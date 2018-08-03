@@ -27,7 +27,7 @@ public class ObservedProperty<T> : ObservedProperty {
         }
     }
     
-    public ObservedProperty(UIElement owner) : base(owner) { }
+    public ObservedProperty(UIElement owner) : base("name", owner) { }
 
     public static implicit operator T(ObservedProperty<T> property) {
         return property.value;

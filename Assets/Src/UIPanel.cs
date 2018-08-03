@@ -5,10 +5,6 @@ using JetBrains.Annotations;
 public class UIPanel : UIElement {
     [Prop] public bool visible;
     
-    public override void Initialize(List<object> props) {
-        visible = true;
-    }
-
     public void OnPropsChanged() {
         
     }

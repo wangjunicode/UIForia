@@ -66,8 +66,12 @@ namespace Src {
             for (int i = 0; i < template.children.Count; i++) {
                 UIElementTemplate childTemplate = template.children[i];
                 UIElement child = Activator.CreateInstance(childTemplate.type.type) as UIElement;
-                CreateContextBindings(context, childTemplate, child);
                 Debug.Assert(child != null, nameof(child) + " != null");
+                // expand child here if not a primitive
+                if (!(child is UIElementPrimitive)) {
+                    TemplateParser.GetParsedTemplate(child.GetType().ToString()).Instantiate(/*prop values*/);
+                }
+                CreateContextBindings(context, childTemplate, child);
                 child.gameObject.transform.SetParent(parentTransform);
                 children[i] = child;
                 child.children = CreateChildrenRecursive(context, childTemplate, child);

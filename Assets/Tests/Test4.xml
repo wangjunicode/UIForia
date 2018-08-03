@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<UITemplate>
+    <RootType>Spec.Test4</RootType>
+    <Contents>
+        <UIPanel visible="$isPanelVisible"/>
+    </Contents>
+</UITemplate>

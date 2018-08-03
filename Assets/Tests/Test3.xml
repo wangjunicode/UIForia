@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="utf-8"?>
+<UITemplate>
+    <RootType>Spec.Test3</RootType>
+    <Contents>
+        <UIPanel/>
+        <UIPanel/>
+        <UIPanel/>
+    </Contents>
+
+</UITemplate>

@@ -149,7 +149,23 @@ namespace Src {
                 else if (attr.IsValueLookup) {
                     FieldInfo fieldInfo = context.type.GetField(attr.propertyName);
                     ExpressionBinding binding = ParseAttributeExpression(fieldInfo, attr.propertyName);
-                    template.expressionBindings.Add(binding);
+                    ExpressionParser parser = new ExpressionParser(new Tokenizer().Tokenize(""));
+                    ExpressionBinding binding = parser.Parse(null);
+                    if (binding.isMultipart) {
+                        for (int j = 0; j < binding.parts.Length; j++) {
+                            ExpressionBindingPart part = binding.parts[j];
+                            // types of bindings
+                            //  -> constant
+                            //  -> expression.once
+                            //  -> expression.constant
+                            //  -> expression.simple
+                            //  -> expression.lookup
+                            //  -> expression.complex
+                        }
+                    }
+                    // contextId = FindContext(binding);
+                    template.AddExpressionBinding(binding);
+//                    template.expressionBindings.Add(binding);
                 }
             }
             

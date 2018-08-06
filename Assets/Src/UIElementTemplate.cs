@@ -38,6 +38,7 @@ namespace Src {
         public bool IsSlot => templateType      == UIElementTemplateType.Slot;
         public bool IsTemplate => templateType  == UIElementTemplateType.Template;
         public bool IsPrimitive => templateType == UIElementTemplateType.Primitive;
+        public bool IsRepeat => templateType == UIElementTemplateType.Repeat;
 
         private void ExpandTemplateElement(UIElement toExpand) {
             UIElementTemplate template = TemplateParser.GetParsedTemplate(toExpand.GetType());
@@ -70,6 +71,10 @@ namespace Src {
                         Debug.Assert(scopedChildren != null, "scopedChildren != null");
                         actualChildList.AddRange(scopedChildren);
                         continue;
+                    }
+
+                    if (template.IsRepeat) {
+                        
                     }
 
                     UIElement child = Activator.CreateInstance(template.processedType.type) as UIElement;
@@ -154,6 +159,14 @@ namespace Src {
             literalBindings.Add(new LiteralBinding(attrName, literalValue));
         }
 
+        public void AddExpressionBinding(ExpressionBinding binding) {
+            if ((binding.flags & ExpressionBinding.ExpressionFlag.Simple) != 0) {
+                
+            }
+            else if (binding.isConstant) {
+                
+            }
+        }
     }
 
 }

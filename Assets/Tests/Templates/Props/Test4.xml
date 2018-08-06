@@ -4,17 +4,46 @@
     <Import path="./thing" as="blah"/>
     <Contents>
         <Spec.Props.Test1Thing intValue="{value}"/>
+
+        <Switch value="{someEnum}">
+
+            <Case id="Constant.Value0">Text here</Case>
+
+            <Case id="Constant.Value1">Text here</Case>
+
+            <Case id="Constant.Value2">Text here</Case>
+
+            <Case id="Constant.Value3">Text here</Case>
+
+            <Default>Text here</Default>
+            
+        </Switch>
+
         <Repeat filter="" list="{valueList}" alias="item">
             {item.something}
             {someRootProperty}
-            <Repeat list="{item.things}">
-                {item.morething[value]}
-                
-                <UIImage src="{item.basePath + root.path}"/>
-                
-                <Slot id="1"/>
-
-            </Repeat>
         </Repeat>
+
+        <Repeat list="{item.things}">
+            {item.more.thing[value].x}
+            <UIImage src="{item.basePath + root.path}"/>
+            <Slot id="1"/>
+        </Repeat>
+
     </Contents>
 </UITemplate>
+
+        <!--/*-->
+        <!--* Grammar-->
+        <!--*     ConstantStatement = Constant-->
+        <!--*     ExpressionStatement = { Expression }-->
+        <!--*     Constant = String | Boolean | Number-->
+        <!--*     ValueExpression = Lookup | PropertyAccess | ArrayAccess | Constant-->
+        <!--*     Lookup = Identifier-->
+        <!--*     PropertyAccess = Identifier . (Identifier+)-->
+        <!--*     ArrayAccess = Identifier [ Expression ]-->
+        <!--*     Operator = ValueExpression Operator ValueExpression-->
+        <!--*     Expression = ValueExpression ?(Operator Expression)*-->
+        <!--*     MethodExpression = Identifier (ParameterList)-->
+        <!--*     ParameterList = Expression (, Expression)*-->
+        <!--*/-->

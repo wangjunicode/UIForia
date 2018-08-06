@@ -84,4 +84,8 @@ public class TemplateContext {
         return contextProviders[contextIndex];
     }
 
+    public void AddContext(object dataSource) {
+        contextProviders.Add(dataSource);
+    }
+    
 }

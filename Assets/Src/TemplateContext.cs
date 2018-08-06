@@ -1,46 +1,87 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Reflection;
 using Src;
 
 public class TemplateContext {
-    public struct Binding {
-        public readonly string key;
-        public readonly string propName;
-        public readonly UIElement boundElement;
 
-        public Binding(string key, string propName, UIElement boundElement) {
-            this.key = key;
-            this.propName = propName;
-            this.boundElement = boundElement;
-        }
+    private struct ContextPointer {
+
+        public int contextIndex;
+        public int propertyIndex;
+        public ObservedProperty<float> x;
+        public ObservedProperty<string> list;
+        // context.subscribe(properties)
+
     }
-
+    /*
+     * 
+     */
+    
+    public readonly UIElement element;
     public readonly List<string> dirtyBindings;
-    private readonly Dictionary<string, List<Binding>> bindingMap;
-
-    public TemplateContext() {
-        bindingMap = new Dictionary<string, List<Binding>>();
+    
+    private readonly List<object> contextProviders;
+    private readonly Dictionary<string, List<UIElement>> bindingMap;
+    
+    public TemplateContext(UIElement element) {
+        this.element = element;
+        bindingMap = new Dictionary<string, List<UIElement>>();
         dirtyBindings = new List<string>();
     }
 
-    public void CreateBinding(PropertyBindPair binding, UIElement element) {
-        List<Binding> list;
-        if (!bindingMap.TryGetValue(binding.value, out list)) {
-            list = new List<Binding>();
-            bindingMap[binding.value] = list;
+    public void CreateBinding(ExpressionBinding binding, UIElement element) {
+        List<UIElement> list;
+        // todo this will need to change when expressions get more interesting
+        if (!bindingMap.TryGetValue(binding.expressionString, out list)) {
+            list = new List<UIElement>();
+            bindingMap[binding.expressionString] = list;
         }
-
-        // probably want to type check that too
-        list.Add(new Binding(binding.key, binding.value, element));
+        list.Add(element);
     }
 
-    public List<Binding> GetBoundElements(string bindingName) {
-        List<Binding> list;
+    public object GetBindingValue(string bindingValue) {
+        return element.observedProperties[bindingValue].RawValue;
+        for (int i = 0; i < element.observedProperties.Length; i++) {
+            if (element.observedProperties[i].name == bindingValue) {
+                return element.observedProperties[i].RawValue;
+            }
+        }
+        // might be a dotted property 
+        // might be a function call
+        // for now its just a look up
+        return null;
+    }
+
+    public List<UIElement> GetBoundElements(string bindingName) {
+        List<UIElement> list;
         return bindingMap.TryGetValue(bindingName, out list) ? list : null;
     }
 
-    public ObservedProperty GetBinding(string bindingName) {
-        return null;
+    public void FlushChanges() {
+        /*
+         * for each repeat in scope
+         *     if list.length != old list.length
+         *     if longer
+         *         append
+         *
+         *     list items need to be observable
+         *     when a list item changes
+         *     when creating a list item, register it with all in-scope contexts
+         *     
+         */
+        for (int i = 0; i < dirtyBindings.Count; i++) {
+            string bindingName = dirtyBindings[i];
+            List<UIElement> boundElements = GetBoundElements(bindingName);
+            for (int j = 0; j < boundElements.Count; j++) {
+                UIElement element = boundElements[j];
+                // todo -- CHANGE THIS
+                // element.originTemplate.expressionBindings[0].SetValue(element);
+            }
+        }
     }
+
+    public object GetContext(int contextIndex) {
+        return contextProviders[contextIndex];
+    }
+
 }

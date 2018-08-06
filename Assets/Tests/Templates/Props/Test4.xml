@@ -1,0 +1,20 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+
+<UITemplate>
+    <Import path="./thing" as="blah"/>
+    <Contents>
+        <Spec.Props.Test1Thing intValue="{value}"/>
+        <Repeat filter="" list="{valueList}" alias="item">
+            {item.something}
+            {someRootProperty}
+            <Repeat list="{item.things}">
+                {item.morething[value]}
+                
+                <UIImage src="{item.basePath + root.path}"/>
+                
+                <Slot id="1"/>
+
+            </Repeat>
+        </Repeat>
+    </Contents>
+</UITemplate>

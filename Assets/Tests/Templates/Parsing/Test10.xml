@@ -1,0 +1,11 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+
+<UITemplate>
+    <Contents>
+        unscoped
+        <UIPanel>
+           <Children/>
+        </UIPanel>
+        unscoped
+    </Contents>
+</UITemplate>

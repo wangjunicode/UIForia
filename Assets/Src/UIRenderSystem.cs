@@ -1,5 +1,4 @@
 using System.Collections.Generic;
-using System.Linq;
 
 namespace Src {
     public class UIRenderSystem {
@@ -49,10 +48,10 @@ namespace Src {
         }
 
         private void UpdateBindings(TemplateContext context, UIElement child) {
-            for (int i = 0; i < child.bindings.Length; i++) {
-                PropertyBinding binding = child.bindings[i];
-                //binding.Value = context.GetBinding(binding.key).Value;
-            }
+//            for (int i = 0; i < child.bindings.Length; i++) {
+//                PropertyBinding binding = child.bindings[i];
+//                //binding.Value = context.GetBinding(binding.key).Value;
+//            }
         }
 
         /*

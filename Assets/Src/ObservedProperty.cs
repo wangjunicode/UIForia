@@ -1,36 +1,47 @@
-﻿public class ObservedProperty {
+﻿using JetBrains.Annotations;
+
+public class ObservedProperty {
 
     public readonly string name;
     public readonly UIElement owner;
- 
-    public ObservedProperty(string name, UIElement owner) {
-        this.owner = owner;
-    }
+
+    protected object value;
+    protected bool isDirty;
     
-}
+    protected ObservedProperty(string name, UIElement owner) {
+        this.name = name;
+        this.owner = owner;
+        this.isDirty = false;
+    }
 
-public class ObservedProperty<T> : ObservedProperty {
-    private T value;
-
-    public T Value {
+    public object RawValue {
         get { return value; }
-        set {
+        protected set {
             if (this.value.Equals(value)) return;
             this.value = value;
-            if (!owner.dirtyProperties.Contains(this)) {
-                owner.dirtyProperties.Add(this);
-            }
-
-            if (owner.dirtyProperties.Count > 0) {
-                owner.MarkDirty();
+            if (!isDirty) {
+                owner.providedContext.dirtyBindings.Add(name);
+                isDirty = true;
             }
         }
     }
-    
-    public ObservedProperty(UIElement owner) : base("name", owner) { }
+
+}
+
+public sealed class ObservedProperty<T> : ObservedProperty {
+
+    public T Value {
+        get { return (T) value; }
+        set { RawValue = value; }
+    }
+
+    [UsedImplicitly]
+    public ObservedProperty(string name, UIElement owner) : base(name, owner) {
+        this.value = default(T);
+    }
 
     public static implicit operator T(ObservedProperty<T> property) {
-        return property.value;
+        return (T) property.value;
     }
 
 }

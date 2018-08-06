@@ -1,81 +1,22 @@
 ﻿using System.Collections.Generic;
+using Src;
 using UnityEngine;
 
-public class UIView {
-
-    public readonly List<UIElement> dirtyElements;
-    public readonly List<TemplateContext> dirtyContexts;
-    private readonly List<UIElement> renderQueue;
-    
-    public void FlushChanges() {
-
-        for (int i = 0; i < dirtyElements.Count; i++) {
-            UIElement element = dirtyElements[i];
-            FlushDirtyProperties(element);
-        }
-        
-    }
-
-    public void UpdateRendering() {
-        /*
-         * for each dirty element
-         *     if needs creation -> push to create queue
-         *     if needs layout
-         *     
-         */
-    
-        RectTransform x;
-    
-        // hide
-        // show
-        // create
-        // destroy
-        // style
-        // layout
-    }
-
-    public void UpdateLayout() { }
-
-    private void FlushDirtyProperties(UIElement element) {
-        TemplateContext context = element.templateContext;
-        
-        for (int i = 0; i < context.dirtyBindings.Count; i++) {
-            string name = context.dirtyBindings[i];
-            List<TemplateContext.Binding> dirtyBindings = context.GetBoundElements(name);
-            // for each dirty element
-            // update dirty prop values via reflection
-            // invoke on props updated handle
-            // send to render system for layout / styling / painting
-            
-        }
-   
-    }
-    
-}
-
 public class UIElement {
-    public Style style;
-    public ContentBox contentBox;
+
     public UIElement[] children;
-    public PropertyBinding[] bindings;
-    public TemplateContext templateContext;
-    public readonly GameObject gameObject;
-    public readonly List<ObservedProperty> dirtyProperties;
-    public readonly UIElement root;
+    public TemplateContext providedContext;
+    public TemplateContext referenceContext;
+    public UIElementTemplate originTemplate;
+    public ObservedProperty[] observedProperties;
     
     public UIElement() {
-        gameObject = new GameObject();
-        gameObject.AddComponent<RectTransform>();
-        dirtyProperties = new List<ObservedProperty>();
-    }
-
-    public virtual void Initialize(List<object> props) {
-       
-    }
-
-    public virtual void OnPropsChanged(List<object> props) {
         
     }
+
+    public virtual void Initialize() { }
+
+    public virtual void OnPropsChanged(List<object> props) { }
 
     public virtual void OnShown() { }
 
@@ -89,10 +30,20 @@ public class UIElement {
         }
     }
 
-    public void MarkDirty() {
-        // root.MarkDirty(this)
-        
-       
+    public ObservedProperty GetProperty(string bindingValue) {
+        for (int i = 0; i < observedProperties.Length; i++) {
+            if (observedProperties[i].name == bindingValue) {
+                return observedProperties[i];
+            }
+        }
+        return null;
+    }
+
+
+    public override string ToString() {
+        string retn = string.Empty;
+        retn += "<" + GetType().Name + ">";
+        return retn;
     }
 
 }

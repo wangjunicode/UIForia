@@ -5,7 +5,7 @@ namespace Src {
         public readonly string template;
 
         public TemplateAttribute(string template) {
-            this.template = template;
+            this.template = "/" + template;
         }
     }
 }

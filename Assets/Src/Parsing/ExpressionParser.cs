@@ -1,26 +1,29 @@
 using System.Collections.Generic;
 
 namespace Src {
+
     public class ExpressionParser {
+
         private readonly TokenStream tokenStream;
 
         public ExpressionParser(TokenStream tokenStream) {
             this.tokenStream = tokenStream;
         }
 
-        public ASTNode Parse(List<TokenDefinition> tokens) {
-            ConstantExpressionNode node = new ConstantExpressionNode();
-            ExpressionNode expressionNode = new ExpressionNode();
-            if (TryParseConstantExpression(ref node)) {
-                return node;
-            }
-            else if (TryParseExpression(ref expressionNode)) { }
-
-            return null;
-        }
+//        public ASTNode Parse(List<TokenDefinition> tokens) {
+//            ConstantExpressionNode node = new ConstantExpressionNode();
+//            ExpressionNode expressionNode = new ExpressionNode();
+//            if (TryParseConstantExpression(ref node)) {
+//                return node;
+//            }
+//            else if (TryParseExpression(ref expressionNode)) { }
+//
+//            return null;
+//        }
 
         private bool TryParseExpression(ref ExpressionNode node) {
             if (TryParseValueExpression()) { }
+            return true;
         }
 
         private bool TryParseValueExpression() {
@@ -28,10 +31,10 @@ namespace Src {
         }
 
         private bool TryParseLookupExpression(ref ExpressionNode node) {
-            
-            if (TryParseIdentifier(ref node)) {
-                
-            }
+
+//            if (TryParseIdentifier(ref node)) {
+//                
+//            }
             return true;
         }
 
@@ -49,8 +52,8 @@ namespace Src {
                 return false;
             }
 
-            node.value = tokenStream.Current.value;
-            tokenStream.Consume(1);
+//            node.value = tokenStream.Current.value;
+//            tokenStream.Consume(1);
             return true;
         }
 
@@ -82,8 +85,8 @@ namespace Src {
         private bool TryParseIdentifier(ref IdentifierNode identifierNode) {
             tokenStream.Save();
             if (tokenStream.Current.tokenType == TokenType.AnyIdentifier &&
-                tokenStream.Next.tokenType == TokenType.WhiteSpace) {
-                identifierNode = new IdentifierNode(token.current.value);
+                tokenStream.Next.tokenType    == TokenType.WhiteSpace) {
+                identifierNode = new IdentifierNode(tokenStream.Current.value);
                 return true;
             }
             return true;
@@ -110,9 +113,10 @@ namespace Src {
         }
 
         private bool TryParsePropertyAccess() {
-            if (TryParseIdentifier() && TryParseDot()) {
-                //tree.Add(new PropertyAccessNode() { identifier = ParseIdentifier, property = ParseIdentifier2)
-            }
+//            if (TryParseIdentifier() && TryParseDot()) {
+//                //tree.Add(new PropertyAccessNode() { identifier = ParseIdentifier, property = ParseIdentifier2)
+//            }
+            return true;
         }
 
         private bool TryParseUnaryExpression() {
@@ -121,16 +125,19 @@ namespace Src {
 
         private bool TryParseOperator() {
             bool isOperator = (tokenStream.Current.tokenType & TokenType.Operator) != 0;
+            return isOperator;
         }
 
         private bool TryParsePropertyAccessChain() {
-            if (TryParseDot() && TryParseIdentifier()) {
-                if (TryParsePropertyAccessChain()) { }
-
-                return true;
-            }
+//            if (TryParseDot() && TryParseIdentifier()) {
+//                if (TryParsePropertyAccessChain()) { }
+//
+//                return true;
+//            }
 
             return false;
         }
+
     }
+
 }

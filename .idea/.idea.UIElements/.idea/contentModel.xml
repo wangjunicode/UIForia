@@ -10,21 +10,29 @@
           <e p="Elements" t="Include">
             <e p="ColorSelector.cs" t="Include" />
             <e p="SomeView.cs" t="Include" />
+            <e p="UIElementRepeat.cs" t="Include" />
             <e p="UIElementSlot.cs" t="Include" />
             <e p="UIPanel.cs" t="Include" />
           </e>
           <e p="ObservedList.cs" t="Include" />
           <e p="ObservedProperty.cs" t="Include" />
           <e p="Parsing" t="Include">
+            <e p="Ast.cs" t="Include" />
             <e p="ChildrenSlotWithChildrenException.cs" t="Include" />
+            <e p="DslToken.cs" t="Include" />
             <e p="ExpressionBinding.cs" t="Include" />
+            <e p="ExpressionParser.cs" t="Include" />
             <e p="InvalidTemplateException.cs" t="Include" />
             <e p="LiteralBinding.cs" t="Include" />
             <e p="MultipleChildSlotException.cs" t="Include" />
             <e p="ProcessedType.cs" t="Include" />
             <e p="PropBinding.cs" t="Include" />
             <e p="TemplateParser.cs" t="Include" />
+            <e p="Tokenizer.cs" t="Include" />
+            <e p="TokenStream.cs" t="Include" />
+            <e p="TokenType.cs" t="Include" />
             <e p="TypeProcessor.cs" t="Include" />
+            <e p="Visitor.cs" t="Include" />
           </e>
           <e p="Primitives" t="Include">
             <e p="UIImage.cs" t="Include" />
@@ -71,6 +79,7 @@
             </e>
           </e>
           <e p="Tests.asmdef" t="Include" />
+          <e p="TokenizingTests.cs" t="Include" />
         </e>
       </e>
       <e p="Library" t="ExcludeRecursive" />

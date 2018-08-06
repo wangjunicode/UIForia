@@ -24,10 +24,9 @@ namespace Src {
         public int contextId;
         public bool isConstant;
         public bool isMultipart;
-        public ExpressionBindingPart[] parts;
         
         public void SetValue(UIElement target) {
-            TemplateContext context = target.referenceContext.GetContext(contextId);
+            TemplateContext context = target.referenceContext;
             if ((flags & ExpressionFlag.Inverted) != 0) {
                 bool value = (bool) context.GetBindingValue(expressionString);
                 fieldInfo.SetValue(target, value);
@@ -38,29 +37,12 @@ namespace Src {
         }
 
         public object Evaluate() {
-            ExpressionBinding binding;
-            
-            Func<ExpressionBinding, object> lookupProperty = (b) => {
-                //contextRoot.GetValue(b.id);
-                return null;
-            };
-            
-            //Func<object, object> AddIntegers = () => { return (int) a.value + (int) b.value; };
-            
-//            for (int i = 0; i < binding.actions.Length; i++) {
-//                
-//            }
-//            
+           
             return null;
         }
         
     }
 
-    public class ExpressionBindingPart {
-        public bool isConstant;
-        public string contextName;
-        public string expression;
-    }
     
     
 }

@@ -4,25 +4,12 @@ using Src;
 
 public class TemplateContext {
 
-    private struct ContextPointer {
-
-        public int contextIndex;
-        public int propertyIndex;
-        public ObservedProperty<float> x;
-        public ObservedProperty<string> list;
-        // context.subscribe(properties)
-
-    }
-    /*
-     * 
-     */
-    
     public readonly UIElement element;
     public readonly List<string> dirtyBindings;
-    
+
     private readonly List<object> contextProviders;
     private readonly Dictionary<string, List<UIElement>> bindingMap;
-    
+
     public TemplateContext(UIElement element) {
         this.element = element;
         bindingMap = new Dictionary<string, List<UIElement>>();
@@ -40,12 +27,12 @@ public class TemplateContext {
     }
 
     public object GetBindingValue(string bindingValue) {
-        return element.observedProperties[bindingValue].RawValue;
-        for (int i = 0; i < element.observedProperties.Length; i++) {
-            if (element.observedProperties[i].name == bindingValue) {
-                return element.observedProperties[i].RawValue;
-            }
-        }
+        //return element.observedProperties[bindingValue].RawValue;
+//        for (int i = 0; i < element.observedProperties.Length; i++) {
+//            if (element.observedProperties[i].name == bindingValue) {
+//                return element.observedProperties[i].RawValue;
+//            }
+//        }
         // might be a dotted property 
         // might be a function call
         // for now its just a look up
@@ -58,17 +45,6 @@ public class TemplateContext {
     }
 
     public void FlushChanges() {
-        /*
-         * for each repeat in scope
-         *     if list.length != old list.length
-         *     if longer
-         *         append
-         *
-         *     list items need to be observable
-         *     when a list item changes
-         *     when creating a list item, register it with all in-scope contexts
-         *     
-         */
         for (int i = 0; i < dirtyBindings.Count; i++) {
             string bindingName = dirtyBindings[i];
             List<UIElement> boundElements = GetBoundElements(bindingName);
@@ -87,5 +63,5 @@ public class TemplateContext {
     public void AddContext(object dataSource) {
         contextProviders.Add(dataSource);
     }
-    
+
 }

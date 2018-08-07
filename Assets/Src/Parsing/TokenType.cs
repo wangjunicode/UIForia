@@ -50,7 +50,8 @@ namespace Src {
         Constant = String | Number                                                    | Boolean,
         Comparator = Equals | NotEquals | GreaterThan | GreaterThanEqualTo | LessThan | LessThanEqualTo,
         BooleanTest = Not | Or                                                        | And,
-        AnyIdentifier = Identifier                                                    | SpecialIdentifier
+        AnyIdentifier = Identifier                                                    | SpecialIdentifier,
+        UnaryOperator = Plus | Minus | Not
     }
 
 }

@@ -15,6 +15,14 @@ namespace Src {
             this.value = value;
         }
 
+        public static implicit operator TokenType(DslToken token) {
+            return token.tokenType;
+        }
+        
+        public static implicit operator string(DslToken token) {
+            return token.value;
+        }
+        
     }
 
 }

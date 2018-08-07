@@ -1,143 +1,299 @@
+using System;
 using System.Collections.Generic;
+using System.Linq;
+using System.Linq.Expressions;
 
 namespace Src {
+    public class BindingGenerator { }
+
+    public class StringGenerator { }
+
+    public class CodeGenerator {
+        public CodeGenerator(ASTNode root) { }
+
+
+        public void Visit(ConstantValueNode node) {
+            // bindings.Add(new ConstantValueBinding(node.value));
+        }
+
+        public void Visit(RootContextLookup node) {
+            // bindings.Add(new RootContextLookupBinding(node.identifier);
+        }
+
+        public void Visit(ExpressionNode node) {
+            // if node.left is ParenExpression
+            // if node.left is ConstantExpression
+            // if node.right is op expression
+            // new OperatorBinding(node.left, node.right.op, node.right.expression)
+            // if operatorbinding.Optimize()
+            // operatorbinding.right == constant
+        }
+
+        public void Visit() {
+            // CompoundExpressionBinding()
+            // left = exp, op = op
+            // expression.Add(new OperatorExpression(op, Visit(left), Visit(right));
+        }
+    }
 
     public class ExpressionParser {
-
         private readonly TokenStream tokenStream;
+        private readonly Stack<ExpressionNode> expressionStack;
+        private readonly Stack<OperatorNode> operatorStack;
 
         public ExpressionParser(TokenStream tokenStream) {
             this.tokenStream = tokenStream;
+            expressionStack = new Stack<ExpressionNode>();
+            operatorStack = new Stack<OperatorNode>();
         }
 
-//        public ASTNode Parse(List<TokenDefinition> tokens) {
-//            ConstantExpressionNode node = new ConstantExpressionNode();
-//            ExpressionNode expressionNode = new ExpressionNode();
-//            if (TryParseConstantExpression(ref node)) {
-//                return node;
-//            }
-//            else if (TryParseExpression(ref expressionNode)) { }
-//
-//            return null;
-//        }
-
-        private bool TryParseExpression(ref ExpressionNode node) {
-            if (TryParseValueExpression()) { }
-            return true;
+        private void EvaluateWhile(Func<bool> condition) {
+            while (condition()) {
+                ExpressionNode right = expressionStack.Pop();
+                ExpressionNode left = expressionStack.Pop();
+                OperatorExpression expression = new OperatorExpression();
+                expression.right = right;
+                expression.left = left;
+                expression.op = operatorStack.Pop();
+                expressionStack.Push(expression);
+            }
         }
 
-        private bool TryParseValueExpression() {
-            return true;
-        }
+        public ASTNode Parse() {
+            ConsumeWhiteSpace();
 
-        private bool TryParseLookupExpression(ref ExpressionNode node) {
+            expressionStack.Clear();
+            operatorStack.Clear();
 
-//            if (TryParseIdentifier(ref node)) {
-//                
-//            }
-            return true;
-        }
+            while (tokenStream.HasMoreTokens) {
+                ExpressionNode operand = ParseExpressionOperand();
+                ConsumeWhiteSpace();
 
-        private bool TryParsePropertyAccessExpression() {
-            return true;
-        }
+                if (operand != null) {
+                    expressionStack.Push(operand);
+                    continue;
+                }
 
-        private bool TryParseArrayAccessExpression() {
-            return true;
-        }
+                OperatorNode op = ParseOperatorExpression();
+                if (op != null) {
+                    EvaluateWhile(() => {
+                        if (operatorStack.Count == 0) return false;
+                        if (operatorStack.Peek() is ParenOperatorNode) return false;
+                        return op.precedence <= operatorStack.Peek().precedence;
+                    });
+                    operatorStack.Push(op);
+                    continue;
+                }
 
-        private bool TryParseConstantExpression(ref ConstantExpressionNode node) {
-            tokenStream.Save();
-            if ((tokenStream.Current.tokenType & TokenType.Constant) == 0) {
-                return false;
+                if (tokenStream.Current == TokenType.ParenOpen) {
+                    tokenStream.Advance();
+                    ParenOperatorNode parenNode = new ParenOperatorNode();
+                    operatorStack.Push(parenNode);
+                    continue;
+                }
+
+                if (tokenStream.Current == TokenType.ParenClose) {
+                    tokenStream.Advance();
+                    EvaluateWhile(() => {
+                        if (operatorStack.Count == 0) return false;
+                        return !(operatorStack.Peek() is ParenOperatorNode);
+                    });
+                    operatorStack.Pop();
+                    continue;
+                }
+
+                throw new Exception("Failed");
             }
 
-//            node.value = tokenStream.Current.value;
-//            tokenStream.Consume(1);
-            return true;
-        }
-
-        private bool TryParseExpressionStatement() {
-            tokenStream.Save();
-
-            // ExpressionStatementNode node = new ExpressionStatementNode;
-
-            if (tokenStream.Current.tokenType != TokenType.ExpressionOpen) {
-                return false;
+            EvaluateWhile(() => operatorStack.Count > 0);
+            if (expressionStack.Count != 1) {
+                throw new Exception("Failed");
             }
 
-            tokenStream.Consume(1);
+            return expressionStack.Pop();
+        }
 
-            ConstantExpressionNode node = new ConstantExpressionNode();
-            if (!TryParseConstantExpression(ref node)) {
+
+        private ExpressionNode ParseExpressionOperand() {
+            ExpressionNode constant = ParseConstantExpression();
+            if (constant != null) {
+                return constant;
+            }
+
+            RootContextLookup lookup = ParseLookupValue();
+            if (lookup != null) {
+                return lookup;
+            }
+
+            return null;
+        }
+
+        private ExpressionNode ParseExpressionStatement() {
+            tokenStream.Save();
+            if (tokenStream.Current != TokenType.ExpressionOpen) {
                 tokenStream.Restore();
-                return false;
+                return null;
             }
 
-            if (tokenStream.Current.tokenType != TokenType.ExpressionClose) {
-                tokenStream.Consume(1);
-                return false;
+            tokenStream.Advance();
+
+            ExpressionNode expression = ParseExpression();
+            if (expression == null) {
+                // error -- expected expression here
             }
 
-            return true;
+            if (tokenStream.Current != TokenType.ExpressionClose) {
+                tokenStream.Restore();
+                return null;
+            }
+
+            tokenStream.Advance();
+
+            return null;
         }
 
-        private bool TryParseIdentifier(ref IdentifierNode identifierNode) {
+        private ExpressionNode ParseExpression() {
+            RootContextLookup lookup = ParseLookupValue();
+            if (lookup != null) {
+                return lookup;
+            }
+
+            ConstantValueNode constant = ParseConstantValue();
+            if (constant != null) {
+                return constant;
+            }
+
+            UnaryExpressionNode unary = ParseUnaryExpression();
+            if (unary != null) {
+                return unary;
+            }
+
+            //PropertyAccessExpressionNode propertyAccess = ParsePropertyAccess();
+
+            return null;
+        }
+
+        private OperatorNode ParseOperatorExpression() {
             tokenStream.Save();
-            if (tokenStream.Current.tokenType == TokenType.AnyIdentifier &&
-                tokenStream.Next.tokenType    == TokenType.WhiteSpace) {
-                identifierNode = new IdentifierNode(tokenStream.Current.value);
-                return true;
+            ConsumeWhiteSpace();
+            if ((tokenStream.Current & TokenType.Operator) == 0) {
+                tokenStream.Restore();
+                return null;
             }
-            return true;
+
+            OperatorNode opNode = new OperatorNode();
+            switch (tokenStream.Current.tokenType) {
+                case TokenType.Plus:
+                    opNode.precedence = 1;
+                    opNode.op = OperatorType.Plus;
+                    break;
+                case TokenType.Minus:
+                    opNode.precedence = 1;
+                    opNode.op = OperatorType.Minus;
+                    break;
+                case TokenType.Times:
+                    opNode.precedence = 2;
+                    opNode.op = OperatorType.Times;
+                    break;
+                case TokenType.Divide:
+                    opNode.precedence = 2;
+                    opNode.op = OperatorType.Divide;
+                    break;
+                case TokenType.Mod:
+                    opNode.precedence = 1;
+                    opNode.op = OperatorType.Mod;
+                    break;
+                default:
+                    throw new Exception("Unknown op type");
+            }
+
+            tokenStream.Advance();
+            return opNode;
         }
 
-        private bool TryParseConstant() {
+        private UnaryExpressionNode ParseUnaryExpression() {
             tokenStream.Save();
-            if ((tokenStream.Current.tokenType & TokenType.Constant) == 0) {
-                return false;
+
+            string op = string.Empty;
+            if ((tokenStream.Current & TokenType.UnaryOperator) != 0) {
+                op = tokenStream.Current;
+                tokenStream.Advance();
             }
 
-            tokenStream.Consume(1);
-            //expressionParts.Add(new ConstantExpression());
-            return true;
-        }
+            ExpressionNode expression = ParseExpression();
 
-        private bool TryParseDot() {
-            if (tokenStream.Current.tokenType == TokenType.PropertyAccess) {
-                tokenStream.Consume(1);
-                return true;
+            if (expression != null) {
+                UnaryExpressionNode retn = new UnaryExpressionNode();
+                retn.expression = expression;
+                retn.op = op;
+                return retn;
             }
 
-            return false;
+            tokenStream.Restore();
+            return null;
         }
 
-        private bool TryParsePropertyAccess() {
-//            if (TryParseIdentifier() && TryParseDot()) {
-//                //tree.Add(new PropertyAccessNode() { identifier = ParseIdentifier, property = ParseIdentifier2)
-//            }
-            return true;
+        private ConstantValueNode ParseConstantExpression() {
+            ConstantValueNode node = ParseConstantValue();
+
+            return node;
         }
 
-        private bool TryParseUnaryExpression() {
-            return true;
+        private RootContextLookup ParseLookupValue() {
+            tokenStream.Save();
+            ConsumeWhiteSpace();
+            IdentifierNode idNode = ParseIdentifier();
+
+            if (idNode == null) return null;
+
+            RootContextLookup lookup = new RootContextLookup();
+            lookup.idNode = idNode;
+            return lookup;
         }
 
-        private bool TryParseOperator() {
-            bool isOperator = (tokenStream.Current.tokenType & TokenType.Operator) != 0;
-            return isOperator;
+        private IdentifierNode ParseIdentifier() {
+            tokenStream.Save();
+            ConsumeWhiteSpace();
+
+            if (tokenStream.Current != TokenType.Identifier) return null;
+
+            IdentifierNode node = new IdentifierNode(tokenStream.Current);
+            tokenStream.Advance();
+            return node;
         }
 
-        private bool TryParsePropertyAccessChain() {
-//            if (TryParseDot() && TryParseIdentifier()) {
-//                if (TryParsePropertyAccessChain()) { }
-//
-//                return true;
-//            }
-
-            return false;
+        private void ConsumeWhiteSpace() {
+            if (tokenStream.HasMoreTokens && tokenStream.Current == TokenType.WhiteSpace) {
+                tokenStream.Advance();
+            }
         }
 
+        private ConstantValueNode ParseConstantValue() {
+            tokenStream.Save();
+            ConsumeWhiteSpace();
+            if (tokenStream.Current == TokenType.Boolean) {
+                BooleanConstantNode constantNode = new BooleanConstantNode();
+                constantNode.value = bool.Parse(tokenStream.Current);
+                tokenStream.Advance();
+                return constantNode;
+            }
+
+            if (tokenStream.Current == TokenType.Number) {
+                NumericConstantNode constantNode = new NumericConstantNode();
+                constantNode.value = double.Parse(tokenStream.Current);
+                tokenStream.Advance();
+                return constantNode;
+            }
+
+            if (tokenStream.Current == TokenType.String) {
+                StringConstantNode constantNode = new StringConstantNode();
+                constantNode.value = tokenStream.Current.value.Substring(1, tokenStream.Current.value.Length - 2);
+                tokenStream.Advance();
+                return constantNode;
+            }
+
+            tokenStream.Restore();
+            return null;
+        }
     }
-
 }

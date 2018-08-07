@@ -11,16 +11,45 @@ namespace Src {
          *     ExpressionStatement = { Expression }
          *
          *     Constant = String | Boolean | Number
+         *     MethodExpression = Identifier ( ParameterList )
          *     ValueExpression = Lookup | PropertyAccess | ArrayAccess | Constant
+         *     Expression = ValueExpression | UnaryExpression | OperatorExpression | ParenExpression
          *     Lookup = Identifier
          *     PropertyAccess = Identifier . (Identifier+)
          *     ArrayAccess = Identifier [ Expression ] 
-         *     Operator = ValueExpression Operator ValueExpression
-         *     Expression = ValueExpression ?(Operator Expression)*
-         *     MethodExpression = Identifier (ParameterList)
+         *     OperatorExpression = ValueExpression Operator ValueExpression
+         *     UnaryOperatorExpression = (!|-|+) Expression
+         *     ParenExpression = ( Expression )
          *     ParameterList = Expression (, Expression)*
          */
-
+        //ParseParenExpression()
+            // if op == * if node is * or / inject paren node as parent
+                // op node.parent = new paren expression node
+                // left = parent.right
+            //((item.x + (5 * 1)) * 3)
+            // 5 + 10 + (1 * 4)
+            // item.z + 5 + item.y
+            // parse expression
+                //parse property access
+                // parse op expression (+)
+                // parse constant value
+                // parse op expression(*)
+                // parse property access
+            
+            //expression
+                //parse paren expression
+                    //left = parse property access
+                    //right = parse operator expression
+                        //parse operator
+                        //parse constant
+                // op times
+                // value 3
+            
+            // visit expression
+                //output expression =         
+                //  left = visit paren expression
+                //  right = visit op expression
+                //output = expression binding(left, right);
         private static int ConsumeWhiteSpace(int start, string input) {
             int ptr = start;
             if (ptr >= input.Length) return input.Length;

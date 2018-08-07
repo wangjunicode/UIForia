@@ -4,14 +4,12 @@ namespace Src {
 
     public class TokenStream {
         private int ptr;
-        private int savedPtr;
 
         private readonly Stack<int> stack;
         private readonly List<DslToken> tokens;
 
         public TokenStream(List<DslToken> tokens) {
             this.tokens = tokens;
-            savedPtr = 0;
             stack = new Stack<int>();
             stack.Push(0);
         }
@@ -20,7 +18,7 @@ namespace Src {
         public DslToken Next => tokens[ptr     + 1];
         public DslToken Previous => tokens[ptr - 1];
 
-        public bool HasMoreTokens => (ptr + 1) < tokens.Count;
+        public bool HasMoreTokens => ptr < tokens.Count;
 
         public bool Is(TokenType tokenType) {
             return Current.tokenType == tokenType;
@@ -30,7 +28,7 @@ namespace Src {
             return tokens[ptr + count];
         }
 
-        public void Consume(int count) {
+        public void Advance(int count = 1) {
             ptr += count;
         }
 

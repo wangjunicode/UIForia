@@ -74,12 +74,21 @@ namespace Src {
                     }
 
                     if (template.IsRepeat) {
-                        
+                            
                     }
 
                     UIElement child = Activator.CreateInstance(template.processedType.type) as UIElement;
                     Debug.Assert(child != null, nameof(child) + " != null");
                     child.referenceContext = context;
+                    
+                    // for each attribute in template 
+                    // generate binding
+                    // if binding is constant or contains only constants then don't bind
+                    // if binding has a once modifier dont' bind
+                    
+                    // binding -> target + expression(context) + change notification?
+                    // context.AddBinding(element, propName, binding(static?));
+
                     child.originTemplate = template;
                     template.processedType.AssignObservedProperties(child);
                     template.AssignLiteralBindings(child);
@@ -125,7 +134,6 @@ namespace Src {
                 for (int j = 0; j < bindings.Count; j++) {
                     //child.referenceContexts[binding.contextId]
                     ExpressionBinding binding = bindings[j];
-                    binding.SetValue(child);
                 }
             }
         }
@@ -160,12 +168,7 @@ namespace Src {
         }
 
         public void AddExpressionBinding(ExpressionBinding binding) {
-            if ((binding.flags & ExpressionBinding.ExpressionFlag.Simple) != 0) {
-                
-            }
-            else if (binding.isConstant) {
-                
-            }
+          
         }
     }
 

@@ -20,8 +20,10 @@
         </Switch>
 
         <Repeat filter="" list="{valueList}" alias="item">
-            {item.something}
+            {item.something @someObservedProperty} -- only check for updates when property changed
             {someRootProperty}
+            {valuelist[$i].y}
+            {$valueListLength}
         </Repeat>
 
         <Repeat list="{item.things}">

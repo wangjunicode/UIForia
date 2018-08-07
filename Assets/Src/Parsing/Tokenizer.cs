@@ -5,23 +5,7 @@ namespace Src {
 
     public static class Tokenizer {
 
-        /*
-         * Grammar
-         *     ConstantStatement = Constant
-         *     ExpressionStatement = { Expression }
-         *
-         *     Constant = String | Boolean | Number
-         *     MethodExpression = Identifier ( ParameterList )
-         *     ValueExpression = Lookup | PropertyAccess | ArrayAccess | Constant
-         *     Expression = ValueExpression | UnaryExpression | OperatorExpression | ParenExpression
-         *     Lookup = Identifier
-         *     PropertyAccess = Identifier . (Identifier+)
-         *     ArrayAccess = Identifier [ Expression ] 
-         *     OperatorExpression = ValueExpression Operator ValueExpression
-         *     UnaryOperatorExpression = (!|-|+) Expression
-         *     ParenExpression = ( Expression )
-         *     ParameterList = Expression (, Expression)*
-         */
+       
         //ParseParenExpression()
             // if op == * if node is * or / inject paren node as parent
                 // op node.parent = new paren expression node

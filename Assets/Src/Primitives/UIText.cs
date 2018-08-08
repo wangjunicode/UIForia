@@ -1,5 +1,6 @@
 ﻿using Rendering;
 using Src;
+using UnityEngine;
 
 public class UIText : UIElementPrimitive {
 
@@ -19,13 +20,14 @@ public class UIText : UIElementPrimitive {
         textRenderElement.Text = label;
     }
 
-    public void OnInitialRender() {
+    public void OnCreate() {
         textRenderElement = view.CreateTextPrimitive(this);
         textRenderElement.Text = label;
-        //apply font styles
-        //textRenderElement.font = style.GetFont();view.FontTree.GetFontForElement(this);
+        view.MarkForRendering(this);
     }
 
-    public UIText(UIView view) : base(view) { }
-
+    public void ApplyFontSettings(TextStyle fontSettings) {
+        textRenderElement.ApplyFontSettings(fontSettings);
+    }
+    
 }

@@ -118,7 +118,7 @@ namespace Src {
 
         public UIElement CreateElement(UIView view) {
             UIElement root = Activator.CreateInstance(processedType.type) as UIElement;
-                
+            return null;
         }
         
         public UIElement CreateElement(UIElement[] scopedChildren = null) {

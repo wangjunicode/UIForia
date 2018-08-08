@@ -1,5 +1,10 @@
-﻿namespace Src {
+﻿using Rendering;
 
-    public class UIImage : UIElementPrimitive { }
+namespace Src {
+
+    public class UIImage : UIElementPrimitive {
+
+
+    }
 
 }

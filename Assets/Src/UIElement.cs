@@ -1,23 +1,34 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using Rendering;
 using Src;
-using Src.Layout;
-using UnityEngine;
-
 
 public class UIElement {
 
+    [Flags]
+    internal enum UIElementFlags {
+
+        RequiresRendering = 1 << 0
+
+    }
+    
+    internal UIElementFlags flags;
     public readonly int id;
+    public UIElement parent;
     public UIElement[] children;
     public TemplateContext providedContext;
     public TemplateContext referenceContext;
     public UIElementTemplate originTemplate;
     public ObservedProperty[] observedProperties;
-    public UILayout layout;
-    public UIStyle style;
-    
-    public readonly UIView view;
-    
+    public UIStyle style = new UIStyle();
+    public UITransform transform;
+    public UIView view;
+
+    public UIElement() {
+        id = UIView.NextElementId;
+        transform = new UITransform(null, null);
+    }
+
     public UIElement(UIView view) {
         id = UIView.NextElementId;
         this.view = view;

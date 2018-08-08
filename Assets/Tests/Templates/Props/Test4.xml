@@ -7,6 +7,7 @@
         Text {
             fontSize: 11px;
             fontAsset: url(path/to/asset.font)
+            overflow: Hidden | Visible
         }
         
         Material {
@@ -35,15 +36,17 @@
         }
         
         Size {
-            padding:
+            padding: % of container
             margin:
             border:
-            width:
+            width: px | % if fit == none & % -> treat as pixel width
             height:
+            fitWidth: None | FitFixedContent | FillParent
+            fitHeight: None | FitFixedContent | FillParent
         }
         
         Layout {
-            type: Flex | Grid | Radial | None
+            type: Flex | Grid | Radial | Stack | None
             alignmentMainAxis
             alignmentCrossAxis
             direction
@@ -52,11 +55,12 @@
         }
         
         LayoutItem {         
+            
             inFlow: false
-            minWidth: 300px
-            maxWidth: 200px;
+            minWidth: parent(40%) //300px
+            maxWidth: content(50%);
             minHeight: 
-            maxHeight:
+            maxHeight: 
             grow: 1
             shrink 1
             basisWidth = parent(40%)
@@ -72,6 +76,16 @@
             
             parent:mouseEnter {}
         }
+        
+        fixed parent
+            width: 50%
+        parent child relative
+            width: 50% makes no sense
+        parent parent relative
+            width: 50% -> fine
+            
+        width: implicit -> implicit width
+        
         
     </Style>
     <Contents>

@@ -1,3 +1,4 @@
+using Rendering;
 using UnityEngine;
 using UnityEngine.UI;
 
@@ -12,6 +13,11 @@ namespace Src {
         }
 
         public override Texture2D Image { get; set; }
+       
+        public override void ApplyStyleSettings(UIStyle style) {
+            imageComponent.color = style.background.color;
+            imageComponent.texture = style.background.texture;
+        }
 
     }
 

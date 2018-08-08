@@ -3,16 +3,6 @@ using System.Collections.Generic;
 using UnityEngine;
 
 namespace Rendering {
-
-    public class ContentBox {
-
-        public RectOffset padding;
-        public RectOffset margin;
-        public RectOffset border;
-        public float contentWidth;
-        public float contentHeight;
-
-    }
     
     [Flags]
     public enum UIFlags {
@@ -59,6 +49,11 @@ namespace Rendering {
         public readonly UITransform parent;
         public readonly List<UITransform> children;
         public readonly UIView view;
+        public Vector2 position;
+        public Vector2 scale;
+        public Vector2 pivot;
+        public float rotation;
+        public UIElement element;
 
         // width and height from transform are only in relation to actual pixel size
         // they are readonly unless not in flow
@@ -83,6 +78,16 @@ namespace Rendering {
 
         public float GetPixelWidth() {
             // element.style.GetContentBox();
+            return 0;
+        }
+        
+        public Rect GetLayoutRect() {
+            return new Rect() {
+                x = position.x,
+                y = position.y,
+                width = element.style.contentBox.GetContentWidth(),
+                height = element.style.contentBox.GetContentHeight()
+            };
         }
     }
     

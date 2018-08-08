@@ -1,76 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project version="4">
   <component name="ChangeListManager">
-    <list default="true" id="fe7bb848-2f0a-476b-8e69-6c641eab4202" name="Default" comment="">
-      <change afterPath="$PROJECT_DIR$/Assets/Src/Parsing/AstNodes/AccessExpressionNode.cs" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/Assets/Src/Parsing/AstNodes/AccessExpressionNode.cs.meta" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/Assets/Src/Parsing/AstNodes/AccessExpressionPart.cs" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/Assets/Src/Parsing/AstNodes/AccessExpressionPart.cs.meta" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/Assets/Src/Parsing/AstNodes/ArrayAccessExpressionPart.cs" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/Assets/Src/Parsing/AstNodes/ArrayAccessExpressionPart.cs.meta" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/Assets/Src/Parsing/AstNodes/Ast.cs" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/Assets/Src/Parsing/AstNodes/BooleanConstantNode.cs" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/Assets/Src/Parsing/AstNodes/BooleanConstantNode.cs.meta" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/Assets/Src/Parsing/AstNodes/ConstantValueNode.cs" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/Assets/Src/Parsing/AstNodes/ConstantValueNode.cs.meta" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/Assets/Src/Parsing/AstNodes/ExpressionNode.cs" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/Assets/Src/Parsing/AstNodes/ExpressionNode.cs.meta" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/Assets/Src/Parsing/AstNodes/IdentifierNode.cs" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/Assets/Src/Parsing/AstNodes/IdentifierNode.cs.meta" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/Assets/Src/Parsing/AstNodes/NumericConstantNode.cs" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/Assets/Src/Parsing/AstNodes/NumericConstantNode.cs.meta" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/Assets/Src/Parsing/AstNodes/OperatorExpression.cs" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/Assets/Src/Parsing/AstNodes/OperatorExpression.cs.meta" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/Assets/Src/Parsing/AstNodes/OperatorNode.cs" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/Assets/Src/Parsing/AstNodes/OperatorNode.cs.meta" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/Assets/Src/Parsing/AstNodes/ParenOperatorNode.cs" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/Assets/Src/Parsing/AstNodes/ParenOperatorNode.cs.meta" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/Assets/Src/Parsing/AstNodes/PropertyAccessExpressionPart.cs" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/Assets/Src/Parsing/AstNodes/PropertyAccessExpressionPart.cs.meta" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/Assets/Src/Parsing/AstNodes/RootContextLookup.cs" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/Assets/Src/Parsing/AstNodes/RootContextLookup.cs.meta" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/Assets/Src/Parsing/AstNodes/StringConstantNode.cs" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/Assets/Src/Parsing/AstNodes/StringConstantNode.cs.meta" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/Assets/Src/Parsing/AstNodes/UnaryExpressionNode.cs" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/Assets/Src/Parsing/AstNodes/UnaryExpressionNode.cs.meta" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/Assets/Src/Parsing/AttributeDefinition.cs" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/Assets/Src/Parsing/AttributeDefinition.cs.meta" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/Assets/Src/Parsing/BindingGenerator.cs" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/Assets/Src/Parsing/BindingGenerator.cs.meta" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/Assets/Src/Parsing/Bindings.meta" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/Assets/Src/Parsing/ContextDefinition.cs" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/Assets/Src/Parsing/ContextDefinition.cs.meta" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/Assets/Src/Parsing/UnaryMinusBinding.cs" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/Assets/Src/Parsing/UnaryMinusBinding.cs.meta" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/.idea.UIElements/.idea/contentModel.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/.idea.UIElements/.idea/contentModel.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/.idea.UIElements/.idea/indexLayout.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/.idea.UIElements/.idea/indexLayout.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/.idea.UIElements/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/.idea.UIElements/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/.idea.UIElements/riderModule.iml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/.idea.UIElements/riderModule.iml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Assets/InitTestScene636690866723914980.unity" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/Assets/InitTestScene636690866723914980.unity.meta" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/Assets/InitTestScene636690869553241640.unity" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/Assets/InitTestScene636690869553241640.unity.meta" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/Assets/InitTestScene636692456004999220.unity" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/Assets/InitTestScene636692456004999220.unity.meta" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/Assets/InitTestScene636692563599684802.unity" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/Assets/InitTestScene636692563599684802.unity.meta" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/Assets/InitTestScene636692564585528038.unity" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/Assets/InitTestScene636692564585528038.unity.meta" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/Assets/InitTestScene636692568672493707.unity" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/Assets/InitTestScene636692568672493707.unity.meta" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/Assets/Plugins/Editor/JetBrains/JetBrains.Rider.Unity.Editor.Plugin.Repacked.dll" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/Plugins/Editor/JetBrains/JetBrains.Rider.Unity.Editor.Plugin.Repacked.dll" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Assets/Src/Parsing/Ast.cs" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/Assets/Src/Parsing/Ast.cs.meta" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/Src/Parsing/AstNodes/Ast.cs.meta" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Assets/Src/Parsing/ExpressionBinding.cs" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/Src/Parsing/ExpressionBinding.cs" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Assets/Src/Parsing/ExpressionParser.cs" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/Src/Parsing/ExpressionParser.cs" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Assets/Src/Parsing/OperatorType.cs" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/Src/Parsing/OperatorType.cs" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Assets/Src/Parsing/TemplateParser.cs" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/Src/Parsing/TemplateParser.cs" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Assets/Src/Parsing/Tokenizer.cs" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/Src/Parsing/Tokenizer.cs" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Assets/Src/TemplateContext.cs" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/Src/TemplateContext.cs" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Assets/Src/UIElementTemplate.cs" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/Src/UIElementTemplate.cs" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Assets/Tests/Templates/Props/Test4.xml" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/Tests/Templates/Props/Test4.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/ProjectSettings/ProjectVersion.txt" beforeDir="false" afterPath="$PROJECT_DIR$/ProjectSettings/ProjectVersion.txt" afterDir="false" />
-    </list>
+    <list default="true" id="fe7bb848-2f0a-476b-8e69-6c641eab4202" name="Default" comment="" />
     <option name="EXCLUDED_CONVERTED_TO_IGNORED" value="true" />
     <option name="TRACKING_ENABLED" value="true" />
     <option name="SHOW_DIALOG" value="false" />
@@ -118,8 +49,8 @@
           <file leaf-file-name="BindingGenerator.cs" pinned="false" current-in-tab="true">
             <entry file="file://$PROJECT_DIR$/Assets/Src/Parsing/BindingGenerator.cs">
               <provider selected="true" editor-type-id="text-editor">
-                <state relative-caret-position="832">
-                  <caret line="52" column="17" lean-forward="true" selection-start-line="52" selection-start-column="17" selection-end-line="52" selection-end-column="17" />
+                <state relative-caret-position="480">
+                  <caret line="30" lean-forward="true" selection-start-line="30" selection-end-line="30" />
                   <folding>
                     <marker date="1533675960000" expanded="true" signature="29:4329" ph="{...}" />
                     <marker date="1533675960000" expanded="true" signature="66:4326" ph="{...}" />
@@ -780,12 +711,12 @@
       <workItem from="1533373954734" duration="210000" />
       <workItem from="1533374257083" duration="64026000" />
       <workItem from="1533660381692" duration="31000" />
-      <workItem from="1533660445888" duration="19269000" />
+      <workItem from="1533660445888" duration="19401000" />
     </task>
     <servers />
   </component>
   <component name="TimeTrackingManager">
-    <option name="totallyTimeSpent" value="101968000" />
+    <option name="totallyTimeSpent" value="102100000" />
   </component>
   <component name="TodoView">
     <todo-panel id="selected-file">
@@ -1493,8 +1424,8 @@
     </entry>
     <entry file="file://$PROJECT_DIR$/Assets/Src/Parsing/BindingGenerator.cs">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="832">
-          <caret line="52" column="17" lean-forward="true" selection-start-line="52" selection-start-column="17" selection-end-line="52" selection-end-column="17" />
+        <state relative-caret-position="480">
+          <caret line="30" lean-forward="true" selection-start-line="30" selection-end-line="30" />
           <folding>
             <marker date="1533675960000" expanded="true" signature="29:4329" ph="{...}" />
             <marker date="1533675960000" expanded="true" signature="66:4326" ph="{...}" />

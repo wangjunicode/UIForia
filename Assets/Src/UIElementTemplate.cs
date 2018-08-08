@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Reflection;
+using Rendering;
 
 namespace Src {
 
@@ -115,6 +116,11 @@ namespace Src {
             return root;
         }
 
+        public UIElement CreateElement(UIView view) {
+            UIElement root = Activator.CreateInstance(processedType.type) as UIElement;
+                
+        }
+        
         public UIElement CreateElement(UIElement[] scopedChildren = null) {
             UIElement root = Activator.CreateInstance(processedType.type) as UIElement;
             processedType.AssignObservedProperties(root);

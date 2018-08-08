@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using Rendering;
 
 namespace Src.Elements {
     
@@ -53,5 +54,8 @@ namespace Src.Elements {
 
             return null;
         }
+
+        public UIElementRepeat(UIView view) : base(view) { }
+
     }
 }

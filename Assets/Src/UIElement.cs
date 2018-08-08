@@ -1,17 +1,26 @@
 ﻿using System.Collections.Generic;
+using Rendering;
 using Src;
+using Src.Layout;
 using UnityEngine;
+
 
 public class UIElement {
 
+    public readonly int id;
     public UIElement[] children;
     public TemplateContext providedContext;
     public TemplateContext referenceContext;
     public UIElementTemplate originTemplate;
     public ObservedProperty[] observedProperties;
+    public UILayout layout;
+    public UIStyle style;
     
-    public UIElement() {
-        
+    public readonly UIView view;
+    
+    public UIElement(UIView view) {
+        id = UIView.NextElementId;
+        this.view = view;
     }
 
     public virtual void Initialize() { }
@@ -29,17 +38,7 @@ public class UIElement {
             if (children == null) children = value;
         }
     }
-
-    public ObservedProperty GetProperty(string bindingValue) {
-        for (int i = 0; i < observedProperties.Length; i++) {
-            if (observedProperties[i].name == bindingValue) {
-                return observedProperties[i];
-            }
-        }
-        return null;
-    }
-
-
+    
     public override string ToString() {
         string retn = string.Empty;
         retn += "<" + GetType().Name + ">";

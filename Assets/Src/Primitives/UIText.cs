@@ -1,26 +1,31 @@
-﻿using UnityEngine;
-using UnityEngine.UI;
+﻿using Rendering;
+using Src;
 
 public class UIText : UIElementPrimitive {
 
-    private Text textComponent;
-
+    // Text
+    // RawImage
+    // Image
+    // Mask
+    // Mask2D
+    // InputField
+    // TextArea
+    
+    private TextPrimitive textRenderElement;
+    
     [Prop] public string label;
 
     public void OnPropsChanged() {
-        textComponent.text = label;
+        textRenderElement.Text = label;
     }
 
-//    public override GameObject Create() {
-//        GameObject go = new GameObject();
-//        go.AddComponent<RectTransform>();
-//        textComponent = go.AddComponent<Text>();
-//        textComponent.text = label;
-//        return go;
-//    }
-
-    public virtual void ApplyUpdates() {
-        textComponent.text = label;
+    public void OnInitialRender() {
+        textRenderElement = view.CreateTextPrimitive(this);
+        textRenderElement.Text = label;
+        //apply font styles
+        //textRenderElement.font = style.GetFont();view.FontTree.GetFontForElement(this);
     }
-    
+
+    public UIText(UIView view) : base(view) { }
+
 }

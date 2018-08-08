@@ -1,0 +1,38 @@
+
+// Todo 
+
+- Get real scene objects
+- Create Inspector / Debugger
+- Support <Repeat>
+- Support Bindings 
+- Extend template parser
+- Support rect transform writing
+- Support Out of Flow layout
+- Support Style cascading
+- Support <Style>
+- Support <Import>
+- Support font tree cascade
+- Support pushing style changes to rendered thing
+- Support Destroying Elements
+- Support Enable / Disable Elements
+- Support Event Propagation
+- Support references to globals in templates
+- Support style skinning
+- Support Hover events and styles
+- Support Focus events and styles
+- Support handlers for list events (add, remove, move)
+- Support <Switch> elements
+- Support <Slot> elements
+- Support <Prefab> tag, goes against unity-agnostic design
+- Style data structures
+- Flex Layout
+- Mouse Event Annotations
+- Filter Lists
+- Create / Destroy List Elements
+
+ Optimizations
+- Reduce memory usage
+- Improve memory layout
+- Support .once bindings and dependent bindings (::someotherbinding)
+- Support function calls in dirty checking
+- Reduce boxing

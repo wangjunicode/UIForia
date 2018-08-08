@@ -1,5 +1,9 @@
+using System;
+using System.Reflection;
+using System.Runtime.InteropServices;
 using NUnit.Framework;
 using Src;
+using UnityEngine;
 
 namespace Tests {
     [TestFixture]
@@ -13,7 +17,7 @@ namespace Tests {
             Assert.IsInstanceOf<NumericConstantNode>(root);
             NumericConstantNode n = (NumericConstantNode) root;
             Assert.AreEqual(5.0, n.value);
-            
+
             // todo -- re think handling of negative constants
 //            stream = new TokenStream(Tokenizer.Tokenize("-5.6"));
 //            parser = new ExpressionParser(stream);
@@ -127,6 +131,11 @@ namespace Tests {
             Assert.AreEqual(opEx.op.op, OperatorType.Plus);
             Assert.IsInstanceOf<RootContextLookup>(opEx.left);
             Assert.IsInstanceOf<ConstantValueNode>(opEx.right);
+        }
+
+        [Test]
+        public void Parse_ExpressionWithSignificantParens() {
+            
         }
     }
 }

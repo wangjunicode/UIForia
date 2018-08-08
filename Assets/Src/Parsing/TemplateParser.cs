@@ -136,7 +136,7 @@ namespace Src {
 
             for (int i = 0; i < attributes.Count; i++) {
                 AttributeDefinition attr = attributes[i];
-                ContextDefinition context = GetContextByName(attr.contextName);
+               // ContextDefinition context = GetContextByName(attr.contextName);
             }
 
         }

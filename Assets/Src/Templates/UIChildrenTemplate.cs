@@ -9,6 +9,9 @@ namespace Src {
             throw new System.NotImplementedException();
         }
 
+        // if next template has slot children
+        // traverse those without pushing context
+        // then push 
         public override UIElement CreateScoped(TemplateScope scope) {
             NonRenderedElement retn = new NonRenderedElement();
             

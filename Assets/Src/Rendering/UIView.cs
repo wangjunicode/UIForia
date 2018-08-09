@@ -24,8 +24,11 @@ namespace Rendering {
 
         public UIElement root;
         public GameObject gameObject;
-
+        
+        private readonly SkipTree<ExpressionBinding> bindingSkipTree;
+        
         public UIView() {
+            bindingSkipTree = new SkipTree<ExpressionBinding>();
             this.gameObjects = new Dictionary<int, GameObject>();
             this.renderables = new Dictionary<int, ImagePrimitive>();
             renderQueue = new List<UIElement>();
@@ -44,14 +47,33 @@ namespace Rendering {
             //      contexts[i].FlushChanges();
             //    }
             
+            bindingSkipTree.TraverseCull(TraverseBindings);
+            
+            //bindingSkipTree.ClearOrphans();
+            
             HandleBindingChanges();
-            HandleCreatedElements();
-            HandleHidingElements();
-            HandleShowingElements();
-            HandleDestroyingElements();
-            HandleRenderUpdates();
+            HandleCreatedElements(); // list
+            HandleHidingElements(); // -> turn off bindings
+            HandleShowingElements(); // list
+            HandleDestroyingElements();// -> destroy bindings
+            HandleRenderUpdates(); // list
+            
             RunLayout();
-            HandleMouseEvents();
+            HandleMouseEvents(); // skip tree
+        }
+
+        private bool TraverseBindings(IHierarchical item) {
+            UIElement element = (UIElement) item;
+            // enter();
+            // element.templateRoot.context
+            // element
+            // exit();
+            // if item.destroyed || not enabled || not visible -> return true;
+            // else run bindings
+            // for each binding
+                // binding.execute(context);
+            
+            return false;
         }
 
         private void HandleRenderUpdates() {
@@ -248,6 +270,10 @@ namespace Rendering {
         }
 
         public void RegisterStyle(UIElement element, object computeInitialStyle) {
+            throw new NotImplementedException();
+        }
+
+        public void DestroyElement(UIElement toDestroy) {
             throw new NotImplementedException();
         }
 

@@ -5,9 +5,9 @@ namespace Src {
     public class AccessorBinding : ExpressionBinding {
 
         private string contextName;
-        private List<PropertyAcessorBinding> parts;
+        private List<PropertyAccessorBinding> parts;
 
-        public AccessorBinding(string contextName, List<PropertyAcessorBinding> parts) {
+        public AccessorBinding(string contextName, List<PropertyAccessorBinding> parts) {
             this.parts = parts;
             this.contextName = contextName;
         }
@@ -22,7 +22,7 @@ namespace Src {
                 ExpressionBinding part = parts[i];
                 if (part is ArrayAccessExpressionPart) { }
                 else {
-                    PropertyAcessorBinding propertyPart = (PropertyAcessorBinding) part;
+                    PropertyAccessorBinding propertyPart = (PropertyAccessorBinding) part;
                     instance = propertyPart.Evaluate(instance);
                     if (instance == null) return null;
                 }

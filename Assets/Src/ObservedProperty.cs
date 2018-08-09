@@ -20,7 +20,6 @@ public class ObservedProperty {
             if (this.value.Equals(value)) return;
             this.value = value;
             if (!isDirty) {
-                owner.providedContext.dirtyBindings.Add(name);
                 isDirty = true;
             }
         }

@@ -22,6 +22,11 @@ namespace Src {
                 childTemplates[i].CreateScoped(scope);
             }
 
+            context.view = view;
+            context.currentList.source = null;
+            context.currentIndex = -1;
+            root.providedContext = context;
+            
             return root;
         }
 

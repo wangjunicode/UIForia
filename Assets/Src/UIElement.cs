@@ -3,13 +3,13 @@ using System.Collections.Generic;
 using Rendering;
 using Src;
 
-public class UIElement {
+public class UIElement : IHierarchical {
 
     [Flags]
     internal enum UIElementFlags {
 
         RequiresRendering = 1 << 0
-
+                            
     }
     
     internal UIElementFlags flags;
@@ -18,8 +18,6 @@ public class UIElement {
     public List<UIElement> children;
     public TemplateContext providedContext;
     public TemplateContext referenceContext;
-    public UIElementTemplate originTemplate;
-    public ObservedProperty[] observedProperties;
     public UIStyle style = new UIStyle();
     public UITransform transform;
     public UIView view;
@@ -49,5 +47,7 @@ public class UIElement {
         retn += "<" + GetType().Name + ">";
         return retn;
     }
+
+    public IHierarchical Parent => parent;
 
 }

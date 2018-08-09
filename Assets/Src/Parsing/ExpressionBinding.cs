@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections;
 using System.Reflection;
 
 namespace Src {
@@ -8,9 +9,8 @@ namespace Src {
         public string propName; // shared
         public object previousValue; // needed?
         public ExpressionBinding expression; // shared
+        public BindingChangeHandler changeHandler; //shared
         public UIElement element; // instanced -> maybe not even needed because of traversal order
-        public event Action onChange; // could take an element id instead of each getting its own handler.
-                                      // potential big savings for lists
 
     }
 
@@ -28,10 +28,88 @@ namespace Src {
 
     }
 
+    public class StyleValueSetter : ExpressionBinding {
+
+        public override object Evaluate(TemplateContext context) {
+            context.element.view.MarkForRendering(context.element);
+            return base.Evaluate(context);
+        }
+
+    }
+
+    public class TextValueSetter { }
+
+    public class PropertySetter { }
+
+    public class FieldSetter { }
+
+    public class ListFilterSetter { }
+
+    public class ListSetter { }
+
+    public class VisibilitySetter { }
+
+    public class RepeatChildIndexSetter : ExpressionBinding {
+
+        public override object Evaluate(TemplateContext context) {
+            context.currentIndex = ((UIRepeatChild) context.element).index;
+        }
+
+    }
+    
+    public abstract class BindingChangeHandler {
+
+        public abstract void HandleChange(TemplateContext context, object newValue, object oldValue);
+
+    }
+
+    
+    
+    public class PropSetter : BindingChangeHandler {
+
+        public override void HandleChange(TemplateContext context, object newValue, object oldValue) {
+            context.element.GetType().GetField("").SetValue(context, newValue);
+            context.element.OnPropsChanged(null);
+        }
+
+    }
+
+    public class ListAssignmentWatcher : BindingChangeHandler {
+
+        public override void HandleChange(TemplateContext context, object newValue, object oldValue) {
+            context.SetListSource((IList) newValue);
+        }
+
+    }
+    
+    public class ListSizeWatcher : BindingChangeHandler {
+
+        public override void HandleChange(TemplateContext context, object newValue, object oldValue) {
+            int oldSize = (int) oldValue;
+            int newSize = (int) newValue;
+            if (oldSize > newSize) {
+                
+            }
+//            context.currentList.Resize()
+        }
+
+    }
+    
     public class ExpressionBinding {
+
+        public void Run(UIElement element) {
+            // if list isze is different
+            // element.view.resize list
+            // element.listproperty[index] = evaluate(element); 
+        }
         
         public virtual object Evaluate(TemplateContext context) {
             return null;
+        }
+
+        public virtual void HandleChange(TemplateContext context) {
+            // context.currentElement.setValue
+            // context.currentElement.style.whatever = yes
         }
         
     }

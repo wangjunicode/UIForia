@@ -36,13 +36,15 @@ namespace Src {
         }
 
         public void Compile(ContextDefinition context) {
+            // List{binding, handler, context}
             for (int i = 0; i < attributes.Count; i++) {
-                ExpressionBinding binding = BindingGenerator.Generate(context, attributes[i].bindingExpression);
+                // repeat binding = context.currentList = element.GetListProperty("listName");
+                ExpressionBinding binding = BindingGenerator.GenerateFromAttribute(context, attributes[i]);
+                ExpressionChangeHandler handler = BindingGenerator.GenerateChangeHandler(context, attributes[i]);
                 // an expression binding is just a targetProperty linked to a function
                 // that function is called every frame
                 // when the output of the function changes, callbacks are invoked on the element if needed
                 // targetProperty -> function()
-                
             }
         }
 

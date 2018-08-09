@@ -8,6 +8,10 @@ namespace Src {
             return Visit(context, root);
         }
 
+        public static void GenerateFromAttribute(ContextDefinition context, AttributeDefinition attr) {
+            
+        }
+
         private static ExpressionBinding Visit(ContextDefinition context, ExpressionNode node) {
             switch (node.expressionType) {
 

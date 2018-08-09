@@ -1,13 +1,13 @@
 ﻿using UnityEngine;
 
-public struct ContextBoxPart {
+public struct ContentBoxPart {
 
     public float top;
     public float right;
     public float bottom;
     public float left;
 
-    public ContextBoxPart(float top, float right, float bottom, float left) {
+    public ContentBoxPart(float top, float right, float bottom, float left) {
         this.top = top;
         this.right = right;
         this.bottom = bottom;
@@ -23,15 +23,16 @@ public enum FitType {
 
     None,
     Content,
-    Parent
+    Parent,
+    Unset
 
 }
 
 public class ContentBox {
 
-    public ContextBoxPart border;
-    public ContextBoxPart margin;
-    public ContextBoxPart padding;
+    public ContentBoxPart border;
+    public ContentBoxPart margin;
+    public ContentBoxPart padding;
     
     public FitType widthFit;
     public FitType heightFit;

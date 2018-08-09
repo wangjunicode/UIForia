@@ -32,27 +32,18 @@ namespace Rendering {
         }
 
         public void OnCreate() {
-            UIElementTemplate template = TemplateParser.GetParsedTemplate(templateType);
-            root = template.CreateElement(this);
-
-            Stack<UIElement> stack = new Stack<UIElement>();
-            stack.Push(root);
-            while (stack.Count > 0) {
-                UIElement element = stack.Pop();
-
-                element.style.ComputeSize();
-
-                for (int i = 0; i < element.children.Length; i++) {
-                    stack.Push(element.children[i]);
-                }
-            }
-
+            root = TemplateParser.GetParsedTemplate(templateType).Instantiate(this, null, null);
         }
 
         public void Update() {
+            // for now every element has a template context
+            // I know that this is dumb, it will be addressed later
+            // traverse contexts in a tree
+            
             //   for (int i = 0; i < contexts.Count; i++) {
             //      contexts[i].FlushChanges();
             //    }
+            
             HandleBindingChanges();
             HandleCreatedElements();
             HandleHidingElements();
@@ -69,6 +60,7 @@ namespace Rendering {
                 element.flags &= ~(UIElement.UIElementFlags.RequiresRendering);
                 RenderElement(element);
             }
+
             renderQueue.Clear();
         }
 
@@ -89,7 +81,6 @@ namespace Rendering {
         private void HandleFocusEvents() { }
 
         private void RunLayout() {
-
             //if nothing new, moved, destroyed, enabled, or disabled and no dirty layout styles and transforms don't run layout
 
             // find highest level element with children that changed
@@ -105,16 +96,14 @@ namespace Rendering {
             while (stack.Count > 0) {
                 UIElement element = stack.Pop();
 
-                if (element.children.Length == 0) break;
+                if (element.children.Count == 0) break;
 
                 element.style.layout.Run(element);
 
-                for (int i = 0; i < element.children.Length; i++) {
+                for (int i = 0; i < element.children.Count; i++) {
                     stack.Push(element.children[i]);
                 }
-
             }
-
         }
 
         public void CreateListElement(UIElementTemplate template, int idx, TemplateContext context) { }
@@ -136,7 +125,6 @@ namespace Rendering {
                     renderQueue.Add(element);
                 }
             }
-
         }
 
         public void RenderElement(UIElement element) {
@@ -151,6 +139,7 @@ namespace Rendering {
                     image = CreateImagePrimitive(element);
                     renderables[element.id] = image;
                 }
+
                 image.ApplyStyleSettings(element.style);
             }
         }
@@ -171,6 +160,7 @@ namespace Rendering {
                     retn.font = ptr.style.textStyle.font;
                     break;
                 }
+
                 ptr = ptr.parent;
             }
 
@@ -180,6 +170,7 @@ namespace Rendering {
                     retn.alignment = ptr.style.textStyle.alignment;
                     break;
                 }
+
                 ptr = ptr.parent;
             }
 
@@ -189,6 +180,7 @@ namespace Rendering {
                     retn.fontSize = ptr.style.textStyle.fontSize;
                     break;
                 }
+
                 ptr = ptr.parent;
             }
 
@@ -198,6 +190,7 @@ namespace Rendering {
                     retn.fontStyle = ptr.style.textStyle.fontStyle;
                     break;
                 }
+
                 ptr = ptr.parent;
             }
 
@@ -207,6 +200,7 @@ namespace Rendering {
                     retn.color = ptr.style.textStyle.color;
                     break;
                 }
+
                 ptr = ptr.parent;
             }
 
@@ -251,6 +245,10 @@ namespace Rendering {
 
         private static string GetGameObjectName(UIElement element) {
             return "UIElement_" + element.GetType().Name + " " + element.id;
+        }
+
+        public void RegisterStyle(UIElement element, object computeInitialStyle) {
+            throw new NotImplementedException();
         }
 
     }

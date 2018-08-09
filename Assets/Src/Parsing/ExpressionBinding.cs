@@ -13,7 +13,21 @@ namespace Src {
                                       // potential big savings for lists
 
     }
-    
+
+    public class ManualExpressionBinding : ExpressionBinding {
+
+        private readonly Func<TemplateContext, bool> fn;
+        
+        public ManualExpressionBinding(Func<TemplateContext, bool> fn) {
+            this.fn = fn;
+        }
+
+        public override object Evaluate(TemplateContext context) {
+            return fn.Invoke(context);
+        }
+
+    }
+
     public class ExpressionBinding {
         
         public virtual object Evaluate(TemplateContext context) {
@@ -21,14 +35,10 @@ namespace Src {
         }
         
     }
-
-    
     
 }
 
 /*
-
-
 
 class CodeGenedExpressionBinding_Safe {
     // {item.x[$i].y}

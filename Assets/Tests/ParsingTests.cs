@@ -1,10 +1,18 @@
-﻿//using Src;
-//using NUnit.Framework;
-//using UnityEngine;
-//
-//[TestFixture]
-//public class ParsingTests {
-//
+﻿using Src;
+using NUnit.Framework;
+using UnityEngine;
+
+[TestFixture]
+public class ParsingTests {
+
+    [Test]
+    public void ParseTemplateParts() {
+        
+        TemplateParser.GetParsedTemplate(typeof(Spec.Temp));
+        
+    }
+
+}
 //    [Test]
 //    public void ParseThreeSelfClosingChildren() {
 //        UIElementTemplate parsedTemplate = TemplateParser.GetParsedTemplate(typeof(Spec.Test1));

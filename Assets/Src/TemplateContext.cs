@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System.Collections;
+using System.Collections.Generic;
 
 namespace Src {
 
@@ -10,6 +11,8 @@ namespace Src {
         private readonly List<object> contextProviders;
         private readonly Dictionary<string, List<UIElement>> bindingMap;
 
+        public IList currentList;
+        
         public TemplateContext(UIElement element) {
             this.element = element;
             bindingMap = new Dictionary<string, List<UIElement>>();
@@ -32,6 +35,10 @@ namespace Src {
             // for each dirty checked binding
             // binding.Update();
             // binding.target = binding.Evaluate(this);
+        }
+
+        public void RegisterBindings(UIElement uiElement, List<ExpressionBinding> generatedBindings) {
+            throw new System.NotImplementedException();
         }
 
     }

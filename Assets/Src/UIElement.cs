@@ -15,7 +15,7 @@ public class UIElement {
     internal UIElementFlags flags;
     public readonly int id;
     public UIElement parent;
-    public UIElement[] children;
+    public List<UIElement> children;
     public TemplateContext providedContext;
     public TemplateContext referenceContext;
     public UIElementTemplate originTemplate;
@@ -43,12 +43,6 @@ public class UIElement {
     public virtual void OnHidden() { }
 
     public virtual void OnDestroyed() { }
-
-    public UIElement[] Children {
-        set {
-            if (children == null) children = value;
-        }
-    }
     
     public override string ToString() {
         string retn = string.Empty;

@@ -1,4 +1,5 @@
-﻿using Rendering;
+﻿using System.Collections.Generic;
+using Rendering;
 using UnityEngine;
 
 namespace Src {
@@ -23,10 +24,10 @@ namespace Src {
             UIText text0 = new UIText();
             UIText text1 = new UIText();
             UIText text2 = new UIText();
-            panel.children = new[] {
+            panel.children = new List<UIElement>() {
                 text0, text1, text2
             };
-            for (int i = 0; i < panel.children.Length; i++) {
+            for (int i = 0; i < panel.children.Count; i++) {
                 panel.children[i].parent = panel;
             }
             view.root = panel;

@@ -9,7 +9,8 @@ namespace Src {
         public readonly string value;
 
         private static readonly string[] EmptyModifierList = new string[0];
-        
+        public ExpressionNode bindingExpression;
+
         public AttributeDefinition(string key, string value) {
             this.key = key;
             this.value = value;

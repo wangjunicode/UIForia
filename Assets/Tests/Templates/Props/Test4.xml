@@ -2,7 +2,16 @@
 
 <UITemplate>
     <Import path="./thing" as="blah"/>
-    <Style>
+    <Style extends="id" from="./path/to/thing">
+        
+        <Text>
+            <FontSize value="12"/>
+            <FontAsset url=""/>
+            <FontStyle/>
+            <FontOverflow/>
+            <FontColor/>
+            <TextAnchor/>
+        </Text>
         
         Text {
             fontSize: 11px;
@@ -89,6 +98,80 @@
         
     </Style>
     <Contents>
+        
+        <UITemplate id="Section">
+            Hello There
+            <Children/>
+            Good bye
+        </UITemplate>
+        
+        <!--<ColorSelector selected="{index}">-->
+        <Color value="{Color.red}"/>
+        <Color value="{Color.red}"/>
+        <Color value="{Color.red}"/>
+        <Color value="{Color.red}"/>
+        
+        <Section>
+            More Text
+        </Section>
+        
+        <Children/>        
+        Create(template.children.createAll(context))    
+        <!--</ColorSelector>-->
+        
+        InstantiateColorSelector(view, parent, scopedChildren) ->
+            create instance
+            assign props
+            
+            for each child in ACTUAL template
+                create(view, instance, localContext
+        
+        create color selector
+            -> create scoped children
+                -> get template for child
+                -> pass in props from definition
+                -> pass in children from definition
+                -> return created child
+            -> get template for color selector
+            -> pass in props
+            -> pass in children
+            -> return created color selector template
+        
+        <Section>
+            Text
+            <Children/>
+            
+            <Switch value="4">
+            
+                <Case when="4"/>
+            
+                <Case when="5"/>
+            
+                <Case when="6"/>
+            
+                <Case when="7"/>
+            
+            </Switch>
+            
+            more text
+            <SomeThingElse something="2">
+                Even more children
+                Even more children
+                Even more children
+                <Slot id="1"/>
+                Even more children
+            </SomeThingElse>
+        </Section>
+        
+        <SlotInput id="1">
+            dafeafeafa
+        </SlotInput>
+        
+        <Panel>
+            Child 1 {text} 
+            <ColorSelector>Child 2</ColorSelector>
+        </Panel>
+        
         <Spec.Props.Test1Thing intValue="{value}"/>
 
         <Switch value="{someEnum}">
@@ -104,6 +187,15 @@
             <Default>Text here</Default>
             
         </Switch>
+        
+        <ColorSelector>
+            <Color/>
+            <Color/>
+            <Color/>
+            <Color/>
+            <Color/>
+            <Color/>
+        </ColorSelector>
 
         <Repeat filter="" list="{valueList}" alias="item" onItemMoved="{}" onItemAdded="{}" onItemRemoved="{}">
             {item.something :: someObservedProperty} -- only check for updates when property changed
@@ -115,23 +207,12 @@
         <Repeat list="{item.things}">
             {item.more.thing[value].x}
             <UIImage src="{item.basePath + root.path}"/>
-            <Slot id="1"/>
+            
+            <Slot id="1">
+                
+            </Slot>
+            
         </Repeat>
 
     </Contents>
 </UITemplate>
-
-        <!--/*-->
-        <!--* Grammar-->
-        <!--*     ConstantStatement = Constant-->
-        <!--*     ExpressionStatement = { Expression }-->
-        <!--*     Constant = String | Boolean | Number-->
-        <!--*     ValueExpression = Lookup | PropertyAccess | ArrayAccess | Constant-->
-        <!--*     Lookup = Identifier-->
-        <!--*     PropertyAccess = Identifier . (Identifier+)-->
-        <!--*     ArrayAccess = Identifier [ Expression ]-->
-        <!--*     Operator = ValueExpression Operator ValueExpression-->
-        <!--*     Expression = ValueExpression ?(Operator Expression)*-->
-        <!--*     MethodExpression = Identifier (ParameterList)-->
-        <!--*     ParameterList = Expression (, Expression)*-->
-        <!--*/-->

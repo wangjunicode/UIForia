@@ -3,6 +3,9 @@ using Src;
 
 namespace Spec {
 
+    [Template("Tests/Templates/Parsing/Temp.xml")]
+    public class Temp : UIElement { }
+
     [Template("Tests/Templates/Parsing/Test1.xml")]
     public class Test1 : UIElement { }
 

@@ -5,19 +5,6 @@ using UnityEngine.UI;
 
 namespace Src.Layout {
 
-    public struct LayoutParameters {
-
-        public int growthFactor;
-        public int shrinkFactor;
-        public UnitValue minWidth;
-        public UnitValue maxWidth;
-        public UnitValue minHeight;
-        public UnitValue maxHeight;
-        public UnitValue basisWidth;
-        public UnitValue basisHeight;
-
-    }
-    
     public class UIFlexLayout {
         
         private Rect rect;
@@ -27,7 +14,7 @@ namespace Src.Layout {
         public CrossAxisAlignment crossAxisAlignment;
                
         public void DoLayout(UITransform transform, Rect rect) {
-            LayoutRebuilder
+            
 //            
 //            this.rect = rect;
 //            children = transform.children;

@@ -1,9 +1,5 @@
 using System;
-using System.Collections;
 using System.Collections.Generic;
-using System.Linq;
-using System.Linq.Expressions;
-using System.Reflection;
 
 /*
 * Grammar
@@ -24,184 +20,20 @@ using System.Reflection;
 */
 namespace Src {
 
-    public class NumericConstantBinding : ExpressionBinding {
-
-        public readonly double value;
-
-        public NumericConstantBinding(double value) {
-            this.value = value;
-        }
-
-        public double Evaluate(TemplateContext context) {
-            return value;
-        }
-
-    }
-
-    public class UnaryBooleanBinding : ExpressionBinding {
-
-        public readonly ExpressionBinding binding;
-
-        public UnaryBooleanBinding(ExpressionBinding binding) {
-            this.binding = binding;
-        }
-
-        public override object Evaluate(TemplateContext context) {
-            object value = binding.Evaluate(context);
-            if (value is bool) return !((bool) value);
-            return value != null;
-        }
-
-    }
-
-    public class UnaryPlusBinding : ExpressionBinding {
-
-        public readonly ExpressionBinding binding;
-
-        public UnaryPlusBinding(ExpressionBinding binding) {
-            this.binding = binding;
-        }
-
-        public override object Evaluate(TemplateContext context) {
-            object value = binding.Evaluate(context);
-            if (value is int) return +(int) value;
-            if (value is float) return +(float) value;
-            if (value is double) return +(double) value;
-            if (value is short) return +(short) value;
-            if (value is ushort) return +(ushort) value;
-            if (value is byte) return +(byte) value;
-            if (value is sbyte) return +(sbyte) value;
-            if (value is long) return +(long) value;
-            if (value is ulong) return +(ulong) value;
-            throw new Exception("Failed to match numeric type");
-        }
-
-    }
-
-//    public class OperatorBindingInt {
-//
-//        public ExpressionBinding left;
-//        public ExpressionBinding right;
-//        public OperatorType operatorType;
-//
-//        public int Evaluate() {
-//            switch (operatorType) {
-//                case OperatorType.Plus:
-//                    return (int) left.Evaluate() + (int) right.Evaluate();
-//                case OperatorType.Minus:
-//                    return (int) left.Evaluate() - (int) right.Evaluate();
-//                case OperatorType.Times:
-//                    return (int) left.Evaluate() * (int) right.Evaluate();
-//                case OperatorType.Divide:
-//                    return (int) left.Evaluate() / (int) right.Evaluate();
-//            }
-//            throw new Exception("Unknown operator");
-//        }
-//
-//    }
-
-    public class PropertyAcessorBinding : ExpressionBinding {
-
-        private readonly string fieldName;
-        private Type cachedType;
-        private FieldInfo cachedFieldInfo;
-
-        private const BindingFlags Flags = BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic;
-
-        public PropertyAcessorBinding(string fieldName) {
-            this.fieldName = fieldName;
-        }
-
-        public object Evaluate(object target) {
-            if (target == null) return null;
-            if (target.GetType() == cachedType) {
-                return cachedFieldInfo.GetValue(target);
-            }
-            else {
-                cachedType = target.GetType();
-                cachedFieldInfo = cachedType.GetField(fieldName, Flags);
-
-                if (cachedFieldInfo == null) return null;
-
-                return cachedFieldInfo.GetValue(target);
-            }
-        }
-
-    }
-
-    public class ArrayAccessorBinding : ExpressionBinding {
-
-        public readonly ExpressionBinding expressionBinding;
-
-        public ArrayAccessorBinding(ExpressionBinding expressionBinding) {
-            this.expressionBinding = expressionBinding;
-        }
-
-        public object Evaluate(TemplateContext context, IList list) {
-            int idx = (int) expressionBinding.Evaluate(context);
-            if ((uint) idx >= (uint) list.Count) {
-                return null;
-            }
-            return list[idx];
-        }
-
-    }
-
-    public class AccessorBinding : ExpressionBinding {
-
-        private string contextName;
-        private List<PropertyAcessorBinding> parts;
-
-        public AccessorBinding(string contextName, List<PropertyAcessorBinding> parts) {
-            this.parts = parts;
-            this.contextName = contextName;
-        }
-
-        public override object Evaluate(TemplateContext context) {
-            object target = null;//context.GetContext(contextName);
-            object instance = target;
-
-            if (target == null) return null;
-
-            for (int i = 0; i < parts.Count; i++) {
-                ExpressionBinding part = parts[i];
-                if (part is ArrayAccessExpressionPart) { }
-                else {
-                    PropertyAcessorBinding propertyPart = (PropertyAcessorBinding) part;
-                    instance = propertyPart.Evaluate(instance);
-                    if (instance == null) return null;
-                }
-            }
-
-            return null;
-        }
-
-    }
-//    public class PropertyAccessBinding : ExpressionBinding {
-//
-//        private TemplateContext context;
-//        private PropertyAccessPart[] parts;
-//
-//        public object Evaluate() {
-//            object instance = context.GetContext(0);
-//            for (int i = 0; i < parts.Length; i++) {
-//                FieldInfo fieldInfo = parts[i].fieldInfo;
-//                instance = fieldInfo.GetValue(instance);
-//                if (instance == null) {
-//                    return null;
-//                }
-//            }
-//            return instance;
-//        }
-//
-//    }
-
     public class ExpressionParser {
 
-        private readonly TokenStream tokenStream;
+        private TokenStream tokenStream;
         private readonly Stack<ExpressionNode> expressionStack;
         private readonly Stack<OperatorNode> operatorStack;
 
+        private static readonly TokenStream EmptyTokenStream = new TokenStream(new List<DslToken>());
+        
+        public ExpressionParser() {
+            tokenStream = EmptyTokenStream;
+            expressionStack = new Stack<ExpressionNode>();
+            operatorStack = new Stack<OperatorNode>();
+        }
+        
         public ExpressionParser(TokenStream tokenStream) {
             this.tokenStream = tokenStream;
             expressionStack = new Stack<ExpressionNode>();
@@ -225,6 +57,11 @@ namespace Src {
             }
         }
 
+        public ExpressionNode Parse(string input) {
+            tokenStream = new TokenStream(Tokenizer.Tokenize(input));
+            return Parse();
+        }
+        
         public ExpressionNode Parse() {
             ConsumeWhiteSpace();
 

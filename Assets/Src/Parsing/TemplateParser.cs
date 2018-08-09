@@ -2,184 +2,228 @@ using System;
 using System.IO;
 using System.Xml;
 using System.Collections.Generic;
-using System.Globalization;
-using System.Reflection;
+using System.Linq;
+using System.Xml.Linq;
+using Src.Parsing.Style;
+using Src.Style;
 using UnityEngine;
 
 namespace Src {
 
-    // type check the template attributes
-    // process attributes 
-    // handle importing
-    // handle style nodes
-    // ensure valid contexts
-    // warn about non-existent props
-    // ensure required things are required
-    // build and validate contexts
-    // ensure terminal nodes are terminal
-    // reference constant values not in the context (for things like a route map)
+    public class TemplateParser {
 
-    // todo slot & children nodes cannot appear inside repeats
+        private string TemplateName = string.Empty;
 
-    public static class TemplateParser {
+        private readonly ParsedTemplate output = new ParsedTemplate();
+        private int repeatCount;
+        
+        private static readonly ExpressionParser expressionParser = new ExpressionParser();
 
-        private static string TemplateName = string.Empty;
+        private static readonly Dictionary<Type, ParsedTemplate> parsedTemplates =
+            new Dictionary<Type, ParsedTemplate>();
 
-        private static readonly List<ContextDefinition> contexts = new List<ContextDefinition>();
-        private static readonly Dictionary<Type, UIElementTemplate> parsedTemplates = new Dictionary<Type, UIElementTemplate>();
 
-        public static UIElementTemplate GetParsedTemplate(Type elementType, bool forceReload = false) {
+        public static ParsedTemplate GetParsedTemplate(ProcessedType processedType, bool forceReload = false) {
+            return GetParsedTemplate(processedType.type, forceReload);
+        }
+        
+        public static ParsedTemplate GetParsedTemplate(Type elementType, bool forceReload = false) {
             if (!forceReload && parsedTemplates.ContainsKey(elementType)) {
                 return parsedTemplates[elementType];
             }
-            ProcessedType type = TypeProcessor.GetProcessedType(elementType);
+
+            TemplateParser parser = new TemplateParser();
+            ProcessedType type = TypeProcessor.GetType(elementType);
             string template = File.ReadAllText(Application.dataPath + type.GetTemplatePath());
-            UIElementTemplate parsedTemplate = ParseTemplate(type, template);
+            ParsedTemplate parsedTemplate = parser.ParseTemplate(type, template);
             parsedTemplates[elementType] = parsedTemplate;
             return parsedTemplate;
         }
 
-        public static UIElementTemplate GetParsedTemplate<T>(bool forceReload = false) where T : UIElement {
+        public ParsedTemplate GetParsedTemplate<T>(bool forceReload = false) where T : UIElement {
             return GetParsedTemplate(typeof(T), forceReload);
         }
 
-        private static UIElementTemplate ParseTemplate(ProcessedType type, string template) {
+        private StyleTemplate ParseStyleSheet(XElement root) {
+            StyleTemplate styleTemplate = new StyleTemplate();
+            TextStyleParser.ParseStyle(root.GetChild("Text"), styleTemplate);
+            PaintStyleParser.ParseStyle(root.GetChild("Paint"), styleTemplate);
+            AnimationStyleParser.ParseStyle(root.GetChild("Animations"), styleTemplate);
+            SizeStyleParser.ParseStyle(root.GetChild("Size"), styleTemplate);
+            LayoutStyleParser.ParseStyle(root.GetChild("Layout"), styleTemplate);
+            LayoutItemStyleParser.ParseStyle(root.GetChild("LayoutItem"), styleTemplate);
+            return styleTemplate;
+        }
+
+        private ParsedTemplate ParseTemplate(ProcessedType type, string template) {
             TemplateName = type.GetTemplatePath();
-            contexts.Clear();
 
-            XmlReader xReader = XmlReader.Create(new StringReader(template));
-            if (!xReader.ReadToDescendant("Contents")) {
-                throw new InvalidTemplateException(type.type.Name, "Template is missing a Contents Section");
-            }
+            XDocument doc = XDocument.Parse(template);
+            doc.MergeTextNodes();
 
-            UIElementTemplate root = new UIElementTemplate(UIElementTemplateType.Template, type);
-            Stack<UIElementTemplate> stack = new Stack<UIElementTemplate>();
-            stack.Push(root);
+            List<ImportDeclaration> imports = new List<ImportDeclaration>();
+            List<StyleTemplate> styleTemplates = new List<StyleTemplate>();
 
-            AddContext(new ContextDefinition("this", type));
-
-            bool foundSlot = false;
-            while (xReader.Read()) {
-                switch (xReader.NodeType) {
-
-                    case XmlNodeType.Element:
-                        bool shouldDescend = !xReader.IsEmptyElement;
-
-                        UIElementTemplate parsedElement = ParseElement(xReader);
-                        if (parsedElement.IsSlot && foundSlot) {
-                            throw new MultipleChildSlotException(type.type.Name);
-                        }
-                        if (parsedElement.IsSlot) {
-                            foundSlot = true;
-                            if (shouldDescend) {
-                                throw new ChildrenSlotWithChildrenException(type.type.Name);
-                            }
-                        }
-                        stack.Peek().children.Add(parsedElement);
-                        if (shouldDescend) {
-                            stack.Push(parsedElement);
-                        }
-                        break;
-                    case XmlNodeType.EndElement:
-                        if (stack.Count > 0) stack.Pop();
-                        break;
-
-                    case XmlNodeType.Text:
-                        stack.Peek().children.Add(ParseTextNode(xReader));
-                        break;
-                    case XmlNodeType.Whitespace:
-                        break;
+            IEnumerable<XElement> importElements = doc.Root.GetChildren("Import");
+            foreach (var xElement in importElements) {
+                XAttribute pathAttr = xElement.Attributes().FirstOrDefault((a) => a.Name == "path");
+                XAttribute aliasAttr = xElement.Attributes().FirstOrDefault((a) => a.Name == "as");
+                if (pathAttr == null || string.IsNullOrEmpty(pathAttr.Value)) {
+                    throw new Exception("Import node without a 'path' attribute");
                 }
 
-            }
-            if (stack.Count > 0) stack.Pop();
-            xReader.Dispose();
-            TemplateName = string.Empty;
-            return root;
-        }
+                if (aliasAttr == null || string.IsNullOrEmpty(aliasAttr.Value)) {
+                    throw new Exception("Import node without an 'as' attribute");
+                }
 
-        private static UIElementTemplate ParseTextNode(XmlReader reader) {
-            ProcessedType processedType = TypeProcessor.GetProcessedType(typeof(UITextElement));
-            UIElementTemplate element = new UIElementTemplate(UIElementTemplateType.Text, processedType);
-            element.text = reader.Value;
-            // todo -- split when encountering {} inside of text
-            return element;
-        }
-
-        private static UIElementTemplate ParseElement(XmlReader reader) {
-            UIElementTemplateType templateType = UIElementTemplateType.Template;
-
-            if (reader.Name == "Children") {
-                return new UIElementTemplate(UIElementTemplateType.Slot, null);
+                imports.Add(new ImportDeclaration(pathAttr.Value, aliasAttr.Value));
             }
 
-            if (reader.Name == "Repeat") {
-                AddContext(ReadRepeatAttributes(reader));
-                return new UIElementTemplate(UIElementTemplateType.Repeat, null);
+            IEnumerable<XElement> styleElements = doc.Root.GetChildren("Style");
+            foreach (var styleElement in styleElements) {
+                XAttribute idAttr = styleElement.Attributes().FirstOrDefault((a) => a.Name == "id");
+                XAttribute extendsAttr = styleElement.Attributes().FirstOrDefault((a) => a.Name == "extends");
+                XAttribute fromAttr = styleElement.Attributes().FirstOrDefault((a) => a.Name == "from");
+
+                if (idAttr == null || string.IsNullOrEmpty(idAttr.Value)) {
+                    throw new Exception("Style tags require an 'id' attribute");
+                }
+
+                if (styleTemplates.Find((t) => t.id == idAttr.Value.Trim()) != null) {
+                    throw new Exception("Style tags must have a unique id");
+                }
+
+                StyleTemplate styleTemplate = ParseStyleSheet(styleElement);
+                styleTemplate.id = idAttr.Value.Trim();
+                styleTemplate.extendsId = extendsAttr?.Value.Trim();
+                styleTemplate.extendsPath = fromAttr?.Value.Trim();
+                styleTemplates.Add(styleTemplate);
             }
 
-            ProcessedType childProcessedType = TypeProcessor.GetProcessedType(reader.Name);
-
-            if (childProcessedType.isPrimitive) {
-                templateType = UIElementTemplateType.Primitive;
+            XElement contentElement = doc.Root.GetChild("Contents");
+            if (contentElement == null) {
+                throw new Exception($"Template {TemplateName} is missing a 'Contents' section");
             }
 
-            UIElementTemplate element = new UIElementTemplate(templateType, childProcessedType);
+            output.type = type.type;
+            output.imports = imports;
+            output.styles = styleTemplates;
+            output.filePath = TemplateName;
+            output.contexts = new List<ContextDefinition>();
+            output.rootElement = (UIElementTemplate) ParseElement(contentElement);
 
-            List<AttributeDefinition> attributes = ParseAttributes(reader);
-            CreateBindings(element, childProcessedType, attributes);
-
-            return element;
+            return output;
         }
 
-        private static void CreateBindings(UIElementTemplate template, ProcessedType processedType, List<AttributeDefinition> attributes) {
+        private UITemplate ParseCaseElement(XElement element) {
+            // must be direct child of switch
+            return null;
+        }
 
-            for (int i = 0; i < attributes.Count; i++) {
-                AttributeDefinition attr = attributes[i];
-               // ContextDefinition context = GetContextByName(attr.contextName);
+        private UITemplate ParseDefaultElement(XElement element) {
+            // must be direct child of switch
+            return null;
+        }
+
+        private UITemplate ParseRepeatElement(XElement element) {
+            // cannot be in a repeat
+            return null;
+        }
+
+        private UITemplate ParseSlotElement(XElement element) {
+            // cannot be in a repeat
+            return null;
+        }
+
+        private UITemplate ParseChildrenElement(XElement element) {
+            // cannot be in a repeat
+            return null;
+        }
+
+        private UITemplate ParseSwitchElement(XElement element) {
+            // can only contain <Case> and <Default>
+            return null;
+        }
+
+        private UITemplate ParsePrefabElement(XElement element) {
+            return null;
+        }
+
+        private UITextTemplate ParseTextNode(XText node) {
+            return null;
+        }
+
+        private UITemplate ParseTemplateElement(XElement element) {
+            UITemplate template = new UIElementTemplate();
+
+            template.processedElementType = TypeProcessor.GetType(element.Name.LocalName, output.imports);
+            template.attributes = ParseAttributes(element.Attributes());
+            template.childTemplates = ParseNodes(element.Nodes());
+
+            for (int i = 0; i < template.childTemplates.Count; i++) {
+                template.childTemplates[i].parent = template;
             }
 
+            return template;
         }
 
-        private static ContextDefinition ReadRepeatAttributes(XmlReader reader) {
-            List<AttributeDefinition> attributes = ParseAttributes(reader);
-//            AttributeDefinition listAttr = attributes.Find((a) => a.name == "list");
-            AttributeDefinition alias = attributes.Find((a) => a.name == "alias");
-//            AttributeDefinition filter = attributes.Find((a) => a.name   == "filter");
-
-            string name = alias != null ? alias.key : "item";
-            ContextDefinition contextDefinition = new ContextDefinition(name, null);
-
-//            if (listAttr == null) {
-//                throw new InvalidTemplateException(TemplateName, "<Repeat> is missing a 'list' attribute");
-//            }
-//
-//            if (alias != null && !alias.IsConstantValue) {
-//                throw new InvalidTemplateException(TemplateName, "<Repeat> alias must be a constant string value");
-//            }
-
-            return contextDefinition;
-
-        }
-
-        private static void AddContext(ContextDefinition context) {
-            ContextDefinition existing = GetContextByName(context.name);
-            if (existing != null) {
-                throw new InvalidTemplateException(TemplateName, $"<Repeat> is using an alias '{context.name}' but this is already taken.");
+        private UITemplate ParseElement(XElement element) {
+            if (element.Name == "Children") {
+                return ParseChildrenElement(element);
             }
-        }
 
-        private static ContextDefinition GetContextByName(string contextName) {
-            return contexts.Find((c) => c.name == contextName);
-        }
-
-        private static List<AttributeDefinition> ParseAttributes(XmlReader reader) {
-            List<AttributeDefinition> attributeList = new List<AttributeDefinition>();
-            for (int i = 0; i < reader.AttributeCount; i++) {
-                reader.MoveToAttribute(i);
-                attributeList.Add(new AttributeDefinition(reader.Name, reader.Value));
+            if (element.Name == "Repeat") {
+                return ParseRepeatElement(element);
             }
-            return attributeList;
+
+            if (element.Name == "Slot") {
+                return ParseSlotElement(element);
+            }
+
+            if (element.Name == "Switch") {
+                return ParseSwitchElement(element);
+            }
+
+            if (element.Name == "Prefab") {
+                return ParsePrefabElement(element);
+            }
+
+            if (element.Name == "Default") {
+                return ParseDefaultElement(element);
+            }
+
+            if (element.Name == "Case") {
+                return ParseCaseElement(element);
+            }
+
+            return ParseTemplateElement(element);
+        }
+
+        private List<UITemplate> ParseNodes(IEnumerable<XNode> nodes) {
+            List<UITemplate> retn = new List<UITemplate>();
+            foreach (var node in nodes) {
+                if (node.NodeType == XmlNodeType.Text) {
+                    retn.Add(ParseTextNode((XText) node));
+                }
+                else if (node.NodeType == XmlNodeType.Element) {
+                    retn.Add(ParseElement((XElement) node));
+                }
+
+                throw new Exception("Unable to handle node type: " + node.NodeType);
+            }
+
+            return retn;
+        }
+
+        private List<AttributeDefinition> ParseAttributes(IEnumerable<XAttribute> attributes) {
+            List<AttributeDefinition> retn = new List<AttributeDefinition>();
+            foreach (var attr in attributes) {
+                AttributeDefinition attrDef = new AttributeDefinition(attr.Name.LocalName, attr.Value.Trim());
+                attrDef.bindingExpression = expressionParser.Parse(attrDef.value);
+                retn.Add(attrDef);
+            }
+
+            return retn;
         }
 
     }

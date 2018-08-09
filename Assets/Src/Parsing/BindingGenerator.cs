@@ -4,11 +4,7 @@ namespace Src {
 
     public class BindingGenerator {
 
-        public static ExpressionBinding Generate(Type expectedOutputType, ContextDefinition context, ExpressionNode root) {
-            Type outputType = root.GetYieldedType(context);
-            if (!expectedOutputType.IsAssignableFrom(outputType)) {
-                throw new Exception("Typecheck failed");
-            }
+        public static ExpressionBinding Generate(ContextDefinition context, ExpressionNode root) {
             return Visit(context, root);
         }
 

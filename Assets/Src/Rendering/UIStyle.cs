@@ -9,9 +9,18 @@ namespace Rendering {
 
         Visible,
         Hidden,
-
+        Unset
     }
 
+    public enum TextOverflow {
+
+        Wrap,
+        Truncate,
+        Overflow,
+        Unset       
+
+    }
+    
     public class Background {
 
         public Color color;
@@ -21,7 +30,14 @@ namespace Rendering {
 
     }
 
-    public enum BorderStyle { }
+    public enum BorderStyle {
+
+        Solid,
+        Dashed,
+        Dotted,
+        Unset
+
+    }
 
     public class MaterialDesc {
 
@@ -35,6 +51,19 @@ namespace Rendering {
         public Shadow shadow;
         public float opacity;
         public Visibility visibility;
+
+    }
+
+    public struct LayoutParameters {
+
+        public int growthFactor;
+        public int shrinkFactor;
+        public UnitValue minWidth;
+        public UnitValue maxWidth;
+        public UnitValue minHeight;
+        public UnitValue maxHeight;
+        public UnitValue basisWidth;
+        public UnitValue basisHeight;
 
     }
 
@@ -58,32 +87,19 @@ namespace Rendering {
 
     }
 
-    public class LayoutItemDesc {
-
-        public bool inFlow;
-        public float minWidth;
-        public float maxWidth;
-        public float minHeight;
-        public float maxHeight;
-        public int growthFactor;
-        public int shrinkFactor;
-        public float basisWidth;
-        public float basisHeight;
-
-    }
-
     public enum LayoutWrap {
 
         None,
         Wrap,
-        Reverse
-
+        Reverse,
+        Unset
     }
 
     public enum LayoutDirection {
 
         Row,
-        Column
+        Column,
+        Unset
 
     }
 
@@ -94,7 +110,8 @@ namespace Rendering {
         Radial,
         VStack,
         HStack,
-        None
+        None,
+        Unset
 
     }
 
@@ -108,6 +125,10 @@ namespace Rendering {
 
         public TextStyle textStyle = new TextStyle();
 
+        public const int UnsetIntValue = int.MaxValue;
+        public const float UnsetFloatValue = float.MaxValue;
+        public static readonly Color UnsetColorValue = new Color(0, 0, 0, 0);
+        
         public UIStyle() {
             _background = new Background();
             _background.color = Color.white;
@@ -182,8 +203,8 @@ namespace Rendering {
             // 3. default 
             // 4. fit children
             // 5. fit parent
-
         }
+
         /*
 
         // content relative with parent relative child is an error
@@ -220,7 +241,6 @@ namespace Rendering {
         public Background background {
             get { return _background; }
             set {
-
                 // if(element.renderState == hover)
                 // return if(hover.isBackgroundSet) else return _background
                 // for each element 

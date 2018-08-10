@@ -1,7 +1,6 @@
 using System;
 using System.Collections.Generic;
 using Src;
-using Src.Layout;
 using UnityEngine;
 using UnityEngine.UI;
 
@@ -18,62 +17,33 @@ namespace Rendering {
         private Dictionary<int, ImagePrimitive> renderables;
 
         public List<UIElement> renderQueue;
-
+        public SkipTree<TemplateBinding> bindingSkipTree;
+        
         private static int ElementIdGenerator;
         public static int NextElementId => ElementIdGenerator++;
 
         public UIElement root;
         public GameObject gameObject;
-        
-        private readonly SkipTree<ExpressionBinding> bindingSkipTree;
-        
+
         public UIView() {
-            bindingSkipTree = new SkipTree<ExpressionBinding>();
-            this.gameObjects = new Dictionary<int, GameObject>();
-            this.renderables = new Dictionary<int, ImagePrimitive>();
+            gameObjects = new Dictionary<int, GameObject>();
+            renderables = new Dictionary<int, ImagePrimitive>();
             renderQueue = new List<UIElement>();
         }
 
         public void OnCreate() {
-            root = TemplateParser.GetParsedTemplate(templateType).Instantiate(this, null, null);
+            root = TemplateParser.GetParsedTemplate(templateType).CreateWithoutScope(this, null);
         }
 
         public void Update() {
-            // for now every element has a template context
-            // I know that this is dumb, it will be addressed later
-            // traverse contexts in a tree
-            
-            //   for (int i = 0; i < contexts.Count; i++) {
-            //      contexts[i].FlushChanges();
-            //    }
-            
-            bindingSkipTree.TraverseCull(TraverseBindings);
-            
-            //bindingSkipTree.ClearOrphans();
-            
             HandleBindingChanges();
-            HandleCreatedElements(); // list
-            HandleHidingElements(); // -> turn off bindings
-            HandleShowingElements(); // list
-            HandleDestroyingElements();// -> destroy bindings
-            HandleRenderUpdates(); // list
-            
+            HandleCreatedElements();
+            HandleHidingElements();
+            HandleShowingElements();
+            HandleDestroyingElements();
+            HandleRenderUpdates();
             RunLayout();
-            HandleMouseEvents(); // skip tree
-        }
-
-        private bool TraverseBindings(IHierarchical item) {
-            UIElement element = (UIElement) item;
-            // enter();
-            // element.templateRoot.context
-            // element
-            // exit();
-            // if item.destroyed || not enabled || not visible -> return true;
-            // else run bindings
-            // for each binding
-                // binding.execute(context);
-            
-            return false;
+            HandleMouseEvents();
         }
 
         private void HandleRenderUpdates() {
@@ -273,7 +243,12 @@ namespace Rendering {
             throw new NotImplementedException();
         }
 
-        public void DestroyElement(UIElement toDestroy) {
+        public void RegisterBindings(UIElement element, Binding[] bindings, TemplateContext context) {
+            if (bindings.Length == 0) return;
+            bindingSkipTree.AddItem(new TemplateBinding(element, bindings, context));
+        }
+
+        public void SetEnabled(UIElement element, bool isEnabled) {
             throw new NotImplementedException();
         }
 

@@ -3,7 +3,7 @@ using System.Reflection;
 
 namespace Src {
 
-    public class PropertyAccessorBinding : ExpressionBinding {
+    public class PropertyAccessorEvaluator : ExpressionEvaluator {
 
         private readonly string fieldName;
         private Type cachedType;
@@ -11,7 +11,7 @@ namespace Src {
 
         private const BindingFlags Flags = BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic;
 
-        public PropertyAccessorBinding(string fieldName) {
+        public PropertyAccessorEvaluator(string fieldName) {
             this.fieldName = fieldName;
         }
 

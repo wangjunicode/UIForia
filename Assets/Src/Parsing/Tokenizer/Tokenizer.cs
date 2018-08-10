@@ -3,6 +3,8 @@ using System.Collections.Generic;
 
 namespace Src {
 
+    // todo support ternary, Math, some other globals
+
     public static class Tokenizer {
 
        

@@ -1,10 +1,10 @@
 namespace Src {
 
-    public class NumericConstantBinding : ExpressionBinding {
+    public class NumericConstantEvaluator : ExpressionEvaluator {
 
         public readonly double value;
 
-        public NumericConstantBinding(double value) {
+        public NumericConstantEvaluator(double value) {
             this.value = value;
         }
 

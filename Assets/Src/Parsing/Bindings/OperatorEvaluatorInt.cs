@@ -2,10 +2,10 @@ using System;
 
 namespace Src {
 
-    public class OperatorBindingInt : ExpressionBinding {
+    public class OperatorEvaluatorInt : ExpressionEvaluator {
 
-        public ExpressionBinding left;
-        public ExpressionBinding right;
+        public ExpressionEvaluator left;
+        public ExpressionEvaluator right;
         public OperatorType operatorType;
 
         public int Evaluate() {

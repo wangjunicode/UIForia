@@ -1,58 +1,34 @@
-using System.Collections;
+using System;
+using System.Collections.Generic;
 
 namespace Src {
 
-    public class UIRepeatChild : UIElement {
-
-        public int index;
-        public bool shown;
-
-    }
-    
-    public class UIRepeatChildTemplate : UITemplate {
-
-        public IList list;
-        public int index;
-        
-        public override bool TypeCheck() {
-            return true;
-        }
-
-        public override UIElement CreateScoped(TemplateScope scope) {
-            throw new System.NotImplementedException();
-        }
-        
-    }
-
     public class UIRepeatTemplate : UITemplate {
 
+        private Binding[] bindings;
+
         public override bool TypeCheck() {
             throw new System.NotImplementedException();
         }
 
-        public void UpdateBindings(TemplateContext context) {
-            // for each child -> update bindings
-            // pop 
+        public void Compile(List<ContextDefinition> contextDefinitions) {
+
+            // {this.someobject.list}
+            // Getter("someobject", Getter("list"));
+            ExpressionEvaluator listGetter = BindingGenerator.Generate(contextDefinitions[0],
+                attributes.Find((a) => a.name == "list").bindingExpression);
+
+            bindings = new Binding[] {
+               // new RepeatEnterBinding()
+            };
+            
         }
 
         public override UIElement CreateScoped(TemplateScope scope) {
-            NonRenderedElement element = new NonRenderedElement();
-            element.referenceContext = scope.context;
-            // <Repeat list="{values}"/>
-            //     {item.stringOutput}
-            //     binding = list[i].stringValue
-            //     binding = listSizeChange
-            //     eventually id like callbacks for list events (move, add, remove)
-            //     so that they can be animated etc
-            //     that probably only works with an observable list
+            UIRepeatElement element = new UIRepeatElement();
 
-//            ExpressionBinding binding = new ManualExpressionBinding((context) => {
-//                return context.currentList.Count != 0;
-//            });
 
-            for (int i = 0; i < attributes.Count; i++) {
-                //scope.CreateBinding(binding, this, HandleBindingUpdate);
-            }
+            scope.view.RegisterBindings(element, bindings, scope.context);
 
             return element;
         }

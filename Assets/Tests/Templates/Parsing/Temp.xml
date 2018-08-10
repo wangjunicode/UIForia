@@ -15,12 +15,7 @@
         <!--comment-->
         
         faea
-        <Repeat list="{myList}">
-            <Button label="{myList}" onClick="{HandleButtonClick($index)"/>
-        </Repeat>
-        <Text>My Text here</Text>
-        more text
-        <Div>Text</Div>
+      
     </Contents>
     
 </UITemplate>

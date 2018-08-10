@@ -1,46 +1,46 @@
-﻿<?xml version="1.0" encoding="utf-8"?>
+﻿<!--<?xml version="1.0" encoding="utf-8"?>-->
 
-<UITemplate>
-    <Import path="./thing" as="blah"/>
-    <Style extends="id" from="./path/to/thing">
+<!--<UITemplate>-->
+    <!--<Import path="./thing" as="blah"/>-->
+    <!--<Style extends="id" from="./path/to/thing">-->
 
-        <Text>
-            <FontSize value="12"/>
-            <FontAsset url=""/>
-            <FontStyle/>
-            <FontOverflow/>
-            <FontColor/>
-            <TextAnchor/>
-        </Text>
+        <!--<Text>-->
+            <!--<FontSize value="12"/>-->
+            <!--<FontAsset url=""/>-->
+            <!--<FontStyle/>-->
+            <!--<FontOverflow/>-->
+            <!--<FontColor/>-->
+            <!--<TextAnchor/>-->
+        <!--</Text>-->
 
 
-    </Style>
-    <Contents>
+    <!--</Style>-->
+    <!--<Contents>-->
 
-       <Panel>
-           <Container>
-               Text {something.bound} here
-               <Repeat list="{complexList}" as="item">
-                   <TextInput value="{(reference.complexList[i])item.inputString}" placeholder="{item.placeholderString}"/>
-                   <Image src="{item.imageSource}" alt="{imagealttext}"/>
-               </Repeat>
-           </Container>
-       </Panel>
-        
-        <ColorSelector>
-            
-            <Color rgba="{rgba}"/>
-            <Children/>
-            Text
-            
-        </ColorSelector>
+       <!--<Panel>-->
+           <!--<Container>-->
+               <!--Text {something.bound} here-->
+               <!--<Repeat list="{complexList}" as="item">-->
+                   <!--<TextInput value="{(reference.complexList[i])item.inputString}" placeholder="{item.placeholderString}"/>-->
+                   <!--<Image src="{item.imageSource}" alt="{imagealttext}"/>-->
+               <!--</Repeat>-->
+           <!--</Container>-->
+       <!--</Panel>-->
+        <!---->
+        <!--<ColorSelector>-->
+            <!---->
+            <!--<Color rgba="{rgba}"/>-->
+            <!--<Children/>-->
+            <!--Text-->
+            <!---->
+        <!--</ColorSelector>-->
 
-    </Contents>
-</UITemplate>
+    <!--</Contents>-->
+<!--</UITemplate>-->
 
-<Thing>
-    <Children/>
-</Thing>
+<!--<Thing>-->
+    <!--<Children/>-->
+<!--</Thing>-->
 
-// if element template parent is a template -> you are a child and need to bind off of the 
-// child stack
+<!--// if element template parent is a template -> you are a child and need to bind off of the -->
+<!--// child stack-->

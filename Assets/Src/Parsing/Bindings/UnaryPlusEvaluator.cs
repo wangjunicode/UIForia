@@ -2,16 +2,16 @@ using System;
 
 namespace Src {
 
-    public class UnaryPlusBinding : ExpressionBinding {
+    public class UnaryPlusEvaluator : ExpressionEvaluator {
 
-        public readonly ExpressionBinding binding;
+        public readonly ExpressionEvaluator Evaluator;
 
-        public UnaryPlusBinding(ExpressionBinding binding) {
-            this.binding = binding;
+        public UnaryPlusEvaluator(ExpressionEvaluator evaluator) {
+            this.Evaluator = evaluator;
         }
 
         public override object Evaluate(TemplateContext context) {
-            object value = binding.Evaluate(context);
+            object value = Evaluator.Evaluate(context);
             if (value is int) return +(int) value;
             if (value is float) return +(float) value;
             if (value is double) return +(double) value;

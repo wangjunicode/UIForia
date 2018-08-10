@@ -53,6 +53,8 @@ namespace Src.Style {
                     MergeTextNodes((XElement) output[i]);
                 }
             }
+            
+            element.ReplaceNodes(output);
 
             
         }

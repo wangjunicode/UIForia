@@ -2,12 +2,12 @@ using System.Collections.Generic;
 
 namespace Src {
 
-    public class AccessorBinding : ExpressionBinding {
+    public class AccessorEvaluator : ExpressionEvaluator {
 
         private string contextName;
-        private List<PropertyAccessorBinding> parts;
+        private List<PropertyAccessorEvaluator> parts;
 
-        public AccessorBinding(string contextName, List<PropertyAccessorBinding> parts) {
+        public AccessorEvaluator(string contextName, List<PropertyAccessorEvaluator> parts) {
             this.parts = parts;
             this.contextName = contextName;
         }
@@ -19,10 +19,10 @@ namespace Src {
             if (target == null) return null;
 
             for (int i = 0; i < parts.Count; i++) {
-                ExpressionBinding part = parts[i];
+                ExpressionEvaluator part = parts[i];
                 if (part is ArrayAccessExpressionPart) { }
                 else {
-                    PropertyAccessorBinding propertyPart = (PropertyAccessorBinding) part;
+                    PropertyAccessorEvaluator propertyPart = (PropertyAccessorEvaluator) part;
                     instance = propertyPart.Evaluate(instance);
                     if (instance == null) return null;
                 }

@@ -5,12 +5,16 @@ namespace Src {
 
     public interface IHierarchical {
 
+        IHierarchical Element { get; }
         IHierarchical Parent { get; }
 
     }
 
-    public class SkipTree<T> {
+    public class SkipTree<T> where T : IHierarchical {
 
+        // todo -- I can probably get rid of 'values' 
+        // todo -- pool things
+        // todo -- concept of 'orphan' vs 'remove'
         private List<SkipTreeNode<T>> roots;
         private Dictionary<IHierarchical, SkipTreeNode<T>> nodeMap;
 
@@ -19,13 +23,13 @@ namespace Src {
             nodeMap = new Dictionary<IHierarchical, SkipTreeNode<T>>();
         }
 
-        public void AddItem(IHierarchical key, T item) {
+        public void AddItem(T item) {
             SkipTreeNode<T> node;
-            if (nodeMap.TryGetValue(key, out node)) {
+            if (nodeMap.TryGetValue(item.Element, out node)) {
                 node.values.Add(item);
                 return;
             }
-            node = CreateNode(key);
+            node = CreateNode(item.Element);
             node.values.Add(item);
         }
 
@@ -77,6 +81,10 @@ namespace Src {
 
         public void Traverse(Action<IHierarchical> traverseFn) { }
 
+        public void TraverseDepthFirst(Action<IHierarchical> traverseFn) {
+            
+        }
+        
         public void TraverseRemove(Func<IHierarchical, bool> traverseFn) {
             for (int i = 0; i < roots.Count; i++) { }
         }
@@ -158,7 +166,11 @@ namespace Src {
             public IHierarchical element;
             public List<T> values;
             public List<SkipTreeNode<T>> children;
-
+            
+            public SkipTreeNode<T> nextSibling;
+            public SkipTreeNode<T> prevSibling;
+            public SkipTreeNode<T> firstChild;
+            
             public SkipTreeNode(IHierarchical element) {
                 this.element = element;
                 this.values = new List<T>();

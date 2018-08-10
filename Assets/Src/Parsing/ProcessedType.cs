@@ -44,19 +44,6 @@ namespace Src {
             return false;
         }
 
-        public void AssignObservedProperties(UIElement element) {
-            ObservedProperty[] properties = new ObservedProperty[contextProperties.Count];
-            for (int i = 0; i < contextProperties.Count; i++) {
-                FieldInfo fieldInfo = contextProperties[i];
-                constructorParameters[0] = fieldInfo.Name;
-                constructorParameters[1] = element;
-                ObservedProperty property = Activator.CreateInstance(fieldInfo.FieldType, constructorParameters) as ObservedProperty;
-                fieldInfo.SetValue(element, property);
-                properties[i] = property;
-            }
-            element.observedProperties = properties;
-        }
-
         public FieldInfo GetField(string bindingKey) {
             for (int i = 0; i < propFields.Count; i++) {
                 if (propFields[i].Name == bindingKey) return propFields[i];

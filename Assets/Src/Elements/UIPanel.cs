@@ -5,8 +5,4 @@ using Src;
 [Template("Templates/UIPanel.xml")]
 public class UIPanel : UIElement {
 
-    public void OnCreate() {
-        view.CreateImagePrimitive(this);
-    }
-
 }

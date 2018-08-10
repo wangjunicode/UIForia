@@ -30,7 +30,9 @@ namespace Src {
         }
 
         public static ProcessedType GetType(Type type) {
+            
             Assert.IsNotNull(type, "type != null");
+            
             ProcessedType processedType = new ProcessedType(type);
 
             FieldInfo[] fields = type.GetFields(BindFlags);

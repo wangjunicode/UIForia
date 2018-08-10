@@ -16,25 +16,17 @@ public class UIElement : IHierarchical {
     public readonly int id;
     public UIElement parent;
     public List<UIElement> children;
-    public TemplateContext providedContext;
-    public TemplateContext referenceContext;
     public UIStyle style = new UIStyle();
     public UITransform transform;
-    public UIView view;
 
     public UIElement() {
         id = UIView.NextElementId;
         transform = new UITransform(null, null);
     }
 
-    public UIElement(UIView view) {
-        id = UIView.NextElementId;
-        this.view = view;
-    }
-
     public virtual void Initialize() { }
 
-    public virtual void OnPropsChanged(List<object> props) { }
+    public virtual void OnPropsChanged() { }
 
     public virtual void OnShown() { }
 
@@ -48,6 +40,9 @@ public class UIElement : IHierarchical {
         return retn;
     }
 
+    public IHierarchical Element => this;
     public IHierarchical Parent => parent;
+    
+    public bool isEnabled { get; set; }
 
 }

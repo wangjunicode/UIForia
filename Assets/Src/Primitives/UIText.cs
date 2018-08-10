@@ -3,14 +3,6 @@ using Src;
 using UnityEngine;
 
 public class UIText : UIElementPrimitive {
-
-    // Text
-    // RawImage
-    // Image
-    // Mask
-    // Mask2D
-    // InputField
-    // TextArea
     
     private TextPrimitive textRenderElement;
     
@@ -20,11 +12,11 @@ public class UIText : UIElementPrimitive {
         textRenderElement.Text = label;
     }
 
-    public void OnCreate() {
-        textRenderElement = view.CreateTextPrimitive(this);
-        textRenderElement.Text = label;
-        view.MarkForRendering(this);
-    }
+    // this should be done at instaniate time when the view is in scope
+//    public void OnCreate() {
+//        textRenderElement = view.CreateTextPrimitive(this);
+//        textRenderElement.Text = label;
+//    }
 
     public void ApplyFontSettings(TextStyle fontSettings) {
         textRenderElement.ApplyFontSettings(fontSettings);

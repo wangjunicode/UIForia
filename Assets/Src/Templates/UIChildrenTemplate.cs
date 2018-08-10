@@ -1,9 +1,12 @@
+using System;
 using System.Collections.Generic;
 using Rendering;
 
 namespace Src {
 
     public class UIChildrenTemplate : UITemplate {
+
+        public override Type ElementType => typeof(UIChildrenElement);
 
         public override bool TypeCheck() {
             throw new System.NotImplementedException();

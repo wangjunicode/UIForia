@@ -24,7 +24,9 @@ namespace Src {
             textComponent.fontSize = fontSettings.fontSize;
             textComponent.color = (Color) fontSettings.color;
             textComponent.rectTransform.SetSize(textComponent.preferredWidth, textComponent.preferredHeight);
-            
+            textComponent.verticalOverflow = fontSettings.verticalOverflow;
+            textComponent.horizontalOverflow = fontSettings.horizontalOverflow;
+
         }
 
         private float CalculateLineHeight(Text text) {

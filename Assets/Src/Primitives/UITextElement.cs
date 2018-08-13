@@ -1,6 +1,15 @@
+﻿using Rendering;
+using Src;
 
-namespace Src {
+public class UITextElement : UIElement {
+    
+    public TextPrimitive textRenderElement;
+    
+    [Prop] public string label;
 
-    public class UITextElement : UIElementPrimitive { }
 
+    public void ApplyFontSettings(TextStyle fontSettings) {
+        textRenderElement.ApplyFontSettings(fontSettings);
+    }
+    
 }

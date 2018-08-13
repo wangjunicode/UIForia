@@ -1,4 +1,5 @@
-﻿using Src;
+﻿using System;
+using Src;
 using NUnit.Framework;
 using UnityEngine;
 
@@ -7,40 +8,190 @@ public class ParsingTests {
 
     [Test]
     public void ParseTemplateParts() {
-        
         TemplateParser.GetParsedTemplate(typeof(Spec.Temp));
-        
     }
 
+    [Test]
+    public void ParseThreeSelfClosingChildren() {
+        ParsedTemplate parsedTemplate = TemplateParser.GetParsedTemplate(typeof(Spec.Test1));
+        Assert.IsNotNull(parsedTemplate);
+        Assert.AreEqual(3, parsedTemplate.childTemplates.Count);
+        Assert.AreEqual(typeof(UIPanel), parsedTemplate.childTemplates[0].ElementType);
+        Assert.AreEqual(typeof(UIPanel), parsedTemplate.childTemplates[1].ElementType);
+        Assert.AreEqual(typeof(UIPanel), parsedTemplate.childTemplates[2].ElementType);
+    }
+
+    [Test]
+    public void ParseThreeNonSelfClosingChildren() {
+        ParsedTemplate parsedTemplate = TemplateParser.GetParsedTemplate(typeof(Spec.Test2));
+        Assert.AreEqual(3, parsedTemplate.childTemplates.Count);
+        Assert.AreEqual(typeof(UIPanel), parsedTemplate.childTemplates[0].ElementType);
+        Assert.AreEqual(typeof(UIPanel), parsedTemplate.childTemplates[1].ElementType);
+        Assert.AreEqual(typeof(UIPanel), parsedTemplate.childTemplates[2].ElementType);
+    }
+
+    [Test]
+    public void ParseTextAtRootLevel() {
+        ParsedTemplate parsedTemplate = TemplateParser.GetParsedTemplate(typeof(Spec.Test3));
+        Assert.IsNotNull(parsedTemplate);
+        Assert.AreEqual(typeof(UITextElement), parsedTemplate.childTemplates[0].ElementType);
+    }
+
+    [Test]
+    public void Children_ParsesCorrectly() {
+        ParsedTemplate parsedTemplate = TemplateParser.ParseTemplateFromString<Spec.Test1>(@"
+            <UITemplate>
+                <Contents>
+                    <Children/>
+                </Contents>
+            </UITemplate>
+        ");
+        Assert.AreEqual(typeof(UIChildrenElement), parsedTemplate.childTemplates[0].ElementType);
+    }
+
+    [Test]
+    public void Children_CannotAppearInsideRepeat() {
+        var x = Assert.Throws<InvalidTemplateException>(() => {
+            TemplateParser.ParseTemplateFromString<Spec.Test1>(@"
+                <UITemplate>
+                    <Contents>
+                        <Repeat>
+                            <Children/>
+                        </Repeat>
+                    </Contents>
+                </UITemplate>
+            ");
+        });
+        Assert.AreEqual("<Children> cannot be inside <Repeat>", x.Message);
+    }
+    
+    [Test]
+    public void Children_MustBeEmpty() {
+        var x = Assert.Throws<InvalidTemplateException>(() => {
+            TemplateParser.ParseTemplateFromString<Spec.Test1>(@"
+                <UITemplate>
+                    <Contents>
+                            <Children>text</Children>
+                    </Contents>
+                </UITemplate>
+            ");
+        });
+        Assert.AreEqual("<Children> tags cannot have children", x.Message);
+    }
+
+    [Test]
+    public void Switch_CanOnlyContainCaseAndDefault() {
+        var x = Assert.Throws<InvalidTemplateException>(() => {
+            TemplateParser.ParseTemplateFromString<Spec.Test1>(@"
+                <UITemplate>
+                    <Contents>
+                        <Switch>
+                            text                                        
+                        </Switch>
+                    </Contents>
+                </UITemplate>
+            ");
+        });
+        Assert.AreEqual("<Switch> can only contain <Case> and <Default> elements", x.Message);
+    }
+
+    [Test]
+    public void Switch_CanOnlyContainOneDefault() {
+        var x = Assert.Throws<InvalidTemplateException>(() => {
+            TemplateParser.ParseTemplateFromString<Spec.Test1>(@"
+                <UITemplate>
+                    <Contents>
+                        <Switch>
+                            <Default>text1</Default>                                        
+                            <Default>text2</Default>                                        
+                        </Switch>
+                    </Contents>
+                </UITemplate>
+            ");
+        });
+        Assert.AreEqual("<Switch> can only contain one <Default> element", x.Message);
+    }
+
+    [Test]
+    public void Switch_CanContainOnlyCases() {
+        Assert.DoesNotThrow(() => {
+            TemplateParser.ParseTemplateFromString<Spec.Test1>(@"
+                <UITemplate>
+                    <Contents>
+                        <Switch>
+                            <Case when='1'>text1</Case>                                        
+                            <Case when='2'>text2</Case>                                        
+                        </Switch>
+                    </Contents>
+                </UITemplate>
+            ");
+        });
+    }
+
+    [Test]
+    public void Switch_CanContainOnlyDefault() {
+        Assert.DoesNotThrow(() => {
+            TemplateParser.ParseTemplateFromString<Spec.Test1>(@"
+                <UITemplate>
+                    <Contents>
+                        <Switch>
+                            <Default>text1</Default>                                        
+                        </Switch>
+                    </Contents>
+                </UITemplate>
+            ");
+        });
+    }
+
+    [Test]
+    public void Switch_CannotBeEmpty() {
+        var x = Assert.Throws<InvalidTemplateException>(() => {
+            TemplateParser.ParseTemplateFromString<Spec.Test1>(@"
+                <UITemplate>
+                    <Contents>
+                        <Switch>
+                                                                  
+                        </Switch>
+                    </Contents>
+                </UITemplate>
+            ");
+        });
+        Assert.AreEqual("<Switch> cannot be empty", x.Message);
+    }
+
+    [Test]
+    public void Case_MustHaveWhenAttribute() {
+        var x = Assert.Throws<InvalidTemplateException>(() => {
+            TemplateParser.ParseTemplateFromString<Spec.Test1>(@"
+                <UITemplate>
+                    <Contents>
+                        <Switch>
+                            <Case>text1</Case>                                        
+                            <Case when='2'>text2</Case>                                        
+                        </Switch>
+                    </Contents>
+                </UITemplate>
+            ");
+        });
+        Assert.AreEqual("<Case> is missing required attribute 'when'", x.Message);
+    }
+
+    [Test]
+    public void Prefab_MustBeEmpty() {
+        var x = Assert.Throws<InvalidTemplateException>(() => {
+            TemplateParser.ParseTemplateFromString<Spec.Test1>(@"
+                <UITemplate>
+                    <Contents>
+                            <Prefab>text</Prefab>
+                    </Contents>
+                </UITemplate>
+            ");
+        });
+        Assert.AreEqual("<Prefab> tags cannot have children", x.Message);
+    }
+    
 }
-//    [Test]
-//    public void ParseThreeSelfClosingChildren() {
-//        UIElementTemplate parsedTemplate = TemplateParser.GetParsedTemplate(typeof(Spec.Test1));
-//        Assert.IsNotNull(parsedTemplate);
-//        Assert.AreEqual(3, parsedTemplate.children.Count);
-//    }
-//
-//    [Test]
-//    public void ParseThreeNonSelfClosingChildren() {
-//        UIElementTemplate parsedTemplate = TemplateParser.GetParsedTemplate(typeof(Spec.Test2));
-//        Assert.IsNotNull(parsedTemplate);
-//        Assert.AreEqual(3, parsedTemplate.children.Count);
-//        Assert.AreEqual(1, parsedTemplate.children[0].children.Count);
-//        Assert.AreEqual(1, parsedTemplate.children[1].children.Count);
-//        Assert.AreEqual(1, parsedTemplate.children[2].children.Count);
-//    }
-//
-//    [Test]
-//    public void ParseTextChildren() {
-//        UIElementTemplate parsedTemplate = TemplateParser.GetParsedTemplate(typeof(Spec.Test2));
-//        Assert.IsNotNull(parsedTemplate);
-//        Assert.AreEqual(1, parsedTemplate.children[0].children.Count);
-//        Assert.AreEqual(1, parsedTemplate.children[1].children.Count);
-//        Assert.AreEqual(1, parsedTemplate.children[2].children.Count);
-//        Assert.AreEqual("Text1", parsedTemplate.children[0].children[0].text);
-//        Assert.AreEqual("Text2", parsedTemplate.children[1].children[0].text);
-//        Assert.AreEqual("Text3", parsedTemplate.children[2].children[0].text);
-//    }
+
 //
 //    [Test]
 //    public void GenerateUIElements() {

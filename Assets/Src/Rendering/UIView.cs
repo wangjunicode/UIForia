@@ -1,7 +1,6 @@
 using System;
 using System.Collections.Generic;
 using Src;
-using Src.Layout;
 using UnityEngine;
 using UnityEngine.UI;
 
@@ -18,62 +17,62 @@ namespace Rendering {
         private Dictionary<int, ImagePrimitive> renderables;
 
         public List<UIElement> renderQueue;
+        public SkipTree<TemplateBinding> bindingSkipTree;
 
         private static int ElementIdGenerator;
         public static int NextElementId => ElementIdGenerator++;
 
         public UIElement root;
         public GameObject gameObject;
-        
-        private readonly SkipTree<ExpressionBinding> bindingSkipTree;
-        
+
         public UIView() {
-            bindingSkipTree = new SkipTree<ExpressionBinding>();
-            this.gameObjects = new Dictionary<int, GameObject>();
-            this.renderables = new Dictionary<int, ImagePrimitive>();
+            gameObjects = new Dictionary<int, GameObject>();
+            renderables = new Dictionary<int, ImagePrimitive>();
             renderQueue = new List<UIElement>();
         }
 
         public void OnCreate() {
-            root = TemplateParser.GetParsedTemplate(templateType).Instantiate(this, null, null);
+            root = TemplateParser.GetParsedTemplate(templateType).CreateWithoutScope(this);
+
+            Stack<UIElement> stack = new Stack<UIElement>();
+            stack.Push(root);
+            while (stack.Count > 0) {
+                UIElement element = stack.Pop();
+
+                if (element is UITextElement) {
+                    // stitch up parent reference since text might be created before we have the actual parent
+                    gameObjects[element.id].transform.SetParent(gameObjects[element.parent.id].transform);
+                    ((UITextElement) element).ApplyFontSettings(GetFontSettings(element));
+
+                }
+                else if (element.style.RequiresRendering()) {
+                    renderables[element.id] = CreateImagePrimitive(element);
+                }
+                else if (element is UIRepeatElement) {
+                    // create children based on bindings
+                }
+
+                if (element.HasChildren) {
+                    for (int i = 0; i < element.children.Count; i++) {
+                        stack.Push(element.children[i]);
+                    }
+                }
+            }
+
+            // traverse -> create unity elements based on type
+            // traverse -> call OnInitialize()
+            // traverse -> call OnEnable()
         }
 
         public void Update() {
-            // for now every element has a template context
-            // I know that this is dumb, it will be addressed later
-            // traverse contexts in a tree
-            
-            //   for (int i = 0; i < contexts.Count; i++) {
-            //      contexts[i].FlushChanges();
-            //    }
-            
-            bindingSkipTree.TraverseCull(TraverseBindings);
-            
-            //bindingSkipTree.ClearOrphans();
-            
             HandleBindingChanges();
-            HandleCreatedElements(); // list
-            HandleHidingElements(); // -> turn off bindings
-            HandleShowingElements(); // list
-            HandleDestroyingElements();// -> destroy bindings
-            HandleRenderUpdates(); // list
-            
+            HandleCreatedElements();
+            HandleHidingElements();
+            HandleShowingElements();
+            HandleDestroyingElements();
+            HandleRenderUpdates();
             RunLayout();
-            HandleMouseEvents(); // skip tree
-        }
-
-        private bool TraverseBindings(IHierarchical item) {
-            UIElement element = (UIElement) item;
-            // enter();
-            // element.templateRoot.context
-            // element
-            // exit();
-            // if item.destroyed || not enabled || not visible -> return true;
-            // else run bindings
-            // for each binding
-                // binding.execute(context);
-            
-            return false;
+            HandleMouseEvents();
         }
 
         private void HandleRenderUpdates() {
@@ -110,8 +109,8 @@ namespace Rendering {
 
             RectTransform rectTransform = gameObject.transform as RectTransform; // view's rect transform
             Rect available; // compute this rect from canvas size offset by view's position on canvas
-            root.style.contentBox.totalWidth = rectTransform.sizeDelta.x;
-            root.style.contentBox.totalHeight = rectTransform.sizeDelta.y;
+           // root.style.contentBox.contentWidth = rectTransform.sizeDelta.x;
+           // root.style.contentBox.contentHeight = rectTransform.sizeDelta.y;
 
             Stack<UIElement> stack = new Stack<UIElement>();
             stack.Push(root);
@@ -120,7 +119,7 @@ namespace Rendering {
 
                 if (element.children.Count == 0) break;
 
-                element.style.layout.Run(element);
+            //    element.style.layout.Run(element);
 
                 for (int i = 0; i < element.children.Count; i++) {
                     stack.Push(element.children[i]);
@@ -128,35 +127,29 @@ namespace Rendering {
             }
         }
 
-        public void CreateListElement(UIElementTemplate template, int idx, TemplateContext context) { }
-
-        public void MarkForRendering(List<UIElement> elements) {
-            for (int i = 0; i < elements.Count; i++) {
-                UIElement element = elements[i];
-                // elements to render.Add(element);
-            }
-        }
+        /*
+         *
+         * Creating render items
+         *     3 types -> image-type, mask-type, text-type
+         *     image-type is created based on style parameters
+         *     text-type is created based on text content changes
+         * 
+         */
 
         public void MarkForRendering(UIElement element) {
-            // if element is text -> traverse font tree & find settings
-            // if element is mask -> ??
-            // if element is image | raw image -> apply material, background, etc
-            if ((element.flags & UIElement.UIElementFlags.RequiresRendering) == 0) {
-                if (element is UIText || element.style.RequiresRendering()) {
-                    element.flags |= UIElement.UIElementFlags.RequiresRendering;
-                    renderQueue.Add(element);
-                }
-            }
+           
+           
         }
 
         public void RenderElement(UIElement element) {
-            if (element is UIText) {
-                UIText text = (UIText) element;
-                text.ApplyFontSettings(GetFontSettings(element));
+            if (element is UITextElement) {
+                UITextElement textElement = (UITextElement) element;
+                textElement.ApplyFontSettings(GetFontSettings(element));
             }
             else {
                 ImagePrimitive image;
                 // if doesn't exist, create it
+                // todo remove this
                 if (!renderables.TryGetValue(element.id, out image)) {
                     image = CreateImagePrimitive(element);
                     renderables[element.id] = image;
@@ -166,7 +159,26 @@ namespace Rendering {
             }
         }
 
-        // todo optimize w/ a font tree (using skip tree)
+        public struct TextStyleNode {
+
+            public int id;
+            public List<UIElement> dependents;
+            
+        }
+        
+        /*
+         * need to handle changes in the ancestry
+         * when a text style changes
+         * traverse the tree from that node downwards
+         *  if a child node was listening to parent node move the pointer
+         *
+         *
+         *  a text style higher up can change causing children to re-calculate
+         *  a text style on 'this' node can change
+         *
+         *  
+         */
+        
         public TextStyle GetFontSettings(UIElement element) {
             TextStyle retn = new TextStyle();
 
@@ -175,57 +187,9 @@ namespace Rendering {
             retn.color = Color.black;
             retn.alignment = TextAnchor.MiddleLeft;
             retn.fontStyle = FontStyle.Normal;
-
-            UIElement ptr = element;
-            while (ptr != null) {
-                if (ptr.style.textStyle.font != null) {
-                    retn.font = ptr.style.textStyle.font;
-                    break;
-                }
-
-                ptr = ptr.parent;
-            }
-
-            ptr = element;
-            while (ptr != null) {
-                if (ptr.style.textStyle.alignment != null) {
-                    retn.alignment = ptr.style.textStyle.alignment;
-                    break;
-                }
-
-                ptr = ptr.parent;
-            }
-
-            ptr = element;
-            while (ptr != null) {
-                if (ptr.style.textStyle.fontSize != -1) {
-                    retn.fontSize = ptr.style.textStyle.fontSize;
-                    break;
-                }
-
-                ptr = ptr.parent;
-            }
-
-            ptr = element;
-            while (ptr != null) {
-                if (ptr.style.textStyle.fontStyle != null) {
-                    retn.fontStyle = ptr.style.textStyle.fontStyle;
-                    break;
-                }
-
-                ptr = ptr.parent;
-            }
-
-            ptr = element;
-            while (ptr != null) {
-                if (ptr.style.textStyle.color != null) {
-                    retn.color = ptr.style.textStyle.color;
-                    break;
-                }
-
-                ptr = ptr.parent;
-            }
-
+            retn.verticalOverflow = VerticalWrapMode.Overflow;
+            retn.horizontalOverflow = HorizontalWrapMode.Overflow;
+            
             return retn;
         }
 
@@ -236,44 +200,48 @@ namespace Rendering {
 
             if (element == null) return gameObject;
 
-            if (!gameObjects.TryGetValue(element.id, out obj)) {
-                obj = new GameObject(GetGameObjectName(element));
-                gameObjects[element.id] = obj;
-                RectTransform transform = obj.AddComponent<RectTransform>();
-                GameObject parentObject = GetOrCreateGameObject(element.parent);
-                transform.SetParent(parentObject.transform);
-                transform.anchorMin = new Vector2(0, 1);
-                transform.anchorMax = new Vector2(0, 1);
-                transform.pivot = new Vector2(0, 1);
-                transform.anchoredPosition = new Vector2();
+            if (gameObjects.TryGetValue(element.id, out obj)) {
+                return obj;
             }
+
+            obj = new GameObject(GetGameObjectName(element));
+            gameObjects[element.id] = obj;
+            RectTransform transform = obj.AddComponent<RectTransform>();
+            GameObject parentObject = GetOrCreateGameObject(element.parent);
+            transform.SetParent(parentObject.transform);
+            transform.anchorMin = new Vector2(0, 1);
+            transform.anchorMax = new Vector2(0, 1);
+            transform.pivot = new Vector2(0, 1);
+            transform.anchoredPosition = new Vector2();
 
             return obj;
         }
 
-        public TextPrimitive CreateTextPrimitive(UIElement element) {
-            GameObject obj = GetOrCreateGameObject(element);
+        public void CreateTextPrimitive(UITextElement textElement, string text) {
+            GameObject obj = GetOrCreateGameObject(textElement);
             Text textComponent = obj.AddComponent<Text>();
-            return new UnityTextPrimitive(textComponent);
+            textComponent.text = text;
+            textElement.textRenderElement = new UnityTextPrimitive(textComponent);
         }
 
         public UnityImagePrimitive CreateImagePrimitive(UIElement element) {
             GameObject obj = GetOrCreateGameObject(element);
-            RawImage imageComponent = obj.AddComponent<RawImage>();
+            ProceduralImage imageComponent = obj.AddComponent<ProceduralImage>();
             UnityImagePrimitive imagePrimitive = new UnityImagePrimitive(imageComponent);
             renderables[element.id] = imagePrimitive;
             return imagePrimitive;
         }
 
         private static string GetGameObjectName(UIElement element) {
-            return "UIElement_" + element.GetType().Name + " " + element.id;
+            return "<" + element.GetType().Name + "> " + element.id;
         }
 
-        public void RegisterStyle(UIElement element, object computeInitialStyle) {
-            throw new NotImplementedException();
+        public void RegisterBindings(UIElement element, Binding[] bindings, TemplateContext context) {
+            if (bindings.Length == 0) return;
+            bindingSkipTree.AddItem(new TemplateBinding(element, bindings, context));
         }
 
-        public void DestroyElement(UIElement toDestroy) {
+        public void SetEnabled(UIElement element, bool isEnabled) {
             throw new NotImplementedException();
         }
 

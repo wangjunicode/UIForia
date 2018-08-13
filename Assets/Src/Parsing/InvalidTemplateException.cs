@@ -4,7 +4,13 @@ namespace Src {
 
     public class InvalidTemplateException : Exception {
 
-        public InvalidTemplateException(string templateName, string message) : base($"Template '{templateName}' is invalid: {message}") { }
+        public readonly string templateName;
+
+        public InvalidTemplateException(string templateName, string message) : base(message) {
+            this.templateName = templateName;
+        }
+
+        public string FullErrorMessage => $"Template '{templateName}' is invalid: {Message}";
 
     }
 

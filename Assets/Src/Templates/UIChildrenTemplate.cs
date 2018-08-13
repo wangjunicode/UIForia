@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using Rendering;
 
@@ -5,18 +6,19 @@ namespace Src {
 
     public class UIChildrenTemplate : UITemplate {
 
+        public override Type ElementType => typeof(UIChildrenElement);
+
         public override bool TypeCheck() {
-            throw new System.NotImplementedException();
+            throw new NotImplementedException();
         }
 
-        // if next template has slot children
-        // traverse those without pushing context
-        // then push 
         public override UIElement CreateScoped(TemplateScope scope) {
-            NonRenderedElement retn = new NonRenderedElement();
+            UIChildrenElement retn = new UIChildrenElement();
+            retn.children = new List<UIElement>();
             
             for (int i = 0; i < scope.inputChildren.Count; i++) {
                 retn.children.Add(scope.inputChildren[i]);
+                retn.children[i].parent = retn;
             }
 
             return retn;

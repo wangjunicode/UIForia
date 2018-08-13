@@ -6,10 +6,18 @@ namespace Src {
     public class TemplateScope {
 
         public UIView view;
-        public UIElement rootElement;
         public TemplateContext context;
-        public List<object> props;
         public List<UIElement> inputChildren;
+
+        public List<StyleTemplate> styleTemplates;
+
+        public StyleTemplate GetStyleTemplate(string id) {
+            for (int i = 0; i < styleTemplates.Count; i++) {
+                if (styleTemplates[i].id == id) return styleTemplates[i];
+            }
+
+            return null;
+        }
 
     }
 

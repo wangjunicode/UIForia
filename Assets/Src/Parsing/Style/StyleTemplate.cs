@@ -21,30 +21,29 @@ namespace Src {
         // paint
         public Visibility visibility = Visibility.Unset;
         public Color backgroundColor = UIStyle.UnsetColorValue;
+        public Color borderColor = UIStyle.UnsetColorValue;
         public BorderStyle borderStyle = BorderStyle.Unset;
-        public float borderRadius = UIStyle.UnsetFloatValue;
+        public float borderRadiusTopLeft = UIStyle.UnsetFloatValue;
+        public float borderRadiusTopRight = UIStyle.UnsetFloatValue;
+        public float borderRadiusBottomLeft = UIStyle.UnsetFloatValue;
+        public float borderRadiusBottomRight = UIStyle.UnsetFloatValue;
         public float opacity = UIStyle.UnsetFloatValue;
         public Material material = null;
         public Texture2D backgroundImage = null;
 
         // size
-        public float paddingLeft = UIStyle.UnsetFloatValue;
-        public float paddingRight = UIStyle.UnsetFloatValue;
-        public float paddingTop = UIStyle.UnsetFloatValue;
-        public float paddingBottom = UIStyle.UnsetFloatValue;
-        public float marginLeft = UIStyle.UnsetFloatValue;
-        public float marginRight = UIStyle.UnsetFloatValue;
-        public float marginTop = UIStyle.UnsetFloatValue;
-        public float marginBottom = UIStyle.UnsetFloatValue;
-        public float borderTop = UIStyle.UnsetFloatValue;
-        public float borderBottom = UIStyle.UnsetFloatValue;
-        public float borderLeft = UIStyle.UnsetFloatValue;
-        public float borderRight = UIStyle.UnsetFloatValue;
-
+        public UIStyleRect margin;
+        public UIStyleRect padding;
+        public UIStyleRect border;
         public float width = UIStyle.UnsetFloatValue;
         public float height = UIStyle.UnsetFloatValue;
         public FitType widthFit = FitType.Unset;
         public FitType heightFit = FitType.Unset;
+
+        // transform
+        public Vector2 scale;
+        public Vector2 pivot;
+        public Vector2 position;
 
         // layout
         public LayoutType layoutType = LayoutType.Unset;

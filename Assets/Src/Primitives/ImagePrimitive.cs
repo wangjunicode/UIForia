@@ -8,7 +8,7 @@ namespace Src {
 
         public abstract Texture2D Image { get; set; }
         
-        public abstract void ApplyStyleSettings(UIStyle style);
+        public abstract void ApplyStyleSettings(UIStyleSet style);
 
     }
 

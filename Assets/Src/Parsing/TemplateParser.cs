@@ -3,6 +3,7 @@ using System.IO;
 using System.Xml;
 using System.Collections.Generic;
 using System.Linq;
+using System.Runtime.Remoting.Messaging;
 using System.Xml.Linq;
 using Src.Parsing.Style;
 using Src.Style;
@@ -15,33 +16,49 @@ namespace Src {
         private string TemplateName = string.Empty;
 
         private readonly ParsedTemplate output = new ParsedTemplate();
-        private int repeatCount;
-        
+
         private static readonly ExpressionParser expressionParser = new ExpressionParser();
 
         private static readonly Dictionary<Type, ParsedTemplate> parsedTemplates =
             new Dictionary<Type, ParsedTemplate>();
 
+        private static readonly string[] RepeatAttributes = {"list", "as", "filter", "onItemAdded", "onItemRemoved"};
+        private static readonly string[] CaseAttributes = {"when"};
+        private static readonly string[] PrefabAttributes = {"if", "src"};
+        private static readonly string[] SwitchAttributes = {"if", "value"};
+        private static readonly string[] DefaultAttributes = { };
+        private static readonly string[] ChildrenAttributes = { };
+        private static readonly string[] TextAttributes = { };
 
         public static ParsedTemplate GetParsedTemplate(ProcessedType processedType, bool forceReload = false) {
             return GetParsedTemplate(processedType.type, forceReload);
         }
-        
+
         public static ParsedTemplate GetParsedTemplate(Type elementType, bool forceReload = false) {
             if (!forceReload && parsedTemplates.ContainsKey(elementType)) {
                 return parsedTemplates[elementType];
             }
 
-            TemplateParser parser = new TemplateParser();
-            ProcessedType type = TypeProcessor.GetType(elementType);
-            string template = File.ReadAllText(Application.dataPath + type.GetTemplatePath());
-            ParsedTemplate parsedTemplate = parser.ParseTemplate(type, template);
+            ParsedTemplate parsedTemplate = ParseTemplateFromType(elementType);
             parsedTemplates[elementType] = parsedTemplate;
             return parsedTemplate;
         }
 
         public ParsedTemplate GetParsedTemplate<T>(bool forceReload = false) where T : UIElement {
             return GetParsedTemplate(typeof(T), forceReload);
+        }
+
+        public static ParsedTemplate ParseTemplateFromType(Type type) {
+            ProcessedType processedType = TypeProcessor.GetType(type);
+            string template = File.ReadAllText(Application.dataPath + processedType.GetTemplatePath());
+            XDocument doc = XDocument.Parse(template);
+            return new TemplateParser().ParseTemplate(processedType, doc);
+        }
+
+        public static ParsedTemplate ParseTemplateFromString<T>(string input) {
+            XDocument doc = XDocument.Parse(input);
+            ProcessedType processedType = TypeProcessor.GetType(typeof(T));
+            return new TemplateParser().ParseTemplate(processedType, doc);
         }
 
         private StyleTemplate ParseStyleSheet(XElement root) {
@@ -55,10 +72,9 @@ namespace Src {
             return styleTemplate;
         }
 
-        private ParsedTemplate ParseTemplate(ProcessedType type, string template) {
+        private ParsedTemplate ParseTemplate(ProcessedType type, XDocument doc) {
             TemplateName = type.GetTemplatePath();
 
-            XDocument doc = XDocument.Parse(template);
             doc.MergeTextNodes();
 
             List<ImportDeclaration> imports = new List<ImportDeclaration>();
@@ -66,14 +82,15 @@ namespace Src {
 
             IEnumerable<XElement> importElements = doc.Root.GetChildren("Import");
             foreach (var xElement in importElements) {
-                XAttribute pathAttr = xElement.Attributes().FirstOrDefault((a) => a.Name == "path");
-                XAttribute aliasAttr = xElement.Attributes().FirstOrDefault((a) => a.Name == "as");
+                XAttribute pathAttr = xElement.GetAttribute("path");
+                XAttribute aliasAttr = xElement.GetAttribute("as");
+
                 if (pathAttr == null || string.IsNullOrEmpty(pathAttr.Value)) {
-                    throw new Exception("Import node without a 'path' attribute");
+                    throw new InvalidTemplateException(TemplateName, "Import node without a 'path' attribute");
                 }
 
                 if (aliasAttr == null || string.IsNullOrEmpty(aliasAttr.Value)) {
-                    throw new Exception("Import node without an 'as' attribute");
+                    throw new InvalidTemplateException(TemplateName, "Import node without an 'as' attribute");
                 }
 
                 imports.Add(new ImportDeclaration(pathAttr.Value, aliasAttr.Value));
@@ -81,16 +98,16 @@ namespace Src {
 
             IEnumerable<XElement> styleElements = doc.Root.GetChildren("Style");
             foreach (var styleElement in styleElements) {
-                XAttribute idAttr = styleElement.Attributes().FirstOrDefault((a) => a.Name == "id");
-                XAttribute extendsAttr = styleElement.Attributes().FirstOrDefault((a) => a.Name == "extends");
-                XAttribute fromAttr = styleElement.Attributes().FirstOrDefault((a) => a.Name == "from");
+                XAttribute idAttr = styleElement.GetAttribute("id");
+                XAttribute extendsAttr = styleElement.GetAttribute("extends");
+                XAttribute fromAttr = styleElement.GetAttribute("from");
 
                 if (idAttr == null || string.IsNullOrEmpty(idAttr.Value)) {
-                    throw new Exception("Style tags require an 'id' attribute");
+                    throw new InvalidTemplateException(TemplateName, "Style tags require an 'id' attribute");
                 }
 
                 if (styleTemplates.Find((t) => t.id == idAttr.Value.Trim()) != null) {
-                    throw new Exception("Style tags must have a unique id");
+                    throw new InvalidTemplateException(TemplateName, "Style tags must have a unique id");
                 }
 
                 StyleTemplate styleTemplate = ParseStyleSheet(styleElement);
@@ -102,55 +119,115 @@ namespace Src {
 
             XElement contentElement = doc.Root.GetChild("Contents");
             if (contentElement == null) {
-                throw new Exception($"Template {TemplateName} is missing a 'Contents' section");
+                throw new InvalidTemplateException(TemplateName, " missing a 'Contents' section");
             }
 
             output.type = type.type;
             output.imports = imports;
             output.styles = styleTemplates;
             output.filePath = TemplateName;
-            output.contexts = new List<ContextDefinition>();
-            output.rootElement = (UIElementTemplate) ParseElement(contentElement);
+            List<UITemplate> children = ParseNodes(contentElement.Nodes());
+            // output.contexts = new List<ContextDefinition>();
+
+            output.rootElement = new UIElementTemplate();
+            output.rootElement.childTemplates = children;
+            output.rootElement.processedElementType = type;
 
             return output;
         }
 
+
         private UITemplate ParseCaseElement(XElement element) {
-            // must be direct child of switch
-            return null;
+            EnsureAttribute(element, "when");
+            EnsureOnlyAttributes(element, CaseAttributes);
+            
+            UISwitchCaseTemplate template = new UISwitchCaseTemplate();
+            template.childTemplates = ParseNodes(element.Nodes());
+            return template;
         }
 
         private UITemplate ParseDefaultElement(XElement element) {
-            // must be direct child of switch
-            return null;
+            
+            EnsureOnlyAttributes(element, DefaultAttributes);
+            
+            UISwitchDefaultTemplate template = new UISwitchDefaultTemplate();
+            template.childTemplates = ParseNodes(element.Nodes());
+            return template;
         }
 
         private UITemplate ParseRepeatElement(XElement element) {
-            // cannot be in a repeat
-            return null;
+            EnsureNotInsideTagName(element, "Repeat");
+            EnsureAttribute(element, "list");
+            EnsureOnlyAttributes(element, RepeatAttributes);
+
+            UIRepeatTemplate template = new UIRepeatTemplate();
+            template.attributes = ParseAttributes(element.Attributes());
+            template.childTemplates = ParseNodes(element.Nodes());
+
+            return template;
         }
 
+
         private UITemplate ParseSlotElement(XElement element) {
-            // cannot be in a repeat
+            Abort("<Slot> not yet implemented");
+            EnsureNotInsideTagName(element, "Repeat");
+            EnsureOnlyAttributes(element, ChildrenAttributes);
             return null;
         }
 
         private UITemplate ParseChildrenElement(XElement element) {
-            // cannot be in a repeat
-            return null;
+            EnsureEmpty(element);
+            EnsureNotInsideTagName(element, "Repeat");
+            EnsureOnlyAttributes(element, ChildrenAttributes);
+            return new UIChildrenTemplate();
         }
 
+
         private UITemplate ParseSwitchElement(XElement element) {
+            EnsureAttribute(element, "value");
+            EnsureOnlyAttributes(element, SwitchAttributes);
+
             // can only contain <Case> and <Default>
-            return null;
+            UISwitchTemplate template = new UISwitchTemplate();
+
+            template.childTemplates = ParseNodes(element.Nodes());
+
+            if (template.childTemplates.Count == 0) {
+                throw Abort("<Switch> cannot be empty");
+            }
+
+            bool hasDefault = false;
+            for (int i = 0; i < template.childTemplates.Count; i++) {
+                Type elementType = template.childTemplates[i].ElementType;
+                if (elementType == typeof(UISwitchDefaultElement)) {
+                    if (hasDefault) {
+                        throw Abort("<Switch> can only contain one <Default> element");
+                    }
+
+                    hasDefault = true;
+                }
+
+                if (elementType != typeof(UISwitchDefaultElement) && elementType != typeof(UISwitchCaseElement)) {
+                    throw Abort("<Switch> can only contain <Case> and <Default> elements");
+                }
+            }
+
+            return template;
         }
 
         private UITemplate ParsePrefabElement(XElement element) {
-            return null;
+            EnsureEmpty(element);
+            EnsureOnlyAttributes(element, PrefabAttributes);
+
+            UIPrefabTemplate template = new UIPrefabTemplate();
+            template.attributes = ParseAttributes(element.Attributes());
+
+            return template;
         }
 
         private UITextTemplate ParseTextNode(XText node) {
-            return null;
+            // todo split nodes based on inline {expressions}
+            return new UITextTemplate(node.ToString().Trim());
         }
 
         private UITemplate ParseTemplateElement(XElement element) {
@@ -159,10 +236,6 @@ namespace Src {
             template.processedElementType = TypeProcessor.GetType(element.Name.LocalName, output.imports);
             template.attributes = ParseAttributes(element.Attributes());
             template.childTemplates = ParseNodes(element.Nodes());
-
-            for (int i = 0; i < template.childTemplates.Count; i++) {
-                template.childTemplates[i].parent = template;
-            }
 
             return template;
         }
@@ -202,28 +275,71 @@ namespace Src {
         private List<UITemplate> ParseNodes(IEnumerable<XNode> nodes) {
             List<UITemplate> retn = new List<UITemplate>();
             foreach (var node in nodes) {
-                if (node.NodeType == XmlNodeType.Text) {
-                    retn.Add(ParseTextNode((XText) node));
-                }
-                else if (node.NodeType == XmlNodeType.Element) {
-                    retn.Add(ParseElement((XElement) node));
+                
+                switch (node.NodeType) {
+                    case XmlNodeType.Text:
+                        retn.Add(ParseTextNode((XText) node));
+                        continue;
+                    
+                    case XmlNodeType.Element:
+                        retn.Add(ParseElement((XElement) node));
+                        continue;
                 }
 
-                throw new Exception("Unable to handle node type: " + node.NodeType);
+                throw new InvalidTemplateException(TemplateName, "Unable to handle node type: " + node.NodeType);
             }
 
             return retn;
         }
 
         private List<AttributeDefinition> ParseAttributes(IEnumerable<XAttribute> attributes) {
-            List<AttributeDefinition> retn = new List<AttributeDefinition>();
-            foreach (var attr in attributes) {
-                AttributeDefinition attrDef = new AttributeDefinition(attr.Name.LocalName, attr.Value.Trim());
-                attrDef.bindingExpression = expressionParser.Parse(attrDef.value);
-                retn.Add(attrDef);
-            }
+            return attributes.Select(attr => new AttributeDefinition(attr.Name.LocalName, attr.Value.Trim())).ToList();
+        }
 
-            return retn;
+        private InvalidTemplateException Abort(string message) {
+            return new InvalidTemplateException(TemplateName, message);
+        }
+
+        private void EnsureAttribute(XElement element, string attrName) {
+            if (element.GetAttribute(attrName) == null) {
+                throw new InvalidTemplateException(TemplateName,
+                    $"<{element.Name.LocalName}> is missing required attribute '{attrName}'");
+            }
+        }
+
+        private void EnsureMissingAttribute(XElement element, string attrName) {
+            if (element.GetAttribute(attrName) != null) {
+                throw new InvalidTemplateException(TemplateName,
+                    $"<{element.Name.LocalName}> is not allowed to have attribute '{attrName}'");
+            }
+        }
+
+        private void EnsureOnlyAttributes(XElement element, string[] attrs) {
+            foreach (var attr in element.Attributes()) {
+                if (!attrs.Contains(attr.Name.LocalName)) {
+                    throw Abort($"<{element.Name.LocalName}> cannot have attribute: '{attr.Name.LocalName}");
+                }
+            }
+        }
+
+        private void EnsureEmpty(XElement element) {
+            if (!element.IsEmpty) {
+                throw new InvalidTemplateException(TemplateName,
+                    $"<{element.Name.LocalName}> tags cannot have children");
+            }
+        }
+
+        private void EnsureNotInsideTagName(XElement element, string tagName) {
+            XElement ptr = element;
+
+            while (ptr.Parent != null) {
+                if (ptr.Parent.Name.LocalName == tagName) {
+                    throw new InvalidTemplateException(TemplateName,
+                        $"<{element.Name.LocalName}> cannot be inside <{tagName}>");
+                }
+
+                ptr = ptr.Parent;
+            }
         }
 
     }

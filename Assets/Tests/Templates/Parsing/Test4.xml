@@ -1,44 +1,17 @@
 <?xml version="1.0" encoding="utf-8"?>
 
 <UITemplate>
-
-    <Style id="style1">
-        
-    </Style>
-
-    <Style id="panel0" inherit="style1">
-            Background: Red;
-            Margin: 4
-            Padding: 1;
-            Layout: {
-                AlignSelf: Vertical;
-            }
-    </Style>
-
+    
     <Contents>
-        <UIPanel x-style-set="$panelStyles" x-style-background="$background" x-style="panel0" x-styleType="shared|instance" visible="$isPanelVisible"/>
         
-        // this.style.background = 'x'
-        // this.sharedStyle.background.y = 'x';
-        // this.style.hover.background 
-        // 
-        <div style="panel0">
-            <SomeComplexList>
-                <item></item>
-                <item></item>
-                <item></item>
-            </SomeComplexList>
-        </div>
+        <UIPanel>
+                Text here
+        </UIPanel>
         
-        <SomeComplexList>
-            <SomeStyleNode>
-                <Children/>
-            </SomeStyleNode>
-        </SomeComplexList>
-        
-        <SomeStyleNode>
-            <Children/>
-        </SomeStyleNode>
-        
+        <UIPanel>
+                More text here
+        </UIPanel>
+       
     </Contents>
+    
 </UITemplate>

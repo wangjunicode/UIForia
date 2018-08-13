@@ -85,8 +85,8 @@ namespace Rendering {
             return new Rect() {
                 x = position.x,
                 y = position.y,
-                width = element.style.contentBox.GetContentWidth(),
-                height = element.style.contentBox.GetContentHeight()
+                width = element.style.contentWidth,
+                height = element.style.contentHeight
             };
         }
     }

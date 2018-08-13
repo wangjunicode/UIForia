@@ -2,17 +2,22 @@ using System;
 
 namespace Src {
 
-    public class BindingGenerator {
+    // bindings have 2 parts
+    // 1. Evaluate some expression and return a value
+    // 2. Do something with that value. This can be anything
+    //    and is usually defined by 
+    
+    public static class BindingGenerator {
 
-        public static ExpressionBinding Generate(ContextDefinition context, ExpressionNode root) {
+        public static ExpressionEvaluator Generate(ContextDefinition context, ExpressionNode root) {
             return Visit(context, root);
         }
 
-        public static void GenerateFromAttribute(ContextDefinition context, AttributeDefinition attr) {
-            
+        public static Binding GenerateFromAttribute(ContextDefinition context, AttributeDefinition attr) {
+            return null;
         }
 
-        private static ExpressionBinding Visit(ContextDefinition context, ExpressionNode node) {
+        private static ExpressionEvaluator Visit(ContextDefinition context, ExpressionNode node) {
             switch (node.expressionType) {
 
                 case ExpressionNodeType.ConstantValue:
@@ -32,24 +37,24 @@ namespace Src {
             return null;
         }
 
-        private static ExpressionBinding VisitOperatorExpression(ContextDefinition context, OperatorExpression node) {
+        private static ExpressionEvaluator VisitOperatorExpression(ContextDefinition context, OperatorExpression node) {
             throw new NotImplementedException();
         }
 
-        private static ExpressionBinding VisitUnaryExpression(ContextDefinition context, UnaryExpressionNode node) {
+        private static ExpressionEvaluator VisitUnaryExpression(ContextDefinition context, UnaryExpressionNode node) {
             Type yieldType = node.expression.GetYieldedType(context);
             if (yieldType == typeof(bool)) {
                 if (node.op == UnaryOperatorType.Not) {
-                    return new UnaryBooleanBinding(Visit(context, node.expression));
+                    return new UnaryBooleanEvaluator(Visit(context, node.expression));
                 }
                 throw new Exception("Unary but not boolean operator");
             }
             else if (IsNumericType(yieldType)) {
                 switch (node.op) {
                     case UnaryOperatorType.Plus:
-                        return new UnaryPlusBinding(Visit(context, node.expression));
+                        return new UnaryPlusEvaluator(Visit(context, node.expression));
                     case UnaryOperatorType.Minus:
-                        return new UnaryMinusBinding(Visit(context, node.expression));
+                        return new UnaryMinusEvaluator(Visit(context, node.expression));
                 }
             }
             else { }
@@ -69,7 +74,7 @@ namespace Src {
                    || type == typeof(decimal);
         }
 
-        private static ExpressionBinding VisitAccessExpression(ContextDefinition context, AccessExpressionNode node) {
+        private static ExpressionEvaluator VisitAccessExpression(ContextDefinition context, AccessExpressionNode node) {
 
             string contextId = node.rootIdentifier;
             for (int i = 0; i < node.parts.Count; i++) {
@@ -98,8 +103,8 @@ namespace Src {
             return null;
         }
 
-        private static ExpressionBinding VisitNumericConstant(NumericConstantNode node) {
-            return new NumericConstantBinding(node.value);
+        private static ExpressionEvaluator VisitNumericConstant(NumericConstantNode node) {
+            return new NumericConstantEvaluator(node.value);
         }
 
         private static bool EnsureCompatableType(Type type1, Type type2) {

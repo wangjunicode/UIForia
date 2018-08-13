@@ -13,6 +13,14 @@
             <TextAnchor/>
         </Text>
 
+        <Size>
+            <Margin value="4px, 4px, 4px, 4px"/>
+            
+        </Size>
+        
+        <Paint>
+            <BackgroundColor value="rgba(4, 5, 6, 7)"/>
+        </Paint>
         Text {
         fontSize: 11px;
         fontAsset: url(path/to/asset.font)
@@ -137,6 +145,9 @@
         -> pass in children
         -> return created color selector template
 
+        
+        <UIPanel onMouseDown={} layout.direction="{someBound}"/>
+        
         <Section>
             Text
             <Children/>
@@ -176,13 +187,13 @@
 
         <Switch value="{someEnum}">
 
-            <Case id="Constant.Value0">Text here</Case>
+            <Case when="Constant.Value0">Text here</Case>
 
-            <Case id="Constant.Value1">Text here</Case>
+            <Case when="Constant.Value1">Text here</Case>
 
-            <Case id="Constant.Value2">Text here</Case>
+            <Case when="Constant.Value2">Text here</Case>
 
-            <Case id="Constant.Value3">Text here</Case>
+            <Case when="Constant.Value3">Text here</Case>
 
             <Default>Text here</Default>
 
@@ -194,7 +205,7 @@
             </Repeat>
         </ColorSelector>
 
-        <Repeat if="{shouldShowList}" filter="" list="{valueList}" alias="item" onItemMoved="{}" onItemAdded="{}"
+        <Repeat filter="" list="{valueList}" alias="item" onItemMoved="{}" onItemAdded="{}"
                 onItemRemoved="{}">
             <Implicit.RepeatChild> -> context.currentList.$index = 1;
                 {item.something :: someObservedProperty} -- only check for updates when property changed

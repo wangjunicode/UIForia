@@ -6,17 +6,16 @@ namespace Src {
 
     public class UnityImagePrimitive : ImagePrimitive {
 
-        private readonly RawImage imageComponent;
+        private readonly ProceduralImage imageComponent;
         
-        public UnityImagePrimitive(RawImage imageComponent) {
+        public UnityImagePrimitive(ProceduralImage imageComponent) {
             this.imageComponent = imageComponent;
         }
 
         public override Texture2D Image { get; set; }
        
         public override void ApplyStyleSettings(UIStyle style) {
-            imageComponent.color = style.background.color;
-            imageComponent.texture = style.background.texture;
+            
         }
 
     }

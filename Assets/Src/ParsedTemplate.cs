@@ -31,7 +31,8 @@ namespace Src {
             List<UIElement> children = new List<UIElement>();
             
             for (int i = 0; i < rootElement.childTemplates.Count; i++) {
-                children.Add(rootElement.childTemplates[i].CreateScoped(scope));        
+                children.Add(rootElement.childTemplates[i].CreateScoped(scope));
+                children[i].parent = instance;
             }
 
             instance.children = children;
@@ -57,12 +58,17 @@ namespace Src {
             scope.view = view;
             scope.context = context;
             scope.inputChildren = inputChildren ?? EmptyElementList;
+            scope.styleTemplates = styles;
             
-            UIElement root = rootElement.CreateScoped(scope);
-
+            UIElement root = (UIElement) Activator.CreateInstance(rootElement.processedElementType.type);
+            root.children = new List<UIElement>();
+            
+            for (int i = 0; i < childTemplates.Count; i++) {
+                root.children.Add(childTemplates[i].CreateScoped(scope));
+                root.children[i].parent = root;
+            }
+            
             context.rootElement = root;
-
-            // rootPropsToAttributes().ApplyValues(root);
 
             return root;
         }

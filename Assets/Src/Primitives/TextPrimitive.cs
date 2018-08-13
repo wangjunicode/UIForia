@@ -2,7 +2,7 @@ using Rendering;
 
 namespace Src {
 
-    public abstract class TextPrimitive : UIRenderPrimitive {
+    public abstract class TextPrimitive  {
 
         public abstract string Text { get; set; }
 

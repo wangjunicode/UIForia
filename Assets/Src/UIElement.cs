@@ -8,7 +8,9 @@ public class UIElement : IHierarchical {
     [Flags]
     internal enum UIElementFlags {
 
-        RequiresRendering = 1 << 0
+        RequiresRendering = 1 << 0,
+        HasRenderedElement = 1 << 1,
+        RenderElementCreated = 1 << 2,
                             
     }
     
@@ -44,5 +46,23 @@ public class UIElement : IHierarchical {
     public IHierarchical Parent => parent;
     
     public bool isEnabled { get; set; }
+    public bool HasChildren => children != null && children.Count > 0;
+
+    public static void Traverse(UIElement root, Action<UIElement> action) {
+        Stack<UIElement> stack = new Stack<UIElement>();
+        stack.Push(root);
+        
+        while (stack.Count > 0) {
+            UIElement element = stack.Pop();
+            
+            action(element);
+
+            if (!element.HasChildren) continue;
+            
+            for (int i = 0; i < element.children.Count; i++) {
+                stack.Push(element.children[i]);
+            }
+        }
+    }
 
 }

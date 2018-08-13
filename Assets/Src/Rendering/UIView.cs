@@ -18,7 +18,7 @@ namespace Rendering {
 
         public List<UIElement> renderQueue;
         public SkipTree<TemplateBinding> bindingSkipTree;
-        
+
         private static int ElementIdGenerator;
         public static int NextElementId => ElementIdGenerator++;
 
@@ -32,7 +32,36 @@ namespace Rendering {
         }
 
         public void OnCreate() {
-            root = TemplateParser.GetParsedTemplate(templateType).CreateWithoutScope(this, null);
+            root = TemplateParser.GetParsedTemplate(templateType).CreateWithoutScope(this);
+
+            Stack<UIElement> stack = new Stack<UIElement>();
+            stack.Push(root);
+            while (stack.Count > 0) {
+                UIElement element = stack.Pop();
+
+                if (element is UITextElement) {
+                    // stitch up parent reference since text might be created before we have the actual parent
+                    gameObjects[element.id].transform.SetParent(gameObjects[element.parent.id].transform);
+                    ((UITextElement)element).ApplyFontSettings(GetFontSettings(element));
+                    
+                }
+                else if (element.style.RequiresRendering()) {
+                    renderables[element.id] = CreateImagePrimitive(element);
+                }
+                else if (element is UIRepeatElement) {
+                    // create children based on bindings
+                }
+
+                if (element.HasChildren) {
+                    for (int i = 0; i < element.children.Count; i++) {
+                        stack.Push(element.children[i]);
+                    }
+                }
+            }
+
+            // traverse -> create unity elements based on type
+            // traverse -> call OnInitialize()
+            // traverse -> call OnEnable()
         }
 
         public void Update() {
@@ -98,21 +127,22 @@ namespace Rendering {
             }
         }
 
-        public void CreateListElement(UIElementTemplate template, int idx, TemplateContext context) { }
-
-        public void MarkForRendering(List<UIElement> elements) {
-            for (int i = 0; i < elements.Count; i++) {
-                UIElement element = elements[i];
-                // elements to render.Add(element);
-            }
-        }
+       
+        /*
+         *
+         * Creating render items
+         *     3 types -> image-type, mask-type, text-type
+         *     image-type is created based on style parameters
+         *     text-type is created based on text content changes
+         * 
+         */
 
         public void MarkForRendering(UIElement element) {
             // if element is text -> traverse font tree & find settings
             // if element is mask -> ??
             // if element is image | raw image -> apply material, background, etc
             if ((element.flags & UIElement.UIElementFlags.RequiresRendering) == 0) {
-                if (element is UIText || element.style.RequiresRendering()) {
+                if (element is UITextElement || element.style.RequiresRendering()) {
                     element.flags |= UIElement.UIElementFlags.RequiresRendering;
                     renderQueue.Add(element);
                 }
@@ -120,13 +150,14 @@ namespace Rendering {
         }
 
         public void RenderElement(UIElement element) {
-            if (element is UIText) {
-                UIText text = (UIText) element;
-                text.ApplyFontSettings(GetFontSettings(element));
+            if (element is UITextElement) {
+                UITextElement textElement = (UITextElement) element;
+                textElement.ApplyFontSettings(GetFontSettings(element));
             }
             else {
                 ImagePrimitive image;
                 // if doesn't exist, create it
+                // todo remove this
                 if (!renderables.TryGetValue(element.id, out image)) {
                     image = CreateImagePrimitive(element);
                     renderables[element.id] = image;
@@ -206,41 +237,40 @@ namespace Rendering {
 
             if (element == null) return gameObject;
 
-            if (!gameObjects.TryGetValue(element.id, out obj)) {
-                obj = new GameObject(GetGameObjectName(element));
-                gameObjects[element.id] = obj;
-                RectTransform transform = obj.AddComponent<RectTransform>();
-                GameObject parentObject = GetOrCreateGameObject(element.parent);
-                transform.SetParent(parentObject.transform);
-                transform.anchorMin = new Vector2(0, 1);
-                transform.anchorMax = new Vector2(0, 1);
-                transform.pivot = new Vector2(0, 1);
-                transform.anchoredPosition = new Vector2();
+            if (gameObjects.TryGetValue(element.id, out obj)) {
+                return obj;
             }
+
+            obj = new GameObject(GetGameObjectName(element));
+            gameObjects[element.id] = obj;
+            RectTransform transform = obj.AddComponent<RectTransform>();
+            GameObject parentObject = GetOrCreateGameObject(element.parent);
+            transform.SetParent(parentObject.transform);
+            transform.anchorMin = new Vector2(0, 1);
+            transform.anchorMax = new Vector2(0, 1);
+            transform.pivot = new Vector2(0, 1);
+            transform.anchoredPosition = new Vector2();
 
             return obj;
         }
 
-        public TextPrimitive CreateTextPrimitive(UIElement element) {
-            GameObject obj = GetOrCreateGameObject(element);
+        public void CreateTextPrimitive(UITextElement textElement, string text) {
+            GameObject obj = GetOrCreateGameObject(textElement);
             Text textComponent = obj.AddComponent<Text>();
-            return new UnityTextPrimitive(textComponent);
+            textComponent.text = text;
+            textElement.textRenderElement = new UnityTextPrimitive(textComponent);
         }
 
         public UnityImagePrimitive CreateImagePrimitive(UIElement element) {
             GameObject obj = GetOrCreateGameObject(element);
-            RawImage imageComponent = obj.AddComponent<RawImage>();
+            ProceduralImage imageComponent = obj.AddComponent<ProceduralImage>();
             UnityImagePrimitive imagePrimitive = new UnityImagePrimitive(imageComponent);
             renderables[element.id] = imagePrimitive;
             return imagePrimitive;
         }
 
         private static string GetGameObjectName(UIElement element) {
-            return "UIElement_" + element.GetType().Name + " " + element.id;
-        }
-
-        public void RegisterStyle(UIElement element, object computeInitialStyle) {
-            throw new NotImplementedException();
+            return "<" + element.GetType().Name + "> " + element.id;
         }
 
         public void RegisterBindings(UIElement element, Binding[] bindings, TemplateContext context) {

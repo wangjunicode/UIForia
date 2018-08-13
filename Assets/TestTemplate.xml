@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="utf-8"?>
+<UITemplate>
+
+    <Style id="panelStyle">
+        <Text>
+            <FontColor value="rgb(255, 0, 0)"/>
+        </Text>
+        <Size>
+            <Width value="100"/>
+            <Height value="100"/>
+        </Size>
+    </Style>
+
+    <Contents>
+    
+        <UIPanel style="panelStyle" style.backgroundColor="rgb(255, 0, 0)">
+            Content is here
+        </UIPanel>
+    
+      
+    </Contents>
+    
+</UITemplate>

@@ -15,23 +15,35 @@ namespace Src {
         public override Type ElementType => typeof(UITextElement);
 
         public override bool TypeCheck() {
-            throw new System.NotImplementedException();
+            throw new NotImplementedException();
         }
 
         public void Compile() {
             bindings = new Binding[attributes.Count];
 
-            if (attributes.Find((definition => definition.name == "if")) != null) { }
         }
 
         public override UIElement CreateScoped(TemplateScope scope) {
             // todo -- find solution for constant expressions so they are not registered
 
             UITextElement instance = new UITextElement();
-
-            scope.view.RegisterBindings(instance, bindings, scope.context);
+            
+            scope.view.CreateTextPrimitive(instance, text);
+            
+//            scope.view.RegisterBindings(instance, bindings, scope.context);
 
             return instance;
+        }
+
+    }
+
+    public class SetUITextBinding : Binding {
+
+        public override void Execute(UIElement element, TemplateContext context) {
+//            if (element._textChanged) {
+//                element._textChanged = false;
+//            }
+//            context.view.SetElementText(element, ((UITextElement) element).label);
         }
 
     }

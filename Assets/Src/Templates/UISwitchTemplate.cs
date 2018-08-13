@@ -4,8 +4,7 @@ namespace Src {
 
         public override UIElement CreateScoped(TemplateScope scope) {
 
-            // somehow register binding
-            NonRenderedElement retn = new NonRenderedElement();
+            UISwitchElement retn = new UISwitchElement();
             for (int i = 0; i < childTemplates.Count; i++) {
                 // todo -- process children 
             }

@@ -1,4 +1,3 @@
-using System;
 using System.Collections.Generic;
 
 namespace Src {
@@ -24,11 +23,17 @@ namespace Src {
             outputScope.context = context;
             outputScope.inputChildren = scopedChildren;
             outputScope.view = scope.view;
+            outputScope.styleTemplates = templateToExpand.styles;
             
             UIElement instance = templateToExpand.CreateWithScope(outputScope);
-
+            
+            ApplyStyles(instance, scope);
+            
             context.rootElement = instance;
-            scope.view.RegisterBindings(instance, bindings, scope.context);
+
+            if (bindings != null && bindings.Length > 0) {
+                scope.view.RegisterBindings(instance, bindings, scope.context);
+            }
 
             return instance;
         }
@@ -36,6 +41,10 @@ namespace Src {
         public bool Compile(ContextDefinition context) {
             if (bindings != null) return true;
 
+            if (attributes == null) {
+                return true;
+            }
+            
             bindings = new Binding[attributes.Count];
 
             for (int i = 0; i < attributes.Count; i++) {

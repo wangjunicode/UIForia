@@ -1,6 +1,7 @@
 using System.Collections.Generic;
 using System.Xml.Linq;
 using Rendering;
+using Src.Parsing.Style;
 using UnityEngine;
 
 namespace Src.Style {
@@ -24,6 +25,11 @@ namespace Src.Style {
                 XElement fontStyle = textNode.GetChild("FontStyle");
                 if (fontStyle != null) {
                     template.fontStyle = (FontStyle) fontStyle.GetAttribute("value").GetValueAsInt();
+                }
+
+                XElement fontColor = textNode.GetChild("FontColor");
+                if (fontColor != null) {
+                    template.fontColor = StyleParseUtil.ParseColor(fontColor.GetAttribute("value").Value);
                 }
 
                 XElement textOverflow = textNode.GetChild("TextOverflow");

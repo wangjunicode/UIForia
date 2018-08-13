@@ -1,35 +1,11 @@
 using System;
-using System.Collections.Generic;
-using System.Xml.Linq;
-using Src.Style;
 using UnityEngine;
 
 namespace Src.Parsing.Style {
 
-    public static class PaintStyleParser {
+    public static class StyleParseUtil {
 
-        public static void ParseStyle(XElement element, StyleTemplate template) {
-            if (element == null) return;
-            IEnumerable<XElement> nodes = element.Elements("Paint");
-            foreach (var node in nodes) {
-                XElement backgroundColor = node.GetChild("BackgroundColor");
-                XElement backgroundImage = node.GetChild("BackgroundImage");
-
-                if (backgroundColor != null) {
-                    template.backgroundColor = ParseColor(node.GetAttribute("value").Value);
-                }
-
-                if (backgroundImage != null) {
-                    template.backgroundImage = ParseResourcePath(node.GetAttribute("value").Value);
-                }
-            }
-        }
-
-        private static Texture2D ParseResourcePath(string input) {
-            return Resources.Load<Texture2D>(input);
-        }
-
-        private static Color ParseColor(string input) {
+        public static Color ParseColor(string input) {
             Color retn = new Color();
             input = input.Replace(" ", string.Empty);
 

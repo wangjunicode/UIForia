@@ -22,6 +22,14 @@ namespace Src {
         private static readonly Dictionary<Type, ParsedTemplate> parsedTemplates =
             new Dictionary<Type, ParsedTemplate>();
 
+        private static readonly string[] RepeatAttributes = {"list", "as", "filter", "onItemAdded", "onItemRemoved"};
+        private static readonly string[] CaseAttributes = {"when"};
+        private static readonly string[] PrefabAttributes = {"if", "src"};
+        private static readonly string[] SwitchAttributes = {"if", "value"};
+        private static readonly string[] DefaultAttributes = { };
+        private static readonly string[] ChildrenAttributes = { };
+        private static readonly string[] TextAttributes = { };
+
         public static ParsedTemplate GetParsedTemplate(ProcessedType processedType, bool forceReload = false) {
             return GetParsedTemplate(processedType.type, forceReload);
         }
@@ -130,13 +138,18 @@ namespace Src {
 
 
         private UITemplate ParseCaseElement(XElement element) {
-            UISwitchCaseTemplate template = new UISwitchCaseTemplate();
             EnsureAttribute(element, "when");
+            EnsureOnlyAttributes(element, CaseAttributes);
+            
+            UISwitchCaseTemplate template = new UISwitchCaseTemplate();
             template.childTemplates = ParseNodes(element.Nodes());
             return template;
         }
 
         private UITemplate ParseDefaultElement(XElement element) {
+            
+            EnsureOnlyAttributes(element, DefaultAttributes);
+            
             UISwitchDefaultTemplate template = new UISwitchDefaultTemplate();
             template.childTemplates = ParseNodes(element.Nodes());
             return template;
@@ -144,40 +157,45 @@ namespace Src {
 
         private UITemplate ParseRepeatElement(XElement element) {
             EnsureNotInsideTagName(element, "Repeat");
+            EnsureAttribute(element, "list");
+            EnsureOnlyAttributes(element, RepeatAttributes);
 
             UIRepeatTemplate template = new UIRepeatTemplate();
-            // todo -- parse attributes
+            template.attributes = ParseAttributes(element.Attributes());
             template.childTemplates = ParseNodes(element.Nodes());
 
             return template;
         }
 
+
         private UITemplate ParseSlotElement(XElement element) {
             Abort("<Slot> not yet implemented");
             EnsureNotInsideTagName(element, "Repeat");
+            EnsureOnlyAttributes(element, ChildrenAttributes);
             return null;
         }
 
         private UITemplate ParseChildrenElement(XElement element) {
-            // cannot be in a repeat
-
             EnsureEmpty(element);
             EnsureNotInsideTagName(element, "Repeat");
-
+            EnsureOnlyAttributes(element, ChildrenAttributes);
             return new UIChildrenTemplate();
         }
 
 
         private UITemplate ParseSwitchElement(XElement element) {
+            EnsureAttribute(element, "value");
+            EnsureOnlyAttributes(element, SwitchAttributes);
+
             // can only contain <Case> and <Default>
             UISwitchTemplate template = new UISwitchTemplate();
-            
+
             template.childTemplates = ParseNodes(element.Nodes());
 
             if (template.childTemplates.Count == 0) {
                 throw Abort("<Switch> cannot be empty");
             }
-            
+
             bool hasDefault = false;
             for (int i = 0; i < template.childTemplates.Count; i++) {
                 Type elementType = template.childTemplates[i].ElementType;
@@ -185,21 +203,25 @@ namespace Src {
                     if (hasDefault) {
                         throw Abort("<Switch> can only contain one <Default> element");
                     }
+
                     hasDefault = true;
                 }
+
                 if (elementType != typeof(UISwitchDefaultElement) && elementType != typeof(UISwitchCaseElement)) {
-                   throw Abort("<Switch> can only contain <Case> and <Default> elements");
+                    throw Abort("<Switch> can only contain <Case> and <Default> elements");
                 }
-            }            
-            
+            }
+
             return template;
         }
 
         private UITemplate ParsePrefabElement(XElement element) {
-            UIPrefabTemplate template = new UIPrefabTemplate();
-
             EnsureEmpty(element);
-            
+            EnsureOnlyAttributes(element, PrefabAttributes);
+
+            UIPrefabTemplate template = new UIPrefabTemplate();
+            template.attributes = ParseAttributes(element.Attributes());
+
             return template;
         }
 
@@ -253,14 +275,15 @@ namespace Src {
         private List<UITemplate> ParseNodes(IEnumerable<XNode> nodes) {
             List<UITemplate> retn = new List<UITemplate>();
             foreach (var node in nodes) {
-                if (node.NodeType == XmlNodeType.Text) {
-                    retn.Add(ParseTextNode((XText) node));
-                    continue;
-                }
-
-                if (node.NodeType == XmlNodeType.Element) {
-                    retn.Add(ParseElement((XElement) node));
-                    continue;
+                
+                switch (node.NodeType) {
+                    case XmlNodeType.Text:
+                        retn.Add(ParseTextNode((XText) node));
+                        continue;
+                    
+                    case XmlNodeType.Element:
+                        retn.Add(ParseElement((XElement) node));
+                        continue;
                 }
 
                 throw new InvalidTemplateException(TemplateName, "Unable to handle node type: " + node.NodeType);
@@ -270,14 +293,7 @@ namespace Src {
         }
 
         private List<AttributeDefinition> ParseAttributes(IEnumerable<XAttribute> attributes) {
-            List<AttributeDefinition> retn = new List<AttributeDefinition>();
-            foreach (var attr in attributes) {
-                AttributeDefinition attrDef = new AttributeDefinition(attr.Name.LocalName, attr.Value.Trim());
-                attrDef.bindingExpression = expressionParser.Parse(attrDef.value);
-                retn.Add(attrDef);
-            }
-
-            return retn;
+            return attributes.Select(attr => new AttributeDefinition(attr.Name.LocalName, attr.Value.Trim())).ToList();
         }
 
         private InvalidTemplateException Abort(string message) {
@@ -286,22 +302,33 @@ namespace Src {
 
         private void EnsureAttribute(XElement element, string attrName) {
             if (element.GetAttribute(attrName) == null) {
-                throw new InvalidTemplateException(TemplateName, $"<{element.Name.LocalName}> is missing required attribute '{attrName}'");
+                throw new InvalidTemplateException(TemplateName,
+                    $"<{element.Name.LocalName}> is missing required attribute '{attrName}'");
             }
         }
 
         private void EnsureMissingAttribute(XElement element, string attrName) {
             if (element.GetAttribute(attrName) != null) {
-                throw new InvalidTemplateException(TemplateName, $"<{element.Name.LocalName}> is not allowed to have attribute '{attrName}'");
+                throw new InvalidTemplateException(TemplateName,
+                    $"<{element.Name.LocalName}> is not allowed to have attribute '{attrName}'");
             }
         }
-        
+
+        private void EnsureOnlyAttributes(XElement element, string[] attrs) {
+            foreach (var attr in element.Attributes()) {
+                if (!attrs.Contains(attr.Name.LocalName)) {
+                    throw Abort($"<{element.Name.LocalName}> cannot have attribute: '{attr.Name.LocalName}");
+                }
+            }
+        }
+
         private void EnsureEmpty(XElement element) {
             if (!element.IsEmpty) {
-                throw new InvalidTemplateException(TemplateName, $"<{element.Name.LocalName}> tags cannot have children");
-            }    
+                throw new InvalidTemplateException(TemplateName,
+                    $"<{element.Name.LocalName}> tags cannot have children");
+            }
         }
-        
+
         private void EnsureNotInsideTagName(XElement element, string tagName) {
             XElement ptr = element;
 

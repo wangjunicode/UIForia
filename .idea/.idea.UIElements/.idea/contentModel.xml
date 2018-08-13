@@ -19,6 +19,7 @@
             <e p="UIRepeatElement.cs" t="Include" />
             <e p="UISwitchCaseElement.cs" t="Include" />
             <e p="UISwitchDefaultElement.cs" t="Include" />
+            <e p="UISwitchElement.cs" t="Include" />
           </e>
           <e p="ImportDeclaration.cs" t="Include" />
           <e p="Layout" t="Include">
@@ -77,6 +78,7 @@
               <e p="LayoutStyleParser.cs" t="Include" />
               <e p="PaintStyleParser.cs" t="Include" />
               <e p="SizeStyleParser.cs" t="Include" />
+              <e p="StyleParseUtil.cs" t="Include" />
               <e p="StyleTemplate.cs" t="Include" />
               <e p="TextStyleParser.cs" t="Include" />
             </e>
@@ -96,7 +98,6 @@
             <e p="TextPrimitive.cs" t="Include" />
             <e p="UIImage.cs" t="Include" />
             <e p="UIRenderPrimitive.cs" t="Include" />
-            <e p="UIText.cs" t="Include" />
             <e p="UITextElement.cs" t="Include" />
             <e p="UnityImagePrimitive.cs" t="Include" />
             <e p="UnityTextPrimitive.cs" t="Include" />
@@ -104,9 +105,22 @@
           <e p="PropAttribute.cs" t="Include" />
           <e p="PropertyBindPair.cs" t="Include" />
           <e p="Rendering" t="Include">
+            <e p="BorderStyle.cs" t="Include" />
+            <e p="LayoutDirection.cs" t="Include" />
+            <e p="LayoutParameters.cs" t="Include" />
+            <e p="LayoutType.cs" t="Include" />
+            <e p="LayoutWrap.cs" t="Include" />
+            <e p="PaintDesc.cs" t="Include" />
+            <e p="ProceduralImage.cs" t="Include" />
+            <e p="TextOverflow.cs" t="Include" />
+            <e p="TextStyle.cs" t="Include" />
             <e p="UIStyle.cs" t="Include" />
             <e p="UITransform.cs" t="Include" />
             <e p="UIView.cs" t="Include" />
+            <e p="Visibility.cs" t="Include" />
+          </e>
+          <e p="Shaders" t="Include">
+            <e p="ProceduralImage.shader" t="Include" />
           </e>
           <e p="SkipTree.cs" t="Include" />
           <e p="Src.asmdef" t="Include" />
@@ -114,7 +128,6 @@
           <e p="TemplateAttribute.cs" t="Include" />
           <e p="TemplateContext.cs" t="Include" />
           <e p="Templates" t="Include">
-            <e p="NonRenderedElement.cs" t="Include" />
             <e p="TemplateBinding.cs" t="Include" />
             <e p="TemplateScope.cs" t="Include" />
             <e p="UIChildrenTemplate.cs" t="Include" />

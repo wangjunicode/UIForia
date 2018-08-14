@@ -39,39 +39,24 @@ namespace Src {
         }
 
         public void ApplyStyles(UIElement element, TemplateScope scope) {
-            
+
             element.style = new UIStyleSet(element, scope.view);
-            
+
             if (!HasAttribute("style")) return;
-            
+
             AttributeDefinition styleAttr = GetAttribute("style");
             StyleTemplate styleTemplate = scope.GetStyleTemplate(styleAttr.value);
-            
-            scope.GetStyleInstance();
-            
+
             if (styleTemplate == null) {
                 Debug.LogWarning("Unable to find style definition for: " + styleAttr.name);
                 return;
             }
 
-            UIStyleSet style = new UIStyleSet(element, scope.view);
-            
-            style.backgroundColor = styleTemplate.backgroundColor;
-            style.backgroundImage = styleTemplate.backgroundImage;
-            
-            style.margin = styleTemplate.margin;
-            style.padding = styleTemplate.padding;
-            style.border = styleTemplate.border;
-
-            
-//            style.alignment = styleTemplate.textAnchor;
-//            style.color = styleTemplate.fontColor;
-//            style.fontSize = styleTemplate.fontSize;
-//            style.font = Resources.Load<Font>(styleTemplate.fontAssetName);
-//            style.fontStyle = styleTemplate.fontStyle;
-            element.style = style;
+            UIStyle styleInstance = scope.GetStyleInstance(styleTemplate.id);
+            element.style.SetInstanceStyle(styleInstance, StyleStateType.Normal);
 
         }
+
     }
 
 }

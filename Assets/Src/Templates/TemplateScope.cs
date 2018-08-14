@@ -19,9 +19,10 @@ namespace Src {
             return null;
         }
 
+        // todo -- shared instances
+        // todo -- might not belong here since we want 1 instance across all templates not just scope
         public UIStyle GetStyleInstance(string id) {
-            styleTemplates[0].Instantiate();
-            return null;
+            return styleTemplates.Find((t) => t.id == id)?.Instantiate();
         }
     }
 

@@ -2,6 +2,7 @@ namespace Rendering {
 
     public enum LayoutType {
 
+        Flow,
         Flex,
         Grid,
         Radial,

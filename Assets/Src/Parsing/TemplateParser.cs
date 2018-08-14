@@ -67,7 +67,7 @@ namespace Src {
             PaintStyleParser.ParseStyle(root.GetChild("Paint"), styleTemplate);
             AnimationStyleParser.ParseStyle(root.GetChild("Animations"), styleTemplate);
             SizeStyleParser.ParseStyle(root.GetChild("Size"), styleTemplate);
-            LayoutStyleParser.ParseStyle(root.GetChild("Layout"), styleTemplate);
+            LayoutStyleParser.ParseStyle(root, styleTemplate);
             LayoutItemStyleParser.ParseStyle(root.GetChild("LayoutItem"), styleTemplate);
             return styleTemplate;
         }

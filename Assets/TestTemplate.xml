@@ -30,10 +30,12 @@
         <LayoutItem.IgnoreLayout value="true"/>
         <LayoutItem.LayoutType value="Fixed | Flow"/>
         
-        <Rect.X value="auto"/>
-        <Rect.Y value="-20px" anchor="Parent"/>
-        <Rect.W value="30" anchor="Parent | ParentEdge"/>
-        <Rect.H value="40%" anchor="Content"/>
+        <!--<Rect.X value="0"/>-->
+        <!--<Rect.Y value="-20px" anchor="Parent"/>-->
+        <!--<Rect.W value="30" anchor="Parent | ParentEdge"/>-->
+        <!--<Rect.H value="40%" anchor="Content"/>-->
+        <Rect.W value="50"/>
+        <Rect.H value="30"/>
         
         <Rect.MaxWidth/>
         <Rect.MinWidth/>
@@ -46,6 +48,13 @@
 
     </Style>
 
+    <Style id="panel0">
+        
+        <Rect.W value="300"/>
+        <Rect.H value="100"/>
+        
+    </Style>
+    
     <Contents>
 
         <UIPanel style="panelStyle" 
@@ -53,8 +62,11 @@
                  style.rect.y="{yVal}" 
                  style.backgroundColor="rgb(255, 0, 0)">
             Content is here
+           
         </UIPanel>
-
+        <UIPanel style="panel0"/>
+        <UIPanel style="panel0"/>
+        <UIPanel style="panel0"/>
     </Contents>
 
 </UITemplate>

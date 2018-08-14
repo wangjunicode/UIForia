@@ -1,4 +1,7 @@
 using System;
+using System.Xml.Linq;
+using Rendering;
+using Src.Style;
 using UnityEngine;
 
 namespace Src.Parsing.Style {
@@ -17,8 +20,8 @@ namespace Src.Parsing.Style {
             );
         }
 
-        public static UIStyleRect ParseContentBox(string value) {
-            UIStyleRect box = new UIStyleRect();
+        public static ContentBoxRect ParseContentBox(string value) {
+            ContentBoxRect box = new ContentBoxRect();
 
             if (!value.Contains(",")) {
                 float m = float.Parse(value);
@@ -60,7 +63,6 @@ namespace Src.Parsing.Style {
             throw new Exception("Bad content box input");
         }
 
-        
         public static Color ParseColor(string input) {
             Color retn = new Color();
             input = input.Replace(" ", string.Empty);
@@ -88,6 +90,15 @@ namespace Src.Parsing.Style {
             }
 
             return retn;
+        }
+
+        public static UIMeasurement ParseMeasurement(string value) {
+            return new UIMeasurement(float.Parse(value), UIUnit.Pixel);
+        }
+
+        public static void ParseMeasurement(ref UIMeasurement measurement, XElement element) {
+            if (element == null) return;
+            measurement = new UIMeasurement(float.Parse(element.GetAttribute("value").Value), UIUnit.Pixel);
         }
 
     }

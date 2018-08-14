@@ -10,21 +10,6 @@ namespace Rendering {
         InLayoutFlow = 1 << 1,
     }
 
-    public enum UIUnit {
-        Pixel,
-        Percent,
-        Content,
-        Parent,
-        View
-    }
-
-    public struct UnitValue {
-
-        public float value;
-        public UIUnit unit;
-
-    }
-    
     // transform.isInLayoutFlow = false;
     // transform.layoutParameters.grow = 1;
     // transform.layoutParameters.shrink = 1;
@@ -63,12 +48,6 @@ namespace Rendering {
             this.view = view;
             flags = 0;
             children = new List<UITransform>();
-        }
-
-        public void SetPosition(Vector2 position, UIUnit unit) {
-            // if isInFlow && !layouttype == layout.none return;
-            flags |= UIFlags.TransformChanged;
-            view.MarkTransformDirty(this);
         }
 
         public bool IsInLayoutFlow {

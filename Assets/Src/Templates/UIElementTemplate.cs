@@ -11,7 +11,10 @@ namespace Src {
             List<UIElement> scopedChildren = new List<UIElement>(childTemplates.Count);
             
             for (int i = 0; i < childTemplates.Count; i++) {
-                scopedChildren.Add(childTemplates[i].CreateScoped(scope));
+                UIElement child = childTemplates[i].CreateScoped(scope);
+                if (child != null) {
+                    scopedChildren.Add(child);
+                }
             }
 
             ParsedTemplate templateToExpand = TemplateParser.GetParsedTemplate(processedElementType);

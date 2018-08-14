@@ -21,7 +21,7 @@ namespace Src {
         public Type ElementType => rootElement.ElementType;
 
         private static readonly List<UIElement> EmptyElementList = new List<UIElement>(0);
-        
+
         public UIElement CreateWithScope(TemplateScope scope) {
 
             if (!isCompiled) Compile();
@@ -29,13 +29,17 @@ namespace Src {
             UIElement instance = (UIElement) Activator.CreateInstance(rootElement.processedElementType.type);
 
             List<UIElement> children = new List<UIElement>();
-            
+
             for (int i = 0; i < rootElement.childTemplates.Count; i++) {
-                children.Add(rootElement.childTemplates[i].CreateScoped(scope));
-                children[i].parent = instance;
+                UIElement child = rootElement.childTemplates[i].CreateScoped(scope);
+                if (child != null) {
+                    children.Add(child);
+                    child.parent = instance;
+                }
             }
 
             instance.children = children;
+            rootElement.ApplyStyles(instance, scope);
 
             return instance;
 
@@ -49,9 +53,9 @@ namespace Src {
         }
 
         public UIElement CreateWithoutScope(UIView view, List<UIElement> inputChildren = null) {
-            
+
             if (!isCompiled) Compile();
-            
+
             TemplateContext context = new TemplateContext(view);
 
             TemplateScope scope = new TemplateScope();
@@ -59,15 +63,16 @@ namespace Src {
             scope.context = context;
             scope.inputChildren = inputChildren ?? EmptyElementList;
             scope.styleTemplates = styles;
-            
+
             UIElement root = (UIElement) Activator.CreateInstance(rootElement.processedElementType.type);
             root.children = new List<UIElement>();
-            
+
             for (int i = 0; i < childTemplates.Count; i++) {
                 root.children.Add(childTemplates[i].CreateScoped(scope));
                 root.children[i].parent = root;
             }
-            
+
+            rootElement.ApplyStyles(root, scope);
             context.rootElement = root;
 
             return root;

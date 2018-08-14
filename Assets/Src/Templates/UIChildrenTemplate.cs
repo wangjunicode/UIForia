@@ -13,6 +13,9 @@ namespace Src {
         }
 
         public override UIElement CreateScoped(TemplateScope scope) {
+
+            if (scope.inputChildren.Count == 0) return null;
+            
             UIChildrenElement retn = new UIChildrenElement();
             retn.children = new List<UIElement>();
             
@@ -21,6 +24,9 @@ namespace Src {
                 retn.children[i].parent = retn;
             }
 
+            // todo -- this element doesn't need styling
+            ApplyStyles(retn, scope);
+            
             return retn;
         }
 

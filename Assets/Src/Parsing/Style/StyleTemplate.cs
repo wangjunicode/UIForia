@@ -4,20 +4,12 @@ using UnityEngine;
 
 namespace Src {
 
-    public struct UIMeasurement {
-
-        public float value;
-        public int relativeTo;
-        public int unit;
-
-    }
-
     public class StyleTemplate {
 
         public string id;
         public string extendsId;
         public string extendsPath;
-
+        
         // text
         public int fontSize = UIStyle.UnsetIntValue;
         public string fontAssetName = string.Empty;
@@ -40,17 +32,17 @@ namespace Src {
         public Texture2D backgroundImage = null;
 
         // rect
-        public UIStyleRect margin;
-        public UIStyleRect padding;
-        public UIStyleRect border;
+        public ContentBoxRect margin;
+        public ContentBoxRect padding;
+        public ContentBoxRect border;
         public float width = UIStyle.UnsetFloatValue;
         public float height = UIStyle.UnsetFloatValue;
 
-        public UIMeasurement rectX;
-        public UIMeasurement rectY;
-        public UIMeasurement rectW;
-        public UIMeasurement rectH;
-        
+        public UIMeasurement rectX = UIStyle.UnsetMeasurementValue;
+        public UIMeasurement rectY = UIStyle.UnsetMeasurementValue;
+        public UIMeasurement rectW = UIStyle.UnsetMeasurementValue;
+        public UIMeasurement rectH = UIStyle.UnsetMeasurementValue;
+
         public UIMeasurement rectMinW;
         public UIMeasurement rectMaxW;
         public UIMeasurement rectMinH;
@@ -91,6 +83,10 @@ namespace Src {
             style.contentBox.margin = margin;
             style.contentBox.padding = padding;
 
+            style.rect.x = rectX;
+            style.rect.y = rectY;
+            style.rect.width = rectW;
+            style.rect.height = rectH;
 
             return style;
         }

@@ -1,4 +1,5 @@
 using System;
+using Src;
 using Src.Layout;
 using UnityEngine;
 
@@ -70,6 +71,8 @@ namespace Rendering {
             paint = new PaintDesc();
             layoutParameters = new LayoutParameters();
         }
+
+        public static UIMeasurement UnsetMeasurementValue { get; set; }
 
 
         public void ApplyChanges() {

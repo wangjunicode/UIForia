@@ -1,20 +1,59 @@
 <?xml version="1.0" encoding="utf-8"?>
 <UITemplate>
 
-    <Style id="panelStyle">
+    <Style id="panelStyle" extends="id" from="../path">
+
+        <Font.Color value="rgb(255, 0, 0)"/>
         
-        <FontColor value="rgb(255, 0, 0)"/>
-        <Width value="100"/>
-        <Height value="100"/>
+        <Font.Alignment value=""/>
         
+        <Layout.Type value="Flow"/>
+        <Layout.Direction value="Column"/>
+        <Layout.Flow.MainAxisOverflow value=""/>
+        
+        <Layout.Flow.AlignChildren/>
+        <Layout.Flow.JustifyChildren/>
+        
+        <Layout.Flow.Width value="Parent(100%)"/>
+        <Layout.Flow.Width value=""/>
+        
+        <Layout.Flow.Overflow value="wrap"/>
+        
+        <Layout.Flow.Height value="Content(100%)"/>
+        <Layout.Flow.Height value="InFlowContent(100%)"/>
+        
+        <Layout.Flow.Width value="100px"/>
+        <Layout.Flow.Width value="Viewport(100%)"/>
+        
+        <LayoutItem.Flex.WidthBasis/>
+        
+        <LayoutItem.IgnoreLayout value="true"/>
+        <LayoutItem.LayoutType value="Fixed | Flow"/>
+        
+        <Rect.X value="auto"/>
+        <Rect.Y value="-20px" anchor="Parent"/>
+        <Rect.W value="30" anchor="Parent | ParentEdge"/>
+        <Rect.H value="40%" anchor="Content"/>
+        
+        <Rect.MaxWidth/>
+        <Rect.MinWidth/>
+        <Rect.MinHeight/>
+        <Rect.MaxHeight/>
+        
+        <Padding.Top value=""/>
+        
+        <Border.Radius.TopLeft value=""/>
+
     </Style>
 
     <Contents>
 
-        <UIPanel style="panelStyle" style.backgroundColor="rgb(255, 0, 0)">
+        <UIPanel style="panelStyle" 
+                 style.rect.x="Fixed(20px)"
+                 style.rect.y="{yVal}" 
+                 style.backgroundColor="rgb(255, 0, 0)">
             Content is here
         </UIPanel>
-
 
     </Contents>
 

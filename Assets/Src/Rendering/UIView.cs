@@ -40,6 +40,8 @@ namespace Rendering {
                 UIElement element = stack.Pop();
 
                 if (element is UITextElement) {
+                    UITextElement textElement = element as UITextElement;
+                    CreateTextPrimitive(textElement);
                     // stitch up parent reference since text might be created before we have the actual parent
                     gameObjects[element.id].transform.SetParent(gameObjects[element.parent.id].transform);
                     ((UITextElement) element).ApplyFontSettings(GetFontSettings(element));
@@ -217,11 +219,12 @@ namespace Rendering {
             return obj;
         }
 
-        public void CreateTextPrimitive(UITextElement textElement, string text) {
+        public void CreateTextPrimitive(UITextElement textElement) {
             GameObject obj = GetOrCreateGameObject(textElement);
             Text textComponent = obj.AddComponent<Text>();
-            textComponent.text = text;
-            textElement.textRenderElement = new UnityTextPrimitive(textComponent);
+            UnityTextPrimitive textPrimitive = new UnityTextPrimitive(textComponent);;
+//            renderables[textElement.id] = textPrimitive;
+            textElement.textRenderElement = textPrimitive;
         }
 
         public UnityImagePrimitive CreateImagePrimitive(UIElement element) {

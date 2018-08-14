@@ -4,6 +4,14 @@ using UnityEngine;
 
 namespace Src {
 
+    public struct UIMeasurement {
+
+        public float value;
+        public int relativeTo;
+        public int unit;
+
+    }
+
     public class StyleTemplate {
 
         public string id;
@@ -31,14 +39,27 @@ namespace Src {
         public Material material = null;
         public Texture2D backgroundImage = null;
 
-        // size
+        // rect
         public UIStyleRect margin;
         public UIStyleRect padding;
         public UIStyleRect border;
         public float width = UIStyle.UnsetFloatValue;
         public float height = UIStyle.UnsetFloatValue;
-        public FitType widthFit = FitType.Unset;
-        public FitType heightFit = FitType.Unset;
+
+        public UIMeasurement rectX;
+        public UIMeasurement rectY;
+        public UIMeasurement rectW;
+        public UIMeasurement rectH;
+        
+        public UIMeasurement rectMinW;
+        public UIMeasurement rectMaxW;
+        public UIMeasurement rectMinH;
+        public UIMeasurement rectMaxH;
+
+        public UIMeasurement paddingTop;
+        public UIMeasurement paddingRight;
+        public UIMeasurement paddingBottom;
+        public UIMeasurement paddingLeft;
 
         // transform
         public Vector2 scale;
@@ -61,6 +82,18 @@ namespace Src {
         public float maxHeight = UIStyle.UnsetFloatValue;
         public float basisWidth = UIStyle.UnsetFloatValue;
         public float basisHeight = UIStyle.UnsetFloatValue;
+
+        public UIStyle Instantiate() {
+            UIStyle style = new UIStyle();
+
+            style.contentBox = new ContentBox();
+            style.contentBox.border = border;
+            style.contentBox.margin = margin;
+            style.contentBox.padding = padding;
+
+
+            return style;
+        }
 
     }
 

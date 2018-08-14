@@ -28,7 +28,7 @@ namespace Src {
 
             UITextElement instance = new UITextElement();
             
-            scope.view.CreateTextPrimitive(instance, text);
+//            scope.view.CreateTextPrimitive(instance, text);
             
 //            scope.view.RegisterBindings(instance, bindings, scope.context);
 

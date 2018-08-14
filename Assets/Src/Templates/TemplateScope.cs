@@ -19,6 +19,10 @@ namespace Src {
             return null;
         }
 
+        public UIStyle GetStyleInstance(string id) {
+            styleTemplates[0].Instantiate();
+            return null;
+        }
     }
 
 }

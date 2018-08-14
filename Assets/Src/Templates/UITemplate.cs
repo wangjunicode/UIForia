@@ -39,10 +39,16 @@ namespace Src {
         }
 
         public void ApplyStyles(UIElement element, TemplateScope scope) {
+            
+            element.style = new UIStyleSet(element, scope.view);
+            
             if (!HasAttribute("style")) return;
             
             AttributeDefinition styleAttr = GetAttribute("style");
             StyleTemplate styleTemplate = scope.GetStyleTemplate(styleAttr.value);
+            
+            scope.GetStyleInstance();
+            
             if (styleTemplate == null) {
                 Debug.LogWarning("Unable to find style definition for: " + styleAttr.name);
                 return;

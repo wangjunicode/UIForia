@@ -7,8 +7,8 @@ public class UITextElement : UIElement {
     
     [Prop] public string label;
 
-
     public void ApplyFontSettings(TextStyle fontSettings) {
+        textRenderElement.Text = label;
         textRenderElement.ApplyFontSettings(fontSettings);
     }
     

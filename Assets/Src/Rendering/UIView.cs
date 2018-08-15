@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using Src;
+using Src.Layout;
 using UnityEngine;
 using UnityEngine.UI;
 
@@ -34,11 +35,11 @@ namespace Rendering {
             foreach (KeyValuePair<int, GameObject> go in gameObjects) {
                 UnityEngine.Object.Destroy(go.Value);
             }
-            
+
             gameObjects.Clear();
             renderQueue.Clear();
 //            bindingSkipTree = new SkipTree<TemplateBinding>();
-            
+
             root = TemplateParser.GetParsedTemplate(templateType, true).CreateWithoutScope(this);
             InitializeElements();
         }
@@ -70,7 +71,7 @@ namespace Rendering {
                 }
                 // todo -- skip tree for render nodes?
                 // todo -- debug view for tree?
-                else if (true)  {//element.style.RequiresRendering()) {
+                else if (true) { //element.style.RequiresRendering()) {
                     CreateImagePrimitive(element);
                 }
                 else if (element is UIRepeatElement) {
@@ -79,7 +80,7 @@ namespace Rendering {
 
             });
         }
-        
+
         private void HandleRenderUpdates() {
             for (int i = 0; i < renderQueue.Count; i++) {
                 UIElement element = renderQueue[i];
@@ -108,15 +109,37 @@ namespace Rendering {
 
         private void RunLayout() {
 
-            Rect available; // compute this rect from canvas size offset by view's position on canvas
+            Rect viewport = rectTransform.rect; // compute this rect from canvas size offset by view's position on canvas
 
-            root.style.layout.Run(this, rectTransform.rect, root);
+            Stack<LayoutData> layoutData = new Stack<LayoutData>();
+
+            layoutData.Push(root.style.layout.Run(viewport, null, root));
             
+            float xOffset = 0;
+            float yOffset = 0;
+
+            while (layoutData.Count != 0) {
+                LayoutData data = layoutData.Pop();
+
+                data.x += xOffset;
+                data.y += yOffset;
+                // convert to world space
+                // apply to unity transforms
+                // add / update masks
+                // add / update scroll views
+
+                SetLayoutRect(data.elementId, data.layoutRect);
+
+                for (int i = 0; i < data.children.Count; i++) {
+                    layoutData.Push(data.children[i]);
+                }
+            }
+
         }
 
-        public void SetLayoutRect(UIElement element, Rect rect) {
+        public void SetLayoutRect(int id, Rect rect) {
             GameObject obj;
-            if (gameObjects.TryGetValue(element.id, out obj)) {
+            if (gameObjects.TryGetValue(id, out obj)) {
                 RectTransform rectTransform = obj.transform as RectTransform;
                 rectTransform.anchoredPosition = new Vector2(rect.x, rect.y);
                 rectTransform.sizeDelta = new Vector2(rect.width, rect.height);

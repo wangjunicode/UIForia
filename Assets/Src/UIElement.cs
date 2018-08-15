@@ -1,9 +1,11 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using JetBrains.Annotations;
 using Rendering;
 using Src;
 
+[DebuggerDisplay("id={id}")]
 public class UIElement : IHierarchical {
 
     [Flags]

@@ -62,16 +62,20 @@
 
     <Contents>
 
-        <UIPanel style="panelStyle, panel0" style.paint.backgroundColor="rgb(255, 0, 0)">
-
-            <UIPanel style.paint.backgroundColor="rgb(255, 0, 0)"/>
-            <UIPanel style.paint.backgroundColor="rgb(0, 255, 0)"/>
-            <UIPanel style.paint.backgroundColor="rgb(0, 0, 255)"/>
+        <UIPanel style.layout.direction="row" style="panelStyle, panel0" style.paint.backgroundColor="rgb(255, 0, 0)">
+            <!--todo: make a special type called container that doesn't create a UIChildrenElement but allows natural nesting-->
+            <UIPanel style.rect.w="50" style.rect.h="100" style.paint.backgroundColor="rgb(255, 0, 0)"/>
+            <UIPanel style.rect.w="50" style.rect.h="100" style.paint.backgroundColor="rgb(0, 255, 0)"/>
+            <UIPanel style.rect.w="50" style.rect.h="100" style.paint.backgroundColor="rgb(0, 0, 255)"/>
 
         </UIPanel>
+        
+        <Children style=""/>
+        
         <UIPanel style="panel0"/>
         <UIPanel style="panel0" style.paint.backgroundColor="rgb(255, 255, 0)"/>
         <UIPanel style="panel0" style.rect.w="50"/>
+        
     </Contents>
 
 </UITemplate>

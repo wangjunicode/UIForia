@@ -58,6 +58,11 @@ namespace Src {
                     style.rect.height = StyleParseUtil.ParseMeasurement(attr.value);
                     break;
                 
+                case "layout.direction":
+                    style = style ?? new UIStyle();
+                    style.layoutDirection = StyleParseUtil.ParseLayoutDirection(attr.value);
+                    break;
+                
                 default:
                     Debug.LogWarning(
                         $"Attribute {attr.key} seems like a style property but doesn't match a valid style key name");

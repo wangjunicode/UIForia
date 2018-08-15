@@ -13,6 +13,8 @@ namespace Src {
             this.value = value;
             this.unit = unit;
         }
+
+        public bool isFixed => (unit & UIUnit.Fixed) != 0;
         
         public bool Equals(UIMeasurement other) {
             return value.Equals(other.value) && unit == other.unit;

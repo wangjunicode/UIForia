@@ -110,6 +110,12 @@ namespace Src.Parsing.Style {
             measurement = new UIMeasurement(float.Parse(element.GetAttribute("value").Value), UIUnit.Pixel);
         }
 
+        public static LayoutDirection ParseLayoutDirection(string attrValue) {
+            if (attrValue == "row") return LayoutDirection.Row;
+            if (attrValue == "column") return LayoutDirection.Column;
+            return LayoutDirection.Unset;
+        }
+
     }
 
 }

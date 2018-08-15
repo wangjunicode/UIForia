@@ -18,7 +18,8 @@ namespace Rendering {
         public UILayoutRect rect;
         public ContentBox contentBox;
         public LayoutType layoutType;
-
+        public LayoutDirection layoutDirection;
+        
         public event Action<UIStyle> onChange;
 
         public const int UnsetIntValue = int.MaxValue;
@@ -68,6 +69,8 @@ namespace Rendering {
         }
 
         public static readonly UIStyle Default = new UIStyle() {
+            layoutType = LayoutType.Flow,
+            layoutDirection = LayoutDirection.Column,
             rect = new UILayoutRect() {
                 x = new UIMeasurement(),
                 y = new UIMeasurement(),

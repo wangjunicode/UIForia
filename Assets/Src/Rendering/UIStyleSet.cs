@@ -106,6 +106,8 @@ namespace Rendering {
             }
         }
 
+        public bool ignoreLayout => false;
+        
         public UIMeasurement rectWidth {
             get {
                 UIStyle style = FindActiveStyle((s) => s.rect.width != UIStyle.UnsetMeasurementValue);
@@ -121,7 +123,10 @@ namespace Rendering {
         }
 
         public LayoutDirection layoutDirection {
-            get { return LayoutDirection.Column; }
+            get {
+                UIStyle style = FindActiveStyle((s) => s.layoutDirection != LayoutDirection.Unset);
+                return style != null ? style.layoutDirection : UIStyle.Default.layoutDirection;
+            }
         }
 
         public Color backgroundColor {

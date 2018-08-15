@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using Rendering;
 using UnityEngine;
@@ -6,72 +7,107 @@ namespace Src.Layout {
 
     public class FlowLayout : UILayout {
 
-        public override void Run(UIView view, Rect rect, UIElement element) {
-            if (element.style.layoutDirection == LayoutDirection.Column) {
-                RunLayoutVertical(view, rect, element);
-            }
-            else {
-                RunLayoutHorizontal(view, rect, element);
-            }
-        }
+        public override LayoutData Run(Rect viewport, LayoutData parentLayoutData, UIElement element) {
 
-        private void RunLayoutHorizontal(UIView view, Rect space, UIElement element) {
-            
-        }
+            LayoutData retn = new LayoutData(parentLayoutData, element.id);
 
-        
-        
-        private void RunLayoutVertical(UIView view, Rect viewSpaceContentRect, UIElement element) {
+            retn.relativeToWidth = element.style.rectWidth.unit;
+            retn.relativeToHeight = element.style.rectHeight.unit;
+
+            if ((retn.relativeToWidth & UIUnit.Fixed) != 0) {
+                retn.width = GetFixedWidth(viewport, element.style.rectWidth, retn.parent);
+            }
+
+            if ((retn.relativeToHeight & UIUnit.Fixed) != 0) {
+                retn.height = GetFixedHeight(viewport, element.style.rectHeight, retn.parent);
+            }
 
             List<UIElement> children = element.children;
+
+            float minX = 0;
+            float minY = 0;
+            float maxX = 0;
+            float maxY = 0;
+
+            float xOffset = 0;
             float yOffset = 0;
+
             for (int i = 0; i < children.Count; i++) {
                 UIElement child = children[i];
                 UILayout childLayout = child.style.layout;
-                float width = childLayout.GetLayoutWidth(child);
-                float height = childLayout.GetLayoutHeight(child);
 
-                Rect rect = new Rect();
-                
-                rect.x = 0f; // maybe just take rect.x from style
-                rect.y = yOffset;
-                rect.height = height;
-                rect.width = width;
+                LayoutData childLayoutData = childLayout.Run(viewport, retn, child);
 
-                yOffset -= height;
-                view.SetLayoutRect(child, rect);
+                if (retn.relativeToWidth == UIUnit.Content) {
+                    minX = Math.Min(minX, childLayoutData.x);
+                    maxX = Math.Max(maxX, childLayoutData.x);
+                }
+
+                if (retn.relativeToHeight == UIUnit.Content) {
+                    minY = Math.Min(minY, childLayoutData.y);
+                    maxY = Math.Max(maxY, childLayoutData.y);
+                }
+
+                if (!childLayoutData.isInFlow) continue;
+
+                if (element.style.layoutDirection == LayoutDirection.Column) {
+                    childLayoutData.y = yOffset;
+                    yOffset -= childLayoutData.height;
+                }
+                else {
+                    childLayoutData.x = xOffset;
+                    xOffset += childLayoutData.width;
+                }
+
             }
 
+            // todo -- set height / width if content relative
+
+            retn.isInFlow = !element.style.ignoreLayout;
+
+            return retn;
+
         }
 
-        public override float GetLayoutWidth(UIElement element) {
-            UIMeasurement width = element.style.rectWidth;
+        private float GetFixedWidth(Rect viewport, UIMeasurement width, LayoutData parent) {
+            switch (width.unit) {
 
-            return width.value;
+                case UIUnit.Pixel:
+                    return width.value;
+
+                case UIUnit.Content:
+                    throw new Exception("Bad");
+
+                case UIUnit.Parent:
+                    if (parent == null) {
+                        return 0f;
+                    }
+                    return parent.width * width.value;
+
+                case UIUnit.View:
+                    return viewport.width * width.value;
+            }
+
+            return 0;
         }
 
-        public override float GetLayoutHeight(UIElement element) {
-            UIMeasurement height = element.style.rectHeight;
+        private float GetFixedHeight(Rect viewport, UIMeasurement height, LayoutData parent) {
             switch (height.unit) {
 
                 case UIUnit.Pixel:
                     return height.value;
 
-                case UIUnit.Content: 
-                    return 0f;
+                case UIUnit.Content:
+                    throw new Exception("Bad");
 
                 case UIUnit.Parent:
-                    if (element.parent == null) {
+                    if (parent == null) {
                         return 0f;
                     }
-                    UIMeasurement parentHeight = element.parent.style.rectHeight;
-                    if (parentHeight.unit == UIUnit.Content) {
-                        return 0f;
-                    }
-                    return GetLayoutHeight(element.parent);
-                
+                    return parent.height * height.value;
+
                 case UIUnit.View:
-                    return 0f;
+                    return viewport.height * height.value;
             }
 
             return 0;

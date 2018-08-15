@@ -5,7 +5,10 @@ Shader "UI/Procedural UI Image"
 		[PerRendererData]_MainTex ("Base (RGB)", 2D) = "white" {}
 		_Width("width", float) = 100
 		_Height("height", float) = 100
+		_BorderWidth("borderWidth", float) = 0.1
 		_Radius("radius", Vector) = (0,0,0,0)
+		_ContentRect("contentRect", Vector) = (0, 0, 0, 0)
+		_ContentColor("contentColor", Color) = (1, 1, 1, 1)
 		_LineWeight("line weight", float) = 0
 		_PixelWorldScale("Pixel world scale", float) = 1
 		// required for UI.Mask
@@ -47,6 +50,8 @@ Shader "UI/Procedural UI Image"
 		Pass
 		{
 			CGPROGRAM
+// Upgrade NOTE: excluded shader from DX11; has structs without semantics (struct appdata_t members contenttrWorld,contentblWorld)
+#pragma exclude_renderers d3d11
 			#pragma vertex vert
 			#pragma fragment frag
 			//#pragma exclude_renderers gles3 metal d3d11_9x xbox360 xboxone ps3 ps4 psp2 
@@ -60,6 +65,7 @@ Shader "UI/Procedural UI Image"
 				float4 vertex   : POSITION;
 				float4 color    : COLOR;
 				float2 texcoord : TEXCOORD0;
+
 			};
 
 			struct v2f
@@ -68,6 +74,7 @@ Shader "UI/Procedural UI Image"
 				fixed4 color    : COLOR;
 				half2 texcoord  : TEXCOORD0;
 				float4 worldPosition : TEXCOORD1;
+
 			};
 			
 			fixed4 _TextureSampleAdd;
@@ -81,14 +88,19 @@ Shader "UI/Procedural UI Image"
 			half _Height;
 			half _PixelWorldScale;
 			half4 _Radius;
+			half4 _ContentColor;
+			half4 _ContentRect;
 			half _LineWeight;
+			float _BorderWidth;
 			sampler2D _MainTex;
 			
 			v2f vert(appdata_t IN){
 				v2f OUT;
 				OUT.worldPosition = IN.vertex;
 				OUT.vertex = UnityObjectToClipPos(OUT.worldPosition);
-				OUT.texcoord = IN.texcoord*float2(_Width,_Height);
+				_Width = _Width - 1;
+				_Height = _Height - 1;
+				OUT.texcoord = IN.texcoord * float2(_Width, _Height);
 				#ifdef UNITY_HALF_TEXEL_OFFSET
 				OUT.vertex.xy += (_ScreenParams.zw-1.0)*float2(-1,1);
 				#endif
@@ -105,24 +117,55 @@ Shader "UI/Procedural UI Image"
 				v = any(b)*min(min(min(foo.x,foo.y),foo.z),foo.w)+v*(1-any(b));
 				return v;
 			}
-
-			fixed4 frag (v2f IN) : SV_Target
-			{
+			
+			half insideRect(float2 input, half2 topRight, half2 bottomLeft) {
+			    half2 retn = step(bottomLeft, input) - step(topRight, input);
+			    return retn.x * retn.y;
+			}
+			
+			fixed4 frag (v2f IN) : SV_Target {
 				half4 color = IN.color;
-
-				if (_UseClipRect)
-					color *= UnityGet2DClipping(IN.worldPosition.xy, _ClipRect);
-				
-				if (_UseAlphaClip)
-					clip (color.a - 0.001);
-				if(_LineWeight>0){
-					half l = (_LineWeight+1/_PixelWorldScale)/2;
-					color.a *= saturate((l-distance(visible(IN.texcoord,_Radius),l))*_PixelWorldScale);
-				}
-				else{
-					color.a *= saturate(visible(IN.texcoord,_Radius)*_PixelWorldScale);
-				}
-				return color;
+//                half2 topRight = half2(_ContentRect.x + _ContentRect.z, _ContentRect.y);
+//                half2 bottomLeft = half2(_ContentRect.y + _ContentRect.w, _ContentRect.x);
+//                half insideContentRect = insideRect(IN.worldPosition.xy, topRight, bottomLeft);
+////                half minX = _ContentRect.x;
+////                half minY = minX;
+////                half maxX = 1 - 5;
+////                
+//               
+//               if(insideContentRect) {
+//                    color = _ContentColor;
+//                }
+//                
+                half2 texCoord = IN.texcoord;
+                float maxX = 95;//1 - _BorderWidth;
+                float minX = 5; //_BorderWidth;
+                float minY = 5;//minX / (_Width / _Height);
+                float maxY = 95;//maxX / (_Width / _Height);
+                
+                if(texCoord.x < maxX && texCoord.x >= minX && texCoord.y < maxY && texCoord.y > minY) {
+                    color = _ContentColor;
+                }
+                else {
+                    color = half4(0, 0, 0, 1);
+                }
+                return color;
+//                
+//				if (_UseClipRect)
+//					color *= UnityGet2DClipping(IN.worldPosition.xy, _ClipRect);
+//				
+//				if (_UseAlphaClip)
+//					//clip (color.a - 0.001);
+//					
+//				if(_LineWeight>0){
+//					half l = (_LineWeight+1/_PixelWorldScale)/2;
+//					color.a *= saturate((l-distance(visible(IN.texcoord,_Radius),l))*_PixelWorldScale);
+//				}
+//				else{
+//					color.a *= saturate(visible(IN.texcoord,_Radius)*_PixelWorldScale);
+//				}
+//				
+//				return color;
 			}
 			ENDCG
 		}

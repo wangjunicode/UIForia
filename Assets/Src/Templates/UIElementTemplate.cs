@@ -7,9 +7,8 @@ namespace Src {
         private Binding[] bindings;
 
         public override UIElement CreateScoped(TemplateScope scope) {
-
             List<UIElement> scopedChildren = new List<UIElement>(childTemplates.Count);
-            
+
             for (int i = 0; i < childTemplates.Count; i++) {
                 UIElement child = childTemplates[i].CreateScoped(scope);
                 if (child != null) {
@@ -18,20 +17,19 @@ namespace Src {
             }
 
             ParsedTemplate templateToExpand = TemplateParser.GetParsedTemplate(processedElementType);
-      
+
             TemplateContext context = new TemplateContext(scope.view);
 
             TemplateScope outputScope = new TemplateScope();
-            
+
             outputScope.context = context;
             outputScope.inputChildren = scopedChildren;
             outputScope.view = scope.view;
-            outputScope.styleTemplates = templateToExpand.styles;
-            
+
             UIElement instance = templateToExpand.CreateWithScope(outputScope);
-            
+
             ApplyStyles(instance, scope);
-            
+
             context.rootElement = instance;
 
             if (bindings != null && bindings.Length > 0) {
@@ -40,21 +38,30 @@ namespace Src {
 
             return instance;
         }
-        
-        public bool Compile(ContextDefinition context) {
+
+        public override bool Compile(ParsedTemplate template) {
+            if (!base.Compile(template)) {
+                return false;
+            }
+
             if (bindings != null) return true;
 
             if (attributes == null) {
                 return true;
             }
-            
-            bindings = new Binding[attributes.Count];
+
+            List<Binding> bindingList = new List<Binding>();
 
             for (int i = 0; i < attributes.Count; i++) {
                 AttributeDefinition attr = attributes[i];
-                bindings[i] = BindingGenerator.GenerateFromAttribute(context, attr);
+                
+                if(attr.key.StartsWith("style")) continue;
+                
+                bindingList.Add(BindingGenerator.GenerateFromAttribute(template.contextDefinition, attr));
             }
 
+            bindings = bindingList.ToArray();
+            
             return true;
         }
 

@@ -20,11 +20,9 @@ public class UIElement : IHierarchical {
     public UIElement parent;
     public List<UIElement> children;
     [UsedImplicitly] public UIStyleSet style;
-    public UITransform transform;
 
     public UIElement() {
         id = UIView.NextElementId;
-        transform = new UITransform(null, null);
     }
 
     public virtual void Initialize() { }

@@ -9,13 +9,11 @@ namespace Src {
         public Type type;
         public string filePath;
         public UIElementTemplate rootElement;
-        public List<StyleTemplate> styles;
+        public List<UIStyle> styles;
         public List<ImportDeclaration> imports;
         public ContextDefinition contextDefinition;
-        public Dictionary<string, UIElement> slotMap;
 
-        public bool isCompiled;
-        public bool isSuccessfullyCompiled;
+        private bool isCompiled;
 
         public List<UITemplate> childTemplates => rootElement.childTemplates;
         public Type ElementType => rootElement.ElementType;
@@ -23,7 +21,6 @@ namespace Src {
         private static readonly List<UIElement> EmptyElementList = new List<UIElement>(0);
 
         public UIElement CreateWithScope(TemplateScope scope) {
-
             if (!isCompiled) Compile();
 
             UIElement instance = (UIElement) Activator.CreateInstance(rootElement.processedElementType.type);
@@ -42,18 +39,28 @@ namespace Src {
             rootElement.ApplyStyles(instance, scope);
 
             return instance;
-
         }
 
-        public bool Compile() {
-            if (isCompiled) return isSuccessfullyCompiled;
+        private void Compile() {
+            if (isCompiled) return;
+            
+            Stack<UITemplate> stack = new Stack<UITemplate>();
+            
+            stack.Push(rootElement);
+            
+            while (stack.Count > 0) {
+                UITemplate template = stack.Pop();
+                template.CompileStyles(this);
+                template.Compile(this);
+                for (int i = 0; i < template.childTemplates.Count; i++) {
+                    stack.Push(template.childTemplates[i]);
+                }
+            }
+
             isCompiled = true;
-            isSuccessfullyCompiled = rootElement.Compile(contextDefinition);
-            return isSuccessfullyCompiled;
         }
 
         public UIElement CreateWithoutScope(UIView view, List<UIElement> inputChildren = null) {
-
             if (!isCompiled) Compile();
 
             TemplateContext context = new TemplateContext(view);
@@ -62,7 +69,6 @@ namespace Src {
             scope.view = view;
             scope.context = context;
             scope.inputChildren = inputChildren ?? EmptyElementList;
-            scope.styleTemplates = styles;
 
             UIElement root = (UIElement) Activator.CreateInstance(rootElement.processedElementType.type);
             root.children = new List<UIElement>();
@@ -78,9 +84,12 @@ namespace Src {
             return root;
         }
 
-        private StyleTemplate GetStyleTemplate(string id) {
+        public UIStyle GetStyleInstance(string styleName) {
+            // todo handle searching imports
             for (int i = 0; i < styles.Count; i++) {
-                if (styles[i].id == id) return styles[i];
+                if (styles[i].localId == styleName) {
+                    return styles[i];
+                }
             }
 
             return null;

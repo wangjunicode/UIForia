@@ -21,6 +21,12 @@ namespace Src {
 
         }
 
+        public void RefreshView() {
+            if (view != null) {
+                view.Refresh();
+            }
+        }
+        
         public void Update() {
             view.Update();
         }

@@ -100,7 +100,7 @@ namespace Rendering {
         }
 #endif
         /// <summary>
-        /// Generates the Verticies needed.
+        /// Generates the Vertices needed.
         /// </summary>
         /// <param name="vh">vertex helper</param>
         void GenerateSimpleSprite(VertexHelper vh) {

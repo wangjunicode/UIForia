@@ -1,7 +1,5 @@
-﻿using System;
-using Src;
+﻿using Src;
 using NUnit.Framework;
-using UnityEngine;
 
 [TestFixture]
 public class ParsingTests {
@@ -55,7 +53,7 @@ public class ParsingTests {
             TemplateParser.ParseTemplateFromString<Spec.Test1>(@"
                 <UITemplate>
                     <Contents>
-                        <Repeat>
+                        <Repeat list='{null}'>
                             <Children/>
                         </Repeat>
                     </Contents>
@@ -85,7 +83,7 @@ public class ParsingTests {
             TemplateParser.ParseTemplateFromString<Spec.Test1>(@"
                 <UITemplate>
                     <Contents>
-                        <Switch>
+                        <Switch value='1'>
                             text                                        
                         </Switch>
                     </Contents>
@@ -101,7 +99,7 @@ public class ParsingTests {
             TemplateParser.ParseTemplateFromString<Spec.Test1>(@"
                 <UITemplate>
                     <Contents>
-                        <Switch>
+                        <Switch value='1'>
                             <Default>text1</Default>                                        
                             <Default>text2</Default>                                        
                         </Switch>
@@ -118,7 +116,7 @@ public class ParsingTests {
             TemplateParser.ParseTemplateFromString<Spec.Test1>(@"
                 <UITemplate>
                     <Contents>
-                        <Switch>
+                        <Switch value='1'>
                             <Case when='1'>text1</Case>                                        
                             <Case when='2'>text2</Case>                                        
                         </Switch>
@@ -134,7 +132,7 @@ public class ParsingTests {
             TemplateParser.ParseTemplateFromString<Spec.Test1>(@"
                 <UITemplate>
                     <Contents>
-                        <Switch>
+                        <Switch value='1'>
                             <Default>text1</Default>                                        
                         </Switch>
                     </Contents>
@@ -149,7 +147,7 @@ public class ParsingTests {
             TemplateParser.ParseTemplateFromString<Spec.Test1>(@"
                 <UITemplate>
                     <Contents>
-                        <Switch>
+                        <Switch value='1'>
                                                                   
                         </Switch>
                     </Contents>
@@ -165,7 +163,7 @@ public class ParsingTests {
             TemplateParser.ParseTemplateFromString<Spec.Test1>(@"
                 <UITemplate>
                     <Contents>
-                        <Switch>
+                        <Switch value='1'>
                             <Case>text1</Case>                                        
                             <Case when='2'>text2</Case>                                        
                         </Switch>

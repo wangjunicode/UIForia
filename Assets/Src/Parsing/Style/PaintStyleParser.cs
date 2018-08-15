@@ -1,4 +1,5 @@
 using System.Xml.Linq;
+using Rendering;
 using Src.Style;
 using UnityEngine;
 
@@ -6,7 +7,7 @@ namespace Src.Parsing.Style {
 
     public static class PaintStyleParser {
 
-        public static void ParseStyle(XElement element, StyleTemplate template) {
+        public static void ParseStyle(XElement element, UIStyle template) {
             if (element == null) return;
 
             XElement backgroundColor = element.GetChild("BackgroundColor");
@@ -14,15 +15,15 @@ namespace Src.Parsing.Style {
             XElement borderColor = element.GetChild("BorderColor");
 
             if (backgroundColor != null) {
-                template.backgroundColor = StyleParseUtil.ParseColor(element.GetAttribute("value").Value);
+                template.paint.backgroundColor = StyleParseUtil.ParseColor(element.GetAttribute("value").Value);
             }
 
             if (backgroundImage != null) {
-                template.backgroundImage = ParseResourcePath(element.GetAttribute("value").Value);
+                template.paint.backgroundImage = ParseResourcePath(element.GetAttribute("value").Value);
             }
 
             if (borderColor != null) {
-                template.borderColor = StyleParseUtil.ParseColor(element.GetAttribute("value").Value);
+                template.paint.borderColor = StyleParseUtil.ParseColor(element.GetAttribute("value").Value);
             }
         }
 

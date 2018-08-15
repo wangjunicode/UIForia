@@ -14,6 +14,7 @@ namespace Src.Parsing.Style {
             if (values.Length != 2) {
                 throw new Exception("Unable to parse Vector2: " + input);
             }
+
             return new Vector2(
                 float.Parse(values[0]),
                 float.Parse(values[1])
@@ -65,31 +66,39 @@ namespace Src.Parsing.Style {
 
         public static Color ParseColor(string input) {
             Color retn = new Color();
-            input = input.Replace(" ", string.Empty);
+            ParseColor(ref retn, input);
+            return retn;
+        }
 
+        public static void ParseColor(ref Color color, XElement element) {
+            if (element == null) return;
+            ParseColor(ref color, element.GetAttribute("value").Value);
+        }
+
+        public static void ParseColor(ref Color color, string input) {
+            input = input.Replace(" ", string.Empty);
+            input = input.Replace(")", string.Empty);
             if (input.StartsWith("rgb(")) {
                 string[] values = input.Substring(4).Split(',');
                 if (values.Length == 3) {
-                    retn.r = Mathf.Clamp(float.Parse(values[0]), 0, 255);
-                    retn.g = Mathf.Clamp(float.Parse(values[1]), 0, 255);
-                    retn.b = Mathf.Clamp(float.Parse(values[2]), 0, 255);
-                    retn.a = 1f;
+                    color.r = Mathf.Clamp(float.Parse(values[0]), 0, 255);
+                    color.g = Mathf.Clamp(float.Parse(values[1]), 0, 255);
+                    color.b = Mathf.Clamp(float.Parse(values[2]), 0, 255);
+                    color.a = 1f;
                 }
             }
             else if (input.StartsWith("rgba(")) {
                 string[] values = input.Substring(5).Split(',');
                 if (values.Length == 4) {
-                    retn.r = Mathf.Clamp(float.Parse(values[0]), 0, 255);
-                    retn.g = Mathf.Clamp(float.Parse(values[1]), 0, 255);
-                    retn.b = Mathf.Clamp(float.Parse(values[2]), 0, 255);
-                    retn.a = Mathf.Clamp(float.Parse(values[3]), 0, 255);
+                    color.r = Mathf.Clamp(float.Parse(values[0]), 0, 255);
+                    color.g = Mathf.Clamp(float.Parse(values[1]), 0, 255);
+                    color.b = Mathf.Clamp(float.Parse(values[2]), 0, 255);
+                    color.a = Mathf.Clamp(float.Parse(values[3]), 0, 255);
                 }
             }
             else {
                 throw new Exception("Cannot parse color: " + input);
             }
-
-            return retn;
         }
 
         public static UIMeasurement ParseMeasurement(string value) {

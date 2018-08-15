@@ -29,28 +29,24 @@ namespace Rendering {
             renderQueue = new List<UIElement>();
         }
 
+        public void Refresh() {
+
+            foreach (KeyValuePair<int, GameObject> go in gameObjects) {
+                UnityEngine.Object.Destroy(go.Value);
+            }
+            
+            gameObjects.Clear();
+            renderQueue.Clear();
+//            bindingSkipTree = new SkipTree<TemplateBinding>();
+            
+            root = TemplateParser.GetParsedTemplate(templateType, true).CreateWithoutScope(this);
+            InitializeElements();
+        }
+
         public void OnCreate() {
             root = TemplateParser.GetParsedTemplate(templateType).CreateWithoutScope(this);
             rectTransform = gameObject.transform as RectTransform;
-            
-            UIElement.Traverse(root, (element) => {
-
-                UITextElement textElement = element as UITextElement;
-
-                if (textElement != null) {
-                    CreateTextPrimitive(textElement);
-                }
-                // todo -- skip tree for render nodes?
-                // todo -- debug view for tree?
-                else if (element.style.RequiresRendering()) {
-                    CreateImagePrimitive(element);
-                }
-                else if (element is UIRepeatElement) {
-                    // create children based on bindings
-                }
-
-            });
-
+            InitializeElements();
         }
 
         public void Update() {
@@ -64,6 +60,26 @@ namespace Rendering {
             HandleMouseEvents();
         }
 
+        private void InitializeElements() {
+            UIElement.Traverse(root, (element) => {
+
+                UITextElement textElement = element as UITextElement;
+
+                if (textElement != null) {
+                    CreateTextPrimitive(textElement);
+                }
+                // todo -- skip tree for render nodes?
+                // todo -- debug view for tree?
+                else if (true)  {//element.style.RequiresRendering()) {
+                    CreateImagePrimitive(element);
+                }
+                else if (element is UIRepeatElement) {
+                    // create children based on bindings
+                }
+
+            });
+        }
+        
         private void HandleRenderUpdates() {
             for (int i = 0; i < renderQueue.Count; i++) {
                 UIElement element = renderQueue[i];
@@ -127,19 +143,6 @@ namespace Rendering {
 //            }
         }
 
-        /*
-         * need to handle changes in the ancestry
-         * when a text style changes
-         * traverse the tree from that node downwards
-         *  if a child node was listening to parent node move the pointer
-         *
-         *
-         *  a text style higher up can change causing children to re-calculate
-         *  a text style on 'this' node can change
-         *
-         *  
-         */
-
         public TextStyle GetFontSettings(UIElement element) {
             TextStyle retn = new TextStyle();
 
@@ -191,6 +194,7 @@ namespace Rendering {
             GameObject obj = GetOrCreateGameObject(element);
             ProceduralImage imageComponent = obj.AddComponent<ProceduralImage>();
             UnityImagePrimitive imagePrimitive = new UnityImagePrimitive(imageComponent);
+            imageComponent.color = element.style.backgroundColor;
             return imagePrimitive;
         }
 
@@ -199,8 +203,8 @@ namespace Rendering {
         }
 
         public void RegisterBindings(UIElement element, Binding[] bindings, TemplateContext context) {
-            if (bindings.Length == 0) return;
-            bindingSkipTree.AddItem(new TemplateBinding(element, bindings, context));
+//            if (bindings.Length == 0) return;
+//            bindingSkipTree.AddItem(new TemplateBinding(element, bindings, context));
         }
 
         public void SetEnabled(UIElement element, bool isEnabled) {

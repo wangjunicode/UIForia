@@ -16,7 +16,7 @@ namespace Src {
             // {this.someobject.list}
             // Getter("someobject", Getter("list"));
             ExpressionEvaluator listGetter = BindingGenerator.Generate(contextDefinitions[0],
-                attributes.Find((a) => a.name == "list").bindingExpression);
+                attributes.Find((a) => a.key == "list").bindingExpression);
 
             bindings = new Binding[] {
                // new RepeatEnterBinding()

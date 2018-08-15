@@ -5,9 +5,6 @@ public class ContentBox {
     public ContentBoxRect margin;
     public ContentBoxRect padding;
 
-    public float contentWidth;
-    public float contentHeight;
-
 //    public float GetContentWidth() {
 //        return Mathf.Min(0, contentWidth - (border.horizontal + margin.horizontal + padding.horizontal));
 //    }
@@ -25,5 +22,13 @@ public class ContentBox {
 //        totalHeight = height - (border.vertical + margin.vertical + padding.vertical);
 //        return totalHeight;
 //    }
+
+    public ContentBox Clone() {
+        ContentBox clone = new ContentBox();
+        clone.border = border;
+        clone.margin = margin;
+        clone.padding = padding;
+        return clone;
+    }
 
 }

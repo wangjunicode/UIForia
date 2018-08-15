@@ -12,13 +12,14 @@ namespace Rendering {
 
         private UIView view;
         private UIElement element;
+        private int baseCounter;
 
         public UIStyleSet(UIElement element, UIView view) {
             currentStateType = StyleStateType.Normal;
             this.element = element;
             this.view = view;
             stylePairs = new StyleFlagPair[1];
-            stylePairs[0] = new StyleFlagPair(new UIStyle(), StyleStateType.InstanceNormal);
+            stylePairs[0] = new StyleFlagPair(new UIStyle(), StyleStateType.InstanceNormal, -1);
         }
 
         public UIStyleProxy hover {
@@ -68,32 +69,30 @@ namespace Rendering {
             for (int i = 0; i < stylePairs.Length; i++) {
                 StyleStateType target = stylePairs[i].checkFlag & state;
                 if ((target == state)) {
-                    stylePairs[i] = new StyleFlagPair(style, state);
+                    stylePairs[i] = new StyleFlagPair(style, state, -1);
                     stylePairs[i].style.onChange -= OnStyleChanged;
                     style.onChange += OnStyleChanged; // todo only if new
                     return;
                 }
             }
+
             style.onChange += OnStyleChanged;
             Array.Resize(ref stylePairs, stylePairs.Length + 1);
-            stylePairs[stylePairs.Length - 1] = new StyleFlagPair(style, state);
-            Array.Sort(stylePairs, (a, b) => {
-                return (int) a.checkFlag > (int) b.checkFlag ? 1 : -1;
-            });
+            stylePairs[stylePairs.Length - 1] = new StyleFlagPair(style, state, -1);
+            SortStyles();
         }
 
-        public void AddBaseStyle(UIStyle style, StyleStateType stateType = StyleStateType.Normal) { }
+        public void AddBaseStyle(UIStyle style, StyleStateType state = StyleStateType.Normal) {
+            state &= ~(StyleStateType.Instance);
+            state |= StyleStateType.Base;
+            // todo -- check for duplicates
+            Array.Resize(ref stylePairs, stylePairs.Length + 1);
+            stylePairs[stylePairs.Length - 1] = new StyleFlagPair(style, state, baseCounter++);
+            SortStyles();
+        }
 
-        public int baseStyleCount {
-            get {
-                int retn = 0;
-                for (int i = 0; i < stylePairs.Length; i++) {
-                    if ((stylePairs[i].checkFlag & StyleStateType.Base) != 0) {
-                        retn++;
-                    }
-                }
-                return retn;
-            }
+        private void SortStyles() {
+            Array.Sort(stylePairs, (a, b) => a.SortPriority > b.SortPriority ? -1 : 1);
         }
 
         public UILayout layout {
@@ -128,7 +127,7 @@ namespace Rendering {
         public Color backgroundColor {
             get {
                 UIStyle style = FindActiveStyle((s) => s.paint.backgroundColor != UIStyle.UnsetColorValue);
-                return style != null ? style.paint.backgroundColor : UIStyle.UnsetColorValue;
+                return style != null ? style.paint.backgroundColor : UIStyle.Default.paint.backgroundColor;
             }
             set {
                 SetBackgroundColorForState(StyleStateType.InstanceNormal, value);
@@ -139,7 +138,7 @@ namespace Rendering {
         public Texture2D backgroundImage {
             get {
                 UIStyle style = FindActiveStyle((s) => s.paint.backgroundImage != null);
-                return style != null ? style.paint.backgroundImage : null;
+                return style != null ? style.paint.backgroundImage : UIStyle.Default.paint.backgroundImage;
             }
             set {
                 SetBackgroundImageForState(StyleStateType.InstanceNormal, value);
@@ -150,7 +149,7 @@ namespace Rendering {
         public Color borderColor {
             get {
                 UIStyle style = FindActiveStyle((s) => s.paint.borderColor != UIStyle.UnsetColorValue);
-                return style != null ? style.paint.borderColor : UIStyle.UnsetColorValue;
+                return style != null ? style.paint.borderColor : UIStyle.Default.paint.borderColor;
             }
             set {
                 SetBackgroundColorForState(StyleStateType.InstanceNormal, value);
@@ -169,28 +168,28 @@ namespace Rendering {
                 return style != null ? style.contentBox.margin.left : UIStyle.Default.contentBox.margin.left;
             }
         }
-        
+
         public float marginRight {
             get {
                 UIStyle style = FindActiveStyle((s) => s.contentBox.margin.right != UIStyle.UnsetFloatValue);
                 return style != null ? style.contentBox.margin.right : UIStyle.Default.contentBox.margin.right;
             }
         }
-        
+
         public float marginTop {
             get {
                 UIStyle style = FindActiveStyle((s) => s.contentBox.margin.top != UIStyle.UnsetFloatValue);
                 return style != null ? style.contentBox.margin.top : UIStyle.Default.contentBox.margin.top;
             }
         }
-        
+
         public float marginBottom {
             get {
                 UIStyle style = FindActiveStyle((s) => s.contentBox.margin.bottom != UIStyle.UnsetFloatValue);
                 return style != null ? style.contentBox.margin.bottom : UIStyle.Default.contentBox.margin.bottom;
             }
         }
-        
+
         public ContentBoxRect padding {
             get { return new ContentBoxRect(paddingTop, paddingRight, paddingBottom, paddingLeft); }
             //set { SetPaddingForState(StyleStateType.InstanceNormal, value); }
@@ -202,30 +201,30 @@ namespace Rendering {
                 return style != null ? style.contentBox.padding.left : UIStyle.Default.contentBox.padding.left;
             }
         }
-        
+
         public float paddingRight {
             get {
                 UIStyle style = FindActiveStyle((s) => s.contentBox.padding.right != UIStyle.UnsetFloatValue);
                 return style != null ? style.contentBox.padding.right : UIStyle.Default.contentBox.padding.right;
             }
         }
-        
+
         public float paddingTop {
             get {
                 UIStyle style = FindActiveStyle((s) => s.contentBox.padding.top != UIStyle.UnsetFloatValue);
                 return style != null ? style.contentBox.padding.top : UIStyle.Default.contentBox.padding.top;
             }
         }
-        
+
         public float paddingBottom {
             get {
                 UIStyle style = FindActiveStyle((s) => s.contentBox.padding.bottom != UIStyle.UnsetFloatValue);
                 return style != null ? style.contentBox.padding.bottom : UIStyle.Default.contentBox.padding.bottom;
             }
         }
-        
+
         public ContentBoxRect border {
-            get {return new ContentBoxRect(borderTop, borderRight, borderBottom, borderLeft); }
+            get { return new ContentBoxRect(borderTop, borderRight, borderBottom, borderLeft); }
 //            set { SetBorderForState(StyleStateType.InstanceNormal, value); }
         }
 
@@ -235,43 +234,43 @@ namespace Rendering {
                 return style != null ? style.contentBox.border.left : UIStyle.Default.contentBox.border.left;
             }
         }
-        
+
         public float borderRight {
             get {
                 UIStyle style = FindActiveStyle((s) => s.contentBox.border.right != UIStyle.UnsetFloatValue);
                 return style != null ? style.contentBox.border.right : UIStyle.Default.contentBox.border.right;
             }
         }
-        
+
         public float borderTop {
             get {
                 UIStyle style = FindActiveStyle((s) => s.contentBox.border.top != UIStyle.UnsetFloatValue);
                 return style != null ? style.contentBox.border.top : UIStyle.Default.contentBox.border.top;
             }
         }
-        
+
         public float borderBottom {
             get {
                 UIStyle style = FindActiveStyle((s) => s.contentBox.border.bottom != UIStyle.UnsetFloatValue);
                 return style != null ? style.contentBox.border.bottom : UIStyle.Default.contentBox.border.bottom;
             }
         }
-        
-        public float contentWidth {
-            get {
-                UIStyle style = FindActiveStyle((s) => s.contentBox.contentWidth != UIStyle.UnsetFloatValue);
-                return style != null ? style.contentBox.contentWidth : UIStyle.UnsetFloatValue;
-            }
-            set { SetContentWidthForState(StyleStateType.InstanceNormal, value); }
-        }
 
-        public float contentHeight {
-            get {
-                UIStyle style = FindActiveStyle((s) => s.contentBox.contentHeight != UIStyle.UnsetFloatValue);
-                return style != null ? style.contentBox.contentHeight : UIStyle.UnsetFloatValue;
-            }
-            set { SetContentHeightForState(StyleStateType.InstanceNormal, value); }
-        }
+//        public float contentWidth {
+//            get {
+//                UIStyle style = FindActiveStyle((s) => s.contentBox.contentWidth != UIStyle.UnsetFloatValue);
+//                return style != null ? style.contentBox.contentWidth : UIStyle.UnsetFloatValue;
+//            }
+//            set { SetContentWidthForState(StyleStateType.InstanceNormal, value); }
+//        }
+//
+//        public float contentHeight {
+//            get {
+//                UIStyle style = FindActiveStyle((s) => s.contentBox.contentHeight != UIStyle.UnsetFloatValue);
+//                return style != null ? style.contentBox.contentHeight : UIStyle.UnsetFloatValue;
+//            }
+//            set { SetContentHeightForState(StyleStateType.InstanceNormal, value); }
+//        }
 
         private UIStyle GetStyleForState(StyleStateType state) {
             // only return instance styles
@@ -283,6 +282,7 @@ namespace Rendering {
                     return style;
                 }
             }
+
             return null;
         }
 
@@ -294,6 +294,7 @@ namespace Rendering {
                     }
                 }
             }
+
             return null;
         }
 
@@ -343,23 +344,23 @@ namespace Rendering {
             return (style != null) ? style.contentBox.padding : UIStyle.UnsetRectValue;
         }
 
-        public float GetContentWidthForState(StyleStateType state) {
-            UIStyle style = GetStyleForState(state);
-            return (style != null) ? style.contentBox.contentWidth : UIStyle.UnsetFloatValue;
-        }
-
-        public void SetContentWidthForState(StyleStateType state, float value) {
-            GetOrCreateStyleForState(state).contentBox.contentWidth = value;
-        }
-
-        public float GetContentHeightForState(StyleStateType state) {
-            UIStyle style = GetStyleForState(state);
-            return (style != null) ? style.contentBox.contentHeight : UIStyle.UnsetFloatValue;
-        }
-
-        public void SetContentHeightForState(StyleStateType state, float value) {
-            GetOrCreateStyleForState(state).contentBox.contentHeight = value;
-        }
+//        public float GetContentWidthForState(StyleStateType state) {
+//            UIStyle style = GetStyleForState(state);
+//            return (style != null) ? style.contentBox.contentWidth : UIStyle.UnsetFloatValue;
+//        }
+//
+//        public void SetContentWidthForState(StyleStateType state, float value) {
+//            GetOrCreateStyleForState(state).contentBox.contentWidth = value;
+//        }
+//
+//        public float GetContentHeightForState(StyleStateType state) {
+//            UIStyle style = GetStyleForState(state);
+//            return (style != null) ? style.contentBox.contentHeight : UIStyle.UnsetFloatValue;
+//        }
+//
+//        public void SetContentHeightForState(StyleStateType state, float value) {
+//            GetOrCreateStyleForState(state).contentBox.contentHeight = value;
+//        }
 
         public void SetBorderForState(StyleStateType state, ContentBoxRect border) {
             GetOrCreateStyleForState(state).contentBox.border = border;
@@ -380,9 +381,9 @@ namespace Rendering {
         }
 
         public bool RequiresRendering() {
-            return backgroundColor    != UIStyle.UnsetColorValue
+            return backgroundColor != UIStyle.UnsetColorValue
                    && backgroundImage != null
-                   && borderColor     != UIStyle.UnsetColorValue;
+                   && borderColor != UIStyle.UnsetColorValue;
         }
 
         private void OnStyleChanged(UIStyle style) { }
@@ -424,15 +425,15 @@ namespace Rendering {
                 set { styleSet.SetPaddingForState(stateType, value); }
             }
 
-            public float contentWidth {
-                get { return styleSet.GetContentWidthForState(stateType); }
-                set { styleSet.SetContentWidthForState(stateType, value); }
-            }
-
-            public float contentHeight {
-                get { return styleSet.GetContentHeightForState(stateType); }
-                set { styleSet.SetContentHeightForState(stateType, value); }
-            }
+//            public float contentWidth {
+//                get { return styleSet.GetContentWidthForState(stateType); }
+//                set { styleSet.SetContentWidthForState(stateType, value); }
+//            }
+//
+//            public float contentHeight {
+//                get { return styleSet.GetContentHeightForState(stateType); }
+//                set { styleSet.SetContentHeightForState(stateType, value); }
+//            }
 
             public ContentBoxRect border {
                 get { return styleSet.GetBorderForState(stateType); }
@@ -451,10 +452,49 @@ namespace Rendering {
 
             public readonly UIStyle style;
             public readonly StyleStateType checkFlag;
+            private readonly int styleNumber;
 
-            public StyleFlagPair(UIStyle style, StyleStateType checkFlag) {
+            public StyleFlagPair(UIStyle style, StyleStateType checkFlag, int styleNumber) {
                 this.style = style;
                 this.checkFlag = checkFlag;
+                this.styleNumber = styleNumber;
+            }
+
+            public int SortPriority {
+                get {
+                    int retn = 0;
+
+                    if ((checkFlag & StyleStateType.Instance) != 0) {
+                        retn += 1000;
+                    }
+
+                    else {
+                        retn += styleNumber;
+                    }
+
+                    if ((checkFlag & StyleStateType.IsState) != 0) {
+                        retn += 500;
+
+                        if ((checkFlag & StyleStateType.Hover) != 0) {
+                            retn += 50;
+                        }
+
+                        else if ((checkFlag & StyleStateType.Active) != 0) {
+                            retn += 40;
+                        }
+
+                        else if ((checkFlag & StyleStateType.Disabled) != 0) {
+                            retn += 30;
+                        }
+
+                        else if ((checkFlag & StyleStateType.Focused) != 0) {
+                            retn += 20;
+                        }
+                    }
+
+
+                    return retn;
+                }
             }
 
         }

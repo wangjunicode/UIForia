@@ -5,6 +5,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Runtime.Remoting.Messaging;
 using System.Xml.Linq;
+using Rendering;
 using Src.Parsing.Style;
 using Src.Style;
 using UnityEngine;
@@ -61,14 +62,15 @@ namespace Src {
             return new TemplateParser().ParseTemplate(processedType, doc);
         }
 
-        private StyleTemplate ParseStyleSheet(XElement root) {
-            StyleTemplate styleTemplate = new StyleTemplate();
-            TextStyleParser.ParseStyle(root.GetChild("Text"), styleTemplate);
-            PaintStyleParser.ParseStyle(root.GetChild("Paint"), styleTemplate);
-            AnimationStyleParser.ParseStyle(root.GetChild("Animations"), styleTemplate);
-            SizeStyleParser.ParseStyle(root.GetChild("Size"), styleTemplate);
-            LayoutStyleParser.ParseStyle(root, styleTemplate);
-            LayoutItemStyleParser.ParseStyle(root.GetChild("LayoutItem"), styleTemplate);
+        private UIStyle ParseStyleSheet(XElement styleElement) {
+            XAttribute idAttr = styleElement.GetAttribute("id");
+            
+            if (idAttr == null || string.IsNullOrEmpty(idAttr.Value)) {
+                throw new InvalidTemplateException(TemplateName, "Style tags require an 'id' attribute");
+            }
+            
+            UIStyle styleTemplate = new UIStyle(idAttr.Value.Trim(), TemplateName);
+            StyleParser.ParseStyle(styleElement, styleTemplate);
             return styleTemplate;
         }
 
@@ -78,7 +80,7 @@ namespace Src {
             doc.MergeTextNodes();
 
             List<ImportDeclaration> imports = new List<ImportDeclaration>();
-            List<StyleTemplate> styleTemplates = new List<StyleTemplate>();
+            List<UIStyle> styleTemplates = new List<UIStyle>();
 
             IEnumerable<XElement> importElements = doc.Root.GetChildren("Import");
             foreach (var xElement in importElements) {
@@ -98,23 +100,12 @@ namespace Src {
 
             IEnumerable<XElement> styleElements = doc.Root.GetChildren("Style");
             foreach (var styleElement in styleElements) {
-                XAttribute idAttr = styleElement.GetAttribute("id");
-                XAttribute extendsAttr = styleElement.GetAttribute("extends");
-                XAttribute fromAttr = styleElement.GetAttribute("from");
-
-                if (idAttr == null || string.IsNullOrEmpty(idAttr.Value)) {
-                    throw new InvalidTemplateException(TemplateName, "Style tags require an 'id' attribute");
-                }
-
-                if (styleTemplates.Find((t) => t.id == idAttr.Value.Trim()) != null) {
-                    throw new InvalidTemplateException(TemplateName, "Style tags must have a unique id");
-                }
-
-                StyleTemplate styleTemplate = ParseStyleSheet(styleElement);
-                styleTemplate.id = idAttr.Value.Trim();
-                styleTemplate.extendsId = extendsAttr?.Value.Trim();
-                styleTemplate.extendsPath = fromAttr?.Value.Trim();
+              
+                // todo -- return a list of UIStyles and flags for their state
+                UIStyle styleTemplate = ParseStyleSheet(styleElement);
+                
                 styleTemplates.Add(styleTemplate);
+                
             }
 
             XElement contentElement = doc.Root.GetChild("Contents");

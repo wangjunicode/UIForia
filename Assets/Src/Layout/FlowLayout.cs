@@ -15,20 +15,25 @@ namespace Src.Layout {
             }
         }
 
-        private void RunLayoutHorizontal(UIView view, Rect space, UIElement element) { }
+        private void RunLayoutHorizontal(UIView view, Rect space, UIElement element) {
+            
+        }
 
+        
+        
         private void RunLayoutVertical(UIView view, Rect viewSpaceContentRect, UIElement element) {
 
             List<UIElement> children = element.children;
             float yOffset = 0;
             for (int i = 0; i < children.Count; i++) {
                 UIElement child = children[i];
-                float width = GetLayoutWidth(child);
-                float height = GetLayoutHeight(child);
+                UILayout childLayout = child.style.layout;
+                float width = childLayout.GetLayoutWidth(child);
+                float height = childLayout.GetLayoutHeight(child);
 
                 Rect rect = new Rect();
                 
-                rect.x = 0f;
+                rect.x = 0f; // maybe just take rect.x from style
                 rect.y = yOffset;
                 rect.height = height;
                 rect.width = width;
@@ -52,8 +57,8 @@ namespace Src.Layout {
                 case UIUnit.Pixel:
                     return height.value;
 
-                case UIUnit.Content: // todo -- wrong
-                    return element.style.layout.GetLayoutHeight(element);
+                case UIUnit.Content: 
+                    return 0f;
 
                 case UIUnit.Parent:
                     if (element.parent == null) {

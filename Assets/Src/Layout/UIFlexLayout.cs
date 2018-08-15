@@ -5,15 +5,14 @@ using UnityEngine.UI;
 
 namespace Src.Layout {
 
-    public class UIFlexLayout {
         
-        private Rect rect;
-        
-        public List<UITransform> children;
-        public MainAxisAlignment mainAxisAlignment;
-        public CrossAxisAlignment crossAxisAlignment;
-               
-        public void DoLayout(UITransform transform, Rect rect) {
+//        private Rect rect;
+//        
+//        public List<UITransform> children;
+//        public MainAxisAlignment mainAxisAlignment;
+//        public CrossAxisAlignment crossAxisAlignment;
+//               
+//        public void DoLayout(UITransform transform, Rect rect) {
             
 //            
 //            this.rect = rect;
@@ -164,6 +163,5 @@ namespace Src.Layout {
 //                    return 0;
 //            }
 //        }   
-    }
+//    }
 
-}

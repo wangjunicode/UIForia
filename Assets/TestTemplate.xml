@@ -4,69 +4,74 @@
     <Style id="panelStyle" extends="id" from="../path">
 
         <Font.Color value="rgb(255, 0, 0)"/>
-        
+
         <Font.Alignment value=""/>
-        
+
         <Layout.Type value="Flow"/>
         <Layout.Direction value="Column"/>
         <Layout.Flow.MainAxisOverflow value=""/>
-        
+
         <Layout.Flow.AlignChildren/>
         <Layout.Flow.JustifyChildren/>
-        
+
         <Layout.Flow.Width value="Parent(100%)"/>
         <Layout.Flow.Width value=""/>
-        
+
         <Layout.Flow.Overflow value="wrap"/>
-        
+
         <Layout.Flow.Height value="Content(100%)"/>
         <Layout.Flow.Height value="InFlowContent(100%)"/>
-        
+
         <Layout.Flow.Width value="100px"/>
         <Layout.Flow.Width value="Viewport(100%)"/>
-        
+
         <LayoutItem.Flex.WidthBasis/>
-        
+
         <LayoutItem.IgnoreLayout value="true"/>
         <LayoutItem.LayoutType value="Fixed | Flow"/>
-        
+
         <!--<Rect.X value="0"/>-->
         <!--<Rect.Y value="-20px" anchor="Parent"/>-->
         <!--<Rect.W value="30" anchor="Parent | ParentEdge"/>-->
         <!--<Rect.H value="40%" anchor="Content"/>-->
+
         <Rect.W value="50"/>
         <Rect.H value="30"/>
-        
+
         <Rect.MaxWidth/>
         <Rect.MinWidth/>
         <Rect.MinHeight/>
         <Rect.MaxHeight/>
-        
+
         <Padding.Top value=""/>
-        
+
         <Border.Radius.TopLeft value=""/>
+
+        <Hover>
+
+        </Hover>
 
     </Style>
 
     <Style id="panel0">
-        
-        <Rect.W value="300"/>
+
+        <Rect.W value="200"/>
         <Rect.H value="100"/>
-        
+
     </Style>
-    
+
     <Contents>
 
-        <UIPanel style="panelStyle" 
-                 style.rect.x="Fixed(20px)"
-                 style.rect.y="{yVal}" 
-                 style.backgroundColor="rgb(255, 0, 0)">
-            Content is here
-           
+        <UIPanel style="panelStyle, panel0" style.paint.backgroundColor="rgb(255, 0, 0)">
+
+            <UIPanel style.paint.backgroundColor="rgb(255, 0, 0)"/>
+            <UIPanel style.paint.backgroundColor="rgb(0, 255, 0)"/>
+            <UIPanel style.paint.backgroundColor="rgb(0, 0, 255)"/>
+
         </UIPanel>
         <UIPanel style="panel0"/>
-        <UIPanel style="panel0"/>
-        <UIPanel style="panel0"/>
+        <UIPanel style="panel0" style.paint.backgroundColor="rgb(255, 255, 0)"/>
+        <UIPanel style="panel0" style.rect.w="50"/>
     </Contents>
 
 </UITemplate>

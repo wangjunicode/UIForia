@@ -44,9 +44,7 @@ namespace Src {
                     continue; //todo -- props are not compatible with observed properties
                 }
 
-                if (typeof(ObservedProperty).IsAssignableFrom(fieldInfo.FieldType)) {
-                    processedType.contextProperties.Add(fieldInfo);
-                }
+               
             }
 
             typeMap[type.Name] = processedType;

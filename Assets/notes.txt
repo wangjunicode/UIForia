@@ -1,0 +1,127 @@
+
+
+Music: luiz gonzales -- ethereal
+
+Style {
+    
+    GetLayoutContentBox() {
+        return new Rect() {
+            x = style.contentX,
+            y = style.contentY,
+            w = style.GetLayoutWidth(layouttype),
+            h = style.GetLayoutHeight(layouttype)
+        }
+    }
+
+    GetLayoutWidth(type) {
+        return {
+            preferred: text || image ? text.preferred : GetPreferredWidth()
+        }
+    }
+
+    GetPreferredWidth() {
+        if(text || image) {
+            return text ? text.preferred : image.preferred
+        }
+        switch(unit) {
+            case Unit.Pixel:
+                return width;
+        }
+    }
+
+}
+
+a auto
+    b 10px
+        x parent
+    c parent -> use content size or 0 instead
+        d 20px
+    f 200vh
+        g parent
+            e parent
+
+size != layout
+
+flex layout column -> auto
+    item 20px
+    item parent (invalid)
+    item auto
+
+gridLayout
+
+flexLayout.GetHeight() {
+    if(auto) {
+        // do layout -> return ((max child y + height) - min child y)
+    }
+    if (parent) {
+        if(parent == auto) -> return invalid
+        return parent.height * height.value;
+    }
+    if (fixed) {
+        return height.value;
+    }
+    if (viewport) {
+        return canvas.height * height.value;
+    }
+}
+
+flexLayout.GetOverflowHeight() {
+
+}
+
+layout output = rect tree?
+
+GetLayoutHeight() {
+    switch(unit) {
+        case Pixel: return height;
+        case Parent: 
+            if parent is content relative
+                return 0;
+            return parent.GetLayoutContentBox().height;
+        case Viewport:
+            return height * viewport.height
+        case Content:
+            return contentBox.verticalSpace + Layout() // need to actually do layout here I think
+    }
+}
+
+foreach child
+    if child.size type == parent relative
+
+if height == 100% of parent
+    if parent is fixed -> no problem
+    if parent is parent relative -> no problem
+    if parent is vh relative -> no problem
+    if parent is content relative -> FAIL treat child as content relative instead, or maybe 0
+
+if parent is content based and child is parent based,
+CSS implicitly converts the child to 'auto', meaning content based
+this is really confusing. maybe its nicer to set it to 0 or throw a big ass warning
+
+
+RectPosition
+LayoutPosition
+FlowPosition
+
+if rect.x is 'auto' 
+    x = whatever parent says it should be, ie 0 if first child, else previous child.x + width
+
+if rect.x is fixed
+    x = rect.x
+    in flow = false if direction is row, true if direction is column
+
+if rect.x is viewport based
+    in flow = false
+
+if rect.w = 'auto'
+    w = content width
+
+if rect.y is 'auto'
+
+if rect.h is 'parent'
+    h = parent.height || if parent height is 'content | auto' -> 0 or content height?
+
+Layout = Flow | FixedFlow
+    Flow -> expand w / h to contain children
+    FixedFlow -> no expanding
+    Flex -> Flexbox

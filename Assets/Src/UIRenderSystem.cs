@@ -4,15 +4,15 @@ namespace Src {
     public class UIRenderSystem {
         private List<UIElementPrimitive> dirtyPrimitives;
         private List<UIElement> dirtyLayouts;
-        private List<TemplateContext> dirtyContexts;
+        private List<UITemplateContext> dirtyContexts;
 
         public UIRenderSystem() {
-            dirtyContexts = new List<TemplateContext>();
+            dirtyContexts = new List<UITemplateContext>();
         }
 
         public void RenderChanges() {
             for (int i = 0; i < dirtyContexts.Count; i++) {
-                TemplateContext ctx = dirtyContexts[i];
+                UITemplateContext ctx = dirtyContexts[i];
                 List<UIElement> dirtyElements = new List<UIElement>();
 
 //                for (int j = 0; j < ctx.dirtyBindings.Count; j++) {
@@ -47,7 +47,7 @@ namespace Src {
           
         }
 
-        private void UpdateBindings(TemplateContext context, UIElement child) {
+        private void UpdateBindings(UITemplateContext context, UIElement child) {
 //            for (int i = 0; i < child.bindings.Length; i++) {
 //                PropertyBinding binding = child.bindings[i];
 //                //binding.Value = context.GetBinding(binding.key).Value;

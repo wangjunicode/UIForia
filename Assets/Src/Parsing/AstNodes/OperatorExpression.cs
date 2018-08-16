@@ -6,9 +6,9 @@ namespace Src {
 
         public ExpressionNode left;
         public ExpressionNode right;
-        public OperatorNode op;
+        public IOperatorNode op;
 
-        public OperatorExpression(ExpressionNode right, ExpressionNode left, OperatorNode op) 
+        public OperatorExpression(ExpressionNode right, ExpressionNode left, IOperatorNode op) 
             : base(ExpressionNodeType.Operator) {
             this.left = left;
             this.right = right;
@@ -18,7 +18,7 @@ namespace Src {
         public override Type GetYieldedType(ContextDefinition context) {
             Type typeLeft = left.GetYieldedType(context);
             Type typeRight = right.GetYieldedType(context);
-            if (op.op == OperatorType.Plus) {
+            if (op.OpType == OperatorType.Plus) {
                 if (typeLeft == typeof(string) || typeRight == typeof(string)) {
                     return typeof(string);
                 }

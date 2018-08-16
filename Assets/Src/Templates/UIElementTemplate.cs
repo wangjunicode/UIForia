@@ -18,7 +18,7 @@ namespace Src {
 
             ParsedTemplate templateToExpand = TemplateParser.GetParsedTemplate(processedElementType);
 
-            TemplateContext context = new TemplateContext(scope.view);
+            UITemplateContext context = new UITemplateContext(scope.view);
 
             TemplateScope outputScope = new TemplateScope();
 
@@ -57,7 +57,7 @@ namespace Src {
                 
                 if(attr.key.StartsWith("style")) continue;
                 
-                bindingList.Add(BindingGenerator.GenerateFromAttribute(template.contextDefinition, attr));
+                //bindingList.Add(ExpressionCompiler.GenerateFromAttribute(template.contextDefinition, attr));
             }
 
             bindings = bindingList.ToArray();

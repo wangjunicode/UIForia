@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<UITemplate>
+    
+    <Contents>
+        
+        <Repeat list="{colors}" as="color">
+        
+            <UIPanel style.paint.backgroundColor="{color}"/>
+        
+        </Repeat>
+        
+    </Contents>
+    
+</UITemplate>

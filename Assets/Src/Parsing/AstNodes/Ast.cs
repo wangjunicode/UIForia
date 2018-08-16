@@ -11,10 +11,13 @@ namespace Src {
     
     public enum ExpressionNodeType {
 
-        ConstantValue,
+        LiteralValue,
         Operator,
         Unary,
-        Accessor
+        RootContextAccessor,
+        Accessor,
+
+        Paren
 
     }
 

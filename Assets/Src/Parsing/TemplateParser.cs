@@ -32,7 +32,7 @@ namespace Src {
         private static readonly string[] TextAttributes = { };
 
         public static ParsedTemplate GetParsedTemplate(ProcessedType processedType, bool forceReload = false) {
-            return GetParsedTemplate(processedType.type, forceReload);
+            return GetParsedTemplate(processedType.rawType, forceReload);
         }
 
         public static ParsedTemplate GetParsedTemplate(Type elementType, bool forceReload = false) {
@@ -113,7 +113,7 @@ namespace Src {
                 throw new InvalidTemplateException(TemplateName, " missing a 'Contents' section");
             }
 
-            output.type = type.type;
+            output.type = type.rawType;
             output.imports = imports;
             output.styles = styleTemplates;
             output.filePath = TemplateName;

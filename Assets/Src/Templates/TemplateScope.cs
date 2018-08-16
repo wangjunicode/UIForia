@@ -6,7 +6,7 @@ namespace Src {
     public class TemplateScope {
 
         public UIView view;
-        public TemplateContext context;
+        public UITemplateContext context;
         public List<UIElement> inputChildren;
         
     }

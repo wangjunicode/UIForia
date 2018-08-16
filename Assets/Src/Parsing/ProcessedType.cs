@@ -5,10 +5,10 @@ using System.Reflection;
 
 namespace Src {
 
-    [DebuggerDisplay("{type.Name}")]
+    [DebuggerDisplay("{rawType.Name}")]
     public class ProcessedType {
 
-        public readonly Type type;
+        public readonly Type rawType;
         public readonly List<FieldInfo> propFields;
         public readonly List<FieldInfo> contextProperties;
         public readonly bool isPrimitive;
@@ -17,16 +17,16 @@ namespace Src {
 
         private static object[] constructorParameters = new object[2];
 
-        public ProcessedType(Type type) {
-            this.type = type;
+        public ProcessedType(Type rawType) {
+            this.rawType = rawType;
             propFields = new List<FieldInfo>();
             contextProperties = new List<FieldInfo>();
-            isPrimitive = type.IsSubclassOf(typeof(UIElementPrimitive));
+            isPrimitive = rawType.IsSubclassOf(typeof(UIElementPrimitive));
         }
 
         public string GetTemplatePath() {
             if (templatePath != null) return templatePath;
-            TemplateAttribute attr = type.GetCustomAttribute<TemplateAttribute>();
+            TemplateAttribute attr = rawType.GetCustomAttribute<TemplateAttribute>();
             if (attr != null) {
                 templatePath = attr.template;
             }

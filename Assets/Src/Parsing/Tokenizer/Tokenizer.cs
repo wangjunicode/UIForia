@@ -64,7 +64,7 @@ namespace Src {
             return consumed;
         }
 
-        public static int TryReadDigit(int ptr, string input, List<DslToken> output) {
+        private static int TryReadDigit(int ptr, string input, List<DslToken> output) {
             bool foundDot = false;
             int startIndex = ptr;
             if (ptr >= input.Length) return input.Length;
@@ -81,7 +81,7 @@ namespace Src {
             return TryConsumeWhiteSpace(ptr, input, output);
         }
 
-        public static int TryReadIdentifier(int ptr, string input, List<DslToken> output) {
+        private static int TryReadIdentifier(int ptr, string input, List<DslToken> output) {
             int start = ptr;
             if (ptr >= input.Length) return input.Length;
             char first = input[ptr];
@@ -95,7 +95,7 @@ namespace Src {
             return TryConsumeWhiteSpace(ptr, input, output);
         }
 
-        public static int TryReadString(int ptr, string input, List<DslToken> output) {
+        private static int TryReadString(int ptr, string input, List<DslToken> output) {
             int start = ptr;
             if (ptr        >= input.Length) return input.Length;
             if (input[ptr] != '\'') return ptr;

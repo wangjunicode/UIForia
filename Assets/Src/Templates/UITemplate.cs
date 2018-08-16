@@ -11,7 +11,6 @@ namespace Src {
         public ProcessedType processedElementType;
         public List<UITemplate> childTemplates;
         public List<AttributeDefinition> attributes;
-        public List<ExpressionEvaluator> generatedBindings;
 
         public UIStyle normalStyleTemplate;
         public UIStyle hoverStyleTemplate;
@@ -28,7 +27,7 @@ namespace Src {
 
         public abstract UIElement CreateScoped(TemplateScope scope);
 
-        public virtual Type ElementType => processedElementType.type;
+        public virtual Type ElementType => processedElementType.rawType;
 
         // todo -- also compile a binding if needed
         private void CompileStyleBinding(ref UIStyle style, AttributeDefinition attr, string styleKey) {
@@ -36,6 +35,7 @@ namespace Src {
                 case "paint.backgroundColor":
                     style = style ?? new UIStyle();
                     style.paint.backgroundColor = StyleParseUtil.ParseColor(attr.value);
+//                    style.paint.backgroundColor = StyleBindingCompiler.CompileColorExpression(contextDefinition, attr.value)
                     break;
 
                 case "rect.x":

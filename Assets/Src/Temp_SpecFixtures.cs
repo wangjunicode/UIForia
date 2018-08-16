@@ -14,14 +14,12 @@ namespace Spec {
     [Template("Tests/Templates/Parsing/Test3.xml")]
     public class Test3 : UIElement {
 
-        public ObservedProperty<float> floatProperty;
 
     }
 
     [Template("Tests/Templates/Parsing/Test4.xml")]
     public class Test4 : UIElement {
 
-        public ObservedProperty<bool> isPanelVisible;
 
     }
 
@@ -73,18 +71,7 @@ namespace Spec {
             [Prop] public int intValue;
             [Prop] public bool boolValue;
 
-        }
-
-        [Template("Tests/Templates/Props/Test3.xml")]
-        public class Test3 : UIElement {
-
-            public ObservedProperty<int> value;
-
-            public override void Initialize() {
-                value.Value = 123;
-            }
-
-        }
+        }       
 
         
     }

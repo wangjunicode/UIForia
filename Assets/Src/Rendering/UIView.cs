@@ -225,7 +225,7 @@ namespace Rendering {
             return "<" + element.GetType().Name + "> " + element.id;
         }
 
-        public void RegisterBindings(UIElement element, Binding[] bindings, TemplateContext context) {
+        public void RegisterBindings(UIElement element, Binding[] bindings, UITemplateContext context) {
 //            if (bindings.Length == 0) return;
 //            bindingSkipTree.AddItem(new TemplateBinding(element, bindings, context));
         }

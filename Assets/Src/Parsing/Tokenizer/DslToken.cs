@@ -1,5 +1,8 @@
+using System.Diagnostics;
+
 namespace Src {
 
+    [DebuggerDisplay("{value} -> {tokenType}")]
     public struct DslToken {
 
         public readonly TokenType tokenType;

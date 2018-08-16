@@ -13,11 +13,6 @@ namespace Src {
 
         public void Compile(List<ContextDefinition> contextDefinitions) {
 
-            // {this.someobject.list}
-            // Getter("someobject", Getter("list"));
-            ExpressionEvaluator listGetter = BindingGenerator.Generate(contextDefinitions[0],
-                attributes.Find((a) => a.key == "list").bindingExpression);
-
             bindings = new Binding[] {
                // new RepeatEnterBinding()
             };

@@ -23,7 +23,7 @@ namespace Src {
         public UIElement CreateWithScope(TemplateScope scope) {
             if (!isCompiled) Compile();
 
-            UIElement instance = (UIElement) Activator.CreateInstance(rootElement.processedElementType.type);
+            UIElement instance = (UIElement) Activator.CreateInstance(rootElement.processedElementType.rawType);
 
             List<UIElement> children = new List<UIElement>();
 
@@ -63,14 +63,14 @@ namespace Src {
         public UIElement CreateWithoutScope(UIView view, List<UIElement> inputChildren = null) {
             if (!isCompiled) Compile();
 
-            TemplateContext context = new TemplateContext(view);
+            UITemplateContext context = new UITemplateContext(view);
 
             TemplateScope scope = new TemplateScope();
             scope.view = view;
             scope.context = context;
             scope.inputChildren = inputChildren ?? EmptyElementList;
 
-            UIElement root = (UIElement) Activator.CreateInstance(rootElement.processedElementType.type);
+            UIElement root = (UIElement) Activator.CreateInstance(rootElement.processedElementType.rawType);
             root.children = new List<UIElement>();
 
             for (int i = 0; i < childTemplates.Count; i++) {

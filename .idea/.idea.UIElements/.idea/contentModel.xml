@@ -1,15 +1,21 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project version="4">
   <component name="ContentModelStore">
-    <e p="$USER_HOME$/Library/Caches/Rider2018.1/resharper-host/local/Transient/ReSharperHost/v12/SolutionCaches/_UIElements.-870298077.00" t="ExcludeRecursive" />
-    <e p="$PROJECT_DIR$" t="IncludeRecursive">
+    <e p="\app" t="IncludeRecursive" />
+    <e p="\c41f851" t="IncludeRecursive" />
+    <e p="C:\Seed\UIElements" t="IncludeRecursive">
       <e p="Assets" t="Include">
         <e p="Src" t="Include">
           <e p="Binding" t="Include">
             <e p="Binding.cs" t="Include" />
-            <e p="VisibiliityBinding.cs" t="Include" />
+            <e p="StyleBindings" t="Include">
+              <e p="BackgroundColorBinding.cs" t="Include" />
+            </e>
           </e>
-          <e p="BindingType.cs" t="Include" />
+          <e p="Compilers" t="Include">
+            <e p="ExpressionCompiler.cs" t="Include" />
+            <e p="StyleBindingCompiler.cs" t="Include" />
+          </e>
           <e p="ContentBox.cs" t="Include" />
           <e p="ContentBoxRect.cs" t="Include" />
           <e p="Editor" t="Include">
@@ -24,6 +30,20 @@
             <e p="UISwitchDefaultElement.cs" t="Include" />
             <e p="UISwitchElement.cs" t="Include" />
           </e>
+          <e p="Expressions" t="Include">
+            <e p="AccessorExpression.cs" t="Include" />
+            <e p="ArrayAccessorExpression.cs" t="Include" />
+            <e p="BooleanLiteralExpression.cs" t="Include" />
+            <e p="Expression.cs" t="Include" />
+            <e p="NumericLiteralExpression.cs" t="Include" />
+            <e p="OperatorEvaluatorInt.cs" t="Include" />
+            <e p="PropertyAccessorExpression.cs" t="Include" />
+            <e p="RootContextSimpleAccessExpression.cs" t="Include" />
+            <e p="StringLiteralExpression.cs" t="Include" />
+            <e p="UnaryBooleanExpression.cs" t="Include" />
+            <e p="UnaryMinusExpression.cs" t="Include" />
+            <e p="UnaryPlusExpression.cs" t="Include" />
+          </e>
           <e p="ImportDeclaration.cs" t="Include" />
           <e p="Layout" t="Include">
             <e p="CrossAxisAlignment.cs" t="Include" />
@@ -33,8 +53,6 @@
             <e p="UIFlexLayout.cs" t="Include" />
             <e p="UILayout.cs" t="Include" />
           </e>
-          <e p="ObservedList.cs" t="Include" />
-          <e p="ObservedProperty.cs" t="Include" />
           <e p="ParsedTemplate.cs" t="Include" />
           <e p="Parsing" t="Include">
             <e p="AstNodes" t="Include">
@@ -42,41 +60,26 @@
               <e p="AccessExpressionPart.cs" t="Include" />
               <e p="ArrayAccessExpressionPart.cs" t="Include" />
               <e p="Ast.cs" t="Include" />
-              <e p="BooleanConstantNode.cs" t="Include" />
-              <e p="ConstantValueNode.cs" t="Include" />
+              <e p="BooleanLiteralNode.cs" t="Include" />
               <e p="ExpressionNode.cs" t="Include" />
               <e p="IdentifierNode.cs" t="Include" />
-              <e p="NumericConstantNode.cs" t="Include" />
+              <e p="LiteralValueNode.cs" t="Include" />
+              <e p="NumericLiteralNode.cs" t="Include" />
               <e p="OperatorExpression.cs" t="Include" />
               <e p="OperatorNode.cs" t="Include" />
               <e p="ParenOperatorNode.cs" t="Include" />
               <e p="PropertyAccessExpressionPart.cs" t="Include" />
               <e p="RootContextLookup.cs" t="Include" />
-              <e p="StringConstantNode.cs" t="Include" />
+              <e p="StringLiteralNode.cs" t="Include" />
               <e p="UnaryExpressionNode.cs" t="Include" />
             </e>
             <e p="AttributeDefinition.cs" t="Include" />
-            <e p="BindingGenerator.cs" t="Include" />
-            <e p="Bindings" t="Include">
-              <e p="AccessorEvaluator.cs" t="Include" />
-              <e p="ArrayAccessorEvaluator.cs" t="Include" />
-              <e p="NumericConstantEvaluator.cs" t="Include" />
-              <e p="OperatorEvaluatorInt.cs" t="Include" />
-              <e p="PropertyAccessorEvaluator.cs" t="Include" />
-              <e p="UnaryBooleanEvaluator.cs" t="Include" />
-              <e p="UnaryMinusEvaluator.cs" t="Include" />
-              <e p="UnaryPlusEvaluator.cs" t="Include" />
-            </e>
             <e p="ChildrenSlotWithChildrenException.cs" t="Include" />
             <e p="ContextDefinition.cs" t="Include" />
-            <e p="ExpressionEvaluator.cs" t="Include" />
             <e p="ExpressionParser.cs" t="Include" />
             <e p="InvalidTemplateException.cs" t="Include" />
-            <e p="LiteralBinding.cs" t="Include" />
-            <e p="MultipleChildSlotException.cs" t="Include" />
             <e p="OperatorType.cs" t="Include" />
             <e p="ProcessedType.cs" t="Include" />
-            <e p="PropBinding.cs" t="Include" />
             <e p="Style" t="Include">
               <e p="PaintStyleParser.cs" t="Include" />
               <e p="StyleParser.cs" t="Include" />
@@ -157,7 +160,8 @@
           <e p="UIViewBehavior.cs" t="Include" />
         </e>
         <e p="Tests" t="Include">
-          <e p="BindingParserTests.cs" t="Include" />
+          <e p="ExpressionParserTests.cs" t="Include" />
+          <e p="ExpressionTests.cs" t="Include" />
           <e p="ParsingTests.cs" t="Include" />
           <e p="PropTests.cs" t="Include" />
           <e p="StyleTests.cs" t="Include" />
@@ -198,5 +202,8 @@
       <e p="Tests.csproj" t="IncludeRecursive" />
       <e p="UIElements.sln" t="IncludeFlat" />
     </e>
+    <e p="C:\Users\Matt\.Rider2018.2\config\extensions" t="IncludeRecursive" />
+    <e p="C:\Users\Matt\.Rider2018.2\system\extResources" t="IncludeRecursive" />
+    <e p="C:\Users\Matt\.Rider2018.2\system\resharper-host\local\Transient\ReSharperHost\v182\SolutionCaches\_UIElements.1439856042.00" t="ExcludeRecursive" />
   </component>
 </project>

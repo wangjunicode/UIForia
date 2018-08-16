@@ -39,7 +39,7 @@ namespace Src {
 
     public class SetUITextBinding : Binding {
 
-        public override void Execute(UIElement element, TemplateContext context) {
+        public override void Execute(UIElement element, UITemplateContext context) {
 //            if (element._textChanged) {
 //                element._textChanged = false;
 //            }

@@ -1,6 +1,13 @@
 namespace Src {
 
-    public class OperatorNode : ASTNode {
+    public interface IOperatorNode {
+
+        int Precedence { get; }
+        OperatorType OpType { get; }
+
+    }
+
+    public class OperatorNode : ASTNode, IOperatorNode {
 
         public readonly OperatorType op;
         public readonly int precedence;
@@ -9,6 +16,9 @@ namespace Src {
             this.precedence = precedence;
             this.op = op;
         }
+
+        public int Precedence => precedence;
+        public OperatorType OpType => op;
 
     }
 

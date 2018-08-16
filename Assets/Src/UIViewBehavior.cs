@@ -1,10 +1,23 @@
-﻿using Rendering;
+﻿using System.Collections.Generic;
+using Rendering;
 using UnityEngine;
 
 namespace Src {
 
     [Template("TestTemplate.xml")]
     public class TempUIType : UIElement { }
+
+    [Template("TestRepeat.xml")]
+    public class TestRepeat : UIElement {
+
+        public List<Color> colors = new List<Color>() {
+            Color.black, 
+            Color.red,
+            Color.white,
+            Color.blue
+        };
+
+    }
 
     public class UIViewBehavior : MonoBehaviour {
 
@@ -16,7 +29,7 @@ namespace Src {
             view = new UIView();
             view.font = font;
             view.gameObject = gameObject;
-            view.templateType = typeof(TempUIType);
+            view.templateType = typeof(TestRepeat);
             view.OnCreate();
 
         }

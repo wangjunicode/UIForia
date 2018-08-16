@@ -44,7 +44,7 @@ namespace Src {
         GreaterThanEqualTo = 1 << 23,
         LessThanEqualTo = 1    << 24,
 
-        WhiteSpace = 1 << 25,
+//        WhiteSpace = 1 << 25,
 
         Operator = Plus | Minus | Times | Divide                                      | Mod,
         Constant = String | Number                                                    | Boolean,

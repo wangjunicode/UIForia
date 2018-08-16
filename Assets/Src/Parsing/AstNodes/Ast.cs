@@ -17,7 +17,8 @@ namespace Src {
         RootContextAccessor,
         Accessor,
 
-        Paren
+        Paren,
+        ArrayAccess
 
     }
 

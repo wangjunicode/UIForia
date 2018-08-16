@@ -53,15 +53,15 @@ namespace Src {
                 }
             }
             output.Add(new DslToken(tokenType, match));
-            return TryConsumeWhiteSpace(ptr + match.Length, input, output);
+            return TryConsumeWhiteSpace(ptr + match.Length, input);
         }
 
-        private static int TryConsumeWhiteSpace(int ptr, string input, List<DslToken> output) {
-            int consumed = ConsumeWhiteSpace(ptr, input);
-            if (consumed != ptr) {
-                output.Add(new DslToken(TokenType.WhiteSpace));
-            }
-            return consumed;
+        private static int TryConsumeWhiteSpace(int ptr, string input) {
+            return ConsumeWhiteSpace(ptr, input);
+//            if (consumed != ptr) {
+//                output.Add(new DslToken(TokenType.WhiteSpace));
+//            }
+//            return consumed;
         }
 
         private static int TryReadDigit(int ptr, string input, List<DslToken> output) {
@@ -78,7 +78,7 @@ namespace Src {
                 ptr++;
             }
             output.Add(new DslToken(TokenType.Number, input.Substring(startIndex, ptr - startIndex)));
-            return TryConsumeWhiteSpace(ptr, input, output);
+            return TryConsumeWhiteSpace(ptr, input);
         }
 
         private static int TryReadIdentifier(int ptr, string input, List<DslToken> output) {
@@ -92,7 +92,7 @@ namespace Src {
             }
 
             output.Add(new DslToken(TokenType.Identifier, input.Substring(start, ptr - start)));
-            return TryConsumeWhiteSpace(ptr, input, output);
+            return TryConsumeWhiteSpace(ptr, input);
         }
 
         private static int TryReadString(int ptr, string input, List<DslToken> output) {
@@ -118,13 +118,13 @@ namespace Src {
 
             output.Add(new DslToken(TokenType.String, input.Substring(start, ptr - start)));
 
-            return TryConsumeWhiteSpace(ptr, input, output);
+            return TryConsumeWhiteSpace(ptr, input);
         }
 
         public static List<DslToken> Tokenize(string input) {
             List<DslToken> output = new List<DslToken>();
 
-            int ptr = TryConsumeWhiteSpace(0, input, output);
+            int ptr = TryConsumeWhiteSpace(0, input);
             while (ptr < input.Length) {
                 int start = ptr;
 
@@ -157,7 +157,7 @@ namespace Src {
                 ptr = TryReadString(ptr, input, output);
                 ptr = TryReadDigit(ptr, input, output);
                 ptr = TryReadIdentifier(ptr, input, output);
-                ptr = TryConsumeWhiteSpace(ptr, input, output);
+                ptr = TryConsumeWhiteSpace(ptr, input);
 
                 if (ptr == start && ptr < input.Length) {
                     throw new Exception("Tokenizer failed on string: " + input);

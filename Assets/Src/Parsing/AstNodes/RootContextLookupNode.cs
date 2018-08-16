@@ -2,11 +2,11 @@ using System;
 
 namespace Src {
 
-    public class RootContextLookup : ExpressionNode {
+    public class RootContextLookupNode : ExpressionNode {
 
         public readonly IdentifierNode idNode;
 
-        public RootContextLookup(IdentifierNode idNode) : base (ExpressionNodeType.RootContextAccessor) {
+        public RootContextLookupNode(IdentifierNode idNode) : base (ExpressionNodeType.RootContextAccessor) {
             this.idNode = idNode;
         }
 

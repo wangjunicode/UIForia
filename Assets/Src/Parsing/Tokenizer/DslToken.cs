@@ -18,10 +18,12 @@ namespace Src {
             this.value = value;
         }
 
+        [DebuggerStepThrough]
         public static implicit operator TokenType(DslToken token) {
             return token.tokenType;
         }
         
+        [DebuggerStepThrough]
         public static implicit operator string(DslToken token) {
             return token.value;
         }

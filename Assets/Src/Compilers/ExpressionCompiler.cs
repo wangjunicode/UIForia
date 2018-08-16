@@ -16,7 +16,7 @@ namespace Src {
             return Visit(root);
         }
 
-        private RootContextSimpleAccessExpression VisitRootContextAccessor(RootContextLookup node) {
+        private RootContextSimpleAccessExpression VisitRootContextAccessor(RootContextLookupNode node) {
             string fieldName = node.idNode.identifier;
             Type type = context.processedType.rawType;
             return new RootContextSimpleAccessExpression(type, fieldName);
@@ -25,7 +25,7 @@ namespace Src {
         private Expression Visit(ExpressionNode node) {
             switch (node.expressionType) {
                 case ExpressionNodeType.RootContextAccessor:
-                    return VisitRootContextAccessor((RootContextLookup) node);
+                    return VisitRootContextAccessor((RootContextLookupNode) node);
 
                 case ExpressionNodeType.LiteralValue:
                     return VisitConstant((LiteralValueNode)node);
@@ -37,13 +37,13 @@ namespace Src {
                     return VisitUnaryExpression(context, (UnaryExpressionNode) node);
 
                 case ExpressionNodeType.Operator:
-                    return VisitOperatorExpression(context, (OperatorExpression) node);
+                    return VisitOperatorExpression(context, (OperatorExpressionNode) node);
             }
 
             return null;
         }
 
-        private Expression VisitOperatorExpression(ContextDefinition context, OperatorExpression node) {
+        private Expression VisitOperatorExpression(ContextDefinition context, OperatorExpressionNode node) {
             throw new NotImplementedException();
         }
 
@@ -83,16 +83,16 @@ namespace Src {
         }
 
         private Expression VisitAccessExpression(ContextDefinition context, AccessExpressionNode node) {
-            string contextId = node.rootIdentifier;
-            for (int i = 0; i < node.parts.Count; i++) {
-                AccessExpressionPart part = node.parts[i];
-                if (part is ArrayAccessExpressionPart) {
-                    ArrayAccessExpressionPart arrayPart = (ArrayAccessExpressionPart) part;
-                }
-                else {
-                    PropertyAccessExpressionPart propertyPart = (PropertyAccessExpressionPart) part;
-                }
-            }
+//            string contextId = node.rootIdentifier;
+//            for (int i = 0; i < node.parts.Count; i++) {
+//                AccessExpressionPart part = node.parts[i];
+//                if (part is ArrayAccessExpressionPart) {
+//                    ArrayAccessExpressionPart arrayPart = (ArrayAccessExpressionPart) part;
+//                }
+//                else {
+//                    PropertyAccessExpressionPart propertyPart = (PropertyAccessExpressionPart) part;
+//                }
+//            }
 
             //TypeCheck here
             //node.TypeCheck(context);

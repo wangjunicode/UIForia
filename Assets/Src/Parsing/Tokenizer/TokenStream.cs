@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using System.Diagnostics;
 
 namespace Src {
 
@@ -20,19 +21,23 @@ namespace Src {
         public DslToken Last => tokens[tokens.Count - 1];
 
         public bool HasMoreTokens => ptr < tokens.Count;
+        public bool HasPrevious => ptr - 1 >= 0;
 
         public void Advance(int count = 1) {
             ptr += count;
         }
 
+        [DebuggerStepThrough]
         public void Save() {
             stack.Push(ptr);
         }
 
+        [DebuggerStepThrough]
         public void Restore() {
             ptr = stack.Pop();
         }
 
+        [DebuggerStepThrough]
         public void Chop() {
             tokens.RemoveAt(tokens.Count - 1);
         }
@@ -46,6 +51,7 @@ namespace Src {
             return retn;
         }
 
+        [DebuggerStepThrough]
         public TokenStream AdvanceAndReturnSubStream(int advance) {
             List<DslToken> subStreamTokens = tokens.GetRange(ptr, advance);
             Advance(advance);

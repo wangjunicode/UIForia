@@ -171,75 +171,55 @@ namespace Tests {
             Assert.AreEqual(TokenType.ExpressionClose, tokens[0].tokenType);
         }
 
-        [Test]
-        public void Tokenize_Whitespace() {
-            string input = " ";
-            List<DslToken> tokens = Tokenizer.Tokenize(input);
-            Assert.AreEqual(1, tokens.Count);
-            Assert.AreEqual(TokenType.WhiteSpace, tokens[0].tokenType);
-            
-            input = "     ";
-            tokens = Tokenizer.Tokenize(input);
-            Assert.AreEqual(1, tokens.Count);
-            Assert.AreEqual(TokenType.WhiteSpace, tokens[0].tokenType);
-        }
-
+       
         [Test]
         public void Tokenize_CompoundOperatorExpression() {
             string input = "52 + 2.4";
             List<DslToken> tokens = Tokenizer.Tokenize(input);
-            Assert.AreEqual(5, tokens.Count);
+            Assert.AreEqual(3, tokens.Count);
             Assert.AreEqual(TokenType.Number, tokens[0].tokenType);
-            Assert.AreEqual(TokenType.WhiteSpace, tokens[1].tokenType);
-            Assert.AreEqual(TokenType.Plus, tokens[2].tokenType);
-            Assert.AreEqual(TokenType.WhiteSpace, tokens[3].tokenType);
-            Assert.AreEqual(TokenType.Number, tokens[4].tokenType);
+            Assert.AreEqual(TokenType.Plus, tokens[1].tokenType);
+            Assert.AreEqual(TokenType.Number, tokens[2].tokenType);
             
             input = "-52 * 714";
             tokens = Tokenizer.Tokenize(input);
-            Assert.AreEqual(6, tokens.Count);
+            Assert.AreEqual(4, tokens.Count);
             Assert.AreEqual(TokenType.Minus, tokens[0].tokenType);
             Assert.AreEqual(TokenType.Number, tokens[1].tokenType);
-            Assert.AreEqual(TokenType.WhiteSpace, tokens[2].tokenType);
-            Assert.AreEqual(TokenType.Times, tokens[3].tokenType);
-            Assert.AreEqual(TokenType.WhiteSpace, tokens[4].tokenType);
-            Assert.AreEqual(TokenType.Number, tokens[5].tokenType);
+            Assert.AreEqual(TokenType.Times, tokens[2].tokenType);
+            Assert.AreEqual(TokenType.Number, tokens[3].tokenType);
         }
 
         [Test]
         public void Tokenize_CompoundPropertyAccess() {
             string input = "366 + something.first.second.third";
             List<DslToken> tokens = Tokenizer.Tokenize(input);
-            Assert.AreEqual(11, tokens.Count);
+            Assert.AreEqual(9, tokens.Count);
             Assert.AreEqual(TokenType.Number, tokens[0].tokenType);
-            Assert.AreEqual(TokenType.WhiteSpace, tokens[1].tokenType);
-            Assert.AreEqual(TokenType.Plus, tokens[2].tokenType);
-            Assert.AreEqual(TokenType.WhiteSpace, tokens[3].tokenType);
+            Assert.AreEqual(TokenType.Plus, tokens[1].tokenType);
+            Assert.AreEqual(TokenType.Identifier, tokens[2].tokenType);
+            Assert.AreEqual(TokenType.PropertyAccess, tokens[3].tokenType);
             Assert.AreEqual(TokenType.Identifier, tokens[4].tokenType);
             Assert.AreEqual(TokenType.PropertyAccess, tokens[5].tokenType);
             Assert.AreEqual(TokenType.Identifier, tokens[6].tokenType);
             Assert.AreEqual(TokenType.PropertyAccess, tokens[7].tokenType);
             Assert.AreEqual(TokenType.Identifier, tokens[8].tokenType);
-            Assert.AreEqual(TokenType.PropertyAccess, tokens[9].tokenType);
-            Assert.AreEqual(TokenType.Identifier, tokens[10].tokenType);
         }
 
         [Test]
         public void Tokenize_CompoundArrayAccess() {
             string input = "366 + something[first]second.third";
             List<DslToken> tokens = Tokenizer.Tokenize(input);
-            Assert.AreEqual(11, tokens.Count);
+            Assert.AreEqual(9, tokens.Count);
             Assert.AreEqual(TokenType.Number, tokens[0].tokenType);
-            Assert.AreEqual(TokenType.WhiteSpace, tokens[1].tokenType);
-            Assert.AreEqual(TokenType.Plus, tokens[2].tokenType);
-            Assert.AreEqual(TokenType.WhiteSpace, tokens[3].tokenType);
+            Assert.AreEqual(TokenType.Plus, tokens[1].tokenType);
+            Assert.AreEqual(TokenType.Identifier, tokens[2].tokenType);
+            Assert.AreEqual(TokenType.ArrayAccessOpen, tokens[3].tokenType);
             Assert.AreEqual(TokenType.Identifier, tokens[4].tokenType);
-            Assert.AreEqual(TokenType.ArrayAccessOpen, tokens[5].tokenType);
+            Assert.AreEqual(TokenType.ArrayAccessClose, tokens[5].tokenType);
             Assert.AreEqual(TokenType.Identifier, tokens[6].tokenType);
-            Assert.AreEqual(TokenType.ArrayAccessClose, tokens[7].tokenType);
+            Assert.AreEqual(TokenType.PropertyAccess, tokens[7].tokenType);
             Assert.AreEqual(TokenType.Identifier, tokens[8].tokenType);
-            Assert.AreEqual(TokenType.PropertyAccess, tokens[9].tokenType);
-            Assert.AreEqual(TokenType.Identifier, tokens[10].tokenType);
         }
 
        
@@ -251,24 +231,16 @@ namespace Tests {
             List<TokenType> types = new List<TokenType>();
             
             types.Add(TokenType.Identifier);
-            types.Add(TokenType.WhiteSpace);
             types.Add(TokenType.NotEquals);
-            types.Add(TokenType.WhiteSpace);
             types.Add(TokenType.Number);
-            types.Add(TokenType.WhiteSpace);
             types.Add(TokenType.And);
-            types.Add(TokenType.WhiteSpace);
             types.Add(TokenType.Not);
             types.Add(TokenType.Identifier);
-            types.Add(TokenType.WhiteSpace);
             types.Add(TokenType.Or);
-            types.Add(TokenType.WhiteSpace);
             types.Add(TokenType.Minus);
             types.Add(TokenType.ParenOpen);
             types.Add(TokenType.Number);
-            types.Add(TokenType.WhiteSpace);
             types.Add(TokenType.Times);
-            types.Add(TokenType.WhiteSpace);
             types.Add(TokenType.Number);
             types.Add(TokenType.ParenClose);
             

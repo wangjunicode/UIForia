@@ -1,15 +1,16 @@
 using System;
 using System.Collections.Generic;
+using System.Globalization;
 using System.Runtime.Remoting.Messaging;
 
 /*
 * Grammar
-*     ConstantStatement = Constant
+*     LiteralStatement = Literal
 *     ExpressionStatement = { Expression }
 *
-*     Constant = String | Boolean | Number
+*     Literal = String | Boolean | Number
 *     MethodExpression = Identifier ( ParameterList )
-*     ValueExpression = Lookup | PropertyAccess | ArrayAccess | Constant
+*     ValueExpression = Lookup | PropertyAccess | ArrayAccess | Literal
 *     Expression = ValueExpression | UnaryExpression | OperatorExpression | ParenExpression
 *     Lookup = Identifier
 *     PropertyAccess = Identifier . (Identifier+)
@@ -28,9 +29,9 @@ namespace Src {
         private readonly Stack<IOperatorNode> operatorStack;
 
         private static readonly TokenStream EmptyTokenStream = new TokenStream(new List<DslToken>());
-        
+
         private bool isLiteralExpression;
-        
+
         public ExpressionParser() {
             tokenStream = EmptyTokenStream;
             expressionStack = new Stack<ExpressionNode>();
@@ -49,8 +50,8 @@ namespace Src {
             operatorStack = new Stack<IOperatorNode>();
         }
 
-        private int FindMatchingBraceIndex() {
-            if (tokenStream.Current != TokenType.ParenOpen) {
+        private int FindMatchingBraceIndex(TokenType braceOpen, TokenType braceClose) {
+            if (tokenStream.Current != braceOpen) {
                 return -1;
             }
 
@@ -61,11 +62,11 @@ namespace Src {
             while (tokenStream.HasMoreTokens) {
                 i++;
 
-                if (tokenStream.Current == TokenType.ParenOpen) {
+                if (tokenStream.Current == braceOpen) {
                     counter++;
                 }
 
-                if (tokenStream.Current == TokenType.ParenClose) {
+                if (tokenStream.Current == braceClose) {
                     counter--;
                     if (counter == 0) {
                         tokenStream.Restore();
@@ -81,7 +82,6 @@ namespace Src {
         }
 
         public ExpressionNode Parse() {
-            ConsumeWhiteSpace();
 
             expressionStack.Clear();
             operatorStack.Clear();
@@ -110,7 +110,6 @@ namespace Src {
         private ExpressionNode ParseLoop(Func<ExpressionNode> parseFn) {
             while (tokenStream.HasMoreTokens) {
                 ExpressionNode operand = parseFn();
-                ConsumeWhiteSpace();
 
                 if (operand != null) {
                     expressionStack.Push(operand);
@@ -121,7 +120,7 @@ namespace Src {
                 if (op != null) {
                     EvaluateWhile(() => {
                         if (operatorStack.Count == 0) return false;
-                        return op.precedence <= operatorStack.Peek().Precedence;
+                        return op.precedence    <= operatorStack.Peek().Precedence;
                     });
                     operatorStack.Push(op);
                     continue;
@@ -146,29 +145,57 @@ namespace Src {
             throw new Exception($"Failed to parse {tokenStream}. {additionalInfo}");
         }
 
+        private bool ParseArrayBracketExpression(ref AccessExpressionPartNode retn) {
+            if (tokenStream.Current != TokenType.ArrayAccessOpen) {
+                return false;
+            }
+
+            int advance = FindMatchingBraceIndex(TokenType.ArrayAccessOpen, TokenType.ArrayAccessClose);
+            if (advance == -1) throw new Exception("Unmatched array bracket");
+            tokenStream.Advance(); // step over the open brace
+
+            // -1 to drop the closing array bracket token
+            TokenStream stream = tokenStream.AdvanceAndReturnSubStream(advance - 1);
+            // step over closing array bracket
+            tokenStream.Advance();
+
+            ExpressionParser subParser = new ExpressionParser(stream);
+            subParser.isLiteralExpression = isLiteralExpression;
+
+            if (isLiteralExpression) {
+                retn = new ArrayAccessExpressionNode(subParser.ParseLoop(subParser.ParseLiteralExpressionOperand));
+            }
+            else {
+                retn = new ArrayAccessExpressionNode(subParser.ParseLoop(subParser.ParseDynamicExpressionOperand));
+            }
+            return true;
+        }
+
         private bool ParseParenExpression(ref ExpressionNode retn) {
             if (tokenStream.Current != TokenType.ParenOpen) {
                 return false;
             }
 
-            int advance = FindMatchingBraceIndex();
+            int advance = FindMatchingBraceIndex(TokenType.ParenOpen, TokenType.ParenClose);
             if (advance == -1) throw new Exception("Unmatched paren");
-            
+
             tokenStream.Advance(); // step over the open brace
-            
+
             // -1 to drop the closing paren token
             TokenStream stream = tokenStream.AdvanceAndReturnSubStream(advance - 1);
-            
+
             // step over closing paren
             tokenStream.Advance();
-            
+
             ExpressionParser subParser = new ExpressionParser(stream);
             subParser.isLiteralExpression = isLiteralExpression;
-            
+
             if (isLiteralExpression) {
                 retn = new ParenOperatorNode(subParser.ParseLoop(subParser.ParseLiteralExpressionOperand));
             }
-            retn = new ParenOperatorNode(subParser.ParseLoop(subParser.ParseDynamicExpressionOperand));
+            else {
+                retn = new ParenOperatorNode(subParser.ParseLoop(subParser.ParseDynamicExpressionOperand));
+            }
             return true;
         }
 
@@ -176,25 +203,27 @@ namespace Src {
             ExpressionNode retn = null;
             if (ParseParenExpression(ref retn)) return retn;
 
-            if (ParseConstantValue(ref retn)) return retn;
+            if (ParseLiteralValue(ref retn)) return retn;
 
             return null;
         }
 
         private ExpressionNode ParseDynamicExpressionOperand() {
             ExpressionNode retn = null;
-            ConsumeWhiteSpace();
+
             if (ParseParenExpression(ref retn)) return retn;
-            if (ParseConstantValue(ref retn)) return retn;
+            if (ParseAccessExpression(ref retn)) return retn;
+            if (ParseLiteralValue(ref retn)) return retn;
             if (ParseLookupValue(ref retn)) return retn;
+
             return null;
         }
 
         private bool ParseExpression(ref ExpressionNode retn) {
-            ConsumeWhiteSpace();
+
             if (ParseParenExpression(ref retn)) return true;
             if (ParseLookupValue(ref retn)) return true;
-            if (ParseConstantValue(ref retn)) return true;
+            if (ParseLiteralValue(ref retn)) return true;
             if (ParseUnaryExpression(ref retn)) return true;
 
             return false;
@@ -202,7 +231,6 @@ namespace Src {
 
         private OperatorNode ParseOperatorExpression() {
             tokenStream.Save();
-            ConsumeWhiteSpace();
 
             if ((tokenStream.Current & TokenType.Operator) == 0) {
                 tokenStream.Restore();
@@ -233,16 +261,15 @@ namespace Src {
         }
 
         // todo make sure --, ++, and !! are not allowed
-        // maybe pre-process the token stream  for these
+        // maybe pre-process the token stream for these
         // also disallow =, +=, -=, *=, /=, %=
         private bool ParseUnaryExpression(ref ExpressionNode retn) {
             tokenStream.Save();
 
             UnaryOperatorType opType = UnaryOperatorType.Not;
 
-            // handles folding constants like !true or -someValue
-//            ExpressionNode unaryConstantNode = ParseUnaryConstantValue();
-            if (ParseUnaryConstantValue(ref retn)) {
+            // handles folding Literals like !true or -someValue
+            if (ParseUnaryLiteralValue(ref retn)) {
                 return true;
             }
 
@@ -276,19 +303,17 @@ namespace Src {
 
         private bool ParseLookupValue(ref ExpressionNode retn) {
             tokenStream.Save();
-            ConsumeWhiteSpace();
 
             ASTNode idNode = null;
 
             if (!ParseIdentifier(ref idNode)) return false;
 
-            retn = new RootContextLookup(((IdentifierNode) idNode));
+            retn = new RootContextLookupNode(((IdentifierNode) idNode));
             return true;
         }
 
         private bool ParseIdentifier(ref ASTNode node) {
             tokenStream.Save();
-            ConsumeWhiteSpace();
 
             if (tokenStream.Current != TokenType.Identifier) return false;
 
@@ -297,13 +322,78 @@ namespace Src {
             return true;
         }
 
-        private void ConsumeWhiteSpace() {
-            if (tokenStream.HasMoreTokens && tokenStream.Current == TokenType.WhiteSpace) {
-                tokenStream.Advance();
-            }
+        private bool ParseAccessExpressionPart(ref AccessExpressionPartNode retn) {
+            tokenStream.Save();
+
+            if (ParseDotAccessExpression(ref retn)) return true;
+            if (ParseArrayBracketExpression(ref retn)) return true;
+
+            tokenStream.Restore();
+            return false;
         }
 
-        private bool ParseUnaryConstantValue(ref ExpressionNode retn) {
+        private bool ParseDotAccessExpression(ref AccessExpressionPartNode retn) {
+            tokenStream.Save();
+            if (tokenStream.Current == TokenType.PropertyAccess) {
+                tokenStream.Advance();
+
+                ASTNode idNode = null;
+
+                if (!ParseIdentifier(ref idNode)) {
+                    tokenStream.Restore();
+                    return false;
+                }
+
+                retn = new PropertyAccessExpressionPartNode(((IdentifierNode) idNode).identifier);
+
+                return true;
+            }
+            tokenStream.Restore();
+            return false;
+        }
+
+        // identifier ((. identifier) | [ expression ] )*)
+        private bool ParseAccessExpression(ref ExpressionNode retn) {
+            tokenStream.Save();
+            ASTNode idNode = null;
+
+            if (!ParseIdentifier(ref idNode)) {
+                tokenStream.Restore();
+                return false;
+            }
+
+            if (!tokenStream.HasMoreTokens) {
+                tokenStream.Restore();
+                return false;
+            }
+            
+            AccessExpressionPartNode head = null;
+            if (!ParseAccessExpressionPart(ref head)) {
+                tokenStream.Restore();
+                return false;
+            }
+
+            List<AccessExpressionPartNode> parts = new List<AccessExpressionPartNode>();
+
+            parts.Add(head);
+            
+            while (tokenStream.HasMoreTokens) {
+
+                AccessExpressionPartNode partNode = null;
+                if (ParseAccessExpressionPart(ref partNode)) {
+                    parts.Add(partNode);
+                }
+                else {
+                    break;
+                }
+            }
+
+            retn = new AccessExpressionNode((IdentifierNode) idNode, parts);
+
+            return true;
+        }
+
+        private bool ParseUnaryLiteralValue(ref ExpressionNode retn) {
             if (tokenStream.Current == TokenType.Not) {
                 if (tokenStream.Next == TokenType.Boolean) {
                     bool value = bool.Parse(tokenStream.Next.value);
@@ -313,33 +403,34 @@ namespace Src {
                 }
             }
 
-            // handle negative numbers
-            if (tokenStream.Current == TokenType.Minus) {
-                if (tokenStream.Next == TokenType.Number) {
-                    tokenStream.Advance(2);
-                    retn = new NumericLiteralNode(double.Parse("-" + tokenStream.Previous));
-                    return true;
-                }
-            }
+            if (!tokenStream.HasPrevious ||
+                (tokenStream.HasPrevious && (tokenStream.Previous.tokenType & TokenType.Operator) != 0)) {
 
-            // handle unary positive numbers
-            if (tokenStream.Current == TokenType.Plus) {
-                if (tokenStream.Next == TokenType.Number) {
-                    tokenStream.Advance(2);
-                    retn = new NumericLiteralNode(double.Parse(tokenStream.Previous));
-                    return true;
+                if (tokenStream.Current == TokenType.Minus) {
+                    if (tokenStream.Next == TokenType.Number) {
+                        tokenStream.Advance(2);
+                        retn = new NumericLiteralNode(-double.Parse(tokenStream.Previous, CultureInfo.InvariantCulture));
+                        return true;
+                    }
                 }
+
+                if (tokenStream.Current == TokenType.Plus) {
+                    if (tokenStream.Next == TokenType.Number) {
+                        tokenStream.Advance(2);
+                        retn = new NumericLiteralNode(double.Parse(tokenStream.Previous, CultureInfo.InvariantCulture));
+                        return true;
+                    }
+                }
+
             }
 
             return false;
         }
 
-        private bool ParseConstantValue(ref ExpressionNode retn) {
+        private bool ParseLiteralValue(ref ExpressionNode retn) {
             tokenStream.Save();
-            ConsumeWhiteSpace();
 
-
-            if (ParseUnaryConstantValue(ref retn)) return true;
+            if (ParseUnaryLiteralValue(ref retn)) return true;
 
             if (tokenStream.Current == TokenType.Boolean) {
                 tokenStream.Advance();
@@ -349,7 +440,7 @@ namespace Src {
 
             if (tokenStream.Current == TokenType.Number) {
                 tokenStream.Advance();
-                retn = new NumericLiteralNode(double.Parse(tokenStream.Previous));
+                retn = new NumericLiteralNode(double.Parse(tokenStream.Previous, CultureInfo.InvariantCulture));
                 return true;
             }
 
@@ -366,7 +457,7 @@ namespace Src {
 
         private void EvaluateWhile(Func<bool> condition) {
             while (condition()) {
-                expressionStack.Push(new OperatorExpression(
+                expressionStack.Push(new OperatorExpressionNode(
                         expressionStack.Pop(),
                         expressionStack.Pop(),
                         operatorStack.Pop()
@@ -376,50 +467,5 @@ namespace Src {
         }
 
     }
-
-    //private ExpressionNode ParseAccessExpression() {
-//            // identifier ((. identifier) | [ expression ] )*)
-//            IdentifierNode idNode = ParseIdentifier();
-//            if (idNode == null) return null;
-//
-//            AccessExpressionPart part = ParseAccessExpressionPart();
-//            List<AccessExpressionPart> parts = new List<AccessExpressionPart>();
-//
-//            while (part != null) {
-//                parts.Add(part);
-//                part = ParseAccessExpressionPart();
-//            }
-//
-//            return new AccessExpressionNode(idNode.identifier, parts);
-//        }
-//    private AccessExpressionPart ParseAccessExpressionPart() {
-//    tokenStream.Save();
-//    if (tokenStream.Current == TokenType.PropertyAccess) {
-//        tokenStream.Advance();
-//
-//        IdentifierNode idNode = ParseIdentifier();
-//        if (idNode != null) {
-//            return new PropertyAccessExpressionPart(idNode.identifier);
-//        }
-//
-//        tokenStream.Restore();
-//        return null;
-//    }
-//
-//    if (tokenStream.Current == TokenType.ArrayAccessOpen) {
-//    tokenStream.Advance();
-//    ExpressionNode expressionNode = ParseExpression();
-//
-//        if (expressionNode != null) {
-//        if (tokenStream.Current == TokenType.ArrayAccessClose) {
-//            tokenStream.Advance();
-//            return new ArrayAccessExpressionPart(expressionNode);
-//        }
-//    }
-//    }
-//
-//    tokenStream.Restore();
-//    return null;
-//}
 
 }

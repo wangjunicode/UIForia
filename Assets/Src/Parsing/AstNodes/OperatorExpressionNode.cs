@@ -2,13 +2,13 @@ using System;
 
 namespace Src {
 
-    public class OperatorExpression : ExpressionNode {
+    public class OperatorExpressionNode : ExpressionNode {
 
         public ExpressionNode left;
         public ExpressionNode right;
         public IOperatorNode op;
 
-        public OperatorExpression(ExpressionNode right, ExpressionNode left, IOperatorNode op) 
+        public OperatorExpressionNode(ExpressionNode right, ExpressionNode left, IOperatorNode op) 
             : base(ExpressionNodeType.Operator) {
             this.left = left;
             this.right = right;

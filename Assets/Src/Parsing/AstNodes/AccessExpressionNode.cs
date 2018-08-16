@@ -5,12 +5,12 @@ namespace Src {
 
     public class AccessExpressionNode : ExpressionNode {
 
-        public readonly string rootIdentifier;
-        public readonly List<AccessExpressionPart> parts;
+        public readonly IdentifierNode identifierNode;
+        public readonly List<AccessExpressionPartNode> parts;
 
-        public AccessExpressionNode(string identifier, List<AccessExpressionPart> accessExpressionParts)
+        public AccessExpressionNode(IdentifierNode identifierNode, List<AccessExpressionPartNode> accessExpressionParts)
             : base(ExpressionNodeType.Accessor) {
-            this.rootIdentifier = identifier;
+            this.identifierNode = identifierNode;
             this.parts = accessExpressionParts;
         }
 

@@ -1,4 +1,5 @@
-﻿using NUnit.Framework;
+﻿using JetBrains.Annotations;
+using NUnit.Framework;
 using Src;
 using UnityEngine;
 
@@ -16,6 +17,10 @@ namespace Tests {
             public bool boolValue;
             public int[] intArrayValue;
             public Vector3[] vectors;
+
+            [UsedImplicitly]
+            public void SimpleMethod() { }
+            public void SimpleMethod2(int i) { }
 
         }
         
@@ -66,6 +71,18 @@ namespace Tests {
         public void CheckType_ParenExpression_Literal() {
             ExpressionParser parser = new ExpressionParser();
             Assert.AreEqual(typeof(bool), parser.Parse("(true)").GetYieldedType(nullContext));
+        }
+
+        [Test]
+        public void CheckType_MethodCall_NoParameters() {
+            ExpressionParser parser = new ExpressionParser();
+            Assert.AreEqual(typeof(void), parser.Parse("{SimpleMethod()}").GetYieldedType(simpleRootContext));
+        }
+        
+        [Test]
+        public void CheckType_MethodCall_1Argument() {
+            ExpressionParser parser = new ExpressionParser();
+            Assert.AreEqual(typeof(void), parser.Parse("{SimpleMethod2(1)}").GetYieldedType(simpleRootContext));
         }
     }
 

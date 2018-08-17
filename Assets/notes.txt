@@ -125,3 +125,8 @@ Layout = Flow | FixedFlow
     Flow -> expand w / h to contain children
     FixedFlow -> no expanding
     Flex -> Flexbox
+
+
+
+
+need to handle numbers property or method lookup breaks

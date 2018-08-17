@@ -57,6 +57,8 @@ namespace Src {
                 
                 if(attr.key.StartsWith("style")) continue;
                 
+                //Binding binding = TryGeneratingBinding(attr, template);
+                
                 //bindingList.Add(ExpressionCompiler.GenerateFromAttribute(template.contextDefinition, attr));
             }
 

@@ -15,7 +15,11 @@
         <!--comment-->
         
         faea
-      
+
+        <Repeat list="{mylist[i]}">
+            text
+        </Repeat>
+        
     </Contents>
     
 </UITemplate>

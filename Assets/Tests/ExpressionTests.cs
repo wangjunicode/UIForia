@@ -22,7 +22,6 @@ namespace Tests {
         [Test]
         public void LiteralExpression_BooleanTrue() {
             Expression expression = GetLiteralExpression("true");
-            
             Assert.IsInstanceOf<BooleanLiteralExpression>(expression);
             Assert.AreEqual(true, expression.Evaluate(null));
         }
@@ -77,7 +76,7 @@ namespace Tests {
         [Test]
         public void LiteralOperatorExpression_Add_Integer() {
             Expression expression = GetLiteralExpression("64 + 5");
-            Assert.IsInstanceOf<BooleanLiteralExpression>(expression);
+            Assert.IsInstanceOf<OperatorExpression_Int>(expression);
             Assert.AreEqual(69, expression.Evaluate(null));
         }
         

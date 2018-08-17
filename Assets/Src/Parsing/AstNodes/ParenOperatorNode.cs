@@ -10,8 +10,12 @@ namespace Src {
             this.expression = expression;
         }
 
+        public override bool TypeCheck(ContextDefinition contextDefinition) {
+            return expression.TypeCheck(contextDefinition);
+        }
+
         public override Type GetYieldedType(ContextDefinition context) {
-            throw new NotImplementedException();
+            return expression.GetYieldedType(context);
         }
 
     }

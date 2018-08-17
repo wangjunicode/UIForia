@@ -3,7 +3,6 @@ using System.IO;
 using System.Xml;
 using System.Collections.Generic;
 using System.Linq;
-using System.Runtime.Remoting.Messaging;
 using System.Xml.Linq;
 using Rendering;
 using Src.Parsing.Style;
@@ -117,8 +116,8 @@ namespace Src {
             output.imports = imports;
             output.styles = styleTemplates;
             output.filePath = TemplateName;
+            output.contextDefinition = new ContextDefinition(type.rawType);
             List<UITemplate> children = ParseNodes(contentElement.Nodes());
-            // output.contexts = new List<ContextDefinition>();
 
             output.rootElement = new UIElementTemplate();
             output.rootElement.childTemplates = children;
@@ -147,17 +146,17 @@ namespace Src {
         }
 
         private UITemplate ParseRepeatElement(XElement element) {
-            EnsureNotInsideTagName(element, "Repeat");
             EnsureAttribute(element, "list");
+            EnsureNotInsideTagName(element, "Repeat");
             EnsureOnlyAttributes(element, RepeatAttributes);
 
+           
             UIRepeatTemplate template = new UIRepeatTemplate();
             template.attributes = ParseAttributes(element.Attributes());
             template.childTemplates = ParseNodes(element.Nodes());
 
             return template;
         }
-
 
         private UITemplate ParseSlotElement(XElement element) {
             Abort("<Slot> not yet implemented");
@@ -172,7 +171,6 @@ namespace Src {
             EnsureOnlyAttributes(element, ChildrenAttributes);
             return new UIChildrenTemplate();
         }
-
 
         private UITemplate ParseSwitchElement(XElement element) {
             EnsureAttribute(element, "value");

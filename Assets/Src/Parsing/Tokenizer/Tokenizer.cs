@@ -58,10 +58,6 @@ namespace Src {
 
         private static int TryConsumeWhiteSpace(int ptr, string input) {
             return ConsumeWhiteSpace(ptr, input);
-//            if (consumed != ptr) {
-//                output.Add(new DslToken(TokenType.WhiteSpace));
-//            }
-//            return consumed;
         }
 
         private static int TryReadDigit(int ptr, string input, List<DslToken> output) {
@@ -85,13 +81,19 @@ namespace Src {
             int start = ptr;
             if (ptr >= input.Length) return input.Length;
             char first = input[ptr];
-            if (!char.IsLetter(first) && first != '_') return ptr;
+            if (!char.IsLetter(first) && first != '_' && first != '$') return ptr;
 
-            while (ptr < input.Length && (char.IsLetterOrDigit(input[ptr]) || input[ptr] == '_')) {
+            while (ptr < input.Length && (char.IsLetterOrDigit(input[ptr]) || input[ptr] == '_' || input[ptr] == '$')) {
                 ptr++;
             }
 
-            output.Add(new DslToken(TokenType.Identifier, input.Substring(start, ptr - start)));
+            if (first == '$') {
+                output.Add(new DslToken(TokenType.SpecialIdentifier, input.Substring(start, ptr - start)));
+            }
+            else {
+                output.Add(new DslToken(TokenType.Identifier, input.Substring(start, ptr - start)));
+
+            }
             return TryConsumeWhiteSpace(ptr, input);
         }
 
@@ -143,8 +145,11 @@ namespace Src {
                 ptr = TryReadCharacters(ptr, input, "/", TokenType.Divide, output);
                 ptr = TryReadCharacters(ptr, input, "*", TokenType.Times, output);
                 ptr = TryReadCharacters(ptr, input, "%", TokenType.Mod, output);
+                ptr = TryReadCharacters(ptr, input, "?", TokenType.QuestionMark, output);
+                ptr = TryReadCharacters(ptr, input, ":", TokenType.Colon, output);
 
-                ptr = TryReadCharacters(ptr, input, ".", TokenType.PropertyAccess, output);
+                ptr = TryReadCharacters(ptr, input, ".", TokenType.Dot, output);
+                ptr = TryReadCharacters(ptr, input, ",", TokenType.Comma, output);
                 ptr = TryReadCharacters(ptr, input, "(", TokenType.ParenOpen, output);
                 ptr = TryReadCharacters(ptr, input, ")", TokenType.ParenClose, output);
                 ptr = TryReadCharacters(ptr, input, "[", TokenType.ArrayAccessOpen, output);

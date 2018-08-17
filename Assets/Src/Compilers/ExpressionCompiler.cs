@@ -1,6 +1,4 @@
 using System;
-using System.Collections.Generic;
-using UnityEngine;
 
 namespace Src {
 
@@ -24,6 +22,7 @@ namespace Src {
 
         private Expression Visit(ExpressionNode node) {
             switch (node.expressionType) {
+              
                 case ExpressionNodeType.RootContextAccessor:
                     return VisitRootContextAccessor((RootContextLookupNode) node);
 
@@ -37,14 +36,33 @@ namespace Src {
                     return VisitUnaryExpression(context, (UnaryExpressionNode) node);
 
                 case ExpressionNodeType.Operator:
-                    return VisitOperatorExpression(context, (OperatorExpressionNode) node);
+                    return VisitOperatorExpression((OperatorExpressionNode) node);
             }
 
             return null;
         }
 
-        private Expression VisitOperatorExpression(ContextDefinition context, OperatorExpressionNode node) {
-            throw new NotImplementedException();
+        // type checking
+        // method source with chaining
+        // code gen
+        
+        private Expression VisitOperatorExpression(OperatorExpressionNode node) {
+            
+            Type typeLeft = node.left.GetYieldedType(context);
+            Type typeRight = node.right.GetYieldedType(context);
+            
+            bool x = sizeof(float) < sizeof(byte);
+            char z = (char) 1;
+            int f = z;
+            float z2 = z;
+            
+            switch (node.OpType) {
+                case OperatorType.Plus:
+                    Expression left = Visit(node.left);
+                    Expression right = Visit(node.right);
+                    return new OperatorExpression_Int(OperatorType.Plus, left, right);
+            }
+            return null;
         }
 
         private Expression VisitUnaryExpression(ContextDefinition context, UnaryExpressionNode node) {

@@ -16,9 +16,9 @@ namespace Src {
         Unary,
         RootContextAccessor,
         Accessor,
-
         Paren,
-        ArrayAccess
+        ArrayAccess,
+        MethodCall
 
     }
 

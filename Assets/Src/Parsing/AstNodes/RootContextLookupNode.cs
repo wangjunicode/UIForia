@@ -1,33 +1,30 @@
 using System;
+using System.Diagnostics;
+using System.Reflection;
 
 namespace Src {
 
+    [DebuggerDisplay("{idNode.identifier}")]
     public class RootContextLookupNode : ExpressionNode {
 
+        private FieldInfo fieldInfo;
         public readonly IdentifierNode idNode;
 
-        public RootContextLookupNode(IdentifierNode idNode) : base (ExpressionNodeType.RootContextAccessor) {
+        public RootContextLookupNode(IdentifierNode idNode) : base(ExpressionNodeType.RootContextAccessor) {
             this.idNode = idNode;
         }
 
         public override Type GetYieldedType(ContextDefinition context) {
-            //context.GetType().GetField(idNode.identifier);
-            return null;
+            if (this.fieldInfo == null) {
+                const BindingFlags flags = BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic;
+                fieldInfo = context.processedType.rawType.GetField(idNode.identifier, flags);
+            }
+            if (fieldInfo == null) {
+                throw new FieldNotDefinedException(context.processedType.rawType, idNode.identifier);
+            }
+            return fieldInfo.FieldType;
         }
 
     }
 
 }
-
-
-/*
- * ParseTemplate -> Tokenize Expression -> Parse Expression -> GenerateExpression | GenerateBinding
- * 
- * BindingGenerator
- * IfBindingGenerator
- * StyleBindingGenerator
- * ExpressionGenerator
- *
- * Expression = Function to get some value, returns value
- * Binding = Function to check some value and or set some value, returns void
-*/

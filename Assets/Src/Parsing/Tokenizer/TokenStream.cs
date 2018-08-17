@@ -23,6 +23,7 @@ namespace Src {
         public bool HasMoreTokens => ptr < tokens.Count;
         public bool HasPrevious => ptr - 1 >= 0;
 
+        [DebuggerStepThrough]
         public void Advance(int count = 1) {
             ptr += count;
         }
@@ -56,6 +57,16 @@ namespace Src {
             List<DslToken> subStreamTokens = tokens.GetRange(ptr, advance);
             Advance(advance);
             return new TokenStream(subStreamTokens);
+        }
+
+        [DebuggerStepThrough]
+        public TokenType Peek(int i) {
+            return tokens[ptr + i];
+        }
+
+        [DebuggerStepThrough]
+        public bool HasTokenAt(int p0) {
+            return ptr + p0 < tokens.Count;
         }
 
     }

@@ -36,6 +36,7 @@
             <e p="Expression.cs" t="Include" />
             <e p="NumericLiteralExpression.cs" t="Include" />
             <e p="OperatorEvaluatorInt.cs" t="Include" />
+            <e p="OperatorExpression_Int.cs" t="Include" />
             <e p="PropertyAccessorExpression.cs" t="Include" />
             <e p="RootContextSimpleAccessExpression.cs" t="Include" />
             <e p="StringLiteralExpression.cs" t="Include" />
@@ -61,14 +62,18 @@
               <e p="Ast.cs" t="Include" />
               <e p="BooleanLiteralNode.cs" t="Include" />
               <e p="ExpressionNode.cs" t="Include" />
+              <e p="FieldNotDefinedException.cs" t="Include" />
               <e p="IdentifierNode.cs" t="Include" />
               <e p="LiteralValueNode.cs" t="Include" />
+              <e p="MethodCallNode.cs" t="Include" />
+              <e p="MethodSignatureNode.cs" t="Include" />
               <e p="NumericLiteralNode.cs" t="Include" />
               <e p="OperatorExpressionNode.cs" t="Include" />
               <e p="OperatorNode.cs" t="Include" />
               <e p="ParenOperatorNode.cs" t="Include" />
               <e p="PropertyAccessExpressionPartNode.cs" t="Include" />
               <e p="RootContextLookupNode.cs" t="Include" />
+              <e p="SpecialIdentifierNode.cs" t="Include" />
               <e p="StringLiteralNode.cs" t="Include" />
               <e p="UnaryExpressionNode.cs" t="Include" />
             </e>
@@ -189,6 +194,7 @@
           </e>
           <e p="Tests.asmdef" t="Include" />
           <e p="TokenizingTests.cs" t="Include" />
+          <e p="TypeCheckTests.cs" t="Include" />
         </e>
       </e>
       <e p="Library" t="ExcludeRecursive" />

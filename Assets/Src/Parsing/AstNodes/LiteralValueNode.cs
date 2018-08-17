@@ -4,6 +4,10 @@ namespace Src {
 
         protected LiteralValueNode(ExpressionNodeType expressionType) : base(expressionType) { }
 
+        public override bool TypeCheck(ContextDefinition contextDefinition) {
+            return true;
+        }
+
     }
 
 }

@@ -198,11 +198,11 @@ namespace Tests {
             Assert.AreEqual(TokenType.Number, tokens[0].tokenType);
             Assert.AreEqual(TokenType.Plus, tokens[1].tokenType);
             Assert.AreEqual(TokenType.Identifier, tokens[2].tokenType);
-            Assert.AreEqual(TokenType.PropertyAccess, tokens[3].tokenType);
+            Assert.AreEqual(TokenType.Dot, tokens[3].tokenType);
             Assert.AreEqual(TokenType.Identifier, tokens[4].tokenType);
-            Assert.AreEqual(TokenType.PropertyAccess, tokens[5].tokenType);
+            Assert.AreEqual(TokenType.Dot, tokens[5].tokenType);
             Assert.AreEqual(TokenType.Identifier, tokens[6].tokenType);
-            Assert.AreEqual(TokenType.PropertyAccess, tokens[7].tokenType);
+            Assert.AreEqual(TokenType.Dot, tokens[7].tokenType);
             Assert.AreEqual(TokenType.Identifier, tokens[8].tokenType);
         }
 
@@ -218,7 +218,7 @@ namespace Tests {
             Assert.AreEqual(TokenType.Identifier, tokens[4].tokenType);
             Assert.AreEqual(TokenType.ArrayAccessClose, tokens[5].tokenType);
             Assert.AreEqual(TokenType.Identifier, tokens[6].tokenType);
-            Assert.AreEqual(TokenType.PropertyAccess, tokens[7].tokenType);
+            Assert.AreEqual(TokenType.Dot, tokens[7].tokenType);
             Assert.AreEqual(TokenType.Identifier, tokens[8].tokenType);
         }
 
@@ -248,6 +248,49 @@ namespace Tests {
 
         }
 
+        [Test]
+        public void Tokenize_SpecialIdentifier() {
+            string input = "1 + $ident";
+            List<DslToken> tokens = Tokenizer.Tokenize(input);
+            List<TokenType> types = new List<TokenType>();
+            types.Add(TokenType.Number);
+            types.Add(TokenType.Plus);
+            types.Add(TokenType.SpecialIdentifier);
+            
+            AssertTokenTypes(types, tokens);
+        }
+
+        [Test]
+        public void Tokenize_Comma() {
+            string input = "method(1, 2, 3)";
+            List<DslToken> tokens = Tokenizer.Tokenize(input);
+            List<TokenType> types = new List<TokenType>();
+            types.Add(TokenType.Identifier);
+            types.Add(TokenType.ParenOpen);
+            types.Add(TokenType.Number);
+            types.Add(TokenType.Comma);
+            types.Add(TokenType.Number);
+            types.Add(TokenType.Comma);
+            types.Add(TokenType.Number);
+            types.Add(TokenType.ParenClose);
+            
+            AssertTokenTypes(types, tokens);
+        }
+
+        [Test]
+        public void Tokenize_Ternary() {
+            string input = "value ? 1 : 2";
+            List<DslToken> tokens = Tokenizer.Tokenize(input);
+            List<TokenType> types = new List<TokenType>();
+            types.Add(TokenType.Identifier);
+            types.Add(TokenType.QuestionMark);
+            types.Add(TokenType.Number);
+            types.Add(TokenType.Colon);
+            types.Add(TokenType.Number);
+            
+            AssertTokenTypes(types, tokens);
+        }
+        
         [Test]
         public void FailsToTokenizeUnterminatedString() {
             Assert.Throws<Exception>(() => {

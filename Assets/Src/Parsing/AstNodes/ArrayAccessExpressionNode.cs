@@ -10,8 +10,12 @@ namespace Src {
             this.expressionNode = expressionNode;
         }
 
+        public override bool TypeCheck(ContextDefinition contextDefinition) {
+            return typeof(int) == expressionNode.GetYieldedType(contextDefinition);
+        }
+        
         public override Type GetYieldedType(ContextDefinition context) {
-            throw new NotImplementedException();
+            return typeof(int);
         }
 
     }

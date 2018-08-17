@@ -45,7 +45,7 @@ namespace Src {
             if (isCompiled) return;
             
             Stack<UITemplate> stack = new Stack<UITemplate>();
-            
+                        
             stack.Push(rootElement);
             
             while (stack.Count > 0) {

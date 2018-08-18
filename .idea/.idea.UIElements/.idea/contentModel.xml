@@ -29,20 +29,27 @@
             <e p="UISwitchDefaultElement.cs" t="Include" />
             <e p="UISwitchElement.cs" t="Include" />
           </e>
+          <e p="ExpressionContext.cs" t="Include" />
           <e p="Expressions" t="Include">
-            <e p="AccessorExpression.cs" t="Include" />
-            <e p="ArrayAccessorExpression.cs" t="Include" />
-            <e p="BooleanLiteralExpression.cs" t="Include" />
+            <e p="AccessExpression_Property.cs" t="Include" />
+            <e p="AccessExpression_Root.cs" t="Include" />
             <e p="Expression.cs" t="Include" />
-            <e p="NumericLiteralExpression.cs" t="Include" />
-            <e p="OperatorEvaluatorInt.cs" t="Include" />
-            <e p="OperatorExpression_Int.cs" t="Include" />
-            <e p="PropertyAccessorExpression.cs" t="Include" />
-            <e p="RootContextSimpleAccessExpression.cs" t="Include" />
-            <e p="StringLiteralExpression.cs" t="Include" />
-            <e p="UnaryBooleanExpression.cs" t="Include" />
-            <e p="UnaryMinusExpression.cs" t="Include" />
-            <e p="UnaryPlusExpression.cs" t="Include" />
+            <e p="LiteralExpression_Boolean.cs" t="Include" />
+            <e p="LiteralExpression_Double.cs" t="Include" />
+            <e p="LiteralExpression_Float.cs" t="Include" />
+            <e p="LiteralExpression_Int.cs" t="Include" />
+            <e p="LiteralExpression_String.cs" t="Include" />
+            <e p="OperatorExpression_Arithmetic.cs" t="Include" />
+            <e p="OperatorExpression_Boolean.cs" t="Include" />
+            <e p="OperatorExpression_Comparison.cs" t="Include" />
+            <e p="OperatorExpression_Equality.cs" t="Include" />
+            <e p="OperatorExpression_StringConcat.cs" t="Include" />
+            <e p="OperatorExpression_Ternary.cs" t="Include" />
+            <e p="ParenExpression.cs" t="Include" />
+            <e p="ResolveExpression_Alias.cs" t="Include" />
+            <e p="UnaryExpression_Boolean.cs" t="Include" />
+            <e p="UnaryExpression_Minus.cs" t="Include" />
+            <e p="UnaryExpression_Plus.cs" t="Include" />
           </e>
           <e p="ImportDeclaration.cs" t="Include" />
           <e p="Layout" t="Include">
@@ -58,6 +65,7 @@
             <e p="AstNodes" t="Include">
               <e p="AccessExpressionNode.cs" t="Include" />
               <e p="AccessExpressionPartNode.cs" t="Include" />
+              <e p="AliasExpression.cs" t="Include" />
               <e p="ArrayAccessExpressionNode.cs" t="Include" />
               <e p="Ast.cs" t="Include" />
               <e p="BooleanLiteralNode.cs" t="Include" />
@@ -70,7 +78,7 @@
               <e p="NumericLiteralNode.cs" t="Include" />
               <e p="OperatorExpressionNode.cs" t="Include" />
               <e p="OperatorNode.cs" t="Include" />
-              <e p="ParenOperatorNode.cs" t="Include" />
+              <e p="ParenExpressionNode.cs" t="Include" />
               <e p="PropertyAccessExpressionPartNode.cs" t="Include" />
               <e p="RootContextLookupNode.cs" t="Include" />
               <e p="SpecialIdentifierNode.cs" t="Include" />
@@ -113,6 +121,7 @@
           </e>
           <e p="PropAttribute.cs" t="Include" />
           <e p="PropertyBindPair.cs" t="Include" />
+          <e p="ReflectionUtil.cs" t="Include" />
           <e p="Rendering" t="Include">
             <e p="BitUtil.cs" t="Include" />
             <e p="BorderStyle.cs" t="Include" />
@@ -141,7 +150,6 @@
           <e p="Src.asmdef" t="Include" />
           <e p="Temp_SpecFixtures.cs" t="Include" />
           <e p="TemplateAttribute.cs" t="Include" />
-          <e p="TemplateContext.cs" t="Include" />
           <e p="Templates" t="Include">
             <e p="TemplateBinding.cs" t="Include" />
             <e p="TemplateScope.cs" t="Include" />
@@ -164,8 +172,8 @@
           <e p="UIViewBehavior.cs" t="Include" />
         </e>
         <e p="Tests" t="Include">
+          <e p="ExpressionCompilerTests.cs" t="Include" />
           <e p="ExpressionParserTests.cs" t="Include" />
-          <e p="ExpressionTests.cs" t="Include" />
           <e p="ParsingTests.cs" t="Include" />
           <e p="PropTests.cs" t="Include" />
           <e p="StyleTests.cs" t="Include" />

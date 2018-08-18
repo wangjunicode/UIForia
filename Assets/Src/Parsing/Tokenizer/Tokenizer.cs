@@ -65,14 +65,23 @@ namespace Src {
             int startIndex = ptr;
             if (ptr >= input.Length) return input.Length;
 
-            if (!char.IsDigit(input[ptr]) && input[ptr] != '-') return ptr;
+            if (!char.IsDigit(input[ptr])) return ptr;
 
+            // 1
+            // 1.4
+            // 1.4f
+            
             while (ptr < input.Length && (char.IsDigit(input[ptr]) || (!foundDot && input[ptr] == '.'))) {
                 if (input[ptr] == '.') {
                     foundDot = true;
                 }
                 ptr++;
             }
+
+            if (ptr < input.Length && input[ptr] == 'f') {
+                ptr++;
+            }
+            
             output.Add(new DslToken(TokenType.Number, input.Substring(startIndex, ptr - startIndex)));
             return TryConsumeWhiteSpace(ptr, input);
         }

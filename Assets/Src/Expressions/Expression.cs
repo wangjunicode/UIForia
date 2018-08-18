@@ -1,11 +1,20 @@
+using System;
+
 namespace Src {
 
     public abstract class Expression {
 
-        public abstract object Evaluate(TemplateContext context);
+        public abstract Type YieldedType { get; }
+        
+        public abstract object Evaluate(ExpressionContext context);
 
     }
-    
+
+    public abstract class Expression<T> : Expression {
+
+        public abstract T EvaluateTyped(ExpressionContext context);
+
+    }
     
 //    public class FieldSetterStruct_Dynamic<T> where T : struct {
 //

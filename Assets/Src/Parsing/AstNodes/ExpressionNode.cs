@@ -6,7 +6,8 @@ namespace Src {
 
         public readonly ExpressionNodeType expressionType;
 
-
+        protected Type yieldedType;
+        
         protected ExpressionNode(ExpressionNodeType expressionType) {
             this.expressionType = expressionType;
         }

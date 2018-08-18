@@ -1,19 +1,12 @@
 
 namespace Src {
 
-    public enum UnaryOperatorType {
-
-        Not,
-        Plus,
-        Minus
-
-    }
-    
     public enum ExpressionNodeType {
 
         LiteralValue,
         Operator,
         Unary,
+        AliasAccessor,
         RootContextAccessor,
         Accessor,
         Paren,

@@ -54,6 +54,20 @@ namespace Tests {
             Assert.AreEqual(TokenType.Minus, tokens[0].tokenType);
             Assert.AreEqual(TokenType.Number, tokens[1].tokenType);
             
+            input = "-6264f";
+            tokens = Tokenizer.Tokenize(input);
+            Assert.AreEqual("-", tokens[0].value);
+            Assert.AreEqual("6264f", tokens[1].value);
+            Assert.AreEqual(TokenType.Minus, tokens[0].tokenType);
+            Assert.AreEqual(TokenType.Number, tokens[1].tokenType);
+            
+            input = "-6264.414f ";
+            tokens = Tokenizer.Tokenize(input);
+            Assert.AreEqual("-", tokens[0].value);
+            Assert.AreEqual("6264.414f", tokens[1].value);
+            Assert.AreEqual(TokenType.Minus, tokens[0].tokenType);
+            
+            Assert.AreEqual(TokenType.Number, tokens[1].tokenType);
             input = "6264";
             tokens = Tokenizer.Tokenize(input);
             Assert.AreEqual(1, tokens.Count);

@@ -19,10 +19,12 @@ namespace Src {
         LessThanEqualTo = 1 << 12,
         And = 1 << 13,
         Or = 1 << 14,
+        Not = 1 << 15,
 
-        Boolean = And | Or,
+        Boolean = And | Or | Not,
         Arithmetic = Plus | Minus | Times | Divide | Mod,
         Comparator = Equals | NotEquals | GreaterThan | GreaterThanEqualTo | LessThan | LessThanEqualTo,
+
 
     }
 }

@@ -11,16 +11,16 @@ namespace Tests {
             TokenStream stream = new TokenStream(Tokenizer.Tokenize("5"));
             ExpressionParser parser = new ExpressionParser(stream);
             ExpressionNode root = parser.Parse();
-            Assert.IsInstanceOf<NumericLiteralNode>(root);
-            NumericLiteralNode n = (NumericLiteralNode) root;
+            Assert.IsInstanceOf<IntLiteralNode>(root);
+            IntLiteralNode n = (IntLiteralNode) root;
             Assert.AreEqual(5.0, n.value);
 
             stream = new TokenStream(Tokenizer.Tokenize("-5.6"));
             parser = new ExpressionParser(stream);
             root = parser.Parse();
-            Assert.IsInstanceOf<NumericLiteralNode>(root);
-            n = (NumericLiteralNode) root;
-            Assert.AreEqual(-5.6, n.value);
+            Assert.IsInstanceOf<DoubleLiteralNode>(root);
+            DoubleLiteralNode doubleNode0 = (DoubleLiteralNode) root;
+            Assert.AreEqual(-5.6, doubleNode0.value);
 
             stream = new TokenStream(Tokenizer.Tokenize("'hello'"));
             parser = new ExpressionParser(stream);
@@ -174,10 +174,10 @@ namespace Tests {
             TokenStream stream = new TokenStream(Tokenizer.Tokenize("{ (someIdentifier + 735.2) }"));
             ExpressionParser parser = new ExpressionParser(stream);
             ExpressionNode root = parser.Parse();
-            Assert.IsInstanceOf<ParenOperatorNode>(root);
-            ParenOperatorNode parenNode = (ParenOperatorNode) root;
-            Assert.IsInstanceOf<OperatorExpressionNode>(parenNode.expression);
-            OperatorExpressionNode opNode = (OperatorExpressionNode) parenNode.expression;
+            Assert.IsInstanceOf<ParenExpressionNode>(root);
+            ParenExpressionNode parenNode = (ParenExpressionNode) root;
+            Assert.IsInstanceOf<OperatorExpressionNode>(parenNode.expressionNode);
+            OperatorExpressionNode opNode = (OperatorExpressionNode) parenNode.expressionNode;
             Assert.IsInstanceOf<RootContextLookupNode>(opNode.left);
             Assert.IsInstanceOf<NumericLiteralNode>(opNode.right);
         }
@@ -191,7 +191,7 @@ namespace Tests {
             OperatorExpressionNode opEx = (OperatorExpressionNode) root;
             Assert.AreEqual(opEx.op.OpType, OperatorType.Plus);
             Assert.IsInstanceOf<RootContextLookupNode>(opEx.left);
-            Assert.IsInstanceOf<ParenOperatorNode>(opEx.right);
+            Assert.IsInstanceOf<ParenExpressionNode>(opEx.right);
         }
 
         [Test]
@@ -199,9 +199,9 @@ namespace Tests {
             TokenStream stream = new TokenStream(Tokenizer.Tokenize("(1)"));
             ExpressionParser parser = new ExpressionParser(stream);
             ExpressionNode root = parser.Parse();
-            Assert.IsInstanceOf<ParenOperatorNode>(root);
-            ParenOperatorNode opEx = (ParenOperatorNode) root;
-            Assert.IsInstanceOf<NumericLiteralNode>(opEx.expression);
+            Assert.IsInstanceOf<ParenExpressionNode>(root);
+            ParenExpressionNode opEx = (ParenExpressionNode) root;
+            Assert.IsInstanceOf<NumericLiteralNode>(opEx.expressionNode);
         }
 
         [Test]
@@ -221,10 +221,39 @@ namespace Tests {
             ExpressionNode root = parser.Parse();
             Assert.IsInstanceOf<OperatorExpressionNode>(root);
             OperatorExpressionNode opEx = (OperatorExpressionNode) root;
-            Assert.IsInstanceOf<ParenOperatorNode>(opEx.left);
+            Assert.IsInstanceOf<ParenExpressionNode>(opEx.left);
             Assert.IsInstanceOf<NumericLiteralNode>(opEx.right);
         }
 
+        [Test]
+        public void Parse_AliasLookup() {
+            ExpressionParser parser = new ExpressionParser("{$myalias}");
+            ExpressionNode root = parser.Parse();
+            Assert.IsInstanceOf<AliasExpressionNode>(root);
+            AliasExpressionNode node = (AliasExpressionNode) root;
+            Assert.AreEqual("$myalias", node.identifierNode.identifier);
+        }
+        
+        [Test]
+        public void Parse_AliasLookup_PropertyAccess() {
+            ExpressionParser parser = new ExpressionParser("{$myalias.someValue}");
+            ExpressionNode root = parser.Parse();
+            Assert.IsInstanceOf<AccessExpressionNode>(root);
+            AccessExpressionNode node = (AccessExpressionNode) root;
+            Assert.AreEqual("$myalias", node.identifierNode.identifier);
+            Assert.AreEqual(1, node.parts.Count);
+            Assert.IsInstanceOf<AccessExpressionPartNode>(node.parts[0]);
+        }
+        
+        [Test]
+        public void Parse_AliasLookup_InnerExpression() {
+            ExpressionParser parser = new ExpressionParser("{$myalias * 5}");
+            ExpressionNode root = parser.Parse();
+            Assert.IsInstanceOf<OperatorExpressionNode>(root);
+            OperatorExpressionNode node = (OperatorExpressionNode) root;
+            Assert.AreEqual("$myalias", ((AliasExpressionNode)node.left).identifierNode.identifier);            
+        }
+        
         [Test]
         public void Parse_PropertyAccess_RootContext_Level1() {
             ExpressionParser parser = new ExpressionParser("{rootContext.property}");
@@ -273,11 +302,11 @@ namespace Tests {
             Assert.AreEqual("rootContext", node.identifierNode.identifier);
             Assert.AreEqual(1, node.parts.Count);
             Assert.IsInstanceOf<ArrayAccessExpressionNode>(node.parts[0]);
-            Assert.IsInstanceOf<ParenOperatorNode>(((ArrayAccessExpressionNode) node.parts[0]).expressionNode);
+            Assert.IsInstanceOf<ParenExpressionNode>(((ArrayAccessExpressionNode) node.parts[0]).expressionNode);
 
-            Assert.IsInstanceOf<ParenOperatorNode>(((ArrayAccessExpressionNode) node.parts[0]).expressionNode);
-            ParenOperatorNode parenNode = (ParenOperatorNode) ((ArrayAccessExpressionNode) node.parts[0]).expressionNode;
-            OperatorExpressionNode opNode = (OperatorExpressionNode) parenNode.expression;
+            Assert.IsInstanceOf<ParenExpressionNode>(((ArrayAccessExpressionNode) node.parts[0]).expressionNode);
+            ParenExpressionNode parenNode = (ParenExpressionNode) ((ArrayAccessExpressionNode) node.parts[0]).expressionNode;
+            OperatorExpressionNode opNode = (OperatorExpressionNode) parenNode.expressionNode;
             Assert.AreEqual(OperatorType.Plus, opNode.op.OpType);
             Assert.IsInstanceOf<NumericLiteralNode>(opNode.left);
             Assert.IsInstanceOf<NumericLiteralNode>(opNode.right);
@@ -423,6 +452,50 @@ namespace Tests {
             Assert.IsInstanceOf<NumericLiteralNode>(selection.right);
         }
 
+        [Test]
+        public void Parse_UnaryExpression_MinusParen() {
+            ExpressionParser parser = new ExpressionParser("-(64.8)");
+            ExpressionNode root = parser.Parse();
+            UnaryExpressionNode node = AssertInstanceOfAndReturn<UnaryExpressionNode>(root);
+            Assert.AreEqual(OperatorType.Minus, node.op);
+            ParenExpressionNode paren = AssertInstanceOfAndReturn<ParenExpressionNode>(node.expression);
+            DoubleLiteralNode d = AssertInstanceOfAndReturn<DoubleLiteralNode>(paren.expressionNode);
+            Assert.AreEqual(64.8, d.value);
+        }
+        
+        [Test]
+        public void Parse_UnaryExpression_PlusParen() {
+            ExpressionParser parser = new ExpressionParser("+(64.8)");
+            ExpressionNode root = parser.Parse();
+            UnaryExpressionNode node = AssertInstanceOfAndReturn<UnaryExpressionNode>(root);
+            Assert.AreEqual(OperatorType.Plus, node.op);
+            ParenExpressionNode paren = AssertInstanceOfAndReturn<ParenExpressionNode>(node.expression);
+            DoubleLiteralNode d = AssertInstanceOfAndReturn<DoubleLiteralNode>(paren.expressionNode);
+            Assert.AreEqual(64.8, d.value);
+        }
+        
+        [Test]
+        public void Parse_UnaryExpression_NotParen() {
+            ExpressionParser parser = new ExpressionParser("!(true)");
+            ExpressionNode root = parser.Parse();
+            UnaryExpressionNode node = AssertInstanceOfAndReturn<UnaryExpressionNode>(root);
+            Assert.AreEqual(OperatorType.Not, node.op);
+            ParenExpressionNode paren = AssertInstanceOfAndReturn<ParenExpressionNode>(node.expression);
+            BooleanLiteralNode b = AssertInstanceOfAndReturn<BooleanLiteralNode>(paren.expressionNode);
+            Assert.AreEqual(true, b.value);
+        }
+        
+        [Test]
+        public void Parse_UnaryExpression_PlusParenMinus() {
+            ExpressionParser parser = new ExpressionParser("+(-64.8)");
+            ExpressionNode root = parser.Parse();
+            UnaryExpressionNode node = AssertInstanceOfAndReturn<UnaryExpressionNode>(root);
+            Assert.AreEqual(OperatorType.Plus, node.op);
+            ParenExpressionNode paren = AssertInstanceOfAndReturn<ParenExpressionNode>(node.expression);
+            DoubleLiteralNode b = AssertInstanceOfAndReturn<DoubleLiteralNode>(paren.expressionNode);
+            Assert.AreEqual(-64.8, b.value);
+        }
+        
         public static string GetIdentifierName(ASTNode node) {
             if (node is IdentifierNode) {
                 return ((IdentifierNode) node).identifier;

@@ -14,72 +14,126 @@ namespace Src {
             return Visit(root);
         }
 
-        private RootContextSimpleAccessExpression VisitRootContextAccessor(RootContextLookupNode node) {
-            string fieldName = node.idNode.identifier;
-            Type type = context.processedType.rawType;
-            return new RootContextSimpleAccessExpression(type, fieldName);
-        }
-
         private Expression Visit(ExpressionNode node) {
             switch (node.expressionType) {
-              
+
+                case ExpressionNodeType.AliasAccessor:
+                    return VisitAliasNode((AliasExpressionNode) node);
+
+                case ExpressionNodeType.Paren:
+                    return VisitParenNode((ParenExpressionNode) node);
+
                 case ExpressionNodeType.RootContextAccessor:
                     return VisitRootContextAccessor((RootContextLookupNode) node);
 
                 case ExpressionNodeType.LiteralValue:
-                    return VisitConstant((LiteralValueNode)node);
+                    return VisitConstant((LiteralValueNode) node);
 
                 case ExpressionNodeType.Accessor:
-                    return VisitAccessExpression(context, (AccessExpressionNode) node);
+                    return VisitAccessExpression((AccessExpressionNode) node);
 
                 case ExpressionNodeType.Unary:
-                    return VisitUnaryExpression(context, (UnaryExpressionNode) node);
+                    return VisitUnaryExpression((UnaryExpressionNode) node);
 
                 case ExpressionNodeType.Operator:
                     return VisitOperatorExpression((OperatorExpressionNode) node);
+
+                case ExpressionNodeType.MethodCall:
+                    break;
+
             }
 
             return null;
         }
 
-        // type checking
-        // method source with chaining
-        // code gen
-        
+        private Expression VisitAliasNode(AliasExpressionNode node) {
+            Type aliasedType = context.ResolveType(node.alias);
+
+            if (aliasedType == typeof(int)) {
+                return new ResolveExpression_Alias_Int(node.alias);
+            }
+            else {
+                return new ResolveExpression_Alias_Object(node.alias, aliasedType);
+            }
+
+        }
+
+        private AccessExpression_Root VisitRootContextAccessor(RootContextLookupNode node) {
+            string fieldName = node.idNode.identifier;
+            Type type = context.processedType.rawType;
+            return new AccessExpression_Root(type, fieldName);
+        }
+
+        private Expression VisitParenNode(ParenExpressionNode node) {
+            return ParenExpressionFactory.CreateParenExpression(Visit(node.expressionNode));
+        }
+
         private Expression VisitOperatorExpression(OperatorExpressionNode node) {
-            
-            Type typeLeft = node.left.GetYieldedType(context);
-            Type typeRight = node.right.GetYieldedType(context);
-            
-            bool x = sizeof(float) < sizeof(byte);
-            char z = (char) 1;
-            int f = z;
-            float z2 = z;
-            
+            Type leftType = node.left.GetYieldedType(context);
+            Type rightType = node.right.GetYieldedType(context);
+
             switch (node.OpType) {
                 case OperatorType.Plus:
-                    Expression left = Visit(node.left);
-                    Expression right = Visit(node.right);
-                    return new OperatorExpression_Int(OperatorType.Plus, left, right);
+
+                    if (leftType == typeof(string) || rightType == typeof(string)) {
+                        return OperatorExpression_StringConcat.Create(Visit(node.left), Visit(node.right));
+                    }
+
+                    if (ReflectionUtil.AreNumericTypesCompatible(leftType, rightType)) {
+                        return OperatorExpression_Arithmetic.Create(OperatorType.Plus, Visit(node.left), Visit(node.right));
+                    }
+
+                    break;
+
+                case OperatorType.Minus:
+                case OperatorType.Divide:
+                case OperatorType.Times:
+                case OperatorType.Mod:
+
+                    if (ReflectionUtil.AreNumericTypesCompatible(leftType, rightType)) {
+                        return OperatorExpression_Arithmetic.Create(node.OpType, Visit(node.left), Visit(node.right));
+                    }
+                    break;
+
+                case OperatorType.TernaryCondition:
+
+                    return VisitOperator_TernaryCondition(node);
+
+                case OperatorType.TernarySelection:
+                    throw new Exception("Should never visit a TernarySelection operator");
+
+                case OperatorType.GreaterThan:
+                case OperatorType.GreaterThanEqualTo:
+                case OperatorType.LessThan:
+                case OperatorType.LessThanEqualTo:
+                    return new OperatorExpression_Comparison(node.OpType, Visit(node.left), Visit(node.right));
+
+                case OperatorType.Equals:
+                case OperatorType.NotEquals:
+                    return new OperatorExpression_Equality(node.OpType, Visit(node.left), Visit(node.right));
             }
-            return null;
+
+            throw new Exception("Bad operator expression");
         }
 
-        private Expression VisitUnaryExpression(ContextDefinition context, UnaryExpressionNode node) {
+        private Expression VisitUnaryExpression(UnaryExpressionNode node) {
             Type yieldType = node.expression.GetYieldedType(context);
             if (yieldType == typeof(bool)) {
-                if (node.op == UnaryOperatorType.Not) {
-                    return new UnaryBooleanExpression(Visit(node.expression));
+                if (node.op == OperatorType.Not) {
+                    return new UnaryExpression_Boolean((Expression<bool>) Visit(node.expression));
                 }
 
                 throw new Exception("Unary but not boolean operator");
             }
             else if (IsNumericType(yieldType)) {
                 switch (node.op) {
-                    case UnaryOperatorType.Plus:
-                        return new UnaryPlusEvaluator(Visit(node.expression));
-                    case UnaryOperatorType.Minus:
-                        return new UnaryMinusEvaluator(Visit(node.expression));
+
+                    case OperatorType.Plus:
+                        return UnaryExpression_PlusFactory.Create(Visit(node.expression));
+
+                    case OperatorType.Minus:
+                        return UnaryExpression_MinusFactory.Create(Visit(node.expression));
+
                 }
             }
             else { }
@@ -89,79 +143,128 @@ namespace Src {
 
         private static bool IsNumericType(Type type) {
             return type == typeof(int)
-                   || type == typeof(uint)
-                   || type == typeof(byte)
-                   || type == typeof(sbyte)
-                   || type == typeof(short)
-                   || type == typeof(ushort)
                    || type == typeof(float)
-                   || type == typeof(long)
-                   || type == typeof(ulong)
-                   || type == typeof(decimal);
+                   || type == typeof(double);
+
         }
 
-        private Expression VisitAccessExpression(ContextDefinition context, AccessExpressionNode node) {
-//            string contextId = node.rootIdentifier;
-//            for (int i = 0; i < node.parts.Count; i++) {
-//                AccessExpressionPart part = node.parts[i];
-//                if (part is ArrayAccessExpressionPart) {
-//                    ArrayAccessExpressionPart arrayPart = (ArrayAccessExpressionPart) part;
-//                }
-//                else {
-//                    PropertyAccessExpressionPart propertyPart = (PropertyAccessExpressionPart) part;
-//                }
-//            }
+        private Expression VisitAccessExpression(AccessExpressionNode node) {
 
-            //TypeCheck here
-            //node.TypeCheck(context);
-            //  PropertyAccessBinding binding = new PropertyAccessBinding();
-            //  return binding;
-            // thing.item[$i].values[$j].x;
-            // propertyLookup
-            // -> ArrayLookup
-            // -> (iterator lookup)
-            // -> property access
-            // -> array access
-            // -> (iterator lookup)
-            // -> property access
-            return null;
+            string contextName = node.identifierNode.identifier;
+            Type headType = context.ResolveType(contextName);
+
+            if (headType == null) {
+                throw new Exception("Missing field or alias for access on context: " + contextName);
+            }
+
+            if (headType.IsPrimitive) {
+                throw new Exception($"Attempting property access on type {headType.Name} on a primitive field {contextName}");
+            }
+
+            int startOffset = 0;
+            int partCount = node.parts.Count;
+
+            bool isRootContext = !(node.identifierNode is SpecialIdentifierNode);
+
+            if (isRootContext) {
+                startOffset++;
+                partCount++;
+            }
+
+            Type lastType = headType;
+            AccessExpressionPart[] parts = new AccessExpressionPart[partCount];
+
+            for (int i = startOffset; i < partCount; i++) {
+
+                AccessExpressionPartNode part = node.parts[i - startOffset];
+
+                PropertyAccessExpressionPartNode propertyPart = part as PropertyAccessExpressionPartNode;
+
+                if (propertyPart != null) {
+                    string fieldName = propertyPart.fieldName;
+                    lastType = ReflectionUtil.GetFieldInfoOrThrow(lastType, fieldName).FieldType;
+                    parts[i] = new AccessExpressionPart_Field(fieldName);
+                    continue;
+                }
+
+                ArrayAccessExpressionNode arrayPart = part as ArrayAccessExpressionNode;
+                if (arrayPart != null) {
+                    Expression<int> indexExpression = (Expression<int>) Visit(arrayPart.expressionNode);
+                    lastType = ReflectionUtil.GetArrayElementTypeOrThrow(lastType);
+                    parts[i] = new AccessExpressionPart_List(indexExpression);
+                    continue;
+                }
+
+                throw new Exception("Unknown AccessExpression Type: " + part.GetType());
+
+            }
+
+            if (isRootContext) {
+                parts[0] = new AccessExpressionPart_Field(contextName);
+            }
+
+            AccessExpression retn = new AccessExpression(contextName, lastType, parts);
+            return retn;
         }
 
         private static Expression VisitConstant(LiteralValueNode node) {
-            
+
             if (node is NumericLiteralNode) {
-                return new NumericLiteralExpression(((NumericLiteralNode) node).value);
+                return VisitNumericLiteralNode((NumericLiteralNode) node);
             }
 
             if (node is BooleanLiteralNode) {
-                return new BooleanLiteralExpression(((BooleanLiteralNode) node).value);
+                return new LiteralExpression_Boolean(((BooleanLiteralNode) node).value);
             }
 
             if (node is StringLiteralNode) {
-                return new StringLiteralExpression(((StringLiteralNode) node).value);
+                return new LiteralExpression_String(((StringLiteralNode) node).value);
             }
 
             return null;
         }
 
-        private static Expression VisitStringConstant(StringLiteralNode node) {
-            return new StringLiteralExpression(node.value);
+        private static Expression VisitNumericLiteralNode(NumericLiteralNode node) {
+            if (node is FloatLiteralNode) {
+                return new LiteralExpression_Float(((FloatLiteralNode) node).value);
+            }
+            else if (node is IntLiteralNode) {
+                return new LiteralExpression_Int(((IntLiteralNode) node).value);
+            }
+            else {
+                return new LiteralExpression_Double(((DoubleLiteralNode) node).value);
+            }
         }
 
-        private static Expression VisitBooleanConstant(BooleanLiteralNode node) {
-            return new BooleanLiteralExpression(node.value);
-        }
+        private Expression VisitOperator_TernaryCondition(OperatorExpressionNode node) {
+            Expression<bool> condition = (Expression<bool>) Visit(node.left);
+            OperatorExpressionNode select = (OperatorExpressionNode) node.right;
 
-        private static Expression VisitNumericConstant(NumericLiteralNode node) {
-            return new NumericLiteralExpression(node.value);
-        }
+            if (select.OpType != OperatorType.TernarySelection) {
+                throw new Exception("Bad ternary");
+            }
 
-        private static bool EnsureCompatibleType(Type type1, Type type2) {
-            return type1.IsAssignableFrom(type2);
-        }
+            Expression right = Visit(select.right);
+            Expression left = Visit(select.left);
 
-        private static bool EnsureHasField(Type type, string fieldName) {
-            return type.GetField(fieldName) != null;
+            if (right.YieldedType == typeof(int) && left.YieldedType == typeof(int)) {
+                return new OperatorExpression_Ternary_Generic<int>(condition, (Expression<int>) left, (Expression<int>) right);
+            }
+            else if (right.YieldedType == typeof(float) && left.YieldedType == typeof(float)) {
+                return new OperatorExpression_Ternary_Generic<float>(condition, (Expression<float>) left, (Expression<float>) right);
+            }
+            else if (right.YieldedType == typeof(double) && left.YieldedType == typeof(double)) {
+                return new OperatorExpression_Ternary_Generic<double>(condition, (Expression<double>) left, (Expression<double>) right);
+            }
+            else if (right.YieldedType == typeof(string) && left.YieldedType == typeof(string)) {
+                return new OperatorExpression_Ternary_Generic<string>(condition, (Expression<string>) left, (Expression<string>) right);
+            }
+            else if (right.YieldedType == typeof(bool) && left.YieldedType == typeof(bool)) {
+                return new OperatorExpression_Ternary_Generic<bool>(condition, (Expression<bool>) left, (Expression<bool>) right);
+            }
+            else {
+                return new OperatorExpression_Ternary(condition, left, right);
+            }
         }
 
     }

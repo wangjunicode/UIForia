@@ -33,11 +33,29 @@ namespace Src {
             this.aliases = new List<Alias>();
             this.processedType = TypeProcessor.GetType(type);
             this.listContexts = new List<ListContextDefinition>();
-            aliases.Add(new Alias("this", type));
-            aliases.Add(new Alias(string.Empty, type));
         }
 
         public Type rootContextType => processedType.rawType;
+
+        public void SetAliasToType(string alias, Type type) {
+
+            for (int i = 0; i < aliases.Count; i++) {
+                if (aliases[i].name == alias) {
+                    aliases[i] = new Alias(alias, type);
+                    return;
+                }
+            }
+            aliases.Add(new Alias(alias, type));
+        }
+
+        public void RemoveAlias(string alias) {
+            for (int i = 0; i < aliases.Count; i++) {
+                if (aliases[i].name == alias) {
+                    aliases.RemoveAt(i);
+                    return;
+                }
+            }
+        }
 
         public void AddListContext(Type listItemType, string itemAlias, string indexAlias, string lengthAlias) {
             if (aliases.Any((alias) => alias.name == itemAlias)) {
@@ -78,9 +96,11 @@ namespace Src {
             }
 
             FieldInfo fieldInfo = rootContextType.GetField(alias, bindFlags);
+            
             if (fieldInfo != null) {
                 return fieldInfo.FieldType;
             }
+            
             return null;
         }
 

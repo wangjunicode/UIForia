@@ -14,14 +14,17 @@ namespace Src {
         }
 
         public override Type YieldedType => typeof(bool);
-        
+
         public override bool EvaluateTyped(ExpressionContext context) {
             return value;
         }
 
-
         public override object Evaluate(ExpressionContext context) {
             return boxedValue;
+        }
+
+        public override bool IsConstant() {
+            return true;
         }
 
     }

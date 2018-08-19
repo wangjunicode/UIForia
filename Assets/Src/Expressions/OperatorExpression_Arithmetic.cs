@@ -18,7 +18,7 @@ namespace Src {
         private static bool IsNumericLiteralExpression(Expression expression) {
             return expression is LiteralExpression_Float || expression is LiteralExpression_Double || expression is LiteralExpression_Int;
         }
-        
+
         private static Expression CreateOperatorExpression(OperatorType operatorType, Expression left, Expression right) {
             Type leftType = left.YieldedType;
             Type rightType = right.YieldedType;
@@ -142,6 +142,10 @@ namespace Src {
             return EvaluateTyped(context);
         }
 
+        public override bool IsConstant() {
+            return left.IsConstant() && right.IsConstant();
+        }
+
     }
 
     public class OperatorExpression_Arithmetic_DoubleFloat : Expression<double> {
@@ -184,6 +188,10 @@ namespace Src {
             return EvaluateTyped(context);
         }
 
+        public override bool IsConstant() {
+            return left.IsConstant() && right.IsConstant();
+        }
+
     }
 
     public class OperatorExpression_Arithmetic_DoubleDouble : Expression<double> {
@@ -224,6 +232,10 @@ namespace Src {
 
         public override object Evaluate(ExpressionContext context) {
             return EvaluateTyped(context);
+        }
+
+        public override bool IsConstant() {
+            return left.IsConstant() && right.IsConstant();
         }
 
     }
@@ -273,6 +285,10 @@ namespace Src {
             return EvaluateTyped(context);
         }
 
+        public override bool IsConstant() {
+            return left.IsConstant() && right.IsConstant();
+        }
+
     }
 
     public class OperatorExpression_Arithmetic_FloatFloat : Expression<float> {
@@ -314,6 +330,10 @@ namespace Src {
 
         public override object Evaluate(ExpressionContext context) {
             return EvaluateTyped(context);
+        }
+
+        public override bool IsConstant() {
+            return left.IsConstant() && right.IsConstant();
         }
 
     }
@@ -362,6 +382,10 @@ namespace Src {
             return EvaluateTyped(context);
         }
 
+        public override bool IsConstant() {
+            return left.IsConstant() && right.IsConstant();
+        }
+
     }
 
     public class OperatorExpression_Arithmetic_IntInt : Expression<int> {
@@ -401,6 +425,10 @@ namespace Src {
 
         public override object Evaluate(ExpressionContext context) {
             return EvaluateTyped(context);
+        }
+
+        public override bool IsConstant() {
+            return left.IsConstant() && right.IsConstant();
         }
 
     }
@@ -447,6 +475,10 @@ namespace Src {
             return EvaluateTyped(context);
         }
 
+        public override bool IsConstant() {
+            return left.IsConstant() && right.IsConstant();
+        }
+
     }
 
     public class OperatorExpression_Arithmetic_IntFloat : Expression<float> {
@@ -488,6 +520,10 @@ namespace Src {
             return EvaluateTyped(context);
         }
 
+        public override bool IsConstant() {
+            return left.IsConstant() && right.IsConstant();
+        }
+
     }
 
     public class OperatorExpression_Arithmetic_IntDouble : Expression<double> {
@@ -527,6 +563,10 @@ namespace Src {
 
         public override object Evaluate(ExpressionContext context) {
             return EvaluateTyped(context);
+        }
+
+        public override bool IsConstant() {
+            return left.IsConstant() && right.IsConstant();
         }
 
     }

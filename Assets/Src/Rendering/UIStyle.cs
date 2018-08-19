@@ -2,7 +2,6 @@ using System;
 using System.Diagnostics;
 using JetBrains.Annotations;
 using Src;
-using Src.Layout;
 using UnityEngine;
 
 namespace Rendering {

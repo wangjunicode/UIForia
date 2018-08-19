@@ -129,4 +129,157 @@ Layout = Flow | FixedFlow
 
 
 
-need to handle numbers property or method lookup breaks
+LayoutType
+LayoutDirection
+Units
+Colors
+ContentBox
+Urls / Asset Pointers
+Int
+Float
+Visibility
+Overflow
+
+Style {
+    color: rgba(1, 2, 3, 4.4);
+    font: url('path');
+    rgb($index * 4, 1, 4);
+}
+
+context.SetAlias("rgb", Color.constructor);
+context.SetAlias("url", AssetPointer);
+context.SetAlias("LayoutType", LayoutType);
+
+style.Visibility="Visible"
+style.Visibility="{isVisible ? $visible : $hidden}"
+style.LayoutDirection="$Column"
+style.LayoutType="$Flex";
+style.hover.rect={ $Rect(10, 5, 2, 5) }
+style.font="{url(someUrlField)}"
+
+context.SetFunctionAlias("Rect", () => new Rect());
+
+class StyleBinding_LayoutType {
+
+    public void Execute(UIElement element, UITemplateContext context) {
+        context.SetAlias("Flex", LayoutType.Flex);
+        context.SetAlias("Grid", LayoutType.Grid);
+        context.SetAlias("Stack", LayoutType.Stack);
+        context.SetAlias("None", LayoutType.None);
+        LayoutType layoutType = expression.EvaluateTyped(context);
+        if(layoutType != element.style.layoutType) {
+            element.style.layoutType = layoutType;
+            context.view.MarkForRendering(element);
+        }
+        context.RemoveAlias("Flex");
+    }
+
+}
+
+class StyleBinding_BackgroundColor {
+
+    public readonly Expression<Color> expression;
+
+    public void Execute(UIElement element, UITemplateContext context) {
+        context.SetFunctionAlias("Color", (float r, float g, float b) => {
+            return new Color(r, g, b);
+        })
+        Color color = expression.EvaluateTyped(context);
+    }
+
+}
+
+class MethodCallExpression<T, U, V, W, Z> : Expression<Z> {
+
+    public override Z EvaluateTyped(ExpressionContext context) {
+        
+        context.GetMethod<T, U, V, W, Z>(methodName);
+
+        return method.Invoke(
+            arg0.EvaluateTyped(context), 
+            arg1.EvaluateTyped(context),
+            arg2.EvaluateTyped(context),
+            arg3.EvaluateTyped(context)
+        );
+
+    }
+
+}
+
+class MethodPointerExpression {
+
+    public Expression[] args;
+
+    public override Func<T> EvaluateTyped(ExpressionContext context) {
+        return new MethodPointer(method, args);
+    }
+
+}
+
+Render Primitives:
+    Text
+    TextMeshProText
+    RawImage
+    ProceduralImage
+    RectMask
+    PolygonMask
+
+When style changes such that it needs to be rendered:
+    Border,
+    Color,
+    Opacity,
+    Background,
+    Material,
+    Shadow,
+    Visibility,
+    etc
+
+style will update these properties based on the type of primitive
+if it wasn't rendered before we automatically create an appropriate primitive(s)
+if it no longer needs to render, we remove the primitive
+
+Some things have a 'proxy' parent such as children of a control flow node
+that node is never renderable
+
+layout traversal is of all non proxy elements
+
+   handle creating and removing
+            handle filtering
+            handle moving index (maybe)
+            
+            how do you behave with layout since it has an implicit parent element
+            1. repeat is inline and inserts children to parent scope
+                need to manage which elements belong to which index
+                need to set index in bindings somehow
+                
+            2. repeat has a special layout handler
+            
+            3. 2 variants -- inline repeat, regular repeat
+            
+            inline repeat is not style-able at all
+            block repeat is treated as a normal element
+            
+            for inline need to solve context setting
+            
+            probably with non rendering children that contain the others
+            these children exist only in the binding hierarchy
+            
+            'parent' is starting to be fuzzy
+            we have 
+                actual parent
+                template parent
+                render parent
+                layout parent
+                binding parent
+                style parent?
+                input parent?
+                animation parent?
+                scope parent?
+            skip tree can be powerful here
+            
+            when as a user do I ever need to access my parent? probably never, only the systems need it
+            probably never need to touch children either
+            
+            repeat.enter()
+                context.SetAlias("$index", i);
+

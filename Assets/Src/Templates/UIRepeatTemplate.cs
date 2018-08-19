@@ -6,10 +6,6 @@ namespace Src {
 
         private Binding[] bindings;
 
-        public override bool TypeCheck() {
-            throw new System.NotImplementedException();
-        }
-
         public override bool Compile(ParsedTemplate template) {
             
             ContextDefinition context = template.contextDefinition;
@@ -39,13 +35,13 @@ namespace Src {
             Expression listExpression = compiler.Compile(listExpressionNode);
             Type listType = listExpressionNode.GetYieldedType(context);
             
-            context.AddListContext(listType, itemAlias, indexAlias, lengthAlias);
+           // context.AddListContext(listType, itemAlias, indexAlias, lengthAlias);
 
             for (int i = 0; i < childTemplates.Count; i++) {
                 childTemplates[i].Compile(template);
             }
             
-            context.RemoveListContext(itemAlias);
+            //context.RemoveListContext(itemAlias);
             
             bindings = new Binding[] {
                // new RepeatEnterBinding()
@@ -54,13 +50,13 @@ namespace Src {
             return true;
         }
 
-        public override UIElement CreateScoped(TemplateScope scope) {
-            UIRepeatElement element = new UIRepeatElement();
-
-
-            scope.view.RegisterBindings(element, bindings, scope.context);
-
-            return element;
+        public override RegistrationData CreateScoped(TemplateScope scope) {
+            throw new NotImplementedException();
+//            UIRepeatElement element = new UIRepeatElement();
+//
+//            scope.view.bindingSystem.Register(element, bindings, scope.context);
+//
+//            return element;
         }
 
     }

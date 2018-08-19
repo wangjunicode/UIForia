@@ -44,7 +44,7 @@ public class ParsingTests {
                 </Contents>
             </UITemplate>
         ");
-        Assert.AreEqual(typeof(UIChildrenElement), parsedTemplate.childTemplates[0].ElementType);
+        Assert.IsInstanceOf<UIChildrenTemplate>(parsedTemplate.childTemplates[0]);
     }
 
     [Test]

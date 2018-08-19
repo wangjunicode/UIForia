@@ -1,7 +1,6 @@
 using NUnit.Framework;
 using Src;
 
-namespace Tests {
 
     [TestFixture]
     public class ExpressionParserTests {
@@ -513,4 +512,3 @@ namespace Tests {
 
     }
 
-}

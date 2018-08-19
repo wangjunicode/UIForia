@@ -160,7 +160,10 @@
         -> pass in children
         -> return created color selector template
 
-
+        <Using key="{Math}" as=""/>
+        
+        <UseFunction name="global::Math.Max(float, float)" as="Max"/>
+        
         <Section>
             Text
             <Children/>
@@ -212,13 +215,15 @@
 
         </Switch>
 
-        <ColorSelector>
+        <ColorSelector onClick="{Alert('hello')}" onColorChanged="{}">
             <Repeat list="{colors}">
-                <Text>{item.rgb + this.alpha}</Text>
+                <Text style.margin="{StyleRect(px(1), content(2), 3, parent(4)}">
+                    {item.rgb + this.alpha}
+                </Text>
             </Repeat>
         </ColorSelector>
 
-        <Repeat filter="" list="{valueList}" alias="item" onItemMoved="{}" onItemAdded="{}"
+        <Repeat filter="" list="{valueList}" x-bindOnce="" x-updateRate="" alias="item" onItemMoved="{}" onItemAdded="{}"
                 onItemRemoved="{}">
             <Implicit.RepeatChild>-> context.currentList.$index = 1;
                 {item.something :: someObservedProperty} -- only check for updates when property changed

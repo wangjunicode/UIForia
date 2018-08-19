@@ -19,9 +19,22 @@ namespace Rendering {
             this.element = element;
             this.view = view;
             stylePairs = new StyleFlagPair[1];
-            stylePairs[0] = new StyleFlagPair(new UIStyle(), StyleStateType.InstanceNormal, -1);
         }
 
+        public void EnterState(StyleStateType type) {
+            type &= ~(StyleStateType.Instance);
+            type &= ~(StyleStateType.Base);
+            currentStateType |= type;
+        }
+
+        public void ExitState(StyleStateType type) {
+            if (type == StyleStateType.Hover) {
+                currentStateType &= ~(StyleStateType.Hover);
+               // view.MarkForRenderStateChange(element);
+            }
+        }
+        
+       
         public UIStyleProxy hover {
             get { return new UIStyleProxy(this, StyleStateType.Hover); }
             // ReSharper disable once ValueParameterNotUsed
@@ -107,12 +120,13 @@ namespace Rendering {
         }
 
         public bool ignoreLayout => false;
-        
+
         public UIMeasurement rectWidth {
             get {
                 UIStyle style = FindActiveStyle((s) => s.rect.width != UIStyle.UnsetMeasurementValue);
                 return style != null ? style.rect.width : UIStyle.Default.rect.width;
             }
+            set { SetRectWidthForState(StyleStateType.InstanceNormal, value); }
         }
 
         public UIMeasurement rectHeight {
@@ -120,6 +134,7 @@ namespace Rendering {
                 UIStyle style = FindActiveStyle((s) => s.rect.height != UIStyle.UnsetMeasurementValue);
                 return style != null ? style.rect.height : UIStyle.Default.rect.height;
             }
+            set { SetRectHeightForState(StyleStateType.InstanceNormal, value); }
         }
 
         public LayoutDirection layoutDirection {
@@ -136,7 +151,7 @@ namespace Rendering {
             }
             set {
                 SetBackgroundColorForState(StyleStateType.InstanceNormal, value);
-                view.MarkForRendering(element);
+              //  view.MarkForRendering(element);
             }
         }
 
@@ -147,7 +162,7 @@ namespace Rendering {
             }
             set {
                 SetBackgroundImageForState(StyleStateType.InstanceNormal, value);
-                view.MarkForRendering(element);
+               // view.MarkForRendering(element, UIView.StyleOperation());
             }
         }
 
@@ -158,10 +173,13 @@ namespace Rendering {
             }
             set {
                 SetBackgroundColorForState(StyleStateType.InstanceNormal, value);
-                view.MarkForRendering(element);
+               // view.MarkForRendering(element);
             }
         }
 
+        // todo radius should work individually on corners, make this a vector4 or similar
+        public float borderRadius => UIStyle.UnsetFloatValue;
+        
         public ContentBoxRect margin {
             get { return new ContentBoxRect(marginTop, marginRight, marginBottom, marginLeft); }
 //            set { SetMarginForState(StyleStateType.InstanceNormal, value); }
@@ -315,6 +333,7 @@ namespace Rendering {
 
         public void SetBackgroundColorForState(StyleStateType state, Color color) {
             GetOrCreateStyleForState(state).paint.backgroundColor = color;
+            view.renderSystem.RegisterStyleStateChange(element);
         }
 
         public Color GetBackgroundColorForState(StyleStateType state) {
@@ -347,6 +366,25 @@ namespace Rendering {
         public ContentBoxRect GetPaddingForState(StyleStateType state) {
             UIStyle style = GetStyleForState(state);
             return (style != null) ? style.contentBox.padding : UIStyle.UnsetRectValue;
+        }
+
+        public UIMeasurement GetRectWidthForState(StyleStateType state) {
+            UIStyle style = GetStyleForState(state);
+            return (style != null) ? style.rect.width : UIStyle.Default.rect.width;
+        }
+
+        public void SetRectWidthForState(StyleStateType state, UIMeasurement width) {
+            GetOrCreateStyleForState(state).rect.width = width;
+            view.renderSystem.SetRectWidth(element, rectWidth);
+        }
+
+        public UIMeasurement GetRectHeightForState(StyleStateType state) {
+            UIStyle style = GetStyleForState(state);
+            return (style != null) ? style.rect.height : UIStyle.Default.rect.height;
+        }
+
+        public void SetRectHeightForState(StyleStateType state, UIMeasurement height) {
+            GetOrCreateStyleForState(state).rect.height = height;
         }
 
 //        public float GetContentWidthForState(StyleStateType state) {
@@ -496,7 +534,6 @@ namespace Rendering {
                             retn += 20;
                         }
                     }
-
 
                     return retn;
                 }

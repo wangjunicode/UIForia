@@ -1,8 +1,9 @@
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using Rendering;
-using Src.Parsing.Style;
-using UnityEngine;
+using Src.Compilers;
+using Src.StyleBindings;
 
 namespace Src {
 
@@ -19,60 +20,24 @@ namespace Src {
         public UIStyle disabledStyleTemplate;
         public List<UIStyle> baseStyles;
 
+        public StyleBinding[] constantBindings;
+        public StyleBinding[] dynamicStyleBindings;
+
         public UITemplate() {
             childTemplates = new List<UITemplate>();
         }
-        
-        public abstract bool TypeCheck();
 
-        public abstract UIElement CreateScoped(TemplateScope scope);
+        
+        public abstract RegistrationData CreateScoped(TemplateScope scope);
 
         public virtual Type ElementType => processedElementType.rawType;
 
-        // todo -- also compile a binding if needed
-        private void CompileStyleBinding(ref UIStyle style, AttributeDefinition attr, string styleKey) {
-            switch (styleKey) {
-                case "paint.backgroundColor":
-                    style = style ?? new UIStyle();
-                    style.paint.backgroundColor = StyleParseUtil.ParseColor(attr.value);
-//                    style.paint.backgroundColor = StyleBindingCompiler.CompileColorExpression(contextDefinition, attr.value)
-                    break;
-
-                case "rect.x":
-                    style = style ?? new UIStyle();
-                    style.rect.x = StyleParseUtil.ParseMeasurement(attr.value);
-                    break;
-
-                case "rect.y":
-                    style = style ?? new UIStyle();
-                    style.rect.y = StyleParseUtil.ParseMeasurement(attr.value);
-                    break;
-
-                case "rect.w":
-                    style = style ?? new UIStyle();
-                    style.rect.width = StyleParseUtil.ParseMeasurement(attr.value);
-                    break;
-
-                case "rect.h":
-                    style = style ?? new UIStyle();
-                    style.rect.height = StyleParseUtil.ParseMeasurement(attr.value);
-                    break;
-                
-                case "layout.direction":
-                    style = style ?? new UIStyle();
-                    style.layoutDirection = StyleParseUtil.ParseLayoutDirection(attr.value);
-                    break;
-                
-                default:
-                    Debug.LogWarning(
-                        $"Attribute {attr.key} seems like a style property but doesn't match a valid style key name");
-                    break;
-            }
-        }
-
+        private static readonly StyleBindingCompiler styleCompiler = new StyleBindingCompiler();
 
         public void CompileStyles(ParsedTemplate template) {
             if (attributes == null) return;
+
+            List<StyleBinding> styleList = new List<StyleBinding>();
 
             for (int i = 0; i < attributes.Count; i++) {
                 AttributeDefinition attr = attributes[i];
@@ -100,24 +65,32 @@ namespace Src {
 
                     if (baseStyles.Count == 0) baseStyles = null;
                 }
-                else if (attr.key.StartsWith("style.hover.")) {
-                    CompileStyleBinding(ref hoverStyleTemplate, attr, attr.key.Substring("style.hover.".Length));
-                }
+                else {
+                    StyleBinding binding = styleCompiler.Compile(template.contextDefinition, attr.key, attr.value);
 
-                else if (attr.key.StartsWith("style.disabled.")) {
-                    CompileStyleBinding(ref disabledStyleTemplate, attr, attr.key.Substring("style.disabled.".Length));
-                }
+                    styleList.Add(binding);
 
-                else if (attr.key.StartsWith("style.focused.")) {
-                    CompileStyleBinding(ref focusedStyleTemplate, attr, attr.key.Substring("style.focused.".Length));
                 }
+            }
 
-                else if (attr.key.StartsWith("style.active.")) {
-                    CompileStyleBinding(ref activeStyleTemplate, attr, attr.key.Substring("style.active.".Length));
-                }
-                else if (attr.key.StartsWith("style.")) {
-                    CompileStyleBinding(ref normalStyleTemplate, attr, attr.key.Substring("style.".Length));
-                }
+            constantBindings = styleList.Where((s) => s.IsConstant()).ToArray();
+            dynamicStyleBindings = styleList.Where((s) => !s.IsConstant()).ToArray();
+
+        }
+
+        private UIStyle GetStyleForState(StyleStateType state) {
+            switch (state) {
+                case StyleStateType.Normal:
+                    return normalStyleTemplate;
+                case StyleStateType.Active:
+                    return activeStyleTemplate;
+                case StyleStateType.Disabled:
+                    return disabledStyleTemplate;
+                case StyleStateType.Hover:
+                    return hoverStyleTemplate;
+                case StyleStateType.Focused:
+                    return focusedStyleTemplate;
+                default: return null;
             }
         }
 
@@ -145,7 +118,7 @@ namespace Src {
             return null;
         }
 
-        public void ApplyStyles(UIElement element, TemplateScope scope) {
+        public void ApplyConstantStyles(UIElement element, TemplateScope scope) {
             element.style = new UIStyleSet(element, scope.view);
 
             if (normalStyleTemplate != null) {
@@ -174,6 +147,13 @@ namespace Src {
                     element.style.AddBaseStyle(baseStyles[i]);
                 }
             }
+
+            if (constantBindings != null) {
+                for (int i = 0; i < constantBindings.Length; i++) {
+                    constantBindings[i].Apply(element.style, scope.context);
+                }
+            }
+
         }
 
     }

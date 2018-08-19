@@ -16,31 +16,68 @@ namespace Src {
         private bool isCompiled;
 
         public List<UITemplate> childTemplates => rootElement.childTemplates;
-        public Type ElementType => rootElement.ElementType;
 
-        private static readonly List<UIElement> EmptyElementList = new List<UIElement>(0);
+        private static readonly List<RegistrationData> EmptyElementList = new List<RegistrationData>(0);
 
         public UIElement CreateWithScope(TemplateScope scope) {
             if (!isCompiled) Compile();
 
             UIElement instance = (UIElement) Activator.CreateInstance(rootElement.processedElementType.rawType);
 
-            List<UIElement> children = new List<UIElement>();
+            RegistrationData instanceData = new RegistrationData(instance, null, scope.context);
+            
+            List<RegistrationData> children = new List<RegistrationData>();
 
             for (int i = 0; i < rootElement.childTemplates.Count; i++) {
-                UIElement child = rootElement.childTemplates[i].CreateScoped(scope);
-                if (child != null) {
-                    children.Add(child);
-                    child.parent = instance;
+                UITemplate template = rootElement.childTemplates[i];
+                if (template is UIChildrenTemplate) {
+                    children.AddRange(scope.inputChildren);
+                }
+                else {
+                    children.Add(template.CreateScoped(scope));
                 }
             }
 
-            instance.children = children;
-            rootElement.ApplyStyles(instance, scope);
+            for (int i = 0; i < children.Count; i++) {
+                scope.SetParent(children[i], instanceData);
+            }
+                        
+            rootElement.ApplyConstantStyles(instance, scope);
 
             return instance;
         }
 
+       
+        public UIElement CreateWithoutScope(UIView view) {
+            if (!isCompiled) Compile();
+
+            UITemplateContext context = new UITemplateContext(view);
+
+            List<RegistrationData> outputList = new List<RegistrationData>();
+            
+            TemplateScope scope = new TemplateScope(outputList);
+            scope.view = view;
+            scope.context = context;
+            scope.inputChildren = EmptyElementList;
+
+            UIElement root = (UIElement) Activator.CreateInstance(rootElement.processedElementType.rawType);
+            context.rootElement = root;
+
+            RegistrationData rootData = new RegistrationData(root, null, context);
+            
+            scope.SetParent(rootData, default(RegistrationData));
+            
+            for (int i = 0; i < childTemplates.Count; i++) {
+                scope.SetParent(childTemplates[i].CreateScoped(scope), rootData);
+            }
+
+            rootElement.ApplyConstantStyles(root, scope);
+
+            scope.RegisterAll();
+            
+            return root;
+        }
+        
         private void Compile() {
             if (isCompiled) return;
             
@@ -58,30 +95,6 @@ namespace Src {
             }
 
             isCompiled = true;
-        }
-
-        public UIElement CreateWithoutScope(UIView view, List<UIElement> inputChildren = null) {
-            if (!isCompiled) Compile();
-
-            UITemplateContext context = new UITemplateContext(view);
-
-            TemplateScope scope = new TemplateScope();
-            scope.view = view;
-            scope.context = context;
-            scope.inputChildren = inputChildren ?? EmptyElementList;
-
-            UIElement root = (UIElement) Activator.CreateInstance(rootElement.processedElementType.rawType);
-            root.children = new List<UIElement>();
-
-            for (int i = 0; i < childTemplates.Count; i++) {
-                root.children.Add(childTemplates[i].CreateScoped(scope));
-                root.children[i].parent = root;
-            }
-
-            rootElement.ApplyStyles(root, scope);
-            context.rootElement = root;
-
-            return root;
         }
 
         public UIStyle GetStyleInstance(string styleName) {

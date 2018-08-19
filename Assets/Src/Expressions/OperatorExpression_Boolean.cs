@@ -32,6 +32,9 @@ namespace Src {
             return EvaluateTyped(context);
         }
 
+        public override bool IsConstant() {
+            return left.IsConstant() && right.IsConstant();
+        }
     }
 
 }

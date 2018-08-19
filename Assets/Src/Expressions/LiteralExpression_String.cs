@@ -20,6 +20,10 @@ namespace Src {
             return value;
         }
 
+        public override bool IsConstant() {
+            return true;
+        }
+
     }
 
 }

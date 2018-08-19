@@ -47,6 +47,10 @@ namespace Src {
             return expression.Evaluate(context);
         }
 
+        public override bool IsConstant() {
+            return expression.IsConstant();
+        }
+
     }
 
     public class ParenExpression_Typed<T> : Expression<T> {
@@ -65,6 +69,10 @@ namespace Src {
 
         public override object Evaluate(ExpressionContext context) {
             return expression.EvaluateTyped(context);
+        }
+
+        public override bool IsConstant() {
+            return expression.IsConstant();
         }
 
     }

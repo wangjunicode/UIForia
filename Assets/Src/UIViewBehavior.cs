@@ -1,11 +1,18 @@
 ﻿using System.Collections.Generic;
 using Rendering;
 using UnityEngine;
+using UnityEngine.UI;
 
 namespace Src {
 
     [Template("TestTemplate.xml")]
-    public class TempUIType : UIElement { }
+    public class TempUIType : UIElement {
+
+        [Prop] public float r;
+        [Prop] public float g;
+        [Prop] public float b;
+
+    }
 
     [Template("TestRepeat.xml")]
     public class TestRepeat : UIElement {
@@ -24,23 +31,30 @@ namespace Src {
         public Font font;
         public UIView view;
 
+        public Color color;
+        
         public void Start() {
 
-            view = new UIView();
+            view = new UIView(gameObject);
             view.font = font;
-            view.gameObject = gameObject;
-            view.templateType = typeof(TestRepeat);
-            view.OnCreate();
-
+            view.templateType = typeof(TempUIType);
+           view.OnCreate();
+            TempUIType t = (TempUIType) view.root;
         }
 
         public void RefreshView() {
-            if (view != null) {
-                view.Refresh();
-            }
+            view?.Refresh();
         }
         
         public void Update() {
+//            Vector3[] corners = new Vector3[4];
+//            GetComponent<RectTransform>().GetWorldCorners(corners);
+//            Rect newRect = new Rect(corners[0], corners[2] - corners[0]);
+//            GetComponentInChildren<Text>().text = newRect + "\n" + Input.mousePosition;
+//            TempUIType t = (TempUIType) view.root;
+//            t.r = color.r;
+//            t.g = color.g;
+//            t.b = color.b;
             view.Update();
         }
 

@@ -1,4 +1,5 @@
 using System;
+using System.Reflection;
 
 namespace Src {
 
@@ -39,13 +40,43 @@ namespace Src {
                     return VisitOperatorExpression((OperatorExpressionNode) node);
 
                 case ExpressionNodeType.MethodCall:
-                    break;
+                    return VisitMethodCallExpression((MethodCallNode) node);
 
             }
 
             return null;
         }
 
+        private Expression VisitMethodCallExpression(MethodCallNode node) {
+
+            string methodName = node.identifierNode.identifier;
+
+            context.ResolveType(node.identifierNode.identifier);
+            MethodInfo info = context.ResolveMethod(methodName);
+
+            if (info == null) {
+                throw new Exception($"Cannot find method {methodName} on type {context.rootType.Name} or any registered aliases");
+            }
+
+            ParameterInfo[] parameterInfos = info.GetParameters();
+            if (parameterInfos.Length != node.signatureNode.parts.Count) {
+                throw new Exception("Argument count is wrong");
+            }
+            
+            Expression[] args = new Expression[node.signatureNode.parts.Count];
+            for (int i = 0; i < args.Length; i++) {
+                args[i] = Visit(node.signatureNode.parts[i]);
+            }
+            
+//            for (int i = 0; i < parameterInfos.Length; i++) {
+//                if (!parameterInfos[i].ParameterType.IsAssignableFrom(args[i].YieldedType)) {
+//                    throw new Exception($"Cannot use parameter of type {args[i].YieldedType} for parameter of type {parameterInfos[i].ParameterType}");
+//                }    
+//            }
+            
+            return new MethodCallExpression(info, args);
+        }
+        
         private Expression VisitAliasNode(AliasExpressionNode node) {
             Type aliasedType = context.ResolveType(node.alias);
 

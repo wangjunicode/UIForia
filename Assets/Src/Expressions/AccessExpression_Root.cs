@@ -20,6 +20,10 @@ namespace Src {
             return cachedFieldInfo.GetValue(context.rootContext);
         }
 
+        public override bool IsConstant() {
+            return false;
+        }
+
     }
 
 }

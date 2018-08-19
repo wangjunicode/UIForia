@@ -21,6 +21,10 @@ namespace Src {
             return condition.EvaluateTyped(context) ? left.Evaluate(context) : right.Evaluate(context);
         }
 
+        public override bool IsConstant() {
+            return condition.IsConstant() && left.IsConstant() && right.IsConstant();
+        }
+
     }
 
     public class OperatorExpression_Ternary_Generic<T> : Expression<T> {
@@ -34,7 +38,7 @@ namespace Src {
             this.left = left;
             this.right = right;
         }
-        
+
         public override Type YieldedType => typeof(T);
 
         public override T EvaluateTyped(ExpressionContext context) {
@@ -43,6 +47,10 @@ namespace Src {
 
         public override object Evaluate(ExpressionContext context) {
             return condition.EvaluateTyped(context) ? left.Evaluate(context) : right.Evaluate(context);
+        }
+
+        public override bool IsConstant() {
+            return condition.IsConstant() && left.IsConstant() && right.IsConstant();
         }
 
     }

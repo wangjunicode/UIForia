@@ -39,6 +39,18 @@ namespace Src {
             return !(self == other);
         }
 
+        public static implicit operator UIMeasurement(int value) {
+            return new UIMeasurement(value, UIUnit.Pixel);
+        }
+        
+        public static implicit operator UIMeasurement(float value) {
+            return new UIMeasurement(value, UIUnit.Pixel);
+        }
+        
+        public static implicit operator UIMeasurement(double value) {
+            return new UIMeasurement((float)value, UIUnit.Pixel);
+        }
+        
     }
 
 }

@@ -8,8 +8,11 @@
           <e p="Binding" t="Include">
             <e p="Binding.cs" t="Include" />
             <e p="StyleBindings" t="Include">
-              <e p="BackgroundColorBinding.cs" t="Include" />
+              <e p="StyleBinding.cs" t="Include" />
+              <e p="StyleBinding_BackgroundColor.cs" t="Include" />
+              <e p="StyleBinding_RectW.cs" t="Include" />
             </e>
+            <e p="TemplateBinding.cs" t="Include" />
           </e>
           <e p="Compilers" t="Include">
             <e p="ExpressionCompiler.cs" t="Include" />
@@ -21,7 +24,7 @@
             <e p="RefreshTemplates.cs" t="Include" />
           </e>
           <e p="Elements" t="Include">
-            <e p="UIChildrenElement.cs" t="Include" />
+            <e p="UIGroupElement.cs" t="Include" />
             <e p="UIPanel.cs" t="Include" />
             <e p="UIRepeatChild.cs" t="Include" />
             <e p="UIRepeatElement.cs" t="Include" />
@@ -34,11 +37,13 @@
             <e p="AccessExpression_Property.cs" t="Include" />
             <e p="AccessExpression_Root.cs" t="Include" />
             <e p="Expression.cs" t="Include" />
+            <e p="Expression_Cast.cs" t="Include" />
             <e p="LiteralExpression_Boolean.cs" t="Include" />
             <e p="LiteralExpression_Double.cs" t="Include" />
             <e p="LiteralExpression_Float.cs" t="Include" />
             <e p="LiteralExpression_Int.cs" t="Include" />
             <e p="LiteralExpression_String.cs" t="Include" />
+            <e p="MethodCallExpression.cs" t="Include" />
             <e p="OperatorExpression_Arithmetic.cs" t="Include" />
             <e p="OperatorExpression_Boolean.cs" t="Include" />
             <e p="OperatorExpression_Comparison.cs" t="Include" />
@@ -120,7 +125,6 @@
             <e p="UnityTextPrimitive.cs" t="Include" />
           </e>
           <e p="PropAttribute.cs" t="Include" />
-          <e p="PropertyBindPair.cs" t="Include" />
           <e p="ReflectionUtil.cs" t="Include" />
           <e p="Rendering" t="Include">
             <e p="BitUtil.cs" t="Include" />
@@ -129,6 +133,7 @@
             <e p="LayoutParameters.cs" t="Include" />
             <e p="LayoutType.cs" t="Include" />
             <e p="LayoutWrap.cs" t="Include" />
+            <e p="MouseEventType.cs" t="Include" />
             <e p="PaintDesc.cs" t="Include" />
             <e p="ProceduralImage.cs" t="Include" />
             <e p="StyleStateType.cs" t="Include" />
@@ -148,13 +153,20 @@
           </e>
           <e p="SkipTree.cs" t="Include" />
           <e p="Src.asmdef" t="Include" />
+          <e p="Systems" t="Include">
+            <e p="BindingSystem.cs" t="Include" />
+            <e p="LayoutSystem.cs" t="Include" />
+            <e p="LifeCycleSystem.cs" t="Include" />
+            <e p="RenderStystem.cs" t="Include" />
+          </e>
           <e p="Temp_SpecFixtures.cs" t="Include" />
           <e p="TemplateAttribute.cs" t="Include" />
           <e p="Templates" t="Include">
-            <e p="TemplateBinding.cs" t="Include" />
+            <e p="RegistrationData.cs" t="Include" />
             <e p="TemplateScope.cs" t="Include" />
             <e p="UIChildrenTemplate.cs" t="Include" />
             <e p="UIElementTemplate.cs" t="Include" />
+            <e p="UIGroupTemplate.cs" t="Include" />
             <e p="UIPrefabTemplate.cs" t="Include" />
             <e p="UIRepeatChildTemplate.cs" t="Include" />
             <e p="UIRepeatTemplate.cs" t="Include" />
@@ -167,8 +179,8 @@
           </e>
           <e p="todo.txt" t="Include" />
           <e p="UIElement.cs" t="Include" />
+          <e p="UIElementFlags.cs" t="Include" />
           <e p="UIElementPrimitive.cs" t="Include" />
-          <e p="UIRenderSystem.cs" t="Include" />
           <e p="UIViewBehavior.cs" t="Include" />
         </e>
         <e p="Tests" t="Include">
@@ -176,6 +188,7 @@
           <e p="ExpressionParserTests.cs" t="Include" />
           <e p="ParsingTests.cs" t="Include" />
           <e p="PropTests.cs" t="Include" />
+          <e p="SkipTreeTests.cs" t="Include" />
           <e p="StyleTests.cs" t="Include" />
           <e p="Templates" t="Include">
             <e p="Parsing" t="Include">

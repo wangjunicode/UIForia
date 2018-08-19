@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using NUnit.Framework;
 using Src;
 
-namespace Tests {
 
     [TestFixture]
     public class TokenizingTests {
@@ -328,4 +327,3 @@ namespace Tests {
         }
     }
 
-}

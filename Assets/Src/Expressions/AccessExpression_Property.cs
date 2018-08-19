@@ -18,6 +18,11 @@ namespace Src {
 
         public override Type YieldedType => yieldedType;
 
+        public override bool IsConstant() {
+            return false;
+        }
+        
+
         public override object Evaluate(ExpressionContext context) {
             object target = context.ResolveObjectAlias(contextName);
             object last = target;

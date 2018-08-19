@@ -4,6 +4,8 @@ namespace Src {
 
         public abstract void Execute(UIElement element, UITemplateContext context);
 
+        public abstract bool IsConstant();
+
     }
 
 }

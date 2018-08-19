@@ -1,117 +1,116 @@
 using System;
 using System.Collections.Generic;
-using System.Linq;
 using System.Reflection;
 
 namespace Src {
-
-    public struct ListContextDefinition {
-
-        public readonly Type type;
-        public readonly string itemAlias;
-        public readonly string indexAlias;
-        public readonly string lengthAlias;
-
-        public ListContextDefinition(Type type, string itemAlias, string indexAlias, string lengthAlias) {
-            this.type = type;
-            this.itemAlias = itemAlias;
-            this.indexAlias = indexAlias;
-            this.lengthAlias = lengthAlias;
-        }
-
-    }
 
     public class ContextDefinition {
 
         private const BindingFlags bindFlags = BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic;
 
-        private List<Alias> aliases;
+        private List<Alias<Type>> typeAliases;
+        private List<Alias<MethodInfo>> methodAliases;
+
         public readonly ProcessedType processedType;
-        public List<ListContextDefinition> listContexts;
 
         public ContextDefinition(Type type) {
-            this.aliases = new List<Alias>();
+            this.typeAliases = new List<Alias<Type>>();
+            this.methodAliases = new List<Alias<MethodInfo>>();
             this.processedType = TypeProcessor.GetType(type);
-            this.listContexts = new List<ListContextDefinition>();
         }
 
-        public Type rootContextType => processedType.rawType;
+        public Type rootType => processedType.rawType;
 
-        public void SetAliasToType(string alias, Type type) {
+        // todo -- figure out correct binding flags and attributes to support
+        public void SetMethodAlias(string alias, MethodInfo info) {
+            RemoveAlias(alias);
+            
+            if (alias[0] != '$') {
+                MethodInfo rootInfo = rootType.GetMethod(alias, ReflectionUtil.InstanceBindFlags);
+                if (rootInfo != null) {
+                    throw new AmbiguousMatchException($"The root type {rootType.Name} defines '{alias}' but an alias also exists for '{alias}'. Use the $ operator to disambiguate");
 
-            for (int i = 0; i < aliases.Count; i++) {
-                if (aliases[i].name == alias) {
-                    aliases[i] = new Alias(alias, type);
+                }
+                FieldInfo fieldInfo = rootType.GetField(alias);
+                if (fieldInfo != null) {
+                    throw new AmbiguousMatchException($"The root type {rootType.Name} defines '{alias}' but an alias also exists for '{alias}'. Use the $ operator to disambiguate");
+                }
+            }
+            
+            for (int i = 0; i < methodAliases.Count; i++) {
+                if (methodAliases[i].name == alias) {
+                    methodAliases[i] = new Alias<MethodInfo>(alias, info);
                     return;
                 }
             }
-            aliases.Add(new Alias(alias, type));
+            methodAliases.Add(new Alias<MethodInfo>(alias, info));
+        }
+
+        public void RemoveMethodAlias(string alias) {
+            for (int i = 0; i < methodAliases.Count; i++) {
+                if (methodAliases[i].name == alias) {
+                    methodAliases.RemoveAt(i);
+                    return;
+                }
+            }
+        }
+
+        public void SetAliasToType(string alias, Type type) {
+            for (int i = 0; i < typeAliases.Count; i++) {
+                if (typeAliases[i].name == alias) {
+                    typeAliases[i] = new Alias<Type>(alias, type);
+                    return;
+                }
+            }
+            typeAliases.Add(new Alias<Type>(alias, type));
         }
 
         public void RemoveAlias(string alias) {
-            for (int i = 0; i < aliases.Count; i++) {
-                if (aliases[i].name == alias) {
-                    aliases.RemoveAt(i);
-                    return;
-                }
-            }
-        }
-
-        public void AddListContext(Type listItemType, string itemAlias, string indexAlias, string lengthAlias) {
-            if (aliases.Any((alias) => alias.name == itemAlias)) {
-                throw new Exception($"Item alias {itemAlias} already used in scope. Find another name and assign via the <Repeat as='yourAlias'>");
-            }
-            else if (aliases.Any((alias) => alias.name == indexAlias)) {
-                throw new Exception($"Index alias {indexAlias} already used in scope. Find another name and assign via the <Repeat indexAlias='yourAlias'>");
-            }
-            else if (aliases.Any((alias) => alias.name == lengthAlias)) {
-                throw new Exception($"Length alias {lengthAlias} already used in scope. Find another name and assign via the <Repeat lengthAlias='yourAlias'>");
-            }
-
-            aliases.Add(new Alias(itemAlias, listItemType));
-            aliases.Add(new Alias(indexAlias, typeof(int)));
-            aliases.Add(new Alias(lengthAlias, typeof(int)));
-
-            listContexts.Add(new ListContextDefinition(listItemType, itemAlias, indexAlias, lengthAlias));
-        }
-
-        public void RemoveListContext(string aliasName) {
-            for (int i = 0; i < listContexts.Count; i++) {
-                if (listContexts[i].itemAlias == aliasName) {
-                    ListContextDefinition listContextDefinition = listContexts[i];
-                    listContexts.RemoveAt(i);
-                    aliases.RemoveAt(aliases.FindIndex((alias) => alias.name == listContextDefinition.itemAlias));
-                    aliases.RemoveAt(aliases.FindIndex((alias) => alias.name == listContextDefinition.indexAlias));
-                    aliases.RemoveAt(aliases.FindIndex((alias) => alias.name == listContextDefinition.lengthAlias));
+            for (int i = 0; i < typeAliases.Count; i++) {
+                if (typeAliases[i].name == alias) {
+                    typeAliases.RemoveAt(i);
                     return;
                 }
             }
         }
 
         public Type ResolveType(string alias) {
-            for (int i = 0; i < aliases.Count; i++) {
-                if (aliases[i].name == alias) {
-                    return aliases[i].type;
+            for (int i = 0; i < typeAliases.Count; i++) {
+                if (typeAliases[i].name == alias) {
+                    return typeAliases[i].value;
                 }
             }
 
-            FieldInfo fieldInfo = rootContextType.GetField(alias, bindFlags);
-            
+            FieldInfo fieldInfo = rootType.GetField(alias, bindFlags);
+
             if (fieldInfo != null) {
                 return fieldInfo.FieldType;
             }
-            
+
             return null;
         }
 
-        private struct Alias {
+        // todo -- don't allow overloads
+        public MethodInfo ResolveMethod(string methodName) {
 
-            public readonly Type type;
+            MethodInfo rootInfo = rootType.GetMethod(methodName, ReflectionUtil.InstanceBindFlags);
+
+            Alias<MethodInfo> aliasedInfo = methodAliases.Find((a) => a.name == methodName);
+            if (rootInfo != null && aliasedInfo.value != null) {
+                throw new AmbiguousMatchException($"The root type {rootType.Name} defines '{methodName}' but an alias also exists for '{methodName}'. Use the $ operator to disambiguate");
+            }
+
+            return rootInfo != null ? rootInfo : aliasedInfo.value;
+        }
+
+        private struct Alias<T> {
+
+            public readonly T value;
             public readonly string name;
 
-            public Alias(string name, Type type) {
+            public Alias(string name, T value) {
                 this.name = name;
-                this.type = type;
+                this.value = value;
             }
 
         }

@@ -22,10 +22,10 @@ namespace Src {
         private static readonly Dictionary<Type, ParsedTemplate> parsedTemplates =
             new Dictionary<Type, ParsedTemplate>();
 
-        private static readonly string[] RepeatAttributes = {"list", "as", "filter", "onItemAdded", "onItemRemoved"};
-        private static readonly string[] CaseAttributes = {"when"};
-        private static readonly string[] PrefabAttributes = {"if", "src"};
-        private static readonly string[] SwitchAttributes = {"if", "value"};
+        private static readonly string[] RepeatAttributes = { "list", "as", "filter", "onItemAdded", "onItemRemoved" };
+        private static readonly string[] CaseAttributes = { "when" };
+        private static readonly string[] PrefabAttributes = { "if", "src" };
+        private static readonly string[] SwitchAttributes = { "if", "value" };
         private static readonly string[] DefaultAttributes = { };
         private static readonly string[] ChildrenAttributes = { };
         private static readonly string[] TextAttributes = { };
@@ -63,11 +63,11 @@ namespace Src {
 
         private UIStyle ParseStyleSheet(XElement styleElement) {
             XAttribute idAttr = styleElement.GetAttribute("id");
-            
+
             if (idAttr == null || string.IsNullOrEmpty(idAttr.Value)) {
                 throw new InvalidTemplateException(TemplateName, "Style tags require an 'id' attribute");
             }
-            
+
             UIStyle styleTemplate = new UIStyle(idAttr.Value.Trim(), TemplateName);
             StyleParser.ParseStyle(styleElement, styleTemplate);
             return styleTemplate;
@@ -99,12 +99,12 @@ namespace Src {
 
             IEnumerable<XElement> styleElements = doc.Root.GetChildren("Style");
             foreach (var styleElement in styleElements) {
-              
+
                 // todo -- return a list of UIStyles and flags for their state
                 UIStyle styleTemplate = ParseStyleSheet(styleElement);
-                
+
                 styleTemplates.Add(styleTemplate);
-                
+
             }
 
             XElement contentElement = doc.Root.GetChild("Contents");
@@ -126,20 +126,19 @@ namespace Src {
             return output;
         }
 
-
         private UITemplate ParseCaseElement(XElement element) {
             EnsureAttribute(element, "when");
             EnsureOnlyAttributes(element, CaseAttributes);
-            
+
             UISwitchCaseTemplate template = new UISwitchCaseTemplate();
             template.childTemplates = ParseNodes(element.Nodes());
             return template;
         }
 
         private UITemplate ParseDefaultElement(XElement element) {
-            
+
             EnsureOnlyAttributes(element, DefaultAttributes);
-            
+
             UISwitchDefaultTemplate template = new UISwitchDefaultTemplate();
             template.childTemplates = ParseNodes(element.Nodes());
             return template;
@@ -150,11 +149,17 @@ namespace Src {
             EnsureNotInsideTagName(element, "Repeat");
             EnsureOnlyAttributes(element, RepeatAttributes);
 
-           
             UIRepeatTemplate template = new UIRepeatTemplate();
             template.attributes = ParseAttributes(element.Attributes());
             template.childTemplates = ParseNodes(element.Nodes());
 
+            return template;
+        }
+
+        private UITemplate ParseGroupElement(XElement element) {
+            UIGroupTemplate template = new UIGroupTemplate();
+            template.attributes = ParseAttributes(element.Attributes());
+            template.childTemplates = ParseNodes(element.Nodes());
             return template;
         }
 
@@ -258,18 +263,22 @@ namespace Src {
                 return ParseCaseElement(element);
             }
 
+            if (element.Name == "Group") {
+                return ParseGroupElement(element);
+            }
+
             return ParseTemplateElement(element);
         }
 
         private List<UITemplate> ParseNodes(IEnumerable<XNode> nodes) {
             List<UITemplate> retn = new List<UITemplate>();
             foreach (var node in nodes) {
-                
+
                 switch (node.NodeType) {
                     case XmlNodeType.Text:
                         retn.Add(ParseTextNode((XText) node));
                         continue;
-                    
+
                     case XmlNodeType.Element:
                         retn.Add(ParseElement((XElement) node));
                         continue;

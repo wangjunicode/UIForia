@@ -9,7 +9,7 @@ namespace Src {
         public UnaryExpression_Boolean(Expression<bool> expression) {
             this.expression = expression;
         }
-        
+
         public override Type YieldedType => typeof(bool);
 
         public override bool EvaluateTyped(ExpressionContext context) {
@@ -21,7 +21,10 @@ namespace Src {
             if (value is bool) return !((bool) value);
             return value != null;
         }
-       
+
+        public override bool IsConstant() {
+            return expression.IsConstant();
+        }
 
     }
 

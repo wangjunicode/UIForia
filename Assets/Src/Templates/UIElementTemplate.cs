@@ -6,21 +6,18 @@ namespace Src {
 
         private Binding[] bindings;
 
-        public override UIElement CreateScoped(TemplateScope scope) {
-            List<UIElement> scopedChildren = new List<UIElement>(childTemplates.Count);
+        public override RegistrationData CreateScoped(TemplateScope scope) {
+            List<RegistrationData> scopedChildren = new List<RegistrationData>(childTemplates.Count);
 
             for (int i = 0; i < childTemplates.Count; i++) {
-                UIElement child = childTemplates[i].CreateScoped(scope);
-                if (child != null) {
-                    scopedChildren.Add(child);
-                }
+                scopedChildren.Add(childTemplates[i].CreateScoped(scope));
             }
 
             ParsedTemplate templateToExpand = TemplateParser.GetParsedTemplate(processedElementType);
 
             UITemplateContext context = new UITemplateContext(scope.view);
 
-            TemplateScope outputScope = new TemplateScope();
+            TemplateScope outputScope = new TemplateScope(scope.outputList);
 
             outputScope.context = context;
             outputScope.inputChildren = scopedChildren;
@@ -28,15 +25,11 @@ namespace Src {
 
             UIElement instance = templateToExpand.CreateWithScope(outputScope);
 
-            ApplyStyles(instance, scope);
+            ApplyConstantStyles(instance, scope);
 
             context.rootElement = instance;
-
-            if (bindings != null && bindings.Length > 0) {
-                scope.view.RegisterBindings(instance, bindings, scope.context);
-            }
-
-            return instance;
+            
+            return new RegistrationData(instance, bindings, scope.context);
         }
 
         public override bool Compile(ParsedTemplate template) {
@@ -62,12 +55,10 @@ namespace Src {
                 //bindingList.Add(ExpressionCompiler.GenerateFromAttribute(template.contextDefinition, attr));
             }
 
+            bindingList.AddRange(dynamicStyleBindings);
+            
             bindings = bindingList.ToArray();
             
-            return true;
-        }
-
-        public override bool TypeCheck() {
             return true;
         }
 

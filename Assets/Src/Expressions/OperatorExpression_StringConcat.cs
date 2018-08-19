@@ -29,6 +29,9 @@ namespace Src {
             return new OperatorExpression_StringConcat(left, right);
         }
 
+        public override bool IsConstant() {
+            return left.IsConstant() && right.IsConstant();
+        }
     }
 
     public class OperatorExpression_StringConcat_Typed : Expression<string> {
@@ -51,6 +54,9 @@ namespace Src {
             return left.EvaluateTyped(context) + right.EvaluateTyped(context);
         }
 
+        public override bool IsConstant() {
+            return left.IsConstant() && right.IsConstant();
+        }
     }
 
     public class OperatorExpression_StringConcat_Const_Dynamic : Expression<string> {
@@ -73,6 +79,9 @@ namespace Src {
             return left + right.EvaluateTyped(context);
         }
 
+        public override bool IsConstant() {
+            return right.IsConstant();
+        }
     }
 
     public class OperatorExpression_StringConcat_Dynamic_Const : Expression<string> {
@@ -94,7 +103,9 @@ namespace Src {
         public override string EvaluateTyped(ExpressionContext context) {
             return left.EvaluateTyped(context) + right;
         }
-
+        public override bool IsConstant() {
+            return left.IsConstant();
+        }
     }
 
 }

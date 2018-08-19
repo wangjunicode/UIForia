@@ -22,6 +22,10 @@ namespace Src {
             return boxedValue;
         }
 
+        public override bool IsConstant() {
+            return true;
+        }
+
     }
 
 }

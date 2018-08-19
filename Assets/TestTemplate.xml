@@ -2,55 +2,7 @@
 <UITemplate>
 
     <Style id="panelStyle" extends="id" from="../path">
-
-        <Font.Color value="rgb(255, 0, 0)"/>
-
-        <Font.Alignment value=""/>
-
-        <Layout.Type value="Flow"/>
-        <Layout.Direction value="Column"/>
-        <Layout.Flow.MainAxisOverflow value=""/>
-
-        <Layout.Flow.AlignChildren/>
-        <Layout.Flow.JustifyChildren/>
-
-        <Layout.Flow.Width value="Parent(100%)"/>
-        <Layout.Flow.Width value=""/>
-
-        <Layout.Flow.Overflow value="wrap"/>
-
-        <Layout.Flow.Height value="Content(100%)"/>
-        <Layout.Flow.Height value="InFlowContent(100%)"/>
-
-        <Layout.Flow.Width value="100px"/>
-        <Layout.Flow.Width value="Viewport(100%)"/>
-
-        <LayoutItem.Flex.WidthBasis/>
-
-        <LayoutItem.IgnoreLayout value="true"/>
-        <LayoutItem.LayoutType value="Fixed | Flow"/>
-
-        <!--<Rect.X value="0"/>-->
-        <!--<Rect.Y value="-20px" anchor="Parent"/>-->
-        <!--<Rect.W value="30" anchor="Parent | ParentEdge"/>-->
-        <!--<Rect.H value="40%" anchor="Content"/>-->
-
-        <Rect.W value="50"/>
-        <Rect.H value="30"/>
-
-        <Rect.MaxWidth/>
-        <Rect.MinWidth/>
-        <Rect.MinHeight/>
-        <Rect.MaxHeight/>
-
-        <Padding.Top value=""/>
-
-        <Border.Radius.TopLeft value=""/>
-
-        <Hover>
-
-        </Hover>
-
+        
     </Style>
 
     <Style id="panel0">
@@ -62,19 +14,28 @@
 
     <Contents>
 
-        <UIPanel style.layout.direction="row" style="panelStyle, panel0" style.paint.backgroundColor="rgb(255, 0, 0)">
-            <!--todo: make a special type called container that doesn't create a UIChildrenElement but allows natural nesting-->
-            <UIPanel style.rect.w="50" style.rect.h="100" style.paint.backgroundColor="rgb(255, 0, 0)"/>
-            <UIPanel style.rect.w="50" style.rect.h="100" style.paint.backgroundColor="rgb(0, 255, 0)"/>
-            <UIPanel style.rect.w="50" style.rect.h="100" style.paint.backgroundColor="rgb(0, 0, 255)"/>
+        <Group style="panelStyle, panel0" style.backgroundColor="{rgb(r, g, b)}">
+            <Group style.rectW="50" style.rectH="100" style.backgroundColor="{rgb(255, 255, 0)}">
+   
+            </Group>
+            <Group style.rectW="50" style.rectH="100" style.backgroundColor="{rgb(0, 255, 0)}"/>
+            <Group style.rectW="50" style.rectH="100" style.backgroundColor="{rgb(0, 0, 255)}"/>
 
-        </UIPanel>
+        </Group>
         
-        <Children style=""/>
+        <Group style="panel0"/>
+        <Group style="panel0" style.backgroundColor="{rgb(128, 128, 128)}"/>
+        <Group style="panel0" style.rectW="50"/>
         
-        <UIPanel style="panel0"/>
-        <UIPanel style="panel0" style.paint.backgroundColor="rgb(255, 255, 0)"/>
-        <UIPanel style="panel0" style.rect.w="50"/>
+        switch / case / default / inline-repeat / slot 
+        
+         <Switch value="">
+             
+             <Case when="1">
+                       
+             </Case>
+             
+         </Switch>
         
     </Contents>
 

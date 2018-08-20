@@ -15,27 +15,27 @@
     <Contents>
 
         <Group style="panelStyle, panel0" style.backgroundColor="{rgb(r, g, b)}">
-            <Group style.rectW="50" style.rectH="100" style.backgroundColor="{rgb(255, 255, 0)}">
-   
-            </Group>
+            
+            <Group style.rectW="50" style.rectH="100" style.backgroundColor="{rgb(255, 255, 0)}"/>
             <Group style.rectW="50" style.rectH="100" style.backgroundColor="{rgb(0, 255, 0)}"/>
             <Group style.rectW="50" style.rectH="100" style.backgroundColor="{rgb(0, 0, 255)}"/>
+            <Group style.rectW="50" style.rectH="100" style.backgroundColor="{rgb(2, 63, 63)}"/>
 
         </Group>
         
-        <Group style="panel0"/>
-        <Group style="panel0" style.backgroundColor="{rgb(128, 128, 128)}"/>
-        <Group style="panel0" style.rectW="50"/>
-        
-        switch / case / default / inline-repeat / slot 
-        
-         <Switch value="">
-             
-             <Case when="1">
-                       
-             </Case>
-             
-         </Switch>
+        <!--<Group style="panel0"/>-->
+        <!--<Group style="panel0" style.backgroundColor="{rgb(128, 128, 128)}"/>-->
+        <!--<Group style="panel0" style.rectW="50"/>-->
+        <!---->
+        <!--switch / case / default / inline-repeat / slot -->
+        <!---->
+         <!--<Switch value="">-->
+             <!---->
+             <!--<Case when="1">-->
+                       <!---->
+             <!--</Case>-->
+             <!---->
+         <!--</Switch>-->
         
     </Contents>
 

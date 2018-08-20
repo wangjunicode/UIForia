@@ -1,8 +1,9 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project version="4">
   <component name="ContentModelStore">
-    <e p="$USER_HOME$/Library/Caches/Rider2018.1/resharper-host/local/Transient/ReSharperHost/v12/SolutionCaches/_UIElements.-870298077.00" t="ExcludeRecursive" />
-    <e p="$PROJECT_DIR$" t="IncludeRecursive">
+    <e p="\app" t="IncludeRecursive" />
+    <e p="\c41f851" t="IncludeRecursive" />
+    <e p="C:\Seed\UIElements" t="IncludeRecursive">
       <e p="Assets" t="Include">
         <e p="Src" t="Include">
           <e p="Binding" t="Include">
@@ -125,12 +126,12 @@
             <e p="UnityTextPrimitive.cs" t="Include" />
           </e>
           <e p="PropAttribute.cs" t="Include" />
+          <e p="RectTransformExtensions.cs" t="Include" />
           <e p="ReflectionUtil.cs" t="Include" />
           <e p="Rendering" t="Include">
             <e p="BitUtil.cs" t="Include" />
             <e p="BorderStyle.cs" t="Include" />
             <e p="LayoutDirection.cs" t="Include" />
-            <e p="LayoutParameters.cs" t="Include" />
             <e p="LayoutType.cs" t="Include" />
             <e p="LayoutWrap.cs" t="Include" />
             <e p="MouseEventType.cs" t="Include" />
@@ -157,7 +158,7 @@
             <e p="BindingSystem.cs" t="Include" />
             <e p="LayoutSystem.cs" t="Include" />
             <e p="LifeCycleSystem.cs" t="Include" />
-            <e p="RenderStystem.cs" t="Include" />
+            <e p="RenderSystem.cs" t="Include" />
           </e>
           <e p="Temp_SpecFixtures.cs" t="Include" />
           <e p="TemplateAttribute.cs" t="Include" />
@@ -228,5 +229,8 @@
       <e p="Tests.csproj" t="IncludeRecursive" />
       <e p="UIElements.sln" t="IncludeFlat" />
     </e>
+    <e p="C:\Users\Matt\.Rider2018.2\config\extensions" t="IncludeRecursive" />
+    <e p="C:\Users\Matt\.Rider2018.2\system\extResources" t="IncludeRecursive" />
+    <e p="C:\Users\Matt\.Rider2018.2\system\resharper-host\local\Transient\ReSharperHost\v182\SolutionCaches\_UIElements.1439856042.00" t="ExcludeRecursive" />
   </component>
 </project>

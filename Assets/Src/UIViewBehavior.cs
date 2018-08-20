@@ -30,6 +30,7 @@ namespace Src {
 
         public Font font;
         public UIView view;
+        public float frameTime;
 
         public Color color;
         
@@ -38,7 +39,7 @@ namespace Src {
             view = new UIView(gameObject);
             view.font = font;
             view.templateType = typeof(TempUIType);
-           view.OnCreate();
+            view.OnCreate();
             TempUIType t = (TempUIType) view.root;
         }
 
@@ -55,7 +56,9 @@ namespace Src {
 //            t.r = color.r;
 //            t.g = color.g;
 //            t.b = color.b;
+            float start = Time.realtimeSinceStartup;
             view.Update();
+            frameTime = start - Time.realtimeSinceStartup;
         }
 
     }

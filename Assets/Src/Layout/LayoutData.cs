@@ -6,44 +6,99 @@ namespace Src.Layout {
 
     public class LayoutData : ISkipTreeTraversable {
 
-        public float x;
-        public float y;
-        public float width;
-        public float height;
-        public float minWidth;
-        public float maxWidth;
-        public float minHeight;
-        public float maxHeight;
+        public UIMeasurement staticX;
+        public UIMeasurement staticY;
 
-        public bool isInFlow;
-        public UILayout layout;
+        public UIMeasurement preferredWidth;
+        public UIMeasurement preferredHeight;
+
+        public UIMeasurement minWidth;
+        public UIMeasurement maxWidth;
+
+        public UIMeasurement minHeight;
+        public UIMeasurement maxHeight;
+
+        // can compress into single int
+        public int growthFactor; 
+        public int shrinkFactor;
+
+        // can compress with flags
+        public MainAxisAlignment mainAxisAlignment; 
+        public CrossAxisAlignment crossAxisAlignment;
+
+        public int order; // can maybe compress
+
+        public bool isInFlow; // can compress with flags
+
+        public ContentBoxRect margin;
+        public ContentBoxRect border;
+        public ContentBoxRect padding;
+
+        public UILayout layout; // can compress with flags
         public LayoutData parent;
-        public UIElement element;
-        public UIUnit relativeToWidth;
-        public UIUnit relativeToHeight;
-        public List<LayoutData> children;
-        public LayoutDirection layoutDirection;
+        public LayoutWrap wrapMode; // can compress with flags
 
+        public readonly UIElement element; // can be an id / offset
+
+        public readonly List<LayoutData> children; // can be computed
+        public LayoutDirection layoutDirection; // can be compressed
+        public RectTransform unityTransform; // can probably get removed
+       
         public LayoutData(UIElement element) {
             this.children = new List<LayoutData>();
             this.element = element;
             this.isInFlow = true;
         }
 
-        public float GetFixedWidth() {
-            switch (relativeToWidth) {
-                case UIUnit.Fixed:
-                    return width;
+        public IHierarchical Element => element;
+        public IHierarchical Parent => element.parent;
+
+        public float ContentStartOffsetX => margin.left + padding.left + border.left;
+        public float ContentEndOffsetX => margin.right + padding.right + border.right;
+
+        public float ContentStartOffsetY => margin.top + padding.top + border.top;
+        public float ContentEndOffsetY => margin.bottom + padding.bottom + border.bottom;
+
+        public float GetPreferredWidth(UIUnit parentUnit, float parentValue, float viewportValue) {
+            switch (preferredWidth.unit) {
+                case UIUnit.Pixel:
+                    return preferredWidth.value;
+
+                case UIUnit.Content:
+                    return layout.GetContentWidth(this, parentValue, viewportValue);
+
                 case UIUnit.Parent:
-                    
+                    if (parentUnit == UIUnit.Content) return 0;
+                    return preferredWidth.value * parentValue;
+
+                case UIUnit.View:
+                    return preferredWidth.value * viewportValue;
+
+                default:
+                    return 0;
             }
         }
 
-        public Rect layoutRect => new Rect(x, y, width, height);
+        public float GetPreferredHeight(UIUnit parentUnit, float parentValue, float viewportValue) {
+            switch (preferredHeight.unit) {
+                case UIUnit.Pixel:
+                    return preferredHeight.value;
 
-        public IHierarchical Element => this;
-        public IHierarchical Parent => parent;
+                case UIUnit.Content:
+                    return layout.GetContentHeight(this, parentValue, viewportValue);
 
+                case UIUnit.Parent:
+                    if (parentUnit == UIUnit.Content) return 0;
+                    return preferredHeight.value * parentValue;
+
+                case UIUnit.View:
+                    return preferredHeight.value * viewportValue;
+
+                default:
+                    return 0;
+            }
+        }
+        
         public void OnParentChanged(ISkipTreeTraversable newParent) {
             parent = (LayoutData) newParent;
         }

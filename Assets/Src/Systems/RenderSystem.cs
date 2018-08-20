@@ -45,7 +45,7 @@ namespace Src.Systems {
         public Graphic maskComponent;
         public Graphic imageComponent;
         public RenderPrimitiveType primitiveType;
-
+        
         public RenderData(UIElement element, RenderPrimitiveType primitiveType, RectTransform unityTransform, RectTransform rootTransform) {
             this.element = element;
             this.primitiveType = primitiveType;
@@ -74,45 +74,107 @@ namespace Src.Systems {
 
     public class RenderSystem {
 
-        private Dictionary<int, GameObject> gameObjects;
         private Dictionary<int, RawImage> rawImages;
         private Dictionary<int, Text> texts;
         private Dictionary<int, ProceduralImage> proceduralImages;
         private Dictionary<int, Mask> masks;
         private Dictionary<int, RectMask2D> masks2d;
+        private Rect[] layoutResults;
 
-        public GameObject gameObject;
-
-        public SkipTree<LayoutData> layoutTree;
-        public SkipTree<RenderData> renderSkipTree;
+        private readonly GameObject gameObject;
+        private SkipTree<LayoutData> layoutTree;
+        private SkipTree<RenderData> renderSkipTree;
 
         public Font font; // temp
+        private List<GameObject> renderedGameObjects;
 
         public RenderSystem(GameObject gameObject) {
             this.gameObject = gameObject;
+            renderedGameObjects = new List<GameObject>();
             this.renderSkipTree = new SkipTree<RenderData>();
+            this.layoutTree = new SkipTree<LayoutData>();
+            this.layoutResults = new Rect[128];
         }
-
+        
         public void Update() {
+            Rect viewport = gameObject.GetComponent<RectTransform>().rect;//)new Rect(0, 0, 1024, 1024);
             
+            // todo -- I'd like to handle this in a better / faster way eventually
+            // todo avoid closure here
             layoutTree.TraversePreOrderWithCallback((data => {
+                
                 data.children.Clear();
-                data.parent?.children.Add(data);
+                
+                if (data.parent == null) return;
+                
+                data.parent.children.Add(data);
+
+                if (layoutResults.Length < data.parent.children.Count) {
+                    Array.Resize(ref layoutResults, layoutResults.Length * 2);
+                }
+
             }));
 
-            layoutTree.TraversePreOrderWithCallback((data => {
-                data.layout.Run(new Rect(0, 0, 1000, 1000), data.parent);
-            }));
+            // todo -- there needs to be pseudo root in the layout tree in order to handle layout of root level things
+            Stack<LayoutDataSet> stack = new Stack<LayoutDataSet>();
 
+            LayoutData[] roots = layoutTree.GetRootItems();
+            
+            LayoutData pseudoRoot = new LayoutData(null);
+            pseudoRoot.layoutDirection = LayoutDirection.Column;
+            pseudoRoot.mainAxisAlignment = MainAxisAlignment.Default;
+            pseudoRoot.crossAxisAlignment = CrossAxisAlignment.Stretch;
+            pseudoRoot.layout = UILayout.Flex;
+            
+            pseudoRoot.preferredWidth = viewport.width;
+            pseudoRoot.preferredWidth = viewport.height;
+            pseudoRoot.maxWidth = float.MaxValue;
+            pseudoRoot.maxHeight = float.MaxValue;
+            pseudoRoot.minWidth = viewport.width;
+            pseudoRoot.minHeight = viewport.height;
+            
+            pseudoRoot.children.AddRange(roots);
+
+            stack.Push(new LayoutDataSet(pseudoRoot, viewport));
+//            for (int i = 0; i < roots.Length; i++) {
+//                stack.Push(new LayoutDataSet(roots[i], viewport));
+//            }
+
+            while (stack.Count > 0) {
+                LayoutDataSet layoutSet = stack.Pop();
+                LayoutData data = layoutSet.data;
+                
+                data.layout.Run(viewport, layoutSet, layoutResults);
+
+                if (data.unityTransform != null) {
+                    // todo -- when ecs supports RectTransformAccess:
+                   // transformRects[next++] = layoutSet.result;
+                    data.unityTransform.SetLeftTopPosition(new Vector2(layoutSet.result.x, layoutSet.result.y));
+                    data.unityTransform.SetSize(layoutSet.result.width, layoutSet.result.height);
+                }
+                
+                // note: we never need to clear the layoutResults array
+                for (int i = 0; i < data.children.Count; i++) {
+                    stack.Push(new LayoutDataSet(data.children[i], layoutResults[i]));        
+                }
+            }
+           
         }
 
         public void Reset() {
+            // todo -- destroy game objects in trees
+
+            renderSkipTree.TraversePreOrderWithCallback((data => { data.unityTransform = null; }));
+            layoutTree.TraversePreOrderWithCallback((data => { data.unityTransform = null; }));
+            
             renderSkipTree = new SkipTree<RenderData>();
-            foreach (KeyValuePair<int, GameObject> go in gameObjects) {
-                Object.Destroy(go.Value);
+            layoutTree = new SkipTree<LayoutData>();
+
+            for (int i = 0; i < renderedGameObjects.Count; i++) {
+                Object.Destroy(renderedGameObjects[i]);
             }
 
-            gameObjects.Clear();
+            renderedGameObjects.Clear();
 
         }
 
@@ -133,7 +195,8 @@ namespace Src.Systems {
                 unityTransform.anchorMin = new Vector2(0, 1);
                 unityTransform.anchorMax = new Vector2(0, 1);
                 unityTransform.pivot = new Vector2(0, 1);
-                unityTransform.anchoredPosition = new Vector2();
+                unityTransform.SetLeftTopPosition(Vector2.zero);
+                renderedGameObjects.Add(obj);
                 data = new RenderData(element, primitiveType, unityTransform, (RectTransform) gameObject.transform);
                 renderSkipTree.AddItem(data);
                 CreateComponents(data);
@@ -261,63 +324,8 @@ namespace Src.Systems {
                    || styleSet.backgroundColor != UIStyle.UnsetColorValue;
         }
 
-//        public void CreateTextPrimitive(UITextElement textElement) {
-//            GameObject obj = GetOrCreateGameObject(textElement);
-//            Text textComponent = obj.AddComponent<Text>();
-//            UnityTextPrimitive textPrimitive = new UnityTextPrimitive(textComponent);
-////            renderables[textElement.id] = textPrimitive;
-//            // stitch up parent reference since text might be created before we have the actual parent
-//            gameObjects[textElement.id].transform.SetParent(gameObjects[textElement.parent.id].transform);
-//            textElement.textRenderElement = textPrimitive;
-//            textElement.ApplyFontSettings(GetFontSettings(textElement));
-//        }
-//
-//        public UnityImagePrimitive CreateImagePrimitive(UIElement element) {
-//            GameObject obj = GetOrCreateGameObject(element);
-//            ProceduralImage imageComponent = obj.AddComponent<ProceduralImage>();
-//            UnityImagePrimitive imagePrimitive = new UnityImagePrimitive(imageComponent);
-//            imageComponent.color = element.style.backgroundColor;
-//            return imagePrimitive;
-//        }
-
-//        public TextStyle GetFontSettings(UIElement element) {
-//            TextStyle retn = new TextStyle();
-//
-//            retn.font = font;
-//            retn.fontSize = 12;
-//            retn.color = Color.black;
-//            retn.alignment = TextAnchor.MiddleLeft;
-//            retn.fontStyle = FontStyle.Normal;
-//            retn.verticalOverflow = VerticalWrapMode.Overflow;
-//            retn.horizontalOverflow = HorizontalWrapMode.Overflow;
-//
-//            return retn;
-//        }
-
-//        private GameObject GetOrCreateGameObject(UIElement element) {
-//            GameObject obj;
-//
-//            if (element == null) return gameObject;
-//
-//            if (gameObjects.TryGetValue(element.id, out obj)) {
-//                return obj;
-//            }
-//
-//            obj = new GameObject(GetGameObjectName(element));
-//            gameObjects[element.id] = obj;
-//            RectTransform transform = obj.AddComponent<RectTransform>();
-//            GameObject parentObject = GetOrCreateGameObject(element.parent);
-//            transform.SetParent(parentObject.transform);
-//            transform.anchorMin = new Vector2(0, 1);
-//            transform.anchorMax = new Vector2(0, 1);
-//            transform.pivot = new Vector2(0, 1);
-//            transform.anchoredPosition = new Vector2();
-//
-//            return obj;
-//        }
-
         public void SetRectWidth(UIElement element, UIMeasurement width) {
-            layoutTree.GetItem(element).width = width.value;
+            layoutTree.GetItem(element).preferredWidth = width.value;
         }
 
         private static string GetGameObjectName(UIElement element) {
@@ -327,7 +335,13 @@ namespace Src.Systems {
         public void Register(UIElement instance) {
             RegisterStyleStateChange(instance);
             // todo -- if instance is layout-able
-            layoutTree.AddItem(new LayoutData(instance));
+            // todo -- temporary
+            LayoutData data = new LayoutData(instance);
+            data.layout = UILayout.Flex;
+            data.crossAxisAlignment = CrossAxisAlignment.Stretch;
+            data.layoutDirection = LayoutDirection.Row;
+            data.unityTransform = renderSkipTree.GetItem(instance).unityTransform;
+            layoutTree.AddItem(data);
         }
 
     }

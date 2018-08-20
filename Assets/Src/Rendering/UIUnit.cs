@@ -10,8 +10,6 @@ namespace Rendering {
         Parent = 1 << 2,
         View = 1 << 3,
 
-        Fixed = Pixel | Parent | View
-
     }
 
 }

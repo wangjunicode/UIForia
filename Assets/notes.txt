@@ -283,3 +283,70 @@ layout traversal is of all non proxy elements
             repeat.enter()
                 context.SetAlias("$index", i);
 
+Layout runs top down where each box is told how much space they get by their parent
+
+    Boxes can overflow and underflow
+
+    Flex layout will size children based on overflow / underflow / remaining space and may apply wrapping
+
+    Flow layout will not grow / shrink things but may apply wrapping
+
+    Grid layout will grow / shink based on grid size
+
+    Fixed layout will do nothing and just respect child positioning
+
+    children can be 'in flow' or 'out of flow' 
+        in flow means they are positioned by their corresponding parent layout
+        out of flow means they are ignored and can position themselves however they like
+        there should be option for size computations to include / exclude out of flow elements
+
+    an element size can depend on the size of it's children. 
+        in this case content size is computed:
+        for each in flow child
+            size += breadth of child w/o wrapping
+            if the sizing of a child is parent relative - treat it as 0 and log a warning
+        for each out of flow child
+            if breadth is greater than size-so-far
+                size-so-far = out of flow child extents
+        clamp final size to min/max
+
+    layout ignores scrolling and masking, those are applied by the render system
+
+    layout needs to compute children based on the content box and not the full breadth of the parent
+        so if 100 width parent has margin 10 and padding 10, content box = 60 (100 - margin(20) - padding(20))
+
+    Layout.Run(Rect viewport, Rect sizeComputedFromParentInLocalSpace, LayoutData data) {
+        float contentStartX = sizeComputedFromParentInLocalSpace.x + contentBox.fullSizeLeft;
+        float contentEndX = sizeComputedFromParentInLocalSpace.x - contentBox.fullSizeRight
+        float usableWidth = contentEndX - contentStartX;
+    }
+
+When a style changes it just reports the change to which ever system(s) care about it
+That way systems never need to query style properties which *might* be slightly expensive
+
+parent == content && child == parent -> 0
+
+need to link style -> layout data & include defaults
+need default flex behavior for when size is 0 -> ie split equally between children
+
+
+
+Mission: Make Unity UI Great Again(strike through) for the first time
+
+Matt's super-duper-ui-project is coming soon(tm) which will let us 
+build snazzy UI's faster than ever. The scope of the project doesn't
+currently include editor tools for building UI, until now! 
+
+This Discover Week project will attempt to answer two questions:
+    1. On a scale of 1 to awesome: how awesome can editor UI tooling be?
+    2. See question 1.
+
+
+
+
+
+
+
+
+
+

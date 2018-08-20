@@ -33,14 +33,15 @@ public class UIView {
 
         bindingSystem.Reset();
         renderSystem.Reset();
+        lifeCycleSystem.Reset();
         root = TemplateParser.GetParsedTemplate(templateType, true).CreateWithoutScope(this);
 
     }
 
     public void Register(RegistrationData elementData) {
-        bindingSystem.Register(elementData.element, elementData.bindings, elementData.context);
         lifeCycleSystem.Register(elementData.element);
         renderSystem.Register(elementData.element);
+        bindingSystem.Register(elementData.element, elementData.bindings, elementData.context);
     }
 
     public void OnCreate() {
@@ -72,40 +73,10 @@ public class UIView {
         List<UIStyleSet> respondsToHover = new List<UIStyleSet>();
 
     }
-
     
-
     private void HandleKeyboardEvents() { }
 
     private void HandleFocusEvents() { }
-
-    private void RunLayout() {
-
-        Rect viewport = rectTransform.rect; // compute this rect from canvas size offset by view's position on canvas
-
-        Stack<LayoutData> layoutData = new Stack<LayoutData>();
-
-        layoutData.Push(root.style.layout.Run(viewport, null, root));
-
-        float xOffset = 0;
-        float yOffset = 0;
-
-        while (layoutData.Count != 0) {
-            LayoutData data = layoutData.Pop();
-
-            data.x += xOffset;
-            data.y += yOffset;
-            // convert to world space
-            // apply to unity transforms
-            // add / update masks
-            // add / update scroll views
-
-            for (int i = 0; i < data.children.Count; i++) {
-                layoutData.Push(data.children[i]);
-            }
-        }
-
-    }
 
 }
 

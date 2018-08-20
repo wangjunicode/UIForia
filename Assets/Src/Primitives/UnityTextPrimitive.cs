@@ -26,23 +26,14 @@ namespace Src {
             textComponent.rectTransform.SetSize(textComponent.preferredWidth, textComponent.preferredHeight);
             textComponent.verticalOverflow = fontSettings.verticalOverflow;
             textComponent.horizontalOverflow = fontSettings.horizontalOverflow;
-
         }
 
         private float CalculateLineHeight(Text text) {
             var extents = text.cachedTextGenerator.rectExtents.size * 0.5f;
-            var lineHeight = text.cachedTextGeneratorForLayout.GetPreferredHeight("A", text.GetGenerationSettings(extents));
+            var lineHeight =
+                text.cachedTextGeneratorForLayout.GetPreferredHeight("A", text.GetGenerationSettings(extents));
 
             return lineHeight;
-        }
-
-    }
-
-    public static class RectTransformExtensions {
-
-        public static void SetSize(this RectTransform transform, float width, float height) {
-            transform.SetSizeWithCurrentAnchors(RectTransform.Axis.Horizontal, width);
-            transform.SetSizeWithCurrentAnchors(RectTransform.Axis.Vertical, height);
         }
 
     }

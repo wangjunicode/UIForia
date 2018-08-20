@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using Rendering;
 using UnityEngine;
 
@@ -19,11 +20,11 @@ namespace Src.Layout {
         public UIMeasurement maxHeight;
 
         // can compress into single int
-        public int growthFactor; 
+        public int growthFactor;
         public int shrinkFactor;
 
         // can compress with flags
-        public MainAxisAlignment mainAxisAlignment; 
+        public MainAxisAlignment mainAxisAlignment;
         public CrossAxisAlignment crossAxisAlignment;
 
         public int order; // can maybe compress
@@ -34,7 +35,7 @@ namespace Src.Layout {
         public ContentBoxRect border;
         public ContentBoxRect padding;
 
-        public UILayout layout; // can compress with flags
+        public LayoutType layoutType; // can compress with flags
         public LayoutData parent;
         public LayoutWrap wrapMode; // can compress with flags
 
@@ -42,8 +43,7 @@ namespace Src.Layout {
 
         public readonly List<LayoutData> children; // can be computed
         public LayoutDirection layoutDirection; // can be compressed
-        public RectTransform unityTransform; // can probably get removed
-       
+
         public LayoutData(UIElement element) {
             this.children = new List<LayoutData>();
             this.element = element;
@@ -52,6 +52,16 @@ namespace Src.Layout {
 
         public IHierarchical Element => element;
         public IHierarchical Parent => element.parent;
+
+        public UILayout layout {
+            get {
+                switch (layoutType) {
+                    case LayoutType.Flex: return UILayout.Flex;
+                    case LayoutType.Flow: return UILayout.Flow;
+                    default: throw new NotImplementedException();
+                }
+            }
+        }
 
         public float ContentStartOffsetX => margin.left + padding.left + border.left;
         public float ContentEndOffsetX => margin.right + padding.right + border.right;
@@ -98,7 +108,7 @@ namespace Src.Layout {
                     return 0;
             }
         }
-        
+
         public void OnParentChanged(ISkipTreeTraversable newParent) {
             parent = (LayoutData) newParent;
         }

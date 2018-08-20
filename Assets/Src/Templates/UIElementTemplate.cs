@@ -6,8 +6,8 @@ namespace Src {
 
         private Binding[] bindings;
 
-        public override RegistrationData CreateScoped(TemplateScope scope) {
-            List<RegistrationData> scopedChildren = new List<RegistrationData>(childTemplates.Count);
+        public override UIElementCreationData CreateScoped(TemplateScope scope) {
+            List<UIElementCreationData> scopedChildren = new List<UIElementCreationData>(childTemplates.Count);
 
             for (int i = 0; i < childTemplates.Count; i++) {
                 scopedChildren.Add(childTemplates[i].CreateScoped(scope));
@@ -24,12 +24,13 @@ namespace Src {
             outputScope.view = scope.view;
 
             UIElement instance = templateToExpand.CreateWithScope(outputScope);
+            instance.name = name;
 
             ApplyConstantStyles(instance, scope);
 
             context.rootElement = instance;
             
-            return new RegistrationData(instance, bindings, scope.context);
+            return new UIElementCreationData(instance, bindings, scope.context);
         }
 
         public override bool Compile(ParsedTemplate template) {

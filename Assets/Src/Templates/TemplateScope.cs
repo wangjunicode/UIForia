@@ -6,22 +6,22 @@ namespace Src {
 
         public UIView view;
         public UITemplateContext context;
-        public List<RegistrationData> inputChildren;
+        public List<UIElementCreationData> inputChildren;
         
-        public readonly List<RegistrationData> outputList;
+        public readonly List<UIElementCreationData> outputList;
 
-        public TemplateScope(List<RegistrationData> outputList) {
+        public TemplateScope(List<UIElementCreationData> outputList) {
             this.outputList = outputList;
         }
         
-        public void SetParent(RegistrationData registrationData, RegistrationData instance) {
+        public void SetParent(UIElementCreationData uiElementCreationData, UIElementCreationData instance) {
             if (instance.element == null) {
-                registrationData.element.parent = null;
+                uiElementCreationData.element.parent = null;
             }
             else {
-                registrationData.element.parent = instance.element;
+                uiElementCreationData.element.parent = instance.element;
             }
-            outputList.Add(registrationData);
+            outputList.Add(uiElementCreationData);
         }
 
         public void RegisterAll() {

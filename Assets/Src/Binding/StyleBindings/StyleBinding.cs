@@ -4,9 +4,9 @@ namespace Src.StyleBindings {
 
     public abstract class StyleBinding : Binding {
 
-        public readonly StyleStateType state;
+        public readonly StyleState state;
         
-        protected StyleBinding(StyleStateType state) {
+        protected StyleBinding(StyleState state) {
             this.state = state;
         }
 

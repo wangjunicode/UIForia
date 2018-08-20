@@ -11,7 +11,6 @@ namespace Src {
         public readonly Type rawType;
         public readonly List<FieldInfo> propFields;
         public readonly List<FieldInfo> contextProperties;
-        public readonly bool isPrimitive;
         
         private string templatePath;
 
@@ -21,7 +20,6 @@ namespace Src {
             this.rawType = rawType;
             propFields = new List<FieldInfo>();
             contextProperties = new List<FieldInfo>();
-            isPrimitive = rawType.IsSubclassOf(typeof(UIElementPrimitive));
         }
 
         public string GetTemplatePath() {

@@ -50,7 +50,7 @@ namespace Src {
             return true;
         }
 
-        public override RegistrationData CreateScoped(TemplateScope scope) {
+        public override UIElementCreationData CreateScoped(TemplateScope scope) {
             throw new NotImplementedException();
 //            UIRepeatElement element = new UIRepeatElement();
 //

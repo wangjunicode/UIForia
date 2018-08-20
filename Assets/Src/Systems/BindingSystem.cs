@@ -1,7 +1,8 @@
-﻿
+﻿using Rendering;
+
 namespace Src.Systems {
 
-    public class BindingSystem {
+    public class BindingSystem : ISystem {
 
         // todo can probaby be optimized a bit with an id-> template binding map
         // build template hierarchy and use that instead of true element hierarchy
@@ -12,18 +13,43 @@ namespace Src.Systems {
         public BindingSystem() {
             this.bindingSkipTree = new SkipTree<TemplateBinding>();
         }
-
-        public void Register(UIElement element, Binding[] bindings, UITemplateContext context) {
-            if (bindings == null || bindings.Length == 0) return;
-            bindingSkipTree.AddItem(new TemplateBinding(element, bindings, context));
+        
+        public void OnReset() {
+            bindingSkipTree.Clear();
         }
 
-        public void Update() {
+        public void OnUpdate() {
             bindingSkipTree.TraverseRecursePreOrder();
         }
 
-        public void Reset() {
-            bindingSkipTree = new SkipTree<TemplateBinding>();
+        public void OnDestroy() {
+            bindingSkipTree.Clear();
+        }
+
+        public void OnElementCreated(UIElementCreationData data) {
+            if (data.bindings == null || data.bindings.Length == 0) return;
+            bindingSkipTree.AddItem(new TemplateBinding(data.element, data.bindings, data.context));
+        }
+
+        public void OnElementEnabled(UIElement element) {
+            TemplateBinding binding = bindingSkipTree.GetItem(element);
+            if (binding != null) {
+                bindingSkipTree.EnableHierarchy(binding);
+            }
+        }
+
+        public void OnElementDisabled(UIElement element) {
+            TemplateBinding binding = bindingSkipTree.GetItem(element);
+            if (binding != null) {
+                bindingSkipTree.DisableHierarchy(binding);
+            }
+        }
+
+        public void OnElementDestroyed(UIElement element) {
+            TemplateBinding binding = bindingSkipTree.GetItem(element);
+            if (binding != null) {
+                bindingSkipTree.RemoveHierarchy(binding);
+            }
         }
 
     }

@@ -6,7 +6,7 @@ namespace Src {
 
         public override Type ElementType => typeof(UISwitchCaseElement);
 
-        public override RegistrationData CreateScoped(TemplateScope scope) {
+        public override UIElementCreationData CreateScoped(TemplateScope scope) {
             throw new System.NotImplementedException();
         }
 

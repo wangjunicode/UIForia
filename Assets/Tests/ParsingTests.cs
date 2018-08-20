@@ -29,13 +29,6 @@ public class ParsingTests {
     }
 
     [Test]
-    public void ParseTextAtRootLevel() {
-        ParsedTemplate parsedTemplate = TemplateParser.GetParsedTemplate(typeof(Spec.Test3));
-        Assert.IsNotNull(parsedTemplate);
-        Assert.AreEqual(typeof(UITextElement), parsedTemplate.childTemplates[0].ElementType);
-    }
-
-    [Test]
     public void Children_ParsesCorrectly() {
         ParsedTemplate parsedTemplate = TemplateParser.ParseTemplateFromString<Spec.Test1>(@"
             <UITemplate>

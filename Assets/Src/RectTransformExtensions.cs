@@ -8,8 +8,7 @@ namespace Src {
             transform.SetSizeWithCurrentAnchors(RectTransform.Axis.Horizontal, width);
             transform.SetSizeWithCurrentAnchors(RectTransform.Axis.Vertical, height);
         }
-
-
+        
         public static void SetDefaultScale(this RectTransform trans) {
             trans.localScale = new Vector3(1, 1, 1);
         }
@@ -33,26 +32,33 @@ namespace Src {
         }
 
         public static void SetPositionOfPivot(this RectTransform trans, Vector2 newPos) {
-            trans.localPosition = new Vector3(newPos.x, newPos.y, trans.localPosition.z);
+            trans.anchoredPosition = new Vector3(newPos.x, newPos.y, trans.localPosition.z);
         }
 
         public static void SetLeftBottomPosition(this RectTransform trans, Vector2 newPos) {
-            trans.localPosition = new Vector3(newPos.x + (trans.pivot.x * trans.rect.width),
+            trans.anchoredPosition = new Vector3(newPos.x + (trans.pivot.x * trans.rect.width),
                 newPos.y + (trans.pivot.y * trans.rect.height), trans.localPosition.z);
         }
 
+        public static void SetLeftTopPosition(this RectTransform trans, float x, float y) {
+            trans.anchoredPosition = new Vector3(x, y, 0);
+//            trans.anchoredPosition = new Vector3(newPos.x + (trans.pivot.x * trans.rect.width),
+//                newPos.y - ((1f - trans.pivot.y) * trans.rect.height), trans.localPosition.z);
+        }
+        
         public static void SetLeftTopPosition(this RectTransform trans, Vector2 newPos) {
-            trans.localPosition = new Vector3(newPos.x + (trans.pivot.x * trans.rect.width),
-                newPos.y - ((1f - trans.pivot.y) * trans.rect.height), trans.localPosition.z);
+            trans.anchoredPosition = new Vector3(newPos.x, newPos.y, 0);
+//            trans.anchoredPosition = new Vector3(newPos.x + (trans.pivot.x * trans.rect.width),
+//                newPos.y - ((1f - trans.pivot.y) * trans.rect.height), trans.localPosition.z);
         }
 
         public static void SetRightBottomPosition(this RectTransform trans, Vector2 newPos) {
-            trans.localPosition = new Vector3(newPos.x - ((1f - trans.pivot.x) * trans.rect.width),
+            trans.anchoredPosition = new Vector3(newPos.x - ((1f - trans.pivot.x) * trans.rect.width),
                 newPos.y + (trans.pivot.y * trans.rect.height), trans.localPosition.z);
         }
 
         public static void SetRightTopPosition(this RectTransform trans, Vector2 newPos) {
-            trans.localPosition = new Vector3(newPos.x - ((1f - trans.pivot.x) * trans.rect.width),
+            trans.anchoredPosition = new Vector3(newPos.x - ((1f - trans.pivot.x) * trans.rect.width),
                 newPos.y - ((1f - trans.pivot.y) * trans.rect.height), trans.localPosition.z);
         }
 

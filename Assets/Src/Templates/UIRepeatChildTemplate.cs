@@ -3,7 +3,7 @@ namespace Src {
 
     public class UIRepeatChildTemplate : UITemplate {
         
-        public override RegistrationData CreateScoped(TemplateScope scope) {
+        public override UIElementCreationData CreateScoped(TemplateScope scope) {
             throw new System.NotImplementedException();
         }
         

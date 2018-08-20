@@ -1,22 +1,7 @@
-using System;
 using System.Collections.Generic;
-using JetBrains.Annotations;
-using Rendering;
 using UnityEngine;
 
 namespace Src.Layout {
-
-    public struct LayoutDataSet {
-
-        public readonly Rect result;
-        public readonly LayoutData data;
-
-        public LayoutDataSet(LayoutData data, Rect result) {
-            this.data = data;
-            this.result = result;
-        }
-
-    }
 
     public abstract class UILayout {
 
@@ -24,6 +9,7 @@ namespace Src.Layout {
 
         public static readonly FlowLayout Flow = new FlowLayout();
         public static readonly FlexLayout Flex = new FlexLayout();
+        public static readonly FixedLayout Fixed = new FixedLayout();
 
         public virtual float GetContentWidth(LayoutData data, float contentSize, float viewportSize) {
             List<LayoutData> children = data.children;

@@ -22,13 +22,13 @@ namespace Src {
 
         public StyleBinding[] constantBindings;
         public StyleBinding[] dynamicStyleBindings;
+        public string name;
 
         public UITemplate() {
             childTemplates = new List<UITemplate>();
         }
 
-        
-        public abstract RegistrationData CreateScoped(TemplateScope scope);
+        public abstract UIElementCreationData CreateScoped(TemplateScope scope);
 
         public virtual Type ElementType => processedElementType.rawType;
 
@@ -78,23 +78,27 @@ namespace Src {
 
         }
 
-        private UIStyle GetStyleForState(StyleStateType state) {
+        private UIStyle GetStyleForState(StyleState state) {
             switch (state) {
-                case StyleStateType.Normal:
+                case StyleState.Normal:
                     return normalStyleTemplate;
-                case StyleStateType.Active:
+                case StyleState.Active:
                     return activeStyleTemplate;
-                case StyleStateType.Disabled:
+                case StyleState.Disabled:
                     return disabledStyleTemplate;
-                case StyleStateType.Hover:
+                case StyleState.Hover:
                     return hoverStyleTemplate;
-                case StyleStateType.Focused:
+                case StyleState.Focused:
                     return focusedStyleTemplate;
                 default: return null;
             }
         }
 
         public virtual bool Compile(ParsedTemplate template) {
+            AttributeDefinition nameAttr = GetAttribute("x-name");
+            if (nameAttr != null) {
+                this.name = nameAttr.value;
+            }
             return true;
         }
 
@@ -122,23 +126,23 @@ namespace Src {
             element.style = new UIStyleSet(element, scope.view);
 
             if (normalStyleTemplate != null) {
-                element.style.SetInstanceStyle(new UIStyle(normalStyleTemplate), StyleStateType.Normal);
+                element.style.SetInstanceStyle(new UIStyle(normalStyleTemplate), StyleState.Normal);
             }
 
             if (hoverStyleTemplate != null) {
-                element.style.SetInstanceStyle(new UIStyle(hoverStyleTemplate), StyleStateType.Hover);
+                element.style.SetInstanceStyle(new UIStyle(hoverStyleTemplate), StyleState.Hover);
             }
 
             if (disabledStyleTemplate != null) {
-                element.style.SetInstanceStyle(new UIStyle(disabledStyleTemplate), StyleStateType.Disabled);
+                element.style.SetInstanceStyle(new UIStyle(disabledStyleTemplate), StyleState.Disabled);
             }
 
             if (focusedStyleTemplate != null) {
-                element.style.SetInstanceStyle(new UIStyle(focusedStyleTemplate), StyleStateType.Focused);
+                element.style.SetInstanceStyle(new UIStyle(focusedStyleTemplate), StyleState.Focused);
             }
 
             if (activeStyleTemplate != null) {
-                element.style.SetInstanceStyle(new UIStyle(activeStyleTemplate), StyleStateType.Active);
+                element.style.SetInstanceStyle(new UIStyle(activeStyleTemplate), StyleState.Active);
             }
 
             if (baseStyles != null) {

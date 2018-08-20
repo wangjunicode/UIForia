@@ -1,4 +1,6 @@
-﻿namespace Src.Systems {
+﻿using Rendering;
+
+namespace Src.Systems {
 
     public class LifeCycleData : ISkipTreeTraversable {
 
@@ -7,7 +9,7 @@
         public LifeCycleData(UIElement element) {
             this.element = element;
         }
-        
+
         public IHierarchical Element => element;
         public IHierarchical Parent => element.parent;
 
@@ -25,21 +27,29 @@
 
     }
 
-    public class LifeCycleSystem {
+    public class LifeCycleSystem : ISystem {
 
         private SkipTree<LifeCycleData> lifeCycleTree;
 
         public LifeCycleSystem() {
             this.lifeCycleTree = new SkipTree<LifeCycleData>();
         }
-        
-        public void Register(UIElement element) {
-                
-        }
 
-        public void Reset() {
-            
-        }
+        public void Reset() { }
+
+        public void OnReset() { }
+
+        public void OnUpdate() { }
+
+        public void OnDestroy() { }
+
+        public void OnElementCreated(UIElementCreationData elementData) { }
+
+        public void OnElementEnabled(UIElement element) { }
+
+        public void OnElementDisabled(UIElement element) { }
+
+        public void OnElementDestroyed(UIElement element) { }
 
     }
 

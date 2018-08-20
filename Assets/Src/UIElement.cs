@@ -10,6 +10,7 @@ public class UIElement : IHierarchical {
     internal UIElementFlags flags;
 
     public readonly int id;
+    public string name;
 
     // todo -- children probably go away since 'children' will mean different
     // things in different contexts and systems
@@ -35,7 +36,12 @@ public class UIElement : IHierarchical {
 
     public override string ToString() {
         string retn = string.Empty;
-        retn += "<" + GetType().Name + ">";
+        if (name != null) {
+            retn += "<" + name + ":" + GetType().Name + " " + id + ">";
+        }
+        else {
+            retn += "<" + GetType().Name + " " + id + ">";
+        }
         return retn;
     }
 

@@ -198,6 +198,7 @@ namespace Src.Layout {
             float offset = 0;
 
             switch (mainAxisAlignment) {
+                case MainAxisAlignment.Unset:
                 case MainAxisAlignment.Start:
                 case MainAxisAlignment.Default:
                     gutterSize = 0;
@@ -255,6 +256,7 @@ namespace Src.Layout {
                         items[i].axisStart = 0;
                         items[i].outputSize = contentSize;
                         break;
+                    case CrossAxisAlignment.Unset:
                     case CrossAxisAlignment.Default:
                     case CrossAxisAlignment.Start:
                         items[i].axisStart = 0;

@@ -17,16 +17,16 @@ namespace Src {
 
         public List<UITemplate> childTemplates => rootElement.childTemplates;
 
-        private static readonly List<RegistrationData> EmptyElementList = new List<RegistrationData>(0);
+        private static readonly List<UIElementCreationData> EmptyElementList = new List<UIElementCreationData>(0);
 
         public UIElement CreateWithScope(TemplateScope scope) {
             if (!isCompiled) Compile();
 
             UIElement instance = (UIElement) Activator.CreateInstance(rootElement.processedElementType.rawType);
 
-            RegistrationData instanceData = new RegistrationData(instance, null, scope.context);
+            UIElementCreationData instanceData = new UIElementCreationData(instance, null, scope.context);
             
-            List<RegistrationData> children = new List<RegistrationData>();
+            List<UIElementCreationData> children = new List<UIElementCreationData>();
 
             for (int i = 0; i < rootElement.childTemplates.Count; i++) {
                 UITemplate template = rootElement.childTemplates[i];
@@ -53,7 +53,7 @@ namespace Src {
 
             UITemplateContext context = new UITemplateContext(view);
 
-            List<RegistrationData> outputList = new List<RegistrationData>();
+            List<UIElementCreationData> outputList = new List<UIElementCreationData>();
             
             TemplateScope scope = new TemplateScope(outputList);
             scope.view = view;
@@ -63,9 +63,9 @@ namespace Src {
             UIElement root = (UIElement) Activator.CreateInstance(rootElement.processedElementType.rawType);
             context.rootElement = root;
 
-            RegistrationData rootData = new RegistrationData(root, null, context);
+            UIElementCreationData rootData = new UIElementCreationData(root, null, context);
             
-            scope.SetParent(rootData, default(RegistrationData));
+            scope.SetParent(rootData, default(UIElementCreationData));
             
             for (int i = 0; i < childTemplates.Count; i++) {
                 scope.SetParent(childTemplates[i].CreateScoped(scope), rootData);

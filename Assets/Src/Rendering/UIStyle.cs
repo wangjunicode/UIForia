@@ -1,40 +1,53 @@
-using System;
-using System.Diagnostics;
-using JetBrains.Annotations;
 using Src;
+using System;
 using UnityEngine;
+using System.Diagnostics;
+using Src.Layout;
 
 namespace Rendering {
 
     [DebuggerDisplay("{localId}->{filePath}")]
     public class UIStyle {
-
-        [PublicAPI]
+        
+        public const int UnsetIntValue = int.MaxValue;
+        public const float UnsetFloatValue = float.MaxValue;
+        
+        private static int NextStyleId;
+        public static readonly Color UnsetColorValue = new Color(-1f, -1f, -1f, -1f);
+        public static readonly ContentBoxRect UnsetRectValue = new ContentBoxRect();
+        public static readonly Vector2 UnsetVector2Value = new Vector2(float.MaxValue, float.MaxValue);
+        public static readonly UIMeasurement UnsetMeasurementValue = new UIMeasurement(float.MaxValue, UIUnit.View);
+        
         public readonly string filePath;
         public readonly string localId;
 
         public PaintDesc paint;
+        
         public UILayoutRect rect;
-        public ContentBox contentBox;
+        public UIMeasurement minWidth;
+        public UIMeasurement maxWidth;
+        public UIMeasurement minHeight;
+        public UIMeasurement maxHeight;
+        public int growthFactor;
+        public int shrinkFactor;
+        
+        public ContentBoxRect border;
+        public ContentBoxRect margin;
+        public ContentBoxRect padding;
+        
         public LayoutType layoutType;
+        public LayoutWrap layoutWrap;
+        public LayoutFlowType layoutFlow;
         public LayoutDirection layoutDirection;
+        public MainAxisAlignment mainAxisAlignment;
+        public CrossAxisAlignment crossAxisAlignment;
         
         public event Action<UIStyle> onChange;
-
-        public const int UnsetIntValue = int.MaxValue;
-        public const float UnsetFloatValue = float.MaxValue;
-        public static readonly Color UnsetColorValue = new Color(-1f, -1f, -1f, -1f);
-        public static readonly ContentBoxRect UnsetRectValue = new ContentBoxRect();
-        public static readonly Vector2 UnsetVector2Value = new Vector2(float.MaxValue, float.MaxValue);
-        public static UIMeasurement UnsetMeasurementValue = new UIMeasurement(float.MaxValue, UIUnit.View);
-        
-        private static int NextStyleId;
 
         public UIStyle(string localId, string filePath) {
             this.localId = localId;
             this.filePath = filePath;
             layoutType = LayoutType.Flow;
-            contentBox = new ContentBox();
             paint = new PaintDesc();
             rect = new UILayoutRect();
         }
@@ -43,7 +56,6 @@ namespace Rendering {
             localId = "AnonymousStyle[" + (NextStyleId++) + "]";
             filePath = string.Empty;
             layoutType = LayoutType.Flow;
-            contentBox = new ContentBox();
             paint = new PaintDesc();
             rect = new UILayoutRect();
         }
@@ -51,9 +63,11 @@ namespace Rendering {
         public UIStyle(UIStyle toCopy) {
             localId = "AnonymousStyle[" + (NextStyleId++) + "]";
             filePath = string.Empty;
-            contentBox = toCopy.contentBox.Clone();
             rect = toCopy.rect.Clone();
             paint = toCopy.paint.Clone();
+            margin = toCopy.margin;
+            border = toCopy.border;
+            padding = toCopy.padding;
             layoutType = toCopy.layoutType;
         }
 
@@ -62,25 +76,25 @@ namespace Rendering {
         public void ApplyChanges() {
             onChange?.Invoke(this);
         }
-
-        public bool RequiresRendering() {
-            return paint.backgroundColor != UnsetColorValue;
-        }
-
+        
         public static readonly UIStyle Default = new UIStyle() {
-            layoutType = LayoutType.Flow,
+            layoutType = LayoutType.Flex,
             layoutDirection = LayoutDirection.Column,
+            layoutFlow  = LayoutFlowType.InFlow,
+            layoutWrap =  LayoutWrap.None,
+            
             rect = new UILayoutRect() {
                 x = new UIMeasurement(),
                 y = new UIMeasurement(),
-                width = new UIMeasurement(),
-                height = new UIMeasurement()
+                width = new UIMeasurement(100f, UIUnit.Parent),
+                height = new UIMeasurement(100f, UIUnit.Parent)
             },
             paint = new PaintDesc() {
                 borderColor = new Color(1f, 1f, 1f, 1f),
                 backgroundColor = new Color(1f, 1f, 1f, 1f)
             } 
         };
+
 
     }
 

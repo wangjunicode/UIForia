@@ -20,7 +20,7 @@ namespace Src {
 
     }
 
-    public class SkipTree<T> where T : ISkipTreeTraversable {
+    public class SkipTree<T> where T : class, IHierarchical, ISkipTreeTraversable {
 
         private readonly SkipTreeNode<T> root;
         private readonly Dictionary<IHierarchical, SkipTreeNode<T>> nodeMap;
@@ -159,6 +159,13 @@ namespace Src {
             }
         }
 
+        public void Clear() {
+            nodeMap.Clear();
+            root.childCount = 0;
+            root.firstChild = null;
+            root.nextSibling = null;
+        }
+        
         [PublicAPI]
         public int GetChildCount(T element) {
             SkipTreeNode<T> node;
@@ -313,6 +320,35 @@ namespace Src {
                 }
             }
         }
+        
+        public void TraversePreOrderWithCallback<U>(U closureArg, Action<U, T> traverseFn) {
+            SkipTreeNode<T> ptr = root.firstChild;
+            Stack<SkipTreeNode<T>> stack = new Stack<SkipTreeNode<T>>();
+
+            while (ptr != null) {
+                if (!ptr.isDisabled) {
+                    stack.Push(ptr);
+                }
+
+                ptr = ptr.nextSibling;
+            }
+
+            while (stack.Count > 0) {
+                SkipTreeNode<T> current = stack.Pop();
+
+                traverseFn(closureArg, current.element);
+
+                ptr = current.firstChild;
+
+                while (ptr != null) {
+                    if (!ptr.isDisabled) {
+                        stack.Push(ptr);
+                    }
+
+                    ptr = ptr.nextSibling;
+                }
+            }
+        }
 
         public void TraverseRecursePreOrder() {
             SkipTreeNode<T> ptr = root.firstChild;
@@ -447,6 +483,8 @@ namespace Src {
             }
 
         }
+
+       
 
     }
 

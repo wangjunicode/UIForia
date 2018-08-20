@@ -2,98 +2,83 @@ using System;
 using System.Collections.Generic;
 using Rendering;
 using Src;
-using Src.Layout;
 using Src.Systems;
-using UnityEngine;
 
-public class UIView {
+public abstract class UIView {
 
-    public Type templateType;
-    public Font font;
 
     private static int ElementIdGenerator;
     public static int NextElementId => ElementIdGenerator++;
 
-    public UIElement root;
-    public GameObject gameObject;
+    private UIElement root;
 
-    private RectTransform rectTransform;
-    public BindingSystem bindingSystem;
-    public RenderSystem renderSystem;
-    public LifeCycleSystem lifeCycleSystem;
+    public readonly BindingSystem bindingSystem;
+    public readonly LifeCycleSystem lifeCycleSystem;
+    public readonly LayoutSystem layoutSystem;
     
-    public UIView(GameObject gameObject) {
-        this.gameObject = gameObject;
+    private Type elementType;
+
+    protected UIView(Type elementType) {
+        this.elementType = elementType;
+        layoutSystem = new LayoutSystem();
         bindingSystem = new BindingSystem();
-        renderSystem = new RenderSystem(gameObject);
-        lifeCycleSystem = new LifeCycleSystem();;
+        lifeCycleSystem = new LifeCycleSystem();
     }
 
-    public void Refresh() {
-
-        bindingSystem.Reset();
-        renderSystem.Reset();
-        lifeCycleSystem.Reset();
-        root = TemplateParser.GetParsedTemplate(templateType, true).CreateWithoutScope(this);
-
+    public UIElement Root => root;
+    
+    public abstract IRenderSystem renderSystem { get; protected set; }
+    
+    public abstract void Render();
+    
+    public virtual void Refresh() {
+        bindingSystem.OnReset();
+        renderSystem.OnReset();
+        lifeCycleSystem.OnReset();
+        layoutSystem.OnReset();
+        root = TemplateParser.GetParsedTemplate(elementType, true).CreateWithoutScope(this);
     }
 
-    public void Register(RegistrationData elementData) {
-        lifeCycleSystem.Register(elementData.element);
-        renderSystem.Register(elementData.element);
-        bindingSystem.Register(elementData.element, elementData.bindings, elementData.context);
+    public virtual void Register(UIElementCreationData elementData) {
+        layoutSystem.OnElementCreated(elementData);
+        lifeCycleSystem.OnElementCreated(elementData);
+        renderSystem.OnElementCreated(elementData);
+        bindingSystem.OnElementCreated(elementData);
     }
 
-    public void OnCreate() {
-        renderSystem.font = font;
-        root = TemplateParser.GetParsedTemplate(templateType).CreateWithoutScope(this);
-        rectTransform = gameObject.transform as RectTransform;
+    public virtual void OnCreate() {
+        root = TemplateParser.GetParsedTemplate(elementType).CreateWithoutScope(this);
     }
 
-    public void Update() {
-        bindingSystem.Update();
+    public virtual void OnDestroy() {
+        lifeCycleSystem.OnDestroy();
+        bindingSystem.OnDestroy();
+        renderSystem.OnDestroy();
+        layoutSystem.OnDestroy();
+    }
+    
+    public virtual void Update() {
+        bindingSystem.OnUpdate();
         HandleCreatedElements();
         HandleHidingElements();
         HandleShowingElements();
         HandleDestroyingElements();
-        renderSystem.Update();
-//        RunLayout();
+        renderSystem.OnUpdate();
         HandleMouseEvents();
     }
 
-    private void HandleDestroyingElements() { }
+    protected virtual void HandleDestroyingElements() { }
 
-    private void HandleCreatedElements() { }
+    protected virtual void HandleCreatedElements() { }
 
-    private void HandleHidingElements() { }
+    protected virtual void HandleHidingElements() { }
 
-    private void HandleShowingElements() { }
+    protected virtual void HandleShowingElements() { }
 
-    private void HandleMouseEvents() {
-        List<UIStyleSet> respondsToHover = new List<UIStyleSet>();
+    protected virtual void HandleMouseEvents() { }
 
-    }
-    
-    private void HandleKeyboardEvents() { }
+    protected virtual void HandleKeyboardEvents() { }
 
-    private void HandleFocusEvents() { }
-
-}
-
-public struct MouseHandleShape {
-
-    public Rect rect;
-    public float radius;
-    public int elementId;
-    public bool capture;
-    public MouseEventType types;
-
-    public static bool Contains(MouseHandleShape shape, Vector2 point) {
-        Vector2 center = shape.rect.center;
-        if ((point - center).sqrMagnitude < shape.radius * shape.radius) {
-            return false;
-        }
-        return shape.rect.Contains(point);
-    }
+    protected virtual void HandleFocusEvents() { }
 
 }

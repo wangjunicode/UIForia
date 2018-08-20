@@ -4,7 +4,7 @@ namespace Src {
 
     public class UISwitchTemplate : UITemplate {
 
-        public override RegistrationData CreateScoped(TemplateScope scope) {
+        public override UIElementCreationData CreateScoped(TemplateScope scope) {
             throw new NotImplementedException();
         }
 

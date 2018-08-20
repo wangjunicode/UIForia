@@ -2,7 +2,7 @@ namespace Src {
 
     public class UIPrefabTemplate : UITemplate {
 
-        public override RegistrationData CreateScoped(TemplateScope scope) {
+        public override UIElementCreationData CreateScoped(TemplateScope scope) {
             throw new System.NotImplementedException();
         }
 

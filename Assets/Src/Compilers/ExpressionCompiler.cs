@@ -1,7 +1,9 @@
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Reflection;
 using JetBrains.Annotations;
+using Src.Compilers.AliasSource;
 using Src.Compilers.CastHandlers;
 using UnityEngine;
 
@@ -11,6 +13,8 @@ namespace Src {
 
         private readonly ContextDefinition context;
         private List<ICastHandler> userCastHandlers;
+
+        private static readonly ExpressionParser parser = new ExpressionParser();
 
         private static readonly List<ICastHandler> builtInCastHandlers = new List<ICastHandler>() {
             new CastHandler_ColorToVector4(),
@@ -25,12 +29,29 @@ namespace Src {
             new CastHandler_Vector4ToColor()
         };
 
+        [PublicAPI]
         public ExpressionCompiler(ContextDefinition context) {
             this.context = context;
         }
 
+        [PublicAPI]
         public Expression Compile(ExpressionNode root) {
             return Visit(root);
+        }
+
+        [PublicAPI]
+        public Expression<T> Compile<T>(ExpressionNode root) {
+            return (Expression<T>) HandleCasting(typeof(T), Visit(root));
+        }
+
+        [PublicAPI]
+        public Expression Compile(string source) {
+            return Visit(parser.Parse(source));
+        }
+
+        [PublicAPI]
+        public Expression<T> Compile<T>(string source) {
+            return (Expression<T>) HandleCasting(typeof(T), Visit(parser.Parse(source)));
         }
 
         [PublicAPI]
@@ -179,8 +200,8 @@ namespace Src {
         private Expression VisitMethodCallExpression(MethodCallNode node) {
             string methodName = node.identifierNode.identifier;
 
-            context.ResolveType(node.identifierNode.identifier);
-            MethodInfo info = context.ResolveMethod(methodName);
+            Type[] yieldedTypes = node.signatureNode.parts.Select(p => p.GetYieldedType(context)).ToArray();
+            MethodInfo info = (MethodInfo) context.ResolveConstAlias(methodName, yieldedTypes);
 
             if (info == null) {
                 throw new Exception(
@@ -219,23 +240,28 @@ namespace Src {
             Type callType;
             switch (args.Length) {
                 case 0:
-                    callType = ReflectionUtil.CreateGenericType(typeof(MethodCallExpression_Instance<,>), genericArguments);
+                    callType = ReflectionUtil.CreateGenericType(typeof(MethodCallExpression_Instance<,>),
+                        genericArguments);
                     break;
 
                 case 1:
-                    callType = ReflectionUtil.CreateGenericType(typeof(MethodCallExpression_Instance<,,>), genericArguments);
+                    callType = ReflectionUtil.CreateGenericType(typeof(MethodCallExpression_Instance<,,>),
+                        genericArguments);
                     break;
 
                 case 2:
-                    callType = ReflectionUtil.CreateGenericType(typeof(MethodCallExpression_Instance<,,,>), genericArguments);
+                    callType = ReflectionUtil.CreateGenericType(typeof(MethodCallExpression_Instance<,,,>),
+                        genericArguments);
                     break;
 
                 case 3:
-                    callType = ReflectionUtil.CreateGenericType(typeof(MethodCallExpression_Instance<,,,,>), genericArguments);
+                    callType = ReflectionUtil.CreateGenericType(typeof(MethodCallExpression_Instance<,,,,>),
+                        genericArguments);
                     break;
 
                 case 4:
-                    callType = ReflectionUtil.CreateGenericType(typeof(MethodCallExpression_Instance<,,,,,>), genericArguments);
+                    callType = ReflectionUtil.CreateGenericType(typeof(MethodCallExpression_Instance<,,,,,>),
+                        genericArguments);
                     break;
 
                 default:
@@ -250,25 +276,26 @@ namespace Src {
         }
 
         private Expression VisitAliasNode(AliasExpressionNode node) {
-            Type aliasedType = context.ResolveType(node.alias);
+            Type aliasedType = context.ResolveRuntimeAliasType(node.alias);
 
-            if (aliasedType == typeof(int)) {
-                return new ResolveExpression_Alias_Int(node.alias);
-            }
-            else {
-                return new ResolveExpression_Alias_Object(node.alias, aliasedType);
-            }
+            return (Expression) ReflectionUtil.CreateGenericInstanceFromOpenType(
+                typeof(ResolveExpression_Alias<>),
+                aliasedType,
+                node.alias
+            );
         }
 
         private Expression VisitRootContextAccessor(RootContextLookupNode node) {
             string fieldName = node.idNode.identifier;
             // todo -- alias is resolved before field access, might be an issue
-            object constantAlias = context.ResolveConstantAlias(fieldName);
+            object constantAlias = context.ResolveConstAlias(fieldName);
             if (constantAlias != null) {
                 Type aliasType = constantAlias.GetType();
 
                 if (aliasType.IsEnum) {
-                    return new LiteralExpression_Enum((Enum) constantAlias);
+                    Type enumType = typeof(LiteralExpression_Enum<>).MakeGenericType(aliasType);
+                    ReflectionUtil.ObjectArray1[0] = constantAlias;
+                    return (Expression) Activator.CreateInstance(enumType, ReflectionUtil.ObjectArray1);
                 }
 
                 if (aliasType == typeof(string)) {
@@ -292,8 +319,14 @@ namespace Src {
                 }
             }
 
-            Type type = context.processedType.rawType;
-            return new AccessExpression_Root(type, fieldName);
+            Type propertyType = ReflectionUtil.GetFieldType(context.rootType, fieldName);
+            ReflectionUtil.ObjectArray2[0] = context.rootType;
+            ReflectionUtil.ObjectArray2[1] = fieldName;
+            return (Expression) ReflectionUtil.CreateGenericInstanceFromOpenType(
+                typeof(AccessExpression_Root<>),
+                propertyType,
+                ReflectionUtil.ObjectArray2
+            );
         }
 
         private Expression VisitParenNode(ParenExpressionNode node) {
@@ -359,16 +392,18 @@ namespace Src {
 
                 throw new Exception("Unary but not boolean operator");
             }
-            else if (IsNumericType(yieldType)) {
-                switch (node.op) {
-                    case OperatorType.Plus:
-                        return UnaryExpression_PlusFactory.Create(Visit(node.expression));
 
-                    case OperatorType.Minus:
-                        return UnaryExpression_MinusFactory.Create(Visit(node.expression));
-                }
+            if (!IsNumericType(yieldType)) {
+                return null;
             }
-            else { }
+
+            switch (node.op) {
+                case OperatorType.Plus:
+                    return UnaryExpression_PlusFactory.Create(Visit(node.expression));
+
+                case OperatorType.Minus:
+                    return UnaryExpression_MinusFactory.Create(Visit(node.expression));
+            }
 
             return null;
         }
@@ -381,7 +416,7 @@ namespace Src {
 
         private Expression VisitAccessExpression(AccessExpressionNode node) {
             string contextName = node.identifierNode.identifier;
-            Type headType = context.ResolveType(contextName);
+            Type headType = context.ResolveRuntimeAliasType(contextName);
 
             if (headType == null) {
                 throw new Exception("Missing field or alias for access on context: " + contextName);
@@ -456,12 +491,12 @@ namespace Src {
             if (node is FloatLiteralNode) {
                 return new LiteralExpression_Float(((FloatLiteralNode) node).value);
             }
-            else if (node is IntLiteralNode) {
+
+            if (node is IntLiteralNode) {
                 return new LiteralExpression_Int(((IntLiteralNode) node).value);
             }
-            else {
-                return new LiteralExpression_Double(((DoubleLiteralNode) node).value);
-            }
+
+            return new LiteralExpression_Double(((DoubleLiteralNode) node).value);
         }
 
         private Expression VisitOperator_TernaryCondition(OperatorExpressionNode node) {
@@ -475,29 +510,60 @@ namespace Src {
             Expression right = Visit(select.right);
             Expression left = Visit(select.left);
 
-            if (right.YieldedType == typeof(int) && left.YieldedType == typeof(int)) {
-                return new OperatorExpression_Ternary_Generic<int>(condition, (Expression<int>) left,
-                    (Expression<int>) right);
+            // todo -- need to assert a type match here
+            Type commonBase = ReflectionUtil.GetCommonBaseClass(right.YieldedType, left.YieldedType);
+
+            if (commonBase == null || commonBase == typeof(ValueType) || commonBase == typeof(object)) {
+                throw new Exception(
+                    "Types in ternary don't match: {right.YieldedType.Name} is not {left.YieldedType.Name}");
             }
-            else if (right.YieldedType == typeof(float) && left.YieldedType == typeof(float)) {
-                return new OperatorExpression_Ternary_Generic<float>(condition, (Expression<float>) left,
-                    (Expression<float>) right);
+
+            if (commonBase == typeof(int)) {
+                return new OperatorExpression_Ternary<int>(
+                    condition,
+                    (Expression<int>) left,
+                    (Expression<int>) right
+                );
             }
-            else if (right.YieldedType == typeof(double) && left.YieldedType == typeof(double)) {
-                return new OperatorExpression_Ternary_Generic<double>(condition, (Expression<double>) left,
-                    (Expression<double>) right);
+
+            if (commonBase == typeof(float)) {
+                return new OperatorExpression_Ternary<float>(
+                    condition,
+                    (Expression<float>) left,
+                    (Expression<float>) right
+                );
             }
-            else if (right.YieldedType == typeof(string) && left.YieldedType == typeof(string)) {
-                return new OperatorExpression_Ternary_Generic<string>(condition, (Expression<string>) left,
-                    (Expression<string>) right);
+
+            if (commonBase == typeof(double)) {
+                return new OperatorExpression_Ternary<double>(
+                    condition,
+                    (Expression<double>) left,
+                    (Expression<double>) right
+                );
             }
-            else if (right.YieldedType == typeof(bool) && left.YieldedType == typeof(bool)) {
-                return new OperatorExpression_Ternary_Generic<bool>(condition, (Expression<bool>) left,
-                    (Expression<bool>) right);
+
+            if (commonBase == typeof(string)) {
+                return new OperatorExpression_Ternary<string>(
+                    condition,
+                    (Expression<string>) left,
+                    (Expression<string>) right
+                );
             }
-            else {
-                return new OperatorExpression_Ternary(condition, left, right);
+
+            if (commonBase == typeof(bool)) {
+                return new OperatorExpression_Ternary<bool>(
+                    condition,
+                    (Expression<bool>) left,
+                    (Expression<bool>) right
+                );
             }
+
+            Type openType = typeof(OperatorExpression_Ternary<>);
+            ReflectionUtil.ObjectArray3[0] = condition;
+            ReflectionUtil.ObjectArray3[1] = left;
+            ReflectionUtil.ObjectArray3[2] = right;
+            return (Expression) ReflectionUtil.CreateGenericInstanceFromOpenType(openType, right.YieldedType,
+                ReflectionUtil.ObjectArray3);
         }
 
     }

@@ -24,12 +24,10 @@ namespace Src {
 
         private struct DelegateEntry {
 
-            public readonly Type delegateType;
             public readonly Delegate instance;
             public readonly MethodInfo methodInfo;
 
-            public DelegateEntry(Type delegateType, Delegate instance, MethodInfo methodInfo) {
-                this.delegateType = delegateType;
+            public DelegateEntry(Delegate instance, MethodInfo methodInfo) {
                 this.instance = instance;
                 this.methodInfo = methodInfo;
             }
@@ -39,6 +37,7 @@ namespace Src {
         public const BindingFlags PublicStatic = BindingFlags.Public | BindingFlags.Static;
         public const BindingFlags PublicInstance = BindingFlags.Public | BindingFlags.Instance;
         public const BindingFlags InstanceBindFlags = BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic;
+        public const BindingFlags InterfaceBindFlags = BindingFlags.Instance | BindingFlags.Public | BindingFlags.Static;
 
         private static readonly List<GenericTypeEntry> generics = new List<GenericTypeEntry>();
         private static readonly List<DelegateEntry> staticDelegates = new List<DelegateEntry>();
@@ -47,6 +46,7 @@ namespace Src {
         public static readonly object[] ObjectArray0 = new object[0];
         public static readonly object[] ObjectArray1 = new object[1];
         public static readonly object[] ObjectArray2 = new object[2];
+        public static readonly object[] ObjectArray3 = new object[3];
 
         public static Type GetArrayElementTypeOrThrow(Type targetType) {
             bool isListType = typeof(IList).IsAssignableFrom(targetType);
@@ -237,7 +237,12 @@ namespace Src {
 //            }
         }
 
-        public static object CreateGenericInstance(Type genericType, params object[] args) {
+        public static object CreateGenericInstance(Type genericBase, params object[] args) {
+            return Activator.CreateInstance(genericBase, args);
+        }
+        
+        public static object CreateGenericInstanceFromOpenType(Type openBaseType, Type genericArgument, params object[] args) {
+            Type genericType = openBaseType.MakeGenericType(genericArgument);
             return Activator.CreateInstance(genericType, args);
         }
 
@@ -449,7 +454,7 @@ namespace Src {
 
             Type delegateType = GetClosedDelegateType(methodInfo);
             Delegate instance = Delegate.CreateDelegate(delegateType, methodInfo, true);
-            DelegateEntry newEntry = new DelegateEntry(delegateType, instance, methodInfo);
+            DelegateEntry newEntry = new DelegateEntry(instance, methodInfo);
             staticDelegates.Add(newEntry);
             return instance;
         }
@@ -463,7 +468,7 @@ namespace Src {
             }
 
             Delegate instance = Delegate.CreateDelegate(delegateType, methodInfo, true);
-            DelegateEntry newEntry = new DelegateEntry(delegateType, instance, methodInfo);
+            DelegateEntry newEntry = new DelegateEntry(instance, methodInfo);
             staticDelegates.Add(newEntry);
             return instance;
         }
@@ -478,7 +483,7 @@ namespace Src {
 
             Type delegateType = GetOpenDelegateType(methodInfo);
             Delegate openDelegate = CreateOpenDelegate(delegateType, methodInfo);
-            DelegateEntry openEntry = new DelegateEntry(delegateType, openDelegate, methodInfo);
+            DelegateEntry openEntry = new DelegateEntry(openDelegate, methodInfo);
             openDelegates.Add(openEntry);
 
             return openDelegate;
@@ -493,7 +498,7 @@ namespace Src {
             }
 
             Delegate openDelegate = CreateOpenDelegate(delegateType, methodInfo);
-            DelegateEntry openEntry = new DelegateEntry(delegateType, openDelegate, methodInfo);
+            DelegateEntry openEntry = new DelegateEntry(openDelegate, methodInfo);
             openDelegates.Add(openEntry);
 
             return openDelegate;
@@ -508,6 +513,10 @@ namespace Src {
         public static Delegate GetDelegate(Type delegateType, MethodInfo methodInfo) {
             methodInfo = ResolvePossibleInterface(methodInfo.DeclaringType, methodInfo);
             return methodInfo.IsStatic ? GetClosedDelegate(delegateType, methodInfo) : GetOpenDelegate(delegateType, methodInfo);
+        }
+
+        public static Type GetFieldType(Type type, string fieldName) {
+            return GetFieldInfoOrThrow(type, fieldName).FieldType;
         }
 
     }

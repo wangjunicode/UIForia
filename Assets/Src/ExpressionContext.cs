@@ -4,23 +4,24 @@ namespace Src {
 
     public class ExpressionContext {
 
+        // todo -- make this work off of alias sources also
+
         public object rootContext;
-        protected List<Alias<int>> integerAliases;
-        protected List<Alias<object>> objectAliases;
+        protected readonly List<ExpressionAlias<int>> integerAliases;
+        protected readonly List<ExpressionAlias<object>> objectAliases;
 
         public ExpressionContext(object rootContext) {
             this.rootContext = rootContext;
-            this.integerAliases = new List<Alias<int>>();
-            this.objectAliases = new List<Alias<object>>();
-            this.objectAliases.Add(new Alias<object>("this", rootContext));
+            this.integerAliases = new List<ExpressionAlias<int>>();
+            this.objectAliases = new List<ExpressionAlias<object>>();
         }
 
         public void SetObjectAlias(string name, object target) {
-            this.objectAliases.Add(new Alias<object>(name, target));
+            this.objectAliases.Add(new ExpressionAlias<object>(name, target));
         }
 
         public void SetIntAlias(string name, int value) {
-            integerAliases.Add(new Alias<int>(name, value));
+            integerAliases.Add(new ExpressionAlias<int>(name, value));
         }
 
         public void RemoveObjectAlias(string alias) {
@@ -31,7 +32,7 @@ namespace Src {
                 }
             }
         }
-        
+
         public void RemoveIntAlias(string alias) {
             for (int i = 0; i < integerAliases.Count; i++) {
                 if (integerAliases[i].name == alias) {
@@ -47,6 +48,7 @@ namespace Src {
                     return integerAliases[i].value;
                 }
             }
+
             return int.MaxValue;
         }
 
@@ -64,16 +66,11 @@ namespace Src {
             return null;
         }
 
-        protected struct Alias<T> {
-
-            public readonly string name;
-            public readonly T value;
-
-            public Alias(string name, T value) {
-                this.name = name;
-                this.value = value;
-            }
-
+        public object ResolveRuntimeAlias(string alias) {
+            // todo -- this will be changed
+            object retn = ResolveObjectAlias(alias);
+            if (retn != null) return retn;
+            return ResolveIntAlias(alias);
         }
 
     }

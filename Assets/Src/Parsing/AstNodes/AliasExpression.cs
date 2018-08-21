@@ -16,7 +16,7 @@ namespace Src {
         public string alias => identifierNode.identifier;
 
         public override Type GetYieldedType(ContextDefinition context) {
-            return context.ResolveType(identifierNode.identifier);
+            return context.ResolveRuntimeAliasType(identifierNode.identifier);
         }
 
     }

@@ -16,7 +16,7 @@
     
     <Contents>
 
-        <Group x-name="my name" someAttr="{LayoutDirection.Column}" style.layoutDirection="Column" onMouseClick="{handleClick()}" style="panelStyle, panel0" style.backgroundColor="{rgb(r, g, b)}">
+        <Group x-name="my name" style.padding="rect(5f)" someAttr="{LayoutDirection.Column}" style.layoutDirection="Column" onMouseClick="{handleClick()}" style="panelStyle, panel0" style.backgroundColor="{rgb(r, g, b)}">
             
             <Group style.rectWidth="50" style.rectHeight="100" style.backgroundColor="{rgb(255, 255, 0)}"/>
             <Group style.rectWidth="50" style.rectHeight="100" style.backgroundColor="{rgb(0, 255, 0)}"/>

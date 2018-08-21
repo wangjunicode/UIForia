@@ -9,7 +9,7 @@ namespace Src {
         public SpecialIdentifierNode(string identifier) : base(identifier) {}
 
         public Type GetYieldedType(ContextDefinition context) {
-            return context.ResolveType(identifier);
+            return context.ResolveRuntimeAliasType(identifier);
         }
     }
 

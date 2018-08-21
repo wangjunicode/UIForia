@@ -1,4 +1,5 @@
-﻿using JetBrains.Annotations;
+﻿using System;
+using JetBrains.Annotations;
 using NUnit.Framework;
 using Src;
 using UnityEngine;
@@ -82,6 +83,15 @@ public class TypeCheckTests {
     public void CheckType_MethodCall_1Argument() {
         ExpressionParser parser = new ExpressionParser();
         Assert.AreEqual(typeof(void), parser.Parse("{SimpleMethod2(1)}").GetYieldedType(simpleRootContext));
+    }
+
+    [Test]
+    public void CheckType_TernaryArguments() {
+        var error = Assert.Throws<Exception>(() => {
+            ExpressionCompiler compiler = new ExpressionCompiler(nullContext);
+            compiler.Compile("{ true ? true : 1f }");
+        });
+        Assert.IsTrue(error.Message.StartsWith("Types in ternary don't match"));
     }
 
 }

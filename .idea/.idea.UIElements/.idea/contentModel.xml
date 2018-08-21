@@ -67,6 +67,13 @@
             <e p="TemplateBinding.cs" t="Include" />
           </e>
           <e p="Compilers" t="Include">
+            <e p="AliasSources" t="Include">
+              <e p="ColorAliasSource.cs" t="Include" />
+              <e p="EnumAliasSources.cs" t="Include" />
+              <e p="IAliasSource.cs" t="Include" />
+              <e p="MethodAliasSource.cs" t="Include" />
+              <e p="ReflectionAliasSource.cs" t="Include" />
+            </e>
             <e p="CastHandlers" t="Include">
               <e p="CastHandler_ColorToVector4.cs" t="Include" />
               <e p="CastHandler_DoubleToMeasurement.cs" t="Include" />
@@ -164,6 +171,7 @@
             <e p="AttributeDefinition.cs" t="Include" />
             <e p="ChildrenSlotWithChildrenException.cs" t="Include" />
             <e p="ContextDefinition.cs" t="Include" />
+            <e p="ExpressionAlias.cs" t="Include" />
             <e p="ExpressionParser.cs" t="Include" />
             <e p="InvalidTemplateException.cs" t="Include" />
             <e p="OperatorType.cs" t="Include" />

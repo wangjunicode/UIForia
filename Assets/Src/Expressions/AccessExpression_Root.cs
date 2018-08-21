@@ -3,15 +3,16 @@ using System.Reflection;
 
 namespace Src {
 
-    public class AccessExpression_Root : Expression {
+    public class AccessExpression_Root<T> : Expression<T> {
 
-        private const BindingFlags Flags = BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic;
-
-        private readonly string fieldName;
         private readonly FieldInfo cachedFieldInfo;
 
         public AccessExpression_Root(Type type, string fieldName) {
-            cachedFieldInfo = type.GetField(fieldName, Flags);
+            cachedFieldInfo = ReflectionUtil.GetFieldInfoOrThrow(type, fieldName);
+        }
+
+        public override T EvaluateTyped(ExpressionContext context) {
+            return (T)cachedFieldInfo.GetValue(context.rootContext);
         }
 
         public override Type YieldedType => cachedFieldInfo.FieldType;

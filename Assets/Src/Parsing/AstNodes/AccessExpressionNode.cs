@@ -20,7 +20,7 @@ namespace Src {
         // if is array access -> return currentType.GetElementType()
         // if is property access -> return currentType.GetField("identifier").FieldType
         public override Type GetYieldedType(ContextDefinition context) {
-            Type partType = context.ResolveType(identifierNode.identifier);
+            Type partType = context.ResolveRuntimeAliasType(identifierNode.identifier);
 
             for (int i = 0; i < parts.Count; i++) {
                 if (parts[i] is PropertyAccessExpressionPartNode) {

@@ -1,7 +1,10 @@
 using System;
 using System.Collections.Generic;
+using System.Reflection;
 using NUnit.Framework;
 using Src;
+using Src.Compilers;
+using Src.Compilers.AliasSource;
 using UnityEngine;
 
 [TestFixture]
@@ -184,7 +187,7 @@ public class ExpressionCompilerTests {
         ExpressionCompiler compiler = new ExpressionCompiler(testContextDef);
         Expression expression = compiler.Compile(parser.Parse());
 
-        Assert.IsInstanceOf<AccessExpression_Root>(expression);
+        Assert.IsInstanceOf<AccessExpression_Root<float>>(expression);
         Assert.AreEqual(1234.5f, expression.Evaluate(ctx));
     }
 
@@ -248,7 +251,7 @@ public class ExpressionCompilerTests {
 
         ctx.SetObjectAlias("$item", target.valueContainer);
 
-        testContextDef.SetAliasToType("$item", typeof(ValueContainer));
+        testContextDef.AddRuntimeAlias("$item", typeof(ValueContainer));
 
         ExpressionParser parser = new ExpressionParser("{$item.x}");
         ExpressionCompiler compiler = new ExpressionCompiler(testContextDef);
@@ -265,7 +268,7 @@ public class ExpressionCompilerTests {
         target.someArray.Add(11);
         target.someArray.Add(111);
         ExpressionContext ctx = new ExpressionContext(target);
-        testContextDef.SetAliasToType("$i", typeof(int));
+        testContextDef.AddRuntimeAlias("$i", typeof(int));
         ctx.SetIntAlias("$i", 2);
 
         ExpressionParser parser = new ExpressionParser("{someArray[$i]}");
@@ -283,7 +286,7 @@ public class ExpressionCompilerTests {
         target.someArray.Add(11);
         target.someArray.Add(111);
         ExpressionContext ctx = new ExpressionContext(target);
-        testContextDef.SetAliasToType("$i", typeof(int));
+        testContextDef.AddRuntimeAlias("$i", typeof(int));
         ctx.SetIntAlias("$i", 2);
 
         ExpressionParser parser = new ExpressionParser("{someArray[$i - 1]}");
@@ -302,7 +305,7 @@ public class ExpressionCompilerTests {
         ExpressionParser parser = new ExpressionParser("{ 1 > 2 ? 5 : 6}");
         ExpressionCompiler compiler = new ExpressionCompiler(testContextDef);
         Expression expression = compiler.Compile(parser.Parse());
-        Assert.IsInstanceOf<OperatorExpression_Ternary_Generic<int>>(expression);
+        Assert.IsInstanceOf<OperatorExpression_Ternary<int>>(expression);
         Assert.AreEqual(6, expression.Evaluate(ctx));
     }
 
@@ -316,7 +319,7 @@ public class ExpressionCompilerTests {
         ExpressionParser parser = new ExpressionParser("{ value > 2 ? 5 : 6}");
         ExpressionCompiler compiler = new ExpressionCompiler(testContextDef);
         Expression expression = compiler.Compile(parser.Parse());
-        Assert.IsInstanceOf<OperatorExpression_Ternary_Generic<int>>(expression);
+        Assert.IsInstanceOf<OperatorExpression_Ternary<int>>(expression);
         Assert.AreEqual(5, expression.Evaluate(ctx));
     }
 
@@ -376,16 +379,18 @@ public class ExpressionCompilerTests {
         target.value = 124;
 
         ExpressionContext ctx = new ExpressionContext(target);
-
-        testContextDef.SetMethodAlias("AliasedMethod", typeof(Mathf).GetMethod("Max", new[] {
+        MethodInfo info = typeof(Mathf).GetMethod("Max", new[] {
             typeof(float), typeof(float)
-        }));
-
+        });
+        
+        MethodAliasSource methodSource = new MethodAliasSource("AliasedMethod", info);
+        
+        testContextDef.AddConstAliasSource(methodSource);
+        
         ExpressionParser parser = new ExpressionParser("{AliasedMethod(1f, 2f)}");
         ExpressionCompiler compiler = new ExpressionCompiler(testContextDef);
         Expression expression = compiler.Compile(parser.Parse());
 
-        // ctx.SetObjectAlias("AliasedMethod", );
         Assert.AreEqual(2, expression.Evaluate(ctx));
     }
 
@@ -398,15 +403,16 @@ public class ExpressionCompilerTests {
 
     }
 
+
     [Test]
     public void ResolveConstantEnumAlias() {
         TestRoot target = new TestRoot();
-        testContextDef.SetConstantAlias("One", TestEnum.One);
+        testContextDef.AddConstAliasSource(new EnumAliasSource<TestEnum>());
         ExpressionContext ctx = new ExpressionContext(target);
         ExpressionParser parser = new ExpressionParser("{One}");
         ExpressionCompiler compiler = new ExpressionCompiler(testContextDef);
         Expression expression = compiler.Compile(parser.Parse());
-        Assert.IsInstanceOf<LiteralExpression_Enum>(expression);
+        Assert.IsInstanceOf<LiteralExpression_Enum<TestEnum>>(expression);
         Assert.AreEqual(TestEnum.One, expression.Evaluate(ctx));
     }
 

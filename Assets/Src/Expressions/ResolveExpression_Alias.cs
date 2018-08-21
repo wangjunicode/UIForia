@@ -2,44 +2,22 @@
 
 namespace Src {
 
-    public class ResolveExpression_Alias_Int : Expression<int> {
+    public class ResolveExpression_Alias<T> : Expression<T> {
 
-        public readonly string alias;
+        private readonly string alias;
 
-        public ResolveExpression_Alias_Int(string alias) {
+        public ResolveExpression_Alias(string alias) {
             this.alias = alias;
         }
 
-        public override Type YieldedType => typeof(int);
+        public override Type YieldedType => typeof(T);
 
-        public override int EvaluateTyped(ExpressionContext context) {
-            return context.ResolveIntAlias(alias);
+        public override T EvaluateTyped(ExpressionContext context) {
+            return (T)context.ResolveRuntimeAlias(alias);
         }
 
         public override object Evaluate(ExpressionContext context) {
-            return context.ResolveIntAlias(alias);
-        }
-
-        public override bool IsConstant() {
-            return false;
-        }
-
-    }
-
-    public class ResolveExpression_Alias_Object : Expression {
-
-        public readonly string alias;
-        public readonly Type yieldedType;
-
-        public ResolveExpression_Alias_Object(string alias, Type yieldedType) {
-            this.alias = alias;
-            this.yieldedType = yieldedType;
-        }
-
-        public override Type YieldedType => yieldedType;
-
-        public override object Evaluate(ExpressionContext context) {
-            return context.ResolveObjectAlias(alias);
+            return context.ResolveRuntimeAlias(alias);
         }
 
         public override bool IsConstant() {

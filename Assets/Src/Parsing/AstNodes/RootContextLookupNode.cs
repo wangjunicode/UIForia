@@ -16,11 +16,10 @@ namespace Src {
 
         public override Type GetYieldedType(ContextDefinition context) {
             if (this.fieldInfo == null) {
-                const BindingFlags flags = BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic;
-                fieldInfo = context.processedType.rawType.GetField(idNode.identifier, flags);
+                fieldInfo = context.rootType.GetField(idNode.identifier, ReflectionUtil.InstanceBindFlags);
             }
             if (fieldInfo == null) {
-                throw new FieldNotDefinedException(context.processedType.rawType, idNode.identifier);
+                throw new FieldNotDefinedException(context.rootType, idNode.identifier);
             }
             return fieldInfo.FieldType;
         }

@@ -1,13 +1,52 @@
 ﻿using System;
 using System.Collections;
+using System.Collections.Generic;
+using System.Linq;
 using System.Reflection;
 
 namespace Src {
 
     public static class ReflectionUtil {
 
+        private struct GenericTypeEntry {
+
+            public readonly Type[] paramTypes;
+            public readonly Type retnType;
+            public readonly Type baseType;
+
+            public GenericTypeEntry(Type baseType, Type[] paramTypes, Type retnType) {
+                this.baseType = baseType;
+                this.paramTypes = paramTypes;
+                this.retnType = retnType;
+            }
+
+        }
+
+        private struct DelegateEntry {
+
+            public readonly Type delegateType;
+            public readonly Delegate instance;
+            public readonly MethodInfo methodInfo;
+
+            public DelegateEntry(Type delegateType, Delegate instance, MethodInfo methodInfo) {
+                this.delegateType = delegateType;
+                this.instance = instance;
+                this.methodInfo = methodInfo;
+            }
+
+        }
+
         public const BindingFlags PublicStatic = BindingFlags.Public | BindingFlags.Static;
+        public const BindingFlags PublicInstance = BindingFlags.Public | BindingFlags.Instance;
         public const BindingFlags InstanceBindFlags = BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic;
+
+        private static readonly List<GenericTypeEntry> generics = new List<GenericTypeEntry>();
+        private static readonly List<DelegateEntry> staticDelegates = new List<DelegateEntry>();
+        private static readonly List<DelegateEntry> openDelegates = new List<DelegateEntry>();
+
+        public static readonly object[] ObjectArray0 = new object[0];
+        public static readonly object[] ObjectArray1 = new object[1];
+        public static readonly object[] ObjectArray2 = new object[2];
 
         public static Type GetArrayElementTypeOrThrow(Type targetType) {
             bool isListType = typeof(IList).IsAssignableFrom(targetType);
@@ -30,7 +69,6 @@ namespace Src {
             }
 
             throw new Exception($"Trying to read the element type of {targetType.Name} but it is not a list type");
-
         }
 
         public static FieldInfo GetFieldInfoOrThrow(Type type, string fieldName) {
@@ -38,6 +76,7 @@ namespace Src {
             if (fieldInfo == null) {
                 throw new Exception($"Field called {fieldName} was not found on type {type.Name}");
             }
+
             return fieldInfo;
         }
 
@@ -85,63 +124,63 @@ namespace Src {
             switch (Type.GetTypeCode(left)) {
                 case TypeCode.Byte:
                     switch (Type.GetTypeCode(right)) {
-                        case TypeCode.Byte:   return true;
-                        case TypeCode.Int16:  return true;
-                        case TypeCode.Int32:  return true;
-                        case TypeCode.Int64:  return true;
+                        case TypeCode.Byte: return true;
+                        case TypeCode.Int16: return true;
+                        case TypeCode.Int32: return true;
+                        case TypeCode.Int64: return true;
                         case TypeCode.Double: return true;
                         case TypeCode.Single: return true;
-                        default:              return false;
+                        default: return false;
                     }
                 case TypeCode.Int16:
                     switch (Type.GetTypeCode(right)) {
-                        case TypeCode.Byte:   return false;
-                        case TypeCode.Int16:  return true;
-                        case TypeCode.Int32:  return true;
-                        case TypeCode.Int64:  return true;
+                        case TypeCode.Byte: return false;
+                        case TypeCode.Int16: return true;
+                        case TypeCode.Int32: return true;
+                        case TypeCode.Int64: return true;
                         case TypeCode.Double: return true;
                         case TypeCode.Single: return true;
-                        default:              return false;
+                        default: return false;
                     }
                 case TypeCode.Int32:
                     switch (Type.GetTypeCode(right)) {
-                        case TypeCode.Byte:   return false;
-                        case TypeCode.Int16:  return false;
-                        case TypeCode.Int32:  return true;
-                        case TypeCode.Int64:  return true;
+                        case TypeCode.Byte: return false;
+                        case TypeCode.Int16: return false;
+                        case TypeCode.Int32: return true;
+                        case TypeCode.Int64: return true;
                         case TypeCode.Double: return true;
                         case TypeCode.Single: return true;
-                        default:              return false;
+                        default: return false;
                     }
                 case TypeCode.Int64:
                     switch (Type.GetTypeCode(right)) {
-                        case TypeCode.Byte:   return false;
-                        case TypeCode.Int16:  return false;
-                        case TypeCode.Int32:  return false;
-                        case TypeCode.Int64:  return true;
+                        case TypeCode.Byte: return false;
+                        case TypeCode.Int16: return false;
+                        case TypeCode.Int32: return false;
+                        case TypeCode.Int64: return true;
                         case TypeCode.Double: return true;
                         case TypeCode.Single: return true;
-                        default:              return false;
+                        default: return false;
                     }
                 case TypeCode.Double:
                     switch (Type.GetTypeCode(right)) {
-                        case TypeCode.Byte:   return false;
-                        case TypeCode.Int16:  return false;
-                        case TypeCode.Int32:  return true;
-                        case TypeCode.Int64:  return false;
+                        case TypeCode.Byte: return false;
+                        case TypeCode.Int16: return false;
+                        case TypeCode.Int32: return true;
+                        case TypeCode.Int64: return false;
                         case TypeCode.Double: return true;
                         case TypeCode.Single: return true;
-                        default:              return false;
+                        default: return false;
                     }
                 case TypeCode.Single:
                     switch (Type.GetTypeCode(right)) {
-                        case TypeCode.Byte:   return false;
-                        case TypeCode.Int16:  return false;
-                        case TypeCode.Int32:  return true;
-                        case TypeCode.Int64:  return false;
+                        case TypeCode.Byte: return false;
+                        case TypeCode.Int16: return false;
+                        case TypeCode.Int32: return true;
+                        case TypeCode.Int64: return false;
                         case TypeCode.Double: return false;
                         case TypeCode.Single: return true;
-                        default:              return false;
+                        default: return false;
                     }
                 default:
                     return false;
@@ -154,6 +193,7 @@ namespace Src {
                 case OperatorType.Plus:
                     return type.GetMethod("op_Addition", PublicStatic);
             }
+
             return null;
 //            switch (method.Name) {
 //                case "op_Implicit":
@@ -195,6 +235,279 @@ namespace Src {
 //                case "op_UnaryPlus":
 //                case "op_OnesComplement": break;
 //            }
+        }
+
+        public static object CreateGenericInstance(Type genericType, params object[] args) {
+            return Activator.CreateInstance(genericType, args);
+        }
+
+        public static Type CreateGenericType(Type baseType, params Type[] genericArguments) {
+            for (int i = 0; i < generics.Count; i++) {
+                GenericTypeEntry entry = generics[i];
+                if (entry.baseType != baseType || genericArguments.Length != entry.paramTypes.Length) {
+                    continue;
+                }
+
+                if (!TypeParamsMatch(entry.paramTypes, genericArguments)) {
+                    continue;
+                }
+
+                return entry.retnType;
+            }
+
+            Type outputType = baseType.MakeGenericType(genericArguments);
+            GenericTypeEntry newType = new GenericTypeEntry(
+                baseType,
+                genericArguments,
+                outputType
+            );
+            generics.Add(newType);
+            return outputType;
+        }
+
+        private static bool TypeParamsMatch(Type[] params0, Type[] params1) {
+            if (params0.Length != params1.Length) return false;
+            for (int i = 0; i < params0.Length; i++) {
+                if (params0[i] != params1[i]) {
+                    return false;
+                }
+            }
+
+            return true;
+        }
+
+        public static bool HasAnyAttribute(MethodInfo methodInfo, params Type[] types) {
+            for (int i = 0; i < types.Length; i++) {
+                if (methodInfo.GetCustomAttribute(types[i]) != null) {
+                    return true;
+                }
+            }
+
+            return false;
+        }
+
+        public static bool HasAnyAttribute(FieldInfo fieldInfo, params Type[] types) {
+            for (int i = 0; i < types.Length; i++) {
+                if (fieldInfo.GetCustomAttribute(types[i]) != null) {
+                    return true;
+                }
+            }
+
+            return false;
+        }
+
+        public static TDelegateType CreateOpenDelegate<TDelegateType>(MethodInfo info) where TDelegateType : class {
+            return Delegate.CreateDelegate(typeof(TDelegateType), null, info) as TDelegateType;
+        }
+
+        public static Delegate CreateOpenDelegate(Type type, MethodInfo info) {
+            return Delegate.CreateDelegate(type, null, info);
+        }
+
+        public static Type GetOpenDelegateType(MethodInfo info) {
+            ParameterInfo[] parameters = info.GetParameters();
+            Type[] signatureTypes = new Type[parameters.Length + 2];
+
+            signatureTypes[0] = info.DeclaringType;
+
+            for (int i = 1; i < parameters.Length + 1; i++) {
+                signatureTypes[i] = parameters[i - 1].ParameterType;
+            }
+
+            signatureTypes[parameters.Length + 1] = info.ReturnType;
+
+            switch (signatureTypes.Length) {
+                case 1:
+                    return typeof(Func<>).MakeGenericType(signatureTypes);
+                case 2:
+                    return typeof(Func<,>).MakeGenericType(signatureTypes);
+                case 3:
+                    return typeof(Func<,,>).MakeGenericType(signatureTypes);
+                case 4:
+                    return typeof(Func<,,,>).MakeGenericType(signatureTypes);
+                case 5:
+                    return typeof(Func<,,,,>).MakeGenericType(signatureTypes);
+                case 6:
+                    return typeof(Func<,,,,,>).MakeGenericType(signatureTypes);
+                case 7:
+                    return typeof(Func<,,,,,,>).MakeGenericType(signatureTypes);
+                case 8:
+                    return typeof(Func<,,,,,,,>).MakeGenericType(signatureTypes);
+                case 9:
+                    return typeof(Func<,,,,,,,,>).MakeGenericType(signatureTypes);
+                case 10:
+                    return typeof(Func<,,,,,,,,,>).MakeGenericType(signatureTypes);
+                default:
+                    throw new ArgumentOutOfRangeException();
+            }
+        }
+
+        public static Type GetClosedDelegateType(MethodInfo info) {
+            ParameterInfo[] parameters = info.GetParameters();
+            Type[] signatureTypes = new Type[parameters.Length + 1];
+
+            for (int i = 0; i < parameters.Length; i++) {
+                signatureTypes[i] = parameters[i].ParameterType;
+            }
+
+            signatureTypes[parameters.Length + 1] = info.ReturnType;
+
+            switch (signatureTypes.Length) {
+                case 1:
+                    return typeof(Func<>).MakeGenericType(signatureTypes);
+                case 2:
+                    return typeof(Func<,>).MakeGenericType(signatureTypes);
+                case 3:
+                    return typeof(Func<,,>).MakeGenericType(signatureTypes);
+                case 4:
+                    return typeof(Func<,,,>).MakeGenericType(signatureTypes);
+                case 5:
+                    return typeof(Func<,,,,>).MakeGenericType(signatureTypes);
+                case 6:
+                    return typeof(Func<,,,,,>).MakeGenericType(signatureTypes);
+                case 7:
+                    return typeof(Func<,,,,,,>).MakeGenericType(signatureTypes);
+                case 8:
+                    return typeof(Func<,,,,,,,>).MakeGenericType(signatureTypes);
+                case 9:
+                    return typeof(Func<,,,,,,,,>).MakeGenericType(signatureTypes);
+                case 10:
+                    return typeof(Func<,,,,,,,,,>).MakeGenericType(signatureTypes);
+                default:
+                    throw new ArgumentOutOfRangeException();
+            }
+        }
+
+        private static bool SignatureMatches(MethodInfo one, MethodInfo two) {
+            if (one.ReturnType != two.ReturnType) return false;
+            if (one.Name != two.Name) return false;
+            
+            ParameterInfo[] parameters1 = one.GetParameters();
+            ParameterInfo[] parameters2 = two.GetParameters();
+            if (parameters1.Length != parameters2.Length) {
+                return false;
+            }
+
+            for (int i = 0; i < parameters1.Length; i++) {
+                if (parameters1[i].ParameterType != parameters2[i].ParameterType) {
+                    return false;
+                }
+            }
+
+            return true;
+        }
+
+        private static MethodInfo ResolvePossibleInterface(Type declaringType, MethodInfo original) {
+            if (original.IsStatic) {
+                return original;
+            }
+
+            Type[] interfaces = declaringType.GetInterfaces();
+
+            if (interfaces.Length == 0) {
+                return original;
+            }
+
+            for (int i = 0; i < interfaces.Length; i++) {
+                MethodInfo interfaceMethod = interfaces[i]
+                    .GetMethods(PublicInstance)
+                    .FirstOrDefault((methodInfo) => SignatureMatches(original, methodInfo));
+
+                if (interfaceMethod != null) {
+                    return interfaceMethod;
+                }
+            }
+
+            return original;
+        }
+
+        private static MethodInfo ResolvePossibleBaseClassMethod(Type declaringType, MethodInfo original) {
+            Type baseClass = declaringType.BaseType;
+            
+            while (baseClass != null) {
+                MethodInfo method = baseClass
+                    .GetMethods(PublicInstance)
+                    .FirstOrDefault((methodInfo) => SignatureMatches(original, methodInfo));
+
+                if (method != null) {
+                    return method;
+                }
+
+                baseClass = baseClass.BaseType;
+            }
+
+            return original;
+        }
+
+        private static Delegate GetClosedDelegate(MethodInfo methodInfo) {
+            for (int i = 0; i < staticDelegates.Count; i++) {
+                DelegateEntry entry = staticDelegates[i];
+                if (entry.methodInfo == methodInfo) {
+                    return entry.instance;
+                }
+            }
+
+            Type delegateType = GetClosedDelegateType(methodInfo);
+            Delegate instance = Delegate.CreateDelegate(delegateType, methodInfo, true);
+            DelegateEntry newEntry = new DelegateEntry(delegateType, instance, methodInfo);
+            staticDelegates.Add(newEntry);
+            return instance;
+        }
+
+        private static Delegate GetClosedDelegate(Type delegateType, MethodInfo methodInfo) {
+            for (int i = 0; i < staticDelegates.Count; i++) {
+                DelegateEntry entry = staticDelegates[i];
+                if (entry.methodInfo == methodInfo) {
+                    return entry.instance;
+                }
+            }
+
+            Delegate instance = Delegate.CreateDelegate(delegateType, methodInfo, true);
+            DelegateEntry newEntry = new DelegateEntry(delegateType, instance, methodInfo);
+            staticDelegates.Add(newEntry);
+            return instance;
+        }
+
+        private static Delegate GetOpenDelegate(MethodInfo methodInfo) {
+            for (int i = 0; i < openDelegates.Count; i++) {
+                DelegateEntry entry = openDelegates[i];
+                if (entry.methodInfo == methodInfo) {
+                    return entry.instance;
+                }
+            }
+
+            Type delegateType = GetOpenDelegateType(methodInfo);
+            Delegate openDelegate = CreateOpenDelegate(delegateType, methodInfo);
+            DelegateEntry openEntry = new DelegateEntry(delegateType, openDelegate, methodInfo);
+            openDelegates.Add(openEntry);
+
+            return openDelegate;
+        }
+
+        private static Delegate GetOpenDelegate(Type delegateType, MethodInfo methodInfo) {
+            for (int i = 0; i < openDelegates.Count; i++) {
+                DelegateEntry entry = openDelegates[i];
+                if (entry.methodInfo == methodInfo) {
+                    return entry.instance;
+                }
+            }
+
+            Delegate openDelegate = CreateOpenDelegate(delegateType, methodInfo);
+            DelegateEntry openEntry = new DelegateEntry(delegateType, openDelegate, methodInfo);
+            openDelegates.Add(openEntry);
+
+            return openDelegate;
+        }
+
+        public static Delegate GetDelegate(MethodInfo methodInfo) {
+            methodInfo = ResolvePossibleBaseClassMethod(methodInfo.DeclaringType, methodInfo);
+            methodInfo = ResolvePossibleInterface(methodInfo.DeclaringType, methodInfo);
+            return methodInfo.IsStatic ? GetClosedDelegate(methodInfo) : GetOpenDelegate(methodInfo);
+        }
+
+        public static Delegate GetDelegate(Type delegateType, MethodInfo methodInfo) {
+            methodInfo = ResolvePossibleInterface(methodInfo.DeclaringType, methodInfo);
+            return methodInfo.IsStatic ? GetClosedDelegate(delegateType, methodInfo) : GetOpenDelegate(delegateType, methodInfo);
         }
 
     }

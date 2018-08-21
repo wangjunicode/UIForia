@@ -49,8 +49,8 @@ namespace Src {
 
                     if (attr.value.IndexOf(' ') != -1) {
                         string[] names = attr.value.Split(' ');
-                        foreach (string name in names) {
-                            UIStyle style = template.GetStyleInstance(name);
+                        foreach (string part in names) {
+                            UIStyle style = template.GetStyleInstance(part);
                             if (style != null) {
                                 baseStyles.Add(style);
                             }

@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Reflection;
 
 namespace Src {
@@ -8,19 +9,41 @@ namespace Src {
 
         private const BindingFlags bindFlags = BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic;
 
-        private List<Alias<Type>> typeAliases;
-        private List<Alias<MethodInfo>> methodAliases;
+        private readonly List<Alias<Type>> typeAliases;
+        private readonly List<Alias<MethodInfo>> methodAliases;
+        private readonly List<Alias<object>> constantAliases;
 
         public readonly ProcessedType processedType;
 
         public ContextDefinition(Type type) {
             this.typeAliases = new List<Alias<Type>>();
             this.methodAliases = new List<Alias<MethodInfo>>();
+            this.constantAliases = new List<Alias<object>>();
             this.processedType = TypeProcessor.GetType(type);
         }
 
         public Type rootType => processedType.rawType;
 
+        public void SetConstantAlias(string name, object value) {
+            for (int i = 0; i < constantAliases.Count; i++) {
+                if (constantAliases[i].name == name) {
+                    constantAliases[i] = new Alias<object>(name, value);
+                    return;
+                }    
+            }
+            constantAliases.Add(new Alias<object>(name, value));
+        }
+
+        public object ResolveConstantAlias(string aliasName) {
+            for (int i = 0; i < constantAliases.Count; i++) {
+                if (constantAliases[i].name == aliasName) {
+                    return constantAliases[i].value;
+                }    
+            }
+
+            return null;
+        }
+        
         // todo -- figure out correct binding flags and attributes to support
         public void SetMethodAlias(string alias, MethodInfo info) {
             RemoveAlias(alias);
@@ -65,6 +88,8 @@ namespace Src {
             typeAliases.Add(new Alias<Type>(alias, type));
         }
 
+       
+        
         public void RemoveAlias(string alias) {
             for (int i = 0; i < typeAliases.Count; i++) {
                 if (typeAliases[i].name == alias) {

@@ -12,7 +12,7 @@ namespace Src {
             this.text = text;
         }
 
-       // public override Type ElementType => typeof(UITextElement);
+       public override Type ElementType => typeof(string);
 
         public void Compile() {
             bindings = new Binding[attributes.Count];

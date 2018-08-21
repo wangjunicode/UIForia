@@ -1,11 +1,29 @@
 using System;
+using System.Collections.Generic;
 using System.Reflection;
+using JetBrains.Annotations;
+using Src.Compilers.CastHandlers;
+using UnityEngine;
 
 namespace Src {
 
     public class ExpressionCompiler {
 
         private readonly ContextDefinition context;
+        private List<ICastHandler> userCastHandlers;
+
+        private static readonly List<ICastHandler> builtInCastHandlers = new List<ICastHandler>() {
+            new CastHandler_ColorToVector4(),
+            new CastHandler_DoubleToMeasurement(),
+            new CastHandler_FloatToInt(),
+            new CastHandler_FloatToMeasurement(),
+            new CastHandler_IntToDouble(),
+            new CastHandler_IntToFloat(),
+            new CastHandler_IntToMeasurement(),
+            new CastHandler_Vector2ToVector3(),
+            new CastHandler_Vector3ToVector2(),
+            new CastHandler_Vector4ToColor()
+        };
 
         public ExpressionCompiler(ContextDefinition context) {
             this.context = context;
@@ -15,9 +33,22 @@ namespace Src {
             return Visit(root);
         }
 
+        [PublicAPI]
+        public void AddCastHandler(ICastHandler handler) {
+            if (userCastHandlers == null) {
+                userCastHandlers = new List<ICastHandler>();
+            }
+
+            userCastHandlers.Add(handler);
+        }
+
+        [PublicAPI]
+        public void RemoveCastHandler(ICastHandler handler) {
+            userCastHandlers?.Remove(handler);
+        }
+
         private Expression Visit(ExpressionNode node) {
             switch (node.expressionType) {
-
                 case ExpressionNodeType.AliasAccessor:
                     return VisitAliasNode((AliasExpressionNode) node);
 
@@ -41,42 +72,183 @@ namespace Src {
 
                 case ExpressionNodeType.MethodCall:
                     return VisitMethodCallExpression((MethodCallNode) node);
-
             }
 
             return null;
         }
 
-        private Expression VisitMethodCallExpression(MethodCallNode node) {
 
+        private Expression HandleCasting(Type requiredType, Expression expression) {
+            Type yieldedType = expression.YieldedType;
+
+            if (yieldedType == requiredType) {
+                return expression;
+            }
+
+            if (userCastHandlers != null) {
+                for (int i = 0; i < userCastHandlers.Count; i++) {
+                    if (userCastHandlers[i].CanHandle(requiredType, yieldedType)) {
+                        return userCastHandlers[i].Cast(requiredType, expression);
+                    }
+                }
+            }
+
+            for (int i = 0; i < builtInCastHandlers.Count; i++) {
+                if (builtInCastHandlers[i].CanHandle(requiredType, yieldedType)) {
+                    return builtInCastHandlers[i].Cast(requiredType, expression);
+                }
+            }
+
+            return expression;
+        }
+
+        private void ValidateParameterTypes(ParameterInfo[] parameters, Expression[] arguments) {
+            for (int i = 0; i < parameters.Length; i++) {
+                if (!parameters[i].ParameterType.IsAssignableFrom(arguments[i].YieldedType)) {
+                    throw new Exception(
+                        $"Cannot use parameter of type {arguments[i].YieldedType} for parameter of type {parameters[i].ParameterType}");
+                }
+            }
+        }
+
+        private Expression VisitMethodCallExpression_Static(MethodInfo info, MethodCallNode node) {
+            string methodName = node.identifierNode.identifier;
+
+            IReadOnlyList<ExpressionNode> signatureParts = node.signatureNode.parts;
+
+            ParameterInfo[] parameters = info.GetParameters();
+
+            if (parameters.Length != signatureParts.Count) {
+                throw new Exception("Argument count is wrong");
+            }
+
+            Expression[] args = new Expression[signatureParts.Count];
+            Type[] genericArguments = new Type[signatureParts.Count + 1];
+
+            for (int i = 0; i < args.Length; i++) {
+                Type requiredType = parameters[i].ParameterType;
+                ExpressionNode argumentNode = signatureParts[i];
+                Expression argumentExpression = Visit(argumentNode);
+                args[i] = HandleCasting(requiredType, argumentExpression);
+
+                genericArguments[i] = args[i].YieldedType;
+            }
+
+            genericArguments[genericArguments.Length - 1] = info.ReturnType;
+
+            ValidateParameterTypes(parameters, args);
+
+            Type callType;
+            switch (args.Length) {
+                case 0:
+                    callType = ReflectionUtil.CreateGenericType(typeof(MethodCallExpression_Static<>),
+                        genericArguments);
+                    break;
+
+                case 1:
+                    callType = ReflectionUtil.CreateGenericType(typeof(MethodCallExpression_Static<,>),
+                        genericArguments);
+                    break;
+
+                case 2:
+                    callType = ReflectionUtil.CreateGenericType(typeof(MethodCallExpression_Static<,,>),
+                        genericArguments);
+                    break;
+
+                case 3:
+                    callType = ReflectionUtil.CreateGenericType(typeof(MethodCallExpression_Static<,,,>),
+                        genericArguments);
+                    break;
+
+                case 4:
+                    callType = ReflectionUtil.CreateGenericType(typeof(MethodCallExpression_Static<,,,,>),
+                        genericArguments);
+                    break;
+
+                default:
+                    throw new Exception(
+                        $"Expressions only support functions with up to 4 arguments. {methodName} is supplying {args.Length} ");
+            }
+
+            ReflectionUtil.ObjectArray2[0] = info;
+            ReflectionUtil.ObjectArray2[1] = args;
+
+            return (Expression) ReflectionUtil.CreateGenericInstance(callType, ReflectionUtil.ObjectArray2);
+        }
+
+        private Expression VisitMethodCallExpression(MethodCallNode node) {
             string methodName = node.identifierNode.identifier;
 
             context.ResolveType(node.identifierNode.identifier);
             MethodInfo info = context.ResolveMethod(methodName);
 
             if (info == null) {
-                throw new Exception($"Cannot find method {methodName} on type {context.rootType.Name} or any registered aliases");
+                throw new Exception(
+                    $"Cannot find method {methodName} on type {context.rootType.Name} or any registered aliases");
             }
 
-            ParameterInfo[] parameterInfos = info.GetParameters();
-            if (parameterInfos.Length != node.signatureNode.parts.Count) {
+            if (info.IsStatic) {
+                return VisitMethodCallExpression_Static(info, node);
+            }
+
+            ParameterInfo[] parameters = info.GetParameters();
+            IReadOnlyList<ExpressionNode> signatureParts = node.signatureNode.parts;
+
+            if (parameters.Length != signatureParts.Count) {
                 throw new Exception("Argument count is wrong");
             }
-            
-            Expression[] args = new Expression[node.signatureNode.parts.Count];
+
+            Expression[] args = new Expression[signatureParts.Count];
+            Type[] genericArguments = new Type[signatureParts.Count + 2];
+
+            genericArguments[0] = context.rootType; // todo -- this means root functions only, no chaining right now! 
+
             for (int i = 0; i < args.Length; i++) {
-                args[i] = Visit(node.signatureNode.parts[i]);
+                Type requiredType = parameters[i].ParameterType;
+                ExpressionNode argumentNode = signatureParts[i];
+                Expression argumentExpression = Visit(argumentNode);
+                args[i] = HandleCasting(requiredType, argumentExpression);
+
+                genericArguments[i + 1] = args[i].YieldedType;
             }
-            
-//            for (int i = 0; i < parameterInfos.Length; i++) {
-//                if (!parameterInfos[i].ParameterType.IsAssignableFrom(args[i].YieldedType)) {
-//                    throw new Exception($"Cannot use parameter of type {args[i].YieldedType} for parameter of type {parameterInfos[i].ParameterType}");
-//                }    
-//            }
-            
-            return new MethodCallExpression(info, args);
+
+            genericArguments[genericArguments.Length - 1] = info.ReturnType;
+
+            ValidateParameterTypes(parameters, args);
+
+            Type callType;
+            switch (args.Length) {
+                case 0:
+                    callType = ReflectionUtil.CreateGenericType(typeof(MethodCallExpression_Instance<,>), genericArguments);
+                    break;
+
+                case 1:
+                    callType = ReflectionUtil.CreateGenericType(typeof(MethodCallExpression_Instance<,,>), genericArguments);
+                    break;
+
+                case 2:
+                    callType = ReflectionUtil.CreateGenericType(typeof(MethodCallExpression_Instance<,,,>), genericArguments);
+                    break;
+
+                case 3:
+                    callType = ReflectionUtil.CreateGenericType(typeof(MethodCallExpression_Instance<,,,,>), genericArguments);
+                    break;
+
+                case 4:
+                    callType = ReflectionUtil.CreateGenericType(typeof(MethodCallExpression_Instance<,,,,,>), genericArguments);
+                    break;
+
+                default:
+                    throw new Exception(
+                        $"Expressions only support functions with up to 4 arguments. {methodName} is supplying {args.Length} ");
+            }
+
+            ReflectionUtil.ObjectArray2[0] = info;
+            ReflectionUtil.ObjectArray2[1] = args;
+
+            return (Expression) ReflectionUtil.CreateGenericInstance(callType, ReflectionUtil.ObjectArray2);
         }
-        
+
         private Expression VisitAliasNode(AliasExpressionNode node) {
             Type aliasedType = context.ResolveType(node.alias);
 
@@ -86,11 +258,40 @@ namespace Src {
             else {
                 return new ResolveExpression_Alias_Object(node.alias, aliasedType);
             }
-
         }
 
-        private AccessExpression_Root VisitRootContextAccessor(RootContextLookupNode node) {
+        private Expression VisitRootContextAccessor(RootContextLookupNode node) {
             string fieldName = node.idNode.identifier;
+            // todo -- alias is resolved before field access, might be an issue
+            object constantAlias = context.ResolveConstantAlias(fieldName);
+            if (constantAlias != null) {
+                Type aliasType = constantAlias.GetType();
+
+                if (aliasType.IsEnum) {
+                    return new LiteralExpression_Enum((Enum) constantAlias);
+                }
+
+                if (aliasType == typeof(string)) {
+                    return new LiteralExpression_String((string) constantAlias);
+                }
+
+                if (aliasType == typeof(int)) {
+                    return new LiteralExpression_Int((int) constantAlias);
+                }
+
+                if (aliasType == typeof(double)) {
+                    return new LiteralExpression_Double((double) constantAlias);
+                }
+
+                if (aliasType == typeof(float)) {
+                    return new LiteralExpression_Float((float) constantAlias);
+                }
+
+                if (aliasType == typeof(bool)) {
+                    return new LiteralExpression_Boolean((bool) constantAlias);
+                }
+            }
+
             Type type = context.processedType.rawType;
             return new AccessExpression_Root(type, fieldName);
         }
@@ -111,7 +312,8 @@ namespace Src {
                     }
 
                     if (ReflectionUtil.AreNumericTypesCompatible(leftType, rightType)) {
-                        return OperatorExpression_Arithmetic.Create(OperatorType.Plus, Visit(node.left), Visit(node.right));
+                        return OperatorExpression_Arithmetic.Create(OperatorType.Plus, Visit(node.left),
+                            Visit(node.right));
                     }
 
                     break;
@@ -124,6 +326,7 @@ namespace Src {
                     if (ReflectionUtil.AreNumericTypesCompatible(leftType, rightType)) {
                         return OperatorExpression_Arithmetic.Create(node.OpType, Visit(node.left), Visit(node.right));
                     }
+
                     break;
 
                 case OperatorType.TernaryCondition:
@@ -158,13 +361,11 @@ namespace Src {
             }
             else if (IsNumericType(yieldType)) {
                 switch (node.op) {
-
                     case OperatorType.Plus:
                         return UnaryExpression_PlusFactory.Create(Visit(node.expression));
 
                     case OperatorType.Minus:
                         return UnaryExpression_MinusFactory.Create(Visit(node.expression));
-
                 }
             }
             else { }
@@ -176,11 +377,9 @@ namespace Src {
             return type == typeof(int)
                    || type == typeof(float)
                    || type == typeof(double);
-
         }
 
         private Expression VisitAccessExpression(AccessExpressionNode node) {
-
             string contextName = node.identifierNode.identifier;
             Type headType = context.ResolveType(contextName);
 
@@ -189,7 +388,8 @@ namespace Src {
             }
 
             if (headType.IsPrimitive) {
-                throw new Exception($"Attempting property access on type {headType.Name} on a primitive field {contextName}");
+                throw new Exception(
+                    $"Attempting property access on type {headType.Name} on a primitive field {contextName}");
             }
 
             int startOffset = 0;
@@ -206,7 +406,6 @@ namespace Src {
             AccessExpressionPart[] parts = new AccessExpressionPart[partCount];
 
             for (int i = startOffset; i < partCount; i++) {
-
                 AccessExpressionPartNode part = node.parts[i - startOffset];
 
                 PropertyAccessExpressionPartNode propertyPart = part as PropertyAccessExpressionPartNode;
@@ -227,7 +426,6 @@ namespace Src {
                 }
 
                 throw new Exception("Unknown AccessExpression Type: " + part.GetType());
-
             }
 
             if (isRootContext) {
@@ -239,7 +437,6 @@ namespace Src {
         }
 
         private static Expression VisitConstant(LiteralValueNode node) {
-
             if (node is NumericLiteralNode) {
                 return VisitNumericLiteralNode((NumericLiteralNode) node);
             }
@@ -279,19 +476,24 @@ namespace Src {
             Expression left = Visit(select.left);
 
             if (right.YieldedType == typeof(int) && left.YieldedType == typeof(int)) {
-                return new OperatorExpression_Ternary_Generic<int>(condition, (Expression<int>) left, (Expression<int>) right);
+                return new OperatorExpression_Ternary_Generic<int>(condition, (Expression<int>) left,
+                    (Expression<int>) right);
             }
             else if (right.YieldedType == typeof(float) && left.YieldedType == typeof(float)) {
-                return new OperatorExpression_Ternary_Generic<float>(condition, (Expression<float>) left, (Expression<float>) right);
+                return new OperatorExpression_Ternary_Generic<float>(condition, (Expression<float>) left,
+                    (Expression<float>) right);
             }
             else if (right.YieldedType == typeof(double) && left.YieldedType == typeof(double)) {
-                return new OperatorExpression_Ternary_Generic<double>(condition, (Expression<double>) left, (Expression<double>) right);
+                return new OperatorExpression_Ternary_Generic<double>(condition, (Expression<double>) left,
+                    (Expression<double>) right);
             }
             else if (right.YieldedType == typeof(string) && left.YieldedType == typeof(string)) {
-                return new OperatorExpression_Ternary_Generic<string>(condition, (Expression<string>) left, (Expression<string>) right);
+                return new OperatorExpression_Ternary_Generic<string>(condition, (Expression<string>) left,
+                    (Expression<string>) right);
             }
             else if (right.YieldedType == typeof(bool) && left.YieldedType == typeof(bool)) {
-                return new OperatorExpression_Ternary_Generic<bool>(condition, (Expression<bool>) left, (Expression<bool>) right);
+                return new OperatorExpression_Ternary_Generic<bool>(condition, (Expression<bool>) left,
+                    (Expression<bool>) right);
             }
             else {
                 return new OperatorExpression_Ternary(condition, left, right);

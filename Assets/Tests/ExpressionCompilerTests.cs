@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using NUnit.Framework;
 using Src;
@@ -77,7 +78,6 @@ public class ExpressionCompilerTests {
 
         Assert.IsInstanceOf<LiteralExpression_String>(expression);
         Assert.AreEqual("some string here", expression.Evaluate(null));
-
     }
 
     [Test]
@@ -291,7 +291,6 @@ public class ExpressionCompilerTests {
         Expression expression = compiler.Compile(parser.Parse());
         Assert.IsInstanceOf<AccessExpression>(expression);
         Assert.AreEqual(11, expression.Evaluate(ctx));
-
     }
 
     [Test]
@@ -352,7 +351,7 @@ public class ExpressionCompilerTests {
 
         ExpressionContext ctx = new ExpressionContext(target);
 
-        ExpressionParser parser = new ExpressionParser("{GetValue1(5)}");
+        ExpressionParser parser = new ExpressionParser("{GetValue1(5f)}");
         ExpressionCompiler compiler = new ExpressionCompiler(testContextDef);
         Expression expression = compiler.Compile(parser.Parse());
         Assert.AreEqual(124 * 5, expression.Evaluate(ctx));
@@ -388,6 +387,27 @@ public class ExpressionCompilerTests {
 
         // ctx.SetObjectAlias("AliasedMethod", );
         Assert.AreEqual(2, expression.Evaluate(ctx));
+    }
+
+    [Flags]
+    public enum TestEnum {
+
+        One = 1 << 0,
+        Two = 1 << 1,
+        Three = 1 << 2
+
+    }
+
+    [Test]
+    public void ResolveConstantEnumAlias() {
+        TestRoot target = new TestRoot();
+        testContextDef.SetConstantAlias("One", TestEnum.One);
+        ExpressionContext ctx = new ExpressionContext(target);
+        ExpressionParser parser = new ExpressionParser("{One}");
+        ExpressionCompiler compiler = new ExpressionCompiler(testContextDef);
+        Expression expression = compiler.Compile(parser.Parse());
+        Assert.IsInstanceOf<LiteralExpression_Enum>(expression);
+        Assert.AreEqual(TestEnum.One, expression.Evaluate(ctx));
     }
 
     private static Expression GetLiteralExpression(string input) {

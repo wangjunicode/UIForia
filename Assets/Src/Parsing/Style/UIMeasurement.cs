@@ -9,8 +9,18 @@ namespace Src {
         public readonly float value;
         public readonly UIUnit unit;
 
-        public UIMeasurement(float value, UIUnit unit) {
+        public UIMeasurement(float value, UIUnit unit = UIUnit.Pixel) {
             this.value = value;
+            this.unit = unit;
+        }
+        
+        public UIMeasurement(int value, UIUnit unit = UIUnit.Pixel) {
+            this.value = value;
+            this.unit = unit;
+        }
+        
+        public UIMeasurement(double value, UIUnit unit = UIUnit.Pixel) {
+            this.value = (float)value;
             this.unit = unit;
         }
 

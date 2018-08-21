@@ -58,7 +58,7 @@ namespace Src.Compilers {
 
         private ContextDefinition context;
         private ExpressionCompiler compiler;
-        private ExpressionParser parser;
+        private readonly ExpressionParser parser;
 
         public StyleBindingCompiler() {
             parser = new ExpressionParser();
@@ -89,9 +89,10 @@ namespace Src.Compilers {
             
             compiler = new ExpressionCompiler(context);
             Target targetState = GetTargetState(key);
-            ExpressionNode expressionNode = parser.Parse(value);
-            Expression expression = compiler.Compile(expressionNode);
-
+            ExpressionNode expressionNode;// = parser.Parse(value);
+            Expression expression;// = compiler.Compile(expressionNode);
+            expressionNode = parser.Parse(value);
+            expression = compiler.Compile(expressionNode);
             switch (targetState.property) {
                 // Paint
                 case StyleTemplateConstants.BackgroundImage:
@@ -144,6 +145,12 @@ namespace Src.Compilers {
                     return new StyleBinding_CrossAxisAlignment(targetState.state, (Expression<CrossAxisAlignment>)expression);
 
                 case StyleTemplateConstants.LayoutDirection:
+                    context.SetConstantAlias("Row", (int)LayoutDirection.Row);
+                    context.SetConstantAlias("Column", (int)LayoutDirection.Column);
+                    expressionNode = parser.Parse(value);
+                    expression = compiler.Compile(expressionNode);
+                    context.RemoveAlias("Row");
+                    context.RemoveAlias("Column");
                     return new StyleBinding_LayoutDirection(targetState.state, (Expression<LayoutDirection>)expression);
 
                 case StyleTemplateConstants.LayoutFlow:

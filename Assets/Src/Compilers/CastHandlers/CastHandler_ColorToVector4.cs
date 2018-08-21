@@ -11,7 +11,7 @@ namespace Src.Compilers.CastHandlers {
 
         public Expression Cast(Type requiredType, Expression expression) {
             Expression<Color> colorExpression = (Expression<Color>) expression;
-            return new TypedCastExpression<Color, Vector4>(colorExpression,
+            return new CastExpression<Color, Vector4>(colorExpression,
                 (exp, ctx) => { return (Vector4) exp.EvaluateTyped(ctx); });
         }
 

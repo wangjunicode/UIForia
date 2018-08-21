@@ -4,8 +4,6 @@ namespace Src {
 
     public class UIElementTemplate : UITemplate {
 
-        private Binding[] bindings;
-
         public override UIElementCreationData CreateScoped(TemplateScope scope) {
             List<UIElementCreationData> scopedChildren = new List<UIElementCreationData>(childTemplates.Count);
 
@@ -26,40 +24,18 @@ namespace Src {
             UIElement instance = templateToExpand.CreateWithScope(outputScope);
             instance.name = name;
 
-            ApplyConstantStyles(instance, scope);
-
             context.rootElement = instance;
             
-            return new UIElementCreationData(instance, bindings, scope.context);
+            return new UIElementCreationData(
+                name,
+                instance,
+                styleDefinition,
+                null, 
+                scope.context
+            );
         }
 
         public override bool Compile(ParsedTemplate template) {
-            if (!base.Compile(template)) {
-                return false;
-            }
-
-            if (bindings != null) return true;
-
-            if (attributes == null) {
-                return true;
-            }
-
-            List<Binding> bindingList = new List<Binding>();
-
-            for (int i = 0; i < attributes.Count; i++) {
-                AttributeDefinition attr = attributes[i];
-                
-                if(attr.key.StartsWith("style")) continue;
-                
-                //Binding binding = TryGeneratingBinding(attr, template);
-                
-                //bindingList.Add(ExpressionCompiler.GenerateFromAttribute(template.contextDefinition, attr));
-            }
-
-            bindingList.AddRange(dynamicStyleBindings);
-            
-            bindings = bindingList.ToArray();
-            
             return true;
         }
 

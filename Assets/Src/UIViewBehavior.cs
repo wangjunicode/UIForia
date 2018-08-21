@@ -15,10 +15,10 @@ namespace Src {
     public class UIViewBehavior : MonoBehaviour {
 
         public UIView view;
-        
+
         public void Start() {
             Canvas canvas = gameObject.GetComponent<Canvas>();
-            RectTransform rectTransform  = canvas.GetComponent<RectTransform>();
+            RectTransform rectTransform = canvas.GetComponent<RectTransform>();
             rectTransform.pivot = new Vector2(0, 1);
             view = new UIGameObjectView(typeof(TempUIType), rectTransform);
             view.OnCreate();
@@ -27,9 +27,9 @@ namespace Src {
         public void RefreshView() {
             view?.Refresh();
         }
-        
+
         public void Update() {
-            view.Update();
+            view?.Update();
         }
 
     }

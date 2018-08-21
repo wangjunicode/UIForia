@@ -2,7 +2,7 @@ namespace Rendering {
 
     public partial class UIStyleSet {
 
-        private struct StyleDefinition {
+        private struct StyleEntry {
 
             public readonly UIStyle style;
             public readonly StyleState state;
@@ -10,7 +10,7 @@ namespace Rendering {
             public readonly int priority;
 
             //style number is used to prioritize shared styles, higher numbers are less important
-            public StyleDefinition(UIStyle style, StyleType type, StyleState state, int styleNumber = -1) {
+            public StyleEntry(UIStyle style, StyleType type, StyleState state, int styleNumber = -1) {
                 this.style = style;
                 this.type = type;
                 this.state = state;

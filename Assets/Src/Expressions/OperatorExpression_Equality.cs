@@ -2,26 +2,26 @@
 
 namespace Src {
 
-    public class OperatorExpression_Equality : Expression<bool> {
+    public class OperatorExpression_Equality<U, V> : Expression<bool> {
 
-        public readonly Expression left;
-        public readonly Expression right;
+        public readonly Expression<U> left;
+        public readonly Expression<V> right;
         public readonly OperatorType operatorType;
-        
-        public OperatorExpression_Equality(OperatorType operatorType, Expression left, Expression right) {
+
+        public OperatorExpression_Equality(OperatorType operatorType, Expression<U> left, Expression<V> right) {
             this.operatorType = operatorType;
             this.left = left;
             this.right = right;
         }
 
         public override Type YieldedType => typeof(bool);
-        
+
         public override bool EvaluateTyped(ExpressionContext context) {
             if (operatorType == OperatorType.Equals) {
-                return left.Evaluate(context).Equals(right.Evaluate(context));
+                return left.EvaluateTyped(context).Equals(right.EvaluateTyped(context));
             }
             else if (operatorType == OperatorType.NotEquals) {
-                return !(left.Evaluate(context).Equals(right.Evaluate(context)));
+                return !(left.EvaluateTyped(context).Equals(right.EvaluateTyped(context)));
             }
             throw new Exception("Invalid equality operator: " + operatorType);
         }
@@ -33,7 +33,7 @@ namespace Src {
         public override bool IsConstant() {
             return left.IsConstant() && right.IsConstant();
         }
-        
+
     }
 
 }

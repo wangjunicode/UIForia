@@ -6,6 +6,8 @@ namespace Src {
 
         public abstract bool IsConstant();
 
+        public static readonly Binding[] EmptyArray = new Binding[0];
+
     }
 
 }

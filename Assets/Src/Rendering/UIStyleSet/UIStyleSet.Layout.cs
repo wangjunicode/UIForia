@@ -4,8 +4,6 @@ namespace Rendering {
 
     public partial class UIStyleSet {
 
-        # region Layout
-
         public LayoutFlowType layoutFlow {
             get { return FindActiveStyle((s) => s.layoutFlow != LayoutFlowType.Unset).layoutFlow; }
             set { SetLayoutFlow(value); }
@@ -91,8 +89,6 @@ namespace Rendering {
             GetOrCreateStyle(state).crossAxisAlignment = alignment;
             view.layoutSystem.SetCrossAxisAlignment(element, alignment);
         }
-
-        #endregion
 
     }
 

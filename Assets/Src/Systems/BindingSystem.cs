@@ -27,8 +27,12 @@ namespace Src.Systems {
         }
 
         public void OnElementCreated(UIElementCreationData data) {
-            if (data.bindings == null || data.bindings.Length == 0) return;
-            bindingSkipTree.AddItem(new TemplateBinding(data.element, data.bindings, data.context));
+            
+            // todo handle merging style bindings w/ non style bindings, probably in the compile step
+            
+           
+            bindingSkipTree.AddItem(new TemplateBinding(data.element, bindings, data.context));
+            
         }
 
         public void OnElementEnabled(UIElement element) {

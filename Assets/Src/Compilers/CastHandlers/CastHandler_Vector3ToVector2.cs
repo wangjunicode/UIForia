@@ -13,7 +13,7 @@ namespace Src.Compilers.CastHandlers {
             
             Expression<Vector3> vec3Expression = (Expression<Vector3>) expression;
             
-            return new TypedCastExpression<Vector3, Vector2>(vec3Expression, (exp, ctx) => {
+            return new CastExpression<Vector3, Vector2>(vec3Expression, (exp, ctx) => {
                 Vector3 vec3 = exp.EvaluateTyped(ctx);
                 return new Vector2(vec3.x, vec3.y);
             });

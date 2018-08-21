@@ -4,8 +4,6 @@ namespace Rendering {
 
     public partial class UIStyleSet {
 
-        #region Constraints
-
         public UIMeasurement minWidth {
             get { return FindActiveStyle((s) => s.minWidth != UIStyle.UnsetMeasurementValue).minWidth; }
             set { SetMinWidth(value); }
@@ -101,9 +99,6 @@ namespace Rendering {
                 view.layoutSystem.SetGrowthFactor(element, factor);
             }
         }
-
-        
-        #endregion
 
     }
 

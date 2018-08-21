@@ -8,8 +8,8 @@ namespace Src {
 
         public Type type;
         public string filePath;
-        public UIElementTemplate rootElement;
         public List<UIStyle> styles;
+        public UIElementTemplate rootElement;
         public List<ImportDeclaration> imports;
         public ContextDefinition contextDefinition;
 
@@ -22,10 +22,16 @@ namespace Src {
         public UIElement CreateWithScope(TemplateScope scope) {
             if (!isCompiled) Compile();
 
-            UIElement instance = (UIElement) Activator.CreateInstance(rootElement.processedElementType.rawType);
+            UIElement instance = (UIElement) Activator.CreateInstance(rootElement.ElementType);
 
-            UIElementCreationData instanceData = new UIElementCreationData(instance, null, scope.context);
-            
+            UIElementCreationData instanceData = new UIElementCreationData(
+                "TemplateRoot",
+                instance,
+                null,
+                null,
+                scope.context
+            );
+
             List<UIElementCreationData> children = new List<UIElementCreationData>();
 
             for (int i = 0; i < rootElement.childTemplates.Count; i++) {
@@ -41,50 +47,51 @@ namespace Src {
             for (int i = 0; i < children.Count; i++) {
                 scope.SetParent(children[i], instanceData);
             }
-                        
-            rootElement.ApplyConstantStyles(instance, scope);
 
             return instance;
         }
 
-       
         public UIElement CreateWithoutScope(UIView view) {
             if (!isCompiled) Compile();
 
             UITemplateContext context = new UITemplateContext(view);
 
             List<UIElementCreationData> outputList = new List<UIElementCreationData>();
-            
+
             TemplateScope scope = new TemplateScope(outputList);
             scope.view = view;
             scope.context = context;
             scope.inputChildren = EmptyElementList;
 
-            UIElement root = (UIElement) Activator.CreateInstance(rootElement.processedElementType.rawType);
-            context.rootElement = root;
+            UIElement instance = (UIElement) Activator.CreateInstance(rootElement.ElementType);
+            context.rootElement = instance;
 
-            UIElementCreationData rootData = new UIElementCreationData(root, null, context);
-            
+            UIElementCreationData rootData = new UIElementCreationData(
+                "TemplateRoot",
+                instance,
+                null,
+                null,
+                context
+            );
+
             scope.SetParent(rootData, default(UIElementCreationData));
-            
+
             for (int i = 0; i < childTemplates.Count; i++) {
                 scope.SetParent(childTemplates[i].CreateScoped(scope), rootData);
             }
 
-            rootElement.ApplyConstantStyles(root, scope);
-
             scope.RegisterAll();
-            
-            return root;
+
+            return instance;
         }
-        
+
         private void Compile() {
             if (isCompiled) return;
-            
+
             Stack<UITemplate> stack = new Stack<UITemplate>();
-                        
+
             stack.Push(rootElement);
-            
+
             while (stack.Count > 0) {
                 UITemplate template = stack.Pop();
                 template.CompileStyles(this);

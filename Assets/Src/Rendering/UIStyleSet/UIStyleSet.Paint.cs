@@ -4,8 +4,6 @@ namespace Rendering {
 
     public partial class UIStyleSet {
 
-        #region Paint
-
         public Color backgroundColor {
             get { return FindActiveStyle((s) => s.paint.backgroundColor != UIStyle.UnsetColorValue).paint.backgroundColor; }
             set { SetBackgroundColor(value); }
@@ -54,8 +52,6 @@ namespace Rendering {
         public Color GetBorderColor(StyleState state) {
             return GetStyle(state).paint.borderColor;
         }
-
-        #endregion
 
     }
 

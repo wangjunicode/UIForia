@@ -11,7 +11,7 @@ namespace Src.Compilers.CastHandlers {
         public Expression Cast(Type requiredType, Expression expression) {
             Expression<double> doubleExpression = (Expression<double>) expression;
 
-            return new TypedCastExpression<double, UIMeasurement>(doubleExpression,
+            return new CastExpression<double, UIMeasurement>(doubleExpression,
                 (exp, ctx) => new UIMeasurement(exp.EvaluateTyped(ctx)));
         }
 

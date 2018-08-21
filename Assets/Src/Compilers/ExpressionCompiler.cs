@@ -98,7 +98,6 @@ namespace Src {
             return null;
         }
 
-
         private Expression HandleCasting(Type requiredType, Expression expression) {
             Type yieldedType = expression.YieldedType;
 
@@ -293,9 +292,13 @@ namespace Src {
                 Type aliasType = constantAlias.GetType();
 
                 if (aliasType.IsEnum) {
-                    Type enumType = typeof(LiteralExpression_Enum<>).MakeGenericType(aliasType);
+                    Type openEnumType = typeof(LiteralExpression_Enum<>);
                     ReflectionUtil.ObjectArray1[0] = constantAlias;
-                    return (Expression) Activator.CreateInstance(enumType, ReflectionUtil.ObjectArray1);
+                    return (Expression) ReflectionUtil.CreateGenericInstanceFromOpenType(
+                        openEnumType,
+                        aliasType,
+                        ReflectionUtil.ObjectArray1
+                    );
                 }
 
                 if (aliasType == typeof(string)) {
@@ -341,7 +344,18 @@ namespace Src {
                 case OperatorType.Plus:
 
                     if (leftType == typeof(string) || rightType == typeof(string)) {
-                        return OperatorExpression_StringConcat.Create(Visit(node.left), Visit(node.right));
+
+                        Type openType = typeof(OperatorExpression_StringConcat<,>);
+                        ReflectionUtil.TypeArray2[0] = leftType;
+                        ReflectionUtil.TypeArray2[1] = rightType;
+                        ReflectionUtil.ObjectArray2[0] = Visit(node.left);
+                        ReflectionUtil.ObjectArray2[1] = Visit(node.right);
+
+                        return (Expression) ReflectionUtil.CreateGenericInstanceFromOpenType(
+                            openType,
+                            ReflectionUtil.TypeArray2,
+                            ReflectionUtil.ObjectArray2
+                        );
                     }
 
                     if (ReflectionUtil.AreNumericTypesCompatible(leftType, rightType)) {
@@ -377,7 +391,20 @@ namespace Src {
 
                 case OperatorType.Equals:
                 case OperatorType.NotEquals:
-                    return new OperatorExpression_Equality(node.OpType, Visit(node.left), Visit(node.right));
+
+                    Type openEqualityType = typeof(OperatorExpression_Equality<,>);
+                    ReflectionUtil.TypeArray2[0] = node.left.GetYieldedType(context);
+                    ReflectionUtil.TypeArray2[1] = node.right.GetYieldedType(context);
+
+                    ReflectionUtil.ObjectArray3[0] = node.OpType;
+                    ReflectionUtil.ObjectArray3[1] = Visit(node.left);
+                    ReflectionUtil.ObjectArray3[2] = Visit(node.right);
+
+                    return (Expression) ReflectionUtil.CreateGenericInstanceFromOpenType(
+                        openEqualityType,
+                        ReflectionUtil.TypeArray2,
+                        ReflectionUtil.ObjectArray3
+                    );
             }
 
             throw new Exception("Bad operator expression");
@@ -562,8 +589,7 @@ namespace Src {
             ReflectionUtil.ObjectArray3[0] = condition;
             ReflectionUtil.ObjectArray3[1] = left;
             ReflectionUtil.ObjectArray3[2] = right;
-            return (Expression) ReflectionUtil.CreateGenericInstanceFromOpenType(openType, right.YieldedType,
-                ReflectionUtil.ObjectArray3);
+            return (Expression) ReflectionUtil.CreateGenericInstanceFromOpenType(openType, commonBase, ReflectionUtil.ObjectArray3);
         }
 
     }

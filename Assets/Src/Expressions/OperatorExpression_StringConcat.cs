@@ -2,6 +2,33 @@
 
 namespace Src {
 
+    
+    public class OperatorExpression_StringConcat<U, V> : Expression<string> {
+
+        public readonly Expression<U> left;
+        public readonly Expression<V> right;
+
+        public OperatorExpression_StringConcat(Expression<U> left, Expression<V> right) {
+            this.left = left;
+            this.right = right;
+        }
+
+        public override Type YieldedType => typeof(string);
+        
+        public override string EvaluateTyped(ExpressionContext context) {
+            return left.EvaluateTyped(context).ToString() + right.EvaluateTyped(context).ToString();
+        }
+        
+        public override object Evaluate(ExpressionContext context) {
+            return left.EvaluateTyped(context).ToString() + right.EvaluateTyped(context).ToString();
+        }
+
+        public override bool IsConstant() {
+            return left.IsConstant() && right.IsConstant();
+        }
+        
+    }
+    
     public class OperatorExpression_StringConcat : Expression<string> {
 
         public readonly Expression left;
@@ -20,13 +47,6 @@ namespace Src {
 
         public override object Evaluate(ExpressionContext context) {
             return left.Evaluate(context) + right.Evaluate(context).ToString();
-        }
-
-        public static Expression Create(Expression left, Expression right) {
-            if (left.YieldedType == typeof(string) && right.YieldedType == typeof(string)) {
-                return new OperatorExpression_StringConcat_Typed((Expression<string>) left, (Expression<string>) right);
-            }
-            return new OperatorExpression_StringConcat(left, right);
         }
 
         public override bool IsConstant() {

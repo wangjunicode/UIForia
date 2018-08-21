@@ -7,25 +7,27 @@ using Src.StyleBindings;
 
 namespace Src {
 
-    public abstract class UITemplate {
+    public class StyleDefinition {
 
-        public ProcessedType processedElementType;
-        public List<UITemplate> childTemplates;
-        public List<AttributeDefinition> attributes;
-
-        public UIStyle normalStyleTemplate;
-        public UIStyle hoverStyleTemplate;
-        public UIStyle activeStyleTemplate;
-        public UIStyle focusedStyleTemplate;
-        public UIStyle disabledStyleTemplate;
         public List<UIStyle> baseStyles;
-
         public StyleBinding[] constantBindings;
         public StyleBinding[] dynamicStyleBindings;
-        public string name;
 
+    }
+
+    public abstract class UITemplate {
+
+        public string name;
+        public List<UITemplate> childTemplates;
+        public List<AttributeDefinition> attributes;
+        public ProcessedType processedElementType;
+        public StyleDefinition styleDefinition;
+        public Binding[] bindings;
+        
         public UITemplate() {
             childTemplates = new List<UITemplate>();
+            styleDefinition = new StyleDefinition();
+            bindings = Binding.EmptyArray;
         }
 
         public abstract UIElementCreationData CreateScoped(TemplateScope scope);
@@ -37,16 +39,17 @@ namespace Src {
         public void CompileStyles(ParsedTemplate template) {
             if (attributes == null) return;
 
-            List<StyleBinding> styleList = new List<StyleBinding>();
+            List<UIStyle> baseStyles = null;
+            List<StyleBinding> styleList = null;
 
             for (int i = 0; i < attributes.Count; i++) {
                 AttributeDefinition attr = attributes[i];
 
                 if (!attr.key.StartsWith("style")) continue;
 
-                if (attr.key == "style") {
-                    baseStyles = new List<UIStyle>();
+                baseStyles = baseStyles ?? new List<UIStyle>();
 
+                if (attr.key == "style") {
                     if (attr.value.IndexOf(' ') != -1) {
                         string[] names = attr.value.Split(' ');
                         foreach (string part in names) {
@@ -63,35 +66,17 @@ namespace Src {
                         }
                     }
 
-                    if (baseStyles.Count == 0) baseStyles = null;
                 }
                 else {
-                    StyleBinding binding = styleCompiler.Compile(template.contextDefinition, attr.key, attr.value);
-
-                    styleList.Add(binding);
-
+                    styleList = styleList ?? new List<StyleBinding>();
+                    styleList.Add(styleCompiler.Compile(template.contextDefinition, attr.key, attr.value));
                 }
             }
 
-            constantBindings = styleList.Where((s) => s.IsConstant()).ToArray();
-            dynamicStyleBindings = styleList.Where((s) => !s.IsConstant()).ToArray();
+            styleDefinition.baseStyles = baseStyles;
+            styleDefinition.constantBindings = styleList.Where((s) => s.IsConstant()).ToArray();
+            styleDefinition.dynamicStyleBindings = styleList.Where((s) => !s.IsConstant()).ToArray();
 
-        }
-
-        private UIStyle GetStyleForState(StyleState state) {
-            switch (state) {
-                case StyleState.Normal:
-                    return normalStyleTemplate;
-                case StyleState.Active:
-                    return activeStyleTemplate;
-                case StyleState.Disabled:
-                    return disabledStyleTemplate;
-                case StyleState.Hover:
-                    return hoverStyleTemplate;
-                case StyleState.Focused:
-                    return focusedStyleTemplate;
-                default: return null;
-            }
         }
 
         public virtual bool Compile(ParsedTemplate template) {
@@ -122,43 +107,24 @@ namespace Src {
             return null;
         }
 
-        public void ApplyConstantStyles(UIElement element, TemplateScope scope) {
-            element.style = new UIStyleSet(element, scope.view);
-
-            if (normalStyleTemplate != null) {
-                element.style.SetInstanceStyle(new UIStyle(normalStyleTemplate), StyleState.Normal);
-            }
-
-            if (hoverStyleTemplate != null) {
-                element.style.SetInstanceStyle(new UIStyle(hoverStyleTemplate), StyleState.Hover);
-            }
-
-            if (disabledStyleTemplate != null) {
-                element.style.SetInstanceStyle(new UIStyle(disabledStyleTemplate), StyleState.Disabled);
-            }
-
-            if (focusedStyleTemplate != null) {
-                element.style.SetInstanceStyle(new UIStyle(focusedStyleTemplate), StyleState.Focused);
-            }
-
-            if (activeStyleTemplate != null) {
-                element.style.SetInstanceStyle(new UIStyle(activeStyleTemplate), StyleState.Active);
-            }
-
-            if (baseStyles != null) {
-                // todo -- for now we only use 'normal' styles, no states
-                for (int i = 0; i < baseStyles.Count; i++) {
-                    element.style.AddBaseStyle(baseStyles[i]);
-                }
-            }
-
-            if (constantBindings != null) {
-                for (int i = 0; i < constantBindings.Length; i++) {
-                    constantBindings[i].Apply(element.style, scope.context);
-                }
-            }
-
-        }
+//        ApplyConstantStyles(UIElement element, TemplateScope scope) {
+//            element.style = new UIStyleSet(element, scope.view);
+//            List<StyleDefinition> styles = new List<StyleDefinition>();
+//            
+//            if (baseStyles != null) {
+//                // todo -- for now we only use 'normal' styles, no states
+//                for (int i = 0; i < baseStyles.Count; i++) {
+//                    element.style.AddBaseStyle(baseStyles[i]);
+//                }
+//            }
+//
+//            if (constantBindings != null) {
+//                for (int i = 0; i < constantBindings.Length; i++) {
+//                    constantBindings[i].Apply(element.style, scope.context);
+//                }
+//            }
+//
+//        }
 
     }
 

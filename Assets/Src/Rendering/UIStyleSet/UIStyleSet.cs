@@ -7,7 +7,7 @@ namespace Rendering {
 
     public partial class UIStyleSet {
 
-        private StyleDefinition[] appliedStyles;
+        private StyleEntry[] appliedStyles;
         private StyleState currentState;
 
         private UIView view;
@@ -74,36 +74,35 @@ namespace Rendering {
         public void SetInstanceStyle(UIStyle style, StyleState state = StyleState.Normal) {
 
             if (appliedStyles == null) {
-                appliedStyles = new StyleDefinition[1];
-                appliedStyles[0] = new StyleDefinition(new UIStyle(style), StyleType.Instance, state);
+                appliedStyles = new StyleEntry[1];
+                appliedStyles[0] = new StyleEntry(new UIStyle(style), StyleType.Instance, state);
                 return;
             }
 
             for (int i = 0; i < appliedStyles.Length; i++) {
                 StyleState target = appliedStyles[i].state & state;
                 if ((target == state)) {
-                    appliedStyles[i] = new StyleDefinition(new UIStyle(style), StyleType.Instance, state);
+                    appliedStyles[i] = new StyleEntry(new UIStyle(style), StyleType.Instance, state);
                     return;
                 }
             }
 
             Array.Resize(ref appliedStyles, appliedStyles.Length + 1);
-            appliedStyles[appliedStyles.Length - 1] = new StyleDefinition(style, StyleType.Instance, state);
+            appliedStyles[appliedStyles.Length - 1] = new StyleEntry(style, StyleType.Instance, state);
             SortStyles();
         }
 
         public void AddBaseStyle(UIStyle style, StyleState state = StyleState.Normal) {
             // todo -- check for duplicates
             if (appliedStyles == null) {
-                appliedStyles = new StyleDefinition[1];
+                appliedStyles = new StyleEntry[1];
             }
             else {
                 Array.Resize(ref appliedStyles, appliedStyles.Length + 1);
             }
-            appliedStyles[appliedStyles.Length - 1] = new StyleDefinition(style, StyleType.Shared, state, baseCounter++);
+            appliedStyles[appliedStyles.Length - 1] = new StyleEntry(style, StyleType.Shared, state, baseCounter++);
             SortStyles();
         }
-
        
         private void SortStyles() {
             Array.Sort(appliedStyles, (a, b) => a.priority > b.priority ? -1 : 1);

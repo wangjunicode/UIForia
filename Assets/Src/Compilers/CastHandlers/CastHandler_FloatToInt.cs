@@ -10,7 +10,7 @@ namespace Src.Compilers.CastHandlers {
 
         public Expression Cast(Type requiredType, Expression expression) {
             Expression<float> floatExpression = (Expression<float>) expression;
-            return new TypedCastExpression<float, int>(floatExpression, (exp, ctx) => (int) exp.EvaluateTyped(ctx));
+            return new CastExpression<float, int>(floatExpression, (exp, ctx) => (int) exp.EvaluateTyped(ctx));
         }
 
     }

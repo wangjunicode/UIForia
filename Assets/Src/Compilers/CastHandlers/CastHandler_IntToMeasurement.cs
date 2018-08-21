@@ -11,7 +11,7 @@ namespace Src.Compilers.CastHandlers {
         public Expression Cast(Type requiredType, Expression expression) {
             Expression<int> intExpression = (Expression<int>) expression;
 
-            return new TypedCastExpression<int, UIMeasurement>(intExpression,
+            return new CastExpression<int, UIMeasurement>(intExpression,
                 (exp, ctx) => new UIMeasurement(exp.EvaluateTyped(ctx)));
         }
 

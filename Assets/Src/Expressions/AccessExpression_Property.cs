@@ -22,7 +22,6 @@ namespace Src {
             return false;
         }
         
-
         public override object Evaluate(ExpressionContext context) {
             object target = context.ResolveObjectAlias(contextName);
             object last = target;
@@ -35,6 +34,54 @@ namespace Src {
             }
 
             return last;
+        }
+
+    }
+    
+    public class AccessExpression<T> : Expression<T> {
+
+        public readonly string contextName;
+        public readonly Type yieldedType;
+        public readonly AccessExpressionPart[] parts;
+
+        public AccessExpression(string contextName, Type yieldedType, AccessExpressionPart[] parts) {
+            this.contextName = contextName;
+            this.yieldedType = yieldedType;
+            this.parts = parts;
+        }
+
+        public override Type YieldedType => yieldedType;
+
+        public override bool IsConstant() {
+            return false;
+        }
+        
+        public override object Evaluate(ExpressionContext context) {
+            object target = context.ResolveObjectAlias(contextName);
+            object last = target;
+
+            for (int i = 0; i < parts.Length; i++) {
+                last = parts[i].Evaluate(last, context);
+                if (last == null) {
+                    return null;
+                }
+            }
+
+            return last;
+        }
+
+        public override T EvaluateTyped(ExpressionContext context) {
+            object target = context.ResolveObjectAlias(contextName);
+            object last = target;
+
+            for (int i = 0; i < parts.Length; i++) {
+                last = parts[i].Evaluate(last, context);
+                if (last == null) {
+                    return default(T);
+                }
+            }
+
+            return (T)last;
         }
 
     }

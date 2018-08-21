@@ -2,8 +2,6 @@ namespace Rendering {
 
     public partial class UIStyleSet {
 
-        #region ContentBox
-
         public ContentBoxRect margin {
             get { return new ContentBoxRect(marginTop, marginRight, marginBottom, marginLeft); }
             set { SetMargin(value); }
@@ -256,8 +254,6 @@ namespace Rendering {
                 view.layoutSystem.SetBorder(element, rect);
             }
         }
-
-        #endregion
 
     }
 

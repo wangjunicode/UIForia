@@ -2,25 +2,18 @@ namespace Src {
 
     public struct UIElementCreationData {
 
-        public readonly string name;
-        public readonly UIElement element;
-        public readonly Binding[] bindings;
-        public readonly StyleDefinition style;
-        public readonly UITemplateContext context;
+        public string name;
+        public UIElement element;
+        public Binding[] bindings;
+        public StyleDefinition style;
+        public UITemplateContext context;
 
-        public UIElementCreationData(
-            string name,
-            UIElement element,
-            StyleDefinition style,
-            Binding[] bindings,
-            UITemplateContext context) {
-
+        public UIElementCreationData(string name, UIElement element, UITemplateContext context, StyleDefinition style = null, Binding[] bindings = null) {
             this.name = name;
             this.element = element;
-            this.style = style;
-            this.bindings = bindings;
             this.context = context;
-
+            this.style = style;
+            this.bindings = bindings ?? Binding.EmptyArray;
         }
 
         public int GetDepth() {
@@ -30,6 +23,7 @@ namespace Src {
                 ptr = ptr.parent;
                 depth++;
             }
+
             return depth;
         }
 

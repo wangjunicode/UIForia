@@ -21,12 +21,7 @@ namespace Src.Systems {
 
         public void OnParentChanged(ISkipTreeTraversable newParent) {
             RenderData parent = (RenderData) newParent;
-            if (parent == null) {
-                unityTransform.SetParent(rootTransform);
-            }
-            else {
-                unityTransform.SetParent(parent.unityTransform);
-            }
+            unityTransform.SetParent(parent == null ? rootTransform : parent.unityTransform);
         }
 
         public void OnBeforeTraverse() { }

@@ -1,4 +1,5 @@
 ﻿using System.Diagnostics;
+using Rendering;
 using Src;
 
 [DebuggerDisplay("{top}, {right}, {bottom}, {left}")]
@@ -24,13 +25,15 @@ public struct ContentBoxRect {
     }
 
     public float horizontal => right + left;
-    public float vertical => top     + bottom;
+    public float vertical => top + bottom;
+
+    public static readonly ContentBoxRect Unset = new ContentBoxRect(UIStyle.UnsetFloatThreshold);
 
     public bool Equals(ContentBoxRect other) {
-        return top       == other.top
-               && right  == other.right
+        return top == other.top
+               && right == other.right
                && bottom == other.bottom
-               && left   == other.left;
+               && left == other.left;
     }
 
     public override bool Equals(object obj) {
@@ -49,9 +52,9 @@ public struct ContentBoxRect {
     }
 
     public static bool operator ==(ContentBoxRect self, ContentBoxRect other) {
-        return self.top       == other.top
-               && self.left   == other.left
-               && self.right  == other.right
+        return self.top == other.top
+               && self.left == other.left
+               && self.right == other.right
                && self.bottom == other.bottom;
     }
 

@@ -5,14 +5,13 @@ namespace Src.StyleBindings {
 
     public class StyleBinding_BackgroundColor : StyleBinding {
 
-        public readonly Expression<Color> expression;
+        private readonly Expression<Color> expression;
         
         public StyleBinding_BackgroundColor(StyleState state, Expression<Color> expression) : base(state) {
             this.expression = expression;
         }        
         
         public override void Execute(UIElement element, UITemplateContext context) {
-           // context.SetMethodAlias("rgb", rgbInfo);
             Color color = expression.EvaluateTyped(context);
             Color currentColor = element.style.GetBackgroundColor(state);
             if (color != currentColor) {

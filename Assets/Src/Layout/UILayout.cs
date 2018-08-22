@@ -18,7 +18,7 @@ namespace Src.Layout {
             // return sum of preferred sizes
             for (int i = 0; i < children.Count; i++) {
                 LayoutData child = children[i];
-                output += child.GetPreferredWidth(data.preferredWidth.unit, contentSize, viewportSize);
+                output += child.GetPreferredWidth(data.rect.width.unit, contentSize, viewportSize);
             }
 
             return output;
@@ -31,7 +31,7 @@ namespace Src.Layout {
             // return sum of preferred sizes
             for (int i = 0; i < children.Count; i++) {
                 LayoutData child = children[i];
-                output += child.GetPreferredHeight(data.preferredHeight.unit, contentSize, viewportSize);
+                output += child.GetPreferredHeight(data.rect.height.unit, contentSize, viewportSize);
             }
 
             return output;

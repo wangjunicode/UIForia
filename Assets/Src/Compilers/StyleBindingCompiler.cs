@@ -1,5 +1,6 @@
 using System;
 using System.Reflection;
+using JetBrains.Annotations;
 using Rendering;
 using Src.Compilers.AliasSource;
 using Src.Layout;
@@ -55,7 +56,6 @@ namespace Src.Compilers {
 
     }
 
-
     public class StyleBindingCompiler {
 
         private ContextDefinition context;
@@ -81,7 +81,6 @@ namespace Src.Compilers {
             rect1Source = new MethodAliasSource("rect", type.GetMethod("Rect", new[] {typeof(float)}));
             rect2Source = new MethodAliasSource("rect", type.GetMethod("Rect", new[] {typeof(float), typeof(float)}));
             rect4Source = new MethodAliasSource("rect", type.GetMethod("Rect", new[] {typeof(float), typeof(float), typeof(float), typeof(float)}));
-
 
             colorSource = new ColorAliasSource();
             layoutTypeSource = new EnumAliasSource<LayoutType>();
@@ -272,26 +271,32 @@ namespace Src.Compilers {
             return expression;
         }
 
+        [Pure]
         public static Color Rgb(float r, float g, float b) {
             return new Color(r / 255f, g / 255f, b / 255f);
         }
 
+        [Pure]
         public static Color Rgba(float r, float g, float b, float a) {
             return new Color(r / 255f, g / 255f, b / 255f, a / 255f);
         }
 
+        [Pure]
         public static ContentBoxRect Rect(float top, float right, float bottom, float left) {
             return new ContentBoxRect(top, right, bottom, left);
         }
 
+        [Pure]
         public static ContentBoxRect Rect(float topBottom, float leftRight) {
             return new ContentBoxRect(topBottom, leftRight, topBottom, leftRight);
         }
 
+        [Pure]
         public static ContentBoxRect Rect(float value) {
             return new ContentBoxRect(value, value, value, value);
         }
 
+        [Pure]
         public static AssetPointer Url(string url) {
             return new AssetPointer(url);
         }

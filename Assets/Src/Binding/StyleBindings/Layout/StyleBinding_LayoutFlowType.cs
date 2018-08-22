@@ -23,7 +23,7 @@ namespace Src.StyleBindings {
         }
 
         public override void Apply(UIStyle style, UITemplateContext context) {
-            style.layoutFlow = expression.EvaluateTyped(context);
+            style.layoutParameters.flow = expression.EvaluateTyped(context);
         }
 
         public override void Apply(UIStyleSet styleSet, UITemplateContext context) {

@@ -39,10 +39,15 @@ namespace Src.Systems {
 
             for (int i = 0; i < count; i++) {
                 RectTransform transform = transforms[layoutResults[i].elementId];
-                transform.anchoredPosition = layoutResults[i].rect.position;
+                Vector2 position = layoutResults[i].rect.position;
+                transform.anchoredPosition = new Vector2(position.x, -position.y);
                 transform.sizeDelta = layoutResults[i].rect.size;
             }
 
+        }
+
+        public void SetViewportRect(Rect viewport) {
+            
         }
 
         public void OnReset() {
@@ -65,7 +70,11 @@ namespace Src.Systems {
         }
 
         public void OnElementStyleChanged(UIElement element) {
-
+            
+            // todo -- replace w/ flag check and hide style if possible
+            
+            if(element.style == null) return;
+            
             RenderData data = renderSkipTree.GetItem(element);
 
             RenderPrimitiveType primitiveType = DeterminePrimitiveType(element);

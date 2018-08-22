@@ -23,7 +23,7 @@ namespace Src.StyleBindings.Src.StyleBindings {
         }
 
         public override void Apply(UIStyle style, UITemplateContext context) {
-            style.growthFactor = expression.EvaluateTyped(context);
+            style.layoutConstraints.growthFactor = expression.EvaluateTyped(context);
         }
 
         public override void Apply(UIStyleSet styleSet, UITemplateContext context) {

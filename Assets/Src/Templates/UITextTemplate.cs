@@ -1,32 +1,51 @@
-using System;
+using Src.Parsing;
 
 namespace Src {
 
     public class UITextTemplate : UITemplate {
 
-        private Binding[] bindings;
 
-        public readonly string text;
+        private static readonly TextElementParser textParser = new TextElementParser();
 
-        public UITextTemplate(string text) {
-            this.text = text;
+        public UITextTemplate(string rawText) : base(null) {
+            this.RawText = rawText;
         }
+        
+        public string RawText { get; }
 
-       public override Type ElementType => typeof(string);
+        public override bool Compile(ParsedTemplate template) {
 
-        public void Compile() {
-            bindings = new Binding[attributes.Count];
+            string[] expressionParts = textParser.Parse(RawText);
+
+            if (expressionParts.Length == 1) {
+                Expression<string> exp = template.compiler.Compile<string>(expressionParts[0]);
+                bindingList.Add(new TextBinding_Single(exp));    
+            }
+            else {
+                
+                Expression<string>[] expressions = new Expression<string>[expressionParts.Length];
+                
+                for (int i = 0; i < expressionParts.Length; i++) {
+                    expressions[i] = template.compiler.Compile<string>(expressionParts[i]);
+                }
+                
+                // todo -- if constant, try to merge bindings. This probably happens in the binding system
+                // todo    because we need to have access to the element and an expression context
+                bindingList.Add(new TextBinding_Multiple(expressions));
+            }
+            
+            return base.Compile(template);
         }
 
         public override UIElementCreationData CreateScoped(TemplateScope scope) {
-            throw new NotImplementedException();//
-//          //  UITextElement instance = new UITextElement();
-//            ApplyConstantStyles(instance, scope);            
-//
-//            return new UIElementCreationData(instance, bindings, scope.context);
+            return GetCreationData(new UITextElement(), scope.context);
         }
 
     }
 
-
+   
+    
+   
+    
+    
 }

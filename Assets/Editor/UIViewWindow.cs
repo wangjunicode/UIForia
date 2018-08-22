@@ -6,18 +6,27 @@ namespace Src.Editor {
 
     public class UIViewWindow : EditorWindow {
 
-        private UIView view;
+        private UIViewIMGUI view;
 
         private void Update() {
             view.Update();
         }
 
         private void OnGUI() {
+            if (GUI.Button(new Rect(0, 0, 100, 20), "Refresh")) {
+                view.Refresh();
+            }
+            Rect viewport = new Rect(position) {
+                x = 0,
+                y = 20,
+                height = position.height - 20
+            };
+            view.SetViewRect(viewport);
             view.Render();
         }
 
         public void Awake() {
-            view = new UIViewIMGUI(typeof(TempUIType));
+            view = view ?? new UIViewIMGUI(typeof(TempUIType));
         }
 
         [MenuItem("UI/Editor Window")]
@@ -26,6 +35,7 @@ namespace Src.Editor {
         }
 
         private void OnEnable() {
+            view = new UIViewIMGUI(typeof(TempUIType));
             view.OnCreate();
             EditorApplication.update += Update;
         }

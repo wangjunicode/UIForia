@@ -23,7 +23,7 @@ namespace Src.StyleBindings.Src.StyleBindings {
         }
 
         public override void Apply(UIStyle style, UITemplateContext context) {
-            style.maxHeight = expression.EvaluateTyped(context);
+            style.layoutConstraints.maxHeight = expression.EvaluateTyped(context);
         }
 
         public override void Apply(UIStyleSet styleSet, UITemplateContext context) {

@@ -3,7 +3,7 @@ using Rendering;
 
 namespace Src {
 
-    [DebuggerDisplay("{value} unit = {unit}")]
+    [DebuggerDisplay("{unit}({value})")]
     public struct UIMeasurement {
 
         public readonly float value;
@@ -13,18 +13,22 @@ namespace Src {
             this.value = value;
             this.unit = unit;
         }
-        
+
         public UIMeasurement(int value, UIUnit unit = UIUnit.Pixel) {
             this.value = value;
             this.unit = unit;
         }
-        
+
         public UIMeasurement(double value, UIUnit unit = UIUnit.Pixel) {
-            this.value = (float)value;
+            this.value = (float) value;
             this.unit = unit;
         }
 
+        public bool isDefined => value < UIStyle.UnsetFloatThreshold;
+        
         public bool isFixed => (unit & (UIUnit.Pixel | UIUnit.Parent | UIUnit.View)) != 0;
+        
+        public static UIMeasurement Parent100 => new UIMeasurement(1f, UIUnit.Parent);
 
         public float GetFixedPixelValue(float parentValue, float viewportValue) {
             switch (unit) {
@@ -44,7 +48,7 @@ namespace Src {
                     return 0;
             }
         }
-        
+
         public bool Equals(UIMeasurement other) {
             return value.Equals(other.value) && unit == other.unit;
         }
@@ -71,15 +75,16 @@ namespace Src {
         public static implicit operator UIMeasurement(int value) {
             return new UIMeasurement(value, UIUnit.Pixel);
         }
-        
+
         public static implicit operator UIMeasurement(float value) {
             return new UIMeasurement(value, UIUnit.Pixel);
         }
-        
+
         public static implicit operator UIMeasurement(double value) {
-            return new UIMeasurement((float)value, UIUnit.Pixel);
+            return new UIMeasurement((float) value, UIUnit.Pixel);
         }
-        
+
     }
+
 
 }

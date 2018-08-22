@@ -1,102 +1,141 @@
+using JetBrains.Annotations;
 using Src;
+using Src.Systems;
 
 namespace Rendering {
 
+    [PublicAPI]
     public partial class UIStyleSet {
 
+        [PublicAPI]
+        public LayoutConstraints constraints {
+            get { return new LayoutConstraints(minWidth, maxWidth, minHeight, maxHeight, growthFactor, shrinkFactor); }
+            set { SetLayoutConstraints(value); }
+        }
+
+        [PublicAPI]
         public UIMeasurement minWidth {
-            get { return FindActiveStyle((s) => s.minWidth != UIStyle.UnsetMeasurementValue).minWidth; }
+            get { return FindActiveStyle((s) => s.layoutConstraints.minWidth != UIStyle.UnsetMeasurementValue).layoutConstraints.minWidth; }
             set { SetMinWidth(value); }
         }
 
+        [PublicAPI]
         public UIMeasurement maxWidth {
-            get { return FindActiveStyle((s) => s.maxWidth != UIStyle.UnsetMeasurementValue).maxWidth; }
+            get { return FindActiveStyle((s) => s.layoutConstraints.maxWidth != UIStyle.UnsetMeasurementValue).layoutConstraints.maxWidth; }
             set { SetMaxWidth(value); }
         }
 
+        [PublicAPI]
         public UIMeasurement minHeight {
-            get { return FindActiveStyle((s) => s.minHeight != UIStyle.UnsetMeasurementValue).minHeight; }
+            get { return FindActiveStyle((s) => s.layoutConstraints.minHeight != UIStyle.UnsetMeasurementValue).layoutConstraints.minHeight; }
             set { SetMinHeight(value); }
         }
 
+        [PublicAPI]
         public UIMeasurement maxHeight {
-            get { return FindActiveStyle((s) => s.maxHeight != UIStyle.UnsetMeasurementValue).maxHeight; }
+            get { return FindActiveStyle((s) => s.layoutConstraints.maxHeight != UIStyle.UnsetMeasurementValue).layoutConstraints.maxHeight; }
             set { SetMaxHeight(value); }
         }
 
+        [PublicAPI]
         public int growthFactor {
-            get { return FindActiveStyle((s) => s.growthFactor != UIStyle.UnsetIntValue).growthFactor; }
+            get { return FindActiveStyle((s) => s.layoutConstraints.growthFactor != UIStyle.UnsetIntValue).layoutConstraints.growthFactor; }
             set { SetGrowthFactor(value); }
         }
-        
+
+        [PublicAPI]
         public int shrinkFactor {
-            get { return FindActiveStyle((s) => s.shrinkFactor != UIStyle.UnsetIntValue).shrinkFactor; }
+            get { return FindActiveStyle((s) => s.layoutConstraints.shrinkFactor != UIStyle.UnsetIntValue).layoutConstraints.shrinkFactor; }
             set { SetShrinkFactor(value); }
         }
-        
+
+        [PublicAPI]
+        public LayoutConstraints GetConstraints(StyleState state = StyleState.Normal) {
+            return GetStyle(state).layoutConstraints;
+        }
+
+        [PublicAPI]
+        public void SetLayoutConstraints(LayoutConstraints value, StyleState state = StyleState.Normal) {
+            UIStyle style = GetOrCreateStyle(state);
+            style.layoutConstraints = value;
+            changeHandler.SetConstraints(elementId, constraints);
+        }
+
+        [PublicAPI]
         public UIMeasurement GetMinWidth(StyleState state = StyleState.Normal) {
-            return GetStyle(state).minWidth;
+            return GetStyle(state).layoutConstraints.minWidth;
         }
 
+        [PublicAPI]
         public void SetMinWidth(UIMeasurement measurement, StyleState state = StyleState.Normal) {
-            GetOrCreateStyle(state).minWidth = measurement;
+            GetOrCreateStyle(state).layoutConstraints.minWidth = measurement;
             if (minWidth == measurement) {
-                view.layoutSystem.SetRectMinWidth(element, measurement);
+                changeHandler.SetConstraints(elementId, constraints);
             }
         }
 
+        [PublicAPI]
         public UIMeasurement GetMaxWidth(StyleState state = StyleState.Normal) {
-            return GetStyle(state).maxWidth;
+            return GetStyle(state).layoutConstraints.maxWidth;
         }
 
+        [PublicAPI]
         public void SetMaxWidth(UIMeasurement measurement, StyleState state = StyleState.Normal) {
-            GetOrCreateStyle(state).maxWidth = measurement;
+            GetOrCreateStyle(state).layoutConstraints.maxWidth = measurement;
             if (maxWidth == measurement) {
-                view.layoutSystem.SetRectMaxWidth(element, measurement);
+                changeHandler.SetConstraints(elementId, constraints);
             }
         }
 
+        [PublicAPI]
         public UIMeasurement GetMinHeight(StyleState state = StyleState.Normal) {
-            return GetStyle(state).minHeight;
+            return GetStyle(state).layoutConstraints.minHeight;
         }
 
+        [PublicAPI]
         public void SetMinHeight(UIMeasurement measurement, StyleState state = StyleState.Normal) {
-            GetOrCreateStyle(state).minHeight = measurement;
+            GetOrCreateStyle(state).layoutConstraints.minHeight = measurement;
             if (minHeight == measurement) {
-                view.layoutSystem.SetRectMinHeight(element, measurement);
+                changeHandler.SetConstraints(elementId, constraints);
             }
         }
 
+        [PublicAPI]
         public UIMeasurement GetMaxHeight(StyleState state = StyleState.Normal) {
-            return GetStyle(state).maxHeight;
+            return GetStyle(state).layoutConstraints.maxHeight;
         }
 
+        [PublicAPI]
         public void SetMaxHeight(UIMeasurement measurement, StyleState state = StyleState.Normal) {
-            GetOrCreateStyle(state).maxHeight = measurement;
+            GetOrCreateStyle(state).layoutConstraints.maxHeight = measurement;
             if (maxHeight == measurement) {
-                view.layoutSystem.SetRectMaxHeight(element, measurement);
+                changeHandler.SetConstraints(elementId, constraints);
             }
         }
 
+        [PublicAPI]
         public int GetShrinkFactor(StyleState state = StyleState.Normal) {
-            return GetStyle(state).shrinkFactor;
+            return GetStyle(state).layoutConstraints.shrinkFactor;
         }
 
+        [PublicAPI]
         public void SetShrinkFactor(int factor, StyleState state = StyleState.Normal) {
-            GetOrCreateStyle(state).shrinkFactor = factor;
+            GetOrCreateStyle(state).layoutConstraints.shrinkFactor = factor;
             if (shrinkFactor == factor) {
-                view.layoutSystem.SetShrinkFactor(element, factor);
+                changeHandler.SetConstraints(elementId, constraints);
             }
         }
 
+        [PublicAPI]
         public int GetGrowthFactor(StyleState state = StyleState.Normal) {
-            return GetStyle(state).growthFactor;
+            return GetStyle(state).layoutConstraints.growthFactor;
         }
 
+        [PublicAPI]
         public void SetGrowthFactor(int factor, StyleState state = StyleState.Normal) {
-            GetOrCreateStyle(state).growthFactor = factor;
+            GetOrCreateStyle(state).layoutConstraints.growthFactor = factor;
             if (growthFactor == factor) {
-                view.layoutSystem.SetGrowthFactor(element, factor);
+                changeHandler.SetConstraints(elementId, constraints);
             }
         }
 

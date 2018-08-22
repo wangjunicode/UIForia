@@ -1,23 +1,23 @@
 using System;
-using Src;
-using Src.Layout;
-using UnityEngine;
+using System.Diagnostics;
+using Src.Systems;
 
 namespace Rendering {
 
+    [DebuggerDisplay("id = {elementId} state = {currentState}")]
     public partial class UIStyleSet {
 
         private StyleEntry[] appliedStyles;
         private StyleState currentState;
 
-        private UIView view;
-        private UIElement element;
         private int baseCounter;
+        public readonly int elementId;
+        private readonly IStyleChangeHandler changeHandler;
 
-        public UIStyleSet(UIElement element, UIView view) {
-            currentState = StyleState.Normal;
-            this.element = element;
-            this.view = view;
+        public UIStyleSet(int elementId, IStyleChangeHandler changeHandler) {
+            this.elementId = elementId;
+            this.changeHandler = changeHandler;
+            this.currentState = StyleState.Normal;
         }
 
         public void EnterState(StyleState type) {
@@ -72,7 +72,6 @@ namespace Rendering {
         }
 
         public void SetInstanceStyle(UIStyle style, StyleState state = StyleState.Normal) {
-
             if (appliedStyles == null) {
                 appliedStyles = new StyleEntry[1];
                 appliedStyles[0] = new StyleEntry(new UIStyle(style), StyleType.Instance, state);
@@ -92,6 +91,26 @@ namespace Rendering {
             SortStyles();
         }
 
+        private void SetInstanceStyleNoCopy(UIStyle style, StyleState state = StyleState.Normal) {
+            if (appliedStyles == null) {
+                appliedStyles = new StyleEntry[1];
+                appliedStyles[0] = new StyleEntry(style, StyleType.Instance, state);
+                return;
+            }
+
+            for (int i = 0; i < appliedStyles.Length; i++) {
+                StyleState target = appliedStyles[i].state & state;
+                if ((target == state)) {
+                    appliedStyles[i] = new StyleEntry(style, StyleType.Instance, state);
+                    return;
+                }
+            }
+
+            Array.Resize(ref appliedStyles, appliedStyles.Length + 1);
+            appliedStyles[appliedStyles.Length - 1] = new StyleEntry(style, StyleType.Instance, state);
+            SortStyles();
+        }
+        
         public void AddBaseStyle(UIStyle style, StyleState state = StyleState.Normal) {
             // todo -- check for duplicates
             if (appliedStyles == null) {
@@ -100,12 +119,28 @@ namespace Rendering {
             else {
                 Array.Resize(ref appliedStyles, appliedStyles.Length + 1);
             }
+
             appliedStyles[appliedStyles.Length - 1] = new StyleEntry(style, StyleType.Shared, state, baseCounter++);
             SortStyles();
         }
-       
+
         private void SortStyles() {
             Array.Sort(appliedStyles, (a, b) => a.priority > b.priority ? -1 : 1);
+        }
+
+        private UIStyle FindActiveStyle(Func<UIStyle, bool> callback) {
+            if (appliedStyles == null) return UIStyle.Default;
+
+            for (int i = 0; i < appliedStyles.Length; i++) {
+                if ((appliedStyles[i].state & currentState) != 0) {
+                    if (callback(appliedStyles[i].style)) {
+                        return appliedStyles[i].style;
+                    }
+                }
+            }
+
+            // return default if no matches were found
+            return UIStyle.Default;
         }
 
         private UIStyle GetStyle(StyleState state) {
@@ -123,25 +158,19 @@ namespace Rendering {
             return null;
         }
 
-        private UIStyle FindActiveStyle(Func<UIStyle, bool> callback) {
-            if (appliedStyles == null) return UIStyle.Default;
-
-            for (int i = 0; i < appliedStyles.Length - 1; i++) {
-                if ((appliedStyles[i].state & currentState) != 0) {
-                    if (callback(appliedStyles[i].style)) {
-                        return appliedStyles[i].style;
-                    }
-                }
+        // only return instance styles
+        private UIStyle GetOrCreateStyle(StyleState state) {
+            if (appliedStyles == null) {
+                UIStyle newStyle = new UIStyle();
+                SetInstanceStyleNoCopy(newStyle, state);
+                return newStyle;
             }
 
-            // return default if no matches were found
-            return UIStyle.Default;
-        }
-
-        private UIStyle GetOrCreateStyle(StyleState state) {
-            // only return instance styles
             UIStyle retn = GetStyle(state);
-            if (retn != null) return retn;
+            if (retn != null && retn != UIStyle.Default) {
+                return retn;
+            }
+
             UIStyle style = new UIStyle();
             SetInstanceStyle(style, state);
             return style;

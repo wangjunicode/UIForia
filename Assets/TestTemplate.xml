@@ -1,44 +1,19 @@
 <?xml version="1.0" encoding="utf-8"?>
 <UITemplate>
-
-    <Style id="panelStyle" extends="id" from="../path">
-        
-    </Style>
-
-    <Style id="panel0">
-
-        <Rect.W value="200"/>
-        <Rect.H value="100"/>
-
-    </Style>
     
     <Using key="LayoutDirection" as="Constants.LayoutDirection"/>
     
     <Contents>
 
-        <Group x-name="my name" style.padding="rect(5f)" someAttr="{LayoutDirection.Column}" style.layoutDirection="Column" onMouseClick="{handleClick()}" style="panelStyle, panel0" style.backgroundColor="{rgb(r, g, b)}">
-            
-            <Group style.rectWidth="50" style.rectHeight="100" style.backgroundColor="{rgb(255, 255, 0)}"/>
-            <Group style.rectWidth="50" style.rectHeight="100" style.backgroundColor="{rgb(0, 255, 0)}"/>
-            <Group style.rectWidth="50" style.rectHeight="100" style.backgroundColor="{rgb(0, 0, 255)}"/>
-            <!--<Group style.rectWidth="50" style.rectHeight="100" style.backgroundColor="{rgb(2, 63, 63)}"/>-->
-
+        <Group x-name="my name" style.rectWidth="75" style.backgroundColor="{rgb(128, 128, 128)}">
+            <!--Hello World!-->
+         
+            <!--More Text!-->
         </Group>
-        
-        <!--<Group style="panel0"/>-->
-        <!--<Group style="panel0" style.backgroundColor="{rgb(128, 128, 128)}"/>-->
-        <!--<Group style="panel0" style.rectW="50"/>-->
-        <!---->
-        <!--switch / case / default / inline-repeat / slot -->
-        <!---->
-         <!--<Switch value="">-->
-             <!---->
-             <!--<Case when="1">-->
-                       <!---->
-             <!--</Case>-->
-             <!---->
-         <!--</Switch>-->
-        
+        <!--<Group style.rectWidth="50" style.shrinkFactor="1" style.rectHeight="100" style.backgroundColor="{rgb(255, 255, 0)}"/>-->
+        <Group x-name="child 0" style.growthFactor="2" style.rectWidth="50" style.rectHeight="100" style.backgroundColor="{rgb(0, 255, 0)}"/>
+        <Group x-name="child 1" style.growthFactor="2" style.maxWidth="200" style.rectWidth="50" style.rectHeight="100" style.backgroundColor="{rgb(0, 0, 255)}"/>
+        <Group x-name="child 2" style.rectWidth="50" style.minWidth="200" style.rectHeight="100" style.backgroundColor="{rgb(255, 0, 0)}"/>
     </Contents>
 
 </UITemplate>

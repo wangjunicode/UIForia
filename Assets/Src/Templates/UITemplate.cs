@@ -11,33 +11,43 @@ namespace Src {
 
         public List<UIStyle> baseStyles;
         public StyleBinding[] constantBindings;
-        public StyleBinding[] dynamicStyleBindings;
 
     }
 
     public abstract class UITemplate {
 
-        public string name;
-        public List<UITemplate> childTemplates;
-        public List<AttributeDefinition> attributes;
-        public ProcessedType processedElementType;
-        public StyleDefinition styleDefinition;
-        public Binding[] bindings;
+        private string name;
+        public readonly List<UITemplate> childTemplates;
+        public readonly List<AttributeDefinition> attributes;
         
-        public UITemplate() {
-            childTemplates = new List<UITemplate>();
+        private readonly StyleDefinition styleDefinition;
+        private Binding[] bindings; // used for output
+        protected readonly List<Binding> bindingList = new List<Binding>(); // used for compilation
+        private static readonly StyleBindingCompiler styleCompiler = new StyleBindingCompiler();
+
+        protected UITemplate(List<UITemplate> childTemplates, List<AttributeDefinition> attributes = null) {
+            this.childTemplates = childTemplates;
+            this.attributes = attributes;
             styleDefinition = new StyleDefinition();
             bindings = Binding.EmptyArray;
         }
 
+        public UIElementCreationData GetCreationData(UIElement element, UITemplateContext context) {
+            UIElementCreationData data = new UIElementCreationData();
+            data.name = name;
+            data.element = element;
+            data.context = context;
+            data.style = styleDefinition;
+            data.bindings = bindings;
+            return data;
+        }
+
         public abstract UIElementCreationData CreateScoped(TemplateScope scope);
 
-        public virtual Type ElementType => processedElementType.rawType;
-
-        private static readonly StyleBindingCompiler styleCompiler = new StyleBindingCompiler();
+//        public abstract Type ElementType { get; }
 
         public void CompileStyles(ParsedTemplate template) {
-            if (attributes == null) return;
+            if (attributes == null || attributes.Count == 0) return;
 
             List<UIStyle> baseStyles = null;
             List<StyleBinding> styleList = null;
@@ -65,7 +75,6 @@ namespace Src {
                             baseStyles.Add(style);
                         }
                     }
-
                 }
                 else {
                     styleList = styleList ?? new List<StyleBinding>();
@@ -73,21 +82,28 @@ namespace Src {
                 }
             }
 
-            styleDefinition.baseStyles = baseStyles;
-            styleDefinition.constantBindings = styleList.Where((s) => s.IsConstant()).ToArray();
-            styleDefinition.dynamicStyleBindings = styleList.Where((s) => !s.IsConstant()).ToArray();
+            if (baseStyles != null) {
+                styleDefinition.baseStyles = baseStyles;
+            }
 
+            if (styleList == null) return;
+            
+            styleDefinition.constantBindings = styleList.Where((s) => s.IsConstant()).ToArray();
+            bindingList.AddRange(styleList.Where((s) => !s.IsConstant()));
         }
 
         public virtual bool Compile(ParsedTemplate template) {
             AttributeDefinition nameAttr = GetAttribute("x-name");
+            bindings = new Binding[bindingList.Count];
             if (nameAttr != null) {
                 this.name = nameAttr.value;
             }
+
+            bindings = bindingList.ToArray();
             return true;
         }
 
-        public bool HasAttribute(string attributeName) {
+        protected bool HasAttribute(string attributeName) {
             if (attributes == null) return false;
 
             for (int i = 0; i < attributes.Count; i++) {
@@ -97,7 +113,7 @@ namespace Src {
             return false;
         }
 
-        public AttributeDefinition GetAttribute(string attributeName) {
+        protected AttributeDefinition GetAttribute(string attributeName) {
             if (attributes == null) return null;
 
             for (int i = 0; i < attributes.Count; i++) {
@@ -106,25 +122,6 @@ namespace Src {
 
             return null;
         }
-
-//        ApplyConstantStyles(UIElement element, TemplateScope scope) {
-//            element.style = new UIStyleSet(element, scope.view);
-//            List<StyleDefinition> styles = new List<StyleDefinition>();
-//            
-//            if (baseStyles != null) {
-//                // todo -- for now we only use 'normal' styles, no states
-//                for (int i = 0; i < baseStyles.Count; i++) {
-//                    element.style.AddBaseStyle(baseStyles[i]);
-//                }
-//            }
-//
-//            if (constantBindings != null) {
-//                for (int i = 0; i < constantBindings.Length; i++) {
-//                    constantBindings[i].Apply(element.style, scope.context);
-//                }
-//            }
-//
-//        }
 
     }
 

@@ -1,13 +1,18 @@
 using System;
+using System.Collections.Generic;
 
 namespace Src {
 
     public class UIChildrenTemplate : UITemplate {
 
+        public UIChildrenTemplate(List<UITemplate> childTemplates = null, List<AttributeDefinition> attributes = null) 
+            : base(childTemplates, attributes) { }
+        
         // This class is generally just a marker, it shouldn't do anything on it's own
         public override UIElementCreationData CreateScoped(TemplateScope scope) {
             throw new NotImplementedException();
         }
+
 
     }
 

@@ -1,6 +1,6 @@
 using NUnit.Framework;
 using Src;
-
+using static Tests.TestUtils;
 
     [TestFixture]
     public class ExpressionParserTests {
@@ -505,10 +505,7 @@ using Src;
             return null;
         }
 
-        public static T AssertInstanceOfAndReturn<T>(object target) {
-            Assert.IsInstanceOf<T>(target);
-            return (T) target;
-        }
+       
 
     }
 

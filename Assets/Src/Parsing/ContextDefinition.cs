@@ -1,7 +1,6 @@
 using System;
 using System.Collections.Generic;
 using System.Reflection;
-using Src.Compilers;
 using Src.Compilers.AliasSource;
 
 namespace Src {

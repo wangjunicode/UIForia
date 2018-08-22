@@ -8,5 +8,6 @@ internal enum UIElementFlags {
     RenderElementCreated = 1 << 2,
     TextElement = 1 << 3,
     ImplicitElement = 1 << 4,
+    RequiresLayout = 1 << 5,
 
 }

@@ -8,49 +8,135 @@ namespace Src.Systems {
 
     public class LayoutSystem : ISystem {
 
-        private Stack<LayoutDataSet> layoutStack;
-        private SkipTree<LayoutData> layoutTree;
-        private Rect[] layoutRects;
+        private readonly Rect[] layoutRects;
+        private readonly SkipTree<LayoutData> layoutTree;
+        private readonly Stack<LayoutDataSet> layoutStack;
+        private readonly IStyleSystem styleSystem;
+        private readonly Dictionary<int, LayoutData> layoutDataMap;
 
-        public LayoutSystem() {
-            this.layoutStack = new Stack<LayoutDataSet>();
-            this.layoutTree = new SkipTree<LayoutData>();
+        public LayoutSystem(IStyleSystem styleSystem) {
+            this.styleSystem = styleSystem;
             this.layoutRects = new Rect[16];
+            this.layoutTree = new SkipTree<LayoutData>();
+            this.layoutStack = new Stack<LayoutDataSet>();
+            this.layoutDataMap = new Dictionary<int, LayoutData>();
+            this.styleSystem.onRectChanged += HandleRectChanged;
+            this.styleSystem.onLayoutChanged += HandleLayoutChanged;
+            this.styleSystem.onBorderChanged += HandleBorderChanged;
+            this.styleSystem.onMarginChanged += HandleMarginChanged;
+            this.styleSystem.onPaddingChanged += HandlePaddingChanged;
+            this.styleSystem.onConstraintChanged += HandleConstraintChanged;
         }
+
+        private void HandleRectChanged(int elementId, LayoutRect rect) {
+            LayoutData data;
+            if (layoutDataMap.TryGetValue(elementId, out data)) {
+                data.rect = rect;
+            }
+        }
+
+        private void HandleConstraintChanged(int elementId, LayoutConstraints constraints) {
+            LayoutData data;
+            if (layoutDataMap.TryGetValue(elementId, out data)) {
+                data.constraints = constraints;
+            }
+        }
+
+        private void HandlePaddingChanged(int elementId, ContentBoxRect padding) {
+            LayoutData data;
+            if (layoutDataMap.TryGetValue(elementId, out data)) {
+                data.padding = padding;
+            }
+        }
+
+        private void HandleMarginChanged(int elementId, ContentBoxRect margin) {
+            LayoutData data;
+            if (layoutDataMap.TryGetValue(elementId, out data)) {
+                data.margin = margin;
+            }
+        }
+
+        private void HandleBorderChanged(int elementId, ContentBoxRect border) {
+            LayoutData data;
+            if (layoutDataMap.TryGetValue(elementId, out data)) {
+                data.border = border;
+            }
+        }
+
+        private void HandleLayoutChanged(int elementId, LayoutParameters parameters) {
+            LayoutData data;
+            if (layoutDataMap.TryGetValue(elementId, out data)) {
+                data.parameters = parameters;
+            }
+        }
+
+        public void OnInitialize() {
+            IReadOnlyList<UIStyleSet> styles = styleSystem.GetAllStyles();
+            for (int i = 0; i < styles.Count; i++) {
+                LayoutData data;
+                UIStyleSet styleSet = styles[i];
+                if (layoutDataMap.TryGetValue(styles[i].elementId, out data)) {
+                    data.border = styleSet.border;
+                    data.padding = styleSet.padding;
+                    data.margin = styleSet.margin;
+                    data.parameters = styleSet.layout;
+                    data.constraints = styleSet.constraints;
+                    data.rect = styleSet.rect;
+                }
+            }
+        }
+
+        private void CreateOrUpdateElement(UIElement element) { }
 
         public void OnElementCreated(UIElementCreationData elementData) {
             // todo -- if instance is layout-able
             // todo -- temporary
+            Debug.Log("Layout: " + elementData.element.id);
+            if ((elementData.element.flags & UIElementFlags.RequiresLayout) == 0) {
+                return;
+            }
+
+            if ((elementData.element.flags & UIElementFlags.TextElement) != 0) {
+                UITextElement textElement = (UITextElement) elementData.element;
+                textElement.onSizeChanged += HandleTextSizeChange;
+            }
+
             LayoutData data = new LayoutData(elementData.element);
-            data.layoutType = LayoutType.Flex;
-            data.crossAxisAlignment = CrossAxisAlignment.Stretch;
-            data.layoutDirection = LayoutDirection.Row;
+            if (data.element.style != null) {
+                data.border = data.element.style.border;
+                data.padding = data.element.style.padding;
+                data.margin = data.element.style.margin;
+                data.parameters = data.element.style.layout;
+                data.constraints = data.element.style.constraints;
+                data.rect = data.element.style.rect;
+            }
+            else {
+                data.parameters.type = LayoutType.Flex;
+                data.parameters.crossAxisAlignment = CrossAxisAlignment.Stretch;
+                data.parameters.direction = LayoutDirection.Row;
+            }
+
             layoutTree.AddItem(data);
+            layoutDataMap[data.element.id] = data;
         }
 
         public int RunLayout(Rect viewport, ref LayoutResult[] output) {
-
             layoutTree.TraversePreOrderWithCallback(output, SetupLayoutPass);
 
             LayoutData[] roots = layoutTree.GetRootItems();
             // todo -- there needs to be pseudo root in the layout tree in order to handle layout of root level things
 
-            LayoutData pseudoRoot = new LayoutData(null);
-            pseudoRoot.layoutDirection = LayoutDirection.Column;
-            pseudoRoot.mainAxisAlignment = MainAxisAlignment.Default;
-            pseudoRoot.crossAxisAlignment = CrossAxisAlignment.Stretch;
-            pseudoRoot.layoutType = LayoutType.Flex;
+//            LayoutData pseudoRoot = new LayoutData(null);
+//            pseudoRoot.parameters = UIStyle.Default.layoutParameters;
+//            
+//            pseudoRoot.rect.width = viewport.width;
+//            pseudoRoot.rect.height = viewport.height;
+//            pseudoRoot.constraints.minWidth = viewport.width;
+//            pseudoRoot.constraints.minHeight = viewport.height;
+//
+//            pseudoRoot.children.AddRange(roots);
 
-            pseudoRoot.preferredWidth = viewport.width;
-            pseudoRoot.preferredWidth = viewport.height;
-            pseudoRoot.maxWidth = float.MaxValue;
-            pseudoRoot.maxHeight = float.MaxValue;
-            pseudoRoot.minWidth = viewport.width;
-            pseudoRoot.minHeight = viewport.height;
-
-            pseudoRoot.children.AddRange(roots);
-
-            layoutStack.Push(new LayoutDataSet(pseudoRoot, viewport));
+            layoutStack.Push(new LayoutDataSet(roots[0], viewport));
 
             int retnCount = 0;
 
@@ -74,12 +160,20 @@ namespace Src.Systems {
         }
 
         public void OnReset() {
+            layoutDataMap.Clear();
             layoutTree.Clear();
         }
 
         public void OnUpdate() { }
 
         public void OnDestroy() {
+            this.styleSystem.onRectChanged -= HandleRectChanged;
+            this.styleSystem.onLayoutChanged -= HandleLayoutChanged;
+            this.styleSystem.onBorderChanged -= HandleBorderChanged;
+            this.styleSystem.onMarginChanged -= HandleMarginChanged;
+            this.styleSystem.onPaddingChanged -= HandlePaddingChanged;
+            this.styleSystem.onConstraintChanged -= HandleConstraintChanged;
+            layoutDataMap.Clear();
             layoutTree.Clear();
         }
 
@@ -100,88 +194,18 @@ namespace Src.Systems {
         public void OnElementDestroyed(UIElement element) {
             LayoutData data = layoutTree.GetItem(element);
             if (data != null) {
+                // todo -- recurse this hierarchy and do a proper destroy call on each
                 layoutTree.RemoveHierarchy(data);
+                if ((data.element.flags & UIElementFlags.TextElement) != 0) {
+                    UITextElement textElement = (UITextElement) data.element;
+                    textElement.onSizeChanged -= HandleTextSizeChange;
+                }
             }
         }
 
-        public void SetRectX(UIElement element, UIMeasurement measurement) {
-            layoutTree.GetItem(element).staticX = measurement;
-        }
-
-        public void SetRectY(UIElement element, UIMeasurement measurement) {
-            layoutTree.GetItem(element).staticY = measurement;
-        }
-
-        public void SetRectWidth(UIElement element, UIMeasurement measurement) {
-            layoutTree.GetItem(element).preferredWidth = measurement;
-        }
-
-        public void SetRectHeight(UIElement element, UIMeasurement measurement) {
-            layoutTree.GetItem(element).preferredHeight = measurement;
-        }
-
-        public void SetRectMinWidth(UIElement element, UIMeasurement measurement) {
-            layoutTree.GetItem(element).minWidth = measurement;
-        }
-
-        public void SetRectMinHeight(UIElement element, UIMeasurement measurement) {
-            layoutTree.GetItem(element).minHeight = measurement;
-        }
-
-        public void SetRectMaxWidth(UIElement element, UIMeasurement measurement) {
-            layoutTree.GetItem(element).maxWidth = measurement;
-        }
-
-        public void SetRectMaxHeight(UIElement element, UIMeasurement measurement) {
-            layoutTree.GetItem(element).maxHeight = measurement;
-        }
-
-        public void SetGrowthFactor(UIElement element, int factor) {
-            layoutTree.GetItem(element).growthFactor = factor;
-        }
-
-        public void SetShrinkFactor(UIElement element, int factor) {
-            layoutTree.GetItem(element).shrinkFactor = factor;
-        }
-
-        public void SetMainAxisAlignment(UIElement element, MainAxisAlignment alignment) {
-            layoutTree.GetItem(element).mainAxisAlignment = alignment;
-        }
-
-        public void SetCrossAxisAlignment(UIElement element, CrossAxisAlignment alignment) {
-            layoutTree.GetItem(element).crossAxisAlignment = alignment;
-        }
-
-        public void SetLayoutType(UIElement element, LayoutType layoutType) {
-            layoutTree.GetItem(element).layoutType = layoutType;
-        }
-
-        public void SetLayoutDirection(UIElement element, LayoutDirection direction) {
-            layoutTree.GetItem(element).layoutDirection = direction;
-        }
-
-        public void SetLayoutWrap(UIElement element, LayoutWrap wrapMode) {
-            layoutTree.GetItem(element).wrapMode = wrapMode;
-        }
-
-        public void SetInFlow(UIElement element, bool isInFlow) {
-            layoutTree.GetItem(element).isInFlow = isInFlow;
-        }
-
-        public void SetMargin(UIElement element, ContentBoxRect rect) {
-            layoutTree.GetItem(element).margin = rect;
-        }
-
-        public void SetBorder(UIElement element, ContentBoxRect rect) {
-            layoutTree.GetItem(element).border = rect;
-        }
-
-        public void SetPadding(UIElement element, ContentBoxRect rect) {
-            layoutTree.GetItem(element).padding = rect;
-        }
+        private void HandleTextSizeChange(UIElement element, Vector2 size) { }   
 
         private void SetupLayoutPass(LayoutResult[] layoutResults, LayoutData data) {
-
             data.children.Clear();
 
             if (data.parent == null) return;
@@ -191,7 +215,6 @@ namespace Src.Systems {
             if (layoutResults.Length < data.parent.children.Count) {
                 Array.Resize(ref layoutResults, layoutResults.Length * 2);
             }
-
         }
 
     }

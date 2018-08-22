@@ -6,36 +6,36 @@ namespace Src {
 
     public class ParsedTemplate {
 
-        public Type type;
         public string filePath;
         public List<UIStyle> styles;
-        public UIElementTemplate rootElement;
+        public UIElementTemplate rootElementTemplate;
         public List<ImportDeclaration> imports;
-        public ContextDefinition contextDefinition;
-
+        public readonly ContextDefinition contextDefinition;
+        public readonly ExpressionCompiler compiler;
+        
         private bool isCompiled;
 
-        public List<UITemplate> childTemplates => rootElement.childTemplates;
+        public ParsedTemplate(UIElementTemplate rootElement) {
+            this.rootElementTemplate = rootElement;
+            this.contextDefinition = new ContextDefinition(rootElement.RootType);
+            this.compiler = new ExpressionCompiler(contextDefinition);
+        }
+        
+        public List<UITemplate> childTemplates => rootElementTemplate.childTemplates;
 
         private static readonly List<UIElementCreationData> EmptyElementList = new List<UIElementCreationData>(0);
 
         public UIElement CreateWithScope(TemplateScope scope) {
             if (!isCompiled) Compile();
 
-            UIElement instance = (UIElement) Activator.CreateInstance(rootElement.ElementType);
+            UIElement instance = (UIElement) Activator.CreateInstance(rootElementTemplate.RootType);
 
-            UIElementCreationData instanceData = new UIElementCreationData(
-                "TemplateRoot",
-                instance,
-                null,
-                null,
-                scope.context
-            );
+            UIElementCreationData instanceData = new UIElementCreationData("TemplateRoot", instance, scope.context);
 
             List<UIElementCreationData> children = new List<UIElementCreationData>();
 
-            for (int i = 0; i < rootElement.childTemplates.Count; i++) {
-                UITemplate template = rootElement.childTemplates[i];
+            for (int i = 0; i < rootElementTemplate.childTemplates.Count; i++) {
+                UITemplate template = rootElementTemplate.childTemplates[i];
                 if (template is UIChildrenTemplate) {
                     children.AddRange(scope.inputChildren);
                 }
@@ -63,16 +63,10 @@ namespace Src {
             scope.context = context;
             scope.inputChildren = EmptyElementList;
 
-            UIElement instance = (UIElement) Activator.CreateInstance(rootElement.ElementType);
+            UIElement instance = (UIElement) Activator.CreateInstance(rootElementTemplate.RootType);
             context.rootElement = instance;
 
-            UIElementCreationData rootData = new UIElementCreationData(
-                "TemplateRoot",
-                instance,
-                null,
-                null,
-                context
-            );
+            UIElementCreationData rootData = new UIElementCreationData("TemplateRoot", instance, context);
 
             scope.SetParent(rootData, default(UIElementCreationData));
 
@@ -90,15 +84,19 @@ namespace Src {
 
             Stack<UITemplate> stack = new Stack<UITemplate>();
 
-            stack.Push(rootElement);
+            stack.Push(rootElementTemplate);
 
             while (stack.Count > 0) {
                 UITemplate template = stack.Pop();
                 template.CompileStyles(this);
                 template.Compile(this);
-                for (int i = 0; i < template.childTemplates.Count; i++) {
-                    stack.Push(template.childTemplates[i]);
+                
+                if (template.childTemplates != null) {
+                    for (int i = 0; i < template.childTemplates.Count; i++) {
+                        stack.Push(template.childTemplates[i]);
+                    }
                 }
+                
             }
 
             isCompiled = true;

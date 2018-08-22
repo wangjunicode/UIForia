@@ -4,8 +4,8 @@ namespace Src {
 
     public class LiteralExpression_Int : Expression<int> {
 
-        public readonly int value;
-        public readonly object boxedValue;
+        private readonly int value;
+        private readonly object boxedValue;
 
         public LiteralExpression_Int(int value) {
             this.value = value;

@@ -7,51 +7,25 @@ namespace Src {
 
     public static class Tokenizer {
 
-       
-        //ParseParenExpression()
-            // if op == * if node is * or / inject paren node as parent
-                // op node.parent = new paren expression node
-                // left = parent.right
-            //((item.x + (5 * 1)) * 3)
-            // 5 + 10 + (1 * 4)
-            // item.z + 5 + item.y
-            // parse expression
-                //parse property access
-                // parse op expression (+)
-                // parse constant value
-                // parse op expression(*)
-                // parse property access
-            
-            //expression
-                //parse paren expression
-                    //left = parse property access
-                    //right = parse operator expression
-                        //parse operator
-                        //parse constant
-                // op times
-                // value 3
-            
-            // visit expression
-                //output expression =         
-                //  left = visit paren expression
-                //  right = visit op expression
-                //output = expression binding(left, right);
         private static int ConsumeWhiteSpace(int start, string input) {
             int ptr = start;
             if (ptr >= input.Length) return input.Length;
             while (ptr < input.Length && char.IsWhiteSpace(input[ptr])) {
                 ptr++;
             }
+
             return ptr;
         }
 
-        private static int TryReadCharacters(int ptr, string input, string match, TokenType tokenType, List<DslToken> output) {
+        private static int TryReadCharacters(int ptr, string input, string match, TokenType tokenType,
+            List<DslToken> output) {
             if (ptr + match.Length > input.Length) return ptr;
             for (int i = 0; i < match.Length; i++) {
                 if (input[ptr + i] != match[i]) {
                     return ptr;
                 }
             }
+
             output.Add(new DslToken(tokenType, match));
             return TryConsumeWhiteSpace(ptr + match.Length, input);
         }
@@ -70,18 +44,19 @@ namespace Src {
             // 1
             // 1.4
             // 1.4f
-            
+
             while (ptr < input.Length && (char.IsDigit(input[ptr]) || (!foundDot && input[ptr] == '.'))) {
                 if (input[ptr] == '.') {
                     foundDot = true;
                 }
+
                 ptr++;
             }
 
             if (ptr < input.Length && input[ptr] == 'f') {
                 ptr++;
             }
-            
+
             output.Add(new DslToken(TokenType.Number, input.Substring(startIndex, ptr - startIndex)));
             return TryConsumeWhiteSpace(ptr, input);
         }
@@ -96,19 +71,16 @@ namespace Src {
                 ptr++;
             }
 
-            if (first == '$') {
-                output.Add(new DslToken(TokenType.SpecialIdentifier, input.Substring(start, ptr - start)));
-            }
-            else {
-                output.Add(new DslToken(TokenType.Identifier, input.Substring(start, ptr - start)));
+            output.Add(first == '$'
+                ? new DslToken(TokenType.SpecialIdentifier, input.Substring(start, ptr - start))
+                : new DslToken(TokenType.Identifier, input.Substring(start, ptr - start)));
 
-            }
             return TryConsumeWhiteSpace(ptr, input);
         }
 
         private static int TryReadString(int ptr, string input, List<DslToken> output) {
             int start = ptr;
-            if (ptr        >= input.Length) return input.Length;
+            if (ptr >= input.Length) return input.Length;
             if (input[ptr] != '\'') return ptr;
 
             ptr++;

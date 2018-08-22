@@ -49,7 +49,7 @@ namespace Src {
             int i = 0;
             SkipTreeNode<T> ptr = root.firstChild;
             while (ptr != null) {
-                roots[i] = ptr.element;
+                roots[i] = ptr.item;
                 i++;
                 ptr = ptr.nextSibling;
             }
@@ -75,7 +75,7 @@ namespace Src {
         public T GetItem<U>(U key) where U : IHierarchical {
             SkipTreeNode<T> node;
             if (nodeMap.TryGetValue(key, out node)) {
-                return node.element;
+                return node.item;
             }
 
             return default(T);
@@ -213,7 +213,7 @@ namespace Src {
             while (ptr != null) {
                 ptr.parent = node.parent;
                 node.parent.childCount++;
-                ptr.element.OnParentChanged(ptr.parent.element);
+                ptr.item.OnParentChanged(ptr.parent.item);
                 lastChild = ptr;
                 ptr = ptr.nextSibling;
             }
@@ -229,7 +229,7 @@ namespace Src {
             }
 
             node.parent = null;
-            node.element = default(T);
+            node.item = default(T);
             node.nextSibling = null;
             node.firstChild = null;
             nodeMap.Remove(element);
@@ -280,7 +280,7 @@ namespace Src {
             while (stack.Count > 0) {
                 SkipTreeNode<T> current = stack.Pop();
 
-                nodeMap.Remove(current.element);
+                nodeMap.Remove(current.item);
 
                 ptr = current.firstChild;
 
@@ -307,7 +307,7 @@ namespace Src {
             while (stack.Count > 0) {
                 SkipTreeNode<T> current = stack.Pop();
 
-                traverseFn(current.element);
+                traverseFn(current.item);
 
                 ptr = current.firstChild;
 
@@ -336,7 +336,7 @@ namespace Src {
             while (stack.Count > 0) {
                 SkipTreeNode<T> current = stack.Pop();
 
-                traverseFn(closureArg, current.element);
+                traverseFn(closureArg, current.item);
 
                 ptr = current.firstChild;
 
@@ -358,11 +358,11 @@ namespace Src {
                 ptr = ptr.nextSibling;
             }
         }
-
+        
         private void TraverseRecursePreorderStep(SkipTreeNode<T> node) {
             if (node.isDisabled) return;
 
-            node.element.OnBeforeTraverse();
+            node.item.OnBeforeTraverse();
 
             SkipTreeNode<T> ptr = node.firstChild;
             while (ptr != null) {
@@ -370,7 +370,7 @@ namespace Src {
                 ptr = ptr.nextSibling;
             }
 
-            node.element.OnAfterTraverse();
+            node.item.OnAfterTraverse();
         }
 
         private SkipTreeNode<T> FindPreviousSibling(SkipTreeNode<T> node) {
@@ -389,10 +389,10 @@ namespace Src {
         private void Insert(SkipTreeNode<T> parent, SkipTreeNode<T> inserted) {
             inserted.parent = parent;
             parent.childCount++;
-            inserted.element.OnParentChanged(parent.element);
+            inserted.item.OnParentChanged(parent.item);
 
             SkipTreeNode<T> ptr = parent.firstChild;
-            ISkipTreeTraversable element = inserted.element;
+            ISkipTreeTraversable element = inserted.item;
 
             // set parent
             // walk through current parent's children
@@ -404,7 +404,7 @@ namespace Src {
             SkipTreeNode<T> parentPreviousChild = null;
 
             while (ptr != null) {
-                ISkipTreeTraversable currentElement = ptr.element;
+                ISkipTreeTraversable currentElement = ptr.item;
                 if (IsDescendentOf(currentElement, element)) {
                     SkipTreeNode<T> next = ptr.nextSibling;
 
@@ -425,7 +425,7 @@ namespace Src {
                     ptr.parent.childCount--;
                     ptr.parent = inserted;
                     inserted.childCount++;
-                    ptr.element.OnParentChanged(inserted.element);
+                    ptr.item.OnParentChanged(inserted.item);
                     ptr.nextSibling = null;
                     insertedLastChild = ptr;
                     ptr = next;
@@ -467,18 +467,18 @@ namespace Src {
             return false;
         }
 
-        [DebuggerDisplay("{element}")]
+        [DebuggerDisplay("{item}")]
         private class SkipTreeNode<U> {
 
-            public U element;
+            public U item;
             public bool isDisabled;
             public SkipTreeNode<U> parent;
             public SkipTreeNode<U> nextSibling;
             public SkipTreeNode<U> firstChild;
             public int childCount;
 
-            public SkipTreeNode(U element) {
-                this.element = element;
+            public SkipTreeNode(U item) {
+                this.item = item;
                 this.isDisabled = false;
             }
 

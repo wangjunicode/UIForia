@@ -1,6 +1,7 @@
 using System.Xml.Linq;
 using Rendering;
 using Src.Style;
+using UnityEngine;
 
 namespace Src.Parsing.Style {
 
@@ -13,8 +14,12 @@ namespace Src.Parsing.Style {
             StyleParseUtil.ParseMeasurement(ref style.rect.y, root.GetChild("Rect.Y"));
             StyleParseUtil.ParseMeasurement(ref style.rect.width, root.GetChild("Rect.W"));
             StyleParseUtil.ParseMeasurement(ref style.rect.height, root.GetChild("Rect.H"));
-            
-            StyleParseUtil.ParseColor(ref style.paint.backgroundColor, root.GetChild("Paint.BackgroundColor"));
+
+//            Color borderColor = UIStyle.UnsetColorValue;
+//            Color backgroundColor = UIStyle.UnsetColorValue;
+//            Texture2D backgroundImage = null;
+//            
+//            StyleParseUtil.ParseColor(ref backgroundColor, root.GetChild("Paint.BackgroundColor"));
             
         }
 

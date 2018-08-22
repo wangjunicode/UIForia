@@ -1,8 +1,38 @@
+using System;
 using System.Collections.Generic;
 
 namespace Src {
 
     public class UIElementTemplate : UITemplate {
+
+        private Type rootType;
+        private readonly string typeName;
+        
+        public UIElementTemplate(string typeName, List<UITemplate> childTemplates, List<AttributeDefinition> attributes = null)
+            : base(childTemplates, attributes) {
+            
+            this.typeName = typeName;
+            
+        }
+
+        public UIElementTemplate(Type rootType, List<UITemplate> childTemplates, List<AttributeDefinition> attributes = null)
+            : base(childTemplates, attributes) {
+            
+            this.rootType = rootType;
+            
+        }
+
+        public Type RootType => rootType;
+        
+        public override bool Compile(ParsedTemplate template) {
+            base.Compile(template);
+            
+            if (rootType == null) {
+                rootType = TypeProcessor.GetType(typeName, template.imports).rawType;
+            }
+
+            return true;
+        }
 
         public override UIElementCreationData CreateScoped(TemplateScope scope) {
             List<UIElementCreationData> scopedChildren = new List<UIElementCreationData>(childTemplates.Count);
@@ -11,10 +41,8 @@ namespace Src {
                 scopedChildren.Add(childTemplates[i].CreateScoped(scope));
             }
 
-            ParsedTemplate templateToExpand = TemplateParser.GetParsedTemplate(processedElementType);
-
+            ParsedTemplate templateToExpand = TemplateParser.GetParsedTemplate(rootType);
             UITemplateContext context = new UITemplateContext(scope.view);
-
             TemplateScope outputScope = new TemplateScope(scope.outputList);
 
             outputScope.context = context;
@@ -22,21 +50,10 @@ namespace Src {
             outputScope.view = scope.view;
 
             UIElement instance = templateToExpand.CreateWithScope(outputScope);
-            instance.name = name;
 
             context.rootElement = instance;
-            
-            return new UIElementCreationData(
-                name,
-                instance,
-                styleDefinition,
-                null, 
-                scope.context
-            );
-        }
 
-        public override bool Compile(ParsedTemplate template) {
-            return true;
+            return GetCreationData(instance, context);
         }
 
     }

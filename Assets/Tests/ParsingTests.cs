@@ -1,8 +1,9 @@
 ﻿using Src;
 using NUnit.Framework;
+using Src.Parsing;
 
 [TestFixture]
-public class ParsingTests {
+public class TemplateParsingTests {
 
     [Test]
     public void ParseTemplateParts() {
@@ -14,18 +15,18 @@ public class ParsingTests {
         ParsedTemplate parsedTemplate = TemplateParser.GetParsedTemplate(typeof(Spec.Test1));
         Assert.IsNotNull(parsedTemplate);
         Assert.AreEqual(3, parsedTemplate.childTemplates.Count);
-        Assert.AreEqual(typeof(UIPanel), parsedTemplate.childTemplates[0].ElementType);
-        Assert.AreEqual(typeof(UIPanel), parsedTemplate.childTemplates[1].ElementType);
-        Assert.AreEqual(typeof(UIPanel), parsedTemplate.childTemplates[2].ElementType);
+        Assert.AreEqual(typeof(UIPanel), ((UIElementTemplate) parsedTemplate.childTemplates[0]).RootType);
+        Assert.AreEqual(typeof(UIPanel), ((UIElementTemplate) parsedTemplate.childTemplates[1]).RootType);
+        Assert.AreEqual(typeof(UIPanel), ((UIElementTemplate) parsedTemplate.childTemplates[2]).RootType);
     }
 
     [Test]
     public void ParseThreeNonSelfClosingChildren() {
         ParsedTemplate parsedTemplate = TemplateParser.GetParsedTemplate(typeof(Spec.Test2));
         Assert.AreEqual(3, parsedTemplate.childTemplates.Count);
-        Assert.AreEqual(typeof(UIPanel), parsedTemplate.childTemplates[0].ElementType);
-        Assert.AreEqual(typeof(UIPanel), parsedTemplate.childTemplates[1].ElementType);
-        Assert.AreEqual(typeof(UIPanel), parsedTemplate.childTemplates[2].ElementType);
+        Assert.AreEqual(typeof(UIPanel), ((UIElementTemplate) parsedTemplate.childTemplates[0]).RootType);
+        Assert.AreEqual(typeof(UIPanel), ((UIElementTemplate) parsedTemplate.childTemplates[1]).RootType);
+        Assert.AreEqual(typeof(UIPanel), ((UIElementTemplate) parsedTemplate.childTemplates[2]).RootType);
     }
 
     [Test]
@@ -55,7 +56,7 @@ public class ParsingTests {
         });
         Assert.AreEqual("<Children> cannot be inside <Repeat>", x.Message);
     }
-    
+
     [Test]
     public void Children_MustBeEmpty() {
         var x = Assert.Throws<InvalidTemplateException>(() => {
@@ -180,116 +181,51 @@ public class ParsingTests {
         });
         Assert.AreEqual("<Prefab> tags cannot have children", x.Message);
     }
+
+    [Test]
+    public void Text_Parses() {
+        Assert.DoesNotThrow(() => {
+            TemplateParser.ParseTemplateFromString<Spec.Test1>(@"
+                <UITemplate>
+                    <Contents>
+                            <Group>text</Group>
+                    </Contents>
+                </UITemplate>
+            ");
+        });
+    }
+
+    [Test]
+    public void Text_AssignsRawString() {
+        ParsedTemplate parsedTemplate = TemplateParser.ParseTemplateFromString<Spec.Test1>(@"
+                <UITemplate>
+                    <Contents>
+                            <Group>text {value} is here</Group>
+                    </Contents>
+                </UITemplate>
+            ");
+        UITextTemplate template = (UITextTemplate) parsedTemplate.childTemplates[0].childTemplates[0];
+        Assert.IsNotNull(template);
+        Assert.AreEqual("text {value} is here", template.RawText);
+    }
+
+    [Test]
+    public void Text_ParsesExpressionParts() {
+        TextElementParser parser = new TextElementParser();
+        string[] output1 = parser.Parse("one expression");
+        Assert.AreEqual(1, output1.Length);
+        Assert.AreEqual("one expression", output1[0]);
+        
+        string[] output2 = parser.Parse("two {expressions}");
+        Assert.AreEqual(2, output2.Length);
+        Assert.AreEqual("two ", output2[0]);
+        Assert.AreEqual("{expressions}", output2[1]);
+        
+        string[] output3 = parser.Parse("three {expressions} here");
+        Assert.AreEqual(3, output3.Length);
+        Assert.AreEqual("three ", output3[0]);
+        Assert.AreEqual("{expressions}", output3[1]);
+        Assert.AreEqual(" here", output3[2]);
+    }
     
 }
-
-//
-//    [Test]
-//    public void GenerateUIElements() {
-//        UIElementTemplate parsedTemplate = TemplateParser.GetParsedTemplate(typeof(Spec.Test5));
-//        UIElement root = parsedTemplate.CreateElement();
-//        Assert.AreEqual(root.children.Length, 3);
-//        
-//        Assert.IsInstanceOf<UITextElement>(root.children[0]);
-//        Assert.IsInstanceOf<UIPanel>(root.children[1]);
-//        Assert.IsInstanceOf<UITextElement>(root.children[2]);
-//        
-//        Assert.AreEqual(root.children[1].children.Length, 1);
-//        Assert.IsInstanceOf<UITextElement>(root.children[1].children[0]);
-//    }
-//    
-//    [Test]
-//    public void GenerateUIElements_DoubleNested() {
-//        UIElementTemplate parsedTemplate = TemplateParser.GetParsedTemplate<Spec.Test6>();
-//        UIElement root = parsedTemplate.CreateElement();
-//        Assert.AreEqual(root.children.Length, 3);
-//        
-//        Assert.IsInstanceOf<UITextElement>(root.children[0]);
-//        Assert.IsInstanceOf<UIPanel>(root.children[1]);
-//        Assert.IsInstanceOf<UITextElement>(root.children[2]);
-//
-//        UIPanel panel = root.children[1] as UIPanel;
-//        Assert.AreEqual(panel.children.Length, 3);
-//        Assert.IsInstanceOf<UITextElement>(panel.children[0]);
-//        Assert.IsInstanceOf<UIPanel>(panel.children[1]);
-//        Assert.IsInstanceOf<UITextElement>(panel.children[2]);
-//
-//        UIPanel innerPanel = panel.children[1] as UIPanel;
-//        Assert.AreEqual(innerPanel.children.Length, 1);
-//        Assert.IsInstanceOf<UITextElement>(innerPanel.children[0]);
-//
-//    }
-//
-//    [Test]
-//    public void PassChildrenInToCreate() {
-//        UIElementTemplate parsedTemplate = TemplateParser.GetParsedTemplate<Spec.Test7>();
-//        UITextElement text = new UITextElement();
-//        UIElement[] children = { text };
-//        UIElement root = parsedTemplate.CreateElement(children);
-//        Assert.AreEqual(2, root.children.Length);
-//        Assert.IsInstanceOf<UITextElement>(root.children[0]);
-//        Assert.IsInstanceOf<UITextElement>(root.children[1]);
-//    }
-//
-//    [Test] // todo -- maybe throw an error in this case
-//    public void PassChildrenToTemplateWithoutSlotDefined() {
-//        UIElementTemplate parsedTemplate = TemplateParser.GetParsedTemplate<Spec.Test2>();
-//        UITextElement text = new UITextElement();
-//        UIElement[] children = { text };
-//        UIElement root = parsedTemplate.CreateElement(children);
-//        Assert.AreEqual(3, root.children.Length);
-//        Assert.AreEqual(1, root.children[0].children.Length);
-//        Assert.AreEqual(1, root.children[1].children.Length);
-//        Assert.AreEqual(1, root.children[2].children.Length);
-//    }
-//
-//    [Test]
-//    public void MultipleChildrenSlotsShouldError() {
-//        Assert.Throws<MultipleChildSlotException>(() => {
-//            TemplateParser.GetParsedTemplate<Spec.Test8>();
-//        });
-//    }
-//    
-//    [Test]
-//    public void ChildrenSlotWithChildrenShouldError() {
-//        Assert.Throws<ChildrenSlotWithChildrenException>(() => {
-//            TemplateParser.GetParsedTemplate<Spec.Test11>();
-//        });
-//    }
-//
-//    [Test]
-//    public void TemplateMustHaveAContentsSection() {
-//        Assert.Throws<InvalidTemplateException>(() => {
-//            TemplateParser.GetParsedTemplate<Spec.Test12>();
-//        });
-//    }
-//    
-//    [Test]
-//    public void AllowChildrenSlotToBeOnlyElement() {
-//        UIElementTemplate parsedTemplate = TemplateParser.GetParsedTemplate<Spec.Test9>();
-//        UITextElement text1 = new UITextElement();
-//        UITextElement text2 = new UITextElement();
-//        UIElement[] children = { text1, text2};
-//        UIElement root = parsedTemplate.CreateElement(children);
-//        Assert.AreEqual(2, root.children.Length);
-//    }
-//
-//    [Test]
-//    public void AllowChildrenSlotInNestedElement() {
-//        UIElementTemplate parsedTemplate = TemplateParser.GetParsedTemplate<Spec.Test10>();
-//        UITextElement text1 = new UITextElement();
-//        UITextElement text2 = new UITextElement();
-//        UIElement[] children = { text1, text2};
-//        UIElement root = parsedTemplate.CreateElement(children);
-//        Assert.AreEqual(3, root.children.Length);
-//        UIElement panel = root.children[1];
-//        Assert.AreEqual(2, panel.children.Length);
-//        Assert.AreEqual(text1, panel.children[0]);
-//        Assert.AreEqual(text2, panel.children[1]);
-//    }
-//
-//
-//    // template not found for type
-//    // type not found for tag name
-//   
-//}

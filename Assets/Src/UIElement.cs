@@ -9,19 +9,16 @@ public class UIElement : IHierarchical {
 
     internal UIElementFlags flags;
 
-    public readonly int id;
     public string name;
+    public readonly int id;
 
-    // todo -- children probably go away since 'children' will mean different
-    // things in different contexts and systems
-    //public List<UIElement> children;
     [UsedImplicitly] public UIStyleSet style;
 
     protected internal UIElement parent;
 
     public UIElement() {
         id = UIView.NextElementId;
-        this.flags = 0;
+        this.flags = UIElementFlags.RequiresLayout | UIElementFlags.RequiresRendering;
     }
 
     public virtual void Initialize() { }

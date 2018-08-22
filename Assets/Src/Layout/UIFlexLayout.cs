@@ -17,7 +17,7 @@ namespace Src.Layout {
             widthItems = new FlexItemAxis[16];
             heightItems = new FlexItemAxis[16];
         }
-        
+
         public override void Run(Rect viewport, LayoutDataSet dataSet, Rect[] results) {
             Rect size = dataSet.result;
             LayoutData data = dataSet.data;
@@ -51,20 +51,24 @@ namespace Src.Layout {
                 FlexItemAxis heightItem = new FlexItemAxis();
 
                 widthItem.axisStart = 0;
-                widthItem.preferredSize = child.GetPreferredWidth(data.preferredWidth.unit, contentRect.width, viewport.width);
-                widthItem.minSize = child.minWidth.GetFixedPixelValue(contentRect.width, viewport.width);
-                widthItem.maxSize = float.MaxValue;//child.maxWidth.GetFixedPixelValue(contentRect.width, viewport.width);
+                widthItem.preferredSize =
+                    child.GetPreferredWidth(data.rect.width.unit, contentRect.width, viewport.width);
+                widthItem.minSize = child.GetMinWidth(data.rect.width.unit, contentRect.width, viewport.width);
+                widthItem.maxSize = child.GetMaxWidth(data.rect.width.unit, contentRect.width, viewport.width);
+                widthItem.outputSize = widthItem.MinDefined ? widthItem.minSize : widthItem.preferredSize;
 
-                widthItem.growthFactor = child.growthFactor;
-                widthItem.shrinkFactor = child.shrinkFactor;
+                widthItem.growthFactor = child.constraints.growthFactor;
+                widthItem.shrinkFactor = child.constraints.shrinkFactor;
 
                 heightItem.axisStart = 0;
-                heightItem.preferredSize = child.GetPreferredHeight(data.preferredHeight.unit, contentRect.height, viewport.height);
-                heightItem.minSize = child.minHeight.GetFixedPixelValue(contentRect.height, viewport.height);
-                heightItem.maxSize = float.MaxValue;//child.maxHeight.GetFixedPixelValue(contentRect.height, viewport.height);
+                heightItem.preferredSize =
+                    child.GetPreferredHeight(data.rect.height.unit, contentRect.height, viewport.height);
+                heightItem.minSize = child.GetMinHeight(data.rect.height.unit, contentRect.height, viewport.height);
+                heightItem.maxSize = child.GetMaxHeight(data.rect.height.unit, contentRect.height, viewport.height);
+                heightItem.outputSize = heightItem.preferredSize;
 
-                heightItem.growthFactor = child.growthFactor;
-                heightItem.shrinkFactor = child.shrinkFactor;
+                heightItem.growthFactor = child.constraints.growthFactor;
+                heightItem.shrinkFactor = child.constraints.shrinkFactor;
 
                 widthItems[itemCount] = widthItem;
                 heightItems[itemCount] = heightItem;
@@ -75,7 +79,7 @@ namespace Src.Layout {
                 itemCount++;
             }
 
-            if (data.layoutDirection == LayoutDirection.Row) {
+            if (data.parameters.direction == LayoutDirection.Row) {
                 if (remainingWidth > 0) {
                     GrowAxis(widthItems, itemCount, remainingWidth);
                 }
@@ -83,8 +87,8 @@ namespace Src.Layout {
                     ShrinkAxis(widthItems, itemCount, remainingWidth);
                 }
 
-                AlignMainAxis(widthItems, itemCount, data.mainAxisAlignment);
-                AlignCrossAxis(heightItems, itemCount, data.crossAxisAlignment, contentRect.height);
+                AlignMainAxis(widthItems, itemCount, data.parameters.mainAxisAlignment);
+                AlignCrossAxis(heightItems, itemCount, data.parameters.crossAxisAlignment, contentRect.height);
             }
             else {
                 if (remainingHeight > 0) {
@@ -93,9 +97,9 @@ namespace Src.Layout {
                 else if (remainingHeight < 0) {
                     ShrinkAxis(heightItems, itemCount, remainingHeight);
                 }
-                
-                AlignMainAxis(heightItems, itemCount, data.mainAxisAlignment);
-                AlignCrossAxis(widthItems, itemCount, data.crossAxisAlignment, contentRect.width);
+
+                AlignMainAxis(heightItems, itemCount, data.parameters.mainAxisAlignment);
+                AlignCrossAxis(widthItems, itemCount, data.parameters.crossAxisAlignment, contentRect.width);
             }
 
             int itemTracker = 0;
@@ -115,6 +119,44 @@ namespace Src.Layout {
             }
         }
 
+        private static void AllocateToPreferredSize(FlexItemAxis[] items, int itemCount, float remainingSpace) {
+            int pieces = items.Length;
+
+            bool didAllocate = true;
+            while (didAllocate && remainingSpace > 0 && pieces > 0) {
+                didAllocate = false;
+
+                float pieceSize = remainingSpace / pieces;
+
+                for (int i = 0; i < itemCount; i++) {
+                    bool maxDefined = items[i].MaxDefined;
+                    
+                    float max = items[i].maxSize;
+                    float outputSize = items[i].outputSize;
+                    float preferred = items[i].preferredSize;
+                    float targetSize = maxDefined && max < preferred ? max : preferred;
+
+                    if ((int) outputSize == (int) targetSize) {
+                        continue;
+                    }
+
+                    didAllocate = true;
+                    float start = outputSize;
+                    float growSize = pieceSize;
+                    float totalGrowth = start + growSize;
+                    float output = targetSize < totalGrowth ? targetSize : totalGrowth;
+
+                    remainingSpace -= output - start;
+
+                    items[i].outputSize = output;
+
+                    if ((int) output == (int) targetSize) {
+                        pieces--;
+                    }
+                }
+            }
+        }
+
         private static void GrowAxis(FlexItemAxis[] items, int itemCount, float remainingSpace) {
             int pieces = 0;
             int growBonus = 0;
@@ -128,26 +170,32 @@ namespace Src.Layout {
             }
 
             bool didAllocate = true;
-            while (didAllocate && remainingSpace > 0) {
+            while (didAllocate && (int) remainingSpace > 0) {
                 didAllocate = false;
 
                 float pieceSize = SafeDivide(remainingSpace, pieces);
 
                 for (int i = 0; i < itemCount; i++) {
-
                     float max = items[i].maxSize;
                     float output = items[i].outputSize;
+                    bool maxDefined = items[i].MaxDefined;
                     int growthFactor = items[i].growthFactor + growBonus;
 
-                    if (growthFactor == 0 || output == max) {
+                    if (growthFactor == 0) {
+                        continue;
+                    }
+
+                    if ((maxDefined && (int) output == (int) max)) {
+                        pieces -= growthFactor;
                         continue;
                     }
 
                     didAllocate = true;
-                    float start = items[i].preferredSize;
+                    float start = items[i].outputSize;
                     float growSize = growthFactor * pieceSize;
                     float totalGrowth = start + growSize;
-                    output = totalGrowth > max ? max : totalGrowth;
+                    output = (maxDefined && totalGrowth > max) ? max : totalGrowth;
+
                     remainingSpace -= output - start;
 
                     items[i].outputSize = output;
@@ -167,16 +215,17 @@ namespace Src.Layout {
 
             overflow *= -1;
 
-            while (didAllocate && overflow > 0) {
+            while (didAllocate && (int) overflow > 0) {
                 didAllocate = false;
-                float pieceSize = SafeDivide(overflow, pieces);
-                for (int i = 0; i < itemCount; i++) {
 
+                float pieceSize = SafeDivide(overflow, pieces);
+
+                for (int i = 0; i < itemCount; i++) {
                     float min = items[i].minSize;
                     float size = items[i].outputSize;
                     int shrinkFactor = items[i].shrinkFactor;
 
-                    if (shrinkFactor == 0 || size == min) {
+                    if (shrinkFactor == 0 || min != UIStyle.UnsetFloatThreshold && size == min) {
                         continue;
                     }
 
@@ -238,7 +287,8 @@ namespace Src.Layout {
             }
         }
 
-        private static void AlignCrossAxis(FlexItemAxis[] items, int itemCount, CrossAxisAlignment crossAxisAlignment, float contentSize) {
+        private static void AlignCrossAxis(FlexItemAxis[] items, int itemCount, CrossAxisAlignment crossAxisAlignment,
+            float contentSize) {
             // todo -- respect individual align-cross-axis-self settings on children
 
             for (int i = 0; i < itemCount; i++) {
@@ -281,6 +331,9 @@ namespace Src.Layout {
             public float minSize;
             public int growthFactor;
             public int shrinkFactor;
+
+            public bool MaxDefined => maxSize <= UIStyle.UnsetFloatThreshold;
+            public bool MinDefined => minSize <= UIStyle.UnsetFloatThreshold;
 
         }
 

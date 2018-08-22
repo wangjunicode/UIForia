@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using UnityEngine;
 
 namespace Src {
 
@@ -25,7 +26,7 @@ namespace Src {
         }
 
         public void RegisterAll() {
-            
+            Debug.Log("Registering " + outputList.Count + " elements");
             for (int i = 0; i < outputList.Count; i++) {
                 view.Register(outputList[i]);
             }

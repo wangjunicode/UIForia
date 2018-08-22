@@ -1,30 +1,23 @@
+using System.Diagnostics;
 using Src;
 
 namespace Rendering {
 
-    public class UILayoutRect {
+    [DebuggerDisplay("{x}, {y}, {width}, {height}")]
+    public struct LayoutRect {
 
         public UIMeasurement x;
         public UIMeasurement y;
         public UIMeasurement width;
         public UIMeasurement height;
-
-        public UILayoutRect() {
-            x = UIStyle.UnsetMeasurementValue;
-            y = UIStyle.UnsetMeasurementValue;
-            width = UIStyle.UnsetMeasurementValue;
-            height = UIStyle.UnsetMeasurementValue;
+        
+        public LayoutRect(UIMeasurement x, UIMeasurement y, UIMeasurement width, UIMeasurement height) {
+            this.x = x;
+            this.y = y;
+            this.width = width;
+            this.height = height;
         }
         
-        public UILayoutRect Clone() {
-            UILayoutRect clone = new UILayoutRect();
-            clone.x = x;
-            clone.y = y;
-            clone.width = width;
-            clone.height = height;
-            return clone;
-        }
-
     }
 
 }

@@ -28,10 +28,9 @@ namespace Src.Systems {
 
         public void OnElementCreated(UIElementCreationData data) {
             
-            // todo handle merging style bindings w/ non style bindings, probably in the compile step
+            if (data.bindings.Length == 0) return;
             
-           
-            bindingSkipTree.AddItem(new TemplateBinding(data.element, bindings, data.context));
+            bindingSkipTree.AddItem(new TemplateBinding(data.element, data.bindings, data.context));
             
         }
 

@@ -1,19 +1,23 @@
 <?xml version="1.0" encoding="utf-8"?>
 <UITemplate>
-    
-    <Using key="LayoutDirection" as="Constants.LayoutDirection"/>
-    
-    <Contents>
 
-        <Group x-name="my name" style.rectWidth="75" style.backgroundColor="{rgb(128, 128, 128)}">
-            <!--Hello World!-->
-         
-            <!--More Text!-->
-        </Group>
-        <!--<Group style.rectWidth="50" style.shrinkFactor="1" style.rectHeight="100" style.backgroundColor="{rgb(255, 255, 0)}"/>-->
-        <Group x-name="child 0" style.growthFactor="2" style.rectWidth="50" style.rectHeight="100" style.backgroundColor="{rgb(0, 255, 0)}"/>
-        <Group x-name="child 1" style.growthFactor="2" style.maxWidth="200" style.rectWidth="50" style.rectHeight="100" style.backgroundColor="{rgb(0, 0, 255)}"/>
-        <Group x-name="child 2" style.rectWidth="50" style.minWidth="200" style.rectHeight="100" style.backgroundColor="{rgb(255, 0, 0)}"/>
+    <Contents acceptStyles="true" acceptOnlyStyles="['padding', 'background', 'color']">
+
+            
+            <Group x-name="my name" style.mainAxisAlignment="Center" style.padding="{rect(20)}" style.rectWidth="175"
+                   style.backgroundColor="{rgb(128, 128, 128)}">
+
+                Hello World!
+
+            </Group>
+
+            <Group x-name="child 0" style.growthFactor="0" style.rectWidth="100"
+                   style.backgroundColor="{rgb(0, 255, 0)}"/>
+            <Group x-name="child 1" style.growthFactor="0" style.rectWidth="250"
+                   style.backgroundColor="{rgb(0, 0, 255)}"/>
+
+            <Group x-name="child 2" style.rectWidth="50" style.rectHeight="100"
+                   style.backgroundColor="{rgb(255, 0, 0)}"/>
     </Contents>
 
 </UITemplate>

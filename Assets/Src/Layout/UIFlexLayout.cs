@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using Rendering;
 using UnityEngine;
 using UnityEngine.UI;
@@ -8,7 +9,6 @@ namespace Src.Layout {
 
     public class FlexLayout : UILayout {
 
-        private Rect contentRect;
         private int itemCount;
         private FlexItemAxis[] widthItems;
         private FlexItemAxis[] heightItems;
@@ -27,19 +27,17 @@ namespace Src.Layout {
                 Array.Resize(ref heightItems, data.children.Count * 2);
             }
 
-            float contentStartX = size.x + data.ContentStartOffsetX;
-            float contentStartY = size.y + data.ContentStartOffsetY;
-            float contentEndX = size.xMax - data.ContentEndOffsetX;
-            float contentEndY = size.yMax - data.ContentEndOffsetY;
+            float contentStartX = data.ContentStartOffsetX;
+            float contentStartY = data.ContentStartOffsetY;
+            float contentEndX = size.xMax - size.x - data.ContentEndOffsetX;
+            float contentEndY = size.yMax - size.y - data.ContentEndOffsetY;
             float contentAreaWidth = contentEndX - contentStartX;
             float contentAreaHeight = contentEndY - contentStartY;
 
-            contentRect = new Rect(contentStartX, contentStartY, contentAreaWidth, contentAreaHeight);
-
             List<LayoutData> children = data.children;
 
-            float remainingWidth = contentRect.width;
-            float remainingHeight = contentRect.height;
+            float remainingWidth = contentAreaWidth;
+            float remainingHeight = contentAreaHeight;
 
             itemCount = 0;
 
@@ -50,22 +48,22 @@ namespace Src.Layout {
                 FlexItemAxis widthItem = new FlexItemAxis();
                 FlexItemAxis heightItem = new FlexItemAxis();
 
-                widthItem.axisStart = 0;
+                widthItem.axisStart = contentStartX;
                 widthItem.preferredSize =
-                    child.GetPreferredWidth(data.rect.width.unit, contentRect.width, viewport.width);
-                widthItem.minSize = child.GetMinWidth(data.rect.width.unit, contentRect.width, viewport.width);
-                widthItem.maxSize = child.GetMaxWidth(data.rect.width.unit, contentRect.width, viewport.width);
-                widthItem.outputSize = widthItem.MinDefined ? widthItem.minSize : widthItem.preferredSize;
+                    child.GetPreferredWidth(data.rect.width.unit, contentAreaWidth, viewport.width);
+                widthItem.minSize = child.GetMinWidth(data.rect.width.unit, contentAreaWidth, viewport.width);
+                widthItem.maxSize = child.GetMaxWidth(data.rect.width.unit, contentAreaWidth, viewport.width);
+                widthItem.outputSize = widthItem.MinDefined && widthItem.preferredSize < widthItem.minSize ? widthItem.minSize : widthItem.preferredSize;
 
                 widthItem.growthFactor = child.constraints.growthFactor;
                 widthItem.shrinkFactor = child.constraints.shrinkFactor;
 
-                heightItem.axisStart = 0;
+                heightItem.axisStart = contentStartY;
                 heightItem.preferredSize =
-                    child.GetPreferredHeight(data.rect.height.unit, contentRect.height, viewport.height);
-                heightItem.minSize = child.GetMinHeight(data.rect.height.unit, contentRect.height, viewport.height);
-                heightItem.maxSize = child.GetMaxHeight(data.rect.height.unit, contentRect.height, viewport.height);
-                heightItem.outputSize = heightItem.preferredSize;
+                    child.GetPreferredHeight(data.rect.height.unit, contentAreaHeight, viewport.height);
+                heightItem.minSize = child.GetMinHeight(data.rect.height.unit, contentAreaHeight, viewport.height);
+                heightItem.maxSize = child.GetMaxHeight(data.rect.height.unit, contentAreaHeight, viewport.height);
+                heightItem.outputSize = heightItem.MinDefined && heightItem.preferredSize < heightItem.minSize ? heightItem.minSize : heightItem.preferredSize;
 
                 heightItem.growthFactor = child.constraints.growthFactor;
                 heightItem.shrinkFactor = child.constraints.shrinkFactor;
@@ -73,33 +71,35 @@ namespace Src.Layout {
                 widthItems[itemCount] = widthItem;
                 heightItems[itemCount] = heightItem;
 
-                remainingHeight -= heightItem.preferredSize;
-                remainingWidth -= widthItem.preferredSize;
+                remainingHeight -= heightItem.outputSize;
+                remainingWidth -= widthItem.outputSize;
 
                 itemCount++;
             }
 
             if (data.parameters.direction == LayoutDirection.Row) {
+
                 if (remainingWidth > 0) {
-                    GrowAxis(widthItems, itemCount, remainingWidth);
+                    remainingWidth = GrowAxis(widthItems, itemCount, remainingWidth);
                 }
                 else if (remainingWidth < 0) {
                     ShrinkAxis(widthItems, itemCount, remainingWidth);
                 }
 
-                AlignMainAxis(widthItems, itemCount, data.parameters.mainAxisAlignment);
-                AlignCrossAxis(heightItems, itemCount, data.parameters.crossAxisAlignment, contentRect.height);
+                AlignMainAxis(widthItems, itemCount, contentStartX, remainingWidth, data.parameters.mainAxisAlignment);
+                AlignCrossAxis(heightItems, itemCount, contentStartY, data.parameters.crossAxisAlignment, contentAreaHeight);
             }
             else {
+
                 if (remainingHeight > 0) {
-                    GrowAxis(heightItems, itemCount, remainingHeight);
+                    remainingHeight = GrowAxis(heightItems, itemCount, remainingHeight);
                 }
                 else if (remainingHeight < 0) {
                     ShrinkAxis(heightItems, itemCount, remainingHeight);
                 }
 
-                AlignMainAxis(heightItems, itemCount, data.parameters.mainAxisAlignment);
-                AlignCrossAxis(widthItems, itemCount, data.parameters.crossAxisAlignment, contentRect.width);
+                AlignMainAxis(heightItems, itemCount, contentStartY, remainingHeight, data.parameters.mainAxisAlignment);
+                AlignCrossAxis(widthItems, itemCount, contentStartX, data.parameters.crossAxisAlignment, contentAreaWidth);
             }
 
             int itemTracker = 0;
@@ -119,79 +119,36 @@ namespace Src.Layout {
             }
         }
 
-        private static void AllocateToPreferredSize(FlexItemAxis[] items, int itemCount, float remainingSpace) {
-            int pieces = items.Length;
-
-            bool didAllocate = true;
-            while (didAllocate && remainingSpace > 0 && pieces > 0) {
-                didAllocate = false;
-
-                float pieceSize = remainingSpace / pieces;
-
-                for (int i = 0; i < itemCount; i++) {
-                    bool maxDefined = items[i].MaxDefined;
-                    
-                    float max = items[i].maxSize;
-                    float outputSize = items[i].outputSize;
-                    float preferred = items[i].preferredSize;
-                    float targetSize = maxDefined && max < preferred ? max : preferred;
-
-                    if ((int) outputSize == (int) targetSize) {
-                        continue;
-                    }
-
-                    didAllocate = true;
-                    float start = outputSize;
-                    float growSize = pieceSize;
-                    float totalGrowth = start + growSize;
-                    float output = targetSize < totalGrowth ? targetSize : totalGrowth;
-
-                    remainingSpace -= output - start;
-
-                    items[i].outputSize = output;
-
-                    if ((int) output == (int) targetSize) {
-                        pieces--;
-                    }
-                }
-            }
-        }
-
-        private static void GrowAxis(FlexItemAxis[] items, int itemCount, float remainingSpace) {
+        private static float GrowAxis(FlexItemAxis[] items, int itemCount, float remainingSpace) {
             int pieces = 0;
-            int growBonus = 0;
+
             for (int i = 0; i < itemCount; i++) {
                 pieces += items[i].growthFactor;
             }
 
-            if (pieces == 0) {
-                growBonus = 1;
-                pieces = itemCount;
-            }
+            bool allocate = pieces > 0;
 
-            bool didAllocate = true;
-            while (didAllocate && (int) remainingSpace > 0) {
-                didAllocate = false;
+            while (allocate && (int) remainingSpace > 0 && pieces > 0) {
+                allocate = false;
 
-                float pieceSize = SafeDivide(remainingSpace, pieces);
+                float pieceSize = remainingSpace / pieces;
 
                 for (int i = 0; i < itemCount; i++) {
                     float max = items[i].maxSize;
                     float output = items[i].outputSize;
                     bool maxDefined = items[i].MaxDefined;
-                    int growthFactor = items[i].growthFactor + growBonus;
+                    int growthFactor = items[i].growthFactor;
 
                     if (growthFactor == 0) {
                         continue;
                     }
 
                     if ((maxDefined && (int) output == (int) max)) {
-                        pieces -= growthFactor;
                         continue;
                     }
 
-                    didAllocate = true;
-                    float start = items[i].outputSize;
+                    allocate = true;
+                    float start = output;
                     float growSize = growthFactor * pieceSize;
                     float totalGrowth = start + growSize;
                     output = (maxDefined && totalGrowth > max) ? max : totalGrowth;
@@ -201,9 +158,9 @@ namespace Src.Layout {
                     items[i].outputSize = output;
                 }
             }
+            return remainingSpace;
         }
 
-        // needs preferred, min, shrinkFactor
         private static void ShrinkAxis(FlexItemAxis[] items, int itemCount, float overflow) {
             int pieces = 0;
 
@@ -211,88 +168,91 @@ namespace Src.Layout {
                 pieces += items[i].shrinkFactor;
             }
 
-            bool didAllocate = pieces > 0;
-
             overflow *= -1;
 
-            while (didAllocate && (int) overflow > 0) {
-                didAllocate = false;
+            bool allocate = pieces > 0;
+            while (allocate && (int) overflow > 0) {
+                allocate = false;
 
-                float pieceSize = SafeDivide(overflow, pieces);
+                float pieceSize = overflow / pieces;
 
                 for (int i = 0; i < itemCount; i++) {
                     float min = items[i].minSize;
-                    float size = items[i].outputSize;
+                    float output = items[i].outputSize;
+                    bool minDefined = items[i].MinDefined;
                     int shrinkFactor = items[i].shrinkFactor;
 
-                    if (shrinkFactor == 0 || min != UIStyle.UnsetFloatThreshold && size == min) {
+                    if (shrinkFactor == 0) {
                         continue;
                     }
 
-                    didAllocate = true;
+                    if ((minDefined && (int) output == (int) min) || output == 0f) {
+                        continue;
+                    }
+
+                    allocate = true;
+                    float start = output;
                     float shrinkSize = shrinkFactor * pieceSize;
-                    float totalShrink = size - shrinkSize;
-                    float output = totalShrink < min ? min : totalShrink;
-                    overflow -= output - size;
+                    float totalShrink = output - shrinkSize;
+                    output = (minDefined && totalShrink < min) ? min : totalShrink;
+                    output = output < 0 ? 0 : output;
+                    overflow += output - start;
 
                     items[i].outputSize = output;
                 }
             }
         }
 
-        // todo I don't think this needs to be specific per axis
-        private static void AlignMainAxis(FlexItemAxis[] items, int itemCount, MainAxisAlignment mainAxisAlignment) {
-            float gutterSize = 0;
-            int segmentCount = 0;
+        private static void AlignMainAxis(FlexItemAxis[] items, int itemCount, float axisStart, float space, MainAxisAlignment mainAxisAlignment) {
             float offset = 0;
+            float spacerSize = 0;
+
+            if (itemCount == 0) return;
 
             switch (mainAxisAlignment) {
                 case MainAxisAlignment.Unset:
                 case MainAxisAlignment.Start:
                 case MainAxisAlignment.Default:
-                    gutterSize = 0;
-                    segmentCount = 0;
                     break;
                 case MainAxisAlignment.Center:
-                    gutterSize = 0;
-                    segmentCount = 0;
-                    offset = gutterSize * 0.5f;
+                    offset = space * 0.5f;
                     break;
                 case MainAxisAlignment.End:
-                    gutterSize = 0f;
-                    segmentCount = 0;
-                    offset = 0;
+                    offset = space;
                     break;
                 case MainAxisAlignment.SpaceBetween: {
-                    gutterSize = 0;
-                    segmentCount = itemCount - 1;
+                    if (itemCount == 1) {
+                        offset = space * 0.5f;
+                        break;
+                    }
+                    spacerSize = space / (itemCount - 1);
                     offset = 0;
                     break;
                 }
                 case MainAxisAlignment.SpaceAround: {
-                    gutterSize = 0;
-                    segmentCount = itemCount;
-                    offset = (gutterSize / segmentCount * 0.5f);
+                    if (itemCount == 1) {
+                        offset = space * 0.5f;
+                        break;
+                    }
+                    spacerSize = (space / itemCount);
+                    offset = spacerSize * 0.5f;
                     break;
                 }
                 default:
                     throw new ArgumentOutOfRangeException(nameof(mainAxisAlignment), mainAxisAlignment, null);
             }
 
-            float spacerSize = SafeDivide(gutterSize, segmentCount);
-
             for (int i = 0; i < itemCount; i++) {
-                items[i].axisStart = offset;
+                items[i].axisStart = axisStart + offset;
                 offset += items[i].outputSize + spacerSize;
             }
         }
 
-        private static void AlignCrossAxis(FlexItemAxis[] items, int itemCount, CrossAxisAlignment crossAxisAlignment,
+        private static void AlignCrossAxis(FlexItemAxis[] items, int itemCount, float axisStart, CrossAxisAlignment crossAxisAlignment,
             float contentSize) {
             // todo -- respect individual align-cross-axis-self settings on children
 
             for (int i = 0; i < itemCount; i++) {
-                items[i].outputSize = items[i].preferredSize;
                 switch (crossAxisAlignment) {
                     case CrossAxisAlignment.Center:
                         items[i].axisStart = (contentSize * 0.5f) - (items[i].outputSize * 0.5f);
@@ -302,26 +262,23 @@ namespace Src.Layout {
                         items[i].outputSize = (contentSize - items[i].outputSize);
                         break;
 
-                    case CrossAxisAlignment.Stretch:
-                        items[i].axisStart = 0;
-                        items[i].outputSize = contentSize;
-                        break;
-                    case CrossAxisAlignment.Unset:
-                    case CrossAxisAlignment.Default:
                     case CrossAxisAlignment.Start:
                         items[i].axisStart = 0;
                         break;
+                    
+                    case CrossAxisAlignment.Unset:
+                    case CrossAxisAlignment.Default:
+                    case CrossAxisAlignment.Stretch:
                     default:
+                        items[i].outputSize = contentSize;
                         items[i].axisStart = 0;
                         break;
                 }
+                items[i].axisStart += axisStart;
             }
         }
 
-        private static float SafeDivide(float numerator, float denominator) {
-            return denominator == 0 ? 0 : numerator / denominator;
-        }
-
+        [DebuggerDisplay("{outputSize}")]
         private struct FlexItemAxis {
 
             public float axisStart;

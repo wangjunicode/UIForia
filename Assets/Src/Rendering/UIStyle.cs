@@ -100,8 +100,8 @@ namespace Rendering {
             rect = new LayoutRect() {
                 x = new UIMeasurement(),
                 y = new UIMeasurement(),
-                width = UIMeasurement.Parent100,
-                height = UIMeasurement.Parent100
+                width = UIMeasurement.Content100,
+                height = UIMeasurement.Content100
             },
             layoutConstraints = new LayoutConstraints() {
                 minWidth = UnsetFloatValue,

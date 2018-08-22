@@ -90,15 +90,14 @@ namespace Src.Systems {
 
         public void OnElementCreated(UIElementCreationData elementData) {
             // todo -- if instance is layout-able
-            // todo -- temporary
-            Debug.Log("Layout: " + elementData.element.id);
+
             if ((elementData.element.flags & UIElementFlags.RequiresLayout) == 0) {
                 return;
             }
 
             if ((elementData.element.flags & UIElementFlags.TextElement) != 0) {
                 UITextElement textElement = (UITextElement) elementData.element;
-                textElement.onSizeChanged += HandleTextSizeChange;
+                textElement.onSizeChanged += HandleTextSizeChanged;
             }
 
             LayoutData data = new LayoutData(elementData.element);
@@ -124,18 +123,10 @@ namespace Src.Systems {
             layoutTree.TraversePreOrderWithCallback(output, SetupLayoutPass);
 
             LayoutData[] roots = layoutTree.GetRootItems();
-            // todo -- there needs to be pseudo root in the layout tree in order to handle layout of root level things
-
-//            LayoutData pseudoRoot = new LayoutData(null);
-//            pseudoRoot.parameters = UIStyle.Default.layoutParameters;
-//            
-//            pseudoRoot.rect.width = viewport.width;
-//            pseudoRoot.rect.height = viewport.height;
-//            pseudoRoot.constraints.minWidth = viewport.width;
-//            pseudoRoot.constraints.minHeight = viewport.height;
-//
-//            pseudoRoot.children.AddRange(roots);
-
+            
+            // temp
+            roots[0].parameters.mainAxisAlignment = MainAxisAlignment.SpaceBetween;
+            
             layoutStack.Push(new LayoutDataSet(roots[0], viewport));
 
             int retnCount = 0;
@@ -198,12 +189,17 @@ namespace Src.Systems {
                 layoutTree.RemoveHierarchy(data);
                 if ((data.element.flags & UIElementFlags.TextElement) != 0) {
                     UITextElement textElement = (UITextElement) data.element;
-                    textElement.onSizeChanged -= HandleTextSizeChange;
+                    textElement.onSizeChanged -= HandleTextSizeChanged;
                 }
             }
         }
 
-        private void HandleTextSizeChange(UIElement element, Vector2 size) { }   
+        private void HandleTextSizeChanged(UIElement element, Vector2 size) {
+            LayoutData layoutData;
+            if (layoutDataMap.TryGetValue(element.id, out layoutData)) {
+                layoutData.rect = new LayoutRect(layoutData.rect.x, layoutData.rect.y, size.x, size.y);
+            }
+        }
 
         private void SetupLayoutPass(LayoutResult[] layoutResults, LayoutData data) {
             data.children.Clear();

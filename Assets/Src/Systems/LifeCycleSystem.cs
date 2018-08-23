@@ -42,6 +42,8 @@ namespace Src.Systems {
         public void OnUpdate() { }
 
         public void OnDestroy() { }
+        
+        public void OnInitialize() {}
 
         public void OnElementCreated(UIElementCreationData elementData) { }
 

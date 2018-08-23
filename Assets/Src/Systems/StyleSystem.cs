@@ -2,8 +2,6 @@
 using System.Collections.Generic;
 using System.Linq;
 using Rendering;
-using Src.Layout;
-using UnityEngine;
 
 namespace Src.Systems {
 
@@ -17,6 +15,8 @@ namespace Src.Systems {
 
     public delegate void LayoutChanged(int elementId, LayoutParameters layoutParameters);
 
+    public delegate void BorderRadiusChanged(int elementId, BorderRadius radius);
+    
     public class StyleSystem : ISystem, IStyleSystem {
 
         public event PaintChanged onPaintChanged;
@@ -26,7 +26,8 @@ namespace Src.Systems {
         public event ContentBoxChanged onBorderChanged;
         public event ContentBoxChanged onPaddingChanged;
         public event ConstraintChanged onConstraintChanged;
-
+        public event BorderRadiusChanged onBorderRadiusChanged;
+        
         private readonly Dictionary<int, UIStyleSet> styleMap;
 
         public StyleSystem() {
@@ -40,6 +41,8 @@ namespace Src.Systems {
         public void OnUpdate() { }
 
         public void OnDestroy() { }
+        
+        public void OnInitialize() {}
 
         public void OnElementCreated(UIElementCreationData elementData) {
             UIElement element = elementData.element;
@@ -79,7 +82,8 @@ namespace Src.Systems {
         }
 
         public IReadOnlyList<UIStyleSet> GetActiveStyles() {
-            throw new NotImplementedException();
+            // todo -- don't return for disabled elements
+            return styleMap.ToList().Select((kvp) => kvp.Value).ToList();
         }
 
         public void SetRect(int elementId, LayoutRect rect) {
@@ -98,6 +102,10 @@ namespace Src.Systems {
             onBorderChanged?.Invoke(elementId, border);
         }
 
+        public void SetBorderRadius(int elementId, BorderRadius radius) {
+            onBorderRadiusChanged?.Invoke(elementId, radius);
+        }
+        
         public void SetLayout(int elementId, LayoutParameters layoutParameters) {
             onLayoutChanged?.Invoke(elementId, layoutParameters);
         }

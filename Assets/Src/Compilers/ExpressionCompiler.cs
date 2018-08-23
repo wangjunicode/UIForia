@@ -123,8 +123,7 @@ namespace Src {
         private void ValidateParameterTypes(ParameterInfo[] parameters, Expression[] arguments) {
             for (int i = 0; i < parameters.Length; i++) {
                 if (!parameters[i].ParameterType.IsAssignableFrom(arguments[i].YieldedType)) {
-                    throw new Exception(
-                        $"Cannot use parameter of type {arguments[i].YieldedType} for parameter of type {parameters[i].ParameterType}");
+                    throw new Exception($"Cannot use parameter of type {arguments[i].YieldedType} for parameter of type {parameters[i].ParameterType}");
                 }
             }
         }
@@ -159,33 +158,27 @@ namespace Src {
             Type callType;
             switch (args.Length) {
                 case 0:
-                    callType = ReflectionUtil.CreateGenericType(typeof(MethodCallExpression_Static<>),
-                        genericArguments);
+                    callType = ReflectionUtil.CreateGenericType(typeof(MethodCallExpression_Static<>), genericArguments);
                     break;
 
                 case 1:
-                    callType = ReflectionUtil.CreateGenericType(typeof(MethodCallExpression_Static<,>),
-                        genericArguments);
+                    callType = ReflectionUtil.CreateGenericType(typeof(MethodCallExpression_Static<,>), genericArguments);
                     break;
 
                 case 2:
-                    callType = ReflectionUtil.CreateGenericType(typeof(MethodCallExpression_Static<,,>),
-                        genericArguments);
+                    callType = ReflectionUtil.CreateGenericType(typeof(MethodCallExpression_Static<,,>), genericArguments);
                     break;
 
                 case 3:
-                    callType = ReflectionUtil.CreateGenericType(typeof(MethodCallExpression_Static<,,,>),
-                        genericArguments);
+                    callType = ReflectionUtil.CreateGenericType(typeof(MethodCallExpression_Static<,,,>), genericArguments);
                     break;
 
                 case 4:
-                    callType = ReflectionUtil.CreateGenericType(typeof(MethodCallExpression_Static<,,,,>),
-                        genericArguments);
+                    callType = ReflectionUtil.CreateGenericType(typeof(MethodCallExpression_Static<,,,,>), genericArguments);
                     break;
 
                 default:
-                    throw new Exception(
-                        $"Expressions only support functions with up to 4 arguments. {methodName} is supplying {args.Length} ");
+                    throw new Exception($"Expressions only support functions with up to 4 arguments. {methodName} is supplying {args.Length} ");
             }
 
             ReflectionUtil.ObjectArray2[0] = info;
@@ -200,9 +193,11 @@ namespace Src {
             Type[] yieldedTypes = node.signatureNode.parts.Select(p => p.GetYieldedType(context)).ToArray();
             MethodInfo info = (MethodInfo) context.ResolveConstAlias(methodName, yieldedTypes);
 
+            info = info ?? ReflectionUtil.GetMethodInfo(context.rootType, methodName);
+            
             if (info == null) {
-                throw new Exception(
-                    $"Cannot find method {methodName} on type {context.rootType.Name} or any registered aliases");
+                
+                throw new Exception($"Cannot find method {methodName} on type {context.rootType.Name} or any registered aliases");
             }
 
             if (info.IsStatic) {
@@ -237,28 +232,23 @@ namespace Src {
             Type callType;
             switch (args.Length) {
                 case 0:
-                    callType = ReflectionUtil.CreateGenericType(typeof(MethodCallExpression_Instance<,>),
-                        genericArguments);
+                    callType = ReflectionUtil.CreateGenericType(typeof(MethodCallExpression_Instance<,>), genericArguments);
                     break;
 
                 case 1:
-                    callType = ReflectionUtil.CreateGenericType(typeof(MethodCallExpression_Instance<,,>),
-                        genericArguments);
+                    callType = ReflectionUtil.CreateGenericType(typeof(MethodCallExpression_Instance<,,>), genericArguments);
                     break;
 
                 case 2:
-                    callType = ReflectionUtil.CreateGenericType(typeof(MethodCallExpression_Instance<,,,>),
-                        genericArguments);
+                    callType = ReflectionUtil.CreateGenericType(typeof(MethodCallExpression_Instance<,,,>), genericArguments);
                     break;
 
                 case 3:
-                    callType = ReflectionUtil.CreateGenericType(typeof(MethodCallExpression_Instance<,,,,>),
-                        genericArguments);
+                    callType = ReflectionUtil.CreateGenericType(typeof(MethodCallExpression_Instance<,,,,>), genericArguments);
                     break;
 
                 case 4:
-                    callType = ReflectionUtil.CreateGenericType(typeof(MethodCallExpression_Instance<,,,,,>),
-                        genericArguments);
+                    callType = ReflectionUtil.CreateGenericType(typeof(MethodCallExpression_Instance<,,,,,>), genericArguments);
                     break;
 
                 default:
@@ -289,35 +279,12 @@ namespace Src {
             if (constantAlias != null) {
                 Type aliasType = constantAlias.GetType();
 
-                if (aliasType.IsEnum) {
-                    Type openEnumType = typeof(LiteralExpression_Enum<>);
-                    ReflectionUtil.ObjectArray1[0] = constantAlias;
-                    return (Expression) ReflectionUtil.CreateGenericInstanceFromOpenType(
-                        openEnumType,
-                        aliasType,
-                        ReflectionUtil.ObjectArray1
-                    );
-                }
-
-                if (aliasType == typeof(string)) {
-                    return new LiteralExpression_String((string) constantAlias);
-                }
-
-                if (aliasType == typeof(int)) {
-                    return new LiteralExpression_Int((int) constantAlias);
-                }
-
-                if (aliasType == typeof(double)) {
-                    return new LiteralExpression_Double((double) constantAlias);
-                }
-
-                if (aliasType == typeof(float)) {
-                    return new LiteralExpression_Float((float) constantAlias);
-                }
-
-                if (aliasType == typeof(bool)) {
-                    return new LiteralExpression_Boolean((bool) constantAlias);
-                }
+                ReflectionUtil.ObjectArray1[0] = constantAlias;
+                return (Expression) ReflectionUtil.CreateGenericInstanceFromOpenType(
+                    typeof(ConstantExpression<>),
+                    aliasType,
+                    ReflectionUtil.ObjectArray1
+                );
             }
 
             Type propertyType = ReflectionUtil.GetFieldType(context.rootType, fieldName);
@@ -342,7 +309,6 @@ namespace Src {
                 case OperatorType.Plus:
 
                     if (leftType == typeof(string) || rightType == typeof(string)) {
-
                         Type openType = typeof(OperatorExpression_StringConcat<,>);
                         ReflectionUtil.TypeArray2[0] = leftType;
                         ReflectionUtil.TypeArray2[1] = rightType;
@@ -502,11 +468,11 @@ namespace Src {
             }
 
             if (node is BooleanLiteralNode) {
-                return new LiteralExpression_Boolean(((BooleanLiteralNode) node).value);
+                return new ConstantExpression<bool>(((BooleanLiteralNode) node).value);
             }
 
             if (node is StringLiteralNode) {
-                return new LiteralExpression_String(((StringLiteralNode) node).value);
+                return new ConstantExpression<string>(((StringLiteralNode) node).value);
             }
 
             return null;
@@ -514,14 +480,14 @@ namespace Src {
 
         private static Expression VisitNumericLiteralNode(NumericLiteralNode node) {
             if (node is FloatLiteralNode) {
-                return new LiteralExpression_Float(((FloatLiteralNode) node).value);
+                return new ConstantExpression<float>(((FloatLiteralNode) node).value);
             }
 
             if (node is IntLiteralNode) {
-                return new LiteralExpression_Int(((IntLiteralNode) node).value);
+                return new ConstantExpression<int>(((IntLiteralNode) node).value);
             }
 
-            return new LiteralExpression_Double(((DoubleLiteralNode) node).value);
+            return new ConstantExpression<double>(((DoubleLiteralNode) node).value);
         }
 
         private Expression VisitOperator_TernaryCondition(OperatorExpressionNode node) {

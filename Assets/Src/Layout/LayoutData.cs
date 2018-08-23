@@ -11,7 +11,7 @@ namespace Src.Layout {
     public class LayoutData : ISkipTreeTraversable {
 
         public LayoutRect rect;
-       
+
         public LayoutParameters parameters;
         public LayoutConstraints constraints;
 
@@ -19,23 +19,19 @@ namespace Src.Layout {
         public ContentBoxRect border;
         public ContentBoxRect padding;
 
+        public Vector2 textContentSize;
+        
         public LayoutData parent;
-        public readonly UIElement element; 
-        public readonly List<LayoutData> children; 
+        public readonly UIElement element;
+        public readonly List<LayoutData> children;
 
         public LayoutData(UIElement element) {
             this.element = element;
             this.children = new List<LayoutData>();
-            
-            constraints = new LayoutConstraints(
-                UIStyle.UnsetMeasurementValue,
-                UIStyle.UnsetMeasurementValue,
-                UIStyle.UnsetMeasurementValue,
-                UIStyle.UnsetMeasurementValue
-            );
-            
+
+            constraints = LayoutConstraints.Unset;
+
             rect = new LayoutRect(0, 0, UIMeasurement.Parent100, UIMeasurement.Parent100);
-            
         }
 
         public IHierarchical Element => element;
@@ -56,7 +52,7 @@ namespace Src.Layout {
 
         public float ContentStartOffsetY => margin.top + padding.top + border.top;
         public float ContentEndOffsetY => margin.bottom + padding.bottom + border.bottom;
-        
+
         public bool isInFlow => parameters.flow != LayoutFlowType.OutOfFlow;
 
         public float GetMinWidth(UIUnit parentUnit, float parentValue, float viewportValue) {
@@ -80,7 +76,7 @@ namespace Src.Layout {
                     return 0;
             }
         }
-        
+
         public float GetMaxWidth(UIUnit parentUnit, float parentValue, float viewportValue) {
             switch (constraints.maxWidth.unit) {
                 case UIUnit.Pixel:
@@ -102,7 +98,7 @@ namespace Src.Layout {
                     return 0;
             }
         }
-        
+
         public float GetMinHeight(UIUnit parentUnit, float parentValue, float viewportValue) {
             switch (constraints.minHeight.unit) {
                 case UIUnit.Pixel:
@@ -124,7 +120,7 @@ namespace Src.Layout {
                     return 0;
             }
         }
-        
+
         public float GetMaxHeight(UIUnit parentUnit, float parentValue, float viewportValue) {
             switch (constraints.maxHeight.unit) {
                 case UIUnit.Pixel:
@@ -146,25 +142,32 @@ namespace Src.Layout {
                     return 0;
             }
         }
-        
+
         public float GetPreferredWidth(UIUnit parentUnit, float parentValue, float viewportValue) {
+            float baseWidth = 0;
             switch (rect.width.unit) {
                 case UIUnit.Pixel:
-                    return rect.width.value;
-
+                    baseWidth = rect.width.value;
+                    break;
                 case UIUnit.Content:
-                    return layout.GetContentWidth(this, parentValue, viewportValue);
-
+                    if ((element.flags & UIElementFlags.TextElement) != 0) {
+                        
+                    }
+                    baseWidth = layout.GetContentWidth(this, parentValue, viewportValue);
+                    break;
                 case UIUnit.Parent:
-                    if (parentUnit == UIUnit.Content) return 0;
-                    return rect.width.value * parentValue;
-
+                    if (parentUnit == UIUnit.Content) break;
+                    baseWidth = rect.width.value * parentValue;
+                    break;
                 case UIUnit.View:
-                    return rect.width.value * viewportValue;
-
+                    baseWidth = rect.width.value * viewportValue;
+                    break;
                 default:
-                    return 0;
+                    baseWidth = 0;
+                    break;
             }
+
+            return baseWidth + padding.horizontal + margin.horizontal + border.horizontal;
         }
 
         public float GetPreferredHeight(UIUnit parentUnit, float parentValue, float viewportValue) {

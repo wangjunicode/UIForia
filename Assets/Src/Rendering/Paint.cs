@@ -1,3 +1,4 @@
+using System.Diagnostics;
 using Src;
 using UnityEngine;
 
@@ -5,29 +6,28 @@ namespace Rendering {
 
     public struct Paint {
 
-        public  Color backgroundColor;
-        public  Color borderColor;
-        public  Texture2D backgroundImage;
-        
+        public Color backgroundColor;
+        public Color borderColor;
+        public Texture2D backgroundImage;
+
         public static readonly Paint Unset = new Paint(
-            UIStyle.UnsetColorValue, 
-            UIStyle.UnsetColorValue
+            ColorUtil.UnsetColorValue,
+            ColorUtil.UnsetColorValue,
+            null,
+            BorderRadius.Unset
         );
 
-        // todo -- can compress these by merging units & accessing via property bit mask
-//        public readonly UIMeasurement borderRadiusTopLeft;
-//        public readonly UIMeasurement borderRadiusTopRight;
-//        public readonly UIMeasurement borderRadiusBottomLeft;
-//        public readonly UIMeasurement borderRadiusBottomRight;
 
         public Paint(Color backgroundColor, Color borderColor, Texture2D backgroundImage = null) {
             this.backgroundColor = backgroundColor;
             this.borderColor = borderColor;
             this.backgroundImage = backgroundImage;
-//            borderRadiusTopLeft = UIStyle.UnsetMeasurementValue; 
-//            borderRadiusTopRight = UIStyle.UnsetMeasurementValue;
-//            borderRadiusBottomLeft = UIStyle.UnsetMeasurementValue;
-//            borderRadiusBottomRight = UIStyle.UnsetMeasurementValue;
+        }
+
+        public Paint(Color backgroundColor, Color borderColor, Texture2D backgroundImage, BorderRadius borderRadius) {
+            this.backgroundColor = backgroundColor;
+            this.borderColor = borderColor;
+            this.backgroundImage = backgroundImage;
         }
 
         public override bool Equals(object obj) {
@@ -47,13 +47,15 @@ namespace Rendering {
                 return hashCode;
             }
         }
-
+        
+        [DebuggerStepThrough]
         public static bool operator ==(Paint self, Paint other) {
             return self.backgroundColor == other.backgroundColor
                    && self.backgroundImage == other.backgroundImage
                    && self.borderColor == other.borderColor;
         }
 
+        [DebuggerStepThrough]
         public static bool operator !=(Paint self, Paint other) {
             return !(self == other);
         }

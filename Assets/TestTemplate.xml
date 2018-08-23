@@ -1,23 +1,29 @@
 <?xml version="1.0" encoding="utf-8"?>
 <UITemplate>
 
-    <Contents acceptStyles="true" acceptOnlyStyles="['padding', 'background', 'color']">
+    <Contents style.backgroundColor="{rgb(255, 0, 0)}" 
+              style.borderColor="blue"
+              style.border="rect(5f)"
+              style.borderRadius="radius(0f)" 
+              style.layoutDirection="Row" 
+              style.crossAxisAlignment="Center"
+              acceptStyles="true" 
+              acceptOnlyStyles="['padding', 'background', 'color']">
 
-            
-            <Group x-name="my name" style.mainAxisAlignment="Center" style.padding="{rect(20)}" style.rectWidth="175"
-                   style.backgroundColor="{rgb(128, 128, 128)}">
+        <Group x-name="my name" style.minHeight="300" style.mainAxisAlignment="Start" style.padding="{rect(20)}" style.rectWidth="content(100)" style.backgroundColor="{rgb(128, 128, 128)}">
 
-                Hello World!
+            Hi, I followed the Michael La Voie answer from this post: http://answers.unity3d.com/questions/6585/change-gui-font-size-and-color , but I cant change font color. By default the shader of an imported font is read-only and I cant manually change the color, though here are 2 script attempts which failed:
 
-            </Group>
+            GUI.color = Color.red;
+            myStyle.font.material.color = Color.red;
 
-            <Group x-name="child 0" style.growthFactor="0" style.rectWidth="100"
-                   style.backgroundColor="{rgb(0, 255, 0)}"/>
-            <Group x-name="child 1" style.growthFactor="0" style.rectWidth="250"
-                   style.backgroundColor="{rgb(0, 0, 255)}"/>
+        </Group>
 
-            <Group x-name="child 2" style.rectWidth="50" style.rectHeight="100"
-                   style.backgroundColor="{rgb(255, 0, 0)}"/>
+        <Group x-name="child 0" style.backgroundColor="{rgb(0, 255, 0)}"/>
+        <Group x-name="child 1" style.backgroundColor="{rgb(0, 0, 255)}"/>
+        
+        <Group x-name="child 2" style.rectWidth="100" style.rectHeight="100" style.backgroundColor="{rgb(255, 0, 0)}"/>
+
     </Contents>
 
 </UITemplate>

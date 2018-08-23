@@ -12,15 +12,17 @@ public abstract class UIView {
     private UIElement root;
 
     // todo -- move to protected & interfaces
-    public readonly BindingSystem bindingSystem;
-    public readonly LifeCycleSystem lifeCycleSystem;
-    public readonly LayoutSystem layoutSystem;
-    public readonly StyleSystem styleSystem;
+    protected readonly BindingSystem bindingSystem;
+    protected readonly LifeCycleSystem lifeCycleSystem;
+    protected readonly LayoutSystem layoutSystem;
+    protected readonly StyleSystem styleSystem;
+    protected readonly ElementRegistrySystem elementSystem;
     
     private readonly Type elementType;
 
     protected UIView(Type elementType) {
         this.elementType = elementType;
+        elementSystem = new ElementRegistrySystem();
         styleSystem = new StyleSystem();
         layoutSystem = new LayoutSystem(styleSystem);
         bindingSystem = new BindingSystem();
@@ -29,7 +31,7 @@ public abstract class UIView {
 
     public UIElement Root => root;
     
-    public abstract IRenderSystem renderSystem { get; protected set; }
+    protected abstract IRenderSystem renderSystem { get; set; }
     
     public abstract void Render();
     
@@ -39,12 +41,18 @@ public abstract class UIView {
         lifeCycleSystem.OnReset();
         layoutSystem.OnReset();
         styleSystem.OnReset();
+        elementSystem.OnReset(); 
+        
         root = TemplateParser.GetParsedTemplate(elementType, true).CreateWithoutScope(this);
+        
         layoutSystem.OnInitialize();
+        renderSystem.OnInitialize();
+        
     }
 
     // todo -- make this stuff event based to make dependency graph explicit or removed
     public virtual void Register(UIElementCreationData elementData) {
+        elementSystem.OnElementCreated(elementData);
         layoutSystem.OnElementCreated(elementData);
         styleSystem.OnElementCreated(elementData);
         lifeCycleSystem.OnElementCreated(elementData);
@@ -55,6 +63,7 @@ public abstract class UIView {
     public virtual void OnCreate() {
         root = TemplateParser.GetParsedTemplate(elementType).CreateWithoutScope(this);
         layoutSystem.OnInitialize();
+        renderSystem.OnInitialize();
     }
 
     public virtual void OnDestroy() {
@@ -63,6 +72,7 @@ public abstract class UIView {
         renderSystem.OnDestroy();
         layoutSystem.OnDestroy();
         styleSystem.OnDestroy();
+        elementSystem.OnDestroy();
     }
     
     public virtual void Update() {

@@ -15,37 +15,37 @@ namespace Rendering {
 
         [PublicAPI]
         public UIMeasurement minWidth {
-            get { return FindActiveStyle((s) => s.layoutConstraints.minWidth != UIStyle.UnsetMeasurementValue).layoutConstraints.minWidth; }
+            get { return FindActiveStyle((s) => s.layoutConstraints.minWidth.IsDefined()).layoutConstraints.minWidth; }
             set { SetMinWidth(value); }
         }
 
         [PublicAPI]
         public UIMeasurement maxWidth {
-            get { return FindActiveStyle((s) => s.layoutConstraints.maxWidth != UIStyle.UnsetMeasurementValue).layoutConstraints.maxWidth; }
+            get { return FindActiveStyle((s) => s.layoutConstraints.maxWidth.IsDefined()).layoutConstraints.maxWidth; }
             set { SetMaxWidth(value); }
         }
 
         [PublicAPI]
         public UIMeasurement minHeight {
-            get { return FindActiveStyle((s) => s.layoutConstraints.minHeight != UIStyle.UnsetMeasurementValue).layoutConstraints.minHeight; }
+            get { return FindActiveStyle((s) => s.layoutConstraints.minHeight.IsDefined()).layoutConstraints.minHeight; }
             set { SetMinHeight(value); }
         }
 
         [PublicAPI]
         public UIMeasurement maxHeight {
-            get { return FindActiveStyle((s) => s.layoutConstraints.maxHeight != UIStyle.UnsetMeasurementValue).layoutConstraints.maxHeight; }
+            get { return FindActiveStyle((s) => s.layoutConstraints.maxHeight.IsDefined()).layoutConstraints.maxHeight; }
             set { SetMaxHeight(value); }
         }
 
         [PublicAPI]
         public int growthFactor {
-            get { return FindActiveStyle((s) => s.layoutConstraints.growthFactor != UIStyle.UnsetIntValue).layoutConstraints.growthFactor; }
+            get { return FindActiveStyle((s) => s.layoutConstraints.growthFactor != IntUtil.UnsetValue).layoutConstraints.growthFactor; }
             set { SetGrowthFactor(value); }
         }
 
         [PublicAPI]
         public int shrinkFactor {
-            get { return FindActiveStyle((s) => s.layoutConstraints.shrinkFactor != UIStyle.UnsetIntValue).layoutConstraints.shrinkFactor; }
+            get { return FindActiveStyle((s) => s.layoutConstraints.shrinkFactor != IntUtil.UnsetValue).layoutConstraints.shrinkFactor; }
             set { SetShrinkFactor(value); }
         }
 

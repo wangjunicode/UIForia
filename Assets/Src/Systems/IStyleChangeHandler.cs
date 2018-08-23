@@ -10,6 +10,7 @@ namespace Src.Systems {
         void SetBorder(int elementId, ContentBoxRect border);
         void SetPadding(int elementId, ContentBoxRect padding);
         void SetLayout(int elementId, LayoutParameters data);
+        void SetBorderRadius(int elementId, BorderRadius radius);
         void SetConstraints(int elementId, LayoutConstraints constraints);
 
     }

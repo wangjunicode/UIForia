@@ -30,7 +30,7 @@ namespace Src {
 
             UIElement instance = (UIElement) Activator.CreateInstance(rootElementTemplate.RootType);
 
-            UIElementCreationData instanceData = new UIElementCreationData("TemplateRoot", instance, scope.context);
+            UIElementCreationData instanceData = rootElementTemplate.GetCreationData(instance, scope.context);
 
             List<UIElementCreationData> children = new List<UIElementCreationData>();
 
@@ -66,7 +66,7 @@ namespace Src {
             UIElement instance = (UIElement) Activator.CreateInstance(rootElementTemplate.RootType);
             context.rootElement = instance;
 
-            UIElementCreationData rootData = new UIElementCreationData("TemplateRoot", instance, context);
+            UIElementCreationData rootData = rootElementTemplate.GetCreationData(instance, scope.context);
 
             scope.SetParent(rootData, default(UIElementCreationData));
 

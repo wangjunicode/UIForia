@@ -8,12 +8,12 @@ namespace Src.Systems {
 
     public class GameObjectRenderSystem : IRenderSystem {
 
-        private LayoutSystem layoutSystem;
-        private RectTransform rectTransform;
+        private readonly LayoutSystem layoutSystem;
+        private readonly RectTransform rectTransform;
         private LayoutResult[] layoutResults;
 
-        private SkipTree<RenderData> renderSkipTree;
-        private Dictionary<int, RectTransform> transforms;
+        private readonly SkipTree<RenderData> renderSkipTree;
+        private readonly Dictionary<int, RectTransform> transforms;
 
         public GameObjectRenderSystem(LayoutSystem layoutSystem, RectTransform rectTransform) {
             this.layoutSystem = layoutSystem;
@@ -22,6 +22,8 @@ namespace Src.Systems {
             this.layoutResults = new LayoutResult[128];
             this.transforms = new Dictionary<int, RectTransform>();
         }
+
+        public void OnInitialize() { }
 
         public void OnElementCreated(UIElementCreationData creationData) {
             OnElementStyleChanged(creationData.element);
@@ -43,18 +45,12 @@ namespace Src.Systems {
                 transform.anchoredPosition = new Vector2(position.x, -position.y);
                 transform.sizeDelta = layoutResults[i].rect.size;
             }
-
         }
 
-        public void SetViewportRect(Rect viewport) {
-            
-        }
+        public void SetViewportRect(Rect viewport) { }
 
         public void OnReset() {
-
-            renderSkipTree.TraversePreOrderWithCallback((data => {
-                data.unityTransform = null;
-            }));
+            renderSkipTree.TraversePreOrderWithCallback((data => { data.unityTransform = null; }));
 
             foreach (var kvp in transforms) {
                 Object.Destroy(kvp.Value.gameObject);
@@ -62,7 +58,6 @@ namespace Src.Systems {
 
             renderSkipTree.Clear();
             transforms.Clear();
-
         }
 
         public void OnDestroy() {
@@ -70,17 +65,15 @@ namespace Src.Systems {
         }
 
         public void OnElementStyleChanged(UIElement element) {
-            
             // todo -- replace w/ flag check and hide style if possible
-            
-            if(element.style == null) return;
-            
+
+            if (element.style == null) return;
+
             RenderData data = renderSkipTree.GetItem(element);
 
             RenderPrimitiveType primitiveType = DeterminePrimitiveType(element);
 
             if (data == null) {
-
                 if (primitiveType == RenderPrimitiveType.None) {
                     // probably not needed but just to be save unset the flag
                     element.flags &= ~(UIElementFlags.RequiresRendering);
@@ -131,9 +124,8 @@ namespace Src.Systems {
             }
 
             CreateComponents(data);
-
         }
-        
+
         public void OnElementDestroyed(UIElement element) {
             RenderData data = renderSkipTree.GetItem(element);
 
@@ -209,10 +201,11 @@ namespace Src.Systems {
             if ((element.flags & UIElementFlags.TextElement) != 0) {
                 return RenderPrimitiveType.Text;
             }
+
             UIStyleSet styleSet = element.style;
             if (styleSet.backgroundImage == null
-                && styleSet.borderColor == UIStyle.UnsetColorValue
-                && styleSet.backgroundColor == UIStyle.UnsetColorValue) {
+                && styleSet.borderColor == ColorUtil.UnsetColorValue
+                && styleSet.backgroundColor == ColorUtil.UnsetColorValue) {
                 return RenderPrimitiveType.None;
             }
 
@@ -221,7 +214,6 @@ namespace Src.Systems {
 //            }
 
             return RenderPrimitiveType.RawImage;
-
         }
 
     }

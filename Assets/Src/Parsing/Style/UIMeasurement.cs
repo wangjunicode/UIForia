@@ -24,12 +24,16 @@ namespace Src {
             this.unit = unit;
         }
 
-        public bool isDefined => value < UIStyle.UnsetFloatThreshold;
+        public bool IsDefined() {
+            return FloatUtil.IsDefined(value);
+        }
         
         public bool isFixed => (unit & (UIUnit.Pixel | UIUnit.Parent | UIUnit.View)) != 0;
         
         public static UIMeasurement Parent100 => new UIMeasurement(1f, UIUnit.Parent);
         public static UIMeasurement Content100 => new UIMeasurement(1f, UIUnit.Content);
+        
+        public static UIMeasurement Unset => new UIMeasurement(FloatUtil.UnsetFloatValue);
 
         public float GetFixedPixelValue(float parentValue, float viewportValue) {
             switch (unit) {

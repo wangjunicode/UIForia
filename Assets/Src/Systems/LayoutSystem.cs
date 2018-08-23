@@ -125,7 +125,7 @@ namespace Src.Systems {
             LayoutData[] roots = layoutTree.GetRootItems();
             
             // temp
-            roots[0].parameters.mainAxisAlignment = MainAxisAlignment.SpaceBetween;
+//            roots[0].parameters.mainAxisAlignment = MainAxisAlignment.Start;
             
             layoutStack.Push(new LayoutDataSet(roots[0], viewport));
 

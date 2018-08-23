@@ -1,8 +1,9 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project version="4">
   <component name="ContentModelStore">
-    <e p="$USER_HOME$/Library/Caches/Rider2018.1/resharper-host/local/Transient/ReSharperHost/v12/SolutionCaches/_UIElements.-870298077.00" t="ExcludeRecursive" />
-    <e p="$PROJECT_DIR$" t="IncludeRecursive">
+    <e p="\app" t="IncludeRecursive" />
+    <e p="\c41f851" t="IncludeRecursive" />
+    <e p="C:\Seed\UIElements" t="IncludeRecursive">
       <e p="Assembly-CSharp-Editor.csproj" t="IncludeRecursive" />
       <e p="Assembly-CSharp.csproj" t="IncludeRecursive" />
       <e p="Assets" t="Include">
@@ -56,6 +57,11 @@
                 <e p="StyleBinding_BackgroundColor.cs" t="Include" />
                 <e p="StyleBinding_BackgroundImage.cs" t="Include" />
                 <e p="StyleBinding_BorderColor.cs" t="Include" />
+                <e p="StyleBinding_BorderRadius.cs" t="Include" />
+                <e p="StyleBinding_BorderRadius_BottomLeft.cs" t="Include" />
+                <e p="StyleBinding_BorderRadius_BottomRight.cs" t="Include" />
+                <e p="StyleBinding_BorderRadius_TopLeft.cs" t="Include" />
+                <e p="StyleBinding_BorderRadius_TopRight.cs" t="Include" />
               </e>
               <e p="Rect" t="Include">
                 <e p="StyleBinding_RectHeight.cs" t="Include" />
@@ -108,6 +114,7 @@
           <e p="Expressions" t="Include">
             <e p="AccessExpression_Property.cs" t="Include" />
             <e p="AccessExpression_Root.cs" t="Include" />
+            <e p="ConstantExpression.cs" t="Include" />
             <e p="Expression.cs" t="Include" />
             <e p="Expression_Cast.cs" t="Include" />
             <e p="LiteralExpression_Boolean.cs" t="Include" />
@@ -129,6 +136,10 @@
             <e p="UnaryExpression_Boolean.cs" t="Include" />
             <e p="UnaryExpression_Minus.cs" t="Include" />
             <e p="UnaryExpression_Plus.cs" t="Include" />
+          </e>
+          <e p="extensions" t="Include">
+            <e p="ColorExtensions.cs" t="Include" />
+            <e p="RectTransformExtensions.cs" t="Include" />
           </e>
           <e p="ImportDeclaration.cs" t="Include" />
           <e p="Layout" t="Include">
@@ -200,15 +211,15 @@
             <e p="XMLExtensions.cs" t="Include" />
           </e>
           <e p="PropAttribute.cs" t="Include" />
-          <e p="RectTransformExtensions.cs" t="Include" />
           <e p="ReflectionUtil.cs" t="Include" />
           <e p="Rendering" t="Include">
-            <e p="BitUtil.cs" t="Include" />
+            <e p="BorderRadius.cs" t="Include" />
             <e p="BorderStyle.cs" t="Include" />
             <e p="IRenderSystem.cs" t="Include" />
+            <e p="ISystem.cs" t="Include" />
             <e p="MouseEventType.cs" t="Include" />
             <e p="MouseHandleShape.cs" t="Include" />
-            <e p="PaintDesc.cs" t="Include" />
+            <e p="Paint.cs" t="Include" />
             <e p="ProceduralImage.cs" t="Include" />
             <e p="TextOverflow.cs" t="Include" />
             <e p="TextStyle.cs" t="Include" />
@@ -217,6 +228,7 @@
             <e p="UIStyleSet" t="Include">
               <e p="LayoutParameters.cs" t="Include" />
               <e p="StyleState.cs" t="Include" />
+              <e p="UIStyleSet.BorderRadius.cs" t="Include" />
               <e p="UIStyleSet.Constraints.cs" t="Include" />
               <e p="UIStyleSet.ContentBox.cs" t="Include" />
               <e p="UIStyleSet.cs" t="Include" />
@@ -231,12 +243,16 @@
             <e p="Visibility.cs" t="Include" />
           </e>
           <e p="Shaders" t="Include">
+            <e p="GUIRoundedRect.shader" t="Include" />
+            <e p="GUITexture.shader" t="Include" />
             <e p="ProceduralImage.shader" t="Include" />
+            <e p="UIStandardShader.shader" t="Include" />
           </e>
           <e p="SkipTree.cs" t="Include" />
           <e p="Src.asmdef" t="Include" />
           <e p="Systems" t="Include">
             <e p="BindingSystem.cs" t="Include" />
+            <e p="ElementRegistrySystem.cs" t="Include" />
             <e p="GameObjectRenderSystem.cs" t="Include" />
             <e p="IMGUIRenderData.cs" t="Include" />
             <e p="IMGUIRenderSystem.cs" t="Include" />
@@ -272,6 +288,10 @@
           <e p="UIElement.cs" t="Include" />
           <e p="UIElementFlags.cs" t="Include" />
           <e p="UIViewBehavior.cs" t="Include" />
+          <e p="Util" t="Include">
+            <e p="BitUtil.cs" t="Include" />
+            <e p="FloatUtil.cs" t="Include" />
+          </e>
         </e>
         <e p="Templates" t="Include">
           <e p="UIPanel.xml" t="Include" />
@@ -280,9 +300,9 @@
         <e p="Tests" t="Include">
           <e p="ExpressionCompilerTests.cs" t="Include" />
           <e p="ExpressionParserTests.cs" t="Include" />
-          <e p="ParsingTests.cs" t="Include" />
           <e p="ReflectionUtilTests.cs" t="Include" />
           <e p="SkipTreeTests.cs" t="Include" />
+          <e p="TemplateParsingTests.cs" t="Include" />
           <e p="Templates" t="Include">
             <e p="Parsing" t="Include">
               <e p="Temp.xml" t="Include" />
@@ -350,5 +370,8 @@
       <e p="Tests.csproj" t="IncludeRecursive" />
       <e p="UIElements.sln" t="IncludeFlat" />
     </e>
+    <e p="C:\Users\Matt\.Rider2018.2\config\extensions" t="IncludeRecursive" />
+    <e p="C:\Users\Matt\.Rider2018.2\system\extResources" t="IncludeRecursive" />
+    <e p="C:\Users\Matt\.Rider2018.2\system\resharper-host\local\Transient\ReSharperHost\v182\SolutionCaches\_UIElements.1439856042.00" t="ExcludeRecursive" />
   </component>
 </project>

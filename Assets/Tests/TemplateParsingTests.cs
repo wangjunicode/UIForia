@@ -11,25 +11,6 @@ public class TemplateParsingTests {
     }
 
     [Test]
-    public void ParseThreeSelfClosingChildren() {
-        ParsedTemplate parsedTemplate = TemplateParser.GetParsedTemplate(typeof(Spec.Test1));
-        Assert.IsNotNull(parsedTemplate);
-        Assert.AreEqual(3, parsedTemplate.childTemplates.Count);
-        Assert.AreEqual(typeof(UIPanel), ((UIElementTemplate) parsedTemplate.childTemplates[0]).RootType);
-        Assert.AreEqual(typeof(UIPanel), ((UIElementTemplate) parsedTemplate.childTemplates[1]).RootType);
-        Assert.AreEqual(typeof(UIPanel), ((UIElementTemplate) parsedTemplate.childTemplates[2]).RootType);
-    }
-
-    [Test]
-    public void ParseThreeNonSelfClosingChildren() {
-        ParsedTemplate parsedTemplate = TemplateParser.GetParsedTemplate(typeof(Spec.Test2));
-        Assert.AreEqual(3, parsedTemplate.childTemplates.Count);
-        Assert.AreEqual(typeof(UIPanel), ((UIElementTemplate) parsedTemplate.childTemplates[0]).RootType);
-        Assert.AreEqual(typeof(UIPanel), ((UIElementTemplate) parsedTemplate.childTemplates[1]).RootType);
-        Assert.AreEqual(typeof(UIPanel), ((UIElementTemplate) parsedTemplate.childTemplates[2]).RootType);
-    }
-
-    [Test]
     public void Children_ParsesCorrectly() {
         ParsedTemplate parsedTemplate = TemplateParser.ParseTemplateFromString<Spec.Test1>(@"
             <UITemplate>
@@ -206,26 +187,26 @@ public class TemplateParsingTests {
             ");
         UITextTemplate template = (UITextTemplate) parsedTemplate.childTemplates[0].childTemplates[0];
         Assert.IsNotNull(template);
-        Assert.AreEqual("text {value} is here", template.RawText);
+        Assert.AreEqual("'text {value} is here'", template.RawText);
     }
 
     [Test]
     public void Text_ParsesExpressionParts() {
         TextElementParser parser = new TextElementParser();
-        string[] output1 = parser.Parse("one expression");
+        string[] output1 = parser.Parse("'one expression'");
         Assert.AreEqual(1, output1.Length);
-        Assert.AreEqual("one expression", output1[0]);
+        Assert.AreEqual("'one expression'", output1[0]);
         
-        string[] output2 = parser.Parse("two {expressions}");
+        string[] output2 = parser.Parse("'two {expressions}'");
         Assert.AreEqual(2, output2.Length);
-        Assert.AreEqual("two ", output2[0]);
+        Assert.AreEqual("'two '", output2[0]);
         Assert.AreEqual("{expressions}", output2[1]);
         
-        string[] output3 = parser.Parse("three {expressions} here");
+        string[] output3 = parser.Parse("'three {expressions} here'");
         Assert.AreEqual(3, output3.Length);
-        Assert.AreEqual("three ", output3[0]);
+        Assert.AreEqual("'three '", output3[0]);
         Assert.AreEqual("{expressions}", output3[1]);
-        Assert.AreEqual(" here", output3[2]);
+        Assert.AreEqual("' here'", output3[2]);
     }
     
 }

@@ -29,6 +29,12 @@ namespace Src.Compilers {
         public const string BackgroundImage = "backgroundImage";
         public const string BackgroundColor = "backgroundColor";
 
+        public const string BorderRadius = "borderRadius";
+        public const string BorderRadiusTopLeft = "borderRadiusTopLeft";
+        public const string BorderRadiusTopRight = "borderRadiusTopRight";
+        public const string BorderRadiusBottomRight = "borderRadiusBottomRight";
+        public const string BorderRadiusBottomLeft = "borderRadiusBottomLeft";
+
         public const string Padding = "padding";
         public const string PaddingTop = "paddingTop";
         public const string PaddingRight = "paddingRight";
@@ -66,6 +72,11 @@ namespace Src.Compilers {
         private static readonly MethodAliasSource rect1Source;
         private static readonly MethodAliasSource rect2Source;
         private static readonly MethodAliasSource rect4Source;
+
+        private static readonly MethodAliasSource borderRadiusRect1Source;
+        private static readonly MethodAliasSource borderRadiusRect2Source;
+        private static readonly MethodAliasSource borderRadiusRect4Source;
+
         private static readonly ColorAliasSource colorSource;
         private static readonly EnumAliasSource<LayoutType> layoutTypeSource;
         private static readonly EnumAliasSource<LayoutDirection> layoutDirectionSource;
@@ -78,9 +89,15 @@ namespace Src.Compilers {
             Type type = typeof(StyleBindingCompiler);
             rgbSource = new MethodAliasSource("rgb", type.GetMethod("Rgb", ReflectionUtil.PublicStatic));
             rgbaSource = new MethodAliasSource("rgba", type.GetMethod("Rgba", ReflectionUtil.PublicStatic));
+
             rect1Source = new MethodAliasSource("rect", type.GetMethod("Rect", new[] {typeof(float)}));
             rect2Source = new MethodAliasSource("rect", type.GetMethod("Rect", new[] {typeof(float), typeof(float)}));
             rect4Source = new MethodAliasSource("rect", type.GetMethod("Rect", new[] {typeof(float), typeof(float), typeof(float), typeof(float)}));
+
+            // todo use ui measurement methods 
+            borderRadiusRect1Source = new MethodAliasSource("radius", type.GetMethod("Radius", new[] {typeof(float)}));
+            borderRadiusRect2Source = new MethodAliasSource("radius", type.GetMethod("Radius", new[] {typeof(float), typeof(float)}));
+            borderRadiusRect4Source = new MethodAliasSource("radius", type.GetMethod("Radius", new[] {typeof(float), typeof(float), typeof(float), typeof(float)}));
 
             colorSource = new ColorAliasSource();
             layoutTypeSource = new EnumAliasSource<LayoutType>();
@@ -115,8 +132,27 @@ namespace Src.Compilers {
                         Compile<Color>(value, rgbSource, rgbaSource, colorSource));
 
                 case StyleTemplateConstants.BorderColor:
-                    return new StyleBinding_BorderColor(targetState.state,
-                        Compile<Color>(value, rgbSource, rgbaSource, colorSource));
+                    return new StyleBinding_BorderColor(targetState.state, Compile<Color>(value, rgbSource, rgbaSource, colorSource));
+
+                case StyleTemplateConstants.BorderRadius:
+                    return new StyleBinding_BorderRadius(targetState.state, Compile<BorderRadius>(
+                        value, 
+                        borderRadiusRect1Source,
+                        borderRadiusRect2Source,
+                        borderRadiusRect4Source
+                    ));
+
+                case StyleTemplateConstants.BorderRadiusTopLeft:
+                    return new StyleBinding_BorderRadius_TopLeft(targetState.state, Compile<float>(value));
+
+                case StyleTemplateConstants.BorderRadiusTopRight:
+                    return new StyleBinding_BorderRadius_TopRight(targetState.state, Compile<float>(value));
+
+                case StyleTemplateConstants.BorderRadiusBottomRight:
+                    return new StyleBinding_BorderRadius_BottomRight(targetState.state, Compile<float>(value));
+
+                case StyleTemplateConstants.BorderRadiusBottomLeft:
+                    return new StyleBinding_BorderRadius_BottomLeft(targetState.state, Compile<float>(value));
 
                 // Rect
                 case StyleTemplateConstants.RectX:
@@ -154,24 +190,16 @@ namespace Src.Compilers {
                 // Layout
 
                 case StyleTemplateConstants.MainAxisAlignment:
-                    return new StyleBinding_MainAxisAlignment(
-                        targetState.state, Compile<MainAxisAlignment>(value, mainAxisAlignmentSource)
-                    );
+                    return new StyleBinding_MainAxisAlignment(targetState.state, Compile<MainAxisAlignment>(value, mainAxisAlignmentSource));
 
                 case StyleTemplateConstants.CrossAxisAlignment:
-                    return new StyleBinding_CrossAxisAlignment(
-                        targetState.state, Compile<CrossAxisAlignment>(value, crossAxisAlignmentSource)
-                    );
+                    return new StyleBinding_CrossAxisAlignment(targetState.state, Compile<CrossAxisAlignment>(value, crossAxisAlignmentSource));
 
                 case StyleTemplateConstants.LayoutDirection:
-                    return new StyleBinding_LayoutDirection(
-                        targetState.state, Compile<LayoutDirection>(value, layoutDirectionSource)
-                    );
+                    return new StyleBinding_LayoutDirection(targetState.state, Compile<LayoutDirection>(value, layoutDirectionSource));
 
                 case StyleTemplateConstants.LayoutFlow:
-                    return new StyleBinding_LayoutFlowType(
-                        targetState.state, Compile<LayoutFlowType>(value, layoutFlowSource)
-                    );
+                    return new StyleBinding_LayoutFlowType(targetState.state, Compile<LayoutFlowType>(value, layoutFlowSource));
 
                 case StyleTemplateConstants.LayoutType:
                     return new StyleBinding_LayoutType(targetState.state, Compile<LayoutType>(value, layoutTypeSource));
@@ -200,6 +228,7 @@ namespace Src.Compilers {
 
                 case StyleTemplateConstants.Border:
                     return new StyleBinding_Border(targetState.state, Compile<ContentBoxRect>(value, rect1Source, rect2Source, rect4Source));
+
                 case StyleTemplateConstants.BorderTop:
                     return new StyleBinding_BorderTop(targetState.state, Compile<float>(value));
 
@@ -282,6 +311,21 @@ namespace Src.Compilers {
         }
 
         [Pure]
+        public static UIMeasurement ContentMeasurement(float value) {
+            return new UIMeasurement(value, UIUnit.Content);    
+        }
+        
+        [Pure]
+        public static UIMeasurement ParentMeasurement(float value) {
+            return new UIMeasurement(value, UIUnit.Parent);    
+        }
+        
+        [Pure]
+        public static UIMeasurement ViewportMeasurement(float value) {
+            return new UIMeasurement(value, UIUnit.View);    
+        }
+        
+        [Pure]
         public static ContentBoxRect Rect(float top, float right, float bottom, float left) {
             return new ContentBoxRect(top, right, bottom, left);
         }
@@ -294,6 +338,21 @@ namespace Src.Compilers {
         [Pure]
         public static ContentBoxRect Rect(float value) {
             return new ContentBoxRect(value, value, value, value);
+        }
+
+        [Pure]
+        public static BorderRadius Radius(float value) {
+            return new BorderRadius(value);
+        }
+
+        [Pure]
+        public static BorderRadius Radius(float top, float bottom) {
+            return new BorderRadius(top, bottom);
+        }
+
+        [Pure]
+        public static BorderRadius Radius(float topLeft, float topRight, float bottomRight, float bottomLeft) {
+            return new BorderRadius(topLeft, topRight, bottomRight, bottomLeft);
         }
 
         [Pure]

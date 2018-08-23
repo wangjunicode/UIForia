@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using Rendering;
+using Src.Extensions;
 using UnityEngine;
 
 namespace Src.Systems {
@@ -9,28 +10,23 @@ namespace Src.Systems {
 
         private readonly IStyleSystem styleSystem;
         private readonly LayoutSystem layoutSystem;
+        private readonly IElementRegistry elementSystem;
         private readonly SkipTree<IMGUIRenderData> renderSkipTree;
-        private LayoutResult[] layoutResults;
+        private readonly Dictionary<Color, Texture2D> textureCache;
+
         private Rect viewportRect;
+        private LayoutResult[] layoutResults;
 
-        // temp
-        private readonly Dictionary<int, UIElement> elementMap;
-
-        public IMGUIRenderSystem(IStyleSystem styleSystem, LayoutSystem layoutSystem) {
+        public IMGUIRenderSystem(IElementRegistry elementSystem, IStyleSystem styleSystem, LayoutSystem layoutSystem) {
             this.styleSystem = styleSystem;
             this.layoutSystem = layoutSystem;
+            this.elementSystem = elementSystem;
 
+            this.textureCache = new Dictionary<Color, Texture2D>();
             this.renderSkipTree = new SkipTree<IMGUIRenderData>();
             this.layoutResults = new LayoutResult[128];
-            this.elementMap = new Dictionary<int, UIElement>();
         }
 
-        private Texture2D MakeSimpleTexture(Color color) {
-            Texture2D texture = new Texture2D(1, 1);
-            texture.SetPixel(0, 0, color);
-            texture.Apply();
-            return texture;
-        }
 
         public void SetViewportRect(Rect viewportRect) {
             this.viewportRect = viewportRect;
@@ -39,29 +35,55 @@ namespace Src.Systems {
         public void OnRender() {
             int count = layoutSystem.RunLayout(viewportRect, ref layoutResults);
 
-            IMGUIRenderData.s_DrawRect = viewportRect;
+            IMGUIRenderData.s_DrawRect.x = 0f;
+            IMGUIRenderData.s_DrawRect.y = 0f;
+            IMGUIRenderData.s_DrawRect.width = viewportRect.width;
+            IMGUIRenderData.s_DrawRect.height = viewportRect.height;
 
             for (int i = 0; i < count; i++) {
                 LayoutResult result = layoutResults[i];
-                UIElement element;
-                if (elementMap.TryGetValue(result.elementId, out element)) {
-                    renderSkipTree.GetItem(element).SetLocalLayoutRect(result.rect);
-                }
+                UIElement element = elementSystem.GetElement(result.elementId);
+
+                if (element == null) continue;
+
+                IMGUIRenderData renderData = renderSkipTree.GetItem(element);
+                renderData?.SetLocalLayoutRect(result.rect);
             }
 
             renderSkipTree.TraverseRecursePreOrder();
         }
 
-        public void OnInitialize() { }
+        public void OnInitialize() {
+            styleSystem.onBorderChanged += HandleBorderChanged;
+            styleSystem.onMarginChanged += HandleMarginChanged;
+            styleSystem.onPaintChanged += HandlePaintChanged;
+            styleSystem.onBorderRadiusChanged += HandleBorderRadiusChanged;
+
+            IReadOnlyList<UIStyleSet> styles = styleSystem.GetActiveStyles();
+            for (int i = 0; i < styles.Count; i++) {
+                UIElement element = elementSystem.GetElement(styles[i].elementId);
+                if (element != null) {
+                    OnElementStyleChanged(element);
+                }
+            }
+        }
 
         public void OnReset() {
             renderSkipTree.Clear();
-            elementMap.Clear();
         }
 
         public void OnUpdate() { }
 
-        public void OnDestroy() { }
+        public void OnDestroy() {
+            foreach (KeyValuePair<Color, Texture2D> kvp in textureCache) {
+                UnityEngine.Object.DestroyImmediate(kvp.Value);
+            }
+
+            styleSystem.onBorderChanged -= HandleBorderChanged;
+            styleSystem.onMarginChanged -= HandleMarginChanged;
+            styleSystem.onPaintChanged -= HandlePaintChanged;
+            styleSystem.onBorderRadiusChanged -= HandleBorderRadiusChanged;
+        }
 
         public void OnElementCreated(UIElementCreationData data) {
             if (data.element.style == null) return;
@@ -86,6 +108,7 @@ namespace Src.Systems {
             }
 
             data.SetText(text);
+           
         }
 
         public void OnElementEnabled(UIElement element) {
@@ -104,11 +127,21 @@ namespace Src.Systems {
                 textElement.onTextChanged -= OnTextChanged;
             }
 
-            elementMap.Remove(element.id);
             IMGUIRenderData data = renderSkipTree.GetItem(element);
             if (data == null) return;
             renderSkipTree.RemoveItem(data);
             data.element = null;
+        }
+
+        private Texture2D GetTexture(Color color) {
+            Texture2D texture;
+            if (textureCache.TryGetValue(color, out texture)) {
+                return texture;
+            }
+
+            texture = MakeSimpleTexture(color);
+            textureCache[color] = texture;
+            return texture;
         }
 
         public void OnElementStyleChanged(UIElement element) {
@@ -127,13 +160,9 @@ namespace Src.Systems {
 
                 element.flags |= UIElementFlags.RequiresRendering;
 
-                GUIStyle style = GUIStyleFromStyleSet(element.style);
-
-                data = new IMGUIRenderData(element, primitiveType, style);
-                data.texture = MakeSimpleTexture(element.style.backgroundColor);
+                data = CreateRenderData(element, primitiveType);
 
                 renderSkipTree.AddItem(data);
-                elementMap[element.id] = element;
                 return;
             }
 
@@ -145,19 +174,66 @@ namespace Src.Systems {
             data.primitiveType = primitiveType;
 
             if (primitiveType != RenderPrimitiveType.None) {
+                // todo -- mask goes here I think
                 return;
             }
 
             element.flags &= ~(UIElementFlags.RequiresRendering);
 
             renderSkipTree.RemoveItem(data);
-            elementMap.Remove(data.element.id);
             data.element = null;
         }
 
-        private GUIStyle GUIStyleFromStyleSet(UIStyleSet styleSet) {
-            GUIStyle retn = new GUIStyle();
-            return retn;
+        private void HandleBorderRadiusChanged(int elementId, BorderRadius radius) {
+            UIElement element = elementSystem.GetElement(elementId);
+            if (element != null) {
+                IMGUIRenderData data = renderSkipTree.GetItem(element);
+                if (data != null) {
+                    OnElementStyleChanged(element);
+                }
+            }
+        }
+
+        private void HandleBorderChanged(int elementId, ContentBoxRect borderRect) {
+            UIElement element = elementSystem.GetElement(elementId);
+            if (element != null) {
+                IMGUIRenderData data = renderSkipTree.GetItem(element);
+                if (data != null) {
+                    OnElementStyleChanged(element);
+                }
+            }
+        }
+
+        private void HandleMarginChanged(int elementId, ContentBoxRect marginRect) {
+            UIElement element = elementSystem.GetElement(elementId);
+            if (element != null) {
+                IMGUIRenderData data = renderSkipTree.GetItem(element);
+                if (data != null) {
+                    OnElementStyleChanged(element);
+                }
+            }
+        }
+
+        private void HandlePaintChanged(int elementId, Paint paint) {
+            UIElement element = elementSystem.GetElement(elementId);
+            if (element != null) {
+                IMGUIRenderData data = renderSkipTree.GetItem(element);
+                if (data != null) {
+                    OnElementStyleChanged(element);
+                }
+            }
+        }
+
+        private void HandleTextChanged(int elementId, string text) { }
+
+        private void HandleTextSizeChanged(int elementId, Vector2 size) { }
+
+        private IMGUIRenderData CreateRenderData(UIElement element, RenderPrimitiveType primitiveType) {
+            IMGUIRenderData data = new IMGUIRenderData(element, primitiveType);
+
+            ApplyStyles(data);
+
+            return data;
         }
 
         private void ApplyStyles(IMGUIRenderData data) {
@@ -167,12 +243,39 @@ namespace Src.Systems {
             switch (data.primitiveType) {
                 case RenderPrimitiveType.RawImage:
                 case RenderPrimitiveType.ProceduralImage:
-                    data.backgroundColor = style.backgroundColor;
+
+                    Color backgroundColor = style.backgroundColor;
+                    Color borderColor = style.borderColor;
+                    Texture2D backgroundImage = style.backgroundImage;
+                    BorderRadius borderRadius = style.borderRadius;
+                    ContentBoxRect borderSize = style.border;
+
+                    // todo -- ref count since we need to actually call Destroy on textures
+                    data.borderTexture = null;
+                    data.backgroundTexture = null;
+
+                    if (backgroundImage != null) {
+                        data.backgroundTexture = backgroundImage;
+                    }
+
+                    if (backgroundColor.IsDefined()) {
+                        data.backgroundTexture = GetTexture(backgroundColor);
+                    }
+
+                    if (borderRadius.IsDefined()) {
+                        data.borderRadius = borderRadius;
+                    }
+
+                    if (borderColor.IsDefined()) {
+                        data.borderTexture = GetTexture(borderColor);
+                    }
+
+                    if (borderSize.IsDefined()) {
+                        data.borderSize = borderSize;
+                    }
+
                     break;
                 case RenderPrimitiveType.Text:
-                    break;
-                case RenderPrimitiveType.Mask:
-                case RenderPrimitiveType.Mask2D:
                     break;
             }
         }
@@ -184,8 +287,8 @@ namespace Src.Systems {
 
             UIStyleSet styleSet = element.style;
             if (styleSet.backgroundImage == null
-                && styleSet.borderColor == UIStyle.UnsetColorValue
-                && styleSet.backgroundColor == UIStyle.UnsetColorValue) {
+                && styleSet.borderColor == ColorUtil.UnsetColorValue
+                && styleSet.backgroundColor == ColorUtil.UnsetColorValue) {
                 return RenderPrimitiveType.None;
             }
 
@@ -194,6 +297,13 @@ namespace Src.Systems {
 //            }
 
             return RenderPrimitiveType.RawImage;
+        }
+
+        private static Texture2D MakeSimpleTexture(Color color) {
+            Texture2D texture = new Texture2D(1, 1);
+            texture.SetPixel(0, 0, color);
+            texture.Apply();
+            return texture;
         }
 
     }

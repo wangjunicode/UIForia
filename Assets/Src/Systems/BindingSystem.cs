@@ -4,16 +4,16 @@ namespace Src.Systems {
 
     public class BindingSystem : ISystem {
 
-        // todo can probaby be optimized a bit with an id-> template binding map
+        // todo can probably be optimized a bit with an id-> template binding map
         // build template hierarchy and use that instead of true element hierarchy
 
-        private SkipTree<TemplateBinding> bindingSkipTree;
+        private readonly SkipTree<TemplateBinding> bindingSkipTree;
 //        private readonly Dictionary<int, TemplateBinding> map;
 
         public BindingSystem() {
             this.bindingSkipTree = new SkipTree<TemplateBinding>();
         }
-        
+
         public void OnReset() {
             bindingSkipTree.Clear();
         }
@@ -26,12 +26,12 @@ namespace Src.Systems {
             bindingSkipTree.Clear();
         }
 
+        public void OnInitialize() { }
+
         public void OnElementCreated(UIElementCreationData data) {
-            
             if (data.bindings.Length == 0) return;
-            
+
             bindingSkipTree.AddItem(new TemplateBinding(data.element, data.bindings, data.context));
-            
         }
 
         public void OnElementEnabled(UIElement element) {

@@ -5,6 +5,7 @@ using NUnit.Framework;
 using Src;
 using Src.Compilers;
 using Src.Compilers.AliasSource;
+using Tests;
 using UnityEngine;
 
 [TestFixture]
@@ -45,17 +46,17 @@ public class ExpressionCompilerTests {
     }
 
     [Test]
-    public void LiteralExpression_BooleanTrue() {
+    public void ConstantExpression_BoolTrue() {
         Expression expression = GetLiteralExpression("true");
-        Assert.IsInstanceOf<LiteralExpression_Boolean>(expression);
+        Assert.IsInstanceOf<ConstantExpression<bool>>(expression);
         Assert.AreEqual(true, expression.Evaluate(null));
     }
 
     [Test]
-    public void LiteralExpression_BooleanFalse() {
+    public void ConstantExpression_BoolFalse() {
         Expression expression = GetLiteralExpression("false");
 
-        Assert.IsInstanceOf<LiteralExpression_Boolean>(expression);
+        Assert.IsInstanceOf<ConstantExpression<bool>>(expression);
         Assert.AreEqual(false, expression.Evaluate(null));
     }
 
@@ -63,7 +64,7 @@ public class ExpressionCompilerTests {
     public void LiteralExpression_Numeric() {
         Expression expression = GetLiteralExpression("114.5");
 
-        Assert.IsInstanceOf<LiteralExpression_Double>(expression);
+        Assert.IsInstanceOf<ConstantExpression<double>>(expression);
         Assert.AreEqual(114.5, expression.Evaluate(null));
     }
 
@@ -71,36 +72,36 @@ public class ExpressionCompilerTests {
     public void LiteralExpression_NegativeNumeric() {
         Expression expression = GetLiteralExpression("-114.5f");
 
-        Assert.IsInstanceOf<LiteralExpression_Float>(expression);
+        Assert.IsInstanceOf<ConstantExpression<float>>(expression);
         Assert.AreEqual(-114.5f, expression.Evaluate(null));
     }
 
     [Test]
-    public void LiteralExpression_String() {
+    public void ConstantExpression_String() {
         Expression expression = GetLiteralExpression("'some string here'");
 
-        Assert.IsInstanceOf<LiteralExpression_String>(expression);
+        Assert.IsInstanceOf<ConstantExpression<string>>(expression);
         Assert.AreEqual("some string here", expression.Evaluate(null));
     }
 
     [Test]
     public void UnaryBoolean_WithLiteral_True() {
         Expression expression = GetLiteralExpression("!true");
-        Assert.IsInstanceOf<LiteralExpression_Boolean>(expression);
+        Assert.IsInstanceOf<ConstantExpression<bool>>(expression);
         Assert.AreEqual(false, expression.Evaluate(null));
     }
 
     [Test]
     public void UnaryBoolean_WithLiteral_False() {
         Expression expression = GetLiteralExpression("!false");
-        Assert.IsInstanceOf<LiteralExpression_Boolean>(expression);
+        Assert.IsInstanceOf<ConstantExpression<bool>>(expression);
         Assert.AreEqual(true, expression.Evaluate(null));
     }
 
     [Test]
     public void LiteralOperatorExpression_Add_IntInt_Fold() {
         Expression expression = GetLiteralExpression("64 + 5");
-        Assert.IsInstanceOf<LiteralExpression_Int>(expression);
+        Assert.IsInstanceOf<ConstantExpression<int>>(expression);
         Assert.AreEqual(69, expression.Evaluate(null));
         Assert.IsInstanceOf<int>(expression.Evaluate(null));
     }
@@ -108,7 +109,7 @@ public class ExpressionCompilerTests {
     [Test]
     public void LiteralOperatorExpression_Add_IntFloat_Fold() {
         Expression expression = GetLiteralExpression("64 + 5f");
-        Assert.IsInstanceOf<LiteralExpression_Float>(expression);
+        Assert.IsInstanceOf<ConstantExpression<float>>(expression);
         Assert.AreEqual(69f, expression.Evaluate(null));
         Assert.IsInstanceOf<float>(expression.Evaluate(null));
     }
@@ -116,7 +117,7 @@ public class ExpressionCompilerTests {
     [Test]
     public void LiteralOperatorExpression_Add_IntDouble_Fold() {
         Expression expression = GetLiteralExpression("64 + 5.0");
-        Assert.IsInstanceOf<LiteralExpression_Double>(expression);
+        Assert.IsInstanceOf<ConstantExpression<double>>(expression);
         Assert.AreEqual(69.0, expression.Evaluate(null));
         Assert.IsInstanceOf<double>(expression.Evaluate(null));
     }
@@ -124,7 +125,7 @@ public class ExpressionCompilerTests {
     [Test]
     public void LiteralOperatorExpression_Add_FloatInt_Fold() {
         Expression expression = GetLiteralExpression("64f + 5");
-        Assert.IsInstanceOf<LiteralExpression_Float>(expression);
+        Assert.IsInstanceOf<ConstantExpression<float>>(expression);
         Assert.AreEqual(69f, expression.Evaluate(null));
         Assert.IsInstanceOf<float>(expression.Evaluate(null));
     }
@@ -132,7 +133,7 @@ public class ExpressionCompilerTests {
     [Test]
     public void LiteralOperatorExpression_Add_FloatFloat_Fold() {
         Expression expression = GetLiteralExpression("64f + 5.8f");
-        Assert.IsInstanceOf<LiteralExpression_Float>(expression);
+        Assert.IsInstanceOf<ConstantExpression<float>>(expression);
         Assert.AreEqual(69.8f, expression.Evaluate(null));
         Assert.IsInstanceOf<float>(expression.Evaluate(null));
     }
@@ -140,7 +141,7 @@ public class ExpressionCompilerTests {
     [Test]
     public void LiteralOperatorExpression_Add_DoubleInt_Fold() {
         Expression expression = GetLiteralExpression("64.8 + 5");
-        Assert.IsInstanceOf<LiteralExpression_Double>(expression);
+        Assert.IsInstanceOf<ConstantExpression<double>>(expression);
         Assert.AreEqual(69.8, expression.Evaluate(null));
         Assert.IsInstanceOf<double>(expression.Evaluate(null));
     }
@@ -148,7 +149,7 @@ public class ExpressionCompilerTests {
     [Test]
     public void LiteralOperatorExpression_Add_DoubleFloat_Fold() {
         Expression expression = GetLiteralExpression("64.8 + 5f");
-        Assert.IsInstanceOf<LiteralExpression_Double>(expression);
+        Assert.IsInstanceOf<ConstantExpression<double>>(expression);
         Assert.AreEqual(69.8, expression.Evaluate(null));
         Assert.IsInstanceOf<double>(expression.Evaluate(null));
     }
@@ -156,7 +157,7 @@ public class ExpressionCompilerTests {
     [Test]
     public void LiteralOperatorExpression_Add_DoubleDouble_Fold() {
         Expression expression = GetLiteralExpression("64.8 + 5.0");
-        Assert.IsInstanceOf<LiteralExpression_Double>(expression);
+        Assert.IsInstanceOf<ConstantExpression<double>>(expression);
         Assert.AreEqual(69.8, expression.Evaluate(null));
         Assert.IsInstanceOf<double>(expression.Evaluate(null));
     }
@@ -382,11 +383,11 @@ public class ExpressionCompilerTests {
         MethodInfo info = typeof(Mathf).GetMethod("Max", new[] {
             typeof(float), typeof(float)
         });
-        
+
         MethodAliasSource methodSource = new MethodAliasSource("AliasedMethod", info);
-        
+
         testContextDef.AddConstAliasSource(methodSource);
-        
+
         ExpressionParser parser = new ExpressionParser("{AliasedMethod(1f, 2f)}");
         ExpressionCompiler compiler = new ExpressionCompiler(testContextDef);
         Expression expression = compiler.Compile(parser.Parse());
@@ -394,26 +395,34 @@ public class ExpressionCompilerTests {
         Assert.AreEqual(2, expression.Evaluate(ctx));
     }
 
-    [Flags]
-    public enum TestEnum {
-
-        One = 1 << 0,
-        Two = 1 << 1,
-        Three = 1 << 2
-
-    }
+  
 
 
     [Test]
     public void ResolveConstantEnumAlias() {
         TestRoot target = new TestRoot();
-        testContextDef.AddConstAliasSource(new EnumAliasSource<TestEnum>());
+        testContextDef.AddConstAliasSource(new EnumAliasSource<TestUtils.TestEnum>());
         ExpressionContext ctx = new ExpressionContext(target);
         ExpressionParser parser = new ExpressionParser("{One}");
         ExpressionCompiler compiler = new ExpressionCompiler(testContextDef);
         Expression expression = compiler.Compile(parser.Parse());
-        Assert.IsInstanceOf<LiteralExpression_Enum<TestEnum>>(expression);
-        Assert.AreEqual(TestEnum.One, expression.Evaluate(ctx));
+        Assert.IsInstanceOf<ConstantExpression<TestUtils.TestEnum>>(expression);
+        Assert.AreEqual(TestUtils.TestEnum.One, expression.Evaluate(ctx));
+    }
+
+
+
+    [Test]
+    public void ResolveNonStandardAliasType() {
+        TestRoot target = new TestRoot();
+        Color color = Color.red;
+        testContextDef.AddConstAliasSource(new TestUtils.TestAliasSource(color));
+        ExpressionContext ctx = new ExpressionContext(target);
+        ExpressionParser parser = new ExpressionParser("{NonStandard}");
+        ExpressionCompiler compiler = new ExpressionCompiler(testContextDef);
+        Expression expression = compiler.Compile(parser.Parse());
+        Assert.IsInstanceOf<ConstantExpression<Color>>(expression);
+        Assert.AreEqual(Color.red, expression.Evaluate(ctx));
     }
 
     private static Expression GetLiteralExpression(string input) {

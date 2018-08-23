@@ -13,25 +13,25 @@ namespace Rendering {
 
         [PublicAPI]
         public UIMeasurement rectX {
-            get { return FindActiveStyle((s) => s.rect.x != UIStyle.UnsetMeasurementValue).rect.x; }
+            get { return FindActiveStyle((s) => s.rect.x != UIMeasurement.Unset).rect.x; }
             set { SetRectX(value); }
         }
 
         [PublicAPI]
         public UIMeasurement rectY {
-            get { return FindActiveStyle((s) => s.rect.y != UIStyle.UnsetMeasurementValue).rect.y; }
+            get { return FindActiveStyle((s) => s.rect.y != UIMeasurement.Unset).rect.y; }
             set { SetRectY(value); }
         }
 
         [PublicAPI]
         public UIMeasurement rectWidth {
-            get { return FindActiveStyle((s) => s.rect.width != UIStyle.UnsetMeasurementValue).rect.width; }
+            get { return FindActiveStyle((s) => s.rect.width != UIMeasurement.Unset).rect.width; }
             set { SetRectWidth(value); }
         }
 
         [PublicAPI]
         public UIMeasurement rectHeight {
-            get { return FindActiveStyle((s) => s.rect.height != UIStyle.UnsetMeasurementValue).rect.height; }
+            get { return FindActiveStyle((s) => s.rect.height != UIMeasurement.Unset).rect.height; }
             set { SetRectHeight(value); }
         }
 

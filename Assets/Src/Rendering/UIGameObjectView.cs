@@ -10,7 +10,7 @@ namespace Rendering {
             renderSystem = new GameObjectRenderSystem(layoutSystem, viewTransform);
         }
 
-        public override IRenderSystem renderSystem { get; protected set; }
+        protected override IRenderSystem renderSystem { get; set; }
 
         public override void Render() {
             renderSystem.OnUpdate();

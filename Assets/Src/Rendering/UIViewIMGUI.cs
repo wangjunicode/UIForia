@@ -7,14 +7,14 @@ namespace Rendering {
     public sealed class UIViewIMGUI : UIView {
         
         public UIViewIMGUI(Type elementType) : base(elementType) {
-            renderSystem = new IMGUIRenderSystem(styleSystem, layoutSystem);
+            renderSystem = new IMGUIRenderSystem(elementSystem, styleSystem, layoutSystem);
         }
 
         public void SetViewRect(Rect viewportRect) {
             renderSystem.SetViewportRect(viewportRect);
         }
         
-        public override IRenderSystem renderSystem { get; protected set; }
+        protected override IRenderSystem renderSystem { get; set; }
         
         public override void Render() {
             renderSystem.OnRender();

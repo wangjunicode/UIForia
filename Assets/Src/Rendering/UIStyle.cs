@@ -8,16 +8,8 @@ using Src.Systems;
 namespace Rendering {
 
     [DebuggerDisplay("{localId}->{filePath}")]
-    public class UIStyle {
-
-        public const int UnsetIntValue = int.MaxValue;
-        public const float UnsetFloatThreshold = 900f;
-        public const float UnsetFloatValue = 1000f;
-        
-        
-        public static readonly Color UnsetColorValue = new Color(-1f, -1f, -1f, -1f);
-        public static readonly UIMeasurement UnsetMeasurementValue = new UIMeasurement(UnsetFloatValue, UIUnit.View);
-
+    public class UIStyle {        
+       
         private static int NextStyleId;
         
         public readonly string filePath;
@@ -28,7 +20,9 @@ namespace Rendering {
 
         public LayoutParameters layoutParameters;
         public LayoutConstraints layoutConstraints;
-
+        
+        public BorderRadius borderRadius;
+        
         public ContentBoxRect border;
         public ContentBoxRect margin;
         public ContentBoxRect padding;
@@ -56,6 +50,7 @@ namespace Rendering {
             margin = toCopy.margin;
             border = toCopy.border;
             padding = toCopy.padding;
+            borderRadius = toCopy.borderRadius;
             layoutParameters = toCopy.layoutParameters;
             layoutConstraints = toCopy.layoutConstraints;
         }
@@ -67,20 +62,13 @@ namespace Rendering {
         }
 
         private void Initialize() {
-            rect = new LayoutRect() {
-                x = UnsetMeasurementValue,
-                y = UnsetMeasurementValue,
-                width = UnsetMeasurementValue,
-                height = UnsetMeasurementValue
-            };
-            layoutConstraints = new LayoutConstraints() {
-                minWidth = UnsetFloatValue,
-                maxWidth = UnsetFloatValue,
-                minHeight = UnsetFloatValue,
-                maxHeight = UnsetFloatValue,
-                growthFactor = 0,
-                shrinkFactor = 0
-            };
+            rect = LayoutRect.Unset;
+            layoutConstraints = LayoutConstraints.Unset;
+            margin = ContentBoxRect.Unset;
+            padding = ContentBoxRect.Unset;
+            border = ContentBoxRect.Unset;
+            paint = Paint.Unset;
+            borderRadius = BorderRadius.Unset;
             layoutParameters = new LayoutParameters() {
                 type = LayoutType.Flex,
                 direction = LayoutDirection.Column,
@@ -89,14 +77,9 @@ namespace Rendering {
                 mainAxisAlignment = MainAxisAlignment.Default,
                 wrap = LayoutWrap.None
             };
-            margin = ContentBoxRect.Unset;
-            padding = ContentBoxRect.Unset;
-            border = ContentBoxRect.Unset;
-            paint = Paint.Unset;
         }
         
         public static readonly UIStyle Default = new UIStyle("Default", string.Empty) {
-            
             rect = new LayoutRect() {
                 x = new UIMeasurement(),
                 y = new UIMeasurement(),
@@ -104,10 +87,10 @@ namespace Rendering {
                 height = UIMeasurement.Content100
             },
             layoutConstraints = new LayoutConstraints() {
-                minWidth = UnsetFloatValue,
-                maxWidth = UnsetFloatValue,
-                minHeight = UnsetFloatValue,
-                maxHeight = UnsetFloatValue,
+                minWidth = UIMeasurement.Unset,
+                maxWidth = UIMeasurement.Unset,
+                minHeight = UIMeasurement.Unset,
+                maxHeight = UIMeasurement.Unset,
                 growthFactor = 0,
                 shrinkFactor = 0
             },
@@ -137,10 +120,8 @@ namespace Rendering {
                 left = 0,
                 bottom = 0
             },
-            paint = new Paint(
-                new Color(1f, 1f, 1f, 1f),
-                new Color(1f, 1f, 1f, 1f)
-            )
+            borderRadius = BorderRadius.Unset,
+            paint =  Paint.Unset
         };
 
     }

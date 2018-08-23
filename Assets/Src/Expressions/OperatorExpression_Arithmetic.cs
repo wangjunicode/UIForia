@@ -16,7 +16,7 @@ namespace Src {
         }
 
         private static bool IsNumericLiteralExpression(Expression expression) {
-            return expression is LiteralExpression_Float || expression is LiteralExpression_Double || expression is LiteralExpression_Int;
+            return expression is ConstantExpression<int> || expression is ConstantExpression<float> || expression is ConstantExpression<double>;
         }
 
         private static Expression CreateOperatorExpression(OperatorType operatorType, Expression left, Expression right) {
@@ -86,13 +86,13 @@ namespace Src {
         private static Expression CreateNumericLiteralExpression(object value) {
             Type type = value.GetType();
             if (type == typeof(int)) {
-                return new LiteralExpression_Int((int) value);
+                return new ConstantExpression<int>((int) value);
             }
             else if (type == typeof(float)) {
-                return new LiteralExpression_Float((float) value);
+                return new ConstantExpression<float>((float) value);
             }
             else if (type == typeof(double)) {
-                return new LiteralExpression_Double((double) value);
+                return new ConstantExpression<double>((double) value);
             }
 
             throw new Exception("Failed to create numeric literal from : " + value);

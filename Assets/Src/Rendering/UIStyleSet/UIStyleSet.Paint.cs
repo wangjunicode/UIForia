@@ -1,4 +1,5 @@
 using JetBrains.Annotations;
+using Src.Extensions;
 using UnityEngine;
 
 namespace Rendering {
@@ -8,34 +9,34 @@ namespace Rendering {
         [PublicAPI]
         public Paint paint {
             get { return new Paint(backgroundColor, borderColor, backgroundImage); }
-            set { SetPaint(value); }
+            set { SetPaint(value, StyleState.Normal); }
         }
 
         [PublicAPI]
         public Color backgroundColor {
-            get {
-                return FindActiveStyle((s) => s.paint.backgroundColor != UIStyle.UnsetColorValue).paint.backgroundColor;
-            }
-            set { SetBackgroundColor(value); }
+            get { return FindActiveStyle((s) => s.paint.backgroundColor.IsDefined()).paint.backgroundColor; }
+            set { SetBackgroundColor(value, StyleState.Normal); }
         }
 
         [PublicAPI]
         public Texture2D backgroundImage {
             get { return FindActiveStyle((s) => s.paint.backgroundImage != null).paint.backgroundImage; }
-            set { SetBackgroundImage(value); }
+            set { SetBackgroundImage(value, StyleState.Normal); }
         }
 
         [PublicAPI]
         public Color borderColor {
-            get { return FindActiveStyle((s) => s.paint.borderColor != UIStyle.UnsetColorValue).paint.borderColor; }
-            set { SetBackgroundColor(value); }
+            get { return FindActiveStyle((s) => s.paint.borderColor.IsDefined()).paint.borderColor; }
+            set { SetBackgroundColor(value, StyleState.Normal); }
         }
 
+
         [PublicAPI]
-        public void SetPaint(Paint newPaint, StyleState state = StyleState.Normal) {
+        public void SetPaint(Paint newPaint, StyleState state) {
             GetOrCreateStyle(state).paint = newPaint;
-            if (paint == newPaint) { }
+            changeHandler.SetPaint(elementId, paint);
         }
+
 
         [PublicAPI]
         public Color GetBackgroundColor(StyleState state) {
@@ -43,7 +44,7 @@ namespace Rendering {
         }
 
         [PublicAPI]
-        public void SetBackgroundColor(Color color, StyleState state = StyleState.Normal) {
+        public void SetBackgroundColor(Color color, StyleState state) {
             UIStyle target = GetOrCreateStyle(state);
             target.paint = new Paint(color, target.paint.borderColor, target.paint.backgroundImage);
             if (backgroundColor == color) {
@@ -52,13 +53,9 @@ namespace Rendering {
         }
 
         [PublicAPI]
-        public void SetBackgroundImage(Texture2D image, StyleState state = StyleState.Normal) {
+        public void SetBackgroundImage(Texture2D image, StyleState state) {
             UIStyle target = GetOrCreateStyle(state);
-            target.paint = new Paint(
-                target.paint.backgroundColor,
-                target.paint.borderColor,
-                image
-            );
+            target.paint = new Paint(target.paint.backgroundColor, target.paint.borderColor, image);
 
             if (backgroundImage == image) {
                 changeHandler.SetPaint(elementId, paint);
@@ -71,13 +68,9 @@ namespace Rendering {
         }
 
         [PublicAPI]
-        public void SetBorderColor(Color color, StyleState state = StyleState.Normal) {
+        public void SetBorderColor(Color color, StyleState state) {
             UIStyle target = GetOrCreateStyle(state);
-            target.paint = new Paint(
-                target.paint.backgroundColor,
-                color,
-                target.paint.backgroundImage
-            );
+            target.paint = new Paint(target.paint.backgroundColor, color, target.paint.backgroundImage);
             if (borderColor == color) {
                 changeHandler.SetPaint(elementId, paint);
             }

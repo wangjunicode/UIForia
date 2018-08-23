@@ -607,4 +607,9 @@ public static class ReflectionUtil {
         return Expression.Lambda<Func<TObject, TProperty>>(propertyGetterExpression, paramExpression).Compile();
     }
 
+    // todo -- need some parameter matching at least
+    public static MethodInfo GetMethodInfo(Type type, string methodName) {
+        return type.GetMethod(methodName);
+    }
+
 }

@@ -1,6 +1,6 @@
 ﻿using System.Diagnostics;
 using Rendering;
-using Src;
+using UnityEngine;
 
 [DebuggerDisplay("{top}, {right}, {bottom}, {left}")]
 public struct ContentBoxRect {
@@ -9,6 +9,8 @@ public struct ContentBoxRect {
     public float right;
     public float bottom;
     public float left;
+
+    public static readonly ContentBoxRect Unset = new ContentBoxRect(FloatUtil.UnsetFloatValue);
 
     public ContentBoxRect(float value) {
         this.top = value;
@@ -27,7 +29,13 @@ public struct ContentBoxRect {
     public float horizontal => right + left;
     public float vertical => top + bottom;
 
-    public static readonly ContentBoxRect Unset = new ContentBoxRect(UIStyle.UnsetFloatThreshold);
+    [DebuggerStepThrough]
+    public bool IsDefined() {
+        return FloatUtil.IsDefined(top)
+               && FloatUtil.IsDefined(right)
+               && FloatUtil.IsDefined(bottom)
+               && FloatUtil.IsDefined(left);
+    }
 
     public bool Equals(ContentBoxRect other) {
         return top == other.top
@@ -41,16 +49,7 @@ public struct ContentBoxRect {
         return obj is ContentBoxRect && Equals((ContentBoxRect) obj);
     }
 
-    public override int GetHashCode() {
-        unchecked {
-            int hashCode = top.GetHashCode();
-            hashCode = (hashCode * 397) ^ right.GetHashCode();
-            hashCode = (hashCode * 397) ^ bottom.GetHashCode();
-            hashCode = (hashCode * 397) ^ left.GetHashCode();
-            return hashCode;
-        }
-    }
-
+    [DebuggerStepThrough]
     public static bool operator ==(ContentBoxRect self, ContentBoxRect other) {
         return self.top == other.top
                && self.left == other.left
@@ -58,8 +57,19 @@ public struct ContentBoxRect {
                && self.bottom == other.bottom;
     }
 
+    [DebuggerStepThrough]
     public static bool operator !=(ContentBoxRect self, ContentBoxRect other) {
         return !(self == other);
+    }
+
+    [DebuggerStepThrough]
+    public static implicit operator Vector4(ContentBoxRect rect) {
+        return new Vector4(
+            FloatUtil.IsDefined(rect.top) ? rect.top : 0,
+            FloatUtil.IsDefined(rect.right) ? rect.right : 0,
+            FloatUtil.IsDefined(rect.bottom) ? rect.bottom : 0,
+            FloatUtil.IsDefined(rect.left) ? rect.left : 0
+        );
     }
 
 }

@@ -117,8 +117,9 @@ namespace Src {
 
 
             List<UITemplate> children = ParseNodes(contentElement.Nodes());
+            List<AttributeDefinition> attributes = ParseAttributes(contentElement.Attributes());
 
-            UIElementTemplate rootTemplate = new UIElementTemplate(type.rawType, children);
+            UIElementTemplate rootTemplate = new UIElementTemplate(type.rawType, children, attributes);
             
             ParsedTemplate output = new ParsedTemplate(rootTemplate);
             output.imports = imports;

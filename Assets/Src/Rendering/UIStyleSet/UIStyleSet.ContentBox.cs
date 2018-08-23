@@ -12,25 +12,25 @@ namespace Rendering {
 
         [PublicAPI]
         public float marginLeft {
-            get { return FindActiveStyle((s) => s.margin.left != UIStyle.UnsetFloatThreshold).margin.left; }
+            get { return FindActiveStyle((s) => s.margin.left != FloatUtil.UnsetFloatValue).margin.left; }
             set { SetMarginLeft(value); }
         }
 
         [PublicAPI]
         public float marginRight {
-            get { return FindActiveStyle((s) => s.margin.right != UIStyle.UnsetFloatThreshold).margin.right; }
+            get { return FindActiveStyle((s) => s.margin.right != FloatUtil.UnsetFloatValue).margin.right; }
             set { SetMarginRight(value); }
         }
 
         [PublicAPI]
         public float marginTop {
-            get { return FindActiveStyle((s) => s.margin.top != UIStyle.UnsetFloatThreshold).margin.top; }
+            get { return FindActiveStyle((s) => s.margin.top != FloatUtil.UnsetFloatValue).margin.top; }
             set { SetMarginTop(value); }
         }
 
         [PublicAPI]
         public float marginBottom {
-            get { return FindActiveStyle((s) => s.margin.bottom != UIStyle.UnsetFloatThreshold).margin.bottom; }
+            get { return FindActiveStyle((s) => s.margin.bottom != FloatUtil.UnsetFloatValue).margin.bottom; }
             set { SetMarginBottom(value); }
         }
 
@@ -105,25 +105,25 @@ namespace Rendering {
 
         [PublicAPI]
         public float paddingLeft {
-            get { return FindActiveStyle((s) => s.padding.left != UIStyle.UnsetFloatThreshold).padding.left; }
+            get { return FindActiveStyle((s) => s.padding.left != FloatUtil.UnsetFloatValue).padding.left; }
             set { SetPaddingLeft(value); }
         }
 
         [PublicAPI]
         public float paddingRight {
-            get { return FindActiveStyle((s) => s.padding.right != UIStyle.UnsetFloatThreshold).padding.right; }
+            get { return FindActiveStyle((s) => s.padding.right != FloatUtil.UnsetFloatValue).padding.right; }
             set { SetPaddingRight(value); }
         }
 
         [PublicAPI]
         public float paddingTop {
-            get { return FindActiveStyle((s) => s.padding.top != UIStyle.UnsetFloatThreshold).padding.top; }
+            get { return FindActiveStyle((s) => s.padding.top != FloatUtil.UnsetFloatValue).padding.top; }
             set { SetPaddingTop(value); }
         }
 
         [PublicAPI]
         public float paddingBottom {
-            get { return FindActiveStyle((s) => s.padding.bottom != UIStyle.UnsetFloatThreshold).padding.bottom; }
+            get { return FindActiveStyle((s) => s.padding.bottom != FloatUtil.UnsetFloatValue).padding.bottom; }
             set { SetPaddingBottom(value); }
         }
 
@@ -198,25 +198,25 @@ namespace Rendering {
 
         [PublicAPI]
         public float borderLeft {
-            get { return FindActiveStyle((s) => s.border.left != UIStyle.UnsetFloatThreshold).border.left; }
+            get { return FindActiveStyle((s) => s.border.left != FloatUtil.UnsetFloatValue).border.left; }
             set { SetBorderLeft(value); }
         }
 
         [PublicAPI]
         public float borderRight {
-            get { return FindActiveStyle((s) => s.border.right != UIStyle.UnsetFloatThreshold).border.right; }
+            get { return FindActiveStyle((s) => s.border.right != FloatUtil.UnsetFloatValue).border.right; }
             set { SetBorderRight(value); }
         }
 
         [PublicAPI]
         public float borderTop {
-            get { return FindActiveStyle((s) => s.border.top != UIStyle.UnsetFloatThreshold).border.top; }
+            get { return FindActiveStyle((s) => s.border.top != FloatUtil.UnsetFloatValue).border.top; }
             set { SetBorderTop(value); }
         }
 
         [PublicAPI]
         public float borderBottom {
-            get { return FindActiveStyle((s) => s.border.bottom != UIStyle.UnsetFloatThreshold).border.bottom; }
+            get { return FindActiveStyle((s) => s.border.bottom != FloatUtil.UnsetFloatValue).border.bottom; }
             set { SetBorderBottom(value); }
         }
 

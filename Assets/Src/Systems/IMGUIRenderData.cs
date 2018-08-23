@@ -1,38 +1,57 @@
-﻿using UnityEngine;
+﻿using Rendering;
+using UnityEditor;
+using UnityEngine;
 
 namespace Src.Systems {
 
     public class IMGUIRenderData : ISkipTreeTraversable {
 
         public Rect layoutRect;
-        public Texture2D texture;
+
+        public Texture2D borderTexture;
+        public Texture2D backgroundTexture;
+        public BorderRadius borderRadius;
+
         public UIElement element;
         public GUIContent content;
         public GUIStyle imguiStyle;
+        public ContentBoxRect borderSize;
         public Color backgroundColor;
         public IMGUIRenderData parent;
         public RenderPrimitiveType primitiveType;
+        public Material material;
+        public Vector2 textElementSize;
 
-        public IMGUIRenderData(UIElement element, RenderPrimitiveType primitiveType, GUIStyle imguiStyle) {
+        public IMGUIRenderData(UIElement element, RenderPrimitiveType primitiveType) {
             this.element = element;
             this.primitiveType = primitiveType;
             this.imguiStyle = imguiStyle ?? GUIStyle.none;
             this.content = content ?? GUIContent.none;
             this.backgroundColor = Color.white;
+            this.borderSize = ContentBoxRect.Unset;
+            this.material = AssetDatabase.LoadAssetAtPath<Material>("Assets/GUITexture.mat");
         }
-        
+
         public void SetText(string text) {
             if (content == GUIContent.none) {
                 content = new GUIContent();
             }
 
             content.text = text;
+            // todo -- need to apply styles n shit
             UITextElement textElement = (UITextElement) element;
-            textElement.SetDimensions(imguiStyle.CalcSize(content));
+            textElementSize = imguiStyle.CalcSize(content);
+            textElement.SetDimensions(textElementSize);
         }
+
+        public static int _RectShaderPropertyId = Shader.PropertyToID("_Rect");
+        public static int _BorderWidthPropertyId = Shader.PropertyToID("_BorderWidths");
+        public static int _BorderRadiusPropertyId = Shader.PropertyToID("_BorderRadiuses");
+
+        public static int _BorderColorPropertyId = Shader.PropertyToID("_BorderColor");
         
         // temp
-        public static Rect s_DrawRect;      
+        public static Rect s_DrawRect;
 
         public void SetLocalLayoutRect(Rect layoutRect) {
             this.layoutRect = layoutRect;
@@ -53,11 +72,51 @@ namespace Src.Systems {
             switch (primitiveType) {
                 case RenderPrimitiveType.RawImage:
                 case RenderPrimitiveType.ProceduralImage:
-                    GUI.DrawTexture(s_DrawRect, texture, ScaleMode.StretchToFill, false, s_DrawRect.width / s_DrawRect.height, Color.cyan, 5, 20f);
+
+
+                    if (borderTexture != null && borderSize.IsDefined()) {
+                        if (backgroundTexture != null) {
+                            Rect innerRect = new Rect(s_DrawRect);
+                            innerRect.x += borderSize.left;
+                            innerRect.y += borderSize.top;
+                            innerRect.width -= borderSize.right * 2f;
+                            innerRect.height -= borderSize.bottom * 2f;
+//                            material.SetFloat("_Radius", 0.5f);
+//                            material.SetColor("_Color", Color.red);
+//                            material.SetFloat("_Width", 100f);
+//                            material.SetFloat("_Height", 100f);
+                            //Graphics.DrawTexture(new Rect(300, 300, 300f, 300f), backgroundTexture, material);
+                        }
+
+//                        // only draws a border!
+                        GUI.DrawTexture(
+                            s_DrawRect,
+                            borderTexture,
+                            ScaleMode.ScaleToFit,
+                            true,
+                            s_DrawRect.width / s_DrawRect.height,
+                            Color.white,
+                            borderSize, 
+                            borderRadius
+                        );
+                    }
+                    else {
+                        if (backgroundTexture != null) {
+                            //Graphics.DrawTexture(s_DrawRect, backgroundTexture, material);
+                            GUI.DrawTexture(s_DrawRect, backgroundTexture);
+                        }
+                    }
+
                     break;
-                
+
                 case RenderPrimitiveType.Text:
-                    GUI.Label(s_DrawRect, content);
+                    GUIStyle style = new GUIStyle();
+                    style.normal.textColor = Color.white;
+                    style.fixedWidth = s_DrawRect.width;
+                    style.wordWrap = true;
+                    style.clipping = TextClipping.Clip;
+                    float size = style.CalcHeight(content, s_DrawRect.width);
+                    GUI.Label(s_DrawRect, content, style);
                     break;
             }
         }

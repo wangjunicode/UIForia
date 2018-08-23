@@ -15,6 +15,7 @@ namespace Src.Systems {
         event ContentBoxChanged onBorderChanged;
         event ContentBoxChanged onPaddingChanged;
         event ConstraintChanged onConstraintChanged;
+        event BorderRadiusChanged onBorderRadiusChanged;
 
     }
 

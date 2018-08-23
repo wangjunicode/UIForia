@@ -16,6 +16,9 @@ namespace Src.Editor {
             if (GUI.Button(new Rect(0, 0, 100, 20), "Refresh")) {
                 view.Refresh();
             }
+
+            GUI.Label(new Rect(116f, 0, 200, 20), position.size.ToString());
+
             Rect viewport = new Rect(position) {
                 x = 0,
                 y = 20,

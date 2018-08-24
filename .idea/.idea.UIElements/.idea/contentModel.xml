@@ -70,6 +70,10 @@
                 <e p="StyleBinding_RectY.cs" t="Include" />
               </e>
               <e p="StyleBinding.cs" t="Include" />
+              <e p="Text" t="Include">
+                <e p="StyleBinding_FontSize.cs" t="Include" />
+                <e p="StyleBinding_TextColor.cs" t="Include" />
+              </e>
             </e>
             <e p="TemplateBinding.cs" t="Include" />
             <e p="TextBinding_Multiple.cs" t="Include" />
@@ -82,6 +86,7 @@
               <e p="IAliasSource.cs" t="Include" />
               <e p="MethodAliasSource.cs" t="Include" />
               <e p="ReflectionAliasSource.cs" t="Include" />
+              <e p="ValueAliasSource.cs" t="Include" />
             </e>
             <e p="CastHandlers" t="Include">
               <e p="CastHandler_ColorToVector4.cs" t="Include" />
@@ -215,8 +220,12 @@
           <e p="Rendering" t="Include">
             <e p="BorderRadius.cs" t="Include" />
             <e p="BorderStyle.cs" t="Include" />
+            <e p="GOTextSizeCalculator.cs" t="Include" />
+            <e p="IMGUITextSizeCalculator.cs" t="Include" />
             <e p="IRenderSystem.cs" t="Include" />
             <e p="ISystem.cs" t="Include" />
+            <e p="ITextSizeCalculator.cs" t="Include" />
+            <e p="LayoutParameters.cs" t="Include" />
             <e p="MouseEventType.cs" t="Include" />
             <e p="MouseHandleShape.cs" t="Include" />
             <e p="Paint.cs" t="Include" />
@@ -226,7 +235,6 @@
             <e p="UIGameObjectView.cs" t="Include" />
             <e p="UIStyle.cs" t="Include" />
             <e p="UIStyleSet" t="Include">
-              <e p="LayoutParameters.cs" t="Include" />
               <e p="StyleState.cs" t="Include" />
               <e p="UIStyleSet.BorderRadius.cs" t="Include" />
               <e p="UIStyleSet.Constraints.cs" t="Include" />
@@ -236,6 +244,7 @@
               <e p="UIStyleSet.Paint.cs" t="Include" />
               <e p="UIStyleSet.Rect.cs" t="Include" />
               <e p="UIStyleSet.StyleDefinition.cs" t="Include" />
+              <e p="UIStyleSet.Text.cs" t="Include" />
               <e p="UIStyleSet.UIStyleProxy.cs" t="Include" />
             </e>
             <e p="UIView.cs" t="Include" />
@@ -253,7 +262,7 @@
           <e p="Systems" t="Include">
             <e p="BindingSystem.cs" t="Include" />
             <e p="ElementRegistrySystem.cs" t="Include" />
-            <e p="GameObjectRenderSystem.cs" t="Include" />
+            <e p="GORenderSystem.cs" t="Include" />
             <e p="IMGUIRenderData.cs" t="Include" />
             <e p="IMGUIRenderSystem.cs" t="Include" />
             <e p="IStyleChangeHandler.cs" t="Include" />

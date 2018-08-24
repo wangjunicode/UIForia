@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.Linq;
 using JetBrains.Annotations;
 
 namespace Src {
@@ -24,6 +25,7 @@ namespace Src {
 
         private readonly SkipTreeNode<T> root;
         private readonly Dictionary<IHierarchical, SkipTreeNode<T>> nodeMap;
+        private static readonly List<T> scratchList = new List<T>();
 
         public SkipTree() {
             root = new SkipTreeNode<T>(default(T));
@@ -357,6 +359,16 @@ namespace Src {
                 TraverseRecursePreorderStep(ptr);
                 ptr = ptr.nextSibling;
             }
+        }
+
+        public T[] ToArray() {
+            // todo accept array argument to avoid allocation
+            TraversePreOrderWithCallback(scratchList, (list, node) => {
+                list.Add(node);
+            });
+            T[] retn = scratchList.ToArray();
+            scratchList.Clear();
+            return retn;
         }
         
         private void TraverseRecursePreorderStep(SkipTreeNode<T> node) {

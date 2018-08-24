@@ -6,16 +6,16 @@ using Object = UnityEngine.Object;
 
 namespace Src.Systems {
 
-    public class GameObjectRenderSystem : IRenderSystem {
+    public class GORenderSystem : IRenderSystem {
 
-        private readonly LayoutSystem layoutSystem;
+        private readonly ILayoutSystem layoutSystem;
         private readonly RectTransform rectTransform;
         private LayoutResult[] layoutResults;
 
         private readonly SkipTree<RenderData> renderSkipTree;
         private readonly Dictionary<int, RectTransform> transforms;
 
-        public GameObjectRenderSystem(LayoutSystem layoutSystem, RectTransform rectTransform) {
+        public GORenderSystem(ILayoutSystem layoutSystem, RectTransform rectTransform) {
             this.layoutSystem = layoutSystem;
             this.rectTransform = rectTransform;
             this.renderSkipTree = new SkipTree<RenderData>();
@@ -214,6 +214,14 @@ namespace Src.Systems {
 //            }
 
             return RenderPrimitiveType.RawImage;
+        }
+
+        public float CalcTextWidth(string text, UIStyleSet style) {
+            throw new System.NotImplementedException();
+        }
+
+        public float CalcTextHeight(string text, UIStyleSet style, float width) {
+            throw new System.NotImplementedException();
         }
 
     }

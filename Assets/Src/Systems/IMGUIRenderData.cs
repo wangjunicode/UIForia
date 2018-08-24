@@ -12,46 +12,38 @@ namespace Src.Systems {
         public Texture2D backgroundTexture;
         public BorderRadius borderRadius;
 
-        public UIElement element;
-        public GUIContent content;
-        public GUIStyle imguiStyle;
-        public ContentBoxRect borderSize;
+        public Material material;
+        public string textContent;
+        public TextStyle textStyle;
         public Color backgroundColor;
+        public Vector2 textElementSize;
+        public ContentBoxRect borderSize;
+        
+        public UIElement element;
         public IMGUIRenderData parent;
         public RenderPrimitiveType primitiveType;
-        public Material material;
-        public Vector2 textElementSize;
-
+        
+        public static GUIContent s_GUIContent = new GUIContent();
+        public static Rect s_DrawRect;
+        
         public IMGUIRenderData(UIElement element, RenderPrimitiveType primitiveType) {
             this.element = element;
             this.primitiveType = primitiveType;
-            this.imguiStyle = imguiStyle ?? GUIStyle.none;
-            this.content = content ?? GUIContent.none;
             this.backgroundColor = Color.white;
             this.borderSize = ContentBoxRect.Unset;
             this.material = AssetDatabase.LoadAssetAtPath<Material>("Assets/GUITexture.mat");
         }
 
         public void SetText(string text) {
-            if (content == GUIContent.none) {
-                content = new GUIContent();
-            }
-
-            content.text = text;
-            // todo -- need to apply styles n shit
-            UITextElement textElement = (UITextElement) element;
-            textElementSize = imguiStyle.CalcSize(content);
-            textElement.SetDimensions(textElementSize);
+            textContent = text;
         }
 
         public static int _RectShaderPropertyId = Shader.PropertyToID("_Rect");
         public static int _BorderWidthPropertyId = Shader.PropertyToID("_BorderWidths");
-        public static int _BorderRadiusPropertyId = Shader.PropertyToID("_BorderRadiuses");
-
+        public static int _BorderRadiusPropertyId = Shader.PropertyToID("_BorderRadii");
         public static int _BorderColorPropertyId = Shader.PropertyToID("_BorderColor");
         
         // temp
-        public static Rect s_DrawRect;
 
         public void SetLocalLayoutRect(Rect layoutRect) {
             this.layoutRect = layoutRect;
@@ -72,7 +64,6 @@ namespace Src.Systems {
             switch (primitiveType) {
                 case RenderPrimitiveType.RawImage:
                 case RenderPrimitiveType.ProceduralImage:
-
 
                     if (borderTexture != null && borderSize.IsDefined()) {
                         if (backgroundTexture != null) {
@@ -102,7 +93,6 @@ namespace Src.Systems {
                     }
                     else {
                         if (backgroundTexture != null) {
-                            //Graphics.DrawTexture(s_DrawRect, backgroundTexture, material);
                             GUI.DrawTexture(s_DrawRect, backgroundTexture);
                         }
                     }
@@ -111,12 +101,9 @@ namespace Src.Systems {
 
                 case RenderPrimitiveType.Text:
                     GUIStyle style = new GUIStyle();
-                    style.normal.textColor = Color.white;
-                    style.fixedWidth = s_DrawRect.width;
+                    style.fontSize = 12;
                     style.wordWrap = true;
-                    style.clipping = TextClipping.Clip;
-                    float size = style.CalcHeight(content, s_DrawRect.width);
-                    GUI.Label(s_DrawRect, content, style);
+                    GUI.Label(s_DrawRect, textContent, style);
                     break;
             }
         }
@@ -130,6 +117,10 @@ namespace Src.Systems {
 
         public IHierarchical Element => element;
         public IHierarchical Parent => element.parent;
+
+        public void SetFontProperties(TextStyle textStyle) {
+            this.textStyle = textStyle;
+        }
 
     }
 

@@ -27,7 +27,6 @@ namespace Rendering {
         public void ExitState(StyleState type) {
             if (type == StyleState.Hover) {
                 currentState &= ~(StyleState.Hover);
-//                view.MarkForRenderStateChange(element);
             }
         }
 

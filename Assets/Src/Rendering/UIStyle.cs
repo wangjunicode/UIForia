@@ -27,6 +27,8 @@ namespace Rendering {
         public ContentBoxRect margin;
         public ContentBoxRect padding;
 
+        public TextStyle text;
+        
         public event Action<UIStyle> onChange;
 
         public UIStyle(string localId, string filePath) {
@@ -83,8 +85,8 @@ namespace Rendering {
             rect = new LayoutRect() {
                 x = new UIMeasurement(),
                 y = new UIMeasurement(),
-                width = UIMeasurement.Content100,
-                height = UIMeasurement.Content100
+                width = UIMeasurement.Auto,
+                height = UIMeasurement.Auto
             },
             layoutConstraints = new LayoutConstraints() {
                 minWidth = UIMeasurement.Unset,
@@ -121,7 +123,16 @@ namespace Rendering {
                 bottom = 0
             },
             borderRadius = BorderRadius.Unset,
-            paint =  Paint.Unset
+            paint =  Paint.Unset,
+            text = new TextStyle(
+                Color.black,
+                null, 
+                12, 
+                FontStyle.Normal,
+                TextAnchor.UpperLeft,
+                HorizontalWrapMode.Overflow,
+                VerticalWrapMode.Overflow
+            )
         };
 
     }

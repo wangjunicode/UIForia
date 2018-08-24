@@ -6,6 +6,7 @@ using Src.Compilers.AliasSource;
 using Src.Layout;
 using Src.StyleBindings;
 using Src.StyleBindings.Src.StyleBindings;
+using Src.StyleBindings.Text;
 using UnityEngine;
 
 namespace Src.Compilers {
@@ -60,6 +61,9 @@ namespace Src.Compilers {
         public const string LayoutFlow = "layoutFlow";
         public const string LayoutWrap = "layoutWrap";
 
+        public const string TextColor = "textColor";
+        public const string FontSize = "fontSize";
+
     }
 
     public class StyleBindingCompiler {
@@ -77,7 +81,13 @@ namespace Src.Compilers {
         private static readonly MethodAliasSource borderRadiusRect2Source;
         private static readonly MethodAliasSource borderRadiusRect4Source;
 
+        private static readonly MethodAliasSource parentMeasurementSource;
+        private static readonly MethodAliasSource contentMeasurementSource;
+        private static readonly MethodAliasSource viewportMeasurementSource;
+        private static readonly MethodAliasSource pixelMeasurementSource;
+
         private static readonly ColorAliasSource colorSource;
+        private static readonly ValueAliasSource<UIMeasurement> autoKeywordSource; 
         private static readonly EnumAliasSource<LayoutType> layoutTypeSource;
         private static readonly EnumAliasSource<LayoutDirection> layoutDirectionSource;
         private static readonly EnumAliasSource<LayoutFlowType> layoutFlowSource;
@@ -90,14 +100,18 @@ namespace Src.Compilers {
             rgbSource = new MethodAliasSource("rgb", type.GetMethod("Rgb", ReflectionUtil.PublicStatic));
             rgbaSource = new MethodAliasSource("rgba", type.GetMethod("Rgba", ReflectionUtil.PublicStatic));
 
-            rect1Source = new MethodAliasSource("rect", type.GetMethod("Rect", new[] {typeof(float)}));
-            rect2Source = new MethodAliasSource("rect", type.GetMethod("Rect", new[] {typeof(float), typeof(float)}));
-            rect4Source = new MethodAliasSource("rect", type.GetMethod("Rect", new[] {typeof(float), typeof(float), typeof(float), typeof(float)}));
+            rect1Source = new MethodAliasSource("rect", type.GetMethod(nameof(Rect), new[] {typeof(float)}));
+            rect2Source = new MethodAliasSource("rect", type.GetMethod(nameof(Rect), new[] {typeof(float), typeof(float)}));
+            rect4Source = new MethodAliasSource("rect", type.GetMethod(nameof(Rect), new[] {typeof(float), typeof(float), typeof(float), typeof(float)}));
 
-            // todo use ui measurement methods 
-            borderRadiusRect1Source = new MethodAliasSource("radius", type.GetMethod("Radius", new[] {typeof(float)}));
-            borderRadiusRect2Source = new MethodAliasSource("radius", type.GetMethod("Radius", new[] {typeof(float), typeof(float)}));
-            borderRadiusRect4Source = new MethodAliasSource("radius", type.GetMethod("Radius", new[] {typeof(float), typeof(float), typeof(float), typeof(float)}));
+            borderRadiusRect1Source = new MethodAliasSource("radius", type.GetMethod(nameof(Radius), new[] {typeof(float)}));
+            borderRadiusRect2Source = new MethodAliasSource("radius", type.GetMethod(nameof(Radius), new[] {typeof(float), typeof(float)}));
+            borderRadiusRect4Source = new MethodAliasSource("radius", type.GetMethod(nameof(Radius), new[] {typeof(float), typeof(float), typeof(float), typeof(float)}));
+
+            pixelMeasurementSource = new MethodAliasSource("pixels", type.GetMethod(nameof(PixelMeasurement), new[] {typeof(float)}));
+            parentMeasurementSource = new MethodAliasSource("parent", type.GetMethod(nameof(ParentMeasurement), new[] {typeof(float)}));
+            viewportMeasurementSource = new MethodAliasSource("view", type.GetMethod(nameof(ViewportMeasurement), new[] {typeof(float)}));
+            contentMeasurementSource = new MethodAliasSource("content", type.GetMethod(nameof(ContentMeasurement), new[] {typeof(float)}));
 
             colorSource = new ColorAliasSource();
             layoutTypeSource = new EnumAliasSource<LayoutType>();
@@ -106,6 +120,7 @@ namespace Src.Compilers {
             layoutWrapSource = new EnumAliasSource<LayoutWrap>();
             mainAxisAlignmentSource = new EnumAliasSource<MainAxisAlignment>();
             crossAxisAlignmentSource = new EnumAliasSource<CrossAxisAlignment>();
+            autoKeywordSource = new ValueAliasSource<UIMeasurement>("auto", UIMeasurement.Auto);
         }
 
         public StyleBinding Compile(ContextDefinition context, string key, string value) {
@@ -114,10 +129,6 @@ namespace Src.Compilers {
             if (value[0] != '{') {
                 value = '{' + value + '}';
             }
-
-            // todo -- dont' compile until we know the type of attribute we are parsing
-            // then set contexts to alias constants, get constant returns from url and rgb functions, etc
-//            context.SetAliasToConstant("");
 
             compiler = new ExpressionCompiler(context);
             Target targetState = GetTargetState(key);
@@ -136,7 +147,7 @@ namespace Src.Compilers {
 
                 case StyleTemplateConstants.BorderRadius:
                     return new StyleBinding_BorderRadius(targetState.state, Compile<BorderRadius>(
-                        value, 
+                        value,
                         borderRadiusRect1Source,
                         borderRadiusRect2Source,
                         borderRadiusRect4Source
@@ -156,30 +167,86 @@ namespace Src.Compilers {
 
                 // Rect
                 case StyleTemplateConstants.RectX:
-                    return new StyleBinding_RectX(targetState.state, Compile<UIMeasurement>(value));
+                    return new StyleBinding_RectX(targetState.state, Compile<UIMeasurement>(
+                        value,
+                        autoKeywordSource,
+                        pixelMeasurementSource,
+                        viewportMeasurementSource,
+                        parentMeasurementSource,
+                        contentMeasurementSource
+                    ));
 
                 case StyleTemplateConstants.RectY:
-                    return new StyleBinding_RectY(targetState.state, Compile<UIMeasurement>(value));
+                    return new StyleBinding_RectY(targetState.state, Compile<UIMeasurement>(
+                        value,
+                        autoKeywordSource,
+                        pixelMeasurementSource,
+                        viewportMeasurementSource,
+                        parentMeasurementSource,
+                        contentMeasurementSource
+                    ));
 
                 case StyleTemplateConstants.RectWidth:
-                    return new StyleBinding_RectWidth(targetState.state, Compile<UIMeasurement>(value));
+                    return new StyleBinding_RectWidth(targetState.state, Compile<UIMeasurement>(
+                        value,
+                        autoKeywordSource,
+                        pixelMeasurementSource,
+                        viewportMeasurementSource,
+                        parentMeasurementSource,
+                        contentMeasurementSource
+                    ));
 
                 case StyleTemplateConstants.RectHeight:
-                    return new StyleBinding_RectHeight(targetState.state, Compile<UIMeasurement>(value));
+                    return new StyleBinding_RectHeight(targetState.state, Compile<UIMeasurement>(
+                        value,
+                        autoKeywordSource,
+                        pixelMeasurementSource,
+                        viewportMeasurementSource,
+                        parentMeasurementSource,
+                        contentMeasurementSource
+                    ));
 
                 // Constraints
 
                 case StyleTemplateConstants.MinWidth:
-                    return new StyleBinding_MinWidth(targetState.state, Compile<UIMeasurement>(value));
+                    return new StyleBinding_MinWidth(targetState.state, Compile<UIMeasurement>(
+                        value,
+                        autoKeywordSource,
+                        pixelMeasurementSource,
+                        viewportMeasurementSource,
+                        parentMeasurementSource,
+                        contentMeasurementSource
+                    ));
 
                 case StyleTemplateConstants.MaxWidth:
-                    return new StyleBinding_MaxWidth(targetState.state, Compile<UIMeasurement>(value));
+                    return new StyleBinding_MaxWidth(targetState.state, Compile<UIMeasurement>(
+                        value,
+                        autoKeywordSource,
+                        pixelMeasurementSource,
+                        viewportMeasurementSource,
+                        parentMeasurementSource,
+                        contentMeasurementSource
+                    ));
 
                 case StyleTemplateConstants.MinHeight:
-                    return new StyleBinding_MinHeight(targetState.state, Compile<UIMeasurement>(value));
+                    return new StyleBinding_MinHeight(targetState.state, Compile<UIMeasurement>(
+                        value,
+                        autoKeywordSource,
+                        pixelMeasurementSource,
+                        viewportMeasurementSource,
+                        parentMeasurementSource,
+                        contentMeasurementSource
+                    ));
 
                 case StyleTemplateConstants.MaxHeight:
-                    return new StyleBinding_MaxHeight(targetState.state, Compile<UIMeasurement>(value));
+                    return new StyleBinding_MaxHeight(targetState.state, Compile<UIMeasurement>(
+                        value,
+                        autoKeywordSource,
+                        pixelMeasurementSource,
+                        viewportMeasurementSource,
+                        parentMeasurementSource,
+                        contentMeasurementSource
+                    ));
 
                 case StyleTemplateConstants.GrowthFactor:
                     return new StyleBinding_GrowthFactor(targetState.state, Compile<int>(value));
@@ -258,7 +325,15 @@ namespace Src.Compilers {
                 case StyleTemplateConstants.MarginLeft:
                     return new StyleBinding_MarginLeft(targetState.state, Compile<float>(value));
 
-                default: return null;
+                // Text
+                
+                case StyleTemplateConstants.TextColor:
+                    return new StyleBinding_TextColor(targetState.state, Compile<Color>(value, colorSource, rgbSource, rgbaSource));
+                    
+                case StyleTemplateConstants.FontSize:
+                    return new StyleBinding_FontSize(targetState.state, Compile<int>(value));
+                
+                default: throw new NotImplementedException("Style: " + targetState.property);
             }
         }
 
@@ -311,20 +386,25 @@ namespace Src.Compilers {
         }
 
         [Pure]
-        public static UIMeasurement ContentMeasurement(float value) {
-            return new UIMeasurement(value, UIUnit.Content);    
+        public static UIMeasurement PixelMeasurement(float value) {
+            return new UIMeasurement(value, UIUnit.Pixel);
         }
-        
+
+        [Pure]
+        public static UIMeasurement ContentMeasurement(float value) {
+            return new UIMeasurement(value * 0.01, UIUnit.Content);
+        }
+
         [Pure]
         public static UIMeasurement ParentMeasurement(float value) {
-            return new UIMeasurement(value, UIUnit.Parent);    
+            return new UIMeasurement(value * 0.01, UIUnit.Parent);
         }
-        
+
         [Pure]
         public static UIMeasurement ViewportMeasurement(float value) {
-            return new UIMeasurement(value, UIUnit.View);    
+            return new UIMeasurement(value * 0.01, UIUnit.View);
         }
-        
+
         [Pure]
         public static ContentBoxRect Rect(float top, float right, float bottom, float left) {
             return new ContentBoxRect(top, right, bottom, left);

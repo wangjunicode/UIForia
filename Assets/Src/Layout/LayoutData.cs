@@ -7,6 +7,8 @@ using UnityEngine;
 
 namespace Src.Layout {
 
+    public class IMGUILayoutData { }
+
     [DebuggerDisplay("{element}")]
     public class LayoutData : ISkipTreeTraversable {
 
@@ -20,32 +22,30 @@ namespace Src.Layout {
         public ContentBoxRect padding;
 
         public Vector2 textContentSize;
-        
+
+        public float previousParentWidth;
+
         public LayoutData parent;
+        public UILayout layout;
         public readonly UIElement element;
         public readonly List<LayoutData> children;
 
+        public string textContent;
+        
+        public readonly UIStyleSet style;
+        
         public LayoutData(UIElement element) {
             this.element = element;
             this.children = new List<LayoutData>();
-
+            this.previousParentWidth = float.MinValue;
             constraints = LayoutConstraints.Unset;
-
-            rect = new LayoutRect(0, 0, UIMeasurement.Parent100, UIMeasurement.Parent100);
+            this.style = element.style;
         }
 
         public IHierarchical Element => element;
         public IHierarchical Parent => element.parent;
-
-        public UILayout layout {
-            get {
-                switch (parameters.type) {
-                    case LayoutType.Flex: return UILayout.Flex;
-                    case LayoutType.Flow: return UILayout.Flow;
-                    default: throw new NotImplementedException();
-                }
-            }
-        }
+        
+        public bool isInFlow => parameters.flow != LayoutFlowType.OutOfFlow;
 
         public float ContentStartOffsetX => margin.left + padding.left + border.left;
         public float ContentEndOffsetX => margin.right + padding.right + border.right;
@@ -53,21 +53,92 @@ namespace Src.Layout {
         public float ContentStartOffsetY => margin.top + padding.top + border.top;
         public float ContentEndOffsetY => margin.bottom + padding.bottom + border.bottom;
 
-        public bool isInFlow => parameters.flow != LayoutFlowType.OutOfFlow;
+        public float GetPreferredWidth(UIUnit parentUnit, float parentValue, float viewportValue) {
+            float baseWidth = 0;
+
+            switch (rect.width.unit) {
+                case UIUnit.Auto:
+                    baseWidth = parentValue;
+                    break;
+
+                case UIUnit.Pixel:
+                    baseWidth = rect.width.value;
+                    break;
+
+                case UIUnit.Content:
+                    baseWidth = layout.GetContentWidth(this, parentValue, viewportValue);
+                    break;
+
+                case UIUnit.Parent:
+                    if (parentUnit == UIUnit.Content) return 0;
+                    baseWidth = rect.width.value * parentValue;
+                    break;
+
+                case UIUnit.View:
+                    baseWidth = rect.width.value * viewportValue;
+                    break;
+
+                default:
+                    baseWidth = 0;
+                    break;
+            }
+
+            return baseWidth;
+        }
+
+        public float GetPreferredHeight(UIUnit parentUnit, float computedWidth, float parentValue, float viewportValue) {
+            switch (rect.height.unit) {
+                case UIUnit.Auto:
+                    return ContentStartOffsetY
+                           + layout.GetContentHeight(this, computedWidth, parentValue, viewportValue)
+                           + ContentEndOffsetY;
+
+                case UIUnit.Pixel:
+                    return rect.height.value;
+
+                case UIUnit.Content:
+                    return (ContentStartOffsetY
+                            + layout.GetContentHeight(this, computedWidth, parentValue, viewportValue)
+                            + ContentEndOffsetY) * rect.height.value;
+
+                case UIUnit.Parent:
+                    if (parentUnit == UIUnit.Content) return 0;
+                    return rect.height.value * parentValue;
+
+                case UIUnit.View:
+                    return rect.height.value * viewportValue;
+
+                default:
+                    return 0;
+            }
+        }
+     
+        public void OnParentChanged(ISkipTreeTraversable newParent) {
+            parent = (LayoutData) newParent;
+        }
+
+        void ISkipTreeTraversable.OnBeforeTraverse() {
+            children.Clear();
+        }
+
+        void ISkipTreeTraversable.OnAfterTraverse() {
+            parent?.children.Add(this);
+        }
+
 
         public float GetMinWidth(UIUnit parentUnit, float parentValue, float viewportValue) {
             switch (constraints.minWidth.unit) {
+                case UIUnit.Auto:
+                    return 0;
+
                 case UIUnit.Pixel:
                     return constraints.minWidth.value;
 
                 case UIUnit.Content:
                     throw new NotImplementedException();
-                    return layout.GetContentWidth(this, parentValue, viewportValue);
 
                 case UIUnit.Parent:
                     throw new NotImplementedException();
-                    if (parentUnit == UIUnit.Content) return 0;
-                    return constraints.minWidth.value * parentValue;
 
                 case UIUnit.View:
                     return constraints.minWidth.value * viewportValue;
@@ -84,10 +155,8 @@ namespace Src.Layout {
 
                 case UIUnit.Content:
                     throw new NotImplementedException();
-                    return layout.GetContentWidth(this, parentValue, viewportValue);
 
                 case UIUnit.Parent:
-                    throw new NotImplementedException();
                     if (parentUnit == UIUnit.Content) return 0;
                     return constraints.maxWidth.value * parentValue;
 
@@ -106,10 +175,8 @@ namespace Src.Layout {
 
                 case UIUnit.Content:
                     throw new NotImplementedException();
-                    return layout.GetContentWidth(this, parentValue, viewportValue);
 
                 case UIUnit.Parent:
-                    throw new NotImplementedException();
                     if (parentUnit == UIUnit.Content) return 0;
                     return constraints.minHeight.value * parentValue;
 
@@ -128,12 +195,9 @@ namespace Src.Layout {
 
                 case UIUnit.Content:
                     throw new NotImplementedException();
-                    return layout.GetContentWidth(this, parentValue, viewportValue);
 
                 case UIUnit.Parent:
                     throw new NotImplementedException();
-                    if (parentUnit == UIUnit.Content) return 0;
-                    return constraints.maxHeight.value * parentValue;
 
                 case UIUnit.View:
                     return constraints.maxHeight.value * viewportValue;
@@ -141,65 +205,6 @@ namespace Src.Layout {
                 default:
                     return 0;
             }
-        }
-
-        public float GetPreferredWidth(UIUnit parentUnit, float parentValue, float viewportValue) {
-            float baseWidth = 0;
-            switch (rect.width.unit) {
-                case UIUnit.Pixel:
-                    baseWidth = rect.width.value;
-                    break;
-                case UIUnit.Content:
-                    if ((element.flags & UIElementFlags.TextElement) != 0) {
-                        
-                    }
-                    baseWidth = layout.GetContentWidth(this, parentValue, viewportValue);
-                    break;
-                case UIUnit.Parent:
-                    if (parentUnit == UIUnit.Content) break;
-                    baseWidth = rect.width.value * parentValue;
-                    break;
-                case UIUnit.View:
-                    baseWidth = rect.width.value * viewportValue;
-                    break;
-                default:
-                    baseWidth = 0;
-                    break;
-            }
-
-            return baseWidth + padding.horizontal + margin.horizontal + border.horizontal;
-        }
-
-        public float GetPreferredHeight(UIUnit parentUnit, float parentValue, float viewportValue) {
-            switch (rect.height.unit) {
-                case UIUnit.Pixel:
-                    return rect.height.value;
-
-                case UIUnit.Content:
-                    return layout.GetContentHeight(this, parentValue, viewportValue);
-
-                case UIUnit.Parent:
-                    if (parentUnit == UIUnit.Content) return 0;
-                    return rect.height.value * parentValue;
-
-                case UIUnit.View:
-                    return rect.height.value * viewportValue;
-
-                default:
-                    return 0;
-            }
-        }
-
-        public void OnParentChanged(ISkipTreeTraversable newParent) {
-            parent = (LayoutData) newParent;
-        }
-
-        void ISkipTreeTraversable.OnBeforeTraverse() {
-            children.Clear();
-        }
-
-        void ISkipTreeTraversable.OnAfterTraverse() {
-            parent?.children.Add(this);
         }
 
     }

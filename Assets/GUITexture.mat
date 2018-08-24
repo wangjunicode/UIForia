@@ -7,8 +7,8 @@ Material:
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInternal: {fileID: 0}
   m_Name: GUITexture
-  m_Shader: {fileID: 4800000, guid: 45432f1c7aab481686b0ef8b046e2a96, type: 3}
-  m_ShaderKeywords: 
+  m_Shader: {fileID: 4800000, guid: 1f6f9739ab19421880e99fb320d586cc, type: 3}
+  m_ShaderKeywords: _SHOULDMASK_ON
   m_LightmapFlags: 4
   m_EnableInstancingVariants: 0
   m_DoubleSidedGI: 0
@@ -68,6 +68,7 @@ Material:
     - _OcclusionStrength: 1
     - _Parallax: 0.02
     - _Radius: 0.5
+    - _ShouldMask: 1
     - _SmoothnessTextureChannel: 0
     - _SpecularHighlights: 1
     - _SrcBlend: 1
@@ -75,6 +76,8 @@ Material:
     - _Width: 100
     - _ZWrite: 1
     m_Colors:
+    - _BorderRadii: {r: 0, g: 0, b: 0, a: 0}
+    - _BorderWidths: {r: 0, g: 0, b: 0, a: 0}
     - _Color: {r: 0.990566, g: 0.023362402, b: 0.023362402, a: 1}
     - _ColorAndBorderRadius: {r: 0.8, g: 0.752, b: 0.701, a: 0.1}
     - _CornerRadiuses: {r: 0, g: 0, b: 0, a: 0}

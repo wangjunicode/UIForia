@@ -16,6 +16,7 @@ namespace Src.Systems {
         event ContentBoxChanged onPaddingChanged;
         event ConstraintChanged onConstraintChanged;
         event BorderRadiusChanged onBorderRadiusChanged;
+        event FontPropertyChanged onFontPropertyChanged;
 
     }
 

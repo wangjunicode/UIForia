@@ -14,7 +14,7 @@ public abstract class UIView {
     // todo -- move to protected & interfaces
     protected readonly BindingSystem bindingSystem;
     protected readonly LifeCycleSystem lifeCycleSystem;
-    protected readonly LayoutSystem layoutSystem;
+    //protected readonly ILayoutSystem layoutSystem;
     protected readonly StyleSystem styleSystem;
     protected readonly ElementRegistrySystem elementSystem;
     
@@ -24,7 +24,6 @@ public abstract class UIView {
         this.elementType = elementType;
         elementSystem = new ElementRegistrySystem();
         styleSystem = new StyleSystem();
-        layoutSystem = new LayoutSystem(styleSystem);
         bindingSystem = new BindingSystem();
         lifeCycleSystem = new LifeCycleSystem();
     }
@@ -32,6 +31,7 @@ public abstract class UIView {
     public UIElement Root => root;
     
     protected abstract IRenderSystem renderSystem { get; set; }
+    protected abstract ILayoutSystem layoutSystem { get; set; }
     
     public abstract void Render();
     

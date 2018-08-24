@@ -1,3 +1,4 @@
+using Rendering;
 using UnityEngine;
 
 namespace Src.Layout {
@@ -7,6 +8,8 @@ namespace Src.Layout {
         public override void Run(Rect viewport, LayoutDataSet size, Rect[] results) {
             throw new System.NotImplementedException();
         }
+
+        public FixedLayout(ITextSizeCalculator textSizeCalculator) : base(textSizeCalculator) { }
 
     }
 

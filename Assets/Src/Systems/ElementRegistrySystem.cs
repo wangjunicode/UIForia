@@ -36,6 +36,7 @@ namespace Src.Systems {
         public void OnInitialize() { }
 
         public void OnElementCreated(UIElementCreationData elementData) {
+            elementData.element.name = elementData.name;
             map[elementData.element.id] = elementData.element;
         }
 

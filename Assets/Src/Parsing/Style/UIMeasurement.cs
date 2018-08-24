@@ -30,29 +30,10 @@ namespace Src {
         
         public bool isFixed => (unit & (UIUnit.Pixel | UIUnit.Parent | UIUnit.View)) != 0;
         
+        public static UIMeasurement Auto => new UIMeasurement(0, UIUnit.Auto);
         public static UIMeasurement Parent100 => new UIMeasurement(1f, UIUnit.Parent);
         public static UIMeasurement Content100 => new UIMeasurement(1f, UIUnit.Content);
-        
         public static UIMeasurement Unset => new UIMeasurement(FloatUtil.UnsetFloatValue);
-
-        public float GetFixedPixelValue(float parentValue, float viewportValue) {
-            switch (unit) {
-                case UIUnit.Pixel:
-                    return value;
-
-                case UIUnit.Content:
-                    return 0;
-
-                case UIUnit.Parent:
-                    return value * parentValue;
-
-                case UIUnit.View:
-                    return value * viewportValue;
-
-                default:
-                    return 0;
-            }
-        }
 
         public bool Equals(UIMeasurement other) {
             return value.Equals(other.value) && unit == other.unit;

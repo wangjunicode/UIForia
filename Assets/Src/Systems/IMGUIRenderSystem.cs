@@ -6,18 +6,65 @@ using UnityEngine;
 
 namespace Src.Systems {
 
+//    public class FontTree {
+//
+//        public class FontNode : ISkipTreeTraversable {
+//
+//            public UIElement element;
+//
+//            public TextData textData;
+//            
+//            public IHierarchical Element => element;
+//            public IHierarchical Parent => element.parent;
+//
+//            public void OnParentChanged(ISkipTreeTraversable newParent) {
+//                
+//            }
+//
+//            public void OnBeforeTraverse() {
+//                
+//            }
+//
+//            public void OnAfterTraverse() {
+//                
+//            }
+//
+//        }
+//
+//        private readonly IStyleSystem styleSystem;
+//        private readonly SkipTree<FontNode> fontTree;
+//        
+//        public FontTree(IStyleSystem styleSystem) {
+//            this.styleSystem = styleSystem;
+//        }
+//
+//        public TextStyle GetTextStyle(UIElement element) {
+//            
+//            // start at nearest parent element in tree
+//            // walk tree assigning properties that are not set
+//            // when all properties set (via a counter check)
+//            // return 
+//            // root will define defaults
+//            return default(TextStyle);
+//        }
+//        
+//
+//    }
+
     public class IMGUIRenderSystem : IRenderSystem {
 
         private readonly IStyleSystem styleSystem;
-        private readonly LayoutSystem layoutSystem;
+        private readonly ILayoutSystem layoutSystem;
         private readonly IElementRegistry elementSystem;
         private readonly SkipTree<IMGUIRenderData> renderSkipTree;
         private readonly Dictionary<Color, Texture2D> textureCache;
 
         private Rect viewportRect;
         private LayoutResult[] layoutResults;
+        private IMGUIRenderData[] renderData;
+        private bool renderDataDirty;
 
-        public IMGUIRenderSystem(IElementRegistry elementSystem, IStyleSystem styleSystem, LayoutSystem layoutSystem) {
+        public IMGUIRenderSystem(IElementRegistry elementSystem, IStyleSystem styleSystem, ILayoutSystem layoutSystem) {
             this.styleSystem = styleSystem;
             this.layoutSystem = layoutSystem;
             this.elementSystem = elementSystem;
@@ -25,6 +72,7 @@ namespace Src.Systems {
             this.textureCache = new Dictionary<Color, Texture2D>();
             this.renderSkipTree = new SkipTree<IMGUIRenderData>();
             this.layoutResults = new LayoutResult[128];
+            this.renderDataDirty = true;
         }
 
 
@@ -34,6 +82,11 @@ namespace Src.Systems {
 
         public void OnRender() {
             int count = layoutSystem.RunLayout(viewportRect, ref layoutResults);
+
+            //if (renderDataDirty) {
+            //   renderDataDirty = false;
+            renderData = renderSkipTree.ToArray();
+            //}            
 
             IMGUIRenderData.s_DrawRect.x = 0f;
             IMGUIRenderData.s_DrawRect.y = 0f;
@@ -46,11 +99,64 @@ namespace Src.Systems {
 
                 if (element == null) continue;
 
-                IMGUIRenderData renderData = renderSkipTree.GetItem(element);
-                renderData?.SetLocalLayoutRect(result.rect);
+                IMGUIRenderData data = renderSkipTree.GetItem(element);
+                data?.SetLocalLayoutRect(result.rect);
             }
 
-            renderSkipTree.TraverseRecursePreOrder();
+            for (int i = 0; i < renderData.Length; i++) {
+                IMGUIRenderData data = renderData[i];
+                RenderPrimitiveType primitiveType = data.primitiveType;
+                        
+                switch (primitiveType) {
+                    case RenderPrimitiveType.RawImage:
+                    case RenderPrimitiveType.ProceduralImage:
+
+                        if (data.borderTexture != null && data.borderSize.IsDefined()) {
+                            if (data.backgroundTexture != null) {
+                                Rect innerRect = new Rect(data.layoutRect);
+                                innerRect.x += data.borderSize.left;
+                                innerRect.y += data.borderSize.top;
+                                innerRect.width -= data.borderSize.right * 2f;
+                                innerRect.height -= data.borderSize.bottom * 2f;
+//                            material.SetFloat("_Radius", 0.5f);
+//                            material.SetColor("_Color", Color.red);
+//                            material.SetFloat("_Width", 100f);
+//                            material.SetFloat("_Height", 100f);
+                                //Graphics.DrawTexture(new Rect(300, 300, 300f, 300f), backgroundTexture, material);
+                            }
+
+//                        // only draws a border!
+                            GUI.DrawTexture(
+                                data.layoutRect,
+                                data.borderTexture,
+                                ScaleMode.ScaleToFit,
+                                true,
+                                data.layoutRect.width / data.layoutRect.height,
+                                Color.white,
+                                data.borderSize,
+                                data.borderRadius
+                            );
+                        }
+                        else {
+                            if (data.backgroundTexture != null) {
+                                GUI.DrawTexture(data.layoutRect, data.backgroundTexture);
+                            }
+                        }
+
+                        break;
+
+                    case RenderPrimitiveType.Text:
+                        GUIStyle style = new GUIStyle();
+                        style.fontSize = 12;
+                        style.wordWrap = true;
+                        GUI.Label(data.layoutRect, data.textContent, style);
+                        break;
+                }
+                
+               
+            }
+
+//            renderSkipTree.TraverseRecursePreOrder();
         }
 
         public void OnInitialize() {
@@ -69,6 +175,7 @@ namespace Src.Systems {
         }
 
         public void OnReset() {
+            renderData = null;
             renderSkipTree.Clear();
         }
 
@@ -83,6 +190,9 @@ namespace Src.Systems {
             styleSystem.onMarginChanged -= HandleMarginChanged;
             styleSystem.onPaintChanged -= HandlePaintChanged;
             styleSystem.onBorderRadiusChanged -= HandleBorderRadiusChanged;
+            styleSystem.onFontPropertyChanged -= HandleFontPropertyChanged;
+            renderData = null;
+            renderSkipTree.Clear();
         }
 
         public void OnElementCreated(UIElementCreationData data) {
@@ -108,7 +218,6 @@ namespace Src.Systems {
             }
 
             data.SetText(text);
-           
         }
 
         public void OnElementEnabled(UIElement element) {
@@ -221,6 +330,15 @@ namespace Src.Systems {
                 if (data != null) {
                     OnElementStyleChanged(element);
                 }
+            }
+        }
+
+        private void HandleFontPropertyChanged(int elementId, TextStyle textStyle) {
+            UIElement element = elementSystem.GetElement(elementId);
+            if (element != null) {
+                IMGUIRenderData data = renderSkipTree.GetItem(element);
+                // todo -- change to use font tree
+                data?.SetFontProperties(textStyle);
             }
         }
 

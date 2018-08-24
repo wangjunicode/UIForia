@@ -16,6 +16,8 @@ namespace Src.Systems {
     public delegate void LayoutChanged(int elementId, LayoutParameters layoutParameters);
 
     public delegate void BorderRadiusChanged(int elementId, BorderRadius radius);
+
+    public delegate void FontPropertyChanged(int elementId, TextStyle textStyle);
     
     public class StyleSystem : ISystem, IStyleSystem {
 
@@ -27,6 +29,7 @@ namespace Src.Systems {
         public event ContentBoxChanged onPaddingChanged;
         public event ConstraintChanged onConstraintChanged;
         public event BorderRadiusChanged onBorderRadiusChanged;
+        public event FontPropertyChanged onFontPropertyChanged;
         
         private readonly Dictionary<int, UIStyleSet> styleMap;
 
@@ -112,6 +115,10 @@ namespace Src.Systems {
 
         public void SetConstraints(int elementId, LayoutConstraints constraints) {
             onConstraintChanged?.Invoke(elementId, constraints);
+        }
+
+        public void SetText(int elementId, TextStyle textStyle) {
+            onFontPropertyChanged?.Invoke(elementId, textStyle);
         }
 
         public void SetPaint(int elementId, Paint paint) {

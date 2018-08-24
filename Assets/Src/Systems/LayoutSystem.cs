@@ -6,26 +6,39 @@ using UnityEngine;
 
 namespace Src.Systems {
 
-    public class LayoutSystem : ISystem {
+    public interface ILayoutSystem : ISystem {
+
+        int RunLayout(Rect viewport, ref LayoutResult[] output);
+
+    }
+
+    public class LayoutSystem : ILayoutSystem {
 
         private readonly Rect[] layoutRects;
+        private readonly IStyleSystem styleSystem;
         private readonly SkipTree<LayoutData> layoutTree;
         private readonly Stack<LayoutDataSet> layoutStack;
-        private readonly IStyleSystem styleSystem;
         private readonly Dictionary<int, LayoutData> layoutDataMap;
-
-        public LayoutSystem(IStyleSystem styleSystem) {
+                
+        private readonly FlexLayout flexLayout;
+        private readonly FlowLayout flowLayout;
+        private readonly FixedLayout fixedLayout;
+        
+        public LayoutSystem(ITextSizeCalculator textSizeCalculator, IStyleSystem styleSystem) {
             this.styleSystem = styleSystem;
             this.layoutRects = new Rect[16];
             this.layoutTree = new SkipTree<LayoutData>();
             this.layoutStack = new Stack<LayoutDataSet>();
             this.layoutDataMap = new Dictionary<int, LayoutData>();
+            
             this.styleSystem.onRectChanged += HandleRectChanged;
             this.styleSystem.onLayoutChanged += HandleLayoutChanged;
             this.styleSystem.onBorderChanged += HandleBorderChanged;
             this.styleSystem.onMarginChanged += HandleMarginChanged;
             this.styleSystem.onPaddingChanged += HandlePaddingChanged;
             this.styleSystem.onConstraintChanged += HandleConstraintChanged;
+            
+            this.flexLayout = new FlexLayout(textSizeCalculator);
         }
 
         private void HandleRectChanged(int elementId, LayoutRect rect) {
@@ -67,6 +80,14 @@ namespace Src.Systems {
             LayoutData data;
             if (layoutDataMap.TryGetValue(elementId, out data)) {
                 data.parameters = parameters;
+                data.layout = GetLayoutInstance(parameters.type);
+            }
+        }
+        
+        private void HandleTextChanged(UIElement element, string text) {
+            LayoutData layoutData;
+            if (layoutDataMap.TryGetValue(element.id, out layoutData)) {
+                layoutData.textContent = text;
             }
         }
 
@@ -81,23 +102,18 @@ namespace Src.Systems {
                     data.margin = styleSet.margin;
                     data.parameters = styleSet.layout;
                     data.constraints = styleSet.constraints;
+                    data.layout = GetLayoutInstance(data.parameters.type);
                     data.rect = styleSet.rect;
                 }
             }
         }
 
-        private void CreateOrUpdateElement(UIElement element) { }
-
         public void OnElementCreated(UIElementCreationData elementData) {
             // todo -- if instance is layout-able
 
-            if ((elementData.element.flags & UIElementFlags.RequiresLayout) == 0) {
-                return;
-            }
-
             if ((elementData.element.flags & UIElementFlags.TextElement) != 0) {
                 UITextElement textElement = (UITextElement) elementData.element;
-                textElement.onSizeChanged += HandleTextSizeChanged;
+                textElement.onTextChanged += HandleTextChanged;
             }
 
             LayoutData data = new LayoutData(elementData.element);
@@ -108,6 +124,7 @@ namespace Src.Systems {
                 data.parameters = data.element.style.layout;
                 data.constraints = data.element.style.constraints;
                 data.rect = data.element.style.rect;
+                data.layout = GetLayoutInstance(data.element.style.layoutType);
             }
             else {
                 data.parameters.type = LayoutType.Flex;
@@ -119,13 +136,18 @@ namespace Src.Systems {
             layoutDataMap[data.element.id] = data;
         }
 
+        private UILayout GetLayoutInstance(LayoutType layoutType) {
+            switch (layoutType) {
+                    case LayoutType.Flex:
+                        return flexLayout;
+            }    
+            throw new NotImplementedException();
+        }
+        
         public int RunLayout(Rect viewport, ref LayoutResult[] output) {
             layoutTree.TraversePreOrderWithCallback(output, SetupLayoutPass);
 
             LayoutData[] roots = layoutTree.GetRootItems();
-            
-            // temp
-//            roots[0].parameters.mainAxisAlignment = MainAxisAlignment.Start;
             
             layoutStack.Push(new LayoutDataSet(roots[0], viewport));
 
@@ -134,7 +156,7 @@ namespace Src.Systems {
             while (layoutStack.Count > 0) {
                 LayoutDataSet layoutSet = layoutStack.Pop();
                 LayoutData data = layoutSet.data;
-
+                
                 data.layout.Run(viewport, layoutSet, layoutRects);
 
                 if (data.element != null && (data.element.flags & UIElementFlags.RequiresRendering) != 0) {
@@ -189,15 +211,8 @@ namespace Src.Systems {
                 layoutTree.RemoveHierarchy(data);
                 if ((data.element.flags & UIElementFlags.TextElement) != 0) {
                     UITextElement textElement = (UITextElement) data.element;
-                    textElement.onSizeChanged -= HandleTextSizeChanged;
+                    textElement.onTextChanged -= HandleTextChanged;
                 }
-            }
-        }
-
-        private void HandleTextSizeChanged(UIElement element, Vector2 size) {
-            LayoutData layoutData;
-            if (layoutDataMap.TryGetValue(element.id, out layoutData)) {
-                layoutData.rect = new LayoutRect(layoutData.rect.x, layoutData.rect.y, size.x, size.y);
             }
         }
 

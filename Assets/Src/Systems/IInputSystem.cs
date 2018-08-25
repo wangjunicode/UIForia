@@ -1,8 +1,8 @@
-﻿namespace Src.Systems {
+﻿using Rendering;
 
-    public interface IInputSystem {
+namespace Src.Systems {
 
-        void OnUpdate();
+    public interface IInputSystem : ISystem {
 
     }
 

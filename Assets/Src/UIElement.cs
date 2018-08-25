@@ -15,8 +15,6 @@ public class UIElement : IHierarchical {
 
     protected internal UIElement parent;
 
-    public int intValue; // todo remove
-
     public UIElement() {
         id = UIView.NextElementId;
         this.flags = UIElementFlags.RequiresLayout | UIElementFlags.RequiresRendering;

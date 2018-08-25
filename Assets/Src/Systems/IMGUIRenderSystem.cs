@@ -73,7 +73,6 @@ namespace Src.Systems {
             this.renderDataDirty = true;
         }
 
-
         public void SetViewportRect(Rect viewportRect) {
             this.viewportRect = viewportRect;
         }
@@ -82,7 +81,7 @@ namespace Src.Systems {
             int count = layoutSystem.RectCount;
             LayoutResult[] layoutResults = layoutSystem.LayoutResults;
 
-                //if (renderDataDirty) {
+            //if (renderDataDirty) {
             //   renderDataDirty = false;
             renderData = renderSkipTree.ToArray();
             //}            
@@ -105,13 +104,13 @@ namespace Src.Systems {
             for (int i = 0; i < renderData.Length; i++) {
                 IMGUIRenderData data = renderData[i];
                 RenderPrimitiveType primitiveType = data.primitiveType;
-                
-                Rect paintRect = new Rect(data.layoutRect);                        
+
+                Rect paintRect = new Rect(data.layoutRect);
                 paintRect.x += data.element.style.marginLeft;
                 paintRect.y += data.element.style.marginTop;
                 paintRect.width -= data.element.style.marginRight;
                 paintRect.height -= data.element.style.marginBottom;
- 
+
                 switch (primitiveType) {
                     case RenderPrimitiveType.RawImage:
                     case RenderPrimitiveType.ProceduralImage:
@@ -153,8 +152,7 @@ namespace Src.Systems {
                         GUI.Label(data.layoutRect, data.textContent, style);
                         break;
                 }
-                
-               
+
             }
 
 //            renderSkipTree.TraverseRecursePreOrder();
@@ -208,7 +206,8 @@ namespace Src.Systems {
         }
 
         private void OnTextChanged(UIElement element, string text) {
-            Debug.Log("Text changed");
+//            Debug.Log("Text changed");
+            // todo -- add metrics per-element on text changes
             IMGUIRenderData data = renderSkipTree.GetItem(element);
 
             // if the item isn't in our tree we don't care about it
@@ -257,7 +256,7 @@ namespace Src.Systems {
         public void OnElementStyleChanged(UIElement element) {
             if (element.style == null) return;
 
-            Debug.Log("Style change");
+//            Debug.Log("Style change");
             IMGUIRenderData data = renderSkipTree.GetItem(element);
             RenderPrimitiveType primitiveType = DeterminePrimitiveType(element);
 
@@ -297,41 +296,28 @@ namespace Src.Systems {
         private void HandleBorderRadiusChanged(int elementId, BorderRadius radius) {
             UIElement element = elementSystem.GetElement(elementId);
             if (element != null) {
-                IMGUIRenderData data = renderSkipTree.GetItem(element);
-                if (data != null) {
-                    OnElementStyleChanged(element);
-                }
+                OnElementStyleChanged(element);
             }
         }
 
         private void HandleBorderChanged(int elementId, ContentBoxRect borderRect) {
             UIElement element = elementSystem.GetElement(elementId);
             if (element != null) {
-                IMGUIRenderData data = renderSkipTree.GetItem(element);
-                if (data != null) {
-                    OnElementStyleChanged(element);
-                }
+                OnElementStyleChanged(element);
             }
         }
 
         private void HandleMarginChanged(int elementId, ContentBoxRect marginRect) {
             UIElement element = elementSystem.GetElement(elementId);
             if (element != null) {
-                IMGUIRenderData data = renderSkipTree.GetItem(element);
-                if (data != null) {
-                    OnElementStyleChanged(element);
-                }
+                OnElementStyleChanged(element);
             }
         }
 
         private void HandlePaintChanged(int elementId, Paint paint) {
-            Debug.Log("Handling paint: " + elementId);
             UIElement element = elementSystem.GetElement(elementId);
             if (element != null) {
-                IMGUIRenderData data = renderSkipTree.GetItem(element);
-                if (data != null) {
-                    OnElementStyleChanged(element);
-                }
+                OnElementStyleChanged(element);
             }
         }
 

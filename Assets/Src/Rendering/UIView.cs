@@ -48,6 +48,8 @@ public abstract class UIView {
         
         layoutSystem.OnInitialize();
         renderSystem.OnInitialize();
+        styleSystem.OnInitialize();
+        inputSystem.OnInitialize();
         
     }
 
@@ -59,15 +61,19 @@ public abstract class UIView {
         lifeCycleSystem.OnElementCreated(elementData);
         renderSystem.OnElementCreated(elementData);
         bindingSystem.OnElementCreated(elementData);
+        inputSystem.OnElementCreated(elementData);
     }
 
     public virtual void OnCreate() {
         root = TemplateParser.GetParsedTemplate(elementType).CreateWithoutScope(this);
         layoutSystem.OnInitialize();
         renderSystem.OnInitialize();
+        inputSystem.OnInitialize();
+        bindingSystem.OnInitialize();
     }
 
     public virtual void OnDestroy() {
+        inputSystem.OnDestroy();
         lifeCycleSystem.OnDestroy();
         bindingSystem.OnDestroy();
         renderSystem.OnDestroy();

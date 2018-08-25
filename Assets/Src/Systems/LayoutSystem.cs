@@ -6,14 +6,6 @@ using UnityEngine;
 
 namespace Src.Systems {
 
-    public interface ILayoutSystem : ISystem {
-
-        int RectCount { get; }
-        LayoutResult[] LayoutResults { get; }
-        void SetViewportRect(Rect viewportRect);
-
-    }
-
     public class LayoutSystem : ILayoutSystem {
 
         private readonly Rect[] layoutRects;
@@ -22,7 +14,10 @@ namespace Src.Systems {
         private readonly SkipTree<LayoutData> layoutTree;
         private readonly Stack<LayoutDataSet> layoutStack;
         private readonly Dictionary<int, LayoutData> layoutDataMap;
-
+        
+        // todo -- use simple array for this w/ unique ids -> indices on elements
+        private readonly Dictionary<int, Rect> layoutResultMap;
+        
         private readonly FlexLayout flexLayout;
         private readonly FlowLayout flowLayout;
         private readonly FixedLayout fixedLayout;
@@ -32,6 +27,10 @@ namespace Src.Systems {
         private LayoutResult[] rects;
         private Rect viewport;
 
+        /*
+         * It is possible to have a scheme where element ids can also contain an integer index into lists
+         * To do this we need to maintain a list of available ids a-la bitsquid packed list
+         */
         public LayoutSystem(ITextSizeCalculator textSizeCalculator, IElementRegistry registry, IStyleSystem styleSystem) {
             this.styleSystem = styleSystem;
             this.registry = registry;
@@ -39,7 +38,8 @@ namespace Src.Systems {
             this.layoutTree = new SkipTree<LayoutData>();
             this.layoutStack = new Stack<LayoutDataSet>();
             this.layoutDataMap = new Dictionary<int, LayoutData>();
-
+            this.layoutResultMap = new Dictionary<int, Rect>();
+            
             this.styleSystem.onRectChanged += HandleRectChanged;
             this.styleSystem.onLayoutChanged += HandleLayoutChanged;
             this.styleSystem.onBorderChanged += HandleBorderChanged;
@@ -154,7 +154,7 @@ namespace Src.Systems {
         }
 
         public int RectCount => rectCount;
-        public LayoutResult[] LayoutResults => rects; 
+        public LayoutResult[] LayoutResults => rects;
 
         public void SetViewportRect(Rect viewport) {
             this.viewport = viewport;
@@ -165,18 +165,39 @@ namespace Src.Systems {
             layoutTree.Clear();
         }
 
+        public Rect GetRectForElement(int elementId) {
+            Rect retn;
+            layoutResultMap.TryGetValue(elementId, out retn);
+            return retn;
+        }
+        
+        // todo this needs to be replaced with a quad tree eventually
+        public int QueryPoint(Vector2 point, ref LayoutResult[] queryResults) {
+            int retnCount = 0;
+            for (int i = 0; i < rectCount; i++) {
+                if (rects[i].rect.Contains(point)) {
+                    if (rectCount == queryResults.Length) {
+                        Array.Resize(ref queryResults, queryResults.Length * 2);
+                    }
+                    queryResults[retnCount++] = rects[i];
+                }
+            }
+            return retnCount;
+        }
+
         public void OnUpdate() {
 
             rectCount = 0;
-            
+            layoutResultMap.Clear();
             // todo change this not to return a new array copy
+            // todo this can be made better w/ new skip tree traversal methods
             LayoutData[] roots = layoutTree.GetRootItems();
 
             if (roots.Length == 0) {
                 return;
             }
-            
-            layoutTree.TraversePreOrderWithCallback(rects, SetupLayoutPass);
+
+            layoutTree.TraversePreOrder(rects, SetupLayoutPass);
 
             layoutStack.Push(new LayoutDataSet(roots[0], viewport));
 
@@ -186,6 +207,8 @@ namespace Src.Systems {
 
                 data.layout.Run(viewport, layoutSet, layoutRects);
 
+                layoutResultMap[data.element.id] = layoutSet.result;
+                
                 if (data.element != null && (data.element.flags & UIElementFlags.RequiresRendering) != 0) {
                     rects[rectCount++] = new LayoutResult(data.element.id, layoutSet.result);
                 }

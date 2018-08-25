@@ -1,4 +1,6 @@
 using System;
+using System.Collections.Generic;
+using System.Linq;
 using JetBrains.Annotations;
 using Rendering;
 using Src.Compilers.AliasSource;
@@ -86,7 +88,7 @@ namespace Src.Compilers {
         private static readonly MethodAliasSource pixelMeasurementSource;
 
         private static readonly ColorAliasSource colorSource;
-        private static readonly ValueAliasSource<UIMeasurement> autoKeywordSource; 
+        private static readonly ValueAliasSource<UIMeasurement> autoKeywordSource;
         private static readonly EnumAliasSource<LayoutType> layoutTypeSource;
         private static readonly EnumAliasSource<LayoutDirection> layoutDirectionSource;
         private static readonly EnumAliasSource<LayoutFlowType> layoutFlowSource;
@@ -99,18 +101,18 @@ namespace Src.Compilers {
             rgbSource = new MethodAliasSource("rgb", type.GetMethod("Rgb", ReflectionUtil.PublicStatic));
             rgbaSource = new MethodAliasSource("rgba", type.GetMethod("Rgba", ReflectionUtil.PublicStatic));
 
-            rect1Source = new MethodAliasSource("rect", type.GetMethod(nameof(Rect), new[] {typeof(float)}));
-            rect2Source = new MethodAliasSource("rect", type.GetMethod(nameof(Rect), new[] {typeof(float), typeof(float)}));
-            rect4Source = new MethodAliasSource("rect", type.GetMethod(nameof(Rect), new[] {typeof(float), typeof(float), typeof(float), typeof(float)}));
+            rect1Source = new MethodAliasSource("rect", type.GetMethod(nameof(Rect), new[] { typeof(float) }));
+            rect2Source = new MethodAliasSource("rect", type.GetMethod(nameof(Rect), new[] { typeof(float), typeof(float) }));
+            rect4Source = new MethodAliasSource("rect", type.GetMethod(nameof(Rect), new[] { typeof(float), typeof(float), typeof(float), typeof(float) }));
 
-            borderRadiusRect1Source = new MethodAliasSource("radius", type.GetMethod(nameof(Radius), new[] {typeof(float)}));
-            borderRadiusRect2Source = new MethodAliasSource("radius", type.GetMethod(nameof(Radius), new[] {typeof(float), typeof(float)}));
-            borderRadiusRect4Source = new MethodAliasSource("radius", type.GetMethod(nameof(Radius), new[] {typeof(float), typeof(float), typeof(float), typeof(float)}));
+            borderRadiusRect1Source = new MethodAliasSource("radius", type.GetMethod(nameof(Radius), new[] { typeof(float) }));
+            borderRadiusRect2Source = new MethodAliasSource("radius", type.GetMethod(nameof(Radius), new[] { typeof(float), typeof(float) }));
+            borderRadiusRect4Source = new MethodAliasSource("radius", type.GetMethod(nameof(Radius), new[] { typeof(float), typeof(float), typeof(float), typeof(float) }));
 
-            pixelMeasurementSource = new MethodAliasSource("pixels", type.GetMethod(nameof(PixelMeasurement), new[] {typeof(float)}));
-            parentMeasurementSource = new MethodAliasSource("parent", type.GetMethod(nameof(ParentMeasurement), new[] {typeof(float)}));
-            viewportMeasurementSource = new MethodAliasSource("view", type.GetMethod(nameof(ViewportMeasurement), new[] {typeof(float)}));
-            contentMeasurementSource = new MethodAliasSource("content", type.GetMethod(nameof(ContentMeasurement), new[] {typeof(float)}));
+            pixelMeasurementSource = new MethodAliasSource("pixels", type.GetMethod(nameof(PixelMeasurement), new[] { typeof(float) }));
+            parentMeasurementSource = new MethodAliasSource("parent", type.GetMethod(nameof(ParentMeasurement), new[] { typeof(float) }));
+            viewportMeasurementSource = new MethodAliasSource("view", type.GetMethod(nameof(ViewportMeasurement), new[] { typeof(float) }));
+            contentMeasurementSource = new MethodAliasSource("content", type.GetMethod(nameof(ContentMeasurement), new[] { typeof(float) }));
 
             colorSource = new ColorAliasSource();
             layoutTypeSource = new EnumAliasSource<LayoutType>();
@@ -122,14 +124,34 @@ namespace Src.Compilers {
             autoKeywordSource = new ValueAliasSource<UIMeasurement>("auto", UIMeasurement.Auto);
         }
 
-        public StyleBinding Compile(ContextDefinition context, string key, string value) {
+        public StyleBindingCompiler(ContextDefinition context) {
             this.context = context;
+            this.compiler = new ExpressionCompiler(context);
+        }
+
+        public void SetContext(ContextDefinition context) {
+            this.context = context;
+            this.compiler.SetContext(context);
+        }
+
+        public StyleBinding Compile(AttributeDefinition attributeDefinition) {
+            return Compile(context, attributeDefinition.key, attributeDefinition.value);
+        }
+
+        public StyleBinding Compile(ContextDefinition context, string key, string value) {
+            SetContext(context);
+            return Compile(key, value);
+        }
+
+        public StyleBinding Compile(string key, string value) {
+
+            if (!key.StartsWith("style.")) return null;
+            
             // todo -- drop this restriction if possible
             if (value[0] != '{') {
                 value = '{' + value + '}';
             }
 
-            compiler = new ExpressionCompiler(context);
             Target targetState = GetTargetState(key);
 
             switch (targetState.property) {
@@ -325,18 +347,19 @@ namespace Src.Compilers {
                     return new StyleBinding_MarginLeft(targetState.state, Compile<float>(value));
 
                 // Text
-                
+
                 case StyleTemplateConstants.TextColor:
                     return new StyleBinding_TextColor(targetState.state, Compile<Color>(value, colorSource, rgbSource, rgbaSource));
-                    
+
                 case StyleTemplateConstants.FontSize:
                     return new StyleBinding_FontSize(targetState.state, Compile<int>(value));
-                
-                default: throw new NotImplementedException("Style: " + targetState.property);
+
+                default: return null;
             }
         }
 
         private static Target GetTargetState(string key) {
+            
             if (key.StartsWith("style.hover.")) {
                 return new Target(key.Substring("style.hover.".Length), StyleState.Hover);
             }

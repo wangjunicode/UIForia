@@ -19,6 +19,10 @@
         <e p="Src" t="Include">
           <e p="Binding" t="Include">
             <e p="Binding.cs" t="Include" />
+            <e p="FieldSetterBinding.cs" t="Include" />
+            <e p="InputBindings" t="Include">
+              <e p="InputBinding.cs" t="Include" />
+            </e>
             <e p="StyleBindings" t="Include">
               <e p="Border" t="Include">
                 <e p="StyleBinding_Border.cs" t="Include" />
@@ -92,7 +96,6 @@
               <e p="ReflectionAliasSource.cs" t="Include" />
               <e p="ValueAliasSource.cs" t="Include" />
             </e>
-            <e p="BindExpressionCompiler.cs" t="Include" />
             <e p="CastHandlers" t="Include">
               <e p="CastHandler_ColorToVector4.cs" t="Include" />
               <e p="CastHandler_DoubleToMeasurement.cs" t="Include" />
@@ -108,6 +111,8 @@
               <e p="ICastHandler.cs" t="Include" />
             </e>
             <e p="ExpressionCompiler.cs" t="Include" />
+            <e p="InputBindingCompiler.cs" t="Include" />
+            <e p="PropertyBindingCompiler.cs" t="Include" />
             <e p="StyleBindingCompiler.cs" t="Include" />
           </e>
           <e p="ContentBoxRect.cs" t="Include" />
@@ -153,6 +158,13 @@
             <e p="RectTransformExtensions.cs" t="Include" />
           </e>
           <e p="ImportDeclaration.cs" t="Include" />
+          <e p="Input" t="Include">
+            <e p="InputEvent.cs" t="Include" />
+            <e p="InputEventType.cs" t="Include" />
+            <e p="MouseEvent.cs" t="Include" />
+            <e p="MouseEventType.cs" t="Include" />
+            <e p="MouseHandleShape.cs" t="Include" />
+          </e>
           <e p="Layout" t="Include">
             <e p="CrossAxisAlignment.cs" t="Include" />
             <e p="FixedLayout.cs" t="Include" />
@@ -219,7 +231,6 @@
               <e p="TokenType.cs" t="Include" />
             </e>
             <e p="TypeProcessor.cs" t="Include" />
-            <e p="Visitor.cs" t="Include" />
             <e p="XMLExtensions.cs" t="Include" />
           </e>
           <e p="PropAttribute.cs" t="Include" />
@@ -233,8 +244,6 @@
             <e p="ISystem.cs" t="Include" />
             <e p="ITextSizeCalculator.cs" t="Include" />
             <e p="LayoutParameters.cs" t="Include" />
-            <e p="MouseEventType.cs" t="Include" />
-            <e p="MouseHandleShape.cs" t="Include" />
             <e p="Paint.cs" t="Include" />
             <e p="ProceduralImage.cs" t="Include" />
             <e p="TextOverflow.cs" t="Include" />
@@ -256,7 +265,6 @@
             </e>
             <e p="UIView.cs" t="Include" />
             <e p="UIViewIMGUI.cs" t="Include" />
-            <e p="Visibility.cs" t="Include" />
           </e>
           <e p="Shaders" t="Include">
             <e p="GUIRoundedRect.shader" t="Include" />
@@ -271,6 +279,7 @@
             <e p="ElementRegistrySystem.cs" t="Include" />
             <e p="GORenderSystem.cs" t="Include" />
             <e p="IInputSystem.cs" t="Include" />
+            <e p="ILayoutSystem.cs" t="Include" />
             <e p="IMGUIInputSystem.cs" t="Include" />
             <e p="IMGUIRenderData.cs" t="Include" />
             <e p="IMGUIRenderSystem.cs" t="Include" />

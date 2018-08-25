@@ -15,16 +15,20 @@ namespace Src {
             this.outputList = outputList;
         }
         
-        public void SetParent(UIElementCreationData uiElementCreationData, UIElementCreationData instance) {
-            if (instance.element == null) {
-                uiElementCreationData.element.parent = null;
-            }
-            else {
-                uiElementCreationData.element.parent = instance.element;
-            }
+        public void SetParent(UIElementCreationData uiElementCreationData, UIElementCreationData parent) {
             outputList.Add(uiElementCreationData);
+            if (parent == null) {
+                outputList.Add(uiElementCreationData);
+                return;
+            }
+            uiElementCreationData.element.parent = parent.element;
         }
 
+        public void Clear() {
+            inputChildren.Clear();
+            outputList.Clear();
+        }
+        
         public void RegisterAll() {
             Debug.Log("Registering " + outputList.Count + " elements");
             for (int i = 0; i < outputList.Count; i++) {

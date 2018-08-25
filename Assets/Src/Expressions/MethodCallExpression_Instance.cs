@@ -4,6 +4,168 @@ using JetBrains.Annotations;
 
 namespace Src {
 
+    public class MethodCallExpression_InstanceVoid<T> : Expression<Terminal> {
+
+        public override Type YieldedType => typeof(void);
+        private readonly Action<T> method;
+
+        public MethodCallExpression_InstanceVoid(MethodInfo methodInfo, Expression[] argumentExpressions) {
+            this.method = (Action<T>) ReflectionUtil.GetDelegate(typeof(Action<T>), methodInfo);
+        }
+
+        public override object Evaluate(ExpressionContext context) {
+            method((T) context.rootContext);
+            return null;
+        }
+
+        public override Terminal EvaluateTyped(ExpressionContext context) {
+            method((T) context.rootContext);
+            return null;
+        }
+
+        public override bool IsConstant() {
+            return false;
+        }
+
+    }
+
+    public class MethodCallExpression_InstanceVoid<T, U> : Expression<Terminal> {
+
+        public override Type YieldedType => typeof(void);
+        private readonly Action<T, U> method;
+        private readonly Expression<U> argument0;
+
+        public MethodCallExpression_InstanceVoid(MethodInfo methodInfo, Expression[] argumentExpressions) {
+            this.method = (Action<T, U>) ReflectionUtil.GetDelegate(typeof(Action<T, U>), methodInfo);
+            this.argument0 = (Expression<U>) argumentExpressions[0];
+        }
+
+        public override object Evaluate(ExpressionContext context) {
+            method((T) context.rootContext, argument0.EvaluateTyped(context));
+            return null;
+        }
+
+        public override Terminal EvaluateTyped(ExpressionContext context) {
+            method((T) context.rootContext, argument0.EvaluateTyped(context));
+            return null;
+        }
+
+        public override bool IsConstant() {
+            return false;
+        }
+
+    }
+
+    public class MethodCallExpression_InstanceVoid<T, U, V> : Expression<Terminal> {
+
+        public override Type YieldedType => typeof(void);
+        private readonly Action<T, U, V> method;
+        private readonly Expression<U> argument0;
+        private readonly Expression<V> argument1;
+
+        public MethodCallExpression_InstanceVoid(MethodInfo methodInfo, Expression[] argumentExpressions) {
+            this.method = (Action<T, U, V>) ReflectionUtil.GetDelegate(typeof(Action<T, U, V>), methodInfo);
+            this.argument0 = (Expression<U>) argumentExpressions[0];
+            this.argument1 = (Expression<V>) argumentExpressions[1];
+        }
+
+        public override object Evaluate(ExpressionContext context) {
+            method((T) context.rootContext, argument0.EvaluateTyped(context), argument1.EvaluateTyped(context));
+            return null;
+        }
+
+        public override Terminal EvaluateTyped(ExpressionContext context) {
+            method((T) context.rootContext, argument0.EvaluateTyped(context), argument1.EvaluateTyped(context));
+            return null;
+        }
+
+        public override bool IsConstant() {
+            return false;
+        }
+
+    }
+
+    public class MethodCallExpression_InstanceVoid<T, U, V, W> : Expression<Terminal> {
+
+        public override Type YieldedType => typeof(void);
+        private readonly Action<T, U, V, W> method;
+        private readonly Expression<U> argument0;
+        private readonly Expression<V> argument1;
+        private readonly Expression<W> argument2;
+
+        public MethodCallExpression_InstanceVoid(MethodInfo methodInfo, Expression[] argumentExpressions) {
+            this.method = (Action<T, U, V, W>) ReflectionUtil.GetDelegate(typeof(Action<T, U, V, W>), methodInfo);
+            this.argument0 = (Expression<U>) argumentExpressions[0];
+            this.argument1 = (Expression<V>) argumentExpressions[1];
+            this.argument2 = (Expression<W>) argumentExpressions[2];
+        }
+
+        public override object Evaluate(ExpressionContext context) {
+            method((T) context.rootContext,
+                argument0.EvaluateTyped(context),
+                argument1.EvaluateTyped(context),
+                argument2.EvaluateTyped(context)
+            );
+            return null;
+        }
+
+        public override Terminal EvaluateTyped(ExpressionContext context) {
+            method((T) context.rootContext,
+                argument0.EvaluateTyped(context),
+                argument1.EvaluateTyped(context),
+                argument2.EvaluateTyped(context)
+            );
+            return null;
+        }
+
+        public override bool IsConstant() {
+            return false;
+        }
+
+    }
+
+    public class MethodCallExpression_InstanceVoid<T, U, V, W, X> : Expression<Terminal> {
+
+        public override Type YieldedType => typeof(void);
+        private readonly Action<T, U, V, W, X> method;
+        private readonly Expression<U> argument0;
+        private readonly Expression<V> argument1;
+        private readonly Expression<W> argument2;
+        private readonly Expression<X> argument3;
+
+        public MethodCallExpression_InstanceVoid(MethodInfo methodInfo, Expression[] argumentExpressions) {
+            this.method = (Action<T, U, V, W, X>) ReflectionUtil.GetDelegate(typeof(Action<T, U, V, W, X>), methodInfo);
+            this.argument0 = (Expression<U>) argumentExpressions[0];
+            this.argument1 = (Expression<V>) argumentExpressions[1];
+            this.argument2 = (Expression<W>) argumentExpressions[2];
+            this.argument3 = (Expression<X>) argumentExpressions[3];
+        }
+
+        public override object Evaluate(ExpressionContext context) {
+            method((T) context.rootContext,
+                argument0.EvaluateTyped(context),
+                argument1.EvaluateTyped(context),
+                argument2.EvaluateTyped(context),
+                argument3.EvaluateTyped(context)
+            );
+            return null;
+        }
+
+        public override Terminal EvaluateTyped(ExpressionContext context) {
+            method((T) context.rootContext,
+                argument0.EvaluateTyped(context),
+                argument1.EvaluateTyped(context),
+                argument2.EvaluateTyped(context),
+                argument3.EvaluateTyped(context)
+            );
+            return null;
+        }
+
+        public override bool IsConstant() {
+            return false;
+        }
+
+    }
     // used for methods with 0 arguments, U = context type, T = return type
     public class MethodCallExpression_Instance<U, T> : Expression<T> {
 

@@ -25,9 +25,9 @@ public class TemplateTests {
         UITextTemplate template = new UITextTemplate("'hello'");
         template.Compile(dummyTemplate);
         UIElementCreationData data = template.GetCreationData(new UITextElement(), new UITemplateContext(null));
-        Assert.IsNotEmpty(data.bindings);
-        Assert.AreEqual(1, data.bindings.Length);
-        Assert.IsInstanceOf<TextBinding_Single>(data.bindings[0]);
+        Assert.IsNotEmpty(data.constantBindings);
+        Assert.AreEqual(1, data.constantBindings.Length);
+        Assert.IsInstanceOf<TextBinding_Single>(data.constantBindings[0]);
         
     }
     
@@ -37,10 +37,10 @@ public class TemplateTests {
         UITextTemplate template = new UITextTemplate("'hello {'there'}'");
         template.Compile(dummyTemplate);
         UIElementCreationData data = template.GetCreationData(new UITextElement(), new UITemplateContext(null));
-        Assert.IsNotEmpty(data.bindings);
-        Assert.AreEqual(1, data.bindings.Length);
-        Assert.IsInstanceOf<TextBinding_Multiple>(data.bindings[0]);
-        data.bindings[0].Execute(data.element, data.context);
+        Assert.IsNotEmpty(data.constantBindings);
+        Assert.AreEqual(1, data.constantBindings.Length);
+        Assert.IsInstanceOf<TextBinding_Multiple>(data.constantBindings[0]);
+        data.constantBindings[0].Execute(data.element, data.context);
         Assert.AreEqual("hello there", As<UITextElement>(data.element).GetText());
     }
 

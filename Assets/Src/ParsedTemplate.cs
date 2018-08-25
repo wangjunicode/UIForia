@@ -82,26 +82,37 @@ namespace Src {
         private void Compile() {
             if (isCompiled) return;
 
-            Stack<UITemplate> stack = new Stack<UITemplate>();
-
-            stack.Push(rootElementTemplate);
-
-            while (stack.Count > 0) {
-                UITemplate template = stack.Pop();
-                template.CompileStyles(this);
-                template.Compile(this);
-                
-                if (template.childTemplates != null) {
-                    for (int i = 0; i < template.childTemplates.Count; i++) {
-                        stack.Push(template.childTemplates[i]);
-                    }
-                }
-                
-            }
-
-            isCompiled = true;
+            CompileStep(rootElementTemplate);
+//            Stack<UITemplate> stack = new Stack<UITemplate>();
+//
+//            stack.Push(rootElementTemplate);
+//
+//            while (stack.Count > 0) {
+//                UITemplate template = stack.Pop();
+//                
+//                template.Compile(this);
+//                
+//                if (template.childTemplates != null) {
+//                    for (int i = 0; i < template.childTemplates.Count; i++) {
+//                        stack.Push(template.childTemplates[i]);
+//                    }
+//                }
+//                
+//            }
+//
+//            isCompiled = true;
         }
 
+        private void CompileStep(UITemplate template) {
+            template.Compile(this);
+            if (template.childTemplates != null) {
+                for (int i = 0; i < template.childTemplates.Count; i++) {
+                    CompileStep(template.childTemplates[i]);
+                }
+            }
+
+        }
+        
         public UIStyle GetStyleInstance(string styleName) {
             // todo handle searching imports
             for (int i = 0; i < styles.Count; i++) {

@@ -2,9 +2,12 @@ namespace Src {
 
     public class UIRepeatChild : UIElement {
 
-        public int index;
-        public bool shown;
-
+        public UIRepeatChild() {
+            flags |= UIElementFlags.ImplicitElement;
+            flags &= ~(UIElementFlags.RequiresLayout);
+            flags &= ~(UIElementFlags.RequiresRendering);
+        }
+        
     }
 
 }

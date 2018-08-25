@@ -47,7 +47,7 @@ namespace Src.Systems {
         public void SetViewportRect(Rect viewport) { }
 
         public void OnReset() {
-            renderSkipTree.TraversePreOrderWithCallback((data => { data.unityTransform = null; }));
+            renderSkipTree.TraversePreOrder((data => { data.unityTransform = null; }));
 
             foreach (var kvp in transforms) {
                 Object.Destroy(kvp.Value.gameObject);

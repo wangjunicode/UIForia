@@ -1,6 +1,9 @@
 <?xml version="1.0" encoding="utf-8"?>
 <UITemplate>
 
+    <!--todo: add an opt-in style interface to root node-->
+    <!--acceptStyles="true"-->
+    <!--acceptOnlyStyles="['padding', 'background', 'color']"-->
     <Contents style.backgroundColor="{rgb(255, 0, 0)}" 
               style.borderColor="blue"
               style.border="rect(5f)"
@@ -10,8 +13,7 @@
               style.mainAxisAlignment="Center"
               style.crossAxisAlignment="Center"
               style.rectWidth="view(100)"
-              acceptStyles="true" 
-              acceptOnlyStyles="['padding', 'background', 'color']">
+          >
 
         <Group x-name="outer1" 
                style.mainAxisAlignment="Start" 

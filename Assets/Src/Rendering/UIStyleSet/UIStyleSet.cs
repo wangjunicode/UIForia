@@ -15,37 +15,36 @@ namespace Rendering {
         private readonly IStyleChangeHandler changeHandler;
         
         public UIStyle activeStyles;
+
+        private StyleState containedStates; 
         
         public UIStyleSet(int elementId, IStyleChangeHandler changeHandler) {
             this.elementId = elementId;
             this.changeHandler = changeHandler;
             this.currentState = StyleState.Normal;
+            this.containedStates = StyleState.Normal;
             this.activeStyles = new UIStyle();
         }
 
-        public void EnterState(StyleState type) {
-            currentState |= type;
-            changeHandler.SetPaint(elementId, paint);
+        public void EnterState(StyleState state) {
+            if (state == StyleState.Normal || (currentState & state) != 0) {
+                return;
+            }
+            currentState |= state;
+            Refresh();
         }
 
-        public void ExitState(StyleState type) {
-            if (type == StyleState.Hover) {
-                currentState &= ~(StyleState.Hover);
+        public void ExitState(StyleState state) {
+            if (state == StyleState.Normal || (currentState & state) == 0) {
+                return;
             }
+            currentState &= ~(state);
+            currentState |= StyleState.Normal;
+            Refresh();
         }
 
-        // todo -- cachable
-        public bool HasHoverStyle {
-            get {
-                if (appliedStyles == null) return false;
-                for (int i = 0; i < appliedStyles.Length; i++) {
-                    if ((appliedStyles[i].state == StyleState.Hover)) {
-                        return true;
-                    }
-                }
-                return false;
-            }
-        }
+        public bool HasHoverStyle => (containedStates & StyleState.Hover) != 0;
+        
         public UIStyleProxy hover {
             get { return new UIStyleProxy(this, StyleState.Hover); }
             // ReSharper disable once ValueParameterNotUsed
@@ -189,6 +188,31 @@ namespace Rendering {
             UIStyle style = new UIStyle();
             SetInstanceStyle(style, state);
             return style;
+        }
+        
+        // todo -- hide this again
+        public void Refresh() {
+            containedStates = StyleState.Normal;
+
+            if (appliedStyles != null) {
+
+                for (int i = 0; i < appliedStyles.Length; i++) {
+                    containedStates |= appliedStyles[i].state;
+                }
+                
+            }
+
+            changeHandler.SetPaint(elementId, paint);
+            changeHandler.SetLayout(elementId, layout);
+            changeHandler.SetConstraints(elementId, constraints);
+            changeHandler.SetMargin(elementId, margin);
+            changeHandler.SetPadding(elementId, padding);
+            changeHandler.SetBorder(elementId, border);
+            changeHandler.SetBorderRadius(elementId, borderRadius);
+            changeHandler.SetRect(elementId, rect);
+            changeHandler.SetText(elementId, textStyle);
+            changeHandler.SetAvailableStates(elementId, containedStates);
+            
         }
 
     }

@@ -47,7 +47,7 @@ namespace Src.Systems {
         }
 
         public void OnUpdate() {
-            updateTree.TraversePreOrderWithCallback((data) => data.element.OnUpdate());
+            updateTree.TraversePreOrder((data) => data.element.OnUpdate());
         }
 
         public void OnDestroy() {

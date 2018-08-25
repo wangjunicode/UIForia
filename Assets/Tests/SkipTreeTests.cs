@@ -2,6 +2,8 @@
 using NUnit.Framework;
 using Src;
 
+// ReSharper disable HeapView.CanAvoidClosure
+
 [TestFixture]
 public class SkipTreeTests {
 
@@ -22,8 +24,7 @@ public class SkipTreeTests {
         public IHierarchical Element => this;
         public IHierarchical Parent => parent;
 
-        public void OnParentChanged(ISkipTreeTraversable newParent) {
-        }
+        public void OnParentChanged(ISkipTreeTraversable newParent) { }
 
         public void OnBeforeTraverse() {
             throw new System.NotImplementedException();
@@ -45,7 +46,7 @@ public class SkipTreeTests {
         tree.AddItem(three);
         string[] output = new string[2];
         int i = 0;
-        tree.TraversePreOrderWithCallback((item) => {
+        tree.TraversePreOrder((item) => {
             output[i++] = item.name;
         });
         Assert.AreEqual(new[] { "two", "three" }, output);
@@ -62,7 +63,7 @@ public class SkipTreeTests {
         tree.AddItem(one);
         string[] output = new string[3];
         int i = 0;
-        tree.TraversePreOrderWithCallback((item) => {
+        tree.TraversePreOrder((item) => {
             output[i++] = item.name;
         });
         Assert.AreEqual(new[] { "one", "two", "three" }, output);
@@ -80,7 +81,7 @@ public class SkipTreeTests {
         tree.AddItem(one);
         string[] output = new string[3];
         int i = 0;
-        tree.TraversePreOrderWithCallback((item) => {
+        tree.TraversePreOrder((item) => {
             output[i++] = item.name;
         });
         Assert.AreEqual(new[] { "one", "three", "four" }, output);
@@ -98,12 +99,12 @@ public class SkipTreeTests {
         tree.RemoveItem(one);
         string[] output = new string[2];
         int i = 0;
-        tree.TraversePreOrderWithCallback((item) => {
+        tree.TraversePreOrder((item) => {
             output[i++] = item.name;
         });
         Assert.AreEqual(new[] { "two", "three" }, output);
     }
-    
+
     [Test]
     public void RemoveAnElementWithSiblings() {
         SkipTree<Item> tree = new SkipTree<Item>();
@@ -122,13 +123,13 @@ public class SkipTreeTests {
         tree.RemoveItem(two);
         string[] output = new string[5];
         int i = 0;
-        tree.TraversePreOrderWithCallback((item) => {
+        tree.TraversePreOrder((item) => {
             output[i++] = item.name;
         });
         Assert.AreEqual(new[] { "one", "four", "five", "six", "three" }, output);
         Assert.AreEqual(tree.Size, 5);
     }
-    
+
     [Test]
     public void RemoveAnElementHierarchy() {
         SkipTree<Item> tree = new SkipTree<Item>();
@@ -147,7 +148,7 @@ public class SkipTreeTests {
         tree.RemoveHierarchy(two);
         string[] output = new string[2];
         int i = 0;
-        tree.TraversePreOrderWithCallback((item) => {
+        tree.TraversePreOrder((item) => {
             output[i++] = item.name;
         });
         Assert.AreEqual(new[] { "one", "three" }, output);
@@ -155,7 +156,7 @@ public class SkipTreeTests {
     }
 
     [Test]
-    public void DisableHierarchy() {
+    public void DisableHierarchy_NodeInTree() {
         SkipTree<Item> tree = new SkipTree<Item>();
         var one = new Item(null, "one");
         var two = new Item(null, "two");
@@ -172,7 +173,7 @@ public class SkipTreeTests {
         tree.DisableHierarchy(two);
         string[] output = new string[2];
         int i = 0;
-        tree.TraversePreOrderWithCallback((item) => {
+        tree.TraversePreOrder((item) => {
             output[i++] = item.name;
         });
         Assert.AreEqual(new[] { "one", "three" }, output);
@@ -180,7 +181,32 @@ public class SkipTreeTests {
     }
 
     [Test]
-    public void EnableHierarchy() {
+    public void DisableHierarchy_NodeNotInTree() {
+        SkipTree<Item> tree = new SkipTree<Item>();
+        var one = new Item(null, "one");
+        var two = new Item(null, "two");
+        var three = new Item(null, "three");
+        var four = new Item(two, "four");
+        var five = new Item(two, "five");
+        var six = new Item(two, "six");
+        tree.AddItem(one);
+        // two not in tree!
+        tree.AddItem(three);
+        tree.AddItem(four);
+        tree.AddItem(five);
+        tree.AddItem(six);
+        tree.DisableHierarchy(two);
+        string[] output = new string[2];
+        int i = 0;
+        tree.TraversePreOrder((item) => {
+            output[i++] = item.name;
+        });
+        Assert.AreEqual(new[] { "one", "three" }, output);
+        Assert.AreEqual(5, tree.Size);
+    }
+
+    [Test]
+    public void EnableHierarchy_NodeInTree() {
         SkipTree<Item> tree = new SkipTree<Item>();
         var one = new Item(null, "one");
         var two = new Item(null, "two");
@@ -198,11 +224,38 @@ public class SkipTreeTests {
         tree.EnableHierarchy(two);
         string[] output = new string[6];
         int i = 0;
-        tree.TraversePreOrderWithCallback((item) => {
+        tree.TraversePreOrder((item) => {
             output[i++] = item.name;
         });
         Assert.AreEqual(new[] { "one", "two", "four", "five", "six", "three" }, output);
         Assert.AreEqual(6, tree.Size);
     }
-    
+
+    [Test]
+    public void EnableHierarchy_NodeNotInTree() {
+        SkipTree<Item> tree = new SkipTree<Item>();
+        var one = new Item(null, "one");
+        var two = new Item(null, "two");
+        var three = new Item(null, "three");
+        var four = new Item(two, "four");
+        var five = new Item(two, "five");
+        var six = new Item(two, "six");
+        tree.AddItem(one);
+        // two not in tree!
+        tree.AddItem(three);
+        tree.AddItem(four);
+        tree.AddItem(five);
+        tree.AddItem(six);
+        tree.DisableHierarchy(five);
+        tree.DisableHierarchy(four);
+        string[] output = new string[5];
+        int i = 0;
+        tree.EnableHierarchy(two);
+        tree.TraversePreOrder((item) => {
+            output[i++] = item.name;
+        });
+        Assert.AreEqual(new[] { "one", "three", "four", "five", "six" }, output);
+        Assert.AreEqual(5, tree.Size);
+    }
+
 }

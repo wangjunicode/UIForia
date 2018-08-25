@@ -11,7 +11,7 @@ namespace Src.Layout {
         protected UILayout(ITextSizeCalculator textSizeCalculator) {
             this.textSizeCalculator = textSizeCalculator;
         }
-        
+
         public abstract void Run(Rect viewport, LayoutDataSet size, Rect[] results);
 
         public virtual float GetContentWidth(LayoutData data, float contentSize, float viewportSize) {
@@ -30,33 +30,33 @@ namespace Src.Layout {
                 }
             }
             else {
-                
+
                 for (int i = 0; i < children.Count; i++) {
                     LayoutData child = children[i];
                     output = Mathf.Max(output, child.GetPreferredWidth(data.rect.width.unit, contentSize, viewportSize));
                 }
-                
+
             }
-            
+
             return output;
         }
 
         public float GetContentHeight(LayoutData data, float parentWidth, float contentSize, float viewportSize) {
-            
+
             if ((data.element.flags & UIElementFlags.TextElement) != 0) {
+                // todo -- add metrics per component about calc calls
                 if (data.previousParentWidth != parentWidth) {
                     data.previousParentWidth = parentWidth;
                     data.textContentSize.y = textSizeCalculator.CalcTextHeight(data.textContent, data.element.style, parentWidth);
-                    Debug.Log("Size at layout: " + data.textContentSize.y + "parent: " + parentWidth);
                 }
                 return data.textContentSize.y;
             }
-            
+
             List<LayoutData> children = data.children;
 
             // todo include statically positioned things who's breadth exceeds max computed
             float output = 0;
-            
+
             if (data.parameters.direction == LayoutDirection.Row) {
                 for (int i = 0; i < children.Count; i++) {
                     output = Mathf.Max(output, children[i].GetPreferredHeight(data.rect.height.unit, parentWidth, contentSize, viewportSize));
@@ -70,7 +70,7 @@ namespace Src.Layout {
 
             return output;
         }
-        
+
         public float GetPreferredWidth(LayoutData item, UIUnit parentUnit, float parentValue, float viewportValue) {
             float baseWidth = 0;
 
@@ -129,8 +129,7 @@ namespace Src.Layout {
                 default:
                     return 0;
             }
-        }     
-
+        }
 
     }
 

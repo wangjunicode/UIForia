@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Reflection;
+using JetBrains.Annotations;
 using NUnit.Framework;
 using Src;
 using Src.Compilers;
@@ -34,6 +35,93 @@ public class ExpressionCompilerTests {
             return value * multiple;
         }
 
+        public float RetnMethod0() {
+            return value;
+        }
+
+        public float RetnMethod1(float arg0) {
+            return value + arg0;
+        }
+
+        public float RetnMethod2(float arg0, float arg1) {
+            return value + arg0 + arg1;
+        }
+
+        public float RetnMethod3(float arg0, float arg1, float arg2) {
+            return value + arg0 + arg1 + arg2;
+        }
+
+        public float RetnMethod4(float arg0, float arg1, float arg2, float arg3) {
+            return value + arg0 + arg1 + arg2 + arg3;
+        }
+        
+        [UsedImplicitly]
+        public void VoidMethod0() {
+            value = 0;
+        }
+
+        [UsedImplicitly]
+        public void VoidMethod1(float one) {
+            value = one;
+        }
+
+        [UsedImplicitly]
+        public void VoidMethod2(float one, float two) {
+            value = one + two;
+        }
+
+        [UsedImplicitly]
+        public void VoidMethod3(float one, float two, float three) {
+            value = one + two + three;
+        }
+
+        [UsedImplicitly]
+        public void VoidMethod4(float one, float two, float x, float y) {
+            value = one + two + x + y;
+        }
+
+        public static string staticStringValue;
+        
+        public static void StaticVoid0() {
+            staticStringValue = "CalledStaticVoid0";
+        }
+        
+        public static void StaticVoid1(string arg0) {
+            staticStringValue = "CalledStaticVoid1_" + arg0;
+        }
+
+        public static void StaticVoid2(string arg0, string arg1) {
+            staticStringValue = "CalledStaticVoid2_" + arg0 + arg1;
+        }
+        
+        public static void StaticVoid3(string arg0, string arg1, string arg2) {
+            staticStringValue = "CalledStaticVoid3_" + arg0 + arg1 + arg2;
+        }
+        
+        public static void StaticVoid4(string arg0, string arg1, string arg2, string arg3) {
+            staticStringValue = "CalledStaticVoid4_" + arg0 + arg1 + arg2 + arg3;
+        }
+        
+        public static string StaticNonVoid0() {
+            return "StaticNonVoid0";
+        }
+        
+        public static string StaticNonVoid1(string arg0) {
+            return "StaticNonVoid1" + arg0;
+        }
+
+        public static string StaticNonVoid2(string arg0, string arg1) {
+            return "StaticNonVoid2" + arg0 + arg1;
+        }
+        
+        public static string StaticNonVoid3(string arg0, string arg1, string arg2) {
+            return  "StaticNonVoid3" + arg0 + arg1 + arg2;
+        }
+        
+        public static string StaticNonVoid4(string arg0, string arg1, string arg2, string arg3) {
+            return "StaticNonVoid4" + arg0 + arg1 + arg2 + arg3;
+        }
+        
     }
 
     private static ContextDefinition testContextDef = new ContextDefinition(typeof(TestRoot));
@@ -43,6 +131,7 @@ public class ExpressionCompilerTests {
     public void Setup() {
         testContextDef = new ContextDefinition(typeof(TestRoot));
         nullContext = new ContextDefinition(typeof(EmptyTarget));
+        TestRoot.staticStringValue = string.Empty;
     }
 
     [Test]
@@ -395,9 +484,281 @@ public class ExpressionCompilerTests {
         Assert.AreEqual(2, expression.Evaluate(ctx));
     }
 
-  
+    [Test]
+    public void MethodCallExpression_CallVoidReturnInstance() {
+        TestRoot target = new TestRoot();
+        target.value = 124;
 
+        ExpressionContext ctx = new ExpressionContext(target);
 
+        ExpressionParser parser = new ExpressionParser("{VoidMethod0()}");
+        ExpressionCompiler compiler = new ExpressionCompiler(testContextDef);
+        Expression expression = compiler.Compile(parser.Parse());
+        object retn = expression.Evaluate(ctx);
+        Assert.IsNull(retn);
+        Assert.AreEqual(0, target.value);
+    }
+
+    [Test]
+    public void MethodCallExpression_CallVoidReturnInstance_1Arg() {
+        TestRoot target = new TestRoot();
+        target.value = 124;
+
+        ExpressionContext ctx = new ExpressionContext(target);
+
+        ExpressionParser parser = new ExpressionParser("{VoidMethod1(1)}");
+        ExpressionCompiler compiler = new ExpressionCompiler(testContextDef);
+        Expression expression = compiler.Compile(parser.Parse());
+        object retn = expression.Evaluate(ctx);
+        Assert.IsNull(retn);
+        Assert.AreEqual(1, target.value);
+    }
+    
+    [Test]
+    public void MethodCallExpression_CallVoidReturnInstance_2Arg() {
+        TestRoot target = new TestRoot();
+        target.value = 124;
+
+        ExpressionContext ctx = new ExpressionContext(target);
+
+        ExpressionParser parser = new ExpressionParser("{VoidMethod2(1, 2)}");
+        ExpressionCompiler compiler = new ExpressionCompiler(testContextDef);
+        Expression expression = compiler.Compile(parser.Parse());
+        object retn = expression.Evaluate(ctx);
+        Assert.IsNull(retn);
+        Assert.AreEqual(3, target.value);
+    }
+    
+    [Test]
+    public void MethodCallExpression_CallVoidReturnInstance_3Arg() {
+        TestRoot target = new TestRoot();
+        target.value = 124;
+
+        ExpressionContext ctx = new ExpressionContext(target);
+
+        ExpressionParser parser = new ExpressionParser("{VoidMethod3(1, 2, 3)}");
+        ExpressionCompiler compiler = new ExpressionCompiler(testContextDef);
+        Expression expression = compiler.Compile(parser.Parse());
+        object retn = expression.Evaluate(ctx);
+        Assert.IsNull(retn);
+        Assert.AreEqual(6, target.value);
+    }
+    
+    [Test]
+    public void MethodCallExpression_CallVoidReturnInstance_4Arg() {
+        TestRoot target = new TestRoot();
+        target.value = 124;
+
+        ExpressionContext ctx = new ExpressionContext(target);
+
+        ExpressionParser parser = new ExpressionParser("{VoidMethod4(1, 2, 3, 4)}");
+        ExpressionCompiler compiler = new ExpressionCompiler(testContextDef);
+        Expression expression = compiler.Compile(parser.Parse());
+        object retn = expression.Evaluate(ctx);
+        Assert.IsNull(retn);
+        Assert.AreEqual(10, target.value);
+    }
+    
+    [Test]
+    public void MethodCallExpression_CallVoidReturnStatic_0Arg() {
+        TestRoot target = new TestRoot();
+        target.value = 124;
+
+        ExpressionContext ctx = new ExpressionContext(target);
+
+        ExpressionParser parser = new ExpressionParser("{StaticVoid0()}");
+        ExpressionCompiler compiler = new ExpressionCompiler(testContextDef);
+        Expression expression = compiler.Compile(parser.Parse());
+        object retn = expression.Evaluate(ctx);
+        Assert.IsNull(retn);
+        Assert.AreEqual("CalledStaticVoid0", TestRoot.staticStringValue);
+    }
+    
+    [Test]
+    public void MethodCallExpression_CallVoidReturnStatic_1Arg() {
+        TestRoot target = new TestRoot();
+        target.value = 124;
+
+        ExpressionContext ctx = new ExpressionContext(target);
+
+        ExpressionParser parser = new ExpressionParser("{StaticVoid1('yes')}");
+        ExpressionCompiler compiler = new ExpressionCompiler(testContextDef);
+        Expression expression = compiler.Compile(parser.Parse());
+        object retn = expression.Evaluate(ctx);
+        Assert.IsNull(retn);
+        Assert.AreEqual("CalledStaticVoid1_yes", TestRoot.staticStringValue);
+    }
+    
+    [Test]
+    public void MethodCallExpression_CallVoidReturnStatic_2Arg() {
+        TestRoot target = new TestRoot();
+        target.value = 124;
+
+        ExpressionContext ctx = new ExpressionContext(target);
+
+        ExpressionParser parser = new ExpressionParser("{StaticVoid2('yes','no')}");
+        ExpressionCompiler compiler = new ExpressionCompiler(testContextDef);
+        Expression expression = compiler.Compile(parser.Parse());
+        object retn = expression.Evaluate(ctx);
+        Assert.IsNull(retn);
+        Assert.AreEqual("CalledStaticVoid2_yesno", TestRoot.staticStringValue);
+    }
+    
+    [Test]
+    public void MethodCallExpression_CallVoidReturnStatic_3Arg() {
+        TestRoot target = new TestRoot();
+        target.value = 124;
+
+        ExpressionContext ctx = new ExpressionContext(target);
+
+        ExpressionParser parser = new ExpressionParser("{StaticVoid3('yes','no', 'maybe')}");
+        ExpressionCompiler compiler = new ExpressionCompiler(testContextDef);
+        Expression expression = compiler.Compile(parser.Parse());
+        object retn = expression.Evaluate(ctx);
+        Assert.IsNull(retn);
+        Assert.AreEqual("CalledStaticVoid3_yesnomaybe", TestRoot.staticStringValue);
+    }
+
+    [Test]
+    public void MethodCallExpression_CallVoidReturnStatic_4Arg() {
+        TestRoot target = new TestRoot();
+        target.value = 124;
+
+        ExpressionContext ctx = new ExpressionContext(target);
+
+        ExpressionParser parser = new ExpressionParser("{StaticVoid4('yes','no', 'maybe', 'def')}");
+        ExpressionCompiler compiler = new ExpressionCompiler(testContextDef);
+        Expression expression = compiler.Compile(parser.Parse());
+        object retn = expression.Evaluate(ctx);
+        Assert.IsNull(retn);
+        Assert.AreEqual("CalledStaticVoid4_yesnomaybedef", TestRoot.staticStringValue);
+    }
+    
+    [Test]
+    public void MethodCallExpression_CallNonVoidReturnInstance_0Arg() {
+        TestRoot target = new TestRoot();
+        target.value = 1;
+
+        ExpressionContext ctx = new ExpressionContext(target);
+
+        ExpressionParser parser = new ExpressionParser("{RetnMethod0()}");
+        ExpressionCompiler compiler = new ExpressionCompiler(testContextDef);
+        Expression expression = compiler.Compile(parser.Parse());
+        Assert.AreEqual(1 ,expression.Evaluate(ctx));
+    }
+    
+    [Test]
+    public void MethodCallExpression_CallNonVoidReturnInstance_1Arg() {
+        TestRoot target = new TestRoot();
+        target.value = 1;
+
+        ExpressionContext ctx = new ExpressionContext(target);
+
+        ExpressionParser parser = new ExpressionParser("{RetnMethod1(1f)}");
+        ExpressionCompiler compiler = new ExpressionCompiler(testContextDef);
+        Expression expression = compiler.Compile(parser.Parse());
+        Assert.AreEqual(2 ,expression.Evaluate(ctx));
+    }
+    
+    [Test]
+    public void MethodCallExpression_CallNonVoidReturnInstance_2Arg() {
+        TestRoot target = new TestRoot();
+        target.value = 1;
+
+        ExpressionContext ctx = new ExpressionContext(target);
+
+        ExpressionParser parser = new ExpressionParser("{RetnMethod2(1f, 2f)}");
+        ExpressionCompiler compiler = new ExpressionCompiler(testContextDef);
+        Expression expression = compiler.Compile(parser.Parse());
+        Assert.AreEqual(4 ,expression.Evaluate(ctx));
+    }
+
+    [Test]
+    public void MethodCallExpression_CallNonVoidReturnInstance_3Arg() {
+        TestRoot target = new TestRoot();
+        target.value = 1;
+
+        ExpressionContext ctx = new ExpressionContext(target);
+
+        ExpressionParser parser = new ExpressionParser("{RetnMethod3(1f, 2f, 3f)}");
+        ExpressionCompiler compiler = new ExpressionCompiler(testContextDef);
+        Expression expression = compiler.Compile(parser.Parse());
+        Assert.AreEqual(7 ,expression.Evaluate(ctx));
+    }
+    
+    [Test]
+    public void MethodCallExpression_CallNonVoidReturnInstance_4Arg() {
+        TestRoot target = new TestRoot();
+        target.value = 1;
+
+        ExpressionContext ctx = new ExpressionContext(target);
+
+        ExpressionParser parser = new ExpressionParser("{RetnMethod4(1f, 2f, 3f, 4f)}");
+        ExpressionCompiler compiler = new ExpressionCompiler(testContextDef);
+        Expression expression = compiler.Compile(parser.Parse());
+        Assert.AreEqual(11 ,expression.Evaluate(ctx));
+    }
+    
+    [Test]
+    public void MethodCallExpression_CallNonVoidReturnStatic_0Arg() {
+        TestRoot target = new TestRoot();
+
+        ExpressionContext ctx = new ExpressionContext(target);
+
+        ExpressionParser parser = new ExpressionParser("{StaticNonVoid0()}");
+        ExpressionCompiler compiler = new ExpressionCompiler(testContextDef);
+        Expression expression = compiler.Compile(parser.Parse());
+        Assert.AreEqual("StaticNonVoid0" ,expression.Evaluate(ctx));
+    }
+
+    [Test]
+    public void MethodCallExpression_CallNonVoidReturnStatic_1Arg() {
+        TestRoot target = new TestRoot();
+
+        ExpressionContext ctx = new ExpressionContext(target);
+
+        ExpressionParser parser = new ExpressionParser("{StaticNonVoid1('hello')}");
+        ExpressionCompiler compiler = new ExpressionCompiler(testContextDef);
+        Expression expression = compiler.Compile(parser.Parse());
+        Assert.AreEqual("StaticNonVoid1hello" ,expression.Evaluate(ctx));
+    }
+
+    [Test]
+    public void MethodCallExpression_CallNonVoidReturnStatic_2Arg() {
+        TestRoot target = new TestRoot();
+
+        ExpressionContext ctx = new ExpressionContext(target);
+
+        ExpressionParser parser = new ExpressionParser("{StaticNonVoid2('hi','there')}");
+        ExpressionCompiler compiler = new ExpressionCompiler(testContextDef);
+        Expression expression = compiler.Compile(parser.Parse());
+        Assert.AreEqual("StaticNonVoid2hithere" ,expression.Evaluate(ctx));
+    }
+
+    [Test]
+    public void MethodCallExpression_CallNonVoidReturnStatic_3Arg() {
+        TestRoot target = new TestRoot();
+
+        ExpressionContext ctx = new ExpressionContext(target);
+
+        ExpressionParser parser = new ExpressionParser("{StaticNonVoid3('hi','there', 'how')}");
+        ExpressionCompiler compiler = new ExpressionCompiler(testContextDef);
+        Expression expression = compiler.Compile(parser.Parse());
+        Assert.AreEqual("StaticNonVoid3hitherehow" ,expression.Evaluate(ctx));
+    }
+    
+    [Test]
+    public void MethodCallExpression_CallNonVoidReturnStatic_4Arg() {
+        TestRoot target = new TestRoot();
+
+        ExpressionContext ctx = new ExpressionContext(target);
+
+        ExpressionParser parser = new ExpressionParser("{StaticNonVoid4('hi','there', 'how', 'areya')}");
+        ExpressionCompiler compiler = new ExpressionCompiler(testContextDef);
+        Expression expression = compiler.Compile(parser.Parse());
+        Assert.AreEqual("StaticNonVoid4hitherehowareya" ,expression.Evaluate(ctx));
+    }
+    
     [Test]
     public void ResolveConstantEnumAlias() {
         TestRoot target = new TestRoot();
@@ -409,8 +770,6 @@ public class ExpressionCompilerTests {
         Assert.IsInstanceOf<ConstantExpression<TestUtils.TestEnum>>(expression);
         Assert.AreEqual(TestUtils.TestEnum.One, expression.Evaluate(ctx));
     }
-
-
 
     [Test]
     public void ResolveNonStandardAliasType() {

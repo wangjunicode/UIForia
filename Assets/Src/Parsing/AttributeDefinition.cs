@@ -12,6 +12,7 @@ namespace Src {
 
         private static readonly string[] EmptyModifierList = new string[0];
         public ExpressionNode bindingExpression;
+        public bool isCompiled;
 
         public AttributeDefinition(string key, string value) {
             this.key = key.Trim();

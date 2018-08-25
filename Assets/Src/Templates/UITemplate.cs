@@ -1,122 +1,104 @@
-using System;
 using System.Collections.Generic;
 using System.Linq;
 using Rendering;
 using Src.Compilers;
+using Src.InputBindings;
 using Src.StyleBindings;
 
 namespace Src {
 
-    public class StyleDefinition {
-
-        public List<UIStyle> baseStyles;
-        public StyleBinding[] constantBindings;
-
-    }
-
     public abstract class UITemplate {
 
-        private string name;
-        public readonly List<UITemplate> childTemplates;
+        public List<UITemplate> childTemplates;
         public readonly List<AttributeDefinition> attributes;
 
-        private readonly StyleDefinition styleDefinition;
-        private Binding[] bindings; // used for output
-        protected readonly List<Binding> bindingList = new List<Binding>(); // used for compilation
-        private static readonly StyleBindingCompiler styleCompiler = new StyleBindingCompiler();
+        private Binding[] bindings;
+        private InputBinding[] inputBindings;
+        private Binding[] constantBindings;
+        
+        private List<UIStyle> baseStyles;
+        private List<StyleBinding> constantStyleBindings;
+
+        protected List<Binding> bindingList;
+
+        private static readonly StyleBindingCompiler styleCompiler = new StyleBindingCompiler(null);
+        private static readonly InputBindingCompiler inputCompiler = new InputBindingCompiler(null);
+        private static readonly PropertyBindingCompiler propCompiler = new PropertyBindingCompiler(null);
 
         protected UITemplate(List<UITemplate> childTemplates, List<AttributeDefinition> attributes = null) {
             this.childTemplates = childTemplates;
             this.attributes = attributes;
-            styleDefinition = new StyleDefinition();
-            bindings = Binding.EmptyArray;
+            
+            this.baseStyles = new List<UIStyle>();
+            this.bindingList = new List<Binding>();
+            this.constantStyleBindings = new List<StyleBinding>();
+            
+            this.bindings = Binding.EmptyArray;
+            this.inputBindings = InputBinding.EmptyArray;
+            this.constantBindings = Binding.EmptyArray;
         }
 
         public UIElementCreationData GetCreationData(UIElement element, UITemplateContext context) {
             UIElementCreationData data = new UIElementCreationData();
-            data.name = name;
             data.element = element;
             data.context = context;
-            data.style = styleDefinition;
+            data.baseStyles = baseStyles;
+            
             data.bindings = bindings;
+            data.inputBindings = inputBindings;
+            data.constantBindings = constantBindings;
+            data.constantStyleBindings = constantStyleBindings;
             return data;
         }
 
         public abstract UIElementCreationData CreateScoped(TemplateScope scope);
 
-//        public abstract Type ElementType { get; }
-
-        public void CompileStyles(ParsedTemplate template) {
+        public void CompileStyleBindings(ParsedTemplate template) {
             if (attributes == null || attributes.Count == 0) return;
 
-            List<UIStyle> baseStyles = null;
-            List<StyleBinding> styleList = null;
-
+            styleCompiler.SetContext(template.contextDefinition);
             for (int i = 0; i < attributes.Count; i++) {
                 AttributeDefinition attr = attributes[i];
+                StyleBinding binding = styleCompiler.Compile(attr);
+                if(binding == null) continue;
 
-                if (!attr.key.StartsWith("style")) continue;
-
-                baseStyles = baseStyles ?? new List<UIStyle>();
-
-                if (attr.key == "style") {
-                    if (attr.value.IndexOf(' ') != -1) {
-                        string[] names = attr.value.Split(' ');
-                        foreach (string part in names) {
-                            UIStyle style = template.GetStyleInstance(part);
-                            if (style != null) {
-                                baseStyles.Add(style);
-                            }
-                        }
-                    }
-                    else {
-                        UIStyle style = template.GetStyleInstance(attr.value);
-                        if (style != null) {
-                            baseStyles.Add(style);
-                        }
-                    }
+                if (binding.IsConstant()) {
+                    constantStyleBindings.Add(binding);
                 }
                 else {
-                    styleList = styleList ?? new List<StyleBinding>();
-                    styleList.Add(styleCompiler.Compile(template.contextDefinition, attr.key, attr.value));
+                    bindingList.Add(binding);
                 }
             }
+            
+        }
 
-            if (baseStyles != null) {
-                styleDefinition.baseStyles = baseStyles;
-            }
+        public virtual void CompileInputBindings(ParsedTemplate template) {
+            inputCompiler.SetContext(template.contextDefinition);
+            inputBindings = inputCompiler.Compile(attributes).ToArray();
+        }
 
-            if (styleList == null) return;
-
-            styleDefinition.constantBindings = styleList.Where((s) => s.IsConstant()).ToArray();
-            bindingList.AddRange(styleList.Where((s) => !s.IsConstant()));
+        public virtual void CompilePropertyBindings(ParsedTemplate template) {
+            if (attributes == null || attributes.Count == 0) return;
+            propCompiler.SetContext(template.contextDefinition);
+            
+            // todo -- filter out already compiled attributes, warn if attribute was already handled
+//            propCompiler.CompileAttribute(attributes.Where(a) => !a.isCompiled);
+            // set constant bindings here
         }
 
         public virtual bool Compile(ParsedTemplate template) {
-            AttributeDefinition nameAttr = GetAttribute("x-name");
-            bindings = new Binding[bindingList.Count];
-            if (nameAttr != null) {
-                this.name = nameAttr.value;
-            }
-
-            bindings = bindingList.ToArray();
+            ResolveBaseStyles(template);
+            CompileStyleBindings(template);
+            CompileInputBindings(template);
+            CompilePropertyBindings(template);
+            ResolveConstantBindings();
             return true;
         }
 
-        protected List<AttributeDefinition> GetUserAttributes() {
-            return attributes.Where((a) => {
-                return !a.key.StartsWith("style") && a.key != "name";
-            }).ToList();
-        }
-
-        protected bool HasAttribute(string attributeName) {
-            if (attributes == null) return false;
-
-            for (int i = 0; i < attributes.Count; i++) {
-                if (attributes[i].key == attributeName) return true;
-            }
-
-            return false;
+        protected void ResolveConstantBindings() {
+            bindings = bindingList.Where((binding) => !binding.IsConstant()).ToArray();
+            constantBindings = bindingList.Where((binding) => binding.IsConstant()).ToArray();
+            bindingList = null;
         }
 
         protected AttributeDefinition GetAttribute(string attributeName) {
@@ -129,6 +111,24 @@ namespace Src {
             return null;
         }
 
+        protected List<AttributeDefinition> GetUncompiledAttributes() {
+            return attributes.Where((attr) => !attr.isCompiled).ToList();
+        }
+        
+        private void ResolveBaseStyles(ParsedTemplate template) {
+            AttributeDefinition styleAttr = GetAttribute("style");
+            if (styleAttr == null) return;
+
+            string[] names = styleAttr.value.Split(' ');
+            foreach (string part in names) {
+                UIStyle style = template.GetStyleInstance(part);
+                if (style != null) {
+                    baseStyles.Add(style);
+                }
+            }
+        }
+
+      
     }
 
 }

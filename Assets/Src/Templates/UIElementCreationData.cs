@@ -1,19 +1,26 @@
+using System.Collections.Generic;
+using Rendering;
+using Src.InputBindings;
+using Src.StyleBindings;
+
 namespace Src {
 
-    public struct UIElementCreationData {
+    public class UIElementCreationData {
 
-        public string name;
         public UIElement element;
         public Binding[] bindings;
-        public StyleDefinition style;
+        public InputBinding[] inputBindings;
+        public Binding[] constantBindings;
+        public List<UIStyle> baseStyles;
+        public List<StyleBinding> constantStyleBindings;
+        
         public UITemplateContext context;
 
-        public UIElementCreationData(string name, UIElement element, UITemplateContext context, StyleDefinition style = null, Binding[] bindings = null) {
-            this.name = name;
-            this.element = element;
-            this.context = context;
-            this.style = style;
-            this.bindings = bindings ?? Binding.EmptyArray;
+        public int elementId => element.id;
+        public string name => element.name;
+        
+        public int GetSiblingIndex() {
+            return 0;
         }
 
         public int GetDepth() {

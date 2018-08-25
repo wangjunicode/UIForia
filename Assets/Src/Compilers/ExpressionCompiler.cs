@@ -7,9 +7,12 @@ using Src.Compilers.CastHandlers;
 
 namespace Src {
 
+    // takes the place of void since generics can't use void types
+    public sealed class Terminal { }
+
     public class ExpressionCompiler {
 
-        private readonly ContextDefinition context;
+        private ContextDefinition context;
         private List<ICastHandler> userCastHandlers;
 
         private static readonly ExpressionParser parser = new ExpressionParser();
@@ -47,7 +50,7 @@ namespace Src {
         public Expression Compile(string source) {
             return Visit(parser.Parse(source));
         }
-        
+
         [PublicAPI]
         public Expression Compile(Type outputType, string source) {
             return HandleCasting(outputType, Visit(parser.Parse(source)));
@@ -70,6 +73,11 @@ namespace Src {
         [PublicAPI]
         public void RemoveCastHandler(ICastHandler handler) {
             userCastHandlers?.Remove(handler);
+        }
+
+        [PublicAPI]
+        public void SetContext(ContextDefinition contextDefinition) {
+            this.context = contextDefinition;
         }
 
         private Expression Visit(ExpressionNode node) {
@@ -200,27 +208,52 @@ namespace Src {
             MethodInfo info = (MethodInfo) context.ResolveConstAlias(methodName, yieldedTypes);
 
             info = info ?? ReflectionUtil.GetMethodInfo(context.rootType, methodName);
-            
+
             if (info == null) {
-                
+
                 throw new Exception($"Cannot find method {methodName} on type {context.rootType.Name} or any registered aliases");
             }
 
+            MethodType methodType = 0;
+            bool isVoid = info.ReturnType == typeof(void);
+
             if (info.IsStatic) {
-                return VisitMethodCallExpression_Static(info, node);
+                methodType |= MethodType.Static;
+                //return VisitMethodCallExpression_Static(info, node);
+            }
+            else {
+                methodType |= MethodType.Instance;
+            }
+            if (isVoid) {
+                methodType |= MethodType.Void;
             }
 
             ParameterInfo[] parameters = info.GetParameters();
             IReadOnlyList<ExpressionNode> signatureParts = node.signatureNode.parts;
 
             if (parameters.Length != signatureParts.Count) {
-                throw new Exception("Argument count is wrong");
+                throw new Exception("Argument count is wrong for method " 
+                                    + methodName + " expected: " + parameters.Length 
+                                    + " but was provided: " + signatureParts.Count);
+            }
+
+            int genericOffset = 0;
+            int extraArgumentCount = 2;
+
+            if ((methodType & MethodType.Void) != 0) {
+                extraArgumentCount--;
+            }
+            if ((methodType & MethodType.Static) != 0) {
+                extraArgumentCount--;
             }
 
             Expression[] args = new Expression[signatureParts.Count];
-            Type[] genericArguments = new Type[signatureParts.Count + 2];
+            Type[] genericArguments = new Type[signatureParts.Count + extraArgumentCount];
 
-            genericArguments[0] = context.rootType; // todo -- this means root functions only, no chaining right now! 
+            if ((methodType & MethodType.Instance) != 0) {
+                genericArguments[0] = context.rootType; // todo -- this means root functions only, no chaining right now! 
+                genericOffset = 1;
+            }
 
             for (int i = 0; i < args.Length; i++) {
                 Type requiredType = parameters[i].ParameterType;
@@ -228,44 +261,109 @@ namespace Src {
                 Expression argumentExpression = Visit(argumentNode);
                 args[i] = HandleCasting(requiredType, argumentExpression);
 
-                genericArguments[i + 1] = args[i].YieldedType;
+                genericArguments[i + genericOffset] = args[i].YieldedType;
             }
 
-            genericArguments[genericArguments.Length - 1] = info.ReturnType;
+            if ((methodType & MethodType.Void) == 0) {
+                genericArguments[genericArguments.Length - 1] = info.ReturnType;
+            }
 
             ValidateParameterTypes(parameters, args);
 
-            Type callType;
-            switch (args.Length) {
-                case 0:
-                    callType = ReflectionUtil.CreateGenericType(typeof(MethodCallExpression_Instance<,>), genericArguments);
-                    break;
-
-                case 1:
-                    callType = ReflectionUtil.CreateGenericType(typeof(MethodCallExpression_Instance<,,>), genericArguments);
-                    break;
-
-                case 2:
-                    callType = ReflectionUtil.CreateGenericType(typeof(MethodCallExpression_Instance<,,,>), genericArguments);
-                    break;
-
-                case 3:
-                    callType = ReflectionUtil.CreateGenericType(typeof(MethodCallExpression_Instance<,,,,>), genericArguments);
-                    break;
-
-                case 4:
-                    callType = ReflectionUtil.CreateGenericType(typeof(MethodCallExpression_Instance<,,,,,>), genericArguments);
-                    break;
-
-                default:
-                    throw new Exception(
-                        $"Expressions only support functions with up to 4 arguments. {methodName} is supplying {args.Length} ");
-            }
+            Type callType = GetMethodCallType(methodName, args.Length, genericArguments, methodType);
 
             ReflectionUtil.ObjectArray2[0] = info;
             ReflectionUtil.ObjectArray2[1] = args;
 
             return (Expression) ReflectionUtil.CreateGenericInstance(callType, ReflectionUtil.ObjectArray2);
+        }
+
+        [Flags]
+        private enum MethodType {
+
+            Static = 1 << 0,
+            Instance = 1 << 1,
+            Void = 1 << 2,
+
+            InstanceVoid = Instance | Void,
+            StaticVoid = Static | Void
+
+        }
+
+        private Type GetMethodCallType(string methodName, int argumentCount, Type[] genericArguments, MethodType methodType) {
+            switch (argumentCount) {
+                case 0:
+
+                    switch (methodType) {
+                        case MethodType.Static:
+                            return ReflectionUtil.CreateGenericType(typeof(MethodCallExpression_Static<>), genericArguments);
+                        case MethodType.StaticVoid:
+                            return typeof(MethodCallExpression_StaticVoid);
+                        case MethodType.InstanceVoid:
+                            return ReflectionUtil.CreateGenericType(typeof(MethodCallExpression_InstanceVoid<>), genericArguments);
+                        case MethodType.Instance:
+                            return ReflectionUtil.CreateGenericType(typeof(MethodCallExpression_Instance<,>), genericArguments);
+                        default:
+                            throw new Exception("Cannot create method");
+                    }
+                case 1:
+                    switch (methodType) {
+                        case MethodType.Static:
+                            return ReflectionUtil.CreateGenericType(typeof(MethodCallExpression_Static<,>), genericArguments);
+                        case MethodType.StaticVoid:
+                            return ReflectionUtil.CreateGenericType(typeof(MethodCallExpression_StaticVoid<>), genericArguments);
+                        case MethodType.InstanceVoid:
+                            return ReflectionUtil.CreateGenericType(typeof(MethodCallExpression_InstanceVoid<,>), genericArguments);
+                        case MethodType.Instance:
+                            return ReflectionUtil.CreateGenericType(typeof(MethodCallExpression_Instance<,,>), genericArguments);
+                        default:
+                            throw new Exception("Cannot create method");
+                    }
+                case 2:
+                    switch (methodType) {
+                        case MethodType.Static:
+                            return ReflectionUtil.CreateGenericType(typeof(MethodCallExpression_Static<,,>), genericArguments);
+                        case MethodType.StaticVoid:
+                            return ReflectionUtil.CreateGenericType(typeof(MethodCallExpression_StaticVoid<,>), genericArguments);
+                        case MethodType.InstanceVoid:
+                            return ReflectionUtil.CreateGenericType(typeof(MethodCallExpression_InstanceVoid<,,>), genericArguments);
+                        case MethodType.Instance:
+                            return ReflectionUtil.CreateGenericType(typeof(MethodCallExpression_Instance<,,,>), genericArguments);
+                        default:
+                            throw new Exception("Cannot create method");
+                    }
+                case 3:
+                    switch (methodType) {
+                        case MethodType.Static:
+                            return ReflectionUtil.CreateGenericType(typeof(MethodCallExpression_Static<,,,>), genericArguments);
+                        case MethodType.StaticVoid:
+                            return ReflectionUtil.CreateGenericType(typeof(MethodCallExpression_StaticVoid<,,>), genericArguments);
+                        case MethodType.InstanceVoid:
+                            return ReflectionUtil.CreateGenericType(typeof(MethodCallExpression_InstanceVoid<,,,>), genericArguments);
+                        case MethodType.Instance:
+                            return ReflectionUtil.CreateGenericType(typeof(MethodCallExpression_Instance<,,,,>), genericArguments);
+                        default:
+                            throw new Exception("Cannot create method");
+                    }
+
+                case 4:
+                    switch (methodType) {
+                        case MethodType.Static:
+                            return ReflectionUtil.CreateGenericType(typeof(MethodCallExpression_Static<,,,,>), genericArguments);
+                        case MethodType.StaticVoid:
+                            return ReflectionUtil.CreateGenericType(typeof(MethodCallExpression_StaticVoid<,,,>), genericArguments);
+                        case MethodType.InstanceVoid:
+                            return ReflectionUtil.CreateGenericType(typeof(MethodCallExpression_InstanceVoid<,,,,>), genericArguments);
+                        case MethodType.Instance:
+                            return ReflectionUtil.CreateGenericType(typeof(MethodCallExpression_Instance<,,,,,>), genericArguments);
+                        default:
+                            throw new Exception("Cannot create method");
+                    }
+
+                default:
+                    throw new Exception(
+                        $"Expressions only support functions with up to 4 arguments. {methodName} is supplying {argumentCount} ");
+            }
         }
 
         private Expression VisitAliasNode(AliasExpressionNode node) {

@@ -17,8 +17,12 @@ namespace Src.Systems {
         event ConstraintChanged onConstraintChanged;
         event BorderRadiusChanged onBorderRadiusChanged;
         event FontPropertyChanged onFontPropertyChanged;
-
+        event AvailableStatesChanged onAvailableStatesChanged;
+        
         UIStyleSet GetStyleForElement(int elementId);
+
+        void EnterState(int elementId, StyleState state);
+        void ExitState(int elementId, StyleState state);
 
     }
 

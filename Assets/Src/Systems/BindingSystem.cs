@@ -1,4 +1,5 @@
 ﻿using Rendering;
+using UnityEngine;
 
 namespace Src.Systems {
 
@@ -29,8 +30,12 @@ namespace Src.Systems {
         public void OnInitialize() { }
 
         public void OnElementCreated(UIElementCreationData data) {
+            if (data.constantBindings.Length != 0) {
+                for (int i = 0; i < data.constantBindings.Length; i++) {
+                    data.constantBindings[i].Execute(data.element, data.context);
+                }
+            }
             if (data.bindings.Length == 0) return;
-
             bindingSkipTree.AddItem(new TemplateBinding(data.element, data.bindings, data.context));
         }
 

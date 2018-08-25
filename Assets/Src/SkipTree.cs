@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Diagnostics;
-using System.Linq;
 using JetBrains.Annotations;
 
 namespace Src {
@@ -22,18 +21,11 @@ namespace Src {
     }
 
     // need to support a version w/ integer keys instead of / in addition to item keys
-    // needs better traversal support
-    // needs better hierarchy support
     // should not require traversal callbacks
-    // needs a better way to get root items
-    // traverse from node (or where node should be)
     // specify node type? ie extend SkipTreeNode<T>
-    // set root node? probably doesn't make sense since hierarchies
-    //                could add 2 children of 'real root' but not the root itself
     // better ToList / ToArray support w/o allocation
-    // better GetRoot w/o allocation
-    // traverse all vs traverse enabled
     // maintain enabled count?
+
     public class SkipTree<T> where T : class, IHierarchical, ISkipTreeTraversable {
 
         private readonly SkipTreeNode<T> root;
@@ -53,6 +45,15 @@ namespace Src {
             T[] retn = new T[root.childCount];
             GetRootItems(ref retn);
             return retn;
+        }
+
+        [PublicAPI]
+        public void GetRootItems(IList<T> roots) {
+            SkipTreeNode<T> ptr = root.firstChild;
+            while (ptr != null) {
+                roots.Add(ptr.item);
+                ptr = ptr.nextSibling;
+            }
         }
 
         [PublicAPI]
@@ -87,8 +88,9 @@ namespace Src {
         }
 
         [PublicAPI]
-        public T GetItem<U>(U key) where U : IHierarchical {
+        public T GetItem<U>(U key) where U : class, IHierarchical {
             SkipTreeNode<T> node;
+
             if (nodeMap.TryGetValue(key, out node)) {
                 return node.item;
             }
@@ -180,7 +182,7 @@ namespace Src {
             root.firstChild = null;
             root.nextSibling = null;
         }
-        
+
         [PublicAPI]
         public int GetChildCount(T element) {
             SkipTreeNode<T> node;
@@ -252,24 +254,12 @@ namespace Src {
 
         [PublicAPI]
         public void EnableHierarchy(T item) {
-            SkipTreeNode<T> node;
-            IHierarchical element = item.Element;
-            if (!nodeMap.TryGetValue(element, out node)) {
-                return;
-            }
-
-            node.isDisabled = false;
+            TraverseNodes(false, item, (isDisabled, n) => n.isDisabled = isDisabled, true);
         }
 
         [PublicAPI]
         public void DisableHierarchy(T item) {
-            SkipTreeNode<T> node;
-            IHierarchical element = item.Element;
-            if (!nodeMap.TryGetValue(element, out node)) {
-                return;
-            }
-
-            node.isDisabled = true;
+            TraverseNodes(true, item, (isDisabled, n) => n.isDisabled = isDisabled, false);
         }
 
         [PublicAPI]
@@ -306,62 +296,49 @@ namespace Src {
             }
         }
 
+        public void TraversePreOrder(Action<T> traverseFn, bool includeDisabled = false) {
+            // SkipTreeNode<T> ptr = root.firstChild;
+            //  while (ptr != null) {
+            TraversePreOrderCallbackStep(root, traverseFn, includeDisabled);
+            //    ptr = ptr.nextSibling;
+            // }
+        }
 
-        public void TraversePreOrderWithCallback(Action<T> traverseFn) {
-            SkipTreeNode<T> ptr = root.firstChild;
-            Stack<SkipTreeNode<T>> stack = new Stack<SkipTreeNode<T>>();
+        public void TraversePreOrder<U>(U closureArg, Action<U, T> traverseFn, bool includeDisabled = false) {
+            TraversePreOrderCallbackStep(root, closureArg, traverseFn, includeDisabled);
+        }
 
-            while (ptr != null) {
-                if (!ptr.isDisabled) {
-                    stack.Push(ptr);
-                }
-
-                ptr = ptr.nextSibling;
+        public void TraversePreOrder(T item, Action<T> traverseFn, bool includeDisabled = false) {
+            SkipTreeNode<T> node;
+            if (nodeMap.TryGetValue(item, out node)) {
+                TraversePreOrderCallbackStep(node, traverseFn, includeDisabled);
+                return;
             }
-
-            while (stack.Count > 0) {
-                SkipTreeNode<T> current = stack.Pop();
-
-                traverseFn(current.item);
-
-                ptr = current.firstChild;
-
-                while (ptr != null) {
-                    if (!ptr.isDisabled) {
-                        stack.Push(ptr);
-                    }
-
-                    ptr = ptr.nextSibling;
+            SkipTreeNode<T> parent = FindParent(item);
+            parent = parent ?? root;
+            SkipTreeNode<T> ptr = parent.firstChild;
+            while (ptr != null) {
+                if (IsDescendentOf(ptr.item, item)) {
+                    TraversePreOrderCallbackStep(ptr, traverseFn, includeDisabled);
                 }
+                ptr = ptr.nextSibling;
             }
         }
-        
-        public void TraversePreOrderWithCallback<U>(U closureArg, Action<U, T> traverseFn) {
-            SkipTreeNode<T> ptr = root.firstChild;
-            Stack<SkipTreeNode<T>> stack = new Stack<SkipTreeNode<T>>();
 
-            while (ptr != null) {
-                if (!ptr.isDisabled) {
-                    stack.Push(ptr);
-                }
-
-                ptr = ptr.nextSibling;
+        public void TraversePreOrder<U>(T item, U closureArg, Action<U, T> traverseFn, bool includeDisabled = false) {
+            SkipTreeNode<T> node;
+            if (nodeMap.TryGetValue(item, out node)) {
+                TraversePreOrderCallbackStep(node, closureArg, traverseFn, includeDisabled);
+                return;
             }
-
-            while (stack.Count > 0) {
-                SkipTreeNode<T> current = stack.Pop();
-
-                traverseFn(closureArg, current.item);
-
-                ptr = current.firstChild;
-
-                while (ptr != null) {
-                    if (!ptr.isDisabled) {
-                        stack.Push(ptr);
-                    }
-
-                    ptr = ptr.nextSibling;
+            SkipTreeNode<T> parent = FindParent(item);
+            parent = parent ?? root;
+            SkipTreeNode<T> ptr = parent.firstChild;
+            while (ptr != null) {
+                if (IsDescendentOf(ptr.item, item)) {
+                    TraversePreOrderCallbackStep(ptr, closureArg, traverseFn, includeDisabled);
                 }
+                ptr = ptr.nextSibling;
             }
         }
 
@@ -374,16 +351,67 @@ namespace Src {
             }
         }
 
-        public T[] ToArray() {
+        public T[] ToArray(bool includeDisabled = false) {
             // todo accept array argument to avoid allocation
-            TraversePreOrderWithCallback(scratchList, (list, node) => {
+            TraversePreOrder(scratchList, (list, node) => {
                 list.Add(node);
-            });
+            }, includeDisabled);
             T[] retn = scratchList.ToArray();
             scratchList.Clear();
             return retn;
         }
-        
+
+        private void TraverseNodes<U>(U closureArg, T item, Action<U, SkipTreeNode<T>> traverseFn, bool includeDisabled) {
+            SkipTreeNode<T> node;
+            if (nodeMap.TryGetValue(item, out node)) {
+                TraverseNodesStep(closureArg, node, traverseFn, includeDisabled);
+                return;
+            }
+            SkipTreeNode<T> parent = FindParent(item);
+            parent = parent ?? root;
+            SkipTreeNode<T> ptr = parent.firstChild;
+            while (ptr != null) {
+                if (IsDescendentOf(ptr.item, item)) {
+                    TraverseNodesStep(closureArg, ptr, traverseFn, includeDisabled);
+                }
+                ptr = ptr.nextSibling;
+            }
+        }
+
+        private void TraverseNodesStep<U>(U closureArg, SkipTreeNode<T> startNode, Action<U, SkipTreeNode<T>> traverseFn, bool includeDisabled) {
+            if (startNode.isDisabled && !includeDisabled) {
+                return;
+            }
+            
+            traverseFn(closureArg, startNode);
+
+            SkipTreeNode<T> ptr = startNode.firstChild;
+
+            if (ptr == null) return;
+
+            // todo -- pool stacks
+            Stack<SkipTreeNode<T>> stack = new Stack<SkipTreeNode<T>>();
+
+            while (ptr != null) {
+                if (includeDisabled || !ptr.isDisabled) {
+                    stack.Push(ptr);
+                }
+                ptr = ptr.nextSibling;
+            }
+
+            while (stack.Count > 0) {
+                SkipTreeNode<T> current = stack.Pop();
+                traverseFn(closureArg, current);
+                ptr = current.firstChild;
+                while (ptr != null) {
+                    if (includeDisabled || !ptr.isDisabled) {
+                        stack.Push(ptr);
+                    }
+                    ptr = ptr.nextSibling;
+                }
+            }
+        }
+
         private void TraverseRecursePreorderStep(SkipTreeNode<T> node) {
             if (node.isDisabled) return;
 
@@ -396,6 +424,69 @@ namespace Src {
             }
 
             node.item.OnAfterTraverse();
+        }
+
+        private void TraversePreOrderCallbackStep(SkipTreeNode<T> startNode, Action<T> traverseFn, bool includeDisabled) {
+
+            if (startNode.isDisabled && !includeDisabled) {
+                return;
+            }
+
+            if (startNode != root) {
+                traverseFn(startNode.item);
+            }
+            
+            if (startNode.firstChild == null) {
+                return;
+            }
+
+            SkipTreeNode<T> ptr = startNode.firstChild;
+            // todo -- pool stacks
+            Stack<SkipTreeNode<T>> stack = new Stack<SkipTreeNode<T>>();
+
+            while (ptr != null) {
+                if (includeDisabled || !ptr.isDisabled) {
+                    stack.Push(ptr);
+                }
+                ptr = ptr.nextSibling;
+            }
+
+            while (stack.Count > 0) {
+                SkipTreeNode<T> current = stack.Pop();
+                traverseFn(current.item);
+                ptr = current.firstChild;
+                while (ptr != null) {
+                    if (includeDisabled || !ptr.isDisabled) {
+                        stack.Push(ptr);
+                    }
+                    ptr = ptr.nextSibling;
+                }
+            }
+        }
+
+        private void TraversePreOrderCallbackStep<U>(SkipTreeNode<T> startNode, U closureArg, Action<U, T> traverseFn, bool includeDisabled) {
+            SkipTreeNode<T> ptr = startNode.firstChild;
+            // todo -- pool stacks
+            Stack<SkipTreeNode<T>> stack = new Stack<SkipTreeNode<T>>();
+
+            while (ptr != null) {
+                if (includeDisabled || !ptr.isDisabled) {
+                    stack.Push(ptr);
+                }
+                ptr = ptr.nextSibling;
+            }
+
+            while (stack.Count > 0) {
+                SkipTreeNode<T> current = stack.Pop();
+                traverseFn(closureArg, current.item);
+                ptr = current.firstChild;
+                while (ptr != null) {
+                    if (includeDisabled || !ptr.isDisabled) {
+                        stack.Push(ptr);
+                    }
+                    ptr = ptr.nextSibling;
+                }
+            }
         }
 
         private SkipTreeNode<T> FindPreviousSibling(SkipTreeNode<T> node) {
@@ -461,6 +552,7 @@ namespace Src {
                 }
             }
 
+            inserted.isDisabled = parent.isDisabled;
             inserted.nextSibling = parent.firstChild;
             parent.firstChild = inserted;
         }
@@ -472,10 +564,8 @@ namespace Src {
                 if (nodeMap.TryGetValue(ptr, out node)) {
                     return node;
                 }
-
                 ptr = ptr.Parent;
             }
-
             return null;
         }
 
@@ -485,10 +575,8 @@ namespace Src {
                 if (ptr == parent.Element) {
                     return true;
                 }
-
                 ptr = ptr.Parent;
             }
-
             return false;
         }
 
@@ -508,8 +596,6 @@ namespace Src {
             }
 
         }
-
-       
 
     }
 

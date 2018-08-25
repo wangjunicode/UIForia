@@ -9,7 +9,7 @@ namespace Rendering {
         public UIViewIMGUI(Type elementType) : base(elementType) {
             layoutSystem = new LayoutSystem(new IMGUITextSizeCalculator(), elementSystem, styleSystem);
             renderSystem = new IMGUIRenderSystem(elementSystem, styleSystem, layoutSystem);
-            inputSystem = new IMGUIInputSystem(layoutSystem, styleSystem);
+            inputSystem = new IMGUIInputSystem(layoutSystem, elementSystem, styleSystem);
         }
 
         public void SetViewRect(Rect viewportRect) {

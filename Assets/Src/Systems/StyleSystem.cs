@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using Rendering;
+using Src.StyleBindings;
 
 namespace Src.Systems {
 
@@ -19,6 +20,8 @@ namespace Src.Systems {
 
     public delegate void FontPropertyChanged(int elementId, TextStyle textStyle);
 
+    public delegate void AvailableStatesChanged(int elementId, StyleState state);
+
     public class StyleSystem : ISystem, IStyleSystem {
 
         public event PaintChanged onPaintChanged;
@@ -30,6 +33,7 @@ namespace Src.Systems {
         public event ConstraintChanged onConstraintChanged;
         public event BorderRadiusChanged onBorderRadiusChanged;
         public event FontPropertyChanged onFontPropertyChanged;
+        public event AvailableStatesChanged onAvailableStatesChanged;
 
         private readonly Dictionary<int, UIStyleSet> styleMap;
 
@@ -49,27 +53,27 @@ namespace Src.Systems {
 
         public void OnElementCreated(UIElementCreationData elementData) {
             UIElement element = elementData.element;
-            StyleDefinition style = elementData.style;
             UITemplateContext context = elementData.context;
 
-            if (style == null) return;
+            List<UIStyle> baseStyles = elementData.baseStyles;
+            List<StyleBinding> constantStyleBindings = elementData.constantStyleBindings;
 
+            // todo -- this will create a style for all elements, 
+            // we can optimize this away w/ flags
             element.style = new UIStyleSet(element.id, this);
 
             styleMap[element.id] = element.style;
 
-            if (style.constantBindings != null) {
-                for (var i = 0; i < style.constantBindings.Length; i++) {
-                    style.constantBindings[i].Apply(element.style, context);
-                }
+            for (var i = 0; i < constantStyleBindings.Count; i++) {
+                constantStyleBindings[i].Apply(element.style, context);
             }
 
-            // todo -- maybe this is where external style paths get resolved
-            if (style.baseStyles != null) {
-                for (int i = 0; i < style.baseStyles.Count; i++) {
-                    element.style.AddBaseStyle(style.baseStyles[i]);
-                }
+            for (int i = 0; i < baseStyles.Count; i++) {
+                element.style.AddBaseStyle(baseStyles[i]);
             }
+
+            element.style.Refresh();
+
         }
 
         public void OnElementEnabled(UIElement element) { }
@@ -89,6 +93,14 @@ namespace Src.Systems {
             return styleMap.ToList().Select((kvp) => kvp.Value).ToList();
         }
 
+        public void EnterState(int elementId, StyleState state) {
+            styleMap[elementId].EnterState(state);    
+        }
+
+        public void ExitState(int elementId, StyleState state) {
+            styleMap[elementId].ExitState(state);
+        }
+        
         public void SetRect(int elementId, LayoutRect rect) {
             onRectChanged?.Invoke(elementId, rect);
         }
@@ -123,6 +135,10 @@ namespace Src.Systems {
 
         public void SetPaint(int elementId, Paint paint) {
             onPaintChanged?.Invoke(elementId, paint);
+        }
+
+        public void SetAvailableStates(int elementId, StyleState availableStates) {
+            onAvailableStatesChanged?.Invoke(elementId, availableStates);
         }
 
         public UIStyleSet GetStyleForElement(int elementId) {

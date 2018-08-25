@@ -4,6 +4,216 @@ using JetBrains.Annotations;
 
 namespace Src {
 
+    public class MethodCallExpression_StaticVoid : Expression<Terminal> {
+
+        private readonly Action method;
+        private readonly bool isConstant;
+
+        public MethodCallExpression_StaticVoid(MethodInfo methodInfo, Expression[] argumentExpressions) {
+            method = (Action) ReflectionUtil.GetDelegate(typeof(Action), methodInfo);
+            isConstant = ReflectionUtil.HasAnyAttribute(methodInfo,
+                typeof(PureAttribute),
+                typeof(System.Diagnostics.Contracts.PureAttribute)
+            );
+        }
+
+        public override Type YieldedType => typeof(Terminal);
+
+        public override object Evaluate(ExpressionContext context) {
+            method();
+            return null;
+        }
+
+        public override Terminal EvaluateTyped(ExpressionContext context) {
+            method();
+            return null;
+        }
+
+        public override bool IsConstant() {
+            return isConstant;
+        }
+
+    }
+
+    public class MethodCallExpression_StaticVoid<T> : Expression<Terminal> {
+
+        private readonly Action<T> method;
+        private readonly bool isConstant;
+        private readonly Expression<T> argument0;
+
+        public MethodCallExpression_StaticVoid(MethodInfo methodInfo, Expression[] argumentExpressions) {
+            method = (Action<T>) ReflectionUtil.GetDelegate(typeof(Action<T>), methodInfo);
+            argument0 = (Expression<T>) argumentExpressions[0];
+            isConstant = argument0.IsConstant()
+                         && ReflectionUtil.HasAnyAttribute(methodInfo,
+                             typeof(PureAttribute),
+                             typeof(System.Diagnostics.Contracts.PureAttribute)
+                         );
+        }
+
+        public override Type YieldedType => typeof(Terminal);
+
+        public override object Evaluate(ExpressionContext context) {
+            method(argument0.EvaluateTyped(context));
+            return null;
+        }
+
+        public override Terminal EvaluateTyped(ExpressionContext context) {
+            method(argument0.EvaluateTyped(context));
+            return null;
+        }
+
+        public override bool IsConstant() {
+            return isConstant;
+        }
+
+    }
+
+    public class MethodCallExpression_StaticVoid<T, U> : Expression<Terminal> {
+
+        private readonly Action<T, U> method;
+        private readonly bool isConstant;
+        private readonly Expression<T> argument0;
+        private readonly Expression<U> argument1;
+
+        public MethodCallExpression_StaticVoid(MethodInfo methodInfo, Expression[] argumentExpressions) {
+            method = (Action<T, U>) ReflectionUtil.GetDelegate(typeof(Action<T, U>), methodInfo);
+            argument0 = (Expression<T>) argumentExpressions[0];
+            argument1 = (Expression<U>) argumentExpressions[1];
+            isConstant = argument0.IsConstant()
+                         && argument1.IsConstant()
+                         && ReflectionUtil.HasAnyAttribute(methodInfo,
+                             typeof(PureAttribute),
+                             typeof(System.Diagnostics.Contracts.PureAttribute)
+                         );
+        }
+
+        public override Type YieldedType => typeof(Terminal);
+
+        public override object Evaluate(ExpressionContext context) {
+            method(
+                argument0.EvaluateTyped(context),
+                argument1.EvaluateTyped(context)
+            );
+            return null;
+        }
+
+        public override Terminal EvaluateTyped(ExpressionContext context) {
+            method(
+                argument0.EvaluateTyped(context),
+                argument1.EvaluateTyped(context)
+            );
+            return null;
+        }
+
+        public override bool IsConstant() {
+            return isConstant;
+        }
+
+    }
+    
+    public class MethodCallExpression_StaticVoid<T, U, V> : Expression<Terminal> {
+
+        private readonly Action<T, U, V> method;
+        private readonly bool isConstant;
+        private readonly Expression<T> argument0;
+        private readonly Expression<U> argument1;
+        private readonly Expression<V> argument2;
+
+        public MethodCallExpression_StaticVoid(MethodInfo methodInfo, Expression[] argumentExpressions) {
+            method = (Action<T, U, V>) ReflectionUtil.GetDelegate(typeof(Action<T, U, V>), methodInfo);
+            argument0 = (Expression<T>) argumentExpressions[0];
+            argument1 = (Expression<U>) argumentExpressions[1];
+            argument2 = (Expression<V>) argumentExpressions[2];
+            isConstant = argument0.IsConstant()
+                         && argument1.IsConstant()
+                         && argument2.IsConstant()
+                         && ReflectionUtil.HasAnyAttribute(methodInfo,
+                             typeof(PureAttribute),
+                             typeof(System.Diagnostics.Contracts.PureAttribute)
+                         );
+        }
+
+        public override Type YieldedType => typeof(Terminal);
+
+        public override object Evaluate(ExpressionContext context) {
+            method(
+                argument0.EvaluateTyped(context),
+                argument1.EvaluateTyped(context),
+                argument2.EvaluateTyped(context)
+            );
+            return null;
+        }
+
+        public override Terminal EvaluateTyped(ExpressionContext context) {
+            method(
+                argument0.EvaluateTyped(context),
+                argument1.EvaluateTyped(context),
+                argument2.EvaluateTyped(context)
+            );
+            return null;
+        }
+
+        public override bool IsConstant() {
+            return isConstant;
+        }
+
+    }
+
+    public class MethodCallExpression_StaticVoid<T, U, V, W> : Expression<Terminal> {
+
+        private readonly Action<T, U, V, W> method;
+        private readonly bool isConstant;
+        private readonly Expression<T> argument0;
+        private readonly Expression<U> argument1;
+        private readonly Expression<V> argument2;
+        private readonly Expression<W> argument3;
+
+        public MethodCallExpression_StaticVoid(MethodInfo methodInfo, Expression[] argumentExpressions) {
+            method = (Action<T, U, V, W>) ReflectionUtil.GetDelegate(typeof(Action<T, U, V, W>), methodInfo);
+            argument0 = (Expression<T>) argumentExpressions[0];
+            argument1 = (Expression<U>) argumentExpressions[1];
+            argument2 = (Expression<V>) argumentExpressions[2];
+            argument3 = (Expression<W>) argumentExpressions[3];
+            isConstant = argument0.IsConstant()
+                         && argument1.IsConstant()
+                         && argument2.IsConstant()
+                         && argument3.IsConstant()
+                         && ReflectionUtil.HasAnyAttribute(methodInfo,
+                             typeof(PureAttribute),
+                             typeof(System.Diagnostics.Contracts.PureAttribute)
+                         );
+        }
+
+        public override Type YieldedType => typeof(Terminal);
+
+        public override object Evaluate(ExpressionContext context) {
+            method(
+                argument0.EvaluateTyped(context),
+                argument1.EvaluateTyped(context),
+                argument2.EvaluateTyped(context),
+                argument3.EvaluateTyped(context)
+            );
+            return null;
+        }
+
+        public override Terminal EvaluateTyped(ExpressionContext context) {
+            method(
+                argument0.EvaluateTyped(context),
+                argument1.EvaluateTyped(context),
+                argument2.EvaluateTyped(context),
+                argument3.EvaluateTyped(context)
+            );
+            return null;
+        }
+
+        public override bool IsConstant() {
+            return isConstant;
+        }
+
+    }
+
+    
     public class MethodCallExpression_Static<T> : Expression<T> {
 
         private readonly Func<T> method;

@@ -2,11 +2,21 @@
 <UITemplate>
     <Contents>
         
-        <Group name="toolbar" someValue="{1 + 1}">
+        <Group onMouseEnter="OnMouseEnter($event)" style.backgroundColor="blue" style.hover.backgroundColor="red" name="toolbar" someValue="{1 + 1}">
         
             Toolbar Here {time}
             
         </Group>
+
+        <Group onMouseDown="OnMouseDown($event)" onMouseEnter="OnMouseEnter($event)" style.backgroundColor="white" style.hover.backgroundColor="red" name="toolbar" someValue="{1 + 1}">
+
+            Toolbar Here {time}
+
+        </Group>
+        
+        <Repeat list="{values}" as="item">
+            <!--{item}-->
+        </Repeat>
         
     </Contents>
 </UITemplate>

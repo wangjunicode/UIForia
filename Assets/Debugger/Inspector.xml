@@ -1,0 +1,12 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<UITemplate>
+    <Contents>
+        
+        <Group name="toolbar" someValue="{1 + 1}">
+        
+            Toolbar Here {time}
+            
+        </Group>
+        
+    </Contents>
+</UITemplate>

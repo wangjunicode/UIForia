@@ -15,12 +15,20 @@ public class UIElement : IHierarchical {
 
     protected internal UIElement parent;
 
+    public int intValue; // todo remove
+
     public UIElement() {
         id = UIView.NextElementId;
         this.flags = UIElementFlags.RequiresLayout | UIElementFlags.RequiresRendering;
     }
 
-    public virtual void Initialize() { }
+    public virtual void OnCreate() { }
+
+    public virtual void OnUpdate() { }
+
+    public virtual void OnEnable() { }
+
+    public virtual void OnDisable() { }
 
     public virtual void OnPropsChanged() { }
 
@@ -28,7 +36,7 @@ public class UIElement : IHierarchical {
 
     public virtual void OnHidden() { }
 
-    public virtual void OnDestroyed() { }
+    public virtual void OnDestroy() { }
 
     public override string ToString() {
         string retn = string.Empty;

@@ -32,6 +32,7 @@ public abstract class UIView {
     
     protected abstract IRenderSystem renderSystem { get; set; }
     protected abstract ILayoutSystem layoutSystem { get; set; }
+    protected abstract IInputSystem inputSystem { get; set; }
     
     public abstract void Render();
     
@@ -76,7 +77,9 @@ public abstract class UIView {
     }
     
     public virtual void Update() {
+        layoutSystem.OnUpdate();
         bindingSystem.OnUpdate();
+        lifeCycleSystem.OnUpdate();
         HandleCreatedElements();
         HandleHidingElements();
         HandleShowingElements();

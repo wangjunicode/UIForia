@@ -53,67 +53,9 @@ namespace Src.Systems {
             parent = (IMGUIRenderData) newParent;
         }
 
-        public void OnBeforeTraverse() {
-            s_DrawRect = new Rect(s_DrawRect) {
-                x = s_DrawRect.x + layoutRect.x,
-                y = s_DrawRect.y + layoutRect.y,
-                width = layoutRect.width,
-                height = layoutRect.height
-            };
+        public void OnBeforeTraverse() {}
 
-            switch (primitiveType) {
-                case RenderPrimitiveType.RawImage:
-                case RenderPrimitiveType.ProceduralImage:
-
-                    if (borderTexture != null && borderSize.IsDefined()) {
-                        if (backgroundTexture != null) {
-                            Rect innerRect = new Rect(s_DrawRect);
-                            innerRect.x += borderSize.left;
-                            innerRect.y += borderSize.top;
-                            innerRect.width -= borderSize.right * 2f;
-                            innerRect.height -= borderSize.bottom * 2f;
-//                            material.SetFloat("_Radius", 0.5f);
-//                            material.SetColor("_Color", Color.red);
-//                            material.SetFloat("_Width", 100f);
-//                            material.SetFloat("_Height", 100f);
-                            //Graphics.DrawTexture(new Rect(300, 300, 300f, 300f), backgroundTexture, material);
-                        }
-
-//                        // only draws a border!
-                        GUI.DrawTexture(
-                            s_DrawRect,
-                            borderTexture,
-                            ScaleMode.ScaleToFit,
-                            true,
-                            s_DrawRect.width / s_DrawRect.height,
-                            Color.white,
-                            borderSize, 
-                            borderRadius
-                        );
-                    }
-                    else {
-                        if (backgroundTexture != null) {
-                            GUI.DrawTexture(s_DrawRect, backgroundTexture);
-                        }
-                    }
-
-                    break;
-
-                case RenderPrimitiveType.Text:
-                    GUIStyle style = new GUIStyle();
-                    style.fontSize = 12;
-                    style.wordWrap = true;
-                    GUI.Label(s_DrawRect, textContent, style);
-                    break;
-            }
-        }
-
-        public void OnAfterTraverse() {
-            s_DrawRect = new Rect(s_DrawRect) {
-                x = s_DrawRect.x - layoutRect.x,
-                y = s_DrawRect.y - layoutRect.y
-            };
-        }
+        public void OnAfterTraverse() {}
 
         public IHierarchical Element => element;
         public IHierarchical Parent => element.parent;

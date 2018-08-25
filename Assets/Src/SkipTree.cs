@@ -21,6 +21,19 @@ namespace Src {
 
     }
 
+    // need to support a version w/ integer keys instead of / in addition to item keys
+    // needs better traversal support
+    // needs better hierarchy support
+    // should not require traversal callbacks
+    // needs a better way to get root items
+    // traverse from node (or where node should be)
+    // specify node type? ie extend SkipTreeNode<T>
+    // set root node? probably doesn't make sense since hierarchies
+    //                could add 2 children of 'real root' but not the root itself
+    // better ToList / ToArray support w/o allocation
+    // better GetRoot w/o allocation
+    // traverse all vs traverse enabled
+    // maintain enabled count?
     public class SkipTree<T> where T : class, IHierarchical, ISkipTreeTraversable {
 
         private readonly SkipTreeNode<T> root;

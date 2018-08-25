@@ -6,7 +6,7 @@
               style.border="rect(5f)"
               style.padding="rect(12f)"
               style.borderRadius="radius(0f)" 
-              style.layoutDirection="Row" 
+              style.layoutDirection="Column" 
               style.mainAxisAlignment="Center"
               style.crossAxisAlignment="Center"
               style.rectWidth="view(100)"
@@ -17,8 +17,11 @@
                style.mainAxisAlignment="Start" 
                style.padding="{rect(0)}" 
                style.shrinkFactor="1"
-               style.minWidth="300"
+               style.rectHeight="content(100)"
                style.layoutDirection="Column"
+               style.marginBottom="20f"
+               style.border="rect(10f,10f,10f,10f)"
+               style.borderColor="yellow"
                style.backgroundColor="{rgb(128, 128, 128)}">
             
             <!--<Group x-name="inner" style.textColor="red" style.padding="rect(200)" style.rectHeight="auto" style.backgroundColor="rgb(255, 0, 0)"/>-->
@@ -34,9 +37,10 @@
                style.mainAxisAlignment="Start"
                style.layoutDirection="Column"
                style.padding="{rect(0)}"
+               style.shrinkFactor="1"
                style.backgroundColor="{rgb(128, 128, 128)}">
 
-            <!--<Group x-name="inner" style.textColor="red" style.padding="rect(200)" style.rectHeight="auto" style.backgroundColor="rgb(255, 0, 0)"/>-->
+            <Group x-name="inner" style.hover.backgroundColor="rgb(255, 0, 255)" style.padding="rect(20)" style.rectHeight="50" style.backgroundColor="rgb(0, 255, 255)"/>
 
             Hi, I followed the Michael La Voie answer from this post: http://answers.unity3d.com/questions/6585/change-gui-font-size-and-color , but I cant change font color. By default the shader of an imported font is read-only and I cant manually change the color, though here are 2 script attempts which failed:
 

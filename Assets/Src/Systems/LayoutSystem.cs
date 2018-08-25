@@ -8,7 +8,9 @@ namespace Src.Systems {
 
     public interface ILayoutSystem : ISystem {
 
-        int RunLayout(Rect viewport, ref LayoutResult[] output);
+        int RectCount { get; }
+        LayoutResult[] LayoutResults { get; }
+        void SetViewportRect(Rect viewportRect);
 
     }
 
@@ -16,29 +18,37 @@ namespace Src.Systems {
 
         private readonly Rect[] layoutRects;
         private readonly IStyleSystem styleSystem;
+        private readonly IElementRegistry registry;
         private readonly SkipTree<LayoutData> layoutTree;
         private readonly Stack<LayoutDataSet> layoutStack;
         private readonly Dictionary<int, LayoutData> layoutDataMap;
-                
+
         private readonly FlexLayout flexLayout;
         private readonly FlowLayout flowLayout;
         private readonly FixedLayout fixedLayout;
-        
-        public LayoutSystem(ITextSizeCalculator textSizeCalculator, IStyleSystem styleSystem) {
+
+        private bool isInitialized;
+        private int rectCount;
+        private LayoutResult[] rects;
+        private Rect viewport;
+
+        public LayoutSystem(ITextSizeCalculator textSizeCalculator, IElementRegistry registry, IStyleSystem styleSystem) {
             this.styleSystem = styleSystem;
+            this.registry = registry;
             this.layoutRects = new Rect[16];
             this.layoutTree = new SkipTree<LayoutData>();
             this.layoutStack = new Stack<LayoutDataSet>();
             this.layoutDataMap = new Dictionary<int, LayoutData>();
-            
+
             this.styleSystem.onRectChanged += HandleRectChanged;
             this.styleSystem.onLayoutChanged += HandleLayoutChanged;
             this.styleSystem.onBorderChanged += HandleBorderChanged;
             this.styleSystem.onMarginChanged += HandleMarginChanged;
             this.styleSystem.onPaddingChanged += HandlePaddingChanged;
             this.styleSystem.onConstraintChanged += HandleConstraintChanged;
-            
+
             this.flexLayout = new FlexLayout(textSizeCalculator);
+            this.rects = new LayoutResult[16];
         }
 
         private void HandleRectChanged(int elementId, LayoutRect rect) {
@@ -58,21 +68,21 @@ namespace Src.Systems {
         private void HandlePaddingChanged(int elementId, ContentBoxRect padding) {
             LayoutData data;
             if (layoutDataMap.TryGetValue(elementId, out data)) {
-                data.padding = padding;
+                data.SetPadding(padding);
             }
         }
 
         private void HandleMarginChanged(int elementId, ContentBoxRect margin) {
             LayoutData data;
             if (layoutDataMap.TryGetValue(elementId, out data)) {
-                data.margin = margin;
+                data.SetMargin(margin);
             }
         }
 
         private void HandleBorderChanged(int elementId, ContentBoxRect border) {
             LayoutData data;
             if (layoutDataMap.TryGetValue(elementId, out data)) {
-                data.border = border;
+                data.SetBorder(border);
             }
         }
 
@@ -80,36 +90,47 @@ namespace Src.Systems {
             LayoutData data;
             if (layoutDataMap.TryGetValue(elementId, out data)) {
                 data.parameters = parameters;
-                data.layout = GetLayoutInstance(parameters.type);
+                data.SetLayout(GetLayoutInstance(parameters.type));
             }
         }
-        
+
         private void HandleTextChanged(UIElement element, string text) {
             LayoutData layoutData;
             if (layoutDataMap.TryGetValue(element.id, out layoutData)) {
-                layoutData.textContent = text;
+                layoutData.SetTextContent(text);
             }
         }
 
         public void OnInitialize() {
+            isInitialized = true;
             IReadOnlyList<UIStyleSet> styles = styleSystem.GetAllStyles();
             for (int i = 0; i < styles.Count; i++) {
                 LayoutData data;
                 UIStyleSet styleSet = styles[i];
-                if (layoutDataMap.TryGetValue(styles[i].elementId, out data)) {
-                    data.border = styleSet.border;
-                    data.padding = styleSet.padding;
-                    data.margin = styleSet.margin;
-                    data.parameters = styleSet.layout;
-                    data.constraints = styleSet.constraints;
-                    data.layout = GetLayoutInstance(data.parameters.type);
-                    data.rect = styleSet.rect;
+                UIElement element = registry.GetElement(styleSet.elementId);
+                UITextElement textElement;
+                if (!layoutDataMap.TryGetValue(styles[i].elementId, out data)) {
+                    data = new LayoutData(element);
+                    layoutTree.AddItem(data);
+                    layoutDataMap[data.element.id] = data;
+                    if ((element.flags & UIElementFlags.TextElement) != 0) {
+                        textElement = (UITextElement) element;
+                        textElement.onTextChanged += HandleTextChanged;
+                    }
+
+                }
+                data.UpdateFromStyle();
+                data.SetLayout(GetLayoutInstance(styleSet.layoutType));
+                textElement = element as UITextElement;
+                if (textElement != null) {
+                    data.SetTextContent(textElement.GetText());
                 }
             }
         }
 
         public void OnElementCreated(UIElementCreationData elementData) {
             // todo -- if instance is layout-able
+            if (!isInitialized || elementData.element.style == null) return;
 
             if ((elementData.element.flags & UIElementFlags.TextElement) != 0) {
                 UITextElement textElement = (UITextElement) elementData.element;
@@ -117,20 +138,8 @@ namespace Src.Systems {
             }
 
             LayoutData data = new LayoutData(elementData.element);
-            if (data.element.style != null) {
-                data.border = data.element.style.border;
-                data.padding = data.element.style.padding;
-                data.margin = data.element.style.margin;
-                data.parameters = data.element.style.layout;
-                data.constraints = data.element.style.constraints;
-                data.rect = data.element.style.rect;
-                data.layout = GetLayoutInstance(data.element.style.layoutType);
-            }
-            else {
-                data.parameters.type = LayoutType.Flex;
-                data.parameters.crossAxisAlignment = CrossAxisAlignment.Stretch;
-                data.parameters.direction = LayoutDirection.Row;
-            }
+            data.UpdateFromStyle();
+            data.SetLayout(GetLayoutInstance(elementData.element.style.layoutType));
 
             layoutTree.AddItem(data);
             layoutDataMap[data.element.id] = data;
@@ -138,38 +147,17 @@ namespace Src.Systems {
 
         private UILayout GetLayoutInstance(LayoutType layoutType) {
             switch (layoutType) {
-                    case LayoutType.Flex:
-                        return flexLayout;
-            }    
+                case LayoutType.Flex:
+                    return flexLayout;
+            }
             throw new NotImplementedException();
         }
-        
-        public int RunLayout(Rect viewport, ref LayoutResult[] output) {
-            layoutTree.TraversePreOrderWithCallback(output, SetupLayoutPass);
 
-            LayoutData[] roots = layoutTree.GetRootItems();
-            
-            layoutStack.Push(new LayoutDataSet(roots[0], viewport));
+        public int RectCount => rectCount;
+        public LayoutResult[] LayoutResults => rects; 
 
-            int retnCount = 0;
-
-            while (layoutStack.Count > 0) {
-                LayoutDataSet layoutSet = layoutStack.Pop();
-                LayoutData data = layoutSet.data;
-                
-                data.layout.Run(viewport, layoutSet, layoutRects);
-
-                if (data.element != null && (data.element.flags & UIElementFlags.RequiresRendering) != 0) {
-                    output[retnCount++] = new LayoutResult(data.element.id, layoutSet.result);
-                }
-
-                // note: we never need to clear the layoutResults array
-                for (int i = 0; i < data.children.Count; i++) {
-                    layoutStack.Push(new LayoutDataSet(data.children[i], layoutRects[i]));
-                }
-            }
-
-            return retnCount;
+        public void SetViewportRect(Rect viewport) {
+            this.viewport = viewport;
         }
 
         public void OnReset() {
@@ -177,7 +165,37 @@ namespace Src.Systems {
             layoutTree.Clear();
         }
 
-        public void OnUpdate() { }
+        public void OnUpdate() {
+
+            rectCount = 0;
+            
+            // todo change this not to return a new array copy
+            LayoutData[] roots = layoutTree.GetRootItems();
+
+            if (roots.Length == 0) {
+                return;
+            }
+            
+            layoutTree.TraversePreOrderWithCallback(rects, SetupLayoutPass);
+
+            layoutStack.Push(new LayoutDataSet(roots[0], viewport));
+
+            while (layoutStack.Count > 0) {
+                LayoutDataSet layoutSet = layoutStack.Pop();
+                LayoutData data = layoutSet.data;
+
+                data.layout.Run(viewport, layoutSet, layoutRects);
+
+                if (data.element != null && (data.element.flags & UIElementFlags.RequiresRendering) != 0) {
+                    rects[rectCount++] = new LayoutResult(data.element.id, layoutSet.result);
+                }
+
+                // note: we never need to clear the layoutResults array
+                for (int i = 0; i < data.children.Count; i++) {
+                    layoutStack.Push(new LayoutDataSet(data.children[i], layoutRects[i]));
+                }
+            }
+        }
 
         public void OnDestroy() {
             this.styleSystem.onRectChanged -= HandleRectChanged;

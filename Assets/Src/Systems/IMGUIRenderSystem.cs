@@ -60,7 +60,6 @@ namespace Src.Systems {
         private readonly Dictionary<Color, Texture2D> textureCache;
 
         private Rect viewportRect;
-        private LayoutResult[] layoutResults;
         private IMGUIRenderData[] renderData;
         private bool renderDataDirty;
 
@@ -71,7 +70,6 @@ namespace Src.Systems {
 
             this.textureCache = new Dictionary<Color, Texture2D>();
             this.renderSkipTree = new SkipTree<IMGUIRenderData>();
-            this.layoutResults = new LayoutResult[128];
             this.renderDataDirty = true;
         }
 
@@ -81,9 +79,10 @@ namespace Src.Systems {
         }
 
         public void OnRender() {
-            int count = layoutSystem.RunLayout(viewportRect, ref layoutResults);
+            int count = layoutSystem.RectCount;
+            LayoutResult[] layoutResults = layoutSystem.LayoutResults;
 
-            //if (renderDataDirty) {
+                //if (renderDataDirty) {
             //   renderDataDirty = false;
             renderData = renderSkipTree.ToArray();
             //}            
@@ -106,32 +105,34 @@ namespace Src.Systems {
             for (int i = 0; i < renderData.Length; i++) {
                 IMGUIRenderData data = renderData[i];
                 RenderPrimitiveType primitiveType = data.primitiveType;
-                        
+                
+                Rect paintRect = new Rect(data.layoutRect);                        
+                paintRect.x += data.element.style.marginLeft;
+                paintRect.y += data.element.style.marginTop;
+                paintRect.width -= data.element.style.marginRight;
+                paintRect.height -= data.element.style.marginBottom;
+ 
                 switch (primitiveType) {
                     case RenderPrimitiveType.RawImage:
                     case RenderPrimitiveType.ProceduralImage:
 
                         if (data.borderTexture != null && data.borderSize.IsDefined()) {
                             if (data.backgroundTexture != null) {
-                                Rect innerRect = new Rect(data.layoutRect);
+                                Rect innerRect = new Rect(paintRect);
                                 innerRect.x += data.borderSize.left;
                                 innerRect.y += data.borderSize.top;
                                 innerRect.width -= data.borderSize.right * 2f;
                                 innerRect.height -= data.borderSize.bottom * 2f;
-//                            material.SetFloat("_Radius", 0.5f);
-//                            material.SetColor("_Color", Color.red);
-//                            material.SetFloat("_Width", 100f);
-//                            material.SetFloat("_Height", 100f);
-                                //Graphics.DrawTexture(new Rect(300, 300, 300f, 300f), backgroundTexture, material);
+                                GUI.DrawTexture(innerRect, data.backgroundTexture);
                             }
 
-//                        // only draws a border!
+                            // undocumented in Unity, only draws a border!
                             GUI.DrawTexture(
-                                data.layoutRect,
+                                paintRect,
                                 data.borderTexture,
                                 ScaleMode.ScaleToFit,
                                 true,
-                                data.layoutRect.width / data.layoutRect.height,
+                                paintRect.width / paintRect.height,
                                 Color.white,
                                 data.borderSize,
                                 data.borderRadius
@@ -139,7 +140,7 @@ namespace Src.Systems {
                         }
                         else {
                             if (data.backgroundTexture != null) {
-                                GUI.DrawTexture(data.layoutRect, data.backgroundTexture);
+                                GUI.DrawTexture(paintRect, data.backgroundTexture);
                             }
                         }
 
@@ -324,6 +325,7 @@ namespace Src.Systems {
         }
 
         private void HandlePaintChanged(int elementId, Paint paint) {
+            Debug.Log("Handling paint: " + elementId);
             UIElement element = elementSystem.GetElement(elementId);
             if (element != null) {
                 IMGUIRenderData data = renderSkipTree.GetItem(element);

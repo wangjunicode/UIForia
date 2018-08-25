@@ -2,8 +2,6 @@
 
     public class UIGroupElement : UIElement {
 
-        
-
     }
 
 }

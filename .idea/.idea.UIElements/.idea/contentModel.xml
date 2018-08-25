@@ -1,13 +1,17 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project version="4">
   <component name="ContentModelStore">
-    <e p="\app" t="IncludeRecursive" />
-    <e p="\c41f851" t="IncludeRecursive" />
-    <e p="C:\Seed\UIElements" t="IncludeRecursive">
+    <e p="$USER_HOME$/Library/Caches/Rider2018.1/resharper-host/local/Transient/ReSharperHost/v12/SolutionCaches/_UIElements.-870298077.00" t="ExcludeRecursive" />
+    <e p="$PROJECT_DIR$" t="IncludeRecursive">
       <e p="Assembly-CSharp-Editor.csproj" t="IncludeRecursive" />
       <e p="Assembly-CSharp.csproj" t="IncludeRecursive" />
       <e p="Assets" t="Include">
+        <e p="Debugger" t="Include">
+          <e p="Inspector.cs" t="Include" />
+          <e p="Inspector.xml" t="Include" />
+        </e>
         <e p="Editor" t="Include">
+          <e p="DebuggerWindow.cs" t="Include" />
           <e p="RefreshTemplates.cs" t="Include" />
           <e p="UIViewWindow.cs" t="Include" />
         </e>
@@ -88,6 +92,7 @@
               <e p="ReflectionAliasSource.cs" t="Include" />
               <e p="ValueAliasSource.cs" t="Include" />
             </e>
+            <e p="BindExpressionCompiler.cs" t="Include" />
             <e p="CastHandlers" t="Include">
               <e p="CastHandler_ColorToVector4.cs" t="Include" />
               <e p="CastHandler_DoubleToMeasurement.cs" t="Include" />
@@ -96,6 +101,7 @@
               <e p="CastHandler_IntToDouble.cs" t="Include" />
               <e p="CastHandler_IntToFloat.cs" t="Include" />
               <e p="CastHandler_IntToMeasurement.cs" t="Include" />
+              <e p="CastHandler_ToString.cs" t="Include" />
               <e p="CastHandler_Vector2ToVector3.cs" t="Include" />
               <e p="CastHandler_Vector3ToVector2.cs" t="Include" />
               <e p="CastHandler_Vector4ToColor.cs" t="Include" />
@@ -150,6 +156,7 @@
           <e p="Layout" t="Include">
             <e p="CrossAxisAlignment.cs" t="Include" />
             <e p="FixedLayout.cs" t="Include" />
+            <e p="FlexLayout2.cs" t="Include" />
             <e p="FlowLayout.cs" t="Include" />
             <e p="LayoutData.cs" t="Include" />
             <e p="LayoutDataSet.cs" t="Include" />
@@ -263,6 +270,8 @@
             <e p="BindingSystem.cs" t="Include" />
             <e p="ElementRegistrySystem.cs" t="Include" />
             <e p="GORenderSystem.cs" t="Include" />
+            <e p="IInputSystem.cs" t="Include" />
+            <e p="IMGUIInputSystem.cs" t="Include" />
             <e p="IMGUIRenderData.cs" t="Include" />
             <e p="IMGUIRenderSystem.cs" t="Include" />
             <e p="IStyleChangeHandler.cs" t="Include" />
@@ -307,6 +316,7 @@
         </e>
         <e p="TestRepeat.xml" t="Include" />
         <e p="Tests" t="Include">
+          <e p="BindingCompilerTests.cs" t="Include" />
           <e p="ExpressionCompilerTests.cs" t="Include" />
           <e p="ExpressionParserTests.cs" t="Include" />
           <e p="ReflectionUtilTests.cs" t="Include" />
@@ -379,8 +389,5 @@
       <e p="Tests.csproj" t="IncludeRecursive" />
       <e p="UIElements.sln" t="IncludeFlat" />
     </e>
-    <e p="C:\Users\Matt\.Rider2018.2\config\extensions" t="IncludeRecursive" />
-    <e p="C:\Users\Matt\.Rider2018.2\system\extResources" t="IncludeRecursive" />
-    <e p="C:\Users\Matt\.Rider2018.2\system\resharper-host\local\Transient\ReSharperHost\v182\SolutionCaches\_UIElements.1439856042.00" t="ExcludeRecursive" />
   </component>
 </project>

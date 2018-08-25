@@ -10,7 +10,6 @@ namespace Src.Systems {
 
         private readonly ILayoutSystem layoutSystem;
         private readonly RectTransform rectTransform;
-        private LayoutResult[] layoutResults;
 
         private readonly SkipTree<RenderData> renderSkipTree;
         private readonly Dictionary<int, RectTransform> transforms;
@@ -19,7 +18,6 @@ namespace Src.Systems {
             this.layoutSystem = layoutSystem;
             this.rectTransform = rectTransform;
             this.renderSkipTree = new SkipTree<RenderData>();
-            this.layoutResults = new LayoutResult[128];
             this.transforms = new Dictionary<int, RectTransform>();
         }
 
@@ -34,10 +32,9 @@ namespace Src.Systems {
         }
 
         public void OnRender() {
-            Rect viewport = rectTransform.rect;
-
             // todo -- only run layout when its actually needed
-            int count = layoutSystem.RunLayout(viewport, ref layoutResults);
+            int count = layoutSystem.RectCount;
+            LayoutResult[] layoutResults = layoutSystem.LayoutResults;
 
             for (int i = 0; i < count; i++) {
                 RectTransform transform = transforms[layoutResults[i].elementId];

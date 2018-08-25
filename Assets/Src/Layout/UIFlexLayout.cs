@@ -8,7 +8,6 @@ namespace Src.Layout {
 
     public class FlexLayout : UILayout {
 
-//        private int itemCount;
         private FlexItemAxis[] widthItems;
         private FlexItemAxis[] heightItems;
 
@@ -18,9 +17,7 @@ namespace Src.Layout {
         }
 
         private void DoLayoutRow(Rect viewport, LayoutDataSet dataSet, Rect contentArea) {
-            Rect size = dataSet.result;
             LayoutData data = dataSet.data;
-
 
             int itemCount = 0;
             List<LayoutData> children = data.children;
@@ -61,6 +58,7 @@ namespace Src.Layout {
                 remainingWidth = 0;
             }
 
+            itemCount = 0; // need to reset so we safely skip non flow children
             for (int i = 0; i < children.Count; i++) {
                 LayoutData child = children[i];
                 if (!child.isInFlow) continue;
@@ -72,12 +70,12 @@ namespace Src.Layout {
                 heightItem.maxSize = child.GetMaxHeight(data.rect.height.unit, contentArea.height, viewport.height);
                 // now we have the final width and can compute preferred height accordingly
                 // this restriction doesn't exist in the column layout case
-                heightItem.preferredSize = child.GetPreferredHeight(data.rect.height.unit, widthItems[i].outputSize, contentArea.height, viewport.height);
+                heightItem.preferredSize = child.GetPreferredHeight(data.rect.height.unit, widthItems[itemCount].outputSize, contentArea.height, viewport.height);
                 
                 heightItem.outputSize = heightItem.MinDefined && heightItem.preferredSize < heightItem.minSize ? heightItem.minSize : heightItem.preferredSize;
                 heightItem.outputSize = heightItem.MaxDefined && heightItem.outputSize > heightItem.maxSize ? heightItem.maxSize : heightItem.outputSize;
 
-                heightItems[itemCount] = heightItem;
+                heightItems[itemCount++] = heightItem;
 
             }
 
@@ -86,7 +84,6 @@ namespace Src.Layout {
         }
 
         private void DoLayoutColumn(Rect viewport, LayoutDataSet dataSet, Rect contentArea) {
-            Rect size = dataSet.result;
             LayoutData data = dataSet.data;
 
             float remainingHeight = contentArea.height;
@@ -113,7 +110,9 @@ namespace Src.Layout {
                 heightItem.axisStart = contentArea.y;
                 heightItem.minSize = child.GetMinHeight(data.rect.height.unit, contentArea.height, viewport.height);
                 heightItem.maxSize = child.GetMaxHeight(data.rect.height.unit, contentArea.height, viewport.height);
-                heightItem.preferredSize = child.GetPreferredHeight(data.rect.height.unit, widthItems[i].outputSize, contentArea.height, viewport.height);
+
+                heightItem.preferredSize = child.GetPreferredHeight(data.rect.height.unit, widthItem.outputSize, contentArea.height, viewport.height);
+                
                 heightItem.outputSize = heightItem.MinDefined && heightItem.preferredSize < heightItem.minSize ? heightItem.minSize : heightItem.preferredSize;
                 heightItem.outputSize = heightItem.MaxDefined && heightItem.outputSize > heightItem.maxSize ? heightItem.maxSize : heightItem.outputSize;
 
@@ -354,7 +353,7 @@ namespace Src.Layout {
             }
         }
 
-        [DebuggerDisplay("{outputSize}")]
+        [DebuggerDisplay("{" + nameof(outputSize) + "}")]
         private struct FlexItemAxis {
 
             public float axisStart;

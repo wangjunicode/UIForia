@@ -1,5 +1,4 @@
 using System.Diagnostics;
-using Src;
 using UnityEngine;
 
 namespace Rendering {
@@ -16,7 +15,6 @@ namespace Rendering {
             null,
             BorderRadius.Unset
         );
-
 
         public Paint(Color backgroundColor, Color borderColor, Texture2D backgroundImage = null) {
             this.backgroundColor = backgroundColor;

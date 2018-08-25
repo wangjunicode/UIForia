@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using Src.Compilers;
 
 namespace Src {
 
@@ -30,7 +31,13 @@ namespace Src {
             if (rootType == null) {
                 rootType = TypeProcessor.GetType(typeName, template.imports).rawType;
             }
+            BindExpressionCompiler bindingCompiler = new BindExpressionCompiler(template.contextDefinition);
+            List<AttributeDefinition> userAttrs = GetUserAttributes();
 
+            for (int i = 0; i < userAttrs.Count; i++) {
+                bindingCompiler.Compile(rootType, userAttrs[i].key, userAttrs[i].value);
+            }
+            
             return true;
         }
 

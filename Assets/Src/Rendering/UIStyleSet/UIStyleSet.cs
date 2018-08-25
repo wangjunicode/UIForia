@@ -7,21 +7,25 @@ namespace Rendering {
     [DebuggerDisplay("id = {elementId} state = {currentState}")]
     public partial class UIStyleSet {
 
-        private StyleEntry[] appliedStyles;
         private StyleState currentState;
+        private StyleEntry[] appliedStyles;
 
         private int baseCounter;
         public readonly int elementId;
         private readonly IStyleChangeHandler changeHandler;
-
+        
+        public UIStyle activeStyles;
+        
         public UIStyleSet(int elementId, IStyleChangeHandler changeHandler) {
             this.elementId = elementId;
             this.changeHandler = changeHandler;
             this.currentState = StyleState.Normal;
+            this.activeStyles = new UIStyle();
         }
 
         public void EnterState(StyleState type) {
             currentState |= type;
+            changeHandler.SetPaint(elementId, paint);
         }
 
         public void ExitState(StyleState type) {
@@ -30,6 +34,18 @@ namespace Rendering {
             }
         }
 
+        // todo -- cachable
+        public bool HasHoverStyle {
+            get {
+                if (appliedStyles == null) return false;
+                for (int i = 0; i < appliedStyles.Length; i++) {
+                    if ((appliedStyles[i].state == StyleState.Hover)) {
+                        return true;
+                    }
+                }
+                return false;
+            }
+        }
         public UIStyleProxy hover {
             get { return new UIStyleProxy(this, StyleState.Hover); }
             // ReSharper disable once ValueParameterNotUsed

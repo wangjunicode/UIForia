@@ -43,7 +43,7 @@ public static class ReflectionUtil {
     private static readonly List<GenericTypeEntry> generics = new List<GenericTypeEntry>();
     private static readonly List<DelegateEntry> staticDelegates = new List<DelegateEntry>();
     private static readonly List<DelegateEntry> openDelegates = new List<DelegateEntry>();
-    
+
     private static Dictionary<Type, List<LinqAccessor>> linqDelegates = new Dictionary<Type, List<LinqAccessor>>();
 
     public static readonly object[] ObjectArray0 = new object[0];
@@ -194,54 +194,14 @@ public static class ReflectionUtil {
         }
     }
 
-    public static MethodInfo GetMethodForOperator(Type type, OperatorType opType) {
-        // todo what about when the types don't match?
-        switch (opType) {
-            case OperatorType.Plus:
-                return type.GetMethod("op_Addition", PublicStatic);
-        }
+    public static bool IsOverride(MethodInfo m) {
+        return m.GetBaseDefinition().DeclaringType != m.DeclaringType;
+    }
 
-        return null;
-//            switch (method.Name) {
-//                case "op_Implicit":
-//                case "op_Explicit":
-//                case "op_Addition":
-//                case "op_Subtraction":
-//                case "op_Multiply":
-//                case "op_Division":
-//                case "op_Modulus":
-//                case "op_ExclusiveOr":
-//                case "op_BitwiseAnd":
-//                case "op_BitwiseOr":
-//                case "op_LogicalAnd":
-//                case "op_LogicalOr":
-//                case "op_Assign":
-//                case "op_LeftShift":
-//                case "op_RightShift":
-//                case "op_SignedRightShift":
-//                case "op_UnsignedRightShift":
-//                case "op_Equality":
-//                case "op_GreaterThan":
-//                case "op_LessThan":
-//                case "op_Inequality":
-//                case "op_GreaterThanOrEqual":
-//                case "op_LessThanOrEqual":
-//                case "op_MultiplicationAssignment":
-//                case "op_SubtractionAssignment":
-//                case "op_ExclusiveOrAssignment":
-//                case "op_LeftShiftAssignment":
-//                case "op_ModulusAssignment":
-//                case "op_AdditionAssignment":
-//                case "op_BitwiseAndAssignment":
-//                case "op_BitwiseOrAssignment":
-//                case "op_Comma":
-//                case "op_DivisionAssignment":
-//                case "op_Decrement":
-//                case "op_Increment":
-//                case "op_UnaryNegation":
-//                case "op_UnaryPlus":
-//                case "op_OnesComplement": break;
-//            }
+    // todo -- doesn't warn about parameters, etc
+    public static bool IsOverride(object target, string methodName) {
+        MethodInfo info = target.GetType().GetMethod(methodName, PublicInstance, null, Type.EmptyTypes, null);
+        return IsOverride(info);
     }
 
     public static object CreateGenericInstance(Type genericBase, params object[] args) {
@@ -533,8 +493,8 @@ public static class ReflectionUtil {
 
     private static Delegate CreateFieldGetter(Type declaredType, string fieldName) {
         ParameterExpression paramExpression = Expression.Parameter(declaredType, "value");
-        Expression propertyGetterExpression = Expression.Property(paramExpression, fieldName);
-        return Expression.Lambda(propertyGetterExpression, paramExpression).Compile();
+        Expression fieldGetterExpression = Expression.Field(paramExpression, fieldName);
+        return Expression.Lambda(fieldGetterExpression, paramExpression).Compile();
     }
 
     private static Delegate CreateFieldSetter(Type baseType, Type fieldType, string fieldName) {
@@ -563,7 +523,7 @@ public static class ReflectionUtil {
         }
 
     }
-    
+
     public static LinqAccessor GetLinqAccessors(Type baseType, Type fieldType, string fieldName) {
         List<LinqAccessor> linqList;
 
@@ -583,7 +543,7 @@ public static class ReflectionUtil {
         Delegate setter = CreateFieldSetter(baseType, fieldType, fieldName);
         LinqAccessor linqEntry = new LinqAccessor(fieldName, getter, setter);
         linqList.Add(linqEntry);
-        
+
         return linqEntry;
     }
 
@@ -595,12 +555,12 @@ public static class ReflectionUtil {
 
         return Expression.Lambda<Action<TObject, TProperty>>(
             Expression.Assign(propertyGetterExpression, paramExpression1),
-            paramExpression0, 
+            paramExpression0,
             paramExpression1
         ).Compile();
 
     }
-    
+
     public static Func<TObject, TProperty> GetPropGetter<TObject, TProperty>(string propertyName) {
         ParameterExpression paramExpression = Expression.Parameter(typeof(TObject), "value");
         Expression propertyGetterExpression = Expression.Property(paramExpression, propertyName);

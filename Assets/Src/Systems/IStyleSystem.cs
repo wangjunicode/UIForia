@@ -18,6 +18,8 @@ namespace Src.Systems {
         event BorderRadiusChanged onBorderRadiusChanged;
         event FontPropertyChanged onFontPropertyChanged;
 
+        UIStyleSet GetStyleForElement(int elementId);
+
     }
 
 }

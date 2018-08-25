@@ -19,7 +19,7 @@ namespace Src {
         private string name;
         public readonly List<UITemplate> childTemplates;
         public readonly List<AttributeDefinition> attributes;
-        
+
         private readonly StyleDefinition styleDefinition;
         private Binding[] bindings; // used for output
         protected readonly List<Binding> bindingList = new List<Binding>(); // used for compilation
@@ -87,7 +87,7 @@ namespace Src {
             }
 
             if (styleList == null) return;
-            
+
             styleDefinition.constantBindings = styleList.Where((s) => s.IsConstant()).ToArray();
             bindingList.AddRange(styleList.Where((s) => !s.IsConstant()));
         }
@@ -101,6 +101,12 @@ namespace Src {
 
             bindings = bindingList.ToArray();
             return true;
+        }
+
+        protected List<AttributeDefinition> GetUserAttributes() {
+            return attributes.Where((a) => {
+                return !a.key.StartsWith("style") && a.key != "name";
+            }).ToList();
         }
 
         protected bool HasAttribute(string attributeName) {

@@ -10,7 +10,7 @@ namespace Src.Systems {
     public delegate void RectPropertyChanged(int elementId, LayoutRect rect);
 
     public delegate void ContentBoxChanged(int elementId, ContentBoxRect rect);
-    
+
     public delegate void ConstraintChanged(int elementId, LayoutConstraints constraints);
 
     public delegate void LayoutChanged(int elementId, LayoutParameters layoutParameters);
@@ -18,7 +18,7 @@ namespace Src.Systems {
     public delegate void BorderRadiusChanged(int elementId, BorderRadius radius);
 
     public delegate void FontPropertyChanged(int elementId, TextStyle textStyle);
-    
+
     public class StyleSystem : ISystem, IStyleSystem {
 
         public event PaintChanged onPaintChanged;
@@ -30,7 +30,7 @@ namespace Src.Systems {
         public event ConstraintChanged onConstraintChanged;
         public event BorderRadiusChanged onBorderRadiusChanged;
         public event FontPropertyChanged onFontPropertyChanged;
-        
+
         private readonly Dictionary<int, UIStyleSet> styleMap;
 
         public StyleSystem() {
@@ -44,8 +44,8 @@ namespace Src.Systems {
         public void OnUpdate() { }
 
         public void OnDestroy() { }
-        
-        public void OnInitialize() {}
+
+        public void OnInitialize() { }
 
         public void OnElementCreated(UIElementCreationData elementData) {
             UIElement element = elementData.element;
@@ -108,7 +108,7 @@ namespace Src.Systems {
         public void SetBorderRadius(int elementId, BorderRadius radius) {
             onBorderRadiusChanged?.Invoke(elementId, radius);
         }
-        
+
         public void SetLayout(int elementId, LayoutParameters layoutParameters) {
             onLayoutChanged?.Invoke(elementId, layoutParameters);
         }
@@ -123,6 +123,12 @@ namespace Src.Systems {
 
         public void SetPaint(int elementId, Paint paint) {
             onPaintChanged?.Invoke(elementId, paint);
+        }
+
+        public UIStyleSet GetStyleForElement(int elementId) {
+            UIStyleSet style;
+            styleMap.TryGetValue(elementId, out style);
+            return style;
         }
 
     }

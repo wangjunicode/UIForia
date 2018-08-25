@@ -41,17 +41,17 @@ namespace Src.Layout {
             return output;
         }
 
-        //protected virtual float ComputeContentHeight() { }
-
         public float GetContentHeight(LayoutData data, float parentWidth, float contentSize, float viewportSize) {
+            
             if ((data.element.flags & UIElementFlags.TextElement) != 0) {
-                //if (data.previousParentWidth != parentWidth) {
+                if (data.previousParentWidth != parentWidth) {
                     data.previousParentWidth = parentWidth;
                     data.textContentSize.y = textSizeCalculator.CalcTextHeight(data.textContent, data.element.style, parentWidth);
-                //}
-                Debug.Log("Size at layout: " + data.textContentSize.y);
+                    Debug.Log("Size at layout: " + data.textContentSize.y + "parent: " + parentWidth);
+                }
                 return data.textContentSize.y;
             }
+            
             List<LayoutData> children = data.children;
 
             // todo include statically positioned things who's breadth exceeds max computed

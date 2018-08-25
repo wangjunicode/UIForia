@@ -15,6 +15,7 @@ namespace Src {
         private static readonly ExpressionParser parser = new ExpressionParser();
 
         private static readonly List<ICastHandler> builtInCastHandlers = new List<ICastHandler>() {
+            new CastHandler_ToString(),
             new CastHandler_ColorToVector4(),
             new CastHandler_DoubleToMeasurement(),
             new CastHandler_FloatToInt(),
@@ -45,6 +46,11 @@ namespace Src {
         [PublicAPI]
         public Expression Compile(string source) {
             return Visit(parser.Parse(source));
+        }
+        
+        [PublicAPI]
+        public Expression Compile(Type outputType, string source) {
+            return HandleCasting(outputType, Visit(parser.Parse(source)));
         }
 
         [PublicAPI]

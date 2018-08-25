@@ -6,6 +6,7 @@ namespace Rendering {
 
         [PublicAPI]
         public ContentBoxRect margin {
+            // return activeStyle.margin;
             get { return new ContentBoxRect(marginTop, marginRight, marginBottom, marginLeft); }
             set { SetMargin(value); }
         }
@@ -57,6 +58,7 @@ namespace Rendering {
         [PublicAPI]
         public void SetMargin(ContentBoxRect value, StyleState state = StyleState.Normal) {
             GetOrCreateStyle(state).margin = value;
+            activeStyles.margin = margin;
             changeHandler.SetMargin(elementId, margin);
         }
 
@@ -68,6 +70,7 @@ namespace Rendering {
         [PublicAPI]
         public void SetMarginLeft(float value, StyleState state = StyleState.Normal) {
             GetOrCreateStyle(state).margin.left = value;
+            // activeStyle.marginLeft = FindActiveStyle() => .marginLeft;
             if (marginLeft == value) {
                 changeHandler.SetMargin(elementId, margin);
             }

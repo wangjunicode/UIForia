@@ -1,19 +1,23 @@
-﻿using Rendering;
+﻿using Debugger;
+using Rendering;
 using UnityEditor;
 using UnityEngine;
 
 namespace Src.Editor {
 
-    public class UIViewWindow : EditorWindow {
+    public class DebuggerWindow : EditorWindow {
 
+        [MenuItem("UI/Debugger Window")]
+        
+        private static void InitWindow() {
+            GetWindow(typeof(DebuggerWindow)).Show();
+        }
+        
         private UIViewIMGUI view;
 
         private void Update() {
             view.Update();
-            Repaint();
         }
-
-        private Vector2 mouse;
 
         private void OnGUI() {
    
@@ -23,40 +27,29 @@ namespace Src.Editor {
                 height = position.height - 20
             };
             
-            float start = Time.realtimeSinceStartup;
             view.SetViewRect(viewport);
             view.Render();
-            float end = Time.realtimeSinceStartup - start;
+
             if (GUI.Button(new Rect(0, 0, 100, 20), "Refresh")) {
                 view.Refresh();
             }
             
             switch (Event.current.type) {
                 case EventType.MouseMove:
-                    mouse = Event.current.mousePosition;
                     Repaint();
                     break;
             }
-            
-            GUI.Label(new Rect(116f, 2, 200, 20), position.size.ToString());
-            GUI.Label(new Rect(216f, 2, 200, 20), mouse.ToString());
-            GUI.Label(new Rect(316f, 2, 200, 20), "Frame Time: " + end.ToString("0.00"));
-          
+                      
         }
 
         public void Awake() {
             view = view ?? new UIViewIMGUI(typeof(TempUIType));
         }
 
-        [MenuItem("UI/Editor Window")]
-        static void InitWindow() {
-            GetWindow(typeof(UIViewWindow)).Show();
-        }
-
         private void OnEnable() {
             wantsMouseMove = true;
             wantsMouseEnterLeaveWindow = true;
-            view = new UIViewIMGUI(typeof(TempUIType));
+            view = new UIViewIMGUI(typeof(Inspector));
             view.OnCreate();
             EditorApplication.update += Update;
         }
@@ -66,7 +59,6 @@ namespace Src.Editor {
             view = null;
             EditorApplication.update -= Update;
         }
-
     }
 
 }

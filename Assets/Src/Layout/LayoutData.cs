@@ -7,8 +7,6 @@ using UnityEngine;
 
 namespace Src.Layout {
 
-    public class IMGUILayoutData { }
-
     [DebuggerDisplay("{element}")]
     public class LayoutData : ISkipTreeTraversable {
 
@@ -27,24 +25,26 @@ namespace Src.Layout {
 
         public LayoutData parent;
         public UILayout layout;
+
         public readonly UIElement element;
         public readonly List<LayoutData> children;
 
         public string textContent;
-        
+
         public readonly UIStyleSet style;
-        
+        public float horizontal;
+
         public LayoutData(UIElement element) {
             this.element = element;
             this.children = new List<LayoutData>();
             this.previousParentWidth = float.MinValue;
-            constraints = LayoutConstraints.Unset;
+            this.constraints = LayoutConstraints.Unset;
             this.style = element.style;
         }
 
         public IHierarchical Element => element;
         public IHierarchical Parent => element.parent;
-        
+
         public bool isInFlow => parameters.flow != LayoutFlowType.OutOfFlow;
 
         public float ContentStartOffsetX => margin.left + padding.left + border.left;
@@ -87,8 +87,10 @@ namespace Src.Layout {
         }
 
         public float GetPreferredHeight(UIUnit parentUnit, float computedWidth, float parentValue, float viewportValue) {
+            computedWidth = computedWidth - horizontal;
             switch (rect.height.unit) {
-                case UIUnit.Auto:
+                case UIUnit.Auto: // fit parent content
+                    // should be renamed & defined as nearest parent block
                     return ContentStartOffsetY
                            + layout.GetContentHeight(this, computedWidth, parentValue, viewportValue)
                            + ContentEndOffsetY;
@@ -101,7 +103,8 @@ namespace Src.Layout {
                             + layout.GetContentHeight(this, computedWidth, parentValue, viewportValue)
                             + ContentEndOffsetY) * rect.height.value;
 
-                case UIUnit.Parent:
+                // idea: setting for filling parent + margin / padding or border
+                case UIUnit.Parent: // fill parent extents, width + marginHorizontal + borderHorizontal + paddingHorizontal
                     if (parentUnit == UIUnit.Content) return 0;
                     return rect.height.value * parentValue;
 
@@ -112,7 +115,7 @@ namespace Src.Layout {
                     return 0;
             }
         }
-     
+
         public void OnParentChanged(ISkipTreeTraversable newParent) {
             parent = (LayoutData) newParent;
         }
@@ -124,7 +127,6 @@ namespace Src.Layout {
         void ISkipTreeTraversable.OnAfterTraverse() {
             parent?.children.Add(this);
         }
-
 
         public float GetMinWidth(UIUnit parentUnit, float parentValue, float viewportValue) {
             switch (constraints.minWidth.unit) {
@@ -205,6 +207,40 @@ namespace Src.Layout {
                 default:
                     return 0;
             }
+        }
+
+        public void UpdateFromStyle() {
+            border = style.border;
+            padding = style.padding;
+            margin = style.margin;
+            parameters = style.layout;
+            constraints = style.constraints;
+            rect = style.rect;
+            horizontal = border.horizontal - padding.horizontal - margin.horizontal;
+        }
+
+        public void SetLayout(UILayout layout) {
+            this.layout = layout;
+        }
+
+        public void SetMargin(ContentBoxRect margin) {
+            this.margin = margin;
+            horizontal = border.horizontal - padding.horizontal - margin.horizontal;
+        }
+        
+        public void SetPadding(ContentBoxRect padding) {
+            this.padding = padding;
+            horizontal = border.horizontal - padding.horizontal - margin.horizontal;
+        }
+        
+        public void SetBorder(ContentBoxRect border) {
+            this.border = border;
+            horizontal = border.horizontal - padding.horizontal - margin.horizontal;
+        }
+        
+        public void SetTextContent(string text) {
+            previousParentWidth = float.MinValue;
+            textContent = text;
         }
 
     }

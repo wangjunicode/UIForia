@@ -24,6 +24,12 @@ namespace Tests {
             return (T) target;
         }
 
+        public class TestUIElementType : UIElement {
+
+            public int intValue;
+
+        }
+        
         public class TestAliasSource : IAliasSource {
 
             public object value;

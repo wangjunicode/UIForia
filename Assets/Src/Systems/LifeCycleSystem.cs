@@ -1,9 +1,8 @@
-﻿using System.Collections.Generic;
-using Rendering;
+﻿using Rendering;
 
 namespace Src.Systems {
 
-    public class LifeCycleData : ISkipTreeTraversable {
+    public class LifeCycleData : IHierarchical {
 
         public readonly UIElement element;
 
@@ -11,14 +10,9 @@ namespace Src.Systems {
             this.element = element;
         }
 
+        public int UniqueId => element.id;
         public IHierarchical Element => element;
         public IHierarchical Parent => element.parent;
-
-        public void OnParentChanged(ISkipTreeTraversable newParent) { }
-
-        public void OnBeforeTraverse() { }
-
-        public void OnAfterTraverse() { }
 
     }
 
@@ -69,13 +63,13 @@ namespace Src.Systems {
                 enableTree.AddItem(new LifeCycleData(element));
             }
             if (ReflectionUtil.IsOverride(element, nameof(UIElement.OnDisable))) {
-                enableTree.AddItem(new LifeCycleData(element));
+                disableTree.AddItem(new LifeCycleData(element));
             }
             if (ReflectionUtil.IsOverride(element, nameof(UIElement.OnCreate))) {
-                enableTree.AddItem(new LifeCycleData(element));
+                createTree.AddItem(new LifeCycleData(element));
             }
             if (ReflectionUtil.IsOverride(element, nameof(UIElement.OnDestroy))) {
-                enableTree.AddItem(new LifeCycleData(element));
+                destroyTree.AddItem(new LifeCycleData(element));
             }
         }
 
@@ -85,25 +79,36 @@ namespace Src.Systems {
             // todo -- not quite right, need to revisit skip tree to call enable 
             // todo    on all nodes that are children of this. Right now the skip 
             // todo    just sets disabled on the node and doesn't traverse, which needs to happen
-            LifeCycleData data = enableTree.GetItem(element);
-            if (data != null) {
-                enableTree.EnableHierarchy(data);
-                updateTree.EnableHierarchy(data);
-            }
+            LifeCycleData data = enableTree.GetItem(element) ?? new LifeCycleData(element);
+            enableTree.EnableHierarchy(data);
+            updateTree.EnableHierarchy(data);
         }
 
+        // this awkwardness of newLifeCycleData can be fixed by allowing
+        // skip tree to take an item type (element in this case)
+        // instead of or in addition to an item instance
         public void OnElementDisabled(UIElement element) {
-            LifeCycleData data = enableTree.GetItem(element);
-            if (data != null) {
-                disableTree.DisableHierarchy(data);
-            }
+            LifeCycleData data = enableTree.GetItem(element) ?? new LifeCycleData(element);
+            disableTree.DisableHierarchy(data);
         }
 
         public void OnElementDestroyed(UIElement element) {
-            LifeCycleData data = enableTree.GetItem(element);
-            if (data != null) {
-                disableTree.RemoveHierarchy(data);
-            }
+
+            LifeCycleData data = destroyTree.GetItem(element) ?? new LifeCycleData(element);
+            destroyTree.TraversePreOrder(data, (item) => item.element.OnDestroy(), true);
+
+            createTree.RemoveHierarchy(data);
+            disableTree.RemoveHierarchy(data);
+            enableTree.RemoveHierarchy(data);
+            updateTree.RemoveHierarchy(data);
+            destroyTree.RemoveHierarchy(data);
+
+        }
+
+        public void OnElementShown(UIElement element) {
+        }
+
+        public void OnElementHidden(UIElement element) {
         }
 
     }

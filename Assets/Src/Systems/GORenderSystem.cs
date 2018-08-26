@@ -144,6 +144,12 @@ namespace Src.Systems {
             data.element = null;
         }
 
+        public void OnElementShown(UIElement element) {
+        }
+
+        public void OnElementHidden(UIElement element) {
+        }
+
         public void OnElementEnabled(UIElement element) {
             RenderData data = renderSkipTree.GetItem(element);
             renderSkipTree.EnableHierarchy(data);

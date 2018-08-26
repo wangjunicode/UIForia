@@ -1,8 +1,10 @@
 namespace Src {
 
-    public class UISwitchElement : UIElement {
+    public abstract class UISwitchElement : UIElement { }
 
-        
+    public class UISwitchElement<T> : UISwitchElement {
+
+        public T currentValue;
 
     }
 

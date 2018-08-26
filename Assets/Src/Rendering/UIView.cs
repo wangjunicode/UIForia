@@ -1,10 +1,10 @@
 using System;
+using System.Collections.Generic;
 using Rendering;
 using Src;
 using Src.Systems;
 
 public abstract class UIView {
-
 
     private static int ElementIdGenerator;
     public static int NextElementId => ElementIdGenerator++;
@@ -17,15 +17,21 @@ public abstract class UIView {
     //protected readonly ILayoutSystem layoutSystem;
     protected readonly StyleSystem styleSystem;
     protected readonly ElementRegistrySystem elementSystem;
-    
+
+    protected List<ISystem> systems;
     private readonly Type elementType;
 
     protected UIView(Type elementType) {
         this.elementType = elementType;
+        this.systems = new List<ISystem>();
         elementSystem = new ElementRegistrySystem();
         styleSystem = new StyleSystem();
         bindingSystem = new BindingSystem();
         lifeCycleSystem = new LifeCycleSystem();
+        systems.Add(elementSystem);
+        systems.Add(styleSystem);
+        systems.Add(bindingSystem);
+        systems.Add(lifeCycleSystem);
     }
 
     public UIElement Root => root;
@@ -50,26 +56,39 @@ public abstract class UIView {
         renderSystem.OnInitialize();
         styleSystem.OnInitialize();
         inputSystem.OnInitialize();
-        
+        bindingSystem.OnInitialize();
+        lifeCycleSystem.OnInitialize();
     }
 
     // todo -- make this stuff event based to make dependency graph explicit or removed
     public virtual void Register(UIElementCreationData elementData) {
         elementSystem.OnElementCreated(elementData);
-        layoutSystem.OnElementCreated(elementData);
         styleSystem.OnElementCreated(elementData);
+        layoutSystem.OnElementCreated(elementData);
         lifeCycleSystem.OnElementCreated(elementData);
         renderSystem.OnElementCreated(elementData);
         bindingSystem.OnElementCreated(elementData);
         inputSystem.OnElementCreated(elementData);
     }
 
+    public virtual void DestroyElement(UIElement element) {
+        lifeCycleSystem.OnElementDestroyed(element);
+        inputSystem.OnElementDestroyed(element);
+        bindingSystem.OnElementDestroyed(element);
+        renderSystem.OnElementDestroyed(element);
+        layoutSystem.OnElementDestroyed(element);
+        styleSystem.OnElementDestroyed(element);
+        elementSystem.OnElementDestroyed(element);
+    }
+    
     public virtual void OnCreate() {
         root = TemplateParser.GetParsedTemplate(elementType).CreateWithoutScope(this);
         layoutSystem.OnInitialize();
         renderSystem.OnInitialize();
+        styleSystem.OnInitialize();
         inputSystem.OnInitialize();
         bindingSystem.OnInitialize();
+        lifeCycleSystem.OnInitialize();
     }
 
     public virtual void OnDestroy() {
@@ -86,26 +105,63 @@ public abstract class UIView {
         layoutSystem.OnUpdate();
         bindingSystem.OnUpdate();
         lifeCycleSystem.OnUpdate();
-        HandleCreatedElements();
-        HandleHidingElements();
-        HandleShowingElements();
-        HandleDestroyingElements();
         renderSystem.OnUpdate();
-        HandleMouseEvents();
     }
 
-    protected virtual void HandleDestroyingElements() { }
+    // todo -- enqueue these to be flushed at end of update
+    public void EnableElement(UIElement element) {
+        if ((element.flags & UIElementFlags.Enabled) != 0) {
+            return;
+        }
+        element.flags |= UIElementFlags.Enabled;
+        // expect life cycle system in invoke handlers for this
+        if (element.parent != null && (element.parent.flags & UIElementFlags.Enabled) != 0) {
+            foreach (ISystem system in systems) {
+                system.OnElementEnabled(element);
+            }
+        }
+    }
 
-    protected virtual void HandleCreatedElements() { }
+    // todo -- enqueue these to be flushed at end of update
+    public void DisableElement(UIElement element) {
+        if ((element.flags & UIElementFlags.Enabled) == 0) {
+            return;
+        }
+        element.flags &= ~(UIElementFlags.Enabled);
+        // expect life cycle system in invoke handlers for this
+        if (element.parent != null && (element.parent.flags & UIElementFlags.Enabled) != 0) {
+            foreach (ISystem system in systems) {
+                system.OnElementDisabled(element);
+            }
+        }
+    }
 
-    protected virtual void HandleHidingElements() { }
+    // todo -- enqueue these to be flushed at end of update
+    public void ShowElement(UIElement element) {
+        if ((element.flags & UIElementFlags.Shown) != 0) {
+            return;
+        }
+        element.flags |= UIElementFlags.Shown;
+        // expect life cycle system in invoke handlers for this
+        if (element.parent != null && (element.parent.flags & UIElementFlags.Shown) != 0) {
+            foreach (ISystem system in systems) {
+                system.OnElementShown(element);
+            }
+        }
+    }
 
-    protected virtual void HandleShowingElements() { }
-
-    protected virtual void HandleMouseEvents() { }
-
-    protected virtual void HandleKeyboardEvents() { }
-
-    protected virtual void HandleFocusEvents() { }
+    // todo -- enqueue these to be flushed at end of update
+    public void HideElement(UIElement element) {
+        if ((element.flags & UIElementFlags.Shown) == 0) {
+            return;
+        }
+        element.flags |= UIElementFlags.Shown;
+        // expect life cycle system in invoke handlers for this
+        if (element.parent != null && (element.parent.flags & UIElementFlags.Shown) == 0) {
+            foreach (ISystem system in systems) {
+                system.OnElementHidden(element);
+            }
+        }
+    }
 
 }

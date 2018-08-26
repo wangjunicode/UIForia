@@ -7,7 +7,7 @@ namespace Rendering {
     public sealed class UIGameObjectView : UIView {
 
         public UIGameObjectView(Type elementType, RectTransform viewTransform) : base(elementType) {
-            layoutSystem = new LayoutSystem(new GOTextSizeCalculator(), elementSystem, styleSystem);
+            layoutSystem = new LayoutSystem(new GOTextSizeCalculator(), styleSystem);
             renderSystem = new GORenderSystem(layoutSystem, viewTransform);
             inputSystem = null;
         }

@@ -13,6 +13,8 @@ namespace Rendering {
         void OnElementEnabled(UIElement element);
         void OnElementDisabled(UIElement element);
         void OnElementDestroyed(UIElement element);
+        void OnElementShown(UIElement element);
+        void OnElementHidden(UIElement element);
 
     }
 

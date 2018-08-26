@@ -16,24 +16,23 @@ namespace Src.Layout {
             heightItems = new FlexItemAxis[16];
         }
 
-        private void DoLayoutRow(Rect viewport, LayoutDataSet dataSet, Rect contentArea) {
-            LayoutData data = dataSet.data;
+        private void DoLayoutRow(Rect viewport, LayoutNode currentNode, Rect contentArea) {
 
             int itemCount = 0;
-            List<LayoutData> children = data.children;
+            LayoutNode[] children = currentNode.children;
 
             float remainingWidth = contentArea.width;
 
-            for (int i = 0; i < children.Count; i++) {
-                LayoutData child = children[i];
+            for (int i = 0; i < children.Length; i++) {
+                LayoutNode child = children[i];
                 if (!child.isInFlow) continue;
 
                 FlexItemAxis widthItem = new FlexItemAxis();
 
                 widthItem.axisStart = contentArea.x;
-                widthItem.minSize = child.GetMinWidth(data.rect.width.unit, contentArea.width, viewport.width);
-                widthItem.maxSize = child.GetMaxWidth(data.rect.width.unit, contentArea.width, viewport.width);
-                widthItem.preferredSize = child.GetPreferredWidth(data.rect.width.unit, contentArea.width, viewport.width);
+                widthItem.minSize = child.GetMinWidth(currentNode.rect.width.unit, contentArea.width, viewport.width);
+                widthItem.maxSize = child.GetMaxWidth(currentNode.rect.width.unit, contentArea.width, viewport.width);
+                widthItem.preferredSize = child.GetPreferredWidth(currentNode.rect.width.unit, contentArea.width, viewport.width);
                 widthItem.outputSize = widthItem.MinDefined && widthItem.preferredSize < widthItem.minSize ? widthItem.minSize : widthItem.preferredSize;
                 widthItem.outputSize = widthItem.MaxDefined && widthItem.outputSize > widthItem.maxSize ? widthItem.maxSize : widthItem.outputSize;
 
@@ -59,18 +58,18 @@ namespace Src.Layout {
             }
 
             itemCount = 0; // need to reset so we safely skip non flow children
-            for (int i = 0; i < children.Count; i++) {
-                LayoutData child = children[i];
+            for (int i = 0; i < children.Length; i++) {
+                LayoutNode child = children[i];
                 if (!child.isInFlow) continue;
                 
                 FlexItemAxis heightItem = new FlexItemAxis();
                 
                 heightItem.axisStart = contentArea.y;
-                heightItem.minSize = child.GetMinHeight(data.rect.height.unit, contentArea.height, viewport.height);
-                heightItem.maxSize = child.GetMaxHeight(data.rect.height.unit, contentArea.height, viewport.height);
+                heightItem.minSize = child.GetMinHeight(currentNode.rect.height.unit, contentArea.height, viewport.height);
+                heightItem.maxSize = child.GetMaxHeight(currentNode.rect.height.unit, contentArea.height, viewport.height);
                 // now we have the final width and can compute preferred height accordingly
                 // this restriction doesn't exist in the column layout case
-                heightItem.preferredSize = child.GetPreferredHeight(data.rect.height.unit, widthItems[itemCount].outputSize, contentArea.height, viewport.height);
+                heightItem.preferredSize = child.GetPreferredHeight(currentNode.rect.height.unit, widthItems[itemCount].outputSize, contentArea.height, viewport.height);
                 
                 heightItem.outputSize = heightItem.MinDefined && heightItem.preferredSize < heightItem.minSize ? heightItem.minSize : heightItem.preferredSize;
                 heightItem.outputSize = heightItem.MaxDefined && heightItem.outputSize > heightItem.maxSize ? heightItem.maxSize : heightItem.outputSize;
@@ -79,28 +78,28 @@ namespace Src.Layout {
 
             }
 
-            AlignMainAxis(widthItems, itemCount, contentArea.x, remainingWidth, data.parameters.mainAxisAlignment);
-            AlignCrossAxis(heightItems, itemCount, contentArea.y, data.parameters.crossAxisAlignment, contentArea.height);
+            AlignMainAxis(widthItems, itemCount, contentArea.x, remainingWidth, currentNode.parameters.mainAxisAlignment);
+            AlignCrossAxis(heightItems, itemCount, contentArea.y, currentNode.parameters.crossAxisAlignment, contentArea.height);
         }
 
-        private void DoLayoutColumn(Rect viewport, LayoutDataSet dataSet, Rect contentArea) {
-            LayoutData data = dataSet.data;
+        private void DoLayoutColumn(Rect viewport, LayoutNode currentNode, Rect contentArea) {
 
             float remainingHeight = contentArea.height;
-            List<LayoutData> children = data.children;
+            LayoutNode[] children = currentNode.children;
+            
             int itemCount = 0;
 
-            for (int i = 0; i < children.Count; i++) {
-                LayoutData child = children[i];
+            for (int i = 0; i < children.Length; i++) {
+                LayoutNode child = children[i];
                 if (!child.isInFlow) continue;
 
                 FlexItemAxis heightItem = new FlexItemAxis();
                 FlexItemAxis widthItem = new FlexItemAxis();
 
                 widthItem.axisStart = contentArea.x;
-                widthItem.minSize = child.GetMinWidth(data.rect.width.unit, contentArea.width, viewport.width);
-                widthItem.maxSize = child.GetMaxWidth(data.rect.width.unit, contentArea.width, viewport.width);
-                widthItem.preferredSize = child.GetPreferredWidth(data.rect.width.unit, contentArea.width, viewport.width);
+                widthItem.minSize = child.GetMinWidth(currentNode.rect.width.unit, contentArea.width, viewport.width);
+                widthItem.maxSize = child.GetMaxWidth(currentNode.rect.width.unit, contentArea.width, viewport.width);
+                widthItem.preferredSize = child.GetPreferredWidth(currentNode.rect.width.unit, contentArea.width, viewport.width);
                 widthItem.outputSize = widthItem.MinDefined && widthItem.preferredSize < widthItem.minSize ? widthItem.minSize : widthItem.preferredSize;
                 widthItem.outputSize = widthItem.MaxDefined && widthItem.outputSize > widthItem.maxSize ? widthItem.maxSize : widthItem.outputSize;
 
@@ -108,10 +107,10 @@ namespace Src.Layout {
                 widthItem.shrinkFactor = child.constraints.shrinkFactor;
 
                 heightItem.axisStart = contentArea.y;
-                heightItem.minSize = child.GetMinHeight(data.rect.height.unit, contentArea.height, viewport.height);
-                heightItem.maxSize = child.GetMaxHeight(data.rect.height.unit, contentArea.height, viewport.height);
+                heightItem.minSize = child.GetMinHeight(currentNode.rect.height.unit, contentArea.height, viewport.height);
+                heightItem.maxSize = child.GetMaxHeight(currentNode.rect.height.unit, contentArea.height, viewport.height);
 
-                heightItem.preferredSize = child.GetPreferredHeight(data.rect.height.unit, widthItem.outputSize, contentArea.height, viewport.height);
+                heightItem.preferredSize = child.GetPreferredHeight(currentNode.rect.height.unit, widthItem.outputSize, contentArea.height, viewport.height);
                 
                 heightItem.outputSize = heightItem.MinDefined && heightItem.preferredSize < heightItem.minSize ? heightItem.minSize : heightItem.preferredSize;
                 heightItem.outputSize = heightItem.MaxDefined && heightItem.outputSize > heightItem.maxSize ? heightItem.maxSize : heightItem.outputSize;
@@ -138,38 +137,37 @@ namespace Src.Layout {
                 remainingHeight = 0;
             }
 
-            AlignMainAxis(heightItems, itemCount, contentArea.y, remainingHeight, data.parameters.mainAxisAlignment);
-            AlignCrossAxis(widthItems, itemCount, contentArea.x, data.parameters.crossAxisAlignment, contentArea.width);
+            AlignMainAxis(heightItems, itemCount, contentArea.y, remainingHeight, currentNode.parameters.mainAxisAlignment);
+            AlignCrossAxis(widthItems, itemCount, contentArea.x, currentNode.parameters.crossAxisAlignment, contentArea.width);
         }
 
-        public override void Run(Rect viewport, LayoutDataSet dataSet, Rect[] results) {
-            Rect size = dataSet.result;
-            LayoutData data = dataSet.data;
+        public override void Run(Rect viewport, LayoutNode currentNode, Rect[] results) {
+            Rect size = currentNode.outputRect;
 
-            float contentStartX = data.ContentStartOffsetX;
-            float contentStartY = data.ContentStartOffsetY;
-            float contentEndX = size.xMax - size.x - data.ContentEndOffsetX;
-            float contentEndY = size.yMax - size.y - data.ContentEndOffsetY;
+            float contentStartX = currentNode.contentStartOffsetX;
+            float contentStartY = currentNode.contentStartOffsetY;
+            float contentEndX = size.xMax - size.x - currentNode.contentEndOffsetX;
+            float contentEndY = size.yMax - size.y - currentNode.contentEndOffsetY;
             float contentAreaWidth = contentEndX - contentStartX;
             float contentAreaHeight = contentEndY - contentStartY;
             
             Rect contentArea = new Rect(contentStartX, contentStartY, contentAreaWidth, contentAreaHeight);
             
-            if (widthItems.Length < data.children.Count) {
-                Array.Resize(ref widthItems, data.children.Count * 2);
-                Array.Resize(ref heightItems, data.children.Count * 2);
+            if (widthItems.Length < currentNode.children.Length) {
+                Array.Resize(ref widthItems, currentNode.children.Length * 2);
+                Array.Resize(ref heightItems, currentNode.children.Length * 2);
             }
 
-            if (data.parameters.direction == LayoutDirection.Row) {
-                DoLayoutRow(viewport, dataSet, contentArea);
+            if (currentNode.parameters.direction == LayoutDirection.Row) {
+                DoLayoutRow(viewport, currentNode, contentArea);
             }
             else {
-                DoLayoutColumn(viewport, dataSet, contentArea);
+                DoLayoutColumn(viewport, currentNode, contentArea);
             }
 
             int itemTracker = 0;
-            for (int i = 0; i < data.children.Count; i++) {
-                if (data.children[i].isInFlow) {
+            for (int i = 0; i < currentNode.children.Length; i++) {
+                if (currentNode.children[i].isInFlow) {
                     results[i] = new Rect(
                         widthItems[itemTracker].axisStart + size.x,
                         heightItems[itemTracker].axisStart + size.y,

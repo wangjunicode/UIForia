@@ -182,12 +182,12 @@ namespace Src.Systems {
                     break;
                 case EventType.MouseEnterWindow:
                     break;
-                
+
                 case EventType.MouseLeaveWindow:
                     break;
-                
+
                 case EventType.ScrollWheel:
-        
+
                     break;
                 case EventType.MouseDrag:
                     break;
@@ -235,7 +235,17 @@ namespace Src.Systems {
 
         public void OnElementDisabled(UIElement element) { }
 
-        public void OnElementDestroyed(UIElement element) { }
+        public void OnElementDestroyed(UIElement element) {
+            elementsLastFrame.Remove(element.id);
+            elementsThisFrame.Remove(element.id);
+            hoverStyles.Remove(element.id);
+            hoverStylesLastFrame.Remove(element.id);
+            hoverStylesThisFrame.Remove(element.id);
+        }
+
+        public void OnElementShown(UIElement element) { }
+
+        public void OnElementHidden(UIElement element) { }
 
         private struct InputBindingGroup {
 

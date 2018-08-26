@@ -48,6 +48,12 @@ namespace Src.Systems {
             map.Remove(element.id);
         }
 
+        public void OnElementShown(UIElement element) {
+        }
+
+        public void OnElementHidden(UIElement element) {
+        }
+
     }
 
 }

@@ -34,7 +34,7 @@ namespace Src {
             for (int i = 0; i < outputList.Count; i++) {
                 view.Register(outputList[i]);
             }
-            
+            Clear();
         }
 
     }

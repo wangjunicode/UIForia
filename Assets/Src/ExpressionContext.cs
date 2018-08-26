@@ -1,11 +1,13 @@
-﻿using System.Collections.Generic;
+﻿using System.Collections;
+using System.Collections.Generic;
 
 namespace Src {
 
     public class ExpressionContext {
 
         // todo -- make this work off of alias sources also
-
+        // todo -- potentially lots of boxing going on here
+        
         public object rootContext;
         protected readonly List<ExpressionAlias<int>> integerAliases;
         protected readonly List<ExpressionAlias<object>> objectAliases;
@@ -17,10 +19,22 @@ namespace Src {
         }
 
         public void SetObjectAlias(string name, object target) {
+            for (int i = 0; i < objectAliases.Count; i++) {
+                if (objectAliases[i].name == name) {
+                    objectAliases[i] = new ExpressionAlias<object>(name, target);
+                    return;
+                }
+            }
             this.objectAliases.Add(new ExpressionAlias<object>(name, target));
         }
 
         public void SetIntAlias(string name, int value) {
+            for (int i = 0; i < integerAliases.Count; i++) {
+                if (integerAliases[i].name == name) {
+                    integerAliases[i] = new ExpressionAlias<int>(name, value);
+                    return;
+                }
+            }
             integerAliases.Add(new ExpressionAlias<int>(name, value));
         }
 
@@ -70,7 +84,11 @@ namespace Src {
             // todo -- this will be changed
             object retn = ResolveObjectAlias(alias);
             if (retn != null) return retn;
-            return ResolveIntAlias(alias);
+            int intValue = ResolveIntAlias(alias);
+            if (intValue != int.MaxValue) {
+                return intValue;
+            }
+            return null;
         }
 
     }
@@ -78,6 +96,7 @@ namespace Src {
     public class UITemplateContext : ExpressionContext {
 
         public readonly UIView view;
+        public IList activelist;
 
         public UITemplateContext(UIView view) : base(null) {
             this.view = view;

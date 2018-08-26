@@ -7,14 +7,16 @@ namespace Rendering {
     public sealed class UIViewIMGUI : UIView {
 
         public UIViewIMGUI(Type elementType) : base(elementType) {
-            layoutSystem = new LayoutSystem(new IMGUITextSizeCalculator(), elementSystem, styleSystem);
+            layoutSystem = new LayoutSystem(new IMGUITextSizeCalculator(), styleSystem);
             renderSystem = new IMGUIRenderSystem(elementSystem, styleSystem, layoutSystem);
             inputSystem = new IMGUIInputSystem(layoutSystem, elementSystem, styleSystem);
+            systems.Add(layoutSystem);
+            systems.Add(renderSystem);
+            systems.Add(inputSystem);
         }
 
         public void SetViewRect(Rect viewportRect) {
             layoutSystem.SetViewportRect(viewportRect);
-            renderSystem.SetViewportRect(viewportRect);
         }
         
         protected override IInputSystem inputSystem { get; set; }

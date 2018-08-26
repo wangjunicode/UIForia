@@ -2,39 +2,52 @@
 using System.Collections.Generic;
 using System.Diagnostics;
 using JetBrains.Annotations;
+using Rendering;
 
 namespace Src {
 
     public interface IHierarchical {
 
+        int UniqueId { get; }
         IHierarchical Element { get; }
         IHierarchical Parent { get; }
 
     }
-
-    public interface ISkipTreeTraversable : IHierarchical {
-
-        void OnParentChanged(ISkipTreeTraversable newParent);
-        void OnBeforeTraverse();
-        void OnAfterTraverse();
-
-    }
-
-    // need to support a version w/ integer keys instead of / in addition to item keys
-    // should not require traversal callbacks
-    // specify node type? ie extend SkipTreeNode<T>
+    
+    // specify node type? ie extend SkipTreeNode
     // better ToList / ToArray support w/o allocation
     // maintain enabled count?
+    // todo allow IHierarchical keys instead of / in addition to T type keys
 
-    public class SkipTree<T> where T : class, IHierarchical, ISkipTreeTraversable {
+    // todo -- method to recycle tree node arrays
+    public class SkipTree<T> where T : class, IHierarchical {
 
-        private readonly SkipTreeNode<T> root;
-        private readonly Dictionary<IHierarchical, SkipTreeNode<T>> nodeMap;
+        public enum TreeChangeType {
+
+            ItemAdded,
+            ItemRemoved,
+            HierarchyEnabled,
+            HierarchyDisabled,
+            HierarchyRemoved,
+            Cleared
+
+        }
+        
+        public delegate void TreeChanged(TreeChangeType changeType);
+
+        public delegate void ParentChanged(T child, T newParent, T oldParent);
+        
+        private readonly SkipTreeNode root;
+        private readonly Dictionary<int, SkipTreeNode> nodeMap;
         private static readonly List<T> scratchList = new List<T>();
+        private static readonly List<SkipTreeNode> scratchNodeList = new List<SkipTreeNode>();
 
+        public event TreeChanged onTreeChanged;
+        public event ParentChanged onItemParentChanged;
+        
         public SkipTree() {
-            root = new SkipTreeNode<T>(default(T));
-            nodeMap = new Dictionary<IHierarchical, SkipTreeNode<T>>();
+            root = new SkipTreeNode(default(T));
+            nodeMap = new Dictionary<int, SkipTreeNode>();
         }
 
         [PublicAPI]
@@ -49,7 +62,7 @@ namespace Src {
 
         [PublicAPI]
         public void GetRootItems(IList<T> roots) {
-            SkipTreeNode<T> ptr = root.firstChild;
+            SkipTreeNode ptr = root.firstChild;
             while (ptr != null) {
                 roots.Add(ptr.item);
                 ptr = ptr.nextSibling;
@@ -63,7 +76,7 @@ namespace Src {
             }
 
             int i = 0;
-            SkipTreeNode<T> ptr = root.firstChild;
+            SkipTreeNode ptr = root.firstChild;
             while (ptr != null) {
                 roots[i] = ptr.item;
                 i++;
@@ -75,23 +88,24 @@ namespace Src {
 
         [PublicAPI]
         public void AddItem(T item) {
-            SkipTreeNode<T> node;
+            SkipTreeNode node;
             IHierarchical element = item.Element;
-            if (nodeMap.TryGetValue(element, out node)) {
+            if (nodeMap.TryGetValue(element.UniqueId, out node)) {
                 return;
             }
 
-            node = new SkipTreeNode<T>(item);
-            nodeMap[element] = node;
-            SkipTreeNode<T> parent = FindParent(element);
+            node = new SkipTreeNode(item);
+            nodeMap[element.UniqueId] = node;
+            SkipTreeNode parent = FindParent(element);
             Insert(parent ?? root, node);
+            onTreeChanged?.Invoke(TreeChangeType.ItemAdded);
         }
 
         [PublicAPI]
         public T GetItem<U>(U key) where U : class, IHierarchical {
-            SkipTreeNode<T> node;
+            SkipTreeNode node;
 
-            if (nodeMap.TryGetValue(key, out node)) {
+            if (nodeMap.TryGetValue(key.UniqueId, out node)) {
                 return node.item;
             }
 
@@ -100,8 +114,8 @@ namespace Src {
 
         [PublicAPI]
         public int GetSiblingIndex(T element) {
-            SkipTreeNode<T> node;
-            if (!nodeMap.TryGetValue(element, out node)) {
+            SkipTreeNode node;
+            if (!nodeMap.TryGetValue(element.UniqueId, out node)) {
                 return -1;
             }
 
@@ -109,21 +123,21 @@ namespace Src {
                 return -1;
             }
 
-            SkipTreeNode<T> ptr = node.parent.firstChild;
+            SkipTreeNode ptr = node.parent.firstChild;
             int index = 0;
             while (ptr != node) {
                 index++;
                 ptr = ptr.nextSibling;
             }
 
-            return index;
+            return node.parent.childCount - index - 1;
         }
 
         [PublicAPI]
         public void SetSiblingIndex(T element, int index) {
-            // todo -- remove and insert
-            SkipTreeNode<T> node;
-            if (!nodeMap.TryGetValue(element, out node)) {
+
+            SkipTreeNode node;
+            if (!nodeMap.TryGetValue(element.UniqueId, out node)) {
                 return;
             }
 
@@ -131,26 +145,29 @@ namespace Src {
 
             int count = node.parent.childCount;
 
-            if (index < count) index = count;
+            if (index > count) index = count;
 
-            SkipTreeNode<T> ptr = null;
-            SkipTreeNode<T> trail = null;
+            // who list is inverted with respect the order in which 
+            // items are added, we need to adjust indices to fix this
+            index = count - 1 - index;
 
+            
             if (node.parent.firstChild == node) {
-                node.parent.firstChild = node.nextSibling;
+                if (count > 1) {
+                    node.parent.firstChild = node.nextSibling;
+                }
+                else {
+                    return;
+                }
             }
             else {
-                ptr = node.parent.firstChild;
+                SkipTreeNode prev = FindPreviousSibling(node);
 
-                while (ptr != null) {
-                    if (ptr == node) {
-                        // ReSharper disable once PossibleNullReferenceException
-                        trail.nextSibling = node.nextSibling;
-                        break;
-                    }
-
-                    trail = ptr;
-                    ptr = ptr.nextSibling;
+                if (prev != null) {
+                    prev.nextSibling = node.nextSibling;
+                }
+                else {
+                    node.nextSibling = null;
                 }
             }
 
@@ -160,19 +177,22 @@ namespace Src {
                 return;
             }
 
-            ptr = node.parent.firstChild;
+            SkipTreeNode trail = null;
+            SkipTreeNode ptr = node.parent.firstChild;
             int i = 0;
             while (ptr != null && i < index) {
-                if (i == index) {
-                    node.nextSibling = ptr;
-                    // ReSharper disable once PossibleNullReferenceException
-                    trail.nextSibling = node;
-                    return;
-                }
-
                 i++;
                 trail = ptr;
                 ptr = ptr.nextSibling;
+            }
+            if (i == index) {
+                node.nextSibling = ptr;
+                // ReSharper disable once PossibleNullReferenceException
+                trail.nextSibling = node;
+            }
+            else {
+                Debug.Assert(trail != null, nameof(trail) + " != null");
+                trail.nextSibling = node;
             }
         }
 
@@ -181,12 +201,13 @@ namespace Src {
             root.childCount = 0;
             root.firstChild = null;
             root.nextSibling = null;
+            onTreeChanged?.Invoke(TreeChangeType.Cleared);
         }
 
         [PublicAPI]
-        public int GetChildCount(T element) {
-            SkipTreeNode<T> node;
-            if (!nodeMap.TryGetValue(element, out node)) {
+        public int GetChildCount(IHierarchical item) {
+            SkipTreeNode node;
+            if (!nodeMap.TryGetValue(item.UniqueId, out node)) {
                 return 0;
             }
 
@@ -194,19 +215,16 @@ namespace Src {
         }
 
         [PublicAPI]
-        public int GetActiveChildCount(T element) {
-            SkipTreeNode<T> node;
-            if (!nodeMap.TryGetValue(element, out node)) {
+        public int GetActiveChildCount(IHierarchical element) {
+            SkipTreeNode node;
+            if (!nodeMap.TryGetValue(element.UniqueId, out node)) {
                 return 0;
             }
 
-            SkipTreeNode<T> ptr = node.parent.firstChild;
+            SkipTreeNode ptr = node.parent.firstChild;
             int count = 0;
             while (ptr != null) {
-                if (!ptr.isDisabled) {
-                    count++;
-                }
-
+                count += !ptr.isDisabled ? 1 : 0;
                 ptr = ptr.nextSibling;
             }
 
@@ -214,23 +232,23 @@ namespace Src {
         }
 
         [PublicAPI]
-        public void RemoveItem(T item) {
-            SkipTreeNode<T> node;
+        public void RemoveItem(IHierarchical item) {
+            SkipTreeNode node;
             IHierarchical element = item.Element;
-            if (!nodeMap.TryGetValue(element, out node)) {
+            if (!nodeMap.TryGetValue(element.UniqueId, out node)) {
                 return;
             }
 
-            SkipTreeNode<T> parent = node.parent;
-            SkipTreeNode<T> ptr = node.firstChild;
-            SkipTreeNode<T> nodeNext = node.nextSibling;
-            SkipTreeNode<T> nodePrev = FindPreviousSibling(node);
-            SkipTreeNode<T> lastChild = null;
+            SkipTreeNode parent = node.parent;
+            SkipTreeNode ptr = node.firstChild;
+            SkipTreeNode nodeNext = node.nextSibling;
+            SkipTreeNode nodePrev = FindPreviousSibling(node);
+            SkipTreeNode lastChild = null;
 
             while (ptr != null) {
                 ptr.parent = node.parent;
                 node.parent.childCount++;
-                ptr.item.OnParentChanged(ptr.parent.item);
+                onItemParentChanged?.Invoke(ptr.item, ptr.parent.item, node.parent.item);
                 lastChild = ptr;
                 ptr = ptr.nextSibling;
             }
@@ -249,74 +267,100 @@ namespace Src {
             node.item = default(T);
             node.nextSibling = null;
             node.firstChild = null;
-            nodeMap.Remove(element);
+            nodeMap.Remove(element.UniqueId);
+            onTreeChanged?.Invoke(TreeChangeType.ItemRemoved);
         }
 
         [PublicAPI]
-        public void EnableHierarchy(T item) {
+        public void EnableHierarchy(IHierarchical item) {
             TraverseNodes(false, item, (isDisabled, n) => n.isDisabled = isDisabled, true);
+            onTreeChanged?.Invoke(TreeChangeType.HierarchyEnabled);
         }
 
         [PublicAPI]
-        public void DisableHierarchy(T item) {
+        public void DisableHierarchy(IHierarchical item) {
             TraverseNodes(true, item, (isDisabled, n) => n.isDisabled = isDisabled, false);
+            onTreeChanged?.Invoke(TreeChangeType.HierarchyDisabled);
         }
 
         [PublicAPI]
-        public void RemoveHierarchy(T item) {
-            SkipTreeNode<T> node;
+        public void RemoveHierarchy(IHierarchical item) {
+            SkipTreeNode node;
+            SkipTreeNode ptr;
             IHierarchical element = item.Element;
-            if (!nodeMap.TryGetValue(element, out node)) {
-                return;
-            }
+            Stack<SkipTreeNode> stack = new Stack<SkipTreeNode>();
 
-            SkipTreeNode<T> ptr = node;
-            SkipTreeNode<T> nodeNext = node.nextSibling;
-            SkipTreeNode<T> nodePrev = FindPreviousSibling(node);
-
-            if (nodePrev != null) {
-                nodePrev.nextSibling = nodeNext;
-            }
-
-            Stack<SkipTreeNode<T>> stack = new Stack<SkipTreeNode<T>>();
-
-            stack.Push(ptr);
-
-            while (stack.Count > 0) {
-                SkipTreeNode<T> current = stack.Pop();
-
-                nodeMap.Remove(current.item);
-
-                ptr = current.firstChild;
-
+            if (!nodeMap.TryGetValue(element.UniqueId, out node)) {
+                SkipTreeNode parent = FindParent(item);
+                SkipTreeNode trail = null;
+                parent = parent ?? root;
+                ptr = parent.firstChild;
                 while (ptr != null) {
-                    stack.Push(ptr);
+                    if (IsDescendentOf(ptr.item, item)) {
+                        if (ptr == parent.firstChild) {
+                            parent.firstChild = ptr.nextSibling;
+                        }
+                        else if (trail != null) {
+                            trail.nextSibling = ptr.nextSibling;
+                        }
+                        stack.Push(ptr);
+                    }
+                    else {
+                        trail = ptr;
+                    }
                     ptr = ptr.nextSibling;
                 }
             }
+            else {
+                SkipTreeNode nodeNext = node.nextSibling;
+                SkipTreeNode nodePrev = FindPreviousSibling(node);
+                if (nodePrev != null) {
+                    nodePrev.nextSibling = nodeNext;
+                }
+                stack.Push(node);
+            }
+
+            while (stack.Count > 0) {
+                SkipTreeNode current = stack.Pop();
+
+                nodeMap.Remove(current.item.UniqueId);
+                AddChildrenToStack(stack, current, true);
+
+            }
+            onTreeChanged?.Invoke(TreeChangeType.HierarchyRemoved);
         }
 
+        public void ConditionalTraversePreOrder(Func<T, bool> traverseFn) {
+            
+            Stack<SkipTreeNode> stack = new Stack<SkipTreeNode>();
+            AddChildrenToStack(stack, root, true);
+
+            while (stack.Count > 0) {
+                SkipTreeNode current = stack.Pop();
+                if (traverseFn(current.item)) {
+                    AddChildrenToStack(stack, current, true);
+                }
+            }
+            
+        }
+        
         public void TraversePreOrder(Action<T> traverseFn, bool includeDisabled = false) {
-            // SkipTreeNode<T> ptr = root.firstChild;
-            //  while (ptr != null) {
             TraversePreOrderCallbackStep(root, traverseFn, includeDisabled);
-            //    ptr = ptr.nextSibling;
-            // }
         }
 
         public void TraversePreOrder<U>(U closureArg, Action<U, T> traverseFn, bool includeDisabled = false) {
             TraversePreOrderCallbackStep(root, closureArg, traverseFn, includeDisabled);
         }
 
-        public void TraversePreOrder(T item, Action<T> traverseFn, bool includeDisabled = false) {
-            SkipTreeNode<T> node;
-            if (nodeMap.TryGetValue(item, out node)) {
+        public void TraversePreOrder(IHierarchical item, Action<T> traverseFn, bool includeDisabled = false) {
+            SkipTreeNode node;
+            if (nodeMap.TryGetValue(item.UniqueId, out node)) {
                 TraversePreOrderCallbackStep(node, traverseFn, includeDisabled);
                 return;
             }
-            SkipTreeNode<T> parent = FindParent(item);
+            SkipTreeNode parent = FindParent(item);
             parent = parent ?? root;
-            SkipTreeNode<T> ptr = parent.firstChild;
+            SkipTreeNode ptr = parent.firstChild;
             while (ptr != null) {
                 if (IsDescendentOf(ptr.item, item)) {
                     TraversePreOrderCallbackStep(ptr, traverseFn, includeDisabled);
@@ -325,15 +369,15 @@ namespace Src {
             }
         }
 
-        public void TraversePreOrder<U>(T item, U closureArg, Action<U, T> traverseFn, bool includeDisabled = false) {
-            SkipTreeNode<T> node;
-            if (nodeMap.TryGetValue(item, out node)) {
+        public void TraversePreOrder<U>(IHierarchical item, U closureArg, Action<U, T> traverseFn, bool includeDisabled = false) {
+            SkipTreeNode node;
+            if (nodeMap.TryGetValue(item.UniqueId, out node)) {
                 TraversePreOrderCallbackStep(node, closureArg, traverseFn, includeDisabled);
                 return;
             }
-            SkipTreeNode<T> parent = FindParent(item);
+            SkipTreeNode parent = FindParent(item);
             parent = parent ?? root;
-            SkipTreeNode<T> ptr = parent.firstChild;
+            SkipTreeNode ptr = parent.firstChild;
             while (ptr != null) {
                 if (IsDescendentOf(ptr.item, item)) {
                     TraversePreOrderCallbackStep(ptr, closureArg, traverseFn, includeDisabled);
@@ -343,12 +387,53 @@ namespace Src {
         }
 
         public void TraverseRecursePreOrder() {
-            SkipTreeNode<T> ptr = root.firstChild;
+            SkipTreeNode ptr = root.firstChild;
 
             while (ptr != null) {
                 TraverseRecursePreorderStep(ptr);
                 ptr = ptr.nextSibling;
             }
+        }
+
+      
+        
+        public TreeNode GetTraversableTree(bool includeDisabled = false) {
+            return GetChildTree(root, includeDisabled);
+        }
+
+        public TreeNode GetTraversableTree(T item, bool includeDisabled = false) {
+            SkipTreeNode node;
+            IHierarchical element = item.Element;
+
+            if (!nodeMap.TryGetValue(element.UniqueId, out node)) {
+
+                SkipTreeNode parent = FindParent(item);
+                parent = parent ?? root;
+                SkipTreeNode ptr = parent.firstChild;
+
+                while (ptr != null) {
+                    if (!includeDisabled && ptr.isDisabled) {
+                        ptr = ptr.nextSibling;
+                        continue;
+                    }
+                    if (IsDescendentOf(ptr.item, item)) {
+                        scratchNodeList.Add(ptr);
+                    }
+                    ptr = ptr.nextSibling;
+                }
+
+                TreeNode[] children = scratchNodeList.Count == 0
+                    ? TreeNode.EmptyArray
+                    : new TreeNode[scratchNodeList.Count];
+
+                for (int i = 0; i < children.Length; i++) {
+                    children[i] = GetChildTree(scratchNodeList[i], includeDisabled);
+                }
+
+                return new TreeNode(item, false, children);
+            }
+
+            return GetChildTree(node, includeDisabled);
         }
 
         public T[] ToArray(bool includeDisabled = false) {
@@ -361,15 +446,15 @@ namespace Src {
             return retn;
         }
 
-        private void TraverseNodes<U>(U closureArg, T item, Action<U, SkipTreeNode<T>> traverseFn, bool includeDisabled) {
-            SkipTreeNode<T> node;
-            if (nodeMap.TryGetValue(item, out node)) {
+        private void TraverseNodes<U>(U closureArg, IHierarchical item, Action<U, SkipTreeNode> traverseFn, bool includeDisabled) {
+            SkipTreeNode node;
+            if (nodeMap.TryGetValue(item.UniqueId, out node)) {
                 TraverseNodesStep(closureArg, node, traverseFn, includeDisabled);
                 return;
             }
-            SkipTreeNode<T> parent = FindParent(item);
+            SkipTreeNode parent = FindParent(item);
             parent = parent ?? root;
-            SkipTreeNode<T> ptr = parent.firstChild;
+            SkipTreeNode ptr = parent.firstChild;
             while (ptr != null) {
                 if (IsDescendentOf(ptr.item, item)) {
                     TraverseNodesStep(closureArg, ptr, traverseFn, includeDisabled);
@@ -378,20 +463,30 @@ namespace Src {
             }
         }
 
-        private void TraverseNodesStep<U>(U closureArg, SkipTreeNode<T> startNode, Action<U, SkipTreeNode<T>> traverseFn, bool includeDisabled) {
+        private void TraverseNodesStep<U>(U closureArg, SkipTreeNode startNode, Action<U, SkipTreeNode> traverseFn, bool includeDisabled) {
             if (startNode.isDisabled && !includeDisabled) {
                 return;
             }
-            
+
             traverseFn(closureArg, startNode);
 
-            SkipTreeNode<T> ptr = startNode.firstChild;
-
-            if (ptr == null) return;
+            if (startNode.firstChild == null) return;
 
             // todo -- pool stacks
-            Stack<SkipTreeNode<T>> stack = new Stack<SkipTreeNode<T>>();
+            Stack<SkipTreeNode> stack = new Stack<SkipTreeNode>();
 
+            AddChildrenToStack(stack, startNode, includeDisabled);
+
+            while (stack.Count > 0) {
+                SkipTreeNode current = stack.Pop();
+                traverseFn(closureArg, current);
+                AddChildrenToStack(stack, current, includeDisabled);
+
+            }
+        }
+
+        private void AddChildrenToStack(Stack<SkipTreeNode> stack, SkipTreeNode parent, bool includeDisabled) {
+            SkipTreeNode ptr = parent.firstChild;
             while (ptr != null) {
                 if (includeDisabled || !ptr.isDisabled) {
                     stack.Push(ptr);
@@ -399,34 +494,20 @@ namespace Src {
                 ptr = ptr.nextSibling;
             }
 
-            while (stack.Count > 0) {
-                SkipTreeNode<T> current = stack.Pop();
-                traverseFn(closureArg, current);
-                ptr = current.firstChild;
-                while (ptr != null) {
-                    if (includeDisabled || !ptr.isDisabled) {
-                        stack.Push(ptr);
-                    }
-                    ptr = ptr.nextSibling;
-                }
-            }
         }
 
-        private void TraverseRecursePreorderStep(SkipTreeNode<T> node) {
+        private void TraverseRecursePreorderStep(SkipTreeNode node) {
             if (node.isDisabled) return;
 
-            node.item.OnBeforeTraverse();
-
-            SkipTreeNode<T> ptr = node.firstChild;
+            SkipTreeNode ptr = node.firstChild;
             while (ptr != null) {
                 TraverseRecursePreorderStep(ptr);
                 ptr = ptr.nextSibling;
             }
 
-            node.item.OnAfterTraverse();
         }
 
-        private void TraversePreOrderCallbackStep(SkipTreeNode<T> startNode, Action<T> traverseFn, bool includeDisabled) {
+        private void TraversePreOrderCallbackStep(SkipTreeNode startNode, Action<T> traverseFn, bool includeDisabled) {
 
             if (startNode.isDisabled && !includeDisabled) {
                 return;
@@ -435,62 +516,39 @@ namespace Src {
             if (startNode != root) {
                 traverseFn(startNode.item);
             }
-            
+
             if (startNode.firstChild == null) {
                 return;
             }
 
-            SkipTreeNode<T> ptr = startNode.firstChild;
             // todo -- pool stacks
-            Stack<SkipTreeNode<T>> stack = new Stack<SkipTreeNode<T>>();
-
-            while (ptr != null) {
-                if (includeDisabled || !ptr.isDisabled) {
-                    stack.Push(ptr);
-                }
-                ptr = ptr.nextSibling;
-            }
+            Stack<SkipTreeNode> stack = new Stack<SkipTreeNode>();
+            AddChildrenToStack(stack, startNode, includeDisabled);
 
             while (stack.Count > 0) {
-                SkipTreeNode<T> current = stack.Pop();
+                SkipTreeNode current = stack.Pop();
                 traverseFn(current.item);
-                ptr = current.firstChild;
-                while (ptr != null) {
-                    if (includeDisabled || !ptr.isDisabled) {
-                        stack.Push(ptr);
-                    }
-                    ptr = ptr.nextSibling;
-                }
+                AddChildrenToStack(stack, current, includeDisabled);
+
             }
         }
 
-        private void TraversePreOrderCallbackStep<U>(SkipTreeNode<T> startNode, U closureArg, Action<U, T> traverseFn, bool includeDisabled) {
-            SkipTreeNode<T> ptr = startNode.firstChild;
+        private void TraversePreOrderCallbackStep<U>(SkipTreeNode startNode, U closureArg, Action<U, T> traverseFn, bool includeDisabled) {
             // todo -- pool stacks
-            Stack<SkipTreeNode<T>> stack = new Stack<SkipTreeNode<T>>();
+            Stack<SkipTreeNode> stack = new Stack<SkipTreeNode>();
 
-            while (ptr != null) {
-                if (includeDisabled || !ptr.isDisabled) {
-                    stack.Push(ptr);
-                }
-                ptr = ptr.nextSibling;
-            }
-
+            AddChildrenToStack(stack, startNode, includeDisabled);
             while (stack.Count > 0) {
-                SkipTreeNode<T> current = stack.Pop();
+                SkipTreeNode current = stack.Pop();
                 traverseFn(closureArg, current.item);
-                ptr = current.firstChild;
-                while (ptr != null) {
-                    if (includeDisabled || !ptr.isDisabled) {
-                        stack.Push(ptr);
-                    }
-                    ptr = ptr.nextSibling;
-                }
+                AddChildrenToStack(stack, current, includeDisabled);
             }
         }
 
-        private SkipTreeNode<T> FindPreviousSibling(SkipTreeNode<T> node) {
-            SkipTreeNode<T> ptr = node.parent.firstChild;
+        private SkipTreeNode FindPreviousSibling(SkipTreeNode node) {
+            SkipTreeNode ptr = node.parent.firstChild;
+            if (ptr == node) return null;
+            
             while (ptr != null) {
                 if (ptr.nextSibling == node) {
                     return ptr;
@@ -502,13 +560,11 @@ namespace Src {
             return null;
         }
 
-        private void Insert(SkipTreeNode<T> parent, SkipTreeNode<T> inserted) {
-            inserted.parent = parent;
-            parent.childCount++;
-            inserted.item.OnParentChanged(parent.item);
+        private void Insert(SkipTreeNode parent, SkipTreeNode inserted) {
 
-            SkipTreeNode<T> ptr = parent.firstChild;
-            ISkipTreeTraversable element = inserted.item;
+
+            SkipTreeNode ptr = parent.firstChild;
+            IHierarchical element = inserted.item;
 
             // set parent
             // walk through current parent's children
@@ -516,13 +572,13 @@ namespace Src {
             // remove from parent
             // attach as first sibling to inserted
 
-            SkipTreeNode<T> insertedLastChild = null;
-            SkipTreeNode<T> parentPreviousChild = null;
+            SkipTreeNode insertedLastChild = null;
+            SkipTreeNode parentPreviousChild = null;
 
             while (ptr != null) {
-                ISkipTreeTraversable currentElement = ptr.item;
+                IHierarchical currentElement = ptr.item;
                 if (IsDescendentOf(currentElement, element)) {
-                    SkipTreeNode<T> next = ptr.nextSibling;
+                    SkipTreeNode next = ptr.nextSibling;
 
                     if (ptr == parent.firstChild) {
                         parent.firstChild = next;
@@ -541,7 +597,7 @@ namespace Src {
                     ptr.parent.childCount--;
                     ptr.parent = inserted;
                     inserted.childCount++;
-                    ptr.item.OnParentChanged(inserted.item);
+                    onItemParentChanged?.Invoke(ptr.item, inserted.item, ptr.parent.item);
                     ptr.nextSibling = null;
                     insertedLastChild = ptr;
                     ptr = next;
@@ -552,16 +608,19 @@ namespace Src {
                 }
             }
 
+            parent.childCount++;
+            inserted.parent = parent;
             inserted.isDisabled = parent.isDisabled;
             inserted.nextSibling = parent.firstChild;
             parent.firstChild = inserted;
+            onItemParentChanged?.Invoke(inserted.item, parent.item, null);
         }
 
-        private SkipTreeNode<T> FindParent(IHierarchical element) {
+        private SkipTreeNode FindParent(IHierarchical element) {
             IHierarchical ptr = element.Parent;
             while (ptr != null) {
-                SkipTreeNode<T> node;
-                if (nodeMap.TryGetValue(ptr, out node)) {
+                SkipTreeNode node;
+                if (nodeMap.TryGetValue(ptr.UniqueId, out node)) {
                     return node;
                 }
                 ptr = ptr.Parent;
@@ -569,7 +628,7 @@ namespace Src {
             return null;
         }
 
-        private static bool IsDescendentOf(IHierarchical child, ISkipTreeTraversable parent) {
+        private static bool IsDescendentOf(IHierarchical child, IHierarchical parent) {
             IHierarchical ptr = child;
             while (ptr != null) {
                 if (ptr == parent.Element) {
@@ -580,20 +639,83 @@ namespace Src {
             return false;
         }
 
-        [DebuggerDisplay("{item}")]
-        private class SkipTreeNode<U> {
+        private TreeNode GetChildTree(SkipTreeNode node, bool includeDisabled) {
+            SkipTreeNode ptr = node.firstChild;
+            int count = 0;
+            if (node.childCount == 0) {
+                return new TreeNode(node.item, node.isDisabled, TreeNode.EmptyArray);
+            }
+            else if (!includeDisabled) {
+                while (ptr != null) {
+                    if (!ptr.isDisabled) {
+                        count++;
+                    }
+                    ptr = ptr.nextSibling;
+                }
+                if (count == 0) {
+                    return new TreeNode(node.item, node.isDisabled, TreeNode.EmptyArray);
+                }
+                ptr = node.firstChild;
+                TreeNode[] children = new TreeNode[count];
+                count = 0;
+                while (ptr != null) {
+                    children[count++] = GetChildTree(ptr, false);
+                    ptr = ptr.nextSibling;
+                }
+                ArrayUtil.ReverseInPlace(children);
+                return new TreeNode(node.item, node.isDisabled, children);
+            }
+            else {
+                count = 0;
+                TreeNode[] children = new TreeNode[node.childCount];
+                while (ptr != null) {
+                    children[count++] = GetChildTree(ptr, false);
+                    ptr = ptr.nextSibling;
+                }
+                ArrayUtil.ReverseInPlace(children);
+                return new TreeNode(node.item, true, children);
+            }
+        }
 
-            public U item;
+        
+        [DebuggerDisplay("{item} -> disabled: {isDisabled}")]
+        private class SkipTreeNode {
+
+            public T item;
             public bool isDisabled;
-            public SkipTreeNode<U> parent;
-            public SkipTreeNode<U> nextSibling;
-            public SkipTreeNode<U> firstChild;
+            public SkipTreeNode parent;
+            public SkipTreeNode nextSibling;
+            public SkipTreeNode firstChild;
             public int childCount;
 
-            public SkipTreeNode(U item) {
+            public SkipTreeNode(T item) {
                 this.item = item;
                 this.isDisabled = false;
             }
+
+        }
+
+    #if DEBUG
+        [UsedImplicitly]
+        private TreeNode DebugTree {
+            get { return GetTraversableTree(true); }
+        }
+    #endif
+
+        [DebuggerDisplay("{item} -> disabled: {isDisabled}")]
+        public struct TreeNode {
+
+            public readonly T item;
+            public readonly bool isDisabled;
+            public readonly TreeNode[] children;
+
+            internal TreeNode(T item, bool isDisabled, TreeNode[] children) {
+                this.item = item;
+                this.isDisabled = isDisabled;
+                this.children = children ?? EmptyArray;
+            }
+
+            public static TreeNode[] EmptyArray = new TreeNode[0];
 
         }
 

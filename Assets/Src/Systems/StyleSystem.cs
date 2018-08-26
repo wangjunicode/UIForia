@@ -55,6 +55,10 @@ namespace Src.Systems {
             UIElement element = elementData.element;
             UITemplateContext context = elementData.context;
 
+            if ((element.flags & UIElementFlags.ImplicitElement) != 0) {
+                return;
+            }
+            
             List<UIStyle> baseStyles = elementData.baseStyles;
             List<StyleBinding> constantStyleBindings = elementData.constantStyleBindings;
 
@@ -82,6 +86,12 @@ namespace Src.Systems {
 
         public void OnElementDestroyed(UIElement element) {
             styleMap.Remove(element.id);
+        }
+
+        public void OnElementShown(UIElement element) {
+        }
+
+        public void OnElementHidden(UIElement element) {
         }
 
         public IReadOnlyList<UIStyleSet> GetAllStyles() {

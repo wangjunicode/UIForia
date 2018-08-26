@@ -13,7 +13,7 @@ namespace Src {
         public Binding[] constantBindings;
         public List<UIStyle> baseStyles;
         public List<StyleBinding> constantStyleBindings;
-        
+        public Binding[] conditionalBindings;
         public UITemplateContext context;
 
         public int elementId => element.id;

@@ -17,7 +17,10 @@ public class UIElement : IHierarchical {
 
     public UIElement() {
         id = UIView.NextElementId;
-        this.flags = UIElementFlags.RequiresLayout | UIElementFlags.RequiresRendering;
+        this.flags = UIElementFlags.Enabled
+                     | UIElementFlags.Shown
+                     | UIElementFlags.RequiresLayout
+                     | UIElementFlags.RequiresRendering;
     }
 
     public virtual void OnCreate() { }
@@ -47,6 +50,7 @@ public class UIElement : IHierarchical {
         return retn;
     }
 
+    public int UniqueId => id;
     public IHierarchical Element => this;
     public IHierarchical Parent => parent;
 

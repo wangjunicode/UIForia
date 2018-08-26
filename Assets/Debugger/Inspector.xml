@@ -1,22 +1,33 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <UITemplate>
     <Contents>
-        
-        <Group onMouseEnter="OnMouseEnter($event)" style.backgroundColor="blue" style.hover.backgroundColor="red" name="toolbar" someValue="{1 + 1}">
-        
-            Toolbar Here {time}
-            
-        </Group>
-
-        <Group onMouseDown="OnMouseDown($event)" onMouseEnter="OnMouseEnter($event)" style.backgroundColor="white" style.hover.backgroundColor="red" name="toolbar" someValue="{1 + 1}">
+        <Group  onMouseDown="OnMouseDown($event)" style.backgroundColor="blue" style.hover.backgroundColor="red" name="toolbar" someValue="{1 + 1}">
 
             Toolbar Here {time}
 
         </Group>
+
+        <Group x-if="{showMe}" onMouseEnter="OnMouseEnter($event)" style.backgroundColor="white" style.hover.backgroundColor="red" name="toolbar" someValue="{1 + 1}">
+
+           I am shown! {showMe}
+
+        </Group>
+        <!--<Repeat list="{values}" as="item">-->
+            <!--some text here-->
+            <!--{$item}-->
+        <!--</Repeat>-->
+        <!---->
         
-        <Repeat list="{values}" as="item">
-            <!--{item}-->
-        </Repeat>
-        
+        <!--<Switch value="{selection}">-->
+            <!--<Case when="1">-->
+                <!--One!-->
+            <!--</Case>-->
+            <!--<Case when="2">-->
+                <!--Two!-->
+            <!--</Case>-->
+            <!--<Default>-->
+                <!--Other!-->
+            <!--</Default>-->
+        <!--</Switch>-->
     </Contents>
 </UITemplate>

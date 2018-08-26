@@ -3,146 +3,183 @@ using System.Collections.Generic;
 using Rendering;
 using Src.Layout;
 using UnityEngine;
+using TreeChangeType = Src.SkipTree<UIElement>.TreeChangeType;
 
 namespace Src.Systems {
 
     public class LayoutSystem : ILayoutSystem {
 
-        private readonly Rect[] layoutRects;
         private readonly IStyleSystem styleSystem;
-        private readonly IElementRegistry registry;
-        private readonly SkipTree<LayoutData> layoutTree;
-        private readonly Stack<LayoutDataSet> layoutStack;
-        private readonly Dictionary<int, LayoutData> layoutDataMap;
-        
+        private readonly SkipTree<UIElement> layoutTree;
+        private readonly Stack<LayoutNode> layoutStack;
+        private readonly Dictionary<int, LayoutNode> layoutDataMap;
+
         // todo -- use simple array for this w/ unique ids -> indices on elements
         private readonly Dictionary<int, Rect> layoutResultMap;
-        
+
         private readonly FlexLayout flexLayout;
         private readonly FlowLayout flowLayout;
         private readonly FixedLayout fixedLayout;
 
-        private bool isInitialized;
         private int rectCount;
-        private LayoutResult[] rects;
+
+        // todo -- remove layoutrects
         private Rect viewport;
+        private Rect[] layoutRects;
+        private LayoutResult[] rects;
+        private LayoutNode traverseTree;
+
+        private bool rebuildLayout;
 
         /*
          * It is possible to have a scheme where element ids can also contain an integer index into lists
          * To do this we need to maintain a list of available ids a-la bitsquid packed list
          */
-        public LayoutSystem(ITextSizeCalculator textSizeCalculator, IElementRegistry registry, IStyleSystem styleSystem) {
+        public LayoutSystem(ITextSizeCalculator textSizeCalculator, IStyleSystem styleSystem) {
             this.styleSystem = styleSystem;
-            this.registry = registry;
             this.layoutRects = new Rect[16];
-            this.layoutTree = new SkipTree<LayoutData>();
-            this.layoutStack = new Stack<LayoutDataSet>();
-            this.layoutDataMap = new Dictionary<int, LayoutData>();
+            this.layoutStack = new Stack<LayoutNode>();
+            this.layoutTree = new SkipTree<UIElement>();
             this.layoutResultMap = new Dictionary<int, Rect>();
-            
+            this.layoutDataMap = new Dictionary<int, LayoutNode>();
+
             this.styleSystem.onRectChanged += HandleRectChanged;
             this.styleSystem.onLayoutChanged += HandleLayoutChanged;
-            this.styleSystem.onBorderChanged += HandleBorderChanged;
-            this.styleSystem.onMarginChanged += HandleMarginChanged;
-            this.styleSystem.onPaddingChanged += HandlePaddingChanged;
+            this.styleSystem.onBorderChanged += HandleContentBoxChanged;
+            this.styleSystem.onMarginChanged += HandleContentBoxChanged;
+            this.styleSystem.onPaddingChanged += HandleContentBoxChanged;
             this.styleSystem.onConstraintChanged += HandleConstraintChanged;
 
             this.flexLayout = new FlexLayout(textSizeCalculator);
             this.rects = new LayoutResult[16];
+
+            this.layoutTree.onTreeChanged += RebuildTree;
+            rebuildLayout = true;
+        }
+
+        // todo -- rebuild once right before layout is actually called
+        private void RebuildTree(TreeChangeType changeType) {
+            switch (changeType) {
+                case TreeChangeType.ItemAdded:
+                    break;
+                case TreeChangeType.HierarchyDisabled:
+                    break;
+                case TreeChangeType.HierarchyRemoved:
+                    break;
+                case TreeChangeType.HierarchyEnabled:
+                    break;
+                case TreeChangeType.Cleared:
+                    break;
+            }
+            rebuildLayout = true;
+            // todo make this suck less later
+            // todo just use fucking style object w/ cache instead of jumping through so many hoops
+
+        }
+
+        private LayoutNode[] GetChildTree(SkipTree<UIElement>.TreeNode parent) {
+            LayoutNode[] children = new LayoutNode[parent.children.Length];
+            for (int i = 0; i < parent.children.Length; i++) {
+                UIElement element = parent.children[i].item;
+                LayoutNode child = new LayoutNode(element, element.id, GetChildTree(parent.children[i]));
+                layoutDataMap[child.elementId] = child;
+                SetFromStyle(child, element);
+                children[i] = child;
+            }
+            return children;
+        }
+
+        private void SetFromStyle(LayoutNode node, UIElement element) {
+            UIStyleSet style = styleSystem.GetStyleForElement(node.elementId);
+
+            layoutDataMap[node.elementId] = node;
+
+            if ((element.flags & UIElementFlags.TextElement) != 0) {
+                UITextElement textElement = (UITextElement) element;
+                textElement.onTextChanged += HandleTextChanged;
+                node.textContent = textElement.GetText();
+                node.isTextElement = true;
+            }
+
+            node.style = element.style;
+
+            node.previousParentWidth = float.MinValue;
+            node.textContentSize = Vector2.zero;
+
+            node.contentStartOffsetX = style.paddingLeft + style.marginLeft + style.borderLeft;
+            node.contentEndOffsetX = style.paddingRight + style.marginRight + style.borderRight;
+
+            node.contentStartOffsetY = style.paddingTop + style.marginTop + style.borderTop;
+            node.contentEndOffsetY = style.paddingBottom + style.marginBottom + style.borderBottom;
+
+            node.parameters = style.layoutParameters;
+            node.layout = GetLayoutInstance(node.parameters.type);
+
+            node.constraints = style.constraints;
+            node.rect = style.rect;
+
         }
 
         private void HandleRectChanged(int elementId, LayoutRect rect) {
-            LayoutData data;
+            LayoutNode data;
             if (layoutDataMap.TryGetValue(elementId, out data)) {
                 data.rect = rect;
             }
         }
 
         private void HandleConstraintChanged(int elementId, LayoutConstraints constraints) {
-            LayoutData data;
+            LayoutNode data;
             if (layoutDataMap.TryGetValue(elementId, out data)) {
                 data.constraints = constraints;
             }
         }
 
-        private void HandlePaddingChanged(int elementId, ContentBoxRect padding) {
-            LayoutData data;
+        // todo -- change to contentbox changed 
+        private void HandleContentBoxChanged(int elementId, ContentBoxRect padding) {
+            LayoutNode data;
+            UIStyleSet style = styleSystem.GetStyleForElement(elementId);
             if (layoutDataMap.TryGetValue(elementId, out data)) {
-                data.SetPadding(padding);
-            }
-        }
-
-        private void HandleMarginChanged(int elementId, ContentBoxRect margin) {
-            LayoutData data;
-            if (layoutDataMap.TryGetValue(elementId, out data)) {
-                data.SetMargin(margin);
-            }
-        }
-
-        private void HandleBorderChanged(int elementId, ContentBoxRect border) {
-            LayoutData data;
-            if (layoutDataMap.TryGetValue(elementId, out data)) {
-                data.SetBorder(border);
+                data.contentStartOffsetX = style.paddingLeft + style.marginLeft + style.borderLeft;
+                data.contentEndOffsetX = style.paddingRight + style.marginRight + style.borderRight;
+                data.contentStartOffsetY = style.paddingTop + style.marginTop + style.borderTop;
+                data.contentEndOffsetY = style.paddingBottom + style.marginBottom + style.borderBottom;
             }
         }
 
         private void HandleLayoutChanged(int elementId, LayoutParameters parameters) {
-            LayoutData data;
+            LayoutNode data;
             if (layoutDataMap.TryGetValue(elementId, out data)) {
                 data.parameters = parameters;
-                data.SetLayout(GetLayoutInstance(parameters.type));
+                data.layout = GetLayoutInstance(parameters.type);
             }
         }
 
         private void HandleTextChanged(UIElement element, string text) {
-            LayoutData layoutData;
+            LayoutNode layoutData;
             if (layoutDataMap.TryGetValue(element.id, out layoutData)) {
                 layoutData.SetTextContent(text);
             }
         }
 
         public void OnInitialize() {
-            isInitialized = true;
-            IReadOnlyList<UIStyleSet> styles = styleSystem.GetAllStyles();
-            for (int i = 0; i < styles.Count; i++) {
-                LayoutData data;
-                UIStyleSet styleSet = styles[i];
-                UIElement element = registry.GetElement(styleSet.elementId);
-                UITextElement textElement;
-                if (!layoutDataMap.TryGetValue(styles[i].elementId, out data)) {
-                    data = new LayoutData(element);
-                    layoutTree.AddItem(data);
-                    layoutDataMap[data.element.id] = data;
-                    if ((element.flags & UIElementFlags.TextElement) != 0) {
-                        textElement = (UITextElement) element;
-                        textElement.onTextChanged += HandleTextChanged;
-                    }
-
-                }
-                data.UpdateFromStyle();
-                data.SetLayout(GetLayoutInstance(styleSet.layoutType));
-                textElement = element as UITextElement;
-                if (textElement != null) {
-                    data.SetTextContent(textElement.GetText());
-                }
-            }
+            rebuildLayout = true;
         }
 
         public void OnElementCreated(UIElementCreationData elementData) {
-            // todo -- if instance is layout-able
-            if (!isInitialized || elementData.element.style == null) return;
 
+            if (elementData.element.style == null) return;
+
+            if ((elementData.element.flags & UIElementFlags.RequiresLayout) == 0) {
+                return;
+            }
+
+            rebuildLayout = true;
             if ((elementData.element.flags & UIElementFlags.TextElement) != 0) {
                 UITextElement textElement = (UITextElement) elementData.element;
                 textElement.onTextChanged += HandleTextChanged;
             }
 
-            LayoutData data = new LayoutData(elementData.element);
-            data.UpdateFromStyle();
-            data.SetLayout(GetLayoutInstance(elementData.element.style.layoutType));
-
-            layoutTree.AddItem(data);
-            layoutDataMap[data.element.id] = data;
+            layoutTree.AddItem(elementData.element);
         }
 
         private UILayout GetLayoutInstance(LayoutType layoutType) {
@@ -163,6 +200,7 @@ namespace Src.Systems {
         public void OnReset() {
             layoutDataMap.Clear();
             layoutTree.Clear();
+            rebuildLayout = true;
         }
 
         public Rect GetRectForElement(int elementId) {
@@ -170,7 +208,7 @@ namespace Src.Systems {
             layoutResultMap.TryGetValue(elementId, out retn);
             return retn;
         }
-        
+
         // todo this needs to be replaced with a quad tree eventually
         public int QueryPoint(Vector2 point, ref LayoutResult[] queryResults) {
             int retnCount = 0;
@@ -187,35 +225,47 @@ namespace Src.Systems {
 
         public void OnUpdate() {
 
-            rectCount = 0;
-            layoutResultMap.Clear();
-            // todo change this not to return a new array copy
-            // todo this can be made better w/ new skip tree traversal methods
-            LayoutData[] roots = layoutTree.GetRootItems();
+            if (rebuildLayout) {
+                SkipTree<UIElement>.TreeNode tree = layoutTree.GetTraversableTree();
+                if (tree.children.Length != 0) {
+                    traverseTree = new LayoutNode(tree.children[0].item, tree.children[0].item.UniqueId, GetChildTree(tree.children[0]));
+                    SetFromStyle(traverseTree, tree.children[0].item);
+                    layoutDataMap[traverseTree.elementId] = traverseTree;
+                }
+                rebuildLayout = false;
+            }
 
-            if (roots.Length == 0) {
+            if (!rebuildLayout && traverseTree == null) {
                 return;
             }
 
-            layoutTree.TraversePreOrder(rects, SetupLayoutPass);
+            rectCount = 0;
+            layoutResultMap.Clear();
 
-            layoutStack.Push(new LayoutDataSet(roots[0], viewport));
+            if (rects.Length <= layoutTree.Size) {
+                Array.Resize(ref rects, layoutTree.Size * 2);
+                Array.Resize(ref layoutRects, layoutTree.Size * 2);
+            }
+
+            traverseTree.outputRect = viewport;
+
+            layoutStack.Push(traverseTree);
 
             while (layoutStack.Count > 0) {
-                LayoutDataSet layoutSet = layoutStack.Pop();
-                LayoutData data = layoutSet.data;
+                LayoutNode currentTreeNode = layoutStack.Pop();
 
-                data.layout.Run(viewport, layoutSet, layoutRects);
+                // layout rects gets filled from zero every layout iteration
+                // rects is actual final position after layout is completed
+                currentTreeNode.layout.Run(viewport, currentTreeNode, layoutRects);
 
-                layoutResultMap[data.element.id] = layoutSet.result;
-                
-                if (data.element != null && (data.element.flags & UIElementFlags.RequiresRendering) != 0) {
-                    rects[rectCount++] = new LayoutResult(data.element.id, layoutSet.result);
-                }
+                layoutResultMap[currentTreeNode.elementId] = currentTreeNode.outputRect;
+
+                rects[rectCount++] = new LayoutResult(currentTreeNode.elementId, currentTreeNode.outputRect);
 
                 // note: we never need to clear the layoutResults array
-                for (int i = 0; i < data.children.Count; i++) {
-                    layoutStack.Push(new LayoutDataSet(data.children[i], layoutRects[i]));
+                for (int i = 0; i < currentTreeNode.children.Length; i++) {
+                    currentTreeNode.children[i].outputRect = layoutRects[i];
+                    layoutStack.Push(currentTreeNode.children[i]);
                 }
             }
         }
@@ -223,51 +273,34 @@ namespace Src.Systems {
         public void OnDestroy() {
             this.styleSystem.onRectChanged -= HandleRectChanged;
             this.styleSystem.onLayoutChanged -= HandleLayoutChanged;
-            this.styleSystem.onBorderChanged -= HandleBorderChanged;
-            this.styleSystem.onMarginChanged -= HandleMarginChanged;
-            this.styleSystem.onPaddingChanged -= HandlePaddingChanged;
+            this.styleSystem.onBorderChanged -= HandleContentBoxChanged;
+            this.styleSystem.onMarginChanged -= HandleContentBoxChanged;
+            this.styleSystem.onPaddingChanged -= HandleContentBoxChanged;
             this.styleSystem.onConstraintChanged -= HandleConstraintChanged;
             layoutDataMap.Clear();
             layoutTree.Clear();
         }
 
         public void OnElementEnabled(UIElement element) {
-            LayoutData data = layoutTree.GetItem(element);
-            if (data != null) {
-                layoutTree.EnableHierarchy(data);
-            }
+            layoutTree.EnableHierarchy(element);
         }
 
         public void OnElementDisabled(UIElement element) {
-            LayoutData data = layoutTree.GetItem(element);
-            if (data != null) {
-                layoutTree.EnableHierarchy(data);
-            }
+            layoutTree.EnableHierarchy(element);
         }
 
         public void OnElementDestroyed(UIElement element) {
-            LayoutData data = layoutTree.GetItem(element);
-            if (data != null) {
-                // todo -- recurse this hierarchy and do a proper destroy call on each
-                layoutTree.RemoveHierarchy(data);
-                if ((data.element.flags & UIElementFlags.TextElement) != 0) {
-                    UITextElement textElement = (UITextElement) data.element;
-                    textElement.onTextChanged -= HandleTextChanged;
-                }
+            // todo -- recurse this hierarchy and do a proper destroy call on each
+            layoutTree.RemoveHierarchy(element);
+            if ((element.flags & UIElementFlags.TextElement) != 0) {
+                UITextElement textElement = (UITextElement) element;
+                textElement.onTextChanged -= HandleTextChanged;
             }
         }
 
-        private void SetupLayoutPass(LayoutResult[] layoutResults, LayoutData data) {
-            data.children.Clear();
+        public void OnElementShown(UIElement element) { }
 
-            if (data.parent == null) return;
-
-            data.parent.children.Add(data);
-
-            if (layoutResults.Length < data.parent.children.Count) {
-                Array.Resize(ref layoutResults, layoutResults.Length * 2);
-            }
-        }
+        public void OnElementHidden(UIElement element) { }
 
     }
 

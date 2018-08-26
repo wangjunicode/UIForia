@@ -203,7 +203,7 @@ namespace Rendering {
             }
 
             changeHandler.SetPaint(elementId, paint);
-            changeHandler.SetLayout(elementId, layout);
+            changeHandler.SetLayout(elementId, layoutParameters);
             changeHandler.SetConstraints(elementId, constraints);
             changeHandler.SetMargin(elementId, margin);
             changeHandler.SetPadding(elementId, padding);

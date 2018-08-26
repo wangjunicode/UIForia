@@ -59,7 +59,6 @@ namespace Src.Systems {
         private readonly SkipTree<IMGUIRenderData> renderSkipTree;
         private readonly Dictionary<Color, Texture2D> textureCache;
 
-        private Rect viewportRect;
         private IMGUIRenderData[] renderData;
         private bool renderDataDirty;
 
@@ -73,10 +72,6 @@ namespace Src.Systems {
             this.renderDataDirty = true;
         }
 
-        public void SetViewportRect(Rect viewportRect) {
-            this.viewportRect = viewportRect;
-        }
-
         public void OnRender() {
             int count = layoutSystem.RectCount;
             LayoutResult[] layoutResults = layoutSystem.LayoutResults;
@@ -85,11 +80,6 @@ namespace Src.Systems {
             //   renderDataDirty = false;
             renderData = renderSkipTree.ToArray();
             //}            
-
-            IMGUIRenderData.s_DrawRect.x = 0f;
-            IMGUIRenderData.s_DrawRect.y = 0f;
-            IMGUIRenderData.s_DrawRect.width = viewportRect.width;
-            IMGUIRenderData.s_DrawRect.height = viewportRect.height;
 
             for (int i = 0; i < count; i++) {
                 LayoutResult result = layoutResults[i];
@@ -155,7 +145,6 @@ namespace Src.Systems {
 
             }
 
-//            renderSkipTree.TraverseRecursePreOrder();
         }
 
         public void OnInitialize() {
@@ -220,14 +209,16 @@ namespace Src.Systems {
             data.SetText(text);
         }
 
+        // todo -- rethink how lifecycle works, here we want to enable children of the element
+        // todo    but only once, if OnEnable is called for the whole heirarchy, we run this handle n times
+        // todo    where n = number of ancestors of orginal node
         public void OnElementEnabled(UIElement element) {
-            IMGUIRenderData data = renderSkipTree.GetItem(element);
+            IMGUIRenderData data = renderSkipTree.GetItem(element) ?? new IMGUIRenderData(element, RenderPrimitiveType.None);
             renderSkipTree.EnableHierarchy(data);
         }
 
         public void OnElementDisabled(UIElement element) {
-            IMGUIRenderData data = renderSkipTree.GetItem(element);
-            renderSkipTree.DisableHierarchy(data);
+            renderSkipTree.DisableHierarchy(element);
         }
 
         public void OnElementDestroyed(UIElement element) {
@@ -236,11 +227,12 @@ namespace Src.Systems {
                 textElement.onTextChanged -= OnTextChanged;
             }
 
-            IMGUIRenderData data = renderSkipTree.GetItem(element);
-            if (data == null) return;
-            renderSkipTree.RemoveItem(data);
-            data.element = null;
+            renderSkipTree.RemoveHierarchy(element);
         }
+
+        public void OnElementShown(UIElement element) { }
+
+        public void OnElementHidden(UIElement element) { }
 
         private Texture2D GetTexture(Color color) {
             Texture2D texture;

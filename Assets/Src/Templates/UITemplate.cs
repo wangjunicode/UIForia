@@ -13,9 +13,10 @@ namespace Src {
         public readonly List<AttributeDefinition> attributes;
 
         private Binding[] bindings;
-        private InputBinding[] inputBindings;
         private Binding[] constantBindings;
-        
+        private Binding[] conditionalBindings;
+        private InputBinding[] inputBindings;
+
         private List<UIStyle> baseStyles;
         private List<StyleBinding> constantStyleBindings;
 
@@ -28,14 +29,15 @@ namespace Src {
         protected UITemplate(List<UITemplate> childTemplates, List<AttributeDefinition> attributes = null) {
             this.childTemplates = childTemplates;
             this.attributes = attributes;
-            
+
             this.baseStyles = new List<UIStyle>();
             this.bindingList = new List<Binding>();
             this.constantStyleBindings = new List<StyleBinding>();
-            
+
             this.bindings = Binding.EmptyArray;
             this.inputBindings = InputBinding.EmptyArray;
             this.constantBindings = Binding.EmptyArray;
+            this.conditionalBindings = Binding.EmptyArray;
         }
 
         public UIElementCreationData GetCreationData(UIElement element, UITemplateContext context) {
@@ -43,11 +45,12 @@ namespace Src {
             data.element = element;
             data.context = context;
             data.baseStyles = baseStyles;
-            
+
             data.bindings = bindings;
             data.inputBindings = inputBindings;
             data.constantBindings = constantBindings;
             data.constantStyleBindings = constantStyleBindings;
+            data.conditionalBindings = conditionalBindings;
             return data;
         }
 
@@ -60,7 +63,7 @@ namespace Src {
             for (int i = 0; i < attributes.Count; i++) {
                 AttributeDefinition attr = attributes[i];
                 StyleBinding binding = styleCompiler.Compile(attr);
-                if(binding == null) continue;
+                if (binding == null) continue;
 
                 if (binding.IsConstant()) {
                     constantStyleBindings.Add(binding);
@@ -69,7 +72,7 @@ namespace Src {
                     bindingList.Add(binding);
                 }
             }
-            
+
         }
 
         public virtual void CompileInputBindings(ParsedTemplate template) {
@@ -80,7 +83,7 @@ namespace Src {
         public virtual void CompilePropertyBindings(ParsedTemplate template) {
             if (attributes == null || attributes.Count == 0) return;
             propCompiler.SetContext(template.contextDefinition);
-            
+
             // todo -- filter out already compiled attributes, warn if attribute was already handled
 //            propCompiler.CompileAttribute(attributes.Where(a) => !a.isCompiled);
             // set constant bindings here
@@ -91,8 +94,24 @@ namespace Src {
             CompileStyleBindings(template);
             CompileInputBindings(template);
             CompilePropertyBindings(template);
+            CompileConditionalBindings(template);
             ResolveConstantBindings();
             return true;
+        }
+
+        // todo -- show / hide / disable
+        protected virtual void CompileConditionalBindings(ParsedTemplate template) {
+            AttributeDefinition ifDef = GetAttribute("x-if");
+            AttributeDefinition unlessDef = GetAttribute("x-unless");
+            AttributeDefinition showDef = GetAttribute("x-show");
+            AttributeDefinition hideDef = GetAttribute("x-hide");
+
+            if (ifDef != null) {
+                conditionalBindings = new Binding[1];
+                Expression<bool> ifExpression = template.compiler.Compile<bool>(ifDef.value);
+                ifDef.isCompiled = true;
+                conditionalBindings[0] = new EnabledBinding(ifExpression);
+            }
         }
 
         protected void ResolveConstantBindings() {
@@ -114,7 +133,7 @@ namespace Src {
         protected List<AttributeDefinition> GetUncompiledAttributes() {
             return attributes.Where((attr) => !attr.isCompiled).ToList();
         }
-        
+
         private void ResolveBaseStyles(ParsedTemplate template) {
             AttributeDefinition styleAttr = GetAttribute("style");
             if (styleAttr == null) return;
@@ -128,7 +147,24 @@ namespace Src {
             }
         }
 
-      
+    }
+
+    public class ShowBinding : Binding {
+
+        private readonly Expression<bool> expression;
+
+        public ShowBinding(Expression<bool> expression) {
+            this.expression = expression;
+        }
+
+        public override void Execute(UIElement element, UITemplateContext context) {
+            
+        }
+
+        public override bool IsConstant() {
+            throw new System.NotImplementedException();
+        }
+
     }
 
 }

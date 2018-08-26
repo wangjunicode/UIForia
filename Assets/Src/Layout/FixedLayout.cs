@@ -5,11 +5,11 @@ namespace Src.Layout {
 
     public class FixedLayout : UILayout {
 
-        public override void Run(Rect viewport, LayoutDataSet size, Rect[] results) {
+        public FixedLayout(ITextSizeCalculator textSizeCalculator) : base(textSizeCalculator) { }
+
+        public override void Run(Rect viewport, LayoutNode layoutNode, Rect[] results) {
             throw new System.NotImplementedException();
         }
-
-        public FixedLayout(ITextSizeCalculator textSizeCalculator) : base(textSizeCalculator) { }
 
     }
 

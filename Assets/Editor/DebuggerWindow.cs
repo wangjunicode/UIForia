@@ -39,7 +39,8 @@ namespace Src.Editor {
                     Repaint();
                     break;
             }
-                      
+            Repaint();
+   
         }
 
         public void Awake() {

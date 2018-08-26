@@ -1,5 +1,7 @@
+using System;
 using System.Collections.Generic;
 using System.Linq;
+using JetBrains.Annotations;
 using Rendering;
 using Src.Compilers;
 using Src.InputBindings;
@@ -12,13 +14,13 @@ namespace Src {
         public List<UITemplate> childTemplates;
         public readonly List<AttributeDefinition> attributes;
 
-        private Binding[] bindings;
-        private Binding[] constantBindings;
-        private Binding[] conditionalBindings;
-        private InputBinding[] inputBindings;
+        protected Binding[] bindings;
+        protected Binding[] constantBindings;
+        protected Binding[] conditionalBindings;
+        protected InputBinding[] inputBindings;
 
-        private List<UIStyle> baseStyles;
-        private List<StyleBinding> constantStyleBindings;
+        protected List<UIStyle> baseStyles;
+        protected List<StyleBinding> constantStyleBindings;
 
         protected List<Binding> bindingList;
 
@@ -72,21 +74,6 @@ namespace Src {
                     bindingList.Add(binding);
                 }
             }
-
-        }
-
-        public virtual void CompileInputBindings(ParsedTemplate template) {
-            inputCompiler.SetContext(template.contextDefinition);
-            inputBindings = inputCompiler.Compile(attributes).ToArray();
-        }
-
-        public virtual void CompilePropertyBindings(ParsedTemplate template) {
-            if (attributes == null || attributes.Count == 0) return;
-            propCompiler.SetContext(template.contextDefinition);
-
-            // todo -- filter out already compiled attributes, warn if attribute was already handled
-//            propCompiler.CompileAttribute(attributes.Where(a) => !a.isCompiled);
-            // set constant bindings here
         }
 
         public virtual bool Compile(ParsedTemplate template) {
@@ -99,6 +86,41 @@ namespace Src {
             return true;
         }
 
+        [PublicAPI]
+        public AttributeDefinition GetAttribute(string attributeName) {
+            if (attributes == null) return null;
+
+            for (int i = 0; i < attributes.Count; i++) {
+                if (attributes[i].key == attributeName) return attributes[i];
+            }
+
+            return null;
+        }
+
+        [PublicAPI]
+        public List<AttributeDefinition> GetUncompiledAttributes() {
+            return attributes.Where((attr) => !attr.isCompiled).ToList();
+        }
+
+        protected void AddConditionalBinding(Binding binding) {
+            Array.Resize(ref conditionalBindings, conditionalBindings.Length + 1);
+            conditionalBindings[conditionalBindings.Length - 1] = binding;
+        }
+        
+        protected virtual void CompileInputBindings(ParsedTemplate template) {
+            inputCompiler.SetContext(template.contextDefinition);
+            inputBindings = inputCompiler.Compile(attributes).ToArray();
+        }
+
+        protected virtual void CompilePropertyBindings(ParsedTemplate template) {
+            if (attributes == null || attributes.Count == 0) return;
+            propCompiler.SetContext(template.contextDefinition);
+
+            // todo -- filter out already compiled attributes, warn if attribute was already handled
+//            propCompiler.CompileAttribute(attributes.Where(a) => !a.isCompiled);
+            // set constant bindings here
+        }
+        
         // todo -- show / hide / disable
         protected virtual void CompileConditionalBindings(ParsedTemplate template) {
             AttributeDefinition ifDef = GetAttribute("x-if");
@@ -118,20 +140,6 @@ namespace Src {
             bindings = bindingList.Where((binding) => !binding.IsConstant()).ToArray();
             constantBindings = bindingList.Where((binding) => binding.IsConstant()).ToArray();
             bindingList = null;
-        }
-
-        protected AttributeDefinition GetAttribute(string attributeName) {
-            if (attributes == null) return null;
-
-            for (int i = 0; i < attributes.Count; i++) {
-                if (attributes[i].key == attributeName) return attributes[i];
-            }
-
-            return null;
-        }
-
-        protected List<AttributeDefinition> GetUncompiledAttributes() {
-            return attributes.Where((attr) => !attr.isCompiled).ToList();
         }
 
         private void ResolveBaseStyles(ParsedTemplate template) {

@@ -1,10 +1,12 @@
 using System.Collections.Generic;
+using System.Diagnostics;
 using Rendering;
 using Src.InputBindings;
 using Src.StyleBindings;
 
 namespace Src {
 
+    [DebuggerDisplay("{element} depth: {depth}")]
     public class UIElementCreationData {
 
         public UIElement element;
@@ -19,13 +21,15 @@ namespace Src {
         public int elementId => element.id;
         public string name => element.name;
         
-        public int GetSiblingIndex() {
-            return 0;
-        }
+        private int depth = int.MinValue;
+        public List<UIElementCreationData> children = new List<UIElementCreationData>();
 
         public int GetDepth() {
-            int depth = 0;
-            UIElement ptr = element;
+            if (depth != int.MinValue) {
+                return depth;
+            }
+            depth = 0;
+            UIElement ptr = element.parent;
             while (ptr != null) {
                 ptr = ptr.parent;
                 depth++;

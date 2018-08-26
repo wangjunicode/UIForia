@@ -88,6 +88,8 @@
                 <e p="StyleBinding_TextColor.cs" t="Include" />
               </e>
             </e>
+            <e p="SwitchBindingInt.cs" t="Include" />
+            <e p="SwitchCaseBinding.cs" t="Include" />
             <e p="TemplateBinding.cs" t="Include" />
             <e p="TextBinding_Multiple.cs" t="Include" />
             <e p="TextBinding_Single.cs" t="Include" />

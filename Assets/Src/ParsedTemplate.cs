@@ -12,7 +12,8 @@ namespace Src {
         public List<ImportDeclaration> imports;
         public readonly ContextDefinition contextDefinition;
         public readonly ExpressionCompiler compiler;
-        
+
+        private int idGenerator;
         private bool isCompiled;
 
         public ParsedTemplate(UIElementTemplate rootElement) {
@@ -20,7 +21,7 @@ namespace Src {
             this.contextDefinition = new ContextDefinition(rootElement.RootType);
             this.compiler = new ExpressionCompiler(contextDefinition);
         }
-        
+
         public List<UITemplate> childTemplates => rootElementTemplate.childTemplates;
 
         private static readonly List<UIElementCreationData> EmptyElementList = new List<UIElementCreationData>(0);
@@ -68,12 +69,11 @@ namespace Src {
 
             UIElementCreationData rootData = rootElementTemplate.GetCreationData(instance, scope.context);
 
-            scope.SetParent(rootData, default(UIElementCreationData));
-
             for (int i = 0; i < childTemplates.Count; i++) {
                 scope.SetParent(childTemplates[i].CreateScoped(scope), rootData);
             }
 
+            scope.SetParent(rootData, null);
             scope.RegisterAll();
 
             return instance;
@@ -81,26 +81,8 @@ namespace Src {
 
         private void Compile() {
             if (isCompiled) return;
-
+            isCompiled = true;
             CompileStep(rootElementTemplate);
-//            Stack<UITemplate> stack = new Stack<UITemplate>();
-//
-//            stack.Push(rootElementTemplate);
-//
-//            while (stack.Count > 0) {
-//                UITemplate template = stack.Pop();
-//                
-//                template.Compile(this);
-//                
-//                if (template.childTemplates != null) {
-//                    for (int i = 0; i < template.childTemplates.Count; i++) {
-//                        stack.Push(template.childTemplates[i]);
-//                    }
-//                }
-//                
-//            }
-//
-//            isCompiled = true;
         }
 
         private void CompileStep(UITemplate template) {
@@ -112,7 +94,7 @@ namespace Src {
             }
 
         }
-        
+
         public UIStyle GetStyleInstance(string styleName) {
             // todo handle searching imports
             for (int i = 0; i < styles.Count; i++) {
@@ -122,6 +104,10 @@ namespace Src {
             }
 
             return null;
+        }
+
+        public int MakeId() {
+            return idGenerator++;
         }
 
     }

@@ -23,6 +23,16 @@ public class UIElement : IHierarchical {
                      | UIElementFlags.RequiresRendering;
     }
 
+    public bool isImplicit => (flags & UIElementFlags.ImplicitElement) != 0;
+
+    public bool isSelfEnabled => (flags & UIElementFlags.Enabled) != 0;
+    
+    public bool isSelfDisabled => (flags & UIElementFlags.Enabled) == 0;
+    
+    public bool isEnabled => (flags & UIElementFlags.Enabled) != 0 && (flags & UIElementFlags.AncestorDisabled) == 0;
+
+    public bool isDisabled => (flags & UIElementFlags.Enabled) == 0 || (flags & UIElementFlags.AncestorDisabled) != 0;
+
     public virtual void OnCreate() { }
 
     public virtual void OnUpdate() { }

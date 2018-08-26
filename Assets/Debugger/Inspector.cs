@@ -10,16 +10,18 @@ namespace Debugger {
 
         public float time;
         public Vector2 mousePosition;
-        public List<float> values;
+        public List<int> values;
         public bool showMe;
-        
+        public int selectedValue;
+
         public Inspector() {
-            this.values = new List<float>();
-            values.Add(1f);
-            values.Add(2f);
-            values.Add(3f);
+            selectedValue = 0;
+            this.values = new List<int>();
+            values.Add(1);
+            values.Add(2);
+            values.Add(3);
         }
-        
+
         public override void OnUpdate() {
             time = Time.realtimeSinceStartup;
         }
@@ -29,9 +31,10 @@ namespace Debugger {
         }
 
         public void OnMouseDown(MouseInputEvent evt) {
-            showMe = !showMe;
+            selectedValue = (selectedValue + 1) % values.Count;
+            Debug.Log(selectedValue);
         }
-        
+
     }
 
 }

@@ -1,10 +1,12 @@
 namespace Src {
 
-    public abstract class UISwitchElement : UIElement { }
+    public class UISwitchElement : UIElement {
 
-    public class UISwitchElement<T> : UISwitchElement {
-
-        public T currentValue;
+        public UISwitchElement() {
+            flags |= UIElementFlags.Enabled;
+            flags |= UIElementFlags.ImplicitElement;
+            flags &= ~(UIElementFlags.RequiresLayout | UIElementFlags.RequiresLayout);
+        }
 
     }
 

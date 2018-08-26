@@ -43,29 +43,29 @@ public abstract class UIView {
     public abstract void Render();
     
     public virtual void Refresh() {
+        lifeCycleSystem.OnReset();
+        elementSystem.OnReset(); 
         bindingSystem.OnReset();
         renderSystem.OnReset();
-        lifeCycleSystem.OnReset();
         layoutSystem.OnReset();
         styleSystem.OnReset();
-        elementSystem.OnReset(); 
         
         root = TemplateParser.GetParsedTemplate(elementType, true).CreateWithoutScope(this);
         
+        lifeCycleSystem.OnInitialize();
+        styleSystem.OnInitialize();
         layoutSystem.OnInitialize();
         renderSystem.OnInitialize();
-        styleSystem.OnInitialize();
         inputSystem.OnInitialize();
         bindingSystem.OnInitialize();
-        lifeCycleSystem.OnInitialize();
     }
 
     // todo -- make this stuff event based to make dependency graph explicit or removed
     public virtual void Register(UIElementCreationData elementData) {
         elementSystem.OnElementCreated(elementData);
+        lifeCycleSystem.OnElementCreated(elementData);
         styleSystem.OnElementCreated(elementData);
         layoutSystem.OnElementCreated(elementData);
-        lifeCycleSystem.OnElementCreated(elementData);
         renderSystem.OnElementCreated(elementData);
         bindingSystem.OnElementCreated(elementData);
         inputSystem.OnElementCreated(elementData);

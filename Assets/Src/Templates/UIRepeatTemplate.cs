@@ -72,6 +72,7 @@ namespace Src {
                 ReflectionUtil.ObjectArray3
             );
 
+            // todo -- unsure this works across templates, might best to communicate via context instead
             terminalBindings = new Binding[1];
             terminalBindings[0] = new RepeatTerminalBinding(repeatBinding);
 

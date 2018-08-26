@@ -213,8 +213,7 @@ namespace Src.Systems {
         // todo    but only once, if OnEnable is called for the whole heirarchy, we run this handle n times
         // todo    where n = number of ancestors of orginal node
         public void OnElementEnabled(UIElement element) {
-            IMGUIRenderData data = renderSkipTree.GetItem(element) ?? new IMGUIRenderData(element, RenderPrimitiveType.None);
-            renderSkipTree.EnableHierarchy(data);
+            renderSkipTree.EnableHierarchy(element);
         }
 
         public void OnElementDisabled(UIElement element) {
@@ -247,8 +246,7 @@ namespace Src.Systems {
 
         public void OnElementStyleChanged(UIElement element) {
             if (element.style == null) return;
-
-//            Debug.Log("Style change");
+            if (element.isDisabled || element.isImplicit) return;
             IMGUIRenderData data = renderSkipTree.GetItem(element);
             RenderPrimitiveType primitiveType = DeterminePrimitiveType(element);
 

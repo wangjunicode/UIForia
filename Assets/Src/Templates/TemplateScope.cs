@@ -1,5 +1,4 @@
 using System.Collections.Generic;
-using UnityEngine;
 
 namespace Src {
 
@@ -8,32 +7,38 @@ namespace Src {
         public UIView view;
         public UITemplateContext context;
         public List<UIElementCreationData> inputChildren;
-        
+
         public readonly List<UIElementCreationData> outputList;
 
         public TemplateScope(List<UIElementCreationData> outputList) {
             this.outputList = outputList;
         }
-        
-        public void SetParent(UIElementCreationData uiElementCreationData, UIElementCreationData parent) {
-            outputList.Add(uiElementCreationData);
+
+        public void SetParent(UIElementCreationData child, UIElementCreationData parent) {
             if (parent == null) {
-                outputList.Add(uiElementCreationData);
+                outputList.Add(child);
                 return;
             }
-            uiElementCreationData.element.parent = parent.element;
+            child.element.parent = parent.element;
+            parent.children.Add(child);
         }
 
         public void Clear() {
             inputChildren.Clear();
             outputList.Clear();
         }
+
+        private void Register(List<UIElementCreationData> list) {
+            if (list == null) return;
+            for (int i = 0; i < list.Count; i++) {
+                view.Register(list[i]);
+                Register(list[i].children);
+            }
+            list.Clear();
+        }
         
         public void RegisterAll() {
-            Debug.Log("Registering " + outputList.Count + " elements");
-            for (int i = 0; i < outputList.Count; i++) {
-                view.Register(outputList[i]);
-            }
+            Register(outputList);
             Clear();
         }
 

@@ -18,10 +18,10 @@ namespace Src {
         private static readonly Dictionary<Type, ParsedTemplate> parsedTemplates =
             new Dictionary<Type, ParsedTemplate>();
 
-        private static readonly string[] RepeatAttributes = {"list", "as", "filter", "onItemAdded", "onItemRemoved"};
-        private static readonly string[] CaseAttributes = {"when"};
-        private static readonly string[] PrefabAttributes = {"if", "src"};
-        private static readonly string[] SwitchAttributes = {"if", "value"};
+        private static readonly string[] RepeatAttributes = { "list", "as", "filter", "onItemAdded", "onItemRemoved" };
+        private static readonly string[] CaseAttributes = { "when" };
+        private static readonly string[] PrefabAttributes = { "if", "src" };
+        private static readonly string[] SwitchAttributes = { "if", "value" };
         private static readonly string[] DefaultAttributes = { };
         private static readonly string[] ChildrenAttributes = { };
         private static readonly string[] TextAttributes = { };
@@ -49,7 +49,7 @@ namespace Src {
             string template = File.ReadAllText(Application.dataPath + processedType.GetTemplatePath());
             XDocument doc = XDocument.Parse(template);
             ParsedTemplate parsedTemplate = null;
-            
+
             try {
                 parsedTemplate = new TemplateParser().ParseTemplate(processedType, doc);
             }
@@ -115,12 +115,11 @@ namespace Src {
                 throw new InvalidTemplateException(templateName, " missing a 'Contents' section");
             }
 
-
             List<UITemplate> children = ParseNodes(contentElement.Nodes());
             List<AttributeDefinition> attributes = ParseAttributes(contentElement.Attributes());
 
             UIElementTemplate rootTemplate = new UIElementTemplate(type.rawType, children, attributes);
-            
+
             ParsedTemplate output = new ParsedTemplate(rootTemplate);
             output.imports = imports;
             output.styles = styleTemplates;
@@ -132,7 +131,10 @@ namespace Src {
             EnsureAttribute(element, "when");
             EnsureOnlyAttributes(element, CaseAttributes);
 
-            UISwitchCaseTemplate template = new UISwitchCaseTemplate(ParseNodes(element.Nodes()));
+            UISwitchCaseTemplate template = new UISwitchCaseTemplate(
+                ParseNodes(element.Nodes()),
+                ParseAttributes(element.Attributes())
+            );
 
             return template;
         }
@@ -140,7 +142,10 @@ namespace Src {
         private static UITemplate ParseDefaultElement(XElement element) {
             EnsureOnlyAttributes(element, DefaultAttributes);
 
-            UISwitchDefaultTemplate template = new UISwitchDefaultTemplate(ParseNodes(element.Nodes()));
+            UISwitchDefaultTemplate template = new UISwitchDefaultTemplate(
+                ParseNodes(element.Nodes()),
+                ParseAttributes(element.Attributes())
+            );
             return template;
         }
 
@@ -185,7 +190,10 @@ namespace Src {
             EnsureOnlyAttributes(element, SwitchAttributes);
 
             // can only contain <Case> and <Default>
-            UISwitchTemplate template = new UISwitchTemplate(ParseNodes(element.Nodes()));
+            UISwitchTemplate template = new UISwitchTemplate(
+                ParseNodes(element.Nodes()),
+                ParseAttributes(element.Attributes())
+            );
 
             if (template.childTemplates.Count == 0) {
                 throw Abort("<Switch> cannot be empty");

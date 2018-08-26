@@ -7,27 +7,28 @@
 
         </Group>
 
-        <Group x-if="{showMe}" onMouseEnter="OnMouseEnter($event)" style.backgroundColor="white" style.hover.backgroundColor="red" name="toolbar" someValue="{1 + 1}">
+        <!--<Group x-if="{showMe}" onMouseEnter="OnMouseEnter($event)" style.backgroundColor="white" style.hover.backgroundColor="red" name="toolbar" someValue="{1 + 1}">-->
 
-           I am shown! {showMe}
+           <!--I am shown! {showMe}-->
 
-        </Group>
+        <!--</Group>-->
         <!--<Repeat list="{values}" as="item">-->
             <!--some text here-->
             <!--{$item}-->
         <!--</Repeat>-->
         <!---->
         
-        <!--<Switch value="{selection}">-->
-            <!--<Case when="1">-->
-                <!--One!-->
-            <!--</Case>-->
-            <!--<Case when="2">-->
-                <!--Two!-->
-            <!--</Case>-->
-            <!--<Default>-->
-                <!--Other!-->
-            <!--</Default>-->
-        <!--</Switch>-->
+        <Switch value="{selectedValue}">
+            <Case when="1">
+                One!
+            </Case>
+            <Case when="2">
+                Two!
+            </Case>
+            <Default>
+                Other! {selectedValue}
+            </Default>
+        </Switch>
+        
     </Contents>
 </UITemplate>

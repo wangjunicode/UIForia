@@ -34,6 +34,7 @@ namespace Src.Layout {
 
                 for (int i = 0; i < children.Count; i++) {
                     LayoutNode child = children[i];
+                    if (!child.isInFlow || child.element.isDisabled) continue;
                     output = Mathf.Max(output, child.GetPreferredWidth(child.rect.width.unit, contentSize, viewportSize));
                 }
 
@@ -60,11 +61,14 @@ namespace Src.Layout {
 
             if (node.parameters.direction == LayoutDirection.Row) {
                 for (int i = 0; i < children.Count; i++) {
+                    if (!children[i].isInFlow || children[i].element.isDisabled) continue;
+
                     output = Mathf.Max(output, children[i].GetPreferredHeight(node.rect.height.unit, parentWidth, contentSize, viewportSize));
                 }
             }
             else {
                 for (int i = 0; i < children.Count; i++) {
+                    if (!children[i].isInFlow || children[i].element.isDisabled) continue;
                     output += children[i].GetPreferredHeight(node.rect.height.unit, parentWidth, contentSize, viewportSize);
                 }
             }

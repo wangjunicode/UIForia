@@ -166,6 +166,10 @@ namespace Src.Layout {
             for (int i = 0; i < currentNode.children.Count; i++) {
                 if (currentNode.children[i].isInFlow && currentNode.children[i].element.isEnabled) {
 //                    results[i] = 
+                    currentNode.children[i].localPosition = new Vector2(
+                        widthItems[itemTracker].axisStart,
+                        heightItems[itemTracker].axisStart
+                        );
                     currentNode.children[i].outputRect = new Rect(
                         widthItems[itemTracker].axisStart + size.x,
                         heightItems[itemTracker].axisStart + size.y,

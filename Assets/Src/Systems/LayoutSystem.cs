@@ -91,7 +91,7 @@ namespace Src.Systems {
                     return false;
                 }
                 if (node.element.isDisabled) return false;
-                rects[rectCount++] = new LayoutResult(node.element.id, node.outputRect);
+                rects[rectCount++] = new LayoutResult(node.element.id, node.outputRect, new Rect(node.localPosition, node.outputRect.size));
                 if (node.isTextElement) {
                     return true;
                 }

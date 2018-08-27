@@ -367,6 +367,9 @@ namespace Src {
         }
 
         private void ConditionalTraversePreOrderStep(SkipTreeNode node, Func<T, bool> traverseFn) {
+            if (node != root && !traverseFn(node.item)) {
+                return;
+            }
             Stack<SkipTreeNode> stack = new Stack<SkipTreeNode>();
             AddChildrenToStack(stack, node, true);
 

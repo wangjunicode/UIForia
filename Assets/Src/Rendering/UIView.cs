@@ -127,6 +127,7 @@ public abstract class UIView : IElementRegistry {
 
     public void Update() {
         elementTree.ConditionalTraversePreOrder((element) => {
+            if (element == null) return true;
             if (element.isDisabled) return false;
             element.OnUpdate();
             return true;
@@ -157,6 +158,9 @@ public abstract class UIView : IElementRegistry {
             return true;
         });
 
+        foreach (ISystem system in systems) {
+            system.OnElementEnabled(element);
+        }
     }
 
     public void DisableElement(UIElement element) {
@@ -181,7 +185,9 @@ public abstract class UIView : IElementRegistry {
 
             return true;
         });
-        
+        foreach (ISystem system in systems) {
+            system.OnElementDisabled(element);
+        }
     }
 
     public UIElement GetElement(int elementId) {

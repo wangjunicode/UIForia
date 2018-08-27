@@ -28,7 +28,8 @@ namespace Src.Layout {
         public bool isTextElement;
         public readonly UIStyleSet style;
         public readonly UIElement element;
-        
+        public Vector2 localPosition;
+
         public LayoutNode(UIElement element) {
             this.element = element;
             this.children = new List<LayoutNode>();

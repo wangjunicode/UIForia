@@ -21,7 +21,7 @@ namespace Src {
             RectTransform rectTransform = canvas.GetComponent<RectTransform>();
             rectTransform.pivot = new Vector2(0, 1);
             view = new UIGameObjectView(typeof(TempUIType), rectTransform);
-            view.OnCreate();
+            view.Initialize();
         }
 
         public void RefreshView() {

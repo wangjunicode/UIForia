@@ -3,14 +3,16 @@ using JetBrains.Annotations;
 using Rendering;
 using Src;
 
-[DebuggerDisplay("{name} {GetType()} id={id}")]
+[DebuggerDisplay("{GetType()} id={id} {name}")]
 public class UIElement : IHierarchical {
 
-    internal UIElementFlags flags;
+    // todo make internal but available for testing
+    public UIElementFlags flags;
 
     public string name;
     public readonly int id;
 
+    // todo make readonly but assignable via style system
     [UsedImplicitly] public UIStyleSet style;
 
     protected internal UIElement parent;
@@ -23,16 +25,22 @@ public class UIElement : IHierarchical {
                      | UIElementFlags.RequiresRendering;
     }
 
+    public bool isShown => (flags & UIElementFlags.SelfAndAncestorShown) == UIElementFlags.SelfAndAncestorShown;
+
     public bool isImplicit => (flags & UIElementFlags.ImplicitElement) != 0;
 
     public bool isSelfEnabled => (flags & UIElementFlags.Enabled) != 0;
-    
+
     public bool isSelfDisabled => (flags & UIElementFlags.Enabled) == 0;
+
+    public bool isEnabled => (flags & UIElementFlags.SelfAndAncestorEnabled) == UIElementFlags.SelfAndAncestorEnabled;
+
+    public bool isDisabled => (flags & UIElementFlags.Enabled) == 0 || (flags & UIElementFlags.AncestorEnabled) == 0;
+
+    public bool hasDisabledAncestor => (flags & UIElementFlags.AncestorEnabled) == 0;
     
-    public bool isEnabled => (flags & UIElementFlags.Enabled) != 0 && (flags & UIElementFlags.AncestorDisabled) == 0;
-
-    public bool isDisabled => (flags & UIElementFlags.Enabled) == 0 || (flags & UIElementFlags.AncestorDisabled) != 0;
-
+    public bool isDestroyed => (flags & UIElementFlags.Destroyed) != 0;
+    
     public virtual void OnCreate() { }
 
     public virtual void OnUpdate() { }
@@ -57,6 +65,7 @@ public class UIElement : IHierarchical {
         else {
             retn += "<" + GetType().Name + " " + id + ">";
         }
+
         return retn;
     }
 

@@ -1,8 +1,6 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using Rendering;
+﻿using Rendering;
 using Src.StyleBindings;
+using System.Collections.Generic;
 
 namespace Src.Systems {
 
@@ -22,7 +20,11 @@ namespace Src.Systems {
 
     public delegate void AvailableStatesChanged(int elementId, StyleState state);
 
+    public delegate void TextContentChanged(int elementId, string text);
+    
     public class StyleSystem : ISystem, IStyleSystem {
+
+        private const UIElementFlags FlagCheck = UIElementFlags.RequiresLayout | UIElementFlags.RequiresLayout | UIElementFlags.TextElement;
 
         public event PaintChanged onPaintChanged;
         public event LayoutChanged onLayoutChanged;
@@ -34,83 +36,73 @@ namespace Src.Systems {
         public event BorderRadiusChanged onBorderRadiusChanged;
         public event FontPropertyChanged onFontPropertyChanged;
         public event AvailableStatesChanged onAvailableStatesChanged;
+        public event TextContentChanged onTextContentChanged;
+        
+        private readonly IElementRegistry elementRegistry;
 
-        private readonly Dictionary<int, UIStyleSet> styleMap;
-
-        public StyleSystem() {
-            this.styleMap = new Dictionary<int, UIStyleSet>();
+        public StyleSystem(IElementRegistry elementRegistry) {
+            this.elementRegistry = elementRegistry;
         }
 
-        public void OnReset() {
-            styleMap.Clear();
+        public void OnReset() { }
+
+        public void OnElementCreated(InitData elementData) {
+            UIElement element = elementData.element;
+
+            if ((element.flags & UIElementFlags.TextElement) != 0) {
+                ((UITextElement) element).onTextChanged += HandleTextChanged;
+            }
+            
+            if ((element.flags & FlagCheck) != 0) {
+                
+                UITemplateContext context = elementData.context;
+                List<UIStyle> baseStyles = elementData.baseStyles;
+                List<StyleBinding> constantStyleBindings = elementData.constantStyleBindings;
+                
+                element.style = new UIStyleSet(element.id, this);
+                for (var i = 0; i < constantStyleBindings.Count; i++) {
+                    constantStyleBindings[i].Apply(element.style, context);
+                }
+
+                for (int i = 0; i < baseStyles.Count; i++) {
+                    element.style.AddBaseStyle(baseStyles[i]);
+                }
+
+                element.style.Refresh();
+            }
+
+            for (int i = 0; i < elementData.children.Count; i++) {
+                OnElementCreated(elementData.children[i]);
+            }
+           
         }
 
         public void OnUpdate() { }
 
         public void OnDestroy() { }
 
+        public void OnReady() { }
+
         public void OnInitialize() { }
-
-        public void OnElementCreated(UIElementCreationData elementData) {
-            UIElement element = elementData.element;
-            UITemplateContext context = elementData.context;
-
-            if ((element.flags & UIElementFlags.ImplicitElement) != 0) {
-                return;
-            }
-            
-            List<UIStyle> baseStyles = elementData.baseStyles;
-            List<StyleBinding> constantStyleBindings = elementData.constantStyleBindings;
-
-            // todo -- this will create a style for all elements, 
-            // we can optimize this away w/ flags
-            element.style = new UIStyleSet(element.id, this);
-
-            styleMap[element.id] = element.style;
-
-            for (var i = 0; i < constantStyleBindings.Count; i++) {
-                constantStyleBindings[i].Apply(element.style, context);
-            }
-
-            for (int i = 0; i < baseStyles.Count; i++) {
-                element.style.AddBaseStyle(baseStyles[i]);
-            }
-
-            element.style.Refresh();
-
-        }
 
         public void OnElementEnabled(UIElement element) { }
 
         public void OnElementDisabled(UIElement element) { }
 
-        public void OnElementDestroyed(UIElement element) {
-            styleMap.Remove(element.id);
-        }
+        public void OnElementDestroyed(UIElement element) { }
 
-        public void OnElementShown(UIElement element) {
-        }
+        public void OnElementShown(UIElement element) { }
 
-        public void OnElementHidden(UIElement element) {
-        }
-
-        public IReadOnlyList<UIStyleSet> GetAllStyles() {
-            return styleMap.ToList().Select((kvp) => kvp.Value).ToList();
-        }
-
-        public IReadOnlyList<UIStyleSet> GetActiveStyles() {
-            // todo -- don't return for disabled elements
-            return styleMap.ToList().Select((kvp) => kvp.Value).ToList();
-        }
+        public void OnElementHidden(UIElement element) { }
 
         public void EnterState(int elementId, StyleState state) {
-            styleMap[elementId].EnterState(state);    
+            elementRegistry.GetElement(elementId).style.EnterState(state);
         }
 
         public void ExitState(int elementId, StyleState state) {
-            styleMap[elementId].ExitState(state);
+            elementRegistry.GetElement(elementId).style.ExitState(state);
         }
-        
+
         public void SetRect(int elementId, LayoutRect rect) {
             onRectChanged?.Invoke(elementId, rect);
         }
@@ -152,11 +144,12 @@ namespace Src.Systems {
         }
 
         public UIStyleSet GetStyleForElement(int elementId) {
-            UIStyleSet style;
-            styleMap.TryGetValue(elementId, out style);
-            return style;
+            return elementRegistry.GetElement(elementId).style;
         }
 
+        private void HandleTextChanged(UITextElement element, string text) {
+            onTextContentChanged?.Invoke(element.id, text);
+        }
     }
 
 }

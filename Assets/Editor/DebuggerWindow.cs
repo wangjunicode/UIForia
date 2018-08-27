@@ -15,9 +15,6 @@ namespace Src.Editor {
         
         private UIViewIMGUI view;
 
-        private void Update() {
-            view.Update();
-        }
 
         private void OnGUI() {
    
@@ -28,37 +25,27 @@ namespace Src.Editor {
             };
             
             view.SetViewRect(viewport);
-            view.Render();
+            view.Update();
 
             if (GUI.Button(new Rect(0, 0, 100, 20), "Refresh")) {
                 view.Refresh();
             }
-            
-            switch (Event.current.type) {
-                case EventType.MouseMove:
-                    Repaint();
-                    break;
-            }
+         
             Repaint();
-   
-        }
-
-        public void Awake() {
-            view = view ?? new UIViewIMGUI(typeof(TempUIType));
         }
 
         private void OnEnable() {
             wantsMouseMove = true;
             wantsMouseEnterLeaveWindow = true;
             view = new UIViewIMGUI(typeof(Inspector));
-            view.OnCreate();
-            EditorApplication.update += Update;
+            view.Initialize();
+//            EditorApplication.update += Update;
         }
 
         private void OnDisable() {
             view.OnDestroy();
             view = null;
-            EditorApplication.update -= Update;
+//            EditorApplication.update -= Update;
         }
     }
 

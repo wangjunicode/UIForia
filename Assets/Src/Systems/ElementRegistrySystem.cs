@@ -33,9 +33,13 @@ namespace Src.Systems {
             map.Clear();
         }
 
+        public void OnReady() {
+            
+        }
+
         public void OnInitialize() { }
 
-        public void OnElementCreated(UIElementCreationData elementData) {
+        public void OnElementCreated(InitData elementData) {
             elementData.element.name = elementData.name;
             map[elementData.element.id] = elementData.element;
         }

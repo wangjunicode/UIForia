@@ -58,15 +58,12 @@ namespace Src {
                 return;
             }
 
-            // todo remove scope & use context.view instead 
             if (previousList == null) {
                 repeat.previousListRef = new T();
                 for (int i = 0; i < list.Count; i++) {
                     repeat.previousListRef.Add(list[i]);
-                    UIElementCreationData newItem = repeat.template.CreateScoped(repeat.scope);
-                    newItem.element.parent = repeat;
-                    context.view.Register(newItem);
-                    repeat.scope.RegisterAll();
+                    InitData newItem = repeat.template.CreateScoped(repeat.scope);
+                    context.view.CreateElement(newItem, repeat);
                     repeat.children.Add(newItem.element);
                 }
                 previousList = repeat.previousListRef;
@@ -76,13 +73,12 @@ namespace Src {
             if (list != previousList) { }
 
             if (list.Count > previousList.Count) {
-                int diff = list.Count - previousList.Count;
+                int previousCount = previousList.Count;
+                int diff = list.Count - previousCount;
                 for (int i = 0; i < diff; i++) {
-                    previousList.Add(list[i]);
-                    UIElementCreationData newItem = repeat.template.CreateScoped(repeat.scope);
-                    newItem.element.parent = repeat;
-                    context.view.Register(newItem);
-                    repeat.scope.RegisterAll();
+                    previousList.Add(list[previousCount + i]);
+                    InitData newItem = repeat.template.CreateScoped(repeat.scope);
+                    context.view.CreateElement(newItem, repeat);
                     repeat.children.Add(newItem.element);
                 }
             }
@@ -90,13 +86,13 @@ namespace Src {
                 int diff = previousList.Count - list.Count;
                 for (int i = 0; i < diff; i++) {
                     int index = previousList.Count - 1;
+                    context.view.DestroyElement(repeat.children[index]);
                     previousList.RemoveAt(index);
-                    repeat.scope.view.DestroyElement(repeat.children[index]);
                 }
 
             }
             
-            Reset(context, (IList)repeat.previousListRef, repeat.previousListRef.Count);
+            Reset(context, (IList)previousList, previousList.Count);
 
         }
 

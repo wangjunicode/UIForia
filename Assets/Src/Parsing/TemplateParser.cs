@@ -1,5 +1,4 @@
 using System;
-using System.IO;
 using System.Xml;
 using System.Collections.Generic;
 using System.Linq;
@@ -7,7 +6,6 @@ using System.Xml.Linq;
 using Rendering;
 using Src.Parsing.Style;
 using Src.Style;
-using UnityEngine;
 
 namespace Src {
 
@@ -18,10 +16,10 @@ namespace Src {
         private static readonly Dictionary<Type, ParsedTemplate> parsedTemplates =
             new Dictionary<Type, ParsedTemplate>();
 
-        private static readonly string[] RepeatAttributes = { "list", "as", "filter", "onItemAdded", "onItemRemoved" };
+        private static readonly string[] RepeatAttributes = { "x-if", "list", "as", "filter", "onItemAdded", "onItemRemoved" };
         private static readonly string[] CaseAttributes = { "when" };
-        private static readonly string[] PrefabAttributes = { "if", "src" };
-        private static readonly string[] SwitchAttributes = { "if", "value" };
+        private static readonly string[] PrefabAttributes = { "x-if", "src" };
+        private static readonly string[] SwitchAttributes = { "x-if", "value" };
         private static readonly string[] DefaultAttributes = { };
         private static readonly string[] ChildrenAttributes = { };
         private static readonly string[] TextAttributes = { };
@@ -46,7 +44,8 @@ namespace Src {
 
         public static ParsedTemplate ParseTemplateFromType(Type type) {
             ProcessedType processedType = TypeProcessor.GetType(type);
-            string template = File.ReadAllText(Application.dataPath + processedType.GetTemplatePath());
+
+            string template = processedType.GetTemplate();
             XDocument doc = XDocument.Parse(template);
             ParsedTemplate parsedTemplate = null;
 
@@ -79,7 +78,7 @@ namespace Src {
         }
 
         private ParsedTemplate ParseTemplate(ProcessedType type, XDocument doc) {
-            templateName = type.GetTemplatePath();
+            templateName = type.GetTemplateName();
 
             doc.MergeTextNodes();
 

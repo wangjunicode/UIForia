@@ -9,8 +9,8 @@ namespace Src {
             this.terminalBindings = terminalBindings;
         }
 
-        public override UIElementCreationData CreateScoped(TemplateScope scope) {
-            UIElementCreationData data = GetCreationData(new UIRepeatTerminal(), scope.context);
+        public override InitData CreateScoped(TemplateScope inputScope) {
+            InitData data = GetCreationData(new UIRepeatTerminal(), inputScope.context);
             data.bindings = terminalBindings;
             return data;
         }

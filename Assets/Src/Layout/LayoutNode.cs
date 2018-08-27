@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Diagnostics;
 using Rendering;
 using Src.Systems;
@@ -7,14 +8,12 @@ using UnityEngine;
 namespace Src.Layout {
 
     [DebuggerDisplay("{element}")]
-    public class LayoutNode {
-
-        public readonly int elementId;
+    public class LayoutNode : IHierarchical {
 
         public Rect outputRect;
         public LayoutRect rect;
         public UILayout layout;
-        public LayoutNode[] children;
+        public List<LayoutNode> children;
         public LayoutParameters parameters;
         public LayoutConstraints constraints;
 
@@ -27,16 +26,40 @@ namespace Src.Layout {
         public float contentStartOffsetY;
         public float contentEndOffsetY;
         public bool isTextElement;
-        public UIStyleSet style;
-        public UIElement element;
-        public LayoutNode(UIElement element, int elementId, LayoutNode[] children) {
+        public readonly UIStyleSet style;
+        public readonly UIElement element;
+        
+        public LayoutNode(UIElement element) {
             this.element = element;
-            this.elementId = elementId;
-            this.children = children;
+            this.children = new List<LayoutNode>();
+            this.style = element.style;
         }
 
         public bool isInFlow => parameters.flow != LayoutFlowType.OutOfFlow;
 
+        public void UpdateData(LayoutSystem layoutSystem) {
+            previousParentWidth = float.MinValue;
+            textContentSize = Vector2.zero;
+
+            contentStartOffsetX = style.paddingLeft + style.marginLeft + style.borderLeft;
+            contentEndOffsetX = style.paddingRight + style.marginRight + style.borderRight;
+
+            contentStartOffsetY = style.paddingTop + style.marginTop + style.borderTop;
+            contentEndOffsetY = style.paddingBottom + style.marginBottom + style.borderBottom;
+
+            parameters = style.layoutParameters;
+            layout = layoutSystem.GetLayoutInstance(parameters.type);
+
+            constraints = style.constraints;
+            rect = style.rect;
+            
+            UITextElement textElement = element as UITextElement;
+            if (textElement != null) {
+                isTextElement = true;
+                textContent = textElement.GetText();
+            }
+        }
+        
         public float GetMinWidth(UIUnit parentUnit, float parentValue, float viewportValue) {
             switch (constraints.minWidth.unit) {
                 case UIUnit.Auto:
@@ -185,6 +208,10 @@ namespace Src.Layout {
                     return 0;
             }
         }
+
+        public int UniqueId => element.id;
+        public IHierarchical Element => element;
+        public IHierarchical Parent => element.parent;
 
     }
 //

@@ -1,7 +1,8 @@
 using System;
-using System.Collections.Generic;
 using System.Diagnostics;
+using System.IO;
 using System.Reflection;
+using UnityEngine;
 
 namespace Src {
 
@@ -9,44 +10,35 @@ namespace Src {
     public class ProcessedType {
 
         public readonly Type rawType;
-        public readonly List<FieldInfo> propFields;
-        public readonly List<FieldInfo> contextProperties;
-        
-        private string templatePath;
-
-        private static object[] constructorParameters = new object[2];
+        private readonly TemplateAttribute templateAttr;
 
         public ProcessedType(Type rawType) {
             this.rawType = rawType;
-            propFields = new List<FieldInfo>();
-            contextProperties = new List<FieldInfo>();
+            templateAttr = rawType.GetCustomAttribute<TemplateAttribute>();
         }
 
-        public string GetTemplatePath() {
-            if (templatePath != null) return templatePath;
-            TemplateAttribute attr = rawType.GetCustomAttribute<TemplateAttribute>();
-            if (attr != null) {
-                templatePath = attr.template;
+        public string GetTemplate() {
+            if (templateAttr == null) {
+                throw new Exception($"Template not defined for {rawType.Name}");
             }
-            return templatePath;
+
+            if (templateAttr.templateType == TemplateType.File) {
+                return File.ReadAllText(Application.dataPath + "/" + templateAttr.template);
+            }
+
+            return templateAttr.template;
         }
 
-        public bool HasProp(string propName) {
-
-            for (int i = 0; i < propFields.Count; i++) {
-                if (propFields[i].Name == propName) {
-                    return true;
-                }
+        public string GetTemplateName() {
+            if (templateAttr == null) {
+                return "Null";
             }
 
-            return false;
-        }
-
-        public FieldInfo GetField(string bindingKey) {
-            for (int i = 0; i < propFields.Count; i++) {
-                if (propFields[i].Name == bindingKey) return propFields[i];
+            if (templateAttr.templateType == TemplateType.File) {
+                return Path.GetFileName(templateAttr.template);
             }
-            return null;
+
+            return "InlineTemplate: " + rawType.Name;
         }
 
     }

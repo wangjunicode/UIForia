@@ -44,6 +44,10 @@ namespace Src {
         private static Type GetFieldType(Type targetType, PropertyAccessExpressionPartNode node) {
             FieldInfo fieldInfo = targetType.GetField(node.fieldName, flags);
             if (fieldInfo == null) {
+                PropertyInfo propertyInfo = targetType.GetProperty(node.fieldName, flags);
+                if (propertyInfo != null) {
+                    return propertyInfo.PropertyType;
+                }
                 throw new FieldNotDefinedException(targetType, node.fieldName);
             }
             return fieldInfo.FieldType;

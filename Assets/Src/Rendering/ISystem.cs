@@ -7,9 +7,10 @@ namespace Rendering {
         void OnReset();
         void OnUpdate();
         void OnDestroy();
+        void OnReady();
         void OnInitialize();
         
-        void OnElementCreated(UIElementCreationData elementData);
+        void OnElementCreated(InitData elementData);
         void OnElementEnabled(UIElement element);
         void OnElementDisabled(UIElement element);
         void OnElementDestroyed(UIElement element);

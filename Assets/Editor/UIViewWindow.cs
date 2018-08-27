@@ -25,7 +25,7 @@ namespace Src.Editor {
             
             float start = Time.realtimeSinceStartup;
             view.SetViewRect(viewport);
-            view.Render();
+            view.Update();
             float end = Time.realtimeSinceStartup - start;
             if (GUI.Button(new Rect(0, 0, 100, 20), "Refresh")) {
                 view.Refresh();
@@ -57,14 +57,14 @@ namespace Src.Editor {
             wantsMouseMove = true;
             wantsMouseEnterLeaveWindow = true;
             view = new UIViewIMGUI(typeof(TempUIType));
-            view.OnCreate();
-            EditorApplication.update += Update;
+            view.Initialize();
+           // EditorApplication.update += Update;
         }
 
         private void OnDisable() {
             view.OnDestroy();
             view = null;
-            EditorApplication.update -= Update;
+          //  EditorApplication.update -= Update;
         }
 
     }

@@ -17,15 +17,14 @@ namespace Src.Layout {
         }
 
         private void DoLayoutRow(Rect viewport, LayoutNode currentNode, Rect contentArea) {
-
             int itemCount = 0;
-            LayoutNode[] children = currentNode.children;
+            List<LayoutNode> children = currentNode.children;
 
             float remainingWidth = contentArea.width;
 
-            for (int i = 0; i < children.Length; i++) {
+            for (int i = 0; i < children.Count; i++) {
                 LayoutNode child = children[i];
-                if (!child.isInFlow) continue;
+                if (!child.isInFlow || child.element.isDisabled) continue;
 
                 FlexItemAxis widthItem = new FlexItemAxis();
 
@@ -58,24 +57,23 @@ namespace Src.Layout {
             }
 
             itemCount = 0; // need to reset so we safely skip non flow children
-            for (int i = 0; i < children.Length; i++) {
+            for (int i = 0; i < children.Count; i++) {
                 LayoutNode child = children[i];
-                if (!child.isInFlow) continue;
-                
+                if (!child.isInFlow || child.element.isDisabled) continue;
+
                 FlexItemAxis heightItem = new FlexItemAxis();
-                
+
                 heightItem.axisStart = contentArea.y;
                 heightItem.minSize = child.GetMinHeight(currentNode.rect.height.unit, contentArea.height, viewport.height);
                 heightItem.maxSize = child.GetMaxHeight(currentNode.rect.height.unit, contentArea.height, viewport.height);
                 // now we have the final width and can compute preferred height accordingly
                 // this restriction doesn't exist in the column layout case
                 heightItem.preferredSize = child.GetPreferredHeight(currentNode.rect.height.unit, widthItems[itemCount].outputSize, contentArea.height, viewport.height);
-                
+
                 heightItem.outputSize = heightItem.MinDefined && heightItem.preferredSize < heightItem.minSize ? heightItem.minSize : heightItem.preferredSize;
                 heightItem.outputSize = heightItem.MaxDefined && heightItem.outputSize > heightItem.maxSize ? heightItem.maxSize : heightItem.outputSize;
 
                 heightItems[itemCount++] = heightItem;
-
             }
 
             AlignMainAxis(widthItems, itemCount, contentArea.x, remainingWidth, currentNode.parameters.mainAxisAlignment);
@@ -83,15 +81,14 @@ namespace Src.Layout {
         }
 
         private void DoLayoutColumn(Rect viewport, LayoutNode currentNode, Rect contentArea) {
-
             float remainingHeight = contentArea.height;
-            LayoutNode[] children = currentNode.children;
-            
+            List<LayoutNode> children = currentNode.children;
+
             int itemCount = 0;
 
-            for (int i = 0; i < children.Length; i++) {
+            for (int i = 0; i < children.Count; i++) {
                 LayoutNode child = children[i];
-                if (!child.isInFlow) continue;
+                if (!child.isInFlow || child.element.isDisabled) continue;
 
                 FlexItemAxis heightItem = new FlexItemAxis();
                 FlexItemAxis widthItem = new FlexItemAxis();
@@ -111,7 +108,7 @@ namespace Src.Layout {
                 heightItem.maxSize = child.GetMaxHeight(currentNode.rect.height.unit, contentArea.height, viewport.height);
 
                 heightItem.preferredSize = child.GetPreferredHeight(currentNode.rect.height.unit, widthItem.outputSize, contentArea.height, viewport.height);
-                
+
                 heightItem.outputSize = heightItem.MinDefined && heightItem.preferredSize < heightItem.minSize ? heightItem.minSize : heightItem.preferredSize;
                 heightItem.outputSize = heightItem.MaxDefined && heightItem.outputSize > heightItem.maxSize ? heightItem.maxSize : heightItem.outputSize;
 
@@ -150,12 +147,12 @@ namespace Src.Layout {
             float contentEndY = size.yMax - size.y - currentNode.contentEndOffsetY;
             float contentAreaWidth = contentEndX - contentStartX;
             float contentAreaHeight = contentEndY - contentStartY;
-            
+
             Rect contentArea = new Rect(contentStartX, contentStartY, contentAreaWidth, contentAreaHeight);
-            
-            if (widthItems.Length < currentNode.children.Length) {
-                Array.Resize(ref widthItems, currentNode.children.Length * 2);
-                Array.Resize(ref heightItems, currentNode.children.Length * 2);
+
+            if (widthItems.Length < currentNode.children.Count) {
+                Array.Resize(ref widthItems, currentNode.children.Count * 2);
+                Array.Resize(ref heightItems, currentNode.children.Count * 2);
             }
 
             if (currentNode.parameters.direction == LayoutDirection.Row) {
@@ -166,9 +163,10 @@ namespace Src.Layout {
             }
 
             int itemTracker = 0;
-            for (int i = 0; i < currentNode.children.Length; i++) {
-                if (currentNode.children[i].isInFlow) {
-                    results[i] = new Rect(
+            for (int i = 0; i < currentNode.children.Count; i++) {
+                if (currentNode.children[i].isInFlow && currentNode.children[i].element.isEnabled) {
+//                    results[i] = 
+                    currentNode.children[i].outputRect = new Rect(
                         widthItems[itemTracker].axisStart + size.x,
                         heightItems[itemTracker].axisStart + size.y,
                         widthItems[itemTracker].outputSize,
@@ -177,7 +175,7 @@ namespace Src.Layout {
                     itemTracker++;
                 }
                 else {
-                    results[i] = new Rect(); // todo -- sizing for non flow children
+                    //results[i] = new Rect(); // todo -- sizing for non flow children
                 }
             }
         }

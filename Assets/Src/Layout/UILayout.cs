@@ -1,3 +1,4 @@
+using System.Collections.Generic;
 using Rendering;
 using UnityEngine;
 
@@ -19,19 +20,19 @@ namespace Src.Layout {
 //                return data.textContentSize.x;
 //            }
 
-            LayoutNode[] children = node.children;
+            List<LayoutNode> children = node.children;
             // todo include statically positioned things who's breadth exceeds max computed
             float output = 0;
             if (node.parameters.direction == LayoutDirection.Row) {
                 // return sum of preferred sizes
-                for (int i = 0; i < children.Length; i++) {
+                for (int i = 0; i < children.Count; i++) {
                     LayoutNode child = children[i];
                     output += child.GetPreferredWidth(node.rect.width.unit, contentSize, viewportSize);
                 }
             }
             else {
 
-                for (int i = 0; i < children.Length; i++) {
+                for (int i = 0; i < children.Count; i++) {
                     LayoutNode child = children[i];
                     output = Mathf.Max(output, child.GetPreferredWidth(child.rect.width.unit, contentSize, viewportSize));
                 }
@@ -52,18 +53,18 @@ namespace Src.Layout {
                 return node.textContentSize.y;
             }
 
-            LayoutNode[] children = node.children;
+            List<LayoutNode> children = node.children;
 
             // todo include statically positioned things who's breadth exceeds max computed
             float output = 0;
 
             if (node.parameters.direction == LayoutDirection.Row) {
-                for (int i = 0; i < children.Length; i++) {
+                for (int i = 0; i < children.Count; i++) {
                     output = Mathf.Max(output, children[i].GetPreferredHeight(node.rect.height.unit, parentWidth, contentSize, viewportSize));
                 }
             }
             else {
-                for (int i = 0; i < children.Length; i++) {
+                for (int i = 0; i < children.Count; i++) {
                     output += children[i].GetPreferredHeight(node.rect.height.unit, parentWidth, contentSize, viewportSize);
                 }
             }

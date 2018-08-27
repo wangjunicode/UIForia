@@ -10,7 +10,7 @@ namespace Src.Systems {
         void SetViewportRect(Rect viewportRect);
 
         int QueryPoint(Vector2 point, ref LayoutResult[] output);
-        Rect GetRectForElement(int elementId);
+        bool GetRectForElement(int elementId, out Rect rect);
 
     }
 

@@ -78,6 +78,14 @@ public static class ReflectionUtil {
         throw new Exception($"Trying to read the element type of {targetType.Name} but it is not a list type");
     }
 
+    public static FieldInfo GetFieldInfo(Type type, string fieldName) {
+        return type.GetField(fieldName, InstanceBindFlags);
+    }
+    
+    public static PropertyInfo GetPropertyInfo(Type type, string propertyType) {
+        return type.GetProperty(propertyType, InstanceBindFlags);
+    }
+    
     public static FieldInfo GetFieldInfoOrThrow(Type type, string fieldName) {
         FieldInfo fieldInfo = type.GetField(fieldName, InstanceBindFlags);
         if (fieldInfo == null) {

@@ -1,7 +1,7 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <UITemplate>
     <Contents>
-        <Group  onMouseDown="OnMouseDown($event)" style.backgroundColor="blue" style.hover.backgroundColor="red" name="toolbar" someValue="{1 + 1}">
+        <Group onMouseContext="OnMouseContext()" onMouseDown="OnMouseDown($event)" style.backgroundColor="blue" style.hover.backgroundColor="red" name="toolbar" someValue="{1 + 1}">
 
             Toolbar Here {time}
 
@@ -12,13 +12,12 @@
            <!--I am shown! {showMe}-->
 
         <!--</Group>-->
-        <!--<Repeat list="{values}" as="item">-->
-            <!--some text here-->
-            <!--{$item}-->
-        <!--</Repeat>-->
+        <Repeat list="{values}" as="item">
+            some text here {$item}
+        </Repeat>
         <!---->
         
-        <Switch value="{selectedValue}">
+        <Switch x-if="{values.Count > 3}" value="{selectedValue}">
             <Case when="1">
                 One!
             </Case>

@@ -13,15 +13,15 @@ namespace Src {
         }
 
         // called at runtime! not at creating time like the rest of the templates
-        public override UIElementCreationData CreateScoped(TemplateScope scope) {
+        public override InitData CreateScoped(TemplateScope inputScope) {
 
             UIRepeatChild instance = new UIRepeatChild();
                         
-            UIElementCreationData data = GetCreationData(instance, scope.context);
+            InitData data = GetCreationData(instance, inputScope.context);
             data.bindings = repeatChildBindings;
             
             for (int i = 0; i < childTemplates.Count; i++) {
-                scope.SetParent(childTemplates[i].CreateScoped(scope), data);
+                data.AddChild(childTemplates[i].CreateScoped(inputScope));
             }
 
             return data;

@@ -42,10 +42,13 @@ namespace Src.Systems {
             disableTree.Clear();
         }
 
+        public void OnReady() {
+        }
+
         public void OnInitialize() {
             allElementTree.TraversePreOrder(this, (self, element) => {
                 if (self.HasDisabledAncestor(element)) {
-                    element.flags |= UIElementFlags.AncestorDisabled;
+                //    element.flags |= UIElementFlags.AncestorDisabled;
                 }
                 if (element.isDisabled) {
                     // maybe invoke OnDisable? this will happen before other systems get a shot at it
@@ -56,19 +59,19 @@ namespace Src.Systems {
         private bool HasDisabledAncestor(UIElement element) {
             UIElement ptr = element.parent;
             while (ptr != null) {
-                if ((ptr.flags & UIElementFlags.AncestorDisabled) != 0 || (ptr.flags & UIElementFlags.Enabled) == 0) {
-                    return true;
-                }
+               // if ((ptr.flags & UIElementFlags.AncestorDisabled) != 0 || (ptr.flags & UIElementFlags.Enabled) == 0) {
+               //     return true;
+               // }
                 ptr = ptr.parent;
             }
             return false;
         }
 
-        public void OnElementCreated(UIElementCreationData elementData) {
+        public void OnElementCreated(InitData elementData) {
             UIElement element = elementData.element;
             allElementTree.AddItem(element);
             if (HasDisabledAncestor(element)) {
-                element.flags |= UIElementFlags.AncestorDisabled;
+                //element.flags |= UIElementFlags.AncestorDisabled;
             }
             // traverse for enabled / disabled here?
             if (ReflectionUtil.IsOverride(element, nameof(UIElement.OnUpdate))) {
@@ -96,13 +99,13 @@ namespace Src.Systems {
             // todo    just sets disabled on the node and doesn't traverse, which needs to happen
             enableTree.EnableHierarchy(element);
             updateTree.EnableHierarchy(element);
-            if ((element.flags & UIElementFlags.AncestorDisabled) == 0) {
-                allElementTree.TraversePreOrder(element, (x) => {
-                    if (!HasDisabledAncestor(x)) {
-                        x.flags &= ~(UIElementFlags.AncestorDisabled);
-                    }
-                }, true);
-            }
+           // if ((element.flags & UIElementFlags.AncestorDisabled) == 0) {
+           //     allElementTree.TraversePreOrder(element, (x) => {
+           //         if (!HasDisabledAncestor(x)) {
+           //             x.flags &= ~(UIElementFlags.AncestorDisabled);
+           //         }
+           //     }, true);
+           // }
         }
 
         // this awkwardness of newLifeCycleData can be fixed by allowing

@@ -1,5 +1,4 @@
 
-using UnityEngine;
 
 namespace Src {
 
@@ -16,13 +15,11 @@ namespace Src {
         public override void Execute(UIElement element, UITemplateContext context) {
             if (index == context.GetSwitchValue(switchId)) {
                 if ((element.flags & UIElementFlags.Enabled) == 0) {
-                    Debug.Log("Enabling case: " + index);
                     context.view.EnableElement(element);
                 }
             }
             else {
                 if ((element.flags & UIElementFlags.Enabled) != 0) {
-                    Debug.Log("Disabling case: " + index);
                     context.view.DisableElement(element);
                 }
             }

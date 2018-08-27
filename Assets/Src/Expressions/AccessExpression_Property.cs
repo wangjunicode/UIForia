@@ -6,9 +6,9 @@ namespace Src {
 
     public class AccessExpression : Expression {
 
-        public readonly string contextName;
-        public readonly Type yieldedType;
-        public readonly AccessExpressionPart[] parts;
+        private readonly string contextName;
+        private readonly Type yieldedType;
+        private readonly AccessExpressionPart[] parts;
 
         public AccessExpression(string contextName, Type yieldedType, AccessExpressionPart[] parts) {
             this.contextName = contextName;
@@ -129,6 +129,31 @@ namespace Src {
                 }
             }
             return cachedFieldInfo.GetValue(target);
+        }
+
+    }
+    
+    public class AccessExpressionPart_Property : AccessExpressionPart {
+
+        private Type cachedType;
+        private PropertyInfo cachedPropertyInfo;
+        private readonly string propertyName;
+
+        public AccessExpressionPart_Property(string propertyName) {
+            this.propertyName = propertyName;
+        }
+
+        public override object Evaluate(object target, ExpressionContext context) {
+            if (target == null) return null;
+            Type targetType = target.GetType();
+            if (targetType != cachedType || cachedPropertyInfo == null) {
+                cachedType = targetType;
+                cachedPropertyInfo = targetType.GetProperty(propertyName, ReflectionUtil.InstanceBindFlags);
+                if (cachedPropertyInfo == null) {
+                    throw new Exception($"Property {propertyName} does not exist on type {targetType}");
+                }
+            }
+            return cachedPropertyInfo.GetValue(target);
         }
 
     }

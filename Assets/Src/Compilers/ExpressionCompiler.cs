@@ -542,8 +542,15 @@ namespace Src {
 
                 if (propertyPart != null) {
                     string fieldName = propertyPart.fieldName;
-                    lastType = ReflectionUtil.GetFieldInfoOrThrow(lastType, fieldName).FieldType;
-                    parts[i] = new AccessExpressionPart_Field(fieldName);
+                    FieldInfo fieldInfo = ReflectionUtil.GetFieldInfo(lastType, fieldName);
+                    if (fieldInfo != null) {
+                        lastType = fieldInfo.FieldType;
+                        parts[i] = new AccessExpressionPart_Field(fieldName);
+                    }
+                    else {
+                        lastType = ReflectionUtil.GetPropertyInfo(lastType, fieldName).PropertyType;
+                        parts[i] = new AccessExpressionPart_Property(fieldName);
+                    }
                     continue;
                 }
 

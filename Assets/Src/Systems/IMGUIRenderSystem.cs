@@ -3,53 +3,9 @@ using System.Collections.Generic;
 using Rendering;
 using Src.Extensions;
 using UnityEngine;
+using Object = UnityEngine.Object;
 
 namespace Src.Systems {
-
-//    public class FontTree {
-//
-//        public class FontNode : ISkipTreeTraversable {
-//
-//            public UIElement element;
-//
-//            public TextData textData;
-//            
-//            public IHierarchical Element => element;
-//            public IHierarchical Parent => element.parent;
-//
-//            public void OnParentChanged(ISkipTreeTraversable newParent) {
-//                
-//            }
-//
-//            public void OnBeforeTraverse() {
-//                
-//            }
-//
-//            public void OnAfterTraverse() {
-//                
-//            }
-//
-//        }
-//
-//        private readonly IStyleSystem styleSystem;
-//        private readonly SkipTree<FontNode> fontTree;
-//        
-//        public FontTree(IStyleSystem styleSystem) {
-//            this.styleSystem = styleSystem;
-//        }
-//
-//        public TextStyle GetTextStyle(UIElement element) {
-//            
-//            // start at nearest parent element in tree
-//            // walk tree assigning properties that are not set
-//            // when all properties set (via a counter check)
-//            // return 
-//            // root will define defaults
-//            return default(TextStyle);
-//        }
-//        
-//
-//    }
 
     public class IMGUIRenderSystem : IRenderSystem {
 
@@ -59,9 +15,8 @@ namespace Src.Systems {
         private readonly SkipTree<IMGUIRenderData> renderSkipTree;
         private readonly Dictionary<Color, Texture2D> textureCache;
 
-        private IMGUIRenderData[] renderData;
-        private bool renderDataDirty;
-
+        private bool isReady;
+        
         public IMGUIRenderSystem(IElementRegistry elementSystem, IStyleSystem styleSystem, ILayoutSystem layoutSystem) {
             this.styleSystem = styleSystem;
             this.layoutSystem = layoutSystem;
@@ -69,17 +24,11 @@ namespace Src.Systems {
 
             this.textureCache = new Dictionary<Color, Texture2D>();
             this.renderSkipTree = new SkipTree<IMGUIRenderData>();
-            this.renderDataDirty = true;
         }
 
         public void OnRender() {
             int count = layoutSystem.RectCount;
             LayoutResult[] layoutResults = layoutSystem.LayoutResults;
-
-            //if (renderDataDirty) {
-            //   renderDataDirty = false;
-            renderData = renderSkipTree.ToArray();
-            //}            
 
             for (int i = 0; i < count; i++) {
                 LayoutResult result = layoutResults[i];
@@ -91,45 +40,48 @@ namespace Src.Systems {
                 data?.SetLocalLayoutRect(result.rect);
             }
 
-            for (int i = 0; i < renderData.Length; i++) {
-                IMGUIRenderData data = renderData[i];
-                RenderPrimitiveType primitiveType = data.primitiveType;
+            renderSkipTree.ConditionalTraversePreOrder((renderData) => {
+                if (renderData.element.isDisabled) {
+                    return false;
+                }
 
-                Rect paintRect = new Rect(data.layoutRect);
-                paintRect.x += data.element.style.marginLeft;
-                paintRect.y += data.element.style.marginTop;
-                paintRect.width -= data.element.style.marginRight;
-                paintRect.height -= data.element.style.marginBottom;
+                RenderPrimitiveType primitiveType = renderData.primitiveType;
+
+                Rect paintRect = new Rect(renderData.layoutRect);
+                paintRect.x += renderData.element.style.marginLeft;
+                paintRect.y += renderData.element.style.marginTop;
+                paintRect.width -= renderData.element.style.marginRight;
+                paintRect.height -= renderData.element.style.marginBottom;
 
                 switch (primitiveType) {
                     case RenderPrimitiveType.RawImage:
                     case RenderPrimitiveType.ProceduralImage:
 
-                        if (data.borderTexture != null && data.borderSize.IsDefined()) {
-                            if (data.backgroundTexture != null) {
+                        if (renderData.borderTexture != null && renderData.borderSize.IsDefined()) {
+                            if (renderData.backgroundTexture != null) {
                                 Rect innerRect = new Rect(paintRect);
-                                innerRect.x += data.borderSize.left;
-                                innerRect.y += data.borderSize.top;
-                                innerRect.width -= data.borderSize.right * 2f;
-                                innerRect.height -= data.borderSize.bottom * 2f;
-                                GUI.DrawTexture(innerRect, data.backgroundTexture);
+                                innerRect.x += renderData.borderSize.left;
+                                innerRect.y += renderData.borderSize.top;
+                                innerRect.width -= renderData.borderSize.right * 2f;
+                                innerRect.height -= renderData.borderSize.bottom * 2f;
+                                GUI.DrawTexture(innerRect, renderData.backgroundTexture);
                             }
 
                             // undocumented in Unity, only draws a border!
                             GUI.DrawTexture(
                                 paintRect,
-                                data.borderTexture,
+                                renderData.borderTexture,
                                 ScaleMode.ScaleToFit,
                                 true,
                                 paintRect.width / paintRect.height,
                                 Color.white,
-                                data.borderSize,
-                                data.borderRadius
+                                renderData.borderSize,
+                                renderData.borderRadius
                             );
                         }
                         else {
-                            if (data.backgroundTexture != null) {
-                                GUI.DrawTexture(paintRect, data.backgroundTexture);
+                            if (renderData.backgroundTexture != null) {
+                                GUI.DrawTexture(paintRect, renderData.backgroundTexture);
                             }
                         }
 
@@ -139,39 +91,40 @@ namespace Src.Systems {
                         GUIStyle style = new GUIStyle();
                         style.fontSize = 12;
                         style.wordWrap = true;
-                        GUI.Label(data.layoutRect, data.textContent, style);
+                        GUI.Label(renderData.layoutRect, renderData.textContent, style);
                         break;
                 }
 
-            }
-
+                return true;
+            });
         }
 
-        public void OnInitialize() {
+        public void OnReady() {
+            isReady = true;
             styleSystem.onBorderChanged += HandleBorderChanged;
             styleSystem.onMarginChanged += HandleMarginChanged;
             styleSystem.onPaintChanged += HandlePaintChanged;
             styleSystem.onBorderRadiusChanged += HandleBorderRadiusChanged;
-
-            IReadOnlyList<UIStyleSet> styles = styleSystem.GetActiveStyles();
-            for (int i = 0; i < styles.Count; i++) {
-                UIElement element = elementSystem.GetElement(styles[i].elementId);
-                if (element != null) {
-                    OnElementStyleChanged(element);
-                }
-            }
+            styleSystem.onTextContentChanged += HandleTextChanged;
+            renderSkipTree.TraversePreOrder(this, (self, renderData) => {
+                renderData.primitiveType = self.DeterminePrimitiveType(renderData.element);
+                self.ApplyStyles(renderData);
+            });
         }
+
+        public void OnInitialize() { }
 
         public void OnReset() {
-            renderData = null;
-            renderSkipTree.Clear();
+            OnDestroy();
         }
 
-        public void OnUpdate() { }
+        public void OnUpdate() {
+            OnRender();
+        }
 
         public void OnDestroy() {
             foreach (KeyValuePair<Color, Texture2D> kvp in textureCache) {
-                UnityEngine.Object.DestroyImmediate(kvp.Value);
+                Object.DestroyImmediate(kvp.Value);
             }
 
             styleSystem.onBorderChanged -= HandleBorderChanged;
@@ -179,53 +132,52 @@ namespace Src.Systems {
             styleSystem.onPaintChanged -= HandlePaintChanged;
             styleSystem.onBorderRadiusChanged -= HandleBorderRadiusChanged;
             styleSystem.onFontPropertyChanged -= HandleFontPropertyChanged;
-            renderData = null;
+            styleSystem.onTextContentChanged -= HandleTextChanged;
             renderSkipTree.Clear();
+            textureCache.Clear();
         }
 
-        public void OnElementCreated(UIElementCreationData data) {
-            if (data.element.style == null) return;
-
-            UITextElement textElement = data.element as UITextElement;
-            if (textElement != null) {
-                textElement.onTextChanged += OnTextChanged;
+        public void OnElementCreated(InitData data) {
+            if ((data.element.flags & UIElementFlags.RequiresRendering) != 0) {
+                IMGUIRenderData renderData = new IMGUIRenderData(data.element);
+                renderSkipTree.AddItem(renderData);
+                if (isReady) {
+                    renderData.primitiveType = DeterminePrimitiveType(renderData.element);
+                    ApplyStyles(renderData);
+                }
             }
 
-            OnElementStyleChanged(data.element);
+            for (int i = 0; i < data.children.Count; i++) {
+                OnElementCreated(data.children[i]);
+            }
+
         }
 
-        private void OnTextChanged(UIElement element, string text) {
-//            Debug.Log("Text changed");
+        private void HandleTextChanged(int elementId, string text) {
             // todo -- add metrics per-element on text changes
-            IMGUIRenderData data = renderSkipTree.GetItem(element);
+            IMGUIRenderData data = renderSkipTree.GetItem(elementId);
 
+            if (data == null) {
+                return;
+            }
             // if the item isn't in our tree we don't care about it
-            if (data == null) return;
 
             if ((data.element.flags & UIElementFlags.TextElement) == 0) {
-                throw new Exception("Trying to set text on a non text element: " + element);
+                throw new Exception("Trying to set text on a non text element: " + elementId);
             }
 
             data.SetText(text);
         }
 
-        // todo -- rethink how lifecycle works, here we want to enable children of the element
-        // todo    but only once, if OnEnable is called for the whole heirarchy, we run this handle n times
-        // todo    where n = number of ancestors of orginal node
         public void OnElementEnabled(UIElement element) {
-            renderSkipTree.EnableHierarchy(element);
+            // render skip tree handles this, no need to do anything fancy
         }
 
         public void OnElementDisabled(UIElement element) {
-            renderSkipTree.DisableHierarchy(element);
+            // render skip tree handles this, no need to do anything fancy
         }
 
         public void OnElementDestroyed(UIElement element) {
-            UITextElement textElement = element as UITextElement;
-            if (textElement != null) {
-                textElement.onTextChanged -= OnTextChanged;
-            }
-
             renderSkipTree.RemoveHierarchy(element);
         }
 
@@ -244,24 +196,18 @@ namespace Src.Systems {
             return texture;
         }
 
-        public void OnElementStyleChanged(UIElement element) {
-            if (element.style == null) return;
-            if (element.isDisabled || element.isImplicit) return;
+        private void OnElementStyleChanged(UIElement element) {
             IMGUIRenderData data = renderSkipTree.GetItem(element);
             RenderPrimitiveType primitiveType = DeterminePrimitiveType(element);
 
             if (data == null) {
-                if (primitiveType == RenderPrimitiveType.None) {
-                    // probably not needed but just to be safe unset the flag
-                    element.flags &= ~(UIElementFlags.RequiresRendering);
+                if ((element.flags & UIElementFlags.RequiresRendering) == 0) {
                     return;
                 }
-
-                element.flags |= UIElementFlags.RequiresRendering;
-
-                data = CreateRenderData(element, primitiveType);
-
+                data = new IMGUIRenderData(element);
                 renderSkipTree.AddItem(data);
+                data.primitiveType = primitiveType;
+                ApplyStyles(data);
                 return;
             }
 
@@ -271,16 +217,7 @@ namespace Src.Systems {
             }
 
             data.primitiveType = primitiveType;
-
-            if (primitiveType != RenderPrimitiveType.None) {
-                // todo -- mask goes here I think
-                return;
-            }
-
-            element.flags &= ~(UIElementFlags.RequiresRendering);
-
-            renderSkipTree.RemoveItem(data);
-            data.element = null;
+            // todo -- mask goes here I think
         }
 
         private void HandleBorderRadiusChanged(int elementId, BorderRadius radius) {
@@ -318,18 +255,6 @@ namespace Src.Systems {
                 // todo -- change to use font tree
                 data?.SetFontProperties(textStyle);
             }
-        }
-
-        private void HandleTextChanged(int elementId, string text) { }
-
-        private void HandleTextSizeChanged(int elementId, Vector2 size) { }
-
-        private IMGUIRenderData CreateRenderData(UIElement element, RenderPrimitiveType primitiveType) {
-            IMGUIRenderData data = new IMGUIRenderData(element, primitiveType);
-
-            ApplyStyles(data);
-
-            return data;
         }
 
         private void ApplyStyles(IMGUIRenderData data) {
@@ -372,6 +297,8 @@ namespace Src.Systems {
 
                     break;
                 case RenderPrimitiveType.Text:
+                    UITextElement textElement = (UITextElement) data.element;
+                    data.textContent = textElement.GetText();
                     break;
             }
         }
@@ -387,10 +314,6 @@ namespace Src.Systems {
                 && styleSet.backgroundColor == ColorUtil.UnsetColorValue) {
                 return RenderPrimitiveType.None;
             }
-
-//            if (styleSet.borderRadius != UIStyle.UnsetFloatValue) {
-//                return RenderPrimitiveType.ProceduralImage;
-//            }
 
             return RenderPrimitiveType.RawImage;
         }

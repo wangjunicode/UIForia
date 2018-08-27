@@ -7,7 +7,7 @@ namespace Src {
         public UIPrefabTemplate(List<AttributeDefinition> attributes)
             : base(null, attributes) { }
 
-        public override UIElementCreationData CreateScoped(TemplateScope scope) {
+        public override InitData CreateScoped(TemplateScope inputScope) {
             throw new System.NotImplementedException();
         }
 

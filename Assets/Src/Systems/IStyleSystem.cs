@@ -1,12 +1,8 @@
-﻿using System.Collections.Generic;
-using Rendering;
+﻿using Rendering;
 
 namespace Src.Systems {
 
     public interface IStyleSystem : IStyleChangeHandler {
-
-        IReadOnlyList<UIStyleSet> GetAllStyles();
-        IReadOnlyList<UIStyleSet> GetActiveStyles();
 
         event PaintChanged onPaintChanged;
         event LayoutChanged onLayoutChanged;
@@ -18,6 +14,7 @@ namespace Src.Systems {
         event BorderRadiusChanged onBorderRadiusChanged;
         event FontPropertyChanged onFontPropertyChanged;
         event AvailableStatesChanged onAvailableStatesChanged;
+        event TextContentChanged onTextContentChanged;
         
         UIStyleSet GetStyleForElement(int elementId);
 

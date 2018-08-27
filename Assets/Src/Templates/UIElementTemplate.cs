@@ -35,26 +35,25 @@ namespace Src {
             return true;
         }
 
-        public override UIElementCreationData CreateScoped(TemplateScope scope) {
-            List<UIElementCreationData> scopedChildren = new List<UIElementCreationData>(childTemplates.Count);
+        public override InitData CreateScoped(TemplateScope inputScope) {
+            List<InitData> scopedChildren = new List<InitData>(childTemplates.Count);
 
             for (int i = 0; i < childTemplates.Count; i++) {
-                scopedChildren.Add(childTemplates[i].CreateScoped(scope));
+                scopedChildren.Add(childTemplates[i].CreateScoped(inputScope));
             }
 
             ParsedTemplate templateToExpand = TemplateParser.GetParsedTemplate(rootType);
-            UITemplateContext context = new UITemplateContext(scope.view);
-            TemplateScope outputScope = new TemplateScope(scope.outputList);
+            TemplateScope outputScope = new TemplateScope();
 
-            outputScope.context = context;
+            // todo -- some templates don't need their own scope
+            outputScope.context = new UITemplateContext(inputScope.context.view);
             outputScope.inputChildren = scopedChildren;
-            outputScope.view = scope.view;
 
-            UIElement instance = templateToExpand.CreateWithScope(outputScope);
+            InitData instanceData = templateToExpand.CreateWithScope(outputScope);
 
-            context.rootElement = instance;
-
-            return GetCreationData(instance, context);
+            outputScope.context.rootElement = instanceData.element;
+            
+            return instanceData;
         }
 
     }

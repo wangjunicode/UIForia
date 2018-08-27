@@ -42,10 +42,8 @@ namespace Src {
             this.conditionalBindings = Binding.EmptyArray;
         }
 
-        public UIElementCreationData GetCreationData(UIElement element, UITemplateContext context) {
-            UIElementCreationData data = new UIElementCreationData();
-            data.element = element;
-            data.context = context;
+        public InitData GetCreationData(UIElement element, UITemplateContext context) {
+            InitData data = new InitData(element, context);
             data.baseStyles = baseStyles;
 
             data.bindings = bindings;
@@ -56,7 +54,7 @@ namespace Src {
             return data;
         }
 
-        public abstract UIElementCreationData CreateScoped(TemplateScope scope);
+        public abstract InitData CreateScoped(TemplateScope inputScope);
 
         public void CompileStyleBindings(ParsedTemplate template) {
             if (attributes == null || attributes.Count == 0) return;
@@ -129,10 +127,9 @@ namespace Src {
             AttributeDefinition hideDef = GetAttribute("x-hide");
 
             if (ifDef != null) {
-                conditionalBindings = new Binding[1];
                 Expression<bool> ifExpression = template.compiler.Compile<bool>(ifDef.value);
                 ifDef.isCompiled = true;
-                conditionalBindings[0] = new EnabledBinding(ifExpression);
+                AddConditionalBinding(new EnabledBinding(ifExpression));
             }
         }
 

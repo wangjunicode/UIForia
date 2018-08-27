@@ -5,7 +5,7 @@ namespace Src {
         public UISwitchElement() {
             flags |= UIElementFlags.Enabled;
             flags |= UIElementFlags.ImplicitElement;
-            flags &= ~(UIElementFlags.RequiresLayout | UIElementFlags.RequiresLayout);
+            flags &= ~(UIElementFlags.RequiresRendering | UIElementFlags.RequiresLayout);
         }
 
     }

@@ -21,9 +21,13 @@ namespace Src.Systems {
             this.transforms = new Dictionary<int, RectTransform>();
         }
 
+        public void OnReady() {
+            
+        }
+
         public void OnInitialize() { }
 
-        public void OnElementCreated(UIElementCreationData creationData) {
+        public void OnElementCreated(InitData creationData) {
             OnElementStyleChanged(creationData.element);
         }
 

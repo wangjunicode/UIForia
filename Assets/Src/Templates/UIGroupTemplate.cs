@@ -7,14 +7,14 @@ namespace Src {
         public UIGroupTemplate(List<UITemplate> childTemplates, List<AttributeDefinition> attributes = null) 
             : base(childTemplates, attributes) { }
         
-        public override UIElementCreationData CreateScoped(TemplateScope scope) {
+        public override InitData CreateScoped(TemplateScope inputScope) {
 
             UIGroupElement instance = new UIGroupElement();
 
-            UIElementCreationData instanceData = GetCreationData(instance, scope.context);
+            InitData instanceData = GetCreationData(instance, inputScope.context);
 
             for (int i = 0; i < childTemplates.Count; i++) {
-                scope.SetParent(childTemplates[i].CreateScoped(scope), instanceData);
+                instanceData.AddChild(childTemplates[i].CreateScoped(inputScope));
             }
            
             return instanceData;

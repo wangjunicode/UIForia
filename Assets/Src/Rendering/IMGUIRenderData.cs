@@ -17,12 +17,16 @@ namespace Src.Systems {
         public UIElement element;
         public RenderPrimitiveType primitiveType;
 
-        public IMGUIRenderData(UIElement element, RenderPrimitiveType primitiveType) {
+        public IMGUIRenderData(UIElement element) {
             this.element = element;
-            this.primitiveType = primitiveType;
             this.borderSize = ContentBoxRect.Unset;
+            this.primitiveType = RenderPrimitiveType.None;
         }
-
+        
+        public int UniqueId => element.id;
+        public IHierarchical Element => element;
+        public IHierarchical Parent => element.parent;
+        
         public void SetText(string text) {
             textContent = text;
         }
@@ -30,10 +34,6 @@ namespace Src.Systems {
         public void SetLocalLayoutRect(Rect layoutRect) {
             this.layoutRect = layoutRect;
         }
-
-        public int UniqueId => element.id;
-        public IHierarchical Element => element;
-        public IHierarchical Parent => element.parent;
 
         public void SetFontProperties(TextStyle textStyle) {
             this.textStyle = textStyle;

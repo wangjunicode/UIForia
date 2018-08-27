@@ -1,7 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Runtime.Remoting;
 using Rendering;
 using Src.Input;
 using Src.InputBindings;
@@ -9,26 +7,28 @@ using UnityEngine;
 
 namespace Src.Systems {
 
-    public class IMGUIInputSystem : ISystem, IInputSystem {
+    public class IMGUIInputSystem : IInputSystem {
 
         public const string EventAlias = "$event";
 
         private readonly IStyleSystem styleSystem;
         private readonly ILayoutSystem layoutSystem;
 
-        private HashSet<int> hoverStyles;
         private HashSet<int> hoverStylesThisFrame;
         private HashSet<int> hoverStylesLastFrame;
         private HashSet<int> elementsThisFrame;
         private HashSet<int> elementsLastFrame;
-        private Dictionary<int, InputBindingGroup> bindingMap;
+        
+        private readonly HashSet<int> hoverStyles;
+        private readonly IElementRegistry elementSystem;
+        private readonly Dictionary<int, InputBindingGroup> bindingMap;
+        
         private int[] scratchArray;
         private int resultCount;
         private LayoutResult[] queryResults;
-        private ElementRegistrySystem elementSystem;
         private Vector2 mousePosition;
 
-        public IMGUIInputSystem(ILayoutSystem layoutSystem, ElementRegistrySystem elementSystem, IStyleSystem styleSystem) {
+        public IMGUIInputSystem(ILayoutSystem layoutSystem, IElementRegistry elementSystem, IStyleSystem styleSystem) {
             this.styleSystem = styleSystem;
             this.layoutSystem = layoutSystem;
             this.elementSystem = elementSystem;
@@ -73,6 +73,7 @@ namespace Src.Systems {
             for (int i = 0; i < resultCount; i++) {
                 int elementId = queryResults[i].elementId;
                 elementsThisFrame.Add(elementId);
+                
                 if (hoverStyles.Contains(elementId)) {
                     hoverStylesThisFrame.Add(elementId);
                     styleSystem.EnterState(elementId, StyleState.Hover);
@@ -152,6 +153,7 @@ namespace Src.Systems {
             if (elementsThisFrame.Count >= scratchArray.Length) {
                 Array.Resize(ref scratchArray, elementsThisFrame.Count * 2);
             }
+            
             elementsThisFrame.CopyTo(scratchArray);
             InputEvent mouseEvent = new MouseInputEvent(eventType, mousePosition);
             for (int i = 0; i < elementsThisFrame.Count; i++) {
@@ -169,6 +171,7 @@ namespace Src.Systems {
                     RunMouseEvent(InputEventType.MouseContext);
                     break;
                 case EventType.MouseDown:
+                    if (Event.current.button == 1) break;
                     mousePosition = Event.current.mousePosition;
                     RunMouseEvent(InputEventType.MouseDown);
                     break;
@@ -209,25 +212,27 @@ namespace Src.Systems {
             this.styleSystem.onAvailableStatesChanged -= HandleStatefulStyle;
         }
 
-        public void OnInitialize() {
-            IReadOnlyList<UIStyleSet> styles = styleSystem.GetAllStyles();
-            for (int i = 0; i < styles.Count; i++) {
-                if (styles[i].HasHoverStyle) {
-                    hoverStyles.Add(styles[i].elementId);
-                }
-            }
-        }
+        public void OnReady() { }
 
-        public void OnElementCreated(UIElementCreationData elementData) {
+        public void OnInitialize() { }
+
+        public void OnElementCreated(InitData elementData) {
             InputBinding[] inputBindings = elementData.inputBindings;
+            
             if (inputBindings != null && inputBindings.Length > 0) {
+                
                 InputEventType handledEvents = 0;
+                
                 for (int i = 0; i < inputBindings.Length; i++) {
                     handledEvents |= inputBindings[i].eventType;
                 }
 
                 bindingMap[elementData.elementId] = new InputBindingGroup(elementData.context, inputBindings, handledEvents);
 
+            }
+
+            for (int i = 0; i < elementData.children.Count; i++) {
+                OnElementCreated(elementData.children[i]);
             }
         }
 

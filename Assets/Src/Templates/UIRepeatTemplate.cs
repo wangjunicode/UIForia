@@ -15,10 +15,10 @@ namespace Src {
         public UIRepeatTemplate(List<UITemplate> childTemplates, List<AttributeDefinition> attributes = null)
             : base(childTemplates, attributes) { }
 
-        public override UIElementCreationData CreateScoped(TemplateScope scope) {
+        public override InitData CreateScoped(TemplateScope inputScope) {
 
             ReflectionUtil.ObjectArray2[0] = childTemplates[0];
-            ReflectionUtil.ObjectArray2[1] = scope;
+            ReflectionUtil.ObjectArray2[1] = inputScope;
 
             UIElement instance = (UIElement) ReflectionUtil.CreateGenericInstanceFromOpenType(
                 typeof(UIRepeatElement<>),
@@ -26,19 +26,17 @@ namespace Src {
                 ReflectionUtil.ObjectArray2
             );
 
-            UIElementCreationData data = GetCreationData(instance, scope.context);
+            InitData data = GetCreationData(instance, inputScope.context);
 
             UIRepeatTerminal terminal = new UIRepeatTerminal();
 
-            UIElementCreationData terminalData = new UIElementCreationData();
-            terminalData.element = terminal;
+            InitData terminalData = new InitData(terminal, inputScope.context);
             terminalData.bindings = terminalBindings;
-            terminalData.context = scope.context;
             terminalData.constantBindings = Binding.EmptyArray;
             terminalData.inputBindings = InputBindings.InputBinding.EmptyArray;
             terminalData.constantStyleBindings = null;
 
-            scope.SetParent(terminalData, data);
+            data.AddChild(terminalData);
 
             return data;
         }

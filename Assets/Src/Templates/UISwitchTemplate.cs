@@ -15,12 +15,12 @@ namespace Src {
         public UISwitchTemplate(List<UITemplate> childTemplates, List<AttributeDefinition> attributes = null)
             : base(childTemplates, attributes) { }
 
-        public override UIElementCreationData CreateScoped(TemplateScope scope) {
+        public override InitData CreateScoped(TemplateScope inputScope) {
             UISwitchElement instance = new UISwitchElement();
-            UIElementCreationData data = GetCreationData(instance, scope.context);
+            InitData data = GetCreationData(instance, inputScope.context);
 
             for (int i = 0; i < childTemplates.Count; i++) {
-                scope.SetParent(childTemplates[i].CreateScoped(scope), data);
+                data.AddChild(childTemplates[i].CreateScoped(inputScope));
             }
 
             return data;

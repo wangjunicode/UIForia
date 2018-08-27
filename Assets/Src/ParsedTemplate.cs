@@ -1,18 +1,23 @@
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using Rendering;
 
 namespace Src {
 
     public class ParsedTemplate {
 
+        private static readonly List<InitData> EmptyElementList = new List<InitData>(0);
+        
         public string filePath;
         public List<UIStyle> styles;
-        public UIElementTemplate rootElementTemplate;
         public List<ImportDeclaration> imports;
-        public readonly ContextDefinition contextDefinition;
-        public readonly ExpressionCompiler compiler;
 
+        public readonly ExpressionCompiler compiler;
+        public readonly ContextDefinition contextDefinition;
+        
+        private readonly UIElementTemplate rootElementTemplate;
+        
         private int idGenerator;
         private bool isCompiled;
 
@@ -24,59 +29,46 @@ namespace Src {
 
         public List<UITemplate> childTemplates => rootElementTemplate.childTemplates;
 
-        private static readonly List<UIElementCreationData> EmptyElementList = new List<UIElementCreationData>(0);
 
-        public UIElement CreateWithScope(TemplateScope scope) {
+        public InitData CreateWithScope(TemplateScope scope) {
             if (!isCompiled) Compile();
 
             UIElement instance = (UIElement) Activator.CreateInstance(rootElementTemplate.RootType);
 
-            UIElementCreationData instanceData = rootElementTemplate.GetCreationData(instance, scope.context);
-
-            List<UIElementCreationData> children = new List<UIElementCreationData>();
+            InitData instanceData = rootElementTemplate.GetCreationData(instance, scope.context);
 
             for (int i = 0; i < rootElementTemplate.childTemplates.Count; i++) {
                 UITemplate template = rootElementTemplate.childTemplates[i];
                 if (template is UIChildrenTemplate) {
-                    children.AddRange(scope.inputChildren);
+                    for (int j = 0; j < scope.inputChildren.Count; j++) {
+                        instanceData.AddChild(scope.inputChildren[j]);
+                    }
                 }
                 else {
-                    children.Add(template.CreateScoped(scope));
+                    instanceData.AddChild(template.CreateScoped(scope));
                 }
             }
-
-            for (int i = 0; i < children.Count; i++) {
-                scope.SetParent(children[i], instanceData);
-            }
-
-            return instance;
+            
+            return instanceData;
         }
 
-        public UIElement CreateWithoutScope(UIView view) {
+        public InitData CreateWithoutScope(UIView view) {
             if (!isCompiled) Compile();
 
-            UITemplateContext context = new UITemplateContext(view);
-
-            List<UIElementCreationData> outputList = new List<UIElementCreationData>();
-
-            TemplateScope scope = new TemplateScope(outputList);
-            scope.view = view;
-            scope.context = context;
+            TemplateScope scope = new TemplateScope();
+            scope.context = new UITemplateContext(view);
             scope.inputChildren = EmptyElementList;
 
             UIElement instance = (UIElement) Activator.CreateInstance(rootElementTemplate.RootType);
-            context.rootElement = instance;
+            scope.context.rootElement = instance;
 
-            UIElementCreationData rootData = rootElementTemplate.GetCreationData(instance, scope.context);
+            InitData rootData = rootElementTemplate.GetCreationData(instance, scope.context);
 
             for (int i = 0; i < childTemplates.Count; i++) {
-                scope.SetParent(childTemplates[i].CreateScoped(scope), rootData);
+                rootData.AddChild(childTemplates[i].CreateScoped(scope));
             }
-
-            scope.SetParent(rootData, null);
-            scope.RegisterAll();
-
-            return instance;
+            
+            return rootData;
         }
 
         private void Compile() {

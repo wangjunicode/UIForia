@@ -23,16 +23,21 @@ namespace Debugger {
         }
 
         public override void OnUpdate() {
-            time = Time.realtimeSinceStartup;
+//            time = Time.realtimeSinceStartup;
         }
 
         public void OnMouseEnter(MouseInputEvent evt) {
 //            Debug.Log("Entered! " + evt.mousePosition);
         }
 
+        public void OnMouseContext() {
+            values.RemoveAt(values.Count - 1);
+        }
+
         public void OnMouseDown(MouseInputEvent evt) {
             selectedValue = (selectedValue + 1) % values.Count;
             Debug.Log(selectedValue);
+            values.Add(values.Count);
         }
 
     }

@@ -37,8 +37,8 @@ namespace Src {
             return base.Compile(template);
         }
 
-        public override UIElementCreationData CreateScoped(TemplateScope scope) {
-            return GetCreationData(new UITextElement(), scope.context);
+        public override InitData CreateScoped(TemplateScope inputScope) {
+            return GetCreationData(new UITextElement(), inputScope.context);
         }
 
     }

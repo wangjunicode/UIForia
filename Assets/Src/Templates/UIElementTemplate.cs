@@ -1,6 +1,5 @@
 using System;
 using System.Collections.Generic;
-using Src.Compilers;
 
 namespace Src {
 
@@ -26,18 +25,21 @@ namespace Src {
         public Type RootType => rootType;
         
         public override bool Compile(ParsedTemplate template) {
-            base.Compile(template);
-            
             if (rootType == null) {
                 rootType = TypeProcessor.GetType(typeName, template.imports).rawType;
             }
             
+            base.Compile(template);
+
             return true;
         }
+
+        public override Type elementType => rootType;
 
         public override InitData CreateScoped(TemplateScope inputScope) {
             List<InitData> scopedChildren = new List<InitData>(childTemplates.Count);
 
+            UnityEngine.Debug.Log(rootType.Name);
             for (int i = 0; i < childTemplates.Count; i++) {
                 scopedChildren.Add(childTemplates[i].CreateScoped(inputScope));
             }
@@ -51,6 +53,15 @@ namespace Src {
 
             InitData instanceData = templateToExpand.CreateWithScope(outputScope);
 
+            // todo -- not sure this is safe to overwrite bindings here
+            // actually the only bindings allowed on <Contents> tag should be styles
+            // which would make this ok. need to merge styles though
+            instanceData.constantBindings = constantBindings;
+            instanceData.conditionalBindings = conditionalBindings;
+            instanceData.bindings = bindings;
+            instanceData.context = inputScope.context;
+            instanceData.inputBindings = inputBindings;
+            instanceData.constantStyleBindings = constantStyleBindings;
             outputScope.context.rootElement = instanceData.element;
             
             return instanceData;

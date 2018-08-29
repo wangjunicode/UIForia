@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 
 namespace Src {
 
@@ -6,7 +7,9 @@ namespace Src {
 
         public UIGroupTemplate(List<UITemplate> childTemplates, List<AttributeDefinition> attributes = null) 
             : base(childTemplates, attributes) { }
-        
+
+        public override Type elementType => typeof(UIGroupElement);
+
         public override InitData CreateScoped(TemplateScope inputScope) {
 
             UIGroupElement instance = new UIGroupElement();

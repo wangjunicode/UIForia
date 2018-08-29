@@ -111,7 +111,7 @@ namespace Src {
 
             return default(T);
         }
-        
+
         [PublicAPI]
         public T GetItem(int key) {
             SkipTreeNode node;
@@ -359,7 +359,9 @@ namespace Src {
             SkipTreeNode ptr = parent.firstChild;
             while (ptr != null) {
                 if (IsDescendentOf(ptr.item, start)) {
-                    ConditionalTraversePreOrderStep(ptr, traverseFn);
+                    if (traverseFn(ptr.item)) {
+                        ConditionalTraversePreOrderStep(ptr, traverseFn);
+                    }
                 }
 
                 ptr = ptr.nextSibling;
@@ -367,9 +369,6 @@ namespace Src {
         }
 
         private void ConditionalTraversePreOrderStep(SkipTreeNode node, Func<T, bool> traverseFn) {
-            if (node != root && !traverseFn(node.item)) {
-                return;
-            }
             Stack<SkipTreeNode> stack = new Stack<SkipTreeNode>();
             AddChildrenToStack(stack, node, true);
 

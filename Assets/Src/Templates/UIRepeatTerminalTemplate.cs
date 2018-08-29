@@ -1,4 +1,6 @@
 ﻿
+using System;
+
 namespace Src {
 
     public class UIRepeatTerminalTemplate : UITemplate {
@@ -8,6 +10,8 @@ namespace Src {
         public UIRepeatTerminalTemplate(Binding[] terminalBindings) : base(null) {
             this.terminalBindings = terminalBindings;
         }
+
+        public override Type elementType => typeof(UIRepeatTerminal);
 
         public override InitData CreateScoped(TemplateScope inputScope) {
             InitData data = GetCreationData(new UIRepeatTerminal(), inputScope.context);

@@ -408,7 +408,9 @@ namespace Src {
         private Expression VisitOperatorExpression(OperatorExpressionNode node) {
             Type leftType = node.left.GetYieldedType(context);
             Type rightType = node.right.GetYieldedType(context);
-
+            object leftExpression = null;
+            object rightExpression = null;
+            
             switch (node.OpType) {
                 case OperatorType.Plus:
 
@@ -416,8 +418,10 @@ namespace Src {
                         Type openType = typeof(OperatorExpression_StringConcat<,>);
                         ReflectionUtil.TypeArray2[0] = leftType;
                         ReflectionUtil.TypeArray2[1] = rightType;
-                        ReflectionUtil.ObjectArray2[0] = Visit(node.left);
-                        ReflectionUtil.ObjectArray2[1] = Visit(node.right);
+                        leftExpression = Visit(node.left);
+                        rightExpression = Visit(node.right);
+                        ReflectionUtil.ObjectArray2[0] = leftExpression;
+                        ReflectionUtil.ObjectArray2[1] = rightExpression;
 
                         return (Expression) ReflectionUtil.CreateGenericInstanceFromOpenType(
                             openType,
@@ -464,9 +468,11 @@ namespace Src {
                     ReflectionUtil.TypeArray2[0] = node.left.GetYieldedType(context);
                     ReflectionUtil.TypeArray2[1] = node.right.GetYieldedType(context);
 
+                    leftExpression = Visit(node.left);
+                    rightExpression = Visit(node.right); 
                     ReflectionUtil.ObjectArray3[0] = node.OpType;
-                    ReflectionUtil.ObjectArray3[1] = Visit(node.left);
-                    ReflectionUtil.ObjectArray3[2] = Visit(node.right);
+                    ReflectionUtil.ObjectArray3[1] = leftExpression;
+                    ReflectionUtil.ObjectArray3[2] = rightExpression;
 
                     return (Expression) ReflectionUtil.CreateGenericInstanceFromOpenType(
                         openEqualityType,
@@ -569,8 +575,10 @@ namespace Src {
                 parts[0] = new AccessExpressionPart_Field(contextName);
             }
 
-            AccessExpression retn = new AccessExpression(contextName, lastType, parts);
-            return retn;
+            ReflectionUtil.ObjectArray2[0] = contextName;
+            ReflectionUtil.ObjectArray2[1] = parts;
+            return (Expression) ReflectionUtil.CreateGenericInstanceFromOpenType(typeof(AccessExpression<>),lastType , ReflectionUtil.ObjectArray2);
+//            AccessExpression retn = new AccessExpression(contextName, lastType, parts);
         }
 
         private static Expression VisitConstant(LiteralValueNode node) {

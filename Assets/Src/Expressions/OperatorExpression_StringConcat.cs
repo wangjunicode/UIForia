@@ -5,8 +5,8 @@ namespace Src {
     
     public class OperatorExpression_StringConcat<U, V> : Expression<string> {
 
-        public readonly Expression<U> left;
-        public readonly Expression<V> right;
+        private readonly Expression<U> left;
+        private readonly Expression<V> right;
 
         public OperatorExpression_StringConcat(Expression<U> left, Expression<V> right) {
             this.left = left;

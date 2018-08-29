@@ -18,15 +18,15 @@ namespace Src.Compilers {
             this.compiler.SetContext(context);
         }
 
-        public Binding CompileAttribute(AttributeDefinition attributeDefinition) {
+        public Binding CompileAttribute(Type targetType, AttributeDefinition attributeDefinition) {
             string attrKey = attributeDefinition.key;
             string attrValue = attributeDefinition.value;
             
-            FieldInfo fieldInfo = ReflectionUtil.GetFieldInfoOrThrow(context.rootType, attrKey);
+            FieldInfo fieldInfo = ReflectionUtil.GetFieldInfoOrThrow(targetType, attrKey);
             Expression expression = compiler.Compile(attrValue);
-            ReflectionUtil.LinqAccessor accessor = ReflectionUtil.GetLinqAccessors(context.rootType, fieldInfo.FieldType, attrKey);
+            ReflectionUtil.LinqAccessor accessor = ReflectionUtil.GetLinqAccessors(targetType, fieldInfo.FieldType, attrKey);
 
-            ReflectionUtil.TypeArray2[0] = context.rootType;
+            ReflectionUtil.TypeArray2[0] = targetType;
             ReflectionUtil.TypeArray2[1] = fieldInfo.FieldType;
 
             ReflectionUtil.ObjectArray3[0] = expression;

@@ -19,7 +19,8 @@ namespace Src {
             U castElement = (U) element;
             T currentValue = getter(castElement);
             T newValue = expression.EvaluateTyped(context);
-            if (currentValue.Equals(newValue)) {
+           
+            if (!Equals(currentValue, newValue)){
                 setter(castElement, newValue);
             }
         }

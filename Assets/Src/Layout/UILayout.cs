@@ -16,9 +16,7 @@ namespace Src.Layout {
 
         // todo -- handle text x
         public virtual float GetContentWidth(LayoutNode node, float contentSize, float viewportSize) {
-//            if ((data.element.flags & UIElementFlags.TextElement) != 0) {
-//                return data.textContentSize.x;
-//            }
+            contentSize -= (node.contentEndOffsetX + node.contentStartOffsetX);
 
             List<LayoutNode> children = node.children;
             // todo include statically positioned things who's breadth exceeds max computed
@@ -43,13 +41,14 @@ namespace Src.Layout {
             return output;
         }
 
-        public float GetContentHeight(LayoutNode node, float parentWidth, float contentSize, float viewportSize) {
+        public float GetContentHeight(LayoutNode node, float adjustedWidth, float parentWidth, float viewportSize) {
 
             if (node.isTextElement) {
                 // todo -- add metrics per component about calc calls
-                if (node.previousParentWidth != parentWidth) {
-                    node.previousParentWidth = parentWidth;
-                    node.textContentSize.y = textSizeCalculator.CalcTextHeight(node.textContent, node.style, parentWidth);
+                // this is bizarre but click the mouse changes how text height gets calculated...no idea why 
+                if (Mathf.Abs(node.previousParentWidth - adjustedWidth) > 3f) {
+                    node.previousParentWidth = adjustedWidth;
+                    node.textContentSize.y = textSizeCalculator.CalcTextHeight(node.textContent, node.style, adjustedWidth);
                 }
                 return node.textContentSize.y;
             }
@@ -63,13 +62,13 @@ namespace Src.Layout {
                 for (int i = 0; i < children.Count; i++) {
                     if (!children[i].isInFlow || children[i].element.isDisabled) continue;
 
-                    output = Mathf.Max(output, children[i].GetPreferredHeight(node.rect.height.unit, parentWidth, contentSize, viewportSize));
+                    output = Mathf.Max(output, children[i].GetPreferredHeight(node.rect.height.unit, adjustedWidth, parentWidth, viewportSize));
                 }
             }
             else {
                 for (int i = 0; i < children.Count; i++) {
                     if (!children[i].isInFlow || children[i].element.isDisabled) continue;
-                    output += children[i].GetPreferredHeight(node.rect.height.unit, parentWidth, contentSize, viewportSize);
+                    output += children[i].GetPreferredHeight(node.rect.height.unit, adjustedWidth, parentWidth, viewportSize);
                 }
             }
 

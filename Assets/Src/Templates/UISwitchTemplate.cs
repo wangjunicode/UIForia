@@ -15,6 +15,8 @@ namespace Src {
         public UISwitchTemplate(List<UITemplate> childTemplates, List<AttributeDefinition> attributes = null)
             : base(childTemplates, attributes) { }
 
+        public override Type elementType => typeof(UISwitchTemplate);
+
         public override InitData CreateScoped(TemplateScope inputScope) {
             UISwitchElement instance = new UISwitchElement();
             InitData data = GetCreationData(instance, inputScope.context);
@@ -46,7 +48,7 @@ namespace Src {
                 throw new NotImplementedException();
             }
 
-            return base.Compile(template);
+            return true;
         }
 
         private void CompileStringVersion(ParsedTemplate template) { }

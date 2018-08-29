@@ -1,3 +1,5 @@
+// Upgrade NOTE: replaced 'mul(UNITY_MATRIX_MVP,*)' with 'UnityObjectToClipPos(*)'
+
 Shader "UI/Procedural UI Image"
 {
 	Properties
@@ -5,16 +7,9 @@ Shader "UI/Procedural UI Image"
 		[PerRendererData]_MainTex ("Base (RGB)", 2D) = "white" {}
 		_Width("width", float) = 100
 		_Height("height", float) = 100
-		//_BorderWidth("borderWidth", float) = 0.1
-		//_BorderRect("borderRect", Vector) = (0, 0, 0, 0)
-		//[Toggle(_HasBorder)]
-		//_HasBorder("hasBorder", float) = 0
 		_Radius("radius", Vector) = (0,0,0,0)
-		_ContentRect("contentRect", Vector) = (0, 0, 0, 0)
-		_ContentColor("contentColor", Color) = (1, 1, 1, 1)
 		_LineWeight("line weight", float) = 0
 		_PixelWorldScale("Pixel world scale", float) = 1
-		
 		// required for UI.Mask
         _StencilComp ("Stencil Comparison", Float) = 8
         _Stencil ("Stencil ID", Float) = 0
@@ -56,7 +51,7 @@ Shader "UI/Procedural UI Image"
 			CGPROGRAM
 			#pragma vertex vert
 			#pragma fragment frag
-
+			//#pragma exclude_renderers gles3 metal d3d11_9x xbox360 xboxone ps3 ps4 psp2 
 			#include "UnityCG.cginc"
 			#include "UnityUI.cginc"
 			
@@ -67,7 +62,6 @@ Shader "UI/Procedural UI Image"
 				float4 vertex   : POSITION;
 				float4 color    : COLOR;
 				float2 texcoord : TEXCOORD0;
-
 			};
 
 			struct v2f
@@ -76,7 +70,6 @@ Shader "UI/Procedural UI Image"
 				fixed4 color    : COLOR;
 				half2 texcoord  : TEXCOORD0;
 				float4 worldPosition : TEXCOORD1;
-
 			};
 			
 			fixed4 _TextureSampleAdd;
@@ -90,78 +83,71 @@ Shader "UI/Procedural UI Image"
 			half _Height;
 			half _PixelWorldScale;
 			half4 _Radius;
-			//half4 _ContentColor;
-			//half4 _ContentRect;
 			half _LineWeight;
-			float _BorderWidth;
 			sampler2D _MainTex;
 			
 			v2f vert(appdata_t IN){
 				v2f OUT;
 				OUT.worldPosition = IN.vertex;
 				OUT.vertex = UnityObjectToClipPos(OUT.worldPosition);
-				// todo use width & height without - fall off
-				_Width = _Width - 1;
-				_Height = _Height - 1;
-				OUT.texcoord = IN.texcoord * float2(_Width, _Height);
+				OUT.texcoord = IN.texcoord*float2(_Width,_Height);
 				#ifdef UNITY_HALF_TEXEL_OFFSET
-				OUT.vertex.xy += (_ScreenParams.zw - 1.0) * float2(-1, 1);
+				OUT.vertex.xy += (_ScreenParams.zw-1.0)*float2(-1,1);
 				#endif
-				OUT.color = IN.color * (1 + _TextureSampleAdd);
+				OUT.color = IN.color*(1+_TextureSampleAdd);
 				return OUT;
 			}
-
-			half visible(half2 pos, half4 r){
-				half4 p = half4(pos, _Width - pos.x, _Height - pos.y);
-				half v = min(min(min(p.x, p.y), p.z), p.w);
-				bool4 b = bool4(all(p.xw < r[0]), all(p.zw < r[1]), all(p.zy < r[2]), all(p.xy < r[3]));
-				half4 vis = r - half4(length(p.xw - r[0]), length(p.zw - r[1]), length(p.zy - r[2]), length(p.xy - r[3]));
-				half4 foo = min(b * max(vis, 0), v) + (1 - b) * v;
-				v = any(b) * min(min(min(foo.x, foo.y), foo.z), foo.w) + v * (1 - any(b));
+			
+//			half visible(half2 pos,half4 r){
+//				half4 p = half4(pos,_Width-pos.x,_Height-pos.y);
+//				half v = min(min(min(p.x,p.y),p.z),p.w);
+//				if(all(p.xw<r[0])){
+//					//v = min(r[0]-distance(p.xw,half2(r[0],r[0])),v);
+//					v = min(r[0]-length(p.xw-r[0]),v);
+//				}
+//				else if(all(p.zw<r[1])){
+//					//v = min(r[1]-distance(p.zw,half2(r[1],r[1])),v);
+//					v = min(r[1]-length(p.zw-r[1]),v);
+//				}
+//				if(all(p.zy<r[2])){
+//					//v = min(r[2]-distance(p.zy,half2(r[2],r[2])),v);
+//					v = min(r[2]-length(p.zy-r[2]),v);
+//				}
+//				else if(all(p.xy<r[3])){
+//					//v = min(r[3]-distance(p.xy,half2(r[3],r[3])),v);
+//					v = min(r[3]-length(p.xy-r[3]),v);
+//				}
+//				return v;
+//			}
+			//more optmised version without dynamic branching
+			half visible(half2 pos,half4 r){
+				half4 p = half4(pos,_Width-pos.x,_Height-pos.y);
+				half v = min(min(min(p.x,p.y),p.z),p.w);
+				bool4 b = bool4(all(p.xw<r[0]),all(p.zw<r[1]),all(p.zy<r[2]),all(p.xy<r[3]));
+				half4 vis = r-half4(length(p.xw-r[0]),length(p.zw-r[1]),length(p.zy-r[2]),length(p.xy-r[3]));
+				half4 foo = min(b*max(vis,0),v)+(1-b)*v;
+				v = any(b)*min(min(min(foo.x,foo.y),foo.z),foo.w)+v*(1-any(b));
 				return v;
 			}
-			
-//			half insideRect(float2 input, half2 topRight, half2 bottomLeft) {
-//			    half2 retn = step(bottomLeft, input) - step(topRight, input);
-//			    return retn.x * retn.y;
-//			}
-//			
-			fixed4 frag (v2f IN) : SV_Target {
+
+			fixed4 frag (v2f IN) : SV_Target
+			{
 				half4 color = IN.color;
 
-//                half2 texCoord = IN.texcoord;
-//                float maxX = 95;//1 - _BorderWidth;
-//                float minX = 5; //_BorderWidth;
-//                float minY = 5;//minX / (_Width / _Height);
-//                float maxY = 95;//maxX / (_Width / _Height);
-//                
-//                if(texCoord.x < maxX && texCoord.x >= minX && texCoord.y < maxY && texCoord.y > minY) {
-//                    color = _ContentColor;
-//                }
-//                else {
-//                    color = half4(0, 0, 0, 1);
-//                }
-//                return color;
-                
-				if (_UseClipRect) {
+				if (_UseClipRect)
 					color *= UnityGet2DClipping(IN.worldPosition.xy, _ClipRect);
-				}
 				
-				if (_UseAlphaClip) {
+				if (_UseAlphaClip)
 					clip (color.a - 0.001);
-			    }
-				
-				if(false) {
-                    if(_LineWeight > 0){
-                        half l = (_LineWeight + 1 / _PixelWorldScale) * 0.5;
-                        color.a *= saturate((l - distance(visible(IN.texcoord, _Radius), l)) *_PixelWorldScale);
-                    }
-                    else{
-                        color.a *= saturate(visible(IN.texcoord, _Radius) * _PixelWorldScale);
-                    }
+				if(_LineWeight>0){
+					half l = (_LineWeight+1/_PixelWorldScale)/2;
+					color.a *= saturate((l-distance(visible(IN.texcoord,_Radius),l))*_PixelWorldScale);
+				}
+				else{
+					color.a *= saturate(visible(IN.texcoord,_Radius)*_PixelWorldScale);
 				}
 				return color;
-		    }
+			}
 			ENDCG
 		}
 	}

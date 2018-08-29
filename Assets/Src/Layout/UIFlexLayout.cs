@@ -343,9 +343,12 @@ namespace Src.Layout {
                         items[i].axisStart = 0;
                         break;
 
-                    default:
+                    case CrossAxisAlignment.Stretch:
                         items[i].axisStart = 0;
                         items[i].outputSize = contentSize;
+                        break;
+                    default:
+                        items[i].axisStart = 0;
                         break;
                 }
 

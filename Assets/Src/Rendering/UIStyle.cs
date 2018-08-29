@@ -71,14 +71,7 @@ namespace Rendering {
             border = ContentBoxRect.Unset;
             paint = Paint.Unset;
             borderRadius = BorderRadius.Unset;
-            layoutParameters = new LayoutParameters() {
-                type = LayoutType.Flex,
-                direction = LayoutDirection.Column,
-                flow = LayoutFlowType.InFlow,
-                crossAxisAlignment = CrossAxisAlignment.Default,
-                mainAxisAlignment = MainAxisAlignment.Default,
-                wrap = LayoutWrap.None
-            };
+            layoutParameters = LayoutParameters.Unset;
         }
         
         public static readonly UIStyle Default = new UIStyle("Default", string.Empty) {

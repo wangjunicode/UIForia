@@ -11,31 +11,63 @@ namespace Src.Systems {
         private readonly ILayoutSystem layoutSystem;
         private readonly IStyleSystem styleSystem;
         private readonly RectTransform rectTransform;
+        private readonly IElementRegistry elementRegistry;
 
         private readonly SkipTree<RenderData> renderSkipTree;
         private readonly Dictionary<int, RectTransform> transforms;
-
+        private bool ready;
         public Font tempFont;
-        public GORenderSystem(ILayoutSystem layoutSystem, IStyleSystem styleSystem, RectTransform rectTransform) {
+
+        public GORenderSystem(ILayoutSystem layoutSystem, IStyleSystem styleSystem, IElementRegistry elementRegistry, RectTransform rectTransform) {
             this.layoutSystem = layoutSystem;
             this.rectTransform = rectTransform;
+            this.elementRegistry = elementRegistry;
             this.renderSkipTree = new SkipTree<RenderData>();
             this.transforms = new Dictionary<int, RectTransform>();
             this.renderSkipTree.onItemParentChanged += (item, newParent, oldParent) => {
                 item.unityTransform.SetParent(newParent == null ? rectTransform : newParent.unityTransform);
             };
+
             this.styleSystem = styleSystem;
-            this.styleSystem.onTextContentChanged += (elementId, text) => {
-                if (transforms.ContainsKey(elementId)) {
-                    RectTransform transform = transforms[elementId];
-                    transform.GetComponent<Text>().text = text;
-                }
-            };
         }
 
-        public void OnReady() { }
+        private void HandleTextContentChanged(int elementId, string text) {
+            if (transforms.ContainsKey(elementId)) {
+                RectTransform transform = transforms[elementId];
+                transform.GetComponent<Text>().text = text;
+            }
+        }
 
-        public void OnInitialize() { }
+        private void HandleBorderRadiusChange(int elementId, BorderRadius radius) {
+            if (!ready) return;
+            UIElement element = elementRegistry.GetElement(elementId);
+            OnElementStyleChanged(element);
+        }
+
+        private void HandlePaintChange(int elementId, Paint paint) {
+            if (!ready) return;
+            UIElement element = elementRegistry.GetElement(elementId);
+            OnElementStyleChanged(element);
+        }
+
+        private void HandleStyleChange(int elementId, ContentBoxRect rect) {
+            if (!ready) return;
+            UIElement element = elementRegistry.GetElement(elementId);
+            OnElementStyleChanged(element);
+        }
+
+        public void OnReady() {
+            ready = true;
+        }
+
+        public void OnInitialize() {
+            this.styleSystem.onTextContentChanged += HandleTextContentChanged;
+            this.styleSystem.onBorderChanged += HandleStyleChange;
+            this.styleSystem.onPaddingChanged += HandleStyleChange;
+            this.styleSystem.onBorderChanged += HandleStyleChange;
+            this.styleSystem.onPaintChanged += HandlePaintChange;
+            this.styleSystem.onBorderRadiusChanged += HandleBorderRadiusChange;
+        }
 
         public void OnElementCreated(InitData creationData) {
             OnElementStyleChanged(creationData.element);
@@ -50,24 +82,34 @@ namespace Src.Systems {
             LayoutResult[] layoutResults = layoutSystem.LayoutResults;
 
             for (int i = 0; i < count; i++) {
-                if (transforms.ContainsKey(layoutResults[i].elementId)) {
-                    RectTransform transform = transforms[layoutResults[i].elementId];
-                    Vector2 position = layoutResults[i].localRect.position;
-                    transform.anchoredPosition = new Vector3(position.x, -position.y, 0);
-                    transform.sizeDelta = layoutResults[i].localRect.size;
-                }
+                if (!transforms.ContainsKey(layoutResults[i].elementId)) continue;
+                
+                RectTransform transform = transforms[layoutResults[i].elementId];
+                Vector2 position = layoutResults[i].localRect.position;
+                position.x = (int) position.x;
+                position.y = (int) position.y;
+                Vector2 size = layoutResults[i].localRect.size;
+                size.x = (int) size.x;
+                size.y = (int) size.y;
+                transform.anchoredPosition = new Vector3(position.x, -position.y, 0);
+                transform.sizeDelta = size;
             }
         }
 
         public void OnReset() {
-            renderSkipTree.TraversePreOrder((data => {
-                data.unityTransform = null;
-            }));
+            ready = false;
+            renderSkipTree.TraversePreOrder((data => { data.unityTransform = null; }));
 
             foreach (var kvp in transforms) {
                 Object.Destroy(kvp.Value.gameObject);
             }
 
+            this.styleSystem.onTextContentChanged -= HandleTextContentChanged;
+            this.styleSystem.onBorderChanged -= HandleStyleChange;
+            this.styleSystem.onPaddingChanged -= HandleStyleChange;
+            this.styleSystem.onBorderChanged -= HandleStyleChange;
+            this.styleSystem.onPaintChanged -= HandlePaintChange;
+            this.styleSystem.onBorderRadiusChanged -= HandleBorderRadiusChange;
             renderSkipTree.Clear();
             transforms.Clear();
         }
@@ -76,19 +118,13 @@ namespace Src.Systems {
             OnReset();
         }
 
-        public void OnElementStyleChanged(UIElement element) {
-            if ((element.flags & UIElementFlags.RequiresRendering) == 0) {
-                return;
-            }
+        private void OnElementStyleChanged(UIElement element) {
 
             RenderData data = renderSkipTree.GetItem(element);
 
             RenderPrimitiveType primitiveType = DeterminePrimitiveType(element);
 
             if (data == null) {
-                if (primitiveType == RenderPrimitiveType.None) {
-                    return;
-                }
 
                 GameObject obj = new GameObject(element.ToString());
 
@@ -110,8 +146,9 @@ namespace Src.Systems {
                 ApplyStyles(data);
                 return;
             }
+            
+            data.primitiveType = primitiveType;
 
-            // todo -- pool
             if (data.imageComponent != null) {
                 Object.Destroy(data.imageComponent);
             }
@@ -121,14 +158,10 @@ namespace Src.Systems {
             }
 
             if (primitiveType == RenderPrimitiveType.None) {
-                // todo -- pool
-                renderSkipTree.RemoveItem(data);
-                Object.Destroy(data.unityTransform);
-                data.rootTransform = null;
-                data.element = null;
                 return;
             }
 
+            data.primitiveType = primitiveType;
             CreateComponents(data);
         }
 
@@ -162,30 +195,24 @@ namespace Src.Systems {
         }
 
         public void OnElementEnabled(UIElement element) {
-//            RenderData data = renderSkipTree.GetItem(element);
-//            if (data == null) {
-//                // todo probably only works for 1 element not heirarhcy
-////                OnElementStyleChanged(element);
-//                
-//                return;
-//            }
+            if (transforms.ContainsKey(element.id)) {
+                transforms[element.id].gameObject.SetActive(true);
+            }
             renderSkipTree.ConditionalTraversePreOrder(element, (item) => {
                 if (item.element.isDisabled) return false;
                 item.unityTransform.gameObject.SetActive(true);
                 return true;
             });
-//            renderSkipTree.EnableHierarchy(data);
-//            if (transforms.ContainsKey(element.id)) {
-//                transforms[element.id].gameObject.SetActive(true);
-//            }
         }
 
         public void OnElementDisabled(UIElement element) {
-            RenderData data = renderSkipTree.GetItem(element);
-            renderSkipTree.DisableHierarchy(data);
             if (transforms.ContainsKey(element.id)) {
                 transforms[element.id].gameObject.SetActive(false);
             }
+            renderSkipTree.ConditionalTraversePreOrder(element, (item) => {
+                item.unityTransform.gameObject.SetActive(false);
+                return true;
+            });
         }
 
         private void CreateComponents(RenderData data) {
@@ -195,7 +222,7 @@ namespace Src.Systems {
                     ApplyStyles(data);
                     return;
                 case RenderPrimitiveType.ProceduralImage:
-                    data.imageComponent = data.unityTransform.gameObject.AddComponent<RawImage>();
+                    data.imageComponent = data.unityTransform.gameObject.AddComponent<BorderedImage>();
                     ApplyStyles(data);
                     return;
                 case RenderPrimitiveType.Mask:
@@ -206,6 +233,7 @@ namespace Src.Systems {
                     Text text = (Text) data.imageComponent;
                     text.text = ((UITextElement) data.element).GetText();
                     text.font = tempFont;
+                    text.fontSize = 12;
                     text.color = data.element.style.textColor;
                     text.horizontalOverflow = HorizontalWrapMode.Overflow;
                     text.verticalOverflow = VerticalWrapMode.Overflow;
@@ -225,8 +253,10 @@ namespace Src.Systems {
                     rawImage.uvRect = new Rect(0, 0, 1, 1);
                     break;
                 case RenderPrimitiveType.ProceduralImage:
-                    ProceduralImage procImage = (ProceduralImage) data.imageComponent;
+                    BorderedImage procImage = (BorderedImage) data.imageComponent;
                     procImage.color = style.backgroundColor;
+                    procImage.borderColor = style.borderColor;
+                    procImage.border = style.border;
                     break;
                 case RenderPrimitiveType.Text:
                     Text text = (Text) data.imageComponent;
@@ -239,6 +269,10 @@ namespace Src.Systems {
         }
 
         private RenderPrimitiveType DeterminePrimitiveType(UIElement element) {
+            if ((element.flags & UIElementFlags.RequiresRendering) == 0) {
+                return RenderPrimitiveType.None;
+            }
+            
             if ((element.flags & UIElementFlags.TextElement) != 0) {
                 return RenderPrimitiveType.Text;
             }
@@ -250,9 +284,9 @@ namespace Src.Systems {
                 return RenderPrimitiveType.None;
             }
 
-//            if (styleSet.borderRadius != UIStyle.UnsetFloatValue) {
-//                return RenderPrimitiveType.ProceduralImage;
-//            }
+            if (styleSet.border.IsDefined()) {
+                return RenderPrimitiveType.ProceduralImage;
+            }
 
             return RenderPrimitiveType.RawImage;
         }

@@ -4,6 +4,7 @@ using System.Diagnostics;
 using Rendering;
 using Src.Systems;
 using UnityEngine;
+using Debug = UnityEngine.Debug;
 
 namespace Src.Layout {
 
@@ -89,8 +90,16 @@ namespace Src.Layout {
         }
 
         public float GetPreferredWidth(UIUnit parentUnit, float parentValue, float viewportValue) {
-            float baseWidth = 0;
+            float baseWidth;
+            if (isTextElement) {
+                // weirdly the text size is calculated differently when the mouse is down
+                float width = new IMGUITextSizeCalculator().CalcTextWidth(textContent, style);
+                if (Mathf.Abs(width - textContentSize.x) > 3f) {
+                    textContentSize.x = width;
+                }
 
+                return textContentSize.x;
+            }
             switch (rect.width.unit) {
                 case UIUnit.Auto:
                     baseWidth = parentValue;
@@ -118,25 +127,21 @@ namespace Src.Layout {
                     break;
             }
 
-            return baseWidth;
+            return baseWidth;// +  (contentStartOffsetX + contentEndOffsetX);
         }
 
         public float GetPreferredHeight(UIUnit parentUnit, float computedWidth, float parentValue, float viewportValue) {
-            computedWidth = computedWidth - (contentEndOffsetX - contentStartOffsetX);
+            computedWidth = computedWidth - (contentEndOffsetX + contentStartOffsetX);
             switch (rect.height.unit) {
                 case UIUnit.Auto: // fit parent content
                     // should be renamed & defined as nearest parent block
-                    return contentStartOffsetY
-                           + layout.GetContentHeight(this, computedWidth, parentValue, viewportValue)
-                           + contentEndOffsetY;
+                    return layout.GetContentHeight(this, computedWidth, parentValue, viewportValue);
 
                 case UIUnit.Pixel:
                     return rect.height.value;
 
                 case UIUnit.Content:
-                    return (contentStartOffsetY
-                            + layout.GetContentHeight(this, computedWidth, parentValue, viewportValue)
-                            + contentEndOffsetY) * rect.height.value;
+                    return layout.GetContentHeight(this, computedWidth, parentValue, viewportValue) * rect.height.value;
 
                 // idea: setting for filling parent + margin / padding or border
                 case UIUnit.Parent: // fill parent extents, width + marginHorizontal + borderHorizontal + paddingHorizontal
@@ -215,185 +220,5 @@ namespace Src.Layout {
         public IHierarchical Parent => element.parent;
 
     }
-//
-//    [DebuggerDisplay("{element}")]
-//    public class LayoutData : IHierarchical {
-//
-////        public Rect outputRect;
-////        
-////        public LayoutRect rect;
-////        
-////        public LayoutParameters parameters;
-////        public LayoutConstraints constraints;
-////
-////        public ContentBoxRect margin;
-////        public ContentBoxRect border;
-////        public ContentBoxRect padding;
-////
-////        public Vector2 textContentSize;
-////
-////        public float previousParentWidth;
-////
-////        public LayoutData parent;
-////        public UILayout layout;
-//
-//        public readonly UIElement element;
-//        //public readonly List<LayoutData> children;
-//
-////        public string textContent;
-////
-////        public readonly UIStyleSet style;
-////        public float horizontal;
-//
-//        public LayoutData(UIElement element) {
-//            this.element = element;
-//            //  this.children = new List<LayoutData>();
-////            this.previousParentWidth = float.MinValue;
-////            this.constraints = LayoutConstraints.Unset;
-////            this.style = element.style;
-//        }
-//
-//        public int UniqueId => element.id;
-//        public IHierarchical Element => element;
-//
-//        public IHierarchical Parent => element.parent;
-////
-////        public bool isInFlow => parameters.flow != LayoutFlowType.OutOfFlow;
-////
-////        public float ContentStartOffsetX => margin.left + padding.left + border.left;
-////        public float ContentEndOffsetX => margin.right + padding.right + border.right;
-////
-////        public float ContentStartOffsetY => margin.top + padding.top + border.top;
-////        public float ContentEndOffsetY => margin.bottom + padding.bottom + border.bottom;
-////
-//
-//////        public void OnParentChanged(ISkipTreeTraversable newParent) {
-//////            parent = (LayoutData) newParent;
-//////        }
-//////
-//////        void ISkipTreeTraversable.OnBeforeTraverse() {
-//////            children.Clear();
-//////        }
-//////
-//////        void ISkipTreeTraversable.OnAfterTraverse() {
-//////            parent?.children.Add(this);
-//////        }
-////
-////        public float GetMinWidth(UIUnit parentUnit, float parentValue, float viewportValue) {
-////            switch (constraints.minWidth.unit) {
-////                case UIUnit.Auto:
-////                    return 0;
-////
-////                case UIUnit.Pixel:
-////                    return constraints.minWidth.value;
-////
-////                case UIUnit.Content:
-////                    throw new NotImplementedException();
-////
-////                case UIUnit.Parent:
-////                    throw new NotImplementedException();
-////
-////                case UIUnit.View:
-////                    return constraints.minWidth.value * viewportValue;
-////
-////                default:
-////                    return 0;
-////            }
-////        }
-////
-////        public float GetMaxWidth(UIUnit parentUnit, float parentValue, float viewportValue) {
-////            switch (constraints.maxWidth.unit) {
-////                case UIUnit.Pixel:
-////                    return constraints.maxWidth.value;
-////
-////                case UIUnit.Content:
-////                    throw new NotImplementedException();
-////
-////                case UIUnit.Parent:
-////                    if (parentUnit == UIUnit.Content) return 0;
-////                    return constraints.maxWidth.value * parentValue;
-////
-////                case UIUnit.View:
-////                    return constraints.maxWidth.value * viewportValue;
-////
-////                default:
-////                    return 0;
-////            }
-////        }
-////
-////        public float GetMinHeight(UIUnit parentUnit, float parentValue, float viewportValue) {
-////            switch (constraints.minHeight.unit) {
-////                case UIUnit.Pixel:
-////                    return constraints.minHeight.value;
-////
-////                case UIUnit.Content:
-////                    throw new NotImplementedException();
-////
-////                case UIUnit.Parent:
-////                    if (parentUnit == UIUnit.Content) return 0;
-////                    return constraints.minHeight.value * parentValue;
-////
-////                case UIUnit.View:
-////                    return constraints.minHeight.value * viewportValue;
-////
-////                default:
-////                    return 0;
-////            }
-////        }
-////
-////        public float GetMaxHeight(UIUnit parentUnit, float parentValue, float viewportValue) {
-////            switch (constraints.maxHeight.unit) {
-////                case UIUnit.Pixel:
-////                    return constraints.maxHeight.value;
-////
-////                case UIUnit.Content:
-////                    throw new NotImplementedException();
-////
-////                case UIUnit.Parent:
-////                    throw new NotImplementedException();
-////
-////                case UIUnit.View:
-////                    return constraints.maxHeight.value * viewportValue;
-////
-////                default:
-////                    return 0;
-////            }
-////        }
-////
-////        public void UpdateFromStyle() {
-////            border = style.border;
-////            padding = style.padding;
-////            margin = style.margin;
-////            parameters = style.layout;
-////            constraints = style.constraints;
-////            rect = style.rect;
-////            horizontal = border.horizontal - padding.horizontal - margin.horizontal;
-////        }
-////
-////        public void SetLayout(UILayout layout) {
-////            this.layout = layout;
-////        }
-////
-////        public void SetMargin(ContentBoxRect margin) {
-////            this.margin = margin;
-////            horizontal = border.horizontal - padding.horizontal - margin.horizontal;
-////        }
-////        
-////        public void SetPadding(ContentBoxRect padding) {
-////            this.padding = padding;
-////            horizontal = border.horizontal - padding.horizontal - margin.horizontal;
-////        }
-////        
-////        public void SetBorder(ContentBoxRect border) {
-////            this.border = border;
-////            horizontal = border.horizontal - padding.horizontal - margin.horizontal;
-////        }
-////        
-////        public void SetTextContent(string text) {
-////            previousParentWidth = float.MinValue;
-////            textContent = text;
-////        }
-//
-//    }
 
 }

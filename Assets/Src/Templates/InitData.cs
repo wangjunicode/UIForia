@@ -16,7 +16,7 @@ namespace Src {
     public class InitData {
 
         public readonly UIElement element;
-        public readonly UITemplateContext context;
+        public UITemplateContext context;
         public readonly List<InitData> children;
 
         

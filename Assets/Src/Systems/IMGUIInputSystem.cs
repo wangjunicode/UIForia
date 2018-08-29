@@ -252,20 +252,7 @@ namespace Src.Systems {
 
         public void OnElementHidden(UIElement element) { }
 
-        private struct InputBindingGroup {
-
-            public readonly UITemplateContext context;
-            public readonly InputBinding[] bindings;
-            public readonly InputEventType handledEvents;
-
-            public InputBindingGroup(UITemplateContext context, InputBinding[] bindings, InputEventType handledEvents) {
-                this.context = context;
-                this.bindings = bindings;
-                this.handledEvents = handledEvents;
-            }
-
-        }
-
+       
     }
 
 }

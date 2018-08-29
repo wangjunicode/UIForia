@@ -65,10 +65,20 @@ public struct ContentBoxRect {
     [DebuggerStepThrough]
     public static implicit operator Vector4(ContentBoxRect rect) {
         return new Vector4(
+            FloatUtil.IsDefined(rect.left) ? rect.left : 0,
             FloatUtil.IsDefined(rect.top) ? rect.top : 0,
             FloatUtil.IsDefined(rect.right) ? rect.right : 0,
-            FloatUtil.IsDefined(rect.bottom) ? rect.bottom : 0,
-            FloatUtil.IsDefined(rect.left) ? rect.left : 0
+            FloatUtil.IsDefined(rect.bottom) ? rect.bottom : 0
+        );
+    }
+    
+    [DebuggerStepThrough]
+    public static implicit operator Rect(ContentBoxRect rect) {
+        return new Rect(
+            FloatUtil.IsDefined(rect.left) ? rect.left : 0,
+            FloatUtil.IsDefined(rect.top) ? rect.top : 0,
+            FloatUtil.IsDefined(rect.right) ? rect.right : 0,
+            FloatUtil.IsDefined(rect.bottom) ? rect.bottom : 0
         );
     }
 

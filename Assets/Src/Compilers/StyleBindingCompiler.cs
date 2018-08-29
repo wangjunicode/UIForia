@@ -70,7 +70,7 @@ namespace Src.Compilers {
     public class StyleBindingCompiler {
 
         private ContextDefinition context;
-        private ExpressionCompiler compiler;
+        private readonly ExpressionCompiler compiler;
 
         private static readonly MethodAliasSource rgbSource;
         private static readonly MethodAliasSource rgbaSource;

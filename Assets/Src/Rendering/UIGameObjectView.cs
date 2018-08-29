@@ -14,15 +14,20 @@ namespace Rendering {
         public UIGameObjectView(Font tempFont, Type elementType, RectTransform viewTransform) : base(elementType) {
             this.rectTransform = viewTransform;
             layoutSystem = new LayoutSystem(new GOTextSizeCalculator(), styleSystem);
-            renderSystem = new GORenderSystem(layoutSystem, styleSystem, viewTransform);
-            inputSystem = null;
+            renderSystem = new GORenderSystem(layoutSystem, styleSystem, this, viewTransform);
+            inputSystem = new GOInputSystem(layoutSystem, this, styleSystem);
             ((GORenderSystem) renderSystem).tempFont = tempFont;
             systems.Add(layoutSystem);
             systems.Add(renderSystem);
+            systems.Add(inputSystem);
         }
 
         public void UpdateViewport() {
-            layoutSystem.SetViewportRect(rectTransform.rect);
+            layoutSystem.SetViewportRect(new Rect(rectTransform.rect) {
+                x = 0,
+                y = 0
+            });
+            Canvas.ForceUpdateCanvases();
         }
 
     }

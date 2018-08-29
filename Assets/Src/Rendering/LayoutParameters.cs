@@ -28,7 +28,16 @@ namespace Rendering {
             this.mainAxisAlignment = mainAxisAlignment;
             this.crossAxisAlignment = crossAxisAlignment;
         }
-        
+
+        public static LayoutParameters Unset => new LayoutParameters(
+            LayoutType.Unset,
+            LayoutWrap.Unset, 
+            LayoutFlowType.Unset, 
+            LayoutDirection.Unset,
+            MainAxisAlignment.Unset, 
+            CrossAxisAlignment.Unset
+        );
+
         public override bool Equals(object obj) {
             if (ReferenceEquals(null, obj)) return false;
             return obj is LayoutParameters && this == ((LayoutParameters) obj);

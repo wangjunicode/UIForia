@@ -15,6 +15,8 @@ namespace Src {
         public UIRepeatTemplate(List<UITemplate> childTemplates, List<AttributeDefinition> attributes = null)
             : base(childTemplates, attributes) { }
 
+        public override Type elementType => typeof(UIRepeatTemplate);
+
         public override InitData CreateScoped(TemplateScope inputScope) {
 
             ReflectionUtil.ObjectArray2[0] = childTemplates[0];

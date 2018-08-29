@@ -1,3 +1,4 @@
+using System;
 using Src.Parsing;
 
 namespace Src {
@@ -36,6 +37,8 @@ namespace Src {
             
             return base.Compile(template);
         }
+
+        public override Type elementType => typeof(UITextElement);
 
         public override InitData CreateScoped(TemplateScope inputScope) {
             return GetCreationData(new UITextElement(), inputScope.context);

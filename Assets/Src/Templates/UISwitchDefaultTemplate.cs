@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 
 namespace Src {
@@ -8,7 +9,9 @@ namespace Src {
 
         public UISwitchDefaultTemplate(List<UITemplate> childTemplates, List<AttributeDefinition> attributes = null)
             : base(childTemplates, attributes) { }
-        
+
+        public override Type elementType => typeof(UISwitchDefaultElement);
+
         public override InitData CreateScoped(TemplateScope inputScope) {
             UISwitchDefaultElement instance = new UISwitchDefaultElement();
             InitData data = GetCreationData(instance, inputScope.context);

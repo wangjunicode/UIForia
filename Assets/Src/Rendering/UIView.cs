@@ -185,6 +185,7 @@ public abstract class UIView : IElementRegistry {
 
             return true;
         });
+        
         foreach (ISystem system in systems) {
             system.OnElementDisabled(element);
         }

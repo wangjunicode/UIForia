@@ -44,7 +44,7 @@ namespace Src {
                         case TypeCode.Double:
                             return new OperatorExpression_Arithmetic_IntDouble(operatorType, leftInt, (Expression<double>) right);
 
-                        default: throw new Exception("Operand types are not compatable");
+                        default: throw new Exception("Operand types are not compatible");
                     }
 
                 case TypeCode.Single:
@@ -57,7 +57,7 @@ namespace Src {
                         case TypeCode.Single:
                             return new OperatorExpression_Arithmetic_FloatFloat(operatorType, leftFloat, (Expression<float>) right);
 
-                        default: throw new Exception("Operand types are not compatable");
+                        default: throw new Exception("Operand types are not compatible");
                     }
 
                 case TypeCode.Double:
@@ -73,11 +73,11 @@ namespace Src {
                         case TypeCode.Double:
                             return new OperatorExpression_Arithmetic_DoubleDouble(operatorType, leftDouble, (Expression<double>) right);
 
-                        default: throw new Exception("Operand types are not compatable");
+                        default: throw new Exception("Operand types are not compatible");
 
                     }
 
-                default: throw new Exception("Operand types are not compatable");
+                default: throw new Exception("Operand types are not compatible");
 
             }
 

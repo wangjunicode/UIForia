@@ -25,9 +25,7 @@ namespace Src.Systems {
         public LayoutSystem(ITextSizeCalculator textSizeCalculator, IStyleSystem styleSystem) {
             this.styleSystem = styleSystem;
             this.layoutTree = new SkipTree<LayoutNode>();
-            this.styleSystem.onLayoutChanged += HandleLayoutChanged;
-
-            this.styleSystem.onTextContentChanged += HandleTextChanged;
+  
 
             this.flexLayout = new FlexLayout(textSizeCalculator);
             this.rects = new LayoutResult[16];
@@ -39,9 +37,30 @@ namespace Src.Systems {
         public int RectCount => rectCount;
         public LayoutResult[] LayoutResults => rects;
 
-       
-        public void OnInitialize() { }
-
+        public void OnInitialize() {
+            this.styleSystem.onLayoutChanged += HandleLayoutChanged;
+            this.styleSystem.onTextContentChanged += HandleTextChanged;
+            this.styleSystem.onRectChanged += HandleRectChanged;
+            this.styleSystem.onBorderChanged += HandleContentBoxChanged;
+            this.styleSystem.onPaddingChanged += HandleContentBoxChanged;
+            this.styleSystem.onMarginChanged += HandleContentBoxChanged;
+            this.styleSystem.onConstraintChanged += HandleConstraintChanged;
+        }
+        
+        private void HandleConstraintChanged(int elementId, LayoutConstraints constraints) {
+            LayoutNode node = layoutTree.GetItem(elementId);
+            node?.UpdateData(this);
+        }
+        
+        private void HandleContentBoxChanged(int elementId, ContentBoxRect rect) {
+            LayoutNode node = layoutTree.GetItem(elementId);
+            node?.UpdateData(this);
+        }
+        private void HandleRectChanged(int elementId, LayoutRect rect) {
+            LayoutNode node = layoutTree.GetItem(elementId);
+            node?.UpdateData(this);
+        }
+        
         public void OnReady() {
             isReady = true;
             layoutTree.TraversePreOrder(this, (self, node) => { node.UpdateData(self); });
@@ -133,8 +152,13 @@ namespace Src.Systems {
         }
 
         public void OnDestroy() {
-            this.styleSystem.onLayoutChanged -= HandleLayoutChanged;
-            this.styleSystem.onTextContentChanged -= HandleTextChanged;
+            this.styleSystem.onLayoutChanged += HandleLayoutChanged;
+            this.styleSystem.onTextContentChanged += HandleTextChanged;
+            this.styleSystem.onRectChanged += HandleRectChanged;
+            this.styleSystem.onBorderChanged += HandleContentBoxChanged;
+            this.styleSystem.onPaddingChanged += HandleContentBoxChanged;
+            this.styleSystem.onMarginChanged += HandleContentBoxChanged;
+            this.styleSystem.onConstraintChanged += HandleConstraintChanged;
             layoutTree.Clear();
         }
 
@@ -154,6 +178,7 @@ namespace Src.Systems {
             LayoutNode node = layoutTree.GetItem(elementId);
             if (node == null) return;
             node.layout = GetLayoutInstance(parameters.type);
+            node.parameters = parameters;
         }
 
         private void HandleTextChanged(int elementId, string text) {

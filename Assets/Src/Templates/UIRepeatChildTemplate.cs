@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 
 namespace Src {
@@ -13,6 +14,8 @@ namespace Src {
         }
 
         // called at runtime! not at creating time like the rest of the templates
+        public override Type elementType => typeof(UIRepeatChild);
+
         public override InitData CreateScoped(TemplateScope inputScope) {
 
             UIRepeatChild instance = new UIRepeatChild();

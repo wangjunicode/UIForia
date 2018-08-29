@@ -90,13 +90,74 @@ Shader "UIElement/Standard"
         return o;
     }
     
+//    fixed4 NoBorderRadius() {
+//        half4 col = tex2D(_MainTex, i.texcoord);
+//            
+//        col *= i.color;
+//
+//        float2 p = i.texcoord;
+//        p.x *= _RectVector.z;
+//        p.y *= _RectVector.w;
+//        
+//        bool xIsLeft = (p.x - _RectVector.x - _RectVector.z / 2.0f) <= 0.0f;
+//        bool yIsTop  = (p.y - _RectVector.y - _RectVector.w / 2.0f) <= 0.0f;
+//
+//        float bw1 = _BorderWidthVector.x;
+//        float bw2 = _BorderWidthVector.y;
+//
+//        int radiusIndex = 0;
+//        float activeRadius = 0;
+//        half2 center = half2(0, 0);
+//        
+//        if (xIsLeft) {
+//            activeRadius = lerp(_BorderRadiiVector.w, _BorderRadiiVector.x, yIsTop);//yIsTop ? 0 : 3;
+//            center.x = _RectVector.x + activeRadius;
+//            center.y = _RectVector.y + activeRadius;
+//        } else {
+//            activeRadius = lerp(_BorderRadiiVector.z, _BorderRadiiVector.y, yIsTop);//yIsTop ? 1 : 2;
+//            center.x = _RectVector.x + _RectVector.z - activeRadius;
+//            center.y = _RectVector.y + activeRadius;
+//            bw1 = _BorderWidthVector.z;
+//        }
+//                
+//        center.y = lerp(_RectVector.y + _RectVector.w - activeRadius, center.y, yIsTop);
+//        bw2 = lerp(_BorderWidthVector.w, bw2, yIsTop);
+//                
+//        bool isInCorner = 
+//            (xIsLeft
+//                ? p.x <= center.x 
+//                : p.x >= center.x)
+//          &&
+//            (yIsTop
+//                ? p.y <= center.y 
+//                : p.y >= center.y);
+//           
+//        
+//        float cornerAlpha = isInCorner ? GetCornerAlpha(p, center, bw1, bw2, activeRadius, pixelScale, _ShouldMask) : 1.0f;
+//        
+//        float4 centerRect = float4(
+//            _RectVector.x + _BorderWidthVector.x,
+//            _RectVector.y + _BorderWidthVector.y,
+//            _RectVector.z - (_BorderWidthVector.x + _BorderWidthVector.z),
+//            _RectVector.w - (_BorderWidthVector.y + _BorderWidthVector.w)
+//        );
+//        
+//        bool isPointInCenter = IsPointInside(p, centerRect);
+//
+//        if(isPointInCenter) {
+//            return half4(1, 0, 0, 1);
+//        }
+//        
+//        return half4(1,1,1,1);
+//    }
+    
     fixed4 frag (v2f i) : SV_Target
     {
         // input values are in screen space
-        _RectVector.x = 300;
-        _RectVector.y = 300;
-        _RectVector.z = 300;
-        _RectVector.w = 300;
+        _RectVector.x = 0;
+        _RectVector.y = 0;
+        _RectVector.z = 200;
+        _RectVector.w = 100;
         
         _BorderWidthVector.x = 10;
         _BorderWidthVector.y = 10;
@@ -118,8 +179,46 @@ Shader "UIElement/Standard"
             
         col *= i.color;
 
-        float2 p = i.pos.xy;
-
+        float2 p = i.texcoord;
+        p.x *= _RectVector.z;
+        p.y *= _RectVector.w;
+        
+//        if(p.x < 10) {
+//            return half4(1,1,1,1);
+//        }
+//        return half4(1, 0, 0, 1);
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
         bool xIsLeft = (p.x - _RectVector.x - _RectVector.z / 2.0f) <= 0.0f;
         bool yIsTop  = (p.y - _RectVector.y - _RectVector.w / 2.0f) <= 0.0f;
 
@@ -165,6 +264,12 @@ Shader "UIElement/Standard"
         
         bool isPointInCenter = IsPointInside(p, centerRect);
 
+        if(isPointInCenter) {
+            return half4(1, 0, 0, 1);
+        }
+        
+        return half4(1,1,1,1);
+        
         // this turns mask on / off only for the spots in the 'corners' of the rect
         half middleMask = _ShouldMask && isPointInCenter ? 0.0f : 1.0f;
         

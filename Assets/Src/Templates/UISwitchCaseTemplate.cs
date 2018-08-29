@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 
 namespace Src {
@@ -9,6 +10,8 @@ namespace Src {
 
         public UISwitchCaseTemplate(List<UITemplate> childTemplates, List<AttributeDefinition> attributes = null)
             : base(childTemplates, attributes) { }
+
+        public override Type elementType => typeof(UISwitchCaseElement);
 
         public override InitData CreateScoped(TemplateScope inputScope) {
             UISwitchCaseElement instance = new UISwitchCaseElement();

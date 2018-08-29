@@ -7,12 +7,6 @@ namespace Src.Editor {
     public class UIViewWindow : EditorWindow {
 
         private UIViewIMGUI view;
-
-        private void Update() {
-            view.Update();
-            Repaint();
-        }
-
         private Vector2 mouse;
 
         private void OnGUI() {

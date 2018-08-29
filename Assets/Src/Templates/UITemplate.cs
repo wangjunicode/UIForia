@@ -28,6 +28,8 @@ namespace Src {
         private static readonly InputBindingCompiler inputCompiler = new InputBindingCompiler(null);
         private static readonly PropertyBindingCompiler propCompiler = new PropertyBindingCompiler(null);
 
+        public abstract Type elementType { get; }
+        
         protected UITemplate(List<UITemplate> childTemplates, List<AttributeDefinition> attributes = null) {
             this.childTemplates = childTemplates;
             this.attributes = attributes;
@@ -64,6 +66,7 @@ namespace Src {
                 AttributeDefinition attr = attributes[i];
                 StyleBinding binding = styleCompiler.Compile(attr);
                 if (binding == null) continue;
+                attr.isCompiled = true;
 
                 if (binding.IsConstant()) {
                     constantStyleBindings.Add(binding);
@@ -104,6 +107,11 @@ namespace Src {
             Array.Resize(ref conditionalBindings, conditionalBindings.Length + 1);
             conditionalBindings[conditionalBindings.Length - 1] = binding;
         }
+
+        protected void AddConstantBinding(Binding binding) {
+            Array.Resize(ref constantBindings, constantBindings.Length + 1);
+            constantBindings[constantBindings.Length - 1] = binding;
+        }
         
         protected virtual void CompileInputBindings(ParsedTemplate template) {
             inputCompiler.SetContext(template.contextDefinition);
@@ -112,8 +120,22 @@ namespace Src {
 
         protected virtual void CompilePropertyBindings(ParsedTemplate template) {
             if (attributes == null || attributes.Count == 0) return;
+            // remove this
+            if (GetType() != typeof(UIElementTemplate)) return;
+            
             propCompiler.SetContext(template.contextDefinition);
 
+            for (int i = 0; i < attributes.Count; i++) {
+                if(attributes[i].isCompiled) continue;
+                if (attributes[i].key.StartsWith("x-")) {
+                    continue;
+                }
+                attributes[i].isCompiled = true;
+                Binding binding = propCompiler.CompileAttribute(elementType, attributes[i]);
+                if (binding != null) {
+                    bindingList.Add(binding);
+                }
+            }
             // todo -- filter out already compiled attributes, warn if attribute was already handled
 //            propCompiler.CompileAttribute(attributes.Where(a) => !a.isCompiled);
             // set constant bindings here

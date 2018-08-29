@@ -38,19 +38,18 @@ namespace Src {
 
     }
     
+    // todo more generic version for part types?
     public class AccessExpression<T> : Expression<T> {
 
-        public readonly string contextName;
-        public readonly Type yieldedType;
-        public readonly AccessExpressionPart[] parts;
+        private readonly string contextName;
+        private readonly AccessExpressionPart[] parts;
 
-        public AccessExpression(string contextName, Type yieldedType, AccessExpressionPart[] parts) {
+        public AccessExpression(string contextName, AccessExpressionPart[] parts) {
             this.contextName = contextName;
-            this.yieldedType = yieldedType;
             this.parts = parts;
         }
 
-        public override Type YieldedType => yieldedType;
+        public override Type YieldedType => typeof(T);
 
         public override bool IsConstant() {
             return false;

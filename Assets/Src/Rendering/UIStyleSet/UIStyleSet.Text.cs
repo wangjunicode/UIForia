@@ -6,7 +6,7 @@ namespace Rendering {
 
         public TextStyle textStyle {
             // todo -- this needs to do property look ups WITHOUT checking the default style
-            get { return new TextStyle(textColor, font, fontSize, fontStyle, textAnchor, textWrap, textOverflow); }
+            get { return new TextStyle(textColor, font, fontSize, fontStyle, textAnchor, whiteSpace, textWrap, textOverflow); }
             set { SetTextStyle(value, StyleState.Normal); }
         }
 
@@ -43,6 +43,11 @@ namespace Rendering {
         public VerticalWrapMode textOverflow {
             get { return FindActiveStyle((s) => (int) s.text.verticalOverflow != -1).text.verticalOverflow; }
             set { SetTextWrapVertical(value, StyleState.Normal); }
+        }
+
+        public WhitespaceMode whiteSpace {
+            get { return FindActiveStyle((s) => s.text.whiteSpace != WhitespaceMode.Unset).text.whiteSpace; }
+            set { SetWhitespace(value, StyleState.Normal); }
         }
 
         public TextStyle GetTextStyle(StyleState state) {
@@ -114,6 +119,18 @@ namespace Rendering {
             }
         }
 
+        public WhitespaceMode GetWhitespace(StyleState state) {
+            return GetStyle(state).text.whiteSpace;
+        }
+
+        public void SetWhitespace(WhitespaceMode newWhitespace, StyleState state) {
+            UIStyle style = GetOrCreateStyle(state);
+            style.text.whiteSpace = newWhitespace;
+            if (whiteSpace == newWhitespace) {
+                changeHandler.SetText(elementId, textStyle);
+            }
+        }
+        
         public HorizontalWrapMode GetTextWrapHorizontal(StyleState state) {
             return GetStyle(state).text.horizontalOverflow;
         }

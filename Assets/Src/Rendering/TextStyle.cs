@@ -4,12 +4,12 @@ namespace Rendering {
 
     public enum WhitespaceMode {
 
+        Unset,
         Wrap,
         NoWrap,
         Preserve,
         PreserveWrap,
-        PreserveLine
-
+        PreserveLine // might be nice to have this be 'pre' but use whatever offset the first line is set on as a uniform space
     }
     
     public struct TextStyle {
@@ -22,6 +22,7 @@ namespace Rendering {
         public FontStyle fontStyle;
         public TextAnchor alignment;
 
+        public WhitespaceMode whiteSpace;
         public HorizontalWrapMode horizontalOverflow;
         // todo -- handle these in styles
         public VerticalWrapMode verticalOverflow;
@@ -32,6 +33,7 @@ namespace Rendering {
             int fontSize,
             FontStyle fontStyle,
             TextAnchor alignment,
+            WhitespaceMode whiteSpace,
             HorizontalWrapMode horizontalOverflow,
             VerticalWrapMode verticalOverflow
         ) { // ----------------------------
@@ -40,6 +42,7 @@ namespace Rendering {
             this.fontStyle = fontStyle;
             this.alignment = alignment;
             this.fontSize = fontSize;
+            this.whiteSpace = whiteSpace;
             this.horizontalOverflow = horizontalOverflow;
             this.verticalOverflow = verticalOverflow;
         }
@@ -49,7 +52,8 @@ namespace Rendering {
             font = null,
             fontSize = IntUtil.UnsetValue,
             fontStyle = FontStyle.Normal,
-            alignment = TextAnchor.MiddleLeft,
+            alignment = TextAnchor.UpperLeft,
+            whiteSpace =  WhitespaceMode.Unset,
             horizontalOverflow = HorizontalWrapMode.Overflow,
             verticalOverflow = VerticalWrapMode.Overflow
         };

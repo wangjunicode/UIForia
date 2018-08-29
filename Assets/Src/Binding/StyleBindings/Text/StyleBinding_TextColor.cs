@@ -11,8 +11,7 @@ namespace Src.StyleBindings.Text {
             this.expression = expression;
         }
 
-        public override void Execute(UIElement element, UITemplateContext context) {
-        }
+        public override void Execute(UIElement element, UITemplateContext context) {}
 
         public override bool IsConstant() {
             return expression.IsConstant();

@@ -64,6 +64,7 @@ namespace Src.Compilers {
 
         public const string TextColor = "textColor";
         public const string FontSize = "fontSize";
+        public const string Whitespace = "whiteSpace";
 
     }
 
@@ -95,7 +96,8 @@ namespace Src.Compilers {
         private static readonly EnumAliasSource<LayoutWrap> layoutWrapSource;
         private static readonly EnumAliasSource<MainAxisAlignment> mainAxisAlignmentSource;
         private static readonly EnumAliasSource<CrossAxisAlignment> crossAxisAlignmentSource;
-
+        private static readonly EnumAliasSource<WhitespaceMode> whiteSpaceSource;
+        
         static StyleBindingCompiler() {
             Type type = typeof(StyleBindingCompiler);
             rgbSource = new MethodAliasSource("rgb", type.GetMethod("Rgb", ReflectionUtil.PublicStatic));
@@ -122,6 +124,7 @@ namespace Src.Compilers {
             mainAxisAlignmentSource = new EnumAliasSource<MainAxisAlignment>();
             crossAxisAlignmentSource = new EnumAliasSource<CrossAxisAlignment>();
             autoKeywordSource = new ValueAliasSource<UIMeasurement>("auto", UIMeasurement.Auto);
+            whiteSpaceSource = new EnumAliasSource<WhitespaceMode>();
         }
 
         public StyleBindingCompiler(ContextDefinition context) {
@@ -354,6 +357,9 @@ namespace Src.Compilers {
                 case StyleTemplateConstants.FontSize:
                     return new StyleBinding_FontSize(targetState.state, Compile<int>(value));
 
+                case StyleTemplateConstants.Whitespace:
+                    return new StyleBinding_Whitespace(targetState.state, Compile<WhitespaceMode>(value, whiteSpaceSource));
+                
                 default: return null;
             }
         }

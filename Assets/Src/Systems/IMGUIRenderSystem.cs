@@ -89,7 +89,10 @@ namespace Src.Systems {
 
                     case RenderPrimitiveType.Text:
                         GUIStyle style = new GUIStyle();
-                        style.fontSize = 12;
+                        style.font = renderData.element.style.font;
+                        style.fontSize = renderData.element.style.fontSize;
+                        style.fontStyle = renderData.element.style.fontStyle;
+                        style.alignment = renderData.element.style.textAnchor;
                         style.wordWrap = true;
                         GUI.Label(renderData.layoutRect, renderData.textContent, style);
                         break;

@@ -9,7 +9,6 @@ namespace Rendering {
 
         private StyleState currentState;
         private StyleEntry[] appliedStyles;
-
         private int baseCounter;
         public readonly int elementId;
         private readonly IStyleChangeHandler changeHandler;
@@ -26,6 +25,8 @@ namespace Rendering {
             this.activeStyles = new UIStyle();
         }
 
+        public string textContent { get; private set; }
+        
         public void EnterState(StyleState state) {
             if (state == StyleState.Normal || (currentState & state) != 0) {
                 return;

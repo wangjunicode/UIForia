@@ -25,7 +25,6 @@ namespace Src.Systems {
         public LayoutSystem(ITextSizeCalculator textSizeCalculator, IStyleSystem styleSystem) {
             this.styleSystem = styleSystem;
             this.layoutTree = new SkipTree<LayoutNode>();
-  
 
             this.flexLayout = new FlexLayout(textSizeCalculator);
             this.rects = new LayoutResult[16];

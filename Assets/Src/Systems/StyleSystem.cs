@@ -1,6 +1,7 @@
 ﻿using Rendering;
 using Src.StyleBindings;
 using System.Collections.Generic;
+using System.Text;
 
 namespace Src.Systems {
 
@@ -24,7 +25,7 @@ namespace Src.Systems {
     
     public class StyleSystem : ISystem, IStyleSystem {
 
-        private const UIElementFlags FlagCheck = UIElementFlags.RequiresLayout | UIElementFlags.RequiresLayout | UIElementFlags.TextElement;
+        private const UIElementFlags FlagCheck = UIElementFlags.RequiresRendering | UIElementFlags.RequiresLayout | UIElementFlags.TextElement;
 
         public event PaintChanged onPaintChanged;
         public event LayoutChanged onLayoutChanged;
@@ -148,6 +149,24 @@ namespace Src.Systems {
         }
 
         private void HandleTextChanged(UITextElement element, string text) {
+//            WhitespaceMode whiteSpace = element.style.textStyle.whiteSpace;
+//            StringBuilder builder = new StringBuilder();
+//            int ptr = 0;
+//            bool collapsing = false;
+//            text = text.Trim();
+//            while (ptr < text.Length) {
+//                if (char.IsWhiteSpace(text[ptr])) {
+//                    if (!collapsing) {
+//                        collapsing = true;
+//                        builder.Append(text[ptr]);
+//                    }
+//                }
+//                else {
+//                    collapsing = false;
+//                    builder.Append(text[ptr]);
+//                }
+//                ptr++;
+//            }
             onTextContentChanged?.Invoke(element.id, text);
         }
     }

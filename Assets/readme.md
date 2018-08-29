@@ -60,6 +60,7 @@ Any property on an element can be accessed.
     <SomeElement someValue="{someFieldOnTheType}"/>
     <SomeElement someValue="{someArrayField[6]}"/>
     <SomeElement someValue="{some.nested.array[6].some.other.property}"/>
+    <SomeElement someValue="{some.nested.array[6 + 1 * 2 / 5].some.other.property}"/>
 ````
 
 #### Method References

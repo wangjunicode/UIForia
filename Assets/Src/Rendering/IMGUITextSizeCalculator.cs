@@ -12,8 +12,9 @@ namespace Rendering {
             s_GUIStyle.fontSize = style.fontSize;
             s_GUIStyle.fontStyle = style.fontStyle;
             s_GUIStyle.alignment = style.textAnchor;
+            s_GUIStyle.wordWrap = true;
             s_GUIContent.text = text;
-            return Mathf.Ceil(s_GUIStyle.CalcSize(s_GUIContent).x);
+            return Mathf.Ceil(s_GUIStyle.CalcSize(s_GUIContent).x + 1);
         }
 
         public float CalcTextHeight(string text, UIStyleSet style, float width) {
@@ -21,12 +22,30 @@ namespace Rendering {
             s_GUIStyle.fontSize = style.fontSize;
             s_GUIStyle.fontStyle = style.fontStyle;
             s_GUIStyle.alignment = style.textAnchor;
-//            s_GUIStyle.active = new GUIStyleState();
             s_GUIStyle.wordWrap = true;
             s_GUIContent.text = text;
             return Mathf.Ceil(s_GUIStyle.CalcHeight(s_GUIContent, width));
         }
 
+        public static float S_CalcTextWidth(string text, UIStyleSet style) {
+            s_GUIStyle.font = style.font;
+            s_GUIStyle.fontSize = style.fontSize;
+            s_GUIStyle.fontStyle = style.fontStyle;
+            s_GUIStyle.alignment = style.textAnchor;
+            s_GUIStyle.wordWrap = false;
+            s_GUIContent.text = text;
+            return Mathf.Ceil(s_GUIStyle.CalcSize(s_GUIContent).x + 1);
+        }
+
+        public static float S_CalcTextHeight(string text, UIStyleSet style, float width) {
+            s_GUIStyle.font = style.font;
+            s_GUIStyle.fontSize = style.fontSize;
+            s_GUIStyle.fontStyle = style.fontStyle;
+            s_GUIStyle.alignment = style.textAnchor;
+            s_GUIStyle.wordWrap = true;
+            s_GUIContent.text = text;
+            return Mathf.Ceil(s_GUIStyle.CalcHeight(s_GUIContent, width));
+        }
     }
 
 }

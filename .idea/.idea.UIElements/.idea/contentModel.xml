@@ -83,6 +83,7 @@
               <e p="Text" t="Include">
                 <e p="StyleBinding_FontSize.cs" t="Include" />
                 <e p="StyleBinding_TextColor.cs" t="Include" />
+                <e p="StyleBinding_Whitespace.cs" t="Include" />
               </e>
             </e>
             <e p="SwitchBindingInt.cs" t="Include" />

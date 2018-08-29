@@ -4,7 +4,6 @@ using System.Diagnostics;
 using Rendering;
 using Src.Systems;
 using UnityEngine;
-using Debug = UnityEngine.Debug;
 
 namespace Src.Layout {
 
@@ -38,11 +37,14 @@ namespace Src.Layout {
         }
 
         public bool isInFlow => parameters.flow != LayoutFlowType.OutOfFlow;
+        
+        public float horizontalOffset => contentStartOffsetX + contentEndOffsetX;
+        public float verticalOffset => contentStartOffsetY + contentEndOffsetY;
 
         public void UpdateData(LayoutSystem layoutSystem) {
             previousParentWidth = float.MinValue;
             textContentSize = Vector2.zero;
-
+        //    textContent = style.textContent;
             contentStartOffsetX = style.paddingLeft + style.marginLeft + style.borderLeft;
             contentEndOffsetX = style.paddingRight + style.marginRight + style.borderRight;
 
@@ -54,14 +56,14 @@ namespace Src.Layout {
 
             constraints = style.constraints;
             rect = style.rect;
-            
+
             UITextElement textElement = element as UITextElement;
             if (textElement != null) {
                 isTextElement = true;
                 textContent = textElement.GetText();
             }
         }
-        
+
         public float GetMinWidth(UIUnit parentUnit, float parentValue, float viewportValue) {
             switch (constraints.minWidth.unit) {
                 case UIUnit.Auto:
@@ -87,19 +89,16 @@ namespace Src.Layout {
         public void SetTextContent(string text) {
             previousParentWidth = float.MinValue;
             textContent = text;
+            textContentSize.x = IMGUITextSizeCalculator.S_CalcTextWidth(textContent, style);;
         }
 
         public float GetPreferredWidth(UIUnit parentUnit, float parentValue, float viewportValue) {
             float baseWidth;
-            if (isTextElement) {
-                // weirdly the text size is calculated differently when the mouse is down
-                float width = new IMGUITextSizeCalculator().CalcTextWidth(textContent, style);
-                if (Mathf.Abs(width - textContentSize.x) > 3f) {
-                    textContentSize.x = width;
-                }
 
-                return textContentSize.x;
+            if (isTextElement) {
+                return Mathf.Min(IMGUITextSizeCalculator.S_CalcTextWidth(textContent, style), parentValue);
             }
+
             switch (rect.width.unit) {
                 case UIUnit.Auto:
                     baseWidth = parentValue;
@@ -110,7 +109,7 @@ namespace Src.Layout {
                     break;
 
                 case UIUnit.Content:
-                    baseWidth = layout.GetContentWidth(this, parentValue, viewportValue);
+                    baseWidth = layout.GetContentWidth(this, parentValue - (contentStartOffsetX + contentEndOffsetX), viewportValue);
                     break;
 
                 case UIUnit.Parent:
@@ -127,33 +126,46 @@ namespace Src.Layout {
                     break;
             }
 
-            return baseWidth;// +  (contentStartOffsetX + contentEndOffsetX);
+            return baseWidth + (contentStartOffsetX + contentEndOffsetX);
         }
 
         public float GetPreferredHeight(UIUnit parentUnit, float computedWidth, float parentValue, float viewportValue) {
-            computedWidth = computedWidth - (contentEndOffsetX + contentStartOffsetX);
+            
+            if (isTextElement) {
+                float height = IMGUITextSizeCalculator.S_CalcTextHeight(textContent, style, computedWidth);
+                return height;
+            }
+            
+            float baseHeight = 0;
             switch (rect.height.unit) {
                 case UIUnit.Auto: // fit parent content
                     // should be renamed & defined as nearest parent block
-                    return layout.GetContentHeight(this, computedWidth, parentValue, viewportValue);
-
+                    baseHeight = layout.GetContentHeight(this, computedWidth, parentValue - verticalOffset, viewportValue);
+                    break;
                 case UIUnit.Pixel:
-                    return rect.height.value;
-
+                    baseHeight = rect.height.value;
+                    break;
                 case UIUnit.Content:
-                    return layout.GetContentHeight(this, computedWidth, parentValue, viewportValue) * rect.height.value;
-
+                    baseHeight = layout.GetContentHeight(this, computedWidth, parentValue - verticalOffset, viewportValue) * rect.height.value;
+                    break;
                 // idea: setting for filling parent + margin / padding or border
                 case UIUnit.Parent: // fill parent extents, width + marginHorizontal + borderHorizontal + paddingHorizontal
-                    if (parentUnit == UIUnit.Content) return 0;
-                    return rect.height.value * parentValue;
-
+                    if (parentUnit == UIUnit.Content) {
+                        baseHeight = 0;
+                    }
+                    else {
+                        baseHeight = rect.height.value * parentValue;
+                    }
+                    break;
                 case UIUnit.View:
-                    return rect.height.value * viewportValue;
-
+                    baseHeight = rect.height.value * viewportValue;
+                    break;
                 default:
-                    return 0;
+                    baseHeight = 0;
+                    break;
             }
+
+            return baseHeight + verticalOffset;
         }
 
         public float GetMaxWidth(UIUnit parentUnit, float parentValue, float viewportValue) {

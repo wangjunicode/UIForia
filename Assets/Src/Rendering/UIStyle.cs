@@ -123,6 +123,7 @@ namespace Rendering {
                 12, 
                 FontStyle.Normal,
                 TextAnchor.UpperLeft,
+                WhitespaceMode.Wrap,
                 HorizontalWrapMode.Overflow,
                 VerticalWrapMode.Overflow
             )

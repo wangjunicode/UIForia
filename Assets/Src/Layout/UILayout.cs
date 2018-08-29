@@ -16,15 +16,21 @@ namespace Src.Layout {
 
         // todo -- handle text x
         public virtual float GetContentWidth(LayoutNode node, float contentSize, float viewportSize) {
-            contentSize -= (node.contentEndOffsetX + node.contentStartOffsetX);
 
+            if (node.isTextElement) {
+                return node.textContentSize.x;
+            }
+            
             List<LayoutNode> children = node.children;
+            
             // todo include statically positioned things who's breadth exceeds max computed
+            
             float output = 0;
             if (node.parameters.direction == LayoutDirection.Row) {
                 // return sum of preferred sizes
                 for (int i = 0; i < children.Count; i++) {
                     LayoutNode child = children[i];
+                    if (!child.isInFlow || child.element.isDisabled) continue;
                     output += child.GetPreferredWidth(node.rect.width.unit, contentSize, viewportSize);
                 }
             }

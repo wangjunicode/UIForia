@@ -68,7 +68,7 @@ namespace Src.Layout {
                 heightItem.maxSize = child.GetMaxHeight(currentNode.rect.height.unit, contentArea.height, viewport.height);
                 // now we have the final width and can compute preferred height accordingly
                 // this restriction doesn't exist in the column layout case
-                heightItem.preferredSize = child.GetPreferredHeight(currentNode.rect.height.unit, widthItems[itemCount].outputSize, contentArea.height, viewport.height);
+                heightItem.preferredSize = child.GetPreferredHeight(currentNode.rect.height.unit, widthItems[itemCount].outputSize - child.horizontalOffset, contentArea.height, viewport.height);
 
                 heightItem.outputSize = heightItem.MinDefined && heightItem.preferredSize < heightItem.minSize ? heightItem.minSize : heightItem.preferredSize;
                 heightItem.outputSize = heightItem.MaxDefined && heightItem.outputSize > heightItem.maxSize ? heightItem.maxSize : heightItem.outputSize;
@@ -107,7 +107,8 @@ namespace Src.Layout {
                 heightItem.minSize = child.GetMinHeight(currentNode.rect.height.unit, contentArea.height, viewport.height);
                 heightItem.maxSize = child.GetMaxHeight(currentNode.rect.height.unit, contentArea.height, viewport.height);
 
-                heightItem.preferredSize = child.GetPreferredHeight(currentNode.rect.height.unit, widthItem.outputSize, contentArea.height, viewport.height);
+                // need to un-offset the output size because nested calls to GetPreferredHeight() will add the offset back.
+                heightItem.preferredSize = child.GetPreferredHeight(currentNode.rect.height.unit, widthItem.outputSize - child.horizontalOffset, contentArea.height, viewport.height);
 
                 heightItem.outputSize = heightItem.MinDefined && heightItem.preferredSize < heightItem.minSize ? heightItem.minSize : heightItem.preferredSize;
                 heightItem.outputSize = heightItem.MaxDefined && heightItem.outputSize > heightItem.maxSize ? heightItem.maxSize : heightItem.outputSize;

@@ -2,68 +2,75 @@
 <UITemplate>
     <Contents style.layoutDirection="Column" style.border="rect(10f)" style.borderColor="yellow">
         
-        <Group style.backgroundColor="blue" x-name="toolbar">
-            
-Lorem ipsum dolor sit amet, consectetur adipiscing elit. Suspendisse nunc tellus, blandit et est id,
-posuere feugiat tellus. Integer vitae luctus ligula, vel molestie turpis. Morbi quis justo nibh.
-Fusce maximus velit ut lorem tincidunt, eget suscipit velit pharetra. Donec aliquam fermentum condimentum. 
-Donec ac sem sit amet leo interdum placerat. Mauris ullamcorper tincidunt ante, vel aliquam arcu. Aliquam
-placerat pretium placerat. Nunc neque dui, venenatis sit amet ligula eget, suscipit consequat urna. Quisque 
-ut venenatis magna. In fringilla iaculis tortor, nec consequat tellus feugiat et. Nullam tempor nibh velit, 
-posuere pellentesque enim venenatis vitae. Ut id purus lobortis lectus interdum facilisis id eget tellus. 
-Integer euismod arcu orci, vel dignissim neque convallis eget. Praesent condimentum diam sit amet ex cursus,
-ut convallis sem placerat.
-            
-        </Group>
-
-        <Group style.layoutDirection="{dir}"
-               style.backgroundColor="red"
-               style.mainAxisAlignment="{mainAlignment}"
-               style.crossAxisAlignment="{crossAxis}"
-               style.rectHeight="isHorizontal ? 100f : 400f"
-               style.hover.backgroundColor="cyan">
-
-            <Group style.rectHeight="50" style.rectWidth="50" style.backgroundColor="green" style.border="rect(2f)" style.borderColor="blue"/>
-            <Group style.rectHeight="50" style.rectWidth="50" style.backgroundColor="white"/>
-            <Group style.rectHeight="50" style.rectWidth="50" style.backgroundColor="blue"/>
-            <Group style.rectHeight="50" style.rectWidth="50" style.backgroundColor="yellow"/>
-
+        <Group style.padding="rect(5f, 10f, 5f, 10f)" style.rectWidth="content(100)" style.backgroundColor="rgb(128, 128, 128)">
+            <Group style.backgroundColor="red" style.rectWidth="content(100)" style.padding="rect(5f)">
+            Text string here
+more text
+            </Group>
         </Group>
         
-        <Group x-if="{values.Count > 3 ? true : false}" style.backgroundColor="white">
-            I only show if there are more than 3 values in the list!
-        </Group>
-        
-        <Group style.layoutDirection="Row" style.mainAxisAlignment="SpaceAround">
-            <UIButton style.rectWidth="100" style.rectHeight="14" onMouseDown="AddToValues()" buttonText="'Add more values'"/>
-            <UIButton style.rectWidth="100" style.rectHeight="14" onMouseDown="ToggleLayoutDirection()" buttonText="'Toggle layout direction'"/>
-            <UIButton style.rectWidth="100" style.rectHeight="14" onMouseDown="ToggleLayoutMode()" buttonText="'Main Axis'"/>
-            <UIButton style.rectWidth="100" style.rectHeight="14" onMouseDown="ToggleCrossAxis()" buttonText="'Cross Axis'"/>
-            <UIButton style.rectWidth="100" style.rectHeight="14" onMouseDown="SwitchValue()" buttonText="{'Switch Value ' + values.Count}"/>
-        </Group>
+        <!--<Group style.backgroundColor="blue" x-name="toolbar">-->
+            <!---->
+<!--Lorem ipsum dolor sit amet, consectetur adipiscing elit. Suspendisse nunc tellus, blandit et est id,-->
+<!--posuere feugiat tellus. Integer vitae luctus ligula, vel molestie turpis. Morbi quis justo nibh.-->
+<!--Fusce maximus velit ut lorem tincidunt, eget suscipit velit pharetra. Donec aliquam fermentum condimentum. -->
+<!--Donec ac sem sit amet leo interdum placerat. Mauris ullamcorper tincidunt ante, vel aliquam arcu. Aliquam-->
+<!--placerat pretium placerat. Nunc neque dui, venenatis sit amet ligula eget, suscipit consequat urna. Quisque -->
+<!--ut venenatis magna. In fringilla iaculis tortor, nec consequat tellus feugiat et. Nullam tempor nibh velit, -->
+<!--posuere pellentesque enim venenatis vitae. Ut id purus lobortis lectus interdum facilisis id eget tellus. -->
+<!--Integer euismod arcu orci, vel dignissim neque convallis eget. Praesent condimentum diam sit amet ex cursus,-->
+<!--ut convallis sem placerat.-->
+            <!---->
+        <!--</Group>-->
 
-        <Group x-if="{showError}" style.backgroundColor="white" style.hover.backgroundColor="red">
-           You need to add items to the list before using the switch
-        </Group>
-  
-        <Group style.backgroundColor="rgb(45, 152, 25)">
-            <Repeat list="{values}" as="item">
-                some text here {$item}
-            </Repeat>
-        </Group>
-        
-        <Group style.backgroundColor="rgb(255, 0,0)">
-            <Switch value="{selectedValue}">
-            <Case when="1">
-            One!
-            </Case>
-            <Case when="2">
-            Two!
-            </Case>
-            <Default>
-            Other! {selectedValue}
-            </Default>
-            </Switch>
-        </Group>
+        <!--<Group style.layoutDirection="{dir}"-->
+               <!--style.backgroundColor="red"-->
+               <!--style.mainAxisAlignment="{mainAlignment}"-->
+               <!--style.crossAxisAlignment="{crossAxis}"-->
+               <!--style.rectHeight="isHorizontal ? 100f : 400f"-->
+               <!--style.hover.backgroundColor="cyan">-->
+
+            <!--<Group style.rectHeight="50" style.rectWidth="50" style.backgroundColor="green" style.border="rect(2f)" style.borderColor="blue"/>-->
+            <!--<Group style.rectHeight="50" style.rectWidth="50" style.backgroundColor="white"/>-->
+            <!--<Group style.rectHeight="50" style.rectWidth="50" style.backgroundColor="blue"/>-->
+            <!--<Group style.rectHeight="50" style.rectWidth="50" style.backgroundColor="yellow"/>-->
+
+        <!--</Group>-->
+        <!---->
+        <!--<Group x-if="{values.Count > 3 ? true : false}" style.backgroundColor="white">-->
+            <!--I only show if there are more than 3 values in the list!-->
+        <!--</Group>-->
+        <!---->
+        <!--<Group style.layoutDirection="Row" style.mainAxisAlignment="SpaceAround">-->
+            <!--<UIButton style.rectWidth="100" style.rectHeight="14" onMouseDown="AddToValues()" buttonText="'Add more values'"/>-->
+            <!--<UIButton style.rectWidth="100" style.rectHeight="14" onMouseDown="ToggleLayoutDirection()" buttonText="'Toggle layout direction'"/>-->
+            <!--<UIButton style.rectWidth="100" style.rectHeight="14" onMouseDown="ToggleLayoutMode()" buttonText="'Main Axis'"/>-->
+            <!--<UIButton style.rectWidth="100" style.rectHeight="14" onMouseDown="ToggleCrossAxis()" buttonText="'Cross Axis'"/>-->
+            <!--<UIButton style.rectWidth="100" style.rectHeight="14" onMouseDown="SwitchValue()" buttonText="{'Switch Value ' + values.Count}"/>-->
+        <!--</Group>-->
+
+        <!--<Group x-if="{showError}" style.backgroundColor="white" style.hover.backgroundColor="red">-->
+           <!--You need to add items to the list before using the switch-->
+        <!--</Group>-->
+  <!---->
+        <!--<Group style.backgroundColor="rgb(45, 152, 25)">-->
+            <!--<Repeat list="{values}" as="item">-->
+                <!--some text here {$item}-->
+            <!--</Repeat>-->
+        <!--</Group>-->
+        <!---->
+        <!--<Group style.backgroundColor="rgb(255, 0,0)">-->
+            <!--<Switch value="{selectedValue}">-->
+            <!--<Case when="1">-->
+            <!--One!-->
+            <!--</Case>-->
+            <!--<Case when="2">-->
+            <!--Two!-->
+            <!--</Case>-->
+            <!--<Default>-->
+            <!--Other! {selectedValue}-->
+            <!--</Default>-->
+            <!--</Switch>-->
+        <!--</Group>-->
     </Contents>
 </UITemplate>

@@ -31,7 +31,7 @@ namespace Src {
         public InputBinding[] inputBindings;
         public List<UIStyle> baseStyles;
         public List<StyleBinding> constantStyleBindings;
-        
+
         public InitData(UIElement element, UITemplateContext context) {
             this.element = element;
             this.context = context;

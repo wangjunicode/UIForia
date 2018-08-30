@@ -15,6 +15,10 @@ public class UIElement : IHierarchical {
     // todo make readonly but assignable via style system
     [UsedImplicitly] public UIStyleSet style;
 
+    
+    // todo make readonly and hide this
+    public int depth;
+    
     protected internal UIElement parent;
 
     public UIElement() {

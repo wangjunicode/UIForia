@@ -1,7 +1,10 @@
 ﻿using System.Collections.Generic;
+using Debugger;
 using Rendering;
 using UnityEngine;
+using UnityEngine.EventSystems;
 using UnityEngine.UI;
+using InputField = UnityEngine.UI.InputField;
 using Object = UnityEngine.Object;
 
 namespace Src.Systems {
@@ -83,18 +86,22 @@ namespace Src.Systems {
 
             for (int i = 0; i < count; i++) {
                 if (!transforms.ContainsKey(layoutResults[i].elementId)) continue;
-                
+                RenderData renderData = renderSkipTree.GetItem(layoutResults[i].elementId);
+                ContentBoxRect margin = renderData.element.style.margin;
                 RectTransform transform = transforms[layoutResults[i].elementId];
                 Vector2 position = layoutResults[i].localRect.position;
-                position.x = (int) position.x;
-                position.y = (int) position.y;
+                position.x = (int) position.x + margin.left;
+                position.y = (int) position.y + margin.top;
                 Vector2 size = layoutResults[i].localRect.size;
-                size.x = (int) size.x;
-                size.y = (int) size.y;
+                size.x = (int) size.x - (margin.left + margin.right);
+                size.y = (int) size.y - (margin.top + margin.bottom);
                 transform.anchoredPosition = new Vector3(position.x, -position.y, 0);
                 transform.sizeDelta = size;
             }
-        }
+            // if focusRequiresCursor
+                // CreateOrUpdateCursor();
+            
+        }  
 
         public void OnReset() {
             ready = false;
@@ -221,13 +228,16 @@ namespace Src.Systems {
                     data.imageComponent = data.unityTransform.gameObject.AddComponent<RawImage>();
                     ApplyStyles(data);
                     return;
+                
                 case RenderPrimitiveType.ProceduralImage:
                     data.imageComponent = data.unityTransform.gameObject.AddComponent<BorderedImage>();
                     ApplyStyles(data);
                     return;
+                
                 case RenderPrimitiveType.Mask:
                 case RenderPrimitiveType.Mask2D:
                     break;
+                
                 case RenderPrimitiveType.Text:
                     data.imageComponent = data.unityTransform.gameObject.AddComponent<Text>();
                     Text text = (Text) data.imageComponent;
@@ -237,6 +247,38 @@ namespace Src.Systems {
                     text.color = data.element.style.textColor;
                     text.horizontalOverflow = HorizontalWrapMode.Overflow;
                     text.verticalOverflow = VerticalWrapMode.Overflow;
+                    break;
+                
+                case RenderPrimitiveType.InputField:
+                    InputField input = data.unityTransform.gameObject.AddComponent<InputField>();
+                    input.text = "Text Content";
+                    InputFieldFocusHandler focusHandler = input.gameObject.AddComponent<InputFieldFocusHandler>();
+                    
+                    GameObject placeholder = new GameObject("Placeholder");
+                    placeholder.AddComponent<Text>();
+                    placeholder.transform.SetParent(data.unityTransform);
+                    
+                    GameObject textObject = new GameObject("Text");
+                    textObject.transform.SetParent(data.unityTransform);
+                    
+                    input.placeholder = placeholder.GetComponent<Text>();
+                    input.textComponent = textObject.GetComponent<Text>();
+                    input.contentType = InputField.ContentType.Standard;
+                    input.lineType = InputField.LineType.SingleLine;
+                    input.transition = Selectable.Transition.None;
+
+                    input.onValueChanged.AddListener((value) => {
+                            
+                    });
+                    
+                    focusHandler.onFocus += () => {
+                        //view.FocusElement(element);
+                    };
+                    
+                    focusHandler.onBlur += (str) => {
+                        //view.BlurElement(element);
+                    };
+                    
                     break;
             }
         }
@@ -262,8 +304,15 @@ namespace Src.Systems {
                     Text text = (Text) data.imageComponent;
                     text.text = ((UITextElement) data.element).GetText();
                     break;
+                
                 case RenderPrimitiveType.Mask:
                 case RenderPrimitiveType.Mask2D:
+                    break;
+                
+                case RenderPrimitiveType.InputField:
+                    Debugger.UIInputFieldElement uiInputElement = (Debugger.UIInputFieldElement)data.element;
+                    InputField unityInputField = (InputField) data.uiComponent;
+                    unityInputField.text = uiInputElement.content;
                     break;
             }
         }
@@ -277,6 +326,10 @@ namespace Src.Systems {
                 return RenderPrimitiveType.Text;
             }
 
+            if ((element.flags & UIElementFlags.InputField) != 0) {
+                return RenderPrimitiveType.InputField;
+            }
+            
             UIStyleSet styleSet = element.style;
             if (styleSet.backgroundImage == null
                 && styleSet.borderColor == ColorUtil.UnsetColorValue

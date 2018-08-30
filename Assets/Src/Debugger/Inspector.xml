@@ -2,15 +2,19 @@
 <UITemplate>
     <Contents style.layoutDirection="Column" style.border="rect(10f)" style.borderColor="yellow">
         
-        <Group style.padding="rect(5f, 10f, 5f, 10f)" style.rectWidth="content(100)" style.backgroundColor="rgb(128, 128, 128)">
+        <Group style.padding="rect(10f)"
+               style.rectWidth="content(100)"
+               style.margin="rect(20f)"
+               style.backgroundColor="rgb(0, 0, 255)">
+            
             <Group style.backgroundColor="red" style.rectWidth="content(100)" style.padding="rect(5f)">
-            Text string here
-more text
+            Text string here more text
             </Group>
+          
         </Group>
-        
+      <!---->
         <!--<Group style.backgroundColor="blue" x-name="toolbar">-->
-            <!---->
+            <!--{time}-->
 <!--Lorem ipsum dolor sit amet, consectetur adipiscing elit. Suspendisse nunc tellus, blandit et est id,-->
 <!--posuere feugiat tellus. Integer vitae luctus ligula, vel molestie turpis. Morbi quis justo nibh.-->
 <!--Fusce maximus velit ut lorem tincidunt, eget suscipit velit pharetra. Donec aliquam fermentum condimentum. -->
@@ -42,7 +46,7 @@ more text
         <!--</Group>-->
         <!---->
         <!--<Group style.layoutDirection="Row" style.mainAxisAlignment="SpaceAround">-->
-            <!--<UIButton style.rectWidth="100" style.rectHeight="14" onMouseDown="AddToValues()" buttonText="'Add more values'"/>-->
+            <!--<UIButton style.rectWidth="100" style.growthFactor="2" style.rectHeight="14" onMouseDown="AddToValues()" buttonText="'Add more values'"/>-->
             <!--<UIButton style.rectWidth="100" style.rectHeight="14" onMouseDown="ToggleLayoutDirection()" buttonText="'Toggle layout direction'"/>-->
             <!--<UIButton style.rectWidth="100" style.rectHeight="14" onMouseDown="ToggleLayoutMode()" buttonText="'Main Axis'"/>-->
             <!--<UIButton style.rectWidth="100" style.rectHeight="14" onMouseDown="ToggleCrossAxis()" buttonText="'Cross Axis'"/>-->

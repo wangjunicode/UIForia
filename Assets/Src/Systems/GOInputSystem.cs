@@ -7,6 +7,8 @@ using UnityEngine;
 
 namespace Src.Systems {
 
+    public class AcceptFocus : Attribute { }
+
     public class GOInputSystem : IInputSystem {
 
         public const string EventAlias = "$event";
@@ -67,15 +69,79 @@ namespace Src.Systems {
 
         }
 
+        private UIElement lastFocused;
+        
         public void OnUpdate() {
             Vector2 positionLastFrame = mousePosition;
             mousePosition = new Vector2(UnityEngine.Input.mousePosition.x, Screen.height - UnityEngine.Input.mousePosition.y);
             QueryLayout();
             MouseState state = 0;
+            
             if (UnityEngine.Input.GetMouseButtonDown(0)) {
+                
                 RunMouseEvent(InputEventType.MouseDown);
+                
+                // for each element this frame sorted by depth
+                
+                // if accept focus
+                    // element.focus();
+                    // break;
+                
+                // if last focused element is not current focused element
+                    // last focused element.blur()
+
+                List<UIElement> focusAcceptors = new List<UIElement>();
+                for (int i = 0; i < elementsThisFrame.Count; i++) {
+                    UIElement element = elementSystem.GetElement(scratchArray[i]);
+                    if ((element.flags & UIElementFlags.AcceptFocus) != 0) {
+                        focusAcceptors.Add(element);
+                    }
+                    
+                }
+
+                if (focusAcceptors.Count > 0) {
+                    // ask current focus to relinquish?
+                    focusAcceptors.Sort((a, b) => a.depth > b.depth ? -1 : 1);
+
+                    // focus should probably cascade
+                    UIElement focused = focusAcceptors[0];
+                    if (focused != lastFocused) {
+                        if (lastFocused != null) {
+                            //view.BlurElement(lastFocused);
+                        }
+
+                        lastFocused = focused;
+                        // view.FocusElement(focused);
+                    }
+                    
+                }
+                
             }
+
             RunMouseEvent(InputEventType.MouseMove);
+
+//            Event evt = new Event();
+//            
+//            while (Event.PopEvent(evt)) {
+//                
+//                if (evt.rawType == EventType.KeyDown) {
+//                    consumedEvent = true;
+//                    var shouldContinue = KeyPressed(evt);
+//                    if (shouldContinue == EditState.Finish) {
+//                        DeactivateInputField();
+//                        break;
+//                    }
+//                }
+//
+//                if (evt.type != EventType.ValidateCommand && evt.type != EventType.ExecuteCommand) continue;
+//
+//                if (evt.commandName == "SelectAll") {
+//                    SelectAll();
+//                    consumedEvent = true;
+//                }
+//                
+//            }
+            
             // UnityEngine.Input.mousePosition;
             // UnityEngine.Input.GetMouseButtonDown()
             // UnityEngine.Input.GetMouseButton(0);
@@ -203,6 +269,7 @@ namespace Src.Systems {
             for (int i = 0; i < elementsThisFrame.Count; i++) {
                 RunBindings(scratchArray[i], mouseEvent);
             }
+
         }
 
         private void RunBindings(int elementId, InputEvent inputEvent) {
@@ -242,7 +309,7 @@ namespace Src.Systems {
 
                 bindingMap[elementData.elementId] = new InputBindingGroup(elementData.context, inputBindings, handledEvents);
             }
-
+            
             for (int i = 0; i < elementData.children.Count; i++) {
                 OnElementCreated(elementData.children[i]);
             }

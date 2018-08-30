@@ -7,7 +7,8 @@
         ProceduralImage,
         Mask,
         Mask2D,
-        Text
+        Text,
+        InputField
 
     }
 

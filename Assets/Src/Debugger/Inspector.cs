@@ -32,7 +32,7 @@ namespace Debugger {
         }
 
         public override void OnUpdate() {
-//            time = Time.realtimeSinceStartup;
+            time = Time.realtimeSinceStartup;
         }
 
         

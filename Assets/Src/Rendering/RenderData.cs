@@ -11,7 +11,8 @@ namespace Src.Systems {
         public Graphic maskComponent;
         public Graphic imageComponent;
         public RenderPrimitiveType primitiveType;
-        
+        public MonoBehaviour uiComponent;
+
         public RenderData(UIElement element, RenderPrimitiveType primitiveType, RectTransform unityTransform, RectTransform rootTransform) {
             this.element = element;
             this.primitiveType = primitiveType;

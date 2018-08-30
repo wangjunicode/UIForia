@@ -20,8 +20,7 @@ namespace Rendering {
         public void SetViewRect(Rect viewportRect) {
             layoutSystem.SetViewportRect(viewportRect);
         }
-     
-
+        
     }
 
 }

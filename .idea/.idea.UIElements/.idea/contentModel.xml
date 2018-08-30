@@ -122,10 +122,14 @@
           </e>
           <e p="ContentBoxRect.cs" t="Include" />
           <e p="Debugger" t="Include">
+            <e p="GOInputFieldRender.cs" t="Include" />
+            <e p="InputFieldFocusHandler.cs" t="Include" />
             <e p="Inspector.cs" t="Include" />
             <e p="Inspector.xml" t="Include" />
+            <e p="Temp.cs" t="Include" />
             <e p="UIButton.cs" t="Include" />
             <e p="UIButton.xml" t="Include" />
+            <e p="UIInputFieldElement.cs" t="Include" />
           </e>
           <e p="Elements" t="Include">
             <e p="UIGroupElement.cs" t="Include" />
@@ -173,6 +177,7 @@
           <e p="Input" t="Include">
             <e p="InputEvent.cs" t="Include" />
             <e p="InputEventType.cs" t="Include" />
+            <e p="KeyboardInputEvent.cs" t="Include" />
             <e p="MouseEvent.cs" t="Include" />
             <e p="MouseEventType.cs" t="Include" />
             <e p="MouseHandleShape.cs" t="Include" />

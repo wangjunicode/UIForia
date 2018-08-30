@@ -19,10 +19,16 @@ public enum UIElementFlags {
     Destroyed = 1 << 8,
     AncestorDestroyed = 1 << 9,
     
+    RequiresSpecialRendering = 1 << 10,
+    
+    InputField = 1 << 11, 
+    AcceptFocus = 1 << 12,
+    
+    IsFocused = 1 << 13,
+    
     SelfAndAncestorShown = Shown | AncestorShown,
     SelfAndAncestorEnabled = Enabled | AncestorEnabled,
 
-    PendingEnable = 1 << 10,
-    PendingDisable = 1 << 11
+
 
 }

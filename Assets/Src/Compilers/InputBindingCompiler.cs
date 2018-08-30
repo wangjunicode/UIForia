@@ -58,6 +58,7 @@ namespace Src.Compilers {
         }
         
         private static readonly ValueTuple<string, Type> mouseEventAlias = ValueTuple.Create("$event", typeof(MouseInputEvent));
+        private static readonly ValueTuple<string, Type> keyboardEventAlias = ValueTuple.Create("$event", typeof(KeyboardInputEvent));
 
         private static readonly InputAttributeTuple[] s_InputAttributeDefs = {
             new InputAttributeTuple("onMouseEnter", InputEventType.MouseEnter, mouseEventAlias),
@@ -68,6 +69,8 @@ namespace Src.Compilers {
             new InputAttributeTuple("onMouseHover", InputEventType.MouseHover, mouseEventAlias),
             new InputAttributeTuple("onMouseScroll", InputEventType.MouseScroll, mouseEventAlias),
             new InputAttributeTuple("onMouseContext", InputEventType.MouseContext, mouseEventAlias),
+            new InputAttributeTuple("onKeyDown", InputEventType.KeyDown, keyboardEventAlias), 
+            new InputAttributeTuple("onKeyUp", InputEventType.KeyUp, keyboardEventAlias), 
         };
 
         private struct InputAttributeTuple {

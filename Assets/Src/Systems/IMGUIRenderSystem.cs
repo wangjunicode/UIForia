@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Reflection;
 using Rendering;
 using Src.Extensions;
 using UnityEngine;
@@ -16,7 +17,7 @@ namespace Src.Systems {
         private readonly Dictionary<Color, Texture2D> textureCache;
 
         private bool isReady;
-        
+
         public IMGUIRenderSystem(IElementRegistry elementSystem, IStyleSystem styleSystem, ILayoutSystem layoutSystem) {
             this.styleSystem = styleSystem;
             this.layoutSystem = layoutSystem;
@@ -27,6 +28,7 @@ namespace Src.Systems {
         }
 
         public void OnRender() {
+            if (Event.current.type != EventType.Repaint) return;
             int count = layoutSystem.RectCount;
             LayoutResult[] layoutResults = layoutSystem.LayoutResults;
 
@@ -50,8 +52,8 @@ namespace Src.Systems {
                 Rect paintRect = new Rect(renderData.layoutRect);
                 paintRect.x += renderData.element.style.marginLeft;
                 paintRect.y += renderData.element.style.marginTop;
-                paintRect.width -= renderData.element.style.marginRight;
-                paintRect.height -= renderData.element.style.marginBottom;
+                paintRect.width -= renderData.element.style.marginRight + renderData.element.style.marginLeft;
+                paintRect.height -= renderData.element.style.marginBottom + renderData.element.style.marginTop;
 
                 switch (primitiveType) {
                     case RenderPrimitiveType.RawImage:
@@ -62,8 +64,8 @@ namespace Src.Systems {
                                 Rect innerRect = new Rect(paintRect);
                                 innerRect.x += renderData.borderSize.left;
                                 innerRect.y += renderData.borderSize.top;
-                                innerRect.width -= renderData.borderSize.right * 2f;
-                                innerRect.height -= renderData.borderSize.bottom * 2f;
+                                innerRect.width -= renderData.borderSize.right + renderData.borderSize.left;
+                                innerRect.height -= renderData.borderSize.bottom + renderData.borderSize.top;
                                 GUI.DrawTexture(innerRect, renderData.backgroundTexture);
                             }
 
@@ -95,6 +97,17 @@ namespace Src.Systems {
                         style.alignment = renderData.element.style.textAnchor;
                         style.wordWrap = true;
                         GUI.Label(renderData.layoutRect, renderData.textContent, style);
+//                        MethodInfo info = typeof(GUIStyle).GetMethod("DrawWithTextSelection", BindingFlags.Instance | BindingFlags.NonPublic,
+//                            null,
+//                            new [] {
+//                                typeof(Rect), typeof(GUIContent), typeof(bool), typeof(bool), typeof(int), typeof(int), typeof(bool)
+//                            }, null);
+//                        info.Invoke(style, new object[] {
+//                            renderData.layoutRect,
+//                            new GUIContent(renderData.textContent),
+//                            true, true, 0, 5, false
+//                        });
+//                        style.DrawWithTextSelection(renderData.layoutRect, new GUIContent(renderData.textContent), 0, 0, 5);
                         break;
                 }
 
@@ -153,7 +166,6 @@ namespace Src.Systems {
             for (int i = 0; i < data.children.Count; i++) {
                 OnElementCreated(data.children[i]);
             }
-
         }
 
         private void HandleTextChanged(int elementId, string text) {
@@ -207,6 +219,7 @@ namespace Src.Systems {
                 if ((element.flags & UIElementFlags.RequiresRendering) == 0) {
                     return;
                 }
+
                 data = new IMGUIRenderData(element);
                 renderSkipTree.AddItem(data);
                 data.primitiveType = primitiveType;

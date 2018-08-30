@@ -9,7 +9,7 @@ namespace Src.Systems {
 
     public class IMGUIInputSystem : IInputSystem {
 
-        public const string EventAlias = "$event";
+        private const string EventAlias = "$event";
 
         private readonly IStyleSystem styleSystem;
         private readonly ILayoutSystem layoutSystem;
@@ -163,7 +163,28 @@ namespace Src.Systems {
 
         public void OnUpdate() {
 
-            // todo make sure this isnt over spammed
+            Event e = Event.current;
+ 
+            if(e.type == EventType.ValidateCommand) { // Validate the command
+ 
+                if(e.commandName == "Copy" || e.commandName == "Paste") {
+                    e.Use(); // without this line we won't get ExecuteCommand
+                }
+   
+            } 
+            else if(e.type == EventType.ExecuteCommand) { // Execute the command
+ 
+                if(e.commandName == "Copy") {
+                    // ...
+                } else if(e.commandName == "Paste") {
+                    // ...
+                }
+                else {
+                    Debug.Log(e.keyCode);
+                }
+            }
+            
+            // todo make sure this isn't over spammed
             QueryLayout();
             switch (Event.current.type) {
                 case EventType.ContextClick:
@@ -194,6 +215,14 @@ namespace Src.Systems {
                     break;
                 case EventType.MouseDrag:
                     break;
+                
+                case EventType.KeyDown:
+                    TextEditor ed = new TextEditor();
+                    Debug.Log(Event.current.control + " " + Event.current.keyCode);
+                    break;
+                case EventType.KeyUp:
+                    Debug.Log(Event.current.control + " " + Event.current.keyCode);
+                    break;
             }
 
             Swap(ref elementsLastFrame, ref elementsThisFrame);
@@ -207,7 +236,7 @@ namespace Src.Systems {
             lhs = rhs;
             rhs = temp;
         }
-
+ 
         public void OnDestroy() {
             this.styleSystem.onAvailableStatesChanged -= HandleStatefulStyle;
         }

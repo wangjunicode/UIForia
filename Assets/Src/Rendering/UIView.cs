@@ -125,7 +125,7 @@ public abstract class UIView : IElementRegistry {
 
     public virtual void OnDestroy() { }
 
-    public void Update() {
+    public virtual void Update() {
         elementTree.ConditionalTraversePreOrder((element) => {
             if (element == null) return true;
             if (element.isDisabled) return false;

@@ -3,8 +3,6 @@ using Src.Input;
 
 namespace Src.InputBindings {
 
-    
-    
     public class InputBinding : Binding {
 
         public new static readonly InputBinding[] EmptyArray = new InputBinding[0];
@@ -26,5 +24,5 @@ namespace Src.InputBindings {
         }
 
     }
-
+    
 }

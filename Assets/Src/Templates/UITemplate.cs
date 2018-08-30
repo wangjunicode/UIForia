@@ -1,11 +1,13 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Reflection;
 using JetBrains.Annotations;
 using Rendering;
 using Src.Compilers;
 using Src.InputBindings;
 using Src.StyleBindings;
+using Src.Systems;
 
 namespace Src {
 
@@ -24,6 +26,7 @@ namespace Src {
 
         protected List<Binding> bindingList;
 
+        public bool acceptFocus;
         private static readonly StyleBindingCompiler styleCompiler = new StyleBindingCompiler(null);
         private static readonly InputBindingCompiler inputCompiler = new InputBindingCompiler(null);
         private static readonly PropertyBindingCompiler propCompiler = new PropertyBindingCompiler(null);
@@ -47,12 +50,14 @@ namespace Src {
         public InitData GetCreationData(UIElement element, UITemplateContext context) {
             InitData data = new InitData(element, context);
             data.baseStyles = baseStyles;
-
             data.bindings = bindings;
             data.inputBindings = inputBindings;
             data.constantBindings = constantBindings;
             data.constantStyleBindings = constantStyleBindings;
             data.conditionalBindings = conditionalBindings;
+            if (acceptFocus) {
+                element.flags |= UIElementFlags.AcceptFocus;
+            }
             return data;
         }
 
@@ -84,6 +89,7 @@ namespace Src {
             CompilePropertyBindings(template);
             CompileConditionalBindings(template);
             ResolveConstantBindings();
+            acceptFocus = elementType.GetCustomAttribute(typeof(AcceptFocus)) != null;
             return true;
         }
 

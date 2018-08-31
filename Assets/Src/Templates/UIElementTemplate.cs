@@ -29,6 +29,13 @@ namespace Src {
                 rootType = TypeProcessor.GetType(typeName, template.imports).rawType;
             }
             
+            ParsedTemplate templateToExpand = TemplateParser.GetParsedTemplate(rootType);
+            templateToExpand.Compile();
+            // todo -- make this not suck
+            bindingList = bindingList ?? new List<Binding>();
+            bindingList.AddRange(templateToExpand.rootElementTemplate.bindings);
+            bindingList.AddRange(templateToExpand.rootElementTemplate.constantBindings);
+            // todo -- remove duplicate bindings
             base.Compile(template);
 
             return true;
@@ -39,7 +46,6 @@ namespace Src {
         public override InitData CreateScoped(TemplateScope inputScope) {
             List<InitData> scopedChildren = new List<InitData>(childTemplates.Count);
 
-            UnityEngine.Debug.Log(rootType.Name);
             for (int i = 0; i < childTemplates.Count; i++) {
                 scopedChildren.Add(childTemplates[i].CreateScoped(inputScope));
             }

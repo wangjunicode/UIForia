@@ -6,14 +6,7 @@ namespace Src {
 
         public UITemplateContext context;
         public List<InitData> inputChildren;
-
-
-        public TemplateScope() {}
         
-        public void Clear() {
-            inputChildren.Clear();
-        }
-
     }
 
 }

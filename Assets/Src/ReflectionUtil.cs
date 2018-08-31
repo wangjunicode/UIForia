@@ -580,4 +580,32 @@ public static class ReflectionUtil {
         return type.GetMethod(methodName);
     }
 
+    public static bool IsCallbackType(Type type) {
+        if (type == typeof(Action)) return true;
+        Type generic = null;
+        if (type.IsGenericTypeDefinition) {
+            generic = type;
+        }
+        else if (type.IsGenericType) {
+            generic = type.GetGenericTypeDefinition();
+        }
+        if (generic == null) return false;
+        if (generic == typeof(Action<>)) return true;
+        if (generic == typeof(Action<,>)) return true;
+        if (generic == typeof(Action<,,>)) return true;
+        if (generic == typeof(Action<,,,>)) return true;
+        if (generic == typeof(Action<,,,,>)) return true;
+        if (generic == typeof(Action<,,,,,>)) return true;
+        if (generic == typeof(Action<,,,,,,>)) return true;
+        if (generic == typeof(Func<>)) return true;
+        if (generic == typeof(Func<,>)) return true;
+        if (generic == typeof(Func<,,>)) return true;
+        if (generic == typeof(Func<,,,>)) return true;
+        if (generic == typeof(Func<,,,,>)) return true;
+        if (generic == typeof(Func<,,,,,>)) return true;
+        if (generic == typeof(Func<,,,,,,>)) return true;
+        if (generic == typeof(Func<,,,,,,,>)) return true;
+        return false;
+    }
+
 }

@@ -16,8 +16,8 @@ namespace Src {
         public List<UITemplate> childTemplates;
         public readonly List<AttributeDefinition> attributes;
 
-        protected Binding[] bindings;
-        protected Binding[] constantBindings;
+        protected internal Binding[] bindings;
+        protected internal Binding[] constantBindings;
         protected Binding[] conditionalBindings;
         protected InputBinding[] inputBindings;
 
@@ -126,9 +126,7 @@ namespace Src {
 
         protected virtual void CompilePropertyBindings(ParsedTemplate template) {
             if (attributes == null || attributes.Count == 0) return;
-            // remove this
-            if (GetType() != typeof(UIElementTemplate)) return;
-            
+          
             propCompiler.SetContext(template.contextDefinition);
 
             for (int i = 0; i < attributes.Count; i++) {
@@ -142,9 +140,6 @@ namespace Src {
                     bindingList.Add(binding);
                 }
             }
-            // todo -- filter out already compiled attributes, warn if attribute was already handled
-//            propCompiler.CompileAttribute(attributes.Where(a) => !a.isCompiled);
-            // set constant bindings here
         }
         
         // todo -- show / hide / disable
@@ -178,24 +173,6 @@ namespace Src {
                     baseStyles.Add(style);
                 }
             }
-        }
-
-    }
-
-    public class ShowBinding : Binding {
-
-        private readonly Expression<bool> expression;
-
-        public ShowBinding(Expression<bool> expression) {
-            this.expression = expression;
-        }
-
-        public override void Execute(UIElement element, UITemplateContext context) {
-            
-        }
-
-        public override bool IsConstant() {
-            throw new System.NotImplementedException();
         }
 
     }

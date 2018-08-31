@@ -98,10 +98,10 @@ namespace Src.Systems {
                 transform.anchoredPosition = new Vector3(position.x, -position.y, 0);
                 transform.sizeDelta = size;
             }
+
             // if focusRequiresCursor
-                // CreateOrUpdateCursor();
-            
-        }  
+            // CreateOrUpdateCursor();
+        }
 
         public void OnReset() {
             ready = false;
@@ -126,13 +126,11 @@ namespace Src.Systems {
         }
 
         private void OnElementStyleChanged(UIElement element) {
-
             RenderData data = renderSkipTree.GetItem(element);
 
             RenderPrimitiveType primitiveType = DeterminePrimitiveType(element);
 
             if (data == null) {
-
                 GameObject obj = new GameObject(element.ToString());
 
                 RectTransform unityTransform = obj.AddComponent<RectTransform>();
@@ -153,7 +151,7 @@ namespace Src.Systems {
                 ApplyStyles(data);
                 return;
             }
-            
+
             data.primitiveType = primitiveType;
 
             if (data.imageComponent != null) {
@@ -205,6 +203,7 @@ namespace Src.Systems {
             if (transforms.ContainsKey(element.id)) {
                 transforms[element.id].gameObject.SetActive(true);
             }
+
             renderSkipTree.ConditionalTraversePreOrder(element, (item) => {
                 if (item.element.isDisabled) return false;
                 item.unityTransform.gameObject.SetActive(true);
@@ -216,6 +215,7 @@ namespace Src.Systems {
             if (transforms.ContainsKey(element.id)) {
                 transforms[element.id].gameObject.SetActive(false);
             }
+
             renderSkipTree.ConditionalTraversePreOrder(element, (item) => {
                 item.unityTransform.gameObject.SetActive(false);
                 return true;
@@ -228,17 +228,18 @@ namespace Src.Systems {
                     data.imageComponent = data.unityTransform.gameObject.AddComponent<RawImage>();
                     ApplyStyles(data);
                     return;
-                
+
                 case RenderPrimitiveType.ProceduralImage:
                     data.imageComponent = data.unityTransform.gameObject.AddComponent<BorderedImage>();
                     ApplyStyles(data);
                     return;
-                
+
                 case RenderPrimitiveType.Mask:
                 case RenderPrimitiveType.Mask2D:
                     break;
-                
+
                 case RenderPrimitiveType.Text:
+
                     data.imageComponent = data.unityTransform.gameObject.AddComponent<Text>();
                     Text text = (Text) data.imageComponent;
                     text.text = ((UITextElement) data.element).GetText();
@@ -247,38 +248,44 @@ namespace Src.Systems {
                     text.color = data.element.style.textColor;
                     text.horizontalOverflow = HorizontalWrapMode.Overflow;
                     text.verticalOverflow = VerticalWrapMode.Overflow;
+
+                    UIInputFieldElement parent = data.element.parent as UIInputFieldElement;
+                    if (parent != null) {
+                        RectTransform t = transforms[parent.id];
+                        InputField i = t.GetComponent<InputField>();
+                        i.textComponent = text;
+                        text.supportRichText = false;
+                    }
+
                     break;
-                
+
                 case RenderPrimitiveType.InputField:
+                    UIInputFieldElement inputElement = (UIInputFieldElement) data.element;
+
                     InputField input = data.unityTransform.gameObject.AddComponent<InputField>();
-                    input.text = "Text Content";
+
+                    input.text = inputElement.content;
+
                     InputFieldFocusHandler focusHandler = input.gameObject.AddComponent<InputFieldFocusHandler>();
-                    
-                    GameObject placeholder = new GameObject("Placeholder");
-                    placeholder.AddComponent<Text>();
-                    placeholder.transform.SetParent(data.unityTransform);
-                    
-                    GameObject textObject = new GameObject("Text");
-                    textObject.transform.SetParent(data.unityTransform);
-                    
-                    input.placeholder = placeholder.GetComponent<Text>();
-                    input.textComponent = textObject.GetComponent<Text>();
+
                     input.contentType = InputField.ContentType.Standard;
                     input.lineType = InputField.LineType.SingleLine;
                     input.transition = Selectable.Transition.None;
 
                     input.onValueChanged.AddListener((value) => {
-                            
+                        inputElement.SetText(value);
                     });
-                    
+
                     focusHandler.onFocus += () => {
                         //view.FocusElement(element);
                     };
-                    
+
                     focusHandler.onBlur += (str) => {
                         //view.BlurElement(element);
                     };
-                    
+
+                    // data.imageComponent = data.unityTransform.gameObject.AddComponent<BorderedImage>();
+                    //ApplyStyles(data);
                     break;
             }
         }
@@ -294,6 +301,7 @@ namespace Src.Systems {
                     rawImage.color = style.backgroundColor;
                     rawImage.uvRect = new Rect(0, 0, 1, 1);
                     break;
+                case RenderPrimitiveType.InputField:
                 case RenderPrimitiveType.ProceduralImage:
                     BorderedImage procImage = (BorderedImage) data.imageComponent;
                     procImage.color = style.backgroundColor;
@@ -304,15 +312,9 @@ namespace Src.Systems {
                     Text text = (Text) data.imageComponent;
                     text.text = ((UITextElement) data.element).GetText();
                     break;
-                
+
                 case RenderPrimitiveType.Mask:
                 case RenderPrimitiveType.Mask2D:
-                    break;
-                
-                case RenderPrimitiveType.InputField:
-                    Debugger.UIInputFieldElement uiInputElement = (Debugger.UIInputFieldElement)data.element;
-                    InputField unityInputField = (InputField) data.uiComponent;
-                    unityInputField.text = uiInputElement.content;
                     break;
             }
         }
@@ -321,7 +323,7 @@ namespace Src.Systems {
             if ((element.flags & UIElementFlags.RequiresRendering) == 0) {
                 return RenderPrimitiveType.None;
             }
-            
+
             if ((element.flags & UIElementFlags.TextElement) != 0) {
                 return RenderPrimitiveType.Text;
             }
@@ -329,7 +331,7 @@ namespace Src.Systems {
             if ((element.flags & UIElementFlags.InputField) != 0) {
                 return RenderPrimitiveType.InputField;
             }
-            
+
             UIStyleSet styleSet = element.style;
             if (styleSet.backgroundImage == null
                 && styleSet.borderColor == ColorUtil.UnsetColorValue

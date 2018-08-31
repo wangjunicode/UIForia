@@ -25,6 +25,7 @@ public enum UIElementFlags {
     AcceptFocus = 1 << 12,
     
     IsFocused = 1 << 13,
+    Image = 1 << 14,
     
     SelfAndAncestorShown = Shown | AncestorShown,
     SelfAndAncestorEnabled = Enabled | AncestorEnabled,

@@ -15,6 +15,7 @@
         <e p="Src" t="Include">
           <e p="Binding" t="Include">
             <e p="Binding.cs" t="Include" />
+            <e p="CallbackBinding.cs" t="Include" />
             <e p="DisabledBinding.cs" t="Include" />
             <e p="EnabledBinding.cs" t="Include" />
             <e p="FieldSetterBinding.cs" t="Include" />
@@ -133,6 +134,7 @@
           </e>
           <e p="Elements" t="Include">
             <e p="UIGroupElement.cs" t="Include" />
+            <e p="UIImageElement.cs" t="Include" />
             <e p="UIPanel.cs" t="Include" />
             <e p="UIRepeatChild.cs" t="Include" />
             <e p="UIRepeatElement.cs" t="Include" />
@@ -318,6 +320,8 @@
             <e p="UIChildrenTemplate.cs" t="Include" />
             <e p="UIElementTemplate.cs" t="Include" />
             <e p="UIGroupTemplate.cs" t="Include" />
+            <e p="UIImageTemplate.cs" t="Include" />
+            <e p="UIInputFieldTemplate.cs" t="Include" />
             <e p="UIPrefabTemplate.cs" t="Include" />
             <e p="UIRepeatChildTemplate.cs" t="Include" />
             <e p="UIRepeatTemplate.cs" t="Include" />

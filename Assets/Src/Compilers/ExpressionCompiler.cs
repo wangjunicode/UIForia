@@ -80,6 +80,16 @@ namespace Src {
             this.context = contextDefinition;
         }
 
+        [PublicAPI]
+        public void AddRuntimeAlias(string aliasName, Type aliasType) {
+            context.AddRuntimeAlias(aliasName, aliasType);
+        }
+
+        [PublicAPI]
+        public void RemoveRuntimeAlias(string aliasName) {
+            context.RemoveRuntimeAlias(aliasName);
+        }
+
         private Expression Visit(ExpressionNode node) {
             switch (node.expressionType) {
                 case ExpressionNodeType.AliasAccessor:

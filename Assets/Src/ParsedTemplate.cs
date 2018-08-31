@@ -16,7 +16,7 @@ namespace Src {
         public readonly ExpressionCompiler compiler;
         public readonly ContextDefinition contextDefinition;
         
-        private readonly UIElementTemplate rootElementTemplate;
+        public readonly UIElementTemplate rootElementTemplate;
         
         private int idGenerator;
         private bool isCompiled;
@@ -28,7 +28,6 @@ namespace Src {
         }
 
         public List<UITemplate> childTemplates => rootElementTemplate.childTemplates;
-
 
         public InitData CreateWithScope(TemplateScope scope) {
             if (!isCompiled) Compile();
@@ -71,7 +70,7 @@ namespace Src {
             return rootData;
         }
 
-        private void Compile() {
+        public void Compile() {
             if (isCompiled) return;
             isCompiled = true;
             CompileStep(rootElementTemplate);

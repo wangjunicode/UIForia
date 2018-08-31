@@ -31,11 +31,14 @@ namespace Debugger {
             isHorizontal = true;
         }
 
+        public void OnTextInputChanged(string value, string otherParam) {
+            Debug.Log(value + " " + otherParam);
+        }
+
         public override void OnUpdate() {
             time = Time.realtimeSinceStartup;
         }
 
-        
         public void ToggleLayoutDirection() {
             if (dir == LayoutDirection.Column) {
                 dir = LayoutDirection.Row;

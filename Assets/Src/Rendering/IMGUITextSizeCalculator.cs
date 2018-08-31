@@ -33,6 +33,8 @@ namespace Rendering {
             s_GUIStyle.fontStyle = style.fontStyle;
             s_GUIStyle.alignment = style.textAnchor;
             s_GUIStyle.wordWrap = false;
+            s_GUIStyle.stretchWidth = false;
+            s_GUIStyle.richText = false;
             s_GUIContent.text = text;
             return Mathf.Ceil(s_GUIStyle.CalcSize(s_GUIContent).x + 1);
         }

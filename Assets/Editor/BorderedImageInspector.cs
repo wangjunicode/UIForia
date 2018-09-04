@@ -9,10 +9,12 @@ namespace Src.Editor {
 
         private SerializedProperty borderColor;
         private SerializedProperty borderSizes;
+        private SerializedProperty borderRadii;
         
         protected override void OnEnable() {
             base.OnEnable();
             borderColor = serializedObject.FindProperty("borderColor");
+            borderRadii = serializedObject.FindProperty("borderRadii");
             borderSizes = serializedObject.FindProperty("border");
         }
 
@@ -20,7 +22,8 @@ namespace Src.Editor {
             EditorGUILayout.PropertyField (m_Color);
             EditorGUILayout.PropertyField (borderColor);
             EditorGUILayout.PropertyField(borderSizes);
-            serializedObject.ApplyModifiedProperties ();
+            EditorGUILayout.PropertyField(borderRadii);
+            serializedObject.ApplyModifiedProperties();
         }
 
     }

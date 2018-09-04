@@ -206,7 +206,7 @@ Shader "Internal-GUIRoundedRect"
         }
         
         if(isPointInCenter) {
-            return half4(0, 0, 0,1);    
+            return half4(0, 0, 0, 1);    
         }
         
         // corners outside borders

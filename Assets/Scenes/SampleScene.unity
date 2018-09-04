@@ -326,6 +326,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 1447573794}
+  - component: {fileID: 1447573796}
   m_Layer: 5
   m_Name: UIRoot
   m_TagString: Untagged
@@ -351,6 +352,13 @@ RectTransform:
   m_AnchoredPosition: {x: 0, y: 0}
   m_SizeDelta: {x: 0, y: 0}
   m_Pivot: {x: 0.5, y: 0.5}
+--- !u!222 &1447573796
+CanvasRenderer:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInternal: {fileID: 0}
+  m_GameObject: {fileID: 1447573793}
+  m_CullTransparentMesh: 0
 --- !u!1 &1506585478
 GameObject:
   m_ObjectHideFlags: 0
@@ -381,7 +389,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: a63e0330136641939c07c55cc3f5724f, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  tempFont: {fileID: 10102, guid: 0000000000000000e000000000000000, type: 0}
+  tempFont: {fileID: 10102, guid: 0000000000000000e000000000000000, type: 3}
 --- !u!114 &1506585480
 MonoBehaviour:
   m_ObjectHideFlags: 0

@@ -8,25 +8,24 @@ namespace Src.Systems {
 
     public class LayoutSystem : ILayoutSystem {
 
-        private readonly IStyleSystem styleSystem;
-        private readonly SkipTree<LayoutNode> layoutTree;
-
-        // todo -- use simple array for this w/ unique ids -> indices on elements
-
         private readonly FlexLayout flexLayout;
         private readonly FlowLayout flowLayout;
         private readonly FixedLayout fixedLayout;
+        private readonly IStyleSystem styleSystem;
+        private readonly SkipTree<LayoutNode> layoutTree;
 
         private int rectCount;
         private Rect viewport;
-        private LayoutResult[] rects;
         private bool isReady;
-        
+        private LayoutResult[] rects;
+
         public LayoutSystem(ITextSizeCalculator textSizeCalculator, IStyleSystem styleSystem) {
             this.styleSystem = styleSystem;
             this.layoutTree = new SkipTree<LayoutNode>();
 
             this.flexLayout = new FlexLayout(textSizeCalculator);
+            this.fixedLayout = new FixedLayout(textSizeCalculator);
+            
             this.rects = new LayoutResult[16];
 
             this.layoutTree.onItemParentChanged += HandleTreeParentChanged;
@@ -36,6 +35,10 @@ namespace Src.Systems {
         public int RectCount => rectCount;
         public LayoutResult[] LayoutResults => rects;
 
+        public void SetViewportRect(Rect viewport) {
+            this.viewport = viewport;
+        }
+
         public void OnInitialize() {
             this.styleSystem.onLayoutChanged += HandleLayoutChanged;
             this.styleSystem.onTextContentChanged += HandleTextChanged;
@@ -44,22 +47,9 @@ namespace Src.Systems {
             this.styleSystem.onPaddingChanged += HandleContentBoxChanged;
             this.styleSystem.onMarginChanged += HandleContentBoxChanged;
             this.styleSystem.onConstraintChanged += HandleConstraintChanged;
+            this.styleSystem.onFontPropertyChanged += HandleFontPropertyChanged;
         }
-        
-        private void HandleConstraintChanged(int elementId, LayoutConstraints constraints) {
-            LayoutNode node = layoutTree.GetItem(elementId);
-            node?.UpdateData(this);
-        }
-        
-        private void HandleContentBoxChanged(int elementId, ContentBoxRect rect) {
-            LayoutNode node = layoutTree.GetItem(elementId);
-            node?.UpdateData(this);
-        }
-        private void HandleRectChanged(int elementId, LayoutRect rect) {
-            LayoutNode node = layoutTree.GetItem(elementId);
-            node?.UpdateData(this);
-        }
-        
+
         public void OnReady() {
             isReady = true;
             layoutTree.TraversePreOrder(this, (self, node) => { node.UpdateData(self); });
@@ -69,11 +59,10 @@ namespace Src.Systems {
             if ((elementData.element.flags & UIElementFlags.RequiresLayout) != 0) {
                 LayoutNode node = new LayoutNode(elementData.element);
                 layoutTree.AddItem(node);
-                
+
                 if (isReady) {
                     node.UpdateData(this);
                 }
-                
             }
 
             for (int i = 0; i < elementData.children.Count; i++) {
@@ -85,15 +74,13 @@ namespace Src.Systems {
             switch (layoutType) {
                 case LayoutType.Flex:
                     return flexLayout;
+                case LayoutType.Fixed:
+                    return fixedLayout;
             }
 
             throw new NotImplementedException();
         }
 
-
-        public void SetViewportRect(Rect viewport) {
-            this.viewport = viewport;
-        }
 
         public void OnUpdate() {
             rectCount = 0;
@@ -108,15 +95,16 @@ namespace Src.Systems {
                 if ((node.element.flags & UIElementFlags.Destroyed) != 0) {
                     return false;
                 }
+
                 if (node.element.isDisabled) return false;
                 rects[rectCount++] = new LayoutResult(node.element.id, node.outputRect, new Rect(node.localPosition, node.outputRect.size));
                 if (node.isTextElement) {
                     return true;
                 }
-                node.layout.Run(viewport, node, null);
+
+                node.layout.Run(viewport, node);
                 return true;
             });
-
         }
 
         public bool GetRectForElement(int elementId, out Rect rect) {
@@ -134,13 +122,16 @@ namespace Src.Systems {
         public int QueryPoint(Vector2 point, ref LayoutResult[] queryResults) {
             int retnCount = 0;
             for (int i = 0; i < rectCount; i++) {
-                if (rects[i].rect.Contains(point)) {
-                    if (rectCount == queryResults.Length) {
-                        Array.Resize(ref queryResults, queryResults.Length * 2);
-                    }
 
-                    queryResults[retnCount++] = rects[i];
+                if (!rects[i].rect.Contains(point)) {
+                    continue;
                 }
+                
+                if (rectCount == queryResults.Length) {
+                    Array.Resize(ref queryResults, queryResults.Length * 2);
+                }
+
+                queryResults[retnCount++] = rects[i];
             }
 
             return retnCount;
@@ -151,19 +142,20 @@ namespace Src.Systems {
         }
 
         public void OnDestroy() {
-            this.styleSystem.onLayoutChanged += HandleLayoutChanged;
-            this.styleSystem.onTextContentChanged += HandleTextChanged;
-            this.styleSystem.onRectChanged += HandleRectChanged;
-            this.styleSystem.onBorderChanged += HandleContentBoxChanged;
-            this.styleSystem.onPaddingChanged += HandleContentBoxChanged;
-            this.styleSystem.onMarginChanged += HandleContentBoxChanged;
-            this.styleSystem.onConstraintChanged += HandleConstraintChanged;
+            this.styleSystem.onFontPropertyChanged -= HandleFontPropertyChanged;
+            this.styleSystem.onLayoutChanged -= HandleLayoutChanged;
+            this.styleSystem.onTextContentChanged -= HandleTextChanged;
+            this.styleSystem.onRectChanged -= HandleRectChanged;
+            this.styleSystem.onBorderChanged -= HandleContentBoxChanged;
+            this.styleSystem.onPaddingChanged -= HandleContentBoxChanged;
+            this.styleSystem.onMarginChanged -= HandleContentBoxChanged;
+            this.styleSystem.onConstraintChanged -= HandleConstraintChanged;
             layoutTree.Clear();
         }
 
-        public void OnElementEnabled(UIElement element) {}
+        public void OnElementEnabled(UIElement element) { }
 
-        public void OnElementDisabled(UIElement element) {}
+        public void OnElementDisabled(UIElement element) { }
 
         public void OnElementDestroyed(UIElement element) {
             layoutTree.RemoveHierarchy(element);
@@ -172,6 +164,11 @@ namespace Src.Systems {
         public void OnElementShown(UIElement element) { }
 
         public void OnElementHidden(UIElement element) { }
+
+        private void HandleFontPropertyChanged(int elementId, TextStyle textStyle) {
+            LayoutNode node = layoutTree.GetItem(elementId);
+            node?.UpdateTextMeasurements();
+        }
 
         private void HandleLayoutChanged(int elementId, LayoutParameters parameters) {
             LayoutNode node = layoutTree.GetItem(elementId);
@@ -184,10 +181,25 @@ namespace Src.Systems {
             LayoutNode node = layoutTree.GetItem(elementId);
             node?.SetTextContent(text);
         }
-        
+
         private static void HandleTreeParentChanged(LayoutNode child, LayoutNode newParent, LayoutNode oldParent) {
             oldParent?.children.Remove(child);
             newParent?.children.Add(child);
+        }
+
+        private void HandleConstraintChanged(int elementId, LayoutConstraints constraints) {
+            LayoutNode node = layoutTree.GetItem(elementId);
+            node?.UpdateData(this);
+        }
+
+        private void HandleContentBoxChanged(int elementId, ContentBoxRect rect) {
+            LayoutNode node = layoutTree.GetItem(elementId);
+            node?.UpdateData(this);
+        }
+
+        private void HandleRectChanged(int elementId, LayoutRect rect) {
+            LayoutNode node = layoutTree.GetItem(elementId);
+            node?.UpdateData(this);
         }
 
     }

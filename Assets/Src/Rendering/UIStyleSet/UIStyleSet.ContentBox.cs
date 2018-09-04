@@ -58,7 +58,7 @@ namespace Rendering {
         [PublicAPI]
         public void SetMargin(ContentBoxRect value, StyleState state = StyleState.Normal) {
             GetOrCreateStyle(state).margin = value;
-            activeStyles.margin = margin;
+            computedStyle.margin = margin;
             changeHandler.SetMargin(elementId, margin);
         }
 

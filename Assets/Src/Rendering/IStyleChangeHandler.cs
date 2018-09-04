@@ -12,7 +12,7 @@ namespace Src.Systems {
         void SetLayout(int elementId, LayoutParameters data);
         void SetBorderRadius(int elementId, BorderRadius radius);
         void SetConstraints(int elementId, LayoutConstraints constraints);
-        void SetText(int elementId, TextStyle textStyle);
+        void SetTextStyle(int elementId, TextStyle textStyle);
         void SetAvailableStates(int elementId, StyleState availableStates);
 
     }

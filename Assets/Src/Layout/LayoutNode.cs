@@ -7,44 +7,49 @@ using UnityEngine;
 
 namespace Src.Layout {
 
-    [DebuggerDisplay("{element}")]
+    [DebuggerDisplay("{" + nameof(element) + "}")]
     public class LayoutNode : IHierarchical {
 
         public Rect outputRect;
         public LayoutRect rect;
         public UILayout layout;
-        public List<LayoutNode> children;
         public LayoutParameters parameters;
         public LayoutConstraints constraints;
 
         public string textContent;
-        public Vector2 textContentSize;
-        public float previousParentWidth;
+        public float preferredTextWidth;
 
         public float contentStartOffsetX;
         public float contentEndOffsetX;
         public float contentStartOffsetY;
         public float contentEndOffsetY;
         public bool isTextElement;
+
+        public Vector2 localPosition;
         public readonly UIStyleSet style;
         public readonly UIElement element;
-        public Vector2 localPosition;
+        public readonly List<LayoutNode> children;
+
+        private List<MeasureResult> measureResults;
 
         public LayoutNode(UIElement element) {
             this.element = element;
-            this.children = new List<LayoutNode>();
             this.style = element.style;
+            this.children = new List<LayoutNode>();
         }
 
         public bool isInFlow => parameters.flow != LayoutFlowType.OutOfFlow;
-        
+
         public float horizontalOffset => contentStartOffsetX + contentEndOffsetX;
         public float verticalOffset => contentStartOffsetY + contentEndOffsetY;
 
+        public int UniqueId => element.id;
+        public IHierarchical Element => element;
+        public IHierarchical Parent => element.parent;
+
         public void UpdateData(LayoutSystem layoutSystem) {
-            previousParentWidth = float.MinValue;
-            textContentSize = Vector2.zero;
-        //    textContent = style.textContent;
+            preferredTextWidth = 0;
+
             contentStartOffsetX = style.paddingLeft + style.marginLeft + style.borderLeft;
             contentEndOffsetX = style.paddingRight + style.marginRight + style.borderRight;
 
@@ -60,7 +65,10 @@ namespace Src.Layout {
             UITextElement textElement = element as UITextElement;
             if (textElement != null) {
                 isTextElement = true;
-                textContent = textElement.GetText();
+                textContent = textElement.GetText(); // read from style later
+                preferredTextWidth = layout.GetTextWidth(textContent, style);
+                measureResults = measureResults ?? new List<MeasureResult>(4);
+                measureResults.Clear();
             }
         }
 
@@ -73,10 +81,10 @@ namespace Src.Layout {
                     return constraints.minWidth.value;
 
                 case UIUnit.Content:
-                    throw new NotImplementedException();
+                    return layout.GetContentWidth(this, parentValue - (contentStartOffsetX + contentEndOffsetX), viewportValue) * constraints.minWidth.value;
 
                 case UIUnit.Parent:
-                    throw new NotImplementedException();
+                    return constraints.minWidth.value * parentValue;
 
                 case UIUnit.View:
                     return constraints.minWidth.value * viewportValue;
@@ -87,16 +95,41 @@ namespace Src.Layout {
         }
 
         public void SetTextContent(string text) {
-            previousParentWidth = float.MinValue;
             textContent = text;
-            textContentSize.x = IMGUITextSizeCalculator.S_CalcTextWidth(textContent, style);;
+            preferredTextWidth = layout.GetTextWidth(textContent, style);
+        }
+
+        public void UpdateTextMeasurements() {
+            if (!isTextElement) return;
+            preferredTextWidth = layout.GetTextWidth(textContent, style);
+            measureResults.Clear();
+        }
+
+        public float GetTextHeight(float computedWidth) {
+            int intWidth = (int) computedWidth;
+            for (int i = 0; i < measureResults.Count; i++) {
+                if (measureResults[i].width == intWidth) {
+                    return measureResults[i].height;
+                }
+            }
+
+            float height = layout.GetTextHeight(textContent, style, computedWidth);
+
+            if (measureResults.Count == 4) {
+                measureResults[0] = new MeasureResult(intWidth, height);
+            }
+            else {
+                measureResults.Add(new MeasureResult(intWidth, height));
+            }
+
+            return height;
         }
 
         public float GetPreferredWidth(UIUnit parentUnit, float parentValue, float viewportValue) {
             float baseWidth;
 
             if (isTextElement) {
-                return Mathf.Min(IMGUITextSizeCalculator.S_CalcTextWidth(textContent, style), parentValue);
+                return Math.Max(0, Mathf.Min(preferredTextWidth, parentValue));
             }
 
             switch (rect.width.unit) {
@@ -130,13 +163,12 @@ namespace Src.Layout {
         }
 
         public float GetPreferredHeight(UIUnit parentUnit, float computedWidth, float parentValue, float viewportValue) {
-            
             if (isTextElement) {
-                float height = IMGUITextSizeCalculator.S_CalcTextHeight(textContent, style, computedWidth);
-                return height;
+                return GetTextHeight(computedWidth);
             }
-            
-            float baseHeight = 0;
+
+            float baseHeight;
+
             switch (rect.height.unit) {
                 case UIUnit.Auto: // fit parent content
                     // should be renamed & defined as nearest parent block
@@ -156,6 +188,7 @@ namespace Src.Layout {
                     else {
                         baseHeight = rect.height.value * parentValue;
                     }
+
                     break;
                 case UIUnit.View:
                     baseHeight = rect.height.value * viewportValue;
@@ -227,9 +260,18 @@ namespace Src.Layout {
             }
         }
 
-        public int UniqueId => element.id;
-        public IHierarchical Element => element;
-        public IHierarchical Parent => element.parent;
+
+        private struct MeasureResult {
+
+            public readonly int width;
+            public readonly float height;
+
+            public MeasureResult(int width, float height) {
+                this.width = width;
+                this.height = height;
+            }
+
+        }
 
     }
 

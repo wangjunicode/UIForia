@@ -4,7 +4,7 @@ namespace Src.StyleBindings {
 
     public class StyleBinding_LayoutType : StyleBinding {
 
-        public readonly Expression<LayoutType> expression;
+        private readonly Expression<LayoutType> expression;
 
         public StyleBinding_LayoutType(StyleState state, Expression<LayoutType> expression) : base(state) {
             this.expression = expression;

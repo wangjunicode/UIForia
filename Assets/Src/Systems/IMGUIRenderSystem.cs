@@ -326,8 +326,8 @@ namespace Src.Systems {
 
             UIStyleSet styleSet = element.style;
             if (styleSet.backgroundImage == null
-                && styleSet.borderColor == ColorUtil.UnsetColorValue
-                && styleSet.backgroundColor == ColorUtil.UnsetColorValue) {
+                && styleSet.borderColor == ColorUtil.UnsetValue
+                && styleSet.backgroundColor == ColorUtil.UnsetValue) {
                 return RenderPrimitiveType.None;
             }
 

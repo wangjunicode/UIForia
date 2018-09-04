@@ -18,12 +18,12 @@ namespace Src {
         protected void Reset(UITemplateContext context, IList activeList, int listLength) {
             currentIndex = 0;
             context.SetIntAlias(lengthAliasName, listLength);
-            context.activelist = activeList;
+            context.activeList = activeList;
         }
 
         public void Next(UITemplateContext context) {
             context.SetIntAlias(arrayIndexAliasName, currentIndex);
-            context.SetObjectAlias("$item", context.activelist[currentIndex]);
+            context.SetObjectAlias("$item", context.activeList[currentIndex]);
             currentIndex++;
         }
 

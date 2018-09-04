@@ -13,7 +13,10 @@ namespace Rendering {
         public LayoutDirection direction;
         public MainAxisAlignment mainAxisAlignment;
         public CrossAxisAlignment crossAxisAlignment;
-
+        
+        public bool ignoreScale;
+        public bool ignoreRotation;
+        
         public LayoutParameters(
             LayoutType type,
             LayoutWrap wrap,
@@ -27,6 +30,8 @@ namespace Rendering {
             this.direction = direction;
             this.mainAxisAlignment = mainAxisAlignment;
             this.crossAxisAlignment = crossAxisAlignment;
+            ignoreRotation = false;
+            ignoreScale = false;
         }
 
         public static LayoutParameters Unset => new LayoutParameters(

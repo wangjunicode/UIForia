@@ -16,6 +16,52 @@ namespace Src.Layout {
             heightItems = new FlexItemAxis[16];
         }
 
+        public override void Run(Rect viewport, LayoutNode currentNode) {
+            Rect size = currentNode.outputRect;
+
+            float contentStartX = currentNode.contentStartOffsetX;
+            float contentStartY = currentNode.contentStartOffsetY;
+            float contentEndX = size.xMax - size.x - currentNode.contentEndOffsetX;
+            float contentEndY = size.yMax - size.y - currentNode.contentEndOffsetY;
+            float contentAreaWidth = contentEndX - contentStartX;
+            float contentAreaHeight = contentEndY - contentStartY;
+
+            Rect contentArea = new Rect(contentStartX, contentStartY, contentAreaWidth, contentAreaHeight);
+
+            if (widthItems.Length < currentNode.children.Count) {
+                Array.Resize(ref widthItems, currentNode.children.Count * 2);
+                Array.Resize(ref heightItems, currentNode.children.Count * 2);
+            }
+
+            if (currentNode.parameters.direction == LayoutDirection.Row) {
+                DoLayoutRow(viewport, currentNode, contentArea);
+            }
+            else {
+                DoLayoutColumn(viewport, currentNode, contentArea);
+            }
+
+            int itemTracker = 0;
+            for (int i = 0; i < currentNode.children.Count; i++) {
+                if (currentNode.children[i].isInFlow && currentNode.children[i].element.isEnabled) {
+                    // todo -- this is weeeeird
+                    currentNode.children[i].localPosition = new Vector2(
+                        widthItems[itemTracker].axisStart - (currentNode.element.style.marginLeft),
+                        heightItems[itemTracker].axisStart - (currentNode.element.style.marginTop)
+                    );
+                    currentNode.children[i].outputRect = new Rect(
+                        widthItems[itemTracker].axisStart + size.x,
+                        heightItems[itemTracker].axisStart + size.y,
+                        widthItems[itemTracker].outputSize,
+                        heightItems[itemTracker].outputSize
+                    );
+                    itemTracker++;
+                }
+                else {
+                    //results[i] = new Rect(); // todo -- sizing for non flow children
+                }
+            }
+        }
+
         private void DoLayoutRow(Rect viewport, LayoutNode currentNode, Rect contentArea) {
             int itemCount = 0;
             List<LayoutNode> children = currentNode.children;
@@ -68,7 +114,8 @@ namespace Src.Layout {
                 heightItem.maxSize = child.GetMaxHeight(currentNode.rect.height.unit, contentArea.height, viewport.height);
                 // now we have the final width and can compute preferred height accordingly
                 // this restriction doesn't exist in the column layout case
-                heightItem.preferredSize = child.GetPreferredHeight(currentNode.rect.height.unit, widthItems[itemCount].outputSize - child.horizontalOffset, contentArea.height, viewport.height);
+                heightItem.preferredSize = child.GetPreferredHeight(currentNode.rect.height.unit, widthItems[itemCount].outputSize - child.horizontalOffset, contentArea.height,
+                    viewport.height);
 
                 heightItem.outputSize = heightItem.MinDefined && heightItem.preferredSize < heightItem.minSize ? heightItem.minSize : heightItem.preferredSize;
                 heightItem.outputSize = heightItem.MaxDefined && heightItem.outputSize > heightItem.maxSize ? heightItem.maxSize : heightItem.outputSize;
@@ -108,7 +155,8 @@ namespace Src.Layout {
                 heightItem.maxSize = child.GetMaxHeight(currentNode.rect.height.unit, contentArea.height, viewport.height);
 
                 // need to un-offset the output size because nested calls to GetPreferredHeight() will add the offset back.
-                heightItem.preferredSize = child.GetPreferredHeight(currentNode.rect.height.unit, widthItem.outputSize - child.horizontalOffset, contentArea.height, viewport.height);
+                heightItem.preferredSize =
+                    child.GetPreferredHeight(currentNode.rect.height.unit, widthItem.outputSize - child.horizontalOffset, contentArea.height, viewport.height);
 
                 heightItem.outputSize = heightItem.MinDefined && heightItem.preferredSize < heightItem.minSize ? heightItem.minSize : heightItem.preferredSize;
                 heightItem.outputSize = heightItem.MaxDefined && heightItem.outputSize > heightItem.maxSize ? heightItem.maxSize : heightItem.outputSize;
@@ -139,51 +187,6 @@ namespace Src.Layout {
             AlignCrossAxis(widthItems, itemCount, contentArea.x, currentNode.parameters.crossAxisAlignment, contentArea.width);
         }
 
-        public override void Run(Rect viewport, LayoutNode currentNode, Rect[] results) {
-            Rect size = currentNode.outputRect;
-
-            float contentStartX = currentNode.contentStartOffsetX;
-            float contentStartY = currentNode.contentStartOffsetY;
-            float contentEndX = size.xMax - size.x - currentNode.contentEndOffsetX;
-            float contentEndY = size.yMax - size.y - currentNode.contentEndOffsetY;
-            float contentAreaWidth = contentEndX - contentStartX;
-            float contentAreaHeight = contentEndY - contentStartY;
-
-            Rect contentArea = new Rect(contentStartX, contentStartY, contentAreaWidth, contentAreaHeight);
-
-            if (widthItems.Length < currentNode.children.Count) {
-                Array.Resize(ref widthItems, currentNode.children.Count * 2);
-                Array.Resize(ref heightItems, currentNode.children.Count * 2);
-            }
-
-            if (currentNode.parameters.direction == LayoutDirection.Row) {
-                DoLayoutRow(viewport, currentNode, contentArea);
-            }
-            else {
-                DoLayoutColumn(viewport, currentNode, contentArea);
-            }
-
-            int itemTracker = 0;
-            for (int i = 0; i < currentNode.children.Count; i++) {
-                if (currentNode.children[i].isInFlow && currentNode.children[i].element.isEnabled) {
-                    // todo -- this is weeeeird
-                    currentNode.children[i].localPosition = new Vector2(
-                        widthItems[itemTracker].axisStart - (currentNode.element.style.marginLeft),
-                        heightItems[itemTracker].axisStart - (currentNode.element.style.marginTop)
-                    );
-                    currentNode.children[i].outputRect = new Rect(
-                        widthItems[itemTracker].axisStart + size.x,
-                        heightItems[itemTracker].axisStart + size.y,
-                        widthItems[itemTracker].outputSize,
-                        heightItems[itemTracker].outputSize
-                    );
-                    itemTracker++;
-                }
-                else {
-                    //results[i] = new Rect(); // todo -- sizing for non flow children
-                }
-            }
-        }
 
         private static float GrowAxis(FlexItemAxis[] items, int itemCount, float remainingSpace) {
             int pieces = 0;

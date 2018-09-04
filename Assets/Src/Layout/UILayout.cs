@@ -12,13 +12,20 @@ namespace Src.Layout {
             this.textSizeCalculator = textSizeCalculator;
         }
 
-        public abstract void Run(Rect viewport, LayoutNode layoutNode, Rect[] results);
+        public abstract void Run(Rect viewport, LayoutNode layoutNode);
 
-        // todo -- handle text x
+        public float GetTextWidth(string text, UIStyleSet style) {
+            return textSizeCalculator.CalcTextWidth(text, style);
+        }
+
+        public float GetTextHeight(string text, UIStyleSet style, float width) {
+            return textSizeCalculator.CalcTextHeight(text, style, width);
+        }
+        
         public virtual float GetContentWidth(LayoutNode node, float contentSize, float viewportSize) {
 
             if (node.isTextElement) {
-                return node.textContentSize.x;
+                return node.preferredTextWidth;
             }
             
             List<LayoutNode> children = node.children;
@@ -47,16 +54,17 @@ namespace Src.Layout {
             return output;
         }
 
-        public float GetContentHeight(LayoutNode node, float adjustedWidth, float parentWidth, float viewportSize) {
+        public virtual float GetContentHeight(LayoutNode node, float adjustedWidth, float parentWidth, float viewportSize) {
 
             if (node.isTextElement) {
                 // todo -- add metrics per component about calc calls
                 // this is bizarre but click the mouse changes how text height gets calculated...no idea why 
-                if (Mathf.Abs(node.previousParentWidth - adjustedWidth) > 3f) {
-                    node.previousParentWidth = adjustedWidth;
-                    node.textContentSize.y = textSizeCalculator.CalcTextHeight(node.textContent, node.style, adjustedWidth);
-                }
-                return node.textContentSize.y;
+//                if (Mathf.Abs(node.previousParentWidth - adjustedWidth) > 3f) {
+//                    node.previousParentWidth = adjustedWidth;
+//                    node.textContentSize.y = textSizeCalculator.CalcTextHeight(node.textContent, node.style, adjustedWidth);
+//                }
+
+                return node.GetTextHeight(adjustedWidth);
             }
 
             List<LayoutNode> children = node.children;

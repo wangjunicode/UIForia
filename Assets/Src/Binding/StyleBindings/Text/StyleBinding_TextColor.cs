@@ -11,14 +11,20 @@ namespace Src.StyleBindings.Text {
             this.expression = expression;
         }
 
-        public override void Execute(UIElement element, UITemplateContext context) {}
+        public override void Execute(UIElement element, UITemplateContext context) {
+            Color currentColor = element.style.GetTextColor(state);
+            Color newColor = expression.EvaluateTyped(context);
+            if (newColor != currentColor) {
+                element.style.SetTextColor(newColor, state);
+            }
+        }
 
         public override bool IsConstant() {
             return expression.IsConstant();
         }
 
         public override void Apply(UIStyle style, UITemplateContext context) {
-            style.text.color = expression.EvaluateTyped(context);
+            style.textStyle.color = expression.EvaluateTyped(context);
         }
 
         public override void Apply(UIStyleSet styleSet, UITemplateContext context) {

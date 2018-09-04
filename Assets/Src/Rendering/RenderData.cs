@@ -1,4 +1,5 @@
-﻿using UnityEngine;
+﻿using Shapes2D;
+using UnityEngine;
 using UnityEngine.UI;
 
 namespace Src.Systems {
@@ -9,10 +10,11 @@ namespace Src.Systems {
         public RectTransform rootTransform;
         public RectTransform unityTransform;
         public Graphic maskComponent;
-        public Graphic imageComponent;
+        public Graphic renderComponent;
         public RenderPrimitiveType primitiveType;
         public MonoBehaviour uiComponent;
-
+        public Shape shape;
+        
         public RenderData(UIElement element, RenderPrimitiveType primitiveType, RectTransform unityTransform, RectTransform rootTransform) {
             this.element = element;
             this.primitiveType = primitiveType;

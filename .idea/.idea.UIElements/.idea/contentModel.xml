@@ -1,16 +1,23 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project version="4">
   <component name="ContentModelStore">
-    <e p="\app" t="IncludeRecursive" />
-    <e p="\c41f851" t="IncludeRecursive" />
     <e p="C:\Seed\UIElements" t="IncludeRecursive">
       <e p="Assembly-CSharp-Editor.csproj" t="IncludeRecursive" />
+      <e p="Assembly-CSharp.csproj" t="IncludeRecursive" />
       <e p="Assets" t="Include">
         <e p="Editor" t="Include">
           <e p="BorderedImageInspector.cs" t="Include" />
           <e p="DebuggerWindow.cs" t="Include" />
           <e p="RefreshTemplates.cs" t="Include" />
           <e p="UIViewWindow.cs" t="Include" />
+        </e>
+        <e p="notes.txt" t="Include" />
+        <e p="Shapes2D" t="Include">
+          <e p="Editor" t="Include">
+            <e p="CustomHandles.cs" t="Include" />
+            <e p="MenuItems.cs" t="Include" />
+            <e p="ShapeEditor.cs" t="Include" />
+          </e>
         </e>
         <e p="Src" t="Include">
           <e p="Binding" t="Include">
@@ -92,6 +99,7 @@
             <e p="TemplateBinding.cs" t="Include" />
             <e p="TextBinding_Multiple.cs" t="Include" />
             <e p="TextBinding_Single.cs" t="Include" />
+            <e p="UITemplateContext.cs" t="Include" />
           </e>
           <e p="Compilers" t="Include">
             <e p="AliasSources" t="Include">
@@ -121,7 +129,6 @@
             <e p="PropertyBindingCompiler.cs" t="Include" />
             <e p="StyleBindingCompiler.cs" t="Include" />
           </e>
-          <e p="ContentBoxRect.cs" t="Include" />
           <e p="Debugger" t="Include">
             <e p="GOInputFieldRender.cs" t="Include" />
             <e p="InputFieldFocusHandler.cs" t="Include" />
@@ -133,6 +140,8 @@
             <e p="UIInputFieldElement.cs" t="Include" />
           </e>
           <e p="Elements" t="Include">
+            <e p="UIElement.cs" t="Include" />
+            <e p="UIElementFlags.cs" t="Include" />
             <e p="UIGroupElement.cs" t="Include" />
             <e p="UIImageElement.cs" t="Include" />
             <e p="UIPanel.cs" t="Include" />
@@ -144,13 +153,13 @@
             <e p="UISwitchElement.cs" t="Include" />
             <e p="UITextElement.cs" t="Include" />
           </e>
-          <e p="ExpressionContext.cs" t="Include" />
           <e p="Expressions" t="Include">
             <e p="AccessExpression_Property.cs" t="Include" />
             <e p="AccessExpression_Root.cs" t="Include" />
             <e p="ConstantExpression.cs" t="Include" />
             <e p="Expression.cs" t="Include" />
             <e p="Expression_Cast.cs" t="Include" />
+            <e p="ExpressionContext.cs" t="Include" />
             <e p="LiteralExpression_Boolean.cs" t="Include" />
             <e p="LiteralExpression_Double.cs" t="Include" />
             <e p="LiteralExpression_Enum.cs" t="Include" />
@@ -252,11 +261,11 @@
             <e p="XMLExtensions.cs" t="Include" />
           </e>
           <e p="PropAttribute.cs" t="Include" />
-          <e p="ReflectionUtil.cs" t="Include" />
           <e p="Rendering" t="Include">
             <e p="BorderedImage.cs" t="Include" />
             <e p="BorderRadius.cs" t="Include" />
             <e p="BorderStyle.cs" t="Include" />
+            <e p="ContentBoxRect.cs" t="Include" />
             <e p="GOTextSizeCalculator.cs" t="Include" />
             <e p="IMGUIRenderData.cs" t="Include" />
             <e p="IMGUITextSizeCalculator.cs" t="Include" />
@@ -288,6 +297,7 @@
             </e>
             <e p="UIView.cs" t="Include" />
             <e p="UIViewIMGUI.cs" t="Include" />
+            <e p="WhitespaceMode.cs" t="Include" />
           </e>
           <e p="Shaders" t="Include">
             <e p="GUIRoundedRect.shader" t="Include" />
@@ -296,13 +306,29 @@
             <e p="SimpleBorder.shader" t="Include" />
             <e p="UIStandardShader.shader" t="Include" />
           </e>
-          <e p="SkipTree.cs" t="Include" />
-          <e p="Src.asmdef" t="Include" />
+          <e p="Shapes2D" t="Include">
+            <e p="Scripts" t="Include">
+              <e p="PolyMap.cs" t="Include" />
+              <e p="Shape.cs" t="Include" />
+              <e p="Shapes2DPrefs.cs" t="Include" />
+            </e>
+            <e p="Shaders" t="Include">
+              <e p="Common.cginc" t="Include" />
+              <e p="Ellipse.cginc" t="Include" />
+              <e p="Path.cginc" t="Include" />
+              <e p="Polygon.cginc" t="Include" />
+              <e p="Rectangle.cginc" t="Include" />
+              <e p="Shape.shader" t="Include" />
+              <e p="Triangle.cginc" t="Include" />
+            </e>
+          </e>
+          <e p="SrcAsm.asmdef" t="Include" />
           <e p="Systems" t="Include">
             <e p="BindingSystem.cs" t="Include" />
             <e p="ElementRegistrySystem.cs" t="Include" />
             <e p="GOInputSystem.cs" t="Include" />
             <e p="GORenderSystem.cs" t="Include" />
+            <e p="Gradient.cs" t="Include" />
             <e p="IInputSystem.cs" t="Include" />
             <e p="ILayoutSystem.cs" t="Include" />
             <e p="IMGUIInputSystem.cs" t="Include" />
@@ -334,14 +360,22 @@
             <e p="UITextTemplate.cs" t="Include" />
           </e>
           <e p="todo.txt" t="Include" />
-          <e p="UIElement.cs" t="Include" />
-          <e p="UIElementFlags.cs" t="Include" />
           <e p="UIViewBehavior.cs" t="Include" />
           <e p="Util" t="Include">
             <e p="ArrayUtil.cs" t="Include" />
             <e p="BitUtil.cs" t="Include" />
+            <e p="ColorUtil.cs" t="Include" />
             <e p="FloatUtil.cs" t="Include" />
+            <e p="IntUtil.cs" t="Include" />
+            <e p="ReflectionUtil.cs" t="Include" />
+            <e p="SkipTree.cs" t="Include" />
+            <e p="WhitespaceProcessor.cs" t="Include" />
           </e>
+        </e>
+        <e p="Temp.cs" t="Include" />
+        <e p="Templates" t="Include">
+          <e p="InputField.xml" t="Include" />
+          <e p="UIPanel.xml" t="Include" />
         </e>
         <e p="Tests" t="Include">
           <e p="BindingCompilerTests.cs" t="Include" />
@@ -349,6 +383,7 @@
           <e p="ExpressionParserTests.cs" t="Include" />
           <e p="ReflectionUtilTests.cs" t="Include" />
           <e p="SkipTreeTests.cs" t="Include" />
+          <e p="StyleTests.cs" t="Include" />
           <e p="TemplateParsingTests.cs" t="Include" />
           <e p="Templates" t="Include">
             <e p="Parsing" t="Include">
@@ -374,21 +409,48 @@
             </e>
           </e>
           <e p="TemplateTests.cs" t="Include" />
-          <e p="Tests.asmdef" t="Include" />
+          <e p="TestAsm.asmdef" t="Include" />
           <e p="TestUtils.cs" t="Include" />
           <e p="TokenizingTests.cs" t="Include" />
           <e p="TypeCheckTests.cs" t="Include" />
           <e p="UIView_Tests.cs" t="Include" />
+          <e p="WhitespaceProcessorTests.cs" t="Include" />
+        </e>
+        <e p="TestTemplate.xml" t="Include" />
+        <e p="TextMesh Pro" t="Include">
+          <e p="Resources" t="Include">
+            <e p="LineBreaking Following Characters.txt" t="Include" />
+            <e p="LineBreaking Leading Characters.txt" t="Include" />
+            <e p="Shaders" t="Include">
+              <e p="TMP_Bitmap-Custom-Atlas.shader" t="Include" />
+              <e p="TMP_Bitmap-Mobile.shader" t="Include" />
+              <e p="TMP_Bitmap.shader" t="Include" />
+              <e p="TMP_SDF Overlay.shader" t="Include" />
+              <e p="TMP_SDF-Mobile Masking.shader" t="Include" />
+              <e p="TMP_SDF-Mobile Overlay.shader" t="Include" />
+              <e p="TMP_SDF-Mobile.shader" t="Include" />
+              <e p="TMP_SDF-Surface-Mobile.shader" t="Include" />
+              <e p="TMP_SDF-Surface.shader" t="Include" />
+              <e p="TMP_SDF.shader" t="Include" />
+              <e p="TMP_Sprite.shader" t="Include" />
+              <e p="TMPro.cginc" t="Include" />
+              <e p="TMPro_Properties.cginc" t="Include" />
+              <e p="TMPro_Surface.cginc" t="Include" />
+            </e>
+          </e>
+          <e p="Sprites" t="Include">
+            <e p="EmojiOne Attribution.txt" t="Include" />
+          </e>
         </e>
       </e>
       <e p="Library" t="ExcludeRecursive" />
       <e p="obj" t="ExcludeRecursive" />
       <e p="packages" t="ExcludeRecursive" />
-      <e p="Src.csproj" t="IncludeRecursive" />
+      <e p="SrcAsm.csproj" t="IncludeRecursive" />
       <e p="Temp" t="ExcludeRecursive">
         <e p="bin" t="ExcludeRecursive" />
       </e>
-      <e p="Tests.csproj" t="IncludeRecursive" />
+      <e p="TestAsm.csproj" t="IncludeRecursive" />
       <e p="UIElements.sln" t="IncludeFlat" />
     </e>
     <e p="C:\Users\Matt\.Rider2018.2\config\extensions" t="IncludeRecursive" />

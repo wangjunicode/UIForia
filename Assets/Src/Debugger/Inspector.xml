@@ -1,10 +1,21 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <UITemplate>
-    <Contents style.layoutDirection="Column">
+    
+    <Contents style.textColor="{textColor}" style.layoutType="Fixed">
 
-        <Group style.rectWidth="content(100)" style.rectHeight="14f" style.backgroundColor="white" style.padding="rect(10f)">
-            <InputField onValueChanged="{OnTextInputChanged($event, 'other parameter')}" placeholder="'Enter text here...'"/>
+        <Group style.padding="rect(10f)"
+               style.rectX="parent(50)"
+               style.rectY="parent(50)"
+             
+               style.backgroundColor="white">
+            
+            <Group style.backgroundColor="red" style.padding="rect(0f)">
+                Text content! Text content! Here we go this is a long string {time}
+            </Group>
+            
         </Group>
         
+        
     </Contents>
+    
 </UITemplate>

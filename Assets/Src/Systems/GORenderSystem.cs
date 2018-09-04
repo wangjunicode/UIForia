@@ -1,8 +1,8 @@
 ﻿using System.Collections.Generic;
 using Debugger;
 using Rendering;
+using TMPro;
 using UnityEngine;
-using UnityEngine.EventSystems;
 using UnityEngine.UI;
 using InputField = UnityEngine.UI.InputField;
 using Object = UnityEngine.Object;
@@ -18,14 +18,15 @@ namespace Src.Systems {
 
         private readonly SkipTree<RenderData> renderSkipTree;
         private readonly Dictionary<int, RectTransform> transforms;
+
         private bool ready;
-        public Font tempFont;
 
         public GORenderSystem(ILayoutSystem layoutSystem, IStyleSystem styleSystem, IElementRegistry elementRegistry, RectTransform rectTransform) {
             this.layoutSystem = layoutSystem;
             this.rectTransform = rectTransform;
             this.elementRegistry = elementRegistry;
             this.renderSkipTree = new SkipTree<RenderData>();
+
             this.transforms = new Dictionary<int, RectTransform>();
             this.renderSkipTree.onItemParentChanged += (item, newParent, oldParent) => {
                 item.unityTransform.SetParent(newParent == null ? rectTransform : newParent.unityTransform);
@@ -34,36 +35,13 @@ namespace Src.Systems {
             this.styleSystem = styleSystem;
         }
 
-        private void HandleTextContentChanged(int elementId, string text) {
-            if (transforms.ContainsKey(elementId)) {
-                RectTransform transform = transforms[elementId];
-                transform.GetComponent<Text>().text = text;
-            }
-        }
-
-        private void HandleBorderRadiusChange(int elementId, BorderRadius radius) {
-            if (!ready) return;
-            UIElement element = elementRegistry.GetElement(elementId);
-            OnElementStyleChanged(element);
-        }
-
-        private void HandlePaintChange(int elementId, Paint paint) {
-            if (!ready) return;
-            UIElement element = elementRegistry.GetElement(elementId);
-            OnElementStyleChanged(element);
-        }
-
-        private void HandleStyleChange(int elementId, ContentBoxRect rect) {
-            if (!ready) return;
-            UIElement element = elementRegistry.GetElement(elementId);
-            OnElementStyleChanged(element);
-        }
 
         public void OnReady() {
             ready = true;
         }
 
         public void OnInitialize() {
+            this.styleSystem.onFontPropertyChanged += HandleFontPropertyChanged;
             this.styleSystem.onTextContentChanged += HandleTextContentChanged;
             this.styleSystem.onBorderChanged += HandleStyleChange;
             this.styleSystem.onPaddingChanged += HandleStyleChange;
@@ -98,9 +76,6 @@ namespace Src.Systems {
                 transform.anchoredPosition = new Vector3(position.x, -position.y, 0);
                 transform.sizeDelta = size;
             }
-
-            // if focusRequiresCursor
-            // CreateOrUpdateCursor();
         }
 
         public void OnReset() {
@@ -154,8 +129,8 @@ namespace Src.Systems {
 
             data.primitiveType = primitiveType;
 
-            if (data.imageComponent != null) {
-                Object.Destroy(data.imageComponent);
+            if (data.renderComponent != null) {
+                Object.Destroy(data.renderComponent);
             }
 
             if (data.maskComponent != null) {
@@ -178,8 +153,8 @@ namespace Src.Systems {
             renderSkipTree.RemoveItem(data);
             transforms.Remove(element.id);
 
-            if (data.imageComponent != null) {
-                Object.Destroy(data.imageComponent);
+            if (data.renderComponent != null) {
+                Object.Destroy(data.renderComponent);
             }
 
             if (data.maskComponent != null) {
@@ -216,46 +191,35 @@ namespace Src.Systems {
                 transforms[element.id].gameObject.SetActive(false);
             }
 
-            renderSkipTree.ConditionalTraversePreOrder(element, (item) => {
-                item.unityTransform.gameObject.SetActive(false);
-                return true;
-            });
+            // do I need to do the whole hierarchy?
+            renderSkipTree.TraversePreOrder(element, (item) => { item.unityTransform.gameObject.SetActive(false); });
         }
 
         private void CreateComponents(RenderData data) {
+            GameObject gameObject = data.unityTransform.gameObject;
             switch (data.primitiveType) {
                 case RenderPrimitiveType.RawImage:
-                    data.imageComponent = data.unityTransform.gameObject.AddComponent<RawImage>();
-                    ApplyStyles(data);
-                    return;
+                    data.renderComponent = gameObject.AddComponent<RawImage>();
+                    break;
 
                 case RenderPrimitiveType.ProceduralImage:
-                    data.imageComponent = data.unityTransform.gameObject.AddComponent<BorderedImage>();
-                    ApplyStyles(data);
-                    return;
+                    data.renderComponent = gameObject.AddComponent<BorderedImage>();
+                    break;
 
                 case RenderPrimitiveType.Mask:
                 case RenderPrimitiveType.Mask2D:
                     break;
 
                 case RenderPrimitiveType.Text:
+                    data.renderComponent = gameObject.AddComponent<TextMeshProUGUI>();
 
-                    data.imageComponent = data.unityTransform.gameObject.AddComponent<Text>();
-                    Text text = (Text) data.imageComponent;
-                    text.text = ((UITextElement) data.element).GetText();
-                    text.font = tempFont;
-                    text.fontSize = 12;
-                    text.color = data.element.style.textColor;
-                    text.horizontalOverflow = HorizontalWrapMode.Overflow;
-                    text.verticalOverflow = VerticalWrapMode.Overflow;
-
-                    UIInputFieldElement parent = data.element.parent as UIInputFieldElement;
-                    if (parent != null) {
-                        RectTransform t = transforms[parent.id];
-                        InputField i = t.GetComponent<InputField>();
-                        i.textComponent = text;
-                        text.supportRichText = false;
-                    }
+//                    UIInputFieldElement parent = data.element.parent as UIInputFieldElement;
+//                    if (parent != null) {
+//                        RectTransform t = transforms[parent.id];
+//                        InputField i = t.GetComponent<InputField>();
+//                        i.textComponent = text;
+//                        text.supportRichText = false;
+//                    }
 
                     break;
 
@@ -272,9 +236,7 @@ namespace Src.Systems {
                     input.lineType = InputField.LineType.SingleLine;
                     input.transition = Selectable.Transition.None;
 
-                    input.onValueChanged.AddListener((value) => {
-                        inputElement.SetText(value);
-                    });
+                    input.onValueChanged.AddListener((value) => { inputElement.SetText(value); });
 
                     focusHandler.onFocus += () => {
                         //view.FocusElement(element);
@@ -288,7 +250,10 @@ namespace Src.Systems {
                     //ApplyStyles(data);
                     break;
             }
+
+            ApplyStyles(data);
         }
+
 
         private void ApplyStyles(RenderData data) {
             UIElement element = data.element;
@@ -296,21 +261,33 @@ namespace Src.Systems {
 
             switch (data.primitiveType) {
                 case RenderPrimitiveType.RawImage:
-                    RawImage rawImage = (RawImage) data.imageComponent;
+                    RawImage rawImage = (RawImage) data.renderComponent;
                     rawImage.texture = style.backgroundImage;
                     rawImage.color = style.backgroundColor;
                     rawImage.uvRect = new Rect(0, 0, 1, 1);
                     break;
+
                 case RenderPrimitiveType.InputField:
                 case RenderPrimitiveType.ProceduralImage:
-                    BorderedImage procImage = (BorderedImage) data.imageComponent;
+//                    Shape shape = data.shape;
+//                    shape.settings.outlineColor = style.borderColor;
+//                    shape.settings.outlineSize = style.borderLeft;
+//                    shape.settings.fillColor = style.backgroundColor;
+//                    shape.settings.roundnessPerCorner = false;
+//                    shape.settings.roundness = style.borderRadiusBottomLeft;
+//                    shape.settings.fillType = FillType.SolidColor;
+//                    shape.settings.fill
+                    BorderedImage procImage = (BorderedImage) data.renderComponent;
                     procImage.color = style.backgroundColor;
                     procImage.borderColor = style.borderColor;
                     procImage.border = style.border;
                     break;
+
                 case RenderPrimitiveType.Text:
-                    Text text = (Text) data.imageComponent;
-                    text.text = ((UITextElement) data.element).GetText();
+                    TextMeshProUGUI textMesh = (TextMeshProUGUI) data.renderComponent;
+                    textMesh.text = style.textContent;
+                    textMesh.fontSize = style.fontSize;
+                    textMesh.color = style.textColor;
                     break;
 
                 case RenderPrimitiveType.Mask:
@@ -334,16 +311,56 @@ namespace Src.Systems {
 
             UIStyleSet styleSet = element.style;
             if (styleSet.backgroundImage == null
-                && styleSet.borderColor == ColorUtil.UnsetColorValue
-                && styleSet.backgroundColor == ColorUtil.UnsetColorValue) {
+                && styleSet.borderColor == ColorUtil.UnsetValue
+                && styleSet.backgroundColor == ColorUtil.UnsetValue) {
                 return RenderPrimitiveType.None;
             }
 
-            if (styleSet.border.IsDefined()) {
+            ContentBoxRect border = styleSet.border;
+            if(border.left > 0 || border.right > 0 || border.top > 0 || border.bottom > 0) {
                 return RenderPrimitiveType.ProceduralImage;
             }
 
             return RenderPrimitiveType.RawImage;
+        }
+
+      
+        private void HandleBorderRadiusChange(int elementId, BorderRadius radius) {
+            if (!ready) return;
+            UIElement element = elementRegistry.GetElement(elementId);
+            OnElementStyleChanged(element);
+        }
+
+        private void HandlePaintChange(int elementId, Paint paint) {
+            if (!ready) return;
+            UIElement element = elementRegistry.GetElement(elementId);
+            OnElementStyleChanged(element);
+        }
+
+        private void HandleStyleChange(int elementId, ContentBoxRect rect) {
+            if (!ready) return;
+            UIElement element = elementRegistry.GetElement(elementId);
+            OnElementStyleChanged(element);
+        }
+
+        private void HandleTextContentChanged(int elementId, string text) {
+            if (!ready) return;
+            RenderData data = renderSkipTree.GetItem(elementId);
+            if (data == null) return;
+            TextMeshProUGUI textMesh = data.renderComponent as TextMeshProUGUI;
+            if (textMesh != null) {
+                textMesh.text = text;
+            }
+        }
+
+        private void HandleFontPropertyChanged(int elementId, TextStyle style) {
+            if (!ready) return;
+            RenderData data = renderSkipTree.GetItem(elementId);
+            if (data == null) return;
+            TextMeshProUGUI textMesh = data.renderComponent as TextMeshProUGUI;
+            if (textMesh != null) {
+                ApplyStyles(data);
+            }
         }
 
     }

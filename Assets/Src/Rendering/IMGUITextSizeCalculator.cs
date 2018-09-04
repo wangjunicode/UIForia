@@ -32,10 +32,13 @@ namespace Rendering {
             s_GUIStyle.fontSize = style.fontSize;
             s_GUIStyle.fontStyle = style.fontStyle;
             s_GUIStyle.alignment = style.textAnchor;
-            s_GUIStyle.wordWrap = false;
+            s_GUIStyle.padding = new RectOffset();
+            s_GUIStyle.margin = new RectOffset();
+            s_GUIStyle.wordWrap = true;
             s_GUIStyle.stretchWidth = false;
             s_GUIStyle.richText = false;
             s_GUIContent.text = text;
+            s_GUIStyle.imagePosition = ImagePosition.TextOnly;
             return Mathf.Ceil(s_GUIStyle.CalcSize(s_GUIContent).x + 1);
         }
 
@@ -45,6 +48,8 @@ namespace Rendering {
             s_GUIStyle.fontStyle = style.fontStyle;
             s_GUIStyle.alignment = style.textAnchor;
             s_GUIStyle.wordWrap = true;
+            s_GUIStyle.richText = false;
+            s_GUIStyle.imagePosition = ImagePosition.TextOnly;
             s_GUIContent.text = text;
             return Mathf.Ceil(s_GUIStyle.CalcHeight(s_GUIContent, width));
         }

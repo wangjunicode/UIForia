@@ -23,7 +23,7 @@ namespace Src {
         public void Start() {
             RectTransform rectTransform = transform.Find("UIRoot").GetComponent<RectTransform>();
             rectTransform.pivot = new Vector2(0, 1);
-            view = new UIGameObjectView(tempFont, typeof(Inspector), rectTransform);
+            view = new UIGameObjectView(typeof(Inspector), rectTransform);
             view.Initialize();
         }
 

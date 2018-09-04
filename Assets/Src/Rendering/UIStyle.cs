@@ -1,5 +1,4 @@
 using Src;
-using System;
 using UnityEngine;
 using System.Diagnostics;
 using Src.Layout;
@@ -7,6 +6,15 @@ using Src.Systems;
 
 namespace Rendering {
 
+    public struct UITransform {
+
+        public float rotation;
+        public Vector2 scale;
+        public Vector2 pivot;
+        public Vector2 translation;
+        
+    }
+    
     [DebuggerDisplay("{localId}->{filePath}")]
     public class UIStyle {        
        
@@ -27,10 +35,8 @@ namespace Rendering {
         public ContentBoxRect margin;
         public ContentBoxRect padding;
 
-        public TextStyle text;
+        public TextStyle textStyle;
         
-        public event Action<UIStyle> onChange;
-
         public UIStyle(string localId, string filePath) {
             this.localId = localId;
             this.filePath = filePath;
@@ -55,13 +61,10 @@ namespace Rendering {
             borderRadius = toCopy.borderRadius;
             layoutParameters = toCopy.layoutParameters;
             layoutConstraints = toCopy.layoutConstraints;
+            textStyle = toCopy.textStyle;
         }
 
         public string Id => filePath == string.Empty ? localId : localId + "->" + filePath;
-
-        public void ApplyChanges() {
-            onChange?.Invoke(this);
-        }
 
         private void Initialize() {
             rect = LayoutRect.Unset;
@@ -72,12 +75,13 @@ namespace Rendering {
             paint = Paint.Unset;
             borderRadius = BorderRadius.Unset;
             layoutParameters = LayoutParameters.Unset;
+            textStyle = TextStyle.Unset;
         }
         
         public static readonly UIStyle Default = new UIStyle("Default", string.Empty) {
             rect = new LayoutRect() {
-                x = new UIMeasurement(),
-                y = new UIMeasurement(),
+                x = new UIMeasurement(0),
+                y = new UIMeasurement(0),
                 width = UIMeasurement.Auto,
                 height = UIMeasurement.Auto
             },
@@ -117,7 +121,7 @@ namespace Rendering {
             },
             borderRadius = BorderRadius.Unset,
             paint =  Paint.Unset,
-            text = new TextStyle(
+            textStyle = new TextStyle(
                 Color.black,
                 null, 
                 12, 

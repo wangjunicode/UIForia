@@ -22,13 +22,24 @@ namespace Debugger {
         public bool isHorizontal;
         public int crossAxisIndex;
         public bool showError;
-        
+        public int fontSize = 12;
+        public Color textColor;
+
         public Inspector() {
+            textColor = Color.black;
             selectedValue = 0;
             this.values = new List<int>();
             mainAlignment = MainAxisAlignment.Start;
             dir = LayoutDirection.Row;
             isHorizontal = true;
+        }
+
+        public void SetTextColor() {
+            textColor = new Color(
+                Random.value,
+                Random.value,
+                Random.value,
+                1);
         }
 
         public void OnTextInputChanged(string value, string otherParam) {
@@ -58,30 +69,31 @@ namespace Debugger {
             if (values.Count == 0) {
                 showError = true;
             }
+
             if (values.Count > 0) {
                 selectedValue = (selectedValue + 1) % values.Count;
             }
         }
-        
+
         public void ToggleLayoutMode() {
             currentAxisMode += 1;
             currentAxisMode = currentAxisMode % 4;
             switch (currentAxisMode) {
-                    case 0:
-                        mainAlignment = MainAxisAlignment.Center;
-                        break;
-                    case 1:
-                        mainAlignment = MainAxisAlignment.End;
-                        break;
-                    case 2:
-                        mainAlignment = MainAxisAlignment.SpaceAround;
-                        break;
-                    case 3:
-                        mainAlignment = MainAxisAlignment.SpaceAround;
-                        break;
-                    case 4:
-                        mainAlignment = MainAxisAlignment.Start;
-                        break;
+                case 0:
+                    mainAlignment = MainAxisAlignment.Center;
+                    break;
+                case 1:
+                    mainAlignment = MainAxisAlignment.End;
+                    break;
+                case 2:
+                    mainAlignment = MainAxisAlignment.SpaceAround;
+                    break;
+                case 3:
+                    mainAlignment = MainAxisAlignment.SpaceAround;
+                    break;
+                case 4:
+                    mainAlignment = MainAxisAlignment.Start;
+                    break;
             }
         }
 
@@ -90,6 +102,7 @@ namespace Debugger {
             if (crossAxisIndex == 4) {
                 crossAxisIndex = 0;
             }
+
             switch (crossAxisIndex) {
                 case 0:
                     crossAxis = CrossAxisAlignment.Center;
@@ -105,7 +118,7 @@ namespace Debugger {
                     break;
             }
         }
-        
+
         public void OnMouseEnter(MouseInputEvent evt) {
 //            Debug.Log("Entered! " + evt.mousePosition);
         }
@@ -123,6 +136,7 @@ namespace Debugger {
             values.Add(values.Count);
             showError = false;
         }
+
     }
 
 }

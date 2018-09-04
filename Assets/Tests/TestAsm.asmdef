@@ -1,7 +1,7 @@
 {
-    "name": "Tests",
+    "name": "TestAsm",
     "references": [
-        "Src"
+        "SrcAsm"
     ],
     "optionalUnityReferences": [
         "TestAssemblies"

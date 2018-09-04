@@ -1,9 +1,11 @@
 using System;
 using System.Diagnostics;
+using Src.Extensions;
 using Src.Systems;
+using Src.Util;
 
 namespace Rendering {
-
+    
     [DebuggerDisplay("id = {elementId} state = {currentState}")]
     public partial class UIStyleSet {
 
@@ -12,25 +14,58 @@ namespace Rendering {
         private int baseCounter;
         public readonly int elementId;
         private readonly IStyleChangeHandler changeHandler;
-        
-        public UIStyle activeStyles;
 
-        private StyleState containedStates; 
+        public UIStyle computedStyle;
+
+        private StyleState containedStates;
+
+        public TextStyle ownTextStyle;
         
-        public UIStyleSet(int elementId, IStyleChangeHandler changeHandler) {
+        // todo replace with IFontHandler
+        private StyleSystem styleSystem;
+        
+        public UIStyleSet(int elementId, IStyleChangeHandler changeHandler, StyleSystem styleSystem) {
             this.elementId = elementId;
             this.changeHandler = changeHandler;
             this.currentState = StyleState.Normal;
             this.containedStates = StyleState.Normal;
-            this.activeStyles = new UIStyle();
+            this.styleSystem = styleSystem;
+            this.computedStyle = new UIStyle();
+            this.ownTextStyle = TextStyle.Unset;
         }
 
-        public string textContent { get; private set; }
-        
+        private string content;
+        public string textContent {
+            get { return content;}
+            set {
+                switch (whiteSpace) {
+                    case WhitespaceMode.Unset:
+                        content = value;
+                        break;
+                    case WhitespaceMode.Wrap:
+                        content = WhitespaceProcessor.ProcessWrap(value);
+                        break;
+                    case WhitespaceMode.NoWrap:
+                        content = value;
+                        break;
+                    case WhitespaceMode.Preserve:
+                        content = value;
+                        break;
+                    case WhitespaceMode.PreserveWrap:
+                        content = value;
+                        break;
+                    default:
+                        throw new ArgumentOutOfRangeException();
+                }
+            }
+            
+        }
+
         public void EnterState(StyleState state) {
             if (state == StyleState.Normal || (currentState & state) != 0) {
                 return;
             }
+
             currentState |= state;
             Refresh();
         }
@@ -39,13 +74,14 @@ namespace Rendering {
             if (state == StyleState.Normal || (currentState & state) == 0) {
                 return;
             }
+
             currentState &= ~(state);
             currentState |= StyleState.Normal;
             Refresh();
         }
 
         public bool HasHoverStyle => (containedStates & StyleState.Hover) != 0;
-        
+
         public UIStyleProxy hover {
             get { return new UIStyleProxy(this, StyleState.Hover); }
             // ReSharper disable once ValueParameterNotUsed
@@ -88,8 +124,9 @@ namespace Rendering {
 
         public void SetInstanceStyle(UIStyle style, StyleState state = StyleState.Normal) {
             if (appliedStyles == null) {
-                appliedStyles = new StyleEntry[1];
-                appliedStyles[0] = new StyleEntry(new UIStyle(style), StyleType.Instance, state);
+                appliedStyles = new[] {
+                    new StyleEntry(new UIStyle(style), StyleType.Instance, state)
+                };
                 return;
             }
 
@@ -104,6 +141,7 @@ namespace Rendering {
             Array.Resize(ref appliedStyles, appliedStyles.Length + 1);
             appliedStyles[appliedStyles.Length - 1] = new StyleEntry(style, StyleType.Instance, state);
             SortStyles();
+            Refresh();
         }
 
         private void SetInstanceStyleNoCopy(UIStyle style, StyleState state = StyleState.Normal) {
@@ -124,8 +162,9 @@ namespace Rendering {
             Array.Resize(ref appliedStyles, appliedStyles.Length + 1);
             appliedStyles[appliedStyles.Length - 1] = new StyleEntry(style, StyleType.Instance, state);
             SortStyles();
+            Refresh();
         }
-        
+
         public void AddBaseStyle(UIStyle style, StyleState state = StyleState.Normal) {
             // todo -- check for duplicates
             if (appliedStyles == null) {
@@ -137,6 +176,24 @@ namespace Rendering {
 
             appliedStyles[appliedStyles.Length - 1] = new StyleEntry(style, StyleType.Shared, state, baseCounter++);
             SortStyles();
+            Refresh();
+        }
+
+        public void RemoveBaseStyle(UIStyle style, StyleState state = StyleState.Normal) {
+            if (appliedStyles == null) {
+                return;
+            }
+
+            for (int i = 0; i < appliedStyles.Length; i++) {
+                if (appliedStyles[i].style == style && state == appliedStyles[i].state) {
+                    appliedStyles[i] = appliedStyles[appliedStyles.Length - 1];
+                    break;
+                }
+            }
+            
+            Array.Resize(ref appliedStyles, appliedStyles.Length - 1);
+            SortStyles();
+            Refresh();
         }
 
         private void SortStyles() {
@@ -147,15 +204,33 @@ namespace Rendering {
             if (appliedStyles == null) return UIStyle.Default;
 
             for (int i = 0; i < appliedStyles.Length; i++) {
-                if ((appliedStyles[i].state & currentState) != 0) {
-                    if (callback(appliedStyles[i].style)) {
-                        return appliedStyles[i].style;
-                    }
+                if ((appliedStyles[i].state & currentState) == 0) {
+                    continue;
+                }
+
+                if (callback(appliedStyles[i].style)) {
+                    return appliedStyles[i].style;
                 }
             }
 
             // return default if no matches were found
             return UIStyle.Default;
+        }
+
+        private UIStyle FindActiveStyleWithoutDefault(Func<UIStyle, bool> callback) {
+            if (appliedStyles == null) return null;
+
+            for (int i = 0; i < appliedStyles.Length; i++) {
+                if ((appliedStyles[i].state & currentState) == 0) {
+                    continue;
+                }
+
+                if (callback(appliedStyles[i].style)) {
+                    return appliedStyles[i].style;
+                }
+            }
+
+            return null;
         }
 
         private UIStyle GetStyle(StyleState state) {
@@ -190,19 +265,22 @@ namespace Rendering {
             SetInstanceStyle(style, state);
             return style;
         }
-        
-        // todo -- hide this again
-        public void Refresh() {
+
+        internal void Refresh() {
             containedStates = StyleState.Normal;
 
             if (appliedStyles != null) {
-
                 for (int i = 0; i < appliedStyles.Length; i++) {
                     containedStates |= appliedStyles[i].state;
                 }
-                
             }
 
+            UIStyle activeFontSizeStyle = FindActiveStyleWithoutDefault((s) => IntUtil.IsDefined(s.textStyle.fontSize));
+            UIStyle activeFontColorStyle = FindActiveStyleWithoutDefault((s) => ColorUtil.IsDefined(s.textStyle.color));
+            
+            styleSystem.SetFontSize(elementId, activeFontSizeStyle?.textStyle.fontSize ?? IntUtil.UnsetValue);
+            styleSystem.SetFontColor(elementId, activeFontColorStyle?.textStyle.color ?? ColorUtil.UnsetValue);
+            
             changeHandler.SetPaint(elementId, paint);
             changeHandler.SetLayout(elementId, layoutParameters);
             changeHandler.SetConstraints(elementId, constraints);
@@ -211,9 +289,8 @@ namespace Rendering {
             changeHandler.SetBorder(elementId, border);
             changeHandler.SetBorderRadius(elementId, borderRadius);
             changeHandler.SetRect(elementId, rect);
-            changeHandler.SetText(elementId, textStyle);
+            changeHandler.SetTextStyle(elementId, textStyle);
             changeHandler.SetAvailableStates(elementId, containedStates);
-            
         }
 
     }

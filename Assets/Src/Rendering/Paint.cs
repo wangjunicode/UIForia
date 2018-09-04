@@ -10,8 +10,8 @@ namespace Rendering {
         public Texture2D backgroundImage;
 
         public static readonly Paint Unset = new Paint(
-            ColorUtil.UnsetColorValue,
-            ColorUtil.UnsetColorValue,
+            ColorUtil.UnsetValue,
+            ColorUtil.UnsetValue,
             null,
             BorderRadius.Unset
         );

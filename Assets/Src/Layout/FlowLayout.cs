@@ -6,7 +6,7 @@ namespace Src.Layout {
 
     public class FlowLayout : UILayout {
 
-        public override void Run(Rect viewport, LayoutNode currentNode, Rect[] results) { }
+        public override void Run(Rect viewport, LayoutNode currentNode) { }
 
         public FlowLayout(ITextSizeCalculator textSizeCalculator) : base(textSizeCalculator) { }
 

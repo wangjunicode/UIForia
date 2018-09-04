@@ -1,4 +1,5 @@
 using Rendering;
+using UnityEngine;
 
 namespace Src.StyleBindings.Text {
 
@@ -11,6 +12,12 @@ namespace Src.StyleBindings.Text {
         }
 
         public override void Execute(UIElement element, UITemplateContext context) {
+            int currentSize = element.style.GetFontSize(state);
+            int newSize = expression.EvaluateTyped(context);
+            if (currentSize != newSize) {
+            Debug.Log("current: " + currentSize + " new " + newSize);
+                element.style.SetFontSize(newSize, state);
+            }
         }
 
         public override bool IsConstant() {
@@ -18,12 +25,13 @@ namespace Src.StyleBindings.Text {
         }
 
         public override void Apply(UIStyle style, UITemplateContext context) {
-            style.text.fontSize = expression.EvaluateTyped(context);
+            style.textStyle.fontSize = expression.EvaluateTyped(context);
         }
 
         public override void Apply(UIStyleSet styleSet, UITemplateContext context) {
             int currentSize = styleSet.GetFontSize(state);
             int newSize = expression.EvaluateTyped(context);
+            Debug.Log("current: " + currentSize + " new " + newSize);
             if (currentSize != newSize) {
                 styleSet.SetFontSize(newSize, state);
             }

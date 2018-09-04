@@ -10,6 +10,7 @@ namespace Rendering {
         private static Sprite instance;
        
         public Rect border;
+        public Rect borderRadii;
         public Color borderColor;
         
         protected override void OnEnable() {
@@ -36,9 +37,10 @@ namespace Rendering {
             this.UpdateMaterial();
         }
 
-        public void SetMaterialParameters(Rect border, Color borderColor, Color contentColor) {
+        public void SetMaterialParameters(Rect border, Rect borderRadii, Color borderColor, Color contentColor) {
             this.border = border;
             this.borderColor = borderColor;
+            this.borderRadii = borderRadii;
             this.color = contentColor;
         }
         
@@ -46,9 +48,11 @@ namespace Rendering {
             float width = rectTransform.rect.width;
             float height = rectTransform.rect.height;
             Vector4 borderVector = new Vector4(border.x, border.y, border.width, border.height);
+            Vector4 borderRadiiVector = new Vector4(borderRadii.x, borderRadii.y, borderRadii.width, borderRadii.height);
             
             baseMaterial.SetVector("_RectVector", new Vector4(0, 0, width, height));
             baseMaterial.SetVector("_BorderWidthVector", borderVector);
+            baseMaterial.SetVector("_BorderRadiiVector", borderRadiiVector);
             baseMaterial.SetColor("_ContentColor", color);
             baseMaterial.SetColor("_BorderColor", borderColor);
             return baseMaterial;

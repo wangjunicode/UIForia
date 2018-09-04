@@ -34,7 +34,7 @@ namespace Src {
             }
             info = context.rootType.GetMethod(identifierNode.identifier, flags, null, types, null);
             if (info == null) {
-                throw new Exception("Method missing");
+                throw new Exception("Method missing: " + identifierNode.identifier);
             }
 
             yieldedType = info.ReturnType;

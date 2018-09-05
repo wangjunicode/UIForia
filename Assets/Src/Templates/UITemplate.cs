@@ -23,7 +23,7 @@ namespace Src {
 
         protected List<UIStyle> baseStyles;
         protected List<StyleBinding> constantStyleBindings;
-
+        protected List<KeyboardEventHandler> keyboardEventHandlers;
         protected List<Binding> bindingList;
 
         public bool acceptFocus;
@@ -55,6 +55,7 @@ namespace Src {
             data.constantBindings = constantBindings;
             data.constantStyleBindings = constantStyleBindings;
             data.conditionalBindings = conditionalBindings;
+            data.keyboardEventHandlers = keyboardEventHandlers;
             if (acceptFocus) {
                 element.flags |= UIElementFlags.AcceptFocus;
             }
@@ -122,6 +123,11 @@ namespace Src {
         protected virtual void CompileInputBindings(ParsedTemplate template) {
             inputCompiler.SetContext(template.contextDefinition);
             inputBindings = inputCompiler.Compile(attributes).ToArray();
+        }
+
+        protected virtual void CompileEventAnnotations(ParsedTemplate template) {
+            inputCompiler.SetContext(template.contextDefinition);
+            keyboardEventHandlers = inputCompiler.CompileKeyboardInputAttributes(elementType);
         }
 
         protected virtual void CompilePropertyBindings(ParsedTemplate template) {

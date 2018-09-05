@@ -58,12 +58,16 @@ namespace Src.Systems {
         }
 
         public void OnUpdate() {
-            // todo -- only run layout when its actually needed
+
             int count = layoutSystem.RectCount;
             LayoutResult[] layoutResults = layoutSystem.LayoutResults;
 
             for (int i = 0; i < count; i++) {
-                if (!transforms.ContainsKey(layoutResults[i].elementId)) continue;
+                
+                if (!transforms.ContainsKey(layoutResults[i].elementId)) {
+                    continue;
+                }
+                
                 RenderData renderData = renderSkipTree.GetItem(layoutResults[i].elementId);
                 ContentBoxRect margin = renderData.element.style.margin;
                 RectTransform transform = transforms[layoutResults[i].elementId];
@@ -76,6 +80,7 @@ namespace Src.Systems {
                 transform.anchoredPosition = new Vector3(position.x, -position.y, 0);
                 transform.sizeDelta = size;
             }
+            
         }
 
         public void OnReset() {

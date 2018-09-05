@@ -1,6 +1,7 @@
 using System.Collections.Generic;
 using System.Diagnostics;
 using Rendering;
+using Src.Compilers;
 using Src.InputBindings;
 using Src.StyleBindings;
 
@@ -31,7 +32,8 @@ namespace Src {
         public InputBinding[] inputBindings;
         public List<UIStyle> baseStyles;
         public List<StyleBinding> constantStyleBindings;
-
+        public List<KeyboardEventHandler> keyboardEventHandlers;
+        
         public InitData(UIElement element, UITemplateContext context) {
             this.element = element;
             this.context = context;

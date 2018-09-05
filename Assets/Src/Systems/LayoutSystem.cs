@@ -31,7 +31,6 @@ namespace Src.Systems {
             this.layoutTree.onItemParentChanged += HandleTreeParentChanged;
         }
 
-
         public int RectCount => rectCount;
         public LayoutResult[] LayoutResults => rects;
 

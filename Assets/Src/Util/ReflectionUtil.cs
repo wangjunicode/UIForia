@@ -37,6 +37,7 @@ public static class ReflectionUtil {
 
     public const BindingFlags PublicStatic = BindingFlags.Public | BindingFlags.Static;
     public const BindingFlags PublicInstance = BindingFlags.Public | BindingFlags.Instance;
+    public const BindingFlags StaticFlags = BindingFlags.Static | BindingFlags.Public | BindingFlags.NonPublic;
     public const BindingFlags InstanceBindFlags = BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic;
     public const BindingFlags InterfaceBindFlags = BindingFlags.Instance | BindingFlags.Public | BindingFlags.Static;
 
@@ -54,6 +55,8 @@ public static class ReflectionUtil {
     public static readonly Type[] TypeArray1 = new Type[1];
     public static readonly Type[] TypeArray2 = new Type[2];
     public static readonly Type[] TypeArray3 = new Type[3];
+
+//    private static Dictionary<Type, object[]> methodAttributeCache;
 
     public static Type GetArrayElementTypeOrThrow(Type targetType) {
         bool isListType = typeof(IList).IsAssignableFrom(targetType);
@@ -81,11 +84,11 @@ public static class ReflectionUtil {
     public static FieldInfo GetFieldInfo(Type type, string fieldName) {
         return type.GetField(fieldName, InstanceBindFlags);
     }
-    
+
     public static PropertyInfo GetPropertyInfo(Type type, string propertyType) {
         return type.GetProperty(propertyType, InstanceBindFlags);
     }
-    
+
     public static FieldInfo GetFieldInfoOrThrow(Type type, string fieldName) {
         FieldInfo fieldInfo = type.GetField(fieldName, InstanceBindFlags);
         if (fieldInfo == null) {
@@ -139,63 +142,63 @@ public static class ReflectionUtil {
         switch (Type.GetTypeCode(left)) {
             case TypeCode.Byte:
                 switch (Type.GetTypeCode(right)) {
-                    case TypeCode.Byte:   return true;
-                    case TypeCode.Int16:  return true;
-                    case TypeCode.Int32:  return true;
-                    case TypeCode.Int64:  return true;
+                    case TypeCode.Byte: return true;
+                    case TypeCode.Int16: return true;
+                    case TypeCode.Int32: return true;
+                    case TypeCode.Int64: return true;
                     case TypeCode.Double: return true;
                     case TypeCode.Single: return true;
-                    default:              return false;
+                    default: return false;
                 }
             case TypeCode.Int16:
                 switch (Type.GetTypeCode(right)) {
-                    case TypeCode.Byte:   return false;
-                    case TypeCode.Int16:  return true;
-                    case TypeCode.Int32:  return true;
-                    case TypeCode.Int64:  return true;
+                    case TypeCode.Byte: return false;
+                    case TypeCode.Int16: return true;
+                    case TypeCode.Int32: return true;
+                    case TypeCode.Int64: return true;
                     case TypeCode.Double: return true;
                     case TypeCode.Single: return true;
-                    default:              return false;
+                    default: return false;
                 }
             case TypeCode.Int32:
                 switch (Type.GetTypeCode(right)) {
-                    case TypeCode.Byte:   return false;
-                    case TypeCode.Int16:  return false;
-                    case TypeCode.Int32:  return true;
-                    case TypeCode.Int64:  return true;
+                    case TypeCode.Byte: return false;
+                    case TypeCode.Int16: return false;
+                    case TypeCode.Int32: return true;
+                    case TypeCode.Int64: return true;
                     case TypeCode.Double: return true;
                     case TypeCode.Single: return true;
-                    default:              return false;
+                    default: return false;
                 }
             case TypeCode.Int64:
                 switch (Type.GetTypeCode(right)) {
-                    case TypeCode.Byte:   return false;
-                    case TypeCode.Int16:  return false;
-                    case TypeCode.Int32:  return false;
-                    case TypeCode.Int64:  return true;
+                    case TypeCode.Byte: return false;
+                    case TypeCode.Int16: return false;
+                    case TypeCode.Int32: return false;
+                    case TypeCode.Int64: return true;
                     case TypeCode.Double: return true;
                     case TypeCode.Single: return true;
-                    default:              return false;
+                    default: return false;
                 }
             case TypeCode.Double:
                 switch (Type.GetTypeCode(right)) {
-                    case TypeCode.Byte:   return false;
-                    case TypeCode.Int16:  return false;
-                    case TypeCode.Int32:  return true;
-                    case TypeCode.Int64:  return false;
+                    case TypeCode.Byte: return false;
+                    case TypeCode.Int16: return false;
+                    case TypeCode.Int32: return true;
+                    case TypeCode.Int64: return false;
                     case TypeCode.Double: return true;
                     case TypeCode.Single: return true;
-                    default:              return false;
+                    default: return false;
                 }
             case TypeCode.Single:
                 switch (Type.GetTypeCode(right)) {
-                    case TypeCode.Byte:   return false;
-                    case TypeCode.Int16:  return false;
-                    case TypeCode.Int32:  return true;
-                    case TypeCode.Int64:  return false;
+                    case TypeCode.Byte: return false;
+                    case TypeCode.Int16: return false;
+                    case TypeCode.Int32: return true;
+                    case TypeCode.Int64: return false;
                     case TypeCode.Double: return false;
                     case TypeCode.Single: return true;
-                    default:              return false;
+                    default: return false;
                 }
             default:
                 return false;
@@ -291,7 +294,10 @@ public static class ReflectionUtil {
 
     public static Type GetOpenDelegateType(MethodInfo info) {
         ParameterInfo[] parameters = info.GetParameters();
-        Type[] signatureTypes = new Type[parameters.Length + 2];
+
+        int additionalSize = info.ReturnType == typeof(void) ? 1 : 2;
+
+        Type[] signatureTypes = new Type[parameters.Length + additionalSize];
 
         signatureTypes[0] = info.DeclaringType;
 
@@ -299,29 +305,55 @@ public static class ReflectionUtil {
             signatureTypes[i] = parameters[i - 1].ParameterType;
         }
 
-        signatureTypes[parameters.Length + 1] = info.ReturnType;
+        if (info.ReturnType != typeof(void)) {
+            signatureTypes[parameters.Length + 1] = info.ReturnType;
+            switch (signatureTypes.Length) {
+                case 1:
+                    return typeof(Func<>).MakeGenericType(signatureTypes);
+                case 2:
+                    return typeof(Func<,>).MakeGenericType(signatureTypes);
+                case 3:
+                    return typeof(Func<,,>).MakeGenericType(signatureTypes);
+                case 4:
+                    return typeof(Func<,,,>).MakeGenericType(signatureTypes);
+                case 5:
+                    return typeof(Func<,,,,>).MakeGenericType(signatureTypes);
+                case 6:
+                    return typeof(Func<,,,,,>).MakeGenericType(signatureTypes);
+                case 7:
+                    return typeof(Func<,,,,,,>).MakeGenericType(signatureTypes);
+                case 8:
+                    return typeof(Func<,,,,,,,>).MakeGenericType(signatureTypes);
+                case 9:
+                    return typeof(Func<,,,,,,,,>).MakeGenericType(signatureTypes);
+                case 10:
+                    return typeof(Func<,,,,,,,,,>).MakeGenericType(signatureTypes);
+                default:
+                    throw new ArgumentOutOfRangeException();
+            }
+        }
 
         switch (signatureTypes.Length) {
             case 1:
-                return typeof(Func<>).MakeGenericType(signatureTypes);
+                return typeof(Action<>).MakeGenericType(signatureTypes);
             case 2:
-                return typeof(Func<,>).MakeGenericType(signatureTypes);
+                return typeof(Action<,>).MakeGenericType(signatureTypes);
             case 3:
-                return typeof(Func<,,>).MakeGenericType(signatureTypes);
+                return typeof(Action<,,>).MakeGenericType(signatureTypes);
             case 4:
-                return typeof(Func<,,,>).MakeGenericType(signatureTypes);
+                return typeof(Action<,,,>).MakeGenericType(signatureTypes);
             case 5:
-                return typeof(Func<,,,,>).MakeGenericType(signatureTypes);
+                return typeof(Action<,,,,>).MakeGenericType(signatureTypes);
             case 6:
-                return typeof(Func<,,,,,>).MakeGenericType(signatureTypes);
+                return typeof(Action<,,,,,>).MakeGenericType(signatureTypes);
             case 7:
-                return typeof(Func<,,,,,,>).MakeGenericType(signatureTypes);
+                return typeof(Action<,,,,,,>).MakeGenericType(signatureTypes);
             case 8:
-                return typeof(Func<,,,,,,,>).MakeGenericType(signatureTypes);
+                return typeof(Action<,,,,,,,>).MakeGenericType(signatureTypes);
             case 9:
-                return typeof(Func<,,,,,,,,>).MakeGenericType(signatureTypes);
+                return typeof(Action<,,,,,,,,>).MakeGenericType(signatureTypes);
             case 10:
-                return typeof(Func<,,,,,,,,,>).MakeGenericType(signatureTypes);
+                return typeof(Action<,,,,,,,,,>).MakeGenericType(signatureTypes);
             default:
                 throw new ArgumentOutOfRangeException();
         }
@@ -329,35 +361,68 @@ public static class ReflectionUtil {
 
     public static Type GetClosedDelegateType(MethodInfo info) {
         ParameterInfo[] parameters = info.GetParameters();
-        Type[] signatureTypes = new Type[parameters.Length + 1];
+
+        int additionalSize = info.ReturnType == typeof(void) ? 0 : 1;
+        
+        Type[] signatureTypes = new Type[parameters.Length + additionalSize];
 
         for (int i = 0; i < parameters.Length; i++) {
             signatureTypes[i] = parameters[i].ParameterType;
         }
 
-        signatureTypes[parameters.Length + 1] = info.ReturnType;
+        if (info.ReturnType != typeof(void)) {
+            
+            signatureTypes[parameters.Length + 1] = info.ReturnType;
+            
+            switch (signatureTypes.Length) {
+                case 1:
+                    return typeof(Func<>).MakeGenericType(signatureTypes);
+                case 2:
+                    return typeof(Func<,>).MakeGenericType(signatureTypes);
+                case 3:
+                    return typeof(Func<,,>).MakeGenericType(signatureTypes);
+                case 4:
+                    return typeof(Func<,,,>).MakeGenericType(signatureTypes);
+                case 5:
+                    return typeof(Func<,,,,>).MakeGenericType(signatureTypes);
+                case 6:
+                    return typeof(Func<,,,,,>).MakeGenericType(signatureTypes);
+                case 7:
+                    return typeof(Func<,,,,,,>).MakeGenericType(signatureTypes);
+                case 8:
+                    return typeof(Func<,,,,,,,>).MakeGenericType(signatureTypes);
+                case 9:
+                    return typeof(Func<,,,,,,,,>).MakeGenericType(signatureTypes);
+                case 10:
+                    return typeof(Func<,,,,,,,,,>).MakeGenericType(signatureTypes);
+                default:
+                    throw new ArgumentOutOfRangeException();
+            }
+        }
 
         switch (signatureTypes.Length) {
+            case 0:
+                return typeof(Action);
             case 1:
-                return typeof(Func<>).MakeGenericType(signatureTypes);
+                return typeof(Action<>).MakeGenericType(signatureTypes);
             case 2:
-                return typeof(Func<,>).MakeGenericType(signatureTypes);
+                return typeof(Action<,>).MakeGenericType(signatureTypes);
             case 3:
-                return typeof(Func<,,>).MakeGenericType(signatureTypes);
+                return typeof(Action<,,>).MakeGenericType(signatureTypes);
             case 4:
-                return typeof(Func<,,,>).MakeGenericType(signatureTypes);
+                return typeof(Action<,,,>).MakeGenericType(signatureTypes);
             case 5:
-                return typeof(Func<,,,,>).MakeGenericType(signatureTypes);
+                return typeof(Action<,,,,>).MakeGenericType(signatureTypes);
             case 6:
-                return typeof(Func<,,,,,>).MakeGenericType(signatureTypes);
+                return typeof(Action<,,,,,>).MakeGenericType(signatureTypes);
             case 7:
-                return typeof(Func<,,,,,,>).MakeGenericType(signatureTypes);
+                return typeof(Action<,,,,,,>).MakeGenericType(signatureTypes);
             case 8:
-                return typeof(Func<,,,,,,,>).MakeGenericType(signatureTypes);
+                return typeof(Action<,,,,,,,>).MakeGenericType(signatureTypes);
             case 9:
-                return typeof(Func<,,,,,,,,>).MakeGenericType(signatureTypes);
+                return typeof(Action<,,,,,,,,>).MakeGenericType(signatureTypes);
             case 10:
-                return typeof(Func<,,,,,,,,,>).MakeGenericType(signatureTypes);
+                return typeof(Action<,,,,,,,,,>).MakeGenericType(signatureTypes);
             default:
                 throw new ArgumentOutOfRangeException();
         }
@@ -515,7 +580,6 @@ public static class ReflectionUtil {
             paramExpression0,
             paramExpression1
         ).Compile();
-
     }
 
     public struct LinqAccessor {
@@ -556,7 +620,6 @@ public static class ReflectionUtil {
     }
 
     public static Action<TObject, TProperty> GetPropSetter<TObject, TProperty>(string propertyName) {
-
         ParameterExpression paramExpression0 = Expression.Parameter(typeof(TObject));
         ParameterExpression paramExpression1 = Expression.Parameter(typeof(TProperty), propertyName);
         MemberExpression propertyGetterExpression = Expression.Field(paramExpression0, propertyName);
@@ -566,7 +629,6 @@ public static class ReflectionUtil {
             paramExpression0,
             paramExpression1
         ).Compile();
-
     }
 
     public static Func<TObject, TProperty> GetPropGetter<TObject, TProperty>(string propertyName) {
@@ -589,6 +651,7 @@ public static class ReflectionUtil {
         else if (type.IsGenericType) {
             generic = type.GetGenericTypeDefinition();
         }
+
         if (generic == null) return false;
         if (generic == typeof(Action<>)) return true;
         if (generic == typeof(Action<,>)) return true;

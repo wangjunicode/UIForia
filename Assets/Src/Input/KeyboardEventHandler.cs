@@ -6,18 +6,57 @@ using UnityEngine;
 
 namespace Src.Compilers {
 
-    public abstract class KeyboardEventHandler {
+    public abstract class KeyboardEventHandler : IComparable<KeyboardEventHandler> {
 
         public InputEventType eventType;
         public bool requiresFocus;
-        public EventModifiers requiredModifiers;
+        public KeyboardModifiers requiredModifiers;
         public KeyCode keyCode;
 #if DEBUG
         public MethodInfo methodInfo;
 #endif
-        public abstract void Invoke(object element, KeyboardInputEvent evt);
+        public abstract void Invoke(object target, KeyboardInputEvent evt);
 
+        // keyboard event handlers should be sorted by require focus
+        // then by require specific key
+        // then the rest
+        // focus + specific key is top priority
+        // then focus w/o specific key
+        // then specific key w/o focus
+        // then any key w/o focus
+        
+        public int CompareTo(KeyboardEventHandler other) {
+
+            int focusResult = CompareFocus(other);
+            if (focusResult != 0) return focusResult;
+
+            int keyCodeResult = CompareKeys(other);
+            if (keyCodeResult != 0) return keyCodeResult;
+            
+            int modifierResult = CompareModifiers(other);
+            if (modifierResult != 0) return modifierResult;
+
+            return 1;
+        }
+
+        private int CompareKeys(KeyboardEventHandler other) {
+            if (keyCode == other.keyCode) return 0;
+            return keyCode != KeyCodeUtil.AnyKey ? 1 : -1;
+        }
+
+        private int CompareFocus(KeyboardEventHandler other) {
+            if (other.requiresFocus == requiresFocus) return 0;
+            return requiresFocus ? 1 : -1;
+        }
+
+        private int CompareModifiers(KeyboardEventHandler other) {
+            if (requiredModifiers == KeyboardModifiers.None && other.requiredModifiers == KeyboardModifiers.None) return 0;
+            if (requiredModifiers != KeyboardModifiers.None && other.requiredModifiers != KeyboardModifiers.None) return 0;
+            return (requiredModifiers != KeyboardModifiers.None) ? 1 : -1;
+        }
     }
+    
+    
 
     public class KeyboardEventHandlerIgnoreEvent<T> : KeyboardEventHandler {
 
@@ -28,7 +67,7 @@ namespace Src.Compilers {
         }
 
         // can probably merge a bunch of flags & just do 1 check
-        public override void Invoke(object element, KeyboardInputEvent evt) {
+        public override void Invoke(object target, KeyboardInputEvent evt) {
             if (evt.type != eventType) return;
             
             if (requiresFocus && !evt.isFocused) return;
@@ -42,7 +81,7 @@ namespace Src.Compilers {
                 return;
             }
             
-            handler((T) element);
+            handler((T) target);
             
         }        
 
@@ -56,7 +95,7 @@ namespace Src.Compilers {
             this.handler = handler;
         }
 
-        public override void Invoke(object element, KeyboardInputEvent evt) {
+        public override void Invoke(object target, KeyboardInputEvent evt) {
             if (evt.type != eventType) return;
             
             if (requiresFocus && !evt.isFocused) return;
@@ -69,7 +108,7 @@ namespace Src.Compilers {
             if ((requiredModifiers & evt.modifiers) != requiredModifiers) {
                 return;
             }
-            handler((T) element, evt);
+            handler((T) target, evt);
         }
 
     }

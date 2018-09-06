@@ -15,7 +15,10 @@ namespace Src.Input {
         MouseScroll = 1 << 7,
 
         KeyDown = 1 << 8,
-        KeyUp = 1 << 9
+        KeyUp = 1 << 9,
+
+        Focus = 1 << 10,
+        Blur = 1 << 11
 
     }
 

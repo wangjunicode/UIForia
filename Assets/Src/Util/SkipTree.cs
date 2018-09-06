@@ -367,8 +367,17 @@ namespace Src {
                 ptr = ptr.nextSibling;
             }
         }
-        
-        public void ConditionalTraversePreOrder<U>(IHierarchical start, U closureArg,  Func<T, U, bool> traverseFn) {
+
+        public void ConditionalTraversePreOrder<U>(U closureArg, Func<T, U, bool> traverseFn) {
+            ConditionalTraversePreOrderStep(root, closureArg, traverseFn);
+        }
+
+        public void ConditionalTraversePreOrder<U>(IHierarchical start, U closureArg, Func<T, U, bool> traverseFn) {
+            if (start == null) {
+                ConditionalTraversePreOrderStep(root, closureArg, traverseFn);
+                return;
+            }
+
             SkipTreeNode node;
             if (nodeMap.TryGetValue(start.UniqueId, out node)) {
                 ConditionalTraversePreOrderStep(node, closureArg, traverseFn);
@@ -400,7 +409,7 @@ namespace Src {
                 }
             }
         }
-        
+
         private void ConditionalTraversePreOrderStep<U>(SkipTreeNode node, U closureArg, Func<T, U, bool> traverseFn) {
             Stack<SkipTreeNode> stack = new Stack<SkipTreeNode>();
             AddChildrenToStack(stack, node, true);

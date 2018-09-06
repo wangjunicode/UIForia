@@ -21,13 +21,13 @@ public class InputCompiler_KeyUpAttributes {
         [OnKeyUp(KeyCode.A)]
         public void HandleSpecificKeyUp() { }
 
-        [OnKeyUp(KeyCode.A, EventModifiers.Alt)]
+        [OnKeyUp(KeyCode.A, KeyboardModifiers.Alt)]
         public void HandleSpecificKeyUpWithModifier() { }
 
         [OnKeyUp(KeyCode.A)]
         public void HandleSpecificKeyUpWithArgument(KeyboardInputEvent evt) { }
 
-        [OnKeyUp(KeyCode.A, EventModifiers.Alt)]
+        [OnKeyUp(KeyCode.A, KeyboardModifiers.Alt)]
         public void HandleSpecificKeyUpWithModifierWithArgument(KeyboardInputEvent evt) { }
 
         [OnKeyUpWithFocus]
@@ -39,13 +39,13 @@ public class InputCompiler_KeyUpAttributes {
         [OnKeyUpWithFocus(KeyCode.A)]
         public void HandleFocusSpecificKeyUp() { }
 
-        [OnKeyUpWithFocus(KeyCode.A, EventModifiers.Alt)]
+        [OnKeyUpWithFocus(KeyCode.A, KeyboardModifiers.Alt)]
         public void HandleFocusSpecificKeyUpWithModifier() { }
 
         [OnKeyUpWithFocus(KeyCode.A)]
         public void HandleFocusSpecificKeyUpWithArgument(KeyboardInputEvent evt) { }
 
-        [OnKeyUpWithFocus(KeyCode.A, EventModifiers.Alt)]
+        [OnKeyUpWithFocus(KeyCode.A, KeyboardModifiers.Alt)]
         public void HandleFocusSpecificKeyUpWithModifierWithArgument(KeyboardInputEvent evt) { }
 
     }
@@ -67,7 +67,7 @@ public class InputCompiler_KeyUpAttributes {
         Assert.IsInstanceOf<KeyboardEventHandler<KeyUpTestThing>>(handler);
         Assert.AreEqual(InputEventType.KeyUp, handler.eventType);
         Assert.AreEqual(false, handler.requiresFocus);
-        Assert.AreEqual(EventModifiers.None, handler.requiredModifiers);
+        Assert.AreEqual(KeyboardModifiers.None, handler.requiredModifiers);
         Assert.AreEqual(KeyCodeUtil.AnyKey, handler.keyCode);
     }
 
@@ -79,7 +79,7 @@ public class InputCompiler_KeyUpAttributes {
         Assert.IsInstanceOf<KeyboardEventHandlerIgnoreEvent<KeyUpTestThing>>(handler);
         Assert.AreEqual(InputEventType.KeyUp, handler.eventType);
         Assert.AreEqual(false, handler.requiresFocus);
-        Assert.AreEqual(EventModifiers.None, handler.requiredModifiers);
+        Assert.AreEqual(KeyboardModifiers.None, handler.requiredModifiers);
         Assert.AreEqual(KeyCodeUtil.AnyKey, handler.keyCode);
     }
 
@@ -91,7 +91,7 @@ public class InputCompiler_KeyUpAttributes {
         Assert.IsInstanceOf<KeyboardEventHandlerIgnoreEvent<KeyUpTestThing>>(handler);
         Assert.AreEqual(InputEventType.KeyUp, handler.eventType);
         Assert.AreEqual(false, handler.requiresFocus);
-        Assert.AreEqual(EventModifiers.None, handler.requiredModifiers);
+        Assert.AreEqual(KeyboardModifiers.None, handler.requiredModifiers);
         Assert.AreEqual(KeyCode.A, handler.keyCode);
     }
 
@@ -103,7 +103,7 @@ public class InputCompiler_KeyUpAttributes {
         Assert.IsInstanceOf<KeyboardEventHandlerIgnoreEvent<KeyUpTestThing>>(handler);
         Assert.AreEqual(InputEventType.KeyUp, handler.eventType);
         Assert.AreEqual(false, handler.requiresFocus);
-        Assert.AreEqual(EventModifiers.Alt, handler.requiredModifiers);
+        Assert.AreEqual(KeyboardModifiers.Alt, handler.requiredModifiers);
         Assert.AreEqual(KeyCode.A, handler.keyCode);
     }
 
@@ -115,7 +115,7 @@ public class InputCompiler_KeyUpAttributes {
         Assert.IsInstanceOf<KeyboardEventHandler<KeyUpTestThing>>(handler);
         Assert.AreEqual(InputEventType.KeyUp, handler.eventType);
         Assert.AreEqual(false, handler.requiresFocus);
-        Assert.AreEqual(EventModifiers.None, handler.requiredModifiers);
+        Assert.AreEqual(KeyboardModifiers.None, handler.requiredModifiers);
         Assert.AreEqual(KeyCode.A, handler.keyCode);
     }
 
@@ -127,7 +127,7 @@ public class InputCompiler_KeyUpAttributes {
         Assert.IsInstanceOf<KeyboardEventHandler<KeyUpTestThing>>(handler);
         Assert.AreEqual(InputEventType.KeyUp, handler.eventType);
         Assert.AreEqual(false, handler.requiresFocus);
-        Assert.AreEqual(EventModifiers.Alt, handler.requiredModifiers);
+        Assert.AreEqual(KeyboardModifiers.Alt, handler.requiredModifiers);
         Assert.AreEqual(KeyCode.A, handler.keyCode);
     }
 
@@ -139,7 +139,7 @@ public class InputCompiler_KeyUpAttributes {
         Assert.IsInstanceOf<KeyboardEventHandler<KeyUpTestThing>>(handler);
         Assert.AreEqual(InputEventType.KeyUp, handler.eventType);
         Assert.AreEqual(true, handler.requiresFocus);
-        Assert.AreEqual(EventModifiers.None, handler.requiredModifiers);
+        Assert.AreEqual(KeyboardModifiers.None, handler.requiredModifiers);
         Assert.AreEqual(KeyCodeUtil.AnyKey, handler.keyCode);
     }
 
@@ -151,7 +151,7 @@ public class InputCompiler_KeyUpAttributes {
         Assert.IsInstanceOf<KeyboardEventHandlerIgnoreEvent<KeyUpTestThing>>(handler);
         Assert.AreEqual(InputEventType.KeyUp, handler.eventType);
         Assert.AreEqual(true, handler.requiresFocus);
-        Assert.AreEqual(EventModifiers.None, handler.requiredModifiers);
+        Assert.AreEqual(KeyboardModifiers.None, handler.requiredModifiers);
         Assert.AreEqual(KeyCodeUtil.AnyKey, handler.keyCode);
     }
 
@@ -163,7 +163,7 @@ public class InputCompiler_KeyUpAttributes {
         Assert.IsInstanceOf<KeyboardEventHandlerIgnoreEvent<KeyUpTestThing>>(handler);
         Assert.AreEqual(InputEventType.KeyUp, handler.eventType);
         Assert.AreEqual(true, handler.requiresFocus);
-        Assert.AreEqual(EventModifiers.None, handler.requiredModifiers);
+        Assert.AreEqual(KeyboardModifiers.None, handler.requiredModifiers);
         Assert.AreEqual(KeyCode.A, handler.keyCode);
     }
 
@@ -175,7 +175,7 @@ public class InputCompiler_KeyUpAttributes {
         Assert.IsInstanceOf<KeyboardEventHandlerIgnoreEvent<KeyUpTestThing>>(handler);
         Assert.AreEqual(InputEventType.KeyUp, handler.eventType);
         Assert.AreEqual(true, handler.requiresFocus);
-        Assert.AreEqual(EventModifiers.Alt, handler.requiredModifiers);
+        Assert.AreEqual(KeyboardModifiers.Alt, handler.requiredModifiers);
         Assert.AreEqual(KeyCode.A, handler.keyCode);
     }
 
@@ -187,7 +187,7 @@ public class InputCompiler_KeyUpAttributes {
         Assert.IsInstanceOf<KeyboardEventHandler<KeyUpTestThing>>(handler);
         Assert.AreEqual(InputEventType.KeyUp, handler.eventType);
         Assert.AreEqual(true, handler.requiresFocus);
-        Assert.AreEqual(EventModifiers.None, handler.requiredModifiers);
+        Assert.AreEqual(KeyboardModifiers.None, handler.requiredModifiers);
         Assert.AreEqual(KeyCode.A, handler.keyCode);
     }
 
@@ -199,7 +199,7 @@ public class InputCompiler_KeyUpAttributes {
         Assert.IsInstanceOf<KeyboardEventHandler<KeyUpTestThing>>(handler);
         Assert.AreEqual(InputEventType.KeyUp, handler.eventType);
         Assert.AreEqual(true, handler.requiresFocus);
-        Assert.AreEqual(EventModifiers.Alt, handler.requiredModifiers);
+        Assert.AreEqual(KeyboardModifiers.Alt, handler.requiredModifiers);
         Assert.AreEqual(KeyCode.A, handler.keyCode);
     }
 
@@ -223,13 +223,13 @@ public class InputCompiler_KeyDownAttributes {
         [OnKeyDown(KeyCode.A)]
         public void HandleSpecificKeyPress() { }
 
-        [OnKeyDown(KeyCode.A, EventModifiers.Alt)]
+        [OnKeyDown(KeyCode.A, KeyboardModifiers.Alt)]
         public void HandleSpecificKeyPressWithModifier() { }
 
         [OnKeyDown(KeyCode.A)]
         public void HandleSpecificKeyPressWithArgument(KeyboardInputEvent evt) { }
 
-        [OnKeyDown(KeyCode.A, EventModifiers.Alt)]
+        [OnKeyDown(KeyCode.A, KeyboardModifiers.Alt)]
         public void HandleSpecificKeyPressWithModifierWithArgument(KeyboardInputEvent evt) { }
 
         [OnKeyDownWithFocus]
@@ -241,13 +241,13 @@ public class InputCompiler_KeyDownAttributes {
         [OnKeyDownWithFocus(KeyCode.A)]
         public void HandleFocusSpecificKeyPress() { }
 
-        [OnKeyDownWithFocus(KeyCode.A, EventModifiers.Alt)]
+        [OnKeyDownWithFocus(KeyCode.A, KeyboardModifiers.Alt)]
         public void HandleFocusSpecificKeyPressWithModifier() { }
 
         [OnKeyDownWithFocus(KeyCode.A)]
         public void HandleFocusSpecificKeyPressWithArgument(KeyboardInputEvent evt) { }
 
-        [OnKeyDownWithFocus(KeyCode.A, EventModifiers.Alt)]
+        [OnKeyDownWithFocus(KeyCode.A, KeyboardModifiers.Alt)]
         public void HandleFocusSpecificKeyPressWithModifierWithArgument(KeyboardInputEvent evt) { }
 
     }
@@ -269,7 +269,7 @@ public class InputCompiler_KeyDownAttributes {
         Assert.IsInstanceOf<KeyboardEventHandler<KeyDownTestThing>>(handler);
         Assert.AreEqual(InputEventType.KeyDown, handler.eventType);
         Assert.AreEqual(false, handler.requiresFocus);
-        Assert.AreEqual(EventModifiers.None, handler.requiredModifiers);
+        Assert.AreEqual(KeyboardModifiers.None, handler.requiredModifiers);
         Assert.AreEqual(KeyCodeUtil.AnyKey, handler.keyCode);
     }
 
@@ -281,7 +281,7 @@ public class InputCompiler_KeyDownAttributes {
         Assert.IsInstanceOf<KeyboardEventHandlerIgnoreEvent<KeyDownTestThing>>(handler);
         Assert.AreEqual(InputEventType.KeyDown, handler.eventType);
         Assert.AreEqual(false, handler.requiresFocus);
-        Assert.AreEqual(EventModifiers.None, handler.requiredModifiers);
+        Assert.AreEqual(KeyboardModifiers.None, handler.requiredModifiers);
         Assert.AreEqual(KeyCodeUtil.AnyKey, handler.keyCode);
     }
 
@@ -293,7 +293,7 @@ public class InputCompiler_KeyDownAttributes {
         Assert.IsInstanceOf<KeyboardEventHandlerIgnoreEvent<KeyDownTestThing>>(handler);
         Assert.AreEqual(InputEventType.KeyDown, handler.eventType);
         Assert.AreEqual(false, handler.requiresFocus);
-        Assert.AreEqual(EventModifiers.None, handler.requiredModifiers);
+        Assert.AreEqual(KeyboardModifiers.None, handler.requiredModifiers);
         Assert.AreEqual(KeyCode.A, handler.keyCode);
     }
 
@@ -305,7 +305,7 @@ public class InputCompiler_KeyDownAttributes {
         Assert.IsInstanceOf<KeyboardEventHandlerIgnoreEvent<KeyDownTestThing>>(handler);
         Assert.AreEqual(InputEventType.KeyDown, handler.eventType);
         Assert.AreEqual(false, handler.requiresFocus);
-        Assert.AreEqual(EventModifiers.Alt, handler.requiredModifiers);
+        Assert.AreEqual(KeyboardModifiers.Alt, handler.requiredModifiers);
         Assert.AreEqual(KeyCode.A, handler.keyCode);
     }
 
@@ -317,7 +317,7 @@ public class InputCompiler_KeyDownAttributes {
         Assert.IsInstanceOf<KeyboardEventHandler<KeyDownTestThing>>(handler);
         Assert.AreEqual(InputEventType.KeyDown, handler.eventType);
         Assert.AreEqual(false, handler.requiresFocus);
-        Assert.AreEqual(EventModifiers.None, handler.requiredModifiers);
+        Assert.AreEqual(KeyboardModifiers.None, handler.requiredModifiers);
         Assert.AreEqual(KeyCode.A, handler.keyCode);
     }
 
@@ -329,7 +329,7 @@ public class InputCompiler_KeyDownAttributes {
         Assert.IsInstanceOf<KeyboardEventHandler<KeyDownTestThing>>(handler);
         Assert.AreEqual(InputEventType.KeyDown, handler.eventType);
         Assert.AreEqual(false, handler.requiresFocus);
-        Assert.AreEqual(EventModifiers.Alt, handler.requiredModifiers);
+        Assert.AreEqual(KeyboardModifiers.Alt, handler.requiredModifiers);
         Assert.AreEqual(KeyCode.A, handler.keyCode);
     }
 
@@ -341,7 +341,7 @@ public class InputCompiler_KeyDownAttributes {
         Assert.IsInstanceOf<KeyboardEventHandler<KeyDownTestThing>>(handler);
         Assert.AreEqual(InputEventType.KeyDown, handler.eventType);
         Assert.AreEqual(true, handler.requiresFocus);
-        Assert.AreEqual(EventModifiers.None, handler.requiredModifiers);
+        Assert.AreEqual(KeyboardModifiers.None, handler.requiredModifiers);
         Assert.AreEqual(KeyCodeUtil.AnyKey, handler.keyCode);
     }
 
@@ -353,7 +353,7 @@ public class InputCompiler_KeyDownAttributes {
         Assert.IsInstanceOf<KeyboardEventHandlerIgnoreEvent<KeyDownTestThing>>(handler);
         Assert.AreEqual(InputEventType.KeyDown, handler.eventType);
         Assert.AreEqual(true, handler.requiresFocus);
-        Assert.AreEqual(EventModifiers.None, handler.requiredModifiers);
+        Assert.AreEqual(KeyboardModifiers.None, handler.requiredModifiers);
         Assert.AreEqual(KeyCodeUtil.AnyKey, handler.keyCode);
     }
 
@@ -365,7 +365,7 @@ public class InputCompiler_KeyDownAttributes {
         Assert.IsInstanceOf<KeyboardEventHandlerIgnoreEvent<KeyDownTestThing>>(handler);
         Assert.AreEqual(InputEventType.KeyDown, handler.eventType);
         Assert.AreEqual(true, handler.requiresFocus);
-        Assert.AreEqual(EventModifiers.None, handler.requiredModifiers);
+        Assert.AreEqual(KeyboardModifiers.None, handler.requiredModifiers);
         Assert.AreEqual(KeyCode.A, handler.keyCode);
     }
 
@@ -377,7 +377,7 @@ public class InputCompiler_KeyDownAttributes {
         Assert.IsInstanceOf<KeyboardEventHandlerIgnoreEvent<KeyDownTestThing>>(handler);
         Assert.AreEqual(InputEventType.KeyDown, handler.eventType);
         Assert.AreEqual(true, handler.requiresFocus);
-        Assert.AreEqual(EventModifiers.Alt, handler.requiredModifiers);
+        Assert.AreEqual(KeyboardModifiers.Alt, handler.requiredModifiers);
         Assert.AreEqual(KeyCode.A, handler.keyCode);
     }
 
@@ -389,7 +389,7 @@ public class InputCompiler_KeyDownAttributes {
         Assert.IsInstanceOf<KeyboardEventHandler<KeyDownTestThing>>(handler);
         Assert.AreEqual(InputEventType.KeyDown, handler.eventType);
         Assert.AreEqual(true, handler.requiresFocus);
-        Assert.AreEqual(EventModifiers.None, handler.requiredModifiers);
+        Assert.AreEqual(KeyboardModifiers.None, handler.requiredModifiers);
         Assert.AreEqual(KeyCode.A, handler.keyCode);
     }
 
@@ -401,7 +401,7 @@ public class InputCompiler_KeyDownAttributes {
         Assert.IsInstanceOf<KeyboardEventHandler<KeyDownTestThing>>(handler);
         Assert.AreEqual(InputEventType.KeyDown, handler.eventType);
         Assert.AreEqual(true, handler.requiresFocus);
-        Assert.AreEqual(EventModifiers.Alt, handler.requiredModifiers);
+        Assert.AreEqual(KeyboardModifiers.Alt, handler.requiredModifiers);
         Assert.AreEqual(KeyCode.A, handler.keyCode);
     }
 

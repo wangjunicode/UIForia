@@ -73,6 +73,7 @@ public class UIElement : IHierarchical {
         return retn;
     }
 
+    // todo -- remove this so we can hide parent from user
     public int UniqueId => id;
     public IHierarchical Element => this;
     public IHierarchical Parent => parent;

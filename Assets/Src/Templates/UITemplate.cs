@@ -122,7 +122,7 @@ namespace Src {
         
         protected virtual void CompileInputBindings(ParsedTemplate template) {
             inputCompiler.SetContext(template.contextDefinition);
-            inputBindings = inputCompiler.Compile(attributes).ToArray();
+            inputBindings = inputCompiler.Compile(elementType, attributes).ToArray();
         }
 
         protected virtual void CompileEventAnnotations(ParsedTemplate template) {

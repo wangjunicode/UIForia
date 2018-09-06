@@ -23,14 +23,14 @@ namespace Src.Compilers {
             this.compiler.SetContext(context);
         }
 
-        public List<InputBinding> Compile(List<AttributeDefinition> attributeDefinitions) {
+        public List<InputBinding> Compile(Type targetType, List<AttributeDefinition> attributeDefinitions) {
             List<InputBinding> retn = new List<InputBinding>();
 
             if (attributeDefinitions == null) return retn;
 
             for (int i = 0; i < attributeDefinitions.Count; i++) {
                 if (attributeDefinitions[i].isCompiled) continue;
-                InputBinding binding = CompileAttribute(attributeDefinitions[i]);
+                InputBinding binding = CompileAttribute(targetType, attributeDefinitions[i]);
                 if (binding != null) {
                     retn.Add(binding);
                 }
@@ -106,32 +106,23 @@ namespace Src.Compilers {
             return retn;
         }
 
-        private Action<UIElement, KeyboardInputEvent> GetValidDelegate(Delegate callback) {
-            if (callback.Method.ReturnType != typeof(void)) {
-                throw new Exception("Return type of InputHandler function must be void");
-            }
-
-            ParameterInfo[] parameters = callback.Method.GetParameters();
-            if (parameters.Length == 0) {
-                Action<UIElement> actual = (Action<UIElement>) callback;
-                return (element, evt) => { actual(element); };
-            }
-
-            if (parameters.Length == 1) {
-                if (parameters[0].ParameterType == typeof(KeyboardInputEvent)) {
-                    Action<UIElement, KeyboardInputEvent> actual = (Action<UIElement, KeyboardInputEvent>) callback;
-                    return (element, evt) => { actual(element, evt); };
-                }
-            }
-
-            return null;
-        }
-
-        private InputBinding CompileAttribute(AttributeDefinition attr) {
+        private InputBinding CompileAttribute(Type targetType, AttributeDefinition attr) {
             for (int i = 0; i < s_InputAttributeDefs.Length; i++) {
                 if (attr.key == s_InputAttributeDefs[i].attrName) {
                     InputAttributeTuple tuple = s_InputAttributeDefs[i];
                     string source = attr.value;
+
+                    if (tuple.attrName == "onFocus") {
+                        if (!typeof(IFocusable).IsAssignableFrom(targetType)) {
+                            throw new Exception(targetType.Name + " must implement IFocusable in order to handle onFocus listeners");
+                        }
+                    }
+                    else if (tuple.attrName == "onBlur") {
+                        if (!typeof(IFocusable).IsAssignableFrom(targetType)) {
+                            throw new Exception(targetType.Name + " must implement IFocusable in order to handle onBlur listeners");
+                        }
+                    }
+                    
                     if (source[0] != '{') {
                         source = '{' + attr.value + '}';
                     }
@@ -149,6 +140,7 @@ namespace Src.Compilers {
 
         private static readonly ValueTuple<string, Type> mouseEventAlias = ValueTuple.Create("$event", typeof(MouseInputEvent));
         private static readonly ValueTuple<string, Type> keyboardEventAlias = ValueTuple.Create("$event", typeof(KeyboardInputEvent));
+        private static readonly ValueTuple<string, Type> focusEventAlias = ValueTuple.Create("$event", typeof(FocusEvent));
 
         private static readonly InputAttributeTuple[] s_InputAttributeDefs = {
             new InputAttributeTuple("onMouseEnter", InputEventType.MouseEnter, mouseEventAlias),
@@ -161,6 +153,8 @@ namespace Src.Compilers {
             new InputAttributeTuple("onMouseContext", InputEventType.MouseContext, mouseEventAlias),
             new InputAttributeTuple("onKeyDown", InputEventType.KeyDown, keyboardEventAlias),
             new InputAttributeTuple("onKeyUp", InputEventType.KeyUp, keyboardEventAlias),
+            new InputAttributeTuple("onFocus", InputEventType.Focus, focusEventAlias),
+            new InputAttributeTuple("onBlur", InputEventType.Blur, keyboardEventAlias),
         };
 
         private struct InputAttributeTuple {

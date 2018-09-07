@@ -12,6 +12,7 @@ namespace Src.Compilers {
         public bool requiresFocus;
         public KeyboardModifiers requiredModifiers;
         public KeyCode keyCode;
+        public char character;
 #if DEBUG
         public MethodInfo methodInfo;
 #endif
@@ -39,6 +40,25 @@ namespace Src.Compilers {
             return 1;
         }
 
+        protected bool ShouldRun(KeyboardInputEvent evt) {
+            if (evt.type != eventType) return false;
+            
+            if (requiresFocus && !evt.isFocused) return false;
+
+            if (character != '\0' && (character != evt.character)) return false;
+            
+            if (evt.keyCode != keyCode && keyCode != KeyCodeUtil.AnyKey) {
+                return false;
+            }
+            
+            // if all required modifiers are present these should be equal
+            if ((requiredModifiers & evt.modifiers) != requiredModifiers) {
+                return false;
+            }
+
+            return true;
+        }
+
         private int CompareKeys(KeyboardEventHandler other) {
             if (keyCode == other.keyCode) return 0;
             return keyCode != KeyCodeUtil.AnyKey ? 1 : -1;
@@ -56,7 +76,6 @@ namespace Src.Compilers {
         }
     }
     
-    
 
     public class KeyboardEventHandlerIgnoreEvent<T> : KeyboardEventHandler {
 
@@ -68,21 +87,11 @@ namespace Src.Compilers {
 
         // can probably merge a bunch of flags & just do 1 check
         public override void Invoke(object target, KeyboardInputEvent evt) {
-            if (evt.type != eventType) return;
-            
-            if (requiresFocus && !evt.isFocused) return;
-            
-            if (evt.keyCode != keyCode && keyCode != KeyCodeUtil.AnyKey) {
-                return;
+
+            if (ShouldRun(evt)) {
+                handler((T) target);
             }
-            
-            // if all required modifiers are present these should be equal
-            if ((requiredModifiers & evt.modifiers) != requiredModifiers) {
-                return;
-            }
-            
-            handler((T) target);
-            
+
         }        
 
     }
@@ -96,19 +105,9 @@ namespace Src.Compilers {
         }
 
         public override void Invoke(object target, KeyboardInputEvent evt) {
-            if (evt.type != eventType) return;
-            
-            if (requiresFocus && !evt.isFocused) return;
-            
-            if (evt.keyCode != keyCode && keyCode != KeyCodeUtil.AnyKey) {
-                return;
+            if (ShouldRun(evt)) {
+                handler((T) target, evt);
             }
-            
-            // if all required modifiers are present these should be equal
-            if ((requiredModifiers & evt.modifiers) != requiredModifiers) {
-                return;
-            }
-            handler((T) target, evt);
         }
 
     }

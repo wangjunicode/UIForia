@@ -6,7 +6,7 @@ using Src.Layout;
 using UnityEngine;
 
 namespace Debugger {
-
+    
     [Template("Src/Debugger/Inspector.xml")]
     public class Inspector : UIElement {
 

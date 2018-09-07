@@ -2,10 +2,11 @@
 <UITemplate>
 
     <Contents style.minWidth="14f"
-              style.rectWidth="content(100)"
+              style.backgroundColor="red"
+              style.rectWidth="100"
               style.rectHeight="14f">
 
-        {content}
+        {text}
 
     </Contents>
 

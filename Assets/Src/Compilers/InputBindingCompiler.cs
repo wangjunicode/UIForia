@@ -89,6 +89,7 @@ namespace Src.Compilers {
 #endif
                     handler.eventType = attr.eventType;
                     handler.keyCode = attr.key;
+                    handler.character = attr.character;
                     handler.requiredModifiers = attr.modifiers;
                     handler.requiresFocus = attr.requireFocus;
 

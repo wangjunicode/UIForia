@@ -244,10 +244,6 @@ namespace Src {
         private static UITemplate ParseImageElement(XElement element) {
             return new UIImageTemplate(null, ParseAttributes(element.Attributes()));    
         }
-        
-        private static UITemplate ParseInputFieldElement(XElement element) {
-            return new UIInputFieldTemplate(ParseNodes(element.Nodes()), ParseAttributes(element.Attributes()));
-        }
 
         private static UITemplate ParseElement(XElement element) {
             
@@ -257,10 +253,6 @@ namespace Src {
 
             if (element.Name == "Image") {
                 return ParseImageElement(element);
-            }
-            
-            if (element.Name == "InputField") {
-                return ParseInputFieldElement(element);
             }
 
             if (element.Name == "Repeat") {

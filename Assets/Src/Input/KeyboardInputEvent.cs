@@ -7,10 +7,12 @@ namespace Src.Input {
         public readonly bool isFocused;
         public readonly KeyCode keyCode;
         public readonly KeyboardModifiers modifiers;
-
-        public KeyboardInputEvent(InputEventType type, KeyCode keyCode, KeyboardModifiers modifiers, bool isFocused) : base(type) {
+        public readonly char character;
+        
+        public KeyboardInputEvent(InputEventType type, KeyCode keyCode, char character, KeyboardModifiers modifiers, bool isFocused) : base(type) {
             this.keyCode = keyCode;
             this.modifiers = modifiers;
+            this.character = character;
             this.isFocused = isFocused;
         }
 

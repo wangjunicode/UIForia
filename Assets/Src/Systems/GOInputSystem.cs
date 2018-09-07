@@ -129,7 +129,7 @@ namespace Src.Systems {
             QueryLayout();
 
             // focusProvider.ReleaseFocus(); 
-            
+
             ProcessKeyboardEvents();
 
             // EventSystem.current.currentSelectedGameObject;
@@ -172,7 +172,6 @@ namespace Src.Systems {
             }
 
             RunMouseEvent(InputEventType.MouseMove);
-
 
             Swap(ref elementsLastFrame, ref elementsThisFrame);
             Swap(ref hoverStylesLastFrame, ref hoverStylesThisFrame);
@@ -223,9 +222,6 @@ namespace Src.Systems {
                 keyboardEventTree.AddItem(new KeyboardEventTreeNode(elementData.element, elementData.keyboardEventHandlers));
             }
 
-            // if(elementData.keyboardBindings.Count > 0) {
-            //    keyboardBindMap.Add(elementData.elementId, elementData.keyboardBindings) 
-            //    keyboardBindTree.AddItem(elementData.element);
             // need a tree for event handlers for bubble / capture
             // capture if any handlers have capture
             // bubble if any handlers have bubble
@@ -278,8 +274,8 @@ namespace Src.Systems {
         }
 
 
-        private void ProcessKeyboardEvent(KeyCode keyCode, InputEventType eventType, KeyboardModifiers modifiers) {
-            KeyboardInputEvent keyEvent = new KeyboardInputEvent(eventType, keyCode, modifiers, focusedId != -1);
+        private void ProcessKeyboardEvent(KeyCode keyCode, InputEventType eventType, char character, KeyboardModifiers modifiers) {
+            KeyboardInputEvent keyEvent = new KeyboardInputEvent(eventType, keyCode, character, modifiers, focusedId != -1);
             if (focusedId != -1) {
                 keyboardEventTree.ConditionalTraversePreOrder(keyEvent, (item, evt) => {
                     if (evt.stopPropagation) return false;
@@ -319,65 +315,108 @@ namespace Src.Systems {
             downThisFrame.Clear();
             upThisFrame.Clear();
 
-            modifiersThisFrame = modifiersLastFrame;
+            HandleShiftKey(KeyCode.LeftShift);
+            HandleShiftKey(KeyCode.RightShift);
 
+            if (IsKeyDown(KeyCode.LeftShift) || IsKeyDown(KeyCode.RightShift)) {
+                modifiersThisFrame |= KeyboardModifiers.Shift;
+            }
+            else {
+                modifiersThisFrame &= ~KeyboardModifiers.Shift;
+            }
+            
             while (Event.PopEvent(s_Event)) {
-                KeyCode pressedKeyCode = s_Event.keyCode;
-                if (pressedKeyCode == KeyCode.None || (int) pressedKeyCode > (int) KeyCode.Mouse0) {
-                    continue;
+                KeyCode keyCode = s_Event.keyCode;
+                char character = s_Event.character;
+                
+                // need to check this on osx, according to stackoverflow OSX and Windows might handle
+                // sending key events differently
+                
+                if (keyCode == KeyCode.None && character != '\0') {
+                    
+                    if (s_Event.rawType == EventType.KeyDown) {
+                        ProcessKeyboardEvent(keyCode, InputEventType.KeyDown, character, modifiersThisFrame);
+                        continue;
+                    }    
+                    
+                    if (s_Event.rawType == EventType.KeyUp) {
+                        ProcessKeyboardEvent(keyCode, InputEventType.KeyUp, character, modifiersThisFrame);
+                        continue;
+                    }
+                    
                 }
-
+                
                 switch (s_Event.rawType) {
+                    
                     case EventType.KeyDown:
-                        downThisFrame.Add(pressedKeyCode);
-                        keyStates[pressedKeyCode] = KeyState.DownThisFrame;
-                        ProcessKeyboardEvent(pressedKeyCode, InputEventType.KeyDown, modifiersThisFrame);
-                        HandleModifierDown(pressedKeyCode);
-
+                        if (keyStates.ContainsKey(keyCode)) {
+                            KeyState state = keyStates[keyCode];
+                            if ((state & KeyState.Down) == 0) {
+                                downThisFrame.Add(keyCode);
+                                keyStates[keyCode] = KeyState.DownThisFrame;
+                                ProcessKeyboardEvent(keyCode, InputEventType.KeyDown, s_Event.character, modifiersThisFrame);
+                            }
+                        }
+                        else {
+                            downThisFrame.Add(keyCode);
+                            keyStates[keyCode] = KeyState.DownThisFrame;
+                            ProcessKeyboardEvent(keyCode, InputEventType.KeyDown, s_Event.character, modifiersThisFrame);
+                        }                        
+                        HandleModifierDown(keyCode);
                         break;
+                    
                     case EventType.KeyUp:
-                        upThisFrame.Add(pressedKeyCode);
-                        keyStates[pressedKeyCode] = KeyState.UpThisFrame;
-                        ProcessKeyboardEvent(pressedKeyCode, InputEventType.KeyUp, modifiersThisFrame);
-                        HandleModifierUp(pressedKeyCode);
+                        upThisFrame.Add(keyCode);
+                        keyStates[keyCode] = KeyState.UpThisFrame;
+                        ProcessKeyboardEvent(keyCode, InputEventType.KeyUp, s_Event.character, modifiersThisFrame);
+                        HandleModifierUp(keyCode);
                         break;
                 }
             }
 
-            modifiersThisFrame = KeyboardModifiers.None;
+        }
+
+        private void HandleShiftKey(KeyCode code) {
+            bool wasDown = IsKeyDown(code);
+            bool isDown = UnityEngine.Input.GetKey(code);
+            if ((wasDown && !isDown) || UnityEngine.Input.GetKeyUp(code)) {
+                keyStates[code] = KeyState.UpThisFrame;
+                upThisFrame.Add(code);
+                ProcessKeyboardEvent(code, InputEventType.KeyUp, '\0', modifiersThisFrame);
+            }
+            else if (UnityEngine.Input.GetKeyDown(code)) {
+                keyStates[code] = KeyState.DownThisFrame;
+                downThisFrame.Add(code);
+            }
+            else if (isDown) {
+                keyStates[code] = KeyState.Down;
+            }
+            else {
+                keyStates[code] = KeyState.Up;
+            }
         }
 
         private void HandleModifierDown(KeyCode keyCode) {
             switch (keyCode) {
                 case KeyCode.LeftAlt:
-                    modifiersThisFrame |= KeyboardModifiers.LeftAlt;
-                    break;
                 case KeyCode.RightAlt:
-                    modifiersThisFrame |= KeyboardModifiers.RightAlt;
+                    modifiersThisFrame |= KeyboardModifiers.Alt;
                     break;
                 case KeyCode.LeftControl:
-                    modifiersThisFrame |= KeyboardModifiers.LeftControl;
-                    break;
                 case KeyCode.RightControl:
-                    modifiersThisFrame |= KeyboardModifiers.RightControl;
+                    modifiersThisFrame |= KeyboardModifiers.Control;
                     break;
                 case KeyCode.LeftCommand:
-                    modifiersThisFrame |= KeyboardModifiers.LeftCommand;
-                    break;
                 case KeyCode.RightCommand:
-                    modifiersThisFrame |= KeyboardModifiers.RightCommand;
+                    modifiersThisFrame |= KeyboardModifiers.Command;
                     break;
                 case KeyCode.LeftWindows:
-                    modifiersThisFrame |= KeyboardModifiers.LeftWindows;
-                    break;
                 case KeyCode.RightWindows:
-                    modifiersThisFrame |= KeyboardModifiers.RightWindows;
+                    modifiersThisFrame |= KeyboardModifiers.Windows;
                     break;
                 case KeyCode.LeftShift:
-                    modifiersThisFrame |= KeyboardModifiers.LeftShift;
-                    break;
                 case KeyCode.RightShift:
-                    modifiersThisFrame |= KeyboardModifiers.RightShift;
+                    modifiersThisFrame |= KeyboardModifiers.Shift;
                     break;
                 case KeyCode.Numlock:
                     modifiersThisFrame |= KeyboardModifiers.NumLock;
@@ -391,34 +430,64 @@ namespace Src.Systems {
         private void HandleModifierUp(KeyCode keyCode) {
             switch (keyCode) {
                 case KeyCode.LeftAlt:
-                    modifiersThisFrame &= ~KeyboardModifiers.LeftAlt;
+                    if (!UnityEngine.Input.GetKey(KeyCode.RightAlt)) {
+                        modifiersThisFrame &= ~KeyboardModifiers.Alt;
+                    }
+
                     break;
                 case KeyCode.RightAlt:
-                    modifiersThisFrame &= ~KeyboardModifiers.RightAlt;
+                    if (!UnityEngine.Input.GetKey(KeyCode.LeftAlt)) {
+                        modifiersThisFrame &= ~KeyboardModifiers.Alt;
+                    }
+
                     break;
                 case KeyCode.LeftControl:
-                    modifiersThisFrame &= ~KeyboardModifiers.LeftControl;
+                    if (!UnityEngine.Input.GetKey(KeyCode.RightControl)) {
+                        modifiersThisFrame &= ~KeyboardModifiers.Control;
+                    }
+
                     break;
                 case KeyCode.RightControl:
-                    modifiersThisFrame &= ~KeyboardModifiers.RightControl;
+                    if (!UnityEngine.Input.GetKey(KeyCode.LeftControl)) {
+                        modifiersThisFrame &= ~KeyboardModifiers.Control;
+                    }
+
                     break;
                 case KeyCode.LeftCommand:
-                    modifiersThisFrame &= ~KeyboardModifiers.LeftCommand;
+                    if (!UnityEngine.Input.GetKey(KeyCode.RightCommand)) {
+                        modifiersThisFrame &= ~KeyboardModifiers.Command;
+                    }
+
                     break;
                 case KeyCode.RightCommand:
-                    modifiersThisFrame &= ~KeyboardModifiers.RightCommand;
+                    if (!UnityEngine.Input.GetKey(KeyCode.LeftCommand)) {
+                        modifiersThisFrame &= ~KeyboardModifiers.Command;
+                    }
+
                     break;
                 case KeyCode.LeftWindows:
-                    modifiersThisFrame &= ~KeyboardModifiers.LeftWindows;
+                    if (!UnityEngine.Input.GetKey(KeyCode.RightWindows)) {
+                        modifiersThisFrame &= ~KeyboardModifiers.Windows;
+                    }
+
                     break;
                 case KeyCode.RightWindows:
-                    modifiersThisFrame &= ~KeyboardModifiers.RightWindows;
+                    if (!UnityEngine.Input.GetKey(KeyCode.LeftWindows)) {
+                        modifiersThisFrame &= ~KeyboardModifiers.Windows;
+                    }
+
                     break;
                 case KeyCode.LeftShift:
-                    modifiersThisFrame &= ~KeyboardModifiers.LeftShift;
+                    if (!UnityEngine.Input.GetKey(KeyCode.RightShift)) {
+                        modifiersThisFrame &= ~KeyboardModifiers.Shift;
+                    }
+
                     break;
                 case KeyCode.RightShift:
-                    modifiersThisFrame &= ~KeyboardModifiers.RightShift;
+                    if (!UnityEngine.Input.GetKey(KeyCode.LeftShift)) {
+                        modifiersThisFrame &= ~KeyboardModifiers.Shift;
+                    }
+
                     break;
                 case KeyCode.Numlock:
                     modifiersThisFrame &= ~KeyboardModifiers.NumLock;

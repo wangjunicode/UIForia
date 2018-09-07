@@ -87,6 +87,7 @@ namespace Src {
             ResolveBaseStyles(template);
             CompileStyleBindings(template);
             CompileInputBindings(template);
+            CompileEventAnnotations(template);
             CompilePropertyBindings(template);
             CompileConditionalBindings(template);
             ResolveConstantBindings();

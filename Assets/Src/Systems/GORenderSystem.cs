@@ -51,10 +51,31 @@ namespace Src.Systems {
         }
 
         public void OnElementCreated(InitData creationData) {
+            IDirectDrawMesh directDraw = creationData.element as IDirectDrawMesh;
+            
+            if (directDraw != null) {
+                directDraw.onMeshUpdate += HandleMeshUpdate;
+            }
+            
             OnElementStyleChanged(creationData.element);
+            
             for (int i = 0; i < creationData.children.Count; i++) {
                 OnElementCreated(creationData.children[i]);
             }
+            
+            UITextContainerElement container = creationData.element as UITextContainerElement;
+            if (container != null) {
+                RectTransform containerTransform = transforms[container.id];
+                Transform child = containerTransform.GetChild(0);
+                // todo -- need the font ref to update when font changes
+                container.textInfo = child.GetComponent<TextMeshProUGUI>().textInfo;
+                container.fontAsset = child.GetComponent<TextMeshProUGUI>().font;
+            }
+
+        }
+
+        private void HandleMeshUpdate(UIElement element, Mesh mesh) {
+            transforms[element.id].GetComponent<CanvasRenderer>().SetMesh(mesh);
         }
 
         public void OnUpdate() {
@@ -228,32 +249,32 @@ namespace Src.Systems {
 
                     break;
 
-                case RenderPrimitiveType.InputField:
-                    UIInputFieldElement inputElement = (UIInputFieldElement) data.element;
-
-                    InputField input = data.unityTransform.gameObject.AddComponent<InputField>();
-
-                    input.text = inputElement.content;
-
-                    InputFieldFocusHandler focusHandler = input.gameObject.AddComponent<InputFieldFocusHandler>();
-
-                    input.contentType = InputField.ContentType.Standard;
-                    input.lineType = InputField.LineType.SingleLine;
-                    input.transition = Selectable.Transition.None;
-
-                    input.onValueChanged.AddListener((value) => { inputElement.SetText(value); });
-
-                    focusHandler.onFocus += () => {
-                        //view.FocusElement(element);
-                    };
-
-                    focusHandler.onBlur += (str) => {
-                        //view.BlurElement(element);
-                    };
-
-                    // data.imageComponent = data.unityTransform.gameObject.AddComponent<BorderedImage>();
-                    //ApplyStyles(data);
-                    break;
+//                case RenderPrimitiveType.InputField:
+//                    UIInputFieldElement inputElement = (UIInputFieldElement) data.element;
+//
+//                    InputField input = data.unityTransform.gameObject.AddComponent<InputField>();
+//
+//                    input.text = inputElement.content;
+//
+//                    InputFieldFocusHandler focusHandler = input.gameObject.AddComponent<InputFieldFocusHandler>();
+//
+//                    input.contentType = InputField.ContentType.Standard;
+//                    input.lineType = InputField.LineType.SingleLine;
+//                    input.transition = Selectable.Transition.None;
+//
+//                    input.onValueChanged.AddListener((value) => { inputElement.SetText(value); });
+//
+//                    focusHandler.onFocus += () => {
+//                        //view.FocusElement(element);
+//                    };
+//
+//                    focusHandler.onBlur += (str) => {
+//                        //view.BlurElement(element);
+//                    };
+//
+//                    // data.imageComponent = data.unityTransform.gameObject.AddComponent<BorderedImage>();
+//                    //ApplyStyles(data);
+//                    break;
             }
 
             ApplyStyles(data);
@@ -272,7 +293,6 @@ namespace Src.Systems {
                     rawImage.uvRect = new Rect(0, 0, 1, 1);
                     break;
 
-                case RenderPrimitiveType.InputField:
                 case RenderPrimitiveType.ProceduralImage:
 //                    Shape shape = data.shape;
 //                    shape.settings.outlineColor = style.borderColor;
@@ -308,10 +328,6 @@ namespace Src.Systems {
 
             if ((element.flags & UIElementFlags.TextElement) != 0) {
                 return RenderPrimitiveType.Text;
-            }
-
-            if ((element.flags & UIElementFlags.InputField) != 0) {
-                return RenderPrimitiveType.InputField;
             }
 
             UIStyleSet styleSet = element.style;

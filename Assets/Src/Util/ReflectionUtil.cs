@@ -97,7 +97,33 @@ public static class ReflectionUtil {
 
         return fieldInfo;
     }
+    
+    public static PropertyInfo GetPropertyInfoOrThrow(Type type, string propertyName) {
+        PropertyInfo propertyInfo = type.GetProperty(propertyName, InstanceBindFlags);
+        if (propertyInfo == null) {
+            throw new Exception($"Property called {propertyName} was not found on type {type.Name}");
+        }
 
+        return propertyInfo;
+        
+    }
+
+    public static bool IsField(Type type, string fieldName) {
+        return type.GetField(fieldName, InstanceBindFlags) != null;
+    }
+    
+    public static bool IsProperty(Type type, string propertyName) {
+        return type.GetProperty(propertyName, InstanceBindFlags) != null;
+    }
+    
+    public static Type GetFieldType(Type type, string fieldName) {
+        return GetFieldInfoOrThrow(type, fieldName).FieldType;
+    }
+    
+    public static Type GetPropertyType(Type type, string propertyName) {
+        return GetPropertyInfoOrThrow(type, propertyName).PropertyType;
+    }
+    
     public static Type GetCommonBaseClass(params Type[] types) {
         if (types.Length == 0) {
             return null;
@@ -560,10 +586,6 @@ public static class ReflectionUtil {
         return methodInfo.IsStatic ? GetClosedDelegate(delegateType, methodInfo) : GetOpenDelegate(delegateType, methodInfo);
     }
 
-    public static Type GetFieldType(Type type, string fieldName) {
-        return GetFieldInfoOrThrow(type, fieldName).FieldType;
-    }
-
     private static Delegate CreateFieldGetter(Type declaredType, string fieldName) {
         ParameterExpression paramExpression = Expression.Parameter(declaredType, "value");
         Expression fieldGetterExpression = Expression.Field(paramExpression, fieldName);
@@ -670,5 +692,7 @@ public static class ReflectionUtil {
         if (generic == typeof(Func<,,,,,,,>)) return true;
         return false;
     }
+
+   
 
 }

@@ -25,6 +25,11 @@ public class ExpressionCompilerTests {
         public ValueContainer valueContainer;
         public List<int> someArray;
 
+        public float valueProperty {
+            get { return value; }
+            set { this.value = value; }
+        }
+        
         public float GetValue() {
             return value;
         }
@@ -266,7 +271,7 @@ public class ExpressionCompilerTests {
     }
 
     [Test]
-    public void AccessExpression_RootContext_Level0() {
+    public void AccessExpression_RootContext_FieldLevel0() {
         TestRoot target = new TestRoot();
         target.value = 1234.5f;
 
@@ -275,7 +280,21 @@ public class ExpressionCompilerTests {
         ExpressionCompiler compiler = new ExpressionCompiler(testContextDef);
         Expression expression = compiler.Compile(parser.Parse());
 
-        Assert.IsInstanceOf<AccessExpression_Root<float>>(expression);
+        Assert.IsInstanceOf<AccessExpression_RootField<float>>(expression);
+        Assert.AreEqual(1234.5f, expression.Evaluate(ctx));
+    }
+    
+    [Test]
+    public void AccessExpression_RootContext_PropertyLevel0() {
+        TestRoot target = new TestRoot();
+        target.value = 1234.5f;
+
+        ExpressionContext ctx = new ExpressionContext(target);
+        ExpressionParser parser = new ExpressionParser("{valueProperty}");
+        ExpressionCompiler compiler = new ExpressionCompiler(testContextDef);
+        Expression expression = compiler.Compile(parser.Parse());
+
+        Assert.IsInstanceOf<AccessExpression_RootProperty<float>>(expression);
         Assert.AreEqual(1234.5f, expression.Evaluate(ctx));
     }
 

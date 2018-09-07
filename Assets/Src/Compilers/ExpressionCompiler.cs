@@ -220,7 +220,6 @@ namespace Src {
             info = info ?? ReflectionUtil.GetMethodInfo(context.rootType, methodName);
 
             if (info == null) {
-
                 throw new Exception($"Cannot find method {methodName} on type {context.rootType.Name} or any registered aliases");
             }
 
@@ -234,6 +233,7 @@ namespace Src {
             else {
                 methodType |= MethodType.Instance;
             }
+
             if (isVoid) {
                 methodType |= MethodType.Void;
             }
@@ -242,8 +242,8 @@ namespace Src {
             IReadOnlyList<ExpressionNode> signatureParts = node.signatureNode.parts;
 
             if (parameters.Length != signatureParts.Count) {
-                throw new Exception("Argument count is wrong for method " 
-                                    + methodName + " expected: " + parameters.Length 
+                throw new Exception("Argument count is wrong for method "
+                                    + methodName + " expected: " + parameters.Length
                                     + " but was provided: " + signatureParts.Count);
             }
 
@@ -253,6 +253,7 @@ namespace Src {
             if ((methodType & MethodType.Void) != 0) {
                 extraArgumentCount--;
             }
+
             if ((methodType & MethodType.Static) != 0) {
                 extraArgumentCount--;
             }
@@ -401,14 +402,29 @@ namespace Src {
                 );
             }
 
-            Type propertyType = ReflectionUtil.GetFieldType(context.rootType, fieldName);
-            ReflectionUtil.ObjectArray2[0] = context.rootType;
-            ReflectionUtil.ObjectArray2[1] = fieldName;
-            return (Expression) ReflectionUtil.CreateGenericInstanceFromOpenType(
-                typeof(AccessExpression_Root<>),
-                propertyType,
-                ReflectionUtil.ObjectArray2
-            );
+            if (ReflectionUtil.IsField(context.rootType, fieldName)) {
+                Type fieldType = ReflectionUtil.GetFieldType(context.rootType, fieldName);
+                ReflectionUtil.ObjectArray2[0] = context.rootType;
+                ReflectionUtil.ObjectArray2[1] = fieldName;
+                return (Expression) ReflectionUtil.CreateGenericInstanceFromOpenType(
+                    typeof(AccessExpression_RootField<>),
+                    fieldType,
+                    ReflectionUtil.ObjectArray2
+                );
+            }
+
+            if (ReflectionUtil.IsProperty(context.rootType, fieldName)) {
+                Type propertyType = ReflectionUtil.GetPropertyType(context.rootType, fieldName);
+                ReflectionUtil.ObjectArray2[0] = context.rootType;
+                ReflectionUtil.ObjectArray2[1] = fieldName;
+                return (Expression) ReflectionUtil.CreateGenericInstanceFromOpenType(
+                    typeof(AccessExpression_RootProperty<>),
+                    propertyType,
+                    ReflectionUtil.ObjectArray2
+                );
+            }
+
+            throw new Exception($"Cannot resolve {fieldName} as a field or property on type {context.rootType.Name}");
         }
 
         private Expression VisitParenNode(ParenExpressionNode node) {
@@ -420,7 +436,7 @@ namespace Src {
             Type rightType = node.right.GetYieldedType(context);
             object leftExpression = null;
             object rightExpression = null;
-            
+
             switch (node.OpType) {
                 case OperatorType.Plus:
 
@@ -479,7 +495,7 @@ namespace Src {
                     ReflectionUtil.TypeArray2[1] = node.right.GetYieldedType(context);
 
                     leftExpression = Visit(node.left);
-                    rightExpression = Visit(node.right); 
+                    rightExpression = Visit(node.right);
                     ReflectionUtil.ObjectArray3[0] = node.OpType;
                     ReflectionUtil.ObjectArray3[1] = leftExpression;
                     ReflectionUtil.ObjectArray3[2] = rightExpression;
@@ -567,6 +583,7 @@ namespace Src {
                         lastType = ReflectionUtil.GetPropertyInfo(lastType, fieldName).PropertyType;
                         parts[i] = new AccessExpressionPart_Property(fieldName);
                     }
+
                     continue;
                 }
 
@@ -587,7 +604,7 @@ namespace Src {
 
             ReflectionUtil.ObjectArray2[0] = contextName;
             ReflectionUtil.ObjectArray2[1] = parts;
-            return (Expression) ReflectionUtil.CreateGenericInstanceFromOpenType(typeof(AccessExpression<>),lastType , ReflectionUtil.ObjectArray2);
+            return (Expression) ReflectionUtil.CreateGenericInstanceFromOpenType(typeof(AccessExpression<>), lastType, ReflectionUtil.ObjectArray2);
 //            AccessExpression retn = new AccessExpression(contextName, lastType, parts);
         }
 

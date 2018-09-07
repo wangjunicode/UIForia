@@ -35,6 +35,8 @@ namespace Src {
             bindingList = bindingList ?? new List<Binding>();
             bindingList.AddRange(templateToExpand.rootElementTemplate.bindings);
             bindingList.AddRange(templateToExpand.rootElementTemplate.constantBindings);
+            constantStyleBindings.AddRange(templateToExpand.rootElementTemplate.constantStyleBindings);
+            
             // todo -- remove duplicate bindings
             base.Compile(template);
 

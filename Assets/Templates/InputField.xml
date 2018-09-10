@@ -2,12 +2,24 @@
 <UITemplate>
 
     <Contents style.minWidth="14f"
-              style.backgroundColor="red"
+              transform="matrix(position, scale(s)|scale(x,y), rad()|deg())"
+              transform.position="vec2(x, y)"
               style.rectWidth="100"
               style.rectHeight="14f">
 
+        <!--<Shape x-attr=""></Shape>-->
+        
+        <!--<Image width="" height="" preserveAspect="" src="" material=""/>-->
+        
+        <!--<Graphic x-id="highlight"/>-->
+        
+        <Text x-id="text">
+            {text}
+        </Text>
         {text}
-
+        
+        <!--<Graphic x-id="cursor"/>-->
+        
     </Contents>
 
 </UITemplate>

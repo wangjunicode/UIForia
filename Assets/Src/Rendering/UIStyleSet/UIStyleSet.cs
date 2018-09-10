@@ -288,7 +288,7 @@ namespace Rendering {
             changeHandler.SetPadding(elementId, padding);
             changeHandler.SetBorder(elementId, border);
             changeHandler.SetBorderRadius(elementId, borderRadius);
-            changeHandler.SetRect(elementId, rect);
+            changeHandler.SetDimensions(elementId, dimensions);
             changeHandler.SetTextStyle(elementId, textStyle);
             changeHandler.SetAvailableStates(elementId, containedStates);
         }

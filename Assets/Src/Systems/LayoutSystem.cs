@@ -196,7 +196,7 @@ namespace Src.Systems {
             node?.UpdateData(this);
         }
 
-        private void HandleRectChanged(int elementId, LayoutRect rect) {
+        private void HandleRectChanged(int elementId, Dimensions rect) {
             LayoutNode node = layoutTree.GetItem(elementId);
             node?.UpdateData(this);
         }

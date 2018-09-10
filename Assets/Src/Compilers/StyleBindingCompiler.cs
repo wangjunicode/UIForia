@@ -14,8 +14,8 @@ namespace Src.Compilers {
 
     public static class StyleTemplateConstants {
 
-        public const string RectX = "rectX";
-        public const string RectY = "rectY";
+//        public const string RectX = "rectX";
+//        public const string RectY = "rectY";
         public const string RectWidth = "rectWidth";
         public const string RectHeight = "rectHeight";
 
@@ -190,25 +190,25 @@ namespace Src.Compilers {
                     return new StyleBinding_BorderRadius_BottomLeft(targetState.state, Compile<float>(value));
 
                 // Rect
-                case StyleTemplateConstants.RectX:
-                    return new StyleBinding_RectX(targetState.state, Compile<UIMeasurement>(
-                        value,
-                        autoKeywordSource,
-                        pixelMeasurementSource,
-                        viewportMeasurementSource,
-                        parentMeasurementSource,
-                        contentMeasurementSource
-                    ));
-
-                case StyleTemplateConstants.RectY:
-                    return new StyleBinding_RectY(targetState.state, Compile<UIMeasurement>(
-                        value,
-                        autoKeywordSource,
-                        pixelMeasurementSource,
-                        viewportMeasurementSource,
-                        parentMeasurementSource,
-                        contentMeasurementSource
-                    ));
+//                case StyleTemplateConstants.RectX:
+//                    return new StyleBinding_RectX(targetState.state, Compile<UIMeasurement>(
+//                        value,
+//                        autoKeywordSource,
+//                        pixelMeasurementSource,
+//                        viewportMeasurementSource,
+//                        parentMeasurementSource,
+//                        contentMeasurementSource
+//                    ));
+//
+//                case StyleTemplateConstants.RectY:
+//                    return new StyleBinding_RectY(targetState.state, Compile<UIMeasurement>(
+//                        value,
+//                        autoKeywordSource,
+//                        pixelMeasurementSource,
+//                        viewportMeasurementSource,
+//                        parentMeasurementSource,
+//                        contentMeasurementSource
+//                    ));
 
                 case StyleTemplateConstants.RectWidth:
                     return new StyleBinding_RectWidth(targetState.state, Compile<UIMeasurement>(

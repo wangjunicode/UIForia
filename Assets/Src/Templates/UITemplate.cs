@@ -5,6 +5,7 @@ using System.Reflection;
 using JetBrains.Annotations;
 using Rendering;
 using Src.Compilers;
+using Src.Input;
 using Src.InputBindings;
 using Src.StyleBindings;
 using Src.Systems;
@@ -13,6 +14,8 @@ namespace Src {
 
     public abstract class UITemplate {
 
+        public const string k_SpecialAttrPrefix = "x-";
+        
         public List<UITemplate> childTemplates;
         public readonly List<AttributeDefinition> attributes;
 
@@ -24,7 +27,9 @@ namespace Src {
         protected List<UIStyle> baseStyles;
         protected List<StyleBinding> constantStyleBindings;
         protected List<KeyboardEventHandler> keyboardEventHandlers;
+        protected List<MouseEventHandler> mouseEventHandlers;
         protected List<Binding> bindingList;
+        protected List<ValueTuple<string, string>> templateAttributes;
 
         public bool acceptFocus;
         private static readonly StyleBindingCompiler styleCompiler = new StyleBindingCompiler(null);
@@ -56,6 +61,8 @@ namespace Src {
             data.constantStyleBindings = constantStyleBindings;
             data.conditionalBindings = conditionalBindings;
             data.keyboardEventHandlers = keyboardEventHandlers;
+            data.mouseEventHandlers = mouseEventHandlers;
+            element.templateAttributes = templateAttributes;
             if (acceptFocus) {
                 element.flags |= UIElementFlags.AcceptFocus;
             }
@@ -90,6 +97,7 @@ namespace Src {
             CompileEventAnnotations(template);
             CompilePropertyBindings(template);
             CompileConditionalBindings(template);
+            ResolveActualAttributes();
             ResolveConstantBindings();
             acceptFocus = elementType.GetCustomAttribute(typeof(AcceptFocus)) != null;
             return true;
@@ -111,6 +119,19 @@ namespace Src {
             return attributes.Where((attr) => !attr.isCompiled).ToList();
         }
 
+        protected void ResolveActualAttributes() {
+            if (attributes == null) return;
+            // todo maybe can be shared
+            // todo enforce constant-ness of attr values
+            IEnumerable<AttributeDefinition> realAttributes = attributes.Where(a => a.isRealAttribute).ToArray();
+            if (realAttributes.Any()) {
+                templateAttributes = new List<ValueTuple<string, string>>();
+                foreach (var s in realAttributes) {
+                    templateAttributes.Add(ValueTuple.Create(s.key.Substring(k_SpecialAttrPrefix.Length), s.value));
+                }
+            }
+        }
+        
         protected void AddConditionalBinding(Binding binding) {
             Array.Resize(ref conditionalBindings, conditionalBindings.Length + 1);
             conditionalBindings[conditionalBindings.Length - 1] = binding;
@@ -129,6 +150,7 @@ namespace Src {
         protected virtual void CompileEventAnnotations(ParsedTemplate template) {
             inputCompiler.SetContext(template.contextDefinition);
             keyboardEventHandlers = inputCompiler.CompileKeyboardInputAttributes(elementType);
+            mouseEventHandlers = inputCompiler.CompileMouseInputAttributes(elementType);
         }
 
         protected virtual void CompilePropertyBindings(ParsedTemplate template) {

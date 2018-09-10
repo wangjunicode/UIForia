@@ -5,7 +5,7 @@ namespace Src.Systems {
     public interface IStyleChangeHandler {
 
         void SetPaint(int elementId, Paint paint);
-        void SetRect(int elementId, LayoutRect rect);
+        void SetDimensions(int elementId, Dimensions rect);
         void SetMargin(int elementId, ContentBoxRect margin);
         void SetBorder(int elementId, ContentBoxRect border);
         void SetPadding(int elementId, ContentBoxRect padding);

@@ -25,9 +25,27 @@ namespace Src.Systems {
         public IHierarchical Parent => element.parent;
 
     }
+    
+    public class MouseEventTreeNode : IHierarchical {
+
+        private readonly UIElement element;
+        public readonly IReadOnlyList<MouseEventHandler> handlers;
+
+        public MouseEventTreeNode(UIElement element, List<MouseEventHandler> handlers) {
+            this.element = element;
+            this.handlers = handlers;
+        }
+
+        public int UniqueId => element.id;
+        public IHierarchical Element => element;
+        public IHierarchical Parent => element.parent;
+
+    }
 
     public class AcceptFocus : Attribute { }
 
+    // element.style.CreateBinding<Type>(StyleState.Normal, "property", () => value).Enabled = false;
+    
     public class GOInputSystem : IInputSystem, IInputProvider {
 
         private const string EventAlias = "$event";
@@ -45,6 +63,7 @@ namespace Src.Systems {
         private readonly Dictionary<KeyCode, KeyState> keyStates;
         private readonly Dictionary<int, InputBindingGroup> bindingMap;
         private readonly SkipTree<KeyboardEventTreeNode> keyboardEventTree;
+        private readonly SkipTree<MouseEventTreeNode> mouseEventTree;
 
         private int[] scratchArray;
         private int resultCount;
@@ -84,6 +103,9 @@ namespace Src.Systems {
             downThisFrame = new List<KeyCode>();
             keyStates = new Dictionary<KeyCode, KeyState>();
             keyboardEventTree = new SkipTree<KeyboardEventTreeNode>();
+            mouseEventTree = new SkipTree<MouseEventTreeNode>();
+            
+            focusedId = -1;
         }
 
         public KeyboardModifiers KeyboardModifiers => modifiersThisFrame;
@@ -126,50 +148,11 @@ namespace Src.Systems {
 
             // this assumes strictly screen space UI for now
             mousePosition = new Vector2(UnityEngine.Input.mousePosition.x, Screen.height - UnityEngine.Input.mousePosition.y);
-            QueryLayout();
 
             // focusProvider.ReleaseFocus(); 
 
             ProcessKeyboardEvents();
-
-            // EventSystem.current.currentSelectedGameObject;
-
-            if (UnityEngine.Input.GetMouseButtonDown(0)) {
-                RunMouseEvent(InputEventType.MouseDown);
-
-                // for each element this frame sorted by depth
-
-                // if accept focus
-                // element.focus();
-                // break;
-
-                // if last focused element is not current focused element
-                // last focused element.blur()
-
-                List<UIElement> focusAcceptors = new List<UIElement>();
-                for (int i = 0; i < elementsThisFrame.Count; i++) {
-                    UIElement element = elementSystem.GetElement(scratchArray[i]);
-                    if ((element.flags & UIElementFlags.AcceptFocus) != 0) {
-                        focusAcceptors.Add(element);
-                    }
-                }
-
-                if (focusAcceptors.Count > 0) {
-                    // ask current focus to relinquish?
-                    focusAcceptors.Sort((a, b) => a.depth > b.depth ? -1 : 1);
-
-                    // focus should probably cascade
-                    UIElement focused = focusAcceptors[0];
-                    if (focused != lastFocused) {
-                        if (lastFocused != null) {
-                            //view.BlurElement(lastFocused);
-                        }
-
-                        lastFocused = focused;
-                        // view.FocusElement(focused);
-                    }
-                }
-            }
+            ProcessMouseEvents();
 
             RunMouseEvent(InputEventType.MouseMove);
 
@@ -197,8 +180,11 @@ namespace Src.Systems {
             hoverStylesLastFrame.Clear();
             hoverStylesThisFrame.Clear();
             keyboardEventTree.Clear();
+            mouseEventTree.Clear();
             bindingMap.Clear();
         }
+
+        private void ResolveMasks(Vector2 point) { }
 
         public void OnElementCreated(InitData elementData) {
             InputBinding[] inputBindings = elementData.inputBindings;
@@ -213,15 +199,14 @@ namespace Src.Systems {
                 bindingMap[elementData.elementId] = new InputBindingGroup(elementData.context, inputBindings, handledEvents);
             }
 
-            // should maybe be implicit based on handlers
-            if (elementData.element.GetType().GetCustomAttribute(typeof(AcceptFocus)) != null) {
-                //focusAcceptors.Add(elementData.element.id);
-            }
-
             if (elementData.keyboardEventHandlers != null) {
                 keyboardEventTree.AddItem(new KeyboardEventTreeNode(elementData.element, elementData.keyboardEventHandlers));
             }
 
+            if (elementData.mouseEventHandlers != null) {
+                mouseEventTree.AddItem(new MouseEventTreeNode(elementData.element, elementData.mouseEventHandlers));
+            }
+            
             // need a tree for event handlers for bubble / capture
             // capture if any handlers have capture
             // bubble if any handlers have bubble
@@ -258,6 +243,10 @@ namespace Src.Systems {
             hoverStyles.Remove(element.id);
             hoverStylesLastFrame.Remove(element.id);
             hoverStylesThisFrame.Remove(element.id);
+            
+            mouseEventTree.RemoveHierarchy(element);
+            keyboardEventTree.RemoveHierarchy(element);
+            
         }
 
         public void OnElementShown(UIElement element) { }
@@ -273,10 +262,9 @@ namespace Src.Systems {
             return KeyState.Up;
         }
 
-
         private void ProcessKeyboardEvent(KeyCode keyCode, InputEventType eventType, char character, KeyboardModifiers modifiers) {
             KeyboardInputEvent keyEvent = new KeyboardInputEvent(eventType, keyCode, character, modifiers, focusedId != -1);
-            if (focusedId != -1) {
+            if (focusedId == -1) {
                 keyboardEventTree.ConditionalTraversePreOrder(keyEvent, (item, evt) => {
                     if (evt.stopPropagation) return false;
 
@@ -324,30 +312,27 @@ namespace Src.Systems {
             else {
                 modifiersThisFrame &= ~KeyboardModifiers.Shift;
             }
-            
+
             while (Event.PopEvent(s_Event)) {
                 KeyCode keyCode = s_Event.keyCode;
                 char character = s_Event.character;
-                
+
                 // need to check this on osx, according to stackoverflow OSX and Windows might handle
                 // sending key events differently
-                
+
                 if (keyCode == KeyCode.None && character != '\0') {
-                    
                     if (s_Event.rawType == EventType.KeyDown) {
                         ProcessKeyboardEvent(keyCode, InputEventType.KeyDown, character, modifiersThisFrame);
                         continue;
-                    }    
-                    
+                    }
+
                     if (s_Event.rawType == EventType.KeyUp) {
                         ProcessKeyboardEvent(keyCode, InputEventType.KeyUp, character, modifiersThisFrame);
                         continue;
                     }
-                    
                 }
-                
+
                 switch (s_Event.rawType) {
-                    
                     case EventType.KeyDown:
                         if (keyStates.ContainsKey(keyCode)) {
                             KeyState state = keyStates[keyCode];
@@ -361,10 +346,11 @@ namespace Src.Systems {
                             downThisFrame.Add(keyCode);
                             keyStates[keyCode] = KeyState.DownThisFrame;
                             ProcessKeyboardEvent(keyCode, InputEventType.KeyDown, s_Event.character, modifiersThisFrame);
-                        }                        
+                        }
+
                         HandleModifierDown(keyCode);
                         break;
-                    
+
                     case EventType.KeyUp:
                         upThisFrame.Add(keyCode);
                         keyStates[keyCode] = KeyState.UpThisFrame;
@@ -373,7 +359,6 @@ namespace Src.Systems {
                         break;
                 }
             }
-
         }
 
         private void HandleShiftKey(KeyCode code) {
@@ -509,7 +494,7 @@ namespace Src.Systems {
             }
         }
 
-        private void QueryLayout() {
+        private void ProcessMouseEvents() {
             resultCount = layoutSystem.QueryPoint(mousePosition, ref queryResults);
 
             for (int i = 0; i < resultCount; i++) {
@@ -533,6 +518,39 @@ namespace Src.Systems {
 
             RunMouseEnter();
             RunMouseExit();
+
+            // todo -- or tab focus!
+
+            if (UnityEngine.Input.GetMouseButtonDown(0)) {
+                elementsThisFrame.CopyTo(scratchArray);
+                // todo -- sort by depth
+                // todo -- cull masked
+                bool didFocus = false;
+                for (int i = 0; i < elementsThisFrame.Count; i++) {
+                    UIElement element = elementSystem.GetElement(scratchArray[i]);
+                    if ((element.flags & UIElementFlags.AcceptFocus) != 0) {
+                        if (element.id != focusedId) {
+                            if (focusedId != -1) {
+                                IFocusable blurElement = (IFocusable) elementSystem.GetElement(focusedId);
+                                blurElement.Blur();
+                            }
+
+                            IFocusable focusElement = (IFocusable) element;
+                            focusElement.Focus();
+                            focusedId = element.id;
+                        }
+
+                        didFocus = true;
+                        break;
+                    }
+                }
+
+                if (!didFocus && focusedId != -1) {
+                    IFocusable blurElement = (IFocusable) elementSystem.GetElement(focusedId);
+                    blurElement.Blur();
+                    focusedId = -1;
+                }
+            }
         }
 
         private void RunMouseEnter() {
@@ -541,7 +559,7 @@ namespace Src.Systems {
             }
 
             elementsThisFrame.CopyTo(scratchArray);
-            InputEvent mouseEnter = new MouseInputEvent(InputEventType.MouseEnter, mousePosition);
+            InputEvent mouseEnter = new MouseInputEvent(InputEventType.MouseEnter, mousePosition, modifiersThisFrame, false);
             for (int i = 0; i < elementsThisFrame.Count; i++) {
                 int elementId = scratchArray[i];
                 if (!elementsLastFrame.Contains(elementId)) {
@@ -556,7 +574,7 @@ namespace Src.Systems {
             }
 
             elementsLastFrame.CopyTo(scratchArray);
-            InputEvent mouseExit = new MouseInputEvent(InputEventType.MouseExit, mousePosition);
+            InputEvent mouseExit = new MouseInputEvent(InputEventType.MouseExit, mousePosition, modifiersThisFrame, false);
             for (int i = 0; i < elementsLastFrame.Count; i++) {
                 int elementId = scratchArray[i];
                 if (!elementsThisFrame.Contains(elementId)) {
@@ -574,7 +592,7 @@ namespace Src.Systems {
             }
 
             elementsThisFrame.CopyTo(scratchArray);
-            InputEvent mouseEvent = new MouseInputEvent(eventType, mousePosition);
+            InputEvent mouseEvent = new MouseInputEvent(eventType, mousePosition, modifiersThisFrame, false);
             for (int i = 0; i < elementsThisFrame.Count; i++) {
                 RunBindings(scratchArray[i], mouseEvent);
             }

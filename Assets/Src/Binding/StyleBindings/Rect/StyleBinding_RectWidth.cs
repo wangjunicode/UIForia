@@ -11,10 +11,10 @@ namespace Src.StyleBindings {
         }
 
         public override void Execute(UIElement element, UITemplateContext context) {
-            UIMeasurement width = element.style.GetRectWidth(state);
+            UIMeasurement width = element.style.GetWidth(state);
             UIMeasurement newWidth = expression.EvaluateTyped(context);
             if (width != newWidth) {
-                element.style.SetRectWidth(newWidth, state);
+                element.style.SetWidth(newWidth, state);
             }
         }
 
@@ -23,11 +23,11 @@ namespace Src.StyleBindings {
         }
 
         public override void Apply(UIStyle style, UITemplateContext context) {
-            style.rect.width = expression.EvaluateTyped(context);
+            style.dimensions.width = expression.EvaluateTyped(context);
         }
 
         public override void Apply(UIStyleSet styleSet, UITemplateContext context) {
-            styleSet.SetRectWidth(expression.EvaluateTyped(context), state);
+            styleSet.SetWidth(expression.EvaluateTyped(context), state);
         }
 
     }

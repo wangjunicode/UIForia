@@ -5,15 +5,6 @@ using Src.Layout;
 using Src.Systems;
 
 namespace Rendering {
-
-    public struct UITransform {
-
-        public float rotation;
-        public Vector2 scale;
-        public Vector2 pivot;
-        public Vector2 translation;
-        
-    }
     
     [DebuggerDisplay("{localId}->{filePath}")]
     public class UIStyle {        
@@ -24,7 +15,7 @@ namespace Rendering {
         public readonly string localId;
 
         public Paint paint;
-        public LayoutRect rect;
+        public Dimensions dimensions;
 
         public LayoutParameters layoutParameters;
         public LayoutConstraints layoutConstraints;
@@ -36,6 +27,7 @@ namespace Rendering {
         public ContentBoxRect padding;
 
         public TextStyle textStyle;
+        public UITransform transform;
         
         public UIStyle(string localId, string filePath) {
             this.localId = localId;
@@ -46,14 +38,14 @@ namespace Rendering {
         public UIStyle() {
             localId = "AnonymousStyle[" + (NextStyleId++) + "]";
             filePath = string.Empty;
-            rect = new LayoutRect();
+            dimensions = new Dimensions();
             Initialize();
         }
 
         public UIStyle(UIStyle toCopy) {
             localId = "AnonymousStyle[" + (NextStyleId++) + "]";
             filePath = string.Empty;
-            rect = toCopy.rect;
+            dimensions = toCopy.dimensions;
             paint = toCopy.paint;
             margin = toCopy.margin;
             border = toCopy.border;
@@ -67,7 +59,7 @@ namespace Rendering {
         public string Id => filePath == string.Empty ? localId : localId + "->" + filePath;
 
         private void Initialize() {
-            rect = LayoutRect.Unset;
+            dimensions = Dimensions.Unset;
             layoutConstraints = LayoutConstraints.Unset;
             margin = ContentBoxRect.Unset;
             padding = ContentBoxRect.Unset;
@@ -79,9 +71,13 @@ namespace Rendering {
         }
         
         public static readonly UIStyle Default = new UIStyle("Default", string.Empty) {
-            rect = new LayoutRect() {
-                x = new UIMeasurement(0),
-                y = new UIMeasurement(0),
+            transform = new UITransform() {
+                position = new MeasurementVector2(),
+                pivot = new Vector2(),
+                scale = new Vector2(1, 1),
+                rotation = 0f
+            },
+            dimensions = new Dimensions() {
                 width = UIMeasurement.Auto,
                 height = UIMeasurement.Auto
             },

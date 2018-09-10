@@ -1,28 +1,23 @@
 using System;
+using System.Collections;
 using JetBrains.Annotations;
 using Src;
 using Src.Input;
 using Src.Systems;
 using TMPro;
 using UnityEngine;
+using UnityEngine.UI;
 
 namespace Debugger {
 
     // <InputField type="Text" placeholder="" onValueChanged={} onFocus={} onBlur="{}" onMouseDown={} onKeyUp={}/>
-
-    public interface IDirectDrawMesh {
-
-        Mesh GetMesh();
-        event Action<UIElement, Mesh> onMeshUpdate;
-
-    }
 
     // todo -- enforce 1 child 
 //    [SingleChild(typeof(UITextElement))]
 
     [AcceptFocus]
     [Template("Templates/InputField.xml")]
-    public class UIInputFieldElement : UITextContainerElement, IDirectDrawMesh {
+    public class UIInputFieldElement : UITextContainerElement, IDirectDrawMesh, IFocusable {
 
         public event Action<UIElement, Mesh> onMeshUpdate;
 
@@ -47,43 +42,107 @@ namespace Debugger {
         public bool m_isSelectAll;
         public int characterLimit;
         public string m_Text;
-        public char m_AsteriskChar;
-
+        public bool m_AllowInput;
+        public bool m_CaretVisible;
+        public float m_BlinkStartTime;
+        private Color m_SelectionColor = new Color(168f / 255f, 206f / 255f, 255f / 255f, 192f / 255f);
+        private float m_CaretBlinkRate = 0.85f;
+        private Coroutine m_BlinkCoroutine = null;
+        public float m_CaretWidth = 1;
+        public string m_OriginalText;
         protected int m_StringPosition = 0;
         protected int m_StringSelectPosition = 0;
         protected int m_CaretPosition = 0;
         protected int m_CaretSelectPosition = 0;
-        public TMP_InputField.InputType inputType;
+        private bool isStringPositionDirty;
 
         public TMP_InputField.LineType lineType;
 
+        private static readonly VertexHelper s_VertexHelper = new VertexHelper();
+
         public Mesh mesh;
+
+        private readonly UIVertex[] cursorVertices;
 
         public UIInputFieldElement() {
             mesh = new Mesh();
             m_Text = string.Empty;
+            cursorVertices = new[] {
+                UIVertex.simpleVert,
+                UIVertex.simpleVert,
+                UIVertex.simpleVert,
+                UIVertex.simpleVert
+            };
+        }
+
+        public override void OnCreate() {
+            //caret = template.FindById<Graphic>("caret");
+            //caret.Enabled = true;
+            //caret.transform.position = position;
+            //caret.transform.scale.x = caretWidth;
+            // template.FindByType<>();
+            // template.FindByName();
+        }  
+        
+        protected static string clipboard {
+            get { return GUIUtility.systemCopyBuffer; }
+            set { GUIUtility.systemCopyBuffer = value; }
+        }
+
+        protected int stringPositionInternal {
+            get { return m_StringPosition + Input.compositionString.Length; }
+            set { m_StringPosition = ClampStringPosition(m_Text, value); }
+        }
+
+        protected int stringSelectPositionInternal {
+            get { return m_StringSelectPosition + Input.compositionString.Length; }
+            set { m_StringSelectPosition = ClampStringPosition(m_Text, value); }
+        }
+
+        protected int caretPositionInternal {
+            get { return m_CaretPosition + Input.compositionString.Length; }
+            set { m_CaretPosition = ClampCaretPosition(m_TextInfo.characterCount, value); }
+        }
+
+        protected int caretSelectPositionInternal {
+            get { return m_CaretSelectPosition + Input.compositionString.Length; }
+            set { m_CaretSelectPosition = ClampCaretPosition(m_TextInfo.characterCount, value); }
+        }
+        
+        public string text {
+            get { return m_Text; }
+            set {
+                if (m_Text == value) {
+                    return;
+                }
+
+                m_Text = value ?? string.Empty;
+
+                if (m_StringPosition > m_Text.Length) {
+                    m_StringPosition = m_Text.Length;
+                    m_StringSelectPosition = m_Text.Length;
+                }
+
+                SendOnValueChangedAndUpdateLabel();
+            }
         }
 
         // validators?
         // formatters?
 
-        [OnFocus]
-        public void OnFocus() { }
+        public override void OnUpdate() {
+            UpdateMesh();
+        }
 
-        [OnBlur]
-        public void OnBlur() { }
-
-        // todo -- delete won't work until cursor / focus is working
         [UsedImplicitly]
         [OnKeyDown(KeyCode.Backspace)]
         private void HandleBackspace() {
-            Debug.Log("DELETE");
             if (isReadOnly) {
                 return;
             }
 
             if (hasSelection) {
-                Delete();
+                HandleDeleteKey();
                 SendOnValueChangedAndUpdateLabel();
             }
             else {
@@ -114,7 +173,6 @@ namespace Debugger {
         [UsedImplicitly]
         [OnKeyDown(KeyCode.Delete)]
         private void HandleDeleteKey() {
-            Debug.Log("DELETE");
             if (isReadOnly) {
                 return;
             }
@@ -156,6 +214,172 @@ namespace Debugger {
             }
         }
 
+        private void UpdateMesh() {
+            if (isStringPositionDirty) { }
+
+//            if (!hasSelection) {
+//                GenerateCaret(s_VertexHelper);
+//            }
+//            else {
+//                GenerateHighlight(s_VertexHelper);
+//            }
+
+            GenerateCaret(s_VertexHelper);
+//
+            s_VertexHelper.FillMesh(mesh);
+            onMeshUpdate?.Invoke(this, mesh);
+            s_VertexHelper.Clear();
+        }
+
+        // width, text info, charInfo[], caret position, string position
+        private void GenerateCaret(VertexHelper vbo) {
+
+            float width = m_CaretWidth;
+
+            int characterCount = textInfo.characterCount;
+            Vector2 startPosition = Vector2.zero;
+            float height = 0;
+            TMP_CharacterInfo currentCharacter;
+            caretColor = Color.black;
+
+            // Get the position of the Caret based on position in the string.
+            int caretPosition = Mathf.Max(0, GetCaretPositionFromStringIndex(stringPositionInternal));
+
+            if (caretPosition == 0) {
+                currentCharacter = textInfo.characterInfo[0];
+                startPosition = new Vector2(currentCharacter.origin, currentCharacter.descender);
+                height = currentCharacter.ascender - currentCharacter.descender;
+            }
+            else if (caretPosition < characterCount) {
+                currentCharacter = textInfo.characterInfo[caretPosition];
+                startPosition = new Vector2(currentCharacter.origin, currentCharacter.descender);
+                height = currentCharacter.ascender - currentCharacter.descender;
+            }
+            else {
+                currentCharacter = textInfo.characterInfo[characterCount - 1];
+                startPosition = new Vector2(currentCharacter.xAdvance, currentCharacter.descender);
+                height = currentCharacter.ascender - currentCharacter.descender;
+            }
+
+            // Clamp Caret height
+            float top = startPosition.y + height;
+            float bottom = top - height;
+
+            Rect rect = new Rect(startPosition.x, top, width, bottom);
+            cursorVertices[0].position = new Vector3(startPosition.x, bottom, 0.0f);
+            cursorVertices[1].position = new Vector3(startPosition.x, top, 0.0f);
+            cursorVertices[2].position = new Vector3(startPosition.x + width, top, 0.0f);
+            cursorVertices[3].position = new Vector3(startPosition.x + width, bottom, 0.0f);
+
+            // Set Vertex Color for the caret color.
+            cursorVertices[0].color = caretColor;
+            cursorVertices[1].color = caretColor;
+            cursorVertices[2].color = caretColor;
+            cursorVertices[3].color = caretColor;
+
+            vbo.AddUIVertexQuad(cursorVertices);
+
+            int screenHeight = Screen.height;
+            // Removed multiple display support until it supports none native resolutions(case 741751)
+            //int displayIndex = m_TextComponent.canvas.targetDisplay;
+            //if (Screen.fullScreen && displayIndex < Display.displays.Length)
+            //    screenHeight = Display.displays[displayIndex].renderingHeight;
+
+            startPosition.y = screenHeight - startPosition.y;
+            Input.compositionCursorPos = startPosition;
+
+        }
+
+        [OnMouseDown]
+        private void OnMouseDown(MouseInputEvent evt) {
+            Debug.Log(evt.mousePosition);
+        }
+
+        private void GenerateHighlight(VertexHelper vbo) {
+            caretPositionInternal = m_CaretPosition = GetCaretPositionFromStringIndex(stringPositionInternal);
+            caretSelectPositionInternal = m_CaretSelectPosition = GetCaretPositionFromStringIndex(stringSelectPositionInternal);
+
+            //Debug.Log("StringPosition:" + caretPositionInternal + "  StringSelectPosition:" + caretSelectPositionInternal);
+
+            Vector2 caretPosition;
+            float height = 0;
+            if (caretSelectPositionInternal < textInfo.characterCount) {
+                caretPosition = new Vector2(textInfo.characterInfo[caretSelectPositionInternal].origin, textInfo.characterInfo[caretSelectPositionInternal].descender);
+                height = textInfo.characterInfo[caretSelectPositionInternal].ascender - textInfo.characterInfo[caretSelectPositionInternal].descender;
+            }
+            else {
+                caretPosition = new Vector2(textInfo.characterInfo[caretSelectPositionInternal - 1].xAdvance, textInfo.characterInfo[caretSelectPositionInternal - 1].descender);
+                height = textInfo.characterInfo[caretSelectPositionInternal - 1].ascender - textInfo.characterInfo[caretSelectPositionInternal - 1].descender;
+            }
+
+            // TODO: Don't adjust the position of the RectTransform if Reset On Deactivation is disabled
+            // and we just selected the Input Field again.
+            //  AdjustRectTransformRelativeToViewport(caretPosition, height, true);
+
+            int startChar = Mathf.Max(0, caretPositionInternal);
+            int endChar = Mathf.Max(0, caretSelectPositionInternal);
+
+            // Ensure pos is always less then selPos to make the code simpler
+            if (startChar > endChar) {
+                int temp = startChar;
+                startChar = endChar;
+                endChar = temp;
+            }
+
+            endChar -= 1;
+
+            //Debug.Log("Updating Highlight... Caret Position: " + startChar + " Caret Select POS: " + endChar);
+
+
+            int currentLineIndex = textInfo.characterInfo[startChar].lineNumber;
+            int nextLineStartIdx = textInfo.lineInfo[currentLineIndex].lastCharacterIndex;
+
+            UIVertex vert = UIVertex.simpleVert;
+            vert.uv0 = Vector2.zero;
+            vert.color = m_SelectionColor;
+
+            int currentChar = startChar;
+            while (currentChar <= endChar && currentChar < textInfo.characterCount) {
+                if (currentChar == nextLineStartIdx || currentChar == endChar) {
+                    TMP_CharacterInfo startCharInfo = textInfo.characterInfo[startChar];
+                    TMP_CharacterInfo endCharInfo = textInfo.characterInfo[currentChar];
+
+                    // Extra check to handle Carriage Return
+                    if (currentChar > 0 && endCharInfo.character == 10 && textInfo.characterInfo[currentChar - 1].character == 13) {
+                        endCharInfo = textInfo.characterInfo[currentChar - 1];
+                    }
+
+                    Vector2 startPosition = new Vector2(startCharInfo.origin, textInfo.lineInfo[currentLineIndex].ascender);
+                    Vector2 endPosition = new Vector2(endCharInfo.xAdvance, textInfo.lineInfo[currentLineIndex].descender);
+
+                    var startIndex = vbo.currentVertCount;
+                    vert.position = new Vector3(startPosition.x, endPosition.y, 0.0f);
+                    vbo.AddVert(vert);
+
+                    vert.position = new Vector3(endPosition.x, endPosition.y, 0.0f);
+                    vbo.AddVert(vert);
+
+                    vert.position = new Vector3(endPosition.x, startPosition.y, 0.0f);
+                    vbo.AddVert(vert);
+
+                    vert.position = new Vector3(startPosition.x, startPosition.y, 0.0f);
+                    vbo.AddVert(vert);
+
+                    vbo.AddTriangle(startIndex, startIndex + 1, startIndex + 2);
+                    vbo.AddTriangle(startIndex + 2, startIndex + 3, startIndex + 0);
+
+                    startChar = currentChar + 1;
+                    currentLineIndex++;
+
+                    if (currentLineIndex < textInfo.lineCount) {
+                        nextLineStartIdx = textInfo.lineInfo[currentLineIndex].lastCharacterIndex;
+                    }
+                }
+
+                currentChar++;
+            }
+        }
+
         [UsedImplicitly]
         [OnKeyDown]
         private void HandleKeyPress(KeyboardInputEvent evt) {
@@ -170,129 +394,7 @@ namespace Debugger {
 
             Append(c);
         }
-
-        [OnMouseDown]
-        public void OnMouseDown(MouseInputEvent evt) {
-            CaretPosition cursor;
-            int cursorIndex = TexMeshProUtil.GetCursorIndexFromPosition(textInfo, evt.mousePosition, out cursor);
-        }
-
-        public char asteriskChar {
-            get { return m_AsteriskChar; }
-            set {
-                if (m_AsteriskChar != value) {
-                    m_AsteriskChar = value;
-                    UpdateLabel();
-                }
-            }
-        }
-
-        public string text {
-            get { return m_Text; }
-            set {
-                if (m_Text == value) {
-                    return;
-                }
-
-                if (value == null) value = string.Empty;
-
-                m_Text = value;
-
-                if (m_StringPosition > m_Text.Length) {
-                    m_StringPosition = m_StringSelectPosition = m_Text.Length;
-                }
-
-                // Set RectTransform relative position to top of viewport.
-                // AdjustTextPositionRelativeToViewport(0);
-
-                // m_forceRectTransformAdjustment = true;
-
-                SendOnValueChangedAndUpdateLabel();
-            }
-        }
-
-        //[OnKeyCommand(KeyCommand.Copy)]
-        public void DoKeyPress() {
-            // for each key pressed this frame
-            //
-        }
-
-        static string clipboard {
-            get { return GUIUtility.systemCopyBuffer; }
-            set { GUIUtility.systemCopyBuffer = value; }
-        }
-
-        protected int stringPositionInternal {
-            get { return m_StringPosition + Input.compositionString.Length; }
-            set {
-                m_StringPosition = value;
-                ClampStringPos(ref m_StringPosition);
-            }
-        }
-
-        protected int stringSelectPositionInternal {
-            get { return m_StringSelectPosition + Input.compositionString.Length; }
-            set {
-                m_StringSelectPosition = value;
-                ClampStringPos(ref m_StringSelectPosition);
-            }
-        }
-
-        protected int caretPositionInternal {
-            get { return m_CaretPosition + Input.compositionString.Length; }
-            set {
-                m_CaretPosition = value;
-                ClampCaretPos(ref m_CaretPosition);
-            }
-        }
-
-        protected int caretSelectPositionInternal {
-            get { return m_CaretSelectPosition + Input.compositionString.Length; }
-            set {
-                m_CaretSelectPosition = value;
-                ClampCaretPos(ref m_CaretSelectPosition);
-            }
-        }
-
-        protected void ClampStringPos(ref int pos) {
-            if (pos < 0)
-                pos = 0;
-            else if (pos > text.Length)
-                pos = text.Length;
-        }
-
-        protected void ClampCaretPos(ref int pos) {
-            if (pos < 0) {
-                pos = 0;
-            }
-            else if (pos > textInfo.characterCount - 1) {
-                pos = textInfo.characterCount - 1;
-            }
-        }
-
-        protected void SelectAll() {
-            m_isSelectAll = true;
-            stringPositionInternal = text.Length;
-            stringSelectPositionInternal = 0;
-        }
-
-        /// <summary>
-        /// Append the specified text to the end of the current.
-        /// </summary>
-        protected virtual void Append(string input) {
-            if (isReadOnly) {
-                return;
-            }
-
-            for (int i = 0; i < input.Length; ++i) {
-                char c = input[i];
-
-                if (c >= ' ' || c == '\t' || c == '\r' || c == 10 || c == '\n') {
-                    Append(c);
-                }
-            }
-        }
-
+        
         protected virtual void Append(char input) {
             if (isReadOnly) {
                 return;
@@ -310,7 +412,7 @@ namespace Debugger {
             }
 
             string replaceString = c.ToString();
-            Delete();
+            HandleDeleteKey();
 
             // Can't go past the character limit
             if (characterLimit > 0 && text.Length >= characterLimit) {
@@ -321,120 +423,10 @@ namespace Debugger {
             stringSelectPositionInternal = stringPositionInternal += replaceString.Length;
         }
 
-        // Handling of DEL key
-        private void ForwardSpace() {
-            if (isReadOnly) {
-                return;
-            }
-
-            if (hasSelection) {
-                Delete();
-                SendOnValueChangedAndUpdateLabel();
-            }
-            else {
-                if (isRichTextEditingAllowed) {
-                    if (stringPositionInternal < text.Length) {
-                        m_Text = text.Remove(stringPositionInternal, 1);
-                        SendOnValueChangedAndUpdateLabel();
-                    }
-                }
-                else {
-                    if (caretPositionInternal < textInfo.characterCount - 1) {
-                        stringSelectPositionInternal = stringPositionInternal = GetStringIndexFromCaretPosition(caretPositionInternal);
-                        m_Text = text.Remove(stringPositionInternal, 1);
-                        SendOnValueChangedAndUpdateLabel();
-                    }
-                }
-            }
-        }
-
-        private void Delete() {
-            if (isReadOnly) {
-                return;
-            }
-
-            if (stringPositionInternal == stringSelectPositionInternal)
-                return;
-
-            if (isRichTextEditingAllowed || m_isSelectAll) {
-                // Handling of Delete when Rich Text is allowed.
-                if (stringPositionInternal < stringSelectPositionInternal) {
-                    m_Text = text.Substring(0, stringPositionInternal) + text.Substring(stringSelectPositionInternal, text.Length - stringSelectPositionInternal);
-                    stringSelectPositionInternal = stringPositionInternal;
-                }
-                else {
-                    m_Text = text.Substring(0, stringSelectPositionInternal) + text.Substring(stringPositionInternal, text.Length - stringPositionInternal);
-                    stringPositionInternal = stringSelectPositionInternal;
-                }
-
-                m_isSelectAll = false;
-            }
-            else {
-                stringPositionInternal = GetStringIndexFromCaretPosition(caretPositionInternal);
-                stringSelectPositionInternal = GetStringIndexFromCaretPosition(caretSelectPositionInternal);
-
-                // Handling of Delete when Rich Text is not allowed.
-                if (caretPositionInternal < caretSelectPositionInternal) {
-                    m_Text = text.Substring(0, stringPositionInternal) + text.Substring(stringSelectPositionInternal, text.Length - stringSelectPositionInternal);
-
-                    stringSelectPositionInternal = stringPositionInternal;
-                    caretSelectPositionInternal = caretPositionInternal;
-                }
-                else {
-                    m_Text = text.Substring(0, stringSelectPositionInternal) + text.Substring(stringPositionInternal, text.Length - stringPositionInternal);
-                    stringPositionInternal = stringSelectPositionInternal;
-
-                    stringPositionInternal = stringSelectPositionInternal;
-                    caretPositionInternal = caretSelectPositionInternal;
-                }
-            }
-        }
-
-        private void Backspace() {
-            if (isReadOnly) {
-                return;
-            }
-
-            if (hasSelection) {
-                Delete();
-                SendOnValueChangedAndUpdateLabel();
-            }
-            else {
-                if (isRichTextEditingAllowed) {
-                    if (stringPositionInternal > 0) {
-                        m_Text = m_Text.Remove(stringPositionInternal - 1, 1);
-                        stringSelectPositionInternal = stringPositionInternal = stringPositionInternal - 1;
-
-                        m_isLastKeyBackspace = true;
-
-                        SendOnValueChangedAndUpdateLabel();
-                    }
-                }
-                else {
-                    if (caretPositionInternal > 0) {
-                        m_Text = m_Text.Remove(GetStringIndexFromCaretPosition(caretPositionInternal - 1), 1);
-                        caretSelectPositionInternal = caretPositionInternal = caretPositionInternal - 1;
-                        stringSelectPositionInternal = stringPositionInternal = GetStringIndexFromCaretPosition(caretPositionInternal);
-                    }
-
-                    m_isLastKeyBackspace = true;
-
-                    SendOnValueChangedAndUpdateLabel();
-                }
-            }
-        }
 
         private void SendOnValueChangedAndUpdateLabel() {
             UpdateLabel();
         }
-
-        private int GetStringIndexFromCaretPosition(int caretPosition) {
-            // Clamp values between 0 and character count.
-            ClampCaretPos(ref caretPosition);
-
-            return textInfo.characterInfo[caretPosition].index;
-        }
-
 
         protected void UpdateLabel() {
             string fullText;
@@ -445,7 +437,7 @@ namespace Debugger {
                 fullText = text;
             }
 
-            string processed = inputType == TMP_InputField.InputType.Password ? new string(asteriskChar, fullText.Length) : fullText;
+            string processed = fullText;
 
             // If not currently editing the text, set the visible range to the whole text.
             // The UpdateLabel method will then truncate it to the part that fits inside the Text area.
@@ -463,22 +455,21 @@ namespace Debugger {
         }
 
         void SetCaretVisible() {
-//            if (!m_AllowInput)
-//                return;
-//
-//            m_CaretVisible = true;
-//            m_BlinkStartTime = Time.unscaledTime;
-//            SetCaretActive();
+            if (!m_AllowInput) {
+                return;
+            }
+
+            m_CaretVisible = true;
+            m_BlinkStartTime = Time.unscaledTime;
+            //SetCaretActive();
         }
-
-
+        
         private string GetSelectedString() {
-            if (!hasSelection) return "";
+            if (!hasSelection) return string.Empty;
 
             int startPos = stringPositionInternal;
             int endPos = stringSelectPositionInternal;
 
-            // Ensure pos is always less then selPos to make the code simpler
             if (startPos > endPos) {
                 int temp = startPos;
                 startPos = endPos;
@@ -490,6 +481,70 @@ namespace Debugger {
 
         public Mesh GetMesh() {
             return mesh;
+        }
+
+        public event Action<FocusEvent> onFocus;
+        public event Action<BlurEvent> onBlur;
+
+        public bool HasFocus { get; }
+        public bool HasFocusLocked { get; }
+
+        public void Focus() {
+            Debug.Log("FOCUSED");
+            onFocus?.Invoke(new FocusEvent());
+            Input.imeCompositionMode = IMECompositionMode.On;
+            m_AllowInput = true;
+            m_OriginalText = text;
+            m_WasCanceled = false;
+            SetCaretVisible();
+            UpdateLabel();
+        }
+
+        public void Blur() {
+            Debug.Log("BLURRED");
+            onBlur?.Invoke(new BlurEvent());
+        }
+
+
+        private int GetCaretPositionFromStringIndex(int stringIndex) {
+            int count = textInfo.characterCount;
+
+            for (int i = 0; i < count; i++) {
+                if (textInfo.characterInfo[i].index >= stringIndex) {
+                    return i;
+                }
+            }
+
+            return count;
+        }
+
+        private int GetStringIndexFromCaretPosition(int caretPosition) {
+            return textInfo.characterInfo[ClampCaretPosition(m_TextInfo.characterCount, caretPosition)].index;
+        }
+        
+        private static int ClampStringPosition(string text, int pos) {
+            if (pos < 0) {
+                return 0;
+            }
+
+            if (pos > text.Length) {
+                return text.Length;
+            }
+
+            return pos;
+        }
+
+        private static int ClampCaretPosition(int characterCount, int pos) {
+            
+            if (characterCount == 0 || pos < 0) {
+                return 0;
+            }
+
+            if (pos > characterCount - 1) {
+                return characterCount - 1;
+            }
+
+            return pos;
         }
 
     }

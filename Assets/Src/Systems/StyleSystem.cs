@@ -10,7 +10,7 @@ namespace Src.Systems {
 
     public delegate void PaintChanged(int elementId, Paint paint);
 
-    public delegate void RectPropertyChanged(int elementId, LayoutRect rect);
+    public delegate void RectPropertyChanged(int elementId, Dimensions rect);
 
     public delegate void ContentBoxChanged(int elementId, ContentBoxRect rect);
 
@@ -110,7 +110,7 @@ namespace Src.Systems {
             elementRegistry.GetElement(elementId).style.ExitState(state);
         }
 
-        public void SetRect(int elementId, LayoutRect rect) {
+        public void SetDimensions(int elementId, Dimensions rect) {
             onRectChanged?.Invoke(elementId, rect);
         }
 

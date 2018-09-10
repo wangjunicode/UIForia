@@ -20,6 +20,11 @@ public class TranscludedThing : UIElement {
     public Action onDisableCallback;
     public Action onEnableCallback;
 
+    public Action onCreate;
+
+    public override void OnCreate() {
+        onCreate?.Invoke();
+    }
     public override void OnDisable() {
         onDisableCallback?.Invoke();
     }
@@ -41,7 +46,20 @@ public class TranscludedThing : UIElement {
             </Contents>
         </UITemplate>
     ")]
-public class ViewTestThing : UIElement { }
+public class ViewTestThing : UIElement {
+
+    public bool didCreate;
+    public int updateCount;
+
+    public override void OnCreate() {
+        didCreate = true;
+    }
+
+    public override void OnUpdate() {
+        updateCount++;
+    }
+
+}
 
 [TestFixture]
 public class UIView_Tests {
@@ -277,6 +295,26 @@ public class UIView_Tests {
         Assert.AreEqual(1, callCount);
         testView.EnableElement(group);
         Assert.AreEqual(2, callCount);
+    }
+
+    
+    
+    [Test]
+    public void LifeCycle_OnCreate() {
+        TestView testView = new TestView(typeof(ViewTestThing));
+        testView.Initialize(true);
+        ViewTestThing thing = (ViewTestThing)testView.RootElement;
+        Assert.IsTrue(thing.didCreate);
+    }
+
+    [Test]
+    public void LifeCycle_OnUpdate() {
+        TestView testView = new TestView(typeof(ViewTestThing));
+        testView.Initialize(true);
+        ViewTestThing thing = (ViewTestThing)testView.RootElement;
+        Assert.AreEqual(0, thing.updateCount);
+        testView.Update();
+        Assert.AreEqual(1, thing.updateCount);
     }
     
     private struct TypeAssert {

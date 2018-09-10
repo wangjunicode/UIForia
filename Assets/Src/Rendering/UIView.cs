@@ -12,6 +12,7 @@ public abstract class UIView : IElementRegistry {
 
     // todo -- move to interfaces
     protected readonly BindingSystem bindingSystem;
+
     //protected readonly LifeCycleSystem lifeCycleSystem;
     protected readonly StyleSystem styleSystem;
     protected readonly SkipTree<UIElement> elementTree;
@@ -28,8 +29,8 @@ public abstract class UIView : IElementRegistry {
     protected UIView(Type elementType) {
         this.elementType = elementType;
         this.systems = new List<ISystem>();
-        this.elementTree  = new SkipTree<UIElement>();
-        
+        this.elementTree = new SkipTree<UIElement>();
+
         styleSystem = new StyleSystem(this);
         bindingSystem = new BindingSystem();
 
@@ -37,6 +38,8 @@ public abstract class UIView : IElementRegistry {
         systems.Add(bindingSystem);
     }
 
+    public UIElement RootElement => rootElement;
+    
     public void Initialize(bool forceTemplateReparse = false) {
         foreach (ISystem system in systems) {
             system.OnInitialize();
@@ -59,7 +62,6 @@ public abstract class UIView : IElementRegistry {
     }
 
     protected void InitHierarchy(InitData elementData) {
-
         if (elementData.element.parent == null) {
             elementData.element.flags |= UIElementFlags.AncestorEnabled;
         }
@@ -68,13 +70,12 @@ public abstract class UIView : IElementRegistry {
                 elementData.element.flags |= UIElementFlags.AncestorEnabled;
             }
         }
-                
+
         elementTree.AddItem(elementData.element);
-        
+
         for (int i = 0; i < elementData.children.Count; i++) {
             InitHierarchy(elementData.children[i]);
         }
-        
     }
 
     // todo take a template instead of an init data instance? (and scope)
@@ -85,19 +86,12 @@ public abstract class UIView : IElementRegistry {
             data.element.flags |= UIElementFlags.AncestorEnabled;
 
             rootElement = data.element;
-
-            InitHierarchy(data);
-
-            for (int i = 0; i < systems.Count; i++) {
-                systems[i].OnElementCreated(data);
-            }
-
-            return;
         }
-
-        data.element.parent = parent;
-        if (parent.isEnabled) {
-            data.element.flags |= UIElementFlags.AncestorEnabled;
+        else {
+            data.element.parent = parent;
+            if (parent.isEnabled) {
+                data.element.flags |= UIElementFlags.AncestorEnabled;
+            }
         }
 
         InitHierarchy(data);
@@ -105,6 +99,16 @@ public abstract class UIView : IElementRegistry {
         for (int i = 0; i < systems.Count; i++) {
             systems[i].OnElementCreated(data);
         }
+
+        InvokeOnCreate(data);
+    }
+
+    private void InvokeOnCreate(InitData elementData) {
+        for (int i = 0; i < elementData.children.Count; i++) {
+            InvokeOnCreate(elementData.children[i]);
+        }
+
+        elementData.element.OnCreate();
     }
 
     public void DestroyElement(UIElement element) {
@@ -152,7 +156,7 @@ public abstract class UIView : IElementRegistry {
         elementTree.ConditionalTraversePreOrder(element, (child) => {
             child.flags |= UIElementFlags.AncestorEnabled;
             if (child.isSelfDisabled) return false;
-            
+
             child.OnEnable(); // todo -- maybe enqueue and flush calls after so we don't have buffer problems
 
             return true;
@@ -168,24 +172,23 @@ public abstract class UIView : IElementRegistry {
         if (element.isSelfDisabled) return;
 
         element.flags &= ~(UIElementFlags.Enabled);
-        
+
         // if element was already disabled via ancestor, no-op
         if (element.hasDisabledAncestor) {
             return;
         }
-        
+
         element.OnDisable();
-        
+
         elementTree.ConditionalTraversePreOrder(element, (child) => {
-            
             child.flags &= ~(UIElementFlags.AncestorEnabled);
             if (child.isSelfDisabled) return false;
-            
+
             child.OnDisable(); // todo -- enqueue for later
 
             return true;
         });
-        
+
         foreach (ISystem system in systems) {
             system.OnElementDisabled(element);
         }

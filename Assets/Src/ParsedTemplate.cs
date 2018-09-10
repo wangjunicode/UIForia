@@ -48,6 +48,9 @@ namespace Src {
                 }
             }
             
+            instanceData.element.templateChildren = scope.inputChildren.Select(c => c.element).ToArray();
+            instanceData.element.ownChildren = instanceData.children.Select(c => c.element).ToArray();
+            
             return instanceData;
         }
 
@@ -66,7 +69,10 @@ namespace Src {
             for (int i = 0; i < childTemplates.Count; i++) {
                 rootData.AddChild(childTemplates[i].CreateScoped(scope));
             }
-            
+
+            rootData.element.templateChildren = rootData.children.Select(c => c.element).ToArray();
+            rootData.element.ownChildren = rootData.element.templateChildren;
+
             return rootData;
         }
 

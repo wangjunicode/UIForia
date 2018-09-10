@@ -16,6 +16,7 @@ namespace Src {
 
         public override bool Compile(ParsedTemplate template) {
 
+            // todo -- if part is constant and value is empty string, remove it
             string[] expressionParts = textParser.Parse(RawText);
 
             if (expressionParts.Length == 1) {

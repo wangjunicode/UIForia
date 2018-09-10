@@ -2,8 +2,9 @@
 <UITemplate>
     
     <Contents>
-        
-        <UIInputFieldElement/>
+
+        <GraphicTest/>
+        <!--<UIInputFieldElement/>-->
         <!--<Group style.padding="rect(10f)"-->
                <!--style.rectX="parent(50)"-->
                <!--style.rectY="parent(50)"-->

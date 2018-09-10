@@ -241,6 +241,35 @@ namespace Src {
             return template;
         }
 
+        private static UITemplate ParseTextContainerElement(XElement element) {
+            UITemplate template = new UITextContainerTemplate(
+                ParseNodes(element.Nodes()),
+                ParseAttributes(element.Attributes())
+            );
+            return template;
+        }
+        
+        private static UITemplate ParseGraphicElement(XElement element) {
+            UITemplate template = new UIGraphicTemplate(
+                ParseNodes(element.Nodes()),
+                ParseAttributes(element.Attributes())
+            );
+            return template;
+        }
+
+        private static UITemplate ParseMaskElement(XElement element) {
+            throw new NotImplementedException();    
+        }
+        
+        private static UITemplate ParseShapeElement(XElement element) {
+            throw new NotImplementedException();    
+            UITemplate template = new UIShapeTemplate(
+                ParseNodes(element.Nodes()),
+                ParseAttributes(element.Attributes())
+            );
+            return template;
+        }
+
         private static UITemplate ParseImageElement(XElement element) {
             return new UIImageTemplate(null, ParseAttributes(element.Attributes()));    
         }
@@ -251,6 +280,32 @@ namespace Src {
                 return ParseChildrenElement(element);
             }
 
+            if (element.Name == "Text") {
+                return ParseTextContainerElement(element);
+            }
+
+            if (element.Name == "Graphic") {
+                return ParseGraphicElement(element);
+            }
+            
+//            if (element.Name == "Paragraph") { }
+            
+//            if (element.Name == "Heading1") { }
+//            if (element.Name == "Heading2") { }
+//            if (element.Name == "Heading3") { }
+//            if (element.Name == "Heading4") { }
+//            if (element.Name == "Heading5") { }
+//            if (element.Name == "Heading6") { }
+//
+//            if (element.Name == "UnorderedList") { }
+//            if (element.Name == "OrderedList") { }
+//
+//            if (element.Name == "ListItem") { }
+
+            if (element.Name == "Mask") {
+                return ParseMaskElement(element);
+            }
+            
             if (element.Name == "Image") {
                 return ParseImageElement(element);
             }

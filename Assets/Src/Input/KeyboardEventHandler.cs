@@ -1,10 +1,9 @@
 ﻿using System;
 using System.Reflection;
-using Src.Input;
 using Src.Util;
 using UnityEngine;
 
-namespace Src.Compilers {
+namespace Src.Input {
 
     public abstract class KeyboardEventHandler : IComparable<KeyboardEventHandler> {
 

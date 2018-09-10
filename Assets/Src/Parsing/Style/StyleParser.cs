@@ -9,18 +9,15 @@ namespace Src.Parsing.Style {
 
         public static void ParseStyle(XElement root, UIStyle style) {
             if (root == null) return;
-            
-            StyleParseUtil.ParseMeasurement(ref style.rect.x, root.GetChild("Rect.X"));
-            StyleParseUtil.ParseMeasurement(ref style.rect.y, root.GetChild("Rect.Y"));
-            StyleParseUtil.ParseMeasurement(ref style.rect.width, root.GetChild("Rect.W"));
-            StyleParseUtil.ParseMeasurement(ref style.rect.height, root.GetChild("Rect.H"));
+
+            StyleParseUtil.ParseMeasurement(ref style.dimensions.width, root.GetChild("Rect.W"));
+            StyleParseUtil.ParseMeasurement(ref style.dimensions.height, root.GetChild("Rect.H"));
 
 //            Color borderColor = UIStyle.UnsetColorValue;
 //            Color backgroundColor = UIStyle.UnsetColorValue;
 //            Texture2D backgroundImage = null;
 //            
 //            StyleParseUtil.ParseColor(ref backgroundColor, root.GetChild("Paint.BackgroundColor"));
-            
         }
 
     }

@@ -21,7 +21,8 @@ public enum UIElementFlags {
     
     RequiresSpecialRendering = 1 << 10,
     
-//    InputField = 1 << 11, 
+    Primitive = 1 << 11,
+    
     AcceptFocus = 1 << 12,
     
     IsFocused = 1 << 13,

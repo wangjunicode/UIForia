@@ -11,7 +11,7 @@ namespace Src.Layout {
     public class LayoutNode : IHierarchical {
 
         public Rect outputRect;
-        public LayoutRect rect;
+        public Dimensions rect;
         public UILayout layout;
         public LayoutParameters parameters;
         public LayoutConstraints constraints;
@@ -60,7 +60,7 @@ namespace Src.Layout {
             layout = layoutSystem.GetLayoutInstance(parameters.type);
 
             constraints = style.constraints;
-            rect = style.rect;
+            rect = style.dimensions;
 
             UITextElement textElement = element as UITextElement;
             if (textElement != null) {

@@ -22,6 +22,9 @@ namespace Src.Input {
         bool HasFocus { get; }
         bool HasFocusLocked { get; }
 
+        void Focus();
+        void Blur();
+
     }
 
 }

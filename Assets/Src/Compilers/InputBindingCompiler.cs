@@ -12,6 +12,7 @@ namespace Src.Compilers {
         private readonly ExpressionCompiler compiler;
 
         private static readonly Dictionary<Type, List<KeyboardEventHandler>> s_KeyboardHandlerCache = new Dictionary<Type, List<KeyboardEventHandler>>();
+        private static readonly Dictionary<Type, List<MouseEventHandler>> s_MouseHandlerCache = new Dictionary<Type, List<MouseEventHandler>>();
 
         public InputBindingCompiler(ContextDefinition context) {
             this.context = context;
@@ -39,6 +40,72 @@ namespace Src.Compilers {
             return retn;
         }
 
+        public List<MouseEventHandler> CompileMouseInputAttributes(Type type) {
+            if (s_MouseHandlerCache.ContainsKey(type)) {
+                return s_MouseHandlerCache[type];
+            }
+            
+            MethodInfo[] methods = type.GetMethods(ReflectionUtil.InstanceBindFlags);
+
+            if (methods.Length == 0) {
+                s_MouseHandlerCache[type] = null;
+                return null;
+            }
+
+            List<MouseEventHandler> retn = new List<MouseEventHandler>();
+            ReflectionUtil.TypeArray1[0] = type;
+            
+             for (int i = 0; i < methods.Length; i++) {
+                MethodInfo info = methods[i];
+                object[] customAttributes = info.GetCustomAttributes(typeof(MouseInputBindingAttribute), true);
+
+                for (int j = 0; j < customAttributes.Length; j++) {
+                    MouseInputBindingAttribute attr = (MouseInputBindingAttribute) customAttributes[j];
+
+                    ParameterInfo[] parameters = info.GetParameters();
+                    MouseEventHandler handler = null;
+
+                    switch (parameters.Length) {
+                        case 0: {
+                            Type openDelegateType = ReflectionUtil.GetOpenDelegateType(info);
+                            Type handlerType = ReflectionUtil.CreateGenericType(typeof(MouseEventHandlerIgnoreEvent<>), ReflectionUtil.TypeArray1[0]);
+                            ReflectionUtil.ObjectArray1[0] = ReflectionUtil.CreateOpenDelegate(openDelegateType, info);
+                            handler = (MouseEventHandler) ReflectionUtil.CreateGenericInstance(handlerType, ReflectionUtil.ObjectArray1);
+                            break;
+                        }
+                        case 1: {
+                            ReflectionUtil.TypeArray1[0] = type;
+                            Type openDelegateType = ReflectionUtil.GetOpenDelegateType(info);
+                            Type handlerType = ReflectionUtil.CreateGenericType(typeof(MouseEventHandler<>), ReflectionUtil.TypeArray1[0]);
+                            ReflectionUtil.ObjectArray1[0] = ReflectionUtil.CreateOpenDelegate(openDelegateType, info);
+                            handler = (MouseEventHandler) ReflectionUtil.CreateGenericInstance(handlerType, ReflectionUtil.ObjectArray1);
+                            break;
+                        }
+                        default:
+                            continue;
+                    }
+
+#if DEBUG
+                    handler.methodInfo = info;
+#endif
+                    handler.eventType = attr.eventType;
+                    handler.requiredModifiers = attr.modifiers;
+                    handler.requiresFocus = attr.requiresFocus;
+
+                    retn.Add(handler);
+                }
+            }
+
+            if (retn.Count == 0) {
+                s_MouseHandlerCache[type] = null;
+                return null;
+            }
+
+            s_MouseHandlerCache[type] = retn;
+
+            return retn;
+        }
+        
         public List<KeyboardEventHandler> CompileKeyboardInputAttributes(Type type) {
             if (s_KeyboardHandlerCache.ContainsKey(type)) {
                 return s_KeyboardHandlerCache[type];
@@ -91,7 +158,7 @@ namespace Src.Compilers {
                     handler.keyCode = attr.key;
                     handler.character = attr.character;
                     handler.requiredModifiers = attr.modifiers;
-                    handler.requiresFocus = attr.requireFocus;
+                    handler.requiresFocus = attr.requiresFocus;
 
                     retn.Add(handler);
                 }

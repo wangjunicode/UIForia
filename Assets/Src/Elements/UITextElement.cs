@@ -1,17 +1,17 @@
-
 namespace Src {
 
     public class UITextElement : UIElement {
 
         private string text;
-        
+
         public delegate void TextChanged(UITextElement thisElement, string text);
 
         public event TextChanged onTextChanged;
 
         public UITextElement(string text = "") {
             this.text = text;
-            flags |= UIElementFlags.TextElement;
+            flags = flags | UIElementFlags.TextElement
+                          | UIElementFlags.Primitive;
         }
 
         public string GetText() {
@@ -26,7 +26,6 @@ namespace Src {
             this.text = newText;
             onTextChanged?.Invoke(this, text);
         }
-
 
     }
 

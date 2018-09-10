@@ -99,31 +99,31 @@ namespace Src.Systems {
             if (elementsThisFrame.Count >= scratchArray.Length) {
                 Array.Resize(ref scratchArray, elementsThisFrame.Count * 2);
             }
-            elementsThisFrame.CopyTo(scratchArray);
-            InputEvent mouseEnter = new MouseInputEvent(InputEventType.MouseEnter, mousePosition);
-            for (int i = 0; i < elementsThisFrame.Count; i++) {
-                int elementId = scratchArray[i];
-                if (!elementsLastFrame.Contains(elementId)) {
-                    RunBindings(elementId, mouseEnter);
-                }
-            }
+//            elementsThisFrame.CopyTo(scratchArray);
+//            InputEvent mouseEnter = new MouseInputEvent(InputEventType.MouseEnter, mousePosition);
+//            for (int i = 0; i < elementsThisFrame.Count; i++) {
+//                int elementId = scratchArray[i];
+//                if (!elementsLastFrame.Contains(elementId)) {
+//                    RunBindings(elementId, mouseEnter);
+//                }
+//            }
         }
 
         private void RunMouseExit() {
             if (elementsLastFrame.Count >= scratchArray.Length) {
                 Array.Resize(ref scratchArray, elementsThisFrame.Count * 2);
             }
-            elementsLastFrame.CopyTo(scratchArray);
-            InputEvent mouseExit = new MouseInputEvent(InputEventType.MouseExit, mousePosition);
-            for (int i = 0; i < elementsLastFrame.Count; i++) {
-                int elementId = scratchArray[i];
-                if (!elementsThisFrame.Contains(elementId)) {
-                    RunBindings(elementId, mouseExit);
-                }
-                else {
-                    //RunBindings(elementId, mouseHover);
-                }
-            }
+//            elementsLastFrame.CopyTo(scratchArray);
+//            InputEvent mouseExit = new MouseInputEvent(InputEventType.MouseExit, mousePosition);
+//            for (int i = 0; i < elementsLastFrame.Count; i++) {
+//                int elementId = scratchArray[i];
+//                if (!elementsThisFrame.Contains(elementId)) {
+//                    RunBindings(elementId, mouseExit);
+//                }
+//                else {
+//                    //RunBindings(elementId, mouseHover);
+//                }
+//            }
         }
 
         private void RunBindings(int elementId, InputEvent inputEvent) {
@@ -154,11 +154,11 @@ namespace Src.Systems {
                 Array.Resize(ref scratchArray, elementsThisFrame.Count * 2);
             }
             
-            elementsThisFrame.CopyTo(scratchArray);
-            InputEvent mouseEvent = new MouseInputEvent(eventType, mousePosition);
-            for (int i = 0; i < elementsThisFrame.Count; i++) {
-                RunBindings(scratchArray[i], mouseEvent);
-            }
+//            elementsThisFrame.CopyTo(scratchArray);
+//            InputEvent mouseEvent = new MouseInputEvent(eventType, mousePosition);
+//            for (int i = 0; i < elementsThisFrame.Count; i++) {
+//                RunBindings(scratchArray[i], mouseEvent);
+//            }
         }
 
         public void OnUpdate() {

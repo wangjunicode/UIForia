@@ -10,7 +10,7 @@ namespace Src {
 
         public readonly UIView view;
         public IList activeList;
-
+        
         public UITemplateContext(UIView view) : base(null) {
             this.view = view;
         }

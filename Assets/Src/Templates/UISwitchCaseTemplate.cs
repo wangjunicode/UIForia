@@ -20,7 +20,7 @@ namespace Src {
             for (int i = 0; i < childTemplates.Count; i++) {
                 data.AddChild(childTemplates[i].CreateScoped(inputScope));
             }
-
+            
             return data;
         }
 

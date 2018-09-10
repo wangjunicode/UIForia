@@ -1,7 +1,7 @@
 using System.Collections.Generic;
 using System.Diagnostics;
 using Rendering;
-using Src.Compilers;
+using Src.Input;
 using Src.InputBindings;
 using Src.StyleBindings;
 
@@ -20,7 +20,6 @@ namespace Src {
         public UITemplateContext context;
         public readonly List<InitData> children;
 
-        
         // these are SHARED between all instances of a template
         // therefore we can't combine them into one single list
         // to be processed by various systems. We save a ton of
@@ -33,6 +32,7 @@ namespace Src {
         public List<UIStyle> baseStyles;
         public List<StyleBinding> constantStyleBindings;
         public List<KeyboardEventHandler> keyboardEventHandlers;
+        public List<MouseEventHandler> mouseEventHandlers;
         
         public InitData(UIElement element, UITemplateContext context) {
             this.element = element;

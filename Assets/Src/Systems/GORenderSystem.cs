@@ -1,10 +1,10 @@
 ﻿using System.Collections.Generic;
 using Debugger;
 using Rendering;
+using Src.Elements;
 using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
-using InputField = UnityEngine.UI.InputField;
 using Object = UnityEngine.Object;
 
 namespace Src.Systems {
@@ -51,18 +51,18 @@ namespace Src.Systems {
         }
 
         public void OnElementCreated(InitData creationData) {
-            IDirectDrawMesh directDraw = creationData.element as IDirectDrawMesh;
-            
+            UIGraphicElement directDraw = creationData.element as UIGraphicElement;
+
             if (directDraw != null) {
-                directDraw.onMeshUpdate += HandleMeshUpdate;
+                directDraw.onMeshUpdated += HandleMeshUpdate;
             }
-            
+
             OnElementStyleChanged(creationData.element);
-            
+
             for (int i = 0; i < creationData.children.Count; i++) {
                 OnElementCreated(creationData.children[i]);
             }
-            
+
             UITextContainerElement container = creationData.element as UITextContainerElement;
             if (container != null) {
                 RectTransform containerTransform = transforms[container.id];
@@ -70,25 +70,32 @@ namespace Src.Systems {
                 // todo -- need the font ref to update when font changes
                 container.textInfo = child.GetComponent<TextMeshProUGUI>().textInfo;
                 container.fontAsset = child.GetComponent<TextMeshProUGUI>().font;
+                container.textInfo.textComponent.text = container.textInfo.textComponent.text ?? string.Empty;
             }
-
         }
 
-        private void HandleMeshUpdate(UIElement element, Mesh mesh) {
-            transforms[element.id].GetComponent<CanvasRenderer>().SetMesh(mesh);
+        private void HandleMeshUpdate(int elementId, Mesh mesh) {
+            UIGraphicElement graphicElement = (UIGraphicElement) renderSkipTree.GetItem(elementId).element;
+            Transform transform = transforms[elementId];
+
+            CanvasRenderer canvasRenderer = transform.GetComponent<CanvasRenderer>();
+            if (canvasRenderer == null) {
+                canvasRenderer = transform.gameObject.AddComponent<CanvasRenderer>();
+                canvasRenderer.SetMaterial(graphicElement.GetMaterial(), Texture2D.whiteTexture);
+            }
+
+            canvasRenderer.SetMesh(mesh);
         }
 
         public void OnUpdate() {
-
             int count = layoutSystem.RectCount;
             LayoutResult[] layoutResults = layoutSystem.LayoutResults;
 
             for (int i = 0; i < count; i++) {
-                
                 if (!transforms.ContainsKey(layoutResults[i].elementId)) {
                     continue;
                 }
-                
+
                 RenderData renderData = renderSkipTree.GetItem(layoutResults[i].elementId);
                 ContentBoxRect margin = renderData.element.style.margin;
                 RectTransform transform = transforms[layoutResults[i].elementId];
@@ -101,7 +108,6 @@ namespace Src.Systems {
                 transform.anchoredPosition = new Vector3(position.x, -position.y, 0);
                 transform.sizeDelta = size;
             }
-            
         }
 
         public void OnReset() {
@@ -338,14 +344,14 @@ namespace Src.Systems {
             }
 
             ContentBoxRect border = styleSet.border;
-            if(border.left > 0 || border.right > 0 || border.top > 0 || border.bottom > 0) {
+            if (border.left > 0 || border.right > 0 || border.top > 0 || border.bottom > 0) {
                 return RenderPrimitiveType.ProceduralImage;
             }
 
             return RenderPrimitiveType.RawImage;
         }
 
-      
+
         private void HandleBorderRadiusChange(int elementId, BorderRadius radius) {
             if (!ready) return;
             UIElement element = elementRegistry.GetElement(elementId);

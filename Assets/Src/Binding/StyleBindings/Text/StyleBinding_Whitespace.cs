@@ -1,4 +1,5 @@
 using Rendering;
+using Src.Rendering;
 
 namespace Src.StyleBindings.Text {
 
@@ -6,7 +7,7 @@ namespace Src.StyleBindings.Text {
 
         private readonly Expression<WhitespaceMode> expression;
 
-        public StyleBinding_Whitespace(StyleState state, Expression<WhitespaceMode> expression) : base(state) {
+        public StyleBinding_Whitespace(StyleState state, Expression<WhitespaceMode> expression) : base(RenderConstants.Whitespace, state) {
             this.expression = expression;
         }
 

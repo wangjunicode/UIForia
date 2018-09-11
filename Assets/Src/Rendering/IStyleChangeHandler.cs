@@ -14,6 +14,7 @@ namespace Src.Systems {
         void SetConstraints(int elementId, LayoutConstraints constraints);
         void SetTextStyle(int elementId, TextStyle textStyle);
         void SetAvailableStates(int elementId, StyleState availableStates);
+        void SetTransform(int elementId, UITransform transform);
 
     }
 

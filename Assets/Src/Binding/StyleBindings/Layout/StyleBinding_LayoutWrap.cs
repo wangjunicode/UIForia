@@ -1,12 +1,13 @@
 ﻿using Rendering;
+using Src.Rendering;
 
 namespace Src.StyleBindings {
 
     public class StyleBinding_LayoutWrap : StyleBinding {
 
-        public readonly Expression<LayoutWrap> expression;
+        private readonly Expression<LayoutWrap> expression;
 
-        public StyleBinding_LayoutWrap(StyleState state, Expression<LayoutWrap> expression) : base(state) {
+        public StyleBinding_LayoutWrap(StyleState state, Expression<LayoutWrap> expression) : base(RenderConstants.LayoutWrap, state) {
             this.expression = expression;
         }
 

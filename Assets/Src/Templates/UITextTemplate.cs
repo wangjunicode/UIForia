@@ -5,7 +5,6 @@ namespace Src {
 
     public class UITextTemplate : UITemplate {
 
-
         private static readonly TextElementParser textParser = new TextElementParser();
 
         public UITextTemplate(string rawText) : base(null) {

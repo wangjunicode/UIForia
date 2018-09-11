@@ -41,7 +41,8 @@ namespace Src.Systems {
         public event FontPropertyChanged onFontPropertyChanged;
         public event AvailableStatesChanged onAvailableStatesChanged;
         public event TextContentChanged onTextContentChanged;
-
+        public event Action<int, UITransform> onTransformChanged;
+        
         private readonly IElementRegistry elementRegistry;
         private readonly SkipTree<UIElement> fontTree;
 
@@ -148,6 +149,10 @@ namespace Src.Systems {
 
         public void SetAvailableStates(int elementId, StyleState availableStates) {
             onAvailableStatesChanged?.Invoke(elementId, availableStates);
+        }
+
+        public void SetTransform(int elementId, UITransform transform) {
+            onTransformChanged?.Invoke(elementId, transform);
         }
 
         public UIStyleSet GetStyleForElement(int elementId) {

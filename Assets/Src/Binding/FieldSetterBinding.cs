@@ -1,6 +1,9 @@
 ﻿using System;
 
 namespace Src {
+    
+    // todo [OnPropChanged(nameof(someproperty))]
+    // todo enable OnPropChanged annotations
 
     // todo make overloads for numeric types, value types, and class type to avoid boxing
     public class FieldSetterBinding<U, T> : Binding where U : UIElement {
@@ -9,7 +12,7 @@ namespace Src {
         private readonly Func<U, T> getter;
         private readonly Func<U, T, T> setter;
 
-        public FieldSetterBinding(Expression<T> expression, Func<U, T> getter, Func<U, T, T> setter) {
+        public FieldSetterBinding(string bindingId, Expression<T> expression, Func<U, T> getter, Func<U, T, T> setter) : base(bindingId) {
             this.expression = expression;
             this.getter = getter;
             this.setter = setter;

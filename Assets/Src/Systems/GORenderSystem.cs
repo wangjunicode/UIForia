@@ -53,10 +53,6 @@ namespace Src.Systems {
         public void OnElementCreated(InitData creationData) {
             UIGraphicElement directDraw = creationData.element as UIGraphicElement;
 
-            if (directDraw != null) {
-                directDraw.onMeshUpdated += HandleMeshUpdate;
-            }
-
             OnElementStyleChanged(creationData.element);
 
             for (int i = 0; i < creationData.children.Count; i++) {
@@ -64,6 +60,14 @@ namespace Src.Systems {
             }
 
             UITextContainerElement container = creationData.element as UITextContainerElement;
+
+            if (directDraw != null) {
+                RectTransform transform = transforms[directDraw.id];
+                GOCanvasElement canvasElement = transform.gameObject.AddComponent<GOCanvasElement>();
+                canvasElement.m_GraphicElement = directDraw;
+                directDraw.updateManager = canvasElement;
+            }
+
             if (container != null) {
                 RectTransform containerTransform = transforms[container.id];
                 Transform child = containerTransform.GetChild(0);
@@ -74,18 +78,18 @@ namespace Src.Systems {
             }
         }
 
-        private void HandleMeshUpdate(int elementId, Mesh mesh) {
-            UIGraphicElement graphicElement = (UIGraphicElement) renderSkipTree.GetItem(elementId).element;
-            Transform transform = transforms[elementId];
-
-            CanvasRenderer canvasRenderer = transform.GetComponent<CanvasRenderer>();
-            if (canvasRenderer == null) {
-                canvasRenderer = transform.gameObject.AddComponent<CanvasRenderer>();
-                canvasRenderer.SetMaterial(graphicElement.GetMaterial(), Texture2D.whiteTexture);
-            }
-
-            canvasRenderer.SetMesh(mesh);
-        }
+//        private void HandleMeshUpdate(int elementId, Mesh mesh) {
+//            UIGraphicElement graphicElement = (UIGraphicElement) renderSkipTree.GetItem(elementId).element;
+//            Transform transform = transforms[elementId];
+//
+//            CanvasRenderer canvasRenderer = transform.GetComponent<CanvasRenderer>();
+//            if (canvasRenderer == null) {
+//                canvasRenderer = transform.gameObject.AddComponent<CanvasRenderer>();
+//                canvasRenderer.SetMaterial(graphicElement.GetMaterial(), Texture2D.whiteTexture);
+//            }
+//
+//            canvasRenderer.SetMesh(mesh);
+//        }
 
         public void OnUpdate() {
             int count = layoutSystem.RectCount;
@@ -105,6 +109,18 @@ namespace Src.Systems {
                 Vector2 size = layoutResults[i].localRect.size;
                 size.x = (int) size.x - (margin.left + margin.right);
                 size.y = (int) size.y - (margin.top + margin.bottom);
+
+                // TextMeshPro text elements need a bit more space or they wrap weirdly
+                if (renderData.element is UITextElement) {
+                    TextMeshProUGUI tmp = renderData.renderComponent as TextMeshProUGUI;
+                    if (tmp != null) {
+                        int characterCount = tmp.textInfo.characterCount;
+                        if (characterCount > 0) {
+                            size.x += (tmp.textInfo.characterInfo[tmp.textInfo.characterCount - 1].xAdvance * 2f);
+                        }
+                    }
+                }
+
                 transform.anchoredPosition = new Vector3(position.x, -position.y, 0);
                 transform.sizeDelta = size;
             }
@@ -244,43 +260,8 @@ namespace Src.Systems {
 
                 case RenderPrimitiveType.Text:
                     data.renderComponent = gameObject.AddComponent<TextMeshProUGUI>();
-
-//                    UIInputFieldElement parent = data.element.parent as UIInputFieldElement;
-//                    if (parent != null) {
-//                        RectTransform t = transforms[parent.id];
-//                        InputField i = t.GetComponent<InputField>();
-//                        i.textComponent = text;
-//                        text.supportRichText = false;
-//                    }
-
                     break;
 
-//                case RenderPrimitiveType.InputField:
-//                    UIInputFieldElement inputElement = (UIInputFieldElement) data.element;
-//
-//                    InputField input = data.unityTransform.gameObject.AddComponent<InputField>();
-//
-//                    input.text = inputElement.content;
-//
-//                    InputFieldFocusHandler focusHandler = input.gameObject.AddComponent<InputFieldFocusHandler>();
-//
-//                    input.contentType = InputField.ContentType.Standard;
-//                    input.lineType = InputField.LineType.SingleLine;
-//                    input.transition = Selectable.Transition.None;
-//
-//                    input.onValueChanged.AddListener((value) => { inputElement.SetText(value); });
-//
-//                    focusHandler.onFocus += () => {
-//                        //view.FocusElement(element);
-//                    };
-//
-//                    focusHandler.onBlur += (str) => {
-//                        //view.BlurElement(element);
-//                    };
-//
-//                    // data.imageComponent = data.unityTransform.gameObject.AddComponent<BorderedImage>();
-//                    //ApplyStyles(data);
-//                    break;
             }
 
             ApplyStyles(data);

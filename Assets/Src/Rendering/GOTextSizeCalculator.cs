@@ -13,21 +13,19 @@ namespace Rendering {
             ruler.richText = false;
             ruler.raycastTarget = false;
         }
-        
+
         public float CalcTextWidth(string text, UIStyleSet style) {
-            ruler.text = text;
             ruler.fontSize = style.fontSize;
-            //ruler.ForceMeshUpdate();
-            return ruler.GetPreferredValues().x + 1;
+            ruler.text = text + "\u200B";
+            return Mathf.CeilToInt(ruler.GetPreferredValues().x + 1);
         }
 
         public float CalcTextHeight(string text, UIStyleSet style, float width) {
-            ruler.text = text;
             ruler.fontSize = style.fontSize;
-           // ruler.ForceMeshUpdate();
-            return ruler.GetPreferredValues(width, 0).y;
+            ruler.text = text + "\u200B";
+            return Mathf.CeilToInt(ruler.GetPreferredValues(width + 1, 0).y);
         }
-        
+
     }
 
 }

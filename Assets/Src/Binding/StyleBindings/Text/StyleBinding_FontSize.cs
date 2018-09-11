@@ -1,4 +1,5 @@
 using Rendering;
+using Src.Rendering;
 using UnityEngine;
 
 namespace Src.StyleBindings.Text {
@@ -7,7 +8,7 @@ namespace Src.StyleBindings.Text {
 
         private readonly Expression<int> expression;
 
-        public StyleBinding_FontSize(StyleState state, Expression<int> expression) : base(state) {
+        public StyleBinding_FontSize(StyleState state, Expression<int> expression) : base(RenderConstants.FontSize, state) {
             this.expression = expression;
         }
 

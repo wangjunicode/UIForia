@@ -11,7 +11,7 @@ public abstract class UIView : IElementRegistry {
     public static int NextElementId => ElementIdGenerator++;
 
     // todo -- move to interfaces
-    protected readonly BindingSystem bindingSystem;
+    protected internal readonly BindingSystem bindingSystem;
 
     //protected readonly LifeCycleSystem lifeCycleSystem;
     protected readonly StyleSystem styleSystem;
@@ -86,9 +86,11 @@ public abstract class UIView : IElementRegistry {
             data.element.flags |= UIElementFlags.AncestorEnabled;
 
             rootElement = data.element;
+            rootElement.depth = 0;
         }
         else {
             data.element.parent = parent;
+            data.element.depth = parent.depth + 1;
             if (parent.isEnabled) {
                 data.element.flags |= UIElementFlags.AncestorEnabled;
             }
@@ -101,6 +103,7 @@ public abstract class UIView : IElementRegistry {
         }
 
         InvokeOnCreate(data);
+        InvokeOnReady(data);
     }
 
     private void InvokeOnCreate(InitData elementData) {
@@ -109,6 +112,14 @@ public abstract class UIView : IElementRegistry {
         }
 
         elementData.element.OnCreate();
+    }
+    
+    private void InvokeOnReady(InitData elementData) {
+        for (int i = 0; i < elementData.children.Count; i++) {
+            InvokeOnReady(elementData.children[i]);
+        }
+
+        elementData.element.OnReady();
     }
 
     public void DestroyElement(UIElement element) {

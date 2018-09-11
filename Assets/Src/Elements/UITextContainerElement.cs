@@ -1,5 +1,8 @@
 using System;
+using JetBrains.Annotations;
+using Src;
 using TMPro;
+using UnityEngine;
 
 
 public class UITextContainerElement : UIElement {
@@ -7,6 +10,9 @@ public class UITextContainerElement : UIElement {
     // todo -- wrap these in an interface for interop with other text systems
     protected TMP_TextInfo m_TextInfo;
     protected TMP_FontAsset m_FontAsset;
+
+    public event Action<int, string> onTextContentChanged;
+    private UITextElement m_TextElement;
 
     public UITextContainerElement() {
         flags |= UIElementFlags.TextContainer;
@@ -28,8 +34,31 @@ public class UITextContainerElement : UIElement {
         set { m_FontAsset = value; }
     }
 
-    protected bool IsCharacterValid(char character) {
+    public override void OnCreate() {
+        m_TextElement = (UITextElement) ownChildren[0];
+        m_TextElement.onTextChanged += HandleTextElementTextChanged;
+        m_TextElement.DisableBinding("text");
+        style.width = UIMeasurement.Content100;
+        style.height = UIMeasurement.Content100;
+    }
+
+    public override void OnDestroy() {
+        m_TextElement = (UITextElement) ownChildren[0];
+        m_TextElement.onTextChanged -= HandleTextElementTextChanged;
+    }
+
+    private void HandleTextElementTextChanged(UITextElement element, string text) {
+//        Debug.Log("Text changed");
+        onTextContentChanged?.Invoke(element.id, text);
+    }
+
+    [PublicAPI]
+    public bool IsCharacterValid(char character) {
         return m_FontAsset.HasCharacter(character);
+    }
+
+    public void SetText(string text) {
+        m_TextElement.SetText(text);
     }
 
 }

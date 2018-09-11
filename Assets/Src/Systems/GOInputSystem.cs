@@ -25,7 +25,7 @@ namespace Src.Systems {
         public IHierarchical Parent => element.parent;
 
     }
-    
+
     public class MouseEventTreeNode : IHierarchical {
 
         private readonly UIElement element;
@@ -45,7 +45,7 @@ namespace Src.Systems {
     public class AcceptFocus : Attribute { }
 
     // element.style.CreateBinding<Type>(StyleState.Normal, "property", () => value).Enabled = false;
-    
+
     public class GOInputSystem : IInputSystem, IInputProvider {
 
         private const string EventAlias = "$event";
@@ -104,7 +104,7 @@ namespace Src.Systems {
             keyStates = new Dictionary<KeyCode, KeyState>();
             keyboardEventTree = new SkipTree<KeyboardEventTreeNode>();
             mouseEventTree = new SkipTree<MouseEventTreeNode>();
-            
+
             focusedId = -1;
         }
 
@@ -203,10 +203,11 @@ namespace Src.Systems {
                 keyboardEventTree.AddItem(new KeyboardEventTreeNode(elementData.element, elementData.keyboardEventHandlers));
             }
 
+            // todo -- merge mouseEventHandlers with inputBindings
             if (elementData.mouseEventHandlers != null) {
                 mouseEventTree.AddItem(new MouseEventTreeNode(elementData.element, elementData.mouseEventHandlers));
             }
-            
+
             // need a tree for event handlers for bubble / capture
             // capture if any handlers have capture
             // bubble if any handlers have bubble
@@ -243,10 +244,9 @@ namespace Src.Systems {
             hoverStyles.Remove(element.id);
             hoverStylesLastFrame.Remove(element.id);
             hoverStylesThisFrame.Remove(element.id);
-            
+
             mouseEventTree.RemoveHierarchy(element);
             keyboardEventTree.RemoveHierarchy(element);
-            
         }
 
         public void OnElementShown(UIElement element) { }
@@ -495,11 +495,36 @@ namespace Src.Systems {
         }
 
         private void ProcessMouseEvents() {
+
+            IsMouseLeftDown = UnityEngine.Input.GetMouseButton(0);
+            IsMouseRightDown = UnityEngine.Input.GetMouseButton(1);
+            IsMouseMiddleDown = UnityEngine.Input.GetMouseButton(2);
+            
+            IsMouseLeftDownThisFrame = UnityEngine.Input.GetMouseButtonDown(0);
+            IsMouseRightDownThisFrame = UnityEngine.Input.GetMouseButtonDown(1);
+            IsMouseMiddleDownThisFrame = UnityEngine.Input.GetMouseButtonDown(2);
+
+            if (IsMouseLeftDown) {
+                if (IsMouseLeftDownThisFrame) {
+                    MouseDownPosition = UnityEngine.Input.mousePosition;
+                }
+            }
+            else {
+                MouseDownPosition = new Vector2(-1, -1);
+            }
+            
+            MousePosition = UnityEngine.Input.mousePosition;
+            ScrollDelta = UnityEngine.Input.mouseScrollDelta;
+            
             resultCount = layoutSystem.QueryPoint(mousePosition, ref queryResults);
+            List<UIElement> elements = new List<UIElement>();
 
             for (int i = 0; i < resultCount; i++) {
                 int elementId = queryResults[i].elementId;
+
                 elementsThisFrame.Add(elementId);
+
+                elements.Add(elementSystem.GetElement(elementId));
 
                 if (hoverStyles.Contains(elementId)) {
                     hoverStylesThisFrame.Add(elementId);
@@ -512,6 +537,8 @@ namespace Src.Systems {
                 styleSystem.ExitState(elementId, StyleState.Hover);
             }
 
+            elements.Sort((a, b) => a.depth < b.depth ? 1 : -1);
+
             // elements this frame that were not in the set last frame
             // -> if has binding for mouse enter -> mouse enter
             // if was in last frame & not in this frame -> mouse exit
@@ -519,30 +546,45 @@ namespace Src.Systems {
             RunMouseEnter();
             RunMouseExit();
 
+            // get top of stack element for mouse
+            // traverse while event propagating
+
+            // todo this is only the bubble phase
+            MouseInputEvent mouseEvent = new MouseInputEvent(InputEventType.MouseEnter, mousePosition, KeyboardModifiers, false);
+            for (int i = 0; i < elements.Count; i++) {
+                RunBindings(elements[i], mouseEvent);
+                if (mouseEvent.ShouldStopPropagation) {
+                    break;
+                }
+            }
+            
             // todo -- or tab focus!
 
-            if (UnityEngine.Input.GetMouseButtonDown(0)) {
+            if (IsMouseLeftDownThisFrame) {
                 elementsThisFrame.CopyTo(scratchArray);
                 // todo -- sort by depth
                 // todo -- cull masked
                 bool didFocus = false;
                 for (int i = 0; i < elementsThisFrame.Count; i++) {
                     UIElement element = elementSystem.GetElement(scratchArray[i]);
-                    if ((element.flags & UIElementFlags.AcceptFocus) != 0) {
-                        if (element.id != focusedId) {
-                            if (focusedId != -1) {
-                                IFocusable blurElement = (IFocusable) elementSystem.GetElement(focusedId);
-                                blurElement.Blur();
-                            }
-
-                            IFocusable focusElement = (IFocusable) element;
-                            focusElement.Focus();
-                            focusedId = element.id;
+                    
+                    if ((element.flags & UIElementFlags.AcceptFocus) == 0) {
+                        continue;
+                    }
+                    
+                    if (element.id != focusedId) {
+                        if (focusedId != -1) {
+                            IFocusable blurElement = (IFocusable) elementSystem.GetElement(focusedId);
+                            blurElement.Blur();
                         }
 
-                        didFocus = true;
-                        break;
+                        IFocusable focusElement = (IFocusable) element;
+                        focusElement.Focus();
+                        focusedId = element.id;
                     }
+
+                    didFocus = true;
+                    break;
                 }
 
                 if (!didFocus && focusedId != -1) {
@@ -599,8 +641,13 @@ namespace Src.Systems {
         }
 
         private void RunBindings(int elementId, InputEvent inputEvent) {
+            RunBindings(elementSystem.GetElement(elementId), inputEvent);
+        }
+
+        private void RunBindings(UIElement element, InputEvent inputEvent) {
             InputBindingGroup bindingGroup;
-            if (!bindingMap.TryGetValue(elementId, out bindingGroup)) {
+
+            if (!bindingMap.TryGetValue(element.id, out bindingGroup)) {
                 return;
             }
 
@@ -609,14 +656,19 @@ namespace Src.Systems {
             }
 
             InputBinding[] bindings = bindingGroup.bindings;
-            UIElement element = elementSystem.GetElement(elementId);
             InputEventType eventType = inputEvent.type;
 
             bindingGroup.context.SetObjectAlias(EventAlias, inputEvent);
+
             for (int i = 0; i < bindings.Length; i++) {
                 InputBinding binding = bindings[i];
-                if (binding.eventType == eventType) {
-                    binding.Execute(element, bindingGroup.context);
+                if (binding.eventType != eventType) {
+                    continue;
+                }
+
+                binding.Execute(element, bindingGroup.context);
+                if (inputEvent.ShouldStopPropagationImmediately) {
+                    break;
                 }
             }
 

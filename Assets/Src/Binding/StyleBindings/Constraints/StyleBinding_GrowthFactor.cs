@@ -1,12 +1,13 @@
 ﻿using Rendering;
+using Src.Rendering;
 
-namespace Src.StyleBindings.Src.StyleBindings {
+namespace Src.StyleBindings {
 
     public class StyleBinding_GrowthFactor : StyleBinding {
 
-        public readonly Expression<int> expression;
+        private readonly Expression<int> expression;
 
-        public StyleBinding_GrowthFactor(StyleState state, Expression<int> expression) : base(state) {
+        public StyleBinding_GrowthFactor(StyleState state, Expression<int> expression) : base(RenderConstants.GrowthFactor, state) {
             this.expression = expression;
         }
 

@@ -41,7 +41,6 @@ namespace Src {
 
         public override Type elementType => rootType;
 
-        //[OnPropChange(nameof(rootType))]
         public override InitData CreateScoped(TemplateScope inputScope) {
             List<InitData> scopedChildren = new List<InitData>(childTemplates.Count);
 
@@ -81,8 +80,11 @@ namespace Src {
 
         private void AssignContext(UIElement element, UITemplateContext context) {
             element.templateContext = context;
-            for (int i = 0; i < element.templateChildren.Length; i++) {
-                AssignContext(element.templateChildren[i], context);
+            
+            if (element.ownChildren == null) return;
+            
+            for (int i = 0; i < element.ownChildren.Length; i++) {
+                AssignContext(element.ownChildren[i], context);
             }
         }
 

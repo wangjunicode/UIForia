@@ -1,12 +1,12 @@
+using System;
+
 namespace Src {
 
     public class UITextElement : UIElement {
 
         private string text;
 
-        public delegate void TextChanged(UITextElement thisElement, string text);
-
-        public event TextChanged onTextChanged;
+        public event Action<UITextElement, string> onTextChanged;
 
         public UITextElement(string text = "") {
             this.text = text;

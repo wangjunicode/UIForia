@@ -4,7 +4,7 @@ namespace Src {
 
         private readonly RepeatBinding parentBinding;
 
-        public RepeatChildBinding(RepeatBinding parentBinding) {
+        public RepeatChildBinding(RepeatBinding parentBinding) : base("RepeatChild") {
             this.parentBinding = parentBinding;
         }
 

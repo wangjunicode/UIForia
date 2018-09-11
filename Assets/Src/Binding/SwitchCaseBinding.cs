@@ -7,7 +7,7 @@ namespace Src {
         private readonly int index;
         private readonly int switchId;
 
-        public SwitchCaseBinding(int switchId, int index) {
+        public SwitchCaseBinding(int switchId, int index) : base($"{switchId}:{index}") {
             this.switchId = switchId;
             this.index = index;
         }

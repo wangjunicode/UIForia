@@ -4,18 +4,19 @@ namespace Src {
 
         private readonly Expression<bool> expression;
 
-        public EnabledBinding(Expression<bool> expression) {
+        // todo -- constant name
+        public EnabledBinding(Expression<bool> expression) : base("enabled") {
             this.expression = expression;
         }
 
         public override void Execute(UIElement element, UITemplateContext context) {
-            bool isEnabled = (element.flags & UIElementFlags.Enabled) != 0;
+            bool enabled = (element.flags & UIElementFlags.Enabled) != 0;
             if (expression.EvaluateTyped(context)) {
-                if (isEnabled) return;
+                if (enabled) return;
                 context.view.EnableElement(element);
             }
             else {
-                if (!isEnabled) return;
+                if (!enabled) return;
                 context.view.DisableElement(element);
 
             }

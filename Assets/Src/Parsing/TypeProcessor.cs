@@ -1,6 +1,5 @@
 using System;
 using System.Collections.Generic;
-using UnityEditor.Compilation;
 using UnityEngine.Assertions;
 using Assembly = System.Reflection.Assembly;
 

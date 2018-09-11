@@ -1,12 +1,13 @@
 ﻿using Rendering;
+using Src.Rendering;
 
 namespace Src.StyleBindings {
 
     public class StyleBinding_BorderTop : StyleBinding {
 
-        public readonly Expression<float> expression;
+        private readonly Expression<float> expression;
 
-        public StyleBinding_BorderTop(StyleState state, Expression<float> expression) : base(state) {
+        public StyleBinding_BorderTop(StyleState state, Expression<float> expression) : base(RenderConstants.BorderTop, state) {
             this.expression = expression;
         }
 

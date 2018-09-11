@@ -1,12 +1,13 @@
 ﻿using Rendering;
+using Src.Rendering;
 
 namespace Src.StyleBindings {
 
     public class StyleBinding_Padding : StyleBinding {
 
-        public readonly Expression<ContentBoxRect> expression;
+        private readonly Expression<ContentBoxRect> expression;
 
-        public StyleBinding_Padding(StyleState state, Expression<ContentBoxRect> expression) : base(state) {
+        public StyleBinding_Padding(StyleState state, Expression<ContentBoxRect> expression) : base(RenderConstants.Padding, state) {
             this.expression = expression;
         }
 

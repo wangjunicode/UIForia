@@ -51,6 +51,8 @@ namespace Src {
             instanceData.element.templateChildren = scope.inputChildren.Select(c => c.element).ToArray();
             instanceData.element.ownChildren = instanceData.children.Select(c => c.element).ToArray();
             
+            AssignContext(instance, scope.context);
+
             return instanceData;
         }
 
@@ -73,9 +75,18 @@ namespace Src {
             rootData.element.templateChildren = rootData.children.Select(c => c.element).ToArray();
             rootData.element.ownChildren = rootData.element.templateChildren;
 
+            AssignContext(instance, scope.context);
+            
             return rootData;
         }
 
+        private void AssignContext(UIElement element, UITemplateContext context) {
+            element.templateContext = context;
+            for (int i = 0; i < element.templateChildren.Length; i++) {
+                AssignContext(element.templateChildren[i], context);
+            }
+        }
+        
         public void Compile() {
             if (isCompiled) return;
             isCompiled = true;

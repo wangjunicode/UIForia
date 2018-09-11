@@ -4,7 +4,8 @@ namespace Src {
 
         private readonly Expression<bool> expression;
         
-        public DisabledBinding(Expression<bool> expression) {
+        // todo -- constant name
+        public DisabledBinding(Expression<bool> expression) : base("disabled") {
             this.expression = expression;
         }
         

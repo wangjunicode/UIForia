@@ -13,25 +13,25 @@ namespace Rendering {
 
         [PublicAPI]
         public float marginLeft {
-            get { return FindActiveStyle((s) => s.margin.left != FloatUtil.UnsetFloatValue).margin.left; }
+            get { return FindActiveStyle((s) => FloatUtil.IsDefined(s.margin.left)).margin.left; }
             set { SetMarginLeft(value); }
         }
 
         [PublicAPI]
         public float marginRight {
-            get { return FindActiveStyle((s) => s.margin.right != FloatUtil.UnsetFloatValue).margin.right; }
+            get { return FindActiveStyle((s) => FloatUtil.IsDefined(s.margin.right)).margin.right; }
             set { SetMarginRight(value); }
         }
 
         [PublicAPI]
         public float marginTop {
-            get { return FindActiveStyle((s) => s.margin.top != FloatUtil.UnsetFloatValue).margin.top; }
+            get { return FindActiveStyle((s) => FloatUtil.IsDefined(s.margin.top)).margin.top; }
             set { SetMarginTop(value); }
         }
 
         [PublicAPI]
         public float marginBottom {
-            get { return FindActiveStyle((s) => s.margin.bottom != FloatUtil.UnsetFloatValue).margin.bottom; }
+            get { return FindActiveStyle((s) => FloatUtil.IsDefined(s.margin.bottom)).margin.bottom; }
             set { SetMarginBottom(value); }
         }
 
@@ -108,25 +108,25 @@ namespace Rendering {
 
         [PublicAPI]
         public float paddingLeft {
-            get { return FindActiveStyle((s) => s.padding.left != FloatUtil.UnsetFloatValue).padding.left; }
+            get { return FindActiveStyle((s) => FloatUtil.IsDefined(s.padding.left)).padding.left; }
             set { SetPaddingLeft(value); }
         }
 
         [PublicAPI]
         public float paddingRight {
-            get { return FindActiveStyle((s) => s.padding.right != FloatUtil.UnsetFloatValue).padding.right; }
+            get { return FindActiveStyle((s) => FloatUtil.IsDefined(s.padding.left)).padding.right; }
             set { SetPaddingRight(value); }
         }
 
         [PublicAPI]
         public float paddingTop {
-            get { return FindActiveStyle((s) => s.padding.top != FloatUtil.UnsetFloatValue).padding.top; }
+            get { return FindActiveStyle((s) => FloatUtil.IsDefined(s.padding.left)).padding.top; }
             set { SetPaddingTop(value); }
         }
 
         [PublicAPI]
         public float paddingBottom {
-            get { return FindActiveStyle((s) => s.padding.bottom != FloatUtil.UnsetFloatValue).padding.bottom; }
+            get { return FindActiveStyle((s) => FloatUtil.IsDefined(s.padding.left)).padding.bottom; }
             set { SetPaddingBottom(value); }
         }
 
@@ -201,25 +201,25 @@ namespace Rendering {
 
         [PublicAPI]
         public float borderLeft {
-            get { return FindActiveStyle((s) => s.border.left != FloatUtil.UnsetFloatValue).border.left; }
+            get { return FindActiveStyle((s) => FloatUtil.IsDefined(s.border.left)).border.left; }
             set { SetBorderLeft(value); }
         }
 
         [PublicAPI]
         public float borderRight {
-            get { return FindActiveStyle((s) => s.border.right != FloatUtil.UnsetFloatValue).border.right; }
+            get { return FindActiveStyle((s) => FloatUtil.IsDefined(s.border.left)).border.right; }
             set { SetBorderRight(value); }
         }
 
         [PublicAPI]
         public float borderTop {
-            get { return FindActiveStyle((s) => s.border.top != FloatUtil.UnsetFloatValue).border.top; }
+            get { return FindActiveStyle((s) => FloatUtil.IsDefined(s.border.left)).border.top; }
             set { SetBorderTop(value); }
         }
 
         [PublicAPI]
         public float borderBottom {
-            get { return FindActiveStyle((s) => s.border.bottom != FloatUtil.UnsetFloatValue).border.bottom; }
+            get { return FindActiveStyle((s) => FloatUtil.IsDefined(s.border.left)).border.bottom; }
             set { SetBorderBottom(value); }
         }
 

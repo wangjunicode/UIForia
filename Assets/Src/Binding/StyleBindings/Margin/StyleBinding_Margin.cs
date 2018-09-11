@@ -1,12 +1,13 @@
 ﻿using Rendering;
+using Src.Rendering;
 
 namespace Src.StyleBindings {
 
     public class StyleBinding_Margin : StyleBinding {
 
-        public readonly Expression<ContentBoxRect> expression;
+        private readonly Expression<ContentBoxRect> expression;
 
-        public StyleBinding_Margin(StyleState state, Expression<ContentBoxRect> expression) : base(state) {
+        public StyleBinding_Margin(StyleState state, Expression<ContentBoxRect> expression) : base(RenderConstants.Margin, state) {
             this.expression = expression;
         }
 

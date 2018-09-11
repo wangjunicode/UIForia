@@ -1,12 +1,13 @@
 ﻿using Rendering;
+using Src.Rendering;
 
 namespace Src.StyleBindings {
 
     public class StyleBinding_PaddingBottom : StyleBinding {
 
-        public readonly Expression<float> expression;
+        private readonly Expression<float> expression;
 
-        public StyleBinding_PaddingBottom(StyleState state, Expression<float> expression) : base(state) {
+        public StyleBinding_PaddingBottom(StyleState state, Expression<float> expression) : base(RenderConstants.PaddingBottom, state) {
             this.expression = expression;
         }
 

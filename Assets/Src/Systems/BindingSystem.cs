@@ -20,7 +20,9 @@ namespace Src.Systems {
         public void OnUpdate() {
             conditionalSkipTree.ConditionalTraversePreOrder((item) => {
                 for (int i = 0; i < item.bindings.Length; i++) {
-                    item.bindings[i].Execute(item.element, item.context);
+                    if (item.bindings[i].isEnabled) {
+                        item.bindings[i].Execute(item.element, item.context);
+                    }
                 }
 
                 return (item.element.flags & UIElementFlags.Enabled) != 0;
@@ -28,9 +30,61 @@ namespace Src.Systems {
 
             bindingSkipTree.TraversePreOrder((item) => {
                 for (int i = 0; i < item.bindings.Length; i++) {
-                    item.bindings[i].Execute(item.element, item.context);
+                    if (item.bindings[i].isEnabled) {
+                        item.bindings[i].Execute(item.element, item.context);
+                    }
                 }
             });
+        }
+
+        public bool EnableBinding(UIElement element, string bindingId) {
+            TemplateBinding binding = bindingSkipTree.GetItem(element);
+            if (binding == null) return false;
+            for (int i = 0; i < binding.bindings.Length; i++) {
+                if (binding.bindings[i].bindingId == bindingId) {
+                    binding.bindings[i].isEnabled = true;
+                    return true;
+                }
+            }
+
+            return false;
+        }
+
+        public bool DisableBinding(UIElement element, string bindingId) {
+            TemplateBinding binding = bindingSkipTree.GetItem(element);
+            if (binding == null) return false;
+            for (int i = 0; i < binding.bindings.Length; i++) {
+                if (binding.bindings[i].bindingId == bindingId) {
+                    binding.bindings[i].isEnabled = false;
+                    return true;
+                }
+            }
+
+            return false;
+        }
+
+        public bool HasBinding(UIElement element, string bindingId) {
+            TemplateBinding binding = bindingSkipTree.GetItem(element);
+            if (binding == null) return false;
+            for (int i = 0; i < binding.bindings.Length; i++) {
+                if (binding.bindings[i].bindingId == bindingId) {
+                    return true;
+                }
+            }
+
+            return false;
+        }
+        
+        public bool IsBindingEnabled(UIElement element, string bindingId) {
+            TemplateBinding binding = bindingSkipTree.GetItem(element);
+            if (binding == null) return false;
+            for (int i = 0; i < binding.bindings.Length; i++) {
+                if (binding.bindings[i].bindingId == bindingId) {
+                    return binding.bindings[i].isEnabled;
+                }
+            }
+
+            return false;
         }
 
         public void OnDestroy() {
@@ -61,11 +115,12 @@ namespace Src.Systems {
                 bindingSkipTree.SetSiblingIndex(repeatChildBinding, childCount - 1);
             }
             else if (data.element is UIRepeatTerminal) {
+                // todo -- valid this
                 TemplateBinding terminalBinding = new TemplateBinding(data.element, data.bindings, data.context);
                 bindingSkipTree.AddItem(terminalBinding);
                 bindingSkipTree.SetSiblingIndex(terminalBinding, int.MaxValue);
             }
-            
+
             if (data.bindings.Length > 0) {
                 bindingSkipTree.AddItem(new TemplateBinding(data.element, data.bindings, data.context));
             }

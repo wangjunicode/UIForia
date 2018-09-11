@@ -1,4 +1,5 @@
 ﻿using Rendering;
+using Src.Rendering;
 using UnityEngine;
 
 namespace Src.StyleBindings {
@@ -7,7 +8,7 @@ namespace Src.StyleBindings {
 
         public readonly Expression<Texture2D> expression;
         
-        public StyleBinding_BackgroundImage(StyleState state, Expression<Texture2D> expression) : base(state) {
+        public StyleBinding_BackgroundImage(StyleState state, Expression<Texture2D> expression) : base(RenderConstants.BackgroundImage, state) {
             this.expression = expression;
         }        
         

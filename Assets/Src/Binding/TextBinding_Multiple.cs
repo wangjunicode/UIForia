@@ -8,7 +8,7 @@ namespace Src {
         
         private static readonly StringBuilder builder = new StringBuilder(1024);
         
-        public TextBinding_Multiple(Expression<string>[] expressions) {
+        public TextBinding_Multiple(Expression<string>[] expressions) : base("text") {
             this.expressions = expressions;
         }
         

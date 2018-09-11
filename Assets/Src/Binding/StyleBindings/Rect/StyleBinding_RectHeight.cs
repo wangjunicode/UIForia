@@ -1,4 +1,5 @@
 ﻿using Rendering;
+using Src.Rendering;
 
 namespace Src.StyleBindings {
 
@@ -6,7 +7,7 @@ namespace Src.StyleBindings {
 
         public readonly Expression<UIMeasurement> expression;
 
-        public StyleBinding_RectHeight(StyleState state, Expression<UIMeasurement> expression) : base(state) {
+        public StyleBinding_RectHeight(StyleState state, Expression<UIMeasurement> expression) : base(RenderConstants.RectHeight, state) {
             this.expression = expression;
         }
 

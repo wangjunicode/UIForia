@@ -1,12 +1,13 @@
 ﻿using Rendering;
+using Src.Rendering;
 
 namespace Src.StyleBindings {
 
     public class StyleBinding_LayoutFlowType : StyleBinding {
 
-        public readonly Expression<LayoutFlowType> expression;
+        private readonly Expression<LayoutFlowType> expression;
 
-        public StyleBinding_LayoutFlowType(StyleState state, Expression<LayoutFlowType> expression) : base(state) {
+        public StyleBinding_LayoutFlowType(StyleState state, Expression<LayoutFlowType> expression) : base(RenderConstants.LayoutFlow, state) {
             this.expression = expression;
         }
 

@@ -62,8 +62,8 @@ public class UIElement : IHierarchical {
 
 
     // todo make readonly and hide this
-    public int depth;  
-    
+    public int depth;
+
     public UITransform transform;
 
     protected internal UIElement parent;
@@ -101,6 +101,8 @@ public class UIElement : IHierarchical {
 
     public virtual void OnCreate() { }
 
+    public virtual void OnReady() { }
+    
     public virtual void OnUpdate() { }
 
     public virtual void OnEnable() { }
@@ -117,26 +119,26 @@ public class UIElement : IHierarchical {
 
 
     public bool EnableBinding(string propertyName) {
-        return true;
+        return templateContext.view.bindingSystem.EnableBinding(this, propertyName);
     }
 
     public bool DisableBinding(string propertyName) {
-        return true;
+        return templateContext.view.bindingSystem.DisableBinding(this, propertyName);
     }
-    
+
     public bool HasBinding(string propertyName) {
         return false;
     }
 
     public void SetEnabled(bool active) {
-        if (active) {
+        if (active && isSelfDisabled) {
             templateContext.view.EnableElement(this);
         }
-        else {
+        else if (!active && isSelfEnabled) {
             templateContext.view.DisableElement(this);
         }
     }
-    
+
     protected UIElement FindById(string id) {
         if (isPrimitive || ownChildren == null) {
             return null;
@@ -156,6 +158,26 @@ public class UIElement : IHierarchical {
         return null;
     }
 
+    protected T FindById<T>(string id) where T : UIElement {
+        if (isPrimitive || ownChildren == null) {
+            return null;
+        }
+
+        for (int i = 0; i < ownChildren.Length; i++) {
+            if (ownChildren[i].GetAttribute("id") == id) {
+                return ownChildren[i] as T;
+            }
+
+            UIElement childResult = ownChildren[i].FindByIdTemplateScoped(id);
+            if (childResult != null) {
+                return childResult as T;
+            }
+        }
+
+        return null;
+    }
+
+
     private UIElement FindByIdTemplateScoped(string id) {
         if (isPrimitive || templateChildren == null) {
             return null;
@@ -174,7 +196,7 @@ public class UIElement : IHierarchical {
 
         return null;
     }
-    
+
     public override string ToString() {
         string retn = string.Empty;
         if (name != null) {

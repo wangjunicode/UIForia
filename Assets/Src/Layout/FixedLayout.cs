@@ -99,7 +99,8 @@ namespace Src.Layout {
                 case UIUnit.Auto:
                     return 0;
                 default:
-                    throw new ArgumentOutOfRangeException();
+                    return 0;
+//                    throw new ArgumentOutOfRangeException();
             }
         }
 

@@ -1,12 +1,13 @@
 ﻿using Rendering;
+using Src.Rendering;
 
-namespace Src.StyleBindings.Src.StyleBindings {
+namespace Src.StyleBindings {
 
     public class StyleBinding_MinHeight : StyleBinding {
 
-        public readonly Expression<UIMeasurement> expression;
+        private readonly Expression<UIMeasurement> expression;
 
-        public StyleBinding_MinHeight(StyleState state, Expression<UIMeasurement> expression) : base(state) {
+        public StyleBinding_MinHeight(StyleState state, Expression<UIMeasurement> expression) : base(RenderConstants.MinHeight, state) {
             this.expression = expression;
         }
 

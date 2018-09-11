@@ -1,13 +1,14 @@
 ﻿using Rendering;
 using Src.Layout;
+using Src.Rendering;
 
 namespace Src.StyleBindings {
 
     public class StyleBinding_MainAxisAlignment : StyleBinding {
 
-        public readonly Expression<MainAxisAlignment> expression;
+        private readonly Expression<MainAxisAlignment> expression;
 
-        public StyleBinding_MainAxisAlignment(StyleState state, Expression<MainAxisAlignment> expression) : base(state) {
+        public StyleBinding_MainAxisAlignment(StyleState state, Expression<MainAxisAlignment> expression) : base(RenderConstants.MainAxisAlignment, state) {
             this.expression = expression;
         }
 

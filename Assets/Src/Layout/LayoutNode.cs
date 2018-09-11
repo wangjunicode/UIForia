@@ -4,6 +4,7 @@ using System.Diagnostics;
 using Rendering;
 using Src.Systems;
 using UnityEngine;
+using Debug = UnityEngine.Debug;
 
 namespace Src.Layout {
 
@@ -96,7 +97,9 @@ namespace Src.Layout {
 
         public void SetTextContent(string text) {
             textContent = text;
-            preferredTextWidth = layout.GetTextWidth(textContent, style);
+            if (layout != null) {
+                preferredTextWidth = layout.GetTextWidth(textContent, style);
+            }
         }
 
         public void UpdateTextMeasurements() {

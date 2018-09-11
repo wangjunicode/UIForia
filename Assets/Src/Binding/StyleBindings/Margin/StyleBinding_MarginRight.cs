@@ -1,12 +1,13 @@
 ﻿using Rendering;
+using Src.Rendering;
 
 namespace Src.StyleBindings {
 
     public class StyleBinding_MarginRight : StyleBinding {
 
-        public readonly Expression<float> expression;
+        private readonly Expression<float> expression;
 
-        public StyleBinding_MarginRight(StyleState state, Expression<float> expression) : base(state) {
+        public StyleBinding_MarginRight(StyleState state, Expression<float> expression) : base(RenderConstants.MarginRight, state) {
             this.expression = expression;
         }
 

@@ -1,72 +1,15 @@
 using System;
-using System.Collections.Generic;
-using System.Linq;
 using JetBrains.Annotations;
 using Rendering;
 using Src.Compilers.AliasSource;
 using Src.Layout;
+using Src.Rendering;
 using Src.StyleBindings;
 using Src.StyleBindings.Src.StyleBindings;
 using Src.StyleBindings.Text;
 using UnityEngine;
 
 namespace Src.Compilers {
-
-    public static class StyleTemplateConstants {
-
-//        public const string RectX = "rectX";
-//        public const string RectY = "rectY";
-        public const string RectWidth = "rectWidth";
-        public const string RectHeight = "rectHeight";
-
-        public const string MinWidth = "minWidth";
-        public const string MaxWidth = "maxWidth";
-        public const string MinHeight = "minHeight";
-        public const string MaxHeight = "maxHeight";
-
-        public const string GrowthFactor = "growthFactor";
-        public const string ShrinkFactor = "shrinkFactor";
-
-        public const string BorderColor = "borderColor";
-        public const string BackgroundImage = "backgroundImage";
-        public const string BackgroundColor = "backgroundColor";
-
-        public const string BorderRadius = "borderRadius";
-        public const string BorderRadiusTopLeft = "borderRadiusTopLeft";
-        public const string BorderRadiusTopRight = "borderRadiusTopRight";
-        public const string BorderRadiusBottomRight = "borderRadiusBottomRight";
-        public const string BorderRadiusBottomLeft = "borderRadiusBottomLeft";
-
-        public const string Padding = "padding";
-        public const string PaddingTop = "paddingTop";
-        public const string PaddingRight = "paddingRight";
-        public const string PaddingBottom = "paddingBottom";
-        public const string PaddingLeft = "paddingLeft";
-
-        public const string Border = "border";
-        public const string BorderTop = "borderTop";
-        public const string BorderRight = "borderRight";
-        public const string BorderBottom = "borderBottom";
-        public const string BorderLeft = "borderLeft";
-
-        public const string Margin = "margin";
-        public const string MarginTop = "marginTop";
-        public const string MarginRight = "marginRight";
-        public const string MarginBottom = "marginBottom";
-        public const string MarginLeft = "marginLeft";
-
-        public const string MainAxisAlignment = "mainAxisAlignment";
-        public const string CrossAxisAlignment = "crossAxisAlignment";
-        public const string LayoutDirection = "layoutDirection";
-        public const string LayoutType = "layoutType";
-        public const string LayoutFlow = "layoutFlow";
-        public const string LayoutWrap = "layoutWrap";
-
-        public const string TextColor = "textColor";
-        public const string FontSize = "fontSize";
-        public const string Whitespace = "whiteSpace";
-
-    }
 
     public class StyleBindingCompiler {
 
@@ -97,24 +40,24 @@ namespace Src.Compilers {
         private static readonly EnumAliasSource<MainAxisAlignment> mainAxisAlignmentSource;
         private static readonly EnumAliasSource<CrossAxisAlignment> crossAxisAlignmentSource;
         private static readonly EnumAliasSource<WhitespaceMode> whiteSpaceSource;
-        
+
         static StyleBindingCompiler() {
             Type type = typeof(StyleBindingCompiler);
             rgbSource = new MethodAliasSource("rgb", type.GetMethod("Rgb", ReflectionUtil.PublicStatic));
             rgbaSource = new MethodAliasSource("rgba", type.GetMethod("Rgba", ReflectionUtil.PublicStatic));
 
-            rect1Source = new MethodAliasSource("rect", type.GetMethod(nameof(Rect), new[] { typeof(float) }));
-            rect2Source = new MethodAliasSource("rect", type.GetMethod(nameof(Rect), new[] { typeof(float), typeof(float) }));
-            rect4Source = new MethodAliasSource("rect", type.GetMethod(nameof(Rect), new[] { typeof(float), typeof(float), typeof(float), typeof(float) }));
+            rect1Source = new MethodAliasSource("rect", type.GetMethod(nameof(Rect), new[] {typeof(float)}));
+            rect2Source = new MethodAliasSource("rect", type.GetMethod(nameof(Rect), new[] {typeof(float), typeof(float)}));
+            rect4Source = new MethodAliasSource("rect", type.GetMethod(nameof(Rect), new[] {typeof(float), typeof(float), typeof(float), typeof(float)}));
 
-            borderRadiusRect1Source = new MethodAliasSource("radius", type.GetMethod(nameof(Radius), new[] { typeof(float) }));
-            borderRadiusRect2Source = new MethodAliasSource("radius", type.GetMethod(nameof(Radius), new[] { typeof(float), typeof(float) }));
-            borderRadiusRect4Source = new MethodAliasSource("radius", type.GetMethod(nameof(Radius), new[] { typeof(float), typeof(float), typeof(float), typeof(float) }));
+            borderRadiusRect1Source = new MethodAliasSource("radius", type.GetMethod(nameof(Radius), new[] {typeof(float)}));
+            borderRadiusRect2Source = new MethodAliasSource("radius", type.GetMethod(nameof(Radius), new[] {typeof(float), typeof(float)}));
+            borderRadiusRect4Source = new MethodAliasSource("radius", type.GetMethod(nameof(Radius), new[] {typeof(float), typeof(float), typeof(float), typeof(float)}));
 
-            pixelMeasurementSource = new MethodAliasSource("pixels", type.GetMethod(nameof(PixelMeasurement), new[] { typeof(float) }));
-            parentMeasurementSource = new MethodAliasSource("parent", type.GetMethod(nameof(ParentMeasurement), new[] { typeof(float) }));
-            viewportMeasurementSource = new MethodAliasSource("view", type.GetMethod(nameof(ViewportMeasurement), new[] { typeof(float) }));
-            contentMeasurementSource = new MethodAliasSource("content", type.GetMethod(nameof(ContentMeasurement), new[] { typeof(float) }));
+            pixelMeasurementSource = new MethodAliasSource("pixels", type.GetMethod(nameof(PixelMeasurement), new[] {typeof(float)}));
+            parentMeasurementSource = new MethodAliasSource("parent", type.GetMethod(nameof(ParentMeasurement), new[] {typeof(float)}));
+            viewportMeasurementSource = new MethodAliasSource("view", type.GetMethod(nameof(ViewportMeasurement), new[] {typeof(float)}));
+            contentMeasurementSource = new MethodAliasSource("content", type.GetMethod(nameof(ContentMeasurement), new[] {typeof(float)}));
 
             colorSource = new ColorAliasSource();
             layoutTypeSource = new EnumAliasSource<LayoutType>();
@@ -147,9 +90,8 @@ namespace Src.Compilers {
         }
 
         public StyleBinding Compile(string key, string value) {
-
             if (!key.StartsWith("style.")) return null;
-            
+
             // todo -- drop this restriction if possible
             if (value[0] != '{') {
                 value = '{' + value + '}';
@@ -159,17 +101,17 @@ namespace Src.Compilers {
 
             switch (targetState.property) {
                 // Paint
-                case StyleTemplateConstants.BackgroundImage:
+                case RenderConstants.BackgroundImage:
                     return new StyleBinding_BackgroundImage(targetState.state, Compile<Texture2D>(value));
 
-                case StyleTemplateConstants.BackgroundColor:
+                case RenderConstants.BackgroundColor:
                     return new StyleBinding_BackgroundColor(targetState.state,
                         Compile<Color>(value, rgbSource, rgbaSource, colorSource));
 
-                case StyleTemplateConstants.BorderColor:
+                case RenderConstants.BorderColor:
                     return new StyleBinding_BorderColor(targetState.state, Compile<Color>(value, rgbSource, rgbaSource, colorSource));
 
-                case StyleTemplateConstants.BorderRadius:
+                case RenderConstants.BorderRadius:
                     return new StyleBinding_BorderRadius(targetState.state, Compile<BorderRadius>(
                         value,
                         borderRadiusRect1Source,
@@ -177,40 +119,20 @@ namespace Src.Compilers {
                         borderRadiusRect4Source
                     ));
 
-                case StyleTemplateConstants.BorderRadiusTopLeft:
+                case RenderConstants.BorderRadiusTopLeft:
                     return new StyleBinding_BorderRadius_TopLeft(targetState.state, Compile<float>(value));
 
-                case StyleTemplateConstants.BorderRadiusTopRight:
+                case RenderConstants.BorderRadiusTopRight:
                     return new StyleBinding_BorderRadius_TopRight(targetState.state, Compile<float>(value));
 
-                case StyleTemplateConstants.BorderRadiusBottomRight:
+                case RenderConstants.BorderRadiusBottomRight:
                     return new StyleBinding_BorderRadius_BottomRight(targetState.state, Compile<float>(value));
 
-                case StyleTemplateConstants.BorderRadiusBottomLeft:
+                case RenderConstants.BorderRadiusBottomLeft:
                     return new StyleBinding_BorderRadius_BottomLeft(targetState.state, Compile<float>(value));
 
                 // Rect
-//                case StyleTemplateConstants.RectX:
-//                    return new StyleBinding_RectX(targetState.state, Compile<UIMeasurement>(
-//                        value,
-//                        autoKeywordSource,
-//                        pixelMeasurementSource,
-//                        viewportMeasurementSource,
-//                        parentMeasurementSource,
-//                        contentMeasurementSource
-//                    ));
-//
-//                case StyleTemplateConstants.RectY:
-//                    return new StyleBinding_RectY(targetState.state, Compile<UIMeasurement>(
-//                        value,
-//                        autoKeywordSource,
-//                        pixelMeasurementSource,
-//                        viewportMeasurementSource,
-//                        parentMeasurementSource,
-//                        contentMeasurementSource
-//                    ));
-
-                case StyleTemplateConstants.RectWidth:
+                case RenderConstants.RectWidth:
                     return new StyleBinding_RectWidth(targetState.state, Compile<UIMeasurement>(
                         value,
                         autoKeywordSource,
@@ -220,7 +142,7 @@ namespace Src.Compilers {
                         contentMeasurementSource
                     ));
 
-                case StyleTemplateConstants.RectHeight:
+                case RenderConstants.RectHeight:
                     return new StyleBinding_RectHeight(targetState.state, Compile<UIMeasurement>(
                         value,
                         autoKeywordSource,
@@ -232,7 +154,7 @@ namespace Src.Compilers {
 
                 // Constraints
 
-                case StyleTemplateConstants.MinWidth:
+                case RenderConstants.MinWidth:
                     return new StyleBinding_MinWidth(targetState.state, Compile<UIMeasurement>(
                         value,
                         autoKeywordSource,
@@ -242,7 +164,7 @@ namespace Src.Compilers {
                         contentMeasurementSource
                     ));
 
-                case StyleTemplateConstants.MaxWidth:
+                case RenderConstants.MaxWidth:
                     return new StyleBinding_MaxWidth(targetState.state, Compile<UIMeasurement>(
                         value,
                         autoKeywordSource,
@@ -252,7 +174,7 @@ namespace Src.Compilers {
                         contentMeasurementSource
                     ));
 
-                case StyleTemplateConstants.MinHeight:
+                case RenderConstants.MinHeight:
                     return new StyleBinding_MinHeight(targetState.state, Compile<UIMeasurement>(
                         value,
                         autoKeywordSource,
@@ -262,7 +184,7 @@ namespace Src.Compilers {
                         contentMeasurementSource
                     ));
 
-                case StyleTemplateConstants.MaxHeight:
+                case RenderConstants.MaxHeight:
                     return new StyleBinding_MaxHeight(targetState.state, Compile<UIMeasurement>(
                         value,
                         autoKeywordSource,
@@ -272,100 +194,99 @@ namespace Src.Compilers {
                         contentMeasurementSource
                     ));
 
-                case StyleTemplateConstants.GrowthFactor:
+                case RenderConstants.GrowthFactor:
                     return new StyleBinding_GrowthFactor(targetState.state, Compile<int>(value));
 
-                case StyleTemplateConstants.ShrinkFactor:
+                case RenderConstants.ShrinkFactor:
                     return new StyleBinding_ShrinkFactor(targetState.state, Compile<int>(value));
 
                 // Layout
 
-                case StyleTemplateConstants.MainAxisAlignment:
+                case RenderConstants.MainAxisAlignment:
                     return new StyleBinding_MainAxisAlignment(targetState.state, Compile<MainAxisAlignment>(value, mainAxisAlignmentSource));
 
-                case StyleTemplateConstants.CrossAxisAlignment:
+                case RenderConstants.CrossAxisAlignment:
                     return new StyleBinding_CrossAxisAlignment(targetState.state, Compile<CrossAxisAlignment>(value, crossAxisAlignmentSource));
 
-                case StyleTemplateConstants.LayoutDirection:
+                case RenderConstants.LayoutDirection:
                     return new StyleBinding_LayoutDirection(targetState.state, Compile<LayoutDirection>(value, layoutDirectionSource));
 
-                case StyleTemplateConstants.LayoutFlow:
+                case RenderConstants.LayoutFlow:
                     return new StyleBinding_LayoutFlowType(targetState.state, Compile<LayoutFlowType>(value, layoutFlowSource));
 
-                case StyleTemplateConstants.LayoutType:
+                case RenderConstants.LayoutType:
                     return new StyleBinding_LayoutType(targetState.state, Compile<LayoutType>(value, layoutTypeSource));
 
-                case StyleTemplateConstants.LayoutWrap:
+                case RenderConstants.LayoutWrap:
                     return new StyleBinding_LayoutWrap(targetState.state, Compile<LayoutWrap>(value, layoutWrapSource));
 
                 // Padding
 
-                case StyleTemplateConstants.Padding:
+                case RenderConstants.Padding:
                     return new StyleBinding_Padding(targetState.state, Compile<ContentBoxRect>(value, rect1Source, rect2Source, rect4Source));
 
-                case StyleTemplateConstants.PaddingTop:
+                case RenderConstants.PaddingTop:
                     return new StyleBinding_PaddingTop(targetState.state, Compile<float>(value));
 
-                case StyleTemplateConstants.PaddingRight:
+                case RenderConstants.PaddingRight:
                     return new StyleBinding_PaddingRight(targetState.state, Compile<float>(value));
 
-                case StyleTemplateConstants.PaddingBottom:
+                case RenderConstants.PaddingBottom:
                     return new StyleBinding_PaddingBottom(targetState.state, Compile<float>(value));
 
-                case StyleTemplateConstants.PaddingLeft:
+                case RenderConstants.PaddingLeft:
                     return new StyleBinding_PaddingLeft(targetState.state, Compile<float>(value));
 
                 // Border
 
-                case StyleTemplateConstants.Border:
+                case RenderConstants.Border:
                     return new StyleBinding_Border(targetState.state, Compile<ContentBoxRect>(value, rect1Source, rect2Source, rect4Source));
 
-                case StyleTemplateConstants.BorderTop:
+                case RenderConstants.BorderTop:
                     return new StyleBinding_BorderTop(targetState.state, Compile<float>(value));
 
-                case StyleTemplateConstants.BorderRight:
+                case RenderConstants.BorderRight:
                     return new StyleBinding_BorderRight(targetState.state, Compile<float>(value));
 
-                case StyleTemplateConstants.BorderBottom:
+                case RenderConstants.BorderBottom:
                     return new StyleBinding_BorderBottom(targetState.state, Compile<float>(value));
 
-                case StyleTemplateConstants.BorderLeft:
+                case RenderConstants.BorderLeft:
                     return new StyleBinding_PaddingLeft(targetState.state, Compile<float>(value));
 
                 // Margin
 
-                case StyleTemplateConstants.Margin:
+                case RenderConstants.Margin:
                     return new StyleBinding_Margin(targetState.state, Compile<ContentBoxRect>(value, rect1Source, rect2Source, rect4Source));
 
-                case StyleTemplateConstants.MarginTop:
+                case RenderConstants.MarginTop:
                     return new StyleBinding_MarginTop(targetState.state, Compile<float>(value));
 
-                case StyleTemplateConstants.MarginRight:
+                case RenderConstants.MarginRight:
                     return new StyleBinding_MarginRight(targetState.state, Compile<float>(value));
 
-                case StyleTemplateConstants.MarginBottom:
+                case RenderConstants.MarginBottom:
                     return new StyleBinding_MarginBottom(targetState.state, Compile<float>(value));
 
-                case StyleTemplateConstants.MarginLeft:
+                case RenderConstants.MarginLeft:
                     return new StyleBinding_MarginLeft(targetState.state, Compile<float>(value));
 
                 // Text
 
-                case StyleTemplateConstants.TextColor:
+                case RenderConstants.TextColor:
                     return new StyleBinding_TextColor(targetState.state, Compile<Color>(value, colorSource, rgbSource, rgbaSource));
 
-                case StyleTemplateConstants.FontSize:
+                case RenderConstants.FontSize:
                     return new StyleBinding_FontSize(targetState.state, Compile<int>(value));
 
-                case StyleTemplateConstants.Whitespace:
+                case RenderConstants.Whitespace:
                     return new StyleBinding_Whitespace(targetState.state, Compile<WhitespaceMode>(value, whiteSpaceSource));
-                
+
                 default: return null;
             }
         }
 
         private static Target GetTargetState(string key) {
-            
             if (key.StartsWith("style.hover.")) {
                 return new Target(key.Substring("style.hover.".Length), StyleState.Hover);
             }

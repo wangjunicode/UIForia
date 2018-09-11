@@ -1,4 +1,5 @@
 using Rendering;
+using Src.Rendering;
 
 namespace Src.StyleBindings {
 
@@ -6,7 +7,7 @@ namespace Src.StyleBindings {
 
         private readonly Expression<BorderRadius> expression;
 
-        public StyleBinding_BorderRadius(StyleState state, Expression<BorderRadius> expression) : base(state) {
+        public StyleBinding_BorderRadius(StyleState state, Expression<BorderRadius> expression) : base(RenderConstants.BorderRadius, state) {
             this.expression = expression;
         }
 

@@ -68,11 +68,12 @@ namespace Rendering {
             borderRadius = BorderRadius.Unset;
             layoutParameters = LayoutParameters.Unset;
             textStyle = TextStyle.Unset;
+            transform = new UITransform();
         }
         
         public static readonly UIStyle Default = new UIStyle("Default", string.Empty) {
             transform = new UITransform() {
-                position = new MeasurementVector2(),
+                position = new MeasurementVector2(new UIMeasurement(0), new UIMeasurement()),
                 pivot = new Vector2(),
                 scale = new Vector2(1, 1),
                 rotation = 0f

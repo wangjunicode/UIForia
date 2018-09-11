@@ -1,12 +1,13 @@
 ﻿using Rendering;
+using Src.Rendering;
 
 namespace Src.StyleBindings {
 
     public class StyleBinding_LayoutDirection : StyleBinding {
 
-        public readonly Expression<LayoutDirection> expression;
+        private readonly Expression<LayoutDirection> expression;
 
-        public StyleBinding_LayoutDirection(StyleState state, Expression<LayoutDirection> expression) : base(state) {
+        public StyleBinding_LayoutDirection(StyleState state, Expression<LayoutDirection> expression) : base(RenderConstants.LayoutDirection, state) {
             this.expression = expression;
         }
 

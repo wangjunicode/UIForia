@@ -4,7 +4,7 @@ namespace Src {
 
         private readonly RepeatBinding parentBinding;
 
-        public RepeatTerminalBinding(RepeatBinding parentBinding) {
+        public RepeatTerminalBinding(RepeatBinding parentBinding) : base("terminal") {
             this.parentBinding = parentBinding;
         }
 

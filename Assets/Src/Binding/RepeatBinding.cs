@@ -10,7 +10,8 @@ namespace Src {
         private readonly string lengthAliasName;
         private readonly string arrayIndexAliasName;
 
-        protected RepeatBinding(string arrayIndexAliasName, string lengthAliasName) {
+        // todo use const for list name
+        protected RepeatBinding(string arrayIndexAliasName, string lengthAliasName) : base("list") {
             this.arrayIndexAliasName = arrayIndexAliasName;
             this.lengthAliasName = lengthAliasName;
         }
@@ -21,6 +22,7 @@ namespace Src {
             context.activeList = activeList;
         }
 
+        // todo -- use const for item alias
         public void Next(UITemplateContext context) {
             context.SetIntAlias(arrayIndexAliasName, currentIndex);
             context.SetObjectAlias("$item", context.activeList[currentIndex]);

@@ -1,4 +1,5 @@
 ﻿using Rendering;
+using Src.Rendering;
 
 namespace Src.StyleBindings {
 
@@ -6,7 +7,7 @@ namespace Src.StyleBindings {
 
         private readonly Expression<LayoutType> expression;
 
-        public StyleBinding_LayoutType(StyleState state, Expression<LayoutType> expression) : base(state) {
+        public StyleBinding_LayoutType(StyleState state, Expression<LayoutType> expression) : base(RenderConstants.LayoutType, state) {
             this.expression = expression;
         }
 

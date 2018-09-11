@@ -7,7 +7,7 @@ namespace Src {
         private readonly Expression<int> expression;
         private readonly UISwitchDefaultElement defaultCase;
 
-        public SwitchBindingInt(int id, int[] values, Expression<int> expression) {
+        public SwitchBindingInt(int id, int[] values, Expression<int> expression) : base($"{id}") {
             this.id = id;
             this.values = values;
             this.expression = expression;

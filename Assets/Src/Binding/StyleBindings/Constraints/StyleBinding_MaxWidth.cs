@@ -1,12 +1,13 @@
 ﻿using Rendering;
+using Src.Rendering;
 
 namespace Src.StyleBindings.Src.StyleBindings {
 
     public class StyleBinding_MaxWidth : StyleBinding {
 
-        public readonly Expression<UIMeasurement> expression;
+        private readonly Expression<UIMeasurement> expression;
 
-        public StyleBinding_MaxWidth(StyleState state, Expression<UIMeasurement> expression) : base(state) {
+        public StyleBinding_MaxWidth(StyleState state, Expression<UIMeasurement> expression) : base(RenderConstants.MaxWidth, state) {
             this.expression = expression;
         }
 

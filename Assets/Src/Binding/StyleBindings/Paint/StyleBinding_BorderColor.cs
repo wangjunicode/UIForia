@@ -1,4 +1,5 @@
 ﻿using Rendering;
+using Src.Rendering;
 using UnityEngine;
 
 namespace Src.StyleBindings {
@@ -7,7 +8,7 @@ namespace Src.StyleBindings {
 
         public readonly Expression<Color> expression;
         
-        public StyleBinding_BorderColor(StyleState state, Expression<Color> expression) : base(state) {
+        public StyleBinding_BorderColor(StyleState state, Expression<Color> expression) : base(RenderConstants.BorderColor, state) {
             this.expression = expression;
         }        
         

@@ -132,7 +132,6 @@
             <e p="StyleBindingCompiler.cs" t="Include" />
           </e>
           <e p="Debugger" t="Include">
-            <e p="CaretGraphic.cs" t="Include" />
             <e p="GOInputFieldRender.cs" t="Include" />
             <e p="Inspector.cs" t="Include" />
             <e p="Inspector.xml" t="Include" />
@@ -289,6 +288,7 @@
             <e p="ITextSizeCalculator.cs" t="Include" />
             <e p="LayoutParameters.cs" t="Include" />
             <e p="Paint.cs" t="Include" />
+            <e p="RenderConstants.cs" t="Include" />
             <e p="RenderData.cs" t="Include" />
             <e p="RenderPrimitiveType.cs" t="Include" />
             <e p="TextOverflow.cs" t="Include" />
@@ -341,6 +341,7 @@
           <e p="Systems" t="Include">
             <e p="BindingSystem.cs" t="Include" />
             <e p="ElementRegistrySystem.cs" t="Include" />
+            <e p="GOCanvasElement.cs" t="Include" />
             <e p="GOInputSystem.cs" t="Include" />
             <e p="GORenderSystem.cs" t="Include" />
             <e p="Gradient.cs" t="Include" />
@@ -363,7 +364,6 @@
             <e p="UIGraphicTemplate.cs" t="Include" />
             <e p="UIGroupTemplate.cs" t="Include" />
             <e p="UIImageTemplate.cs" t="Include" />
-            <e p="UIInputFieldTemplate.cs" t="Include" />
             <e p="UIMaskTemplate.cs" t="Include" />
             <e p="UIPrefabTemplate.cs" t="Include" />
             <e p="UIRepeatChildTemplate.cs" t="Include" />

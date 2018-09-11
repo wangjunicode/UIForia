@@ -25,13 +25,13 @@ namespace Rendering {
 
         [PublicAPI]
         public UIMeasurement width {
-            get { return FindActiveStyle((s) => s.dimensions.width != UIMeasurement.Unset).dimensions.width; }
+            get { return FindActiveStyle((s) => s.dimensions.width.IsDefined()).dimensions.width; }
             set { SetWidth(value); }
         }
 
         [PublicAPI]
         public UIMeasurement height {
-            get { return FindActiveStyle((s) => s.dimensions.height != UIMeasurement.Unset).dimensions.height; }
+            get { return FindActiveStyle((s) => s.dimensions.height.IsDefined()).dimensions.height; }
             set { SetHeight(value); }
         }
 

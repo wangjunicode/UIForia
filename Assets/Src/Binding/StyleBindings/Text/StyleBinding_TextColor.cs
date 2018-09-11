@@ -1,4 +1,5 @@
 using Rendering;
+using Src.Rendering;
 using UnityEngine;
 
 namespace Src.StyleBindings.Text {
@@ -7,7 +8,7 @@ namespace Src.StyleBindings.Text {
 
         private readonly Expression<Color> expression;
 
-        public StyleBinding_TextColor(StyleState state, Expression<Color> expression) : base(state) {
+        public StyleBinding_TextColor(StyleState state, Expression<Color> expression) : base(RenderConstants.TextColor, state) {
             this.expression = expression;
         }
 

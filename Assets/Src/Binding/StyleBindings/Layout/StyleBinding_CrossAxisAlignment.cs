@@ -1,13 +1,14 @@
 ﻿using Rendering;
 using Src.Layout;
+using Src.Rendering;
 
 namespace Src.StyleBindings {
 
     public class StyleBinding_CrossAxisAlignment : StyleBinding {
 
-        public readonly Expression<CrossAxisAlignment> expression;
+        private readonly Expression<CrossAxisAlignment> expression;
 
-        public StyleBinding_CrossAxisAlignment(StyleState state, Expression<CrossAxisAlignment> expression) : base(state) {
+        public StyleBinding_CrossAxisAlignment(StyleState state, Expression<CrossAxisAlignment> expression) : base(RenderConstants.CrossAxisAlignment, state) {
             this.expression = expression;
         }
 

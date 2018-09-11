@@ -6,7 +6,7 @@ namespace Src.StyleBindings {
 
         protected readonly StyleState state;
         
-        protected StyleBinding(StyleState state) {
+        protected StyleBinding(string propertyName, StyleState state) : base(propertyName + ":" + state){
             this.state = state;
         }
 

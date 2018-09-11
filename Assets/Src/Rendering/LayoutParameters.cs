@@ -3,6 +3,16 @@ using Src.Layout;
 
 namespace Rendering {
 
+    public enum SizeCalculation {
+
+        Unset,
+        IgnoreScale,
+        IgnoreRotation,
+        AABB,
+        OBB,
+        TranslationAsOffsetFromLayout
+    }
+    
     [DebuggerDisplay("{type}, {direction}")]
     public struct LayoutParameters {
 
@@ -13,10 +23,7 @@ namespace Rendering {
         public LayoutDirection direction;
         public MainAxisAlignment mainAxisAlignment;
         public CrossAxisAlignment crossAxisAlignment;
-        
-        public bool ignoreScale;
-        public bool ignoreRotation;
-        
+                
         public LayoutParameters(
             LayoutType type,
             LayoutWrap wrap,
@@ -30,8 +37,6 @@ namespace Rendering {
             this.direction = direction;
             this.mainAxisAlignment = mainAxisAlignment;
             this.crossAxisAlignment = crossAxisAlignment;
-            ignoreRotation = false;
-            ignoreScale = false;
         }
 
         public static LayoutParameters Unset => new LayoutParameters(

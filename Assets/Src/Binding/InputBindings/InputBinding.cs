@@ -10,7 +10,7 @@ namespace Src.InputBindings {
         public readonly InputEventType eventType;
         private readonly Expression<Terminal> expression;
 
-        public InputBinding(InputEventType eventType, Expression<Terminal> expression) {
+        public InputBinding(InputEventType eventType, Expression<Terminal> expression) : base(eventType.ToString()) {
             this.eventType = eventType;
             this.expression = expression;
         }

@@ -51,6 +51,7 @@ public static class ReflectionUtil {
     public static readonly object[] ObjectArray1 = new object[1];
     public static readonly object[] ObjectArray2 = new object[2];
     public static readonly object[] ObjectArray3 = new object[3];
+    public static readonly object[] ObjectArray4 = new object[4];
 
     public static readonly Type[] TypeArray1 = new Type[1];
     public static readonly Type[] TypeArray2 = new Type[2];

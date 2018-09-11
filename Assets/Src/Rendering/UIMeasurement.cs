@@ -51,6 +51,9 @@ namespace Src {
         }
 
         public static bool operator ==(UIMeasurement self, UIMeasurement other) {
+            if (float.IsNaN(self.value) && float.IsNaN(other.value)) {
+                return self.unit == other.unit;
+            }
             return self.value == other.value && self.unit == other.unit;
         }
 

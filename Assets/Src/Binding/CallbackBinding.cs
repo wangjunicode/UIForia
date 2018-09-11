@@ -13,7 +13,7 @@ namespace Src.Compilers {
         [SuppressMessage("ReSharper", "StaticMemberInGenericType")]
         private static MethodInfo runInfo;
 
-        public CallbackBinding(Expression<Terminal> expression, EventInfo eventInfo) {
+        public CallbackBinding(Expression<Terminal> expression, EventInfo eventInfo) : base(eventInfo.Name) {
             this.expression = expression;
             this.evtInfo = eventInfo;
             runInfo = runInfo ?? typeof(Handler).GetMethod(nameof(Handler.Run));
@@ -27,6 +27,7 @@ namespace Src.Compilers {
             return true;
         }
 
+        // todo -- can this be a struct?
         private class Handler {
 
             private readonly UITemplateContext ctx;
@@ -54,7 +55,7 @@ namespace Src.Compilers {
         [SuppressMessage("ReSharper", "StaticMemberInGenericType")]
         private static MethodInfo runInfo;
 
-        public CallbackBinding(Expression<Terminal> expression, EventInfo eventInfo) {
+        public CallbackBinding(Expression<Terminal> expression, EventInfo eventInfo) : base(eventInfo.Name) {
             this.expression = expression;
             this.evtInfo = eventInfo;
             runInfo = runInfo ?? typeof(Handler).GetMethod(nameof(Handler.Run));
@@ -100,7 +101,7 @@ namespace Src.Compilers {
         [SuppressMessage("ReSharper", "StaticMemberInGenericType")]
         private static MethodInfo runInfo;
 
-        public CallbackBinding(Expression<Terminal> expression, EventInfo eventInfo) {
+        public CallbackBinding(Expression<Terminal> expression, EventInfo eventInfo) : base(eventInfo.Name) {
             this.expression = expression;
             this.evtInfo = eventInfo;
             runInfo = runInfo ?? typeof(Handler).GetMethod(nameof(Handler.Run));
@@ -147,7 +148,7 @@ namespace Src.Compilers {
         [SuppressMessage("ReSharper", "StaticMemberInGenericType")]
         private static MethodInfo runInfo;
 
-        public CallbackBinding(Expression<Terminal> expression, EventInfo eventInfo) {
+        public CallbackBinding(Expression<Terminal> expression, EventInfo eventInfo) : base(eventInfo.Name) {
             this.expression = expression;
             this.evtInfo = eventInfo;
             runInfo = runInfo ?? typeof(Handler).GetMethod(nameof(Handler.Run));
@@ -196,7 +197,7 @@ namespace Src.Compilers {
         [SuppressMessage("ReSharper", "StaticMemberInGenericType")]
         private static MethodInfo runInfo;
 
-        public CallbackBinding(Expression<Terminal> expression, EventInfo eventInfo) {
+        public CallbackBinding(Expression<Terminal> expression, EventInfo eventInfo) : base(eventInfo.Name) {
             this.expression = expression;
             this.evtInfo = eventInfo;
             runInfo = runInfo ?? typeof(Handler).GetMethod(nameof(Handler.Run));
@@ -233,7 +234,6 @@ namespace Src.Compilers {
                 ctx.RemoveObjectAlias(PropertyBindingCompiler.EvtArgNames[1]);
                 ctx.RemoveObjectAlias(PropertyBindingCompiler.EvtArgNames[2]);
                 ctx.RemoveObjectAlias(PropertyBindingCompiler.EvtArgNames[3]);
-
             }
 
         }

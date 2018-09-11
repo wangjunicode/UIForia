@@ -1,4 +1,5 @@
 ﻿using Rendering;
+using Src.Rendering;
 
 namespace Src.StyleBindings {
 
@@ -6,7 +7,7 @@ namespace Src.StyleBindings {
 
         public readonly Expression<float> expression;
 
-        public StyleBinding_PaddingRight(StyleState state, Expression<float> expression) : base(state) {
+        public StyleBinding_PaddingRight(StyleState state, Expression<float> expression) : base(RenderConstants.PaddingRight, state) {
             this.expression = expression;
         }
 

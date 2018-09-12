@@ -78,31 +78,19 @@ namespace Src.Systems {
             }
         }
 
-//        private void HandleMeshUpdate(int elementId, Mesh mesh) {
-//            UIGraphicElement graphicElement = (UIGraphicElement) renderSkipTree.GetItem(elementId).element;
-//            Transform transform = transforms[elementId];
-//
-//            CanvasRenderer canvasRenderer = transform.GetComponent<CanvasRenderer>();
-//            if (canvasRenderer == null) {
-//                canvasRenderer = transform.gameObject.AddComponent<CanvasRenderer>();
-//                canvasRenderer.SetMaterial(graphicElement.GetMaterial(), Texture2D.whiteTexture);
-//            }
-//
-//            canvasRenderer.SetMesh(mesh);
-//        }
-
         public void OnUpdate() {
             int count = layoutSystem.RectCount;
             LayoutResult[] layoutResults = layoutSystem.LayoutResults;
 
             for (int i = 0; i < count; i++) {
-                if (!transforms.ContainsKey(layoutResults[i].elementId)) {
+                RectTransform transform;
+                
+                if (!transforms.TryGetValue(layoutResults[i].element.id, out transform)) {
                     continue;
                 }
 
-                RenderData renderData = renderSkipTree.GetItem(layoutResults[i].elementId);
+                RenderData renderData = renderSkipTree.GetItem(layoutResults[i].element.id);
                 ContentBoxRect margin = renderData.element.style.margin;
-                RectTransform transform = transforms[layoutResults[i].elementId];
                 Vector2 position = layoutResults[i].localRect.position;
                 position.x = (int) position.x + margin.left;
                 position.y = (int) position.y + margin.top;

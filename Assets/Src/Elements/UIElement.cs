@@ -62,15 +62,11 @@ public class UIElement : IHierarchical {
 
 
     // todo make readonly and hide this
-    public int depth;
-
-    public UITransform transform;
 
     protected internal UIElement parent;
 
     public UIElement() {
         id = UIView.NextElementId;
-        transform = new UITransform();
         this.flags = UIElementFlags.Enabled
                      | UIElementFlags.Shown
                      | UIElementFlags.RequiresLayout
@@ -102,7 +98,7 @@ public class UIElement : IHierarchical {
     public virtual void OnCreate() { }
 
     public virtual void OnReady() { }
-    
+
     public virtual void OnUpdate() { }
 
     public virtual void OnEnable() { }
@@ -117,6 +113,8 @@ public class UIElement : IHierarchical {
 
     public virtual void OnDestroy() { }
 
+    public int depth { get; internal set; }
+    public int siblingIndex { get; internal set; }
 
     public bool EnableBinding(string propertyName) {
         return templateContext.view.bindingSystem.EnableBinding(this, propertyName);
@@ -127,7 +125,7 @@ public class UIElement : IHierarchical {
     }
 
     public bool HasBinding(string propertyName) {
-        return false;
+        return templateContext.view.bindingSystem.HasBinding(this, propertyName);
     }
 
     public void SetEnabled(bool active) {
@@ -139,7 +137,7 @@ public class UIElement : IHierarchical {
         }
     }
 
-    protected UIElement FindById(string id) {
+    public UIElement FindById(string id) {
         if (isPrimitive || ownChildren == null) {
             return null;
         }
@@ -158,7 +156,7 @@ public class UIElement : IHierarchical {
         return null;
     }
 
-    protected T FindById<T>(string id) where T : UIElement {
+    public T FindById<T>(string id) where T : UIElement {
         if (isPrimitive || ownChildren == null) {
             return null;
         }
@@ -197,6 +195,75 @@ public class UIElement : IHierarchical {
         return null;
     }
 
+    public T FindFirstByType<T>() where T : UIElement {
+        if (isPrimitive || ownChildren == null) {
+            return null;
+        }
+
+        for (int i = 0; i < ownChildren.Length; i++) {
+            if (ownChildren[i] is T) {
+                return (T) ownChildren[i];
+            }
+
+            UIElement childResult = ownChildren[i].FindFirstByTypeTemplateScoped<T>();
+            if (childResult != null) {
+                return (T) childResult;
+            }
+        }
+
+        return null;
+    }
+
+    protected UIElement FindFirstByTypeTemplateScoped<T>() where T : UIElement {
+        if (isPrimitive || templateChildren == null) {
+            return null;
+        }
+
+        for (int i = 0; i < templateChildren.Length; i++) {
+            if (templateChildren[i] is T) {
+                return (T) templateChildren[i];
+            }
+
+            UIElement childResult = templateChildren[i].FindFirstByTypeTemplateScoped<T>();
+            if (childResult != null) {
+                return (T) childResult;
+            }
+        }
+
+        return null;
+    }
+
+    public List<T> FindByType<T>(List<T> retn = null) where T : UIElement {
+        retn = retn ?? new List<T>();
+        if (isPrimitive || ownChildren == null) {
+            return retn;
+        }
+
+        for (int i = 0; i < ownChildren.Length; i++) {
+            if (ownChildren[i] is T) {
+                retn.Add((T) ownChildren[i]);
+            }
+
+            ownChildren[i].FindByTypeTemplateScoped<T>(retn);
+        }
+
+        return retn;
+    }
+
+    protected void FindByTypeTemplateScoped<T>(List<T> retn) where T : UIElement {
+        if (isPrimitive || ownChildren == null) {
+            return;
+        }
+
+        for (int i = 0; i < templateChildren.Length; i++) {
+            if (templateChildren[i] is T) {
+                retn.Add((T) templateChildren[i]);
+            }
+
+            templateChildren[i].FindByTypeTemplateScoped(retn);
+        }
+    }
+
     public override string ToString() {
         string retn = string.Empty;
         if (name != null) {
@@ -227,6 +294,24 @@ public class UIElement : IHierarchical {
     // todo -- remove this so we can hide parent from user
     public int UniqueId => id;
     public IHierarchical Element => this;
-    public IHierarchical Parent => parent;
+    public IHierarchical Parent => parent;   
 
+    public class DepthComparerAscending : IComparer<UIElement> {
+
+        public int Compare(UIElement a, UIElement b) {
+            if (a.depth != b.depth) {
+                return a.depth < b.depth ? 1 : -1;
+            }
+
+            if (a.parent == b.parent) {
+                return a.siblingIndex < b.siblingIndex ? 1 : -1;
+            }
+
+            if (a.parent == null) return 1;
+            if (b.parent == null) return -1;
+        
+            return a.parent.siblingIndex < b.parent.siblingIndex ? 1 : -1;
+        }
+
+    }
 }

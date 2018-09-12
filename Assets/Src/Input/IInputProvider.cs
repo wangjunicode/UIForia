@@ -16,18 +16,21 @@ namespace Src.Systems {
 
         bool IsMouseLeftDown { get; }
         bool IsMouseLeftDownThisFrame { get; }
+        bool IsMouseLeftUpThisFrame { get; }
 
         bool IsMouseRightDown { get; }
         bool IsMouseRightDownThisFrame { get; }
+        bool IsMouseRightUpThisFrame { get; }
 
         bool IsMouseMiddleDown { get; }
         bool IsMouseMiddleDownThisFrame { get; }
+        bool IsMouseMiddleUpThisFrame { get; }
 
         Vector2 ScrollDelta { get; }
         Vector2 MousePosition { get; }
 
         Vector2 MouseDownPosition { get; }
-
+        
         bool IsDragging { get; }
 
     }

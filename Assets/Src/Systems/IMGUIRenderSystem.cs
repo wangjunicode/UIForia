@@ -34,7 +34,7 @@ namespace Src.Systems {
 
             for (int i = 0; i < count; i++) {
                 LayoutResult result = layoutResults[i];
-                UIElement element = elementSystem.GetElement(result.elementId);
+                UIElement element = result.element;
 
                 if (element == null) continue;
 

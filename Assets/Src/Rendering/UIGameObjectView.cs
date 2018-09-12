@@ -15,7 +15,7 @@ namespace Rendering {
             this.rectTransform = viewTransform;
             layoutSystem = new LayoutSystem(new GOTextSizeCalculator(), styleSystem);
             renderSystem = new GORenderSystem(layoutSystem, styleSystem, this, viewTransform);
-            inputSystem = new GOInputSystem(layoutSystem, this, styleSystem);
+            inputSystem = new GOInputSystem(layoutSystem, styleSystem);
             systems.Add(layoutSystem);
             systems.Add(renderSystem);
             systems.Add(inputSystem);

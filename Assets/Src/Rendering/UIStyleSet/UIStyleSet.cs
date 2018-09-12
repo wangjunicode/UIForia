@@ -71,6 +71,10 @@ namespace Rendering {
             Refresh();
         }
 
+        public bool IsInState(StyleState state) {
+            return (currentState & state) != 0;
+        }
+        
         public void ExitState(StyleState state) {
             if (state == StyleState.Normal || (currentState & state) == 0) {
                 return;

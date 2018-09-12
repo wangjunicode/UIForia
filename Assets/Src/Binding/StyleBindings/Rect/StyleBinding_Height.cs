@@ -3,18 +3,18 @@ using Src.Rendering;
 
 namespace Src.StyleBindings {
 
-    public class StyleBinding_RectHeight : StyleBinding {
+    public class StyleBinding_Height : StyleBinding {
 
-        public readonly Expression<UIMeasurement> expression;
+        private readonly Expression<UIMeasurement> expression;
 
-        public StyleBinding_RectHeight(StyleState state, Expression<UIMeasurement> expression) : base(RenderConstants.RectHeight, state) {
+        public StyleBinding_Height(StyleState state, Expression<UIMeasurement> expression) : base(RenderConstants.Height, state) {
             this.expression = expression;
         }
 
         public override void Execute(UIElement element, UITemplateContext context) {
-            UIMeasurement width = element.style.GetHeight(state);
+            UIMeasurement height = element.style.GetHeight(state);
             UIMeasurement newHeight = expression.EvaluateTyped(context);
-            if (width != newHeight) {
+            if (height != newHeight) {
                 element.style.SetHeight(newHeight, state);
             }
         }

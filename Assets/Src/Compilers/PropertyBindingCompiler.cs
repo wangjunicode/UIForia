@@ -47,9 +47,9 @@ namespace Src.Compilers {
             ReflectionUtil.TypeArray2[1] = fieldInfo.FieldType;
 
             ReflectionUtil.ObjectArray4[0] = attrKey;
-            ReflectionUtil.ObjectArray4[0] = expression;
-            ReflectionUtil.ObjectArray4[1] = accessor.fieldGetter;
-            ReflectionUtil.ObjectArray4[2] = accessor.fieldSetter;
+            ReflectionUtil.ObjectArray4[1] = expression;
+            ReflectionUtil.ObjectArray4[2] = accessor.fieldGetter;
+            ReflectionUtil.ObjectArray4[3] = accessor.fieldSetter;
 
             return (Binding) ReflectionUtil.CreateGenericInstanceFromOpenType(
                 typeof(FieldSetterBinding<,>),

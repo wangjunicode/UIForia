@@ -59,9 +59,15 @@ namespace Src {
             return parsedTemplate;
         }
 
-        public static ParsedTemplate ParseTemplateFromString<T>(string input) {
+        public static ParsedTemplate ParseTemplateFromString<T>(string input) where T : UIElement {
             XDocument doc = XDocument.Parse(input);
             ProcessedType processedType = TypeProcessor.GetType(typeof(T));
+            return new TemplateParser().ParseTemplate(processedType, doc);
+        }
+        
+        public static ParsedTemplate ParseTemplateFromString(Type rootType, string input) {
+            XDocument doc = XDocument.Parse(input);
+            ProcessedType processedType = TypeProcessor.GetType(rootType);
             return new TemplateParser().ParseTemplate(processedType, doc);
         }
 

@@ -26,8 +26,8 @@ namespace Src.Layout {
                     continue;
                 }
 
-                float x = GetPixelValue(child.element.transform.position.x, contentAreaWidth, viewport.width);
-                float y = GetPixelValue(child.element.transform.position.y, contentAreaHeight, viewport.height);
+                float x = GetPixelValue(child.style.positionX, contentAreaWidth, viewport.width);
+                float y = GetPixelValue(child.style.positionY, contentAreaHeight, viewport.height);
                 float width = child.GetPreferredWidth(currentNode.rect.width.unit, contentAreaWidth, viewport.width);
 
                 if (child.rect.width.unit == UIUnit.Auto) {
@@ -55,7 +55,7 @@ namespace Src.Layout {
 
                 if (child.element.isDisabled) continue;
 
-                float x = GetPixelValue(child.element.transform.position.x, contentSize, viewportSize);
+                float x = GetPixelValue(child.style.positionX, contentSize, viewportSize);
                 float width = child.GetPreferredWidth(node.style.dimensions.width.unit, contentSize, viewportSize);
                 
                 if (child.rect.width.unit == UIUnit.Auto) {
@@ -78,7 +78,7 @@ namespace Src.Layout {
 
                 if (child.element.isDisabled) continue;
 
-                float y = GetPixelValue(child.element.transform.position.y, adjustedWidth, viewportSize);
+                float y = GetPixelValue(child.style.positionY, adjustedWidth, viewportSize);
                 minY = Mathf.Min(minY, y);
                 maxY = Mathf.Max(maxY, y + child.GetPreferredWidth(node.style.dimensions.height.unit, adjustedWidth, viewportSize));
             }

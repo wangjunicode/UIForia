@@ -2,8 +2,9 @@ namespace Src.Rendering {
 
     public static class RenderConstants {
 
-        public const string RectWidth = "rectWidth";
-        public const string RectHeight = "rectHeight";
+        public const string Size = "size";
+        public const string Width = "width";
+        public const string Height = "height";
 
         public const string MinWidth = "minWidth";
         public const string MaxWidth = "maxWidth";
@@ -51,6 +52,11 @@ namespace Src.Rendering {
         public const string TextColor = "textColor";
         public const string FontSize = "fontSize";
         public const string Whitespace = "whiteSpace";
+
+        public const string Translation = "translation";
+        public const string Rotation = "rotation";
+        public const string Pivot = "pivot";
+        public const string Scale = "scale";
 
     }
 

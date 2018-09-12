@@ -277,7 +277,6 @@ namespace Debugger {
 
         [OnMouseDown]
         private void OnMouseDown(MouseInputEvent evt) {
-            Debug.Log(evt.mousePosition);
         }
 
         [UsedImplicitly]

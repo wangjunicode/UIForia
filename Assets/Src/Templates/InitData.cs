@@ -31,8 +31,8 @@ namespace Src {
         public InputBinding[] inputBindings;
         public List<UIStyle> baseStyles;
         public List<StyleBinding> constantStyleBindings;
-        public List<KeyboardEventHandler> keyboardEventHandlers;
-        public List<MouseEventHandler> mouseEventHandlers;
+        public KeyboardEventHandler[] keyboardEventHandlers;
+        public MouseEventHandler[] mouseEventHandlers;
         
         public InitData(UIElement element, UITemplateContext context) {
             this.element = element;

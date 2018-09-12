@@ -28,10 +28,10 @@
             <e p="DisabledBinding.cs" t="Include" />
             <e p="EnabledBinding.cs" t="Include" />
             <e p="FieldSetterBinding.cs" t="Include" />
-            <e p="InputBindingGroup.cs" t="Include" />
             <e p="InputBindings" t="Include">
               <e p="InputBinding.cs" t="Include" />
             </e>
+            <e p="MouseHandlerGroup.cs" t="Include" />
             <e p="RepeatBinding.cs" t="Include" />
             <e p="RepeatChildBinding.cs" t="Include" />
             <e p="RepeatTerminalBinding.cs" t="Include" />
@@ -84,16 +84,20 @@
                 <e p="StyleBinding_BorderRadius_TopRight.cs" t="Include" />
               </e>
               <e p="Rect" t="Include">
-                <e p="StyleBinding_RectHeight.cs" t="Include" />
-                <e p="StyleBinding_RectWidth.cs" t="Include" />
+                <e p="StyleBinding_Dimensions.cs" t="Include" />
+                <e p="StyleBinding_Height.cs" t="Include" />
                 <e p="StyleBinding_RectX.cs" t="Include" />
                 <e p="StyleBinding_RectY.cs" t="Include" />
+                <e p="StyleBinding_Width.cs" t="Include" />
               </e>
               <e p="StyleBinding.cs" t="Include" />
               <e p="Text" t="Include">
                 <e p="StyleBinding_FontSize.cs" t="Include" />
                 <e p="StyleBinding_TextColor.cs" t="Include" />
                 <e p="StyleBinding_Whitespace.cs" t="Include" />
+              </e>
+              <e p="Transform" t="Include">
+                <e p="StyleBinding_Translation.cs" t="Include" />
               </e>
             </e>
             <e p="SwitchBindingInt.cs" t="Include" />
@@ -191,12 +195,13 @@
           <e p="ImportDeclaration.cs" t="Include" />
           <e p="Input" t="Include">
             <e p="EventPhase.cs" t="Include" />
+            <e p="EventPropagator.cs" t="Include" />
             <e p="FocusEventHandler.cs" t="Include" />
             <e p="IFocusable.cs" t="Include" />
             <e p="IInputProvider.cs" t="Include" />
             <e p="InputEvent.cs" t="Include" />
             <e p="InputEventType.cs" t="Include" />
-            <e p="KeyboardEventHandler.cs" t="Include" />
+            <e p="KeyboardEventHandler_WithEvent.cs" t="Include" />
             <e p="KeyboardInputEvent.cs" t="Include" />
             <e p="KeyboardModifiers.cs" t="Include" />
             <e p="KeyState.cs" t="Include" />
@@ -349,7 +354,16 @@
             <e p="ILayoutSystem.cs" t="Include" />
             <e p="IMGUIInputSystem.cs" t="Include" />
             <e p="IMGUIRenderSystem.cs" t="Include" />
+            <e p="InputSystem" t="Include">
+              <e p="InputSystem.cs" t="Include" />
+              <e p="InputSystem.ISystem.cs" t="Include" />
+              <e p="InputSystem.Keyboard.cs" t="Include" />
+              <e p="InputSystem.Mouse.cs" t="Include" />
+              <e p="InputSystem.Util.cs" t="Include" />
+              <e p="MouseState.cs" t="Include" />
+            </e>
             <e p="IStyleSystem.cs" t="Include" />
+            <e p="KeyboardEventTreeNode.cs" t="Include" />
             <e p="LayoutSystem.cs" t="Include" />
             <e p="LifeCycleSystem.cs" t="Include" />
             <e p="StyleSystem.cs" t="Include" />
@@ -387,6 +401,7 @@
             <e p="FloatUtil.cs" t="Include" />
             <e p="IntUtil.cs" t="Include" />
             <e p="KeyCodeUtil.cs" t="Include" />
+            <e p="MeasurementVector2.cs" t="Include" />
             <e p="ReflectionUtil.cs" t="Include" />
             <e p="SkipTree.cs" t="Include" />
             <e p="TexMeshProUtil.cs" t="Include" />
@@ -401,9 +416,17 @@
         <e p="Tests" t="Include">
           <e p="BindingCompilerTests.cs" t="Include" />
           <e p="ElementQueryTests.cs" t="Include" />
+          <e p="ElementTests.cs" t="Include" />
           <e p="ExpressionCompilerTests.cs" t="Include" />
           <e p="ExpressionParserTests.cs" t="Include" />
           <e p="InputCompilerBindingTests.cs" t="Include" />
+          <e p="InputSystem_Tests.cs" t="Include" />
+          <e p="Mocks" t="Include">
+            <e p="MockInputSystem.cs" t="Include" />
+            <e p="MockLayoutSystem.cs" t="Include" />
+            <e p="MockTextSizeCalculator.cs" t="Include" />
+            <e p="MockView.cs" t="Include" />
+          </e>
           <e p="ReflectionUtilTests.cs" t="Include" />
           <e p="SkipTreeTests.cs" t="Include" />
           <e p="StyleTests.cs" t="Include" />

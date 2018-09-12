@@ -6,18 +6,21 @@ namespace Src.Input {
 
     public abstract class MouseEventHandler : IComparable<MouseEventHandler> {
 
-        public InputEventType eventType;
-        public bool requiresFocus;
-        public KeyboardModifiers requiredModifiers;
+        public readonly InputEventType eventType;
+        public readonly KeyboardModifiers requiredModifiers;
+        public readonly EventPhase eventPhase;
 #if DEBUG
         public MethodInfo methodInfo;
 #endif
-        public abstract void Invoke(object target, MouseInputEvent evt);
+        protected MouseEventHandler(InputEventType eventType, KeyboardModifiers requiredModifiers, EventPhase eventPhase) {
+            this.eventType = eventType;
+            this.requiredModifiers = requiredModifiers;
+            this.eventPhase = eventPhase;
+        }
+
+        public abstract void Invoke(object target, UITemplateContext context, MouseInputEvent evt);
 
         public int CompareTo(MouseEventHandler other) {
-            int focusResult = CompareFocus(other);
-            if (focusResult != 0) return focusResult;
-
             int modifierResult = CompareModifiers(other);
             if (modifierResult != 0) return modifierResult;
 
@@ -27,19 +30,8 @@ namespace Src.Input {
         protected bool ShouldRun(MouseInputEvent evt) {
             if (evt.type != eventType) return false;
 
-            if (requiresFocus && !evt.isFocused) return false;
-
             // if all required modifiers are present these should be equal
-            if ((requiredModifiers & evt.modifiers) != requiredModifiers) {
-                return false;
-            }
-
-            return true;
-        }     
-
-        private int CompareFocus(MouseEventHandler other) {
-            if (other.requiresFocus == requiresFocus) return 0;
-            return requiresFocus ? 1 : -1;
+            return (requiredModifiers & evt.modifiers) == requiredModifiers;
         }
 
         private int CompareModifiers(MouseEventHandler other) {
@@ -50,16 +42,34 @@ namespace Src.Input {
 
     }
 
-    public class MouseEventHandlerIgnoreEvent<T> : MouseEventHandler {
+    public class MouseEventHandler_Expression : MouseEventHandler {
+
+        private readonly Expression<Terminal> expression;
+
+        public MouseEventHandler_Expression(InputEventType evtType, Expression<Terminal> expression, KeyboardModifiers modifiers, EventPhase phase)
+            : base(evtType, modifiers, phase) {
+            this.expression = expression;
+        }
+
+        public override void Invoke(object target, UITemplateContext context, MouseInputEvent evt) {
+            if (ShouldRun(evt)) {
+                expression.EvaluateTyped(context);
+            }
+        }
+
+    }
+
+
+    public class MouseEventHandler_IgnoreEvent<T> : MouseEventHandler {
 
         private readonly Action<T> handler;
 
-        public MouseEventHandlerIgnoreEvent(Action<T> handler) {
+        public MouseEventHandler_IgnoreEvent(InputEventType eventType, KeyboardModifiers requiredModifiers, EventPhase phase, Action<T> handler)
+            : base(eventType, requiredModifiers, phase) {
             this.handler = handler;
         }
 
-        // can probably merge a bunch of flags & just do 1 check
-        public override void Invoke(object target, MouseInputEvent evt) {
+        public override void Invoke(object target, UITemplateContext context, MouseInputEvent evt) {
             if (ShouldRun(evt)) {
                 handler((T) target);
             }
@@ -67,15 +77,16 @@ namespace Src.Input {
 
     }
 
-    public class MouseEventHandler<T> : MouseEventHandler {
+    public class MouseEventHandler_WithEvent<T> : MouseEventHandler {
 
         private readonly Action<T, MouseInputEvent> handler;
 
-        public MouseEventHandler(Action<T, MouseInputEvent> handler) {
+        public MouseEventHandler_WithEvent(InputEventType eventType, KeyboardModifiers requiredModifiers, EventPhase phase, Action<T, MouseInputEvent> handler)
+            : base(eventType, requiredModifiers, phase) {
             this.handler = handler;
         }
 
-        public override void Invoke(object target, MouseInputEvent evt) {
+        public override void Invoke(object target, UITemplateContext context, MouseInputEvent evt) {
             if (ShouldRun(evt)) {
                 handler((T) target, evt);
             }

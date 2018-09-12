@@ -26,8 +26,8 @@ namespace Src {
 
         protected List<UIStyle> baseStyles;
         protected List<StyleBinding> constantStyleBindings;
-        protected List<KeyboardEventHandler> keyboardEventHandlers;
-        protected List<MouseEventHandler> mouseEventHandlers;
+        protected KeyboardEventHandler[] keyboardEventHandlers;
+        protected MouseEventHandler[] mouseEventHandlers;
         protected List<Binding> bindingList;
         protected List<ValueTuple<string, string>> templateAttributes;
 
@@ -94,7 +94,6 @@ namespace Src {
             ResolveBaseStyles(template);
             CompileStyleBindings(template);
             CompileInputBindings(template);
-            CompileEventAnnotations(template);
             CompilePropertyBindings(template);
             CompileConditionalBindings(template);
             ResolveActualAttributes();
@@ -144,14 +143,17 @@ namespace Src {
         
         protected virtual void CompileInputBindings(ParsedTemplate template) {
             inputCompiler.SetContext(template.contextDefinition);
-            inputBindings = inputCompiler.Compile(elementType, attributes).ToArray();
+            List<MouseEventHandler> mouseHandlers = inputCompiler.CompileMouseEventHandlers(elementType, attributes);
+            List<KeyboardEventHandler> keyboardHandlers = inputCompiler.CompileKeyboardEventHandlers(elementType, attributes);
+            if (mouseHandlers != null) {
+                mouseEventHandlers = mouseHandlers.ToArray();
+            }
+
+            if (keyboardHandlers != null) {
+                keyboardEventHandlers = keyboardHandlers.ToArray();
+            }
         }
 
-        protected virtual void CompileEventAnnotations(ParsedTemplate template) {
-            inputCompiler.SetContext(template.contextDefinition);
-            keyboardEventHandlers = inputCompiler.CompileKeyboardInputAttributes(elementType);
-            mouseEventHandlers = inputCompiler.CompileMouseInputAttributes(elementType);
-        }
 
         protected virtual void CompilePropertyBindings(ParsedTemplate template) {
             if (attributes == null || attributes.Count == 0) return;

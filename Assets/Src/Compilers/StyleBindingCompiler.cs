@@ -22,6 +22,9 @@ namespace Src.Compilers {
         private static readonly MethodAliasSource rect2Source;
         private static readonly MethodAliasSource rect4Source;
 
+        private static readonly MethodAliasSource sizeAliasSource;
+        private static readonly MethodAliasSource vec2MeasurementSource;
+
         private static readonly MethodAliasSource borderRadiusRect1Source;
         private static readonly MethodAliasSource borderRadiusRect2Source;
         private static readonly MethodAliasSource borderRadiusRect4Source;
@@ -50,6 +53,8 @@ namespace Src.Compilers {
             rect2Source = new MethodAliasSource("rect", type.GetMethod(nameof(Rect), new[] {typeof(float), typeof(float)}));
             rect4Source = new MethodAliasSource("rect", type.GetMethod(nameof(Rect), new[] {typeof(float), typeof(float), typeof(float), typeof(float)}));
 
+            sizeAliasSource = new MethodAliasSource("size", type.GetMethod(nameof(Size)));
+            vec2MeasurementSource = new MethodAliasSource("vec2", type.GetMethod(nameof(Vec2Measurement)));
             borderRadiusRect1Source = new MethodAliasSource("radius", type.GetMethod(nameof(Radius), new[] {typeof(float)}));
             borderRadiusRect2Source = new MethodAliasSource("radius", type.GetMethod(nameof(Radius), new[] {typeof(float), typeof(float)}));
             borderRadiusRect4Source = new MethodAliasSource("radius", type.GetMethod(nameof(Radius), new[] {typeof(float), typeof(float), typeof(float), typeof(float)}));
@@ -131,9 +136,28 @@ namespace Src.Compilers {
                 case RenderConstants.BorderRadiusBottomLeft:
                     return new StyleBinding_BorderRadius_BottomLeft(targetState.state, Compile<float>(value));
 
+                // Transform
+                case RenderConstants.Translation:
+                    return new StyleBinding_Translation(targetState.state, Compile<MeasurementVector2>(value, vec2MeasurementSource));
+
+                case RenderConstants.Rotation:
+                    throw new NotImplementedException();
+                
+                case RenderConstants.Pivot:
+                    throw new NotImplementedException();
+                
+                case RenderConstants.Scale:
+                    throw  new NotImplementedException();
+                
                 // Rect
-                case RenderConstants.RectWidth:
-                    return new StyleBinding_RectWidth(targetState.state, Compile<UIMeasurement>(
+                case RenderConstants.Size:
+                    return new StyleBinding_Dimensions(targetState.state, Compile<Dimensions>(
+                        value,
+                        sizeAliasSource
+                    ));
+
+                case RenderConstants.Width:
+                    return new StyleBinding_Width(targetState.state, Compile<UIMeasurement>(
                         value,
                         autoKeywordSource,
                         pixelMeasurementSource,
@@ -142,8 +166,8 @@ namespace Src.Compilers {
                         contentMeasurementSource
                     ));
 
-                case RenderConstants.RectHeight:
-                    return new StyleBinding_RectHeight(targetState.state, Compile<UIMeasurement>(
+                case RenderConstants.Height:
+                    return new StyleBinding_Height(targetState.state, Compile<UIMeasurement>(
                         value,
                         autoKeywordSource,
                         pixelMeasurementSource,
@@ -382,6 +406,18 @@ namespace Src.Compilers {
         [Pure]
         public static BorderRadius Radius(float topLeft, float topRight, float bottomRight, float bottomLeft) {
             return new BorderRadius(topLeft, topRight, bottomRight, bottomLeft);
+        }
+
+        // todo -- support UIMeasurement as arguments here
+        [Pure]
+        public static Dimensions Size(float width, float height) {
+            return new Dimensions(new UIMeasurement(width), new UIMeasurement(height));
+        }
+
+        // todo -- support UIMeasurement as arguments here
+        [Pure]
+        public static MeasurementVector2 Vec2Measurement(float x, float y) {
+            return new MeasurementVector2(new UIMeasurement(x), new UIMeasurement(y));
         }
 
         [Pure]

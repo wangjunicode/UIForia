@@ -54,7 +54,7 @@ public class InputCompiler_KeyUpAttributes {
     public void Setup() {
         ContextDefinition ctx = new ContextDefinition(typeof(KeyUpTestThing));
         InputBindingCompiler compiler = new InputBindingCompiler(ctx);
-        handlers = compiler.CompileKeyboardInputAttributes(typeof(KeyUpTestThing));
+        handlers = compiler.CompileKeyboardEventHandlers(typeof(KeyUpTestThing), null);
     }
 
     public List<KeyboardEventHandler> handlers;
@@ -64,7 +64,7 @@ public class InputCompiler_KeyUpAttributes {
         MethodInfo info = typeof(KeyUpTestThing).GetMethod(nameof(KeyUpTestThing.HandleAnyKeyUpWithArgument));
         KeyboardEventHandler handler = GetHandlerForMethod(info, handlers);
 
-        Assert.IsInstanceOf<KeyboardEventHandler<KeyUpTestThing>>(handler);
+        Assert.IsInstanceOf<KeyboardEventHandler_WithEvent<KeyUpTestThing>>(handler);
         Assert.AreEqual(InputEventType.KeyUp, handler.eventType);
         Assert.AreEqual(false, handler.requiresFocus);
         Assert.AreEqual(KeyboardModifiers.None, handler.requiredModifiers);
@@ -76,7 +76,7 @@ public class InputCompiler_KeyUpAttributes {
         MethodInfo info = typeof(KeyUpTestThing).GetMethod(nameof(KeyUpTestThing.HandleAnyKeyUpWithoutArgument));
         KeyboardEventHandler handler = GetHandlerForMethod(info, handlers);
 
-        Assert.IsInstanceOf<KeyboardEventHandlerIgnoreEvent<KeyUpTestThing>>(handler);
+        Assert.IsInstanceOf<KeyboardEventHandler_IgnoreEvent<KeyUpTestThing>>(handler);
         Assert.AreEqual(InputEventType.KeyUp, handler.eventType);
         Assert.AreEqual(false, handler.requiresFocus);
         Assert.AreEqual(KeyboardModifiers.None, handler.requiredModifiers);
@@ -88,7 +88,7 @@ public class InputCompiler_KeyUpAttributes {
         MethodInfo info = typeof(KeyUpTestThing).GetMethod(nameof(KeyUpTestThing.HandleSpecificKeyUp));
         KeyboardEventHandler handler = GetHandlerForMethod(info, handlers);
 
-        Assert.IsInstanceOf<KeyboardEventHandlerIgnoreEvent<KeyUpTestThing>>(handler);
+        Assert.IsInstanceOf<KeyboardEventHandler_IgnoreEvent<KeyUpTestThing>>(handler);
         Assert.AreEqual(InputEventType.KeyUp, handler.eventType);
         Assert.AreEqual(false, handler.requiresFocus);
         Assert.AreEqual(KeyboardModifiers.None, handler.requiredModifiers);
@@ -100,7 +100,7 @@ public class InputCompiler_KeyUpAttributes {
         MethodInfo info = typeof(KeyUpTestThing).GetMethod(nameof(KeyUpTestThing.HandleSpecificKeyUpWithModifier));
         KeyboardEventHandler handler = GetHandlerForMethod(info, handlers);
 
-        Assert.IsInstanceOf<KeyboardEventHandlerIgnoreEvent<KeyUpTestThing>>(handler);
+        Assert.IsInstanceOf<KeyboardEventHandler_IgnoreEvent<KeyUpTestThing>>(handler);
         Assert.AreEqual(InputEventType.KeyUp, handler.eventType);
         Assert.AreEqual(false, handler.requiresFocus);
         Assert.AreEqual(KeyboardModifiers.Alt, handler.requiredModifiers);
@@ -112,7 +112,7 @@ public class InputCompiler_KeyUpAttributes {
         MethodInfo info = typeof(KeyUpTestThing).GetMethod(nameof(KeyUpTestThing.HandleSpecificKeyUpWithArgument));
         KeyboardEventHandler handler = GetHandlerForMethod(info, handlers);
 
-        Assert.IsInstanceOf<KeyboardEventHandler<KeyUpTestThing>>(handler);
+        Assert.IsInstanceOf<KeyboardEventHandler_WithEvent<KeyUpTestThing>>(handler);
         Assert.AreEqual(InputEventType.KeyUp, handler.eventType);
         Assert.AreEqual(false, handler.requiresFocus);
         Assert.AreEqual(KeyboardModifiers.None, handler.requiredModifiers);
@@ -124,7 +124,7 @@ public class InputCompiler_KeyUpAttributes {
         MethodInfo info = typeof(KeyUpTestThing).GetMethod(nameof(KeyUpTestThing.HandleSpecificKeyUpWithModifierWithArgument));
         KeyboardEventHandler handler = GetHandlerForMethod(info, handlers);
 
-        Assert.IsInstanceOf<KeyboardEventHandler<KeyUpTestThing>>(handler);
+        Assert.IsInstanceOf<KeyboardEventHandler_WithEvent<KeyUpTestThing>>(handler);
         Assert.AreEqual(InputEventType.KeyUp, handler.eventType);
         Assert.AreEqual(false, handler.requiresFocus);
         Assert.AreEqual(KeyboardModifiers.Alt, handler.requiredModifiers);
@@ -136,7 +136,7 @@ public class InputCompiler_KeyUpAttributes {
         MethodInfo info = typeof(KeyUpTestThing).GetMethod(nameof(KeyUpTestThing.HandleFocusAnyKeyUpWithArgument));
         KeyboardEventHandler handler = GetHandlerForMethod(info, handlers);
 
-        Assert.IsInstanceOf<KeyboardEventHandler<KeyUpTestThing>>(handler);
+        Assert.IsInstanceOf<KeyboardEventHandler_WithEvent<KeyUpTestThing>>(handler);
         Assert.AreEqual(InputEventType.KeyUp, handler.eventType);
         Assert.AreEqual(true, handler.requiresFocus);
         Assert.AreEqual(KeyboardModifiers.None, handler.requiredModifiers);
@@ -148,7 +148,7 @@ public class InputCompiler_KeyUpAttributes {
         MethodInfo info = typeof(KeyUpTestThing).GetMethod(nameof(KeyUpTestThing.HandleFocusAnyKeyUpWithoutArgument));
         KeyboardEventHandler handler = GetHandlerForMethod(info, handlers);
 
-        Assert.IsInstanceOf<KeyboardEventHandlerIgnoreEvent<KeyUpTestThing>>(handler);
+        Assert.IsInstanceOf<KeyboardEventHandler_IgnoreEvent<KeyUpTestThing>>(handler);
         Assert.AreEqual(InputEventType.KeyUp, handler.eventType);
         Assert.AreEqual(true, handler.requiresFocus);
         Assert.AreEqual(KeyboardModifiers.None, handler.requiredModifiers);
@@ -160,7 +160,7 @@ public class InputCompiler_KeyUpAttributes {
         MethodInfo info = typeof(KeyUpTestThing).GetMethod(nameof(KeyUpTestThing.HandleFocusSpecificKeyUp));
         KeyboardEventHandler handler = GetHandlerForMethod(info, handlers);
 
-        Assert.IsInstanceOf<KeyboardEventHandlerIgnoreEvent<KeyUpTestThing>>(handler);
+        Assert.IsInstanceOf<KeyboardEventHandler_IgnoreEvent<KeyUpTestThing>>(handler);
         Assert.AreEqual(InputEventType.KeyUp, handler.eventType);
         Assert.AreEqual(true, handler.requiresFocus);
         Assert.AreEqual(KeyboardModifiers.None, handler.requiredModifiers);
@@ -172,7 +172,7 @@ public class InputCompiler_KeyUpAttributes {
         MethodInfo info = typeof(KeyUpTestThing).GetMethod(nameof(KeyUpTestThing.HandleFocusSpecificKeyUpWithModifier));
         KeyboardEventHandler handler = GetHandlerForMethod(info, handlers);
 
-        Assert.IsInstanceOf<KeyboardEventHandlerIgnoreEvent<KeyUpTestThing>>(handler);
+        Assert.IsInstanceOf<KeyboardEventHandler_IgnoreEvent<KeyUpTestThing>>(handler);
         Assert.AreEqual(InputEventType.KeyUp, handler.eventType);
         Assert.AreEqual(true, handler.requiresFocus);
         Assert.AreEqual(KeyboardModifiers.Alt, handler.requiredModifiers);
@@ -184,7 +184,7 @@ public class InputCompiler_KeyUpAttributes {
         MethodInfo info = typeof(KeyUpTestThing).GetMethod(nameof(KeyUpTestThing.HandleFocusSpecificKeyUpWithArgument));
         KeyboardEventHandler handler = GetHandlerForMethod(info, handlers);
 
-        Assert.IsInstanceOf<KeyboardEventHandler<KeyUpTestThing>>(handler);
+        Assert.IsInstanceOf<KeyboardEventHandler_WithEvent<KeyUpTestThing>>(handler);
         Assert.AreEqual(InputEventType.KeyUp, handler.eventType);
         Assert.AreEqual(true, handler.requiresFocus);
         Assert.AreEqual(KeyboardModifiers.None, handler.requiredModifiers);
@@ -196,7 +196,7 @@ public class InputCompiler_KeyUpAttributes {
         MethodInfo info = typeof(KeyUpTestThing).GetMethod(nameof(KeyUpTestThing.HandleFocusSpecificKeyUpWithModifierWithArgument));
         KeyboardEventHandler handler = GetHandlerForMethod(info, handlers);
 
-        Assert.IsInstanceOf<KeyboardEventHandler<KeyUpTestThing>>(handler);
+        Assert.IsInstanceOf<KeyboardEventHandler_WithEvent<KeyUpTestThing>>(handler);
         Assert.AreEqual(InputEventType.KeyUp, handler.eventType);
         Assert.AreEqual(true, handler.requiresFocus);
         Assert.AreEqual(KeyboardModifiers.Alt, handler.requiredModifiers);
@@ -258,7 +258,7 @@ public class InputCompiler_KeyDownAttributes {
     public void Setup() {
         ContextDefinition ctx = new ContextDefinition(typeof(KeyDownTestThing));
         InputBindingCompiler compiler = new InputBindingCompiler(ctx);
-        handlers = compiler.CompileKeyboardInputAttributes(typeof(KeyDownTestThing));
+        handlers = compiler.CompileKeyboardEventHandlers(typeof(KeyDownTestThing), null);
     }
 
     [Test]
@@ -266,7 +266,7 @@ public class InputCompiler_KeyDownAttributes {
         MethodInfo info = typeof(KeyDownTestThing).GetMethod(nameof(KeyDownTestThing.HandleAnyKeyPressWithArgument));
         KeyboardEventHandler handler = GetHandlerForMethod(info, handlers);
 
-        Assert.IsInstanceOf<KeyboardEventHandler<KeyDownTestThing>>(handler);
+        Assert.IsInstanceOf<KeyboardEventHandler_WithEvent<KeyDownTestThing>>(handler);
         Assert.AreEqual(InputEventType.KeyDown, handler.eventType);
         Assert.AreEqual(false, handler.requiresFocus);
         Assert.AreEqual(KeyboardModifiers.None, handler.requiredModifiers);
@@ -278,7 +278,7 @@ public class InputCompiler_KeyDownAttributes {
         MethodInfo info = typeof(KeyDownTestThing).GetMethod(nameof(KeyDownTestThing.HandleAnyKeyPressWithoutArgument));
         KeyboardEventHandler handler = GetHandlerForMethod(info, handlers);
 
-        Assert.IsInstanceOf<KeyboardEventHandlerIgnoreEvent<KeyDownTestThing>>(handler);
+        Assert.IsInstanceOf<KeyboardEventHandler_IgnoreEvent<KeyDownTestThing>>(handler);
         Assert.AreEqual(InputEventType.KeyDown, handler.eventType);
         Assert.AreEqual(false, handler.requiresFocus);
         Assert.AreEqual(KeyboardModifiers.None, handler.requiredModifiers);
@@ -290,7 +290,7 @@ public class InputCompiler_KeyDownAttributes {
         MethodInfo info = typeof(KeyDownTestThing).GetMethod(nameof(KeyDownTestThing.HandleSpecificKeyPress));
         KeyboardEventHandler handler = GetHandlerForMethod(info, handlers);
 
-        Assert.IsInstanceOf<KeyboardEventHandlerIgnoreEvent<KeyDownTestThing>>(handler);
+        Assert.IsInstanceOf<KeyboardEventHandler_IgnoreEvent<KeyDownTestThing>>(handler);
         Assert.AreEqual(InputEventType.KeyDown, handler.eventType);
         Assert.AreEqual(false, handler.requiresFocus);
         Assert.AreEqual(KeyboardModifiers.None, handler.requiredModifiers);
@@ -302,7 +302,7 @@ public class InputCompiler_KeyDownAttributes {
         MethodInfo info = typeof(KeyDownTestThing).GetMethod(nameof(KeyDownTestThing.HandleSpecificKeyPressWithModifier));
         KeyboardEventHandler handler = GetHandlerForMethod(info, handlers);
 
-        Assert.IsInstanceOf<KeyboardEventHandlerIgnoreEvent<KeyDownTestThing>>(handler);
+        Assert.IsInstanceOf<KeyboardEventHandler_IgnoreEvent<KeyDownTestThing>>(handler);
         Assert.AreEqual(InputEventType.KeyDown, handler.eventType);
         Assert.AreEqual(false, handler.requiresFocus);
         Assert.AreEqual(KeyboardModifiers.Alt, handler.requiredModifiers);
@@ -314,7 +314,7 @@ public class InputCompiler_KeyDownAttributes {
         MethodInfo info = typeof(KeyDownTestThing).GetMethod(nameof(KeyDownTestThing.HandleSpecificKeyPressWithArgument));
         KeyboardEventHandler handler = GetHandlerForMethod(info, handlers);
 
-        Assert.IsInstanceOf<KeyboardEventHandler<KeyDownTestThing>>(handler);
+        Assert.IsInstanceOf<KeyboardEventHandler_WithEvent<KeyDownTestThing>>(handler);
         Assert.AreEqual(InputEventType.KeyDown, handler.eventType);
         Assert.AreEqual(false, handler.requiresFocus);
         Assert.AreEqual(KeyboardModifiers.None, handler.requiredModifiers);
@@ -326,7 +326,7 @@ public class InputCompiler_KeyDownAttributes {
         MethodInfo info = typeof(KeyDownTestThing).GetMethod(nameof(KeyDownTestThing.HandleSpecificKeyPressWithModifierWithArgument));
         KeyboardEventHandler handler = GetHandlerForMethod(info, handlers);
 
-        Assert.IsInstanceOf<KeyboardEventHandler<KeyDownTestThing>>(handler);
+        Assert.IsInstanceOf<KeyboardEventHandler_WithEvent<KeyDownTestThing>>(handler);
         Assert.AreEqual(InputEventType.KeyDown, handler.eventType);
         Assert.AreEqual(false, handler.requiresFocus);
         Assert.AreEqual(KeyboardModifiers.Alt, handler.requiredModifiers);
@@ -338,7 +338,7 @@ public class InputCompiler_KeyDownAttributes {
         MethodInfo info = typeof(KeyDownTestThing).GetMethod(nameof(KeyDownTestThing.HandleFocusAnyKeyPressWithArgument));
         KeyboardEventHandler handler = GetHandlerForMethod(info, handlers);
 
-        Assert.IsInstanceOf<KeyboardEventHandler<KeyDownTestThing>>(handler);
+        Assert.IsInstanceOf<KeyboardEventHandler_WithEvent<KeyDownTestThing>>(handler);
         Assert.AreEqual(InputEventType.KeyDown, handler.eventType);
         Assert.AreEqual(true, handler.requiresFocus);
         Assert.AreEqual(KeyboardModifiers.None, handler.requiredModifiers);
@@ -350,7 +350,7 @@ public class InputCompiler_KeyDownAttributes {
         MethodInfo info = typeof(KeyDownTestThing).GetMethod(nameof(KeyDownTestThing.HandleFocusAnyKeyPressWithoutArgument));
         KeyboardEventHandler handler = GetHandlerForMethod(info, handlers);
 
-        Assert.IsInstanceOf<KeyboardEventHandlerIgnoreEvent<KeyDownTestThing>>(handler);
+        Assert.IsInstanceOf<KeyboardEventHandler_IgnoreEvent<KeyDownTestThing>>(handler);
         Assert.AreEqual(InputEventType.KeyDown, handler.eventType);
         Assert.AreEqual(true, handler.requiresFocus);
         Assert.AreEqual(KeyboardModifiers.None, handler.requiredModifiers);
@@ -362,7 +362,7 @@ public class InputCompiler_KeyDownAttributes {
         MethodInfo info = typeof(KeyDownTestThing).GetMethod(nameof(KeyDownTestThing.HandleFocusSpecificKeyPress));
         KeyboardEventHandler handler = GetHandlerForMethod(info, handlers);
 
-        Assert.IsInstanceOf<KeyboardEventHandlerIgnoreEvent<KeyDownTestThing>>(handler);
+        Assert.IsInstanceOf<KeyboardEventHandler_IgnoreEvent<KeyDownTestThing>>(handler);
         Assert.AreEqual(InputEventType.KeyDown, handler.eventType);
         Assert.AreEqual(true, handler.requiresFocus);
         Assert.AreEqual(KeyboardModifiers.None, handler.requiredModifiers);
@@ -374,7 +374,7 @@ public class InputCompiler_KeyDownAttributes {
         MethodInfo info = typeof(KeyDownTestThing).GetMethod(nameof(KeyDownTestThing.HandleFocusSpecificKeyPressWithModifier));
         KeyboardEventHandler handler = GetHandlerForMethod(info, handlers);
 
-        Assert.IsInstanceOf<KeyboardEventHandlerIgnoreEvent<KeyDownTestThing>>(handler);
+        Assert.IsInstanceOf<KeyboardEventHandler_IgnoreEvent<KeyDownTestThing>>(handler);
         Assert.AreEqual(InputEventType.KeyDown, handler.eventType);
         Assert.AreEqual(true, handler.requiresFocus);
         Assert.AreEqual(KeyboardModifiers.Alt, handler.requiredModifiers);
@@ -386,7 +386,7 @@ public class InputCompiler_KeyDownAttributes {
         MethodInfo info = typeof(KeyDownTestThing).GetMethod(nameof(KeyDownTestThing.HandleFocusSpecificKeyPressWithArgument));
         KeyboardEventHandler handler = GetHandlerForMethod(info, handlers);
 
-        Assert.IsInstanceOf<KeyboardEventHandler<KeyDownTestThing>>(handler);
+        Assert.IsInstanceOf<KeyboardEventHandler_WithEvent<KeyDownTestThing>>(handler);
         Assert.AreEqual(InputEventType.KeyDown, handler.eventType);
         Assert.AreEqual(true, handler.requiresFocus);
         Assert.AreEqual(KeyboardModifiers.None, handler.requiredModifiers);
@@ -398,7 +398,7 @@ public class InputCompiler_KeyDownAttributes {
         MethodInfo info = typeof(KeyDownTestThing).GetMethod(nameof(KeyDownTestThing.HandleFocusSpecificKeyPressWithModifierWithArgument));
         KeyboardEventHandler handler = GetHandlerForMethod(info, handlers);
 
-        Assert.IsInstanceOf<KeyboardEventHandler<KeyDownTestThing>>(handler);
+        Assert.IsInstanceOf<KeyboardEventHandler_WithEvent<KeyDownTestThing>>(handler);
         Assert.AreEqual(InputEventType.KeyDown, handler.eventType);
         Assert.AreEqual(true, handler.requiresFocus);
         Assert.AreEqual(KeyboardModifiers.Alt, handler.requiredModifiers);

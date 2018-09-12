@@ -2,45 +2,58 @@
 
 namespace Src.Input {
 
-    public class MouseInputEvent : InputEvent {
+    public struct MouseInputEvent {
 
-        public readonly bool isFocused;
-        public readonly Vector2 mousePosition;
+        public readonly InputEventType type;
         public readonly KeyboardModifiers modifiers;
-
-        public MouseInputEvent(InputEventType type, Vector2 mousePosition, KeyboardModifiers modifiers, bool isFocused) : base(type) {
-            this.mousePosition = mousePosition;
+        
+        private readonly EventPropagator source;
+        
+        public MouseInputEvent(EventPropagator source, InputEventType type, KeyboardModifiers modifiers) {
+            this.source = source;
+            this.type = type;
             this.modifiers = modifiers;
-            this.isFocused = isFocused;
+        }
+
+        public void Consume() {
+            source.isConsumed = true;
         }
         
         public void StopPropagation() {
-            stopPropagation = true;
+            source.shouldStopPropagation = true;
         }
 
-        public void StopPropagationImmediately() {
-            stopPropagationImmediately = true;
-        }
+        public bool IsConsumed => source.isConsumed;
+        
+        public bool Alt => (modifiers & KeyboardModifiers.Alt) != 0;
 
-        internal bool stopPropagation { get; private set; }
-        internal bool stopPropagationImmediately { get; private set; }
+        public bool Shift => (modifiers & KeyboardModifiers.Shift) != 0;
 
-        public bool alt => (modifiers & KeyboardModifiers.Alt) != 0;
+        public bool Ctrl => (modifiers & KeyboardModifiers.Control) != 0;
 
-        public bool shift => (modifiers & KeyboardModifiers.Shift) != 0;
+        public bool OnlyControl => Ctrl && !Alt && !Shift;
 
-        public bool ctrl => (modifiers & KeyboardModifiers.Control) != 0;
+        public bool Command => (modifiers & KeyboardModifiers.Command) != 0;
 
-        public bool onlyControl => ctrl && !alt && !shift;
+        public bool NumLock => (modifiers & KeyboardModifiers.NumLock) != 0;
 
-        public bool command => (modifiers & KeyboardModifiers.Command) != 0;
+        public bool CapsLock => (modifiers & KeyboardModifiers.CapsLock) != 0;
 
-        public bool numLock => (modifiers & KeyboardModifiers.NumLock) != 0;
+        public bool Windows => (modifiers & KeyboardModifiers.Windows) != 0;
 
-        public bool capsLock => (modifiers & KeyboardModifiers.CapsLock) != 0;
+        public bool IsMouseLeftDown => source.mouseState.isLeftMouseDown;
+        public bool IsMouseLeftDownThisFrame => source.mouseState.isLeftMouseDownThisFrame;
 
-        public bool windows => (modifiers & KeyboardModifiers.Windows) != 0;
+        public bool IsMouseRightDown => source.mouseState.isRightMouseDown;
+        public bool IsMouseRightDownThisFrame => source.mouseState.isRightMouseDownThisFrame;
 
+        public bool IsMouseMiddleDown => source.mouseState.isMiddleMouseDown;
+        public bool IsMouseMiddleDownThisFrame => source.mouseState.isMiddleMouseDownThisFrame;
+
+        public Vector2 ScrollDelta => source.mouseState.scrollDelta;
+
+        public Vector2 MousePosition => source.mouseState.mousePosition;
+        public Vector2 MouseDownPosition => source.mouseState.mouseDownPosition;
     }
 
 }

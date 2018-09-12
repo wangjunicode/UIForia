@@ -1,17 +1,4 @@
-﻿using Src;
-using UnityEngine;
-
-public struct MeasurementVector2 {
-
-    public UIMeasurement x;
-    public UIMeasurement y;
-
-    public MeasurementVector2(UIMeasurement x, UIMeasurement y) {
-        this.x = x;
-        this.y = y;
-    }
-
-}
+﻿using UnityEngine;
 
 public class UITransform {
 

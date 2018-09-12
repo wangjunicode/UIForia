@@ -1,10 +1,12 @@
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.Runtime.CompilerServices;
 using Rendering;
 using Src;
 using Src.Systems;
 
+[assembly:InternalsVisibleTo("")] 
 public abstract class UIView : IElementRegistry {
 
     private static int ElementIdGenerator;
@@ -21,16 +23,19 @@ public abstract class UIView : IElementRegistry {
     protected readonly Type elementType;
     private UIElement rootElement;
 
+    private string template;
+    
     // init -> prepare systems for elements
     // ready -> about to handle first frame, initial template is loaded by now
     // OnElementCreated -> init an entire hierarchy of elements (1 call for the whole group)
     // OnElementDestroyed -> destroy an entire hierarchy of elements (1 call for the whole group)
 
-    protected UIView(Type elementType) {
+    protected UIView(Type elementType, string template = null) {
         this.elementType = elementType;
         this.systems = new List<ISystem>();
         this.elementTree = new SkipTree<UIElement>();
-
+        this.template = template;
+        
         styleSystem = new StyleSystem(this);
         bindingSystem = new BindingSystem();
 
@@ -45,7 +50,12 @@ public abstract class UIView : IElementRegistry {
             system.OnInitialize();
         }
 
-        CreateElement(TemplateParser.GetParsedTemplate(elementType, forceTemplateReparse).CreateWithoutScope(this), null);
+        if (template != null) {
+            CreateElement(TemplateParser.ParseTemplateFromString(elementType, template).CreateWithoutScope(this), null);
+        }
+        else {
+            CreateElement(TemplateParser.GetParsedTemplate(elementType, forceTemplateReparse).CreateWithoutScope(this), null);
+        }
 
         foreach (ISystem system in systems) {
             system.OnReady();
@@ -61,20 +71,27 @@ public abstract class UIView : IElementRegistry {
         Initialize(true);
     }
 
+    
     protected void InitHierarchy(InitData elementData) {
-        if (elementData.element.parent == null) {
-            elementData.element.flags |= UIElementFlags.AncestorEnabled;
+        UIElement element = elementData.element;
+        List<InitData> children = elementData.children;
+        // todo -- assert no duplicate root elements
+        if (element.parent == null) {
+            element.flags |= UIElementFlags.AncestorEnabled;
+            element.depth = 0;
         }
         else {
-            if (elementData.element.parent.isEnabled) {
-                elementData.element.flags |= UIElementFlags.AncestorEnabled;
+            if (element.parent.isEnabled) {
+                element.flags |= UIElementFlags.AncestorEnabled;
             }
+            element.depth = element.parent.depth + 1;
         }
 
-        elementTree.AddItem(elementData.element);
+        elementTree.AddItem(element);
 
-        for (int i = 0; i < elementData.children.Count; i++) {
-            InitHierarchy(elementData.children[i]);
+        for (int i = 0; i < children.Count; i++) {
+            children[i].element.siblingIndex = i;
+            InitHierarchy(children[i]);
         }
     }
 
@@ -86,11 +103,9 @@ public abstract class UIView : IElementRegistry {
             data.element.flags |= UIElementFlags.AncestorEnabled;
 
             rootElement = data.element;
-            rootElement.depth = 0;
         }
         else {
             data.element.parent = parent;
-            data.element.depth = parent.depth + 1;
             if (parent.isEnabled) {
                 data.element.flags |= UIElementFlags.AncestorEnabled;
             }
@@ -106,7 +121,7 @@ public abstract class UIView : IElementRegistry {
         InvokeOnReady(data);
     }
 
-    private void InvokeOnCreate(InitData elementData) {
+    private static void InvokeOnCreate(InitData elementData) {
         for (int i = 0; i < elementData.children.Count; i++) {
             InvokeOnCreate(elementData.children[i]);
         }
@@ -114,7 +129,7 @@ public abstract class UIView : IElementRegistry {
         elementData.element.OnCreate();
     }
     
-    private void InvokeOnReady(InitData elementData) {
+    private static void InvokeOnReady(InitData elementData) {
         for (int i = 0; i < elementData.children.Count; i++) {
             InvokeOnReady(elementData.children[i]);
         }
@@ -210,40 +225,3 @@ public abstract class UIView : IElementRegistry {
     }
 
 }
-
-/*
- enableTree.TraversePreOrder((element) => {
-            element.flags |= UIElementFlags.Enabled;
-            element.flags &= ~(UIElementFlags.PendingEnable);
-        });
-
-        enableTree.GetRootItems(scratchList);
-
-        for (int i = 0; i < scratchList.Count; i++) {
-            UIElement root = scratchList[i];
-            if (root.hasDisabledAncestor) continue;
-
-            // enable tree will contain everything that had EnableElement called on it
-            // we need to walk the tree until we find a disabled child and set the AncestorEnabled flag
-            // if the element was disabled before the flag is updated, invoke it's OnEnabled handler
-            elementTree.ConditionalTraversePreOrder(root, (element) => {
-                bool wasDisabled = element.isDisabled;
-                element.flags |= UIElementFlags.AncestorEnabled;
-
-                if ((element.flags & UIElementFlags.PendingEnable) != 0) {
-                    element.flags |= UIElementFlags.Enabled;
-                    element.flags &= ~(UIElementFlags.PendingEnable);
-                }
-
-                if (wasDisabled && !element.isDisabled) {
-                    // invoke OnEnabled if present
-                    element.OnEnable();
-                }
-
-                return element.isSelfDisabled;
-            });
-        }
-
-        enableTree.Clear();
-        scratchList.Clear();
-        */

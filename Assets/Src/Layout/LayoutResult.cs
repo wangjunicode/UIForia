@@ -6,11 +6,11 @@ namespace Src.Systems {
 
         public readonly Rect rect;
         public readonly Rect localRect;
-        public readonly int elementId;
+        public readonly UIElement element;
 
         // todo fix local rect its just for demo
-        public LayoutResult(int elementId, Rect rect, Rect localRect) {
-            this.elementId = elementId;
+        public LayoutResult(UIElement element, Rect rect, Rect localRect) {
+            this.element = element;
             this.rect = rect;
             this.localRect = localRect;
         }

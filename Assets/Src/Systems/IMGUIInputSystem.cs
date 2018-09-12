@@ -21,7 +21,7 @@ namespace Src.Systems {
         
         private readonly HashSet<int> hoverStyles;
         private readonly IElementRegistry elementSystem;
-        private readonly Dictionary<int, InputBindingGroup> bindingMap;
+        private readonly Dictionary<int, MouseHandlerGroup> bindingMap;
         
         private int[] scratchArray;
         private int resultCount;
@@ -40,7 +40,7 @@ namespace Src.Systems {
             this.elementsThisFrame = new HashSet<int>();
             this.elementsLastFrame = new HashSet<int>();
 
-            this.bindingMap = new Dictionary<int, InputBindingGroup>();
+            this.bindingMap = new Dictionary<int, MouseHandlerGroup>();
 
             this.styleSystem.onAvailableStatesChanged += HandleStatefulStyle;
             queryResults = new LayoutResult[16];
@@ -71,7 +71,7 @@ namespace Src.Systems {
             resultCount = layoutSystem.QueryPoint(Event.current.mousePosition, ref queryResults);
 
             for (int i = 0; i < resultCount; i++) {
-                int elementId = queryResults[i].elementId;
+                int elementId = queryResults[i].element.id;
                 elementsThisFrame.Add(elementId);
                 
                 if (hoverStyles.Contains(elementId)) {
@@ -127,25 +127,25 @@ namespace Src.Systems {
         }
 
         private void RunBindings(int elementId, InputEvent inputEvent) {
-            InputBindingGroup bindingGroup;
-            if (!bindingMap.TryGetValue(elementId, out bindingGroup)) {
-                return;
-            }
-            if ((bindingGroup.handledEvents & inputEvent.type) == 0) {
-                return;
-            }
-            InputBinding[] bindings = bindingGroup.bindings;
-            UIElement element = elementSystem.GetElement(elementId);
-            InputEventType eventType = inputEvent.type;
-
-            bindingGroup.context.SetObjectAlias(EventAlias, inputEvent);
-            for (int i = 0; i < bindings.Length; i++) {
-                InputBinding binding = bindings[i];
-                if (binding.eventType == eventType) {
-                    binding.Execute(element, bindingGroup.context);
-                }
-            }
-            bindingGroup.context.RemoveObjectAlias(EventAlias);
+//            MouseHandlerGroup bindingGroup;
+//            if (!bindingMap.TryGetValue(elementId, out bindingGroup)) {
+//                return;
+//            }
+//            if ((bindingGroup.handledEvents & inputEvent.type) == 0) {
+//                return;
+//            }
+//            InputBinding[] bindings = bindingGroup.bindings;
+//            UIElement element = elementSystem.GetElement(elementId);
+//            InputEventType eventType = inputEvent.type;
+//
+//            bindingGroup.context.SetObjectAlias(EventAlias, inputEvent);
+//            for (int i = 0; i < bindings.Length; i++) {
+//                InputBinding binding = bindings[i];
+//                if (binding.eventType == eventType) {
+//                    binding.Execute(element, bindingGroup.context);
+//                }
+//            }
+//            bindingGroup.context.RemoveObjectAlias(EventAlias);
 
         }
 
@@ -256,7 +256,7 @@ namespace Src.Systems {
                     handledEvents |= inputBindings[i].eventType;
                 }
 
-                bindingMap[elementData.elementId] = new InputBindingGroup(elementData.context, inputBindings, handledEvents);
+              //  bindingMap[elementData.elementId] = new MouseHandlerGroup(elementData.context, inputBindings, handledEvents);
 
             }
 

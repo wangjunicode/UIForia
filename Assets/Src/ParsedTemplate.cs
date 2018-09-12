@@ -82,8 +82,10 @@ namespace Src {
 
         private void AssignContext(UIElement element, UITemplateContext context) {
             element.templateContext = context;
-            for (int i = 0; i < element.templateChildren.Length; i++) {
-                AssignContext(element.templateChildren[i], context);
+            if (element.templateChildren != null) {
+                for (int i = 0; i < element.templateChildren.Length; i++) {
+                    AssignContext(element.templateChildren[i], context);
+                }
             }
         }
         

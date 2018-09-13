@@ -13,8 +13,8 @@ namespace Src {
 
         public override Type elementType => typeof(UIRepeatTerminal);
 
-        public override InitData CreateScoped(TemplateScope inputScope) {
-            InitData data = GetCreationData(new UIRepeatTerminal(), inputScope.context);
+        public override MetaData CreateScoped(TemplateScope inputScope) {
+            MetaData data = GetCreationData(new UIRepeatTerminal(), inputScope.context);
             data.bindings = terminalBindings;
             return data;
         }

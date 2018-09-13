@@ -1,4 +1,7 @@
+using System;
+using System.Collections.Generic;
 using Rendering;
+using Src;
 using Src.Input;
 using UnityEngine;
 
@@ -21,37 +24,76 @@ public abstract partial class InputSystem {
     public Vector2 MousePosition => m_MouseState.mousePosition;
     public Vector2 MouseDownPosition => m_MouseState.mouseDownPosition;
 
-    public bool IsDragging => m_MouseState.isDragging;
+    public bool IsDragging { get; protected set; }
+
+    private void RunMouseEvents(List<UIElement> elements, InputEventType eventType) {
+        m_EventPropagator.Reset(m_MouseState);
+        MouseInputEvent mouseEvent = new MouseInputEvent(m_EventPropagator, eventType, modifiersThisFrame);
+        object boxedEvent = mouseEvent;
+        for (int i = 0; i < elements.Count; i++) {
+            UIElement element = elements[i];
+            MouseHandlerGroup mouseHandlerGroup;
+
+            if (!m_MouseHandlerMap.TryGetValue(element.id, out mouseHandlerGroup)) {
+                continue;
+            }
+
+            if ((mouseHandlerGroup.handledEvents & eventType) == 0) {
+                continue;
+            }
+
+            MouseEventHandler[] handlers = mouseHandlerGroup.handlers;
+            mouseHandlerGroup.context.SetObjectAlias(k_EventAlias, boxedEvent);
+
+            for (int j = 0; j < handlers.Length; j++) {
+                MouseEventHandler handler = handlers[j];
+                if (handler.eventType != eventType) {
+                    continue;
+                }
+
+                if (handler.eventPhase != EventPhase.Bubble) {
+                    m_MouseEventCaptureList.Add(ValueTuple.Create(handler, element, mouseHandlerGroup.context));
+                    continue;
+                }
+
+                handler.Invoke(element, mouseHandlerGroup.context, mouseEvent);
+                if (m_EventPropagator.shouldStopPropagation) {
+                    break;
+                }
+            }
+
+            mouseHandlerGroup.context.RemoveObjectAlias(k_EventAlias);
+            if (m_EventPropagator.shouldStopPropagation) {
+                m_MouseEventCaptureList.Clear();
+                return;
+            }
+        }
+
+        for (int i = 0; i < m_MouseEventCaptureList.Count; i++) {
+            MouseEventHandler handler = m_MouseEventCaptureList[i].Item1;
+            UIElement element = m_MouseEventCaptureList[i].Item2;
+            UITemplateContext context = m_MouseEventCaptureList[i].Item3;
+            context.SetObjectAlias(k_EventAlias, boxedEvent);
+
+            handler.Invoke(element, context, mouseEvent);
+
+            context.RemoveObjectAlias(k_EventAlias);
+
+            if (m_EventPropagator.shouldStopPropagation) {
+                m_MouseEventCaptureList.Clear();
+                return;
+            }
+        }
+
+        m_MouseEventCaptureList.Clear();
+    }
+
 
     private void ProcessMouseEvents() {
-        m_LayoutResultCount = m_LayoutSystem.QueryPoint(m_MouseState.mousePosition, ref m_LayoutQueryResults);
 
-        for (int i = 0; i < m_LayoutResultCount; i++) {
-            int elementId = m_LayoutQueryResults[i].element.id;
-
-            UIElement element = m_LayoutQueryResults[i].element;
-
-            m_ElementsThisFrame.Add(element);
-
-            if (!m_ElementsLastFrame.Contains(element)) {
-                m_EnteredElements.Add(element);
-                m_StyleSystem.EnterState(elementId, StyleState.Hover);
-            }
-        }
-
-        for (int i = 0; i < m_ElementsLastFrame.Count; i++) {
-            if (!m_ElementsThisFrame.Contains(m_ElementsLastFrame[i])) {
-                m_ExitedElements.Add(m_ElementsLastFrame[i]);
-                m_StyleSystem.ExitState(m_ElementsLastFrame[i].id, StyleState.Hover);
-            }
-        }
-
-        m_EnteredElements.Sort(s_DepthComparer);
-        m_ElementsThisFrame.Sort(s_DepthComparer);
-
-        RunMouseEvents(m_EnteredElements, InputEventType.MouseEnter);
         RunMouseEvents(m_ExitedElements, InputEventType.MouseExit);
-        
+        RunMouseEvents(m_EnteredElements, InputEventType.MouseEnter);
+
         if (m_MouseState.isLeftMouseDownThisFrame) {
             RunMouseEvents(m_ElementsThisFrame, InputEventType.MouseDown);
         }
@@ -61,8 +103,8 @@ public abstract partial class InputSystem {
 
         RunMouseEvents(m_ElementsThisFrame, m_MouseState.DidMove ? InputEventType.MouseMove : InputEventType.MouseHover);
 
-        m_EnteredElements.Clear();
-        m_ExitedElements.Clear();
     }
+
+   
 
 }

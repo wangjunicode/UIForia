@@ -31,7 +31,6 @@
             <e p="InputBindings" t="Include">
               <e p="InputBinding.cs" t="Include" />
             </e>
-            <e p="MouseHandlerGroup.cs" t="Include" />
             <e p="RepeatBinding.cs" t="Include" />
             <e p="RepeatChildBinding.cs" t="Include" />
             <e p="RepeatTerminalBinding.cs" t="Include" />
@@ -194,6 +193,12 @@
           </e>
           <e p="ImportDeclaration.cs" t="Include" />
           <e p="Input" t="Include">
+            <e p="DragCreatorGroup.cs" t="Include" />
+            <e p="DragEvent.cs" t="Include" />
+            <e p="DragEventAttribute.cs" t="Include" />
+            <e p="DragEventCreator.cs" t="Include" />
+            <e p="DragEventHandler.cs" t="Include" />
+            <e p="DragHandlerGroup.cs" t="Include" />
             <e p="EventPhase.cs" t="Include" />
             <e p="EventPropagator.cs" t="Include" />
             <e p="FocusEventHandler.cs" t="Include" />
@@ -201,14 +206,14 @@
             <e p="IInputProvider.cs" t="Include" />
             <e p="InputEvent.cs" t="Include" />
             <e p="InputEventType.cs" t="Include" />
-            <e p="KeyboardEventHandler_WithEvent.cs" t="Include" />
+            <e p="KeyboardEventHandler.cs" t="Include" />
             <e p="KeyboardInputEvent.cs" t="Include" />
             <e p="KeyboardModifiers.cs" t="Include" />
             <e p="KeyState.cs" t="Include" />
             <e p="MouseEvent.cs" t="Include" />
             <e p="MouseEventHandler.cs" t="Include" />
             <e p="MouseEventType.cs" t="Include" />
-            <e p="MouseHandleShape.cs" t="Include" />
+            <e p="MouseHandlerGroup.cs" t="Include" />
           </e>
           <e p="Layout" t="Include">
             <e p="CrossAxisAlignment.cs" t="Include" />
@@ -356,6 +361,7 @@
             <e p="IMGUIRenderSystem.cs" t="Include" />
             <e p="InputSystem" t="Include">
               <e p="InputSystem.cs" t="Include" />
+              <e p="InputSystem.Drag.cs" t="Include" />
               <e p="InputSystem.ISystem.cs" t="Include" />
               <e p="InputSystem.Keyboard.cs" t="Include" />
               <e p="InputSystem.Mouse.cs" t="Include" />
@@ -371,7 +377,7 @@
           <e p="Temp_SpecFixtures.cs" t="Include" />
           <e p="TemplateAttribute.cs" t="Include" />
           <e p="Templates" t="Include">
-            <e p="InitData.cs" t="Include" />
+            <e p="MetaData.cs" t="Include" />
             <e p="TemplateScope.cs" t="Include" />
             <e p="UIChildrenTemplate.cs" t="Include" />
             <e p="UIElementTemplate.cs" t="Include" />
@@ -420,7 +426,8 @@
           <e p="ExpressionCompilerTests.cs" t="Include" />
           <e p="ExpressionParserTests.cs" t="Include" />
           <e p="InputCompilerBindingTests.cs" t="Include" />
-          <e p="InputSystem_Tests.cs" t="Include" />
+          <e p="InputSystem_DragTests.cs" t="Include" />
+          <e p="InputSystem_MouseTests.cs" t="Include" />
           <e p="Mocks" t="Include">
             <e p="MockInputSystem.cs" t="Include" />
             <e p="MockLayoutSystem.cs" t="Include" />

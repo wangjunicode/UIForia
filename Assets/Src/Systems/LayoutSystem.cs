@@ -54,7 +54,7 @@ namespace Src.Systems {
             layoutTree.TraversePreOrder(this, (self, node) => { node.UpdateData(self); });
         }
 
-        public void OnElementCreated(InitData elementData) {
+        public void OnElementCreated(MetaData elementData) {
             if ((elementData.element.flags & UIElementFlags.RequiresLayout) != 0) {
                 LayoutNode node = new LayoutNode(elementData.element);
                 layoutTree.AddItem(node);

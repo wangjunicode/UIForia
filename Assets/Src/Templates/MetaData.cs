@@ -14,11 +14,11 @@ namespace Src {
     
     // todo -- pool these
     [DebuggerDisplay("{" + nameof(element) + "}")]
-    public class InitData {
+    public class MetaData {
 
         public readonly UIElement element;
         public UITemplateContext context;
-        public readonly List<InitData> children;
+        public readonly List<MetaData> children;
 
         // these are SHARED between all instances of a template
         // therefore we can't combine them into one single list
@@ -33,17 +33,19 @@ namespace Src {
         public List<StyleBinding> constantStyleBindings;
         public KeyboardEventHandler[] keyboardEventHandlers;
         public MouseEventHandler[] mouseEventHandlers;
+        public DragEventHandler[] dragEventHandlers;
+        public DragEventCreator[] dragEventCreators;
         
-        public InitData(UIElement element, UITemplateContext context) {
+        public MetaData(UIElement element, UITemplateContext context) {
             this.element = element;
             this.context = context;
-            this.children = new List<InitData>();
+            this.children = new List<MetaData>();
         }
         
         public int elementId => element.id;
         public string name => element.name;
         
-        public void AddChild(InitData child) {
+        public void AddChild(MetaData child) {
             children.Add(child);
             child.element.parent = element;
         }

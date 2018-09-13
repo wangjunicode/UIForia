@@ -10,7 +10,7 @@ namespace Rendering {
         void OnReady();
         void OnInitialize();
         
-        void OnElementCreated(InitData elementData);
+        void OnElementCreated(MetaData elementData);
         void OnElementEnabled(UIElement element);
         void OnElementDisabled(UIElement element);
         void OnElementDestroyed(UIElement element);

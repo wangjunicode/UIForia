@@ -10,7 +10,7 @@ namespace Src {
 
         public override Type elementType => null;
 
-        public override InitData CreateScoped(TemplateScope inputScope) {
+        public override MetaData CreateScoped(TemplateScope inputScope) {
             throw new System.NotImplementedException();
         }
 

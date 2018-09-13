@@ -18,7 +18,18 @@ namespace Src.Input {
         KeyUp = 1 << 9,
 
         Focus = 1 << 10,
-        Blur = 1 << 11
+        Blur = 1 << 11,
+
+        DragCreate = 1 << 12,
+        DragMove = 1 << 13,
+        DragHover = 1 << 14,
+        DragEnter = 1 << 15,
+        DragExit = 1 << 16,
+        DragDrop = 1 << 17,
+        DragCancel = 1 << 18,
+
+        DragUpdate = DragMove | DragHover,
+        MouseUpdate = MouseMove | MouseHover,
 
     }
 

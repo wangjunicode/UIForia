@@ -13,9 +13,9 @@ namespace Src {
 
         public override Type elementType => typeof(UISwitchCaseElement);
 
-        public override InitData CreateScoped(TemplateScope inputScope) {
+        public override MetaData CreateScoped(TemplateScope inputScope) {
             UISwitchCaseElement instance = new UISwitchCaseElement();
-            InitData data = GetCreationData(instance, inputScope.context);
+            MetaData data = GetCreationData(instance, inputScope.context);
             
             for (int i = 0; i < childTemplates.Count; i++) {
                 data.AddChild(childTemplates[i].CreateScoped(inputScope));

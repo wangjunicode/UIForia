@@ -39,7 +39,7 @@ namespace Src.Systems {
 
         public void OnInitialize() { }
 
-        public void OnElementCreated(InitData elementData) {
+        public void OnElementCreated(MetaData elementData) {
             elementData.element.name = elementData.name;
             map[elementData.element.id] = elementData.element;
         }

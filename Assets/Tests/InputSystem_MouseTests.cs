@@ -208,23 +208,25 @@ public class InputSystemTests {
         testView.Initialize();
         testView.layoutSystem.SetViewportRect(new Rect(0, 0, 1000, 1000));
         InputSystemTestThing root = (InputSystemTestThing) testView.RootElement;
-        MouseState mouseState = new MouseState();
-        mouseState.isLeftMouseDown = true;
-        mouseState.isLeftMouseDownThisFrame = true;
 
-        mouseState.mousePosition = new Vector2(20, 10);
-        testView.inputSystem.SetMouseState(mouseState);
+
+        testView.inputSystem.MouseDown(new Vector2(20, 10));
         testView.Update();
+        
         Assert.AreEqual(0, root.clickedChildIndex);
         Assert.IsTrue(root.wasMouseDown);
 
-        mouseState.mousePosition = new Vector2(120, 10);
-        testView.inputSystem.SetMouseState(mouseState);
+        testView.inputSystem.ClearClickState();
+        testView.Update();
+        
+        testView.inputSystem.MouseDown(new Vector2(120, 10));
         testView.Update();
         Assert.AreEqual(1, root.clickedChildIndex);
 
-        mouseState.mousePosition = new Vector2(220, 10);
-        testView.inputSystem.SetMouseState(mouseState);
+        testView.inputSystem.ClearClickState();
+        testView.Update();
+        
+        testView.inputSystem.MouseDown(new Vector2(220, 10));
         testView.Update();
         Assert.AreEqual(2, root.clickedChildIndex);
     }
@@ -236,21 +238,19 @@ public class InputSystemTests {
         testView.layoutSystem.SetViewportRect(new Rect(0, 0, 1000, 1000));
         InputSystemTestThing2 root = (InputSystemTestThing2) testView.RootElement;
 
-        MouseState mouseState = new MouseState();
-        mouseState.isLeftMouseDown = true;
-        mouseState.isLeftMouseDownThisFrame = true;
-
-        mouseState.mousePosition = new Vector2(20, 10);
-        testView.inputSystem.SetMouseState(mouseState);
+        testView.inputSystem.MouseDown(new Vector2(20, 10));
+        
         root.shouldStopPropagation = true;
         testView.Update();
 
         Assert.AreEqual(0, root.clickedChildIndex);
         Assert.IsFalse(root.wasMouseDown);
 
+        testView.inputSystem.MouseUp();
+        testView.Update();
+        
         root.shouldStopPropagation = false;
-        mouseState.mousePosition = new Vector2(120, 10);
-        testView.inputSystem.SetMouseState(mouseState);
+        testView.inputSystem.MouseDown(new Vector2(120, 10));
         testView.Update();
 
         Assert.AreEqual(1, root.clickedChildIndex);
@@ -264,23 +264,20 @@ public class InputSystemTests {
         testView.layoutSystem.SetViewportRect(new Rect(0, 0, 1000, 1000));
         InputSystemTestThing2 root = (InputSystemTestThing2) testView.RootElement;
 
-        MouseState mouseState = new MouseState();
-        mouseState.isLeftMouseDown = true;
-        mouseState.isLeftMouseDownThisFrame = true;
-
-        mouseState.mousePosition = new Vector2(120, 10);
-        testView.inputSystem.SetMouseState(mouseState);
+        testView.inputSystem.MouseDown( new Vector2(120, 10));
         root.shouldStopPropagation = true;
         testView.Update();
 
         Assert.AreEqual(-1, root.clickedChildIndex);
         Assert.IsTrue(root.wasMouseDown);
 
+        testView.inputSystem.ClearClickState();
+        testView.Update();
+
         root.wasMouseDown = false;
 
         root.shouldStopPropagation = false;
-        mouseState.mousePosition = new Vector2(120, 10);
-        testView.inputSystem.SetMouseState(mouseState);
+        testView.inputSystem.MouseDown( new Vector2(120, 10));
         testView.Update();
 
         Assert.AreEqual(1, root.clickedChildIndex);

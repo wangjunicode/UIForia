@@ -5,7 +5,7 @@ namespace Src {
     public class TemplateScope {
 
         public UITemplateContext context;
-        public List<InitData> inputChildren;
+        public List<MetaData> inputChildren;
         
     }
 

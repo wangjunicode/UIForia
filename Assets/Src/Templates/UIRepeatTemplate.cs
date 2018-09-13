@@ -17,7 +17,7 @@ namespace Src {
 
         public override Type elementType => typeof(UIRepeatTemplate);
 
-        public override InitData CreateScoped(TemplateScope inputScope) {
+        public override MetaData CreateScoped(TemplateScope inputScope) {
 
             ReflectionUtil.ObjectArray2[0] = childTemplates[0];
             ReflectionUtil.ObjectArray2[1] = inputScope;
@@ -28,11 +28,11 @@ namespace Src {
                 ReflectionUtil.ObjectArray2
             );
 
-            InitData data = GetCreationData(instance, inputScope.context);
+            MetaData data = GetCreationData(instance, inputScope.context);
 
             UIRepeatTerminal terminal = new UIRepeatTerminal();
 
-            InitData terminalData = new InitData(terminal, inputScope.context);
+            MetaData terminalData = new MetaData(terminal, inputScope.context);
             terminalData.bindings = terminalBindings;
             terminalData.constantBindings = Binding.EmptyArray;
             terminalData.inputBindings = InputBindings.InputBinding.EmptyArray;

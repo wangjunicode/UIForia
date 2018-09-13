@@ -38,7 +38,7 @@ public abstract partial class InputSystem {
     protected void ProcessKeyboardEvent(KeyCode keyCode, InputEventType eventType, char character, KeyboardModifiers modifiers) {
         KeyboardInputEvent keyEvent = new KeyboardInputEvent(eventType, keyCode, character, modifiers, m_FocusedId != -1);
         if (m_FocusedId == -1) {
-            keyboardEventTree.ConditionalTraversePreOrder(keyEvent, (item, evt) => {
+            m_KeyboardEventTree.ConditionalTraversePreOrder(keyEvent, (item, evt) => {
                 if (evt.stopPropagation) return false;
 
                 IReadOnlyList<KeyboardEventHandler> handlers = item.handlers;
@@ -55,7 +55,7 @@ public abstract partial class InputSystem {
             });
         }
         else {
-            KeyboardEventTreeNode focusedNode = keyboardEventTree.GetItem(m_FocusedId);
+            KeyboardEventTreeNode focusedNode = m_KeyboardEventTree.GetItem(m_FocusedId);
             IReadOnlyList<KeyboardEventHandler> handlers = focusedNode.handlers;
             for (int i = 0; i < handlers.Count; i++) {
                 if (keyEvent.stopPropagationImmediately) break;
@@ -65,16 +65,16 @@ public abstract partial class InputSystem {
     }
 
     private void ProcessKeyboardEvents() {
-        for (int i = 0; i < upThisFrame.Count; i++) {
-            m_KeyStates[upThisFrame[i]] = KeyState.UpNotThisFrame;
+        for (int i = 0; i < m_UpThisFrame.Count; i++) {
+            m_KeyStates[m_UpThisFrame[i]] = KeyState.UpNotThisFrame;
         }
 
-        for (int i = 0; i < downThisFrame.Count; i++) {
-            m_KeyStates[downThisFrame[i]] = KeyState.DownNotThisFrame;
+        for (int i = 0; i < m_DownThisFrame.Count; i++) {
+            m_KeyStates[m_DownThisFrame[i]] = KeyState.DownNotThisFrame;
         }
 
-        downThisFrame.Clear();
-        upThisFrame.Clear();
+        m_DownThisFrame.Clear();
+        m_UpThisFrame.Clear();
 
         HandleShiftKey(KeyCode.LeftShift);
         HandleShiftKey(KeyCode.RightShift);
@@ -110,13 +110,13 @@ public abstract partial class InputSystem {
                     if (m_KeyStates.ContainsKey(keyCode)) {
                         KeyState state = m_KeyStates[keyCode];
                         if ((state & KeyState.Down) == 0) {
-                            downThisFrame.Add(keyCode);
+                            m_DownThisFrame.Add(keyCode);
                             m_KeyStates[keyCode] = KeyState.DownThisFrame;
                             ProcessKeyboardEvent(keyCode, InputEventType.KeyDown, s_Event.character, modifiersThisFrame);
                         }
                     }
                     else {
-                        downThisFrame.Add(keyCode);
+                        m_DownThisFrame.Add(keyCode);
                         m_KeyStates[keyCode] = KeyState.DownThisFrame;
                         ProcessKeyboardEvent(keyCode, InputEventType.KeyDown, s_Event.character, modifiersThisFrame);
                     }
@@ -125,7 +125,7 @@ public abstract partial class InputSystem {
                     break;
 
                 case EventType.KeyUp:
-                    upThisFrame.Add(keyCode);
+                    m_UpThisFrame.Add(keyCode);
                     m_KeyStates[keyCode] = KeyState.UpThisFrame;
                     ProcessKeyboardEvent(keyCode, InputEventType.KeyUp, s_Event.character, modifiersThisFrame);
                     HandleModifierUp(keyCode);
@@ -139,12 +139,12 @@ public abstract partial class InputSystem {
         bool isDown = UnityEngine.Input.GetKey(code);
         if ((wasDown && !isDown) || UnityEngine.Input.GetKeyUp(code)) {
             m_KeyStates[code] = KeyState.UpThisFrame;
-            upThisFrame.Add(code);
+            m_UpThisFrame.Add(code);
             ProcessKeyboardEvent(code, InputEventType.KeyUp, '\0', modifiersThisFrame);
         }
         else if (UnityEngine.Input.GetKeyDown(code)) {
             m_KeyStates[code] = KeyState.DownThisFrame;
-            downThisFrame.Add(code);
+            m_DownThisFrame.Add(code);
         }
         else if (isDown) {
             m_KeyStates[code] = KeyState.Down;

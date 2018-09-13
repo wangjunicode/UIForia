@@ -7,6 +7,8 @@ using Src.Input;
 using Src.Util;
 using UnityEngine;
 
+// todo -- test mouse and drag and focus annotations
+
 [TestFixture]
 public class InputCompiler_KeyUpAttributes {
 

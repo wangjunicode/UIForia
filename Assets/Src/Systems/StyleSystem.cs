@@ -53,7 +53,7 @@ namespace Src.Systems {
 
         public void OnReset() { }
 
-        public void OnElementCreated(InitData elementData) {
+        public void OnElementCreated(MetaData elementData) {
             UIElement element = elementData.element;
 
             if ((element.flags & UIElementFlags.TextElement) != 0) {

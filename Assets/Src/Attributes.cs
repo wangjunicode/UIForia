@@ -9,13 +9,13 @@ namespace Src {
     public class AcceptFocus : Attribute { }
 
     [AttributeUsage(AttributeTargets.Method)]
-    public abstract class MouseInputBindingAttribute : Attribute {
+    public abstract class MouseEventHandlerAttribute : Attribute {
 
         public readonly KeyboardModifiers modifiers;
         public readonly InputEventType eventType;
         public readonly EventPhase phase;
 
-        protected MouseInputBindingAttribute(KeyboardModifiers modifiers, InputEventType eventType, EventPhase phase) {
+        protected MouseEventHandlerAttribute(KeyboardModifiers modifiers, InputEventType eventType, EventPhase phase) {
             this.modifiers = modifiers;
             this.eventType = eventType;
             this.phase = phase;
@@ -24,7 +24,7 @@ namespace Src {
     }
 
     [AttributeUsage(AttributeTargets.Method)]
-    public class OnMouseDownAttribute : MouseInputBindingAttribute {
+    public class OnMouseDownAttribute : MouseEventHandlerAttribute {
 
         public OnMouseDownAttribute(KeyboardModifiers modifiers = KeyboardModifiers.None, EventPhase phase = EventPhase.Bubble)
             : base(modifiers, InputEventType.MouseDown, phase) { }
@@ -36,7 +36,7 @@ namespace Src {
     }
 
     [AttributeUsage(AttributeTargets.Method)]
-    public class OnMouseUpAttribute : MouseInputBindingAttribute {
+    public class OnMouseUpAttribute : MouseEventHandlerAttribute {
 
         public OnMouseUpAttribute(KeyboardModifiers modifiers = KeyboardModifiers.None, EventPhase phase = EventPhase.Bubble)
             : base(modifiers, InputEventType.MouseUp, phase) { }
@@ -47,7 +47,7 @@ namespace Src {
     }
 
     [AttributeUsage(AttributeTargets.Method)]
-    public class OnMouseEnterAttribute : MouseInputBindingAttribute {
+    public class OnMouseEnterAttribute : MouseEventHandlerAttribute {
 
         public OnMouseEnterAttribute(KeyboardModifiers modifiers = KeyboardModifiers.None, EventPhase phase = EventPhase.Bubble)
             : base(modifiers, InputEventType.MouseEnter, phase) { }
@@ -58,7 +58,7 @@ namespace Src {
     }
 
     [AttributeUsage(AttributeTargets.Method)]
-    public class OnMouseExitAttribute : MouseInputBindingAttribute {
+    public class OnMouseExitAttribute : MouseEventHandlerAttribute {
 
         public OnMouseExitAttribute(KeyboardModifiers modifiers = KeyboardModifiers.None, EventPhase phase = EventPhase.Bubble)
             : base(modifiers, InputEventType.MouseExit, phase) { }
@@ -69,7 +69,7 @@ namespace Src {
     }
 
     [AttributeUsage(AttributeTargets.Method)]
-    public class OnMouseMoveAttribute : MouseInputBindingAttribute {
+    public class OnMouseMoveAttribute : MouseEventHandlerAttribute {
 
         public OnMouseMoveAttribute(KeyboardModifiers modifiers = KeyboardModifiers.None, EventPhase phase = EventPhase.Bubble)
             : base(modifiers, InputEventType.MouseMove, phase) { }
@@ -80,7 +80,7 @@ namespace Src {
     }
 
     [AttributeUsage(AttributeTargets.Method)]
-    public class OnMouseHoverAttribute : MouseInputBindingAttribute {
+    public class OnMouseHoverAttribute : MouseEventHandlerAttribute {
 
         public OnMouseHoverAttribute(KeyboardModifiers modifiers = KeyboardModifiers.None, EventPhase phase = EventPhase.Bubble)
             : base(modifiers, InputEventType.MouseHover, phase) { }
@@ -90,9 +90,9 @@ namespace Src {
 
     }
 
-    
+
     [AttributeUsage(AttributeTargets.Method)]
-    public class OnMouseContextAttribute : MouseInputBindingAttribute {
+    public class OnMouseContextAttribute : MouseEventHandlerAttribute {
 
         public OnMouseContextAttribute(KeyboardModifiers modifiers = KeyboardModifiers.None, EventPhase phase = EventPhase.Bubble)
             : base(modifiers, InputEventType.MouseContext, phase) { }
@@ -161,15 +161,6 @@ namespace Src {
 
     }
 
-    [AttributeUsage(AttributeTargets.Method)]
-    public class OnDragStartAttribute : Attribute {
 
-        public readonly Type dragEventType;
-
-        public OnDragStartAttribute(Type dragEventType = null) {
-            this.dragEventType = dragEventType;
-        }
-
-    }
-
+   
 }

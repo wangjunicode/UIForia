@@ -11,12 +11,12 @@ namespace Src {
 
         public override Type elementType => typeof(UITextContainerElement);
 
-        public override InitData CreateScoped(TemplateScope inputScope) {
+        public override MetaData CreateScoped(TemplateScope inputScope) {
             UIElement instance = new UITextContainerElement();
-            InitData initData = GetCreationData(instance, inputScope.context);
+            MetaData metaData = GetCreationData(instance, inputScope.context);
 
             if (childTemplates.Count == 0) {
-                initData.AddChild(new UITextTemplate(string.Empty).CreateScoped(inputScope));
+                metaData.AddChild(new UITextTemplate(string.Empty).CreateScoped(inputScope));
             }
             else {
                 if (childTemplates.Count > 1) {
@@ -28,13 +28,13 @@ namespace Src {
                 }
                 
                 for (int i = 0; i < childTemplates.Count; i++) {
-                    initData.AddChild(childTemplates[i].CreateScoped(inputScope));
+                    metaData.AddChild(childTemplates[i].CreateScoped(inputScope));
                 }
             }
 
-            instance.ownChildren = initData.children.Select(c => c.element).ToArray();
+            instance.ownChildren = metaData.children.Select(c => c.element).ToArray();
             
-            return initData;
+            return metaData;
         }
 
     }

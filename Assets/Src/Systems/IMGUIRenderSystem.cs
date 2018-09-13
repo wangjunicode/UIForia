@@ -153,7 +153,7 @@ namespace Src.Systems {
             textureCache.Clear();
         }
 
-        public void OnElementCreated(InitData data) {
+        public void OnElementCreated(MetaData data) {
             if ((data.element.flags & UIElementFlags.RequiresRendering) != 0) {
                 IMGUIRenderData renderData = new IMGUIRenderData(data.element);
                 renderSkipTree.AddItem(renderData);

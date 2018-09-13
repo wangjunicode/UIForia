@@ -50,7 +50,7 @@ namespace Src.Systems {
             this.styleSystem.onBorderRadiusChanged += HandleBorderRadiusChange;
         }
 
-        public void OnElementCreated(InitData creationData) {
+        public void OnElementCreated(MetaData creationData) {
             UIGraphicElement directDraw = creationData.element as UIGraphicElement;
 
             OnElementStyleChanged(creationData.element);
@@ -103,8 +103,8 @@ namespace Src.Systems {
                     TextMeshProUGUI tmp = renderData.renderComponent as TextMeshProUGUI;
                     if (tmp != null) {
                         int characterCount = tmp.textInfo.characterCount;
-                        if (characterCount > 0) {
-                            size.x += (tmp.textInfo.characterInfo[tmp.textInfo.characterCount - 1].xAdvance * 2f);
+                        if (characterCount > 0) {                           
+                            size.x += 6f; // todo -- make this relative to font size
                         }
                     }
                 }

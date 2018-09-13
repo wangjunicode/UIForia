@@ -73,8 +73,8 @@ public class UIView_Tests {
 
         public TestView(Type elementType) : base(elementType) { }
 
-        public InitData TestCreate() {
-            InitData data = TemplateParser.GetParsedTemplate(elementType, true).CreateWithoutScope(this);
+        public MetaData TestCreate() {
+            MetaData data = TemplateParser.GetParsedTemplate(elementType, true).CreateWithoutScope(this);
             data.element.flags |= UIElementFlags.AncestorEnabled;
             InitHierarchy(data);
             return data;
@@ -87,7 +87,7 @@ public class UIView_Tests {
     public void InitializesHierarchyInTreeOrder() {
         TestView testView = new TestView(typeof(ViewTestThing));
 
-        InitData data = testView.TestCreate();
+        MetaData data = testView.TestCreate();
 
         Assert.IsInstanceOf<ViewTestThing>(data.element);
 
@@ -107,7 +107,7 @@ public class UIView_Tests {
     public void SetsFlagsForHierarchyChildren() {
         TestView testView = new TestView(typeof(ViewTestThing));
 
-        InitData data = testView.TestCreate();
+        MetaData data = testView.TestCreate();
         data.children[0].children[0].element.flags &= ~(UIElementFlags.Enabled);
 
         Assert.IsInstanceOf<TranscludedThing>(data.children[0].children[0].element);
@@ -129,7 +129,7 @@ public class UIView_Tests {
     [Test]
     public void DisableElement() {
         TestView testView = new TestView(typeof(ViewTestThing));
-        InitData data = testView.TestCreate();
+        MetaData data = testView.TestCreate();
         TranscludedThing thing = As<TranscludedThing>(data.children[0].children[0].element);
         
         testView.DisableElement(thing);
@@ -194,7 +194,7 @@ public class UIView_Tests {
     [Test]
     public void Callback_OnDisable() {
          TestView testView = new TestView(typeof(ViewTestThing));
-        InitData data = testView.TestCreate();
+        MetaData data = testView.TestCreate();
         TranscludedThing thing = As<TranscludedThing>(data.children[0].children[0].element);
 
         int callCount = 0;
@@ -218,7 +218,7 @@ public class UIView_Tests {
     [Test]
     public void EnableElement() {
         TestView testView = new TestView(typeof(ViewTestThing));
-        InitData data = testView.TestCreate();
+        MetaData data = testView.TestCreate();
         TranscludedThing thing = As<TranscludedThing>(data.children[0].children[0].element);
         
         testView.DisableElement(thing);
@@ -281,7 +281,7 @@ public class UIView_Tests {
     [Test]
     public void Callback_OnEnable() {
         TestView testView = new TestView(typeof(ViewTestThing));
-        InitData data = testView.TestCreate();
+        MetaData data = testView.TestCreate();
         TranscludedThing thing = As<TranscludedThing>(data.children[0].children[0].element);
         UIGroupElement group = As<UIGroupElement>(data.children[0].element);
         int callCount = 0;
@@ -342,7 +342,7 @@ public class UIView_Tests {
 
     }
 
-    private static void AssertHierarchy(InitData data, TypeAssert assertRoot, int depth = 0) {
+    private static void AssertHierarchy(MetaData data, TypeAssert assertRoot, int depth = 0) {
         Assert.AreEqual(data.element.GetType(), assertRoot.parentType);
         if (data.children.Count != assertRoot.childTypes.Length) {
             Assert.Fail("Child Count did not match at depth: " + depth);
@@ -357,7 +357,7 @@ public class UIView_Tests {
         }
     }
 
-    private static void AssertHierarchyFlags(InitData data, TypeAssert assertRoot, int depth = 0) {
+    private static void AssertHierarchyFlags(MetaData data, TypeAssert assertRoot, int depth = 0) {
         Assert.AreEqual(data.element.GetType(), assertRoot.parentType);
 
         switch (assertRoot.flags) {

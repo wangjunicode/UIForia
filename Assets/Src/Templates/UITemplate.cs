@@ -26,8 +26,12 @@ namespace Src {
 
         protected List<UIStyle> baseStyles;
         protected List<StyleBinding> constantStyleBindings;
-        protected KeyboardEventHandler[] keyboardEventHandlers;
+        
+        protected DragEventCreator[] dragEventCreators;
+        protected DragEventHandler[] dragEventHandlers;
         protected MouseEventHandler[] mouseEventHandlers;
+        protected KeyboardEventHandler[] keyboardEventHandlers;
+        
         protected List<Binding> bindingList;
         protected List<ValueTuple<string, string>> templateAttributes;
 
@@ -52,8 +56,8 @@ namespace Src {
             this.conditionalBindings = Binding.EmptyArray;
         }
 
-        public InitData GetCreationData(UIElement element, UITemplateContext context) {
-            InitData data = new InitData(element, context);
+        public MetaData GetCreationData(UIElement element, UITemplateContext context) {
+            MetaData data = new MetaData(element, context);
             data.baseStyles = baseStyles;
             data.bindings = bindings;
             data.inputBindings = inputBindings;
@@ -62,6 +66,8 @@ namespace Src {
             data.conditionalBindings = conditionalBindings;
             data.keyboardEventHandlers = keyboardEventHandlers;
             data.mouseEventHandlers = mouseEventHandlers;
+            data.dragEventCreators = dragEventCreators;
+            data.dragEventHandlers = dragEventHandlers;
             element.templateAttributes = templateAttributes;
             if (acceptFocus) {
                 element.flags |= UIElementFlags.AcceptFocus;
@@ -69,7 +75,7 @@ namespace Src {
             return data;
         }
 
-        public abstract InitData CreateScoped(TemplateScope inputScope);
+        public abstract MetaData CreateScoped(TemplateScope inputScope);
 
         public void CompileStyleBindings(ParsedTemplate template) {
             if (attributes == null || attributes.Count == 0) return;
@@ -145,12 +151,22 @@ namespace Src {
             inputCompiler.SetContext(template.contextDefinition);
             List<MouseEventHandler> mouseHandlers = inputCompiler.CompileMouseEventHandlers(elementType, attributes);
             List<KeyboardEventHandler> keyboardHandlers = inputCompiler.CompileKeyboardEventHandlers(elementType, attributes);
+            List<DragEventCreator> dragCreators = inputCompiler.CompileDragEventCreators(elementType, attributes);
+            List<DragEventHandler> dragHandlers = inputCompiler.CompileDragEventHandlers(elementType, attributes);
             if (mouseHandlers != null) {
                 mouseEventHandlers = mouseHandlers.ToArray();
             }
 
             if (keyboardHandlers != null) {
                 keyboardEventHandlers = keyboardHandlers.ToArray();
+            }
+
+            if (dragCreators != null) {
+                dragEventCreators = dragCreators.ToArray();
+            }
+
+            if (dragHandlers != null) {
+                dragEventHandlers = dragHandlers.ToArray();
             }
         }
 

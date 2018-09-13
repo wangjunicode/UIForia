@@ -16,11 +16,11 @@ namespace Src {
         // called at runtime! not at creating time like the rest of the templates
         public override Type elementType => typeof(UIRepeatChild);
 
-        public override InitData CreateScoped(TemplateScope inputScope) {
+        public override MetaData CreateScoped(TemplateScope inputScope) {
 
             UIRepeatChild instance = new UIRepeatChild();
                         
-            InitData data = GetCreationData(instance, inputScope.context);
+            MetaData data = GetCreationData(instance, inputScope.context);
             data.bindings = repeatChildBindings;
             
             for (int i = 0; i < childTemplates.Count; i++) {

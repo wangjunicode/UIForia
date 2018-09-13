@@ -11,10 +11,10 @@ namespace Src {
 
         public override Type elementType => typeof(UIGroupElement);
 
-        public override InitData CreateScoped(TemplateScope inputScope) {
+        public override MetaData CreateScoped(TemplateScope inputScope) {
             UIGroupElement instance = new UIGroupElement();
 
-            InitData instanceData = GetCreationData(instance, inputScope.context);
+            MetaData instanceData = GetCreationData(instance, inputScope.context);
 
             for (int i = 0; i < childTemplates.Count; i++) {
                 instanceData.AddChild(childTemplates[i].CreateScoped(inputScope));

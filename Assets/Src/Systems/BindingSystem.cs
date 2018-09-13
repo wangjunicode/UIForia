@@ -96,7 +96,7 @@ namespace Src.Systems {
 
         public void OnInitialize() { }
 
-        public void OnElementCreated(InitData data) {
+        public void OnElementCreated(MetaData data) {
             if (data.constantBindings.Length != 0) {
                 for (int i = 0; i < data.constantBindings.Length; i++) {
                     data.constantBindings[i].Execute(data.element, data.context);

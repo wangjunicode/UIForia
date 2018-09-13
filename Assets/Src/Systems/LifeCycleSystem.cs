@@ -67,7 +67,7 @@ namespace Src.Systems {
             return false;
         }
 
-        public void OnElementCreated(InitData elementData) {
+        public void OnElementCreated(MetaData elementData) {
             UIElement element = elementData.element;
             allElementTree.AddItem(element);
             if (HasDisabledAncestor(element)) {

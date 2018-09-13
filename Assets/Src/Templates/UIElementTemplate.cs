@@ -41,8 +41,8 @@ namespace Src {
 
         public override Type elementType => rootType;
 
-        public override InitData CreateScoped(TemplateScope inputScope) {
-            List<InitData> scopedChildren = new List<InitData>(childTemplates.Count);
+        public override MetaData CreateScoped(TemplateScope inputScope) {
+            List<MetaData> scopedChildren = new List<MetaData>(childTemplates.Count);
 
             for (int i = 0; i < childTemplates.Count; i++) {
                 scopedChildren.Add(childTemplates[i].CreateScoped(inputScope));
@@ -55,7 +55,7 @@ namespace Src {
             outputScope.context = new UITemplateContext(inputScope.context.view);
             outputScope.inputChildren = scopedChildren;
 
-            InitData instanceData = templateToExpand.CreateWithScope(outputScope);
+            MetaData instanceData = templateToExpand.CreateWithScope(outputScope);
 
             // todo -- not sure this is safe to overwrite bindings here
             // actually the only bindings allowed on <Contents> tag should be styles

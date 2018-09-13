@@ -11,7 +11,7 @@ namespace Src {
         // This class is generally just a marker, it shouldn't do anything on it's own
         public override Type elementType => typeof(UIChildrenTemplate);
 
-        public override InitData CreateScoped(TemplateScope inputScope) {
+        public override MetaData CreateScoped(TemplateScope inputScope) {
             throw new NotImplementedException();
         }
 

@@ -10,7 +10,7 @@ namespace Src {
 
         public override Type elementType => typeof(UIGraphicElement);
         
-        public override InitData CreateScoped(TemplateScope inputScope) {
+        public override MetaData CreateScoped(TemplateScope inputScope) {
             return GetCreationData(new UIGraphicElement(), inputScope.context);
         }
 

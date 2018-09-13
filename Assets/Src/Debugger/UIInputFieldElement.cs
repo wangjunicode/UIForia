@@ -391,6 +391,24 @@ namespace Debugger {
         public bool HasFocus { get; }
         public bool HasFocusLocked { get; }
 
+        [OnDragCreate]
+        public TextSelectDragEvent CreateDragEvent() {
+            TextSelectDragEvent evt = new TextSelectDragEvent();
+            evt.onUpdate += HandleDragUpdate;
+            return evt;
+        }
+
+        private void HandleDragUpdate(DragEvent evt) {
+                Debug.Log("UPDATING");
+        }
+        
+        [OnDragMove(typeof(TextSelectDragEvent))]
+        public void OnDragMove() {
+            Debug.Log("Drag moved");
+        }
+
+        public class TextSelectDragEvent : DragEvent { }
+
         public void Focus() {
             Debug.Log("FOCUSED");
             onFocus?.Invoke(new FocusEvent());

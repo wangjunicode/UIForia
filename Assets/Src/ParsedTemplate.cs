@@ -7,7 +7,7 @@ namespace Src {
 
     public class ParsedTemplate {
 
-        private static readonly List<InitData> EmptyElementList = new List<InitData>(0);
+        private static readonly List<MetaData> EmptyElementList = new List<MetaData>(0);
         
         public string filePath;
         public List<UIStyle> styles;
@@ -29,12 +29,12 @@ namespace Src {
 
         public List<UITemplate> childTemplates => rootElementTemplate.childTemplates;
 
-        public InitData CreateWithScope(TemplateScope scope) {
+        public MetaData CreateWithScope(TemplateScope scope) {
             if (!isCompiled) Compile();
 
             UIElement instance = (UIElement) Activator.CreateInstance(rootElementTemplate.RootType);
 
-            InitData instanceData = rootElementTemplate.GetCreationData(instance, scope.context);
+            MetaData instanceData = rootElementTemplate.GetCreationData(instance, scope.context);
 
             for (int i = 0; i < rootElementTemplate.childTemplates.Count; i++) {
                 UITemplate template = rootElementTemplate.childTemplates[i];
@@ -56,7 +56,7 @@ namespace Src {
             return instanceData;
         }
 
-        public InitData CreateWithoutScope(UIView view) {
+        public MetaData CreateWithoutScope(UIView view) {
             if (!isCompiled) Compile();
 
             TemplateScope scope = new TemplateScope();
@@ -66,7 +66,7 @@ namespace Src {
             UIElement instance = (UIElement) Activator.CreateInstance(rootElementTemplate.RootType);
             scope.context.rootElement = instance;
 
-            InitData rootData = rootElementTemplate.GetCreationData(instance, scope.context);
+            MetaData rootData = rootElementTemplate.GetCreationData(instance, scope.context);
 
             for (int i = 0; i < childTemplates.Count; i++) {
                 rootData.AddChild(childTemplates[i].CreateScoped(scope));

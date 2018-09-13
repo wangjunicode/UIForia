@@ -12,6 +12,8 @@ namespace Src.Compilers {
 
         private static readonly Dictionary<Type, List<KeyboardEventHandler>> s_KeyboardHandlerCache = new Dictionary<Type, List<KeyboardEventHandler>>();
         private static readonly Dictionary<Type, List<MouseEventHandler>> s_MouseHandlerCache = new Dictionary<Type, List<MouseEventHandler>>();
+        private static readonly Dictionary<Type, List<DragEventCreator>> s_DragCreatorCache = new Dictionary<Type, List<DragEventCreator>>();
+        private static readonly Dictionary<Type, List<DragEventHandler>> s_DragHandlerCache = new Dictionary<Type, List<DragEventHandler>>();
 
         public InputBindingCompiler(ContextDefinition context) {
             this.compiler = new ExpressionCompiler(context);
@@ -21,36 +23,29 @@ namespace Src.Compilers {
             compiler.SetContext(context);
         }
 
+
+        public List<DragEventCreator> CompileDragEventCreators(Type targetType, List<AttributeDefinition> attributeDefinitions) {
+            List<DragEventCreator> creatorsFromTemplateAttrs = CompileDragCreatorTemplateAttributes(attributeDefinitions);
+            List<DragEventCreator> creatorsFromClassAttrs = CompileDragCreatorClassAttributes(targetType);
+            return Combine(creatorsFromClassAttrs, creatorsFromTemplateAttrs);
+        }
+
         public List<MouseEventHandler> CompileMouseEventHandlers(Type targetType, List<AttributeDefinition> attributeDefinitions) {
-            List<MouseEventHandler> handlersFromTemplateAttrs = CompileMouseTemplateAttributes(targetType, attributeDefinitions);
-            List<MouseEventHandler> handlersFromClassAttrs = CompileMouseInputClassAttributes(targetType);
-
-            if (handlersFromClassAttrs == null) {
-                return handlersFromTemplateAttrs;
-            }
-
-            if (handlersFromTemplateAttrs == null) {
-                return handlersFromClassAttrs;
-            }
-
-            handlersFromTemplateAttrs.AddRange(handlersFromClassAttrs);
-            return handlersFromTemplateAttrs;
+            List<MouseEventHandler> handlersFromTemplateAttrs = CompileMouseEventTemplateAttributes(targetType, attributeDefinitions);
+            List<MouseEventHandler> handlersFromClassAttrs = CompileMouseEventClassAttributes(targetType);
+            return Combine(handlersFromTemplateAttrs, handlersFromClassAttrs);
         }
 
         public List<KeyboardEventHandler> CompileKeyboardEventHandlers(Type targetType, List<AttributeDefinition> attributeDefinitions) {
             List<KeyboardEventHandler> handlersFromTemplateAttrs = CompileKeyboardTemplateAttributes(attributeDefinitions);
             List<KeyboardEventHandler> handlersFromClassAttrs = CompileKeyboardClassAttributes(targetType);
+            return Combine(handlersFromTemplateAttrs, handlersFromClassAttrs);
+        }
 
-            if (handlersFromClassAttrs == null) {
-                return handlersFromTemplateAttrs;
-            }
-
-            if (handlersFromTemplateAttrs == null) {
-                return handlersFromClassAttrs;
-            }
-
-            handlersFromTemplateAttrs.AddRange(handlersFromClassAttrs);
-            return handlersFromTemplateAttrs;
+        public List<DragEventHandler> CompileDragEventHandlers(Type targetType, List<AttributeDefinition> attributeDefinitions) {
+            List<DragEventHandler> handlersFromTemplateAttrs = CompileDragEventHandlerTemplateAttributes(attributeDefinitions);
+            List<DragEventHandler> handlersFromClassAttrs = CompileDragEventHandlerClassAttributes(targetType);
+            return Combine(handlersFromClassAttrs, handlersFromTemplateAttrs);
         }
 
         private List<KeyboardEventHandler> CompileKeyboardClassAttributes(Type type) {
@@ -118,6 +113,27 @@ namespace Src.Compilers {
             return retn;
         }
 
+
+        private List<KeyboardEventHandler> CompileKeyboardTemplateAttributes(List<AttributeDefinition> attributeDefinitions) {
+            if (attributeDefinitions == null) return null;
+
+            List<KeyboardEventHandler> retn = null;
+
+            for (int i = 0; i < attributeDefinitions.Count; i++) {
+                if (attributeDefinitions[i].isCompiled || attributeDefinitions[i].isRealAttribute) {
+                    continue;
+                }
+
+                KeyboardEventHandler binding = CompileKeyboardTemplateAttribute(attributeDefinitions[i]);
+                if (binding != null) {
+                    retn = retn ?? new List<KeyboardEventHandler>();
+                    retn.Add(binding);
+                }
+            }
+
+            return retn;
+        }
+
         private KeyboardEventHandler CompileKeyboardTemplateAttribute(AttributeDefinition attr) {
             for (int i = 0; i < s_KeyboardAttributeDefs.Length; i++) {
                 if (attr.key == s_KeyboardAttributeDefs[i].attrName) {
@@ -140,7 +156,27 @@ namespace Src.Compilers {
             return null;
         }
 
-        private MouseEventHandler CompileMouseAttribute(AttributeDefinition attr) {
+        private List<MouseEventHandler> CompileMouseEventTemplateAttributes(Type targetType, List<AttributeDefinition> attributeDefinitions) {
+            if (attributeDefinitions == null) return null;
+
+            List<MouseEventHandler> retn = null;
+
+            for (int i = 0; i < attributeDefinitions.Count; i++) {
+                if (attributeDefinitions[i].isCompiled || attributeDefinitions[i].isRealAttribute) {
+                    continue;
+                }
+
+                MouseEventHandler binding = CompileMouseTemplateAttribute(attributeDefinitions[i]);
+                if (binding != null) {
+                    retn = retn ?? new List<MouseEventHandler>();
+                    retn.Add(binding);
+                }
+            }
+
+            return retn;
+        }
+
+        private MouseEventHandler CompileMouseTemplateAttribute(AttributeDefinition attr) {
             if (!attr.key.Contains("Mouse")) {
                 return null;
             }
@@ -148,14 +184,6 @@ namespace Src.Compilers {
             for (int i = 0; i < s_MouseAttributeDefs.Length; i++) {
                 if (attr.key.StartsWith(s_MouseAttributeDefs[i].attrName)) {
                     InputAttributeTuple tuple = s_MouseAttributeDefs[i];
-
-
-                    // todo -- this stuff
-                    // bool isBubble = attr.key.Contains(".bubble");
-                    // bool isOnce = attr.key.Contains(".once");
-                    //.shift
-                    //.control
-                    //.alt
 
                     EventPhase phase = EventPhase.Bubble;
                     KeyboardModifiers modifiers = KeyboardModifiers.None;
@@ -206,47 +234,7 @@ namespace Src.Compilers {
             return null;
         }
 
-        private List<KeyboardEventHandler> CompileKeyboardTemplateAttributes(List<AttributeDefinition> attributeDefinitions) {
-            if (attributeDefinitions == null) return null;
-
-            List<KeyboardEventHandler> retn = null;
-
-            for (int i = 0; i < attributeDefinitions.Count; i++) {
-                if (attributeDefinitions[i].isCompiled || attributeDefinitions[i].isRealAttribute) {
-                    continue;
-                }
-
-                KeyboardEventHandler binding = CompileKeyboardTemplateAttribute(attributeDefinitions[i]);
-                if (binding != null) {
-                    retn = retn ?? new List<KeyboardEventHandler>();
-                    retn.Add(binding);
-                }
-            }
-
-            return retn;
-        }
-
-        private List<MouseEventHandler> CompileMouseTemplateAttributes(Type targetType, List<AttributeDefinition> attributeDefinitions) {
-            if (attributeDefinitions == null) return null;
-
-            List<MouseEventHandler> retn = null;
-
-            for (int i = 0; i < attributeDefinitions.Count; i++) {
-                if (attributeDefinitions[i].isCompiled || attributeDefinitions[i].isRealAttribute) {
-                    continue;
-                }
-
-                MouseEventHandler binding = CompileMouseAttribute(attributeDefinitions[i]);
-                if (binding != null) {
-                    retn = retn ?? new List<MouseEventHandler>();
-                    retn.Add(binding);
-                }
-            }
-
-            return retn;
-        }
-
-        private List<MouseEventHandler> CompileMouseInputClassAttributes(Type targetType) {
+        private List<MouseEventHandler> CompileMouseEventClassAttributes(Type targetType) {
             if (s_MouseHandlerCache.ContainsKey(targetType)) {
                 return s_MouseHandlerCache[targetType];
             }
@@ -257,10 +245,10 @@ namespace Src.Compilers {
 
             for (int i = 0; i < methods.Length; i++) {
                 MethodInfo info = methods[i];
-                object[] customAttributes = info.GetCustomAttributes(typeof(MouseInputBindingAttribute), true);
+                object[] customAttributes = info.GetCustomAttributes(typeof(MouseEventHandlerAttribute), true);
 
                 for (int j = 0; j < customAttributes.Length; j++) {
-                    MouseInputBindingAttribute attr = (MouseInputBindingAttribute) customAttributes[j];
+                    MouseEventHandlerAttribute attr = (MouseEventHandlerAttribute) customAttributes[j];
 
                     ParameterInfo[] parameters = info.GetParameters();
                     Type handlerType = null;
@@ -299,15 +287,285 @@ namespace Src.Compilers {
                 }
             }
 
-            if (retn == null || retn.Count == 0) {
-                s_MouseHandlerCache[targetType] = null;
-                return null;
-            }
-
             s_MouseHandlerCache[targetType] = retn;
 
             return retn;
         }
+
+        private List<DragEventHandler> CompileDragEventHandlerClassAttributes(Type targetType) {
+            if (s_DragHandlerCache.ContainsKey(targetType)) {
+                return s_DragHandlerCache[targetType];
+            }
+
+            List<DragEventHandler> retn = null;
+
+            MethodInfo[] methods = targetType.GetMethods(ReflectionUtil.InstanceBindFlags);
+
+            for (int i = 0; i < methods.Length; i++) {
+                MethodInfo info = methods[i];
+                object[] customAttributes = info.GetCustomAttributes(typeof(DragEventHandlerAttribute), true);
+
+                for (int j = 0; j < customAttributes.Length; j++) {
+                    DragEventHandlerAttribute attr = (DragEventHandlerAttribute) customAttributes[j];
+
+                    ParameterInfo[] parameters = info.GetParameters();
+                    Type handlerType = null;
+                    DragEventHandler handler = null;
+                    Type openDelegateType = ReflectionUtil.GetOpenDelegateType(info);
+
+                    ReflectionUtil.ObjectArray5[0] = attr.eventType;
+                    ReflectionUtil.ObjectArray5[1] = attr.requiredType;
+                    ReflectionUtil.ObjectArray5[2] = attr.modifiers;
+                    ReflectionUtil.ObjectArray5[3] = attr.phase;
+                    ReflectionUtil.ObjectArray5[4] = ReflectionUtil.CreateOpenDelegate(openDelegateType, info);
+
+                    switch (parameters.Length) {
+                        case 0: {
+                            handlerType = ReflectionUtil.CreateGenericType(typeof(DragEventHandler_IgnoreEvent<>), targetType);
+                            break;
+                        }
+                        case 1: {
+                            System.Diagnostics.Debug.Assert(parameters[0].ParameterType == typeof(MouseInputEvent));
+                            handlerType = ReflectionUtil.CreateGenericType(typeof(DragEventHandler_WithEvent<>), targetType);
+                            break;
+                        }
+                        default:
+                            throw new Exception("Method with attribute " + attr.GetType().Name + " must take 0 arguments or 1 argument of type " + nameof(MouseInputEvent));
+                    }
+
+                    handler = (DragEventHandler) ReflectionUtil.CreateGenericInstance(handlerType, ReflectionUtil.ObjectArray5);
+#if DEBUG
+                    handler.methodInfo = info;
+#endif
+                    
+                    if (retn == null) {
+                        retn = new List<DragEventHandler>();
+                    }
+
+                    retn.Add(handler);
+                }
+            }
+
+            s_DragHandlerCache[targetType] = retn;
+
+            return retn;
+        }
+
+        private List<DragEventHandler> CompileDragEventHandlerTemplateAttributes(List<AttributeDefinition> attributeDefinitions) {
+            if (attributeDefinitions == null) return null;
+
+            List<DragEventHandler> retn = null;
+
+            for (int i = 0; i < attributeDefinitions.Count; i++) {
+                if (attributeDefinitions[i].isCompiled || attributeDefinitions[i].isRealAttribute) {
+                    continue;
+                }
+
+                DragEventHandler handler = CompileDragHandlerTemplateAttribute(attributeDefinitions[i]);
+                if (handler != null) {
+                    retn = retn ?? new List<DragEventHandler>();
+                    retn.Add(handler);
+                }
+            }
+
+            return retn;
+        }
+
+        private DragEventHandler CompileDragHandlerTemplateAttribute(AttributeDefinition attr) {
+            if (!attr.key.StartsWith("onDrag")) {
+                return null;
+            }
+
+            for (int i = 0; i < s_DragAttributeDefs.Length; i++) {
+                if (!attr.key.StartsWith(s_DragAttributeDefs[i].attrName)) {
+                    continue;
+                }
+
+                InputAttributeTuple tuple = s_DragAttributeDefs[i];
+
+                EventPhase phase = EventPhase.Bubble;
+                KeyboardModifiers modifiers = KeyboardModifiers.None;
+
+                if (attr.key != tuple.attrName) {
+                    phase = GetPhase(attr.key);
+                    modifiers = GetModifiers(attr.key);
+                }
+
+                string source = attr.value;
+
+                if (source[0] != '{') {
+                    source = '{' + attr.value + '}';
+                }
+
+                compiler.AddRuntimeAlias(s_MouseEventAlias.Item1, s_MouseEventAlias.Item2);
+                Expression<Terminal> expression = compiler.Compile<Terminal>(source);
+                compiler.RemoveRuntimeAlias(s_MouseEventAlias.Item1);
+                attr.isCompiled = true;
+                return new DragEventHandler_Expression(tuple.eventType, expression, modifiers, phase);
+            }
+
+            return null;
+        }
+
+        private static EventPhase GetPhase(string attrKey) {
+            return attrKey.Contains(".capture") ? EventPhase.Capture : EventPhase.Bubble;
+        }
+
+        private static KeyboardModifiers GetModifiers(string attrKey) {
+            KeyboardModifiers modifiers = KeyboardModifiers.None;
+            bool isShift = attrKey.Contains(".shift");
+            bool isControl = attrKey.Contains(".ctrl") || attrKey.Contains(".control");
+            bool isCommand = attrKey.Contains(".cmd") || attrKey.Contains(".command");
+            bool isAlt = attrKey.Contains(".alt");
+            if (isShift) {
+                modifiers |= KeyboardModifiers.Shift;
+            }
+
+            if (isControl) {
+                modifiers |= KeyboardModifiers.Control;
+            }
+
+            if (isCommand) {
+                modifiers |= KeyboardModifiers.Command;
+            }
+
+            if (isAlt) {
+                modifiers |= KeyboardModifiers.Alt;
+            }
+
+            return modifiers;
+        }
+
+        private List<DragEventCreator> CompileDragCreatorTemplateAttributes(List<AttributeDefinition> attributeDefinitions) {
+            if (attributeDefinitions == null) return null;
+
+            List<DragEventCreator> retn = null;
+
+            for (int i = 0; i < attributeDefinitions.Count; i++) {
+                if (attributeDefinitions[i].isCompiled || attributeDefinitions[i].isRealAttribute) {
+                    continue;
+                }
+
+                DragEventCreator creator = CompileDragCreatorTemplateAttribute(attributeDefinitions[i]);
+                if (creator != null) {
+                    retn = retn ?? new List<DragEventCreator>();
+                    retn.Add(creator);
+                }
+            }
+
+            return retn;
+        }
+
+        private DragEventCreator CompileDragCreatorTemplateAttribute(AttributeDefinition attr) {
+            if (!attr.key.StartsWith("onDragCreate")) {
+                return null;
+            }
+
+            EventPhase phase = EventPhase.Bubble;
+            KeyboardModifiers modifiers = KeyboardModifiers.None;
+
+            if (attr.key != "onDragCreate") {
+                bool isCapture = attr.key.Contains(".capture");
+                bool isShift = attr.key.Contains(".shift");
+                bool isControl = attr.key.Contains(".ctrl") || attr.key.Contains(".control");
+                bool isCommand = attr.key.Contains(".cmd") || attr.key.Contains(".command");
+                bool isAlt = attr.key.Contains(".alt");
+
+                if (isShift) {
+                    modifiers |= KeyboardModifiers.Shift;
+                }
+
+                if (isControl) {
+                    modifiers |= KeyboardModifiers.Control;
+                }
+
+                if (isCommand) {
+                    modifiers |= KeyboardModifiers.Command;
+                }
+
+                if (isAlt) {
+                    modifiers |= KeyboardModifiers.Alt;
+                }
+
+                if (isCapture) {
+                    phase = EventPhase.Capture;
+                }
+            }
+
+            string source = attr.value;
+
+
+            if (source[0] != '{') {
+                source = '{' + attr.value + '}';
+            }
+
+            compiler.AddRuntimeAlias(s_MouseEventAlias.Item1, s_MouseEventAlias.Item2);
+            Expression<DragEvent> expression = compiler.Compile<DragEvent>(source);
+            compiler.RemoveRuntimeAlias(s_MouseEventAlias.Item1);
+            attr.isCompiled = true;
+            return new DragEventCreator_Expression(expression, modifiers, phase);
+        }
+
+        private List<DragEventCreator> CompileDragCreatorClassAttributes(Type targetType) {
+            if (s_DragCreatorCache.ContainsKey(targetType)) {
+                return s_DragCreatorCache[targetType];
+            }
+
+            List<DragEventCreator> retn = null;
+
+            MethodInfo[] methods = targetType.GetMethods(ReflectionUtil.InstanceBindFlags);
+
+            for (int i = 0; i < methods.Length; i++) {
+                MethodInfo info = methods[i];
+                object[] customAttributes = info.GetCustomAttributes(typeof(OnDragCreateAttribute), true);
+
+                for (int j = 0; j < customAttributes.Length; j++) {
+                    OnDragCreateAttribute attr = (OnDragCreateAttribute) customAttributes[j];
+
+                    if (!typeof(DragEvent).IsAssignableFrom(info.ReturnType)) {
+                        throw new Exception($"Methods annotated with {nameof(OnDragCreateAttribute)} must return an instance of {nameof(DragEvent)}");
+                    }
+
+                    ParameterInfo[] parameters = info.GetParameters();
+                    Type handlerType = null;
+                    DragEventCreator creator = null;
+                    Type openDelegateType = ReflectionUtil.GetOpenDelegateType(info);
+
+                    ReflectionUtil.ObjectArray3[0] = attr.modifiers;
+                    ReflectionUtil.ObjectArray3[1] = attr.phase;
+                    ReflectionUtil.ObjectArray3[2] = ReflectionUtil.CreateOpenDelegate(openDelegateType, info);
+
+                    switch (parameters.Length) {
+                        case 0: {
+                            handlerType = ReflectionUtil.CreateGenericType(typeof(DragEventCreator_IgnoreEvent<>), targetType);
+                            break;
+                        }
+                        case 1: {
+                            System.Diagnostics.Debug.Assert(parameters[0].ParameterType == typeof(MouseInputEvent));
+                            handlerType = ReflectionUtil.CreateGenericType(typeof(DragEventCreator_WithEvent<>), targetType);
+                            break;
+                        }
+                        default:
+                            throw new Exception("Method with attribute " + attr.GetType().Name + " must take 0 arguments or 1 argument of type " + nameof(MouseInputEvent));
+                    }
+
+                    creator = (DragEventCreator) ReflectionUtil.CreateGenericInstance(handlerType, ReflectionUtil.ObjectArray3);
+#if DEBUG
+                    creator.methodInfo = info;
+#endif
+
+                    if (retn == null) {
+                        retn = new List<DragEventCreator>();
+                    }
+
+                    retn.Add(creator);
+                }
+            }
+
+            s_DragCreatorCache[targetType] = retn;
+            return retn;
+        }
+
 
         private static readonly ValueTuple<string, Type> s_MouseEventAlias = ValueTuple.Create("$event", typeof(MouseInputEvent));
         private static readonly ValueTuple<string, Type> s_KeyboardEventAlias = ValueTuple.Create("$event", typeof(KeyboardInputEvent));
@@ -322,6 +580,15 @@ namespace Src.Compilers {
             new InputAttributeTuple("onMouseHover", InputEventType.MouseHover, s_MouseEventAlias),
             new InputAttributeTuple("onMouseScroll", InputEventType.MouseScroll, s_MouseEventAlias),
             new InputAttributeTuple("onMouseContext", InputEventType.MouseContext, s_MouseEventAlias),
+        };
+
+        private static readonly InputAttributeTuple[] s_DragAttributeDefs = {
+            new InputAttributeTuple("onDragMove", InputEventType.DragMove, s_MouseEventAlias),
+            new InputAttributeTuple("onDragHover", InputEventType.DragHover, s_MouseEventAlias),
+            new InputAttributeTuple("onDragEnter", InputEventType.DragEnter, s_MouseEventAlias),
+            new InputAttributeTuple("onDragExit", InputEventType.DragExit, s_MouseEventAlias),
+            new InputAttributeTuple("onDragDrop", InputEventType.DragDrop, s_MouseEventAlias),
+            new InputAttributeTuple("onDragCancel", InputEventType.DragCancel, s_MouseEventAlias),
         };
 
         private static readonly InputAttributeTuple[] s_KeyboardAttributeDefs = {
@@ -346,6 +613,19 @@ namespace Src.Compilers {
                 this.alias = alias;
             }
 
+        }
+
+        private static List<T> Combine<T>(List<T> a, List<T> b) {
+            if (a == null) {
+                return b;
+            }
+
+            if (b == null) {
+                return a;
+            }
+
+            a.AddRange(b);
+            return a;
         }
 
     }

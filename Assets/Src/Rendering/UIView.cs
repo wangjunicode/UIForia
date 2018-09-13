@@ -72,9 +72,9 @@ public abstract class UIView : IElementRegistry {
     }
 
     
-    protected void InitHierarchy(InitData elementData) {
+    protected void InitHierarchy(MetaData elementData) {
         UIElement element = elementData.element;
-        List<InitData> children = elementData.children;
+        List<MetaData> children = elementData.children;
         // todo -- assert no duplicate root elements
         if (element.parent == null) {
             element.flags |= UIElementFlags.AncestorEnabled;
@@ -96,7 +96,7 @@ public abstract class UIView : IElementRegistry {
     }
 
     // todo take a template instead of an init data instance? (and scope)
-    public void CreateElement(InitData data, UIElement parent) {
+    public void CreateElement(MetaData data, UIElement parent) {
         if (parent == null) {
             Debug.Assert(rootElement == null, nameof(rootElement) + " must be null if providing a null parent");
 
@@ -121,7 +121,7 @@ public abstract class UIView : IElementRegistry {
         InvokeOnReady(data);
     }
 
-    private static void InvokeOnCreate(InitData elementData) {
+    private static void InvokeOnCreate(MetaData elementData) {
         for (int i = 0; i < elementData.children.Count; i++) {
             InvokeOnCreate(elementData.children[i]);
         }
@@ -129,7 +129,7 @@ public abstract class UIView : IElementRegistry {
         elementData.element.OnCreate();
     }
     
-    private static void InvokeOnReady(InitData elementData) {
+    private static void InvokeOnReady(MetaData elementData) {
         for (int i = 0; i < elementData.children.Count; i++) {
             InvokeOnReady(elementData.children[i]);
         }

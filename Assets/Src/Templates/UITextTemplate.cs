@@ -40,7 +40,7 @@ namespace Src {
 
         public override Type elementType => typeof(UITextElement);
 
-        public override InitData CreateScoped(TemplateScope inputScope) {
+        public override MetaData CreateScoped(TemplateScope inputScope) {
             return GetCreationData(new UITextElement(), inputScope.context);
         }
 

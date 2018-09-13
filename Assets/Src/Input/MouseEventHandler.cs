@@ -59,7 +59,6 @@ namespace Src.Input {
 
     }
 
-
     public class MouseEventHandler_IgnoreEvent<T> : MouseEventHandler {
 
         private readonly Action<T> handler;

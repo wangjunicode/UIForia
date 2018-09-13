@@ -26,10 +26,10 @@ namespace Src {
             return true;
         }
 
-        public override InitData CreateScoped(TemplateScope inputScope) {
+        public override MetaData CreateScoped(TemplateScope inputScope) {
             UIImageElement instance = new UIImageElement();
 
-            InitData data = GetCreationData(instance, inputScope.context);
+            MetaData data = GetCreationData(instance, inputScope.context);
 
             return data;
         }

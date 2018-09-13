@@ -19,8 +19,17 @@ public struct MouseState {
     public Vector2 previousMousePosition;
     
     public Vector2 scrollDelta;
-    public bool isDragging;
 
+    public Vector2 MouseDownDelta {
+        get {
+            if (mouseDownPosition.x < 0 || mouseDownPosition.y < 0) {
+                return Vector2.zero;
+            }
+
+            return mousePosition - mouseDownPosition;
+        }
+    }
+    
     public Vector2 MouseDelta => previousMousePosition - mousePosition;
     public bool DidMove => MouseDelta.sqrMagnitude > 0;
 

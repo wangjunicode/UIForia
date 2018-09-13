@@ -17,9 +17,9 @@ namespace Src {
 
         public override Type elementType => typeof(UISwitchTemplate);
 
-        public override InitData CreateScoped(TemplateScope inputScope) {
+        public override MetaData CreateScoped(TemplateScope inputScope) {
             UISwitchElement instance = new UISwitchElement();
-            InitData data = GetCreationData(instance, inputScope.context);
+            MetaData data = GetCreationData(instance, inputScope.context);
 
             for (int i = 0; i < childTemplates.Count; i++) {
                 data.AddChild(childTemplates[i].CreateScoped(inputScope));

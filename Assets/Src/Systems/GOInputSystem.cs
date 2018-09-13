@@ -20,24 +20,25 @@ namespace Src.Systems {
             retn.isLeftMouseUpThisFrame = UnityEngine.Input.GetMouseButtonUp(0);
             retn.isRightMouseUpThisFrame = UnityEngine.Input.GetMouseButtonUp(1);
             retn.isMiddleMouseUpThisFrame = UnityEngine.Input.GetMouseButtonUp(2);
-            
-            retn.isDragging = false; // todo!
-            
+                        
             if (retn.isLeftMouseDown) {
                 if (retn.isLeftMouseDownThisFrame) {
-                    retn.mouseDownPosition = UnityEngine.Input.mousePosition;
+                    retn.mouseDownPosition = ConvertMousePosition(UnityEngine.Input.mousePosition);
                 }
             }
             else {
                 retn.mouseDownPosition = new Vector2(-1, -1);
             }
 
-            retn.mousePosition = UnityEngine.Input.mousePosition;
+            retn.mousePosition = ConvertMousePosition(UnityEngine.Input.mousePosition);
             retn.scrollDelta = UnityEngine.Input.mouseScrollDelta;
             retn.previousMousePosition = m_MouseState.mousePosition;
             return retn;
         }
 
+        private static Vector2 ConvertMousePosition(Vector2 position) {
+            return new Vector2(position.x, Screen.height - position.y);
+        }
     }
 
 }

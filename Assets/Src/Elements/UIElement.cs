@@ -4,6 +4,7 @@ using System.Diagnostics;
 using JetBrains.Annotations;
 using Rendering;
 using Src;
+using Src.Systems;
 
 [Flags]
 public enum QueryOptions {
@@ -116,6 +117,8 @@ public class UIElement : IHierarchical {
     public int depth { get; internal set; }
     public int siblingIndex { get; internal set; }
 
+    public IInputProvider Input { get; internal set; }
+    
     public bool EnableBinding(string propertyName) {
         return templateContext.view.bindingSystem.EnableBinding(this, propertyName);
     }

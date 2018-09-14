@@ -351,10 +351,10 @@
           <e p="Systems" t="Include">
             <e p="BindingSystem.cs" t="Include" />
             <e p="ElementRegistrySystem.cs" t="Include" />
-            <e p="GOCanvasElement.cs" t="Include" />
             <e p="GOInputSystem.cs" t="Include" />
             <e p="GORenderSystem.cs" t="Include" />
             <e p="Gradient.cs" t="Include" />
+            <e p="IGraphicUpdateManager.cs" t="Include" />
             <e p="IInputSystem.cs" t="Include" />
             <e p="ILayoutSystem.cs" t="Include" />
             <e p="IMGUIInputSystem.cs" t="Include" />
@@ -410,7 +410,7 @@
             <e p="MeasurementVector2.cs" t="Include" />
             <e p="ReflectionUtil.cs" t="Include" />
             <e p="SkipTree.cs" t="Include" />
-            <e p="TexMeshProUtil.cs" t="Include" />
+            <e p="TextMeshProUtil.cs" t="Include" />
             <e p="WhitespaceProcessor.cs" t="Include" />
           </e>
         </e>

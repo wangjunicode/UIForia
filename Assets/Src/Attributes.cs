@@ -123,7 +123,7 @@ namespace Src {
 
 
     // don't get key up events for non key code inputs :(
-    [AttributeUsage(AttributeTargets.Method)]
+    [AttributeUsage(AttributeTargets.Method, AllowMultiple = true)]
     public class OnKeyUpAttribute : KeyboardInputBindingAttribute {
 
         public OnKeyUpAttribute(KeyCode key = KeyCodeUtil.AnyKey, KeyboardModifiers modifiers = KeyboardModifiers.None)
@@ -131,7 +131,7 @@ namespace Src {
 
     }
 
-    [AttributeUsage(AttributeTargets.Method)]
+    [AttributeUsage(AttributeTargets.Method, AllowMultiple = true)]
     public class OnKeyDownAttribute : KeyboardInputBindingAttribute {
 
         public OnKeyDownAttribute(KeyCode key = KeyCodeUtil.AnyKey, KeyboardModifiers modifiers = KeyboardModifiers.None)
@@ -142,7 +142,7 @@ namespace Src {
 
     }
 
-    [AttributeUsage(AttributeTargets.Method)]
+    [AttributeUsage(AttributeTargets.Method, AllowMultiple = true)]
     public class OnKeyUpWithFocusAttribute : KeyboardInputBindingAttribute {
 
         public OnKeyUpWithFocusAttribute(KeyCode key = KeyCodeUtil.AnyKey, KeyboardModifiers modifiers = KeyboardModifiers.None)
@@ -150,7 +150,7 @@ namespace Src {
 
     }
 
-    [AttributeUsage(AttributeTargets.Method)]
+    [AttributeUsage(AttributeTargets.Method, AllowMultiple = true)]
     public class OnKeyDownWithFocusAttribute : KeyboardInputBindingAttribute {
 
         public OnKeyDownWithFocusAttribute(KeyCode key = KeyCodeUtil.AnyKey, KeyboardModifiers modifiers = KeyboardModifiers.None)

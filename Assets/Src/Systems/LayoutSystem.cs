@@ -83,7 +83,6 @@ namespace Src.Systems {
 
         public void OnUpdate() {
             rectCount = 0;
-
             if (rects.Length <= layoutTree.Size) {
                 Array.Resize(ref rects, layoutTree.Size * 2);
             }

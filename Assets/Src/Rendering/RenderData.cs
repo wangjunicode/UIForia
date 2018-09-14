@@ -1,5 +1,4 @@
-﻿using Shapes2D;
-using UnityEngine;
+﻿using UnityEngine;
 using UnityEngine.UI;
 
 namespace Src.Systems {
@@ -7,26 +6,15 @@ namespace Src.Systems {
     public class RenderData : IHierarchical {
 
         public UIElement element;
-        public RectTransform rootTransform;
-        public RectTransform unityTransform;
-        public Graphic maskComponent;
         public Graphic renderComponent;
+        public RectTransform unityTransform;
         public RenderPrimitiveType primitiveType;
-        public MonoBehaviour uiComponent;
-        public Shape shape;
         
-        public RenderData(UIElement element, RenderPrimitiveType primitiveType, RectTransform unityTransform, RectTransform rootTransform) {
+        public RenderData(UIElement element, RenderPrimitiveType primitiveType, RectTransform unityTransform) {
             this.element = element;
             this.primitiveType = primitiveType;
             this.unityTransform = unityTransform;
-            this.rootTransform = rootTransform;
         }
-
-        // todo replae w/ callback on tree itself
-//        public void OnParentChanged(ISkipTreeTraversable newParent) {
-//            RenderData parent = (RenderData) newParent;
-//            unityTransform.SetParent(parent == null ? rootTransform : parent.unityTransform);
-//        }
 
         public int UniqueId => element.id;
         public IHierarchical Element => element;

@@ -2,10 +2,13 @@
 <UITemplate>
 
     <Contents style.layoutType="Fixed"
+              style.fontSize="32"
               style.width="content(100)"
+              style.maxWidth="300"
+              style.minWidth="30"
               style.backgroundColor="white"
-              style.hover.backgroundColor="red"
-              style.height="14f">
+              style.height="content(100)"
+              style.minHeight="14f">
         
         <Graphic x-id="highlight"/>
         

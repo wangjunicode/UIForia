@@ -50,6 +50,9 @@ namespace Src.Input {
         public bool IsMouseMiddleDown => source.mouseState.isMiddleMouseDown;
         public bool IsMouseMiddleDownThisFrame => source.mouseState.isMiddleMouseDownThisFrame;
 
+        public bool IsDoubleClick => source.mouseState.isDoubleClick;
+        public bool IsTripleClick => source.mouseState.isTripleClick;
+        
         public Vector2 ScrollDelta => source.mouseState.scrollDelta;
 
         public Vector2 MousePosition => source.mouseState.mousePosition;

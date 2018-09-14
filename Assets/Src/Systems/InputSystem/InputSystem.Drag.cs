@@ -67,7 +67,6 @@ public abstract partial class InputSystem {
         MouseInputEvent mouseEvent = new MouseInputEvent(m_EventPropagator, InputEventType.DragCreate, modifiersThisFrame);
         
         object boxedEvent = mouseEvent;
-        Debug.Log(m_MouseDownElements.Count);
         for (int i = 0; i < m_MouseDownElements.Count; i++) {
             DragCreatorGroup dragCreatorGroup;
             UIElement element = m_MouseDownElements[i];
@@ -76,7 +75,7 @@ public abstract partial class InputSystem {
                 continue;
             }
 
-            // todo -- figure out of these should respect propagation
+            // todo -- figure out if these should respect propagation
             dragCreatorGroup.context.SetObjectAlias(k_EventAlias, boxedEvent);
             
             m_CurrentDragEvent = dragCreatorGroup.TryCreateEvent(element, mouseEvent);

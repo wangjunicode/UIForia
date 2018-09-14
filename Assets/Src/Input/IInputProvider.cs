@@ -33,6 +33,9 @@ namespace Src.Systems {
         
         bool IsDragging { get; }
 
+        bool RequestFocus(IFocusable target);
+        void ReleaseFocus(IFocusable target);
+
     }
 
 }

@@ -7,14 +7,12 @@
 - Support <Import>
 - Support <Mask>
 - Support Destroying Elements
-- Support Event Propagation
 - Support references to globals in templates
 - Support style skinning
 - Support Focus events
 - Support handlers for list events (add, remove, move)
 - Support <Slot> elements
 - Support <Prefab> tag, goes against unity-agnostic design
-- Mouse Event Annotations
 - Filter Lists
 - Create / Destroy List Elements
 - Support <Image>
@@ -28,7 +26,6 @@
 - Support layout ordering
 - Support out of flow
 - Support animation
-- Support properties in templates
 - Support transform
 - Support arbitrary creation of child nodes?
 

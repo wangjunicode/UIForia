@@ -36,8 +36,8 @@ public abstract partial class InputSystem {
     }
 
     protected void ProcessKeyboardEvent(KeyCode keyCode, InputEventType eventType, char character, KeyboardModifiers modifiers) {
-        KeyboardInputEvent keyEvent = new KeyboardInputEvent(eventType, keyCode, character, modifiers, m_FocusedId != -1);
-        if (m_FocusedId == -1) {
+        KeyboardInputEvent keyEvent = new KeyboardInputEvent(eventType, keyCode, character, modifiers, m_FocusedElement != null);
+        if (m_FocusedElement == null) {
             m_KeyboardEventTree.ConditionalTraversePreOrder(keyEvent, (item, evt) => {
                 if (evt.stopPropagation) return false;
 
@@ -55,7 +55,7 @@ public abstract partial class InputSystem {
             });
         }
         else {
-            KeyboardEventTreeNode focusedNode = m_KeyboardEventTree.GetItem(m_FocusedId);
+            KeyboardEventTreeNode focusedNode = m_KeyboardEventTree.GetItem(m_FocusedElement);
             IReadOnlyList<KeyboardEventHandler> handlers = focusedNode.handlers;
             for (int i = 0; i < handlers.Count; i++) {
                 if (keyEvent.stopPropagationImmediately) break;

@@ -16,14 +16,14 @@ namespace Rendering {
 
         public float CalcTextWidth(string text, UIStyleSet style) {
             ruler.fontSize = style.fontSize;
-            ruler.text = text + "\u200B";
-            return Mathf.CeilToInt(ruler.GetPreferredValues().x + 1);
+            ruler.text = text;
+            return Mathf.CeilToInt(ruler.GetPreferredValues().x);
         }
 
         public float CalcTextHeight(string text, UIStyleSet style, float width) {
             ruler.fontSize = style.fontSize;
-            ruler.text = text + "\u200B";
-            return Mathf.CeilToInt(ruler.GetPreferredValues(width + 1, 0).y);
+            ruler.text = text;
+            return Mathf.CeilToInt(ruler.GetPreferredValues(width, 0).y);
         }
 
     }

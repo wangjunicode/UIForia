@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.Linq;
 using Rendering;
 using Src.Systems;
 using UnityEngine;
@@ -11,6 +12,7 @@ namespace Src.Layout {
     [DebuggerDisplay("{" + nameof(element) + "}")]
     public class LayoutNode : IHierarchical {
 
+        public const int k_MeasurementResultCount = 4;
         public Rect outputRect;
         public Dimensions rect;
         public UILayout layout;
@@ -31,7 +33,8 @@ namespace Src.Layout {
         public readonly UIElement element;
         public readonly List<LayoutNode> children;
 
-        private List<MeasureResult> measureResults;
+        private MeasureResult[] measureResults;
+        private int currentMeasureResultIndex;
 
         public LayoutNode(UIElement element) {
             this.element = element;
@@ -49,7 +52,6 @@ namespace Src.Layout {
         public IHierarchical Parent => element.parent;
 
         public void UpdateData(LayoutSystem layoutSystem) {
-            preferredTextWidth = 0;
 
             contentStartOffsetX = style.paddingLeft + style.marginLeft + style.borderLeft;
             contentEndOffsetX = style.paddingRight + style.marginRight + style.borderRight;
@@ -66,10 +68,7 @@ namespace Src.Layout {
             UITextElement textElement = element as UITextElement;
             if (textElement != null) {
                 isTextElement = true;
-                textContent = textElement.GetText(); // read from style later
-                preferredTextWidth = layout.GetTextWidth(textContent, style);
-                measureResults = measureResults ?? new List<MeasureResult>(4);
-                measureResults.Clear();
+                SetTextContent(textElement.GetText());
             }
         }
 
@@ -97,20 +96,27 @@ namespace Src.Layout {
 
         public void SetTextContent(string text) {
             textContent = text;
+            UpdateTextMeasurements();
+        }
+
+        public void UpdateTextMeasurements() {
+            if (!isTextElement) return;
+
+            currentMeasureResultIndex = 0;
+            measureResults = measureResults ?? new MeasureResult[k_MeasurementResultCount];
+            
+            for (int i = 0; i < measureResults.Length; i++) {
+                measureResults[i] = new MeasureResult();
+            }
+
             if (layout != null) {
                 preferredTextWidth = layout.GetTextWidth(textContent, style);
             }
         }
 
-        public void UpdateTextMeasurements() {
-            if (!isTextElement) return;
-            preferredTextWidth = layout.GetTextWidth(textContent, style);
-            measureResults.Clear();
-        }
-
         public float GetTextHeight(float computedWidth) {
             int intWidth = (int) computedWidth;
-            for (int i = 0; i < measureResults.Count; i++) {
+            for (int i = 0; i < measureResults.Length; i++) {
                 if (measureResults[i].width == intWidth) {
                     return measureResults[i].height;
                 }
@@ -118,12 +124,8 @@ namespace Src.Layout {
 
             float height = layout.GetTextHeight(textContent, style, computedWidth);
 
-            if (measureResults.Count == 4) {
-                measureResults[0] = new MeasureResult(intWidth, height);
-            }
-            else {
-                measureResults.Add(new MeasureResult(intWidth, height));
-            }
+            currentMeasureResultIndex = (currentMeasureResultIndex + 1) % measureResults.Length;
+            measureResults[currentMeasureResultIndex] = new MeasureResult(intWidth, height);
 
             return height;
         }

@@ -10,7 +10,7 @@ public abstract partial class InputSystem {
 
     public void OnReset() {
         // don't clear key states
-        m_FocusedId = -1;
+        m_FocusedElement = null;
         m_LayoutResultCount = 0;
         m_ElementsLastFrame.Clear();
         m_ElementsThisFrame.Clear();
@@ -76,6 +76,8 @@ public abstract partial class InputSystem {
         if (dragEventCreators != null) {
             m_DragCreatorMap[elementData.elementId] = new DragCreatorGroup(elementData.context, dragEventCreators);
         }
+
+        elementData.element.Input = this;
         
         for (int i = 0; i < elementData.children.Count; i++) {
             OnElementCreated(elementData.children[i]);

@@ -32,7 +32,6 @@ namespace Src.StyleBindings.Text {
         public override void Apply(UIStyleSet styleSet, UITemplateContext context) {
             int currentSize = styleSet.GetFontSize(state);
             int newSize = expression.EvaluateTyped(context);
-            Debug.Log("current: " + currentSize + " new " + newSize);
             if (currentSize != newSize) {
                 styleSet.SetFontSize(newSize, state);
             }

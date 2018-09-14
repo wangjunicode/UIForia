@@ -80,7 +80,7 @@ namespace Src.Layout {
 
                 float y = GetPixelValue(child.style.positionY, adjustedWidth, viewportSize);
                 minY = Mathf.Min(minY, y);
-                maxY = Mathf.Max(maxY, y + child.GetPreferredWidth(node.style.dimensions.height.unit, adjustedWidth, viewportSize));
+                maxY = Mathf.Max(maxY, y + child.GetPreferredHeight(node.style.dimensions.height.unit, adjustedWidth, parentWidth, viewportSize));
             }
 
             return Mathf.Max(0, maxY - minY);

@@ -15,15 +15,16 @@ namespace Src.Input {
     }
 
     public interface IFocusable {
+      
+        void Focus();
+        void Blur();
+
+    }
+
+    public interface IFocusableEvented : IFocusable {
 
         event Action<FocusEvent> onFocus;
         event Action<BlurEvent> onBlur;
-        
-        bool HasFocus { get; }
-        bool HasFocusLocked { get; }
-
-        void Focus();
-        void Blur();
 
     }
 

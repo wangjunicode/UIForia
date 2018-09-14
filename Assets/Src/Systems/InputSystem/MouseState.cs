@@ -20,6 +20,9 @@ public struct MouseState {
     
     public Vector2 scrollDelta;
 
+    public bool isDoubleClick;
+    public bool isTripleClick;
+    
     public Vector2 MouseDownDelta {
         get {
             if (mouseDownPosition.x < 0 || mouseDownPosition.y < 0) {

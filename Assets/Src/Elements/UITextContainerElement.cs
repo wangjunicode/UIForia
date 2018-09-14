@@ -2,8 +2,6 @@ using System;
 using JetBrains.Annotations;
 using Src;
 using TMPro;
-using UnityEngine;
-
 
 public class UITextContainerElement : UIElement {
 
@@ -48,7 +46,6 @@ public class UITextContainerElement : UIElement {
     }
 
     private void HandleTextElementTextChanged(UITextElement element, string text) {
-//        Debug.Log("Text changed");
         onTextContentChanged?.Invoke(element.id, text);
     }
 

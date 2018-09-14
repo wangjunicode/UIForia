@@ -17,7 +17,7 @@ public abstract partial class InputSystem : IInputSystem, IInputProvider {
     private List<UIElement> m_ElementsThisFrame;
     private List<UIElement> m_ElementsLastFrame;
 
-    private int m_FocusedId;
+    private UIElement m_FocusedElement;
     private DragEvent m_CurrentDragEvent;
     private KeyboardModifiers modifiersThisFrame;
 
@@ -65,10 +65,39 @@ public abstract partial class InputSystem : IInputSystem, IInputProvider {
         this.m_EventPropagator = new EventPropagator();
         this.m_MouseEventCaptureList = new List<ValueTuple<MouseEventHandler, UIElement, UITemplateContext>>();
         this.m_DragEventCaptureList = new List<ValueTuple<DragEventHandler, UIElement, UITemplateContext>>();
-        this.m_FocusedId = -1;
+        this.m_FocusedElement = null;
     }
 
     protected abstract MouseState GetMouseState();
+
+    public bool RequestFocus(IFocusable target) {
+        if (!(target is UIElement)) {
+            return false;
+        }
+        // todo -- if focus handlers added via template invoke them
+        if (m_FocusedElement != null) {
+            if (m_FocusedElement == (UIElement) target) {
+                return true;
+            }
+            IFocusable focusable = (IFocusable) m_FocusedElement;
+            focusable.Blur();
+        }
+        
+        // todo -- use this EventSystem.current.SetSelectedGameObject(gameObject, eventData);
+
+        m_FocusedElement = (UIElement) target;
+        target.Focus();
+        return true;
+    }
+
+    public void ReleaseFocus(IFocusable target) {
+        if (m_FocusedElement == (UIElement) target) {
+            IFocusable focusable = (IFocusable) m_FocusedElement;
+            focusable.Blur();
+            // todo -- if focus handlers added via template invoke them
+            m_FocusedElement = null;
+        }
+    }
 
     public virtual void OnUpdate() {
         m_MouseState = GetMouseState();
@@ -97,7 +126,7 @@ public abstract partial class InputSystem : IInputSystem, IInputProvider {
 
     private void ProcessMouseInput() {
         m_LayoutResultCount = m_LayoutSystem.QueryPoint(m_MouseState.mousePosition, ref m_LayoutQueryResults);
-        
+
         for (int i = 0; i < m_LayoutResultCount; i++) {
             int elementId = m_LayoutQueryResults[i].element.id;
 
@@ -120,11 +149,10 @@ public abstract partial class InputSystem : IInputSystem, IInputProvider {
 
         m_EnteredElements.Sort(s_DepthComparer);
         m_ElementsThisFrame.Sort(s_DepthComparer);
-        
+
         if (m_MouseState.isLeftMouseDownThisFrame) {
             m_MouseDownElements.AddRange(m_ElementsThisFrame);
         }
-        
     }
 
 }

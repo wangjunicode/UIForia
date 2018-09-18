@@ -58,7 +58,7 @@ namespace Rendering {
         public void SetLayoutConstraints(LayoutConstraints value, StyleState state = StyleState.Normal) {
             UIStyle style = GetOrCreateStyle(state);
             style.layoutConstraints = value;
-            changeHandler.SetConstraints(elementId, constraints);
+            changeHandler.SetConstraints(element, constraints);
         }
 
         [PublicAPI]
@@ -70,7 +70,7 @@ namespace Rendering {
         public void SetMinWidth(UIMeasurement measurement, StyleState state = StyleState.Normal) {
             GetOrCreateStyle(state).layoutConstraints.minWidth = measurement;
             if (minWidth == measurement) {
-                changeHandler.SetConstraints(elementId, constraints);
+                changeHandler.SetConstraints(element, constraints);
             }
         }
 
@@ -83,7 +83,7 @@ namespace Rendering {
         public void SetMaxWidth(UIMeasurement measurement, StyleState state = StyleState.Normal) {
             GetOrCreateStyle(state).layoutConstraints.maxWidth = measurement;
             if (maxWidth == measurement) {
-                changeHandler.SetConstraints(elementId, constraints);
+                changeHandler.SetConstraints(element, constraints);
             }
         }
 
@@ -96,7 +96,7 @@ namespace Rendering {
         public void SetMinHeight(UIMeasurement measurement, StyleState state = StyleState.Normal) {
             GetOrCreateStyle(state).layoutConstraints.minHeight = measurement;
             if (minHeight == measurement) {
-                changeHandler.SetConstraints(elementId, constraints);
+                changeHandler.SetConstraints(element, constraints);
             }
         }
 
@@ -109,7 +109,7 @@ namespace Rendering {
         public void SetMaxHeight(UIMeasurement measurement, StyleState state = StyleState.Normal) {
             GetOrCreateStyle(state).layoutConstraints.maxHeight = measurement;
             if (maxHeight == measurement) {
-                changeHandler.SetConstraints(elementId, constraints);
+                changeHandler.SetConstraints(element, constraints);
             }
         }
 
@@ -122,7 +122,7 @@ namespace Rendering {
         public void SetShrinkFactor(int factor, StyleState state = StyleState.Normal) {
             GetOrCreateStyle(state).layoutConstraints.shrinkFactor = factor;
             if (shrinkFactor == factor) {
-                changeHandler.SetConstraints(elementId, constraints);
+                changeHandler.SetConstraints(element, constraints);
             }
         }
 
@@ -135,7 +135,7 @@ namespace Rendering {
         public void SetGrowthFactor(int factor, StyleState state = StyleState.Normal) {
             GetOrCreateStyle(state).layoutConstraints.growthFactor = factor;
             if (growthFactor == factor) {
-                changeHandler.SetConstraints(elementId, constraints);
+                changeHandler.SetConstraints(element, constraints);
             }
         }
 

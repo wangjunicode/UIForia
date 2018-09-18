@@ -14,11 +14,14 @@ namespace Src.Layout {
 
         public const int k_MeasurementResultCount = 4;
         public Rect outputRect;
+        public float computedWidth;
+        public float computedHeight;
         public Dimensions rect;
+        public Bounds childExtents;
+        public Bounds inFlowChildExtents;
         public UILayout layout;
         public LayoutParameters parameters;
         public LayoutConstraints constraints;
-
         public string textContent;
         public float preferredTextWidth;
 
@@ -51,8 +54,35 @@ namespace Src.Layout {
         public IHierarchical Element => element;
         public IHierarchical Parent => element.parent;
 
-        public void UpdateData(LayoutSystem layoutSystem) {
+        public Extents GetChildExtents() {
+            Vector2 min = new Vector2(float.MaxValue, float.MaxValue);
+            Vector2 max = new Vector2(float.MinValue, float.MinValue);
+            
+            for (int i = 0; i < children.Count; i++) {
+                LayoutNode child = children[i];
+                
+                if (child.localPosition.x < min.x) {
+                    min.x = child.localPosition.x;
+                }
+                
+                if (child.localPosition.y < min.y) {
+                    min.y = child.localPosition.y;
+                }
 
+                if (child.localPosition.x + child.computedWidth > max.x) {
+                    max.x = child.localPosition.x + child.computedWidth;
+                }
+                
+                if (child.localPosition.y + child.computedHeight > max.y) {
+                    max.y = child.localPosition.y + child.computedHeight;
+                }
+
+            }
+
+            return new Extents(min, max);
+        }
+
+        public void UpdateData(LayoutSystem layoutSystem) {
             contentStartOffsetX = style.paddingLeft + style.marginLeft + style.borderLeft;
             contentEndOffsetX = style.paddingRight + style.marginRight + style.borderRight;
 
@@ -104,7 +134,7 @@ namespace Src.Layout {
 
             currentMeasureResultIndex = 0;
             measureResults = measureResults ?? new MeasureResult[k_MeasurementResultCount];
-            
+
             for (int i = 0; i < measureResults.Length; i++) {
                 measureResults[i] = new MeasureResult();
             }

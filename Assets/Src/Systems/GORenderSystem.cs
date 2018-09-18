@@ -14,7 +14,7 @@ namespace Src.Systems {
 
         private readonly ILayoutSystem layoutSystem;
         private readonly IStyleSystem styleSystem;
-        private readonly IElementRegistry elementRegistry;
+        private readonly UIView elementRegistry;
 
         private readonly SkipTree<RenderData> renderSkipTree;
         private readonly Dictionary<int, RectTransform> m_TransformMap;
@@ -23,8 +23,10 @@ namespace Src.Systems {
 
         private readonly List<IGraphicElement> m_DirtyGraphicList;
         private readonly Dictionary<int, CanvasRenderer> m_CanvasRendererMap;
+        private readonly Dictionary<int, RectMask2D> m_MaskMap;
+        private readonly List<RenderData> m_MaskElements;
 
-        public GORenderSystem(ILayoutSystem layoutSystem, IStyleSystem styleSystem, IElementRegistry elementRegistry, RectTransform rectTransform) {
+        public GORenderSystem(ILayoutSystem layoutSystem, IStyleSystem styleSystem, UIView elementRegistry, RectTransform rectTransform) {
             this.layoutSystem = layoutSystem;
             this.rectTransform = rectTransform;
             this.elementRegistry = elementRegistry;
@@ -33,14 +35,19 @@ namespace Src.Systems {
             this.m_DirtyGraphicList = new List<IGraphicElement>();
             this.m_CanvasRendererMap = new Dictionary<int, CanvasRenderer>();
             this.m_TransformMap = new Dictionary<int, RectTransform>();
+            this.m_MaskMap = new Dictionary<int, RectMask2D>();
+            this.m_MaskElements = new List<RenderData>();
 
             this.renderSkipTree.onItemParentChanged += (item, newParent, oldParent) => {
                 item.unityTransform.SetParent(newParent == null ? rectTransform : newParent.unityTransform);
+                item.unityTransform.anchorMin = new Vector2(0, 1);
+                item.unityTransform.anchorMax = new Vector2(0, 1);
+                item.unityTransform.pivot = new Vector2(0, 1);
+                item.unityTransform.anchoredPosition = Vector3.zero;
             };
 
             this.styleSystem = styleSystem;
         }
-
 
         public void OnReady() {
             ready = true;
@@ -85,6 +92,19 @@ namespace Src.Systems {
             }
         }
 
+        /*
+         * ClipTree
+         *     traverse
+         *         foreach item
+         *             item.setclipRect(parent.rect)
+         *         
+         *
+         * add mask ->
+         *     foreach other mask
+         *         if child should be in new mask
+         *         old mask.remove
+         *         new mask.add
+         */
         public void OnUpdate() {
             int count = layoutSystem.RectCount;
             LayoutResult[] layoutResults = layoutSystem.LayoutResults;
@@ -98,20 +118,85 @@ namespace Src.Systems {
 
                 RenderData renderData = renderSkipTree.GetItem(layoutResults[i].element.id);
                 ContentBoxRect margin = renderData.element.style.margin;
-
+                UIElement element = renderData.element;
+                
                 Vector2 position = layoutResults[i].localRect.position;
                 position.x = Mathf.CeilToInt(position.x + margin.left);
                 position.y = -Mathf.CeilToInt(position.y + margin.top);
+                
+                Vector2 size = layoutResults[i].localRect.size;
+                size.x = Mathf.CeilToInt(size.x - (margin.left + margin.right));
+                size.y = Mathf.CeilToInt(size.y - (margin.top + margin.bottom));
+                
+                if (element.style.HandlesOverflow && element.measurements.IsOverflowing) {
+                    RectMask2D mask;
+                    if (!m_MaskMap.TryGetValue(element.id, out mask)) {
+                        RectTransform contentTransform = transform;
+                        GameObject maskHolder = new GameObject("Mask");
+                        mask = maskHolder.AddComponent<RectMask2D>();
+                        RectTransform parent = transform.parent as RectTransform;
+                        m_MaskMap[element.id] = mask;
+                        transform.SetParent(mask.transform);
+                        mask.transform.SetParent(parent);
+                        transform = mask.transform as RectTransform;
+                        transform.anchorMin = new Vector2(0, 1);
+                        transform.anchorMax = new Vector2(0, 1);
+                        transform.pivot = new Vector2(0, 1);
+                        contentTransform.SetParent(transform);
+                        contentTransform.anchoredPosition = new Vector2();
+                    }
+                    else {
+                        RectTransform contentTransform = transform;
+                        contentTransform.anchoredPosition = new Vector2();
+                        transform = mask.transform as RectTransform;
+                    }
+
+                    // if has mask
+                    // get transform parent
+                    // set size to size - scroll bar
+
+//                    if (element.measurements.IsOverflowingX && renderData.horizontalScrollbar == null) {
+//                        ScrollBar horizontal = new ScrollBar();
+//                        horizontal.SetParent(element);
+////                            horizontal.SetStyle(element.style.scrollStyle);
+//                        horizontal.flags |= UIElementFlags.ImplicitElement;
+//                        horizontal.onScrollUpdate += (f) => { };
+//                        renderData.horizontalScrollbar = horizontal;
+//                        if (renderData.verticalScrollbar == null) {
+//                            m_MaskElements.Add(renderData);
+//                        }
+//                    }
+                    if (element.measurements.IsOverflowingY && renderData.verticalScrollbar == null) {
+                        ScrollBar vertical = new ScrollBar();
+                        vertical.flags |= UIElementFlags.ImplicitElement;
+                        vertical.SetParent(element);
+//                            vertical.SetStyle(element.style.scrollStyle);
+                        vertical.style.width = 5f;
+                        vertical.style.height = size.y;
+                        vertical.style.backgroundColor = Color.green;
+                        var data = renderSkipTree.GetItem(vertical);
+                        data.unityTransform.anchoredPosition = position;
+                        data.unityTransform.sizeDelta = new Vector2(5f, size.y);
+                        ApplyStyles(data);
+                        vertical.onScrollUpdate += (f) => { };
+                        renderData.verticalScrollbar = vertical;
+                        if (renderData.horizontalScrollbar == null) {
+                            m_MaskElements.Add(renderData);
+                        }
+                    }
+
+                    //mask.SetClipRect(new Rect(0, 0, element.measurements.width - 5f, element.measurements.height - 5f));
+                }
+
                 if (transform.anchoredPosition != position) {
                     transform.anchoredPosition = position;
                 }
 
-                Vector2 size = layoutResults[i].localRect.size;
-                size.x = Mathf.CeilToInt(size.x - (margin.left + margin.right));
-                size.y = Mathf.CeilToInt(size.y - (margin.top + margin.bottom));
+
                 if (transform.sizeDelta != size) {
                     transform.sizeDelta = size;
                 }
+
 
                 // Text elements give me lots of trouble. Here is what needs to happen:
                 // Layout needs to measure the preferred size of the string. It does this on it's own
@@ -131,6 +216,17 @@ namespace Src.Systems {
                             textMesh.ForceMeshUpdate();
                         }
                     }
+                }
+            }
+
+            for (int i = 0; i < m_MaskElements.Count; i++) {
+                RenderData maskedData = m_MaskElements[i];
+                if (maskedData.horizontalScrollbar != null) {
+                    //  maskedData.horizontalScrollbar.SetStyleAndSize();
+                }
+
+                if (maskedData.verticalScrollbar != null) {
+                    //  maskedData.verticalScrollbar.SetStyleAndSize();
                 }
             }
 
@@ -238,6 +334,16 @@ namespace Src.Systems {
 
         public void OnElementHidden(UIElement element) { }
 
+        public void OnElementParentChanged(UIElement element, UIElement oldParent, UIElement newParent) {
+            RenderData data = renderSkipTree.GetItem(element);
+            if (data != null) {
+                renderSkipTree.UpdateItemParent(element);
+            }
+            else {
+                OnElementStyleChanged(element);
+            }
+        }
+
         public void OnRender() {
             OnUpdate();
         }
@@ -279,14 +385,12 @@ namespace Src.Systems {
             }
 
             renderSkipTree.TraversePreOrder(element, this, (self, item) => {
-                
                 item.unityTransform.gameObject.SetActive(false);
                 CanvasRenderer canvasRenderer;
 
                 if (self.m_CanvasRendererMap.TryGetValue(item.element.id, out canvasRenderer)) {
                     canvasRenderer.Clear();
                 }
-                
             });
         }
 
@@ -390,27 +494,24 @@ namespace Src.Systems {
         }
 
 
-        private void HandleBorderRadiusChange(int elementId, BorderRadius radius) {
+        private void HandleBorderRadiusChange(UIElement element, BorderRadius radius) {
             if (!ready) return;
-            UIElement element = elementRegistry.GetElement(elementId);
             OnElementStyleChanged(element);
         }
 
-        private void HandlePaintChange(int elementId, Paint paint) {
+        private void HandlePaintChange(UIElement element, Paint paint) {
             if (!ready) return;
-            UIElement element = elementRegistry.GetElement(elementId);
             OnElementStyleChanged(element);
         }
 
-        private void HandleStyleChange(int elementId, ContentBoxRect rect) {
+        private void HandleStyleChange(UIElement element, ContentBoxRect rect) {
             if (!ready) return;
-            UIElement element = elementRegistry.GetElement(elementId);
             OnElementStyleChanged(element);
         }
 
-        private void HandleFontPropertyChanged(int elementId, TextStyle style) {
+        private void HandleFontPropertyChanged(UIElement element, TextStyle style) {
             if (!ready) return;
-            RenderData data = renderSkipTree.GetItem(elementId);
+            RenderData data = renderSkipTree.GetItem(element);
             if (data == null) return;
             TextMeshProUGUI textMesh = data.renderComponent as TextMeshProUGUI;
             if (textMesh != null) {

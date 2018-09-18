@@ -59,7 +59,7 @@ namespace Rendering {
         public void SetMargin(ContentBoxRect value, StyleState state = StyleState.Normal) {
             GetOrCreateStyle(state).margin = value;
             computedStyle.margin = margin;
-            changeHandler.SetMargin(elementId, margin);
+            changeHandler.SetMargin(element, margin);
         }
 
         [PublicAPI]
@@ -72,7 +72,7 @@ namespace Rendering {
             GetOrCreateStyle(state).margin.left = value;
             // activeStyle.marginLeft = FindActiveStyle() => .marginLeft;
             if (marginLeft == value) {
-                changeHandler.SetMargin(elementId, margin);
+                changeHandler.SetMargin(element, margin);
             }
         }
 
@@ -80,7 +80,7 @@ namespace Rendering {
         public void SetMarginRight(float value, StyleState state = StyleState.Normal) {
             GetOrCreateStyle(state).margin.right = value;
             if (marginRight == value) {
-                changeHandler.SetMargin(elementId, margin);
+                changeHandler.SetMargin(element, margin);
             }
         }
 
@@ -88,7 +88,7 @@ namespace Rendering {
         public void SetMarginTop(float value, StyleState state = StyleState.Normal) {
             GetOrCreateStyle(state).margin.top = value;
             if (marginTop == value) {
-                changeHandler.SetMargin(elementId, margin);
+                changeHandler.SetMargin(element, margin);
             }
         }
 
@@ -96,7 +96,7 @@ namespace Rendering {
         public void SetMarginBottom(float value, StyleState state = StyleState.Normal) {
             GetOrCreateStyle(state).margin.bottom = value;
             if (marginBottom == value) {
-                changeHandler.SetMargin(elementId, margin);
+                changeHandler.SetMargin(element, margin);
             }
         }
 
@@ -158,14 +158,14 @@ namespace Rendering {
         [PublicAPI]
         public void SetPadding(ContentBoxRect value, StyleState state = StyleState.Normal) {
             GetOrCreateStyle(state).padding = value;
-            changeHandler.SetPadding(elementId, padding);
+            changeHandler.SetPadding(element, padding);
         }
 
         [PublicAPI]
         public void SetPaddingLeft(float value, StyleState state = StyleState.Normal) {
             GetOrCreateStyle(state).padding.left = value;
             if (paddingLeft == value) {
-                changeHandler.SetPadding(elementId, padding);
+                changeHandler.SetPadding(element, padding);
             }
         }
 
@@ -173,7 +173,7 @@ namespace Rendering {
         public void SetPaddingRight(float value, StyleState state = StyleState.Normal) {
             GetOrCreateStyle(state).padding.right = value;
             if (paddingRight == value) {
-                changeHandler.SetPadding(elementId, padding);
+                changeHandler.SetPadding(element, padding);
             }
         }
 
@@ -181,7 +181,7 @@ namespace Rendering {
         public void SetPaddingTop(float value, StyleState state = StyleState.Normal) {
             GetOrCreateStyle(state).padding.top = value;
             if (paddingTop == value) {
-                changeHandler.SetPadding(elementId, padding);
+                changeHandler.SetPadding(element, padding);
             }
         }
 
@@ -189,7 +189,7 @@ namespace Rendering {
         public void SetPaddingBottom(float value, StyleState state = StyleState.Normal) {
             GetOrCreateStyle(state).padding.bottom = value;
             if (paddingBottom == value) {
-                changeHandler.SetPadding(elementId, padding);
+                changeHandler.SetPadding(element, padding);
             }
         }
 
@@ -228,7 +228,7 @@ namespace Rendering {
         [PublicAPI]
         public void SetBorder(ContentBoxRect value, StyleState state = StyleState.Normal) {
             GetOrCreateStyle(state).border = value;
-            changeHandler.SetBorder(elementId, border);
+            changeHandler.SetBorder(element, border);
         }
 
         [PublicAPI]
@@ -260,7 +260,7 @@ namespace Rendering {
         public void SetBorderLeft(float value, StyleState state = StyleState.Normal) {
             GetOrCreateStyle(state).border.left = value;
             if (borderLeft == value) {
-                changeHandler.SetBorder(elementId, border);
+                changeHandler.SetBorder(element, border);
             }
         }
 
@@ -268,7 +268,7 @@ namespace Rendering {
         public void SetBorderRight(float value, StyleState state = StyleState.Normal) {
             GetOrCreateStyle(state).border.right = value;
             if (borderRight == value) {
-                changeHandler.SetBorder(elementId, border);
+                changeHandler.SetBorder(element, border);
             }
         }
 
@@ -276,7 +276,7 @@ namespace Rendering {
         public void SetBorderTop(float value, StyleState state = StyleState.Normal) {
             GetOrCreateStyle(state).border.top = value;
             if (borderRight == value) {
-                changeHandler.SetBorder(elementId, border);
+                changeHandler.SetBorder(element, border);
             }
         }
 
@@ -284,7 +284,7 @@ namespace Rendering {
         public void SetBorderBottom(float value, StyleState state = StyleState.Normal) {
             GetOrCreateStyle(state).border.bottom = value;
             if (borderBottom == value) {
-                changeHandler.SetBorder(elementId, border);
+                changeHandler.SetBorder(element, border);
             }
         }
 

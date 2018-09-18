@@ -11,7 +11,7 @@ namespace Rendering {
         public UIViewIMGUI(Type elementType) : base(elementType) {
             layoutSystem = new LayoutSystem(new IMGUITextSizeCalculator(), styleSystem);
             IRenderSystem renderSystem = new IMGUIRenderSystem(this, styleSystem, layoutSystem);
-            IInputSystem inputSystem = new IMGUIInputSystem(layoutSystem, this, styleSystem);
+            IInputSystem inputSystem = new IMGUIInputSystem(layoutSystem, styleSystem);
             systems.Add(layoutSystem);
             systems.Add(renderSystem);
             systems.Add(inputSystem);
@@ -24,11 +24,3 @@ namespace Rendering {
     }
 
 }
-
-/*
-Layout Rects -> if has style, register w/ input system
-
-    How do I tell if ui style has a hover state? for now we don't.
-    How I map layout rect (ie position) to style?
-
-*/

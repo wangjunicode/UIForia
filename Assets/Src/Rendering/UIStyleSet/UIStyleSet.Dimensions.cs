@@ -43,7 +43,7 @@ namespace Rendering {
         [PublicAPI]
         public void SetDimensions(Dimensions newDimensions, StyleState state = StyleState.Normal) {
             GetOrCreateStyle(state).dimensions = newDimensions;
-            changeHandler.SetDimensions(elementId, newDimensions);
+            changeHandler.SetDimensions(element, newDimensions);
         }
 
 //        [PublicAPI]
@@ -56,7 +56,7 @@ namespace Rendering {
 //            UIStyle style = GetOrCreateStyle(state);
 //            style.dimensions = new Dimensions(measurement, style.dimensions.y, style.dimensions.width, style.dimensions.height);
 //            if (rectX == measurement) {
-//                changeHandler.SetRect(elementId, rect);
+//                changeHandler.SetRect(element, rect);
 //            }
 //        }
 //
@@ -70,7 +70,7 @@ namespace Rendering {
 //            UIStyle style = GetOrCreateStyle(state);
 //            style.dimensions = new Dimensions(style.dimensions.x, measurement, style.dimensions.width, style.dimensions.height);
 //            if (rectY == measurement) {
-//                changeHandler.SetRect(elementId, rect);
+//                changeHandler.SetRect(element, rect);
 //            }
 //        }
 
@@ -84,7 +84,7 @@ namespace Rendering {
             UIStyle style = GetOrCreateStyle(state);
             style.dimensions = new Dimensions(width, style.dimensions.height);
             if (this.width == width) {
-                changeHandler.SetDimensions(elementId, dimensions);
+                changeHandler.SetDimensions(element, dimensions);
             }
         }
 
@@ -98,7 +98,7 @@ namespace Rendering {
             UIStyle style = GetOrCreateStyle(state);
             style.dimensions = new Dimensions(style.dimensions.width, height);
             if (this.height == height) {
-                changeHandler.SetDimensions(elementId, dimensions);
+                changeHandler.SetDimensions(element, dimensions);
             }
         }
 

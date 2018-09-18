@@ -1,19 +1,18 @@
 using System;
 using System.Diagnostics;
-using Src;
-using Src.Extensions;
+using Src.Rendering;
 using Src.Systems;
 using Src.Util;
 
 namespace Rendering {
     
-    [DebuggerDisplay("id = {elementId} state = {currentState}")]
+    [DebuggerDisplay("id = {element.id} state = {currentState}")]
     public partial class UIStyleSet {
 
         private StyleState currentState;
         private StyleEntry[] appliedStyles;
         private int baseCounter;
-        public readonly int elementId;
+        public readonly UIElement element;
         private readonly IStyleChangeHandler changeHandler;
 
         public UIStyle computedStyle;
@@ -22,11 +21,10 @@ namespace Rendering {
 
         public TextStyle ownTextStyle;
         
-        // todo replace with IFontHandler
         private StyleSystem styleSystem;
         
-        public UIStyleSet(int elementId, IStyleChangeHandler changeHandler, StyleSystem styleSystem) {
-            this.elementId = elementId;
+        public UIStyleSet(UIElement element, IStyleChangeHandler changeHandler, StyleSystem styleSystem) {
+            this.element = element;
             this.changeHandler = changeHandler;
             this.currentState = StyleState.Normal;
             this.containedStates = StyleState.Normal;
@@ -110,6 +108,8 @@ namespace Rendering {
             // ReSharper disable once ValueParameterNotUsed
             set { SetDisabledStyle(UIStyleProxy.hack); }
         }
+
+        public bool HandlesOverflow => computedStyle.overflowX != Overflow.None || computedStyle.overflowY != Overflow.None;
 
         public void SetActiveStyle(UIStyle style) {
             SetInstanceStyle(style, StyleState.Active);
@@ -283,19 +283,19 @@ namespace Rendering {
             UIStyle activeFontSizeStyle = FindActiveStyleWithoutDefault((s) => IntUtil.IsDefined(s.textStyle.fontSize));
             UIStyle activeFontColorStyle = FindActiveStyleWithoutDefault((s) => ColorUtil.IsDefined(s.textStyle.color));
             
-            styleSystem.SetFontSize(elementId, activeFontSizeStyle?.textStyle.fontSize ?? IntUtil.UnsetValue);
-            styleSystem.SetFontColor(elementId, activeFontColorStyle?.textStyle.color ?? ColorUtil.UnsetValue);
+            styleSystem.SetFontSize(element, activeFontSizeStyle?.textStyle.fontSize ?? IntUtil.UnsetValue);
+            styleSystem.SetFontColor(element, activeFontColorStyle?.textStyle.color ?? ColorUtil.UnsetValue);
                         
-            changeHandler.SetPaint(elementId, paint);
-            changeHandler.SetLayout(elementId, layoutParameters);
-            changeHandler.SetConstraints(elementId, constraints);
-            changeHandler.SetMargin(elementId, margin);
-            changeHandler.SetPadding(elementId, padding);
-            changeHandler.SetBorder(elementId, border);
-            changeHandler.SetBorderRadius(elementId, borderRadius);
-            changeHandler.SetDimensions(elementId, dimensions);
-            changeHandler.SetTextStyle(elementId, textStyle);
-            changeHandler.SetAvailableStates(elementId, containedStates);
+            changeHandler.SetPaint(element, paint);
+            changeHandler.SetLayout(element, layoutParameters);
+            changeHandler.SetConstraints(element, constraints);
+            changeHandler.SetMargin(element, margin);
+            changeHandler.SetPadding(element, padding);
+            changeHandler.SetBorder(element, border);
+            changeHandler.SetBorderRadius(element, borderRadius);
+            changeHandler.SetDimensions(element, dimensions);
+            changeHandler.SetTextStyle(element, textStyle);
+            changeHandler.SetAvailableStates(element, containedStates);
         }
 
     }

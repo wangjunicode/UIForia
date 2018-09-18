@@ -67,7 +67,7 @@ namespace Rendering {
             style.transform.position = new MeasurementVector2(x, style.transform.position.y);
             if ((state & currentState) != 0 && style == FindActiveStyleWithoutDefault((s) => s.transform.position.x != UIMeasurement.Unset)) {
                 computedStyle.transform.position = new MeasurementVector2(x, computedStyle.transform.position.y);
-                changeHandler.SetTransform(elementId, computedStyle.transform);
+                changeHandler.SetTransform(element, computedStyle.transform);
             }
         }
 
@@ -82,7 +82,7 @@ namespace Rendering {
             style.transform.position = new MeasurementVector2(style.transform.position.x, y);
             if ((state & currentState) != 0 && style == FindActiveStyleWithoutDefault((s) => s.transform.position.y != UIMeasurement.Unset)) {
                 computedStyle.transform.position = new MeasurementVector2(computedStyle.transform.position.x, y);
-                changeHandler.SetTransform(elementId, computedStyle.transform);
+                changeHandler.SetTransform(element, computedStyle.transform);
             }
         }
 
@@ -100,7 +100,7 @@ namespace Rendering {
                 UIMeasurement y = FindActiveStyle((s) => s.transform.position.y.IsDefined()).transform.position.y;
                 if (computedStyle.transform.position.x != x || computedStyle.transform.position.y != y) {
                     computedStyle.transform.position = new MeasurementVector2(x, y);
-                    changeHandler.SetTransform(elementId, computedStyle.transform);
+                    changeHandler.SetTransform(element, computedStyle.transform);
                 }
             }
         }
@@ -116,7 +116,7 @@ namespace Rendering {
             style.transform.rotation = rotationDeg;
             if ((state & currentState) != 0 && style == FindActiveStyleWithoutDefault((s) => FloatUtil.IsDefined(s.transform.rotation))) {
                 computedStyle.transform.rotation = rotationDeg;
-                changeHandler.SetTransform(elementId, computedStyle.transform);
+                changeHandler.SetTransform(element, computedStyle.transform);
             }
         }
 
@@ -131,7 +131,7 @@ namespace Rendering {
             style.transform.scale = new Vector2(x, style.transform.scale.y);
             if ((state & currentState) != 0 && style == FindActiveStyleWithoutDefault((s) => FloatUtil.IsDefined(s.transform.scale.x))) {
                 computedStyle.transform.scale = new Vector2(x, computedStyle.transform.scale.y);
-                changeHandler.SetTransform(elementId, computedStyle.transform);
+                changeHandler.SetTransform(element, computedStyle.transform);
             }
         }
 
@@ -146,7 +146,7 @@ namespace Rendering {
             style.transform.scale = new Vector2(style.transform.scale.x, y);
             if ((state & currentState) != 0 && style == FindActiveStyleWithoutDefault((s) => FloatUtil.IsDefined(s.transform.scale.y))) {
                 computedStyle.transform.scale = new Vector2(computedStyle.transform.scale.x, y);
-                changeHandler.SetTransform(elementId, computedStyle.transform);
+                changeHandler.SetTransform(element, computedStyle.transform);
             }
         }
         
@@ -164,7 +164,7 @@ namespace Rendering {
                 float y = FindActiveStyle((s) => FloatUtil.IsDefined(s.transform.scale.y)).transform.scale.y;
                 if (computedStyle.transform.scale.x != x || computedStyle.transform.scale.y != y) {
                     computedStyle.transform.scale = new Vector2(x, y);
-                    changeHandler.SetTransform(elementId, computedStyle.transform);
+                    changeHandler.SetTransform(element, computedStyle.transform);
                 }
             }
         }
@@ -180,7 +180,7 @@ namespace Rendering {
             style.transform.pivot = new Vector2(x, style.transform.pivot.y);
             if ((state & currentState) != 0 && style == FindActiveStyleWithoutDefault((s) => FloatUtil.IsDefined(s.transform.pivot.x))) {
                 computedStyle.transform.pivot = new Vector2(x, computedStyle.transform.pivot.y);
-                changeHandler.SetTransform(elementId, computedStyle.transform);
+                changeHandler.SetTransform(element, computedStyle.transform);
             }
         }
 
@@ -195,7 +195,7 @@ namespace Rendering {
             style.transform.pivot = new Vector2(style.transform.pivot.x, y);
             if ((state & currentState) != 0 && style == FindActiveStyleWithoutDefault((s) => FloatUtil.IsDefined(s.transform.pivot.y))) {
                 computedStyle.transform.pivot = new Vector2(computedStyle.transform.pivot.x, y);
-                changeHandler.SetTransform(elementId, computedStyle.transform);
+                changeHandler.SetTransform(element, computedStyle.transform);
             }
         }
         
@@ -213,7 +213,7 @@ namespace Rendering {
                 float y = FindActiveStyle((s) => FloatUtil.IsDefined(s.transform.pivot.y)).transform.pivot.y;
                 if (computedStyle.transform.pivot.x != x || computedStyle.transform.pivot.y != y) {
                     computedStyle.transform.pivot = new Vector2(x, y);
-                    changeHandler.SetTransform(elementId, computedStyle.transform);
+                    changeHandler.SetTransform(element, computedStyle.transform);
                 }
             }
         }

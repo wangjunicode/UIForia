@@ -56,7 +56,7 @@ namespace Rendering {
             UIStyle style = GetOrCreateStyle(state);
             style.layoutParameters = parameters;
             if (layoutParameters == parameters) {
-                changeHandler.SetLayout(elementId, layoutParameters);
+                changeHandler.SetLayout(element, layoutParameters);
             }
         }
 
@@ -67,7 +67,7 @@ namespace Rendering {
         public void SetLayoutDirection(LayoutDirection direction, StyleState state = StyleState.Normal) {
             GetOrCreateStyle(state).layoutParameters.direction = direction;
             if (layoutDirection == direction) {
-                changeHandler.SetLayout(elementId, layoutParameters);
+                changeHandler.SetLayout(element, layoutParameters);
             }
         }
 
@@ -78,7 +78,7 @@ namespace Rendering {
         public void SetLayoutFlow(LayoutFlowType flowType, StyleState state = StyleState.Normal) {
             GetOrCreateStyle(state).layoutParameters.flow = flowType;
             if (flowType == layoutFlow) {
-                changeHandler.SetLayout(elementId, layoutParameters);
+                changeHandler.SetLayout(element, layoutParameters);
             }
         }
 
@@ -89,7 +89,7 @@ namespace Rendering {
         public void SetLayoutType(LayoutType layoutType, StyleState state = StyleState.Normal) {
             GetOrCreateStyle(state).layoutParameters.type = layoutType;
             if (this.layoutType == layoutType) {
-                changeHandler.SetLayout(elementId, layoutParameters);
+                changeHandler.SetLayout(element, layoutParameters);
             }
         }
 
@@ -100,7 +100,7 @@ namespace Rendering {
         public void SetLayoutWrap(LayoutWrap layoutWrap, StyleState state = StyleState.Normal) {
             GetOrCreateStyle(state).layoutParameters.wrap = layoutWrap;
             if (this.layoutWrap == layoutWrap) {
-                changeHandler.SetLayout(elementId, layoutParameters);
+                changeHandler.SetLayout(element, layoutParameters);
             }
         }
 
@@ -111,7 +111,7 @@ namespace Rendering {
         public void SetMainAxisAlignment(MainAxisAlignment alignment, StyleState state = StyleState.Normal) {
             GetOrCreateStyle(state).layoutParameters.mainAxisAlignment = alignment;
             if (this.mainAxisAlignment == alignment) {
-                changeHandler.SetLayout(elementId, layoutParameters);
+                changeHandler.SetLayout(element, layoutParameters);
             }
         }
 
@@ -122,7 +122,7 @@ namespace Rendering {
         public void SetCrossAxisAlignment(CrossAxisAlignment alignment, StyleState state = StyleState.Normal) {
             GetOrCreateStyle(state).layoutParameters.crossAxisAlignment = alignment;
             if (this.crossAxisAlignment == alignment) {
-                changeHandler.SetLayout(elementId, layoutParameters);
+                changeHandler.SetLayout(element, layoutParameters);
             }
         }
 

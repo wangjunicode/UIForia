@@ -29,6 +29,10 @@ public enum UIElementFlags {
     Image = 1 << 14,
     TextContainer = 1 << 15,
     
+    Reparentable = 1 << 16,
+    Initialized = 1 << 17,
+    Created = 1 << 18,
+    
     SelfAndAncestorShown = Shown | AncestorShown,
     SelfAndAncestorEnabled = Enabled | AncestorEnabled,
 

@@ -34,7 +34,7 @@ namespace Rendering {
         [PublicAPI]
         public void SetPaint(Paint newPaint, StyleState state) {
             GetOrCreateStyle(state).paint = newPaint;
-            changeHandler.SetPaint(elementId, paint);
+            changeHandler.SetPaint(element, paint);
         }
 
 
@@ -48,7 +48,7 @@ namespace Rendering {
             UIStyle target = GetOrCreateStyle(state);
             target.paint = new Paint(color, target.paint.borderColor, target.paint.backgroundImage);
             if (backgroundColor == color) {
-                changeHandler.SetPaint(elementId, paint);
+                changeHandler.SetPaint(element, paint);
             }
         }
 
@@ -58,7 +58,7 @@ namespace Rendering {
             target.paint = new Paint(target.paint.backgroundColor, target.paint.borderColor, image);
 
             if (backgroundImage == image) {
-                changeHandler.SetPaint(elementId, paint);
+                changeHandler.SetPaint(element, paint);
             }
         }
 
@@ -72,7 +72,7 @@ namespace Rendering {
             UIStyle target = GetOrCreateStyle(state);
             target.paint = new Paint(target.paint.backgroundColor, color, target.paint.backgroundImage);
             if (borderColor == color) {
-                changeHandler.SetPaint(elementId, paint);
+                changeHandler.SetPaint(element, paint);
             }
         }
 

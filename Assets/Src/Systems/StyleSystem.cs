@@ -7,23 +7,23 @@ using UnityEngine;
 
 namespace Src.Systems {
 
-    public delegate void PaintChanged(int elementId, Paint paint);
+    public delegate void PaintChanged(UIElement element, Paint paint);
 
-    public delegate void RectPropertyChanged(int elementId, Dimensions rect);
+    public delegate void RectPropertyChanged(UIElement element, Dimensions rect);
 
-    public delegate void ContentBoxChanged(int elementId, ContentBoxRect rect);
+    public delegate void ContentBoxChanged(UIElement element, ContentBoxRect rect);
 
-    public delegate void ConstraintChanged(int elementId, LayoutConstraints constraints);
+    public delegate void ConstraintChanged(UIElement element, LayoutConstraints constraints);
 
-    public delegate void LayoutChanged(int elementId, LayoutParameters layoutParameters);
+    public delegate void LayoutChanged(UIElement element, LayoutParameters layoutParameters);
 
-    public delegate void BorderRadiusChanged(int elementId, BorderRadius radius);
+    public delegate void BorderRadiusChanged(UIElement element, BorderRadius radius);
 
-    public delegate void FontPropertyChanged(int elementId, TextStyle textStyle);
+    public delegate void FontPropertyChanged(UIElement element, TextStyle textStyle);
 
-    public delegate void AvailableStatesChanged(int elementId, StyleState state);
+    public delegate void AvailableStatesChanged(UIElement element, StyleState state);
 
-    public delegate void TextContentChanged(int elementId, string text);
+    public delegate void TextContentChanged(UIElement element, string text);
 
     public class StyleSystem : ISystem, IStyleSystem {
 
@@ -40,13 +40,11 @@ namespace Src.Systems {
         public event FontPropertyChanged onFontPropertyChanged;
         public event AvailableStatesChanged onAvailableStatesChanged;
         public event TextContentChanged onTextContentChanged;
-        public event Action<int, UITransform> onTransformChanged;
+        public event Action<UIElement, UITransform> onTransformChanged;
         
-        private readonly IElementRegistry elementRegistry;
         private readonly SkipTree<UIElement> fontTree;
 
-        public StyleSystem(IElementRegistry elementRegistry) {
-            this.elementRegistry = elementRegistry;
+        public StyleSystem() {
             this.fontTree = new SkipTree<UIElement>();
         }
 
@@ -64,7 +62,7 @@ namespace Src.Systems {
                 List<UIStyle> baseStyles = elementData.baseStyles;
                 List<StyleBinding> constantStyleBindings = elementData.constantStyleBindings;
 
-                element.style = new UIStyleSet(element.id, this, this);
+                element.style = new UIStyleSet(element, this, this);
                 for (var i = 0; i < constantStyleBindings.Count; i++) {
                     constantStyleBindings[i].Apply(element.style, context);
                 }
@@ -101,66 +99,60 @@ namespace Src.Systems {
         public void OnElementShown(UIElement element) { }
 
         public void OnElementHidden(UIElement element) { }
-
-        public void EnterState(int elementId, StyleState state) {
-            elementRegistry.GetElement(elementId).style.EnterState(state);
+        
+        public void OnElementParentChanged(UIElement element, UIElement oldParent, UIElement newParent) {
+            if (element.style == null) {
+                element.style = new UIStyleSet(element, this, this);
+            }
         }
 
-        public void ExitState(int elementId, StyleState state) {
-            elementRegistry.GetElement(elementId).style.ExitState(state);
+
+        public void SetDimensions(UIElement element, Dimensions rect) {
+            onRectChanged?.Invoke(element, rect);
         }
 
-        public void SetDimensions(int elementId, Dimensions rect) {
-            onRectChanged?.Invoke(elementId, rect);
+        public void SetMargin(UIElement element, ContentBoxRect margin) {
+            onMarginChanged?.Invoke(element, margin);
         }
 
-        public void SetMargin(int elementId, ContentBoxRect margin) {
-            onMarginChanged?.Invoke(elementId, margin);
+        public void SetPadding(UIElement element, ContentBoxRect padding) {
+            onPaddingChanged?.Invoke(element, padding);
         }
 
-        public void SetPadding(int elementId, ContentBoxRect padding) {
-            onPaddingChanged?.Invoke(elementId, padding);
+        public void SetBorder(UIElement element, ContentBoxRect border) {
+            onBorderChanged?.Invoke(element, border);
         }
 
-        public void SetBorder(int elementId, ContentBoxRect border) {
-            onBorderChanged?.Invoke(elementId, border);
+        public void SetBorderRadius(UIElement element, BorderRadius radius) {
+            onBorderRadiusChanged?.Invoke(element, radius);
         }
 
-        public void SetBorderRadius(int elementId, BorderRadius radius) {
-            onBorderRadiusChanged?.Invoke(elementId, radius);
+        public void SetLayout(UIElement element, LayoutParameters layoutParameters) {
+            onLayoutChanged?.Invoke(element, layoutParameters);
         }
 
-        public void SetLayout(int elementId, LayoutParameters layoutParameters) {
-            onLayoutChanged?.Invoke(elementId, layoutParameters);
+        public void SetConstraints(UIElement element, LayoutConstraints constraints) {
+            onConstraintChanged?.Invoke(element, constraints);
         }
 
-        public void SetConstraints(int elementId, LayoutConstraints constraints) {
-            onConstraintChanged?.Invoke(elementId, constraints);
+        public void SetTextStyle(UIElement element, TextStyle textStyle) {
+            onFontPropertyChanged?.Invoke(element, textStyle);
         }
 
-        public void SetTextStyle(int elementId, TextStyle textStyle) {
-            onFontPropertyChanged?.Invoke(elementId, textStyle);
+        public void SetPaint(UIElement element, Paint paint) {
+            onPaintChanged?.Invoke(element, paint);
         }
 
-        public void SetPaint(int elementId, Paint paint) {
-            onPaintChanged?.Invoke(elementId, paint);
+        public void SetAvailableStates(UIElement element, StyleState availableStates) {
+            onAvailableStatesChanged?.Invoke(element, availableStates);
         }
 
-        public void SetAvailableStates(int elementId, StyleState availableStates) {
-            onAvailableStatesChanged?.Invoke(elementId, availableStates);
-        }
-
-        public void SetTransform(int elementId, UITransform transform) {
-            onTransformChanged?.Invoke(elementId, transform);
-        }
-
-        public UIStyleSet GetStyleForElement(int elementId) {
-            return elementRegistry.GetElement(elementId).style;
+        public void SetTransform(UIElement element, UITransform transform) {
+            onTransformChanged?.Invoke(element, transform);
         }
 
         // todo all nodes are currently in the font tree -- bad!
-        internal int SetFontSize(int elementId, int fontSize) {
-            UIElement element = elementRegistry.GetElement(elementId);
+        internal int SetFontSize(UIElement element, int fontSize) {
 
             if (!IntUtil.IsDefined(fontSize)) {
                 fontSize = element.parent?.style.fontSize ?? UIStyle.Default.textStyle.fontSize;
@@ -175,7 +167,7 @@ namespace Src.Systems {
                 }
 
                 item.style.computedStyle.textStyle.fontSize = tuple.Item2;
-                tuple.Item1.onFontPropertyChanged?.Invoke(item.id, item.style.textStyle);
+                tuple.Item1.onFontPropertyChanged?.Invoke(item, item.style.textStyle);
                 
                 return true;
                 
@@ -185,8 +177,7 @@ namespace Src.Systems {
             return fontSize;
         }
         
-        internal Color SetFontColor(int elementId, Color color) {
-            UIElement element = elementRegistry.GetElement(elementId);
+        internal Color SetFontColor(UIElement element, Color color) {
 
             if (!color.IsDefined()) {
                 color = element.parent?.style.textColor ?? UIStyle.Default.textStyle.color;
@@ -201,7 +192,7 @@ namespace Src.Systems {
                 }
 
                 item.style.computedStyle.textStyle.color = tuple.Item2;
-                tuple.Item1.onFontPropertyChanged?.Invoke(item.id, item.style.textStyle);
+                tuple.Item1.onFontPropertyChanged?.Invoke(item, item.style.textStyle);
                 
                 return true;
                 
@@ -213,7 +204,7 @@ namespace Src.Systems {
 
         private void HandleTextChanged(UITextElement element, string text) {
             element.style.textContent = text;
-            onTextContentChanged?.Invoke(element.id, text);
+            onTextContentChanged?.Invoke(element, text);
         }
 
     }

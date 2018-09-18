@@ -217,6 +217,7 @@
           </e>
           <e p="Layout" t="Include">
             <e p="CrossAxisAlignment.cs" t="Include" />
+            <e p="Extents.cs" t="Include" />
             <e p="FixedLayout.cs" t="Include" />
             <e p="FlowLayout.cs" t="Include" />
             <e p="LayoutConstraints.cs" t="Include" />
@@ -288,6 +289,7 @@
             <e p="BorderRadius.cs" t="Include" />
             <e p="BorderStyle.cs" t="Include" />
             <e p="ContentBoxRect.cs" t="Include" />
+            <e p="ElementMeasurements.cs" t="Include" />
             <e p="GOTextSizeCalculator.cs" t="Include" />
             <e p="IDirectDrawMesh.cs" t="Include" />
             <e p="IMGUIRenderData.cs" t="Include" />
@@ -297,6 +299,7 @@
             <e p="ISystem.cs" t="Include" />
             <e p="ITextSizeCalculator.cs" t="Include" />
             <e p="LayoutParameters.cs" t="Include" />
+            <e p="Overflow.cs" t="Include" />
             <e p="Paint.cs" t="Include" />
             <e p="RenderConstants.cs" t="Include" />
             <e p="RenderData.cs" t="Include" />
@@ -350,7 +353,6 @@
           <e p="SrcAsm.asmdef" t="Include" />
           <e p="Systems" t="Include">
             <e p="BindingSystem.cs" t="Include" />
-            <e p="ElementRegistrySystem.cs" t="Include" />
             <e p="GOInputSystem.cs" t="Include" />
             <e p="GORenderSystem.cs" t="Include" />
             <e p="Gradient.cs" t="Include" />
@@ -371,7 +373,7 @@
             <e p="IStyleSystem.cs" t="Include" />
             <e p="KeyboardEventTreeNode.cs" t="Include" />
             <e p="LayoutSystem.cs" t="Include" />
-            <e p="LifeCycleSystem.cs" t="Include" />
+            <e p="RectMask.cs" t="Include" />
             <e p="StyleSystem.cs" t="Include" />
           </e>
           <e p="Temp_SpecFixtures.cs" t="Include" />
@@ -399,6 +401,7 @@
             <e p="UITextTemplate.cs" t="Include" />
           </e>
           <e p="todo.txt" t="Include" />
+          <e p="UIRoot.cs" t="Include" />
           <e p="UIViewBehavior.cs" t="Include" />
           <e p="Util" t="Include">
             <e p="ArrayUtil.cs" t="Include" />
@@ -407,9 +410,12 @@
             <e p="FloatUtil.cs" t="Include" />
             <e p="IntUtil.cs" t="Include" />
             <e p="KeyCodeUtil.cs" t="Include" />
+            <e p="ListPool.cs" t="Include" />
             <e p="MeasurementVector2.cs" t="Include" />
+            <e p="ObjectPool.cs" t="Include" />
             <e p="ReflectionUtil.cs" t="Include" />
             <e p="SkipTree.cs" t="Include" />
+            <e p="StackPool.cs" t="Include" />
             <e p="TextMeshProUtil.cs" t="Include" />
             <e p="WhitespaceProcessor.cs" t="Include" />
           </e>

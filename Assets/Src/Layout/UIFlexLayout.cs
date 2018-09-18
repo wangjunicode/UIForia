@@ -41,25 +41,41 @@ namespace Src.Layout {
             }
 
             int itemTracker = 0;
-            for (int i = 0; i < currentNode.children.Count; i++) {
-                if (currentNode.children[i].isInFlow && currentNode.children[i].element.isEnabled) {
-                    // todo -- this is weeeeird
-                    currentNode.children[i].localPosition = new Vector2(
-                        widthItems[itemTracker].axisStart - (currentNode.element.style.marginLeft),
-                        heightItems[itemTracker].axisStart - (currentNode.element.style.marginTop)
+                        
+            List<LayoutNode> children = currentNode.children;
+            for (int i = 0; i < children.Count; i++) {
+                LayoutNode child = children[i];
+                if (child.isInFlow && child.element.isEnabled) {
+                    child.computedWidth = widthItems[itemTracker].outputSize;
+                    child.computedHeight = heightItems[itemTracker].outputSize;
+                    Vector2 localPosition = new Vector2(
+                        widthItems[itemTracker].axisStart,
+                        heightItems[itemTracker].axisStart
                     );
-                    currentNode.children[i].outputRect = new Rect(
+                    // todo -- this is weeeeird
+                    child.localPosition = new Vector2(
+                        localPosition.x - (currentNode.element.style.marginLeft),
+                        localPosition.y - (currentNode.element.style.marginTop)
+                    );
+                    child.outputRect = new Rect(
                         widthItems[itemTracker].axisStart + size.x,
                         heightItems[itemTracker].axisStart + size.y,
                         widthItems[itemTracker].outputSize,
                         heightItems[itemTracker].outputSize
                     );
+                    
+                    
                     itemTracker++;
                 }
                 else {
                     //results[i] = new Rect(); // todo -- sizing for non flow children
                 }
             }
+
+            
+            /*
+             * overflow = total child extends > parent extents
+             */
         }
 
         private void DoLayoutRow(Rect viewport, LayoutNode currentNode, Rect contentArea) {

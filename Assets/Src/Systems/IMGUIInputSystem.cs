@@ -20,7 +20,6 @@ namespace Src.Systems {
         private HashSet<int> elementsLastFrame;
         
         private readonly HashSet<int> hoverStyles;
-        private readonly IElementRegistry elementSystem;
         private readonly Dictionary<int, MouseHandlerGroup> bindingMap;
         
         private int[] scratchArray;
@@ -28,10 +27,9 @@ namespace Src.Systems {
         private LayoutResult[] queryResults;
         private Vector2 mousePosition;
 
-        public IMGUIInputSystem(ILayoutSystem layoutSystem, IElementRegistry elementSystem, IStyleSystem styleSystem) {
+        public IMGUIInputSystem(ILayoutSystem layoutSystem, IStyleSystem styleSystem) {
             this.styleSystem = styleSystem;
             this.layoutSystem = layoutSystem;
-            this.elementSystem = elementSystem;
 
             this.hoverStyles = new HashSet<int>();
             this.hoverStylesThisFrame = new HashSet<int>();
@@ -42,7 +40,7 @@ namespace Src.Systems {
 
             this.bindingMap = new Dictionary<int, MouseHandlerGroup>();
 
-            this.styleSystem.onAvailableStatesChanged += HandleStatefulStyle;
+            //this.styleSystem.onAvailableStatesChanged += HandleStatefulStyle;
             queryResults = new LayoutResult[16];
             scratchArray = new int[16];
         }
@@ -76,14 +74,14 @@ namespace Src.Systems {
                 
                 if (hoverStyles.Contains(elementId)) {
                     hoverStylesThisFrame.Add(elementId);
-                    styleSystem.EnterState(elementId, StyleState.Hover);
+                    //styleSystem.EnterState(elementId, StyleState.Hover);
                 }
 
             }
 
             hoverStylesLastFrame.ExceptWith(hoverStylesThisFrame);
             foreach (int elementId in hoverStylesLastFrame) {
-                styleSystem.ExitState(elementId, StyleState.Hover);
+                //styleSystem.ExitState(elementId, StyleState.Hover);
             }
 
             // elements this frame that were not in the set last frame
@@ -238,7 +236,7 @@ namespace Src.Systems {
         }
  
         public void OnDestroy() {
-            this.styleSystem.onAvailableStatesChanged -= HandleStatefulStyle;
+           // this.styleSystem.onAvailableStatesChanged -= HandleStatefulStyle;
         }
 
         public void OnReady() { }
@@ -280,8 +278,10 @@ namespace Src.Systems {
         public void OnElementShown(UIElement element) { }
 
         public void OnElementHidden(UIElement element) { }
+        public void OnElementParentChanged(UIElement element, UIElement oldParent, UIElement newParent) {
+            
+        }
 
-       
     }
 
 }

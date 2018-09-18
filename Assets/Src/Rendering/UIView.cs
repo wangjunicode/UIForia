@@ -1,13 +1,27 @@
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
-using System.Runtime.CompilerServices;
 using Rendering;
 using Src;
 using Src.Systems;
 
-[assembly:InternalsVisibleTo("")] 
-public abstract class UIView : IElementRegistry {
+public class OrphanView : UIView {
+
+    public OrphanView() : base(null) { }
+
+    internal override bool SetElementParent(UIElement element, UIElement newParent) {
+        if (!newParent.CanAcceptChild(element)) {
+            return false;
+        }
+
+        element.view = this;
+        element.parent = newParent;
+        return true;
+    }
+
+}
+
+public abstract class UIView {
 
     private static int ElementIdGenerator;
     public static int NextElementId => ElementIdGenerator++;
@@ -15,7 +29,6 @@ public abstract class UIView : IElementRegistry {
     // todo -- move to interfaces
     protected internal readonly BindingSystem bindingSystem;
 
-    //protected readonly LifeCycleSystem lifeCycleSystem;
     protected readonly StyleSystem styleSystem;
     protected readonly SkipTree<UIElement> elementTree;
 
@@ -23,8 +36,8 @@ public abstract class UIView : IElementRegistry {
     protected readonly Type elementType;
     private UIElement rootElement;
 
-    private string template;
-    
+    private readonly string template;
+
     // init -> prepare systems for elements
     // ready -> about to handle first frame, initial template is loaded by now
     // OnElementCreated -> init an entire hierarchy of elements (1 call for the whole group)
@@ -35,8 +48,8 @@ public abstract class UIView : IElementRegistry {
         this.systems = new List<ISystem>();
         this.elementTree = new SkipTree<UIElement>();
         this.template = template;
-        
-        styleSystem = new StyleSystem(this);
+
+        styleSystem = new StyleSystem();
         bindingSystem = new BindingSystem();
 
         systems.Add(styleSystem);
@@ -44,7 +57,9 @@ public abstract class UIView : IElementRegistry {
     }
 
     public UIElement RootElement => rootElement;
-    
+
+    internal static readonly OrphanView OrphanView = new OrphanView();
+
     public void Initialize(bool forceTemplateReparse = false) {
         foreach (ISystem system in systems) {
             system.OnInitialize();
@@ -71,10 +86,31 @@ public abstract class UIView : IElementRegistry {
         Initialize(true);
     }
 
-    
-    protected void InitHierarchy(MetaData elementData) {
-        UIElement element = elementData.element;
-        List<MetaData> children = elementData.children;
+    internal virtual bool SetElementParent(UIElement element, UIElement newParent) {
+        if (!newParent.CanAcceptChild(element)) {
+            return false;
+        }
+
+        UIElement oldParent = element.parent;
+        element.parent = newParent;
+        
+        if (element.view == null) {
+            InitHierarchy(element);
+        }
+
+        element.view = this;
+
+
+        for (int i = 0; i < systems.Count; i++) {
+            systems[i].OnElementParentChanged(element, oldParent, newParent);
+        }
+
+        return true;
+    }
+
+    protected void InitHierarchy(UIElement element) {
+        element.view = this;
+
         // todo -- assert no duplicate root elements
         if (element.parent == null) {
             element.flags |= UIElementFlags.AncestorEnabled;
@@ -84,13 +120,19 @@ public abstract class UIView : IElementRegistry {
             if (element.parent.isEnabled) {
                 element.flags |= UIElementFlags.AncestorEnabled;
             }
+
             element.depth = element.parent.depth + 1;
         }
 
         elementTree.AddItem(element);
 
-        for (int i = 0; i < children.Count; i++) {
-            children[i].element.siblingIndex = i;
+        UIElement[] children = element.ownChildren;
+        if (children == null) {
+            return;
+        }
+
+        for (int i = 0; i < children.Length; i++) {
+            children[i].siblingIndex = i;
             InitHierarchy(children[i]);
         }
     }
@@ -111,7 +153,8 @@ public abstract class UIView : IElementRegistry {
             }
         }
 
-        InitHierarchy(data);
+        InitHierarchy(data.element);
+        data.element.view = this;
 
         for (int i = 0; i < systems.Count; i++) {
             systems[i].OnElementCreated(data);
@@ -128,7 +171,7 @@ public abstract class UIView : IElementRegistry {
 
         elementData.element.OnCreate();
     }
-    
+
     private static void InvokeOnReady(MetaData elementData) {
         for (int i = 0; i < elementData.children.Count; i++) {
             InvokeOnReady(elementData.children[i]);

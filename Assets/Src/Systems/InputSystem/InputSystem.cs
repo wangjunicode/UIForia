@@ -124,11 +124,14 @@ public abstract partial class InputSystem : IInputSystem, IInputProvider {
         }
     }
 
+    public void OnElementParentChanged(UIElement element, UIElement oldParent, UIElement newParent) {
+        // no-op, maybe need to do something w/ dragged element
+    }
+
     private void ProcessMouseInput() {
         m_LayoutResultCount = m_LayoutSystem.QueryPoint(m_MouseState.mousePosition, ref m_LayoutQueryResults);
 
         for (int i = 0; i < m_LayoutResultCount; i++) {
-            int elementId = m_LayoutQueryResults[i].element.id;
 
             UIElement element = m_LayoutQueryResults[i].element;
 
@@ -136,14 +139,14 @@ public abstract partial class InputSystem : IInputSystem, IInputProvider {
 
             if (!m_ElementsLastFrame.Contains(element)) {
                 m_EnteredElements.Add(element);
-                m_StyleSystem.EnterState(elementId, StyleState.Hover);
+                element.style.EnterState(StyleState.Hover);
             }
         }
 
         for (int i = 0; i < m_ElementsLastFrame.Count; i++) {
             if (!m_ElementsThisFrame.Contains(m_ElementsLastFrame[i])) {
                 m_ExitedElements.Add(m_ElementsLastFrame[i]);
-                m_StyleSystem.ExitState(m_ElementsLastFrame[i].id, StyleState.Hover);
+                m_ElementsLastFrame[i].style.ExitState(StyleState.Hover);
             }
         }
 

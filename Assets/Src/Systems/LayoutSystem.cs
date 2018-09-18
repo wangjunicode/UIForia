@@ -95,7 +95,22 @@ namespace Src.Systems {
                 }
 
                 if (node.element.isDisabled) return false;
-                self.rects[self.rectCount++] = new LayoutResult(node.element, node.outputRect, new Rect(node.localPosition, node.outputRect.size));
+                
+                self.rects[self.rectCount++] = new LayoutResult(
+                    node.element,
+                    node.outputRect,
+                    new Rect(node.localPosition, node.outputRect.size)
+                );
+
+                ElementMeasurements measurements = node.element.measurements;
+                measurements.childExtents = node.GetChildExtents();
+                measurements.viewPosition = Vector2.zero;
+                measurements.screenPosition = Vector2.zero;
+                measurements.localPosition = node.localPosition;
+                        
+                measurements.width = node.outputRect.width;
+                measurements.height = node.outputRect.height;
+                
                 if (node.isTextElement) {
                     return true;
                 }
@@ -162,21 +177,25 @@ namespace Src.Systems {
         public void OnElementShown(UIElement element) { }
 
         public void OnElementHidden(UIElement element) { }
+        
+        public void OnElementParentChanged(UIElement element, UIElement oldParent, UIElement newParent) {
+            layoutTree.UpdateItemParent(element);
+        }
 
-        private void HandleFontPropertyChanged(int elementId, TextStyle textStyle) {
-            LayoutNode node = layoutTree.GetItem(elementId);
+        private void HandleFontPropertyChanged(UIElement element, TextStyle textStyle) {
+            LayoutNode node = layoutTree.GetItem(element);
             node?.UpdateTextMeasurements();
         }
 
-        private void HandleLayoutChanged(int elementId, LayoutParameters parameters) {
-            LayoutNode node = layoutTree.GetItem(elementId);
+        private void HandleLayoutChanged(UIElement element, LayoutParameters parameters) {
+            LayoutNode node = layoutTree.GetItem(element);
             if (node == null) return;
             node.layout = GetLayoutInstance(parameters.type);
             node.parameters = parameters;
         }
 
-        private void HandleTextChanged(int elementId, string text) {
-            LayoutNode node = layoutTree.GetItem(elementId);
+        private void HandleTextChanged(UIElement element, string text) {
+            LayoutNode node = layoutTree.GetItem(element);
             node?.SetTextContent(text);
         }
 
@@ -185,18 +204,18 @@ namespace Src.Systems {
             newParent?.children.Add(child);
         }
 
-        private void HandleConstraintChanged(int elementId, LayoutConstraints constraints) {
-            LayoutNode node = layoutTree.GetItem(elementId);
+        private void HandleConstraintChanged(UIElement element, LayoutConstraints constraints) {
+            LayoutNode node = layoutTree.GetItem(element);
             node?.UpdateData(this);
         }
 
-        private void HandleContentBoxChanged(int elementId, ContentBoxRect rect) {
-            LayoutNode node = layoutTree.GetItem(elementId);
+        private void HandleContentBoxChanged(UIElement element, ContentBoxRect rect) {
+            LayoutNode node = layoutTree.GetItem(element);
             node?.UpdateData(this);
         }
 
-        private void HandleRectChanged(int elementId, Dimensions rect) {
-            LayoutNode node = layoutTree.GetItem(elementId);
+        private void HandleRectChanged(UIElement element, Dimensions rect) {
+            LayoutNode node = layoutTree.GetItem(element);
             node?.UpdateData(this);
         }
 

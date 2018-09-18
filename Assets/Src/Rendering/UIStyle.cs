@@ -2,6 +2,7 @@ using Src;
 using UnityEngine;
 using System.Diagnostics;
 using Src.Layout;
+using Src.Rendering;
 using Src.Systems;
 
 namespace Rendering {
@@ -16,7 +17,8 @@ namespace Rendering {
 
         public Paint paint;
         public Dimensions dimensions;
-
+        public Overflow overflowX;
+        public Overflow overflowY;
         public LayoutParameters layoutParameters;
         public LayoutConstraints layoutConstraints;
         

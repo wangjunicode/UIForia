@@ -74,7 +74,7 @@ namespace Src.Systems {
 
             return false;
         }
-        
+
         public bool IsBindingEnabled(UIElement element, string bindingId) {
             TemplateBinding binding = bindingSkipTree.GetItem(element);
             if (binding == null) return false;
@@ -148,6 +148,19 @@ namespace Src.Systems {
         public void OnElementShown(UIElement element) { }
 
         public void OnElementHidden(UIElement element) { }
+
+        public void OnElementParentChanged(UIElement element, UIElement oldParent, UIElement newParent) {
+            TemplateBinding elementBindings = bindingSkipTree.GetItem(element);
+
+            if (elementBindings != null) {
+                bindingSkipTree.UpdateItemParent(elementBindings);
+            }
+
+            TemplateBinding conditionalBindings = conditionalSkipTree.GetItem(element);
+            if (conditionalBindings != null) {
+                conditionalSkipTree.UpdateItemParent(conditionalBindings);
+            }
+        }
 
     }
 

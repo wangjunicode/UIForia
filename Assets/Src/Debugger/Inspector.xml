@@ -1,20 +1,20 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <UITemplate>
     
-    <Contents>
+    <Contents style.layoutType="Fixed">
 
-        <UIInputFieldElement/>
-        <!--<Group style.padding="rect(10f)"-->
-               <!--style.rectX="parent(50)"-->
-               <!--style.rectY="parent(50)"-->
-             <!---->
-               <!--style.backgroundColor="white">-->
-            <!---->
-            <!--<Group style.backgroundColor="red" style.padding="rect(0f)">-->
-                <!--Text content! Text content! Here we go this is a long string {time}-->
-            <!--</Group>-->
-            <!---->
-        <!--</Group>-->
+        <!--<UIInputFieldElement/>-->
+        <Group x-id="maskthing" style.padding="rect(10f)"
+               style.translation="vec2(100, 200)"
+               style.width="100"
+               style.height="100"
+               style.backgroundColor="white">
+            
+            <Group style.backgroundColor="red" style.width="200" style.height="200">
+                
+            </Group>
+            
+        </Group>
         
         
     </Contents>

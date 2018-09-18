@@ -12,13 +12,13 @@ namespace Src.Systems {
 
         private readonly IStyleSystem styleSystem;
         private readonly ILayoutSystem layoutSystem;
-        private readonly IElementRegistry elementSystem;
+        private readonly UIView elementSystem;
         private readonly SkipTree<IMGUIRenderData> renderSkipTree;
         private readonly Dictionary<Color, Texture2D> textureCache;
 
         private bool isReady;
 
-        public IMGUIRenderSystem(IElementRegistry elementSystem, IStyleSystem styleSystem, ILayoutSystem layoutSystem) {
+        public IMGUIRenderSystem(UIView elementSystem, IStyleSystem styleSystem, ILayoutSystem layoutSystem) {
             this.styleSystem = styleSystem;
             this.layoutSystem = layoutSystem;
             this.elementSystem = elementSystem;
@@ -117,11 +117,11 @@ namespace Src.Systems {
 
         public void OnReady() {
             isReady = true;
-            styleSystem.onBorderChanged += HandleBorderChanged;
-            styleSystem.onMarginChanged += HandleMarginChanged;
-            styleSystem.onPaintChanged += HandlePaintChanged;
-            styleSystem.onBorderRadiusChanged += HandleBorderRadiusChanged;
-            styleSystem.onTextContentChanged += HandleTextChanged;
+//            styleSystem.onBorderChanged += HandleBorderChanged;
+//            styleSystem.onMarginChanged += HandleMarginChanged;
+//            styleSystem.onPaintChanged += HandlePaintChanged;
+//            styleSystem.onBorderRadiusChanged += HandleBorderRadiusChanged;
+//            styleSystem.onTextContentChanged += HandleTextChanged;
             renderSkipTree.TraversePreOrder(this, (self, renderData) => {
                 renderData.primitiveType = self.DeterminePrimitiveType(renderData.element);
                 self.ApplyStyles(renderData);
@@ -143,12 +143,12 @@ namespace Src.Systems {
                 Object.DestroyImmediate(kvp.Value);
             }
 
-            styleSystem.onBorderChanged -= HandleBorderChanged;
-            styleSystem.onMarginChanged -= HandleMarginChanged;
-            styleSystem.onPaintChanged -= HandlePaintChanged;
-            styleSystem.onBorderRadiusChanged -= HandleBorderRadiusChanged;
-            styleSystem.onFontPropertyChanged -= HandleFontPropertyChanged;
-            styleSystem.onTextContentChanged -= HandleTextChanged;
+//            styleSystem.onBorderChanged -= HandleBorderChanged;
+//            styleSystem.onMarginChanged -= HandleMarginChanged;
+//            styleSystem.onPaintChanged -= HandlePaintChanged;
+//            styleSystem.onBorderRadiusChanged -= HandleBorderRadiusChanged;
+//            styleSystem.onFontPropertyChanged -= HandleFontPropertyChanged;
+//            styleSystem.onTextContentChanged -= HandleTextChanged;
             renderSkipTree.Clear();
             textureCache.Clear();
         }
@@ -199,6 +199,9 @@ namespace Src.Systems {
         public void OnElementShown(UIElement element) { }
 
         public void OnElementHidden(UIElement element) { }
+        public void OnElementParentChanged(UIElement element, UIElement oldParent, UIElement newParent) {
+            
+        }
 
         private Texture2D GetTexture(Color color) {
             Texture2D texture;

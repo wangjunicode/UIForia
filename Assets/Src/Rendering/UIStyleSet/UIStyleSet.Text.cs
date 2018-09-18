@@ -56,7 +56,7 @@ namespace Rendering {
 
         public void SetTextStyle(TextStyle newStyle, StyleState state) {
             GetOrCreateStyle(state).textStyle = newStyle;
-            changeHandler.SetTextStyle(elementId, textStyle);
+            changeHandler.SetTextStyle(element, textStyle);
         }
 
         public Color GetTextColor(StyleState state) {
@@ -67,7 +67,7 @@ namespace Rendering {
 //            UIStyle style = GetOrCreateStyle(state);
 //            style.textStyle.color = color;
 //            if (textColor == color) {
-//                changeHandler.SetTextStyle(elementId, textStyle);
+//                changeHandler.SetTextStyle(element, textStyle);
 //            }
             UIStyle targetStyle = GetOrCreateStyle(state);
             targetStyle.textStyle.color = color;
@@ -81,8 +81,8 @@ namespace Rendering {
 
             if (!color.IsDefined()) {
                 ownTextStyle.color = activeStyle?.textStyle.color ?? ColorUtil.UnsetValue;
-                styleSystem.SetFontColor(elementId, color);
-                changeHandler.SetTextStyle(elementId, computedStyle.textStyle);
+                styleSystem.SetFontColor(element, color);
+                changeHandler.SetTextStyle(element, computedStyle.textStyle);
                 return;
             }
 
@@ -95,8 +95,8 @@ namespace Rendering {
             }
             
             ownTextStyle.color = color;
-            styleSystem.SetFontColor(elementId, color);
-            changeHandler.SetTextStyle(elementId, computedStyle.textStyle);
+            styleSystem.SetFontColor(element, color);
+            changeHandler.SetTextStyle(element, computedStyle.textStyle);
         }
 
         public Font GetFont(StyleState state) {
@@ -107,7 +107,7 @@ namespace Rendering {
             UIStyle style = GetOrCreateStyle(state);
             style.textStyle.font = newFont;
             if (font == newFont) {
-                changeHandler.SetTextStyle(elementId, textStyle);
+                changeHandler.SetTextStyle(element, textStyle);
             }
         }
 
@@ -141,8 +141,8 @@ namespace Rendering {
 
             if (!IntUtil.IsDefined(newFontSize)) {
                 ownTextStyle.fontSize = activeStyle?.textStyle.fontSize ?? IntUtil.UnsetValue;
-                styleSystem.SetFontSize(elementId, newFontSize);
-                changeHandler.SetTextStyle(elementId, computedStyle.textStyle);
+                styleSystem.SetFontSize(element, newFontSize);
+                changeHandler.SetTextStyle(element, computedStyle.textStyle);
                 return;
             }
 
@@ -155,8 +155,8 @@ namespace Rendering {
             }
             
             ownTextStyle.fontSize = newFontSize;
-            styleSystem.SetFontSize(elementId, newFontSize);
-            changeHandler.SetTextStyle(elementId, computedStyle.textStyle);
+            styleSystem.SetFontSize(element, newFontSize);
+            changeHandler.SetTextStyle(element, computedStyle.textStyle);
             
         }
 
@@ -170,7 +170,7 @@ namespace Rendering {
             FontStyle computed = GetComputedFontStyle();
             FontStyle current = computedStyle.textStyle.fontStyle;
             if (current != newFontStyle && computed == newFontStyle) {
-                changeHandler.SetTextStyle(elementId, textStyle);
+                changeHandler.SetTextStyle(element, textStyle);
             }
         }
 
@@ -183,7 +183,7 @@ namespace Rendering {
             style.textStyle.alignment = newTextAnchor;
             computedStyle.textStyle.alignment = GetComputedTextAnchor();
             if (textAnchor == newTextAnchor) {
-                changeHandler.SetTextStyle(elementId, textStyle);
+                changeHandler.SetTextStyle(element, textStyle);
             }
         }
 
@@ -196,7 +196,7 @@ namespace Rendering {
             style.textStyle.whiteSpace = newWhitespace;
             computedStyle.textStyle.whiteSpace = GetComputedWhitespaceMode();
             if (whiteSpace == newWhitespace) {
-                changeHandler.SetTextStyle(elementId, textStyle);
+                changeHandler.SetTextStyle(element, textStyle);
             }
         }
 
@@ -208,7 +208,7 @@ namespace Rendering {
             UIStyle style = GetOrCreateStyle(state);
             style.textStyle.horizontalOverflow = newWrapMode;
             if (textWrap == newWrapMode) {
-                changeHandler.SetTextStyle(elementId, textStyle);
+                changeHandler.SetTextStyle(element, textStyle);
             }
         }
 
@@ -220,7 +220,7 @@ namespace Rendering {
             UIStyle style = GetOrCreateStyle(state);
             style.textStyle.verticalOverflow = newWrapMode;
             if (textOverflow == newWrapMode) {
-                changeHandler.SetTextStyle(elementId, textStyle);
+                changeHandler.SetTextStyle(element, textStyle);
             }
         }
 

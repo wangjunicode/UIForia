@@ -43,7 +43,7 @@ namespace Rendering {
         public void SetBorderRadius(BorderRadius newBorderRadius, StyleState state) {
             UIStyle style = GetOrCreateStyle(state);
             style.borderRadius = newBorderRadius;
-            changeHandler.SetBorderRadius(elementId, borderRadius);
+            changeHandler.SetBorderRadius(element, borderRadius);
         }
 
         [PublicAPI]
@@ -61,7 +61,7 @@ namespace Rendering {
                 style.borderRadius.bottomLeft
             );
             if (borderRadiusTopLeft == value) {
-                changeHandler.SetBorderRadius(elementId, borderRadius);
+                changeHandler.SetBorderRadius(element, borderRadius);
             }
         }
 
@@ -80,7 +80,7 @@ namespace Rendering {
                 style.borderRadius.bottomLeft
             );
             if (borderRadiusTopRight == value) {
-                changeHandler.SetBorderRadius(elementId, borderRadius);
+                changeHandler.SetBorderRadius(element, borderRadius);
             }
         }
 
@@ -99,7 +99,7 @@ namespace Rendering {
                 style.borderRadius.bottomLeft
             );
             if (borderRadiusBottomRight == value) {
-                changeHandler.SetBorderRadius(elementId, borderRadius);
+                changeHandler.SetBorderRadius(element, borderRadius);
             }
         }
 
@@ -118,7 +118,7 @@ namespace Rendering {
                 value
             );
             if (borderRadiusBottomLeft == value) {
-                changeHandler.SetBorderRadius(elementId, borderRadius);
+                changeHandler.SetBorderRadius(element, borderRadius);
             }
         }
 

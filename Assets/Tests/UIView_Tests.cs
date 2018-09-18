@@ -76,7 +76,7 @@ public class UIView_Tests {
         public MetaData TestCreate() {
             MetaData data = TemplateParser.GetParsedTemplate(elementType, true).CreateWithoutScope(this);
             data.element.flags |= UIElementFlags.AncestorEnabled;
-            InitHierarchy(data);
+            InitHierarchy(data.element);
             return data;
         }
 

@@ -50,6 +50,8 @@ namespace Src {
 
         public override void Execute(UIElement element, UITemplateContext context) {
 
+            // todo re work this so that this binding handles all child binding execution
+            
             UIRepeatElement<T> repeat = (UIRepeatElement<T>) element;
 
             T list = expression.EvaluateTyped(context);

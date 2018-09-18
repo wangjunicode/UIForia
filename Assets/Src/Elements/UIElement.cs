@@ -49,6 +49,8 @@ public class TemplateQueryInterface {
 [DebuggerDisplay("{GetType()} id={id} {name}")]
 public class UIElement : IHierarchical {
 
+    // todo some of this stuff isn't used often or present for many elements. may make sense to move to dictionaries so we keep things compact
+
     // todo make internal but available for testing
     public UIElementFlags flags;
 
@@ -61,13 +63,15 @@ public class UIElement : IHierarchical {
     // todo make readonly but assignable via style system
     [UsedImplicitly] public UIStyleSet style;
 
-
     // todo make readonly and hide this
 
     protected internal UIElement parent;
-
+    internal UIView view;
+    public readonly ElementMeasurements measurements;
+    
     public UIElement() {
         id = UIView.NextElementId;
+        this.measurements = new ElementMeasurements();
         this.flags = UIElementFlags.Enabled
                      | UIElementFlags.Shown
                      | UIElementFlags.RequiresLayout
@@ -77,6 +81,24 @@ public class UIElement : IHierarchical {
     internal UITemplateContext templateContext;
     internal UIElement[] templateChildren;
     internal UIElement[] ownChildren;
+
+    public virtual bool CanAcceptChild(UIElement child) {
+        return true;
+    }
+
+    public bool SetParent(UIElement newParent, int siblingIndex = Int32.MaxValue) {
+        if (newParent.view == null) {
+            return UIView.OrphanView.SetElementParent(this, newParent);
+        }
+
+        return newParent.view.SetElementParent(this, newParent);
+    }
+
+    public int SetSiblingIndex(int index) {
+        return index;
+    }
+
+    public bool isOrphaned => view == null;
 
     public bool isShown => (flags & UIElementFlags.SelfAndAncestorShown) == UIElementFlags.SelfAndAncestorShown;
 
@@ -118,7 +140,7 @@ public class UIElement : IHierarchical {
     public int siblingIndex { get; internal set; }
 
     public IInputProvider Input { get; internal set; }
-    
+
     public bool EnableBinding(string propertyName) {
         return templateContext.view.bindingSystem.EnableBinding(this, propertyName);
     }
@@ -294,10 +316,9 @@ public class UIElement : IHierarchical {
         return null;
     }
 
-    // todo -- remove this so we can hide parent from user
     public int UniqueId => id;
     public IHierarchical Element => this;
-    public IHierarchical Parent => parent;   
+    public IHierarchical Parent => parent;
 
     public class DepthComparerAscending : IComparer<UIElement> {
 
@@ -312,9 +333,10 @@ public class UIElement : IHierarchical {
 
             if (a.parent == null) return 1;
             if (b.parent == null) return -1;
-        
+
             return a.parent.siblingIndex < b.parent.siblingIndex ? 1 : -1;
         }
 
     }
+
 }

@@ -17,6 +17,8 @@ namespace Rendering {
         void OnElementShown(UIElement element);
         void OnElementHidden(UIElement element);
 
+        void OnElementParentChanged(UIElement element, UIElement oldParent, UIElement newParent);
+
     }
 
 }

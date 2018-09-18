@@ -16,11 +16,6 @@ namespace Src.Systems {
         event AvailableStatesChanged onAvailableStatesChanged;
         event TextContentChanged onTextContentChanged;
         
-        UIStyleSet GetStyleForElement(int elementId);
-
-        void EnterState(int elementId, StyleState state);
-        void ExitState(int elementId, StyleState state);
-
     }
 
 }

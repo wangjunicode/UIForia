@@ -25,7 +25,7 @@ public class StyleTests {
     public void SetFontSize_UpdateComputedStyleWithValue() {
         
         UIView_Tests.TestView view = new UIView_Tests.TestView(typeof(StyleSetTestThing));
-        StyleSystem s = new StyleSystem(view);
+        StyleSystem s = new StyleSystem();
         MetaData data = view.TestCreate();
         s.OnElementCreated(data);
         UIElement element = data.element;
@@ -42,7 +42,7 @@ public class StyleTests {
     public void SetFontSize_UpdateComputedStyleWithUnsetValue() {
         
         UIView_Tests.TestView view = new UIView_Tests.TestView(typeof(StyleSetTestThing));
-        StyleSystem s = new StyleSystem(view);
+        StyleSystem s = new StyleSystem();
         MetaData data = view.TestCreate();
         s.OnElementCreated(data);
         UIElement element = data.element;
@@ -60,7 +60,7 @@ public class StyleTests {
     [Test]
     public void SetFontSize_InheritedByChildrenWithoutOverride() {
         UIView_Tests.TestView view = new UIView_Tests.TestView(typeof(StyleSetTestThing));
-        StyleSystem s = new StyleSystem(view);
+        StyleSystem s = new StyleSystem();
         MetaData data = view.TestCreate();
         s.OnElementCreated(data);
         UIElement element = data.element;
@@ -78,7 +78,7 @@ public class StyleTests {
     [Test]
     public void SetFontSize_ChildWithOverride() {
         UIView_Tests.TestView view = new UIView_Tests.TestView(typeof(StyleSetTestThing));
-        StyleSystem s = new StyleSystem(view);
+        StyleSystem s = new StyleSystem();
         MetaData data = view.TestCreate();
         s.OnElementCreated(data);
         UIElement element = data.element;
@@ -99,7 +99,7 @@ public class StyleTests {
     [Test]
     public void SetFontSize_StateNotActive() {
         UIView_Tests.TestView view = new UIView_Tests.TestView(typeof(StyleSetTestThing));
-        StyleSystem s = new StyleSystem(view);
+        StyleSystem s = new StyleSystem();
         MetaData data = view.TestCreate();
         s.OnElementCreated(data);
         UIElement element = data.element;
@@ -113,7 +113,7 @@ public class StyleTests {
     [Test]
     public void SetFontSize_StateActiveOverridden() {
         UIView_Tests.TestView view = new UIView_Tests.TestView(typeof(StyleSetTestThing));
-        StyleSystem s = new StyleSystem(view);
+        StyleSystem s = new StyleSystem();
         MetaData data = view.TestCreate();
         s.OnElementCreated(data);
         UIElement element = data.element;
@@ -132,7 +132,7 @@ public class StyleTests {
     [Test]
     public void SetFontSize_EnterState() {
         UIView_Tests.TestView view = new UIView_Tests.TestView(typeof(StyleSetTestThing));
-        StyleSystem s = new StyleSystem(view);
+        StyleSystem s = new StyleSystem();
         MetaData data = view.TestCreate();
         s.OnElementCreated(data);
         UIElement element = data.element;
@@ -155,7 +155,7 @@ public class StyleTests {
     [Test]
     public void SetFontSize_ExitState() {
         UIView_Tests.TestView view = new UIView_Tests.TestView(typeof(StyleSetTestThing));
-        StyleSystem s = new StyleSystem(view);
+        StyleSystem s = new StyleSystem();
         MetaData data = view.TestCreate();
         s.OnElementCreated(data);
         UIElement element = data.element;
@@ -180,7 +180,7 @@ public class StyleTests {
     [Test]
     public void SetFontSize_UseBaseStyleFontSize() {
         UIView_Tests.TestView view = new UIView_Tests.TestView(typeof(StyleSetTestThing));
-        StyleSystem s = new StyleSystem(view);
+        StyleSystem s = new StyleSystem();
         MetaData data = view.TestCreate();
         s.OnElementCreated(data);
         UIElement element = data.element;
@@ -203,7 +203,7 @@ public class StyleTests {
     [Test]
     public void SetFontSize_EmitChangeEvent_OnChange() {
         UIView_Tests.TestView view = new UIView_Tests.TestView(typeof(StyleSetTestThing));
-        StyleSystem s = new StyleSystem(view);
+        StyleSystem s = new StyleSystem();
         MetaData data = view.TestCreate();
         s.OnElementCreated(data);
         UIElement element = data.element;
@@ -227,7 +227,7 @@ public class StyleTests {
     [Test]
     public void SetFontSize_EmitChangeEvent_ForChangedChildren() {
         UIView_Tests.TestView view = new UIView_Tests.TestView(typeof(StyleSetTestThing));
-        StyleSystem s = new StyleSystem(view);
+        StyleSystem s = new StyleSystem();
         MetaData data = view.TestCreate();
         s.OnElementCreated(data);
         UIElement element = data.element;
@@ -236,8 +236,8 @@ public class StyleTests {
         int defaultSize = UIStyle.Default.textStyle.fontSize;
         int changeCount = 0;
         
-        s.onFontPropertyChanged += (id, prop) => {
-            if (id == child.id) {
+        s.onFontPropertyChanged += (cbChild, prop) => {
+            if (child == cbChild) {
                 changeCount++;
                 Assert.AreEqual(defaultSize + 1, prop.fontSize);
             }
@@ -255,7 +255,7 @@ public class StyleTests {
     [Test]
     public void SetFontSize_EmitChangeEvent_NotWhenUnchanged() {
         UIView_Tests.TestView view = new UIView_Tests.TestView(typeof(StyleSetTestThing));
-        StyleSystem s = new StyleSystem(view);
+        StyleSystem s = new StyleSystem();
         MetaData data = view.TestCreate();
         s.OnElementCreated(data);
         UIElement element = data.element;

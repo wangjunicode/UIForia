@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using Rendering;
 using Src;
+using Src.Elements;
 using Src.Input;
 using Src.Systems;
 using UnityEngine;
@@ -66,23 +67,37 @@ public abstract partial class InputSystem : IInputSystem, IInputProvider {
         this.m_MouseEventCaptureList = new List<ValueTuple<MouseEventHandler, UIElement, UITemplateContext>>();
         this.m_DragEventCaptureList = new List<ValueTuple<DragEventHandler, UIElement, UITemplateContext>>();
         this.m_FocusedElement = null;
+
+        this.m_LayoutSystem.onCreateVirtualScrollbar += HandleCreateScrollbar;
     }
 
     protected abstract MouseState GetMouseState();
 
+    private static readonly UITemplateContext s_DummyContext = new UITemplateContext(null);
+    
+    private void HandleCreateScrollbar(VirtualScrollbar scrollbar) {
+        m_DragCreatorMap.Add(scrollbar.id, new DragCreatorGroup(s_DummyContext, new DragEventCreator[] {
+            
+            new DragEventCreator_WithEvent<VirtualScrollbar>(KeyboardModifiers.None, EventPhase.Bubble, (instance, evt) => instance.CreateDragEvent(evt))
+            
+        }));
+    }
+    
     public bool RequestFocus(IFocusable target) {
         if (!(target is UIElement)) {
             return false;
         }
+
         // todo -- if focus handlers added via template invoke them
         if (m_FocusedElement != null) {
             if (m_FocusedElement == (UIElement) target) {
                 return true;
             }
+
             IFocusable focusable = (IFocusable) m_FocusedElement;
             focusable.Blur();
         }
-        
+
         // todo -- use this EventSystem.current.SetSelectedGameObject(gameObject, eventData);
 
         m_FocusedElement = (UIElement) target;
@@ -124,29 +139,25 @@ public abstract partial class InputSystem : IInputSystem, IInputProvider {
         }
     }
 
-    public void OnElementParentChanged(UIElement element, UIElement oldParent, UIElement newParent) {
-        // no-op, maybe need to do something w/ dragged element
-    }
-
     private void ProcessMouseInput() {
         m_LayoutResultCount = m_LayoutSystem.QueryPoint(m_MouseState.mousePosition, ref m_LayoutQueryResults);
 
         for (int i = 0; i < m_LayoutResultCount; i++) {
-
             UIElement element = m_LayoutQueryResults[i].element;
 
+            // todo -- handle masking here
             m_ElementsThisFrame.Add(element);
 
             if (!m_ElementsLastFrame.Contains(element)) {
                 m_EnteredElements.Add(element);
-                element.style.EnterState(StyleState.Hover);
+                element.style?.EnterState(StyleState.Hover);
             }
         }
 
         for (int i = 0; i < m_ElementsLastFrame.Count; i++) {
             if (!m_ElementsThisFrame.Contains(m_ElementsLastFrame[i])) {
                 m_ExitedElements.Add(m_ElementsLastFrame[i]);
-                m_ElementsLastFrame[i].style.ExitState(StyleState.Hover);
+                m_ElementsLastFrame[i].style?.ExitState(StyleState.Hover);
             }
         }
 

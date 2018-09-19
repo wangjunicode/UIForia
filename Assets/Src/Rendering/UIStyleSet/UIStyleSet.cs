@@ -5,7 +5,7 @@ using Src.Systems;
 using Src.Util;
 
 namespace Rendering {
-    
+
     [DebuggerDisplay("id = {element.id} state = {currentState}")]
     public partial class UIStyleSet {
 
@@ -20,9 +20,9 @@ namespace Rendering {
         private StyleState containedStates;
 
         public TextStyle ownTextStyle;
-        
+
         private StyleSystem styleSystem;
-        
+
         public UIStyleSet(UIElement element, IStyleChangeHandler changeHandler, StyleSystem styleSystem) {
             this.element = element;
             this.changeHandler = changeHandler;
@@ -34,8 +34,9 @@ namespace Rendering {
         }
 
         private string content;
+
         public string textContent {
-            get { return content;}
+            get { return content; }
             set {
                 switch (whiteSpace) {
                     case WhitespaceMode.Unset:
@@ -57,7 +58,6 @@ namespace Rendering {
                         throw new ArgumentOutOfRangeException();
                 }
             }
-            
         }
 
         public void EnterState(StyleState state) {
@@ -72,7 +72,7 @@ namespace Rendering {
         public bool IsInState(StyleState state) {
             return (currentState & state) != 0;
         }
-        
+
         public void ExitState(StyleState state) {
             if (state == StyleState.Normal || (currentState & state) == 0) {
                 return;
@@ -110,6 +110,10 @@ namespace Rendering {
         }
 
         public bool HandlesOverflow => computedStyle.overflowX != Overflow.None || computedStyle.overflowY != Overflow.None;
+
+        public bool HandlesOverflowX => computedStyle.overflowX != Overflow.None;
+
+        public bool HandlesOverflowY => computedStyle.overflowY != Overflow.None;
 
         public void SetActiveStyle(UIStyle style) {
             SetInstanceStyle(style, StyleState.Active);
@@ -195,7 +199,7 @@ namespace Rendering {
                     break;
                 }
             }
-            
+
             Array.Resize(ref appliedStyles, appliedStyles.Length - 1);
             SortStyles();
             Refresh();
@@ -282,10 +286,10 @@ namespace Rendering {
 
             UIStyle activeFontSizeStyle = FindActiveStyleWithoutDefault((s) => IntUtil.IsDefined(s.textStyle.fontSize));
             UIStyle activeFontColorStyle = FindActiveStyleWithoutDefault((s) => ColorUtil.IsDefined(s.textStyle.color));
-            
+
             styleSystem.SetFontSize(element, activeFontSizeStyle?.textStyle.fontSize ?? IntUtil.UnsetValue);
             styleSystem.SetFontColor(element, activeFontColorStyle?.textStyle.color ?? ColorUtil.UnsetValue);
-                        
+
             changeHandler.SetPaint(element, paint);
             changeHandler.SetLayout(element, layoutParameters);
             changeHandler.SetConstraints(element, constraints);

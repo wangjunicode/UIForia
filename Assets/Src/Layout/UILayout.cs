@@ -33,7 +33,7 @@ namespace Src.Layout {
             // todo include statically positioned things who's breadth exceeds max computed
             
             float output = 0;
-            if (node.parameters.direction == LayoutDirection.Row) {
+            if (node.element.style.layoutDirection == LayoutDirection.Row) {
                 // return sum of preferred sizes
                 for (int i = 0; i < children.Count; i++) {
                     LayoutNode child = children[i];
@@ -72,7 +72,7 @@ namespace Src.Layout {
             // todo include statically positioned things who's breadth exceeds max computed
             float output = 0;
 
-            if (node.parameters.direction == LayoutDirection.Row) {
+            if (node.element.style.layoutDirection == LayoutDirection.Row) {
                 for (int i = 0; i < children.Count; i++) {
                     if (!children[i].isInFlow || children[i].element.isDisabled) continue;
 

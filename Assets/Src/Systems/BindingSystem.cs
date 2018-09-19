@@ -18,6 +18,7 @@ namespace Src.Systems {
         }
 
         public void OnUpdate() {
+            // todo -- replace w/ traversable tree, rebuild tree on new element / parent change / enable / disable / delete
             conditionalSkipTree.ConditionalTraversePreOrder((item) => {
                 for (int i = 0; i < item.bindings.Length; i++) {
                     if (item.bindings[i].isEnabled) {
@@ -95,8 +96,11 @@ namespace Src.Systems {
         public void OnReady() { }
 
         public void OnInitialize() { }
+        public void OnElementCreated(UIElement element) { }
 
-        public void OnElementCreated(MetaData data) {
+        public void OnElementMoved(UIElement element, int newIndex, int oldIndex) { }
+
+        public void OnElementCreatedFromTemplate(MetaData data) {
             if (data.constantBindings.Length != 0) {
                 for (int i = 0; i < data.constantBindings.Length; i++) {
                     data.constantBindings[i].Execute(data.element, data.context);
@@ -126,7 +130,7 @@ namespace Src.Systems {
             }
 
             for (int i = 0; i < data.children.Count; i++) {
-                OnElementCreated(data.children[i]);
+                OnElementCreatedFromTemplate(data.children[i]);
             }
         }
 

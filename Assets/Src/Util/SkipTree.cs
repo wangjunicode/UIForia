@@ -396,7 +396,7 @@ namespace Src {
         public void ConditionalTraversePreOrder<U>(U closureArg, Func<T, U, bool> traverseFn) {
             ConditionalTraversePreOrderStep(root, closureArg, traverseFn);
         }
-
+        
         public void ConditionalTraversePreOrder<U>(IHierarchical start, U closureArg, Func<T, U, bool> traverseFn) {
             if (start == null) {
                 ConditionalTraversePreOrderStep(root, closureArg, traverseFn);
@@ -511,6 +511,10 @@ namespace Src {
             return GetChildTree(root, includeDisabled);
         }
 
+        public void RecycleTree(TreeNode node) {
+            throw new NotImplementedException();
+        }
+        
         public TreeNode GetTraversableTree(T item, bool includeDisabled = false) {
             SkipTreeNode node;
             IHierarchical element = item.Element;
@@ -758,7 +762,7 @@ namespace Src {
             if (node.childCount == 0) {
                 return new TreeNode(node.item, node.isDisabled, TreeNode.EmptyArray);
             }
-            else if (!includeDisabled) {
+            if (!includeDisabled) {
                 while (ptr != null) {
                     if (!ptr.isDisabled) {
                         count++;

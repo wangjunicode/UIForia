@@ -1,9 +1,14 @@
-﻿using Rendering;
+﻿using System;
+using Rendering;
+using Src.Elements;
 using UnityEngine;
 
 namespace Src.Systems {
 
     public interface ILayoutSystem : ISystem {
+
+        event Action<VirtualScrollbar> onCreateVirtualScrollbar;
+        event Action<VirtualScrollbar> onDestroyVirtualScrollbar;
 
         int RectCount { get; }
         LayoutResult[] LayoutResults { get; }

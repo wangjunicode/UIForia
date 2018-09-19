@@ -10,39 +10,38 @@ namespace Src.Layout {
         public FixedLayout(ITextSizeCalculator textSizeCalculator) : base(textSizeCalculator) { }
 
         public override void Run(Rect viewport, LayoutNode currentNode) {
-            Rect size = currentNode.outputRect;
+            Rect screenRect = currentNode.element.ScreenRect;
             float contentStartX = currentNode.contentStartOffsetX;
             float contentStartY = currentNode.contentStartOffsetY;
-            float contentEndX = size.xMax - size.x - currentNode.contentEndOffsetX;
-            float contentEndY = size.yMax - size.y - currentNode.contentEndOffsetY;
+            float contentEndX = screenRect.xMax - screenRect.x - currentNode.contentEndOffsetX;
+            float contentEndY = screenRect.yMax - screenRect.y - currentNode.contentEndOffsetY;
             float contentAreaWidth = contentEndX - contentStartX;
             float contentAreaHeight = contentEndY - contentStartY;
 
             List<LayoutNode> children = currentNode.children;
-
+            
             for (int i = 0; i < children.Count; i++) {
                 LayoutNode child = children[i];
                 if (child.element.isDisabled) {
                     continue;
                 }
 
-                float x = GetPixelValue(child.style.positionX, contentAreaWidth, viewport.width);
-                float y = GetPixelValue(child.style.positionY, contentAreaHeight, viewport.height);
+                float x = GetPixelValue(child.element.style.positionX, contentAreaWidth, viewport.width);
+                float y = GetPixelValue(child.element.style.positionY, contentAreaHeight, viewport.height);
+                
                 float width = child.GetPreferredWidth(currentNode.rect.width.unit, contentAreaWidth, viewport.width);
 
+                // todo -- is this weird?
                 if (child.rect.width.unit == UIUnit.Auto) {
                     width = contentAreaWidth - x;
                 }
                 
                 float height = child.GetPreferredHeight(currentNode.rect.height.unit, width, contentAreaHeight, viewport.height);
-                
-                // todo -- this is weeeeird
-                child.localPosition = new Vector2(
-                    x - (currentNode.element.style.marginLeft),
-                    y - (currentNode.element.style.marginTop)
-                );
 
-                child.outputRect = new Rect(x + size.x, y + size.y, width, height);
+                child.element.width = width;
+                child.element.height = height;
+                child.element.localPosition =  new Vector2(x, y) - currentNode.element.scrollOffset;
+                child.element.screenPosition = new Vector2(screenRect.x + x, screenRect.y + y) - currentNode.element.scrollOffset;
             }
         }
 
@@ -55,8 +54,8 @@ namespace Src.Layout {
 
                 if (child.element.isDisabled) continue;
 
-                float x = GetPixelValue(child.style.positionX, contentSize, viewportSize);
-                float width = child.GetPreferredWidth(node.style.dimensions.width.unit, contentSize, viewportSize);
+                float x = GetPixelValue(child.element.style.positionX, contentSize, viewportSize);
+                float width = child.GetPreferredWidth(node.element.style.dimensions.width.unit, contentSize, viewportSize);
                 
                 if (child.rect.width.unit == UIUnit.Auto) {
                     width = contentSize - x;
@@ -78,9 +77,9 @@ namespace Src.Layout {
 
                 if (child.element.isDisabled) continue;
 
-                float y = GetPixelValue(child.style.positionY, adjustedWidth, viewportSize);
+                float y = GetPixelValue(child.element.style.positionY, adjustedWidth, viewportSize);
                 minY = Mathf.Min(minY, y);
-                maxY = Mathf.Max(maxY, y + child.GetPreferredHeight(node.style.dimensions.height.unit, adjustedWidth, parentWidth, viewportSize));
+                maxY = Mathf.Max(maxY, y + child.GetPreferredHeight(node.element.style.dimensions.height.unit, adjustedWidth, parentWidth, viewportSize));
             }
 
             return Mathf.Max(0, maxY - minY);

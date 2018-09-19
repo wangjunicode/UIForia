@@ -9,16 +9,6 @@ public class OrphanView : UIView {
 
     public OrphanView() : base(null) { }
 
-    internal override bool SetElementParent(UIElement element, UIElement newParent) {
-        if (!newParent.CanAcceptChild(element)) {
-            return false;
-        }
-
-        element.view = this;
-        element.parent = newParent;
-        return true;
-    }
-
 }
 
 public abstract class UIView {
@@ -55,6 +45,8 @@ public abstract class UIView {
         systems.Add(styleSystem);
         systems.Add(bindingSystem);
     }
+    
+    // todo -- always call OnCreate & OnReady, don't call OnEnabled unless actually enabled
 
     public UIElement RootElement => rootElement;
 
@@ -66,10 +58,10 @@ public abstract class UIView {
         }
 
         if (template != null) {
-            CreateElement(TemplateParser.ParseTemplateFromString(elementType, template).CreateWithoutScope(this), null);
+            CreateElementFromTemplate(TemplateParser.ParseTemplateFromString(elementType, template).CreateWithoutScope(this), null);
         }
         else {
-            CreateElement(TemplateParser.GetParsedTemplate(elementType, forceTemplateReparse).CreateWithoutScope(this), null);
+            CreateElementFromTemplate(TemplateParser.GetParsedTemplate(elementType, forceTemplateReparse).CreateWithoutScope(this), null);
         }
 
         foreach (ISystem system in systems) {
@@ -84,28 +76,6 @@ public abstract class UIView {
 
         rootElement = null;
         Initialize(true);
-    }
-
-    internal virtual bool SetElementParent(UIElement element, UIElement newParent) {
-        if (!newParent.CanAcceptChild(element)) {
-            return false;
-        }
-
-        UIElement oldParent = element.parent;
-        element.parent = newParent;
-        
-        if (element.view == null) {
-            InitHierarchy(element);
-        }
-
-        element.view = this;
-
-
-        for (int i = 0; i < systems.Count; i++) {
-            systems[i].OnElementParentChanged(element, oldParent, newParent);
-        }
-
-        return true;
     }
 
     protected void InitHierarchy(UIElement element) {
@@ -138,7 +108,7 @@ public abstract class UIView {
     }
 
     // todo take a template instead of an init data instance? (and scope)
-    public void CreateElement(MetaData data, UIElement parent) {
+    public void CreateElementFromTemplate(MetaData data, UIElement parent) {
         if (parent == null) {
             Debug.Assert(rootElement == null, nameof(rootElement) + " must be null if providing a null parent");
 
@@ -157,27 +127,32 @@ public abstract class UIView {
         data.element.view = this;
 
         for (int i = 0; i < systems.Count; i++) {
-            systems[i].OnElementCreated(data);
+            systems[i].OnElementCreatedFromTemplate(data);
         }
 
-        InvokeOnCreate(data);
-        InvokeOnReady(data);
+        InvokeOnCreate(data.element);
+        InvokeOnReady(data.element);
     }
 
-    private static void InvokeOnCreate(MetaData elementData) {
-        for (int i = 0; i < elementData.children.Count; i++) {
-            InvokeOnCreate(elementData.children[i]);
+    private static void InvokeOnCreate(UIElement element) {
+        if (element.ownChildren != null) {
+            for (int i = 0; i < element.ownChildren.Length; i++) {
+                InvokeOnCreate(element.ownChildren[i]);
+            }
         }
 
-        elementData.element.OnCreate();
+        element.flags |= UIElementFlags.Created;
+        element.OnCreate();
     }
 
-    private static void InvokeOnReady(MetaData elementData) {
-        for (int i = 0; i < elementData.children.Count; i++) {
-            InvokeOnReady(elementData.children[i]);
+    private static void InvokeOnReady(UIElement element) {
+        if (element.ownChildren != null) {
+            for (int i = 0; i < element.ownChildren.Length; i++) {
+                InvokeOnReady(element.ownChildren[i]);
+            }
         }
-
-        elementData.element.OnReady();
+        element.flags |= UIElementFlags.Initialized;
+        element.OnReady();
     }
 
     public void DestroyElement(UIElement element) {

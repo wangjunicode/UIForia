@@ -1,10 +1,10 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Diagnostics;
-using JetBrains.Annotations;
 using Rendering;
 using Src;
 using Src.Systems;
+using UnityEngine;
 
 [Flags]
 public enum QueryOptions {
@@ -17,61 +17,25 @@ public enum QueryOptions {
 
 }
 
-public class TemplateQueryInterface {
-
-    public T FindElementById<T>(string id) where T : UIElement {
-        return null;
-    }
-
-    public UIElement FindElementById(string id) {
-        return null;
-    }
-
-    public List<T> FindElementsByType<T>() where T : UIElement {
-        return null;
-    }
-
-    // Where((s) => {});
-    // active, inactive
-    // typeof parent == 
-    // typeof RenderedParent == {}
-    // hasAttribute
-    // FindElementsWithAttribute("attr", value?)
-    // FindElementOfType()
-    // FindElementWithParentOfType()
-    // FindElementsWithChildrenOfType()
-    // FindElementsWithAncestorOfType()
-    // FindElementsWithAncestorWithAttribute();
-    // QueryOption.ScopeToTemplate | QueryOption.IgnoreInactive | QueryOption.IgnoreImplicit | QueryOption.IgnoreAttributeCasing
-
-}
-
 [DebuggerDisplay("{GetType()} id={id} {name}")]
 public class UIElement : IHierarchical {
 
     // todo some of this stuff isn't used often or present for many elements. may make sense to move to dictionaries so we keep things compact
 
-    // todo make internal but available for testing
-    public UIElementFlags flags;
+    public readonly int id;
+    public string name;
+    public UIElementFlags flags; // todo make internal but available for testing
+    public UIStyleSet style;
 
-    // probably better as a list since we never have many of these and list uses less memory
     internal IReadOnlyList<ValueTuple<string, string>> templateAttributes;
 
-    public string name;
-    public readonly int id;
-
     // todo make readonly but assignable via style system
-    [UsedImplicitly] public UIStyleSet style;
 
-    // todo make readonly and hide this
-
-    protected internal UIElement parent;
+    internal UIElement parent;
     internal UIView view;
-    public readonly ElementMeasurements measurements;
     
-    public UIElement() {
-        id = UIView.NextElementId;
-        this.measurements = new ElementMeasurements();
+    protected UIElement() {
+        this.id = UIView.NextElementId;
         this.flags = UIElementFlags.Enabled
                      | UIElementFlags.Shown
                      | UIElementFlags.RequiresLayout
@@ -81,25 +45,21 @@ public class UIElement : IHierarchical {
     internal UITemplateContext templateContext;
     internal UIElement[] templateChildren;
     internal UIElement[] ownChildren;
+    
+    public Vector2 localPosition { get; internal set; }
+    public Vector2 screenPosition { get; internal set; }
+    public Vector2 scrollOffset { get; internal set; }
+    
+    public float width { get; internal set; }
+    public float height { get; internal set; }
+    
+    public int depth { get; internal set; }
+    public int siblingIndex { get; internal set; }
 
-    public virtual bool CanAcceptChild(UIElement child) {
-        return true;
-    }
-
-    public bool SetParent(UIElement newParent, int siblingIndex = Int32.MaxValue) {
-        if (newParent.view == null) {
-            return UIView.OrphanView.SetElementParent(this, newParent);
-        }
-
-        return newParent.view.SetElementParent(this, newParent);
-    }
-
-    public int SetSiblingIndex(int index) {
-        return index;
-    }
-
-    public bool isOrphaned => view == null;
-
+    public IInputProvider Input { get; internal set; }
+    
+    public Rect ScreenRect => new Rect(screenPosition.x, screenPosition.y, width, height);
+    
     public bool isShown => (flags & UIElementFlags.SelfAndAncestorShown) == UIElementFlags.SelfAndAncestorShown;
 
     public bool isImplicit => (flags & UIElementFlags.ImplicitElement) != 0;
@@ -136,10 +96,7 @@ public class UIElement : IHierarchical {
 
     public virtual void OnDestroy() { }
 
-    public int depth { get; internal set; }
-    public int siblingIndex { get; internal set; }
-
-    public IInputProvider Input { get; internal set; }
+   
 
     public bool EnableBinding(string propertyName) {
         return templateContext.view.bindingSystem.EnableBinding(this, propertyName);

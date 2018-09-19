@@ -27,7 +27,7 @@ namespace Src.Systems {
             retn.isLeftMouseUpThisFrame = UnityEngine.Input.GetMouseButtonUp(0);
             retn.isRightMouseUpThisFrame = UnityEngine.Input.GetMouseButtonUp(1);
             retn.isMiddleMouseUpThisFrame = UnityEngine.Input.GetMouseButtonUp(2);
-
+            retn.mouseDownPosition = m_MouseState.mouseDownPosition;
             float now = Time.unscaledTime;
 
             if (retn.isLeftMouseDown) {

@@ -41,7 +41,7 @@ namespace Src.Systems {
         public event AvailableStatesChanged onAvailableStatesChanged;
         public event TextContentChanged onTextContentChanged;
         public event Action<UIElement, UITransform> onTransformChanged;
-        
+
         private readonly SkipTree<UIElement> fontTree;
 
         public StyleSystem() {
@@ -50,7 +50,7 @@ namespace Src.Systems {
 
         public void OnReset() { }
 
-        public void OnElementCreated(MetaData elementData) {
+        public void OnElementCreatedFromTemplate(MetaData elementData) {
             UIElement element = elementData.element;
 
             if ((element.flags & UIElementFlags.TextElement) != 0) {
@@ -78,7 +78,7 @@ namespace Src.Systems {
             fontTree.AddItem(element);
 
             for (int i = 0; i < elementData.children.Count; i++) {
-                OnElementCreated(elementData.children[i]);
+                OnElementCreatedFromTemplate(elementData.children[i]);
             }
         }
 
@@ -90,6 +90,14 @@ namespace Src.Systems {
 
         public void OnInitialize() { }
 
+        public void OnElementCreated(UIElement element) {
+            if (element.style == null) {
+                element.style = new UIStyleSet(element, this, this);
+            }
+        }
+
+        public void OnElementMoved(UIElement element, int newIndex, int oldIndex) { }
+
         public void OnElementEnabled(UIElement element) { }
 
         public void OnElementDisabled(UIElement element) { }
@@ -99,7 +107,7 @@ namespace Src.Systems {
         public void OnElementShown(UIElement element) { }
 
         public void OnElementHidden(UIElement element) { }
-        
+
         public void OnElementParentChanged(UIElement element, UIElement oldParent, UIElement newParent) {
             if (element.style == null) {
                 element.style = new UIStyleSet(element, this, this);
@@ -153,51 +161,45 @@ namespace Src.Systems {
 
         // todo all nodes are currently in the font tree -- bad!
         internal int SetFontSize(UIElement element, int fontSize) {
-
             if (!IntUtil.IsDefined(fontSize)) {
                 fontSize = element.parent?.style.fontSize ?? UIStyle.Default.textStyle.fontSize;
             }
 
             ValueTuple<StyleSystem, int> v = ValueTuple.Create(this, fontSize);
-            
+
             fontTree.ConditionalTraversePreOrder(element, v, (item, tuple) => {
-                
                 if (IntUtil.IsDefined(item.style.ownTextStyle.fontSize)) {
                     return false;
                 }
 
                 item.style.computedStyle.textStyle.fontSize = tuple.Item2;
                 tuple.Item1.onFontPropertyChanged?.Invoke(item, item.style.textStyle);
-                
+
                 return true;
-                
             });
-            
+
             element.style.computedStyle.textStyle.fontSize = fontSize;
             return fontSize;
         }
-        
-        internal Color SetFontColor(UIElement element, Color color) {
 
+        internal Color SetFontColor(UIElement element, Color color) {
             if (!color.IsDefined()) {
                 color = element.parent?.style.textColor ?? UIStyle.Default.textStyle.color;
             }
 
             ValueTuple<StyleSystem, Color> v = ValueTuple.Create(this, color);
-            
+
             fontTree.ConditionalTraversePreOrder(element, v, (item, tuple) => {
-                
                 if (item.style.ownTextStyle.color.IsDefined()) {
                     return false;
                 }
 
                 item.style.computedStyle.textStyle.color = tuple.Item2;
                 tuple.Item1.onFontPropertyChanged?.Invoke(item, item.style.textStyle);
-                
+
                 return true;
-                
             });
-            
+
             element.style.computedStyle.textStyle.color = color;
             return color;
         }

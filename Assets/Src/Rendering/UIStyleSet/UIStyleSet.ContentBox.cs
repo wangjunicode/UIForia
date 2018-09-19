@@ -1,4 +1,5 @@
 using JetBrains.Annotations;
+using Src.Rendering;
 
 namespace Rendering {
 
@@ -222,6 +223,9 @@ namespace Rendering {
             get { return FindActiveStyle((s) => FloatUtil.IsDefined(s.border.left)).border.bottom; }
             set { SetBorderBottom(value); }
         }
+
+        public HorizontalScrollbarAttachment horizontalScrollbarAttachment => HorizontalScrollbarAttachment.Bottom;
+        public VerticalScrollbarAttachment verticalScrollbarAttachment => VerticalScrollbarAttachment.Right;
 
         // in these cases we just set the whole value because we might be in a style state
         // where only part of the content box is affected by a set call

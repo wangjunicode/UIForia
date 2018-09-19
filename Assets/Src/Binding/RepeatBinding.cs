@@ -67,7 +67,7 @@ namespace Src {
                 for (int i = 0; i < list.Count; i++) {
                     repeat.previousListRef.Add(list[i]);
                     MetaData newItem = repeat.template.CreateScoped(repeat.scope);
-                    context.view.CreateElement(newItem, repeat);
+                    context.view.CreateElementFromTemplate(newItem, repeat);
                     repeat.children.Add(newItem.element);
                 }
                 previousList = repeat.previousListRef;
@@ -82,7 +82,7 @@ namespace Src {
                 for (int i = 0; i < diff; i++) {
                     previousList.Add(list[previousCount + i]);
                     MetaData newItem = repeat.template.CreateScoped(repeat.scope);
-                    context.view.CreateElement(newItem, repeat);
+                    context.view.CreateElementFromTemplate(newItem, repeat);
                     repeat.children.Add(newItem.element);
                 }
             }

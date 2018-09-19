@@ -262,10 +262,6 @@ namespace Src {
             );
             return template;
         }
-
-        private static UITemplate ParseMaskElement(XElement element) {
-            throw new NotImplementedException();    
-        }
         
         private static UITemplate ParseShapeElement(XElement element) {
             throw new NotImplementedException();    
@@ -308,9 +304,6 @@ namespace Src {
 //
 //            if (element.Name == "ListItem") { }
 
-            if (element.Name == "Mask") {
-                return ParseMaskElement(element);
-            }
             
             if (element.Name == "Image") {
                 return ParseImageElement(element);

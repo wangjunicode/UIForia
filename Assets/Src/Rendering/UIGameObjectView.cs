@@ -14,7 +14,7 @@ namespace Rendering {
         public UIGameObjectView(Type elementType, RectTransform viewTransform) : base(elementType) {
             this.rectTransform = viewTransform;
             layoutSystem = new LayoutSystem(new GOTextSizeCalculator(), styleSystem);
-            renderSystem = new GORenderSystem(layoutSystem, styleSystem, this, viewTransform);
+            renderSystem = new GORenderSystem(layoutSystem, styleSystem, viewTransform);
             inputSystem = new GOInputSystem(layoutSystem, styleSystem);
             systems.Add(layoutSystem);
             systems.Add(renderSystem);

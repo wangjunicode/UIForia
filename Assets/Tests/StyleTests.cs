@@ -27,7 +27,7 @@ public class StyleTests {
         UIView_Tests.TestView view = new UIView_Tests.TestView(typeof(StyleSetTestThing));
         StyleSystem s = new StyleSystem();
         MetaData data = view.TestCreate();
-        s.OnElementCreated(data);
+        s.OnElementCreatedFromTemplate(data);
         UIElement element = data.element;
 
         Assert.AreEqual(UIStyle.Default.textStyle.fontSize, element.style.fontSize);
@@ -44,7 +44,7 @@ public class StyleTests {
         UIView_Tests.TestView view = new UIView_Tests.TestView(typeof(StyleSetTestThing));
         StyleSystem s = new StyleSystem();
         MetaData data = view.TestCreate();
-        s.OnElementCreated(data);
+        s.OnElementCreatedFromTemplate(data);
         UIElement element = data.element;
 
         Assert.AreEqual(UIStyle.Default.textStyle.fontSize, element.style.fontSize);
@@ -62,7 +62,7 @@ public class StyleTests {
         UIView_Tests.TestView view = new UIView_Tests.TestView(typeof(StyleSetTestThing));
         StyleSystem s = new StyleSystem();
         MetaData data = view.TestCreate();
-        s.OnElementCreated(data);
+        s.OnElementCreatedFromTemplate(data);
         UIElement element = data.element;
         UIElement child = data.children[0].element;
 
@@ -80,7 +80,7 @@ public class StyleTests {
         UIView_Tests.TestView view = new UIView_Tests.TestView(typeof(StyleSetTestThing));
         StyleSystem s = new StyleSystem();
         MetaData data = view.TestCreate();
-        s.OnElementCreated(data);
+        s.OnElementCreatedFromTemplate(data);
         UIElement element = data.element;
         UIElement child = data.children[0].element;
         UIElement grandChild = data.children[0].children[0].element;
@@ -101,7 +101,7 @@ public class StyleTests {
         UIView_Tests.TestView view = new UIView_Tests.TestView(typeof(StyleSetTestThing));
         StyleSystem s = new StyleSystem();
         MetaData data = view.TestCreate();
-        s.OnElementCreated(data);
+        s.OnElementCreatedFromTemplate(data);
         UIElement element = data.element;
         int defaultSize = UIStyle.Default.textStyle.fontSize;
 
@@ -115,7 +115,7 @@ public class StyleTests {
         UIView_Tests.TestView view = new UIView_Tests.TestView(typeof(StyleSetTestThing));
         StyleSystem s = new StyleSystem();
         MetaData data = view.TestCreate();
-        s.OnElementCreated(data);
+        s.OnElementCreatedFromTemplate(data);
         UIElement element = data.element;
         UIElement child = data.children[0].element;
         int defaultSize = UIStyle.Default.textStyle.fontSize;
@@ -134,7 +134,7 @@ public class StyleTests {
         UIView_Tests.TestView view = new UIView_Tests.TestView(typeof(StyleSetTestThing));
         StyleSystem s = new StyleSystem();
         MetaData data = view.TestCreate();
-        s.OnElementCreated(data);
+        s.OnElementCreatedFromTemplate(data);
         UIElement element = data.element;
         UIElement child = data.children[0].element;
         int defaultSize = UIStyle.Default.textStyle.fontSize;
@@ -157,7 +157,7 @@ public class StyleTests {
         UIView_Tests.TestView view = new UIView_Tests.TestView(typeof(StyleSetTestThing));
         StyleSystem s = new StyleSystem();
         MetaData data = view.TestCreate();
-        s.OnElementCreated(data);
+        s.OnElementCreatedFromTemplate(data);
         UIElement element = data.element;
         UIElement child = data.children[0].element;
         int defaultSize = UIStyle.Default.textStyle.fontSize;
@@ -182,7 +182,7 @@ public class StyleTests {
         UIView_Tests.TestView view = new UIView_Tests.TestView(typeof(StyleSetTestThing));
         StyleSystem s = new StyleSystem();
         MetaData data = view.TestCreate();
-        s.OnElementCreated(data);
+        s.OnElementCreatedFromTemplate(data);
         UIElement element = data.element;
         UIElement child = data.children[0].element;
         int defaultSize = UIStyle.Default.textStyle.fontSize;
@@ -205,7 +205,7 @@ public class StyleTests {
         UIView_Tests.TestView view = new UIView_Tests.TestView(typeof(StyleSetTestThing));
         StyleSystem s = new StyleSystem();
         MetaData data = view.TestCreate();
-        s.OnElementCreated(data);
+        s.OnElementCreatedFromTemplate(data);
         UIElement element = data.element;
         int defaultSize = UIStyle.Default.textStyle.fontSize;
         int changeCount = 0;
@@ -229,7 +229,7 @@ public class StyleTests {
         UIView_Tests.TestView view = new UIView_Tests.TestView(typeof(StyleSetTestThing));
         StyleSystem s = new StyleSystem();
         MetaData data = view.TestCreate();
-        s.OnElementCreated(data);
+        s.OnElementCreatedFromTemplate(data);
         UIElement element = data.element;
         UIElement child = data.children[0].element;
 
@@ -257,7 +257,7 @@ public class StyleTests {
         UIView_Tests.TestView view = new UIView_Tests.TestView(typeof(StyleSetTestThing));
         StyleSystem s = new StyleSystem();
         MetaData data = view.TestCreate();
-        s.OnElementCreated(data);
+        s.OnElementCreatedFromTemplate(data);
         UIElement element = data.element;
         int defaultSize = UIStyle.Default.textStyle.fontSize;
         int changeCount = 0;

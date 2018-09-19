@@ -38,17 +38,25 @@ public abstract partial class InputSystem {
         m_DragHandlerMap.Remove(element.id);
     }
 
+
+    public void OnElementCreated(UIElement element) { }
+
+    public void OnElementMoved(UIElement element, int newIndex, int oldIndex) { }
+
+    public void OnElementParentChanged(UIElement element, UIElement oldParent, UIElement newParent) {
+        // no-op, maybe need to do something w/ dragged element
+    }
+
     public void OnElementShown(UIElement element) { }
 
     public void OnElementHidden(UIElement element) { }
 
-    public void OnElementCreated(MetaData elementData) {
-        
+    public void OnElementCreatedFromTemplate(MetaData elementData) {
         MouseEventHandler[] mouseHandlers = elementData.mouseEventHandlers;
         DragEventCreator[] dragEventCreators = elementData.dragEventCreators;
         DragEventHandler[] dragEventHandlers = elementData.dragEventHandlers;
         KeyboardEventHandler[] keyboardHandlers = elementData.keyboardEventHandlers;
-        
+
         if (mouseHandlers != null && mouseHandlers.Length > 0) {
             InputEventType handledEvents = 0;
 
@@ -65,10 +73,10 @@ public abstract partial class InputSystem {
             for (int i = 0; i < dragEventHandlers.Length; i++) {
                 handledEvents |= dragEventHandlers[i].eventType;
             }
-            
+
             m_DragHandlerMap[elementData.elementId] = new DragHandlerGroup(elementData.context, dragEventHandlers, handledEvents);
         }
-        
+
         if (keyboardHandlers != null && keyboardHandlers.Length > 0) {
             m_KeyboardEventTree.AddItem(new KeyboardEventTreeNode(elementData.element, keyboardHandlers));
         }
@@ -78,9 +86,9 @@ public abstract partial class InputSystem {
         }
 
         elementData.element.Input = this;
-        
+
         for (int i = 0; i < elementData.children.Count; i++) {
-            OnElementCreated(elementData.children[i]);
+            OnElementCreatedFromTemplate(elementData.children[i]);
         }
     }
 

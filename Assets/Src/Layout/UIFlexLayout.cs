@@ -17,7 +17,7 @@ namespace Src.Layout {
         }
 
         public override void Run(Rect viewport, LayoutNode currentNode) {
-            Rect size = currentNode.outputRect;
+            Rect size = currentNode.element.ScreenRect;
 
             float contentStartX = currentNode.contentStartOffsetX;
             float contentStartY = currentNode.contentStartOffsetY;
@@ -33,7 +33,7 @@ namespace Src.Layout {
                 Array.Resize(ref heightItems, currentNode.children.Count * 2);
             }
 
-            if (currentNode.parameters.direction == LayoutDirection.Row) {
+            if (currentNode.element.style.layoutDirection == LayoutDirection.Row) {
                 DoLayoutRow(viewport, currentNode, contentArea);
             }
             else {
@@ -41,30 +41,30 @@ namespace Src.Layout {
             }
 
             int itemTracker = 0;
-                        
+
             List<LayoutNode> children = currentNode.children;
+            float marginLeft = currentNode.element.style.marginLeft;
+            float marginTop = currentNode.element.style.marginTop;
+            Vector2 scrollOffset = currentNode.element.scrollOffset;
+            
             for (int i = 0; i < children.Count; i++) {
                 LayoutNode child = children[i];
+                
                 if (child.isInFlow && child.element.isEnabled) {
-                    child.computedWidth = widthItems[itemTracker].outputSize;
-                    child.computedHeight = heightItems[itemTracker].outputSize;
+                    child.element.width = widthItems[itemTracker].outputSize;
+                    child.element.height = heightItems[itemTracker].outputSize;
+                    
                     Vector2 localPosition = new Vector2(
                         widthItems[itemTracker].axisStart,
                         heightItems[itemTracker].axisStart
                     );
-                    // todo -- this is weeeeird
-                    child.localPosition = new Vector2(
-                        localPosition.x - (currentNode.element.style.marginLeft),
-                        localPosition.y - (currentNode.element.style.marginTop)
-                    );
-                    child.outputRect = new Rect(
-                        widthItems[itemTracker].axisStart + size.x,
-                        heightItems[itemTracker].axisStart + size.y,
-                        widthItems[itemTracker].outputSize,
-                        heightItems[itemTracker].outputSize
-                    );
                     
-                    
+                    child.element.localPosition = localPosition - scrollOffset;
+                    child.element.screenPosition = new Vector2(
+                        size.x + (localPosition.x - scrollOffset.x),
+                        size.y + (localPosition.y - scrollOffset.y)
+                    );
+
                     itemTracker++;
                 }
                 else {
@@ -72,11 +72,25 @@ namespace Src.Layout {
                 }
             }
 
+            //AdjustForScrollBars(currentNode);
             
-            /*
-             * overflow = total child extends > parent extents
-             */
         }
+
+//        private void AdjustForScrollBars(LayoutNode currentNode) {
+//            if (!currentNode.style.HandlesOverflow) {
+//                return;
+//            }
+//
+//            Extents extents = currentNode.GetChildExtents();
+//            if (extents.max.y > currentNode.computedHeight) {
+//                List<LayoutNode> children = currentNode.children;
+//                float scrollBarHeight = currentNode.GetScrollBarHeight();
+//                for (int i = 0; i < children.Count; i++) {
+//                    // if scrollbar attachment == top localPosition.y += currentNode.GetScrollBarHeight();
+//                    children[i].outputRect.height -= currentNode.GetScrollBarHeight()
+//                }
+//            }
+//        }
 
         private void DoLayoutRow(Rect viewport, LayoutNode currentNode, Rect contentArea) {
             int itemCount = 0;
@@ -97,8 +111,8 @@ namespace Src.Layout {
                 widthItem.outputSize = widthItem.MinDefined && widthItem.preferredSize < widthItem.minSize ? widthItem.minSize : widthItem.preferredSize;
                 widthItem.outputSize = widthItem.MaxDefined && widthItem.outputSize > widthItem.maxSize ? widthItem.maxSize : widthItem.outputSize;
 
-                widthItem.growthFactor = child.constraints.growthFactor;
-                widthItem.shrinkFactor = child.constraints.shrinkFactor;
+                widthItem.growthFactor = child.element.style.growthFactor;
+                widthItem.shrinkFactor = child.element.style.shrinkFactor;
 
                 widthItems[itemCount] = widthItem;
 
@@ -139,8 +153,8 @@ namespace Src.Layout {
                 heightItems[itemCount++] = heightItem;
             }
 
-            AlignMainAxis(widthItems, itemCount, contentArea.x, remainingWidth, currentNode.parameters.mainAxisAlignment);
-            AlignCrossAxis(heightItems, itemCount, contentArea.y, currentNode.parameters.crossAxisAlignment, contentArea.height);
+            AlignMainAxis(widthItems, itemCount, contentArea.x, remainingWidth, currentNode.element.style.mainAxisAlignment);
+            AlignCrossAxis(heightItems, itemCount, contentArea.y, currentNode.element.style.crossAxisAlignment, contentArea.height);
         }
 
         private void DoLayoutColumn(Rect viewport, LayoutNode currentNode, Rect contentArea) {
@@ -163,8 +177,8 @@ namespace Src.Layout {
                 widthItem.outputSize = widthItem.MinDefined && widthItem.preferredSize < widthItem.minSize ? widthItem.minSize : widthItem.preferredSize;
                 widthItem.outputSize = widthItem.MaxDefined && widthItem.outputSize > widthItem.maxSize ? widthItem.maxSize : widthItem.outputSize;
 
-                widthItem.growthFactor = child.constraints.growthFactor;
-                widthItem.shrinkFactor = child.constraints.shrinkFactor;
+                widthItem.growthFactor = child.element.style.growthFactor;
+                widthItem.shrinkFactor = child.element.style.shrinkFactor;
 
                 heightItem.axisStart = contentArea.y;
                 heightItem.minSize = child.GetMinHeight(currentNode.rect.height.unit, contentArea.height, viewport.height);
@@ -177,8 +191,8 @@ namespace Src.Layout {
                 heightItem.outputSize = heightItem.MinDefined && heightItem.preferredSize < heightItem.minSize ? heightItem.minSize : heightItem.preferredSize;
                 heightItem.outputSize = heightItem.MaxDefined && heightItem.outputSize > heightItem.maxSize ? heightItem.maxSize : heightItem.outputSize;
 
-                heightItem.growthFactor = child.constraints.growthFactor;
-                heightItem.shrinkFactor = child.constraints.shrinkFactor;
+                heightItem.growthFactor = child.element.style.growthFactor;
+                heightItem.shrinkFactor = child.element.style.shrinkFactor;
 
                 widthItems[itemCount] = widthItem;
                 heightItems[itemCount] = heightItem;
@@ -199,8 +213,8 @@ namespace Src.Layout {
                 remainingHeight = 0;
             }
 
-            AlignMainAxis(heightItems, itemCount, contentArea.y, remainingHeight, currentNode.parameters.mainAxisAlignment);
-            AlignCrossAxis(widthItems, itemCount, contentArea.x, currentNode.parameters.crossAxisAlignment, contentArea.width);
+            AlignMainAxis(heightItems, itemCount, contentArea.y, remainingHeight, currentNode.element.style.mainAxisAlignment);
+            AlignCrossAxis(widthItems, itemCount, contentArea.x, currentNode.element.style.crossAxisAlignment, contentArea.width);
         }
 
 

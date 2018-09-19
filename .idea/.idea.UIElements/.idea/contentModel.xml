@@ -159,6 +159,8 @@
             <e p="UITextContainerElement.cs" t="Include" />
             <e p="UITextElement.cs" t="Include" />
             <e p="UITransform.cs" t="Include" />
+            <e p="VirtualElement.cs" t="Include" />
+            <e p="VirtualScrollBar.cs" t="Include" />
           </e>
           <e p="Expressions" t="Include">
             <e p="AccessExpression_Property.cs" t="Include" />
@@ -289,8 +291,8 @@
             <e p="BorderRadius.cs" t="Include" />
             <e p="BorderStyle.cs" t="Include" />
             <e p="ContentBoxRect.cs" t="Include" />
-            <e p="ElementMeasurements.cs" t="Include" />
             <e p="GOTextSizeCalculator.cs" t="Include" />
+            <e p="HorizontalScrollbarAttachment.cs" t="Include" />
             <e p="IDirectDrawMesh.cs" t="Include" />
             <e p="IMGUIRenderData.cs" t="Include" />
             <e p="IMGUITextSizeCalculator.cs" t="Include" />
@@ -325,6 +327,7 @@
             </e>
             <e p="UIView.cs" t="Include" />
             <e p="UIViewIMGUI.cs" t="Include" />
+            <e p="VerticalScrollbarAttachment.cs" t="Include" />
             <e p="WhitespaceMode.cs" t="Include" />
           </e>
           <e p="Shaders" t="Include">
@@ -413,6 +416,7 @@
             <e p="ListPool.cs" t="Include" />
             <e p="MeasurementVector2.cs" t="Include" />
             <e p="ObjectPool.cs" t="Include" />
+            <e p="ReadOnlyVector2.cs" t="Include" />
             <e p="ReflectionUtil.cs" t="Include" />
             <e p="SkipTree.cs" t="Include" />
             <e p="StackPool.cs" t="Include" />

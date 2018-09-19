@@ -1,11 +1,10 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Diagnostics;
-using System.Linq;
 using Rendering;
+using Src.Elements;
 using Src.Systems;
 using UnityEngine;
-using Debug = UnityEngine.Debug;
 
 namespace Src.Layout {
 
@@ -13,15 +12,10 @@ namespace Src.Layout {
     public class LayoutNode : IHierarchical {
 
         public const int k_MeasurementResultCount = 4;
-        public Rect outputRect;
-        public float computedWidth;
-        public float computedHeight;
         public Dimensions rect;
-        public Bounds childExtents;
-        public Bounds inFlowChildExtents;
+        
         public UILayout layout;
-        public LayoutParameters parameters;
-        public LayoutConstraints constraints;
+        
         public string textContent;
         public float preferredTextWidth;
 
@@ -31,21 +25,21 @@ namespace Src.Layout {
         public float contentEndOffsetY;
         public bool isTextElement;
 
-        public Vector2 localPosition;
-        public readonly UIStyleSet style;
         public readonly UIElement element;
         public readonly List<LayoutNode> children;
+        
+        public VirtualScrollbar horizontalScrollbar;
+        public VirtualScrollbar verticalScrollbar;
 
         private MeasureResult[] measureResults;
         private int currentMeasureResultIndex;
 
         public LayoutNode(UIElement element) {
             this.element = element;
-            this.style = element.style;
             this.children = new List<LayoutNode>();
         }
 
-        public bool isInFlow => parameters.flow != LayoutFlowType.OutOfFlow;
+        public bool isInFlow => element.style.layoutParameters.flow != LayoutFlowType.OutOfFlow;
 
         public float horizontalOffset => contentStartOffsetX + contentEndOffsetX;
         public float verticalOffset => contentStartOffsetY + contentEndOffsetY;
@@ -60,21 +54,22 @@ namespace Src.Layout {
             
             for (int i = 0; i < children.Count; i++) {
                 LayoutNode child = children[i];
-                
-                if (child.localPosition.x < min.x) {
-                    min.x = child.localPosition.x;
+                Vector2 screenPosition = child.element.screenPosition;
+
+                if (screenPosition.x < min.x) {
+                    min.x = screenPosition.x;
                 }
                 
-                if (child.localPosition.y < min.y) {
-                    min.y = child.localPosition.y;
+                if (screenPosition.y < min.y) {
+                    min.y = screenPosition.y;
                 }
 
-                if (child.localPosition.x + child.computedWidth > max.x) {
-                    max.x = child.localPosition.x + child.computedWidth;
+                if (screenPosition.x + child.element.width > max.x) {
+                    max.x = screenPosition.x + child.element.width;
                 }
                 
-                if (child.localPosition.y + child.computedHeight > max.y) {
-                    max.y = child.localPosition.y + child.computedHeight;
+                if (screenPosition.y + child.element.height > max.y) {
+                    max.y = screenPosition.y + child.element.height;
                 }
 
             }
@@ -83,16 +78,15 @@ namespace Src.Layout {
         }
 
         public void UpdateData(LayoutSystem layoutSystem) {
+            UIStyleSet style = element.style;
             contentStartOffsetX = style.paddingLeft + style.marginLeft + style.borderLeft;
             contentEndOffsetX = style.paddingRight + style.marginRight + style.borderRight;
 
             contentStartOffsetY = style.paddingTop + style.marginTop + style.borderTop;
             contentEndOffsetY = style.paddingBottom + style.marginBottom + style.borderBottom;
 
-            parameters = style.layoutParameters;
-            layout = layoutSystem.GetLayoutInstance(parameters.type);
+            layout = layoutSystem.GetLayoutInstance(style.layoutType);
 
-            constraints = style.constraints;
             rect = style.dimensions;
 
             UITextElement textElement = element as UITextElement;
@@ -103,6 +97,7 @@ namespace Src.Layout {
         }
 
         public float GetMinWidth(UIUnit parentUnit, float parentValue, float viewportValue) {
+            LayoutConstraints constraints = element.style.constraints;
             switch (constraints.minWidth.unit) {
                 case UIUnit.Auto:
                     return 0;
@@ -140,7 +135,7 @@ namespace Src.Layout {
             }
 
             if (layout != null) {
-                preferredTextWidth = layout.GetTextWidth(textContent, style);
+                preferredTextWidth = layout.GetTextWidth(textContent, element.style);
             }
         }
 
@@ -152,7 +147,7 @@ namespace Src.Layout {
                 }
             }
 
-            float height = layout.GetTextHeight(textContent, style, computedWidth);
+            float height = layout.GetTextHeight(textContent, element.style, computedWidth);
 
             currentMeasureResultIndex = (currentMeasureResultIndex + 1) % measureResults.Length;
             measureResults[currentMeasureResultIndex] = new MeasureResult(intWidth, height);
@@ -237,6 +232,7 @@ namespace Src.Layout {
         }
 
         public float GetMaxWidth(UIUnit parentUnit, float parentValue, float viewportValue) {
+            LayoutConstraints constraints = element.style.constraints;
             switch (constraints.maxWidth.unit) {
                 case UIUnit.Pixel:
                     return constraints.maxWidth.value;
@@ -257,6 +253,7 @@ namespace Src.Layout {
         }
 
         public float GetMinHeight(UIUnit parentUnit, float parentValue, float viewportValue) {
+            LayoutConstraints constraints = element.style.constraints;
             switch (constraints.minHeight.unit) {
                 case UIUnit.Pixel:
                     return constraints.minHeight.value;
@@ -277,6 +274,7 @@ namespace Src.Layout {
         }
 
         public float GetMaxHeight(UIUnit parentUnit, float parentValue, float viewportValue) {
+            LayoutConstraints constraints = element.style.constraints;
             switch (constraints.maxHeight.unit) {
                 case UIUnit.Pixel:
                     return constraints.maxHeight.value;
@@ -306,6 +304,14 @@ namespace Src.Layout {
                 this.height = height;
             }
 
+        }
+
+        public float GetScrollBarWidth() {
+            return 5f;
+        }
+        
+        public float GetScrollBarHeight() {
+            return 5f;
         }
 
     }

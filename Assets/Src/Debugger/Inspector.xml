@@ -4,14 +4,13 @@
     <Contents style.layoutType="Fixed">
 
         <!--<UIInputFieldElement/>-->
-        <Group x-id="maskthing" style.padding="rect(10f)"
-               style.translation="vec2(100, 200)"
+        <Group x-id="maskthing" style.translation="vec2(100, 200)"
                style.width="100"
                style.height="100"
                style.backgroundColor="white">
 
             <Group style.backgroundColor="red" style.width="200" style.height="200">
-
+                Text Here
             </Group>
 
             <Group style.backgroundColor="green" style.width="200" style.height="200">
@@ -19,7 +18,6 @@
             </Group>
 
             <Group style.backgroundColor="blue" style.width="200" style.height="200">
-
             </Group>
 
         </Group>

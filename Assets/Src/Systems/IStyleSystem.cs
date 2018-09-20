@@ -1,4 +1,5 @@
-﻿using Rendering;
+﻿using System;
+using Rendering;
 
 namespace Src.Systems {
 
@@ -15,7 +16,8 @@ namespace Src.Systems {
         event FontPropertyChanged onFontPropertyChanged;
         event AvailableStatesChanged onAvailableStatesChanged;
         event TextContentChanged onTextContentChanged;
-        
+        event Action<UIElement> onOverflowPropertyChanged;
+
     }
 
 }

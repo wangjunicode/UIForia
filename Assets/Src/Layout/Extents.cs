@@ -1,4 +1,5 @@
-﻿using UnityEngine;
+﻿using Src.Systems;
+using UnityEngine;
 
 public struct Extents {
 
@@ -11,5 +12,7 @@ public struct Extents {
     }
 
     public static Extents zero => new Extents(Vector2.zero, Vector2.zero);
+
+    public Size Size => new Size(max.x - min.x, max.y - min.y);
 
 }

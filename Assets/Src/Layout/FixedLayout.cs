@@ -1,6 +1,8 @@
 using System;
 using System.Collections.Generic;
 using Rendering;
+using Src.Systems;
+using Src.Util;
 using UnityEngine;
 
 namespace Src.Layout {
@@ -9,20 +11,20 @@ namespace Src.Layout {
 
         public FixedLayout(ITextSizeCalculator textSizeCalculator) : base(textSizeCalculator) { }
 
-        public override void Run(Rect viewport, LayoutNode currentNode) {
-            Rect screenRect = currentNode.element.ScreenRect;
-            float contentStartX = currentNode.contentStartOffsetX;
-            float contentStartY = currentNode.contentStartOffsetY;
-            float contentEndX = screenRect.xMax - screenRect.x - currentNode.contentEndOffsetX;
-            float contentEndY = screenRect.yMax - screenRect.y - currentNode.contentEndOffsetY;
-            float contentAreaWidth = contentEndX - contentStartX;
-            float contentAreaHeight = contentEndY - contentStartY;
+        public override List<Rect> Run(Rect viewport, LayoutNode currentNode) {
+            Rect screenRect = currentNode.element.layoutResult.ScreenRect;
+            
+            float contentAreaWidth = screenRect.xMax - screenRect.x - currentNode.contentEndOffsetX - currentNode.contentStartOffsetX;
+            float contentAreaHeight = screenRect.yMax - screenRect.y - currentNode.contentEndOffsetY - currentNode.contentStartOffsetY;
 
             List<LayoutNode> children = currentNode.children;
+            List<Rect> retn = ListPool<Rect>.Get();
             
             for (int i = 0; i < children.Count; i++) {
                 LayoutNode child = children[i];
+                Rect rect = new Rect();
                 if (child.element.isDisabled) {
+                    retn.Add(rect);
                     continue;
                 }
 
@@ -37,12 +39,10 @@ namespace Src.Layout {
                 }
                 
                 float height = child.GetPreferredHeight(currentNode.rect.height.unit, width, contentAreaHeight, viewport.height);
-
-                child.element.width = width;
-                child.element.height = height;
-                child.element.localPosition =  new Vector2(x, y) - currentNode.element.scrollOffset;
-                child.element.screenPosition = new Vector2(screenRect.x + x, screenRect.y + y) - currentNode.element.scrollOffset;
+                retn.Add(new Rect(x, y, width, height));
             }
+
+            return retn;
         }
 
         public override float GetContentWidth(LayoutNode node, float contentSize, float viewportSize) {

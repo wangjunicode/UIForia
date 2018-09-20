@@ -46,20 +46,15 @@ public class UIElement : IHierarchical {
     internal UIElement[] templateChildren;
     internal UIElement[] ownChildren;
     
-    public Vector2 localPosition { get; internal set; }
-    public Vector2 screenPosition { get; internal set; }
+    public LayoutResult layoutResult { get; internal set; }
+
     public Vector2 scrollOffset { get; internal set; }
-    
-    public float width { get; internal set; }
-    public float height { get; internal set; }
-    
+        
     public int depth { get; internal set; }
     public int siblingIndex { get; internal set; }
 
     public IInputProvider Input { get; internal set; }
-    
-    public Rect ScreenRect => new Rect(screenPosition.x, screenPosition.y, width, height);
-    
+        
     public bool isShown => (flags & UIElementFlags.SelfAndAncestorShown) == UIElementFlags.SelfAndAncestorShown;
 
     public bool isImplicit => (flags & UIElementFlags.ImplicitElement) != 0;
@@ -94,9 +89,7 @@ public class UIElement : IHierarchical {
 
     public virtual void OnHidden() { }
 
-    public virtual void OnDestroy() { }
-
-   
+    public virtual void OnDestroy() { }   
 
     public bool EnableBinding(string propertyName) {
         return templateContext.view.bindingSystem.EnableBinding(this, propertyName);

@@ -1,5 +1,6 @@
 using System.Collections.Generic;
 using Rendering;
+using Src.Systems;
 using UnityEngine;
 
 namespace Src.Layout {
@@ -11,8 +12,8 @@ namespace Src.Layout {
         protected UILayout(ITextSizeCalculator textSizeCalculator) {
             this.textSizeCalculator = textSizeCalculator;
         }
-
-        public abstract void Run(Rect viewport, LayoutNode layoutNode);
+        
+        public abstract List<Rect> Run(Rect viewport, LayoutNode layoutNode);
 
         public float GetTextWidth(string text, UIStyleSet style) {
             return textSizeCalculator.CalcTextWidth(text, style);
@@ -57,13 +58,6 @@ namespace Src.Layout {
         public virtual float GetContentHeight(LayoutNode node, float adjustedWidth, float parentWidth, float viewportSize) {
 
             if (node.isTextElement) {
-                // todo -- add metrics per component about calc calls
-                // this is bizarre but click the mouse changes how text height gets calculated...no idea why 
-//                if (Mathf.Abs(node.previousParentWidth - adjustedWidth) > 3f) {
-//                    node.previousParentWidth = adjustedWidth;
-//                    node.textContentSize.y = textSizeCalculator.CalcTextHeight(node.textContent, node.style, adjustedWidth);
-//                }
-
                 return node.GetTextHeight(adjustedWidth);
             }
 

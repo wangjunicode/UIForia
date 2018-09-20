@@ -46,7 +46,7 @@ namespace Src.Systems {
                 }
             }
             else {
-                retn.mouseDownPosition = new Vector2(-1, -1);
+                retn.mouseDownPosition = new Vector2();
             }
 
             retn.mousePosition = ConvertMousePosition(UnityEngine.Input.mousePosition);
@@ -62,12 +62,16 @@ namespace Src.Systems {
             // only true on the frame the mouse is down
             retn.isDoubleClick = m_IsDoubleClick;
             retn.isTripleClick = m_IsTripleClick;
-
             return retn;
         }
 
         private static Vector2 ConvertMousePosition(Vector2 position) {
+            // todo -- HACK I have no idea why but unity reports the mouse position as 4 pixels different in the editor
+#if UNITY_EDITOR
+            return new Vector2(position.x, Screen.height - position.y + 4f);
+#else
             return new Vector2(position.x, Screen.height - position.y);
+#endif
         }
 
     }

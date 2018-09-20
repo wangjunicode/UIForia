@@ -1,5 +1,6 @@
 using Src.Input;
 using Src.Rendering;
+using Src.Systems;
 using UnityEngine;
 
 namespace Src.Elements {
@@ -17,49 +18,56 @@ namespace Src.Elements {
         public readonly ScrollbarOrientation orientation;
         public float handleSize;
         public float trackSize;
-        public float contentHeight;
 
         public VirtualScrollbar(UIElement target, ScrollbarOrientation orientation) {
             this.targetElement = target;
             this.orientation = orientation;
             this.trackSize = 5f;
+            this.handleSize = 5f;
+            this.depth = target.depth;
+            this.siblingIndex = int.MaxValue - (orientation == ScrollbarOrientation.Horizontal ? 1 : 0);
         }
 
+        public Vector2 handlePosition => new Vector2(
+            orientation == ScrollbarOrientation.Vertical ? 0 : targetElement.scrollOffset.x * (targetElement.layoutResult.width - handleWidth),
+            orientation == ScrollbarOrientation.Horizontal ? 0 : targetElement.scrollOffset.y * (targetElement.layoutResult.height - handleHeight)
+        );
+
+        public float handleWidth => orientation == ScrollbarOrientation.Vertical ? handleSize : (targetElement.layoutResult.width / targetElement.layoutResult.contentWidth) * targetElement.layoutResult.width;
+        public float handleHeight => orientation == ScrollbarOrientation.Horizontal ? handleSize : (targetElement.layoutResult.height / targetElement.layoutResult.contentHeight) * targetElement.layoutResult.height;
+
         public ScrollbarDragEvent CreateDragEvent(MouseInputEvent evt) {
-            Rect handleRect = HandleRect;
-            if (handleRect.Contains(evt.MouseDownPosition)) {
-                ScrollbarDragEvent retn = new ScrollbarDragEvent();
-                float baseOffset = evt.MouseDownPosition.y - GetTrackRect().y;
-                retn.onUpdate += (dragEvent) => {
-                    handleRect = HandleRect;
-                    Rect trackRect = GetTrackRect();
-                    float max = trackRect.height - ((targetElement.height / contentHeight) * targetElement.height);
-                    float offset = baseOffset + evt.MousePosition.y - trackRect.y;
-                    offset = Mathf.Clamp(offset, 0, max) / targetElement.height;
-                    Debug.Log("offset: " + offset + " fix this matt");
-                    targetElement.scrollOffset = new Vector2(0, contentHeight * offset);
-                };
-                return retn;
+            if (HandleRect.Contains(evt.MouseDownPosition)) {
+                float baseOffset;
+                if (orientation == ScrollbarOrientation.Vertical) {
+                    baseOffset = evt.MouseDownPosition.y - (GetTrackRect().y + handlePosition.y);
+                }
+                else {
+                    baseOffset = evt.MouseDownPosition.x - (GetTrackRect().x + handlePosition.x);
+                }
+
+                return new ScrollbarDragEvent(baseOffset, this);
             }
 
             return null;
         }
 
         public Rect GetTrackRect() {
-            Vector2 parentWorld = targetElement.screenPosition;
+            LayoutResult targetElementLayoutResult = targetElement.layoutResult;
+            Vector2 parentWorld = targetElement.layoutResult.screenPosition;
             if (orientation == ScrollbarOrientation.Vertical) {
                 if (targetElement.style.verticalScrollbarAttachment == VerticalScrollbarAttachment.Right) {
-                    float x = parentWorld.x + targetElement.width - trackSize;
+                    float x = parentWorld.x + targetElementLayoutResult.width - trackSize;
                     float y = parentWorld.y;
                     float w = trackSize;
-                    float h = targetElement.height;
+                    float h = targetElementLayoutResult.height;
                     return new Rect(x, y, w, h);
                 }
                 else {
                     float x = parentWorld.x;
                     float y = parentWorld.y;
                     float w = trackSize;
-                    float h = targetElement.height;
+                    float h = targetElementLayoutResult.height;
                     return new Rect(x, y, w, h);
                 }
             }
@@ -67,14 +75,14 @@ namespace Src.Elements {
             if (targetElement.style.horizontalScrollbarAttachment == HorizontalScrollbarAttachment.Top) {
                 float x = parentWorld.x;
                 float y = parentWorld.y;
-                float w = targetElement.width;
+                float w = targetElementLayoutResult.width;
                 float h = trackSize;
                 return new Rect(x, y, w, h);
             }
             else {
                 float x = parentWorld.x;
-                float y = parentWorld.y + targetElement.height - trackSize;
-                float w = targetElement.width;
+                float y = parentWorld.y + targetElementLayoutResult.height - trackSize;
+                float w = targetElementLayoutResult.width;
                 float h = trackSize;
                 return new Rect(x, y, w, h);
             }
@@ -82,20 +90,20 @@ namespace Src.Elements {
 
         public Rect HandleRect {
             get {
-                Vector2 parentWorld = targetElement.screenPosition;
+                Vector2 parentWorld = targetElement.layoutResult.screenPosition;
                 if (orientation == ScrollbarOrientation.Vertical) {
                     if (targetElement.style.verticalScrollbarAttachment == VerticalScrollbarAttachment.Right) {
-                        float x = parentWorld.x + targetElement.width - trackSize;
-                        float y = parentWorld.y + targetElement.scrollOffset.y;
-                        float w = 5f;
-                        float h = (targetElement.height / contentHeight) * targetElement.height;
+                        float x = parentWorld.x + targetElement.layoutResult.width - trackSize;
+                        float y = parentWorld.y + handlePosition.y;
+                        float w = handleSize;
+                        float h = handleHeight;
                         return new Rect(x, y, w, h);
                     }
                     else {
                         float x = parentWorld.x;
                         float y = parentWorld.y;
                         float w = handleSize;
-                        float h = handleSize;
+                        float h = handleHeight;
                         return new Rect(x, y, w, h);
                     }
                 }
@@ -103,25 +111,45 @@ namespace Src.Elements {
                 if (targetElement.style.horizontalScrollbarAttachment == HorizontalScrollbarAttachment.Top) {
                     float x = parentWorld.x;
                     float y = parentWorld.y;
-                    float w = handleSize;
+                    float w = handleWidth;
                     float h = handleSize;
                     return new Rect(x, y, w, h);
                 }
                 else {
                     float x = parentWorld.x;
-                    float y = parentWorld.y + targetElement.height - trackSize;
-                    float w = targetElement.width;
-                    float h = trackSize;
+                    float y = parentWorld.y + targetElement.layoutResult.height - trackSize;
+                    float w = handleWidth;
+                    float h = handleSize;
                     return new Rect(x, y, w, h);
                 }
             }
         }
 
-        public void SetHandleSize(float size) {
-            this.handleSize = size;
-        }
+        public class ScrollbarDragEvent : DragEvent {
 
-        public class ScrollbarDragEvent : DragEvent { }
+            public readonly float baseOffset;
+            public readonly VirtualScrollbar scrollbar;
+
+            public ScrollbarDragEvent(float baseOffset, VirtualScrollbar scrollbar) {
+                this.baseOffset = baseOffset;
+                this.scrollbar = scrollbar;
+            }
+
+            public override void Update() {
+                Rect trackRect = scrollbar.GetTrackRect();
+                if (scrollbar.orientation == ScrollbarOrientation.Vertical) {
+                    float max = trackRect.height - scrollbar.handleHeight;
+                    float offset = Mathf.Clamp(MousePosition.y - trackRect.y - baseOffset, 0, max);
+                    scrollbar.targetElement.scrollOffset = new Vector2(scrollbar.targetElement.scrollOffset.x, offset / max);
+                }
+                else {
+                    float max = trackRect.width - scrollbar.handleWidth;
+                    float offset = Mathf.Clamp(MousePosition.x - trackRect.x - baseOffset, 0, max);
+                    scrollbar.targetElement.scrollOffset = new Vector2(offset / max, scrollbar.targetElement.scrollOffset.y);
+                }
+            }
+
+        }
 
     }
 

@@ -14,7 +14,7 @@ using UnityEngine.UI;
 [Template("Templates/InputField.xml")]
 public class UIInputFieldElement : UIElement, IFocusable {
 
-    public class TextSelectDragEvent : DragEvent { }
+    public class TextSelectDragEvent : CallbackDragEvent { }
 
     private static readonly char[] kSeparators = {' ', '.', ',', '\t', '\r', '\n'};
 

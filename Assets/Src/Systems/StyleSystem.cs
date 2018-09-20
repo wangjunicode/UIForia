@@ -41,7 +41,8 @@ namespace Src.Systems {
         public event AvailableStatesChanged onAvailableStatesChanged;
         public event TextContentChanged onTextContentChanged;
         public event Action<UIElement, UITransform> onTransformChanged;
-
+        public event Action<UIElement> onOverflowPropertyChanged;
+        
         private readonly SkipTree<UIElement> fontTree;
 
         public StyleSystem() {

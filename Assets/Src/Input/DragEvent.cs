@@ -7,26 +7,23 @@ namespace Src.Input {
 
         public readonly Type type;
         internal EventPropagator source;
-        
-        public event Action<DragEvent> onUpdate;
-        
+
+
         protected DragEvent() {
             this.type = GetType();
         }
-        
+
         public Vector2 MousePosition { get; internal set; }
         public Vector2 DragStartPosition { get; internal set; }
         public KeyboardModifiers Modifiers { get; internal set; }
         public InputEventType CurrentEventType { get; internal set; }
-        
+
         public float StartTime { get; internal set; }
-        public bool IsCanceled { get; private set; }
+        public bool IsCanceled { get; protected set; }
         public bool IsDropped { get; }
 
-        internal void Update() {
-            onUpdate?.Invoke(this);
-        }
-        
+        public virtual void Update() { }
+
         public bool IsConsumed => source.isConsumed;
 
         public void StopPropagation() {
@@ -34,22 +31,36 @@ namespace Src.Input {
                 source.shouldStopPropagation = true;
             }
         }
-        
+
         public void Consume() {
             if (source != null) {
                 source.isConsumed = true;
             }
         }
 
-        public void Drop(bool success) {
+        public virtual void Drop(bool success) { }
+
+        public virtual void Cancel() { }
+
+    }
+
+    public class CallbackDragEvent : DragEvent {
+
+        public event Action<DragEvent> onUpdate;
+
+        public override void Update() {
+            onUpdate?.Invoke(this);
+        }
+
+        public override void Drop(bool success) {
             onUpdate = null;
         }
 
-        public void Cancel() {
+        public override void Cancel() {
             IsCanceled = true;
             onUpdate = null;
         }
-        
+
     }
 
 }

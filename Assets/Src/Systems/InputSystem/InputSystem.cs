@@ -5,6 +5,7 @@ using Src;
 using Src.Elements;
 using Src.Input;
 using Src.Systems;
+using Src.Util;
 using UnityEngine;
 
 public abstract partial class InputSystem : IInputSystem, IInputProvider {
@@ -33,9 +34,6 @@ public abstract partial class InputSystem : IInputSystem, IInputProvider {
     private readonly Dictionary<int, DragCreatorGroup> m_DragCreatorMap;
     private readonly SkipTree<KeyboardEventTreeNode> m_KeyboardEventTree;
 
-    private int m_LayoutResultCount;
-    private LayoutResult[] m_LayoutQueryResults;
-
     private readonly List<KeyCode> m_DownThisFrame;
     private readonly List<KeyCode> m_UpThisFrame;
 
@@ -57,7 +55,6 @@ public abstract partial class InputSystem : IInputSystem, IInputProvider {
         this.m_MouseHandlerMap = new Dictionary<int, MouseHandlerGroup>();
         this.m_DragCreatorMap = new Dictionary<int, DragCreatorGroup>();
         this.m_DragHandlerMap = new Dictionary<int, DragHandlerGroup>();
-        this.m_LayoutQueryResults = new LayoutResult[16];
 
         this.m_UpThisFrame = new List<KeyCode>();
         this.m_DownThisFrame = new List<KeyCode>();
@@ -140,20 +137,27 @@ public abstract partial class InputSystem : IInputSystem, IInputProvider {
     }
 
     private void ProcessMouseInput() {
-        m_LayoutResultCount = m_LayoutSystem.QueryPoint(m_MouseState.mousePosition, ref m_LayoutQueryResults);
-
-        for (int i = 0; i < m_LayoutResultCount; i++) {
-            UIElement element = m_LayoutQueryResults[i].element;
+        List <UIElement> queryResults = m_LayoutSystem.QueryPoint(m_MouseState.mousePosition, ListPool<UIElement>.Get());
+        
+        List<string> s = new List<string>();
+        for (int i = 0; i < queryResults.Count; i++) {
+            UIElement element = queryResults[i];
 
             // todo -- handle masking here
             m_ElementsThisFrame.Add(element);
-
+            s.Add(element.ToString());
+       
             if (!m_ElementsLastFrame.Contains(element)) {
                 m_EnteredElements.Add(element);
                 element.style?.EnterState(StyleState.Hover);
             }
         }
 
+        string output = "";
+        for (int i = 0; i < s.Count; i++) {
+            output += s[i] + ", ";
+        }
+        Debug.Log(output);
         for (int i = 0; i < m_ElementsLastFrame.Count; i++) {
             if (!m_ElementsThisFrame.Contains(m_ElementsLastFrame[i])) {
                 m_ExitedElements.Add(m_ElementsLastFrame[i]);

@@ -2,6 +2,8 @@ using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using Rendering;
+using Src.Systems;
+using Src.Util;
 using UnityEngine;
 
 namespace Src.Layout {
@@ -16,17 +18,13 @@ namespace Src.Layout {
             heightItems = new FlexItemAxis[16];
         }
 
-        public override void Run(Rect viewport, LayoutNode currentNode) {
-            Rect size = currentNode.element.ScreenRect;
+        public override List<Rect> Run(Rect viewport, LayoutNode currentNode) {
+            Rect screenRect = currentNode.element.layoutResult.ScreenRect;
 
-            float contentStartX = currentNode.contentStartOffsetX;
-            float contentStartY = currentNode.contentStartOffsetY;
-            float contentEndX = size.xMax - size.x - currentNode.contentEndOffsetX;
-            float contentEndY = size.yMax - size.y - currentNode.contentEndOffsetY;
-            float contentAreaWidth = contentEndX - contentStartX;
-            float contentAreaHeight = contentEndY - contentStartY;
+            float contentAreaWidth = screenRect.xMax - screenRect.x - currentNode.contentEndOffsetX - currentNode.contentStartOffsetX;
+            float contentAreaHeight = screenRect.yMax - screenRect.y - currentNode.contentEndOffsetY - currentNode.contentStartOffsetY;
 
-            Rect contentArea = new Rect(contentStartX, contentStartY, contentAreaWidth, contentAreaHeight);
+            Size contentArea = new Size(contentAreaWidth, contentAreaHeight);
 
             if (widthItems.Length < currentNode.children.Count) {
                 Array.Resize(ref widthItems, currentNode.children.Count * 2);
@@ -43,56 +41,33 @@ namespace Src.Layout {
             int itemTracker = 0;
 
             List<LayoutNode> children = currentNode.children;
-            float marginLeft = currentNode.element.style.marginLeft;
-            float marginTop = currentNode.element.style.marginTop;
-            Vector2 scrollOffset = currentNode.element.scrollOffset;
-            
+
+            List<Rect> retn = ListPool<Rect>.Get();
             for (int i = 0; i < children.Count; i++) {
                 LayoutNode child = children[i];
-                
+                Rect result = new Rect();
                 if (child.isInFlow && child.element.isEnabled) {
-                    child.element.width = widthItems[itemTracker].outputSize;
-                    child.element.height = heightItems[itemTracker].outputSize;
                     
-                    Vector2 localPosition = new Vector2(
-                        widthItems[itemTracker].axisStart,
-                        heightItems[itemTracker].axisStart
-                    );
-                    
-                    child.element.localPosition = localPosition - scrollOffset;
-                    child.element.screenPosition = new Vector2(
-                        size.x + (localPosition.x - scrollOffset.x),
-                        size.y + (localPosition.y - scrollOffset.y)
-                    );
+                    result.x = widthItems[itemTracker].axisStart;
+                    result.y = heightItems[itemTracker].axisStart;
+                    result.width = widthItems[itemTracker].outputSize;
+                    result.height = heightItems[itemTracker].outputSize;
 
                     itemTracker++;
+
                 }
                 else {
                     //results[i] = new Rect(); // todo -- sizing for non flow children
                 }
+
+                retn.Add(result);
             }
 
-            //AdjustForScrollBars(currentNode);
-            
+            return retn;
+
         }
 
-//        private void AdjustForScrollBars(LayoutNode currentNode) {
-//            if (!currentNode.style.HandlesOverflow) {
-//                return;
-//            }
-//
-//            Extents extents = currentNode.GetChildExtents();
-//            if (extents.max.y > currentNode.computedHeight) {
-//                List<LayoutNode> children = currentNode.children;
-//                float scrollBarHeight = currentNode.GetScrollBarHeight();
-//                for (int i = 0; i < children.Count; i++) {
-//                    // if scrollbar attachment == top localPosition.y += currentNode.GetScrollBarHeight();
-//                    children[i].outputRect.height -= currentNode.GetScrollBarHeight()
-//                }
-//            }
-//        }
-
-        private void DoLayoutRow(Rect viewport, LayoutNode currentNode, Rect contentArea) {
+        private void DoLayoutRow(Rect viewport, LayoutNode currentNode, Size contentArea) {
             int itemCount = 0;
             List<LayoutNode> children = currentNode.children;
 
@@ -104,7 +79,7 @@ namespace Src.Layout {
 
                 FlexItemAxis widthItem = new FlexItemAxis();
 
-                widthItem.axisStart = contentArea.x;
+                widthItem.axisStart = 0;
                 widthItem.minSize = child.GetMinWidth(currentNode.rect.width.unit, contentArea.width, viewport.width);
                 widthItem.maxSize = child.GetMaxWidth(currentNode.rect.width.unit, contentArea.width, viewport.width);
                 widthItem.preferredSize = child.GetPreferredWidth(currentNode.rect.width.unit, contentArea.width, viewport.width);
@@ -139,7 +114,7 @@ namespace Src.Layout {
 
                 FlexItemAxis heightItem = new FlexItemAxis();
 
-                heightItem.axisStart = contentArea.y;
+                heightItem.axisStart = 0;
                 heightItem.minSize = child.GetMinHeight(currentNode.rect.height.unit, contentArea.height, viewport.height);
                 heightItem.maxSize = child.GetMaxHeight(currentNode.rect.height.unit, contentArea.height, viewport.height);
                 // now we have the final width and can compute preferred height accordingly
@@ -153,11 +128,11 @@ namespace Src.Layout {
                 heightItems[itemCount++] = heightItem;
             }
 
-            AlignMainAxis(widthItems, itemCount, contentArea.x, remainingWidth, currentNode.element.style.mainAxisAlignment);
-            AlignCrossAxis(heightItems, itemCount, contentArea.y, currentNode.element.style.crossAxisAlignment, contentArea.height);
+            AlignMainAxis(widthItems, itemCount, remainingWidth, currentNode.element.style.mainAxisAlignment);
+            AlignCrossAxis(heightItems, itemCount, currentNode.element.style.crossAxisAlignment, contentArea.height);
         }
 
-        private void DoLayoutColumn(Rect viewport, LayoutNode currentNode, Rect contentArea) {
+        private void DoLayoutColumn(Rect viewport, LayoutNode currentNode, Size contentArea) {
             float remainingHeight = contentArea.height;
             List<LayoutNode> children = currentNode.children;
 
@@ -170,7 +145,7 @@ namespace Src.Layout {
                 FlexItemAxis heightItem = new FlexItemAxis();
                 FlexItemAxis widthItem = new FlexItemAxis();
 
-                widthItem.axisStart = contentArea.x;
+                widthItem.axisStart = 0;
                 widthItem.minSize = child.GetMinWidth(currentNode.rect.width.unit, contentArea.width, viewport.width);
                 widthItem.maxSize = child.GetMaxWidth(currentNode.rect.width.unit, contentArea.width, viewport.width);
                 widthItem.preferredSize = child.GetPreferredWidth(currentNode.rect.width.unit, contentArea.width, viewport.width);
@@ -180,7 +155,7 @@ namespace Src.Layout {
                 widthItem.growthFactor = child.element.style.growthFactor;
                 widthItem.shrinkFactor = child.element.style.shrinkFactor;
 
-                heightItem.axisStart = contentArea.y;
+                heightItem.axisStart = 0;
                 heightItem.minSize = child.GetMinHeight(currentNode.rect.height.unit, contentArea.height, viewport.height);
                 heightItem.maxSize = child.GetMaxHeight(currentNode.rect.height.unit, contentArea.height, viewport.height);
 
@@ -213,8 +188,8 @@ namespace Src.Layout {
                 remainingHeight = 0;
             }
 
-            AlignMainAxis(heightItems, itemCount, contentArea.y, remainingHeight, currentNode.element.style.mainAxisAlignment);
-            AlignCrossAxis(widthItems, itemCount, contentArea.x, currentNode.element.style.crossAxisAlignment, contentArea.width);
+            AlignMainAxis(heightItems, itemCount, remainingHeight, currentNode.element.style.mainAxisAlignment);
+            AlignCrossAxis(widthItems, itemCount, currentNode.element.style.crossAxisAlignment, contentArea.width);
         }
 
 
@@ -313,7 +288,7 @@ namespace Src.Layout {
             }
         }
 
-        private static void AlignMainAxis(FlexItemAxis[] items, int itemCount, float axisStart, float space, MainAxisAlignment mainAxisAlignment) {
+        private static void AlignMainAxis(FlexItemAxis[] items, int itemCount, float space, MainAxisAlignment mainAxisAlignment) {
             float offset = 0;
             float spacerSize = 0;
 
@@ -355,12 +330,12 @@ namespace Src.Layout {
             }
 
             for (int i = 0; i < itemCount; i++) {
-                items[i].axisStart = axisStart + offset;
+                items[i].axisStart = offset;
                 offset += items[i].outputSize + spacerSize;
             }
         }
 
-        private static void AlignCrossAxis(FlexItemAxis[] items, int itemCount, float axisStart, CrossAxisAlignment crossAxisAlignment, float contentSize) {
+        private static void AlignCrossAxis(FlexItemAxis[] items, int itemCount, CrossAxisAlignment crossAxisAlignment, float contentSize) {
             // todo -- respect individual align-cross-axis-self settings on children
 
             for (int i = 0; i < itemCount; i++) {
@@ -386,7 +361,6 @@ namespace Src.Layout {
                         break;
                 }
 
-                items[i].axisStart += axisStart;
             }
         }
 

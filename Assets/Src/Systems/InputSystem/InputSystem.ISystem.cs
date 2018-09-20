@@ -11,7 +11,6 @@ public abstract partial class InputSystem {
     public void OnReset() {
         // don't clear key states
         m_FocusedElement = null;
-        m_LayoutResultCount = 0;
         m_ElementsLastFrame.Clear();
         m_ElementsThisFrame.Clear();
         m_MouseDownElements.Clear();

@@ -48,35 +48,6 @@ namespace Src.Layout {
         public IHierarchical Element => element;
         public IHierarchical Parent => element.parent;
 
-        public Extents GetChildExtents() {
-            Vector2 min = new Vector2(float.MaxValue, float.MaxValue);
-            Vector2 max = new Vector2(float.MinValue, float.MinValue);
-            
-            for (int i = 0; i < children.Count; i++) {
-                LayoutNode child = children[i];
-                Vector2 screenPosition = child.element.screenPosition;
-
-                if (screenPosition.x < min.x) {
-                    min.x = screenPosition.x;
-                }
-                
-                if (screenPosition.y < min.y) {
-                    min.y = screenPosition.y;
-                }
-
-                if (screenPosition.x + child.element.width > max.x) {
-                    max.x = screenPosition.x + child.element.width;
-                }
-                
-                if (screenPosition.y + child.element.height > max.y) {
-                    max.y = screenPosition.y + child.element.height;
-                }
-
-            }
-
-            return new Extents(min, max);
-        }
-
         public void UpdateData(LayoutSystem layoutSystem) {
             UIStyleSet style = element.style;
             contentStartOffsetX = style.paddingLeft + style.marginLeft + style.borderLeft;
@@ -304,15 +275,7 @@ namespace Src.Layout {
                 this.height = height;
             }
 
-        }
-
-        public float GetScrollBarWidth() {
-            return 5f;
-        }
-        
-        public float GetScrollBarHeight() {
-            return 5f;
-        }
+        }       
 
     }
 

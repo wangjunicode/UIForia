@@ -2,6 +2,7 @@
 using Rendering;
 using Src.Elements;
 using Src.Rendering;
+using Src.Util;
 using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
@@ -34,7 +35,6 @@ namespace Src.Systems {
             this.m_CanvasRendererMap = new Dictionary<int, CanvasRenderer>();
             this.m_TransformMap = new Dictionary<int, RectTransform>();
             this.m_VirtualScrollbarElements = new List<RenderData>();
-
             this.layoutSystem.onCreateVirtualScrollbar += OnVirtualScrollbarCreated;
 
             this.renderSkipTree.onItemParentChanged += (item, newParent, oldParent) => {
@@ -109,28 +109,27 @@ namespace Src.Systems {
         }
 
         public void OnUpdate() {
-            int count = layoutSystem.RectCount;
-            LayoutResult[] layoutResults = layoutSystem.LayoutResults;
+            List<LayoutResult> layoutResults = layoutSystem.GetLayoutResults(ListPool<LayoutResult>.Get());
 
             // todo -- figure out anchored position for elements who's actual parent is not rendered
 
-            for (int i = 0; i < count; i++) {
+            for (int i = 0; i < layoutResults.Count; i++) {
                 RectTransform transform;
+                LayoutResult layoutResult = layoutResults[i];
+                UIElement element = layoutResult.element;
 
-                if (!m_TransformMap.TryGetValue(layoutResults[i].element.id, out transform)) {
+                if (!m_TransformMap.TryGetValue(element.id, out transform)) {
                     continue;
                 }
 
-                RenderData renderData = renderSkipTree.GetItem(layoutResults[i].element.id);
-                UIElement element = renderData.element;
-                
+                RenderData renderData = renderSkipTree.GetItem(element.id);
                 ContentBoxRect margin = element.style.margin;
-        
-                Vector2 position = element.localPosition;
+
+                Vector2 position = element.layoutResult.localPosition;
                 position.x = Mathf.CeilToInt(position.x + margin.left);
                 position.y = -Mathf.CeilToInt(position.y + margin.top);
 
-                Vector2 size = new Vector2(element.width, element.height);
+                Vector2 size = new Vector2(element.layoutResult.width, element.layoutResult.height);
                 size.x = Mathf.CeilToInt(size.x - (margin.left + margin.right));
                 size.y = Mathf.CeilToInt(size.y - (margin.top + margin.bottom));
 
@@ -167,38 +166,11 @@ namespace Src.Systems {
                 RenderData data = m_VirtualScrollbarElements[i];
 
                 if (data.horizontalScrollbar != null) {
-                    RectTransform transform = m_TransformMap[data.horizontalScrollbar.id];
-                    UIElement targetElement = data.horizontalScrollbar.targetElement;
-                    HorizontalScrollbarAttachment attachment = targetElement.style.horizontalScrollbarAttachment;
-                    Vector2 targetPosition = targetElement.localPosition;
-                    if (attachment == HorizontalScrollbarAttachment.Bottom) {
-                        targetPosition.y += targetElement.height - 5f;
-                    }
-
-                    targetPosition.y = -targetPosition.y;
-                    transform.anchoredPosition = targetPosition;
-                    transform.sizeDelta = new Vector2(targetElement.width, 5f);
-                    Rect handleRect = data.horizontalScrollbar.HandleRect;
-                    data.horizontalScrollbarHandle.anchoredPosition = new Vector2(targetElement.scrollOffset.x, 0f);
-                    data.horizontalScrollbarHandle.sizeDelta = new Vector2(handleRect.width, handleRect.height);
+                    RenderScrollbar(data.horizontalScrollbar, data.horizontalScrollbarHandle);
                 }
 
                 if (data.verticalScrollbar != null) {
-                    RectTransform transform = m_TransformMap[data.verticalScrollbar.id];
-                    UIElement targetElement = data.verticalScrollbar.targetElement;
-                    Vector2 targetPosition = targetElement.localPosition;
-
-                    VerticalScrollbarAttachment attachment = targetElement.style.verticalScrollbarAttachment;
-                    if (attachment == VerticalScrollbarAttachment.Right) {
-                        targetPosition.x += targetElement.width - 5f;
-                    }
-
-                    targetPosition.y = -targetPosition.y;
-                    transform.anchoredPosition = targetPosition;
-                    transform.sizeDelta = new Vector2(5f, targetElement.height);
-                    Rect handleRect = data.verticalScrollbar.HandleRect;
-                    data.verticalScrollbarHandle.anchoredPosition = new Vector2(0, -targetElement.scrollOffset.y);
-                    data.verticalScrollbarHandle.sizeDelta = new Vector2(handleRect.width, handleRect.height);
+                    RenderScrollbar(data.verticalScrollbar, data.verticalScrollbarHandle);
                 }
             }
 
@@ -217,7 +189,25 @@ namespace Src.Systems {
                 }
             }
 
+            ListPool<LayoutResult>.Release(layoutResults);
             m_DirtyGraphicList.Clear();
+        }
+
+        private void RenderScrollbar(VirtualScrollbar scrollbar, RectTransform handle) {
+            RectTransform transform = m_TransformMap[scrollbar.id];
+            UIElement targetElement = scrollbar.targetElement;
+            Rect trackRect = scrollbar.GetTrackRect();
+            Vector2 targetPosition = new Vector2(trackRect.x, trackRect.y);
+
+            targetPosition.y = -targetPosition.y;
+            transform.anchoredPosition = targetPosition;
+            transform.sizeDelta = new Vector2(trackRect.width, trackRect.height);
+
+            Rect handleRect = scrollbar.HandleRect;
+            Vector2 handlePosition = scrollbar.handlePosition;
+            handlePosition.y = -handlePosition.y;
+            handle.anchoredPosition = handlePosition;
+            handle.sizeDelta = new Vector2(handleRect.width, handleRect.height);
         }
 
         public void OnVirtualScrollbarCreated(VirtualScrollbar scrollbar) {
@@ -241,7 +231,6 @@ namespace Src.Systems {
                     img = handleTransform.gameObject.AddComponent<RawImage>();
                     img.color = Color.blue;
                     renderData.horizontalScrollbarHandle = handleTransform;
-                    
                 }
                 else if (scrollbar.orientation == ScrollbarOrientation.Vertical) {
                     renderData.verticalScrollbar = scrollbar;

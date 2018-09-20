@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using Rendering;
 using Src.Elements;
 using UnityEngine;
@@ -10,12 +11,10 @@ namespace Src.Systems {
         event Action<VirtualScrollbar> onCreateVirtualScrollbar;
         event Action<VirtualScrollbar> onDestroyVirtualScrollbar;
 
-        int RectCount { get; }
-        LayoutResult[] LayoutResults { get; }
         void SetViewportRect(Rect viewportRect);
 
-        int QueryPoint(Vector2 point, ref LayoutResult[] output);
-        bool GetRectForElement(int elementId, out Rect rect);
+        List<UIElement> QueryPoint(Vector2 point, List<UIElement> retn);
+        List<LayoutResult> GetLayoutResults(List<LayoutResult> retn);
 
     }
 

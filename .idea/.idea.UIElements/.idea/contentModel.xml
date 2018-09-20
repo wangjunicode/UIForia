@@ -376,7 +376,6 @@
             <e p="IStyleSystem.cs" t="Include" />
             <e p="KeyboardEventTreeNode.cs" t="Include" />
             <e p="LayoutSystem.cs" t="Include" />
-            <e p="RectMask.cs" t="Include" />
             <e p="StyleSystem.cs" t="Include" />
           </e>
           <e p="Temp_SpecFixtures.cs" t="Include" />

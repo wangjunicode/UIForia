@@ -5,7 +5,8 @@ namespace Rendering {
         Unset,
         Flow,
         Flex,
-        Fixed
+        Fixed,
+        Grid
 //        Grid,
 //        Radial,
 //        VStack,

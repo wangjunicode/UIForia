@@ -4,6 +4,9 @@ namespace Rendering {
 
     public partial class UIStyleSet {
 
+        public GridPlacement gridItem;
+        public GridDefinition gridDefinition;
+        
         public LayoutParameters layoutParameters {
             get {
                 return new LayoutParameters(

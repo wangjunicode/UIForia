@@ -22,7 +22,6 @@
 - Support layout ordering
 - Support out of flow
 - Support animation
-- Support transform
 - Support arbitrary creation of child nodes?
 
  Optimizations

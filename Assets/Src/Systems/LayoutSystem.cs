@@ -5,6 +5,7 @@ using Src.Elements;
 using Src.Layout;
 using Src.Util;
 using UnityEngine;
+using GridLayout = Src.Layout.GridLayout;
 using TreeChangeType = Src.SkipTree<UIElement>.TreeChangeType;
 
 namespace Src.Systems {
@@ -13,6 +14,7 @@ namespace Src.Systems {
 
         private readonly FlexLayout flexLayout;
         private readonly FlowLayout flowLayout;
+        private readonly GridLayout gridLayout;
         private readonly FixedLayout fixedLayout;
         private readonly IStyleSystem styleSystem;
         private readonly SkipTree<LayoutNode> layoutTree;
@@ -35,7 +37,7 @@ namespace Src.Systems {
 
             this.flexLayout = new FlexLayout(textSizeCalculator);
             this.fixedLayout = new FixedLayout(textSizeCalculator);
-
+            this.gridLayout = new GridLayout(textSizeCalculator);
             this.m_LayoutResults = new List<UIElement>(128);
             this.m_ClipRects = new List<ClipRect>();
             this.m_VirtualScrollBars = new List<VirtualScrollbar>();
@@ -104,6 +106,8 @@ namespace Src.Systems {
                     return flexLayout;
                 case LayoutType.Fixed:
                     return fixedLayout;
+                case LayoutType.Grid:
+                    return gridLayout;
             }
 
             throw new NotImplementedException();

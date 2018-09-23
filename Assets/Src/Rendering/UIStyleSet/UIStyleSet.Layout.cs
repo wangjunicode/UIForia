@@ -4,8 +4,9 @@ namespace Rendering {
 
     public partial class UIStyleSet {
 
-        public GridPlacement gridItem;
+        public GridPlacementParameters gridItem = new GridPlacementParameters(IntUtil.UnsetValue, 1, IntUtil.UnsetValue, 1);
         public GridDefinition gridDefinition;
+        public GridAutoFlow autoFlow = GridAutoFlow.Row;
         
         public LayoutParameters layoutParameters {
             get {

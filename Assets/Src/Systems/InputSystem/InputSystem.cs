@@ -139,13 +139,11 @@ public abstract partial class InputSystem : IInputSystem, IInputProvider {
     private void ProcessMouseInput() {
         List <UIElement> queryResults = m_LayoutSystem.QueryPoint(m_MouseState.mousePosition, ListPool<UIElement>.Get());
         
-        List<string> s = new List<string>();
         for (int i = 0; i < queryResults.Count; i++) {
             UIElement element = queryResults[i];
 
             // todo -- handle masking here
             m_ElementsThisFrame.Add(element);
-            s.Add(element.ToString());
        
             if (!m_ElementsLastFrame.Contains(element)) {
                 m_EnteredElements.Add(element);
@@ -153,11 +151,7 @@ public abstract partial class InputSystem : IInputSystem, IInputProvider {
             }
         }
 
-        string output = "";
-        for (int i = 0; i < s.Count; i++) {
-            output += s[i] + ", ";
-        }
-        Debug.Log(output);
+
         for (int i = 0; i < m_ElementsLastFrame.Count; i++) {
             if (!m_ElementsThisFrame.Contains(m_ElementsLastFrame[i])) {
                 m_ExitedElements.Add(m_ElementsLastFrame[i]);

@@ -3,7 +3,7 @@ using System;
 namespace Src.Layout {
 
     [Flags]
-    public enum GridCellMeasurementType {
+    public enum GridTrackSizeType {
 
         Fractional = 1 << 0,
         Pixel = 1 << 1,
@@ -11,7 +11,6 @@ namespace Src.Layout {
         MaxContent = 1 << 3,
         MinContent = 1 << 4,
         FitContent = 1 << 5,
-        MinMax = 1 << 6,
         Viewport = 1 << 7,
         Parent = 1 << 8,
         Content = 1 << 9,

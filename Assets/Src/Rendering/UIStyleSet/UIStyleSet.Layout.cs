@@ -6,7 +6,6 @@ namespace Rendering {
 
         public GridPlacementParameters gridItem = new GridPlacementParameters(IntUtil.UnsetValue, 1, IntUtil.UnsetValue, 1);
         public GridDefinition gridDefinition;
-        public GridAutoFlow autoFlow = GridAutoFlow.Row;
         
         public LayoutParameters layoutParameters {
             get {

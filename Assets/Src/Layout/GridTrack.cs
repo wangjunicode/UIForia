@@ -5,12 +5,11 @@ namespace Src.Layout {
 
     public class GridTrack {
 
-        public readonly GridTrackSizer sizingFn;
         public float offset;
         public float baseSize;
         public float growthLimit;
-        public List<GridItem> originMembers;
-        public bool isOccupied;
+        public GridTrackSizer sizingFn;
+        public readonly List<GridItem> originMembers;
 
         public GridTrack(GridTrackSizer sizingFn) {
             this.sizingFn = sizingFn;

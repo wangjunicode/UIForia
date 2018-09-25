@@ -36,12 +36,14 @@ namespace Src.Systems {
         }
         
         public Rect ScreenRect => new Rect(screenPosition, new Vector2(size.width, size.height));
+        public Rect LocalRect => new Rect(localPosition, new Vector2(size.width, size.height));
 
         public float width => size.width;
         public float height => size.height;
 
         public float contentWidth => contentSize.width;
         public float contentHeight => contentSize.height;
+        
 
     }
 

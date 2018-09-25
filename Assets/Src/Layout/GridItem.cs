@@ -7,7 +7,7 @@ namespace Src.Layout {
         public int trackStart;
         public int trackSpan;
         public float minSize;
-        public float preferredSize;
+        public float outputSize;
         public float maxSize;
         public bool spansFlexible;
 
@@ -16,7 +16,7 @@ namespace Src.Layout {
         public GridItem(int trackStart, int trackSpan, float minSize, float maxSize, float preferredSize, bool spansFlexible) {
             this.trackStart = trackStart;
             this.trackSpan = trackSpan;
-            this.preferredSize = preferredSize;
+            this.outputSize = preferredSize;
             this.minSize = minSize;
             this.maxSize = maxSize;
             this.spansFlexible = spansFlexible;
@@ -24,12 +24,10 @@ namespace Src.Layout {
 
         public bool IsAxisLocked => IntUtil.IsDefined(trackStart);
         
-        public int trackEnd => trackStart + trackSpan;
-
         public void Reset() {
             trackStart = IntUtil.UnsetValue;
             trackSpan = 1;
-            preferredSize = 0;
+            outputSize = 0;
             minSize = 0;
             maxSize = 0;
             spansFlexible = false;

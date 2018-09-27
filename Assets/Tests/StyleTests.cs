@@ -190,7 +190,7 @@ public class StyleTests {
         UIStyle baseStyle = new UIStyle();
         baseStyle.textStyle.fontSize = defaultSize - 5;
         
-        element.style.AddBaseStyle(baseStyle);
+        element.style.AddBaseStyle(baseStyle, StyleState.Normal);
         
         Assert.AreEqual(defaultSize - 5, element.style.fontSize);
         

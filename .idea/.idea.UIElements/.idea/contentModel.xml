@@ -2,12 +2,24 @@
 <project version="4">
   <component name="ContentModelStore">
     <e p="C:\Seed\UIElements" t="IncludeRecursive">
+      <e p="_DemoAsmDef.csproj" t="IncludeRecursive" />
       <e p="Assembly-CSharp-Editor.csproj" t="IncludeRecursive" />
       <e p="Assets" t="Include">
+        <e p="Demos" t="Include">
+          <e p="_DemoAsmDef.asmdef" t="Include" />
+          <e p="ChatWindow" t="Include">
+            <e p="ChatWindow.cs" t="Include" />
+            <e p="ChatWindow.xml" t="Include" />
+            <e p="ChatWindow_Styles.cs" t="Include" />
+            <e p="Icon.cs" t="Include" />
+          </e>
+          <e p="UIViewBehavior.cs" t="Include" />
+        </e>
         <e p="Editor" t="Include">
           <e p="BorderedImageInspector.cs" t="Include" />
           <e p="DebuggerWindow.cs" t="Include" />
           <e p="RefreshTemplates.cs" t="Include" />
+          <e p="StyleDebugView.cs" t="Include" />
           <e p="UIViewWindow.cs" t="Include" />
         </e>
         <e p="Shapes2D" t="Include">
@@ -160,6 +172,7 @@
             <e p="VirtualElement.cs" t="Include" />
             <e p="VirtualScrollBar.cs" t="Include" />
           </e>
+          <e p="ExportStyleAttribute.cs" t="Include" />
           <e p="Expressions" t="Include">
             <e p="AccessExpression_Property.cs" t="Include" />
             <e p="AccessExpression_RootField.cs" t="Include" />
@@ -219,6 +232,7 @@
             <e p="CrossAxisAlignment.cs" t="Include" />
             <e p="Extents.cs" t="Include" />
             <e p="FixedLayout.cs" t="Include" />
+            <e p="FlexLayout2.cs" t="Include" />
             <e p="FlowLayout.cs" t="Include" />
             <e p="GridAutoFlow.cs" t="Include" />
             <e p="GridAutoPlaceDensity.cs" t="Include" />
@@ -231,12 +245,15 @@
             <e p="GridTrackSizeFn.cs" t="Include" />
             <e p="GridTrackSizer.cs" t="Include" />
             <e p="GridTrackSizeType.cs" t="Include" />
+            <e p="Layout2.cs" t="Include" />
+            <e p="LayoutBox.cs" t="Include" />
             <e p="LayoutConstraints.cs" t="Include" />
             <e p="LayoutDirection.cs" t="Include" />
             <e p="LayoutFlowType.cs" t="Include" />
             <e p="LayoutNode.cs" t="Include" />
             <e p="LayoutResult.cs" t="Include" />
             <e p="LayoutType.cs" t="Include" />
+            <e p="LayoutUpdateType.cs" t="Include" />
             <e p="LayoutWrap.cs" t="Include" />
             <e p="MainAxisAlignment.cs" t="Include" />
             <e p="UIDimensions.cs" t="Include" />
@@ -320,6 +337,7 @@
             <e p="RenderPrimitiveType.cs" t="Include" />
             <e p="TextOverflow.cs" t="Include" />
             <e p="TextStyle.cs" t="Include" />
+            <e p="UIBaseStyleGroup.cs" t="Include" />
             <e p="UIGameObjectView.cs" t="Include" />
             <e p="UIMeasurement.cs" t="Include" />
             <e p="UIStyle.cs" t="Include" />
@@ -366,6 +384,9 @@
             </e>
           </e>
           <e p="SrcAsm.asmdef" t="Include" />
+          <e p="StyleDebugView.cs" t="Include" />
+          <e p="StyleDefinition.cs" t="Include" />
+          <e p="StyleGroupProcessor.cs" t="Include" />
           <e p="Systems" t="Include">
             <e p="BindingSystem.cs" t="Include" />
             <e p="GOInputSystem.cs" t="Include" />
@@ -388,6 +409,7 @@
             <e p="IStyleSystem.cs" t="Include" />
             <e p="KeyboardEventTreeNode.cs" t="Include" />
             <e p="LayoutSystem.cs" t="Include" />
+            <e p="LayoutSystem2.cs" t="Include" />
             <e p="StyleSystem.cs" t="Include" />
           </e>
           <e p="Temp_SpecFixtures.cs" t="Include" />
@@ -416,7 +438,6 @@
           </e>
           <e p="todo.txt" t="Include" />
           <e p="UIRoot.cs" t="Include" />
-          <e p="UIViewBehavior.cs" t="Include" />
           <e p="Util" t="Include">
             <e p="ArrayUtil.cs" t="Include" />
             <e p="BitUtil.cs" t="Include" />
@@ -445,6 +466,7 @@
           <e p="InputCompilerBindingTests.cs" t="Include" />
           <e p="InputSystem_DragTests.cs" t="Include" />
           <e p="InputSystem_MouseTests.cs" t="Include" />
+          <e p="LayoutSystemTests.cs" t="Include" />
           <e p="Mocks" t="Include">
             <e p="MockInputSystem.cs" t="Include" />
             <e p="MockLayoutSystem.cs" t="Include" />

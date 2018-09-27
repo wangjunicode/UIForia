@@ -34,7 +34,7 @@ namespace Src.Layout {
                 float width = child.GetPreferredWidth(currentNode.rect.width.unit, contentAreaWidth, viewport.width);
 
                 // todo -- is this weird?
-                if (child.rect.width.unit == UIUnit.Auto) {
+                if (child.rect.width.unit == UIUnit.FillAvailableSpace) {
                     width = contentAreaWidth - x;
                 }
                 
@@ -57,7 +57,7 @@ namespace Src.Layout {
                 float x = GetPixelValue(child.element.style.positionX, contentSize, viewportSize);
                 float width = child.GetPreferredWidth(node.element.style.dimensions.width.unit, contentSize, viewportSize);
                 
-                if (child.rect.width.unit == UIUnit.Auto) {
+                if (child.rect.width.unit == UIUnit.FillAvailableSpace) {
                     width = contentSize - x;
                 }
                 
@@ -95,7 +95,7 @@ namespace Src.Layout {
                     return parentWidth * x.value;
                 case UIUnit.View:
                     return viewportWidth * x.value;
-                case UIUnit.Auto:
+                case UIUnit.FillAvailableSpace:
                     return 0;
                 default:
                     return 0;

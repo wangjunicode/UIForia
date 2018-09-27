@@ -96,11 +96,13 @@ public class UIElement : IHierarchical {
     }
 
     public bool DisableBinding(string propertyName) {
-        return templateContext.view.bindingSystem.DisableBinding(this, propertyName);
+        return true;
+        // return templateContext.view.bindingSystem.DisableBinding(this, propertyName);
     }
 
     public bool HasBinding(string propertyName) {
-        return templateContext.view.bindingSystem.HasBinding(this, propertyName);
+        return false;
+        //return templateContext.view.bindingSystem.HasBinding(this, propertyName);
     }
 
     public void SetEnabled(bool active) {

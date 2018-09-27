@@ -7,6 +7,7 @@ using Rendering;
 using Src.Compilers;
 using Src.Input;
 using Src.InputBindings;
+using Src.Rendering;
 using Src.StyleBindings;
 using Src.Systems;
 
@@ -24,7 +25,7 @@ namespace Src {
         protected Binding[] conditionalBindings;
         protected InputBinding[] inputBindings;
 
-        protected List<UIStyle> baseStyles;
+        protected List<UIBaseStyleGroup> baseStyles;
         protected List<StyleBinding> constantStyleBindings;
         
         protected DragEventCreator[] dragEventCreators;
@@ -46,7 +47,7 @@ namespace Src {
             this.childTemplates = childTemplates;
             this.attributes = attributes;
 
-            this.baseStyles = new List<UIStyle>();
+            this.baseStyles = new List<UIBaseStyleGroup>();
             this.bindingList = new List<Binding>();
             this.constantStyleBindings = new List<StyleBinding>();
 
@@ -178,7 +179,7 @@ namespace Src {
 
             for (int i = 0; i < attributes.Count; i++) {
                 if(attributes[i].isCompiled) continue;
-                if (attributes[i].key.StartsWith("x-")) {
+                if (attributes[i].key.StartsWith("x-") || attributes[i].key == "style") {
                     continue;
                 }
                 attributes[i].isCompiled = true;
@@ -213,9 +214,17 @@ namespace Src {
             AttributeDefinition styleAttr = GetAttribute("style");
             if (styleAttr == null) return;
 
-            string[] names = styleAttr.value.Split(' ');
-            foreach (string part in names) {
-                UIStyle style = template.GetStyleInstance(part);
+            if (styleAttr.value.IndexOf(' ') != -1) {
+                string[] names = styleAttr.value.Split(' ');
+                foreach (string part in names) {
+                    UIBaseStyleGroup style = template.GetStyleGroupInstance(part);
+                    if (style != null) {
+                        baseStyles.Add(style);
+                    }
+                }
+            }
+            else {
+                UIBaseStyleGroup style = template.GetStyleGroupInstance(styleAttr.value);
                 if (style != null) {
                     baseStyles.Add(style);
                 }

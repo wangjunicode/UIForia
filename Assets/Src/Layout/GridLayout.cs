@@ -30,7 +30,6 @@ namespace Src.Layout {
             this.m_ColTracks = new List<GridTrack>();
             this.m_Occupied = new HashSet<int>();
             this.m_Placements = new List<GridPlacement>();
-            this.m_Placements = new List<GridPlacement>();
         }
 
         public override List<Rect> Run(Rect viewport, LayoutNode currentNode) {
@@ -154,10 +153,11 @@ namespace Src.Layout {
         private void PlaceBothAxesLocked(List<GridPlacement> bothAxesLocked) {
             for (int i = 0; i < bothAxesLocked.Count; i++) {
                 GridPlacement placement = bothAxesLocked[i];
+                
                 GridItem colItem = placement.colItem;
                 GridItem rowItem = placement.rowItem;
 
-                OccupyGridArea(placement.colItem, placement.rowItem, colItem.trackStart, colItem.trackSpan, rowItem.trackStart, rowItem.trackSpan);
+                OccupyGridArea(colItem, rowItem, colItem.trackStart, colItem.trackSpan, rowItem.trackStart, rowItem.trackSpan);
             }
         }
 
@@ -380,8 +380,6 @@ namespace Src.Layout {
             GridItem item = s_GridItemPool.Get();
             item.trackStart = colStart;
             item.trackSpan = colSpan;
-            item.minSize = minSize;
-            item.maxSize = maxSize;
             item.outputSize = preferredSize;
 
             return item;
@@ -401,8 +399,6 @@ namespace Src.Layout {
             GridItem item = s_GridItemPool.Get();
             item.trackStart = rowStart;
             item.trackSpan = rowSpan;
-            item.minSize = minSize;
-            item.maxSize = maxSize;
             item.outputSize = preferredSize;
 
             return item;
@@ -605,10 +601,10 @@ namespace Src.Layout {
             float spannedTrackSize = 0;
             int trackEnd = item.trackStart + item.trackSpan;
             for (int i = item.trackStart; i < trackEnd; i++) {
-                spannedTrackSize += tracks[i].baseSize; // Mathf.Max(tracks[i].baseSize, tracks[i].growthLimit);?
+                spannedTrackSize += tracks[i].baseSize;
             }
 
-            float remainingSpace = item.outputSize - spannedTrackSize;
+            float remainingSpace = Mathf.Max(0, item.outputSize - spannedTrackSize);
             float pieceSize = ComputePieceSize(remainingSpace, tracks, item);
 
             bool didAllocate = remainingSpace > 0;

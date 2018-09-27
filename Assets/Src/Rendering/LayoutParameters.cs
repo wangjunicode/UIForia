@@ -12,6 +12,15 @@ namespace Rendering {
         OBB,
         TranslationAsOffsetFromLayout
     }
+
+    public struct LayoutItemParameters {
+
+        public int growthFactor;
+        public int shrinkFactor;
+        public GridPlacementParameters gridPlacement;
+       // public FlexLayoutParameters flexParameters;
+
+    }
     
     [DebuggerDisplay("{type}, {direction}")]
     public struct LayoutParameters {
@@ -23,7 +32,11 @@ namespace Rendering {
         public LayoutDirection direction;
         public MainAxisAlignment mainAxisAlignment;
         public CrossAxisAlignment crossAxisAlignment;
-                
+
+//        public bool ignoreOutOfFlowForSizing;
+//        public bool ignoreScale;
+//        public bool ignoreRotations;
+//        
         public LayoutParameters(
             LayoutType type,
             LayoutWrap wrap,

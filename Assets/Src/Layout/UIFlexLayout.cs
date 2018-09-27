@@ -88,7 +88,8 @@ namespace Src.Layout {
 
                 widthItem.growthFactor = child.element.style.growthFactor;
                 widthItem.shrinkFactor = child.element.style.shrinkFactor;
-
+                // width *= scale
+                // if !ignoreRotation
                 widthItems[itemCount] = widthItem;
 
                 remainingWidth -= widthItem.outputSize;
@@ -159,9 +160,12 @@ namespace Src.Layout {
                 heightItem.minSize = child.GetMinHeight(currentNode.rect.height.unit, contentArea.height, viewport.height);
                 heightItem.maxSize = child.GetMaxHeight(currentNode.rect.height.unit, contentArea.height, viewport.height);
 
+                // todo -- always compute width first?
+                // when doing wrapped columns
+                // need fixed height / non content based
+                
                 // need to un-offset the output size because nested calls to GetPreferredHeight() will add the offset back.
-                heightItem.preferredSize =
-                    child.GetPreferredHeight(currentNode.rect.height.unit, widthItem.outputSize - child.horizontalOffset, contentArea.height, viewport.height);
+                heightItem.preferredSize = child.GetPreferredHeight(currentNode.rect.height.unit, widthItem.outputSize - child.horizontalOffset, contentArea.height, viewport.height);
 
                 heightItem.outputSize = heightItem.MinDefined && heightItem.preferredSize < heightItem.minSize ? heightItem.minSize : heightItem.preferredSize;
                 heightItem.outputSize = heightItem.MaxDefined && heightItem.outputSize > heightItem.maxSize ? heightItem.maxSize : heightItem.outputSize;

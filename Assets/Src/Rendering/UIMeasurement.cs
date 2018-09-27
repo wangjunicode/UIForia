@@ -30,7 +30,7 @@ namespace Src {
         
         public bool isFixed => (unit & (UIUnit.Pixel | UIUnit.Parent | UIUnit.View)) != 0;
         
-        public static UIMeasurement Auto => new UIMeasurement(0, UIUnit.Auto);
+        public static UIMeasurement Auto => new UIMeasurement(0, UIUnit.FillAvailableSpace);
         public static UIMeasurement Parent100 => new UIMeasurement(1f, UIUnit.Parent);
         public static UIMeasurement Content100 => new UIMeasurement(1f, UIUnit.Content);
         public static UIMeasurement Unset => new UIMeasurement(FloatUtil.UnsetFloatValue);

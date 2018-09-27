@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="utf-8"?>
+<UITemplate>
+    
+    <Style classPath="ChatWindow_Styles.cs"/>
+    
+    <Contents style="container">
+        <Group style="window-header">
+            
+            <Text style="header-text">Klang Gang</Text>
+            
+            <Image src="{url('settings_icon')}"/>
+            
+        </Group>
+    </Contents>
+    
+</UITemplate>

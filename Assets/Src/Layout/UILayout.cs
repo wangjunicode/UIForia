@@ -28,6 +28,11 @@ namespace Src.Layout {
             if (node.isTextElement) {
                 return node.preferredTextWidth;
             }
+
+            // if node has intrinsic width 
+            if (node.isImageElement) {
+                
+            }
             
             List<LayoutNode> children = node.children;
             

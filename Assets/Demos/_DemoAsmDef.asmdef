@@ -1,0 +1,10 @@
+{
+    "name": "_DemoAsmDef",
+    "references": [
+        "SrcAsm"
+    ],
+    "optionalUnityReferences": [],
+    "includePlatforms": [],
+    "excludePlatforms": [],
+    "allowUnsafeCode": false
+}

@@ -3,8 +3,6 @@ using System.Xml;
 using System.Collections.Generic;
 using System.Linq;
 using System.Xml.Linq;
-using Rendering;
-using Src.Parsing.Style;
 using Src.Style;
 
 namespace Src {
@@ -71,16 +69,19 @@ namespace Src {
             return new TemplateParser().ParseTemplate(processedType, doc);
         }
 
-        private UIStyle ParseStyleSheet(XElement styleElement) {
-            XAttribute idAttr = styleElement.GetAttribute("id");
+        private StyleDefinition ParseStyleSheet(XElement styleElement) {
+            XAttribute aliasAttr = styleElement.GetAttribute("alias");
+            XAttribute classPathAttr = styleElement.GetAttribute("classPath");
 
-            if (idAttr == null || string.IsNullOrEmpty(idAttr.Value)) {
-                throw new InvalidTemplateException(templateName, "Style tags require an 'id' attribute");
+            if (classPathAttr == null || string.IsNullOrEmpty(classPathAttr.Value)) {
+                throw new InvalidTemplateException(templateName, "Style tags require a 'classPath' attribute");
+            }
+            
+            if(aliasAttr == null || string.IsNullOrEmpty(aliasAttr.Value)) {
+                return new StyleDefinition(StyleDefinition.k_EmptyAliasName, classPathAttr.Value.Trim());
             }
 
-            UIStyle styleTemplate = new UIStyle(idAttr.Value.Trim(), templateName);
-            StyleParser.ParseStyle(styleElement, styleTemplate);
-            return styleTemplate;
+            return new StyleDefinition(aliasAttr.Value.Trim(), classPathAttr.Value.Trim());
         }
 
         private ParsedTemplate ParseTemplate(ProcessedType type, XDocument doc) {
@@ -89,10 +90,11 @@ namespace Src {
             doc.MergeTextNodes();
 
             List<ImportDeclaration> imports = new List<ImportDeclaration>();
-            List<UIStyle> styleTemplates = new List<UIStyle>();
+            List<StyleDefinition> styleTemplates = new List<StyleDefinition>();
 
             IEnumerable<XElement> importElements = doc.Root.GetChildren("Import");
-            foreach (var xElement in importElements) {
+            
+            foreach (XElement xElement in importElements) {
                 XAttribute pathAttr = xElement.GetAttribute("path");
                 XAttribute aliasAttr = xElement.GetAttribute("as");
 
@@ -108,11 +110,9 @@ namespace Src {
             }
 
             IEnumerable<XElement> styleElements = doc.Root.GetChildren("Style");
-            foreach (var styleElement in styleElements) {
-                // todo -- return a list of UIStyles and flags for their state
-                UIStyle styleTemplate = ParseStyleSheet(styleElement);
-
-                styleTemplates.Add(styleTemplate);
+            
+            foreach (XElement styleElement in styleElements) {                
+                styleTemplates.Add(ParseStyleSheet(styleElement));
             }
 
             XElement contentElement = doc.Root.GetChild("Contents");
@@ -125,9 +125,8 @@ namespace Src {
 
             UIElementTemplate rootTemplate = new UIElementTemplate(type.rawType, children, attributes);
 
-            ParsedTemplate output = new ParsedTemplate(rootTemplate);
+            ParsedTemplate output = new ParsedTemplate(rootTemplate, styleTemplates);
             output.imports = imports;
-            output.styles = styleTemplates;
             output.filePath = templateName;
             return output;
         }

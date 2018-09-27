@@ -97,6 +97,7 @@ namespace Src.Systems {
 
         private static RectTransform CreateGameObject(string name, RectTransform parent = null) {
             GameObject go = new GameObject(name);
+
             RectTransform retn = go.AddComponent<RectTransform>();
             retn.anchorMin = new Vector2(0, 1);
             retn.anchorMax = new Vector2(0, 1);
@@ -280,6 +281,11 @@ namespace Src.Systems {
             if (data == null) {
                 GameObject obj = new GameObject(element.ToString());
 
+#if DEBUG
+                StyleDebugView debugView = obj.AddComponent<StyleDebugView>();
+                debugView.element = element;
+#endif
+                
                 RectTransform unityTransform = obj.AddComponent<RectTransform>();
                 unityTransform.anchorMin = new Vector2(0, 1);
                 unityTransform.anchorMax = new Vector2(0, 1);
@@ -435,8 +441,16 @@ namespace Src.Systems {
             switch (data.primitiveType) {
                 case RenderPrimitiveType.RawImage:
                     RawImage rawImage = (RawImage) data.renderComponent;
-                    rawImage.texture = style.backgroundImage;
-                    rawImage.color = style.backgroundColor;
+                    UIImageElement imageElement = element as UIImageElement;
+                    if (imageElement != null) {
+                        rawImage.texture = imageElement.src.asset;
+                        rawImage.color = Color.white;
+                    }
+                    else {
+                        rawImage.texture = style.backgroundImage;
+                        rawImage.color = style.backgroundColor;
+                    }
+
                     rawImage.uvRect = new Rect(0, 0, 1, 1);
                     break;
 
@@ -468,7 +482,7 @@ namespace Src.Systems {
             }
         }
 
-        private RenderPrimitiveType DeterminePrimitiveType(UIElement element) {
+        private static RenderPrimitiveType DeterminePrimitiveType(UIElement element) {
             if ((element.flags & UIElementFlags.RequiresRendering) == 0) {
                 return RenderPrimitiveType.None;
             }
@@ -476,9 +490,10 @@ namespace Src.Systems {
             if ((element.flags & UIElementFlags.TextElement) != 0) {
                 return RenderPrimitiveType.Text;
             }
-
+            
             UIStyleSet styleSet = element.style;
-            if (styleSet.backgroundImage == null
+            if (!(element is UIImageElement) 
+                && styleSet.backgroundImage == null
                 && styleSet.borderColor == ColorUtil.UnsetValue
                 && styleSet.backgroundColor == ColorUtil.UnsetValue) {
                 return RenderPrimitiveType.None;
@@ -521,61 +536,3 @@ namespace Src.Systems {
     }
 
 }
-//
-//if (element.style.HandlesOverflow && element.measurements.IsOverflowing) {
-//                    RectMask2D mask;
-//                    if (!m_MaskMap.TryGetValue(element.id, out mask)) {                        
-//                        RectTransform contentTransform = transform;
-//                        GameObject scrollViewRoot = new GameObject("ScrollView");
-//                        mask = scrollViewRoot.AddComponent<RectMask2D>();
-//                        RectTransform parent = transform.parent as RectTransform;
-//                        m_MaskMap[element.id] = mask;
-//                        
-//                        transform.SetParent(mask.transform);
-//                        mask.transform.SetParent(parent);
-//                        transform = mask.transform as RectTransform;
-//                        transform.anchorMin = new Vector2(0, 1);
-//                        transform.anchorMax = new Vector2(0, 1);
-//                        transform.pivot = new Vector2(0, 1);
-//                        contentTransform.SetParent(transform);
-//                        contentTransform.anchoredPosition = new Vector2();
-//                    }
-//                    else {
-//                        RectTransform contentTransform = transform;
-//                        contentTransform.anchoredPosition = new Vector2();
-//                        transform = mask.transform as RectTransform;
-//                    }
-//
-////                    if (element.measurements.IsOverflowingX && renderData.horizontalScrollbar == null) {
-////                        ScrollBar horizontal = new ScrollBar();
-////                        horizontal.SetParent(element);
-////                        horizontal.flags |= UIElementFlags.ImplicitElement;
-////                        horizontal.onScrollUpdate += (f) => { };
-////                        renderData.horizontalScrollbar = horizontal;
-////                        if (renderData.verticalScrollbar == null) {
-////                            m_MaskElements.Add(renderData);
-////                        }
-////                    }
-//                    if (element.measurements.IsOverflowingY && renderData.verticalScrollbar == null) {
-//                        ScrollBar vertical = new ScrollBar();
-//                        vertical.flags |= UIElementFlags.ImplicitElement;
-//                        vertical.SetParent(element.parent);
-////                            vertical.SetStyle(element.style.scrollStyle);
-//                        vertical.style.width = 5f;
-//                        vertical.style.height = size.y;
-//                        vertical.style.backgroundColor = Color.green;
-//
-//                        RenderData data = renderSkipTree.GetItem(vertical);
-//                        data.unityTransform.anchoredPosition = position;
-//                        data.unityTransform.sizeDelta = new Vector2(5f, size.y);
-//                        ApplyStyles(data);
-//                        vertical.onScrollUpdate += (f) => { };
-//
-//                        renderData.verticalScrollbar = vertical;
-//                        if (renderData.horizontalScrollbar == null) {
-//                            m_MaskElements.Add(renderData);
-//                        }
-//                    }
-//
-//                    //mask.SetClipRect(new Rect(0, 0, element.measurements.width - 5f, element.measurements.height - 5f));
-//                }

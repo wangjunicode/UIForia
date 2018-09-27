@@ -3,6 +3,7 @@ using Rendering;
 using Src.StyleBindings;
 using System.Collections.Generic;
 using Src.Extensions;
+using Src.Rendering;
 using UnityEngine;
 
 namespace Src.Systems {
@@ -60,7 +61,7 @@ namespace Src.Systems {
 
             if ((element.flags & FlagCheck) != 0) {
                 UITemplateContext context = elementData.context;
-                List<UIStyle> baseStyles = elementData.baseStyles;
+                List<UIBaseStyleGroup> baseStyles = elementData.baseStyles;
                 List<StyleBinding> constantStyleBindings = elementData.constantStyleBindings;
 
                 element.style = new UIStyleSet(element, this, this);
@@ -69,7 +70,7 @@ namespace Src.Systems {
                 }
 
                 for (int i = 0; i < baseStyles.Count; i++) {
-                    element.style.AddBaseStyle(baseStyles[i]);
+                    element.style.AddBaseStyleGroup(baseStyles[i]);
                 }
 
                 element.style.Refresh();
@@ -114,7 +115,6 @@ namespace Src.Systems {
                 element.style = new UIStyleSet(element, this, this);
             }
         }
-
 
         public void SetDimensions(UIElement element, Dimensions rect) {
             onRectChanged?.Invoke(element, rect);

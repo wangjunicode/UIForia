@@ -6,6 +6,22 @@ using Src.Rendering;
 using Src.Systems;
 
 namespace Rendering {
+
+    public struct StyleProperty {
+
+        public readonly int category;
+        public readonly int value;
+
+    }
+
+    public struct StyleValue {
+
+        public int firstWord;
+        public int secondWord;
+
+    }
+    
+    
     
     [DebuggerDisplay("{localId}->{filePath}")]
     public class UIStyle {        

@@ -11,11 +11,13 @@ namespace Src.Layout {
     [DebuggerDisplay("{" + nameof(element) + "}")]
     public class LayoutNode : IHierarchical {
 
+        // todo intrinsic min / max width (ie text min-width = width of longest word)
+
         public const int k_MeasurementResultCount = 4;
         public Dimensions rect;
-        
+
         public UILayout layout;
-        
+
         public string textContent;
         public float preferredTextWidth;
 
@@ -24,10 +26,11 @@ namespace Src.Layout {
         public float contentStartOffsetY;
         public float contentEndOffsetY;
         public bool isTextElement;
+        public bool isImageElement; // todo -- replace w/ intrinsic width & override
 
         public readonly UIElement element;
         public readonly List<LayoutNode> children;
-        
+
         public VirtualScrollbar horizontalScrollbar;
         public VirtualScrollbar verticalScrollbar;
 
@@ -43,6 +46,9 @@ namespace Src.Layout {
 
         public float horizontalOffset => contentStartOffsetX + contentEndOffsetX;
         public float verticalOffset => contentStartOffsetY + contentEndOffsetY;
+
+        public float intrinsicWidth;
+        public float intrinsicHeight;
 
         public int UniqueId => element.id;
         public IHierarchical Element => element;
@@ -65,12 +71,25 @@ namespace Src.Layout {
                 isTextElement = true;
                 SetTextContent(textElement.GetText());
             }
+
+            UIImageElement imageElement = element as UIImageElement;
+            if (imageElement != null) {
+                isImageElement = true;
+                if (imageElement.src.asset != null) {
+                    intrinsicWidth = imageElement.src.asset.width;
+                    intrinsicHeight = imageElement.src.asset.height;
+                }
+                else {
+                    intrinsicWidth = 0;
+                    intrinsicHeight = 0;
+                }
+            }
         }
 
         public float GetMinWidth(UIUnit parentUnit, float parentValue, float viewportValue) {
             LayoutConstraints constraints = element.style.constraints;
             switch (constraints.minWidth.unit) {
-                case UIUnit.Auto:
+                case UIUnit.FillAvailableSpace:
                     return 0;
 
                 case UIUnit.Pixel:
@@ -133,8 +152,10 @@ namespace Src.Layout {
                 return Math.Max(0, Mathf.Min(preferredTextWidth, parentValue));
             }
 
+            if (isImageElement) return intrinsicWidth;
+            
             switch (rect.width.unit) {
-                case UIUnit.Auto:
+                case UIUnit.FillAvailableSpace:
                     baseWidth = parentValue;
                     break;
 
@@ -168,10 +189,12 @@ namespace Src.Layout {
                 return GetTextHeight(computedWidth);
             }
 
+            if (isImageElement) return intrinsicHeight;
+
             float baseHeight;
 
             switch (rect.height.unit) {
-                case UIUnit.Auto: // fit parent content
+                case UIUnit.FillAvailableSpace: // fit parent content
                     // should be renamed & defined as nearest parent block
                     baseHeight = layout.GetContentHeight(this, computedWidth, parentValue - verticalOffset, viewportValue);
                     break;
@@ -275,7 +298,7 @@ namespace Src.Layout {
                 this.height = height;
             }
 
-        }       
+        }
 
     }
 

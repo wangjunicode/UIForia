@@ -66,7 +66,13 @@ namespace Rendering {
             }
 
             currentState |= state;
-            Refresh();
+            if (appliedStyles == null) return;
+            for (int i = 0; i < appliedStyles.Length; i++) {
+                if ((appliedStyles[i].state & state) != 0) {
+                    Refresh();
+                    return;
+                }
+            }
         }
 
         public bool IsInState(StyleState state) {
@@ -80,7 +86,15 @@ namespace Rendering {
 
             currentState &= ~(state);
             currentState |= StyleState.Normal;
-            Refresh();
+
+            if (appliedStyles == null) return;
+
+            for (int i = 0; i < appliedStyles.Length; i++) {
+                if ((appliedStyles[i].state & state) != 0) {
+                    Refresh();
+                    return;
+                }
+            }
         }
 
         public bool HasHoverStyle => (containedStates & StyleState.Hover) != 0;
@@ -174,7 +188,16 @@ namespace Rendering {
             Refresh();
         }
 
-        public void AddBaseStyle(UIStyle style, StyleState state = StyleState.Normal) {
+
+        public void AddBaseStyleGroup(UIBaseStyleGroup group) {
+            if(group.normal != null) AddBaseStyle(group.normal, StyleState.Normal);
+            if(group.active != null) AddBaseStyle(group.active, StyleState.Active);
+            if(group.disabled != null) AddBaseStyle(group.disabled, StyleState.Disabled);
+            if(group.focused != null) AddBaseStyle(group.focused, StyleState.Focused);
+            if(group.hover != null) AddBaseStyle(group.hover, StyleState.Hover);
+        }
+
+        public void AddBaseStyle(UIStyle style, StyleState state) {
             // todo -- check for duplicates
             if (appliedStyles == null) {
                 appliedStyles = new StyleEntry[1];
@@ -277,7 +300,9 @@ namespace Rendering {
 
         internal void Refresh() {
             containedStates = StyleState.Normal;
-
+            
+            // todo -- make this suck less
+            
             if (appliedStyles != null) {
                 for (int i = 0; i < appliedStyles.Length; i++) {
                     containedStates |= appliedStyles[i].state;

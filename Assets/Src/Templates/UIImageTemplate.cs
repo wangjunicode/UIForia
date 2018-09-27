@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.IO;
 using JetBrains.Annotations;
 using Src.Compilers.AliasSource;
 using UnityEngine;
@@ -36,7 +37,8 @@ namespace Src {
 
         [Pure]
         public static AssetPointer<Texture2D> Url(string path) {
-            return new AssetPointer<Texture2D>(Resources.Load<Texture2D>(path));
+            // todo this is kinda dumb
+            return new AssetPointer<Texture2D>(Resources.Load<Texture2D>(Path.GetFileNameWithoutExtension(path)));
         }
 
     }

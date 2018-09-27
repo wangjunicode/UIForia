@@ -10,7 +10,7 @@ namespace Src.Editor {
         private Vector2 mouse;
 
         private void OnGUI() {
-   
+            return;
             Rect viewport = new Rect(position) {
                 x = 0,
                 y = 20,
@@ -39,27 +39,28 @@ namespace Src.Editor {
         }
 
         public void Awake() {
-            view = view ?? new UIViewIMGUI(typeof(TempUIType));
+        //    view = view ?? new UIViewIMGUI(typeof(TempUIType));
         }
 
         [MenuItem("UI/Editor Window")]
         static void InitWindow() {
+            return;
             GetWindow(typeof(UIViewWindow)).Show();
         }
-
-        private void OnEnable() {
-            wantsMouseMove = true;
-            wantsMouseEnterLeaveWindow = true;
-            view = new UIViewIMGUI(typeof(TempUIType));
-            view.Initialize();
-           // EditorApplication.update += Update;
-        }
-
-        private void OnDisable() {
-            view.OnDestroy();
-            view = null;
-          //  EditorApplication.update -= Update;
-        }
+//
+//        private void OnEnable() {
+//            wantsMouseMove = true;
+//            wantsMouseEnterLeaveWindow = true;
+//           // view = new UIViewIMGUI(typeof(TempUIType));
+//            view.Initialize();
+//           // EditorApplication.update += Update;
+//        }
+//
+//        private void OnDisable() {
+//            view.OnDestroy();
+//            view = null;
+//          //  EditorApplication.update -= Update;
+//        }
 
     }
 

@@ -3,6 +3,7 @@ using System.Diagnostics;
 using Rendering;
 using Src.Input;
 using Src.InputBindings;
+using Src.Rendering;
 using Src.StyleBindings;
 
 namespace Src {
@@ -29,7 +30,7 @@ namespace Src {
         public Binding[] constantBindings;
         public Binding[] conditionalBindings;
         public InputBinding[] inputBindings;
-        public List<UIStyle> baseStyles;
+        public List<UIBaseStyleGroup> baseStyles;
         public List<StyleBinding> constantStyleBindings;
         public KeyboardEventHandler[] keyboardEventHandlers;
         public MouseEventHandler[] mouseEventHandlers;

@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using UnityEngine;
 using UnityEngine.Assertions;
 using Assembly = System.Reflection.Assembly;
 
@@ -22,9 +23,9 @@ namespace Src {
                 Assembly assembly = assemblies[i];
 
                 if (!FilterAssembly(assembly)) continue;
-                
+
                 filteredAssemblies.Add(assembly);
-                loadedTypes.AddRange(assembly.GetExportedTypes());
+                loadedTypes.AddRange(assembly.GetTypes());
             }
             
         }
@@ -51,6 +52,40 @@ namespace Src {
             return GetType(type);
         }
 
+        public static Type GetRuntimeType(string typeName) {
+            FilterAssemblies();
+
+            Type type = Type.GetType(typeName);
+
+            if (type == null) {
+                for (int i = 0; i < loadedTypes.Count; i++) {
+                    if (loadedTypes[i].FullName.EndsWith(typeName)) {
+                        type = loadedTypes[i];
+                        break;
+                    }
+                }
+            }
+
+            return type;
+        }
+
+        public static Type GetStyleExportType(string typeName) {
+            FilterAssemblies();
+
+            Type type = Type.GetType(typeName);
+
+            if (type == null) {
+                for (int i = 0; i < loadedTypes.Count; i++) {
+                    if (loadedTypes[i].Name.EndsWith(typeName)) {
+                        type = loadedTypes[i];
+                        break;
+                    }
+                }
+            }
+
+            return type;
+        }
+        
         public static ProcessedType GetType(Type type) {
             ProcessedType processedType = new ProcessedType(type);
             typeMap[type.Name] = processedType;
@@ -61,6 +96,8 @@ namespace Src {
             string name = assembly.FullName;
             
             if (assembly.IsDynamic
+                || name.StartsWith("System,")
+                || name.StartsWith("nunit")
                 || name.Contains("Unity")
                 || name.StartsWith("System.")
                 || name.StartsWith("Microsoft.")

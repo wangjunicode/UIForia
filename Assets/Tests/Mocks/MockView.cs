@@ -1,10 +1,11 @@
 using System;
+using Src.Systems;
 
 namespace Tests.Mocks {
 
     public class MockView : UIView {
 
-        public readonly MockLayoutSystem layoutSystem;
+        public readonly ILayoutSystem layoutSystem;
         public readonly MockTextSizeCalculator textSizeCalculator;
         public readonly MockInputSystem inputSystem;
         

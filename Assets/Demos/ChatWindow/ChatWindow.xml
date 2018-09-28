@@ -10,6 +10,16 @@
             
             <Image src="{url('settings_icon')}"/>
             
+            <Text>
+                
+                <Image/>
+                
+                <TextSpan style="">
+                
+                </TextSpan>
+                
+            </Text>
+            
         </Group>
     </Contents>
     

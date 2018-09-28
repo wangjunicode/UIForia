@@ -202,6 +202,7 @@
           </e>
           <e p="extensions" t="Include">
             <e p="ColorExtensions.cs" t="Include" />
+            <e p="DictionaryExtensions.cs" t="Include" />
             <e p="RectTransformExtensions.cs" t="Include" />
           </e>
           <e p="ImportDeclaration.cs" t="Include" />
@@ -253,6 +254,14 @@
             <e p="LayoutNode.cs" t="Include" />
             <e p="LayoutResult.cs" t="Include" />
             <e p="LayoutType.cs" t="Include" />
+            <e p="LayoutTypes" t="Include">
+              <e p="FixedLayoutBox.cs" t="Include" />
+              <e p="FlexLayoutBox.cs" t="Include" />
+              <e p="GridLayoutBox.cs" t="Include" />
+              <e p="LayoutBox.cs" t="Include" />
+              <e p="RootLayoutBox.cs" t="Include" />
+              <e p="TextContainerLayoutBox.cs" t="Include" />
+            </e>
             <e p="LayoutUpdateType.cs" t="Include" />
             <e p="LayoutWrap.cs" t="Include" />
             <e p="MainAxisAlignment.cs" t="Include" />

@@ -10,11 +10,11 @@ namespace Tests.Mocks {
             : base(textSizeCalculator, styleSystem) {
         }
 
-        public LayoutBox GetBoxForElement(UIElement element) {
-            LayoutBox box;
-            m_LayoutBoxMap.TryGetValue(element.id, out box);
-            return box;
-        }
+//        public LayoutBox GetBoxForElement(UIElement element) {
+//            LayoutBox box;
+//            m_LayoutBoxMap.TryGetValue(element.id, out box);
+//            return box;
+//        }
 
     }
 

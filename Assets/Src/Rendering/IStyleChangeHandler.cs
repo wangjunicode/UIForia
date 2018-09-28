@@ -1,4 +1,5 @@
 ﻿using Rendering;
+using Src.Layout;
 
 namespace Src.Systems {
 
@@ -15,6 +16,16 @@ namespace Src.Systems {
         void SetTextStyle(UIElement element, TextStyle textStyle);
         void SetAvailableStates(UIElement element, StyleState availableStates);
         void SetTransform(UIElement element, UITransform transform);
+
+        void SetMainAxisAlignment(UIElement element, MainAxisAlignment alignment, MainAxisAlignment oldAlignment);
+
+        void SetCrossAxisAlignment(UIElement element, CrossAxisAlignment alignment, CrossAxisAlignment oldAlignment);
+
+        void SetLayoutWrap(UIElement element, LayoutWrap layoutWrap, LayoutWrap oldWrap);
+
+        void SetLayoutDirection(UIElement element, LayoutDirection direction);
+
+        void SetLayoutType(UIElement element, LayoutType layoutType);
 
     }
 

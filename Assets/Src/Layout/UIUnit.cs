@@ -8,9 +8,9 @@ namespace Rendering {
         None = 0,
         Pixel = 1 << 0,
         Content = 1 << 1,
-        Parent = 1 << 2,
+        ParentSize = 1 << 2,
         View = 1 << 3,
-        FillAvailableSpace = 1 << 4,
+        ParentContentArea = 1 << 4,
         Em = 1 << 5,
         MinContent = 1 << 6, // max content size for track
         MaxContent = 1 << 7, // min content size for track

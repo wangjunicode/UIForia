@@ -22,7 +22,7 @@ public class ChatWindow_Styles {
                 mainAxisAlignment = MainAxisAlignment.SpaceBetween
             },
             dimensions = new Dimensions() {
-                width = new UIMeasurement(1f, UIUnit.Parent),
+                width = new UIMeasurement(1f, UIUnit.ParentSize),
                 height = new UIMeasurement(40f)
             },
             paint = new Paint() {

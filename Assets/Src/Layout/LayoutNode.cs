@@ -89,7 +89,7 @@ namespace Src.Layout {
         public float GetMinWidth(UIUnit parentUnit, float parentValue, float viewportValue) {
             LayoutConstraints constraints = element.style.constraints;
             switch (constraints.minWidth.unit) {
-                case UIUnit.FillAvailableSpace:
+                case UIUnit.ParentContentArea:
                     return 0;
 
                 case UIUnit.Pixel:
@@ -98,7 +98,7 @@ namespace Src.Layout {
                 case UIUnit.Content:
                     return layout.GetContentWidth(this, parentValue - (contentStartOffsetX + contentEndOffsetX), viewportValue) * constraints.minWidth.value;
 
-                case UIUnit.Parent:
+                case UIUnit.ParentSize:
                     return constraints.minWidth.value * parentValue;
 
                 case UIUnit.View:
@@ -155,7 +155,7 @@ namespace Src.Layout {
             if (isImageElement) return intrinsicWidth;
             
             switch (rect.width.unit) {
-                case UIUnit.FillAvailableSpace:
+                case UIUnit.ParentContentArea:
                     baseWidth = parentValue;
                     break;
 
@@ -167,7 +167,7 @@ namespace Src.Layout {
                     baseWidth = layout.GetContentWidth(this, parentValue - (contentStartOffsetX + contentEndOffsetX), viewportValue);
                     break;
 
-                case UIUnit.Parent:
+                case UIUnit.ParentSize:
                     if (parentUnit == UIUnit.Content) return 0;
                     baseWidth = rect.width.value * parentValue;
                     break;
@@ -194,7 +194,7 @@ namespace Src.Layout {
             float baseHeight;
 
             switch (rect.height.unit) {
-                case UIUnit.FillAvailableSpace: // fit parent content
+                case UIUnit.ParentContentArea: // fit parent content
                     // should be renamed & defined as nearest parent block
                     baseHeight = layout.GetContentHeight(this, computedWidth, parentValue - verticalOffset, viewportValue);
                     break;
@@ -205,7 +205,7 @@ namespace Src.Layout {
                     baseHeight = layout.GetContentHeight(this, computedWidth, parentValue - verticalOffset, viewportValue) * rect.height.value;
                     break;
                 // idea: setting for filling parent + margin / padding or border
-                case UIUnit.Parent: // fill parent extents, width + marginHorizontal + borderHorizontal + paddingHorizontal
+                case UIUnit.ParentSize: // fill parent extents, width + marginHorizontal + borderHorizontal + paddingHorizontal
                     if (parentUnit == UIUnit.Content) {
                         baseHeight = 0;
                     }
@@ -234,7 +234,7 @@ namespace Src.Layout {
                 case UIUnit.Content:
                     throw new NotImplementedException();
 
-                case UIUnit.Parent:
+                case UIUnit.ParentSize:
                     if (parentUnit == UIUnit.Content) return 0;
                     return constraints.maxWidth.value * parentValue;
 
@@ -255,7 +255,7 @@ namespace Src.Layout {
                 case UIUnit.Content:
                     throw new NotImplementedException();
 
-                case UIUnit.Parent:
+                case UIUnit.ParentSize:
                     if (parentUnit == UIUnit.Content) return 0;
                     return constraints.minHeight.value * parentValue;
 
@@ -276,7 +276,7 @@ namespace Src.Layout {
                 case UIUnit.Content:
                     throw new NotImplementedException();
 
-                case UIUnit.Parent:
+                case UIUnit.ParentSize:
                     throw new NotImplementedException();
 
                 case UIUnit.View:

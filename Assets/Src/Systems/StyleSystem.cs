@@ -3,6 +3,7 @@ using Rendering;
 using Src.StyleBindings;
 using System.Collections.Generic;
 using Src.Extensions;
+using Src.Layout;
 using Src.Rendering;
 using UnityEngine;
 
@@ -44,6 +45,12 @@ namespace Src.Systems {
         public event Action<UIElement, UITransform> onTransformChanged;
         public event Action<UIElement> onOverflowPropertyChanged;
         
+        public event Action<UIElement, MainAxisAlignment, MainAxisAlignment> onMainAxisAlignmentChanged;
+        public event Action<UIElement, CrossAxisAlignment, CrossAxisAlignment> onCrossAxisAlignmentChanged;
+        public event Action<UIElement, LayoutWrap, LayoutWrap> onLayoutWrapChanged;
+        public event Action<UIElement, LayoutDirection> onLayoutDirectionChanged;
+        public event Action<UIElement, LayoutType> onLayoutTypeChanged;
+
         private readonly SkipTree<UIElement> fontTree;
 
         public StyleSystem() {
@@ -158,6 +165,26 @@ namespace Src.Systems {
 
         public void SetTransform(UIElement element, UITransform transform) {
             onTransformChanged?.Invoke(element, transform);
+        }
+
+        public void SetMainAxisAlignment(UIElement element, MainAxisAlignment alignment, MainAxisAlignment oldAlignment) {
+            onMainAxisAlignmentChanged?.Invoke(element, alignment, oldAlignment);
+        }
+
+        public void SetCrossAxisAlignment(UIElement element, CrossAxisAlignment alignment, CrossAxisAlignment oldAlignment) {
+            onCrossAxisAlignmentChanged?.Invoke(element, alignment, oldAlignment);
+        }
+
+        public void SetLayoutWrap(UIElement element, LayoutWrap layoutWrap, LayoutWrap oldWrap) {
+            onLayoutWrapChanged?.Invoke(element, layoutWrap, oldWrap);
+        }
+
+        public void SetLayoutDirection(UIElement element, LayoutDirection direction) {
+            onLayoutDirectionChanged?.Invoke(element, direction);
+        }
+
+        public void SetLayoutType(UIElement element, LayoutType layoutType) {
+            onLayoutTypeChanged?.Invoke(element, layoutType);
         }
 
         // todo all nodes are currently in the font tree -- bad!

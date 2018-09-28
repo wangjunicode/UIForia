@@ -36,7 +36,7 @@ namespace Rendering {
 //        public bool ignoreOutOfFlowForSizing;
 //        public bool ignoreScale;
 //        public bool ignoreRotations;
-//        
+
         public LayoutParameters(
             LayoutType type,
             LayoutWrap wrap,

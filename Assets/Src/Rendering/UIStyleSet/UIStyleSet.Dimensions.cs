@@ -7,32 +7,20 @@ namespace Rendering {
 
         [PublicAPI]
         public Dimensions dimensions {
-            get { return new Dimensions(width, height); }
-            set { SetDimensions(value); }
+            get { return computedStyle.dimensions; }
+            set { SetDimensions(value, StyleState.Normal); }
         }
-//
-//        [PublicAPI]
-//        public UIMeasurement rectX {
-//            get { return FindActiveStyle((s) => s.dimensions.x != UIMeasurement.Unset).dimensions.x; }
-//            set { SetRectX(value); }
-//        }
-//
-//        [PublicAPI]
-//        public UIMeasurement rectY {
-//            get { return FindActiveStyle((s) => s.dimensions.y != UIMeasurement.Unset).dimensions.y; }
-//            set { SetRectY(value); }
-//        }
 
         [PublicAPI]
         public UIMeasurement width {
-            get { return FindActiveStyle((s) => s.dimensions.width.IsDefined()).dimensions.width; }
-            set { SetWidth(value); }
+            get { return computedStyle.dimensions.width; }
+            set { SetWidth(value, StyleState.Normal); }
         }
 
         [PublicAPI]
         public UIMeasurement height {
-            get { return FindActiveStyle((s) => s.dimensions.height.IsDefined()).dimensions.height; }
-            set { SetHeight(value); }
+            get { return computedStyle.dimensions.height; }
+            set { SetHeight(value, StyleState.Normal); }
         }
 
         [PublicAPI]
@@ -41,38 +29,26 @@ namespace Rendering {
         }
 
         [PublicAPI]
-        public void SetDimensions(Dimensions newDimensions, StyleState state = StyleState.Normal) {
-            GetOrCreateStyle(state).dimensions = newDimensions;
-            changeHandler.SetDimensions(element, newDimensions);
+        public void SetDimensions(Dimensions newDimensions, StyleState state) {
+            UIStyle style = GetOrCreateStyle(state);
+            style.dimensions = newDimensions;
+            if ((state & currentState) != 0) {
+                bool widthMatch = style == FindActiveStyleWithoutDefault((s) => s.dimensions.width.IsDefined());
+                bool heightMatch = style == FindActiveStyleWithoutDefault((s) => s.dimensions.width.IsDefined());
+                if (widthMatch && heightMatch) {
+                    computedStyle.dimensions = newDimensions;
+                    changeHandler.SetDimensions(element, newDimensions);
+                }
+                else if (widthMatch) {
+                    computedStyle.dimensions = new Dimensions(newDimensions.width, computedStyle.dimensions.height);
+                    changeHandler.SetDimensions(element, computedStyle.dimensions);
+                }
+                else if (heightMatch) {
+                    computedStyle.dimensions = new Dimensions(computedStyle.dimensions.width, newDimensions.height);
+                    changeHandler.SetDimensions(element, computedStyle.dimensions);
+                }
+            }
         }
-
-//        [PublicAPI]
-//        public UIMeasurement GetRectX(StyleState state) {
-//            return GetStyle(state).dimensions.x;
-//        }
-//
-//        [PublicAPI]
-//        public void SetRectX(UIMeasurement measurement, StyleState state = StyleState.Normal) {
-//            UIStyle style = GetOrCreateStyle(state);
-//            style.dimensions = new Dimensions(measurement, style.dimensions.y, style.dimensions.width, style.dimensions.height);
-//            if (rectX == measurement) {
-//                changeHandler.SetRect(element, rect);
-//            }
-//        }
-//
-//        [PublicAPI]
-//        public UIMeasurement GetRectY(StyleState state) {
-//            return GetStyle(state).dimensions.y;
-//        }
-//
-//        [PublicAPI]
-//        public void SetRectY(UIMeasurement measurement, StyleState state = StyleState.Normal) {
-//            UIStyle style = GetOrCreateStyle(state);
-//            style.dimensions = new Dimensions(style.dimensions.x, measurement, style.dimensions.width, style.dimensions.height);
-//            if (rectY == measurement) {
-//                changeHandler.SetRect(element, rect);
-//            }
-//        }
 
         [PublicAPI]
         public UIMeasurement GetWidth(StyleState state) {
@@ -80,10 +56,11 @@ namespace Rendering {
         }
 
         [PublicAPI]
-        public void SetWidth(UIMeasurement width, StyleState state = StyleState.Normal) {
+        public void SetWidth(UIMeasurement width, StyleState state) {
             UIStyle style = GetOrCreateStyle(state);
             style.dimensions = new Dimensions(width, style.dimensions.height);
-            if (this.width == width) {
+            if ((state & currentState) != 0 && style == FindActiveStyleWithoutDefault((s) => s.dimensions.width.IsDefined())) {
+                computedStyle.dimensions = new Dimensions(width, computedStyle.dimensions.height);
                 changeHandler.SetDimensions(element, dimensions);
             }
         }
@@ -94,10 +71,11 @@ namespace Rendering {
         }
 
         [PublicAPI]
-        public void SetHeight(UIMeasurement height, StyleState state = StyleState.Normal) {
+        public void SetHeight(UIMeasurement newHeight, StyleState state) {
             UIStyle style = GetOrCreateStyle(state);
-            style.dimensions = new Dimensions(style.dimensions.width, height);
-            if (this.height == height) {
+            style.dimensions = new Dimensions(style.dimensions.width, newHeight);
+            if ((state & currentState) != 0 && style == FindActiveStyleWithoutDefault((s) => s.dimensions.height.IsDefined())) {
+                computedStyle.dimensions = new Dimensions(computedStyle.dimensions.width, newHeight);
                 changeHandler.SetDimensions(element, dimensions);
             }
         }

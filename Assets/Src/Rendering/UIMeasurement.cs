@@ -24,14 +24,19 @@ namespace Src {
             this.unit = unit;
         }
 
+        [DebuggerStepThrough]
         public bool IsDefined() {
             return FloatUtil.IsDefined(value);
         }
         
-        public bool isFixed => (unit & (UIUnit.Pixel | UIUnit.Parent | UIUnit.View)) != 0;
+        public bool isFixed => (unit & (UIUnit.Pixel | UIUnit.ParentSize | UIUnit.View | UIUnit.Em)) != 0;
         
-        public static UIMeasurement Auto => new UIMeasurement(0, UIUnit.FillAvailableSpace);
-        public static UIMeasurement Parent100 => new UIMeasurement(1f, UIUnit.Parent);
+        public bool isParentRelative => (unit & (UIUnit.ParentSize | UIUnit.ParentContentArea)) != 0;
+        
+        public bool isContentRelative => (unit & (UIUnit.Content | UIUnit.FitContent | UIUnit.MaxContent | UIUnit.MinContent)) != 0;
+        
+        public static UIMeasurement Auto => new UIMeasurement(1f, UIUnit.ParentContentArea);
+        public static UIMeasurement Parent100 => new UIMeasurement(1f, UIUnit.ParentSize);
         public static UIMeasurement Content100 => new UIMeasurement(1f, UIUnit.Content);
         public static UIMeasurement Unset => new UIMeasurement(FloatUtil.UnsetFloatValue);
 

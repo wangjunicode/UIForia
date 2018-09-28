@@ -1,5 +1,6 @@
 ﻿using System;
 using Rendering;
+using Src.Layout;
 
 namespace Src.Systems {
 
@@ -16,7 +17,13 @@ namespace Src.Systems {
         event FontPropertyChanged onFontPropertyChanged;
         event AvailableStatesChanged onAvailableStatesChanged;
         event TextContentChanged onTextContentChanged;
+        
         event Action<UIElement> onOverflowPropertyChanged;
+        event Action<UIElement, MainAxisAlignment, MainAxisAlignment> onMainAxisAlignmentChanged;
+        event Action<UIElement, CrossAxisAlignment, CrossAxisAlignment> onCrossAxisAlignmentChanged;
+        event Action<UIElement, LayoutWrap, LayoutWrap> onLayoutWrapChanged;
+        event Action<UIElement, LayoutDirection> onLayoutDirectionChanged;
+        event Action<UIElement, LayoutType> onLayoutTypeChanged;
 
     }
 

@@ -49,8 +49,11 @@ public class LayoutSystemTests {
     public void Works() {
         MockView mockView = new MockView(typeof(LayoutTestThing));
         mockView.Initialize();
+        mockView.layoutSystem.SetViewportRect(new Rect(0, 0, 1000f, 1000f));
         LayoutTestThing root = (LayoutTestThing) mockView.RootElement;
         mockView.Update();
+        Assert.AreEqual(Vector2.zero, root.child0.layoutResult.localPosition);
+        Assert.AreEqual(new Vector2(100, 0), root.child1.layoutResult.localPosition);
     }
 
 }

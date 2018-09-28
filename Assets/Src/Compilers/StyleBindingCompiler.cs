@@ -370,7 +370,7 @@ namespace Src.Compilers {
 
         [Pure]
         public static UIMeasurement ParentMeasurement(float value) {
-            return new UIMeasurement(value * 0.01, UIUnit.Parent);
+            return new UIMeasurement(value * 0.01, UIUnit.ParentSize);
         }
 
         [Pure]

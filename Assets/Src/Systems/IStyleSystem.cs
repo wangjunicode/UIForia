@@ -1,6 +1,7 @@
 ﻿using System;
 using Rendering;
 using Src.Layout;
+using Src.Rendering;
 using Src.Util;
 using UnityEngine;
 
@@ -86,6 +87,8 @@ namespace Src.Systems {
         void SetFontStyle(UIElement styleSetElement, TextUtil.FontStyle fontStyle);
 
         void SetTextAnchor(UIElement styleSetElement, TextUtil.TextAnchor textAnchor);
+
+        void SetOverflowX(UIElement styleSetElement, Overflow overflowX);
 
     }
 

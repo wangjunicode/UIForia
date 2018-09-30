@@ -454,12 +454,17 @@ namespace Rendering {
 #region Paint
 
                 case StylePropertyId.BackgroundColor:
+                    BackgroundColor = property.IsDefined ? (Color)new StyleColor(value0) : ColorUtil.UnsetValue; 
                     break;
                 case StylePropertyId.BorderColor:
+                    BorderColor = property.IsDefined ? (Color)new StyleColor(value0) : ColorUtil.UnsetValue; 
                     break;
                 case StylePropertyId.BackgroundImage:
-
+                    BackgroundImage = property.IsDefined 
+                        ? new AssetPointer<Texture2D>((AssetType)value0, value1) 
+                        : new AssetPointer<Texture2D>(AssetType.Texture, IntUtil.UnsetValue); 
                     break;
+                
                 case StylePropertyId.BorderRadiusTopLeft:
                     break;
                 case StylePropertyId.BorderRadiusTopRight:
@@ -589,18 +594,25 @@ namespace Rendering {
 #region Transform
 
                 case StylePropertyId.TransformPositionX:
+                    TransformPositionX = property.IsDefined ? UIMeasurement.Decode(value0, value1) : 0; 
                     break;
                 case StylePropertyId.TransformPositionY:
+                    TransformPositionY = property.IsDefined ? UIMeasurement.Decode(value0, value1) : 0; 
                     break;
                 case StylePropertyId.TransformScaleX:
+                    TransformScaleX = property.IsDefined ? FloatUtil.DecodeToFloat(value0) : 1;
                     break;
                 case StylePropertyId.TransformScaleY:
+                    TransformScaleY = property.IsDefined ? FloatUtil.DecodeToFloat(value0) : 1;
                     break;
                 case StylePropertyId.TransformPivotX:
+                    transformPivotX = property.IsDefined ? UIMeasurement.Decode(value0, value1) : 0; 
                     break;
                 case StylePropertyId.TransformPivotY:
+                    TransformPivotY = property.IsDefined ? UIMeasurement.Decode(value0, value1) : 0; 
                     break;
                 case StylePropertyId.TransformRotation:
+                    TransformRotation = property.IsDefined ? FloatUtil.DecodeToFloat(value0) : 1;
                     break;
 
 #endregion
@@ -611,6 +623,9 @@ namespace Rendering {
                     TextColor = property.IsDefined ? (Color) new StyleColor(value0) : Color.black;
                     break;
                 case StylePropertyId.TextFontAsset:
+                    FontAsset = property.IsDefined 
+                        ? new AssetPointer<Font>((AssetType.Texture)value0, value1) 
+                        : new AssetPointer<Font>((AssetType.Font)value0, IntUtil.UnsetValue);  
                     break;
                 case StylePropertyId.TextFontSize:
                     break;

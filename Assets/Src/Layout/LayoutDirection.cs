@@ -2,9 +2,9 @@ namespace Rendering {
 
     public enum LayoutDirection {
 
-        Unset,
-        Row,
-        Column
+        Unset = 0,
+        Row = 1,
+        Column = 2
 
     }
 

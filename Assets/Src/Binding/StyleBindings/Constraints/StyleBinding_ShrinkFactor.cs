@@ -12,10 +12,12 @@ namespace Src.StyleBindings {
         }
 
         public override void Execute(UIElement element, UITemplateContext context) {
-            int value = element.style.GetShrinkFactor(state);
+            if (!element.style.IsInState(state)) return;
+
+            int value = element.style.computedStyle.flexShrinkFactor;
             int newValue = expression.EvaluateTyped(context);
             if (value != newValue) {
-                element.style.SetShrinkFactor(value, state);
+                element.style.SetFlexItemShrinkFactor(value, state);
             }
         }
 
@@ -24,11 +26,11 @@ namespace Src.StyleBindings {
         }
 
         public override void Apply(UIStyle style, UITemplateContext context) {
-            style.layoutConstraints.shrinkFactor = expression.EvaluateTyped(context);
+            style.FlexItemShrinkFactor = expression.EvaluateTyped(context);
         }
 
         public override void Apply(UIStyleSet styleSet, UITemplateContext context) {
-            styleSet.SetShrinkFactor(expression.EvaluateTyped(context), state);
+            styleSet.SetFlexItemShrinkFactor(expression.EvaluateTyped(context), state);
         }
 
     }

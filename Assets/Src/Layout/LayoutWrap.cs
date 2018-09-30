@@ -2,10 +2,10 @@ namespace Rendering {
 
     public enum LayoutWrap {
 
-        None,
-        Wrap,
-        Reverse,
-        Unset
+        Unset = 0,
+        None = 1,
+        Wrap = 2,
+        Reverse = 3,
 
     }
 

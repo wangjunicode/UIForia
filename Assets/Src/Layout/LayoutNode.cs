@@ -87,26 +87,27 @@ namespace Src.Layout {
         }
 
         public float GetMinWidth(UIUnit parentUnit, float parentValue, float viewportValue) {
-            LayoutConstraints constraints = element.style.constraints;
-            switch (constraints.minWidth.unit) {
-                case UIUnit.ParentContentArea:
-                    return 0;
-
-                case UIUnit.Pixel:
-                    return constraints.minWidth.value;
-
-                case UIUnit.Content:
-                    return layout.GetContentWidth(this, parentValue - (contentStartOffsetX + contentEndOffsetX), viewportValue) * constraints.minWidth.value;
-
-                case UIUnit.ParentSize:
-                    return constraints.minWidth.value * parentValue;
-
-                case UIUnit.View:
-                    return constraints.minWidth.value * viewportValue;
-
-                default:
-                    return 0;
-            }
+//            LayoutConstrUIaints constraints = element.style;
+//            switch (constraints.minWidth.unit) {
+//                case UIUnit.ParentContentArea:
+//                    return 0;
+//
+//                case UIUnit.Pixel:
+//                    return constraints.minWidth.value;
+//
+//                case UIUnit.Content:
+//                    return layout.GetContentWidth(this, parentValue - (contentStartOffsetX + contentEndOffsetX), viewportValue) * constraints.minWidth.value;
+//
+//                case UIUnit.ParentSize:
+//                    return constraints.minWidth.value * parentValue;
+//
+//                case UIUnit.View:
+//                    return constraints.minWidth.value * viewportValue;
+//
+//                default:
+//                    return 0;
+//            }
+            return 0;
         }
 
         public void SetTextContent(string text) {
@@ -226,65 +227,69 @@ namespace Src.Layout {
         }
 
         public float GetMaxWidth(UIUnit parentUnit, float parentValue, float viewportValue) {
-            LayoutConstraints constraints = element.style.constraints;
-            switch (constraints.maxWidth.unit) {
-                case UIUnit.Pixel:
-                    return constraints.maxWidth.value;
-
-                case UIUnit.Content:
-                    throw new NotImplementedException();
-
-                case UIUnit.ParentSize:
-                    if (parentUnit == UIUnit.Content) return 0;
-                    return constraints.maxWidth.value * parentValue;
-
-                case UIUnit.View:
-                    return constraints.maxWidth.value * viewportValue;
-
-                default:
-                    return 0;
-            }
+//            LayoutConstraints constraints = element.style.constraints;
+//            switch (constraints.maxWidth.unit) {
+//                case UIUnit.Pixel:
+//                    return constraints.maxWidth.value;
+//
+//                case UIUnit.Content:
+//                    throw new NotImplementedException();
+//
+//                case UIUnit.ParentSize:
+//                    if (parentUnit == UIUnit.Content) return 0;
+//                    return constraints.maxWidth.value * parentValue;
+//
+//                case UIUnit.View:
+//                    return constraints.maxWidth.value * viewportValue;
+//
+//                default:
+//                    return 0;
+//            }
+            return float.MaxValue;
         }
 
         public float GetMinHeight(UIUnit parentUnit, float parentValue, float viewportValue) {
-            LayoutConstraints constraints = element.style.constraints;
-            switch (constraints.minHeight.unit) {
-                case UIUnit.Pixel:
-                    return constraints.minHeight.value;
-
-                case UIUnit.Content:
-                    throw new NotImplementedException();
-
-                case UIUnit.ParentSize:
-                    if (parentUnit == UIUnit.Content) return 0;
-                    return constraints.minHeight.value * parentValue;
-
-                case UIUnit.View:
-                    return constraints.minHeight.value * viewportValue;
-
-                default:
-                    return 0;
-            }
+//            LayoutConstraints constraints = element.style.constraints;
+//            switch (constraints.minHeight.unit) {
+//                case UIUnit.Pixel:
+//                    return constraints.minHeight.value;
+//
+//                case UIUnit.Content:
+//                    throw new NotImplementedException();
+//
+//                case UIUnit.ParentSize:
+//                    if (parentUnit == UIUnit.Content) return 0;
+//                    return constraints.minHeight.value * parentValue;
+//
+//                case UIUnit.View:
+//                    return constraints.minHeight.value * viewportValue;
+//
+//                default:
+//                    return 0;
+//            }
+            return 0;
         }
 
         public float GetMaxHeight(UIUnit parentUnit, float parentValue, float viewportValue) {
-            LayoutConstraints constraints = element.style.constraints;
-            switch (constraints.maxHeight.unit) {
-                case UIUnit.Pixel:
-                    return constraints.maxHeight.value;
+//            LayoutConstraints constraints = element.style.constraints;
+//            switch (constraints.maxHeight.unit) {
+//                case UIUnit.Pixel:
+//                    return constraints.maxHeight.value;
+//
+//                case UIUnit.Content:
+//                    throw new NotImplementedException();
+//
+//                case UIUnit.ParentSize:
+//                    throw new NotImplementedException();
+//
+//                case UIUnit.View:
+//                    return constraints.maxHeight.value * viewportValue;
+//
+//                default:
+//                    return 0;
+//            }
 
-                case UIUnit.Content:
-                    throw new NotImplementedException();
-
-                case UIUnit.ParentSize:
-                    throw new NotImplementedException();
-
-                case UIUnit.View:
-                    return constraints.maxHeight.value * viewportValue;
-
-                default:
-                    return 0;
-            }
+            return float.MaxValue;
         }
 
 

@@ -1,8 +1,10 @@
+using System;
 using NUnit.Framework;
 using Rendering;
 using Src;
 using Src.Systems;
 using UnityEditor.VersionControl;
+using UnityEngine;
 
 [TestFixture]
 public class StyleTests {
@@ -272,6 +274,5 @@ public class StyleTests {
         
         Assert.AreEqual(0, changeCount);
     }
-    
 
 }

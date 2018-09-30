@@ -91,7 +91,7 @@ namespace Src.Systems {
             m_StyleSystem.onTextContentChanged += HandleTextContentChanged;
             m_StyleSystem.onLayoutDirectionChanged += HandleLayoutDirectionChanged;
             m_StyleSystem.onLayoutWrapChanged += HandleWrapStateChanged;
-            m_StyleSystem.onFlowStateChanged == HandleFlowStateChanged;
+            //m_StyleSystem.onFlowStateChanged == HandleFlowStateChanged;
         }
 
         private void HandleFontPropertyChanged(UIElement element, TextStyle textStyle) { }

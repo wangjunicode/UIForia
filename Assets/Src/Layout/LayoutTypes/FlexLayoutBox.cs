@@ -30,8 +30,7 @@ namespace Src.Layout.LayoutTypes {
                 RunFullRowLayout();
             }
         }
-
-
+        
         private void RunFullColumnLayout() {
             int inFlowItemCount = 0;
             // allocated width / height is known at this point
@@ -56,6 +55,23 @@ namespace Src.Layout.LayoutTypes {
             }
         }
 
+        public float GetPreferredHeightForWidth(float width) {
+            if (style.layoutParameters.direction == LayoutDirection.Column) {
+                
+                if (style.layoutParameters.wrap == LayoutWrap.Wrap) {
+                    // fill width tracks 
+                    // return total height after wrap
+                }
+                else {
+                    // if approximate == true
+                    // don't bother growing / shrinking
+                    // return max preferred height using width and clamped to min / max
+                }
+            }
+
+            return 0;
+        }
+        
         private void RunFullRowLayout() {
             int inFlowItemCount = 0;
             for (int i = 0; i < children.Count; i++) {
@@ -112,6 +128,12 @@ namespace Src.Layout.LayoutTypes {
 
             tracks.Add(currentTrack);
 
+            //get preferred widths
+            //get initial heights
+            //place in track until overflow
+            //stretch width if needed
+            //using final width, get min / max / preferred height
+            //set heights
             // for each track grow/shrink to try to fit allocated height
             // after grow / shrink 
             
@@ -133,9 +155,24 @@ namespace Src.Layout.LayoutTypes {
              * wrap only works with a fixed size
              *
              * track width = largest width
-             * need to getPreferredHeight
-             * and also GetMinRequiredHeightForWidth() 2 cals
+             * need to getPreferredHeight first without a width constraint, then with the width constraint if allocated width != preferred width & alignment stretches
              *
+             * if height shrinks && additional width available, can width grow to fill?
+             *
+             * when content changes -> mark for preferred size update if needed
+             *
+             * if parent is content sized
+             *     mark parent for update
+             *         recurse upwards
+             * 
+             * and also GetMinRequiredHeightForWidth() 2 calls but only when content sized & stretch depending on axis
+             *
+             *     in recursive layout we don't have an allocated parent size when depth > 1
+             *     content based height things 
+             *     
+             *     if predicted allocated width != actual allocated width -> get new height value
+             *        width == allocated width || cachedWidths.Find()
+             * 
              * some tracks could grow while others shrink in the same layout if wrapped
              *
              * place item

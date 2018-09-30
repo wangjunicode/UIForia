@@ -3,19 +3,24 @@ using Src.Rendering;
 
 namespace Src.StyleBindings {
 
-    public class StyleBinding_LayoutDirection : StyleBinding {
+    public class StyleBinding_FlexLayoutDirection : StyleBinding {
 
         private readonly Expression<LayoutDirection> expression;
 
-        public StyleBinding_LayoutDirection(StyleState state, Expression<LayoutDirection> expression) : base(RenderConstants.LayoutDirection, state) {
+        public StyleBinding_FlexLayoutDirection(StyleState state, Expression<LayoutDirection> expression)
+            : base(RenderConstants.LayoutDirection, state) {
             this.expression = expression;
         }
 
         public override void Execute(UIElement element, UITemplateContext context) {
-            LayoutDirection direction = element.style.GetLayoutDirection(state);
+            if (!element.style.IsInState(state) || element.style.computedStyle.layoutType != LayoutType.Flex) {
+                return;
+            }
+
+            LayoutDirection direction = element.style.computedStyle.flexDirection;
             LayoutDirection newDirection = expression.EvaluateTyped(context);
             if (direction != newDirection) {
-                element.style.SetLayoutDirection(newDirection, state);
+                element.style.SetFlexDirection(newDirection, state);
             }
         }
 
@@ -24,11 +29,11 @@ namespace Src.StyleBindings {
         }
 
         public override void Apply(UIStyle style, UITemplateContext context) {
-            style.layoutParameters.direction = expression.EvaluateTyped(context);
+            style.FlexLayoutDirection = expression.EvaluateTyped(context);
         }
 
         public override void Apply(UIStyleSet styleSet, UITemplateContext context) {
-            styleSet.SetLayoutDirection(expression.EvaluateTyped(context), state);
+            styleSet.SetFlexDirection(expression.EvaluateTyped(context), state);
         }
 
     }

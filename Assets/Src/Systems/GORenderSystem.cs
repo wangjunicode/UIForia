@@ -124,15 +124,15 @@ namespace Src.Systems {
                 }
 
                 RenderData renderData = renderSkipTree.GetItem(element.id);
-                ContentBoxRect margin = element.style.margin;
+                ContentBoxRect margin = element.style.computedStyle.margin;
 
                 Vector2 position = element.layoutResult.localPosition;
-                position.x = Mathf.CeilToInt(position.x + margin.left);
-                position.y = -Mathf.CeilToInt(position.y + margin.top);
+                position.x = Mathf.CeilToInt(position.x); // + margin.left);
+                position.y = -Mathf.CeilToInt(position.y); // + margin.top);
 
                 Vector2 size = new Vector2(element.layoutResult.width, element.layoutResult.height);
-                size.x = Mathf.CeilToInt(size.x - (margin.left + margin.right));
-                size.y = Mathf.CeilToInt(size.y - (margin.top + margin.bottom));
+                size.x = Mathf.CeilToInt(size.x); // - (margin.left + margin.right));
+                size.y = Mathf.CeilToInt(size.y); // - (margin.top + margin.bottom));
 
                 if (transform.anchoredPosition != position) {
                     transform.anchoredPosition = position;
@@ -285,7 +285,7 @@ namespace Src.Systems {
                 StyleDebugView debugView = obj.AddComponent<StyleDebugView>();
                 debugView.element = element;
 #endif
-                
+
                 RectTransform unityTransform = obj.AddComponent<RectTransform>();
                 unityTransform.anchorMin = new Vector2(0, 1);
                 unityTransform.anchorMax = new Vector2(0, 1);
@@ -490,23 +490,22 @@ namespace Src.Systems {
             if ((element.flags & UIElementFlags.TextElement) != 0) {
                 return RenderPrimitiveType.Text;
             }
-            
+
             UIStyleSet styleSet = element.style;
-            if (!(element is UIImageElement) 
+            if (!(element is UIImageElement)
                 && styleSet.backgroundImage == null
                 && styleSet.borderColor == ColorUtil.UnsetValue
                 && styleSet.backgroundColor == ColorUtil.UnsetValue) {
                 return RenderPrimitiveType.None;
             }
 
-            ContentBoxRect border = styleSet.border;
-            if (border.left > 0 || border.right > 0 || border.top > 0 || border.bottom > 0) {
-                return RenderPrimitiveType.ProceduralImage;
-            }
+//            ContentBoxRect border = styleSet.border;
+//            if (border.left > 0 || border.right > 0 || border.top > 0 || border.bottom > 0) {
+//                return RenderPrimitiveType.ProceduralImage;
+//            }
 
             return RenderPrimitiveType.RawImage;
         }
-
 
         private void HandleBorderRadiusChange(UIElement element, BorderRadius radius) {
             if (!ready) return;

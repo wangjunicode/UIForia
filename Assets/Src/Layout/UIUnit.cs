@@ -5,7 +5,7 @@ namespace Rendering {
     [Flags]
     public enum UIUnit {
 
-        None = 0,
+        Unset = 0,
         Pixel = 1 << 0,
         Content = 1 << 1,
         ParentSize = 1 << 2,
@@ -14,8 +14,10 @@ namespace Rendering {
         Em = 1 << 5,
         MinContent = 1 << 6, // max content size for track
         MaxContent = 1 << 7, // min content size for track
-        FitContent = 1 << 8  // fit content size for track
+        FitContent = 1 << 8, // fit content size for track
 
+        ConstFixed = Pixel | Em
+                     
         /*
          * Auto works as follows:
          *     It ignores the value provided

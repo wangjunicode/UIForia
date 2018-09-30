@@ -3,19 +3,24 @@ using Src.Rendering;
 
 namespace Src.StyleBindings {
 
-    public class StyleBinding_LayoutWrap : StyleBinding {
+    public class StyleBinding_FlexLayoutWrap : StyleBinding {
 
         private readonly Expression<LayoutWrap> expression;
 
-        public StyleBinding_LayoutWrap(StyleState state, Expression<LayoutWrap> expression) : base(RenderConstants.LayoutWrap, state) {
+        public StyleBinding_FlexLayoutWrap(StyleState state, Expression<LayoutWrap> expression)
+            : base(RenderConstants.LayoutWrap, state) {
             this.expression = expression;
         }
 
         public override void Execute(UIElement element, UITemplateContext context) {
-            LayoutWrap wrap = element.style.GetLayoutWrap(state);
+            if (!element.style.IsInState(state) || element.style.computedStyle.layoutType != LayoutType.Flex) {
+                return;
+            }
+
+            LayoutWrap wrap = element.style.computedStyle.flexWrapMode;
             LayoutWrap newWrap = expression.EvaluateTyped(context);
             if (wrap != newWrap) {
-                element.style.SetLayoutWrap(newWrap, state);
+                element.style.SetFlexWrapMode(newWrap, state);
             }
         }
 
@@ -24,11 +29,11 @@ namespace Src.StyleBindings {
         }
 
         public override void Apply(UIStyle style, UITemplateContext context) {
-            style.layoutParameters.wrap = expression.EvaluateTyped(context);
+            style.FlexLayoutWrap = expression.EvaluateTyped(context);
         }
 
         public override void Apply(UIStyleSet styleSet, UITemplateContext context) {
-            styleSet.SetLayoutWrap(expression.EvaluateTyped(context), state);
+            styleSet.SetFlexWrapMode(expression.EvaluateTyped(context), state);
         }
 
     }

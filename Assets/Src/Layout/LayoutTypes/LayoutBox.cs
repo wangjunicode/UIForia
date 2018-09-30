@@ -21,7 +21,7 @@ namespace Src.Layout.LayoutTypes {
         public float actualWidth;
         public float actualHeight;
 
-        public UIStyle style;
+        public ComputedStyle style;
         public UIElement element;
 
         public LayoutBox parent;
@@ -43,29 +43,6 @@ namespace Src.Layout.LayoutTypes {
 
         public void OnFontSizeChanged(int fontSize) {
             // todo -- Em != font Size, rather size of 'M' in given font at given size 
-            if (style.dimensions.width.unit == UIUnit.Em) {
-                float newPrefWidth = fontSize * style.dimensions.width.value;
-                if (newPrefWidth != preferredWidth) {
-                    preferredWidth = newPrefWidth;
-                    parent.OnChildPreferredWidthChanged(this);
-                }
-            }
-
-            if (style.layoutConstraints.minWidth.unit == UIUnit.Em) {
-                float newMinWidth = fontSize * style.layoutConstraints.minWidth.value;
-                if (newMinWidth != preferredWidth) {
-                    preferredWidth = newMinWidth;
-                    parent.OnChildMinWidthChanged(this);
-                }
-            }
-
-            if (style.layoutConstraints.maxWidth.unit == UIUnit.Em) {
-                float newMaxWidth = fontSize * style.layoutConstraints.maxWidth.value;
-                if (newMaxWidth != preferredWidth) {
-                    preferredWidth = newMaxWidth;
-                    parent.OnChildMaxWidthChanged(this);
-                }
-            }
         }
 
         protected float ResolveFixedWidth(UIMeasurement measurement) {

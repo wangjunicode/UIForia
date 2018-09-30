@@ -26,7 +26,9 @@ namespace Src.StyleBindings {
         }
 
         public override void Apply(UIStyle style, UITemplateContext context) {
-            style.transform.position = expression.EvaluateTyped(context);
+            MeasurementVector2 vec = expression.EvaluateTyped(context);
+            style.TransformPositionX = vec.x;
+            style.TransformPositionY = vec.y;
         }
 
         public override void Apply(UIStyleSet styleSet, UITemplateContext context) {

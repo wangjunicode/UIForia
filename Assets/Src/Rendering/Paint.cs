@@ -12,17 +12,10 @@ namespace Rendering {
         public static readonly Paint Unset = new Paint(
             ColorUtil.UnsetValue,
             ColorUtil.UnsetValue,
-            null,
-            BorderRadius.Unset
+            null
         );
 
         public Paint(Color backgroundColor, Color borderColor, Texture2D backgroundImage = null) {
-            this.backgroundColor = backgroundColor;
-            this.borderColor = borderColor;
-            this.backgroundImage = backgroundImage;
-        }
-
-        public Paint(Color backgroundColor, Color borderColor, Texture2D backgroundImage, BorderRadius borderRadius) {
             this.backgroundColor = backgroundColor;
             this.borderColor = borderColor;
             this.backgroundImage = backgroundImage;

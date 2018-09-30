@@ -8,8 +8,8 @@ namespace Debugger {
 
         public override void OnCreate() {
             UIElement mask = FindById("maskthing");
-            mask.style.computedStyle.overflowX = Overflow.Scroll;
-            mask.style.computedStyle.overflowY = Overflow.Scroll;
+//            mask.style.computedStyle.overflowX = Overflow.Scroll;
+//            mask.style.computedStyle.overflowY = Overflow.Scroll;
         }
 
     }

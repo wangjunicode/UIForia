@@ -1,4 +1,5 @@
 using System;
+using Rendering;
 using Src.Systems;
 using UnityEngine;
 using UnityEngine.UI;
@@ -48,14 +49,14 @@ namespace Src.Elements {
         public bool IsGeometryDirty { get; private set; }
         
         public override void OnCreate() {
-            style.width = new UIMeasurement(0);
-            style.height = new UIMeasurement(0);
+            style.SetPreferredWidth(new UIMeasurement(0), StyleState.All);
+            style.SetPreferredHeight(new UIMeasurement(0), StyleState.All);
         }
 
         public void RebuildGeometry() {
             rebuildGeometry?.Invoke(mesh);
-            style.width = new UIMeasurement(width);
-            style.height = new UIMeasurement(height);
+            style.SetPreferredWidth(new UIMeasurement(width), StyleState.All);
+            style.SetPreferredHeight(new UIMeasurement(height), StyleState.All);
             IsGeometryDirty = false;
         }
 

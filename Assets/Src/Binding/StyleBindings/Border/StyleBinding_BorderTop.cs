@@ -5,15 +5,17 @@ namespace Src.StyleBindings {
 
     public class StyleBinding_BorderTop : StyleBinding {
 
-        private readonly Expression<float> expression;
+        private readonly Expression<UIMeasurement> expression;
 
-        public StyleBinding_BorderTop(StyleState state, Expression<float> expression) : base(RenderConstants.BorderTop, state) {
+        public StyleBinding_BorderTop(StyleState state, Expression<UIMeasurement> expression) : base(RenderConstants.BorderTop, state) {
             this.expression = expression;
         }
 
         public override void Execute(UIElement element, UITemplateContext context) {
-            float value = element.style.GetBorderTop(state);
-            float newValue = expression.EvaluateTyped(context);
+            if (!element.style.IsInState(state)) return;
+
+            UIMeasurement value = element.style.computedStyle.BorderTop;
+            UIMeasurement newValue = expression.EvaluateTyped(context);
             if (value != newValue) {
                 element.style.SetBorderTop(value, state);
             }
@@ -24,7 +26,7 @@ namespace Src.StyleBindings {
         }
 
         public override void Apply(UIStyle style, UITemplateContext context) {
-            style.border.top = expression.EvaluateTyped(context);
+            style.BorderTop = expression.EvaluateTyped(context);
         }
 
         public override void Apply(UIStyleSet styleSet, UITemplateContext context) {

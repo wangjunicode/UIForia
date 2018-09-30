@@ -7,17 +7,33 @@ namespace Src.Util {
         [Flags]
         public enum FontStyle {
 
-            Normal = 0,
-            Bold = 1,
-            Italic = 2,
-            Underline = 4,
-            LowerCase = 8,
-            UpperCase = 16, // 0x00000010
-            SmallCaps = 32, // 0x00000020
-            Strikethrough = 64, // 0x00000040
-            Superscript = 128, // 0x00000080
-            Subscript = 256, // 0x00000100
-            Highlight = 512, // 0x00000200
+            Unset = 0,
+            Normal = 1 << 1,
+            Bold = 1 << 2,
+            Italic = 1 << 3,
+            Underline = 1 << 4,
+            LowerCase = 1 << 5,
+            UpperCase = 1 << 6,  
+            SmallCaps = 1 << 7,  
+            Strikethrough = 1 << 8,  
+            Superscript = 1 << 9,  
+            Subscript = 1 << 10,  
+            Highlight = 1 << 11,  
+
+        }
+
+        public enum TextAnchor {
+
+            Unset = 0,
+            UpperLeft = 1,
+            UpperCenter = 2,
+            UpperRight = 3,
+            MiddleLeft = 4,
+            MiddleCenter = 5,
+            MiddleRight = 6,
+            LowerLeft = 7,
+            LowerCenter = 8,
+            LowerRight = 9
 
         }
 

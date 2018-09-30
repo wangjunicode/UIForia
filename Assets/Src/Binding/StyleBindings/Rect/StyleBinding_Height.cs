@@ -12,10 +12,13 @@ namespace Src.StyleBindings {
         }
 
         public override void Execute(UIElement element, UITemplateContext context) {
-            UIMeasurement height = element.style.GetHeight(state);
+            if (!element.style.IsInState(state)) return;
+
+            UIMeasurement height = element.style.computedStyle.PreferredHeight;
             UIMeasurement newHeight = expression.EvaluateTyped(context);
+            
             if (height != newHeight) {
-                element.style.SetHeight(newHeight, state);
+                element.style.SetPreferredHeight(newHeight, state);
             }
         }
 
@@ -24,11 +27,11 @@ namespace Src.StyleBindings {
         }
 
         public override void Apply(UIStyle style, UITemplateContext context) {
-            style.dimensions.height = expression.EvaluateTyped(context);
+            style.PreferredHeight = expression.EvaluateTyped(context);
         }
 
         public override void Apply(UIStyleSet styleSet, UITemplateContext context) {
-            styleSet.SetHeight(expression.EvaluateTyped(context), state);
+            styleSet.SetPreferredHeight(expression.EvaluateTyped(context), state);
         }
 
     }

@@ -20,7 +20,11 @@ namespace Src.StyleBindings {
         }
 
         public override void Apply(UIStyle style, UITemplateContext context) {
-            style.borderRadius = expression.EvaluateTyped(context);
+            BorderRadius borderRadius = expression.EvaluateTyped(context);
+            style.BorderRadiusTopLeft = borderRadius.topLeft;
+            style.BorderRadiusTopRight = borderRadius.topRight;
+            style.BorderRadiusBottomLeft = borderRadius.bottomLeft;
+            style.BorderRadiusBottomRight = borderRadius.bottomRight;
         }
 
         public override void Apply(UIStyleSet styleSet, UITemplateContext context) {

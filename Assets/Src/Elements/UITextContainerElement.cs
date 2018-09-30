@@ -1,5 +1,6 @@
 using System;
 using JetBrains.Annotations;
+using Rendering;
 using Src;
 using TMPro;
 
@@ -36,8 +37,8 @@ public class UITextContainerElement : UIElement {
         m_TextElement = (UITextElement) ownChildren[0];
         m_TextElement.onTextChanged += HandleTextElementTextChanged;
         m_TextElement.DisableBinding("text");
-        style.width = UIMeasurement.Content100;
-        style.height = UIMeasurement.Content100;
+        style.SetPreferredWidth(UIMeasurement.Content100, StyleState.Normal);
+        style.SetPreferredHeight(UIMeasurement.Content100, StyleState.Normal);
     }
 
     public override void OnDestroy() {

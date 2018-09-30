@@ -1,4 +1,5 @@
 using JetBrains.Annotations;
+using Src;
 using Src.Extensions;
 using UnityEngine;
 
@@ -7,79 +8,59 @@ namespace Rendering {
     public partial class UIStyleSet {
 
         [PublicAPI]
-        public Paint paint {
-            get { return new Paint(backgroundColor, borderColor, backgroundImage); }
-            set { SetPaint(value, StyleState.Normal); }
-        }
-
-        [PublicAPI]
-        public Color backgroundColor {
-            get { return FindActiveStyle((s) => s.paint.backgroundColor.IsDefined()).paint.backgroundColor; }
-            set { SetBackgroundColor(value, StyleState.Normal); }
-        }
-
-        [PublicAPI]
-        public Texture2D backgroundImage {
-            get { return FindActiveStyle((s) => s.paint.backgroundImage != null).paint.backgroundImage; }
-            set { SetBackgroundImage(value, StyleState.Normal); }
-        }
-
-        [PublicAPI]
-        public Color borderColor {
-            get { return FindActiveStyle((s) => s.paint.borderColor.IsDefined()).paint.borderColor; }
-            set { SetBackgroundColor(value, StyleState.Normal); }
-        }
-
-
-        [PublicAPI]
-        public void SetPaint(Paint newPaint, StyleState state) {
-            GetOrCreateStyle(state).paint = newPaint;
-            changeHandler.SetPaint(element, paint);
-        }
-
-
-        [PublicAPI]
         public Color GetBackgroundColor(StyleState state) {
-            return GetStyle(state).paint.backgroundColor;
+            StyleProperty property = GetPropertyValueInState(StylePropertyId.BackgroundColor, state);
+            return property.IsDefined
+                ? (Color) new StyleColor(property.valuePart0)
+                : ColorUtil.UnsetValue;
+        }
+        
+        [PublicAPI]
+        public Color GetBorderColor(StyleState state) {
+            StyleProperty property = GetPropertyValueInState(StylePropertyId.BorderColor, state);
+            return property.IsDefined
+                ? (Color) new StyleColor(property.valuePart0)
+                : ColorUtil.UnsetValue;
         }
 
+        [PublicAPI]
+        public AssetPointer<Texture2D> GetBackgroundImage(StyleState state) {
+            StyleProperty property = GetPropertyValueInState(StylePropertyId.BorderColor, state);
+            return property.IsDefined
+                ? new AssetPointer<Texture2D>((AssetType) property.valuePart0, property.valuePart1)
+                : new AssetPointer<Texture2D>(AssetType.Texture, -1);
+        }
+        
         [PublicAPI]
         public void SetBackgroundColor(Color color, StyleState state) {
-            UIStyle target = GetOrCreateStyle(state);
-            target.paint = new Paint(color, target.paint.borderColor, target.paint.backgroundImage);
-            if (backgroundColor == color) {
-                changeHandler.SetPaint(element, paint);
+            UIStyle style = GetOrCreateInstanceStyle(state);
+            style.BackgroundColor = color;
+            if ((state & currentState) != 0 && style == GetActiveStyleForProperty(StylePropertyId.BackgroundColor)) {
+                computedStyle.BackgroundColor = color;
             }
         }
 
         [PublicAPI]
-        public void SetBackgroundImage(Texture2D image, StyleState state) {
-            UIStyle target = GetOrCreateStyle(state);
-            target.paint = new Paint(target.paint.backgroundColor, target.paint.borderColor, image);
-
-            if (backgroundImage == image) {
-                changeHandler.SetPaint(element, paint);
+        public void SetBackgroundImage(AssetPointer<Texture2D> image, StyleState state) {
+            UIStyle style = GetOrCreateInstanceStyle(state);
+            style.BackgroundImage = image;
+            if ((state & currentState) != 0 && style == GetActiveStyleForProperty(StylePropertyId.BackgroundImage)) {
+                computedStyle.BackgroundImage = image;
             }
         }
 
-        [PublicAPI]
-        public Texture2D GetBackgroundImage(StyleState state) {
-            return GetStyle(state).paint.backgroundImage;
-        }
+      
 
         [PublicAPI]
         public void SetBorderColor(Color color, StyleState state) {
-            UIStyle target = GetOrCreateStyle(state);
-            target.paint = new Paint(target.paint.backgroundColor, color, target.paint.backgroundImage);
-            if (borderColor == color) {
-                changeHandler.SetPaint(element, paint);
+            UIStyle style = GetOrCreateInstanceStyle(state);
+            style.BorderColor = color;
+            if ((state & currentState) != 0 && style == GetActiveStyleForProperty(StylePropertyId.BorderColor)) {
+                computedStyle.BorderColor = color;
             }
         }
 
-        [PublicAPI]
-        public Color GetBorderColor(StyleState state) {
-            return GetStyle(state).paint.borderColor;
-        }
+
 
     }
 

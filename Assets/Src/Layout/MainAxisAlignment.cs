@@ -2,13 +2,13 @@ namespace Src.Layout {
 
     public enum MainAxisAlignment {
         
-        Unset,
-        Start,
-        Default,
-        Center,
-        End,
-        SpaceAround,
-        SpaceBetween,
+        Unset = 0,
+        Start = 1,
+        Default = 2,
+        Center = 3,
+        End = 4,
+        SpaceAround = 5,
+        SpaceBetween = 6,
 
 
     }

@@ -13,10 +13,18 @@ namespace Src.StyleBindings {
 
         public override void Execute(UIElement element, UITemplateContext context) {
             if (!element.style.IsInState(state)) return;
-            Dimensions size = element.style.GetDimensions(state);
+
+            UIMeasurement preferredWidth = element.style.computedStyle.PreferredWidth;
+            UIMeasurement preferredHeight= element.style.computedStyle.PreferredHeight;
+            
             Dimensions newSize = expression.EvaluateTyped(context);
-            if (size.width != newSize.width || size.height != newSize.height) {
-                element.style.SetDimensions(newSize, state);
+            
+            if (preferredWidth != newSize.width) {
+                element.style.SetPreferredWidth(preferredWidth, state);
+            }
+
+            if (preferredHeight != newSize.height) {
+                element.style.SetPreferredHeight(newSize.height, state);
             }
         }
 
@@ -25,11 +33,15 @@ namespace Src.StyleBindings {
         }
 
         public override void Apply(UIStyle style, UITemplateContext context) {
-            style.dimensions = expression.EvaluateTyped(context);
+            Dimensions dimensions = expression.EvaluateTyped(context);
+            style.PreferredWidth = dimensions.width;
+            style.PreferredHeight = dimensions.height;
         }
 
         public override void Apply(UIStyleSet styleSet, UITemplateContext context) {
-            styleSet.SetDimensions(expression.EvaluateTyped(context), state);
+            Dimensions size = expression.EvaluateTyped(context);
+            styleSet.SetPreferredWidth(size.width, state);
+            styleSet.SetPreferredHeight(size.height, state);
         }
 
     }

@@ -64,12 +64,12 @@
                 <e p="StyleBinding_ShrinkFactor.cs" t="Include" />
               </e>
               <e p="Layout" t="Include">
-                <e p="StyleBinding_CrossAxisAlignment.cs" t="Include" />
-                <e p="StyleBinding_LayoutDirection.cs" t="Include" />
+                <e p="StyleBinding_FlexLayoutCrossAxisAlignment.cs" t="Include" />
+                <e p="StyleBinding_FlexLayoutDirection.cs" t="Include" />
+                <e p="StyleBinding_FlexLayoutMainAxisAlignment.cs" t="Include" />
+                <e p="StyleBinding_FlexLayoutWrap.cs" t="Include" />
                 <e p="StyleBinding_LayoutFlowType.cs" t="Include" />
                 <e p="StyleBinding_LayoutType.cs" t="Include" />
-                <e p="StyleBinding_LayoutWrap.cs" t="Include" />
-                <e p="StyleBinding_MainAxisAlignment.cs" t="Include" />
               </e>
               <e p="Margin" t="Include">
                 <e p="StyleBinding_Margin.cs" t="Include" />
@@ -307,8 +307,6 @@
             <e p="OperatorType.cs" t="Include" />
             <e p="ProcessedType.cs" t="Include" />
             <e p="Style" t="Include">
-              <e p="PaintStyleParser.cs" t="Include" />
-              <e p="StyleParser.cs" t="Include" />
               <e p="StyleParseUtil.cs" t="Include" />
               <e p="TextStyleParser.cs" t="Include" />
             </e>
@@ -331,6 +329,7 @@
             <e p="BorderedImage.cs" t="Include" />
             <e p="BorderRadius.cs" t="Include" />
             <e p="BorderStyle.cs" t="Include" />
+            <e p="ComputedStyle.cs" t="Include" />
             <e p="ContentBoxRect.cs" t="Include" />
             <e p="GOTextSizeCalculator.cs" t="Include" />
             <e p="HorizontalScrollbarAttachment.cs" t="Include" />
@@ -347,6 +346,9 @@
             <e p="RenderConstants.cs" t="Include" />
             <e p="RenderData.cs" t="Include" />
             <e p="RenderPrimitiveType.cs" t="Include" />
+            <e p="StyleColor.cs" t="Include" />
+            <e p="StyleProperty.cs" t="Include" />
+            <e p="StylePropertyId.cs" t="Include" />
             <e p="TextOverflow.cs" t="Include" />
             <e p="TextStyle.cs" t="Include" />
             <e p="UIBaseStyleGroup.cs" t="Include" />
@@ -356,12 +358,15 @@
             <e p="UIStyleSet" t="Include">
               <e p="StyleState.cs" t="Include" />
               <e p="UIStyleSet.BorderRadius.cs" t="Include" />
-              <e p="UIStyleSet.Constraints.cs" t="Include" />
               <e p="UIStyleSet.ContentBox.cs" t="Include" />
               <e p="UIStyleSet.cs" t="Include" />
-              <e p="UIStyleSet.Dimensions.cs" t="Include" />
+              <e p="UIStyleSet.FlexItem.cs" t="Include" />
+              <e p="UIStyleSet.FlexLayout.cs" t="Include" />
+              <e p="UIStyleSet.GridItem.cs" t="Include" />
+              <e p="UIStyleSet.GridLayout.cs" t="Include" />
               <e p="UIStyleSet.Layout.cs" t="Include" />
               <e p="UIStyleSet.Paint.cs" t="Include" />
+              <e p="UIStyleSet.Size.cs" t="Include" />
               <e p="UIStyleSet.StyleDefinition.cs" t="Include" />
               <e p="UIStyleSet.Text.cs" t="Include" />
               <e p="UIStyleSet.Transform.cs" t="Include" />
@@ -451,12 +456,14 @@
           <e p="todo.txt" t="Include" />
           <e p="UIRoot.cs" t="Include" />
           <e p="Util" t="Include">
+            <e p="ArrayPool.cs" t="Include" />
             <e p="ArrayUtil.cs" t="Include" />
             <e p="BitUtil.cs" t="Include" />
             <e p="ColorUtil.cs" t="Include" />
             <e p="FloatUtil.cs" t="Include" />
             <e p="IntUtil.cs" t="Include" />
             <e p="KeyCodeUtil.cs" t="Include" />
+            <e p="LightList.cs" t="Include" />
             <e p="ListPool.cs" t="Include" />
             <e p="MeasurementVector2.cs" t="Include" />
             <e p="ObjectPool.cs" t="Include" />

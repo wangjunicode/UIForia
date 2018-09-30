@@ -1,3 +1,5 @@
+using System.Collections.Generic;
+
 namespace Rendering {
 
     public partial class UIStyleSet {

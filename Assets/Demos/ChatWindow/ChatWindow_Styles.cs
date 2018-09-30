@@ -21,10 +21,8 @@ public class ChatWindow_Styles {
                 direction = LayoutDirection.Row,
                 mainAxisAlignment = MainAxisAlignment.SpaceBetween
             },
-            dimensions = new Dimensions() {
-                width = new UIMeasurement(1f, UIUnit.ParentSize),
-                height = new UIMeasurement(40f)
-            },
+            PreferredWidth = new UIMeasurement(1f, UIUnit.ParentSize),
+            PreferredHeight = new UIMeasurement(40f),
             paint = new Paint() {
                 backgroundColor = Color.red
             }

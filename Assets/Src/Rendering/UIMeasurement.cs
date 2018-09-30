@@ -1,13 +1,21 @@
 using System.Diagnostics;
+using System.Runtime.InteropServices;
+using JetBrains.Annotations;
 using Rendering;
 
 namespace Src {
 
+//    todo -- make varieties of UIMeasurement w/ conversions for different scenarios, ie only fixed + percent but no content    
+//    public struct UIFixedLengthMeasurement { }
+    
     [DebuggerDisplay("{unit}({value})")]
+    [StructLayout(LayoutKind.Explicit)]
     public struct UIMeasurement {
 
         public readonly float value;
         public readonly UIUnit unit;
+        
+        
 
         public UIMeasurement(float value, UIUnit unit = UIUnit.Pixel) {
             this.value = value;
@@ -24,6 +32,7 @@ namespace Src {
             this.unit = unit;
         }
 
+        [Pure]
         [DebuggerStepThrough]
         public bool IsDefined() {
             return FloatUtil.IsDefined(value);
@@ -38,7 +47,7 @@ namespace Src {
         public static UIMeasurement Auto => new UIMeasurement(1f, UIUnit.ParentContentArea);
         public static UIMeasurement Parent100 => new UIMeasurement(1f, UIUnit.ParentSize);
         public static UIMeasurement Content100 => new UIMeasurement(1f, UIUnit.Content);
-        public static UIMeasurement Unset => new UIMeasurement(FloatUtil.UnsetFloatValue);
+        public static UIMeasurement Unset => new UIMeasurement(FloatUtil.UnsetValue);
 
         public bool Equals(UIMeasurement other) {
             return value.Equals(other.value) && unit == other.unit;
@@ -61,7 +70,7 @@ namespace Src {
             }
             return self.value == other.value && self.unit == other.unit;
         }
-
+        
         public static bool operator !=(UIMeasurement self, UIMeasurement other) {
             return !(self == other);
         }
@@ -76,6 +85,10 @@ namespace Src {
 
         public static implicit operator UIMeasurement(double value) {
             return new UIMeasurement((float) value, UIUnit.Pixel);
+        }
+
+        public static UIMeasurement Decode(int value, int unit) {
+            return new UIMeasurement(FloatUtil.DecodeToFloat(value), (UIUnit)unit);
         }
 
     }

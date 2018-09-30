@@ -24,7 +24,7 @@ namespace Src.StyleBindings.Text {
         }
 
         public override void Apply(UIStyle style, UITemplateContext context) {
-            style.textStyle.whiteSpace = expression.EvaluateTyped(context);
+            style.WhitespaceMode = expression.EvaluateTyped(context);
         }
 
         public override void Apply(UIStyleSet styleSet, UITemplateContext context) {

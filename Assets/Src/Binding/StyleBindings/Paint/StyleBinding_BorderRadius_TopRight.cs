@@ -5,27 +5,24 @@ namespace Src.StyleBindings {
 
     public class StyleBinding_BorderRadius_TopRight : StyleBinding {
 
-        private readonly Expression<float> expression;
+        private readonly Expression<UIMeasurement> expression;
 
-        public StyleBinding_BorderRadius_TopRight(StyleState state, Expression<float> expression) : base(RenderConstants.BorderRadiusTopRight, state) {
+        public StyleBinding_BorderRadius_TopRight(StyleState state, Expression<UIMeasurement> expression) : base(RenderConstants.BorderRadiusTopRight, state) {
             this.expression = expression;
         }
 
         public override void Execute(UIElement element, UITemplateContext context) {
-            float borderRadius = expression.EvaluateTyped(context);
-            float currentBorderRadius = element.style.GetBorderRadiusTopRight(state);
+            if (!element.style.IsInState(state)) return;
+            
+            UIMeasurement borderRadius = expression.EvaluateTyped(context);
+            UIMeasurement currentBorderRadius = element.style.computedStyle.RareData.borderRadiusTopRight;
             if (borderRadius != currentBorderRadius) {
                 element.style.SetBorderRadiusTopRight(borderRadius, state);
             }
         }
 
         public override void Apply(UIStyle style, UITemplateContext context) {
-            style.borderRadius = new BorderRadius(
-                style.borderRadius.topLeft,
-                expression.EvaluateTyped(context),
-                style.borderRadius.bottomRight,
-                style.borderRadius.bottomLeft
-            );
+            style.BorderRadiusTopRight = expression.EvaluateTyped(context);
         }
 
         public override void Apply(UIStyleSet styleSet, UITemplateContext context) {

@@ -1,273 +1,169 @@
+using Src;
 using Src.Extensions;
+using Src.Util;
 using UnityEngine;
 
 namespace Rendering {
 
     public partial class UIStyleSet {
 
-        public TextStyle textStyle {
-            get { return computedStyle.textStyle; }
-            set { SetTextStyle(value, StyleState.Normal); }
-        }
-
-        public Color textColor {
-            get { return computedStyle.textStyle.color; }
-            set { SetTextColor(value, StyleState.Normal); }
-        }
-
-        public Font font {
-            get { return computedStyle.textStyle.font; }
-            set { SetFont(value, StyleState.Normal); }
-        }
-
-        public int fontSize {
-            get { return computedStyle.textStyle.fontSize; }
-            set { SetFontSize(value, StyleState.Normal); }
-        }
-
-        public FontStyle fontStyle {
-            get { return computedStyle.textStyle.fontStyle; }
-            set { SetFontStyle(value, StyleState.Normal); }
-        }
-
-        public TextAnchor textAnchor {
-            get { return computedStyle.textStyle.alignment; }
-            set { SetTextAnchor(value, StyleState.Normal); }
-        }
-
-        public HorizontalWrapMode textWrap {
-            get { return computedStyle.textStyle.horizontalOverflow; }
-            set { SetTextWrapHorizontal(value, StyleState.Normal); }
-        }
-
-        public VerticalWrapMode textOverflow {
-            get { return computedStyle.textStyle.verticalOverflow; }
-            set { SetTextWrapVertical(value, StyleState.Normal); }
-        }
-
-        public WhitespaceMode whiteSpace {
-            get { return computedStyle.textStyle.whiteSpace; }
-            set { SetWhitespace(value, StyleState.Normal); }
-        }
-
-        public TextStyle GetTextStyle(StyleState state) {
-            return GetStyle(state).textStyle;
-        }
-
-        public void SetTextStyle(TextStyle newStyle, StyleState state) {
-            GetOrCreateStyle(state).textStyle = newStyle;
-            changeHandler.SetTextStyle(element, textStyle);
-        }
 
         public Color GetTextColor(StyleState state) {
-            return GetStyle(state).textStyle.color;
+            StyleProperty property = GetPropertyValueInState(StylePropertyId.TextColor, state);
+            return property.IsDefined
+                ? (Color) new StyleColor(property.valuePart0)
+                : ColorUtil.UnsetValue;
         }
-
+        
         public void SetTextColor(Color color, StyleState state) {
-//            UIStyle style = GetOrCreateStyle(state);
-//            style.textStyle.color = color;
-//            if (textColor == color) {
-//                changeHandler.SetTextStyle(element, textStyle);
-//            }
-            UIStyle targetStyle = GetOrCreateStyle(state);
-            targetStyle.textStyle.color = color;
-
-            // no changes needed if target state is not active
-            if ((state & currentState) == 0) {
-                return;
+            UIStyle style = GetOrCreateInstanceStyle(state);
+            style.TextColor = color;
+            if ((state & currentState) != 0 && style == GetActiveStyleForProperty(StylePropertyId.TextColor)) {
+                computedStyle.TextColor = color;
             }
-
-            UIStyle activeStyle = FindActiveStyleWithoutDefault((s) => s.textStyle.color.IsDefined());
-
-            if (!color.IsDefined()) {
-                ownTextStyle.color = activeStyle?.textStyle.color ?? ColorUtil.UnsetValue;
-                styleSystem.SetFontColor(element, color);
-                changeHandler.SetTextStyle(element, computedStyle.textStyle);
-                return;
-            }
-
-            if (targetStyle != activeStyle) {
-                return;
-            }
-            
-            if (ownTextStyle.color == color) {
-                return;
-            }
-            
-            ownTextStyle.color = color;
-            styleSystem.SetFontColor(element, color);
-            changeHandler.SetTextStyle(element, computedStyle.textStyle);
         }
 
-        public Font GetFont(StyleState state) {
-            return GetStyle(state).textStyle.font;
+        public AssetPointer<Font> GetFont(StyleState state) {
+            StyleProperty property = GetPropertyValueInState(StylePropertyId.TextFontAsset, state);
+            return property.IsDefined
+                ? new AssetPointer<Font>(AssetType.Texture, property.valuePart1)
+                : new AssetPointer<Font>(AssetType.Texture, IntUtil.UnsetValue);
         }
 
-        public void SetFont(Font newFont, StyleState state) {
-            UIStyle style = GetOrCreateStyle(state);
-            style.textStyle.font = newFont;
-            if (font == newFont) {
-                changeHandler.SetTextStyle(element, textStyle);
+        public void SetFont(AssetPointer<Font> newFont, StyleState state) {
+            UIStyle style = GetOrCreateInstanceStyle(state);
+            style.FontAsset = newFont;
+            if ((state & currentState) != 0 && style == GetActiveStyleForProperty(StylePropertyId.TextFontAsset)) {
+                computedStyle.FontAsset = newFont;
             }
         }
 
         public int GetFontSize(StyleState state) {
-            return GetStyle(state).textStyle.fontSize;
+            StyleProperty property = GetPropertyValueInState(StylePropertyId.TextFontSize, state);
+            return property.IsDefined
+                ? property.valuePart0
+                : IntUtil.UnsetValue;
         }
 
         public void SetFontSize(int newFontSize, StyleState state) {
-            // if new value is unset -> 
-            //    if we have a different applied font style (ie hover, base style, whatever)
-            //        set ownTextStyle.fontSize to that and update font tree
-            // if new value is not unset
-            //    if the input state is active
-            //        get the current style that the topmost font size comes from
-            //        if that style is the state target (state is equal and type is instance)
-            //            setOwnTextStyle.fontSize
-            //            update font tree
-            //        else
-            //            return
-            
-            // set state's fontSize to new value
-            UIStyle targetStyle = GetOrCreateStyle(state);
-            targetStyle.textStyle.fontSize = newFontSize;
-
-            // no changes needed if target state is not active
-            if ((state & currentState) == 0) {
-                return;
-            }
-
-            UIStyle activeStyle = FindActiveStyleWithoutDefault((s) => IntUtil.IsDefined(s.textStyle.fontSize));
-
-            if (!IntUtil.IsDefined(newFontSize)) {
-                ownTextStyle.fontSize = activeStyle?.textStyle.fontSize ?? IntUtil.UnsetValue;
-                styleSystem.SetFontSize(element, newFontSize);
-                changeHandler.SetTextStyle(element, computedStyle.textStyle);
-                return;
-            }
-
-            if (targetStyle != activeStyle) {
-                return;
-            }
-            
-            if (ownTextStyle.fontSize == newFontSize) {
-                return;
-            }
-            
-            ownTextStyle.fontSize = newFontSize;
-            styleSystem.SetFontSize(element, newFontSize);
-            changeHandler.SetTextStyle(element, computedStyle.textStyle);
-            
-        }
-
-        public FontStyle GetFontStyle(StyleState state) {
-            return GetStyle(state).textStyle.fontStyle;
-        }
-
-        public void SetFontStyle(FontStyle newFontStyle, StyleState state) {
-            UIStyle style = GetOrCreateStyle(state);
-            style.textStyle.fontStyle = newFontStyle;
-            FontStyle computed = GetComputedFontStyle();
-            FontStyle current = computedStyle.textStyle.fontStyle;
-            if (current != newFontStyle && computed == newFontStyle) {
-                changeHandler.SetTextStyle(element, textStyle);
+            UIStyle style = GetOrCreateInstanceStyle(state);
+            style.FontSize = newFontSize;
+            if ((state & currentState) != 0 && style == GetActiveStyleForProperty(StylePropertyId.TextFontSize)) {
+                computedStyle.FontSize = newFontSize;
             }
         }
 
-        public TextAnchor GetTextAnchor(StyleState state) {
-            return GetStyle(state).textStyle.alignment;
+        public TextUtil.FontStyle GetFontStyle(StyleState state) {
+            StyleProperty property = GetPropertyValueInState(StylePropertyId.TextFontStyle, state);
+            return property.IsDefined
+                ? (TextUtil.FontStyle)property.valuePart0
+                : TextUtil.FontStyle.Unset;
         }
 
-        public void SetTextAnchor(TextAnchor newTextAnchor, StyleState state) {
-            UIStyle style = GetOrCreateStyle(state);
-            style.textStyle.alignment = newTextAnchor;
-            computedStyle.textStyle.alignment = GetComputedTextAnchor();
-            if (textAnchor == newTextAnchor) {
-                changeHandler.SetTextStyle(element, textStyle);
+        public void SetFontStyle(TextUtil.FontStyle newFontStyle, StyleState state) {
+            UIStyle style = GetOrCreateInstanceStyle(state);
+            style.FontStyle = newFontStyle;
+            if ((state & currentState) != 0 && style == GetActiveStyleForProperty(StylePropertyId.TextFontStyle)) {
+                computedStyle.FontStyle = newFontStyle;
             }
         }
 
-        public WhitespaceMode GetWhitespace(StyleState state) {
-            return GetStyle(state).textStyle.whiteSpace;
+        public TextUtil.TextAnchor GetTextAnchor(StyleState state) {
+            StyleProperty property = GetPropertyValueInState(StylePropertyId.TextAnchor, state);
+            return property.IsDefined
+                ? (TextUtil.TextAnchor)property.valuePart0
+                : TextUtil.TextAnchor.Unset;
         }
 
-        public void SetWhitespace(WhitespaceMode newWhitespace, StyleState state) {
-            UIStyle style = GetOrCreateStyle(state);
-            style.textStyle.whiteSpace = newWhitespace;
-            computedStyle.textStyle.whiteSpace = GetComputedWhitespaceMode();
-            if (whiteSpace == newWhitespace) {
-                changeHandler.SetTextStyle(element, textStyle);
+        public void SetTextAnchor(TextUtil.TextAnchor newTextAnchor, StyleState state) {
+            UIStyle style = GetOrCreateInstanceStyle(state);
+            style.TextAnchor = newTextAnchor;
+            if ((state & currentState) != 0 && style == GetActiveStyleForProperty(StylePropertyId.TextAnchor)) {
+                computedStyle.TextAnchor = newTextAnchor;
             }
         }
 
-        public HorizontalWrapMode GetTextWrapHorizontal(StyleState state) {
-            return GetStyle(state).textStyle.horizontalOverflow;
-        }
-
-        public void SetTextWrapHorizontal(HorizontalWrapMode newWrapMode, StyleState state) {
-            UIStyle style = GetOrCreateStyle(state);
-            style.textStyle.horizontalOverflow = newWrapMode;
-            if (textWrap == newWrapMode) {
-                changeHandler.SetTextStyle(element, textStyle);
-            }
-        }
-
-        public VerticalWrapMode GetTextWrapVertical(StyleState state) {
-            return GetStyle(state).textStyle.verticalOverflow;
-        }
-
-        public void SetTextWrapVertical(VerticalWrapMode newWrapMode, StyleState state) {
-            UIStyle style = GetOrCreateStyle(state);
-            style.textStyle.verticalOverflow = newWrapMode;
-            if (textOverflow == newWrapMode) {
-                changeHandler.SetTextStyle(element, textStyle);
-            }
-        }
-
-        private TextStyle GetComputedText() {
-            return new TextStyle(
-                GetComputedFontColor(),
-                GetComputedFont(),
-                GetComputedFontSize(),
-                GetComputedFontStyle(),
-                GetComputedTextAnchor(),
-                GetComputedWhitespaceMode(),
-                GetComputedHorizontalTextWrap(),
-                GetComputedVerticalTextOverflow()
-            );
-        }
-
-        private Color GetComputedFontColor() {
-            return FindActiveStyle(s => s.textStyle.color.IsDefined()).textStyle.color;
-        }
-
-        private Font GetComputedFont() {
-            return FindActiveStyle(s => s.textStyle.font != null).textStyle.font;
-        }
-
-        private int GetComputedFontSize() {
-            return FindActiveStyle((s) => s.textStyle.fontSize != IntUtil.UnsetValue).textStyle.fontSize;
-        }
-
-        private FontStyle GetComputedFontStyle() {
-            return FindActiveStyle((s) => (int) s.textStyle.fontStyle != -1).textStyle.fontStyle;
-        }
-
-        private TextAnchor GetComputedTextAnchor() {
-            return FindActiveStyle((s) => (int) s.textStyle.alignment != -1).textStyle.alignment;
-        }
-
-        private HorizontalWrapMode GetComputedHorizontalTextWrap() {
-            return FindActiveStyle((s) => (int) s.textStyle.horizontalOverflow != -1).textStyle.horizontalOverflow;
-        }
-
-        private VerticalWrapMode GetComputedVerticalTextOverflow() {
-            return FindActiveStyle((s) => (int) s.textStyle.verticalOverflow != -1).textStyle.verticalOverflow;
-        }
-
-        private WhitespaceMode GetComputedWhitespaceMode() {
-            return FindActiveStyle((s) => s.textStyle.whiteSpace != WhitespaceMode.Unset).textStyle.whiteSpace;
-        }
+//        public WhitespaceMode GetWhitespace(StyleState state) {
+//            return GetStyle(state).textStyle.whiteSpace;
+//        }
+//
+//        public void SetWhitespace(WhitespaceMode newWhitespace, StyleState state) {
+//            UIStyle style = GetOrCreateInstanceStyle(state);
+//            style.textStyle.whiteSpace = newWhitespace;
+//            computedStyle.textStyle.whiteSpace = GetComputedWhitespaceMode();
+//            if (whiteSpace == newWhitespace) {
+//                styleSystem.SetTextStyle(element, textStyle);
+//            }
+//        }
+//
+//        public HorizontalWrapMode GetTextWrapHorizontal(StyleState state) {
+//            return GetStyle(state).textStyle.horizontalOverflow;
+//        }
+//
+//        public void SetTextWrapHorizontal(HorizontalWrapMode newWrapMode, StyleState state) {
+//            UIStyle style = GetOrCreateInstanceStyle(state);
+//            style.textStyle.horizontalOverflow = newWrapMode;
+//            if (textWrap == newWrapMode) {
+//                styleSystem.SetTextStyle(element, textStyle);
+//            }
+//        }
+//
+//        public VerticalWrapMode GetTextWrapVertical(StyleState state) {
+//            return GetStyle(state).textStyle.verticalOverflow;
+//        }
+//
+//        public void SetTextWrapVertical(VerticalWrapMode newWrapMode, StyleState state) {
+//            UIStyle style = GetOrCreateInstanceStyle(state);
+//            style.textStyle.verticalOverflow = newWrapMode;
+//            if (textOverflow == newWrapMode) {
+//                styleSystem.SetTextStyle(element, textStyle);
+//            }
+//        }
+//
+//        private TextStyle GetComputedText() {
+//            return new TextStyle(
+//                GetComputedFontColor(),
+//                GetComputedFont(),
+//                GetComputedFontSize(),
+//                GetComputedFontStyle(),
+//                GetComputedTextAnchor(),
+//                GetComputedWhitespaceMode(),
+//                GetComputedHorizontalTextWrap(),
+//                GetComputedVerticalTextOverflow()
+//            );
+//        }
+//
+//        private Color GetComputedFontColor() {
+//            return FindActiveStyle(s => s.textStyle.color.IsDefined()).textStyle.color;
+//        }
+//
+//        private Font GetComputedFont() {
+//            return FindActiveStyle(s => s.textStyle.font != null).textStyle.font;
+//        }
+//
+//        private int GetComputedFontSize() {
+//            return FindActiveStyle((s) => s.textStyle.fontSize != IntUtil.UnsetValue).textStyle.fontSize;
+//        }
+//
+//        private FontStyle GetComputedFontStyle() {
+//            return FindActiveStyle((s) => (int) s.textStyle.fontStyle != -1).textStyle.fontStyle;
+//        }
+//
+//        private TextAnchor GetComputedTextAnchor() {
+//            return FindActiveStyle((s) => (int) s.textStyle.alignment != -1).textStyle.alignment;
+//        }
+//
+//        private HorizontalWrapMode GetComputedHorizontalTextWrap() {
+//            return FindActiveStyle((s) => (int) s.textStyle.horizontalOverflow != -1).textStyle.horizontalOverflow;
+//        }
+//
+//        private VerticalWrapMode GetComputedVerticalTextOverflow() {
+//            return FindActiveStyle((s) => (int) s.textStyle.verticalOverflow != -1).textStyle.verticalOverflow;
+//        }
+//
+//        private WhitespaceMode GetComputedWhitespaceMode() {
+//            return FindActiveStyle((s) => s.textStyle.whiteSpace != WhitespaceMode.Unset).textStyle.whiteSpace;
+//        }
 
     }
 

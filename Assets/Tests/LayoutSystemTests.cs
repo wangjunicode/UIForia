@@ -35,9 +35,7 @@ public class LayoutSystemTests {
             [ExportStyle("child1")]
             public static UIStyle Style1() {
                 return new UIStyle() {
-                    layoutConstraints = new LayoutConstraints() {
-                        minWidth = 300f
-                    }
+                    MinWidth = 300f
                 };
             }
 

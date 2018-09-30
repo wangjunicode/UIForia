@@ -12,7 +12,9 @@ namespace Src.StyleBindings {
         }
 
         public override void Execute(UIElement element, UITemplateContext context) {
-            ContentBoxRect value = element.style.GetPadding(state);
+            if (!element.style.IsInState(state)) return;
+
+            ContentBoxRect value = element.style.computedStyle.padding;
             ContentBoxRect newValue = expression.EvaluateTyped(context);
             if (value != newValue) {
                 element.style.SetPadding(value, state);
@@ -24,7 +26,11 @@ namespace Src.StyleBindings {
         }
 
         public override void Apply(UIStyle style, UITemplateContext context) {
-            style.padding = expression.EvaluateTyped(context);
+            ContentBoxRect padding = expression.EvaluateTyped(context);
+            style.PaddingTop = padding.top;
+            style.PaddingRight = padding.right;
+            style.PaddingBottom = padding.bottom;
+            style.PaddingLeft = padding.left;
         }
 
         public override void Apply(UIStyleSet styleSet, UITemplateContext context) {

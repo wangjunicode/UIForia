@@ -12,10 +12,12 @@ namespace Src.StyleBindings {
         }
 
         public override void Execute(UIElement element, UITemplateContext context) {
-            int value = element.style.GetGrowthFactor(state);
+            if (!element.style.IsInState(state)) return;
+
+            int value = element.style.computedStyle.flexGrowthFactor;
             int newValue = expression.EvaluateTyped(context);
             if (value != newValue) {
-                element.style.SetGrowthFactor(value, state);
+                element.style.SetFlexItemGrowFactor(value, state);
             }
         }
 
@@ -24,11 +26,11 @@ namespace Src.StyleBindings {
         }
 
         public override void Apply(UIStyle style, UITemplateContext context) {
-            style.layoutConstraints.growthFactor = expression.EvaluateTyped(context);
+            style.FlexItemGrowthFactor = expression.EvaluateTyped(context);
         }
 
         public override void Apply(UIStyleSet styleSet, UITemplateContext context) {
-            styleSet.SetGrowthFactor(expression.EvaluateTyped(context), state);
+            styleSet.SetFlexItemGrowFactor(expression.EvaluateTyped(context), state);
         }
 
     }

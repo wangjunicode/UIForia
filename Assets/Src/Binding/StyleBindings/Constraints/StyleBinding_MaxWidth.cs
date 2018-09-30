@@ -24,7 +24,7 @@ namespace Src.StyleBindings.Src.StyleBindings {
         }
 
         public override void Apply(UIStyle style, UITemplateContext context) {
-            style.layoutConstraints.maxWidth = expression.EvaluateTyped(context);
+            style.MaxWidth = expression.EvaluateTyped(context);
         }
 
         public override void Apply(UIStyleSet styleSet, UITemplateContext context) {

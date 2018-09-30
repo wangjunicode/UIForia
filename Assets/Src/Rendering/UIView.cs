@@ -169,6 +169,7 @@ public abstract class UIView {
         for (int i = 0; i < systems.Count; i++) {
             systems[i].OnElementDestroyed(element);
         }
+
     }
 
     public virtual void OnDestroy() { }

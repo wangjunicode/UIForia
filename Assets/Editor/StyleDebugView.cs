@@ -10,8 +10,8 @@ namespace Src.Editor {
             GUI.enabled = false;
             UIElement element = ((StyleDebugView) target).element;
 
-            DrawMeasurement("Position X", element.style.positionX);
-            DrawMeasurement("Position Y", element.style.positionY);
+           // DrawMeasurement("Position X", element.style.positionX);
+           // DrawMeasurement("Position Y", element.style.positionY);
             
             EditorGUILayout.Space();
 

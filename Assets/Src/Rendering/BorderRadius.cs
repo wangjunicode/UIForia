@@ -1,15 +1,16 @@
 using System.Diagnostics;
 using JetBrains.Annotations;
+using Src;
 using UnityEngine;
 
 namespace Rendering {
 
     public struct BorderRadius {
 
-        public readonly float topLeft;
-        public readonly float topRight;
-        public readonly float bottomLeft;
-        public readonly float bottomRight;
+        public readonly UIMeasurement topLeft;
+        public readonly UIMeasurement topRight;
+        public readonly UIMeasurement bottomLeft;
+        public readonly UIMeasurement bottomRight;
 
         public BorderRadius(float radius) {
             this.topLeft = radius;
@@ -32,23 +33,30 @@ namespace Rendering {
             this.bottomLeft = bottomLeft;
         }
 
-        [PublicAPI]
-        public bool HasTopLeft => FloatUtil.IsDefined(topLeft);
-
-        [PublicAPI]
-        public bool HasTopRight => FloatUtil.IsDefined(topRight);
-
-        [PublicAPI]
-        public bool HasBottomLeft => FloatUtil.IsDefined(bottomLeft);
-
-        [PublicAPI]
-        public bool HasBottomRight => FloatUtil.IsDefined(bottomRight);
-
-        [PublicAPI]
-        [DebuggerStepThrough]
-        public bool IsDefined() {
-            return HasTopLeft || HasTopRight || HasBottomRight || HasBottomLeft;
+        public BorderRadius(UIMeasurement topLeft, UIMeasurement topRight, UIMeasurement bottomRight, UIMeasurement bottomLeft) {
+            this.topLeft = topLeft;
+            this.topRight = topRight;
+            this.bottomRight = bottomRight;
+            this.bottomLeft = bottomLeft;
         }
+        
+        [PublicAPI]
+        public bool HasTopLeft => topLeft.IsDefined();
+
+        [PublicAPI]
+        public bool HasTopRight => topRight.IsDefined();
+
+        [PublicAPI]
+        public bool HasBottomLeft => bottomLeft.IsDefined();
+
+        [PublicAPI]
+        public bool HasBottomRight => bottomRight.IsDefined();
+
+//        [PublicAPI]
+//        [DebuggerStepThrough]
+//        public bool IsDefined() {
+//            return HasTopLeft || HasTopRight || HasBottomRight || HasBottomLeft;
+//        }
 
         [PublicAPI]
         [DebuggerStepThrough]
@@ -75,22 +83,22 @@ namespace Rendering {
         }
 
         [PublicAPI]
-        public static BorderRadius Unset => new BorderRadius(FloatUtil.UnsetFloatValue);
+        public static BorderRadius Unset => new BorderRadius(FloatUtil.UnsetValue);
 
         [DebuggerStepThrough]
         public static implicit operator BorderRadius(Vector4 vec4) {
             return new BorderRadius(vec4.x, vec4.y, vec4.z, vec4.w);
         }
 
-        [DebuggerStepThrough]
-        public static implicit operator Vector4(BorderRadius radius) {
-            return new Vector4(
-                FloatUtil.IsDefined(radius.topLeft) ? radius.topLeft : 0,
-                FloatUtil.IsDefined(radius.topRight) ? radius.topRight : 0,
-                FloatUtil.IsDefined(radius.bottomRight) ? radius.bottomRight : 0,
-                FloatUtil.IsDefined(radius.bottomLeft) ? radius.bottomLeft : 0
-            );
-        }
+//        [DebuggerStepThrough]
+//        public static implicit operator Vector4(BorderRadius radius) {
+//            return new Vector4(
+//                FloatUtil.IsDefined(radius.topLeft) ? radius.topLeft : 0,
+//                FloatUtil.IsDefined(radius.topRight) ? radius.topRight : 0,
+//                FloatUtil.IsDefined(radius.bottomRight) ? radius.bottomRight : 0,
+//                FloatUtil.IsDefined(radius.bottomLeft) ? radius.bottomLeft : 0
+//            );
+//        }
 
         [DebuggerStepThrough]
         public static bool operator ==(BorderRadius self, BorderRadius other) {
@@ -102,9 +110,9 @@ namespace Rendering {
             return !self.Equals(other);
         }
 
-        public float[] ToFloatArray() {
-            return new [] {topLeft, topRight, bottomRight, bottomLeft};
-        }
+//        public float[] ToFloatArray() {
+//            return new [] {topLeft, topRight, bottomRight, bottomLeft};
+//        }
 
     }
 

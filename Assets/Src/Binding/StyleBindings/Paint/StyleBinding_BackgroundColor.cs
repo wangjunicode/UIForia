@@ -21,7 +21,7 @@ namespace Src.StyleBindings {
         }
 
         public override void Apply(UIStyle style, UITemplateContext context) {
-            style.paint.backgroundColor = expression.EvaluateTyped(context);
+            style.BackgroundColor = expression.EvaluateTyped(context);
         }
 
         public override void Apply(UIStyleSet styleSet, UITemplateContext context) {

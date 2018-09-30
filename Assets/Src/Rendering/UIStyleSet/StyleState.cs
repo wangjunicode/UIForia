@@ -5,12 +5,12 @@ namespace Rendering {
     [Flags]
     public enum StyleType {
 
-        Default = 1 << 0, 
+        Default = 1 << 0,
         Shared = 1 << 1,
         Instance = 1 << 2
 
     }
-    
+
     [Flags]
     public enum StyleState {
 
@@ -21,6 +21,7 @@ namespace Rendering {
         Disabled = 1 << 3,
         Focused = 1 << 4,
 
+        All = Normal | Hover | Active | Disabled | Focused
 //        Instance = 1 << 5,
 //        Base = 1 << 6,
 //        Default = 1 << 7,

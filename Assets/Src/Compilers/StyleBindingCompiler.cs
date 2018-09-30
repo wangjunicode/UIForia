@@ -107,7 +107,7 @@ namespace Src.Compilers {
             switch (targetState.property) {
                 // Paint
                 case RenderConstants.BackgroundImage:
-                    return new StyleBinding_BackgroundImage(targetState.state, Compile<Texture2D>(value));
+                    return new StyleBinding_BackgroundImage(targetState.state, Compile<AssetPointer<Texture2D>>(value));
 
                 case RenderConstants.BackgroundColor:
                     return new StyleBinding_BackgroundColor(targetState.state,
@@ -125,16 +125,16 @@ namespace Src.Compilers {
                     ));
 
                 case RenderConstants.BorderRadiusTopLeft:
-                    return new StyleBinding_BorderRadius_TopLeft(targetState.state, Compile<float>(value));
+                    return new StyleBinding_BorderRadius_TopLeft(targetState.state, Compile<UIMeasurement>(value));
 
                 case RenderConstants.BorderRadiusTopRight:
-                    return new StyleBinding_BorderRadius_TopRight(targetState.state, Compile<float>(value));
+                    return new StyleBinding_BorderRadius_TopRight(targetState.state, Compile<UIMeasurement>(value));
 
                 case RenderConstants.BorderRadiusBottomRight:
-                    return new StyleBinding_BorderRadius_BottomRight(targetState.state, Compile<float>(value));
+                    return new StyleBinding_BorderRadius_BottomRight(targetState.state, Compile<UIMeasurement>(value));
 
                 case RenderConstants.BorderRadiusBottomLeft:
-                    return new StyleBinding_BorderRadius_BottomLeft(targetState.state, Compile<float>(value));
+                    return new StyleBinding_BorderRadius_BottomLeft(targetState.state, Compile<UIMeasurement>(value));
 
                 // Transform
                 case RenderConstants.Translation:
@@ -142,13 +142,13 @@ namespace Src.Compilers {
 
                 case RenderConstants.Rotation:
                     throw new NotImplementedException();
-                
+
                 case RenderConstants.Pivot:
                     throw new NotImplementedException();
-                
+
                 case RenderConstants.Scale:
-                    throw  new NotImplementedException();
-                
+                    throw new NotImplementedException();
+
                 // Rect
                 case RenderConstants.Size:
                     return new StyleBinding_Dimensions(targetState.state, Compile<Dimensions>(
@@ -227,13 +227,13 @@ namespace Src.Compilers {
                 // Layout
 
                 case RenderConstants.MainAxisAlignment:
-                    return new StyleBinding_MainAxisAlignment(targetState.state, Compile<MainAxisAlignment>(value, mainAxisAlignmentSource));
+                    return new StyleBinding_FlexLayoutMainAxisAlignment(targetState.state, Compile<MainAxisAlignment>(value, mainAxisAlignmentSource));
 
                 case RenderConstants.CrossAxisAlignment:
-                    return new StyleBinding_CrossAxisAlignment(targetState.state, Compile<CrossAxisAlignment>(value, crossAxisAlignmentSource));
+                    return new StyleBinding_FlexLayoutCrossAxisAlignment(targetState.state, Compile<CrossAxisAlignment>(value, crossAxisAlignmentSource));
 
                 case RenderConstants.LayoutDirection:
-                    return new StyleBinding_LayoutDirection(targetState.state, Compile<LayoutDirection>(value, layoutDirectionSource));
+                    return new StyleBinding_FlexLayoutDirection(targetState.state, Compile<LayoutDirection>(value, layoutDirectionSource));
 
                 case RenderConstants.LayoutFlow:
                     return new StyleBinding_LayoutFlowType(targetState.state, Compile<LayoutFlowType>(value, layoutFlowSource));
@@ -242,7 +242,7 @@ namespace Src.Compilers {
                     return new StyleBinding_LayoutType(targetState.state, Compile<LayoutType>(value, layoutTypeSource));
 
                 case RenderConstants.LayoutWrap:
-                    return new StyleBinding_LayoutWrap(targetState.state, Compile<LayoutWrap>(value, layoutWrapSource));
+                    return new StyleBinding_FlexLayoutWrap(targetState.state, Compile<LayoutWrap>(value, layoutWrapSource));
 
                 // Padding
 
@@ -250,16 +250,34 @@ namespace Src.Compilers {
                     return new StyleBinding_Padding(targetState.state, Compile<ContentBoxRect>(value, rect1Source, rect2Source, rect4Source));
 
                 case RenderConstants.PaddingTop:
-                    return new StyleBinding_PaddingTop(targetState.state, Compile<float>(value));
+                    return new StyleBinding_PaddingTop(targetState.state, Compile<UIMeasurement>(value,
+                        autoKeywordSource,
+                        pixelMeasurementSource,
+                        viewportMeasurementSource,
+                        parentMeasurementSource,
+                        contentMeasurementSource
+                    ));
 
                 case RenderConstants.PaddingRight:
-                    return new StyleBinding_PaddingRight(targetState.state, Compile<float>(value));
+                    return new StyleBinding_PaddingRight(targetState.state, Compile<UIMeasurement>(value, autoKeywordSource,
+                        pixelMeasurementSource,
+                        viewportMeasurementSource,
+                        parentMeasurementSource,
+                        contentMeasurementSource));
 
                 case RenderConstants.PaddingBottom:
-                    return new StyleBinding_PaddingBottom(targetState.state, Compile<float>(value));
+                    return new StyleBinding_PaddingBottom(targetState.state, Compile<UIMeasurement>(value, autoKeywordSource,
+                        pixelMeasurementSource,
+                        viewportMeasurementSource,
+                        parentMeasurementSource,
+                        contentMeasurementSource));
 
                 case RenderConstants.PaddingLeft:
-                    return new StyleBinding_PaddingLeft(targetState.state, Compile<float>(value));
+                    return new StyleBinding_PaddingLeft(targetState.state, Compile<UIMeasurement>(value, autoKeywordSource,
+                        pixelMeasurementSource,
+                        viewportMeasurementSource,
+                        parentMeasurementSource,
+                        contentMeasurementSource));
 
                 // Border
 
@@ -267,16 +285,20 @@ namespace Src.Compilers {
                     return new StyleBinding_Border(targetState.state, Compile<ContentBoxRect>(value, rect1Source, rect2Source, rect4Source));
 
                 case RenderConstants.BorderTop:
-                    return new StyleBinding_BorderTop(targetState.state, Compile<float>(value));
+                    return new StyleBinding_BorderTop(targetState.state, Compile<UIMeasurement>(value, autoKeywordSource,
+                        pixelMeasurementSource
+                    ));
 
                 case RenderConstants.BorderRight:
-                    return new StyleBinding_BorderRight(targetState.state, Compile<float>(value));
+                    return new StyleBinding_BorderRight(targetState.state, Compile<UIMeasurement>(value,
+                        pixelMeasurementSource
+                    ));
 
                 case RenderConstants.BorderBottom:
-                    return new StyleBinding_BorderBottom(targetState.state, Compile<float>(value));
+                    return new StyleBinding_BorderBottom(targetState.state, Compile<UIMeasurement>(value, pixelMeasurementSource));
 
                 case RenderConstants.BorderLeft:
-                    return new StyleBinding_PaddingLeft(targetState.state, Compile<float>(value));
+                    return new StyleBinding_PaddingLeft(targetState.state, Compile<UIMeasurement>(value, pixelMeasurementSource));
 
                 // Margin
 
@@ -284,16 +306,32 @@ namespace Src.Compilers {
                     return new StyleBinding_Margin(targetState.state, Compile<ContentBoxRect>(value, rect1Source, rect2Source, rect4Source));
 
                 case RenderConstants.MarginTop:
-                    return new StyleBinding_MarginTop(targetState.state, Compile<float>(value));
+                    return new StyleBinding_MarginTop(targetState.state, Compile<UIMeasurement>(value,
+                        pixelMeasurementSource,
+                        viewportMeasurementSource,
+                        parentMeasurementSource,
+                        contentMeasurementSource));
 
                 case RenderConstants.MarginRight:
-                    return new StyleBinding_MarginRight(targetState.state, Compile<float>(value));
+                    return new StyleBinding_MarginRight(targetState.state, Compile<UIMeasurement>(value,
+                        pixelMeasurementSource,
+                        viewportMeasurementSource,
+                        parentMeasurementSource,
+                        contentMeasurementSource));
 
                 case RenderConstants.MarginBottom:
-                    return new StyleBinding_MarginBottom(targetState.state, Compile<float>(value));
+                    return new StyleBinding_MarginBottom(targetState.state, Compile<UIMeasurement>(value,
+                        pixelMeasurementSource,
+                        viewportMeasurementSource,
+                        parentMeasurementSource,
+                        contentMeasurementSource));
 
                 case RenderConstants.MarginLeft:
-                    return new StyleBinding_MarginLeft(targetState.state, Compile<float>(value));
+                    return new StyleBinding_MarginLeft(targetState.state, Compile<UIMeasurement>(value,
+                        pixelMeasurementSource,
+                        viewportMeasurementSource,
+                        parentMeasurementSource,
+                        contentMeasurementSource));
 
                 // Text
 

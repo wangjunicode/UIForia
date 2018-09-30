@@ -50,6 +50,16 @@ namespace Src.Systems {
         public event Action<UIElement, LayoutWrap, LayoutWrap> onLayoutWrapChanged;
         public event Action<UIElement, LayoutDirection> onLayoutDirectionChanged;
         public event Action<UIElement, LayoutType> onLayoutTypeChanged;
+        public event Action<UIElement, UIMeasurement, UIMeasurement> onMinWidthChanged;
+        public event Action<UIElement, UIMeasurement, UIMeasurement> onMaxWidthChanged;
+        public event Action<UIElement, UIMeasurement, UIMeasurement> onPreferredWidthChanged;
+        public event Action<UIElement, UIMeasurement, UIMeasurement> onMinHeightChanged;
+        public event Action<UIElement, UIMeasurement, UIMeasurement> onMaxHeightChanged;
+        public event Action<UIElement, UIMeasurement, UIMeasurement> onPreferredHeightChanged;
+        public event Action<UIElement, int, int> onGrowthFactorChanged;
+        public event Action<UIElement, int, int> onShrinkFactorChanged;
+        public event Action<UIElement, int> onFlexItemOrderOverrideChanged;
+        public event Action<UIElement, CrossAxisAlignment, CrossAxisAlignment> onFlexItemSelfAlignmentChanged;
 
         private readonly SkipTree<UIElement> fontTree;
 
@@ -71,7 +81,7 @@ namespace Src.Systems {
                 List<UIBaseStyleGroup> baseStyles = elementData.baseStyles;
                 List<StyleBinding> constantStyleBindings = elementData.constantStyleBindings;
 
-                element.style = new UIStyleSet(element, this, this);
+                element.style = new UIStyleSet(element, this);
                 for (var i = 0; i < constantStyleBindings.Count; i++) {
                     constantStyleBindings[i].Apply(element.style, context);
                 }
@@ -101,7 +111,7 @@ namespace Src.Systems {
 
         public void OnElementCreated(UIElement element) {
             if (element.style == null) {
-                element.style = new UIStyleSet(element, this, this);
+                element.style = new UIStyleSet(element, this);
             }
         }
 
@@ -119,7 +129,7 @@ namespace Src.Systems {
 
         public void OnElementParentChanged(UIElement element, UIElement oldParent, UIElement newParent) {
             if (element.style == null) {
-                element.style = new UIStyleSet(element, this, this);
+                element.style = new UIStyleSet(element, this);
             }
         }
 
@@ -187,11 +197,57 @@ namespace Src.Systems {
             onLayoutTypeChanged?.Invoke(element, layoutType);
         }
 
+        public void SetMinWidth(UIElement element, UIMeasurement newMinWidth, UIMeasurement oldMinWidth) {
+            onMinWidthChanged?.Invoke(element, newMinWidth, oldMinWidth);
+        }
+
+        public void SetMaxWidth(UIElement element, UIMeasurement newMaxWidth, UIMeasurement oldMaxWidth) {
+            onMaxWidthChanged?.Invoke(element, newMaxWidth, oldMaxWidth);
+        }
+
+        public void SetPreferredWidth(UIElement element, UIMeasurement newPrefWidth, UIMeasurement oldPrefWidth) {
+            onPreferredWidthChanged?.Invoke(element, newPrefWidth, oldPrefWidth);
+        }
+
+        public void SetMinHeight(UIElement element, UIMeasurement newMinHeight, UIMeasurement oldMinHeight) {
+            onMinHeightChanged?.Invoke(element, newMinHeight, oldMinHeight);
+        }
+
+        public void SetMaxHeight(UIElement element, UIMeasurement newMaxHeight, UIMeasurement oldMaxHeight) {
+            onMaxHeightChanged?.Invoke(element, newMaxHeight, oldMaxHeight);
+        }
+
+        public void SetPreferredHeight(UIElement element, UIMeasurement newPrefHeight, UIMeasurement oldPrefHeight) {
+            onPreferredHeightChanged?.Invoke(element, newPrefHeight, oldPrefHeight);
+        }
+
+        public void SetShrinkFactor(UIElement element, int factor, int oldFactor) {
+            throw new NotImplementedException();
+        }
+
+        public void SetGrowthFactor(UIElement element, int factor, int oldFactor) {
+            throw new NotImplementedException();
+        }
+
+        public void SetFlexOrderOverride(UIElement element, int order, int oldOrder) {
+            throw new NotImplementedException();
+        }
+
+        public void SetFlexSelfAlignment(UIElement element, CrossAxisAlignment alignment, CrossAxisAlignment oldAlignment) {
+            throw new NotImplementedException();
+        }
+
         // todo all nodes are currently in the font tree -- bad!
-        internal int SetFontSize(UIElement element, int fontSize) {
+        public int SetFontSize(UIElement element, int fontSize) {
             if (!IntUtil.IsDefined(fontSize)) {
                 fontSize = element.parent?.style.fontSize ?? UIStyle.Default.textStyle.fontSize;
             }
+            
+            // on font property changed
+            // traverse child style tree
+            // if descendent.defines property(propertyId)
+            // stop
+            // else descendent.computedStyle[propertyId] = value
 
             ValueTuple<StyleSystem, int> v = ValueTuple.Create(this, fontSize);
 
@@ -210,7 +266,7 @@ namespace Src.Systems {
             return fontSize;
         }
 
-        internal Color SetFontColor(UIElement element, Color color) {
+        public Color SetFontColor(UIElement element, Color color) {
             if (!color.IsDefined()) {
                 color = element.parent?.style.textColor ?? UIStyle.Default.textStyle.color;
             }
@@ -240,3 +296,4 @@ namespace Src.Systems {
     }
 
 }
+

@@ -28,8 +28,8 @@ namespace Src.Layout {
                     continue;
                 }
 
-                float x = GetPixelValue(child.element.style.positionX, contentAreaWidth, viewport.width);
-                float y = GetPixelValue(child.element.style.positionY, contentAreaHeight, viewport.height);
+                float x = 0;// GetPixelValue(child.element.style.positionX, contentAreaWidth, viewport.width);
+                float y = 0; //GetPixelValue(child.element.style.positionY, contentAreaHeight, viewport.height);
                 
                 float width = child.GetPreferredWidth(currentNode.rect.width.unit, contentAreaWidth, viewport.width);
 
@@ -53,16 +53,16 @@ namespace Src.Layout {
                 LayoutNode child = children[i];
 
                 if (child.element.isDisabled) continue;
-
-                float x = GetPixelValue(child.element.style.positionX, contentSize, viewportSize);
-                float width = child.GetPreferredWidth(node.element.style.dimensions.width.unit, contentSize, viewportSize);
-                
-                if (child.rect.width.unit == UIUnit.ParentContentArea) {
-                    width = contentSize - x;
-                }
-                
-                minX = Mathf.Min(minX, x);
-                maxX = Mathf.Max(maxX, x + width);
+//
+//                float x = GetPixelValue(child.element.style.positionX, contentSize, viewportSize);
+//                float width = child.GetPreferredWidth(node.element.style.dimensions.width.unit, contentSize, viewportSize);
+//                
+//                if (child.rect.width.unit == UIUnit.ParentContentArea) {
+//                    width = contentSize - x;
+//                }
+//                
+//                minX = Mathf.Min(minX, x);
+//                maxX = Mathf.Max(maxX, x + width);
             }
 
             return Mathf.Max(0, maxX - minX);
@@ -72,15 +72,15 @@ namespace Src.Layout {
             List<LayoutNode> children = node.children;
             float minY = 0;
             float maxY = 0;
-            for (int i = 0; i < children.Count; i++) {
-                LayoutNode child = children[i];
-
-                if (child.element.isDisabled) continue;
-
-                float y = GetPixelValue(child.element.style.positionY, adjustedWidth, viewportSize);
-                minY = Mathf.Min(minY, y);
-                maxY = Mathf.Max(maxY, y + child.GetPreferredHeight(node.element.style.dimensions.height.unit, adjustedWidth, parentWidth, viewportSize));
-            }
+//            for (int i = 0; i < children.Count; i++) {
+//                LayoutNode child = children[i];
+//
+//                if (child.element.isDisabled) continue;
+//
+//                float y = GetPixelValue(child.element.style.positionY, adjustedWidth, viewportSize);
+//                minY = Mathf.Min(minY, y);
+//                maxY = Mathf.Max(maxY, y + child.GetPreferredHeight(node.element.style.dimensions.height.unit, adjustedWidth, parentWidth, viewportSize));
+//            }
 
             return Mathf.Max(0, maxY - minY);
         }

@@ -12,7 +12,9 @@ namespace Src.StyleBindings {
         }
 
         public override void Execute(UIElement element, UITemplateContext context) {
-            ContentBoxRect value = element.style.GetBorder(state);
+            if (!element.style.IsInState(state)) return;
+
+            ContentBoxRect value = element.style.computedStyle.border;
             ContentBoxRect newValue = expression.EvaluateTyped(context);
             if (value != newValue) {
                 element.style.SetBorder(value, state);
@@ -24,7 +26,11 @@ namespace Src.StyleBindings {
         }
 
         public override void Apply(UIStyle style, UITemplateContext context) {
-            style.border = expression.EvaluateTyped(context);
+            ContentBoxRect border = expression.EvaluateTyped(context);
+            style.BorderTop = border.top;
+            style.BorderRight = border.right;
+            style.BorderBottom = border.bottom;
+            style.BorderLeft = border.left;
         }
 
         public override void Apply(UIStyleSet styleSet, UITemplateContext context) {

@@ -32,11 +32,11 @@ public class StyleTests {
         s.OnElementCreatedFromTemplate(data);
         UIElement element = data.element;
 
-        Assert.AreEqual(UIStyle.Default.textStyle.fontSize, element.style.fontSize);
+        Assert.AreEqual(DefaultStyleValues.fontSize, element.style.computedStyle.FontSize);
 
-        element.style.fontSize = UIStyle.Default.textStyle.fontSize + 1;
+        element.style.SetFontSize(DefaultStyleValues.fontSize + 1, StyleState.Normal);
         
-        Assert.AreEqual(UIStyle.Default.textStyle.fontSize + 1, element.style.fontSize);
+        Assert.AreEqual(DefaultStyleValues.fontSize + 1, element.style.computedStyle.FontSize);
 
     }
     
@@ -49,13 +49,13 @@ public class StyleTests {
         s.OnElementCreatedFromTemplate(data);
         UIElement element = data.element;
 
-        Assert.AreEqual(UIStyle.Default.textStyle.fontSize, element.style.fontSize);
-        element.style.fontSize = UIStyle.Default.textStyle.fontSize + 1;
-        Assert.AreEqual(UIStyle.Default.textStyle.fontSize + 1, element.style.fontSize);
+        Assert.AreEqual(DefaultStyleValues.fontSize, element.style.computedStyle.FontSize);
+        element.style.computedStyle.FontSize = DefaultStyleValues.fontSize + 1;
+        Assert.AreEqual(DefaultStyleValues.fontSize + 1, element.style.computedStyle.FontSize);
 
-        element.style.fontSize = IntUtil.UnsetValue;
+        element.style.computedStyle.FontSize = IntUtil.UnsetValue;
         
-        Assert.AreEqual(UIStyle.Default.textStyle.fontSize, element.style.fontSize);
+        Assert.AreEqual(DefaultStyleValues.fontSize, element.style.computedStyle.FontSize);
 
     }
 
@@ -69,11 +69,11 @@ public class StyleTests {
         UIElement child = data.children[0].element;
 
         
-        Assert.AreEqual(UIStyle.Default.textStyle.fontSize, child.style.fontSize);
+        Assert.AreEqual(DefaultStyleValues.fontSize, child.style.computedStyle.FontSize);
         
-        element.style.fontSize = UIStyle.Default.textStyle.fontSize + 1;
+        element.style.computedStyle.FontSize = DefaultStyleValues.fontSize + 1;
         
-        Assert.AreEqual(UIStyle.Default.textStyle.fontSize + 1, child.style.fontSize);
+        Assert.AreEqual(DefaultStyleValues.fontSize + 1, child.style.computedStyle.FontSize);
 
     }
     
@@ -87,14 +87,14 @@ public class StyleTests {
         UIElement child = data.children[0].element;
         UIElement grandChild = data.children[0].children[0].element;
 
-        int defaultSize = UIStyle.Default.textStyle.fontSize;
+        int defaultSize = DefaultStyleValues.fontSize;
 
-        child.style.fontSize = defaultSize + 1;
-        element.style.fontSize = defaultSize - 1;
+        child.style.computedStyle.FontSize = defaultSize + 1;
+        element.style.computedStyle.FontSize = defaultSize - 1;
         
-        Assert.AreEqual(defaultSize + 1, child.style.fontSize);
-        Assert.AreEqual(defaultSize + 1, grandChild.style.fontSize);
-        Assert.AreEqual(defaultSize - 1, element.style.fontSize);
+        Assert.AreEqual(defaultSize + 1, child.style.computedStyle.FontSize);
+        Assert.AreEqual(defaultSize + 1, grandChild.style.computedStyle.FontSize);
+        Assert.AreEqual(defaultSize - 1, element.style.computedStyle.FontSize);
         
     }
 
@@ -105,11 +105,11 @@ public class StyleTests {
         MetaData data = view.TestCreate();
         s.OnElementCreatedFromTemplate(data);
         UIElement element = data.element;
-        int defaultSize = UIStyle.Default.textStyle.fontSize;
+        int defaultSize = DefaultStyleValues.fontSize;
 
         element.style.SetFontSize(defaultSize + 1, StyleState.Hover);
         
-        Assert.AreEqual(defaultSize, element.style.fontSize);
+        Assert.AreEqual(defaultSize, element.style.computedStyle.FontSize);
     }
     
     [Test]
@@ -120,14 +120,14 @@ public class StyleTests {
         s.OnElementCreatedFromTemplate(data);
         UIElement element = data.element;
         UIElement child = data.children[0].element;
-        int defaultSize = UIStyle.Default.textStyle.fontSize;
+        int defaultSize = DefaultStyleValues.fontSize;
             
         element.style.EnterState(StyleState.Hover);
         element.style.SetFontSize(defaultSize + 1, StyleState.Hover);
         element.style.SetFontSize(defaultSize + 2, StyleState.Normal);
         
-        Assert.AreEqual(defaultSize + 1, element.style.fontSize);
-        Assert.AreEqual(defaultSize + 1, child.style.fontSize);
+        Assert.AreEqual(defaultSize + 1, element.style.computedStyle.FontSize);
+        Assert.AreEqual(defaultSize + 1, child.style.computedStyle.FontSize);
 
     }
 
@@ -139,18 +139,18 @@ public class StyleTests {
         s.OnElementCreatedFromTemplate(data);
         UIElement element = data.element;
         UIElement child = data.children[0].element;
-        int defaultSize = UIStyle.Default.textStyle.fontSize;
+        int defaultSize = DefaultStyleValues.fontSize;
             
         element.style.SetFontSize(defaultSize + 1, StyleState.Hover);
         element.style.SetFontSize(defaultSize + 2, StyleState.Normal);
         
-        Assert.AreEqual(defaultSize + 2, element.style.fontSize);
-        Assert.AreEqual(defaultSize + 2, child.style.fontSize);
+        Assert.AreEqual(defaultSize + 2, element.style.computedStyle.FontSize);
+        Assert.AreEqual(defaultSize + 2, child.style.computedStyle.FontSize);
         
         element.style.EnterState(StyleState.Hover);
         
-        Assert.AreEqual(defaultSize + 1, element.style.fontSize);
-        Assert.AreEqual(defaultSize + 1, child.style.fontSize);
+        Assert.AreEqual(defaultSize + 1, element.style.computedStyle.FontSize);
+        Assert.AreEqual(defaultSize + 1, child.style.computedStyle.FontSize);
         
     }
     
@@ -162,20 +162,20 @@ public class StyleTests {
         s.OnElementCreatedFromTemplate(data);
         UIElement element = data.element;
         UIElement child = data.children[0].element;
-        int defaultSize = UIStyle.Default.textStyle.fontSize;
+        int defaultSize = DefaultStyleValues.fontSize;
         
         element.style.EnterState(StyleState.Hover);
             
         element.style.SetFontSize(defaultSize + 1, StyleState.Hover);
         element.style.SetFontSize(defaultSize + 2, StyleState.Normal);
         
-        Assert.AreEqual(defaultSize + 1, element.style.fontSize);
-        Assert.AreEqual(defaultSize + 1, child.style.fontSize);
+        Assert.AreEqual(defaultSize + 1, element.style.computedStyle.FontSize);
+        Assert.AreEqual(defaultSize + 1, child.style.computedStyle.FontSize);
         
         element.style.ExitState(StyleState.Hover);
         
-        Assert.AreEqual(defaultSize + 2, element.style.fontSize);
-        Assert.AreEqual(defaultSize + 2, child.style.fontSize);
+        Assert.AreEqual(defaultSize + 2, element.style.computedStyle.FontSize);
+        Assert.AreEqual(defaultSize + 2, child.style.computedStyle.FontSize);
         
     }
 
@@ -187,18 +187,18 @@ public class StyleTests {
         s.OnElementCreatedFromTemplate(data);
         UIElement element = data.element;
         UIElement child = data.children[0].element;
-        int defaultSize = UIStyle.Default.textStyle.fontSize;
+        int defaultSize = DefaultStyleValues.fontSize;
         
         UIStyle baseStyle = new UIStyle();
-        baseStyle.textStyle.fontSize = defaultSize - 5;
+        baseStyle.FontSize = defaultSize - 5;
         
         element.style.AddBaseStyle(baseStyle, StyleState.Normal);
         
-        Assert.AreEqual(defaultSize - 5, element.style.fontSize);
+        Assert.AreEqual(defaultSize - 5, element.style.computedStyle.FontSize);
         
         element.style.RemoveBaseStyle(baseStyle);
         
-        Assert.AreEqual(defaultSize, element.style.fontSize);
+        Assert.AreEqual(defaultSize, element.style.computedStyle.FontSize);
         
     }
 
@@ -209,7 +209,7 @@ public class StyleTests {
         MetaData data = view.TestCreate();
         s.OnElementCreatedFromTemplate(data);
         UIElement element = data.element;
-        int defaultSize = UIStyle.Default.textStyle.fontSize;
+        int defaultSize = DefaultStyleValues.fontSize;
         int changeCount = 0;
         
         // 1 change call per child that changes
@@ -218,11 +218,11 @@ public class StyleTests {
             Assert.AreEqual(defaultSize + 1, prop.fontSize);
         };
         
-        Assert.AreEqual(UIStyle.Default.textStyle.fontSize, element.style.fontSize);
+        Assert.AreEqual(DefaultStyleValues.fontSize, element.style.computedStyle.FontSize);
 
-        element.style.fontSize = defaultSize + 1;
+        element.style.computedStyle.FontSize = defaultSize + 1;
         
-        Assert.AreEqual(defaultSize + 1, element.style.fontSize);
+        Assert.AreEqual(defaultSize + 1, element.style.computedStyle.FontSize);
         Assert.AreEqual(5, changeCount);
     }
 
@@ -235,7 +235,7 @@ public class StyleTests {
         UIElement element = data.element;
         UIElement child = data.children[0].element;
 
-        int defaultSize = UIStyle.Default.textStyle.fontSize;
+        int defaultSize = DefaultStyleValues.fontSize;
         int changeCount = 0;
         
         s.onFontPropertyChanged += (cbChild, prop) => {
@@ -245,11 +245,11 @@ public class StyleTests {
             }
         };
         
-        Assert.AreEqual(defaultSize, child.style.fontSize);
+        Assert.AreEqual(defaultSize, child.style.computedStyle.FontSize);
         
-        element.style.fontSize = defaultSize + 1;
+        element.style.computedStyle.FontSize = defaultSize + 1;
         
-        Assert.AreEqual(defaultSize + 1, child.style.fontSize);
+        Assert.AreEqual(defaultSize + 1, child.style.computedStyle.FontSize);
         Assert.AreEqual(1, changeCount);
 
     }
@@ -261,16 +261,16 @@ public class StyleTests {
         MetaData data = view.TestCreate();
         s.OnElementCreatedFromTemplate(data);
         UIElement element = data.element;
-        int defaultSize = UIStyle.Default.textStyle.fontSize;
+        int defaultSize = DefaultStyleValues.fontSize;
         int changeCount = 0;
         
-        element.style.fontSize = defaultSize + 1;
+        element.style.computedStyle.FontSize = defaultSize + 1;
 
         s.onFontPropertyChanged += (id, prop) => {
             changeCount++;
         };
         
-        element.style.fontSize = defaultSize + 1;
+        element.style.computedStyle.FontSize = defaultSize + 1;
         
         Assert.AreEqual(0, changeCount);
     }

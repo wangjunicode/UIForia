@@ -71,20 +71,22 @@ namespace Rendering {
             }
 
             currentState |= state;
+
             if (appliedStyles == null) return;
+
             for (int i = 0; i < appliedStyles.Length; i++) {
-                if ((appliedStyles[i].state & state) != 0) {
-                    Refresh();
-                    return;
+                if ((appliedStyles[i].state != state)) {
+                    continue;
+                }
+
+                UIStyle style = appliedStyles[i].style;
+                IReadOnlyList<StyleProperty> properties = appliedStyles[i].style.Properties;
+                for (int j = 0; j < properties.Count; j++) {
+                    if (style == GetActiveStyleForProperty(properties[j].propertyId)) {
+                        computedStyle.SetProperty(properties[j]);
+                    }
                 }
             }
-            
-            // for each property in new state
-            // update computed if needed
-            // SetProperty();
-//            GetInstanceStyle(state);
-//            GetBaseStyle(state);
-
         }
 
         public bool IsInState(StyleState state) {
@@ -102,11 +104,27 @@ namespace Rendering {
             if (appliedStyles == null) return;
 
             for (int i = 0; i < appliedStyles.Length; i++) {
-                if ((appliedStyles[i].state & state) != 0) {
-                    Refresh();
-                    return;
+                if ((appliedStyles[i].state != state)) {
+                    continue;
+                }
+
+                IReadOnlyList<StyleProperty> properties = appliedStyles[i].style.Properties;
+                for (int j = 0; j < properties.Count; j++) {
+                    computedStyle.SetProperty(GetPropertyValueInState(properties[j].propertyId, currentState));
                 }
             }
+        }
+
+        private UIStyle GetStyleForState(StyleState state) {
+            if (appliedStyles == null) return null;
+
+            for (int i = 0; i < appliedStyles.Length; i++) {
+                if ((appliedStyles[i].state == state)) {
+                    return appliedStyles[i].style;
+                }
+            }
+
+            return null;
         }
 
         public bool HasHoverStyle => (containedStates & StyleState.Hover) != 0;
@@ -260,22 +278,6 @@ namespace Rendering {
 //            return UIStyle.Default;
 //        }
 
-        private UIStyle FindActiveStyleWithoutDefault(Func<UIStyle, bool> callback) {
-            if (appliedStyles == null) return null;
-
-            for (int i = 0; i < appliedStyles.Length; i++) {
-                if ((appliedStyles[i].state & currentState) == 0) {
-                    continue;
-                }
-
-                if (callback(appliedStyles[i].style)) {
-                    return appliedStyles[i].style;
-                }
-            }
-
-            return null;
-        }
-
         private StyleProperty GetPropertyValueInState(StylePropertyId propertyId, StyleState state) {
             for (int i = 0; i < appliedStyles.Length; i++) {
                 if ((appliedStyles[i].state & currentState) == 0) {
@@ -339,7 +341,6 @@ namespace Rendering {
         private static readonly HashSet<StylePropertyId> s_DefinedMap = new HashSet<StylePropertyId>();
 
         internal void Initialize() {
-                        
             for (int i = 0; i < appliedStyles.Length; i++) {
                 StyleEntry entry = appliedStyles[i];
                 if ((entry.state & currentState) == 0) {
@@ -354,7 +355,7 @@ namespace Rendering {
                     }
                 }
             }
-            
+
             s_DefinedMap.Clear();
         }
 
@@ -371,7 +372,7 @@ namespace Rendering {
                 ? UIMeasurement.Decode(property.valuePart0, property.valuePart1)
                 : UIMeasurement.Unset;
         }
-        
+
         internal void Refresh() {
             containedStates = StyleState.Normal;
 
@@ -382,6 +383,7 @@ namespace Rendering {
                     containedStates |= appliedStyles[i].state;
                 }
             }
+
             StyleState previousState = 0;
             for (int i = 0; i < appliedStyles.Length; i++) {
                 bool wasApplied = (appliedStyles[i].state & previousState) != 0;
@@ -416,7 +418,7 @@ namespace Rendering {
 
             return null;
         }
-        
+
 //        private UIStyle UpdateProperty(StylePropertyId stylePropertyId) {
 //            for (int i = 0; i < appliedStyles.Length; i++) {
 //                if ((appliedStyles[i].state & currentState) == 0) {

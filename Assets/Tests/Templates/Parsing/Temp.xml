@@ -6,8 +6,6 @@
     <Import path="./thing" as="blah"/>
     <Import path="./other/thing" as="thing"/>
     
-    <Style id="style0" extends="id" from="./path/to/thing"/>
-    
     <Contents> 
         dafeaf
         afea

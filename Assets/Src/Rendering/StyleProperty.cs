@@ -14,8 +14,6 @@ namespace Rendering {
 
         public bool IsDefined => IntUtil.IsDefined(valuePart0) && IntUtil.IsDefined(valuePart1);
 
-        public static StyleProperty Unset => new StyleProperty(0, IntUtil.UnsetValue, IntUtil.UnsetValue);
-
     }
 
 }

@@ -95,7 +95,7 @@ namespace Rendering {
 
             public UIMeasurement BorderRadiusTopLeft {
                 get { return borderRadiusTopLeft; }
-                set {
+                internal set {
                     if (borderRadiusTopLeft == value) return;
                     borderRadiusTopLeft = value;
                     styleSet.styleSystem.SetBorderRadius(styleSet.element, borderRadius);
@@ -104,7 +104,7 @@ namespace Rendering {
 
             public UIMeasurement BorderRadiusTopRight {
                 get { return borderRadiusTopRight; }
-                set {
+                internal set {
                     if (borderRadiusTopRight == value) return;
                     borderRadiusTopRight = value;
                     styleSet.styleSystem.SetBorderRadius(styleSet.element, borderRadius);
@@ -113,7 +113,7 @@ namespace Rendering {
 
             public UIMeasurement BorderRadiusBottomRight {
                 get { return borderRadiusBottomRight; }
-                set {
+                internal set {
                     if (borderRadiusBottomRight == value) return;
                     borderRadiusBottomRight = value;
                     styleSet.styleSystem.SetBorderRadius(styleSet.element, borderRadius);
@@ -122,7 +122,7 @@ namespace Rendering {
 
             public UIMeasurement BorderRadiusBottomLeft {
                 get { return borderRadiusBottomLeft; }
-                set {
+                internal set {
                     if (borderRadiusBottomLeft == value) return;
                     borderRadiusBottomLeft = value;
                     styleSet.styleSystem.SetBorderRadius(styleSet.element, borderRadius);
@@ -152,7 +152,7 @@ namespace Rendering {
 
         public Color BorderColor {
             get { return borderColor; }
-            set {
+            internal set {
                 if (value == borderColor) {
                     return;
                 }
@@ -164,7 +164,7 @@ namespace Rendering {
 
         public Color BackgroundColor {
             get { return backgroundColor; }
-            set {
+            internal set {
                 if (value == backgroundColor) {
                     return;
                 }
@@ -176,7 +176,7 @@ namespace Rendering {
 
         public AssetPointer<Texture2D> BackgroundImage {
             get { return backgroundImage; }
-            set {
+            internal set {
                 if (backgroundImage.id == value.id) {
                     return;
                 }
@@ -195,7 +195,7 @@ namespace Rendering {
 
         public Overflow OverflowX {
             get { return overflowX; }
-            set {
+            internal set {
                 if (value == overflowX) return;
                 overflowX = value;
                 styleSet.styleSystem.SetOverflowX(styleSet.element, overflowX);
@@ -204,7 +204,7 @@ namespace Rendering {
 
         public Overflow OverflowY {
             get { return overflowY; }
-            set {
+            internal set {
                 if (value == overflowY) return;
                 overflowY = value;
                 styleSet.styleSystem.SetOverflowY(styleSet.element, overflowY);
@@ -222,7 +222,7 @@ namespace Rendering {
 
         public int FlexItemOrder {
             get { return flexOrderOverride; }
-            set {
+            internal set {
                 if (value < 0) value = 0;
                 if (flexOrderOverride == value) return;
                 flexOrderOverride = value;
@@ -232,7 +232,7 @@ namespace Rendering {
 
         public int FlexItemGrowthFactor {
             get { return flexGrowthFactor; }
-            set {
+            internal set {
                 if (value < 0) value = 0;
                 if (flexGrowthFactor == value) return;
                 flexGrowthFactor = value;
@@ -242,7 +242,7 @@ namespace Rendering {
 
         public int FlexItemShrinkFactor {
             get { return flexShrinkFactor; }
-            set {
+            internal set {
                 if (value < 0) value = 0;
                 if (flexShrinkFactor == value) return;
                 flexShrinkFactor = value;
@@ -252,7 +252,7 @@ namespace Rendering {
 
         public CrossAxisAlignment FlexItemSelfAlignment {
             get { return flexSelfAlignment; }
-            set {
+            internal set {
                 if (value == flexSelfAlignment) return;
                 flexSelfAlignment = value;
                 styleSet.styleSystem.SetFlexItemProperties(styleSet.element);
@@ -270,7 +270,7 @@ namespace Rendering {
 
         public LayoutDirection FlexLayoutDirection {
             get { return flexLayoutDirection; }
-            set {
+            internal set {
                 if (flexLayoutDirection == value) return;
                 flexLayoutDirection = value;
                 styleSet.styleSystem.SetLayoutDirection(styleSet.element, flexLayoutDirection);
@@ -279,7 +279,7 @@ namespace Rendering {
 
         public LayoutWrap FlexLayoutWrap {
             get { return flexLayoutWrap; }
-            set {
+            internal set {
                 if (flexLayoutWrap == value) return;
                 flexLayoutWrap = value;
                 styleSet.styleSystem.SetLayoutWrap(styleSet.element, flexLayoutWrap);
@@ -288,7 +288,7 @@ namespace Rendering {
 
         public MainAxisAlignment FlexLayoutMainAxisAlignment {
             get { return flexLayoutMainAxisAlignment; }
-            set {
+            internal set {
                 if (flexLayoutMainAxisAlignment == value) return;
                 MainAxisAlignment oldAlignment = flexLayoutMainAxisAlignment;
                 flexLayoutMainAxisAlignment = value;
@@ -298,7 +298,7 @@ namespace Rendering {
 
         public CrossAxisAlignment FlexLayoutCrossAxisAlignment {
             get { return flexLayoutCrossAxisAlignment; }
-            set {
+            internal set {
                 if (flexLayoutCrossAxisAlignment == value) return;
                 CrossAxisAlignment oldAlignment = flexLayoutCrossAxisAlignment;
                 flexLayoutCrossAxisAlignment = value;
@@ -328,7 +328,7 @@ namespace Rendering {
 
         public UIMeasurement MinWidth {
             get { return minWidth; }
-            set {
+            internal set {
                 if (minWidth == value) return;
                 UIMeasurement old = minWidth;
                 minWidth = value;
@@ -338,7 +338,7 @@ namespace Rendering {
 
         public UIMeasurement MaxWidth {
             get { return maxWidth; }
-            set {
+            internal set {
                 if (maxWidth == value) return;
                 UIMeasurement old = maxWidth;
                 maxWidth = value;
@@ -348,7 +348,7 @@ namespace Rendering {
 
         public UIMeasurement PreferredWidth {
             get { return preferredWidth; }
-            set {
+            internal set {
                 if (preferredWidth == value) return;
                 UIMeasurement old = preferredWidth;
                 preferredWidth = value;
@@ -358,7 +358,7 @@ namespace Rendering {
 
         public UIMeasurement MinHeight {
             get { return minHeight; }
-            set {
+            internal set {
                 if (minHeight == value) return;
                 UIMeasurement old = minHeight;
                 minHeight = value;
@@ -368,7 +368,7 @@ namespace Rendering {
 
         public UIMeasurement MaxHeight {
             get { return maxHeight; }
-            set {
+            internal set {
                 if (maxHeight == value) return;
                 UIMeasurement old = maxHeight;
                 maxHeight = value;
@@ -378,7 +378,7 @@ namespace Rendering {
 
         public UIMeasurement PreferredHeight {
             get { return preferredHeight; }
-            set {
+            internal set {
                 if (preferredHeight == value) return;
                 UIMeasurement old = preferredHeight;
                 preferredHeight = value;
@@ -397,7 +397,7 @@ namespace Rendering {
 
         public UIMeasurement MarginTop {
             get { return marginTop; }
-            set {
+            internal set {
                 if (marginTop == value) return;
                 marginTop = value;
                 styleSet.styleSystem.SetMargin(styleSet.element, margin);
@@ -406,7 +406,7 @@ namespace Rendering {
 
         public UIMeasurement MarginRight {
             get { return marginRight; }
-            set {
+            internal set {
                 if (marginRight == value) return;
                 marginRight = value;
                 styleSet.styleSystem.SetMargin(styleSet.element, margin);
@@ -415,7 +415,7 @@ namespace Rendering {
 
         public UIMeasurement MarginBottom {
             get { return marginBottom; }
-            set {
+            internal set {
                 if (marginBottom == value) return;
                 marginBottom = value;
                 styleSet.styleSystem.SetMargin(styleSet.element, margin);
@@ -424,7 +424,7 @@ namespace Rendering {
 
         public UIMeasurement MarginLeft {
             get { return marginLeft; }
-            set {
+            internal set {
                 if (marginLeft == value) return;
                 marginLeft = value;
                 styleSet.styleSystem.SetMargin(styleSet.element, margin);
@@ -442,7 +442,7 @@ namespace Rendering {
 
         public UIMeasurement BorderTop {
             get { return borderTop; }
-            set {
+            internal set {
                 if (borderTop == value) return;
                 borderTop = value;
                 styleSet.styleSystem.SetBorder(styleSet.element, border);
@@ -451,7 +451,7 @@ namespace Rendering {
 
         public UIMeasurement BorderRight {
             get { return borderRight; }
-            set {
+            internal set {
                 if (borderRight == value) return;
                 borderRight = value;
                 styleSet.styleSystem.SetBorder(styleSet.element, border);
@@ -460,7 +460,7 @@ namespace Rendering {
 
         public UIMeasurement BorderBottom {
             get { return borderBottom; }
-            set {
+            internal set {
                 if (borderBottom == value) return;
                 borderBottom = value;
                 styleSet.styleSystem.SetBorder(styleSet.element, border);
@@ -469,7 +469,7 @@ namespace Rendering {
 
         public UIMeasurement BorderLeft {
             get { return borderLeft; }
-            set {
+            internal set {
                 if (borderLeft == value) return;
                 borderLeft = value;
                 styleSet.styleSystem.SetBorder(styleSet.element, border);
@@ -487,7 +487,7 @@ namespace Rendering {
 
         public UIMeasurement PaddingTop {
             get { return paddingTop; }
-            set {
+            internal set {
                 if (paddingTop == value) return;
                 paddingTop = value;
                 styleSet.styleSystem.SetPadding(styleSet.element, padding);
@@ -496,7 +496,7 @@ namespace Rendering {
 
         public UIMeasurement PaddingRight {
             get { return paddingRight; }
-            set {
+            internal set {
                 if (paddingRight == value) return;
                 paddingRight = value;
                 styleSet.styleSystem.SetPadding(styleSet.element, padding);
@@ -505,7 +505,7 @@ namespace Rendering {
 
         public UIMeasurement PaddingBottom {
             get { return paddingBottom; }
-            set {
+            internal set {
                 if (paddingBottom == value) return;
                 paddingBottom = value;
                 styleSet.styleSystem.SetPadding(styleSet.element, padding);
@@ -514,7 +514,7 @@ namespace Rendering {
 
         public UIMeasurement PaddingLeft {
             get { return paddingLeft; }
-            set {
+            internal set {
                 if (paddingLeft == value) return;
                 paddingLeft = value;
                 styleSet.styleSystem.SetPadding(styleSet.element, padding);
@@ -533,7 +533,7 @@ namespace Rendering {
 
         public Color TextColor {
             get { return textColor; }
-            set {
+            internal set {
                 if (textColor == value) return;
                 textColor = value;
                 styleSet.styleSystem.SetFontColor(styleSet.element, textColor);
@@ -542,7 +542,7 @@ namespace Rendering {
 
         public AssetPointer<Font> FontAsset {
             get { return fontAsset; }
-            set {
+            internal set {
                 if (fontAsset.id == value.id) return;
                 fontAsset = value;
                 styleSet.styleSystem.SetFontAsset(styleSet.element, fontAsset);
@@ -551,7 +551,7 @@ namespace Rendering {
 
         public int FontSize {
             get { return fontSize; }
-            set {
+            internal set {
                 if (fontSize == value) return;
                 fontSize = value;
                 styleSet.styleSystem.SetFontSize(styleSet.element, fontSize);
@@ -560,7 +560,7 @@ namespace Rendering {
 
         public TextUtil.FontStyle FontStyle {
             get { return fontStyle; }
-            set {
+            internal set {
                 if (fontStyle == value) return;
                 fontStyle = value;
                 styleSet.styleSystem.SetFontStyle(styleSet.element, fontStyle);
@@ -569,7 +569,7 @@ namespace Rendering {
 
         public TextUtil.TextAnchor TextAnchor {
             get { return textAnchor; }
-            set {
+            internal set {
                 if (textAnchor == value) return;
                 textAnchor = value;
                 styleSet.styleSystem.SetTextAnchor(styleSet.element, textAnchor);
@@ -590,7 +590,7 @@ namespace Rendering {
 
         public UIMeasurement TransformPositionX {
             get { return transformPositionX; }
-            set {
+            internal set {
                 if (value == UIMeasurement.Unset) value = DefaultStyleValues.transformPositionX;
                 if (transformPositionX == value) return;
                 transformPositionX = value;
@@ -600,7 +600,7 @@ namespace Rendering {
 
         public UIMeasurement TransformPositionY {
             get { return transformPositionY; }
-            set {
+            internal set {
                 if (value == UIMeasurement.Unset) value = DefaultStyleValues.transformPositionY;
                 if (transformPositionY == value) return;
                 transformPositionY = value;
@@ -610,7 +610,7 @@ namespace Rendering {
 
         public UIMeasurement TransformPivotX {
             get { return transformPivotX; }
-            set {
+            internal set {
                 if (value == UIMeasurement.Unset) value = DefaultStyleValues.transformPivotX;
                 if (transformPivotX == value) return;
                 transformPivotX = value;
@@ -620,7 +620,7 @@ namespace Rendering {
 
         public UIMeasurement TransformPivotY {
             get { return transformPivotY; }
-            set {
+            internal set {
                 if (value == UIMeasurement.Unset) value = DefaultStyleValues.transformPivotY;
                 if (transformPivotY == value) return;
                 transformPivotY = value;
@@ -630,7 +630,7 @@ namespace Rendering {
 
         public float TransformScaleX {
             get { return transformScaleX; }
-            set {
+            internal set {
                 if (!FloatUtil.IsDefined(value)) value = DefaultStyleValues.transformScaleX;
                 if (Mathf.Approximately(value, transformScaleX)) return;
                 transformScaleX = value;
@@ -640,7 +640,7 @@ namespace Rendering {
 
         public float TransformScaleY {
             get { return transformScaleY; }
-            set {
+            internal set {
                 if (!FloatUtil.IsDefined(value)) value = DefaultStyleValues.transformScaleY;
                 if (Mathf.Approximately(value, transformScaleY)) return;
                 transformScaleY = value;
@@ -650,7 +650,7 @@ namespace Rendering {
 
         public float TransformRotation {
             get { return transformRotation; }
-            set {
+            internal set {
                 if (!FloatUtil.IsDefined(value)) value = DefaultStyleValues.transformRotation;
                 if (Mathf.Approximately(value, transformRotation)) return;
                 transformRotation = value;
@@ -660,7 +660,7 @@ namespace Rendering {
 
         public MeasurementVector2 TransformPosition {
             get { return new MeasurementVector2(transformPositionX, transformPositionY); }
-            set {
+            internal set {
                 TransformPositionX = value.x;
                 TransformPositionY = value.y;
             }
@@ -672,7 +672,7 @@ namespace Rendering {
 
         public LayoutType LayoutType {
             get { return layoutType; }
-            set {
+            internal set {
                 if (layoutType == value) return;
                 layoutType = value;
                 styleSet.styleSystem.SetLayoutType(styleSet.element, layoutType);
@@ -687,6 +687,9 @@ namespace Rendering {
             int value0 = property.valuePart0;
             int value1 = property.valuePart1;
             switch (property.propertyId) {
+                case StylePropertyId.LayoutType:
+                    LayoutType = property.IsDefined ? (LayoutType) value0 : DefaultStyleValues.layoutType;
+                    break;
 #region Overflow
 
                 case StylePropertyId.OverflowX:
@@ -944,6 +947,11 @@ namespace Rendering {
 
 #endregion
 
+                case StylePropertyId.__TextPropertyStart__:
+                case StylePropertyId.__TextPropertyEnd__:
+                    break;
+                case StylePropertyId.IsInLayoutFlow:
+                    break;
                 default:
                     throw new ArgumentOutOfRangeException(nameof(property.propertyId), property.propertyId, null);
             }

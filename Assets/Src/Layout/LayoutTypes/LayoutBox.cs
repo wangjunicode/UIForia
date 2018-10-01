@@ -84,10 +84,10 @@ namespace Src.Layout.LayoutTypes {
         }
 
         public virtual void SetParent(LayoutBox parent) {
+            this.parent?.OnChildRemoved(this);
             this.parent = parent;
+            this.parent?.OnChildAddedChild(this);
         }
-
-       
 
         public virtual void OnChildMinWidthChanged(LayoutBox child) { }
         public virtual void OnChildMaxWidthChanged(LayoutBox child) { }
@@ -122,17 +122,15 @@ namespace Src.Layout.LayoutTypes {
             layoutSystem.RequestLayout(this);
         }
 
-        public virtual void AddChild(LayoutBox child) {
+        public virtual void OnChildAddedChild(LayoutBox child) {
             children.Add(child);
-            child.SetParent(this);
             layoutSystem.RequestLayout(this);
         }
         
-        public virtual void RemoveChild(LayoutBox child) {
+        public virtual void OnChildRemoved(LayoutBox child) {
             if (!children.Remove(child)) {
                 return;
             }
-            child.SetParent(null);
             layoutSystem.RequestLayout(this);
         }
 

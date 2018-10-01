@@ -480,14 +480,14 @@ namespace Rendering {
         }
 
         public bool DefinesProperty(StylePropertyId propertyId) {
-            const int TextPropertyStart = (int) StylePropertyId.__TextPropertyStart__;
-            const int TextPropertyEnd = (int) StylePropertyId.__TextPropertyEnd__;
-
-            int intPropertyId = (int) propertyId;
-            if (intPropertyId > TextPropertyStart && intPropertyId < TextPropertyEnd) {
-                TextPropertyIdFlag flags = (TextPropertyIdFlag) (intPropertyId - TextPropertyStart);
-                return (m_DefinedTextProperties & flags) != 0;
-            }
+//            const int TextPropertyStart = (int) StylePropertyId.__TextPropertyStart__;
+//            const int TextPropertyEnd = (int) StylePropertyId.__TextPropertyEnd__;
+//
+//            int intPropertyId = (int) propertyId;
+//            if (intPropertyId > TextPropertyStart && intPropertyId < TextPropertyEnd) {
+//                TextPropertyIdFlag flags = (TextPropertyIdFlag) (intPropertyId - TextPropertyStart);
+//                return (m_DefinedTextProperties & flags) != 0;
+//            }
 
             for (int i = 0; i < m_StyleProperties.Count; i++) {
                 if (m_StyleProperties[i].propertyId == propertyId) return true;
@@ -507,15 +507,6 @@ namespace Rendering {
             }
 
             return UIMeasurement.Unset;
-        }
-
-        private void SetUIMeasurementProperty(StylePropertyId propertyId, UIMeasurement measurement) {
-            if (measurement.unit == UIUnit.Unset || !FloatUtil.IsDefined(measurement.value)) {
-                RemoveProperty(propertyId);
-            }
-            else {
-                SetProperty(propertyId, FloatUtil.EncodeToInt(measurement.value), (int) measurement.unit);
-            }
         }
 
         private void RemoveProperty(StylePropertyId propertyId) {
@@ -557,7 +548,16 @@ namespace Rendering {
             return property.IsDefined ? (Color) new StyleColor(property.valuePart0) : ColorUtil.UnsetValue;
         }
 
-        private void SetProperty(StylePropertyId propertyId, int value0, int value1 = 0) {
+        internal void SetUIMeasurementProperty(StylePropertyId propertyId, UIMeasurement measurement) {
+            if (measurement.unit == UIUnit.Unset || !FloatUtil.IsDefined(measurement.value)) {
+                RemoveProperty(propertyId);
+            }
+            else {
+                SetProperty(propertyId, FloatUtil.EncodeToInt(measurement.value), (int) measurement.unit);
+            }
+        }
+        
+        internal void SetProperty(StylePropertyId propertyId, int value0, int value1 = 0) {
             for (int i = 0; i < m_StyleProperties.Count; i++) {
                 if (m_StyleProperties[i].propertyId == propertyId) {
                     m_StyleProperties[i] = new StyleProperty(propertyId, value0, value1);
@@ -568,7 +568,7 @@ namespace Rendering {
             m_StyleProperties.Add(new StyleProperty(propertyId, value0, value1));
         }
 
-        private void SetIntProperty(StylePropertyId propertyId, int value) {
+        internal void SetIntProperty(StylePropertyId propertyId, int value) {
             if (!IntUtil.IsDefined(value)) {
                 RemoveProperty(propertyId);
                 return;
@@ -577,7 +577,7 @@ namespace Rendering {
             SetProperty(propertyId, value);
         }
 
-        private void SetFloatProperty(StylePropertyId propertyId, float value) {
+        internal void SetFloatProperty(StylePropertyId propertyId, float value) {
             if (!FloatUtil.IsDefined(value)) {
                 RemoveProperty(propertyId);
                 return;
@@ -586,7 +586,7 @@ namespace Rendering {
             SetProperty(propertyId, FloatUtil.EncodeToInt(value));
         }
 
-        private void SetEnumProperty(StylePropertyId propertyId, int value0) {
+        internal void SetEnumProperty(StylePropertyId propertyId, int value0) {
             if (value0 == 0 || !IntUtil.IsDefined(value0)) {
                 RemoveProperty(propertyId);
                 return;
@@ -595,7 +595,7 @@ namespace Rendering {
             SetProperty(propertyId, value0);
         }
 
-        private void SetColorProperty(StylePropertyId propertyId, Color color) {
+        internal void SetColorProperty(StylePropertyId propertyId, Color color) {
             if (!ColorUtil.IsDefined(color)) {
                 RemoveProperty(propertyId);
                 return;
@@ -605,57 +605,6 @@ namespace Rendering {
         }
 
 #endregion
-
-//        public static readonly UIStyle Default = new UIStyle("Default", string.Empty) {
-//            transform = new UITransform() {
-//                position = new MeasurementVector2(new UIMeasurement(0), new UIMeasurement()),
-//                pivot = new Vector2(),
-//                scale = new Vector2(1, 1),
-//                rotation = 0f
-//            },
-//          
-//            growthFactor = 0,
-//            shrinkFactor = 0,
-//
-//            layoutParameters = new LayoutParameters() {
-//                type = LayoutType.Flex,
-//                direction = LayoutDirection.Column,
-//                flow = LayoutFlowType.InFlow,
-//                crossAxisAlignment = CrossAxisAlignment.Default,
-//                mainAxisAlignment = MainAxisAlignment.Default,
-//                wrap = LayoutWrap.None
-//            },
-//            margin = new ContentBoxRect() {
-//                top = 0,
-//                right = 0,
-//                left = 0,
-//                bottom = 0
-//            },
-//            padding = new ContentBoxRect() {
-//                top = 0,
-//                right = 0,
-//                left = 0,
-//                bottom = 0
-//            },
-//            border = new ContentBoxRect() {
-//                top = 0,
-//                right = 0,
-//                left = 0,
-//                bottom = 0
-//            },
-//            borderRadius = BorderRadius.Unset,
-//            paint = Paint.Unset,
-//            textStyle = new TextStyle(
-//                Color.black,
-//                null,
-//                12,
-//                FontStyle.Normal,
-//                TextAnchor.UpperLeft,
-//                WhitespaceMode.Wrap,
-//                HorizontalWrapMode.Overflow,
-//                VerticalWrapMode.Overflow
-//            )
-//        };
 
     }
 

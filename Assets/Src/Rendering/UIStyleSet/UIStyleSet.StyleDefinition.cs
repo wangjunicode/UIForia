@@ -36,7 +36,11 @@ namespace Rendering {
                 if (state != StyleState.Normal) {
                     retn += 500;
 
-                    if ((state & StyleState.Hover) != 0) {
+                    if ((state & StyleState.Focused) != 0) {
+                        retn += 60;
+                    }
+                    
+                    else if ((state & StyleState.Hover) != 0) {
                         retn += 50;
                     }
 
@@ -47,10 +51,7 @@ namespace Rendering {
                     else if ((state & StyleState.Disabled) != 0) {
                         retn += 30;
                     }
-
-                    else if ((state & StyleState.Focused) != 0) {
-                        retn += 20;
-                    }
+                   
                 }
 
                 return retn;

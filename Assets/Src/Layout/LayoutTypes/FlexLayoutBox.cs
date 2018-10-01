@@ -17,6 +17,8 @@ namespace Src.Layout.LayoutTypes {
         public FlexLayoutBox(LayoutSystem2 layoutSystem, UIElement element)
             : base(layoutSystem, element) {
             tracks = ListPool<FlexTrack>.Get();
+            widths = ArrayPool<FlexItemAxis>.GetMinSize(4);
+            heights = ArrayPool<FlexItemAxis>.GetMinSize(4);
         }
 
         public override void RunLayout() {
@@ -30,12 +32,12 @@ namespace Src.Layout.LayoutTypes {
                 RunFullRowLayout();
             }
         }
-        
+
         private void RunFullColumnLayout() {
             int inFlowItemCount = 0;
             // allocated width / height is known at this point
             for (int i = 0; i < children.Count; i++) {
-                if (children[i].element.isEnabled) {//} && children[i].style.layoutParameters.flow != LayoutFlowType.OutOfFlow) {
+                if (children[i].element.isEnabled) { //} && children[i].style.layoutParameters.flow != LayoutFlowType.OutOfFlow) {
                     widths[inFlowItemCount] = new FlexItemAxis();
                     widths[inFlowItemCount].minSize = children[i].minWidth;
                     widths[inFlowItemCount].maxSize = children[i].maxWidth;
@@ -47,18 +49,18 @@ namespace Src.Layout.LayoutTypes {
                 }
             }
 
-            if (style.FlexLayoutWrap== LayoutWrap.Wrap) {
+            if (style.FlexLayoutWrap == LayoutWrap.Wrap) {
                 FillTracksWrapped(widths, inFlowItemCount, allocatedWidth);
             }
             else {
                 FillColumnTracksUnwrapped(widths, inFlowItemCount, allocatedWidth);
             }
         }
-        
+
         private void RunFullRowLayout() {
             int inFlowItemCount = 0;
             for (int i = 0; i < children.Count; i++) {
-                if (children[i].element.isEnabled ) { // }&& children[i].style.flow != LayoutFlowType.OutOfFlow) {
+                if (children[i].element.isEnabled) { // }&& children[i].style.flow != LayoutFlowType.OutOfFlow) {
                     widths[inFlowItemCount] = new FlexItemAxis();
                     widths[inFlowItemCount].childIndex = inFlowItemCount;
                     widths[inFlowItemCount].outputSize = Mathf.Max(children[i].minWidth, Mathf.Min(children[i].preferredWidth, children[i].maxWidth));
@@ -75,7 +77,7 @@ namespace Src.Layout.LayoutTypes {
             }
 
             float targetSize = allocatedHeight;
-            
+
             FlexTrack currentTrack = new FlexTrack();
             for (int i = 0; i < inFlowItemCount; i++) {
                 float size = heights[i].preferredSize;
@@ -119,9 +121,9 @@ namespace Src.Layout.LayoutTypes {
             //set heights
             // for each track grow/shrink to try to fit allocated height
             // after grow / shrink 
-            
+
             // if width grows height should shrink (for text at least)
-            
+
             // get max track height
             // place next item in row at preferred height for width
             // when doing row layout we never shrink widths so we can safely use largest preferred width in track as sizing
@@ -174,7 +176,6 @@ namespace Src.Layout.LayoutTypes {
             else { }
         }
 
-
         private void FillTracksWrapped(FlexItemAxis[] items, int itemCount, float targetSize) {
             FlexTrack currentTrack = new FlexTrack();
             for (int i = 0; i < itemCount; i++) {
@@ -222,6 +223,16 @@ namespace Src.Layout.LayoutTypes {
             tracks.Add(currentTrack);
         }
 
+        public override void OnChildAddedChild(LayoutBox child) {
+            children.Add(child);
+            if (widths.Length <= children.Count) {
+                ArrayPool<FlexItemAxis>.Resize(ref widths, children.Count);
+            }
+
+            if (heights.Length <= children.Count) {
+                ArrayPool<FlexItemAxis>.Resize(ref heights, children.Count);
+            }
+        }
 
         private static float PositionCrossAxis(float axisOffset, FlexTrack track, FlexItemAxis[] items, CrossAxisAlignment crossAxisAlignment) {
             // todo -- respect individual align-cross-axis-self settings on children

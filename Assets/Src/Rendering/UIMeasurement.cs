@@ -9,14 +9,11 @@ namespace Src {
 //    public struct UIFixedLengthMeasurement { }
     
     [DebuggerDisplay("{unit}({value})")]
-    [StructLayout(LayoutKind.Explicit)]
     public struct UIMeasurement {
 
         public readonly float value;
-        public readonly UIUnit unit;
+        public readonly UIUnit unit;     
         
-        
-
         public UIMeasurement(float value, UIUnit unit = UIUnit.Pixel) {
             this.value = value;
             this.unit = unit;

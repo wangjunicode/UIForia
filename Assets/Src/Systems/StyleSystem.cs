@@ -83,7 +83,7 @@ namespace Src.Systems {
                 List<StyleBinding> constantStyleBindings = elementData.constantStyleBindings;
 
                 element.style = new UIStyleSet(element, this);
-                for (var i = 0; i < constantStyleBindings.Count; i++) {
+                for (int i = 0; i < constantStyleBindings.Count; i++) {
                     constantStyleBindings[i].Apply(element.style, context);
                 }
 
@@ -91,7 +91,7 @@ namespace Src.Systems {
                     element.style.AddBaseStyleGroup(baseStyles[i]);
                 }
 
-                element.style.Refresh();
+                element.style.Initialize();
             }
 
             // todo -- probably not the right move
@@ -187,7 +187,6 @@ namespace Src.Systems {
         }
 
         public void SetLayoutWrap(UIElement element, LayoutWrap layoutWrap) {
-            throw new NotImplementedException();
         }
 
         public void SetLayoutWrap(UIElement element, LayoutWrap layoutWrap, LayoutWrap oldWrap) {
@@ -227,51 +226,40 @@ namespace Src.Systems {
         }
 
         public void SetFlexItemShrinkFactor(UIElement element, int factor, int oldFactor) {
-            throw new NotImplementedException();
         }
 
         public void SetFlexItemGrowthFactor(UIElement element, int factor, int oldFactor) {
-            throw new NotImplementedException();
         }
 
         public void SetFlexItemOrderOverride(UIElement element, int order, int oldOrder) {
-            throw new NotImplementedException();
         }
 
         public void SetFlexItemSelfAlignment(UIElement element, CrossAxisAlignment alignment, CrossAxisAlignment oldAlignment) {
-            throw new NotImplementedException();
         }
 
         public void SetFontAsset(UIElement styleSetElement, AssetPointer<Font> fontAsset) {
-            throw new NotImplementedException();
         }
 
         public void SetFontStyle(UIElement styleSetElement, TextUtil.FontStyle fontStyle) {
-            throw new NotImplementedException();
         }
 
         public void SetTextAnchor(UIElement styleSetElement, TextUtil.TextAnchor textAnchor) {
-            throw new NotImplementedException();
         }
 
-        void IStyleSystem.SetFontSize(UIElement element, int fontSize) {
-            throw new NotImplementedException();
+        public void SetFontSize(UIElement element, int fontSize) {
+          
         }
 
-        void IStyleSystem.SetFontColor(UIElement element, Color fontColor) {
-            throw new NotImplementedException();
+        public void SetFontColor(UIElement element, Color fontColor) {
         }
 
         public void SetFlexItemProperties(UIElement styleSetElement) {
-            throw new NotImplementedException();
         }
 
         public void SetOverflowX(UIElement styleSetElement, Overflow overflowX) {
-            throw new NotImplementedException();
         }
 
         public void SetOverflowY(UIElement styleSetElement, Overflow overflowY) {
-            throw new NotImplementedException();
         }
 
         private void HandleTextChanged(UITextElement element, string text) {

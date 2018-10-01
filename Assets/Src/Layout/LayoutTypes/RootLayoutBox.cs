@@ -11,6 +11,10 @@ namespace Src.Layout.LayoutTypes {
             
         }
 
+        public override void OnChildAddedChild(LayoutBox child) {
+            children.Add(child);
+        }
+
     }
 
 }

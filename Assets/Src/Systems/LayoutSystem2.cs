@@ -45,7 +45,7 @@ namespace Src.Systems {
 
             for (int i = 0; i < m_UpdateRequiredElements.Count; i++) {
                 // if (m_UpdateRequiredElements[i].NeedsLayout) {
-                //     m_UpdateRequiredElements[i].RunLayout();
+                m_UpdateRequiredElements[i].RunLayout();
                 //     m_UpdateRequiredElements[i].dirtyFlags = 0;
                 // }
             }
@@ -230,7 +230,9 @@ namespace Src.Systems {
             layoutBox.SetParent(parent);
             m_LayoutBoxMap.Add(elementData.element.id, layoutBox);
             stack.Push(ValueTuple.Create(elementData, layoutBox));
-
+            
+            m_UpdateRequiredElements.Add(layoutBox);
+            
             while (stack.Count > 0) {
                 ValueTuple<MetaData, LayoutBox> item = stack.Pop();
                 MetaData parentData = item.Item1;

@@ -23,7 +23,7 @@ namespace Tests.Mocks {
 
         public float CalcTextHeight(string text, UIStyleSet style, float width) {
             if (sizes.ContainsKey(text)) return sizes[text].y;
-            return style.fontSize;
+            return style.computedStyle.FontSize;
         }
 
     }

@@ -5,6 +5,7 @@ using System.Collections.Generic;
 using Src.Extensions;
 using Src.Layout;
 using Src.Rendering;
+using Src.Util;
 using UnityEngine;
 
 namespace Src.Systems {
@@ -185,6 +186,10 @@ namespace Src.Systems {
             onCrossAxisAlignmentChanged?.Invoke(element, alignment, oldAlignment);
         }
 
+        public void SetLayoutWrap(UIElement element, LayoutWrap layoutWrap) {
+            throw new NotImplementedException();
+        }
+
         public void SetLayoutWrap(UIElement element, LayoutWrap layoutWrap, LayoutWrap oldWrap) {
             onLayoutWrapChanged?.Invoke(element, layoutWrap, oldWrap);
         }
@@ -221,71 +226,52 @@ namespace Src.Systems {
             onPreferredHeightChanged?.Invoke(element, newPrefHeight, oldPrefHeight);
         }
 
-        public void SetShrinkFactor(UIElement element, int factor, int oldFactor) {
+        public void SetFlexItemShrinkFactor(UIElement element, int factor, int oldFactor) {
             throw new NotImplementedException();
         }
 
-        public void SetGrowthFactor(UIElement element, int factor, int oldFactor) {
+        public void SetFlexItemGrowthFactor(UIElement element, int factor, int oldFactor) {
             throw new NotImplementedException();
         }
 
-        public void SetFlexOrderOverride(UIElement element, int order, int oldOrder) {
+        public void SetFlexItemOrderOverride(UIElement element, int order, int oldOrder) {
             throw new NotImplementedException();
         }
 
-        public void SetFlexSelfAlignment(UIElement element, CrossAxisAlignment alignment, CrossAxisAlignment oldAlignment) {
+        public void SetFlexItemSelfAlignment(UIElement element, CrossAxisAlignment alignment, CrossAxisAlignment oldAlignment) {
             throw new NotImplementedException();
         }
 
-        // todo all nodes are currently in the font tree -- bad!
-        public int SetFontSize(UIElement element, int fontSize) {
-            if (!IntUtil.IsDefined(fontSize)) {
-                fontSize = element.parent?.style.fontSize ?? UIStyle.Default.textStyle.fontSize;
-            }
-            
-            // on font property changed
-            // traverse child style tree
-            // if descendent.defines property(propertyId)
-            // stop
-            // else descendent.computedStyle[propertyId] = value
-
-            ValueTuple<StyleSystem, int> v = ValueTuple.Create(this, fontSize);
-
-            fontTree.ConditionalTraversePreOrder(element, v, (item, tuple) => {
-                if (IntUtil.IsDefined(item.style.ownTextStyle.fontSize)) {
-                    return false;
-                }
-
-                item.style.computedStyle.textStyle.fontSize = tuple.Item2;
-                tuple.Item1.onFontPropertyChanged?.Invoke(item, item.style.textStyle);
-
-                return true;
-            });
-
-            element.style.computedStyle.textStyle.fontSize = fontSize;
-            return fontSize;
+        public void SetFontAsset(UIElement styleSetElement, AssetPointer<Font> fontAsset) {
+            throw new NotImplementedException();
         }
 
-        public Color SetFontColor(UIElement element, Color color) {
-            if (!color.IsDefined()) {
-                color = element.parent?.style.textColor ?? UIStyle.Default.textStyle.color;
-            }
+        public void SetFontStyle(UIElement styleSetElement, TextUtil.FontStyle fontStyle) {
+            throw new NotImplementedException();
+        }
 
-            ValueTuple<StyleSystem, Color> v = ValueTuple.Create(this, color);
+        public void SetTextAnchor(UIElement styleSetElement, TextUtil.TextAnchor textAnchor) {
+            throw new NotImplementedException();
+        }
 
-            fontTree.ConditionalTraversePreOrder(element, v, (item, tuple) => {
-                if (item.style.ownTextStyle.color.IsDefined()) {
-                    return false;
-                }
+        void IStyleSystem.SetFontSize(UIElement element, int fontSize) {
+            throw new NotImplementedException();
+        }
 
-                item.style.computedStyle.textStyle.color = tuple.Item2;
-                tuple.Item1.onFontPropertyChanged?.Invoke(item, item.style.textStyle);
+        void IStyleSystem.SetFontColor(UIElement element, Color fontColor) {
+            throw new NotImplementedException();
+        }
 
-                return true;
-            });
+        public void SetFlexItemProperties(UIElement styleSetElement) {
+            throw new NotImplementedException();
+        }
 
-            element.style.computedStyle.textStyle.color = color;
-            return color;
+        public void SetOverflowX(UIElement styleSetElement, Overflow overflowX) {
+            throw new NotImplementedException();
+        }
+
+        public void SetOverflowY(UIElement styleSetElement, Overflow overflowY) {
+            throw new NotImplementedException();
         }
 
         private void HandleTextChanged(UITextElement element, string text) {

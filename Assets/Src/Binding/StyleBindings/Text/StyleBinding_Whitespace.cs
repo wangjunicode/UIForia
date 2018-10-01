@@ -1,3 +1,4 @@
+using System;
 using Rendering;
 using Src.Rendering;
 
@@ -12,11 +13,13 @@ namespace Src.StyleBindings.Text {
         }
 
         public override void Execute(UIElement element, UITemplateContext context) {
-            WhitespaceMode current = element.style.GetWhitespace(state);
-            WhitespaceMode newValue = expression.EvaluateTyped(context);
-            if (current != newValue) {
-                element.style.SetWhitespace(newValue, state);
-            }
+            if (!element.style.IsInState(state)) return;
+            throw new NotImplementedException();
+//            WhitespaceMode current = element.style.GetWhitespace(state);
+//            WhitespaceMode newValue = expression.EvaluateTyped(context);
+//            if (current != newValue) {
+//                element.style.SetWhitespace(newValue, state);
+//            }
         }
 
         public override bool IsConstant() {
@@ -28,7 +31,8 @@ namespace Src.StyleBindings.Text {
         }
 
         public override void Apply(UIStyleSet styleSet, UITemplateContext context) {
-            styleSet.SetWhitespace(expression.EvaluateTyped(context), state);
+            throw new NotImplementedException();
+            //styleSet.SetWhitespace(expression.EvaluateTyped(context), state);
         }
 
     }

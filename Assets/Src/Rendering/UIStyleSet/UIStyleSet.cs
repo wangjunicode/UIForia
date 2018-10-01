@@ -33,7 +33,7 @@ namespace Rendering {
             this.currentState = StyleState.Normal;
             this.containedStates = StyleState.Normal;
             this.styleSystem = styleSystem;
-            this.computedStyle = new ComputedStyle();
+            this.computedStyle = new ComputedStyle(this);
             this.ownTextStyle = TextStyle.Unset;
         }
 
@@ -243,22 +243,22 @@ namespace Rendering {
             Array.Sort(appliedStyles, (a, b) => a.priority > b.priority ? -1 : 1);
         }
 
-        private UIStyle FindActiveStyle(Func<UIStyle, bool> callback) {
-            if (appliedStyles == null) return UIStyle.Default;
-
-            for (int i = 0; i < appliedStyles.Length; i++) {
-                if ((appliedStyles[i].state & currentState) == 0) {
-                    continue;
-                }
-
-                if (callback(appliedStyles[i].style)) {
-                    return appliedStyles[i].style;
-                }
-            }
-
-            // return default if no matches were found
-            return UIStyle.Default;
-        }
+//        private UIStyle FindActiveStyle(Func<UIStyle, bool> callback) {
+//            if (appliedStyles == null) return UIStyle.Default;
+//
+//            for (int i = 0; i < appliedStyles.Length; i++) {
+//                if ((appliedStyles[i].state & currentState) == 0) {
+//                    continue;
+//                }
+//
+//                if (callback(appliedStyles[i].style)) {
+//                    return appliedStyles[i].style;
+//                }
+//            }
+//
+//            // return default if no matches were found
+//            return UIStyle.Default;
+//        }
 
         private UIStyle FindActiveStyleWithoutDefault(Func<UIStyle, bool> callback) {
             if (appliedStyles == null) return null;
@@ -339,9 +339,7 @@ namespace Rendering {
         private static readonly HashSet<StylePropertyId> s_DefinedMap = new HashSet<StylePropertyId>();
 
         internal void Initialize() {
-            
-            ComputedStyle.SetDefaults(computedStyle);
-            
+                        
             for (int i = 0; i < appliedStyles.Length; i++) {
                 StyleEntry entry = appliedStyles[i];
                 if ((entry.state & currentState) == 0) {
@@ -359,8 +357,6 @@ namespace Rendering {
             
             s_DefinedMap.Clear();
         }
-
-        private static bool IsDefined(ComputedStyle target, StyleProperty property) { }
 
         private float GetFloatValue(StylePropertyId propertyId, StyleState state) {
             StyleProperty property = GetPropertyValueInState(propertyId, state);
@@ -386,37 +382,6 @@ namespace Rendering {
                     containedStates |= appliedStyles[i].state;
                 }
             }
-
-            UIStyle activeFontSizeStyle = FindActiveStyleWithoutDefault((s) => IntUtil.IsDefined(s.textStyle.fontSize));
-            UIStyle activeFontColorStyle = FindActiveStyleWithoutDefault((s) => ColorUtil.IsDefined(s.textStyle.color));
-
-            styleSystem.SetFontSize(element, activeFontSizeStyle?.textStyle.fontSize ?? IntUtil.UnsetValue);
-            styleSystem.SetFontColor(element, activeFontColorStyle?.textStyle.color ?? ColorUtil.UnsetValue);
-
-            styleSystem.SetPaint(element, paint);
-            styleSystem.SetLayout(element, layoutParameters);
-            styleSystem.SetMargin(element, margin);
-            styleSystem.SetPadding(element, padding);
-            styleSystem.SetBorder(element, border);
-            styleSystem.SetBorderRadius(element, borderRadius);
-            styleSystem.SetDimensions(element, dimensions);
-            styleSystem.SetTextStyle(element, textStyle);
-            styleSystem.SetAvailableStates(element, containedStates);
-            // todo -- change this to a diff with a new computed style object
-
-            /*
-             * computed.minWidth = hasMinWidth ? minWidth : defaultMinWidth;
-             * for each style definition (sorted by property and by priority)
-             *     computed.SetProperty(firstActive.Category, firstActive.Value);
-             *     skip to next property
-             * 
-             */
-            // for each entry that was applied before
-            // if no longer applied
-            // gather property ids
-            // for each entry that will be applied
-            // for each property 
-
             StyleState previousState = 0;
             for (int i = 0; i < appliedStyles.Length; i++) {
                 bool wasApplied = (appliedStyles[i].state & previousState) != 0;
@@ -452,21 +417,21 @@ namespace Rendering {
             return null;
         }
         
-        private UIStyle UpdateProperty(StylePropertyId stylePropertyId) {
-            for (int i = 0; i < appliedStyles.Length; i++) {
-                if ((appliedStyles[i].state & currentState) == 0) {
-                    continue;
-                }
-
-                StyleProperty property = appliedStyles[i].style.FindProperty(stylePropertyId);
-                if (property.IsDefined) {
-                    computedStyle.SetProperty(property);
-                    return;
-                }
-            }
-            computedStyle.SetProperty(new StyleProperty(stylePropertyId, -123456789, -123456789));
-            return null;
-        }
+//        private UIStyle UpdateProperty(StylePropertyId stylePropertyId) {
+//            for (int i = 0; i < appliedStyles.Length; i++) {
+//                if ((appliedStyles[i].state & currentState) == 0) {
+//                    continue;
+//                }
+//
+//                StyleProperty property = appliedStyles[i].style.FindProperty(stylePropertyId);
+//                if (property.IsDefined) {
+//                    computedStyle.SetProperty(property);
+//                    return;
+//                }
+//            }
+//            computedStyle.SetProperty(new StyleProperty(stylePropertyId, -123456789, -123456789));
+//            return null;
+//        }
 
     }
 

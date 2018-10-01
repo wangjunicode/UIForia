@@ -202,7 +202,7 @@ namespace Src.Systems {
                 return new TextContainerLayoutBox(textCalculator, this, element);
             }
 
-            switch (element.style.layoutType) {
+            switch (element.style.computedStyle.LayoutType) {
                 case LayoutType.Flex:
                     return new FlexLayoutBox(this, element);
                 case LayoutType.Fixed:

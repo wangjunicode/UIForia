@@ -36,23 +36,15 @@ namespace Rendering {
             UIStyle style = GetOrCreateInstanceStyle(state);
             style.FlexItemGrowthFactor = growthFactor;
             if ((state & currentState) != 0 && style == GetActiveStyleForProperty(StylePropertyId.FlexItemGrow)) {
-                int oldFactor = computedStyle.flexGrowthFactor;
-                if (oldFactor != growthFactor) {
-                    computedStyle.flexGrowthFactor = growthFactor;
-                    styleSystem.SetGrowthFactor(element, growthFactor, oldFactor);
-                }
+                computedStyle.FlexItemGrowthFactor = growthFactor;
             }
         }
-        
+
         public void SetFlexItemShrinkFactor(int shrinkFactor, StyleState state) {
             UIStyle style = GetOrCreateInstanceStyle(state);
             style.FlexItemShrinkFactor = shrinkFactor;
             if ((state & currentState) != 0 && style == GetActiveStyleForProperty(StylePropertyId.FlexItemShrink)) {
-                int oldFactor = computedStyle.flexShrinkFactor;
-                if (oldFactor != shrinkFactor) {
-                    computedStyle.flexShrinkFactor = shrinkFactor;
-                    styleSystem.SetShrinkFactor(element, shrinkFactor, oldFactor);
-                }
+                computedStyle.FlexItemShrinkFactor = shrinkFactor;
             }
         }
 
@@ -60,26 +52,18 @@ namespace Rendering {
             UIStyle style = GetOrCreateInstanceStyle(state);
             style.FlexItemOrder = order;
             if ((state & currentState) != 0 && style == GetActiveStyleForProperty(StylePropertyId.FlexItemOrder)) {
-                int oldOrder = computedStyle.flexOrderOverride;
-                if (oldOrder != order) {
-                    computedStyle.flexOrderOverride = order;
-                    styleSystem.SetFlexOrderOverride(element, order, oldOrder);
-                }
+                computedStyle.FlexItemOrder = order;
             }
         }
-        
+
         public void SetFlexItemSelfAlignment(CrossAxisAlignment alignment, StyleState state) {
             UIStyle style = GetOrCreateInstanceStyle(state);
             style.FlexItemSelfAlign = alignment;
             if ((state & currentState) != 0 && style == GetActiveStyleForProperty(StylePropertyId.FlexItemSelfAlignment)) {
-                CrossAxisAlignment oldAlignment = computedStyle.flexSelfAlignment;
-                if (oldAlignment != alignment) {
-                    computedStyle.flexSelfAlignment = alignment;
-                    styleSystem.SetFlexSelfAlignment(element, alignment, oldAlignment);
-                }
+                computedStyle.FlexItemSelfAlignment = alignment;
             }
         }
-        
+
     }
 
 }

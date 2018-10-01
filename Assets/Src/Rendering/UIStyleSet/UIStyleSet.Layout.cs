@@ -1,8 +1,25 @@
-//using Src.Layout;
-//
-//namespace Rendering {
-//
-//    public partial class UIStyleSet {
+using Src.Layout;
+
+namespace Rendering {
+
+    public partial class UIStyleSet {
+
+        public LayoutType GetLayoutType(StyleState state) {
+            StyleProperty property = GetPropertyValueInState(StylePropertyId.LayoutType, state);
+            return property.IsDefined ? (LayoutType) property.valuePart0 : LayoutType.Unset;
+        }
+
+        public void SetLayoutType(LayoutType layoutType, StyleState state) {
+            UIStyle style = GetOrCreateInstanceStyle(state);
+            style.LayoutType = layoutType;
+            if ((state & currentState) != 0 && style == GetActiveStyleForProperty(StylePropertyId.FlexItemGrow)) {
+                computedStyle.LayoutType = layoutType;
+            }
+        }
+
+    }
+
+}
 //
 //        public GridPlacementParameters gridItem = new GridPlacementParameters(IntUtil.UnsetValue, 1, IntUtil.UnsetValue, 1);
 //        public GridDefinition gridDefinition;

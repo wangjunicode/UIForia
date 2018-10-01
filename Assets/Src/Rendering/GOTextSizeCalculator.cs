@@ -26,7 +26,7 @@ namespace Rendering {
         }
 
         public TextSizeResult CalcTextPreferredAndMinWidth(UIStyleSet style) {
-            ruler.fontSize = style.fontSize;
+            ruler.fontSize = style.computedStyle.FontSize;
             ruler.text = style.textContent;
 
             float preferredWidth = Mathf.CeilToInt(ruler.GetPreferredValues().x);
@@ -48,7 +48,7 @@ namespace Rendering {
         }
         
         public float CalcTextWidth(string text, UIStyleSet style) {
-            ruler.fontSize = style.fontSize;
+            ruler.fontSize = style.computedStyle.FontSize;
             ruler.text = text;
 
             float preferredWidth = Mathf.CeilToInt(ruler.GetPreferredValues().x);
@@ -72,7 +72,7 @@ namespace Rendering {
         }
 
         public float CalcTextHeight(string text, UIStyleSet style, float width) {
-            ruler.fontSize = style.fontSize;
+            ruler.fontSize = style.computedStyle.FontSize;
             ruler.text = text;
             return Mathf.CeilToInt(ruler.GetPreferredValues(width, 0).y);
         }

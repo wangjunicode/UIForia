@@ -53,7 +53,6 @@ namespace Rendering {
 
         public IReadOnlyList<StyleProperty> Properties => m_StyleProperties;
 
-
 #region Overflow Properties
 
         public Overflow OverflowX {
@@ -295,6 +294,16 @@ namespace Rendering {
 
 #region Padding Properties
 
+        public ContentBoxRect Padding {
+            get { return new ContentBoxRect(PaddingTop, PaddingRight, PaddingBottom, PaddingLeft); }
+            set {
+                PaddingTop = value.top;
+                PaddingRight = value.right;
+                PaddingBottom = value.bottom;
+                PaddingLeft = value.left;
+            }
+        }
+
         public UIMeasurement PaddingTop {
             get { return GetUIMeasurementProperty(StylePropertyId.PaddingTop); }
             set { SetUIMeasurementProperty(StylePropertyId.PaddingTop, value); }
@@ -319,6 +328,16 @@ namespace Rendering {
 
 #region Margin Properties
 
+        public ContentBoxRect Margin {
+            get { return new ContentBoxRect(MarginTop, MarginRight, MarginBottom, MarginLeft); }
+            set {
+                MarginTop = value.top;
+                MarginRight = value.right;
+                MarginBottom = value.bottom;
+                MarginLeft = value.left;
+            }
+        }
+        
         public UIMeasurement MarginTop {
             get { return GetUIMeasurementProperty(StylePropertyId.MarginTop); }
             set { SetUIMeasurementProperty(StylePropertyId.MarginTop, value); }
@@ -343,6 +362,16 @@ namespace Rendering {
 
 #region BorderProperties
 
+        public ContentBoxRect Border {
+            get { return new ContentBoxRect(BorderTop, BorderRight, BorderBottom, BorderLeft); }
+            set {
+                BorderTop = value.top;
+                BorderRight = value.right;
+                BorderBottom = value.bottom;
+                BorderLeft = value.left;
+            }
+        }
+        
         public UIMeasurement BorderTop {
             get { return GetUIMeasurementProperty(StylePropertyId.BorderTop); }
             set { SetUIMeasurementProperty(StylePropertyId.BorderTop, value); }

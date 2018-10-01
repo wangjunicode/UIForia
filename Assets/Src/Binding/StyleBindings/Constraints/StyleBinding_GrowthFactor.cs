@@ -14,7 +14,7 @@ namespace Src.StyleBindings {
         public override void Execute(UIElement element, UITemplateContext context) {
             if (!element.style.IsInState(state)) return;
 
-            int value = element.style.computedStyle.flexGrowthFactor;
+            int value = element.style.computedStyle.FlexItemGrowthFactor;
             int newValue = expression.EvaluateTyped(context);
             if (value != newValue) {
                 element.style.SetFlexItemGrowFactor(value, state);

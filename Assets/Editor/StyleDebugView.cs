@@ -20,9 +20,9 @@ namespace Src.Editor {
 
             EditorGUILayout.Space();
             
-            EditorGUILayout.EnumPopup("Layout Type", element.style.layoutType);
-            EditorGUILayout.EnumPopup("Layout Direction", element.style.layoutDirection);
-            EditorGUILayout.EnumPopup("Layout Flow", element.style.layoutFlow);
+//            EditorGUILayout.EnumPopup("Layout Type", element.style.layoutType);
+//            EditorGUILayout.EnumPopup("Layout Direction", element.style.layoutDirection);
+//            EditorGUILayout.EnumPopup("Layout Flow", element.style.layoutFlow);
             GUI.enabled = true;
         }
 

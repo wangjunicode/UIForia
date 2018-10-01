@@ -13,11 +13,11 @@ namespace Src.StyleBindings {
         }
 
         public override void Execute(UIElement element, UITemplateContext context) {
-            if (!element.style.IsInState(state) || element.style.computedStyle.layoutType != LayoutType.Flex) {
+            if (!element.style.IsInState(state) || element.style.computedStyle.LayoutType != LayoutType.Flex) {
                 return;
             }
 
-            LayoutDirection direction = element.style.computedStyle.flexDirection;
+            LayoutDirection direction = element.style.computedStyle.FlexLayoutDirection;
             LayoutDirection newDirection = expression.EvaluateTyped(context);
             if (direction != newDirection) {
                 element.style.SetFlexDirection(newDirection, state);

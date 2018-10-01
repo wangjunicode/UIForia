@@ -447,8 +447,8 @@ namespace Src.Systems {
                         rawImage.color = Color.white;
                     }
                     else {
-                        rawImage.texture = style.backgroundImage;
-                        rawImage.color = style.backgroundColor;
+                        rawImage.texture = style.computedStyle.BackgroundImage.asset;
+                        rawImage.color = style.computedStyle.BackgroundColor;
                     }
 
                     rawImage.uvRect = new Rect(0, 0, 1, 1);
@@ -464,16 +464,16 @@ namespace Src.Systems {
 //                    shape.settings.fillType = FillType.SolidColor;
 //                    shape.settings.fill
                     BorderedImage procImage = (BorderedImage) data.renderComponent;
-                    procImage.color = style.backgroundColor;
-                    procImage.borderColor = style.borderColor;
-                    procImage.border = style.border;
+                    procImage.color = style.computedStyle.BackgroundColor;
+                    procImage.borderColor = style.computedStyle.BorderColor;
+                   // procImage.border = style.computedStyle.border;
                     break;
 
                 case RenderPrimitiveType.Text:
                     TextMeshProUGUI textMesh = (TextMeshProUGUI) data.renderComponent;
                     textMesh.text = style.textContent;
-                    textMesh.fontSize = style.fontSize;
-                    textMesh.color = style.textColor;
+                    textMesh.fontSize = style.computedStyle.FontSize;
+                    textMesh.color = style.computedStyle.TextColor;
                     break;
 
                 case RenderPrimitiveType.Mask:
@@ -493,9 +493,9 @@ namespace Src.Systems {
 
             UIStyleSet styleSet = element.style;
             if (!(element is UIImageElement)
-                && styleSet.backgroundImage == null
-                && styleSet.borderColor == ColorUtil.UnsetValue
-                && styleSet.backgroundColor == ColorUtil.UnsetValue) {
+                && styleSet.computedStyle.BackgroundImage.asset == null
+                && styleSet.computedStyle.BorderColor == ColorUtil.UnsetValue
+                && styleSet.computedStyle.BackgroundColor == ColorUtil.UnsetValue) {
                 return RenderPrimitiveType.None;
             }
 

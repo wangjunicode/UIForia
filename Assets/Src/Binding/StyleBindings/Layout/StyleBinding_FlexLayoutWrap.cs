@@ -13,11 +13,11 @@ namespace Src.StyleBindings {
         }
 
         public override void Execute(UIElement element, UITemplateContext context) {
-            if (!element.style.IsInState(state) || element.style.computedStyle.layoutType != LayoutType.Flex) {
+            if (!element.style.IsInState(state) || element.style.computedStyle.LayoutType != LayoutType.Flex) {
                 return;
             }
 
-            LayoutWrap wrap = element.style.computedStyle.flexWrapMode;
+            LayoutWrap wrap = element.style.computedStyle.FlexLayoutWrap;
             LayoutWrap newWrap = expression.EvaluateTyped(context);
             if (wrap != newWrap) {
                 element.style.SetFlexWrapMode(newWrap, state);

@@ -14,11 +14,11 @@ namespace Src.StyleBindings {
         }
 
         public override void Execute(UIElement element, UITemplateContext context) {
-            if (!element.style.IsInState(state) || element.style.computedStyle.layoutType != LayoutType.Flex) {
+            if (!element.style.IsInState(state) || element.style.computedStyle.LayoutType != LayoutType.Flex) {
                 return;
             }
 
-            MainAxisAlignment alignment = element.style.computedStyle.flexMainAxisAlignment;
+            MainAxisAlignment alignment = element.style.computedStyle.FlexLayoutMainAxisAlignment;
             MainAxisAlignment newAlignment = expression.EvaluateTyped(context);
             if (alignment != newAlignment) {
                 element.style.SetFlexMainAxisAlignment(newAlignment, state);

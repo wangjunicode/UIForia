@@ -14,7 +14,7 @@ namespace Src.StyleBindings {
 
         public override void Execute(UIElement element, UITemplateContext context) {
             if (!element.style.IsInState(state)) return;
-            MeasurementVector2 current = element.style.GetTransformPosition(state);
+            MeasurementVector2 current = element.style.computedStyle.TransformPosition;
             MeasurementVector2 newTranslation = expression.EvaluateTyped(context);
             if (current != newTranslation) {
                 element.style.SetTransformPosition(newTranslation, state);

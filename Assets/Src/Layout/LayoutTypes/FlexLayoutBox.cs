@@ -20,10 +20,10 @@ namespace Src.Layout.LayoutTypes {
         }
 
         public override void RunLayout() {
-            ApplyOrdering(style);
+            ApplyOrdering();
             tracks.Clear();
 
-            if (style.layoutParameters.direction == LayoutDirection.Column) {
+            if (style.FlexLayoutDirection == LayoutDirection.Column) {
                 RunFullColumnLayout();
             }
             else {
@@ -35,47 +35,30 @@ namespace Src.Layout.LayoutTypes {
             int inFlowItemCount = 0;
             // allocated width / height is known at this point
             for (int i = 0; i < children.Count; i++) {
-                if (children[i].element.isEnabled && children[i].style.layoutParameters.flow != LayoutFlowType.OutOfFlow) {
+                if (children[i].element.isEnabled) {//} && children[i].style.layoutParameters.flow != LayoutFlowType.OutOfFlow) {
                     widths[inFlowItemCount] = new FlexItemAxis();
                     widths[inFlowItemCount].minSize = children[i].minWidth;
                     widths[inFlowItemCount].maxSize = children[i].maxWidth;
                     widths[inFlowItemCount].preferredSize = children[i].preferredWidth;
                     widths[inFlowItemCount].outputSize = Mathf.Max(children[i].minWidth, Mathf.Min(children[i].preferredWidth, children[i].maxWidth));
-                    widths[inFlowItemCount].growthFactor = children[i].element.style.growthFactor;
-                    widths[inFlowItemCount].shrinkFactor = children[i].element.style.shrinkFactor;
+                    widths[inFlowItemCount].growthFactor = children[i].style.FlexItemGrowthFactor;
+                    widths[inFlowItemCount].shrinkFactor = children[i].style.FlexItemShrinkFactor;
                     inFlowItemCount++;
                 }
             }
 
-            if (style.layoutParameters.wrap == LayoutWrap.Wrap) {
+            if (style.FlexLayoutWrap== LayoutWrap.Wrap) {
                 FillTracksWrapped(widths, inFlowItemCount, allocatedWidth);
             }
             else {
                 FillColumnTracksUnwrapped(widths, inFlowItemCount, allocatedWidth);
             }
         }
-
-        public float GetPreferredHeightForWidth(float width) {
-            if (style.layoutParameters.direction == LayoutDirection.Column) {
-                
-                if (style.layoutParameters.wrap == LayoutWrap.Wrap) {
-                    // fill width tracks 
-                    // return total height after wrap
-                }
-                else {
-                    // if approximate == true
-                    // don't bother growing / shrinking
-                    // return max preferred height using width and clamped to min / max
-                }
-            }
-
-            return 0;
-        }
         
         private void RunFullRowLayout() {
             int inFlowItemCount = 0;
             for (int i = 0; i < children.Count; i++) {
-                if (children[i].element.isEnabled && children[i].style.layoutParameters.flow != LayoutFlowType.OutOfFlow) {
+                if (children[i].element.isEnabled ) { // }&& children[i].style.flow != LayoutFlowType.OutOfFlow) {
                     widths[inFlowItemCount] = new FlexItemAxis();
                     widths[inFlowItemCount].childIndex = inFlowItemCount;
                     widths[inFlowItemCount].outputSize = Mathf.Max(children[i].minWidth, Mathf.Min(children[i].preferredWidth, children[i].maxWidth));
@@ -185,7 +168,7 @@ namespace Src.Layout.LayoutTypes {
              *     
              */
 
-            if (style.layoutParameters.wrap == LayoutWrap.Wrap) {
+            if (style.FlexLayoutWrap == LayoutWrap.Wrap) {
                 FillTracksWrapped(widths, inFlowItemCount, allocatedWidth);
             }
             else { }
@@ -419,12 +402,12 @@ namespace Src.Layout.LayoutTypes {
             }
         }
 
-        private void ApplyOrdering(UIStyle style) {
+        private void ApplyOrdering() {
             // sort items by style group
             // if no group defined use source order
             // if reverse, apply reverse here
             // todo -- separate this enum
-            if (style.layoutParameters.wrap == LayoutWrap.Reverse) {
+            if (style.FlexLayoutWrap == LayoutWrap.Reverse) {
                 ArrayUtil.ReverseInPlace(widths);
                 ArrayUtil.ReverseInPlace(heights);
             }

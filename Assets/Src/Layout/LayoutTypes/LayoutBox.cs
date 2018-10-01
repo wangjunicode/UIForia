@@ -57,7 +57,8 @@ namespace Src.Layout.LayoutTypes {
                     // todo subtract parent content area
                     return (parent.allocatedWidth) * measurement.value;
                 case UIUnit.Em:
-                    return measurement.value * style.textStyle.fontSize;
+                    // todo -- wrong
+                    return measurement.value * style.FontSize;
                 default:
                     throw new ArgumentOutOfRangeException();
             }
@@ -75,7 +76,8 @@ namespace Src.Layout.LayoutTypes {
                     // todo subtract parent content area
                     return (parent.allocatedHeight) * measurement.value;
                 case UIUnit.Em:
-                    return measurement.value * style.textStyle.fontSize;
+                    // todo -- wrong
+                    return measurement.value * style.FontSize;
                 default:
                     throw new ArgumentOutOfRangeException();
             }

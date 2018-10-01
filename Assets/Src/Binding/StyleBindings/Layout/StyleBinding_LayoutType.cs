@@ -12,7 +12,9 @@ namespace Src.StyleBindings {
         }
 
         public override void Execute(UIElement element, UITemplateContext context) {
-            LayoutType direction = element.style.GetLayoutType(state);
+            if (!element.style.IsInState(state)) return;
+
+            LayoutType direction = element.style.computedStyle.LayoutType;
             LayoutType newType = expression.EvaluateTyped(context);
             if (direction != newType) {
                 element.style.SetLayoutType(newType, state);

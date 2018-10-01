@@ -1,4 +1,5 @@
-﻿using Rendering;
+﻿using System;
+using Rendering;
 using Src.Rendering;
 
 namespace Src.StyleBindings {
@@ -12,11 +13,13 @@ namespace Src.StyleBindings {
         }
 
         public override void Execute(UIElement element, UITemplateContext context) {
-            LayoutFlowType flow = element.style.GetLayoutFlow(state);
-            LayoutFlowType newFlow = expression.EvaluateTyped(context);
-            if (flow != newFlow) {
-                element.style.SetLayoutFlow(newFlow, state);
-            }
+            throw new NotImplementedException();
+            
+//            LayoutFlowType flow = element.style.GetLayoutFlow(state);
+//            LayoutFlowType newFlow = expression.EvaluateTyped(context);
+//            if (flow != newFlow) {
+//                element.style.SetLayoutFlow(newFlow, state);
+//            }
         }
 
         public override bool IsConstant() {
@@ -28,7 +31,8 @@ namespace Src.StyleBindings {
         }
 
         public override void Apply(UIStyleSet styleSet, UITemplateContext context) {
-            styleSet.SetLayoutFlow(expression.EvaluateTyped(context), state);
+            throw new NotImplementedException();
+//            styleSet.SetLayoutFlow(expression.EvaluateTyped(context), state);
         }
 
     }

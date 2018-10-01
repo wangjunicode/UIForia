@@ -40,6 +40,11 @@ namespace Rendering {
             }
         }
 
+        public void SetTransformPosition(MeasurementVector2 position, StyleState state) {
+            SetTransformPositionX(position.x, state);
+            SetTransformPositionY(position.y, state);
+        }
+
         [PublicAPI]
         public float GetTransformRotation(StyleState state) {
             StyleProperty property = GetPropertyValueInState(StylePropertyId.TransformRotation, state);

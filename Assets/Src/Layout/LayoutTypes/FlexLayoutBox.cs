@@ -115,11 +115,11 @@ namespace Src.Layout.LayoutTypes {
                 trackCrossAxisStart = PositionCrossAxis(trackCrossAxisStart, track, crossAxisItems, crossAxisTargetSize);
 
                 for (int j = track.startItem; j < track.startItem + track.itemCount; j++) {
-                    children[widths[j].childIndex].SetAllocatedRect(new Rect(
+                    children[widths[j].childIndex].SetAllocatedRect(
                         widths[j].axisStart,
                         heights[j].axisStart,
                         widths[j].outputSize,
-                        heights[j].outputSize)
+                        heights[j].outputSize
                     );
 
                     if (crossAxisItems[j].axisStart + crossAxisItems[j].outputSize > retn.y) {
@@ -190,11 +190,11 @@ namespace Src.Layout.LayoutTypes {
                 trackCrossAxisStart = PositionCrossAxis(trackCrossAxisStart, track, widths, allocatedWidth);
 
                 for (int j = track.startItem; j < track.startItem + track.itemCount; j++) {
-                    children[widths[j].childIndex].SetAllocatedRect(new Rect(
+                    children[widths[j].childIndex].SetAllocatedRect(
                         widths[j].axisStart,
                         heights[j].axisStart,
                         widths[j].outputSize,
-                        heights[j].outputSize)
+                        heights[j].outputSize
                     );
 
                     if (widths[j].axisStart + widths[j].outputSize > actualWidth) {

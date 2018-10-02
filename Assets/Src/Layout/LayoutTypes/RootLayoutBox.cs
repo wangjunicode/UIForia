@@ -9,10 +9,10 @@ namespace Src.Layout.LayoutTypes {
             : base(layoutSystem, null) { }
 
         public override void RunLayout() {
-            children[0].SetAllocatedRect(new Rect(
+            children[0].SetAllocatedRect(
                 0, 0, 
                 Mathf.Min(children[0].PreferredWidth, actualWidth), 
-                Mathf.Min(children[0].PreferredHeight, actualHeight))
+                Mathf.Min(children[0].PreferredHeight, actualHeight)
             );
         }
 

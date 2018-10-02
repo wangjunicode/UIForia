@@ -208,7 +208,7 @@ public class InputSystemTests {
         testView.Initialize();
         testView.layoutSystem.SetViewportRect(new Rect(0, 0, 1000, 1000));
         InputSystemTestThing root = (InputSystemTestThing) testView.RootElement;
-
+        testView.Update();
 
         testView.inputSystem.MouseDown(new Vector2(20, 10));
         testView.Update();

@@ -165,6 +165,7 @@ public abstract partial class InputSystem : IInputSystem, IInputProvider {
         if (m_MouseState.isLeftMouseDownThisFrame) {
             m_MouseDownElements.AddRange(m_ElementsThisFrame);
         }
+        ListPool<UIElement>.Release(queryResults);
     }
 
 }

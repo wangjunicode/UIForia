@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using Rendering;
+using Src.Elements;
 using Src.Systems;
 using Src.Util;
 using UnityEngine;
@@ -29,6 +30,9 @@ namespace Src.Layout.LayoutTypes {
 
         protected Size preferredContentSize;
 
+        public VirtualScrollbar horizontalScrollbar;
+        public VirtualScrollbar verticalScrollbar;
+        
         protected LayoutBox(LayoutSystem2 layoutSystem, UIElement element) {
             this.element = element;
             this.layoutSystem = layoutSystem;
@@ -50,6 +54,9 @@ namespace Src.Layout.LayoutTypes {
         public float MaxWidth => ResolveWidth(style.MaxWidth);
         public float PreferredWidth => ResolveWidth(style.PreferredWidth);
 
+        public float TransformX => ResolveWidth(style.TransformPositionX);
+        public float TransformY => ResolveHeight(style.TransformPositionY);
+        
         public float MinHeight => ResolveHeight(style.MinHeight);
         public float MaxHeight => ResolveHeight(style.MaxHeight);
         public float PreferredHeight => ResolveHeight(style.PreferredHeight);
@@ -140,16 +147,16 @@ namespace Src.Layout.LayoutTypes {
             layoutSystem.RequestLayout(parent);
         }
 
-        public virtual void SetAllocatedRect(Rect rect) {
-            if (localX != rect.x || localY != rect.y) {
-                localX = rect.x;
-                localY = rect.y;
+        public virtual void SetAllocatedRect(float x, float y, float width, float height) {
+            if (localX != x || localY != y) {
+                localX = x;
+                localY = y;
                 layoutSystem.PositionChanged(this);
             }
 
-            if (allocatedWidth != rect.width || allocatedHeight != rect.height) {
-                allocatedWidth = rect.width;
-                allocatedHeight = rect.height;
+            if (allocatedWidth != width || allocatedHeight != height) {
+                allocatedWidth = width;
+                allocatedHeight = height;
                 layoutSystem.OnRectChanged(this);
                 // todo -- right now this calls layout for all descendants which can probably be avoided if no children are parent sized
                 layoutSystem.RequestLayout(this);

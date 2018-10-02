@@ -81,9 +81,7 @@ namespace Src.Layout.LayoutTypes {
             throw new System.NotImplementedException();
         }
 
-       
         public void SetTextContent(string text) { }
-
 
         public int m_totalCharacterCount;
         public float m_fontScale;

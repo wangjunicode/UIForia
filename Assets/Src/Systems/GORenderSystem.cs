@@ -130,7 +130,7 @@ namespace Src.Systems {
                 position.x = Mathf.CeilToInt(position.x); // + margin.left);
                 position.y = -Mathf.CeilToInt(position.y); // + margin.top);
 
-                Vector2 size = new Vector2(element.layoutResult.width, element.layoutResult.height);
+                Vector2 size = new Vector2(element.layoutResult.allocatedWidth, element.layoutResult.allocatedHeight);
                 size.x = Mathf.CeilToInt(size.x); // - (margin.left + margin.right));
                 size.y = Mathf.CeilToInt(size.y); // - (margin.top + margin.bottom));
 

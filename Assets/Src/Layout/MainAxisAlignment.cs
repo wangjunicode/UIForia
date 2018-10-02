@@ -4,7 +4,6 @@ namespace Src.Layout {
         
         Unset = 0,
         Start = 1,
-        Default = 2,
         Center = 3,
         End = 4,
         SpaceAround = 5,

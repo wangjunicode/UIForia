@@ -5,55 +5,35 @@ namespace Rendering {
     public partial class UIStyleSet {
 
         public LayoutWrap GetFlexWrapMode(StyleState state) {
-            StyleProperty property = GetPropertyValueInState(StylePropertyId.FlexWrap, state);
-            return property.IsDefined ? (LayoutWrap) property.valuePart0 : LayoutWrap.Unset;
+            return (LayoutWrap) GetEnumValue(StylePropertyId.FlexWrap, state);
         }
 
         public LayoutDirection GetFlexLayoutDirection(StyleState state) {
-            StyleProperty property = GetPropertyValueInState(StylePropertyId.FlexDirection, state);
-            return property.IsDefined ? (LayoutDirection) property.valuePart0 : LayoutDirection.Unset;
+            return (LayoutDirection) GetEnumValue(StylePropertyId.FlexDirection, state);
         }
 
         public MainAxisAlignment GetFlexLayoutMainAlignment(StyleState state) {
-            StyleProperty property = GetPropertyValueInState(StylePropertyId.FlexMainAxisAlignment, state);
-            return property.IsDefined ? (MainAxisAlignment) property.valuePart0 : MainAxisAlignment.Unset;
+            return (MainAxisAlignment) GetEnumValue(StylePropertyId.FlexMainAxisAlignment, state);
         }
 
         public CrossAxisAlignment GetFlexLayoutCrossAlignment(StyleState state) {
-            StyleProperty property = GetPropertyValueInState(StylePropertyId.FlexCrossAxisAlignment, state);
-            return property.IsDefined ? (CrossAxisAlignment) property.valuePart0 : CrossAxisAlignment.Unset;
+            return (CrossAxisAlignment) GetEnumValue(StylePropertyId.FlexCrossAxisAlignment, state);
         }
 
         public void SetFlexWrapMode(LayoutWrap wrapMode, StyleState state) {
-            UIStyle style = GetOrCreateInstanceStyle(state);
-            style.FlexLayoutWrap = wrapMode;
-            if ((state & currentState) != 0 && style == GetActiveStyleForProperty(StylePropertyId.FlexWrap)) {
-                computedStyle.FlexLayoutWrap = wrapMode;
-            }
+            SetEnumProperty(StylePropertyId.FlexWrap, (int) wrapMode, state);
         }
 
         public void SetFlexDirection(LayoutDirection direction, StyleState state) {
-            UIStyle style = GetOrCreateInstanceStyle(state);
-            style.FlexLayoutDirection = direction;
-            if ((state & currentState) != 0 && style == GetActiveStyleForProperty(StylePropertyId.FlexDirection)) {
-                computedStyle.FlexLayoutDirection = direction;
-            }
+            SetEnumProperty(StylePropertyId.FlexDirection, (int) direction, state);
         }
 
         public void SetFlexMainAxisAlignment(MainAxisAlignment alignment, StyleState state) {
-            UIStyle style = GetOrCreateInstanceStyle(state);
-            style.FlexLayoutMainAxisAlignment = alignment;
-            if ((state & currentState) != 0 && style == GetActiveStyleForProperty(StylePropertyId.FlexMainAxisAlignment)) {
-                computedStyle.FlexLayoutMainAxisAlignment = alignment;
-            }
+            SetEnumProperty(StylePropertyId.FlexMainAxisAlignment, (int) alignment, state);
         }
 
         public void SetFlexCrossAxisAlignment(CrossAxisAlignment alignment, StyleState state) {
-            UIStyle style = GetOrCreateInstanceStyle(state);
-            style.FlexLayoutCrossAxisAlignment = alignment;
-            if ((state & currentState) != 0 && style == GetActiveStyleForProperty(StylePropertyId.FlexCrossAxisAlignment)) {
-                computedStyle.FlexLayoutCrossAxisAlignment = alignment;
-            }
+            SetEnumProperty(StylePropertyId.FlexCrossAxisAlignment, (int) alignment, state);
         }
 
     }

@@ -5,12 +5,6 @@ using Rendering;
 using Src;
 using Src.Systems;
 
-public class OrphanView : UIView {
-
-    public OrphanView() : base(null) { }
-
-}
-
 public abstract class UIView {
 
     private static int ElementIdGenerator;
@@ -49,8 +43,6 @@ public abstract class UIView {
     // todo -- always call OnCreate & OnReady, don't call OnEnabled unless actually enabled
 
     public UIElement RootElement => rootElement;
-
-    internal static readonly OrphanView OrphanView = new OrphanView();
 
     public void Initialize(bool forceTemplateReparse = false) {
         foreach (ISystem system in systems) {

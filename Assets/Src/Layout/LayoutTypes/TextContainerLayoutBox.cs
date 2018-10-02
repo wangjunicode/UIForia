@@ -77,11 +77,13 @@ namespace Src.Layout.LayoutTypes {
             
         }
 
+        protected override Size RunContentSizeLayout() {
+            throw new System.NotImplementedException();
+        }
+
+       
         public void SetTextContent(string text) { }
 
-        protected override float GetMinRequiredHeightForWidth(float width) {
-            return textSizeCalculator.CalcTextHeight(element.style.textContent, element.style, width);
-        }
 
         public int m_totalCharacterCount;
         public float m_fontScale;

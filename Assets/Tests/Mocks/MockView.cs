@@ -9,7 +9,7 @@ namespace Tests.Mocks {
         public readonly MockTextSizeCalculator textSizeCalculator;
         public readonly MockInputSystem inputSystem;
         
-        public MockView(Type elementType) : base(elementType) {
+        public MockView(Type elementType, string template = null) : base(elementType, template) {
             textSizeCalculator = new MockTextSizeCalculator();
             layoutSystem = new MockLayoutSystem(textSizeCalculator, styleSystem);
             inputSystem = new MockInputSystem(layoutSystem, styleSystem);

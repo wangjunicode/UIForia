@@ -11,6 +11,10 @@ namespace Src.Layout.LayoutTypes {
             
         }
 
+        protected override Size RunContentSizeLayout() {
+            throw new System.NotImplementedException();
+        }
+
     }
 
 }

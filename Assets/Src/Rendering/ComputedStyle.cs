@@ -22,10 +22,10 @@ namespace Rendering {
         public static readonly Overflow overflowX = Overflow.None;
         public static readonly Overflow overflowY = Overflow.None;
 
-        public static readonly int flexOrderOverride = 999;
+        public static readonly int flexOrderOverride = ushort.MaxValue;
         public static readonly int flexGrowthFactor = 0;
         public static readonly int flexShrinkFactor = 0;
-        public static readonly CrossAxisAlignment flexSelfAlignment = CrossAxisAlignment.Default;
+        public static readonly CrossAxisAlignment flexSelfAlignment = CrossAxisAlignment.Unset;
 
         public static readonly LayoutWrap flexLayoutWrap = LayoutWrap.None;
         public static readonly LayoutDirection flexLayoutDirection = LayoutDirection.Row;

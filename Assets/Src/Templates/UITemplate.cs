@@ -139,13 +139,13 @@ namespace Src {
         }
         
         protected void AddConditionalBinding(Binding binding) {
-            Array.Resize(ref conditionalBindings, conditionalBindings.Length + 1);
-            conditionalBindings[conditionalBindings.Length - 1] = binding;
-        }
-
-        protected void AddConstantBinding(Binding binding) {
-            Array.Resize(ref constantBindings, constantBindings.Length + 1);
-            constantBindings[constantBindings.Length - 1] = binding;
+            if (binding.IsConstant()) {
+                bindingList.Add(binding);
+            }
+            else {
+                Array.Resize(ref conditionalBindings, conditionalBindings.Length + 1);
+                conditionalBindings[conditionalBindings.Length - 1] = binding;
+            }
         }
         
         protected virtual void CompileInputBindings(ParsedTemplate template) {

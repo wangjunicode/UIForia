@@ -41,25 +41,23 @@ namespace Src.Systems {
 
             if (m_UpdateRequiredElements.Count == 0) return;
 
-            m_UpdateRequiredElements.Sort((a, b) => a.element.depth > b.element.depth ? -1 : 1);
+            m_UpdateRequiredElements.Sort((a, b) => a.element.depth > b.element.depth ? 1 : -1);
 
             for (int i = 0; i < m_UpdateRequiredElements.Count; i++) {
-                // if (m_UpdateRequiredElements[i].NeedsLayout) {
                 m_UpdateRequiredElements[i].RunLayout();
-                //     m_UpdateRequiredElements[i].dirtyFlags = 0;
-                // }
             }
 
-            m_RectUpdates.Sort((a, b) => a.element.depth > b.element.depth ? -1 : 1);
+            m_RectUpdates.Sort((a, b) => a.element.depth > b.element.depth ? 1 : -1);
 
             for (int i = 0; i < m_RectUpdates.Count; i++) {
                 LayoutBox box = m_RectUpdates[i];
                 UIElement element = box.element;
-                Vector2 localPosition = new Vector2(box.computedX, box.computedY);
+                Vector2 localPosition = new Vector2(box.localX, box.localY);
                 LayoutResult layoutResult = new LayoutResult(element);
                 layoutResult.localPosition = localPosition;
                 layoutResult.screenPosition = localPosition + box.parent.element.layoutResult.screenPosition;
-                layoutResult.size = new Size(box.allocatedWidth, box.allocatedHeight);
+                layoutResult.size = new Size(box.actualWidth, box.actualHeight);
+                layoutResult.allocatedSize = new Size(box.allocatedWidth, box.allocatedHeight);
                 element.layoutResult = layoutResult;
             }
 
@@ -70,6 +68,10 @@ namespace Src.Systems {
             m_RectUpdates.Add(layoutBox);
         }
 
+        internal void PositionChanged(LayoutBox layoutBox) {
+            m_RectUpdates.Add(layoutBox);    
+        }
+        
         internal void RequestLayout(LayoutBox layoutBox) {
             // todo replace w/ set
             if (!m_UpdateRequiredElements.Contains(layoutBox)) {
@@ -79,19 +81,33 @@ namespace Src.Systems {
 
         public void OnDestroy() { }
 
-        public void OnReady() { }
-
-        public void OnInitialize() {
-//            m_StyleSystem.onOverflowPropertyChanged += HandleOverflowChanged;
+        public void OnReady() {
             m_StyleSystem.onBorderChanged += HandleContentBoxChanged;
             m_StyleSystem.onPaddingChanged += HandleContentBoxChanged;
             m_StyleSystem.onMarginChanged += HandleContentBoxChanged;
             m_StyleSystem.onLayoutChanged += HandleLayoutChanged;
             m_StyleSystem.onRectChanged += HandleRectChanged;
             m_StyleSystem.onTextContentChanged += HandleTextContentChanged;
-            m_StyleSystem.onLayoutDirectionChanged += HandleLayoutDirectionChanged;
-            m_StyleSystem.onLayoutWrapChanged += HandleWrapStateChanged;
+            m_StyleSystem.onMinWidthChanged += HandleSizeConstraintChanged;
+            m_StyleSystem.onMaxWidthChanged += HandleSizeConstraintChanged;
+            m_StyleSystem.onPreferredWidthChanged += HandleSizeChanged;
+            m_StyleSystem.onPreferredHeightChanged += HandleSizeChanged;
+        }
+
+        public void OnInitialize() {
+//            m_StyleSystem.onOverflowPropertyChanged += HandleOverflowChanged;
+          
+            //m_StyleSystem.onLayoutDirectionChanged += HandleLayoutDirectionChanged;
+            //m_StyleSystem.onLayoutWrapChanged += HandleWrapStateChanged;
             //m_StyleSystem.onFlowStateChanged == HandleFlowStateChanged;
+        }
+
+        private void HandleSizeChanged(UIElement element, UIMeasurement arg2, UIMeasurement arg3) {
+            m_LayoutBoxMap.GetOrDefault(element.parent.id)?.OnChildSizeChanged();
+        }
+
+        private void HandleSizeConstraintChanged(UIElement element, UIMeasurement newMinWidth, UIMeasurement oldMinWidth) {
+            m_LayoutBoxMap.GetOrDefault(element.id)?.OnSizeConstraintChanged(); // MarkForLayout(UpdateType.Constraint)
         }
 
         private void HandleFontPropertyChanged(UIElement element, TextStyle textStyle) { }
@@ -108,27 +124,10 @@ namespace Src.Systems {
         }
 
         private void HandleRectChanged(UIElement element, Dimensions d) {
+            // if min changes and current >= new min  no layout needed
+            // if max changes and current <= new max  no layout needed
+            
             m_LayoutBoxMap.GetOrDefault(element.id)?.OnContentRectChanged();
-        }
-
-        private void HandleLayoutDirectionChanged(UIElement element, LayoutDirection direction) {
-            m_LayoutBoxMap.GetOrDefault(element.id)?.OnDirectionChanged(direction);    
-        }
-        
-        private void HandleMainAxisAlignmentChanged(UIElement element, MainAxisAlignment newAlignment, MainAxisAlignment oldAlignment) {
-            m_LayoutBoxMap.GetOrDefault(element.id)?.OnMainAxisAlignmentChanged(newAlignment, oldAlignment);
-        }
-
-        private void HandleCrossAxisAlignmentChanged(UIElement element, CrossAxisAlignment newAlignment, CrossAxisAlignment oldAlignment) {
-            m_LayoutBoxMap.GetOrDefault(element.id)?.OnCrossAxisAlignmentChanged(newAlignment, oldAlignment);
-        }
-
-        private void HandleFlowStateChanged(UIElement element, LayoutFlowType flowType, LayoutFlowType oldFlow) {
-            m_LayoutBoxMap.GetOrDefault(element.id)?.OnFlowStateChanged(flowType, oldFlow);
-        }
-
-        private void HandleWrapStateChanged(UIElement element, LayoutWrap newWrap, LayoutWrap oldWrap) {
-            m_LayoutBoxMap.GetOrDefault(element.id)?.OnWrapChanged(newWrap, oldWrap);
         }
 
         private void HandleFlexLayoutStateChanged() { }
@@ -186,9 +185,17 @@ namespace Src.Systems {
 
         public void OnElementMoved(UIElement element, int newIndex, int oldIndex) { }
 
-        public void OnElementEnabled(UIElement element) { }
+        public void OnElementEnabled(UIElement element) {
+            LayoutBox child = m_LayoutBoxMap.GetOrDefault(element.id);
+            if (child == null) return;
+            m_LayoutBoxMap.GetOrDefault(element.parent.id)?.OnChildEnabled(child);
+        }
 
-        public void OnElementDisabled(UIElement element) { }
+        public void OnElementDisabled(UIElement element) {
+            LayoutBox child = m_LayoutBoxMap.GetOrDefault(element.id);
+            if (child == null) return;
+            m_LayoutBoxMap.GetOrDefault(element.parent.id)?.OnChildDisabled(child);
+        }
 
         public void OnElementDestroyed(UIElement element) { }
 
@@ -242,7 +249,7 @@ namespace Src.Systems {
                     MetaData childData = parentData.children[i];
                     LayoutBox childBox = CreateLayoutBox(childData.element);
                     childBox.SetParent(parentBox);
-                    m_LayoutBoxMap.Add(childData.element.id, layoutBox);
+                    m_LayoutBoxMap.Add(childData.element.id, childBox);
                     stack.Push(ValueTuple.Create(childData, childBox));
                 }
             }
@@ -254,15 +261,10 @@ namespace Src.Systems {
 
         public void SetViewportRect(Rect viewportRect) {
             ViewportRect = viewportRect;
-            root.minWidth = viewportRect.width;
-            root.maxWidth = viewportRect.width;
-            root.preferredWidth = viewportRect.width;
             root.allocatedWidth = viewportRect.width;
-            root.minHeight = viewportRect.height;
-            root.maxHeight = viewportRect.height;
-            root.preferredHeight = viewportRect.height;
             root.allocatedHeight = viewportRect.height;
-            //root.SetRectFromParentLayout(0, 0, viewportRect.width, viewportRect.height);
+            root.actualWidth = viewportRect.width;
+            root.actualHeight = viewportRect.height;
             root.RunLayout();
         }
 

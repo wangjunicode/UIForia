@@ -69,6 +69,9 @@ namespace Rendering {
         public static readonly AssetPointer<Font> fontAsset = new AssetPointer<Font>(AssetType.Font, 1);
         public static readonly TextUtil.TextAnchor textAnchor = TextUtil.TextAnchor.MiddleLeft;
 
+        //IgnoreTranslationInLayout
+        //UseScaledAABB
+        
     }
 
     public class ComputedStyle {
@@ -947,10 +950,12 @@ namespace Rendering {
 
 #endregion
 
+                // SizeParameters -> None | IgnoreScaleForLayout | IgnoreRotationForLayout | PreMultiplyScale
                 case StylePropertyId.__TextPropertyStart__:
                 case StylePropertyId.__TextPropertyEnd__:
                     break;
                 case StylePropertyId.IsInLayoutFlow:
+                    // FlowType -> Normal | Ignored | TranslationAsOffset 
                     break;
                 default:
                     throw new ArgumentOutOfRangeException(nameof(property.propertyId), property.propertyId, null);

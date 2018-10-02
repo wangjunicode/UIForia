@@ -1,7 +1,10 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project version="4">
   <component name="ContentModelStore">
-    <e p="C:\Seed\UIElements" t="IncludeRecursive">
+    <e p="C:\Users\matth\.Rider2018.2\config\extensions" t="IncludeRecursive" />
+    <e p="C:\Users\matth\.Rider2018.2\system\extResources" t="IncludeRecursive" />
+    <e p="C:\Users\matth\.Rider2018.2\system\resharper-host\local\Transient\ReSharperHost\v182\SolutionCaches\_UIElements.-1987582547.00" t="ExcludeRecursive" />
+    <e p="C:\Users\matth\RiderProjects\UIElements" t="IncludeRecursive">
       <e p="_DemoAsmDef.csproj" t="IncludeRecursive" />
       <e p="Assembly-CSharp-Editor.csproj" t="IncludeRecursive" />
       <e p="Assets" t="Include">
@@ -479,6 +482,7 @@
           <e p="ElementTests.cs" t="Include" />
           <e p="ExpressionCompilerTests.cs" t="Include" />
           <e p="ExpressionParserTests.cs" t="Include" />
+          <e p="FlexLayoutColTests.cs" t="Include" />
           <e p="FlexLayoutRowTests.cs" t="Include" />
           <e p="GridLayoutTests.cs" t="Include" />
           <e p="InputCompilerBindingTests.cs" t="Include" />
@@ -537,8 +541,5 @@
       <e p="TestAsm.csproj" t="IncludeRecursive" />
       <e p="UIElements.sln" t="IncludeFlat" />
     </e>
-    <e p="C:\Users\Matt\.Rider2018.2\config\extensions" t="IncludeRecursive" />
-    <e p="C:\Users\Matt\.Rider2018.2\system\extResources" t="IncludeRecursive" />
-    <e p="C:\Users\Matt\.Rider2018.2\system\resharper-host\local\Transient\ReSharperHost\v182\SolutionCaches\_UIElements.1439856042.00" t="ExcludeRecursive" />
   </component>
 </project>

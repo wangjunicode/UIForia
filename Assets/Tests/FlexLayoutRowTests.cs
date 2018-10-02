@@ -3,6 +3,7 @@ using Rendering;
 using Src;
 using Src.Layout;
 using Tests.Mocks;
+using UnityEditor.VersionControl;
 using UnityEngine;
 
 [TestFixture]
@@ -58,6 +59,7 @@ public class FlexLayoutRowTests {
         ";
         MockView mockView = new MockView(typeof(FlexRowLayoutThing), template);
         mockView.Initialize();
+        mockView.layoutSystem.SetViewportRect(new Rect(0, 0, 1000f, 1000f));
         FlexRowLayoutThing root = (FlexRowLayoutThing) mockView.RootElement;
         root.style.SetFlexCrossAxisAlignment(CrossAxisAlignment.Start, StyleState.Normal);
         mockView.Update();
@@ -339,15 +341,121 @@ public class FlexLayoutRowTests {
         Assert.AreEqual(new Rect(0, 100, 100, 50), root.child1.layoutResult.ScreenRect);
         Assert.AreEqual(new Rect(0, 150, 100, 100), root.child2.layoutResult.ScreenRect);
     }
+
+    [Test]
+    public void WrapsOnExactSizeMatch() {
+        string template = @"
+        <UITemplate>
+            <Style classPath='FlexLayoutRowTests+FlexRowLayoutThing+Style'/>
+            <Contents style.layoutType='Flex' style.width='600f' style.height='500f'>
+                <Group x-id='child0' style.width='100f' style.height='500f'/>
+                <Group x-id='child1' style='w100h100'/>
+                <Group x-id='child2' style='w100h100'/>
+            </Contents>
+        </UITemplate>
+        ";
+        MockView mockView = new MockView(typeof(FlexRowLayoutThing), template);
+        mockView.Initialize();
+        mockView.layoutSystem.SetViewportRect(new Rect(0, 0, 1000f, 1000f));
+        FlexRowLayoutThing root = (FlexRowLayoutThing) mockView.RootElement;
+        root.style.SetFlexWrapMode(LayoutWrap.Wrap, StyleState.Normal);
+        mockView.Update();
+        Assert.AreEqual(new Rect(0, 0, 100, 500), root.child0.layoutResult.ScreenRect);
+        Assert.AreEqual(new Rect(100, 0, 100, 100), root.child1.layoutResult.ScreenRect);
+        Assert.AreEqual(new Rect(100, 100, 100, 100), root.child2.layoutResult.ScreenRect);
+    }
     
-    public void LimitsGrowthToMaxWidth() { }
+    [Test]
+    public void WrapsOnSizeOverflow() {
+        string template = @"
+        <UITemplate>
+            <Style classPath='FlexLayoutRowTests+FlexRowLayoutThing+Style'/>
+            <Contents style.layoutType='Flex' style.width='600f' style.height='500f'>
+                <Group x-id='child0' style.width='100f' style.height='450f'/>
+                <Group x-id='child1' style='w100h100'/>
+                <Group x-id='child2' style='w100h100'/>
+            </Contents>
+        </UITemplate>
+        ";
+        MockView mockView = new MockView(typeof(FlexRowLayoutThing), template);
+        mockView.Initialize();
+        mockView.layoutSystem.SetViewportRect(new Rect(0, 0, 1000f, 1000f));
+        FlexRowLayoutThing root = (FlexRowLayoutThing) mockView.RootElement;
+        root.style.SetFlexWrapMode(LayoutWrap.Wrap, StyleState.Normal);
+        mockView.Update();
+        Assert.AreEqual(new Rect(0, 0, 100, 450), root.child0.layoutResult.ScreenRect);
+        Assert.AreEqual(new Rect(100, 0, 100, 100), root.child1.layoutResult.ScreenRect);
+        Assert.AreEqual(new Rect(100, 100, 100, 100), root.child2.layoutResult.ScreenRect);
+        
+    }
+    
+    [Test]
+    public void WrapsOnSizeExceeded() {
+        string template = @"
+        <UITemplate>
+            <Style classPath='FlexLayoutRowTests+FlexRowLayoutThing+Style'/>
+            <Contents style.layoutType='Flex' style.width='600f' style.height='500f'>
+                <Group x-id='child0' style.width='100f' style.height='550f'/>
+                <Group x-id='child1' style='w100h100'/>
+                <Group x-id='child2' style='w100h100'/>
+            </Contents>
+        </UITemplate>
+        ";
+        MockView mockView = new MockView(typeof(FlexRowLayoutThing), template);
+        mockView.Initialize();
+        mockView.layoutSystem.SetViewportRect(new Rect(0, 0, 1000f, 1000f));
+        FlexRowLayoutThing root = (FlexRowLayoutThing) mockView.RootElement;
+        root.style.SetFlexWrapMode(LayoutWrap.Wrap, StyleState.Normal);
+        mockView.Update();
+        Assert.AreEqual(new Rect(0, 0, 100, 550), root.child0.layoutResult.ScreenRect);
+        Assert.AreEqual(new Rect(100, 0, 100, 100), root.child1.layoutResult.ScreenRect);
+        Assert.AreEqual(new Rect(100, 100, 100, 100), root.child2.layoutResult.ScreenRect);
+    }
 
-//    [Test]
-//    public void DefaultsToRowLayout() { }
-    //  [Test]
-    // public void DefaultsToCrossAxisStart() { }
+    [Test]
+    public void GrowWrappedTracks() {
+        string template = @"
+        <UITemplate>
+            <Style classPath='FlexLayoutRowTests+FlexRowLayoutThing+Style'/>
+            <Contents style.layoutType='Flex' style.width='600f' style.height='500f'>
+                <Group x-id='child0' style.width='100f' style.height='450f' style.growthFactor='1'/>
+                <Group x-id='child1' style='w100h100' style.growthFactor='1'/>
+                <Group x-id='child2' style='w100h100' style.growthFactor='1'/>
+            </Contents>
+        </UITemplate>
+        ";
+        MockView mockView = new MockView(typeof(FlexRowLayoutThing), template);
+        mockView.Initialize();
+        mockView.layoutSystem.SetViewportRect(new Rect(0, 0, 1000f, 1000f));
+        FlexRowLayoutThing root = (FlexRowLayoutThing) mockView.RootElement;
+        root.style.SetFlexWrapMode(LayoutWrap.Wrap, StyleState.Normal);
+        mockView.Update();
+        Assert.AreEqual(new Rect(0, 0, 100, 500), root.child0.layoutResult.ScreenRect);
+        Assert.AreEqual(new Rect(100, 0, 100, 250), root.child1.layoutResult.ScreenRect);
+        Assert.AreEqual(new Rect(100, 250, 100, 250), root.child2.layoutResult.ScreenRect);
+    }
 
-    // [Test]
-    //public void DefaultsToMainAxisStart() { }
+    [Test]
+    public void ShrinkWrappedTracks() {
+        string template = @"
+        <UITemplate>
+            <Style classPath='FlexLayoutRowTests+FlexRowLayoutThing+Style'/>
+            <Contents style.layoutType='Flex' style.width='600f' style.height='400f'>
+                <Group x-id='child0' style.width='100f' style.height='450f' style.shrinkFactor='1'/>
+                <Group x-id='child1' style.width='100f' style.height='300f' style.shrinkFactor='1'/>
+                <Group x-id='child2' style.width='100f' style.height='300f' style.shrinkFactor='1'/>
+            </Contents>
+        </UITemplate>
+        ";
+        MockView mockView = new MockView(typeof(FlexRowLayoutThing), template);
+        mockView.Initialize();
+        mockView.layoutSystem.SetViewportRect(new Rect(0, 0, 1000f, 1000f));
+        FlexRowLayoutThing root = (FlexRowLayoutThing) mockView.RootElement;
+        root.style.SetFlexWrapMode(LayoutWrap.Wrap, StyleState.Normal);
+        mockView.Update();
+        Assert.AreEqual(new Rect(0, 0, 100, 400), root.child0.layoutResult.ScreenRect);
+        Assert.AreEqual(new Rect(100, 0, 100, 200), root.child1.layoutResult.ScreenRect);
+        Assert.AreEqual(new Rect(100, 200, 100, 200), root.child2.layoutResult.ScreenRect);
+    }
 
 }

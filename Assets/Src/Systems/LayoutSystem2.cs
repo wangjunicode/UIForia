@@ -74,6 +74,7 @@ namespace Src.Systems {
         
         internal void RequestLayout(LayoutBox layoutBox) {
             // todo replace w/ set
+            if (layoutBox == root) return;
             if (!m_UpdateRequiredElements.Contains(layoutBox)) {
                 m_UpdateRequiredElements.Add(layoutBox);
             }
@@ -103,10 +104,12 @@ namespace Src.Systems {
         }
 
         private void HandleSizeChanged(UIElement element, UIMeasurement arg2, UIMeasurement arg3) {
+            if (element.parent == null) return;
             m_LayoutBoxMap.GetOrDefault(element.parent.id)?.OnChildSizeChanged();
         }
 
         private void HandleSizeConstraintChanged(UIElement element, UIMeasurement newMinWidth, UIMeasurement oldMinWidth) {
+            if (element.parent == null) return;
             m_LayoutBoxMap.GetOrDefault(element.id)?.OnSizeConstraintChanged(); // MarkForLayout(UpdateType.Constraint)
         }
 

@@ -51,8 +51,87 @@ namespace Src.Layout.LayoutTypes {
             return new Size();
         }
 
-        private void RunFullColumnLayout() { }
+        private void RunFullColumnLayout() {
+            int inFlowItemCount = 0;
 
+            for (int i = 0; i < children.Count; i++) {
+                LayoutBox child = children[i];
+
+                if (child.element.isEnabled) { // }&& child.style.flow != LayoutFlowType.OutOfFlow) {
+                    heights[inFlowItemCount] = new FlexItemAxis();
+                    heights[inFlowItemCount].childIndex = inFlowItemCount;
+                    heights[inFlowItemCount].outputSize = Mathf.Max(child.MinHeight, Mathf.Min(child.PreferredHeight, child.MaxHeight));
+                    heights[inFlowItemCount].order = BitUtil.SetHighLowBits(child.style.FlexItemOrder, i);
+
+                    heights[inFlowItemCount].crossAxisAlignment = child.style.FlexItemSelfAlignment != CrossAxisAlignment.Unset
+                        ? child.style.FlexItemSelfAlignment
+                        : style.FlexLayoutCrossAxisAlignment;
+
+                    widths[inFlowItemCount] = new FlexItemAxis();
+                    widths[inFlowItemCount].childIndex = inFlowItemCount;
+                    widths[inFlowItemCount].order = BitUtil.SetHighLowBits(child.style.FlexItemOrder, i);
+                    widths[inFlowItemCount].growthFactor = child.style.FlexItemGrowthFactor;
+                    widths[inFlowItemCount].shrinkFactor = child.style.FlexItemShrinkFactor;
+                    widths[inFlowItemCount].minSize = Mathf.Max(0, child.MinWidth);
+                    widths[inFlowItemCount].maxSize = Mathf.Max(0, child.MaxWidth);
+                    widths[inFlowItemCount].outputSize = Mathf.Max(widths[inFlowItemCount].minSize, Mathf.Min(child.PreferredWidth, widths[inFlowItemCount].maxSize));
+
+                    inFlowItemCount++;
+                }
+            }
+
+            Array.Sort(widths, 0, inFlowItemCount);
+            Array.Sort(heights, 0, inFlowItemCount);
+
+            Vector2 size = Run(inFlowItemCount, widths, heights, allocatedWidth, allocatedHeight);
+            actualWidth = size.x;
+            actualHeight = size.y;
+            
+        }
+
+        private Vector2 Run(int inFlowItemCount, FlexItemAxis[] mainAxisItems, FlexItemAxis[] crossAxisItems, float mainAxisTargetSize, float crossAxisTargetSize) {
+            FillTracks(mainAxisItems, inFlowItemCount, mainAxisTargetSize);
+
+            float trackCrossAxisStart = 0;
+            float largestTrackSize = 0;
+            Vector2 retn = Vector2.zero;
+            
+            for (int i = 0; i < tracks.Count; i++) {
+                FlexTrack track = tracks[i];
+                float remainingSpace = mainAxisTargetSize - track.mainSize;
+
+                if (remainingSpace > 0) {
+                    GrowTrack(track, mainAxisItems);
+                }
+                else if (remainingSpace < 0) {
+                    ShrinkTrack(track, mainAxisItems);
+                }
+
+                if (track.mainSize > largestTrackSize) {
+                    largestTrackSize = track.mainSize;
+                }
+
+                AlignMainAxis(track, mainAxisItems, style.FlexLayoutMainAxisAlignment);
+                trackCrossAxisStart = PositionCrossAxis(trackCrossAxisStart, track, crossAxisItems, crossAxisTargetSize);
+
+                for (int j = track.startItem; j < track.startItem + track.itemCount; j++) {
+                    children[widths[j].childIndex].SetAllocatedRect(new Rect(
+                        widths[j].axisStart,
+                        heights[j].axisStart,
+                        widths[j].outputSize,
+                        heights[j].outputSize)
+                    );
+
+                    if (crossAxisItems[j].axisStart + crossAxisItems[j].outputSize > retn.y) {
+                        retn.y = crossAxisItems[j].axisStart + crossAxisItems[j].outputSize;
+                    }
+                }
+            }
+
+            retn.x = largestTrackSize;
+            return retn;
+        }
+        
         private void RunFullRowLayout() {
             int inFlowItemCount = 0;
 
@@ -85,7 +164,6 @@ namespace Src.Layout.LayoutTypes {
             Array.Sort(widths, 0, inFlowItemCount);
             Array.Sort(heights, 0, inFlowItemCount);
 
-
             float targetSize = allocatedHeight;
 
             FillTracks(heights, inFlowItemCount, targetSize);
@@ -98,10 +176,10 @@ namespace Src.Layout.LayoutTypes {
                 float remainingSpace = targetSize - track.mainSize;
 
                 if (remainingSpace > 0) {
-                    GrowTrack(track, heights, remainingSpace);
+                    GrowTrack(track, heights);
                 }
                 else if (remainingSpace < 0) {
-                    ShrinkTrack(track, heights, targetSize);
+                    ShrinkTrack(track, heights);
                 }
 
                 if (track.mainSize > maxTrackHeight) {
@@ -152,9 +230,10 @@ namespace Src.Layout.LayoutTypes {
                     currentTrack.itemCount++;
                 }
                 else if (size >= targetSize) {
-                    currentTrack.itemCount++;
-                    currentTrack.remainingSpace = targetSize - currentTrack.mainSize;
-                    tracks.Add(currentTrack);
+                    if (currentTrack.itemCount != 0) {
+                        currentTrack.remainingSpace = targetSize - currentTrack.mainSize;
+                        tracks.Add(currentTrack);
+                    }
 
                     currentTrack = new FlexTrack();
                     currentTrack.startItem = i;
@@ -164,19 +243,32 @@ namespace Src.Layout.LayoutTypes {
                     tracks.Add(currentTrack);
 
                     currentTrack = new FlexTrack();
-                    currentTrack.startItem = i;
-                    currentTrack.itemCount = 1;
-                    currentTrack.mainSize = size;
+                    currentTrack.startItem = i + 1;
                 }
                 else {
                     currentTrack.itemCount++;
+                    currentTrack.mainSize += size;
                     currentTrack.remainingSpace = targetSize - currentTrack.mainSize;
-                    tracks.Add(currentTrack);
+                    //try to shrink here if possible
 
-                    currentTrack = new FlexTrack();
-                    currentTrack.startItem = i;
-                    currentTrack.itemCount = 1;
-                    currentTrack.mainSize = size;
+                    // if after shrinking there is still overflow, start a new track
+                    if (TryShrinkTrack(currentTrack, items)) {
+                        tracks.Add(currentTrack);
+                        currentTrack = new FlexTrack();
+                        currentTrack.startItem = i + 1;
+                    }
+                    else {
+                        currentTrack.itemCount--;
+                        currentTrack.mainSize -= size;
+                        currentTrack.remainingSpace = targetSize - currentTrack.mainSize;
+
+                        tracks.Add(currentTrack);
+
+                        currentTrack = new FlexTrack();
+                        currentTrack.startItem = i;
+                        currentTrack.itemCount = 1;
+                        currentTrack.mainSize = size;
+                    }
                 }
             }
 
@@ -196,6 +288,7 @@ namespace Src.Layout.LayoutTypes {
         }
 
         private static float PositionCrossAxis(float axisOffset, FlexTrack track, FlexItemAxis[] items, float targetSize) {
+            float crossSize = 0;
             for (int i = track.startItem; i < track.startItem + track.itemCount; i++) {
                 switch (items[i].crossAxisAlignment) {
                     case CrossAxisAlignment.Center:
@@ -220,9 +313,10 @@ namespace Src.Layout.LayoutTypes {
                 }
 
                 items[i].axisStart += axisOffset;
+                crossSize += items[i].outputSize;
             }
 
-            return axisOffset + track.crossSize;
+            return axisOffset + crossSize;
         }
 
         private static void AlignMainAxis(FlexTrack track, FlexItemAxis[] items, MainAxisAlignment mainAxisAlignment) {
@@ -266,13 +360,13 @@ namespace Src.Layout.LayoutTypes {
                 }
             }
 
-            for (int i = 0; i < itemCount; i++) {
+            for (int i = track.startItem; i < track.startItem + track.itemCount; i++) {
                 items[i].axisStart = offset;
                 offset += items[i].outputSize + spacerSize;
             }
         }
 
-        private static void GrowTrack(FlexTrack track, FlexItemAxis[] items, float targetSize) {
+        private static void GrowTrack(FlexTrack track, FlexItemAxis[] items) {
             int pieces = 0;
 
             int startIndex = track.startItem;
@@ -313,13 +407,14 @@ namespace Src.Layout.LayoutTypes {
             track.remainingSpace = remainingSpace;
         }
 
-        private static void ShrinkTrack(FlexTrack track, FlexItemAxis[] items, float targetSize) {
+        private static float DoShrinkTrack(FlexTrack track, FlexItemAxis[] items, float[] outputs) {
             int pieces = 0;
             int startIndex = track.startItem;
             int endIndex = startIndex + track.itemCount;
 
             for (int i = startIndex; i < endIndex; i++) {
                 pieces += items[i].shrinkFactor;
+                outputs[i] = items[i].outputSize;
             }
 
             float overflow = -track.remainingSpace;
@@ -332,10 +427,10 @@ namespace Src.Layout.LayoutTypes {
 
                 for (int i = startIndex; i < endIndex; i++) {
                     float min = items[i].minSize;
-                    float output = items[i].outputSize;
+                    float output = outputs[i];
                     int shrinkFactor = items[i].shrinkFactor;
 
-                    if (shrinkFactor == 0 || (int) output == (int) min || output == 0f) {
+                    if (shrinkFactor == 0 || (int) output == (int) min || (int) output == 0) {
                         continue;
                     }
 
@@ -346,9 +441,42 @@ namespace Src.Layout.LayoutTypes {
                     output = (totalShrink < min) ? min : totalShrink;
                     overflow += output - start;
 
-                    items[i].outputSize = output;
+                    outputs[i] = output;
                 }
             }
+
+            return overflow;
+        }
+
+        private void ShrinkTrack(FlexTrack track, FlexItemAxis[] items) {
+            float[] outputs = ArrayPool<float>.GetMinSize(children.Count);
+            track.remainingSpace = DoShrinkTrack(track, items, outputs);
+            for (int i = track.startItem; i < track.startItem + track.itemCount; i++) {
+                items[i].outputSize = outputs[i];
+            }
+
+            ArrayPool<float>.Release(outputs);
+        }
+
+        private bool TryShrinkTrack(FlexTrack track, FlexItemAxis[] items) {
+            float[] outputs = ArrayPool<float>.GetMinSize(children.Count);
+            float overflow = DoShrinkTrack(track, items, outputs);
+            if (overflow <= 0) {
+                track.remainingSpace = overflow;
+                track.mainSize = 0;
+                for (int i = track.startItem; i < track.startItem + track.itemCount; i++) {
+                    items[i].outputSize = outputs[i];
+                    track.mainSize += outputs[i];
+                }
+
+                ArrayPool<float>.Release(outputs);
+
+                return true;
+            }
+
+            ArrayPool<float>.Release(outputs);
+
+            return false;
         }
 
         private struct FlexItemAxis : IComparable<FlexItemAxis> {

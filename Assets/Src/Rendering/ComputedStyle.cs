@@ -4,6 +4,7 @@ using Src.Layout;
 using Src.Rendering;
 using Src.Systems;
 using Src.Util;
+using TMPro;
 using UnityEngine;
 
 namespace Rendering {
@@ -66,7 +67,7 @@ namespace Rendering {
         public static readonly int fontSize = 12;
         public static readonly Color textColor = Color.black;
         public static readonly TextUtil.FontStyle fontStyle = TextUtil.FontStyle.Normal;
-        public static readonly AssetPointer<Font> fontAsset = new AssetPointer<Font>(AssetType.Font, 1);
+        public static readonly AssetPointer<TMP_FontAsset> fontAsset = new AssetPointer<TMP_FontAsset>(AssetType.Font, 1);
         public static readonly TextUtil.TextAnchor textAnchor = TextUtil.TextAnchor.MiddleLeft;
 
         //IgnoreTranslationInLayout
@@ -530,7 +531,7 @@ namespace Rendering {
 
         private int fontSize = DefaultStyleValues.fontSize;
         private Color textColor = DefaultStyleValues.textColor;
-        private AssetPointer<Font> fontAsset = DefaultStyleValues.fontAsset;
+        private AssetPointer<TMP_FontAsset> fontAsset = DefaultStyleValues.fontAsset;
         private TextUtil.FontStyle fontStyle = DefaultStyleValues.fontStyle;
         private TextUtil.TextAnchor textAnchor = DefaultStyleValues.textAnchor;
 
@@ -543,7 +544,7 @@ namespace Rendering {
             }
         }
 
-        public AssetPointer<Font> FontAsset {
+        public AssetPointer<TMP_FontAsset> FontAsset {
             get { return fontAsset; }
             internal set {
                 if (fontAsset.id == value.id) return;
@@ -884,7 +885,7 @@ namespace Rendering {
                     TextColor = property.IsDefined ? (Color) new StyleColor(value0) : DefaultStyleValues.textColor;
                     break;
                 case StylePropertyId.TextFontAsset:
-                    FontAsset = property.IsDefined ? new AssetPointer<Font>((AssetType) value0, value1) : DefaultStyleValues.fontAsset;
+                    FontAsset = property.IsDefined ? new AssetPointer<TMP_FontAsset>((AssetType) value0, value1) : DefaultStyleValues.fontAsset;
                     break;
                 case StylePropertyId.TextFontSize:
                     FontSize = property.IsDefined ? value0 : DefaultStyleValues.fontSize;

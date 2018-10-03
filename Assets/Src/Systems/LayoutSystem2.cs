@@ -23,11 +23,8 @@ namespace Src.Systems {
 
         private readonly List<UIElement> m_Elements;
 
-        public readonly ITextSizeCalculator textCalculator; //= new GOTextSizeCalculator();
-
         public LayoutSystem2(ITextSizeCalculator textSizeCalculator, IStyleSystem styleSystem) {
             this.root = new RootLayoutBox(this);
-            this.textCalculator = textSizeCalculator;
             this.m_StyleSystem = styleSystem;
             this.m_LayoutBoxMap = new Dictionary<int, LayoutBox>();
             this.m_UpdateRequiredElements = new List<LayoutBox>();
@@ -272,7 +269,7 @@ namespace Src.Systems {
 
         private LayoutBox CreateLayoutBox(UIElement element) {
             if ((element is UITextContainerElement)) {
-                return new TextContainerLayoutBox(textCalculator, this, element);
+                return new TextContainerLayoutBox(this, element);
             }
 
             switch (element.style.computedStyle.LayoutType) {

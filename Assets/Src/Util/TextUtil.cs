@@ -1,4 +1,7 @@
 using System;
+using System.Collections.Generic;
+using System.Text;
+using Rendering;
 
 namespace Src.Util {
 
@@ -15,7 +18,7 @@ namespace Src.Util {
             LowerCase = 1 << 5,
             UpperCase = 1 << 6,  
             SmallCaps = 1 << 7,  
-            Strikethrough = 1 << 8,  
+            StrikeThrough = 1 << 8,  
             Superscript = 1 << 9,  
             Subscript = 1 << 10,  
             Highlight = 1 << 11,  
@@ -37,19 +40,68 @@ namespace Src.Util {
 
         }
 
-        public static int StringToCharArray(string sourceText, ref int[] charBuffer, bool parseControlCharacters = false) {
-            if (sourceText == null) {
+        public static string ProcessWrapString(string input, bool collapseSpaceAndTab = true, bool preserveNewLine = false ) {
+            char[] buffer = null;
+            int count = ProcessWrap(input, true, false, ref buffer);
+            return new string(buffer, 0, count);
+        }
+        
+        public static int ProcessWrap(string input, bool collapseSpaceAndTab, bool preserveNewLine, ref char[] buffer) {
+            bool collapsing = collapseSpaceAndTab;
+
+            if (buffer == null) {
+                buffer = ArrayPool<char>.GetMinSize(input.Length);
+            }
+            
+            if (buffer.Length < input.Length) {
+                ArrayPool<char>.Resize(ref buffer, input.Length);
+            }
+
+            int writeIndex = 0;
+                        
+            for (int i = 0; i < input.Length; i++) {
+                char current = input[i];
+                
+                if (current == '\n' && !preserveNewLine) {
+                    continue;
+                }
+
+                bool isWhiteSpace = current == '\t' || current == ' ';
+               
+                if (collapsing) {
+                    if (!isWhiteSpace) {
+                        buffer[writeIndex++] = current;
+                        collapsing = false;
+                    }
+                }
+                else if (isWhiteSpace) {
+                    collapsing = collapseSpaceAndTab;
+                    buffer[writeIndex++] = ' ';
+                }
+                else {
+                    buffer[writeIndex++] = current;
+                }
+            }
+            return writeIndex;
+        }
+        
+        public static int StringToCharArray(string sourceText, ref int[] charBuffer, WhitespaceMode whiteSpaceMode, bool parseControlCharacters = false) {
+            if (string.IsNullOrEmpty(sourceText)) {
                 charBuffer = charBuffer ?? new int[0];
                 return 0;
             }
+            
+            if (charBuffer == null) {
+                charBuffer = charBuffer = ArrayPool<int>.GetMinSize(sourceText.Length);
+            }
 
             if (charBuffer.Length < sourceText.Length) {
-                Array.Resize(ref charBuffer, sourceText.Length);
+                ArrayPool<int>.Resize(ref charBuffer, sourceText.Length);
             }
 
             if (!parseControlCharacters) {
                 for (int i = 0; i < sourceText.Length; i++) {
-                    char current = sourceText[i];
+                    char current = sourceText[i];                
                     charBuffer[i] = current;
                 }
 
@@ -178,6 +230,72 @@ namespace Src.Util {
             unicode += HexToInt(text[i + 6]) << 4;
             unicode += HexToInt(text[i + 7]);
             return unicode;
+        }
+
+        // line info is processed only when doing wrapping, not here
+        public static TextInfo ProcessText(TextSpan textSpan) {
+            char[] buffer = null;
+            int bufferLength = ProcessWrap(textSpan.text, false, false, ref buffer);
+
+            List<WordInfo> s_WordInfoList = ListPool<WordInfo>.Get();
+
+            WordInfo currentWord = new WordInfo();
+
+            bool inWhiteSpace = false;
+            CharInfo[] charInfos = ArrayPool<CharInfo>.GetExactSize(buffer.Length);
+            for (int i = 0; i < bufferLength; i++) {
+                int charCode = buffer[i];
+                charInfos[i] = new CharInfo();
+                charInfos[i].character = (char)charCode;
+
+                if ((char) charCode == '\n') {
+                    if (currentWord.charCount > 0) {
+                        s_WordInfoList.Add(currentWord);
+                        currentWord = new WordInfo();
+                        currentWord.startChar = i;
+                    }
+
+                    currentWord.charCount = 1;
+                    currentWord.spaceStart = 0;
+                    currentWord.isNewLine = true;
+                    s_WordInfoList.Add(currentWord);
+                    currentWord = new WordInfo();
+                    currentWord.startChar = i + 1;
+                }
+                
+                if (!char.IsWhiteSpace((char) charCode)) {
+                    if (inWhiteSpace) {
+                        // new word starts
+                        s_WordInfoList.Add(currentWord);
+                        currentWord = new WordInfo();
+                        currentWord.startChar = i;
+                        inWhiteSpace = false;
+                    }
+
+                    currentWord.charCount++;
+                }
+                else {
+                    if (!inWhiteSpace) {
+                        inWhiteSpace = true;
+                        currentWord.spaceStart = currentWord.charCount;
+                    }
+
+                    currentWord.charCount++;
+                }
+            }
+
+            if (!inWhiteSpace) {
+                currentWord.spaceStart = currentWord.charCount;
+            }
+
+            s_WordInfoList.Add(currentWord);
+
+            TextInfo retn = new TextInfo();
+            retn.wordCount = s_WordInfoList.Count;
+            retn.wordInfos = ArrayPool<WordInfo>.CopyFromList(s_WordInfoList);
+            retn.charInfos = charInfos;
+            retn.charCount = bufferLength;
+            return retn;
         }
 
     }

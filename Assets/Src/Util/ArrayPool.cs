@@ -52,6 +52,7 @@ namespace Src.Util {
         }
 
         public static void Release(T[] array) {
+            if (array == null) return;
             Array.Clear(array, 0, array.Length);
             if (s_ArrayPool.Count == MaxPoolSize) {
                 int minCount = int.MaxValue;
@@ -70,6 +71,14 @@ namespace Src.Util {
             else {
                 s_ArrayPool.Add(array);
             }
+        }
+
+        public static T[] CopyFromList(IList<T> source) {
+            T[] retn = GetMinSize(source.Count);
+            for (int i = 0; i < source.Count; i++) {
+                retn[i] = source[i];
+            }
+            return retn;
         }
 
     }

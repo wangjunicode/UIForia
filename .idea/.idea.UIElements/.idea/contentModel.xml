@@ -377,6 +377,7 @@
             <e p="VerticalScrollbarAttachment.cs" t="Include" />
             <e p="WhitespaceMode.cs" t="Include" />
           </e>
+          <e p="SDFText.cs" t="Include" />
           <e p="Shaders" t="Include">
             <e p="GUIRoundedRect.shader" t="Include" />
             <e p="GUITexture.shader" t="Include" />
@@ -473,7 +474,6 @@
             <e p="StackPool.cs" t="Include" />
             <e p="TextMeshProUtil.cs" t="Include" />
             <e p="TextUtil.cs" t="Include" />
-            <e p="WhitespaceProcessor.cs" t="Include" />
           </e>
         </e>
         <e p="Tests" t="Include">
@@ -525,6 +525,7 @@
           <e p="TemplateTests.cs" t="Include" />
           <e p="TestAsm.asmdef" t="Include" />
           <e p="TestUtils.cs" t="Include" />
+          <e p="TextProcessor.cs" t="Include" />
           <e p="TokenizingTests.cs" t="Include" />
           <e p="TypeCheckTests.cs" t="Include" />
           <e p="UIView_Tests.cs" t="Include" />

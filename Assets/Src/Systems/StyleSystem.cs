@@ -6,6 +6,7 @@ using Src.Extensions;
 using Src.Layout;
 using Src.Rendering;
 using Src.Util;
+using TMPro;
 using UnityEngine;
 
 namespace Src.Systems {
@@ -237,7 +238,7 @@ namespace Src.Systems {
         public void SetFlexItemSelfAlignment(UIElement element, CrossAxisAlignment alignment, CrossAxisAlignment oldAlignment) {
         }
 
-        public void SetFontAsset(UIElement styleSetElement, AssetPointer<Font> fontAsset) {
+        public void SetFontAsset(UIElement styleSetElement, AssetPointer<TMP_FontAsset> fontAsset) {
         }
 
         public void SetFontStyle(UIElement styleSetElement, TextUtil.FontStyle fontStyle) {

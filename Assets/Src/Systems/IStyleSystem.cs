@@ -3,6 +3,7 @@ using Rendering;
 using Src.Layout;
 using Src.Rendering;
 using Src.Util;
+using TMPro;
 using UnityEngine;
 
 namespace Src.Systems {
@@ -73,7 +74,7 @@ namespace Src.Systems {
         void SetFlexItemOrderOverride(UIElement element, int order, int oldOrder);
         void SetFlexItemSelfAlignment(UIElement element, CrossAxisAlignment alignment, CrossAxisAlignment oldAlignment);
 
-        void SetFontAsset(UIElement styleSetElement, AssetPointer<Font> fontAsset);
+        void SetFontAsset(UIElement styleSetElement, AssetPointer<TMP_FontAsset> fontAsset);
         void SetFontStyle(UIElement styleSetElement, TextUtil.FontStyle fontStyle);
         void SetTextAnchor(UIElement styleSetElement, TextUtil.TextAnchor textAnchor);
         void SetFontSize(UIElement element, int fontSize);

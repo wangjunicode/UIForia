@@ -47,8 +47,19 @@ namespace Src.Layout.LayoutTypes {
 
                 return new Size(maxWidth, totalHeight);
             }
+            else {
+                float maxHeight = 0;
+                float totalWidth = 0;
+                for (int i = 0; i < children.Count; i++) {
+                    LayoutBox child = children[i];
+                    if (child.element.isEnabled) { // }&& child.style.flow != LayoutFlowType.OutOfFlow) {
+                        maxHeight = Mathf.Max(maxHeight, Mathf.Max(child.MinHeight, Mathf.Min(child.PreferredHeight, child.MaxHeight)));
+                        totalWidth += Mathf.Max(child.MinWidth, Mathf.Min(child.PreferredWidth, child.MaxWidth));
+                    }
+                }
 
-            return new Size();
+                return new Size(totalWidth, maxHeight);
+            }
         }
 
         private void RunFullColumnLayout() {
@@ -86,7 +97,6 @@ namespace Src.Layout.LayoutTypes {
             Vector2 size = Run(inFlowItemCount, widths, heights, allocatedWidth, allocatedHeight);
             actualWidth = size.x;
             actualHeight = size.y;
-            
         }
 
         private Vector2 Run(int inFlowItemCount, FlexItemAxis[] mainAxisItems, FlexItemAxis[] crossAxisItems, float mainAxisTargetSize, float crossAxisTargetSize) {
@@ -95,7 +105,7 @@ namespace Src.Layout.LayoutTypes {
             float trackCrossAxisStart = 0;
             float largestTrackSize = 0;
             Vector2 retn = Vector2.zero;
-            
+
             for (int i = 0; i < tracks.Count; i++) {
                 FlexTrack track = tracks[i];
                 float remainingSpace = mainAxisTargetSize - track.mainSize;
@@ -131,7 +141,7 @@ namespace Src.Layout.LayoutTypes {
             retn.x = largestTrackSize;
             return retn;
         }
-        
+
         private void RunFullRowLayout() {
             int inFlowItemCount = 0;
 

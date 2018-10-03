@@ -19,20 +19,19 @@ namespace Src.Layout.LayoutTypes {
         public float actualWidth;
         public float actualHeight;
 
-        public ComputedStyle style;
         public UIElement element;
+        public ComputedStyle style;
 
         public LayoutBox parent;
-
-        private LayoutSystem2 layoutSystem;
-
         public List<LayoutBox> children;
 
         protected Size preferredContentSize;
 
         public VirtualScrollbar horizontalScrollbar;
         public VirtualScrollbar verticalScrollbar;
-        
+
+        private LayoutSystem2 layoutSystem;
+
         protected LayoutBox(LayoutSystem2 layoutSystem, UIElement element) {
             this.element = element;
             this.layoutSystem = layoutSystem;
@@ -56,7 +55,7 @@ namespace Src.Layout.LayoutTypes {
 
         public float TransformX => ResolveWidth(style.TransformPositionX);
         public float TransformY => ResolveHeight(style.TransformPositionY);
-        
+
         public float MinHeight => ResolveHeight(style.MinHeight);
         public float MaxHeight => ResolveHeight(style.MaxHeight);
         public float PreferredHeight => ResolveHeight(style.PreferredHeight);
@@ -92,9 +91,8 @@ namespace Src.Layout.LayoutTypes {
             children.Add(child);
             if (child.element.isEnabled) {
                 layoutSystem.RequestLayout(this);
-            RequestParentLayoutIfContentBased();
+                RequestParentLayoutIfContentBased();
             }
-
         }
 
         public virtual void OnChildRemoved(LayoutBox child) {

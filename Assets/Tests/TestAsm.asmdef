@@ -1,7 +1,8 @@
 {
     "name": "TestAsm",
     "references": [
-        "SrcAsm"
+        "SrcAsm",
+        "Unity.TextMeshPro"
     ],
     "optionalUnityReferences": [
         "TestAssemblies"

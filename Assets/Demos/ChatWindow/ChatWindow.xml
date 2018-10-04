@@ -4,13 +4,17 @@
     <Style classPath="ChatWindow_Styles.cs"/>
     
     <Contents style="container">
-        <Group style="window-header">
-            
-            <Text style="header-text">Klang Gang</Text>
-            
-            <Image src="{url('settings_icon')}"/>
-            
-        </Group>
+        
+        <!--<ClippedPanel/>-->
+        
+        Text is here
+        <!--<Group style="window-header">-->
+            <!--&lt;!&ndash;&ndash;&gt;-->
+            <!--&lt;!&ndash;<Text style="header-text">Klang Gang</Text>&ndash;&gt;-->
+            <!--&lt;!&ndash;&ndash;&gt;-->
+            <!--&lt;!&ndash;<Image src="{url('settings_icon')}"/>&ndash;&gt;-->
+            <!---->
+        <!--</Group>-->
     </Contents>
     
 </UITemplate>

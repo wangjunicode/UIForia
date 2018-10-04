@@ -8,8 +8,10 @@ public class ChatWindow_Styles {
     [ExportStyle("container")]
     public static UIStyle Container() {
         return new UIStyle() {
-                BackgroundColor = Color.blue
-            
+            BackgroundColor = Color.blue,
+            FlexLayoutDirection = LayoutDirection.Column,
+            FlexLayoutMainAxisAlignment = MainAxisAlignment.End,
+            PreferredHeight = 100f
         };
     }
 
@@ -18,7 +20,7 @@ public class ChatWindow_Styles {
         return new UIStyle() {
             FlexLayoutDirection = LayoutDirection.Row,
             FlexLayoutMainAxisAlignment = MainAxisAlignment.SpaceBetween,
-            PreferredWidth = new UIMeasurement(1f, UIUnit.ParentSize),
+            PreferredWidth = new UIMeasurement(0.25f, UIUnit.ParentSize),
             PreferredHeight = new UIMeasurement(40f),
             BackgroundColor = Color.red
         };
@@ -29,7 +31,7 @@ public class ChatWindow_Styles {
         return new UIStyle() {
             Padding = new ContentBoxRect(20f),
             FontSize = 32,
-            TextColor =  Color.white
+            TextColor = Color.white
         };
     }
 

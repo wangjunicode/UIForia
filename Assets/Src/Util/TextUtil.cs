@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Text;
 using Rendering;
+using Src.Text;
 
 namespace Src.Util {
 
@@ -233,9 +234,9 @@ namespace Src.Util {
         }
 
         // line info is processed only when doing wrapping, not here
-        public static TextInfo ProcessText(TextSpan textSpan) {
+        public static TextInfo ProcessText(string text, bool collapseWhitespace, bool preserveNewLines) {
             char[] buffer = null;
-            int bufferLength = ProcessWrap(textSpan.text, false, false, ref buffer);
+            int bufferLength = ProcessWrap(text, collapseWhitespace, preserveNewLines, ref buffer);
 
             List<WordInfo> s_WordInfoList = ListPool<WordInfo>.Get();
 

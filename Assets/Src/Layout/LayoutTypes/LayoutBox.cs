@@ -31,6 +31,7 @@ namespace Src.Layout.LayoutTypes {
         public VirtualScrollbar verticalScrollbar;
 
         private LayoutSystem2 layoutSystem;
+        public bool markedForLayout;
 
         protected LayoutBox(LayoutSystem2 layoutSystem, UIElement element) {
             this.element = element;
@@ -90,8 +91,8 @@ namespace Src.Layout.LayoutTypes {
         public virtual void OnChildAddedChild(LayoutBox child) {
             children.Add(child);
             if (child.element.isEnabled) {
-                layoutSystem.RequestLayout(this);
                 RequestParentLayoutIfContentBased();
+                RequestLayout();
             }
         }
 
@@ -102,7 +103,7 @@ namespace Src.Layout.LayoutTypes {
 
             if (child.element.isEnabled) {
                 RequestParentLayoutIfContentBased();
-                layoutSystem.RequestLayout(this);
+                RequestLayout();
             }
         }
 
@@ -116,6 +117,8 @@ namespace Src.Layout.LayoutTypes {
         }
 
         protected void RequestLayout() {
+            if (markedForLayout) return;
+            markedForLayout = true;
             layoutSystem.RequestLayout(this);
         }
 
@@ -142,7 +145,7 @@ namespace Src.Layout.LayoutTypes {
                 preferredContentSize = Size.Unset;
             }
 
-            layoutSystem.RequestLayout(parent);
+            parent.RequestLayout();
         }
 
         public virtual void SetAllocatedRect(float x, float y, float width, float height) {
@@ -157,7 +160,7 @@ namespace Src.Layout.LayoutTypes {
                 allocatedHeight = height;
                 layoutSystem.OnRectChanged(this);
                 // todo -- right now this calls layout for all descendants which can probably be avoided if no children are parent sized
-                layoutSystem.RequestLayout(this);
+                RequestLayout();
             }
         }
 

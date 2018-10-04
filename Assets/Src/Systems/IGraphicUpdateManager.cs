@@ -4,9 +4,9 @@ namespace Src.Systems {
 
     public interface IGraphicUpdateManager {
 
-        void MarkGeometryDirty(IGraphicElement element);
+        void MarkGeometryDirty(IDrawable element);
 
-        void MarkMaterialDirty(IGraphicElement uiGraphicElement);
+        void MarkMaterialDirty(IDrawable uiGraphicElement);
 
     }
 

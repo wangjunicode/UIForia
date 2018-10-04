@@ -1,11 +1,14 @@
 ﻿using Rendering;
 using UnityEngine;
+using UnityEngine.UI;
 
 namespace Src {
 
     public class UIViewBehavior : MonoBehaviour {
 
         public UIGameObjectView view;
+
+        public Graphic g;
         
         public void Start() {
             RectTransform rectTransform = transform.Find("UIRoot").GetComponent<RectTransform>();

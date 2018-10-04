@@ -16,6 +16,8 @@ namespace Src.Systems {
         List<UIElement> QueryPoint(Vector2 point, List<UIElement> retn);
         List<LayoutResult> GetLayoutResults(List<LayoutResult> retn);
 
+        List<UIElement> GetUpdatedLayoutElements(List<UIElement> retn);
+
     }
 
 }

@@ -7,8 +7,8 @@ namespace Src.Systems {
 
     public struct Size {
 
-        public float width;
-        public float height;
+        public readonly float width;
+        public readonly float height;
 
         public Size(float width, float height) {
             this.width = width;
@@ -29,33 +29,22 @@ namespace Src.Systems {
     
     public struct LayoutResult {
 
-        public readonly UIElement element;
         public Vector2 localPosition;
         public Vector2 screenPosition;
-        public Size size;
-        public Size contentSize;
+        public Size actualSize;
         public Size allocatedSize;
-
-        public LayoutResult(UIElement element) {
-            this.element = element;
-            this.localPosition = new Vector2();
-            this.screenPosition = new Vector2();
-            this.size = new Size();
-            this.contentSize = new Size();
-            this.allocatedSize = new Size();
-        }
         
         public Rect ScreenRect => new Rect(screenPosition, new Vector2(allocatedSize.width, allocatedSize.height));
-        public Rect ScreenOverflowRect => new Rect(screenPosition, new Vector2(size.width, size.height));
+        public Rect ScreenOverflowRect => new Rect(screenPosition, new Vector2(actualSize.width, actualSize.height));
         
         public Rect LocalRect => new Rect(localPosition, new Vector2(allocatedSize.width, allocatedSize.height));
-        public Rect LocalOverflowRect => new Rect(localPosition, new Vector2(size.width, size.height));
+        public Rect LocalOverflowRect => new Rect(localPosition, new Vector2(actualSize.width, actualSize.height));
         
         public float allocatedWidth => allocatedSize.width;
         public float allocatedHeight => allocatedSize.height;
 
-        public float contentWidth => contentSize.width;
-        public float contentHeight => contentSize.height;
+        public float contentWidth => actualSize.width;
+        public float contentHeight => actualSize.height;
         
 
     }

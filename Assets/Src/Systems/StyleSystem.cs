@@ -62,6 +62,7 @@ namespace Src.Systems {
         public event Action<UIElement, int, int> onShrinkFactorChanged;
         public event Action<UIElement, int> onFlexItemOrderOverrideChanged;
         public event Action<UIElement, CrossAxisAlignment, CrossAxisAlignment> onFlexItemSelfAlignmentChanged;
+        public event Action<UIElement, StyleProperty> onStylePropertyChanged;
 
         private readonly SkipTree<UIElement> fontTree;
 

@@ -1,12 +1,9 @@
 ﻿using System.Collections.Generic;
 using Rendering;
 using Src.Elements;
-using Src.Rendering;
+using Src.Extensions;
 using Src.Util;
-using TMPro;
 using UnityEngine;
-using UnityEngine.UI;
-using Object = UnityEngine.Object;
 
 namespace Src.Systems {
 
@@ -14,7 +11,7 @@ namespace Src.Systems {
 
         private readonly RectTransform rectTransform;
 
-        private readonly ILayoutSystem layoutSystem;
+        private readonly ILayoutSystem m_LayoutSystem;
         private readonly IStyleSystem styleSystem;
 
         private readonly SkipTree<RenderData> renderSkipTree;
@@ -22,27 +19,44 @@ namespace Src.Systems {
 
         private bool ready;
 
-        private readonly List<IGraphicElement> m_DirtyGraphicList;
+        private readonly List<IDrawable> m_DirtyGraphicList;
         private readonly Dictionary<int, CanvasRenderer> m_CanvasRendererMap;
         private readonly List<RenderData> m_VirtualScrollbarElements;
+        private readonly List<UIElement> m_ToInitialize;
+
+        private struct StyleUpdate {
+
+            public readonly UIElement element;
+            public readonly StyleProperty styleProperty;
+
+        }
 
         public GORenderSystem(ILayoutSystem layoutSystem, IStyleSystem styleSystem, RectTransform rectTransform) {
-            this.layoutSystem = layoutSystem;
+            this.m_LayoutSystem = layoutSystem;
             this.rectTransform = rectTransform;
             this.renderSkipTree = new SkipTree<RenderData>();
 
-            this.m_DirtyGraphicList = new List<IGraphicElement>();
+            this.m_DirtyGraphicList = new List<IDrawable>();
             this.m_CanvasRendererMap = new Dictionary<int, CanvasRenderer>();
             this.m_TransformMap = new Dictionary<int, RectTransform>();
             this.m_VirtualScrollbarElements = new List<RenderData>();
-            this.layoutSystem.onCreateVirtualScrollbar += OnVirtualScrollbarCreated;
+            this.m_LayoutSystem.onCreateVirtualScrollbar += OnVirtualScrollbarCreated;
+            this.m_ToInitialize = new List<UIElement>();
 
             this.renderSkipTree.onItemParentChanged += (item, newParent, oldParent) => {
-                item.unityTransform.SetParent(newParent == null ? rectTransform : newParent.unityTransform);
-                item.unityTransform.anchorMin = new Vector2(0, 1);
-                item.unityTransform.anchorMax = new Vector2(0, 1);
-                item.unityTransform.pivot = new Vector2(0, 1);
-                item.unityTransform.anchoredPosition = Vector3.zero;
+                RectTransform transform = m_TransformMap.GetOrDefault(item.UniqueId);
+                if (newParent == null) {
+                    transform.SetParent(rectTransform);
+                }
+                else {
+                    RectTransform parentTransform = m_TransformMap.GetOrDefault(newParent.UniqueId);
+                    transform.SetParent(parentTransform == null ? rectTransform : parentTransform);
+                }
+
+                transform.anchorMin = new Vector2(0, 1);
+                transform.anchorMax = new Vector2(0, 1);
+                transform.pivot = new Vector2(0, 1);
+                transform.anchoredPosition = Vector3.zero;
             };
 
             this.styleSystem = styleSystem;
@@ -53,115 +67,130 @@ namespace Src.Systems {
         }
 
         public void OnInitialize() {
-            this.styleSystem.onFontPropertyChanged += HandleFontPropertyChanged;
-            this.styleSystem.onBorderChanged += HandleStyleChange;
-            this.styleSystem.onPaddingChanged += HandleStyleChange;
-            this.styleSystem.onBorderChanged += HandleStyleChange;
-            this.styleSystem.onPaintChanged += HandlePaintChange;
-            this.styleSystem.onBorderRadiusChanged += HandleBorderRadiusChange;
+            this.styleSystem.onStylePropertyChanged += HandleStylePropertyChanged;
         }
 
-        public void OnElementCreated(UIElement element) { }
+        public void OnElementCreated(UIElement element) {
+            m_ToInitialize.Add(element);
+        }
 
         public void OnElementMoved(UIElement element, int newIndex, int oldIndex) { }
 
         public void OnElementCreatedFromTemplate(MetaData creationData) {
-            OnElementStyleChanged(creationData.element);
-
+//            OnElementStyleChanged(creationData.element);
+//
+            m_ToInitialize.Add(creationData.element);
             for (int i = 0; i < creationData.children.Count; i++) {
                 OnElementCreatedFromTemplate(creationData.children[i]);
             }
 
-            UITextContainerElement container = creationData.element as UITextContainerElement;
-            UIGraphicElement directDraw = creationData.element as UIGraphicElement;
-
-            if (directDraw != null) {
-                directDraw.updateManager = this;
-
-                RectTransform transform = m_TransformMap[directDraw.id];
-                CanvasRenderer renderer = transform.gameObject.AddComponent<CanvasRenderer>();
-                renderer.SetMaterial(directDraw.GetMaterial(), Texture2D.whiteTexture);
-                renderer.SetMesh(directDraw.GetMesh());
-                m_CanvasRendererMap[directDraw.id] = renderer;
-            }
-
-            if (container != null) {
-                RectTransform containerTransform = m_TransformMap[container.id];
-                Transform child = containerTransform.GetChild(0);
-                // todo -- need the font ref to update when font changes
-                container.textInfo = child.GetComponent<TextMeshProUGUI>().textInfo;
-                container.fontAsset = child.GetComponent<TextMeshProUGUI>().font;
-                container.textInfo.textComponent.text = container.textInfo.textComponent.text ?? string.Empty;
-            }
+//
+//            UITextContainerElement container = creationData.element as UITextContainerElement;
+//            UIGraphicElement directDraw = creationData.element as UIGraphicElement;
+//
+//            if (directDraw != null) {
+//                directDraw.updateManager = this;
+//
+//                RectTransform transform = m_TransformMap[directDraw.id];
+//                CanvasRenderer renderer = transform.gameObject.AddComponent<CanvasRenderer>();
+//                renderer.SetMaterial(directDraw.GetMaterial(), Texture2D.whiteTexture);
+//                renderer.SetMesh(directDraw.GetMesh());
+//                m_CanvasRendererMap[directDraw.id] = renderer;
+//            }
+//
+//            if (container != null) {
+//                RectTransform containerTransform = m_TransformMap[container.id];
+//                Transform child = containerTransform.GetChild(0);
+//                // todo -- need the font ref to update when font changes
+//                container.textInfo = child.GetComponent<TextMeshProUGUI>().textInfo;
+//                container.fontAsset = child.GetComponent<TextMeshProUGUI>().font;
+//                container.textInfo.textComponent.text = container.textInfo.textComponent.text ?? string.Empty;
+//            }
         }
 
-        private static RectTransform CreateGameObject(string name, RectTransform parent = null) {
-            GameObject go = new GameObject(name);
+        private void HandleStylePropertyChanged(UIElement element, StyleProperty property) {
+            renderSkipTree.GetItem(element.id)?.drawable?.OnStylePropertyChanged(property);
+        }
 
-            RectTransform retn = go.AddComponent<RectTransform>();
-            retn.anchorMin = new Vector2(0, 1);
-            retn.anchorMax = new Vector2(0, 1);
-            retn.pivot = new Vector2(0, 1);
-            if (parent != null) {
-                retn.SetParent(parent);
+        private void InitializeRenderables() {
+            for (int i = 0; i < m_ToInitialize.Count; i++) {
+                UIElement element = m_ToInitialize[i];
+                GameObject go = new GameObject(element.ToString());
+                RectTransform transform = go.AddComponent<RectTransform>();
+                CanvasRenderer canvasRenderer = go.AddComponent<CanvasRenderer>();
+                transform.anchorMin = new Vector2(0, 1);
+                transform.anchorMax = new Vector2(0, 1);
+                transform.pivot = new Vector2(0, 1);
+
+                m_TransformMap.Add(element.id, transform);
+                m_CanvasRendererMap.Add(element.id, canvasRenderer);
+
+                RenderData renderData = new RenderData(element, this);
+
+                renderSkipTree.AddItem(renderData);
+                m_DirtyGraphicList.Add(renderData.drawable);
             }
 
-            return retn;
+            m_ToInitialize.Clear();
         }
 
         public void OnUpdate() {
-            List<LayoutResult> layoutResults = layoutSystem.GetLayoutResults(ListPool<LayoutResult>.Get());
+            InitializeRenderables();
 
-            // todo -- figure out anchored position for elements who's actual parent is not rendered
+            List<UIElement> updatedElements = m_LayoutSystem.GetUpdatedLayoutElements(ListPool<UIElement>.Get());
 
-            for (int i = 0; i < layoutResults.Count; i++) {
+            for (int i = 0; i < updatedElements.Count; i++) {
                 RectTransform transform;
-                LayoutResult layoutResult = layoutResults[i];
-                UIElement element = layoutResult.element;
+                UIElement element = updatedElements[i];
+                LayoutResult layoutResult = updatedElements[i].layoutResult;
 
                 if (!m_TransformMap.TryGetValue(element.id, out transform)) {
                     continue;
                 }
 
                 RenderData renderData = renderSkipTree.GetItem(element.id);
-                ContentBoxRect margin = element.style.computedStyle.margin;
+//                ContentBoxRect margin = element.style.computedStyle.margin;
+//
+                Vector2 position = layoutResult.localPosition;
+                Vector2 size = new Vector2(layoutResult.allocatedWidth, layoutResult.allocatedHeight);
 
-                Vector2 position = element.layoutResult.localPosition;
-                position.x = Mathf.CeilToInt(position.x); // + margin.left);
-                position.y = -Mathf.CeilToInt(position.y); // + margin.top);
+                float rotation = element.style.computedStyle.TransformRotation * Mathf.Deg2Rad;
 
-                Vector2 size = new Vector2(element.layoutResult.allocatedWidth, element.layoutResult.allocatedHeight);
-                size.x = Mathf.CeilToInt(size.x); // - (margin.left + margin.right));
-                size.y = Mathf.CeilToInt(size.y); // - (margin.top + margin.bottom));
+                UIElement ptr = element.parent;
 
-                if (transform.anchoredPosition != position) {
-                    transform.anchoredPosition = position;
+                // while parent is not rendered, localPosition += nonRenderedParent.localPosition
+                while (ptr != null) {
+                    RectTransform ancestorTransform;
+
+                    if (m_TransformMap.TryGetValue(ptr.id, out ancestorTransform)) {
+                        break;
+                    }
+
+                    position += ptr.layoutResult.localPosition;
+
+                    ptr = ptr.parent;
                 }
+
+                Vector3 outputPosition = new Vector3(position.x, Screen.height - position.y);
+                Quaternion outputRotation = Quaternion.identity;
+
+                if (Mathf.Approximately(rotation, 0)) {
+                    outputRotation = Quaternion.identity;
+                }
+                else {
+                    outputRotation = Quaternion.AngleAxis(rotation, Vector3.forward);
+                }
+
+                transform.SetPositionAndRotation(outputPosition, outputRotation);
 
                 if (transform.sizeDelta != size) {
                     transform.sizeDelta = size;
-                }
 
-                // Text elements give me lots of trouble. Here is what needs to happen:
-                // Layout needs to measure the preferred size of the string. It does this on it's own
-                // once that is computed the layout system uses it as normal. When it comes to rendering
-                // we only want to set the text if we have to and then force the mesh to update because
-                // this needs to happen BEFORE we update dirty graphics because things like highlighting
-                // and caret placement need to have up to date data on rendered character layout which 
-                // may differ from what the layout system says. 
-
-                UITextElement textElement = element as UITextElement;
-                if (textElement != null) {
-                    TextMeshProUGUI tmp = renderData.renderComponent as TextMeshProUGUI;
-                    if (tmp != null) {
-                        TextMeshProUGUI textMesh = renderData.renderComponent as TextMeshProUGUI;
-                        if (textMesh != null && textMesh.text != textElement.GetText()) {
-                            textMesh.text = textElement.GetText();
-                            textMesh.ForceMeshUpdate();
-                        }
-                    }
+                    renderData.drawable?.OnAllocatedSizeChanged();
                 }
             }
+
+            ListPool<UIElement>.Release(updatedElements);
 
             for (int i = 0; i < m_VirtualScrollbarElements.Count; i++) {
                 RenderData data = m_VirtualScrollbarElements[i];
@@ -176,23 +205,40 @@ namespace Src.Systems {
             }
 
             for (int i = 0; i < m_DirtyGraphicList.Count; i++) {
-                IGraphicElement graphic = m_DirtyGraphicList[i];
+                IDrawable graphic = m_DirtyGraphicList[i];
                 CanvasRenderer canvasRenderer = m_CanvasRendererMap[graphic.Id];
 
                 if (graphic.IsGeometryDirty) {
-                    graphic.RebuildGeometry();
                     canvasRenderer.SetMesh(graphic.GetMesh());
                 }
 
                 if (graphic.IsMaterialDirty) {
-                    graphic.RebuildMaterial();
-                    canvasRenderer.SetMaterial(graphic.GetMaterial(), Texture2D.whiteTexture);
+                    canvasRenderer.SetMaterial(graphic.GetMaterial(), graphic.GetMaterial().mainTexture);
                 }
             }
 
-            ListPool<LayoutResult>.Release(layoutResults);
             m_DirtyGraphicList.Clear();
         }
+
+        public void OnReset() {
+            ready = false;
+
+            foreach (KeyValuePair<int, RectTransform> kvp in m_TransformMap) {
+                Object.Destroy(kvp.Value.gameObject);
+            }
+
+            this.styleSystem.onStylePropertyChanged -= HandleStylePropertyChanged;
+
+            renderSkipTree.Clear();
+            m_TransformMap.Clear();
+            m_CanvasRendererMap.Clear();
+            m_DirtyGraphicList.Clear();
+        }
+
+        public void OnDestroy() {
+            OnReset();
+        }
+
 
         private void RenderScrollbar(VirtualScrollbar scrollbar, RectTransform handle) {
             RectTransform transform = m_TransformMap[scrollbar.id];
@@ -211,113 +257,6 @@ namespace Src.Systems {
             handle.sizeDelta = new Vector2(handleRect.width, handleRect.height);
         }
 
-        public void OnVirtualScrollbarCreated(VirtualScrollbar scrollbar) {
-            RenderData renderData = renderSkipTree.GetItem(scrollbar.targetElement);
-
-            if (renderData != null) {
-                if (renderData.mask == null) {
-                    renderData.mask = renderData.unityTransform.gameObject.AddComponent<RectMask2D>();
-                    m_VirtualScrollbarElements.Add(renderData);
-                }
-
-                if (scrollbar.orientation == ScrollbarOrientation.Horizontal) {
-                    renderData.horizontalScrollbar = scrollbar;
-                    RectTransform transform = CreateGameObject("Scrollbar H");
-                    transform.SetParent(m_TransformMap[scrollbar.targetElement.parent.id]);
-                    RawImage img = transform.gameObject.AddComponent<RawImage>();
-                    img.color = Color.cyan;
-                    m_TransformMap.Add(scrollbar.id, transform);
-                    RectTransform handleTransform = CreateGameObject("Scrollbar H - Handle");
-                    handleTransform.SetParent(transform);
-                    img = handleTransform.gameObject.AddComponent<RawImage>();
-                    img.color = Color.blue;
-                    renderData.horizontalScrollbarHandle = handleTransform;
-                }
-                else if (scrollbar.orientation == ScrollbarOrientation.Vertical) {
-                    renderData.verticalScrollbar = scrollbar;
-                    RectTransform transform = CreateGameObject("Scrollbar V");
-                    transform.SetParent(m_TransformMap[scrollbar.targetElement.parent.id]);
-                    RawImage img = transform.gameObject.AddComponent<RawImage>();
-                    img.color = Color.cyan;
-                    m_TransformMap.Add(scrollbar.id, transform);
-                    RectTransform handleTransform = CreateGameObject("Scrollbar V - Handle");
-                    handleTransform.SetParent(transform);
-                    img = handleTransform.gameObject.AddComponent<RawImage>();
-                    img.color = Color.blue;
-                    renderData.verticalScrollbarHandle = handleTransform;
-                }
-            }
-        }
-
-        public void OnReset() {
-            ready = false;
-            renderSkipTree.TraversePreOrder((data => { data.unityTransform = null; }));
-
-            foreach (KeyValuePair<int, RectTransform> kvp in m_TransformMap) {
-                Object.Destroy(kvp.Value.gameObject);
-            }
-
-            this.styleSystem.onBorderChanged -= HandleStyleChange;
-            this.styleSystem.onPaddingChanged -= HandleStyleChange;
-            this.styleSystem.onBorderChanged -= HandleStyleChange;
-            this.styleSystem.onPaintChanged -= HandlePaintChange;
-            this.styleSystem.onBorderRadiusChanged -= HandleBorderRadiusChange;
-
-            renderSkipTree.Clear();
-            m_TransformMap.Clear();
-            m_CanvasRendererMap.Clear();
-            m_DirtyGraphicList.Clear();
-        }
-
-        public void OnDestroy() {
-            OnReset();
-        }
-
-        private void OnElementStyleChanged(UIElement element) {
-            RenderData data = renderSkipTree.GetItem(element);
-
-            RenderPrimitiveType primitiveType = DeterminePrimitiveType(element);
-
-            if (data == null) {
-                GameObject obj = new GameObject(element.ToString());
-
-#if DEBUG
-                StyleDebugView debugView = obj.AddComponent<StyleDebugView>();
-                debugView.element = element;
-#endif
-
-                RectTransform unityTransform = obj.AddComponent<RectTransform>();
-                unityTransform.anchorMin = new Vector2(0, 1);
-                unityTransform.anchorMax = new Vector2(0, 1);
-                unityTransform.pivot = new Vector2(0, 1);
-                m_TransformMap[element.id] = unityTransform;
-
-                obj.SetActive(element.isEnabled);
-                data = new RenderData(element, primitiveType, unityTransform);
-                CreateComponents(data);
-                renderSkipTree.AddItem(data);
-
-                return;
-            }
-
-            if (primitiveType == data.primitiveType) {
-                ApplyStyles(data);
-                return;
-            }
-
-            data.primitiveType = primitiveType;
-
-            if (data.renderComponent != null) {
-                Object.Destroy(data.renderComponent);
-            }
-
-            if (primitiveType == RenderPrimitiveType.None) {
-                return;
-            }
-
-            data.primitiveType = primitiveType;
-            CreateComponents(data);
-        }
 
         public void OnElementDestroyed(UIElement element) {
             RenderData data = renderSkipTree.GetItem(element);
@@ -325,13 +264,19 @@ namespace Src.Systems {
             if (data == null) return;
 
             renderSkipTree.RemoveItem(data);
-            m_TransformMap.Remove(element.id);
 
-            if (data.renderComponent != null) {
-                Object.Destroy(data.renderComponent);
+            CanvasRenderer canvasRenderer = m_CanvasRendererMap.GetOrDefault(element.id);
+            if (canvasRenderer != null) {
+                Object.Destroy(canvasRenderer);
             }
 
-            Object.Destroy(data.unityTransform);
+            RectTransform transform = m_TransformMap.GetOrDefault(element.id);
+            if (transform != null) {
+                m_TransformMap.Remove(element.id);
+                Object.Destroy(transform.gameObject);
+            }
+
+            // todo -- release to pool
             data.element = null;
         }
 
@@ -345,7 +290,7 @@ namespace Src.Systems {
                 renderSkipTree.UpdateItemParent(element);
             }
             else {
-                OnElementStyleChanged(element);
+                //OnElementStyleChanged(element);
             }
         }
 
@@ -354,184 +299,169 @@ namespace Src.Systems {
         }
 
         public void OnElementEnabled(UIElement element) {
-            if (m_TransformMap.ContainsKey(element.id)) {
-                m_TransformMap[element.id].gameObject.SetActive(true);
-
-                CanvasRenderer canvasRenderer;
-                if (m_CanvasRendererMap.TryGetValue(element.id, out canvasRenderer)) {
-                    IGraphicElement graphic = (IGraphicElement) element;
-                    canvasRenderer.SetMesh(graphic.GetMesh());
-                    canvasRenderer.SetMaterial(graphic.GetMaterial(), Texture2D.whiteTexture);
-                }
-            }
-
-            renderSkipTree.ConditionalTraversePreOrder(element, this, (item, self) => {
-                if (item.element.isDisabled) return false;
-                item.unityTransform.gameObject.SetActive(true);
-
-                CanvasRenderer canvasRenderer;
-                if (self.m_CanvasRendererMap.TryGetValue(item.element.id, out canvasRenderer)) {
-                    IGraphicElement graphic = (IGraphicElement) item.element;
-                    canvasRenderer.SetMesh(graphic.GetMesh());
-                    canvasRenderer.SetMaterial(graphic.GetMaterial(), Texture2D.whiteTexture);
-                }
-
-                return true;
-            });
+//            if (m_TransformMap.ContainsKey(element.id)) {
+//                m_TransformMap[element.id].gameObject.SetActive(true);
+//
+//                CanvasRenderer canvasRenderer;
+//                if (m_CanvasRendererMap.TryGetValue(element.id, out canvasRenderer)) {
+//                    IGraphicElement graphic = (IGraphicElement) element;
+//                    canvasRenderer.SetMesh(graphic.GetMesh());
+//                    canvasRenderer.SetMaterial(graphic.GetMaterial(), Texture2D.whiteTexture);
+//                }
+//            }
+//
+//            renderSkipTree.ConditionalTraversePreOrder(element, this, (item, self) => {
+//                if (item.element.isDisabled) return false;
+//                item.unityTransform.gameObject.SetActive(true);
+//
+//                CanvasRenderer canvasRenderer;
+//                if (self.m_CanvasRendererMap.TryGetValue(item.element.id, out canvasRenderer)) {
+//                    IGraphicElement graphic = (IGraphicElement) item.element;
+//                    canvasRenderer.SetMesh(graphic.GetMesh());
+//                    canvasRenderer.SetMaterial(graphic.GetMaterial(), Texture2D.whiteTexture);
+//                }
+//
+//                return true;
+//            });
         }
 
         public void OnElementDisabled(UIElement element) {
-            if (m_TransformMap.ContainsKey(element.id)) {
-                m_TransformMap[element.id].gameObject.SetActive(false);
-            }
-
-            if (m_CanvasRendererMap.ContainsKey(element.id)) {
-                m_CanvasRendererMap[element.id].Clear();
-            }
-
-            renderSkipTree.TraversePreOrder(element, this, (self, item) => {
-                item.unityTransform.gameObject.SetActive(false);
-                CanvasRenderer canvasRenderer;
-
-                if (self.m_CanvasRendererMap.TryGetValue(item.element.id, out canvasRenderer)) {
-                    canvasRenderer.Clear();
-                }
-            });
-        }
-
-        public void MarkGeometryDirty(IGraphicElement element) {
-            if (!m_DirtyGraphicList.Contains(element)) {
-                m_DirtyGraphicList.Add(element);
-            }
-        }
-
-        public void MarkMaterialDirty(IGraphicElement element) {
-            if (!m_DirtyGraphicList.Contains(element)) {
-                m_DirtyGraphicList.Add(element);
-            }
-        }
-
-        private void CreateComponents(RenderData data) {
-            GameObject gameObject = data.unityTransform.gameObject;
-            switch (data.primitiveType) {
-                case RenderPrimitiveType.RawImage:
-                    data.renderComponent = gameObject.AddComponent<RawImage>();
-                    break;
-
-                case RenderPrimitiveType.ProceduralImage:
-                    data.renderComponent = gameObject.AddComponent<BorderedImage>();
-                    break;
-
-                case RenderPrimitiveType.Mask:
-                case RenderPrimitiveType.Mask2D:
-                    break;
-
-                case RenderPrimitiveType.Text:
-                    data.renderComponent = gameObject.AddComponent<TextMeshProUGUI>();
-                    break;
-            }
-
-            ApplyStyles(data);
-        }
-
-        private void ApplyStyles(RenderData data) {
-            UIElement element = data.element;
-            UIStyleSet style = element.style;
-
-            switch (data.primitiveType) {
-                case RenderPrimitiveType.RawImage:
-                    RawImage rawImage = (RawImage) data.renderComponent;
-                    UIImageElement imageElement = element as UIImageElement;
-                    if (imageElement != null) {
-                        rawImage.texture = imageElement.src.asset;
-                        rawImage.color = Color.white;
-                    }
-                    else {
-                        rawImage.texture = style.computedStyle.BackgroundImage.asset;
-                        rawImage.color = style.computedStyle.BackgroundColor;
-                    }
-
-                    rawImage.uvRect = new Rect(0, 0, 1, 1);
-                    break;
-
-                case RenderPrimitiveType.ProceduralImage:
-//                    Shape shape = data.shape;
-//                    shape.settings.outlineColor = style.borderColor;
-//                    shape.settings.outlineSize = style.borderLeft;
-//                    shape.settings.fillColor = style.backgroundColor;
-//                    shape.settings.roundnessPerCorner = false;
-//                    shape.settings.roundness = style.borderRadiusBottomLeft;
-//                    shape.settings.fillType = FillType.SolidColor;
-//                    shape.settings.fill
-                    BorderedImage procImage = (BorderedImage) data.renderComponent;
-                    procImage.color = style.computedStyle.BackgroundColor;
-                    procImage.borderColor = style.computedStyle.BorderColor;
-                   // procImage.border = style.computedStyle.border;
-                    break;
-
-                case RenderPrimitiveType.Text:
-                    TextMeshProUGUI textMesh = (TextMeshProUGUI) data.renderComponent;
-                    textMesh.text = style.textContent;
-                    textMesh.fontSize = style.computedStyle.FontSize;
-                    textMesh.color = style.computedStyle.TextColor;
-                    break;
-
-                case RenderPrimitiveType.Mask:
-                case RenderPrimitiveType.Mask2D:
-                    break;
-            }
-        }
-
-        private static RenderPrimitiveType DeterminePrimitiveType(UIElement element) {
-            if ((element.flags & UIElementFlags.RequiresRendering) == 0) {
-                return RenderPrimitiveType.None;
-            }
-
-            if ((element.flags & UIElementFlags.TextElement) != 0) {
-                return RenderPrimitiveType.Text;
-            }
-
-            UIStyleSet styleSet = element.style;
-            if (!(element is UIImageElement)
-                && styleSet.computedStyle.BackgroundImage.asset == null
-                && styleSet.computedStyle.BorderColor == ColorUtil.UnsetValue
-                && styleSet.computedStyle.BackgroundColor == ColorUtil.UnsetValue) {
-                return RenderPrimitiveType.None;
-            }
-
-//            ContentBoxRect border = styleSet.border;
-//            if (border.left > 0 || border.right > 0 || border.top > 0 || border.bottom > 0) {
-//                return RenderPrimitiveType.ProceduralImage;
+//            if (m_TransformMap.ContainsKey(element.id)) {
+//                m_TransformMap[element.id].gameObject.SetActive(false);
 //            }
-
-            return RenderPrimitiveType.RawImage;
+//
+//            if (m_CanvasRendererMap.ContainsKey(element.id)) {
+//                m_CanvasRendererMap[element.id].Clear();
+//            }
+//
+//            renderSkipTree.TraversePreOrder(element, this, (self, item) => {
+//                item.unityTransform.gameObject.SetActive(false);
+//                CanvasRenderer canvasRenderer;
+//
+//                if (self.m_CanvasRendererMap.TryGetValue(item.element.id, out canvasRenderer)) {
+//                    canvasRenderer.Clear();
+//                }
+//            });
         }
 
-        private void HandleBorderRadiusChange(UIElement element, BorderRadius radius) {
-            if (!ready) return;
-            OnElementStyleChanged(element);
-        }
-
-        private void HandlePaintChange(UIElement element, Paint paint) {
-            if (!ready) return;
-            OnElementStyleChanged(element);
-        }
-
-        private void HandleStyleChange(UIElement element, ContentBoxRect rect) {
-            if (!ready) return;
-            OnElementStyleChanged(element);
-        }
-
-        private void HandleFontPropertyChanged(UIElement element, TextStyle style) {
-            if (!ready) return;
-            RenderData data = renderSkipTree.GetItem(element);
-            if (data == null) return;
-            TextMeshProUGUI textMesh = data.renderComponent as TextMeshProUGUI;
-            if (textMesh != null) {
-                ApplyStyles(data);
+        public void MarkGeometryDirty(IDrawable element) {
+            if (!m_DirtyGraphicList.Contains(element)) {
+                m_DirtyGraphicList.Add(element);
             }
+        }
+
+        public void MarkMaterialDirty(IDrawable element) {
+            if (!m_DirtyGraphicList.Contains(element)) {
+                m_DirtyGraphicList.Add(element);
+            }
+        }
+
+        public void OnVirtualScrollbarCreated(VirtualScrollbar scrollbar) {
+            RenderData renderData = renderSkipTree.GetItem(scrollbar.targetElement);
+
+//            if (renderData != null) {
+////                if (renderData.mask == null) {
+////                    renderData.mask = renderData.unityTransform.gameObject.AddComponent<RectMask2D>();
+////                    m_VirtualScrollbarElements.Add(renderData);
+////                }
+//
+//                if (scrollbar.orientation == ScrollbarOrientation.Horizontal) {
+//                    renderData.horizontalScrollbar = scrollbar;
+//                    RectTransform transform = CreateGameObject("Scrollbar H");
+//                    transform.SetParent(m_TransformMap[scrollbar.targetElement.parent.id]);
+//                    RawImage img = transform.gameObject.AddComponent<RawImage>();
+//                    img.color = Color.cyan;
+//                    m_TransformMap.Add(scrollbar.id, transform);
+//                    RectTransform handleTransform = CreateGameObject("Scrollbar H - Handle");
+//                    handleTransform.SetParent(transform);
+//                    img = handleTransform.gameObject.AddComponent<RawImage>();
+//                    img.color = Color.blue;
+//                    renderData.horizontalScrollbarHandle = handleTransform;
+//                }
+//                else if (scrollbar.orientation == ScrollbarOrientation.Vertical) {
+//                    renderData.verticalScrollbar = scrollbar;
+//                    RectTransform transform = CreateGameObject("Scrollbar V");
+//                    transform.SetParent(m_TransformMap[scrollbar.targetElement.parent.id]);
+//                    RawImage img = transform.gameObject.AddComponent<RawImage>();
+//                    img.color = Color.cyan;
+//                    m_TransformMap.Add(scrollbar.id, transform);
+//                    RectTransform handleTransform = CreateGameObject("Scrollbar V - Handle");
+//                    handleTransform.SetParent(transform);
+//                    img = handleTransform.gameObject.AddComponent<RawImage>();
+//                    img.color = Color.blue;
+//                    renderData.verticalScrollbarHandle = handleTransform;
+//                }
+//            }
         }
 
     }
 
 }
+
+//        private void OnElementStyleChanged(UIElement element) {
+//            RenderData data = renderSkipTree.GetItem(element);
+//
+//            RenderPrimitiveType primitiveType = DeterminePrimitiveType(element);
+//
+//            if (data == null) {
+//                GameObject obj = new GameObject(element.ToString());
+//
+//#if DEBUG
+//                StyleDebugView debugView = obj.AddComponent<StyleDebugView>();
+//                debugView.element = element;
+//#endif
+//
+//                RectTransform unityTransform = obj.AddComponent<RectTransform>();
+//                unityTransform.anchorMin = new Vector2(0, 1);
+//                unityTransform.anchorMax = new Vector2(0, 1);
+//                unityTransform.pivot = new Vector2(0, 1);
+//                m_TransformMap[element.id] = unityTransform;
+//
+//                obj.SetActive(element.isEnabled);
+//                data = new RenderData(element, primitiveType, unityTransform);
+//                CreateComponents(data);
+//                renderSkipTree.AddItem(data);
+//
+//                return;
+//            }
+//
+//            if (primitiveType == data.primitiveType) {
+//                ApplyStyles(data);
+//                return;
+//            }
+//
+//            data.primitiveType = primitiveType;
+//
+//            if (data.renderComponent != null) {
+//                Object.Destroy(data.renderComponent);
+//            }
+//
+//            // todo -- maybe remove & re-parent children if not rendering
+//            if (primitiveType == RenderPrimitiveType.None) {
+//                return;
+//            }
+//
+//            data.primitiveType = primitiveType;
+//            CreateComponents(data);
+//        }
+
+
+//                // Text elements give me lots of trouble. Here is what needs to happen:
+//                // Layout needs to measure the preferred size of the string. It does this on it's own
+//                // once that is computed the layout system uses it as normal. When it comes to rendering
+//                // we only want to set the text if we have to and then force the mesh to update because
+//                // this needs to happen BEFORE we update dirty graphics because things like highlighting
+//                // and caret placement need to have up to date data on rendered character layout which 
+//                // may differ from what the layout system says. 
+//
+//                UITextElement textElement = element as UITextElement;
+//                if (textElement != null) {
+//                    TextMeshProUGUI tmp = renderData.renderComponent as TextMeshProUGUI;
+//                    if (tmp != null) {
+//                        TextMeshProUGUI textMesh = renderData.renderComponent as TextMeshProUGUI;
+//                        if (textMesh != null && textMesh.text != textElement.GetText()) {
+//                            textMesh.text = textElement.GetText();
+//                            textMesh.ForceMeshUpdate();
+//                        }
+//                    }
+//                }

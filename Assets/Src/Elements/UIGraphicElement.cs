@@ -6,24 +6,7 @@ using UnityEngine.UI;
 
 namespace Src.Elements {
 
-    public interface IGraphicElement {
-
-        int Id { get; }
-        void RebuildGeometry();
-        void RebuildMaterial();
-
-        void MarkGeometryDirty();
-        void MarkMaterialDirty();
-
-        bool IsMaterialDirty { get; }
-        bool IsGeometryDirty { get; }
-
-        Mesh GetMesh();
-        Material GetMaterial();
-
-    }
-
-    public class UIGraphicElement : UIElement, IGraphicElement {
+    public class UIGraphicElement : UIElement, IDrawable {
 
         public Action<Mesh> rebuildGeometry;
         public Action<Material> rebuildMaterial;
@@ -40,11 +23,13 @@ namespace Src.Elements {
             material = Graphic.defaultGraphicMaterial;
         }
 
-        public int Id => id;
+        public event Action<IDrawable> onMeshDirty;
+        public event Action<IDrawable> onMaterialDirty;
         
         public float width => mesh.bounds.extents.x;
         public float height => mesh.bounds.extents.y;
-        
+
+        public int Id => id;
         public bool IsMaterialDirty { get; private set; }
         public bool IsGeometryDirty { get; private set; }
         
@@ -75,6 +60,10 @@ namespace Src.Elements {
             updateManager.MarkGeometryDirty(this);
         }
 
+        public void OnStylePropertyChanged(StyleProperty property) {
+            
+        }
+
         public Mesh GetMesh() {
             return mesh;
         }
@@ -91,6 +80,14 @@ namespace Src.Elements {
         public void SetMaterial(Material material) {
             this.material = material;
             MarkMaterialDirty();
+        }
+
+        public void OnAllocatedSizeChanged() {
+            throw new NotImplementedException();
+        }
+
+        public void OnStylePropertyChanged(UIElement element, StyleProperty property) {
+            throw new NotImplementedException();
         }
 
     }

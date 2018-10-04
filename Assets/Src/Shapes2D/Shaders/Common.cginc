@@ -285,7 +285,6 @@ fixed4 color_from_distance(float dist, fixed4 fill_color, fixed4 outline_color) 
     } else {
         float outline = _OuterBlur + _OutlineSize;
         float inner_blur = outline + _InnerBlur;
-        return outline_fill_blend(dist, fill_color, outline_color,
-                _OuterBlur, outline, inner_blur);
+        return outline_fill_blend(dist, fill_color, outline_color, _OuterBlur, outline, inner_blur);
     }
 }

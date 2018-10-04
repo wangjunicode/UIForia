@@ -1,10 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project version="4">
   <component name="ContentModelStore">
-    <e p="C:\Users\matth\.Rider2018.2\config\extensions" t="IncludeRecursive" />
-    <e p="C:\Users\matth\.Rider2018.2\system\extResources" t="IncludeRecursive" />
-    <e p="C:\Users\matth\.Rider2018.2\system\resharper-host\local\Transient\ReSharperHost\v182\SolutionCaches\_UIElements.-1987582547.00" t="ExcludeRecursive" />
-    <e p="C:\Users\matth\RiderProjects\UIElements" t="IncludeRecursive">
+    <e p="C:\Seed\UIElements" t="IncludeRecursive">
       <e p="_DemoAsmDef.csproj" t="IncludeRecursive" />
       <e p="Assembly-CSharp-Editor.csproj" t="IncludeRecursive" />
       <e p="Assets" t="Include">
@@ -14,6 +11,7 @@
             <e p="ChatWindow.cs" t="Include" />
             <e p="ChatWindow.xml" t="Include" />
             <e p="ChatWindow_Styles.cs" t="Include" />
+            <e p="ClippedPanel.cs" t="Include" />
             <e p="Icon.cs" t="Include" />
           </e>
           <e p="UIViewBehavior.cs" t="Include" />
@@ -156,6 +154,7 @@
             <e p="UIInputFieldElement.cs" t="Include" />
           </e>
           <e p="Elements" t="Include">
+            <e p="CustomDrawableElement.cs" t="Include" />
             <e p="UIElement.cs" t="Include" />
             <e p="UIElementFlags.cs" t="Include" />
             <e p="UIGraphicElement.cs" t="Include" />
@@ -410,6 +409,7 @@
             <e p="GOInputSystem.cs" t="Include" />
             <e p="GORenderSystem.cs" t="Include" />
             <e p="Gradient.cs" t="Include" />
+            <e p="IDrawable.cs" t="Include" />
             <e p="IGraphicUpdateManager.cs" t="Include" />
             <e p="IInputSystem.cs" t="Include" />
             <e p="ILayoutSystem.cs" t="Include" />
@@ -453,6 +453,13 @@
             <e p="UITemplate.cs" t="Include" />
             <e p="UITextContainerTemplate.cs" t="Include" />
             <e p="UITextTemplate.cs" t="Include" />
+          </e>
+          <e p="Text" t="Include">
+            <e p="CharInfo.cs" t="Include" />
+            <e p="LineInfo.cs" t="Include" />
+            <e p="SpanInfo.cs" t="Include" />
+            <e p="TextInfo.cs" t="Include" />
+            <e p="WordInfo.cs" t="Include" />
           </e>
           <e p="todo.txt" t="Include" />
           <e p="UIRoot.cs" t="Include" />
@@ -542,5 +549,8 @@
       <e p="TestAsm.csproj" t="IncludeRecursive" />
       <e p="UIElements.sln" t="IncludeFlat" />
     </e>
+    <e p="C:\Users\Matt\.Rider2018.2\config\extensions" t="IncludeRecursive" />
+    <e p="C:\Users\Matt\.Rider2018.2\system\extResources" t="IncludeRecursive" />
+    <e p="C:\Users\Matt\.Rider2018.2\system\resharper-host\local\Transient\ReSharperHost\v182\SolutionCaches\_UIElements.1439856042.00" t="ExcludeRecursive" />
   </component>
 </project>

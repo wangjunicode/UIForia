@@ -4,6 +4,7 @@ using JetBrains.Annotations;
 using NUnit.Framework;
 using Src;
 using Src.Compilers.AliasSource;
+using Src.Compilers.AliasSources;
 using Tests;
 using UnityEngine;
 
@@ -782,6 +783,18 @@ public class ExpressionCompilerTests {
         testContextDef.AddConstAliasSource(new EnumAliasSource<TestUtils.TestEnum>());
         ExpressionContext ctx = new ExpressionContext(target);
         ExpressionParser parser = new ExpressionParser("{One}");
+        ExpressionCompiler compiler = new ExpressionCompiler(testContextDef);
+        Expression expression = compiler.Compile(parser.Parse());
+        Assert.IsInstanceOf<ConstantExpression<TestUtils.TestEnum>>(expression);
+        Assert.AreEqual(TestUtils.TestEnum.One, expression.Evaluate(ctx));
+    }
+    
+    [Test]
+    public void ResolveConstantEnumAliasFromExternalReference() {
+        TestRoot target = new TestRoot();
+        testContextDef.AddConstAliasSource(new ExternalReferenceAliasSource("@TestEnum", typeof(TestUtils.TestEnum)));
+        ExpressionContext ctx = new ExpressionContext(target);
+        ExpressionParser parser = new ExpressionParser("{@TestEnum.One}");
         ExpressionCompiler compiler = new ExpressionCompiler(testContextDef);
         Expression expression = compiler.Compile(parser.Parse());
         Assert.IsInstanceOf<ConstantExpression<TestUtils.TestEnum>>(expression);

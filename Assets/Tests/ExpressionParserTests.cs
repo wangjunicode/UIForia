@@ -349,7 +349,7 @@ using static Tests.TestUtils;
             Assert.IsInstanceOf<PropertyAccessExpressionPartNode>(node.parts[2]);
             Assert.IsInstanceOf<PropertyAccessExpressionPartNode>(node.parts[3]);
         }
-
+        
         [Test]
         public void Parse_MethodSignature_Empty() {
             ExpressionParser parser = new ExpressionParser("{someMethod()}");

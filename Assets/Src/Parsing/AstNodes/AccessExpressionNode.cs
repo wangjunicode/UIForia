@@ -22,6 +22,8 @@ namespace Src {
         public override Type GetYieldedType(ContextDefinition context) {
             Type partType = context.ResolveRuntimeAliasType(identifierNode.identifier);
 
+            // todo handle dotting into static types and enums
+            
             for (int i = 0; i < parts.Count; i++) {
                 if (parts[i] is PropertyAccessExpressionPartNode) {
                     partType = GetFieldType(partType, (PropertyAccessExpressionPartNode)parts[i]);
@@ -35,7 +37,6 @@ namespace Src {
                 
                 // todo -- method call as part of access chain
                 
-        
             }
 
             return partType;
@@ -47,6 +48,11 @@ namespace Src {
                 PropertyInfo propertyInfo = targetType.GetProperty(node.fieldName, flags);
                 if (propertyInfo != null) {
                     return propertyInfo.PropertyType;
+                }
+
+                Type nestedType = targetType.GetNestedType(node.fieldName, flags);
+                if (nestedType != null) {
+                    return nestedType;
                 }
                 throw new FieldNotDefinedException(targetType, node.fieldName);
             }

@@ -81,6 +81,8 @@ namespace Src.Systems {
         void SetOverflowX(UIElement styleSetElement, Overflow overflowX);
         void SetOverflowY(UIElement styleSetElement, Overflow overflowY);
 
+        void SetStyleProperty(UIElement element, StyleProperty propertyValue);
+
     }
 
 }

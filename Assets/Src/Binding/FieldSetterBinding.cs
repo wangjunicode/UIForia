@@ -25,6 +25,9 @@ namespace Src {
            
             if (!Equals(currentValue, newValue)){
                 setter(castElement, newValue);
+//                if (callback != null) {
+//                    callback.Invoke(element, fieldName, currentValue);
+//                }
             }
         }
 

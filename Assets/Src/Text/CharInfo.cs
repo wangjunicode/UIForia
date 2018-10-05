@@ -12,6 +12,8 @@ namespace Src.Text {
         public Vector2 uv1;
         public Vector2 uv2;
         public Vector2 uv3;
+        public float ascender;
+        public float descender;
 
     }
 

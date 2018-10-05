@@ -1,5 +1,4 @@
 using Src;
-using Src.Extensions;
 using Src.Util;
 using UnityEngine;
 
@@ -7,12 +6,36 @@ namespace Rendering {
 
     public partial class UIStyleSet {
 
+        private UIStyle.TextPropertyIdFlag definedTextProperties = 0;
+
+        private Color inheritedTextColor;
+        
+        internal bool DefinesTextProperty(UIStyle.TextPropertyIdFlag propertyFlag) {
+            return (definedTextProperties & propertyFlag) != 0;
+        }
+
+        internal void SetInheritedTextColor(Color color) {
+            inheritedTextColor = color;
+            computedStyle.TextColor = color;
+        }
+
         public Color GetTextColor(StyleState state) {
             return GetColorValue(StylePropertyId.TextColor, state);
         }
 
         public void SetTextColor(Color color, StyleState state) {
             SetColorProperty(StylePropertyId.TextColor, color, state);
+            StyleProperty property = GetPropertyValueInState(StylePropertyId.TextColor, currentState);
+            if (property.IsDefined) {
+                // all good
+                definedTextProperties |= UIStyle.TextPropertyIdFlag.TextColor;
+                computedStyle.SetProperty(property);
+            }
+            else {
+                // use inherited or find inherited
+                definedTextProperties &= ~UIStyle.TextPropertyIdFlag.TextColor;
+                styleSystem.SetStyleProperty(element, new StyleProperty(StylePropertyId.TextColor, IntUtil.UnsetValue, IntUtil.UnsetValue));
+            }
         }
 
         public AssetPointer<Font> GetFont(StyleState state) {

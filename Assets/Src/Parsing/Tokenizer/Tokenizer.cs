@@ -139,6 +139,7 @@ namespace Src {
                 ptr = TryReadCharacters(ptr, input, "}", TokenType.ExpressionClose, output);
                 ptr = TryReadCharacters(ptr, input, "true", TokenType.Boolean, output);
                 ptr = TryReadCharacters(ptr, input, "false", TokenType.Boolean, output);
+                ptr = TryReadCharacters(ptr, input, "@", TokenType.At, output);
 
                 ptr = TryReadString(ptr, input, output);
                 ptr = TryReadDigit(ptr, input, output);

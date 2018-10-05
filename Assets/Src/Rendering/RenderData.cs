@@ -29,6 +29,11 @@ namespace Src.Systems {
 
         public int Id => element.id;
         public bool IsGeometryDirty => isMeshDirty;
+        
+        public Texture GetMainTexture() {
+            return Texture2D.whiteTexture;
+        }
+
         public bool IsMaterialDirty => isMaterialDirty;
 
         public void OnAllocatedSizeChanged() {

@@ -329,6 +329,8 @@ namespace Rendering {
                 }
             }
 
+            
+            
             s_DefinedMap.Clear();
         }
 

@@ -152,64 +152,6 @@ namespace Src {
             }
         }
 
-        private Expression VisitMethodCallExpression_Static(MethodInfo info, MethodCallNode node) {
-            string methodName = node.identifierNode.identifier;
-
-            IReadOnlyList<ExpressionNode> signatureParts = node.signatureNode.parts;
-
-            ParameterInfo[] parameters = info.GetParameters();
-
-            if (parameters.Length != signatureParts.Count) {
-                throw new Exception("Argument count is wrong");
-            }
-
-            Expression[] args = new Expression[signatureParts.Count];
-            Type[] genericArguments = new Type[signatureParts.Count + 1];
-
-            for (int i = 0; i < args.Length; i++) {
-                Type requiredType = parameters[i].ParameterType;
-                ExpressionNode argumentNode = signatureParts[i];
-                Expression argumentExpression = Visit(argumentNode);
-                args[i] = HandleCasting(requiredType, argumentExpression);
-
-                genericArguments[i] = args[i].YieldedType;
-            }
-
-            genericArguments[genericArguments.Length - 1] = info.ReturnType;
-
-            ValidateParameterTypes(parameters, args);
-
-            Type callType;
-            switch (args.Length) {
-                case 0:
-                    callType = ReflectionUtil.CreateGenericType(typeof(MethodCallExpression_Static<>), genericArguments);
-                    break;
-
-                case 1:
-                    callType = ReflectionUtil.CreateGenericType(typeof(MethodCallExpression_Static<,>), genericArguments);
-                    break;
-
-                case 2:
-                    callType = ReflectionUtil.CreateGenericType(typeof(MethodCallExpression_Static<,,>), genericArguments);
-                    break;
-
-                case 3:
-                    callType = ReflectionUtil.CreateGenericType(typeof(MethodCallExpression_Static<,,,>), genericArguments);
-                    break;
-
-                case 4:
-                    callType = ReflectionUtil.CreateGenericType(typeof(MethodCallExpression_Static<,,,,>), genericArguments);
-                    break;
-
-                default:
-                    throw new Exception($"Expressions only support functions with up to 4 arguments. {methodName} is supplying {args.Length} ");
-            }
-
-            ReflectionUtil.ObjectArray2[0] = info;
-            ReflectionUtil.ObjectArray2[1] = args;
-
-            return (Expression) ReflectionUtil.CreateGenericInstance(callType, ReflectionUtil.ObjectArray2);
-        }
 
         private Expression VisitMethodCallExpression(MethodCallNode node) {
             string methodName = node.identifierNode.identifier;
@@ -543,7 +485,18 @@ namespace Src {
 
         private Expression VisitAccessExpression(AccessExpressionNode node) {
             string contextName = node.identifierNode.identifier;
-            Type headType = context.ResolveRuntimeAliasType(contextName);
+            Type headType;
+
+            if (node.identifierNode is ExternalReferenceIdentifierNode) {
+                headType = (Type) context.ResolveConstAlias(contextName);
+                // todo -- this will break for non type references... its possible that we want a constant value or something else here
+                if (headType == null) {
+                    throw new Exception("Unable to resolve alias: " + contextName);
+                }
+            }
+            else {
+                headType = context.ResolveRuntimeAliasType(contextName);
+            }
 
             if (headType == null) {
                 throw new Exception("Missing field or alias for access on context: " + contextName);
@@ -557,11 +510,25 @@ namespace Src {
             int startOffset = 0;
             int partCount = node.parts.Count;
 
-            bool isRootContext = !(node.identifierNode is SpecialIdentifierNode);
+            bool isRootContext = !(node.identifierNode is SpecialIdentifierNode) && !(node.identifierNode is ExternalReferenceIdentifierNode);
 
             if (isRootContext) {
                 startOffset++;
                 partCount++;
+            }
+
+            if (headType.IsEnum) {
+                if (partCount != 1) {
+                    throw new Exception("Trying to reference nested Enum value, which is not possible");
+                }
+
+                if (!(node.parts[0] is PropertyAccessExpressionPartNode)) {
+                    throw new Exception("Trying to read enum value but encountered array access");
+                }
+
+                object val = Enum.Parse(headType, ((PropertyAccessExpressionPartNode) node.parts[0]).fieldName);
+                ReflectionUtil.ObjectArray1[0] = val;
+                return (Expression) ReflectionUtil.CreateGenericInstanceFromOpenType(typeof(ConstantExpression<>), headType, ReflectionUtil.ObjectArray1);
             }
 
             Type lastType = headType;
@@ -605,7 +572,6 @@ namespace Src {
             ReflectionUtil.ObjectArray2[0] = contextName;
             ReflectionUtil.ObjectArray2[1] = parts;
             return (Expression) ReflectionUtil.CreateGenericInstanceFromOpenType(typeof(AccessExpression<>), lastType, ReflectionUtil.ObjectArray2);
-//            AccessExpression retn = new AccessExpression(contextName, lastType, parts);
         }
 
         private static Expression VisitConstant(LiteralValueNode node) {
@@ -705,3 +671,62 @@ namespace Src {
     }
 
 }
+//
+//private Expression VisitMethodCallExpression_Static(MethodInfo info, MethodCallNode node) {
+//            string methodName = node.identifierNode.identifier;
+//
+//            IReadOnlyList<ExpressionNode> signatureParts = node.signatureNode.parts;
+//
+//            ParameterInfo[] parameters = info.GetParameters();
+//
+//            if (parameters.Length != signatureParts.Count) {
+//                throw new Exception("Argument count is wrong");
+//            }
+//
+//            Expression[] args = new Expression[signatureParts.Count];
+//            Type[] genericArguments = new Type[signatureParts.Count + 1];
+//
+//            for (int i = 0; i < args.Length; i++) {
+//                Type requiredType = parameters[i].ParameterType;
+//                ExpressionNode argumentNode = signatureParts[i];
+//                Expression argumentExpression = Visit(argumentNode);
+//                args[i] = HandleCasting(requiredType, argumentExpression);
+//
+//                genericArguments[i] = args[i].YieldedType;
+//            }
+//
+//            genericArguments[genericArguments.Length - 1] = info.ReturnType;
+//
+//            ValidateParameterTypes(parameters, args);
+//
+//            Type callType;
+//            switch (args.Length) {
+//                case 0:
+//                    callType = ReflectionUtil.CreateGenericType(typeof(MethodCallExpression_Static<>), genericArguments);
+//                    break;
+//
+//                case 1:
+//                    callType = ReflectionUtil.CreateGenericType(typeof(MethodCallExpression_Static<,>), genericArguments);
+//                    break;
+//
+//                case 2:
+//                    callType = ReflectionUtil.CreateGenericType(typeof(MethodCallExpression_Static<,,>), genericArguments);
+//                    break;
+//
+//                case 3:
+//                    callType = ReflectionUtil.CreateGenericType(typeof(MethodCallExpression_Static<,,,>), genericArguments);
+//                    break;
+//
+//                case 4:
+//                    callType = ReflectionUtil.CreateGenericType(typeof(MethodCallExpression_Static<,,,,>), genericArguments);
+//                    break;
+//
+//                default:
+//                    throw new Exception($"Expressions only support functions with up to 4 arguments. {methodName} is supplying {args.Length} ");
+//            }
+//
+//            ReflectionUtil.ObjectArray2[0] = info;
+//            ReflectionUtil.ObjectArray2[1] = args;
+//
+//            return (Expression) ReflectionUtil.CreateGenericInstance(callType, ReflectionUtil.ObjectArray2);
+//        }

@@ -11,7 +11,35 @@ public class ChatWindow_Styles {
             BackgroundColor = Color.blue,
             FlexLayoutDirection = LayoutDirection.Column,
             FlexLayoutMainAxisAlignment = MainAxisAlignment.End,
-            PreferredHeight = 100f
+            PreferredWidth = 800f,
+            PreferredHeight = 600f
+        };
+    }
+
+    [ExportStyle("clipped-panel")]
+    public static UIStyle ClippedPanel() {
+        return new UIStyle() {
+            BackgroundColor = Color.white,
+            PreferredHeight = 300f
+        };
+    }
+
+    [ExportStyle("direct-messages")]
+    public static UIStyle DirectMessages() {
+        return new UIStyle() {
+            BackgroundColor = new Color(224f, 0, 0, 1f),
+            PreferredWidth = 200f,
+            PreferredHeight = UIMeasurement.Parent100,
+            LayoutType = LayoutType.Flex,
+            FlexLayoutDirection = LayoutDirection.Row
+        };
+    }
+
+    [ExportStyle("direct-messages-header")]
+    public static UIStyle DirectMessagesHeader() {
+        return new UIStyle() {
+            BackgroundColor = new Color(175, 175, 175, 1f),
+            TextColor = Color.black
         };
     }
 

@@ -2,7 +2,6 @@ using System;
 using Src;
 using Src.Layout;
 using Src.Rendering;
-using Src.Systems;
 using Src.Util;
 using TMPro;
 using UnityEngine;
@@ -72,7 +71,7 @@ namespace Rendering {
 
         //IgnoreTranslationInLayout
         //UseScaledAABB
-        
+
     }
 
     public class ComputedStyle {
@@ -102,7 +101,14 @@ namespace Rendering {
                 internal set {
                     if (borderRadiusTopLeft == value) return;
                     borderRadiusTopLeft = value;
-                    styleSet.styleSystem.SetBorderRadius(styleSet.element, borderRadius);
+                    styleSet.styleSystem.SetStyleProperty(
+                        styleSet.element,
+                        new StyleProperty(
+                            StylePropertyId.BorderRadiusTopLeft,
+                            FloatUtil.EncodeToInt(BorderRadiusTopLeft.value),
+                            (int) BorderRadiusTopLeft.unit
+                        )
+                    );
                 }
             }
 
@@ -111,7 +117,14 @@ namespace Rendering {
                 internal set {
                     if (borderRadiusTopRight == value) return;
                     borderRadiusTopRight = value;
-                    styleSet.styleSystem.SetBorderRadius(styleSet.element, borderRadius);
+                    styleSet.styleSystem.SetStyleProperty(
+                        styleSet.element,
+                        new StyleProperty(
+                            StylePropertyId.BorderRadiusTopRight,
+                            FloatUtil.EncodeToInt(BorderRadiusTopRight.value),
+                            (int) BorderRadiusTopRight.unit
+                        )
+                    );
                 }
             }
 
@@ -120,7 +133,14 @@ namespace Rendering {
                 internal set {
                     if (borderRadiusBottomRight == value) return;
                     borderRadiusBottomRight = value;
-                    styleSet.styleSystem.SetBorderRadius(styleSet.element, borderRadius);
+                    styleSet.styleSystem.SetStyleProperty(
+                        styleSet.element,
+                        new StyleProperty(
+                            StylePropertyId.BorderRadiusBottomRight,
+                            FloatUtil.EncodeToInt(BorderRadiusBottomRight.value),
+                            (int) BorderRadiusBottomRight.unit
+                        )
+                    );
                 }
             }
 
@@ -129,7 +149,14 @@ namespace Rendering {
                 internal set {
                     if (borderRadiusBottomLeft == value) return;
                     borderRadiusBottomLeft = value;
-                    styleSet.styleSystem.SetBorderRadius(styleSet.element, borderRadius);
+                    styleSet.styleSystem.SetStyleProperty(
+                        styleSet.element,
+                        new StyleProperty(
+                            StylePropertyId.BorderRadiusBottomLeft,
+                            FloatUtil.EncodeToInt(borderRadiusBottomLeft.value),
+                            (int) borderRadiusBottomLeft.unit
+                        )
+                    );
                 }
             }
 
@@ -148,7 +175,7 @@ namespace Rendering {
         public ContentBoxRect padding => new ContentBoxRect(paddingTop, paddingRight, paddingBottom, paddingLeft);
         public ContentBoxRect margin => new ContentBoxRect(MarginTop, marginRight, marginBottom, marginLeft);
 
-#region Paint
+        #region Paint
 
         private Color borderColor = DefaultStyleValues.borderColor;
         private Color backgroundColor = DefaultStyleValues.backgroundColor;
@@ -162,7 +189,7 @@ namespace Rendering {
                 }
 
                 borderColor = value;
-                styleSet.styleSystem.SetPaint(styleSet.element, new Paint(backgroundColor, borderColor, backgroundImage.asset));
+                SendEvent(new StyleProperty(StylePropertyId.BorderColor, new StyleColor(borderColor).rgba));
             }
         }
 
@@ -174,7 +201,7 @@ namespace Rendering {
                 }
 
                 backgroundColor = value;
-                styleSet.styleSystem.SetPaint(styleSet.element, new Paint(backgroundColor, borderColor, backgroundImage.asset));
+                SendEvent(new StyleProperty(StylePropertyId.BackgroundColor, new StyleColor(backgroundColor).rgba));
             }
         }
 
@@ -186,13 +213,13 @@ namespace Rendering {
                 }
 
                 backgroundImage = value;
-                styleSet.styleSystem.SetPaint(styleSet.element, new Paint(backgroundColor, borderColor, backgroundImage.asset));
+                SendEvent(new StyleProperty(StylePropertyId.BackgroundImage, (int) backgroundImage.assetType, backgroundImage.id));
             }
         }
 
-#endregion
+        #endregion
 
-#region Overflow
+        #region Overflow
 
         private Overflow overflowX = DefaultStyleValues.overflowX;
         private Overflow overflowY = DefaultStyleValues.overflowY;
@@ -202,7 +229,7 @@ namespace Rendering {
             internal set {
                 if (value == overflowX) return;
                 overflowX = value;
-                styleSet.styleSystem.SetOverflowX(styleSet.element, overflowX);
+                SendEvent(new StyleProperty(StylePropertyId.OverflowX, (int) overflowX));
             }
         }
 
@@ -211,13 +238,13 @@ namespace Rendering {
             internal set {
                 if (value == overflowY) return;
                 overflowY = value;
-                styleSet.styleSystem.SetOverflowY(styleSet.element, overflowY);
+                SendEvent(new StyleProperty(StylePropertyId.OverflowY, (int) overflowY));
             }
         }
 
-#endregion
+        #endregion
 
-#region Flex Item 
+        #region Flex Item 
 
         private int flexGrowthFactor = DefaultStyleValues.flexGrowthFactor;
         private int flexShrinkFactor = DefaultStyleValues.flexShrinkFactor;
@@ -230,7 +257,7 @@ namespace Rendering {
                 if (value < 0) value = 0;
                 if (flexOrderOverride == value) return;
                 flexOrderOverride = value;
-                styleSet.styleSystem.SetFlexItemProperties(styleSet.element);
+                SendEvent(new StyleProperty(StylePropertyId.FlexItemOrder, flexOrderOverride));
             }
         }
 
@@ -240,7 +267,7 @@ namespace Rendering {
                 if (value < 0) value = 0;
                 if (flexGrowthFactor == value) return;
                 flexGrowthFactor = value;
-                styleSet.styleSystem.SetFlexItemProperties(styleSet.element);
+                SendEvent(new StyleProperty(StylePropertyId.FlexItemGrow, flexGrowthFactor));
             }
         }
 
@@ -250,7 +277,7 @@ namespace Rendering {
                 if (value < 0) value = 0;
                 if (flexShrinkFactor == value) return;
                 flexShrinkFactor = value;
-                styleSet.styleSystem.SetFlexItemProperties(styleSet.element);
+                SendEvent(new StyleProperty(StylePropertyId.FlexItemShrink, flexShrinkFactor));
             }
         }
 
@@ -259,13 +286,13 @@ namespace Rendering {
             internal set {
                 if (value == flexSelfAlignment) return;
                 flexSelfAlignment = value;
-                styleSet.styleSystem.SetFlexItemProperties(styleSet.element);
+                SendEvent(new StyleProperty(StylePropertyId.FlexItemSelfAlignment, (int) flexSelfAlignment));
             }
         }
 
-#endregion
+        #endregion
 
-#region Flex Layout
+        #region Flex Layout
 
         private LayoutWrap flexLayoutWrap = DefaultStyleValues.flexLayoutWrap;
         private LayoutDirection flexLayoutDirection = DefaultStyleValues.flexLayoutDirection;
@@ -277,7 +304,7 @@ namespace Rendering {
             internal set {
                 if (flexLayoutDirection == value) return;
                 flexLayoutDirection = value;
-                styleSet.styleSystem.SetLayoutDirection(styleSet.element, flexLayoutDirection);
+                SendEvent(new StyleProperty(StylePropertyId.FlexDirection, (int) flexLayoutDirection));
             }
         }
 
@@ -286,7 +313,7 @@ namespace Rendering {
             internal set {
                 if (flexLayoutWrap == value) return;
                 flexLayoutWrap = value;
-                styleSet.styleSystem.SetLayoutWrap(styleSet.element, flexLayoutWrap);
+                SendEvent(new StyleProperty(StylePropertyId.FlexWrap, (int) flexLayoutWrap));
             }
         }
 
@@ -294,9 +321,8 @@ namespace Rendering {
             get { return flexLayoutMainAxisAlignment; }
             internal set {
                 if (flexLayoutMainAxisAlignment == value) return;
-                MainAxisAlignment oldAlignment = flexLayoutMainAxisAlignment;
                 flexLayoutMainAxisAlignment = value;
-                styleSet.styleSystem.SetMainAxisAlignment(styleSet.element, flexLayoutMainAxisAlignment, oldAlignment);
+                SendEvent(new StyleProperty(StylePropertyId.FlexMainAxisAlignment, (int) flexLayoutMainAxisAlignment));
             }
         }
 
@@ -304,23 +330,22 @@ namespace Rendering {
             get { return flexLayoutCrossAxisAlignment; }
             internal set {
                 if (flexLayoutCrossAxisAlignment == value) return;
-                CrossAxisAlignment oldAlignment = flexLayoutCrossAxisAlignment;
                 flexLayoutCrossAxisAlignment = value;
-                styleSet.styleSystem.SetCrossAxisAlignment(styleSet.element, flexLayoutCrossAxisAlignment, oldAlignment);
+                SendEvent(new StyleProperty(StylePropertyId.FlexCrossAxisAlignment, (int) flexLayoutCrossAxisAlignment));
             }
         }
 
-#endregion
+        #endregion
 
-#region Grid Item
+        #region Grid Item
 
-#endregion
+        #endregion
 
-#region Grid Layout
+        #region Grid Layout
 
-#endregion
+        #endregion
 
-#region Size       
+        #region Size       
 
         private UIMeasurement minWidth = DefaultStyleValues.minWidth;
         private UIMeasurement maxWidth = DefaultStyleValues.maxWidth;
@@ -336,7 +361,7 @@ namespace Rendering {
                 if (minWidth == value) return;
                 UIMeasurement old = minWidth;
                 minWidth = value;
-                styleSet.styleSystem.SetMinWidth(styleSet.element, minWidth, old);
+                SendEvent(new StyleProperty(StylePropertyId.MinWidth, FloatUtil.EncodeToInt(minWidth.value), (int) minWidth.unit));
             }
         }
 
@@ -346,7 +371,7 @@ namespace Rendering {
                 if (maxWidth == value) return;
                 UIMeasurement old = maxWidth;
                 maxWidth = value;
-                styleSet.styleSystem.SetMaxWidth(styleSet.element, maxWidth, old);
+                SendEvent(new StyleProperty(StylePropertyId.MaxWidth, FloatUtil.EncodeToInt(maxWidth.value), (int) maxWidth.unit));
             }
         }
 
@@ -356,7 +381,7 @@ namespace Rendering {
                 if (preferredWidth == value) return;
                 UIMeasurement old = preferredWidth;
                 preferredWidth = value;
-                styleSet.styleSystem.SetPreferredWidth(styleSet.element, preferredWidth, old);
+                SendEvent(new StyleProperty(StylePropertyId.PreferredWidth, FloatUtil.EncodeToInt(preferredWidth.value), (int) preferredWidth.unit));
             }
         }
 
@@ -364,9 +389,8 @@ namespace Rendering {
             get { return minHeight; }
             internal set {
                 if (minHeight == value) return;
-                UIMeasurement old = minHeight;
                 minHeight = value;
-                styleSet.styleSystem.SetMinHeight(styleSet.element, minHeight, old);
+                SendEvent(new StyleProperty(StylePropertyId.MinHeight, FloatUtil.EncodeToInt(minHeight.value), (int) minHeight.unit));
             }
         }
 
@@ -374,9 +398,8 @@ namespace Rendering {
             get { return maxHeight; }
             internal set {
                 if (maxHeight == value) return;
-                UIMeasurement old = maxHeight;
                 maxHeight = value;
-                styleSet.styleSystem.SetMaxHeight(styleSet.element, maxHeight, old);
+                SendEvent(new StyleProperty(StylePropertyId.MaxHeight, FloatUtil.EncodeToInt(maxHeight.value), (int) maxHeight.unit));
             }
         }
 
@@ -384,15 +407,14 @@ namespace Rendering {
             get { return preferredHeight; }
             internal set {
                 if (preferredHeight == value) return;
-                UIMeasurement old = preferredHeight;
                 preferredHeight = value;
-                styleSet.styleSystem.SetPreferredHeight(styleSet.element, preferredHeight, old);
+                SendEvent(new StyleProperty(StylePropertyId.PreferredHeight, FloatUtil.EncodeToInt(preferredHeight.value), (int) preferredHeight.unit));
             }
         }
 
-#endregion
+        #endregion
 
-#region Margin
+        #region Margin
 
         private UIMeasurement marginTop = DefaultStyleValues.marginTop;
         private UIMeasurement marginRight = DefaultStyleValues.marginRight;
@@ -404,7 +426,7 @@ namespace Rendering {
             internal set {
                 if (marginTop == value) return;
                 marginTop = value;
-                styleSet.styleSystem.SetMargin(styleSet.element, margin);
+                SendEvent(new StyleProperty(StylePropertyId.MarginTop, FloatUtil.EncodeToInt(marginTop.value), (int) marginTop.unit));
             }
         }
 
@@ -413,7 +435,7 @@ namespace Rendering {
             internal set {
                 if (marginRight == value) return;
                 marginRight = value;
-                styleSet.styleSystem.SetMargin(styleSet.element, margin);
+                SendEvent(new StyleProperty(StylePropertyId.MarginRight, FloatUtil.EncodeToInt(MarginRight.value), (int) MarginRight.unit));
             }
         }
 
@@ -422,7 +444,7 @@ namespace Rendering {
             internal set {
                 if (marginBottom == value) return;
                 marginBottom = value;
-                styleSet.styleSystem.SetMargin(styleSet.element, margin);
+                SendEvent(new StyleProperty(StylePropertyId.MarginBottom, FloatUtil.EncodeToInt(marginBottom.value), (int) marginBottom.unit));
             }
         }
 
@@ -431,13 +453,13 @@ namespace Rendering {
             internal set {
                 if (marginLeft == value) return;
                 marginLeft = value;
-                styleSet.styleSystem.SetMargin(styleSet.element, margin);
+                SendEvent(new StyleProperty(StylePropertyId.MarginLeft, FloatUtil.EncodeToInt(marginLeft.value), (int) marginLeft.unit));
             }
         }
 
-#endregion
+        #endregion
 
-#region Border
+        #region Border
 
         private UIMeasurement borderTop = DefaultStyleValues.borderTop;
         private UIMeasurement borderRight = DefaultStyleValues.borderRight;
@@ -449,7 +471,7 @@ namespace Rendering {
             internal set {
                 if (borderTop == value) return;
                 borderTop = value;
-                styleSet.styleSystem.SetBorder(styleSet.element, border);
+                SendEvent(new StyleProperty(StylePropertyId.BorderTop, FloatUtil.EncodeToInt(borderTop.value), (int) borderTop.unit));
             }
         }
 
@@ -458,7 +480,7 @@ namespace Rendering {
             internal set {
                 if (borderRight == value) return;
                 borderRight = value;
-                styleSet.styleSystem.SetBorder(styleSet.element, border);
+                SendEvent(new StyleProperty(StylePropertyId.BorderRight, FloatUtil.EncodeToInt(borderRight.value), (int) borderRight.unit));
             }
         }
 
@@ -467,7 +489,7 @@ namespace Rendering {
             internal set {
                 if (borderBottom == value) return;
                 borderBottom = value;
-                styleSet.styleSystem.SetBorder(styleSet.element, border);
+                SendEvent(new StyleProperty(StylePropertyId.BorderBottom, FloatUtil.EncodeToInt(borderBottom.value), (int) borderBottom.unit));
             }
         }
 
@@ -476,13 +498,13 @@ namespace Rendering {
             internal set {
                 if (borderLeft == value) return;
                 borderLeft = value;
-                styleSet.styleSystem.SetBorder(styleSet.element, border);
+                SendEvent(new StyleProperty(StylePropertyId.BorderLeft, FloatUtil.EncodeToInt(borderLeft.value), (int) borderLeft.unit));
             }
         }
 
-#endregion
+        #endregion
 
-#region Padding
+        #region Padding
 
         private UIMeasurement paddingTop = DefaultStyleValues.paddingTop;
         private UIMeasurement paddingRight = DefaultStyleValues.paddingRight;
@@ -494,7 +516,7 @@ namespace Rendering {
             internal set {
                 if (paddingTop == value) return;
                 paddingTop = value;
-                styleSet.styleSystem.SetPadding(styleSet.element, padding);
+                SendEvent(new StyleProperty(StylePropertyId.PaddingTop, FloatUtil.EncodeToInt(paddingTop.value), (int) paddingTop.unit));
             }
         }
 
@@ -503,7 +525,7 @@ namespace Rendering {
             internal set {
                 if (paddingRight == value) return;
                 paddingRight = value;
-                styleSet.styleSystem.SetPadding(styleSet.element, padding);
+                SendEvent(new StyleProperty(StylePropertyId.PaddingRight, FloatUtil.EncodeToInt(paddingRight.value), (int) paddingRight.unit));
             }
         }
 
@@ -512,7 +534,7 @@ namespace Rendering {
             internal set {
                 if (paddingBottom == value) return;
                 paddingBottom = value;
-                styleSet.styleSystem.SetPadding(styleSet.element, padding);
+                SendEvent(new StyleProperty(StylePropertyId.PaddingBottom, FloatUtil.EncodeToInt(paddingBottom.value), (int) paddingBottom.unit));
             }
         }
 
@@ -521,13 +543,13 @@ namespace Rendering {
             internal set {
                 if (paddingLeft == value) return;
                 paddingLeft = value;
-                styleSet.styleSystem.SetPadding(styleSet.element, padding);
+                SendEvent(new StyleProperty(StylePropertyId.PaddingLeft, FloatUtil.EncodeToInt(paddingLeft.value), (int) paddingLeft.unit));
             }
         }
 
-#endregion
+        #endregion
 
-#region Text Properties
+        #region Text Properties
 
         private int fontSize = DefaultStyleValues.fontSize;
         private Color textColor = DefaultStyleValues.textColor;
@@ -540,7 +562,7 @@ namespace Rendering {
             internal set {
                 if (textColor == value) return;
                 textColor = value;
-                styleSet.styleSystem.SetFontColor(styleSet.element, textColor);
+                SendEvent(new StyleProperty(StylePropertyId.TextColor, new StyleColor(textColor).rgba));
             }
         }
 
@@ -549,7 +571,7 @@ namespace Rendering {
             internal set {
                 if (fontAsset.id == value.id) return;
                 fontAsset = value;
-                styleSet.styleSystem.SetFontAsset(styleSet.element, fontAsset);
+                SendEvent(new StyleProperty(StylePropertyId.TextFontAsset, (int) fontAsset.assetType, fontAsset.id));
             }
         }
 
@@ -558,7 +580,7 @@ namespace Rendering {
             internal set {
                 if (fontSize == value) return;
                 fontSize = value;
-                styleSet.styleSystem.SetFontSize(styleSet.element, fontSize);
+                SendEvent(new StyleProperty(StylePropertyId.TextFontSize, fontSize));
             }
         }
 
@@ -567,7 +589,7 @@ namespace Rendering {
             internal set {
                 if (fontStyle == value) return;
                 fontStyle = value;
-                styleSet.styleSystem.SetFontStyle(styleSet.element, fontStyle);
+                SendEvent(new StyleProperty(StylePropertyId.TextFontStyle, (int) fontStyle));
             }
         }
 
@@ -576,13 +598,13 @@ namespace Rendering {
             internal set {
                 if (textAnchor == value) return;
                 textAnchor = value;
-                styleSet.styleSystem.SetTextAnchor(styleSet.element, textAnchor);
+                SendEvent(new StyleProperty(StylePropertyId.TextAnchor, (int) textAnchor));
             }
         }
 
-#endregion
+        #endregion
 
-#region Transform
+        #region Transform
 
         private UIMeasurement transformPositionX = DefaultStyleValues.transformPositionX;
         private UIMeasurement transformPositionY = DefaultStyleValues.transformPositionY;
@@ -598,7 +620,7 @@ namespace Rendering {
                 if (value == UIMeasurement.Unset) value = DefaultStyleValues.transformPositionX;
                 if (transformPositionX == value) return;
                 transformPositionX = value;
-                styleSet.styleSystem.SetTransform(styleSet.element, new UITransform());
+                SendEvent(new StyleProperty(StylePropertyId.TransformPositionX, FloatUtil.EncodeToInt(transformPositionX.value), (int) transformPositionX.unit));
             }
         }
 
@@ -608,7 +630,7 @@ namespace Rendering {
                 if (value == UIMeasurement.Unset) value = DefaultStyleValues.transformPositionY;
                 if (transformPositionY == value) return;
                 transformPositionY = value;
-                styleSet.styleSystem.SetTransform(styleSet.element, new UITransform());
+                SendEvent(new StyleProperty(StylePropertyId.TransformPositionY, FloatUtil.EncodeToInt(transformPositionY.value), (int) transformPositionY.unit));
             }
         }
 
@@ -618,7 +640,7 @@ namespace Rendering {
                 if (value == UIMeasurement.Unset) value = DefaultStyleValues.transformPivotX;
                 if (transformPivotX == value) return;
                 transformPivotX = value;
-                styleSet.styleSystem.SetTransform(styleSet.element, new UITransform());
+                SendEvent(new StyleProperty(StylePropertyId.TransformPivotX, FloatUtil.EncodeToInt(transformPivotX.value), (int) transformPivotX.unit));
             }
         }
 
@@ -628,7 +650,7 @@ namespace Rendering {
                 if (value == UIMeasurement.Unset) value = DefaultStyleValues.transformPivotY;
                 if (transformPivotY == value) return;
                 transformPivotY = value;
-                styleSet.styleSystem.SetTransform(styleSet.element, new UITransform());
+                SendEvent(new StyleProperty(StylePropertyId.TransformPivotY, FloatUtil.EncodeToInt(transformPivotY.value), (int) transformPivotY.unit));
             }
         }
 
@@ -638,7 +660,7 @@ namespace Rendering {
                 if (!FloatUtil.IsDefined(value)) value = DefaultStyleValues.transformScaleX;
                 if (Mathf.Approximately(value, transformScaleX)) return;
                 transformScaleX = value;
-                styleSet.styleSystem.SetTransform(styleSet.element, new UITransform());
+                SendEvent(new StyleProperty(StylePropertyId.TransformScaleX, FloatUtil.EncodeToInt(transformScaleX)));
             }
         }
 
@@ -648,7 +670,7 @@ namespace Rendering {
                 if (!FloatUtil.IsDefined(value)) value = DefaultStyleValues.transformScaleY;
                 if (Mathf.Approximately(value, transformScaleY)) return;
                 transformScaleY = value;
-                styleSet.styleSystem.SetTransform(styleSet.element, new UITransform());
+                SendEvent(new StyleProperty(StylePropertyId.TransformScaleY, FloatUtil.EncodeToInt(transformScaleY)));
             }
         }
 
@@ -659,6 +681,7 @@ namespace Rendering {
                 if (Mathf.Approximately(value, transformRotation)) return;
                 transformRotation = value;
                 styleSet.styleSystem.SetTransform(styleSet.element, new UITransform());
+                SendEvent(new StyleProperty(StylePropertyId.TransformRotation, FloatUtil.EncodeToInt(transformRotation)));
             }
         }
 
@@ -670,7 +693,7 @@ namespace Rendering {
             }
         }
 
-#region Layout
+        #region Layout
 
         private LayoutType layoutType = DefaultStyleValues.layoutType;
 
@@ -679,13 +702,17 @@ namespace Rendering {
             internal set {
                 if (layoutType == value) return;
                 layoutType = value;
-                styleSet.styleSystem.SetLayoutType(styleSet.element, layoutType);
+                SendEvent(new StyleProperty(StylePropertyId.LayoutType, (int) layoutType));
             }
         }
 
-#endregion
+        #endregion
 
-#endregion
+        #endregion
+
+        private void SendEvent(StyleProperty property) {
+            styleSet.styleSystem.SetStyleProperty(styleSet.element, property);
+        }
 
         internal void SetProperty(StyleProperty property) {
             int value0 = property.valuePart0;
@@ -694,7 +721,8 @@ namespace Rendering {
                 case StylePropertyId.LayoutType:
                     LayoutType = property.IsDefined ? (LayoutType) value0 : DefaultStyleValues.layoutType;
                     break;
-#region Overflow
+
+                #region Overflow
 
                 case StylePropertyId.OverflowX:
                     overflowX = property.IsDefined ? (Overflow) value0 : DefaultStyleValues.overflowX;
@@ -703,9 +731,9 @@ namespace Rendering {
                     overflowY = property.IsDefined ? (Overflow) value0 : DefaultStyleValues.overflowY;
                     break;
 
-#endregion
+                #endregion
 
-#region Paint
+                #region Paint
 
                 case StylePropertyId.BackgroundColor:
                     BackgroundColor = property.IsDefined ? (Color) new StyleColor(value0) : DefaultStyleValues.backgroundColor;
@@ -729,9 +757,9 @@ namespace Rendering {
                     RareData.BorderRadiusBottomRight = property.IsDefined ? UIMeasurement.Decode(value0, value1) : DefaultStyleValues.borderRadiusBottomRight;
                     break;
 
-#endregion
+                #endregion
 
-#region Grid Item
+                #region Grid Item
 
                 case StylePropertyId.GridItemColStart:
                     break;
@@ -742,9 +770,9 @@ namespace Rendering {
                 case StylePropertyId.GridItemRowSpan:
                     break;
 
-#endregion
+                #endregion
 
-#region Grid Layout
+                #region Grid Layout
 
                 case StylePropertyId.GridFlowDirection:
                     break;
@@ -763,9 +791,9 @@ namespace Rendering {
                 case StylePropertyId.GridRowGap:
                     break;
 
-#endregion
+                #endregion
 
-#region Flex Layout
+                #region Flex Layout
 
                 case StylePropertyId.FlexWrap:
                     FlexLayoutWrap = property.IsDefined ? (LayoutWrap) value0 : DefaultStyleValues.flexLayoutWrap;
@@ -780,9 +808,9 @@ namespace Rendering {
                     FlexLayoutCrossAxisAlignment = property.IsDefined ? (CrossAxisAlignment) value0 : DefaultStyleValues.flexLayoutCrossAxisAlignment;
                     break;
 
-#endregion
+                #endregion
 
-#region Flex Item
+                #region Flex Item
 
                 case StylePropertyId.FlexItemSelfAlignment:
                     FlexItemSelfAlignment = property.IsDefined ? (CrossAxisAlignment) value0 : DefaultStyleValues.flexSelfAlignment;
@@ -797,9 +825,9 @@ namespace Rendering {
                     FlexItemShrinkFactor = property.IsDefined ? value0 : DefaultStyleValues.flexShrinkFactor;
                     break;
 
-#endregion
+                #endregion
 
-#region Margin
+                #region Margin
 
                 case StylePropertyId.MarginTop:
                     MarginTop = property.IsDefined ? UIMeasurement.Decode(value0, value1) : DefaultStyleValues.marginTop;
@@ -817,9 +845,9 @@ namespace Rendering {
                     MarginLeft = property.IsDefined ? UIMeasurement.Decode(value0, value1) : DefaultStyleValues.marginLeft;
                     break;
 
-#endregion
+                #endregion
 
-#region Border
+                #region Border
 
                 case StylePropertyId.BorderTop:
                     BorderTop = property.IsDefined ? UIMeasurement.Decode(value0, value1) : DefaultStyleValues.borderTop;
@@ -834,9 +862,9 @@ namespace Rendering {
                     BorderLeft = property.IsDefined ? UIMeasurement.Decode(value0, value1) : DefaultStyleValues.borderLeft;
                     break;
 
-#endregion
+                #endregion
 
-#region Padding
+                #region Padding
 
                 case StylePropertyId.PaddingTop:
                     PaddingTop = property.IsDefined ? UIMeasurement.Decode(value0, value1) : DefaultStyleValues.paddingTop;
@@ -851,9 +879,9 @@ namespace Rendering {
                     PaddingLeft = property.IsDefined ? UIMeasurement.Decode(value0, value1) : DefaultStyleValues.paddingLeft;
                     break;
 
-#endregion
+                #endregion
 
-#region Transform
+                #region Transform
 
                 case StylePropertyId.TransformPositionX:
                     TransformPositionX = property.IsDefined ? UIMeasurement.Decode(value0, value1) : DefaultStyleValues.transformPositionX;
@@ -877,9 +905,9 @@ namespace Rendering {
                     TransformRotation = property.IsDefined ? FloatUtil.DecodeToFloat(value0) : DefaultStyleValues.transformRotation;
                     break;
 
-#endregion
+                #endregion
 
-#region Text
+                #region Text
 
                 case StylePropertyId.TextColor:
                     TextColor = property.IsDefined ? (Color) new StyleColor(value0) : DefaultStyleValues.textColor;
@@ -921,9 +949,9 @@ namespace Rendering {
                     throw new NotImplementedException();
                     break;
 
-#endregion
+                #endregion
 
-#region Size
+                #region Size
 
                 case StylePropertyId.MinWidth:
                     MinWidth = property.IsDefined ? UIMeasurement.Decode(value0, value1) : DefaultStyleValues.minWidth;
@@ -949,7 +977,7 @@ namespace Rendering {
                     PreferredHeight = property.IsDefined ? UIMeasurement.Decode(value0, value1) : DefaultStyleValues.preferredHeight;
                     break;
 
-#endregion
+                #endregion
 
                 // SizeParameters -> None | IgnoreScaleForLayout | IgnoreRotationForLayout | PreMultiplyScale
                 case StylePropertyId.__TextPropertyStart__:

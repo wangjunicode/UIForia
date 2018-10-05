@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using Rendering;
+using Src.Compilers.AliasSources;
 using Src.Rendering;
 
 namespace Src {
@@ -99,6 +100,15 @@ namespace Src {
         public void Compile() {
             if (isCompiled) return;
             isCompiled = true;
+            for (int i = 0; i < imports.Count; i++) {
+                Type type = TypeProcessor.GetRuntimeType(imports[i].path);
+                if(type == null) throw new Exception("Could not find type for: " + imports[i].path);
+                contextDefinition.AddConstAliasSource(new ExternalReferenceAliasSource(imports[i].alias, type));
+            }
+
+//            Type type = TypeProcessor.GetRuntimeType("ClippedPanel+ClippedCorner");
+//            contextDefinition.AddConstAliasSource(new ExternalReferenceAliasSource("@ClippedCorner", type));
+
             CompileStep(rootElementTemplate);
         }
 

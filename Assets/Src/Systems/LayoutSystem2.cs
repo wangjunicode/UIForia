@@ -358,6 +358,7 @@ namespace Src.Systems {
         }
 
         public List<UIElement> QueryPoint(Vector2 point, List<UIElement> retn) {
+            // todo if point is same as last point or point is off screen, do no work
             if (retn == null) {
                 retn = ListPool<UIElement>.Get();
             }

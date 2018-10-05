@@ -18,6 +18,8 @@ namespace Src.Systems {
         int Id { get; }
         bool IsMaterialDirty { get; }
         bool IsGeometryDirty { get; }
+        Texture GetMainTexture();
+
     }
     
  

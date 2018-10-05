@@ -254,6 +254,8 @@ namespace Src {
 
             return false;
         }
+        
+     
 
         private OperatorNode ParseOperatorExpression() {
             tokenStream.Save();
@@ -441,18 +443,26 @@ namespace Src {
             
             return true;
         }
+
+       
         
         [DebuggerStepThrough]
         private bool ParseIdentifier(ref IdentifierNode node) {
             tokenStream.Save();
 
-            if (tokenStream.Current != TokenType.Identifier && tokenStream.Current != TokenType.SpecialIdentifier) {
+            if (tokenStream.Current != TokenType.Identifier 
+                && tokenStream.Current != TokenType.At
+                && tokenStream.Current != TokenType.SpecialIdentifier) {
                 tokenStream.Restore();
                 return false;
             }
 
             if (tokenStream.Current == TokenType.SpecialIdentifier) {
                 node = new SpecialIdentifierNode(tokenStream.Current);
+            }
+            else if(tokenStream.Current == TokenType.At) {
+                tokenStream.Advance();
+                node = new ExternalReferenceIdentifierNode("@" + tokenStream.Current);
             }
             else {
                 node = new IdentifierNode(tokenStream.Current);
@@ -592,7 +602,7 @@ namespace Src {
             return false;
         }
 
-        private NumericLiteralNode CreateNumericLiteralNode(string input, bool isNegative) {
+        private static NumericLiteralNode CreateNumericLiteralNode(string input, bool isNegative) {
             if (input.IndexOf('.') == -1 && input.IndexOf('f') == -1) {
                 int value = int.Parse(input, CultureInfo.InvariantCulture);
                 if (isNegative) value = -value;

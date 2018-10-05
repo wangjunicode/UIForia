@@ -14,6 +14,7 @@ namespace Src.Text {
         public float descender;
         public float xAdvance;
         public bool isNewLine;
+        public float characterSize;
 
         public int visibleCharCount => charCount - (charCount - spaceStart);
         

@@ -26,6 +26,7 @@ namespace Src {
         // identifiers
         Identifier = 1 << 11,
         SpecialIdentifier = 1 << 12,
+        At = 1 << 30, 
 
         // constants
         String = 1 << 13,
@@ -47,7 +48,7 @@ namespace Src {
         QuestionMark = 1 << 25,
         Colon = 1 << 28,
         Comma = 1 << 29,
-
+        
         ArithmeticOperator = Plus | Minus | Times | Divide | Mod,
         Literal = String | Number | Boolean,
         Comparator = Equals | NotEquals | GreaterThan | GreaterThanEqualTo | LessThan | LessThanEqualTo,

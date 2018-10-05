@@ -121,6 +121,7 @@
             <e p="AliasSources" t="Include">
               <e p="ColorAliasSource.cs" t="Include" />
               <e p="EnumAliasSources.cs" t="Include" />
+              <e p="ExternalReferenceAliasSource.cs" t="Include" />
               <e p="IAliasSource.cs" t="Include" />
               <e p="MethodAliasSource.cs" t="Include" />
               <e p="ReflectionAliasSource.cs" t="Include" />
@@ -155,6 +156,7 @@
           </e>
           <e p="Elements" t="Include">
             <e p="CustomDrawableElement.cs" t="Include" />
+            <e p="Panel.cs" t="Include" />
             <e p="UIElement.cs" t="Include" />
             <e p="UIElementFlags.cs" t="Include" />
             <e p="UIGraphicElement.cs" t="Include" />
@@ -282,6 +284,7 @@
               <e p="Ast.cs" t="Include" />
               <e p="BooleanLiteralNode.cs" t="Include" />
               <e p="ExpressionNode.cs" t="Include" />
+              <e p="ExternalReferenceIdentifierNode.cs" t="Include" />
               <e p="FieldNotDefinedException.cs" t="Include" />
               <e p="IdentifierNode.cs" t="Include" />
               <e p="LiteralValueNode.cs" t="Include" />

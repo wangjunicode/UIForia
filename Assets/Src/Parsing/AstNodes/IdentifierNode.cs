@@ -2,7 +2,7 @@ using System.Diagnostics;
 
 namespace Src {
 
-    [DebuggerDisplay("{identifier}")]
+    [DebuggerDisplay("{" + nameof(identifier) + "}")]
     public class IdentifierNode : ASTNode {
 
         public readonly string identifier;

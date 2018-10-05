@@ -2,6 +2,7 @@ using System;
 using Rendering;
 using Src.Systems;
 using UnityEngine;
+using UnityEngine.UI;
 
 namespace Src {
 
@@ -22,7 +23,9 @@ namespace Src {
 
         public abstract Mesh GetMesh();
 
-        public abstract Material GetMaterial();
+        public virtual Material GetMaterial() {
+            return Graphic.defaultGraphicMaterial;
+        }
 
         protected void SetVerticesDirty() {
             isMeshDirty = true;
@@ -39,6 +42,10 @@ namespace Src {
         public int Id => id;
         public bool IsMaterialDirty => isMaterialDirty;
         public bool IsGeometryDirty => isMeshDirty;
+        
+        public virtual Texture GetMainTexture() {
+            return Texture2D.whiteTexture;
+        }
 
     }
 

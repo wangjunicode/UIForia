@@ -46,7 +46,7 @@ namespace Src.Systems {
         public event TextContentChanged onTextContentChanged;
         public event Action<UIElement, UITransform> onTransformChanged;
         public event Action<UIElement> onOverflowPropertyChanged;
-        
+
         public event Action<UIElement, MainAxisAlignment, MainAxisAlignment> onMainAxisAlignmentChanged;
         public event Action<UIElement, CrossAxisAlignment, CrossAxisAlignment> onCrossAxisAlignmentChanged;
         public event Action<UIElement, LayoutWrap, LayoutWrap> onLayoutWrapChanged;
@@ -64,17 +64,13 @@ namespace Src.Systems {
         public event Action<UIElement, CrossAxisAlignment, CrossAxisAlignment> onFlexItemSelfAlignmentChanged;
         public event Action<UIElement, StyleProperty> onStylePropertyChanged;
 
-        private readonly SkipTree<UIElement> fontTree;
-
-        public StyleSystem() {
-            this.fontTree = new SkipTree<UIElement>();
-        }
-
         public void OnReset() { }
 
         public void OnElementCreatedFromTemplate(MetaData elementData) {
             UIElement element = elementData.element;
 
+            Stack<Color> textColors = StackPool<Color>.Get();
+            
             if ((element.flags & UIElementFlags.TextElement) != 0) {
                 ((UITextElement) element).onTextChanged += HandleTextChanged;
             }
@@ -96,11 +92,29 @@ namespace Src.Systems {
                 element.style.Initialize();
             }
 
-            // todo -- probably not the right move
-            fontTree.AddItem(element);
+
 
             for (int i = 0; i < elementData.children.Count; i++) {
                 OnElementCreatedFromTemplate(elementData.children[i]);
+            }
+            
+            // gather text style properties to initialize style tree
+            // first call needs to gather, recursive calls just use / update values in the stack
+            UIStyleSet current = element.style;
+            if (current.DefinesTextProperty(UIStyle.TextPropertyIdFlag.TextColor)) {
+                textColors.Push(current.computedStyle.TextColor);
+            }
+            else {
+                current.SetInheritedTextColor(textColors.Peek());
+            }
+            
+            for (int i = 0; i < element.ownChildren.Length; i++) {
+                    
+            }
+            
+            // process children
+            if (current.DefinesTextProperty(UIStyle.TextPropertyIdFlag.TextColor)) {
+                textColors.Pop();
             }
         }
 
@@ -134,6 +148,53 @@ namespace Src.Systems {
             if (element.style == null) {
                 element.style = new UIStyleSet(element, this);
             }
+        }
+
+        // todo -- buffer & flush these instead of doing it all at once
+        public void SetStyleProperty(UIElement element, StyleProperty property) {
+            if (IsTextProperty(property.propertyId)) {
+                Stack<UIElement> stack = StackPool<UIElement>.Get();
+                
+                switch (property.propertyId) {
+                    case StylePropertyId.TextAnchor:
+                        break;
+                    case StylePropertyId.TextColor:
+                        stack.Push(element);
+                        Color color = property.AsColor;
+                        while (stack.Count > 0) {
+                            UIElement current = stack.Pop();
+                            if (!current.style.DefinesTextProperty(UIStyle.TextPropertyIdFlag.TextColor)) {
+                                current.style.SetInheritedTextColor(color);
+                            }
+                        }
+
+                        break;
+                    case StylePropertyId.TextAutoSize:
+                        break;
+                    case StylePropertyId.TextFontAsset:
+                        break;
+                    case StylePropertyId.TextFontSize:
+                        break;
+                    case StylePropertyId.TextFontStyle:
+                        break;
+                    case StylePropertyId.TextHorizontalOverflow:
+                        break;
+                    case StylePropertyId.TextVerticalOverflow:
+                        break;
+                    case StylePropertyId.TextWhitespaceMode:
+                        break;
+                }
+
+                StackPool<UIElement>.Release(stack);
+            }
+            onStylePropertyChanged?.Invoke(element, property);
+        }
+
+        private static bool IsTextProperty(StylePropertyId propertyId) {
+            int intId = (int) propertyId;
+            const int start = (int) StylePropertyId.__TextPropertyStart__;
+            const int end = (int) StylePropertyId.__TextPropertyEnd__;
+            return intId > start && intId < end;
         }
 
         public void SetDimensions(UIElement element, Dimensions rect) {
@@ -188,8 +249,7 @@ namespace Src.Systems {
             onCrossAxisAlignmentChanged?.Invoke(element, alignment, oldAlignment);
         }
 
-        public void SetLayoutWrap(UIElement element, LayoutWrap layoutWrap) {
-        }
+        public void SetLayoutWrap(UIElement element, LayoutWrap layoutWrap) { }
 
         public void SetLayoutWrap(UIElement element, LayoutWrap layoutWrap, LayoutWrap oldWrap) {
             onLayoutWrapChanged?.Invoke(element, layoutWrap, oldWrap);
@@ -227,42 +287,29 @@ namespace Src.Systems {
             onPreferredHeightChanged?.Invoke(element, newPrefHeight, oldPrefHeight);
         }
 
-        public void SetFlexItemShrinkFactor(UIElement element, int factor, int oldFactor) {
-        }
+        public void SetFlexItemShrinkFactor(UIElement element, int factor, int oldFactor) { }
 
-        public void SetFlexItemGrowthFactor(UIElement element, int factor, int oldFactor) {
-        }
+        public void SetFlexItemGrowthFactor(UIElement element, int factor, int oldFactor) { }
 
-        public void SetFlexItemOrderOverride(UIElement element, int order, int oldOrder) {
-        }
+        public void SetFlexItemOrderOverride(UIElement element, int order, int oldOrder) { }
 
-        public void SetFlexItemSelfAlignment(UIElement element, CrossAxisAlignment alignment, CrossAxisAlignment oldAlignment) {
-        }
+        public void SetFlexItemSelfAlignment(UIElement element, CrossAxisAlignment alignment, CrossAxisAlignment oldAlignment) { }
 
-        public void SetFontAsset(UIElement styleSetElement, AssetPointer<TMP_FontAsset> fontAsset) {
-        }
+        public void SetFontAsset(UIElement styleSetElement, AssetPointer<TMP_FontAsset> fontAsset) { }
 
-        public void SetFontStyle(UIElement styleSetElement, TextUtil.FontStyle fontStyle) {
-        }
+        public void SetFontStyle(UIElement styleSetElement, TextUtil.FontStyle fontStyle) { }
 
-        public void SetTextAnchor(UIElement styleSetElement, TextUtil.TextAnchor textAnchor) {
-        }
+        public void SetTextAnchor(UIElement styleSetElement, TextUtil.TextAnchor textAnchor) { }
 
-        public void SetFontSize(UIElement element, int fontSize) {
-          
-        }
+        public void SetFontSize(UIElement element, int fontSize) { }
 
-        public void SetFontColor(UIElement element, Color fontColor) {
-        }
+        public void SetFontColor(UIElement element, Color fontColor) { }
 
-        public void SetFlexItemProperties(UIElement styleSetElement) {
-        }
+        public void SetFlexItemProperties(UIElement styleSetElement) { }
 
-        public void SetOverflowX(UIElement styleSetElement, Overflow overflowX) {
-        }
+        public void SetOverflowX(UIElement styleSetElement, Overflow overflowX) { }
 
-        public void SetOverflowY(UIElement styleSetElement, Overflow overflowY) {
-        }
+        public void SetOverflowY(UIElement styleSetElement, Overflow overflowY) { }
 
         private void HandleTextChanged(UITextElement element, string text) {
             element.style.textContent = text;
@@ -272,4 +319,3 @@ namespace Src.Systems {
     }
 
 }
-

@@ -33,6 +33,10 @@ namespace Src.Elements {
         public bool IsMaterialDirty { get; private set; }
         public bool IsGeometryDirty { get; private set; }
         
+        public Texture GetMainTexture() {
+            return Texture2D.whiteTexture;
+        }
+
         public override void OnCreate() {
             style.SetPreferredWidth(new UIMeasurement(0), StyleState.All);
             style.SetPreferredHeight(new UIMeasurement(0), StyleState.All);

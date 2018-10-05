@@ -20,6 +20,8 @@ namespace Src {
                 instanceData.AddChild(childTemplates[i].CreateScoped(inputScope));
             }
 
+            instanceData.baseStyles = baseStyles;
+            
             if (instanceData.children.Count != 0) {
                 instanceData.element.templateChildren = instanceData.children.Select(c => c.element).ToArray();
                 instanceData.element.ownChildren = instanceData.element.templateChildren;

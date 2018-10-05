@@ -95,18 +95,21 @@ namespace Src {
             IEnumerable<XElement> importElements = doc.Root.GetChildren("Import");
             
             foreach (XElement xElement in importElements) {
-                XAttribute pathAttr = xElement.GetAttribute("path");
+                XAttribute valueAttr = xElement.GetAttribute("value");
                 XAttribute aliasAttr = xElement.GetAttribute("as");
 
-                if (pathAttr == null || string.IsNullOrEmpty(pathAttr.Value)) {
-                    throw new InvalidTemplateException(templateName, "Import node without a 'path' attribute");
+                if (valueAttr == null || string.IsNullOrEmpty(valueAttr.Value)) {
+                    throw new InvalidTemplateException(templateName, "Import node without a 'value' attribute");
                 }
 
                 if (aliasAttr == null || string.IsNullOrEmpty(aliasAttr.Value)) {
                     throw new InvalidTemplateException(templateName, "Import node without an 'as' attribute");
                 }
 
-                imports.Add(new ImportDeclaration(pathAttr.Value, aliasAttr.Value));
+                string alias = aliasAttr.Value;
+                if (alias[0] != '@') alias = "@" + alias;
+                
+                imports.Add(new ImportDeclaration(valueAttr.Value, alias));
             }
 
             IEnumerable<XElement> styleElements = doc.Root.GetChildren("Style");
@@ -332,7 +335,7 @@ namespace Src {
                 return ParseCaseElement(element);
             }
 
-            if (element.Name == "Group") {
+            if (element.Name == "Group" || element.Name == "Panel") {
                 return ParseGroupElement(element);
             }
 

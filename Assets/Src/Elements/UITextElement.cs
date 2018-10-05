@@ -100,16 +100,20 @@ namespace Src {
             if (IsTextProperty(property.propertyId)) {
                 switch (property.propertyId) {
                     case StylePropertyId.TextAnchor:
+                        SetVerticesDirty();
                         break;
                     case StylePropertyId.TextColor:
+                        SetVerticesDirty();
                         break;
                     case StylePropertyId.TextAutoSize:
                         break;
                     case StylePropertyId.TextFontAsset:
                         break;
                     case StylePropertyId.TextFontSize:
+                        SetVerticesDirty();
                         break;
                     case StylePropertyId.TextFontStyle:
+                        SetVerticesDirty();
                         break;
                     case StylePropertyId.TextHorizontalOverflow:
                         break;
@@ -137,7 +141,7 @@ namespace Src {
                 float wordAdvance = 0;
 
                 LineInfo currentLine = lineInfos[lineIdx];
-                float lineOffset = currentLine.position.y;
+                float lineOffset = currentLine.Height - currentLine.position.y;
 
                 for (int w = currentLine.wordStart; w < currentLine.wordStart + currentLine.wordCount; w++) {
                     WordInfo currentWord = wordInfos[w];
@@ -145,8 +149,8 @@ namespace Src {
                     for (int i = currentWord.startChar; i < currentWord.startChar + currentWord.charCount; i++) {
                         float x0 = charInfos[i].topLeft.x + wordAdvance;
                         float x1 = charInfos[i].bottomRight.x + wordAdvance;
-                        float y0 = charInfos[i].topLeft.y + lineOffset;
-                        float y1 = charInfos[i].bottomRight.y + lineOffset;
+                        float y0 = charInfos[i].topLeft.y - lineOffset;
+                        float y1 = charInfos[i].bottomRight.y - lineOffset;
                         charInfos[i].topLeft = new Vector2(x0, y0);
                         charInfos[i].bottomRight = new Vector2(x1, y1);
                     }
@@ -161,31 +165,62 @@ namespace Src {
             CharInfo[] charInfos = textInfo.charInfos;
 
             for (int spanIdx = 0; spanIdx < textInfo.spanCount; spanIdx++) {
+                
                 SpanInfo spanInfo = textInfo.spanInfos[spanIdx];
                 TMP_FontAsset fontAsset = spanInfo.font;
-                bool isUsingAlternativeTypeface = false;
+                Material material = fontAsset.material;
+                
+                bool isUsingAltTypeface = false;
                 float boldAdvanceMultiplier = 1;
 
                 if ((spanInfo.fontStyle & TextUtil.FontStyle.Bold) != 0) {
                     fontAsset = GetFontAssetForWeight(spanInfo, 700);
-                    isUsingAlternativeTypeface = true;
+                    isUsingAltTypeface = true;
                     boldAdvanceMultiplier = 1 + fontAsset.boldSpacing * 0.01f;
                 }
-
-                float xAdvance = 0;
-                float yAdvance = 0;
-                float monoAdvance = 0;
-                float bold_xAdvance_multiplier = 1;
 
                 float smallCapsMultiplier = (spanInfo.fontStyle & TextUtil.FontStyle.SmallCaps) == 0 ? 1.0f : 0.8f;
                 float fontScale = spanInfo.fontSize * smallCapsMultiplier / fontAsset.fontInfo.PointSize * fontAsset.fontInfo.Scale;
 
+                float yAdvance = fontAsset.fontInfo.Baseline * fontScale * fontAsset.fontInfo.Scale;
+                float monoAdvance = 0;
+
                 float minWordSize = float.MaxValue;
                 float maxWordSize = float.MinValue;
 
+                float padding = ShaderUtilities.GetPadding(fontAsset.material, enableExtraPadding: false, isBold: false);
+                float stylePadding = 0;
+
+                if (!isUsingAltTypeface && (spanInfo.fontStyle & TextUtil.FontStyle.Bold) == TextUtil.FontStyle.Bold) {
+                    if (material.HasProperty(ShaderUtilities.ID_GradientScale)) {
+                        float gradientScale = material.GetFloat(ShaderUtilities.ID_GradientScale);
+                        stylePadding = fontAsset.boldStyle / 4.0f * gradientScale * material.GetFloat(ShaderUtilities.ID_ScaleRatio_A);
+
+                        // Clamp overall padding to Gradient Scale size.
+                        if (stylePadding + padding > gradientScale) {
+                            padding = gradientScale - stylePadding;
+                        }
+                    }
+
+                    boldAdvanceMultiplier = 1 + fontAsset.boldSpacing * 0.01f;
+                }
+                else if (material.HasProperty(ShaderUtilities.ID_GradientScale)) {
+                    float gradientScale = material.GetFloat(ShaderUtilities.ID_GradientScale);
+                    stylePadding = fontAsset.normalStyle / 4.0f * gradientScale * material.GetFloat(ShaderUtilities.ID_ScaleRatio_A);
+
+                    // Clamp overall padding to Gradient Scale size.
+                    if (stylePadding + padding > gradientScale) {
+                        padding = gradientScale - stylePadding;
+                    }
+                }
+
+                // todo -- handle tab
+                // todo -- handle sprites
+                // todo -- handle alignment / justification
+                
                 for (int w = spanInfo.startWord; w < spanInfo.startWord + spanInfo.wordCount; w++) {
                     WordInfo currentWord = wordInfos[w];
-                    xAdvance = 0;
+                    float xAdvance = 0;
                     // new lines are their own words (idea: give them an xAdvance of some huge number so they always get their own lines)
 
                     for (int i = currentWord.startChar; i < currentWord.startChar + currentWord.charCount; i++) {
@@ -197,17 +232,18 @@ namespace Src {
                         KerningPair adjustmentPair;
                         GlyphValueRecord glyphAdjustments = new GlyphValueRecord();
 
-                        if (i != currentWord.startChar + currentWord.charCount - 1) {
+                        // todo -- if we end up doing character wrapping we probably want to ignore prev x kerning for line start
+                        if (i != textInfo.charCount - 1) {
                             int next = charInfos[i + 1].character;
-                            fontAsset.kerningDictionary.TryGetValue((current << 16) + next, out adjustmentPair);
+                            fontAsset.kerningDictionary.TryGetValue((next << 16) + current, out adjustmentPair);
                             if (adjustmentPair != null) {
                                 glyphAdjustments = adjustmentPair.firstGlyphAdjustments;
                             }
                         }
 
-                        if (i != currentWord.startChar) {
+                        if (i != 0) {
                             int prev = charInfos[i - 1].character;
-                            fontAsset.kerningDictionary.TryGetValue((prev << 16) + current, out adjustmentPair);
+                            fontAsset.kerningDictionary.TryGetValue((current << 16) + prev, out adjustmentPair);
                             if (adjustmentPair != null) {
                                 glyphAdjustments += adjustmentPair.secondGlyphAdjustments;
                             }
@@ -217,7 +253,7 @@ namespace Src {
                         float topShear = 0;
                         float bottomShear = 0;
 
-                        if (!isUsingAlternativeTypeface && ((spanInfo.fontStyle & TextUtil.FontStyle.Italic) != 0)) {
+                        if (!isUsingAltTypeface && ((spanInfo.fontStyle & TextUtil.FontStyle.Italic) != 0)) {
                             float shearValue = fontAsset.italicStyle * 0.01f;
                             topShear = glyph.yOffset * shearValue;
                             bottomShear = (glyph.yOffset - glyph.height) * shearValue;
@@ -226,25 +262,22 @@ namespace Src {
                         Vector2 topLeft;
                         Vector2 bottomRight;
 
-                        float padding = 0.5f;
-                        float style_padding = 0f;
-
                         // idea for auto sizing: multiply scale later on and just save base unscaled vertices
 
-                        topLeft.x = xAdvance + (glyph.xOffset - padding + glyphAdjustments.xPlacement) * currentElementScale;
+                        topLeft.x = xAdvance + (glyph.xOffset - padding - stylePadding + glyphAdjustments.xPlacement) * currentElementScale;
                         topLeft.y = yAdvance + (glyph.yOffset + padding + glyphAdjustments.yPlacement) * currentElementScale;
                         bottomRight.x = topLeft.x + (glyph.width + padding * 2) * currentElementScale;
-                        bottomRight.y = topLeft.y - (glyph.height + padding * 2) * currentElementScale;
+                        bottomRight.y = topLeft.y - (glyph.height + padding * 2 + stylePadding * 2) * currentElementScale;
 
                         FaceInfo faceInfo = fontAsset.fontInfo;
                         Vector2 uv0;
 
-                        uv0.x = (glyph.x - padding - style_padding) / faceInfo.AtlasWidth;
-                        uv0.y = 1 - (glyph.y + padding + style_padding + glyph.height) / faceInfo.AtlasHeight;
+                        uv0.x = (glyph.x - padding - stylePadding) / faceInfo.AtlasWidth;
+                        uv0.y = 1 - (glyph.y + padding + stylePadding + glyph.height) / faceInfo.AtlasHeight;
 
                         Vector2 uv1;
-                        uv1.x = (glyph.x + padding + style_padding + glyph.width) / faceInfo.AtlasWidth;
-                        uv1.y = 1 - (glyph.y - padding - style_padding) / faceInfo.AtlasHeight;
+                        uv1.x = (glyph.x + padding + stylePadding + glyph.width) / faceInfo.AtlasWidth;
+                        uv1.y = 1 - (glyph.y - padding - stylePadding) / faceInfo.AtlasHeight;
 
                         charInfos[i].topLeft = topLeft;
                         charInfos[i].bottomRight = bottomRight;
@@ -259,6 +292,9 @@ namespace Src {
                         float elementAscender = fontAsset.fontInfo.Ascender * currentElementScale / smallCapsMultiplier;
                         float elementDescender = fontAsset.fontInfo.Descender * currentElementScale / smallCapsMultiplier;
 
+                        charInfos[i].ascender = elementAscender;
+                        charInfos[i].descender = elementDescender;
+
                         currentWord.ascender = elementAscender > currentWord.ascender ? elementAscender : currentWord.ascender;
                         currentWord.descender = elementDescender < currentWord.descender ? elementDescender : currentWord.descender;
 
@@ -270,7 +306,11 @@ namespace Src {
                             currentWord.descender = baseDescender < currentWord.descender ? baseDescender : currentWord.descender;
                         }
 
-                        xAdvance += (glyph.xAdvance * bold_xAdvance_multiplier + fontAsset.normalSpacingOffset + glyphAdjustments.xAdvance) * currentElementScale;
+                        if (i < currentWord.startChar + currentWord.spaceStart) {
+                            currentWord.characterSize = charInfos[i].bottomRight.x;
+                        }
+
+                        xAdvance += (glyph.xAdvance * boldAdvanceMultiplier + fontAsset.normalSpacingOffset + glyphAdjustments.xAdvance) * currentElementScale;
                     }
 
                     currentWord.xAdvance = xAdvance;
@@ -282,6 +322,9 @@ namespace Src {
             }
         }
 
+        public override Texture GetMainTexture() {
+            return textInfo.spanInfos[0].font.material.mainTexture;
+        }
 
         public override Mesh GetMesh() {
             if (mesh != null && !IsGeometryDirty) {
@@ -308,6 +351,8 @@ namespace Src {
             Vector4[] tangents = new Vector4[sizeX4];
             Color32[] colors = new Color32[sizeX4];
 
+            Color32 color = style.computedStyle.TextColor;
+            
             int idx_x4 = 0;
             int idx_x6 = 0;
 
@@ -317,11 +362,14 @@ namespace Src {
                 for (int j = 0; j < 4; j++) {
                     normals[idx_x4 + j] = Vector3.back;
                     tangents[idx_x4 + j] = new Vector4(-1f, 0, 0, 1f);
-                    colors[idx_x4 + j] = new Color32(255, 255, 255, 255);
+                    colors[idx_x4 + j] = color;
                 }
 
                 Vector2 topLeft = charInfos[i].topLeft;
                 Vector2 bottomRight = charInfos[i].bottomRight;
+
+//                topLeft.y -= 11.4f;
+//                bottomRight.y -= 11.4f;
 
                 positions[idx_x4 + 0] = new Vector3(topLeft.x, bottomRight.y, 0); // Bottom Left
                 positions[idx_x4 + 1] = new Vector3(topLeft.x, topLeft.y, 0); // Top Left

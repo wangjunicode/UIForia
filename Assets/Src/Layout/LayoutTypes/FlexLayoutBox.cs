@@ -47,19 +47,18 @@ namespace Src.Layout.LayoutTypes {
 
                 return new Size(maxWidth, totalHeight);
             }
-            else {
-                float maxHeight = 0;
-                float totalWidth = 0;
-                for (int i = 0; i < children.Count; i++) {
-                    LayoutBox child = children[i];
-                    if (child.element.isEnabled) { // }&& child.style.flow != LayoutFlowType.OutOfFlow) {
-                        maxHeight = Mathf.Max(maxHeight, Mathf.Max(child.MinHeight, Mathf.Min(child.PreferredHeight, child.MaxHeight)));
-                        totalWidth += Mathf.Max(child.MinWidth, Mathf.Min(child.PreferredWidth, child.MaxWidth));
-                    }
-                }
 
-                return new Size(totalWidth, maxHeight);
+            float maxHeight = 0;
+            float totalWidth = 0;
+            for (int i = 0; i < children.Count; i++) {
+                LayoutBox child = children[i];
+                if (child.element.isEnabled) { // }&& child.style.flow != LayoutFlowType.OutOfFlow) {
+                    maxHeight = Mathf.Max(maxHeight, Mathf.Max(child.MinHeight, Mathf.Min(child.PreferredHeight, child.MaxHeight)));
+                    totalWidth += Mathf.Max(child.MinWidth, Mathf.Min(child.PreferredWidth, child.MaxWidth));
+                }
             }
+
+            return new Size(totalWidth, maxHeight);
         }
 
         private void RunFullColumnLayout() {
@@ -69,14 +68,6 @@ namespace Src.Layout.LayoutTypes {
                 LayoutBox child = children[i];
 
                 if (child.element.isEnabled) { // }&& child.style.flow != LayoutFlowType.OutOfFlow) {
-                    heights[inFlowItemCount] = new FlexItemAxis();
-                    heights[inFlowItemCount].childIndex = inFlowItemCount;
-                    heights[inFlowItemCount].outputSize = Mathf.Max(child.MinHeight, Mathf.Min(child.PreferredHeight, child.MaxHeight));
-                    heights[inFlowItemCount].order = BitUtil.SetHighLowBits(child.style.FlexItemOrder, i);
-
-                    heights[inFlowItemCount].crossAxisAlignment = child.style.FlexItemSelfAlignment != CrossAxisAlignment.Unset
-                        ? child.style.FlexItemSelfAlignment
-                        : style.FlexLayoutCrossAxisAlignment;
 
                     widths[inFlowItemCount] = new FlexItemAxis();
                     widths[inFlowItemCount].childIndex = inFlowItemCount;
@@ -86,6 +77,21 @@ namespace Src.Layout.LayoutTypes {
                     widths[inFlowItemCount].minSize = Mathf.Max(0, child.MinWidth);
                     widths[inFlowItemCount].maxSize = Mathf.Max(0, child.MaxWidth);
                     widths[inFlowItemCount].outputSize = Mathf.Max(widths[inFlowItemCount].minSize, Mathf.Min(child.PreferredWidth, widths[inFlowItemCount].maxSize));
+
+                    float prevAllocated = child.allocatedWidth;
+                    // will be overwritten later but needs to be set for proper content sized height...I think
+                    child.allocatedWidth = widths[inFlowItemCount].outputSize;
+
+                    heights[inFlowItemCount] = new FlexItemAxis();
+                    heights[inFlowItemCount].childIndex = inFlowItemCount;
+                    heights[inFlowItemCount].outputSize = Mathf.Max(child.MinHeight, Mathf.Min(child.PreferredHeight, child.MaxHeight));
+                    heights[inFlowItemCount].order = BitUtil.SetHighLowBits(child.style.FlexItemOrder, i);
+
+                    heights[inFlowItemCount].crossAxisAlignment = child.style.FlexItemSelfAlignment != CrossAxisAlignment.Unset
+                        ? child.style.FlexItemSelfAlignment
+                        : style.FlexLayoutCrossAxisAlignment;
+
+                    child.allocatedWidth = prevAllocated;
 
                     inFlowItemCount++;
                 }

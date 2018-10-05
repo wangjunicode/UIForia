@@ -8,7 +8,8 @@ namespace Src {
 
         private Type rootType;
         private readonly string typeName;
-
+        private ParsedTemplate templateToExpand;
+        
         public UIElementTemplate(string typeName, List<UITemplate> childTemplates, List<AttributeDefinition> attributes = null)
             : base(childTemplates, attributes) {
             this.typeName = typeName;
@@ -26,14 +27,14 @@ namespace Src {
                 rootType = TypeProcessor.GetType(typeName, template.imports).rawType;
             }
 
-            ParsedTemplate templateToExpand = TemplateParser.GetParsedTemplate(rootType);
+            templateToExpand = TemplateParser.GetParsedTemplate(rootType);
             templateToExpand.Compile();
             // todo -- make this not suck
             bindingList = bindingList ?? new List<Binding>();
             bindingList.AddRange(templateToExpand.rootElementTemplate.bindings);
             bindingList.AddRange(templateToExpand.rootElementTemplate.constantBindings);
             constantStyleBindings.AddRange(templateToExpand.rootElementTemplate.constantStyleBindings);
-
+            baseStyles.AddRange(templateToExpand.rootElementTemplate.baseStyles);
             // todo -- remove duplicate bindings
             base.Compile(template);
             return true;
@@ -48,7 +49,6 @@ namespace Src {
                 scopedChildren.Add(childTemplates[i].CreateScoped(inputScope));
             }
 
-            ParsedTemplate templateToExpand = TemplateParser.GetParsedTemplate(rootType);
             TemplateScope outputScope = new TemplateScope();
 
             // todo -- some templates don't need their own scope
@@ -67,7 +67,11 @@ namespace Src {
             instanceData.inputBindings = inputBindings;
             instanceData.constantStyleBindings = constantStyleBindings;
             instanceData.element.templateAttributes = templateAttributes;
-                        
+            instanceData.baseStyles = baseStyles;
+            instanceData.mouseEventHandlers = mouseEventHandlers;
+            instanceData.dragEventCreators = dragEventCreators;
+            instanceData.dragEventHandlers = dragEventHandlers;
+            instanceData.keyboardEventHandlers = keyboardEventHandlers;
             instanceData.element.templateChildren = inputScope.inputChildren.Select(c => c.element).ToArray();
             instanceData.element.ownChildren = instanceData.children.Select(c => c.element).ToArray();
 

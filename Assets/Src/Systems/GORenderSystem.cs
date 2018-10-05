@@ -159,17 +159,17 @@ namespace Src.Systems {
                 UIElement ptr = element.parent;
 
                 // while parent is not rendered, localPosition += nonRenderedParent.localPosition
-                while (ptr != null) {
-                    RectTransform ancestorTransform;
-
-                    if (m_TransformMap.TryGetValue(ptr.id, out ancestorTransform)) {
-                        break;
-                    }
-
-                    position += ptr.layoutResult.localPosition;
-
-                    ptr = ptr.parent;
-                }
+//                while (ptr != null) {
+//                    RectTransform ancestorTransform;
+//
+//                    if (m_TransformMap.TryGetValue(ptr.id, out ancestorTransform)) {
+//                        break;
+//                    }
+//
+//                    position += ptr.layoutResult.localPosition;
+//
+//                    ptr = ptr.parent;
+//                }
 
                 Vector3 outputPosition = new Vector3(position.x, Screen.height - position.y);
                 Quaternion outputRotation = Quaternion.identity;
@@ -213,7 +213,7 @@ namespace Src.Systems {
                 }
 
                 if (graphic.IsMaterialDirty) {
-                    canvasRenderer.SetMaterial(graphic.GetMaterial(), graphic.GetMaterial().mainTexture);
+                    canvasRenderer.SetMaterial(graphic.GetMaterial(), graphic.GetMainTexture());
                 }
             }
 
@@ -238,7 +238,6 @@ namespace Src.Systems {
         public void OnDestroy() {
             OnReset();
         }
-
 
         private void RenderScrollbar(VirtualScrollbar scrollbar, RectTransform handle) {
             RectTransform transform = m_TransformMap[scrollbar.id];

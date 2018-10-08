@@ -44,22 +44,29 @@ namespace Src.Layout.LayoutTypes {
         public abstract void RunLayout();
         protected abstract Size RunContentSizeLayout();
 
-        public virtual void OnContentRectChanged() { }
+        public virtual float MinWidth => Mathf.Max(PaddingHorizontal + BorderHorizontal, ResolveWidth(style.MinWidth));
+        public virtual float MaxWidth => Mathf.Max(PaddingHorizontal + BorderHorizontal, ResolveWidth(style.MaxWidth));
+        public virtual float PreferredWidth => ResolveWidth(style.PreferredWidth);
 
-        public void OnFontSizeChanged(int fontSize) {
-            // todo -- Em != font Size, rather size of 'M' in given font at given size 
-        }
+        public virtual float MinHeight => Mathf.Max(PaddingVertical + BorderVertical, ResolveHeight(style.MinHeight));
+        public virtual float MaxHeight => Mathf.Max(PaddingVertical + BorderVertical, ResolveHeight(style.MaxHeight));
+        public virtual float PreferredHeight => ResolveHeight(style.PreferredHeight);
 
-        public float MinWidth => ResolveWidth(style.MinWidth);
-        public float MaxWidth => ResolveWidth(style.MaxWidth);
-        public float PreferredWidth => ResolveWidth(style.PreferredWidth);
-
+        // todo -- move to fixed units
         public float TransformX => ResolveWidth(style.TransformPositionX);
         public float TransformY => ResolveHeight(style.TransformPositionY);
 
-        public float MinHeight => ResolveHeight(style.MinHeight);
-        public float MaxHeight => ResolveHeight(style.MaxHeight);
-        public float PreferredHeight => ResolveHeight(style.PreferredHeight);
+        public float PaddingHorizontal => ResolveFixedWidth(style.PaddingLeft) + ResolveFixedWidth(style.PaddingRight);
+        public float BorderHorizontal => ResolveFixedWidth(style.BorderLeft) + ResolveFixedWidth(style.BorderRight);
+
+        public float PaddingVertical => ResolveFixedHeight(style.PaddingTop) + ResolveFixedHeight(style.PaddingBottom);
+        public float BorderVertical => ResolveFixedHeight(style.BorderTop) + ResolveFixedHeight(style.BorderBottom);
+
+        public float PaddingLeft => ResolveFixedWidth(style.PaddingLeft);
+        public float BorderLeft => ResolveFixedWidth(style.BorderLeft);
+
+        public float PaddingTop => ResolveFixedHeight(style.PaddingTop);
+        public float BorderTop => ResolveFixedHeight(style.BorderTop);
 
         public virtual void SetParent(LayoutBox parent) {
             this.parent?.OnChildRemoved(this);
@@ -197,19 +204,41 @@ namespace Src.Layout.LayoutTypes {
             return preferredContentSize.height;
         }
 
-        private float ResolveWidth(UIMeasurement width) {
+
+        protected float ResolveFixedWidth(UIFixedLength width) {
+            switch (width.unit) {
+                case UIFixedUnit.Pixel:
+                    return width.value;
+                case UIFixedUnit.Percent:
+                    return allocatedWidth * width.value;
+                default:
+                    return 0;
+            }
+        }
+
+        protected float ResolveFixedHeight(UIFixedLength height) {
+            switch (height.unit) {
+                case UIFixedUnit.Pixel:
+                    return height.value;
+                case UIFixedUnit.Percent:
+                    return allocatedHeight * height.value;
+                default:
+                    return 0;
+            }
+        }
+
+        protected virtual float ResolveWidth(UIMeasurement width) {
             switch (width.unit) {
                 case UIUnit.Pixel:
                     return width.value;
                 case UIUnit.Content:
-                    // layout assuming no constraints
-                    return GetContentPreferredWidth();
+                    return PaddingHorizontal + BorderHorizontal + (GetContentPreferredWidth() * width.value);
                 case UIUnit.ParentSize:
                     return parent.allocatedWidth * width.value;
                 case UIUnit.View:
                     return layoutSystem.ViewportRect.width * width.value;
                 case UIUnit.ParentContentArea:
-                    return parent.allocatedWidth * width.value; // - parent mbp
+                    return parent.allocatedWidth * width.value - (parent.style == null ? 0 : parent.PaddingHorizontal - parent.BorderHorizontal);
                 case UIUnit.Em:
                     return 0;
                 case UIUnit.MinContent:
@@ -223,19 +252,18 @@ namespace Src.Layout.LayoutTypes {
             }
         }
 
-        private float ResolveHeight(UIMeasurement height) {
+        protected virtual float ResolveHeight(UIMeasurement height) {
             switch (height.unit) {
                 case UIUnit.Pixel:
                     return height.value;
                 case UIUnit.Content:
-                    // layout assuming no constraints
-                    return GetContentPreferredHeight();
+                    return PaddingVertical + BorderVertical + (GetContentPreferredHeight() * height.value);
                 case UIUnit.ParentSize:
                     return parent.allocatedHeight * height.value;
                 case UIUnit.View:
                     return layoutSystem.ViewportRect.height * height.value;
                 case UIUnit.ParentContentArea:
-                    return parent.allocatedHeight * height.value; // - parent mbp
+                    return parent.allocatedHeight * height.value - (parent.style == null ? 0 : parent.PaddingVertical - parent.BorderVertical);
                 case UIUnit.Em:
                     return 0;
                 case UIUnit.MinContent:
@@ -248,6 +276,8 @@ namespace Src.Layout.LayoutTypes {
                     throw new ArgumentOutOfRangeException();
             }
         }
+
+        public virtual void OnStylePropertyChanged(StyleProperty property) { }
 
     }
 

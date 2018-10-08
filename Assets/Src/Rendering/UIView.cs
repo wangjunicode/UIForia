@@ -71,7 +71,6 @@ public abstract class UIView {
     }
 
     protected void InitHierarchy(UIElement element) {
-        element.view = this;
 
         // todo -- assert no duplicate root elements
         if (element.parent == null) {
@@ -116,7 +115,6 @@ public abstract class UIView {
         }
 
         InitHierarchy(data.element);
-        data.element.view = this;
 
         for (int i = 0; i < systems.Count; i++) {
             systems[i].OnElementCreatedFromTemplate(data);

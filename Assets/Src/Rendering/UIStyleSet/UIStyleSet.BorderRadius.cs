@@ -17,109 +17,50 @@ namespace Rendering {
 
         [PublicAPI]
         public void SetBorderRadius(BorderRadius newBorderRadius, StyleState state) {
-            UIStyle style = GetOrCreateInstanceStyle(state);
-            style.BorderRadiusTopLeft = newBorderRadius.topLeft;
-            style.BorderRadiusTopRight = newBorderRadius.topRight;
-            style.BorderRadiusBottomRight = newBorderRadius.bottomRight;
-            style.BorderRadiusBottomLeft = newBorderRadius.bottomLeft;
-
-            bool updated = false;
-
-            if (style == GetActiveStyleForProperty(StylePropertyId.BorderRadiusTopLeft)) {
-                computedStyle.RareData.borderRadiusTopLeft = newBorderRadius.topLeft;
-                updated = true;
-            }
-
-            if (style == GetActiveStyleForProperty(StylePropertyId.BorderRadiusTopRight)) {
-                computedStyle.RareData.borderRadiusTopRight = newBorderRadius.topRight;
-                updated = true;
-            }
-
-            if (style == GetActiveStyleForProperty(StylePropertyId.BorderRadiusBottomRight)) {
-                computedStyle.RareData.borderRadiusBottomRight = newBorderRadius.bottomRight;
-                updated = true;
-            }
-
-            if (style == GetActiveStyleForProperty(StylePropertyId.BorderRadiusBottomLeft)) {
-                computedStyle.RareData.borderRadiusBottomLeft = newBorderRadius.bottomLeft;
-                updated = true;
-            }
-
-            if (updated) {
-                styleSystem.SetBorderRadius(element, computedStyle.RareData.borderRadius);
-            }
+            SetBorderRadiusBottomLeft(newBorderRadius.bottomLeft, state);
+            SetBorderRadiusBottomRight(newBorderRadius.bottomRight, state);
+            SetBorderRadiusTopRight(newBorderRadius.topRight, state);
+            SetBorderRadiusTopLeft(newBorderRadius.topLeft, state);
         }
 
         [PublicAPI]
         public UIMeasurement GetBorderRadiusTopLeft(StyleState state) {
-            StyleProperty property = GetPropertyValueInState(StylePropertyId.BorderRadiusTopLeft, state);
-            return property.IsDefined
-                ? UIMeasurement.Decode(property.valuePart0, property.valuePart1)
-                : UIMeasurement.Unset;
+            return GetUIMeasurementValue(StylePropertyId.BorderRadiusTopLeft, state);
         }
 
         [PublicAPI]
         public UIMeasurement GetBorderRadiusTopRight(StyleState state) {
-            StyleProperty property = GetPropertyValueInState(StylePropertyId.BorderRadiusTopRight, state);
-            return property.IsDefined
-                ? UIMeasurement.Decode(property.valuePart0, property.valuePart1)
-                : UIMeasurement.Unset;
+            return GetUIMeasurementValue(StylePropertyId.BorderRadiusTopRight, state);
         }
 
         [PublicAPI]
         public UIMeasurement GetBorderRadiusBottomLeft(StyleState state) {
-            StyleProperty property = GetPropertyValueInState(StylePropertyId.BorderRadiusBottomLeft, state);
-            return property.IsDefined
-                ? UIMeasurement.Decode(property.valuePart0, property.valuePart1)
-                : UIMeasurement.Unset;
+            return GetUIMeasurementValue(StylePropertyId.BorderRadiusBottomLeft, state);
         }
 
         [PublicAPI]
         public UIMeasurement GetBorderRadiusBottomRight(StyleState state) {
-            StyleProperty property = GetPropertyValueInState(StylePropertyId.BorderRadiusBottomRight, state);
-            return property.IsDefined
-                ? UIMeasurement.Decode(property.valuePart0, property.valuePart1)
-                : UIMeasurement.Unset;
+            return GetUIMeasurementValue(StylePropertyId.BorderRadiusBottomRight, state);
         }
 
         [PublicAPI]
         public void SetBorderRadiusTopLeft(UIMeasurement value, StyleState state) {
-            UIStyle style = GetOrCreateInstanceStyle(state);
-            style.BorderRadiusTopLeft = value;
-            if ((state & currentState) != 0 && style == GetActiveStyleForProperty(StylePropertyId.BorderRadiusTopLeft)) {
-                computedStyle.RareData.borderRadiusTopLeft = value;
-                styleSystem.SetBorderRadius(element, computedStyle.RareData.borderRadius);
-            }
+            SetUIMeasurementProperty(StylePropertyId.BorderRadiusTopLeft, value, state);
         }
 
         [PublicAPI]
         public void SetBorderRadiusTopRight(UIMeasurement value, StyleState state) {
-            UIStyle style = GetOrCreateInstanceStyle(state);
-            style.BorderRadiusTopRight = value;
-            if ((state & currentState) != 0 && style == GetActiveStyleForProperty(StylePropertyId.BorderRadiusTopRight)) {
-                computedStyle.RareData.borderRadiusTopRight = value;
-                styleSystem.SetBorderRadius(element, computedStyle.RareData.borderRadius);
-            }
+            SetUIMeasurementProperty(StylePropertyId.BorderRadiusTopRight, value, state);
         }
 
         [PublicAPI]
         public void SetBorderRadiusBottomRight(UIMeasurement value, StyleState state) {
-            UIStyle style = GetOrCreateInstanceStyle(state);
-            style.BorderRadiusBottomRight = value;
-            if ((state & currentState) != 0 && style == GetActiveStyleForProperty(StylePropertyId.BorderRadiusBottomRight)) {
-                computedStyle.RareData.borderRadiusBottomRight = value;
-                styleSystem.SetBorderRadius(element, computedStyle.RareData.borderRadius);
-            }
+            SetUIMeasurementProperty(StylePropertyId.BorderRadiusBottomRight, value, state);
         }
 
         [PublicAPI]
         public void SetBorderRadiusBottomLeft(UIMeasurement value, StyleState state) {
-            UIStyle style = GetOrCreateInstanceStyle(state);
-            style.BorderRadiusBottomLeft = value;
-            if ((state & currentState) != 0 && style == GetActiveStyleForProperty(StylePropertyId.BorderRadiusBottomLeft)) {
-                computedStyle.RareData.borderRadiusBottomLeft = value;
-                styleSystem.SetBorderRadius(element, computedStyle.RareData.borderRadius);
-            }
+            SetUIMeasurementProperty(StylePropertyId.BorderRadiusBottomLeft, value, state);
         }
 
     }

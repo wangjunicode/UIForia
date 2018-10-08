@@ -1,0 +1,57 @@
+<?xml version="1.0" encoding="utf-8"?>
+<UITemplate>
+
+    <Style classPath="WindowFrame+Styles"/>
+
+    <Import value="ClippedPanel+ClippedCorner" as="ClippedCorner"/>
+
+    <Contents style.layoutType='Flex'>
+
+        <Group style="top-bar">
+
+            <Text style="top-bar-text">KLANG GANG</Text>
+
+            <Group style="header-group">
+                <Image src="{url('settings_icon')}"/>
+                <Group style="round-thing"/>
+            </Group>
+
+        </Group>
+
+        <Group style="content-container">
+
+            <ClippedPanel style="side-bar" clipSize="20f" clippedCorner="{@ClippedCorner.BottomLeft}">
+
+
+                <Group style="side-bar-icon-track">
+                    
+                    <Group x-id="shuttle" style="shuttle"/>
+
+                    <Repeat list="{chatGroups}" as="item">
+                        <ChatGroupItem chatGroup="{$item}"/>
+                    </Repeat>
+
+                    <AddChatButton/>
+
+                </Group>
+
+            </ClippedPanel>
+
+            <Group style="message-panel">
+
+            </Group>
+
+            <Group style="message-main-area">
+
+            </Group>
+
+            <ClippedPanel style="message-panel-secondary" clipSize="20f" clippedCorner="{@ClippedCorner.BottomRight}">
+
+            </ClippedPanel>
+
+        </Group>
+
+
+    </Contents>
+
+</UITemplate>

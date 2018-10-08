@@ -458,4 +458,27 @@ public class FlexLayoutRowTests {
         Assert.AreEqual(new Rect(100, 200, 100, 200), root.child2.layoutResult.ScreenRect);
     }
 
+    [Test]
+    public void RespectsPaddingValues() {
+        string template = @"
+        <UITemplate>
+            <Style classPath='FlexLayoutRowTests+FlexRowLayoutThing+Style'/>
+            <Contents style.layoutType='Flex' style.layoutDirection='Row' style.width='500f' style.height='content(100)' style.paddingTop='5f' style.paddingBottom='5f'>
+                <Group x-id='child0' style='w100h100'/>
+                <Group x-id='child1' style='w100h100'/>
+                <Group x-id='child2' style='w100h100'/>
+            </Contents>
+        </UITemplate>
+        ";
+        MockView mockView = new MockView(typeof(FlexRowLayoutThing), template);
+        mockView.Initialize();
+        mockView.layoutSystem.SetViewportRect(new Rect(0, 0, 1000f, 1000f));
+        FlexRowLayoutThing root = (FlexRowLayoutThing) mockView.RootElement;
+        mockView.Update();
+        Assert.AreEqual(new Rect(0, 0, 500, 310), root.layoutResult.ScreenRect);
+        Assert.AreEqual(new Rect(0, 5, 100, 100), root.child0.layoutResult.ScreenRect);
+        Assert.AreEqual(new Rect(0, 105, 100, 100), root.child1.layoutResult.ScreenRect);
+        Assert.AreEqual(new Rect(0, 205, 100, 100), root.child2.layoutResult.ScreenRect);
+    }
+
 }

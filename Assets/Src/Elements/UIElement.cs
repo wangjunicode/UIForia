@@ -32,7 +32,6 @@ public class UIElement : IHierarchical {
     // todo make readonly but assignable via style system
 
     internal UIElement parent;
-    internal UIView view;
     
     protected UIElement() {
         this.id = UIView.NextElementId;
@@ -56,8 +55,6 @@ public class UIElement : IHierarchical {
     public IInputProvider Input { get; internal set; }
         
     public bool isShown => (flags & UIElementFlags.SelfAndAncestorShown) == UIElementFlags.SelfAndAncestorShown;
-
-    public bool isImplicit => (flags & UIElementFlags.ImplicitElement) != 0;
 
     public bool isSelfEnabled => (flags & UIElementFlags.Enabled) != 0;
 
@@ -245,6 +242,9 @@ public class UIElement : IHierarchical {
         string retn = string.Empty;
         if (name != null) {
             retn += "<" + name + ":" + GetType().Name + " " + id + ">";
+        }
+        else if (HasAttribute("style")) {
+            return GetType().Name + " " + GetAttribute("style");
         }
         else {
             retn += "<" + GetType().Name + " " + id + ">";

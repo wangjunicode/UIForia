@@ -19,24 +19,16 @@ public class ClippedPanel : UIElement, IDrawable {
     protected Mesh mesh;
     protected bool isMeshDirty;
     protected bool isMaterialDirty;
-    public float clipSize = 50f;
-
-    [Flags]
-    public enum ClippedCorner {
-
-        None = 0,
-        TopLeft = 1 << 0,
-        TopRight = 1 << 1,
-        BottomLeft = 1 << 2,
-        BottomRight = 1 << 3
-
-    }
+    public float clipSize = 10f;
 
     public ClippedCorner clippedCorner = ClippedCorner.None;
 
+    private Material material;
+    
     public override void OnReady() {
         isMeshDirty = true;
         isMaterialDirty = true;
+        material = new Material(Graphic.defaultGraphicMaterial);
     }
 
     public ClippedCorner prev;
@@ -52,7 +44,13 @@ public class ClippedPanel : UIElement, IDrawable {
         onMeshDirty?.Invoke(this);
     }
 
-    public void OnStylePropertyChanged(StyleProperty property) { }
+    public void OnStylePropertyChanged(StyleProperty property) {
+        
+        if (property.propertyId == StylePropertyId.BackgroundColor) {
+            isMaterialDirty = true;
+        }
+        
+    }
 
     public Mesh GetMesh() {
         /*
@@ -73,7 +71,6 @@ public class ClippedPanel : UIElement, IDrawable {
 
         Color32 color32 = style.computedStyle.BackgroundColor;
         Size size = layoutResult.allocatedSize;
-        Vector2 position = layoutResult.localPosition;
 
         if (clippedCorner == ClippedCorner.None || clipSize <= 0f) {
             s_VertexHelper.AddVert(new Vector3(0, 0), color32, new Vector2(0f, 0f));
@@ -113,26 +110,25 @@ public class ClippedPanel : UIElement, IDrawable {
         Vector3 v14 = new Vector3(width, 0);
         Vector3 v15 = new Vector3(width, clipSize);
 
+        v0.y =  -v0.y;
+        v1.y =  -v1.y;
+        v2.y =  -v2.y;
+        v3.y =  -v3.y;
 
-        v0.y = position.y - v0.y;
-        v1.y = position.y - v1.y;
-        v2.y = position.y - v2.y;
-        v3.y = position.y - v3.y;
+        v4.y =  -v4.y;
+        v5.y =  -v5.y;
+        v6.y =  -v6.y;
+        v7.y =  -v7.y;
 
-        v4.y = position.y - v4.y;
-        v5.y = position.y - v5.y;
-        v6.y = position.y - v6.y;
-        v7.y = position.y - v7.y;
+        v8.y =  -v8.y;
+        v9.y =  -v9.y;
+        v10.y =  -v10.y;
+        v11.y =  -v11.y;
 
-        v8.y = position.y - v8.y;
-        v9.y = position.y - v9.y;
-        v10.y = position.y - v10.y;
-        v11.y = position.y - v11.y;
-
-        v12.y = position.y - v12.y;
-        v13.y = position.y - v13.y;
-        v14.y = position.y - v14.y;
-        v15.y = position.y - v15.y;
+        v12.y =  -v12.y;
+        v13.y =  -v13.y;
+        v14.y =  -v14.y;
+        v15.y =  -v15.y;
 
         // todo -- compute UVs
         s_VertexHelper.AddVert(v0, color32, new Vector2());
@@ -214,6 +210,17 @@ public class ClippedPanel : UIElement, IDrawable {
 
     public Texture GetMainTexture() {
         return Texture2D.whiteTexture;
+    }
+    
+    [Flags]
+    public enum ClippedCorner {
+
+        None = 0,
+        TopLeft = 1 << 0,
+        TopRight = 1 << 1,
+        BottomLeft = 1 << 2,
+        BottomRight = 1 << 3
+
     }
 
 }

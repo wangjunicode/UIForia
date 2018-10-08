@@ -5,17 +5,17 @@ namespace Src.StyleBindings {
 
     public class StyleBinding_BorderTop : StyleBinding {
 
-        private readonly Expression<UIMeasurement> expression;
+        private readonly Expression<UIFixedLength> expression;
 
-        public StyleBinding_BorderTop(StyleState state, Expression<UIMeasurement> expression) : base(RenderConstants.BorderTop, state) {
+        public StyleBinding_BorderTop(StyleState state, Expression<UIFixedLength> expression) : base(RenderConstants.BorderTop, state) {
             this.expression = expression;
         }
 
         public override void Execute(UIElement element, UITemplateContext context) {
             if (!element.style.IsInState(state)) return;
 
-            UIMeasurement value = element.style.computedStyle.BorderTop;
-            UIMeasurement newValue = expression.EvaluateTyped(context);
+            UIFixedLength value = element.style.computedStyle.BorderTop;
+            UIFixedLength newValue = expression.EvaluateTyped(context);
             if (value != newValue) {
                 element.style.SetBorderTop(value, state);
             }

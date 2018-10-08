@@ -416,4 +416,12 @@ public class StyleTests {
         RunSizeTests(TestBody);
     }
 
+    [Test]
+    public void ConvertColorToStyleColor() {
+        Color32 c = new Color32(128, 128, 128, 1);
+        StyleColor styleColor = new StyleColor(c);
+        Assert.AreEqual((Color)c, (Color)styleColor);
+
+    }
+
 }

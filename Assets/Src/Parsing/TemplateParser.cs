@@ -250,11 +250,29 @@ namespace Src {
         }
 
         private static UITemplate ParseTextContainerElement(XElement element) {
-            UITemplate template = new UITextContainerTemplate(
-                ParseNodes(element.Nodes()),
-                ParseAttributes(element.Attributes())
-            );
-            return template;
+            string rawText = string.Empty;
+            foreach (var node in element.Nodes()) {
+                switch (node.NodeType) {
+                    case XmlNodeType.Text:
+                        rawText += "'" + ((XText) node).Value.Trim() + "'";
+                        continue;
+
+                    case XmlNodeType.Element:
+                        throw new Exception("<Text> can only have text children, no elements");
+
+                    case XmlNodeType.Comment:
+                        continue;
+                }
+
+                throw new InvalidTemplateException("Unable to handle node type: " + node.NodeType);
+            }
+            return new UITextTemplate(rawText, ParseAttributes(element.Attributes()));
+//            UITemplate template = new UITextContainerTemplate(
+//                ParseNodes(element.Nodes()),
+//                ParseAttributes(element.Attributes())
+//            );
+//            return template;
+              
         }
         
         private static UITemplate ParseGraphicElement(XElement element) {

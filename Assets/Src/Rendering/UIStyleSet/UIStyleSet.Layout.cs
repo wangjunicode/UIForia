@@ -12,11 +12,23 @@ namespace Rendering {
         public void SetLayoutType(LayoutType layoutType, StyleState state) {
             UIStyle style = GetOrCreateInstanceStyle(state);
             style.LayoutType = layoutType;
-            if ((state & currentState) != 0 && style == GetActiveStyleForProperty(StylePropertyId.FlexItemGrow)) {
+            if ((state & currentState) != 0 && style == GetActiveStyleForProperty(StylePropertyId.LayoutType)) {
                 computedStyle.LayoutType = layoutType;
             }
         }
 
+        public LayoutBehavior GetLayoutBehavior(StyleState state) {
+            StyleProperty property = GetPropertyValueInState(StylePropertyId.LayoutBehavior, state);
+            return property.IsDefined ? (LayoutBehavior) property.valuePart0 : LayoutBehavior.Unset;
+        }
+
+        public void SetLayoutBehavior(LayoutBehavior behavior, StyleState state) {
+            UIStyle style = GetOrCreateInstanceStyle(state);
+            style.LayoutBehavior = behavior;
+            if ((state & currentState) != 0 && style == GetActiveStyleForProperty(StylePropertyId.LayoutBehavior)) {
+                computedStyle.LayoutBehavior = behavior;
+            }
+        }
     }
 
 }

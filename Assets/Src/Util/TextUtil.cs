@@ -17,12 +17,12 @@ namespace Src.Util {
             Italic = 1 << 3,
             Underline = 1 << 4,
             LowerCase = 1 << 5,
-            UpperCase = 1 << 6,  
-            SmallCaps = 1 << 7,  
-            StrikeThrough = 1 << 8,  
-            Superscript = 1 << 9,  
-            Subscript = 1 << 10,  
-            Highlight = 1 << 11,  
+            UpperCase = 1 << 6,
+            SmallCaps = 1 << 7,
+            StrikeThrough = 1 << 8,
+            Superscript = 1 << 9,
+            Subscript = 1 << 10,
+            Highlight = 1 << 11,
 
         }
 
@@ -41,34 +41,44 @@ namespace Src.Util {
 
         }
 
-        public static string ProcessWrapString(string input, bool collapseSpaceAndTab = true, bool preserveNewLine = false ) {
+        public enum TextTransform {
+
+            None = 0,
+            UpperCase = 1,
+            LowerCase = 2,
+            SmallCaps = 3,
+            TitleCase = 4
+
+        }
+
+        public static string ProcessWrapString(string input, bool collapseSpaceAndTab = true, bool preserveNewLine = false, TextTransform textTransform = TextTransform.None) {
             char[] buffer = null;
-            int count = ProcessWrap(input, true, false, ref buffer);
+            int count = ProcessWrap(input, true, false, ref buffer, textTransform);
             return new string(buffer, 0, count);
         }
-        
-        public static int ProcessWrap(string input, bool collapseSpaceAndTab, bool preserveNewLine, ref char[] buffer) {
+
+        public static int ProcessWrap(string input, bool collapseSpaceAndTab, bool preserveNewLine, ref char[] buffer, TextTransform textTransform) {
             bool collapsing = collapseSpaceAndTab;
 
             if (buffer == null) {
                 buffer = ArrayPool<char>.GetMinSize(input.Length);
             }
-            
+
             if (buffer.Length < input.Length) {
                 ArrayPool<char>.Resize(ref buffer, input.Length);
             }
 
             int writeIndex = 0;
-                        
+
             for (int i = 0; i < input.Length; i++) {
                 char current = input[i];
-                
+
                 if (current == '\n' && !preserveNewLine) {
                     continue;
                 }
 
                 bool isWhiteSpace = current == '\t' || current == ' ';
-               
+
                 if (collapsing) {
                     if (!isWhiteSpace) {
                         buffer[writeIndex++] = current;
@@ -83,15 +93,35 @@ namespace Src.Util {
                     buffer[writeIndex++] = current;
                 }
             }
+
+            ApplyTextTransform(buffer, writeIndex, textTransform);
             return writeIndex;
         }
-        
+
+        private static void ApplyTextTransform(char[] buffer, int count, TextTransform transform) {
+            switch (transform) {
+                case TextTransform.UpperCase:
+                case TextTransform.SmallCaps:
+                    for (int i = 0; i < count; i++) {
+                        buffer[i] = char.ToUpper(buffer[i]);
+                    }
+
+                    break;
+                case TextTransform.LowerCase:
+                    for (int i = 0; i < count; i++) {
+                        buffer[i] = char.ToLower(buffer[i]);
+                    }
+
+                    break;
+            }
+        }
+
         public static int StringToCharArray(string sourceText, ref int[] charBuffer, WhitespaceMode whiteSpaceMode, bool parseControlCharacters = false) {
             if (string.IsNullOrEmpty(sourceText)) {
                 charBuffer = charBuffer ?? new int[0];
                 return 0;
             }
-            
+
             if (charBuffer == null) {
                 charBuffer = charBuffer = ArrayPool<int>.GetMinSize(sourceText.Length);
             }
@@ -102,7 +132,7 @@ namespace Src.Util {
 
             if (!parseControlCharacters) {
                 for (int i = 0; i < sourceText.Length; i++) {
-                    char current = sourceText[i];                
+                    char current = sourceText[i];
                     charBuffer[i] = current;
                 }
 
@@ -234,9 +264,9 @@ namespace Src.Util {
         }
 
         // line info is processed only when doing wrapping, not here
-        public static TextInfo ProcessText(string text, bool collapseWhitespace, bool preserveNewLines) {
+        public static TextInfo ProcessText(string text, bool collapseWhitespace, bool preserveNewLines, TextTransform textTransform = TextTransform.None) {
             char[] buffer = null;
-            int bufferLength = ProcessWrap(text, collapseWhitespace, preserveNewLines, ref buffer);
+            int bufferLength = ProcessWrap(text, collapseWhitespace, preserveNewLines, ref buffer, textTransform);
 
             List<WordInfo> s_WordInfoList = ListPool<WordInfo>.Get();
 
@@ -247,7 +277,7 @@ namespace Src.Util {
             for (int i = 0; i < bufferLength; i++) {
                 int charCode = buffer[i];
                 charInfos[i] = new CharInfo();
-                charInfos[i].character = (char)charCode;
+                charInfos[i].character = (char) charCode;
 
                 if ((char) charCode == '\n') {
                     if (currentWord.charCount > 0) {
@@ -263,7 +293,7 @@ namespace Src.Util {
                     currentWord = new WordInfo();
                     currentWord.startChar = i + 1;
                 }
-                
+
                 if (!char.IsWhiteSpace((char) charCode)) {
                     if (inWhiteSpace) {
                         // new word starts
@@ -290,6 +320,14 @@ namespace Src.Util {
             }
 
             s_WordInfoList.Add(currentWord);
+
+            if (textTransform == TextTransform.TitleCase) {
+                for (int i = 0; i < s_WordInfoList.Count; i++) {
+                    currentWord = s_WordInfoList[i];
+                    // todo -- make this better and respect sequences like 'the' and 'a' and 'is' which should not be capitalized
+                    charInfos[currentWord.startChar].character = char.ToUpper(charInfos[currentWord.startChar].character);
+                }
+            }
 
             TextInfo retn = new TextInfo();
             retn.wordCount = s_WordInfoList.Count;

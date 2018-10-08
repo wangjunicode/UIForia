@@ -5,17 +5,17 @@ namespace Src.StyleBindings {
 
     public class StyleBinding_PaddingLeft : StyleBinding {
 
-        public readonly Expression<UIMeasurement> expression;
+        public readonly Expression<UIFixedLength> expression;
 
-        public StyleBinding_PaddingLeft(StyleState state, Expression<UIMeasurement> expression) : base(RenderConstants.PaddingLeft, state) {
+        public StyleBinding_PaddingLeft(StyleState state, Expression<UIFixedLength> expression) : base(RenderConstants.PaddingLeft, state) {
             this.expression = expression;
         }
 
         public override void Execute(UIElement element, UITemplateContext context) {
             if (!element.style.IsInState(state)) return;
 
-            UIMeasurement value = element.style.computedStyle.PaddingLeft;
-            UIMeasurement newValue = expression.EvaluateTyped(context);
+            UIFixedLength value = element.style.computedStyle.PaddingLeft;
+            UIFixedLength newValue = expression.EvaluateTyped(context);
             if (value != newValue) {
                 element.style.SetPaddingLeft(value, state);
             }

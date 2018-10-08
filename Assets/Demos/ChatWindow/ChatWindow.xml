@@ -1,27 +1,22 @@
 <?xml version="1.0" encoding="utf-8"?>
 <UITemplate>
-    
+
     <Style classPath="ChatWindow_Styles.cs"/>
-    
+
     <Import value="ClippedPanel+ClippedCorner" as="ClippedCorner"/>
-    
+
     <Contents style="container">
-        
-        <ClippedPanel onMouseDown="{ChangeCorner()}" style="clipped-panel" clippedCorner="{clippedCorner}">
-            <Panel style="direct-messages">
-                <Panel style="direct-messages-header">
-                    Direct Messages
-                </Panel>
-            </Panel>
-        </ClippedPanel>
-        
-        <!--<Group style="window-header">-->
-            <!--&lt;!&ndash;&ndash;&gt;-->
-            <!--&lt;!&ndash;<Text style="header-text">Klang Gang</Text>&ndash;&gt;-->
-            <!--&lt;!&ndash;&ndash;&gt;-->
-            <!--&lt;!&ndash;<Image src="{url('settings_icon')}"/>&ndash;&gt;-->
-            <!---->
-        <!--</Group>-->
+
+        <WindowFrame>
+            <!--<ClippedPanel onMouseDown="{ChangeCorner()}" style="clipped-panel" clippedCorner="{clippedCorner}">-->
+                <!--<Panel style="direct-messages">-->
+                    <!--<Panel style="direct-messages-header">-->
+                        <!--Direct Messages-->
+                    <!--</Panel>-->
+                <!--</Panel>-->
+            <!--</ClippedPanel>-->
+
+        </WindowFrame>
     </Contents>
-    
+
 </UITemplate>

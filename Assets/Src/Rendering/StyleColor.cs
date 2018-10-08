@@ -49,7 +49,7 @@ namespace Rendering {
         }
 
         public static implicit operator Color(StyleColor c) {
-            return new Color(c.r / byte.MaxValue, c.g / byte.MaxValue, c.b / byte.MaxValue, c.a / byte.MaxValue);
+            return new Color(c.r / (float) byte.MaxValue, c.g / (float) byte.MaxValue, c.b / (float) byte.MaxValue, c.a / (float) byte.MaxValue);
         }
 
         public static StyleColor Lerp(StyleColor a, StyleColor b, float t) {

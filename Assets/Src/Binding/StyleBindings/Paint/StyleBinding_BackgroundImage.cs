@@ -7,19 +7,20 @@ namespace Src.StyleBindings {
 
     public class StyleBinding_BackgroundImage : StyleBinding {
 
-        public readonly Expression<AssetPointer<Texture2D>> expression;
+        public readonly Expression<Texture2DAssetReference> expression;
         
-        public StyleBinding_BackgroundImage(StyleState state, Expression<AssetPointer<Texture2D>> expression) : base(RenderConstants.BackgroundImage, state) {
+        public StyleBinding_BackgroundImage(StyleState state, Expression<Texture2DAssetReference> expression) 
+            : base(RenderConstants.BackgroundImage, state) {
             this.expression = expression;
         }        
         
         public override void Execute(UIElement element, UITemplateContext context) {
-            throw new NotImplementedException();
-//            AssetPointer<Texture2D> textureAssetPtr = expression.EvaluateTyped(context);
-//            Texture2D currentTexture = element.style.GetBackgroundImage(state).asset;
-//            if (texture != currentTexture) {
-//                element.style.SetBackgroundImage(texture, state);
-//            }
+            if (!element.style.IsInState(state)) return;
+            
+            Texture2DAssetReference textureRef = expression.EvaluateTyped(context);
+            if (textureRef.assetId != element.style.computedStyle.BackgroundImage.assetId) {
+                element.style.SetBackgroundImage(textureRef, state);
+            }
         }
 
         public override void Apply(UIStyle style, UITemplateContext context) {

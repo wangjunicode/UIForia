@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using Src.Parsing;
 
 namespace Src {
@@ -7,7 +8,7 @@ namespace Src {
 
         private static readonly TextElementParser textParser = new TextElementParser();
 
-        public UITextTemplate(string rawText) : base(null) {
+        public UITextTemplate(string rawText, List<AttributeDefinition> attributes = null) : base(null, attributes) {
             this.RawText = rawText;
         }
         

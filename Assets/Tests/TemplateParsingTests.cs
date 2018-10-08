@@ -6,11 +6,6 @@ using Src.Parsing;
 public class TemplateParsingTests {
 
     [Test]
-    public void ParseTemplateParts() {
-        TemplateParser.GetParsedTemplate(typeof(Spec.Temp));
-    }
-
-    [Test]
     public void Children_ParsesCorrectly() {
         ParsedTemplate parsedTemplate = TemplateParser.ParseTemplateFromString<Spec.Test1>(@"
             <UITemplate>

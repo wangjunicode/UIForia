@@ -36,6 +36,7 @@ namespace Src.Compilers {
 
         private static readonly ColorAliasSource colorSource;
         private static readonly ValueAliasSource<UIMeasurement> autoKeywordSource;
+        private static readonly MethodAliasSource textureUrlSource;
         private static readonly EnumAliasSource<LayoutType> layoutTypeSource;
         private static readonly EnumAliasSource<LayoutDirection> layoutDirectionSource;
         private static readonly EnumAliasSource<LayoutFlowType> layoutFlowSource;
@@ -43,6 +44,8 @@ namespace Src.Compilers {
         private static readonly EnumAliasSource<MainAxisAlignment> mainAxisAlignmentSource;
         private static readonly EnumAliasSource<CrossAxisAlignment> crossAxisAlignmentSource;
         private static readonly EnumAliasSource<WhitespaceMode> whiteSpaceSource;
+
+        private static readonly IAliasSource[] fixedSources;
 
         static StyleBindingCompiler() {
             Type type = typeof(StyleBindingCompiler);
@@ -52,6 +55,8 @@ namespace Src.Compilers {
             rect1Source = new MethodAliasSource("rect", type.GetMethod(nameof(Rect), new[] {typeof(float)}));
             rect2Source = new MethodAliasSource("rect", type.GetMethod(nameof(Rect), new[] {typeof(float), typeof(float)}));
             rect4Source = new MethodAliasSource("rect", type.GetMethod(nameof(Rect), new[] {typeof(float), typeof(float), typeof(float), typeof(float)}));
+
+            textureUrlSource = new MethodAliasSource("url", type.GetMethod(nameof(TextureUrl)));
 
             sizeAliasSource = new MethodAliasSource("size", type.GetMethod(nameof(Size)));
             vec2MeasurementSource = new MethodAliasSource("vec2", type.GetMethod(nameof(Vec2Measurement)));
@@ -64,6 +69,20 @@ namespace Src.Compilers {
             viewportMeasurementSource = new MethodAliasSource("view", type.GetMethod(nameof(ViewportMeasurement), new[] {typeof(float)}));
             contentMeasurementSource = new MethodAliasSource("content", type.GetMethod(nameof(ContentMeasurement), new[] {typeof(float)}));
 
+            var percentageLengthSource = new MethodAliasSource("percent", type.GetMethod(nameof(PercentageLength), new[] {typeof(float)}));
+            var emLengthSource = new MethodAliasSource("em", type.GetMethod(nameof(EmLength), new[] {typeof(float)}));
+            var viewportWidthLengthSource = new MethodAliasSource("vw", type.GetMethod(nameof(ViewportWidthLength)));
+            var viewportHeightLengthSource = new MethodAliasSource("vh", type.GetMethod(nameof(ViewportHeightLength)));
+            var pixelLengthSource = new MethodAliasSource("px", type.GetMethod(nameof(PixelLength)));
+
+            fixedSources = new IAliasSource[] {
+                pixelLengthSource,
+                percentageLengthSource,
+                emLengthSource,
+                viewportWidthLengthSource,
+                viewportHeightLengthSource
+            };
+
             colorSource = new ColorAliasSource();
             layoutTypeSource = new EnumAliasSource<LayoutType>();
             layoutDirectionSource = new EnumAliasSource<LayoutDirection>();
@@ -74,6 +93,8 @@ namespace Src.Compilers {
             autoKeywordSource = new ValueAliasSource<UIMeasurement>("auto", UIMeasurement.Auto);
             whiteSpaceSource = new EnumAliasSource<WhitespaceMode>();
         }
+
+        
 
         public StyleBindingCompiler(ContextDefinition context) {
             this.context = context;
@@ -107,7 +128,7 @@ namespace Src.Compilers {
             switch (targetState.property) {
                 // Paint
                 case RenderConstants.BackgroundImage:
-                    return new StyleBinding_BackgroundImage(targetState.state, Compile<AssetPointer<Texture2D>>(value));
+                    return new StyleBinding_BackgroundImage(targetState.state, Compile<Texture2DAssetReference>(value, textureUrlSource));
 
                 case RenderConstants.BackgroundColor:
                     return new StyleBinding_BackgroundColor(targetState.state,
@@ -247,58 +268,36 @@ namespace Src.Compilers {
                 // Padding
 
                 case RenderConstants.Padding:
-                    return new StyleBinding_Padding(targetState.state, Compile<ContentBoxRect>(value, rect1Source, rect2Source, rect4Source));
+                    return new StyleBinding_Padding(targetState.state, Compile<PaddingBox>(value, rect1Source, rect2Source, rect4Source));
 
                 case RenderConstants.PaddingTop:
-                    return new StyleBinding_PaddingTop(targetState.state, Compile<UIMeasurement>(value,
-                        autoKeywordSource,
-                        pixelMeasurementSource,
-                        viewportMeasurementSource,
-                        parentMeasurementSource,
-                        contentMeasurementSource
-                    ));
+                    return new StyleBinding_PaddingTop(targetState.state, Compile<UIFixedLength>(value, fixedSources));
 
                 case RenderConstants.PaddingRight:
-                    return new StyleBinding_PaddingRight(targetState.state, Compile<UIMeasurement>(value, autoKeywordSource,
-                        pixelMeasurementSource,
-                        viewportMeasurementSource,
-                        parentMeasurementSource,
-                        contentMeasurementSource));
+                    return new StyleBinding_PaddingRight(targetState.state, Compile<UIFixedLength>(value, fixedSources));
 
                 case RenderConstants.PaddingBottom:
-                    return new StyleBinding_PaddingBottom(targetState.state, Compile<UIMeasurement>(value, autoKeywordSource,
-                        pixelMeasurementSource,
-                        viewportMeasurementSource,
-                        parentMeasurementSource,
-                        contentMeasurementSource));
+                    return new StyleBinding_PaddingBottom(targetState.state, Compile<UIFixedLength>(value, fixedSources));
 
                 case RenderConstants.PaddingLeft:
-                    return new StyleBinding_PaddingLeft(targetState.state, Compile<UIMeasurement>(value, autoKeywordSource,
-                        pixelMeasurementSource,
-                        viewportMeasurementSource,
-                        parentMeasurementSource,
-                        contentMeasurementSource));
+                    return new StyleBinding_PaddingLeft(targetState.state, Compile<UIFixedLength>(value, fixedSources));
 
                 // Border
 
                 case RenderConstants.Border:
-                    return new StyleBinding_Border(targetState.state, Compile<ContentBoxRect>(value, rect1Source, rect2Source, rect4Source));
+                    return new StyleBinding_Border(targetState.state, Compile<PaddingBox>(value, rect1Source, rect2Source, rect4Source));
 
                 case RenderConstants.BorderTop:
-                    return new StyleBinding_BorderTop(targetState.state, Compile<UIMeasurement>(value, autoKeywordSource,
-                        pixelMeasurementSource
-                    ));
+                    return new StyleBinding_BorderTop(targetState.state, Compile<UIFixedLength>(value, fixedSources));
 
                 case RenderConstants.BorderRight:
-                    return new StyleBinding_BorderRight(targetState.state, Compile<UIMeasurement>(value,
-                        pixelMeasurementSource
-                    ));
+                    return new StyleBinding_BorderRight(targetState.state, Compile<UIFixedLength>(value, fixedSources));
 
                 case RenderConstants.BorderBottom:
-                    return new StyleBinding_BorderBottom(targetState.state, Compile<UIMeasurement>(value, pixelMeasurementSource));
+                    return new StyleBinding_BorderBottom(targetState.state, Compile<UIFixedLength>(value, fixedSources));
 
                 case RenderConstants.BorderLeft:
-                    return new StyleBinding_PaddingLeft(targetState.state, Compile<UIMeasurement>(value, pixelMeasurementSource));
+                    return new StyleBinding_BorderLeft(targetState.state, Compile<UIFixedLength>(value, fixedSources));
 
                 // Margin
 
@@ -386,6 +385,7 @@ namespace Src.Compilers {
             return expression;
         }
 
+
         [Pure]
         public static Color Rgb(float r, float g, float b) {
             return new Color(r / 255f, g / 255f, b / 255f);
@@ -417,18 +417,18 @@ namespace Src.Compilers {
         }
 
         [Pure]
-        public static ContentBoxRect Rect(float top, float right, float bottom, float left) {
-            return new ContentBoxRect(top, right, bottom, left);
+        public static PaddingBox Rect(float top, float right, float bottom, float left) {
+            return new PaddingBox(top, right, bottom, left);
         }
 
         [Pure]
-        public static ContentBoxRect Rect(float topBottom, float leftRight) {
-            return new ContentBoxRect(topBottom, leftRight, topBottom, leftRight);
+        public static PaddingBox Rect(float topBottom, float leftRight) {
+            return new PaddingBox(topBottom, leftRight, topBottom, leftRight);
         }
 
         [Pure]
-        public static ContentBoxRect Rect(float value) {
-            return new ContentBoxRect(value, value, value, value);
+        public static PaddingBox Rect(float value) {
+            return new PaddingBox(value, value, value, value);
         }
 
         [Pure]
@@ -459,20 +459,34 @@ namespace Src.Compilers {
         }
 
         [Pure]
-        public static AssetPointer Url(string url) {
-            return new AssetPointer(url);
+        public static Texture2DAssetReference TextureUrl(string url) {
+            return new Texture2DAssetReference(url);
         }
 
-        public struct AssetPointer {
-
-            public readonly string path;
-
-            public AssetPointer(string path) {
-                this.path = path;
-            }
-
+        [Pure]
+        public static UIFixedLength PercentageLength(float value) {
+            return new UIFixedLength(value, UIFixedUnit.Percent);
         }
 
+        [Pure]
+        public static UIFixedLength PixelLength(float value) {
+            return new UIFixedLength(value, UIFixedUnit.Pixel);
+        }
+
+        [Pure]
+        public static UIFixedLength EmLength(float value) {
+            return new UIFixedLength(value, UIFixedUnit.Em);
+        }
+
+        [Pure]
+        public static UIFixedLength ViewportWidthLength(float value) {
+            return new UIFixedLength(value, UIFixedUnit.ViewportWidth);
+        }
+
+        [Pure]
+        public static UIFixedLength ViewportHeightLength(float value) {
+            return new UIFixedLength(value, UIFixedUnit.ViewportHeight);
+        }
         private struct Target {
 
             public readonly string property;

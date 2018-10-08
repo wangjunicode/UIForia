@@ -34,6 +34,12 @@ namespace Src.Compilers {
                 return CompileCallbackAttribute(attrKey, attrValue, eventInfo);
             }
 
+            PropertyInfo propertyInfo = ReflectionUtil.GetPropertyInfo(targetType, attrKey);
+            
+            if (propertyInfo != null) {
+                        
+            }
+
             FieldInfo fieldInfo = ReflectionUtil.GetFieldInfoOrThrow(targetType, attrKey);
 
             if (ReflectionUtil.IsCallbackType(fieldInfo.FieldType)) {

@@ -1,19 +1,17 @@
 using System.Diagnostics;
-using System.Runtime.InteropServices;
 using JetBrains.Annotations;
 using Rendering;
 
 namespace Src {
 
 //    todo -- make varieties of UIMeasurement w/ conversions for different scenarios, ie only fixed + percent but no content    
-//    public struct UIFixedLengthMeasurement { }
-    
+
     [DebuggerDisplay("{unit}({value})")]
     public struct UIMeasurement {
 
         public readonly float value;
-        public readonly UIUnit unit;     
-        
+        public readonly UIUnit unit;
+
         public UIMeasurement(float value, UIUnit unit = UIUnit.Pixel) {
             this.value = value;
             this.unit = unit;
@@ -34,13 +32,13 @@ namespace Src {
         public bool IsDefined() {
             return FloatUtil.IsDefined(value);
         }
-        
+
         public bool isFixed => (unit & (UIUnit.Pixel | UIUnit.ParentSize | UIUnit.View | UIUnit.Em)) != 0;
-        
+
         public bool isParentRelative => (unit & (UIUnit.ParentSize | UIUnit.ParentContentArea)) != 0;
-        
+
         public bool isContentRelative => (unit & (UIUnit.Content | UIUnit.FitContent | UIUnit.MaxContent | UIUnit.MinContent)) != 0;
-        
+
         public static UIMeasurement Auto => new UIMeasurement(1f, UIUnit.ParentContentArea);
         public static UIMeasurement Parent100 => new UIMeasurement(1f, UIUnit.ParentSize);
         public static UIMeasurement Content100 => new UIMeasurement(1f, UIUnit.Content);
@@ -65,9 +63,10 @@ namespace Src {
             if (float.IsNaN(self.value) && float.IsNaN(other.value)) {
                 return self.unit == other.unit;
             }
+
             return self.value == other.value && self.unit == other.unit;
         }
-        
+
         public static bool operator !=(UIMeasurement self, UIMeasurement other) {
             return !(self == other);
         }
@@ -85,10 +84,9 @@ namespace Src {
         }
 
         public static UIMeasurement Decode(int value, int unit) {
-            return new UIMeasurement(FloatUtil.DecodeToFloat(value), (UIUnit)unit);
+            return new UIMeasurement(FloatUtil.DecodeToFloat(value), (UIUnit) unit);
         }
 
     }
-
 
 }

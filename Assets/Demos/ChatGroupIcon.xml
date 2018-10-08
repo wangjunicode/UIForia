@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="utf-8"?>
+<UITemplate>
+
+    <Style classPath="ChatGroupIcon+Styles"/>
+
+    <Contents style="container">
+
+        <Image src="{chatGroup.iconUrl}"/>
+
+        <Group x-if="{unreadCount > 0}" style="unread-indicator">
+            <Text style="unread-count">
+                {unreadCount}
+            </Text>
+        </Group>
+
+    </Contents>
+</UITemplate>

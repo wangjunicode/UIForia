@@ -256,8 +256,7 @@ float blur(float edge1, float edge2, float amount) {
     // return amount*amount*amount*(amount*(amount*6 - 15) + 10);
 }
 
-fixed4 outline_fill_blend(float dist, fixed4 fill_color, fixed4 outline_color,
-        float outer_blur, float outline, float inner_blur) {
+fixed4 outline_fill_blend(float dist, fixed4 fill_color, fixed4 outline_color, float outer_blur, float outline, float inner_blur) {
     float mix = blur(outline, inner_blur, dist);
     #if FILL_NONE
         fixed4 color = outline_color;

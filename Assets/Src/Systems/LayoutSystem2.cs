@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using Rendering;
 using Src.Elements;
 using Src.Extensions;
-using Src.Layout;
 using Src.Layout.LayoutTypes;
 using Src.Util;
 using UnityEngine;
@@ -40,7 +39,7 @@ namespace Src.Systems {
 
         public void OnUpdate() {
             m_RectUpdates.Clear();
-            
+
             if (m_PendingLayoutUpdates.Count == 0) return;
 
             m_PendingLayoutUpdates.Sort((a, b) => a.element.depth > b.element.depth ? 1 : -1);
@@ -169,37 +168,41 @@ namespace Src.Systems {
         public void OnDestroy() { }
 
         public void OnReady() {
-            m_StyleSystem.onBorderChanged += HandleContentBoxChanged;
-            m_StyleSystem.onPaddingChanged += HandleContentBoxChanged;
-            m_StyleSystem.onMarginChanged += HandleContentBoxChanged;
-            m_StyleSystem.onLayoutChanged += HandleLayoutChanged;
-            m_StyleSystem.onRectChanged += HandleRectChanged;
             m_StyleSystem.onTextContentChanged += HandleTextContentChanged;
-            m_StyleSystem.onMinWidthChanged += HandleSizeConstraintChanged;
-            m_StyleSystem.onMaxWidthChanged += HandleSizeConstraintChanged;
-            m_StyleSystem.onPreferredWidthChanged += HandleSizeChanged;
-            m_StyleSystem.onPreferredHeightChanged += HandleSizeChanged;
+            m_StyleSystem.onStylePropertyChanged += HandleStylePropertyChanged;
         }
 
-        public void OnInitialize() {
-//            m_StyleSystem.onOverflowPropertyChanged += HandleOverflowChanged;
+        public void OnInitialize() { }
 
-            //m_StyleSystem.onLayoutDirectionChanged += HandleLayoutDirectionChanged;
-            //m_StyleSystem.onLayoutWrapChanged += HandleWrapStateChanged;
-            //m_StyleSystem.onFlowStateChanged == HandleFlowStateChanged;
+        private void HandleStylePropertyChanged(UIElement element, StyleProperty property) {
+            switch (property.propertyId) {
+                case StylePropertyId.PreferredWidth:
+                case StylePropertyId.PreferredHeight:
+                    HandleSizeChanged(element);
+                    break;
+                case StylePropertyId.MinWidth:
+                case StylePropertyId.MinHeight:
+                case StylePropertyId.MaxWidth:
+                case StylePropertyId.MaxHeight:
+                    HandleSizeConstraintChanged(element);
+                    break;
+                case StylePropertyId.LayoutType:
+                    HandleLayoutChanged(element);
+                    break;
+            }
+
+            m_LayoutBoxMap.GetOrDefault(element.id)?.OnStylePropertyChanged(property);
         }
 
-        private void HandleSizeChanged(UIElement element, UIMeasurement arg2, UIMeasurement arg3) {
+        private void HandleSizeChanged(UIElement element) {
             if (element.parent == null) return;
             m_LayoutBoxMap.GetOrDefault(element.parent.id)?.OnChildSizeChanged();
         }
 
-        private void HandleSizeConstraintChanged(UIElement element, UIMeasurement newMinWidth, UIMeasurement oldMinWidth) {
+        private void HandleSizeConstraintChanged(UIElement element) {
             if (element.parent == null) return;
             m_LayoutBoxMap.GetOrDefault(element.id)?.OnSizeConstraintChanged(); // MarkForLayout(UpdateType.Constraint)
         }
-
-        private void HandleFontPropertyChanged(UIElement element, TextStyle textStyle) { }
 
         // todo -- eventually we can have this take a patch instead of a whole new string
         // that way we don't have to re-layout and re-measure parts of the string that didn't change
@@ -212,18 +215,7 @@ namespace Src.Systems {
             }
         }
 
-        private void HandleRectChanged(UIElement element, Dimensions d) {
-            // if min changes and current >= new min  no layout needed
-            // if max changes and current <= new max  no layout needed
-
-            m_LayoutBoxMap.GetOrDefault(element.id)?.OnContentRectChanged();
-        }
-
-        private void HandleFlexLayoutStateChanged() { }
-
-        private void HandleGridLayoutStateChanged() { }
-
-        private void HandleLayoutChanged(UIElement element, LayoutParameters layoutParameters) {
+        private void HandleLayoutChanged(UIElement element) {
             LayoutBox box;
             if (!m_LayoutBoxMap.TryGetValue(element.id, out box)) {
                 return;
@@ -232,7 +224,7 @@ namespace Src.Systems {
             LayoutBox parent = box.parent;
             LayoutBox replace = box;
 
-            switch (layoutParameters.type) {
+            switch (element.style.computedStyle.LayoutType) {
                 case LayoutType.Fixed:
                     if (!(box is FixedLayoutBox)) {
                         replace = new FixedLayoutBox(this, element);
@@ -263,13 +255,6 @@ namespace Src.Systems {
             // update map to hold new box
         }
 
-        private void HandleContentBoxChanged(UIElement element, ContentBoxRect contentBox) {
-            LayoutBox box;
-            if (m_LayoutBoxMap.TryGetValue(element.id, out box)) {
-                box.OnContentRectChanged();
-            }
-        }
-
         public void OnElementCreated(UIElement element) { }
 
         public void OnElementMoved(UIElement element, int newIndex, int oldIndex) { }
@@ -295,6 +280,10 @@ namespace Src.Systems {
         private LayoutBox CreateLayoutBox(UIElement element) {
             if ((element is UITextElement)) {
                 return new TextContainerLayoutBox(this, element);
+            }
+
+            if ((element is UIImageElement)) {
+                return new ImageLayoutBox(this, element);
             }
 
             switch (element.style.computedStyle.LayoutType) {

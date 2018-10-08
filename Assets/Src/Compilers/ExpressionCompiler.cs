@@ -26,6 +26,9 @@ namespace Src {
             new CastHandler_IntToDouble(),
             new CastHandler_IntToFloat(),
             new CastHandler_IntToMeasurement(),
+            new CastHandler_FloatToFixedLength(),
+            new CastHandler_DoubleToFixedLength(),
+            new CastHandler_IntToFixedLength(),
             new CastHandler_Vector2ToVector3(),
             new CastHandler_Vector3ToVector2(),
             new CastHandler_Vector4ToColor()

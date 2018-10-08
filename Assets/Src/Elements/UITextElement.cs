@@ -55,10 +55,15 @@ namespace Src {
 
             this.text = newText;
 
+            UpdateTextInfo();
+
+            onTextChanged?.Invoke(this, text);
+        }
+
+        private void UpdateTextInfo() {
             SetVerticesDirty();
             bool collapseSpaces = true; //style.computedStyle.TextCollapseWhiteSpace;
             bool preserveNewlines = false; //style.computedStyle.TextPreserveNewLines;
-
 
             if (textInfo.spanInfos != null) ArrayPool<SpanInfo>.Release(textInfo.spanInfos);
             if (textInfo.wordInfos != null) ArrayPool<WordInfo>.Release(textInfo.wordInfos);
@@ -66,18 +71,16 @@ namespace Src {
             if (textInfo.charInfos != null) ArrayPool<CharInfo>.Release(textInfo.charInfos);
 
             // todo release text stuff
-            textInfo = TextUtil.ProcessText(text, collapseSpaces, preserveNewlines);
+            textInfo = TextUtil.ProcessText(text, collapseSpaces, preserveNewlines, style.computedStyle.TextTransform);
             textInfo.spanCount = 1;
             textInfo.spanInfos = ArrayPool<SpanInfo>.GetMinSize(1);
             textInfo.spanInfos[0].wordCount = textInfo.wordCount;
-            textInfo.spanInfos[0].font = TMP_FontAsset.defaultFontAsset;
+            textInfo.spanInfos[0].font = style.computedStyle.FontAsset;
             textInfo.spanInfos[0].charCount = textInfo.charCount;
             textInfo.spanInfos[0].fontSize = style.computedStyle.FontSize;
             textInfo.spanInfos[0].fontStyle = style.computedStyle.FontStyle;
 
             ComputeCharacterAndWordSizes(textInfo);
-
-            onTextChanged?.Invoke(this, text);
         }
 
         public void AppendText() { }
@@ -121,6 +124,9 @@ namespace Src {
                         break;
                     case StylePropertyId.TextWhitespaceMode:
                         break;
+                    case StylePropertyId.TextTransform:
+                        SetVerticesDirty();
+                        break;
                 }
             }
         }
@@ -141,16 +147,16 @@ namespace Src {
                 float wordAdvance = 0;
 
                 LineInfo currentLine = lineInfos[lineIdx];
-                float lineOffset = currentLine.Height - currentLine.position.y;
+                float lineOffset = currentLine.Height - currentLine.position.y; // + currentLine.maxDescender;
 
                 for (int w = currentLine.wordStart; w < currentLine.wordStart + currentLine.wordCount; w++) {
                     WordInfo currentWord = wordInfos[w];
 
                     for (int i = currentWord.startChar; i < currentWord.startChar + currentWord.charCount; i++) {
                         float x0 = charInfos[i].topLeft.x + wordAdvance;
-                        float x1 = charInfos[i].bottomRight.x + wordAdvance;
-                        float y0 = charInfos[i].topLeft.y - lineOffset;
-                        float y1 = charInfos[i].bottomRight.y - lineOffset;
+                        float x1 = charInfos[i].bottomRight.x + wordAdvance; 
+                        float y0 = charInfos[i].topLeft.y - lineOffset - (currentWord.descender + 0.5f); // was without descender + .5f
+                        float y1 = charInfos[i].bottomRight.y - lineOffset - (currentWord.descender + 0.5f);// was without descender + .5f
                         charInfos[i].topLeft = new Vector2(x0, y0);
                         charInfos[i].bottomRight = new Vector2(x1, y1);
                     }
@@ -165,11 +171,10 @@ namespace Src {
             CharInfo[] charInfos = textInfo.charInfos;
 
             for (int spanIdx = 0; spanIdx < textInfo.spanCount; spanIdx++) {
-                
                 SpanInfo spanInfo = textInfo.spanInfos[spanIdx];
                 TMP_FontAsset fontAsset = spanInfo.font;
                 Material material = fontAsset.material;
-                
+
                 bool isUsingAltTypeface = false;
                 float boldAdvanceMultiplier = 1;
 
@@ -217,7 +222,7 @@ namespace Src {
                 // todo -- handle tab
                 // todo -- handle sprites
                 // todo -- handle alignment / justification
-                
+
                 for (int w = spanInfo.startWord; w < spanInfo.startWord + spanInfo.wordCount; w++) {
                     WordInfo currentWord = wordInfos[w];
                     float xAdvance = 0;
@@ -289,6 +294,8 @@ namespace Src {
                         charInfos[i].uv2 = Vector2.one; // todo -- compute uv2s
                         charInfos[i].uv3 = Vector2.one;
 
+                        TMP_TextElement e;
+
                         float elementAscender = fontAsset.fontInfo.Ascender * currentElementScale / smallCapsMultiplier;
                         float elementDescender = fontAsset.fontInfo.Descender * currentElementScale / smallCapsMultiplier;
 
@@ -314,7 +321,7 @@ namespace Src {
                     }
 
                     currentWord.xAdvance = xAdvance;
-                    currentWord.size = new Vector2(xAdvance, currentWord.ascender - currentWord.descender);
+                    currentWord.size = new Vector2(xAdvance, currentWord.ascender); // was ascender - descender
                     minWordSize = Mathf.Min(minWordSize, currentWord.size.x);
                     maxWordSize = Mathf.Max(maxWordSize, currentWord.size.x);
                     wordInfos[w] = currentWord;
@@ -352,7 +359,7 @@ namespace Src {
             Color32[] colors = new Color32[sizeX4];
 
             Color32 color = style.computedStyle.TextColor;
-            
+
             int idx_x4 = 0;
             int idx_x6 = 0;
 

@@ -7,6 +7,9 @@
       <e p="Assets" t="Include">
         <e p="Demos" t="Include">
           <e p="_DemoAsmDef.asmdef" t="Include" />
+          <e p="AddChatButton.xml" t="Include" />
+          <e p="ChatGroup.cs" t="Include" />
+          <e p="ChatGroupIcon.xml" t="Include" />
           <e p="ChatWindow" t="Include">
             <e p="ChatWindow.cs" t="Include" />
             <e p="ChatWindow.xml" t="Include" />
@@ -15,6 +18,8 @@
             <e p="Icon.cs" t="Include" />
           </e>
           <e p="UIViewBehavior.cs" t="Include" />
+          <e p="WindowFrame.cs" t="Include" />
+          <e p="WindowFrame.xml" t="Include" />
         </e>
         <e p="Editor" t="Include">
           <e p="BorderedImageInspector.cs" t="Include" />
@@ -129,10 +134,13 @@
             </e>
             <e p="CastHandlers" t="Include">
               <e p="CastHandler_ColorToVector4.cs" t="Include" />
+              <e p="CastHandler_DoubleToFixedLength.cs" t="Include" />
               <e p="CastHandler_DoubleToMeasurement.cs" t="Include" />
+              <e p="CastHandler_FloatToFixedLength.cs" t="Include" />
               <e p="CastHandler_FloatToInt.cs" t="Include" />
               <e p="CastHandler_FloatToMeasurement.cs" t="Include" />
               <e p="CastHandler_IntToDouble.cs" t="Include" />
+              <e p="CastHandler_IntToFixedLength.cs" t="Include" />
               <e p="CastHandler_IntToFloat.cs" t="Include" />
               <e p="CastHandler_IntToMeasurement.cs" t="Include" />
               <e p="CastHandler_ToString.cs" t="Include" />
@@ -251,6 +259,7 @@
             <e p="GridTrackSizer.cs" t="Include" />
             <e p="GridTrackSizeType.cs" t="Include" />
             <e p="Layout2.cs" t="Include" />
+            <e p="LayoutBehavior.cs" t="Include" />
             <e p="LayoutBox.cs" t="Include" />
             <e p="LayoutConstraints.cs" t="Include" />
             <e p="LayoutDirection.cs" t="Include" />
@@ -262,6 +271,7 @@
               <e p="FixedLayoutBox.cs" t="Include" />
               <e p="FlexLayoutBox.cs" t="Include" />
               <e p="GridLayoutBox.cs" t="Include" />
+              <e p="ImageLayoutBox.cs" t="Include" />
               <e p="LayoutBox.cs" t="Include" />
               <e p="RootLayoutBox.cs" t="Include" />
               <e p="TextContainerLayoutBox.cs" t="Include" />
@@ -333,6 +343,7 @@
             <e p="BorderStyle.cs" t="Include" />
             <e p="ComputedStyle.cs" t="Include" />
             <e p="ContentBoxRect.cs" t="Include" />
+            <e p="DefaultStyleValues.cs" t="Include" />
             <e p="GOTextSizeCalculator.cs" t="Include" />
             <e p="HorizontalScrollbarAttachment.cs" t="Include" />
             <e p="IDirectDrawMesh.cs" t="Include" />
@@ -348,12 +359,15 @@
             <e p="RenderConstants.cs" t="Include" />
             <e p="RenderData.cs" t="Include" />
             <e p="RenderPrimitiveType.cs" t="Include" />
+            <e p="StandardDrawable.cs" t="Include" />
             <e p="StyleColor.cs" t="Include" />
             <e p="StyleProperty.cs" t="Include" />
             <e p="StylePropertyId.cs" t="Include" />
             <e p="TextOverflow.cs" t="Include" />
             <e p="TextStyle.cs" t="Include" />
             <e p="UIBaseStyleGroup.cs" t="Include" />
+            <e p="UIFixedLength.cs" t="Include" />
+            <e p="UIFixedUnit.cs" t="Include" />
             <e p="UIGameObjectView.cs" t="Include" />
             <e p="UIMeasurement.cs" t="Include" />
             <e p="UIStyle.cs" t="Include" />
@@ -383,6 +397,7 @@
           <e p="Shaders" t="Include">
             <e p="GUIRoundedRect.shader" t="Include" />
             <e p="GUITexture.shader" t="Include" />
+            <e p="MattUISimpleRoundedBorder.shader" t="Include" />
             <e p="ProceduralImage.shader" t="Include" />
             <e p="SimpleBorder.shader" t="Include" />
             <e p="UIStandardShader.shader" t="Include" />
@@ -477,6 +492,7 @@
             <e p="LightList.cs" t="Include" />
             <e p="ListPool.cs" t="Include" />
             <e p="MeasurementVector2.cs" t="Include" />
+            <e p="MeshUtil.cs" t="Include" />
             <e p="ObjectPool.cs" t="Include" />
             <e p="ReadOnlyVector2.cs" t="Include" />
             <e p="ReflectionUtil.cs" t="Include" />

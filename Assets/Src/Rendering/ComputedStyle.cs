@@ -8,72 +8,6 @@ using UnityEngine;
 
 namespace Rendering {
 
-    public static class DefaultStyleValues {
-
-        public static readonly UIMeasurement borderRadiusTopLeft = new UIMeasurement(0);
-        public static readonly UIMeasurement borderRadiusTopRight = new UIMeasurement(0);
-        public static readonly UIMeasurement borderRadiusBottomRight = new UIMeasurement(0);
-        public static readonly UIMeasurement borderRadiusBottomLeft = new UIMeasurement(0);
-
-        public static readonly Color borderColor = ColorUtil.UnsetValue;
-        public static readonly Color backgroundColor = ColorUtil.UnsetValue;
-        public static readonly AssetPointer<Texture2D> backgroundImage = new AssetPointer<Texture2D>(AssetType.Texture, -1);
-
-        public static readonly Overflow overflowX = Overflow.None;
-        public static readonly Overflow overflowY = Overflow.None;
-
-        public static readonly int flexOrderOverride = ushort.MaxValue;
-        public static readonly int flexGrowthFactor = 0;
-        public static readonly int flexShrinkFactor = 0;
-        public static readonly CrossAxisAlignment flexSelfAlignment = CrossAxisAlignment.Unset;
-
-        public static readonly LayoutWrap flexLayoutWrap = LayoutWrap.None;
-        public static readonly LayoutDirection flexLayoutDirection = LayoutDirection.Row;
-        public static readonly MainAxisAlignment flexLayoutMainAxisAlignment = MainAxisAlignment.Start;
-        public static readonly CrossAxisAlignment flexLayoutCrossAxisAlignment = CrossAxisAlignment.Start;
-
-        public static readonly UIMeasurement minWidth = new UIMeasurement(0);
-        public static readonly UIMeasurement maxWidth = new UIMeasurement(float.MaxValue);
-        public static readonly UIMeasurement preferredWidth = UIMeasurement.Auto;
-        public static readonly UIMeasurement minHeight = new UIMeasurement(0);
-        public static readonly UIMeasurement maxHeight = new UIMeasurement(float.MaxValue);
-        public static readonly UIMeasurement preferredHeight = UIMeasurement.Content100;
-
-        public static readonly UIMeasurement marginTop = new UIMeasurement(0);
-        public static readonly UIMeasurement marginRight = new UIMeasurement(0);
-        public static readonly UIMeasurement marginLeft = new UIMeasurement(0);
-        public static readonly UIMeasurement marginBottom = new UIMeasurement(0);
-
-        public static readonly UIMeasurement paddingTop = new UIMeasurement(0);
-        public static readonly UIMeasurement paddingRight = new UIMeasurement(0);
-        public static readonly UIMeasurement paddingLeft = new UIMeasurement(0);
-        public static readonly UIMeasurement paddingBottom = new UIMeasurement(0);
-
-        public static readonly UIMeasurement borderTop = new UIMeasurement(0);
-        public static readonly UIMeasurement borderRight = new UIMeasurement(0);
-        public static readonly UIMeasurement borderLeft = new UIMeasurement(0);
-        public static readonly UIMeasurement borderBottom = new UIMeasurement(0);
-
-        public static readonly UIMeasurement transformPositionX = new UIMeasurement(0);
-        public static readonly UIMeasurement transformPositionY = new UIMeasurement(0);
-        public static readonly UIMeasurement transformPivotX = new UIMeasurement(0);
-        public static readonly UIMeasurement transformPivotY = new UIMeasurement(0);
-        public static readonly float transformScaleX = 1;
-        public static readonly float transformScaleY = 1;
-        public static readonly float transformRotation = 0;
-
-        public static readonly LayoutType layoutType = LayoutType.Flex;
-        public static readonly int fontSize = 12;
-        public static readonly Color textColor = Color.black;
-        public static readonly TextUtil.FontStyle fontStyle = TextUtil.FontStyle.Normal;
-        public static readonly AssetPointer<TMP_FontAsset> fontAsset = new AssetPointer<TMP_FontAsset>(AssetType.Font, 1);
-        public static readonly TextUtil.TextAnchor textAnchor = TextUtil.TextAnchor.MiddleLeft;
-
-        //IgnoreTranslationInLayout
-        //UseScaledAABB
-
-    }
-
     public class ComputedStyle {
 
         public class RareStyleData {
@@ -171,15 +105,22 @@ namespace Rendering {
 
         public RareStyleData RareData => rareData ?? (rareData = new RareStyleData(styleSet));
 
-        public ContentBoxRect border => new ContentBoxRect(borderTop, borderRight, borderBottom, borderLeft);
-        public ContentBoxRect padding => new ContentBoxRect(paddingTop, paddingRight, paddingBottom, paddingLeft);
+        public PaddingBox border => new PaddingBox(borderTop, borderRight, borderBottom, borderLeft);
         public ContentBoxRect margin => new ContentBoxRect(MarginTop, marginRight, marginBottom, marginLeft);
+
+        public PaddingBox padding => new PaddingBox(paddingTop, paddingRight, paddingBottom, paddingLeft);
+
+        public bool HasBorderRadius => rareData != null
+                                       && (rareData.borderRadiusBottomLeft.IsDefined()
+                                           || rareData.BorderRadiusBottomRight.IsDefined()
+                                           || rareData.BorderRadiusTopLeft.IsDefined()
+                                           || rareData.BorderRadiusTopRight.IsDefined());
 
         #region Paint
 
         private Color borderColor = DefaultStyleValues.borderColor;
         private Color backgroundColor = DefaultStyleValues.backgroundColor;
-        private AssetPointer<Texture2D> backgroundImage = DefaultStyleValues.backgroundImage;
+        private Texture2DAssetReference backgroundImage = DefaultStyleValues.backgroundImage;
 
         public Color BorderColor {
             get { return borderColor; }
@@ -205,15 +146,15 @@ namespace Rendering {
             }
         }
 
-        public AssetPointer<Texture2D> BackgroundImage {
+        public Texture2DAssetReference BackgroundImage {
             get { return backgroundImage; }
             internal set {
-                if (backgroundImage.id == value.id) {
+                if (backgroundImage.assetId == value.assetId) {
                     return;
                 }
 
                 backgroundImage = value;
-                SendEvent(new StyleProperty(StylePropertyId.BackgroundImage, (int) backgroundImage.assetType, backgroundImage.id));
+                SendEvent(new StyleProperty(StylePropertyId.BackgroundImage, backgroundImage.assetId));
             }
         }
 
@@ -461,12 +402,12 @@ namespace Rendering {
 
         #region Border
 
-        private UIMeasurement borderTop = DefaultStyleValues.borderTop;
-        private UIMeasurement borderRight = DefaultStyleValues.borderRight;
-        private UIMeasurement borderBottom = DefaultStyleValues.borderBottom;
-        private UIMeasurement borderLeft = DefaultStyleValues.borderLeft;
+        private UIFixedLength borderTop = DefaultStyleValues.borderTop;
+        private UIFixedLength borderRight = DefaultStyleValues.borderRight;
+        private UIFixedLength borderBottom = DefaultStyleValues.borderBottom;
+        private UIFixedLength borderLeft = DefaultStyleValues.borderLeft;
 
-        public UIMeasurement BorderTop {
+        public UIFixedLength BorderTop {
             get { return borderTop; }
             internal set {
                 if (borderTop == value) return;
@@ -475,7 +416,7 @@ namespace Rendering {
             }
         }
 
-        public UIMeasurement BorderRight {
+        public UIFixedLength BorderRight {
             get { return borderRight; }
             internal set {
                 if (borderRight == value) return;
@@ -484,7 +425,7 @@ namespace Rendering {
             }
         }
 
-        public UIMeasurement BorderBottom {
+        public UIFixedLength BorderBottom {
             get { return borderBottom; }
             internal set {
                 if (borderBottom == value) return;
@@ -493,7 +434,7 @@ namespace Rendering {
             }
         }
 
-        public UIMeasurement BorderLeft {
+        public UIFixedLength BorderLeft {
             get { return borderLeft; }
             internal set {
                 if (borderLeft == value) return;
@@ -506,12 +447,12 @@ namespace Rendering {
 
         #region Padding
 
-        private UIMeasurement paddingTop = DefaultStyleValues.paddingTop;
-        private UIMeasurement paddingRight = DefaultStyleValues.paddingRight;
-        private UIMeasurement paddingBottom = DefaultStyleValues.paddingBottom;
-        private UIMeasurement paddingLeft = DefaultStyleValues.paddingLeft;
+        private UIFixedLength paddingTop = DefaultStyleValues.paddingTop;
+        private UIFixedLength paddingRight = DefaultStyleValues.paddingRight;
+        private UIFixedLength paddingBottom = DefaultStyleValues.paddingBottom;
+        private UIFixedLength paddingLeft = DefaultStyleValues.paddingLeft;
 
-        public UIMeasurement PaddingTop {
+        public UIFixedLength PaddingTop {
             get { return paddingTop; }
             internal set {
                 if (paddingTop == value) return;
@@ -520,7 +461,7 @@ namespace Rendering {
             }
         }
 
-        public UIMeasurement PaddingRight {
+        public UIFixedLength PaddingRight {
             get { return paddingRight; }
             internal set {
                 if (paddingRight == value) return;
@@ -529,7 +470,7 @@ namespace Rendering {
             }
         }
 
-        public UIMeasurement PaddingBottom {
+        public UIFixedLength PaddingBottom {
             get { return paddingBottom; }
             internal set {
                 if (paddingBottom == value) return;
@@ -538,7 +479,7 @@ namespace Rendering {
             }
         }
 
-        public UIMeasurement PaddingLeft {
+        public UIFixedLength PaddingLeft {
             get { return paddingLeft; }
             internal set {
                 if (paddingLeft == value) return;
@@ -553,9 +494,10 @@ namespace Rendering {
 
         private int fontSize = DefaultStyleValues.fontSize;
         private Color textColor = DefaultStyleValues.textColor;
-        private AssetPointer<TMP_FontAsset> fontAsset = DefaultStyleValues.fontAsset;
+        private FontAssetReference fontAsset = DefaultStyleValues.fontAsset;
         private TextUtil.FontStyle fontStyle = DefaultStyleValues.fontStyle;
         private TextUtil.TextAnchor textAnchor = DefaultStyleValues.textAnchor;
+        private TextUtil.TextTransform textTransform = DefaultStyleValues.textTransform;
 
         public Color TextColor {
             get { return textColor; }
@@ -566,12 +508,12 @@ namespace Rendering {
             }
         }
 
-        public AssetPointer<TMP_FontAsset> FontAsset {
+        public FontAssetReference FontAsset {
             get { return fontAsset; }
             internal set {
-                if (fontAsset.id == value.id) return;
+                if (fontAsset.assetId == value.assetId) return;
                 fontAsset = value;
-                SendEvent(new StyleProperty(StylePropertyId.TextFontAsset, (int) fontAsset.assetType, fontAsset.id));
+                SendEvent(new StyleProperty(StylePropertyId.TextFontAsset, fontAsset.assetId));
             }
         }
 
@@ -599,6 +541,15 @@ namespace Rendering {
                 if (textAnchor == value) return;
                 textAnchor = value;
                 SendEvent(new StyleProperty(StylePropertyId.TextAnchor, (int) textAnchor));
+            }
+        }
+
+        public TextUtil.TextTransform TextTransform {
+            get { return textTransform; }
+            internal set {
+                if (textTransform == value) return;
+                textTransform = value;
+                SendEvent(new StyleProperty(StylePropertyId.TextTransform, (int) textTransform));
             }
         }
 
@@ -680,7 +631,6 @@ namespace Rendering {
                 if (!FloatUtil.IsDefined(value)) value = DefaultStyleValues.transformRotation;
                 if (Mathf.Approximately(value, transformRotation)) return;
                 transformRotation = value;
-                styleSet.styleSystem.SetTransform(styleSet.element, new UITransform());
                 SendEvent(new StyleProperty(StylePropertyId.TransformRotation, FloatUtil.EncodeToInt(transformRotation)));
             }
         }
@@ -693,9 +643,12 @@ namespace Rendering {
             }
         }
 
+        #endregion
+
         #region Layout
 
         private LayoutType layoutType = DefaultStyleValues.layoutType;
+        private LayoutBehavior layoutBehavior = DefaultStyleValues.layoutBehavior;
 
         public LayoutType LayoutType {
             get { return layoutType; }
@@ -706,7 +659,14 @@ namespace Rendering {
             }
         }
 
-        #endregion
+        public LayoutBehavior LayoutBehavior {
+            get { return layoutBehavior; }
+            internal set {
+                if (layoutBehavior == value) return;
+                layoutBehavior = value;
+                SendEvent(new StyleProperty(StylePropertyId.LayoutBehavior, (int) layoutBehavior));
+            }
+        }
 
         #endregion
 
@@ -742,7 +702,7 @@ namespace Rendering {
                     BorderColor = property.IsDefined ? (Color) new StyleColor(value0) : DefaultStyleValues.borderColor;
                     break;
                 case StylePropertyId.BackgroundImage:
-                    BackgroundImage = property.IsDefined ? new AssetPointer<Texture2D>((AssetType) value0, value1) : DefaultStyleValues.backgroundImage;
+                    BackgroundImage = property.IsDefined ? new Texture2DAssetReference(value0) : DefaultStyleValues.backgroundImage;
                     break;
                 case StylePropertyId.BorderRadiusTopLeft:
                     RareData.BorderRadiusTopLeft = property.IsDefined ? UIMeasurement.Decode(value0, value1) : DefaultStyleValues.borderRadiusTopLeft;
@@ -850,16 +810,16 @@ namespace Rendering {
                 #region Border
 
                 case StylePropertyId.BorderTop:
-                    BorderTop = property.IsDefined ? UIMeasurement.Decode(value0, value1) : DefaultStyleValues.borderTop;
+                    BorderTop = property.IsDefined ? UIFixedLength.Decode(value0, value1) : DefaultStyleValues.borderTop;
                     break;
                 case StylePropertyId.BorderRight:
-                    BorderRight = property.IsDefined ? UIMeasurement.Decode(value0, value1) : DefaultStyleValues.borderRight;
+                    BorderRight = property.IsDefined ? UIFixedLength.Decode(value0, value1) : DefaultStyleValues.borderRight;
                     break;
                 case StylePropertyId.BorderBottom:
-                    BorderBottom = property.IsDefined ? UIMeasurement.Decode(value0, value1) : DefaultStyleValues.borderBottom;
+                    BorderBottom = property.IsDefined ? UIFixedLength.Decode(value0, value1) : DefaultStyleValues.borderBottom;
                     break;
                 case StylePropertyId.BorderLeft:
-                    BorderLeft = property.IsDefined ? UIMeasurement.Decode(value0, value1) : DefaultStyleValues.borderLeft;
+                    BorderLeft = property.IsDefined ? UIFixedLength.Decode(value0, value1) : DefaultStyleValues.borderLeft;
                     break;
 
                 #endregion
@@ -867,16 +827,16 @@ namespace Rendering {
                 #region Padding
 
                 case StylePropertyId.PaddingTop:
-                    PaddingTop = property.IsDefined ? UIMeasurement.Decode(value0, value1) : DefaultStyleValues.paddingTop;
+                    PaddingTop = property.IsDefined ? UIFixedLength.Decode(value0, value1) : DefaultStyleValues.paddingTop;
                     break;
                 case StylePropertyId.PaddingRight:
-                    PaddingRight = property.IsDefined ? UIMeasurement.Decode(value0, value1) : DefaultStyleValues.paddingRight;
+                    PaddingRight = property.IsDefined ? UIFixedLength.Decode(value0, value1) : DefaultStyleValues.paddingRight;
                     break;
                 case StylePropertyId.PaddingBottom:
-                    PaddingBottom = property.IsDefined ? UIMeasurement.Decode(value0, value1) : DefaultStyleValues.paddingBottom;
+                    PaddingBottom = property.IsDefined ? UIFixedLength.Decode(value0, value1) : DefaultStyleValues.paddingBottom;
                     break;
                 case StylePropertyId.PaddingLeft:
-                    PaddingLeft = property.IsDefined ? UIMeasurement.Decode(value0, value1) : DefaultStyleValues.paddingLeft;
+                    PaddingLeft = property.IsDefined ? UIFixedLength.Decode(value0, value1) : DefaultStyleValues.paddingLeft;
                     break;
 
                 #endregion
@@ -913,7 +873,7 @@ namespace Rendering {
                     TextColor = property.IsDefined ? (Color) new StyleColor(value0) : DefaultStyleValues.textColor;
                     break;
                 case StylePropertyId.TextFontAsset:
-                    FontAsset = property.IsDefined ? new AssetPointer<TMP_FontAsset>((AssetType) value0, value1) : DefaultStyleValues.fontAsset;
+                    FontAsset = property.IsDefined ? new FontAssetReference(value0) : DefaultStyleValues.fontAsset;
                     break;
                 case StylePropertyId.TextFontSize:
                     FontSize = property.IsDefined ? value0 : DefaultStyleValues.fontSize;
@@ -923,6 +883,9 @@ namespace Rendering {
                     break;
                 case StylePropertyId.TextAnchor:
                     TextAnchor = property.IsDefined ? (TextUtil.TextAnchor) value0 : DefaultStyleValues.textAnchor;
+                    break;
+                case StylePropertyId.TextTransform:
+                    TextTransform = property.IsDefined ? (TextUtil.TextTransform) value0 : DefaultStyleValues.textTransform;
                     break;
                 case StylePropertyId.TextWhitespaceMode:
                     throw new NotImplementedException();
@@ -983,8 +946,9 @@ namespace Rendering {
                 case StylePropertyId.__TextPropertyStart__:
                 case StylePropertyId.__TextPropertyEnd__:
                     break;
-                case StylePropertyId.IsInLayoutFlow:
-                    // FlowType -> Normal | Ignored | TranslationAsOffset 
+                case StylePropertyId.LayoutBehavior:
+                    // FlowType -> Normal | Ignored | TranslationAsOffset
+                    LayoutBehavior = property.IsDefined ? (LayoutBehavior) property.valuePart0 : DefaultStyleValues.layoutBehavior;
                     break;
                 default:
                     throw new ArgumentOutOfRangeException(nameof(property.propertyId), property.propertyId, null);

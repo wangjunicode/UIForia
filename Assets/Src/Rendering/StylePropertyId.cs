@@ -75,6 +75,7 @@ namespace Rendering {
         TextIndentNewLine = __TextPropertyStart__ + UIStyle.TextPropertyIdFlag.TextIndentNewLine,
         TextLayoutStyle = __TextPropertyStart__ + UIStyle.TextPropertyIdFlag.TextLayoutStyle, // UseKerning | Monospace
         TextAutoSize = __TextPropertyStart__ + UIStyle.TextPropertyIdFlag.TextAutoSize,
+        TextTransform = __TextPropertyStart__ + UIStyle.TextPropertyIdFlag.TextTransform,
         __TextPropertyEnd__ = 1013,
 
         MinWidth = 1100,
@@ -86,8 +87,10 @@ namespace Rendering {
 
         LayoutType = 1201,
         IsInLayoutFlow = 1202,
+        LayoutBehavior = 1203
         
-        // total = 69
+        // total = 70
+
 
     }
 

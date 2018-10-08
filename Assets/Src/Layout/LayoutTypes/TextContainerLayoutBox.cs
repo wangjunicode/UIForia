@@ -28,7 +28,7 @@ namespace Src.Layout.LayoutTypes {
             }
 
             actualWidth = maxWidth;
-            actualHeight = lastLine.position.y + lastLine.Height + 3f;
+            actualHeight = lastLine.position.y + lastLine.Height;
             ListPool<LineInfo>.Release(lineInfos);
         }
 
@@ -44,7 +44,7 @@ namespace Src.Layout.LayoutTypes {
             }
 
             ListPool<LineInfo>.Release(lineInfos);
-            return new Size(maxWidth, -lastLine.position.y + lastLine.Height + 3f); // todo -- 3 is line gap
+            return new Size(maxWidth, -lastLine.position.y + lastLine.Height);
         }
 
         // note -- all alignment / justification happens in the renderer
@@ -64,7 +64,7 @@ namespace Src.Layout.LayoutTypes {
             float lineHeight = (font.fontInfo.LineHeight + lineGap) * baseScale;
             // todo -- might want to use an optional 'lineHeight' setting instead of just computing the line height
 
-            currentLine.position.y = lineGap;
+//            currentLine.position.y = lineGap;
             for (int w = 0; w < textInfo.wordCount; w++) {
                 WordInfo currentWord = wordInfos[w];
 
@@ -142,7 +142,12 @@ namespace Src.Layout.LayoutTypes {
                     currentLine.wordCount++;
                     if (currentLine.maxAscender < currentWord.ascender) currentLine.maxAscender = currentWord.ascender;
                     if (currentLine.maxDescender > currentWord.descender) currentLine.maxDescender = currentWord.descender;
-                    currentLine.size = new Vector2(currentLine.size.x + currentWord.xAdvance, currentLine.Height);
+                    float ySize = currentLine.size.y;
+
+                    if (currentWord.size.y > ySize) {
+                        ySize = currentWord.size.y;
+                    }
+                    currentLine.size = new Vector2(currentLine.size.x + currentWord.xAdvance, ySize);
                 }
             }
 

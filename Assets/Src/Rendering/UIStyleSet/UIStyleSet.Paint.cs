@@ -41,7 +41,7 @@ namespace Rendering {
         }
 
         [PublicAPI]
-        public void SetBackgroundImage(AssetPointer<Texture2D> image, StyleState state) {
+        public void SetBackgroundImage(Texture2DAssetReference image, StyleState state) {
             UIStyle style = GetOrCreateInstanceStyle(state);
             style.BackgroundImage = image;
             if ((state & currentState) != 0 && style == GetActiveStyleForProperty(StylePropertyId.BackgroundImage)) {

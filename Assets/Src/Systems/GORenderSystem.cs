@@ -17,19 +17,10 @@ namespace Src.Systems {
         private readonly SkipTree<RenderData> renderSkipTree;
         private readonly Dictionary<int, RectTransform> m_TransformMap;
 
-        private bool ready;
-
         private readonly List<IDrawable> m_DirtyGraphicList;
         private readonly Dictionary<int, CanvasRenderer> m_CanvasRendererMap;
         private readonly List<RenderData> m_VirtualScrollbarElements;
         private readonly List<UIElement> m_ToInitialize;
-
-        private struct StyleUpdate {
-
-            public readonly UIElement element;
-            public readonly StyleProperty styleProperty;
-
-        }
 
         public GORenderSystem(ILayoutSystem layoutSystem, IStyleSystem styleSystem, RectTransform rectTransform) {
             this.m_LayoutSystem = layoutSystem;
@@ -62,9 +53,7 @@ namespace Src.Systems {
             this.styleSystem = styleSystem;
         }
 
-        public void OnReady() {
-            ready = true;
-        }
+        public void OnReady() { }
 
         public void OnInitialize() {
             this.styleSystem.onStylePropertyChanged += HandleStylePropertyChanged;
@@ -77,35 +66,10 @@ namespace Src.Systems {
         public void OnElementMoved(UIElement element, int newIndex, int oldIndex) { }
 
         public void OnElementCreatedFromTemplate(MetaData creationData) {
-//            OnElementStyleChanged(creationData.element);
-//
             m_ToInitialize.Add(creationData.element);
             for (int i = 0; i < creationData.children.Count; i++) {
                 OnElementCreatedFromTemplate(creationData.children[i]);
             }
-
-//
-//            UITextContainerElement container = creationData.element as UITextContainerElement;
-//            UIGraphicElement directDraw = creationData.element as UIGraphicElement;
-//
-//            if (directDraw != null) {
-//                directDraw.updateManager = this;
-//
-//                RectTransform transform = m_TransformMap[directDraw.id];
-//                CanvasRenderer renderer = transform.gameObject.AddComponent<CanvasRenderer>();
-//                renderer.SetMaterial(directDraw.GetMaterial(), Texture2D.whiteTexture);
-//                renderer.SetMesh(directDraw.GetMesh());
-//                m_CanvasRendererMap[directDraw.id] = renderer;
-//            }
-//
-//            if (container != null) {
-//                RectTransform containerTransform = m_TransformMap[container.id];
-//                Transform child = containerTransform.GetChild(0);
-//                // todo -- need the font ref to update when font changes
-//                container.textInfo = child.GetComponent<TextMeshProUGUI>().textInfo;
-//                container.fontAsset = child.GetComponent<TextMeshProUGUI>().font;
-//                container.textInfo.textComponent.text = container.textInfo.textComponent.text ?? string.Empty;
-//            }
         }
 
         private void HandleStylePropertyChanged(UIElement element, StyleProperty property) {
@@ -149,6 +113,9 @@ namespace Src.Systems {
                 }
 
                 RenderData renderData = renderSkipTree.GetItem(element.id);
+
+                if (element is UIImageElement) { }
+
 //                ContentBoxRect margin = element.style.computedStyle.margin;
 //
                 Vector2 position = layoutResult.localPosition;
@@ -181,7 +148,7 @@ namespace Src.Systems {
                     outputRotation = Quaternion.AngleAxis(rotation, Vector3.forward);
                 }
 
-                transform.SetPositionAndRotation(outputPosition, outputRotation);
+                transform.anchoredPosition = new Vector3(outputPosition.x, -position.y);
 
                 if (transform.sizeDelta != size) {
                     transform.sizeDelta = size;
@@ -207,22 +174,25 @@ namespace Src.Systems {
             for (int i = 0; i < m_DirtyGraphicList.Count; i++) {
                 IDrawable graphic = m_DirtyGraphicList[i];
                 CanvasRenderer canvasRenderer = m_CanvasRendererMap[graphic.Id];
+                Mesh mesh = graphic.GetMesh();
+                Material material = graphic.GetMaterial();
+                Texture text = graphic.GetMainTexture();
 
-                if (graphic.IsGeometryDirty) {
-                    canvasRenderer.SetMesh(graphic.GetMesh());
-                }
+                //if (graphic.IsGeometryDirty) {
+                canvasRenderer.SetMesh(mesh);
+                // }
 
-                if (graphic.IsMaterialDirty) {
-                    canvasRenderer.SetMaterial(graphic.GetMaterial(), graphic.GetMainTexture());
-                }
+                //if (graphic.IsMaterialDirty) {
+                canvasRenderer.materialCount = 1;
+                canvasRenderer.SetMaterial(material, 0);
+                canvasRenderer.SetTexture(text);
+                // }
             }
 
             m_DirtyGraphicList.Clear();
         }
 
         public void OnReset() {
-            ready = false;
-
             foreach (KeyValuePair<int, RectTransform> kvp in m_TransformMap) {
                 Object.Destroy(kvp.Value.gameObject);
             }

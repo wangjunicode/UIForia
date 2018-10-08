@@ -1,9 +1,7 @@
 using System;
 using System.Collections.Generic;
-using System.IO;
 using JetBrains.Annotations;
 using Src.Compilers.AliasSource;
-using UnityEngine;
 
 namespace Src {
 
@@ -15,7 +13,7 @@ namespace Src {
             : base(childTemplates, attributes) { }
 
         static UIImageTemplate() {
-            s_UrlSource = new MethodAliasSource("url", typeof(UIImageTemplate).GetMethod(nameof(Url)));
+           s_UrlSource = new MethodAliasSource("url", typeof(UIImageTemplate).GetMethod(nameof(TextureUrl)));
         }
 
         public override Type elementType => typeof(UIImageElement);
@@ -36,9 +34,8 @@ namespace Src {
         }
 
         [Pure]
-        public static AssetPointer<Texture2D> Url(string path) {
-            // todo this is kinda dumb
-            return new AssetPointer<Texture2D>(Resources.Load<Texture2D>(Path.GetFileNameWithoutExtension(path)));
+        public static Texture2DAssetReference TextureUrl(string url) {
+            return new Texture2DAssetReference(url);
         }
 
     }

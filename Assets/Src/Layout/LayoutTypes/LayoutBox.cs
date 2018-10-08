@@ -71,7 +71,7 @@ namespace Src.Layout.LayoutTypes {
         public virtual void SetParent(LayoutBox parent) {
             this.parent?.OnChildRemoved(this);
             this.parent = parent;
-            this.parent?.OnChildAddedChild(this);
+            this.parent?.OnChildAdded(this);
         }
 
         // need layout when
@@ -95,7 +95,7 @@ namespace Src.Layout.LayoutTypes {
             newChild.AdoptChildren(toReplace);
         }
 
-        public virtual void OnChildAddedChild(LayoutBox child) {
+        public virtual void OnChildAdded(LayoutBox child) {
             children.Add(child);
             if (child.element.isEnabled) {
                 RequestParentLayoutIfContentBased();

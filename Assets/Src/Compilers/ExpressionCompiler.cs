@@ -325,6 +325,10 @@ namespace Src {
         private Expression VisitAliasNode(AliasExpressionNode node) {
             Type aliasedType = context.ResolveRuntimeAliasType(node.alias);
 
+            if (aliasedType == null) {
+                throw new Exception("Unable to resolve alias: " + node.alias);    
+            }
+            
             return (Expression) ReflectionUtil.CreateGenericInstanceFromOpenType(
                 typeof(ResolveExpression_Alias<>),
                 aliasedType,

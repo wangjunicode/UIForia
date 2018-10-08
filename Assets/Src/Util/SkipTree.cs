@@ -512,7 +512,7 @@ namespace Src {
         }
 
         public void RecycleTree(TreeNode node) {
-            throw new NotImplementedException();
+            
         }
         
         public TreeNode GetTraversableTree(T item, bool includeDisabled = false) {

@@ -14,9 +14,9 @@ namespace Src {
         public List<ChatGroup> chatGroups = new List<ChatGroup>();
 
         public override void OnReady() {
-            chatGroups.Add(new ChatGroup("icon_1", "Matt", 0));
-            chatGroups.Add(new ChatGroup("icon_2", "Matt", 0));
-            chatGroups.Add(new ChatGroup("icon_3", "Matt", 0));
+            chatGroups.Add(new ChatGroup("icon_1", "Matt", 3));
+            chatGroups.Add(new ChatGroup("icon_2", "Matt", 1));
+            chatGroups.Add(new ChatGroup("icon_3", "Matt", 5));
             chatGroups.Add(new ChatGroup("icon_4", "Matt", 0));
         }
 

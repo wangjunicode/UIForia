@@ -111,7 +111,7 @@ namespace Src {
         }
 
     }
-    
+
     public class MethodCallExpression_StaticVoid<T, U, V> : Expression<Terminal> {
 
         private readonly Action<T, U, V> method;
@@ -213,7 +213,6 @@ namespace Src {
 
     }
 
-    
     public class MethodCallExpression_Static<T> : Expression<T> {
 
         private readonly Func<T> method;
@@ -253,10 +252,11 @@ namespace Src {
         public MethodCallExpression_Static(MethodInfo methodInfo, Expression[] argumentExpressions) {
             this.method = (Func<U, T>) ReflectionUtil.GetDelegate(typeof(Func<U, T>), methodInfo);
             this.argument0 = (Expression<U>) argumentExpressions[0];
-            this.isConstant = ReflectionUtil.HasAnyAttribute(methodInfo,
-                typeof(PureAttribute),
-                typeof(System.Diagnostics.Contracts.PureAttribute)
-            );
+            this.isConstant = argument0.IsConstant()
+                              && ReflectionUtil.HasAnyAttribute(methodInfo,
+                                  typeof(PureAttribute),
+                                  typeof(System.Diagnostics.Contracts.PureAttribute)
+                              );
         }
 
         public override Type YieldedType => typeof(T);

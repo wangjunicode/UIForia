@@ -32,7 +32,7 @@ public class UIElement : IHierarchical {
     // todo make readonly but assignable via style system
 
     internal UIElement parent;
-    
+
     protected UIElement() {
         this.id = UIView.NextElementId;
         this.flags = UIElementFlags.Enabled
@@ -44,16 +44,16 @@ public class UIElement : IHierarchical {
     internal UITemplateContext templateContext;
     internal UIElement[] templateChildren;
     internal UIElement[] ownChildren;
-    
+
     public LayoutResult layoutResult { get; internal set; }
 
     public Vector2 scrollOffset { get; internal set; }
-        
+
     public int depth { get; internal set; }
     public int siblingIndex { get; internal set; }
 
     public IInputProvider Input { get; internal set; }
-        
+
     public bool isShown => (flags & UIElementFlags.SelfAndAncestorShown) == UIElementFlags.SelfAndAncestorShown;
 
     public bool isSelfEnabled => (flags & UIElementFlags.Enabled) != 0;
@@ -86,7 +86,7 @@ public class UIElement : IHierarchical {
 
     public virtual void OnHidden() { }
 
-    public virtual void OnDestroy() { }   
+    public virtual void OnDestroy() { }
 
     public bool EnableBinding(string propertyName) {
         return templateContext.view.bindingSystem.EnableBinding(this, propertyName);
@@ -148,7 +148,6 @@ public class UIElement : IHierarchical {
 
         return null;
     }
-
 
     private UIElement FindByIdTemplateScoped(string id) {
         if (isPrimitive || templateChildren == null) {
@@ -225,7 +224,7 @@ public class UIElement : IHierarchical {
     }
 
     protected void FindByTypeTemplateScoped<T>(List<T> retn) where T : UIElement {
-        if (isPrimitive || ownChildren == null) {
+        if (isPrimitive || ownChildren == null || templateChildren == null) {
             return;
         }
 

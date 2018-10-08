@@ -39,7 +39,7 @@ namespace Src {
         public readonly Texture2D asset;
 
         public Texture2DAssetReference(string referencePath) {
-            if (referencePath == "default") {
+            if (referencePath == "default" || referencePath == null) {
                 assetId = 0;
                 asset = null;
                 return;

@@ -5,11 +5,11 @@
 
     <Contents style="container">
 
-        <Image src="{chatGroup.iconUrl}"/>
+        <Image style="chat-icon" src="{url(chatGroup.iconUrl)}"/>
 
-        <Group x-if="{unreadCount > 0}" style="unread-indicator">
+        <Group x-if="{chatGroup.unreadCount > 0}" style="unread-indicator">
             <Text style="unread-count">
-                {unreadCount}
+                {chatGroup.unreadCount}
             </Text>
         </Group>
 

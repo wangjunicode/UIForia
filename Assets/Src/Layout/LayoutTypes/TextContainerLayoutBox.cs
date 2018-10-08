@@ -79,7 +79,7 @@ namespace Src.Layout.LayoutTypes {
                
                 if (currentWord.isNewLine) {
                     lineInfos.Add(currentLine);
-                    lineOffset -= (currentLine.maxDescender + textInfo.charInfos[currentWord.startChar + currentWord.charCount].ascender + lineGap) * baseScale;
+                    lineOffset -= (currentLine.maxDescender + textInfo.charInfos[currentWord.startChar + currentWord.visibleCharCount - 1].ascender + lineGap) * baseScale;
                     currentLine = new LineInfo();
                     currentLine.position = new Vector2(0, lineOffset);
                     currentLine.wordStart = w + 1;
@@ -92,7 +92,7 @@ namespace Src.Layout.LayoutTypes {
                     // line offset needs to to be bumped
                     if (currentLine.wordCount > 0) {
                         lineInfos.Add(currentLine);
-                        lineOffset -= -currentLine.maxDescender + textInfo.charInfos[currentWord.startChar + currentWord.charCount].ascender + (lineGap) * baseScale;
+                        lineOffset -= -currentLine.maxDescender + textInfo.charInfos[currentWord.startChar + currentWord.visibleCharCount - 1].ascender + (lineGap) * baseScale;
                     }
                     currentLine = new LineInfo();
                     currentLine.position = new Vector2(0, lineOffset);
@@ -103,7 +103,7 @@ namespace Src.Layout.LayoutTypes {
                     currentLine.size = new Vector2(currentWord.size.x, currentLine.Height);
                     lineInfos.Add(currentLine);
 
-                    lineOffset -= -currentLine.maxDescender + textInfo.charInfos[currentWord.startChar + currentWord.charCount].ascender + (lineGap) * baseScale;
+                    lineOffset -= -currentLine.maxDescender + textInfo.charInfos[currentWord.startChar + currentWord.visibleCharCount - 1].ascender + (lineGap) * baseScale;
                     currentLine = new LineInfo();
                     currentLine.wordStart = w + 1;
                     currentLine.position = new Vector2(0, lineOffset);
@@ -120,7 +120,7 @@ namespace Src.Layout.LayoutTypes {
                         currentLine.size = new Vector2(currentLine.size.x + currentWord.characterSize, currentLine.Height);
                         lineInfos.Add(currentLine);
                         
-                        lineOffset -= -currentLine.maxDescender + textInfo.charInfos[currentWord.startChar + currentWord.charCount].ascender + (lineGap) * baseScale;
+                        lineOffset -= -currentLine.maxDescender + textInfo.charInfos[currentWord.startChar + currentWord.visibleCharCount - 1].ascender + (lineGap) * baseScale;
                         
                         currentLine = new LineInfo();
                         currentLine.position = new Vector2(0, lineOffset);
@@ -128,7 +128,7 @@ namespace Src.Layout.LayoutTypes {
                         continue;
                     }
                     lineInfos.Add(currentLine);
-                    lineOffset -= -currentLine.maxDescender + textInfo.charInfos[currentWord.startChar + currentWord.charCount].ascender + (lineGap) * baseScale;
+                    lineOffset -= -currentLine.maxDescender + textInfo.charInfos[currentWord.startChar + currentWord.visibleCharCount - 1].ascender + (lineGap) * baseScale;
                     currentLine = new LineInfo();
                     currentLine.position = new Vector2(0, lineOffset);
                     currentLine.wordStart = w;

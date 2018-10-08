@@ -324,6 +324,7 @@ namespace Src.Systems {
 
                 for (int i = 0; i < parentData.children.Count; i++) {
                     MetaData childData = parentData.children[i];
+                    // todo -- for repeat & switch & other non layout elements, find the correct parent
                     LayoutBox childBox = CreateLayoutBox(childData.element);
                     childBox.SetParent(parentBox);
                     m_LayoutBoxMap.Add(childData.element.id, childBox);

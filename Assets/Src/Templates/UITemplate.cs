@@ -143,8 +143,10 @@ namespace Src {
                 bindingList.Add(binding);
             }
             else {
-                Array.Resize(ref conditionalBindings, conditionalBindings.Length + 1);
-                conditionalBindings[conditionalBindings.Length - 1] = binding;
+//                Array.Resize(ref conditionalBindings, conditionalBindings.Length + 1);
+//                conditionalBindings[conditionalBindings.Length - 1] = binding;
+                bindingList.Add(binding);
+
             }
         }
         

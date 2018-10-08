@@ -44,6 +44,10 @@ namespace Src {
                           | UIElementFlags.Primitive;
         }
 
+        public override void OnReady() {
+            UpdateTextInfo();
+        }
+
         public string GetText() {
             return text;
         }

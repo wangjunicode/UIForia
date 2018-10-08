@@ -15,9 +15,11 @@ namespace Src.Layout.LayoutTypes {
 
         private FlexItemAxis[] widths;
         private FlexItemAxis[] heights;
+        private List<LayoutBox> ignoredChildren;
 
         public FlexLayoutBox(LayoutSystem2 layoutSystem, UIElement element)
             : base(layoutSystem, element) {
+            ignoredChildren = ListPool<LayoutBox>.Get();
             tracks = ListPool<FlexTrack>.Get();
             widths = ArrayPool<FlexItemAxis>.GetMinSize(4);
             heights = ArrayPool<FlexItemAxis>.GetMinSize(4);
@@ -41,7 +43,7 @@ namespace Src.Layout.LayoutTypes {
                 float totalHeight = 0;
                 for (int i = 0; i < children.Count; i++) {
                     LayoutBox child = children[i];
-                    if (child.element.isEnabled && (child.style.LayoutBehavior & LayoutBehavior.Ignored) != 0) {
+                    if (child.element.isEnabled && (child.style.LayoutBehavior & LayoutBehavior.Ignored) == 0) {
                         maxWidth = Mathf.Max(maxWidth, Mathf.Max(child.MinWidth, Mathf.Min(child.PreferredWidth, child.MaxWidth)));
                         totalHeight += Mathf.Max(child.MinHeight, Mathf.Min(child.PreferredHeight, child.MaxHeight));
                     }
@@ -54,7 +56,7 @@ namespace Src.Layout.LayoutTypes {
             float totalWidth = 0;
             for (int i = 0; i < children.Count; i++) {
                 LayoutBox child = children[i];
-                if (child.element.isEnabled && (child.style.LayoutBehavior & LayoutBehavior.Ignored) != 0) {
+                if (child.element.isEnabled && (child.style.LayoutBehavior & LayoutBehavior.Ignored) == 0) {
                     maxHeight = Mathf.Max(maxHeight, Mathf.Max(child.MinHeight, Mathf.Min(child.PreferredHeight, child.MaxHeight)));
                     totalWidth += Mathf.Max(child.MinWidth, Mathf.Min(child.PreferredWidth, child.MaxWidth));
                 }
@@ -69,7 +71,7 @@ namespace Src.Layout.LayoutTypes {
             for (int i = 0; i < children.Count; i++) {
                 LayoutBox child = children[i];
 
-                if (child.element.isEnabled && (child.style.LayoutBehavior & LayoutBehavior.Ignored) != 0) {
+                if (child.element.isEnabled && (child.style.LayoutBehavior & LayoutBehavior.Ignored) == 0) {
                     widths[inFlowItemCount] = new FlexItemAxis();
                     widths[inFlowItemCount].childIndex = inFlowItemCount;
                     widths[inFlowItemCount].order = BitUtil.SetHighLowBits(child.style.FlexItemOrder, i);
@@ -114,7 +116,7 @@ namespace Src.Layout.LayoutTypes {
             for (int i = 0; i < children.Count; i++) {
                 LayoutBox child = children[i];
 
-                if (child.element.isEnabled && (child.style.LayoutBehavior & LayoutBehavior.Ignored) != 0) {
+                if (child.element.isEnabled && (child.style.LayoutBehavior & LayoutBehavior.Ignored) == 0) {
                     widths[inFlowItemCount] = new FlexItemAxis();
                     widths[inFlowItemCount].childIndex = inFlowItemCount;
                     widths[inFlowItemCount].outputSize = Mathf.Max(child.MinWidth, Mathf.Min(child.PreferredWidth, child.MaxWidth));
@@ -191,7 +193,6 @@ namespace Src.Layout.LayoutTypes {
             return retn;
         }
 
-
         private void FillTracks(FlexItemAxis[] items, int itemCount, float targetSize) {
             FlexTrack currentTrack = new FlexTrack();
             if (style.FlexLayoutWrap != LayoutWrap.Wrap) {
@@ -260,7 +261,12 @@ namespace Src.Layout.LayoutTypes {
             tracks.Add(currentTrack);
         }
 
-        public override void OnChildAddedChild(LayoutBox child) {
+        public override void OnChildAdded(LayoutBox child) {
+            if ((child.style.LayoutBehavior & LayoutBehavior.Ignored) != 0) {
+                ignoredChildren.Add(child);
+                return;
+            }
+
             children.Add(child);
             if (widths.Length <= children.Count) {
                 ArrayPool<FlexItemAxis>.Resize(ref widths, children.Count);
@@ -268,6 +274,13 @@ namespace Src.Layout.LayoutTypes {
 
             if (heights.Length <= children.Count) {
                 ArrayPool<FlexItemAxis>.Resize(ref heights, children.Count);
+            }
+        }
+
+        public override void OnChildRemoved(LayoutBox child) {
+            ignoredChildren.Remove(child);
+            if (children.Remove(child)) {
+                RequestLayout();
             }
         }
 

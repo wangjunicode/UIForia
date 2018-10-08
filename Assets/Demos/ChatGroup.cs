@@ -17,7 +17,7 @@ namespace Src {
 
     }
 
-    [Template("Demo/ChatGroupIcon.xml")]
+    [Template("Demos/ChatGroupIcon.xml")]
     public class ChatGroupIcon : UIElement {
 
         public ChatGroup chatGroup;
@@ -26,6 +26,14 @@ namespace Src {
 
             [ExportStyle("container")]
             public static UIStyle Container() {
+                return new UIStyle() {
+                    PreferredWidth = 64f,
+                    PreferredHeight = 64f
+                };
+            }
+            
+            [ExportStyle("chat-icon")]
+            public static UIStyle ChatIcon() {
                 return new UIStyle() {
                     PreferredWidth = 64f,
                     PreferredHeight = 64f

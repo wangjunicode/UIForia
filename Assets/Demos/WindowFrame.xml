@@ -28,7 +28,7 @@
                     <Group x-id="shuttle" style="shuttle"/>
 
                     <Repeat list="{chatGroups}" as="item">
-                        <ChatGroupItem chatGroup="{$item}"/>
+                        <ChatGroupIcon chatGroup="{$item}"/>
                     </Repeat>
 
                     <AddChatButton/>

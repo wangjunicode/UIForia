@@ -13,7 +13,7 @@ namespace Src.Util {
         public static T[] GetMinSize(int minSize) {
             minSize = Mathf.Max(0, minSize);
             for (int i = 0; i < s_ArrayPool.Count; i++) {
-                if (s_ArrayPool.Capacity >= minSize) {
+                if (s_ArrayPool[i].Length >= minSize) {
                     T[] retn = s_ArrayPool[i];
                     s_ArrayPool.RemoveAt(i);
                     return retn;
@@ -26,7 +26,7 @@ namespace Src.Util {
         public static T[] GetExactSize(int size) {
             size = Mathf.Max(0, size);
             for (int i = 0; i < s_ArrayPool.Count; i++) {
-                if (s_ArrayPool.Capacity == size) {
+                if (s_ArrayPool[i].Length == size) {
                     T[] retn = s_ArrayPool[i];
                     s_ArrayPool.RemoveAt(i);
                     return retn;
@@ -39,7 +39,7 @@ namespace Src.Util {
         public static void Resize(ref T[] array, int minSize) {
             minSize = Mathf.Max(0, minSize);
             for (int i = 0; i < s_ArrayPool.Count; i++) {
-                if (s_ArrayPool.Capacity >= minSize) {
+                if (s_ArrayPool[i].Length >= minSize) {
                     T[] retn = s_ArrayPool[i];
                     s_ArrayPool[i] = array;
                     Array.Clear(array, 0, array.Length);

@@ -1,110 +1,129 @@
-using System.Collections;
 using System.Collections.Generic;
+using Src;
+using Src.Util;
 
-namespace Src {
+public class RepeatBindingNode : BindingNode {
 
-    public abstract class RepeatBinding : Binding {
+    public string itemAlias;
+    public string indexAlias;
+    public string lengthAlias;
+    public UITemplate template;
+    public TemplateScope scope;
 
-        private int currentIndex;
+}
 
-        private readonly string lengthAliasName;
-        private readonly string arrayIndexAliasName;
+public class RepeatBindingNode<T, U> : RepeatBindingNode where T : class, IList<U>, new() {
 
-        // todo use const for list name
-        protected RepeatBinding(string arrayIndexAliasName, string lengthAliasName) : base("list") {
-            this.arrayIndexAliasName = arrayIndexAliasName;
-            this.lengthAliasName = lengthAliasName;
-        }
-        
-        protected void Reset(UITemplateContext context, IList activeList, int listLength) {
-            currentIndex = 0;
-            context.SetIntAlias(lengthAliasName, listLength);
-            context.activeList = activeList;
-        }
+    private readonly Expression<T> listExpression;
+    private T previousReference;
 
-        // todo -- use const for item alias
-        public void Next(UITemplateContext context) {
-            context.SetIntAlias(arrayIndexAliasName, currentIndex);
-            context.SetObjectAlias("$item", context.activeList[currentIndex]);
-            currentIndex++;
-        }
-
-        public void Complete(UITemplateContext context) {
-            context.RemoveIntAlias(arrayIndexAliasName);
-            context.RemoveIntAlias(lengthAliasName);
-        }
-
+    public RepeatBindingNode(Expression<T> listExpression, string itemAlias, string indexAlias, string lengthAlias) {
+        this.listExpression = listExpression;
+        this.itemAlias = itemAlias;
+        this.indexAlias = indexAlias;
+        this.lengthAlias = lengthAlias;
     }
-    
-    // todo make a another one for U ref types that can be compared using == 
-    public class RepeatBinding<T, U> : RepeatBinding where T : class, IList<U>, new() {
 
-        private readonly Expression<T> expression;
-
-        public RepeatBinding(Expression<T> expression, string indexAliasName, string lengthAliasName)
-            : base(indexAliasName, lengthAliasName) {
-            this.expression = expression;
-        }
-        // element passed to execute is the repeat element itself
-        // store per-instance data there to keep the binding re-usable
-
-        public override void Execute(UIElement element, UITemplateContext context) {
-
-            // todo re work this so that this binding handles all child binding execution
-            
-            UIRepeatElement<T> repeat = (UIRepeatElement<T>) element;
-
-            T list = expression.EvaluateTyped(context);
-            T previousList = repeat.previousListRef;
-
-            if (previousList == null && list == null) {
-                Reset(context, null, 0);
-                return;
-            }
-
-            if (previousList == null) {
-                repeat.previousListRef = new T();
-                for (int i = 0; i < list.Count; i++) {
-                    repeat.previousListRef.Add(list[i]);
-                    MetaData newItem = repeat.template.CreateScoped(repeat.scope);
-                    context.view.CreateElementFromTemplate(newItem, repeat);
-                    repeat.children.Add(newItem.element);
-                }
-                previousList = repeat.previousListRef;
-            }
-
-            // ReSharper disable once PossibleUnintendedReferenceComparison
-            if (list != previousList) { }
-
-            if (list.Count > previousList.Count) {
-                int previousCount = previousList.Count;
-                int diff = list.Count - previousCount;
-                for (int i = 0; i < diff; i++) {
-                    previousList.Add(list[previousCount + i]);
-                    MetaData newItem = repeat.template.CreateScoped(repeat.scope);
-                    context.view.CreateElementFromTemplate(newItem, repeat);
-                    repeat.children.Add(newItem.element);
-                }
-            }
-            else if (previousList.Count > list.Count) {
-                int diff = previousList.Count - list.Count;
-                for (int i = 0; i < diff; i++) {
-                    int index = previousList.Count - 1;
-                    context.view.DestroyElement(repeat.children[index]);
-                    previousList.RemoveAt(index);
-                }
-
-            }
-            
-            Reset(context, (IList)previousList, previousList.Count);
-
+    private void Reset() {
+        if (previousReference == null) {
+            return;
         }
 
-        public override bool IsConstant() {
-            return false;
+        previousReference.Clear();
+        previousReference = null;
+        for (int i = 0; i < element.ownChildren.Length; i++) {
+            context.view.DestroyElement(element.ownChildren[i]);
         }
 
+        ArrayPool<UIElement>.Release(element.ownChildren);
+        element.ownChildren = new UIElement[0];
+        element.templateChildren = element.ownChildren;
+    }
 
+    public override void Validate() {
+        T list = listExpression.EvaluateTyped(context);
+
+        if (list == null) {
+            Reset();
+            return;
+        }
+
+        if (previousReference == null) {
+            previousReference = new T();
+            ArrayPool<UIElement>.Release(element.ownChildren);
+            UIElement[] ownChildren = ArrayPool<UIElement>.GetExactSize(list.Count);
+            element.ownChildren = ownChildren;
+            for (int i = 0; i < list.Count; i++) {
+                previousReference.Add(list[i]);
+                MetaData newItem = template.CreateScoped(scope);
+                context.view.CreateElementFromTemplate(newItem, element);
+                ownChildren[i] = newItem.element;
+            }
+        }
+        else if (list.Count > previousReference.Count) {
+            UIElement[] oldChildren = element.ownChildren;
+            UIElement[] ownChildren = ArrayPool<UIElement>.GetExactSize(list.Count);
+            element.ownChildren = ownChildren;
+
+            for (int i = 0; i < oldChildren.Length; i++) {
+                ownChildren[i] = oldChildren[i];
+            }
+
+            int previousCount = previousReference.Count;
+            int diff = list.Count - previousCount;
+            for (int i = 0; i < diff; i++) {
+                previousReference.Add(list[previousCount + i]);
+                MetaData newItem = template.CreateScoped(scope);
+                context.view.CreateElementFromTemplate(newItem, element);
+                ownChildren[previousCount + i] = newItem.element;
+            }
+
+            ArrayPool<UIElement>.Release(oldChildren);
+        }
+        else if (previousReference.Count > list.Count) {
+            UIElement[] oldChildren = element.ownChildren;
+            UIElement[] ownChildren = ArrayPool<UIElement>.GetExactSize(list.Count);
+            element.ownChildren = ownChildren;
+
+            int diff = previousReference.Count - list.Count;
+            for (int i = 0; i < diff; i++) {
+                int index = previousReference.Count - 1;
+                previousReference.RemoveAt(index);
+                context.view.DestroyElement(oldChildren[index]);
+            }
+
+            for (int i = 0; i < list.Count; i++) {
+                ownChildren[i] = oldChildren[i];
+            }
+
+            ArrayPool<UIElement>.Release(oldChildren);
+        }
+
+        element.templateChildren = element.ownChildren;
+    }
+
+    public override void OnUpdate(SkipTree<BindingNode>.TreeNode[] children) {
+        for (int i = 0; i < bindings.Length; i++) {
+            if (bindings[i].isEnabled) {
+                bindings[i].Execute(element, context);
+            }
+        }
+
+        if (!element.isEnabled || children == null || previousReference == null) {
+            return;
+        }
+
+        context.SetIntAlias(lengthAlias, previousReference.Count);
+
+        for (int i = 0; i < previousReference.Count; i++) {
+            context.SetIntAlias(indexAlias, i);
+            context.SetObjectAlias(itemAlias, previousReference[i]);
+            children[i].item.OnUpdate(children[i].children);
+        }
+
+        context.RemoveObjectAlias(itemAlias);
+        context.RemoveIntAlias(lengthAlias);
+        context.RemoveIntAlias(indexAlias);
     }
 
 }

@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using JetBrains.Annotations;
 using Src.Compilers.AliasSource;
 
@@ -28,9 +29,22 @@ namespace Src {
         public override MetaData CreateScoped(TemplateScope inputScope) {
             UIImageElement instance = new UIImageElement();
 
-            MetaData data = GetCreationData(instance, inputScope.context);
-
-            return data;
+            MetaData instanceData = GetCreationData(instance, inputScope.context);
+            instanceData.constantBindings = constantBindings;
+            instanceData.conditionalBindings = conditionalBindings;
+            instanceData.bindings = bindings;
+            instanceData.context = inputScope.context;
+            instanceData.inputBindings = inputBindings;
+            instanceData.constantStyleBindings = constantStyleBindings;
+            instanceData.element.templateAttributes = templateAttributes;
+            instanceData.baseStyles = baseStyles;
+            instanceData.mouseEventHandlers = mouseEventHandlers;
+            instanceData.dragEventCreators = dragEventCreators;
+            instanceData.dragEventHandlers = dragEventHandlers;
+            instanceData.keyboardEventHandlers = keyboardEventHandlers;
+            instanceData.element.templateChildren = inputScope.inputChildren.Select(c => c.element).ToArray();
+            instanceData.element.ownChildren = instanceData.children.Select(c => c.element).ToArray();
+            return instanceData;
         }
 
         [Pure]

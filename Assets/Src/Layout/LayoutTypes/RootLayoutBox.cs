@@ -9,7 +9,9 @@ namespace Src.Layout.LayoutTypes {
             : base(layoutSystem, null) { }
 
         public override void RunLayout() {
-            
+            if (children == null || children.Count == 0) {
+                return;
+            }
             children[0].SetAllocatedRect(
                 0, 0, 
                 Mathf.Min(children[0].PreferredWidth, actualWidth), 
@@ -22,7 +24,7 @@ namespace Src.Layout.LayoutTypes {
         }
 
 
-        public override void OnChildAddedChild(LayoutBox child) {
+        public override void OnChildAdded(LayoutBox child) {
             children.Add(child);
         }
 

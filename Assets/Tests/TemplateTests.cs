@@ -10,9 +10,12 @@ public class TemplateTests {
 
     public ParsedTemplate dummyTemplate;
 
-    class TestTarget {
+    class TestTarget : IExpressionContextProvider {
 
         public string stringValue;
+
+        public int UniqueId => 0;
+        public IExpressionContextProvider ExpressionParent => null;
 
     }
     

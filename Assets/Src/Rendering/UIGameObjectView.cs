@@ -13,7 +13,7 @@ namespace Rendering {
         
         public UIGameObjectView(Type elementType, RectTransform viewTransform) : base(elementType) {
             this.rectTransform = viewTransform;
-            layoutSystem = new LayoutSystem2(new GOTextSizeCalculator(), styleSystem);
+            layoutSystem = new LayoutSystem2(styleSystem);
             renderSystem = new GORenderSystem(layoutSystem, styleSystem, viewTransform);
             inputSystem = new GOInputSystem(layoutSystem, styleSystem);
             systems.Add(layoutSystem);
@@ -26,7 +26,7 @@ namespace Rendering {
                 x = 0,
                 y = 0
             });
-            Canvas.ForceUpdateCanvases();
+            //Canvas.ForceUpdateCanvases();
         }
 
     }

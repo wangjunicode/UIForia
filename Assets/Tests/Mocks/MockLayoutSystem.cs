@@ -1,20 +1,21 @@
 using Rendering;
 using Src.Layout;
+using Src.Layout.LayoutTypes;
 using Src.Systems;
 
 namespace Tests.Mocks {
 
     public class MockLayoutSystem : LayoutSystem2 {
 
-        public MockLayoutSystem(ITextSizeCalculator textSizeCalculator, IStyleSystem styleSystem)
-            : base(textSizeCalculator, styleSystem) {
+        public MockLayoutSystem(IStyleSystem styleSystem)
+            : base(styleSystem) {
         }
 
-//        public LayoutBox GetBoxForElement(UIElement element) {
-//            LayoutBox box;
-//            m_LayoutBoxMap.TryGetValue(element.id, out box);
-//            return box;
-//        }
+        public LayoutBox GetBoxForElement(UIElement element) {
+            LayoutBox box;
+            m_LayoutBoxMap.TryGetValue(element.id, out box);
+            return box;
+        }
 
     }
 

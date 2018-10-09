@@ -18,7 +18,7 @@ public enum QueryOptions {
 }
 
 [DebuggerDisplay("{GetType()} id={id} {name}")]
-public class UIElement : IHierarchical {
+public class UIElement : IHierarchical, IExpressionContextProvider {
 
     // todo some of this stuff isn't used often or present for many elements. may make sense to move to dictionaries so we keep things compact
 
@@ -41,9 +41,10 @@ public class UIElement : IHierarchical {
                      | UIElementFlags.RequiresRendering;
     }
 
-    internal UITemplateContext templateContext;
+    internal UIElement templateParent;
     internal UIElement[] templateChildren;
     internal UIElement[] ownChildren;
+    internal UITemplateContext templateContext;
 
     public LayoutResult layoutResult { get; internal set; }
 
@@ -242,8 +243,8 @@ public class UIElement : IHierarchical {
         if (name != null) {
             retn += "<" + name + ":" + GetType().Name + " " + id + ">";
         }
-        else if (HasAttribute("style")) {
-            return GetType().Name + " " + GetAttribute("style");
+        else if (style.HasBaseStyles) {
+            return "<" + GetType().Name + ": " + style.GetBaseStyleNames() + ">";
         }
         else {
             retn += "<" + GetType().Name + " " + id + ">";
@@ -268,6 +269,9 @@ public class UIElement : IHierarchical {
     }
 
     public int UniqueId => id;
+
+    IExpressionContextProvider IExpressionContextProvider.ExpressionParent => templateParent;
+
     public IHierarchical Element => this;
     public IHierarchical Parent => parent;
 

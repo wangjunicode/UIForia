@@ -2,7 +2,6 @@
 using System.Collections.Generic;
 using System.Reflection;
 using Src.Input;
-using UnityEngine;
 
 namespace Src.Compilers {
 
@@ -22,7 +21,6 @@ namespace Src.Compilers {
         public void SetContext(ContextDefinition context) {
             compiler.SetContext(context);
         }
-
 
         public List<DragEventCreator> CompileDragEventCreators(Type targetType, List<AttributeDefinition> attributeDefinitions) {
             List<DragEventCreator> creatorsFromTemplateAttrs = CompileDragCreatorTemplateAttributes(attributeDefinitions);

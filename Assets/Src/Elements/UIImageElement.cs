@@ -4,11 +4,10 @@ using Src.Systems;
 using Src.Util;
 using UnityEngine;
 using UnityEngine.UI;
-using Vector2 = System.Numerics.Vector2;
 
 namespace Src {
 
-    public class UIImageElement : UIElement, IDrawable {
+    public class UIImageElement : UIElement, IDrawable, IPropertyChangedHandler {
 
         public event Action<IDrawable> onMeshDirty;
         public event Action<IDrawable> onMaterialDirty;
@@ -25,24 +24,16 @@ namespace Src {
             flags |= UIElementFlags.Primitive;
             IsMaterialDirty = true;
             IsGeometryDirty = true;
-//            useNativeSize = true; // hack for now
         }
 
         public Texture2D Asset => src.asset;
 
-//        public Texture2DAssetReference src {
-//            get { return _src; }
-//            set {
-//                _src = value;
-//                if (_src.asset != null) {
-//                    style.SetPreferredWidth(_src.asset.width, StyleState.Normal);
-//                    style.SetPreferredHeight(_src.asset.height, StyleState.Normal);
-//                }
-//
-//                IsGeometryDirty = true;
-//                onMeshDirty?.Invoke(this);
-//            }
-//        }
+        public void OnPropertyChanged(string propertyName, object oldValue) {
+            if (propertyName == nameof(src)) {
+                IsMaterialDirty = true;
+                onMaterialDirty?.Invoke(this);
+            }
+        }
 
         public void OnAllocatedSizeChanged() {
             if (scaleToFitContainer) { }
@@ -52,9 +43,6 @@ namespace Src {
 
         public Mesh GetMesh() {
             if (!IsGeometryDirty) return mesh;
-//            if (mesh != null) {
-//                MeshUtil.Release(mesh);
-//            }
 
             Color32 color = style.computedStyle.BackgroundColor;
             if (!ColorUtil.IsDefined(style.computedStyle.BackgroundColor)) {
@@ -77,7 +65,6 @@ namespace Src {
 //
 //            float offsetX = style.computedStyle.PaddingLeft.value + style.computedStyle.BorderLeft.value;
 //            float offsetY = style.computedStyle.PaddingTop.value + style.computedStyle.BorderTop.value;
-            
             mesh = MeshUtil.CreateStandardUIMesh(layoutResult.allocatedSize, color);
 
             return mesh;
@@ -94,6 +81,8 @@ namespace Src {
         public Texture GetMainTexture() {
             return src.asset;
         }
+
+
 
     }
 

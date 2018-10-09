@@ -40,7 +40,9 @@ namespace Src.Systems {
             }
 
             if (treeRoot.children != null && treeRoot.children.Length > 0) {
-                treeRoot.children[0].item?.OnUpdate(treeRoot.children[0].children);
+                for (int i = 0; i < treeRoot.children.Length; i++) {
+                    treeRoot.children[i].item?.OnUpdate(treeRoot.children[i].children);
+                }
             }
         }
 
@@ -108,7 +110,8 @@ namespace Src.Systems {
 
         public void OnElementCreatedFromTemplate(MetaData data) {
             UIElement element = data.element;
-
+            isTreeDirty = true;
+            
             if (data.constantBindings.Length != 0) {
                 for (int i = 0; i < data.constantBindings.Length; i++) {
                     data.constantBindings[i].Execute(element, data.context);

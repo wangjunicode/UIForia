@@ -1,6 +1,8 @@
+using System.Collections.Generic;
 using NUnit.Framework;
 using Rendering;
 using Src;
+using Src.Layout.LayoutTypes;
 using Src.Systems;
 using Tests.Mocks;
 using UnityEngine;
@@ -23,7 +25,8 @@ public class LayoutSystemTests {
         public UIGroupElement child0;
         public UIGroupElement child1;
         public UIGroupElement child2;
-
+        public List<int> list;
+        
         public override void OnCreate() {
             child0 = FindById<UIGroupElement>("child0");
             child1 = FindById<UIGroupElement>("child1");
@@ -254,5 +257,27 @@ public class LayoutSystemTests {
         Assert.AreEqual(new Rect(0, 650, 100, 100), root.child2.layoutResult.ScreenRect);
         Assert.AreEqual(new Rect(0, 100, 300, 500), nestedChild1.layoutResult.ScreenRect);
         Assert.AreEqual(new Rect(0, 600, 200, 50), nestedChild2.layoutResult.ScreenRect);
+    }
+
+    [Test]
+    public void DoesNotAddLayoutBoxForNonLaidOutElements() {
+        string template = @"
+        <UITemplate>
+            <Style classPath='LayoutSystemTests+LayoutTestThing+Style'/>
+            <Contents style.layoutType='Flex'>
+                <Group x-id='child0' style.width='100f' style.height='100f'/>
+                <Repeat x-id='repeat' list='{list}'>
+                    <Group x-id='repeat-child-1' style.width='300f' style.height='50f'/>
+                </Repeat>
+                <Group x-id='child2' style.width='100f' style.height='100f'/>
+            </Contents>
+        </UITemplate>
+        ";
+        MockView mockView = new MockView(typeof(LayoutTestThing), template);
+        mockView.Initialize();
+        LayoutTestThing root = (LayoutTestThing) mockView.RootElement;
+        MockLayoutSystem layoutSystem = (MockLayoutSystem) mockView.layoutSystem;
+        LayoutBox box = layoutSystem.GetBoxForElement(root.FindById("repeat"));
+        Assert.IsNull(box);
     }
 }

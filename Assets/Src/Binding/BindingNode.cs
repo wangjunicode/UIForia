@@ -7,6 +7,8 @@ public class BindingNode : IHierarchical {
     public UIElement element;
 
     public virtual void OnUpdate(SkipTree<BindingNode>.TreeNode[] children) {
+        context.current = element;
+        
         for (int i = 0; i < bindings.Length; i++) {
             if (bindings[i].isEnabled) {
                 bindings[i].Execute(element, context);

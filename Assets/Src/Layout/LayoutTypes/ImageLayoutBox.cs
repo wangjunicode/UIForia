@@ -11,6 +11,9 @@ namespace Src.Layout.LayoutTypes {
 
         public ImageLayoutBox(LayoutSystem2 layoutSystem, UIElement element) : base(layoutSystem, element) {
             image = (UIImageElement) element;
+            image.onMaterialDirty += (e) => {
+                parent.OnChildSizeChanged();
+            };
         }
 
         public override float PreferredWidth {

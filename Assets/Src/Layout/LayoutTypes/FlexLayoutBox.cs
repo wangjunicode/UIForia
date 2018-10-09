@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using Rendering;
 using Src.Systems;
 using Src.Util;
@@ -9,6 +10,8 @@ namespace Src.Layout.LayoutTypes {
 
     // todo -- pool this
     // todo -- handle incremental layout, ie no layout when not required or only run partial like alignment change
+   
+    [DebuggerDisplay("{element.ToString()}")]
     public class FlexLayoutBox : LayoutBox {
 
         private List<FlexTrack> tracks;
@@ -267,7 +270,15 @@ namespace Src.Layout.LayoutTypes {
                 return;
             }
 
-            children.Add(child);
+            int idx = FindLayoutSiblingIndex(child.element);
+            
+            if (idx <= children.Count) {
+                children.Insert(idx, child);
+            }
+            else {
+                children.Add(child);
+            }
+          
             if (widths.Length <= children.Count) {
                 ArrayPool<FlexItemAxis>.Resize(ref widths, children.Count);
             }
@@ -275,8 +286,40 @@ namespace Src.Layout.LayoutTypes {
             if (heights.Length <= children.Count) {
                 ArrayPool<FlexItemAxis>.Resize(ref heights, children.Count);
             }
+            
+            if (child.element.isEnabled) {
+                RequestParentLayoutIfContentBased();
+                RequestLayout();
+            }
         }
 
+        private static int FindLayoutSiblingIndex(UIElement element) {
+            // if parent is not in layout
+            // we want to replace it
+            // so find parent's sibling index
+            // spin through laid out children until finding target
+            // use parent index + child index
+            if (element.parent == null) return 0;
+
+            int idx = 0;
+            for (int i = 0; i < element.parent.ownChildren.Length; i++) {
+                UIElement sibling = element.parent.ownChildren[i];
+                if (sibling == element) {
+                    break;
+                }
+
+                if ((sibling.flags & UIElementFlags.RequiresLayout) != 0 && (sibling.style.computedStyle.LayoutBehavior & LayoutBehavior.Ignored) == 0) {
+                    idx++;
+                }
+            }
+
+            if ((element.parent.flags & UIElementFlags.RequiresLayout) == 0) {
+                idx += FindLayoutSiblingIndex(element.parent);
+            }
+
+            return idx;
+        }
+        
         public override void OnChildRemoved(LayoutBox child) {
             ignoredChildren.Remove(child);
             if (children.Remove(child)) {

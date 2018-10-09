@@ -79,7 +79,6 @@ namespace Src.Systems {
 
             return Texture2D.whiteTexture;
         }
-
         
         public Material GetMaterial() {
 

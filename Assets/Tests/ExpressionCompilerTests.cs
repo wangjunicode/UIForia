@@ -20,7 +20,7 @@ public class ExpressionCompilerTests {
 
     private class EmptyTarget { }
 
-    private class TestRoot {
+    private class TestRoot : IExpressionContextProvider {
 
         public float value;
         public ValueContainer valueContainer;
@@ -125,7 +125,10 @@ public class ExpressionCompilerTests {
         public static string StaticNonVoid4(string arg0, string arg1, string arg2, string arg3) {
             return "StaticNonVoid4" + arg0 + arg1 + arg2 + arg3;
         }
-        
+
+        public int UniqueId => 0;
+        public IExpressionContextProvider ExpressionParent => null;
+
     }
 
     private static ContextDefinition testContextDef = new ContextDefinition(typeof(TestRoot));
@@ -311,7 +314,7 @@ public class ExpressionCompilerTests {
         ExpressionCompiler compiler = new ExpressionCompiler(testContextDef);
         Expression expression = compiler.Compile(parser.Parse());
 
-        Assert.IsInstanceOf<AccessExpression<float>>(expression);
+        Assert.IsInstanceOf<AccessExpression<float, TestRoot>>(expression);
         Assert.AreEqual(123f, expression.Evaluate(ctx));
     }
 
@@ -329,7 +332,7 @@ public class ExpressionCompilerTests {
         ExpressionCompiler compiler = new ExpressionCompiler(testContextDef);
         Expression expression = compiler.Compile(parser.Parse());
 
-        Assert.IsInstanceOf<AccessExpression<int>>(expression);
+        Assert.IsInstanceOf<AccessExpression<int, TestRoot>>(expression);
         Assert.AreEqual(11, expression.Evaluate(ctx));
     }
 
@@ -346,7 +349,7 @@ public class ExpressionCompilerTests {
         ExpressionParser parser = new ExpressionParser("{valueContainer.values[1].x}");
         ExpressionCompiler compiler = new ExpressionCompiler(testContextDef);
         Expression expression = compiler.Compile(parser.Parse());
-        Assert.IsInstanceOf<AccessExpression<float>>(expression);
+        Assert.IsInstanceOf<AccessExpression<float, TestRoot>>(expression);
         Assert.AreEqual(13, expression.Evaluate(ctx));
     }
 
@@ -357,14 +360,14 @@ public class ExpressionCompilerTests {
 
         ExpressionContext ctx = new ExpressionContext(target);
 
-        ctx.SetObjectAlias("$item", target.valueContainer);
+        ctx.SetContextValue(target, "$item", target.valueContainer);
 
         testContextDef.AddRuntimeAlias("$item", typeof(ValueContainer));
 
         ExpressionParser parser = new ExpressionParser("{$item.x}");
         ExpressionCompiler compiler = new ExpressionCompiler(testContextDef);
         Expression expression = compiler.Compile(parser.Parse());
-        Assert.IsInstanceOf<AccessExpression<float>>(expression);
+        Assert.IsInstanceOf<AccessExpression<float, ValueContainer>>(expression);
         Assert.AreEqual(13, expression.Evaluate(ctx));
     }
 
@@ -377,12 +380,12 @@ public class ExpressionCompilerTests {
         target.someArray.Add(111);
         ExpressionContext ctx = new ExpressionContext(target);
         testContextDef.AddRuntimeAlias("$i", typeof(int));
-        ctx.SetIntAlias("$i", 2);
+        ctx.SetContextValue(target, "$i", 2);
 
         ExpressionParser parser = new ExpressionParser("{someArray[$i]}");
         ExpressionCompiler compiler = new ExpressionCompiler(testContextDef);
         Expression expression = compiler.Compile(parser.Parse());
-        Assert.IsInstanceOf<AccessExpression<int>>(expression);
+        Assert.IsInstanceOf<AccessExpression<int, TestRoot>>(expression);
         Assert.AreEqual(111, expression.Evaluate(ctx));
     }
 
@@ -395,12 +398,12 @@ public class ExpressionCompilerTests {
         target.someArray.Add(111);
         ExpressionContext ctx = new ExpressionContext(target);
         testContextDef.AddRuntimeAlias("$i", typeof(int));
-        ctx.SetIntAlias("$i", 2);
+        ctx.SetContextValue(target, "$i", 2);
 
         ExpressionParser parser = new ExpressionParser("{someArray[$i - 1]}");
         ExpressionCompiler compiler = new ExpressionCompiler(testContextDef);
         Expression expression = compiler.Compile(parser.Parse());
-        Assert.IsInstanceOf<AccessExpression<int>>(expression);
+        Assert.IsInstanceOf<AccessExpression<int, TestRoot>>(expression);
         Assert.AreEqual(11, expression.Evaluate(ctx));
     }
 

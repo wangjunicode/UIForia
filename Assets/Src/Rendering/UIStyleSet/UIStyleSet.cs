@@ -139,6 +139,31 @@ namespace Rendering {
 
         public bool HandlesOverflowY => computedStyle.OverflowY != Overflow.None;
 
+        public bool HasBaseStyles {
+            get {
+                if (appliedStyles == null) return false;
+                for (int i = 0; i < appliedStyles.Length; i++) {
+                    if (appliedStyles[i].type == StyleType.Shared) {
+                        return true;
+                    }
+                }
+
+                return false;
+            }
+        }
+
+        public string GetBaseStyleNames() {
+            string output = string.Empty;
+            if (appliedStyles == null) return output;
+            for (int i = 0; i < appliedStyles.Length; i++) {
+                if (appliedStyles[i].type == StyleType.Shared) {
+                    output += appliedStyles[i].style.Id;
+                }
+            }
+
+            return output;
+        }
+
         public void SetNormalStyle(UIStyle style) {
             SetInstanceStyle(style, StyleState.Normal);
         }
@@ -329,8 +354,7 @@ namespace Rendering {
                 }
             }
 
-            
-            
+
             s_DefinedMap.Clear();
         }
 

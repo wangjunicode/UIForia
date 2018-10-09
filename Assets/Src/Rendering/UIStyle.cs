@@ -36,18 +36,19 @@ namespace Rendering {
 
         private static int NextStyleId;
 
-        private string m_Id;
         private List<StyleProperty> m_StyleProperties;
         private TextPropertyIdFlag m_DefinedTextProperties;
 
+        public string Id { get; internal set; }
+
         public UIStyle(string id = null) {
-            m_Id = id ?? "Style: " + (NextStyleId++);
+            Id = id ?? "Style: " + (NextStyleId++);
             m_StyleProperties = ListPool<StyleProperty>.Get();
             m_DefinedTextProperties = 0;
         }
 
         public UIStyle(UIStyle toCopy) {
-            m_Id = "Copy Style: " + (NextStyleId++);
+            Id = "Copy Style: " + (NextStyleId++);
             m_StyleProperties.AddRange(toCopy.m_StyleProperties);
             m_DefinedTextProperties = toCopy.m_DefinedTextProperties;
         }

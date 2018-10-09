@@ -48,9 +48,37 @@ namespace Src.Systems {
                 transform.anchorMax = new Vector2(0, 1);
                 transform.pivot = new Vector2(0, 1);
                 transform.anchoredPosition = Vector3.zero;
+                transform.SetSiblingIndex(FindRenderedSiblingIndex(item.element));
             };
 
             this.styleSystem = styleSystem;
+        }
+
+        private static int FindRenderedSiblingIndex(UIElement element) {
+            // if parent is not rendered
+            // we want to replace
+            // so find parent's sibling index
+            // spin through rendered children until finding target
+            // use parent index + child index
+            if (element.parent == null) return 0;
+
+            int idx = 0;
+            for (int i = 0; i < element.parent.ownChildren.Length; i++) {
+                UIElement sibling = element.parent.ownChildren[i];
+                if (sibling == element) {
+                    break;
+                }
+
+                if ((sibling.flags & UIElementFlags.RequiresRendering) != 0 && sibling.isEnabled) {
+                    idx++;
+                }
+            }
+
+            if ((element.parent.flags & UIElementFlags.RequiresRendering) == 0) {
+                idx += FindRenderedSiblingIndex(element.parent);
+            }
+
+            return idx;
         }
 
         public void OnReady() { }
@@ -79,6 +107,10 @@ namespace Src.Systems {
         private void InitializeRenderables() {
             for (int i = 0; i < m_ToInitialize.Count; i++) {
                 UIElement element = m_ToInitialize[i];
+                if ((element.flags & UIElementFlags.RequiresRendering) == 0) {
+                    continue;
+                }
+
                 GameObject go = new GameObject(element.ToString());
                 RectTransform transform = go.AddComponent<RectTransform>();
                 CanvasRenderer canvasRenderer = go.AddComponent<CanvasRenderer>();
@@ -114,10 +146,6 @@ namespace Src.Systems {
 
                 RenderData renderData = renderSkipTree.GetItem(element.id);
 
-                if (element is UIImageElement) { }
-
-//                ContentBoxRect margin = element.style.computedStyle.margin;
-//
                 Vector2 position = layoutResult.localPosition;
                 Vector2 size = new Vector2(layoutResult.allocatedWidth, layoutResult.allocatedHeight);
 
@@ -126,17 +154,17 @@ namespace Src.Systems {
                 UIElement ptr = element.parent;
 
                 // while parent is not rendered, localPosition += nonRenderedParent.localPosition
-//                while (ptr != null) {
-//                    RectTransform ancestorTransform;
-//
-//                    if (m_TransformMap.TryGetValue(ptr.id, out ancestorTransform)) {
-//                        break;
-//                    }
-//
-//                    position += ptr.layoutResult.localPosition;
-//
-//                    ptr = ptr.parent;
-//                }
+                while (ptr != null) {
+                    RectTransform ancestorTransform;
+
+                    if (m_TransformMap.TryGetValue(ptr.id, out ancestorTransform)) {
+                        break;
+                    }
+
+                    position += ptr.layoutResult.localPosition;
+
+                    ptr = ptr.parent;
+                }
 
                 Vector3 outputPosition = new Vector3(position.x, Screen.height - position.y);
                 Quaternion outputRotation = Quaternion.identity;
@@ -149,7 +177,8 @@ namespace Src.Systems {
                 }
 
                 transform.anchoredPosition = new Vector3(outputPosition.x, -position.y);
-
+                transform.rotation = outputRotation;
+                
                 if (transform.sizeDelta != size) {
                     transform.sizeDelta = size;
 

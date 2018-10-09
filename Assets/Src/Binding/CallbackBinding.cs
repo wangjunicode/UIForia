@@ -20,7 +20,7 @@ namespace Src.Compilers {
         }
 
         public override void Execute(UIElement element, UITemplateContext context) {
-            evtInfo.AddEventHandler(element, Delegate.CreateDelegate(evtInfo.EventHandlerType, new Handler(expression, context), runInfo));
+            evtInfo.AddEventHandler(element, Delegate.CreateDelegate(evtInfo.EventHandlerType, new Handler(expression, context, element), runInfo));
         }
 
         public override bool IsConstant() {
@@ -32,14 +32,17 @@ namespace Src.Compilers {
 
             private readonly UITemplateContext ctx;
             private readonly Expression<Terminal> expression;
+            private readonly IExpressionContextProvider target;
 
-            public Handler(Expression<Terminal> expression, UITemplateContext ctx) {
+            public Handler(Expression<Terminal> expression, UITemplateContext ctx, IExpressionContextProvider target) {
                 this.expression = expression;
                 this.ctx = ctx;
+                this.target = target;
             }
 
             [UsedImplicitly]
             public void Run() {
+                ctx.current = target;
                 expression.EvaluateTyped(ctx);
             }
 
@@ -62,7 +65,7 @@ namespace Src.Compilers {
         }
 
         public override void Execute(UIElement element, UITemplateContext context) {
-            evtInfo.AddEventHandler(element, Delegate.CreateDelegate(evtInfo.EventHandlerType, new Handler(expression, context), runInfo));
+            evtInfo.AddEventHandler(element, Delegate.CreateDelegate(evtInfo.EventHandlerType, new Handler(expression, context, element), runInfo));
         }
 
         public override bool IsConstant() {
@@ -73,20 +76,24 @@ namespace Src.Compilers {
 
             private readonly UITemplateContext ctx;
             private readonly Expression<Terminal> expression;
+            private readonly IExpressionContextProvider target;
 
-            public Handler(Expression<Terminal> expression, UITemplateContext ctx) {
+            public Handler(Expression<Terminal> expression, UITemplateContext ctx, IExpressionContextProvider target) {
                 this.expression = expression;
                 this.ctx = ctx;
+                this.target = target;
             }
 
             [UsedImplicitly]
             public void Run(T evtArg0) {
-                ctx.SetObjectAlias(PropertyBindingCompiler.EvtArgDefaultName, evtArg0);
-                ctx.SetObjectAlias(PropertyBindingCompiler.EvtArgNames[0], evtArg0);
+                ctx.current = target;
+                ctx.SetContextValue(target, PropertyBindingCompiler.EvtArgDefaultName, evtArg0);
+                ctx.SetContextValue(target, PropertyBindingCompiler.EvtArgNames[0], evtArg0);
 
                 expression.EvaluateTyped(ctx);
-                ctx.RemoveObjectAlias(PropertyBindingCompiler.EvtArgDefaultName);
-                ctx.RemoveObjectAlias(PropertyBindingCompiler.EvtArgNames[0]);
+
+                ctx.RemoveContextValue<T>(target, PropertyBindingCompiler.EvtArgDefaultName);
+                ctx.RemoveContextValue<T>(target, PropertyBindingCompiler.EvtArgNames[0]);
             }
 
         }
@@ -108,7 +115,7 @@ namespace Src.Compilers {
         }
 
         public override void Execute(UIElement element, UITemplateContext context) {
-            evtInfo.AddEventHandler(element, Delegate.CreateDelegate(evtInfo.EventHandlerType, new Handler(expression, context), runInfo));
+            evtInfo.AddEventHandler(element, Delegate.CreateDelegate(evtInfo.EventHandlerType, new Handler(expression, context, element), runInfo));
         }
 
         public override bool IsConstant() {
@@ -119,21 +126,24 @@ namespace Src.Compilers {
 
             private readonly UITemplateContext ctx;
             private readonly Expression<Terminal> expression;
+            private readonly IExpressionContextProvider target;
 
-            public Handler(Expression<Terminal> expression, UITemplateContext ctx) {
+            public Handler(Expression<Terminal> expression, UITemplateContext ctx, IExpressionContextProvider target) {
                 this.expression = expression;
                 this.ctx = ctx;
+                this.target = target;
             }
 
             [UsedImplicitly]
             public void Run(T evtArg0, U evtArg1) {
-                ctx.SetObjectAlias(PropertyBindingCompiler.EvtArgDefaultName, evtArg0);
-                ctx.SetObjectAlias(PropertyBindingCompiler.EvtArgNames[0], evtArg0);
-                ctx.SetObjectAlias(PropertyBindingCompiler.EvtArgNames[1], evtArg1);
+                ctx.current = target;
+                ctx.SetContextValue(target, PropertyBindingCompiler.EvtArgDefaultName, evtArg0);
+                ctx.SetContextValue(target, PropertyBindingCompiler.EvtArgNames[0], evtArg0);
+                ctx.SetContextValue(target, PropertyBindingCompiler.EvtArgNames[1], evtArg1);
                 expression.EvaluateTyped(ctx);
-                ctx.RemoveObjectAlias(PropertyBindingCompiler.EvtArgDefaultName);
-                ctx.RemoveObjectAlias(PropertyBindingCompiler.EvtArgNames[0]);
-                ctx.RemoveObjectAlias(PropertyBindingCompiler.EvtArgNames[1]);
+                ctx.RemoveContextValue<T>(target, PropertyBindingCompiler.EvtArgDefaultName);
+                ctx.RemoveContextValue<T>(target, PropertyBindingCompiler.EvtArgNames[0]);
+                ctx.RemoveContextValue<T>(target, PropertyBindingCompiler.EvtArgNames[1]);
             }
 
         }
@@ -155,7 +165,7 @@ namespace Src.Compilers {
         }
 
         public override void Execute(UIElement element, UITemplateContext context) {
-            evtInfo.AddEventHandler(element, Delegate.CreateDelegate(evtInfo.EventHandlerType, new Handler(expression, context), runInfo));
+            evtInfo.AddEventHandler(element, Delegate.CreateDelegate(evtInfo.EventHandlerType, new Handler(expression, context, element), runInfo));
         }
 
         public override bool IsConstant() {
@@ -166,23 +176,26 @@ namespace Src.Compilers {
 
             private readonly UITemplateContext ctx;
             private readonly Expression<Terminal> expression;
+            private readonly IExpressionContextProvider target;
 
-            public Handler(Expression<Terminal> expression, UITemplateContext ctx) {
+            public Handler(Expression<Terminal> expression, UITemplateContext ctx, IExpressionContextProvider target) {
                 this.expression = expression;
                 this.ctx = ctx;
+                this.target = target;
             }
 
             [UsedImplicitly]
             public void Run(T evtArg0, U evtArg1, V evtArg2) {
-                ctx.SetObjectAlias(PropertyBindingCompiler.EvtArgDefaultName, evtArg0);
-                ctx.SetObjectAlias(PropertyBindingCompiler.EvtArgNames[0], evtArg0);
-                ctx.SetObjectAlias(PropertyBindingCompiler.EvtArgNames[1], evtArg1);
-                ctx.SetObjectAlias(PropertyBindingCompiler.EvtArgNames[2], evtArg2);
+                ctx.current = target;
+                ctx.SetContextValue(target, PropertyBindingCompiler.EvtArgDefaultName, evtArg0);
+                ctx.SetContextValue(target, PropertyBindingCompiler.EvtArgNames[0], evtArg0);
+                ctx.SetContextValue(target, PropertyBindingCompiler.EvtArgNames[1], evtArg1);
+                ctx.SetContextValue(target, PropertyBindingCompiler.EvtArgNames[2], evtArg2);
                 expression.EvaluateTyped(ctx);
-                ctx.RemoveObjectAlias(PropertyBindingCompiler.EvtArgDefaultName);
-                ctx.RemoveObjectAlias(PropertyBindingCompiler.EvtArgNames[0]);
-                ctx.RemoveObjectAlias(PropertyBindingCompiler.EvtArgNames[1]);
-                ctx.RemoveObjectAlias(PropertyBindingCompiler.EvtArgNames[2]);
+                ctx.RemoveContextValue<T>(target, PropertyBindingCompiler.EvtArgDefaultName);
+                ctx.RemoveContextValue<T>(target, PropertyBindingCompiler.EvtArgNames[0]);
+                ctx.RemoveContextValue<T>(target, PropertyBindingCompiler.EvtArgNames[1]);
+                ctx.RemoveContextValue<T>(target, PropertyBindingCompiler.EvtArgNames[2]);
             }
 
         }
@@ -204,7 +217,7 @@ namespace Src.Compilers {
         }
 
         public override void Execute(UIElement element, UITemplateContext context) {
-            evtInfo.AddEventHandler(element, Delegate.CreateDelegate(evtInfo.EventHandlerType, new Handler(expression, context), runInfo));
+            evtInfo.AddEventHandler(element, Delegate.CreateDelegate(evtInfo.EventHandlerType, new Handler(expression, context, element), runInfo));
         }
 
         public override bool IsConstant() {
@@ -215,25 +228,28 @@ namespace Src.Compilers {
 
             private readonly UITemplateContext ctx;
             private readonly Expression<Terminal> expression;
+            private readonly IExpressionContextProvider target;
 
-            public Handler(Expression<Terminal> expression, UITemplateContext ctx) {
+            public Handler(Expression<Terminal> expression, UITemplateContext ctx, IExpressionContextProvider target) {
                 this.expression = expression;
                 this.ctx = ctx;
+                this.target = target;
             }
 
             [UsedImplicitly]
             public void Run(T evtArg0, U evtArg1, V evtArg2, W evtArg3) {
-                ctx.SetObjectAlias(PropertyBindingCompiler.EvtArgDefaultName, evtArg0);
-                ctx.SetObjectAlias(PropertyBindingCompiler.EvtArgNames[0], evtArg0);
-                ctx.SetObjectAlias(PropertyBindingCompiler.EvtArgNames[1], evtArg1);
-                ctx.SetObjectAlias(PropertyBindingCompiler.EvtArgNames[2], evtArg2);
-                ctx.SetObjectAlias(PropertyBindingCompiler.EvtArgNames[3], evtArg3);
+                ctx.current = target;
+                ctx.SetContextValue(target, PropertyBindingCompiler.EvtArgDefaultName, evtArg0);
+                ctx.SetContextValue(target, PropertyBindingCompiler.EvtArgNames[0], evtArg0);
+                ctx.SetContextValue(target, PropertyBindingCompiler.EvtArgNames[1], evtArg1);
+                ctx.SetContextValue(target, PropertyBindingCompiler.EvtArgNames[2], evtArg2);
+                ctx.SetContextValue(target, PropertyBindingCompiler.EvtArgNames[3], evtArg3);
                 expression.EvaluateTyped(ctx);
-                ctx.RemoveObjectAlias(PropertyBindingCompiler.EvtArgDefaultName);
-                ctx.RemoveObjectAlias(PropertyBindingCompiler.EvtArgNames[0]);
-                ctx.RemoveObjectAlias(PropertyBindingCompiler.EvtArgNames[1]);
-                ctx.RemoveObjectAlias(PropertyBindingCompiler.EvtArgNames[2]);
-                ctx.RemoveObjectAlias(PropertyBindingCompiler.EvtArgNames[3]);
+                ctx.RemoveContextValue<T>(target, PropertyBindingCompiler.EvtArgDefaultName);
+                ctx.RemoveContextValue<T>(target, PropertyBindingCompiler.EvtArgNames[0]);
+                ctx.RemoveContextValue<T>(target, PropertyBindingCompiler.EvtArgNames[1]);
+                ctx.RemoveContextValue<T>(target, PropertyBindingCompiler.EvtArgNames[2]);
+                ctx.RemoveContextValue<T>(target, PropertyBindingCompiler.EvtArgNames[3]);
             }
 
         }

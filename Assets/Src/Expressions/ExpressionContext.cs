@@ -1,93 +1,129 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections;
+using System.Collections.Generic;
+using Src.Util;
 
 namespace Src {
 
+    public interface IExpressionContextProvider {
+
+        int UniqueId { get; }
+        IExpressionContextProvider ExpressionParent { get; }
+
+    }
+
     public class ExpressionContext {
 
-        // todo -- make this work off of alias sources also
-        // todo -- potentially lots of boxing going on here
+        private Dictionary<string, List<ValueTuple<Type, IList>>> aliasMap;
 
-        public object rootContext;
-        protected readonly List<ExpressionAlias<int>> integerAliases;
-        protected readonly List<ExpressionAlias<object>> objectAliases;
+        public IExpressionContextProvider rootContext;
+        public IExpressionContextProvider current;
 
-        public ExpressionContext(object rootContext) {
+        public ExpressionContext(IExpressionContextProvider rootContext) {
             this.rootContext = rootContext;
-            this.integerAliases = new List<ExpressionAlias<int>>();
-            this.objectAliases = new List<ExpressionAlias<object>>();
+            this.current = rootContext;
         }
 
-        public void SetObjectAlias(string name, object target) {
-            for (int i = 0; i < objectAliases.Count; i++) {
-                if (objectAliases[i].name == name) {
-                    objectAliases[i] = new ExpressionAlias<object>(name, target);
+        public void SetContextValue<T>(string alias, T value) {
+            SetContextValue(rootContext, alias, value);
+        }
+
+        private List<ValueTuple<int, T>> GetList<T>(string alias, bool create = false) {
+            List<ValueTuple<Type, IList>> list;
+            if (aliasMap.TryGetValue(alias, out list)) {
+                for (int i = 0; i < list.Count; i++) {
+                    if (list[i].Item1 == typeof(T)) {
+                        return (List<ValueTuple<int, T>>) list[i].Item2;
+                    }
+                }
+            }
+
+            if (!create) return null;
+            list = new List<ValueTuple<Type, IList>>();
+            aliasMap[alias] = list;
+            List<ValueTuple<int, T>> retn = ListPool<ValueTuple<int, T>>.Get();
+            list.Add(ValueTuple.Create(typeof(T), (IList) retn));
+            return retn;
+        }
+
+        public void SetContextValue<T>(IExpressionContextProvider provider, string alias, T value) {
+            if (aliasMap == null) {
+                aliasMap = new Dictionary<string, List<ValueTuple<Type, IList>>>();
+            }
+
+            int id = provider.UniqueId;
+            List<ValueTuple<Type, IList>> list;
+            ValueTuple<int, T> tuple = ValueTuple.Create(id, value);
+
+            List<ValueTuple<int, T>> valueList = GetList<T>(alias, true);
+            
+            for (int i = 0; i < valueList.Count; i++) {
+                if (valueList[i].Item1 == id) {
+                    valueList[i] = tuple;
                     return;
                 }
             }
-            this.objectAliases.Add(new ExpressionAlias<object>(name, target));
+            valueList.Add(tuple);
         }
 
-        public void SetIntAlias(string name, int value) {
-            for (int i = 0; i < integerAliases.Count; i++) {
-                if (integerAliases[i].name == name) {
-                    integerAliases[i] = new ExpressionAlias<int>(name, value);
+        public bool GetContextValue<T>(string alias, out T retn) {
+            return GetContextValue(rootContext, alias, out retn);
+        }
+
+        public bool GetContextValue<T>(IExpressionContextProvider provider, string alias, out T retn) {
+            if (aliasMap == null) {
+                retn = default(T);
+                return false;
+            }
+
+            // todo -- profile replacing dictionary w/ list
+            List<ValueTuple<int, T>> valueList = GetList<T>(alias);
+            if (valueList == null) {
+                retn = default(T);
+                return false;
+            }
+
+            IExpressionContextProvider ptr = provider;
+
+            while (ptr != null) {
+                int id = ptr.UniqueId;
+
+                for (int i = 0; i < valueList.Count; i++) {
+                    if (valueList[i].Item1 == id) {
+                        retn = valueList[i].Item2;
+                        return true;
+                    }
+                }
+
+                ptr = ptr.ExpressionParent;
+            }
+
+            retn = default(T);
+            return false;
+        }
+
+        public void RemoveContextValue<T>(IExpressionContextProvider provider, string alias, T unusedButRequired = default(T)) {
+            if (aliasMap == null) {
+                return;
+            }
+
+            List<ValueTuple<int, T>> valueList = GetList<T>(alias);
+            if (valueList == null) {
+                return;
+            }
+
+            int id = provider.UniqueId;
+
+            for (int i = 0; i < valueList.Count; i++) {
+                if (valueList[i].Item1 == id) {
+                    valueList.RemoveAt(i);
                     return;
                 }
             }
-            integerAliases.Add(new ExpressionAlias<int>(name, value));
         }
 
-        public void RemoveObjectAlias(string alias) {
-            for (int i = 0; i < objectAliases.Count; i++) {
-                if (objectAliases[i].name == alias) {
-                    objectAliases.RemoveAt(i);
-                    return;
-                }
-            }
-        }
-
-        public void RemoveIntAlias(string alias) {
-            for (int i = 0; i < integerAliases.Count; i++) {
-                if (integerAliases[i].name == alias) {
-                    integerAliases.RemoveAt(i);
-                    return;
-                }
-            }
-        }
-
-        public int ResolveIntAlias(string alias) {
-            for (int i = 0; i < integerAliases.Count; i++) {
-                if (integerAliases[i].name == alias) {
-                    return integerAliases[i].value;
-                }
-            }
-
-            return int.MaxValue;
-        }
-
-        public object ResolveObjectAlias(string alias) {
-            if (alias[0] != '$') {
-                return rootContext;
-            }
-
-            for (int i = 0; i < objectAliases.Count; i++) {
-                if (objectAliases[i].name == alias) {
-                    return objectAliases[i].value;
-                }
-            }
-
-            return null;
-        }
-
-        public object ResolveRuntimeAlias(string alias) {
-            // todo -- this will be changed
-            object retn = ResolveObjectAlias(alias);
-            if (retn != null) return retn;
-            int intValue = ResolveIntAlias(alias);
-            if (intValue != int.MaxValue) {
-                return intValue;
-            }
-            return null;
+        public void RemoveContextValue<T>(string alias, T unusedButRequired = default(T)) {
+            RemoveContextValue(rootContext, alias, unusedButRequired);
         }
 
     }

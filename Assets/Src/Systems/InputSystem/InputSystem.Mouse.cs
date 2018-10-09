@@ -29,7 +29,6 @@ public abstract partial class InputSystem {
     private void RunMouseEvents(List<UIElement> elements, InputEventType eventType) {
         m_EventPropagator.Reset(m_MouseState);
         MouseInputEvent mouseEvent = new MouseInputEvent(m_EventPropagator, eventType, modifiersThisFrame);
-        object boxedEvent = mouseEvent;
         for (int i = 0; i < elements.Count; i++) {
             UIElement element = elements[i];
             MouseHandlerGroup mouseHandlerGroup;
@@ -43,7 +42,7 @@ public abstract partial class InputSystem {
             }
 
             MouseEventHandler[] handlers = mouseHandlerGroup.handlers;
-            mouseHandlerGroup.context.SetObjectAlias(k_EventAlias, boxedEvent);
+            mouseHandlerGroup.context.SetContextValue(element, k_EventAlias, mouseEvent);
 
             for (int j = 0; j < handlers.Length; j++) {
                 MouseEventHandler handler = handlers[j];
@@ -62,7 +61,7 @@ public abstract partial class InputSystem {
                 }
             }
 
-            mouseHandlerGroup.context.RemoveObjectAlias(k_EventAlias);
+            mouseHandlerGroup.context.RemoveContextValue<MouseInputEvent>(element, k_EventAlias);
             if (m_EventPropagator.shouldStopPropagation) {
                 m_MouseEventCaptureList.Clear();
                 return;
@@ -73,11 +72,11 @@ public abstract partial class InputSystem {
             MouseEventHandler handler = m_MouseEventCaptureList[i].Item1;
             UIElement element = m_MouseEventCaptureList[i].Item2;
             UITemplateContext context = m_MouseEventCaptureList[i].Item3;
-            context.SetObjectAlias(k_EventAlias, boxedEvent);
+            context.SetContextValue(element, k_EventAlias, mouseEvent);
 
             handler.Invoke(element, context, mouseEvent);
 
-            context.RemoveObjectAlias(k_EventAlias);
+            context.RemoveContextValue<MouseInputEvent>(element, k_EventAlias);
 
             if (m_EventPropagator.shouldStopPropagation) {
                 m_MouseEventCaptureList.Clear();

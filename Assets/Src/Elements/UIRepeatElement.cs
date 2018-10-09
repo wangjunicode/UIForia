@@ -1,5 +1,4 @@
 using System;
-using System.Collections.Generic;
 
 namespace Src {
 
@@ -16,10 +15,10 @@ namespace Src {
         public string indexAlias;
         public string lengthAlias;
 
-        // todo --  have an inline version of that has no layout / render presense
         public UIRepeatElement(UITemplate template, TemplateScope scope) {
             this.template = template;
             this.scope = scope;
+            flags &= ~(UIElementFlags.RequiresLayout | UIElementFlags.RequiresRendering);
         }
 
     }

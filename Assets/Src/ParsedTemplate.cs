@@ -92,6 +92,7 @@ namespace Src {
             element.templateContext = context;
             if (element.templateChildren != null) {
                 for (int i = 0; i < element.templateChildren.Length; i++) {
+                    element.templateChildren[i].templateParent = element;
                     AssignContext(element.templateChildren[i], context);
                 }
             }
@@ -105,9 +106,6 @@ namespace Src {
                 if(type == null) throw new Exception("Could not find type for: " + imports[i].path);
                 contextDefinition.AddConstAliasSource(new ExternalReferenceAliasSource(imports[i].alias, type));
             }
-
-//            Type type = TypeProcessor.GetRuntimeType("ClippedPanel+ClippedCorner");
-//            contextDefinition.AddConstAliasSource(new ExternalReferenceAliasSource("@ClippedCorner", type));
 
             CompileStep(rootElementTemplate);
         }

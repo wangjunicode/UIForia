@@ -1,3 +1,5 @@
+using System;
+
 namespace Src {
 
     public class SwitchBindingInt : Binding {
@@ -14,16 +16,17 @@ namespace Src {
         }
 
         public override void Execute(UIElement element, UITemplateContext context) {
-            int value = expression.EvaluateTyped(context);
-            
-            for (int i = 0; i < values.Length; i++) {
-                if (values[i] == value) {
-                    context.SetSwitchValue(id, i);
-                    return;
-                }
-            }
-            
-            context.SetSwitchValue(id, -1);
+            throw new NotImplementedException();
+//            int value = expression.EvaluateTyped(context);
+//            
+//            for (int i = 0; i < values.Length; i++) {
+//                if (values[i] == value) {
+//                    context.SetSwitchValue(id, i);
+//                    return;
+//                }
+//            }
+//            
+//            context.SetSwitchValue(id, -1);
         }
 
         public override bool IsConstant() {

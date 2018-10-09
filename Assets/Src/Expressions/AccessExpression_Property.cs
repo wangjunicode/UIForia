@@ -4,45 +4,11 @@ using System.Reflection;
 
 namespace Src {
 
-    public class AccessExpression : Expression {
-
-        private readonly string contextName;
-        private readonly Type yieldedType;
-        private readonly AccessExpressionPart[] parts;
-
-        public AccessExpression(string contextName, Type yieldedType, AccessExpressionPart[] parts) {
-            this.contextName = contextName;
-            this.yieldedType = yieldedType;
-            this.parts = parts;
-        }
-
-        public override Type YieldedType => yieldedType;
-
-        public override bool IsConstant() {
-            return false;
-        }
-        
-        public override object Evaluate(ExpressionContext context) {
-            object target = context.ResolveObjectAlias(contextName);
-            object last = target;
-
-            for (int i = 0; i < parts.Length; i++) {
-                last = parts[i].Evaluate(last, context);
-                if (last == null) {
-                    return null;
-                }
-            }
-
-            return last;
-        }
-
-    }
-    
     // todo more generic version for part types?
-    public class AccessExpression<T> : Expression<T> {
+    public class AccessExpression<T, U> : Expression<T> {
 
-        private readonly string contextName;
-        private readonly AccessExpressionPart[] parts;
+        protected readonly string contextName;
+        protected readonly AccessExpressionPart[] parts;
 
         public AccessExpression(string contextName, AccessExpressionPart[] parts) {
             this.contextName = contextName;
@@ -54,11 +20,17 @@ namespace Src {
         public override bool IsConstant() {
             return false;
         }
-        
-        public override object Evaluate(ExpressionContext context) {
-            object target = context.ResolveObjectAlias(contextName);
-            object last = target;
 
+        public override object Evaluate(ExpressionContext context) {
+            U contextHead;
+            if (contextName[0] == '$') {
+                context.GetContextValue(context.current, contextName, out contextHead);
+            }
+            else {
+                contextHead = (U) context.rootContext;
+            }
+
+            object last = contextHead;
             for (int i = 0; i < parts.Length; i++) {
                 last = parts[i].Evaluate(last, context);
                 if (last == null) {
@@ -70,8 +42,15 @@ namespace Src {
         }
 
         public override T EvaluateTyped(ExpressionContext context) {
-            object target = context.ResolveObjectAlias(contextName);
-            object last = target;
+            U contextHead;
+            if (contextName[0] == '$') {
+                context.GetContextValue(context.current, contextName, out contextHead);
+            }
+            else {
+                contextHead = (U) context.rootContext;
+            }
+
+            object last = contextHead;
 
             for (int i = 0; i < parts.Length; i++) {
                 last = parts[i].Evaluate(last, context);
@@ -80,7 +59,7 @@ namespace Src {
                 }
             }
 
-            return (T)last;
+            return (T) last;
         }
 
     }
@@ -127,11 +106,12 @@ namespace Src {
                     throw new Exception($"Field {fieldName} does not exist on type {targetType}");
                 }
             }
+
             return cachedFieldInfo.GetValue(target);
         }
 
     }
-    
+
     public class AccessExpressionPart_Property : AccessExpressionPart {
 
         private Type cachedType;
@@ -152,6 +132,7 @@ namespace Src {
                     throw new Exception($"Property {propertyName} does not exist on type {targetType}");
                 }
             }
+
             return cachedPropertyInfo.GetValue(target);
         }
 

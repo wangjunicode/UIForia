@@ -9,9 +9,10 @@
 
         <Group x-if="{chatGroup.unreadCount > 0}" style="unread-indicator">
             <Text style="unread-count">
-                {chatGroup.unreadCount}
+                Unread: {chatGroup.unreadCount}
             </Text>
         </Group>
 
     </Contents>
+    
 </UITemplate>

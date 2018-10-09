@@ -14,7 +14,7 @@ namespace Src {
         private static readonly Dictionary<Type, ParsedTemplate> parsedTemplates =
             new Dictionary<Type, ParsedTemplate>();
 
-        private static readonly string[] RepeatAttributes = { "x-if", "list", "as", "filter", "onItemAdded", "onItemRemoved" };
+        private static readonly string[] RepeatAttributes = { "x-if", "x-id", "list", "as", "filter", "onItemAdded", "onItemRemoved" };
         private static readonly string[] CaseAttributes = { "when" };
         private static readonly string[] PrefabAttributes = { "x-if", "src" };
         private static readonly string[] SwitchAttributes = { "x-if", "value" };

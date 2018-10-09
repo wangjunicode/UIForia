@@ -23,7 +23,7 @@ namespace Src.Systems {
 
         private readonly List<UIElement> m_Elements;
 
-        public LayoutSystem2(ITextSizeCalculator textSizeCalculator, IStyleSystem styleSystem) {
+        public LayoutSystem2(IStyleSystem styleSystem) {
             this.root = new RootLayoutBox(this);
             this.m_StyleSystem = styleSystem;
             this.m_LayoutBoxMap = new Dictionary<int, LayoutBox>();
@@ -277,6 +277,7 @@ namespace Src.Systems {
 
         public void OnElementHidden(UIElement element) { }
 
+        // todo pool boxes
         private LayoutBox CreateLayoutBox(UIElement element) {
             if ((element is UITextElement)) {
                 return new TextContainerLayoutBox(this, element);
@@ -299,17 +300,19 @@ namespace Src.Systems {
         }
 
         public void OnElementCreatedFromTemplate(MetaData elementData) {
-            // todo pool
             LayoutBox layoutBox = CreateLayoutBox(elementData.element);
             Stack<ValueTuple<MetaData, LayoutBox>> stack = StackPool<ValueTuple<MetaData, LayoutBox>>.Get();
 
             LayoutBox parent = root;
             if (elementData.element.parent != null) {
-                if (!m_LayoutBoxMap.TryGetValue(elementData.element.parent.id, out parent)) {
-                    parent = root;
+                LayoutBox ptr = null;
+                UIElement e = elementData.element.parent;
+                while (ptr == null) {
+                    e = e.parent;
+                    ptr = m_LayoutBoxMap.GetOrDefault(e.id);
                 }
+                parent = ptr;
             }
-
             layoutBox.SetParent(parent);
             m_LayoutBoxMap.Add(elementData.element.id, layoutBox);
             stack.Push(ValueTuple.Create(elementData, layoutBox));
@@ -322,14 +325,29 @@ namespace Src.Systems {
                 MetaData parentData = item.Item1;
                 LayoutBox parentBox = item.Item2;
 
+                if (parentBox == null) {
+                    LayoutBox ptr = null;
+                    UIElement e = parentData.element;
+                    while (ptr == null) {
+                        e = e.parent;
+                        ptr = m_LayoutBoxMap.GetOrDefault(e.id);
+                    }
+
+                    parentBox = ptr;
+                }
+                
                 for (int i = 0; i < parentData.children.Count; i++) {
                     MetaData childData = parentData.children[i];
-                    // todo -- for repeat & switch & other non layout elements, find the correct parent
-                    LayoutBox childBox = CreateLayoutBox(childData.element);
-                    childBox.SetParent(parentBox);
-                    m_LayoutBoxMap.Add(childData.element.id, childBox);
-                    stack.Push(ValueTuple.Create(childData, childBox));
-                    m_Elements.Add(childData.element);
+                    if ((childData.element.flags & UIElementFlags.RequiresLayout) == 0) {
+                        stack.Push(ValueTuple.Create(childData, (LayoutBox)null));
+                    }
+                    else {
+                        LayoutBox childBox = CreateLayoutBox(childData.element);
+                        childBox.SetParent(parentBox);
+                        m_LayoutBoxMap.Add(childData.element.id, childBox);
+                        stack.Push(ValueTuple.Create(childData, childBox));
+                        m_Elements.Add(childData.element);
+                    }
                 }
             }
 

@@ -1,7 +1,7 @@
 ﻿using System;
 
 namespace Src {
-
+    
     public class ResolveExpression_Alias<T> : Expression<T> {
 
         private readonly string alias;
@@ -13,11 +13,15 @@ namespace Src {
         public override Type YieldedType => typeof(T);
 
         public override T EvaluateTyped(ExpressionContext context) {
-            return (T)context.ResolveRuntimeAlias(alias);
+            T resolved;
+            context.GetContextValue(context.current, alias, out resolved);
+            return resolved;
         }
 
         public override object Evaluate(ExpressionContext context) {
-            return context.ResolveRuntimeAlias(alias);
+            T resolved;
+            context.GetContextValue(context.current, alias, out resolved);
+            return resolved;
         }
 
         public override bool IsConstant() {

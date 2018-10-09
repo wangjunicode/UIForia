@@ -55,6 +55,7 @@ namespace Src.Input {
         }
 
         public override void Invoke(object target, UITemplateContext context, DragEvent evt) {
+            context.current = (IExpressionContextProvider) target;
             if (ShouldRun(evt)) {
                 expression.EvaluateTyped(context);
             }
@@ -72,6 +73,7 @@ namespace Src.Input {
         }
 
         public override void Invoke(object target, UITemplateContext context, DragEvent evt) {
+            context.current = (IExpressionContextProvider) target;
             if (ShouldRun(evt)) {
                 handler((T) target);
             }
@@ -89,6 +91,7 @@ namespace Src.Input {
         }
 
         public override void Invoke(object target, UITemplateContext context, DragEvent evt) {
+            context.current = (IExpressionContextProvider) target;
             if (ShouldRun(evt)) {
                 handler((T) target, evt);
             }

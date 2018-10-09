@@ -578,7 +578,9 @@ namespace Src {
 
             ReflectionUtil.ObjectArray2[0] = contextName;
             ReflectionUtil.ObjectArray2[1] = parts;
-            return (Expression) ReflectionUtil.CreateGenericInstanceFromOpenType(typeof(AccessExpression<>), lastType, ReflectionUtil.ObjectArray2);
+            ReflectionUtil.TypeArray2[0] = lastType;
+            ReflectionUtil.TypeArray2[1] = isRootContext ? context.rootType : headType;
+            return (Expression) ReflectionUtil.CreateGenericInstanceFromOpenType(typeof(AccessExpression<,>), ReflectionUtil.TypeArray2, ReflectionUtil.ObjectArray2);
         }
 
         private static Expression VisitConstant(LiteralValueNode node) {

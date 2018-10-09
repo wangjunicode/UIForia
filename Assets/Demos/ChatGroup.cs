@@ -1,4 +1,6 @@
 using Rendering;
+using Src.Layout;
+using UnityEngine;
 
 namespace Src {
 
@@ -37,6 +39,29 @@ namespace Src {
                 return new UIStyle() {
                     PreferredWidth = 64f,
                     PreferredHeight = 64f
+                };
+            }
+            
+             
+            [ExportStyle("unread-indicator")]
+            public static UIStyle UnreadIndicator() {
+                return new UIStyle() {
+                    PreferredWidth = 32f,
+                    PreferredHeight = 32f,
+                    BackgroundColor = new Color32(255, 84, 84, 255),
+                    BorderRadius = 0.5f,
+                    BorderTop = 10f,
+                    BorderColor = Color.black,
+                    FlexLayoutCrossAxisAlignment = CrossAxisAlignment.Center,
+                    FlexLayoutMainAxisAlignment = MainAxisAlignment.Center
+                };
+            }
+            
+            [ExportStyle("unread-count")]
+            public static UIStyle UnreadCount() {
+                return new UIStyle() {
+                    TextColor = Color.white,
+                    FontSize = 20
                 };
             }
 

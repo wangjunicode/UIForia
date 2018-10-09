@@ -14,12 +14,16 @@ namespace Src {
         public List<ChatGroup> chatGroups = new List<ChatGroup>();
 
         public override void OnReady() {
-            chatGroups.Add(new ChatGroup("icon_1", "Matt", 3));
-            chatGroups.Add(new ChatGroup("icon_2", "Matt", 1));
-            chatGroups.Add(new ChatGroup("icon_3", "Matt", 5));
-            chatGroups.Add(new ChatGroup("icon_4", "Matt", 0));
+            chatGroups.Add(new ChatGroup("icon_1", "Matt 0", 3));
+            chatGroups.Add(new ChatGroup("icon_2", "Matt 1", 1));
+            chatGroups.Add(new ChatGroup("icon_3", "Matt 2", 5));
+            chatGroups.Add(new ChatGroup("icon_4", "Matt 3", 0));
         }
 
+        public void SetCurrentChat(ChatGroup chatGroup) {
+            Debug.Log(chatGroup.name);
+        }
+        
         public class Styles {
 
             [ExportStyle("top-bar")]
@@ -51,7 +55,8 @@ namespace Src {
                     TextColor = Color.white,
                     PreferredWidth = 100f,
                     BackgroundColor = Color.black,
-                    PreferredHeight = 330f//UIMeasurement.Content100 // todo -- add custom layout preference to elements a-la IDrawable 
+                    PaddingBottom = 20f,
+                    PreferredHeight = UIMeasurement.Content100 // todo -- add custom layout preference to elements a-la IDrawable 
                 };
             }
 

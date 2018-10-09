@@ -57,15 +57,13 @@ public abstract partial class InputSystem {
         if (m_CurrentDragEvent.IsDropped) {
             // evt.Drop(success);         
         }
-        
     }
 
     private void BeginDrag() {
         IsDragging = true;
         m_EventPropagator.Reset(m_MouseState);
         MouseInputEvent mouseEvent = new MouseInputEvent(m_EventPropagator, InputEventType.DragCreate, modifiersThisFrame);
-        
-        object boxedEvent = mouseEvent;
+
         for (int i = 0; i < m_MouseDownElements.Count; i++) {
             DragCreatorGroup dragCreatorGroup;
             UIElement element = m_MouseDownElements[i];
@@ -75,19 +73,19 @@ public abstract partial class InputSystem {
             }
 
             // todo -- figure out if these should respect propagation
-            dragCreatorGroup.context.SetObjectAlias(k_EventAlias, boxedEvent);
-            
+            dragCreatorGroup.context.SetContextValue(element, k_EventAlias, mouseEvent);
+
             m_CurrentDragEvent = dragCreatorGroup.TryCreateEvent(element, mouseEvent);
-            
-            dragCreatorGroup.context.RemoveObjectAlias(k_EventAlias);
-            
+
+            dragCreatorGroup.context.RemoveContextValue<MouseInputEvent>(element, k_EventAlias);
+
             if (m_CurrentDragEvent == null) {
                 continue;
             }
 
             m_CurrentDragEvent.StartTime = Time.realtimeSinceStartup;
             m_CurrentDragEvent.DragStartPosition = MousePosition;
-            
+
             UpdateDrag(true);
             return;
         }
@@ -102,10 +100,10 @@ public abstract partial class InputSystem {
 
     private void RunDragEvent(List<UIElement> elements, InputEventType eventType) {
         if (m_CurrentDragEvent.IsCanceled) return;
-        
+
         m_CurrentDragEvent.CurrentEventType = eventType;
         m_CurrentDragEvent.source = m_EventPropagator;
-        
+
         m_EventPropagator.Reset(m_MouseState);
 //        MouseInputEvent mouseEvent = new MouseInputEvent(m_EventPropagator, eventType, modifiersThisFrame);
 //        object boxedEvent = mouseEvent;
@@ -122,7 +120,7 @@ public abstract partial class InputSystem {
             }
 
             DragEventHandler[] handlers = dragHandlerGroup.handlers;
-            dragHandlerGroup.context.SetObjectAlias(k_EventAlias, m_CurrentDragEvent);
+            dragHandlerGroup.context.SetContextValue(element, k_EventAlias, m_CurrentDragEvent);
 
             for (int j = 0; j < handlers.Length; j++) {
                 DragEventHandler handler = handlers[j];
@@ -136,18 +134,18 @@ public abstract partial class InputSystem {
                 }
 
                 handler.Invoke(element, dragHandlerGroup.context, m_CurrentDragEvent);
-                
+
                 if (m_CurrentDragEvent.IsCanceled || m_EventPropagator.shouldStopPropagation) {
                     break;
                 }
             }
 
-            dragHandlerGroup.context.RemoveObjectAlias(k_EventAlias);
-            
+            dragHandlerGroup.context.RemoveContextValue<DragEvent>(element, k_EventAlias);
+
             if (m_EventPropagator.shouldStopPropagation) {
                 break;
             }
-            
+
             if (m_CurrentDragEvent.IsCanceled || m_EventPropagator.shouldStopPropagation) {
                 m_DragEventCaptureList.Clear();
                 return;
@@ -158,11 +156,11 @@ public abstract partial class InputSystem {
             DragEventHandler handler = m_DragEventCaptureList[i].Item1;
             UIElement element = m_DragEventCaptureList[i].Item2;
             UITemplateContext context = m_DragEventCaptureList[i].Item3;
-            context.SetObjectAlias(k_EventAlias, m_CurrentDragEvent);
+            context.SetContextValue(element, k_EventAlias, m_CurrentDragEvent);
 
             handler.Invoke(element, context, m_CurrentDragEvent);
 
-            context.RemoveObjectAlias(k_EventAlias);
+            context.RemoveContextValue<DragEvent>(element, k_EventAlias);
 
             if (m_EventPropagator.shouldStopPropagation) {
                 m_DragEventCaptureList.Clear();

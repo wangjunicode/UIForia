@@ -45,7 +45,6 @@ namespace Src {
             AttributeDefinition lengthAttr = GetAttribute(LengthAttrName);
             AttributeDefinition indexAttr = GetAttribute(IndexAttrName);
 
-            aliasAttr.isCompiled = true;
             listAttr.isCompiled = true;
 
             listExpression = template.compiler.Compile(listAttr.value);
@@ -54,7 +53,12 @@ namespace Src {
 
             lengthAlias = "$length";
             indexAlias = "$index";
-            itemAlias = "$" + aliasAttr.value;
+            itemAlias = "$item";
+
+            if (aliasAttr != null) {
+                itemAlias = "$" + aliasAttr.value;
+                aliasAttr.isCompiled = true;
+            }
             
             if (lengthAttr != null) {
                 lengthAlias = "$" + lengthAttr.value;

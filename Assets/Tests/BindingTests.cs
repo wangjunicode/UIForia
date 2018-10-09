@@ -89,9 +89,9 @@ public class BindingTests {
         view.Update();
         List<BindingTestThingChild> children = root.FindByType<BindingTestThingChild>();
         Assert.AreEqual(3, children.Count);
-        Assert.AreEqual(children[0].intProperty, 0);
-        Assert.AreEqual(children[1].intProperty, 1);
-        Assert.AreEqual(children[2].intProperty, 2);
+        Assert.AreEqual(0, children[0].intProperty);
+        Assert.AreEqual(1, children[1].intProperty);
+        Assert.AreEqual(2, children[2].intProperty);
         root.list.RemoveAt(1);
         view.Update();
         children = root.FindByType<BindingTestThingChild>();

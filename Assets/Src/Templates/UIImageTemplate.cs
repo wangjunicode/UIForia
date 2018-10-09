@@ -1,7 +1,6 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using JetBrains.Annotations;
 using Src.Compilers.AliasSource;
 
 namespace Src {
@@ -47,7 +46,6 @@ namespace Src {
             return instanceData;
         }
 
-        [Pure]
         public static Texture2DAssetReference TextureUrl(string url) {
             return new Texture2DAssetReference(url);
         }

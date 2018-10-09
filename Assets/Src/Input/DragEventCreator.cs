@@ -47,6 +47,7 @@ namespace Src.Input {
         }
 
         public override DragEvent Invoke(object target, UITemplateContext context, MouseInputEvent evt) {
+            context.current = (IExpressionContextProvider) target;
             return ShouldRun(evt) ? expression.EvaluateTyped(context) : null;
         }
 
@@ -62,6 +63,7 @@ namespace Src.Input {
         }
 
         public override DragEvent Invoke(object target, UITemplateContext context, MouseInputEvent evt) {
+            context.current = (IExpressionContextProvider) target;
             return ShouldRun(evt) ? handler((T) target) : null;
         }
 
@@ -77,6 +79,7 @@ namespace Src.Input {
         }
 
         public override DragEvent Invoke(object target, UITemplateContext context, MouseInputEvent evt) {
+            context.current = (IExpressionContextProvider) target;
             return ShouldRun(evt) ? handler((T) target, evt) : null;
         }
 

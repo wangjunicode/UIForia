@@ -279,6 +279,8 @@ namespace Src.Layout.LayoutTypes {
 
         public virtual void OnStylePropertyChanged(StyleProperty property) { }
 
+        public virtual void OnChildStylePropertyChanged(LayoutBox child, StyleProperty property) {}
+
     }
 
 }

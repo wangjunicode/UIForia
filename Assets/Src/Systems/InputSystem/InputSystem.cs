@@ -12,7 +12,8 @@ public abstract partial class InputSystem : IInputSystem, IInputProvider {
 
     private const float k_DragThreshold = 5f;
     private const string k_EventAlias = "$event";
-
+    private const string k_ElementAlias = "$element";
+    
     private readonly IStyleSystem m_StyleSystem;
     private readonly ILayoutSystem m_LayoutSystem;
 

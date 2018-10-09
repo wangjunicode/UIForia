@@ -1,7 +1,10 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project version="4">
   <component name="ContentModelStore">
-    <e p="C:\Seed\UIElements" t="IncludeRecursive">
+    <e p="C:\Users\matth\.Rider2018.2\config\extensions" t="IncludeRecursive" />
+    <e p="C:\Users\matth\.Rider2018.2\system\extResources" t="IncludeRecursive" />
+    <e p="C:\Users\matth\.Rider2018.2\system\resharper-host\local\Transient\ReSharperHost\v182\SolutionCaches\_UIElements.-1987582547.00" t="ExcludeRecursive" />
+    <e p="C:\Users\matth\RiderProjects\UIElements" t="IncludeRecursive">
       <e p="_DemoAsmDef.csproj" t="IncludeRecursive" />
       <e p="Assembly-CSharp-Editor.csproj" t="IncludeRecursive" />
       <e p="Assets" t="Include">
@@ -214,6 +217,7 @@
           <e p="extensions" t="Include">
             <e p="ColorExtensions.cs" t="Include" />
             <e p="DictionaryExtensions.cs" t="Include" />
+            <e p="ListExtensions.cs" t="Include" />
             <e p="RectTransformExtensions.cs" t="Include" />
           </e>
           <e p="ImportDeclaration.cs" t="Include" />
@@ -343,6 +347,7 @@
             <e p="ComputedStyle.cs" t="Include" />
             <e p="ContentBoxRect.cs" t="Include" />
             <e p="DefaultStyleValues.cs" t="Include" />
+            <e p="Easing.cs" t="Include" />
             <e p="GOTextSizeCalculator.cs" t="Include" />
             <e p="HorizontalScrollbarAttachment.cs" t="Include" />
             <e p="IDirectDrawMesh.cs" t="Include" />
@@ -568,8 +573,5 @@
       <e p="TestAsm.csproj" t="IncludeRecursive" />
       <e p="UIElements.sln" t="IncludeFlat" />
     </e>
-    <e p="C:\Users\Matt\.Rider2018.2\config\extensions" t="IncludeRecursive" />
-    <e p="C:\Users\Matt\.Rider2018.2\system\extResources" t="IncludeRecursive" />
-    <e p="C:\Users\Matt\.Rider2018.2\system\resharper-host\local\Transient\ReSharperHost\v182\SolutionCaches\_UIElements.1439856042.00" t="ExcludeRecursive" />
   </component>
 </project>

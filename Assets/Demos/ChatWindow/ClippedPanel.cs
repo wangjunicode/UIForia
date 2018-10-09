@@ -23,12 +23,9 @@ public class ClippedPanel : UIElement, IDrawable {
 
     public ClippedCorner clippedCorner = ClippedCorner.None;
 
-    private Material material;
-    
     public override void OnReady() {
         isMeshDirty = true;
         isMaterialDirty = true;
-        material = new Material(Graphic.defaultGraphicMaterial);
     }
 
     public ClippedCorner prev;

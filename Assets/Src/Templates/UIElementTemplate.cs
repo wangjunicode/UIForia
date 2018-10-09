@@ -4,6 +4,8 @@ using System.Linq;
 
 namespace Src {
 
+    // wraps a ParsedTemplate, this is what is created by parent templates
+    // properties need to be merged from the parsed template <Content/> tag (root)
     public class UIElementTemplate : UITemplate {
 
         private Type rootType;
@@ -57,7 +59,7 @@ namespace Src {
 
             MetaData instanceData = templateToExpand.CreateWithScope(outputScope);
 
-            // todo -- not sure this is safe to overwrite bindings here
+            // todo -- not sure this is safe to overwrite bindings here probably need to merge
             // actually the only bindings allowed on <Contents> tag should be styles
             // which would make this ok. need to merge styles though
             instanceData.constantBindings = constantBindings;
@@ -72,9 +74,7 @@ namespace Src {
             instanceData.dragEventCreators = dragEventCreators;
             instanceData.dragEventHandlers = dragEventHandlers;
             instanceData.keyboardEventHandlers = keyboardEventHandlers;
-            instanceData.element.templateChildren = inputScope.inputChildren.Select(c => c.element).ToArray();
-            instanceData.element.ownChildren = instanceData.children.Select(c => c.element).ToArray();
-
+            
             outputScope.context.rootElement = instanceData.element;
 
             AssignContext(instanceData.element, outputScope.context);

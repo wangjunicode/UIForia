@@ -109,7 +109,7 @@ Shader "MattUI/SimpleRounded" {
                 o.modelPos.z = -UnityObjectToViewPos(v.vertex).z;
                 // for Unity versions < 5.4.0f3
                 // o.modelPos.z = -mul(UNITY_MATRIX_MV, v.vertex).z;
-                o.color = v.color;
+                o.color = fixed4(255, 255, 255, 255); // NOTE -- we take color from _OutlineColor and _FillColor not v.color;
                 return o;
             }
 

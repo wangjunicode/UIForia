@@ -140,14 +140,14 @@ namespace Src.Layout.LayoutTypes {
 
                 else {
                     currentLine.wordCount++;
-                    if (currentLine.maxAscender < currentWord.ascender) currentLine.maxAscender = currentWord.ascender;
-                    if (currentLine.maxDescender > currentWord.descender) currentLine.maxDescender = currentWord.descender;
+                    if (currentLine.maxAscender < currentWord.maxCharTop) currentLine.maxAscender = currentWord.maxCharTop;
+                    if (currentLine.maxDescender > currentWord.minCharBottom) currentLine.maxDescender = currentWord.minCharBottom;
                     float ySize = currentLine.size.y;
 
                     if (currentWord.size.y > ySize) {
                         ySize = currentWord.size.y;
                     }
-                    currentLine.size = new Vector2(currentLine.size.x + currentWord.xAdvance, ySize);
+                    currentLine.size = new Vector2(currentLine.size.x + currentWord.xAdvance, currentWord.minCharBottom + currentWord.maxCharTop);
                 }
             }
 

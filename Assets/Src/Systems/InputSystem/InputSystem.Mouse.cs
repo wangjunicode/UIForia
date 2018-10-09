@@ -43,6 +43,7 @@ public abstract partial class InputSystem {
 
             MouseEventHandler[] handlers = mouseHandlerGroup.handlers;
             mouseHandlerGroup.context.SetContextValue(element, k_EventAlias, mouseEvent);
+            mouseHandlerGroup.context.SetContextValue(element, k_ElementAlias, element);
 
             for (int j = 0; j < handlers.Length; j++) {
                 MouseEventHandler handler = handlers[j];
@@ -56,12 +57,16 @@ public abstract partial class InputSystem {
                 }
 
                 handler.Invoke(element, mouseHandlerGroup.context, mouseEvent);
+                
+                
                 if (m_EventPropagator.shouldStopPropagation) {
                     break;
                 }
             }
 
             mouseHandlerGroup.context.RemoveContextValue<MouseInputEvent>(element, k_EventAlias);
+            mouseHandlerGroup.context.RemoveContextValue(element, k_ElementAlias, element);
+
             if (m_EventPropagator.shouldStopPropagation) {
                 m_MouseEventCaptureList.Clear();
                 return;
@@ -72,11 +77,14 @@ public abstract partial class InputSystem {
             MouseEventHandler handler = m_MouseEventCaptureList[i].Item1;
             UIElement element = m_MouseEventCaptureList[i].Item2;
             UITemplateContext context = m_MouseEventCaptureList[i].Item3;
+            
             context.SetContextValue(element, k_EventAlias, mouseEvent);
-
+            context.SetContextValue(element, k_ElementAlias, element);
+            
             handler.Invoke(element, context, mouseEvent);
 
-            context.RemoveContextValue<MouseInputEvent>(element, k_EventAlias);
+            context.RemoveContextValue(element, k_EventAlias, mouseEvent);
+            context.RemoveContextValue(element, k_ElementAlias, element);
 
             if (m_EventPropagator.shouldStopPropagation) {
                 m_MouseEventCaptureList.Clear();

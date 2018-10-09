@@ -60,7 +60,7 @@ namespace Src.Systems {
 
             Color32 color = element.style.computedStyle.BackgroundColor;
             if (element.style.computedStyle.BackgroundImage.asset != null) {
-                if (!ColorUtil.IsDefined(element.style.computedStyle.BackgroundColor)) {
+                if (!ColorUtil.IsDefined(element.style.computedStyle.BackgroundColor) || element.style.computedStyle.HasBorderRadius) {
                     color = Color.white;
                 }
             }

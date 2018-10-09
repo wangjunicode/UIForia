@@ -8,15 +8,10 @@
     <Contents style="container">
 
         <WindowFrame>
-            <!--<ClippedPanel onMouseDown="{ChangeCorner()}" style="clipped-panel" clippedCorner="{clippedCorner}">-->
-                <!--<Panel style="direct-messages">-->
-                    <!--<Panel style="direct-messages-header">-->
-                        <!--Direct Messages-->
-                    <!--</Panel>-->
-                <!--</Panel>-->
-            <!--</ClippedPanel>-->
+
 
         </WindowFrame>
+        
     </Contents>
 
 </UITemplate>

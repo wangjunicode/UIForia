@@ -118,6 +118,11 @@ namespace Rendering {
             }
         }
 
+        public void SetTransformPosition(Vector2 position, StyleState state) {
+            SetTransformPositionX(position.x, state);
+            SetTransformPositionY(position.y, state);
+        }
+
     }
 
 }

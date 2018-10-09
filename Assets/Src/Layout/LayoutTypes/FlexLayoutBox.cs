@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.Linq;
 using Rendering;
 using Src.Systems;
 using Src.Util;
@@ -10,7 +11,7 @@ namespace Src.Layout.LayoutTypes {
 
     // todo -- pool this
     // todo -- handle incremental layout, ie no layout when not required or only run partial like alignment change
-   
+
     [DebuggerDisplay("{element.ToString()}")]
     public class FlexLayoutBox : LayoutBox {
 
@@ -37,6 +38,14 @@ namespace Src.Layout.LayoutTypes {
             }
             else {
                 RunFullRowLayout();
+            }
+
+            for (int i = 0; i < ignoredChildren.Count; i++) {
+                LayoutBox child = ignoredChildren[i];
+                if (!child.element.isEnabled) continue;
+                float width = Mathf.Max(child.MinWidth, Mathf.Min(child.PreferredWidth, child.MaxWidth));
+                float height = Mathf.Max(child.MinHeight, Mathf.Min(child.PreferredHeight, child.MaxHeight));
+                child.SetAllocatedRect(child.TransformX, child.TransformY, width, height);
             }
         }
 
@@ -66,6 +75,20 @@ namespace Src.Layout.LayoutTypes {
             }
 
             return new Size(totalWidth, maxHeight);
+        }
+
+        public override void OnChildStylePropertyChanged(LayoutBox child, StyleProperty property) {
+            if (child.element.isEnabled && ignoredChildren.Contains(child)) {
+                switch (property.propertyId) {
+                    case StylePropertyId.TransformPositionX:
+                    case StylePropertyId.TransformPositionY:
+                        float width = Mathf.Max(child.MinWidth, Mathf.Min(child.PreferredWidth, child.MaxWidth));
+                        float height = Mathf.Max(child.MinHeight, Mathf.Min(child.PreferredHeight, child.MaxHeight));
+                        child.SetAllocatedRect(child.TransformX, child.TransformY, width, height);
+                        break;
+                }    
+            }
+           
         }
 
         private void RunFullColumnLayout() {
@@ -271,14 +294,14 @@ namespace Src.Layout.LayoutTypes {
             }
 
             int idx = FindLayoutSiblingIndex(child.element);
-            
+
             if (idx <= children.Count) {
                 children.Insert(idx, child);
             }
             else {
                 children.Add(child);
             }
-          
+
             if (widths.Length <= children.Count) {
                 ArrayPool<FlexItemAxis>.Resize(ref widths, children.Count);
             }
@@ -286,7 +309,7 @@ namespace Src.Layout.LayoutTypes {
             if (heights.Length <= children.Count) {
                 ArrayPool<FlexItemAxis>.Resize(ref heights, children.Count);
             }
-            
+
             if (child.element.isEnabled) {
                 RequestParentLayoutIfContentBased();
                 RequestLayout();
@@ -319,7 +342,7 @@ namespace Src.Layout.LayoutTypes {
 
             return idx;
         }
-        
+
         public override void OnChildRemoved(LayoutBox child) {
             ignoredChildren.Remove(child);
             if (children.Remove(child)) {

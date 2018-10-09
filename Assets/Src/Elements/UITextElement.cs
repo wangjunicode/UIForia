@@ -158,9 +158,9 @@ namespace Src {
 
                     for (int i = currentWord.startChar; i < currentWord.startChar + currentWord.charCount; i++) {
                         float x0 = charInfos[i].topLeft.x + wordAdvance;
-                        float x1 = charInfos[i].bottomRight.x + wordAdvance; 
-                        float y0 = charInfos[i].topLeft.y - lineOffset - (currentWord.descender + 0.5f); // was without descender + .5f
-                        float y1 = charInfos[i].bottomRight.y - lineOffset - (currentWord.descender + 0.5f);// was without descender + .5f
+                        float x1 = charInfos[i].bottomRight.x + wordAdvance;
+                        float y0 = charInfos[i].topLeft.y - lineOffset; // - (currentWord.descender + 0.5f); // was without descender + .5f
+                        float y1 = charInfos[i].bottomRight.y - lineOffset; // - (currentWord.descender + 0.5f); // was without descender + .5f
                         charInfos[i].topLeft = new Vector2(x0, y0);
                         charInfos[i].bottomRight = new Vector2(x1, y1);
                     }
@@ -278,6 +278,16 @@ namespace Src {
                         bottomRight.x = topLeft.x + (glyph.width + padding * 2) * currentElementScale;
                         bottomRight.y = topLeft.y - (glyph.height + padding * 2 + stylePadding * 2) * currentElementScale;
 
+                        if (currentWord.startChar + currentWord.visibleCharCount >= i) {
+                            if (topLeft.y > currentWord.maxCharTop) {
+                                currentWord.maxCharTop = topLeft.y;
+                            }
+
+                            if (bottomRight.y < currentWord.minCharBottom) {
+                                currentWord.minCharBottom = bottomRight.y;
+                            }
+                        }
+
                         FaceInfo faceInfo = fontAsset.fontInfo;
                         Vector2 uv0;
 
@@ -378,9 +388,6 @@ namespace Src {
 
                 Vector2 topLeft = charInfos[i].topLeft;
                 Vector2 bottomRight = charInfos[i].bottomRight;
-
-//                topLeft.y -= 11.4f;
-//                bottomRight.y -= 11.4f;
 
                 positions[idx_x4 + 0] = new Vector3(topLeft.x, bottomRight.y, 0); // Bottom Left
                 positions[idx_x4 + 1] = new Vector3(topLeft.x, topLeft.y, 0); // Top Left

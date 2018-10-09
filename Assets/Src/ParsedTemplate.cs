@@ -4,6 +4,7 @@ using System.Linq;
 using Rendering;
 using Src.Compilers.AliasSources;
 using Src.Rendering;
+using Src.Util;
 
 namespace Src {
 
@@ -37,13 +38,16 @@ namespace Src {
 
         public List<UITemplate> childTemplates => rootElementTemplate.childTemplates;
 
+        // todo -- ensure we have a <Children/> tag somewhere in our template if there are input children
+        
         public MetaData CreateWithScope(TemplateScope scope) {
             if (!isCompiled) Compile();
 
             UIElement instance = (UIElement) Activator.CreateInstance(rootElementTemplate.RootType);
 
             MetaData instanceData = rootElementTemplate.GetCreationData(instance, scope.context);
-
+            
+            // todo -- ensure only one <Children/> element
             for (int i = 0; i < rootElementTemplate.childTemplates.Count; i++) {
                 UITemplate template = rootElementTemplate.childTemplates[i];
                 if (template is UIChildrenTemplate) {
@@ -55,7 +59,6 @@ namespace Src {
                     instanceData.AddChild(template.CreateScoped(scope));
                 }
             }
-
             instanceData.element.templateChildren = scope.inputChildren.Select(c => c.element).ToArray();
             instanceData.element.ownChildren = instanceData.children.Select(c => c.element).ToArray();
 

@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections;
 using System.Collections.Generic;
+using Src.Extensions;
 using Src.Util;
 
 namespace Src {
@@ -52,7 +53,6 @@ namespace Src {
             }
 
             int id = provider.UniqueId;
-            List<ValueTuple<Type, IList>> list;
             ValueTuple<int, T> tuple = ValueTuple.Create(id, value);
 
             List<ValueTuple<int, T>> valueList = GetList<T>(alias, true);
@@ -71,6 +71,7 @@ namespace Src {
         }
 
         public bool GetContextValue<T>(IExpressionContextProvider provider, string alias, out T retn) {
+  
             if (aliasMap == null) {
                 retn = default(T);
                 return false;
@@ -116,7 +117,7 @@ namespace Src {
 
             for (int i = 0; i < valueList.Count; i++) {
                 if (valueList[i].Item1 == id) {
-                    valueList.RemoveAt(i);
+                    valueList.UnstableRemove(i);
                     return;
                 }
             }

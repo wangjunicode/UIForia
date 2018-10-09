@@ -323,6 +323,7 @@ namespace Src {
         }
 
         private Expression VisitAliasNode(AliasExpressionNode node) {
+            
             Type aliasedType = context.ResolveRuntimeAliasType(node.alias);
 
             if (aliasedType == null) {

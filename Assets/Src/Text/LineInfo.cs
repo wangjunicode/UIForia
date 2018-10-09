@@ -11,7 +11,7 @@ namespace Src.Text {
         public Vector2 position;
         public Vector2 size;
 
-        public float Height => size.y;//maxAscender - maxDescender;
+        public float Height => maxAscender - maxDescender;
 
     }
 

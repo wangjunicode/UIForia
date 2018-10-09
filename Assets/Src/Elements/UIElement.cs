@@ -5,6 +5,7 @@ using Rendering;
 using Src;
 using Src.Systems;
 using UnityEngine;
+using Debug = UnityEngine.Debug;
 
 [Flags]
 public enum QueryOptions {
@@ -17,7 +18,7 @@ public enum QueryOptions {
 
 }
 
-[DebuggerDisplay("{GetType()} id={id} {name}")]
+[DebuggerDisplay("{ToString()}")]
 public class UIElement : IHierarchical, IExpressionContextProvider {
 
     // todo some of this stuff isn't used often or present for many elements. may make sense to move to dictionaries so we keep things compact
@@ -243,7 +244,7 @@ public class UIElement : IHierarchical, IExpressionContextProvider {
         if (name != null) {
             retn += "<" + name + ":" + GetType().Name + " " + id + ">";
         }
-        else if (style.HasBaseStyles) {
+        else if (style != null && style.HasBaseStyles) {
             return "<" + GetType().Name + ": " + style.GetBaseStyleNames() + ">";
         }
         else {

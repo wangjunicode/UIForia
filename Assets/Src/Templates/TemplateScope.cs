@@ -2,7 +2,7 @@ using System.Collections.Generic;
 
 namespace Src {
 
-    public class TemplateScope {
+    public struct TemplateScope {
 
         public UITemplateContext context;
         public List<MetaData> inputChildren;

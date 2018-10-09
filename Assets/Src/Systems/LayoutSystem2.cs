@@ -40,7 +40,9 @@ namespace Src.Systems {
         public void OnUpdate() {
             m_RectUpdates.Clear();
 
-            if (m_PendingLayoutUpdates.Count == 0) return;
+            if (m_PendingLayoutUpdates.Count == 0 && m_PendingRectUpdates.Count == 0) {
+                return;
+            }
 
             m_PendingLayoutUpdates.Sort((a, b) => a.element.depth > b.element.depth ? 1 : -1);
 
@@ -175,6 +177,12 @@ namespace Src.Systems {
         public void OnInitialize() { }
 
         private void HandleStylePropertyChanged(UIElement element, StyleProperty property) {
+            
+            LayoutBox box = m_LayoutBoxMap.GetOrDefault(element.id);
+            if (box == null) {
+                return;
+            }
+            
             switch (property.propertyId) {
                 case StylePropertyId.PreferredWidth:
                 case StylePropertyId.PreferredHeight:
@@ -189,9 +197,14 @@ namespace Src.Systems {
                 case StylePropertyId.LayoutType:
                     HandleLayoutChanged(element);
                     break;
+                case StylePropertyId.TransformPositionX:
+                case StylePropertyId.TransformPositionY:
+                    break;
             }
 
-            m_LayoutBoxMap.GetOrDefault(element.id)?.OnStylePropertyChanged(property);
+           
+            box.OnStylePropertyChanged(property);
+            box.parent?.OnChildStylePropertyChanged(box, property);
         }
 
         private void HandleSizeChanged(UIElement element) {

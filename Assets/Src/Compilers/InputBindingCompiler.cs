@@ -144,8 +144,13 @@ namespace Src.Compilers {
                     }
 
                     compiler.AddRuntimeAlias(tuple.alias.Item1, tuple.alias.Item2);
+                    compiler.AddRuntimeAlias(s_ElementAlias.Item1, s_ElementAlias.Item2);
+                    
                     Expression<Terminal> expression = compiler.Compile<Terminal>(source);
+                    
+                    compiler.RemoveRuntimeAlias(s_ElementAlias.Item1);
                     compiler.RemoveRuntimeAlias(tuple.alias.Item1);
+                    
                     attr.isCompiled = true;
                     return new KeyboardEventHandler_Expression(tuple.eventType, expression);
                 }
@@ -216,14 +221,18 @@ namespace Src.Compilers {
 
                     string source = attr.value;
 
-
                     if (source[0] != '{') {
                         source = '{' + attr.value + '}';
                     }
 
                     compiler.AddRuntimeAlias(tuple.alias.Item1, tuple.alias.Item2);
+                    compiler.AddRuntimeAlias(s_ElementAlias.Item1, s_ElementAlias.Item2);
+                    
                     Expression<Terminal> expression = compiler.Compile<Terminal>(source);
+                    
                     compiler.RemoveRuntimeAlias(tuple.alias.Item1);
+                    compiler.RemoveRuntimeAlias(s_ElementAlias.Item1);
+                    
                     attr.isCompiled = true;
                     return new MouseEventHandler_Expression(tuple.eventType, expression, modifiers, phase);
                 }
@@ -396,8 +405,13 @@ namespace Src.Compilers {
                 }
 
                 compiler.AddRuntimeAlias(s_MouseEventAlias.Item1, s_MouseEventAlias.Item2);
+                compiler.AddRuntimeAlias(s_ElementAlias.Item1, s_ElementAlias.Item2);
+
                 Expression<Terminal> expression = compiler.Compile<Terminal>(source);
+                
+                compiler.RemoveRuntimeAlias(s_ElementAlias.Item1);
                 compiler.RemoveRuntimeAlias(s_MouseEventAlias.Item1);
+                
                 attr.isCompiled = true;
                 return new DragEventHandler_Expression(tuple.eventType, expression, modifiers, phase);
             }
@@ -498,8 +512,13 @@ namespace Src.Compilers {
             }
 
             compiler.AddRuntimeAlias(s_MouseEventAlias.Item1, s_MouseEventAlias.Item2);
+            compiler.AddRuntimeAlias(s_ElementAlias.Item1, s_ElementAlias.Item2);
+
             Expression<DragEvent> expression = compiler.Compile<DragEvent>(source);
+
+            compiler.RemoveRuntimeAlias(s_ElementAlias.Item1);
             compiler.RemoveRuntimeAlias(s_MouseEventAlias.Item1);
+            
             attr.isCompiled = true;
             return new DragEventCreator_Expression(expression, modifiers, phase);
         }
@@ -524,9 +543,8 @@ namespace Src.Compilers {
                         throw new Exception($"Methods annotated with {nameof(OnDragCreateAttribute)} must return an instance of {nameof(DragEvent)}");
                     }
 
+                    Type handlerType;
                     ParameterInfo[] parameters = info.GetParameters();
-                    Type handlerType = null;
-                    DragEventCreator creator = null;
                     Type openDelegateType = ReflectionUtil.GetOpenDelegateType(info);
 
                     ReflectionUtil.ObjectArray3[0] = attr.modifiers;
@@ -547,7 +565,7 @@ namespace Src.Compilers {
                             throw new Exception("Method with attribute " + attr.GetType().Name + " must take 0 arguments or 1 argument of type " + nameof(MouseInputEvent));
                     }
 
-                    creator = (DragEventCreator) ReflectionUtil.CreateGenericInstance(handlerType, ReflectionUtil.ObjectArray3);
+                    DragEventCreator creator = (DragEventCreator) ReflectionUtil.CreateGenericInstance(handlerType, ReflectionUtil.ObjectArray3);
 #if DEBUG
                     creator.methodInfo = info;
 #endif
@@ -568,6 +586,7 @@ namespace Src.Compilers {
         private static readonly ValueTuple<string, Type> s_MouseEventAlias = ValueTuple.Create("$event", typeof(MouseInputEvent));
         private static readonly ValueTuple<string, Type> s_KeyboardEventAlias = ValueTuple.Create("$event", typeof(KeyboardInputEvent));
         private static readonly ValueTuple<string, Type> s_FocusEventAlias = ValueTuple.Create("$event", typeof(FocusEvent));
+        private static readonly ValueTuple<string, Type> s_ElementAlias = ValueTuple.Create("$element", typeof(UIElement));
 
         private static readonly InputAttributeTuple[] s_MouseAttributeDefs = {
             new InputAttributeTuple("onMouseEnter", InputEventType.MouseEnter, s_MouseEventAlias),

@@ -496,7 +496,7 @@ namespace Rendering {
         private Color textColor = DefaultStyleValues.textColor;
         private FontAssetReference fontAsset = DefaultStyleValues.fontAsset;
         private TextUtil.FontStyle fontStyle = DefaultStyleValues.fontStyle;
-        private TextUtil.TextAnchor textAnchor = DefaultStyleValues.textAnchor;
+        private TextUtil.TextAlignment m_TextAlignment = DefaultStyleValues.TextAlignment;
         private TextUtil.TextTransform textTransform = DefaultStyleValues.textTransform;
 
         public Color TextColor {
@@ -535,12 +535,12 @@ namespace Rendering {
             }
         }
 
-        public TextUtil.TextAnchor TextAnchor {
-            get { return textAnchor; }
+        public TextUtil.TextAlignment TextAlignment {
+            get { return m_TextAlignment; }
             internal set {
-                if (textAnchor == value) return;
-                textAnchor = value;
-                SendEvent(new StyleProperty(StylePropertyId.TextAnchor, (int) textAnchor));
+                if (m_TextAlignment == value) return;
+                m_TextAlignment = value;
+                SendEvent(new StyleProperty(StylePropertyId.TextAnchor, (int) m_TextAlignment));
             }
         }
 
@@ -557,48 +557,48 @@ namespace Rendering {
 
         #region Transform
 
-        private UIMeasurement transformPositionX = DefaultStyleValues.transformPositionX;
-        private UIMeasurement transformPositionY = DefaultStyleValues.transformPositionY;
-        private UIMeasurement transformPivotX = DefaultStyleValues.transformPivotX;
-        private UIMeasurement transformPivotY = DefaultStyleValues.transformPivotY;
+        private UIFixedLength transformPositionX = DefaultStyleValues.transformPositionX;
+        private UIFixedLength transformPositionY = DefaultStyleValues.transformPositionY;
+        private UIFixedLength transformPivotX = DefaultStyleValues.transformPivotX;
+        private UIFixedLength transformPivotY = DefaultStyleValues.transformPivotY;
         private float transformScaleX = DefaultStyleValues.transformScaleX;
         private float transformScaleY = DefaultStyleValues.transformScaleY;
         private float transformRotation = DefaultStyleValues.transformRotation;
 
-        public UIMeasurement TransformPositionX {
+        public UIFixedLength TransformPositionX {
             get { return transformPositionX; }
             internal set {
-                if (value == UIMeasurement.Unset) value = DefaultStyleValues.transformPositionX;
+                if (value == UIFixedLength.Unset) value = DefaultStyleValues.transformPositionX;
                 if (transformPositionX == value) return;
                 transformPositionX = value;
                 SendEvent(new StyleProperty(StylePropertyId.TransformPositionX, FloatUtil.EncodeToInt(transformPositionX.value), (int) transformPositionX.unit));
             }
         }
 
-        public UIMeasurement TransformPositionY {
+        public UIFixedLength TransformPositionY {
             get { return transformPositionY; }
             internal set {
-                if (value == UIMeasurement.Unset) value = DefaultStyleValues.transformPositionY;
+                if (value == UIFixedLength.Unset) value = DefaultStyleValues.transformPositionY;
                 if (transformPositionY == value) return;
                 transformPositionY = value;
                 SendEvent(new StyleProperty(StylePropertyId.TransformPositionY, FloatUtil.EncodeToInt(transformPositionY.value), (int) transformPositionY.unit));
             }
         }
 
-        public UIMeasurement TransformPivotX {
+        public UIFixedLength TransformPivotX {
             get { return transformPivotX; }
             internal set {
-                if (value == UIMeasurement.Unset) value = DefaultStyleValues.transformPivotX;
+                if (value == UIFixedLength.Unset) value = DefaultStyleValues.transformPivotX;
                 if (transformPivotX == value) return;
                 transformPivotX = value;
                 SendEvent(new StyleProperty(StylePropertyId.TransformPivotX, FloatUtil.EncodeToInt(transformPivotX.value), (int) transformPivotX.unit));
             }
         }
 
-        public UIMeasurement TransformPivotY {
+        public UIFixedLength TransformPivotY {
             get { return transformPivotY; }
             internal set {
-                if (value == UIMeasurement.Unset) value = DefaultStyleValues.transformPivotY;
+                if (value == UIFixedLength.Unset) value = DefaultStyleValues.transformPivotY;
                 if (transformPivotY == value) return;
                 transformPivotY = value;
                 SendEvent(new StyleProperty(StylePropertyId.TransformPivotY, FloatUtil.EncodeToInt(transformPivotY.value), (int) transformPivotY.unit));
@@ -635,8 +635,8 @@ namespace Rendering {
             }
         }
 
-        public MeasurementVector2 TransformPosition {
-            get { return new MeasurementVector2(transformPositionX, transformPositionY); }
+        public FixedLengthVector TransformPosition {
+            get { return new FixedLengthVector(transformPositionX, transformPositionY); }
             internal set {
                 TransformPositionX = value.x;
                 TransformPositionY = value.y;
@@ -844,10 +844,10 @@ namespace Rendering {
                 #region Transform
 
                 case StylePropertyId.TransformPositionX:
-                    TransformPositionX = property.IsDefined ? UIMeasurement.Decode(value0, value1) : DefaultStyleValues.transformPositionX;
+                    TransformPositionX = property.IsDefined ? UIFixedLength.Decode(value0, value1) : DefaultStyleValues.transformPositionX;
                     break;
                 case StylePropertyId.TransformPositionY:
-                    TransformPositionY = property.IsDefined ? UIMeasurement.Decode(value0, value1) : DefaultStyleValues.transformPositionY;
+                    TransformPositionY = property.IsDefined ? UIFixedLength.Decode(value0, value1) : DefaultStyleValues.transformPositionY;
                     break;
                 case StylePropertyId.TransformScaleX:
                     TransformScaleX = property.IsDefined ? FloatUtil.DecodeToFloat(value0) : DefaultStyleValues.transformScaleX;
@@ -856,10 +856,10 @@ namespace Rendering {
                     TransformScaleY = property.IsDefined ? FloatUtil.DecodeToFloat(value0) : DefaultStyleValues.transformScaleY;
                     break;
                 case StylePropertyId.TransformPivotX:
-                    transformPivotX = property.IsDefined ? UIMeasurement.Decode(value0, value1) : DefaultStyleValues.transformPivotX;
+                    transformPivotX = property.IsDefined ? UIFixedLength.Decode(value0, value1) : DefaultStyleValues.transformPivotX;
                     break;
                 case StylePropertyId.TransformPivotY:
-                    TransformPivotY = property.IsDefined ? UIMeasurement.Decode(value0, value1) : DefaultStyleValues.transformPivotY;
+                    TransformPivotY = property.IsDefined ? UIFixedLength.Decode(value0, value1) : DefaultStyleValues.transformPivotY;
                     break;
                 case StylePropertyId.TransformRotation:
                     TransformRotation = property.IsDefined ? FloatUtil.DecodeToFloat(value0) : DefaultStyleValues.transformRotation;
@@ -882,7 +882,7 @@ namespace Rendering {
                     FontStyle = property.IsDefined ? (TextUtil.FontStyle) value0 : DefaultStyleValues.fontStyle;
                     break;
                 case StylePropertyId.TextAnchor:
-                    TextAnchor = property.IsDefined ? (TextUtil.TextAnchor) value0 : DefaultStyleValues.textAnchor;
+                    TextAlignment = property.IsDefined ? (TextUtil.TextAlignment) value0 : DefaultStyleValues.TextAlignment;
                     break;
                 case StylePropertyId.TextTransform:
                     TextTransform = property.IsDefined ? (TextUtil.TextTransform) value0 : DefaultStyleValues.textTransform;

@@ -5,17 +5,17 @@ namespace Src.StyleBindings {
 
     public class StyleBinding_Translation : StyleBinding {
 
-        private readonly Expression<MeasurementVector2> expression;
+        private readonly Expression<FixedLengthVector> expression;
         
-        public StyleBinding_Translation(StyleState state, Expression<MeasurementVector2> expression) 
+        public StyleBinding_Translation(StyleState state, Expression<FixedLengthVector> expression) 
             : base(RenderConstants.Translation, state) {
             this.expression = expression;
         }
 
         public override void Execute(UIElement element, UITemplateContext context) {
             if (!element.style.IsInState(state)) return;
-            MeasurementVector2 current = element.style.computedStyle.TransformPosition;
-            MeasurementVector2 newTranslation = expression.EvaluateTyped(context);
+            FixedLengthVector current = element.style.computedStyle.TransformPosition;
+            FixedLengthVector newTranslation = expression.EvaluateTyped(context);
             if (current != newTranslation) {
                 element.style.SetTransformPosition(newTranslation, state);
             }
@@ -26,7 +26,7 @@ namespace Src.StyleBindings {
         }
 
         public override void Apply(UIStyle style, UITemplateContext context) {
-            MeasurementVector2 vec = expression.EvaluateTyped(context);
+            FixedLengthVector vec = expression.EvaluateTyped(context);
             style.TransformPositionX = vec.x;
             style.TransformPositionY = vec.y;
         }

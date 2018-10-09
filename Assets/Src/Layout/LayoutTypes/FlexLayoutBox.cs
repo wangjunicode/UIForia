@@ -387,12 +387,14 @@ namespace Src.Layout.LayoutTypes {
             float offset = 0;
             int itemCount = track.itemCount;
 
+
             if (track.remainingSpace > 0) {
                 switch (mainAxisAlignment) {
                     case MainAxisAlignment.Unset:
                     case MainAxisAlignment.Start:
                         break;
                     case MainAxisAlignment.Center:
+                        mainAxisOffset *= 0.5f;
                         offset = track.remainingSpace * 0.5f;
                         break;
                     case MainAxisAlignment.End:

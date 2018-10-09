@@ -7,9 +7,9 @@
 
         <Image style="chat-icon" src="{url(chatGroup.iconUrl)}"/>
 
-        <Group x-if="{chatGroup.unreadCount > 0}" style="unread-indicator">
+        <Group  style="unread-indicator">
             <Text style="unread-count">
-                Unread: {chatGroup.unreadCount}
+                {chatGroup.unreadCount}
             </Text>
         </Group>
 

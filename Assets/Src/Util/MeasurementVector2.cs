@@ -9,7 +9,7 @@ public struct MeasurementVector2 {
         this.x = x;
         this.y = y;
     }
-    
+
     public static bool operator ==(MeasurementVector2 self, MeasurementVector2 other) {
         return self.x == other.x && self.y == other.y;
     }

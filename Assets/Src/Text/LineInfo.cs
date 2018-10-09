@@ -9,7 +9,7 @@ namespace Src.Text {
         public float maxAscender;
         public float maxDescender;
         public Vector2 position;
-        public Vector2 size;
+        public float width;
 
         public float Height => maxAscender - maxDescender;
 

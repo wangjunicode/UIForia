@@ -7,15 +7,15 @@ namespace Rendering {
     public partial class UIStyleSet {
 
         [PublicAPI]
-        public UIMeasurement GetTransformPositionX(StyleState state) {
+        public UIFixedLength GetTransformPositionX(StyleState state) {
             StyleProperty property = GetPropertyValueInState(StylePropertyId.TransformPositionX, state);
             return property.IsDefined
-                ? UIMeasurement.Decode(property.valuePart0, property.valuePart1)
-                : UIMeasurement.Unset;
+                ? UIFixedLength.Decode(property.valuePart0, property.valuePart1)
+                : UIFixedLength.Unset;
         }
 
         [PublicAPI]
-        public void SetTransformPositionX(UIMeasurement x, StyleState state) {
+        public void SetTransformPositionX(UIFixedLength x, StyleState state) {
             UIStyle style = GetOrCreateInstanceStyle(state);
             style.TransformPositionX = x;
             if ((state & currentState) != 0 && style == GetActiveStyleForProperty(StylePropertyId.TransformPositionX)) {
@@ -24,15 +24,15 @@ namespace Rendering {
         }
 
         [PublicAPI]
-        public UIMeasurement GetTransformPositionY(StyleState state) {
+        public UIFixedLength GetTransformPositionY(StyleState state) {
             StyleProperty property = GetPropertyValueInState(StylePropertyId.TransformPositionY, state);
             return property.IsDefined
-                ? UIMeasurement.Decode(property.valuePart0, property.valuePart1)
-                : UIMeasurement.Unset;
+                ? UIFixedLength.Decode(property.valuePart0, property.valuePart1)
+                : UIFixedLength.Unset;
         }
 
         [PublicAPI]
-        public void SetTransformPositionY(UIMeasurement y, StyleState state) {
+        public void SetTransformPositionY(UIFixedLength y, StyleState state) {
             UIStyle style = GetOrCreateInstanceStyle(state);
             style.TransformPositionY = y;
             if ((state & currentState) != 0 && style == GetActiveStyleForProperty(StylePropertyId.TransformPositionY)) {
@@ -40,7 +40,7 @@ namespace Rendering {
             }
         }
 
-        public void SetTransformPosition(MeasurementVector2 position, StyleState state) {
+        public void SetTransformPosition(FixedLengthVector position, StyleState state) {
             SetTransformPositionX(position.x, state);
             SetTransformPositionY(position.y, state);
         }

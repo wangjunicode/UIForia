@@ -52,10 +52,10 @@ namespace Rendering {
         public static readonly UIFixedLength borderLeft = new UIFixedLength(0);
         public static readonly UIFixedLength borderBottom = new UIFixedLength(0);
 
-        public static readonly UIMeasurement transformPositionX = new UIMeasurement(0);
-        public static readonly UIMeasurement transformPositionY = new UIMeasurement(0);
-        public static readonly UIMeasurement transformPivotX = new UIMeasurement(0);
-        public static readonly UIMeasurement transformPivotY = new UIMeasurement(0);
+        public static readonly UIFixedLength transformPositionX = new UIFixedLength(0);
+        public static readonly UIFixedLength transformPositionY = new UIFixedLength(0);
+        public static readonly UIFixedLength transformPivotX = new UIFixedLength(0);
+        public static readonly UIFixedLength transformPivotY = new UIFixedLength(0);
         public static readonly float transformScaleX = 1;
         public static readonly float transformScaleY = 1;
         public static readonly float transformRotation = 0;
@@ -65,7 +65,7 @@ namespace Rendering {
         public static readonly Color textColor = Color.black;
         public static readonly TextUtil.FontStyle fontStyle = TextUtil.FontStyle.Normal;
         public static readonly FontAssetReference fontAsset = new FontAssetReference("default");
-        public static readonly TextUtil.TextAnchor textAnchor = TextUtil.TextAnchor.MiddleLeft;
+        public static readonly TextUtil.TextAlignment TextAlignment = TextUtil.TextAlignment.Left;
         public static readonly TextUtil.TextTransform textTransform = TextUtil.TextTransform.None;
 
         public static readonly LayoutBehavior layoutBehavior = LayoutBehavior.Normal;

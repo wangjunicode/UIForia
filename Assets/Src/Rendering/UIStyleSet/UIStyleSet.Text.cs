@@ -65,12 +65,12 @@ namespace Rendering {
             SetEnumProperty(StylePropertyId.TextFontStyle, (int) newFontStyle, state);
         }
 
-        public TextUtil.TextAnchor GetTextAnchor(StyleState state) {
-            return (TextUtil.TextAnchor) GetEnumValue(StylePropertyId.TextAnchor, state);
+        public TextUtil.TextAlignment GetTextAnchor(StyleState state) {
+            return (TextUtil.TextAlignment) GetEnumValue(StylePropertyId.TextAnchor, state);
         }
 
-        public void SetTextAnchor(TextUtil.TextAnchor newTextAnchor, StyleState state) {
-            SetEnumProperty(StylePropertyId.TextFontStyle, (int) newTextAnchor, state);
+        public void SetTextAnchor(TextUtil.TextAlignment newTextAlignment, StyleState state) {
+            SetEnumProperty(StylePropertyId.TextFontStyle, (int) newTextAlignment, state);
         }
 
     }

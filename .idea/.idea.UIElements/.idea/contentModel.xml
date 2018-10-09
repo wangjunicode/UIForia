@@ -490,6 +490,7 @@
             <e p="ArrayUtil.cs" t="Include" />
             <e p="BitUtil.cs" t="Include" />
             <e p="ColorUtil.cs" t="Include" />
+            <e p="FixedLengthVector.cs" t="Include" />
             <e p="FloatUtil.cs" t="Include" />
             <e p="IntUtil.cs" t="Include" />
             <e p="KeyCodeUtil.cs" t="Include" />

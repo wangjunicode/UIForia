@@ -9,7 +9,7 @@
 
         <Group style="top-bar">
 
-            <Text style="top-bar-text">KLANGGang</Text>
+            <Text style="top-bar-text">Klang Gang</Text>
 
             <Group style="header-group">
                 <Image src="{url('settings_icon')}"/>
@@ -30,7 +30,7 @@
                         <ChatGroupIcon onMouseDown="{SetCurrentChat($element)}" chatGroup="{$item}"/>
                     </Repeat>
 
-                    <AddChatButton/>
+                    <AddChatButton onMouseDown="{AddChatGroup()}"/>
 
                 </Group>
 
@@ -44,9 +44,9 @@
 
             </Group>
 
-            <!--<ClippedPanel style="message-panel-secondary" clipSize="20f" clippedCorner="{@ClippedCorner.BottomRight}">-->
+            <ClippedPanel style="message-panel-secondary" clipSize="20f" clippedCorner="{@ClippedCorner.BottomRight}">
 
-            <!--</ClippedPanel>-->
+            </ClippedPanel>
 
         </Group>
 

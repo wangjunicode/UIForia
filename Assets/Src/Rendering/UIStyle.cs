@@ -228,14 +228,14 @@ namespace Rendering {
 
         #region Transform Properties
 
-        public UIMeasurement TransformPositionX {
-            get { return GetUIMeasurementProperty(StylePropertyId.TransformPositionX); }
-            set { SetUIMeasurementProperty(StylePropertyId.TransformPositionX, value); }
+        public UIFixedLength TransformPositionX {
+            get { return GetUIFixedLengthProperty(StylePropertyId.TransformPositionX); }
+            set { SetUIFixedLengthProperty(StylePropertyId.TransformPositionX, value); }
         }
 
-        public UIMeasurement TransformPositionY {
-            get { return GetUIMeasurementProperty(StylePropertyId.TransformPositionY); }
-            set { SetUIMeasurementProperty(StylePropertyId.TransformPositionY, value); }
+        public UIFixedLength TransformPositionY {
+            get { return GetUIFixedLengthProperty(StylePropertyId.TransformPositionY); }
+            set { SetUIFixedLengthProperty(StylePropertyId.TransformPositionY, value); }
         }
 
         public float TransformScaleX {
@@ -248,14 +248,14 @@ namespace Rendering {
             set { SetFloatProperty(StylePropertyId.TransformScaleY, value); }
         }
 
-        public UIMeasurement TransformPivotX {
-            get { return GetUIMeasurementProperty(StylePropertyId.TransformPivotX); }
-            set { SetUIMeasurementProperty(StylePropertyId.TransformPivotX, value); }
+        public UIFixedLength TransformPivotX {
+            get { return GetUIFixedLengthProperty(StylePropertyId.TransformPivotX); }
+            set { SetUIFixedLengthProperty(StylePropertyId.TransformPivotX, value); }
         }
 
-        public UIMeasurement TransformPivotY {
-            get { return GetUIMeasurementProperty(StylePropertyId.TransformPivotY); }
-            set { SetUIMeasurementProperty(StylePropertyId.TransformPivotY, value); }
+        public UIFixedLength TransformPivotY {
+            get { return GetUIFixedLengthProperty(StylePropertyId.TransformPivotY); }
+            set { SetUIFixedLengthProperty(StylePropertyId.TransformPivotY, value); }
         }
 
         public float TransformRotation {
@@ -453,8 +453,8 @@ namespace Rendering {
             set { SetEnumProperty(StylePropertyId.TextFontStyle, (int) value); }
         }
 
-        public TextUtil.TextAnchor TextAnchor {
-            get { return (TextUtil.TextAnchor) FindEnumProperty(StylePropertyId.TextAnchor); }
+        public TextUtil.TextAlignment TextAlignment {
+            get { return (TextUtil.TextAlignment) FindEnumProperty(StylePropertyId.TextAnchor); }
             set { SetEnumProperty(StylePropertyId.TextAnchor, (int) value); }
         }
 

@@ -223,8 +223,6 @@ namespace Src.Systems {
             LayoutBox box;
             if (m_LayoutBoxMap.TryGetValue(element.id, out box)) {
                 TextContainerLayoutBox textBox = box.parent as TextContainerLayoutBox;
-
-                textBox?.SetTextContent(content);
             }
         }
 

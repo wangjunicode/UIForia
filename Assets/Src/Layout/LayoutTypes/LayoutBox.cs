@@ -53,8 +53,8 @@ namespace Src.Layout.LayoutTypes {
         public virtual float PreferredHeight => ResolveHeight(style.PreferredHeight);
 
         // todo -- move to fixed units
-        public float TransformX => ResolveWidth(style.TransformPositionX);
-        public float TransformY => ResolveHeight(style.TransformPositionY);
+        public float TransformX => ResolveFixedWidth(style.TransformPositionX);
+        public float TransformY => ResolveFixedHeight(style.TransformPositionY);
 
         public float PaddingHorizontal => ResolveFixedWidth(style.PaddingLeft) + ResolveFixedWidth(style.PaddingRight);
         public float BorderHorizontal => ResolveFixedWidth(style.BorderLeft) + ResolveFixedWidth(style.BorderRight);
@@ -184,7 +184,12 @@ namespace Src.Layout.LayoutTypes {
         protected void RequestParentLayoutIfContentBased() {
             if (IsContentSized) {
                 preferredContentSize = Size.Unset;
-                parent.RequestLayout();
+                LayoutBox ptr = parent;
+                while (ptr != null && ptr.IsContentSized) {
+                    ptr.preferredContentSize = Size.Unset;
+                    ptr.parent?.RequestLayout();
+                    ptr = ptr.parent;
+                }
             }
         }
 
@@ -203,7 +208,6 @@ namespace Src.Layout.LayoutTypes {
 
             return preferredContentSize.height;
         }
-
 
         protected float ResolveFixedWidth(UIFixedLength width) {
             switch (width.unit) {
@@ -279,7 +283,7 @@ namespace Src.Layout.LayoutTypes {
 
         public virtual void OnStylePropertyChanged(StyleProperty property) { }
 
-        public virtual void OnChildStylePropertyChanged(LayoutBox child, StyleProperty property) {}
+        public virtual void OnChildStylePropertyChanged(LayoutBox child, StyleProperty property) { }
 
     }
 

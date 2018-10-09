@@ -24,6 +24,7 @@ namespace Src.Compilers {
 
         private static readonly MethodAliasSource sizeAliasSource;
         private static readonly MethodAliasSource vec2MeasurementSource;
+        private static readonly MethodAliasSource vec2FixedLengthSource;
 
         private static readonly MethodAliasSource borderRadiusRect1Source;
         private static readonly MethodAliasSource borderRadiusRect2Source;
@@ -60,6 +61,7 @@ namespace Src.Compilers {
 
             sizeAliasSource = new MethodAliasSource("size", type.GetMethod(nameof(Size)));
             vec2MeasurementSource = new MethodAliasSource("vec2", type.GetMethod(nameof(Vec2Measurement)));
+            vec2FixedLengthSource = new MethodAliasSource("vec2", type.GetMethod(nameof(Vec2FixedLength)));
             borderRadiusRect1Source = new MethodAliasSource("radius", type.GetMethod(nameof(Radius), new[] {typeof(float)}));
             borderRadiusRect2Source = new MethodAliasSource("radius", type.GetMethod(nameof(Radius), new[] {typeof(float), typeof(float)}));
             borderRadiusRect4Source = new MethodAliasSource("radius", type.GetMethod(nameof(Radius), new[] {typeof(float), typeof(float), typeof(float), typeof(float)}));
@@ -159,7 +161,7 @@ namespace Src.Compilers {
 
                 // Transform
                 case RenderConstants.Translation:
-                    return new StyleBinding_Translation(targetState.state, Compile<MeasurementVector2>(value, vec2MeasurementSource));
+                    return new StyleBinding_Translation(targetState.state, Compile<FixedLengthVector>(value, vec2MeasurementSource));
 
                 case RenderConstants.Rotation:
                     throw new NotImplementedException();
@@ -457,7 +459,12 @@ namespace Src.Compilers {
         public static MeasurementVector2 Vec2Measurement(float x, float y) {
             return new MeasurementVector2(new UIMeasurement(x), new UIMeasurement(y));
         }
-
+        
+        [Pure]
+        public static FixedLengthVector Vec2FixedLength(float x, float y) {
+            return new FixedLengthVector(new UIFixedLength(x), new UIFixedLength(y));
+        }
+        
         [Pure]
         public static Texture2DAssetReference TextureUrl(string url) {
             return new Texture2DAssetReference(url);

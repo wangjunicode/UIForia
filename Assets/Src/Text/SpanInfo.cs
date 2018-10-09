@@ -20,6 +20,7 @@ namespace Src.Text {
         public float fontSize;
         public int startWord;
         public int wordCount;
+        public TextUtil.TextAlignment alignment;
 
     }
 

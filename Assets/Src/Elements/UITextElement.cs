@@ -83,6 +83,7 @@ namespace Src {
             textInfo.spanInfos[0].charCount = textInfo.charCount;
             textInfo.spanInfos[0].fontSize = style.computedStyle.FontSize;
             textInfo.spanInfos[0].fontStyle = style.computedStyle.FontStyle;
+            textInfo.spanInfos[0].alignment = TextUtil.TextAlignment.Center;//style.computedStyle.TextAlignment;
 
             ComputeCharacterAndWordSizes(textInfo);
         }
@@ -148,10 +149,10 @@ namespace Src {
             CharInfo[] charInfos = textInfo.charInfos;
 
             for (int lineIdx = 0; lineIdx < textInfo.lineCount; lineIdx++) {
-                float wordAdvance = 0;
 
                 LineInfo currentLine = lineInfos[lineIdx];
-                float lineOffset = currentLine.Height - currentLine.position.y; // + currentLine.maxDescender;
+                float lineOffset = currentLine.maxAscender - currentLine.position.y;
+                float wordAdvance = currentLine.position.x;
 
                 for (int w = currentLine.wordStart; w < currentLine.wordStart + currentLine.wordCount; w++) {
                     WordInfo currentWord = wordInfos[w];
@@ -159,8 +160,8 @@ namespace Src {
                     for (int i = currentWord.startChar; i < currentWord.startChar + currentWord.charCount; i++) {
                         float x0 = charInfos[i].topLeft.x + wordAdvance;
                         float x1 = charInfos[i].bottomRight.x + wordAdvance;
-                        float y0 = charInfos[i].topLeft.y - lineOffset; // - (currentWord.descender + 0.5f); // was without descender + .5f
-                        float y1 = charInfos[i].bottomRight.y - lineOffset; // - (currentWord.descender + 0.5f); // was without descender + .5f
+                        float y0 = charInfos[i].topLeft.y - lineOffset;
+                        float y1 = charInfos[i].bottomRight.y - lineOffset;
                         charInfos[i].topLeft = new Vector2(x0, y0);
                         charInfos[i].bottomRight = new Vector2(x1, y1);
                     }
@@ -225,7 +226,6 @@ namespace Src {
 
                 // todo -- handle tab
                 // todo -- handle sprites
-                // todo -- handle alignment / justification
 
                 for (int w = spanInfo.startWord; w < spanInfo.startWord + spanInfo.wordCount; w++) {
                     WordInfo currentWord = wordInfos[w];
@@ -355,9 +355,7 @@ namespace Src {
             isMeshDirty = false;
             if (mesh == null) mesh = new Mesh();
             mesh.Clear();
-
-            // todo adjust for anchoring / alignment 
-
+            
             ApplyLineAndWordOffsets(textInfo);
 
             CharInfo[] charInfos = textInfo.charInfos;

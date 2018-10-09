@@ -32,7 +32,7 @@ namespace Rendering {
         public AssetPointer<Texture2D> AsTextureAsset => new AssetPointer<Texture2D>((AssetType) valuePart0, valuePart1);
 
         public TextUtil.FontStyle AsFontStyle => (TextUtil.FontStyle) valuePart0;
-        public TextUtil.TextAnchor AsTextAnchor => (TextUtil.TextAnchor) valuePart0;
+        public TextUtil.TextAlignment AsTextAlignment => (TextUtil.TextAlignment) valuePart0;
         public LayoutDirection AsLayoutDirection => (LayoutDirection) valuePart0;
         public LayoutWrap AsLayoutWrap => (LayoutWrap) valuePart0;
 

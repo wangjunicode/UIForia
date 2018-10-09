@@ -26,18 +26,12 @@ namespace Src.Util {
 
         }
 
-        public enum TextAnchor {
+        public enum TextAlignment {
 
             Unset = 0,
-            UpperLeft = 1,
-            UpperCenter = 2,
-            UpperRight = 3,
-            MiddleLeft = 4,
-            MiddleCenter = 5,
-            MiddleRight = 6,
-            LowerLeft = 7,
-            LowerCenter = 8,
-            LowerRight = 9
+            Left = 1,
+            Right = 2,
+            Center = 3
 
         }
 
@@ -336,6 +330,15 @@ namespace Src.Util {
             retn.charCount = bufferLength;
             return retn;
         }
+
+//        public enum TextAlignment {
+//
+//            Unset = 0,
+//            Left = 1,
+//            Right = 2,
+//            Center = 3
+//
+//        }
 
     }
 

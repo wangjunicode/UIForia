@@ -33,6 +33,7 @@ namespace Src {
         public override void OnUpdate() {
             animationTime += Time.deltaTime;
             float t = Easing.Interpolate(animationTime, EasingFunction.QuadraticEaseIn) / 0.1f;
+            if (shuttle == null) return;
             if (t <= 1f) {
                 shuttle.style.SetTransformPositionY(Mathf.Lerp(startY, targetY, t), StyleState.Normal);
             }
@@ -50,6 +51,10 @@ namespace Src {
         // Texture? 
         // UV Coord
 
+        public void AddChatGroup() {
+            chatGroups.Add(new ChatGroup("icon_5", "Matt " + chatGroups.Count, Random.Range(0, 10)));
+        }
+        
         public void SetCurrentChat(UIElement chatGroupElement) {
             ChatGroupIcon target = (ChatGroupIcon) chatGroupElement;
             if (target.chatGroup == selected) return;
@@ -66,7 +71,8 @@ namespace Src {
                 return new UIStyle() {
                     BackgroundColor = Color.black,
                     PaddingLeft = 100,
-                    LayoutType = LayoutType.Flex,
+                    PaddingTop = 6f,
+                    PaddingBottom = 6f,
                     FlexLayoutDirection = LayoutDirection.Column,
                     FlexLayoutMainAxisAlignment = MainAxisAlignment.SpaceBetween,
                     PreferredWidth = 700f
@@ -78,6 +84,7 @@ namespace Src {
                 return new UIStyle() {
                     TextColor = Color.white,
                     FontSize = 24,
+                    PreferredWidth = 200f,
 //                    TextTransform = TextUtil.TextTransform.UpperCase,
                     FontAsset = new FontAssetReference("Gotham-Medium SDF"),
                 };
@@ -109,8 +116,11 @@ namespace Src {
             [ExportStyle("header-group")]
             public static UIStyle HeaderGroup() {
                 return new UIStyle() {
+                    PaddingRight = 12f,
+                    PreferredWidth = new UIMeasurement(1.2f, UIUnit.Content),
                     FlexLayoutDirection = LayoutDirection.Column,
-                    FlexLayoutCrossAxisAlignment = CrossAxisAlignment.Center
+                    FlexLayoutCrossAxisAlignment = CrossAxisAlignment.Center,
+                    FlexLayoutMainAxisAlignment = MainAxisAlignment.SpaceBetween
                 };
             }
 
@@ -127,8 +137,8 @@ namespace Src {
             [ExportStyle("side-bar-icon")]
             public static UIStyle SidebarIcon() {
                 return new UIStyle() {
-                    PreferredWidth = 64f,
-                    PreferredHeight = 64f,
+                    PreferredWidth = 48,
+                    PreferredHeight = 48,
                     PaddingBottom = 10f,
                 };
             }

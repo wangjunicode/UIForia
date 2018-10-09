@@ -1,7 +1,5 @@
-﻿using System.Collections;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using Rendering;
-using Src.Util;
 
 namespace Src.Systems {
 
@@ -47,51 +45,51 @@ namespace Src.Systems {
         }
 
         public bool EnableBinding(UIElement element, string bindingId) {
-//            TemplateBinding binding = bindingSkipTree.GetItem(element);
-//            if (binding == null) return false;
-//            for (int i = 0; i < binding.bindings.Length; i++) {
-//                if (binding.bindings[i].bindingId == bindingId) {
-//                    binding.bindings[i].isEnabled = true;
-//                    return true;
-//                }
-//            }
+            BindingNode binding = bindingSkipTree.GetItem(element);
+            if (binding == null) return false;
+            for (int i = 0; i < binding.bindings.Length; i++) {
+                if (binding.bindings[i].bindingId == bindingId) {
+                    binding.bindings[i].isEnabled = true;
+                    return true;
+                }
+            }
 
             return false;
         }
 
         public bool DisableBinding(UIElement element, string bindingId) {
-//            TemplateBinding binding = bindingSkipTree.GetItem(element);
-//            if (binding == null) return false;
-//            for (int i = 0; i < binding.bindings.Length; i++) {
-//                if (binding.bindings[i].bindingId == bindingId) {
-//                    binding.bindings[i].isEnabled = false;
-//                    return true;
-//                }
-//            }
+            BindingNode binding = bindingSkipTree.GetItem(element);
+            if (binding == null) return false;
+            for (int i = 0; i < binding.bindings.Length; i++) {
+                if (binding.bindings[i].bindingId == bindingId) {
+                    binding.bindings[i].isEnabled = false;
+                    return true;
+                }
+            }
 
             return false;
         }
 
         public bool HasBinding(UIElement element, string bindingId) {
-//            TemplateBinding binding = bindingSkipTree.GetItem(element);
-//            if (binding == null) return false;
-//            for (int i = 0; i < binding.bindings.Length; i++) {
-//                if (binding.bindings[i].bindingId == bindingId) {
-//                    return true;
-//                }
-//            }
+            BindingNode binding = bindingSkipTree.GetItem(element);
+            if (binding == null) return false;
+            for (int i = 0; i < binding.bindings.Length; i++) {
+                if (binding.bindings[i].bindingId == bindingId) {
+                    return true;
+                }
+            }
 
             return false;
         }
 
         public bool IsBindingEnabled(UIElement element, string bindingId) {
-//            TemplateBinding binding = bindingSkipTree.GetItem(element);
-//            if (binding == null) return false;
-//            for (int i = 0; i < binding.bindings.Length; i++) {
-//                if (binding.bindings[i].bindingId == bindingId) {
-//                    return binding.bindings[i].isEnabled;
-//                }
-//            }
+            BindingNode binding = bindingSkipTree.GetItem(element);
+            if (binding == null) return false;
+            for (int i = 0; i < binding.bindings.Length; i++) {
+                if (binding.bindings[i].bindingId == bindingId) {
+                    return binding.bindings[i].isEnabled;
+                }
+            }
 
             return false;
         }
@@ -111,7 +109,7 @@ namespace Src.Systems {
         public void OnElementCreatedFromTemplate(MetaData data) {
             UIElement element = data.element;
             isTreeDirty = true;
-            
+
             if (data.constantBindings.Length != 0) {
                 for (int i = 0; i < data.constantBindings.Length; i++) {
                     data.constantBindings[i].Execute(element, data.context);
@@ -156,46 +154,22 @@ namespace Src.Systems {
             }
         }
 
-        public void OnElementEnabled(UIElement element) { }
-
-        public void OnElementDisabled(UIElement element) { }
-
         public void OnElementDestroyed(UIElement element) {
             bindingSkipTree.RemoveHierarchy(element);
             isTreeDirty = true;
         }
 
+        public void OnElementEnabled(UIElement element) { }
+
+        public void OnElementDisabled(UIElement element) { }
+
+
         public void OnElementShown(UIElement element) { }
 
         public void OnElementHidden(UIElement element) { }
 
-        public void OnElementParentChanged(UIElement element, UIElement oldParent, UIElement newParent) {
-//            TemplateBinding elementBindings = bindingSkipTree.GetItem(element);
-//
-//            if (elementBindings != null) {
-//                bindingSkipTree.UpdateItemParent(elementBindings);
-//            }
-//
-//            TemplateBinding conditionalBindings = conditionalSkipTree.GetItem(element);
-//            if (conditionalBindings != null) {
-//                conditionalSkipTree.UpdateItemParent(conditionalBindings);
-//            }
-        }
+        public void OnElementParentChanged(UIElement element, UIElement oldParent, UIElement newParent) { }
 
     }
 
 }
-
-//if (data.element is UIRepeatChild) {
-//TemplateBinding repeatChildBinding = new TemplateBinding(data.element, data.bindings, data.context);
-//TemplateBinding parent = bindingSkipTree.GetItem(data.element.parent);
-//int childCount = bindingSkipTree.GetChildCount(parent);
-//bindingSkipTree.AddItem(repeatChildBinding);
-//bindingSkipTree.SetSiblingIndex(repeatChildBinding, childCount - 1);
-//}
-//else if (data.element is UIRepeatTerminal) {
-//// todo -- valid this
-//TemplateBinding terminalBinding = new TemplateBinding(data.element, data.bindings, data.context);
-//bindingSkipTree.AddItem(terminalBinding);
-//bindingSkipTree.SetSiblingIndex(terminalBinding, int.MaxValue);
-//}

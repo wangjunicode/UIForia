@@ -57,7 +57,6 @@ public class RepeatBindingNode<T, U> : RepeatBindingNode where T : class, IList<
                 previousReference.Add(list[i]);
                 MetaData newItem = template.CreateScoped(scope);
                 newItem.element.templateParent = element;
-                newItem.context = context;
                 ownChildren[i] = newItem.element;
                 context.view.CreateElementFromTemplate(newItem, element);
             }

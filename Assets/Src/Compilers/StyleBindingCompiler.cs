@@ -161,7 +161,7 @@ namespace Src.Compilers {
 
                 // Transform
                 case RenderConstants.Translation:
-                    return new StyleBinding_Translation(targetState.state, Compile<FixedLengthVector>(value, vec2MeasurementSource));
+                    return new StyleBinding_Translation(targetState.state, Compile<FixedLengthVector>(value, vec2FixedLengthSource));
 
                 case RenderConstants.Rotation:
                     throw new NotImplementedException();

@@ -14,19 +14,24 @@ namespace Src {
     public class WindowFrame : UIElement {
 
         public List<ChatGroup> chatGroups = new List<ChatGroup>();
-
+        public List<ChatData> activeChats = new List<ChatData>();
+        
         private UIElement shuttle;
         private ChatGroup selected;
 
         private float startY;
         private float targetY;
         private float animationTime;
-
+        private int selectedChatIndex;
+        
         public override void OnReady() {
             chatGroups.Add(new ChatGroup("icon_1", "Matt 0", 3));
-            chatGroups.Add(new ChatGroup("icon_2", "Matt 1", 1));
-            chatGroups.Add(new ChatGroup("icon_3", "Matt 2", 5));
-            chatGroups.Add(new ChatGroup("icon_4", "Matt 3", 0));
+//            chatGroups.Add(new ChatGroup("icon_2", "Matt 1", 1));
+//            chatGroups.Add(new ChatGroup("icon_3", "Matt 2", 5));
+//            chatGroups.Add(new ChatGroup("icon_4", "Matt 3", 0));
+            activeChats.Add(new ChatData("Vondi", "icon_3", true, 0));
+//            activeChats.Add(new ChatData("Byrne", "icon_5", true, 2));
+//            activeChats.Add(new ChatData("Little", "icon_9", false, 0));
             shuttle = FindById("shuttle");
         }
 
@@ -147,7 +152,7 @@ namespace Src {
             public static UIStyle ContentContainer() {
                 return new UIStyle() {
                     FlexLayoutDirection = LayoutDirection.Column,
-                    PreferredWidth = 800f,
+                    PreferredWidth = 1200f,
                     PreferredHeight = 600f
                 };
             }
@@ -156,8 +161,19 @@ namespace Src {
             public static UIStyle MessagePanel() {
                 return new UIStyle() {
                     BackgroundColor = new Color32(224, 224, 224, 255),
-                    PreferredWidth = 128f,
+                    PreferredWidth = new UIMeasurement(0.22f, UIUnit.ParentSize),
                     PreferredHeight = UIMeasurement.Parent100,
+                };
+            }
+            
+            [ExportStyle("message-panel-header")]
+            public static UIStyle MessagePanelHeader() {
+                return new UIStyle() {
+                    Padding = new PaddingBox(12f),
+                    PreferredWidth = UIMeasurement.Parent100,
+                    FlexLayoutDirection = LayoutDirection.Column,
+                    FlexLayoutCrossAxisAlignment = CrossAxisAlignment.Center,
+                    FlexLayoutMainAxisAlignment = MainAxisAlignment.SpaceBetween
                 };
             }
 

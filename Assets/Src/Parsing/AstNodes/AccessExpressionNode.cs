@@ -22,6 +22,9 @@ namespace Src {
         public override Type GetYieldedType(ContextDefinition context) {
             Type partType = context.ResolveRuntimeAliasType(identifierNode.identifier);
 
+            if (partType == null) {
+                throw new Exception($"Unable to resolve '{identifierNode.identifier}'");
+            }
             // todo handle dotting into static types and enums
             
             for (int i = 0; i < parts.Count; i++) {

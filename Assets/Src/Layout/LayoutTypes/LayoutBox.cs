@@ -136,6 +136,7 @@ namespace Src.Layout.LayoutTypes {
 
         protected bool IsContentSized {
             get {
+                if (style == null) return false;
                 UIUnit units = style.PreferredWidth.unit
                                | style.PreferredHeight.unit
                                | style.MinWidth.unit
@@ -185,9 +186,11 @@ namespace Src.Layout.LayoutTypes {
             if (IsContentSized) {
                 preferredContentSize = Size.Unset;
                 LayoutBox ptr = parent;
-                while (ptr != null && ptr.IsContentSized) {
+                bool contentSized = true;
+                while (ptr != null && contentSized) {
+                    ptr.RequestLayout();
+                    contentSized = ptr.IsContentSized;
                     ptr.preferredContentSize = Size.Unset;
-                    ptr.parent?.RequestLayout();
                     ptr = ptr.parent;
                 }
             }

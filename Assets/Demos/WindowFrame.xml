@@ -37,7 +37,15 @@
             </ClippedPanel>
 
             <Group style="message-panel">
-
+                <Group style="message-panel-header">
+                    <Label text="'DIRECT MESSAGES'"/>
+                    <Image src="{url('plus_icon')}"/>
+                </Group>
+                
+                <Repeat list="{activeChats}">
+                    <DirectMessageListEntry chatData="{$item}" isSelected="{$index == selectedChatIndex}"/>    
+                </Repeat>
+                
             </Group>
 
             <Group style="message-main-area">

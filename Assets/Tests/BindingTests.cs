@@ -31,6 +31,7 @@ public class BindingTests {
 
         public int intProperty;
         public List<int> list;
+        public List<int> list2;
 
     }
 
@@ -205,6 +206,37 @@ public class BindingTests {
         view.Update();
         List<UITextElement> children = root.FindByType<UITextElement>();
         Assert.AreEqual(3, children.Count);
+       
+    }
+    
+    [Test]
+    public void HandleMultipleNonNestedRepeats() {
+        string template = @"
+        <UITemplate>
+            <Contents>
+                <Repeat list='{list}' as='item'>
+                    <Text>{$item}</Text>
+                </Repeat>
+                <Repeat list='{list2}' as='item'>
+                    <Text>{$item}</Text>
+                </Repeat>
+            </Contents>
+        </UITemplate>
+        ";
+        MockView view = new MockView(typeof(BindingTestThing), template);
+        view.Initialize();
+        BindingTestThing root = (BindingTestThing) view.RootElement;
+        root.list = new List<int>();
+        root.list2 = new List<int>();
+        root.list.Add(1);
+        root.list.Add(2);
+        root.list.Add(3);
+        root.list2.Add(4);
+        root.list2.Add(5);
+        root.list2.Add(6);
+        view.Update();
+        List<UITextElement> children = root.FindByType<UITextElement>();
+        Assert.AreEqual(6, children.Count);
        
     }
 

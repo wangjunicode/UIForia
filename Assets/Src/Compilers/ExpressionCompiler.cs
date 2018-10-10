@@ -4,6 +4,7 @@ using System.Linq;
 using System.Reflection;
 using JetBrains.Annotations;
 using Src.Compilers.CastHandlers;
+using UnityEngine;
 
 namespace Src {
 
@@ -51,7 +52,13 @@ namespace Src {
 
         [PublicAPI]
         public Expression Compile(string source) {
-            return Visit(parser.Parse(source));
+            try {
+                return Visit(parser.Parse(source));
+            }
+            catch (Exception e) {
+                Debug.Log("Error compiling: " + source);
+                throw e;
+            }
         }
 
         [PublicAPI]

@@ -37,14 +37,20 @@ namespace Src {
                         return (List<ValueTuple<int, T>>) list[i].Item2;
                     }
                 }
+                if (!create) return null;
+                List<ValueTuple<int, T>> retn = ListPool<ValueTuple<int, T>>.Get();
+                list.Add(ValueTuple.Create(typeof(T), (IList) retn));
+                return retn;
             }
-
-            if (!create) return null;
-            list = new List<ValueTuple<Type, IList>>();
-            aliasMap[alias] = list;
-            List<ValueTuple<int, T>> retn = ListPool<ValueTuple<int, T>>.Get();
-            list.Add(ValueTuple.Create(typeof(T), (IList) retn));
-            return retn;
+            else {
+                if (!create) return null;
+                list = new List<ValueTuple<Type, IList>>();
+                aliasMap[alias] = list;
+                List<ValueTuple<int, T>> retn = ListPool<ValueTuple<int, T>>.Get();
+                list.Add(ValueTuple.Create(typeof(T), (IList) retn));
+                return retn;
+            }
+           
         }
 
         public void SetContextValue<T>(IExpressionContextProvider provider, string alias, T value) {

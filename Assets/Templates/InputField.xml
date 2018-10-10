@@ -1,20 +1,15 @@
 <?xml version="1.0" encoding="utf-8"?>
 <UITemplate>
-
-    <Contents style.layoutType="Fixed"
-              style.fontSize="32"
-              style.width="content(100)"
-              style.maxWidth="300"
-              style.minWidth="30"
-              style.backgroundColor="white"
-              style.height="content(100)"
-              style.minHeight="14f">
+    
+    <Style classPath="UIInputFieldElement2+Styles"/>
+    
+    <Contents>
         
-        <Graphic x-id="highlight"/>
+        <Graphic x-id="highlight" />
         
         <Text x-id="text"/>
         
-        <Graphic x-id="cursor"/>
+        <Graphic x-id="cursor" style="caret"/>
         
     </Contents>
 

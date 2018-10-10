@@ -22,8 +22,6 @@ namespace Src {
 
         protected internal Binding[] bindings;
         protected internal Binding[] constantBindings;
-        protected Binding[] conditionalBindings;
-        protected InputBinding[] inputBindings;
 
         protected List<UIBaseStyleGroup> baseStyles;
         protected List<StyleBinding> constantStyleBindings;
@@ -52,19 +50,15 @@ namespace Src {
             this.constantStyleBindings = new List<StyleBinding>();
 
             this.bindings = Binding.EmptyArray;
-            this.inputBindings = InputBinding.EmptyArray;
             this.constantBindings = Binding.EmptyArray;
-            this.conditionalBindings = Binding.EmptyArray;
         }
 
         public MetaData GetCreationData(UIElement element, UITemplateContext context) {
             MetaData data = new MetaData(element, context);
             data.baseStyles = baseStyles;
             data.bindings = bindings;
-            data.inputBindings = inputBindings;
             data.constantBindings = constantBindings;
             data.constantStyleBindings = constantStyleBindings;
-            data.conditionalBindings = conditionalBindings;
             data.keyboardEventHandlers = keyboardEventHandlers;
             data.mouseEventHandlers = mouseEventHandlers;
             data.dragEventCreators = dragEventCreators;

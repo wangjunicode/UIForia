@@ -11,9 +11,7 @@ namespace Src.Layout.LayoutTypes {
 
         public ImageLayoutBox(LayoutSystem2 layoutSystem, UIElement element) : base(layoutSystem, element) {
             image = (UIImageElement) element;
-            image.onMaterialDirty += (e) => {
-                parent.OnChildSizeChanged();
-            };
+            image.onMaterialDirty += (e) => { parent.OnChildSizeChanged(); };
         }
 
         public override float PreferredWidth {
@@ -42,10 +40,6 @@ namespace Src.Layout.LayoutTypes {
             get {
                 if (image.Asset == null) return base.PreferredHeight;
                 if (image.useNativeSize) return PaddingVertical + BorderVertical + image.Asset.height;
-                if (image.preserveAspectRatio && image.Asset.height > 0) {
-                    return PaddingVertical + BorderVertical + (PreferredWidth / image.Asset.width) * image.Asset.height;
-                }
-
                 return base.PreferredHeight;
             }
         }

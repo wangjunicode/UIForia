@@ -69,9 +69,13 @@ namespace Src.Systems {
                 LayoutResult layoutResult = new LayoutResult();
                 layoutResult.localPosition = localPosition;
                 layoutResult.screenPosition = localPosition + box.parent?.element?.layoutResult.screenPosition ?? Vector2.zero;
+                layoutResult.contentOffset = new Vector2(box.PaddingLeft + box.BorderLeft, box.PaddingTop + box.BorderTop);
                 layoutResult.actualSize = new Size(box.actualWidth, box.actualHeight);
                 layoutResult.allocatedSize = new Size(box.allocatedWidth, box.allocatedHeight);
-
+                
+                float contentWidth = box.allocatedWidth - (box.PaddingHorizontal + box.BorderHorizontal);
+                float contentHeight = box.allocatedHeight - (box.PaddingVertical + box.BorderVertical);
+                layoutResult.contentSize = new Size(contentWidth, contentHeight);
                 element.layoutResult = layoutResult;
 
                 // todo -- possible 2nd phase for 'attach' layouts ie fixed / sticky / anchor to edge, this would only do positioning and not sizing
@@ -222,7 +226,10 @@ namespace Src.Systems {
         private void HandleTextContentChanged(UIElement element, string content) {
             LayoutBox box;
             if (m_LayoutBoxMap.TryGetValue(element.id, out box)) {
-                TextContainerLayoutBox textBox = box.parent as TextContainerLayoutBox;
+               TextContainerLayoutBox textBox = box as TextContainerLayoutBox;
+                if (textBox != null) {
+                    textBox.OnTextContentUpdated();
+                }
             }
         }
 

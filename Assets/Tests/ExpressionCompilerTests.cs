@@ -803,6 +803,56 @@ public class ExpressionCompilerTests {
         Assert.IsInstanceOf<ConstantExpression<TestUtils.TestEnum>>(expression);
         Assert.AreEqual(TestUtils.TestEnum.One, expression.Evaluate(ctx));
     }
+    
+    [Test]
+    public void ResolveStaticPropertyAliasFromExternalReference() {
+        TestRoot target = new TestRoot();
+        testContextDef.AddConstAliasSource(new ExternalReferenceAliasSource("@Color", typeof(Color)));
+        ExpressionContext ctx = new ExpressionContext(target);
+        ExpressionParser parser = new ExpressionParser("{@Color.blue}");
+        ExpressionCompiler compiler = new ExpressionCompiler(testContextDef);
+        Expression expression = compiler.Compile(parser.Parse());
+        Assert.AreEqual(Color.blue, expression.Evaluate(ctx));
+    }
+    
+    [Test]
+    public void ResolveStaticPropertyAliasFromExternalReferenceChained() {
+        TestRoot target = new TestRoot();
+        testContextDef.AddConstAliasSource(new ExternalReferenceAliasSource("@Color", typeof(Color)));
+        ExpressionContext ctx = new ExpressionContext(target);
+        ExpressionParser parser = new ExpressionParser("{@Color.blue.b}");
+        ExpressionCompiler compiler = new ExpressionCompiler(testContextDef);
+        Expression expression = compiler.Compile(parser.Parse());
+        Assert.AreEqual(1f, expression.Evaluate(ctx));
+    }
+    
+    public class MyClass {
+
+        public static Color blue = Color.blue;
+
+    }
+    
+    [Test]
+    public void ResolveStaticFieldAliasFromExternalReference() {
+        TestRoot target = new TestRoot();
+        testContextDef.AddConstAliasSource(new ExternalReferenceAliasSource("@Color", typeof(MyClass)));
+        ExpressionContext ctx = new ExpressionContext(target);
+        ExpressionParser parser = new ExpressionParser("{@Color.blue}");
+        ExpressionCompiler compiler = new ExpressionCompiler(testContextDef);
+        Expression expression = compiler.Compile(parser.Parse());
+        Assert.AreEqual(Color.blue, expression.Evaluate(ctx));
+    }
+    
+    [Test]
+    public void ResolveStaticFieldAliasFromExternalReferenceChained() {
+        TestRoot target = new TestRoot();
+        testContextDef.AddConstAliasSource(new ExternalReferenceAliasSource("@Color", typeof(MyClass)));
+        ExpressionContext ctx = new ExpressionContext(target);
+        ExpressionParser parser = new ExpressionParser("{@Color.blue.b}");
+        ExpressionCompiler compiler = new ExpressionCompiler(testContextDef);
+        Expression expression = compiler.Compile(parser.Parse());
+        Assert.AreEqual(1f, expression.Evaluate(ctx));
+    }
 
     [Test]
     public void ResolveNonStandardAliasType() {

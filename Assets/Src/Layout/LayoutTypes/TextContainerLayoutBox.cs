@@ -180,6 +180,11 @@ namespace Src.Layout.LayoutTypes {
             }
         }
 
+        public void OnTextContentUpdated() {
+            RequestLayout();
+            RequestParentLayoutIfContentBased();
+        }
+
     }
 
 }

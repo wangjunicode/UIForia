@@ -28,6 +28,20 @@ namespace Src {
 
         public Texture2D Asset => src.asset;
 
+        public void SetTexture(Texture2D texture) {
+            src = new Texture2DAssetReference(texture);
+            IsMaterialDirty = true;
+            onMaterialDirty?.Invoke(this);
+        }
+
+        public void SetPreserveAspectRatio(bool preserve) {
+            if (preserve != preserveAspectRatio) {
+                preserveAspectRatio = preserve;
+                // todo -- need to trigger layout somehow
+                OnAllocatedSizeChanged();
+            }
+        }
+
         public void OnPropertyChanged(string propertyName, object oldValue) {
             if (propertyName == nameof(src)) {
                 IsMaterialDirty = true;
@@ -36,7 +50,8 @@ namespace Src {
         }
 
         public void OnAllocatedSizeChanged() {
-            if (scaleToFitContainer) { }
+            IsGeometryDirty = true;
+            onMeshDirty?.Invoke(this);
         }
 
         public void OnStylePropertyChanged(StyleProperty property) { }
@@ -49,23 +64,7 @@ namespace Src {
                 color = Color.white;
             }
 
-//            Size size = layoutResult.allocatedSize;
-
-//            float width = size.width
-//                          - style.computedStyle.PaddingLeft.value
-//                          - style.computedStyle.PaddingRight.value
-//                          - style.computedStyle.BorderLeft.value
-//                          - style.computedStyle.BorderRight.value;
-//
-//            float height = size.height
-//                           - style.computedStyle.PaddingTop.value
-//                           - style.computedStyle.PaddingBottom.value
-//                           - style.computedStyle.BorderTop.value
-//                           - style.computedStyle.BorderBottom.value;
-//
-//            float offsetX = style.computedStyle.PaddingLeft.value + style.computedStyle.BorderLeft.value;
-//            float offsetY = style.computedStyle.PaddingTop.value + style.computedStyle.BorderTop.value;
-            mesh = MeshUtil.CreateStandardUIMesh(layoutResult.allocatedSize, color);
+            mesh = MeshUtil.CreateStandardUIMesh(layoutResult.contentOffset, layoutResult.contentSize, color);
 
             return mesh;
         }
@@ -81,8 +80,6 @@ namespace Src {
         public Texture GetMainTexture() {
             return src.asset;
         }
-
-
 
     }
 

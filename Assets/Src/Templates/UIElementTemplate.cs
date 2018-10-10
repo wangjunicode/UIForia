@@ -1,6 +1,9 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using Src.Elements;
+using Src.Util;
+using UnityEngine;
 
 namespace Src {
 
@@ -11,7 +14,8 @@ namespace Src {
         private Type rootType;
         private readonly string typeName;
         private ParsedTemplate templateToExpand;
-        
+        private TemplateType templateType;
+
         public UIElementTemplate(string typeName, List<UITemplate> childTemplates, List<AttributeDefinition> attributes = null)
             : base(childTemplates, attributes) {
             this.typeName = typeName;
@@ -24,10 +28,35 @@ namespace Src {
 
         public Type RootType => rootType;
 
+        private enum TemplateType {
+
+            Primitive,
+            Container,
+            Template
+
+        }
+
         public override bool Compile(ParsedTemplate template) {
+            
             if (rootType == null) {
                 rootType = TypeProcessor.GetType(typeName, template.imports).rawType;
             }
+            
+            if (typeof(UIPrimitiveElement).IsAssignableFrom(rootType)) {
+                // assert no children
+                // assert no template
+                templateType = TemplateType.Primitive;
+                base.Compile(template);
+                return true;
+            }
+
+            if (typeof(UIContainerElement).IsAssignableFrom(rootType)) {
+                templateType = TemplateType.Container;
+                base.Compile(template);
+                return true;
+            }
+
+            templateType = TemplateType.Template;
 
             templateToExpand = TemplateParser.GetParsedTemplate(rootType);
             templateToExpand.Compile();
@@ -57,36 +86,78 @@ namespace Src {
             outputScope.context = new UITemplateContext(inputScope.context.view);
             outputScope.inputChildren = scopedChildren;
 
-            MetaData instanceData = templateToExpand.CreateWithScope(outputScope);
+            MetaData instanceData = MetaData.GetFromPool();
+
+            switch (templateType) {
+                case TemplateType.Primitive:
+                    if (scopedChildren.Count > 0) {
+                        throw new Exception("Primitive elements cannot have children. Children were passed to " + rootType.Name);
+                    }
+
+                    instanceData.element = (UIElement) Activator.CreateInstance(rootType);
+                    instanceData.element.ownChildren = ArrayPool<UIElement>.Empty;
+                    instanceData.element.templateChildren = ArrayPool<UIElement>.Empty;
+                    
+                    break;
+                case TemplateType.Container:
+                    instanceData.element = (UIElement) Activator.CreateInstance(rootType);
+                    
+                    if (scopedChildren.Count == 0) {
+                        instanceData.element.ownChildren = ArrayPool<UIElement>.Empty;
+                        instanceData.element.templateChildren = ArrayPool<UIElement>.Empty;
+                        break;
+                    }
+
+                    instanceData.element.templateChildren = ArrayPool<UIElement>.GetExactSize(scopedChildren.Count);
+                    instanceData.element.ownChildren = instanceData.element.templateChildren;
+                    for (int i = 0; i < scopedChildren.Count; i++) {
+                        MetaData child = scopedChildren[i];
+                        instanceData.element.templateChildren[i] = child.element;
+                        instanceData.AddChild(child);
+                    }
+                    break;
+                case TemplateType.Template:
+                    instanceData = templateToExpand.CreateWithScope(outputScope);
+                    break;
+                default:
+                    throw new ArgumentOutOfRangeException();
+            }
+
+            if (templateType == TemplateType.Template) {
+                // todo -- merge bindings here
+            }
+            else {
+                // todo -- used un-merged bindings
+            }
 
             // todo -- not sure this is safe to overwrite bindings here probably need to merge
             // actually the only bindings allowed on <Contents> tag should be styles
-            // which would make this ok. need to merge styles though
-            instanceData.constantBindings = constantBindings;
-            instanceData.conditionalBindings = conditionalBindings;
+            // which would make this ok. need to merge styles though, maybe input handlers though?
             instanceData.bindings = bindings;
             instanceData.context = inputScope.context;
-            instanceData.inputBindings = inputBindings;
+            instanceData.constantBindings = constantBindings;
             instanceData.constantStyleBindings = constantStyleBindings;
             instanceData.element.templateAttributes = templateAttributes;
+            
             instanceData.baseStyles = baseStyles;
+            
             instanceData.mouseEventHandlers = mouseEventHandlers;
             instanceData.dragEventCreators = dragEventCreators;
             instanceData.dragEventHandlers = dragEventHandlers;
             instanceData.keyboardEventHandlers = keyboardEventHandlers;
-            
+
             outputScope.context.rootElement = instanceData.element;
 
             AssignContext(instanceData.element, outputScope.context);
-            
+
             return instanceData;
         }
 
         private void AssignContext(UIElement element, UITemplateContext context) {
             element.templateContext = context;
-            
+
             if (element.ownChildren == null) return;
-            
+
             for (int i = 0; i < element.ownChildren.Length; i++) {
                 AssignContext(element.ownChildren[i], context);
             }

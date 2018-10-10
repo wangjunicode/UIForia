@@ -1,27 +1,53 @@
 ﻿using System;
-using System.Diagnostics;
+using System.Collections.Generic;
 using System.Reflection;
+using Src.Compilers.AliasSource;
+using Src.Extensions;
+using UnityEngine;
+using Debug = System.Diagnostics.Debug;
 
 namespace Src.Compilers {
 
     public class PropertyBindingCompiler {
 
+        private static readonly Dictionary<Type, List<IAliasSource>> aliasMap = new Dictionary<Type, List<IAliasSource>>();
+
         public static readonly string EvtArgDefaultName = "$event";
+
         public static readonly string[] EvtArgNames = {
             "$eventArg0",
             "$eventArg1",
             "$eventArg2",
             "$eventArg3"
         };
-        
+
         private readonly ExpressionCompiler compiler;
 
         public PropertyBindingCompiler(ContextDefinition context) {
             this.compiler = new ExpressionCompiler(context);
         }
 
+        // todo -- maybe move this to the compiler itself so it can be used per-expression 
+        static PropertyBindingCompiler() {
+            AddTypedAliasSource(typeof(Color), new ColorAliasSource());
+            AddTypedAliasSource(typeof(Color), new MethodAliasSource("rgb", ColorAliasSource.ColorConstructor));
+            AddTypedAliasSource(typeof(Color), new MethodAliasSource("rgba", ColorAliasSource.ColorConstructorAlpha));
+        }
+
         public void SetContext(ContextDefinition context) {
             this.compiler.SetContext(context);
+        }
+
+
+        public static void AddTypedAliasSource(Type type, IAliasSource aliasSource) {
+            if (type == null || aliasSource == null) return;
+            List<IAliasSource> list = aliasMap.GetOrDefault(type);
+            if (list == null) {
+                list = new List<IAliasSource>();
+                aliasMap[type] = list;
+            }
+
+            list.Add(aliasSource);
         }
 
         public Binding CompileAttribute(Type targetType, AttributeDefinition attributeDefinition) {
@@ -29,24 +55,31 @@ namespace Src.Compilers {
             string attrValue = attributeDefinition.value;
 
             EventInfo eventInfo = targetType.GetEvent(attrKey);
-            
+
             if (eventInfo != null) {
                 return CompileCallbackAttribute(attrKey, attrValue, eventInfo);
             }
 
-            PropertyInfo propertyInfo = ReflectionUtil.GetPropertyInfo(targetType, attrKey);
-            
-            if (propertyInfo != null) {
-                        
-            }
-
             FieldInfo fieldInfo = ReflectionUtil.GetFieldInfoOrThrow(targetType, attrKey);
 
-            if (ReflectionUtil.IsCallbackType(fieldInfo.FieldType)) {
-                //todo -- figure out how to handle Func and Action fields
+            //todo -- figure out how to handle Func and Action fields
+
+            List<IAliasSource> aliasSources = aliasMap.GetOrDefault(fieldInfo.FieldType);
+
+            if (aliasSources != null) {
+                for (int i = 0; i < aliasSources.Count; i++) {
+                    compiler.context.AddConstAliasSource(aliasSources[i]);
+                }
             }
 
             Expression expression = compiler.Compile(attrValue);
+
+            if (aliasSources != null) {
+                for (int i = 0; i < aliasSources.Count; i++) {
+                    compiler.context.RemoveConstAliasSource(aliasSources[i]);
+                }
+            }
+
             ReflectionUtil.LinqAccessor accessor = ReflectionUtil.GetLinqAccessors(targetType, fieldInfo.FieldType, attrKey);
 
             ReflectionUtil.TypeArray2[0] = targetType;
@@ -67,9 +100,9 @@ namespace Src.Compilers {
         private Binding CompileCallbackAttribute(string key, string value, EventInfo eventInfo) {
             MethodInfo info = eventInfo.EventHandlerType.GetMethod("Invoke");
             Debug.Assert(info != null, nameof(info) + " != null");
-            
+
             ParameterInfo[] delegateParameters = info.GetParameters();
-            
+
             Type[] argTypes = new Type[delegateParameters.Length];
 
             for (int i = 0; i < delegateParameters.Length; i++) {

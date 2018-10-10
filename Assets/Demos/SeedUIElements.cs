@@ -3,7 +3,7 @@ using Rendering;
 using UnityEngine;
 
 namespace Src {
-
+    
     [Template(TemplateType.String, @"
     <UITemplate>
         <Style classPath='Label+Style'/>
@@ -14,7 +14,7 @@ namespace Src {
         </Contents>
     </UITemplate>
     ")]
-    public class Label : UIElement {
+    public class SeedLabel : UIElement {
 
         [UsedImplicitly] public string text;
 
@@ -26,6 +26,13 @@ namespace Src {
                     TextColor = new Color32(138, 138, 138, 255),
                     FontAsset = new FontAssetReference("Gotham-Medium SDF"),
                     FontSize = 20
+                };
+            }
+
+            [ExportStyle("inline-image")]
+            public static UIStyle InlineImage() {
+                return new UIStyle() {
+                    PreferredHeight = new UIMeasurement(1f, UIUnit.ParentContentArea)
                 };
             }
 

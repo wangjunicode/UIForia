@@ -38,7 +38,7 @@
 
             <Group style="message-panel">
                 <Group style="message-panel-header">
-                    <Label text="'DIRECT MESSAGES'"/>
+                    <SeedLabel text="'DIRECT MESSAGES'"/>
                     <Image src="{url('plus_icon')}"/>
                 </Group>
                 
@@ -49,11 +49,13 @@
             </Group>
 
             <Group style="message-main-area">
-
+                
+                <Input style="input-field" text="'Hello World'"/>
+                
             </Group>
 
             <ClippedPanel style="message-panel-secondary" clipSize="20f" clippedCorner="{@ClippedCorner.BottomRight}">
-
+        
             </ClippedPanel>
 
         </Group>

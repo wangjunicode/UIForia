@@ -13,7 +13,7 @@ namespace Src {
 
     public class ExpressionCompiler {
 
-        private ContextDefinition context;
+        public ContextDefinition context;
         private List<ICastHandler> userCastHandlers;
 
         private static readonly ExpressionParser parser = new ExpressionParser();
@@ -57,6 +57,7 @@ namespace Src {
             }
             catch (Exception e) {
                 Debug.Log("Error compiling: " + source);
+                Debug.Log(e.StackTrace);
                 throw e;
             }
         }
@@ -330,13 +331,12 @@ namespace Src {
         }
 
         private Expression VisitAliasNode(AliasExpressionNode node) {
-            
             Type aliasedType = context.ResolveRuntimeAliasType(node.alias);
 
             if (aliasedType == null) {
-                throw new Exception("Unable to resolve alias: " + node.alias);    
+                throw new Exception("Unable to resolve alias: " + node.alias);
             }
-            
+
             return (Expression) ReflectionUtil.CreateGenericInstanceFromOpenType(
                 typeof(ResolveExpression_Alias<>),
                 aliasedType,
@@ -498,11 +498,26 @@ namespace Src {
                    || type == typeof(double);
         }
 
+        private enum AccessExpressionType {
+
+            Constant,
+            RootLookup,
+            StaticField,
+            StaticProperty,
+
+            AliasLookup
+
+        }
+
         private Expression VisitAccessExpression(AccessExpressionNode node) {
             string contextName = node.identifierNode.identifier;
             Type headType;
+            object arg0 = contextName;
+            AccessExpressionType expressionType = AccessExpressionType.AliasLookup;
+            bool isStaticReferenceExpression = false;
 
             if (node.identifierNode is ExternalReferenceIdentifierNode) {
+                isStaticReferenceExpression = true;
                 headType = (Type) context.ResolveConstAlias(contextName);
                 // todo -- this will break for non type references... its possible that we want a constant value or something else here
                 if (headType == null) {
@@ -522,18 +537,8 @@ namespace Src {
                     $"Attempting property access on type {headType.Name} on a primitive field {contextName}");
             }
 
-            int startOffset = 0;
-            int partCount = node.parts.Count;
-
-            bool isRootContext = !(node.identifierNode is SpecialIdentifierNode) && !(node.identifierNode is ExternalReferenceIdentifierNode);
-
-            if (isRootContext) {
-                startOffset++;
-                partCount++;
-            }
-
             if (headType.IsEnum) {
-                if (partCount != 1) {
+                if (node.parts.Count != 1) {
                     throw new Exception("Trying to reference nested Enum value, which is not possible");
                 }
 
@@ -546,49 +551,161 @@ namespace Src {
                 return (Expression) ReflectionUtil.CreateGenericInstanceFromOpenType(typeof(ConstantExpression<>), headType, ReflectionUtil.ObjectArray1);
             }
 
+            bool isRootContext = !(node.identifierNode is SpecialIdentifierNode) && !(node.identifierNode is ExternalReferenceIdentifierNode);
+            int startOffset = isRootContext ? 1 : 0;
+            int partCount = node.parts.Count;
+            if (isRootContext) {
+                partCount = node.parts.Count + 1;
+            }
+            else if (isStaticReferenceExpression) {
+                partCount = node.parts.Count; //== 1 ? 1 : node.parts.Count - 1;// 1;
+            }
+            else {
+                partCount = node.parts.Count;
+            }
+
             Type lastType = headType;
             AccessExpressionPart[] parts = new AccessExpressionPart[partCount];
 
-            for (int i = startOffset; i < partCount; i++) {
-                AccessExpressionPartNode part = node.parts[i - startOffset];
-
-                PropertyAccessExpressionPartNode propertyPart = part as PropertyAccessExpressionPartNode;
-
+            if (isStaticReferenceExpression) {
+                startOffset = 1;
+                PropertyAccessExpressionPartNode propertyPart = node.parts[0] as PropertyAccessExpressionPartNode;
                 if (propertyPart != null) {
-                    string fieldName = propertyPart.fieldName;
-                    FieldInfo fieldInfo = ReflectionUtil.GetFieldInfo(lastType, fieldName);
+                    FieldInfo fieldInfo = ReflectionUtil.GetStaticFieldInfo(headType, propertyPart.fieldName);
                     if (fieldInfo != null) {
+                        arg0 = fieldInfo;
+                        expressionType = AccessExpressionType.StaticField;
                         lastType = fieldInfo.FieldType;
-                        parts[i] = new AccessExpressionPart_Field(fieldName);
+                        parts[0] = new AccessExpressionPart_StaticField(fieldInfo);
                     }
                     else {
-                        lastType = ReflectionUtil.GetPropertyInfo(lastType, fieldName).PropertyType;
-                        parts[i] = new AccessExpressionPart_Property(fieldName);
+                        PropertyInfo propertyInfo = ReflectionUtil.GetStaticPropertyInfo(headType, propertyPart.fieldName);
+                        expressionType = AccessExpressionType.StaticProperty;
+                        if (propertyInfo == null) {
+                            throw new Exception("Imported values must be static fields or properties. " +
+                                                $"Cannot find a static field or property called {propertyPart.fieldName} on type {headType}");
+                        }
+
+                        arg0 = propertyInfo;
+                        lastType = propertyInfo.PropertyType;
+                        parts[0] = new AccessExpressionPart_StaticProperty(propertyInfo);
+                    }
+                }
+
+                for (int i = startOffset; i < partCount; i++) {
+                    AccessExpressionPartNode part = node.parts[i];
+                    propertyPart = part as PropertyAccessExpressionPartNode;
+                    if (propertyPart != null) {
+                        string fieldName = propertyPart.fieldName;
+                        FieldInfo fieldInfo = ReflectionUtil.GetInstanceOrStaticFieldInfo(lastType, fieldName);
+                        if (fieldInfo != null) {
+                            lastType = fieldInfo.FieldType;
+                            parts[i] = new AccessExpressionPart_Field(fieldName);
+                        }
+                        else {
+                            PropertyInfo propertyInfo = ReflectionUtil.GetInstanceOrStaticPropertyInfo(lastType, fieldName);
+                            lastType = propertyInfo.PropertyType;
+                            if (ReflectionUtil.IsPropertyStatic(propertyInfo)) {
+                                parts[i] = new AccessExpressionPart_StaticProperty(propertyInfo);
+                            }
+                            else {
+                                parts[i] = new AccessExpressionPart_Property(fieldName);
+                            }
+                        }
+
+                        continue;
                     }
 
-                    continue;
-                }
+                    ArrayAccessExpressionNode arrayPart = part as ArrayAccessExpressionNode;
+                    if (arrayPart != null) {
+                        Expression<int> indexExpression = (Expression<int>) Visit(arrayPart.expressionNode);
+                        lastType = ReflectionUtil.GetArrayElementTypeOrThrow(lastType);
+                        parts[i] = new AccessExpressionPart_List(indexExpression);
+                        continue;
+                    }
 
-                ArrayAccessExpressionNode arrayPart = part as ArrayAccessExpressionNode;
-                if (arrayPart != null) {
-                    Expression<int> indexExpression = (Expression<int>) Visit(arrayPart.expressionNode);
-                    lastType = ReflectionUtil.GetArrayElementTypeOrThrow(lastType);
-                    parts[i] = new AccessExpressionPart_List(indexExpression);
-                    continue;
+                    throw new Exception("Unknown AccessExpression Type: " + part.GetType());
                 }
+            }
+            else {
+                for (int i = startOffset; i < partCount; i++) {
+                    AccessExpressionPartNode part = node.parts[i - startOffset];
 
-                throw new Exception("Unknown AccessExpression Type: " + part.GetType());
+                    PropertyAccessExpressionPartNode propertyPart = part as PropertyAccessExpressionPartNode;
+
+                    if (propertyPart != null) {
+                        string fieldName = propertyPart.fieldName;
+                        FieldInfo fieldInfo = ReflectionUtil.GetInstanceOrStaticFieldInfo(lastType, fieldName);
+                        if (fieldInfo != null) {
+                            lastType = fieldInfo.FieldType;
+                            parts[i] = new AccessExpressionPart_Field(fieldName);
+                        }
+                        else {
+                            PropertyInfo propertyInfo = ReflectionUtil.GetInstanceOrStaticPropertyInfo(lastType, fieldName);
+                            lastType = propertyInfo.PropertyType;
+                            if (ReflectionUtil.IsPropertyStatic(propertyInfo)) {
+                                parts[i] = new AccessExpressionPart_StaticProperty(propertyInfo);
+                            }
+                            else {
+                                parts[i] = new AccessExpressionPart_Property(fieldName);
+                            }
+                        }
+
+                        continue;
+                    }
+
+                    ArrayAccessExpressionNode arrayPart = part as ArrayAccessExpressionNode;
+                    if (arrayPart != null) {
+                        Expression<int> indexExpression = (Expression<int>) Visit(arrayPart.expressionNode);
+                        lastType = ReflectionUtil.GetArrayElementTypeOrThrow(lastType);
+                        parts[i] = new AccessExpressionPart_List(indexExpression);
+                        continue;
+                    }
+
+                    throw new Exception("Unknown AccessExpression Type: " + part.GetType());
+                }
             }
 
             if (isRootContext) {
                 parts[0] = new AccessExpressionPart_Field(contextName);
             }
 
-            ReflectionUtil.ObjectArray2[0] = contextName;
-            ReflectionUtil.ObjectArray2[1] = parts;
-            ReflectionUtil.TypeArray2[0] = lastType;
-            ReflectionUtil.TypeArray2[1] = isRootContext ? context.rootType : headType;
-            return (Expression) ReflectionUtil.CreateGenericInstanceFromOpenType(typeof(AccessExpression<,>), ReflectionUtil.TypeArray2, ReflectionUtil.ObjectArray2);
+            switch (expressionType) {
+                case AccessExpressionType.AliasLookup:
+                case AccessExpressionType.RootLookup:
+                    ReflectionUtil.ObjectArray2[0] = arg0;
+                    ReflectionUtil.ObjectArray2[1] = parts;
+                    ReflectionUtil.TypeArray2[0] = lastType;
+                    ReflectionUtil.TypeArray2[1] = isRootContext ? context.rootType : headType;
+                    return (Expression) ReflectionUtil.CreateGenericInstanceFromOpenType(
+                        typeof(AccessExpression<,>),
+                        ReflectionUtil.TypeArray2,
+                        ReflectionUtil.ObjectArray2
+                    );
+
+                case AccessExpressionType.StaticField:
+                    ReflectionUtil.ObjectArray2[0] = arg0;
+                    ReflectionUtil.ObjectArray2[1] = parts;
+                    ReflectionUtil.TypeArray1[0] = lastType;
+                    return (Expression) ReflectionUtil.CreateGenericInstanceFromOpenType(
+                        typeof(AccessExpressionStaticField<>),
+                        ReflectionUtil.TypeArray1,
+                        ReflectionUtil.ObjectArray2
+                    );
+
+                case AccessExpressionType.StaticProperty:
+                    ReflectionUtil.ObjectArray2[0] = arg0;
+                    ReflectionUtil.ObjectArray2[1] = parts;
+                    ReflectionUtil.TypeArray1[0] = lastType;
+                    return (Expression) ReflectionUtil.CreateGenericInstanceFromOpenType(
+                        typeof(AccessExpressionStaticProperty<>),
+                        ReflectionUtil.TypeArray1,
+                        ReflectionUtil.ObjectArray2
+                    );
+                case AccessExpressionType.Constant:
+                default:
+                    throw new ArgumentOutOfRangeException();
+            }
         }
 
         private static Expression VisitConstant(LiteralValueNode node) {

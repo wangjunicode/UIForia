@@ -14,13 +14,12 @@ namespace Src.Elements {
         private Mesh mesh;
         private Material material;
 
-        internal IGraphicUpdateManager updateManager;
-
         public UIGraphicElement() {
-            flags |= UIElementFlags.RequiresSpecialRendering;
             flags |= UIElementFlags.Primitive;
             mesh = new Mesh();
             material = Graphic.defaultGraphicMaterial;
+            IsGeometryDirty = true;
+            IsMaterialDirty = true;
         }
 
         public event Action<IDrawable> onMeshDirty;
@@ -38,30 +37,31 @@ namespace Src.Elements {
         }
 
         public override void OnCreate() {
-            style.SetPreferredWidth(new UIMeasurement(0), StyleState.All);
-            style.SetPreferredHeight(new UIMeasurement(0), StyleState.All);
+            style.SetPreferredWidth(10f, StyleState.Normal);
+            style.SetPreferredHeight(10f, StyleState.Normal);
         }
 
         public void RebuildGeometry() {
             rebuildGeometry?.Invoke(mesh);
-            style.SetPreferredWidth(new UIMeasurement(width), StyleState.All);
-            style.SetPreferredHeight(new UIMeasurement(height), StyleState.All);
+            style.SetPreferredWidth(new UIMeasurement(width), StyleState.Normal);
+            style.SetPreferredHeight(new UIMeasurement(height), StyleState.Normal);
             IsGeometryDirty = false;
         }
 
         public void RebuildMaterial() {
             rebuildMaterial?.Invoke(material);
             IsMaterialDirty = true;
+            onMaterialDirty?.Invoke(this);
         }
 
         public void MarkMaterialDirty() {
             IsMaterialDirty = true;
-            updateManager.MarkMaterialDirty(this);
+            onMeshDirty?.Invoke(this);
         }
 
         public void MarkGeometryDirty() {
             IsGeometryDirty = true;
-            updateManager.MarkGeometryDirty(this);
+            onMaterialDirty?.Invoke(this);
         }
 
         public void OnStylePropertyChanged(StyleProperty property) {
@@ -69,6 +69,9 @@ namespace Src.Elements {
         }
 
         public Mesh GetMesh() {
+            if (IsGeometryDirty) {
+                RebuildGeometry();
+            }
             return mesh;
         }
 
@@ -87,11 +90,11 @@ namespace Src.Elements {
         }
 
         public void OnAllocatedSizeChanged() {
-            throw new NotImplementedException();
+            //throw new NotImplementedException();
         }
 
         public void OnStylePropertyChanged(UIElement element, StyleProperty property) {
-            throw new NotImplementedException();
+            //throw new NotImplementedException();
         }
 
     }

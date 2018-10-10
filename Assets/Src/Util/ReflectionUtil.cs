@@ -86,11 +86,27 @@ public static class ReflectionUtil {
     public static FieldInfo GetFieldInfo(Type type, string fieldName) {
         return type.GetField(fieldName, InstanceBindFlags);
     }
+    
+    public static FieldInfo GetStaticFieldInfo(Type type, string fieldName) {
+        return type.GetField(fieldName, StaticFlags);
+    }
+    
+    public static FieldInfo GetInstanceOrStaticFieldInfo(Type type, string fieldName) {
+        return type.GetField(fieldName, StaticFlags | InstanceBindFlags);
+    }
 
     public static PropertyInfo GetPropertyInfo(Type type, string propertyType) {
         return type.GetProperty(propertyType, InstanceBindFlags);
     }
 
+    public static PropertyInfo GetStaticPropertyInfo(Type type, string fieldName) {
+        return type.GetProperty(fieldName, StaticFlags);
+    }
+    
+    public static PropertyInfo GetInstanceOrStaticPropertyInfo(Type type, string propertyType) {
+        return type.GetProperty(propertyType, StaticFlags | InstanceBindFlags);
+    }
+    
     public static FieldInfo GetFieldInfoOrThrow(Type type, string fieldName) {
         FieldInfo fieldInfo = type.GetField(fieldName, InstanceBindFlags);
         if (fieldInfo == null) {
@@ -695,6 +711,15 @@ public static class ReflectionUtil {
         return false;
     }
 
-   
+
+    public static bool IsPropertyStatic(PropertyInfo propertyInfo) {
+        return propertyInfo.GetMethod?.IsStatic ?? false;
+    }
+
+    public static bool IsPropertyReadOnly(PropertyInfo propertyInfo) {
+        return propertyInfo.SetMethod == null;
+    }
+
+
 
 }

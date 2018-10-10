@@ -3,6 +3,7 @@ using System.Xml;
 using System.Collections.Generic;
 using System.Linq;
 using System.Xml.Linq;
+using Src.Elements;
 using Src.Style;
 
 namespace Src {
@@ -170,8 +171,9 @@ namespace Src {
             return template;
         }
 
-        private static UITemplate ParseGroupElement(XElement element) {
-            UIGroupTemplate template = new UIGroupTemplate(
+        private static UITemplate ParseContainerElement(Type type, XElement element) {
+            UIElementTemplate template = new UIElementTemplate(
+                type,
                 ParseNodes(element.Nodes()),
                 ParseAttributes(element.Attributes())
             );
@@ -224,19 +226,10 @@ namespace Src {
 
             return template;
         }
-
-        private static UITemplate ParsePrefabElement(XElement element) {
-            EnsureEmpty(element);
-            EnsureOnlyAttributes(element, PrefabAttributes);
-
-            UIPrefabTemplate template = new UIPrefabTemplate(ParseAttributes(element.Attributes()));
-
-            return template;
-        }
-
+        
         private static UITextTemplate ParseTextNode(XText node) {
             // todo split nodes based on inline {expressions}
-            return new UITextTemplate("'" + node.Value.Trim() + "'");
+            return new UITextTemplate(null, "'" + node.Value.Trim() + "'");
         }
 
         private static UITemplate ParseTemplateElement(XElement element) {
@@ -249,7 +242,7 @@ namespace Src {
             return template;
         }
 
-        private static UITemplate ParseTextContainerElement(XElement element) {
+        private static UITemplate ParseTextElement(Type type, XElement element) {
             string rawText = string.Empty;
             foreach (var node in element.Nodes()) {
                 switch (node.NodeType) {
@@ -266,13 +259,7 @@ namespace Src {
 
                 throw new InvalidTemplateException("Unable to handle node type: " + node.NodeType);
             }
-            return new UITextTemplate(rawText, ParseAttributes(element.Attributes()));
-//            UITemplate template = new UITextContainerTemplate(
-//                ParseNodes(element.Nodes()),
-//                ParseAttributes(element.Attributes())
-//            );
-//            return template;
-              
+            return new UITextTemplate(type, rawText, ParseAttributes(element.Attributes()));
         }
         
         private static UITemplate ParseGraphicElement(XElement element) {
@@ -285,15 +272,18 @@ namespace Src {
         
         private static UITemplate ParseShapeElement(XElement element) {
             throw new NotImplementedException();    
-            UITemplate template = new UIShapeTemplate(
-                ParseNodes(element.Nodes()),
-                ParseAttributes(element.Attributes())
-            );
-            return template;
         }
 
         private static UITemplate ParseImageElement(XElement element) {
             return new UIImageTemplate(null, ParseAttributes(element.Attributes()));    
+        }
+        
+        private static UITemplate ParseInputElement(XElement element) {
+            return new UIElementTemplate(
+                typeof(UIInputFieldElement2),
+                ParseNodes(element.Nodes()),
+                ParseAttributes(element.Attributes())
+            );
         }
 
         private static UITemplate ParseElement(XElement element) {
@@ -302,28 +292,9 @@ namespace Src {
                 return ParseChildrenElement(element);
             }
 
-            if (element.Name == "Text") {
-                return ParseTextContainerElement(element);
-            }
-
             if (element.Name == "Graphic") {
                 return ParseGraphicElement(element);
             }
-            
-//            if (element.Name == "Paragraph") { }
-            
-//            if (element.Name == "Heading1") { }
-//            if (element.Name == "Heading2") { }
-//            if (element.Name == "Heading3") { }
-//            if (element.Name == "Heading4") { }
-//            if (element.Name == "Heading5") { }
-//            if (element.Name == "Heading6") { }
-//
-//            if (element.Name == "UnorderedList") { }
-//            if (element.Name == "OrderedList") { }
-//
-//            if (element.Name == "ListItem") { }
-
             
             if (element.Name == "Image") {
                 return ParseImageElement(element);
@@ -341,10 +312,6 @@ namespace Src {
                 return ParseSwitchElement(element);
             }
 
-            if (element.Name == "Prefab") {
-                return ParsePrefabElement(element);
-            }
-
             if (element.Name == "Default") {
                 return ParseDefaultElement(element);
             }
@@ -353,12 +320,58 @@ namespace Src {
                 return ParseCaseElement(element);
             }
 
-            if (element.Name == "Group" || element.Name == "Panel") {
-                return ParseGroupElement(element);
+            if (element.Name == "Input") {
+                return ParseInputElement(element);
+            }
+
+            for (int i = 0; i < IntrinsicElementTypes.Length; i++) {
+                if (IntrinsicElementTypes[i].name == element.Name) {
+                    if (IntrinsicElementTypes[i].isContainer) {
+                        return ParseContainerElement(IntrinsicElementTypes[i].type, element);
+                    }
+                    else {
+                        return ParseTextElement(IntrinsicElementTypes[i].type, element);
+                    }
+                }
             }
 
             return ParseTemplateElement(element);
         }
+
+
+        public struct IntrinsicElementType {
+
+            public readonly string name;
+            public readonly Type type;
+            public readonly bool isContainer;
+
+            public IntrinsicElementType(string name, Type type, bool isContainer) {
+                this.name = name;
+                this.type = type;
+                this.isContainer = isContainer;
+            }
+            
+        }
+        
+        public static readonly IntrinsicElementType[] IntrinsicElementTypes =  {
+            new IntrinsicElementType("Group", typeof(UIGroupElement), true), 
+            new IntrinsicElementType("Panel", typeof(UIPanelElement), true), 
+            new IntrinsicElementType("Section", typeof(UISectionElement), true), 
+            new IntrinsicElementType("Div", typeof(UIDivElement), true), 
+            new IntrinsicElementType("Header", typeof(UIHeaderElement), true), 
+            new IntrinsicElementType("Footer", typeof(UIFooterElement), true), 
+            
+            new IntrinsicElementType("Text", typeof(UITextElement), false), 
+            new IntrinsicElementType("Label", typeof(UILabelElement), false), 
+            new IntrinsicElementType("Paragraph", typeof(UIParagraphElement), false), 
+            new IntrinsicElementType("Heading1", typeof(UIHeading1Element), false), 
+            new IntrinsicElementType("Heading2", typeof(UIHeading2Element), false), 
+            new IntrinsicElementType("Heading3", typeof(UIHeading3Element), false), 
+            new IntrinsicElementType("Heading4", typeof(UIHeading4Element), false), 
+            new IntrinsicElementType("Heading5", typeof(UIHeading5Element), false), 
+            new IntrinsicElementType("Heading6", typeof(UIHeading6Element), false), 
+        };
+        
 
         private static List<UITemplate> ParseNodes(IEnumerable<XNode> nodes) {
             List<UITemplate> retn = new List<UITemplate>();

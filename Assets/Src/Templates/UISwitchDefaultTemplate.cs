@@ -24,9 +24,9 @@ namespace Src {
         }
 
         public override bool Compile(ParsedTemplate template) {
-            conditionalBindings = new Binding[] {
-                new SwitchCaseBinding(switchId, -1)
-            };
+//            conditionalBindings = new Binding[] {
+//                new SwitchCaseBinding(switchId, -1)
+//            };
             return true;
         }
 

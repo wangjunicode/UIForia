@@ -166,13 +166,15 @@
           </e>
           <e p="Elements" t="Include">
             <e p="CustomDrawableElement.cs" t="Include" />
+            <e p="IntrinsicTemplates.cs" t="Include" />
             <e p="Panel.cs" t="Include" />
+            <e p="UIContainerElement.cs" t="Include" />
             <e p="UIElement.cs" t="Include" />
             <e p="UIElementFlags.cs" t="Include" />
             <e p="UIGraphicElement.cs" t="Include" />
-            <e p="UIGroupElement.cs" t="Include" />
             <e p="UIImageElement.cs" t="Include" />
             <e p="UIPanel.cs" t="Include" />
+            <e p="UIPrimitiveElement.cs" t="Include" />
             <e p="UIRepeatChild.cs" t="Include" />
             <e p="UIRepeatElement.cs" t="Include" />
             <e p="UIRepeatTerminal.cs" t="Include" />
@@ -460,20 +462,14 @@
             <e p="UIChildrenTemplate.cs" t="Include" />
             <e p="UIElementTemplate.cs" t="Include" />
             <e p="UIGraphicTemplate.cs" t="Include" />
-            <e p="UIGroupTemplate.cs" t="Include" />
             <e p="UIImageTemplate.cs" t="Include" />
-            <e p="UIMaskTemplate.cs" t="Include" />
-            <e p="UIPrefabTemplate.cs" t="Include" />
-            <e p="UIRepeatChildTemplate.cs" t="Include" />
             <e p="UIRepeatTemplate.cs" t="Include" />
             <e p="UIRepeatTerminalTemplate.cs" t="Include" />
             <e p="UIShapeTemplate.cs" t="Include" />
-            <e p="UISlotTemplate.cs" t="Include" />
             <e p="UISwitchCaseTemplate.cs" t="Include" />
             <e p="UISwitchDefaultTemplate.cs" t="Include" />
             <e p="UISwitchTemplate.cs" t="Include" />
             <e p="UITemplate.cs" t="Include" />
-            <e p="UITextContainerTemplate.cs" t="Include" />
             <e p="UITextTemplate.cs" t="Include" />
           </e>
           <e p="Text" t="Include">
@@ -517,6 +513,7 @@
           <e p="FlexLayoutColTests.cs" t="Include" />
           <e p="FlexLayoutRowTests.cs" t="Include" />
           <e p="GridLayoutTests.cs" t="Include" />
+          <e p="ImageLayoutTests.cs" t="Include" />
           <e p="InputCompilerBindingTests.cs" t="Include" />
           <e p="InputSystem_DragTests.cs" t="Include" />
           <e p="InputSystem_MouseTests.cs" t="Include" />

@@ -7,7 +7,7 @@ using UnityEngine;
 namespace Src {
 
     [DebuggerDisplay("{rawType.Name}")]
-    public class ProcessedType {
+    public struct ProcessedType {
 
         public readonly Type rawType;
         private readonly TemplateAttribute templateAttr;
@@ -18,10 +18,11 @@ namespace Src {
         }
 
         public string GetTemplate() {
+            
             if (templateAttr == null) {
                 throw new Exception($"Template not defined for {rawType.Name}");
             }
-
+            
             if (templateAttr.templateType == TemplateType.File) {
                 return File.ReadAllText(Application.dataPath + "/" + templateAttr.template);
             }

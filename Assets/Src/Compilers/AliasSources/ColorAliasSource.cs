@@ -1,3 +1,6 @@
+using System;
+using System.Reflection;
+using JetBrains.Annotations;
 using UnityEngine;
 
 namespace Src.Compilers.AliasSource {
@@ -40,6 +43,19 @@ namespace Src.Compilers.AliasSource {
                     return Color.yellow;
                 default: return null;
             }
+        }
+
+        public static MethodInfo ColorConstructor => typeof(ColorAliasSource).GetMethod(nameof(_ColorConstructor));
+        public static MethodInfo ColorConstructorAlpha => typeof(ColorAliasSource).GetMethod(nameof(_ColorConstructorAlpha));
+        
+        [Pure]
+        public static Color _ColorConstructor(int r, int g, int b) {
+            return new Color32((byte)r, (byte)g, (byte)b, byte.MaxValue);
+        }
+        
+        [Pure]
+        public static Color _ColorConstructorAlpha(int r, int g, int b, int a) {
+            return new Color32((byte)r, (byte)g, (byte)b, (byte)a);
         }
 
     }

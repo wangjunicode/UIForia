@@ -30,10 +30,8 @@ namespace Src {
 
             MetaData instanceData = GetCreationData(instance, inputScope.context);
             instanceData.constantBindings = constantBindings;
-            instanceData.conditionalBindings = conditionalBindings;
             instanceData.bindings = bindings;
             instanceData.context = inputScope.context;
-            instanceData.inputBindings = inputBindings;
             instanceData.constantStyleBindings = constantStyleBindings;
             instanceData.element.templateAttributes = templateAttributes;
             instanceData.baseStyles = baseStyles;

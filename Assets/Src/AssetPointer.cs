@@ -58,6 +58,14 @@ namespace Src {
                 }
             }
         }
+        
+        public Texture2DAssetReference(Texture2D texture) {
+            assetId = texture.GetInstanceID();
+            asset = texture;
+            if (asset != null) {
+                s_TextureMap[assetId] = asset;
+            }
+        }
 
         public Texture2DAssetReference(int id) {
             if (id == 0 || !IntUtil.IsDefined(id)) {

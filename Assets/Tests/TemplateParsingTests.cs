@@ -144,19 +144,19 @@ public class TemplateParsingTests {
         Assert.AreEqual("<Case> is missing required attribute 'when'", x.Message);
     }
 
-    [Test]
-    public void Prefab_MustBeEmpty() {
-        var x = Assert.Throws<InvalidTemplateException>(() => {
-            TemplateParser.ParseTemplateFromString<Spec.Test1>(@"
-                <UITemplate>
-                    <Contents>
-                            <Prefab>text</Prefab>
-                    </Contents>
-                </UITemplate>
-            ");
-        });
-        Assert.AreEqual("<Prefab> tags cannot have children", x.Message);
-    }
+//    [Test]
+//    public void Prefab_MustBeEmpty() {
+//        var x = Assert.Throws<InvalidTemplateException>(() => {
+//            TemplateParser.ParseTemplateFromString<Spec.Test1>(@"
+//                <UITemplate>
+//                    <Contents>
+//                            <Prefab>text</Prefab>
+//                    </Contents>
+//                </UITemplate>
+//            ");
+//        });
+//        Assert.AreEqual("<Prefab> tags cannot have children", x.Message);
+//    }
 
     [Test]
     public void Text_Parses() {

@@ -28,6 +28,8 @@ namespace Src {
                 loadedTypes.AddRange(assembly.GetTypes());
             }
             
+            loadedTypes.Add(typeof(Color));
+            
         }
 
         public static ProcessedType GetType(string typeName, List<ImportDeclaration> importPaths = null) {
@@ -36,6 +38,12 @@ namespace Src {
                 return typeMap[typeName];
             }
 
+            for (int i = 0; i < TemplateParser.IntrinsicElementTypes.Length; i++) {
+                if (typeName == TemplateParser.IntrinsicElementTypes[i].name) {
+                    return new ProcessedType(TemplateParser.IntrinsicElementTypes[i].type);
+                }    
+            }
+            
             Type type = Type.GetType(typeName);
 
             if (type == null) {

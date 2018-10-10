@@ -1,8 +1,12 @@
 using System;
 using JetBrains.Annotations;
+using Rendering;
 using Src;
 using Src.Elements;
 using Src.Input;
+using Src.Layout;
+using Src.Systems;
+using Src.Util;
 using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
@@ -10,6 +14,94 @@ using UnityEngine.UI;
 
 // todo -- enforce 1 child 
 //    [SingleChild(typeof(UITextElement))]
+[Template("Templates/InputField.xml")]
+public class UIInputFieldElement2 : UIElement, IFocusable {
+
+    private UIGraphicElement caret;
+    private UIGraphicElement highlight;
+    private UITextElement textElement;
+
+    public string text;
+
+    private Vector2 cursorPosition;
+    private Vector2 selectionStartPosition;
+    private float caretLineHeight;
+    
+    public override void OnCreate() {
+        caret = FindById<UIGraphicElement>("cursor");
+        highlight = FindById<UIGraphicElement>("highlight");
+        textElement = FindById<UITextElement>("text");
+        caret.rebuildGeometry = UpdateCaretVertices;
+        highlight.rebuildGeometry = UpdateHighlightVertices;
+        caret.MarkGeometryDirty();
+        UpdateLabel();
+    }
+
+    [OnKeyDown]
+    private void EnterText(KeyboardInputEvent evt) {
+        char c = evt.character;
+
+        if (!textElement.textInfo.spanInfos[0].font.HasCharacter(c)) {
+            return;
+        }
+
+        textElement.AppendText(c);
+    }
+
+    [OnMouseDown]
+    private void OnMouseDown(MouseInputEvent evt) {
+        cursorPosition = evt.MousePosition - layoutResult.screenPosition;
+
+        cursorPosition = textElement.PointToCharacterCoordinate(cursorPosition);
+        caretLineHeight = textElement.LineHeightAtPoint(cursorPosition);
+        if (caret.height != caretLineHeight) {
+            caret.MarkGeometryDirty();
+        }
+        caret.style.SetTransformPosition(cursorPosition, StyleState.Normal);
+    }
+
+    private void UpdateHighlightVertices(Mesh obj) { }
+
+    private void UpdateCaretVertices(Mesh obj) {
+        caret.SetMesh(MeshUtil.CreateStandardUIMesh(new Size(1f, caretLineHeight), Color.black));
+    }
+
+    private void UpdateLabel() {
+        textElement.SetText(text);
+    }
+
+    public void Focus() { }
+
+    public void Blur() { }
+
+    public struct TransformAnchor { }
+
+    public enum TransformAnchorLocation {
+
+        LayoutPosition,
+        ScreenTopLeft,
+        ViewTopLeft,
+        ParentTopLeft,
+        NextSibling,
+        PreviousSibling,
+        Sticky,
+        Fixed
+
+    }
+
+    public static class Styles {
+
+        [ExportStyle("caret")]
+        public static UIStyle Caret() {
+            return new UIStyle() {
+                LayoutBehavior = LayoutBehavior.Ignored,
+                //    TransformAnchor = new TransformAnchor()TransformAnchor.ScreenTopLeft
+            };
+        }
+
+    }
+
+}
 
 [Template("Templates/InputField.xml")]
 public class UIInputFieldElement : UIElement, IFocusable {
@@ -598,13 +690,13 @@ public class UIInputFieldElement : UIElement, IFocusable {
                 caretSelectPositionInternal = caretPositionInternal + 1;
                 caretSelectPositionInternal = GetCaretPositionFromStringIndex(stringSelectPositionInternal);
             }
+
             UpdateGeometry();
         }
         else {
             caretPositionInternal = caretSelectPositionInternal = GetCaretPositionFromStringIndex(stringPositionInternal);
             SetCaretVisible();
         }
-
     }
 
     private void UpdateGeometry() {
@@ -667,7 +759,7 @@ public class UIInputFieldElement : UIElement, IFocusable {
 
         string replaceString = c.ToString();
         Delete();
-        
+
         // Can't go past the character limit
         if (characterLimit > 0 && m_Text.Length >= characterLimit) {
             return;

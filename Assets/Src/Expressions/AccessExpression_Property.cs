@@ -46,12 +46,99 @@ namespace Src {
             if (contextName[0] == '$') {
                 context.GetContextValue(context.current, contextName, out contextHead);
             }
+            else if (contextName[0] == '@') {
+                contextHead = (U) context.rootContext;
+            }
             else {
                 contextHead = (U) context.rootContext;
             }
 
             object last = contextHead;
 
+            for (int i = 0; i < parts.Length; i++) {
+                last = parts[i].Evaluate(last, context);
+                if (last == null) {
+                    return default(T);
+                }
+            }
+
+            return (T) last;
+        }
+
+    }
+
+    public class AccessExpressionStaticProperty<T> : Expression<T> {
+
+        protected readonly PropertyInfo propertyInfo;
+        protected readonly AccessExpressionPart[] parts;
+
+        public AccessExpressionStaticProperty(PropertyInfo propertyInfo, AccessExpressionPart[] parts) {
+            this.propertyInfo = propertyInfo;
+            this.parts = parts;
+        }
+
+        public override Type YieldedType => typeof(T);
+
+        public override bool IsConstant() {
+            return false;
+        }
+
+        public override object Evaluate(ExpressionContext context) {
+            object last = propertyInfo.GetValue(null);
+            for (int i = 0; i < parts.Length; i++) {
+                last = parts[i].Evaluate(last, context);
+                if (last == null) {
+                    return null;
+                }
+            }
+
+            return last;
+        }
+
+        public override T EvaluateTyped(ExpressionContext context) {
+            object last = propertyInfo.GetValue(null);
+            for (int i = 0; i < parts.Length; i++) {
+                last = parts[i].Evaluate(last, context);
+                if (last == null) {
+                    return default(T);
+                }
+            }
+
+            return (T) last;
+        }
+
+    }
+    
+    public class AccessExpressionStaticField<T> : Expression<T> {
+
+        protected readonly FieldInfo fieldInfo;
+        protected readonly AccessExpressionPart[] parts;
+
+        public AccessExpressionStaticField(FieldInfo fieldInfo, AccessExpressionPart[] parts) {
+            this.fieldInfo = fieldInfo;
+            this.parts = parts;
+        }
+
+        public override Type YieldedType => typeof(T);
+
+        public override bool IsConstant() {
+            return false;
+        }
+
+        public override object Evaluate(ExpressionContext context) {
+            object last = fieldInfo.GetValue(null);
+            for (int i = 0; i < parts.Length; i++) {
+                last = parts[i].Evaluate(last, context);
+                if (last == null) {
+                    return null;
+                }
+            }
+
+            return last;
+        }
+
+        public override T EvaluateTyped(ExpressionContext context) {
+            object last = fieldInfo.GetValue(null);
             for (int i = 0; i < parts.Length; i++) {
                 last = parts[i].Evaluate(last, context);
                 if (last == null) {
@@ -134,6 +221,48 @@ namespace Src {
             }
 
             return cachedPropertyInfo.GetValue(target);
+        }
+
+    }
+
+    public class AccessExpressionPart_StaticProperty : AccessExpressionPart {
+
+        private readonly PropertyInfo cachedPropertyInfo;
+
+        public AccessExpressionPart_StaticProperty(PropertyInfo cachedPropertyInfo) {
+            this.cachedPropertyInfo = cachedPropertyInfo;
+        }
+
+        public override object Evaluate(object target, ExpressionContext context) {
+            return cachedPropertyInfo.GetValue(null);
+        }
+
+    }
+
+    public class AccessExpressionPart_StaticField : AccessExpressionPart {
+
+        private readonly FieldInfo cachedFieldInfo;
+
+        public AccessExpressionPart_StaticField(FieldInfo cachedFieldInfo) {
+            this.cachedFieldInfo = cachedFieldInfo;
+        }
+
+        public override object Evaluate(object target, ExpressionContext context) {
+            return cachedFieldInfo.GetValue(null);
+        }
+
+    }
+
+    public class AccessExpressionPart_Constant : AccessExpressionPart {
+
+        private readonly object value;
+
+        public AccessExpressionPart_Constant(object value) {
+            this.value = value;
+        }
+
+        public override object Evaluate(object target, ExpressionContext context) {
+            return value;
         }
 
     }

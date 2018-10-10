@@ -10,6 +10,8 @@ namespace Src.Util {
 
         public static int MaxPoolSize = 16;
 
+        public static T[] Empty { get; } = new T[0];
+
         public static T[] GetMinSize(int minSize) {
             minSize = Mathf.Max(0, minSize);
             for (int i = 0; i < s_ArrayPool.Count; i++) {

@@ -107,6 +107,7 @@ namespace Src {
             for (int i = 0; i < imports.Count; i++) {
                 Type type = TypeProcessor.GetRuntimeType(imports[i].path);
                 if(type == null) throw new Exception("Could not find type for: " + imports[i].path);
+                imports[i].type = type;
                 contextDefinition.AddConstAliasSource(new ExternalReferenceAliasSource(imports[i].alias, type));
             }
 

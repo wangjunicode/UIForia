@@ -15,7 +15,7 @@ namespace Src {
 
         public List<ChatGroup> chatGroups = new List<ChatGroup>();
         public List<ChatData> activeChats = new List<ChatData>();
-        
+
         private UIElement shuttle;
         private ChatGroup selected;
 
@@ -23,18 +23,19 @@ namespace Src {
         private float targetY;
         private float animationTime;
         private int selectedChatIndex;
-        
+
         public override void OnReady() {
             chatGroups.Add(new ChatGroup("icon_1", "Matt 0", 3));
-//            chatGroups.Add(new ChatGroup("icon_2", "Matt 1", 1));
-//            chatGroups.Add(new ChatGroup("icon_3", "Matt 2", 5));
-//            chatGroups.Add(new ChatGroup("icon_4", "Matt 3", 0));
+            chatGroups.Add(new ChatGroup("icon_2", "Matt 1", 1));
+            chatGroups.Add(new ChatGroup("icon_3", "Matt 2", 5));
+            chatGroups.Add(new ChatGroup("icon_4", "Matt 3", 0));
             activeChats.Add(new ChatData("Vondi", "icon_3", true, 0));
-//            activeChats.Add(new ChatData("Byrne", "icon_5", true, 2));
-//            activeChats.Add(new ChatData("Little", "icon_9", false, 0));
+            activeChats.Add(new ChatData("Byrne", "icon_5", true, 2));
+            activeChats.Add(new ChatData("Little", "icon_9", false, 0));
             shuttle = FindById("shuttle");
         }
 
+//style.TransformY.Animate(target, curve, time)
         public override void OnUpdate() {
             animationTime += Time.deltaTime;
             float t = Easing.Interpolate(animationTime, EasingFunction.QuadraticEaseIn) / 0.1f;
@@ -59,7 +60,7 @@ namespace Src {
         public void AddChatGroup() {
             chatGroups.Add(new ChatGroup("icon_5", "Matt " + chatGroups.Count, Random.Range(0, 10)));
         }
-        
+
         public void SetCurrentChat(UIElement chatGroupElement) {
             ChatGroupIcon target = (ChatGroupIcon) chatGroupElement;
             if (target.chatGroup == selected) return;
@@ -165,7 +166,7 @@ namespace Src {
                     PreferredHeight = UIMeasurement.Parent100,
                 };
             }
-            
+
             [ExportStyle("message-panel-header")]
             public static UIStyle MessagePanelHeader() {
                 return new UIStyle() {
@@ -202,6 +203,15 @@ namespace Src {
                     PreferredWidth = 8f,
                     PreferredHeight = 64f,
                     BackgroundColor = Color.white,
+                };
+            }
+
+            [ExportStyle("input-field")]
+            public static UIStyle InputField() {
+                return new UIStyle() {
+                    PreferredWidth = UIMeasurement.Auto,
+                    PreferredHeight = 32f,
+                    BackgroundColor = Color.cyan,
                 };
             }
 

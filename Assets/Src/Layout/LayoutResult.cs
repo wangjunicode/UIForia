@@ -31,8 +31,11 @@ namespace Src.Systems {
 
         public Vector2 localPosition;
         public Vector2 screenPosition;
+        public Vector2 contentOffset;
+        
         public Size actualSize;
         public Size allocatedSize;
+        public Size contentSize;
         
         public Rect ScreenRect => new Rect(screenPosition, new Vector2(allocatedSize.width, allocatedSize.height));
         public Rect ScreenOverflowRect => new Rect(screenPosition, new Vector2(actualSize.width, actualSize.height));
@@ -43,8 +46,8 @@ namespace Src.Systems {
         public float allocatedWidth => allocatedSize.width;
         public float allocatedHeight => allocatedSize.height;
 
-        public float contentWidth => actualSize.width;
-        public float contentHeight => actualSize.height;
+        public float contentWidth => contentSize.width;
+        public float contentHeight => contentSize.height;
         
 
     }

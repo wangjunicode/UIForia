@@ -178,7 +178,7 @@ namespace Src.Systems {
 
                 transform.anchoredPosition = new Vector3(outputPosition.x, -position.y);
                 transform.rotation = outputRotation;
-                
+
                 if (transform.sizeDelta != size) {
                     transform.sizeDelta = size;
 
@@ -255,7 +255,6 @@ namespace Src.Systems {
             handle.sizeDelta = new Vector2(handleRect.width, handleRect.height);
         }
 
-
         public void OnElementDestroyed(UIElement element) {
             RenderData data = renderSkipTree.GetItem(element);
 
@@ -297,41 +296,25 @@ namespace Src.Systems {
         }
 
         public void OnElementEnabled(UIElement element) {
-//            if (m_TransformMap.ContainsKey(element.id)) {
-//                m_TransformMap[element.id].gameObject.SetActive(true);
-//
-//                CanvasRenderer canvasRenderer;
-//                if (m_CanvasRendererMap.TryGetValue(element.id, out canvasRenderer)) {
-//                    IGraphicElement graphic = (IGraphicElement) element;
-//                    canvasRenderer.SetMesh(graphic.GetMesh());
-//                    canvasRenderer.SetMaterial(graphic.GetMaterial(), Texture2D.whiteTexture);
-//                }
-//            }
-//
-//            renderSkipTree.ConditionalTraversePreOrder(element, this, (item, self) => {
-//                if (item.element.isDisabled) return false;
-//                item.unityTransform.gameObject.SetActive(true);
-//
-//                CanvasRenderer canvasRenderer;
-//                if (self.m_CanvasRendererMap.TryGetValue(item.element.id, out canvasRenderer)) {
-//                    IGraphicElement graphic = (IGraphicElement) item.element;
-//                    canvasRenderer.SetMesh(graphic.GetMesh());
-//                    canvasRenderer.SetMaterial(graphic.GetMaterial(), Texture2D.whiteTexture);
-//                }
-//
-//                return true;
-//            });
+            if (m_TransformMap.ContainsKey(element.id)) {
+                m_TransformMap[element.id].gameObject.SetActive(true);
+            }
+
+            RenderData renderData = renderSkipTree.GetItem(element.id);
+            if (renderData != null) {
+                m_DirtyGraphicList.Add(renderData.drawable);
+            }
         }
 
         public void OnElementDisabled(UIElement element) {
-//            if (m_TransformMap.ContainsKey(element.id)) {
-//                m_TransformMap[element.id].gameObject.SetActive(false);
-//            }
-//
-//            if (m_CanvasRendererMap.ContainsKey(element.id)) {
-//                m_CanvasRendererMap[element.id].Clear();
-//            }
-//
+            if (m_TransformMap.ContainsKey(element.id)) {
+                m_TransformMap[element.id].gameObject.SetActive(false);
+            }
+
+            if (m_CanvasRendererMap.ContainsKey(element.id)) {
+                m_CanvasRendererMap[element.id].Clear();
+            }
+
 //            renderSkipTree.TraversePreOrder(element, this, (self, item) => {
 //                item.unityTransform.gameObject.SetActive(false);
 //                CanvasRenderer canvasRenderer;
@@ -442,7 +425,6 @@ namespace Src.Systems {
 //            data.primitiveType = primitiveType;
 //            CreateComponents(data);
 //        }
-
 
 //                // Text elements give me lots of trouble. Here is what needs to happen:
 //                // Layout needs to measure the preferred size of the string. It does this on it's own

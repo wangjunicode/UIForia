@@ -61,7 +61,7 @@ namespace Src.Elements {
 
         public void MarkGeometryDirty() {
             IsGeometryDirty = true;
-            onMaterialDirty?.Invoke(this);
+            onMeshDirty?.Invoke(this);
         }
 
         public void OnStylePropertyChanged(StyleProperty property) {
@@ -95,6 +95,14 @@ namespace Src.Elements {
 
         public void OnStylePropertyChanged(UIElement element, StyleProperty property) {
             //throw new NotImplementedException();
+        }
+
+        public void ClearMesh() {
+            if (mesh != null) {
+                mesh.Clear();
+            }
+            IsGeometryDirty = true;
+            onMaterialDirty?.Invoke(this);
         }
 
     }

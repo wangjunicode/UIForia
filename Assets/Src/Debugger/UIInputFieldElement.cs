@@ -6,11 +6,11 @@ using Src.Elements;
 using Src.Input;
 using Src.Layout;
 using Src.Systems;
+using Src.Text;
 using Src.Util;
 using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
-
 
 // todo -- enforce 1 child 
 //    [SingleChild(typeof(UITextElement))]
@@ -24,8 +24,16 @@ public class UIInputFieldElement2 : UIElement, IFocusable {
     public string text;
 
     private Vector2 cursorPosition;
-    private Vector2 selectionStartPosition;
+    private Vector2 selectionPosition;
     private float caretLineHeight;
+    private bool selectAllOnFocus;
+
+    private bool hasFocus;
+
+    protected static string clipboard {
+        get { return GUIUtility.systemCopyBuffer; }
+        set { GUIUtility.systemCopyBuffer = value; }
+    }
     
     public override void OnCreate() {
         caret = FindById<UIGraphicElement>("cursor");
@@ -37,6 +45,7 @@ public class UIInputFieldElement2 : UIElement, IFocusable {
         UpdateLabel();
     }
 
+    
     [OnKeyDown]
     private void EnterText(KeyboardInputEvent evt) {
         char c = evt.character;
@@ -48,19 +57,124 @@ public class UIInputFieldElement2 : UIElement, IFocusable {
         textElement.AppendText(c);
     }
 
+    private bool HasSelection => selectionPosition != cursorPosition;
+
     [OnMouseDown]
     private void OnMouseDown(MouseInputEvent evt) {
-        cursorPosition = evt.MousePosition - layoutResult.screenPosition;
+        bool hadFocus = hasFocus;
 
-        cursorPosition = textElement.PointToCharacterCoordinate(cursorPosition);
+        if (evt.IsConsumed || (!hasFocus && !Input.RequestFocus(this))) {
+            return;
+        }
+
+        if (!hadFocus && selectAllOnFocus) {
+            return;
+        }
+
+        evt.StopPropagation();
+
+        Vector2 mouse = evt.MousePosition - layoutResult.screenPosition;
+
+        if (evt.IsDoubleClick) {
+            WordInfo info = textElement.GetWordAtPoint(mouse);
+            cursorPosition = info.position;
+            selectionPosition = info.position + info.size;
+        }
+        else if (evt.Shift) {
+            if (!HasSelection) {
+                selectionPosition = cursorPosition;
+            }
+            cursorPosition = textElement.PointToCharacterCoordinate(mouse);
+        }
+        else {
+            cursorPosition = textElement.PointToCharacterCoordinate(mouse);
+            ClearSelection();
+        }
+
         caretLineHeight = textElement.LineHeightAtPoint(cursorPosition);
-        if (caret.height != caretLineHeight) {
+        if (!Mathf.Approximately(caret.height, caretLineHeight)) {
             caret.MarkGeometryDirty();
         }
+
+        UpdateHighlight();
+
         caret.style.SetTransformPosition(cursorPosition, StyleState.Normal);
     }
 
-    private void UpdateHighlightVertices(Mesh obj) { }
+    [OnKeyDownWithFocus(KeyCode.A)]
+    private void HandleSelectAll(KeyboardInputEvent evt) {
+        if (evt.onlyControl) {
+            SelectAll();
+            evt.StopPropagation();
+        }
+    }
+
+    [OnKeyDownWithFocus(KeyCode.C)]
+    private void HandleCopy(KeyboardInputEvent evt) {
+        if (evt.onlyControl) {
+            clipboard = textElement.GetSubstring(cursorPosition, selectionPosition);
+            evt.StopPropagation();
+        }
+    }
+
+    [OnKeyDownWithFocus(KeyCode.V)]
+    private void HandlePaste(KeyboardInputEvent evt) {
+        if (evt.onlyControl) {
+            Append(clipboard);
+            evt.StopPropagation();
+        }
+    }
+
+    [OnKeyDownWithFocus(KeyCode.X)]
+    private void HandleCut(KeyboardInputEvent evt) {
+        if (evt.onlyControl) {
+            clipboard = textElement.GetSubstring(cursorPosition, selectionPosition);
+            Delete();
+        }
+    }
+
+    private void SelectAll() {
+        WordInfo firstWord = textElement.GetFirstWord();
+        WordInfo lastWord = textElement.GetLastWord();
+        cursorPosition = firstWord.position;
+        selectionPosition = lastWord.position + lastWord.size;
+    }
+    
+    private void ClearSelection() {
+        selectionPosition = cursorPosition;
+    }
+
+    private void UpdateHighlight() {
+        if (HasSelection) {
+            highlight.SetEnabled(true);
+            highlight.MarkGeometryDirty();
+        }
+        else {
+            highlight.SetEnabled(false);
+        }
+    }
+
+    [OnDragCreate]
+    public UIInputFieldElement.TextSelectDragEvent CreateDragEvent() {
+        UIInputFieldElement.TextSelectDragEvent evt = new UIInputFieldElement.TextSelectDragEvent();
+        evt.onUpdate += HandleDragUpdate;
+        return evt;
+    }
+
+    private void HandleDragUpdate(DragEvent obj) {
+        Vector2 mouse = obj.MousePosition - layoutResult.screenPosition;
+        Vector2 charPosition = textElement.PointToCharacterCoordinate(mouse);
+        if (charPosition != selectionPosition) {
+            selectionPosition = charPosition;
+            UpdateHighlight();
+        }
+    }
+
+    private void UpdateHighlightVertices(Mesh obj) {
+        if (HasSelection) {
+            highlight.SetMesh(textElement.GetHighlightMesh(selectionPosition, cursorPosition));
+        }
+    }
 
     private void UpdateCaretVertices(Mesh obj) {
         caret.SetMesh(MeshUtil.CreateStandardUIMesh(new Size(1f, caretLineHeight), Color.black));
@@ -95,7 +209,13 @@ public class UIInputFieldElement2 : UIElement, IFocusable {
         public static UIStyle Caret() {
             return new UIStyle() {
                 LayoutBehavior = LayoutBehavior.Ignored,
-                //    TransformAnchor = new TransformAnchor()TransformAnchor.ScreenTopLeft
+            };
+        }
+        
+        [ExportStyle("highlight")]
+        public static UIStyle Highlight() {
+            return new UIStyle() {
+                LayoutBehavior = LayoutBehavior.Ignored,
             };
         }
 
@@ -232,7 +352,6 @@ public class UIInputFieldElement : UIElement, IFocusable {
 
         UpdateLabel();
     }
-
 
     private void Delete() {
         if (isReadOnly) {
@@ -509,7 +628,6 @@ public class UIInputFieldElement : UIElement, IFocusable {
             stringSelectPositionInternal = stringPositionInternal = GetStringIndexFromCaretPosition(caretSelectPositionInternal);
         }
     }
-
 
     private void MoveRight(bool shift, bool ctrl) {
         if (hasSelection && !shift) {

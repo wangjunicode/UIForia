@@ -157,7 +157,7 @@ namespace Src {
 
                 for (int w = currentLine.wordStart; w < currentLine.wordStart + currentLine.wordCount; w++) {
                     WordInfo currentWord = wordInfos[w];
-
+                    currentWord.position = new Vector2(wordAdvance, currentLine.position.y);
                     for (int i = currentWord.startChar; i < currentWord.startChar + currentWord.charCount; i++) {
                         float x0 = charInfos[i].topLeft.x + wordAdvance;
                         float x1 = charInfos[i].bottomRight.x + wordAdvance;
@@ -167,6 +167,7 @@ namespace Src {
                         charInfos[i].bottomRight = new Vector2(x1, y1);
                     }
 
+                    wordInfos[w] = currentWord;
                     wordAdvance += currentWord.xAdvance;
                 }
             }
@@ -434,6 +435,10 @@ namespace Src {
             return nearestLine.Height;
         }
 
+//        public bool FindNextWord(WordInfo wordInfo) {
+//            
+//        }
+
         public Vector2 PointToCharacterCoordinate(Vector2 cursorPosition) {
             LineInfo nearestLine = FindNearestLine(cursorPosition);
             WordInfo nearestWord = FindNearestWord(nearestLine, cursorPosition);
@@ -445,8 +450,53 @@ namespace Src {
 
             return new Vector2(nearestChar.topLeft.x, nearestLine.position.y);
         }
+        
+//        private Vector2 PointToCharacterIndex(Vector2 point) {
+//            LineInfo nearestLine = FindNearestLine(point);
+//            WordInfo nearestWord = FindNearestWord(nearestLine, point);
+//            CharInfo nearestChar = FindNearestCharacterIndex(nearestWord, point);
+//        }
 
-        private CharInfo FindNearestCharacter(WordInfo wordInfo, Vector2 point) {
+        public WordInfo GetFirstWord() {
+            return textInfo.wordInfos[0];
+        }
+
+        public WordInfo GetLastWord() {
+            return textInfo.wordInfos[textInfo.wordCount - 1];
+        }
+
+        public WordInfo GetWordAtPoint(Vector2 point) {
+            return FindNearestWord(FindNearestLine(point), point);
+        }
+
+        public string GetSubstring(Vector2 start, Vector2 end) {
+            LineInfo nearestLine = FindNearestLine(start);
+            WordInfo nearestWord = FindNearestWord(nearestLine, start);
+            int startCharIndex = FindNearestCharacterIndex(nearestWord, start);
+
+            nearestLine = FindNearestLine(end);
+            nearestWord = FindNearestWord(nearestLine, end);
+            int endCharIndex = FindNearestCharacterIndex(nearestWord, end);
+
+            if (startCharIndex < endCharIndex) {
+                int tmp = startCharIndex;
+                startCharIndex = endCharIndex;
+                endCharIndex = tmp;
+            }
+            
+            
+        }
+        
+        private float FindCursorXForCharacter(CharInfo charInfo, Vector2 point) {
+            float width = charInfo.bottomRight.x - charInfo.topLeft.x;
+            if (point.x > charInfo.topLeft.x + (width * 0.5f)) {
+                return charInfo.bottomRight.x;
+            }
+
+            return charInfo.topLeft.x;
+        }
+
+        private int FindNearestCharacterIndex(WordInfo wordInfo, Vector2 point) {
             int closestIndex = wordInfo.startChar;
             float closestDistance = float.MaxValue;
             CharInfo[] charInfos = textInfo.charInfos;
@@ -457,7 +507,7 @@ namespace Src {
                 float x2 = charInfo.bottomRight.x;
 
                 if (point.x >= x1 && point.x <= x2) {
-                    return charInfo;
+                    return i;
                 }
 
                 float distToY1 = Mathf.Abs(point.x - x1);
@@ -473,10 +523,18 @@ namespace Src {
                 }
             }
 
-            return charInfos[closestIndex];
+            return closestIndex;
+        }
+        
+        private CharInfo FindNearestCharacter(WordInfo wordInfo, Vector2 point) {
+            return textInfo.charInfos[FindNearestCharacterIndex(wordInfo, point)];
         }
 
         private LineInfo FindNearestLine(Vector2 point) {
+            return textInfo.lineInfos[FindNearestLineIndex(point)];
+        }
+
+        private int FindNearestLineIndex(Vector2 point) {
             int closestIndex = 0;
             float closestDistance = float.MaxValue;
             for (int i = 0; i < textInfo.lineCount; i++) {
@@ -485,7 +543,7 @@ namespace Src {
                 float y2 = -line.maxDescender;
 
                 if (point.y >= y1 && point.y <= y2) {
-                    return line;
+                    return i;
                 }
 
                 float distToY1 = Mathf.Abs(point.y - y1);
@@ -501,7 +559,7 @@ namespace Src {
                 }
             }
 
-            return textInfo.lineInfos[closestIndex];
+            return closestIndex;
         }
 
         private WordInfo FindNearestWord(LineInfo line, Vector2 point) {
@@ -529,6 +587,63 @@ namespace Src {
             }
 
             return textInfo.wordInfos[closestIndex];
+        }
+
+        public Mesh GetHighlightMesh(Vector2 start, Vector2 end) {
+            LineInfo[] lineInfos = textInfo.lineInfos;
+            Color32 selectionColor = new Color32(168, 206, 255, 192);
+
+            int lineStartIndex = FindNearestLineIndex(start);
+            int lineEndIndex = FindNearestLineIndex(end);
+
+            // if on different lines -> swap based on y
+
+            int lineCount = 1 + lineEndIndex - lineStartIndex;
+
+            if (lineCount == 1) {
+                LineInfo currentLine = lineInfos[lineStartIndex];
+
+                WordInfo startWord = FindNearestWord(currentLine, start);
+                CharInfo startChar = FindNearestCharacter(startWord, start);
+
+                WordInfo endWord = FindNearestWord(currentLine, end);
+                CharInfo endChar = FindNearestCharacter(endWord, end);
+
+                float lineOffset = layoutResult.localPosition.y;
+
+                float minX = FindCursorXForCharacter(startChar, start);
+                float maxX = FindCursorXForCharacter(endChar, end);
+                float minY = currentLine.position.y - lineOffset;
+                float maxY = currentLine.position.y - currentLine.Height - lineOffset;
+
+                Vector3 v0 = new Vector3(minX, minY);
+                Vector3 v1 = new Vector3(maxX, minY);
+                Vector3 v2 = new Vector3(maxX, maxY);
+                Vector3 v3 = new Vector3(minX, maxY);
+
+                MeshUtil.s_VertexHelper.AddVert(v0, selectionColor, new Vector2());
+                MeshUtil.s_VertexHelper.AddVert(v1, selectionColor, new Vector2());
+                MeshUtil.s_VertexHelper.AddVert(v2, selectionColor, new Vector2());
+                MeshUtil.s_VertexHelper.AddVert(v3, selectionColor, new Vector2());
+
+                MeshUtil.s_VertexHelper.AddTriangle(0, 1, 2);
+                MeshUtil.s_VertexHelper.AddTriangle(2, 3, 0);
+
+                Mesh highlightMesh = new Mesh();
+
+                MeshUtil.s_VertexHelper.FillMesh(highlightMesh);
+                MeshUtil.s_VertexHelper.Clear();
+
+                return highlightMesh;
+            }
+
+            throw new Exception("Multi line?");
+            return null;
+
+//            
+//            for (int i = lineStartIndex + 1; i < lineCount - 1; i++) {
+//                
+//            }
         }
 
     }

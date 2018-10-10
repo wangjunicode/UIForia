@@ -5,7 +5,7 @@
     
     <Contents>
         
-        <Graphic x-id="highlight" />
+        <Graphic x-id="highlight" style="highlight"/>
         
         <Text x-id="text"/>
         

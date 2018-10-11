@@ -93,6 +93,33 @@ public abstract partial class InputSystem {
             // need to check this on osx, according to stackoverflow OSX and Windows might handle
             // sending key events differently
 
+            if (s_Event.rawType == EventType.ExecuteCommand || s_Event.rawType == EventType.ValidateCommand) {
+                switch (s_Event.commandName) {
+                        case "SelectAll":
+                            ProcessKeyEvent(EventType.KeyDown, KeyCode.A, 'a');
+                            continue;
+                        case "Copy":
+                            ProcessKeyEvent(EventType.KeyDown, KeyCode.C, 'c');
+                            continue;
+                        case "Cut":
+                            ProcessKeyEvent(EventType.KeyDown, KeyCode.X, 'x');
+                            continue;
+                        case "Paste":
+                            ProcessKeyEvent(EventType.KeyDown, KeyCode.V, 'v');
+                            continue;
+                        case "SoftDelete":
+                            Debug.Log("Delete");
+                            continue;
+                        case "Duplicate":
+                            Debug.Log("Duplicate");
+                            continue;
+                        case "Find":
+                            Debug.Log("Find");
+                            continue;
+//                            "Copy", "Cut", "Paste", "Delete", "SoftDelete", "Duplicate", "FrameSelected", "FrameSelectedWithLock", "SelectAll", "Find"
+                }
+            }
+
             if (keyCode == KeyCode.None && character != '\0') {
                 if (s_Event.rawType == EventType.KeyDown) {
                     ProcessKeyboardEvent(keyCode, InputEventType.KeyDown, character, modifiersThisFrame);
@@ -105,35 +132,39 @@ public abstract partial class InputSystem {
                 }
             }
 
-            switch (s_Event.rawType) {
-                case EventType.KeyDown:
-                    if (m_KeyStates.ContainsKey(keyCode)) {
-                        KeyState state = m_KeyStates[keyCode];
-                        if ((state & KeyState.Down) == 0) {
-                            m_DownThisFrame.Add(keyCode);
-                            m_KeyStates[keyCode] = KeyState.DownThisFrame;
-                            ProcessKeyboardEvent(keyCode, InputEventType.KeyDown, s_Event.character, modifiersThisFrame);
-                        }
-                    }
-                    else {
-                        m_DownThisFrame.Add(keyCode);
-                        m_KeyStates[keyCode] = KeyState.DownThisFrame;
-                        ProcessKeyboardEvent(keyCode, InputEventType.KeyDown, s_Event.character, modifiersThisFrame);
-                    }
-
-                    HandleModifierDown(keyCode);
-                    break;
-
-                case EventType.KeyUp:
-                    m_UpThisFrame.Add(keyCode);
-                    m_KeyStates[keyCode] = KeyState.UpThisFrame;
-                    ProcessKeyboardEvent(keyCode, InputEventType.KeyUp, s_Event.character, modifiersThisFrame);
-                    HandleModifierUp(keyCode);
-                    break;
-            }
+            ProcessKeyEvent(s_Event.rawType, s_Event.keyCode, s_Event.character);
         }
     }
 
+    private void ProcessKeyEvent(EventType evtType, KeyCode keyCode, char character) {
+        switch (evtType) {
+            case EventType.KeyDown:
+                if (m_KeyStates.ContainsKey(keyCode)) {
+                    KeyState state = m_KeyStates[keyCode];
+                    if ((state & KeyState.Down) == 0) {
+                        m_DownThisFrame.Add(keyCode);
+                        m_KeyStates[keyCode] = KeyState.DownThisFrame;
+                        ProcessKeyboardEvent(keyCode, InputEventType.KeyDown, character, modifiersThisFrame);
+                    }
+                }
+                else {
+                    m_DownThisFrame.Add(keyCode);
+                    m_KeyStates[keyCode] = KeyState.DownThisFrame;
+                    ProcessKeyboardEvent(keyCode, InputEventType.KeyDown, character, modifiersThisFrame);
+                }
+
+                HandleModifierDown(keyCode);
+                break;
+
+            case EventType.KeyUp:
+                m_UpThisFrame.Add(keyCode);
+                m_KeyStates[keyCode] = KeyState.UpThisFrame;
+                ProcessKeyboardEvent(keyCode, InputEventType.KeyUp, character, modifiersThisFrame);
+                HandleModifierUp(keyCode);
+                break;
+        }
+    }
+    
     private void HandleShiftKey(KeyCode code) {
         bool wasDown = IsKeyDown(code);
         bool isDown = UnityEngine.Input.GetKey(code);

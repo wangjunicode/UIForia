@@ -71,20 +71,20 @@ namespace Src.Layout.LayoutTypes {
 
                 if (currentWord.isNewLine) {
                     lineInfos.Add(currentLine);
-                    lineOffset -= (currentLine.maxDescender + textInfo.charInfos[currentWord.startChar + currentWord.visibleCharCount - 1].ascender + lineGap) * baseScale;
+                    lineOffset -= (currentLine.maxDescender + textInfo.charInfos[currentWord.startChar + currentWord.VisibleCharCount - 1].ascender + lineGap) * baseScale;
                     currentLine = new LineInfo();
                     currentLine.position = new Vector2(currentLine.position.x, lineOffset);
                     currentLine.wordStart = w + 1;
                     continue;
                 }
 
-                if (currentWord.characterSize > width) {
+                if (currentWord.characterSize > width + 0.01f) {
                     // we had words in this line already
                     // finish the line and start a new one
                     // line offset needs to to be bumped
                     if (currentLine.wordCount > 0) {
                         lineInfos.Add(currentLine);
-                        lineOffset -= -currentLine.maxDescender + textInfo.charInfos[currentWord.startChar + currentWord.visibleCharCount - 1].ascender + (lineGap) * baseScale;
+                        lineOffset -= -currentLine.maxDescender + textInfo.charInfos[currentWord.startChar + currentWord.VisibleCharCount - 1].ascender + (lineGap) * baseScale;
                     }
 
                     currentLine = new LineInfo();
@@ -96,15 +96,16 @@ namespace Src.Layout.LayoutTypes {
                     currentLine.width = currentWord.size.x;
                     lineInfos.Add(currentLine);
 
-                    lineOffset -= -currentLine.maxDescender + textInfo.charInfos[currentWord.startChar + currentWord.visibleCharCount - 1].ascender + (lineGap) * baseScale;
+                    lineOffset -= -currentLine.maxDescender + textInfo.charInfos[currentWord.startChar + currentWord.VisibleCharCount - 1].ascender + (lineGap) * baseScale;
                     currentLine = new LineInfo();
                     currentLine.wordStart = w + 1;
                     currentLine.position = new Vector2(currentLine.position.x, lineOffset);
                 }
 
-                else if (currentLine.width + currentWord.size.x > width) {
+                else if (currentLine.width + currentWord.size.x > width + 0.01f) {
+                    int s = (int) (currentLine.width + currentWord.size.x);
                     // characters fit but space does not, strip spaces and start new line w/ next word
-                    if (currentLine.width + currentWord.characterSize < width) {
+                    if (currentLine.width + currentWord.characterSize < width + 0.01f) {
                         currentLine.wordCount++;
 
                         if (currentLine.maxAscender < currentWord.ascender) currentLine.maxAscender = currentWord.ascender;
@@ -112,7 +113,7 @@ namespace Src.Layout.LayoutTypes {
                         currentLine.width += currentWord.characterSize;
                         lineInfos.Add(currentLine);
 
-                        lineOffset -= -currentLine.maxDescender + textInfo.charInfos[currentWord.startChar + currentWord.visibleCharCount - 1].ascender + (lineGap) * baseScale;
+                        lineOffset -= -currentLine.maxDescender + textInfo.charInfos[currentWord.startChar + currentWord.VisibleCharCount - 1].ascender + (lineGap) * baseScale;
 
                         currentLine = new LineInfo();
                         currentLine.position = new Vector2(currentLine.position.x, lineOffset);
@@ -121,7 +122,7 @@ namespace Src.Layout.LayoutTypes {
                     }
 
                     lineInfos.Add(currentLine);
-                    lineOffset -= -currentLine.maxDescender + textInfo.charInfos[currentWord.startChar + currentWord.visibleCharCount - 1].ascender + (lineGap) * baseScale;
+                    lineOffset -= -currentLine.maxDescender + textInfo.charInfos[currentWord.startChar + currentWord.VisibleCharCount - 1].ascender + (lineGap) * baseScale;
                     currentLine = new LineInfo();
                     currentLine.position = new Vector2(currentLine.position.x, lineOffset);
                     currentLine.wordStart = w;

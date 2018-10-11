@@ -20,13 +20,13 @@ public class UIInputFieldElement2 : UIElement, IFocusable {
     private UIGraphicElement caret;
     private UIGraphicElement highlight;
     private UITextElement textElement;
+    private UITextElement.SelectionRange selectionRange;
 
     public string text;
 
-    private Vector2 cursorPosition;
-    private Vector2 selectionPosition;
-    private float caretLineHeight;
     private bool selectAllOnFocus;
+
+    private int cursorCharacterIndex;
 
     private bool hasFocus;
 
@@ -34,7 +34,7 @@ public class UIInputFieldElement2 : UIElement, IFocusable {
         get { return GUIUtility.systemCopyBuffer; }
         set { GUIUtility.systemCopyBuffer = value; }
     }
-    
+
     public override void OnCreate() {
         caret = FindById<UIGraphicElement>("cursor");
         highlight = FindById<UIGraphicElement>("highlight");
@@ -45,7 +45,11 @@ public class UIInputFieldElement2 : UIElement, IFocusable {
         UpdateLabel();
     }
 
-    
+
+    public override void OnUpdate() {
+        if (!hasFocus) return;
+    }
+
     [OnKeyDown]
     private void EnterText(KeyboardInputEvent evt) {
         char c = evt.character;
@@ -54,10 +58,15 @@ public class UIInputFieldElement2 : UIElement, IFocusable {
             return;
         }
 
-        textElement.AppendText(c);
-    }
+        if (selectionRange.HasSelection) {
+            textElement.DeleteRange(selectionRange);
+        }
+        else {
+            textElement.AppendText(c);
+        }
 
-    private bool HasSelection => selectionPosition != cursorPosition;
+//        UpdateCaretAndHighlight();
+    }
 
     [OnMouseDown]
     private void OnMouseDown(MouseInputEvent evt) {
@@ -76,32 +85,24 @@ public class UIInputFieldElement2 : UIElement, IFocusable {
         Vector2 mouse = evt.MousePosition - layoutResult.screenPosition;
 
         if (evt.IsDoubleClick) {
-            WordInfo info = textElement.GetWordAtPoint(mouse);
-            cursorPosition = info.position;
-            selectionPosition = info.position + info.size;
+            selectionRange = textElement.SelectWordAtPoint(mouse);
         }
         else if (evt.Shift) {
-            if (!HasSelection) {
-                selectionPosition = cursorPosition;
-            }
-            cursorPosition = textElement.PointToCharacterCoordinate(mouse);
+            selectionRange = textElement.SelectToPoint(selectionRange, mouse);
         }
         else {
-            cursorPosition = textElement.PointToCharacterCoordinate(mouse);
-            ClearSelection();
+            selectionRange = textElement.GetSelectionAtPoint(mouse);
         }
 
-        caretLineHeight = textElement.LineHeightAtPoint(cursorPosition);
-        if (!Mathf.Approximately(caret.height, caretLineHeight)) {
-            caret.MarkGeometryDirty();
-        }
+//        caretLineHeight = textElement.LineHeightAtPoint(cursorPosition);
+//        if (!Mathf.Approximately(caret.height, caretLineHeight)) {
+//            caret.MarkGeometryDirty();
+//        }
 
-        UpdateHighlight();
-
-        caret.style.SetTransformPosition(cursorPosition, StyleState.Normal);
+        UpdateCaretAndHighlight();
     }
 
-    [OnKeyDownWithFocus(KeyCode.A)]
+    [OnKeyDownWithFocus(KeyCode.A, KeyboardModifiers.Control)]
     private void HandleSelectAll(KeyboardInputEvent evt) {
         if (evt.onlyControl) {
             SelectAll();
@@ -109,75 +110,79 @@ public class UIInputFieldElement2 : UIElement, IFocusable {
         }
     }
 
-    [OnKeyDownWithFocus(KeyCode.C)]
+    [OnKeyDownWithFocus(KeyCode.C, KeyboardModifiers.Control)]
     private void HandleCopy(KeyboardInputEvent evt) {
-        if (evt.onlyControl) {
-            clipboard = textElement.GetSubstring(cursorPosition, selectionPosition);
+        if (evt.onlyControl && selectionRange.HasSelection) {
+            clipboard = textElement.GetSubstring(selectionRange);
             evt.StopPropagation();
         }
     }
 
-    [OnKeyDownWithFocus(KeyCode.V)]
+    [OnKeyDownWithFocus(KeyCode.V, KeyboardModifiers.Control)]
     private void HandlePaste(KeyboardInputEvent evt) {
         if (evt.onlyControl) {
-            Append(clipboard);
+            textElement.AppendText(clipboard);
             evt.StopPropagation();
         }
     }
 
-    [OnKeyDownWithFocus(KeyCode.X)]
+    [OnKeyDownWithFocus(KeyCode.X, KeyboardModifiers.Control)]
     private void HandleCut(KeyboardInputEvent evt) {
-        if (evt.onlyControl) {
-            clipboard = textElement.GetSubstring(cursorPosition, selectionPosition);
-            Delete();
+        if (evt.onlyControl && selectionRange.HasSelection) {
+            clipboard = textElement.GetSubstring(selectionRange);
+            DeleteSelection();
         }
     }
 
     private void SelectAll() {
-        WordInfo firstWord = textElement.GetFirstWord();
-        WordInfo lastWord = textElement.GetLastWord();
-        cursorPosition = firstWord.position;
-        selectionPosition = lastWord.position + lastWord.size;
-    }
-    
-    private void ClearSelection() {
-        selectionPosition = cursorPosition;
+        selectionRange = textElement.SelectAll();
+        UpdateCaretAndHighlight();
     }
 
-    private void UpdateHighlight() {
-        if (HasSelection) {
+    private void ClearSelection() {
+        selectionRange = new UITextElement.SelectionRange() {
+            selectIndex = -1,
+            cursorIndex = selectionRange.cursorIndex,
+            cursorEdge = selectionRange.cursorEdge
+        };
+    }
+
+    private void UpdateCaretAndHighlight() {
+        if (selectionRange.HasSelection) {
             highlight.SetEnabled(true);
             highlight.MarkGeometryDirty();
         }
         else {
             highlight.SetEnabled(false);
         }
+
+//        caret.style.SetTransformPosition(cursorPosition, StyleState.Normal);
     }
 
+    private void DeleteSelection() { }
+
     [OnDragCreate]
-    public UIInputFieldElement.TextSelectDragEvent CreateDragEvent() {
-        UIInputFieldElement.TextSelectDragEvent evt = new UIInputFieldElement.TextSelectDragEvent();
-        evt.onUpdate += HandleDragUpdate;
-        return evt;
+    public UIInputFieldElement.TextSelectDragEvent CreateDragEvent(MouseInputEvent evt) {
+        UIInputFieldElement.TextSelectDragEvent retn = new UIInputFieldElement.TextSelectDragEvent();
+        retn.onUpdate += HandleDragUpdate;
+        Vector2 mouse = evt.MousePosition - layoutResult.screenPosition;
+        selectionRange = textElement.SelectToPoint(selectionRange, mouse);
+        return retn;
     }
 
     private void HandleDragUpdate(DragEvent obj) {
         Vector2 mouse = obj.MousePosition - layoutResult.screenPosition;
-        Vector2 charPosition = textElement.PointToCharacterCoordinate(mouse);
-        if (charPosition != selectionPosition) {
-            selectionPosition = charPosition;
-            UpdateHighlight();
-        }
+        selectionRange = textElement.SelectToPoint(selectionRange, mouse);
     }
 
     private void UpdateHighlightVertices(Mesh obj) {
-        if (HasSelection) {
-            highlight.SetMesh(textElement.GetHighlightMesh(selectionPosition, cursorPosition));
+        if (selectionRange.HasSelection) {
+            highlight.SetMesh(textElement.GetHighlightMesh(selectionRange));
         }
     }
 
     private void UpdateCaretVertices(Mesh obj) {
-        caret.SetMesh(MeshUtil.CreateStandardUIMesh(new Size(1f, caretLineHeight), Color.black));
+        caret.SetMesh(MeshUtil.CreateStandardUIMesh(new Size(1f, 18f), Color.black));
     }
 
     private void UpdateLabel() {
@@ -211,11 +216,19 @@ public class UIInputFieldElement2 : UIElement, IFocusable {
                 LayoutBehavior = LayoutBehavior.Ignored,
             };
         }
-        
+
         [ExportStyle("highlight")]
         public static UIStyle Highlight() {
             return new UIStyle() {
                 LayoutBehavior = LayoutBehavior.Ignored,
+            };
+        }
+
+        [ExportStyle("text")]
+        public static UIStyle Text() {
+            return new UIStyle() {
+                FontSize = 24,
+                MaxWidth = new UIMeasurement(0.5f, UIUnit.ParentContentArea)
             };
         }
 

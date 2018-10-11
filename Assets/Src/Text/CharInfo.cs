@@ -14,6 +14,7 @@ namespace Src.Text {
         public Vector2 uv3;
         public float ascender;
         public float descender;
+        public int lineIndex;
 
     }
 

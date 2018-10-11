@@ -39,7 +39,7 @@ namespace Src {
 
         public bool isContentRelative => (unit & (UIUnit.Content | UIUnit.FitContent | UIUnit.MaxContent | UIUnit.MinContent)) != 0;
 
-        public static UIMeasurement Auto => new UIMeasurement(1f, UIUnit.ParentContentArea);
+        public static UIMeasurement ContentArea => new UIMeasurement(1f, UIUnit.ParentContentArea);
         public static UIMeasurement Parent100 => new UIMeasurement(1f, UIUnit.ParentSize);
         public static UIMeasurement Content100 => new UIMeasurement(1f, UIUnit.Content);
         public static UIMeasurement Unset => new UIMeasurement(FloatUtil.UnsetValue);

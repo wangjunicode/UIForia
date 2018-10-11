@@ -92,7 +92,7 @@ namespace Src.Compilers {
             layoutWrapSource = new EnumAliasSource<LayoutWrap>();
             mainAxisAlignmentSource = new EnumAliasSource<MainAxisAlignment>();
             crossAxisAlignmentSource = new EnumAliasSource<CrossAxisAlignment>();
-            autoKeywordSource = new ValueAliasSource<UIMeasurement>("auto", UIMeasurement.Auto);
+            autoKeywordSource = new ValueAliasSource<UIMeasurement>("auto", UIMeasurement.ContentArea);
             whiteSpaceSource = new EnumAliasSource<WhitespaceMode>();
         }
 

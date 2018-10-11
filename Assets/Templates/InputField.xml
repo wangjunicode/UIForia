@@ -7,7 +7,7 @@
         
         <Graphic x-id="highlight" style="highlight"/>
         
-        <Text x-id="text"/>
+        <Text style='text' x-id="text"/>
         
         <Graphic x-id="cursor" style="caret"/>
         

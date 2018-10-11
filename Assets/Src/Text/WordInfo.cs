@@ -18,8 +18,9 @@ namespace Src.Text {
         public float minCharBottom;
         public float maxCharTop;
         
-        public int visibleCharCount => charCount - (charCount - spaceStart);
-        
+        public int VisibleCharCount => charCount - (charCount - spaceStart);
+        public int LastCharacterIndex => startChar + charCount;
+
     }
 
 }

@@ -209,7 +209,7 @@ namespace Src {
             [ExportStyle("input-field")]
             public static UIStyle InputField() {
                 return new UIStyle() {
-                    PreferredWidth = UIMeasurement.Auto,
+                    PreferredWidth = UIMeasurement.ContentArea,
                     PreferredHeight = 32f,
                     BackgroundColor = Color.cyan,
                 };

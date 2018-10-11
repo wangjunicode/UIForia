@@ -6,13 +6,13 @@ namespace Src.Systems {
 
         public const float k_DoubleClickDelay = 0.5f;
 
+        private Vector2 m_LastMouseDownPosition;
         private float m_LastMouseDownTimestamp;
         private bool m_IsDoubleClick;
         private bool m_IsTripleClick;
 
         public GOInputSystem(ILayoutSystem layoutSystem, IStyleSystem styleSystem)
             : base(layoutSystem, styleSystem) { }
-
 
         protected override MouseState GetMouseState() {
             MouseState retn = new MouseState();
@@ -33,7 +33,7 @@ namespace Src.Systems {
             if (retn.isLeftMouseDown) {
                 if (retn.isLeftMouseDownThisFrame) {
                     retn.mouseDownPosition = ConvertMousePosition(UnityEngine.Input.mousePosition);
-                    if (now - m_LastMouseDownTimestamp <= k_DoubleClickDelay) {
+                    if (now - m_LastMouseDownTimestamp <= k_DoubleClickDelay && Vector2.Distance(m_LastMouseDownPosition, retn.mouseDownPosition) <= 3f) {
                         if (!m_IsDoubleClick) {
                             m_IsDoubleClick = true;
                         }
@@ -41,7 +41,7 @@ namespace Src.Systems {
                             m_IsTripleClick = true;
                         }
                     }
-
+                    m_LastMouseDownPosition = retn.mouseDownPosition;
                     m_LastMouseDownTimestamp = Time.unscaledTime;
                 }
             }
@@ -53,10 +53,10 @@ namespace Src.Systems {
             retn.scrollDelta = UnityEngine.Input.mouseScrollDelta;
             retn.previousMousePosition = m_MouseState.mousePosition;
 
-
             if (now - m_LastMouseDownTimestamp > k_DoubleClickDelay) {
                 m_IsDoubleClick = false;
                 m_IsTripleClick = false;
+                m_LastMouseDownPosition = new Vector2(-999f, -999f);
             }
 
             // only true on the frame the mouse is down

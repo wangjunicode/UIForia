@@ -15,6 +15,11 @@ namespace Src.Text {
         public float ascender;
         public float descender;
         public int lineIndex;
+        public int wordIndex;
+
+        public float Width => bottomRight.x - topLeft.x;
+        public float Height => bottomRight.y - topLeft.y;
+        public Vector2 Center => topLeft + new Vector2(Width * 0.5f, Height * 0.5f);
 
     }
 

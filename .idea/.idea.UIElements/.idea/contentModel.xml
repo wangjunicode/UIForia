@@ -1,7 +1,10 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project version="4">
   <component name="ContentModelStore">
-    <e p="C:\Seed\UIElements" t="IncludeRecursive">
+    <e p="C:\Users\matth\.Rider2018.2\config\extensions" t="IncludeRecursive" />
+    <e p="C:\Users\matth\.Rider2018.2\system\extResources" t="IncludeRecursive" />
+    <e p="C:\Users\matth\.Rider2018.2\system\resharper-host\local\Transient\ReSharperHost\v182\SolutionCaches\_UIElements.-1987582547.00" t="ExcludeRecursive" />
+    <e p="C:\Users\matth\RiderProjects\UIElements" t="IncludeRecursive">
       <e p="_DemoAsmDef.csproj" t="IncludeRecursive" />
       <e p="Assembly-CSharp-Editor.csproj" t="IncludeRecursive" />
       <e p="Assets" t="Include">
@@ -39,6 +42,9 @@
           </e>
         </e>
         <e p="Src" t="Include">
+          <e p="Animation" t="Include">
+            <e p="Animation.cs" t="Include" />
+          </e>
           <e p="AssetPointer.cs" t="Include" />
           <e p="Attributes.cs" t="Include" />
           <e p="Binding" t="Include">
@@ -249,9 +255,6 @@
           <e p="Layout" t="Include">
             <e p="CrossAxisAlignment.cs" t="Include" />
             <e p="Extents.cs" t="Include" />
-            <e p="FixedLayout.cs" t="Include" />
-            <e p="FlexLayout2.cs" t="Include" />
-            <e p="FlowLayout.cs" t="Include" />
             <e p="GridAutoFlow.cs" t="Include" />
             <e p="GridAutoPlaceDensity.cs" t="Include" />
             <e p="GridDefinition.cs" t="Include" />
@@ -263,9 +266,7 @@
             <e p="GridTrackSizeFn.cs" t="Include" />
             <e p="GridTrackSizer.cs" t="Include" />
             <e p="GridTrackSizeType.cs" t="Include" />
-            <e p="Layout2.cs" t="Include" />
             <e p="LayoutBehavior.cs" t="Include" />
-            <e p="LayoutBox.cs" t="Include" />
             <e p="LayoutConstraints.cs" t="Include" />
             <e p="LayoutDirection.cs" t="Include" />
             <e p="LayoutFlowType.cs" t="Include" />
@@ -285,8 +286,6 @@
             <e p="LayoutWrap.cs" t="Include" />
             <e p="MainAxisAlignment.cs" t="Include" />
             <e p="UIDimensions.cs" t="Include" />
-            <e p="UIFlexLayout.cs" t="Include" />
-            <e p="UILayout.cs" t="Include" />
             <e p="UIUnit.cs" t="Include" />
           </e>
           <e p="ParsedTemplate.cs" t="Include" />
@@ -571,8 +570,5 @@
       <e p="TestAsm.csproj" t="IncludeRecursive" />
       <e p="UIElements.sln" t="IncludeFlat" />
     </e>
-    <e p="C:\Users\Matt\.Rider2018.2\config\extensions" t="IncludeRecursive" />
-    <e p="C:\Users\Matt\.Rider2018.2\system\extResources" t="IncludeRecursive" />
-    <e p="C:\Users\Matt\.Rider2018.2\system\resharper-host\local\Transient\ReSharperHost\v182\SolutionCaches\_UIElements.1439856042.00" t="ExcludeRecursive" />
   </component>
 </project>

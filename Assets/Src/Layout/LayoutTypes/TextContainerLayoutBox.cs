@@ -28,13 +28,33 @@ namespace Src.Layout.LayoutTypes {
             }
 
             actualWidth = maxWidth;
-            actualHeight = lastLine.position.y + lastLine.Height;
+            actualHeight = -lastLine.position.y + lastLine.Height;
 
             ApplyTextAlignment(allocatedWidth, textInfo, style.TextAlignment);
 
             ListPool<LineInfo>.Release(lineInfos);
         }
 
+        protected override float GetContentPreferredHeight() {
+            TextInfo textInfo = ((UITextElement) element).textInfo;
+
+            List<LineInfo> lineInfos = RunLayout(textInfo, allocatedWidth);
+            LineInfo lastLine = lineInfos[lineInfos.Count - 1];
+            ListPool<LineInfo>.Release(lineInfos);
+            
+            return -lastLine.position.y + lastLine.Height;
+        }
+
+        public override float GetPreferredHeightForWidth(float width) {
+            TextInfo textInfo = ((UITextElement) element).textInfo;
+
+            List<LineInfo> lineInfos = RunLayout(textInfo, width);
+            LineInfo lastLine = lineInfos[lineInfos.Count - 1];
+            ListPool<LineInfo>.Release(lineInfos);
+            
+            return -lastLine.position.y + lastLine.Height;
+        }
+        
         protected override Size RunContentSizeLayout() {
             TextInfo textInfo = ((UITextElement) element).textInfo;
 

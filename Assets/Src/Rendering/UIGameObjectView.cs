@@ -16,9 +16,9 @@ namespace Rendering {
             layoutSystem = new LayoutSystem2(styleSystem);
             renderSystem = new GORenderSystem(layoutSystem, styleSystem, viewTransform);
             inputSystem = new GOInputSystem(layoutSystem, styleSystem);
+            systems.Add(inputSystem);
             systems.Add(layoutSystem);
             systems.Add(renderSystem);
-            systems.Add(inputSystem);
         }
 
         public void UpdateViewport() {
@@ -26,7 +26,6 @@ namespace Rendering {
                 x = 0,
                 y = 0
             });
-            //Canvas.ForceUpdateCanvases();
         }
 
     }

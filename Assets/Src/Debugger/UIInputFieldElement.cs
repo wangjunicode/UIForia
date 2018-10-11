@@ -1,4 +1,3 @@
-using System;
 using JetBrains.Annotations;
 using Rendering;
 using Src;
@@ -6,7 +5,6 @@ using Src.Elements;
 using Src.Input;
 using Src.Layout;
 using Src.Systems;
-using Src.Text;
 using Src.Util;
 using TMPro;
 using UnityEngine;
@@ -15,19 +13,19 @@ using UnityEngine.UI;
 // todo -- enforce 1 child 
 //    [SingleChild(typeof(UITextElement))]
 [Template("Templates/InputField.xml")]
-public class UIInputFieldElement2 : UIElement, IFocusable {
+public class UIInputFieldElement2 : UIElement, IFocusable, IPropertyChangedHandler {
+
+    public string text;
+    public float caretBlinkRate = 0.85f;
 
     private UIGraphicElement caret;
     private UIGraphicElement highlight;
     private UITextElement textElement;
-    private UITextElement.SelectionRange selectionRange;
-
-    public string text;
+    private UITextElement.SelectionRange selectionRange = new UITextElement.SelectionRange(0, UITextElement.TextEdge.Right);
+    private UITextElement.SelectionRange previousSelectionRange = new UITextElement.SelectionRange(0, UITextElement.TextEdge.Right);
 
     private bool selectAllOnFocus;
-
-    private int cursorCharacterIndex;
-
+    private float blinkStartTime;
     private bool hasFocus;
 
     protected static string clipboard {
@@ -39,15 +37,35 @@ public class UIInputFieldElement2 : UIElement, IFocusable {
         caret = FindById<UIGraphicElement>("cursor");
         highlight = FindById<UIGraphicElement>("highlight");
         textElement = FindById<UITextElement>("text");
+        
         caret.rebuildGeometry = UpdateCaretVertices;
         highlight.rebuildGeometry = UpdateHighlightVertices;
-        caret.MarkGeometryDirty();
-        UpdateLabel();
+        
+        caret.SetEnabled(false);
+        highlight.SetEnabled(false);
+        textElement.SetText(text);
     }
-
 
     public override void OnUpdate() {
         if (!hasFocus) return;
+
+        if (selectionRange != previousSelectionRange) {
+            if (selectionRange.HasSelection) {
+                highlight.SetEnabled(true);
+                highlight.MarkGeometryDirty();
+            }
+            else {
+                highlight.SetEnabled(false);
+            }
+
+            blinkStartTime = Time.unscaledTime;
+            previousSelectionRange = selectionRange;
+        }
+
+        float blinkPeriod = 1f / caretBlinkRate;
+        bool blinkState = (Time.unscaledTime - blinkStartTime) % blinkPeriod < blinkPeriod / 2;
+        caret.style.SetTransformPosition(textElement.GetCursorPosition(selectionRange), StyleState.Normal);
+        caret.SetEnabled(blinkState);
     }
 
     [OnKeyDown]
@@ -59,13 +77,12 @@ public class UIInputFieldElement2 : UIElement, IFocusable {
         }
 
         if (selectionRange.HasSelection) {
-            textElement.DeleteRange(selectionRange);
+            selectionRange = textElement.DeleteRange(selectionRange);
+            textElement.InsertText(selectionRange.cursorIndex, c);
         }
         else {
-            textElement.AppendText(c);
+            selectionRange = textElement.AppendText(c);
         }
-
-//        UpdateCaretAndHighlight();
     }
 
     [OnMouseDown]
@@ -93,13 +110,6 @@ public class UIInputFieldElement2 : UIElement, IFocusable {
         else {
             selectionRange = textElement.GetSelectionAtPoint(mouse);
         }
-
-//        caretLineHeight = textElement.LineHeightAtPoint(cursorPosition);
-//        if (!Mathf.Approximately(caret.height, caretLineHeight)) {
-//            caret.MarkGeometryDirty();
-//        }
-
-        UpdateCaretAndHighlight();
     }
 
     [OnKeyDownWithFocus(KeyCode.A, KeyboardModifiers.Control)]
@@ -136,27 +146,6 @@ public class UIInputFieldElement2 : UIElement, IFocusable {
 
     private void SelectAll() {
         selectionRange = textElement.SelectAll();
-        UpdateCaretAndHighlight();
-    }
-
-    private void ClearSelection() {
-        selectionRange = new UITextElement.SelectionRange() {
-            selectIndex = -1,
-            cursorIndex = selectionRange.cursorIndex,
-            cursorEdge = selectionRange.cursorEdge
-        };
-    }
-
-    private void UpdateCaretAndHighlight() {
-        if (selectionRange.HasSelection) {
-            highlight.SetEnabled(true);
-            highlight.MarkGeometryDirty();
-        }
-        else {
-            highlight.SetEnabled(false);
-        }
-
-//        caret.style.SetTransformPosition(cursorPosition, StyleState.Normal);
     }
 
     private void DeleteSelection() { }
@@ -166,7 +155,7 @@ public class UIInputFieldElement2 : UIElement, IFocusable {
         UIInputFieldElement.TextSelectDragEvent retn = new UIInputFieldElement.TextSelectDragEvent();
         retn.onUpdate += HandleDragUpdate;
         Vector2 mouse = evt.MousePosition - layoutResult.screenPosition;
-        selectionRange = textElement.SelectToPoint(selectionRange, mouse);
+        selectionRange = textElement.BeginSelection(mouse);
         return retn;
     }
 
@@ -182,16 +171,20 @@ public class UIInputFieldElement2 : UIElement, IFocusable {
     }
 
     private void UpdateCaretVertices(Mesh obj) {
-        caret.SetMesh(MeshUtil.CreateStandardUIMesh(new Size(1f, 18f), Color.black));
+        caret.SetMesh(MeshUtil.CreateStandardUIMesh(new Size(1f, textElement.GetLineHeightAtCursor(selectionRange)), Color.black));
     }
 
-    private void UpdateLabel() {
-        textElement.SetText(text);
+    public void Focus() {
+        hasFocus = true;
+        caret.SetEnabled(true);
+        caret.MarkGeometryDirty();
     }
 
-    public void Focus() { }
-
-    public void Blur() { }
+    public void Blur() {
+        hasFocus = false;
+        caret.SetEnabled(false);
+        highlight.SetEnabled(false);
+    }
 
     public struct TransformAnchor { }
 
@@ -232,6 +225,15 @@ public class UIInputFieldElement2 : UIElement, IFocusable {
             };
         }
 
+    }
+
+    public void OnPropertyChanged(string propertyName, object oldValue) {
+        if (textElement == null) return;
+
+        if (propertyName == nameof(text)) {
+            textElement.SetText(text);
+            selectionRange = textElement.ValidateSelectionRange(selectionRange);
+        }
     }
 
 }

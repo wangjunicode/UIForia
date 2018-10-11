@@ -210,8 +210,7 @@ namespace Src {
             public static UIStyle InputField() {
                 return new UIStyle() {
                     PreferredWidth = UIMeasurement.ContentArea,
-                    PreferredHeight = 32f,
-                    BackgroundColor = Color.cyan,
+                    BackgroundColor = Color.white,
                 };
             }
 

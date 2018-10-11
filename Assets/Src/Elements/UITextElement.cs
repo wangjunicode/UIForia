@@ -23,18 +23,10 @@ namespace Src {
     // text flow container can handle layouting text to flow around other contents
     // 
 
-    public sealed class UITextSpanElement : UIElement {
-
-        public int startCharacter;
-        public int characterCount;
-
-    }
-
     public class UITextElement : CustomDrawableElement {
 
         private string text;
         public TextInfo textInfo;
-        protected int[] processedText;
 
         public event Action<UITextElement, string> onTextChanged;
 
@@ -88,19 +80,21 @@ namespace Src {
             ComputeCharacterAndWordSizes(textInfo);
         }
 
-        public void AppendText(char character) {
+        public SelectionRange AppendText(char character) {
             SetText(text + character);
+            return new SelectionRange(textInfo.charCount - 1, TextEdge.Right);
         }
 
-        public void AppendText(string str) {
+        public SelectionRange AppendText(string str) {
             SetText(text + str);
+            return new SelectionRange(textInfo.charCount - 1, TextEdge.Right);
         }
 
         public void DeleteText(int characterIndex, int count) { }
 
-        public void InsertText(int characterIndex) { }
+        public void InsertText(int characterIndex, char character) { }
 
-        public void InsertText(Vector2 position) { }
+        public void InsertText(int characterIndex, string str) { }
 
         public override void OnAllocatedSizeChanged() {
             SetVerticesDirty();
@@ -151,34 +145,6 @@ namespace Src {
             const int start = (int) StylePropertyId.__TextPropertyStart__;
             const int end = (int) StylePropertyId.__TextPropertyEnd__;
             return intId > start && intId < end;
-        }
-
-        protected static void ApplyLineAndWordOffsets(TextInfo textInfo) {
-            LineInfo[] lineInfos = textInfo.lineInfos;
-            WordInfo[] wordInfos = textInfo.wordInfos;
-            CharInfo[] charInfos = textInfo.charInfos;
-
-            for (int lineIdx = 0; lineIdx < textInfo.lineCount; lineIdx++) {
-                LineInfo currentLine = lineInfos[lineIdx];
-                float lineOffset = currentLine.maxAscender - currentLine.position.y;
-                float wordAdvance = currentLine.position.x;
-
-                for (int w = currentLine.wordStart; w < currentLine.wordStart + currentLine.wordCount; w++) {
-                    WordInfo currentWord = wordInfos[w];
-                    currentWord.position = new Vector2(wordAdvance, currentLine.position.y);
-                    for (int i = currentWord.startChar; i < currentWord.startChar + currentWord.charCount; i++) {
-                        float x0 = charInfos[i].topLeft.x + wordAdvance;
-                        float x1 = charInfos[i].bottomRight.x + wordAdvance;
-                        float y0 = charInfos[i].topLeft.y - lineOffset;
-                        float y1 = charInfos[i].bottomRight.y - lineOffset;
-                        charInfos[i].topLeft = new Vector2(x0, y0);
-                        charInfos[i].bottomRight = new Vector2(x1, y1);
-                    }
-
-                    wordInfos[w] = currentWord;
-                    wordAdvance += currentWord.xAdvance;
-                }
-            }
         }
 
         private static void ComputeCharacterAndWordSizes(TextInfo textInfo) {
@@ -318,8 +284,6 @@ namespace Src {
                         charInfos[i].uv2 = Vector2.one; // todo -- compute uv2s
                         charInfos[i].uv3 = Vector2.one;
 
-                        TMP_TextElement e;
-
                         float elementAscender = fontAsset.fontInfo.Ascender * currentElementScale / smallCapsMultiplier;
                         float elementDescender = fontAsset.fontInfo.Descender * currentElementScale / smallCapsMultiplier;
 
@@ -349,6 +313,38 @@ namespace Src {
                     minWordSize = Mathf.Min(minWordSize, currentWord.size.x);
                     maxWordSize = Mathf.Max(maxWordSize, currentWord.size.x);
                     wordInfos[w] = currentWord;
+                }
+            }
+        }
+
+        protected static void ApplyLineAndWordOffsets(TextInfo textInfo) {
+            LineInfo[] lineInfos = textInfo.lineInfos;
+            WordInfo[] wordInfos = textInfo.wordInfos;
+            CharInfo[] charInfos = textInfo.charInfos;
+
+            for (int lineIdx = 0; lineIdx < textInfo.lineCount; lineIdx++) {
+                LineInfo currentLine = lineInfos[lineIdx];
+                float lineOffset = currentLine.maxAscender - currentLine.position.y;
+                float wordAdvance = currentLine.position.x;
+
+                for (int w = currentLine.wordStart; w < currentLine.wordStart + currentLine.wordCount; w++) {
+                    WordInfo currentWord = wordInfos[w];
+                    currentWord.lineIndex = lineIdx;
+                    currentWord.position = new Vector2(wordAdvance, currentLine.position.y);
+
+                    for (int i = currentWord.startChar; i < currentWord.startChar + currentWord.charCount; i++) {
+                        float x0 = charInfos[i].topLeft.x + wordAdvance;
+                        float x1 = charInfos[i].bottomRight.x + wordAdvance;
+                        float y0 = charInfos[i].topLeft.y - lineOffset;
+                        float y1 = charInfos[i].bottomRight.y - lineOffset;
+                        charInfos[i].wordIndex = w;
+                        charInfos[i].lineIndex = lineIdx;
+                        charInfos[i].topLeft = new Vector2(x0, y0);
+                        charInfos[i].bottomRight = new Vector2(x1, y1);
+                    }
+
+                    wordInfos[w] = currentWord;
+                    wordAdvance += currentWord.xAdvance;
                 }
             }
         }
@@ -438,49 +434,14 @@ namespace Src {
             return TMP_FontAsset.defaultFontAsset.material;
         }
 
-        public float LineHeightAtPoint(Vector2 point) {
-            LineInfo nearestLine = FindNearestLine(point);
-            return nearestLine.Height;
-        }
-
-//        public bool FindNextWord(WordInfo wordInfo) {
-//            
-//        }
-
-        public Vector2 PointToCharacterCoordinate(Vector2 cursorPosition) {
-            LineInfo nearestLine = FindNearestLine(cursorPosition);
-            WordInfo nearestWord = FindNearestWord(nearestLine, cursorPosition);
-            CharInfo nearestChar = FindNearestCharacter(nearestWord, cursorPosition);
-            float width = nearestChar.bottomRight.x - nearestChar.topLeft.x;
-            if (cursorPosition.x > nearestChar.topLeft.x + (width * 0.5f)) {
-                return new Vector2(nearestChar.bottomRight.x, nearestLine.position.y);
-            }
-
-            return new Vector2(nearestChar.topLeft.x, nearestLine.position.y);
-        }
-
-//        private Vector2 PointToCharacterIndex(Vector2 point) {
-//            LineInfo nearestLine = FindNearestLine(point);
-//            WordInfo nearestWord = FindNearestWord(nearestLine, point);
-//            CharInfo nearestChar = FindNearestCharacterIndex(nearestWord, point);
-//        }
-
-        public WordInfo GetFirstWord() {
-            return textInfo.wordInfos[0];
-        }
-
-        public WordInfo GetLastWord() {
-            return textInfo.wordInfos[textInfo.wordCount - 1];
-        }
-
-        public WordInfo GetWordAtPoint(Vector2 point) {
+        private WordInfo GetWordAtPoint(Vector2 point) {
             return FindNearestWord(FindNearestLine(point), point);
         }
 
         public SelectionRange DeleteRange(SelectionRange selectionRange) {
             return new SelectionRange();
         }
-        
+
         public string GetSubstring(SelectionRange selectionRange) {
             if (!selectionRange.HasSelection) {
                 return string.Empty;
@@ -499,12 +460,7 @@ namespace Src {
         }
 
         public SelectionRange SelectAll() {
-            return new SelectionRange() {
-                cursorIndex = textInfo.charCount - 1,
-                selectIndex = 0,
-                selectEdge = TextEdge.Left,
-                cursorEdge = TextEdge.Right
-            };
+            return new SelectionRange(textInfo.charCount - 1, TextEdge.Right, 0, TextEdge.Left);
         }
 
         private TextEdge FindCursorEdge(int charIndex, Vector2 point) {
@@ -551,10 +507,6 @@ namespace Src {
             LineInfo nearestLine = FindNearestLine(point);
             WordInfo nearestWord = FindNearestWord(nearestLine, point);
             return FindNearestCharacterIndex(nearestWord, point);
-        }
-
-        private CharInfo FindNearestCharacter(WordInfo wordInfo, Vector2 point) {
-            return textInfo.charInfos[FindNearestCharacterIndex(wordInfo, point)];
         }
 
         private LineInfo FindNearestLine(Vector2 point) {
@@ -617,118 +569,84 @@ namespace Src {
         }
 
         public Mesh GetHighlightMesh(SelectionRange selectionRange) {
-            LineInfo[] lineInfos = textInfo.lineInfos;
             Color32 selectionColor = new Color32(168, 206, 255, 192);
 
-            // line start for min
-            // line end for max
-            // line start / end for in between  
-//            int lineStartIndex = FindNearestLineIndex(start);
-//            int lineEndIndex = FindNearestLineIndex(end);
-//
-//            // if on different lines -> swap based on y
-//
-//            int lineCount = 1 + lineEndIndex - lineStartIndex;
-//
-//            if (lineCount == 1) {
-//                LineInfo currentLine = lineInfos[lineStartIndex];
-//
-//                WordInfo startWord = FindNearestWord(currentLine, start);
-//                CharInfo startChar = FindNearestCharacter(startWord, start);
-//
-//                WordInfo endWord = FindNearestWord(currentLine, end);
-//                CharInfo endChar = FindNearestCharacter(endWord, end);
-//
-//                float lineOffset = layoutResult.localPosition.y;
-//
-//                float minX = FindCursorXForCharacter(startChar, start);
-//                float maxX = FindCursorXForCharacter(endChar, end);
-//                float minY = currentLine.position.y - lineOffset;
-//                float maxY = currentLine.position.y - currentLine.Height - lineOffset;
-//
-//                Vector3 v0 = new Vector3(minX, minY);
-//                Vector3 v1 = new Vector3(maxX, minY);
-//                Vector3 v2 = new Vector3(maxX, maxY);
-//                Vector3 v3 = new Vector3(minX, maxY);
-//
-//                MeshUtil.s_VertexHelper.AddVert(v0, selectionColor, new Vector2());
-//                MeshUtil.s_VertexHelper.AddVert(v1, selectionColor, new Vector2());
-//                MeshUtil.s_VertexHelper.AddVert(v2, selectionColor, new Vector2());
-//                MeshUtil.s_VertexHelper.AddVert(v3, selectionColor, new Vector2());
-//
-//                MeshUtil.s_VertexHelper.AddTriangle(0, 1, 2);
-//                MeshUtil.s_VertexHelper.AddTriangle(2, 3, 0);
-//
-//                Mesh highlightMesh = new Mesh();
-//
-//                MeshUtil.s_VertexHelper.FillMesh(highlightMesh);
-//                MeshUtil.s_VertexHelper.Clear();
-//
-//                return highlightMesh;
-//            }
+            int startIndex = selectionRange.selectIndex;
+            int endIndex = selectionRange.cursorIndex;
+            TextEdge startEdge = selectionRange.selectEdge;
+            TextEdge endEdge = selectionRange.cursorEdge;
 
+            if (selectionRange.cursorIndex < selectionRange.selectIndex) {
+                startIndex = selectionRange.cursorIndex;
+                endIndex = selectionRange.selectIndex;
+                startEdge = selectionRange.cursorEdge;
+                endEdge = selectionRange.selectEdge;
+            }
 
-            return new Mesh();//null;
+            CharInfo startCharInfo = textInfo.charInfos[startIndex];
+            CharInfo endCharInfo = textInfo.charInfos[endIndex];
 
-//            
-//            for (int i = lineStartIndex + 1; i < lineCount - 1; i++) {
-//                
-//            }
+            if (startCharInfo.lineIndex == endCharInfo.lineIndex) {
+                LineInfo currentLine = textInfo.lineInfos[startCharInfo.lineIndex];
+                float minX = startEdge == TextEdge.Right ? startCharInfo.bottomRight.x : startCharInfo.topLeft.x;
+                float maxX = endEdge == TextEdge.Right ? endCharInfo.bottomRight.x : endCharInfo.topLeft.x;
+                float minY = currentLine.position.y - layoutResult.localPosition.y;
+                float maxY = currentLine.position.y - currentLine.Height - layoutResult.localPosition.y;
+                Vector3 v0 = new Vector3(minX, minY);
+                Vector3 v1 = new Vector3(maxX, minY);
+                Vector3 v2 = new Vector3(maxX, maxY);
+                Vector3 v3 = new Vector3(minX, maxY);
+
+                MeshUtil.s_VertexHelper.AddVert(v0, selectionColor, new Vector2(0, 1));
+                MeshUtil.s_VertexHelper.AddVert(v1, selectionColor, new Vector2(0, 0));
+                MeshUtil.s_VertexHelper.AddVert(v2, selectionColor, new Vector2(1, 0));
+                MeshUtil.s_VertexHelper.AddVert(v3, selectionColor, new Vector2(1, 1));
+
+                MeshUtil.s_VertexHelper.AddTriangle(0, 1, 2);
+                MeshUtil.s_VertexHelper.AddTriangle(2, 3, 0);
+
+                Mesh highlightMesh = new Mesh();
+
+                MeshUtil.s_VertexHelper.FillMesh(highlightMesh);
+                MeshUtil.s_VertexHelper.Clear();
+
+                return highlightMesh;
+            }
+
+            return null;
         }
 
         public SelectionRange GetSelectionAtPoint(Vector2 point) {
             int charIndex = FindNearestCharacterIndex(point);
-            return new SelectionRange() {
-                cursorIndex = FindNearestCharacterIndex(point),
-                cursorEdge = FindCursorEdge(charIndex, point),
-                selectIndex = -1,
-            };
+            return new SelectionRange(
+                FindNearestCharacterIndex(point),
+                FindCursorEdge(charIndex, point)
+            );
         }
 
         public SelectionRange SelectWordAtPoint(Vector2 point) {
             WordInfo wordInfo = GetWordAtPoint(point);
-            return new SelectionRange() {
-                cursorIndex = wordInfo.startChar + wordInfo.charCount,
-                selectIndex = wordInfo.startChar,
-                cursorEdge = TextEdge.Right,
-                selectEdge = TextEdge.Left
-            };
+            return new SelectionRange(
+                wordInfo.startChar + wordInfo.VisibleCharCount - 1,
+                TextEdge.Right,
+                wordInfo.startChar
+            );
         }
 
         public SelectionRange ValidateSelectionRange(SelectionRange range) {
-            if (range.cursorIndex >= textInfo.charCount) range.cursorIndex = textInfo.charCount - 1;
-            if (range.selectIndex >= textInfo.charCount) range.selectIndex = textInfo.charCount - 1;
-            return range;
+            int cursorIdx = (range.cursorIndex < textInfo.charCount) ? range.cursorIndex : textInfo.charCount - 1;
+            int selectIdx = (range.selectIndex < textInfo.charCount) ? range.selectIndex : textInfo.charCount - 1;
+            return new SelectionRange(cursorIdx, range.cursorEdge, selectIdx, range.selectEdge);
         }
 
         public SelectionRange SelectToPoint(SelectionRange range, Vector2 point) {
             int charIndex = FindNearestCharacterIndex(point);
-            return new SelectionRange() {
-                cursorIndex = FindNearestCharacterIndex(point),
-                cursorEdge = FindCursorEdge(charIndex, point),
-                selectIndex = range.selectIndex,
-                selectEdge = range.selectEdge
-            };
-        }
-
-        public Vector2 GetCursorPositionFromSelectionStart(SelectionRange selectionRange) {
-            if (textInfo.charCount >= selectionRange.cursorIndex) return new Vector2(-1, -1);
-            float lineY = FindNearestLine(textInfo.charInfos[selectionRange.cursorIndex].topLeft).position.y;
-            if (selectionRange.cursorEdge == TextEdge.Right) {
-                return new Vector2(textInfo.charInfos[selectionRange.cursorIndex].bottomRight.x, lineY);
-            }
-
-            return new Vector2(textInfo.charInfos[selectionRange.cursorIndex].topLeft.x, lineY);
-        }
-
-        public Vector2 GetCursorPositionFromSelectionEnd(SelectionRange selectionRange) {
-            if (textInfo.charCount >= selectionRange.selectIndex) return new Vector2(-1, -1);
-            float lineY = FindNearestLine(textInfo.charInfos[selectionRange.selectIndex].topLeft).position.y;
-            if (selectionRange.selectEdge == TextEdge.Right) {
-                return new Vector2(textInfo.charInfos[selectionRange.selectIndex].bottomRight.x, lineY);
-            }
-
-            return new Vector2(textInfo.charInfos[selectionRange.selectIndex].topLeft.x, lineY);
+            return new SelectionRange(
+                FindNearestCharacterIndex(point),
+                FindCursorEdge(charIndex, point),
+                range.selectIndex,
+                range.selectEdge
+            );
         }
 
         public enum TextEdge {
@@ -740,13 +658,73 @@ namespace Src {
 
         public struct SelectionRange {
 
-            public int cursorIndex;
-            public int selectIndex;
-            public TextEdge cursorEdge;
-            public TextEdge selectEdge;
+            public readonly int cursorIndex;
+            public readonly int selectIndex;
+            public readonly TextEdge cursorEdge;
+            public readonly TextEdge selectEdge;
+
+            public SelectionRange(int cursorIndex, TextEdge cursorEdge, int selectIndex = -1, TextEdge selectEdge = TextEdge.Left) {
+                this.cursorIndex = cursorIndex;
+                this.cursorEdge = cursorEdge;
+                this.selectIndex = selectIndex;
+                this.selectEdge = selectEdge;
+            }
 
             public bool HasSelection => selectIndex != -1;
 
+            public override bool Equals(object obj) {
+                if (ReferenceEquals(null, obj)) return false;
+                return obj is SelectionRange && Equals((SelectionRange) obj);
+            }
+
+            public override int GetHashCode() {
+                unchecked {
+                    int hashCode = cursorIndex;
+                    hashCode = (hashCode * 397) ^ selectIndex;
+                    hashCode = (hashCode * 397) ^ (int) cursorEdge;
+                    hashCode = (hashCode * 397) ^ (int) selectEdge;
+                    return hashCode;
+                }
+            }
+
+            public bool Equals(SelectionRange previousSelectionRange) {
+                return cursorIndex != previousSelectionRange.cursorIndex
+                       || cursorEdge != previousSelectionRange.cursorEdge
+                       || selectEdge != previousSelectionRange.selectEdge
+                       || selectIndex != previousSelectionRange.selectIndex;
+            }
+
+            public static bool operator ==(SelectionRange a, SelectionRange b) {
+                return a.cursorIndex == b.cursorIndex
+                       && a.cursorEdge == b.cursorEdge
+                       && a.selectEdge == b.selectEdge
+                       && a.selectIndex == b.selectIndex;
+            }
+
+            public static bool operator !=(SelectionRange a, SelectionRange b) {
+                return !(a == b);
+            }
+
+        }
+
+        public Vector2 GetCursorPosition(SelectionRange selectionRange) {
+            CharInfo charInfo = textInfo.charInfos[selectionRange.cursorIndex];
+            LineInfo lineInfo = textInfo.lineInfos[charInfo.lineIndex];
+            return new Vector2(selectionRange.cursorEdge == TextEdge.Right
+                    ? charInfo.bottomRight.x
+                    : charInfo.topLeft.x,
+                -lineInfo.position.y
+            );
+        }
+
+        public SelectionRange BeginSelection(Vector2 point) {
+            int selectIdx = FindNearestCharacterIndex(point);
+            TextEdge selectEdge = FindCursorEdge(selectIdx, point);
+            return new SelectionRange(selectIdx, selectEdge, selectIdx, selectEdge);
+        }
+
+        public float GetLineHeightAtCursor(SelectionRange selectionRange) {
+            return textInfo.lineInfos[textInfo.charInfos[selectionRange.cursorIndex].lineIndex].Height;
         }
 
     }

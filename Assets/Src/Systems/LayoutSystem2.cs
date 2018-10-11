@@ -394,7 +394,7 @@ namespace Src.Systems {
                 UIElement element = m_Elements[i];
 
                 // todo -- replace w/ quad tree
-                if (!layoutResult.ScreenRect.Contains(point)) {
+                if (!layoutResult.ScreenOverflowRect.Contains(point)) {
                     continue;
                 }
 

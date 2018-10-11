@@ -5,60 +5,62 @@
 
     <Import value="ClippedPanel+ClippedCorner" as="ClippedCorner"/>
 
-    <Contents style.layoutType='Flex'>
+    <Contents>
 
-        <Group style="top-bar">
+        <!--<Group style="top-bar">-->
 
-            <Text style="top-bar-text">Klang Gang</Text>
+            <!--<Text style="top-bar-text">Klang Gang</Text>-->
 
-            <Group style="header-group">
-                <Image src="{url('settings_icon')}"/>
-                <Group style="round-thing"/>
-            </Group>
+            <!--<Group style="header-group">-->
+                <!--<Image src="{url('settings_icon')}"/>-->
+                <!--<Group style="round-thing"/>-->
+            <!--</Group>-->
 
-        </Group>
+        <!--</Group>-->
 
-        <Group style="content-container">
+        <!--<Group style="content-container">-->
 
-            <ClippedPanel style="side-bar" clipSize="20f" clippedCorner="{@ClippedCorner.BottomLeft}">
-                
-                <Group style="side-bar-icon-track">
-                    
-                    <Group x-id="shuttle" style="shuttle"/>
+            <!--<ClippedPanel style="side-bar" clipSize="20f" clippedCorner="{@ClippedCorner.BottomLeft}">-->
+                <!---->
+                <!--<Group style="side-bar-icon-track">-->
+                    <!---->
+                    <!--<Group x-id="shuttle" style="shuttle"/>-->
 
-                    <Repeat list="{chatGroups}" as="item">
-                        <ChatGroupIcon onMouseDown="{SetCurrentChat($element)}" chatGroup="{$item}"/>
-                    </Repeat>
+                    <!--<Repeat list="{chatGroups}" as="item">-->
+                        <!--<ChatGroupIcon onMouseDown="{SetCurrentChat($element)}" chatGroup="{$item}"/>-->
+                    <!--</Repeat>-->
 
-                    <AddChatButton onMouseDown="{AddChatGroup()}"/>
+                    <!--<AddChatButton onMouseDown="{AddChatGroup()}"/>-->
 
-                </Group>
+                <!--</Group>-->
 
-            </ClippedPanel>
+            <!--</ClippedPanel>-->
 
-            <Group style="message-panel">
-                <Group style="message-panel-header">
-                    <SeedLabel text="'DIRECT MESSAGES'"/>
-                    <Image src="{url('plus_icon')}"/>
-                </Group>
-                
-                <Repeat list="{activeChats}">
-                    <DirectMessageListEntry chatData="{$item}" isSelected="{$index == selectedChatIndex}"/>    
-                </Repeat>
-                
-            </Group>
+            <!--<Group style="message-panel">-->
+                <!--<Group style="message-panel-header">-->
+                    <!--<SeedLabel text="'DIRECT MESSAGES'"/>-->
+                    <!--<Image src="{url('plus_icon')}"/>-->
+                <!--</Group>-->
+                <!---->
+                <!--<Repeat list="{activeChats}">-->
+                    <!--<DirectMessageListEntry chatData="{$item}" isSelected="{$index == selectedChatIndex}"/>    -->
+                <!--</Repeat>-->
+                <!---->
+            <!--</Group>-->
 
-            <Group style="message-main-area">
-                
-                <Input style="input-field" text="'Hello World'"/>
-                
-            </Group>
-
-            <ClippedPanel style="message-panel-secondary" clipSize="20f" clippedCorner="{@ClippedCorner.BottomRight}">
+            <!--<Group style="message-main-area">-->
+                <!---->
+                <!--<Input style="input-field" text="'Hello World this is kinda of annoying beecause it isnt working'"/>-->
+                <!---->
+            <!--</Group>-->
         
-            </ClippedPanel>
+     
 
-        </Group>
+            <!--<ClippedPanel style="message-panel-secondary" clipSize="20f" clippedCorner="{@ClippedCorner.BottomRight}">-->
+        <!---->
+            <!--</ClippedPanel>-->
+
+        <!--</Group>-->
 
 
     </Contents>

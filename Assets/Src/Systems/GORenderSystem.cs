@@ -69,7 +69,7 @@ namespace Src.Systems {
                     break;
                 }
 
-                if ((sibling.flags & UIElementFlags.RequiresRendering) != 0 && sibling.isEnabled) {
+                if ((sibling.flags & UIElementFlags.RequiresRendering) != 0) {
                     idx++;
                 }
             }
@@ -114,6 +114,8 @@ namespace Src.Systems {
                 GameObject go = new GameObject(element.ToString());
                 RectTransform transform = go.AddComponent<RectTransform>();
                 CanvasRenderer canvasRenderer = go.AddComponent<CanvasRenderer>();
+                StyleDebugView debugView = go.AddComponent<StyleDebugView>();
+                debugView.element = element;
                 transform.anchorMin = new Vector2(0, 1);
                 transform.anchorMax = new Vector2(0, 1);
                 transform.pivot = new Vector2(0, 1);
@@ -124,7 +126,9 @@ namespace Src.Systems {
                 RenderData renderData = new RenderData(element, this);
 
                 renderSkipTree.AddItem(renderData);
-                m_DirtyGraphicList.Add(renderData.drawable);
+                if (element.isEnabled) {
+                    m_DirtyGraphicList.Add(renderData.drawable);
+                }
             }
 
             m_ToInitialize.Clear();
@@ -167,7 +171,7 @@ namespace Src.Systems {
                 }
 
                 Vector3 outputPosition = new Vector3(position.x, Screen.height - position.y);
-                Quaternion outputRotation = Quaternion.identity;
+                Quaternion outputRotation;
 
                 if (Mathf.Approximately(rotation, 0)) {
                     outputRotation = Quaternion.identity;
@@ -207,15 +211,10 @@ namespace Src.Systems {
                 Material material = graphic.GetMaterial();
                 Texture text = graphic.GetMainTexture();
 
-                //if (graphic.IsGeometryDirty) {
-                canvasRenderer.SetMesh(mesh);
-                // }
-
-                //if (graphic.IsMaterialDirty) {
                 canvasRenderer.materialCount = 1;
+                canvasRenderer.SetMesh(mesh);
                 canvasRenderer.SetMaterial(material, 0);
                 canvasRenderer.SetTexture(text);
-                // }
             }
 
             m_DirtyGraphicList.Clear();
@@ -240,7 +239,6 @@ namespace Src.Systems {
 
         private void RenderScrollbar(VirtualScrollbar scrollbar, RectTransform handle) {
             RectTransform transform = m_TransformMap[scrollbar.id];
-            UIElement targetElement = scrollbar.targetElement;
             Rect trackRect = scrollbar.GetTrackRect();
             Vector2 targetPosition = new Vector2(trackRect.x, trackRect.y);
 
@@ -315,14 +313,10 @@ namespace Src.Systems {
                 m_CanvasRendererMap[element.id].Clear();
             }
 
-//            renderSkipTree.TraversePreOrder(element, this, (self, item) => {
-//                item.unityTransform.gameObject.SetActive(false);
-//                CanvasRenderer canvasRenderer;
-//
-//                if (self.m_CanvasRendererMap.TryGetValue(item.element.id, out canvasRenderer)) {
-//                    canvasRenderer.Clear();
-//                }
-//            });
+            RenderData renderData = renderSkipTree.GetItem(element.id);
+            if (renderData != null) {
+                m_DirtyGraphicList.Remove(renderData.drawable);
+            }
         }
 
         public void MarkGeometryDirty(IDrawable element) {

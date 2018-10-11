@@ -7,10 +7,28 @@
 
     <Contents style="container">
 
-        <WindowFrame>
+        <!--<WindowFrame>-->
 
 
-        </WindowFrame>
+        <!--</WindowFrame>-->
+        
+        <Group style.width="content(100)">
+
+            <Group style.width="300f" style.height="100f" style.backgroundColor="red"/>
+
+            <Group style.width="300f" style.height="200f" style.backgroundColor="blue"/>
+            
+            <Group style.width="100f" style.height="content(100)">
+               
+                <Text style="text-style">
+                    This is some text that should be kinda long but
+                    I dont know what else I should write here maybe
+                    some lorem ipsum stuff i guess that should be enough.
+                </Text> 
+            
+            </Group>
+            
+        </Group>
         
     </Contents>
 

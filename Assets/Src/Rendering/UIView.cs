@@ -165,15 +165,16 @@ public abstract class UIView {
     public virtual void OnDestroy() { }
 
     public virtual void Update() {
+        for (int i = 0; i < systems.Count; i++) {
+            systems[i].OnUpdate();
+        }
         elementTree.ConditionalTraversePreOrder((element) => {
             if (element == null) return true;
             if (element.isDisabled) return false;
             element.OnUpdate();
             return true;
         });
-        for (int i = 0; i < systems.Count; i++) {
-            systems[i].OnUpdate();
-        }
+
     }
 
     public void EnableElement(UIElement element) {

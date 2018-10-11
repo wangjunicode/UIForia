@@ -11,8 +11,10 @@ namespace Src.Editor {
             GUI.enabled = false;
             UIElement element = ((StyleDebugView) target).element;
 
+            if (element.style == null || element.style.computedStyle == null) {
+                return;
+            }
             ComputedStyle style = element.style.computedStyle;
-
             Color color = EditorGUILayout.ColorField("Background Color", style.BackgroundColor);
 
 //            style.BackgroundColor = color;
@@ -23,19 +25,28 @@ namespace Src.Editor {
 //                EditorGUILayout.EnumPopup("Self Alignment", style.FlexItemSelfAlignment);
 //                Edt
 //            }
-            // DrawMeasurement("Position X", element.style.positionX);
-            // DrawMeasurement("Position Y", element.style.positionY);
+            DrawMeasurement("Min Width", style.MinWidth);
+            DrawMeasurement("Max Width", style.MaxWidth);
+            DrawMeasurement("Preferred Width", style.PreferredWidth);
 
+            DrawMeasurement("Min Height", style.MinHeight);
+            DrawMeasurement("Max Height", style.MaxHeight);
+            DrawMeasurement("Preferred Height", style.PreferredHeight);
+            
             EditorGUILayout.Space();
 
             EditorGUILayout.RectField("LocalRect", element.layoutResult.LocalRect);
             EditorGUILayout.RectField("ScreenRect", element.layoutResult.ScreenRect);
+            EditorGUILayout.RectField("ScreenOverflowRect", element.layoutResult.ScreenOverflowRect);
+            EditorGUILayout.Vector2Field("Actual Size", element.layoutResult.actualSize);
+            EditorGUILayout.Vector2Field("Allocated Size", element.layoutResult.allocatedSize);
+            EditorGUILayout.Vector2Field("Content Size", element.layoutResult.contentSize);
+            EditorGUILayout.Vector2Field("Content Offset", element.layoutResult.contentOffset);
 
             EditorGUILayout.Space();
 
-//            EditorGUILayout.EnumPopup("Layout Type", element.style.layoutType);
-//            EditorGUILayout.EnumPopup("Layout Direction", element.style.layoutDirection);
-//            EditorGUILayout.EnumPopup("Layout Flow", element.style.layoutFlow);
+            EditorGUILayout.EnumPopup("Layout Type", style.LayoutType);
+            EditorGUILayout.EnumPopup("Layout Direction", style.FlexLayoutDirection);
             GUI.enabled = true;
         }
 

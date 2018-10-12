@@ -13,29 +13,29 @@ namespace Rendering {
         }
 
         [StructLayout(LayoutKind.Explicit)]
-        private struct Conversion {
+        public struct Reinterpret {
 
             [FieldOffset(0)] public readonly int intValue;
             [FieldOffset(0)] public readonly float floatValue;
 
-            public Conversion(float floatValue) {
+            public Reinterpret(float floatValue) {
                 intValue = 0;
                 this.floatValue = floatValue;
             }
 
-            public Conversion(int intValue) {
+            public Reinterpret(int intValue) {
                 floatValue = 0;
                 this.intValue = intValue;
             }
 
         }
-        
+
         public static int EncodeToInt(float value) {
-            return new Conversion(value).intValue;
+            return new Reinterpret(value).intValue;
         }
 
         public static float DecodeToFloat(int value) {
-           return new Conversion(value).floatValue;
+            return new Reinterpret(value).floatValue;
         }
 
     }

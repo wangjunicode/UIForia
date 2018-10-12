@@ -13,7 +13,7 @@ namespace Src.Layout.LayoutTypes {
         public TextContainerLayoutBox(LayoutSystem2 layoutSystem, UIElement element)
             : base(layoutSystem, element) { }
 
-        public override void RunLayout() {
+        public void RunLayout() {
             TextInfo textInfo = ((UITextElement) element).textInfo;
             List<LineInfo> lineInfos = RunLayout(textInfo, allocatedWidth);
             LineInfo lastLine = lineInfos[lineInfos.Count - 1];
@@ -43,6 +43,14 @@ namespace Src.Layout.LayoutTypes {
             ListPool<LineInfo>.Release(lineInfos);
             
             return -lastLine.position.y + lastLine.Height;
+        }
+
+        public override void RunWidthLayout() {
+            throw new NotImplementedException();
+        }
+
+        public override void RunHeightLayout() {
+            throw new NotImplementedException();
         }
 
         public override float GetPreferredHeightForWidth(float width) {

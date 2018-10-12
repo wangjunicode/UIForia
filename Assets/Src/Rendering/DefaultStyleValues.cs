@@ -1,5 +1,7 @@
+using System.Collections.Generic;
 using Src;
 using Src.Layout;
+using Src.Layout.LayoutTypes;
 using Src.Rendering;
 using Src.Util;
 using UnityEngine;
@@ -8,70 +10,83 @@ namespace Rendering {
 
     public static class DefaultStyleValues {
 
-        public static readonly UIMeasurement borderRadiusTopLeft = new UIMeasurement(0);
-        public static readonly UIMeasurement borderRadiusTopRight = new UIMeasurement(0);
-        public static readonly UIMeasurement borderRadiusBottomRight = new UIMeasurement(0);
-        public static readonly UIMeasurement borderRadiusBottomLeft = new UIMeasurement(0);
+        public static readonly UIMeasurement BorderRadiusTopLeft = new UIMeasurement(0);
+        public static readonly UIMeasurement BorderRadiusTopRight = new UIMeasurement(0);
+        public static readonly UIMeasurement BorderRadiusBottomRight = new UIMeasurement(0);
+        public static readonly UIMeasurement BorderRadiusBottomLeft = new UIMeasurement(0);
 
-        public static readonly Color borderColor = ColorUtil.UnsetValue;
-        public static readonly Color backgroundColor = ColorUtil.UnsetValue;
-        public static readonly Texture2DAssetReference backgroundImage = new Texture2DAssetReference(IntUtil.UnsetValue);
+        public static readonly Color BorderColor = ColorUtil.UnsetValue;
+        public static readonly Color BackgroundColor = ColorUtil.UnsetValue;
+        public static readonly Texture2DAssetReference BackgroundImage = new Texture2DAssetReference(IntUtil.UnsetValue);
 
-        public static readonly Overflow overflowX = Overflow.None;
-        public static readonly Overflow overflowY = Overflow.None;
+        public static readonly Overflow OverflowX = Overflow.None;
+        public static readonly Overflow OverflowY = Overflow.None;
 
-        public static readonly int flexOrderOverride = ushort.MaxValue;
-        public static readonly int flexGrowthFactor = 0;
-        public static readonly int flexShrinkFactor = 0;
-        public static readonly CrossAxisAlignment flexSelfAlignment = CrossAxisAlignment.Unset;
+        public const int FlexItemOrder = ushort.MaxValue;
+        public const int FlexItemGrow = 0;
+        public const int FlexItemShrink = 0;
+        public static readonly CrossAxisAlignment FlexItemSelfAlignment = CrossAxisAlignment.Unset;
 
-        public static readonly LayoutWrap flexLayoutWrap = LayoutWrap.None;
-        public static readonly LayoutDirection flexLayoutDirection = LayoutDirection.Row;
-        public static readonly MainAxisAlignment flexLayoutMainAxisAlignment = MainAxisAlignment.Start;
-        public static readonly CrossAxisAlignment flexLayoutCrossAxisAlignment = CrossAxisAlignment.Start;
+        public static readonly LayoutWrap FlexWrap = LayoutWrap.None;
+        public static readonly LayoutDirection FlexLayoutDirection = LayoutDirection.Row;
+        public static readonly MainAxisAlignment FlexLayoutMainAxisAlignment = MainAxisAlignment.Start;
+        public static readonly CrossAxisAlignment FlexLayoutCrossAxisAlignment = CrossAxisAlignment.Start;
 
-        public static readonly UIMeasurement minWidth = new UIMeasurement(0);
-        public static readonly UIMeasurement maxWidth = new UIMeasurement(float.MaxValue);
-        public static readonly UIMeasurement preferredWidth = UIMeasurement.Content100;
-        public static readonly UIMeasurement minHeight = new UIMeasurement(0);
-        public static readonly UIMeasurement maxHeight = new UIMeasurement(float.MaxValue);
-        public static readonly UIMeasurement preferredHeight = UIMeasurement.Content100;
+        public static readonly UIMeasurement MinWidth = new UIMeasurement(0);
+        public static readonly UIMeasurement MaxWidth = new UIMeasurement(float.MaxValue);
+        public static readonly UIMeasurement PreferredWidth = UIMeasurement.Content100;
+        public static readonly UIMeasurement MinHeight = new UIMeasurement(0);
+        public static readonly UIMeasurement MaxHeight = new UIMeasurement(float.MaxValue);
+        public static readonly UIMeasurement PreferredHeight = UIMeasurement.Content100;
 
-        public static readonly UIMeasurement marginTop = new UIMeasurement(0);
-        public static readonly UIMeasurement marginRight = new UIMeasurement(0);
-        public static readonly UIMeasurement marginLeft = new UIMeasurement(0);
-        public static readonly UIMeasurement marginBottom = new UIMeasurement(0);
+        public static readonly UIMeasurement MarginTop = new UIMeasurement(0);
+        public static readonly UIMeasurement MarginRight = new UIMeasurement(0);
+        public static readonly UIMeasurement MarginLeft = new UIMeasurement(0);
+        public static readonly UIMeasurement MarginBottom = new UIMeasurement(0);
 
-        public static readonly UIFixedLength paddingTop = new UIFixedLength(0);
-        public static readonly UIFixedLength paddingRight = new UIFixedLength(0);
-        public static readonly UIFixedLength paddingLeft = new UIFixedLength(0);
-        public static readonly UIFixedLength paddingBottom = new UIFixedLength(0);
+        public static readonly UIFixedLength PaddingTop = new UIFixedLength(0);
+        public static readonly UIFixedLength PaddingRight = new UIFixedLength(0);
+        public static readonly UIFixedLength PaddingLeft = new UIFixedLength(0);
+        public static readonly UIFixedLength PaddingBottom = new UIFixedLength(0);
 
-        public static readonly UIFixedLength borderTop = new UIFixedLength(0);
-        public static readonly UIFixedLength borderRight = new UIFixedLength(0);
-        public static readonly UIFixedLength borderLeft = new UIFixedLength(0);
-        public static readonly UIFixedLength borderBottom = new UIFixedLength(0);
+        public static readonly UIFixedLength BorderTop = new UIFixedLength(0);
+        public static readonly UIFixedLength BorderRight = new UIFixedLength(0);
+        public static readonly UIFixedLength BorderLeft = new UIFixedLength(0);
+        public static readonly UIFixedLength BorderBottom = new UIFixedLength(0);
 
-        public static readonly UIFixedLength transformPositionX = new UIFixedLength(0);
-        public static readonly UIFixedLength transformPositionY = new UIFixedLength(0);
-        public static readonly UIFixedLength transformPivotX = new UIFixedLength(0);
-        public static readonly UIFixedLength transformPivotY = new UIFixedLength(0);
-        public static readonly float transformScaleX = 1;
-        public static readonly float transformScaleY = 1;
-        public static readonly float transformRotation = 0;
+        public static readonly UIFixedLength TransformPositionX = new UIFixedLength(0);
+        public static readonly UIFixedLength TransformPositionY = new UIFixedLength(0);
+        public static readonly UIFixedLength TransformPivotX = new UIFixedLength(0);
+        public static readonly UIFixedLength TransformPivotY = new UIFixedLength(0);
+        public const float TransformScaleX = 1;
+        public const float TransformScaleY = 1;
+        public const float TransformRotation = 0;
 
-        public static readonly LayoutType layoutType = LayoutType.Flex;
-        public static readonly int fontSize = 12;
-        public static readonly Color textColor = Color.black;
-        public static readonly TextUtil.FontStyle fontStyle = TextUtil.FontStyle.Normal;
-        public static readonly FontAssetReference fontAsset = new FontAssetReference("default");
-        public static readonly TextUtil.TextAlignment TextAlignment = TextUtil.TextAlignment.Left;
-        public static readonly TextUtil.TextTransform textTransform = TextUtil.TextTransform.None;
+        public static readonly LayoutType LayoutType = LayoutType.Flex;
+        public const int TextFontSize = 18;
+        public static readonly Color TextColor = Color.black;
+        public const TextUtil.FontStyle TextFontStyle = TextUtil.FontStyle.Normal;
+        public static readonly FontAssetReference TextFontAsset = new FontAssetReference("default");
+        public const TextUtil.TextAlignment TextAlignment = TextUtil.TextAlignment.Left;
+        public const TextUtil.TextTransform TextTransform = TextUtil.TextTransform.None;
 
-        public static readonly LayoutBehavior layoutBehavior = LayoutBehavior.Normal;
-        
-        //IgnoreTranslationInLayout
-        //UseScaledAABB
+        public static readonly LayoutBehavior LayoutBehavior = LayoutBehavior.Normal;
+        public const int GridItemColStart = IntUtil.UnsetValue;
+        public const int GridItemRowStart = IntUtil.UnsetValue;
+        public const int GridItemRowSpan = 1;
+        public const int GridItemColSpan = 1;
+
+        public const LayoutDirection GridLayoutDirection = LayoutDirection.Row;
+        public static readonly GridLayoutDensity GridLayoutDensity = GridLayoutDensity.Sparse;
+
+        public const float GridLayoutColGap = 0f;
+        public const float GridLayoutRowGap = 0f;
+
+        public static readonly GridTrackSize GridLayoutColAutoSize = new GridTrackSize();
+        public static readonly GridTrackSize GridLayoutRowAutoSize = new GridTrackSize();
+
+        public static IReadOnlyList<GridTrackSize> GridLayoutColTemplate { get; }
+        public static IReadOnlyList<GridTrackSize> GridLayoutRowTemplate { get; }
 
     }
 

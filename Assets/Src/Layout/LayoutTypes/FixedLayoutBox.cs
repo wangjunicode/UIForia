@@ -9,7 +9,7 @@ namespace Src.Layout.LayoutTypes {
         public FixedLayoutBox(LayoutSystem2 layoutSystem, UIElement element)
             : base(layoutSystem, element) { }
 
-        public override void RunLayout() {
+        public void RunLayout() {
             float minX = 0;
             float maxX = 0;
             float minY = 0;
@@ -61,6 +61,14 @@ namespace Src.Layout.LayoutTypes {
             }
 
             return new Size(Mathf.Max(0, maxX - minX), Mathf.Max(0, maxY - minY));
+        }
+
+        public override void RunWidthLayout() {
+            throw new NotImplementedException();
+        }
+
+        public override void RunHeightLayout() {
+            throw new NotImplementedException();
         }
 
     }

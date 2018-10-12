@@ -33,11 +33,13 @@ namespace Src {
             return FloatUtil.IsDefined(value);
         }
 
-        public bool isFixed => (unit & (UIUnit.Pixel | UIUnit.ParentSize | UIUnit.View | UIUnit.Em)) != 0;
+        public bool IsFixed => !IsParentBased;
 
-        public bool isParentRelative => (unit & (UIUnit.ParentSize | UIUnit.ParentContentArea)) != 0;
+        public bool IsParentBased => (unit & (UIUnit.ParentSize | UIUnit.ParentContentArea)) != 0;
 
-        public bool isContentRelative => (unit & (UIUnit.Content | UIUnit.FitContent | UIUnit.MaxContent | UIUnit.MinContent)) != 0;
+        public bool IsContentBased => unit == UIUnit.Content;
+        
+        //public bool IsContentRelative => (unit & (UIUnit.Content | UIUnit.FitContent | UIUnit.MaxContent | UIUnit.MinContent)) != 0;
 
         public static UIMeasurement ContentArea => new UIMeasurement(1f, UIUnit.ParentContentArea);
         public static UIMeasurement Parent100 => new UIMeasurement(1f, UIUnit.ParentSize);

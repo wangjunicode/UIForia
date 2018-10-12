@@ -44,6 +44,14 @@ namespace Src.Layout.LayoutTypes {
             }
         }
 
+        public override void RunWidthLayout() {
+            throw new NotImplementedException();
+        }
+
+        public override void RunHeightLayout() {
+            throw new NotImplementedException();
+        }
+
         public override float MinHeight {
             get {
                 if (image.useNativeSize && image.Asset != null) return PaddingVertical + BorderVertical + image.Asset.height;
@@ -57,8 +65,6 @@ namespace Src.Layout.LayoutTypes {
                 return base.MaxHeight;
             }
         }
-
-        public override void RunLayout() { }
 
         protected override Size RunContentSizeLayout() {
             Texture2D asset = image.Asset;

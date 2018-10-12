@@ -44,42 +44,42 @@ public class StyleTests {
         TestBody(
             nameof(UIStyleSet.SetFontSize),
             nameof(ComputedStyle.FontSize),
-            nameof(DefaultStyleValues.fontSize)
+            nameof(DefaultStyleValues.TextFontSize)
         );
 
         TestBody(
             nameof(UIStyleSet.SetFlexItemGrowFactor),
             nameof(ComputedStyle.FlexItemGrowthFactor),
-            nameof(DefaultStyleValues.flexGrowthFactor)
+            nameof(DefaultStyleValues.FlexItemGrow)
         );
 
         TestBody(
             nameof(UIStyleSet.SetFlexItemShrinkFactor),
             nameof(ComputedStyle.FlexItemShrinkFactor),
-            nameof(DefaultStyleValues.flexShrinkFactor)
+            nameof(DefaultStyleValues.FlexItemShrink)
         );
 
         TestBody(
             nameof(UIStyleSet.SetFlexItemOrderOverride),
             nameof(ComputedStyle.FlexItemOrder),
-            nameof(DefaultStyleValues.flexOrderOverride)
+            nameof(DefaultStyleValues.FlexItemOrder)
         );
 
         TestBody(
             nameof(UIStyleSet.SetFlexItemOrderOverride),
             nameof(ComputedStyle.FlexItemOrder),
-            nameof(DefaultStyleValues.flexOrderOverride)
+            nameof(DefaultStyleValues.FlexItemOrder)
         );
     }
 
     private void RunSizeTests(Action<string, string, string> TestBody) {
-        TestBody(nameof(UIStyleSet.SetMinWidth), nameof(ComputedStyle.MinWidth), nameof(DefaultStyleValues.minWidth));
-        TestBody(nameof(UIStyleSet.SetMaxWidth), nameof(ComputedStyle.MaxWidth), nameof(DefaultStyleValues.maxWidth));
-        TestBody(nameof(UIStyleSet.SetPreferredWidth), nameof(ComputedStyle.PreferredWidth), nameof(DefaultStyleValues.preferredWidth));
+        TestBody(nameof(UIStyleSet.SetMinWidth), nameof(ComputedStyle.MinWidth), nameof(DefaultStyleValues.MinWidth));
+        TestBody(nameof(UIStyleSet.SetMaxWidth), nameof(ComputedStyle.MaxWidth), nameof(DefaultStyleValues.MaxWidth));
+        TestBody(nameof(UIStyleSet.SetPreferredWidth), nameof(ComputedStyle.PreferredWidth), nameof(DefaultStyleValues.PreferredWidth));
 
-        TestBody(nameof(UIStyleSet.SetMinHeight), nameof(ComputedStyle.MinHeight), nameof(DefaultStyleValues.minHeight));
-        TestBody(nameof(UIStyleSet.SetMaxHeight), nameof(ComputedStyle.MaxHeight), nameof(DefaultStyleValues.maxHeight));
-        TestBody(nameof(UIStyleSet.SetPreferredHeight), nameof(ComputedStyle.PreferredHeight), nameof(DefaultStyleValues.preferredHeight));
+        TestBody(nameof(UIStyleSet.SetMinHeight), nameof(ComputedStyle.MinHeight), nameof(DefaultStyleValues.MinHeight));
+        TestBody(nameof(UIStyleSet.SetMaxHeight), nameof(ComputedStyle.MaxHeight), nameof(DefaultStyleValues.MaxHeight));
+        TestBody(nameof(UIStyleSet.SetPreferredHeight), nameof(ComputedStyle.PreferredHeight), nameof(DefaultStyleValues.PreferredHeight));
     }
 
     [Test]

@@ -17,37 +17,37 @@ namespace Src.Layout.LayoutTypes {
 
         private List<FlexTrack> tracks;
 
-        private FlexItemAxis[] widths;
-        private FlexItemAxis[] heights;
+        private FlexItem[] widths;
+        private FlexItem[] heights;
         private List<LayoutBox> ignoredChildren;
 
         public FlexLayoutBox(LayoutSystem2 layoutSystem, UIElement element)
             : base(layoutSystem, element) {
             ignoredChildren = ListPool<LayoutBox>.Get();
             tracks = ListPool<FlexTrack>.Get();
-            widths = ArrayPool<FlexItemAxis>.GetMinSize(4);
-            heights = ArrayPool<FlexItemAxis>.GetMinSize(4);
+            widths = ArrayPool<FlexItem>.GetMinSize(4);
+            heights = ArrayPool<FlexItem>.GetMinSize(4);
         }
 
-        public override void RunLayout() {
-            if (children.Count == 0) return;
-            tracks.Clear();
-
-            if (style.FlexLayoutDirection == LayoutDirection.Column) {
-                RunFullColumnLayout();
-            }
-            else {
-                RunFullRowLayout();
-            }
-
-            for (int i = 0; i < ignoredChildren.Count; i++) {
-                LayoutBox child = ignoredChildren[i];
-                if (!child.element.isEnabled) continue;
-                float width = Mathf.Max(child.MinWidth, Mathf.Min(child.PreferredWidth, child.MaxWidth));
-                float height = Mathf.Max(child.MinHeight, Mathf.Min(child.PreferredHeight, child.MaxHeight));
-                child.SetAllocatedRect(child.TransformX, child.TransformY, width, height);
-            }
-        }
+//        public void RunLayout() {
+//            if (children.Count == 0) return;
+//            tracks.Clear();
+//
+//            if (style.FlexLayoutDirection == LayoutDirection.Column) {
+//                RunFullColumnLayout();
+//            }
+//            else {
+//                RunFullRowLayout();
+//            }
+//
+//            for (int i = 0; i < ignoredChildren.Count; i++) {
+//                LayoutBox child = ignoredChildren[i];
+//                if (!child.element.isEnabled) continue;
+//                float width = Mathf.Max(child.MinWidth, Mathf.Min(child.PreferredWidth, child.MaxWidth));
+//                float height = Mathf.Max(child.MinHeight, Mathf.Min(child.PreferredHeight, child.MaxHeight));
+//                child.SetAllocatedRect(child.TransformX, child.TransformY, width, height);
+//            }
+//        }
 
         protected override Size RunContentSizeLayout() {
             if (style.FlexLayoutDirection == LayoutDirection.Row) {
@@ -91,144 +91,210 @@ namespace Src.Layout.LayoutTypes {
             }
         }
 
-        private void RunFullColumnLayout() {
-            int inFlowItemCount = 0;
-
-            for (int i = 0; i < children.Count; i++) {
-                LayoutBox child = children[i];
-
-                if (child.element.isEnabled) {
-                    widths[inFlowItemCount] = new FlexItemAxis();
-                    widths[inFlowItemCount].childIndex = inFlowItemCount;
-                    widths[inFlowItemCount].order = BitUtil.SetHighLowBits(child.style.FlexItemOrder, i);
-                    widths[inFlowItemCount].growthFactor = child.style.FlexItemGrowthFactor;
-                    widths[inFlowItemCount].shrinkFactor = child.style.FlexItemShrinkFactor;
-                    widths[inFlowItemCount].minSize = Mathf.Max(0, child.MinWidth);
-                    widths[inFlowItemCount].maxSize = Mathf.Max(0, child.MaxWidth);
-                    widths[inFlowItemCount].outputSize = Mathf.Max(widths[inFlowItemCount].minSize, Mathf.Min(child.PreferredWidth, widths[inFlowItemCount].maxSize));
-
-                    inFlowItemCount++;
-                }
+        public override void RunWidthLayout() {
+            if (children.Count == 0) return;
+            tracks.Clear();
+            if (style.FlexLayoutDirection == LayoutDirection.Column) {
+                RunWidthColumnLayout();
             }
-
-            Array.Sort(widths, 0, inFlowItemCount);
-            Array.Sort(heights, 0, inFlowItemCount);
-
-            float adjustedWidth = allocatedWidth - PaddingHorizontal - BorderHorizontal;
-            float adjustedHeight = allocatedHeight - PaddingVertical - BorderVertical;
-
-            Vector2 size = Run(inFlowItemCount, widths, heights, adjustedWidth, adjustedHeight, PaddingLeft + BorderLeft, PaddingTop + BorderTop);
-            actualWidth = size.x;
-            actualHeight = size.y;
+            else {
+                RunWidthRowLayout();
+            }
         }
 
-        // real layout -> stretch / align / order
-        // content layout unconstrained -> for max/min width/height
-        // content layout constrained -> for output width / height when content sized, should be final w/o align / stretch
-        
-        private void RunFullRowLayout() {
-            int inFlowItemCount = 0;
+        public override void RunHeightLayout() {
+            if (style.FlexLayoutDirection == LayoutDirection.Column) {
+                RunHeightColumnLayout();
+            }
+            else {
+                RunHeightRowLayout();
+            }
+        }
 
-            // for each item
-            // find max item preferred width
-            // if we are content width based 
-            // track width = max width of items in track
-            // using what width?
-            // width = max content size, min content size, preferred size, max size, min size
-            // if preferred width is content size
-            // track width = max of items in track
 
-            float max = 0;
-            float adjustedHeight = allocatedHeight - PaddingVertical - BorderVertical;
+        private void RunWidthColumnLayout() {
+            for (int i = 0; i < children.Count; i++) {
+                LayoutBox child = children[i];
+                widths[i] = new FlexItem();
+                widths[i].childIndex = i;
+                widths[i].order = BitUtil.SetHighLowBits(child.style.FlexItemOrder, i);
+                widths[i].growthFactor = child.style.FlexItemGrowthFactor;
+                widths[i].shrinkFactor = child.style.FlexItemShrinkFactor;
+                widths[i].minSize = Mathf.Max(0, child.MinWidth);
+                widths[i].maxSize = Mathf.Max(0, child.MaxWidth);
+                widths[i].outputSize = Mathf.Max(widths[i].minSize, Mathf.Min(child.PreferredWidth, widths[i].maxSize));
+            }
+
+            Array.Sort(widths, 0, children.Count);
+
             float adjustedWidth = allocatedWidth - PaddingHorizontal - BorderHorizontal;
 
-            for (int i = 0; i < children.Count; i++) {
-                LayoutBox child = children[i];
+            FillTracks(widths, children.Count, adjustedWidth);
+            float largestTrackSize = 0;
+            float paddingBorderLeft = PaddingLeft + BorderLeft;
 
-                if (child.element.isEnabled) {
-                    widths[inFlowItemCount] = new FlexItemAxis();
-                    widths[inFlowItemCount].order = BitUtil.SetHighLowBits(child.style.FlexItemOrder, i);
-                    widths[inFlowItemCount].childIndex = inFlowItemCount;
-                    widths[inFlowItemCount].outputSize = Mathf.Max(child.MinWidth, Mathf.Min(child.PreferredWidth, child.MaxWidth));
+            for (int i = 0; i < tracks.Count; i++) {
+                FlexTrack track = tracks[i];
+                float remainingSpace = adjustedWidth - track.mainSize;
 
-                    if (widths[inFlowItemCount].outputSize > max) max = widths[inFlowItemCount].outputSize;
+                if (remainingSpace > 0) {
+                    GrowTrack(track, widths);
+                }
+                else if (remainingSpace < 0) {
+                    ShrinkTrack(track, widths);
+                }
 
-                    widths[inFlowItemCount].crossAxisAlignment = child.style.FlexItemSelfAlignment != CrossAxisAlignment.Unset
-                        ? child.style.FlexItemSelfAlignment
-                        : style.FlexLayoutCrossAxisAlignment;
+                if (track.mainSize > largestTrackSize) {
+                    largestTrackSize = track.mainSize;
+                }
 
-                    inFlowItemCount++;
+                AlignMainAxis(track, widths, style.FlexLayoutMainAxisAlignment, paddingBorderLeft);
+
+                for (int j = track.startItem; j < track.startItem + track.itemCount; j++) {
+                    children[widths[j].childIndex].SetAllocatedXAndWidth(widths[j].axisStart, widths[j].outputSize);
                 }
             }
+        }
 
-            inFlowItemCount = 0;
+        private float RunColumnLayoutContentCheck(float targetWidth) {
+            float cachedAllocatedWidth = allocatedWidth;
+            float cachedAllocatedHeight = allocatedHeight;
+            allocatedWidth = targetWidth;
+            allocatedHeight = 0f;
+
             for (int i = 0; i < children.Count; i++) {
                 LayoutBox child = children[i];
-
-                if (child.element.isEnabled) {
-                    float width = widths[inFlowItemCount].outputSize;
-                    if (widths[inFlowItemCount].crossAxisAlignment == CrossAxisAlignment.Stretch) {
-                        width = adjustedWidth;
-                    }
-
-                    heights[inFlowItemCount] = new FlexItemAxis();
-                    heights[inFlowItemCount].childIndex = inFlowItemCount;
-                    heights[inFlowItemCount].order = BitUtil.SetHighLowBits(child.style.FlexItemOrder, i);
-                    heights[inFlowItemCount].growthFactor = child.style.FlexItemGrowthFactor;
-                    heights[inFlowItemCount].shrinkFactor = child.style.FlexItemShrinkFactor;
-                    heights[inFlowItemCount].minSize = Mathf.Max(0, child.MinHeight);
-                    heights[inFlowItemCount].maxSize = Mathf.Max(0, child.MaxHeight);
-                    heights[inFlowItemCount].outputSize = Mathf.Max(heights[inFlowItemCount].minSize, Mathf.Min(child.GetPreferredHeightForWidth(width), heights[inFlowItemCount].maxSize));
-                    inFlowItemCount++;
-                }
+                widths[i] = new FlexItem();
+                widths[i].childIndex = i;
+                widths[i].order = BitUtil.SetHighLowBits(child.style.FlexItemOrder, i);
+                widths[i].growthFactor = child.style.FlexItemGrowthFactor;
+                widths[i].shrinkFactor = child.style.FlexItemShrinkFactor;
+                widths[i].minSize = Mathf.Max(0, child.MinWidth);
+                widths[i].maxSize = Mathf.Max(0, child.MaxWidth);
+                widths[i].outputSize = Mathf.Max(widths[i].minSize, Mathf.Min(child.PreferredWidth, widths[i].maxSize));
             }
 
-            // ALWAYS assign final widths first
-            // when finding min/max/preferred widths for content -> use float.max as a constraint
-            // when finding min/max/preferred/output heights for content -> use final width value
-            // that might be best as a 2 pass thing so we know all final widths for all elements 
-            // in the tree before even considering heights
-            
-            // track widths are uniform?
-            // if yes then can apply stretch immediately based on preferred width
-            // otherwise need 2nd layout pass 
+            Array.Sort(widths, 0, children.Count);
 
-            // if no
-            // get height using initial output size
-            // add to track
-            // if overflow track
-            // empty previous track
-            // for each item that was in track
-            // stretch
-            // add to track
-            // repeat as needed
-            // 
+            float adjustedWidth = targetWidth - PaddingHorizontal - BorderHorizontal;
 
-            // fill track using preferred width
-            // if overflow -> try to shrink
-            // if underflow -> grow to fill remaining if possible
-
-            // if alignment is stretch or 
-
-            // css flex ->
-            // if not wrapping: track size = parent width
-            // if wrapping track size = max(child in track)
-            // css flex -> if height is auto-> no wrap. if wrapping, width = child preferred if no wrapping max-width ignored
-
-            // for non-wrapped rows:
-            // if my output width is content sized
-            // track size = max content widths
-            // otherwise tracksize = output width
-
-            Array.Sort(widths, 0, inFlowItemCount);
-            Array.Sort(heights, 0, inFlowItemCount);
-
-            FillTracks(heights, inFlowItemCount, adjustedHeight);
+            FillTracks(widths, children.Count, adjustedWidth);
 
             float largestTrackSize = 0;
-            float trackCrossAxisStart = 0;
-            Vector2 retn = Vector2.zero;
+            float maxHeight = 0;
 
+            for (int i = 0; i < tracks.Count; i++) {
+                FlexTrack track = tracks[i];
+                float height = 0;
+                float remainingSpace = adjustedWidth - track.mainSize;
+
+                if (remainingSpace > 0) {
+                    GrowTrack(track, widths);
+                }
+                else if (remainingSpace < 0) {
+                    ShrinkTrack(track, widths);
+                }
+
+                if (track.mainSize > largestTrackSize) {
+                    largestTrackSize = track.mainSize;
+                }
+
+                for (int j = track.startItem; j < track.startItem + track.itemCount; j++) {
+                    LayoutBox child = children[widths[j].childIndex];
+                    float minSize = Mathf.Max(0, child.MinHeight);
+                    float maxSize = Mathf.Max(0, child.MaxHeight);
+                    height += Mathf.Max(minSize, Mathf.Min(child.GetPreferredHeightForWidth(widths[i].outputSize), maxSize));
+                }
+
+                if (height > maxHeight) {
+                    maxHeight = height;
+                }
+            }
+
+            allocatedWidth = cachedAllocatedWidth;
+            actualHeight = cachedAllocatedHeight;
+            return maxHeight;
+        }
+
+        private void RunHeightColumnLayout() {
+            for (int i = 0; i < children.Count; i++) {
+                LayoutBox child = children[i];
+
+                heights[i] = new FlexItem();
+                heights[i].childIndex = i;
+                heights[i].order = BitUtil.SetHighLowBits(child.style.FlexItemOrder, i);
+                float minSize = Mathf.Max(0, child.MinHeight);
+                float maxSize = Mathf.Max(0, child.MaxHeight);
+                heights[i].outputSize = Mathf.Max(
+                    minSize,
+                    Mathf.Min(
+                        child.GetPreferredHeightForWidth(widths[i].outputSize),
+                        maxSize
+                    )
+                );
+                heights[i].crossAxisAlignment = child.style.FlexItemSelfAlignment != CrossAxisAlignment.Unset
+                    ? child.style.FlexItemSelfAlignment
+                    : style.FlexLayoutCrossAxisAlignment;
+            }
+
+            Array.Sort(heights, 0, children.Count);
+
+            float maxHeight = 0;
+            float trackCrossAxisStart = 0;
+            float targetHeight = allocatedHeight - PaddingVertical - BorderVertical;
+
+            for (int i = 0; i < tracks.Count; i++) {
+                FlexTrack track = tracks[i];
+                trackCrossAxisStart = PositionCrossAxis(trackCrossAxisStart, track, heights, targetHeight);
+
+                for (int j = track.startItem; j < track.startItem + track.itemCount; j++) {
+                    children[heights[j].childIndex].SetAllocatedYAndHeight(heights[j].axisStart, heights[j].outputSize);
+
+                    if (heights[j].AxisEnd > maxHeight) {
+                        maxHeight = heights[j].AxisEnd;
+                    }
+                }
+            }
+
+            actualHeight = maxHeight;
+        }
+
+        private void RunWidthRowLayout() {
+            float max = 0;
+            for (int i = 0; i < children.Count; i++) {
+                LayoutBox child = children[i];
+
+                widths[i] = new FlexItem();
+                widths[i].order = BitUtil.SetHighLowBits(child.style.FlexItemOrder, i);
+                widths[i].childIndex = i;
+                widths[i].outputSize = Mathf.Max(child.MinWidth, Mathf.Min(child.PreferredWidth, child.MaxWidth));
+
+                if (widths[i].outputSize > max) max = widths[i].outputSize;
+
+                widths[i].crossAxisAlignment = child.style.FlexItemSelfAlignment != CrossAxisAlignment.Unset
+                    ? child.style.FlexItemSelfAlignment
+                    : style.FlexLayoutCrossAxisAlignment;
+            }
+
+            for (int i = 0; i < children.Count; i++) {
+                if (widths[i].crossAxisAlignment == CrossAxisAlignment.Stretch) {
+                    widths[i].outputSize = max; // todo -- limit to max width?
+                }
+            }
+
+            float adjustedWidth = allocatedWidth - PaddingHorizontal - BorderHorizontal;
+            float adjustedHeight = allocatedHeight - PaddingVertical - BorderVertical;
+            float paddingBorderTop = PaddingTop + BorderTop;
+
+            float maxWidth = 0;
+            float trackCrossAxisStart = 0;
+
+            FillWrappedRowTracks(adjustedHeight);
+
+            Array.Sort(widths, 0, children.Count);
+            Array.Sort(heights, 0, children.Count);
+
+            float largestTrackSize = 0;
             for (int i = 0; i < tracks.Count; i++) {
                 FlexTrack track = tracks[i];
                 float remainingSpace = adjustedHeight - track.mainSize;
@@ -244,255 +310,304 @@ namespace Src.Layout.LayoutTypes {
                     largestTrackSize = track.mainSize;
                 }
 
-                AlignMainAxis(track, heights, style.FlexLayoutMainAxisAlignment, PaddingTop + BorderTop);
+                AlignMainAxis(track, heights, style.FlexLayoutMainAxisAlignment, paddingBorderTop);
                 trackCrossAxisStart = PositionCrossAxis(trackCrossAxisStart, track, widths, adjustedWidth);
 
                 for (int j = track.startItem; j < track.startItem + track.itemCount; j++) {
-                    children[widths[j].childIndex].SetAllocatedRect(
-                        widths[j].axisStart,
-                        heights[j].axisStart,
-                        widths[j].outputSize,
-                        heights[j].outputSize
-                    );
-
-                    if (widths[j].axisStart + widths[j].outputSize > retn.y) {
-                        retn.y = widths[j].axisStart + widths[j].outputSize;
-                    }
+                    children[widths[j].childIndex].SetAllocatedXAndWidth(widths[j].axisStart, widths[j].outputSize);
                 }
             }
 
-            retn.x = largestTrackSize;
-
-            //Vector2 size = Run(inFlowItemCount, heights, widths, adjustedHeight, adjustedWidth, PaddingTop + BorderTop, PaddingLeft + BorderLeft);
-
-            actualWidth = retn.y;
-            actualHeight = largestTrackSize;
-        }
-
-        public override float GetPreferredHeightForWidth(float width) {
-            if (style.PreferredHeight.unit == UIUnit.Content) {
-                if (style.FlexLayoutDirection == LayoutDirection.Row) {
-                    float retn = 0;
-                    // RunLayout(targetWidth).height;
-                    for (int i = 0; i < children.Count; i++) {
-                        if (children[i].element.isEnabled) {
-                            retn += children[i].GetPreferredHeightForWidth(width);
-                        }
-                    }
-
-                    return retn;
+            FlexTrack lastTrack = tracks[tracks.Count - 1];
+            for (int j = lastTrack.startItem; j < lastTrack.startItem + lastTrack.itemCount; j++) {
+                if (widths[j].AxisEnd > maxWidth) {
+                    maxWidth = widths[j].AxisEnd;
                 }
             }
 
-            return PreferredHeight;
+
+            actualWidth = maxWidth;
         }
 
-        private Vector2 Run(int inFlowItemCount, FlexItemAxis[] mainAxisItems, FlexItemAxis[] crossAxisItems, float mainAxisTargetSize, float crossAxisTargetSize, float mainAxisOffset, float crossAxisOffset) {
-            FillTracks(mainAxisItems, inFlowItemCount, mainAxisTargetSize);
-
-            float trackCrossAxisStart = crossAxisOffset;
+        private void RunHeightRowLayout() {
             float largestTrackSize = 0;
-            Vector2 retn = Vector2.zero;
-
             for (int i = 0; i < tracks.Count; i++) {
                 FlexTrack track = tracks[i];
-                float remainingSpace = mainAxisTargetSize - track.mainSize;
-
-                if (remainingSpace > 0) {
-                    GrowTrack(track, mainAxisItems);
-                }
-                else if (remainingSpace < 0) {
-                    ShrinkTrack(track, mainAxisItems);
-                }
 
                 if (track.mainSize > largestTrackSize) {
                     largestTrackSize = track.mainSize;
                 }
 
-                AlignMainAxis(track, mainAxisItems, style.FlexLayoutMainAxisAlignment, mainAxisOffset);
+                for (int j = track.startItem; j < track.startItem + track.itemCount; j++) {
+                    children[heights[j].childIndex].SetAllocatedYAndHeight(heights[j].axisStart, heights[j].outputSize);
+                }
+            }
 
-                if (crossAxisItems == heights) {
-                    inFlowItemCount = 0;
-                    for (int h = 0; h < children.Count; h++) {
-                        LayoutBox child = children[h];
+            actualHeight = largestTrackSize;
+        }
 
-                        if (child.element.isEnabled) {
-                            child.allocatedWidth = widths[inFlowItemCount].outputSize;
-                            heights[inFlowItemCount] = new FlexItemAxis();
-                            heights[inFlowItemCount].childIndex = inFlowItemCount;
-                            heights[inFlowItemCount].outputSize = Mathf.Max(
-                                child.MinHeight,
-                                Mathf.Min(
-                                    child.GetPreferredHeightForWidth(widths[inFlowItemCount].outputSize),
-                                    child.MaxHeight
-                                )
-                            );
-                            
-                            heights[inFlowItemCount].order = BitUtil.SetHighLowBits(child.style.FlexItemOrder, h);
 
-                            heights[inFlowItemCount].crossAxisAlignment = child.style.FlexItemSelfAlignment != CrossAxisAlignment.Unset
-                                ? child.style.FlexItemSelfAlignment
-                                : style.FlexLayoutCrossAxisAlignment;
-                            
-                            inFlowItemCount++;
+        public override float GetPreferredHeightForWidth(float width) {
+            if (style.PreferredHeight.unit == UIUnit.Content) {
+                // row stacks and we prefer not to wrap so this is fine I think
+                width -= PaddingHorizontal - BorderHorizontal;
+                if (style.FlexLayoutDirection == LayoutDirection.Row) {
+                    float retn = 0;
+                    for (int i = 0; i < children.Count; i++) {
+                        float minSize = children[i].MinHeight;
+                        float maxSize = children[i].MaxHeight;
+                        float prfSize = children[i].GetPreferredHeightForWidth(width);
+                        retn += Mathf.Max(minSize, Mathf.Min(prfSize, maxSize));
+                    }
+
+                    return retn + PaddingVertical + BorderVertical;
+                }
+
+                return RunColumnLayoutContentCheck(width) + PaddingVertical + BorderVertical;
+            }
+
+            return PreferredHeight;
+        }
+
+        private void FillTracks(FlexItem[] items, int itemCount, float targetSize) {
+            FlexTrack currentTrack = new FlexTrack();
+            if (style.FlexLayoutWrap != LayoutWrap.Wrap) {
+                for (int i = 0; i < itemCount; i++) {
+                    currentTrack.mainSize += items[i].outputSize;
+                }
+
+                currentTrack.startItem = 0;
+                currentTrack.itemCount = itemCount;
+                currentTrack.remainingSpace = targetSize - currentTrack.mainSize;
+                tracks.Add(currentTrack);
+                return;
+            }
+
+            for (int i = 0; i < itemCount; i++) {
+                float size = items[i].outputSize;
+
+                if (currentTrack.mainSize + size < targetSize) {
+                    currentTrack.mainSize += size;
+                    currentTrack.itemCount++;
+                }
+                else if (size >= targetSize) {
+                    if (currentTrack.itemCount != 0) {
+                        currentTrack.remainingSpace = targetSize - currentTrack.mainSize;
+                        tracks.Add(currentTrack);
+                    }
+
+                    currentTrack = new FlexTrack();
+                    currentTrack.startItem = i;
+                    currentTrack.mainSize = size;
+                    currentTrack.itemCount = 1;
+                    currentTrack.remainingSpace = targetSize - currentTrack.mainSize;
+                    tracks.Add(currentTrack);
+
+                    currentTrack = new FlexTrack();
+                    currentTrack.startItem = i + 1;
+                }
+                else {
+                    currentTrack.itemCount++;
+                    currentTrack.mainSize += size;
+                    currentTrack.remainingSpace = targetSize - currentTrack.mainSize;
+                    //try to shrink here if possible
+
+                    // if after shrinking there is still overflow, start a new track
+                    if (TryShrinkTrack(currentTrack, items)) {
+                        tracks.Add(currentTrack);
+                        currentTrack = new FlexTrack();
+                        currentTrack.startItem = i + 1;
+                    }
+                    else {
+                        currentTrack.itemCount--;
+                        currentTrack.mainSize -= size;
+                        currentTrack.remainingSpace = targetSize - currentTrack.mainSize;
+
+                        tracks.Add(currentTrack);
+
+                        currentTrack = new FlexTrack();
+                        currentTrack.startItem = i;
+                        currentTrack.itemCount = 1;
+                        currentTrack.mainSize = size;
+                    }
+                }
+            }
+
+            currentTrack.remainingSpace = targetSize - currentTrack.mainSize;
+            tracks.Add(currentTrack);
+        }
+
+        private void FillWrappedRowTracks(float targetSize) {
+            FlexTrack currentTrack = new FlexTrack();
+
+            if (style.FlexLayoutWrap != LayoutWrap.Wrap) {
+                for (int i = 0; i < children.Count; i++) {
+                    LayoutBox child = children[i];
+                    heights[i] = new FlexItem();
+                    heights[i].childIndex = i;
+                    heights[i].order = BitUtil.SetHighLowBits(child.style.FlexItemOrder, i);
+                    heights[i].growthFactor = child.style.FlexItemGrowthFactor;
+                    heights[i].shrinkFactor = child.style.FlexItemShrinkFactor;
+                    heights[i].minSize = Mathf.Max(0, child.MinHeight);
+                    heights[i].maxSize = Mathf.Max(0, child.MaxHeight);
+                    heights[i].outputSize =
+                        Mathf.Max(heights[i].minSize, Mathf.Min(child.GetPreferredHeightForWidth(widths[i].outputSize), heights[i].maxSize));
+                    currentTrack.mainSize += heights[i].outputSize;
+                    currentTrack.crossSize = Mathf.Max(widths[i].outputSize, currentTrack.crossSize);
+                }
+
+                currentTrack.startItem = 0;
+                currentTrack.itemCount = children.Count;
+                currentTrack.remainingSpace = targetSize - currentTrack.mainSize;
+                tracks.Add(currentTrack);
+                return;
+            }
+
+            // for each item
+            // place in track
+            // if track overflowing & more than 1 item
+            // remove
+            // stretch if needed
+            // recalc heights for stretched items
+            // grow / shrink track
+            // start new track
+            // add item to track
+
+            float[] tmpWidths = ArrayPool<float>.GetMinSize(currentTrack.itemCount);
+            float[] tmpHeights = ArrayPool<float>.GetMinSize(currentTrack.itemCount);
+
+            for (int i = 0; i < children.Count; i++) {
+                LayoutBox child = children[i];
+
+                heights[i] = new FlexItem();
+                heights[i].childIndex = i;
+                heights[i].order = BitUtil.SetHighLowBits(child.style.FlexItemOrder, i);
+                heights[i].growthFactor = child.style.FlexItemGrowthFactor;
+                heights[i].shrinkFactor = child.style.FlexItemShrinkFactor;
+                heights[i].minSize = Mathf.Max(0, child.MinHeight);
+                heights[i].maxSize = Mathf.Max(0, child.MaxHeight);
+                float currentItemHeight = Mathf.Max(heights[i].minSize, Mathf.Min(child.GetPreferredHeightForWidth(widths[i].outputSize), heights[i].maxSize));
+                float currentItemWidth = widths[i].outputSize;
+                heights[i].outputSize = currentItemHeight;
+
+                if (currentTrack.itemCount == 0) {
+                    currentTrack.startItem = i;
+                    currentTrack.itemCount = 1;
+                    currentTrack.mainSize = currentItemHeight;
+                    currentTrack.crossSize = currentItemWidth;
+                    currentTrack.remainingSpace = targetSize - currentItemHeight;
+                    
+                    if (currentItemHeight > targetSize) {
+                        ShrinkTrack(currentTrack, heights);
+                        tracks.Add(currentTrack);
+                        currentTrack = new FlexTrack();
+                        currentTrack.startItem = i + 1;
+                    }
+
+                    continue;
+                }
+
+                // if current item is wider, we need to try applying stretch which might change the size of the track items
+                if (currentItemWidth > currentTrack.crossSize) {
+                    float newMainSize = 0f;
+                    float oldMainSize = currentTrack.mainSize;
+
+                    for (int j = currentTrack.startItem; j < currentTrack.startItem + currentTrack.itemCount; j++) {
+                        tmpWidths[j] = widths[j].outputSize;
+                        tmpHeights[j] = heights[j].outputSize;
+                        if (widths[j].crossAxisAlignment == CrossAxisAlignment.Stretch) {
+                            widths[j].outputSize = currentItemWidth;
+                            heights[j].outputSize = Mathf.Max(heights[j].minSize, Mathf.Min(child.GetPreferredHeightForWidth(currentItemWidth), heights[j].maxSize));
+                            newMainSize += tmpHeights[j];
                         }
                     }
-                }
 
-                trackCrossAxisStart = PositionCrossAxis(trackCrossAxisStart, track, crossAxisItems, crossAxisTargetSize);
+                    // if after stretching we fit, add the item to this track
+                    if (newMainSize + currentItemHeight <= targetSize) {
+                        currentTrack.crossSize = currentItemWidth;
+                        currentTrack.mainSize += currentItemHeight;
+                        currentTrack.remainingSpace = targetSize - currentTrack.mainSize;
+                        currentTrack.itemCount++;
 
-                for (int j = track.startItem; j < track.startItem + track.itemCount; j++) {
-                    children[widths[j].childIndex].SetAllocatedRect(
-                        widths[j].axisStart,
-                        heights[j].axisStart,
-                        widths[j].outputSize,
-                        heights[j].outputSize
-                    );
+                        continue;
+                    }
 
-                    if (crossAxisItems[j].axisStart + crossAxisItems[j].outputSize > retn.y) {
-                        retn.y = crossAxisItems[j].axisStart + crossAxisItems[j].outputSize;
+                    // otherwise, maybe we can shrink (need to add the item to also be shrunk)
+                    currentTrack.itemCount++;
+                    currentTrack.mainSize = newMainSize;
+                    currentTrack.remainingSpace = targetSize - currentTrack.mainSize;
+
+                    // we fit after shrinking
+                    if (TryShrinkTrack(currentTrack, heights)) {
+                        // apply the updated cross size
+                        currentTrack.crossSize = currentItemWidth;
+                    }
+                    // still doesn't fit after shrinking, restore the old values and start a new track
+                    else {
+                        for (int j = currentTrack.startItem; j < currentTrack.startItem + currentTrack.itemCount; j++) {
+                            widths[j].outputSize = tmpWidths[j];
+                            heights[j].outputSize = tmpHeights[j];
+                        }
+
+                        currentTrack.itemCount--;
+                        currentTrack.mainSize = oldMainSize;
+                        currentTrack.remainingSpace = targetSize - oldMainSize;
+                        tracks.Add(currentTrack);
+                        
+                        currentTrack = new FlexTrack();
+                        currentTrack.startItem = i;
+                        currentTrack.itemCount = 1;
+                        currentTrack.mainSize = currentItemHeight;
+                        currentTrack.crossSize = currentItemWidth;
+                        currentTrack.remainingSpace = targetSize - currentTrack.mainSize;
+                        
+                        if (currentTrack.remainingSpace < 0) {
+                            ShrinkTrack(currentTrack, heights);
+                            tracks.Add(currentTrack);
+                            currentTrack = new FlexTrack();
+                            currentTrack.startItem = i + 1;
+                        }
+                        
                     }
                 }
-            }
-
-            retn.x = largestTrackSize;
-            return retn;
-        }
-
-        private void FillTracks(FlexItemAxis[] items, int itemCount, float targetSize) {
-            FlexTrack currentTrack = new FlexTrack();
-            if (style.FlexLayoutWrap != LayoutWrap.Wrap) {
-                for (int i = 0; i < itemCount; i++) {
-                    currentTrack.mainSize += items[i].outputSize;
-                }
-
-                currentTrack.startItem = 0;
-                currentTrack.itemCount = itemCount;
-                currentTrack.remainingSpace = targetSize - currentTrack.mainSize;
-                tracks.Add(currentTrack);
-                return;
-            }
-
-            for (int i = 0; i < itemCount; i++) {
-                float size = items[i].outputSize;
-
-                if (currentTrack.mainSize + size < targetSize) {
-                    currentTrack.mainSize += size;
+                // we fit out right, add to current track
+                else if (currentTrack.mainSize + currentItemHeight <= targetSize) {
+                    currentTrack.mainSize += currentItemHeight;
+                    currentTrack.remainingSpace = targetSize - currentTrack.mainSize;
                     currentTrack.itemCount++;
                 }
-                else if (size >= targetSize) {
-                    if (currentTrack.itemCount != 0) {
-                        currentTrack.remainingSpace = targetSize - currentTrack.mainSize;
-                        tracks.Add(currentTrack);
-                    }
-
+                // we don't fit and we can't stretch, try shrinking
+                else if (TryShrinkTrack(currentTrack, heights)) {
+                    currentTrack.mainSize += currentItemHeight;
+                    currentTrack.remainingSpace = targetSize - currentTrack.mainSize;
+                    currentTrack.itemCount++;
+                }
+                // we definitely don't fit, start a new track
+                else {
+                    tracks.Add(currentTrack);
+                        
                     currentTrack = new FlexTrack();
                     currentTrack.startItem = i;
-                    currentTrack.mainSize = size;
                     currentTrack.itemCount = 1;
+                    currentTrack.mainSize = currentItemHeight;
+                    currentTrack.crossSize = currentItemWidth;
                     currentTrack.remainingSpace = targetSize - currentTrack.mainSize;
-                    tracks.Add(currentTrack);
-
-                    currentTrack = new FlexTrack();
-                    currentTrack.startItem = i + 1;
-                }
-                else {
-                    currentTrack.itemCount++;
-                    currentTrack.mainSize += size;
-                    currentTrack.remainingSpace = targetSize - currentTrack.mainSize;
-                    //try to shrink here if possible
-
-                    // if after shrinking there is still overflow, start a new track
-                    if (TryShrinkTrack(currentTrack, items)) {
+                        
+                    if (currentTrack.remainingSpace < 0) {
+                        ShrinkTrack(currentTrack, heights);
                         tracks.Add(currentTrack);
                         currentTrack = new FlexTrack();
                         currentTrack.startItem = i + 1;
                     }
-                    else {
-                        currentTrack.itemCount--;
-                        currentTrack.mainSize -= size;
-                        currentTrack.remainingSpace = targetSize - currentTrack.mainSize;
-
-                        tracks.Add(currentTrack);
-
-                        currentTrack = new FlexTrack();
-                        currentTrack.startItem = i;
-                        currentTrack.itemCount = 1;
-                        currentTrack.mainSize = size;
-                    }
                 }
             }
 
-            currentTrack.remainingSpace = targetSize - currentTrack.mainSize;
-            tracks.Add(currentTrack);
-        }
-
-        private void FillWrappedRowTracks(FlexItemAxis[] items, int itemCount, float targetSize) {
-            FlexTrack currentTrack = new FlexTrack();
-            if (style.FlexLayoutWrap != LayoutWrap.Wrap) {
-                for (int i = 0; i < itemCount; i++) {
-                    currentTrack.mainSize += items[i].outputSize;
-                }
-
-                currentTrack.startItem = 0;
-                currentTrack.itemCount = itemCount;
-                currentTrack.remainingSpace = targetSize - currentTrack.mainSize;
+            if (currentTrack.itemCount > 0) {
                 tracks.Add(currentTrack);
-                return;
             }
 
-            for (int i = 0; i < itemCount; i++) {
-                float size = items[i].outputSize;
-
-                if (currentTrack.mainSize + size < targetSize) {
-                    currentTrack.mainSize += size;
-                    currentTrack.itemCount++;
-                }
-                else if (size >= targetSize) {
-                    if (currentTrack.itemCount != 0) {
-                        currentTrack.remainingSpace = targetSize - currentTrack.mainSize;
-                        tracks.Add(currentTrack);
-                    }
-
-                    currentTrack = new FlexTrack();
-                    currentTrack.startItem = i;
-                    currentTrack.mainSize = size;
-                    currentTrack.itemCount = 1;
-                    currentTrack.remainingSpace = targetSize - currentTrack.mainSize;
-                    tracks.Add(currentTrack);
-
-                    currentTrack = new FlexTrack();
-                    currentTrack.startItem = i + 1;
-                }
-                else {
-                    currentTrack.itemCount++;
-                    currentTrack.mainSize += size;
-                    currentTrack.remainingSpace = targetSize - currentTrack.mainSize;
-                    //try to shrink here if possible
-
-                    // if after shrinking there is still overflow, start a new track
-                    if (TryShrinkTrack(currentTrack, items)) {
-                        tracks.Add(currentTrack);
-                        currentTrack = new FlexTrack();
-                        currentTrack.startItem = i + 1;
-                    }
-                    else {
-                        currentTrack.itemCount--;
-                        currentTrack.mainSize -= size;
-                        currentTrack.remainingSpace = targetSize - currentTrack.mainSize;
-
-                        tracks.Add(currentTrack);
-
-                        currentTrack = new FlexTrack();
-                        currentTrack.startItem = i;
-                        currentTrack.itemCount = 1;
-                        currentTrack.mainSize = size;
-                    }
-                }
-            }
-
-            currentTrack.remainingSpace = targetSize - currentTrack.mainSize;
-            tracks.Add(currentTrack);
+            ArrayPool<float>.Release(tmpWidths);
+            ArrayPool<float>.Release(tmpHeights);
         }
 
         public override void OnChildAdded(LayoutBox child) {
@@ -511,11 +626,11 @@ namespace Src.Layout.LayoutTypes {
             }
 
             if (widths.Length <= children.Count) {
-                ArrayPool<FlexItemAxis>.Resize(ref widths, children.Count);
+                ArrayPool<FlexItem>.Resize(ref widths, children.Count);
             }
 
             if (heights.Length <= children.Count) {
-                ArrayPool<FlexItemAxis>.Resize(ref heights, children.Count);
+                ArrayPool<FlexItem>.Resize(ref heights, children.Count);
             }
 
             if (child.element.isEnabled) {
@@ -558,7 +673,7 @@ namespace Src.Layout.LayoutTypes {
             }
         }
 
-        private static float PositionCrossAxis(float axisOffset, FlexTrack track, FlexItemAxis[] items, float targetSize) {
+        private static float PositionCrossAxis(float axisOffset, FlexTrack track, FlexItem[] items, float targetSize) {
             float crossSize = 0;
             for (int i = track.startItem; i < track.startItem + track.itemCount; i++) {
                 switch (items[i].crossAxisAlignment) {
@@ -590,7 +705,7 @@ namespace Src.Layout.LayoutTypes {
             return axisOffset + crossSize;
         }
 
-        private static void AlignMainAxis(FlexTrack track, FlexItemAxis[] items, MainAxisAlignment mainAxisAlignment, float mainAxisOffset) {
+        private static void AlignMainAxis(FlexTrack track, FlexItem[] items, MainAxisAlignment mainAxisAlignment, float mainAxisOffset) {
             float spacerSize = 0;
             float offset = 0;
             int itemCount = track.itemCount;
@@ -638,7 +753,7 @@ namespace Src.Layout.LayoutTypes {
             }
         }
 
-        private static void GrowTrack(FlexTrack track, FlexItemAxis[] items) {
+        private static void GrowTrack(FlexTrack track, FlexItem[] items) {
             int pieces = 0;
 
             int startIndex = track.startItem;
@@ -679,7 +794,7 @@ namespace Src.Layout.LayoutTypes {
             track.remainingSpace = remainingSpace;
         }
 
-        private static float DoShrinkTrack(FlexTrack track, FlexItemAxis[] items, float[] outputs) {
+        private static float DoShrinkTrack(FlexTrack track, FlexItem[] items, float[] outputs) {
             int pieces = 0;
             int startIndex = track.startItem;
             int endIndex = startIndex + track.itemCount;
@@ -720,7 +835,7 @@ namespace Src.Layout.LayoutTypes {
             return overflow;
         }
 
-        private void ShrinkTrack(FlexTrack track, FlexItemAxis[] items) {
+        private void ShrinkTrack(FlexTrack track, FlexItem[] items) {
             float[] outputs = ArrayPool<float>.GetMinSize(children.Count);
             track.remainingSpace = DoShrinkTrack(track, items, outputs);
             for (int i = track.startItem; i < track.startItem + track.itemCount; i++) {
@@ -730,7 +845,8 @@ namespace Src.Layout.LayoutTypes {
             ArrayPool<float>.Release(outputs);
         }
 
-        private bool TryShrinkTrack(FlexTrack track, FlexItemAxis[] items) {
+        private bool TryShrinkTrack(FlexTrack track, FlexItem[] items) {
+            if (track.remainingSpace >= 0) return false;
             float[] outputs = ArrayPool<float>.GetMinSize(children.Count);
             float overflow = DoShrinkTrack(track, items, outputs);
             if (overflow <= 0) {
@@ -751,7 +867,7 @@ namespace Src.Layout.LayoutTypes {
             return false;
         }
 
-        private struct FlexItemAxis : IComparable<FlexItemAxis> {
+        private struct FlexItem : IComparable<FlexItem> {
 
             public int childIndex;
             public float axisStart;
@@ -763,7 +879,9 @@ namespace Src.Layout.LayoutTypes {
             public CrossAxisAlignment crossAxisAlignment;
             public int order;
 
-            public int CompareTo(FlexItemAxis other) {
+            public float AxisEnd => axisStart + outputSize;
+
+            public int CompareTo(FlexItem other) {
                 int styleOrder = BitUtil.GetHighBits(order);
                 int otherStyleOrder = BitUtil.GetHighBits(other.order);
                 if (styleOrder != otherStyleOrder) {
@@ -782,6 +900,7 @@ namespace Src.Layout.LayoutTypes {
             public int itemCount;
             public float mainSize;
             public float remainingSpace;
+            public float crossSize;
 
             public void Clear() {
                 startItem = 0;
@@ -795,3 +914,207 @@ namespace Src.Layout.LayoutTypes {
     }
 
 }
+//
+//private void RunFullColumnLayout() {
+//            for (int i = 0; i < children.Count; i++) {
+//                LayoutBox child = children[i];
+//
+//                widths[i] = new FlexItem();
+//                widths[i].childIndex = i;
+//                widths[i].order = BitUtil.SetHighLowBits(child.style.FlexItemOrder, i);
+//                widths[i].growthFactor = child.style.FlexItemGrowthFactor;
+//                widths[i].shrinkFactor = child.style.FlexItemShrinkFactor;
+//                widths[i].minSize = Mathf.Max(0, child.MinWidth);
+//                widths[i].maxSize = Mathf.Max(0, child.MaxWidth);
+//                widths[i].outputSize = Mathf.Max(widths[i].minSize, Mathf.Min(child.PreferredWidth, widths[i].maxSize));
+//            }
+//
+//            Array.Sort(widths, 0, children.Count);
+//            Array.Sort(heights, 0, children.Count);
+//
+//            float adjustedWidth = allocatedWidth - PaddingHorizontal - BorderHorizontal;
+//            float adjustedHeight = allocatedHeight - PaddingVertical - BorderVertical;
+//
+//            Vector2 size = Run(children.Count, widths, heights, adjustedWidth, adjustedHeight, PaddingLeft + BorderLeft, PaddingTop + BorderTop);
+//            actualWidth = size.x;
+//            actualHeight = size.y;
+//        }
+//
+//        private void RunFullRowLayout() {
+//            int inFlowItemCount = 0;
+//
+//            // for each item
+//            // find max item preferred width
+//            // if we are content width based 
+//            // track width = max width of items in track
+//            // using what width?
+//            // width = max content size, min content size, preferred size, max size, min size
+//            // if preferred width is content size
+//            // track width = max of items in track
+//
+//            float max = 0;
+//            float adjustedHeight = allocatedHeight - PaddingVertical - BorderVertical;
+//            float adjustedWidth = allocatedWidth - PaddingHorizontal - BorderHorizontal;
+//
+//            for (int i = 0; i < children.Count; i++) {
+//                LayoutBox child = children[i];
+//
+//                if (child.element.isEnabled) {
+//                    widths[inFlowItemCount] = new FlexItem();
+//                    widths[inFlowItemCount].order = BitUtil.SetHighLowBits(child.style.FlexItemOrder, i);
+//                    widths[inFlowItemCount].childIndex = inFlowItemCount;
+//                    widths[inFlowItemCount].outputSize = Mathf.Max(child.MinWidth, Mathf.Min(child.PreferredWidth, child.MaxWidth));
+//
+//                    if (widths[inFlowItemCount].outputSize > max) max = widths[inFlowItemCount].outputSize;
+//
+//                    widths[inFlowItemCount].crossAxisAlignment = child.style.FlexItemSelfAlignment != CrossAxisAlignment.Unset
+//                        ? child.style.FlexItemSelfAlignment
+//                        : style.FlexLayoutCrossAxisAlignment;
+//
+//                    inFlowItemCount++;
+//                }
+//            }
+//
+//            inFlowItemCount = 0;
+//            for (int i = 0; i < children.Count; i++) {
+//                LayoutBox child = children[i];
+//
+//                if (child.element.isEnabled) {
+//                    float width = widths[inFlowItemCount].outputSize;
+//                    if (widths[inFlowItemCount].crossAxisAlignment == CrossAxisAlignment.Stretch) {
+//                        width = adjustedWidth;
+//                    }
+//
+//                    heights[inFlowItemCount] = new FlexItem();
+//                    heights[inFlowItemCount].childIndex = inFlowItemCount;
+//                    heights[inFlowItemCount].order = BitUtil.SetHighLowBits(child.style.FlexItemOrder, i);
+//                    heights[inFlowItemCount].growthFactor = child.style.FlexItemGrowthFactor;
+//                    heights[inFlowItemCount].shrinkFactor = child.style.FlexItemShrinkFactor;
+//                    heights[inFlowItemCount].minSize = Mathf.Max(0, child.MinHeight);
+//                    heights[inFlowItemCount].maxSize = Mathf.Max(0, child.MaxHeight);
+//                    heights[inFlowItemCount].outputSize =
+//                        Mathf.Max(heights[inFlowItemCount].minSize, Mathf.Min(child.GetPreferredHeightForWidth(width), heights[inFlowItemCount].maxSize));
+//                    inFlowItemCount++;
+//                }
+//            }
+//
+//            Array.Sort(widths, 0, inFlowItemCount);
+//            Array.Sort(heights, 0, inFlowItemCount);
+//
+//            FillTracks(heights, inFlowItemCount, adjustedHeight);
+//
+//            float largestTrackSize = 0;
+//            float trackCrossAxisStart = 0;
+//            Vector2 retn = Vector2.zero;
+//
+//            for (int i = 0; i < tracks.Count; i++) {
+//                FlexTrack track = tracks[i];
+//                float remainingSpace = adjustedHeight - track.mainSize;
+//
+//                if (remainingSpace > 0) {
+//                    GrowTrack(track, heights);
+//                }
+//                else if (remainingSpace < 0) {
+//                    ShrinkTrack(track, heights);
+//                }
+//
+//                if (track.mainSize > largestTrackSize) {
+//                    largestTrackSize = track.mainSize;
+//                }
+//
+//                AlignMainAxis(track, heights, style.FlexLayoutMainAxisAlignment, PaddingTop + BorderTop);
+//                trackCrossAxisStart = PositionCrossAxis(trackCrossAxisStart, track, widths, adjustedWidth);
+//
+//                for (int j = track.startItem; j < track.startItem + track.itemCount; j++) {
+//                    children[widths[j].childIndex].SetAllocatedRect(
+//                        widths[j].axisStart,
+//                        heights[j].axisStart,
+//                        widths[j].outputSize,
+//                        heights[j].outputSize
+//                    );
+//
+//                    if (widths[j].axisStart + widths[j].outputSize > retn.y) {
+//                        retn.y = widths[j].axisStart + widths[j].outputSize;
+//                    }
+//                }
+//            }
+//
+//            retn.x = largestTrackSize;
+//
+//            //Vector2 size = Run(inFlowItemCount, heights, widths, adjustedHeight, adjustedWidth, PaddingTop + BorderTop, PaddingLeft + BorderLeft);
+//
+//            actualWidth = retn.y;
+//            actualHeight = largestTrackSize;
+////        }
+//        private Vector2 Run(int inFlowItemCount, FlexItem[] mainAxisItems, FlexItem[] crossAxisItems, float mainAxisTargetSize, float crossAxisTargetSize,
+//            float mainAxisOffset, float crossAxisOffset) {
+//            FillTracks(mainAxisItems, inFlowItemCount, mainAxisTargetSize);
+//
+//            float trackCrossAxisStart = crossAxisOffset;
+//            float largestTrackSize = 0;
+//            Vector2 retn = Vector2.zero;
+//
+//            for (int i = 0; i < tracks.Count; i++) {
+//                FlexTrack track = tracks[i];
+//                float remainingSpace = mainAxisTargetSize - track.mainSize;
+//
+//                if (remainingSpace > 0) {
+//                    GrowTrack(track, mainAxisItems);
+//                }
+//                else if (remainingSpace < 0) {
+//                    ShrinkTrack(track, mainAxisItems);
+//                }
+//
+//                if (track.mainSize > largestTrackSize) {
+//                    largestTrackSize = track.mainSize;
+//                }
+//
+//                AlignMainAxis(track, mainAxisItems, style.FlexLayoutMainAxisAlignment, mainAxisOffset);
+//
+//                if (crossAxisItems == heights) {
+//                    inFlowItemCount = 0;
+//                    for (int h = 0; h < children.Count; h++) {
+//                        LayoutBox child = children[h];
+//
+//                        if (child.element.isEnabled) {
+//                            child.allocatedWidth = widths[inFlowItemCount].outputSize;
+//                            heights[inFlowItemCount] = new FlexItem();
+//                            heights[inFlowItemCount].childIndex = inFlowItemCount;
+//                            heights[inFlowItemCount].outputSize = Mathf.Max(
+//                                child.MinHeight,
+//                                Mathf.Min(
+//                                    child.GetPreferredHeightForWidth(widths[inFlowItemCount].outputSize),
+//                                    child.MaxHeight
+//                                )
+//                            );
+//
+//                            heights[inFlowItemCount].order = BitUtil.SetHighLowBits(child.style.FlexItemOrder, h);
+//
+//                            heights[inFlowItemCount].crossAxisAlignment = child.style.FlexItemSelfAlignment != CrossAxisAlignment.Unset
+//                                ? child.style.FlexItemSelfAlignment
+//                                : style.FlexLayoutCrossAxisAlignment;
+//
+//                            inFlowItemCount++;
+//                        }
+//                    }
+//                }
+//
+//                trackCrossAxisStart = PositionCrossAxis(trackCrossAxisStart, track, crossAxisItems, crossAxisTargetSize);
+//
+//                for (int j = track.startItem; j < track.startItem + track.itemCount; j++) {
+//                    children[widths[j].childIndex].SetAllocatedRect(
+//                        widths[j].axisStart,
+//                        heights[j].axisStart,
+//                        widths[j].outputSize,
+//                        heights[j].outputSize
+//                    );
+//
+//                    if (crossAxisItems[j].axisStart + crossAxisItems[j].outputSize > retn.y) {
+//                        retn.y = crossAxisItems[j].axisStart + crossAxisItems[j].outputSize;
+//                    }
+//                }
+//            }
+//
+//            retn.x = largestTrackSize;
+//            return retn;
+//        }

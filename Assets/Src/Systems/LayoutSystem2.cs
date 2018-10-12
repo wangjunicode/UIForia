@@ -16,7 +16,8 @@ namespace Src.Systems {
 
         protected readonly RootLayoutBox root;
         protected readonly List<LayoutBox> m_RectUpdates;
-        protected readonly List<LayoutBox> m_PendingLayoutUpdates;
+        protected readonly List<LayoutBox> m_PendingWidthLayoutUpdates;
+        protected readonly List<LayoutBox> m_PendingHeightLayoutUpdates;
         protected readonly HashSet<LayoutBox> m_PendingRectUpdates;
         protected readonly Dictionary<int, LayoutBox> m_LayoutBoxMap;
         protected readonly IStyleSystem m_StyleSystem;
@@ -27,9 +28,10 @@ namespace Src.Systems {
             this.root = new RootLayoutBox(this);
             this.m_StyleSystem = styleSystem;
             this.m_LayoutBoxMap = new Dictionary<int, LayoutBox>();
-            this.m_PendingLayoutUpdates = new List<LayoutBox>();
-            this.m_RectUpdates = new List<LayoutBox>();
+            this.m_PendingWidthLayoutUpdates = new List<LayoutBox>();
+            this.m_PendingHeightLayoutUpdates = new List<LayoutBox>();
             this.m_PendingRectUpdates = new HashSet<LayoutBox>();
+            this.m_RectUpdates = new List<LayoutBox>();
             this.m_Elements = new List<UIElement>();
         }
 
@@ -40,23 +42,32 @@ namespace Src.Systems {
         public void OnUpdate() {
             m_RectUpdates.Clear();
 
-            if (m_PendingLayoutUpdates.Count == 0 && m_PendingRectUpdates.Count == 0) {
-                return;
+//            if (m_PendingWidthLayoutUpdates.Count == 0 && m_PendingHeightLayoutUpdates.Count == 0 && m_PendingRectUpdates.Count == 0) {
+//                return;
+//            }
+
+            m_PendingWidthLayoutUpdates.Sort((a, b) => a.element.depth > b.element.depth ? 1 : -1);
+
+            for (int i = 0; i < m_PendingWidthLayoutUpdates.Count; i++) {
+                m_PendingWidthLayoutUpdates[i].RunWidthLayout();
+                m_PendingWidthLayoutUpdates[i].markedForLayout = false;
+                m_PendingRectUpdates.Add(m_PendingWidthLayoutUpdates[i]);
             }
+            
+            m_PendingHeightLayoutUpdates.Sort((a, b) => a.element.depth > b.element.depth ? 1 : -1);
 
-            m_PendingLayoutUpdates.Sort((a, b) => a.element.depth > b.element.depth ? 1 : -1);
-
-            for (int i = 0; i < m_PendingLayoutUpdates.Count; i++) {
-                m_PendingLayoutUpdates[i].RunLayout();
-                m_PendingLayoutUpdates[i].markedForLayout = false;
-                m_PendingRectUpdates.Add(m_PendingLayoutUpdates[i]);
+            for (int i = 0; i < m_PendingHeightLayoutUpdates.Count; i++) {
+                m_PendingHeightLayoutUpdates[i].RunHeightLayout();
+                m_PendingHeightLayoutUpdates[i].markedForLayout = false;
+                m_PendingRectUpdates.Add(m_PendingHeightLayoutUpdates[i]);
             }
-
+            
             foreach (LayoutBox layoutBox in m_PendingRectUpdates) {
                 m_RectUpdates.Add(layoutBox);
             }
 
-            m_PendingLayoutUpdates.Clear();
+            m_PendingWidthLayoutUpdates.Clear();
+            m_PendingHeightLayoutUpdates.Clear();
             m_PendingRectUpdates.Clear();
 
             m_RectUpdates.Sort((a, b) => a.element.depth > b.element.depth ? 1 : -1);
@@ -154,7 +165,7 @@ namespace Src.Systems {
                 StackPool<UIElement>.Release(stack);
             }
 
-            m_PendingLayoutUpdates.Clear();
+            m_PendingWidthLayoutUpdates.Clear();
             m_PendingRectUpdates.Clear();
         }
 
@@ -167,8 +178,18 @@ namespace Src.Systems {
         }
 
         internal void RequestLayout(LayoutBox layoutBox) {
-            if (layoutBox == root) return;
-            m_PendingLayoutUpdates.Add(layoutBox);
+           RequestWidthLayout(layoutBox);
+           RequestHeightLayout(layoutBox);
+        }
+
+        internal void RequestWidthLayout(LayoutBox layoutBox) {
+            if (layoutBox == root || layoutBox.markedForWidthLayout) return;
+            m_PendingWidthLayoutUpdates.Add(layoutBox);
+        }
+
+        internal void RequestHeightLayout(LayoutBox layoutBox) {
+            if (layoutBox == root || layoutBox.markedForHeightLayout) return;
+            m_PendingHeightLayoutUpdates.Add(layoutBox);
         }
 
         public void OnDestroy() { }
@@ -335,7 +356,7 @@ namespace Src.Systems {
             m_LayoutBoxMap.Add(elementData.element.id, layoutBox);
             stack.Push(ValueTuple.Create(elementData, layoutBox));
 
-            m_PendingLayoutUpdates.Add(layoutBox);
+            m_PendingWidthLayoutUpdates.Add(layoutBox);
             m_Elements.Add(elementData.element);
 
             while (stack.Count > 0) {
@@ -380,7 +401,8 @@ namespace Src.Systems {
             root.allocatedHeight = viewportRect.height;
             root.actualWidth = viewportRect.width;
             root.actualHeight = viewportRect.height;
-            root.RunLayout();
+            root.RunWidthLayout();
+            root.RunHeightLayout();
         }
 
         public List<UIElement> QueryPoint(Vector2 point, List<UIElement> retn) {

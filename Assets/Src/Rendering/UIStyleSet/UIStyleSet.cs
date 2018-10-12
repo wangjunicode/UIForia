@@ -469,29 +469,29 @@ namespace Rendering {
                     break;
                 case StylePropertyId.GridItemRowSpan:
                     break;
-                case StylePropertyId.GridFlowDirection:
+                case StylePropertyId.GridLayoutDirection:
                     break;
-                case StylePropertyId.GridPlacementDensity:
+                case StylePropertyId.GridLayoutDensity:
                     break;
-                case StylePropertyId.GridColTemplate:
+                case StylePropertyId.GridLayoutColTemplate:
                     break;
-                case StylePropertyId.GridRowTemplate:
+                case StylePropertyId.GridLayoutRowTemplate:
                     break;
-                case StylePropertyId.GridColAutoSize:
+                case StylePropertyId.GridLayoutColAutoSize:
                     break;
-                case StylePropertyId.GridRowAutoSize:
+                case StylePropertyId.GridLayoutRowAutoSize:
                     break;
-                case StylePropertyId.GridColGap:
+                case StylePropertyId.GridLayoutColGap:
                     break;
-                case StylePropertyId.GridRowGap:
+                case StylePropertyId.GridLayoutRowGap:
                     break;
-                case StylePropertyId.FlexWrap:
+                case StylePropertyId.FlexLayoutWrap:
                     break;
-                case StylePropertyId.FlexDirection:
+                case StylePropertyId.FlexLayoutDirection:
                     break;
-                case StylePropertyId.FlexMainAxisAlignment:
+                case StylePropertyId.FlexLayoutMainAxisAlignment:
                     break;
-                case StylePropertyId.FlexCrossAxisAlignment:
+                case StylePropertyId.FlexLayoutCrossAxisAlignment:
                     break;
                 case StylePropertyId.FlexItemSelfAlignment:
                     break;

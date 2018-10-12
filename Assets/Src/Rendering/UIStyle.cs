@@ -123,13 +123,13 @@ namespace Rendering {
         #region Grid Layout Properties
 
         public LayoutDirection GridLayoutFlowDirection {
-            get { return (LayoutDirection) FindEnumProperty(StylePropertyId.GridFlowDirection); }
-            set { SetEnumProperty(StylePropertyId.GridFlowDirection, (int) value); }
+            get { return (LayoutDirection) FindEnumProperty(StylePropertyId.GridLayoutDirection); }
+            set { SetEnumProperty(StylePropertyId.GridLayoutDirection, (int) value); }
         }
 
-        public GridAutoPlaceDensity GridLayoutPlacementDensity {
-            get { return (GridAutoPlaceDensity) FindEnumProperty(StylePropertyId.GridPlacementDensity); }
-            set { SetEnumProperty(StylePropertyId.GridPlacementDensity, (int) value); }
+        public GridLayoutDensity GridLayoutPlacementDensity {
+            get { return (GridLayoutDensity) FindEnumProperty(StylePropertyId.GridLayoutDensity); }
+            set { SetEnumProperty(StylePropertyId.GridLayoutDensity, (int) value); }
         }
 
         public GridTrackSizer GridLayoutColTemplate {
@@ -153,13 +153,13 @@ namespace Rendering {
         }
 
         public float GridLayoutColGapSize {
-            get { return FindFloatProperty(StylePropertyId.GridColGap); }
-            set { SetFloatProperty(StylePropertyId.GridColGap, value); }
+            get { return FindFloatProperty(StylePropertyId.GridLayoutColGap); }
+            set { SetFloatProperty(StylePropertyId.GridLayoutColGap, value); }
         }
 
         public float GridLayoutRowGapSize {
-            get { return FindFloatProperty(StylePropertyId.GridRowGap); }
-            set { SetFloatProperty(StylePropertyId.GridRowGap, value); }
+            get { return FindFloatProperty(StylePropertyId.GridLayoutRowGap); }
+            set { SetFloatProperty(StylePropertyId.GridLayoutRowGap, value); }
         }
 
         #endregion
@@ -181,23 +181,23 @@ namespace Rendering {
         #region Flex Layout Properties
 
         public LayoutWrap FlexLayoutWrap {
-            get { return (LayoutWrap) FindEnumProperty(StylePropertyId.FlexWrap); }
-            set { SetEnumProperty(StylePropertyId.FlexWrap, (int) value); }
+            get { return (LayoutWrap) FindEnumProperty(StylePropertyId.FlexLayoutWrap); }
+            set { SetEnumProperty(StylePropertyId.FlexLayoutWrap, (int) value); }
         }
 
         public LayoutDirection FlexLayoutDirection {
-            get { return (LayoutDirection) FindEnumProperty(StylePropertyId.FlexDirection); }
-            set { SetEnumProperty(StylePropertyId.FlexDirection, (int) value); }
+            get { return (LayoutDirection) FindEnumProperty(StylePropertyId.FlexLayoutDirection); }
+            set { SetEnumProperty(StylePropertyId.FlexLayoutDirection, (int) value); }
         }
 
         public MainAxisAlignment FlexLayoutMainAxisAlignment {
-            get { return (MainAxisAlignment) FindEnumProperty(StylePropertyId.FlexMainAxisAlignment); }
-            set { SetEnumProperty(StylePropertyId.FlexMainAxisAlignment, (int) value); }
+            get { return (MainAxisAlignment) FindEnumProperty(StylePropertyId.FlexLayoutMainAxisAlignment); }
+            set { SetEnumProperty(StylePropertyId.FlexLayoutMainAxisAlignment, (int) value); }
         }
 
         public CrossAxisAlignment FlexLayoutCrossAxisAlignment {
-            get { return (CrossAxisAlignment) FindEnumProperty(StylePropertyId.FlexCrossAxisAlignment); }
-            set { SetEnumProperty(StylePropertyId.FlexCrossAxisAlignment, (int) value); }
+            get { return (CrossAxisAlignment) FindEnumProperty(StylePropertyId.FlexLayoutCrossAxisAlignment); }
+            set { SetEnumProperty(StylePropertyId.FlexLayoutCrossAxisAlignment, (int) value); }
         }
 
         #endregion

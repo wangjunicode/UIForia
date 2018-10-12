@@ -1,5 +1,7 @@
+using System.Collections.Generic;
 using Src;
 using Src.Layout;
+using Src.Layout.LayoutTypes;
 using Src.Rendering;
 using Src.Util;
 using TMPro;
@@ -35,6 +37,8 @@ namespace Rendering {
         public TextUtil.TextAlignment AsTextAlignment => (TextUtil.TextAlignment) valuePart0;
         public LayoutDirection AsLayoutDirection => (LayoutDirection) valuePart0;
         public LayoutWrap AsLayoutWrap => (LayoutWrap) valuePart0;
+        public GridTrackSize AsGridTrackSize => default(GridTrackSize);
+        public IReadOnlyList<GridTrackSize> AsGridTrackTemplate => null;
 
     }
 

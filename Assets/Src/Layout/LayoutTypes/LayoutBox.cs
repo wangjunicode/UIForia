@@ -30,9 +30,13 @@ namespace Src.Layout.LayoutTypes {
 
         public VirtualScrollbar horizontalScrollbar;
         public VirtualScrollbar verticalScrollbar;
-
-        private LayoutSystem2 layoutSystem;
+        private bool childrenNeedWidthLayout;
+        private bool childrenNeedHeightLayout;
+        
+        protected LayoutSystem2 layoutSystem;
         public bool markedForLayout;
+        public bool markedForWidthLayout;
+        public bool markedForHeightLayout;
 
         protected LayoutBox(LayoutSystem2 layoutSystem, UIElement element) {
             this.element = element;
@@ -42,9 +46,10 @@ namespace Src.Layout.LayoutTypes {
             this.preferredContentSize = Size.Unset;
         }
 
-        public abstract void RunLayout();
         protected abstract Size RunContentSizeLayout();
-
+        public abstract void RunWidthLayout();
+        public abstract void RunHeightLayout();
+        
         public virtual float MinWidth => Mathf.Max(PaddingHorizontal + BorderHorizontal, ResolveWidth(style.MinWidth));
         public virtual float MaxWidth => Mathf.Max(PaddingHorizontal + BorderHorizontal, ResolveWidth(style.MaxWidth));
         public virtual float PreferredWidth => ResolveWidth(style.PreferredWidth);
@@ -160,19 +165,64 @@ namespace Src.Layout.LayoutTypes {
             parent.RequestLayout();
         }
 
-        public virtual void SetAllocatedRect(float x, float y, float width, float height) {
-            if (localX != x || localY != y) {
+        public void SetAllocatedRect(float x, float y, float width, float height) {
+           SetAllocatedXAndWidth(x, width);
+           SetAllocatedYAndHeight(y, height);
+        }
+
+        public void SetAllocatedXAndWidth(float x, float width) {
+            if (localX != x) {
                 localX = x;
+                layoutSystem.PositionChanged(this);
+            }
+
+            if (allocatedWidth != width) {
+                allocatedWidth = width;
+                layoutSystem.OnRectChanged(this);
+                if (!childrenNeedWidthLayout) {
+                    RequestLayout();
+                }
+            }
+        }
+
+        public void SetAllocatedYAndHeight(float y, float height) {
+            if (localY != y) {
                 localY = y;
                 layoutSystem.PositionChanged(this);
             }
 
-            if (allocatedWidth != width || allocatedHeight != height) {
-                allocatedWidth = width;
+            if (allocatedHeight != height) {
                 allocatedHeight = height;
                 layoutSystem.OnRectChanged(this);
-                // todo -- right now this calls layout for all descendants which can probably be avoided if no children are parent sized
-                RequestLayout();
+                if (!childrenNeedHeightLayout) {
+                    RequestLayout();
+                }
+            }
+        }
+
+        protected void UpdateChildrenRequireLayoutOnWidthChange() {
+            childrenNeedWidthLayout = false;
+            for (int i = 0; i < children.Count; i++) {
+                if (children[i].element.isEnabled) {
+                    ComputedStyle childStyle = children[i].style;
+                    childrenNeedWidthLayout = childStyle.WidthIsParentBased;
+                    if (childrenNeedWidthLayout) {
+                        return;
+                    }
+                }
+            }
+        }
+
+        protected void UpdateChildrenRequireLayoutOnHeightChange() {
+            childrenNeedHeightLayout = false;
+            for (int i = 0; i < children.Count; i++) {
+                if (children[i].element.isEnabled) {
+                    ComputedStyle childStyle = children[i].style;
+                    childrenNeedHeightLayout = childStyle.HeightIsParentBased;
+                    if (childrenNeedHeightLayout) {
+                        return;
+                    }
+                }
             }
         }
 
@@ -212,6 +262,7 @@ namespace Src.Layout.LayoutTypes {
             if (!preferredContentSize.IsDefined()) {
                 preferredContentSize = RunContentSizeLayout();
             }
+
             return preferredContentSize.height;
         }
 
@@ -296,6 +347,9 @@ namespace Src.Layout.LayoutTypes {
         public virtual void OnStylePropertyChanged(StyleProperty property) { }
 
         public virtual void OnChildStylePropertyChanged(LayoutBox child, StyleProperty property) { }
+
+
+
 
     }
 

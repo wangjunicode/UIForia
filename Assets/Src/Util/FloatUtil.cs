@@ -29,7 +29,7 @@ namespace Rendering {
             }
 
         }
-
+        
         public static int EncodeToInt(float value) {
             return new Reinterpret(value).intValue;
         }

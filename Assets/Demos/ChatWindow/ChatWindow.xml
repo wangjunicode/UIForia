@@ -12,7 +12,7 @@
 
         <!--</WindowFrame>-->
         
-        <Group style.width="content(100)">
+        <Panel style.width="content(100)">
 
             <Group style.width="300f" style.height="100f" style.backgroundColor="red"/>
 
@@ -28,7 +28,7 @@
             
             </Group>
             
-        </Group>
+        </Panel>
         
     </Contents>
 

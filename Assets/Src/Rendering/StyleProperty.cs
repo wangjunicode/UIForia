@@ -11,14 +11,16 @@ namespace Rendering {
 
     public struct StyleProperty {
 
+        public readonly StylePropertyId propertyId;
         public readonly int valuePart0;
         public readonly int valuePart1;
-        public readonly StylePropertyId propertyId;
+        public readonly object objectField;
 
-        public StyleProperty(StylePropertyId propertyId, int value0, int value1 = 0) {
+        public StyleProperty(StylePropertyId propertyId, int value0, int value1 = 0, object objectField = null) {
             this.propertyId = propertyId;
             this.valuePart0 = value0;
             this.valuePart1 = value1;
+            this.objectField = objectField;
         }
 
         public bool IsDefined => IntUtil.IsDefined(valuePart0) && IntUtil.IsDefined(valuePart1);
@@ -30,6 +32,8 @@ namespace Rendering {
         public MainAxisAlignment AsMainAxisAlignment => (MainAxisAlignment) valuePart0;
         public Overflow AsOverflow => (Overflow) valuePart0;
         public Color AsColor => new StyleColor(valuePart0);
+        
+        // todo move these to use objectField
         public AssetPointer<TMP_FontAsset> AsFontAsset => new AssetPointer<TMP_FontAsset>((AssetType) valuePart0, valuePart1);
         public AssetPointer<Texture2D> AsTextureAsset => new AssetPointer<Texture2D>((AssetType) valuePart0, valuePart1);
 
@@ -37,8 +41,13 @@ namespace Rendering {
         public TextUtil.TextAlignment AsTextAlignment => (TextUtil.TextAlignment) valuePart0;
         public LayoutDirection AsLayoutDirection => (LayoutDirection) valuePart0;
         public LayoutWrap AsLayoutWrap => (LayoutWrap) valuePart0;
-        public GridTrackSize AsGridTrackSize => default(GridTrackSize);
-        public IReadOnlyList<GridTrackSize> AsGridTrackTemplate => null;
+        public GridTrackSize AsGridTrackSize => new GridTrackSize(FloatUtil.DecodeToFloat(valuePart0), (GridTemplateUnit) valuePart1);
+
+        public IReadOnlyList<GridTrackSize> AsGridTrackTemplate => (IReadOnlyList<GridTrackSize>) objectField;
+
+        public static StyleProperty Unset(StylePropertyId propertyId) {
+            return new StyleProperty(propertyId, IntUtil.UnsetValue, IntUtil.UnsetValue);
+        }
 
     }
 

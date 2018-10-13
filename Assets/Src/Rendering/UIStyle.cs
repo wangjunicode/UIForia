@@ -5,6 +5,7 @@ using Src;
 using UnityEngine;
 using System.Diagnostics;
 using Src.Layout;
+using Src.Layout.LayoutTypes;
 using Src.Rendering;
 using Src.Util;
 using TMPro;
@@ -39,16 +40,14 @@ namespace Rendering {
         private List<StyleProperty> m_StyleProperties;
         private TextPropertyIdFlag m_DefinedTextProperties;
 
-        public string Id { get; internal set; }
+        public int Id { get; } = NextStyleId++;
 
-        public UIStyle(string id = null) {
-            Id = id ?? "Style: " + (NextStyleId++);
+        public UIStyle() {
             m_StyleProperties = ListPool<StyleProperty>.Get();
             m_DefinedTextProperties = 0;
         }
 
         public UIStyle(UIStyle toCopy) {
-            Id = "Copy Style: " + (NextStyleId++);
             m_StyleProperties.AddRange(toCopy.m_StyleProperties);
             m_DefinedTextProperties = toCopy.m_DefinedTextProperties;
         }
@@ -132,24 +131,64 @@ namespace Rendering {
             set { SetEnumProperty(StylePropertyId.GridLayoutDensity, (int) value); }
         }
 
-        public GridTrackSizer GridLayoutColTemplate {
-            get { return default(GridTrackSizer); }
-            set { throw new NotImplementedException(); }
+        public IReadOnlyList<GridTrackSize> GridLayoutColTemplate {
+            get {
+                for (int i = 0; i < m_StyleProperties.Count; i++) {
+                    if (m_StyleProperties[i].propertyId == StylePropertyId.GridLayoutColTemplate) {
+                        return m_StyleProperties[i].AsGridTrackTemplate;
+                    }
+                }
+                return ListPool<GridTrackSize>.Empty;
+            }
+            set {
+                if (value == null) {
+                    RemoveProperty(StylePropertyId.GridLayoutColTemplate);
+                    return;
+                }
+                for (int i = 0; i < m_StyleProperties.Count; i++) {
+                    if (m_StyleProperties[i].propertyId == StylePropertyId.GridLayoutColTemplate) {
+                        m_StyleProperties[i] = new StyleProperty(StylePropertyId.GridLayoutColTemplate, (int) LayoutDirection.Column, 0, value);
+                        return;
+                    }
+                }
+                m_StyleProperties.Add(new StyleProperty(StylePropertyId.GridLayoutColTemplate, (int) LayoutDirection.Column, 0, value));
+
+            }
         }
 
-        public GridTrackSizer GridLayoutRowTemplate {
-            get { return default(GridTrackSizer); }
-            set { throw new NotImplementedException(); }
+        public IReadOnlyList<GridTrackSize> GridLayoutRowTemplate {
+            get {
+                for (int i = 0; i < m_StyleProperties.Count; i++) {
+                    if (m_StyleProperties[i].propertyId == StylePropertyId.GridLayoutRowTemplate) {
+                        return m_StyleProperties[i].AsGridTrackTemplate;
+                    }
+                }
+                return ListPool<GridTrackSize>.Empty;
+            }
+            set {
+                if (value == null) {
+                    RemoveProperty(StylePropertyId.GridLayoutRowTemplate);
+                    return;
+                }
+                for (int i = 0; i < m_StyleProperties.Count; i++) {
+                    if (m_StyleProperties[i].propertyId == StylePropertyId.GridLayoutRowTemplate) {
+                        m_StyleProperties[i] = new StyleProperty(StylePropertyId.GridLayoutRowTemplate, (int) LayoutDirection.Row, 0, value);
+                        return;
+                    }
+                }
+                m_StyleProperties.Add(new StyleProperty(StylePropertyId.GridLayoutRowTemplate, (int) LayoutDirection.Row, 0, value));
+
+            }
         }
 
-        public GridTrackSizeFn GridLayoutAutoColSize {
-            get { return default(GridTrackSizeFn); }
-            set { throw new NotImplementedException(); }
+        public GridTrackSize GridLayoutColAutoSize {
+            get { return FindGridTrackSizeProperty(StylePropertyId.GridLayoutColAutoSize); }
+            set { SetGridTrackSizeProperty(StylePropertyId.GridLayoutColAutoSize, value); }
         }
 
-        public GridTrackSizeFn GridLayoutAutoRowSize {
-            get { return default(GridTrackSizeFn); }
-            set { throw new NotImplementedException(); }
+        public GridTrackSize GridLayoutRowAutoSize {
+            get { return FindGridTrackSizeProperty(StylePropertyId.GridLayoutRowAutoSize); }
+            set { SetGridTrackSizeProperty(StylePropertyId.GridLayoutRowAutoSize, value); }
         }
 
         public float GridLayoutColGapSize {
@@ -162,6 +201,16 @@ namespace Rendering {
             set { SetFloatProperty(StylePropertyId.GridLayoutRowGap, value); }
         }
 
+        public CrossAxisAlignment GridLayoutColAlignment {
+            get { return (CrossAxisAlignment)FindEnumProperty(StylePropertyId.GridLayoutColAlignment); }
+            set { SetEnumProperty(StylePropertyId.GridLayoutColAlignment, (int)value);}
+        }
+        
+        public CrossAxisAlignment GridLayoutRowAlignment {
+            get { return (CrossAxisAlignment)FindEnumProperty(StylePropertyId.GridLayoutRowAlignment); }
+            set { SetEnumProperty(StylePropertyId.GridLayoutRowAlignment, (int)value);}
+        }
+        
         #endregion
 
         #region Shared Layout Properties
@@ -497,7 +546,7 @@ namespace Rendering {
         }
 
         internal void OnDestroy() {
-            ListPool<StyleProperty>.Release(m_StyleProperties);
+            ListPool<StyleProperty>.Release(ref m_StyleProperties);
         }
 
         public bool DefinesProperty(StylePropertyId propertyId) {
@@ -515,6 +564,18 @@ namespace Rendering {
             }
 
             return false;
+        }
+
+        private GridTrackSize FindGridTrackSizeProperty(StylePropertyId propertyId) {
+            for (int i = 0; i < m_StyleProperties.Count; i++) {
+                if (m_StyleProperties[i].propertyId == propertyId) {
+                    return new GridTrackSize(
+                        FloatUtil.DecodeToFloat(m_StyleProperties[i].valuePart0),
+                        (GridTemplateUnit) m_StyleProperties[i].valuePart1
+                    );
+                }
+            }
+            return GridTrackSize.Unset;
         }
 
         private UIMeasurement GetUIMeasurementProperty(StylePropertyId propertyId) {
@@ -588,6 +649,15 @@ namespace Rendering {
             }
             else {
                 SetProperty(propertyId, FloatUtil.EncodeToInt(measurement.value), (int) measurement.unit);
+            }
+        }
+
+        internal void SetGridTrackSizeProperty(StylePropertyId propertyId, GridTrackSize size) {
+            if (size.minUnit == GridTemplateUnit.Unset || !FloatUtil.IsDefined(size.minValue)) {
+                RemoveProperty(propertyId);
+            }
+            else {
+                SetProperty(propertyId, FloatUtil.EncodeToInt(size.minValue), (int) size.minUnit);
             }
         }
 

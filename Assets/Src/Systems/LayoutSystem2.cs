@@ -42,15 +42,14 @@ namespace Src.Systems {
         public void OnUpdate() {
             m_RectUpdates.Clear();
 
-//            if (m_PendingWidthLayoutUpdates.Count == 0 && m_PendingHeightLayoutUpdates.Count == 0 && m_PendingRectUpdates.Count == 0) {
-//                return;
-//            }
+            if (m_PendingWidthLayoutUpdates.Count == 0 && m_PendingHeightLayoutUpdates.Count == 0 && m_PendingRectUpdates.Count == 0) {
+                return;
+            }
 
             m_PendingWidthLayoutUpdates.Sort((a, b) => a.element.depth > b.element.depth ? 1 : -1);
 
             for (int i = 0; i < m_PendingWidthLayoutUpdates.Count; i++) {
                 m_PendingWidthLayoutUpdates[i].RunWidthLayout();
-                m_PendingWidthLayoutUpdates[i].markedForLayout = false;
                 m_PendingRectUpdates.Add(m_PendingWidthLayoutUpdates[i]);
             }
             
@@ -58,14 +57,21 @@ namespace Src.Systems {
 
             for (int i = 0; i < m_PendingHeightLayoutUpdates.Count; i++) {
                 m_PendingHeightLayoutUpdates[i].RunHeightLayout();
-                m_PendingHeightLayoutUpdates[i].markedForLayout = false;
                 m_PendingRectUpdates.Add(m_PendingHeightLayoutUpdates[i]);
             }
             
             foreach (LayoutBox layoutBox in m_PendingRectUpdates) {
                 m_RectUpdates.Add(layoutBox);
             }
-
+            
+            for (int i = 0; i < m_PendingWidthLayoutUpdates.Count; i++) {
+                m_PendingWidthLayoutUpdates[i].markedForWidthLayout = false;
+            }
+            
+            for (int i = 0; i < m_PendingHeightLayoutUpdates.Count; i++) {
+                m_PendingHeightLayoutUpdates[i].markedForHeightLayout = false;
+            }
+            
             m_PendingWidthLayoutUpdates.Clear();
             m_PendingHeightLayoutUpdates.Clear();
             m_PendingRectUpdates.Clear();
@@ -175,11 +181,6 @@ namespace Src.Systems {
 
         internal void PositionChanged(LayoutBox layoutBox) {
             m_PendingRectUpdates.Add(layoutBox);
-        }
-
-        internal void RequestLayout(LayoutBox layoutBox) {
-           RequestWidthLayout(layoutBox);
-           RequestHeightLayout(layoutBox);
         }
 
         internal void RequestWidthLayout(LayoutBox layoutBox) {
@@ -357,6 +358,7 @@ namespace Src.Systems {
             stack.Push(ValueTuple.Create(elementData, layoutBox));
 
             m_PendingWidthLayoutUpdates.Add(layoutBox);
+            layoutBox.markedForWidthLayout = true;
             m_Elements.Add(elementData.element);
 
             while (stack.Count > 0) {
@@ -416,7 +418,7 @@ namespace Src.Systems {
                 UIElement element = m_Elements[i];
 
                 // todo -- replace w/ quad tree
-                if (!layoutResult.ScreenOverflowRect.Contains(point)) {
+                if (!layoutResult.ScreenRect.Contains(point)) {
                     continue;
                 }
 

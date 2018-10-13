@@ -82,11 +82,14 @@ namespace Rendering {
         public const float GridLayoutColGap = 0f;
         public const float GridLayoutRowGap = 0f;
 
-        public static readonly GridTrackSize GridLayoutColAutoSize = new GridTrackSize();
-        public static readonly GridTrackSize GridLayoutRowAutoSize = new GridTrackSize();
+        public static readonly GridTrackSize GridLayoutColAutoSize = GridTrackSize.MaxContent;
+        public static readonly GridTrackSize GridLayoutRowAutoSize = GridTrackSize.MaxContent;
 
-        public static IReadOnlyList<GridTrackSize> GridLayoutColTemplate { get; }
-        public static IReadOnlyList<GridTrackSize> GridLayoutRowTemplate { get; }
+        public static readonly IReadOnlyList<GridTrackSize> GridLayoutColTemplate = ListPool<GridTrackSize>.Empty;
+        public static readonly IReadOnlyList<GridTrackSize> GridLayoutRowTemplate = ListPool<GridTrackSize>.Empty;
+
+        public static readonly CrossAxisAlignment GridLayoutColAlignment = CrossAxisAlignment.Start;
+        public static readonly CrossAxisAlignment GridLayoutRowAlignment = CrossAxisAlignment.Start;
 
     }
 

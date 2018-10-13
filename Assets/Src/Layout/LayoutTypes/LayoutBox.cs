@@ -32,7 +32,7 @@ namespace Src.Layout.LayoutTypes {
         public VirtualScrollbar verticalScrollbar;
         private bool childrenNeedWidthLayout;
         private bool childrenNeedHeightLayout;
-        
+
         protected LayoutSystem2 layoutSystem;
         public bool markedForLayout;
         public bool markedForWidthLayout;
@@ -49,7 +49,7 @@ namespace Src.Layout.LayoutTypes {
         protected abstract Size RunContentSizeLayout();
         public abstract void RunWidthLayout();
         public abstract void RunHeightLayout();
-        
+
         public virtual float MinWidth => Mathf.Max(PaddingHorizontal + BorderHorizontal, ResolveWidth(style.MinWidth));
         public virtual float MaxWidth => Mathf.Max(PaddingHorizontal + BorderHorizontal, ResolveWidth(style.MaxWidth));
         public virtual float PreferredWidth => ResolveWidth(style.PreferredWidth);
@@ -77,7 +77,7 @@ namespace Src.Layout.LayoutTypes {
             return PreferredHeight;
         }
 
-        public virtual void SetParent(LayoutBox parent) {
+        public void SetParent(LayoutBox parent) {
             this.parent?.OnChildRemoved(this);
             this.parent = parent;
             this.parent?.OnChildAdded(this);
@@ -93,7 +93,7 @@ namespace Src.Layout.LayoutTypes {
          * - Layout property changes
          */
 
-        public virtual void ReplaceChild(LayoutBox toReplace, LayoutBox newChild) {
+        public void ReplaceChild(LayoutBox toReplace, LayoutBox newChild) {
             int index = children.IndexOf(toReplace);
             if (index == -1) {
                 throw new Exception("Cannot replace child");
@@ -107,7 +107,6 @@ namespace Src.Layout.LayoutTypes {
         public virtual void OnChildAdded(LayoutBox child) {
             children.Add(child);
             if (child.element.isEnabled) {
-                RequestParentLayoutIfContentBased();
                 RequestLayout();
             }
         }
@@ -118,29 +117,42 @@ namespace Src.Layout.LayoutTypes {
             }
 
             if (child.element.isEnabled) {
-                RequestParentLayoutIfContentBased();
                 RequestLayout();
             }
         }
 
-        protected virtual void AdoptChildren(LayoutBox box) {
+        protected void AdoptChildren(LayoutBox box) {
             for (int i = 0; i < box.children.Count; i++) {
                 children.Add(box.children[i]);
             }
 
             RequestLayout();
-            RequestParentLayoutIfContentBased();
         }
 
         protected void RequestLayout() {
-            if (markedForLayout) return;
-            markedForLayout = true;
-            layoutSystem.RequestLayout(this);
+            layoutSystem.RequestWidthLayout(this);
+            layoutSystem.RequestHeightLayout(this);
+            markedForWidthLayout = true;
+            markedForHeightLayout = true;
         }
 
-        public virtual void OnChildSizeChanged() {
-            RequestParentLayoutIfContentBased();
+        protected void RequestContentSizeChangeLayout() {
+            if (IsContentSized) {
+                preferredContentSize = Size.Unset;
+                LayoutBox ptr = parent;
+                bool contentSized = true;
+                while (ptr != null && contentSized) {
+                    ptr.RequestLayout();
+                    contentSized = ptr.IsContentSized;
+                    ptr.preferredContentSize = Size.Unset;
+                    ptr = ptr.parent;
+                }
+            }
+        }
+
+        public void OnChildSizeChanged() {
             RequestLayout();
+            RequestContentSizeChangeLayout();
         }
 
         protected bool IsContentSized {
@@ -161,13 +173,12 @@ namespace Src.Layout.LayoutTypes {
             if ((units & UIUnit.Content) != 0) {
                 preferredContentSize = Size.Unset;
             }
-
-            parent.RequestLayout();
+            RequestContentSizeChangeLayout();
         }
 
         public void SetAllocatedRect(float x, float y, float width, float height) {
-           SetAllocatedXAndWidth(x, width);
-           SetAllocatedYAndHeight(y, height);
+            SetAllocatedXAndWidth(x, width);
+            SetAllocatedYAndHeight(y, height);
         }
 
         public void SetAllocatedXAndWidth(float x, float width) {
@@ -179,7 +190,7 @@ namespace Src.Layout.LayoutTypes {
             if (allocatedWidth != width) {
                 allocatedWidth = width;
                 layoutSystem.OnRectChanged(this);
-                if (!childrenNeedWidthLayout) {
+                if (childrenNeedWidthLayout) {
                     RequestLayout();
                 }
             }
@@ -194,7 +205,7 @@ namespace Src.Layout.LayoutTypes {
             if (allocatedHeight != height) {
                 allocatedHeight = height;
                 layoutSystem.OnRectChanged(this);
-                if (!childrenNeedHeightLayout) {
+                if (childrenNeedHeightLayout) {
                     RequestLayout();
                 }
             }
@@ -226,28 +237,18 @@ namespace Src.Layout.LayoutTypes {
             }
         }
 
-        public void OnChildEnabled(LayoutBox child) {
-            RequestParentLayoutIfContentBased();
+        public virtual void OnChildEnabled(LayoutBox child) {
             RequestLayout();
+            RequestContentSizeChangeLayout();
+            UpdateChildrenRequireLayoutOnWidthChange();
+            UpdateChildrenRequireLayoutOnHeightChange();
         }
 
-        public void OnChildDisabled(LayoutBox child) {
-            RequestParentLayoutIfContentBased();
+        public virtual void OnChildDisabled(LayoutBox child) {
             RequestLayout();
-        }
-
-        protected void RequestParentLayoutIfContentBased() {
-            if (IsContentSized) {
-                preferredContentSize = Size.Unset;
-                LayoutBox ptr = parent;
-                bool contentSized = true;
-                while (ptr != null && contentSized) {
-                    ptr.RequestLayout();
-                    contentSized = ptr.IsContentSized;
-                    ptr.preferredContentSize = Size.Unset;
-                    ptr = ptr.parent;
-                }
-            }
+            RequestContentSizeChangeLayout();
+            UpdateChildrenRequireLayoutOnWidthChange();
+            UpdateChildrenRequireLayoutOnHeightChange();
         }
 
         protected float GetContentPreferredWidth() {
@@ -340,16 +341,22 @@ namespace Src.Layout.LayoutTypes {
             }
         }
 
-        public virtual void RunConstrainedContentSizeLayout(float width) { }
-
-        public virtual void RunTheoreticalContentSizeLayout() { }
-
-        public virtual void OnStylePropertyChanged(StyleProperty property) { }
+        public virtual void OnStylePropertyChanged(StyleProperty property) {
+            switch (property.propertyId) {
+                case StylePropertyId.MinWidth:
+                case StylePropertyId.MaxWidth:
+                case StylePropertyId.PreferredWidth:
+                    UpdateChildrenRequireLayoutOnWidthChange();
+                    break;
+                case StylePropertyId.MinHeight:
+                case StylePropertyId.MaxHeight:
+                case StylePropertyId.PreferredHeight:
+                    UpdateChildrenRequireLayoutOnHeightChange();
+                    break;
+            }
+        }
 
         public virtual void OnChildStylePropertyChanged(LayoutBox child, StyleProperty property) { }
-
-
-
 
     }
 

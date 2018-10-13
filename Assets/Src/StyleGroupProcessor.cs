@@ -62,7 +62,7 @@ public static class StyleGroupProcessor {
         }
 
         if (groups.Count == 0) {
-            ListPool<ValueTuple<string, UIBaseStyleGroup>>.Release(groups);
+            ListPool<ValueTuple<string, UIBaseStyleGroup>>.Release(ref groups);
             s_StyleGroupMap[classPath] = null;
         }
         else {

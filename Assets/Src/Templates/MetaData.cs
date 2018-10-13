@@ -79,7 +79,7 @@ namespace Src {
                 MetaData child = metaData.children[i];
                 Release(ref child);
             }
-            ListPool<MetaData>.Release(metaData.children);
+            ListPool<MetaData>.Release(ref metaData.children);
             
             s_ObjectPool.Release(metaData);
             metaData = null;

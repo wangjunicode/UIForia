@@ -22,6 +22,8 @@ namespace Rendering {
         GridLayoutRowAutoSize = 209,
         GridLayoutColGap = 210,
         GridLayoutRowGap = 211,
+        GridLayoutColAlignment = 212,
+        GridLayoutRowAlignment = 213,
 
         FlexLayoutWrap = 300,
         FlexLayoutDirection = 301,

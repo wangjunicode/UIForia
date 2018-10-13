@@ -215,7 +215,6 @@ namespace Src {
                 foreach (string part in names) {
                     UIBaseStyleGroup style = template.GetStyleGroupInstance(part);
                     if (style != null) {
-                        style.normal.Id = part;
                         baseStyles.Add(style);
                     }
                 }
@@ -223,7 +222,6 @@ namespace Src {
             else {
                 UIBaseStyleGroup style = template.GetStyleGroupInstance(styleAttr.value);
                 if (style != null) {
-                    style.normal.Id = styleAttr.value;
                     baseStyles.Add(style);
                 }
             }

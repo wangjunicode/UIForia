@@ -190,7 +190,7 @@ namespace Src.Systems {
                 }
             }
 
-            ListPool<UIElement>.Release(updatedElements);
+            ListPool<UIElement>.Release(ref updatedElements);
 
             for (int i = 0; i < m_VirtualScrollbarElements.Count; i++) {
                 RenderData data = m_VirtualScrollbarElements[i];

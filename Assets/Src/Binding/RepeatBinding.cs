@@ -126,7 +126,7 @@ public class RepeatBindingNode<T, U> : RepeatBindingNode where T : class, IList<
             return;
         }
 
-        for (int i = 0; i < previousReference.Count; i++) {
+        for (int i = 0; i < children.Length; i++) {
             children[i].item.OnUpdate(children[i].children);
         }
 

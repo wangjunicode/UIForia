@@ -1,99 +1,301 @@
-//using System.Collections.Generic;
-//using NUnit.Framework;
-//using Rendering;
-//using Src;
-//using Src.Layout;
-//using Tests.Mocks;
-//using UnityEngine;
-//
-//[TestFixture]
-//public class GridLayoutTests {
-//
-//    [Template(TemplateType.String, @"
-//        <UITemplate>
-//            <Contents style.layoutType='Grid'>
-//                <Group x-id='child0' style.width='100f' style.height='100f'/>
-//                <Group x-id='child1' style.width='100f' style.height='100f'/>
-//                <Group x-id='child2' style.width='100f' style.height='100f'/>
-//            </Contents>
-//        </UITemplate>
-//    ")]
-//    public class GridLayoutThing3x1 : UIElement {
-//
-//        public UIGroupElement child0;
-//        public UIGroupElement child1;
-//        public UIGroupElement child2;
-//        
-//        public override void OnCreate() {
-//            
-//            child0 = FindById<UIGroupElement>("child0");
-//            child1 = FindById<UIGroupElement>("child1");
-//            child2 = FindById<UIGroupElement>("child2");
-//            
-//        }
-//
-//    }
-//
-//    [Template(TemplateType.String, @"
-//        <UITemplate>
-//            <Contents style.layoutType='Grid'>
-//                <Group x-id='child0' style.width='100f' style.height='100f'/>
-//                <Group x-id='child1' style.width='100f' style.height='100f'/>
-//                <Group x-id='child2' style.width='100f' style.height='100f'/>
-//                <Group x-id='child3' style.width='100f' style.height='100f'/>
-//                <Group x-id='child4' style.width='100f' style.height='100f'/>
-//                <Group x-id='child5' style.width='100f' style.height='100f'/>
-//            </Contents>
-//        </UITemplate>
-//    ")]
-//    public class GridLayoutThing6 : UIElement {
-//
-//        public List<UIElement> gridItems;
-//        
-//        public override void OnCreate() {
-//            gridItems = new List<UIElement>();
-//            int i = 0;
-//            while (true) {
-//                var item = FindById("child" + i);
-//                i++;
-//                if (item == null) break;
-//                gridItems.Add(item);
-//            }
-//        }
-//
-//    }
-//
-//    
-//    [Test]
-//    public void ExplicitPlaced_Fixed3x1() {
-//        MockView mockView = new MockView(typeof(GridLayoutThing3x1));
-//        mockView.Initialize();
-//        GridLayoutThing3x1 root = (GridLayoutThing3x1) mockView.RootElement;
-//        root.child0.style.gridItem = new GridPlacementParameters(0, 1, 0, 1);
-//        root.child1.style.gridItem = new GridPlacementParameters(1, 1, 0, 1);
-//        root.child2.style.gridItem = new GridPlacementParameters(2, 1, 0, 1);
-//            
-//        GridDefinition grid = new GridDefinition();
-//            
-//        grid.rowTemplate = new [] {
-//            new GridTrackSizer(new GridTrackSizeFn(GridTrackSizeType.Pixel, 100f))
-//        };
-//
-//        grid.colTemplate = new [] {
-//            new GridTrackSizer(new GridTrackSizeFn(GridTrackSizeType.Pixel, 100f)),
-//            new GridTrackSizer(new GridTrackSizeFn(GridTrackSizeType.Pixel, 100f)),
-//            new GridTrackSizer(new GridTrackSizeFn(GridTrackSizeType.Pixel, 100f))
-//        };
-//        
-//        root.style.gridDefinition = grid;
-//        mockView.Update();
-//        
-//        Assert.AreEqual(new Vector2(0, 0), root.child0.layoutResult.localPosition);
-//        Assert.AreEqual(new Vector2(100, 0), root.child1.layoutResult.localPosition);
-//        Assert.AreEqual(new Vector2(200, 0), root.child2.layoutResult.localPosition);
-//        
-//    }
-//
+using System.Collections.Generic;
+using NUnit.Framework;
+using Rendering;
+using Src;
+using Src.Layout;
+using Src.Layout.LayoutTypes;
+using Src.Util;
+using Tests.Mocks;
+using UnityEngine;
+
+[TestFixture]
+public class GridLayoutTests {
+
+    [Template(TemplateType.String, @"
+        <UITemplate>
+            <Contents style.layoutType='Grid'>
+                <Group x-id='child0' style.width='100f' style.height='100f'/>
+                <Group x-id='child1' style.width='100f' style.height='100f'/>
+                <Group x-id='child2' style.width='100f' style.height='100f'/>
+            </Contents>
+        </UITemplate>
+    ")]
+    public class GridLayoutThing3x1 : UIElement {
+
+        public UIGroupElement child0;
+        public UIGroupElement child1;
+        public UIGroupElement child2;
+
+        public override void OnCreate() {
+
+            child0 = FindById<UIGroupElement>("child0");
+            child1 = FindById<UIGroupElement>("child1");
+            child2 = FindById<UIGroupElement>("child2");
+
+        }
+
+    }
+
+    [Template(TemplateType.String, @"
+        <UITemplate>
+            <Contents style.layoutType='Grid'>
+                <Repeat list='{gridItems}'>
+                    <Group style.width='100f' style.height='100f'/>
+                </Repeat>
+            </Contents>
+        </UITemplate>
+    ")]
+    public class GridLayoutRepeat : UIElement {
+
+        public List<int> gridItems = new List<int>();
+
+        public UIElement GetChild(int i) {
+            return FindByType<UIGroupElement>()[i];
+        }
+
+        public void SetChildCount(int childCount) {
+           gridItems.Clear();
+            for (int i = 0; i < childCount; i++) {
+                gridItems.Add(i);
+            }
+        }
+
+    }
+
+    [Test]
+    public void ExplicitPlaced_Fixed3x1() {
+        MockView mockView = new MockView(typeof(GridLayoutThing3x1));
+        mockView.Initialize();
+        GridLayoutThing3x1 root = (GridLayoutThing3x1) mockView.RootElement;
+        root.child0.style.SetGridItemPlacement(0, 1, 0, 1, StyleState.Normal);
+        root.child1.style.SetGridItemPlacement(1, 1, 0, 1, StyleState.Normal);
+        root.child2.style.SetGridItemPlacement(2, 1, 0, 1, StyleState.Normal);
+
+
+        var rowTemplate = new List<GridTrackSize>(new[] {
+            new GridTrackSize(100f)
+        });
+
+        var colTemplate = new[] {
+            new GridTrackSize(100f),
+            new GridTrackSize(100f),
+            new GridTrackSize(100f)
+        };
+
+        root.style.SetGridLayoutColTemplate(colTemplate, StyleState.Normal);
+        root.style.SetGridLayoutRowTemplate(rowTemplate, StyleState.Normal);
+        mockView.Update();
+
+        Assert.AreEqual(new Vector2(0, 0), root.child0.layoutResult.localPosition);
+        Assert.AreEqual(new Vector2(100, 0), root.child1.layoutResult.localPosition);
+        Assert.AreEqual(new Vector2(200, 0), root.child2.layoutResult.localPosition);
+
+    }
+    
+    [Test]
+    public void ExplicitPlaced_Fixed3x1Overlap() {
+        MockView mockView = new MockView(typeof(GridLayoutThing3x1));
+        mockView.Initialize();
+        GridLayoutThing3x1 root = (GridLayoutThing3x1) mockView.RootElement;
+        
+        root.child0.style.SetGridItemColStart(0, StyleState.Normal);
+        root.child0.style.SetGridItemColSpan(3, StyleState.Normal);
+        root.child0.style.SetGridItemRowStart(0, StyleState.Normal);
+        
+        root.child1.style.SetGridItemPlacement(1, 1, 0, 1, StyleState.Normal);
+        root.child2.style.SetGridItemPlacement(2, 1, 0, 1, StyleState.Normal);
+
+
+        var rowTemplate = new List<GridTrackSize>(new[] {
+            new GridTrackSize(100f)
+        });
+
+        var colTemplate = new[] {
+            new GridTrackSize(100f),
+            new GridTrackSize(100f),
+            new GridTrackSize(100f)
+        };
+
+        root.style.SetGridLayoutColTemplate(colTemplate, StyleState.Normal);
+        root.style.SetGridLayoutRowTemplate(rowTemplate, StyleState.Normal);
+        mockView.Update();
+
+        Assert.AreEqual(new Rect(0, 0, 100, 100), root.child0.layoutResult.ScreenRect);
+        Assert.AreEqual(new Vector2(100, 0), root.child1.layoutResult.localPosition);
+        Assert.AreEqual(new Vector2(200, 0), root.child2.layoutResult.localPosition);
+
+    }
+    
+    [Test]
+    public void ExplicitPlaced_AlignCenter() {
+        MockView mockView = new MockView(typeof(GridLayoutThing3x1));
+        mockView.Initialize();
+        GridLayoutThing3x1 root = (GridLayoutThing3x1) mockView.RootElement;
+        
+        root.child0.style.SetGridItemColStart(0, StyleState.Normal);
+        root.child0.style.SetGridItemColSpan(3, StyleState.Normal);
+        root.child0.style.SetGridItemRowStart(0, StyleState.Normal);
+        root.child1.style.SetGridItemPlacement(1, 1, 0, 1, StyleState.Normal);
+        root.child2.style.SetGridItemPlacement(2, 1, 0, 1, StyleState.Normal);
+
+        root.style.SetGridLayoutColAlignment(CrossAxisAlignment.Center, StyleState.Normal);
+
+        var rowTemplate = new List<GridTrackSize>(new[] {
+            new GridTrackSize(100f)
+        });
+
+        var colTemplate = new[] {
+            new GridTrackSize(100f),
+            new GridTrackSize(100f),
+            new GridTrackSize(100f)
+        };
+
+        root.style.SetGridLayoutColTemplate(colTemplate, StyleState.Normal);
+        root.style.SetGridLayoutRowTemplate(rowTemplate, StyleState.Normal);
+        mockView.Update();
+
+        Assert.AreEqual(new Rect(100, 0, 100, 100), root.child0.layoutResult.ScreenRect);
+        Assert.AreEqual(new Vector2(100, 0), root.child1.layoutResult.localPosition);
+        Assert.AreEqual(new Vector2(200, 0), root.child2.layoutResult.localPosition);
+
+    }
+    
+    [Test]
+    public void ExplicitPlaced_AlignEnd() {
+        MockView mockView = new MockView(typeof(GridLayoutThing3x1));
+        mockView.Initialize();
+        GridLayoutThing3x1 root = (GridLayoutThing3x1) mockView.RootElement;
+        
+        root.child0.style.SetGridItemColStart(0, StyleState.Normal);
+        root.child0.style.SetGridItemColSpan(3, StyleState.Normal);
+        root.child0.style.SetGridItemRowStart(0, StyleState.Normal);
+        
+        root.child1.style.SetGridItemPlacement(1, 1, 0, 1, StyleState.Normal);
+        root.child2.style.SetGridItemPlacement(2, 1, 0, 1, StyleState.Normal);
+
+        root.style.SetGridLayoutColAlignment(CrossAxisAlignment.End, StyleState.Normal);
+
+        var rowTemplate = new List<GridTrackSize>(new[] {
+            new GridTrackSize(100f)
+        });
+
+        var colTemplate = new[] {
+            new GridTrackSize(100f),
+            new GridTrackSize(100f),
+            new GridTrackSize(100f)
+        };
+
+        root.style.SetGridLayoutColTemplate(colTemplate, StyleState.Normal);
+        root.style.SetGridLayoutRowTemplate(rowTemplate, StyleState.Normal);
+        mockView.Update();
+
+        Assert.AreEqual(new Rect(200, 0, 100, 100), root.child0.layoutResult.ScreenRect);
+        Assert.AreEqual(new Vector2(100, 0), root.child1.layoutResult.localPosition);
+        Assert.AreEqual(new Vector2(200, 0), root.child2.layoutResult.localPosition);
+
+    }
+    
+    [Test]
+    public void ExplicitPlaced_AlignStretch() {
+        MockView mockView = new MockView(typeof(GridLayoutThing3x1));
+        mockView.Initialize();
+        GridLayoutThing3x1 root = (GridLayoutThing3x1) mockView.RootElement;
+        
+        root.child0.style.SetGridItemColStart(0, StyleState.Normal);
+        root.child0.style.SetGridItemColSpan(3, StyleState.Normal);
+        root.child0.style.SetGridItemRowStart(0, StyleState.Normal);
+        
+        root.child1.style.SetGridItemPlacement(1, 1, 0, 1, StyleState.Normal);
+        root.child2.style.SetGridItemPlacement(2, 1, 0, 1, StyleState.Normal);
+
+        root.style.SetGridLayoutColAlignment(CrossAxisAlignment.Stretch, StyleState.Normal);
+
+        var rowTemplate = new List<GridTrackSize>(new[] {
+            new GridTrackSize(100f)
+        });
+
+        var colTemplate = new[] {
+            new GridTrackSize(100f),
+            new GridTrackSize(100f),
+            new GridTrackSize(100f)
+        };
+
+        root.style.SetGridLayoutColTemplate(colTemplate, StyleState.Normal);
+        root.style.SetGridLayoutRowTemplate(rowTemplate, StyleState.Normal);
+        mockView.Update();
+
+        Assert.AreEqual(new Rect(0, 0, 300, 100), root.child0.layoutResult.ScreenRect);
+        Assert.AreEqual(new Vector2(100, 0), root.child1.layoutResult.localPosition);
+        Assert.AreEqual(new Vector2(200, 0), root.child2.layoutResult.localPosition);
+
+    }
+    
+    [Test]
+    public void ExplicitPlaced_MinWidthSingleColumn() {
+        MockView mockView = new MockView(typeof(GridLayoutThing3x1));
+        mockView.Initialize();
+        GridLayoutThing3x1 root = (GridLayoutThing3x1) mockView.RootElement;
+        
+        root.child0.style.SetGridItemPlacement(0, 1, 0, 1, StyleState.Normal);        
+        root.child1.style.SetGridItemPlacement(1, 1, 0, 1, StyleState.Normal);
+        root.child2.style.SetGridItemPlacement(2, 1, 0, 1, StyleState.Normal);
+
+        var rowTemplate = new List<GridTrackSize>(new[] {
+            new GridTrackSize(100f)
+        });
+
+        var colTemplate = new[] {
+            new GridTrackSize(100f),
+            GridTrackSize.MinContent, 
+            new GridTrackSize(100f)
+        };
+
+        root.style.SetGridLayoutColTemplate(colTemplate, StyleState.Normal);
+        root.style.SetGridLayoutRowTemplate(rowTemplate, StyleState.Normal);
+        mockView.Update();
+
+        Assert.AreEqual(new Rect(0, 0, 100, 100), root.child0.layoutResult.ScreenRect);
+        Assert.AreEqual(new Vector2(100, 0), root.child1.layoutResult.localPosition);
+        Assert.AreEqual(new Vector2(200, 0), root.child2.layoutResult.localPosition);
+
+    }
+    
+    [Test]
+    public void ExplicitPlaced_MinWidthMultiColumn() {
+        MockView mockView = new MockView(typeof(GridLayoutThing3x1));
+        mockView.Initialize();
+        GridLayoutThing3x1 root = (GridLayoutThing3x1) mockView.RootElement;
+        
+        root.child0.style.SetPreferredWidth(50f, StyleState.Normal);
+        root.child1.style.SetPreferredWidth(100f, StyleState.Normal);
+        root.child2.style.SetPreferredWidth(100f, StyleState.Normal);
+        
+        root.child0.style.SetGridItemPlacement(1, 1, 0, 1, StyleState.Normal);        
+        root.child1.style.SetGridItemPlacement(1, 1, 0, 1, StyleState.Normal);
+        root.child2.style.SetGridItemPlacement(2, 1, 0, 1, StyleState.Normal);
+
+        var rowTemplate = new List<GridTrackSize>(new[] {
+            new GridTrackSize(100f)
+        });
+
+        var colTemplate = new[] {
+            new GridTrackSize(100f),
+            GridTrackSize.MinContent, // affects positioning of items, not item width
+            new GridTrackSize(100f)
+        };
+
+        root.style.SetGridLayoutColTemplate(colTemplate, StyleState.Normal);
+        root.style.SetGridLayoutRowTemplate(rowTemplate, StyleState.Normal);
+        mockView.Update();
+
+        Assert.AreEqual(new Rect(100, 0, 50, 100), root.child0.layoutResult.ScreenRect);
+        Assert.AreEqual(new Rect(100, 0, 100, 100), root.child1.layoutResult.ScreenRect);
+        Assert.AreEqual(new Rect(150, 0, 100, 100), root.child2.layoutResult.ScreenRect);
+
+    }
+    
+}
+
 //    [Test]
 //    public void ImplicitRowPlaced_Fixed3x1() {
 //        MockView mockView = new MockView(typeof(GridLayoutThing3x1));

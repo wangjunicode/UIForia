@@ -13,7 +13,17 @@ namespace Src.Layout.LayoutTypes {
         public TextContainerLayoutBox(LayoutSystem2 layoutSystem, UIElement element)
             : base(layoutSystem, element) { }
 
-        public void RunLayout() {
+        protected override float GetContentPreferredHeight() {
+            TextInfo textInfo = ((UITextElement) element).textInfo;
+
+            List<LineInfo> lineInfos = RunLayout(textInfo, allocatedWidth);
+            LineInfo lastLine = lineInfos[lineInfos.Count - 1];
+            ListPool<LineInfo>.Release(ref lineInfos);
+
+            return -lastLine.position.y + lastLine.Height;
+        }
+
+        public override void RunWidthLayout() {
             TextInfo textInfo = ((UITextElement) element).textInfo;
             List<LineInfo> lineInfos = RunLayout(textInfo, allocatedWidth);
             LineInfo lastLine = lineInfos[lineInfos.Count - 1];
@@ -32,37 +42,21 @@ namespace Src.Layout.LayoutTypes {
 
             ApplyTextAlignment(allocatedWidth, textInfo, style.TextAlignment);
 
-            ListPool<LineInfo>.Release(lineInfos);
+            ListPool<LineInfo>.Release(ref lineInfos);
         }
 
-        protected override float GetContentPreferredHeight() {
-            TextInfo textInfo = ((UITextElement) element).textInfo;
-
-            List<LineInfo> lineInfos = RunLayout(textInfo, allocatedWidth);
-            LineInfo lastLine = lineInfos[lineInfos.Count - 1];
-            ListPool<LineInfo>.Release(lineInfos);
-            
-            return -lastLine.position.y + lastLine.Height;
-        }
-
-        public override void RunWidthLayout() {
-            throw new NotImplementedException();
-        }
-
-        public override void RunHeightLayout() {
-            throw new NotImplementedException();
-        }
+        public override void RunHeightLayout() { }
 
         public override float GetPreferredHeightForWidth(float width) {
             TextInfo textInfo = ((UITextElement) element).textInfo;
 
             List<LineInfo> lineInfos = RunLayout(textInfo, width);
             LineInfo lastLine = lineInfos[lineInfos.Count - 1];
-            ListPool<LineInfo>.Release(lineInfos);
-            
+            ListPool<LineInfo>.Release(ref lineInfos);
+
             return -lastLine.position.y + lastLine.Height;
         }
-        
+
         protected override Size RunContentSizeLayout() {
             TextInfo textInfo = ((UITextElement) element).textInfo;
 
@@ -74,7 +68,7 @@ namespace Src.Layout.LayoutTypes {
                 maxWidth = Mathf.Max(maxWidth, lineInfos[i].width);
             }
 
-            ListPool<LineInfo>.Release(lineInfos);
+            ListPool<LineInfo>.Release(ref lineInfos);
             return new Size(maxWidth, -lastLine.position.y + lastLine.Height);
         }
 
@@ -211,7 +205,6 @@ namespace Src.Layout.LayoutTypes {
 
         public void OnTextContentUpdated() {
             RequestLayout();
-            RequestParentLayoutIfContentBased();
         }
 
     }

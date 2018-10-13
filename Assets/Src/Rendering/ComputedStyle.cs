@@ -28,11 +28,12 @@ namespace Rendering {
 
         public PaddingBox padding => new PaddingBox(paddingTop, paddingRight, paddingBottom, paddingLeft);
 
-        public bool HasBorderRadius => rareData != null
-                                       && (rareData.borderRadiusBottomLeft.IsDefined()
-                                           || rareData.BorderRadiusBottomRight.IsDefined()
-                                           || rareData.BorderRadiusTopLeft.IsDefined()
-                                           || rareData.BorderRadiusTopRight.IsDefined());
+        public bool HasBorderRadius =>
+            rareData != null
+            && (rareData.borderRadiusBottomLeft.IsDefined()
+                || rareData.BorderRadiusBottomRight.IsDefined()
+                || rareData.BorderRadiusTopLeft.IsDefined()
+                || rareData.BorderRadiusTopRight.IsDefined());
 
         #region Paint
 
@@ -222,6 +223,12 @@ namespace Rendering {
 
         #region Grid Layout
 
+        private IReadOnlyList<GridTrackSize> gridLayoutColTemplate = DefaultStyleValues.GridLayoutColTemplate;
+        private IReadOnlyList<GridTrackSize> gridLayoutRowTemplate = DefaultStyleValues.GridLayoutRowTemplate;
+
+        private GridTrackSize gridLayoutColAutoSize = DefaultStyleValues.GridLayoutColAutoSize;
+        private GridTrackSize gridLayoutRowAutoSize = DefaultStyleValues.GridLayoutRowAutoSize;
+
         public LayoutDirection GridLayoutDirection {
             get { return (LayoutDirection) ReadInt(StylePropertyId.GridLayoutDirection, (int) DefaultStyleValues.GridLayoutDirection); }
             set { WriteInt(StylePropertyId.GridLayoutDirection, (int) value); }
@@ -233,33 +240,47 @@ namespace Rendering {
         }
 
         public IReadOnlyList<GridTrackSize> GridLayoutColTemplate {
-            get {
-                int trackTemplateId = ReadInt(StylePropertyId.GridLayoutColTemplate, -1);
-                return GridLayoutBox.GetTrackColTemplate(trackTemplateId);
-            }
+            get { return gridLayoutColTemplate; }
             set {
-                IReadOnlyList<GridTrackSize> current = GridLayoutBox.GetTrackColTemplate(styleSet.element.id);
+                if (Equals(gridLayoutColTemplate, value)) {
+                    return;
+                }
+                gridLayoutColTemplate = value;
+                SendEvent(new StyleProperty(StylePropertyId.GridLayoutColTemplate, 0, 0, gridLayoutColTemplate));
             }
         }
 
         public IReadOnlyList<GridTrackSize> GridLayoutRowTemplate {
-            get {
-                int trackTemplateId = ReadInt(StylePropertyId.GridLayoutRowTemplate, -1);
-                return GridLayoutBox.GetTrackRowTemplate(trackTemplateId);
-            }
+            get { return gridLayoutRowTemplate; }
             set {
-                IReadOnlyList<GridTrackSize> current = GridLayoutBox.GetTrackColTemplate(styleSet.element.id);
+                if (Equals(gridLayoutRowTemplate, value)) {
+                    return;
+                }
+                gridLayoutRowTemplate = value;
+                SendEvent(new StyleProperty(StylePropertyId.GridLayoutRowTemplate, 0, 0, gridLayoutRowTemplate));
             }
         }
 
         public GridTrackSize GridLayoutColAutoSize {
-            get { return default(GridTrackSize); }
-            set { }
+            get { return gridLayoutColAutoSize; }
+            set {
+                if (gridLayoutColAutoSize == value) {
+                    return;
+                }
+                gridLayoutColAutoSize = value;
+                SendEvent(new StyleProperty(StylePropertyId.GridLayoutColAutoSize, FloatUtil.EncodeToInt(value.minValue), (int) value.minUnit));
+            }
         }
 
         public GridTrackSize GridLayoutRowAutoSize {
-            get { return default(GridTrackSize); }
-            set { }
+            get { return gridLayoutRowAutoSize; }
+            set {
+                if (gridLayoutRowAutoSize == value) {
+                    return;
+                }
+                gridLayoutRowAutoSize = value;
+                SendEvent(new StyleProperty(StylePropertyId.GridLayoutRowAutoSize, FloatUtil.EncodeToInt(value.minValue), (int) value.minUnit));
+            }
         }
 
         public float GridLayoutColGap {
@@ -270,6 +291,16 @@ namespace Rendering {
         public float GridLayoutRowGap {
             get { return ReadFloat(StylePropertyId.GridLayoutRowGap, DefaultStyleValues.GridLayoutRowGap); }
             set { WriteFloat(StylePropertyId.GridLayoutRowGap, value); }
+        }
+
+        public CrossAxisAlignment GridLayoutColAlignment {
+            get { return (CrossAxisAlignment) ReadInt(StylePropertyId.GridLayoutColAlignment, (int) DefaultStyleValues.GridLayoutColAlignment); }
+            set { WriteInt(StylePropertyId.GridLayoutColAlignment, (int) value); }
+        }
+
+        public CrossAxisAlignment GridLayoutRowAlignment {
+            get { return (CrossAxisAlignment) ReadInt(StylePropertyId.GridLayoutRowAlignment, (int) DefaultStyleValues.GridLayoutRowAlignment); }
+            set { WriteInt(StylePropertyId.GridLayoutRowAlignment, (int) value); }
         }
 
         #endregion
@@ -338,7 +369,6 @@ namespace Rendering {
             }
         }
 
-
         public bool WidthIsParentBased => MinWidth.IsParentBased || MaxWidth.IsParentBased || PreferredWidth.IsParentBased;
         public bool HeightIsParentBased => MinHeight.IsParentBased || MaxHeight.IsParentBased || PreferredHeight.IsParentBased;
 
@@ -347,7 +377,7 @@ namespace Rendering {
 
         public bool IsWidthFixed => MinWidth.IsFixed && MaxWidth.IsFixed && PreferredWidth.IsFixed;
         public bool IsHeightFixed => MinHeight.IsFixed && MaxHeight.IsFixed && PreferredHeight.IsFixed;
-        
+
         #endregion
 
         #region Margin
@@ -755,6 +785,12 @@ namespace Rendering {
                 case StylePropertyId.GridLayoutRowGap:
                     GridLayoutRowGap = property.IsDefined ? property.AsFloat : DefaultStyleValues.GridLayoutRowGap;
                     break;
+                case StylePropertyId.GridLayoutColAlignment:
+                    GridLayoutColAlignment = property.IsDefined ? property.AsCrossAxisAlignment : DefaultStyleValues.GridLayoutColAlignment;
+                    break;
+                case StylePropertyId.GridLayoutRowAlignment:
+                    GridLayoutRowAlignment = property.IsDefined ? property.AsCrossAxisAlignment : DefaultStyleValues.GridLayoutRowAlignment;
+                    break;
 
                 #endregion
 
@@ -963,6 +999,7 @@ namespace Rendering {
         [DebuggerStepThrough]
         private int ReadInt(StylePropertyId propertyId, int defaultValue) {
             StyleProperty retn;
+            properties = properties ?? new Dictionary<StylePropertyId, StyleProperty>();
             if (properties.TryGetValue(propertyId, out retn)) {
                 return retn.AsInt;
             }
@@ -972,6 +1009,7 @@ namespace Rendering {
 
         private void WriteInt(StylePropertyId propertyId, int newValue) {
             StyleProperty retn;
+            properties = properties ?? new Dictionary<StylePropertyId, StyleProperty>();
             if (properties.TryGetValue(propertyId, out retn)) {
                 if (retn.AsInt == newValue) return;
             }
@@ -984,6 +1022,7 @@ namespace Rendering {
         [DebuggerStepThrough]
         private float ReadFloat(StylePropertyId propertyId, float defaultValue) {
             StyleProperty retn;
+            properties = properties ?? new Dictionary<StylePropertyId, StyleProperty>();
             if (properties.TryGetValue(propertyId, out retn)) {
                 return retn.AsFloat;
             }
@@ -993,6 +1032,7 @@ namespace Rendering {
 
         private void WriteFloat(StylePropertyId propertyId, float newValue) {
             StyleProperty retn;
+            properties = properties ?? new Dictionary<StylePropertyId, StyleProperty>();
             if (properties.TryGetValue(propertyId, out retn)) {
                 if (retn.AsFloat == newValue) return;
             }
@@ -1017,12 +1057,13 @@ namespace Rendering {
             this.styleSet = styleSet;
         }
 
-        public BorderRadius borderRadius => new BorderRadius(
-            borderRadiusTopLeft,
-            borderRadiusTopRight,
-            borderRadiusBottomRight,
-            borderRadiusBottomLeft
-        );
+        public BorderRadius borderRadius =>
+            new BorderRadius(
+                borderRadiusTopLeft,
+                borderRadiusTopRight,
+                borderRadiusBottomRight,
+                borderRadiusBottomLeft
+            );
 
         public UIMeasurement BorderRadiusTopLeft {
             get { return borderRadiusTopLeft; }

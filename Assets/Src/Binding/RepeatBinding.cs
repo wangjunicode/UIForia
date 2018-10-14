@@ -35,7 +35,7 @@ public class RepeatBindingNode<T, U> : RepeatBindingNode where T : class, IList<
             context.view.DestroyElement(element.ownChildren[i]);
         }
 
-        ArrayPool<UIElement>.Release(element.ownChildren);
+        ArrayPool<UIElement>.Release(ref element.ownChildren);
         element.ownChildren = new UIElement[0];
         element.templateChildren = element.ownChildren;
     }
@@ -50,7 +50,7 @@ public class RepeatBindingNode<T, U> : RepeatBindingNode where T : class, IList<
 
         if (previousReference == null) {
             previousReference = new T();
-            ArrayPool<UIElement>.Release(element.ownChildren);
+            ArrayPool<UIElement>.Release(ref element.ownChildren);
             UIElement[] ownChildren = ArrayPool<UIElement>.GetExactSize(list.Count);
             element.ownChildren = ownChildren;
             for (int i = 0; i < list.Count; i++) {
@@ -81,7 +81,7 @@ public class RepeatBindingNode<T, U> : RepeatBindingNode where T : class, IList<
                 context.view.CreateElementFromTemplate(newItem, element);
             }
 
-            ArrayPool<UIElement>.Release(oldChildren);
+            ArrayPool<UIElement>.Release(ref oldChildren);
         }
         else if (previousReference.Count > list.Count) {
             UIElement[] oldChildren = element.ownChildren;
@@ -101,7 +101,7 @@ public class RepeatBindingNode<T, U> : RepeatBindingNode where T : class, IList<
                 ownChildren[i] = oldChildren[i];
             }
 
-            ArrayPool<UIElement>.Release(oldChildren);
+            ArrayPool<UIElement>.Release(ref oldChildren);
         }
 
         for (int i = 0; i < element.ownChildren.Length; i++) {

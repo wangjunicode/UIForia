@@ -18,11 +18,13 @@ namespace Rendering {
             [FieldOffset(0)] public readonly int intValue;
             [FieldOffset(0)] public readonly float floatValue;
 
+            [DebuggerStepThrough]
             public Reinterpret(float floatValue) {
                 intValue = 0;
                 this.floatValue = floatValue;
             }
 
+            [DebuggerStepThrough]
             public Reinterpret(int intValue) {
                 floatValue = 0;
                 this.intValue = intValue;
@@ -30,10 +32,12 @@ namespace Rendering {
 
         }
         
+        [DebuggerStepThrough]
         public static int EncodeToInt(float value) {
             return new Reinterpret(value).intValue;
         }
 
+        [DebuggerStepThrough]
         public static float DecodeToFloat(int value) {
             return new Reinterpret(value).floatValue;
         }

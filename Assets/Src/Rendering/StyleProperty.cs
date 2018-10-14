@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using System.Diagnostics;
 using Src;
 using Src.Layout;
 using Src.Layout.LayoutTypes;
@@ -16,6 +17,7 @@ namespace Rendering {
         public readonly int valuePart1;
         public readonly object objectField;
 
+        [DebuggerStepThrough]
         public StyleProperty(StylePropertyId propertyId, int value0, int value1 = 0, object objectField = null) {
             this.propertyId = propertyId;
             this.valuePart0 = value0;
@@ -23,7 +25,9 @@ namespace Rendering {
             this.objectField = objectField;
         }
 
-        public bool IsDefined => IntUtil.IsDefined(valuePart0) && IntUtil.IsDefined(valuePart1);
+        public bool IsDefined {
+            [DebuggerStepThrough] get { return IntUtil.IsDefined(valuePart0) && IntUtil.IsDefined(valuePart1); }
+        }
 
         public int AsInt => valuePart0;
         public float AsFloat => FloatUtil.DecodeToFloat(valuePart0);
@@ -45,6 +49,7 @@ namespace Rendering {
 
         public IReadOnlyList<GridTrackSize> AsGridTrackTemplate => (IReadOnlyList<GridTrackSize>) objectField;
 
+        [DebuggerStepThrough]
         public static StyleProperty Unset(StylePropertyId propertyId) {
             return new StyleProperty(propertyId, IntUtil.UnsetValue, IntUtil.UnsetValue);
         }

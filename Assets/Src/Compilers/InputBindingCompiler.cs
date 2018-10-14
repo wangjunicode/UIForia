@@ -582,7 +582,6 @@ namespace Src.Compilers {
             return retn;
         }
 
-
         private static readonly ValueTuple<string, Type> s_MouseEventAlias = ValueTuple.Create("$event", typeof(MouseInputEvent));
         private static readonly ValueTuple<string, Type> s_KeyboardEventAlias = ValueTuple.Create("$event", typeof(KeyboardInputEvent));
         private static readonly ValueTuple<string, Type> s_FocusEventAlias = ValueTuple.Create("$event", typeof(FocusEvent));

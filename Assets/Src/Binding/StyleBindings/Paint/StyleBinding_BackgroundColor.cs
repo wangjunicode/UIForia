@@ -13,6 +13,8 @@ namespace Src.StyleBindings {
         }        
         
         public override void Execute(UIElement element, UITemplateContext context) {
+            if (!element.style.IsInState(state)) return;
+                        
             Color color = expression.EvaluateTyped(context);
             Color currentColor = element.style.GetBackgroundColor(state);
             if (color != currentColor) {

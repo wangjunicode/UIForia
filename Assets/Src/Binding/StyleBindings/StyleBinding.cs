@@ -1,4 +1,5 @@
-﻿using Rendering;
+﻿using System;
+using Rendering;
 
 namespace Src.StyleBindings {
 
@@ -10,6 +11,14 @@ namespace Src.StyleBindings {
             this.state = state;
         }
 
+        public virtual bool ShouldExecute(UIElement element) {
+            return element.style.IsInState(state);
+        }
+
+        public virtual void BeforeExecute() {}
+
+        public virtual void AfterExecute() { }
+        
         public abstract void Apply(UIStyle style, UITemplateContext context);
 
         public abstract void Apply(UIStyleSet styleSet, UITemplateContext context);

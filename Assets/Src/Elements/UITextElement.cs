@@ -61,10 +61,10 @@ namespace Src {
             bool collapseSpaces = true; //style.computedStyle.TextCollapseWhiteSpace;
             bool preserveNewlines = false; //style.computedStyle.TextPreserveNewLines;
 
-            if (textInfo.spanInfos != null) ArrayPool<SpanInfo>.Release(textInfo.spanInfos);
-            if (textInfo.wordInfos != null) ArrayPool<WordInfo>.Release(textInfo.wordInfos);
-            if (textInfo.lineInfos != null) ArrayPool<LineInfo>.Release(textInfo.lineInfos);
-            if (textInfo.charInfos != null) ArrayPool<CharInfo>.Release(textInfo.charInfos);
+            if (textInfo.spanInfos != null) ArrayPool<SpanInfo>.Release(ref textInfo.spanInfos);
+            if (textInfo.wordInfos != null) ArrayPool<WordInfo>.Release(ref textInfo.wordInfos);
+            if (textInfo.lineInfos != null) ArrayPool<LineInfo>.Release(ref textInfo.lineInfos);
+            if (textInfo.charInfos != null) ArrayPool<CharInfo>.Release(ref textInfo.charInfos);
 
             // todo release text stuff
             textInfo = TextUtil.ProcessText(text, collapseSpaces, preserveNewlines, style.computedStyle.TextTransform);

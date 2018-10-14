@@ -4,6 +4,7 @@ using Src.Elements;
 using Src.Extensions;
 using Src.Util;
 using UnityEngine;
+using UnityEngine.UI;
 
 namespace Src.Systems {
 
@@ -334,12 +335,16 @@ namespace Src.Systems {
         public void OnVirtualScrollbarCreated(VirtualScrollbar scrollbar) {
             RenderData renderData = renderSkipTree.GetItem(scrollbar.targetElement);
 
-//            if (renderData != null) {
-////                if (renderData.mask == null) {
-////                    renderData.mask = renderData.unityTransform.gameObject.AddComponent<RectMask2D>();
-////                    m_VirtualScrollbarElements.Add(renderData);
-////                }
-//
+            if (renderData != null) {
+                var x = m_CanvasRendererMap[scrollbar.targetElement.id];
+                x.cull = true;//(new Rect(0, 0, 100f, 100f));
+            }
+        }
+//                if (renderData.mask == null) {
+//                    renderData.mask = renderData.unityTransform.gameObject.AddComponent<RectMask2D>();
+//                    m_VirtualScrollbarElements.Add(renderData);
+//                }
+
 //                if (scrollbar.orientation == ScrollbarOrientation.Horizontal) {
 //                    renderData.horizontalScrollbar = scrollbar;
 //                    RectTransform transform = CreateGameObject("Scrollbar H");
@@ -367,8 +372,7 @@ namespace Src.Systems {
 //                    renderData.verticalScrollbarHandle = handleTransform;
 //                }
 //            }
-        }
-
+        
     }
 
 }

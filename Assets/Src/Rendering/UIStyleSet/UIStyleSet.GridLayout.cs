@@ -13,11 +13,19 @@ namespace Rendering {
         }
 
         public CrossAxisAlignment GetGridLayoutColAlignment(StyleState state) {
-            return (CrossAxisAlignment) GetEnumValue(StylePropertyId.GridLayoutColAlignment, state);
+            return (CrossAxisAlignment) GetEnumProperty(StylePropertyId.GridLayoutColAlignment, state);
         }
 
         public CrossAxisAlignment GetGridLayoutRowAlignment(StyleState state) {
-            return (CrossAxisAlignment) GetEnumValue(StylePropertyId.GridLayoutRowAlignment, state);
+            return (CrossAxisAlignment) GetEnumProperty(StylePropertyId.GridLayoutRowAlignment, state);
+        }
+
+        public GridLayoutDensity GetGridLayoutDensity(StyleState state) {
+            return (GridLayoutDensity) GetEnumProperty(StylePropertyId.GridLayoutDensity, state);
+        }
+
+        public void SetGridLayoutDensity(GridLayoutDensity density, StyleState state) {
+            SetEnumProperty(StylePropertyId.GridLayoutDensity, (int) density, state);
         }
 
     }

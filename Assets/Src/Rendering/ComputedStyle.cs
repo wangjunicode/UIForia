@@ -42,7 +42,7 @@ namespace Rendering {
         private Texture2DAssetReference backgroundImage = DefaultStyleValues.BackgroundImage;
 
         public Color BorderColor {
-            get { return borderColor; }
+            [DebuggerStepThrough] get { return borderColor; }
             internal set {
                 if (value == borderColor) {
                     return;
@@ -54,7 +54,7 @@ namespace Rendering {
         }
 
         public Color BackgroundColor {
-            get { return backgroundColor; }
+            [DebuggerStepThrough] get { return backgroundColor; }
             internal set {
                 if (value == backgroundColor) {
                     return;
@@ -66,7 +66,7 @@ namespace Rendering {
         }
 
         public Texture2DAssetReference BackgroundImage {
-            get { return backgroundImage; }
+            [DebuggerStepThrough] get { return backgroundImage; }
             internal set {
                 if (backgroundImage.assetId == value.assetId) {
                     return;
@@ -85,7 +85,7 @@ namespace Rendering {
         private Overflow overflowY = DefaultStyleValues.OverflowY;
 
         public Overflow OverflowX {
-            get { return overflowX; }
+            [DebuggerStepThrough] get { return overflowX; }
             internal set {
                 if (value == overflowX) return;
                 overflowX = value;
@@ -94,7 +94,7 @@ namespace Rendering {
         }
 
         public Overflow OverflowY {
-            get { return overflowY; }
+            [DebuggerStepThrough] get { return overflowY; }
             internal set {
                 if (value == overflowY) return;
                 overflowY = value;
@@ -112,7 +112,7 @@ namespace Rendering {
         private CrossAxisAlignment flexSelfAlignment = DefaultStyleValues.FlexItemSelfAlignment;
 
         public int FlexItemOrder {
-            get { return flexOrderOverride; }
+            [DebuggerStepThrough] get { return flexOrderOverride; }
             internal set {
                 if (value < 0) value = 0;
                 if (flexOrderOverride == value) return;
@@ -122,7 +122,7 @@ namespace Rendering {
         }
 
         public int FlexItemGrowthFactor {
-            get { return flexGrowthFactor; }
+            [DebuggerStepThrough] get { return flexGrowthFactor; }
             internal set {
                 if (value < 0) value = 0;
                 if (flexGrowthFactor == value) return;
@@ -132,7 +132,7 @@ namespace Rendering {
         }
 
         public int FlexItemShrinkFactor {
-            get { return flexShrinkFactor; }
+            [DebuggerStepThrough] get { return flexShrinkFactor; }
             internal set {
                 if (value < 0) value = 0;
                 if (flexShrinkFactor == value) return;
@@ -142,7 +142,7 @@ namespace Rendering {
         }
 
         public CrossAxisAlignment FlexItemSelfAlignment {
-            get { return flexSelfAlignment; }
+            [DebuggerStepThrough] get { return flexSelfAlignment; }
             internal set {
                 if (value == flexSelfAlignment) return;
                 flexSelfAlignment = value;
@@ -160,7 +160,7 @@ namespace Rendering {
         private CrossAxisAlignment flexLayoutCrossAxisAlignment = DefaultStyleValues.FlexLayoutCrossAxisAlignment;
 
         public LayoutDirection FlexLayoutDirection {
-            get { return flexLayoutDirection; }
+            [DebuggerStepThrough] get { return flexLayoutDirection; }
             internal set {
                 if (flexLayoutDirection == value) return;
                 flexLayoutDirection = value;
@@ -169,7 +169,7 @@ namespace Rendering {
         }
 
         public LayoutWrap FlexLayoutWrap {
-            get { return flexLayoutWrap; }
+            [DebuggerStepThrough] get { return flexLayoutWrap; }
             internal set {
                 if (flexLayoutWrap == value) return;
                 flexLayoutWrap = value;
@@ -178,7 +178,7 @@ namespace Rendering {
         }
 
         public MainAxisAlignment FlexLayoutMainAxisAlignment {
-            get { return flexLayoutMainAxisAlignment; }
+            [DebuggerStepThrough] get { return flexLayoutMainAxisAlignment; }
             internal set {
                 if (flexLayoutMainAxisAlignment == value) return;
                 flexLayoutMainAxisAlignment = value;
@@ -187,7 +187,7 @@ namespace Rendering {
         }
 
         public CrossAxisAlignment FlexLayoutCrossAxisAlignment {
-            get { return flexLayoutCrossAxisAlignment; }
+            [DebuggerStepThrough] get { return flexLayoutCrossAxisAlignment; }
             internal set {
                 if (flexLayoutCrossAxisAlignment == value) return;
                 flexLayoutCrossAxisAlignment = value;
@@ -200,23 +200,39 @@ namespace Rendering {
         #region Grid Item
 
         public int GridItemColStart {
-            get { return ReadInt(StylePropertyId.GridItemColStart, DefaultStyleValues.GridItemColStart); }
-            set { WriteInt(StylePropertyId.GridItemColStart, value); }
+            [DebuggerStepThrough] get { return ReadInt(StylePropertyId.GridItemColStart, DefaultStyleValues.GridItemColStart); }
+            internal set { WriteInt(StylePropertyId.GridItemColStart, value); }
         }
 
         public int GridItemColSpan {
-            get { return ReadInt(StylePropertyId.GridItemColSpan, DefaultStyleValues.GridItemColSpan); }
-            set { WriteInt(StylePropertyId.GridItemColSpan, value); }
+            [DebuggerStepThrough] get { return ReadInt(StylePropertyId.GridItemColSpan, DefaultStyleValues.GridItemColSpan); }
+            internal set { WriteInt(StylePropertyId.GridItemColSpan, value); }
         }
 
         public int GridItemRowStart {
-            get { return ReadInt(StylePropertyId.GridItemRowStart, DefaultStyleValues.GridItemRowStart); }
-            set { WriteInt(StylePropertyId.GridItemRowStart, value); }
+            [DebuggerStepThrough] get { return ReadInt(StylePropertyId.GridItemRowStart, DefaultStyleValues.GridItemRowStart); }
+            internal set { WriteInt(StylePropertyId.GridItemRowStart, value); }
         }
 
         public int GridItemRowSpan {
-            get { return ReadInt(StylePropertyId.GridItemRowSpan, DefaultStyleValues.GridItemRowSpan); }
-            set { WriteInt(StylePropertyId.GridItemRowSpan, value); }
+            [DebuggerStepThrough] get { return ReadInt(StylePropertyId.GridItemRowSpan, DefaultStyleValues.GridItemRowSpan); }
+            internal set { WriteInt(StylePropertyId.GridItemRowSpan, value); }
+        }
+
+        public CrossAxisAlignment GridItemColSelfAlignment {
+            [DebuggerStepThrough]
+            get {
+                return (CrossAxisAlignment)ReadInt(StylePropertyId.GridItemColSelfAlignment, (int)DefaultStyleValues.GridItemColSelfAlignment);
+            }
+            internal set { WriteInt(StylePropertyId.GridItemColSelfAlignment, (int)value); }
+        }
+        
+        public CrossAxisAlignment GridItemRowSelfAlignment {
+            [DebuggerStepThrough]
+            get {
+                return (CrossAxisAlignment)ReadInt(StylePropertyId.GridItemRowSelfAlignment, (int)DefaultStyleValues.GridItemRowSelfAlignment);
+            }
+            internal set { WriteInt(StylePropertyId.GridItemRowSelfAlignment, (int)value); }
         }
 
         #endregion
@@ -230,76 +246,80 @@ namespace Rendering {
         private GridTrackSize gridLayoutRowAutoSize = DefaultStyleValues.GridLayoutRowAutoSize;
 
         public LayoutDirection GridLayoutDirection {
-            get { return (LayoutDirection) ReadInt(StylePropertyId.GridLayoutDirection, (int) DefaultStyleValues.GridLayoutDirection); }
+            [DebuggerStepThrough] get { return (LayoutDirection) ReadInt(StylePropertyId.GridLayoutDirection, (int) DefaultStyleValues.GridLayoutDirection); }
             set { WriteInt(StylePropertyId.GridLayoutDirection, (int) value); }
         }
 
         public GridLayoutDensity GridLayoutDensity {
-            get { return (GridLayoutDensity) ReadInt(StylePropertyId.GridLayoutDensity, (int) DefaultStyleValues.GridLayoutDensity); }
+            [DebuggerStepThrough] get { return (GridLayoutDensity) ReadInt(StylePropertyId.GridLayoutDensity, (int) DefaultStyleValues.GridLayoutDensity); }
             set { WriteInt(StylePropertyId.GridLayoutDensity, (int) value); }
         }
 
         public IReadOnlyList<GridTrackSize> GridLayoutColTemplate {
-            get { return gridLayoutColTemplate; }
+            [DebuggerStepThrough] get { return gridLayoutColTemplate; }
             set {
                 if (Equals(gridLayoutColTemplate, value)) {
                     return;
                 }
+
                 gridLayoutColTemplate = value;
                 SendEvent(new StyleProperty(StylePropertyId.GridLayoutColTemplate, 0, 0, gridLayoutColTemplate));
             }
         }
 
         public IReadOnlyList<GridTrackSize> GridLayoutRowTemplate {
-            get { return gridLayoutRowTemplate; }
+            [DebuggerStepThrough] get { return gridLayoutRowTemplate; }
             set {
                 if (Equals(gridLayoutRowTemplate, value)) {
                     return;
                 }
+
                 gridLayoutRowTemplate = value;
                 SendEvent(new StyleProperty(StylePropertyId.GridLayoutRowTemplate, 0, 0, gridLayoutRowTemplate));
             }
         }
 
         public GridTrackSize GridLayoutColAutoSize {
-            get { return gridLayoutColAutoSize; }
+            [DebuggerStepThrough] get { return gridLayoutColAutoSize; }
             set {
                 if (gridLayoutColAutoSize == value) {
                     return;
                 }
+
                 gridLayoutColAutoSize = value;
                 SendEvent(new StyleProperty(StylePropertyId.GridLayoutColAutoSize, FloatUtil.EncodeToInt(value.minValue), (int) value.minUnit));
             }
         }
 
         public GridTrackSize GridLayoutRowAutoSize {
-            get { return gridLayoutRowAutoSize; }
+            [DebuggerStepThrough] get { return gridLayoutRowAutoSize; }
             set {
                 if (gridLayoutRowAutoSize == value) {
                     return;
                 }
+
                 gridLayoutRowAutoSize = value;
                 SendEvent(new StyleProperty(StylePropertyId.GridLayoutRowAutoSize, FloatUtil.EncodeToInt(value.minValue), (int) value.minUnit));
             }
         }
 
         public float GridLayoutColGap {
-            get { return ReadFloat(StylePropertyId.GridLayoutColGap, DefaultStyleValues.GridLayoutColGap); }
+            [DebuggerStepThrough] get { return ReadFloat(StylePropertyId.GridLayoutColGap, DefaultStyleValues.GridLayoutColGap); }
             set { WriteFloat(StylePropertyId.GridLayoutColGap, value); }
         }
 
         public float GridLayoutRowGap {
-            get { return ReadFloat(StylePropertyId.GridLayoutRowGap, DefaultStyleValues.GridLayoutRowGap); }
+            [DebuggerStepThrough] get { return ReadFloat(StylePropertyId.GridLayoutRowGap, DefaultStyleValues.GridLayoutRowGap); }
             set { WriteFloat(StylePropertyId.GridLayoutRowGap, value); }
         }
 
         public CrossAxisAlignment GridLayoutColAlignment {
-            get { return (CrossAxisAlignment) ReadInt(StylePropertyId.GridLayoutColAlignment, (int) DefaultStyleValues.GridLayoutColAlignment); }
+            [DebuggerStepThrough] get { return (CrossAxisAlignment) ReadInt(StylePropertyId.GridLayoutColAlignment, (int) DefaultStyleValues.GridLayoutColAlignment); }
             set { WriteInt(StylePropertyId.GridLayoutColAlignment, (int) value); }
         }
 
         public CrossAxisAlignment GridLayoutRowAlignment {
-            get { return (CrossAxisAlignment) ReadInt(StylePropertyId.GridLayoutRowAlignment, (int) DefaultStyleValues.GridLayoutRowAlignment); }
+            [DebuggerStepThrough] get { return (CrossAxisAlignment) ReadInt(StylePropertyId.GridLayoutRowAlignment, (int) DefaultStyleValues.GridLayoutRowAlignment); }
             set { WriteInt(StylePropertyId.GridLayoutRowAlignment, (int) value); }
         }
 
@@ -316,7 +336,7 @@ namespace Rendering {
         private UIMeasurement preferredHeight = DefaultStyleValues.PreferredHeight;
 
         public UIMeasurement MinWidth {
-            get { return minWidth; }
+            [DebuggerStepThrough] get { return minWidth; }
             internal set {
                 if (minWidth == value) return;
                 minWidth = value;
@@ -325,7 +345,7 @@ namespace Rendering {
         }
 
         public UIMeasurement MaxWidth {
-            get { return maxWidth; }
+            [DebuggerStepThrough] get { return maxWidth; }
             internal set {
                 if (maxWidth == value) return;
                 maxWidth = value;
@@ -334,7 +354,7 @@ namespace Rendering {
         }
 
         public UIMeasurement PreferredWidth {
-            get { return preferredWidth; }
+            [DebuggerStepThrough] get { return preferredWidth; }
             internal set {
                 if (preferredWidth == value) return;
                 preferredWidth = value;
@@ -343,7 +363,7 @@ namespace Rendering {
         }
 
         public UIMeasurement MinHeight {
-            get { return minHeight; }
+            [DebuggerStepThrough] get { return minHeight; }
             internal set {
                 if (minHeight == value) return;
                 minHeight = value;
@@ -352,7 +372,7 @@ namespace Rendering {
         }
 
         public UIMeasurement MaxHeight {
-            get { return maxHeight; }
+            [DebuggerStepThrough] get { return maxHeight; }
             internal set {
                 if (maxHeight == value) return;
                 maxHeight = value;
@@ -361,7 +381,7 @@ namespace Rendering {
         }
 
         public UIMeasurement PreferredHeight {
-            get { return preferredHeight; }
+            [DebuggerStepThrough] get { return preferredHeight; }
             internal set {
                 if (preferredHeight == value) return;
                 preferredHeight = value;
@@ -388,7 +408,7 @@ namespace Rendering {
         private UIMeasurement marginLeft = DefaultStyleValues.MarginLeft;
 
         public UIMeasurement MarginTop {
-            get { return marginTop; }
+            [DebuggerStepThrough] get { return marginTop; }
             internal set {
                 if (marginTop == value) return;
                 marginTop = value;
@@ -397,7 +417,7 @@ namespace Rendering {
         }
 
         public UIMeasurement MarginRight {
-            get { return marginRight; }
+            [DebuggerStepThrough] get { return marginRight; }
             internal set {
                 if (marginRight == value) return;
                 marginRight = value;
@@ -406,7 +426,7 @@ namespace Rendering {
         }
 
         public UIMeasurement MarginBottom {
-            get { return marginBottom; }
+            [DebuggerStepThrough] get { return marginBottom; }
             internal set {
                 if (marginBottom == value) return;
                 marginBottom = value;
@@ -415,7 +435,7 @@ namespace Rendering {
         }
 
         public UIMeasurement MarginLeft {
-            get { return marginLeft; }
+            [DebuggerStepThrough] get { return marginLeft; }
             internal set {
                 if (marginLeft == value) return;
                 marginLeft = value;
@@ -433,7 +453,7 @@ namespace Rendering {
         private UIFixedLength borderLeft = DefaultStyleValues.BorderLeft;
 
         public UIFixedLength BorderTop {
-            get { return borderTop; }
+            [DebuggerStepThrough] get { return borderTop; }
             internal set {
                 if (borderTop == value) return;
                 borderTop = value;
@@ -442,7 +462,7 @@ namespace Rendering {
         }
 
         public UIFixedLength BorderRight {
-            get { return borderRight; }
+            [DebuggerStepThrough] get { return borderRight; }
             internal set {
                 if (borderRight == value) return;
                 borderRight = value;
@@ -451,7 +471,7 @@ namespace Rendering {
         }
 
         public UIFixedLength BorderBottom {
-            get { return borderBottom; }
+            [DebuggerStepThrough] get { return borderBottom; }
             internal set {
                 if (borderBottom == value) return;
                 borderBottom = value;
@@ -460,7 +480,7 @@ namespace Rendering {
         }
 
         public UIFixedLength BorderLeft {
-            get { return borderLeft; }
+            [DebuggerStepThrough] get { return borderLeft; }
             internal set {
                 if (borderLeft == value) return;
                 borderLeft = value;
@@ -478,7 +498,7 @@ namespace Rendering {
         private UIFixedLength paddingLeft = DefaultStyleValues.PaddingLeft;
 
         public UIFixedLength PaddingTop {
-            get { return paddingTop; }
+            [DebuggerStepThrough] get { return paddingTop; }
             internal set {
                 if (paddingTop == value) return;
                 paddingTop = value;
@@ -487,7 +507,7 @@ namespace Rendering {
         }
 
         public UIFixedLength PaddingRight {
-            get { return paddingRight; }
+            [DebuggerStepThrough] get { return paddingRight; }
             internal set {
                 if (paddingRight == value) return;
                 paddingRight = value;
@@ -496,7 +516,7 @@ namespace Rendering {
         }
 
         public UIFixedLength PaddingBottom {
-            get { return paddingBottom; }
+            [DebuggerStepThrough] get { return paddingBottom; }
             internal set {
                 if (paddingBottom == value) return;
                 paddingBottom = value;
@@ -505,7 +525,7 @@ namespace Rendering {
         }
 
         public UIFixedLength PaddingLeft {
-            get { return paddingLeft; }
+            [DebuggerStepThrough] get { return paddingLeft; }
             internal set {
                 if (paddingLeft == value) return;
                 paddingLeft = value;
@@ -525,7 +545,7 @@ namespace Rendering {
         private TextUtil.TextTransform textTransform = DefaultStyleValues.TextTransform;
 
         public Color TextColor {
-            get { return textColor; }
+            [DebuggerStepThrough] get { return textColor; }
             internal set {
                 if (textColor == value) return;
                 textColor = value;
@@ -534,7 +554,7 @@ namespace Rendering {
         }
 
         public FontAssetReference FontAsset {
-            get { return fontAsset; }
+            [DebuggerStepThrough] get { return fontAsset; }
             internal set {
                 if (fontAsset.assetId == value.assetId) return;
                 fontAsset = value;
@@ -543,7 +563,7 @@ namespace Rendering {
         }
 
         public int FontSize {
-            get { return fontSize; }
+            [DebuggerStepThrough] get { return fontSize; }
             internal set {
                 if (fontSize == value) return;
                 fontSize = value;
@@ -552,7 +572,7 @@ namespace Rendering {
         }
 
         public TextUtil.FontStyle FontStyle {
-            get { return fontStyle; }
+            [DebuggerStepThrough] get { return fontStyle; }
             internal set {
                 if (fontStyle == value) return;
                 fontStyle = value;
@@ -561,7 +581,7 @@ namespace Rendering {
         }
 
         public TextUtil.TextAlignment TextAlignment {
-            get { return m_TextAlignment; }
+            [DebuggerStepThrough] get { return m_TextAlignment; }
             internal set {
                 if (m_TextAlignment == value) return;
                 m_TextAlignment = value;
@@ -570,7 +590,7 @@ namespace Rendering {
         }
 
         public TextUtil.TextTransform TextTransform {
-            get { return textTransform; }
+            [DebuggerStepThrough] get { return textTransform; }
             internal set {
                 if (textTransform == value) return;
                 textTransform = value;
@@ -591,7 +611,7 @@ namespace Rendering {
         private float transformRotation = DefaultStyleValues.TransformRotation;
 
         public UIFixedLength TransformPositionX {
-            get { return transformPositionX; }
+            [DebuggerStepThrough] get { return transformPositionX; }
             internal set {
                 if (value == UIFixedLength.Unset) value = DefaultStyleValues.TransformPositionX;
                 if (transformPositionX == value) return;
@@ -601,7 +621,7 @@ namespace Rendering {
         }
 
         public UIFixedLength TransformPositionY {
-            get { return transformPositionY; }
+            [DebuggerStepThrough] get { return transformPositionY; }
             internal set {
                 if (value == UIFixedLength.Unset) value = DefaultStyleValues.TransformPositionY;
                 if (transformPositionY == value) return;
@@ -611,7 +631,7 @@ namespace Rendering {
         }
 
         public UIFixedLength TransformPivotX {
-            get { return transformPivotX; }
+            [DebuggerStepThrough] get { return transformPivotX; }
             internal set {
                 if (value == UIFixedLength.Unset) value = DefaultStyleValues.TransformPivotX;
                 if (transformPivotX == value) return;
@@ -621,7 +641,7 @@ namespace Rendering {
         }
 
         public UIFixedLength TransformPivotY {
-            get { return transformPivotY; }
+            [DebuggerStepThrough] get { return transformPivotY; }
             internal set {
                 if (value == UIFixedLength.Unset) value = DefaultStyleValues.TransformPivotY;
                 if (transformPivotY == value) return;
@@ -631,7 +651,7 @@ namespace Rendering {
         }
 
         public float TransformScaleX {
-            get { return transformScaleX; }
+            [DebuggerStepThrough] get { return transformScaleX; }
             internal set {
                 if (!FloatUtil.IsDefined(value)) value = DefaultStyleValues.TransformScaleX;
                 if (Mathf.Approximately(value, transformScaleX)) return;
@@ -641,7 +661,7 @@ namespace Rendering {
         }
 
         public float TransformScaleY {
-            get { return transformScaleY; }
+            [DebuggerStepThrough] get { return transformScaleY; }
             internal set {
                 if (!FloatUtil.IsDefined(value)) value = DefaultStyleValues.TransformScaleY;
                 if (Mathf.Approximately(value, transformScaleY)) return;
@@ -651,7 +671,7 @@ namespace Rendering {
         }
 
         public float TransformRotation {
-            get { return transformRotation; }
+            [DebuggerStepThrough] get { return transformRotation; }
             internal set {
                 if (!FloatUtil.IsDefined(value)) value = DefaultStyleValues.TransformRotation;
                 if (Mathf.Approximately(value, transformRotation)) return;
@@ -661,7 +681,7 @@ namespace Rendering {
         }
 
         public FixedLengthVector TransformPosition {
-            get { return new FixedLengthVector(transformPositionX, transformPositionY); }
+            [DebuggerStepThrough] get { return new FixedLengthVector(transformPositionX, transformPositionY); }
             internal set {
                 TransformPositionX = value.x;
                 TransformPositionY = value.y;
@@ -676,7 +696,7 @@ namespace Rendering {
         private LayoutBehavior layoutBehavior = DefaultStyleValues.LayoutBehavior;
 
         public LayoutType LayoutType {
-            get { return layoutType; }
+            [DebuggerStepThrough] get { return layoutType; }
             internal set {
                 if (layoutType == value) return;
                 layoutType = value;
@@ -685,7 +705,7 @@ namespace Rendering {
         }
 
         public LayoutBehavior LayoutBehavior {
-            get { return layoutBehavior; }
+            [DebuggerStepThrough] get { return layoutBehavior; }
             internal set {
                 if (layoutBehavior == value) return;
                 layoutBehavior = value;
@@ -749,12 +769,22 @@ namespace Rendering {
                 #region Grid Item
 
                 case StylePropertyId.GridItemColStart:
+                    GridItemColStart = property.IsDefined ? value0 : DefaultStyleValues.GridItemColStart;
                     break;
                 case StylePropertyId.GridItemColSpan:
+                    GridItemColSpan = property.IsDefined ? value0 : DefaultStyleValues.GridItemColSpan;
                     break;
                 case StylePropertyId.GridItemRowStart:
+                    GridItemRowStart = property.IsDefined ? value0 : DefaultStyleValues.GridItemRowStart;
                     break;
                 case StylePropertyId.GridItemRowSpan:
+                    GridItemRowSpan = property.IsDefined ? value0 : DefaultStyleValues.GridItemRowSpan;
+                    break;
+                case StylePropertyId.GridItemColSelfAlignment:
+                    GridItemColSelfAlignment = property.IsDefined ? property.AsCrossAxisAlignment : DefaultStyleValues.GridItemColSelfAlignment;
+                    break;
+                case StylePropertyId.GridItemRowSelfAlignment:
+                    GridItemRowSelfAlignment = property.IsDefined ? property.AsCrossAxisAlignment : DefaultStyleValues.GridItemRowSelfAlignment;
                     break;
 
                 #endregion
@@ -995,7 +1025,7 @@ namespace Rendering {
                     throw new ArgumentOutOfRangeException(nameof(property.propertyId), property.propertyId, null);
             }
         }
-
+        
         [DebuggerStepThrough]
         private int ReadInt(StylePropertyId propertyId, int defaultValue) {
             StyleProperty retn;
@@ -1066,7 +1096,7 @@ namespace Rendering {
             );
 
         public UIMeasurement BorderRadiusTopLeft {
-            get { return borderRadiusTopLeft; }
+            [DebuggerStepThrough] get { return borderRadiusTopLeft; }
             internal set {
                 if (borderRadiusTopLeft == value) return;
                 borderRadiusTopLeft = value;
@@ -1082,7 +1112,7 @@ namespace Rendering {
         }
 
         public UIMeasurement BorderRadiusTopRight {
-            get { return borderRadiusTopRight; }
+            [DebuggerStepThrough] get { return borderRadiusTopRight; }
             internal set {
                 if (borderRadiusTopRight == value) return;
                 borderRadiusTopRight = value;
@@ -1098,7 +1128,7 @@ namespace Rendering {
         }
 
         public UIMeasurement BorderRadiusBottomRight {
-            get { return borderRadiusBottomRight; }
+            [DebuggerStepThrough] get { return borderRadiusBottomRight; }
             internal set {
                 if (borderRadiusBottomRight == value) return;
                 borderRadiusBottomRight = value;
@@ -1114,7 +1144,7 @@ namespace Rendering {
         }
 
         public UIMeasurement BorderRadiusBottomLeft {
-            get { return borderRadiusBottomLeft; }
+            [DebuggerStepThrough] get { return borderRadiusBottomLeft; }
             internal set {
                 if (borderRadiusBottomLeft == value) return;
                 borderRadiusBottomLeft = value;

@@ -11,7 +11,7 @@ namespace Src.Editor {
             GUI.enabled = false;
             UIElement element = ((StyleDebugView) target).element;
 
-            if (element.style == null || element.style.computedStyle == null) {
+            if (element.style?.computedStyle == null) {
                 return;
             }
             ComputedStyle style = element.style.computedStyle;
@@ -32,6 +32,17 @@ namespace Src.Editor {
             DrawMeasurement("Min Height", style.MinHeight);
             DrawMeasurement("Max Height", style.MaxHeight);
             DrawMeasurement("Preferred Height", style.PreferredHeight);
+
+            UIElement parent = element.Parent as UIElement;
+            if (parent?.style.computedStyle.LayoutType == LayoutType.Grid) {
+                EditorGUILayout.IntField("GridItem Col Start", IntUtil.IsDefined(style.GridItemColStart) ? style.GridItemColStart : -1);
+                EditorGUILayout.IntField("GridItem Col Span", style.GridItemColSpan);
+                EditorGUILayout.IntField("GridItem Row Start", IntUtil.IsDefined(style.GridItemRowStart) ? style.GridItemRowStart : -1);
+                EditorGUILayout.IntField("GridItem Row Span", style.GridItemRowSpan);
+            }
+
+            EditorGUILayout.EnumPopup("Grid Item Col Self Align", style.GridItemColSelfAlignment);
+            EditorGUILayout.EnumPopup("Grid Item Row Self Align", style.GridItemRowSelfAlignment);
             
             EditorGUILayout.Space();
 

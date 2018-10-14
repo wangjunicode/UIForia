@@ -33,11 +33,7 @@ namespace Rendering {
         
         [PublicAPI]
         public void SetBackgroundColor(Color color, StyleState state) {
-            UIStyle style = GetOrCreateInstanceStyle(state);
-            style.BackgroundColor = color;
-            if ((state & currentState) != 0 && style == GetActiveStyleForProperty(StylePropertyId.BackgroundColor)) {
-                computedStyle.BackgroundColor = color;
-            }
+            SetColorProperty(StylePropertyId.BackgroundColor, color, state);
         }
 
         [PublicAPI]
@@ -48,8 +44,6 @@ namespace Rendering {
                 computedStyle.BackgroundImage = image;
             }
         }
-
-      
 
         [PublicAPI]
         public void SetBorderColor(Color color, StyleState state) {

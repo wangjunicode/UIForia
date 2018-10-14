@@ -17,7 +17,7 @@ namespace Rendering {
         }
 
         public CrossAxisAlignment GetFlexItemSelfAlignment(StyleState state) {
-            return (CrossAxisAlignment)GetEnumValue(StylePropertyId.FlexItemSelfAlignment, state);
+            return (CrossAxisAlignment)GetEnumProperty(StylePropertyId.FlexItemSelfAlignment, state);
         }
 
         public void SetFlexItemGrowFactor(int growthFactor, StyleState state) {

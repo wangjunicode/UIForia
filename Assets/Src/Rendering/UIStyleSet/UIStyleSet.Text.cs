@@ -58,7 +58,7 @@ namespace Rendering {
         }
 
         public TextUtil.FontStyle GetFontStyle(StyleState state) {
-            return (TextUtil.FontStyle) GetEnumValue(StylePropertyId.TextFontStyle, state);
+            return (TextUtil.FontStyle) GetEnumProperty(StylePropertyId.TextFontStyle, state);
         }
 
         public void SetFontStyle(TextUtil.FontStyle newFontStyle, StyleState state) {
@@ -66,7 +66,7 @@ namespace Rendering {
         }
 
         public TextUtil.TextAlignment GetTextAnchor(StyleState state) {
-            return (TextUtil.TextAlignment) GetEnumValue(StylePropertyId.TextAnchor, state);
+            return (TextUtil.TextAlignment) GetEnumProperty(StylePropertyId.TextAnchor, state);
         }
 
         public void SetTextAnchor(TextUtil.TextAlignment newTextAlignment, StyleState state) {

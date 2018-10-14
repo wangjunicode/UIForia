@@ -1,9 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project version="4">
   <component name="ContentModelStore">
-    <e p="$USER_HOME$/Library/Caches/Rider2018.2/extResources" t="IncludeRecursive" />
-    <e p="$USER_HOME$/Library/Caches/Rider2018.2/resharper-host/local/Transient/ReSharperHost/v182/SolutionCaches/_UIElements.-870298077.00" t="ExcludeRecursive" />
-    <e p="$PROJECT_DIR$" t="IncludeRecursive">
+    <e p="C:\Seed\UIElements" t="IncludeRecursive">
       <e p="_DemoAsmDef.csproj" t="IncludeRecursive" />
       <e p="Assembly-CSharp-Editor.csproj" t="IncludeRecursive" />
       <e p="Assets" t="Include">
@@ -182,7 +180,6 @@
             <e p="UIPrimitiveElement.cs" t="Include" />
             <e p="UIRepeatChild.cs" t="Include" />
             <e p="UIRepeatElement.cs" t="Include" />
-            <e p="UIRepeatTerminal.cs" t="Include" />
             <e p="UIShapeElement.cs" t="Include" />
             <e p="UISwitchCaseElement.cs" t="Include" />
             <e p="UISwitchDefaultElement.cs" t="Include" />
@@ -254,34 +251,27 @@
           <e p="Layout" t="Include">
             <e p="CrossAxisAlignment.cs" t="Include" />
             <e p="Extents.cs" t="Include" />
-            <e p="GridAutoFlow.cs" t="Include" />
-            <e p="GridDefinition.cs" t="Include" />
             <e p="GridItem.cs" t="Include" />
             <e p="GridLayout.cs" t="Include" />
             <e p="GridLayoutDensity.cs" t="Include" />
             <e p="GridPlacement.cs" t="Include" />
-            <e p="GridPlacementParameters.cs" t="Include" />
             <e p="GridTrack.cs" t="Include" />
-            <e p="GridTrackSizeFn.cs" t="Include" />
-            <e p="GridTrackSizer.cs" t="Include" />
-            <e p="GridTrackSizeType.cs" t="Include" />
             <e p="LayoutBehavior.cs" t="Include" />
-            <e p="LayoutConstraints.cs" t="Include" />
             <e p="LayoutDirection.cs" t="Include" />
             <e p="LayoutFlowType.cs" t="Include" />
-            <e p="LayoutNode.cs" t="Include" />
             <e p="LayoutResult.cs" t="Include" />
             <e p="LayoutType.cs" t="Include" />
             <e p="LayoutTypes" t="Include">
               <e p="FixedLayoutBox.cs" t="Include" />
               <e p="FlexLayoutBox.cs" t="Include" />
               <e p="GridLayoutBox.cs" t="Include" />
+              <e p="GridTemplateUnit.cs" t="Include" />
+              <e p="GridTrackSize.cs" t="Include" />
               <e p="ImageLayoutBox.cs" t="Include" />
               <e p="LayoutBox.cs" t="Include" />
               <e p="RootLayoutBox.cs" t="Include" />
-              <e p="TextContainerLayoutBox.cs" t="Include" />
+              <e p="TextLayoutBox.cs" t="Include" />
             </e>
-            <e p="LayoutUpdateType.cs" t="Include" />
             <e p="LayoutWrap.cs" t="Include" />
             <e p="MainAxisAlignment.cs" t="Include" />
             <e p="UIDimensions.cs" t="Include" />
@@ -348,21 +338,17 @@
             <e p="ContentBoxRect.cs" t="Include" />
             <e p="DefaultStyleValues.cs" t="Include" />
             <e p="Easing.cs" t="Include" />
-            <e p="GOTextSizeCalculator.cs" t="Include" />
             <e p="HorizontalScrollbarAttachment.cs" t="Include" />
             <e p="IDirectDrawMesh.cs" t="Include" />
             <e p="IMGUIRenderData.cs" t="Include" />
-            <e p="IMGUITextSizeCalculator.cs" t="Include" />
             <e p="IRenderSystem.cs" t="Include" />
             <e p="IStyleChangeHandler.cs" t="Include" />
             <e p="ISystem.cs" t="Include" />
             <e p="ITextSizeCalculator.cs" t="Include" />
-            <e p="LayoutParameters.cs" t="Include" />
             <e p="Overflow.cs" t="Include" />
             <e p="Paint.cs" t="Include" />
             <e p="RenderConstants.cs" t="Include" />
             <e p="RenderData.cs" t="Include" />
-            <e p="RenderPrimitiveType.cs" t="Include" />
             <e p="StandardDrawable.cs" t="Include" />
             <e p="StyleColor.cs" t="Include" />
             <e p="StyleProperty.cs" t="Include" />
@@ -462,7 +448,6 @@
             <e p="UIGraphicTemplate.cs" t="Include" />
             <e p="UIImageTemplate.cs" t="Include" />
             <e p="UIRepeatTemplate.cs" t="Include" />
-            <e p="UIRepeatTerminalTemplate.cs" t="Include" />
             <e p="UIShapeTemplate.cs" t="Include" />
             <e p="UISwitchCaseTemplate.cs" t="Include" />
             <e p="UISwitchDefaultTemplate.cs" t="Include" />
@@ -569,5 +554,8 @@
       <e p="TestAsm.csproj" t="IncludeRecursive" />
       <e p="UIElements.sln" t="IncludeFlat" />
     </e>
+    <e p="C:\Users\Matt\.Rider2018.2\config\extensions" t="IncludeRecursive" />
+    <e p="C:\Users\Matt\.Rider2018.2\system\extResources" t="IncludeRecursive" />
+    <e p="C:\Users\Matt\.Rider2018.2\system\resharper-host\local\Transient\ReSharperHost\v182\SolutionCaches\_UIElements.1439856042.00" t="ExcludeRecursive" />
   </component>
 </project>

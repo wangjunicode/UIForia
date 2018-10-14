@@ -354,7 +354,6 @@ namespace Rendering {
                 }
             }
 
-
             s_DefinedMap.Clear();
         }
 
@@ -377,7 +376,7 @@ namespace Rendering {
                 : IntUtil.UnsetValue;
         }
 
-        private int GetEnumValue(StylePropertyId propertyId, StyleState state) {
+        private int GetEnumProperty(StylePropertyId propertyId, StyleState state) {
             StyleProperty property = GetPropertyValueInState(propertyId, state);
             return property.IsDefined
                 ? property.valuePart0
@@ -449,6 +448,164 @@ namespace Rendering {
             computedStyle.SetProperty(GetPropertyValue(propertyId));
         }
 
+        public void SetProperty(StyleProperty property, StyleState state) {
+            throw new NotImplementedException();
+            switch (property.propertyId) {
+                case StylePropertyId.OverflowX:
+                    break;
+                case StylePropertyId.OverflowY:
+                    break;
+                case StylePropertyId.BackgroundColor:
+                    break;
+                case StylePropertyId.BorderColor:
+                    break;
+                case StylePropertyId.BackgroundImage:
+                    break;
+                case StylePropertyId.GridItemColStart:
+                    break;
+                case StylePropertyId.GridItemColSpan:
+                    break;
+                case StylePropertyId.GridItemRowStart:
+                    break;
+                case StylePropertyId.GridItemRowSpan:
+                    break;
+                case StylePropertyId.GridLayoutDirection:
+                    break;
+                case StylePropertyId.GridLayoutDensity:
+                    break;
+                case StylePropertyId.GridLayoutColTemplate:
+                    break;
+                case StylePropertyId.GridLayoutRowTemplate:
+                    break;
+                case StylePropertyId.GridLayoutColAutoSize:
+                    break;
+                case StylePropertyId.GridLayoutRowAutoSize:
+                    break;
+                case StylePropertyId.GridLayoutColGap:
+                    break;
+                case StylePropertyId.GridLayoutRowGap:
+                    break;
+                case StylePropertyId.GridLayoutColAlignment:
+                    break;
+                case StylePropertyId.GridLayoutRowAlignment:
+                    break;
+                case StylePropertyId.FlexLayoutWrap:
+                    break;
+                case StylePropertyId.FlexLayoutDirection:
+                    break;
+                case StylePropertyId.FlexLayoutMainAxisAlignment:
+                    break;
+                case StylePropertyId.FlexLayoutCrossAxisAlignment:
+                    break;
+                case StylePropertyId.FlexItemSelfAlignment:
+                    break;
+                case StylePropertyId.FlexItemOrder:
+                    break;
+                case StylePropertyId.FlexItemGrow:
+                    break;
+                case StylePropertyId.FlexItemShrink:
+                    break;
+                case StylePropertyId.MarginTop:
+                    break;
+                case StylePropertyId.MarginRight:
+                    break;
+                case StylePropertyId.MarginBottom:
+                    break;
+                case StylePropertyId.MarginLeft:
+                    break;
+                case StylePropertyId.BorderTop:
+                    break;
+                case StylePropertyId.BorderRight:
+                    break;
+                case StylePropertyId.BorderBottom:
+                    break;
+                case StylePropertyId.BorderLeft:
+                    break;
+                case StylePropertyId.PaddingTop:
+                    break;
+                case StylePropertyId.PaddingRight:
+                    break;
+                case StylePropertyId.PaddingBottom:
+                    break;
+                case StylePropertyId.PaddingLeft:
+                    break;
+                case StylePropertyId.BorderRadiusTopLeft:
+                    break;
+                case StylePropertyId.BorderRadiusTopRight:
+                    break;
+                case StylePropertyId.BorderRadiusBottomLeft:
+                    break;
+                case StylePropertyId.BorderRadiusBottomRight:
+                    break;
+                case StylePropertyId.TransformPositionX:
+                    break;
+                case StylePropertyId.TransformPositionY:
+                    break;
+                case StylePropertyId.TransformScaleX:
+                    break;
+                case StylePropertyId.TransformScaleY:
+                    break;
+                case StylePropertyId.TransformPivotX:
+                    break;
+                case StylePropertyId.TransformPivotY:
+                    break;
+                case StylePropertyId.TransformRotation:
+                    break;
+                case StylePropertyId.__TextPropertyStart__:
+                    break;
+                case StylePropertyId.TextColor:
+                    break;
+                case StylePropertyId.TextFontAsset:
+                    break;
+                case StylePropertyId.TextFontSize:
+                    break;
+                case StylePropertyId.TextFontStyle:
+                    break;
+                case StylePropertyId.TextAnchor:
+                    break;
+                case StylePropertyId.TextWhitespaceMode:
+                    break;
+                case StylePropertyId.TextWrapMode:
+                    break;
+                case StylePropertyId.TextHorizontalOverflow:
+                    break;
+                case StylePropertyId.TextVerticalOverflow:
+                    break;
+                case StylePropertyId.TextIndentFirstLine:
+                    break;
+                case StylePropertyId.TextIndentNewLine:
+                    break;
+                case StylePropertyId.TextLayoutStyle:
+                    break;
+                case StylePropertyId.TextAutoSize:
+                    break;
+                case StylePropertyId.TextTransform:
+                    break;
+                case StylePropertyId.__TextPropertyEnd__:
+                    break;
+                case StylePropertyId.MinWidth:
+                    break;
+                case StylePropertyId.MaxWidth:
+                    break;
+                case StylePropertyId.PreferredWidth:
+                    break;
+                case StylePropertyId.MinHeight:
+                    break;
+                case StylePropertyId.MaxHeight:
+                    break;
+                case StylePropertyId.PreferredHeight:
+                    break;
+                case StylePropertyId.LayoutType:
+                    break;
+                case StylePropertyId.IsInLayoutFlow:
+                    break;
+                case StylePropertyId.LayoutBehavior:
+                    break;
+                default:
+                    throw new ArgumentOutOfRangeException();
+            }    
+        }
+        
         public void Animate(StylePropertyId propertyId, float localPositionY, EasingFunction cubicEaseInOut, float time) {
             switch (propertyId) {
                 case StylePropertyId.OverflowX:

@@ -1,10 +1,84 @@
+using System.Collections.Generic;
 using Rendering;
 using Src;
 using Src.Layout;
+using Src.Layout.LayoutTypes;
+using Src.Rendering;
 using UnityEngine;
 
 public class ChatWindow_Styles {
 
+    [ExportStyle("grid")]
+    public static UIStyle Grid() {
+        return new UIStyle() {
+            LayoutType = LayoutType.Grid,
+            GridLayoutColGapSize = 12f,
+            GridLayoutRowGapSize = 12f,
+            GridLayoutRowTemplate = new [] {
+                GridTrackSize.MaxContent,
+                new GridTrackSize(100f),
+                new GridTrackSize(100f),
+                new GridTrackSize(100f),
+                new GridTrackSize(100f),
+            },
+            GridLayoutColTemplate = new [] {
+                GridTrackSize.Flex,
+                new GridTrackSize(100f)
+            },
+            GridLayoutRowAlignment = CrossAxisAlignment.Center,
+            GridLayoutColAlignment = CrossAxisAlignment.Stretch,
+            GridLayoutColAutoSize = 100f,
+        };
+    }
+    
+    [ExportStyle("grid-item")]
+    public static UIStyle GridItem() {
+        return new UIStyle() {
+            BackgroundColor = Color.red,
+            PreferredWidth = 100f,
+            PreferredHeight = 100f,
+            FlexLayoutCrossAxisAlignment = CrossAxisAlignment.Center,
+            FlexLayoutMainAxisAlignment = MainAxisAlignment.Center,
+        };
+    }
+    
+    [ExportStyle("overflow")]
+    public static UIStyle Overflow() {
+        return new UIStyle() {
+            BackgroundColor = Color.red,
+            OverflowX = Src.Rendering.Overflow.Scroll,
+            OverflowY = Src.Rendering.Overflow.Scroll
+        };
+    }
+    
+    [ExportStyle("grid-item-alt1")]
+    public static UIStyle GridItemAlt() {
+        return new UIStyle() {
+//            GridItemColSelfAlignment =CrossAxisAlignment.Center,
+            GridItemRowSelfAlignment =CrossAxisAlignment.Center,
+            BackgroundColor = Color.blue,
+            PreferredWidth = 100f,
+            PreferredHeight = 100f,
+            FlexLayoutCrossAxisAlignment = CrossAxisAlignment.Center,
+            FlexLayoutMainAxisAlignment = MainAxisAlignment.Center,
+        };
+    }
+    
+    [ExportStyle("grid-item-alt2")]
+    public static UIStyle GridItemAlt2() {
+        return new UIStyle() {
+//            GridItemColSelfAlignment =CrossAxisAlignment.Center,
+            GridItemRowSelfAlignment =CrossAxisAlignment.Center,
+            BackgroundColor = Color.green,
+            PreferredWidth = 100f,
+            PreferredHeight = 100f,
+            FlexLayoutCrossAxisAlignment = CrossAxisAlignment.Center,
+            FlexLayoutMainAxisAlignment = MainAxisAlignment.Center,
+            GridItemColStart = 1,
+            GridItemColSpan = 3
+        };
+    }
+    
     [ExportStyle("container")]
     public static UIStyle Container() {
         return new UIStyle() {

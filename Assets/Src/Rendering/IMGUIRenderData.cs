@@ -15,12 +15,12 @@ namespace Src.Systems {
         public TextStyle textStyle;
         
         public UIElement element;
-        public RenderPrimitiveType primitiveType;
+     //   public RenderPrimitiveType primitiveType;
 
         public IMGUIRenderData(UIElement element) {
             this.element = element;
             this.borderSize = ContentBoxRect.Unset;
-            this.primitiveType = RenderPrimitiveType.None;
+           // this.primitiveType = RenderPrimitiveType.None;
         }
         
         public int UniqueId => element.id;

@@ -53,7 +53,7 @@ namespace Src.Util {
             Array.Resize(ref array, minSize);
         }
 
-        public static void Release(T[] array) {
+        public static void Release(ref T[] array) {
             if (array == null) return;
             Array.Clear(array, 0, array.Length);
             if (s_ArrayPool.Count == MaxPoolSize) {
@@ -73,6 +73,8 @@ namespace Src.Util {
             else {
                 s_ArrayPool.Add(array);
             }
+
+            array = null;
         }
 
         public static T[] CopyFromList(IList<T> source) {

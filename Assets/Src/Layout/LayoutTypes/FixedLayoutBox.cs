@@ -9,11 +9,42 @@ namespace Src.Layout.LayoutTypes {
         public FixedLayoutBox(LayoutSystem2 layoutSystem, UIElement element)
             : base(layoutSystem, element) { }
 
-        protected override Size RunContentSizeLayout() {
+        protected override float ComputeContentWidth() {
+            float minX = 0;
+            float maxX = 0;
+            for (int i = 0; i < children.Count; i++) {
+                LayoutBox child = children[i];
+
+                float x = child.TransformX;
+                
+                minX = Mathf.Min(minX, x);
+                maxX = Mathf.Max(maxX, x + child.GetWidths().clampedSize);
+            }
+
+            return maxX - minX;
+        }
+
+        protected override float ComputeContentHeight(float width) {
+            float minY = 0;
+            float maxY = 0;
+            for (int i = 0; i < children.Count; i++) {
+                LayoutBox child = children[i];
+
+                float y = child.TransformY;
+                
+                minY = Mathf.Min(minY, y);
+                maxY = Mathf.Max(maxY, y + child.GetHeights(child.GetWidths().clampedSize).clampedSize);
+            }
+
+            return Mathf.Max(0, maxY - minY);
+        }
+
+        public override void RunLayout() {
             float minX = 0;
             float maxX = 0;
             float minY = 0;
             float maxY = 0;
+            
             for (int i = 0; i < children.Count; i++) {
                 LayoutBox child = children[i];
 
@@ -22,56 +53,17 @@ namespace Src.Layout.LayoutTypes {
                 float x = child.TransformX;
                 float y = child.TransformY;
 
-                float width = Math.Max(child.MinWidth, Math.Min(child.PreferredWidth, child.MaxWidth));
-                float height = Math.Max(child.MinHeight, Math.Min(child.PreferredHeight, child.MaxHeight));
-
+                float width = child.GetWidths().clampedSize;
+                LayoutBoxSize heights = child.GetHeights(width);
+                
+                child.SetAllocatedRect(x, y, width, heights.clampedSize);
+                
                 minX = Mathf.Min(minX, x);
                 maxX = Mathf.Max(maxX, x + width);
                 minY = Mathf.Min(minY, y);
-                maxY = Mathf.Max(maxY, y + height);
+                maxY = Mathf.Max(maxY, y + heights.clampedSize);
             }
 
-            return new Size(Mathf.Max(0, maxX - minX), Mathf.Max(0, maxY - minY));
-        }
-
-        public override void RunWidthLayout() {
-            float minX = 0;
-            float maxX = 0;
-            for (int i = 0; i < children.Count; i++) {
-                LayoutBox child = children[i];
-
-                float x = child.TransformX;
-
-                float width = Math.Max(child.MinWidth, Math.Min(child.PreferredWidth, child.MaxWidth));
-
-                child.SetAllocatedXAndWidth(x, width);
-
-                minX = Mathf.Min(minX, x);
-                maxX = Mathf.Max(maxX, x + width);
-
-            }
-
-            actualWidth = Mathf.Max(0, maxX - minX);
-        }
-
-        public override void RunHeightLayout() {
-            float minY = 0;
-            float maxY = 0;
-            for (int i = 0; i < children.Count; i++) {
-                LayoutBox child = children[i];
-
-                float y = child.TransformY;
-
-                float height = Math.Max(child.MinHeight, Math.Min(child.GetPreferredHeightForWidth(child.allocatedWidth), child.MaxHeight));
-
-                child.SetAllocatedYAndHeight(y, height);
-
-                minY = Mathf.Min(minY, y);
-                maxY = Mathf.Max(maxY, y + height);
-
-            }
-
-            actualHeight = Mathf.Max(0, maxY - minY);
         }
 
     }

@@ -26,37 +26,40 @@ namespace Src.Layout.LayoutTypes {
         public LayoutBox parent;
         public List<LayoutBox> children;
 
-        protected Size preferredContentSize;
-
         public VirtualScrollbar horizontalScrollbar;
         public VirtualScrollbar verticalScrollbar;
-        private bool childrenNeedWidthLayout;
-        private bool childrenNeedHeightLayout;
 
         protected LayoutSystem2 layoutSystem;
-        public bool markedForLayout;
-        public bool markedForWidthLayout;
-        public bool markedForHeightLayout;
 
+        // todo compress w/ flags
+        public bool markedForLayout;
+        protected float cachedPreferredWidth;
+
+        private static readonly Dictionary<int, WidthCache> s_HeightForWidthCache = new Dictionary<int, WidthCache>();
+
+        /*
+         * Todo -- When layout happens can probably be optimized a bit
+         * Figure out if parent needs to re-layout instead of assuming it does when child properties change
+         * Don't always re-calculate preferred width
+         * 
+         */
         protected LayoutBox(LayoutSystem2 layoutSystem, UIElement element) {
             this.element = element;
             this.layoutSystem = layoutSystem;
             this.style = element?.style?.computedStyle;
             this.children = ListPool<LayoutBox>.Get();
-            this.preferredContentSize = Size.Unset;
+            this.cachedPreferredWidth = -1;
         }
 
-        protected abstract Size RunContentSizeLayout();
-        public abstract void RunWidthLayout();
-        public abstract void RunHeightLayout();
+        public abstract void RunLayout();
 
-        public virtual float MinWidth => Mathf.Max(PaddingHorizontal + BorderHorizontal, ResolveWidth(style.MinWidth));
-        public virtual float MaxWidth => Mathf.Max(PaddingHorizontal + BorderHorizontal, ResolveWidth(style.MaxWidth));
-        public virtual float PreferredWidth => ResolveWidth(style.PreferredWidth);
+//        public virtual float MinWidth => Mathf.Max(PaddingHorizontal + BorderHorizontal, ResolveMinOrMaxWidth(style.MinWidth));
+//        public virtual float MaxWidth => Mathf.Max(PaddingHorizontal + BorderHorizontal, ResolveMinOrMaxWidth(style.MaxWidth));
+//        public virtual float PreferredWidth => ResolveMinOrMaxWidth(style.PreferredWidth);
 
-        public virtual float MinHeight => Mathf.Max(PaddingVertical + BorderVertical, ResolveHeight(style.MinHeight));
-        public virtual float MaxHeight => Mathf.Max(PaddingVertical + BorderVertical, ResolveHeight(style.MaxHeight));
-        public virtual float PreferredHeight => ResolveHeight(style.PreferredHeight);
+        // public virtual float MinHeight => Mathf.Max(PaddingVertical + BorderVertical, ResolveHeight(style.MinHeight));
+        // public virtual float MaxHeight => Mathf.Max(PaddingVertical + BorderVertical, ResolveHeight(style.MaxHeight));
+        // public virtual float PreferredHeight => ResolveHeight(style.PreferredHeight);
 
         public float TransformX => ResolveFixedWidth(style.TransformPositionX);
         public float TransformY => ResolveFixedHeight(style.TransformPositionY);
@@ -72,10 +75,9 @@ namespace Src.Layout.LayoutTypes {
 
         public float PaddingTop => ResolveFixedHeight(style.PaddingTop);
         public float BorderTop => ResolveFixedHeight(style.BorderTop);
+        public bool IsInitialized { get; set; }
 
-        public virtual float GetPreferredHeightForWidth(float width) {
-            return PreferredHeight;
-        }
+        public virtual void OnInitialize() {}
 
         public void SetParent(LayoutBox parent) {
             this.parent?.OnChildRemoved(this);
@@ -86,10 +88,12 @@ namespace Src.Layout.LayoutTypes {
         // need layout when
         /*
          * - Child Add / Remove / Move / Enable / Disable
-         * - Allocated size changes && we give a shit
-         * - Parent Allocated size changes & we give a shit -> handled automatically
+         * - Allocated size changes && we give a shit -> ie any child is parent dependent
+         * - Parent Allocated size changes & we give a shit -> ie we are parent dependent, handled automatically
          * - Child size changes from style
-         * - Child constraint changes && affects output size
+         * - Child layout behavior changes
+         * - Child transform properties change & we care
+         * - Child constraint changes && affects output size or position
          * - Layout property changes
          */
 
@@ -104,20 +108,22 @@ namespace Src.Layout.LayoutTypes {
             newChild.AdoptChildren(toReplace);
         }
 
-        public virtual void OnChildAdded(LayoutBox child) {
-            children.Add(child);
+        protected virtual void OnChildAdded(LayoutBox child) {
             if (child.element.isEnabled) {
-                RequestLayout();
+                if ((child.style.LayoutBehavior & LayoutBehavior.Ignored) == 0) {
+                    children.Add(child);
+                    RequestContentSizeChangeLayout();
+                }
             }
         }
 
-        public virtual void OnChildRemoved(LayoutBox child) {
+        protected virtual void OnChildRemoved(LayoutBox child) {
             if (!children.Remove(child)) {
                 return;
             }
 
-            if (child.element.isEnabled) {
-                RequestLayout();
+            if ((child.style.LayoutBehavior & LayoutBehavior.Ignored) == 0) {
+                RequestContentSizeChangeLayout();
             }
         }
 
@@ -126,54 +132,33 @@ namespace Src.Layout.LayoutTypes {
                 children.Add(box.children[i]);
             }
 
-            RequestLayout();
+            RequestContentSizeChangeLayout();
         }
 
-        protected void RequestLayout() {
-            layoutSystem.RequestWidthLayout(this);
-            layoutSystem.RequestHeightLayout(this);
-            markedForWidthLayout = true;
-            markedForHeightLayout = true;
+        protected void RequestOwnSizeChangedLayout() {
+            layoutSystem.RequestLayout(this);
+            markedForLayout = true;
         }
 
         protected void RequestContentSizeChangeLayout() {
-            if (IsContentSized) {
-                preferredContentSize = Size.Unset;
-                LayoutBox ptr = parent;
-                bool contentSized = true;
-                while (ptr != null && contentSized) {
-                    ptr.RequestLayout();
-                    contentSized = ptr.IsContentSized;
-                    ptr.preferredContentSize = Size.Unset;
-                    ptr = ptr.parent;
+            if (markedForLayout) {
+                return;
+            }
+
+            layoutSystem.RequestLayout(this);
+            markedForLayout = true;
+            InvalidatePreferredSizeCache();
+            LayoutBox ptr = parent;
+            while (ptr != null) {
+                if (ptr.markedForLayout) {
+                    return;
                 }
-            }
-        }
 
-        public void OnChildSizeChanged() {
-            RequestLayout();
-            RequestContentSizeChangeLayout();
-        }
-
-        protected bool IsContentSized {
-            get {
-                if (style == null) return false;
-                UIUnit units = style.PreferredWidth.unit
-                               | style.PreferredHeight.unit
-                               | style.MinWidth.unit
-                               | style.MaxWidth.unit
-                               | style.MinHeight.unit
-                               | style.MaxHeight.unit;
-                return (units & UIUnit.Content) != 0;
+                layoutSystem.RequestLayout(ptr);
+                ptr.markedForLayout = true;
+                ptr.InvalidatePreferredSizeCache();
+                ptr = ptr.parent;
             }
-        }
-
-        public void OnSizeConstraintChanged() {
-            UIUnit units = style.MinWidth.unit | style.MaxWidth.unit | style.MinHeight.unit | style.MaxHeight.unit;
-            if ((units & UIUnit.Content) != 0) {
-                preferredContentSize = Size.Unset;
-            }
-            RequestContentSizeChangeLayout();
         }
 
         public void SetAllocatedRect(float x, float y, float width, float height) {
@@ -187,12 +172,10 @@ namespace Src.Layout.LayoutTypes {
                 layoutSystem.PositionChanged(this);
             }
 
-            if (allocatedWidth != width) {
+            if ((int) allocatedWidth != (int) width) {
                 allocatedWidth = width;
                 layoutSystem.OnRectChanged(this);
-                if (childrenNeedWidthLayout) {
-                    RequestLayout();
-                }
+                RequestOwnSizeChangedLayout();
             }
         }
 
@@ -202,69 +185,21 @@ namespace Src.Layout.LayoutTypes {
                 layoutSystem.PositionChanged(this);
             }
 
-            if (allocatedHeight != height) {
+            if ((int) allocatedHeight != (int) height) {
                 allocatedHeight = height;
                 layoutSystem.OnRectChanged(this);
-                if (childrenNeedHeightLayout) {
-                    RequestLayout();
-                }
-            }
-        }
-
-        protected void UpdateChildrenRequireLayoutOnWidthChange() {
-            childrenNeedWidthLayout = false;
-            for (int i = 0; i < children.Count; i++) {
-                if (children[i].element.isEnabled) {
-                    ComputedStyle childStyle = children[i].style;
-                    childrenNeedWidthLayout = childStyle.WidthIsParentBased;
-                    if (childrenNeedWidthLayout) {
-                        return;
-                    }
-                }
-            }
-        }
-
-        protected void UpdateChildrenRequireLayoutOnHeightChange() {
-            childrenNeedHeightLayout = false;
-            for (int i = 0; i < children.Count; i++) {
-                if (children[i].element.isEnabled) {
-                    ComputedStyle childStyle = children[i].style;
-                    childrenNeedHeightLayout = childStyle.HeightIsParentBased;
-                    if (childrenNeedHeightLayout) {
-                        return;
-                    }
-                }
+                RequestOwnSizeChangedLayout();
             }
         }
 
         public virtual void OnChildEnabled(LayoutBox child) {
-            RequestLayout();
+            children.Add(child);
             RequestContentSizeChangeLayout();
-            UpdateChildrenRequireLayoutOnWidthChange();
-            UpdateChildrenRequireLayoutOnHeightChange();
         }
 
         public virtual void OnChildDisabled(LayoutBox child) {
-            RequestLayout();
+            children.Remove(child);
             RequestContentSizeChangeLayout();
-            UpdateChildrenRequireLayoutOnWidthChange();
-            UpdateChildrenRequireLayoutOnHeightChange();
-        }
-
-        protected float GetContentPreferredWidth() {
-            if (!preferredContentSize.IsDefined()) {
-                preferredContentSize = RunContentSizeLayout();
-            }
-
-            return preferredContentSize.width;
-        }
-
-        protected virtual float GetContentPreferredHeight() {
-            if (!preferredContentSize.IsDefined()) {
-                preferredContentSize = RunContentSizeLayout();
-            }
-
-            return preferredContentSize.height;
         }
 
         [DebuggerStepThrough]
@@ -274,6 +209,12 @@ namespace Src.Layout.LayoutTypes {
                     return width.value;
                 case UIFixedUnit.Percent:
                     return allocatedWidth * width.value;
+                case UIFixedUnit.ViewportHeight:
+                    return layoutSystem.ViewportRect.height * width.value;
+                case UIFixedUnit.ViewportWidth:
+                    return layoutSystem.ViewportRect.width * width.value;
+                case UIFixedUnit.Em:
+                    return style.FontAsset.asset.fontInfo.PointSize * width.value;
                 default:
                     return 0;
             }
@@ -286,77 +227,367 @@ namespace Src.Layout.LayoutTypes {
                     return height.value;
                 case UIFixedUnit.Percent:
                     return allocatedHeight * height.value;
-                default:
-                    return 0;
-            }
-        }
-
-        protected float ResolveWidth(UIMeasurement width) {
-            switch (width.unit) {
-                case UIUnit.Pixel:
-                    return width.value;
-                case UIUnit.Content:
-                    return PaddingHorizontal + BorderHorizontal + (GetContentPreferredWidth() * width.value);
-                case UIUnit.ParentSize:
-                    return parent.allocatedWidth * width.value;
-                case UIUnit.View:
-                    return layoutSystem.ViewportRect.width * width.value;
-                case UIUnit.ParentContentArea:
-                    return parent.allocatedWidth * width.value - (parent.style == null ? 0 : parent.PaddingHorizontal - parent.BorderHorizontal);
-                case UIUnit.Em:
-                    return 0;
-                case UIUnit.MinContent:
-                    return 0;
-                case UIUnit.MaxContent:
-                    return 0;
-                case UIUnit.FitContent:
-                    return 0;
-                default:
-                    throw new ArgumentOutOfRangeException();
-            }
-        }
-
-        protected float ResolveHeight(UIMeasurement height) {
-            switch (height.unit) {
-                case UIUnit.Pixel:
-                    return height.value;
-                case UIUnit.Content:
-                    return PaddingVertical + BorderVertical + (GetContentPreferredHeight() * height.value);
-                case UIUnit.ParentSize:
-                    return parent.allocatedHeight * height.value;
-                case UIUnit.View:
+                case UIFixedUnit.ViewportHeight:
                     return layoutSystem.ViewportRect.height * height.value;
-                case UIUnit.ParentContentArea:
-                    return parent.allocatedHeight * height.value - (parent.style == null ? 0 : parent.PaddingVertical - parent.BorderVertical);
-                case UIUnit.Em:
+                case UIFixedUnit.ViewportWidth:
+                    return layoutSystem.ViewportRect.width * height.value;
+                case UIFixedUnit.Em:
                     return style.FontAsset.asset.fontInfo.PointSize * height.value;
-                case UIUnit.MinContent:
-                    return 0;
-                case UIUnit.MaxContent:
-                    return 0;
-                case UIUnit.FitContent:
-                    return 0;
                 default:
-                    throw new ArgumentOutOfRangeException();
+                    return 0;
             }
         }
+
 
         public virtual void OnStylePropertyChanged(StyleProperty property) {
             switch (property.propertyId) {
                 case StylePropertyId.MinWidth:
                 case StylePropertyId.MaxWidth:
                 case StylePropertyId.PreferredWidth:
-                    UpdateChildrenRequireLayoutOnWidthChange();
+                    InvalidatePreferredSizeCache();
                     break;
                 case StylePropertyId.MinHeight:
                 case StylePropertyId.MaxHeight:
                 case StylePropertyId.PreferredHeight:
-                    UpdateChildrenRequireLayoutOnHeightChange();
+                    InvalidatePreferredSizeCache();
                     break;
             }
         }
 
-        public virtual void OnChildStylePropertyChanged(LayoutBox child, StyleProperty property) { }
+        public virtual void OnChildStylePropertyChanged(LayoutBox child, StyleProperty property) {
+            switch (property.propertyId) {
+                case StylePropertyId.MinWidth:
+                case StylePropertyId.MaxWidth:
+                case StylePropertyId.PreferredWidth:
+                    RequestContentSizeChangeLayout();
+                    InvalidatePreferredSizeCache();
+                    break;
+                case StylePropertyId.MinHeight:
+                case StylePropertyId.MaxHeight:
+                case StylePropertyId.PreferredHeight:
+                    RequestContentSizeChangeLayout();
+                    InvalidatePreferredSizeCache();
+                    break;
+            }
+        }
+
+        protected static int FindLayoutSiblingIndex(UIElement element) {
+            // if parent is not in layout
+            // we want to replace it
+            // so find parent's sibling index
+            // spin through laid out children until finding target
+            // use parent index + child index
+            if (element.parent == null) return 0;
+
+            int idx = 0;
+            for (int i = 0; i < element.parent.ownChildren.Length; i++) {
+                UIElement sibling = element.parent.ownChildren[i];
+                if (sibling == element) {
+                    break;
+                }
+
+                if ((sibling.flags & UIElementFlags.RequiresLayout) != 0 && (sibling.style.computedStyle.LayoutBehavior & LayoutBehavior.Ignored) == 0) {
+                    idx++;
+                }
+            }
+
+            if ((element.parent.flags & UIElementFlags.RequiresLayout) == 0) {
+                idx += FindLayoutSiblingIndex(element.parent);
+            }
+
+            return idx;
+        }
+
+        protected void InvalidatePreferredSizeCache() {
+            cachedPreferredWidth = -1;
+            if (element != null) {
+                s_HeightForWidthCache.Remove(element.id);
+            }
+        }
+
+        protected void SetCachedHeightForWidth(float width, float height) {
+            WidthCache retn;
+            int intWidth = (int) width;
+            if (s_HeightForWidthCache.TryGetValue(element.id, out retn)) {
+                if (retn.next == 0) {
+                    retn.next = 1;
+                    retn.width0 = intWidth;
+                    retn.height0 = height;
+                }
+                else if (retn.next == 1) {
+                    retn.next = 2;
+                    retn.width1 = intWidth;
+                    retn.height1 = height;
+                }
+                else {
+                    retn.next = 0;
+                    retn.width2 = intWidth;
+                    retn.height2 = height;
+                }
+            }
+            else {
+                retn.next = 1;
+                retn.width0 = intWidth;
+                retn.height0 = height;
+            }
+
+            s_HeightForWidthCache[element.id] = retn;
+        }
+
+        protected float GetCachedHeightForWidth(float width) {
+            WidthCache retn;
+            int intWidth = (int) width;
+            if (s_HeightForWidthCache.TryGetValue(element.id, out retn)) {
+                if (retn.width0 == intWidth) {
+                    return retn.height0;
+                }
+
+                if (retn.width1 == intWidth) {
+                    return retn.height1;
+                }
+
+                if (retn.width2 == intWidth) {
+                    return retn.height2;
+                }
+
+                return -1;
+            }
+
+            return -1;
+        }
+
+        private struct WidthCache {
+
+            public int next;
+
+            public int width0;
+            public int width1;
+            public int width2;
+
+            public float height0;
+            public float height1;
+            public float height2;
+
+        }
+
+        protected virtual float ComputeContentWidth() {
+            return 0f;
+        }
+        
+        protected virtual float ComputeContentHeight(float width) {
+            return 0f;
+        }
+
+        private float GetContentWidth() {
+            if (cachedPreferredWidth == -1) {
+                cachedPreferredWidth = ComputeContentWidth();
+            }
+
+            return cachedPreferredWidth;   
+        }
+
+        private float GetContentHeight(float width) {
+            float cachedHeight = GetCachedHeightForWidth(width);
+            if (cachedHeight == -1) {
+                cachedHeight = ComputeContentHeight(width);
+                SetCachedHeightForWidth(width, cachedHeight);
+            }
+
+            return cachedHeight;
+        }
+        
+        public float GetPreferredWidth() {
+            UIMeasurement widthMeasurement = style.PreferredWidth;
+            switch (widthMeasurement.unit) {
+                case UIUnit.Pixel:
+                    return Mathf.Max(0, widthMeasurement.value);
+
+                case UIUnit.Content:
+                    if (cachedPreferredWidth == -1) {
+                        cachedPreferredWidth = ComputeContentWidth();
+                    }
+
+                    return Mathf.Max(0, PaddingHorizontal + BorderHorizontal + (cachedPreferredWidth * widthMeasurement.value));
+
+                case UIUnit.ParentSize:
+                    if (parent.style.PreferredWidth.IsContentBased) {
+                        return 0f;
+                    }
+                    return Mathf.Max(0, parent.allocatedWidth * widthMeasurement.value);
+
+                case UIUnit.ViewportWidth:
+                    return Mathf.Max(0, layoutSystem.ViewportRect.width * widthMeasurement.value);
+
+                case UIUnit.ViewportHeight:
+                    return Mathf.Max(0, layoutSystem.ViewportRect.height * widthMeasurement.value);
+
+                case UIUnit.ParentContentArea:
+                    if (parent.style.PreferredWidth.IsContentBased) {
+                        return 0f;
+                    }
+                    return Mathf.Max(0, parent.allocatedWidth * widthMeasurement.value - (parent.style == null ? 0 : parent.PaddingHorizontal - parent.BorderHorizontal));
+
+                case UIUnit.Em:
+                    return Math.Max(0, style.FontAsset.asset.fontInfo.PointSize * widthMeasurement.value);
+
+                default:
+                    throw new ArgumentOutOfRangeException();
+            }
+        }
+
+        public float GetPreferredHeight(float contentWidth) {
+            UIMeasurement height = style.PreferredHeight;
+            switch (height.unit) {
+                case UIUnit.Pixel:
+                    return Mathf.Max(0, height.value);
+
+                case UIUnit.Content:
+                    float contentHeight = GetCachedHeightForWidth(contentWidth);
+                    if (contentHeight == -1) {
+                        float cachedWidth = allocatedWidth;
+                        contentHeight = ComputeContentHeight(contentWidth);
+                        SetCachedHeightForWidth(contentWidth, contentHeight);
+                        allocatedWidth = cachedWidth;
+                    }
+
+                    return PaddingVertical + BorderVertical + contentHeight * height.value;
+
+                case UIUnit.ParentSize:
+                    if (parent.style.PreferredHeight.IsContentBased) {
+                        return 0f;
+                    }
+                    return Mathf.Max(0, parent.allocatedHeight * height.value);
+
+                case UIUnit.ViewportWidth:
+                    return Mathf.Max(0, layoutSystem.ViewportRect.width * height.value);
+
+                case UIUnit.ViewportHeight:
+                    return Mathf.Max(0, layoutSystem.ViewportRect.height * height.value);
+
+                case UIUnit.ParentContentArea:
+                    if (parent.style.PreferredHeight.IsContentBased) {
+                        return 0f;
+                    }
+                    return Mathf.Max(0, parent.allocatedHeight * height.value - (parent.style == null ? 0 : parent.PaddingVertical - parent.BorderVertical));
+
+                case UIUnit.Em:
+                    return Mathf.Max(0, style.FontAsset.asset.fontInfo.PointSize * height.value);
+
+                default:
+                    throw new ArgumentOutOfRangeException();
+            }
+        }
+
+        [DebuggerStepThrough]
+        public float GetMinHeight(float contentHeight) {
+            return ResolveMinOrMaxHeight(style.MinHeight, contentHeight);
+        }
+
+        [DebuggerStepThrough]
+        public float GetMaxHeight(float contentHeight) {
+            return ResolveMinOrMaxHeight(style.MaxHeight, contentHeight);
+        }
+
+//        [DebuggerStepThrough]
+        protected float ResolveMinOrMaxWidth(UIMeasurement widthMeasurement) {
+            switch (widthMeasurement.unit) {
+                case UIUnit.Pixel:
+                    return Mathf.Max(0, widthMeasurement.value);
+
+                case UIUnit.Content:
+                    return Mathf.Max(0, PaddingHorizontal + BorderHorizontal + (GetContentWidth() * widthMeasurement.value));
+
+                case UIUnit.ParentSize:
+                    if (parent.style.PreferredWidth.IsContentBased) {
+                        return 0f;
+                    }
+                    return Mathf.Max(0, parent.allocatedWidth * widthMeasurement.value);
+
+                case UIUnit.ViewportWidth:
+                    return Mathf.Max(0, layoutSystem.ViewportRect.width * widthMeasurement.value);
+
+                case UIUnit.ViewportHeight:
+                    return Mathf.Max(0, layoutSystem.ViewportRect.height * widthMeasurement.value);
+
+                case UIUnit.ParentContentArea:
+                    if (parent.style.PreferredWidth.IsContentBased) {
+                        return 0f;
+                    }
+                    return Mathf.Max(0, parent.allocatedWidth * widthMeasurement.value - (parent.style == null ? 0 : parent.PaddingHorizontal - parent.BorderHorizontal));
+
+                case UIUnit.Em:
+                    return Math.Max(0, style.FontAsset.asset.fontInfo.PointSize * widthMeasurement.value);
+
+                default:
+                    throw new ArgumentOutOfRangeException();
+            }
+        }
+
+//        [DebuggerStepThrough]
+        protected float ResolveMinOrMaxHeight(UIMeasurement heightMeasurement, float width) {
+            switch (heightMeasurement.unit) {
+                case UIUnit.Pixel:
+                    return Mathf.Max(0, heightMeasurement.value);
+
+                case UIUnit.Content:
+                    return Mathf.Max(0, GetContentHeight(width) * heightMeasurement.value);
+
+                case UIUnit.ParentSize:
+                    if (parent.style.PreferredHeight.IsContentBased) {
+                        return 0f;
+                    }
+                    return Mathf.Max(0, parent.allocatedHeight * heightMeasurement.value);
+
+                case UIUnit.ViewportWidth:
+                    return Mathf.Max(0, layoutSystem.ViewportRect.width * heightMeasurement.value);
+
+                case UIUnit.ViewportHeight:
+                    return Mathf.Max(0, layoutSystem.ViewportRect.height * heightMeasurement.value);
+
+                case UIUnit.ParentContentArea:
+                    if (parent.style.PreferredHeight.IsContentBased) {
+                        return 0f;
+                    }
+                    return Mathf.Max(0, parent.allocatedHeight * heightMeasurement.value - (parent.style == null ? 0 : parent.PaddingVertical - parent.BorderVertical));
+
+                case UIUnit.Em:
+                    return Mathf.Max(0, style.FontAsset.asset.fontInfo.PointSize * heightMeasurement.value);
+
+                default:
+                    throw new ArgumentOutOfRangeException();
+            }
+        }
+
+        public LayoutBoxSize GetHeights(float width) {
+            float prfHeight = GetPreferredHeight(width);
+            float minHeight = ResolveMinOrMaxHeight(style.MinHeight, width);
+            float maxHeight = ResolveMinOrMaxHeight(style.MaxHeight, width);
+            return new LayoutBoxSize(minHeight, maxHeight, prfHeight);
+        }
+
+        public LayoutBoxSize GetWidths() {
+            float prfWidth = GetPreferredWidth();
+            float minWidth = ResolveMinOrMaxWidth(style.MinWidth);
+            float maxWidth = ResolveMinOrMaxWidth(style.MaxWidth);
+            
+            return new LayoutBoxSize(minWidth, maxWidth, prfWidth);
+        }
+
+        public struct LayoutBoxSize {
+
+            public readonly float minSize;
+            public readonly float maxSize;
+            public readonly float prfSize;
+            public readonly float clampedSize;
+
+            public LayoutBoxSize(float minSize, float maxSize, float prfSize) {
+                this.minSize = minSize;
+                this.maxSize = maxSize;
+                this.prfSize = prfSize;
+                this.clampedSize = Mathf.Max(minSize, Mathf.Min(prfSize, maxSize));
+            }
+
+        }
 
     }
 

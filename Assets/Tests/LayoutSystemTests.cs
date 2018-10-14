@@ -138,7 +138,7 @@ public class LayoutSystemTests {
     }
     
     [Test]
-    public void SizeConstraintChanges_ToContent() {
+    public void WidthSizeConstraintChangesToContent() {
         string template = @"
         <UITemplate>
             <Style classPath='LayoutSystemTests+LayoutTestThing+Style'/>
@@ -163,6 +163,62 @@ public class LayoutSystemTests {
         mockView.Update();
         Assert.AreEqual(new Rect(0, 100, 150, 50), root.child1.layoutResult.ScreenRect);
 
+    }
+    
+    [Test]
+    public void HeightSizeConstraintChangesToMaxContent() {
+        string template = @"
+        <UITemplate>
+            <Style classPath='LayoutSystemTests+LayoutTestThing+Style'/>
+            <Contents style.layoutType='Flex'>
+                <Group x-id='child0' style.width='100f' style.height='100f'/>
+                <Group x-id='child1' style.width='400f' style.height='300f'>
+                    <Group x-id='nested-child' style.width='300f' style.height='50f'/>
+                </Group>
+                <Group x-id='child2' style.width='100f' style.height='100f'/>
+            </Contents>
+        </UITemplate>
+        ";
+        MockView mockView = new MockView(typeof(LayoutTestThing), template);
+        mockView.Initialize();
+        LayoutTestThing root = (LayoutTestThing) mockView.RootElement;
+        
+        mockView.Update();
+        Assert.AreEqual(new Rect(0, 100, 400, 300), root.child1.layoutResult.ScreenRect);
+        
+        root.child1.style.SetMaxHeight(UIMeasurement.Content100, StyleState.Normal);
+        mockView.Update();
+        
+        Assert.AreEqual(new Rect(0, 100, 400, 50), root.child1.layoutResult.ScreenRect);
+
+    }
+    
+    [Test]
+    public void HeightSizeConstraintChangesToMinContent() {
+        string template = @"
+        <UITemplate>
+            <Style classPath='LayoutSystemTests+LayoutTestThing+Style'/>
+            <Contents style.layoutType='Flex'>
+                <Group x-id='child0' style.width='100f' style.height='100f'/>
+                <Group x-id='child1' style.width='400f' style.height='300f'>
+                    <Group x-id='nested-child' style.width='300f' style.height='500f'/>
+                </Group>
+                <Group x-id='child2' style.width='100f' style.height='100f'/>
+            </Contents>
+        </UITemplate>
+        ";
+        MockView mockView = new MockView(typeof(LayoutTestThing), template);
+        mockView.Initialize();
+        LayoutTestThing root = (LayoutTestThing) mockView.RootElement;
+        
+        mockView.Update();
+        Assert.AreEqual(new Rect(0, 100, 400, 300), root.child1.layoutResult.ScreenRect);
+        
+        root.child1.style.SetMinHeight(UIMeasurement.Content100, StyleState.Normal);
+        mockView.Update();
+        
+        Assert.AreEqual(new Rect(0, 100, 400, 500), root.child1.layoutResult.ScreenRect);
+       
     }
     
     [Test]
@@ -230,7 +286,7 @@ public class LayoutSystemTests {
             <Style classPath='LayoutSystemTests+LayoutTestThing+Style'/>
             <Contents style.layoutType='Flex'>
                 <Group x-id='child0' style.width='100f' style.height='100f'/>
-                <Group x-id='child1' style.width='content(100)' style.height='content(100)'>
+                <Group x-id='child1' style='marker' style.width='content(100)' style.height='content(100)'>
                     <Group x-id='nested-child-1' style.width='300f' style.height='50f'/>
                     <Group x-id='nested-child-2' style.width='200f' style.height='50f'/>
                 </Group>

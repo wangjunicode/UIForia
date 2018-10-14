@@ -32,7 +32,8 @@ namespace Src.Compilers {
 
         private static readonly MethodAliasSource parentMeasurementSource;
         private static readonly MethodAliasSource contentMeasurementSource;
-        private static readonly MethodAliasSource viewportMeasurementSource;
+        private static readonly MethodAliasSource viewportWidthMeasurementSource;
+        private static readonly MethodAliasSource viewportHeightMeasurementSource;
         private static readonly MethodAliasSource pixelMeasurementSource;
 
         private static readonly ColorAliasSource colorSource;
@@ -46,7 +47,26 @@ namespace Src.Compilers {
         private static readonly EnumAliasSource<CrossAxisAlignment> crossAxisAlignmentSource;
         private static readonly EnumAliasSource<WhitespaceMode> whiteSpaceSource;
 
+        private static readonly ValueAliasSource<int> siblingIndexSource;
+        private static readonly ValueAliasSource<int> activeSiblingIndexSource;
+        private static readonly ValueAliasSource<int> childCountSource;
+        private static readonly ValueAliasSource<int> activeChildCountSource;
+        private static readonly ValueAliasSource<int> inactiveChildCountSource;
+        private static readonly ValueAliasSource<int> templateChildChildCountSource;
+
         private static readonly IAliasSource[] fixedSources;
+
+        // todo implement these globally in bindings
+        private static readonly string[] k_ElementProperties = {
+            "$childIndex", 
+            "$childCount", 
+            "$activeChildIndex", 
+            "$inactiveChildCount",
+            "$activeChildCount",
+            "$hasActiveChildren", 
+            "$hasInactiveChildren", 
+            "$hasChildren"
+        };
 
         static StyleBindingCompiler() {
             Type type = typeof(StyleBindingCompiler);
@@ -68,7 +88,8 @@ namespace Src.Compilers {
 
             pixelMeasurementSource = new MethodAliasSource("pixels", type.GetMethod(nameof(PixelMeasurement), new[] {typeof(float)}));
             parentMeasurementSource = new MethodAliasSource("parent", type.GetMethod(nameof(ParentMeasurement), new[] {typeof(float)}));
-            viewportMeasurementSource = new MethodAliasSource("view", type.GetMethod(nameof(ViewportMeasurement), new[] {typeof(float)}));
+            viewportWidthMeasurementSource = new MethodAliasSource("viewWidth", type.GetMethod(nameof(ViewportWidthMeasurement), new[] {typeof(float)}));
+            viewportHeightMeasurementSource = new MethodAliasSource("viewHeight", type.GetMethod(nameof(ViewportHeightMeasurement), new[] {typeof(float)}));
             contentMeasurementSource = new MethodAliasSource("content", type.GetMethod(nameof(ContentMeasurement), new[] {typeof(float)}));
 
             var percentageLengthSource = new MethodAliasSource("percent", type.GetMethod(nameof(PercentageLength), new[] {typeof(float)}));
@@ -96,7 +117,6 @@ namespace Src.Compilers {
             whiteSpaceSource = new EnumAliasSource<WhitespaceMode>();
         }
 
-        
 
         public StyleBindingCompiler(ContextDefinition context) {
             this.context = context;
@@ -184,7 +204,7 @@ namespace Src.Compilers {
                         value,
                         autoKeywordSource,
                         pixelMeasurementSource,
-                        viewportMeasurementSource,
+                        viewportWidthMeasurementSource,
                         parentMeasurementSource,
                         contentMeasurementSource
                     ));
@@ -194,7 +214,7 @@ namespace Src.Compilers {
                         value,
                         autoKeywordSource,
                         pixelMeasurementSource,
-                        viewportMeasurementSource,
+                        viewportWidthMeasurementSource,
                         parentMeasurementSource,
                         contentMeasurementSource
                     ));
@@ -206,7 +226,7 @@ namespace Src.Compilers {
                         value,
                         autoKeywordSource,
                         pixelMeasurementSource,
-                        viewportMeasurementSource,
+                        viewportWidthMeasurementSource,
                         parentMeasurementSource,
                         contentMeasurementSource
                     ));
@@ -216,7 +236,7 @@ namespace Src.Compilers {
                         value,
                         autoKeywordSource,
                         pixelMeasurementSource,
-                        viewportMeasurementSource,
+                        viewportWidthMeasurementSource,
                         parentMeasurementSource,
                         contentMeasurementSource
                     ));
@@ -226,7 +246,7 @@ namespace Src.Compilers {
                         value,
                         autoKeywordSource,
                         pixelMeasurementSource,
-                        viewportMeasurementSource,
+                        viewportWidthMeasurementSource,
                         parentMeasurementSource,
                         contentMeasurementSource
                     ));
@@ -236,7 +256,7 @@ namespace Src.Compilers {
                         value,
                         autoKeywordSource,
                         pixelMeasurementSource,
-                        viewportMeasurementSource,
+                        viewportWidthMeasurementSource,
                         parentMeasurementSource,
                         contentMeasurementSource
                     ));
@@ -309,28 +329,28 @@ namespace Src.Compilers {
                 case RenderConstants.MarginTop:
                     return new StyleBinding_MarginTop(targetState.state, Compile<UIMeasurement>(value,
                         pixelMeasurementSource,
-                        viewportMeasurementSource,
+                        viewportWidthMeasurementSource,
                         parentMeasurementSource,
                         contentMeasurementSource));
 
                 case RenderConstants.MarginRight:
                     return new StyleBinding_MarginRight(targetState.state, Compile<UIMeasurement>(value,
                         pixelMeasurementSource,
-                        viewportMeasurementSource,
+                        viewportWidthMeasurementSource,
                         parentMeasurementSource,
                         contentMeasurementSource));
 
                 case RenderConstants.MarginBottom:
                     return new StyleBinding_MarginBottom(targetState.state, Compile<UIMeasurement>(value,
                         pixelMeasurementSource,
-                        viewportMeasurementSource,
+                        viewportWidthMeasurementSource,
                         parentMeasurementSource,
                         contentMeasurementSource));
 
                 case RenderConstants.MarginLeft:
                     return new StyleBinding_MarginLeft(targetState.state, Compile<UIMeasurement>(value,
                         pixelMeasurementSource,
-                        viewportMeasurementSource,
+                        viewportWidthMeasurementSource,
                         parentMeasurementSource,
                         contentMeasurementSource));
 
@@ -378,6 +398,7 @@ namespace Src.Compilers {
                 context.AddConstAliasSource(sources[i]);
             }
 
+            // for each intrinsic 
             Expression<T> expression = compiler.Compile<T>(value);
 
             for (int i = 0; i < sources.Length; i++) {
@@ -414,8 +435,13 @@ namespace Src.Compilers {
         }
 
         [Pure]
-        public static UIMeasurement ViewportMeasurement(float value) {
-            return new UIMeasurement(value * 0.01, UIUnit.View);
+        public static UIMeasurement ViewportWidthMeasurement(float value) {
+            return new UIMeasurement(value * 0.01, UIUnit.ViewportWidth);
+        }
+
+        [Pure]
+        public static UIMeasurement ViewportHeightMeasurement(float value) {
+            return new UIMeasurement(value * 0.01, UIUnit.ViewportHeight);
         }
 
         [Pure]
@@ -459,12 +485,12 @@ namespace Src.Compilers {
         public static MeasurementVector2 Vec2Measurement(float x, float y) {
             return new MeasurementVector2(new UIMeasurement(x), new UIMeasurement(y));
         }
-        
+
         [Pure]
         public static FixedLengthVector Vec2FixedLength(float x, float y) {
             return new FixedLengthVector(new UIFixedLength(x), new UIFixedLength(y));
         }
-        
+
         [Pure]
         public static Texture2DAssetReference TextureUrl(string url) {
             return new Texture2DAssetReference(url);
@@ -494,6 +520,7 @@ namespace Src.Compilers {
         public static UIFixedLength ViewportHeightLength(float value) {
             return new UIFixedLength(value, UIFixedUnit.ViewportHeight);
         }
+
         private struct Target {
 
             public readonly string property;

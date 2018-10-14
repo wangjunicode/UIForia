@@ -7,57 +7,6 @@ using UnityEngine;
 
 namespace Src.Layout.LayoutTypes {
 
-    [Flags]
-    public enum GridTemplateUnit {
-
-        Unset = 0,
-        Pixel = 1 << 0,
-        Container = 1 << 1,
-        ContainerContentArea = 1 << 2,
-        Em = 1 << 3,
-        ViewportWidth = 1 << 4,
-        ViewportHeight = 1 << 5,
-
-        Fraction = 1 << 6,
-        MinContent = 1 << 7,
-        MaxContent = 1 << 8,
-
-        Fixed = Pixel | Container | ContainerContentArea | Em | ViewportWidth | ViewportHeight
-
-    }
-
-    public struct GridTrackSize {
-
-        public readonly float minValue;
-        public readonly float maxValue;
-
-        public readonly GridTemplateUnit minUnit;
-        public readonly GridTemplateUnit maxUnit;
-
-        public GridTrackSize(float value, GridTemplateUnit unit = GridTemplateUnit.Pixel) {
-            this.minUnit = unit;
-            this.minValue = value;
-            this.maxUnit = unit;
-            this.maxValue = value;
-        }
-
-        public static GridTrackSize Unset => new GridTrackSize(0, GridTemplateUnit.Unset);
-        public static GridTrackSize MaxContent => new GridTrackSize(1f, GridTemplateUnit.MaxContent);
-        public static GridTrackSize MinContent => new GridTrackSize(1f, GridTemplateUnit.MinContent);
-
-        public static bool operator ==(GridTrackSize a, GridTrackSize b) {
-            return a.minValue == b.minValue
-                   && a.minUnit == b.minUnit
-                   && a.maxValue == b.maxValue
-                   && a.maxUnit == b.maxUnit;
-        }
-
-        public static bool operator !=(GridTrackSize a, GridTrackSize b) {
-            return !(a == b);
-        }
-
-    }
-
     public class GridLayoutBox : LayoutBox {
 
         private readonly List<GridTrack> m_RowTracks;
@@ -69,14 +18,66 @@ namespace Src.Layout.LayoutTypes {
         private readonly List<float> m_Widths;
         private readonly List<float> m_Heights;
 
+        private bool m_IsPlacementDirty;
+
         public GridLayoutBox(LayoutSystem2 layoutSystem, UIElement element)
             : base(layoutSystem, element) {
+            this.m_IsPlacementDirty = true;
             this.m_Widths = new List<float>(4);
             this.m_Heights = new List<float>(4);
             this.m_RowTracks = new List<GridTrack>();
             this.m_ColTracks = new List<GridTrack>();
             this.m_Occupied = new HashSet<int>();
             this.m_Placements = new List<GridPlacement>();
+        }
+
+        public override void OnInitialize() {
+            m_IsPlacementDirty = true;
+        }
+
+        protected override float ComputeContentWidth() {
+            if (children.Count == 0) {
+                return 0f;
+            }
+
+            Place();
+
+            for (int i = 0; i < children.Count; i++) {
+                m_Widths[i] = children[i].GetWidths().clampedSize;
+            }
+
+            ResolveColumnTrackWidths(0);
+
+            return m_ColTracks[m_ColTracks.Count - 1].End;
+        }
+
+        protected override float ComputeContentHeight(float width) {
+            if (children.Count == 0) {
+                return 0f;
+            }
+
+            Place();
+
+            for (int i = 0; i < children.Count; i++) {
+                m_Widths[i] = children[i].GetWidths().clampedSize;
+            }
+
+            ResolveColumnTrackWidths(width);
+            StretchWidthsIfNeeded();
+
+            for (int i = 0; i < children.Count; i++) {
+                m_Heights[i] = children[i].GetHeights(m_Widths[i]).clampedSize;
+            }
+
+            ResolveRowTrackHeights(0);
+
+            float totalHeights = 0f;
+
+            for (int i = 0; i < m_RowTracks.Count; i++) {
+                totalHeights += m_RowTracks[i].outputSize;
+            }
+
+            return totalHeights + (style.GridLayoutRowGap * (m_RowTracks.Count - 1));
         }
 
         private float ResolveContentMinWidth(GridTrack track, SizeType sizeType) {
@@ -103,7 +104,7 @@ namespace Src.Layout.LayoutTypes {
                             break;
                         }
                     }
-                    else if (spanned.size.minUnit != GridTemplateUnit.Fraction) {
+                    else if (spanned.size.minUnit != GridTemplateUnit.Flex) {
                         pieces++;
                     }
                 }
@@ -120,10 +121,49 @@ namespace Src.Layout.LayoutTypes {
             return minSize;
         }
 
+        private float ResolveContentMinHeight(GridTrack track, SizeType sizeType) {
+            float minSize = 0;
+
+            float value = track.size.minValue;
+
+            if (sizeType == SizeType.Max) {
+                value = track.size.maxValue;
+            }
+
+            for (int i = 0; i < track.spanningItems.Count; i++) {
+                int childIndex = track.spanningItems[i];
+                GridItem rowItem = m_Placements[childIndex].rowItem;
+                int pieces = 0; // never 0 because we only call this function for intrinsic sized tracks
+                float baseHeight = m_Heights[childIndex];
+
+                for (int j = rowItem.trackStart; j < rowItem.trackStart + rowItem.trackSpan; j++) {
+                    GridTrack spanned = m_RowTracks[j];
+                    if ((spanned.size.minUnit & GridTemplateUnit.Fixed) != 0) {
+                        baseHeight -= spanned.outputSize;
+                        if (baseHeight <= 0) {
+                            break;
+                        }
+                    }
+                    else if (spanned.size.minUnit != GridTemplateUnit.Flex) {
+                        pieces++;
+                    }
+                }
+
+                if (minSize == 0) {
+                    minSize = baseHeight;
+                }
+
+                if (baseHeight > 0) {
+                    minSize = Mathf.Min(minSize, value * (baseHeight / pieces));
+                }
+            }
+
+            return minSize;
+        }
+
         private float ResolveContentMaxWidth(GridTrack track, SizeType sizeType) {
             float maxSize = 0;
 
-            GridTemplateUnit unit = track.size.minUnit;
             float value = track.size.minValue;
 
             if (sizeType == SizeType.Max) {
@@ -144,7 +184,7 @@ namespace Src.Layout.LayoutTypes {
                             break;
                         }
                     }
-                    else if (spanned.size.minUnit != GridTemplateUnit.Fraction) {
+                    else if (spanned.size.minUnit != GridTemplateUnit.Flex) {
                         pieces++;
                     }
                 }
@@ -157,69 +197,47 @@ namespace Src.Layout.LayoutTypes {
             return maxSize;
         }
 
-        private float RunContentWidthLayout() {
+        private float ResolveContentMaxHeight(GridTrack track, SizeType sizeType) {
+            float maxSize = 0;
 
-            // todo -- precompute this & update only if needed
-            for (int i = 0; i < children.Count; i++) {
-                LayoutBox child = children[i];
-                float minWidth = child.MinWidth;
-                float maxWidth = child.MaxWidth;
-                float prfWidth = child.PreferredWidth;
-                m_Widths[i] = Mathf.Min(minWidth, Mathf.Min(prfWidth, maxWidth));
+            float value = track.size.minValue;
+
+            if (sizeType == SizeType.Max) {
+                value = track.size.maxValue;
             }
 
-            List<ValueTuple<int, GridTrack>> intrinsics = ListPool<ValueTuple<int, GridTrack>>.Get();
-            List<ValueTuple<int, GridTrack>> flexes = ListPool<ValueTuple<int, GridTrack>>.Get();
+            for (int i = 0; i < track.spanningItems.Count; i++) {
+                int childIndex = track.spanningItems[i];
+                GridItem rowItem = m_Placements[childIndex].rowItem;
+                int pieces = 0; // never 0 because we only call this function for intrinsic sized tracks
+                float baseHeight = m_Heights[childIndex];
 
-            for (int i = 0; i < m_ColTracks.Count; i++) {
-                GridTrack track = m_ColTracks[i];
+                for (int j = rowItem.trackStart; j < rowItem.trackStart + rowItem.trackSpan; j++) {
+                    GridTrack spanned = m_RowTracks[j];
+                    if ((spanned.size.minUnit & GridTemplateUnit.Fixed) != 0) {
+                        baseHeight -= spanned.outputSize;
+                        if (baseHeight <= 0) {
+                            break;
+                        }
+                    }
+                    else if (spanned.size.minUnit != GridTemplateUnit.Flex) {
+                        pieces++;
+                    }
+                }
 
-                if ((track.size.minUnit & GridTemplateUnit.Fixed) != 0) {
-                    track.outputSize = ResolveFixedWidthMeasurement(track.size, SizeType.Min);
-                }
-                else if (track.size.minUnit == GridTemplateUnit.Fraction) {
-                    flexes.Add(ValueTuple.Create(i, track));
-                }
-                else {
-                    intrinsics.Add(ValueTuple.Create(i, track));
+                if (baseHeight > 0) {
+                    maxSize = Mathf.Max(maxSize, value * (baseHeight / pieces));
                 }
             }
 
-            for (int i = 0; i < intrinsics.Count; i++) {
-                GridTrack track = intrinsics[i].Item2;
-
-                if (track.size.minUnit == GridTemplateUnit.MinContent) {
-                    track.outputSize = ResolveContentMinWidth(track, SizeType.Min);
-                }
-                else if (track.size.minUnit == GridTemplateUnit.MaxContent) {
-                    track.outputSize = ResolveContentMinWidth(track, SizeType.Min);
-                }
-
-                m_ColTracks[intrinsics[i].Item1] = track;
-            }
-
-            ListPool<ValueTuple<int, GridTrack>>.Release(ref intrinsics);
-            ListPool<ValueTuple<int, GridTrack>>.Release(ref flexes);
-
-            return m_ColTracks[m_ColTracks.Count - 1].End;
+            return maxSize;
         }
 
-        public override void RunWidthLayout() {
-            Place();
-            for (int i = 0; i < children.Count; i++) {
-                LayoutBox child = children[i];
-                float minWidth = child.MinWidth;
-                float maxWidth = child.MaxWidth;
-                float prfWidth = child.PreferredWidth;
-                m_Widths[i] = Mathf.Max(minWidth, Mathf.Min(prfWidth, maxWidth));
-            }
+        private void ResolveColumnTrackWidths(float remaining) {
+            int flexPieces = 0;
 
             List<ValueTuple<int, GridTrack>> intrinsics = ListPool<ValueTuple<int, GridTrack>>.Get();
             List<ValueTuple<int, GridTrack>> flexes = ListPool<ValueTuple<int, GridTrack>>.Get();
-
-            int flexPieces = 0;
-            float remaining = allocatedWidth - PaddingHorizontal - BorderHorizontal;
-
             for (int i = 0; i < m_ColTracks.Count; i++) {
                 GridTrack track = m_ColTracks[i];
 
@@ -227,9 +245,8 @@ namespace Src.Layout.LayoutTypes {
                     track.outputSize = ResolveFixedWidthMeasurement(track.size, SizeType.Min);
                     remaining -= track.outputSize;
                     m_ColTracks[i] = track;
-
                 }
-                else if (track.size.minUnit == GridTemplateUnit.Fraction) {
+                else if (track.size.minUnit == GridTemplateUnit.Flex) {
                     flexes.Add(ValueTuple.Create(i, track));
                     flexPieces += (int) track.size.minValue; // move flex to max only?
                 }
@@ -252,6 +269,10 @@ namespace Src.Layout.LayoutTypes {
                 m_ColTracks[intrinsics[i].Item1] = track;
             }
 
+
+            float colGap = style.GridLayoutColGap;
+            remaining -= colGap * (m_ColTracks.Count - 1);
+
             if ((int) remaining > 0 && flexes.Count > 0) {
                 float pieceSize = remaining / flexPieces;
                 for (int i = 0; i < flexes.Count; i++) {
@@ -261,77 +282,16 @@ namespace Src.Layout.LayoutTypes {
                 }
             }
 
-            for (int i = 1; i < m_ColTracks.Count; i++) {
-                GridTrack track = m_ColTracks[i];
-                track.position = m_ColTracks[i - 1].End;
-                m_ColTracks[i] = track;
-            }
-
-            actualWidth = m_ColTracks[m_ColTracks.Count - 1].End;
             ListPool<ValueTuple<int, GridTrack>>.Release(ref intrinsics);
             ListPool<ValueTuple<int, GridTrack>>.Release(ref flexes);
-
-            CrossAxisAlignment colAlignment = style.GridLayoutColAlignment;
-
-            for (int i = 0; i < m_Placements.Count; i++) {
-
-                GridPlacement placement = m_Placements[i];
-
-                LayoutBox child = children[i];
-                GridItem colItem = placement.colItem;
-
-                CrossAxisAlignment alignment = child.style.FlexItemSelfAlignment != CrossAxisAlignment.Unset
-                    ? child.style.FlexItemSelfAlignment // todo move to grid item property
-                    : colAlignment;
-
-                float x = m_ColTracks[colItem.trackStart].position;
-                float spannedTracksWidth = m_ColTracks[colItem.trackStart + colItem.trackSpan - 1].End - x;
-
-                float finalX = x;
-                float finalWidth = m_Widths[i];
-
-                if (finalWidth < spannedTracksWidth) {
-                    switch (alignment) {
-                        case CrossAxisAlignment.Center:
-                            finalX = (spannedTracksWidth * 0.5f) - (m_Widths[i] * 0.5f);
-                            break;
-
-                        case CrossAxisAlignment.End:
-                            finalX = spannedTracksWidth - m_Widths[i];
-                            break;
-
-                        case CrossAxisAlignment.Start:
-                            finalX = x;
-                            break;
-
-                        case CrossAxisAlignment.Stretch:
-                            finalX = x;
-                            finalWidth = spannedTracksWidth;
-                            break;
-                        default:
-                            finalX = x;
-                            break;
-                    }
-                }
-                child.SetAllocatedXAndWidth(finalX, finalWidth);
-
-            }
         }
 
-        public override void RunHeightLayout() {
-            for (int i = 0; i < children.Count; i++) {
-                LayoutBox child = children[i];
-                float minHeight = child.MinHeight;
-                float maxHeight = child.MaxHeight;
-                float prfWidth = child.GetPreferredHeightForWidth(m_Widths[i]);
-                m_Heights[i] = Mathf.Max(minHeight, Mathf.Min(prfWidth, maxHeight));
-            }
-
+        private void ResolveRowTrackHeights(float height) {
             List<ValueTuple<int, GridTrack>> intrinsics = ListPool<ValueTuple<int, GridTrack>>.Get();
             List<ValueTuple<int, GridTrack>> flexes = ListPool<ValueTuple<int, GridTrack>>.Get();
 
             int flexPieces = 0;
-            float remaining = allocatedHeight - PaddingVertical - BorderVertical;
+            float remaining = height - PaddingVertical - BorderVertical;
 
             for (int i = 0; i < m_RowTracks.Count; i++) {
                 GridTrack track = m_RowTracks[i];
@@ -340,9 +300,8 @@ namespace Src.Layout.LayoutTypes {
                     track.outputSize = ResolveFixedHeightMeasurement(track.size, SizeType.Min);
                     remaining -= track.outputSize;
                     m_RowTracks[i] = track;
-
                 }
-                else if (track.size.minUnit == GridTemplateUnit.Fraction) {
+                else if (track.size.minUnit == GridTemplateUnit.Flex) {
                     flexes.Add(ValueTuple.Create(i, track));
                     flexPieces += (int) track.size.minValue; // move flex to max only?
                 }
@@ -355,10 +314,10 @@ namespace Src.Layout.LayoutTypes {
                 GridTrack track = intrinsics[i].Item2;
 
                 if (track.size.minUnit == GridTemplateUnit.MinContent) {
-                    track.outputSize = ResolveContentMinWidth(track, SizeType.Min);
+                    track.outputSize = ResolveContentMinHeight(track, SizeType.Min);
                 }
                 else if (track.size.minUnit == GridTemplateUnit.MaxContent) {
-                    track.outputSize = ResolveContentMaxWidth(track, SizeType.Min);
+                    track.outputSize = ResolveContentMaxHeight(track, SizeType.Min);
                 }
 
                 remaining -= track.outputSize;
@@ -374,28 +333,97 @@ namespace Src.Layout.LayoutTypes {
                 }
             }
 
-            for (int i = 1; i < m_RowTracks.Count; i++) {
-                GridTrack track = m_RowTracks[i];
-                track.position = m_RowTracks[i - 1].End;
-                m_RowTracks[i] = track;
-            }
-
-            actualHeight = m_RowTracks[m_RowTracks.Count - 1].End;
             ListPool<ValueTuple<int, GridTrack>>.Release(ref intrinsics);
             ListPool<ValueTuple<int, GridTrack>>.Release(ref flexes);
+        }
 
+        private void StretchWidthsIfNeeded() {
+            float colGap = style.GridLayoutColGap;
+            CrossAxisAlignment colAlignment = style.GridLayoutColAlignment;
+            for (int i = 0; i < m_Placements.Count; i++) {
+                GridPlacement placement = m_Placements[i];
+
+                LayoutBox child = children[i];
+                GridItem colItem = placement.colItem;
+
+                CrossAxisAlignment alignment = child.style.GridItemColSelfAlignment;
+                if (alignment == CrossAxisAlignment.Unset) {
+                    alignment = colAlignment;
+                }
+
+                if (alignment == CrossAxisAlignment.Stretch) {
+                    float spannedTracksWidth = colGap * (colItem.trackSpan - 1);
+
+                    for (int j = colItem.trackStart; j < colItem.trackStart + colItem.trackSpan; j++) {
+                        spannedTracksWidth += m_ColTracks[j].outputSize;
+                    }
+
+                    m_Widths[i] = spannedTracksWidth;
+                }
+            }
+        }
+
+        private void ApplyColumnCrossAxisAlignment() {
+            CrossAxisAlignment colAlignment = style.GridLayoutColAlignment;
+
+            for (int i = 0; i < m_Placements.Count; i++) {
+                GridPlacement placement = m_Placements[i];
+
+                LayoutBox child = children[i];
+                GridItem colItem = placement.colItem;
+
+                CrossAxisAlignment alignment = child.style.GridItemColSelfAlignment;
+                if (alignment == CrossAxisAlignment.Unset) {
+                    alignment = colAlignment;
+                }
+
+                float x = m_ColTracks[colItem.trackStart].position;
+                float spannedTracksWidth = m_ColTracks[colItem.trackStart + colItem.trackSpan - 1].End - x;
+
+                float finalX = x;
+                float finalWidth = m_Widths[i];
+
+                if (finalWidth < spannedTracksWidth) {
+                    switch (alignment) {
+                        case CrossAxisAlignment.Center:
+                            finalX = x + (spannedTracksWidth * 0.5f) - (m_Widths[i] * 0.5f);
+                            break;
+
+                        case CrossAxisAlignment.End:
+                            finalX = x + spannedTracksWidth - m_Widths[i];
+                            break;
+
+                        case CrossAxisAlignment.Start:
+                            finalX = x;
+                            break;
+
+                        case CrossAxisAlignment.Stretch:
+                            finalX = x;
+                            finalWidth = spannedTracksWidth;
+                            break;
+                        default:
+                            finalX = x;
+                            break;
+                    }
+                }
+
+                child.SetAllocatedXAndWidth(finalX, finalWidth);
+            }
+        }
+
+        private void ApplyRowCrossAxisAlignment() {
             CrossAxisAlignment rowAlignment = style.GridLayoutRowAlignment;
 
             for (int i = 0; i < m_Placements.Count; i++) {
-
                 GridPlacement placement = m_Placements[i];
 
                 LayoutBox child = children[i];
                 GridItem rowItem = placement.rowItem;
 
-                CrossAxisAlignment alignment = child.style.FlexItemSelfAlignment != CrossAxisAlignment.Unset
-                    ? child.style.FlexItemSelfAlignment // todo move to grid item property
-                    : rowAlignment;
+                CrossAxisAlignment alignment = child.style.GridItemRowSelfAlignment;
+                if (alignment == CrossAxisAlignment.Unset) {
+                    alignment = rowAlignment;
+                }
 
                 float y = m_RowTracks[rowItem.trackStart].position;
                 float spannedTracksHeight = m_RowTracks[rowItem.trackStart + rowItem.trackSpan - 1].End - y;
@@ -406,11 +434,11 @@ namespace Src.Layout.LayoutTypes {
                 if (finalHeight < spannedTracksHeight) {
                     switch (alignment) {
                         case CrossAxisAlignment.Center:
-                            finalY = (spannedTracksHeight * 0.5f) - (m_Heights[i] * 0.5f);
+                            finalY = y + (spannedTracksHeight * 0.5f) - (m_Heights[i] * 0.5f);
                             break;
 
                         case CrossAxisAlignment.End:
-                            finalY = spannedTracksHeight - m_Heights[i];
+                            finalY = y + spannedTracksHeight - m_Heights[i];
                             break;
 
                         case CrossAxisAlignment.Start:
@@ -426,9 +454,54 @@ namespace Src.Layout.LayoutTypes {
                             break;
                     }
                 }
-                child.SetAllocatedYAndHeight(finalY, finalHeight);
 
+                child.SetAllocatedYAndHeight(finalY, finalHeight);
             }
+        }
+
+        private void PositionColumnTracks() {
+            float colGap = style.GridLayoutColGap;
+
+            for (int i = 1; i < m_ColTracks.Count; i++) {
+                GridTrack track = m_ColTracks[i];
+                track.position = colGap + m_ColTracks[i - 1].End;
+                m_ColTracks[i] = track;
+            }
+        }
+
+        private void PositionRowTracks() {
+            float rowGap = style.GridLayoutRowGap;
+            for (int i = 1; i < m_RowTracks.Count; i++) {
+                GridTrack track = m_RowTracks[i];
+                track.position = rowGap + m_RowTracks[i - 1].End;
+                m_RowTracks[i] = track;
+            }
+        }
+
+        public override void RunLayout() {
+            if (children.Count == 0) {
+                return;
+            }
+            Place();
+
+            for (int i = 0; i < children.Count; i++) {
+                m_Widths[i] = children[i].GetWidths().clampedSize;
+            }
+
+            ResolveColumnTrackWidths(allocatedWidth - PaddingHorizontal - BorderHorizontal);
+            PositionColumnTracks();
+            ApplyColumnCrossAxisAlignment();
+
+            for (int i = 0; i < children.Count; i++) {
+                m_Heights[i] = children[i].GetHeights(m_Widths[i]).clampedSize;
+            }
+
+            ResolveRowTrackHeights(allocatedHeight);
+            PositionRowTracks();
+            ApplyRowCrossAxisAlignment();
+
+            actualWidth = m_ColTracks[m_ColTracks.Count - 1].End;
+            actualHeight = m_RowTracks[m_RowTracks.Count - 1].End;
         }
 
         private float ResolveFixedWidthMeasurement(GridTrackSize size, SizeType sizeType) {
@@ -454,7 +527,7 @@ namespace Src.Layout.LayoutTypes {
                 case GridTemplateUnit.ContainerContentArea:
                     return (parent.allocatedWidth - parent.PaddingHorizontal - parent.BorderHorizontal) * value;
 
-                case GridTemplateUnit.Fraction:
+                case GridTemplateUnit.Flex:
                 case GridTemplateUnit.MinContent:
                 case GridTemplateUnit.MaxContent:
                     return 0f;
@@ -487,7 +560,7 @@ namespace Src.Layout.LayoutTypes {
                 case GridTemplateUnit.ContainerContentArea:
                     return (parent.allocatedHeight - parent.PaddingVertical - parent.BorderVertical) * value;
 
-                case GridTemplateUnit.Fraction:
+                case GridTemplateUnit.Flex:
                 case GridTemplateUnit.MinContent:
                 case GridTemplateUnit.MaxContent:
                     return 0f;
@@ -497,6 +570,10 @@ namespace Src.Layout.LayoutTypes {
         }
 
         private void Place() {
+            if (!m_IsPlacementDirty) {
+                return;
+            }
+
             GridTrackSize autoColSize = style.GridLayoutColAutoSize;
             GridTrackSize autoRowSize = style.GridLayoutRowAutoSize;
             LayoutDirection direction = style.GridLayoutDirection;
@@ -511,7 +588,8 @@ namespace Src.Layout.LayoutTypes {
             m_ColTracks.Clear();
             m_RowTracks.Clear();
             m_Occupied.Clear();
-
+            ResetPlacements();
+            
             IReadOnlyList<GridTrackSize> colTemplate = style.GridLayoutColTemplate;
             IReadOnlyList<GridTrackSize> rowTemplate = style.GridLayoutRowTemplate;
 
@@ -561,6 +639,7 @@ namespace Src.Layout.LayoutTypes {
             PlaceBothAxesLocked(bothAxesLocked);
             PlaceSingleLockedItems(singleAxisLocked);
             PlaceUnlockedItems(noAxisLocked);
+            m_IsPlacementDirty = false;
         }
 
         private void PlaceBothAxesLocked(List<GridPlacement> bothAxesLocked) {
@@ -576,12 +655,7 @@ namespace Src.Layout.LayoutTypes {
             }
         }
 
-        protected override Size RunContentSizeLayout() {
-            // if pending placements -> place them
-            return default(Size);
-        }
-
-        public override void OnChildAdded(LayoutBox child) {
+        protected override void OnChildAdded(LayoutBox child) {
             if ((child.style.LayoutBehavior & LayoutBehavior.Ignored) == 0) {
                 children.Add(child);
                 int colStart = child.style.GridItemColStart;
@@ -589,13 +663,12 @@ namespace Src.Layout.LayoutTypes {
                 int rowStart = child.style.GridItemRowStart;
                 int rowSpan = child.style.GridItemRowSpan;
                 m_Placements.Add(new GridPlacement(child.element.id, m_Placements.Count, new GridItem(colStart, colSpan), new GridItem(rowStart, rowSpan)));
-                RequestLayout();
+                RequestContentSizeChangeLayout();
                 m_Widths.Add(0);
                 m_Heights.Add(0);
+                m_IsPlacementDirty = true;
             }
         }
-
-        public override void OnChildRemoved(LayoutBox child) { }
 
         public override void OnStylePropertyChanged(StyleProperty property) {
             switch (property.propertyId) {
@@ -603,37 +676,46 @@ namespace Src.Layout.LayoutTypes {
                 case StylePropertyId.GridLayoutColTemplate:
                 case StylePropertyId.GridLayoutRowTemplate:
                 case StylePropertyId.GridLayoutDirection:
+                    m_IsPlacementDirty = true;
+                    RequestOwnSizeChangedLayout();
+                    break;
                 case StylePropertyId.GridLayoutRowGap:
                 case StylePropertyId.GridLayoutColGap:
                 case StylePropertyId.GridLayoutColAutoSize:
                 case StylePropertyId.GridLayoutRowAutoSize:
-                    RequestLayout();
+                    RequestOwnSizeChangedLayout();
                     break;
             }
         }
 
+        private void ResetPlacements() {
+            
+            m_Placements.Clear();
+            for (int i = 0; i < children.Count; i++) {
+                LayoutBox child = children[i];
+                int colStart = child.style.GridItemColStart;
+                int colSpan = child.style.GridItemColSpan;
+                int rowStart = child.style.GridItemRowStart;
+                int rowSpan = child.style.GridItemRowSpan;
+                m_Placements.Add(new GridPlacement(child.element.id, i, new GridItem(colStart, colSpan), new GridItem(rowStart, rowSpan)));
+            }
+
+        }
+        
         public override void OnChildStylePropertyChanged(LayoutBox child, StyleProperty property) {
             int idx = GetPlacementIndexForId(child.element.id);
             GridPlacement placement = m_Placements[idx];
             switch (property.propertyId) {
                 case StylePropertyId.LayoutBehavior:
-                    RequestLayout();
+                    RequestOwnSizeChangedLayout();
+                    m_IsPlacementDirty = true;
                     break;
                 case StylePropertyId.GridItemColSpan:
-                    m_Placements[idx] = new GridPlacement(child.element.id, idx, new GridItem(placement.colItem.trackStart, property.AsInt), placement.rowItem);
-                    RequestLayout();
-                    break;
                 case StylePropertyId.GridItemRowSpan:
-                    m_Placements[idx] = new GridPlacement(child.element.id, idx, placement.colItem, new GridItem(placement.rowItem.trackStart, property.AsInt));
-                    RequestLayout();
-                    break;
                 case StylePropertyId.GridItemColStart:
-                    m_Placements[idx] = new GridPlacement(child.element.id, idx, new GridItem(property.AsInt, placement.colItem.trackSpan), placement.rowItem);
-                    RequestLayout();
-                    break;
                 case StylePropertyId.GridItemRowStart:
-                    m_Placements[idx] = new GridPlacement(child.element.id, idx, placement.colItem, new GridItem(property.AsInt, placement.rowItem.trackSpan));
-                    RequestLayout();
+                    m_IsPlacementDirty = true;
+                    RequestOwnSizeChangedLayout();
                     break;
             }
         }
@@ -692,7 +774,7 @@ namespace Src.Layout.LayoutTypes {
 
                     colItem.trackStart = colPtr;
 
-                    placements[i] = new GridPlacement(placement.id, placement.index, colItem, rowItem);
+                    m_Placements[placement.index] = new GridPlacement(placement.id, placement.index, colItem, rowItem);
 
                     OccupyGridArea(m_Placements[placement.index]);
                 }
@@ -751,10 +833,14 @@ namespace Src.Layout.LayoutTypes {
                         cursorX = 0;
                     }
 
+                    if (cursorX + colSpan > colCount) {
+                        cursorX = 0;
+                        cursorY++;
+                    }
+
                     while (!IsGridAreaAvailable(cursorX, colSpan, cursorY, rowSpan)) {
                         cursorX++;
                         if (cursorX + colSpan > colCount) {
-                            colCount = cursorX + colSpan;
                             cursorX = 0;
                             cursorY++;
                         }

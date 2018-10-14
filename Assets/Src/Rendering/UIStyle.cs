@@ -117,6 +117,16 @@ namespace Rendering {
             set { SetIntProperty(StylePropertyId.GridItemRowSpan, value); }
         }
 
+        public CrossAxisAlignment GridItemColSelfAlignment {
+            get { return (CrossAxisAlignment)FindEnumProperty(StylePropertyId.GridItemColSelfAlignment); }
+            set { SetEnumProperty(StylePropertyId.GridItemColSelfAlignment, (int)value);}
+        }
+        
+        public CrossAxisAlignment GridItemRowSelfAlignment {
+            get { return (CrossAxisAlignment)FindEnumProperty(StylePropertyId.GridItemRowSelfAlignment); }
+            set { SetEnumProperty(StylePropertyId.GridItemRowSelfAlignment, (int)value);}
+        }
+
         #endregion
 
         #region Grid Layout Properties

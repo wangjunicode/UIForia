@@ -75,6 +75,8 @@ namespace Rendering {
         public const int GridItemRowStart = IntUtil.UnsetValue;
         public const int GridItemRowSpan = 1;
         public const int GridItemColSpan = 1;
+        public const CrossAxisAlignment GridItemColSelfAlignment = CrossAxisAlignment.Unset;
+        public const CrossAxisAlignment GridItemRowSelfAlignment = CrossAxisAlignment.Unset;
 
         public const LayoutDirection GridLayoutDirection = LayoutDirection.Row;
         public static readonly GridLayoutDensity GridLayoutDensity = GridLayoutDensity.Sparse;

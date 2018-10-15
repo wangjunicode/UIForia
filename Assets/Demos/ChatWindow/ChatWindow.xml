@@ -11,9 +11,16 @@
 
         <!--</WindowFrame>-->
 
-        <Panel style="overflow" style.width="300f" style.height='400f'>
+        <Panel style.layoutType="Radial" style.backgroundColor="red" style.width="300f" style.height='400f'>
             
-            <Panel style.backgroundColor="white" style.width="400f" style.height="800f"/>
+            <Panel style.backgroundColor="white" style.width="20f" style.height="20f"/>
+            <Panel style.backgroundColor="white" style.width="20f" style.height="20f"/>
+            <Panel style.backgroundColor="white" style.width="20f" style.height="20f"/>
+            <Panel style.backgroundColor="white" style.width="20f" style.height="20f"/>
+            <Panel style.backgroundColor="white" style.width="20f" style.height="20f"/>
+            <Panel style.backgroundColor="white" style.width="20f" style.height="20f"/>
+            <Panel style.backgroundColor="white" style.width="20f" style.height="20f"/>
+            <Panel style.backgroundColor="white" style.width="20f" style.height="20f"/>
             
             <!--<Group style.width="300f" style.height="100f" style.backgroundColor="red"/>-->
 

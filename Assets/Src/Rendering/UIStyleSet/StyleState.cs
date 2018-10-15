@@ -20,24 +20,7 @@ namespace Rendering {
         Active = 1 << 2,
         Disabled = 1 << 3,
         Focused = 1 << 4,
-
-        All = Normal | Hover | Active | Disabled | Focused
-//        Instance = 1 << 5,
-//        Base = 1 << 6,
-//        Default = 1 << 7,
-//
-//        IsState = Hover | Active | Disabled | Focused,
-//        InstanceNormal = Instance | Normal,
-//        InstanceHover = Instance | Hover,
-//        InstanceActive = Instance | Active,
-//        InstanceDisabled = Instance | Disabled,
-//        InstanceFocused = Instance | Focused,
-//
-//        BaseNormal = Base | Normal,
-//        BaseHover = Base | Hover,
-//        BaseActive = Base | Active,
-//        BaseDisabled = Base | Disabled,
-//        BaseFocused = Base | Focused,
+        Animation = 1 << 5,
 
     }
 

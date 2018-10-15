@@ -16,8 +16,10 @@ namespace Src.Systems {
         event Action<IDrawable> onMaterialDirty;
 
         int Id { get; }
+        
         bool IsMaterialDirty { get; }
         bool IsGeometryDirty { get; }
+               
         Texture GetMainTexture();
 
     }

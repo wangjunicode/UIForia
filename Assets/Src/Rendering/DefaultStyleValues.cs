@@ -10,6 +10,7 @@ namespace Rendering {
 
     public static class DefaultStyleValues {
 
+        // todo border radius & margin need to be fixed lengths
         public static readonly UIMeasurement BorderRadiusTopLeft = new UIMeasurement(0);
         public static readonly UIMeasurement BorderRadiusTopRight = new UIMeasurement(0);
         public static readonly UIMeasurement BorderRadiusBottomRight = new UIMeasurement(0);
@@ -92,6 +93,10 @@ namespace Rendering {
 
         public static readonly CrossAxisAlignment GridLayoutColAlignment = CrossAxisAlignment.Start;
         public static readonly CrossAxisAlignment GridLayoutRowAlignment = CrossAxisAlignment.Start;
+
+//        public static readonly float RadialLayoutStartAngle = 0f;
+//        public static readonly float RadialLayoutRangeLimit = 0f;
+//        public static readonly UIFixedLength RadialLayoutOffsetDistance = 0f;
 
     }
 

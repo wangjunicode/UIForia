@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using Rendering;
+using Src.Animation;
 using Src.Elements;
 using Src.Extensions;
 using Src.Layout.LayoutTypes;
@@ -255,6 +256,12 @@ namespace Src.Systems {
             LayoutBox replace = box;
 
             switch (element.style.computedStyle.LayoutType) {
+                case LayoutType.Radial:
+                    if (!(box is RadialLayoutBox)) {
+                        replace = new RadialLayoutBox(this, element);
+                    }
+
+                    break;
                 case LayoutType.Fixed:
                     if (!(box is FixedLayoutBox)) {
                         replace = new FixedLayoutBox(this, element);
@@ -320,10 +327,16 @@ namespace Src.Systems {
             switch (element.style.computedStyle.LayoutType) {
                 case LayoutType.Flex:
                     return new FlexLayoutBox(this, element);
+                
                 case LayoutType.Fixed:
                     return new FixedLayoutBox(this, element);
+                
                 case LayoutType.Grid:
                     return new GridLayoutBox(this, element);
+                
+                case LayoutType.Radial:
+                    return new RadialLayoutBox(this, element);
+                
                 default:
                     throw new ArgumentOutOfRangeException();
             }

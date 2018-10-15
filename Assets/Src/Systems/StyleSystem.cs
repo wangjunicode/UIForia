@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using Rendering;
+using Src.Animation;
 using Src.Rendering;
 using Src.StyleBindings;
 
@@ -8,10 +9,19 @@ namespace Src.Systems {
 
     public class StyleSystem : ISystem, IStyleSystem {
 
+        protected readonly StyleAnimator animator;
+        
         public event Action<UIElement, string> onTextContentChanged;
-
         public event Action<UIElement, StyleProperty> onStylePropertyChanged;
 
+        public StyleSystem() {
+            this.animator = new StyleAnimator();
+        }
+
+        public void PlayAnimation(UIStyleSet styleSet, StyleAnimation animation, AnimationOptions overrideOptions = default(AnimationOptions)) {
+            int animationId = animator.PlayAnimation(styleSet, animation, overrideOptions);
+        }
+        
         public void OnReset() { }
 
         public void OnElementCreatedFromTemplate(MetaData elementData) {
@@ -43,7 +53,9 @@ namespace Src.Systems {
             }
         }
 
-        public void OnUpdate() { }
+        public void OnUpdate() {
+            animator.OnUpdate();
+        }
 
         public void OnDestroy() { }
 

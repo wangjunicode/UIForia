@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using Src;
+using Src.Animation;
 using Src.Rendering;
 using Src.Systems;
 using Src.Util;
@@ -133,6 +134,10 @@ namespace Rendering {
 //            set { SetDisabledStyle(UIStyleProxy.hack); }
 //        }
 
+        public void PlayAnimation(string name) { }
+
+        public void PlayAnimation(PropertyAnimation animation) { }
+
         public bool HandlesOverflow => computedStyle.OverflowX != Overflow.None || computedStyle.OverflowY != Overflow.None;
 
         public bool HandlesOverflowX => computedStyle.OverflowX != Overflow.None;
@@ -163,6 +168,8 @@ namespace Rendering {
 
             return output;
         }
+
+        public void OnAnimationStart() { }
 
         public void SetNormalStyle(UIStyle style) {
             SetInstanceStyle(style, StyleState.Normal);
@@ -272,9 +279,9 @@ namespace Rendering {
             Array.Sort(appliedStyles, (a, b) => a.priority > b.priority ? -1 : 1);
         }
 
-        private StyleProperty GetPropertyValue(StylePropertyId propertyId) {
+        public StyleProperty GetPropertyValue(StylePropertyId propertyId) {
             for (int i = 0; i < appliedStyles.Length; i++) {
-                if ((appliedStyles[i].state & currentState) == 0) {
+                if ((int) appliedStyles[i].state != -1 && (appliedStyles[i].state & currentState) == 0) {
                     continue;
                 }
 
@@ -603,163 +610,50 @@ namespace Rendering {
                     break;
                 default:
                     throw new ArgumentOutOfRangeException();
-            }    
+            }
         }
+
+        // todo -- add an opacity property
         
-        public void Animate(StylePropertyId propertyId, float localPositionY, EasingFunction cubicEaseInOut, float time) {
-            switch (propertyId) {
-                case StylePropertyId.OverflowX:
-                    break;
-                case StylePropertyId.OverflowY:
-                    break;
+        public void SetAnimatedProperty(StyleProperty property) {
+            switch (property.propertyId) {
                 case StylePropertyId.BackgroundColor:
-                    break;
                 case StylePropertyId.BorderColor:
-                    break;
                 case StylePropertyId.BackgroundImage:
-                    break;
-                case StylePropertyId.GridItemColStart:
-                    break;
-                case StylePropertyId.GridItemColSpan:
-                    break;
-                case StylePropertyId.GridItemRowStart:
-                    break;
-                case StylePropertyId.GridItemRowSpan:
-                    break;
-                case StylePropertyId.GridLayoutDirection:
-                    break;
-                case StylePropertyId.GridLayoutDensity:
-                    break;
-                case StylePropertyId.GridLayoutColTemplate:
-                    break;
-                case StylePropertyId.GridLayoutRowTemplate:
-                    break;
-                case StylePropertyId.GridLayoutColAutoSize:
-                    break;
-                case StylePropertyId.GridLayoutRowAutoSize:
-                    break;
-                case StylePropertyId.GridLayoutColGap:
-                    break;
-                case StylePropertyId.GridLayoutRowGap:
-                    break;
-                case StylePropertyId.FlexLayoutWrap:
-                    break;
-                case StylePropertyId.FlexLayoutDirection:
-                    break;
-                case StylePropertyId.FlexLayoutMainAxisAlignment:
-                    break;
-                case StylePropertyId.FlexLayoutCrossAxisAlignment:
-                    break;
-                case StylePropertyId.FlexItemSelfAlignment:
-                    break;
-                case StylePropertyId.FlexItemOrder:
-                    break;
-                case StylePropertyId.FlexItemGrow:
-                    break;
-                case StylePropertyId.FlexItemShrink:
-                    break;
                 case StylePropertyId.MarginTop:
-                    break;
                 case StylePropertyId.MarginRight:
-                    break;
                 case StylePropertyId.MarginBottom:
-                    break;
                 case StylePropertyId.MarginLeft:
-                    break;
                 case StylePropertyId.BorderTop:
-                    break;
                 case StylePropertyId.BorderRight:
-                    break;
                 case StylePropertyId.BorderBottom:
-                    break;
                 case StylePropertyId.BorderLeft:
-                    break;
                 case StylePropertyId.PaddingTop:
-                    break;
                 case StylePropertyId.PaddingRight:
-                    break;
                 case StylePropertyId.PaddingBottom:
-                    break;
                 case StylePropertyId.PaddingLeft:
-                    break;
                 case StylePropertyId.BorderRadiusTopLeft:
-                    break;
                 case StylePropertyId.BorderRadiusTopRight:
-                    break;
                 case StylePropertyId.BorderRadiusBottomLeft:
-                    break;
                 case StylePropertyId.BorderRadiusBottomRight:
-                    break;
                 case StylePropertyId.TransformPositionX:
-                    // new Rendering.Animation()
-                    // styleSystem.StartAnimation(this, propertyId, 
-                    // transformX = layoutResult.Resolve();
-                    break;
                 case StylePropertyId.TransformPositionY:
-                    break;
                 case StylePropertyId.TransformScaleX:
-                    break;
                 case StylePropertyId.TransformScaleY:
-                    break;
                 case StylePropertyId.TransformPivotX:
-                    break;
                 case StylePropertyId.TransformPivotY:
-                    break;
                 case StylePropertyId.TransformRotation:
-                    break;
-                case StylePropertyId.__TextPropertyStart__:
-                    break;
                 case StylePropertyId.TextColor:
-                    break;
-                case StylePropertyId.TextFontAsset:
-                    break;
                 case StylePropertyId.TextFontSize:
-                    break;
-                case StylePropertyId.TextFontStyle:
-                    break;
-                case StylePropertyId.TextAnchor:
-                    break;
-                case StylePropertyId.TextWhitespaceMode:
-                    break;
-                case StylePropertyId.TextWrapMode:
-                    break;
-                case StylePropertyId.TextHorizontalOverflow:
-                    break;
-                case StylePropertyId.TextVerticalOverflow:
-                    break;
                 case StylePropertyId.TextIndentFirstLine:
-                    break;
                 case StylePropertyId.TextIndentNewLine:
-                    break;
-                case StylePropertyId.TextLayoutStyle:
-                    break;
-                case StylePropertyId.TextAutoSize:
-                    break;
-                case StylePropertyId.TextTransform:
-                    break;
-                case StylePropertyId.__TextPropertyEnd__:
-                    break;
-                case StylePropertyId.MinWidth:
-                    break;
-                case StylePropertyId.MaxWidth:
-                    break;
                 case StylePropertyId.PreferredWidth:
-                    break;
-                case StylePropertyId.MinHeight:
-                    break;
-                case StylePropertyId.MaxHeight:
-                    break;
                 case StylePropertyId.PreferredHeight:
-                    break;
-                case StylePropertyId.LayoutType:
-                    break;
-                case StylePropertyId.IsInLayoutFlow:
-                    break;
-                case StylePropertyId.LayoutBehavior:
+                    computedStyle.SetProperty(property);
                     break;
                 default:
-                    throw new ArgumentOutOfRangeException(nameof(propertyId), propertyId, null);
-            }    
+                    throw new Exception(property.propertyId + " is not able to be animated");
+            }
         }
 
     }

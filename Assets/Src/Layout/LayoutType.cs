@@ -6,13 +6,8 @@ namespace Rendering {
         Flow,
         Flex,
         Fixed,
-        Grid
-//        Grid,
-//        Radial,
-//        VStack,
-//        HStack,
-//        None,
-
+        Grid,
+        Radial
 
     }
 

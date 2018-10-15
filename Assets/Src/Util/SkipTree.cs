@@ -368,6 +368,26 @@ namespace Src {
             StackPool<SkipTreeNode>.Release(stack);
         }
 
+        public IList<T> GetAncestors(T start, IList<T> outputList = null) {
+            if (outputList == null) {
+                outputList = ListPool<T>.Get();
+            }
+            
+            SkipTreeNode node;
+            
+            if (!nodeMap.TryGetValue(start.UniqueId, out node)) {
+                return outputList;
+            }
+
+            SkipTreeNode ptr = node.parent;
+            while (ptr != null) {
+                outputList.Add(ptr.item);
+                ptr = ptr.parent;
+            }
+            return outputList;
+
+        }
+        
         public void ConditionalTraversePreOrder(Func<T, bool> traverseFn) {
             ConditionalTraversePreOrderStep(root, traverseFn);
         }

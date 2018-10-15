@@ -15,7 +15,11 @@ namespace Src.Systems {
 
         public IDrawable drawable;
         public GORenderSystem renderSystem;
-
+        public CanvasRenderer canvasRenderer;
+        
+        public Rect clipRect;
+        public bool clips;
+        
         public RenderData(UIElement element, GORenderSystem renderSystem) {
             this.element = element;
             this.renderSystem = renderSystem;

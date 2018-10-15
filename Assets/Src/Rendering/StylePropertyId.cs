@@ -8,7 +8,9 @@ namespace Rendering {
         BackgroundColor = 100,
         BorderColor = 101,
         BackgroundImage = 102,
-
+        Opacity = 103, 
+        Cursor = 104, 
+        
         GridItemColStart = 200,
         GridItemColSpan = 201,
         GridItemRowStart = 202,
@@ -93,8 +95,11 @@ namespace Rendering {
         IsInLayoutFlow = 1202,
         LayoutBehavior = 1203
         
-        // total = 70
+        // total = 72
 
+
+
+        
 
     }
 

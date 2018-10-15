@@ -1,6 +1,7 @@
 using System.Collections.Generic;
 using Rendering;
 using Src;
+using Src.Animation;
 using Src.Layout;
 using Src.Layout.LayoutTypes;
 using Src.Rendering;
@@ -8,20 +9,28 @@ using UnityEngine;
 
 public class ChatWindow_Styles {
 
+    //[ExportAnimation("transform")]
+    public static StyleAnimation AnimateTransform() {
+        return new PropertyAnimation(
+            StyleProperty.PreferredWidth(500f),
+            new AnimationOptions(3, EasingFunction.BackEaseOut)
+        );
+    }
+
     [ExportStyle("grid")]
     public static UIStyle Grid() {
         return new UIStyle() {
             LayoutType = LayoutType.Grid,
             GridLayoutColGapSize = 12f,
             GridLayoutRowGapSize = 12f,
-            GridLayoutRowTemplate = new [] {
+            GridLayoutRowTemplate = new[] {
                 GridTrackSize.MaxContent,
                 new GridTrackSize(100f),
                 new GridTrackSize(100f),
                 new GridTrackSize(100f),
                 new GridTrackSize(100f),
             },
-            GridLayoutColTemplate = new [] {
+            GridLayoutColTemplate = new[] {
                 GridTrackSize.Flex,
                 new GridTrackSize(100f)
             },
@@ -30,7 +39,7 @@ public class ChatWindow_Styles {
             GridLayoutColAutoSize = 100f,
         };
     }
-    
+
     [ExportStyle("grid-item")]
     public static UIStyle GridItem() {
         return new UIStyle() {
@@ -41,7 +50,7 @@ public class ChatWindow_Styles {
             FlexLayoutMainAxisAlignment = MainAxisAlignment.Center,
         };
     }
-    
+
     [ExportStyle("overflow")]
     public static UIStyle Overflow() {
         return new UIStyle() {
@@ -50,12 +59,12 @@ public class ChatWindow_Styles {
             OverflowY = Src.Rendering.Overflow.Scroll
         };
     }
-    
+
     [ExportStyle("grid-item-alt1")]
     public static UIStyle GridItemAlt() {
         return new UIStyle() {
 //            GridItemColSelfAlignment =CrossAxisAlignment.Center,
-            GridItemRowSelfAlignment =CrossAxisAlignment.Center,
+            GridItemRowSelfAlignment = CrossAxisAlignment.Center,
             BackgroundColor = Color.blue,
             PreferredWidth = 100f,
             PreferredHeight = 100f,
@@ -63,12 +72,12 @@ public class ChatWindow_Styles {
             FlexLayoutMainAxisAlignment = MainAxisAlignment.Center,
         };
     }
-    
+
     [ExportStyle("grid-item-alt2")]
     public static UIStyle GridItemAlt2() {
         return new UIStyle() {
 //            GridItemColSelfAlignment =CrossAxisAlignment.Center,
-            GridItemRowSelfAlignment =CrossAxisAlignment.Center,
+            GridItemRowSelfAlignment = CrossAxisAlignment.Center,
             BackgroundColor = Color.green,
             PreferredWidth = 100f,
             PreferredHeight = 100f,
@@ -78,7 +87,7 @@ public class ChatWindow_Styles {
             GridItemColSpan = 3
         };
     }
-    
+
     [ExportStyle("container")]
     public static UIStyle Container() {
         return new UIStyle() {
@@ -135,7 +144,7 @@ public class ChatWindow_Styles {
             TextColor = Color.white
         };
     }
-    
+
     [ExportStyle("text-style")]
     public static UIStyle Text() {
         return new UIStyle() {

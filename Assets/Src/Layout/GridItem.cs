@@ -21,9 +21,3 @@ namespace Src.Layout {
 
 }
 
-namespace UIForia {
-
-    public class InvalidArgumentException : System.Exception { }
-
-
-}

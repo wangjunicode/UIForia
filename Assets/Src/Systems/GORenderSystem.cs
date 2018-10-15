@@ -15,18 +15,22 @@ namespace Src.Systems {
         private readonly ILayoutSystem m_LayoutSystem;
         private readonly IStyleSystem styleSystem;
 
-        private readonly SkipTree<RenderData> renderSkipTree;
+        private readonly SkipTree<RenderData> m_RenderSkipTree;
         private readonly Dictionary<int, RectTransform> m_TransformMap;
 
         private readonly List<IDrawable> m_DirtyGraphicList;
         private readonly Dictionary<int, CanvasRenderer> m_CanvasRendererMap;
         private readonly List<RenderData> m_VirtualScrollbarElements;
         private readonly List<UIElement> m_ToInitialize;
+        private readonly SkipTree<RenderData> m_ClipTree;
+        private readonly Canvas m_Canvas;
+        
+        private static readonly List<RenderData> s_ClipChain = new List<RenderData>();
 
         public GORenderSystem(ILayoutSystem layoutSystem, IStyleSystem styleSystem, RectTransform rectTransform) {
             this.m_LayoutSystem = layoutSystem;
             this.rectTransform = rectTransform;
-            this.renderSkipTree = new SkipTree<RenderData>();
+            this.m_RenderSkipTree = new SkipTree<RenderData>();
 
             this.m_DirtyGraphicList = new List<IDrawable>();
             this.m_CanvasRendererMap = new Dictionary<int, CanvasRenderer>();
@@ -34,8 +38,10 @@ namespace Src.Systems {
             this.m_VirtualScrollbarElements = new List<RenderData>();
             this.m_LayoutSystem.onCreateVirtualScrollbar += OnVirtualScrollbarCreated;
             this.m_ToInitialize = new List<UIElement>();
-
-            this.renderSkipTree.onItemParentChanged += (item, newParent, oldParent) => {
+            this.m_ClipTree = new SkipTree<RenderData>();
+            this.m_Canvas = rectTransform.GetComponentInParent<Canvas>();
+            
+            this.m_RenderSkipTree.onItemParentChanged += (item, newParent, oldParent) => {
                 RectTransform transform = m_TransformMap.GetOrDefault(item.UniqueId);
                 if (newParent == null) {
                     transform.SetParent(rectTransform);
@@ -102,7 +108,7 @@ namespace Src.Systems {
         }
 
         private void HandleStylePropertyChanged(UIElement element, StyleProperty property) {
-            renderSkipTree.GetItem(element.id)?.drawable?.OnStylePropertyChanged(property);
+            m_RenderSkipTree.GetItem(element.id)?.drawable?.OnStylePropertyChanged(property);
         }
 
         private void InitializeRenderables() {
@@ -125,8 +131,14 @@ namespace Src.Systems {
                 m_CanvasRendererMap.Add(element.id, canvasRenderer);
 
                 RenderData renderData = new RenderData(element, this);
+                renderData.canvasRenderer = canvasRenderer;
 
-                renderSkipTree.AddItem(renderData);
+                if (element.style.HandlesOverflowX || element.style.HandlesOverflowY) {
+                    renderData.clips = true;
+                    m_ClipTree.AddItem(renderData);
+                }
+
+                m_RenderSkipTree.AddItem(renderData);
                 if (element.isEnabled) {
                     m_DirtyGraphicList.Add(renderData.drawable);
                 }
@@ -139,6 +151,12 @@ namespace Src.Systems {
             InitializeRenderables();
 
             List<UIElement> updatedElements = m_LayoutSystem.GetUpdatedLayoutElements(ListPool<UIElement>.Get());
+            List<RenderData> clipList = ListPool<RenderData>.Get();
+            int clipUpdateStartDepth = -1;
+
+            if (updatedElements.Count > 0) {
+                clipUpdateStartDepth = updatedElements[0].depth;
+            }
 
             for (int i = 0; i < updatedElements.Count; i++) {
                 RectTransform transform;
@@ -149,7 +167,11 @@ namespace Src.Systems {
                     continue;
                 }
 
-                RenderData renderData = renderSkipTree.GetItem(element.id);
+                RenderData renderData = m_RenderSkipTree.GetItem(element.id);
+
+                if (element.depth == clipUpdateStartDepth) {
+                    clipList.Add(renderData);
+                }
 
                 Vector2 position = layoutResult.localPosition;
                 Vector2 size = new Vector2(layoutResult.allocatedWidth, layoutResult.allocatedHeight);
@@ -189,9 +211,110 @@ namespace Src.Systems {
 
                     renderData.drawable?.OnAllocatedSizeChanged();
                 }
+
+                Rect overflowRect = element.layoutResult.ScreenOverflowRect;
+                Rect screenRect = element.layoutResult.ScreenRect;
+
+                // if element is overflowing we need to update it's clip rect if parent handles clipping
+
+                // culling
+                // clipping self
+                // masking children
+
+                // update clipping when:
+                    // - size changes
+                    // - position changes
+                    // - scroll bar added / size change / attachment change
+                    // - clipped ancestor moves
+                    // - clipped ancestor size changes
+                    // - clipped ancestor scroll bar add / remove / size change
+                
+                if (element.style.HandlesOverflow && (overflowRect.width >= 0 || overflowRect.height >= 0)) {
+                    // if overflowing & ancestor handles overflow, we need to mask and maybe cull
+                    // also need to apply mask changes to children
+
+                    Rect localRect = element.layoutResult.LocalRect;
+
+                    Vector2 canvasSize = ((RectTransform) m_Canvas.transform).sizeDelta * 0.5f;
+
+                    // clip rects are relative to CANVAS CENTER!
+                    Rect clipRect = new Rect(
+                        screenRect.x - canvasSize.x,
+                        screenRect.y + canvasSize.y - localRect.height,
+                        localRect.width,
+                        localRect.height
+                    );
+
+                    renderData.canvasRenderer.EnableRectClipping(clipRect);
+
+                    SkipTree<RenderData>.TreeNode node = m_RenderSkipTree.GetTraversableTree(renderData);
+
+                    for (int j = 0; j < node.children.Length; j++) {
+                        SkipTree<RenderData>.TreeNode child = node.children[j];
+                        LayoutResult r = child.item.element.layoutResult;
+                        Rect nodeClipRect = new Rect(
+                            r.ScreenRect.x - canvasSize.x,
+                            r.ScreenRect.y + canvasSize.y - r.allocatedHeight,
+                            r.allocatedWidth,
+                            r.allocatedHeight
+                        );
+                        Rect intersect = RectIntersect(clipRect, nodeClipRect);
+                        child.item.canvasRenderer.EnableRectClipping(intersect);
+                    }
+
+//                    if (element.style.HandlesOverflowX) {
+//                        Debug.Log("Should clip X " + element);
+//                        float x = overflowRect.x - screenRect.x;
+//                        float width = overflowRect.width - screenRect.width;
+//                    }
+//
+//                    if (element.style.HandlesOverflowY) {
+//                        Debug.Log("Should clip Y " + element);
+//
+//                    }
+                    
+                }
             }
 
-            ListPool<UIElement>.Release(ref updatedElements);
+            // run through first level of changes
+            // apply clipping / culling updates to children
+
+//            Stack<SkipTree<RenderData>.TreeNode> cullClipStack = StackPool<SkipTree<RenderData>.TreeNode>.Get();
+//            for (int i = 0; i < clipList.Count; i++) {
+//                RenderData renderdata = clipList[i];
+//
+//                m_ClipTree.GetAncestors(renderdata, s_ClipChain);
+//                Rect clipRect = s_ClipChain[0].clipRect;
+//
+//                if (s_ClipChain.Count == 0 && !renderdata.clips) {
+//                    return;
+//                }
+//
+//                if (s_ClipChain.Count > 0) {
+//                    
+//                    for (int j = 0; j < s_ClipChain.Count; j++) {
+//                        clipRect = RectIntersect(clipRect, s_ClipChain[j].clipRect);
+//                    }
+//                    
+//                }
+//                
+//                SkipTree<RenderData>.TreeNode node = m_RenderSkipTree.GetTraversableTree(renderdata);
+//
+//                while (cullClipStack.Count > 0) {
+//                    node = cullClipStack.Pop();
+//
+//                   // clipRect.Intersect();
+//
+//                    for (int j = 0; j < node.children.Length; j++) {
+//                        cullClipStack.Push(node.children[j]);
+//                    }
+//                    
+//                }
+//
+//                s_ClipChain.Clear();
+//            }
+//
+//            StackPool<SkipTree<RenderData>.TreeNode>.Release(cullClipStack);
 
             for (int i = 0; i < m_VirtualScrollbarElements.Count; i++) {
                 RenderData data = m_VirtualScrollbarElements[i];
@@ -219,6 +342,22 @@ namespace Src.Systems {
             }
 
             m_DirtyGraphicList.Clear();
+
+            ListPool<UIElement>.Release(ref updatedElements);
+        }
+
+
+        private static Rect RectIntersect(Rect a, Rect b) {
+            float xMin = a.x > b.x ? a.x : b.x;
+            float xMax = a.x + a.width < b.x + b.width ? a.x + a.width : b.x + b.width;
+            float yMin = a.y > b.y ? a.y : b.y;
+            float yMax = a.y + a.height < b.y + b.height ? a.y + a.height : b.y + b.height;
+
+            if (xMax >= xMin && yMax >= yMin) {
+                return new Rect(xMin, yMin, xMax - xMin, yMax - yMin);
+            }
+
+            return new Rect(0f, 0f, 0f, 0f);
         }
 
         public void OnReset() {
@@ -228,7 +367,7 @@ namespace Src.Systems {
 
             this.styleSystem.onStylePropertyChanged -= HandleStylePropertyChanged;
 
-            renderSkipTree.Clear();
+            m_RenderSkipTree.Clear();
             m_TransformMap.Clear();
             m_CanvasRendererMap.Clear();
             m_DirtyGraphicList.Clear();
@@ -255,11 +394,11 @@ namespace Src.Systems {
         }
 
         public void OnElementDestroyed(UIElement element) {
-            RenderData data = renderSkipTree.GetItem(element);
+            RenderData data = m_RenderSkipTree.GetItem(element);
 
             if (data == null) return;
 
-            renderSkipTree.RemoveItem(data);
+            m_RenderSkipTree.RemoveItem(data);
 
             CanvasRenderer canvasRenderer = m_CanvasRendererMap.GetOrDefault(element.id);
             if (canvasRenderer != null) {
@@ -281,9 +420,9 @@ namespace Src.Systems {
         public void OnElementHidden(UIElement element) { }
 
         public void OnElementParentChanged(UIElement element, UIElement oldParent, UIElement newParent) {
-            RenderData data = renderSkipTree.GetItem(element);
+            RenderData data = m_RenderSkipTree.GetItem(element);
             if (data != null) {
-                renderSkipTree.UpdateItemParent(element);
+                m_RenderSkipTree.UpdateItemParent(element);
             }
             else {
                 //OnElementStyleChanged(element);
@@ -299,7 +438,7 @@ namespace Src.Systems {
                 m_TransformMap[element.id].gameObject.SetActive(true);
             }
 
-            RenderData renderData = renderSkipTree.GetItem(element.id);
+            RenderData renderData = m_RenderSkipTree.GetItem(element.id);
             if (renderData != null) {
                 m_DirtyGraphicList.Add(renderData.drawable);
             }
@@ -314,7 +453,7 @@ namespace Src.Systems {
                 m_CanvasRendererMap[element.id].Clear();
             }
 
-            RenderData renderData = renderSkipTree.GetItem(element.id);
+            RenderData renderData = m_RenderSkipTree.GetItem(element.id);
             if (renderData != null) {
                 m_DirtyGraphicList.Remove(renderData.drawable);
             }
@@ -333,11 +472,14 @@ namespace Src.Systems {
         }
 
         public void OnVirtualScrollbarCreated(VirtualScrollbar scrollbar) {
-            RenderData renderData = renderSkipTree.GetItem(scrollbar.targetElement);
+            RenderData renderData = m_RenderSkipTree.GetItem(scrollbar.targetElement);
 
             if (renderData != null) {
-                var x = m_CanvasRendererMap[scrollbar.targetElement.id];
-                x.cull = true;//(new Rect(0, 0, 100f, 100f));
+                if (renderData.element.style.HandlesOverflow) {
+                    renderData.clips = true;
+                    m_ClipTree.AddItem(renderData);
+                    // update clipping here?
+                }
             }
         }
 //                if (renderData.mask == null) {
@@ -372,7 +514,7 @@ namespace Src.Systems {
 //                    renderData.verticalScrollbarHandle = handleTransform;
 //                }
 //            }
-        
+
     }
 
 }

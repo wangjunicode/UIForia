@@ -136,7 +136,9 @@ namespace Rendering {
 
         public void PlayAnimation(string name) { }
 
-        public void PlayAnimation(PropertyAnimation animation) { }
+        public void PlayAnimation(StyleAnimation animation) {
+            styleSystem.PlayAnimation(this, animation, default(AnimationOptions));
+        }
 
         public bool HandlesOverflow => computedStyle.OverflowX != Overflow.None || computedStyle.OverflowY != Overflow.None;
 

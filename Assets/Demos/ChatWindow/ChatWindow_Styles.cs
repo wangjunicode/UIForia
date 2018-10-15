@@ -1,4 +1,3 @@
-using System.Collections.Generic;
 using Rendering;
 using Src;
 using Src.Animation;
@@ -7,13 +6,54 @@ using Src.Layout.LayoutTypes;
 using Src.Rendering;
 using UnityEngine;
 
+using static Rendering.StyleProperty;
+
 public class ChatWindow_Styles {
 
     //[ExportAnimation("transform")]
     public static StyleAnimation AnimateTransform() {
-        return new PropertyAnimation(
-            StyleProperty.PreferredWidth(500f),
-            new AnimationOptions(3, EasingFunction.BackEaseOut)
+        return new AnimationGroup(
+            new PropertyAnimation(
+                PreferredWidth(500),
+                new AnimationOptions() {
+                    duration = 2f,
+                    iterations = 2,
+                    delay = 1f,
+                    direction = AnimationDirection.Reverse,
+                    loopType = AnimationLoopType.PingPong
+                }
+            )
+        );
+
+    }
+
+    public static StyleAnimation KeyFrameAnimateTransform() {
+        return new KeyFrameAnimation(
+            new AnimationOptions() {
+                duration = 5f
+            },
+            new AnimationKeyFrame(0f,
+                BackgroundColor(Color.red),
+                PreferredHeight(25f),
+                PreferredWidth(100f)
+            ),
+            new AnimationKeyFrame(0.5f,
+                BackgroundColor(Color.white),
+                PreferredHeight(300f),
+                TransformRotation(180f)
+            ),
+            new AnimationKeyFrame(0.7f,
+                PreferredWidth(100f)
+            ),
+            new AnimationKeyFrame(0.75f,
+                PreferredWidth(300f)
+            ),
+            new AnimationKeyFrame(1f,
+                BackgroundColor(Color.blue),
+                PreferredHeight(25f),
+                PreferredWidth(25f),
+                TransformRotation(0)
+            )
         );
     }
 

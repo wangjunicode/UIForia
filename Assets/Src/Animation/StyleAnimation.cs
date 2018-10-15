@@ -6,9 +6,17 @@ namespace Src.Animation {
 
     public abstract class StyleAnimation {
 
-        public AnimationOptions options;
+        public AnimationOptions m_Options;
         
-        public abstract void Update(UIElement element, Rect viewport, float deltaTime);
+        public abstract bool Update(UIStyleSet styleSet, Rect viewport, float deltaTime);
+
+        public virtual void OnStart(UIStyleSet styleSet, Rect viewport) { }
+
+        public virtual void OnEnd(UIStyleSet styleSet) { }
+
+        public virtual void OnPause(UIStyleSet styleSet) { }
+
+        public virtual void OnResume(UIStyleSet styleSet) { }
 
         protected float ResolveFixedWidth(UIElement element, Rect viewport, UIFixedLength width) {
             switch (width.unit) {

@@ -24,7 +24,7 @@ namespace Src.Systems {
         private readonly List<UIElement> m_ToInitialize;
         private readonly SkipTree<RenderData> m_ClipTree;
         private readonly Canvas m_Canvas;
-        
+
         private static readonly List<RenderData> s_ClipChain = new List<RenderData>();
 
         public GORenderSystem(ILayoutSystem layoutSystem, IStyleSystem styleSystem, RectTransform rectTransform) {
@@ -40,7 +40,7 @@ namespace Src.Systems {
             this.m_ToInitialize = new List<UIElement>();
             this.m_ClipTree = new SkipTree<RenderData>();
             this.m_Canvas = rectTransform.GetComponentInParent<Canvas>();
-            
+
             this.m_RenderSkipTree.onItemParentChanged += (item, newParent, oldParent) => {
                 RectTransform transform = m_TransformMap.GetOrDefault(item.UniqueId);
                 if (newParent == null) {
@@ -108,7 +108,13 @@ namespace Src.Systems {
         }
 
         private void HandleStylePropertyChanged(UIElement element, StyleProperty property) {
-            m_RenderSkipTree.GetItem(element.id)?.drawable?.OnStylePropertyChanged(property);
+            var renderData = m_RenderSkipTree.GetItem(element.id);
+            if (renderData?.drawable == null) return;
+            // todo figure out pivots, unity re-builds meshes. figure out how rotation affects position
+            if (property.propertyId == StylePropertyId.TransformPivotX || property.propertyId == StylePropertyId.TransformPivotY) {
+                renderData.drawable.OnAllocatedSizeChanged();
+            }
+            renderData.drawable.OnStylePropertyChanged(property);
         }
 
         private void InitializeRenderables() {
@@ -141,6 +147,8 @@ namespace Src.Systems {
                 m_RenderSkipTree.AddItem(renderData);
                 if (element.isEnabled) {
                     m_DirtyGraphicList.Add(renderData.drawable);
+                    renderData.drawable.onMeshDirty += MarkGeometryDirty;
+                    renderData.drawable.onMaterialDirty += MarkMaterialDirty;
                 }
             }
 
@@ -176,7 +184,7 @@ namespace Src.Systems {
                 Vector2 position = layoutResult.localPosition;
                 Vector2 size = new Vector2(layoutResult.allocatedWidth, layoutResult.allocatedHeight);
 
-                float rotation = element.style.computedStyle.TransformRotation * Mathf.Deg2Rad;
+                float rotation = element.style.computedStyle.TransformRotation;
 
                 UIElement ptr = element.parent;
 
@@ -203,13 +211,17 @@ namespace Src.Systems {
                     outputRotation = Quaternion.AngleAxis(rotation, Vector3.forward);
                 }
 
-                transform.anchoredPosition = new Vector3(outputPosition.x, -position.y);
-                transform.rotation = outputRotation;
-
                 if (transform.sizeDelta != size) {
                     transform.sizeDelta = size;
-
                     renderData.drawable?.OnAllocatedSizeChanged();
+                }
+
+                if (rotation > 0) {
+                    transform.rotation = outputRotation;
+                    transform.anchoredPosition = new Vector3(outputPosition.x, -position.y);
+                }
+                else {
+                    transform.anchoredPosition = new Vector3(outputPosition.x, -position.y);
                 }
 
                 Rect overflowRect = element.layoutResult.ScreenOverflowRect;
@@ -222,13 +234,13 @@ namespace Src.Systems {
                 // masking children
 
                 // update clipping when:
-                    // - size changes
-                    // - position changes
-                    // - scroll bar added / size change / attachment change
-                    // - clipped ancestor moves
-                    // - clipped ancestor size changes
-                    // - clipped ancestor scroll bar add / remove / size change
-                
+                // - size changes
+                // - position changes
+                // - scroll bar added / size change / attachment change
+                // - clipped ancestor moves
+                // - clipped ancestor size changes
+                // - clipped ancestor scroll bar add / remove / size change
+
                 if (element.style.HandlesOverflow && (overflowRect.width >= 0 || overflowRect.height >= 0)) {
                     // if overflowing & ancestor handles overflow, we need to mask and maybe cull
                     // also need to apply mask changes to children
@@ -245,7 +257,7 @@ namespace Src.Systems {
                         localRect.height
                     );
 
-                    renderData.canvasRenderer.EnableRectClipping(clipRect);
+                    //renderData.canvasRenderer.EnableRectClipping(clipRect);
 
                     SkipTree<RenderData>.TreeNode node = m_RenderSkipTree.GetTraversableTree(renderData);
 
@@ -259,7 +271,7 @@ namespace Src.Systems {
                             r.allocatedHeight
                         );
                         Rect intersect = RectIntersect(clipRect, nodeClipRect);
-                        child.item.canvasRenderer.EnableRectClipping(intersect);
+           //             child.item.canvasRenderer.EnableRectClipping(intersect);
                     }
 
 //                    if (element.style.HandlesOverflowX) {
@@ -272,7 +284,7 @@ namespace Src.Systems {
 //                        Debug.Log("Should clip Y " + element);
 //
 //                    }
-                    
+
                 }
             }
 
@@ -346,7 +358,6 @@ namespace Src.Systems {
             ListPool<UIElement>.Release(ref updatedElements);
         }
 
-
         private static Rect RectIntersect(Rect a, Rect b) {
             float xMin = a.x > b.x ? a.x : b.x;
             float xMax = a.x + a.width < b.x + b.width ? a.x + a.width : b.x + b.width;
@@ -398,6 +409,9 @@ namespace Src.Systems {
 
             if (data == null) return;
 
+            data.drawable.onMeshDirty -= MarkGeometryDirty;
+            data.drawable.onMaterialDirty -= MarkMaterialDirty;
+            
             m_RenderSkipTree.RemoveItem(data);
 
             CanvasRenderer canvasRenderer = m_CanvasRendererMap.GetOrDefault(element.id);
@@ -518,70 +532,3 @@ namespace Src.Systems {
     }
 
 }
-
-//        private void OnElementStyleChanged(UIElement element) {
-//            RenderData data = renderSkipTree.GetItem(element);
-//
-//            RenderPrimitiveType primitiveType = DeterminePrimitiveType(element);
-//
-//            if (data == null) {
-//                GameObject obj = new GameObject(element.ToString());
-//
-//#if DEBUG
-//                StyleDebugView debugView = obj.AddComponent<StyleDebugView>();
-//                debugView.element = element;
-//#endif
-//
-//                RectTransform unityTransform = obj.AddComponent<RectTransform>();
-//                unityTransform.anchorMin = new Vector2(0, 1);
-//                unityTransform.anchorMax = new Vector2(0, 1);
-//                unityTransform.pivot = new Vector2(0, 1);
-//                m_TransformMap[element.id] = unityTransform;
-//
-//                obj.SetActive(element.isEnabled);
-//                data = new RenderData(element, primitiveType, unityTransform);
-//                CreateComponents(data);
-//                renderSkipTree.AddItem(data);
-//
-//                return;
-//            }
-//
-//            if (primitiveType == data.primitiveType) {
-//                ApplyStyles(data);
-//                return;
-//            }
-//
-//            data.primitiveType = primitiveType;
-//
-//            if (data.renderComponent != null) {
-//                Object.Destroy(data.renderComponent);
-//            }
-//
-//            // todo -- maybe remove & re-parent children if not rendering
-//            if (primitiveType == RenderPrimitiveType.None) {
-//                return;
-//            }
-//
-//            data.primitiveType = primitiveType;
-//            CreateComponents(data);
-//        }
-
-//                // Text elements give me lots of trouble. Here is what needs to happen:
-//                // Layout needs to measure the preferred size of the string. It does this on it's own
-//                // once that is computed the layout system uses it as normal. When it comes to rendering
-//                // we only want to set the text if we have to and then force the mesh to update because
-//                // this needs to happen BEFORE we update dirty graphics because things like highlighting
-//                // and caret placement need to have up to date data on rendered character layout which 
-//                // may differ from what the layout system says. 
-//
-//                UITextElement textElement = element as UITextElement;
-//                if (textElement != null) {
-//                    TextMeshProUGUI tmp = renderData.renderComponent as TextMeshProUGUI;
-//                    if (tmp != null) {
-//                        TextMeshProUGUI textMesh = renderData.renderComponent as TextMeshProUGUI;
-//                        if (textMesh != null && textMesh.text != textElement.GetText()) {
-//                            textMesh.text = textElement.GetText();
-//                            textMesh.ForceMeshUpdate();
-//                        }
-//                    }
-//                }

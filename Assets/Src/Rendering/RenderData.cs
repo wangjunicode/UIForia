@@ -47,15 +47,6 @@ namespace Src.Systems {
             renderSystem.MarkMaterialDirty(element);
         }
 
-        public void OnStylePropertyChanged(StyleProperty property) {
-            if (element == drawable) {
-                drawable.OnStylePropertyChanged(property);
-            }
-            else {
-                if (property.propertyId == StylePropertyId.BorderRadiusTopLeft) { }
-            }
-        }
-
     }
 
 }

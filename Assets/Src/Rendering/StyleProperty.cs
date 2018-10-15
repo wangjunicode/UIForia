@@ -31,6 +31,13 @@ namespace Rendering {
             this.valuePart1 = 0;
             this.objectField = null;
         }
+        
+        public StyleProperty(StylePropertyId propertyId, Src.Rendering.Gradient gradient) {
+            this.propertyId = propertyId;
+            this.valuePart0 = 0;
+            this.valuePart1 = (int)ColorType.Gradient;
+            this.objectField = gradient;
+        }
 
         public StyleProperty(StylePropertyId propertyId, UIFixedLength length) {
             this.propertyId = propertyId;
@@ -107,6 +114,10 @@ namespace Rendering {
         public IReadOnlyList<GridTrackSize> AsGridTrackTemplate => (IReadOnlyList<GridTrackSize>) objectField;
         public UIFixedLength AsFixedLength => new UIFixedLength(FloatUtil.DecodeToFloat(valuePart0), (UIFixedUnit) valuePart1);
 
+        public Src.Rendering.Gradient AsGradient => (Src.Rendering.Gradient) objectField;
+
+        public bool IsGradient => objectField != null && (ColorType) valuePart1 == ColorType.Gradient;
+        
         [DebuggerStepThrough]
         public static StyleProperty Unset(StylePropertyId propertyId) {
             return new StyleProperty(propertyId, IntUtil.UnsetValue, IntUtil.UnsetValue);
@@ -142,6 +153,10 @@ namespace Rendering {
         
         public static StyleProperty BackgroundColor(Color color) {
             return new StyleProperty(StylePropertyId.BackgroundColor, color);
+        }
+        
+        public static StyleProperty BackgroundColor(Src.Rendering.Gradient gradient) {
+            return new StyleProperty(StylePropertyId.BackgroundColor, 0, (int)ColorType.Gradient, gradient);
         }
         
         public static StyleProperty BackgroundImage(AssetPointer<Texture2D> texture) {

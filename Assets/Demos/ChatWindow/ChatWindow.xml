@@ -5,39 +5,14 @@
 
     <Import value="ClippedPanel+ClippedCorner" as="ClippedCorner"/>
 
-    <Contents style="container">
+    <Contents style.backgroundColor="white" style="container">
 
         <!--<WindowFrame>-->
 
         <!--</WindowFrame>-->
 
-        <Panel style.layoutType="Radial" style.backgroundColor="red" style.width="300f" style.height='400f'>
+        <Panel x-id="child-to-animate" style.backgroundColor="red" style.width="100f" style.height='100f'/>
             
-            <Panel style.backgroundColor="white" style.width="20f" style.height="20f"/>
-            <Panel style.backgroundColor="white" style.width="20f" style.height="20f"/>
-            <Panel style.backgroundColor="white" style.width="20f" style.height="20f"/>
-            <Panel style.backgroundColor="white" style.width="20f" style.height="20f"/>
-            <Panel style.backgroundColor="white" style.width="20f" style.height="20f"/>
-            <Panel style.backgroundColor="white" style.width="20f" style.height="20f"/>
-            <Panel style.backgroundColor="white" style.width="20f" style.height="20f"/>
-            <Panel style.backgroundColor="white" style.width="20f" style.height="20f"/>
-            
-            <!--<Group style.width="300f" style.height="100f" style.backgroundColor="red"/>-->
-
-            <!--<Group style.width="300f" style.height="200f" style.backgroundColor="blue"/>-->
-            <!---->
-            <!--<Group style.width="100f" style.height="content(100)">-->
-            <!---->
-            <!--<Text style="text-style">-->
-            <!--This is some text that should be kinda long but-->
-            <!--I dont know what else I should write here maybe-->
-            <!--some lorem ipsum stuff i guess that should be enough.-->
-            <!--</Text> -->
-            <!---->
-            <!--</Group>-->
-
-        </Panel>
-
     </Contents>
 
 </UITemplate>

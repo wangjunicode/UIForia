@@ -1025,6 +1025,80 @@ namespace Rendering {
                     throw new ArgumentOutOfRangeException(nameof(property.propertyId), property.propertyId, null);
             }
         }
+
+        internal StyleProperty GetProperty(StylePropertyId propertyId) {
+            switch (propertyId) {
+                case StylePropertyId.TransformRotation:
+                    return StyleProperty.TransformRotation(TransformRotation);
+                
+                case StylePropertyId.TransformPositionX:
+                    return StyleProperty.TransformPositionX(TransformPositionX);
+                
+                case StylePropertyId.TransformPositionY:
+                    return StyleProperty.TransformPositionY(TransformPositionY);
+                
+                case StylePropertyId.MinWidth:
+                    return StyleProperty.MinWidth(MinWidth);
+                
+                case StylePropertyId.MaxWidth:
+                    return StyleProperty.MaxWidth(MaxWidth);
+                
+                case StylePropertyId.PreferredWidth:
+                    return StyleProperty.PreferredWidth(PreferredWidth);
+                
+                case StylePropertyId.MinHeight:
+                    return StyleProperty.MinHeight(MinHeight);
+                
+                case StylePropertyId.MaxHeight:
+                    return StyleProperty.MaxHeight(MaxHeight);
+                
+                case StylePropertyId.PreferredHeight:
+                    return StyleProperty.PreferredHeight(PreferredHeight);
+                
+                case StylePropertyId.BackgroundColor:
+                    return StyleProperty.BackgroundColor(BackgroundColor);
+                
+                case StylePropertyId.PaddingTop:
+                    return StyleProperty.PaddingTop(PaddingTop);
+                
+                case StylePropertyId.PaddingRight:
+                    return StyleProperty.PaddingRight(PaddingRight);
+                
+                case StylePropertyId.PaddingBottom:
+                    return StyleProperty.PaddingBottom(PaddingBottom);
+                
+                case StylePropertyId.PaddingLeft:
+                    return StyleProperty.PaddingLeft(PaddingLeft);
+                
+                case StylePropertyId.BorderTop:
+                    return StyleProperty.BorderTop(BorderTop);
+                
+                case StylePropertyId.BorderRight:
+                    return StyleProperty.BorderRight(BorderRight);
+                
+                case StylePropertyId.BorderBottom:
+                    return StyleProperty.BorderBottom(BorderBottom);
+                
+                case StylePropertyId.BorderLeft:
+                    return StyleProperty.BorderLeft(BorderLeft);
+                
+                case StylePropertyId.MarginTop:
+                    return StyleProperty.MarginTop(MarginTop);
+                
+                case StylePropertyId.MarginRight:
+                    return StyleProperty.MarginRight(MarginRight);
+                
+                case StylePropertyId.MarginBottom:
+                    return StyleProperty.MarginBottom(MarginBottom);
+                
+                case StylePropertyId.MarginLeft:
+                    return StyleProperty.MarginLeft(MarginLeft);
+                
+                default:
+                    throw new ArgumentOutOfRangeException("Missing: " + propertyId);
+
+            }
+        }
         
         [DebuggerStepThrough]
         private int ReadInt(StylePropertyId propertyId, int defaultValue) {

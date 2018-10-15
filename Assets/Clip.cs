@@ -13,8 +13,13 @@ public class Clip : MonoBehaviour {
 	}
 	
 	// Update is called once per frame
-	void Update () {
-		GetComponent<CanvasRenderer>().EnableRectClipping(clipRect);
-		GetComponent<CanvasRenderer>().cull = cull;
+//	void Update () {
+//		GetComponent<CanvasRenderer>().EnableRectClipping(clipRect);
+//		GetComponent<CanvasRenderer>().cull = cull;
+//	}
+
+	protected void OnRectTransformDimensionsChange() {
+		Debug.Log("Changed");
 	}
+
 }

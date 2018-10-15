@@ -4,6 +4,7 @@ using Rendering;
 using Src.Animation;
 using Src.Elements;
 using Src.Extensions;
+using Src.Layout;
 using Src.Layout.LayoutTypes;
 using Src.Util;
 using UnityEngine;
@@ -190,6 +191,13 @@ namespace Src.Systems {
             m_PendingRectUpdates.Clear();
         }
 
+        private void LayoutIgnored() { }
+
+        private void LayoutSticky() {
+            // only sticky within the parent
+            //
+        }
+
         internal void OnRectChanged(LayoutBox layoutBox) {
             m_PendingRectUpdates.Add(layoutBox);
         }
@@ -223,8 +231,14 @@ namespace Src.Systems {
                 case StylePropertyId.LayoutType:
                     HandleLayoutChanged(element);
                     break;
+                case StylePropertyId.LayoutBehavior:
+                    HandleLayoutBehaviorChanged(box);
+                    break;
                 case StylePropertyId.TransformPositionX:
                 case StylePropertyId.TransformPositionY:
+                    break;
+                case StylePropertyId.TransformRotation:
+                    m_PendingRectUpdates.Add(box);                    
                     break;
             }
 
@@ -234,6 +248,27 @@ namespace Src.Systems {
 
             if (box.parent != null && box.parent.IsInitialized) {
                 box.parent.OnChildStylePropertyChanged(box, property);
+            }
+        }
+
+        private List<LayoutBox> m_IgnoredBoxes = new List<LayoutBox>();
+        
+        private void HandleLayoutBehaviorChanged(LayoutBox box) {
+            switch (box.style.LayoutBehavior) {
+                    case LayoutBehavior.Ignored:
+                        m_IgnoredBoxes.Add(box);
+                        break;
+                    case LayoutBehavior.Fixed:
+                        break;
+                    case LayoutBehavior.Sticky:
+                        break;
+                    case LayoutBehavior.Normal:
+                        break;
+//                    case LayoutBehavior.Anchored:
+//                        break;
+            }
+            if (box.style.LayoutBehavior == LayoutBehavior.Ignored) {
+                m_IgnoredBoxes.Add(box);
             }
         }
 

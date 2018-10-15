@@ -57,8 +57,8 @@ namespace Rendering {
 
         public static readonly UIFixedLength TransformPositionX = new UIFixedLength(0);
         public static readonly UIFixedLength TransformPositionY = new UIFixedLength(0);
-        public static readonly UIFixedLength TransformPivotX = new UIFixedLength(0);
-        public static readonly UIFixedLength TransformPivotY = new UIFixedLength(0);
+        public static readonly UIFixedLength TransformPivotX = new UIFixedLength(0.5f, UIFixedUnit.Percent);
+        public static readonly UIFixedLength TransformPivotY = new UIFixedLength(0.5f, UIFixedUnit.Percent);
         public const float TransformScaleX = 1;
         public const float TransformScaleY = 1;
         public const float TransformRotation = 0;

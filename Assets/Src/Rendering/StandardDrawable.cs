@@ -64,8 +64,6 @@ namespace Src.Systems {
                     color = Color.white;
                 }
             }
-
-            float width = element.layoutResult.allocatedWidth;
             
             mesh = MeshUtil.CreateStandardUIMesh(element.layoutResult.allocatedSize, color);
 

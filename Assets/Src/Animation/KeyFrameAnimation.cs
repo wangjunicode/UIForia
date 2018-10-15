@@ -13,7 +13,8 @@ namespace Src.Animation {
 
         private readonly List<ValueTuple<StylePropertyId, List<ProcessedKeyFrame>>> processedFrames;
 
-        public KeyFrameAnimation(AnimationKeyFrame[] frames) {
+        public KeyFrameAnimation(AnimationOptions options, params AnimationKeyFrame[] frames) {
+            this.options = options;
             processedFrames = ListPool<ValueTuple<StylePropertyId, List<ProcessedKeyFrame>>>.Get();
 
             for (int i = 0; i < frames.Length; i++) {
@@ -37,11 +38,25 @@ namespace Src.Animation {
             processedFrames.Add(ValueTuple.Create(property.propertyId, list));
         }
 
-        public override void Update(UIElement element, Rect viewport, float deltaTime) {
+        public override void OnStart(UIStyleSet styleSet, Rect viewport) {
+            for (int i = 0; i < processedFrames.Count; i++) {
+                StylePropertyId property = processedFrames[i].Item1;
+                List<ProcessedKeyFrame> frames = processedFrames[i].Item2;
+                if (frames[0].key != 0f) {
+                    frames.Insert(0, new ProcessedKeyFrame(0f, styleSet.computedStyle.GetProperty(property)));
+                }
+            }
+        }
+        
+        public override bool Update(UIStyleSet styleSet, Rect viewport, float deltaTime) {
             elapsedTime += deltaTime;
             float progress = Mathf.Clamp01(elapsedTime / options.duration);
-            if (progress == 1f) { }
+            
+            if (progress == 1f) {
+                
+            }
 
+            UIElement element = styleSet.element;
             // todo - insert an implicit frame for 0% and 100% if not provided
 
             for (int i = 0; i < processedFrames.Count; i++) {
@@ -58,9 +73,14 @@ namespace Src.Animation {
                     }
                 }
 
+                if (prev.key > (elapsedTime / options.duration)) {
+                    continue;
+                }
+
                 float v0;
                 float v1;
-                float t = (elapsedTime - prev.key) / (next.key - prev.key);
+                float t = (((elapsedTime / options.duration) - prev.key) / (next.key - prev.key));
+                
                 switch (propertyId) {
                     case StylePropertyId.TransformPivotX:
                     case StylePropertyId.TransformPositionX:
@@ -103,7 +123,7 @@ namespace Src.Animation {
                     case StylePropertyId.GridLayoutColGap:
                     case StylePropertyId.GridLayoutRowGap:
                         v0 = prev.property.AsFloat;
-                        v1 = prev.property.AsFloat;
+                        v1 = next.property.AsFloat;
                         element.style.SetAnimatedProperty(new StyleProperty(propertyId, Mathf.Lerp(v0, v1, t)));
                         break;
                     case StylePropertyId.BorderColor:
@@ -111,7 +131,7 @@ namespace Src.Animation {
                     case StylePropertyId.TextColor:
                         // todo -- figure out gradients & lerping those
                         Color c0 = prev.property.AsColor;
-                        Color c1 = prev.property.AsColor;
+                        Color c1 = next.property.AsColor;
                         element.style.SetAnimatedProperty(new StyleProperty(propertyId, Color.Lerp(c0, c1, t)));
                         break;
 
@@ -119,7 +139,10 @@ namespace Src.Animation {
                         throw new UIForia.InvalidArgumentException(propertyId + " is not a supported animation property");
                 }
             }
+            return false;
         }
+
+       
 
         private struct ProcessedKeyFrame {
 

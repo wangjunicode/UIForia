@@ -1,5 +1,6 @@
 ﻿using System;
 using Rendering;
+using Src.Animation;
 
 namespace Src.Systems {
 
@@ -9,6 +10,8 @@ namespace Src.Systems {
         event Action<UIElement, StyleProperty> onStylePropertyChanged;
 
         void SetStyleProperty(UIElement element, StyleProperty propertyValue);
+
+        void PlayAnimation(UIStyleSet styleSet, StyleAnimation animation, AnimationOptions options);
 
     }
 

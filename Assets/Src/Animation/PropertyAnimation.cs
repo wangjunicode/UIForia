@@ -1,28 +1,218 @@
+using System;
+using System.Collections.Generic;
 using Rendering;
 using Src.Rendering;
+using Src.Util;
 using UnityEngine;
 
 namespace Src.Animation {
 
+    public struct AnimationStatus {
+
+        public int iterationCount;
+        public float elapsedTime;
+        public float floatValue;
+        public object startValueAsObject;
+        public AnimationDirection direction;
+        public bool isDelaying;
+
+        public AnimationStatus(float floatValue, object value) {
+            this.elapsedTime = 0;
+            this.iterationCount = 0;
+            this.startValueAsObject = value;
+            this.floatValue = floatValue;
+            this.direction = AnimationDirection.Forward;
+            this.isDelaying = false;
+        }
+
+        public AnimationStatus(object value) {
+            this.elapsedTime = 0;
+            this.iterationCount = 0;
+            this.floatValue = 0;
+            this.startValueAsObject = value;
+            this.direction = AnimationDirection.Forward;
+            this.isDelaying = false;
+        }
+
+        public AnimationStatus(float value) {
+            this.iterationCount = 0;
+            this.elapsedTime = 0;
+            this.floatValue = value;
+            this.startValueAsObject = null;
+            this.direction = AnimationDirection.Forward;
+            this.isDelaying = false;
+        }
+
+    }
+
     public class PropertyAnimation : StyleAnimation {
 
-        public StyleProperty endValue;
-        public StylePropertyId propertyId;
-        public float floatVal;
-        public Color colorValue;
+        public StyleProperty m_StartValue;
+        public StyleProperty m_TargetValue;
+        private List<ValueTuple<int, AnimationStatus>> m_StatusList;
 
-        public PropertyAnimation(StyleProperty targetProperty, AnimationOptions options = default(AnimationOptions)) {
-                
+        public PropertyAnimation(StyleProperty targetValue, AnimationOptions options) {
+            m_Options = options;
+            m_TargetValue = targetValue;
+            m_StartValue = StyleProperty.Unset(m_TargetValue.propertyId);
+            m_StatusList = ListPool<ValueTuple<int, AnimationStatus>>.Get();
         }
-        
-        public PropertyAnimation(StylePropertyId propertyId, StyleProperty startValue, AnimationOptions options) { }
 
-        // updates always work with absolute float values
-        // on final output -> set style value to endValue
+        public PropertyAnimation(StyleProperty startValue, StyleProperty targetValue, AnimationOptions options) {
+            m_Options = options;
+            m_StartValue = startValue;
+            m_TargetValue = targetValue;
+            m_StatusList = ListPool<ValueTuple<int, AnimationStatus>>.Get();
+        }
 
-        public override void Update(UIElement element, Rect viewport, float deltaTime) {
-            float t = Easing.Interpolate(options.duration, options.timingFunction) / 0.1f;
+        public override void OnStart(UIStyleSet styleSet, Rect viewport) {
+            UIElement element = styleSet.element;
+            int idx = -1;
+            for (int i = 0; i < m_StatusList.Count; i++) {
+                if (m_StatusList[i].Item1 == element.id) {
+                    idx = i;
+                    break;
+                }
+            }
+            if (idx == -1) {
+                StyleProperty startValue;
+                if (m_StartValue.IsDefined) {
+                    startValue = m_StartValue;
+                }
+                else {
+                    startValue = styleSet.computedStyle.GetProperty(m_TargetValue.propertyId);
+                }
+                AnimationStatus status = ResolveStartValue(styleSet, viewport, startValue);
+                if (m_Options.direction == AnimationDirection.Reverse) {
+                    status.direction = AnimationDirection.Reverse;
+                }
+                if (m_Options.delay > 0) {
+                    status.isDelaying = true;
+                }
+                m_StatusList.Add(ValueTuple.Create(element.id, status));
+            }
+            else {
+                throw new Exception("Trying to start the same animation twice: " + element);
+            }
+        }
+
+        private AnimationStatus ResolveStartValue(UIStyleSet styleSet, Rect viewport, StyleProperty startProperty) {
+            UIElement element = styleSet.element;
+            switch (m_TargetValue.propertyId) {
+                case StylePropertyId.TransformPivotX:
+                case StylePropertyId.TransformPositionX:
+                case StylePropertyId.PaddingLeft:
+                case StylePropertyId.PaddingRight:
+                case StylePropertyId.BorderLeft:
+                case StylePropertyId.BorderRight:
+                case StylePropertyId.MarginLeft:
+                case StylePropertyId.MarginRight:
+                    return new AnimationStatus(ResolveFixedWidth(element, viewport, startProperty.AsFixedLength));
+
+                case StylePropertyId.TransformPivotY:
+                case StylePropertyId.TransformPositionY:
+                case StylePropertyId.PaddingTop:
+                case StylePropertyId.PaddingBottom:
+                case StylePropertyId.BorderTop:
+                case StylePropertyId.BorderBottom:
+                case StylePropertyId.MarginTop:
+                case StylePropertyId.MarginBottom:
+                    return new AnimationStatus(ResolveFixedHeight(element, viewport, startProperty.AsFixedLength));
+
+                case StylePropertyId.PreferredWidth:
+                    return new AnimationStatus(ResolveWidthMeasurement(element, viewport, startProperty.AsMeasurement));
+
+                case StylePropertyId.PreferredHeight:
+                    return new AnimationStatus(ResolveHeightMeasurement(element, viewport, startProperty.AsMeasurement));
+
+                case StylePropertyId.Opacity:
+                case StylePropertyId.TransformScaleX:
+                case StylePropertyId.TransformScaleY:
+                case StylePropertyId.TransformRotation:
+                case StylePropertyId.GridLayoutColGap:
+                case StylePropertyId.GridLayoutRowGap:
+                    return new AnimationStatus(startProperty.AsFloat);
+
+                case StylePropertyId.BorderColor:
+                case StylePropertyId.BackgroundColor:
+                case StylePropertyId.TextColor:
+                    if (startProperty.IsGradient) {
+                        return new AnimationStatus((int) ColorType.Gradient, startProperty.AsGradient);
+                    }
+                    else {
+                        return new AnimationStatus((int) ColorType.Color, new StyleColor(startProperty.AsColor).rgba);
+                    }
+
+                default: throw new UIForia.InvalidArgumentException(m_TargetValue.propertyId + " is not a supported animation property");
+
+            }
+        }
+
+        public override bool Update(UIStyleSet styleSet, Rect viewport, float deltaTime) {
+            UIElement element = styleSet.element;
+            int idx = -1;
+            for (int i = 0; i < m_StatusList.Count; i++) {
+                if (m_StatusList[i].Item1 == element.id) {
+                    idx = i;
+                    break;
+                }
+            }
+            if (idx == -1) {
+                return true;
+            }
+
+            float duration = (m_Options.duration - m_Options.delay) / m_Options.iterations;
+
+            AnimationStatus status = m_StatusList[idx].Item2;
+            status.elapsedTime += deltaTime;
+            StylePropertyId propertyId = m_TargetValue.propertyId;
+
+            if (status.iterationCount == 0) {
+                if (status.isDelaying) {
+                    if (status.elapsedTime < m_Options.delay) {
+                        m_StatusList[idx] = ValueTuple.Create(element.id, status);
+                        return false;
+                    }
+                    else {
+                        status.isDelaying = false;
+                        status.elapsedTime = 0f;
+                    }
+                }
+            }
+            else {
+                if (status.isDelaying) {
+                    if (status.direction == AnimationDirection.Forward) {
+                        if (status.elapsedTime >= m_Options.forwardStartDelay) {
+                            status.elapsedTime = 0f;
+                            status.isDelaying = false;
+                        }
+                        else {
+                            m_StatusList[idx] = ValueTuple.Create(element.id, status);
+                            return false;
+                        }
+                    }
+                    else {
+                        if (status.elapsedTime >= m_Options.reverseStartDelay) {
+                            status.elapsedTime = 0f;
+                            status.isDelaying = false;
+                        }
+                        else {
+                            m_StatusList[idx] = ValueTuple.Create(element.id, status);
+                            return false;
+                        }
+                    }
+                }
+            }
+
+            float t = Mathf.Clamp01(Easing.Interpolate(status.elapsedTime / duration, m_Options.timingFunction));
             float v;
+
+            float adjustedT = t;
+
+            if (status.direction == AnimationDirection.Reverse) {
+                adjustedT = 1 - t;
+            }
+
             switch (propertyId) {
                 case StylePropertyId.TransformPivotX:
                 case StylePropertyId.TransformPositionX:
@@ -32,7 +222,7 @@ namespace Src.Animation {
                 case StylePropertyId.BorderRight:
                 case StylePropertyId.MarginLeft:
                 case StylePropertyId.MarginRight:
-                    v = Mathf.Lerp(floatVal, ResolveFixedWidth(element, viewport, endValue.AsFixedLength), t);
+                    v = Mathf.Lerp(status.floatValue, ResolveFixedWidth(element, viewport, m_TargetValue.AsFixedLength), adjustedT);
                     element.style.SetAnimatedProperty(new StyleProperty(propertyId, new UIFixedLength(v)));
                     break;
                 case StylePropertyId.TransformPivotY:
@@ -43,15 +233,15 @@ namespace Src.Animation {
                 case StylePropertyId.BorderBottom:
                 case StylePropertyId.MarginTop:
                 case StylePropertyId.MarginBottom:
-                    v = Mathf.Lerp(floatVal, ResolveFixedHeight(element, viewport, endValue.AsFixedLength), t);
+                    v = Mathf.Lerp(status.floatValue, ResolveFixedHeight(element, viewport, m_TargetValue.AsFixedLength), adjustedT);
                     element.style.SetAnimatedProperty(new StyleProperty(propertyId, new UIFixedLength(v)));
                     break;
                 case StylePropertyId.PreferredWidth:
-                    v = Mathf.Lerp(floatVal, ResolveWidthMeasurement(element, viewport, endValue.AsMeasurement), t);
+                    v = Mathf.Lerp(status.floatValue, ResolveWidthMeasurement(element, viewport, m_TargetValue.AsMeasurement), adjustedT);
                     element.style.SetAnimatedProperty(new StyleProperty(propertyId, new UIMeasurement(v)));
                     break;
                 case StylePropertyId.PreferredHeight:
-                    v = Mathf.Lerp(floatVal, ResolveHeightMeasurement(element, viewport, endValue.AsMeasurement), t);
+                    v = Mathf.Lerp(status.floatValue, ResolveHeightMeasurement(element, viewport, m_TargetValue.AsMeasurement), adjustedT);
                     element.style.SetAnimatedProperty(new StyleProperty(propertyId, new UIMeasurement(v)));
                     break;
                 case StylePropertyId.Opacity:
@@ -60,18 +250,104 @@ namespace Src.Animation {
                 case StylePropertyId.TransformRotation:
                 case StylePropertyId.GridLayoutColGap:
                 case StylePropertyId.GridLayoutRowGap:
-                    v = Mathf.Lerp(floatVal, endValue.AsFloat, t);
+                    v = Mathf.Lerp(status.floatValue, m_TargetValue.AsFloat, adjustedT);
                     element.style.SetAnimatedProperty(new StyleProperty(propertyId, v));
                     break;
                 case StylePropertyId.BorderColor:
                 case StylePropertyId.BackgroundColor:
                 case StylePropertyId.TextColor:
-                    Color c = Color.Lerp(colorValue, endValue.AsColor, t);
-                    element.style.SetAnimatedProperty(new StyleProperty(propertyId, c));
+                    if (m_TargetValue.IsGradient) {
+                        Rendering.Gradient targetGradient = m_TargetValue.AsGradient;
+                        if ((int) status.floatValue == (int) ColorType.Gradient) {
+                            Rendering.Gradient startGradient = (Rendering.Gradient) status.startValueAsObject;
+                            Rendering.Gradient finalGradient = new Rendering.Gradient();
+
+                            finalGradient.start = Mathf.Lerp(startGradient.start, targetGradient.start, adjustedT);
+                            finalGradient.rotation = Mathf.Lerp(startGradient.rotation, targetGradient.rotation, adjustedT);
+                            finalGradient.color0 = Color.Lerp(startGradient.color0, targetGradient.color0, adjustedT);
+                            finalGradient.color1 = Color.Lerp(startGradient.color1, targetGradient.color1, adjustedT);
+                            finalGradient.offset = Vector2.Lerp(startGradient.offset, targetGradient.offset, adjustedT);
+                            finalGradient.axis = targetGradient.axis;
+                            finalGradient.type = targetGradient.type;
+                            element.style.SetAnimatedProperty(new StyleProperty(propertyId, finalGradient));
+                        }
+                        else {
+
+                            Color color = new StyleColor((int) status.floatValue);
+
+                            Rendering.Gradient finalGradient = new Rendering.Gradient();
+
+                            finalGradient.start = Mathf.Lerp(0, targetGradient.start, adjustedT);
+                            finalGradient.rotation = Mathf.Lerp(0, targetGradient.rotation, adjustedT);
+                            finalGradient.color0 = Color.Lerp(color, targetGradient.color0, adjustedT);
+                            finalGradient.color1 = Color.Lerp(color, targetGradient.color1, adjustedT);
+                            finalGradient.offset = Vector2.Lerp(Vector2.zero, targetGradient.offset, adjustedT);
+                            finalGradient.axis = targetGradient.axis;
+                            finalGradient.type = targetGradient.type;
+
+                            element.style.SetAnimatedProperty(new StyleProperty(propertyId, finalGradient));
+                        }
+                    }
+                    else {
+                        if ((int) status.floatValue == (int) ColorType.Gradient) {
+                            Rendering.Gradient startGradient = (Rendering.Gradient) status.startValueAsObject;
+                            Rendering.Gradient finalGradient = new Rendering.Gradient();
+                            Color targetColor = m_TargetValue.AsColor;
+                            finalGradient.start = Mathf.Lerp(startGradient.start, 0, adjustedT);
+                            finalGradient.rotation = Mathf.Lerp(startGradient.rotation, 0, adjustedT);
+                            finalGradient.color0 = Color.Lerp(startGradient.color0, targetColor, adjustedT);
+                            finalGradient.color1 = Color.Lerp(startGradient.color1, targetColor, adjustedT);
+                            finalGradient.offset = Vector2.Lerp(startGradient.offset, Vector2.zero, adjustedT);
+                            finalGradient.axis = startGradient.axis;
+                            finalGradient.type = startGradient.type;
+                            element.style.SetAnimatedProperty(new StyleProperty(propertyId, finalGradient));
+                        }
+                        else {
+                            Color c = Color.Lerp(new StyleColor((int) status.floatValue), m_TargetValue.AsColor, adjustedT);
+                            element.style.SetAnimatedProperty(new StyleProperty(propertyId, c));
+                        }
+
+                    }
+
                     break;
 
                 default:
                     throw new UIForia.InvalidArgumentException(propertyId + " is not a supported animation property");
+            }
+
+            if (t == 1f) {
+                status.elapsedTime = 0f;
+                status.iterationCount++;
+                if (m_Options.loopType == AnimationLoopType.PingPong) {
+                    if (status.direction == AnimationDirection.Forward) {
+                        status.direction = AnimationDirection.Reverse;
+                    }
+                    else {
+                        status.direction = AnimationDirection.Forward;
+                    }
+                }
+                if (status.direction == AnimationDirection.Forward) {
+                    if (m_Options.forwardStartDelay > 0f) {
+                        status.isDelaying = true;
+                    }
+                }
+                else {
+                    if (m_Options.reverseStartDelay > 0f) {
+                        status.isDelaying = true;
+                    }
+                }
+            }
+
+            m_StatusList[idx] = ValueTuple.Create(element.id, status);
+            return status.iterationCount == m_Options.iterations && t == 1f;
+        }
+
+        public override void OnEnd(UIStyleSet styleSet) {
+            for (int i = 0; i < m_StatusList.Count; i++) {
+                if (m_StatusList[i].Item1 == styleSet.element.id) {
+                    m_StatusList.RemoveAt(i);
+                    return;
+                }
             }
         }
 

@@ -1,3 +1,4 @@
+using Rendering;
 using UnityEngine;
 
 namespace Src.Animation {
@@ -7,16 +8,16 @@ namespace Src.Animation {
         private StyleAnimation[] animations;
         private int currentAnimation;
         
-        public AnimationSequence(AnimationOptions options, StyleAnimation[] animations) {
-            this.options = options;
+        public AnimationSequence(AnimationOptions mOptions, StyleAnimation[] animations) {
+            this.m_Options = mOptions;
             this.animations = animations;
         }
         
-        public override void Update(UIElement element, Rect viewport, float deltaTime) {
+        public override bool Update(UIStyleSet styleSet, Rect viewport, float deltaTime) {
 
-            float progress = 1f / options.duration;
+            float progress = 1f / m_Options.duration;
             int count = animations.Length;
-            float slice = count / options.duration;
+            float slice = count / m_Options.duration;
             int currentIndex = 0;
             float smallestDist = float.MaxValue;
 
@@ -28,8 +29,13 @@ namespace Src.Animation {
                 }
             }
             
-            animations[currentIndex].Update(element, viewport, deltaTime);
+            animations[currentIndex].Update(styleSet, viewport, deltaTime);
 
+            return true;
+        }
+
+        public override void OnStart(UIStyleSet styleSet, Rect viewport) {
+            
         }
 
     }

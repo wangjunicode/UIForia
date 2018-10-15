@@ -1,5 +1,6 @@
 using System.Collections.Generic;
 using Rendering;
+using Src.Extensions;
 using UnityEngine;
 
 namespace Src.Animation {
@@ -13,8 +14,7 @@ namespace Src.Animation {
 
     public enum AnimationLoopType {
 
-        Forward,
-        Reverse,
+        Constant,
         PingPong
 
     }
@@ -43,14 +43,14 @@ namespace Src.Animation {
 
         }
 
-        protected List<StyleAnimation> m_PlayingAnimations;
+        protected List<AnimDef> m_PlayingAnimations;
         protected List<AnimDef> m_QueuedAnimations;
         protected Rect m_Viewport;
 
         protected static int NextId;
         
         public StyleAnimator() {
-            this.m_PlayingAnimations = new List<StyleAnimation>();
+            this.m_PlayingAnimations = new List<AnimDef>();
             this.m_QueuedAnimations = new List<AnimDef>();
             AnimationKeyFrame[] a = {
                 new AnimationKeyFrame(0f,
@@ -67,7 +67,7 @@ namespace Src.Animation {
             m_Viewport = viewport;
         }
 
-        public int PlayAnimation( UIStyleSet styleSet, StyleAnimation animation, AnimationOptions options) {
+        public int PlayAnimation( UIStyleSet styleSet, StyleAnimation animation, AnimationOptions options = default(AnimationOptions)) {
             m_QueuedAnimations.Add(new AnimDef(styleSet, animation, options));
             return NextId++;
         }
@@ -75,18 +75,27 @@ namespace Src.Animation {
         public void OnUpdate() {
             for (int i = 0; i < m_QueuedAnimations.Count; i++) {
                 AnimDef anim = m_QueuedAnimations[i];
-
-                AnimationOptions baseOptions = anim.animation.options;
+                AnimationOptions baseOptions = anim.animation.m_Options;
                 AnimationOptions overrideOptions = anim.options;
                 
-                anim.styleSet.OnAnimationStart();
+                if (anim.options == default(AnimationOptions)) {
+                    
+                }
                 
+                anim.animation.OnStart(anim.styleSet, m_Viewport);
+                m_PlayingAnimations.Add(anim);
             }
+            
+            m_QueuedAnimations.Clear();
 
             float deltaTime = Time.deltaTime;
             for (int i = 0; i < m_PlayingAnimations.Count; i++) {
-                StyleAnimation anim = m_PlayingAnimations[i];
-                anim.Update(anim., m_Viewport, deltaTime);
+                StyleAnimation anim = m_PlayingAnimations[i].animation;
+
+                if (anim.Update(m_PlayingAnimations[i].styleSet, m_Viewport, deltaTime)) {
+                    m_PlayingAnimations.UnstableRemove(i);
+                }
+                
             }
         }
 

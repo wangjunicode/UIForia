@@ -42,6 +42,7 @@ public abstract partial class InputSystem {
 
         if (firstFrame) {
             RunDragEvent(m_ElementsThisFrame, InputEventType.DragEnter);
+            m_CurrentDragEvent.Update();
         }
         else {
             RunDragEvent(m_ExitedElements, InputEventType.DragExit);

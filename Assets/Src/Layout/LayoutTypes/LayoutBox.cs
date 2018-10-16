@@ -5,6 +5,7 @@ using Rendering;
 using Src.Elements;
 using Src.Systems;
 using Src.Util;
+using UIForia;
 using UnityEngine;
 
 namespace Src.Layout.LayoutTypes {
@@ -53,14 +54,6 @@ namespace Src.Layout.LayoutTypes {
 
         public abstract void RunLayout();
 
-//        public virtual float MinWidth => Mathf.Max(PaddingHorizontal + BorderHorizontal, ResolveMinOrMaxWidth(style.MinWidth));
-//        public virtual float MaxWidth => Mathf.Max(PaddingHorizontal + BorderHorizontal, ResolveMinOrMaxWidth(style.MaxWidth));
-//        public virtual float PreferredWidth => ResolveMinOrMaxWidth(style.PreferredWidth);
-
-        // public virtual float MinHeight => Mathf.Max(PaddingVertical + BorderVertical, ResolveHeight(style.MinHeight));
-        // public virtual float MaxHeight => Mathf.Max(PaddingVertical + BorderVertical, ResolveHeight(style.MaxHeight));
-        // public virtual float PreferredHeight => ResolveHeight(style.PreferredHeight);
-
         public float TransformX => ResolveFixedWidth(style.TransformPositionX);
         public float TransformY => ResolveFixedHeight(style.TransformPositionY);
 
@@ -75,9 +68,10 @@ namespace Src.Layout.LayoutTypes {
 
         public float PaddingTop => ResolveFixedHeight(style.PaddingTop);
         public float BorderTop => ResolveFixedHeight(style.BorderTop);
+
         public bool IsInitialized { get; set; }
 
-        public virtual void OnInitialize() {}
+        public virtual void OnInitialize() { }
 
         public void SetParent(LayoutBox parent) {
             this.parent?.OnChildRemoved(this);
@@ -207,14 +201,19 @@ namespace Src.Layout.LayoutTypes {
             switch (width.unit) {
                 case UIFixedUnit.Pixel:
                     return width.value;
+
                 case UIFixedUnit.Percent:
                     return allocatedWidth * width.value;
+
                 case UIFixedUnit.ViewportHeight:
                     return layoutSystem.ViewportRect.height * width.value;
+
                 case UIFixedUnit.ViewportWidth:
                     return layoutSystem.ViewportRect.width * width.value;
+
                 case UIFixedUnit.Em:
                     return style.FontAsset.asset.fontInfo.PointSize * width.value;
+
                 default:
                     return 0;
             }
@@ -251,6 +250,12 @@ namespace Src.Layout.LayoutTypes {
                 case StylePropertyId.PreferredHeight:
                     InvalidatePreferredSizeCache();
                     break;
+                case StylePropertyId.AnchorTop:
+                case StylePropertyId.AnchorRight:
+                case StylePropertyId.AnchorBottom:
+                case StylePropertyId.AnchorLeft:
+                    InvalidatePreferredSizeCache();
+                    break;
             }
         }
 
@@ -265,6 +270,13 @@ namespace Src.Layout.LayoutTypes {
                 case StylePropertyId.MinHeight:
                 case StylePropertyId.MaxHeight:
                 case StylePropertyId.PreferredHeight:
+                    RequestContentSizeChangeLayout();
+                    InvalidatePreferredSizeCache();
+                    break;
+                case StylePropertyId.AnchorTop:
+                case StylePropertyId.AnchorRight:
+                case StylePropertyId.AnchorBottom:
+                case StylePropertyId.AnchorLeft:
                     RequestContentSizeChangeLayout();
                     InvalidatePreferredSizeCache();
                     break;
@@ -373,7 +385,7 @@ namespace Src.Layout.LayoutTypes {
         protected virtual float ComputeContentWidth() {
             return 0f;
         }
-        
+
         protected virtual float ComputeContentHeight(float width) {
             return 0f;
         }
@@ -383,7 +395,7 @@ namespace Src.Layout.LayoutTypes {
                 cachedPreferredWidth = ComputeContentWidth();
             }
 
-            return cachedPreferredWidth;   
+            return cachedPreferredWidth;
         }
 
         private float GetContentHeight(float width) {
@@ -395,8 +407,9 @@ namespace Src.Layout.LayoutTypes {
 
             return cachedHeight;
         }
-        
+
         public float GetPreferredWidth() {
+            AnchorTarget anchorTarget;
             UIMeasurement widthMeasurement = style.PreferredWidth;
             switch (widthMeasurement.unit) {
                 case UIUnit.Pixel:
@@ -413,6 +426,7 @@ namespace Src.Layout.LayoutTypes {
                     if (parent.style.PreferredWidth.IsContentBased) {
                         return 0f;
                     }
+
                     return Mathf.Max(0, parent.allocatedWidth * widthMeasurement.value);
 
                 case UIUnit.ViewportWidth:
@@ -425,17 +439,119 @@ namespace Src.Layout.LayoutTypes {
                     if (parent.style.PreferredWidth.IsContentBased) {
                         return 0f;
                     }
+
                     return Mathf.Max(0, parent.allocatedWidth * widthMeasurement.value - (parent.style == null ? 0 : parent.PaddingHorizontal - parent.BorderHorizontal));
 
                 case UIUnit.Em:
                     return Math.Max(0, style.FontAsset.asset.fontInfo.PointSize * widthMeasurement.value);
+
+                case UIUnit.AnchorWidth:
+                    anchorTarget = style.AnchorTarget;
+                    if (parent.style.PreferredWidth.IsContentBased && anchorTarget == AnchorTarget.Parent || anchorTarget == AnchorTarget.ParentContentArea) {
+                        return 0f;
+                    }
+
+                    return ResolveAnchorWidth(widthMeasurement);
+
+                case UIUnit.AnchorHeight:
+                    anchorTarget = style.AnchorTarget;
+                    if (parent.style.PreferredWidth.IsContentBased && anchorTarget == AnchorTarget.Parent || anchorTarget == AnchorTarget.ParentContentArea) {
+                        return 0f;
+                    }
+
+                    return ResolveAnchorHeight(widthMeasurement);
 
                 default:
                     throw new ArgumentOutOfRangeException();
             }
         }
 
+        protected float ResolveAnchorWidth(UIMeasurement widthMeasurement) {
+            float left;
+            float right;
+            switch (style.AnchorTarget) {
+                case AnchorTarget.Parent:
+
+                    left = ResolveAnchor(parent.allocatedWidth, style.AnchorLeft);
+                    right = parent.allocatedWidth - ResolveAnchor(parent.allocatedWidth, style.AnchorRight);
+                    return Mathf.Max(0, (right - left) * widthMeasurement.value);
+
+                case AnchorTarget.ParentContentArea:
+                    float contentArea = parent.allocatedWidth - parent.PaddingHorizontal - parent.BorderHorizontal;
+                    left = ResolveAnchor(contentArea, style.AnchorLeft);
+                    right = contentArea - ResolveAnchor(contentArea, style.AnchorRight);
+                    return Mathf.Max(0, (right - left) * widthMeasurement.value);
+
+                case AnchorTarget.Screen:
+                    left = ResolveAnchor(Screen.width, style.AnchorLeft);
+                    right = ResolveAnchor(Screen.width, style.AnchorRight);
+                    return Mathf.Max(0, (right - left) * widthMeasurement.value);
+
+                case AnchorTarget.Viewport:
+                    left = ResolveAnchor(layoutSystem.ViewportRect.width, style.AnchorLeft);
+                    right = layoutSystem.ViewportRect.width - ResolveAnchor(layoutSystem.ViewportRect.width, style.AnchorRight);
+                    return Mathf.Max(0, (right - left) * widthMeasurement.value);
+
+                default:
+                    throw new ArgumentOutOfRangeException();
+            }
+        }
+
+        protected float ResolveAnchorHeight(UIMeasurement heightMeasurement) {
+            float top;
+            float bottom;
+
+            switch (style.AnchorTarget) {
+                case AnchorTarget.Parent:
+                    top = ResolveAnchor(parent.allocatedHeight, style.AnchorTop);
+                    bottom = parent.allocatedHeight - ResolveAnchor(parent.allocatedHeight, style.AnchorBottom);
+                    return Mathf.Max(0, (bottom - top) * heightMeasurement.value);
+
+                case AnchorTarget.ParentContentArea:
+                    float contentArea = parent.allocatedHeight - parent.PaddingVertical - parent.BorderVertical;
+                    top = ResolveAnchor(contentArea, style.AnchorTop);
+                    bottom = contentArea - ResolveAnchor(contentArea, style.AnchorBottom);
+                    return Mathf.Max(0, (bottom - top) * heightMeasurement.value);
+
+                case AnchorTarget.Screen:
+                    top = ResolveAnchor(Screen.height, style.AnchorTop);
+                    bottom = Screen.height - ResolveAnchor(Screen.height, style.AnchorBottom);
+                    return Mathf.Max(0, (bottom - top) * heightMeasurement.value);
+
+                case AnchorTarget.Viewport:
+                    top = ResolveAnchor(layoutSystem.ViewportRect.height, style.AnchorTop);
+                    bottom = layoutSystem.ViewportRect.height - ResolveAnchor(layoutSystem.ViewportRect.height, style.AnchorBottom);
+                    return Mathf.Max(0, (bottom - top) * heightMeasurement.value);
+
+                default:
+                    throw new ArgumentOutOfRangeException();
+            }
+        }
+
+        protected float ResolveAnchor(float baseWidth, UIFixedLength anchor) {
+            switch (anchor.unit) {
+                case UIFixedUnit.Pixel:
+                    return anchor.value;
+
+                case UIFixedUnit.Percent:
+                    return baseWidth * anchor.value;
+
+                case UIFixedUnit.ViewportHeight:
+                    return layoutSystem.ViewportRect.height * anchor.value;
+
+                case UIFixedUnit.ViewportWidth:
+                    return layoutSystem.ViewportRect.width * anchor.value;
+
+                case UIFixedUnit.Em:
+                    return style.FontAsset.asset.fontInfo.PointSize * anchor.value;
+                
+                default:
+                    throw new InvalidArgumentException();
+            }
+        }
+
         public float GetPreferredHeight(float contentWidth) {
+            AnchorTarget anchorTarget;
             UIMeasurement height = style.PreferredHeight;
             switch (height.unit) {
                 case UIUnit.Pixel:
@@ -456,6 +572,7 @@ namespace Src.Layout.LayoutTypes {
                     if (parent.style.PreferredHeight.IsContentBased) {
                         return 0f;
                     }
+
                     return Mathf.Max(0, parent.allocatedHeight * height.value);
 
                 case UIUnit.ViewportWidth:
@@ -468,11 +585,27 @@ namespace Src.Layout.LayoutTypes {
                     if (parent.style.PreferredHeight.IsContentBased) {
                         return 0f;
                     }
+
                     return Mathf.Max(0, parent.allocatedHeight * height.value - (parent.style == null ? 0 : parent.PaddingVertical - parent.BorderVertical));
 
                 case UIUnit.Em:
                     return Mathf.Max(0, style.FontAsset.asset.fontInfo.PointSize * height.value);
 
+                case UIUnit.AnchorWidth:
+                    anchorTarget = style.AnchorTarget;
+                    if (parent.style.PreferredHeight.IsContentBased && anchorTarget == AnchorTarget.Parent || anchorTarget == AnchorTarget.ParentContentArea) {
+                        return 0f;
+                    }
+
+                    return ResolveAnchorWidth(height);
+
+                case UIUnit.AnchorHeight:
+                    anchorTarget = style.AnchorTarget;
+                    if (parent.style.PreferredHeight.IsContentBased && anchorTarget == AnchorTarget.Parent || anchorTarget == AnchorTarget.ParentContentArea) {
+                        return 0f;
+                    }
+
+                    return ResolveAnchorHeight(height);
                 default:
                     throw new ArgumentOutOfRangeException();
             }
@@ -488,8 +621,9 @@ namespace Src.Layout.LayoutTypes {
             return ResolveMinOrMaxHeight(style.MaxHeight, contentHeight);
         }
 
-//        [DebuggerStepThrough]
+        [DebuggerStepThrough]
         protected float ResolveMinOrMaxWidth(UIMeasurement widthMeasurement) {
+            AnchorTarget anchorTarget;
             switch (widthMeasurement.unit) {
                 case UIUnit.Pixel:
                     return Mathf.Max(0, widthMeasurement.value);
@@ -501,6 +635,7 @@ namespace Src.Layout.LayoutTypes {
                     if (parent.style.PreferredWidth.IsContentBased) {
                         return 0f;
                     }
+
                     return Mathf.Max(0, parent.allocatedWidth * widthMeasurement.value);
 
                 case UIUnit.ViewportWidth:
@@ -513,18 +648,36 @@ namespace Src.Layout.LayoutTypes {
                     if (parent.style.PreferredWidth.IsContentBased) {
                         return 0f;
                     }
+
                     return Mathf.Max(0, parent.allocatedWidth * widthMeasurement.value - (parent.style == null ? 0 : parent.PaddingHorizontal - parent.BorderHorizontal));
 
                 case UIUnit.Em:
                     return Math.Max(0, style.FontAsset.asset.fontInfo.PointSize * widthMeasurement.value);
+
+                case UIUnit.AnchorWidth:
+                    anchorTarget = style.AnchorTarget;
+                    if (parent.style.PreferredWidth.IsContentBased && anchorTarget == AnchorTarget.Parent || anchorTarget == AnchorTarget.ParentContentArea) {
+                        return 0f;
+                    }
+
+                    return ResolveAnchorWidth(widthMeasurement);
+
+                case UIUnit.AnchorHeight:
+                    anchorTarget = style.AnchorTarget;
+                    if (parent.style.PreferredWidth.IsContentBased && anchorTarget == AnchorTarget.Parent || anchorTarget == AnchorTarget.ParentContentArea) {
+                        return 0f;
+                    }
+
+                    return ResolveAnchorHeight(widthMeasurement);
 
                 default:
                     throw new ArgumentOutOfRangeException();
             }
         }
 
-//        [DebuggerStepThrough]
+        [DebuggerStepThrough]
         protected float ResolveMinOrMaxHeight(UIMeasurement heightMeasurement, float width) {
+            AnchorTarget anchorTarget;
             switch (heightMeasurement.unit) {
                 case UIUnit.Pixel:
                     return Mathf.Max(0, heightMeasurement.value);
@@ -536,6 +689,7 @@ namespace Src.Layout.LayoutTypes {
                     if (parent.style.PreferredHeight.IsContentBased) {
                         return 0f;
                     }
+
                     return Mathf.Max(0, parent.allocatedHeight * heightMeasurement.value);
 
                 case UIUnit.ViewportWidth:
@@ -548,11 +702,27 @@ namespace Src.Layout.LayoutTypes {
                     if (parent.style.PreferredHeight.IsContentBased) {
                         return 0f;
                     }
+
                     return Mathf.Max(0, parent.allocatedHeight * heightMeasurement.value - (parent.style == null ? 0 : parent.PaddingVertical - parent.BorderVertical));
 
                 case UIUnit.Em:
                     return Mathf.Max(0, style.FontAsset.asset.fontInfo.PointSize * heightMeasurement.value);
 
+                case UIUnit.AnchorWidth:
+                    anchorTarget = style.AnchorTarget;
+                    if (parent.style.PreferredHeight.IsContentBased && anchorTarget == AnchorTarget.Parent || anchorTarget == AnchorTarget.ParentContentArea) {
+                        return 0f;
+                    }
+
+                    return ResolveAnchorWidth(heightMeasurement);
+
+                case UIUnit.AnchorHeight:
+                    anchorTarget = style.AnchorTarget;
+                    if (parent.style.PreferredHeight.IsContentBased && anchorTarget == AnchorTarget.Parent || anchorTarget == AnchorTarget.ParentContentArea) {
+                        return 0f;
+                    }
+
+                    return ResolveAnchorHeight(heightMeasurement);
                 default:
                     throw new ArgumentOutOfRangeException();
             }
@@ -569,7 +739,7 @@ namespace Src.Layout.LayoutTypes {
             float prfWidth = GetPreferredWidth();
             float minWidth = ResolveMinOrMaxWidth(style.MinWidth);
             float maxWidth = ResolveMinOrMaxWidth(style.MaxWidth);
-            
+
             return new LayoutBoxSize(minWidth, maxWidth, prfWidth);
         }
 

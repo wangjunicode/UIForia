@@ -59,10 +59,20 @@ namespace Rendering {
         public static readonly UIFixedLength TransformPositionY = new UIFixedLength(0);
         public static readonly UIFixedLength TransformPivotX = new UIFixedLength(0.5f, UIFixedUnit.Percent);
         public static readonly UIFixedLength TransformPivotY = new UIFixedLength(0.5f, UIFixedUnit.Percent);
+        
+        public const TransformBehavior TransformBehaviorX = TransformBehavior.Default;
+        public const TransformBehavior TransformBehaviorY = TransformBehavior.Default;
+        
         public const float TransformScaleX = 1;
         public const float TransformScaleY = 1;
         public const float TransformRotation = 0;
 
+        public static readonly UIFixedLength AnchorTop = 0f;
+        public static readonly UIFixedLength AnchorRight = 1f;
+        public static readonly UIFixedLength AnchorBottom = 1f;
+        public static readonly UIFixedLength AnchorLeft = 0f;
+        public const AnchorTarget AnchorTarget = Rendering.AnchorTarget.Parent;
+        
         public static readonly LayoutType LayoutType = LayoutType.Flex;
         public const int TextFontSize = 18;
         public static readonly Color TextColor = Color.black;

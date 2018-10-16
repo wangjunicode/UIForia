@@ -65,6 +65,10 @@ namespace Src {
             return new UIFixedLength((float) value, UIFixedUnit.Pixel);
         }
 
+        public static UIFixedLength Percent(float value) {
+            return new UIFixedLength(value, UIFixedUnit.Percent);
+        }
+
     }
 
 }

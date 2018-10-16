@@ -118,13 +118,13 @@ namespace Rendering {
         }
 
         public CrossAxisAlignment GridItemColSelfAlignment {
-            get { return (CrossAxisAlignment)FindEnumProperty(StylePropertyId.GridItemColSelfAlignment); }
-            set { SetEnumProperty(StylePropertyId.GridItemColSelfAlignment, (int)value);}
+            get { return (CrossAxisAlignment) FindEnumProperty(StylePropertyId.GridItemColSelfAlignment); }
+            set { SetEnumProperty(StylePropertyId.GridItemColSelfAlignment, (int) value); }
         }
-        
+
         public CrossAxisAlignment GridItemRowSelfAlignment {
-            get { return (CrossAxisAlignment)FindEnumProperty(StylePropertyId.GridItemRowSelfAlignment); }
-            set { SetEnumProperty(StylePropertyId.GridItemRowSelfAlignment, (int)value);}
+            get { return (CrossAxisAlignment) FindEnumProperty(StylePropertyId.GridItemRowSelfAlignment); }
+            set { SetEnumProperty(StylePropertyId.GridItemRowSelfAlignment, (int) value); }
         }
 
         #endregion
@@ -148,6 +148,7 @@ namespace Rendering {
                         return m_StyleProperties[i].AsGridTrackTemplate;
                     }
                 }
+
                 return ListPool<GridTrackSize>.Empty;
             }
             set {
@@ -155,14 +156,15 @@ namespace Rendering {
                     RemoveProperty(StylePropertyId.GridLayoutColTemplate);
                     return;
                 }
+
                 for (int i = 0; i < m_StyleProperties.Count; i++) {
                     if (m_StyleProperties[i].propertyId == StylePropertyId.GridLayoutColTemplate) {
                         m_StyleProperties[i] = new StyleProperty(StylePropertyId.GridLayoutColTemplate, (int) LayoutDirection.Column, 0, value);
                         return;
                     }
                 }
-                m_StyleProperties.Add(new StyleProperty(StylePropertyId.GridLayoutColTemplate, (int) LayoutDirection.Column, 0, value));
 
+                m_StyleProperties.Add(new StyleProperty(StylePropertyId.GridLayoutColTemplate, (int) LayoutDirection.Column, 0, value));
             }
         }
 
@@ -173,6 +175,7 @@ namespace Rendering {
                         return m_StyleProperties[i].AsGridTrackTemplate;
                     }
                 }
+
                 return ListPool<GridTrackSize>.Empty;
             }
             set {
@@ -180,14 +183,15 @@ namespace Rendering {
                     RemoveProperty(StylePropertyId.GridLayoutRowTemplate);
                     return;
                 }
+
                 for (int i = 0; i < m_StyleProperties.Count; i++) {
                     if (m_StyleProperties[i].propertyId == StylePropertyId.GridLayoutRowTemplate) {
                         m_StyleProperties[i] = new StyleProperty(StylePropertyId.GridLayoutRowTemplate, (int) LayoutDirection.Row, 0, value);
                         return;
                     }
                 }
-                m_StyleProperties.Add(new StyleProperty(StylePropertyId.GridLayoutRowTemplate, (int) LayoutDirection.Row, 0, value));
 
+                m_StyleProperties.Add(new StyleProperty(StylePropertyId.GridLayoutRowTemplate, (int) LayoutDirection.Row, 0, value));
             }
         }
 
@@ -212,15 +216,15 @@ namespace Rendering {
         }
 
         public CrossAxisAlignment GridLayoutColAlignment {
-            get { return (CrossAxisAlignment)FindEnumProperty(StylePropertyId.GridLayoutColAlignment); }
-            set { SetEnumProperty(StylePropertyId.GridLayoutColAlignment, (int)value);}
+            get { return (CrossAxisAlignment) FindEnumProperty(StylePropertyId.GridLayoutColAlignment); }
+            set { SetEnumProperty(StylePropertyId.GridLayoutColAlignment, (int) value); }
         }
-        
+
         public CrossAxisAlignment GridLayoutRowAlignment {
-            get { return (CrossAxisAlignment)FindEnumProperty(StylePropertyId.GridLayoutRowAlignment); }
-            set { SetEnumProperty(StylePropertyId.GridLayoutRowAlignment, (int)value);}
+            get { return (CrossAxisAlignment) FindEnumProperty(StylePropertyId.GridLayoutRowAlignment); }
+            set { SetEnumProperty(StylePropertyId.GridLayoutRowAlignment, (int) value); }
         }
-        
+
         #endregion
 
         #region Shared Layout Properties
@@ -320,6 +324,16 @@ namespace Rendering {
         public float TransformRotation {
             get { return FindFloatProperty(StylePropertyId.TransformRotation); }
             set { SetFloatProperty(StylePropertyId.TransformRotation, value); }
+        }
+
+        public TransformBehavior TransformBehaviorX {
+            get { return (TransformBehavior) FindEnumProperty(StylePropertyId.TransformBehaviorX); }
+            set { SetEnumProperty(StylePropertyId.TransformBehaviorX, (int) value); }
+        }
+
+        public TransformBehavior TransformBehaviorY {
+            get { return (TransformBehavior) FindEnumProperty(StylePropertyId.TransformBehaviorY); }
+            set { SetEnumProperty(StylePropertyId.TransformBehaviorY, (int) value); }
         }
 
         #endregion
@@ -548,6 +562,37 @@ namespace Rendering {
 
         #endregion
 
+        #region Anchor Properties
+
+        public UIFixedLength AnchorTop {
+            get { return GetUIFixedLengthProperty(StylePropertyId.AnchorTop); }
+            set { SetUIFixedLengthProperty(StylePropertyId.AnchorTop, value); }
+        }
+
+        public UIFixedLength AnchorRight {
+            get { return GetUIFixedLengthProperty(StylePropertyId.AnchorRight); }
+            set { SetUIFixedLengthProperty(StylePropertyId.AnchorRight, value); }
+        }
+
+        public UIFixedLength AnchorBottom {
+            get { return GetUIFixedLengthProperty(StylePropertyId.AnchorBottom); }
+            set { SetUIFixedLengthProperty(StylePropertyId.AnchorBottom, value); }
+        }
+
+        public UIFixedLength AnchorLeft {
+            get { return GetUIFixedLengthProperty(StylePropertyId.AnchorLeft); }
+            set { SetUIFixedLengthProperty(StylePropertyId.AnchorLeft, value); }
+        }
+
+        public AnchorTarget AnchorTarget {
+            get { return (AnchorTarget) FindEnumProperty(StylePropertyId.AnchorTarget); }
+            set {
+                SetEnumProperty(StylePropertyId.AnchorTarget, (int) value);
+            }
+        }
+
+        #endregion
+
         #region Methods
 
         internal void OnSpawn() {
@@ -585,6 +630,7 @@ namespace Rendering {
                     );
                 }
             }
+
             return GridTrackSize.Unset;
         }
 

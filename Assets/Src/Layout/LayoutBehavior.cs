@@ -9,8 +9,8 @@ namespace Src.Layout {
         Normal = 1 << 0,
         Fixed = 1 << 1,
         Sticky = 1 << 2,
-        Manual = 1 << 3,
-        Ignored = Fixed | Sticky | Manual
+        Anchor = 1 << 3,
+        Ignored = 1 << 4,
 
     }
 

@@ -1,6 +1,8 @@
+using Rendering;
 using Src.Input;
 using Src.Rendering;
 using Src.Systems;
+using Src.Util;
 using UnityEngine;
 
 namespace Src.Elements {
@@ -12,20 +14,67 @@ namespace Src.Elements {
 
     }
 
+    public class ScrollbarDragEvent : DragEvent {
+
+        public readonly float baseOffset;
+        public readonly VirtualScrollbar scrollbar;
+
+        public ScrollbarDragEvent(float baseOffset, VirtualScrollbar scrollbar) {
+            this.baseOffset = baseOffset;
+            this.scrollbar = scrollbar;
+        }
+
+        public override void Update() {
+            Rect trackRect = scrollbar.GetTrackRect();
+            if (scrollbar.orientation == ScrollbarOrientation.Vertical) {
+                float max = trackRect.height - scrollbar.handleHeight;
+                float offset = Mathf.Clamp(MousePosition.y - trackRect.y - baseOffset, 0, max);
+                scrollbar.targetElement.scrollOffset = new Vector2(scrollbar.targetElement.scrollOffset.x, offset / max);
+                scrollbar.handle.style.SetTransformPosition(new Vector2(0f, offset), StyleState.Normal);
+            }
+            else {
+                float max = trackRect.width - scrollbar.handleWidth;
+                float offset = Mathf.Clamp(MousePosition.x - trackRect.x - baseOffset, 0, max);
+                scrollbar.targetElement.scrollOffset = new Vector2(offset / max, scrollbar.targetElement.scrollOffset.y);
+                scrollbar.handle.style.SetTransformPosition(new Vector2(offset, 0f), StyleState.Normal);
+            }
+        }
+
+    }
+
+    public class VirtualScrollbarHandle : VirtualElement {
+
+        public VirtualScrollbarHandle() {
+            flags |= UIElementFlags.Enabled | UIElementFlags.AncestorEnabled;
+            ownChildren = ArrayPool<UIElement>.Empty;
+        }
+
+    }
+
     public class VirtualScrollbar : VirtualElement {
 
         public readonly UIElement targetElement;
         public readonly ScrollbarOrientation orientation;
         public float handleSize;
         public float trackSize;
+        public VirtualScrollbarHandle handle;
 
         public VirtualScrollbar(UIElement target, ScrollbarOrientation orientation) {
             this.targetElement = target;
+            this.handle = new VirtualScrollbarHandle();
+            this.handle.parent = this;
+            this.ownChildren = ArrayPool<UIElement>.GetExactSize(1);
+            this.ownChildren[0] = handle;
             this.orientation = orientation;
-            this.trackSize = 5f;
-            this.handleSize = 5f;
+            this.trackSize = 15f;
+            this.handleSize = 15f;
             this.depth = target.depth;
+            this.parent = target;
             this.siblingIndex = int.MaxValue - (orientation == ScrollbarOrientation.Horizontal ? 1 : 0);
+            this.handle.depth = depth + 1;
+            if (target.isEnabled) {
+                flags |= UIElementFlags.AncestorEnabled;
+            }
         }
 
         public Vector2 handlePosition => new Vector2(
@@ -33,9 +82,15 @@ namespace Src.Elements {
             orientation == ScrollbarOrientation.Horizontal ? 0 : targetElement.scrollOffset.y * (targetElement.layoutResult.allocatedHeight - handleHeight)
         );
 
-        public float handleWidth => orientation == ScrollbarOrientation.Vertical ? handleSize : (targetElement.layoutResult.allocatedWidth / targetElement.layoutResult.contentWidth) * targetElement.layoutResult.allocatedWidth;
-        public float handleHeight => orientation == ScrollbarOrientation.Horizontal ? handleSize : (targetElement.layoutResult.allocatedHeight / targetElement.layoutResult.contentHeight) * targetElement.layoutResult.allocatedHeight;
+        public float handleWidth => orientation == ScrollbarOrientation.Vertical
+            ? handleSize
+            : (targetElement.layoutResult.allocatedWidth / targetElement.layoutResult.contentWidth) * targetElement.layoutResult.allocatedWidth;
 
+        public float handleHeight => orientation == ScrollbarOrientation.Horizontal
+            ? handleSize
+            : (targetElement.layoutResult.allocatedHeight / targetElement.layoutResult.contentHeight) * targetElement.layoutResult.allocatedHeight;
+
+        [OnDragCreate]
         public ScrollbarDragEvent CreateDragEvent(MouseInputEvent evt) {
             if (HandleRect.Contains(evt.MouseDownPosition)) {
                 float baseOffset;
@@ -123,32 +178,6 @@ namespace Src.Elements {
                     return new Rect(x, y, w, h);
                 }
             }
-        }
-
-        public class ScrollbarDragEvent : DragEvent {
-
-            public readonly float baseOffset;
-            public readonly VirtualScrollbar scrollbar;
-
-            public ScrollbarDragEvent(float baseOffset, VirtualScrollbar scrollbar) {
-                this.baseOffset = baseOffset;
-                this.scrollbar = scrollbar;
-            }
-
-            public override void Update() {
-                Rect trackRect = scrollbar.GetTrackRect();
-                if (scrollbar.orientation == ScrollbarOrientation.Vertical) {
-                    float max = trackRect.height - scrollbar.handleHeight;
-                    float offset = Mathf.Clamp(MousePosition.y - trackRect.y - baseOffset, 0, max);
-                    scrollbar.targetElement.scrollOffset = new Vector2(scrollbar.targetElement.scrollOffset.x, offset / max);
-                }
-                else {
-                    float max = trackRect.width - scrollbar.handleWidth;
-                    float offset = Mathf.Clamp(MousePosition.x - trackRect.x - baseOffset, 0, max);
-                    scrollbar.targetElement.scrollOffset = new Vector2(offset / max, scrollbar.targetElement.scrollOffset.y);
-                }
-            }
-
         }
 
     }

@@ -158,7 +158,7 @@ namespace Src {
 
             if (index > count) index = count;
 
-            // who list is inverted with respect the order in which 
+            // whole list is inverted with respect the order in which 
             // items are added, we need to adjust indices to fix this
             index = count - 1 - index;
 

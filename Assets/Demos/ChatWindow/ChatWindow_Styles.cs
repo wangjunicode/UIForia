@@ -5,26 +5,22 @@ using Src.Layout;
 using Src.Layout.LayoutTypes;
 using Src.Rendering;
 using UnityEngine;
-
 using static Rendering.StyleProperty;
+using AnchorTarget = Rendering.AnchorTarget;
 
 public class ChatWindow_Styles {
 
     //[ExportAnimation("transform")]
     public static StyleAnimation AnimateTransform() {
-        return new AnimationGroup(
-            new PropertyAnimation(
-                PreferredWidth(500),
-                new AnimationOptions() {
-                    duration = 2f,
-                    iterations = 2,
-                    delay = 1f,
-                    direction = AnimationDirection.Reverse,
-                    loopType = AnimationLoopType.PingPong
-                }
-            )
+        //return new AnimationGroup(
+        return new PropertyAnimation(
+            AnchorRight(UIFixedLength.Percent(0.5f)),
+            new AnimationOptions() {
+                duration = 2f,
+                iterations = 2,
+                loopType = AnimationLoopType.PingPong
+            }
         );
-
     }
 
     public static StyleAnimation KeyFrameAnimateTransform() {
@@ -55,6 +51,17 @@ public class ChatWindow_Styles {
                 TransformRotation(0)
             )
         );
+    }
+
+    [ExportStyle("anchor-item")]
+    public static UIStyle Anchor() {
+        return new UIStyle() {
+            BackgroundColor = Color.red,
+            AnchorTarget = AnchorTarget.Viewport,
+            PreferredWidth = new UIMeasurement(1f, UIUnit.AnchorWidth),
+            PreferredHeight = new UIMeasurement(1f, UIUnit.AnchorHeight),
+            AnchorRight = new UIFixedLength(1f, UIFixedUnit.Percent),
+        };
     }
 
     [ExportStyle("grid")]
@@ -134,7 +141,8 @@ public class ChatWindow_Styles {
             FlexLayoutDirection = LayoutDirection.Column,
             FlexLayoutMainAxisAlignment = MainAxisAlignment.Start,
             PreferredWidth = 800f,
-            PreferredHeight = 600f
+            PreferredHeight = 600f,
+            OverflowY = Src.Rendering.Overflow.Scroll
         };
     }
 

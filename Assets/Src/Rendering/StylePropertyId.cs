@@ -66,7 +66,9 @@ namespace Rendering {
         TransformPivotX = 904,
         TransformPivotY = 905,
         TransformRotation = 906,
-
+        TransformBehaviorX = 907,
+        TransformBehaviorY = 908,
+        
         __TextPropertyStart__ = 1000,
         TextColor = __TextPropertyStart__ + UIStyle.TextPropertyIdFlag.TextColor,
         TextFontAsset = __TextPropertyStart__ + UIStyle.TextPropertyIdFlag.TextFontAsset,
@@ -93,12 +95,26 @@ namespace Rendering {
 
         LayoutType = 1201,
         IsInLayoutFlow = 1202,
-        LayoutBehavior = 1203
+        LayoutBehavior = 1203,
         
-        // total = 72
-
-
-
+        AnchorTop = 1301, 
+        AnchorRight = 1302,
+        AnchorBottom = 1303,
+        AnchorLeft = 1304,
+        AnchorTarget = 1305
+        
+//        ScrollBarVerticalTrackSize = 1301,
+//        ScrollBarVerticalHandleSize = 1303,
+//        ScrollBarVerticalFadeDelay = 1305,
+//        ScrollBarVerticalHoverTrackSize = 1305,
+//        ScrollBarVerticalHoverHandleSize = 1305,
+//        ScrollBarVerticalDragTrackSize = 1305,
+//        ScrollBarVerticalDragHandleSize = 1305,
+//        ScrollBarVerticalTrackBackground = 1304,
+//        
+//        ScrollBarHorizontalTrackSize = 1302,
+//        ScrollBarHorizontalHandleSize = 1304,
+//        ScrollBarHorizontalFadeDelay = 1305,
         
 
     }

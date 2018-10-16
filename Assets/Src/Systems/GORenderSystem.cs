@@ -20,7 +20,6 @@ namespace Src.Systems {
 
         private readonly List<IDrawable> m_DirtyGraphicList;
         private readonly Dictionary<int, CanvasRenderer> m_CanvasRendererMap;
-        private readonly List<RenderData> m_VirtualScrollbarElements;
         private readonly List<UIElement> m_ToInitialize;
         private readonly SkipTree<RenderData> m_ClipTree;
         private readonly Canvas m_Canvas;
@@ -35,7 +34,6 @@ namespace Src.Systems {
             this.m_DirtyGraphicList = new List<IDrawable>();
             this.m_CanvasRendererMap = new Dictionary<int, CanvasRenderer>();
             this.m_TransformMap = new Dictionary<int, RectTransform>();
-            this.m_VirtualScrollbarElements = new List<RenderData>();
             this.m_LayoutSystem.onCreateVirtualScrollbar += OnVirtualScrollbarCreated;
             this.m_ToInitialize = new List<UIElement>();
             this.m_ClipTree = new SkipTree<RenderData>();
@@ -61,32 +59,6 @@ namespace Src.Systems {
             this.styleSystem = styleSystem;
         }
 
-        private static int FindRenderedSiblingIndex(UIElement element) {
-            // if parent is not rendered
-            // we want to replace
-            // so find parent's sibling index
-            // spin through rendered children until finding target
-            // use parent index + child index
-            if (element.parent == null) return 0;
-
-            int idx = 0;
-            for (int i = 0; i < element.parent.ownChildren.Length; i++) {
-                UIElement sibling = element.parent.ownChildren[i];
-                if (sibling == element) {
-                    break;
-                }
-
-                if ((sibling.flags & UIElementFlags.RequiresRendering) != 0) {
-                    idx++;
-                }
-            }
-
-            if ((element.parent.flags & UIElementFlags.RequiresRendering) == 0) {
-                idx += FindRenderedSiblingIndex(element.parent);
-            }
-
-            return idx;
-        }
 
         public void OnReady() { }
 
@@ -114,12 +86,14 @@ namespace Src.Systems {
             if (property.propertyId == StylePropertyId.TransformPivotX || property.propertyId == StylePropertyId.TransformPivotY) {
                 renderData.drawable.OnAllocatedSizeChanged();
             }
+
             renderData.drawable.OnStylePropertyChanged(property);
         }
 
         private void InitializeRenderables() {
             for (int i = 0; i < m_ToInitialize.Count; i++) {
                 UIElement element = m_ToInitialize[i];
+                
                 if ((element.flags & UIElementFlags.RequiresRendering) == 0) {
                     continue;
                 }
@@ -127,8 +101,10 @@ namespace Src.Systems {
                 GameObject go = new GameObject(element.ToString());
                 RectTransform transform = go.AddComponent<RectTransform>();
                 CanvasRenderer canvasRenderer = go.AddComponent<CanvasRenderer>();
+                
                 StyleDebugView debugView = go.AddComponent<StyleDebugView>();
                 debugView.element = element;
+                
                 transform.anchorMin = new Vector2(0, 1);
                 transform.anchorMax = new Vector2(0, 1);
                 transform.pivot = new Vector2(0, 1);
@@ -138,18 +114,24 @@ namespace Src.Systems {
 
                 RenderData renderData = new RenderData(element, this);
                 renderData.canvasRenderer = canvasRenderer;
+                m_RenderSkipTree.AddItem(renderData);
 
-                if (element.style.HandlesOverflowX || element.style.HandlesOverflowY) {
-                    renderData.clips = true;
-                    m_ClipTree.AddItem(renderData);
+                if ((element is VirtualElement)) {
+                    transform.SetSiblingIndex(int.MaxValue);
+                }
+                else {
+                    if (element.style.HandlesOverflowX || element.style.HandlesOverflowY) {
+                        renderData.clips = true;
+                        m_ClipTree.AddItem(renderData);
+                    }
                 }
 
-                m_RenderSkipTree.AddItem(renderData);
                 if (element.isEnabled) {
                     m_DirtyGraphicList.Add(renderData.drawable);
                     renderData.drawable.onMeshDirty += MarkGeometryDirty;
                     renderData.drawable.onMaterialDirty += MarkMaterialDirty;
                 }
+                
             }
 
             m_ToInitialize.Clear();
@@ -271,19 +253,8 @@ namespace Src.Systems {
                             r.allocatedHeight
                         );
                         Rect intersect = RectIntersect(clipRect, nodeClipRect);
-           //             child.item.canvasRenderer.EnableRectClipping(intersect);
+                        //             child.item.canvasRenderer.EnableRectClipping(intersect);
                     }
-
-//                    if (element.style.HandlesOverflowX) {
-//                        Debug.Log("Should clip X " + element);
-//                        float x = overflowRect.x - screenRect.x;
-//                        float width = overflowRect.width - screenRect.width;
-//                    }
-//
-//                    if (element.style.HandlesOverflowY) {
-//                        Debug.Log("Should clip Y " + element);
-//
-//                    }
 
                 }
             }
@@ -327,18 +298,18 @@ namespace Src.Systems {
 //            }
 //
 //            StackPool<SkipTree<RenderData>.TreeNode>.Release(cullClipStack);
-
-            for (int i = 0; i < m_VirtualScrollbarElements.Count; i++) {
-                RenderData data = m_VirtualScrollbarElements[i];
-
-                if (data.horizontalScrollbar != null) {
-                    RenderScrollbar(data.horizontalScrollbar, data.horizontalScrollbarHandle);
-                }
-
-                if (data.verticalScrollbar != null) {
-                    RenderScrollbar(data.verticalScrollbar, data.verticalScrollbarHandle);
-                }
-            }
+//
+//            for (int i = 0; i < m_VirtualScrollbarElements.Count; i++) {
+//                RenderData data = m_VirtualScrollbarElements[i];
+//
+//                if (data.horizontalScrollbar != null) {
+//                    RenderScrollbar(data.horizontalScrollbar, data.horizontalScrollbarHandle);
+//                }
+//
+//                if (data.verticalScrollbar != null) {
+//                    RenderScrollbar(data.verticalScrollbar, data.verticalScrollbarHandle);
+//                }
+//            }
 
             for (int i = 0; i < m_DirtyGraphicList.Count; i++) {
                 IDrawable graphic = m_DirtyGraphicList[i];
@@ -411,7 +382,7 @@ namespace Src.Systems {
 
             data.drawable.onMeshDirty -= MarkGeometryDirty;
             data.drawable.onMaterialDirty -= MarkMaterialDirty;
-            
+
             m_RenderSkipTree.RemoveItem(data);
 
             CanvasRenderer canvasRenderer = m_CanvasRendererMap.GetOrDefault(element.id);
@@ -486,49 +457,83 @@ namespace Src.Systems {
         }
 
         public void OnVirtualScrollbarCreated(VirtualScrollbar scrollbar) {
-            RenderData renderData = m_RenderSkipTree.GetItem(scrollbar.targetElement);
-
-            if (renderData != null) {
-                if (renderData.element.style.HandlesOverflow) {
-                    renderData.clips = true;
-                    m_ClipTree.AddItem(renderData);
-                    // update clipping here?
-                }
-            }
+            m_ToInitialize.Add(scrollbar);
+            m_ToInitialize.Add(scrollbar.handle);
+//            RenderData renderData = m_RenderSkipTree.GetItem(scrollbar.targetElement);
+//
+//            if (renderData != null) {
+//                if (renderData.element.style.HandlesOverflow) {
+//                    renderData.clips = true;
+//                    m_ClipTree.AddItem(renderData);
+//                    // update clipping here?
+//                }
+//            }
+//            else {
+//                return;
+//            }
+//
+//            if (scrollbar.orientation == ScrollbarOrientation.Horizontal) {
+//                renderData.horizontalScrollbar = scrollbar;
+//                RectTransform transform = CreateGameObject("Scrollbar H");
+//                transform.SetParent(m_TransformMap[scrollbar.targetElement.parent.id]);
+//                RawImage img = transform.gameObject.AddComponent<RawImage>();
+//                img.color = Color.cyan;
+//                m_TransformMap.Add(scrollbar.id, transform);
+//                RectTransform handleTransform = CreateGameObject("Scrollbar H - Handle");
+//                handleTransform.SetParent(transform);
+//                img = handleTransform.gameObject.AddComponent<RawImage>();
+//                img.color = Color.blue;
+//                renderData.horizontalScrollbarHandle = handleTransform;
+//            }
+//            else if (scrollbar.orientation == ScrollbarOrientation.Vertical) {
+//                renderData.verticalScrollbar = scrollbar;
+//                RectTransform transform = CreateGameObject("Scrollbar V");
+//                transform.SetParent(m_TransformMap[scrollbar.targetElement.parent.id]);
+//                RawImage img = transform.gameObject.AddComponent<RawImage>();
+//                img.color = Color.cyan;
+//                m_TransformMap.Add(scrollbar.id, transform);
+//                RectTransform handleTransform = CreateGameObject("Scrollbar V - Handle");
+//                handleTransform.SetParent(transform);
+//                img = handleTransform.gameObject.AddComponent<RawImage>();
+//                img.color = Color.blue;
+//                renderData.verticalScrollbarHandle = handleTransform;
+//            }
         }
 //                if (renderData.mask == null) {
 //                    renderData.mask = renderData.unityTransform.gameObject.AddComponent<RectMask2D>();
 //                    m_VirtualScrollbarElements.Add(renderData);
 //                }
 
-//                if (scrollbar.orientation == ScrollbarOrientation.Horizontal) {
-//                    renderData.horizontalScrollbar = scrollbar;
-//                    RectTransform transform = CreateGameObject("Scrollbar H");
-//                    transform.SetParent(m_TransformMap[scrollbar.targetElement.parent.id]);
-//                    RawImage img = transform.gameObject.AddComponent<RawImage>();
-//                    img.color = Color.cyan;
-//                    m_TransformMap.Add(scrollbar.id, transform);
-//                    RectTransform handleTransform = CreateGameObject("Scrollbar H - Handle");
-//                    handleTransform.SetParent(transform);
-//                    img = handleTransform.gameObject.AddComponent<RawImage>();
-//                    img.color = Color.blue;
-//                    renderData.horizontalScrollbarHandle = handleTransform;
-//                }
-//                else if (scrollbar.orientation == ScrollbarOrientation.Vertical) {
-//                    renderData.verticalScrollbar = scrollbar;
-//                    RectTransform transform = CreateGameObject("Scrollbar V");
-//                    transform.SetParent(m_TransformMap[scrollbar.targetElement.parent.id]);
-//                    RawImage img = transform.gameObject.AddComponent<RawImage>();
-//                    img.color = Color.cyan;
-//                    m_TransformMap.Add(scrollbar.id, transform);
-//                    RectTransform handleTransform = CreateGameObject("Scrollbar V - Handle");
-//                    handleTransform.SetParent(transform);
-//                    img = handleTransform.gameObject.AddComponent<RawImage>();
-//                    img.color = Color.blue;
-//                    renderData.verticalScrollbarHandle = handleTransform;
-//                }
+
 //            }
 
+        
+        private static int FindRenderedSiblingIndex(UIElement element) {
+            // if parent is not rendered
+            // we want to replace
+            // so find parent's sibling index
+            // spin through rendered children until finding target
+            // use parent index + child index
+            if (element.parent == null) return 0;
+
+            int idx = 0;
+            for (int i = 0; i < element.parent.ownChildren.Length; i++) {
+                UIElement sibling = element.parent.ownChildren[i];
+                if (sibling == element) {
+                    break;
+                }
+
+                if ((sibling.flags & UIElementFlags.RequiresRendering) != 0) {
+                    idx++;
+                }
+            }
+
+            if ((element.parent.flags & UIElementFlags.RequiresRendering) == 0) {
+                idx += FindRenderedSiblingIndex(element.parent);
+            }
+
+            return idx;
+        }
     }
 
 }

@@ -4,7 +4,7 @@ using Src.Animation;
 
 namespace Src.Systems {
 
-    public interface IStyleSystem {
+    public interface IStyleSystem : ISystem {
 
         event Action<UIElement, string> onTextContentChanged;
         event Action<UIElement, StyleProperty> onStylePropertyChanged;

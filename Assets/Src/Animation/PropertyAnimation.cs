@@ -74,6 +74,7 @@ namespace Src.Animation {
                     break;
                 }
             }
+
             if (idx == -1) {
                 StyleProperty startValue;
                 if (m_StartValue.IsDefined) {
@@ -82,13 +83,16 @@ namespace Src.Animation {
                 else {
                     startValue = styleSet.computedStyle.GetProperty(m_TargetValue.propertyId);
                 }
+
                 AnimationStatus status = ResolveStartValue(styleSet, viewport, startValue);
                 if (m_Options.direction == AnimationDirection.Reverse) {
                     status.direction = AnimationDirection.Reverse;
                 }
+
                 if (m_Options.delay > 0) {
                     status.isDelaying = true;
                 }
+
                 m_StatusList.Add(ValueTuple.Create(element.id, status));
             }
             else {
@@ -133,6 +137,18 @@ namespace Src.Animation {
                 case StylePropertyId.GridLayoutRowGap:
                     return new AnimationStatus(startProperty.AsFloat);
 
+                case StylePropertyId.AnchorTop:
+                    return new AnimationStatus(ResolveAnchorTop(element, viewport, startProperty.AsFixedLength));
+
+                case StylePropertyId.AnchorRight:
+                    return new AnimationStatus(ResolveAnchorRight(element, viewport, startProperty.AsFixedLength));
+
+                case StylePropertyId.AnchorBottom:
+                    return new AnimationStatus(ResolveAnchorBottom(element, viewport, startProperty.AsFixedLength));
+
+                case StylePropertyId.AnchorLeft:
+                    return new AnimationStatus(ResolveAnchorLeft(element, viewport, startProperty.AsFixedLength));
+
                 case StylePropertyId.BorderColor:
                 case StylePropertyId.BackgroundColor:
                 case StylePropertyId.TextColor:
@@ -144,7 +160,6 @@ namespace Src.Animation {
                     }
 
                 default: throw new UIForia.InvalidArgumentException(m_TargetValue.propertyId + " is not a supported animation property");
-
             }
         }
 
@@ -157,11 +172,12 @@ namespace Src.Animation {
                     break;
                 }
             }
+
             if (idx == -1) {
                 return true;
             }
 
-            float duration = (m_Options.duration - m_Options.delay) / m_Options.iterations;
+            float duration = (m_Options.duration - m_Options.delay) / Mathf.Max(1, m_Options.iterations);
 
             AnimationStatus status = m_StatusList[idx].Item2;
             status.elapsedTime += deltaTime;
@@ -253,6 +269,28 @@ namespace Src.Animation {
                     v = Mathf.Lerp(status.floatValue, m_TargetValue.AsFloat, adjustedT);
                     element.style.SetAnimatedProperty(new StyleProperty(propertyId, v));
                     break;
+                case StylePropertyId.AnchorTop:
+                    v = Mathf.Lerp(status.floatValue, ResolveAnchorTop(element, viewport, m_TargetValue.AsFixedLength), adjustedT);
+                    element.style.SetAnimatedProperty(StyleProperty.AnchorTop(v));
+                    break;
+
+                case StylePropertyId.AnchorRight:
+                    float val = ResolveAnchorRight(element, viewport, m_TargetValue.AsFixedLength);
+                    v = Mathf.Lerp(status.floatValue, val, adjustedT);
+                    Debug.Log(v);
+                    element.style.SetAnimatedProperty(StyleProperty.AnchorRight(v));
+                    break;
+
+                case StylePropertyId.AnchorBottom:
+                    v = Mathf.Lerp(status.floatValue, ResolveAnchorBottom(element, viewport, m_TargetValue.AsFixedLength), adjustedT);
+                    element.style.SetAnimatedProperty(StyleProperty.AnchorBottom(v));
+                    break;
+
+                case StylePropertyId.AnchorLeft:
+                    v = Mathf.Lerp(status.floatValue, ResolveAnchorLeft(element, viewport, m_TargetValue.AsFixedLength), adjustedT);
+                    element.style.SetAnimatedProperty(StyleProperty.AnchorLeft(v));
+                    break;
+
                 case StylePropertyId.BorderColor:
                 case StylePropertyId.BackgroundColor:
                 case StylePropertyId.TextColor:
@@ -272,7 +310,6 @@ namespace Src.Animation {
                             element.style.SetAnimatedProperty(new StyleProperty(propertyId, finalGradient));
                         }
                         else {
-
                             Color color = new StyleColor((int) status.floatValue);
 
                             Rendering.Gradient finalGradient = new Rendering.Gradient();
@@ -306,7 +343,6 @@ namespace Src.Animation {
                             Color c = Color.Lerp(new StyleColor((int) status.floatValue), m_TargetValue.AsColor, adjustedT);
                             element.style.SetAnimatedProperty(new StyleProperty(propertyId, c));
                         }
-
                     }
 
                     break;
@@ -326,6 +362,7 @@ namespace Src.Animation {
                         status.direction = AnimationDirection.Forward;
                     }
                 }
+
                 if (status.direction == AnimationDirection.Forward) {
                     if (m_Options.forwardStartDelay > 0f) {
                         status.isDelaying = true;
@@ -339,7 +376,7 @@ namespace Src.Animation {
             }
 
             m_StatusList[idx] = ValueTuple.Create(element.id, status);
-            return status.iterationCount == m_Options.iterations && t == 1f;
+            return status.iterationCount == Mathf.Max(1, m_Options.iterations) && t == 1;
         }
 
         public override void OnEnd(UIStyleSet styleSet) {

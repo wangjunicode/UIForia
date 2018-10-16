@@ -6,9 +6,6 @@ namespace Rendering {
 
     public sealed class UIGameObjectView : UIView {
 
-        private readonly IRenderSystem renderSystem;
-        private readonly IInputSystem inputSystem;
-        private readonly ILayoutSystem layoutSystem;
         private readonly RectTransform rectTransform;
         
         public UIGameObjectView(Type elementType, RectTransform viewTransform) : base(elementType) {

@@ -76,7 +76,7 @@ public abstract partial class InputSystem : IInputSystem, IInputProvider {
     private void HandleCreateScrollbar(VirtualScrollbar scrollbar) {
         m_DragCreatorMap.Add(scrollbar.id, new DragCreatorGroup(s_DummyContext, new DragEventCreator[] {
             
-            new DragEventCreator_WithEvent<VirtualScrollbar>(KeyboardModifiers.None, EventPhase.Bubble, (instance, evt) => instance.CreateDragEvent(evt))
+            new DragEventCreator_WithEvent<VirtualScrollbar>(KeyboardModifiers.None, EventPhase.Bubble, (instance, evt) => instance.CreateDragEvent(evt)),
             
         }));
     }
@@ -151,7 +151,6 @@ public abstract partial class InputSystem : IInputSystem, IInputProvider {
                 element.style?.EnterState(StyleState.Hover);
             }
         }
-
 
         for (int i = 0; i < m_ElementsLastFrame.Count; i++) {
             if (!m_ElementsThisFrame.Contains(m_ElementsLastFrame[i])) {

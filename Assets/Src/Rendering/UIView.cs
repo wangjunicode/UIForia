@@ -10,10 +10,11 @@ public abstract class UIView {
     private static int ElementIdGenerator;
     public static int NextElementId => ElementIdGenerator++;
 
-    // todo -- move to interfaces
-    protected internal readonly BindingSystem bindingSystem;
-
-    protected readonly StyleSystem styleSystem;
+    protected readonly BindingSystem bindingSystem;
+    protected readonly IStyleSystem styleSystem;
+    protected ILayoutSystem layoutSystem;
+    protected IRenderSystem renderSystem;
+    protected IInputSystem inputSystem;
     protected readonly SkipTree<UIElement> elementTree;
 
     protected readonly List<ISystem> systems;
@@ -55,7 +56,9 @@ public abstract class UIView {
         else {
             CreateElementFromTemplate(TemplateParser.GetParsedTemplate(elementType, forceTemplateReparse).CreateWithoutScope(this), null);
         }
-
+        
+        layoutSystem.ForceLayout();
+        
         foreach (ISystem system in systems) {
             system.OnReady();
         }
@@ -165,6 +168,13 @@ public abstract class UIView {
     public virtual void OnDestroy() { }
 
     public virtual void Update() {
+        
+        styleSystem.OnUpdate();
+        layoutSystem.OnUpdate();
+        inputSystem.OnUpdate();
+        bindingSystem.OnUpdate();
+        renderSystem.OnUpdate();
+        
         for (int i = 0; i < systems.Count; i++) {
             systems[i].OnUpdate();
         }

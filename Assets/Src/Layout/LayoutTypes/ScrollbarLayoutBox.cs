@@ -1,53 +1,26 @@
-using System;
 using Rendering;
+using Src.Elements;
 using Src.Systems;
 using UnityEngine;
 
 namespace Src.Layout.LayoutTypes {
 
-    public class FixedLayoutBox : LayoutBox {
+    public class ScrollbarLayoutBox : LayoutBox {
 
-        public FixedLayoutBox(LayoutSystem2 layoutSystem, UIElement element)
-            : base(layoutSystem, element) { }
-
-        protected override float ComputeContentWidth() {
-            float minX = 0;
-            float maxX = 0;
-            for (int i = 0; i < children.Count; i++) {
-                LayoutBox child = children[i];
-
-                float x = child.TransformX;
-
-                minX = Mathf.Min(minX, x);
-                maxX = Mathf.Max(maxX, x + child.GetWidths().clampedSize);
-            }
-
-            return maxX - minX;
-        }
-
-        protected override float ComputeContentHeight(float width) {
-            float minY = 0;
-            float maxY = 0;
-            for (int i = 0; i < children.Count; i++) {
-                LayoutBox child = children[i];
-
-                float y = child.TransformY;
-
-                minY = Mathf.Min(minY, y);
-                maxY = Mathf.Max(maxY, y + child.GetHeights(child.GetWidths().clampedSize).clampedSize);
-            }
-
-            return Mathf.Max(0, maxY - minY);
-        }
+        public ScrollbarLayoutBox(LayoutSystem2 layoutSystem, UIElement element) : base(layoutSystem, element) { }
 
         public override void RunLayout() {
             float minX = 0;
             float maxX = 0;
             float minY = 0;
             float maxY = 0;
-
+            
+            VirtualScrollbarHandle handle = ((VirtualScrollbar) element).handle;
+            
             for (int i = 0; i < children.Count; i++) {
                 LayoutBox child = children[i];
+
+                if (child.element.isDisabled) continue;
 
                 float x = child.TransformX;
                 float y = child.TransformY;
@@ -61,7 +34,7 @@ namespace Src.Layout.LayoutTypes {
                 maxX = Mathf.Max(maxX, x + width);
                 minY = Mathf.Min(minY, y);
                 maxY = Mathf.Max(maxY, y + heights.clampedSize);
-            }
+            } 
         }
 
         public override void OnStylePropertyChanged(StyleProperty property) {
@@ -72,7 +45,7 @@ namespace Src.Layout.LayoutTypes {
                     break;
             }
         }
-
+        
     }
 
 }

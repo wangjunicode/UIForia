@@ -18,6 +18,8 @@ namespace Src.Systems {
 
         List<UIElement> GetUpdatedLayoutElements(List<UIElement> retn);
 
+        void ForceLayout();
+
     }
 
 }

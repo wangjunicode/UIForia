@@ -18,8 +18,6 @@ public class Clip : MonoBehaviour {
 //		GetComponent<CanvasRenderer>().cull = cull;
 //	}
 
-	protected void OnRectTransformDimensionsChange() {
-		Debug.Log("Changed");
-	}
+	protected void OnRectTransformDimensionsChange() {	}
 
 }

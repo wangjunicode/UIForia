@@ -117,7 +117,8 @@ namespace Rendering {
         public Src.Rendering.Gradient AsGradient => (Src.Rendering.Gradient) objectField;
 
         public bool IsGradient => objectField != null && (ColorType) valuePart1 == ColorType.Gradient;
-        
+        public AnchorTarget AsAnchorTarget => (AnchorTarget) valuePart0;
+
         [DebuggerStepThrough]
         public static StyleProperty Unset(StylePropertyId propertyId) {
             return new StyleProperty(propertyId, IntUtil.UnsetValue, IntUtil.UnsetValue);
@@ -325,6 +326,26 @@ namespace Rendering {
         
         public static StyleProperty PreferredHeight(UIMeasurement preferredHeight) {
             return new StyleProperty(StylePropertyId.PreferredHeight, preferredHeight);
+        }
+
+        public static StyleProperty AnchorTop(UIFixedLength anchor) {
+            return new StyleProperty(StylePropertyId.AnchorTop, FloatUtil.EncodeToInt(anchor.value), (int)anchor.unit);
+        }
+        
+        public static StyleProperty AnchorRight(UIFixedLength anchor) {
+            return new StyleProperty(StylePropertyId.AnchorRight, FloatUtil.EncodeToInt(anchor.value), (int)anchor.unit);
+        }
+        
+        public static StyleProperty AnchorBottom(UIFixedLength anchor) {
+            return new StyleProperty(StylePropertyId.AnchorBottom, FloatUtil.EncodeToInt(anchor.value), (int)anchor.unit);
+        }
+        
+        public static StyleProperty AnchorLeft(UIFixedLength anchor) {
+            return new StyleProperty(StylePropertyId.AnchorLeft, FloatUtil.EncodeToInt(anchor.value), (int)anchor.unit);
+        }
+        
+        public static StyleProperty AnchorTarget(AnchorTarget anchorTarget) {
+            return new StyleProperty(StylePropertyId.AnchorTarget, (int) anchorTarget);
         }
         
     }

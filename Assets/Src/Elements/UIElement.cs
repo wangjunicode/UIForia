@@ -51,6 +51,8 @@ public class UIElement : IHierarchical, IExpressionContextProvider {
 
     public Vector2 scrollOffset { get; internal set; }
 
+    public ComputedStyle ComputedStyle => style.computedStyle;
+    
     public int depth { get; internal set; }
     public int siblingIndex { get; internal set; }
 
@@ -91,7 +93,8 @@ public class UIElement : IHierarchical, IExpressionContextProvider {
     public virtual void OnDestroy() { }
 
     public bool EnableBinding(string propertyName) {
-        return templateContext.view.bindingSystem.EnableBinding(this, propertyName);
+       throw new NotImplementedException();
+        //return templateContext.view.bindingSystem.EnableBinding(this, propertyName);
     }
 
     public bool DisableBinding(string propertyName) {

@@ -73,6 +73,8 @@ namespace Src.Animation {
         }
 
         public void OnUpdate() {
+            // todo -- temp
+            SetViewportRect(GameObject.Find("UIRoot").GetComponent<RectTransform>().rect);
             for (int i = 0; i < m_QueuedAnimations.Count; i++) {
                 AnimDef anim = m_QueuedAnimations[i];
                 AnimationOptions baseOptions = anim.animation.m_Options;

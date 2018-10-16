@@ -7,7 +7,7 @@ namespace Src.Animation {
     public abstract class StyleAnimation {
 
         public AnimationOptions m_Options;
-        
+
         public abstract bool Update(UIStyleSet styleSet, Rect viewport, float deltaTime);
 
         public virtual void OnStart(UIStyleSet styleSet, Rect viewport) { }
@@ -146,6 +146,182 @@ namespace Src.Animation {
 
                 default:
                     throw new ArgumentOutOfRangeException();
+            }
+        }
+
+        private UIElement ResolveLayoutParent(UIElement element) {
+            UIElement ptr = element.parent;
+            while ((ptr.flags & UIElementFlags.RequiresLayout) == 0) {
+                ptr = ptr.parent;
+            }
+
+            return ptr;
+        }
+
+        private float ResolveVerticalAnchorBaseHeight(UIElement element, Rect viewport) {
+            switch (element.ComputedStyle.AnchorTarget) {
+                case AnchorTarget.Parent:
+                    return ResolveLayoutParent(element).layoutResult.allocatedHeight;
+
+                case AnchorTarget.ParentContentArea:
+                    UIElement layoutParent = ResolveLayoutParent(element);
+                    ComputedStyle parentStyle = layoutParent.ComputedStyle;
+                    return Mathf.Max(0, (element.parent.layoutResult.allocatedHeight
+                                         - ResolveFixedWidth(element, viewport, parentStyle.PaddingTop)
+                                         - ResolveFixedWidth(element, viewport, parentStyle.PaddingBottom)
+                                         - ResolveFixedWidth(element, viewport, parentStyle.BorderBottom)
+                                         - ResolveFixedWidth(element, viewport, parentStyle.BorderTop)));
+
+                case AnchorTarget.Viewport:
+                    return viewport.height;
+
+                case AnchorTarget.Screen:
+                    return Screen.height;
+
+                default:
+                    throw new ArgumentOutOfRangeException();
+            }
+        }
+
+        private float ResolveHorizontalAnchorBaseWidth(UIElement element, Rect viewport) {
+            switch (element.ComputedStyle.AnchorTarget) {
+                case AnchorTarget.Parent:
+                    return ResolveLayoutParent(element).layoutResult.allocatedWidth;
+
+                case AnchorTarget.ParentContentArea:
+                    UIElement layoutParent = ResolveLayoutParent(element);
+                    ComputedStyle parentStyle = layoutParent.ComputedStyle;
+                    return Mathf.Max(0, (element.parent.layoutResult.allocatedWidth
+                                         - ResolveFixedWidth(element, viewport, parentStyle.PaddingRight)
+                                         - ResolveFixedWidth(element, viewport, parentStyle.PaddingLeft)
+                                         - ResolveFixedWidth(element, viewport, parentStyle.BorderLeft)
+                                         - ResolveFixedWidth(element, viewport, parentStyle.BorderRight)));
+
+                case AnchorTarget.Viewport:
+                    return viewport.width;
+
+                case AnchorTarget.Screen:
+                    return Screen.width;
+
+                default:
+                    throw new ArgumentOutOfRangeException();
+            }
+        }
+
+        public float ResolveAnchorTop(UIElement element, Rect viewport, UIFixedLength anchor) {
+            switch (element.ComputedStyle.AnchorTarget) {
+                case AnchorTarget.Parent:
+                    return ResolveVerticalAnchor(element, viewport, anchor);
+
+                case AnchorTarget.Viewport:
+                    return viewport.y + ResolveVerticalAnchor(element, viewport, anchor);
+
+                case AnchorTarget.Screen:
+                    return ResolveLayoutParent(element).layoutResult.screenPosition.y - ResolveVerticalAnchor(element, viewport, anchor);
+
+                default:
+                    throw new ArgumentOutOfRangeException();
+            }
+        }
+
+        public float ResolveAnchorBottom(UIElement element, Rect viewport, UIFixedLength anchor) {
+            UIElement layoutParent = ResolveLayoutParent(element);
+            switch (element.ComputedStyle.AnchorTarget) {
+                case AnchorTarget.Parent:
+                    return ResolveVerticalAnchor(element, viewport, anchor);
+
+                case AnchorTarget.Viewport:
+                    return (layoutParent.layoutResult.screenPosition.y + layoutParent.layoutResult.allocatedHeight) + viewport.y + viewport.height +
+                           ResolveVerticalAnchor(element, viewport, anchor);
+
+                case AnchorTarget.Screen:
+                    return (layoutParent.layoutResult.screenPosition.y + layoutParent.layoutResult.allocatedHeight) -
+                           ResolveVerticalAnchor(element, viewport, anchor);
+
+                default:
+                    throw new ArgumentOutOfRangeException();
+            }
+        }
+
+        public float ResolveAnchorLeft(UIElement element, Rect viewport, UIFixedLength anchor) {
+            switch (element.ComputedStyle.AnchorTarget) {
+                case AnchorTarget.Parent:
+                    return ResolveHorizontalAnchor(element, viewport, anchor);
+
+                case AnchorTarget.Viewport:
+                    return ResolveLayoutParent(element).layoutResult.screenPosition.x - viewport.x + ResolveHorizontalAnchor(element, viewport, anchor);
+
+                case AnchorTarget.Screen:
+                    return ResolveHorizontalAnchor(element, viewport, anchor);
+
+                default:
+                    throw new ArgumentOutOfRangeException();
+            }
+        }
+
+        public float ResolveAnchorRight(UIElement element, Rect viewport, UIFixedLength anchor) {
+            return ResolveHorizontalAnchor(element, viewport, anchor);
+//            UIElement layoutParent = ResolveLayoutParent(element);
+//            switch (element.ComputedStyle.AnchorTarget) {
+//                case AnchorTarget.Parent:
+//                    return ResolveHorizontalAnchor(element, viewport, anchor);
+//
+//                case AnchorTarget.Viewport:
+//                    return (layoutParent.layoutResult.screenPosition.x + layoutParent.layoutResult.allocatedWidth) + viewport.x + viewport.width +
+//                           ResolveHorizontalAnchor(element, viewport, anchor);
+//
+//                case AnchorTarget.Screen:
+//                    float resolved = ResolveHorizontalAnchor(element, viewport, anchor);
+//
+//                    return resolved;//(layoutParent.layoutResult.screenPosition.x + layoutParent.layoutResult.allocatedWidth) -
+////                           resolved;
+//
+//                default:
+//                    throw new ArgumentOutOfRangeException();
+//            }
+        }
+
+        public float ResolveVerticalAnchor(UIElement element, Rect viewport, UIFixedLength anchor) {
+            switch (anchor.unit) {
+                case UIFixedUnit.Pixel:
+                    return anchor.value;
+
+                case UIFixedUnit.Percent:
+                    return ResolveVerticalAnchorBaseHeight(element, viewport) * anchor.value;
+
+                case UIFixedUnit.ViewportHeight:
+                    return viewport.height * anchor.value;
+
+                case UIFixedUnit.ViewportWidth:
+                    return viewport.width * anchor.value;
+
+                case UIFixedUnit.Em:
+                    return element.ComputedStyle.FontAsset.asset.fontInfo.PointSize * anchor.value;
+
+                default:
+                    return 0;
+            }
+        }
+
+        public float ResolveHorizontalAnchor(UIElement element, Rect viewport, UIFixedLength anchor) {
+            switch (anchor.unit) {
+                case UIFixedUnit.Pixel:
+                    return anchor.value;
+
+                case UIFixedUnit.Percent:
+                    return ResolveHorizontalAnchorBaseWidth(element, viewport) * anchor.value;
+
+                case UIFixedUnit.ViewportHeight:
+                    return viewport.height * anchor.value;
+
+                case UIFixedUnit.ViewportWidth:
+                    return viewport.width * anchor.value;
+
+                case UIFixedUnit.Em:
+                    return element.ComputedStyle.FontAsset.asset.fontInfo.PointSize * anchor.value;
+
+                default:
+                    return 0;
             }
         }
 

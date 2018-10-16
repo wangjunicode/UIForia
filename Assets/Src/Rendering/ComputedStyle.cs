@@ -220,19 +220,13 @@ namespace Rendering {
         }
 
         public CrossAxisAlignment GridItemColSelfAlignment {
-            [DebuggerStepThrough]
-            get {
-                return (CrossAxisAlignment)ReadInt(StylePropertyId.GridItemColSelfAlignment, (int)DefaultStyleValues.GridItemColSelfAlignment);
-            }
-            internal set { WriteInt(StylePropertyId.GridItemColSelfAlignment, (int)value); }
+            [DebuggerStepThrough] get { return (CrossAxisAlignment) ReadInt(StylePropertyId.GridItemColSelfAlignment, (int) DefaultStyleValues.GridItemColSelfAlignment); }
+            internal set { WriteInt(StylePropertyId.GridItemColSelfAlignment, (int) value); }
         }
-        
+
         public CrossAxisAlignment GridItemRowSelfAlignment {
-            [DebuggerStepThrough]
-            get {
-                return (CrossAxisAlignment)ReadInt(StylePropertyId.GridItemRowSelfAlignment, (int)DefaultStyleValues.GridItemRowSelfAlignment);
-            }
-            internal set { WriteInt(StylePropertyId.GridItemRowSelfAlignment, (int)value); }
+            [DebuggerStepThrough] get { return (CrossAxisAlignment) ReadInt(StylePropertyId.GridItemRowSelfAlignment, (int) DefaultStyleValues.GridItemRowSelfAlignment); }
+            internal set { WriteInt(StylePropertyId.GridItemRowSelfAlignment, (int) value); }
         }
 
         #endregion
@@ -600,6 +594,35 @@ namespace Rendering {
 
         #endregion
 
+        #region Anchor Properties
+
+        public UIFixedLength AnchorTop {
+            get { return ReadFixedLength(StylePropertyId.AnchorTop, DefaultStyleValues.AnchorTop); }
+            internal set { WriteFixedLength(StylePropertyId.AnchorTop, value); }
+        }
+
+        public UIFixedLength AnchorRight {
+            get { return ReadFixedLength(StylePropertyId.AnchorRight, DefaultStyleValues.AnchorRight); }
+            internal set { WriteFixedLength(StylePropertyId.AnchorRight, value); }
+        }
+
+        public UIFixedLength AnchorBottom {
+            get { return ReadFixedLength(StylePropertyId.AnchorBottom, DefaultStyleValues.AnchorBottom); }
+            internal set { WriteFixedLength(StylePropertyId.AnchorBottom, value); }
+        }
+
+        public UIFixedLength AnchorLeft {
+            get { return ReadFixedLength(StylePropertyId.AnchorLeft, DefaultStyleValues.AnchorLeft); }
+            internal set { WriteFixedLength(StylePropertyId.AnchorLeft, value); }
+        }
+
+        public AnchorTarget AnchorTarget {
+            get { return (AnchorTarget) ReadInt(StylePropertyId.AnchorTarget, (int) DefaultStyleValues.AnchorTarget); }
+            internal set { WriteInt(StylePropertyId.AnchorTarget, (int) value); }
+        }
+
+        #endregion
+
         #region Transform
 
         private UIFixedLength transformPositionX = DefaultStyleValues.TransformPositionX;
@@ -686,6 +709,16 @@ namespace Rendering {
                 TransformPositionX = value.x;
                 TransformPositionY = value.y;
             }
+        }
+
+        public TransformBehavior TransformBehaviorX {
+            [DebuggerStepThrough] get { return (TransformBehavior) ReadInt(StylePropertyId.TransformBehaviorX, (int) DefaultStyleValues.TransformBehaviorX); }
+            internal set { WriteInt(StylePropertyId.TransformBehaviorX, (int) value); }
+        }
+        
+        public TransformBehavior TransformBehaviorY {
+            [DebuggerStepThrough] get { return (TransformBehavior) ReadInt(StylePropertyId.TransformBehaviorY, (int) DefaultStyleValues.TransformBehaviorY); }
+            internal set { WriteInt(StylePropertyId.TransformBehaviorY, (int) value); }
         }
 
         #endregion
@@ -1021,6 +1054,21 @@ namespace Rendering {
                     // FlowType -> Normal | Ignored | TranslationAsOffset
                     LayoutBehavior = property.IsDefined ? (LayoutBehavior) property.valuePart0 : DefaultStyleValues.LayoutBehavior;
                     break;
+                case StylePropertyId.AnchorTarget:
+                    AnchorTarget = property.IsDefined ? property.AsAnchorTarget : DefaultStyleValues.AnchorTarget;
+                    break;
+                case StylePropertyId.AnchorTop:
+                    AnchorTop = property.IsDefined ? property.AsFixedLength : DefaultStyleValues.AnchorTop;
+                    break;
+                case StylePropertyId.AnchorRight:
+                    AnchorRight = property.IsDefined ? property.AsFixedLength : DefaultStyleValues.AnchorRight;
+                    break;
+                case StylePropertyId.AnchorBottom:
+                    AnchorBottom = property.IsDefined ? property.AsFixedLength : DefaultStyleValues.AnchorBottom;
+                    break;
+                case StylePropertyId.AnchorLeft:
+                    AnchorLeft = property.IsDefined ? property.AsFixedLength : DefaultStyleValues.AnchorLeft;
+                    break;
                 default:
                     throw new ArgumentOutOfRangeException(nameof(property.propertyId), property.propertyId, null);
             }
@@ -1030,76 +1078,114 @@ namespace Rendering {
             switch (propertyId) {
                 case StylePropertyId.TransformRotation:
                     return StyleProperty.TransformRotation(TransformRotation);
-                
+
                 case StylePropertyId.TransformPositionX:
                     return StyleProperty.TransformPositionX(TransformPositionX);
-                
+
                 case StylePropertyId.TransformPositionY:
                     return StyleProperty.TransformPositionY(TransformPositionY);
-                
+
                 case StylePropertyId.MinWidth:
                     return StyleProperty.MinWidth(MinWidth);
-                
+
                 case StylePropertyId.MaxWidth:
                     return StyleProperty.MaxWidth(MaxWidth);
-                
+
                 case StylePropertyId.PreferredWidth:
                     return StyleProperty.PreferredWidth(PreferredWidth);
-                
+
                 case StylePropertyId.MinHeight:
                     return StyleProperty.MinHeight(MinHeight);
-                
+
                 case StylePropertyId.MaxHeight:
                     return StyleProperty.MaxHeight(MaxHeight);
-                
+
                 case StylePropertyId.PreferredHeight:
                     return StyleProperty.PreferredHeight(PreferredHeight);
-                
+
                 case StylePropertyId.BackgroundColor:
                     return StyleProperty.BackgroundColor(BackgroundColor);
-                
+
                 case StylePropertyId.PaddingTop:
                     return StyleProperty.PaddingTop(PaddingTop);
-                
+
                 case StylePropertyId.PaddingRight:
                     return StyleProperty.PaddingRight(PaddingRight);
-                
+
                 case StylePropertyId.PaddingBottom:
                     return StyleProperty.PaddingBottom(PaddingBottom);
-                
+
                 case StylePropertyId.PaddingLeft:
                     return StyleProperty.PaddingLeft(PaddingLeft);
-                
+
                 case StylePropertyId.BorderTop:
                     return StyleProperty.BorderTop(BorderTop);
-                
+
                 case StylePropertyId.BorderRight:
                     return StyleProperty.BorderRight(BorderRight);
-                
+
                 case StylePropertyId.BorderBottom:
                     return StyleProperty.BorderBottom(BorderBottom);
-                
+
                 case StylePropertyId.BorderLeft:
                     return StyleProperty.BorderLeft(BorderLeft);
-                
+
                 case StylePropertyId.MarginTop:
                     return StyleProperty.MarginTop(MarginTop);
-                
+
                 case StylePropertyId.MarginRight:
                     return StyleProperty.MarginRight(MarginRight);
-                
+
                 case StylePropertyId.MarginBottom:
                     return StyleProperty.MarginBottom(MarginBottom);
-                
+
                 case StylePropertyId.MarginLeft:
                     return StyleProperty.MarginLeft(MarginLeft);
+
+                case StylePropertyId.AnchorTop:
+                    return StyleProperty.AnchorTop(AnchorTop);
+                
+                case StylePropertyId.AnchorRight:
+                    return StyleProperty.AnchorRight(AnchorRight);
+                
+                case StylePropertyId.AnchorBottom:
+                    return StyleProperty.AnchorBottom(AnchorBottom);
+                
+                case StylePropertyId.AnchorLeft:
+                    return StyleProperty.AnchorLeft(AnchorLeft);
+                
+                case StylePropertyId.AnchorTarget:
+                    return StyleProperty.AnchorTarget(AnchorTarget);
                 
                 default:
                     throw new ArgumentOutOfRangeException("Missing: " + propertyId);
-
             }
         }
-        
+
+        [DebuggerStepThrough]
+        private UIFixedLength ReadFixedLength(StylePropertyId propertyId, UIFixedLength defaultValue) {
+            StyleProperty retn;
+            properties = properties ?? new Dictionary<StylePropertyId, StyleProperty>();
+            if (properties.TryGetValue(propertyId, out retn)) {
+                return retn.AsFixedLength;
+            }
+
+            return defaultValue;
+        }
+
+//        [DebuggerStepThrough]
+        private void WriteFixedLength(StylePropertyId propertyId, UIFixedLength newValue) {
+            StyleProperty retn;
+            properties = properties ?? new Dictionary<StylePropertyId, StyleProperty>();
+            if (properties.TryGetValue(propertyId, out retn)) {
+                if (retn.AsInt == newValue) return;
+            }
+
+            StyleProperty property = new StyleProperty(propertyId, newValue);
+            properties[propertyId] = property;
+            SendEvent(property);
+        }
+
         [DebuggerStepThrough]
         private int ReadInt(StylePropertyId propertyId, int defaultValue) {
             StyleProperty retn;

@@ -50,7 +50,7 @@ public class LayoutSystemTests {
     public void Works() {
         MockView mockView = new MockView(typeof(LayoutTestThing));
         mockView.Initialize();
-        mockView.layoutSystem.SetViewportRect(new Rect(0, 0, 1000f, 1000f));
+        mockView.LayoutSystem.SetViewportRect(new Rect(0, 0, 1000f, 1000f));
         LayoutTestThing root = (LayoutTestThing) mockView.RootElement;
         mockView.Update();
         Assert.AreEqual(Vector2.zero, root.child0.layoutResult.localPosition);
@@ -67,7 +67,7 @@ public class LayoutSystemTests {
     public void Updates() {
         MockView mockView = new MockView(typeof(LayoutTestThing));
         mockView.Initialize();
-        mockView.layoutSystem.SetViewportRect(new Rect(0, 0, 1000f, 1000f));
+        mockView.LayoutSystem.SetViewportRect(new Rect(0, 0, 1000f, 1000f));
         LayoutTestThing root = (LayoutTestThing) mockView.RootElement;
         mockView.Update();
         Assert.AreEqual(Vector2.zero, root.child0.layoutResult.localPosition);
@@ -332,7 +332,7 @@ public class LayoutSystemTests {
         MockView mockView = new MockView(typeof(LayoutTestThing), template);
         mockView.Initialize();
         LayoutTestThing root = (LayoutTestThing) mockView.RootElement;
-        MockLayoutSystem layoutSystem = (MockLayoutSystem) mockView.layoutSystem;
+        MockLayoutSystem layoutSystem = (MockLayoutSystem) mockView.LayoutSystem;
         LayoutBox box = layoutSystem.GetBoxForElement(root.FindById("repeat"));
         Assert.IsNull(box);
     }

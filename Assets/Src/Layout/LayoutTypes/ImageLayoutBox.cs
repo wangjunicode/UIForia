@@ -9,7 +9,7 @@ namespace Src.Layout.LayoutTypes {
 
         private readonly UIImageElement image;
 
-        public ImageLayoutBox(LayoutSystem2 layoutSystem, UIElement element) : base(layoutSystem, element) {
+        public ImageLayoutBox(LayoutSystem layoutSystem, UIElement element) : base(layoutSystem, element) {
             image = (UIImageElement) element;
             image.onMaterialDirty += (e) => { throw new NotImplementedException(); };
         }

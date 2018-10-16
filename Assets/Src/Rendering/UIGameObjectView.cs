@@ -10,7 +10,7 @@ namespace Rendering {
         
         public UIGameObjectView(Type elementType, RectTransform viewTransform) : base(elementType) {
             this.rectTransform = viewTransform;
-            layoutSystem = new LayoutSystem2(styleSystem);
+            layoutSystem = new LayoutSystem(styleSystem);
             renderSystem = new GORenderSystem(layoutSystem, styleSystem, viewTransform);
             inputSystem = new GOInputSystem(layoutSystem, styleSystem);
             systems.Add(inputSystem);
@@ -19,10 +19,18 @@ namespace Rendering {
         }
 
         public void UpdateViewport() {
-            layoutSystem.SetViewportRect(new Rect(rectTransform.rect) {
-                x = 0,
-                y = 0
-            });
+//            layoutSystem.SetViewportRect(new Rect(rectTransform.rect) {
+//                x = 0,
+//                y = 0
+//            });
+        }
+
+        public override void Update() {
+            Rect viewport = rectTransform.rect;
+            viewport.y = viewport.height + viewport.y;
+            layoutSystem.SetViewportRect(viewport);
+            styleSystem.SetViewportRect(viewport);
+            base.Update();
         }
 
     }

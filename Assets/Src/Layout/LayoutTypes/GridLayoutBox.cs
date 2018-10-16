@@ -20,7 +20,7 @@ namespace Src.Layout.LayoutTypes {
 
         private bool m_IsPlacementDirty;
 
-        public GridLayoutBox(LayoutSystem2 layoutSystem, UIElement element)
+        public GridLayoutBox(LayoutSystem layoutSystem, UIElement element)
             : base(layoutSystem, element) {
             this.m_IsPlacementDirty = true;
             this.m_Widths = new List<float>(4);

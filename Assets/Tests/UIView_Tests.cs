@@ -1,7 +1,7 @@
 using System;
 using NUnit.Framework;
 using Src;
-
+using Tests.Mocks;
 using static Tests.TestUtils;
 
 [Template(TemplateType.String, @"
@@ -309,7 +309,7 @@ public class UIView_Tests {
 
     [Test]
     public void LifeCycle_OnUpdate() {
-        TestView testView = new TestView(typeof(ViewTestThing));
+        MockView testView = new MockView(typeof(ViewTestThing));
         testView.Initialize(true);
         ViewTestThing thing = (ViewTestThing)testView.RootElement;
         Assert.AreEqual(0, thing.updateCount);

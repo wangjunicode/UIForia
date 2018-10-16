@@ -7,7 +7,7 @@ namespace Src.Layout.LayoutTypes {
 
     public class ScrollbarLayoutBox : LayoutBox {
 
-        public ScrollbarLayoutBox(LayoutSystem2 layoutSystem, UIElement element) : base(layoutSystem, element) { }
+        public ScrollbarLayoutBox(LayoutSystem layoutSystem, UIElement element) : base(layoutSystem, element) { }
 
         public override void RunLayout() {
             float minX = 0;

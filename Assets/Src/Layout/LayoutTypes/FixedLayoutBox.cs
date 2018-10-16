@@ -7,7 +7,7 @@ namespace Src.Layout.LayoutTypes {
 
     public class FixedLayoutBox : LayoutBox {
 
-        public FixedLayoutBox(LayoutSystem2 layoutSystem, UIElement element)
+        public FixedLayoutBox(LayoutSystem layoutSystem, UIElement element)
             : base(layoutSystem, element) { }
 
         protected override float ComputeContentWidth() {

@@ -6,7 +6,7 @@ namespace Src.Layout.LayoutTypes {
     public class RootLayoutBox : LayoutBox {
 
 
-        public RootLayoutBox(LayoutSystem2 layoutSystem)
+        public RootLayoutBox(LayoutSystem layoutSystem)
             : base(layoutSystem, null) {}
 
         public override void RunLayout() {

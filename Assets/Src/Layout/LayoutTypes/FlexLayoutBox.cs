@@ -20,7 +20,7 @@ namespace Src.Layout.LayoutTypes {
 
         private static float[] scratchFloats = ArrayPool<float>.Empty;
 
-        public FlexLayoutBox(LayoutSystem2 layoutSystem, UIElement element)
+        public FlexLayoutBox(LayoutSystem layoutSystem, UIElement element)
             : base(layoutSystem, element) {
             tracks = ListPool<FlexTrack>.Get();
             widths = ArrayPool<FlexItem>.GetMinSize(4); // todo -- make static
@@ -696,7 +696,7 @@ namespace Src.Layout.LayoutTypes {
         }
 
         protected override void OnChildAdded(LayoutBox child) {
-            if (!child.element.isEnabled) {
+            if (!child.element.isEnabled || child.IsIgnored) {
                 return;
             }
 

@@ -5,7 +5,7 @@ using Src.Systems;
 
 namespace Tests.Mocks {
 
-    public class MockLayoutSystem : LayoutSystem2 {
+    public class MockLayoutSystem : LayoutSystem {
 
         public MockLayoutSystem(IStyleSystem styleSystem)
             : base(styleSystem) {

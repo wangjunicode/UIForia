@@ -57,9 +57,10 @@ public class ChatWindow_Styles {
     public static UIStyle Anchor() {
         return new UIStyle() {
             BackgroundColor = Color.red,
-            AnchorTarget = AnchorTarget.Viewport,
+            AnchorTarget = AnchorTarget.Screen,
             PreferredWidth = new UIMeasurement(1f, UIUnit.AnchorWidth),
             PreferredHeight = new UIMeasurement(1f, UIUnit.AnchorHeight),
+            AnchorLeft = new UIFixedLength(0.1f, UIFixedUnit.Percent),
             AnchorRight = new UIFixedLength(1f, UIFixedUnit.Percent),
         };
     }

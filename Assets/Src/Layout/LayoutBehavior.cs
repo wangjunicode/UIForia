@@ -7,10 +7,8 @@ namespace Src.Layout {
 
         Unset = 0,
         Normal = 1 << 0,
-        Fixed = 1 << 1,
-        Sticky = 1 << 2,
-        Anchor = 1 << 3,
-        Ignored = 1 << 4,
+        Anchors = 1 << 1,
+        Ignored = 1 << 2,
 
     }
 

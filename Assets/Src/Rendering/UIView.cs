@@ -56,9 +56,7 @@ public abstract class UIView {
         else {
             CreateElementFromTemplate(TemplateParser.GetParsedTemplate(elementType, forceTemplateReparse).CreateWithoutScope(this), null);
         }
-        
-        layoutSystem.ForceLayout();
-        
+               
         foreach (ISystem system in systems) {
             system.OnReady();
         }
@@ -170,14 +168,11 @@ public abstract class UIView {
     public virtual void Update() {
         
         styleSystem.OnUpdate();
+        bindingSystem.OnUpdate();
         layoutSystem.OnUpdate();
         inputSystem.OnUpdate();
-        bindingSystem.OnUpdate();
         renderSystem.OnUpdate();
         
-        for (int i = 0; i < systems.Count; i++) {
-            systems[i].OnUpdate();
-        }
         elementTree.ConditionalTraversePreOrder((element) => {
             if (element == null) return true;
             if (element.isDisabled) return false;

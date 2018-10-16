@@ -206,27 +206,27 @@ public class InputSystemTests {
     public void MouseDown_WithPropagation() {
         MockView testView = new MockView(typeof(InputSystemTestThing));
         testView.Initialize();
-        testView.layoutSystem.SetViewportRect(new Rect(0, 0, 1000, 1000));
+        testView.LayoutSystem.SetViewportRect(new Rect(0, 0, 1000, 1000));
         InputSystemTestThing root = (InputSystemTestThing) testView.RootElement;
         testView.Update();
 
-        testView.inputSystem.MouseDown(new Vector2(20, 10));
+        testView.InputSystem.MouseDown(new Vector2(20, 10));
         testView.Update();
         
         Assert.AreEqual(0, root.clickedChildIndex);
         Assert.IsTrue(root.wasMouseDown);
 
-        testView.inputSystem.ClearClickState();
+        testView.InputSystem.ClearClickState();
         testView.Update();
         
-        testView.inputSystem.MouseDown(new Vector2(120, 10));
+        testView.InputSystem.MouseDown(new Vector2(120, 10));
         testView.Update();
         Assert.AreEqual(1, root.clickedChildIndex);
 
-        testView.inputSystem.ClearClickState();
+        testView.InputSystem.ClearClickState();
         testView.Update();
         
-        testView.inputSystem.MouseDown(new Vector2(220, 10));
+        testView.InputSystem.MouseDown(new Vector2(220, 10));
         testView.Update();
         Assert.AreEqual(2, root.clickedChildIndex);
     }
@@ -235,10 +235,10 @@ public class InputSystemTests {
     public void MouseDown_StopPropagation() {
         MockView testView = new MockView(typeof(InputSystemTestThing2));
         testView.Initialize();
-        testView.layoutSystem.SetViewportRect(new Rect(0, 0, 1000, 1000));
+        testView.LayoutSystem.SetViewportRect(new Rect(0, 0, 1000, 1000));
         InputSystemTestThing2 root = (InputSystemTestThing2) testView.RootElement;
 
-        testView.inputSystem.MouseDown(new Vector2(20, 10));
+        testView.InputSystem.MouseDown(new Vector2(20, 10));
         
         root.shouldStopPropagation = true;
         testView.Update();
@@ -246,11 +246,11 @@ public class InputSystemTests {
         Assert.AreEqual(0, root.clickedChildIndex);
         Assert.IsFalse(root.wasMouseDown);
 
-        testView.inputSystem.MouseUp();
+        testView.InputSystem.MouseUp();
         testView.Update();
         
         root.shouldStopPropagation = false;
-        testView.inputSystem.MouseDown(new Vector2(120, 10));
+        testView.InputSystem.MouseDown(new Vector2(120, 10));
         testView.Update();
 
         Assert.AreEqual(1, root.clickedChildIndex);
@@ -261,23 +261,23 @@ public class InputSystemTests {
     public void MouseDown_StopPropagationInBubble() {
         MockView testView = new MockView(typeof(InputSystemTestThing2));
         testView.Initialize();
-        testView.layoutSystem.SetViewportRect(new Rect(0, 0, 1000, 1000));
+        testView.LayoutSystem.SetViewportRect(new Rect(0, 0, 1000, 1000));
         InputSystemTestThing2 root = (InputSystemTestThing2) testView.RootElement;
 
-        testView.inputSystem.MouseDown( new Vector2(120, 10));
+        testView.InputSystem.MouseDown( new Vector2(120, 10));
         root.shouldStopPropagation = true;
         testView.Update();
 
         Assert.AreEqual(-1, root.clickedChildIndex);
         Assert.IsTrue(root.wasMouseDown);
 
-        testView.inputSystem.ClearClickState();
+        testView.InputSystem.ClearClickState();
         testView.Update();
 
         root.wasMouseDown = false;
 
         root.shouldStopPropagation = false;
-        testView.inputSystem.MouseDown( new Vector2(120, 10));
+        testView.InputSystem.MouseDown( new Vector2(120, 10));
         testView.Update();
 
         Assert.AreEqual(1, root.clickedChildIndex);
@@ -288,7 +288,7 @@ public class InputSystemTests {
     public void MouseDown_BubbleThenCapture() {
         MockView testView = new MockView(typeof(InputSystemTestThing2));
         testView.Initialize();
-        testView.layoutSystem.SetViewportRect(new Rect(0, 0, 1000, 1000));
+        testView.LayoutSystem.SetViewportRect(new Rect(0, 0, 1000, 1000));
         InputSystemTestThing2 root = (InputSystemTestThing2) testView.RootElement;
 
         MouseState mouseState = new MouseState();
@@ -296,7 +296,7 @@ public class InputSystemTests {
         mouseState.isLeftMouseDownThisFrame = true;
 
         mouseState.mousePosition = new Vector2(120, 10);
-        testView.inputSystem.SetMouseState(mouseState);
+        testView.InputSystem.SetMouseState(mouseState);
         testView.Update();
 
         Assert.AreEqual(new[] {"down:root", "down:child1"}, root.clickList.ToArray());
@@ -306,7 +306,7 @@ public class InputSystemTests {
     public void MouseDown_OutOfBounds() {
         MockView testView = new MockView(typeof(InputSystemTestThing2));
         testView.Initialize();
-        testView.layoutSystem.SetViewportRect(new Rect(0, 0, 1000, 1000));
+        testView.LayoutSystem.SetViewportRect(new Rect(0, 0, 1000, 1000));
         InputSystemTestThing2 root = (InputSystemTestThing2) testView.RootElement;
 
         MouseState mouseState = new MouseState();
@@ -314,7 +314,7 @@ public class InputSystemTests {
         mouseState.isLeftMouseDownThisFrame = true;
 
         mouseState.mousePosition = new Vector2(1200, 10);
-        testView.inputSystem.SetMouseState(mouseState);
+        testView.InputSystem.SetMouseState(mouseState);
         testView.Update();
 
         Assert.AreEqual(new string[0], root.clickList.ToArray());
@@ -324,13 +324,13 @@ public class InputSystemTests {
     public void MouseUp_FiresAndPropagates() {
         MockView testView = new MockView(typeof(InputSystemTestThing2));
         testView.Initialize();
-        testView.layoutSystem.SetViewportRect(new Rect(0, 0, 1000, 1000));
+        testView.LayoutSystem.SetViewportRect(new Rect(0, 0, 1000, 1000));
         InputSystemTestThing2 root = (InputSystemTestThing2) testView.RootElement;
 
         MouseState mouseState = new MouseState();
         mouseState.isLeftMouseUpThisFrame = true;
         mouseState.mousePosition = new Vector2(220, 10);
-        testView.inputSystem.SetMouseState(mouseState);
+        testView.InputSystem.SetMouseState(mouseState);
         testView.Update();
 
         Assert.AreEqual(new[] {"up:child2", "up:root"}, root.clickList.ToArray());
@@ -340,13 +340,13 @@ public class InputSystemTests {
     public void MouseUp_StopPropagation() {
         MockView testView = new MockView(typeof(InputSystemTestThing2));
         testView.Initialize();
-        testView.layoutSystem.SetViewportRect(new Rect(0, 0, 1000, 1000));
+        testView.LayoutSystem.SetViewportRect(new Rect(0, 0, 1000, 1000));
         InputSystemTestThing2 root = (InputSystemTestThing2) testView.RootElement;
 
         MouseState mouseState = new MouseState();
         mouseState.isLeftMouseUpThisFrame = true;
         mouseState.mousePosition = new Vector2(220, 10);
-        testView.inputSystem.SetMouseState(mouseState);
+        testView.InputSystem.SetMouseState(mouseState);
         root.shouldStopPropagation = true;
         testView.Update();
 
@@ -357,13 +357,13 @@ public class InputSystemTests {
     public void MouseUp_StopPropagationInBubble() {
         MockView testView = new MockView(typeof(InputSystemTestThing2));
         testView.Initialize();
-        testView.layoutSystem.SetViewportRect(new Rect(0, 0, 1000, 1000));
+        testView.LayoutSystem.SetViewportRect(new Rect(0, 0, 1000, 1000));
         InputSystemTestThing2 root = (InputSystemTestThing2) testView.RootElement;
 
         MouseState mouseState = new MouseState();
         mouseState.isLeftMouseUpThisFrame = true;
         mouseState.mousePosition = new Vector2(120, 10);
-        testView.inputSystem.SetMouseState(mouseState);
+        testView.InputSystem.SetMouseState(mouseState);
         root.shouldStopPropagation = true;
         testView.Update();
 
@@ -374,14 +374,14 @@ public class InputSystemTests {
     public void MouseUp_OutOfBounds() {
         MockView testView = new MockView(typeof(InputSystemTestThing2));
         testView.Initialize();
-        testView.layoutSystem.SetViewportRect(new Rect(0, 0, 1000, 1000));
+        testView.LayoutSystem.SetViewportRect(new Rect(0, 0, 1000, 1000));
         InputSystemTestThing2 root = (InputSystemTestThing2) testView.RootElement;
 
         MouseState mouseState = new MouseState();
         mouseState.isLeftMouseUpThisFrame = true;
 
         mouseState.mousePosition = new Vector2(1200, 10);
-        testView.inputSystem.SetMouseState(mouseState);
+        testView.InputSystem.SetMouseState(mouseState);
         testView.Update();
 
         Assert.AreEqual(new string[0], root.clickList.ToArray());
@@ -391,12 +391,12 @@ public class InputSystemTests {
     public void MouseEnter_FiresAndPropagates() {
         MockView testView = new MockView(typeof(InputSystemTestThing2));
         testView.Initialize();
-        testView.layoutSystem.SetViewportRect(new Rect(0, 0, 1000, 1000));
+        testView.LayoutSystem.SetViewportRect(new Rect(0, 0, 1000, 1000));
         InputSystemTestThing2 root = (InputSystemTestThing2) testView.RootElement;
         root.ignoreEnter = false;
         MouseState mouseState = new MouseState();
         mouseState.mousePosition = new Vector2(20, 10);
-        testView.inputSystem.SetMouseState(mouseState);
+        testView.InputSystem.SetMouseState(mouseState);
         testView.Update();
         Assert.AreEqual(new[] {"enter:child0", "enter:root"}, root.clickList.ToArray());
     }
@@ -405,12 +405,12 @@ public class InputSystemTests {
     public void MouseEnter_DoesNotFireAgainForSamePosition() {
         MockView testView = new MockView(typeof(InputSystemTestThing2));
         testView.Initialize();
-        testView.layoutSystem.SetViewportRect(new Rect(0, 0, 1000, 1000));
+        testView.LayoutSystem.SetViewportRect(new Rect(0, 0, 1000, 1000));
         InputSystemTestThing2 root = (InputSystemTestThing2) testView.RootElement;
         root.ignoreEnter = false;
         MouseState mouseState = new MouseState();
         mouseState.mousePosition = new Vector2(20, 10);
-        testView.inputSystem.SetMouseState(mouseState);
+        testView.InputSystem.SetMouseState(mouseState);
         testView.Update();
         Assert.AreEqual(new[] {"enter:child0", "enter:root"}, root.clickList.ToArray());
         testView.Update();
@@ -421,16 +421,16 @@ public class InputSystemTests {
     public void MouseEnter_DoesNotFireAgainForPositionSameElement() {
         MockView testView = new MockView(typeof(InputSystemTestThing2));
         testView.Initialize();
-        testView.layoutSystem.SetViewportRect(new Rect(0, 0, 1000, 1000));
+        testView.LayoutSystem.SetViewportRect(new Rect(0, 0, 1000, 1000));
         InputSystemTestThing2 root = (InputSystemTestThing2) testView.RootElement;
         root.ignoreEnter = false;
         MouseState mouseState = new MouseState();
         mouseState.mousePosition = new Vector2(20, 10);
-        testView.inputSystem.SetMouseState(mouseState);
+        testView.InputSystem.SetMouseState(mouseState);
         testView.Update();
         Assert.AreEqual(new[] {"enter:child0", "enter:root"}, root.clickList.ToArray());
         mouseState.mousePosition = new Vector2(40, 10);
-        testView.inputSystem.SetMouseState(mouseState);
+        testView.InputSystem.SetMouseState(mouseState);
         testView.Update();
         Assert.AreEqual(new[] {"enter:child0", "enter:root"}, root.clickList.ToArray());
     }
@@ -439,16 +439,16 @@ public class InputSystemTests {
     public void MouseEnter_FiresForNewElement() {
         MockView testView = new MockView(typeof(InputSystemTestThing2));
         testView.Initialize();
-        testView.layoutSystem.SetViewportRect(new Rect(0, 0, 1000, 1000));
+        testView.LayoutSystem.SetViewportRect(new Rect(0, 0, 1000, 1000));
         InputSystemTestThing2 root = (InputSystemTestThing2) testView.RootElement;
         root.ignoreEnter = false;
         MouseState mouseState = new MouseState();
         mouseState.mousePosition = new Vector2(20, 10);
-        testView.inputSystem.SetMouseState(mouseState);
+        testView.InputSystem.SetMouseState(mouseState);
         testView.Update();
         Assert.AreEqual(new[] {"enter:child0", "enter:root"}, root.clickList.ToArray());
         mouseState.mousePosition = new Vector2(240, 10);
-        testView.inputSystem.SetMouseState(mouseState);
+        testView.InputSystem.SetMouseState(mouseState);
         testView.Update();
         Assert.AreEqual(new[] {"enter:child0", "enter:root", "enter:child2"}, root.clickList.ToArray());
     }
@@ -457,21 +457,21 @@ public class InputSystemTests {
     public void MouseEnter_FiresForReEnteringElement() {
         MockView testView = new MockView(typeof(InputSystemTestThing2));
         testView.Initialize();
-        testView.layoutSystem.SetViewportRect(new Rect(0, 0, 1000, 1000));
+        testView.LayoutSystem.SetViewportRect(new Rect(0, 0, 1000, 1000));
         InputSystemTestThing2 root = (InputSystemTestThing2) testView.RootElement;
         root.ignoreEnter = false;
         MouseState mouseState = new MouseState();
 
         mouseState.mousePosition = new Vector2(20, 10);
-        testView.inputSystem.SetMouseState(mouseState);
+        testView.InputSystem.SetMouseState(mouseState);
         testView.Update();
 
         mouseState.mousePosition = new Vector2(240, 10);
-        testView.inputSystem.SetMouseState(mouseState);
+        testView.InputSystem.SetMouseState(mouseState);
         testView.Update();
 
         mouseState.mousePosition = new Vector2(20, 10);
-        testView.inputSystem.SetMouseState(mouseState);
+        testView.InputSystem.SetMouseState(mouseState);
         testView.Update();
 
         Assert.AreEqual(new[] {"enter:child0", "enter:root", "enter:child2", "enter:child0"}, root.clickList.ToArray());
@@ -481,16 +481,16 @@ public class InputSystemTests {
     public void MouseExit_FiresAndPropagates() {
         MockView testView = new MockView(typeof(InputSystemTestThing2));
         testView.Initialize();
-        testView.layoutSystem.SetViewportRect(new Rect(0, 0, 1000, 1000));
+        testView.LayoutSystem.SetViewportRect(new Rect(0, 0, 1000, 1000));
         InputSystemTestThing2 root = (InputSystemTestThing2) testView.RootElement;
         root.ignoreExit = false;
 
-        testView.inputSystem.SetMousePosition(new Vector2(20, 10));
+        testView.InputSystem.SetMousePosition(new Vector2(20, 10));
         testView.Update();
 
         Assert.AreEqual(new string[0], root.clickList.ToArray());
 
-        testView.inputSystem.SetMousePosition(new Vector2(1200, 10));
+        testView.InputSystem.SetMousePosition(new Vector2(1200, 10));
         testView.Update();
 
         Assert.AreEqual(new[] {"exit:child0", "exit:root"}, root.clickList.ToArray());
@@ -500,16 +500,16 @@ public class InputSystemTests {
     public void MouseExit_FireOnlyForExitedElement() {
         MockView testView = new MockView(typeof(InputSystemTestThing2));
         testView.Initialize();
-        testView.layoutSystem.SetViewportRect(new Rect(0, 0, 1000, 1000));
+        testView.LayoutSystem.SetViewportRect(new Rect(0, 0, 1000, 1000));
         InputSystemTestThing2 root = (InputSystemTestThing2) testView.RootElement;
         root.ignoreExit = false;
 
-        testView.inputSystem.SetMousePosition(new Vector2(20, 10));
+        testView.InputSystem.SetMousePosition(new Vector2(20, 10));
         testView.Update();
 
         Assert.AreEqual(new string[0], root.clickList.ToArray());
 
-        testView.inputSystem.SetMousePosition(new Vector2(120, 10));
+        testView.InputSystem.SetMousePosition(new Vector2(120, 10));
         testView.Update();
 
         Assert.AreEqual(new[] {"exit:child0"}, root.clickList.ToArray());
@@ -519,22 +519,22 @@ public class InputSystemTests {
     public void MouseExit_FireAgainWhenReenteredElement() {
         MockView testView = new MockView(typeof(InputSystemTestThing2));
         testView.Initialize();
-        testView.layoutSystem.SetViewportRect(new Rect(0, 0, 1000, 1000));
+        testView.LayoutSystem.SetViewportRect(new Rect(0, 0, 1000, 1000));
         InputSystemTestThing2 root = (InputSystemTestThing2) testView.RootElement;
         root.ignoreExit = false;
 
-        testView.inputSystem.SetMousePosition(new Vector2(20, 10));
+        testView.InputSystem.SetMousePosition(new Vector2(20, 10));
         testView.Update();
 
         Assert.AreEqual(new string[0], root.clickList.ToArray());
 
-        testView.inputSystem.SetMousePosition(new Vector2(120, 10));
+        testView.InputSystem.SetMousePosition(new Vector2(120, 10));
         testView.Update();
 
-        testView.inputSystem.SetMousePosition(new Vector2(20, 10));
+        testView.InputSystem.SetMousePosition(new Vector2(20, 10));
         testView.Update();
 
-        testView.inputSystem.SetMousePosition(new Vector2(120, 10));
+        testView.InputSystem.SetMousePosition(new Vector2(120, 10));
         testView.Update();
 
         Assert.AreEqual(new[] {"exit:child0", "exit:child0"}, root.clickList.ToArray());
@@ -544,11 +544,11 @@ public class InputSystemTests {
     public void MouseMove_FiresAndPropagates() {
         MockView testView = new MockView(typeof(InputSystemTestThing2));
         testView.Initialize();
-        testView.layoutSystem.SetViewportRect(new Rect(0, 0, 1000, 1000));
+        testView.LayoutSystem.SetViewportRect(new Rect(0, 0, 1000, 1000));
         InputSystemTestThing2 root = (InputSystemTestThing2) testView.RootElement;
         root.ignoreMove = false;
 
-        testView.inputSystem.SetMousePosition(new Vector2(20, 10));
+        testView.InputSystem.SetMousePosition(new Vector2(20, 10));
         testView.Update();
 
         Assert.AreEqual(new[] {"move:child0", "move:root"}, root.clickList.ToArray());
@@ -558,16 +558,16 @@ public class InputSystemTests {
     public void MouseMove_FiresAgainWhenMovedAndContains() {
         MockView testView = new MockView(typeof(InputSystemTestThing2));
         testView.Initialize();
-        testView.layoutSystem.SetViewportRect(new Rect(0, 0, 1000, 1000));
+        testView.LayoutSystem.SetViewportRect(new Rect(0, 0, 1000, 1000));
         InputSystemTestThing2 root = (InputSystemTestThing2) testView.RootElement;
         root.ignoreMove = false;
 
-        testView.inputSystem.SetMousePosition(new Vector2(20, 10));
+        testView.InputSystem.SetMousePosition(new Vector2(20, 10));
         testView.Update();
 
         Assert.AreEqual(new[] {"move:child0", "move:root"}, root.clickList.ToArray());
 
-        testView.inputSystem.SetMousePosition(new Vector2(21, 10));
+        testView.InputSystem.SetMousePosition(new Vector2(21, 10));
         testView.Update();
 
         Assert.AreEqual(new[] {"move:child0", "move:root", "move:child0", "move:root"}, root.clickList.ToArray());
@@ -577,14 +577,14 @@ public class InputSystemTests {
     public void MouseMove_DoesNotFireAgainWhenNotMovedAndContains() {
         MockView testView = new MockView(typeof(InputSystemTestThing2));
         testView.Initialize();
-        testView.layoutSystem.SetViewportRect(new Rect(0, 0, 1000, 1000));
+        testView.LayoutSystem.SetViewportRect(new Rect(0, 0, 1000, 1000));
         InputSystemTestThing2 root = (InputSystemTestThing2) testView.RootElement;
         root.ignoreMove = false;
 
-        testView.inputSystem.SetMousePosition(new Vector2(20, 10));
+        testView.InputSystem.SetMousePosition(new Vector2(20, 10));
         testView.Update();
 
-        testView.inputSystem.SetMousePosition(new Vector2(20, 10));
+        testView.InputSystem.SetMousePosition(new Vector2(20, 10));
         testView.Update();
 
         Assert.AreEqual(new[] {"move:child0", "move:root"}, root.clickList.ToArray());
@@ -594,15 +594,15 @@ public class InputSystemTests {
     public void MouseHover_FiresAndPropagates() {
         MockView testView = new MockView(typeof(InputSystemTestThing2));
         testView.Initialize();
-        testView.layoutSystem.SetViewportRect(new Rect(0, 0, 1000, 1000));
+        testView.LayoutSystem.SetViewportRect(new Rect(0, 0, 1000, 1000));
         InputSystemTestThing2 root = (InputSystemTestThing2) testView.RootElement;
         root.ignoreHover = false;
 
-        testView.inputSystem.SetMousePosition(new Vector2(20, 10));
+        testView.InputSystem.SetMousePosition(new Vector2(20, 10));
         testView.Update();
         
         Assert.AreEqual(new string[0], root.clickList.ToArray());
-        testView.inputSystem.SetMousePosition(new Vector2(20, 10));
+        testView.InputSystem.SetMousePosition(new Vector2(20, 10));
 
         testView.Update();
 
@@ -613,21 +613,21 @@ public class InputSystemTests {
     public void MouseHover_DoesNotFireAfterMove() {
         MockView testView = new MockView(typeof(InputSystemTestThing2));
         testView.Initialize();
-        testView.layoutSystem.SetViewportRect(new Rect(0, 0, 1000, 1000));
+        testView.LayoutSystem.SetViewportRect(new Rect(0, 0, 1000, 1000));
         InputSystemTestThing2 root = (InputSystemTestThing2) testView.RootElement;
         root.ignoreHover = false;
 
-        testView.inputSystem.SetMousePosition(new Vector2(20, 10));
+        testView.InputSystem.SetMousePosition(new Vector2(20, 10));
         testView.Update();
         
         Assert.AreEqual(new string[0], root.clickList.ToArray());
         
-        testView.inputSystem.SetMousePosition(new Vector2(20, 10));
+        testView.InputSystem.SetMousePosition(new Vector2(20, 10));
         testView.Update();
 
         Assert.AreEqual(new[] {"hover:child0", "hover:root"}, root.clickList.ToArray());
         
-        testView.inputSystem.SetMousePosition(new Vector2(21, 10));
+        testView.InputSystem.SetMousePosition(new Vector2(21, 10));
         testView.Update();
         
         Assert.AreEqual(new[] {"hover:child0", "hover:root"}, root.clickList.ToArray());

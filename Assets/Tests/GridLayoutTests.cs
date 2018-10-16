@@ -291,7 +291,7 @@ public class GridLayoutTests {
         mockView.Initialize();
         GridLayoutThing3x1 root = (GridLayoutThing3x1) mockView.RootElement;
 
-        mockView.layoutSystem.SetViewportRect(new Rect(0, 0, 1000, 1000));
+        mockView.LayoutSystem.SetViewportRect(new Rect(0, 0, 1000, 1000));
         root.child0.style.SetPreferredWidth(50f, StyleState.Normal);
         root.child1.style.SetPreferredWidth(100f, StyleState.Normal);
         root.child2.style.SetPreferredWidth(100f, StyleState.Normal);

@@ -30,7 +30,7 @@ namespace Src.Layout.LayoutTypes {
         public VirtualScrollbar horizontalScrollbar;
         public VirtualScrollbar verticalScrollbar;
 
-        protected LayoutSystem2 layoutSystem;
+        protected LayoutSystem layoutSystem;
 
         // todo compress w/ flags
         public bool markedForLayout;
@@ -44,7 +44,7 @@ namespace Src.Layout.LayoutTypes {
          * Don't always re-calculate preferred width
          * 
          */
-        protected LayoutBox(LayoutSystem2 layoutSystem, UIElement element) {
+        protected LayoutBox(LayoutSystem layoutSystem, UIElement element) {
             this.element = element;
             this.layoutSystem = layoutSystem;
             this.style = element?.style?.computedStyle;
@@ -70,6 +70,7 @@ namespace Src.Layout.LayoutTypes {
         public float BorderTop => ResolveFixedHeight(style.BorderTop);
 
         public bool IsInitialized { get; set; }
+        public bool IsIgnored => (style.LayoutBehavior & LayoutBehavior.Ignored) != 0;
 
         public virtual void OnInitialize() { }
 
@@ -131,7 +132,6 @@ namespace Src.Layout.LayoutTypes {
 
         protected void RequestOwnSizeChangedLayout() {
             layoutSystem.RequestLayout(this);
-            markedForLayout = true;
         }
 
         protected void RequestContentSizeChangeLayout() {
@@ -140,16 +140,14 @@ namespace Src.Layout.LayoutTypes {
             }
 
             layoutSystem.RequestLayout(this);
-            markedForLayout = true;
             InvalidatePreferredSizeCache();
             LayoutBox ptr = parent;
             while (ptr != null) {
+                // not 100% sure this is safe
                 if (ptr.markedForLayout) {
                     return;
                 }
-
                 layoutSystem.RequestLayout(ptr);
-                ptr.markedForLayout = true;
                 ptr.InvalidatePreferredSizeCache();
                 ptr = ptr.parent;
             }
@@ -368,20 +366,7 @@ namespace Src.Layout.LayoutTypes {
             return -1;
         }
 
-        private struct WidthCache {
-
-            public int next;
-
-            public int width0;
-            public int width1;
-            public int width2;
-
-            public float height0;
-            public float height1;
-            public float height2;
-
-        }
-
+        
         protected virtual float ComputeContentWidth() {
             return 0f;
         }
@@ -391,6 +376,7 @@ namespace Src.Layout.LayoutTypes {
         }
 
         private float GetContentWidth() {
+            // todo -- get some stats on this
             if (cachedPreferredWidth == -1) {
                 cachedPreferredWidth = ComputeContentWidth();
             }
@@ -399,6 +385,7 @@ namespace Src.Layout.LayoutTypes {
         }
 
         private float GetContentHeight(float width) {
+            // todo -- get some stats on this
             float cachedHeight = GetCachedHeightForWidth(width);
             if (cachedHeight == -1) {
                 cachedHeight = ComputeContentHeight(width);
@@ -471,15 +458,14 @@ namespace Src.Layout.LayoutTypes {
             float right;
             switch (style.AnchorTarget) {
                 case AnchorTarget.Parent:
-
                     left = ResolveAnchor(parent.allocatedWidth, style.AnchorLeft);
-                    right = parent.allocatedWidth - ResolveAnchor(parent.allocatedWidth, style.AnchorRight);
+                    right = ResolveAnchor(parent.allocatedWidth, style.AnchorRight);
                     return Mathf.Max(0, (right - left) * widthMeasurement.value);
 
                 case AnchorTarget.ParentContentArea:
                     float contentArea = parent.allocatedWidth - parent.PaddingHorizontal - parent.BorderHorizontal;
                     left = ResolveAnchor(contentArea, style.AnchorLeft);
-                    right = contentArea - ResolveAnchor(contentArea, style.AnchorRight);
+                    right = ResolveAnchor(contentArea, style.AnchorRight);
                     return Mathf.Max(0, (right - left) * widthMeasurement.value);
 
                 case AnchorTarget.Screen:
@@ -489,7 +475,7 @@ namespace Src.Layout.LayoutTypes {
 
                 case AnchorTarget.Viewport:
                     left = ResolveAnchor(layoutSystem.ViewportRect.width, style.AnchorLeft);
-                    right = layoutSystem.ViewportRect.width - ResolveAnchor(layoutSystem.ViewportRect.width, style.AnchorRight);
+                    right = ResolveAnchor(layoutSystem.ViewportRect.width, style.AnchorRight);
                     return Mathf.Max(0, (right - left) * widthMeasurement.value);
 
                 default:
@@ -758,6 +744,21 @@ namespace Src.Layout.LayoutTypes {
             }
 
         }
+        
+        private struct WidthCache {
+
+            public int next;
+
+            public int width0;
+            public int width1;
+            public int width2;
+
+            public float height0;
+            public float height1;
+            public float height2;
+
+        }
+
 
     }
 

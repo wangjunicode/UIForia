@@ -1,6 +1,7 @@
 ﻿using System;
 using Rendering;
 using Src.Animation;
+using UnityEngine;
 
 namespace Src.Systems {
 
@@ -12,6 +13,8 @@ namespace Src.Systems {
         void SetStyleProperty(UIElement element, StyleProperty propertyValue);
 
         void PlayAnimation(UIStyleSet styleSet, StyleAnimation animation, AnimationOptions options);
+
+        void SetViewportRect(Rect viewport);
 
     }
 

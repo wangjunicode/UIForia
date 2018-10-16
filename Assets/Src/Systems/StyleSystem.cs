@@ -4,6 +4,7 @@ using Rendering;
 using Src.Animation;
 using Src.Rendering;
 using Src.StyleBindings;
+using UnityEngine;
 
 namespace Src.Systems {
 
@@ -21,7 +22,11 @@ namespace Src.Systems {
         public void PlayAnimation(UIStyleSet styleSet, StyleAnimation animation, AnimationOptions overrideOptions = default(AnimationOptions)) {
             int animationId = animator.PlayAnimation(styleSet, animation, overrideOptions);
         }
-        
+
+        public void SetViewportRect(Rect viewport) {
+            animator.SetViewportRect(viewport);
+        }
+
         public void OnReset() { }
 
         public void OnElementCreatedFromTemplate(MetaData elementData) {

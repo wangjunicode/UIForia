@@ -9,7 +9,7 @@ namespace Src.Layout.LayoutTypes {
 
     public class TextLayoutBox : LayoutBox {
 
-        public TextLayoutBox(LayoutSystem2 layoutSystem, UIElement element)
+        public TextLayoutBox(LayoutSystem layoutSystem, UIElement element)
             : base(layoutSystem, element) { }
 
         protected override float ComputeContentWidth() {

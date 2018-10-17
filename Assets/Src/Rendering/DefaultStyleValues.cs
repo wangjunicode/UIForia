@@ -108,6 +108,10 @@ namespace Rendering {
 //        public static readonly float RadialLayoutRangeLimit = 0f;
 //        public static readonly UIFixedLength RadialLayoutOffsetDistance = 0f;
 
+        public const int ZIndex = 0;
+        public const RenderLayer RenderLayer = Rendering.RenderLayer.Default;
+        public const int LayerOffset = 0;
+
     }
 
 }

@@ -42,10 +42,11 @@ public class UIElement : IHierarchical, IExpressionContextProvider {
                      | UIElementFlags.RequiresRendering;
     }
 
-    internal UIElement templateParent;
-    internal UIElement[] templateChildren;
-    internal UIElement[] ownChildren;
-    internal UITemplateContext templateContext;
+    // todo -- work on this interface
+    public UIElement templateParent;
+    public UIElement[] templateChildren;
+    public UIElement[] ownChildren;
+    public UITemplateContext templateContext;
 
     public LayoutResult layoutResult { get; internal set; }
 

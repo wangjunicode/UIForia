@@ -277,7 +277,6 @@ namespace Src.Animation {
                 case StylePropertyId.AnchorRight:
                     float val = ResolveAnchorRight(element, viewport, m_TargetValue.AsFixedLength);
                     v = Mathf.Lerp(status.floatValue, val, adjustedT);
-                    Debug.Log(v);
                     element.style.SetAnimatedProperty(StyleProperty.AnchorRight(v));
                     break;
 

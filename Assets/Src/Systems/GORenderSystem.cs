@@ -52,13 +52,13 @@ namespace Src.Systems {
                 transform.anchorMin = new Vector2(0, 1);
                 transform.anchorMax = new Vector2(0, 1);
                 transform.pivot = new Vector2(0, 1);
+                transform.localScale = Vector3.one;
                 transform.anchoredPosition = Vector3.zero;
                 transform.SetSiblingIndex(FindRenderedSiblingIndex(item.element));
             };
 
             this.styleSystem = styleSystem;
         }
-
 
         public void OnReady() { }
 
@@ -200,11 +200,13 @@ namespace Src.Systems {
 
                 if (rotation > 0) {
                     transform.rotation = outputRotation;
-                    transform.anchoredPosition = new Vector3(outputPosition.x, -position.y);
+                    transform.anchoredPosition = new Vector3(outputPosition.x, -position.y, 0);
                 }
                 else {
-                    transform.anchoredPosition = new Vector3(outputPosition.x, -position.y);
+                    transform.anchoredPosition = new Vector3(outputPosition.x, -position.y, 0);
                 }
+                
+                
 
                 Rect overflowRect = element.layoutResult.ScreenOverflowRect;
                 Rect screenRect = element.layoutResult.ScreenRect;

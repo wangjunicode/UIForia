@@ -6,7 +6,6 @@ using Src.Layout;
 using Src.Layout.LayoutTypes;
 using Src.Rendering;
 using Src.Util;
-using TMPro;
 using UnityEngine;
 
 namespace Rendering {
@@ -715,7 +714,7 @@ namespace Rendering {
             [DebuggerStepThrough] get { return (TransformBehavior) ReadInt(StylePropertyId.TransformBehaviorX, (int) DefaultStyleValues.TransformBehaviorX); }
             internal set { WriteInt(StylePropertyId.TransformBehaviorX, (int) value); }
         }
-        
+
         public TransformBehavior TransformBehaviorY {
             [DebuggerStepThrough] get { return (TransformBehavior) ReadInt(StylePropertyId.TransformBehaviorY, (int) DefaultStyleValues.TransformBehaviorY); }
             internal set { WriteInt(StylePropertyId.TransformBehaviorY, (int) value); }
@@ -750,6 +749,25 @@ namespace Rendering {
 
         #endregion
 
+        #region Layer
+
+        public int ZIndex {
+            get { return ReadInt(StylePropertyId.ZIndex, DefaultStyleValues.ZIndex); }
+            internal set { WriteInt(StylePropertyId.ZIndex, value); }
+        }
+
+        public RenderLayer RenderLayer {
+            get { return (RenderLayer) ReadInt(StylePropertyId.RenderLayer, (int) DefaultStyleValues.RenderLayer); }
+            internal set { WriteInt(StylePropertyId.RenderLayer, (int) value); }
+        }
+
+        public int LayerOffset {
+            get { return ReadInt(StylePropertyId.LayerOffset, DefaultStyleValues.LayerOffset); }
+            internal set { WriteInt(StylePropertyId.LayerOffset, value); }
+        }
+
+        #endregion
+
         private void SendEvent(StyleProperty property) {
             styleSet.styleSystem.SetStyleProperty(styleSet.element, property);
         }
@@ -758,9 +776,21 @@ namespace Rendering {
             int value0 = property.valuePart0;
             int value1 = property.valuePart1;
             switch (property.propertyId) {
+                case StylePropertyId.Cursor:
+                case StylePropertyId.Opacity:
+                    throw new NotImplementedException();
+
+                #region  Layout
+
+                case StylePropertyId.LayoutBehavior:
+                    LayoutBehavior = property.IsDefined ? (LayoutBehavior) property.valuePart0 : DefaultStyleValues.LayoutBehavior;
+                    break;
+
                 case StylePropertyId.LayoutType:
                     LayoutType = property.IsDefined ? (LayoutType) value0 : DefaultStyleValues.LayoutType;
                     break;
+
+                #endregion
 
                 #region Overflow
 
@@ -969,6 +999,13 @@ namespace Rendering {
                     TransformRotation = property.IsDefined ? FloatUtil.DecodeToFloat(value0) : DefaultStyleValues.TransformRotation;
                     break;
 
+                case StylePropertyId.TransformBehaviorX:
+                    TransformBehaviorX = property.IsDefined ? (TransformBehavior) value0 : DefaultStyleValues.TransformBehaviorX;
+                    break;
+                case StylePropertyId.TransformBehaviorY:
+                    TransformBehaviorY = property.IsDefined ? (TransformBehavior) value0 : DefaultStyleValues.TransformBehaviorY;
+                    break;
+
                 #endregion
 
                 #region Text
@@ -1046,14 +1083,22 @@ namespace Rendering {
 
                 #endregion
 
-                // SizeParameters -> None | IgnoreScaleForLayout | IgnoreRotationForLayout | PreMultiplyScale
-                case StylePropertyId.__TextPropertyStart__:
-                case StylePropertyId.__TextPropertyEnd__:
+                #region Layer
+
+                case StylePropertyId.ZIndex:
+                    ZIndex = property.IsDefined ? property.AsInt : DefaultStyleValues.ZIndex;
                     break;
-                case StylePropertyId.LayoutBehavior:
-                    // FlowType -> Normal | Ignored | TranslationAsOffset
-                    LayoutBehavior = property.IsDefined ? (LayoutBehavior) property.valuePart0 : DefaultStyleValues.LayoutBehavior;
+                case StylePropertyId.LayerOffset:
+                    LayerOffset = property.IsDefined ? property.AsInt : DefaultStyleValues.LayerOffset;
                     break;
+                case StylePropertyId.RenderLayer:
+                    RenderLayer = property.IsDefined ? property.AsRenderLayer : DefaultStyleValues.RenderLayer;
+                    break;
+
+                #endregion
+
+                #region  Anchors
+
                 case StylePropertyId.AnchorTarget:
                     AnchorTarget = property.IsDefined ? property.AsAnchorTarget : DefaultStyleValues.AnchorTarget;
                     break;
@@ -1069,6 +1114,12 @@ namespace Rendering {
                 case StylePropertyId.AnchorLeft:
                     AnchorLeft = property.IsDefined ? property.AsFixedLength : DefaultStyleValues.AnchorLeft;
                     break;
+
+                #endregion
+
+
+                case StylePropertyId.__TextPropertyStart__:
+                case StylePropertyId.__TextPropertyEnd__:
                 default:
                     throw new ArgumentOutOfRangeException(nameof(property.propertyId), property.propertyId, null);
             }
@@ -1144,19 +1195,28 @@ namespace Rendering {
 
                 case StylePropertyId.AnchorTop:
                     return StyleProperty.AnchorTop(AnchorTop);
-                
+
                 case StylePropertyId.AnchorRight:
                     return StyleProperty.AnchorRight(AnchorRight);
-                
+
                 case StylePropertyId.AnchorBottom:
                     return StyleProperty.AnchorBottom(AnchorBottom);
-                
+
                 case StylePropertyId.AnchorLeft:
                     return StyleProperty.AnchorLeft(AnchorLeft);
-                
+
                 case StylePropertyId.AnchorTarget:
                     return StyleProperty.AnchorTarget(AnchorTarget);
-                
+
+                case StylePropertyId.ZIndex:
+                    return StyleProperty.ZIndex(ZIndex);
+
+                case StylePropertyId.LayerOffset:
+                    return StyleProperty.LayerOffset(LayerOffset);
+
+                case StylePropertyId.RenderLayer:
+                    return StyleProperty.RenderLayer(RenderLayer);
+
                 default:
                     throw new ArgumentOutOfRangeException("Missing: " + propertyId);
             }

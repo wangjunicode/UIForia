@@ -84,6 +84,14 @@ namespace Tests.Mocks {
             
         }
 
+        public void MarkGeometryDirty(IDrawable element) {
+            
+        }
+
+        public void MarkMaterialDirty(IDrawable element) {
+            
+        }
+
     }
 
 

@@ -23,6 +23,16 @@ public abstract class UIView {
 
     private readonly string template;
 
+    public event Action<UIElement> onElementCreated;
+    public event Action<UIElement> onElementDestroyed;
+    public event Action<UIElement> onElementEnabled;
+    public event Action<UIElement> onElementDisabled;
+
+    public event Action onRefresh;
+    public event Action onUpdate;
+    public event Action onReady;
+    public event Action onDestroy;
+
     // init -> prepare systems for elements
     // ready -> about to handle first frame, initial template is loaded by now
     // OnElementCreated -> init an entire hierarchy of elements (1 call for the whole group)
@@ -40,7 +50,10 @@ public abstract class UIView {
         systems.Add(styleSystem);
         systems.Add(bindingSystem);
     }
-    
+
+    public IRenderSystem RenderSystem => renderSystem;
+    public ILayoutSystem LayoutSystem => layoutSystem;
+
     // todo -- always call OnCreate & OnReady, don't call OnEnabled unless actually enabled
 
     public UIElement RootElement => rootElement;
@@ -56,23 +69,25 @@ public abstract class UIView {
         else {
             CreateElementFromTemplate(TemplateParser.GetParsedTemplate(elementType, forceTemplateReparse).CreateWithoutScope(this), null);
         }
-               
+
         foreach (ISystem system in systems) {
             system.OnReady();
         }
+        onReady?.Invoke();
     }
 
     public void Refresh() {
+        onRefresh?.Invoke();
         foreach (ISystem system in systems) {
             system.OnReset();
         }
 
         rootElement = null;
         Initialize(true);
+        onRefresh?.Invoke();
     }
 
     protected void InitHierarchy(UIElement element) {
-
         // todo -- assert no duplicate root elements
         if (element.parent == null) {
             element.flags |= UIElementFlags.AncestorEnabled;
@@ -123,6 +138,7 @@ public abstract class UIView {
 
         InvokeOnCreate(data.element);
         InvokeOnReady(data.element);
+        onElementCreated?.Invoke(data.element);
     }
 
     private static void InvokeOnCreate(UIElement element) {
@@ -142,6 +158,7 @@ public abstract class UIView {
                 InvokeOnReady(element.ownChildren[i]);
             }
         }
+
         element.flags |= UIElementFlags.Initialized;
         element.OnReady();
     }
@@ -160,26 +177,25 @@ public abstract class UIView {
         for (int i = 0; i < systems.Count; i++) {
             systems[i].OnElementDestroyed(element);
         }
-
     }
 
     public virtual void OnDestroy() { }
 
     public virtual void Update() {
-        
         styleSystem.OnUpdate();
         bindingSystem.OnUpdate();
         layoutSystem.OnUpdate();
         inputSystem.OnUpdate();
         renderSystem.OnUpdate();
-        
+
         elementTree.ConditionalTraversePreOrder((element) => {
             if (element == null) return true;
             if (element.isDisabled) return false;
             element.OnUpdate();
             return true;
         });
-
+        
+        onUpdate?.Invoke();
     }
 
     public void EnableElement(UIElement element) {
@@ -206,6 +222,8 @@ public abstract class UIView {
         foreach (ISystem system in systems) {
             system.OnElementEnabled(element);
         }
+        
+        onElementEnabled?.Invoke(element);
     }
 
     public void DisableElement(UIElement element) {
@@ -233,6 +251,8 @@ public abstract class UIView {
         foreach (ISystem system in systems) {
             system.OnElementDisabled(element);
         }
+        
+        onElementDisabled?.Invoke(element);
     }
 
     public UIElement GetElement(int elementId) {

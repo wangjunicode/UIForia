@@ -8,16 +8,16 @@ namespace Rendering {
         BackgroundColor = 100,
         BorderColor = 101,
         BackgroundImage = 102,
-        Opacity = 103, 
-        Cursor = 104, 
-        
+        Opacity = 103,
+        Cursor = 104,
+
         GridItemColStart = 200,
         GridItemColSpan = 201,
         GridItemRowStart = 202,
         GridItemRowSpan = 203,
         GridItemColSelfAlignment = 204,
         GridItemRowSelfAlignment = 205,
-        
+
         GridLayoutDirection = 2204,
         GridLayoutDensity = 2205,
         GridLayoutColTemplate = 2206,
@@ -68,7 +68,7 @@ namespace Rendering {
         TransformRotation = 906,
         TransformBehaviorX = 907,
         TransformBehaviorY = 908,
-        
+
         __TextPropertyStart__ = 1000,
         TextColor = __TextPropertyStart__ + UIStyle.TextPropertyIdFlag.TextColor,
         TextFontAsset = __TextPropertyStart__ + UIStyle.TextPropertyIdFlag.TextFontAsset,
@@ -94,15 +94,14 @@ namespace Rendering {
         PreferredHeight = 1105,
 
         LayoutType = 1201,
-        IsInLayoutFlow = 1202,
-        LayoutBehavior = 1203,
-        
-        AnchorTop = 1301, 
+        LayoutBehavior = 1202,
+
+        AnchorTop = 1301,
         AnchorRight = 1302,
         AnchorBottom = 1303,
         AnchorLeft = 1304,
-        AnchorTarget = 1305
-        
+        AnchorTarget = 1305,
+
 //        ScrollBarVerticalTrackSize = 1301,
 //        ScrollBarVerticalHandleSize = 1303,
 //        ScrollBarVerticalFadeDelay = 1305,
@@ -115,7 +114,11 @@ namespace Rendering {
 //        ScrollBarHorizontalTrackSize = 1302,
 //        ScrollBarHorizontalHandleSize = 1304,
 //        ScrollBarHorizontalFadeDelay = 1305,
-        
+
+
+        ZIndex = 1401,
+        RenderLayer = 1402,
+        LayerOffset = 1403
 
     }
 

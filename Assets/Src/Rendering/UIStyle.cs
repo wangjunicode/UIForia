@@ -54,10 +54,6 @@ namespace Rendering {
 
         public IReadOnlyList<StyleProperty> Properties => m_StyleProperties;
 
-        public LayoutBehavior LayoutBehavior {
-            get { return (LayoutBehavior) FindEnumProperty(StylePropertyId.LayoutBehavior); }
-            set { SetEnumProperty(StylePropertyId.LayoutBehavior, (int) value); }
-        }
 
         #region Overflow Properties
 
@@ -227,16 +223,16 @@ namespace Rendering {
 
         #endregion
 
-        #region Shared Layout Properties
+        #region Layout Type and Behavior
 
         public LayoutType LayoutType {
             get { return (LayoutType) FindEnumProperty(StylePropertyId.LayoutType); }
             set { SetEnumProperty(StylePropertyId.LayoutType, (int) value); }
         }
 
-        public LayoutFlowType LayoutInFow {
-            get { return (LayoutFlowType) FindProperty(StylePropertyId.IsInLayoutFlow).valuePart0; }
-            set { SetProperty(StylePropertyId.IsInLayoutFlow, (int) value); }
+        public LayoutBehavior LayoutBehavior {
+            get { return (LayoutBehavior) FindEnumProperty(StylePropertyId.LayoutBehavior); }
+            set { SetEnumProperty(StylePropertyId.LayoutBehavior, (int) value); }
         }
 
         #endregion
@@ -586,9 +582,26 @@ namespace Rendering {
 
         public AnchorTarget AnchorTarget {
             get { return (AnchorTarget) FindEnumProperty(StylePropertyId.AnchorTarget); }
-            set {
-                SetEnumProperty(StylePropertyId.AnchorTarget, (int) value);
-            }
+            set { SetEnumProperty(StylePropertyId.AnchorTarget, (int) value); }
+        }
+
+        #endregion
+
+        #region Layer Properties
+
+        public int LayerOffset {
+            get { return FindIntProperty(StylePropertyId.LayerOffset); }
+            set { SetIntProperty(StylePropertyId.LayerOffset, value); }
+        }
+
+        public int ZIndex {
+            get { return FindIntProperty(StylePropertyId.ZIndex); }
+            set { SetIntProperty(StylePropertyId.ZIndex, value); }
+        }
+
+        public RenderLayer RenderLayer {
+            get { return (RenderLayer) FindEnumProperty(StylePropertyId.RenderLayer); }
+            set { SetIntProperty(StylePropertyId.RenderLayer, (int) value); }
         }
 
         #endregion

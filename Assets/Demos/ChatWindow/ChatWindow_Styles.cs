@@ -57,9 +57,9 @@ public class ChatWindow_Styles {
     public static UIStyle Anchor() {
         return new UIStyle() {
             BackgroundColor = Color.red,
-            AnchorTarget = AnchorTarget.Screen,
+            AnchorTarget = AnchorTarget.Parent,
             PreferredWidth = new UIMeasurement(1f, UIUnit.AnchorWidth),
-            PreferredHeight = new UIMeasurement(1f, UIUnit.AnchorHeight),
+            PreferredHeight = 5f,//new UIMeasurement(1f, UIUnit.AnchorHeight),
             AnchorLeft = new UIFixedLength(0.1f, UIFixedUnit.Percent),
             AnchorRight = new UIFixedLength(1f, UIFixedUnit.Percent),
         };
@@ -139,7 +139,7 @@ public class ChatWindow_Styles {
     [ExportStyle("container")]
     public static UIStyle Container() {
         return new UIStyle() {
-            FlexLayoutDirection = LayoutDirection.Column,
+            FlexLayoutDirection = LayoutDirection.Row,
             FlexLayoutMainAxisAlignment = MainAxisAlignment.Start,
             PreferredWidth = 800f,
             PreferredHeight = 600f,

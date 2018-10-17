@@ -621,8 +621,6 @@ namespace Rendering {
                     break;
                 case StylePropertyId.LayoutType:
                     break;
-                case StylePropertyId.IsInLayoutFlow:
-                    break;
                 case StylePropertyId.LayoutBehavior:
                     break;
                 default:

@@ -46,7 +46,6 @@ namespace Src.Rendering {
         public const string CrossAxisAlignment = "crossAxisAlignment";
         public const string LayoutDirection = "layoutDirection";
         public const string LayoutType = "layoutType";
-        public const string LayoutFlow = "layoutFlow";
         public const string LayoutWrap = "layoutWrap";
 
         public const string TextColor = "textColor";

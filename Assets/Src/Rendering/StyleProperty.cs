@@ -118,6 +118,7 @@ namespace Rendering {
 
         public bool IsGradient => objectField != null && (ColorType) valuePart1 == ColorType.Gradient;
         public AnchorTarget AsAnchorTarget => (AnchorTarget) valuePart0;
+        public RenderLayer AsRenderLayer => (RenderLayer) valuePart0;
 
         [DebuggerStepThrough]
         public static StyleProperty Unset(StylePropertyId propertyId) {
@@ -346,6 +347,18 @@ namespace Rendering {
         
         public static StyleProperty AnchorTarget(AnchorTarget anchorTarget) {
             return new StyleProperty(StylePropertyId.AnchorTarget, (int) anchorTarget);
+        }
+
+        public static StyleProperty ZIndex(int zIndex) {
+            return new StyleProperty(StylePropertyId.ZIndex, zIndex);
+        }
+        
+        public static StyleProperty LayerOffset(int layerOffset) {
+            return new StyleProperty(StylePropertyId.LayerOffset, layerOffset);
+        }
+        
+        public static StyleProperty RenderLayer(RenderLayer renderLayer) {
+            return new StyleProperty(StylePropertyId.RenderLayer, (int)renderLayer);
         }
         
     }

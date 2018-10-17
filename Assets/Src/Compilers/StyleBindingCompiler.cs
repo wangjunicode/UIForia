@@ -278,9 +278,6 @@ namespace Src.Compilers {
                 case RenderConstants.LayoutDirection:
                     return new StyleBinding_FlexLayoutDirection(targetState.state, Compile<LayoutDirection>(value, layoutDirectionSource));
 
-                case RenderConstants.LayoutFlow:
-                    return new StyleBinding_LayoutFlowType(targetState.state, Compile<LayoutFlowType>(value, layoutFlowSource));
-
                 case RenderConstants.LayoutType:
                     return new StyleBinding_LayoutType(targetState.state, Compile<LayoutType>(value, layoutTypeSource));
 

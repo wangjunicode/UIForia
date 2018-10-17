@@ -1,8 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project version="4">
   <component name="ContentModelStore">
-    <e p="$USER_HOME$/Library/Caches/Rider2018.1/resharper-host/local/Transient/ReSharperHost/v12/SolutionCaches/_UIElements.-870298077.00" t="ExcludeRecursive" />
-    <e p="$PROJECT_DIR$" t="IncludeRecursive">
+    <e p="C:\Seed\UIElements" t="IncludeRecursive">
       <e p="_DemoAsmDef.csproj" t="IncludeRecursive" />
       <e p="Assembly-CSharp-Editor.csproj" t="IncludeRecursive" />
       <e p="Assembly-CSharp.csproj" t="IncludeRecursive" />
@@ -29,9 +28,12 @@
         </e>
         <e p="Editor" t="Include">
           <e p="BorderedImageInspector.cs" t="Include" />
+          <e p="CameraViewer.cs" t="Include" />
           <e p="DebuggerWindow.cs" t="Include" />
+          <e p="HierarchyView.cs" t="Include" />
           <e p="RefreshTemplates.cs" t="Include" />
           <e p="StyleDebugView.cs" t="Include" />
+          <e p="UIForiaWindow.cs" t="Include" />
           <e p="UIViewWindow.cs" t="Include" />
         </e>
         <e p="notes.txt" t="Include" />
@@ -87,7 +89,6 @@
                 <e p="StyleBinding_FlexLayoutDirection.cs" t="Include" />
                 <e p="StyleBinding_FlexLayoutMainAxisAlignment.cs" t="Include" />
                 <e p="StyleBinding_FlexLayoutWrap.cs" t="Include" />
-                <e p="StyleBinding_LayoutFlowType.cs" t="Include" />
                 <e p="StyleBinding_LayoutType.cs" t="Include" />
               </e>
               <e p="Margin" t="Include">
@@ -365,6 +366,7 @@
             <e p="Paint.cs" t="Include" />
             <e p="RenderConstants.cs" t="Include" />
             <e p="RenderData.cs" t="Include" />
+            <e p="RenderLayer.cs" t="Include" />
             <e p="StandardDrawable.cs" t="Include" />
             <e p="StyleColor.cs" t="Include" />
             <e p="StyleProperty.cs" t="Include" />
@@ -431,6 +433,7 @@
           <e p="StyleGroupProcessor.cs" t="Include" />
           <e p="Systems" t="Include">
             <e p="BindingSystem.cs" t="Include" />
+            <e p="DirectRenderSystem.cs" t="Include" />
             <e p="GOInputSystem.cs" t="Include" />
             <e p="GORenderSystem.cs" t="Include" />
             <e p="Gradient.cs" t="Include" />
@@ -495,6 +498,7 @@
             <e p="MeasurementVector2.cs" t="Include" />
             <e p="MeshUtil.cs" t="Include" />
             <e p="ObjectPool.cs" t="Include" />
+            <e p="QueuePool.cs" t="Include" />
             <e p="ReadOnlyVector2.cs" t="Include" />
             <e p="ReflectionUtil.cs" t="Include" />
             <e p="SkipTree.cs" t="Include" />
@@ -600,5 +604,8 @@
       <e p="TestAsm.csproj" t="IncludeRecursive" />
       <e p="UIElements.sln" t="IncludeFlat" />
     </e>
+    <e p="C:\Users\Matt\.Rider2018.2\config\extensions" t="IncludeRecursive" />
+    <e p="C:\Users\Matt\.Rider2018.2\system\extResources" t="IncludeRecursive" />
+    <e p="C:\Users\Matt\.Rider2018.2\system\resharper-host\local\Transient\ReSharperHost\v182\SolutionCaches\_UIElements.1439856042.00" t="ExcludeRecursive" />
   </component>
 </project>

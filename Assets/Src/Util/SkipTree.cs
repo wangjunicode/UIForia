@@ -387,6 +387,58 @@ namespace Src {
             return outputList;
 
         }
+
+        public void TraverseAncestors(IHierarchical start, Action<T> traverseFn) {
+            SkipTreeNode node;
+            SkipTreeNode ptr;
+            if (nodeMap.TryGetValue(start.UniqueId, out node)) {
+                ptr = node.parent;
+            }
+            else {
+                ptr = FindParent(start);
+            }
+
+            while (ptr != null) {
+                traverseFn(ptr.item);
+                ptr = ptr.parent;
+            }
+            
+        }
+
+        public void TraverseAncestors<U>(IHierarchical start, U closureArg, Action<T, U> traverseFn) {
+            SkipTreeNode node;
+            SkipTreeNode ptr;
+            if (nodeMap.TryGetValue(start.UniqueId, out node)) {
+                ptr = node.parent;
+            }
+            else {
+                ptr = FindParent(start);
+            }
+
+            while (ptr != null) {
+                traverseFn(ptr.item, closureArg);
+                ptr = ptr.parent;
+            }
+            
+        }
+        
+        public U TraverseAncestors<U>(IHierarchical start, U closureArg, Func<T, U, U> traverseFn) {
+            SkipTreeNode node;
+            SkipTreeNode ptr;
+            if (nodeMap.TryGetValue(start.UniqueId, out node)) {
+                ptr = node.parent;
+            }
+            else {
+                ptr = FindParent(start);
+            }
+
+            while (ptr != null) {
+                closureArg = traverseFn(ptr.item, closureArg);
+                ptr = ptr.parent;
+            }
+
+            return closureArg;
+        }
         
         public void ConditionalTraversePreOrder(Func<T, bool> traverseFn) {
             ConditionalTraversePreOrderStep(root, traverseFn);

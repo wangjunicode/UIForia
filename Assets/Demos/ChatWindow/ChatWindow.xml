@@ -12,7 +12,8 @@
         <!--</WindowFrame>-->
 
         <Panel x-id="child-to-animate" style="anchor-item" style.backgroundColor="red"/>
-        
+        <Panel style.width="100" style.height="1000" style.backgroundColor="blue"/>
+        Text here
     </Contents>
 
 </UITemplate>

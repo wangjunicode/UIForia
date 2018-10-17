@@ -14,13 +14,13 @@ namespace Src.Systems {
         public RectTransform verticalScrollbarHandle;
 
         public IDrawable drawable;
-        public GORenderSystem renderSystem;
+        public IRenderSystem renderSystem;
         public CanvasRenderer canvasRenderer;
         
         public Rect clipRect;
         public bool clips;
         
-        public RenderData(UIElement element, GORenderSystem renderSystem) {
+        public RenderData(UIElement element, IRenderSystem renderSystem) {
             this.element = element;
             this.renderSystem = renderSystem;
 

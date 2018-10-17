@@ -6,7 +6,7 @@ Material:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInternal: {fileID: 0}
-  m_Name: MattUISimpleBorderRadius
+  m_Name: UIForiaRounded
   m_Shader: {fileID: 4800000, guid: 2f08e10e302428040963a7ee605231a1, type: 3}
   m_ShaderKeywords: 
   m_LightmapFlags: 4

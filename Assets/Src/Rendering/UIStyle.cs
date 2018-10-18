@@ -36,9 +36,12 @@ namespace Rendering {
         }
 
         private static int NextStyleId;
-
         private List<StyleProperty> m_StyleProperties;
         private TextPropertyIdFlag m_DefinedTextProperties;
+        
+        // todo -- instead of every style having its own list, use a single large IntMap
+        // todo    that is keyed by BitUtil.SetHighLowBits((int)propertyId, Id);
+        private static readonly IntMap<StyleProperty> s_PropertyMap = new IntMap<StyleProperty>();
 
         public int Id { get; } = NextStyleId++;
 
@@ -784,10 +787,9 @@ namespace Rendering {
             }
 
             SetProperty(propertyId, new StyleColor(color).rgba);
-        }
+        }      
 
         #endregion
-
     }
 
 }

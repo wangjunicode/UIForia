@@ -246,6 +246,9 @@ public class UIElement : IHierarchical, IExpressionContextProvider {
 
     public override string ToString() {
         string retn = string.Empty;
+        if (HasAttribute("id")) {
+            retn += "<" + GetType().Name + ":" + GetAttribute("id") + " " + id + ">";
+        }
         if (name != null) {
             retn += "<" + name + ":" + GetType().Name + " " + id + ">";
         }

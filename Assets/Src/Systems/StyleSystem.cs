@@ -141,7 +141,6 @@ namespace Src.Systems {
 
 
         private void HandleTextChanged(UITextElement element, string text) {
-            element.style.textContent = text;
             onTextContentChanged?.Invoke(element, text);
         }
 

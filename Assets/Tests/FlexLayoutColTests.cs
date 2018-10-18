@@ -494,4 +494,24 @@ public class FlexLayoutColTests {
         Assert.AreEqual(new Rect(200, 0, 100, 100), root.child2.layoutResult.ScreenRect);
     }
 
+    [Test]
+    public void SetsActualWidthAndHeight() {
+        string template = @"
+        <UITemplate>
+            <Style classPath='FlexLayoutColTests+FlexColLayoutThing+Style'/>
+            <Contents style.layoutType='Flex' style.layoutDirection='Column' style.width='content(100)' style.height='content(100)'>
+                <Group x-id='child0' style='w100h100' style.paddingLeft='5f' style.paddingRight='5f'/>
+                <Group x-id='child1' style='w100h100' style.paddingLeft='5f' style.paddingRight='5f'/>
+                <Group x-id='child2' style='w100h100' style.paddingLeft='5f' style.paddingRight='5f'/>
+            </Contents>
+        </UITemplate>
+        ";
+        MockView mockView = new MockView(typeof(FlexColLayoutThing), template);
+        mockView.Initialize();
+        mockView.LayoutSystem.SetViewportRect(new Rect(0, 0, 1000f, 1000f));
+        FlexColLayoutThing root = (FlexColLayoutThing) mockView.RootElement;
+        mockView.Update();
+        Assert.AreEqual(300, root.layoutResult.ActualWidth);
+        Assert.AreEqual(100, root.layoutResult.ActualHeight);
+    }
 }

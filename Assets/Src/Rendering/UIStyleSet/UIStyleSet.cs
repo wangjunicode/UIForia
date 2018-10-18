@@ -37,33 +37,7 @@ namespace Rendering {
             this.containedStates = StyleState.Normal;
             this.styleSystem = styleSystem;
             this.computedStyle = new ComputedStyle(this);
-        }
-
-        public string textContent {
-            get { return content; }
-            set {
-                content = value;
-//                switch (whiteSpace) {
-//                    case WhitespaceMode.Unset:
-//                        content = value;
-//                        break;
-//                    case WhitespaceMode.Wrap:
-//                        content = WhitespaceProcessor.ProcessWrap(value);
-//                        break;
-//                    case WhitespaceMode.NoWrap:
-//                        content = value;
-//                        break;
-//                    case WhitespaceMode.Preserve:
-//                        content = value;
-//                        break;
-//                    case WhitespaceMode.PreserveWrap:
-//                        content = value;
-//                        break;
-//                    default:
-//                        throw new ArgumentOutOfRangeException();
-//                }
-            }
-        }
+        }       
 
         public void EnterState(StyleState state) {
             if (state == StyleState.Normal || (currentState & state) != 0) {
@@ -401,6 +375,13 @@ namespace Rendering {
                 : UIMeasurement.Unset;
         }
 
+        private UIFixedLength GetFixedLengthValue(StylePropertyId propertyId, StyleState state) {
+            StyleProperty property = GetPropertyValueInState(propertyId, state);
+            return property.IsDefined
+                ? UIFixedLength.Decode(property.valuePart0, property.valuePart1)
+                : UIFixedLength.Unset;
+        }
+
         private UIStyle GetActiveStyleForProperty(StylePropertyId stylePropertyId) {
             for (int i = 0; i < appliedStyles.Length; i++) {
                 if ((appliedStyles[i].state & currentState) == 0) {
@@ -452,6 +433,16 @@ namespace Rendering {
         private void SetEnumProperty(StylePropertyId propertyId, int value, StyleState state) {
             UIStyle style = GetOrCreateInstanceStyle(state);
             style.SetEnumProperty(propertyId, value);
+            if ((state & currentState) == 0) {
+                return;
+            }
+
+            computedStyle.SetProperty(GetPropertyValue(propertyId));
+        }
+
+        private void SetFixedLengthProperty(StylePropertyId propertyId, UIFixedLength fixedLength, StyleState state) {
+            UIStyle style = GetOrCreateInstanceStyle(state);
+            style.SetUIFixedLengthProperty(propertyId, fixedLength);
             if ((state & currentState) == 0) {
                 return;
             }

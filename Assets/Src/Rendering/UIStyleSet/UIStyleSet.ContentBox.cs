@@ -120,35 +120,35 @@ namespace Rendering {
 #region Padding
 
         [PublicAPI]
-        public UIMeasurement GetPaddingTop(StyleState state) {
+        public UIFixedLength GetPaddingTop(StyleState state) {
             StyleProperty property = GetPropertyValueInState(StylePropertyId.PaddingTop, state);
             return property.IsDefined
-                ? UIMeasurement.Decode(property.valuePart0, property.valuePart1)
-                : UIMeasurement.Unset;
+                ? UIFixedLength.Decode(property.valuePart0, property.valuePart1)
+                : UIFixedLength.Unset;
         }
 
         [PublicAPI]
-        public UIMeasurement GetPaddingRight(StyleState state) {
+        public UIFixedLength GetPaddingRight(StyleState state) {
             StyleProperty property = GetPropertyValueInState(StylePropertyId.PaddingRight, state);
             return property.IsDefined
-                ? UIMeasurement.Decode(property.valuePart0, property.valuePart1)
-                : UIMeasurement.Unset;
+                ? UIFixedLength.Decode(property.valuePart0, property.valuePart1)
+                : UIFixedLength.Unset;
         }
 
         [PublicAPI]
-        public UIMeasurement GetPaddingBottom(StyleState state) {
+        public UIFixedLength GetPaddingBottom(StyleState state) {
             StyleProperty property = GetPropertyValueInState(StylePropertyId.PaddingBottom, state);
             return property.IsDefined
-                ? UIMeasurement.Decode(property.valuePart0, property.valuePart1)
-                : UIMeasurement.Unset;
+                ? UIFixedLength.Decode(property.valuePart0, property.valuePart1)
+                : UIFixedLength.Unset;
         }
 
         [PublicAPI]
-        public UIMeasurement GetPaddingLeft(StyleState state) {
+        public UIFixedLength GetPaddingLeft(StyleState state) {
             StyleProperty property = GetPropertyValueInState(StylePropertyId.PaddingLeft, state);
             return property.IsDefined
-                ? UIMeasurement.Decode(property.valuePart0, property.valuePart1)
-                : UIMeasurement.Unset;
+                ? UIFixedLength.Decode(property.valuePart0, property.valuePart1)
+                : UIFixedLength.Unset;
         }
 
         [PublicAPI]
@@ -182,8 +182,8 @@ namespace Rendering {
         }
 
         [PublicAPI]
-        public ContentBoxRect GetPadding(StyleState state) {
-            return new ContentBoxRect(
+        public PaddingBox GetPadding(StyleState state) {
+            return new PaddingBox(
                 GetPaddingTop(state),
                 GetPaddingRight(state),
                 GetPaddingBottom(state),

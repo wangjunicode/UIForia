@@ -138,7 +138,7 @@ namespace Src.Systems {
         public void OnUpdate() {
             InitializeRenderables();
 
-            List<UIElement> updatedElements = m_LayoutSystem.GetUpdatedLayoutElements(ListPool<UIElement>.Get());
+            List<UIElement> updatedElements = null;//m_LayoutSystem.GetUpdatedLayoutElements(ListPool<UIElement>.Get());
             List<RenderData> clipList = ListPool<RenderData>.Get();
             int clipUpdateStartDepth = -1;
 
@@ -162,7 +162,7 @@ namespace Src.Systems {
                 }
 
                 Vector2 position = layoutResult.localPosition;
-                Vector2 size = new Vector2(layoutResult.allocatedWidth, layoutResult.allocatedHeight);
+                Vector2 size = new Vector2(layoutResult.AllocatedWidth, layoutResult.AllocatedHeight);
 
                 float rotation = element.style.computedStyle.TransformRotation;
 
@@ -248,9 +248,9 @@ namespace Src.Systems {
                         LayoutResult r = child.item.element.layoutResult;
                         Rect nodeClipRect = new Rect(
                             r.ScreenRect.x - canvasSize.x,
-                            r.ScreenRect.y + canvasSize.y - r.allocatedHeight,
-                            r.allocatedWidth,
-                            r.allocatedHeight
+                            r.ScreenRect.y + canvasSize.y - r.AllocatedHeight,
+                            r.AllocatedWidth,
+                            r.AllocatedHeight
                         );
                         Rect intersect = RectIntersect(clipRect, nodeClipRect);
                         //             child.item.canvasRenderer.EnableRectClipping(intersect);

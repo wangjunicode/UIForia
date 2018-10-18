@@ -190,7 +190,7 @@ namespace Src.Layout.LayoutTypes {
         }
 
         public void OnTextContentUpdated() {
-            RequestOwnSizeChangedLayout();
+            RequestContentSizeChangeLayout();
         }
 
     }

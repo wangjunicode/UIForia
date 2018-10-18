@@ -24,7 +24,7 @@ namespace Src.Animation {
                     return width.value;
 
                 case UIFixedUnit.Percent:
-                    return element.layoutResult.allocatedWidth * width.value;
+                    return element.layoutResult.AllocatedWidth * width.value;
 
                 case UIFixedUnit.ViewportHeight:
                     return viewport.height * width.value;
@@ -46,7 +46,7 @@ namespace Src.Animation {
                     return height.value;
 
                 case UIFixedUnit.Percent:
-                    return element.layoutResult.allocatedHeight * height.value;
+                    return element.layoutResult.AllocatedHeight * height.value;
 
                 case UIFixedUnit.ViewportHeight:
                     return viewport.height * height.value;
@@ -72,14 +72,14 @@ namespace Src.Animation {
                     return measurement.value;
 
                 case UIUnit.Content:
-                    return element.layoutResult.contentWidth * measurement.value;
+                    return element.layoutResult.actualSize.width * measurement.value;
 
                 case UIUnit.ParentSize:
                     if (element.parent.style.computedStyle.PreferredWidth.IsContentBased) {
                         return 0f;
                     }
 
-                    return Mathf.Max(0, element.parent.layoutResult.allocatedWidth * measurement.value);
+                    return Mathf.Max(0, element.parent.layoutResult.AllocatedWidth * measurement.value);
 
                 case UIUnit.ViewportWidth:
                     return Mathf.Max(0, viewport.width * measurement.value);
@@ -93,7 +93,7 @@ namespace Src.Animation {
                         return 0f;
                     }
 
-                    return Mathf.Max(0, (element.parent.layoutResult.allocatedWidth
+                    return Mathf.Max(0, (element.parent.layoutResult.AllocatedWidth
                                          - ResolveFixedWidth(element, viewport, parentStyle.PaddingLeft)
                                          - ResolveFixedWidth(element, viewport, parentStyle.PaddingRight)
                                          - ResolveFixedWidth(element, viewport, parentStyle.BorderRight)
@@ -115,14 +115,14 @@ namespace Src.Animation {
                     return measurement.value;
 
                 case UIUnit.Content:
-                    return element.layoutResult.contentHeight * measurement.value;
+                    return element.layoutResult.actualSize.height * measurement.value;
 
                 case UIUnit.ParentSize:
                     if (element.parent.style.computedStyle.PreferredHeight.IsContentBased) {
                         return 0f;
                     }
 
-                    return Mathf.Max(0, element.parent.layoutResult.allocatedHeight * measurement.value);
+                    return Mathf.Max(0, element.parent.layoutResult.AllocatedHeight * measurement.value);
 
                 case UIUnit.ViewportWidth:
                     return Mathf.Max(0, viewport.width * measurement.value);
@@ -136,7 +136,7 @@ namespace Src.Animation {
                         return 0f;
                     }
 
-                    return Mathf.Max(0, (element.parent.layoutResult.allocatedHeight
+                    return Mathf.Max(0, (element.parent.layoutResult.AllocatedHeight
                                          - ResolveFixedWidth(element, viewport, parentStyle.PaddingTop)
                                          - ResolveFixedWidth(element, viewport, parentStyle.PaddingBottom)
                                          - ResolveFixedWidth(element, viewport, parentStyle.BorderBottom)
@@ -161,12 +161,12 @@ namespace Src.Animation {
         private float ResolveVerticalAnchorBaseHeight(UIElement element, Rect viewport) {
             switch (element.ComputedStyle.AnchorTarget) {
                 case AnchorTarget.Parent:
-                    return ResolveLayoutParent(element).layoutResult.allocatedHeight;
+                    return ResolveLayoutParent(element).layoutResult.AllocatedHeight;
 
                 case AnchorTarget.ParentContentArea:
                     UIElement layoutParent = ResolveLayoutParent(element);
                     ComputedStyle parentStyle = layoutParent.ComputedStyle;
-                    return Mathf.Max(0, (element.parent.layoutResult.allocatedHeight
+                    return Mathf.Max(0, (element.parent.layoutResult.AllocatedHeight
                                          - ResolveFixedWidth(element, viewport, parentStyle.PaddingTop)
                                          - ResolveFixedWidth(element, viewport, parentStyle.PaddingBottom)
                                          - ResolveFixedWidth(element, viewport, parentStyle.BorderBottom)
@@ -186,12 +186,12 @@ namespace Src.Animation {
         private float ResolveHorizontalAnchorBaseWidth(UIElement element, Rect viewport) {
             switch (element.ComputedStyle.AnchorTarget) {
                 case AnchorTarget.Parent:
-                    return ResolveLayoutParent(element).layoutResult.allocatedWidth;
+                    return ResolveLayoutParent(element).layoutResult.AllocatedWidth;
 
                 case AnchorTarget.ParentContentArea:
                     UIElement layoutParent = ResolveLayoutParent(element);
                     ComputedStyle parentStyle = layoutParent.ComputedStyle;
-                    return Mathf.Max(0, (element.parent.layoutResult.allocatedWidth
+                    return Mathf.Max(0, (element.parent.layoutResult.AllocatedWidth
                                          - ResolveFixedWidth(element, viewport, parentStyle.PaddingRight)
                                          - ResolveFixedWidth(element, viewport, parentStyle.PaddingLeft)
                                          - ResolveFixedWidth(element, viewport, parentStyle.BorderLeft)
@@ -231,11 +231,11 @@ namespace Src.Animation {
                     return ResolveVerticalAnchor(element, viewport, anchor);
 
                 case AnchorTarget.Viewport:
-                    return (layoutParent.layoutResult.screenPosition.y + layoutParent.layoutResult.allocatedHeight) + viewport.y + viewport.height +
+                    return (layoutParent.layoutResult.screenPosition.y + layoutParent.layoutResult.AllocatedHeight) + viewport.y + viewport.height +
                            ResolveVerticalAnchor(element, viewport, anchor);
 
                 case AnchorTarget.Screen:
-                    return (layoutParent.layoutResult.screenPosition.y + layoutParent.layoutResult.allocatedHeight) -
+                    return (layoutParent.layoutResult.screenPosition.y + layoutParent.layoutResult.AllocatedHeight) -
                            ResolveVerticalAnchor(element, viewport, anchor);
 
                 default:

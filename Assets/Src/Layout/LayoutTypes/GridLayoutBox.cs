@@ -677,13 +677,13 @@ namespace Src.Layout.LayoutTypes {
                 case StylePropertyId.GridLayoutRowTemplate:
                 case StylePropertyId.GridLayoutDirection:
                     m_IsPlacementDirty = true;
-                    RequestOwnSizeChangedLayout();
+                    markedForLayout = true;
                     break;
                 case StylePropertyId.GridLayoutRowGap:
                 case StylePropertyId.GridLayoutColGap:
                 case StylePropertyId.GridLayoutColAutoSize:
                 case StylePropertyId.GridLayoutRowAutoSize:
-                    RequestOwnSizeChangedLayout();
+                    markedForLayout = true;
                     break;
             }
         }
@@ -707,7 +707,7 @@ namespace Src.Layout.LayoutTypes {
             GridPlacement placement = m_Placements[idx];
             switch (property.propertyId) {
                 case StylePropertyId.LayoutBehavior:
-                    RequestOwnSizeChangedLayout();
+                    markedForLayout = true;
                     m_IsPlacementDirty = true;
                     break;
                 case StylePropertyId.GridItemColSpan:
@@ -715,7 +715,7 @@ namespace Src.Layout.LayoutTypes {
                 case StylePropertyId.GridItemColStart:
                 case StylePropertyId.GridItemRowStart:
                     m_IsPlacementDirty = true;
-                    RequestOwnSizeChangedLayout();
+                    markedForLayout = true;
                     break;
             }
         }

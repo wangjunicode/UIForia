@@ -123,6 +123,27 @@ namespace Rendering {
             SetTransformPositionY(position.y, state);
         }
 
+        public void SetTransformBehavior(TransformBehavior behavior, StyleState state) {
+            SetEnumProperty(StylePropertyId.TransformBehaviorX, (int) behavior, state);
+            SetEnumProperty(StylePropertyId.TransformBehaviorY, (int) behavior, state);
+        }
+
+        public void SetTransformBehaviorX(TransformBehavior behavior, StyleState state) {
+            SetEnumProperty(StylePropertyId.TransformBehaviorX, (int) behavior, state);
+        }
+
+        public void SetTransformBehaviorY(TransformBehavior behavior, StyleState state) {
+            SetEnumProperty(StylePropertyId.TransformBehaviorY, (int) behavior, state);
+        }
+
+        public TransformBehavior GetTransformBehaviorX(StyleState state) {
+            return (TransformBehavior) GetEnumProperty(StylePropertyId.TransformBehaviorX, state);
+        }
+
+        public TransformBehavior GetTransformBehaviorY(StyleState state) {
+            return (TransformBehavior) GetEnumProperty(StylePropertyId.TransformBehaviorX, state);
+        }
+
     }
 
 }

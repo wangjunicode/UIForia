@@ -78,17 +78,17 @@ namespace Src.Elements {
         }
 
         public Vector2 handlePosition => new Vector2(
-            orientation == ScrollbarOrientation.Vertical ? 0 : targetElement.scrollOffset.x * (targetElement.layoutResult.allocatedWidth - handleWidth),
-            orientation == ScrollbarOrientation.Horizontal ? 0 : targetElement.scrollOffset.y * (targetElement.layoutResult.allocatedHeight - handleHeight)
+            orientation == ScrollbarOrientation.Vertical ? 0 : targetElement.scrollOffset.x * (targetElement.layoutResult.AllocatedWidth - handleWidth),
+            orientation == ScrollbarOrientation.Horizontal ? 0 : targetElement.scrollOffset.y * (targetElement.layoutResult.AllocatedHeight - handleHeight)
         );
 
         public float handleWidth => orientation == ScrollbarOrientation.Vertical
             ? handleSize
-            : (targetElement.layoutResult.allocatedWidth / targetElement.layoutResult.contentWidth) * targetElement.layoutResult.allocatedWidth;
+            : (targetElement.layoutResult.AllocatedWidth / targetElement.layoutResult.actualSize.width) * targetElement.layoutResult.AllocatedWidth;
 
         public float handleHeight => orientation == ScrollbarOrientation.Horizontal
             ? handleSize
-            : (targetElement.layoutResult.allocatedHeight / targetElement.layoutResult.contentHeight) * targetElement.layoutResult.allocatedHeight;
+            : (targetElement.layoutResult.AllocatedHeight / targetElement.layoutResult.actualSize.height) * targetElement.layoutResult.AllocatedHeight;
 
         [OnDragCreate]
         public ScrollbarDragEvent CreateDragEvent(MouseInputEvent evt) {
@@ -112,17 +112,17 @@ namespace Src.Elements {
             Vector2 parentWorld = targetElement.layoutResult.screenPosition;
             if (orientation == ScrollbarOrientation.Vertical) {
                 if (targetElement.style.verticalScrollbarAttachment == VerticalScrollbarAttachment.Right) {
-                    float x = parentWorld.x + targetElementLayoutResult.allocatedWidth - trackSize;
+                    float x = parentWorld.x + targetElementLayoutResult.AllocatedWidth - trackSize;
                     float y = parentWorld.y;
                     float w = trackSize;
-                    float h = targetElementLayoutResult.allocatedHeight;
+                    float h = targetElementLayoutResult.AllocatedHeight;
                     return new Rect(x, y, w, h);
                 }
                 else {
                     float x = parentWorld.x;
                     float y = parentWorld.y;
                     float w = trackSize;
-                    float h = targetElementLayoutResult.allocatedHeight;
+                    float h = targetElementLayoutResult.AllocatedHeight;
                     return new Rect(x, y, w, h);
                 }
             }
@@ -130,14 +130,14 @@ namespace Src.Elements {
             if (targetElement.style.horizontalScrollbarAttachment == HorizontalScrollbarAttachment.Top) {
                 float x = parentWorld.x;
                 float y = parentWorld.y;
-                float w = targetElementLayoutResult.allocatedWidth;
+                float w = targetElementLayoutResult.AllocatedWidth;
                 float h = trackSize;
                 return new Rect(x, y, w, h);
             }
             else {
                 float x = parentWorld.x;
-                float y = parentWorld.y + targetElementLayoutResult.allocatedHeight - trackSize;
-                float w = targetElementLayoutResult.allocatedWidth;
+                float y = parentWorld.y + targetElementLayoutResult.AllocatedHeight - trackSize;
+                float w = targetElementLayoutResult.AllocatedWidth;
                 float h = trackSize;
                 return new Rect(x, y, w, h);
             }
@@ -148,7 +148,7 @@ namespace Src.Elements {
                 Vector2 parentWorld = targetElement.layoutResult.screenPosition;
                 if (orientation == ScrollbarOrientation.Vertical) {
                     if (targetElement.style.verticalScrollbarAttachment == VerticalScrollbarAttachment.Right) {
-                        float x = parentWorld.x + targetElement.layoutResult.allocatedWidth - trackSize;
+                        float x = parentWorld.x + targetElement.layoutResult.AllocatedWidth - trackSize;
                         float y = parentWorld.y + handlePosition.y;
                         float w = handleSize;
                         float h = handleHeight;
@@ -172,7 +172,7 @@ namespace Src.Elements {
                 }
                 else {
                     float x = parentWorld.x;
-                    float y = parentWorld.y + targetElement.layoutResult.allocatedHeight - trackSize;
+                    float y = parentWorld.y + targetElement.layoutResult.AllocatedHeight - trackSize;
                     float w = handleWidth;
                     float h = handleSize;
                     return new Rect(x, y, w, h);

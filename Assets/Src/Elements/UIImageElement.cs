@@ -64,7 +64,8 @@ namespace Src {
                 color = Color.white;
             }
 
-            mesh = MeshUtil.CreateStandardUIMesh(layoutResult.contentOffset, layoutResult.contentSize, color);
+            mesh = MeshUtil.CreateStandardUIMesh(layoutResult.contentOffset,
+                layoutResult.actualSize, color);
 
             return mesh;
         }

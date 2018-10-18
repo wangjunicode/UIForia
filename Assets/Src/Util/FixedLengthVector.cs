@@ -1,4 +1,5 @@
 ﻿using Src;
+using UnityEngine;
 
 public struct FixedLengthVector {
 
@@ -8,6 +9,10 @@ public struct FixedLengthVector {
     public FixedLengthVector(UIFixedLength x, UIFixedLength y) {
         this.x = x;
         this.y = y;
+    }
+
+    public static implicit operator FixedLengthVector(Vector2 vec) {
+        return new FixedLengthVector(vec.x, vec.y);
     }
 
     public static bool operator ==(FixedLengthVector self, FixedLengthVector other) {

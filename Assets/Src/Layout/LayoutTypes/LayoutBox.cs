@@ -72,6 +72,14 @@ namespace Src.Layout.LayoutTypes {
         public bool IsInitialized { get; set; }
         public bool IsIgnored => (style.LayoutBehavior & LayoutBehavior.Ignored) != 0;
 
+        public float ContentOffsetLeft => ResolveFixedWidth(style.PaddingLeft) + ResolveFixedWidth(style.BorderLeft);
+        public float ContentOffsetTop => ResolveFixedWidth(style.PaddingTop) + ResolveFixedWidth(style.BorderTop);
+
+        public float AnchorLeft => ResolveHorizontalAnchor(style.AnchorLeft);
+        public float AnchorRight => ResolveHorizontalAnchor(style.AnchorRight);
+        public float AnchorTop => ResolveVerticalAnchor(style.AnchorTop);
+        public float AnchorBottom => ResolveVerticalAnchor(style.AnchorBottom);
+
         public virtual void OnInitialize() { }
 
         public void SetParent(LayoutBox parent) {
@@ -130,16 +138,12 @@ namespace Src.Layout.LayoutTypes {
             RequestContentSizeChangeLayout();
         }
 
-        protected void RequestOwnSizeChangedLayout() {
-            layoutSystem.RequestLayout(this);
-        }
-
         protected void RequestContentSizeChangeLayout() {
             if (markedForLayout) {
                 return;
             }
 
-            layoutSystem.RequestLayout(this);
+            markedForLayout = true;
             InvalidatePreferredSizeCache();
             LayoutBox ptr = parent;
             while (ptr != null) {
@@ -147,7 +151,7 @@ namespace Src.Layout.LayoutTypes {
                 if (ptr.markedForLayout) {
                     return;
                 }
-                layoutSystem.RequestLayout(ptr);
+                ptr.markedForLayout = true;
                 ptr.InvalidatePreferredSizeCache();
                 ptr = ptr.parent;
             }
@@ -159,28 +163,18 @@ namespace Src.Layout.LayoutTypes {
         }
 
         public void SetAllocatedXAndWidth(float x, float width) {
-            if (localX != x) {
-                localX = x;
-                layoutSystem.PositionChanged(this);
-            }
-
+            localX = x;
             if ((int) allocatedWidth != (int) width) {
                 allocatedWidth = width;
-                layoutSystem.OnRectChanged(this);
-                RequestOwnSizeChangedLayout();
+                markedForLayout = true;
             }
         }
 
         public void SetAllocatedYAndHeight(float y, float height) {
-            if (localY != y) {
-                localY = y;
-                layoutSystem.PositionChanged(this);
-            }
-
+            localY = y;
             if ((int) allocatedHeight != (int) height) {
                 allocatedHeight = height;
-                layoutSystem.OnRectChanged(this);
-                RequestOwnSizeChangedLayout();
+                markedForLayout = true;
             }
         }
 
@@ -222,19 +216,23 @@ namespace Src.Layout.LayoutTypes {
             switch (height.unit) {
                 case UIFixedUnit.Pixel:
                     return height.value;
+
                 case UIFixedUnit.Percent:
                     return allocatedHeight * height.value;
+
                 case UIFixedUnit.ViewportHeight:
                     return layoutSystem.ViewportRect.height * height.value;
+
                 case UIFixedUnit.ViewportWidth:
                     return layoutSystem.ViewportRect.width * height.value;
+
                 case UIFixedUnit.Em:
                     return style.FontAsset.asset.fontInfo.PointSize * height.value;
+
                 default:
                     return 0;
             }
         }
-
 
         public virtual void OnStylePropertyChanged(StyleProperty property) {
             switch (property.propertyId) {
@@ -366,7 +364,6 @@ namespace Src.Layout.LayoutTypes {
             return -1;
         }
 
-        
         protected virtual float ComputeContentWidth() {
             return 0f;
         }
@@ -470,7 +467,7 @@ namespace Src.Layout.LayoutTypes {
 
                 case AnchorTarget.Screen:
                     left = ResolveAnchor(Screen.width, style.AnchorLeft);
-                    right = ResolveAnchor(Screen.width, style.AnchorRight);
+                    right = Screen.width - ResolveAnchor(Screen.width, style.AnchorRight);
                     return Mathf.Max(0, (right - left) * widthMeasurement.value);
 
                 case AnchorTarget.Viewport:
@@ -530,7 +527,89 @@ namespace Src.Layout.LayoutTypes {
 
                 case UIFixedUnit.Em:
                     return style.FontAsset.asset.fontInfo.PointSize * anchor.value;
-                
+
+                default:
+                    throw new InvalidArgumentException();
+            }
+        }
+
+        protected float ResolveHorizontalAnchor(UIFixedLength anchor) {
+            switch (anchor.unit) {
+                case UIFixedUnit.Pixel:
+                    return anchor.value;
+
+                case UIFixedUnit.Percent:
+                    switch (style.AnchorTarget) {
+                        // note -- not intended to be called by anything but the layout system
+                        // which happens only for ignored layout behaviors after their parent is
+                        // fully sized and laid out, meaning we don't need to return 0 for content
+                        // sized parents
+                        case AnchorTarget.Parent:
+                            return parent.allocatedWidth * anchor.value;
+
+                        case AnchorTarget.ParentContentArea:
+                            return (parent.allocatedWidth - parent.PaddingHorizontal - parent.BorderHorizontal) * anchor.value;
+
+                        case AnchorTarget.Screen:
+                            return Screen.width * anchor.value;
+
+                        case AnchorTarget.Viewport:
+                            return layoutSystem.ViewportRect.width * anchor.value;
+
+                        default:
+                            throw new InvalidArgumentException();
+                    }
+
+                case UIFixedUnit.ViewportHeight:
+                    return layoutSystem.ViewportRect.height * anchor.value;
+
+                case UIFixedUnit.ViewportWidth:
+                    return layoutSystem.ViewportRect.width * anchor.value;
+
+                case UIFixedUnit.Em:
+                    return style.FontAsset.asset.fontInfo.PointSize * anchor.value;
+
+                default:
+                    throw new InvalidArgumentException();
+            }
+        }
+
+        protected float ResolveVerticalAnchor(UIFixedLength anchor) {
+            switch (anchor.unit) {
+                case UIFixedUnit.Pixel:
+                    return anchor.value;
+
+                case UIFixedUnit.Percent:
+                    switch (style.AnchorTarget) {
+                        // note -- not intended to be called by anything but the layout system
+                        // which happens only for ignored layout behaviors after their parent is
+                        // fully sized and laid out, meaning we don't need to return 0 for content
+                        // sized parents
+                        case AnchorTarget.Parent:
+                            return parent.allocatedHeight * anchor.value;
+
+                        case AnchorTarget.ParentContentArea:
+                            return (parent.allocatedHeight - parent.PaddingVertical - parent.BorderVertical) * anchor.value;
+
+                        case AnchorTarget.Screen:
+                            return Screen.height * anchor.value;
+
+                        case AnchorTarget.Viewport:
+                            return layoutSystem.ViewportRect.height * anchor.value;
+
+                        default:
+                            throw new InvalidArgumentException();
+                    }
+
+                case UIFixedUnit.ViewportHeight:
+                    return layoutSystem.ViewportRect.height * anchor.value;
+
+                case UIFixedUnit.ViewportWidth:
+                    return layoutSystem.ViewportRect.width * anchor.value;
+
+                case UIFixedUnit.Em:
+                    return style.FontAsset.asset.fontInfo.PointSize * anchor.value;
+
                 default:
                     throw new InvalidArgumentException();
             }
@@ -744,7 +823,7 @@ namespace Src.Layout.LayoutTypes {
             }
 
         }
-        
+
         private struct WidthCache {
 
             public int next;
@@ -758,7 +837,6 @@ namespace Src.Layout.LayoutTypes {
             public float height2;
 
         }
-
 
     }
 

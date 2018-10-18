@@ -528,4 +528,24 @@ public class FlexLayoutRowTests {
         Assert.AreEqual(new Rect(150, 200, 100, 200), root.child2.layoutResult.ScreenRect);
     }
 
+    [Test]
+    public void SetsActualWidthAndHeight() {
+        string template = @"
+        <UITemplate>
+            <Style classPath='FlexLayoutRowTests+FlexRowLayoutThing+Style'/>
+            <Contents style.layoutType='Flex' style.layoutDirection='Row' style.width='content(100)' style.height='content(100)'>
+                <Group x-id='child0' style='w100h100' style.paddingLeft='5f' style.paddingRight='5f'/>
+                <Group x-id='child1' style='w100h100' style.paddingLeft='5f' style.paddingRight='5f'/>
+                <Group x-id='child2' style='w100h100' style.paddingLeft='5f' style.paddingRight='5f'/>
+            </Contents>
+        </UITemplate>
+        ";
+        MockView mockView = new MockView(typeof(FlexRowLayoutThing), template);
+        mockView.Initialize();
+        mockView.LayoutSystem.SetViewportRect(new Rect(0, 0, 1000f, 1000f));
+        FlexRowLayoutThing root = (FlexRowLayoutThing) mockView.RootElement;
+        mockView.Update();
+        Assert.AreEqual(100, root.layoutResult.ActualWidth);
+        Assert.AreEqual(300, root.layoutResult.ActualHeight);
+    }
 }

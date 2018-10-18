@@ -56,12 +56,12 @@ public class LayoutSystemTests {
         mockView.Update();
         Assert.AreEqual(Vector2.zero, root.child0.layoutResult.localPosition);
         Assert.AreEqual(new Vector2(0, 100), root.child1.layoutResult.localPosition);
-        Assert.AreEqual(100, root.child1.layoutResult.allocatedWidth);
-        Assert.AreEqual(100, root.child1.layoutResult.allocatedHeight);
+        Assert.AreEqual(100, root.child1.layoutResult.AllocatedWidth);
+        Assert.AreEqual(100, root.child1.layoutResult.AllocatedHeight);
 
         Assert.AreEqual(new Vector2(0, 200), root.child2.layoutResult.localPosition);
-        Assert.AreEqual(100, root.child2.layoutResult.allocatedWidth);
-        Assert.AreEqual(100, root.child2.layoutResult.allocatedHeight);
+        Assert.AreEqual(100, root.child2.layoutResult.AllocatedWidth);
+        Assert.AreEqual(100, root.child2.layoutResult.AllocatedHeight);
     }
 
     [Test]
@@ -73,23 +73,23 @@ public class LayoutSystemTests {
         mockView.Update();
         Assert.AreEqual(Vector2.zero, root.child0.layoutResult.localPosition);
         Assert.AreEqual(new Vector2(0, 100), root.child1.layoutResult.localPosition);
-        Assert.AreEqual(100, root.child1.layoutResult.allocatedWidth);
-        Assert.AreEqual(100, root.child1.layoutResult.allocatedHeight);
+        Assert.AreEqual(100, root.child1.layoutResult.AllocatedWidth);
+        Assert.AreEqual(100, root.child1.layoutResult.AllocatedHeight);
 
         Assert.AreEqual(new Vector2(0, 200), root.child2.layoutResult.localPosition);
-        Assert.AreEqual(100, root.child2.layoutResult.allocatedWidth);
-        Assert.AreEqual(100, root.child2.layoutResult.allocatedHeight);
+        Assert.AreEqual(100, root.child2.layoutResult.AllocatedWidth);
+        Assert.AreEqual(100, root.child2.layoutResult.AllocatedHeight);
 
         root.child2.style.SetPreferredWidth(200, StyleState.Normal);
         mockView.Update();
         Assert.AreEqual(Vector2.zero, root.child0.layoutResult.localPosition);
         Assert.AreEqual(new Vector2(0, 100), root.child1.layoutResult.localPosition);
-        Assert.AreEqual(100, root.child1.layoutResult.allocatedWidth);
-        Assert.AreEqual(100, root.child1.layoutResult.allocatedHeight);
+        Assert.AreEqual(100, root.child1.layoutResult.AllocatedWidth);
+        Assert.AreEqual(100, root.child1.layoutResult.AllocatedHeight);
 
         Assert.AreEqual(new Vector2(0, 200), root.child2.layoutResult.localPosition);
-        Assert.AreEqual(200, root.child2.layoutResult.allocatedWidth);
-        Assert.AreEqual(100, root.child2.layoutResult.allocatedHeight);
+        Assert.AreEqual(200, root.child2.layoutResult.AllocatedWidth);
+        Assert.AreEqual(100, root.child2.layoutResult.AllocatedHeight);
     }
 
     [Test]

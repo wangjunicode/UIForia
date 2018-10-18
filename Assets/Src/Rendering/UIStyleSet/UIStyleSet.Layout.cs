@@ -1,7 +1,9 @@
 using System.Collections.Generic;
+using Src;
 using Src.Layout;
 using Src.Layout.LayoutTypes;
 using Src.Rendering;
+using UnityEngine;
 
 namespace Rendering {
 
@@ -33,62 +35,6 @@ namespace Rendering {
             }
         }
 
-        public void SetGridLayoutColGap(float colGap, StyleState state) {
-            UIStyle style = GetOrCreateInstanceStyle(state);
-            style.GridLayoutColGapSize = colGap;
-            if ((state & currentState) != 0 && style == GetActiveStyleForProperty(StylePropertyId.GridLayoutColGap)) {
-                computedStyle.GridLayoutColGap = colGap;
-            }
-        }
-
-        public void SetGridLayoutRowGap(float rowGap, StyleState state) {
-            UIStyle style = GetOrCreateInstanceStyle(state);
-            style.GridLayoutRowGapSize = rowGap;
-            if ((state & currentState) != 0 && style == GetActiveStyleForProperty(StylePropertyId.GridLayoutRowGap)) {
-                computedStyle.GridLayoutRowGap = rowGap;
-            }
-        }
-
-        public void SetGridLayoutColAutoSize(GridTrackSize size, StyleState state) {
-            UIStyle style = GetOrCreateInstanceStyle(state);
-            style.GridLayoutColAutoSize = size;
-            if ((state & currentState) != 0 && style == GetActiveStyleForProperty(StylePropertyId.GridLayoutColAutoSize)) {
-                computedStyle.GridLayoutColAutoSize = size;
-            }
-        }
-        
-        public void SetGridLayoutRowAutoSize(GridTrackSize size, StyleState state) {
-            UIStyle style = GetOrCreateInstanceStyle(state);
-            style.GridLayoutRowAutoSize = size;
-            if ((state & currentState) != 0 && style == GetActiveStyleForProperty(StylePropertyId.GridLayoutRowAutoSize)) {
-                computedStyle.GridLayoutRowAutoSize = size;
-            }
-        }
-
-        public void SetGridLayoutColTemplate(IReadOnlyList<GridTrackSize> colTemplate, StyleState state) {
-            UIStyle style = GetOrCreateInstanceStyle(state);
-            style.GridLayoutColTemplate = colTemplate;
-            if ((state & currentState) != 0 && style == GetActiveStyleForProperty(StylePropertyId.GridLayoutColTemplate)) {
-                computedStyle.GridLayoutColTemplate = colTemplate;
-            }  
-        }
-        
-        public void SetGridLayoutRowTemplate(IReadOnlyList<GridTrackSize> rowTemplate, StyleState state) {
-            UIStyle style = GetOrCreateInstanceStyle(state);
-            style.GridLayoutRowTemplate = rowTemplate;
-            if ((state & currentState) != 0 && style == GetActiveStyleForProperty(StylePropertyId.GridLayoutRowTemplate)) {
-                computedStyle.GridLayoutRowTemplate = rowTemplate;
-            }  
-        }
-        
-        public float GetGridLayoutColGap(StyleState state) {
-            return GetFloatValue(StylePropertyId.GridLayoutColGap, state);
-        }
-        
-        public float GetGridLayoutRowGap(StyleState state) {
-            return GetFloatValue(StylePropertyId.GridLayoutRowGap, state);
-        }
-
         public void SetOverflowX(Overflow value, StyleState state) {
             SetEnumProperty(StylePropertyId.OverflowX, (int) value, state);
         }
@@ -96,7 +42,7 @@ namespace Rendering {
         public Overflow GetOverflowX(StyleState state) {
             return (Overflow) GetEnumProperty(StylePropertyId.OverflowX, state);
         }
-        
+
         public void SetOverflowY(Overflow value, StyleState state) {
             SetEnumProperty(StylePropertyId.OverflowY, (int) value, state);
         }
@@ -121,13 +67,62 @@ namespace Rendering {
             return GetIntValue(StylePropertyId.RenderLayerOffset, state);
         }
 
-
         public void SetZIndex(int zIndex, StyleState state) {
             SetIntProperty(StylePropertyId.ZIndex, zIndex, state);
         }
-        
+
         public int GetZIndex(StyleState state) {
             return GetIntValue(StylePropertyId.ZIndex, state);
+        }
+
+        public void SetAnchorTopLeft(FixedLengthVector anchor, StyleState state) {
+            SetFixedLengthProperty(StylePropertyId.AnchorLeft, anchor.x, state);
+            SetFixedLengthProperty(StylePropertyId.AnchorTop, anchor.y, state);
+        }
+
+        public void SetAnchorBottomRight(FixedLengthVector anchor, StyleState state) {
+            SetFixedLengthProperty(StylePropertyId.AnchorRight, anchor.x, state);
+            SetFixedLengthProperty(StylePropertyId.AnchorBottom, anchor.y, state);
+        }
+
+        public void SetAnchorTop(UIFixedLength anchor, StyleState state) {
+            SetFixedLengthProperty(StylePropertyId.AnchorTop, anchor, state);
+        }
+
+        public void SetAnchorRight(UIFixedLength anchor, StyleState state) {
+            SetFixedLengthProperty(StylePropertyId.AnchorRight, anchor, state);
+        }
+
+        public void SetAnchorBottom(UIFixedLength anchor, StyleState state) {
+            SetFixedLengthProperty(StylePropertyId.AnchorBottom, anchor, state);
+        }
+
+        public void SetAnchorLeft(UIFixedLength anchor, StyleState state) {
+            SetFixedLengthProperty(StylePropertyId.AnchorLeft, anchor, state);
+        }
+
+        public UIFixedLength GetAnchorTop(StyleState state) {
+            return GetFixedLengthValue(StylePropertyId.AnchorTop, state);
+        }
+
+        public UIFixedLength GetAnchorRight(StyleState state) {
+            return GetFixedLengthValue(StylePropertyId.AnchorRight, state);
+        }
+
+        public UIFixedLength GetAnchorBottom(StyleState state) {
+            return GetFixedLengthValue(StylePropertyId.AnchorBottom, state);
+        }
+
+        public UIFixedLength GetAnchorLeft(StyleState state) {
+            return GetFixedLengthValue(StylePropertyId.AnchorLeft, state);
+        }
+
+        public void SetAnchorTarget(AnchorTarget target, StyleState state) {
+            SetEnumProperty(StylePropertyId.AnchorTarget, (int)target, state);
+        }
+
+        public AnchorTarget GetAnchorTarget(StyleState state) {
+            return (AnchorTarget) GetEnumProperty(StylePropertyId.AnchorTarget, state);
         }
 
     }

@@ -8,7 +8,6 @@ namespace Src.Systems {
 
     public class StandardDrawable : IDrawable {
 
-        private static readonly VertexHelper s_VertexHelper = new VertexHelper();
         private static readonly ObjectPool<Mesh> s_MeshPool = new ObjectPool<Mesh>(null, (m) => m.Clear());
 
         public event Action<IDrawable> onMeshDirty;
@@ -64,8 +63,8 @@ namespace Src.Systems {
                     color = Color.white;
                 }
             }
-            
-            mesh = MeshUtil.CreateStandardUIMesh(element.layoutResult.allocatedSize, color);
+            // mesh generated at actual size, clipping will take care of it if it needs to
+            mesh = MeshUtil.CreateStandardUIMesh(element.layoutResult.actualSize, color);
 
             return mesh;
         }

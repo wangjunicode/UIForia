@@ -8,19 +8,17 @@ namespace Src.Systems {
     public class DirectRenderSystem : IRenderSystem {
 
         private readonly IStyleSystem m_StyleSystem;
-        private readonly ILayoutSystem m_LayoutSystem;
         private readonly List<IDrawable> m_DirtyGraphicList;
         private readonly List<UIElement> m_ToInitialize;
         private readonly List<RenderData> m_RenderList; //todo -- to array
         private readonly BucketList m_Buckets;
         private readonly Camera m_Camera;
         private readonly IntMap<RenderData> m_RenderDataMap;
-        
+
         private static readonly RenderZIndexComparerAscending s_ZIndexComparer = new RenderZIndexComparerAscending();
 
-        public DirectRenderSystem(Camera camera, ILayoutSystem layoutSystem, IStyleSystem styleSystem) {
+        public DirectRenderSystem(Camera camera, IStyleSystem styleSystem) {
             this.m_Camera = camera;
-            this.m_LayoutSystem = layoutSystem;
             this.m_StyleSystem = styleSystem;
             this.m_RenderList = new List<RenderData>();
             this.m_DirtyGraphicList = new List<IDrawable>();
@@ -39,7 +37,7 @@ namespace Src.Systems {
 
                 RenderData renderData = new RenderData(element, this);
                 m_RenderList.Add(renderData);
-                
+
                 if (element.isEnabled) {
                     m_DirtyGraphicList.Add(renderData.drawable);
                     renderData.drawable.onMeshDirty += MarkGeometryDirty;
@@ -61,23 +59,23 @@ namespace Src.Systems {
                 m_DirtyGraphicList.Add(element);
             }
         }
-        
+
         public void OnUpdate() {
-            
+
             /*
              *  for meshes of type IDrawableInstanced -> use draw instanced and pass in material block
              */
-            
+
             InitializeRenderables();
 
             if (m_Camera == null) {
                 return;
             }
-            
+
             MaterialPropertyBlock block;
             Material mat = Resources.Load<Material>("Materials/UIForia");
+         //   Texture2D tex = Resources.Load<Texture2D>("icon_1");
             mat.color = Color.white;
-            mat.SetVector("_ClipRect", new Vector4(-500, -500, 1000, 1000));
 
             m_Camera.orthographic = true;
             m_Camera.orthographicSize = Screen.height * 0.5f;
@@ -93,21 +91,39 @@ namespace Src.Systems {
 
             for (int i = 0; i < m_RenderList.Count; i++) {
                 RenderData data = m_RenderList[i];
-                Vector3 position = data.element.layoutResult.screenPosition;
+                LayoutResult layoutResult = data.element.layoutResult;
+                Vector3 position = layoutResult.screenPosition;
                 position.z = z++;
                 position.y = -position.y;
                 Rect clipRect = data.element.layoutResult.clipRect;
-                mat.SetVector("_ClipRect", new Vector4(clipRect.min.x, clipRect.min.y, clipRect.max.x, clipRect.max.y));
-                Graphics.DrawMesh(data.drawable.GetMesh(), origin + position, Quaternion.identity, mat, 0, m_Camera, 0, null, false, false, false);
+
+                if (clipRect.width <= 0 || clipRect.height <= 0) {
+                    continue;
+                }
+                if (layoutResult.actualSize.width == 0 || layoutResult.actualSize.height == 0) {
+                    continue;
+                }
+
+                float clipX = (clipRect.x - position.x) / layoutResult.actualSize.width;
+                float clipY = ((clipRect.y - position.y) / layoutResult.actualSize.height);
+                float clipW = clipX + (clipRect.width / layoutResult.actualSize.width);
+                float clipH = clipY + (clipRect.height / layoutResult.actualSize.height);
+                mat.mainTexture = null;
+                mat.SetVector("_ClipRect", new Vector4(clipX, clipY, clipW, clipH));
+                //Graphics.DrawMesh(data.drawable.GetMesh(), origin + position, Quaternion.identity, mat, 0, m_Camera, 0, null, false, false, false);
             }
-            
+
+        }
+
+        public List<RenderData> GetRenderList() {
+            return m_RenderList;
         }
 
         private void SortGeometry() {
             if (m_RenderList.Count == 0) {
                 return;
             }
-            
+
             m_RenderList.Sort((a, b) => (a.element.layoutResult.layer < b.element.layoutResult.layer) ? 1 : -1);
 
             int layerStart = 0;
@@ -116,16 +132,16 @@ namespace Src.Systems {
                 RenderData renderData = m_RenderList[i];
                 int layer = renderData.element.layoutResult.layer;
                 if (layer != currentLayer) {
-                    m_RenderList.Sort(layerStart, i - layerStart, s_ZIndexComparer);                    
+                    m_RenderList.Sort(layerStart, i - layerStart, s_ZIndexComparer);
                     currentLayer = layer;
                     layerStart = i;
                 }
             }
-            
+
             for (int i = 0; i < m_RenderList.Count; i++) {
                 m_RenderList[i].zOffset = i;
             }
-            
+
         }
 
         //sort each group by z-index, use depth index to resolve ties, use origin layer if still tied
@@ -178,11 +194,11 @@ namespace Src.Systems {
         public void OnReset() {
             m_RenderList.Clear();
         }
-        
+
         public void OnElementCreated(UIElement element) {
             m_ToInitialize.Add(element);
-        }       
-        
+        }
+
         public void OnElementMoved(UIElement element, int newIndex, int oldIndex) { }
 
         public void OnElementEnabled(UIElement element) { }

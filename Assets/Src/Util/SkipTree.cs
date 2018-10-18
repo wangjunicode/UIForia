@@ -372,9 +372,9 @@ namespace Src {
             if (outputList == null) {
                 outputList = ListPool<T>.Get();
             }
-            
+
             SkipTreeNode node;
-            
+
             if (!nodeMap.TryGetValue(start.UniqueId, out node)) {
                 return outputList;
             }
@@ -384,8 +384,8 @@ namespace Src {
                 outputList.Add(ptr.item);
                 ptr = ptr.parent;
             }
-            return outputList;
 
+            return outputList;
         }
 
         public void TraverseAncestors(IHierarchical start, Action<T> traverseFn) {
@@ -402,7 +402,6 @@ namespace Src {
                 traverseFn(ptr.item);
                 ptr = ptr.parent;
             }
-            
         }
 
         public void TraverseAncestors<U>(IHierarchical start, U closureArg, Action<T, U> traverseFn) {
@@ -419,9 +418,8 @@ namespace Src {
                 traverseFn(ptr.item, closureArg);
                 ptr = ptr.parent;
             }
-            
         }
-        
+
         public U TraverseAncestors<U>(IHierarchical start, U closureArg, Func<T, U, U> traverseFn) {
             SkipTreeNode node;
             SkipTreeNode ptr;
@@ -439,7 +437,7 @@ namespace Src {
 
             return closureArg;
         }
-        
+
         public void ConditionalTraversePreOrder(Func<T, bool> traverseFn) {
             ConditionalTraversePreOrderStep(root, traverseFn);
         }
@@ -468,7 +466,7 @@ namespace Src {
         public void ConditionalTraversePreOrder<U>(U closureArg, Func<T, U, bool> traverseFn) {
             ConditionalTraversePreOrderStep(root, closureArg, traverseFn);
         }
-        
+
         public void ConditionalTraversePreOrder<U>(IHierarchical start, U closureArg, Func<T, U, bool> traverseFn) {
             if (start == null) {
                 ConditionalTraversePreOrderStep(root, closureArg, traverseFn);
@@ -531,6 +529,52 @@ namespace Src {
             TraversePreOrderCallbackStep(root, closureArg, traverseFn, includeDisabled);
         }
 
+        public void TraversePostOrder(Action<T> traversalFn, bool includeDisabled = false) {
+            TraversePostOrderCallbackStep(root, traversalFn, includeDisabled);
+        }
+
+        public void TraversePostOrder<U>(U closureArg, Action<U, T> traverseFn, bool includeDisabled = false) {
+            TraversePreOrderCallbackStep(root, closureArg, traverseFn, includeDisabled);
+        }
+
+        public void TraversePostOrder(IHierarchical item, Action<T> traversalFn, bool includeDisabled = false) {
+            SkipTreeNode node;
+            if (nodeMap.TryGetValue(item.UniqueId, out node)) {
+                TraversePostOrderCallbackStep(node, traversalFn, includeDisabled);
+                return;
+            }
+
+            SkipTreeNode parent = FindParent(item);
+            parent = parent ?? root;
+            SkipTreeNode ptr = parent.firstChild;
+            while (ptr != null) {
+                if (IsDescendantOf(ptr.item, item)) {
+                    TraversePreOrderCallbackStep(ptr, traversalFn, includeDisabled);
+                }
+
+                ptr = ptr.nextSibling;
+            }
+        }
+
+        public void TraversePostOrder<U>(IHierarchical item, U closureArg, Action<T, U> traversalFn, bool includeDisabled = false) {
+            SkipTreeNode node;
+            if (nodeMap.TryGetValue(item.UniqueId, out node)) {
+                TraversePostOrderCallbackStep(node, closureArg, traversalFn, includeDisabled);
+                return;
+            }
+
+            SkipTreeNode parent = FindParent(item);
+            parent = parent ?? root;
+            SkipTreeNode ptr = parent.firstChild;
+            while (ptr != null) {
+                if (IsDescendantOf(ptr.item, item)) {
+                    TraversePostOrderCallbackStep(ptr, closureArg, traversalFn, includeDisabled);
+                }
+
+                ptr = ptr.nextSibling;
+            }
+        }
+
         public void TraversePreOrder(IHierarchical item, Action<T> traverseFn, bool includeDisabled = false) {
             SkipTreeNode node;
             if (nodeMap.TryGetValue(item.UniqueId, out node)) {
@@ -583,10 +627,8 @@ namespace Src {
             return GetChildTree(root, includeDisabled);
         }
 
-        public void RecycleTree(TreeNode node) {
-            
-        }
-        
+        public void RecycleTree(TreeNode node) { }
+
         public TreeNode GetTraversableTree(T item, bool includeDisabled = false) {
             SkipTreeNode node;
             IHierarchical element = item.Element;
@@ -690,6 +732,38 @@ namespace Src {
             while (ptr != null) {
                 TraverseRecursePreorderStep(ptr);
                 ptr = ptr.nextSibling;
+            }
+        }
+
+        private void TraversePostOrderCallbackStep<U>(SkipTreeNode startNode, U closureArg, Action<T, U> traverseFn, bool includeDisabled) {
+            if (startNode.isDisabled && !includeDisabled) {
+                return;
+            }
+
+            SkipTreeNode ptr = startNode.firstChild;
+            while (ptr != null) {
+                TraversePostOrderCallbackStep(ptr, closureArg, traverseFn, includeDisabled);
+                ptr = ptr.nextSibling;
+            }
+
+            if (startNode != root) {
+                traverseFn(startNode.item, closureArg);
+            }
+        }
+
+        private void TraversePostOrderCallbackStep(SkipTreeNode startNode, Action<T> traverseFn, bool includeDisabled) {
+            if (startNode.isDisabled && !includeDisabled) {
+                return;
+            }
+
+            SkipTreeNode ptr = startNode.firstChild;
+            while (ptr != null) {
+                TraversePostOrderCallbackStep(ptr, traverseFn, includeDisabled);
+                ptr = ptr.nextSibling;
+            }
+
+            if (startNode != root) {
+                traverseFn(startNode.item);
             }
         }
 
@@ -834,6 +908,7 @@ namespace Src {
             if (node.childCount == 0) {
                 return new TreeNode(node.item, node.isDisabled, TreeNode.EmptyArray);
             }
+
             if (!includeDisabled) {
                 while (ptr != null) {
                     if (!ptr.isDisabled) {

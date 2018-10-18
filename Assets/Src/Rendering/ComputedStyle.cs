@@ -762,8 +762,8 @@ namespace Rendering {
         }
 
         public int LayerOffset {
-            get { return ReadInt(StylePropertyId.LayerOffset, DefaultStyleValues.LayerOffset); }
-            internal set { WriteInt(StylePropertyId.LayerOffset, value); }
+            get { return ReadInt(StylePropertyId.RenderLayerOffset, DefaultStyleValues.LayerOffset); }
+            internal set { WriteInt(StylePropertyId.RenderLayerOffset, value); }
         }
 
         #endregion
@@ -1088,7 +1088,7 @@ namespace Rendering {
                 case StylePropertyId.ZIndex:
                     ZIndex = property.IsDefined ? property.AsInt : DefaultStyleValues.ZIndex;
                     break;
-                case StylePropertyId.LayerOffset:
+                case StylePropertyId.RenderLayerOffset:
                     LayerOffset = property.IsDefined ? property.AsInt : DefaultStyleValues.LayerOffset;
                     break;
                 case StylePropertyId.RenderLayer:
@@ -1211,7 +1211,7 @@ namespace Rendering {
                 case StylePropertyId.ZIndex:
                     return StyleProperty.ZIndex(ZIndex);
 
-                case StylePropertyId.LayerOffset:
+                case StylePropertyId.RenderLayerOffset:
                     return StyleProperty.LayerOffset(LayerOffset);
 
                 case StylePropertyId.RenderLayer:

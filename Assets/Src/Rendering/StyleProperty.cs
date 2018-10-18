@@ -354,7 +354,7 @@ namespace Rendering {
         }
         
         public static StyleProperty LayerOffset(int layerOffset) {
-            return new StyleProperty(StylePropertyId.LayerOffset, layerOffset);
+            return new StyleProperty(StylePropertyId.RenderLayerOffset, layerOffset);
         }
         
         public static StyleProperty RenderLayer(RenderLayer renderLayer) {

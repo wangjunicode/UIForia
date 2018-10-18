@@ -13,7 +13,7 @@ namespace Src {
         private int freeCount;
         private int capacity;
         
-        public IntMap() : this(4) { }
+        public IntMap() : this(7) { }
 
         public IntMap(int capacity) {
             int size = HashHelpers.GetPrime(capacity);

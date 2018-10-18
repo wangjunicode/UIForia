@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.Collections.Generic;
 using Rendering;
 using Src.Elements;
@@ -65,7 +65,25 @@ namespace Src.Systems {
                     m_PendingLayoutUpdates.Add(box);
                 }
             }
+
             m_PendingInitialization.Clear();
+        }
+
+        private void RunLayout() {
+            m_PendingLayoutUpdates.Sort((a, b) => a.element.depth > b.element.depth ? 1 : -1);
+
+            for (int i = 0; i < m_PendingLayoutUpdates.Count; i++) {
+                m_PendingLayoutUpdates[i].RunLayout();
+                m_PendingLayoutUpdates[i].markedForLayout = false;
+                m_PendingRectUpdates.Add(m_PendingLayoutUpdates[i]);
+            }
+
+            foreach (LayoutBox layoutBox in m_PendingRectUpdates) {
+                m_RectUpdates.Add(layoutBox);
+            }
+
+            m_PendingLayoutUpdates.Clear();
+            m_PendingRectUpdates.Clear();
         }
 
         public void OnUpdate() {
@@ -78,38 +96,25 @@ namespace Src.Systems {
                 m_Root.RunLayout();
             }
 
-            if (m_PendingLayoutUpdates.Count == 0 && m_PendingRectUpdates.Count == 0) {
-                return;
-            }
+            RunLayout();
+            RunRectUpdates();
+            UpdatePerFrameData();
+        }
 
-            m_PendingLayoutUpdates.Sort((a, b) => a.element.depth > b.element.depth ? 1 : -1);
-
-            for (int i = 0; i < m_PendingLayoutUpdates.Count; i++) {
-                m_PendingLayoutUpdates[i].RunLayout();
-                m_PendingRectUpdates.Add(m_PendingLayoutUpdates[i]);
-            }
-
-            foreach (LayoutBox layoutBox in m_PendingRectUpdates) {
-                m_RectUpdates.Add(layoutBox);
-            }
-
-            for (int i = 0; i < m_PendingLayoutUpdates.Count; i++) {
-                m_PendingLayoutUpdates[i].markedForLayout = false;
-            }
-
-            m_PendingLayoutUpdates.Clear();
-            m_PendingRectUpdates.Clear();
-
+        private void RunRectUpdates() {
             m_RectUpdates.Sort((a, b) => a.element.depth > b.element.depth ? 1 : -1);
 
             for (int i = 0; i < m_RectUpdates.Count; i++) {
                 LayoutBox box = m_RectUpdates[i];
                 UIElement element = box.element;
                 LayoutResult layoutResult = new LayoutResult();
+                LayoutBehavior layoutBehavior = box.style.LayoutBehavior;
 
-                if ((box.style.LayoutBehavior == LayoutBehavior.Ignored)) {
-                    // TransformAnchor = Layout | Viewport | Screen
+                if (layoutBehavior == LayoutBehavior.Ignored) {
                     layoutResult.localPosition = new Vector2(box.TransformX, box.TransformY);
+                }
+                else if (layoutBehavior == LayoutBehavior.Anchors) {
+                    // todo
                 }
                 else {
                     layoutResult.localPosition = new Vector2(box.localX, box.localY);
@@ -118,107 +123,217 @@ namespace Src.Systems {
                 float contentWidth = box.actualWidth - (box.PaddingHorizontal + box.BorderHorizontal);
                 float contentHeight = box.actualHeight - (box.PaddingVertical + box.BorderVertical);
 
-                //layoutResult.screenPosition = localPosition + box.parent?.element?.layoutResult.screenPosition ?? Vector2.zero;
                 layoutResult.contentOffset = new Vector2(box.PaddingLeft + box.BorderLeft, box.PaddingTop + box.BorderTop);
                 layoutResult.actualSize = new Size(box.actualWidth, box.actualHeight);
                 layoutResult.allocatedSize = new Size(box.allocatedWidth, box.allocatedHeight);
                 layoutResult.contentSize = new Size(contentWidth, contentHeight);
 
                 element.layoutResult = layoutResult;
+            }
 
-                // todo -- possible 2nd phase for 'attach' layouts ie fixed / sticky / anchor to edge, this would only do positioning and not sizing
+            m_PendingRectUpdates.Clear();
+        }
 
-                VirtualScrollbar vertical = box.verticalScrollbar;
-                VirtualScrollbar horizontal = box.horizontalScrollbar;
-                if (box.actualWidth <= box.allocatedWidth) {
-                    if (horizontal != null) {
-                        onDestroyVirtualScrollbar?.Invoke(horizontal);
-                        m_Elements.Remove(horizontal);
-                        box.horizontalScrollbar = null; // todo -- pool
-                    }
+        private void UpdatePerFrameData() {
+            Stack<UIElement> stack = StackPool<UIElement>.Get();
+
+            UIElement element = m_Root.children[0].element;
+            LayoutResult layoutResult = element.layoutResult;
+
+            stack.Push(m_Root.children[0].element);
+
+            int depth = 0;
+            int computedLayer = ResolveRenderLayer(element) - element.ComputedStyle.LayerOffset;
+            int zIndex = element.ComputedStyle.ZIndex;
+
+            if (depth > computedLayer) {
+                zIndex -= 2000;
+            }
+            else if (depth < computedLayer) {
+                zIndex += -2000;
+            }
+
+            layoutResult.screenPosition = layoutResult.localPosition;
+            layoutResult.layer = computedLayer;
+            layoutResult.zIndex = zIndex;
+            layoutResult.clipRect = ViewportRect;
+            element.layoutResult = layoutResult;
+
+            while (stack.Count > 0) {
+                UIElement current = stack.Pop();
+
+                if (current.ownChildren == null) {
+                    continue;
                 }
-                else {
-                    if (horizontal == null) {
-                        horizontal = new VirtualScrollbar(element, ScrollbarOrientation.Horizontal);
-                        m_Elements.Add(horizontal);
+
+                for (int i = 0; i < current.ownChildren.Length; i++) {
+                    element = current.ownChildren[i];
+                    layoutResult = element.layoutResult;
+
+                    depth = element.depth;
+                    computedLayer = ResolveRenderLayer(element) - element.ComputedStyle.LayerOffset;
+                    zIndex = element.ComputedStyle.ZIndex;
+
+                    if (depth > computedLayer) {
+                        zIndex -= 2000;
+                    }
+                    else if (depth < computedLayer) {
+                        zIndex += -2000;
+                    }
+
+                    layoutResult.screenPosition = current.layoutResult.screenPosition + layoutResult.localPosition;
+                    layoutResult.layer = computedLayer;
+                    layoutResult.zIndex = zIndex;
+
+                    Rect clipRect = ViewportRect; //new Rect(layoutResult.screenPosition, layoutResult.actualSize);
+
+                    // clip rect I provide = my clip rect + overflow handling
+
+                    if (computedLayer > 0) {
+                        UIElement ptr = element.parent;
+
+                        // find ancestor where layer is higher
+                        while (ptr != null && ptr.layoutResult.layer > computedLayer) {
+                            ptr = ptr.parent;
+                        }
+
+                        // from this point on we are trying to find the clip rect to use
+
+                        if (ptr != null) {
+                            bool handlesHorizontal = ptr.style.HandlesOverflowX;
+                            bool handlesVertical = ptr.style.HandlesOverflowY;
+                            if (handlesHorizontal && handlesVertical) {
+                                Rect r = new Rect(ptr.layoutResult.screenPosition, ptr.layoutResult.allocatedSize);
+                                clipRect = RectIntersect(clipRect, RectIntersect(r, ptr.layoutResult.clipRect));
+                            }
+                            else if (handlesHorizontal) {
+                                Rect r = new Rect(
+                                    ptr.layoutResult.screenPosition.x,
+                                    ptr.layoutResult.clipRect.y,
+                                    ptr.layoutResult.allocatedWidth,
+                                    ptr.layoutResult.clipRect.height
+                                );
+                                clipRect = RectIntersect(r, clipRect);
+                            }
+                            else if (handlesVertical) {
+                                Rect r = new Rect(
+                                    ptr.layoutResult.clipRect.x,
+                                    ptr.layoutResult.screenPosition.y,
+                                    ptr.layoutResult.clipRect.width,
+                                    ptr.layoutResult.allocatedHeight
+                                );
+                                clipRect = RectIntersect(r, clipRect);
+                            }
+                            else {
+                                clipRect = ptr.layoutResult.clipRect;
+                            }
+                        }
+                    }
+
+                    layoutResult.clipRect = clipRect;
+                    element.layoutResult = layoutResult;
+                    stack.Push(element);
+                }
+            }
+
+            StackPool<UIElement>.Release(stack);
+        }
+
+
+        private void HandleScrollbars(LayoutBox box) {
+            UIElement element = box.element;
+            LayoutResult layoutResult = element.layoutResult;
+            VirtualScrollbar vertical = box.verticalScrollbar;
+            VirtualScrollbar horizontal = box.horizontalScrollbar;
+            if (box.actualWidth <= box.allocatedWidth) {
+                if (horizontal != null) {
+                    onDestroyVirtualScrollbar?.Invoke(horizontal);
+                    m_Elements.Remove(horizontal);
+                    box.horizontalScrollbar = null; // todo -- pool
+                }
+            }
+            else {
+                if (horizontal == null) {
+                    horizontal = new VirtualScrollbar(element, ScrollbarOrientation.Horizontal);
+                    m_Elements.Add(horizontal);
 //                        onCreateVirtualScrollbar?.Invoke(horizontal);
 //                        Extents childExtents = GetLocalExtents(box.children);
 //                        float offsetX = (childExtents.min.x < 0) ? -childExtents.min.x / box.allocatedWidth : 0f;
 //                        element.scrollOffset = new Vector2(offsetX, element.scrollOffset.y);
-                    }
-
-                    Rect trackRect = horizontal.GetTrackRect();
-                    horizontal.layoutResult = new LayoutResult() {
-                        screenPosition = new Vector2(trackRect.x, trackRect.y),
-                        actualSize = new Size(layoutResult.allocatedHeight, 5f),
-                        allocatedSize = new Size(box.actualWidth, 5f), // todo -- wrong?
-                    };
                 }
 
-                if (box.actualHeight <= box.allocatedHeight) {
-                    if (vertical != null) {
-                        onDestroyVirtualScrollbar?.Invoke(vertical);
-                        m_Elements.Remove(vertical);
-                        box.verticalScrollbar = null; // todo -- pool
-                    }
+                Rect trackRect = horizontal.GetTrackRect();
+                horizontal.layoutResult = new LayoutResult() {
+                    screenPosition = new Vector2(trackRect.x, trackRect.y),
+                    actualSize = new Size(layoutResult.allocatedHeight, 5f),
+                    allocatedSize = new Size(box.actualWidth, 5f), // todo -- wrong?
+                };
+            }
+
+            if (box.actualHeight <= box.allocatedHeight) {
+                if (vertical != null) {
+                    onDestroyVirtualScrollbar?.Invoke(vertical);
+                    m_Elements.Remove(vertical);
+                    box.verticalScrollbar = null; // todo -- pool
                 }
-                else {
-                    if (vertical == null) {
-                        vertical = new VirtualScrollbar(element, ScrollbarOrientation.Vertical);
-                        element.style.InitializeScrollbar(vertical);
-                        LayoutBox scrollbarLayoutBox = new FixedLayoutBox(this, vertical);
-                        LayoutBox scrollbarHandleLayoutBox = new FixedLayoutBox(this, vertical.handle);
+            }
+            else {
+                if (vertical == null) {
+                    vertical = new VirtualScrollbar(element, ScrollbarOrientation.Vertical);
+                    element.style.InitializeScrollbar(vertical);
+                    LayoutBox scrollbarLayoutBox = new FixedLayoutBox(this, vertical);
+                    LayoutBox scrollbarHandleLayoutBox = new FixedLayoutBox(this, vertical.handle);
 
-                        scrollbarLayoutBox.parent = box;
-                        scrollbarHandleLayoutBox.parent = scrollbarLayoutBox;
+                    scrollbarLayoutBox.parent = box;
+                    scrollbarHandleLayoutBox.parent = scrollbarLayoutBox;
 
-                        scrollbarLayoutBox.IsInitialized = true;
-                        scrollbarHandleLayoutBox.IsInitialized = true;
+                    scrollbarLayoutBox.IsInitialized = true;
+                    scrollbarHandleLayoutBox.IsInitialized = true;
 
-                        m_LayoutBoxMap.Add(vertical.id, scrollbarLayoutBox);
-                        m_LayoutBoxMap.Add(vertical.handle.id, scrollbarHandleLayoutBox);
+                    m_LayoutBoxMap.Add(vertical.id, scrollbarLayoutBox);
+                    m_LayoutBoxMap.Add(vertical.handle.id, scrollbarHandleLayoutBox);
 
-                        m_Elements.Add(vertical);
-                        m_Elements.Add(vertical.handle);
+                    m_Elements.Add(vertical);
+                    m_Elements.Add(vertical.handle);
 
-                        m_VirtualElements.Add(vertical);
-                        m_VirtualElements.Add(vertical.handle);
+                    m_VirtualElements.Add(vertical);
+                    m_VirtualElements.Add(vertical.handle);
 
-                        m_PendingIgnoredLayoutUpdates.Add(scrollbarLayoutBox);
-                        m_PendingIgnoredLayoutUpdates.Add(scrollbarHandleLayoutBox);
+                    m_PendingIgnoredLayoutUpdates.Add(scrollbarLayoutBox);
+                    m_PendingIgnoredLayoutUpdates.Add(scrollbarHandleLayoutBox);
 
-                        Extents childExtents = GetLocalExtents(box.children);
-                        float offsetY = (childExtents.min.y < 0) ? -childExtents.min.y / box.allocatedHeight : 0f;
-                        element.scrollOffset = new Vector2(element.scrollOffset.x, offsetY);
+                    Extents childExtents = GetLocalExtents(box.children);
+                    float offsetY = (childExtents.min.y < 0) ? -childExtents.min.y / box.allocatedHeight : 0f;
+                    element.scrollOffset = new Vector2(element.scrollOffset.x, offsetY);
 
-                        scrollbarLayoutBox.allocatedWidth = vertical.trackSize;
-                        scrollbarLayoutBox.allocatedHeight = element.layoutResult.allocatedHeight;
+                    scrollbarLayoutBox.allocatedWidth = vertical.trackSize;
+                    scrollbarLayoutBox.allocatedHeight = element.layoutResult.allocatedHeight;
 
-                        scrollbarHandleLayoutBox.allocatedWidth = vertical.handleSize;
-                        scrollbarHandleLayoutBox.allocatedHeight = element.layoutResult.allocatedHeight;
+                    scrollbarHandleLayoutBox.allocatedWidth = vertical.handleSize;
+                    scrollbarHandleLayoutBox.allocatedHeight = element.layoutResult.allocatedHeight;
 
-                        Rect trackRect = vertical.GetTrackRect();
-                        LayoutResult result = new LayoutResult();
-                        result.actualSize = new Size(vertical.trackSize, element.layoutResult.allocatedHeight);
-                        result.allocatedSize = new Size(vertical.trackSize, element.layoutResult.allocatedHeight);
-                        result.contentSize = new Size(vertical.trackSize, element.layoutResult.allocatedHeight);
-                        result.localPosition = new Vector2(trackRect.x, trackRect.y);
-                        vertical.layoutResult = result;
+                    Rect trackRect = vertical.GetTrackRect();
+                    LayoutResult result = new LayoutResult();
+                    result.actualSize = new Size(vertical.trackSize, element.layoutResult.allocatedHeight);
+                    result.allocatedSize = new Size(vertical.trackSize, element.layoutResult.allocatedHeight);
+                    result.contentSize = new Size(vertical.trackSize, element.layoutResult.allocatedHeight);
+                    result.localPosition = new Vector2(trackRect.x, trackRect.y);
+                    vertical.layoutResult = result;
 
-                        Rect handleRect = vertical.HandleRect;
-                        Vector2 handlePosition = vertical.handlePosition;
-                        result = new LayoutResult();
-                        result.localPosition = new Vector2(0, handlePosition.y);
-                        result.actualSize = new Size(handleRect.width, handleRect.height);
-                        result.allocatedSize = new Size(handleRect.width, handleRect.height);
-                        result.contentSize = new Size(handleRect.width, handleRect.height);
-                        vertical.handle.layoutResult = result;
+                    Rect handleRect = vertical.HandleRect;
+                    Vector2 handlePosition = vertical.handlePosition;
+                    result = new LayoutResult();
+                    result.localPosition = new Vector2(0, handlePosition.y);
+                    result.actualSize = new Size(handleRect.width, handleRect.height);
+                    result.allocatedSize = new Size(handleRect.width, handleRect.height);
+                    result.contentSize = new Size(handleRect.width, handleRect.height);
+                    vertical.handle.layoutResult = result;
 
-                        //  m_PendingRectUpdates.Add(scrollbarLayoutBox);
-                        //   m_PendingRectUpdates.Add(scrollbarHandleLayoutBox);
+                    //  m_PendingRectUpdates.Add(scrollbarLayoutBox);
+                    //   m_PendingRectUpdates.Add(scrollbarHandleLayoutBox);
 
-                        onCreateVirtualScrollbar?.Invoke(vertical);
-                    }
+                    onCreateVirtualScrollbar?.Invoke(vertical);
+                }
 
 //                    else {
 //                        Rect trackRect = vertical.GetTrackRect();
@@ -228,52 +343,21 @@ namespace Src.Systems {
 //                            allocatedSize = new Size(box.actualHeight, 5f),
 //                        };
 //                    }
-                }
+            }
+        }
+
+
+        private static Rect RectIntersect(Rect a, Rect b) {
+            float xMin = a.x > b.x ? a.x : b.x;
+            float xMax = a.x + a.width < b.x + b.width ? a.x + a.width : b.x + b.width;
+            float yMin = a.y > b.y ? a.y : b.y;
+            float yMax = a.y + a.height < b.y + b.height ? a.y + a.height : b.y + b.height;
+
+            if (xMax >= xMin && yMax >= yMin) {
+                return new Rect(xMin, yMin, xMax - xMin, yMax - yMin);
             }
 
-            // add generated scroll bars 
-            foreach (LayoutBox layoutBox in m_PendingRectUpdates) {
-                m_RectUpdates.Add(layoutBox);
-            }
-
-            if (m_RectUpdates.Count > 0) {
-                // todo -- optimize w// list & hash set -> if didn't move position maybe short circuit
-                Stack<UIElement> stack = StackPool<UIElement>.Get();
-
-                stack.Push(m_Root.children[0].element);
-
-                while (stack.Count > 0) {
-                    UIElement current = stack.Pop();
-
-                    if (current.ownChildren == null) continue;
-
-                    for (int i = 0; i < current.ownChildren.Length; i++) {
-                        LayoutResult result = current.ownChildren[i].layoutResult;
-                        result.screenPosition = current.layoutResult.screenPosition + result.localPosition;
-                        current.ownChildren[i].layoutResult = result;
-                        stack.Push(current.ownChildren[i]);
-                    }
-                }
-
-                // todo -- insert sort by depth
-                for (int i = 0; i < m_VirtualElements.Count; i++) {
-                    if (m_VirtualElements[i].parent == null) {
-                        LayoutResult result = m_VirtualElements[i].layoutResult;
-                        result.screenPosition = m_VirtualElements[i].layoutResult.localPosition;
-                        m_VirtualElements[i].layoutResult = result;
-                    }
-                    else {
-                        LayoutResult result = m_VirtualElements[i].layoutResult;
-                        result.screenPosition = m_VirtualElements[i].parent.layoutResult.screenPosition + result.localPosition;
-                        m_VirtualElements[i].layoutResult = result;
-                    }
-                }
-
-                StackPool<UIElement>.Release(stack);
-            }
-
-            //   m_PendingLayoutUpdates.Clear();
-            m_PendingRectUpdates.Clear();
+            return new Rect(0f, 0f, 0f, 0f);
         }
 
         private void LayoutSticky() {
@@ -309,6 +393,7 @@ namespace Src.Systems {
             if (layoutBox == m_Root || layoutBox.markedForLayout) {
                 return;
             }
+
             m_PendingLayoutUpdates.Add(layoutBox);
             layoutBox.markedForLayout = true;
         }
@@ -324,6 +409,7 @@ namespace Src.Systems {
             foreach (KeyValuePair<int, LayoutBox> box in m_LayoutBoxMap) {
                 RequestLayout(box.Value);
             }
+
             OnUpdate();
         }
 
@@ -369,7 +455,6 @@ namespace Src.Systems {
             if (box.parent != null && box.parent.IsInitialized && (box.style.LayoutBehavior & LayoutBehavior.Ignored) == 0) {
                 box.parent.OnChildStylePropertyChanged(box, property);
             }
-
         }
 
         private void HandleLayoutBehaviorChanged(LayoutBox box) {
@@ -572,7 +657,6 @@ namespace Src.Systems {
                 m_RootRequiresLayout = true;
 
                 // todo -- tell all layout boxes / run full layout
-
             }
         }
 
@@ -628,6 +712,33 @@ namespace Src.Systems {
             }
 
             return retn;
+        }
+
+        private int ResolveRenderLayer(UIElement element) {
+            RenderLayer layer = element.style.computedStyle.RenderLayer;
+            switch (layer) {
+                case RenderLayer.Unset:
+                case RenderLayer.Default:
+                    return element.depth;
+
+                case RenderLayer.Parent:
+                    return element.depth - 1;
+
+                case RenderLayer.Template:
+                    return element.templateParent.depth;
+
+                case RenderLayer.Modal:
+                    return -1000;
+                
+                case RenderLayer.View:
+                    return -500;
+                
+                case RenderLayer.Screen:
+                    return -2000;
+                
+                default:
+                    throw new ArgumentOutOfRangeException();
+            }
         }
 
         private static Extents GetLocalExtents(List<LayoutBox> children) {

@@ -46,20 +46,23 @@ namespace Src {
             UIElement instance = (UIElement) Activator.CreateInstance(rootElementTemplate.RootType);
 
             MetaData instanceData = rootElementTemplate.GetCreationData(instance, scope.context);
-            
+            instanceData.element.templateChildren = ArrayPool<UIElement>.Empty;
+
             // todo -- ensure only one <Children/> element
             for (int i = 0; i < rootElementTemplate.childTemplates.Count; i++) {
                 UITemplate template = rootElementTemplate.childTemplates[i];
                 if (template is UIChildrenTemplate) {
+                    instanceData.element.templateChildren = new UIElement[scope.inputChildren.Count];
                     for (int j = 0; j < scope.inputChildren.Count; j++) {
                         instanceData.AddChild(scope.inputChildren[j]);
+                        instanceData.element.templateChildren[j] = scope.inputChildren[j].element;
                     }
+                    scope.inputChildren = null;
                 }
                 else {
                     instanceData.AddChild(template.CreateScoped(scope));
                 }
             }
-            instanceData.element.templateChildren = scope.inputChildren.Select(c => c.element).ToArray();
             instanceData.element.ownChildren = instanceData.children.Select(c => c.element).ToArray();
 
             AssignContext(instance, scope.context);

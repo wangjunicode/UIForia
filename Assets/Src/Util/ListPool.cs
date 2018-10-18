@@ -4,18 +4,31 @@ namespace Src.Util {
 
     public static class ListPool<T> {
 
-        private static readonly ObjectPool<List<T>> s_ListPool = new ObjectPool<List<T>>(null, l => l.Clear());
+        private static readonly Stack<List<T>> s_ListPool = new Stack<List<T>>();
+        private static readonly HashSet<List<T>> s_Contained = new HashSet<List<T>>();
+        
         public static readonly IReadOnlyList<T> Empty = new List<T>(0);
 
         public static List<T> Get() {
-            return s_ListPool.Get();
+            if (s_ListPool.Count > 0) {
+                s_Contained.Remove(s_ListPool.Peek());
+                return s_ListPool.Pop();
+            }
+
+            return new List<T>();
         }
 
         public static void Release(ref List<T> toRelease) {
-            if (Equals(toRelease, Empty)) {
-                s_ListPool.Release(toRelease);
+            
+            if (toRelease == null || Equals(toRelease, Empty) || s_Contained.Contains(toRelease)) {
+                return;
             }
+
+            s_Contained.Add(toRelease);
+            s_ListPool.Push(toRelease);
+            toRelease.Clear();
             toRelease = null;
+            
         }
 
     }

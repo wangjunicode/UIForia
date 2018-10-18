@@ -144,7 +144,11 @@ namespace Src.Layout.LayoutTypes {
 
 
         public override void RunLayout() {
-            if (children.Count == 0) return;
+            if (children.Count == 0) {
+                actualWidth = allocatedWidth;
+                actualHeight = allocatedHeight;
+                return;
+            }
             tracks.Clear(); // todo -- recycle theses
             if (style.FlexLayoutDirection == LayoutDirection.Column) {
                 RunColumnLayout();
@@ -234,8 +238,8 @@ namespace Src.Layout.LayoutTypes {
                 }
             }
 
-            actualWidth = largestTrackMainSize;
-            actualHeight = trackCrossAxisStart;
+            actualWidth = Mathf.Max(allocatedWidth, largestTrackMainSize);
+            actualHeight = Mathf.Max(allocatedHeight, trackCrossAxisStart);
         }
 
         private void RunRowLayout() {
@@ -308,8 +312,8 @@ namespace Src.Layout.LayoutTypes {
                 }
             }
 
-            actualWidth = maxWidth;
-            actualHeight = largestTrackSize;
+            actualWidth = Mathf.Max(allocatedWidth, maxWidth);
+            actualHeight = Mathf.Max(actualHeight, largestTrackSize);
         }
 
         private void FillColumnTracks(float targetSize) {

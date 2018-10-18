@@ -1,6 +1,7 @@
 using System.Collections.Generic;
 using Src.Layout;
 using Src.Layout.LayoutTypes;
+using Src.Rendering;
 
 namespace Rendering {
 
@@ -86,6 +87,47 @@ namespace Rendering {
         
         public float GetGridLayoutRowGap(StyleState state) {
             return GetFloatValue(StylePropertyId.GridLayoutRowGap, state);
+        }
+
+        public void SetOverflowX(Overflow value, StyleState state) {
+            SetEnumProperty(StylePropertyId.OverflowX, (int) value, state);
+        }
+
+        public Overflow GetOverflowX(StyleState state) {
+            return (Overflow) GetEnumProperty(StylePropertyId.OverflowX, state);
+        }
+        
+        public void SetOverflowY(Overflow value, StyleState state) {
+            SetEnumProperty(StylePropertyId.OverflowY, (int) value, state);
+        }
+
+        public Overflow GetOverflowY(StyleState state) {
+            return (Overflow) GetEnumProperty(StylePropertyId.OverflowY, state);
+        }
+
+        public void SetRenderLayer(RenderLayer layer, StyleState state) {
+            SetEnumProperty(StylePropertyId.RenderLayer, (int) layer, state);
+        }
+
+        public RenderLayer GetRenderLayer(StyleState state) {
+            return (RenderLayer) GetEnumProperty(StylePropertyId.RenderLayer, state);
+        }
+
+        public void SetRenderLayerOffset(int offset, StyleState state) {
+            SetIntProperty(StylePropertyId.RenderLayerOffset, offset, state);
+        }
+
+        public int GetRenderLayerOffset(StyleState state) {
+            return GetIntValue(StylePropertyId.RenderLayerOffset, state);
+        }
+
+
+        public void SetZIndex(int zIndex, StyleState state) {
+            SetIntProperty(StylePropertyId.ZIndex, zIndex, state);
+        }
+        
+        public int GetZIndex(StyleState state) {
+            return GetIntValue(StylePropertyId.ZIndex, state);
         }
 
     }

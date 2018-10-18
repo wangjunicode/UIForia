@@ -115,6 +115,8 @@ namespace Src {
                         instanceData.element.templateChildren[i] = child.element;
                         instanceData.AddChild(child);
                     }
+
+                    outputScope.inputChildren = null;
                     break;
                 case TemplateType.Template:
                     instanceData = templateToExpand.CreateWithScope(outputScope);
@@ -159,6 +161,10 @@ namespace Src {
             if (element.ownChildren == null) return;
 
             for (int i = 0; i < element.ownChildren.Length; i++) {
+                if (element.ownChildren[i] == element) {
+                    Debug.Log("BAAAD");
+                    continue;
+                }
                 AssignContext(element.ownChildren[i], context);
             }
         }

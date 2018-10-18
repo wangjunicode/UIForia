@@ -37,6 +37,10 @@ namespace Src.Systems {
         public Size allocatedSize;
         public Size contentSize;
         
+        public int layer;
+        public int zIndex;
+        public Rect clipRect;
+
         public Rect ScreenRect => new Rect(screenPosition, new Vector2(allocatedSize.width, allocatedSize.height));
         public Rect ScreenOverflowRect => new Rect(screenPosition, new Vector2(actualSize.width, actualSize.height));
         

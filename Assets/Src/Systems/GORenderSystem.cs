@@ -113,7 +113,6 @@ namespace Src.Systems {
                 m_CanvasRendererMap.Add(element.id, canvasRenderer);
 
                 RenderData renderData = new RenderData(element, this);
-                renderData.canvasRenderer = canvasRenderer;
                 m_RenderSkipTree.AddItem(renderData);
 
                 if ((element is VirtualElement)) {
@@ -121,7 +120,6 @@ namespace Src.Systems {
                 }
                 else {
                     if (element.style.HandlesOverflowX || element.style.HandlesOverflowY) {
-                        renderData.clips = true;
                         m_ClipTree.AddItem(renderData);
                     }
                 }

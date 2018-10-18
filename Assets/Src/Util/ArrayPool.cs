@@ -7,10 +7,16 @@ namespace Src.Util {
     public static class ArrayPool<T> {
 
         private static readonly List<T[]> s_ArrayPool = new List<T[]>();
+        private static readonly HashSet<T[]> s_Contained = new HashSet<T[]>();
 
-        public static int MaxPoolSize = 16;
+        // ReSharper disable once StaticMemberInGenericType
+        private static int MaxPoolSize = 16;
 
         public static T[] Empty { get; } = new T[0];
+
+        public static void SetMaxPoolSize(int poolSize) {
+            MaxPoolSize = poolSize;
+        }
 
         public static T[] GetMinSize(int minSize) {
             minSize = Mathf.Max(0, minSize);
@@ -18,6 +24,7 @@ namespace Src.Util {
                 if (s_ArrayPool[i].Length >= minSize) {
                     T[] retn = s_ArrayPool[i];
                     s_ArrayPool.RemoveAt(i);
+                    s_Contained.Remove(retn);
                     return retn;
                 }
             }
@@ -31,6 +38,7 @@ namespace Src.Util {
                 if (s_ArrayPool[i].Length == size) {
                     T[] retn = s_ArrayPool[i];
                     s_ArrayPool.RemoveAt(i);
+                    s_Contained.Remove(retn);
                     return retn;
                 }
             }
@@ -43,6 +51,8 @@ namespace Src.Util {
             for (int i = 0; i < s_ArrayPool.Count; i++) {
                 if (s_ArrayPool[i].Length >= minSize) {
                     T[] retn = s_ArrayPool[i];
+                    s_Contained.Remove(retn);
+                    s_Contained.Add(array);
                     s_ArrayPool[i] = array;
                     Array.Clear(array, 0, array.Length);
                     array = retn;
@@ -50,11 +60,16 @@ namespace Src.Util {
                 }
             }
 
+            // add to pool & return new one?
             Array.Resize(ref array, minSize);
         }
 
         public static void Release(ref T[] array) {
-            if (array == null) return;
+            if (array == null || array.Length == 0) return;
+            if (s_Contained.Contains(array)) {
+                return;
+            }
+
             Array.Clear(array, 0, array.Length);
             if (s_ArrayPool.Count == MaxPoolSize) {
                 int minCount = int.MaxValue;
@@ -67,10 +82,13 @@ namespace Src.Util {
                 }
 
                 if (array.Length > minCount) {
+                    s_Contained.Add(array);
+                    s_Contained.Remove(s_ArrayPool[minIndex]);
                     s_ArrayPool[minIndex] = array;
                 }
             }
             else {
+                s_Contained.Add(array);
                 s_ArrayPool.Add(array);
             }
 
@@ -82,6 +100,16 @@ namespace Src.Util {
             for (int i = 0; i < source.Count; i++) {
                 retn[i] = source[i];
             }
+
+            return retn;
+        }
+
+        public static T[] Copy(T[] other) {
+            T[] retn = GetExactSize(other.Length);
+            for (int i = 0; i < retn.Length; i++) {
+                retn[i] = other[i];
+            }
+
             return retn;
         }
 

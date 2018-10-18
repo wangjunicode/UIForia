@@ -47,6 +47,23 @@ public class SkipTreeTests {
         });
         Assert.AreEqual(new[] { "two", "three" }, output);
     }
+    
+    [Test]
+    public void TraversePostOrder() {
+        SkipTree<Item> tree = new SkipTree<Item>();
+        var one = new Item(null, "one");
+        var two = new Item(one, "two");
+        var three = new Item(one, "three");
+        tree.AddItem(one);
+        tree.AddItem(two);
+        tree.AddItem(three);
+        string[] output = new string[3];
+        int i = 0;
+        tree.TraversePostOrder((item) => {
+            output[i++] = item.name;
+        });
+        Assert.AreEqual(new[] { "three", "two", "one" }, output);
+    }
 
     [Test]
     public void AddParentAfterChildren() {

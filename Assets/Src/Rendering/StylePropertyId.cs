@@ -118,7 +118,7 @@ namespace Rendering {
 
         ZIndex = 1401,
         RenderLayer = 1402,
-        LayerOffset = 1403
+        RenderLayerOffset = 1403
 
     }
 

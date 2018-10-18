@@ -590,8 +590,8 @@ namespace Rendering {
         #region Layer Properties
 
         public int LayerOffset {
-            get { return FindIntProperty(StylePropertyId.LayerOffset); }
-            set { SetIntProperty(StylePropertyId.LayerOffset, value); }
+            get { return FindIntProperty(StylePropertyId.RenderLayerOffset); }
+            set { SetIntProperty(StylePropertyId.RenderLayerOffset, value); }
         }
 
         public int ZIndex {

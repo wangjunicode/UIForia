@@ -7,19 +7,10 @@ namespace Src.Systems {
     public class RenderData : IHierarchical {
 
         public UIElement element;
-
-        public VirtualScrollbar horizontalScrollbar;
-        public VirtualScrollbar verticalScrollbar;
-        public RectTransform horizontalScrollbarHandle;
-        public RectTransform verticalScrollbarHandle;
-
         public IDrawable drawable;
         public IRenderSystem renderSystem;
-        public CanvasRenderer canvasRenderer;
-        
-        public Rect clipRect;
-        public bool clips;
-        
+        public float zOffset;
+
         public RenderData(UIElement element, IRenderSystem renderSystem) {
             this.element = element;
             this.renderSystem = renderSystem;

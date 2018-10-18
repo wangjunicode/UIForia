@@ -32,7 +32,7 @@ public class UIElement : IHierarchical, IExpressionContextProvider {
 
     // todo make readonly but assignable via style system
 
-    internal UIElement parent;
+    public UIElement parent;
 
     protected UIElement() {
         this.id = UIView.NextElementId;
@@ -55,6 +55,7 @@ public class UIElement : IHierarchical, IExpressionContextProvider {
     public ComputedStyle ComputedStyle => style.computedStyle;
     
     public int depth { get; internal set; }
+    public int depthIndex { get; internal set; }
     public int siblingIndex { get; internal set; }
 
     public IInputProvider Input { get; internal set; }

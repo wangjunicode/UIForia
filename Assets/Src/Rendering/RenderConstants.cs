@@ -2,6 +2,9 @@ namespace Src.Rendering {
 
     public static class RenderConstants {
 
+        public const string OverflowX = "overflowX";
+        public const string OverflowY = "overflowY";
+        
         public const string Size = "size";
         public const string Width = "width";
         public const string Height = "height";

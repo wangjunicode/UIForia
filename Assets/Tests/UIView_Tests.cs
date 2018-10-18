@@ -25,6 +25,7 @@ public class TranscludedThing : UIElement {
     public override void OnCreate() {
         onCreate?.Invoke();
     }
+
     public override void OnDisable() {
         onDisableCallback?.Invoke();
     }
@@ -61,14 +62,67 @@ public class ViewTestThing : UIElement {
 
 }
 
+       
 [TestFixture]
 public class UIView_Tests {
 
-           
+     const string template = @"
+        <UITemplate>
+            <Contents>
+                <Panel x-id='L0-0'>
+                    <Panel x-id='L1-0'>
+                        <Panel x-id='L2-0'/>
+                        <Panel x-id='L2-1'>
+                            <Panel x-id='L3-0'/>
+                            <Panel x-id='L3-1'/>
+                            <Panel x-id='L3-2'/>
+                        </Panel>
+                        <Panel x-id='L2-2'/>
+                    </Panel>
+                    <Panel x-id='L1-1'>
+                        <Panel x-id='L2-3'/>
+                        <Panel x-id='L2-4'>
+                            <Panel x-id='L3-3'/>
+                            <Panel x-id='L3-4'/>
+                        </Panel>
+                        <Panel x-id='L2-5'/>
+                    </Panel>
+                    <Panel x-id='L1-2'>
+                        <Panel x-id='L2-6'/>
+                        <Panel x-id='L2-7'>
+                            <Panel x-id='L3-5'/>
+                            <Panel x-id='L3-6'/>
+                            <Panel x-id='L3-7'/>
+                        </Panel>
+                        <Panel x-id='L2-8'/>
+                    </Panel>
+                    <Panel x-id='L1-3'>
+                        <Panel x-id='L2-9'/>
+                        <Panel x-id='L2-10'>
+                            <Panel x-id='L3-8'/>
+                            <Panel x-id='L3-9'/>
+                            <Panel x-id='L3-10'/>
+                        </Panel>
+                        <Panel x-id='L2-11'/>
+                    </Panel>
+                    <Panel x-id='L1-4'>
+                        <Panel x-id='L2-12'>
+                            <Panel x-id='L3-11'/>
+                            <Panel x-id='L3-12'/>
+                        </Panel>
+                        <Panel x-id='L2-13'/>
+                        <Panel x-id='L2-14'/>
+                    </Panel>
+                </Panel>
+            </Contents>
+        </UITemplate>
+    ";
+
+    
     const TestEnableFlags enabled = TestEnableFlags.Enabled;
     const TestEnableFlags disabledAncestor = TestEnableFlags.DisabledAncestor;
     const TestEnableFlags disabledSelf = TestEnableFlags.DisabledSelf;
-    
+
     public class TestView : UIView {
 
         public TestView(Type elementType) : base(elementType) { }
@@ -113,7 +167,7 @@ public class UIView_Tests {
         Assert.IsInstanceOf<TranscludedThing>(data.children[0].children[0].element);
 
         Assert.IsInstanceOf<ViewTestThing>(data.element);
-        data.element.flags |= UIElementFlags.AncestorEnabled;     
+        data.element.flags |= UIElementFlags.AncestorEnabled;
 
         AssertHierarchyFlags(data, new TypeAssert(typeof(ViewTestThing), enabled, new[] {
             new TypeAssert(typeof(UIGroupElement), enabled, new[] {
@@ -131,7 +185,7 @@ public class UIView_Tests {
         TestView testView = new TestView(typeof(ViewTestThing));
         MetaData data = testView.TestCreate();
         TranscludedThing thing = As<TranscludedThing>(data.children[0].children[0].element);
-        
+
         testView.DisableElement(thing);
 
         AssertHierarchyFlags(data, new TypeAssert(typeof(ViewTestThing), enabled, new[] {
@@ -143,18 +197,18 @@ public class UIView_Tests {
                 }),
             })
         }));
-        
+
         TestView testView2 = new TestView(typeof(ViewTestThing));
 
         data = testView2.TestCreate();
-        
+
         UITextElement text0 = As<UITextElement>(data.children[0].children[0].children[0].element);
         UITextElement text1 = As<UITextElement>(data.children[0].children[0].children[1].element);
         UITextElement text2 = As<UITextElement>(data.children[0].children[0].children[2].element);
         UIGroupElement group = As<UIGroupElement>(data.children[0].element);
-        
+
         thing = As<TranscludedThing>(data.children[0].children[0].element);
-        
+
         testView2.DisableElement(text1);
         AssertHierarchyFlags(data, new TypeAssert(typeof(ViewTestThing), enabled, new[] {
             new TypeAssert(typeof(UIGroupElement), enabled, new[] {
@@ -166,7 +220,7 @@ public class UIView_Tests {
             })
         }));
 
-        
+
         testView2.DisableElement(text0);
         AssertHierarchyFlags(data, new TypeAssert(typeof(ViewTestThing), enabled, new[] {
             new TypeAssert(typeof(UIGroupElement), enabled, new[] {
@@ -177,7 +231,7 @@ public class UIView_Tests {
                 }),
             })
         }));
-        
+
         testView2.DisableElement(group);
         AssertHierarchyFlags(data, new TypeAssert(typeof(ViewTestThing), enabled, new[] {
             new TypeAssert(typeof(UIGroupElement), disabledSelf, new[] {
@@ -188,30 +242,28 @@ public class UIView_Tests {
                 }),
             })
         }));
-        
     }
 
     [Test]
     public void Callback_OnDisable() {
-         TestView testView = new TestView(typeof(ViewTestThing));
+        TestView testView = new TestView(typeof(ViewTestThing));
         MetaData data = testView.TestCreate();
         TranscludedThing thing = As<TranscludedThing>(data.children[0].children[0].element);
 
         int callCount = 0;
-        
+
         thing.onDisableCallback = () => { callCount++; };
         testView.DisableElement(thing);
         Assert.AreEqual(1, callCount);
-        
+
         TestView testView2 = new TestView(typeof(ViewTestThing));
         data = testView2.TestCreate();
         thing = As<TranscludedThing>(data.children[0].children[0].element);
         thing.onDisableCallback = () => { callCount++; };
         testView2.DisableElement(data.children[0].element);
-        Assert.AreEqual(2, callCount);   
+        Assert.AreEqual(2, callCount);
         testView2.DisableElement(data.children[0].element);
-        Assert.AreEqual(2, callCount);   
-
+        Assert.AreEqual(2, callCount);
     }
 
 
@@ -220,7 +272,7 @@ public class UIView_Tests {
         TestView testView = new TestView(typeof(ViewTestThing));
         MetaData data = testView.TestCreate();
         TranscludedThing thing = As<TranscludedThing>(data.children[0].children[0].element);
-        
+
         testView.DisableElement(thing);
 
         AssertHierarchyFlags(data, new TypeAssert(typeof(ViewTestThing), enabled, new[] {
@@ -232,7 +284,7 @@ public class UIView_Tests {
                 }),
             })
         }));
-        
+
         testView.EnableElement(thing);
         AssertHierarchyFlags(data, new TypeAssert(typeof(ViewTestThing), enabled, new[] {
             new TypeAssert(typeof(UIGroupElement), enabled, new[] {
@@ -297,13 +349,12 @@ public class UIView_Tests {
         Assert.AreEqual(2, callCount);
     }
 
-    
-    
+
     [Test]
     public void LifeCycle_OnCreate() {
         TestView testView = new TestView(typeof(ViewTestThing));
         testView.Initialize(true);
-        ViewTestThing thing = (ViewTestThing)testView.RootElement;
+        ViewTestThing thing = (ViewTestThing) testView.RootElement;
         Assert.IsTrue(thing.didCreate);
     }
 
@@ -311,10 +362,66 @@ public class UIView_Tests {
     public void LifeCycle_OnUpdate() {
         MockView testView = new MockView(typeof(ViewTestThing));
         testView.Initialize(true);
-        ViewTestThing thing = (ViewTestThing)testView.RootElement;
+        ViewTestThing thing = (ViewTestThing) testView.RootElement;
         Assert.AreEqual(0, thing.updateCount);
         testView.Update();
         Assert.AreEqual(1, thing.updateCount);
+    }
+
+    [Test]
+    public void SetDepthIndex() {
+        MockView testView = new MockView(typeof(ViewTestThing), template);
+        testView.Initialize();
+        ViewTestThing root = (ViewTestThing) testView.RootElement;
+        for (int i = 0; i < 5; i++) {
+            Assert.AreEqual(root.FindById("L1-" + i).depthIndex, i);
+        }
+        
+        for (int i = 0; i < 15; i++) {
+            Assert.AreEqual(root.FindById("L2-" + i).depthIndex, i);
+        }
+        
+        for (int i = 0; i < 13; i++) {
+            Assert.AreEqual(root.FindById("L3-" + i).depthIndex, i);
+        }
+    }
+
+    [Test]
+    public void UpdateDepthIndexOnDestroy() {
+
+        MockView testView = new MockView(typeof(ViewTestThing), template);
+        testView.Initialize();
+        ViewTestThing root = (ViewTestThing) testView.RootElement;
+        testView.DestroyElement(root.FindById("L1-3"));
+
+         Assert.AreEqual(0, root.FindById("L1-0").depthIndex);
+         Assert.AreEqual(1, root.FindById("L1-1").depthIndex);
+         Assert.AreEqual(2, root.FindById("L1-2").depthIndex);
+         Assert.AreEqual(3, root.FindById("L1-4").depthIndex);
+        
+//        for (int i = 0; i < 5; i++) {
+//            Assert.AreEqual(root.FindById("L1-" + i).depthIndex, i);
+//        }
+//        
+//        for (int i = 0; i < 15; i++) {
+//            Assert.AreEqual(root.FindById("L2-" + i).depthIndex, i);
+//        }
+//        
+//        for (int i = 0; i < 13; i++) {
+//            Assert.AreEqual(root.FindById("L3-" + i).depthIndex, i);
+//        }
+    }
+
+    [Test]
+    public void RemoveFromChildrenOnDestroy() {
+        MockView testView = new MockView(typeof(ViewTestThing), template);
+        testView.Initialize();
+        ViewTestThing root = (ViewTestThing) testView.RootElement;
+        UIElement parent = root.FindById("L1-3").parent;
+        int childCount = parent.ownChildren.Length;
+        testView.DestroyElement(root.FindById("L1-3"));
+        Assert.IsNull(root.FindById("L1-3"));
+        Assert.AreEqual(childCount - 1, parent.ownChildren.Length);
     }
     
     private struct TypeAssert {

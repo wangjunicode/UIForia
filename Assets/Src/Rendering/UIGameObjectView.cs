@@ -11,19 +11,12 @@ namespace Rendering {
         public UIGameObjectView(Type elementType, RectTransform viewTransform) : base(elementType) {
             this.rectTransform = viewTransform;
             layoutSystem = new LayoutSystem(styleSystem);
-            renderSystem = new DirectRenderSystem(layoutSystem, styleSystem);
+            renderSystem = new DirectRenderSystem(Camera.main, layoutSystem, styleSystem);
 //            renderSystem = new GORenderSystem(layoutSystem, styleSystem, viewTransform);
             inputSystem = new GOInputSystem(layoutSystem, styleSystem);
             systems.Add(inputSystem);
             systems.Add(layoutSystem);
             systems.Add(renderSystem);
-        }
-
-        public void UpdateViewport() {
-//            layoutSystem.SetViewportRect(new Rect(rectTransform.rect) {
-//                x = 0,
-//                y = 0
-//            });
         }
 
         public override void Update() {

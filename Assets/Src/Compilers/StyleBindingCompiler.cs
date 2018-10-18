@@ -268,6 +268,9 @@ namespace Src.Compilers {
                     return new StyleBinding_ShrinkFactor(targetState.state, Compile<int>(value));
 
                 // Layout
+                
+//                case RenderConstants.OverflowX:
+//                    return new StyleBinding_OverflowX(targetState.state);
 
                 case RenderConstants.MainAxisAlignment:
                     return new StyleBinding_FlexLayoutMainAxisAlignment(targetState.state, Compile<MainAxisAlignment>(value, mainAxisAlignmentSource));

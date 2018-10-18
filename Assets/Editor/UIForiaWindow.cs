@@ -69,28 +69,28 @@ namespace Src.Editor {
         }
 
         private void HandlePlayState(PlayModeStateChange obj) {
-            if (obj == PlayModeStateChange.EnteredPlayMode) {
-                playing = true;
-                UIViewBehavior[] views = FindObjectsOfType<UIViewBehavior>();
-                treeView = new HierarchyView(views[0].view.RootElement, state);
-                targetView = views[0].view;
-                viewTransform = views[0].GetComponent<RectTransform>();
-                needsReload = true;
-                targetView.onElementCreated += OnElementCreated;
-                treeView.view = targetView;
-                treeView.viewTransform = viewTransform;
-            }
-            else if (obj == PlayModeStateChange.ExitingPlayMode) {
-                playing = false;
-                if (targetView != null) {
-                    targetView.onElementCreated -= OnElementCreated;
-                }
-
-                if (camera != null) {
-                    DestroyImmediate(camera.gameObject);
-                }
-                
-            }
+//            if (obj == PlayModeStateChange.EnteredPlayMode) {
+//                playing = true;
+//                UIViewBehavior[] views = FindObjectsOfType<UIViewBehavior>();
+//                treeView = new HierarchyView(views[0].view.RootElement, state);
+//                targetView = views[0].view;
+//                viewTransform = views[0].GetComponent<RectTransform>();
+//                needsReload = true;
+//                targetView.onElementCreated += OnElementCreated;
+//                treeView.view = targetView;
+//                treeView.viewTransform = viewTransform;
+//            }
+//            else if (obj == PlayModeStateChange.ExitingPlayMode) {
+//                playing = false;
+//                if (targetView != null) {
+//                    targetView.onElementCreated -= OnElementCreated;
+//                }
+//
+//                if (camera != null) {
+//                    DestroyImmediate(camera.gameObject);
+//                }
+//                
+//            }
         }
 
         private void OnElementCreated(UIElement element) {
@@ -98,19 +98,16 @@ namespace Src.Editor {
         }
 
         public void OnGUI() {
-            //EditorGUILayout.BeginVertical();
+            EditorGUILayout.BeginVertical();
 
             if (playing) {
                 SceneView.RepaintAll();
-                // Rect oldRect = Camera.main.pixelRect;
-                // Handles.SetCamera(new Rect(0, 20, 512, 512), Camera.main);
+               
 
                 // important: only render during the repaint event
                 if (Event.current.type == EventType.Repaint) {
-                 //   Handles.DrawCamera(new Rect(0, 36, 1024, 1024), SceneView.lastActiveSceneView.camera, DrawCameraMode.Normal);
                 }
 
-                // Camera.main.pixelRect = oldRect;
                 if (needsReload) {
                     needsReload = false;
                     treeView.Reload();
@@ -120,7 +117,7 @@ namespace Src.Editor {
 //                treeView.OnGUI(GUILayoutUtility.GetRect(0, 10000, 0, 10000));
             }
 
-            // EditorGUILayout.EndVertical();
+             EditorGUILayout.EndVertical();
         }
 
     }

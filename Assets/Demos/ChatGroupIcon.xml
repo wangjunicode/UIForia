@@ -7,12 +7,14 @@
 
         <Image style="chat-icon" src="{url(chatGroup.iconUrl)}"/>
 
-        <Group  style="unread-indicator">
+        <Group style="unread-indicator">
             <Text style="unread-count">
                 {chatGroup.unreadCount}
             </Text>
         </Group>
 
     </Contents>
-    
+
+
+
 </UITemplate>

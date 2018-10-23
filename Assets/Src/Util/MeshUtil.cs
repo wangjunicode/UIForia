@@ -24,8 +24,7 @@ namespace Src.Util {
             s_VertexHelper.Clear();
             return mesh;
         }
-
-
+        
         public static Mesh CreateStandardUIMesh(Vector2 offset, Size size, Color32 color32) {
             Mesh mesh = new Mesh();
 

@@ -91,9 +91,9 @@ Shader "UIForia/Default"
                 float2 p = float2(IN.texcoord.x, 1 - IN.texcoord.y);
                 // step is basically the function a < b ? 0 : 1;
                 // if either coord of inside is 0, pixel is not contained in clip rect
-                float2 inside = step(_ClipRect.xy, p) * step(p, _ClipRect.zw);                      
+                float2 inside = step(_ClipRect.xy, p) * step(p, _ClipRect.zw);    
+                                  
                // color.a *= inside.x * inside.y;
-                
                 //clip (color.a - 0.001);
                 
                 return color;

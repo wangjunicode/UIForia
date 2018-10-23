@@ -107,8 +107,7 @@ float cross2(float2 p1, float2 p2) {
 
 // returns the distance from a point to a line described by two points
 float distance_to_line(float2 pos, float2 p1, float2 p2) {
-    return abs((p2.x - p1.x) * (p1.y - pos.y) - (p1.x - pos.x) * (p2.y - p1.y)) 
-            / distance(p1, p2); 
+    return abs((p2.x - p1.x) * (p1.y - pos.y) - (p1.x - pos.x) * (p2.y - p1.y)) / distance(p1, p2); 
 }
 
 // http://stackoverflow.com/questions/849211/shortest-distance-between-a-point-and-a-line-segment
@@ -126,8 +125,7 @@ float ellipse(float2 pos, float2 radii) {
 
 // returns the distance to the ellipse from the center at angle theta
 float ellipse_distance(float theta, float2 radii) {
-    return (radii[0] * radii[1]) / sqrt(pow(radii[0], 2) 
-            * pow(sin(theta), 2) + pow(radii[1], 2) * pow(cos(theta), 2));
+    return (radii[0] * radii[1]) / sqrt(pow(radii[0], 2) * pow(sin(theta), 2) + pow(radii[1], 2) * pow(cos(theta), 2));
 }
 
 float2 point_on_ellipse(float theta, float2 radii) {
@@ -137,10 +135,8 @@ float2 point_on_ellipse(float theta, float2 radii) {
 
 float2 rotate_fill(float2 fpos) {
     float2 old_fpos = fpos;
-    fpos.x = old_fpos.x * cos(_FillRotation) 
-            - old_fpos.y * sin(_FillRotation);
-    fpos.y = old_fpos.x * sin(_FillRotation) 
-            + old_fpos.y * cos(_FillRotation);
+    fpos.x = old_fpos.x * cos(_FillRotation) - old_fpos.y * sin(_FillRotation);
+    fpos.y = old_fpos.x * sin(_FillRotation) + old_fpos.y * cos(_FillRotation);
     return fpos;
 }
 
@@ -151,11 +147,14 @@ fixed4 fill(float2 uv) {
     
     #if FILL_NONE
         return fixed4(0, 0, 0, 0);
+        
     #elif FILL_OUTLINE_COLOR
         return _OutlineColor;
+        
     #elif FILL_SOLID_COLOR
         // fill with the fill color
         return _FillColor;
+        
     #elif FILL_GRADIENT
         // gradient
         // todo - simplify and try to remove conditionals
@@ -190,10 +189,15 @@ fixed4 fill(float2 uv) {
             gmin = gmax * _GradientStart;
             current = length(fpos);
         }
-        if (current < gmin)
+        
+        if (current < gmin) {
             return _FillColor;
-        if (gmax == gmin)
+        }
+        
+        if (gmax == gmin) {
             return _FillColor2;
+        }
+        
         return lerp(_FillColor, _FillColor2, (current - gmin) / (gmax - gmin));
     #elif FILL_GRID
         // grid - background is _FillColor, lines are _FillColor2

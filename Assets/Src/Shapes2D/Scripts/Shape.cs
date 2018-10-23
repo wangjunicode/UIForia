@@ -777,6 +777,65 @@
 
         }
 
+        public class BaseShape {
+
+            public float outlineSize = 0.03f;
+            public float blur = 0.027f;
+            public Color outlineColor = new Color(1, 1, 1, 1);
+            public FillType fillType = FillType.MatchOutlineColor;
+            public Color fillColor = new Color(1, 1, 1, 1);
+            public Color fillColor2 = new Color(1, 1, 1, 1);
+            public float fillRotation = 0f;
+            public Vector2 fillOffset = new Vector2(0, 0);
+            public Vector2 fillScale = new Vector2(1, 1);
+            public GradientType gradientType = GradientType.Linear;
+            public GradientAxis gradientAxis = GradientAxis.Horizontal;
+            public float gradientStart = 0f;
+            public Texture2D fillTexture;
+            public float gridSize = 0.5f;
+            public float lineSize = 0.1f;
+
+        }
+
+        public class RectangleShape : BaseShape {
+
+            public Vector4 roundnessVec = Vector4.zero;
+
+        }
+
+        public class TriangleShape : BaseShape {
+
+            public float triangleOffset = 0.5f;
+
+        }
+
+        public class EllipseShape : BaseShape {
+
+            public Vector4 innerRadii;
+            public float arcMinAngle;
+            public float arcMaxAngle;
+            public bool invertArc;
+            public bool useArc;
+            public bool correctScaling;
+
+        }
+
+        public class PolygonShape : BaseShape {
+
+            public int numPolyVerts;
+            public Vector4[] polyVertices;
+
+        }
+
+        public class PathShape : BaseShape {
+
+            public float pathThickness;
+            public int numPathSegments;
+            public Vector4[] pathPoints;
+            public bool fillPathLoops;
+
+        }
+
         protected class ShaderProps {
 
             // we'll get scale from the object's scale in unity
@@ -962,53 +1021,33 @@
             SetKeyword(material, "RECTANGLE", shaderSettings.shapeType == ShapeType.Rectangle);
             SetKeyword(material, "ELLIPSE", shaderSettings.shapeType == ShapeType.Ellipse && shaderSettings.correctScaling);
             SetKeyword(material, "SIMPLE_ELLIPSE", shaderSettings.shapeType == ShapeType.Ellipse && !shaderSettings.correctScaling);
-            SetKeyword(material, "POLYGON_MAP", shaderSettings.shapeType == ShapeType.Polygon
-                                                && shaderSettings.usePolygonMap);
-            SetKeyword(material, "POLYGON_8", shaderSettings.shapeType == ShapeType.Polygon
-                                              && shaderSettings.numPolyVerts <= 8);
-            SetKeyword(material, "POLYGON_16", shaderSettings.shapeType == ShapeType.Polygon
-                                               && shaderSettings.numPolyVerts > 8 && shaderSettings.numPolyVerts <= 16);
-            SetKeyword(material, "POLYGON_24", shaderSettings.shapeType == ShapeType.Polygon
-                                               && shaderSettings.numPolyVerts > 16 && shaderSettings.numPolyVerts <= 24);
-            SetKeyword(material, "POLYGON_32", shaderSettings.shapeType == ShapeType.Polygon
-                                               && shaderSettings.numPolyVerts > 24 && shaderSettings.numPolyVerts <= 32);
-            SetKeyword(material, "POLYGON_40", shaderSettings.shapeType == ShapeType.Polygon
-                                               && shaderSettings.numPolyVerts > 32 && shaderSettings.numPolyVerts <= 40);
-            SetKeyword(material, "POLYGON_48", shaderSettings.shapeType == ShapeType.Polygon
-                                               && shaderSettings.numPolyVerts > 40 && shaderSettings.numPolyVerts <= 48);
-            SetKeyword(material, "POLYGON_56", shaderSettings.shapeType == ShapeType.Polygon
-                                               && shaderSettings.numPolyVerts > 48 && shaderSettings.numPolyVerts <= 56);
-            SetKeyword(material, "POLYGON_64", shaderSettings.shapeType == ShapeType.Polygon
-                                               && shaderSettings.numPolyVerts > 56 && shaderSettings.numPolyVerts <= 64);
+            SetKeyword(material, "POLYGON_MAP", shaderSettings.shapeType == ShapeType.Polygon && shaderSettings.usePolygonMap);
+            SetKeyword(material, "POLYGON_8", shaderSettings.shapeType == ShapeType.Polygon && shaderSettings.numPolyVerts <= 8);
+            SetKeyword(material, "POLYGON_16", shaderSettings.shapeType == ShapeType.Polygon && shaderSettings.numPolyVerts > 8 && shaderSettings.numPolyVerts <= 16);
+            SetKeyword(material, "POLYGON_24", shaderSettings.shapeType == ShapeType.Polygon && shaderSettings.numPolyVerts > 16 && shaderSettings.numPolyVerts <= 24);
+            SetKeyword(material, "POLYGON_32", shaderSettings.shapeType == ShapeType.Polygon && shaderSettings.numPolyVerts > 24 && shaderSettings.numPolyVerts <= 32);
+            SetKeyword(material, "POLYGON_40", shaderSettings.shapeType == ShapeType.Polygon && shaderSettings.numPolyVerts > 32 && shaderSettings.numPolyVerts <= 40);
+            SetKeyword(material, "POLYGON_48", shaderSettings.shapeType == ShapeType.Polygon && shaderSettings.numPolyVerts > 40 && shaderSettings.numPolyVerts <= 48);
+            SetKeyword(material, "POLYGON_56", shaderSettings.shapeType == ShapeType.Polygon && shaderSettings.numPolyVerts > 48 && shaderSettings.numPolyVerts <= 56);
+            SetKeyword(material, "POLYGON_64", shaderSettings.shapeType == ShapeType.Polygon && shaderSettings.numPolyVerts > 56 && shaderSettings.numPolyVerts <= 64);
             SetKeyword(material, "TRIANGLE", shaderSettings.shapeType == ShapeType.Triangle);
-            SetKeyword(material, "PATH_1", shaderSettings.shapeType == ShapeType.Path && !shaderSettings.fillPathLoops
-                                                                                      && shaderSettings.numPathSegments == 1);
-            SetKeyword(material, "PATH_2", shaderSettings.shapeType == ShapeType.Path && !shaderSettings.fillPathLoops
-                                                                                      && shaderSettings.numPathSegments == 2);
-            SetKeyword(material, "PATH_4", shaderSettings.shapeType == ShapeType.Path && !shaderSettings.fillPathLoops
-                                                                                      && shaderSettings.numPathSegments >= 3 && shaderSettings.numPathSegments <= 4);
-            SetKeyword(material, "PATH_8", shaderSettings.shapeType == ShapeType.Path && !shaderSettings.fillPathLoops
-                                                                                      && shaderSettings.numPathSegments >= 5 && shaderSettings.numPathSegments <= 8);
-            SetKeyword(material, "PATH_16", shaderSettings.shapeType == ShapeType.Path && !shaderSettings.fillPathLoops
-                                                                                       && shaderSettings.numPathSegments >= 9 && shaderSettings.numPathSegments <= 16);
-            SetKeyword(material, "PATH_24", shaderSettings.shapeType == ShapeType.Path && !shaderSettings.fillPathLoops
-                                                                                       && shaderSettings.numPathSegments >= 17 && shaderSettings.numPathSegments <= 25);
-            SetKeyword(material, "PATH_32", shaderSettings.shapeType == ShapeType.Path && !shaderSettings.fillPathLoops
-                                                                                       && shaderSettings.numPathSegments >= 25 && shaderSettings.numPathSegments <= 32);
-            SetKeyword(material, "FILLED_PATH_1", shaderSettings.shapeType == ShapeType.Path && shaderSettings.fillPathLoops
-                                                                                             && shaderSettings.numPathSegments == 1);
-            SetKeyword(material, "FILLED_PATH_2", shaderSettings.shapeType == ShapeType.Path && shaderSettings.fillPathLoops
-                                                                                             && shaderSettings.numPathSegments == 2);
-            SetKeyword(material, "FILLED_PATH_4", shaderSettings.shapeType == ShapeType.Path && shaderSettings.fillPathLoops
-                                                                                             && shaderSettings.numPathSegments >= 3 && shaderSettings.numPathSegments <= 4);
-            SetKeyword(material, "FILLED_PATH_8", shaderSettings.shapeType == ShapeType.Path && shaderSettings.fillPathLoops
-                                                                                             && shaderSettings.numPathSegments >= 5 && shaderSettings.numPathSegments <= 8);
-            SetKeyword(material, "FILLED_PATH_16", shaderSettings.shapeType == ShapeType.Path && shaderSettings.fillPathLoops
-                                                                                              && shaderSettings.numPathSegments >= 9 && shaderSettings.numPathSegments <= 16);
-            SetKeyword(material, "FILLED_PATH_24", shaderSettings.shapeType == ShapeType.Path && shaderSettings.fillPathLoops
-                                                                                              && shaderSettings.numPathSegments >= 17 && shaderSettings.numPathSegments <= 24);
-            SetKeyword(material, "FILLED_PATH_32", shaderSettings.shapeType == ShapeType.Path && shaderSettings.fillPathLoops
-                                                                                              && shaderSettings.numPathSegments >= 25 && shaderSettings.numPathSegments <= 32);
+            
+            SetKeyword(material, "PATH_1", shaderSettings.shapeType == ShapeType.Path && !shaderSettings.fillPathLoops && shaderSettings.numPathSegments == 1);
+            SetKeyword(material, "PATH_2", shaderSettings.shapeType == ShapeType.Path && !shaderSettings.fillPathLoops && shaderSettings.numPathSegments == 2);
+            SetKeyword(material, "PATH_4", shaderSettings.shapeType == ShapeType.Path && !shaderSettings.fillPathLoops && shaderSettings.numPathSegments >= 3 && shaderSettings.numPathSegments <= 4);
+            SetKeyword(material, "PATH_8", shaderSettings.shapeType == ShapeType.Path && !shaderSettings.fillPathLoops && shaderSettings.numPathSegments >= 5 && shaderSettings.numPathSegments <= 8);
+            SetKeyword(material, "PATH_16", shaderSettings.shapeType == ShapeType.Path && !shaderSettings.fillPathLoops && shaderSettings.numPathSegments >= 9 && shaderSettings.numPathSegments <= 16);
+            SetKeyword(material, "PATH_24", shaderSettings.shapeType == ShapeType.Path && !shaderSettings.fillPathLoops && shaderSettings.numPathSegments >= 17 && shaderSettings.numPathSegments <= 25);
+            SetKeyword(material, "PATH_32", shaderSettings.shapeType == ShapeType.Path && !shaderSettings.fillPathLoops && shaderSettings.numPathSegments >= 25 && shaderSettings.numPathSegments <= 32);
+            
+            SetKeyword(material, "FILLED_PATH_1", shaderSettings.shapeType == ShapeType.Path && shaderSettings.fillPathLoops && shaderSettings.numPathSegments == 1);
+            SetKeyword(material, "FILLED_PATH_2", shaderSettings.shapeType == ShapeType.Path && shaderSettings.fillPathLoops && shaderSettings.numPathSegments == 2);
+            SetKeyword(material, "FILLED_PATH_4", shaderSettings.shapeType == ShapeType.Path && shaderSettings.fillPathLoops && shaderSettings.numPathSegments >= 3 && shaderSettings.numPathSegments <= 4);
+            SetKeyword(material, "FILLED_PATH_8", shaderSettings.shapeType == ShapeType.Path && shaderSettings.fillPathLoops && shaderSettings.numPathSegments >= 5 && shaderSettings.numPathSegments <= 8);
+            SetKeyword(material, "FILLED_PATH_16", shaderSettings.shapeType == ShapeType.Path && shaderSettings.fillPathLoops && shaderSettings.numPathSegments >= 9 && shaderSettings.numPathSegments <= 16);
+            SetKeyword(material, "FILLED_PATH_24", shaderSettings.shapeType == ShapeType.Path && shaderSettings.fillPathLoops && shaderSettings.numPathSegments >= 17 && shaderSettings.numPathSegments <= 24);
+            SetKeyword(material, "FILLED_PATH_32", shaderSettings.shapeType == ShapeType.Path && shaderSettings.fillPathLoops && shaderSettings.numPathSegments >= 25 && shaderSettings.numPathSegments <= 32);
+            
             SetKeyword(material, "FILL_NONE", shaderSettings.fillType == FillType.None);
             SetKeyword(material, "FILL_CHECKERBOARD", shaderSettings.fillType == FillType.CheckerBoard);
             SetKeyword(material, "FILL_GRADIENT", shaderSettings.fillType == FillType.Gradient);
@@ -1035,21 +1074,27 @@
                 material.SetInt("_PreMultiplyAlpha", 1);
             }
 
-            if (IsUIComponent() && image.canvas.renderMode != RenderMode.WorldSpace)
+            if (IsUIComponent() && image.canvas.renderMode != RenderMode.WorldSpace) {
                 material.SetFloat("_PixelSize", 1f / image.canvas.scaleFactor);
-            else
+            }
+            else {
                 material.SetFloat("_PixelSize", 0); // let the shader figure it out
+            }
+
             material.SetFloat("_XScale", shaderSettings.xScale);
             material.SetFloat("_YScale", shaderSettings.yScale);
             material.SetFloat("_OutlineSize", shaderSettings.outlineSize);
             material.SetFloat("_Blur", shaderSettings.blur);
             material.SetColor("_OutlineColor", shaderSettings.outlineColor);
-            if (shaderSettings.fillType >= FillType.SolidColor
-                && shaderSettings.fillType < FillType.Texture)
+
+            if (shaderSettings.fillType >= FillType.SolidColor && shaderSettings.fillType < FillType.Texture) {
                 material.SetColor("_FillColor", shaderSettings.fillColor);
-            if (shaderSettings.fillType >= FillType.Gradient
-                && shaderSettings.fillType < FillType.Texture)
+            }
+
+            if (shaderSettings.fillType >= FillType.Gradient && shaderSettings.fillType < FillType.Texture) {
                 material.SetColor("_FillColor2", shaderSettings.fillColor2);
+            }
+
             if (shaderSettings.fillType > FillType.SolidColor) {
                 material.SetFloat("_FillRotation", shaderSettings.fillRotation);
                 material.SetFloat("_FillOffsetX", shaderSettings.fillOffset.x);
@@ -1069,37 +1114,43 @@
 
             if (shaderSettings.fillType == FillType.Gradient) {
                 material.SetInt("_GradientType", (int) shaderSettings.gradientType);
-                if (shaderSettings.gradientType < GradientType.Radial)
+
+                if (shaderSettings.gradientType < GradientType.Radial) {
                     material.SetInt("_GradientAxis", (int) shaderSettings.gradientAxis);
+                }
+
                 material.SetFloat("_GradientStart", shaderSettings.gradientStart);
             }
 
-            if (shaderSettings.fillTexture)
+            if (shaderSettings.fillTexture) {
                 material.SetTexture("_FillTexture", shaderSettings.fillTexture);
+            }
+
             if (shaderSettings.shapeType == ShapeType.Rectangle) {
                 material.SetVector("_Roundness", shaderSettings.roundnessVec);
             }
             else if (shaderSettings.shapeType == ShapeType.Ellipse) {
                 material.SetVector("_InnerRadii", shaderSettings.innerRadii);
-                material.SetVector("_ArcAngles", new Vector4(shaderSettings.arcMinAngle,
-                    shaderSettings.arcMaxAngle, shaderSettings.useArc ? 1 : 0,
-                    shaderSettings.invertArc ? 1 : 0));
+                material.SetVector("_ArcAngles", new Vector4(
+                    shaderSettings.arcMinAngle,
+                    shaderSettings.arcMaxAngle,
+                    shaderSettings.useArc ? 1 : 0,
+                    shaderSettings.invertArc ? 1 : 0)
+                );
             }
             else if (shaderSettings.shapeType == ShapeType.Polygon) {
                 material.SetFloat("_NumVerts", shaderSettings.numPolyVerts);
-#if UNITY_5_4_OR_NEWER
                 // in Unity 5.4 you can't resize an array property up, so we have to set the largest
                 // possible size once.  furthermore, Unity likes to reset our properties constantly
                 // so we need to check and make sure that hasn't happened.
-                if (!material.HasProperty("_Verts"))
+                if (!material.HasProperty("_Verts")) {
                     material.SetVectorArray("_Verts", new Vector4[MaxPolygonVertices]);
+                }
+
                 material.SetVectorArray("_Verts", shaderSettings.polyVertices);
-#else
-                    for (int i = 0; i < shaderSettings.numPolyVerts; i++)
-                        material.SetVector(ShaderVertexVarNames[i], shaderSettings.polyVertices[i]);
-                #endif
-                if (shaderSettings.usePolygonMap)
+                if (shaderSettings.usePolygonMap) {
                     material.SetTexture("_PolyMap", shaderSettings.polyMap);
+                }
             }
             else if (settings.shapeType == ShapeType.Triangle) {
                 material.SetFloat("_TriangleOffset", shaderSettings.triangleOffset);
@@ -1107,17 +1158,12 @@
             else if (settings.shapeType == ShapeType.Path) {
                 material.SetFloat("_Thickness", shaderSettings.pathThickness);
                 material.SetFloat("_NumSegments", shaderSettings.numPathSegments);
-#if UNITY_5_4_OR_NEWER
-                // in Unity 5.4 you can't resize an array property up, so we have to set the largest
-                // possible size once.  furthermore, Unity likes to reset our properties constantly
-                // so we need to check and make sure that hasn't happened.
-                if (!material.HasProperty("_Points"))
+
+                if (!material.HasProperty("_Points")) {
                     material.SetVectorArray("_Points", new Vector4[MaxPathSegments * 3]);
+                }
+
                 material.SetVectorArray("_Points", shaderSettings.pathPoints);
-#else
-                    for (int i = 0; i < shaderSettings.numPathSegments * 3; i++)
-                        material.SetVector(ShaderPointsVarNames[i], shaderSettings.pathPoints[i]);
-                #endif
             }
         }
 
@@ -1670,7 +1716,6 @@
             CheckForShaderReset();
 #endif
         }
-
 
         /*****************************************************************************
         /* The remaining methods are used internally by ShapeEditor.

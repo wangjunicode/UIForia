@@ -110,7 +110,7 @@ namespace Src.Systems {
                 float clipH = clipY + (clipRect.height / layoutResult.actualSize.height);
                 mat.mainTexture = null;
                 mat.SetVector("_ClipRect", new Vector4(clipX, clipY, clipW, clipH));
-                //Graphics.DrawMesh(data.drawable.GetMesh(), origin + position, Quaternion.identity, mat, 0, m_Camera, 0, null, false, false, false);
+                Graphics.DrawMesh(data.drawable.GetMesh(), origin + position, Quaternion.identity, mat, 0, m_Camera, 0, null, false, false, false);
             }
 
         }

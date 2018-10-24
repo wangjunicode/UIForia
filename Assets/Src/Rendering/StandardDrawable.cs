@@ -58,7 +58,7 @@ namespace Src.Systems {
             }
 
             Color32 color = element.style.computedStyle.BackgroundColor;
-            if (element.style.computedStyle.BackgroundImage.asset != null) {
+            if (element.style.computedStyle.BackgroundImage != null) {
                 if (!ColorUtil.IsDefined(element.style.computedStyle.BackgroundColor) || element.style.computedStyle.HasBorderRadius) {
                     color = Color.white;
                 }
@@ -66,12 +66,13 @@ namespace Src.Systems {
             // mesh generated at actual size, clipping will take care of it if it needs to
             mesh = MeshUtil.CreateStandardUIMesh(element.layoutResult.actualSize, color);
 
+            isMeshDirty = false;
             return mesh;
         }
 
         public Texture GetMainTexture() {
-            if (element.style.computedStyle.BackgroundImage.asset != null) {
-                return element.style.computedStyle.BackgroundImage.asset;
+            if (element.style.computedStyle.BackgroundImage != null) {
+                return element.style.computedStyle.BackgroundImage;
             }
 
             return Texture2D.whiteTexture;
@@ -85,10 +86,10 @@ namespace Src.Systems {
                     borderRadiusMaterial = new Material(GetBorderRadiusMaterial());
                 }
 
-                float tl = computed.RareData.BorderRadiusTopLeft.IsDefined() ? computed.RareData.BorderRadiusTopLeft.value : 0f;
-                float tr = computed.RareData.BorderRadiusTopRight.IsDefined() ? computed.RareData.BorderRadiusTopRight.value : 0f;
-                float bl = computed.RareData.BorderRadiusBottomLeft.IsDefined() ? computed.RareData.BorderRadiusBottomLeft.value : 0f;
-                float br = computed.RareData.BorderRadiusBottomRight.IsDefined() ? computed.RareData.BorderRadiusBottomRight.value : 0f;
+                float tl = computed.BorderRadiusTopLeft.IsDefined() ? computed.BorderRadiusTopLeft.value : 0f;
+                float tr = computed.BorderRadiusTopRight.IsDefined() ? computed.BorderRadiusTopRight.value : 0f;
+                float bl = computed.BorderRadiusBottomLeft.IsDefined() ? computed.BorderRadiusBottomLeft.value : 0f;
+                float br = computed.BorderRadiusBottomRight.IsDefined() ? computed.BorderRadiusBottomRight.value : 0f;
                 borderRadiusMaterial.SetVector("_Roundness", new Vector4(tl, tr, bl, br) * 100f); // roundness expects 0 - 50
                 borderRadiusMaterial.EnableKeyword("FILL_SOLID_COLOR");
                 borderRadiusMaterial.SetInt("_Shapes2D_SrcBlend", (int) UnityEngine.Rendering.BlendMode.One);

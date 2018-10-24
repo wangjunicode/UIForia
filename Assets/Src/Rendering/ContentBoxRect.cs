@@ -63,7 +63,7 @@ public struct ContentBoxRect {
 
 
 [DebuggerDisplay("{top}, {right}, {bottom}, {left}")]
-public struct PaddingBox {
+public struct FixedLengthRect {
 
     public UIFixedLength top;
     public UIFixedLength right;
@@ -72,28 +72,28 @@ public struct PaddingBox {
 
     public static readonly ContentBoxRect Unset = new ContentBoxRect(FloatUtil.UnsetValue);
 
-    public PaddingBox(float value) {
+    public FixedLengthRect(float value) {
         this.top = value;
         this.right = value;
         this.bottom = value;
         this.left = value;
     }
 
-    public PaddingBox(float top, float right, float bottom, float left) {
+    public FixedLengthRect(float top, float right, float bottom, float left) {
         this.top = top;
         this.right = right;
         this.bottom = bottom;
         this.left = left;
     }
 
-    public PaddingBox(UIFixedLength top, UIFixedLength right, UIFixedLength bottom, UIFixedLength left) {
+    public FixedLengthRect(UIFixedLength top, UIFixedLength right, UIFixedLength bottom, UIFixedLength left) {
         this.top = top;
         this.right = right;
         this.bottom = bottom;
         this.left = left;
     }
    
-    public bool Equals(PaddingBox other) {
+    public bool Equals(FixedLengthRect other) {
         return top == other.top
                && right == other.right
                && bottom == other.bottom
@@ -102,11 +102,11 @@ public struct PaddingBox {
 
     public override bool Equals(object obj) {
         if (ReferenceEquals(null, obj)) return false;
-        return obj is PaddingBox && Equals((PaddingBox) obj);
+        return obj is FixedLengthRect && Equals((FixedLengthRect) obj);
     }
 
     [DebuggerStepThrough]
-    public static bool operator ==(PaddingBox self, PaddingBox other) {
+    public static bool operator ==(FixedLengthRect self, FixedLengthRect other) {
         return self.top == other.top
                && self.left == other.left
                && self.right == other.right
@@ -114,7 +114,7 @@ public struct PaddingBox {
     }
 
     [DebuggerStepThrough]
-    public static bool operator !=(PaddingBox self, PaddingBox other) {
+    public static bool operator !=(FixedLengthRect self, FixedLengthRect other) {
         return !(self == other);
     }
 

@@ -4,21 +4,21 @@ using Src.Layout;
 using Src.Layout.LayoutTypes;
 using Src.Rendering;
 using Src.Util;
+using TMPro;
 using UnityEngine;
 
 namespace Rendering {
 
     public static class DefaultStyleValues {
 
-        // todo border radius & margin need to be fixed lengths
-        public static readonly UIMeasurement BorderRadiusTopLeft = new UIMeasurement(0);
-        public static readonly UIMeasurement BorderRadiusTopRight = new UIMeasurement(0);
-        public static readonly UIMeasurement BorderRadiusBottomRight = new UIMeasurement(0);
-        public static readonly UIMeasurement BorderRadiusBottomLeft = new UIMeasurement(0);
+        public static readonly UIFixedLength BorderRadiusTopLeft = new UIFixedLength(0);
+        public static readonly UIFixedLength BorderRadiusTopRight = new UIFixedLength(0);
+        public static readonly UIFixedLength BorderRadiusBottomRight = new UIFixedLength(0);
+        public static readonly UIFixedLength BorderRadiusBottomLeft = new UIFixedLength(0);
 
         public static readonly Color BorderColor = ColorUtil.UnsetValue;
         public static readonly Color BackgroundColor = ColorUtil.UnsetValue;
-        public static readonly Texture2DAssetReference BackgroundImage = new Texture2DAssetReference(IntUtil.UnsetValue);
+        public static readonly Texture2D BackgroundImage = null;
 
         public static readonly Overflow OverflowX = Overflow.None;
         public static readonly Overflow OverflowY = Overflow.None;
@@ -77,7 +77,7 @@ namespace Rendering {
         public const int TextFontSize = 18;
         public static readonly Color TextColor = Color.black;
         public const TextUtil.FontStyle TextFontStyle = TextUtil.FontStyle.Normal;
-        public static readonly FontAssetReference TextFontAsset = new FontAssetReference("default");
+        public static readonly TMP_FontAsset TextFontAsset = TMP_FontAsset.defaultFontAsset;
         public const TextUtil.TextAlignment TextAlignment = TextUtil.TextAlignment.Left;
         public const TextUtil.TextTransform TextTransform = TextUtil.TextTransform.None;
 

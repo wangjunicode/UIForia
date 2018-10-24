@@ -12,7 +12,7 @@ public class FlexLayoutRowTests {
     
     [Template(TemplateType.String, @"
         <UITemplate>
-            <Style classPath='LayoutSystemTests+LayoutTestThing+Style'/>
+            <Style path='LayoutSystemTests+LayoutTestThing+Style'/>
             <Contents style.layoutType='Flex'>
               
             </Contents>
@@ -49,7 +49,7 @@ public class FlexLayoutRowTests {
     
         string template = @"
         <UITemplate>
-            <Style classPath='FlexLayoutRowTests+FlexRowLayoutThing+Style'/>
+            <Style path='FlexLayoutRowTests+FlexRowLayoutThing+Style'/>
             <Contents style.layoutType='Flex' style.width='500f'>
                 <Group x-id='child0' style='w100h100'/>
                 <Group x-id='child1' style='w100h100'/>
@@ -75,7 +75,7 @@ public class FlexLayoutRowTests {
     
         string template = @"
         <UITemplate>
-            <Style classPath='FlexLayoutRowTests+FlexRowLayoutThing+Style'/>
+            <Style path='FlexLayoutRowTests+FlexRowLayoutThing+Style'/>
             <Contents style.layoutType='Flex' style.width='500f'>
                 <Group x-id='child0' style='w100h100'/>
                 <Group x-id='child1' style='w100h100'/>
@@ -101,7 +101,7 @@ public class FlexLayoutRowTests {
     
         string template = @"
         <UITemplate>
-            <Style classPath='FlexLayoutRowTests+FlexRowLayoutThing+Style'/>
+            <Style path='FlexLayoutRowTests+FlexRowLayoutThing+Style'/>
             <Contents style.layoutType='Flex' style.width='500f'>
                 <Group x-id='child0' style='w100h100'/>
                 <Group x-id='child1' style='w100h100'/>
@@ -127,7 +127,7 @@ public class FlexLayoutRowTests {
     
         string template = @"
         <UITemplate>
-            <Style classPath='FlexLayoutRowTests+FlexRowLayoutThing+Style'/>
+            <Style path='FlexLayoutRowTests+FlexRowLayoutThing+Style'/>
             <Contents style.layoutType='Flex' style.width='500f'>
                 <Group x-id='child0' style='w100h100'/>
                 <Group x-id='child1' style='w100h100'/>
@@ -152,7 +152,7 @@ public class FlexLayoutRowTests {
     public void AppliesMainAxisEnd() {
         string template = @"
         <UITemplate>
-            <Style classPath='FlexLayoutRowTests+FlexRowLayoutThing+Style'/>
+            <Style path='FlexLayoutRowTests+FlexRowLayoutThing+Style'/>
             <Contents style.layoutType='Flex' style.width='500f' style.height='500f'>
                 <Group x-id='child0' style='w100h100'/>
                 <Group x-id='child1' style='w100h100'/>
@@ -176,7 +176,7 @@ public class FlexLayoutRowTests {
     public void AppliesMainAxisStart() {
         string template = @"
         <UITemplate>
-            <Style classPath='FlexLayoutRowTests+FlexRowLayoutThing+Style'/>
+            <Style path='FlexLayoutRowTests+FlexRowLayoutThing+Style'/>
             <Contents style.layoutType='Flex' style.width='500f' style.height='500f'>
                 <Group x-id='child0' style='w100h100'/>
                 <Group x-id='child1' style='w100h100'/>
@@ -200,7 +200,7 @@ public class FlexLayoutRowTests {
     public void AppliesMainAxisSpaceBetween() {
         string template = @"
         <UITemplate>
-            <Style classPath='FlexLayoutRowTests+FlexRowLayoutThing+Style'/>
+            <Style path='FlexLayoutRowTests+FlexRowLayoutThing+Style'/>
             <Contents style.layoutType='Flex' style.width='500f' style.height='500f'>
                 <Group x-id='child0' style='w100h100'/>
                 <Group x-id='child1' style='w100h100'/>
@@ -224,7 +224,7 @@ public class FlexLayoutRowTests {
     public void AppliesMainAxisSpaceAround() {
         string template = @"
         <UITemplate>
-            <Style classPath='FlexLayoutRowTests+FlexRowLayoutThing+Style'/>
+            <Style path='FlexLayoutRowTests+FlexRowLayoutThing+Style'/>
             <Contents style.layoutType='Flex' style.width='600f' style.height='600f'>
                 <Group x-id='child0' style='w100h100'/>
                 <Group x-id='child1' style='w100h100'/>
@@ -250,7 +250,7 @@ public class FlexLayoutRowTests {
     public void HandlesCustomOrdering() {
         string template = @"
         <UITemplate>
-            <Style classPath='FlexLayoutRowTests+FlexRowLayoutThing+Style'/>
+            <Style path='FlexLayoutRowTests+FlexRowLayoutThing+Style'/>
             <Contents style.layoutType='Flex' style.width='500f'>
                 <Group x-id='child0' style='w100h100'/>
                 <Group x-id='child1' style='w100h100' />
@@ -275,7 +275,7 @@ public class FlexLayoutRowTests {
     public void HandleCrossAxisOverride() {
         string template = @"
         <UITemplate>
-            <Style classPath='FlexLayoutRowTests+FlexRowLayoutThing+Style'/>
+            <Style path='FlexLayoutRowTests+FlexRowLayoutThing+Style'/>
             <Contents style.layoutType='Flex' style.width='500f'>
                 <Group x-id='child0' style='w100h100'/>
                 <Group x-id='child1' style='w100h100' />
@@ -300,7 +300,7 @@ public class FlexLayoutRowTests {
     public void GrowsBasedOnGrowthFactor() {
         string template = @"
         <UITemplate>
-            <Style classPath='FlexLayoutRowTests+FlexRowLayoutThing+Style'/>
+            <Style path='FlexLayoutRowTests+FlexRowLayoutThing+Style'/>
             <Contents style.layoutType='Flex' style.width='600f' style.height='500f'>
                 <Group x-id='child0' style='w100h100'/>
                 <Group x-id='child1' style='w100h100' style.growthFactor='1' />
@@ -323,7 +323,7 @@ public class FlexLayoutRowTests {
     public void ShrinksBasedOnShrinkFactor() {
         string template = @"
         <UITemplate>
-            <Style classPath='FlexLayoutRowTests+FlexRowLayoutThing+Style'/>
+            <Style path='FlexLayoutRowTests+FlexRowLayoutThing+Style'/>
             <Contents style.layoutType='Flex' style.width='600f' style.height='250f'>
                 <Group x-id='child0' style='w100h100'/>
                 <Group x-id='child1' style='w100h100' style.shrinkFactor='1' />
@@ -346,7 +346,7 @@ public class FlexLayoutRowTests {
     public void WrapsOnExactSizeMatch() {
         string template = @"
         <UITemplate>
-            <Style classPath='FlexLayoutRowTests+FlexRowLayoutThing+Style'/>
+            <Style path='FlexLayoutRowTests+FlexRowLayoutThing+Style'/>
             <Contents style.layoutType='Flex' style.width='600f' style.height='500f'>
                 <Group x-id='child0' style.width='100f' style.height='500f'/>
                 <Group x-id='child1' style='w100h100'/>
@@ -369,7 +369,7 @@ public class FlexLayoutRowTests {
     public void WrapsOnSizeOverflow() {
         string template = @"
         <UITemplate>
-            <Style classPath='FlexLayoutRowTests+FlexRowLayoutThing+Style'/>
+            <Style path='FlexLayoutRowTests+FlexRowLayoutThing+Style'/>
             <Contents style.layoutType='Flex' style.width='600f' style.height='500f'>
                 <Group x-id='child0' style.width='100f' style.height='450f'/>
                 <Group x-id='child1' style='w100h100'/>
@@ -393,7 +393,7 @@ public class FlexLayoutRowTests {
     public void WrapsOnSizeExceeded() {
         string template = @"
         <UITemplate>
-            <Style classPath='FlexLayoutRowTests+FlexRowLayoutThing+Style'/>
+            <Style path='FlexLayoutRowTests+FlexRowLayoutThing+Style'/>
             <Contents style.layoutType='Flex' style.width='600f' style.height='500f'>
                 <Group x-id='child0' style.width='100f' style.height='550f'/>
                 <Group x-id='child1' style='w100h100'/>
@@ -416,7 +416,7 @@ public class FlexLayoutRowTests {
     public void GrowWrappedTracks() {
         string template = @"
         <UITemplate>
-            <Style classPath='FlexLayoutRowTests+FlexRowLayoutThing+Style'/>
+            <Style path='FlexLayoutRowTests+FlexRowLayoutThing+Style'/>
             <Contents style.layoutType='Flex' style.width='600f' style.height='500f'>
                 <Group x-id='child0' style.width='100f' style.height='450f' style.growthFactor='1'/>
                 <Group x-id='child1' style='w100h100' style.growthFactor='1'/>
@@ -439,7 +439,7 @@ public class FlexLayoutRowTests {
     public void ShrinkWrappedTracks() {
         string template = @"
         <UITemplate>
-            <Style classPath='FlexLayoutRowTests+FlexRowLayoutThing+Style'/>
+            <Style path='FlexLayoutRowTests+FlexRowLayoutThing+Style'/>
             <Contents style.layoutType='Flex' style.width='600f' style.height='400f'>
                 <Group x-id='child0' style.width='100f' style.height='450f' style.shrinkFactor='1'/>
                 <Group x-id='child1' style.width='100f' style.height='300f' style.shrinkFactor='1'/>
@@ -462,7 +462,7 @@ public class FlexLayoutRowTests {
     public void RespectsPaddingValues() {
         string template = @"
         <UITemplate>
-            <Style classPath='FlexLayoutRowTests+FlexRowLayoutThing+Style'/>
+            <Style path='FlexLayoutRowTests+FlexRowLayoutThing+Style'/>
             <Contents style.layoutType='Flex' style.layoutDirection='Row' style.width='500f' style.height='content(100)' style.paddingTop='5f' style.paddingBottom='5f'>
                 <Group x-id='child0' style='w100h100'/>
                 <Group x-id='child1' style='w100h100'/>
@@ -485,7 +485,7 @@ public class FlexLayoutRowTests {
     public void WrapWithMultipleColumnSizes() {
         string template = @"
         <UITemplate>
-            <Style classPath='FlexLayoutRowTests+FlexRowLayoutThing+Style'/>
+            <Style path='FlexLayoutRowTests+FlexRowLayoutThing+Style'/>
             <Contents style.layoutType='Flex' style.width='600f' style.height='400f'>
                 <Group x-id='child0' style.width='100f' style.height='450f'/>
                 <Group x-id='child1' style.width='200f' style.height='200f'/>
@@ -508,7 +508,7 @@ public class FlexLayoutRowTests {
     public void Wrap_AlignTracks() {
         string template = @"
         <UITemplate>
-            <Style classPath='FlexLayoutRowTests+FlexRowLayoutThing+Style'/>
+            <Style path='FlexLayoutRowTests+FlexRowLayoutThing+Style'/>
             <Contents style.layoutType='Flex' style.width='400f' style.height='400f'>
                 <Group x-id='child0' style.width='100f' style.height='450f'/>
                 <Group x-id='child1' style.width='200f' style.height='200f'/>
@@ -532,7 +532,7 @@ public class FlexLayoutRowTests {
     public void SetsActualWidthAndHeight() {
         string template = @"
         <UITemplate>
-            <Style classPath='FlexLayoutRowTests+FlexRowLayoutThing+Style'/>
+            <Style path='FlexLayoutRowTests+FlexRowLayoutThing+Style'/>
             <Contents style.layoutType='Flex' style.layoutDirection='Row' style.width='content(100)' style.height='content(100)'>
                 <Group x-id='child0' style='w100h100' style.paddingLeft='5f' style.paddingRight='5f'/>
                 <Group x-id='child1' style='w100h100' style.paddingLeft='5f' style.paddingRight='5f'/>

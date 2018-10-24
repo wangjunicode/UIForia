@@ -1,15 +1,18 @@
+
 namespace Src {
 
     public struct StyleDefinition {
 
-        internal const string k_EmptyAliasName = "base";
+        internal const string k_EmptyAliasName = "__base__";
         
         public readonly string alias;
-        public readonly string classPath;
-
-        public StyleDefinition(string alias, string classPath) {
+        public readonly string importPath;
+        public readonly string body;
+        
+        public StyleDefinition(string alias, string importPath,  string body = null) {
             this.alias = alias;
-            this.classPath = classPath;
+            this.importPath = importPath;
+            this.body = body;
         }
         
     }

@@ -1,8 +1,8 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using Rendering;
 using Src.Compilers.AliasSources;
+using Src.Parsing.StyleParser;
 using Src.Rendering;
 using Src.Util;
 
@@ -12,28 +12,28 @@ namespace Src {
 
         private static readonly List<MetaData> EmptyElementList = new List<MetaData>(0);
 
-        public string filePath;
-        public List<UIStyle> styles;
         public List<ImportDeclaration> imports;
-        public List<StyleDefinition> styleGroups;
+        public readonly string templateId;
         public readonly ExpressionCompiler compiler;
         public readonly ContextDefinition contextDefinition;
 
         public readonly UIElementTemplate rootElementTemplate;
 
-        private int idGenerator;
+        private static int idGenerator;
         private bool isCompiled;
-
-        public ParsedTemplate(UIElementTemplate rootElement, List<StyleDefinition> styleDefinitions = null) {
+        private List<StyleDefinition> styleGroups;
+        
+        public ParsedTemplate(UIElementTemplate rootElement, string filePath = null) {
+            if (filePath != null) {
+                templateId = filePath;
+            }
+            else {
+                templateId = "Template" + (++idGenerator);
+            }
             this.rootElementTemplate = rootElement;
             this.styleGroups = new List<StyleDefinition>();
             this.contextDefinition = new ContextDefinition(rootElement.RootType);
             this.compiler = new ExpressionCompiler(contextDefinition);
-            if (styleDefinitions != null) {
-                for (int i = 0; i < styleDefinitions.Count; i++) {
-                    AddStyleDefinition(styleDefinitions[i]);
-                }
-            }
         }
 
         public List<UITemplate> childTemplates => rootElementTemplate.childTemplates;
@@ -52,11 +52,14 @@ namespace Src {
             for (int i = 0; i < rootElementTemplate.childTemplates.Count; i++) {
                 UITemplate template = rootElementTemplate.childTemplates[i];
                 if (template is UIChildrenTemplate) {
-                    instanceData.element.templateChildren = new UIElement[scope.inputChildren.Count];
-                    for (int j = 0; j < scope.inputChildren.Count; j++) {
-                        instanceData.AddChild(scope.inputChildren[j]);
-                        instanceData.element.templateChildren[j] = scope.inputChildren[j].element;
+                    if (scope.inputChildren != null) {
+                        instanceData.element.templateChildren = new UIElement[scope.inputChildren.Count];
+                        for (int j = 0; j < scope.inputChildren.Count; j++) {
+                            instanceData.AddChild(scope.inputChildren[j]);
+                            instanceData.element.templateChildren[j] = scope.inputChildren[j].element;
+                        }
                     }
+
                     scope.inputChildren = null;
                 }
                 else {
@@ -126,9 +129,12 @@ namespace Src {
             }
         }
 
-        public UIBaseStyleGroup GetStyleGroupInstance(string styleName) {
+        public UIBaseStyleGroup ResolveStyleGroup(string styleName) {
+            StyleDefinition def;
+            // if no dot in path then the style name is the alias
             if (styleName.IndexOf('.') == -1) {
-                return StyleGroupProcessor.ResolveStyle(FindStyleGroupClassPath(StyleDefinition.k_EmptyAliasName), styleName);
+                def = GetStyleDefinitionFromAlias(StyleDefinition.k_EmptyAliasName);
+                return StyleParser.GetParsedStyle(def.importPath, def.body, styleName);
             }
 
             string[] path = styleName.Split('.');
@@ -136,33 +142,41 @@ namespace Src {
                 throw new Exception("Invalid style path: " + path);
             }
 
-            return StyleGroupProcessor.ResolveStyle(FindStyleGroupClassPath(path[0]), path[1]);
+            def = GetStyleDefinitionFromAlias(path[0]);
+            return StyleParser.GetParsedStyle(def.importPath, null, path[0]);
         }
 
-        public int MakeId() {
+        public static int MakeId() {
             return idGenerator++;
         }
 
-        public void AddStyleDefinition(StyleDefinition styleDefinition) {
+        public void SetStyleGroups(List<StyleDefinition> styleDefinitions) {
+            styleGroups = styleDefinitions;
             for (int i = 0; i < styleGroups.Count; i++) {
-                if (styleGroups[i].alias == styleDefinition.alias) {
-                    throw new Exception("Duplicate style alias: " + styleDefinition.alias);
+                StyleDefinition current = styleGroups[i];
+                for (int j = 0; j < styleGroups.Count; j++) {
+                    if (j == i) {
+                        continue;
+                    }
+                    if (styleGroups[j].alias == current.alias) {
+                        if (current.alias == StyleDefinition.k_EmptyAliasName) {
+                            throw new Exception("You cannot provide multiple style tags with a default alias");
+                        }
+                        throw new Exception("Duplicate style alias: " + current.alias);
+                    }    
                 }
             }
-
-            styleGroups.Add(styleDefinition);
         }
 
-        private string FindStyleGroupClassPath(string alias) {
+        private StyleDefinition GetStyleDefinitionFromAlias(string alias) {
             for (int i = 0; i < styleGroups.Count; i++) {
                 if (styleGroups[i].alias == alias) {
-                    return styleGroups[i].classPath;
+                    return styleGroups[i];
                 }
-            }
-
-            return null;
+            }    
+            throw new UIForia.ParseException("Unable to find a style with the alias: " + alias);
         }
-
+        
     }
 
 }

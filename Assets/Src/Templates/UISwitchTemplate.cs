@@ -29,7 +29,7 @@ namespace Src {
         }
 
         public override bool Compile(ParsedTemplate template) {
-            id = template.MakeId();
+            id = ParsedTemplate.MakeId();
             AttributeDefinition valueAttr = GetAttribute(SwitchValueAttribute);
 
             Expression valueExpression = template.compiler.Compile(valueAttr.value);

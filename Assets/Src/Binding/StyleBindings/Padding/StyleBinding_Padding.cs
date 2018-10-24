@@ -5,17 +5,17 @@ namespace Src.StyleBindings {
 
     public class StyleBinding_Padding : StyleBinding {
 
-        private readonly Expression<PaddingBox> expression;
+        private readonly Expression<FixedLengthRect> expression;
 
-        public StyleBinding_Padding(StyleState state, Expression<PaddingBox> expression) : base(RenderConstants.Padding, state) {
+        public StyleBinding_Padding(StyleState state, Expression<FixedLengthRect> expression) : base(RenderConstants.Padding, state) {
             this.expression = expression;
         }
 
         public override void Execute(UIElement element, UITemplateContext context) {
             if (!element.style.IsInState(state)) return;
 
-            PaddingBox value = element.style.computedStyle.padding;
-            PaddingBox newValue = expression.EvaluateTyped(context);
+            FixedLengthRect value = element.style.computedStyle.padding;
+            FixedLengthRect newValue = expression.EvaluateTyped(context);
             if (value != newValue) {
                 element.style.SetPadding(value, state);
             }
@@ -26,7 +26,7 @@ namespace Src.StyleBindings {
         }
 
         public override void Apply(UIStyle style, UITemplateContext context) {
-            PaddingBox padding = expression.EvaluateTyped(context);
+            FixedLengthRect padding = expression.EvaluateTyped(context);
             style.PaddingTop = padding.top;
             style.PaddingRight = padding.right;
             style.PaddingBottom = padding.bottom;

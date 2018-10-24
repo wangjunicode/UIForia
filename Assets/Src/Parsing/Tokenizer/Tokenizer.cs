@@ -7,7 +7,7 @@ namespace Src {
 
     public static class Tokenizer {
 
-        private static int ConsumeWhiteSpace(int start, string input) {
+        public static int ConsumeWhiteSpace(int start, string input) {
             int ptr = start;
             if (ptr >= input.Length) return input.Length;
             while (ptr < input.Length && char.IsWhiteSpace(input[ptr])) {
@@ -17,7 +17,7 @@ namespace Src {
             return ptr;
         }
 
-        private static int TryReadCharacters(int ptr, string input, string match, TokenType tokenType,
+        public static int TryReadCharacters(int ptr, string input, string match, TokenType tokenType,
             List<DslToken> output) {
             if (ptr + match.Length > input.Length) return ptr;
             for (int i = 0; i < match.Length; i++) {
@@ -30,11 +30,11 @@ namespace Src {
             return TryConsumeWhiteSpace(ptr + match.Length, input);
         }
 
-        private static int TryConsumeWhiteSpace(int ptr, string input) {
+        public static int TryConsumeWhiteSpace(int ptr, string input) {
             return ConsumeWhiteSpace(ptr, input);
         }
 
-        private static int TryReadDigit(int ptr, string input, List<DslToken> output) {
+        public static int TryReadDigit(int ptr, string input, List<DslToken> output) {
             bool foundDot = false;
             int startIndex = ptr;
             if (ptr >= input.Length) return input.Length;

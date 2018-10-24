@@ -1,7 +1,8 @@
 {
     "name": "_DemoAsmDef",
     "references": [
-        "SrcAsm"
+        "SrcAsm",
+        "Unity.TextMeshPro"
     ],
     "optionalUnityReferences": [],
     "includePlatforms": [],

@@ -3,7 +3,7 @@ using System;
 namespace Rendering {
 
     [Flags]
-    public enum UIUnit {
+    public enum UIMeasurementUnit {
 
         Unset = 0,
         Pixel = 1 << 0,

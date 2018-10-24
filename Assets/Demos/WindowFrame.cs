@@ -1,8 +1,8 @@
 using System.Collections.Generic;
 using Rendering;
-using Src.Input;
 using Src.Layout;
 using Src.Rendering;
+using TMPro;
 using UnityEngine;
 
 namespace Src {
@@ -92,7 +92,7 @@ namespace Src {
                     FontSize = 24,
                     PreferredWidth = 200f,
 //                    TextTransform = TextUtil.TextTransform.UpperCase,
-                    FontAsset = new FontAssetReference("Gotham-Medium SDF"),
+                    FontAsset = Resources.Load<TMP_FontAsset>("Gotham-Medium SDF"),
                 };
             }
 
@@ -123,7 +123,7 @@ namespace Src {
             public static UIStyle HeaderGroup() {
                 return new UIStyle() {
                     PaddingRight = 12f,
-                    PreferredWidth = new UIMeasurement(1.2f, UIUnit.Content),
+                    PreferredWidth = new UIMeasurement(1.2f, UIMeasurementUnit.Content),
                     FlexLayoutDirection = LayoutDirection.Column,
                     FlexLayoutCrossAxisAlignment = CrossAxisAlignment.Center,
                     FlexLayoutMainAxisAlignment = MainAxisAlignment.SpaceBetween
@@ -134,7 +134,7 @@ namespace Src {
             public static UIStyle SidebarIconTrack() {
                 return new UIStyle() {
                     PreferredWidth = UIMeasurement.Parent100,
-                    PreferredHeight = new UIMeasurement(1.2f, UIUnit.Content),
+                    PreferredHeight = new UIMeasurement(1.2f, UIMeasurementUnit.Content),
                     FlexLayoutCrossAxisAlignment = CrossAxisAlignment.Center,
                     FlexLayoutMainAxisAlignment = MainAxisAlignment.SpaceBetween
                 };
@@ -162,7 +162,7 @@ namespace Src {
             public static UIStyle MessagePanel() {
                 return new UIStyle() {
                     BackgroundColor = new Color32(224, 224, 224, 255),
-                    PreferredWidth = new UIMeasurement(0.22f, UIUnit.ParentSize),
+                    PreferredWidth = new UIMeasurement(0.22f, UIMeasurementUnit.ParentSize),
                     PreferredHeight = UIMeasurement.Parent100,
                 };
             }
@@ -170,7 +170,7 @@ namespace Src {
             [ExportStyle("message-panel-header")]
             public static UIStyle MessagePanelHeader() {
                 return new UIStyle() {
-                    Padding = new PaddingBox(12f),
+                    Padding = new FixedLengthRect(12f),
                     PreferredWidth = UIMeasurement.Parent100,
                     FlexLayoutDirection = LayoutDirection.Column,
                     FlexLayoutCrossAxisAlignment = CrossAxisAlignment.Center,

@@ -7,9 +7,9 @@ namespace Src.StyleBindings {
 
     public class StyleBinding_BackgroundImage : StyleBinding {
 
-        public readonly Expression<Texture2DAssetReference> expression;
+        public readonly Expression<Texture2D> expression;
         
-        public StyleBinding_BackgroundImage(StyleState state, Expression<Texture2DAssetReference> expression) 
+        public StyleBinding_BackgroundImage(StyleState state, Expression<Texture2D> expression) 
             : base(RenderConstants.BackgroundImage, state) {
             this.expression = expression;
         }        
@@ -17,8 +17,8 @@ namespace Src.StyleBindings {
         public override void Execute(UIElement element, UITemplateContext context) {
             if (!element.style.IsInState(state)) return;
             
-            Texture2DAssetReference textureRef = expression.EvaluateTyped(context);
-            if (textureRef.assetId != element.style.computedStyle.BackgroundImage.assetId) {
+            Texture2D textureRef = expression.EvaluateTyped(context);
+            if (textureRef != element.style.computedStyle.BackgroundImage) {
                 element.style.SetBackgroundImage(textureRef, state);
             }
         }

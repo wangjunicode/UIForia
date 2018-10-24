@@ -24,11 +24,8 @@ namespace Rendering {
         }
 
         [PublicAPI]
-        public AssetPointer<Texture2D> GetBackgroundImage(StyleState state) {
-            StyleProperty property = GetPropertyValueInState(StylePropertyId.BorderColor, state);
-            return property.IsDefined
-                ? new AssetPointer<Texture2D>((AssetType) property.valuePart0, property.valuePart1)
-                : new AssetPointer<Texture2D>(AssetType.Texture, -1);
+        public Texture2D GetBackgroundImage(StyleState state) {
+            return GetPropertyValueInState(StylePropertyId.BorderColor, state).AsTexture;
         }
         
         [PublicAPI]
@@ -37,7 +34,7 @@ namespace Rendering {
         }
 
         [PublicAPI]
-        public void SetBackgroundImage(Texture2DAssetReference image, StyleState state) {
+        public void SetBackgroundImage(Texture2D image, StyleState state) {
             UIStyle style = GetOrCreateInstanceStyle(state);
             style.BackgroundImage = image;
             if ((state & currentState) != 0 && style == GetActiveStyleForProperty(StylePropertyId.BackgroundImage)) {

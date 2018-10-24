@@ -12,6 +12,13 @@ using TMPro;
 
 namespace Rendering {
 
+    public class BaseUIStyle : UIStyle {
+
+        //BaseStyleBinding[] bindings;
+        internal void AddBinding(StylePropertyId propertyId, Binding binding) { }
+
+    }
+
     [DebuggerDisplay("{nameof(Id)}")]
     public class UIStyle {
 
@@ -38,7 +45,7 @@ namespace Rendering {
         private static int NextStyleId;
         private List<StyleProperty> m_StyleProperties;
         private TextPropertyIdFlag m_DefinedTextProperties;
-        
+
         // todo -- instead of every style having its own list, use a single large IntMap
         // todo    that is keyed by BitUtil.SetHighLowBits((int)propertyId, Id);
         private static readonly IntMap<StyleProperty> s_PropertyMap = new IntMap<StyleProperty>();
@@ -57,8 +64,7 @@ namespace Rendering {
 
         public IReadOnlyList<StyleProperty> Properties => m_StyleProperties;
 
-
-        #region Overflow Properties
+#region Overflow Properties
 
         public Overflow OverflowX {
             get { return (Overflow) FindEnumProperty(StylePropertyId.OverflowX); }
@@ -70,9 +76,9 @@ namespace Rendering {
             set { SetEnumProperty(StylePropertyId.OverflowY, (int) value); }
         }
 
-        #endregion
+#endregion
 
-        #region Paint Properties
+#region Paint Properties
 
         public Color BackgroundColor {
             get { return FindColorProperty(StylePropertyId.BackgroundColor); }
@@ -84,17 +90,17 @@ namespace Rendering {
             set { SetColorProperty(StylePropertyId.BorderColor, value); }
         }
 
-        public Texture2DAssetReference BackgroundImage {
+        public Texture2D BackgroundImage {
             get {
                 StyleProperty property = FindProperty(StylePropertyId.BackgroundImage);
-                return new Texture2DAssetReference(property.valuePart0);
+                return property.AsTexture;
             }
-            set { SetProperty(StylePropertyId.BackgroundImage, value.assetId); }
+            set { SetObjectProperty(StylePropertyId.BackgroundImage, value); }
         }
 
-        #endregion
+#endregion
 
-        #region Grid Item Properties
+#region Grid Item Properties
 
         public int GridItemColStart {
             get { return FindIntProperty(StylePropertyId.GridItemColStart); }
@@ -126,11 +132,11 @@ namespace Rendering {
             set { SetEnumProperty(StylePropertyId.GridItemRowSelfAlignment, (int) value); }
         }
 
-        #endregion
+#endregion
 
-        #region Grid Layout Properties
+#region Grid Layout Properties
 
-        public LayoutDirection GridLayoutFlowDirection {
+        public LayoutDirection GridLayoutDirection {
             get { return (LayoutDirection) FindEnumProperty(StylePropertyId.GridLayoutDirection); }
             set { SetEnumProperty(StylePropertyId.GridLayoutDirection, (int) value); }
         }
@@ -224,9 +230,9 @@ namespace Rendering {
             set { SetEnumProperty(StylePropertyId.GridLayoutRowAlignment, (int) value); }
         }
 
-        #endregion
+#endregion
 
-        #region Layout Type and Behavior
+#region Layout Type and Behavior
 
         public LayoutType LayoutType {
             get { return (LayoutType) FindEnumProperty(StylePropertyId.LayoutType); }
@@ -238,9 +244,9 @@ namespace Rendering {
             set { SetEnumProperty(StylePropertyId.LayoutBehavior, (int) value); }
         }
 
-        #endregion
+#endregion
 
-        #region Flex Layout Properties
+#region Flex Layout Properties
 
         public LayoutWrap FlexLayoutWrap {
             get { return (LayoutWrap) FindEnumProperty(StylePropertyId.FlexLayoutWrap); }
@@ -262,9 +268,9 @@ namespace Rendering {
             set { SetEnumProperty(StylePropertyId.FlexLayoutCrossAxisAlignment, (int) value); }
         }
 
-        #endregion
+#endregion
 
-        #region Flex Item Properties
+#region Flex Item Properties
 
         public int FlexItemGrowthFactor {
             get { return FindIntProperty(StylePropertyId.FlexItemGrow); }
@@ -286,9 +292,9 @@ namespace Rendering {
             set { SetEnumProperty(StylePropertyId.FlexItemSelfAlignment, (int) value); }
         }
 
-        #endregion
+#endregion
 
-        #region Transform Properties
+#region Transform Properties
 
         public UIFixedLength TransformPositionX {
             get { return GetUIFixedLengthProperty(StylePropertyId.TransformPositionX); }
@@ -335,9 +341,9 @@ namespace Rendering {
             set { SetEnumProperty(StylePropertyId.TransformBehaviorY, (int) value); }
         }
 
-        #endregion
+#endregion
 
-        #region Size Properties
+#region Size Properties
 
         public UIMeasurement PreferredWidth {
             get { return GetUIMeasurementProperty(StylePropertyId.PreferredWidth); }
@@ -369,12 +375,12 @@ namespace Rendering {
             set { SetUIMeasurementProperty(StylePropertyId.MaxHeight, value); }
         }
 
-        #endregion
+#endregion
 
-        #region Padding Properties
+#region Padding Properties
 
-        public PaddingBox Padding {
-            get { return new PaddingBox(PaddingTop, PaddingRight, PaddingBottom, PaddingLeft); }
+        public FixedLengthRect Padding {
+            get { return new FixedLengthRect(PaddingTop, PaddingRight, PaddingBottom, PaddingLeft); }
             set {
                 PaddingTop = value.top;
                 PaddingRight = value.right;
@@ -403,9 +409,9 @@ namespace Rendering {
             set { SetUIFixedLengthProperty(StylePropertyId.PaddingLeft, value); }
         }
 
-        #endregion
+#endregion
 
-        #region Margin Properties
+#region Margin Properties
 
         public ContentBoxRect Margin {
             get { return new ContentBoxRect(MarginTop, MarginRight, MarginBottom, MarginLeft); }
@@ -437,12 +443,12 @@ namespace Rendering {
             set { SetUIMeasurementProperty(StylePropertyId.MarginLeft, value); }
         }
 
-        #endregion
+#endregion
 
-        #region BorderProperties
+#region BorderProperties
 
-        public PaddingBox Border {
-            get { return new PaddingBox(BorderTop, BorderRight, BorderBottom, BorderLeft); }
+        public FixedLengthRect Border {
+            get { return new FixedLengthRect(BorderTop, BorderRight, BorderBottom, BorderLeft); }
             set {
                 BorderTop = value.top;
                 BorderRight = value.right;
@@ -471,29 +477,29 @@ namespace Rendering {
             set { SetUIFixedLengthProperty(StylePropertyId.BorderLeft, value); }
         }
 
-        public UIMeasurement BorderRadiusTopRight {
-            get { return GetUIMeasurementProperty(StylePropertyId.BorderRadiusTopRight); }
-            set { SetUIMeasurementProperty(StylePropertyId.BorderRadiusTopRight, value); }
+        public UIFixedLength BorderRadiusTopRight {
+            get { return GetUIFixedLengthProperty(StylePropertyId.BorderRadiusTopRight); }
+            set { SetUIFixedLengthProperty(StylePropertyId.BorderRadiusTopRight, value); }
         }
 
-        public UIMeasurement BorderRadiusTopLeft {
-            get { return GetUIMeasurementProperty(StylePropertyId.BorderRadiusTopRight); }
-            set { SetUIMeasurementProperty(StylePropertyId.BorderRadiusTopRight, value); }
+        public UIFixedLength BorderRadiusTopLeft {
+            get { return GetUIFixedLengthProperty(StylePropertyId.BorderRadiusTopRight); }
+            set { SetUIFixedLengthProperty(StylePropertyId.BorderRadiusTopRight, value); }
         }
 
-        public UIMeasurement BorderRadiusBottomLeft {
-            get { return GetUIMeasurementProperty(StylePropertyId.BorderRadiusTopRight); }
-            set { SetUIMeasurementProperty(StylePropertyId.BorderRadiusTopRight, value); }
+        public UIFixedLength BorderRadiusBottomLeft {
+            get { return GetUIFixedLengthProperty(StylePropertyId.BorderRadiusTopRight); }
+            set { SetUIFixedLengthProperty(StylePropertyId.BorderRadiusTopRight, value); }
         }
 
-        public UIMeasurement BorderRadiusBottomRight {
-            get { return GetUIMeasurementProperty(StylePropertyId.BorderRadiusTopRight); }
-            set { SetUIMeasurementProperty(StylePropertyId.BorderRadiusTopRight, value); }
+        public UIFixedLength BorderRadiusBottomRight {
+            get { return GetUIFixedLengthProperty(StylePropertyId.BorderRadiusTopRight); }
+            set { SetUIFixedLengthProperty(StylePropertyId.BorderRadiusTopRight, value); }
         }
 
-        #endregion
+#endregion
 
-        #region Text Properties
+#region Text Properties
 
         public Color TextColor {
             get { return FindColorProperty(StylePropertyId.TextColor); }
@@ -510,14 +516,14 @@ namespace Rendering {
             set { SetIntProperty(StylePropertyId.TextFontSize, value); }
         }
 
-        public FontAssetReference FontAsset {
+        public TMP_FontAsset FontAsset {
             get {
                 StyleProperty property = FindProperty(StylePropertyId.TextFontAsset);
                 return property.IsDefined
-                    ? new FontAssetReference(property.valuePart0)
-                    : new FontAssetReference(IntUtil.UnsetValue);
+                    ? property.AsFont
+                    : null;
             }
-            set { SetProperty(StylePropertyId.TextFontAsset, value.assetId); }
+            set { SetObjectProperty(StylePropertyId.TextFontAsset, value); }
         }
 
         public TextUtil.FontStyle FontStyle {
@@ -550,18 +556,18 @@ namespace Rendering {
             set { SetFloatProperty(StylePropertyId.TextIndentNewLine, value); }
         }
 
-        public float BorderRadius {
+        public BorderRadius BorderRadius {
             set {
-                SetUIMeasurementProperty(StylePropertyId.BorderRadiusTopLeft, value);
-                SetUIMeasurementProperty(StylePropertyId.BorderRadiusTopRight, value);
-                SetUIMeasurementProperty(StylePropertyId.BorderRadiusBottomLeft, value);
-                SetUIMeasurementProperty(StylePropertyId.BorderRadiusBottomRight, value);
+                SetUIFixedLengthProperty(StylePropertyId.BorderRadiusTopLeft, value.topLeft);
+                SetUIFixedLengthProperty(StylePropertyId.BorderRadiusTopRight, value.topRight);
+                SetUIFixedLengthProperty(StylePropertyId.BorderRadiusBottomLeft, value.bottomLeft);
+                SetUIFixedLengthProperty(StylePropertyId.BorderRadiusBottomRight, value.bottomRight);
             }
         }
 
-        #endregion
+#endregion
 
-        #region Anchor Properties
+#region Anchor Properties
 
         public UIFixedLength AnchorTop {
             get { return GetUIFixedLengthProperty(StylePropertyId.AnchorTop); }
@@ -588,9 +594,9 @@ namespace Rendering {
             set { SetEnumProperty(StylePropertyId.AnchorTarget, (int) value); }
         }
 
-        #endregion
+#endregion
 
-        #region Layer Properties
+#region Layer Properties
 
         public int LayerOffset {
             get { return FindIntProperty(StylePropertyId.RenderLayerOffset); }
@@ -607,9 +613,9 @@ namespace Rendering {
             set { SetIntProperty(StylePropertyId.RenderLayer, (int) value); }
         }
 
-        #endregion
+#endregion
 
-        #region Methods
+#region Methods
 
         internal void OnSpawn() {
             m_StyleProperties = ListPool<StyleProperty>.Get();
@@ -655,7 +661,7 @@ namespace Rendering {
                 if (m_StyleProperties[i].propertyId == propertyId) {
                     return new UIMeasurement(
                         FloatUtil.DecodeToFloat(m_StyleProperties[i].valuePart0),
-                        (UIUnit) m_StyleProperties[i].valuePart1
+                        (UIMeasurementUnit) m_StyleProperties[i].valuePart1
                     );
                 }
             }
@@ -716,7 +722,7 @@ namespace Rendering {
         }
 
         internal void SetUIMeasurementProperty(StylePropertyId propertyId, UIMeasurement measurement) {
-            if (measurement.unit == UIUnit.Unset || !FloatUtil.IsDefined(measurement.value)) {
+            if (measurement.unit == UIMeasurementUnit.Unset || !FloatUtil.IsDefined(measurement.value)) {
                 RemoveProperty(propertyId);
             }
             else {
@@ -730,6 +736,22 @@ namespace Rendering {
             }
             else {
                 SetProperty(propertyId, FloatUtil.EncodeToInt(size.minValue), (int) size.minUnit);
+            }
+        }
+
+        internal void SetObjectProperty(StylePropertyId propertyId, object value) {
+            if (value == null) {
+                RemoveProperty(propertyId);
+            }
+            else {
+                for (int i = 0; i < m_StyleProperties.Count; i++) {
+                    if (m_StyleProperties[i].propertyId == propertyId) {
+                        m_StyleProperties[i] = new StyleProperty(propertyId, 0, 0, value);
+                        return;
+                    }
+                }
+
+                m_StyleProperties.Add(new StyleProperty(propertyId, 0, 0, value));
             }
         }
 
@@ -787,9 +809,10 @@ namespace Rendering {
             }
 
             SetProperty(propertyId, new StyleColor(color).rgba);
-        }      
+        }
 
-        #endregion
+#endregion
+
     }
 
 }

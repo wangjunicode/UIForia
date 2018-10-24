@@ -1,5 +1,6 @@
 using Src;
 using Src.Util;
+using TMPro;
 using UnityEngine;
 
 namespace Rendering {
@@ -38,15 +39,21 @@ namespace Rendering {
 //            }
         }
 
-        public AssetPointer<Font> GetFont(StyleState state) {
+        public TMP_FontAsset GetFont(StyleState state) {
             StyleProperty property = GetPropertyValueInState(StylePropertyId.TextFontAsset, state);
             return property.IsDefined
-                ? new AssetPointer<Font>(AssetType.Texture, property.valuePart1)
-                : new AssetPointer<Font>(AssetType.Texture, IntUtil.UnsetValue);
+                ? property.AsFont
+                : null;
         }
 
-        public void SetFont(AssetPointer<Font> newFont, StyleState state) {
-            SetAssetPointerProperty(StylePropertyId.TextFontAsset, newFont, state);
+        public void SetFont(TMP_FontAsset newFont, StyleState state) {
+            UIStyle style = GetOrCreateInstanceStyle(state);
+            style.FontAsset = newFont;
+            if ((state & currentState) == 0) {
+                return;
+            }
+
+            computedStyle.SetProperty(GetPropertyValue(StylePropertyId.TextFontAsset));
         }
 
         public int GetFontSize(StyleState state) {

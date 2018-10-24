@@ -10,19 +10,19 @@ namespace Src {
     public struct UIMeasurement {
 
         public readonly float value;
-        public readonly UIUnit unit;
+        public readonly UIMeasurementUnit unit;
 
-        public UIMeasurement(float value, UIUnit unit = UIUnit.Pixel) {
+        public UIMeasurement(float value, UIMeasurementUnit unit = UIMeasurementUnit.Pixel) {
             this.value = value;
             this.unit = unit;
         }
 
-        public UIMeasurement(int value, UIUnit unit = UIUnit.Pixel) {
+        public UIMeasurement(int value, UIMeasurementUnit unit = UIMeasurementUnit.Pixel) {
             this.value = value;
             this.unit = unit;
         }
 
-        public UIMeasurement(double value, UIUnit unit = UIUnit.Pixel) {
+        public UIMeasurement(double value, UIMeasurementUnit unit = UIMeasurementUnit.Pixel) {
             this.value = (float) value;
             this.unit = unit;
         }
@@ -35,15 +35,15 @@ namespace Src {
 
         public bool IsFixed => !IsParentBased;
 
-        public bool IsParentBased => (unit & (UIUnit.ParentSize | UIUnit.ParentContentArea)) != 0;
+        public bool IsParentBased => (unit & (UIMeasurementUnit.ParentSize | UIMeasurementUnit.ParentContentArea)) != 0;
 
-        public bool IsContentBased => unit == UIUnit.Content;
+        public bool IsContentBased => unit == UIMeasurementUnit.Content;
         
         //public bool IsContentRelative => (unit & (UIUnit.Content | UIUnit.FitContent | UIUnit.MaxContent | UIUnit.MinContent)) != 0;
 
-        public static UIMeasurement ContentArea => new UIMeasurement(1f, UIUnit.ParentContentArea);
-        public static UIMeasurement Parent100 => new UIMeasurement(1f, UIUnit.ParentSize);
-        public static UIMeasurement Content100 => new UIMeasurement(1f, UIUnit.Content);
+        public static UIMeasurement ContentArea => new UIMeasurement(1f, UIMeasurementUnit.ParentContentArea);
+        public static UIMeasurement Parent100 => new UIMeasurement(1f, UIMeasurementUnit.ParentSize);
+        public static UIMeasurement Content100 => new UIMeasurement(1f, UIMeasurementUnit.Content);
         public static UIMeasurement Unset => new UIMeasurement(FloatUtil.UnsetValue);
 
         public bool Equals(UIMeasurement other) {
@@ -74,19 +74,19 @@ namespace Src {
         }
 
         public static implicit operator UIMeasurement(int value) {
-            return new UIMeasurement(value, UIUnit.Pixel);
+            return new UIMeasurement(value, UIMeasurementUnit.Pixel);
         }
 
         public static implicit operator UIMeasurement(float value) {
-            return new UIMeasurement(value, UIUnit.Pixel);
+            return new UIMeasurement(value, UIMeasurementUnit.Pixel);
         }
 
         public static implicit operator UIMeasurement(double value) {
-            return new UIMeasurement((float) value, UIUnit.Pixel);
+            return new UIMeasurement((float) value, UIMeasurementUnit.Pixel);
         }
 
         public static UIMeasurement Decode(int value, int unit) {
-            return new UIMeasurement(FloatUtil.DecodeToFloat(value), (UIUnit) unit);
+            return new UIMeasurement(FloatUtil.DecodeToFloat(value), (UIMeasurementUnit) unit);
         }
 
     }

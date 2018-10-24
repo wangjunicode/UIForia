@@ -295,7 +295,7 @@
             <e p="ScrollBehavior.cs" t="Include" />
             <e p="Size.cs" t="Include" />
             <e p="UIDimensions.cs" t="Include" />
-            <e p="UIUnit.cs" t="Include" />
+            <e p="UIMeasurementUnit.cs" t="Include" />
           </e>
           <e p="ParsedTemplate.cs" t="Include" />
           <e p="Parsing" t="Include">
@@ -331,12 +331,13 @@
             <e p="InvalidTemplateException.cs" t="Include" />
             <e p="OperatorType.cs" t="Include" />
             <e p="ProcessedType.cs" t="Include" />
-            <e p="Style" t="Include">
-              <e p="StyleParseUtil.cs" t="Include" />
-              <e p="TextStyleParser.cs" t="Include" />
-            </e>
             <e p="StyleParser" t="Include">
+              <e p="ParsedStyleSheet.cs" t="Include" />
+              <e p="ParseUtil.cs" t="Include" />
+              <e p="StyleDslToken.cs" t="Include" />
               <e p="StyleParser.cs" t="Include" />
+              <e p="StylePropertyMappers.cs" t="Include" />
+              <e p="StyleTokenType.cs" t="Include" />
             </e>
             <e p="TemplateParser.cs" t="Include" />
             <e p="TextTemplateParser.cs" t="Include" />
@@ -437,7 +438,6 @@
           <e p="SrcAsm.asmdef" t="Include" />
           <e p="StyleDebugView.cs" t="Include" />
           <e p="StyleDefinition.cs" t="Include" />
-          <e p="StyleGroupProcessor.cs" t="Include" />
           <e p="Systems" t="Include">
             <e p="BindingSystem.cs" t="Include" />
             <e p="DirectRenderSystem.cs" t="Include" />
@@ -541,6 +541,7 @@
           </e>
           <e p="ReflectionUtilTests.cs" t="Include" />
           <e p="SkipTreeTests.cs" t="Include" />
+          <e p="StyleParserTests.cs" t="Include" />
           <e p="StyleTests.cs" t="Include" />
           <e p="TemplateParsingTests.cs" t="Include" />
           <e p="Templates" t="Include">

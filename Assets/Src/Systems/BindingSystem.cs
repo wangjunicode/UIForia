@@ -24,6 +24,7 @@ namespace Src.Systems {
 
         public void OnReset() {
             bindingSkipTree.Clear();
+            repeatNodes.Clear();
         }
 
         public void OnUpdate() {

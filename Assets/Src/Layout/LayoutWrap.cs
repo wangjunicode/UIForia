@@ -6,6 +6,7 @@ namespace Rendering {
         None = 1,
         Wrap = 2,
         Reverse = 3,
+        WrapReverse = 4
 
     }
 

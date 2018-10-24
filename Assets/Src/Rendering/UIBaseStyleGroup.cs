@@ -4,6 +4,7 @@ namespace Src.Rendering {
 
     public class UIBaseStyleGroup {
 
+        public string name;
         public UIStyle hover;
         public UIStyle normal;
         public UIStyle active;

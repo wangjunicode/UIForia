@@ -13,12 +13,15 @@ namespace Src {
         public event Action<IDrawable> onMaterialDirty;
 
         private Mesh mesh;
-        private Texture2DAssetReference src;
+        private Texture2D src;
 
         public bool useNativeSize;
         public bool preserveAspectRatio;
         public bool scaleToFitContainer;
 
+        /*
+         * Todo -- this is wrong now, make src a path not an image
+         */
         public UIImageElement() {
             flags |= UIElementFlags.Image;
             flags |= UIElementFlags.Primitive;
@@ -26,10 +29,10 @@ namespace Src {
             IsGeometryDirty = true;
         }
 
-        public Texture2D Asset => src.asset;
+        public Texture2D Asset => src;
 
         public void SetTexture(Texture2D texture) {
-            src = new Texture2DAssetReference(texture);
+            src = texture;
             IsMaterialDirty = true;
             onMaterialDirty?.Invoke(this);
         }
@@ -79,7 +82,7 @@ namespace Src {
         public bool IsGeometryDirty { get; private set; }
 
         public Texture GetMainTexture() {
-            return src.asset;
+            return src;
         }
 
     }

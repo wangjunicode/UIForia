@@ -5,17 +5,17 @@ namespace Src.StyleBindings {
 
     public class StyleBinding_BorderRadius_TopRight : StyleBinding {
 
-        private readonly Expression<UIMeasurement> expression;
+        private readonly Expression<UIFixedLength> expression;
 
-        public StyleBinding_BorderRadius_TopRight(StyleState state, Expression<UIMeasurement> expression) : base(RenderConstants.BorderRadiusTopRight, state) {
+        public StyleBinding_BorderRadius_TopRight(StyleState state, Expression<UIFixedLength> expression) : base(RenderConstants.BorderRadiusTopRight, state) {
             this.expression = expression;
         }
 
         public override void Execute(UIElement element, UITemplateContext context) {
             if (!element.style.IsInState(state)) return;
             
-            UIMeasurement borderRadius = expression.EvaluateTyped(context);
-            UIMeasurement currentBorderRadius = element.style.computedStyle.RareData.borderRadiusTopRight;
+            UIFixedLength borderRadius = expression.EvaluateTyped(context);
+            UIFixedLength currentBorderRadius = element.style.computedStyle.BorderRadiusTopRight;
             if (borderRadius != currentBorderRadius) {
                 element.style.SetBorderRadiusTopRight(borderRadius, state);
             }

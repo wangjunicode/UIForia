@@ -45,7 +45,15 @@ namespace Src.Systems {
 
         public Rect ViewportRect { get; private set; }
 
-        public void OnReset() { }
+        public void OnReset() {
+            m_LayoutBoxMap.Clear();
+            m_PendingRectUpdates.Clear();
+            m_Elements.Clear();
+            m_PendingInitialization.Clear();
+            m_VirtualElements.Clear();
+            m_RootRequiresLayout = true;
+            m_Root.children.Clear();
+        }
 
         protected void InitializeLayoutBoxes() {
             if (m_PendingInitialization.Count == 0) {
@@ -123,11 +131,11 @@ namespace Src.Systems {
             layoutResult.Scale = new Vector2(box.style.TransformScaleX, box.style.TransformScaleY);
             layoutResult.LocalPosition = ResolveLocalPosition(box);
             // todo -- wrong?
-            layoutResult.ScreenPosition = ViewportRect.min + layoutResult.localPosition;
+            layoutResult.ScreenPosition = layoutResult.localPosition;
             layoutResult.Rotation = box.style.TransformRotation;
             layoutResult.Layer = computedLayer;
             layoutResult.ZIndex = zIndex;
-            layoutResult.clipRect = ViewportRect;
+            layoutResult.clipRect = new Rect(0, 0, ViewportRect.width, ViewportRect.height);
             element.layoutResult = layoutResult;
 
             while (stack.Count > 0) {

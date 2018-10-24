@@ -150,7 +150,7 @@ namespace Src.Compilers {
             switch (targetState.property) {
                 // Paint
                 case RenderConstants.BackgroundImage:
-                    return new StyleBinding_BackgroundImage(targetState.state, Compile<Texture2DAssetReference>(value, textureUrlSource));
+                    return new StyleBinding_BackgroundImage(targetState.state, Compile<Texture2D>(value, textureUrlSource));
 
                 case RenderConstants.BackgroundColor:
                     return new StyleBinding_BackgroundColor(targetState.state,
@@ -168,16 +168,16 @@ namespace Src.Compilers {
                     ));
 
                 case RenderConstants.BorderRadiusTopLeft:
-                    return new StyleBinding_BorderRadius_TopLeft(targetState.state, Compile<UIMeasurement>(value));
+                    return new StyleBinding_BorderRadius_TopLeft(targetState.state, Compile<UIFixedLength>(value));
 
                 case RenderConstants.BorderRadiusTopRight:
-                    return new StyleBinding_BorderRadius_TopRight(targetState.state, Compile<UIMeasurement>(value));
+                    return new StyleBinding_BorderRadius_TopRight(targetState.state, Compile<UIFixedLength>(value));
 
                 case RenderConstants.BorderRadiusBottomRight:
-                    return new StyleBinding_BorderRadius_BottomRight(targetState.state, Compile<UIMeasurement>(value));
+                    return new StyleBinding_BorderRadius_BottomRight(targetState.state, Compile<UIFixedLength>(value));
 
                 case RenderConstants.BorderRadiusBottomLeft:
-                    return new StyleBinding_BorderRadius_BottomLeft(targetState.state, Compile<UIMeasurement>(value));
+                    return new StyleBinding_BorderRadius_BottomLeft(targetState.state, Compile<UIFixedLength>(value));
 
                 // Transform
                 case RenderConstants.Translation:
@@ -290,7 +290,7 @@ namespace Src.Compilers {
                 // Padding
 
                 case RenderConstants.Padding:
-                    return new StyleBinding_Padding(targetState.state, Compile<PaddingBox>(value, rect1Source, rect2Source, rect4Source));
+                    return new StyleBinding_Padding(targetState.state, Compile<FixedLengthRect>(value, rect1Source, rect2Source, rect4Source));
 
                 case RenderConstants.PaddingTop:
                     return new StyleBinding_PaddingTop(targetState.state, Compile<UIFixedLength>(value, fixedSources));
@@ -307,7 +307,7 @@ namespace Src.Compilers {
                 // Border
 
                 case RenderConstants.Border:
-                    return new StyleBinding_Border(targetState.state, Compile<PaddingBox>(value, rect1Source, rect2Source, rect4Source));
+                    return new StyleBinding_Border(targetState.state, Compile<FixedLengthRect>(value, rect1Source, rect2Source, rect4Source));
 
                 case RenderConstants.BorderTop:
                     return new StyleBinding_BorderTop(targetState.state, Compile<UIFixedLength>(value, fixedSources));
@@ -421,42 +421,42 @@ namespace Src.Compilers {
 
         [Pure]
         public static UIMeasurement PixelMeasurement(float value) {
-            return new UIMeasurement(value, UIUnit.Pixel);
+            return new UIMeasurement(value, UIMeasurementUnit.Pixel);
         }
 
         [Pure]
         public static UIMeasurement ContentMeasurement(float value) {
-            return new UIMeasurement(value * 0.01, UIUnit.Content);
+            return new UIMeasurement(value * 0.01, UIMeasurementUnit.Content);
         }
 
         [Pure]
         public static UIMeasurement ParentMeasurement(float value) {
-            return new UIMeasurement(value * 0.01, UIUnit.ParentSize);
+            return new UIMeasurement(value * 0.01, UIMeasurementUnit.ParentSize);
         }
 
         [Pure]
         public static UIMeasurement ViewportWidthMeasurement(float value) {
-            return new UIMeasurement(value * 0.01, UIUnit.ViewportWidth);
+            return new UIMeasurement(value * 0.01, UIMeasurementUnit.ViewportWidth);
         }
 
         [Pure]
         public static UIMeasurement ViewportHeightMeasurement(float value) {
-            return new UIMeasurement(value * 0.01, UIUnit.ViewportHeight);
+            return new UIMeasurement(value * 0.01, UIMeasurementUnit.ViewportHeight);
         }
 
         [Pure]
-        public static PaddingBox Rect(float top, float right, float bottom, float left) {
-            return new PaddingBox(top, right, bottom, left);
+        public static FixedLengthRect Rect(float top, float right, float bottom, float left) {
+            return new FixedLengthRect(top, right, bottom, left);
         }
 
         [Pure]
-        public static PaddingBox Rect(float topBottom, float leftRight) {
-            return new PaddingBox(topBottom, leftRight, topBottom, leftRight);
+        public static FixedLengthRect Rect(float topBottom, float leftRight) {
+            return new FixedLengthRect(topBottom, leftRight, topBottom, leftRight);
         }
 
         [Pure]
-        public static PaddingBox Rect(float value) {
-            return new PaddingBox(value, value, value, value);
+        public static FixedLengthRect Rect(float value) {
+            return new FixedLengthRect(value, value, value, value);
         }
 
         [Pure]
@@ -492,8 +492,8 @@ namespace Src.Compilers {
         }
 
         [Pure]
-        public static Texture2DAssetReference TextureUrl(string url) {
-            return new Texture2DAssetReference(url);
+        public static Texture2D TextureUrl(string url) {
+            throw new NotImplementedException();
         }
 
         [Pure]

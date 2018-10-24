@@ -8,7 +8,7 @@ using UnityEngine;
 
 namespace Src.Systems {
 
-    public class StyleSystem : ISystem, IStyleSystem {
+    public class StyleSystem : IStyleSystem {
 
         protected readonly StyleAnimator animator;
         
@@ -27,7 +27,9 @@ namespace Src.Systems {
             animator.SetViewportRect(viewport);
         }
 
-        public void OnReset() { }
+        public void OnReset() {
+            animator.Reset();
+        }
 
         public void OnElementCreatedFromTemplate(MetaData elementData) {
             UIElement element = elementData.element;

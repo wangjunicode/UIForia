@@ -13,7 +13,7 @@ public class LayoutSystemTests {
 
     [Template(TemplateType.String, @"
         <UITemplate>
-            <Style classPath='LayoutSystemTests+LayoutTestThing+Style'/>
+            <Style path='LayoutSystemTests+LayoutTestThing+Style'/>
             <Contents style.layoutType='Flex'>
                 <Group x-id='child0' style='child1' style.width='100f' style.height='100f'/>
                 <Group x-id='child1' style.width='100f' style.height='100f'/>
@@ -96,7 +96,7 @@ public class LayoutSystemTests {
     public void ContentSized() {
         string template = @"
         <UITemplate>
-            <Style classPath='LayoutSystemTests+LayoutTestThing+Style'/>
+            <Style path='LayoutSystemTests+LayoutTestThing+Style'/>
             <Contents style.layoutType='Flex'>
                 <Group x-id='child0' style.width='100f' style.height='100f'/>
                 <Group x-id='child1' style.width='content(100)' style.height='content(100)'>
@@ -117,7 +117,7 @@ public class LayoutSystemTests {
     public void MaxSizeChanges() {
         string template = @"
         <UITemplate>
-            <Style classPath='LayoutSystemTests+LayoutTestThing+Style'/>
+            <Style path='LayoutSystemTests+LayoutTestThing+Style'/>
             <Contents style.layoutType='Flex'>
                 <Group x-id='child0' style.width='100f' style.height='100f'/>
                 <Group x-id='child1' style.width='content(100)' style.height='content(100)'>
@@ -141,7 +141,7 @@ public class LayoutSystemTests {
     public void WidthSizeConstraintChangesToContent() {
         string template = @"
         <UITemplate>
-            <Style classPath='LayoutSystemTests+LayoutTestThing+Style'/>
+            <Style path='LayoutSystemTests+LayoutTestThing+Style'/>
             <Contents style.layoutType='Flex'>
                 <Group x-id='child0' style.width='100f' style.height='100f'/>
                 <Group x-id='child1' style.width='400f' style.height='content(100)'>
@@ -168,7 +168,7 @@ public class LayoutSystemTests {
     public void HeightSizeConstraintChangesToMaxContent() {
         string template = @"
         <UITemplate>
-            <Style classPath='LayoutSystemTests+LayoutTestThing+Style'/>
+            <Style path='LayoutSystemTests+LayoutTestThing+Style'/>
             <Contents style.layoutType='Flex'>
                 <Group x-id='child0' style.width='100f' style.height='100f'/>
                 <Group x-id='child1' style.width='400f' style.height='300f'>
@@ -195,7 +195,7 @@ public class LayoutSystemTests {
     public void HeightSizeConstraintChangesToMinContent() {
         string template = @"
         <UITemplate>
-            <Style classPath='LayoutSystemTests+LayoutTestThing+Style'/>
+            <Style path='LayoutSystemTests+LayoutTestThing+Style'/>
             <Contents style.layoutType='Flex'>
                 <Group x-id='child0' style.width='100f' style.height='100f'/>
                 <Group x-id='child1' style.width='400f' style.height='300f'>
@@ -222,7 +222,7 @@ public class LayoutSystemTests {
     public void ChildEnabled() {
         string template = @"
         <UITemplate>
-            <Style classPath='LayoutSystemTests+LayoutTestThing+Style'/>
+            <Style path='LayoutSystemTests+LayoutTestThing+Style'/>
             <Contents style.layoutType='Flex'>
                 <Group x-id='child0' style.width='100f' style.height='100f'/>
                 <Group x-id='child1' style.width='content(100)' style.height='content(100)'>
@@ -250,7 +250,7 @@ public class LayoutSystemTests {
     public void ChildDisabled() {
         string template = @"
         <UITemplate>
-            <Style classPath='LayoutSystemTests+LayoutTestThing+Style'/>
+            <Style path='LayoutSystemTests+LayoutTestThing+Style'/>
             <Contents style.layoutType='Flex'>
                 <Group x-id='child0' style.width='100f' style.height='100f'/>
                 <Group x-id='child1' style.width='content(100)' style.height='content(100)'>
@@ -280,7 +280,7 @@ public class LayoutSystemTests {
     public void ScreenPositionsGetUpdated() {
         string template = @"
         <UITemplate>
-            <Style classPath='LayoutSystemTests+LayoutTestThing+Style'/>
+            <Style path='LayoutSystemTests+LayoutTestThing+Style'/>
             <Contents style.layoutType='Flex'>
                 <Group x-id='child0' style.width='100f' style.height='100f'/>
                 <Group x-id='child1' style='marker' style.width='content(100)' style.height='content(100)'>
@@ -316,7 +316,7 @@ public class LayoutSystemTests {
     public void DoesNotAddLayoutBoxForNonLaidOutElements() {
         string template = @"
         <UITemplate>
-            <Style classPath='LayoutSystemTests+LayoutTestThing+Style'/>
+            <Style path='LayoutSystemTests+LayoutTestThing+Style'/>
             <Contents style.layoutType='Flex'>
                 <Group x-id='child0' style.width='100f' style.height='100f'/>
                 <Repeat x-id='repeat' list='{list}'>
@@ -338,7 +338,7 @@ public class LayoutSystemTests {
     public void AssignsProperClipRects_WithoutLayers() {
         string template = @"
         <UITemplate>
-            <Style classPath='LayoutSystemTests+LayoutTestThing+Style'/>
+            <Style path='LayoutSystemTests+LayoutTestThing+Style'/>
             <Contents style.width='100f' style.height='200f'>
                 <Group x-id='child0' style.width='100f' style.height='100f'/>
                 <Group x-id='child1' style.width='100f' style.height='100f'/>
@@ -348,14 +348,14 @@ public class LayoutSystemTests {
         MockView mockView = new MockView(typeof(LayoutTestThing), template);
         mockView.Initialize();
         LayoutTestThing root = (LayoutTestThing) mockView.RootElement;
-        root.style.SetOverflowX(Overflow.Truncate, StyleState.Normal);
+        root.style.SetOverflowX(Overflow.Hidden, StyleState.Normal);
         MockLayoutSystem layoutSystem = (MockLayoutSystem) mockView.LayoutSystem;
         layoutSystem.SetViewportRect(new Rect(0, 0, 400, 400));
         mockView.Update();
         Assert.AreEqual(new Rect(0, 0, 400, 400), root.layoutResult.clipRect);
         Assert.AreEqual(new Rect(0, 0, 100, 400), root.FindById("child0").layoutResult.clipRect);
         Assert.AreEqual(new Rect(0, 0, 100, 400), root.FindById("child1").layoutResult.clipRect);
-        root.style.SetOverflowY(Overflow.Truncate, StyleState.Normal);
+        root.style.SetOverflowY(Overflow.Hidden, StyleState.Normal);
         mockView.Update();
         Assert.AreEqual(new Rect(0, 0, 400, 400), root.layoutResult.clipRect);
         Assert.AreEqual(new Rect(0, 0, 100, 200), root.FindById("child0").layoutResult.clipRect);
@@ -366,7 +366,7 @@ public class LayoutSystemTests {
     public void AssignsProperClipRects_NestedWithoutLayers() {
         string template = @"
         <UITemplate>
-            <Style classPath='LayoutSystemTests+LayoutTestThing+Style'/>
+            <Style path='LayoutSystemTests+LayoutTestThing+Style'/>
             <Contents style.width='100f' style.height='200f'>
                 <Group x-id='child0' style.width='100f' style.height='100f'>
                     <Group x-id='nested-child0' style.width='100f' style.height='100f'/>
@@ -378,8 +378,8 @@ public class LayoutSystemTests {
         MockView mockView = new MockView(typeof(LayoutTestThing), template);
         mockView.Initialize();
         LayoutTestThing root = (LayoutTestThing) mockView.RootElement;
-        root.style.SetOverflowX(Overflow.Truncate, StyleState.Normal);
-        root.style.SetOverflowY(Overflow.Truncate, StyleState.Normal);
+        root.style.SetOverflowX(Overflow.Hidden, StyleState.Normal);
+        root.style.SetOverflowY(Overflow.Hidden, StyleState.Normal);
         MockLayoutSystem layoutSystem = (MockLayoutSystem) mockView.LayoutSystem;
         layoutSystem.SetViewportRect(new Rect(0, 0, 400, 400));
         mockView.Update();
@@ -390,7 +390,7 @@ public class LayoutSystemTests {
     public void AssignsProperClipRects_NestedOverflowWithoutLayers() {
         string template = @"
         <UITemplate>
-            <Style classPath='LayoutSystemTests+LayoutTestThing+Style'/>
+            <Style path='LayoutSystemTests+LayoutTestThing+Style'/>
             <Contents style.width='100f' style.height='200f'>
                 <Group x-id='child0' style.width='50f' style.height='100f'>
                     <Group x-id='nested-child0' style.width='100f' style.height='100f'/>
@@ -402,9 +402,9 @@ public class LayoutSystemTests {
         MockView mockView = new MockView(typeof(LayoutTestThing), template);
         mockView.Initialize();
         LayoutTestThing root = (LayoutTestThing) mockView.RootElement;
-        root.style.SetOverflowX(Overflow.Truncate, StyleState.Normal);
-        root.style.SetOverflowY(Overflow.Truncate, StyleState.Normal);
-        root.FindById("child0").style.SetOverflowX(Overflow.Truncate, StyleState.Normal);
+        root.style.SetOverflowX(Overflow.Hidden, StyleState.Normal);
+        root.style.SetOverflowY(Overflow.Hidden, StyleState.Normal);
+        root.FindById("child0").style.SetOverflowX(Overflow.Hidden, StyleState.Normal);
         MockLayoutSystem layoutSystem = (MockLayoutSystem) mockView.LayoutSystem;
         layoutSystem.SetViewportRect(new Rect(0, 0, 400, 400));
         mockView.Update();
@@ -418,7 +418,7 @@ public class LayoutSystemTests {
     public void AssignsProperLayer() {
         string template = @"
         <UITemplate>
-            <Style classPath='LayoutSystemTests+LayoutTestThing+Style'/>
+            <Style path='LayoutSystemTests+LayoutTestThing+Style'/>
             <Contents style.width='100f' style.height='200f'>
                 <Group x-id='child0' style.width='100f' style.height='100f'/>
                 <Group x-id='child1' style.width='100f' style.height='100f'/>
@@ -441,7 +441,7 @@ public class LayoutSystemTests {
     public void AssignsProperLayer_WithOffset() {
         string template = @"
         <UITemplate>
-            <Style classPath='LayoutSystemTests+LayoutTestThing+Style'/>
+            <Style path='LayoutSystemTests+LayoutTestThing+Style'/>
             <Contents style.width='100f' style.height='200f'>
                 <Group x-id='child0' style.width='100f' style.height='100f'/>
                 <Group x-id='child1' style.width='100f' style.height='100f'/>
@@ -467,7 +467,7 @@ public class LayoutSystemTests {
     public void AssignsProperZIndex() {
         string template = @"
         <UITemplate>
-            <Style classPath='LayoutSystemTests+LayoutTestThing+Style'/>
+            <Style path='LayoutSystemTests+LayoutTestThing+Style'/>
             <Contents style.width='100f' style.height='200f'>
                 <Group x-id='child0' style.width='100f' style.height='100f'/>
                 <Group x-id='child1' style.width='100f' style.height='100f'/>

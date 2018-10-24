@@ -33,7 +33,7 @@ namespace Src.Animation {
                     return viewport.width * width.value;
 
                 case UIFixedUnit.Em:
-                    return element.style.computedStyle.FontAsset.asset.fontInfo.PointSize * width.value;
+                    return element.style.computedStyle.FontAsset.fontInfo.PointSize * width.value;
 
                 default:
                     return 0;
@@ -55,7 +55,7 @@ namespace Src.Animation {
                     return viewport.width * height.value;
 
                 case UIFixedUnit.Em:
-                    return element.style.computedStyle.FontAsset.asset.fontInfo.PointSize * height.value;
+                    return element.style.computedStyle.FontAsset.fontInfo.PointSize * height.value;
 
                 default:
                     return 0;
@@ -65,29 +65,29 @@ namespace Src.Animation {
 
         public float ResolveWidthMeasurement(UIElement element, Rect viewport, UIMeasurement measurement) {
             switch (measurement.unit) {
-                case UIUnit.Unset:
+                case UIMeasurementUnit.Unset:
                     return 0;
 
-                case UIUnit.Pixel:
+                case UIMeasurementUnit.Pixel:
                     return measurement.value;
 
-                case UIUnit.Content:
+                case UIMeasurementUnit.Content:
                     return element.layoutResult.actualSize.width * measurement.value;
 
-                case UIUnit.ParentSize:
+                case UIMeasurementUnit.ParentSize:
                     if (element.parent.style.computedStyle.PreferredWidth.IsContentBased) {
                         return 0f;
                     }
 
                     return Mathf.Max(0, element.parent.layoutResult.AllocatedWidth * measurement.value);
 
-                case UIUnit.ViewportWidth:
+                case UIMeasurementUnit.ViewportWidth:
                     return Mathf.Max(0, viewport.width * measurement.value);
 
-                case UIUnit.ViewportHeight:
+                case UIMeasurementUnit.ViewportHeight:
                     return Mathf.Max(0, viewport.height * measurement.value);
 
-                case UIUnit.ParentContentArea:
+                case UIMeasurementUnit.ParentContentArea:
                     ComputedStyle parentStyle = element.parent.style.computedStyle;
                     if (parentStyle.PreferredWidth.IsContentBased) {
                         return 0f;
@@ -98,8 +98,8 @@ namespace Src.Animation {
                                          - ResolveFixedWidth(element, viewport, parentStyle.PaddingRight)
                                          - ResolveFixedWidth(element, viewport, parentStyle.BorderRight)
                                          - ResolveFixedWidth(element, viewport, parentStyle.BorderLeft)));
-                case UIUnit.Em:
-                    return Mathf.Max(0, element.style.computedStyle.FontAsset.asset.fontInfo.PointSize * measurement.value);
+                case UIMeasurementUnit.Em:
+                    return Mathf.Max(0, element.style.computedStyle.FontAsset.fontInfo.PointSize * measurement.value);
 
                 default:
                     throw new ArgumentOutOfRangeException();
@@ -108,29 +108,29 @@ namespace Src.Animation {
 
         public float ResolveHeightMeasurement(UIElement element, Rect viewport, UIMeasurement measurement) {
             switch (measurement.unit) {
-                case UIUnit.Unset:
+                case UIMeasurementUnit.Unset:
                     return 0;
 
-                case UIUnit.Pixel:
+                case UIMeasurementUnit.Pixel:
                     return measurement.value;
 
-                case UIUnit.Content:
+                case UIMeasurementUnit.Content:
                     return element.layoutResult.actualSize.height * measurement.value;
 
-                case UIUnit.ParentSize:
+                case UIMeasurementUnit.ParentSize:
                     if (element.parent.style.computedStyle.PreferredHeight.IsContentBased) {
                         return 0f;
                     }
 
                     return Mathf.Max(0, element.parent.layoutResult.AllocatedHeight * measurement.value);
 
-                case UIUnit.ViewportWidth:
+                case UIMeasurementUnit.ViewportWidth:
                     return Mathf.Max(0, viewport.width * measurement.value);
 
-                case UIUnit.ViewportHeight:
+                case UIMeasurementUnit.ViewportHeight:
                     return Mathf.Max(0, viewport.height * measurement.value);
 
-                case UIUnit.ParentContentArea:
+                case UIMeasurementUnit.ParentContentArea:
                     ComputedStyle parentStyle = element.parent.style.computedStyle;
                     if (parentStyle.PreferredHeight.IsContentBased) {
                         return 0f;
@@ -141,8 +141,8 @@ namespace Src.Animation {
                                          - ResolveFixedWidth(element, viewport, parentStyle.PaddingBottom)
                                          - ResolveFixedWidth(element, viewport, parentStyle.BorderBottom)
                                          - ResolveFixedWidth(element, viewport, parentStyle.BorderTop)));
-                case UIUnit.Em:
-                    return Mathf.Max(0, element.style.computedStyle.FontAsset.asset.fontInfo.PointSize * measurement.value);
+                case UIMeasurementUnit.Em:
+                    return Mathf.Max(0, element.style.computedStyle.FontAsset.fontInfo.PointSize * measurement.value);
 
                 default:
                     throw new ArgumentOutOfRangeException();
@@ -296,7 +296,7 @@ namespace Src.Animation {
                     return viewport.width * anchor.value;
 
                 case UIFixedUnit.Em:
-                    return element.ComputedStyle.FontAsset.asset.fontInfo.PointSize * anchor.value;
+                    return element.ComputedStyle.FontAsset.fontInfo.PointSize * anchor.value;
 
                 default:
                     return 0;
@@ -318,7 +318,7 @@ namespace Src.Animation {
                     return viewport.width * anchor.value;
 
                 case UIFixedUnit.Em:
-                    return element.ComputedStyle.FontAsset.asset.fontInfo.PointSize * anchor.value;
+                    return element.ComputedStyle.FontAsset.fontInfo.PointSize * anchor.value;
 
                 default:
                     return 0;

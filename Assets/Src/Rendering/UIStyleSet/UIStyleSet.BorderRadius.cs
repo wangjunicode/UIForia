@@ -24,43 +24,43 @@ namespace Rendering {
         }
 
         [PublicAPI]
-        public UIMeasurement GetBorderRadiusTopLeft(StyleState state) {
-            return GetUIMeasurementValue(StylePropertyId.BorderRadiusTopLeft, state);
+        public UIFixedLength GetBorderRadiusTopLeft(StyleState state) {
+            return GetFixedLengthValue(StylePropertyId.BorderRadiusTopLeft, state);
         }
 
         [PublicAPI]
-        public UIMeasurement GetBorderRadiusTopRight(StyleState state) {
-            return GetUIMeasurementValue(StylePropertyId.BorderRadiusTopRight, state);
+        public UIFixedLength GetBorderRadiusTopRight(StyleState state) {
+            return GetFixedLengthValue(StylePropertyId.BorderRadiusTopRight, state);
         }
 
         [PublicAPI]
-        public UIMeasurement GetBorderRadiusBottomLeft(StyleState state) {
-            return GetUIMeasurementValue(StylePropertyId.BorderRadiusBottomLeft, state);
+        public UIFixedLength GetBorderRadiusBottomLeft(StyleState state) {
+            return GetFixedLengthValue(StylePropertyId.BorderRadiusBottomLeft, state);
         }
 
         [PublicAPI]
-        public UIMeasurement GetBorderRadiusBottomRight(StyleState state) {
-            return GetUIMeasurementValue(StylePropertyId.BorderRadiusBottomRight, state);
+        public UIFixedLength GetBorderRadiusBottomRight(StyleState state) {
+            return GetFixedLengthValue(StylePropertyId.BorderRadiusBottomRight, state);
         }
 
         [PublicAPI]
-        public void SetBorderRadiusTopLeft(UIMeasurement value, StyleState state) {
-            SetUIMeasurementProperty(StylePropertyId.BorderRadiusTopLeft, value, state);
+        public void SetBorderRadiusTopLeft(UIFixedLength value, StyleState state) {
+            SetFixedLengthProperty(StylePropertyId.BorderRadiusTopLeft, value, state);
         }
 
         [PublicAPI]
-        public void SetBorderRadiusTopRight(UIMeasurement value, StyleState state) {
-            SetUIMeasurementProperty(StylePropertyId.BorderRadiusTopRight, value, state);
+        public void SetBorderRadiusTopRight(UIFixedLength value, StyleState state) {
+            SetFixedLengthProperty(StylePropertyId.BorderRadiusTopRight, value, state);
         }
 
         [PublicAPI]
-        public void SetBorderRadiusBottomRight(UIMeasurement value, StyleState state) {
-            SetUIMeasurementProperty(StylePropertyId.BorderRadiusBottomRight, value, state);
+        public void SetBorderRadiusBottomRight(UIFixedLength value, StyleState state) {
+            SetFixedLengthProperty(StylePropertyId.BorderRadiusBottomRight, value, state);
         }
 
         [PublicAPI]
-        public void SetBorderRadiusBottomLeft(UIMeasurement value, StyleState state) {
-            SetUIMeasurementProperty(StylePropertyId.BorderRadiusBottomLeft, value, state);
+        public void SetBorderRadiusBottomLeft(UIFixedLength value, StyleState state) {
+            SetFixedLengthProperty(StylePropertyId.BorderRadiusBottomLeft, value, state);
         }
 
     }

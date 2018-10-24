@@ -32,7 +32,7 @@ namespace Src {
                 return new UIStyle() {
                     FlexLayoutDirection = LayoutDirection.Column,
                     FlexLayoutCrossAxisAlignment = CrossAxisAlignment.Center,
-                    Padding = new PaddingBox(12f),
+                    Padding = new FixedLengthRect(12f),
                     PreferredWidth = UIMeasurement.Parent100,
                 };
             }
@@ -50,7 +50,7 @@ namespace Src {
             [ExportStyle("name")]
             public static UIStyle Name() {
                 return new UIStyle() {
-                    FontAsset = new FontAssetReference("Gotham-Medium SDF"),
+//                    FontAsset = new FontAssetReference("Gotham-Medium SDF"),
                     FontSize = 18
                 };
             }

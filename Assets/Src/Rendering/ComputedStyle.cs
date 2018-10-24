@@ -6,6 +6,7 @@ using Src.Layout;
 using Src.Layout.LayoutTypes;
 using Src.Rendering;
 using Src.Util;
+using TMPro;
 using UnityEngine;
 
 namespace Rendering {
@@ -13,32 +14,29 @@ namespace Rendering {
     public class ComputedStyle {
 
         private UIStyleSet styleSet;
-        private RareStyleData rareData;
-        private Dictionary<StylePropertyId, StyleProperty> properties;
+        private IntMap<StyleProperty> properties;
 
         public ComputedStyle(UIStyleSet styleSet) {
             this.styleSet = styleSet;
+            this.properties = new IntMap<StyleProperty>();
         }
 
-        public RareStyleData RareData => rareData ?? (rareData = new RareStyleData(styleSet));
-
-        public PaddingBox border => new PaddingBox(borderTop, borderRight, borderBottom, borderLeft);
+        public FixedLengthRect border => new FixedLengthRect(borderTop, borderRight, borderBottom, borderLeft);
         public ContentBoxRect margin => new ContentBoxRect(MarginTop, marginRight, marginBottom, marginLeft);
 
-        public PaddingBox padding => new PaddingBox(paddingTop, paddingRight, paddingBottom, paddingLeft);
+        public FixedLengthRect padding => new FixedLengthRect(paddingTop, paddingRight, paddingBottom, paddingLeft);
 
-        public bool HasBorderRadius =>
-            rareData != null
-            && (rareData.borderRadiusBottomLeft.IsDefined()
-                || rareData.BorderRadiusBottomRight.IsDefined()
-                || rareData.BorderRadiusTopLeft.IsDefined()
-                || rareData.BorderRadiusTopRight.IsDefined());
+        public bool HasBorderRadius => 
+            BorderRadiusTopLeft.value > 0 ||
+            BorderRadiusBottomLeft.value > 0 ||
+            BorderRadiusTopRight.value > 0 ||
+            BorderRadiusBottomLeft.value > 0;
 
-        #region Paint
+#region Paint
 
         private Color borderColor = DefaultStyleValues.BorderColor;
         private Color backgroundColor = DefaultStyleValues.BackgroundColor;
-        private Texture2DAssetReference backgroundImage = DefaultStyleValues.BackgroundImage;
+        private Texture2D backgroundImage = DefaultStyleValues.BackgroundImage;
 
         public Color BorderColor {
             [DebuggerStepThrough] get { return borderColor; }
@@ -64,21 +62,21 @@ namespace Rendering {
             }
         }
 
-        public Texture2DAssetReference BackgroundImage {
+        public Texture2D BackgroundImage {
             [DebuggerStepThrough] get { return backgroundImage; }
             internal set {
-                if (backgroundImage.assetId == value.assetId) {
+                if (backgroundImage == value) {
                     return;
                 }
 
                 backgroundImage = value;
-                SendEvent(new StyleProperty(StylePropertyId.BackgroundImage, backgroundImage.assetId));
+                SendEvent(new StyleProperty(StylePropertyId.BackgroundImage, 0, 0, backgroundImage));
             }
         }
 
-        #endregion
+#endregion
 
-        #region Overflow
+#region Overflow
 
         private Overflow overflowX = DefaultStyleValues.OverflowX;
         private Overflow overflowY = DefaultStyleValues.OverflowY;
@@ -101,9 +99,9 @@ namespace Rendering {
             }
         }
 
-        #endregion
+#endregion
 
-        #region Flex Item 
+#region Flex Item 
 
         private int flexGrowthFactor = DefaultStyleValues.FlexItemGrow;
         private int flexShrinkFactor = DefaultStyleValues.FlexItemShrink;
@@ -149,9 +147,9 @@ namespace Rendering {
             }
         }
 
-        #endregion
+#endregion
 
-        #region Flex Layout
+#region Flex Layout
 
         private LayoutWrap flexLayoutWrap = DefaultStyleValues.FlexWrap;
         private LayoutDirection flexLayoutDirection = DefaultStyleValues.FlexLayoutDirection;
@@ -194,9 +192,9 @@ namespace Rendering {
             }
         }
 
-        #endregion
+#endregion
 
-        #region Grid Item
+#region Grid Item
 
         public int GridItemColStart {
             [DebuggerStepThrough] get { return ReadInt(StylePropertyId.GridItemColStart, DefaultStyleValues.GridItemColStart); }
@@ -228,9 +226,9 @@ namespace Rendering {
             internal set { WriteInt(StylePropertyId.GridItemRowSelfAlignment, (int) value); }
         }
 
-        #endregion
+#endregion
 
-        #region Grid Layout
+#region Grid Layout
 
         private IReadOnlyList<GridTrackSize> gridLayoutColTemplate = DefaultStyleValues.GridLayoutColTemplate;
         private IReadOnlyList<GridTrackSize> gridLayoutRowTemplate = DefaultStyleValues.GridLayoutRowTemplate;
@@ -316,9 +314,9 @@ namespace Rendering {
             set { WriteInt(StylePropertyId.GridLayoutRowAlignment, (int) value); }
         }
 
-        #endregion
+#endregion
 
-        #region Size       
+#region Size       
 
         private UIMeasurement minWidth = DefaultStyleValues.MinWidth;
         private UIMeasurement maxWidth = DefaultStyleValues.MaxWidth;
@@ -391,9 +389,9 @@ namespace Rendering {
         public bool IsWidthFixed => MinWidth.IsFixed && MaxWidth.IsFixed && PreferredWidth.IsFixed;
         public bool IsHeightFixed => MinHeight.IsFixed && MaxHeight.IsFixed && PreferredHeight.IsFixed;
 
-        #endregion
+#endregion
 
-        #region Margin
+#region Margin
 
         private UIMeasurement marginTop = DefaultStyleValues.MarginTop;
         private UIMeasurement marginRight = DefaultStyleValues.MarginRight;
@@ -436,9 +434,9 @@ namespace Rendering {
             }
         }
 
-        #endregion
+#endregion
 
-        #region Border
+#region Border
 
         private UIFixedLength borderTop = DefaultStyleValues.BorderTop;
         private UIFixedLength borderRight = DefaultStyleValues.BorderRight;
@@ -481,9 +479,29 @@ namespace Rendering {
             }
         }
 
-        #endregion
+        public UIFixedLength BorderRadiusTopLeft {
+            [DebuggerStepThrough] get { return ReadFixedLength(StylePropertyId.BorderRadiusTopLeft, DefaultStyleValues.BorderRadiusTopLeft); }
+            internal set { WriteFixedLength(StylePropertyId.BorderRadiusTopLeft, value); }
+        }
+        
+        public UIFixedLength BorderRadiusTopRight {
+            [DebuggerStepThrough] get { return ReadFixedLength(StylePropertyId.BorderRadiusTopRight, DefaultStyleValues.BorderRadiusTopRight); }
+            internal set { WriteFixedLength(StylePropertyId.BorderRadiusTopRight, value); }
+        }
+        
+        public UIFixedLength BorderRadiusBottomRight {
+            [DebuggerStepThrough] get { return ReadFixedLength(StylePropertyId.BorderRadiusBottomRight, DefaultStyleValues.BorderRadiusBottomRight); }
+            internal set { WriteFixedLength(StylePropertyId.BorderRadiusBottomRight, value); }
+        }
+        
+        public UIFixedLength BorderRadiusBottomLeft {
+            [DebuggerStepThrough] get { return ReadFixedLength(StylePropertyId.BorderRadiusBottomLeft, DefaultStyleValues.BorderRadiusBottomLeft); }
+            internal set { WriteFixedLength(StylePropertyId.BorderRadiusBottomLeft, value); }
+        }
 
-        #region Padding
+#endregion
+
+#region Padding
 
         private UIFixedLength paddingTop = DefaultStyleValues.PaddingTop;
         private UIFixedLength paddingRight = DefaultStyleValues.PaddingRight;
@@ -526,13 +544,13 @@ namespace Rendering {
             }
         }
 
-        #endregion
+#endregion
 
-        #region Text Properties
+#region Text Properties
 
         private int fontSize = DefaultStyleValues.TextFontSize;
         private Color textColor = DefaultStyleValues.TextColor;
-        private FontAssetReference fontAsset = DefaultStyleValues.TextFontAsset;
+        private TMP_FontAsset fontAsset = DefaultStyleValues.TextFontAsset;
         private TextUtil.FontStyle fontStyle = DefaultStyleValues.TextFontStyle;
         private TextUtil.TextAlignment m_TextAlignment = DefaultStyleValues.TextAlignment;
         private TextUtil.TextTransform textTransform = DefaultStyleValues.TextTransform;
@@ -546,12 +564,12 @@ namespace Rendering {
             }
         }
 
-        public FontAssetReference FontAsset {
+        public TMP_FontAsset FontAsset {
             [DebuggerStepThrough] get { return fontAsset; }
             internal set {
-                if (fontAsset.assetId == value.assetId) return;
+                if (fontAsset == value) return;
                 fontAsset = value;
-                SendEvent(new StyleProperty(StylePropertyId.TextFontAsset, fontAsset.assetId));
+                SendEvent(StyleProperty.Font(fontAsset));
             }
         }
 
@@ -591,9 +609,9 @@ namespace Rendering {
             }
         }
 
-        #endregion
+#endregion
 
-        #region Anchor Properties
+#region Anchor Properties
 
         public UIFixedLength AnchorTop {
             get { return ReadFixedLength(StylePropertyId.AnchorTop, DefaultStyleValues.AnchorTop); }
@@ -620,9 +638,9 @@ namespace Rendering {
             internal set { WriteInt(StylePropertyId.AnchorTarget, (int) value); }
         }
 
-        #endregion
+#endregion
 
-        #region Transform
+#region Transform
 
         private UIFixedLength transformPositionX = DefaultStyleValues.TransformPositionX;
         private UIFixedLength transformPositionY = DefaultStyleValues.TransformPositionY;
@@ -720,9 +738,9 @@ namespace Rendering {
             internal set { WriteInt(StylePropertyId.TransformBehaviorY, (int) value); }
         }
 
-        #endregion
+#endregion
 
-        #region Layout
+#region Layout
 
         private LayoutType layoutType = DefaultStyleValues.LayoutType;
         private LayoutBehavior layoutBehavior = DefaultStyleValues.LayoutBehavior;
@@ -745,11 +763,11 @@ namespace Rendering {
             }
         }
 
-        public float EmSize => fontAsset.asset.fontInfo.PointSize;
+        public float EmSize => fontAsset.fontInfo.PointSize;
 
-        #endregion
+#endregion
 
-        #region Layer
+#region Layer
 
         public int ZIndex {
             get { return ReadInt(StylePropertyId.ZIndex, DefaultStyleValues.ZIndex); }
@@ -766,7 +784,7 @@ namespace Rendering {
             internal set { WriteInt(StylePropertyId.RenderLayerOffset, value); }
         }
 
-        #endregion
+#endregion
 
         private void SendEvent(StyleProperty property) {
             styleSet.styleSystem.SetStyleProperty(styleSet.element, property);
@@ -780,7 +798,7 @@ namespace Rendering {
                 case StylePropertyId.Opacity:
                     throw new NotImplementedException();
 
-                #region  Layout
+#region  Layout
 
                 case StylePropertyId.LayoutBehavior:
                     LayoutBehavior = property.IsDefined ? (LayoutBehavior) property.valuePart0 : DefaultStyleValues.LayoutBehavior;
@@ -790,9 +808,9 @@ namespace Rendering {
                     LayoutType = property.IsDefined ? (LayoutType) value0 : DefaultStyleValues.LayoutType;
                     break;
 
-                #endregion
+#endregion
 
-                #region Overflow
+#region Overflow
 
                 case StylePropertyId.OverflowX:
                     overflowX = property.IsDefined ? (Overflow) value0 : DefaultStyleValues.OverflowX;
@@ -801,9 +819,9 @@ namespace Rendering {
                     overflowY = property.IsDefined ? (Overflow) value0 : DefaultStyleValues.OverflowY;
                     break;
 
-                #endregion
+#endregion
 
-                #region Paint
+#region Paint
 
                 case StylePropertyId.BackgroundColor:
                     BackgroundColor = property.IsDefined ? (Color) new StyleColor(value0) : DefaultStyleValues.BackgroundColor;
@@ -812,24 +830,24 @@ namespace Rendering {
                     BorderColor = property.IsDefined ? (Color) new StyleColor(value0) : DefaultStyleValues.BorderColor;
                     break;
                 case StylePropertyId.BackgroundImage:
-                    BackgroundImage = property.IsDefined ? new Texture2DAssetReference(value0) : DefaultStyleValues.BackgroundImage;
+                    BackgroundImage = property.IsDefined ? property.AsTexture : DefaultStyleValues.BackgroundImage;
                     break;
                 case StylePropertyId.BorderRadiusTopLeft:
-                    RareData.BorderRadiusTopLeft = property.IsDefined ? UIMeasurement.Decode(value0, value1) : DefaultStyleValues.BorderRadiusTopLeft;
+                    BorderRadiusTopLeft = property.IsDefined ? UIFixedLength.Decode(value0, value1) : DefaultStyleValues.BorderRadiusTopLeft;
                     break;
                 case StylePropertyId.BorderRadiusTopRight:
-                    RareData.BorderRadiusTopRight = property.IsDefined ? UIMeasurement.Decode(value0, value1) : DefaultStyleValues.BorderRadiusTopRight;
+                    BorderRadiusTopRight = property.IsDefined ? UIFixedLength.Decode(value0, value1) : DefaultStyleValues.BorderRadiusTopRight;
                     break;
                 case StylePropertyId.BorderRadiusBottomLeft:
-                    RareData.BorderRadiusBottomLeft = property.IsDefined ? UIMeasurement.Decode(value0, value1) : DefaultStyleValues.BorderRadiusBottomLeft;
+                    BorderRadiusBottomLeft = property.IsDefined ? UIFixedLength.Decode(value0, value1) : DefaultStyleValues.BorderRadiusBottomLeft;
                     break;
                 case StylePropertyId.BorderRadiusBottomRight:
-                    RareData.BorderRadiusBottomRight = property.IsDefined ? UIMeasurement.Decode(value0, value1) : DefaultStyleValues.BorderRadiusBottomRight;
+                    BorderRadiusBottomRight = property.IsDefined ? UIFixedLength.Decode(value0, value1) : DefaultStyleValues.BorderRadiusBottomRight;
                     break;
 
-                #endregion
+#endregion
 
-                #region Grid Item
+#region Grid Item
 
                 case StylePropertyId.GridItemColStart:
                     GridItemColStart = property.IsDefined ? value0 : DefaultStyleValues.GridItemColStart;
@@ -850,9 +868,9 @@ namespace Rendering {
                     GridItemRowSelfAlignment = property.IsDefined ? property.AsCrossAxisAlignment : DefaultStyleValues.GridItemRowSelfAlignment;
                     break;
 
-                #endregion
+#endregion
 
-                #region Grid Layout
+#region Grid Layout
 
                 case StylePropertyId.GridLayoutDirection:
                     GridLayoutDirection = property.IsDefined ? (LayoutDirection) value0 : DefaultStyleValues.GridLayoutDirection;
@@ -885,9 +903,9 @@ namespace Rendering {
                     GridLayoutRowAlignment = property.IsDefined ? property.AsCrossAxisAlignment : DefaultStyleValues.GridLayoutRowAlignment;
                     break;
 
-                #endregion
+#endregion
 
-                #region Flex Layout
+#region Flex Layout
 
                 case StylePropertyId.FlexLayoutWrap:
                     FlexLayoutWrap = property.IsDefined ? (LayoutWrap) value0 : DefaultStyleValues.FlexWrap;
@@ -902,9 +920,9 @@ namespace Rendering {
                     FlexLayoutCrossAxisAlignment = property.IsDefined ? (CrossAxisAlignment) value0 : DefaultStyleValues.FlexLayoutCrossAxisAlignment;
                     break;
 
-                #endregion
+#endregion
 
-                #region Flex Item
+#region Flex Item
 
                 case StylePropertyId.FlexItemSelfAlignment:
                     FlexItemSelfAlignment = property.IsDefined ? (CrossAxisAlignment) value0 : DefaultStyleValues.FlexItemSelfAlignment;
@@ -919,9 +937,9 @@ namespace Rendering {
                     FlexItemShrinkFactor = property.IsDefined ? value0 : DefaultStyleValues.FlexItemShrink;
                     break;
 
-                #endregion
+#endregion
 
-                #region Margin
+#region Margin
 
                 case StylePropertyId.MarginTop:
                     MarginTop = property.IsDefined ? UIMeasurement.Decode(value0, value1) : DefaultStyleValues.MarginTop;
@@ -939,9 +957,9 @@ namespace Rendering {
                     MarginLeft = property.IsDefined ? UIMeasurement.Decode(value0, value1) : DefaultStyleValues.MarginLeft;
                     break;
 
-                #endregion
+#endregion
 
-                #region Border
+#region Border
 
                 case StylePropertyId.BorderTop:
                     BorderTop = property.IsDefined ? UIFixedLength.Decode(value0, value1) : DefaultStyleValues.BorderTop;
@@ -956,9 +974,9 @@ namespace Rendering {
                     BorderLeft = property.IsDefined ? UIFixedLength.Decode(value0, value1) : DefaultStyleValues.BorderLeft;
                     break;
 
-                #endregion
+#endregion
 
-                #region Padding
+#region Padding
 
                 case StylePropertyId.PaddingTop:
                     PaddingTop = property.IsDefined ? UIFixedLength.Decode(value0, value1) : DefaultStyleValues.PaddingTop;
@@ -973,9 +991,9 @@ namespace Rendering {
                     PaddingLeft = property.IsDefined ? UIFixedLength.Decode(value0, value1) : DefaultStyleValues.PaddingLeft;
                     break;
 
-                #endregion
+#endregion
 
-                #region Transform
+#region Transform
 
                 case StylePropertyId.TransformPositionX:
                     TransformPositionX = property.IsDefined ? UIFixedLength.Decode(value0, value1) : DefaultStyleValues.TransformPositionX;
@@ -1006,15 +1024,15 @@ namespace Rendering {
                     TransformBehaviorY = property.IsDefined ? (TransformBehavior) value0 : DefaultStyleValues.TransformBehaviorY;
                     break;
 
-                #endregion
+#endregion
 
-                #region Text
+#region Text
 
                 case StylePropertyId.TextColor:
                     TextColor = property.IsDefined ? (Color) new StyleColor(value0) : DefaultStyleValues.TextColor;
                     break;
                 case StylePropertyId.TextFontAsset:
-                    FontAsset = property.IsDefined ? new FontAssetReference(value0) : DefaultStyleValues.TextFontAsset;
+                    FontAsset = property.IsDefined ? property.AsFont : DefaultStyleValues.TextFontAsset;
                     break;
                 case StylePropertyId.TextFontSize:
                     FontSize = property.IsDefined ? value0 : DefaultStyleValues.TextFontSize;
@@ -1053,9 +1071,9 @@ namespace Rendering {
                     throw new NotImplementedException();
                     break;
 
-                #endregion
+#endregion
 
-                #region Size
+#region Size
 
                 case StylePropertyId.MinWidth:
                     MinWidth = property.IsDefined ? UIMeasurement.Decode(value0, value1) : DefaultStyleValues.MinWidth;
@@ -1081,9 +1099,9 @@ namespace Rendering {
                     PreferredHeight = property.IsDefined ? UIMeasurement.Decode(value0, value1) : DefaultStyleValues.PreferredHeight;
                     break;
 
-                #endregion
+#endregion
 
-                #region Layer
+#region Layer
 
                 case StylePropertyId.ZIndex:
                     ZIndex = property.IsDefined ? property.AsInt : DefaultStyleValues.ZIndex;
@@ -1095,9 +1113,9 @@ namespace Rendering {
                     RenderLayer = property.IsDefined ? property.AsRenderLayer : DefaultStyleValues.RenderLayer;
                     break;
 
-                #endregion
+#endregion
 
-                #region  Anchors
+#region  Anchors
 
                 case StylePropertyId.AnchorTarget:
                     AnchorTarget = property.IsDefined ? property.AsAnchorTarget : DefaultStyleValues.AnchorTarget;
@@ -1115,8 +1133,7 @@ namespace Rendering {
                     AnchorLeft = property.IsDefined ? property.AsFixedLength : DefaultStyleValues.AnchorLeft;
                     break;
 
-                #endregion
-
+#endregion
 
                 case StylePropertyId.__TextPropertyStart__:
                 case StylePropertyId.__TextPropertyEnd__:
@@ -1225,8 +1242,8 @@ namespace Rendering {
         [DebuggerStepThrough]
         private UIFixedLength ReadFixedLength(StylePropertyId propertyId, UIFixedLength defaultValue) {
             StyleProperty retn;
-            properties = properties ?? new Dictionary<StylePropertyId, StyleProperty>();
-            if (properties.TryGetValue(propertyId, out retn)) {
+            properties = properties ?? new IntMap<StyleProperty>();
+            if (properties.TryGetValue((int)propertyId, out retn)) {
                 return retn.AsFixedLength;
             }
 
@@ -1236,21 +1253,21 @@ namespace Rendering {
 //        [DebuggerStepThrough]
         private void WriteFixedLength(StylePropertyId propertyId, UIFixedLength newValue) {
             StyleProperty retn;
-            properties = properties ?? new Dictionary<StylePropertyId, StyleProperty>();
-            if (properties.TryGetValue(propertyId, out retn)) {
+            properties = properties ?? new IntMap<StyleProperty>();
+            if (properties.TryGetValue((int)propertyId, out retn)) {
                 if (retn.AsInt == newValue) return;
             }
 
             StyleProperty property = new StyleProperty(propertyId, newValue);
-            properties[propertyId] = property;
+            properties[(int)propertyId] = property;
             SendEvent(property);
         }
 
         [DebuggerStepThrough]
         private int ReadInt(StylePropertyId propertyId, int defaultValue) {
             StyleProperty retn;
-            properties = properties ?? new Dictionary<StylePropertyId, StyleProperty>();
-            if (properties.TryGetValue(propertyId, out retn)) {
+            properties = properties ?? new IntMap<StyleProperty>();
+            if (properties.TryGetValue((int)propertyId, out retn)) {
                 return retn.AsInt;
             }
 
@@ -1259,21 +1276,21 @@ namespace Rendering {
 
         private void WriteInt(StylePropertyId propertyId, int newValue) {
             StyleProperty retn;
-            properties = properties ?? new Dictionary<StylePropertyId, StyleProperty>();
-            if (properties.TryGetValue(propertyId, out retn)) {
+            properties = properties ?? new IntMap<StyleProperty>();
+            if (properties.TryGetValue((int)propertyId, out retn)) {
                 if (retn.AsInt == newValue) return;
             }
 
             StyleProperty property = new StyleProperty(propertyId, newValue);
-            properties[propertyId] = property;
+            properties[(int)propertyId] = property;
             SendEvent(property);
         }
 
         [DebuggerStepThrough]
         private float ReadFloat(StylePropertyId propertyId, float defaultValue) {
             StyleProperty retn;
-            properties = properties ?? new Dictionary<StylePropertyId, StyleProperty>();
-            if (properties.TryGetValue(propertyId, out retn)) {
+            properties = properties ?? new IntMap<StyleProperty>();
+            if (properties.TryGetValue((int)propertyId, out retn)) {
                 return retn.AsFloat;
             }
 
@@ -1282,101 +1299,13 @@ namespace Rendering {
 
         private void WriteFloat(StylePropertyId propertyId, float newValue) {
             StyleProperty retn;
-            properties = properties ?? new Dictionary<StylePropertyId, StyleProperty>();
-            if (properties.TryGetValue(propertyId, out retn)) {
+            if (properties.TryGetValue((int)propertyId, out retn)) {
                 if (retn.AsFloat == newValue) return;
             }
 
             StyleProperty property = new StyleProperty(propertyId, FloatUtil.EncodeToInt(newValue));
-            properties[propertyId] = property;
+            properties[(int)propertyId] = property;
             SendEvent(property);
-        }
-
-    }
-
-    public class RareStyleData {
-
-        public UIMeasurement borderRadiusTopLeft = DefaultStyleValues.BorderRadiusTopLeft;
-        public UIMeasurement borderRadiusTopRight = DefaultStyleValues.BorderRadiusTopRight;
-        public UIMeasurement borderRadiusBottomRight = DefaultStyleValues.BorderRadiusBottomRight;
-        public UIMeasurement borderRadiusBottomLeft = DefaultStyleValues.BorderRadiusBottomLeft;
-
-        private UIStyleSet styleSet;
-
-        public RareStyleData(UIStyleSet styleSet) {
-            this.styleSet = styleSet;
-        }
-
-        public BorderRadius borderRadius =>
-            new BorderRadius(
-                borderRadiusTopLeft,
-                borderRadiusTopRight,
-                borderRadiusBottomRight,
-                borderRadiusBottomLeft
-            );
-
-        public UIMeasurement BorderRadiusTopLeft {
-            [DebuggerStepThrough] get { return borderRadiusTopLeft; }
-            internal set {
-                if (borderRadiusTopLeft == value) return;
-                borderRadiusTopLeft = value;
-                styleSet.styleSystem.SetStyleProperty(
-                    styleSet.element,
-                    new StyleProperty(
-                        StylePropertyId.BorderRadiusTopLeft,
-                        FloatUtil.EncodeToInt(BorderRadiusTopLeft.value),
-                        (int) BorderRadiusTopLeft.unit
-                    )
-                );
-            }
-        }
-
-        public UIMeasurement BorderRadiusTopRight {
-            [DebuggerStepThrough] get { return borderRadiusTopRight; }
-            internal set {
-                if (borderRadiusTopRight == value) return;
-                borderRadiusTopRight = value;
-                styleSet.styleSystem.SetStyleProperty(
-                    styleSet.element,
-                    new StyleProperty(
-                        StylePropertyId.BorderRadiusTopRight,
-                        FloatUtil.EncodeToInt(BorderRadiusTopRight.value),
-                        (int) BorderRadiusTopRight.unit
-                    )
-                );
-            }
-        }
-
-        public UIMeasurement BorderRadiusBottomRight {
-            [DebuggerStepThrough] get { return borderRadiusBottomRight; }
-            internal set {
-                if (borderRadiusBottomRight == value) return;
-                borderRadiusBottomRight = value;
-                styleSet.styleSystem.SetStyleProperty(
-                    styleSet.element,
-                    new StyleProperty(
-                        StylePropertyId.BorderRadiusBottomRight,
-                        FloatUtil.EncodeToInt(BorderRadiusBottomRight.value),
-                        (int) BorderRadiusBottomRight.unit
-                    )
-                );
-            }
-        }
-
-        public UIMeasurement BorderRadiusBottomLeft {
-            [DebuggerStepThrough] get { return borderRadiusBottomLeft; }
-            internal set {
-                if (borderRadiusBottomLeft == value) return;
-                borderRadiusBottomLeft = value;
-                styleSet.styleSystem.SetStyleProperty(
-                    styleSet.element,
-                    new StyleProperty(
-                        StylePropertyId.BorderRadiusBottomLeft,
-                        FloatUtil.EncodeToInt(borderRadiusBottomLeft.value),
-                        (int) borderRadiusBottomLeft.unit
-                    )
-                );
-            }
         }
 
     }

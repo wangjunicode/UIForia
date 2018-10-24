@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using Src.Compilers.AliasSource;
+using UnityEngine;
 
 namespace Src {
 
@@ -44,8 +45,8 @@ namespace Src {
             return instanceData;
         }
 
-        public static Texture2DAssetReference TextureUrl(string url) {
-            return new Texture2DAssetReference(url);
+        public static Texture2D TextureUrl(string url) {
+            throw new NotImplementedException();
         }
 
     }

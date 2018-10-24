@@ -7,10 +7,10 @@ namespace Rendering {
 
     public struct BorderRadius {
 
-        public readonly UIMeasurement topLeft;
-        public readonly UIMeasurement topRight;
-        public readonly UIMeasurement bottomLeft;
-        public readonly UIMeasurement bottomRight;
+        public readonly UIFixedLength topLeft;
+        public readonly UIFixedLength topRight;
+        public readonly UIFixedLength bottomLeft;
+        public readonly UIFixedLength bottomRight;
 
         public BorderRadius(float radius) {
             this.topLeft = radius;
@@ -33,7 +33,7 @@ namespace Rendering {
             this.bottomLeft = bottomLeft;
         }
 
-        public BorderRadius(UIMeasurement topLeft, UIMeasurement topRight, UIMeasurement bottomRight, UIMeasurement bottomLeft) {
+        public BorderRadius(UIFixedLength topLeft, UIFixedLength topRight, UIFixedLength bottomRight, UIFixedLength bottomLeft) {
             this.topLeft = topLeft;
             this.topRight = topRight;
             this.bottomRight = bottomRight;
@@ -88,6 +88,11 @@ namespace Rendering {
         [DebuggerStepThrough]
         public static implicit operator BorderRadius(Vector4 vec4) {
             return new BorderRadius(vec4.x, vec4.y, vec4.z, vec4.w);
+        }
+        
+        [DebuggerStepThrough]
+        public static implicit operator BorderRadius(float val) {
+            return new BorderRadius(val);
         }
 
 //        [DebuggerStepThrough]

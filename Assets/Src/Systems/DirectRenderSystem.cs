@@ -168,7 +168,9 @@ namespace Src.Systems {
 
         }
 
-        public void OnDestroy() { }
+        public void OnDestroy() {
+           OnReset();
+        }
 
         public void OnReady() { }
 
@@ -193,6 +195,11 @@ namespace Src.Systems {
 
         public void OnReset() {
             m_RenderList.Clear();
+            m_RenderDataMap.Clear();
+            m_DirtyGraphicList.Clear();
+            m_Buckets.Clear();
+            m_ToInitialize.Clear();
+            m_StyleSystem.onStylePropertyChanged -= HandleStylePropertyChanged;
         }
 
         public void OnElementCreated(UIElement element) {

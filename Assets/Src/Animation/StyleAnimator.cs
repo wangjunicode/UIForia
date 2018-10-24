@@ -101,6 +101,11 @@ namespace Src.Animation {
 
         public void PauseAnimation(int animationId) { }
 
+        public void Reset() {
+            m_PlayingAnimations.Clear();
+            m_QueuedAnimations.Clear();
+        }
+
     }
 
     /*

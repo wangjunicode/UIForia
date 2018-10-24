@@ -221,7 +221,7 @@ public class UIInputFieldElement2 : UIElement, IFocusable, IPropertyChangedHandl
         public static UIStyle Text() {
             return new UIStyle() {
                 FontSize = 24,
-                MaxWidth = new UIMeasurement(0.5f, UIUnit.ParentContentArea)
+                MaxWidth = new UIMeasurement(0.5f, UIMeasurementUnit.ParentContentArea)
             };
         }
 

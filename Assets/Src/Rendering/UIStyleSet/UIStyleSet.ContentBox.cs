@@ -152,7 +152,7 @@ namespace Rendering {
         }
 
         [PublicAPI]
-        public void SetPadding(PaddingBox value, StyleState state) {
+        public void SetPadding(FixedLengthRect value, StyleState state) {
             UIStyle style = GetOrCreateInstanceStyle(state);
             style.PaddingTop = value.top;
             style.PaddingRight = value.right;
@@ -182,8 +182,8 @@ namespace Rendering {
         }
 
         [PublicAPI]
-        public PaddingBox GetPadding(StyleState state) {
-            return new PaddingBox(
+        public FixedLengthRect GetPadding(StyleState state) {
+            return new FixedLengthRect(
                 GetPaddingTop(state),
                 GetPaddingRight(state),
                 GetPaddingBottom(state),
@@ -264,7 +264,7 @@ namespace Rendering {
         }
 
         [PublicAPI]
-        public void SetBorder(PaddingBox value, StyleState state) {
+        public void SetBorder(FixedLengthRect value, StyleState state) {
             UIStyle style = GetOrCreateInstanceStyle(state);
             style.BorderTop = value.top;
             style.BorderRight = value.right;
@@ -294,8 +294,8 @@ namespace Rendering {
         }
 
         [PublicAPI]
-        public PaddingBox GetBorder(StyleState state) {
-            return new PaddingBox(
+        public FixedLengthRect GetBorder(StyleState state) {
+            return new FixedLengthRect(
                 GetBorderTop(state),
                 GetBorderRight(state),
                 GetBorderBottom(state),

@@ -6,4 +6,10 @@ namespace UIForia {
 
     }
 
+    public class ParseException : System.Exception {
+
+        public ParseException(string message = null) : base(message) { }
+
+    }
+
 }

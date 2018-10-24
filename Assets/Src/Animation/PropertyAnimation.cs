@@ -49,7 +49,7 @@ namespace Src.Animation {
 
         public StyleProperty m_StartValue;
         public StyleProperty m_TargetValue;
-        private List<ValueTuple<int, AnimationStatus>> m_StatusList;
+        private readonly List<ValueTuple<int, AnimationStatus>> m_StatusList;
 
         public PropertyAnimation(StyleProperty targetValue, AnimationOptions options) {
             m_Options = options;

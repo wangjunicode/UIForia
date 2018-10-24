@@ -24,7 +24,7 @@ namespace Src {
             public static UIStyle Label() {
                 return new UIStyle() {
                     TextColor = new Color32(138, 138, 138, 255),
-                    FontAsset = new FontAssetReference("Gotham-Medium SDF"),
+//                    FontAsset = new FontAssetReference("Gotham-Medium SDF"),
                     FontSize = 20
                 };
             }
@@ -32,7 +32,7 @@ namespace Src {
             [ExportStyle("inline-image")]
             public static UIStyle InlineImage() {
                 return new UIStyle() {
-                    PreferredHeight = new UIMeasurement(1f, UIUnit.ParentContentArea)
+                    PreferredHeight = new UIMeasurement(1f, UIMeasurementUnit.ParentContentArea)
                 };
             }
 

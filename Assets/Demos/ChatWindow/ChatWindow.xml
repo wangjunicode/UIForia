@@ -1,7 +1,24 @@
 <?xml version="1.0" encoding="utf-8"?>
 <UITemplate>
 
-    <Style classPath="ChatWindow_Styles.cs"/>
+    <Style>
+        style container {
+            FlexLayoutDirection = Row;
+            FlexLayoutMainAxisAlignment = Start;
+            PreferredWidth = 800px;
+            PreferredHeight = 600px;
+        }
+        
+        style childStyle {
+            BackgroundColor = blue;
+            PreferredWidth = 200px;
+            PreferredHeight = 0.1pca;
+            LayoutBehavior = Ignore;
+            TransformPositionX = 200px;
+            TransformPositionY = 50px;
+            
+        }
+    </Style>
 
     <Import value="ClippedPanel+ClippedCorner" as="ClippedCorner"/>
 
@@ -11,7 +28,7 @@
 
         <!--</WindowFrame>-->
 
-        <Panel x-id="child"/>
+        <Panel style="childStyle" x-id="child"/>
         
         <!--<Panel x-id="child-to-animate" style="anchor-item" style.backgroundColor="red"/>-->
         <!--<Panel style.width="100" style.height="1000" style.backgroundColor="blue"/>-->

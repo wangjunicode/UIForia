@@ -204,7 +204,7 @@ namespace Src.Layout.LayoutTypes {
                     return layoutSystem.ViewportRect.width * width.value;
 
                 case UIFixedUnit.Em:
-                    return style.FontAsset.asset.fontInfo.PointSize * width.value;
+                    return style.FontAsset.fontInfo.PointSize * width.value;
 
                 default:
                     return 0;
@@ -227,7 +227,7 @@ namespace Src.Layout.LayoutTypes {
                     return layoutSystem.ViewportRect.width * height.value;
 
                 case UIFixedUnit.Em:
-                    return style.FontAsset.asset.fontInfo.PointSize * height.value;
+                    return style.FontAsset.fontInfo.PointSize * height.value;
 
                 default:
                     return 0;
@@ -396,40 +396,40 @@ namespace Src.Layout.LayoutTypes {
             AnchorTarget anchorTarget;
             UIMeasurement widthMeasurement = style.PreferredWidth;
             switch (widthMeasurement.unit) {
-                case UIUnit.Pixel:
+                case UIMeasurementUnit.Pixel:
                     return Mathf.Max(0, widthMeasurement.value);
 
-                case UIUnit.Content:
+                case UIMeasurementUnit.Content:
                     if (cachedPreferredWidth == -1) {
                         cachedPreferredWidth = ComputeContentWidth();
                     }
 
                     return Mathf.Max(0, PaddingHorizontal + BorderHorizontal + (cachedPreferredWidth * widthMeasurement.value));
 
-                case UIUnit.ParentSize:
+                case UIMeasurementUnit.ParentSize:
                     if (parent.style.PreferredWidth.IsContentBased) {
                         return 0f;
                     }
 
                     return Mathf.Max(0, parent.allocatedWidth * widthMeasurement.value);
 
-                case UIUnit.ViewportWidth:
+                case UIMeasurementUnit.ViewportWidth:
                     return Mathf.Max(0, layoutSystem.ViewportRect.width * widthMeasurement.value);
 
-                case UIUnit.ViewportHeight:
+                case UIMeasurementUnit.ViewportHeight:
                     return Mathf.Max(0, layoutSystem.ViewportRect.height * widthMeasurement.value);
 
-                case UIUnit.ParentContentArea:
+                case UIMeasurementUnit.ParentContentArea:
                     if (parent.style.PreferredWidth.IsContentBased) {
                         return 0f;
                     }
 
                     return Mathf.Max(0, parent.allocatedWidth * widthMeasurement.value - (parent.style == null ? 0 : parent.PaddingHorizontal - parent.BorderHorizontal));
 
-                case UIUnit.Em:
-                    return Math.Max(0, style.FontAsset.asset.fontInfo.PointSize * widthMeasurement.value);
+                case UIMeasurementUnit.Em:
+                    return Math.Max(0, style.FontAsset.fontInfo.PointSize * widthMeasurement.value);
 
-                case UIUnit.AnchorWidth:
+                case UIMeasurementUnit.AnchorWidth:
                     anchorTarget = style.AnchorTarget;
                     if (parent.style.PreferredWidth.IsContentBased && anchorTarget == AnchorTarget.Parent || anchorTarget == AnchorTarget.ParentContentArea) {
                         return 0f;
@@ -437,7 +437,7 @@ namespace Src.Layout.LayoutTypes {
 
                     return ResolveAnchorWidth(widthMeasurement);
 
-                case UIUnit.AnchorHeight:
+                case UIMeasurementUnit.AnchorHeight:
                     anchorTarget = style.AnchorTarget;
                     if (parent.style.PreferredWidth.IsContentBased && anchorTarget == AnchorTarget.Parent || anchorTarget == AnchorTarget.ParentContentArea) {
                         return 0f;
@@ -526,7 +526,7 @@ namespace Src.Layout.LayoutTypes {
                     return layoutSystem.ViewportRect.width * anchor.value;
 
                 case UIFixedUnit.Em:
-                    return style.FontAsset.asset.fontInfo.PointSize * anchor.value;
+                    return style.FontAsset.fontInfo.PointSize * anchor.value;
 
                 default:
                     throw new InvalidArgumentException();
@@ -567,7 +567,7 @@ namespace Src.Layout.LayoutTypes {
                     return layoutSystem.ViewportRect.width * anchor.value;
 
                 case UIFixedUnit.Em:
-                    return style.FontAsset.asset.fontInfo.PointSize * anchor.value;
+                    return style.FontAsset.fontInfo.PointSize * anchor.value;
 
                 default:
                     throw new InvalidArgumentException();
@@ -608,7 +608,7 @@ namespace Src.Layout.LayoutTypes {
                     return layoutSystem.ViewportRect.width * anchor.value;
 
                 case UIFixedUnit.Em:
-                    return style.FontAsset.asset.fontInfo.PointSize * anchor.value;
+                    return style.FontAsset.fontInfo.PointSize * anchor.value;
 
                 default:
                     throw new InvalidArgumentException();
@@ -619,10 +619,10 @@ namespace Src.Layout.LayoutTypes {
             AnchorTarget anchorTarget;
             UIMeasurement height = style.PreferredHeight;
             switch (height.unit) {
-                case UIUnit.Pixel:
+                case UIMeasurementUnit.Pixel:
                     return Mathf.Max(0, height.value);
 
-                case UIUnit.Content:
+                case UIMeasurementUnit.Content:
                     float contentHeight = GetCachedHeightForWidth(contentWidth);
                     if (contentHeight == -1) {
                         float cachedWidth = allocatedWidth;
@@ -633,30 +633,30 @@ namespace Src.Layout.LayoutTypes {
 
                     return PaddingVertical + BorderVertical + contentHeight * height.value;
 
-                case UIUnit.ParentSize:
+                case UIMeasurementUnit.ParentSize:
                     if (parent.style.PreferredHeight.IsContentBased) {
                         return 0f;
                     }
 
                     return Mathf.Max(0, parent.allocatedHeight * height.value);
 
-                case UIUnit.ViewportWidth:
+                case UIMeasurementUnit.ViewportWidth:
                     return Mathf.Max(0, layoutSystem.ViewportRect.width * height.value);
 
-                case UIUnit.ViewportHeight:
+                case UIMeasurementUnit.ViewportHeight:
                     return Mathf.Max(0, layoutSystem.ViewportRect.height * height.value);
 
-                case UIUnit.ParentContentArea:
+                case UIMeasurementUnit.ParentContentArea:
                     if (parent.style.PreferredHeight.IsContentBased) {
                         return 0f;
                     }
 
                     return Mathf.Max(0, parent.allocatedHeight * height.value - (parent.style == null ? 0 : parent.PaddingVertical - parent.BorderVertical));
 
-                case UIUnit.Em:
-                    return Mathf.Max(0, style.FontAsset.asset.fontInfo.PointSize * height.value);
+                case UIMeasurementUnit.Em:
+                    return Mathf.Max(0, style.FontAsset.fontInfo.PointSize * height.value);
 
-                case UIUnit.AnchorWidth:
+                case UIMeasurementUnit.AnchorWidth:
                     anchorTarget = style.AnchorTarget;
                     if (parent.style.PreferredHeight.IsContentBased && anchorTarget == AnchorTarget.Parent || anchorTarget == AnchorTarget.ParentContentArea) {
                         return 0f;
@@ -664,7 +664,7 @@ namespace Src.Layout.LayoutTypes {
 
                     return ResolveAnchorWidth(height);
 
-                case UIUnit.AnchorHeight:
+                case UIMeasurementUnit.AnchorHeight:
                     anchorTarget = style.AnchorTarget;
                     if (parent.style.PreferredHeight.IsContentBased && anchorTarget == AnchorTarget.Parent || anchorTarget == AnchorTarget.ParentContentArea) {
                         return 0f;
@@ -690,36 +690,36 @@ namespace Src.Layout.LayoutTypes {
         protected float ResolveMinOrMaxWidth(UIMeasurement widthMeasurement) {
             AnchorTarget anchorTarget;
             switch (widthMeasurement.unit) {
-                case UIUnit.Pixel:
+                case UIMeasurementUnit.Pixel:
                     return Mathf.Max(0, widthMeasurement.value);
 
-                case UIUnit.Content:
+                case UIMeasurementUnit.Content:
                     return Mathf.Max(0, PaddingHorizontal + BorderHorizontal + (GetContentWidth() * widthMeasurement.value));
 
-                case UIUnit.ParentSize:
+                case UIMeasurementUnit.ParentSize:
                     if (parent.style.PreferredWidth.IsContentBased) {
                         return 0f;
                     }
 
                     return Mathf.Max(0, parent.allocatedWidth * widthMeasurement.value);
 
-                case UIUnit.ViewportWidth:
+                case UIMeasurementUnit.ViewportWidth:
                     return Mathf.Max(0, layoutSystem.ViewportRect.width * widthMeasurement.value);
 
-                case UIUnit.ViewportHeight:
+                case UIMeasurementUnit.ViewportHeight:
                     return Mathf.Max(0, layoutSystem.ViewportRect.height * widthMeasurement.value);
 
-                case UIUnit.ParentContentArea:
+                case UIMeasurementUnit.ParentContentArea:
                     if (parent.style.PreferredWidth.IsContentBased) {
                         return 0f;
                     }
 
                     return Mathf.Max(0, parent.allocatedWidth * widthMeasurement.value - (parent.style == null ? 0 : parent.PaddingHorizontal - parent.BorderHorizontal));
 
-                case UIUnit.Em:
-                    return Math.Max(0, style.FontAsset.asset.fontInfo.PointSize * widthMeasurement.value);
+                case UIMeasurementUnit.Em:
+                    return Math.Max(0, style.FontAsset.fontInfo.PointSize * widthMeasurement.value);
 
-                case UIUnit.AnchorWidth:
+                case UIMeasurementUnit.AnchorWidth:
                     anchorTarget = style.AnchorTarget;
                     if (parent.style.PreferredWidth.IsContentBased && anchorTarget == AnchorTarget.Parent || anchorTarget == AnchorTarget.ParentContentArea) {
                         return 0f;
@@ -727,7 +727,7 @@ namespace Src.Layout.LayoutTypes {
 
                     return ResolveAnchorWidth(widthMeasurement);
 
-                case UIUnit.AnchorHeight:
+                case UIMeasurementUnit.AnchorHeight:
                     anchorTarget = style.AnchorTarget;
                     if (parent.style.PreferredWidth.IsContentBased && anchorTarget == AnchorTarget.Parent || anchorTarget == AnchorTarget.ParentContentArea) {
                         return 0f;
@@ -744,36 +744,36 @@ namespace Src.Layout.LayoutTypes {
         protected float ResolveMinOrMaxHeight(UIMeasurement heightMeasurement, float width) {
             AnchorTarget anchorTarget;
             switch (heightMeasurement.unit) {
-                case UIUnit.Pixel:
+                case UIMeasurementUnit.Pixel:
                     return Mathf.Max(0, heightMeasurement.value);
 
-                case UIUnit.Content:
+                case UIMeasurementUnit.Content:
                     return Mathf.Max(0, GetContentHeight(width) * heightMeasurement.value);
 
-                case UIUnit.ParentSize:
+                case UIMeasurementUnit.ParentSize:
                     if (parent.style.PreferredHeight.IsContentBased) {
                         return 0f;
                     }
 
                     return Mathf.Max(0, parent.allocatedHeight * heightMeasurement.value);
 
-                case UIUnit.ViewportWidth:
+                case UIMeasurementUnit.ViewportWidth:
                     return Mathf.Max(0, layoutSystem.ViewportRect.width * heightMeasurement.value);
 
-                case UIUnit.ViewportHeight:
+                case UIMeasurementUnit.ViewportHeight:
                     return Mathf.Max(0, layoutSystem.ViewportRect.height * heightMeasurement.value);
 
-                case UIUnit.ParentContentArea:
+                case UIMeasurementUnit.ParentContentArea:
                     if (parent.style.PreferredHeight.IsContentBased) {
                         return 0f;
                     }
 
                     return Mathf.Max(0, parent.allocatedHeight * heightMeasurement.value - (parent.style == null ? 0 : parent.PaddingVertical - parent.BorderVertical));
 
-                case UIUnit.Em:
-                    return Mathf.Max(0, style.FontAsset.asset.fontInfo.PointSize * heightMeasurement.value);
+                case UIMeasurementUnit.Em:
+                    return Mathf.Max(0, style.FontAsset.fontInfo.PointSize * heightMeasurement.value);
 
-                case UIUnit.AnchorWidth:
+                case UIMeasurementUnit.AnchorWidth:
                     anchorTarget = style.AnchorTarget;
                     if (parent.style.PreferredHeight.IsContentBased && anchorTarget == AnchorTarget.Parent || anchorTarget == AnchorTarget.ParentContentArea) {
                         return 0f;
@@ -781,7 +781,7 @@ namespace Src.Layout.LayoutTypes {
 
                     return ResolveAnchorWidth(heightMeasurement);
 
-                case UIUnit.AnchorHeight:
+                case UIMeasurementUnit.AnchorHeight:
                     anchorTarget = style.AnchorTarget;
                     if (parent.style.PreferredHeight.IsContentBased && anchorTarget == AnchorTarget.Parent || anchorTarget == AnchorTarget.ParentContentArea) {
                         return 0f;

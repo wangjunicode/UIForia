@@ -12,21 +12,19 @@ namespace Src {
 
         private string templateName = string.Empty;
 
-        private static readonly Dictionary<Type, ParsedTemplate> parsedTemplates =
-            new Dictionary<Type, ParsedTemplate>();
+        private static readonly Dictionary<Type, ParsedTemplate> parsedTemplates = new Dictionary<Type, ParsedTemplate>();
 
-        private static readonly string[] RepeatAttributes = { "x-if", "x-id", "list", "as", "filter", "onItemAdded", "onItemRemoved" };
-        private static readonly string[] CaseAttributes = { "when" };
-        private static readonly string[] PrefabAttributes = { "x-if", "src" };
-        private static readonly string[] SwitchAttributes = { "x-if", "value" };
+        private static readonly string[] RepeatAttributes = {"x-if", "x-id", "list", "as", "filter", "onItemAdded", "onItemRemoved"};
+        private static readonly string[] CaseAttributes = {"when"};
+        private static readonly string[] SwitchAttributes = {"x-if", "value"};
         private static readonly string[] DefaultAttributes = { };
         private static readonly string[] ChildrenAttributes = { };
         private static readonly string[] TextAttributes = { };
 
-        public static ParsedTemplate GetParsedTemplate(ProcessedType processedType, bool forceReload = false) {
-            return GetParsedTemplate(processedType.rawType, forceReload);
+        public static void Reset() {
+            parsedTemplates.Clear();
         }
-
+        
         public static ParsedTemplate GetParsedTemplate(Type elementType, bool forceReload = false) {
             if (!forceReload && parsedTemplates.ContainsKey(elementType)) {
                 return parsedTemplates[elementType];
@@ -37,19 +35,25 @@ namespace Src {
             return parsedTemplate;
         }
 
-        public ParsedTemplate GetParsedTemplate<T>(bool forceReload = false) where T : UIElement {
-            return GetParsedTemplate(typeof(T), forceReload);
+        public static ParsedTemplate ParseTemplateFromString<T>(string input) where T : UIElement {
+            XDocument doc = XDocument.Parse(input);
+            return new TemplateParser().ParseTemplate(null, typeof(T), doc);
         }
 
-        public static ParsedTemplate ParseTemplateFromType(Type type) {
+        public static ParsedTemplate ParseTemplateFromString(Type rootType, string input) {
+            XDocument doc = XDocument.Parse(input);
+            return new TemplateParser().ParseTemplate(null, rootType, doc);
+        }
+
+        private static ParsedTemplate ParseTemplateFromType(Type type) {
             ProcessedType processedType = TypeProcessor.GetType(type);
 
             string template = processedType.GetTemplate();
             XDocument doc = XDocument.Parse(template);
-            ParsedTemplate parsedTemplate = null;
+            ParsedTemplate parsedTemplate;
 
             try {
-                parsedTemplate = new TemplateParser().ParseTemplate(processedType, doc);
+                parsedTemplate = new TemplateParser().ParseTemplate(processedType.GetTemplatePath(), processedType.rawType, doc);
             }
             catch (InvalidTemplateException ex) {
                 throw new InvalidTemplateException(template, ex.Message);
@@ -58,43 +62,59 @@ namespace Src {
             return parsedTemplate;
         }
 
-        public static ParsedTemplate ParseTemplateFromString<T>(string input) where T : UIElement {
-            XDocument doc = XDocument.Parse(input);
-            ProcessedType processedType = TypeProcessor.GetType(typeof(T));
-            return new TemplateParser().ParseTemplate(processedType, doc);
-        }
-        
-        public static ParsedTemplate ParseTemplateFromString(Type rootType, string input) {
-            XDocument doc = XDocument.Parse(input);
-            ProcessedType processedType = TypeProcessor.GetType(rootType);
-            return new TemplateParser().ParseTemplate(processedType, doc);
-        }
-
-        private StyleDefinition ParseStyleSheet(XElement styleElement) {
+        private static StyleDefinition ParseStyleSheet(string templateId, XElement styleElement) {
             XAttribute aliasAttr = styleElement.GetAttribute("alias");
-            XAttribute classPathAttr = styleElement.GetAttribute("classPath");
+            XAttribute importPathAttr = styleElement.GetAttribute("path");
 
-            if (classPathAttr == null || string.IsNullOrEmpty(classPathAttr.Value)) {
-                throw new InvalidTemplateException(templateName, "Style tags require a 'classPath' attribute");
-            }
-            
-            if(aliasAttr == null || string.IsNullOrEmpty(aliasAttr.Value)) {
-                return new StyleDefinition(StyleDefinition.k_EmptyAliasName, classPathAttr.Value.Trim());
+            string rawText = string.Empty;
+            // styles can have either a class path or a body
+            foreach (XNode node in styleElement.Nodes()) {
+                switch (node.NodeType) {
+                    case XmlNodeType.Text:
+                        rawText += ((XText) node).Value;
+                        continue;
+
+                    case XmlNodeType.Element:
+                        throw new Exception("<Style> can only have text children, no elements");
+
+                    case XmlNodeType.Comment:
+                        continue;
+                }
+
+                throw new InvalidTemplateException("Unable to handle node type: " + node.NodeType);
             }
 
-            return new StyleDefinition(aliasAttr.Value.Trim(), classPathAttr.Value.Trim());
+            string alias = StyleDefinition.k_EmptyAliasName;
+
+            if (aliasAttr != null && !string.IsNullOrEmpty(aliasAttr.Value)) {
+                alias = aliasAttr.Value.Trim();
+            }
+
+            // if we have a body, expect import path to be null
+            if (!string.IsNullOrEmpty(rawText) && !string.IsNullOrWhiteSpace(rawText)) {
+                if (importPathAttr != null && !string.IsNullOrEmpty(importPathAttr.Value)) {
+                    throw new UIForia.ParseException("Expected 'path' to be null when a body is provided to a style tag");
+                }
+
+                return new StyleDefinition(alias, templateId, rawText);
+            }
+
+            // if we have no body then expect path to be set
+            if (importPathAttr == null || string.IsNullOrEmpty(importPathAttr.Value)) {
+                throw new UIForia.ParseException("Expected 'path' to be provided when a body is not provided in a style tag");
+            }
+
+            return new StyleDefinition(alias, importPathAttr.Value.Trim());
         }
 
-        private ParsedTemplate ParseTemplate(ProcessedType type, XDocument doc) {
-            templateName = type.GetTemplateName();
-
+        private ParsedTemplate ParseTemplate(string templatePath, Type type, XDocument doc) {
             doc.MergeTextNodes();
 
             List<ImportDeclaration> imports = new List<ImportDeclaration>();
             List<StyleDefinition> styleTemplates = new List<StyleDefinition>();
 
             IEnumerable<XElement> importElements = doc.Root.GetChildren("Import");
-            
+
             foreach (XElement xElement in importElements) {
                 XAttribute valueAttr = xElement.GetAttribute("value");
                 XAttribute aliasAttr = xElement.GetAttribute("as");
@@ -109,15 +129,11 @@ namespace Src {
 
                 string alias = aliasAttr.Value;
                 if (alias[0] != '@') alias = "@" + alias;
-                
+
                 imports.Add(new ImportDeclaration(valueAttr.Value, alias));
             }
 
             IEnumerable<XElement> styleElements = doc.Root.GetChildren("Style");
-            
-            foreach (XElement styleElement in styleElements) {                
-                styleTemplates.Add(ParseStyleSheet(styleElement));
-            }
 
             XElement contentElement = doc.Root.GetChild("Contents");
             if (contentElement == null) {
@@ -127,11 +143,16 @@ namespace Src {
             List<UITemplate> children = ParseNodes(contentElement.Nodes());
             List<AttributeDefinition> attributes = ParseAttributes(contentElement.Attributes());
 
-            UIElementTemplate rootTemplate = new UIElementTemplate(type.rawType, children, attributes);
+            UIElementTemplate rootTemplate = new UIElementTemplate(type, children, attributes);
 
-            ParsedTemplate output = new ParsedTemplate(rootTemplate, styleTemplates);
+            ParsedTemplate output = new ParsedTemplate(rootTemplate, templatePath);
             output.imports = imports;
-            output.filePath = templateName;
+
+            foreach (XElement styleElement in styleElements) {
+                styleTemplates.Add(ParseStyleSheet(output.templateId, styleElement));
+            }
+
+            output.SetStyleGroups(styleTemplates);
             return output;
         }
 
@@ -226,7 +247,7 @@ namespace Src {
 
             return template;
         }
-        
+
         private static UITextTemplate ParseTextNode(XText node) {
             // todo split nodes based on inline {expressions}
             return new UITextTemplate(null, "'" + node.Value.Trim() + "'");
@@ -244,7 +265,7 @@ namespace Src {
 
         private static UITemplate ParseTextElement(Type type, XElement element) {
             string rawText = string.Empty;
-            foreach (var node in element.Nodes()) {
+            foreach (XNode node in element.Nodes()) {
                 switch (node.NodeType) {
                     case XmlNodeType.Text:
                         rawText += "'" + ((XText) node).Value.Trim() + "'";
@@ -259,9 +280,10 @@ namespace Src {
 
                 throw new InvalidTemplateException("Unable to handle node type: " + node.NodeType);
             }
+
             return new UITextTemplate(type, rawText, ParseAttributes(element.Attributes()));
         }
-        
+
         private static UITemplate ParseGraphicElement(XElement element) {
             UITemplate template = new UIGraphicTemplate(
                 ParseNodes(element.Nodes()),
@@ -269,15 +291,11 @@ namespace Src {
             );
             return template;
         }
-        
-        private static UITemplate ParseShapeElement(XElement element) {
-            throw new NotImplementedException();    
-        }
 
         private static UITemplate ParseImageElement(XElement element) {
-            return new UIImageTemplate(null, ParseAttributes(element.Attributes()));    
+            return new UIImageTemplate(null, ParseAttributes(element.Attributes()));
         }
-        
+
         private static UITemplate ParseInputElement(XElement element) {
             return new UIElementTemplate(
                 typeof(UIInputFieldElement2),
@@ -287,7 +305,6 @@ namespace Src {
         }
 
         private static UITemplate ParseElement(XElement element) {
-            
             if (element.Name == "Children") {
                 return ParseChildrenElement(element);
             }
@@ -295,7 +312,7 @@ namespace Src {
             if (element.Name == "Graphic") {
                 return ParseGraphicElement(element);
             }
-            
+
             if (element.Name == "Image") {
                 return ParseImageElement(element);
             }
@@ -338,7 +355,6 @@ namespace Src {
             return ParseTemplateElement(element);
         }
 
-
         public struct IntrinsicElementType {
 
             public readonly string name;
@@ -350,32 +366,31 @@ namespace Src {
                 this.type = type;
                 this.isContainer = isContainer;
             }
-            
+
         }
-        
-        public static readonly IntrinsicElementType[] IntrinsicElementTypes =  {
-            new IntrinsicElementType("Group", typeof(UIGroupElement), true), 
-            new IntrinsicElementType("Panel", typeof(UIPanelElement), true), 
-            new IntrinsicElementType("Section", typeof(UISectionElement), true), 
-            new IntrinsicElementType("Div", typeof(UIDivElement), true), 
-            new IntrinsicElementType("Header", typeof(UIHeaderElement), true), 
-            new IntrinsicElementType("Footer", typeof(UIFooterElement), true), 
-            
-            new IntrinsicElementType("Text", typeof(UITextElement), false), 
-            new IntrinsicElementType("Label", typeof(UILabelElement), false), 
-            new IntrinsicElementType("Paragraph", typeof(UIParagraphElement), false), 
-            new IntrinsicElementType("Heading1", typeof(UIHeading1Element), false), 
-            new IntrinsicElementType("Heading2", typeof(UIHeading2Element), false), 
-            new IntrinsicElementType("Heading3", typeof(UIHeading3Element), false), 
-            new IntrinsicElementType("Heading4", typeof(UIHeading4Element), false), 
-            new IntrinsicElementType("Heading5", typeof(UIHeading5Element), false), 
-            new IntrinsicElementType("Heading6", typeof(UIHeading6Element), false), 
+
+        public static readonly IntrinsicElementType[] IntrinsicElementTypes = {
+            new IntrinsicElementType("Group", typeof(UIGroupElement), true),
+            new IntrinsicElementType("Panel", typeof(UIPanelElement), true),
+            new IntrinsicElementType("Section", typeof(UISectionElement), true),
+            new IntrinsicElementType("Div", typeof(UIDivElement), true),
+            new IntrinsicElementType("Header", typeof(UIHeaderElement), true),
+            new IntrinsicElementType("Footer", typeof(UIFooterElement), true),
+
+            new IntrinsicElementType("Text", typeof(UITextElement), false),
+            new IntrinsicElementType("Label", typeof(UILabelElement), false),
+            new IntrinsicElementType("Paragraph", typeof(UIParagraphElement), false),
+            new IntrinsicElementType("Heading1", typeof(UIHeading1Element), false),
+            new IntrinsicElementType("Heading2", typeof(UIHeading2Element), false),
+            new IntrinsicElementType("Heading3", typeof(UIHeading3Element), false),
+            new IntrinsicElementType("Heading4", typeof(UIHeading4Element), false),
+            new IntrinsicElementType("Heading5", typeof(UIHeading5Element), false),
+            new IntrinsicElementType("Heading6", typeof(UIHeading6Element), false),
         };
-        
 
         private static List<UITemplate> ParseNodes(IEnumerable<XNode> nodes) {
             List<UITemplate> retn = new List<UITemplate>();
-            foreach (var node in nodes) {
+            foreach (XNode node in nodes) {
                 switch (node.NodeType) {
                     case XmlNodeType.Text:
                         retn.Add(ParseTextNode((XText) node));
@@ -418,7 +433,7 @@ namespace Src {
         }
 
         private static void EnsureOnlyAttributes(XElement element, string[] attrs) {
-            foreach (var attr in element.Attributes()) {
+            foreach (XAttribute attr in element.Attributes()) {
                 if (!attrs.Contains(attr.Name.LocalName)) {
                     throw Abort($"<{element.Name.LocalName}> cannot have attribute: '{attr.Name.LocalName}");
                 }

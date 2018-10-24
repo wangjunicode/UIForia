@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using Src.Parsing.StyleParser;
 using UnityEditor;
 using UnityEngine;
 using UnityEngine.SceneManagement;
@@ -9,10 +10,12 @@ namespace Src.Editor {
 
         [MenuItem("UI/Refresh UI Templates %g")]
         public static void Refresh() {
-//            List<UIViewBehavior> viewBehaviors = FindObjectOfType<UIViewBehavior>();
-//            for (int i = 0; i < viewBehaviors.Count; i++) {
-//                viewBehaviors[i].RefreshView();
-//            }
+            StyleParser.Reset();
+            TemplateParser.Reset();
+            List<UIViewBehavior> viewBehaviors = FindObjectOfType<UIViewBehavior>();
+            for (int i = 0; i < viewBehaviors.Count; i++) {
+                viewBehaviors[i].RefreshView();
+            }
         }
 
         public static List<T> FindObjectOfType<T>(bool inactive = true) where T : Object {

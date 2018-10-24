@@ -8,6 +8,7 @@ using Src.Layout;
 using Src.Rendering;
 using Src.Systems;
 using Src.Util;
+using TMPro;
 using UnityEngine;
 
 namespace Rendering {
@@ -394,10 +395,6 @@ namespace Rendering {
             }
 
             return null;
-        }
-
-        private void SetAssetPointerProperty(StylePropertyId propertyId, AssetPointer<Font> assetPointer, StyleState state) {
-            throw new NotImplementedException();
         }
 
         private void SetColorProperty(StylePropertyId propertyId, Color color, StyleState state) {

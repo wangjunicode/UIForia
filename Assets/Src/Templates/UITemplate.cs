@@ -210,17 +210,18 @@ namespace Src {
             AttributeDefinition styleAttr = GetAttribute("style");
             if (styleAttr == null) return;
 
+            // todo -- handle + and - instead of space
             if (styleAttr.value.IndexOf(' ') != -1) {
                 string[] names = styleAttr.value.Split(' ');
                 foreach (string part in names) {
-                    UIBaseStyleGroup style = template.GetStyleGroupInstance(part);
+                    UIBaseStyleGroup style = template.ResolveStyleGroup(part.Trim());
                     if (style != null) {
                         baseStyles.Add(style);
                     }
                 }
             }
             else {
-                UIBaseStyleGroup style = template.GetStyleGroupInstance(styleAttr.value);
+                UIBaseStyleGroup style = template.ResolveStyleGroup(styleAttr.value);
                 if (style != null) {
                     baseStyles.Add(style);
                 }

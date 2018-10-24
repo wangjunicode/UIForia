@@ -58,7 +58,7 @@ public class ChatWindow_Styles {
         return new UIStyle() {
             BackgroundColor = Color.red,
             AnchorTarget = AnchorTarget.Parent,
-            PreferredWidth = new UIMeasurement(1f, UIUnit.AnchorWidth),
+            PreferredWidth = new UIMeasurement(1f, UIMeasurementUnit.AnchorWidth),
             PreferredHeight = 5f,//new UIMeasurement(1f, UIUnit.AnchorHeight),
             AnchorLeft = new UIFixedLength(0.1f, UIFixedUnit.Percent),
             AnchorRight = new UIFixedLength(1f, UIFixedUnit.Percent),
@@ -179,7 +179,7 @@ public class ChatWindow_Styles {
         return new UIStyle() {
             FlexLayoutDirection = LayoutDirection.Row,
             FlexLayoutMainAxisAlignment = MainAxisAlignment.SpaceBetween,
-            PreferredWidth = new UIMeasurement(0.25f, UIUnit.ParentSize),
+            PreferredWidth = new UIMeasurement(0.25f, UIMeasurementUnit.ParentSize),
             PreferredHeight = new UIMeasurement(40f),
             BackgroundColor = Color.red
         };
@@ -188,7 +188,7 @@ public class ChatWindow_Styles {
     [ExportStyle("header-text")]
     public static UIStyle HeaderText() {
         return new UIStyle() {
-            Padding = new PaddingBox(20f),
+            Padding = new FixedLengthRect(20f),
             FontSize = 32,
             TextColor = Color.white
         };

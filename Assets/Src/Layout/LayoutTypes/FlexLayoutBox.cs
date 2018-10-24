@@ -10,7 +10,7 @@ namespace Src.Layout.LayoutTypes {
 
     // todo -- pool this
     // todo -- handle incremental layout, ie no layout when not required or only run partial like alignment change
-
+    // todo -- handle reverse 
     [DebuggerDisplay("{element.ToString()}")]
     public class FlexLayoutBox : LayoutBox {
 

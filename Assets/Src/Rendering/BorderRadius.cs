@@ -98,7 +98,7 @@ namespace Rendering {
 //        [DebuggerStepThrough]
 //        public static implicit operator Vector4(BorderRadius radius) {
 //            return new Vector4(
-//                FloatUtil.IsDefined(radius.topLeft) ? radius.topLeft : 0,
+//                rad ? radius.topLeft : 0,
 //                FloatUtil.IsDefined(radius.topRight) ? radius.topRight : 0,
 //                FloatUtil.IsDefined(radius.bottomRight) ? radius.bottomRight : 0,
 //                FloatUtil.IsDefined(radius.bottomLeft) ? radius.bottomLeft : 0

@@ -22,7 +22,7 @@ fixed4 frag(v2f i) : SV_Target {
     // is distance to the rounded part when in a corner circle
     float dist = radius - (min(max(delta.x, delta.y), 0) + length(max(delta, 0)));
 
-    fixed4 color = color_from_distance(dist, fill(i.uv), _OutlineColor);// * i.color;
+    fixed4 color = color_from_distance(dist, fill(i.uv), _OutlineColor) * i.color;
     if (_PreMultiplyAlpha == 1)
         color.rgb *= color.a;
 

@@ -27,7 +27,7 @@ namespace Rendering {
 
         public FixedLengthRect padding => new FixedLengthRect(paddingTop, paddingRight, paddingBottom, paddingLeft);
 
-        public bool HasBorderRadius => 
+        public bool HasBorderRadius =>
             BorderRadiusTopLeft.value > 0 ||
             BorderRadiusBottomLeft.value > 0 ||
             BorderRadiusTopRight.value > 0 ||
@@ -480,21 +480,52 @@ namespace Rendering {
             }
         }
 
+        public BorderRadius BorderRadius => new BorderRadius(BorderRadiusTopLeft, BorderRadiusTopRight, BorderRadiusBottomRight, BorderRadiusBottomLeft);
+
+        public Vector4 ResolvedBorderRadius => new Vector4(
+            ResolveBorderRadiusComponent(BorderRadiusTopLeft), 
+            ResolveBorderRadiusComponent(BorderRadiusTopRight),
+            ResolveBorderRadiusComponent(BorderRadiusBottomRight),
+            ResolveBorderRadiusComponent(BorderRadiusBottomLeft)
+        );
+
+        private float ResolveBorderRadiusComponent(UIFixedLength borderRadius) {
+            switch (borderRadius.unit) {
+                case UIFixedUnit.Pixel:
+                    return borderRadius.value;
+                
+                case UIFixedUnit.Percent:
+                    return styleSet.element.layoutResult.AllocatedWidth * borderRadius.value;
+                
+                case UIFixedUnit.Em:
+                    return 0;
+                
+                case UIFixedUnit.ViewportWidth:
+                    return 0;
+                
+                case UIFixedUnit.ViewportHeight:
+                    return 0;
+                
+                default:
+                    return 0;
+            }
+        }
+
         public UIFixedLength BorderRadiusTopLeft {
             [DebuggerStepThrough] get { return ReadFixedLength(StylePropertyId.BorderRadiusTopLeft, DefaultStyleValues.BorderRadiusTopLeft); }
             internal set { WriteFixedLength(StylePropertyId.BorderRadiusTopLeft, value); }
         }
-        
+
         public UIFixedLength BorderRadiusTopRight {
             [DebuggerStepThrough] get { return ReadFixedLength(StylePropertyId.BorderRadiusTopRight, DefaultStyleValues.BorderRadiusTopRight); }
             internal set { WriteFixedLength(StylePropertyId.BorderRadiusTopRight, value); }
         }
-        
+
         public UIFixedLength BorderRadiusBottomRight {
             [DebuggerStepThrough] get { return ReadFixedLength(StylePropertyId.BorderRadiusBottomRight, DefaultStyleValues.BorderRadiusBottomRight); }
             internal set { WriteFixedLength(StylePropertyId.BorderRadiusBottomRight, value); }
         }
-        
+
         public UIFixedLength BorderRadiusBottomLeft {
             [DebuggerStepThrough] get { return ReadFixedLength(StylePropertyId.BorderRadiusBottomLeft, DefaultStyleValues.BorderRadiusBottomLeft); }
             internal set { WriteFixedLength(StylePropertyId.BorderRadiusBottomLeft, value); }
@@ -1244,7 +1275,7 @@ namespace Rendering {
         private UIFixedLength ReadFixedLength(StylePropertyId propertyId, UIFixedLength defaultValue) {
             StyleProperty retn;
             properties = properties ?? new IntMap<StyleProperty>();
-            if (properties.TryGetValue((int)propertyId, out retn)) {
+            if (properties.TryGetValue((int) propertyId, out retn)) {
                 return retn.AsFixedLength;
             }
 
@@ -1255,12 +1286,12 @@ namespace Rendering {
         private void WriteFixedLength(StylePropertyId propertyId, UIFixedLength newValue) {
             StyleProperty retn;
             properties = properties ?? new IntMap<StyleProperty>();
-            if (properties.TryGetValue((int)propertyId, out retn)) {
+            if (properties.TryGetValue((int) propertyId, out retn)) {
                 if (retn.AsInt == newValue) return;
             }
 
             StyleProperty property = new StyleProperty(propertyId, newValue);
-            properties[(int)propertyId] = property;
+            properties[(int) propertyId] = property;
             SendEvent(property);
         }
 
@@ -1268,7 +1299,7 @@ namespace Rendering {
         private int ReadInt(StylePropertyId propertyId, int defaultValue) {
             StyleProperty retn;
             properties = properties ?? new IntMap<StyleProperty>();
-            if (properties.TryGetValue((int)propertyId, out retn)) {
+            if (properties.TryGetValue((int) propertyId, out retn)) {
                 return retn.AsInt;
             }
 
@@ -1278,12 +1309,12 @@ namespace Rendering {
         private void WriteInt(StylePropertyId propertyId, int newValue) {
             StyleProperty retn;
             properties = properties ?? new IntMap<StyleProperty>();
-            if (properties.TryGetValue((int)propertyId, out retn)) {
+            if (properties.TryGetValue((int) propertyId, out retn)) {
                 if (retn.AsInt == newValue) return;
             }
 
             StyleProperty property = new StyleProperty(propertyId, newValue);
-            properties[(int)propertyId] = property;
+            properties[(int) propertyId] = property;
             SendEvent(property);
         }
 
@@ -1291,7 +1322,7 @@ namespace Rendering {
         private float ReadFloat(StylePropertyId propertyId, float defaultValue) {
             StyleProperty retn;
             properties = properties ?? new IntMap<StyleProperty>();
-            if (properties.TryGetValue((int)propertyId, out retn)) {
+            if (properties.TryGetValue((int) propertyId, out retn)) {
                 return retn.AsFloat;
             }
 
@@ -1300,12 +1331,12 @@ namespace Rendering {
 
         private void WriteFloat(StylePropertyId propertyId, float newValue) {
             StyleProperty retn;
-            if (properties.TryGetValue((int)propertyId, out retn)) {
+            if (properties.TryGetValue((int) propertyId, out retn)) {
                 if (retn.AsFloat == newValue) return;
             }
 
             StyleProperty property = new StyleProperty(propertyId, FloatUtil.EncodeToInt(newValue));
-            properties[(int)propertyId] = property;
+            properties[(int) propertyId] = property;
             SendEvent(property);
         }
 

@@ -1,10 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project version="4">
   <component name="ContentModelStore">
-    <e p="C:\Users\matth\.Rider2018.2\config\extensions" t="IncludeRecursive" />
-    <e p="C:\Users\matth\.Rider2018.2\system\extResources" t="IncludeRecursive" />
-    <e p="C:\Users\matth\.Rider2018.2\system\resharper-host\local\Transient\ReSharperHost\v182\SolutionCaches\_UIElements.-1987582547.00" t="ExcludeRecursive" />
-    <e p="C:\Users\matth\RiderProjects\UIElements" t="IncludeRecursive">
+    <e p="C:\Seed\UIElements" t="IncludeRecursive">
       <e p="_DemoAsmDef.csproj" t="IncludeRecursive" />
       <e p="Assembly-CSharp-Editor.csproj" t="IncludeRecursive" />
       <e p="Assembly-CSharp.csproj" t="IncludeRecursive" />
@@ -40,6 +37,18 @@
           <e p="UIViewWindow.cs" t="Include" />
         </e>
         <e p="notes.txt" t="Include" />
+        <e p="ShadersTemp" t="Include">
+          <e p="DeferredFog.shader" t="Include" />
+          <e p="DeferredShading.shader" t="Include" />
+          <e p="My First Lighting Shader.shader" t="Include" />
+          <e p="My First Shader.shader" t="Include" />
+          <e p="My Lighting.cginc" t="Include" />
+          <e p="My Lightmapping.cginc" t="Include" />
+          <e p="My Shadows.cginc" t="Include" />
+          <e p="MyDeferredShading.cginc" t="Include" />
+          <e p="Texture Splatting.shader" t="Include" />
+          <e p="Textured With Detail.shader" t="Include" />
+        </e>
         <e p="Shapes2D" t="Include">
           <e p="Editor" t="Include">
             <e p="CustomHandles.cs" t="Include" />
@@ -183,9 +192,10 @@
             <e p="UIInputFieldElement.cs" t="Include" />
           </e>
           <e p="Elements" t="Include">
-            <e p="CustomDrawableElement.cs" t="Include" />
             <e p="IntrinsicTemplates.cs" t="Include" />
             <e p="Panel.cs" t="Include" />
+            <e p="ScrollbarDragEvent.cs" t="Include" />
+            <e p="ScrollbarOrientation.cs" t="Include" />
             <e p="UIContainerElement.cs" t="Include" />
             <e p="UIElement.cs" t="Include" />
             <e p="UIElementFlags.cs" t="Include" />
@@ -204,6 +214,7 @@
             <e p="UITransform.cs" t="Include" />
             <e p="VirtualElement.cs" t="Include" />
             <e p="VirtualScrollBar.cs" t="Include" />
+            <e p="VirtualScrollbarHandle.cs" t="Include" />
           </e>
           <e p="ExportStyleAttribute.cs" t="Include" />
           <e p="Expressions" t="Include">
@@ -361,12 +372,11 @@
             <e p="ContentBoxRect.cs" t="Include" />
             <e p="DefaultStyleValues.cs" t="Include" />
             <e p="Easing.cs" t="Include" />
+            <e p="ElementRenderer.cs" t="Include" />
             <e p="HorizontalScrollbarAttachment.cs" t="Include" />
-            <e p="IDirectDrawMesh.cs" t="Include" />
-            <e p="IMGUIRenderData.cs" t="Include" />
+            <e p="IMaterialProvider.cs" t="Include" />
+            <e p="IMeshProvider.cs" t="Include" />
             <e p="IRenderSystem.cs" t="Include" />
-            <e p="IStyleChangeHandler.cs" t="Include" />
-            <e p="ISystem.cs" t="Include" />
             <e p="ITextSizeCalculator.cs" t="Include" />
             <e p="Overflow.cs" t="Include" />
             <e p="Paint.cs" t="Include" />
@@ -374,6 +384,8 @@
             <e p="RenderData.cs" t="Include" />
             <e p="RenderLayer.cs" t="Include" />
             <e p="StandardDrawable.cs" t="Include" />
+            <e p="StandardInstancedRenderer.cs" t="Include" />
+            <e p="StandardRenderer.cs" t="Include" />
             <e p="StyleColor.cs" t="Include" />
             <e p="StyleProperty.cs" t="Include" />
             <e p="StylePropertyId.cs" t="Include" />
@@ -416,6 +428,7 @@
             <e p="ProceduralImage.shader" t="Include" />
             <e p="Rectangle.shader" t="Include" />
             <e p="SimpleBorder.shader" t="Include" />
+            <e p="UIStandardInstanced.shader" t="Include" />
             <e p="UIStandardShader.shader" t="Include" />
             <e p="Unlit.shader" t="Include" />
           </e>
@@ -444,12 +457,8 @@
             <e p="GOInputSystem.cs" t="Include" />
             <e p="GORenderSystem.cs" t="Include" />
             <e p="Gradient.cs" t="Include" />
-            <e p="IDrawable.cs" t="Include" />
-            <e p="IGraphicUpdateManager.cs" t="Include" />
             <e p="IInputSystem.cs" t="Include" />
             <e p="ILayoutSystem.cs" t="Include" />
-            <e p="IMGUIInputSystem.cs" t="Include" />
-            <e p="IMGUIRenderSystem.cs" t="Include" />
             <e p="InputSystem" t="Include">
               <e p="InputSystem.cs" t="Include" />
               <e p="InputSystem.Drag.cs" t="Include" />
@@ -457,10 +466,11 @@
               <e p="InputSystem.Keyboard.cs" t="Include" />
               <e p="InputSystem.Mouse.cs" t="Include" />
               <e p="InputSystem.Util.cs" t="Include" />
+              <e p="KeyboardEventTreeNode.cs" t="Include" />
               <e p="MouseState.cs" t="Include" />
             </e>
             <e p="IStyleSystem.cs" t="Include" />
-            <e p="KeyboardEventTreeNode.cs" t="Include" />
+            <e p="ISystem.cs" t="Include" />
             <e p="LayoutSystem.cs" t="Include" />
             <e p="StyleSystem.cs" t="Include" />
           </e>
@@ -502,6 +512,7 @@
             <e p="KeyCodeUtil.cs" t="Include" />
             <e p="LightList.cs" t="Include" />
             <e p="ListPool.cs" t="Include" />
+            <e p="MathUtil.cs" t="Include" />
             <e p="MeasurementVector2.cs" t="Include" />
             <e p="MeshUtil.cs" t="Include" />
             <e p="ObjectPool.cs" t="Include" />
@@ -612,5 +623,8 @@
       <e p="TestAsm.csproj" t="IncludeRecursive" />
       <e p="UIElements.sln" t="IncludeFlat" />
     </e>
+    <e p="C:\Users\Matt\.Rider2018.2\config\extensions" t="IncludeRecursive" />
+    <e p="C:\Users\Matt\.Rider2018.2\system\extResources" t="IncludeRecursive" />
+    <e p="C:\Users\Matt\.Rider2018.2\system\resharper-host\local\Transient\ReSharperHost\v182\SolutionCaches\_UIElements.1439856042.00" t="ExcludeRecursive" />
   </component>
 </project>

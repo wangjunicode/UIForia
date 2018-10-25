@@ -11,7 +11,6 @@ namespace Src.Layout.LayoutTypes {
 
         public ImageLayoutBox(LayoutSystem layoutSystem, UIElement element) : base(layoutSystem, element) {
             image = (UIImageElement) element;
-            image.onMaterialDirty += (e) => { throw new NotImplementedException(); };
         }
 
 //        public float PreferredWidth {

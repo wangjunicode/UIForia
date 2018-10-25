@@ -1,43 +1,41 @@
-﻿using Rendering;
+﻿using System;
+using System.Diagnostics;
+using Rendering;
 using Src.Elements;
+using Src.Systems;
 using UnityEngine;
 
 namespace Src.Systems {
 
-    public class RenderData : IHierarchical {
-
+    public struct DrawInfo {
+        
         public UIElement element;
-        public IDrawable drawable;
-        public IRenderSystem renderSystem;
-        public float zOffset;
-
-        public RenderData(UIElement element, IRenderSystem renderSystem) {
+        public Vector4 clipVector;
+        public Vector3 renderPosition;
+        public Mesh mesh;
+        public Material material;
+        
+    }
+    
+    [DebuggerDisplay("{" + nameof(element) + ".ToString()}")]
+    public class RenderData {
+        
+        public Mesh mesh;
+        public UIElement element;               
+        public Material material;
+        public Vector4 clipVector;
+        public Vector3 renderPosition;
+        
+        private bool isElementDrawable;
+        
+        public RenderData(UIElement element) {
             this.element = element;
-            this.renderSystem = renderSystem;
-
-            IDrawable graphicElement = element as IDrawable;
-            if (graphicElement != null) {
-                this.drawable = graphicElement;
-                graphicElement.onMeshDirty += HandleMeshDirty;
-                graphicElement.onMaterialDirty += HandleMaterialDirty;
-            }
-            else {
-                this.drawable = new StandardDrawable(element);
-            }
         }
 
-        public int UniqueId => element.id;
-        public IHierarchical Element => element;
-        public IHierarchical Parent => element.parent;
-
-        public void HandleMeshDirty(IDrawable element) {
-            renderSystem.MarkGeometryDirty(element);
-        }
-
-        public void HandleMaterialDirty(IDrawable element) {
-            renderSystem.MarkMaterialDirty(element);
-        }
+        public ElementRenderer Renderer => element.Renderer;
 
     }
 
+    
+    
 }

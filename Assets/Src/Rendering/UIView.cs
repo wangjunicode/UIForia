@@ -147,7 +147,7 @@ public abstract class UIView {
 
     // create element, find where to insert in child depth list
 
-    public class DepthIndexComparer : IComparer<UIElement> {
+    protected class DepthIndexComparer : IComparer<UIElement> {
 
         public int Compare(UIElement x, UIElement y) {
             if (x.parent == y.parent) {

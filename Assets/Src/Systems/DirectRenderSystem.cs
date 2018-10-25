@@ -1,5 +1,7 @@
 using System.Collections.Generic;
 using Rendering;
+using Src.Elements;
+using Src.Util;
 using UnityEngine;
 using BucketList = System.Collections.Generic.List<System.Collections.Generic.List<Src.Systems.RenderData>>;
 
@@ -8,60 +10,65 @@ namespace Src.Systems {
     public class DirectRenderSystem : IRenderSystem {
 
         private readonly IStyleSystem m_StyleSystem;
-        private readonly List<IDrawable> m_DirtyGraphicList;
-        private readonly List<UIElement> m_ToInitialize;
-        private readonly List<RenderData> m_RenderList; //todo -- to array
-        private readonly BucketList m_Buckets;
-        private readonly Camera m_Camera;
-        private readonly IntMap<RenderData> m_RenderDataMap;
 
+        private readonly LightList<UIElement> m_ToInitialize;
+        
+        private readonly LightList<RenderData> m_WillRenderList; 
+        private readonly LightList<RenderData> m_RenderDataList;
+        
+        private readonly Camera m_Camera;
+        private readonly List<VirtualScrollbar> m_Scrollbars;
+        
         private static readonly RenderZIndexComparerAscending s_ZIndexComparer = new RenderZIndexComparerAscending();
 
-        public DirectRenderSystem(Camera camera, IStyleSystem styleSystem) {
+        public DirectRenderSystem(Camera camera, ILayoutSystem layoutSystem, IStyleSystem styleSystem) {
             this.m_Camera = camera;
             this.m_StyleSystem = styleSystem;
-            this.m_RenderList = new List<RenderData>();
-            this.m_DirtyGraphicList = new List<IDrawable>();
-            this.m_RenderDataMap = new IntMap<RenderData>();
-            this.m_ToInitialize = new List<UIElement>();
-            this.m_Buckets = new BucketList();
+            this.m_WillRenderList = new LightList<RenderData>();
+            this.m_RenderDataList = new LightList<RenderData>();
+            this.m_ToInitialize = new LightList<UIElement>();
+            this.m_Scrollbars = new List<VirtualScrollbar>();
+            layoutSystem.onCreateVirtualScrollbar += HandleScrollbarCreated;
+            layoutSystem.onDestroyVirtualScrollbar += HandleScrollbarDestroyed;
         }
-
+       
+        private void HandleScrollbarCreated(VirtualScrollbar scrollbar) {
+            m_ToInitialize.Add(scrollbar);
+            m_ToInitialize.Add(scrollbar.handle);
+            m_Scrollbars.Add(scrollbar);
+        }
+        
+        private void HandleScrollbarDestroyed(VirtualScrollbar scrollbar) {
+            m_ToInitialize.Remove(scrollbar);
+            m_ToInitialize.Remove(scrollbar.handle);
+            m_Scrollbars.Remove(scrollbar);
+        }
+        
         private void InitializeRenderables() {
+            
+            if (m_ToInitialize.Count == 0) return;
+            
+            m_RenderDataList.EnsureAdditionalCapacity(m_ToInitialize.Count);
+            m_WillRenderList.EnsureAdditionalCapacity(m_ToInitialize.Count);
+            
+            UIElement[] list = m_ToInitialize.List;
+            
             for (int i = 0; i < m_ToInitialize.Count; i++) {
-                UIElement element = m_ToInitialize[i];
+                UIElement element = list[i];
 
                 if ((element.flags & UIElementFlags.RequiresRendering) == 0) {
                     continue;
                 }
 
-                RenderData renderData = new RenderData(element, this);
-                m_RenderList.Add(renderData);
-
-                if (element.isEnabled) {
-                    m_DirtyGraphicList.Add(renderData.drawable);
-                    renderData.drawable.onMeshDirty += MarkGeometryDirty;
-                    renderData.drawable.onMaterialDirty += MarkMaterialDirty;
-                }
+                m_RenderDataList.AddUnchecked(new RenderData(element));
+                
             }
 
             m_ToInitialize.Clear();
         }
 
-        public void MarkMaterialDirty(IDrawable element) {
-            if (!m_DirtyGraphicList.Contains(element)) {
-                m_DirtyGraphicList.Add(element);
-            }
-        }
-
-        public void MarkGeometryDirty(IDrawable element) {
-            if (!m_DirtyGraphicList.Contains(element)) {
-                m_DirtyGraphicList.Add(element);
-            }
-        }
 
         public void OnUpdate() {
-
             /*
              *  for meshes of type IDrawableInstanced -> use draw instanced and pass in material block
              */
@@ -72,11 +79,6 @@ namespace Src.Systems {
                 return;
             }
 
-            MaterialPropertyBlock block;
-            Material mat = Resources.Load<Material>("Materials/UIForia");
-         //   Texture2D tex = Resources.Load<Texture2D>("icon_1");
-            mat.color = Color.white;
-
             m_Camera.orthographic = true;
             m_Camera.orthographicSize = Screen.height * 0.5f;
 
@@ -85,63 +87,117 @@ namespace Src.Systems {
             origin.y += 0.5f * Screen.height;
             origin.z = 10f;
 
-            SortGeometry();
 
-            float z = -m_RenderList.Count;
-
-            for (int i = 0; i < m_RenderList.Count; i++) {
-                RenderData data = m_RenderList[i];
+            m_WillRenderList.Clear();
+            RenderData[] renderList = m_RenderDataList.List;
+            
+            for (int i = 0; i < m_RenderDataList.Count; i++) {
+                RenderData data = renderList[i];
                 LayoutResult layoutResult = data.element.layoutResult;
-                Vector3 position = layoutResult.screenPosition;
-                position.z = z++;
-                position.y = -position.y;
-                Rect clipRect = data.element.layoutResult.clipRect;
+                Rect screenRect = layoutResult.ScreenRect;
+
+                Rect clipRect = RectIntersect(layoutResult.clipRect, layoutResult.ScreenRect);
+
+                float clipWAdjustment = 0;
+                float clipHAdjustment = 0;
 
                 if (clipRect.width <= 0 || clipRect.height <= 0) {
                     continue;
                 }
-                if (layoutResult.actualSize.width == 0 || layoutResult.actualSize.height == 0) {
+
+                if (layoutResult.actualSize.width * layoutResult.actualSize.height <= 0) {
                     continue;
                 }
 
-                float clipX = (clipRect.x - position.x) / layoutResult.actualSize.width;
-                float clipY = ((clipRect.y - position.y) / layoutResult.actualSize.height);
-                float clipW = clipX + (clipRect.width / layoutResult.actualSize.width);
-                float clipH = clipY + (clipRect.height / layoutResult.actualSize.height);
-                mat.mainTexture = null;
-                mat.SetVector("_ClipRect", new Vector4(clipX, clipY, clipW, clipH));
-                Graphics.DrawMesh(data.drawable.GetMesh(), origin + position, Quaternion.identity, mat, 0, m_Camera, 0, null, false, false, false);
+                if (layoutResult.allocatedSize.height < layoutResult.actualSize.height) {
+                    clipHAdjustment = layoutResult.allocatedSize.height / layoutResult.actualSize.height;
+                    if (clipHAdjustment >= 1) {
+                        continue;
+                    }
+                }
+
+                if (layoutResult.allocatedSize.width < layoutResult.actualSize.width) {
+                    clipWAdjustment = layoutResult.allocatedSize.width / layoutResult.actualSize.width;
+                    if (clipWAdjustment >= 1) {
+                        continue;
+                    }
+                }
+
+                float clipX = Mathf.Clamp01(MathUtil.PercentOfRange(clipRect.x, screenRect.xMin, screenRect.xMax));
+                float clipY = Mathf.Clamp01(MathUtil.PercentOfRange(clipRect.y, screenRect.yMin, screenRect.yMax));
+                float clipW = Mathf.Clamp01(MathUtil.PercentOfRange(clipRect.xMax, screenRect.xMin, screenRect.xMax)) - clipWAdjustment;
+                float clipH = Mathf.Clamp01(MathUtil.PercentOfRange(clipRect.yMax, screenRect.yMin, screenRect.yMax)) - clipHAdjustment;
+
+                if (clipH <= 0 || clipW <= 0) {
+                    continue;
+                }
+
+                data.clipVector = new Vector4(clipX, clipY, clipW, clipH);
+                m_WillRenderList.AddUnchecked(data);
+                
             }
 
+            if (m_WillRenderList.Count == 0) {
+                return;
+            }
+            
+            ComputePositions(m_WillRenderList);
+            
+            m_WillRenderList.Sort((a, b) => a.Renderer.id > b.Renderer.id ? 1 : -1);
+
+            int start = 0;
+            RenderData[] willRender = m_WillRenderList.List;
+            ElementRenderer renderer = willRender[0].Renderer;
+            for (int i = 1; i < m_WillRenderList.Count; i++) {
+                RenderData data = willRender[i];
+                if (data.Renderer != renderer) {
+                    renderer.Render(willRender, start, i, origin, m_Camera);
+                    renderer = data.Renderer;
+                    start = i;
+                }
+            }
+            renderer.Render(willRender, start, m_WillRenderList.Count, origin, m_Camera);
+            m_WillRenderList.Clear();
+
+        }
+
+        private static Rect RectIntersect(Rect a, Rect b) {
+            float xMin = a.x > b.x ? a.x : b.x;
+            float xMax = a.x + a.width < b.x + b.width ? a.x + a.width : b.x + b.width;
+            float yMin = a.y > b.y ? a.y : b.y;
+            float yMax = a.y + a.height < b.y + b.height ? a.y + a.height : b.y + b.height;
+            return new Rect(xMin, yMin, xMax - xMin, yMax - yMin);
         }
 
         public List<RenderData> GetRenderList() {
-            return m_RenderList;
+            return null;
         }
 
-        private void SortGeometry() {
-            if (m_RenderList.Count == 0) {
+        private static void ComputePositions(LightList<RenderData> renderList) {
+            if (renderList.Count == 0) {
                 return;
             }
 
-            m_RenderList.Sort((a, b) => (a.element.layoutResult.layer < b.element.layoutResult.layer) ? 1 : -1);
+            renderList.Sort((a, b) => (a.element.layoutResult.layer < b.element.layoutResult.layer) ? 1 : -1);
 
             int layerStart = 0;
-            int currentLayer = m_RenderList[0].element.layoutResult.layer;
-            for (int i = 1; i < m_RenderList.Count; i++) {
-                RenderData renderData = m_RenderList[i];
+            int currentLayer = renderList[0].element.layoutResult.layer;
+            RenderData[] list = renderList.List;
+            for (int i = 1; i < renderList.Count; i++) {
+                RenderData renderData = list[i];
                 int layer = renderData.element.layoutResult.layer;
                 if (layer != currentLayer) {
-                    m_RenderList.Sort(layerStart, i - layerStart, s_ZIndexComparer);
+                    renderList.Sort(layerStart, i - layerStart, s_ZIndexComparer);
                     currentLayer = layer;
                     layerStart = i;
                 }
             }
 
-            for (int i = 0; i < m_RenderList.Count; i++) {
-                m_RenderList[i].zOffset = i;
+            for (int z = 0; z < renderList.Count; z++) {
+                Vector2 screenPosition = list[z].element.layoutResult.screenPosition;
+                list[z].renderPosition = new Vector3(screenPosition.x, -screenPosition.y, z);
             }
-
+            
         }
 
         //sort each group by z-index, use depth index to resolve ties, use origin layer if still tied
@@ -169,7 +225,7 @@ namespace Src.Systems {
         }
 
         public void OnDestroy() {
-           OnReset();
+            OnReset();
         }
 
         public void OnReady() { }
@@ -179,46 +235,27 @@ namespace Src.Systems {
         }
 
         private void HandleStylePropertyChanged(UIElement element, StyleProperty property) {
-            RenderData renderData = m_RenderDataMap.GetValueOrDefault(element.id);
-            if (renderData?.drawable == null) {
-                return;
-            }
-
-            // todo figure out pivots, unity re-builds meshes. figure out how rotation affects position
-            if (property.propertyId == StylePropertyId.TransformPivotX || property.propertyId == StylePropertyId.TransformPivotY) {
-                renderData.drawable.OnAllocatedSizeChanged();
-            }
-
-            renderData.drawable.OnStylePropertyChanged(property);
 
         }
 
         public void OnReset() {
-            m_RenderList.Clear();
-            m_RenderDataMap.Clear();
-            m_DirtyGraphicList.Clear();
-            m_Buckets.Clear();
+            m_WillRenderList.Clear();
+            m_RenderDataList.Clear();
             m_ToInitialize.Clear();
             m_StyleSystem.onStylePropertyChanged -= HandleStylePropertyChanged;
         }
 
-        public void OnElementCreated(UIElement element) {
-            m_ToInitialize.Add(element);
-        }
-
-        public void OnElementMoved(UIElement element, int newIndex, int oldIndex) { }
-
         public void OnElementEnabled(UIElement element) { }
 
-        public void OnElementDisabled(UIElement element) { }
-
-        public void OnElementDestroyed(UIElement element) {
-            // remember to recurse, maybe rename to OnElementHierarchyDestroyed
+        public void OnElementDisabled(UIElement element) {
+            // todo -- remove from render list
+            // remember to recurse, maybe rename to OnElementHierarchyDisabled
         }
 
-        public void OnElementShown(UIElement element) { }
-
-        public void OnElementHidden(UIElement element) { }
+        public void OnElementDestroyed(UIElement element) {
+            // todo -- remove from render list
+            // remember to recurse, maybe rename to OnElementHierarchyDestroyed
+        }
 
         public void OnElementCreatedFromTemplate(MetaData creationData) {
             m_ToInitialize.Add(creationData.element);
@@ -227,8 +264,6 @@ namespace Src.Systems {
             }
         }
 
-        public void OnElementParentChanged(UIElement element, UIElement oldParent, UIElement newParent) { }
-
     }
 
-}
+}  

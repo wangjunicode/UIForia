@@ -7,10 +7,8 @@ using UnityEngine.UI;
 
 namespace Src {
 
-    public class UIImageElement : UIElement, IDrawable, IPropertyChangedHandler {
+    public class UIImageElement : UIElement,IPropertyChangedHandler {
 
-        public event Action<IDrawable> onMeshDirty;
-        public event Action<IDrawable> onMaterialDirty;
 
         private Mesh mesh;
         private Texture2D src;
@@ -34,7 +32,6 @@ namespace Src {
         public void SetTexture(Texture2D texture) {
             src = texture;
             IsMaterialDirty = true;
-            onMaterialDirty?.Invoke(this);
         }
 
         public void SetPreserveAspectRatio(bool preserve) {
@@ -48,13 +45,11 @@ namespace Src {
         public void OnPropertyChanged(string propertyName, object oldValue) {
             if (propertyName == nameof(src)) {
                 IsMaterialDirty = true;
-                onMaterialDirty?.Invoke(this);
             }
         }
 
         public void OnAllocatedSizeChanged() {
             IsGeometryDirty = true;
-            onMeshDirty?.Invoke(this);
         }
 
         public void OnStylePropertyChanged(StyleProperty property) { }
@@ -83,6 +78,10 @@ namespace Src {
 
         public Texture GetMainTexture() {
             return src;
+        }
+
+        public ElementRenderer GetRenderer() {
+            throw new NotImplementedException();
         }
 
     }

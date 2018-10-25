@@ -57,7 +57,7 @@ namespace Src.Systems {
                     flags |= LayoutResultFlags.ActualSizeChanged;
                 }
                 else {
-                    flags &= ~LayoutResultFlags.AllocatedSizeChanged;
+                    flags &= ~LayoutResultFlags.ActualSizeChanged;
                 }
             }
         }
@@ -117,7 +117,7 @@ namespace Src.Systems {
         public float Rotation {
             get { return rotation; }
             internal set {
-                if (Mathf.Approximately(rotation, value)) {
+                if (!Mathf.Approximately(rotation, value)) {
                     rotation = value;
                     flags |= LayoutResultFlags.RotationChanged;
                 }

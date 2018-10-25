@@ -50,10 +50,24 @@ public class UIElement : IHierarchical, IExpressionContextProvider {
 
     public LayoutResult layoutResult { get; internal set; }
 
+    private ElementRenderer renderer = ElementRenderer.DefaultInstanced;
+
+    public ElementRenderer Renderer {
+        get { return renderer; }
+        set {
+            if (value == null) {
+                value = ElementRenderer.DefaultInstanced;
+            }
+            else {
+                renderer = value;
+            }
+        }
+    }
+
     public Vector2 scrollOffset { get; internal set; }
 
     public ComputedStyle ComputedStyle => style.computedStyle;
-    
+
     public int depth { get; internal set; }
     public int depthIndex { get; internal set; }
     public int siblingIndex { get; internal set; }
@@ -95,7 +109,7 @@ public class UIElement : IHierarchical, IExpressionContextProvider {
     public virtual void OnDestroy() { }
 
     public bool EnableBinding(string propertyName) {
-       throw new NotImplementedException();
+        throw new NotImplementedException();
         //return templateContext.view.bindingSystem.EnableBinding(this, propertyName);
     }
 
@@ -249,6 +263,7 @@ public class UIElement : IHierarchical, IExpressionContextProvider {
         if (HasAttribute("id")) {
             retn += "<" + GetType().Name + ":" + GetAttribute("id") + " " + id + ">";
         }
+
         if (name != null) {
             retn += "<" + name + ":" + GetType().Name + " " + id + ">";
         }

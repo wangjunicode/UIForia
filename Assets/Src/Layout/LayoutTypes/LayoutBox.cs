@@ -166,7 +166,7 @@ namespace Src.Layout.LayoutTypes {
             localX = x;
             if ((int) allocatedWidth != (int) width) {
                 allocatedWidth = width;
-                markedForLayout = true;
+                markedForLayout = true; // todo might not need it, delegate to virtual fn 
             }
         }
 
@@ -174,7 +174,7 @@ namespace Src.Layout.LayoutTypes {
             localY = y;
             if ((int) allocatedHeight != (int) height) {
                 allocatedHeight = height;
-                markedForLayout = true;
+                markedForLayout = true; // todo might not need it, delegate to virtual fn 
             }
         }
 

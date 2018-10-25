@@ -23,7 +23,7 @@ namespace Src {
     // text flow container can handle layouting text to flow around other contents
     // 
 
-    public class UITextElement : CustomDrawableElement {
+    public class UITextElement : UIElement {
 
         private string text;
         public TextInfo textInfo;
@@ -32,6 +32,7 @@ namespace Src {
 
         public UITextElement(string text = "") {
             this.text = text;
+            Renderer = null;
             flags = flags | UIElementFlags.TextElement
                           | UIElementFlags.Primitive;
         }
@@ -57,7 +58,6 @@ namespace Src {
         }
 
         private void UpdateTextInfo() {
-            SetVerticesDirty();
             bool collapseSpaces = true; //style.computedStyle.TextCollapseWhiteSpace;
             bool preserveNewlines = false; //style.computedStyle.TextPreserveNewLines;
 
@@ -96,9 +96,7 @@ namespace Src {
 
         public void InsertText(int characterIndex, string str) { }
 
-        public override void OnAllocatedSizeChanged() {
-            SetVerticesDirty();
-        }
+    
 
         private static TMP_FontAsset GetFontAssetForWeight(SpanInfo spanInfo, int fontWeight) {
             bool isItalic = (spanInfo.fontStyle & TextUtil.FontStyle.Italic) != 0;
@@ -108,37 +106,37 @@ namespace Src {
             return isItalic ? weights.italicTypeface : weights.regularTypeface;
         }
 
-        public override void OnStylePropertyChanged(StyleProperty property) {
-            if (IsTextProperty(property.propertyId)) {
-                switch (property.propertyId) {
-                    case StylePropertyId.TextAnchor:
-                        SetVerticesDirty();
-                        break;
-                    case StylePropertyId.TextColor:
-                        SetVerticesDirty();
-                        break;
-                    case StylePropertyId.TextAutoSize:
-                        break;
-                    case StylePropertyId.TextFontAsset:
-                        break;
-                    case StylePropertyId.TextFontSize:
-                        SetVerticesDirty();
-                        break;
-                    case StylePropertyId.TextFontStyle:
-                        SetVerticesDirty();
-                        break;
-                    case StylePropertyId.TextHorizontalOverflow:
-                        break;
-                    case StylePropertyId.TextVerticalOverflow:
-                        break;
-                    case StylePropertyId.TextWhitespaceMode:
-                        break;
-                    case StylePropertyId.TextTransform:
-                        SetVerticesDirty();
-                        break;
-                }
-            }
-        }
+//        public override void OnStylePropertyChanged(StyleProperty property) {
+//            if (IsTextProperty(property.propertyId)) {
+//                switch (property.propertyId) {
+//                    case StylePropertyId.TextAnchor:
+//                        SetVerticesDirty();
+//                        break;
+//                    case StylePropertyId.TextColor:
+//                        SetVerticesDirty();
+//                        break;
+//                    case StylePropertyId.TextAutoSize:
+//                        break;
+//                    case StylePropertyId.TextFontAsset:
+//                        break;
+//                    case StylePropertyId.TextFontSize:
+//                        SetVerticesDirty();
+//                        break;
+//                    case StylePropertyId.TextFontStyle:
+//                        SetVerticesDirty();
+//                        break;
+//                    case StylePropertyId.TextHorizontalOverflow:
+//                        break;
+//                    case StylePropertyId.TextVerticalOverflow:
+//                        break;
+//                    case StylePropertyId.TextWhitespaceMode:
+//                        break;
+//                    case StylePropertyId.TextTransform:
+//                        SetVerticesDirty();
+//                        break;
+//                }
+//            }
+//        }
 
         private static bool IsTextProperty(StylePropertyId propertyId) {
             int intId = (int) propertyId;
@@ -349,90 +347,90 @@ namespace Src {
             }
         }
 
-        public override Texture GetMainTexture() {
-            return textInfo.spanInfos[0].font.material.mainTexture;
-        }
-
-        public override Mesh GetMesh() {
-            if (mesh != null && !IsGeometryDirty) {
-                return mesh;
-            }
-
-            isMeshDirty = false;
-            if (mesh == null) mesh = new Mesh();
-            mesh.Clear();
-
-            ApplyLineAndWordOffsets(textInfo);
-
-            CharInfo[] charInfos = textInfo.charInfos;
-
-            int sizeX4 = textInfo.charCount * 4;
-
-            int[] triangles = new int[textInfo.charCount * 6];
-            Vector3[] positions = new Vector3[textInfo.charCount * 4];
-            Vector2[] uvs0 = new Vector2[sizeX4];
-            Vector2[] uvs2 = new Vector2[sizeX4];
-            Vector3[] normals = new Vector3[sizeX4];
-            Vector4[] tangents = new Vector4[sizeX4];
-            Color32[] colors = new Color32[sizeX4];
-
-            Color32 color = style.computedStyle.TextColor;
-
-            int idx_x4 = 0;
-            int idx_x6 = 0;
-
-            for (int i = 0; i < textInfo.charCount; i++) {
-                if (charInfos[i].character == ' ') continue;
-
-                for (int j = 0; j < 4; j++) {
-                    normals[idx_x4 + j] = Vector3.back;
-                    tangents[idx_x4 + j] = new Vector4(-1f, 0, 0, 1f);
-                    colors[idx_x4 + j] = color;
-                }
-
-                Vector2 topLeft = charInfos[i].topLeft;
-                Vector2 bottomRight = charInfos[i].bottomRight;
-
-                positions[idx_x4 + 0] = new Vector3(topLeft.x, bottomRight.y, 0); // Bottom Left
-                positions[idx_x4 + 1] = new Vector3(topLeft.x, topLeft.y, 0); // Top Left
-                positions[idx_x4 + 2] = new Vector3(bottomRight.x, topLeft.y, 0); // Top Right
-                positions[idx_x4 + 3] = new Vector3(bottomRight.x, bottomRight.y); // Bottom Right
-
-                uvs0[idx_x4 + 0] = new Vector2(charInfos[i].uv0.x, charInfos[i].uv0.y);
-                uvs0[idx_x4 + 1] = new Vector2(charInfos[i].uv0.x, charInfos[i].uv1.y);
-                uvs0[idx_x4 + 2] = new Vector2(charInfos[i].uv1.x, charInfos[i].uv1.y);
-                uvs0[idx_x4 + 3] = new Vector2(charInfos[i].uv1.x, charInfos[i].uv0.y);
-
-                uvs2[idx_x4 + 0] = new Vector2(0.0f, 0.5f); // todo -- need to compute these
-                uvs2[idx_x4 + 1] = new Vector2(511f, 0.5f);
-                uvs2[idx_x4 + 2] = new Vector2(2093056, 0.5f);
-                uvs2[idx_x4 + 3] = new Vector2(2093056, 0.5f);
-
-                triangles[idx_x6 + 0] = idx_x4 + 0;
-                triangles[idx_x6 + 1] = idx_x4 + 1;
-                triangles[idx_x6 + 2] = idx_x4 + 2;
-                triangles[idx_x6 + 3] = idx_x4 + 2;
-                triangles[idx_x6 + 4] = idx_x4 + 3;
-                triangles[idx_x6 + 5] = idx_x4 + 0;
-
-                idx_x4 += 4;
-                idx_x6 += 6;
-            }
-
-            mesh.vertices = positions;
-            mesh.uv = uvs0;
-            mesh.uv2 = uvs2;
-            mesh.colors32 = colors;
-            mesh.normals = normals;
-            mesh.tangents = tangents;
-            mesh.triangles = triangles;
-
-            return mesh;
-        }
-
-        public override Material GetMaterial() {
-            return TMP_FontAsset.defaultFontAsset.material;
-        }
+//        public override Texture GetMainTexture() {
+//            return textInfo.spanInfos[0].font.material.mainTexture;
+//        }
+//
+//        public override Mesh GetMesh() {
+//            if (mesh != null && !IsGeometryDirty) {
+//                return mesh;
+//            }
+//
+//            isMeshDirty = false;
+//            if (mesh == null) mesh = new Mesh();
+//            mesh.Clear();
+//
+//            ApplyLineAndWordOffsets(textInfo);
+//
+//            CharInfo[] charInfos = textInfo.charInfos;
+//
+//            int sizeX4 = textInfo.charCount * 4;
+//
+//            int[] triangles = new int[textInfo.charCount * 6];
+//            Vector3[] positions = new Vector3[textInfo.charCount * 4];
+//            Vector2[] uvs0 = new Vector2[sizeX4];
+//            Vector2[] uvs2 = new Vector2[sizeX4];
+//            Vector3[] normals = new Vector3[sizeX4];
+//            Vector4[] tangents = new Vector4[sizeX4];
+//            Color32[] colors = new Color32[sizeX4];
+//
+//            Color32 color = style.computedStyle.TextColor;
+//
+//            int idx_x4 = 0;
+//            int idx_x6 = 0;
+//
+//            for (int i = 0; i < textInfo.charCount; i++) {
+//                if (charInfos[i].character == ' ') continue;
+//
+//                for (int j = 0; j < 4; j++) {
+//                    normals[idx_x4 + j] = Vector3.back;
+//                    tangents[idx_x4 + j] = new Vector4(-1f, 0, 0, 1f);
+//                    colors[idx_x4 + j] = color;
+//                }
+//
+//                Vector2 topLeft = charInfos[i].topLeft;
+//                Vector2 bottomRight = charInfos[i].bottomRight;
+//
+//                positions[idx_x4 + 0] = new Vector3(topLeft.x, bottomRight.y, 0); // Bottom Left
+//                positions[idx_x4 + 1] = new Vector3(topLeft.x, topLeft.y, 0); // Top Left
+//                positions[idx_x4 + 2] = new Vector3(bottomRight.x, topLeft.y, 0); // Top Right
+//                positions[idx_x4 + 3] = new Vector3(bottomRight.x, bottomRight.y); // Bottom Right
+//
+//                uvs0[idx_x4 + 0] = new Vector2(charInfos[i].uv0.x, charInfos[i].uv0.y);
+//                uvs0[idx_x4 + 1] = new Vector2(charInfos[i].uv0.x, charInfos[i].uv1.y);
+//                uvs0[idx_x4 + 2] = new Vector2(charInfos[i].uv1.x, charInfos[i].uv1.y);
+//                uvs0[idx_x4 + 3] = new Vector2(charInfos[i].uv1.x, charInfos[i].uv0.y);
+//
+//                uvs2[idx_x4 + 0] = new Vector2(0.0f, 0.5f); // todo -- need to compute these
+//                uvs2[idx_x4 + 1] = new Vector2(511f, 0.5f);
+//                uvs2[idx_x4 + 2] = new Vector2(2093056, 0.5f);
+//                uvs2[idx_x4 + 3] = new Vector2(2093056, 0.5f);
+//
+//                triangles[idx_x6 + 0] = idx_x4 + 0;
+//                triangles[idx_x6 + 1] = idx_x4 + 1;
+//                triangles[idx_x6 + 2] = idx_x4 + 2;
+//                triangles[idx_x6 + 3] = idx_x4 + 2;
+//                triangles[idx_x6 + 4] = idx_x4 + 3;
+//                triangles[idx_x6 + 5] = idx_x4 + 0;
+//
+//                idx_x4 += 4;
+//                idx_x6 += 6;
+//            }
+//
+//            mesh.vertices = positions;
+//            mesh.uv = uvs0;
+//            mesh.uv2 = uvs2;
+//            mesh.colors32 = colors;
+//            mesh.normals = normals;
+//            mesh.tangents = tangents;
+//            mesh.triangles = triangles;
+//
+//            return mesh;
+//        }
+//
+//        public override Material GetMaterial() {
+//            return TMP_FontAsset.defaultFontAsset.material;
+//        }
 
         private WordInfo GetWordAtPoint(Vector2 point) {
             return FindNearestWord(FindNearestLine(point), point);

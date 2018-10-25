@@ -70,16 +70,16 @@ Shader "UIForia/Default"
                 float4 vertex   : SV_POSITION;
                 fixed4 color    : COLOR; // todo -- probably best to take this from material and not the vertex
                 float2 texcoord  : TEXCOORD0;
-                UNITY_VERTEX_OUTPUT_STEREO
+                float4 world  : TEXCOORD1;
             };
 
             v2f vert(appdata_t v)  {
                 v2f OUT;
                 UNITY_SETUP_INSTANCE_ID(v);
-                UNITY_INITIALIZE_VERTEX_OUTPUT_STEREO(OUT);
                 OUT.vertex = UnityObjectToClipPos(v.vertex);
                 OUT.texcoord = TRANSFORM_TEX(v.texcoord, _MainTex);
                 OUT.color = v.color * _Color;
+                OUT.world = v.vertex;
                 return OUT;
             }
             
@@ -92,9 +92,9 @@ Shader "UIForia/Default"
                 // step is basically the function a < b ? 0 : 1;
                 // if either coord of inside is 0, pixel is not contained in clip rect
                 float2 inside = step(_ClipRect.xy, p) * step(p, _ClipRect.zw);    
-                                  
-               // color.a *= inside.x * inside.y;
-                //clip (color.a - 0.001);
+
+                color.a *= inside.x * inside.y;
+                clip (color.a - 0.001);
                 
                 return color;
             }

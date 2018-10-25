@@ -79,7 +79,7 @@ namespace Src {
             set { Insert(key, value, false); }
         }
 
-        public T GetValueOrDefault(int key, T defaultValue = default(T)) {
+        public T GetOrDefault(int key, T defaultValue = default(T)) {
             int i = FindEntry(key);
             if (i >= 0) {
                 return entries[i].value;

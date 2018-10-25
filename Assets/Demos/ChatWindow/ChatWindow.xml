@@ -7,17 +7,15 @@
             FlexLayoutMainAxisAlignment = Start;
             PreferredWidth = 800px;
             PreferredHeight = 600px;
+            OverflowY = Scroll;
         }
         
         style childStyle {
             BackgroundColor = blue;
             PreferredWidth = 200px;
-            PreferredHeight = 0.1pca;
-            LayoutBehavior = Ignore;
-            TransformPositionX = 200px;
-            TransformPositionY = 50px;
-            
+            PreferredHeight = 300px;
         }
+        
     </Style>
 
     <Import value="ClippedPanel+ClippedCorner" as="ClippedCorner"/>
@@ -28,8 +26,11 @@
 
         <!--</WindowFrame>-->
 
-        <Panel style="childStyle" x-id="child"/>
-        
+        <!--<Panel style="childStyle" style.backgroundColor="red" x-id="child"/>-->
+        <!--<Panel style="childStyle" style.backgroundColor="yellow" x-id="child"/>-->
+        <!--<Panel style="childStyle" style.backgroundColor="green" x-id="child"/>-->
+        <!--<Panel style="childStyle" x-id="child"/>-->
+        <!---->
         <!--<Panel x-id="child-to-animate" style="anchor-item" style.backgroundColor="red"/>-->
         <!--<Panel style.width="100" style.height="1000" style.backgroundColor="blue"/>-->
         <!--Text here-->

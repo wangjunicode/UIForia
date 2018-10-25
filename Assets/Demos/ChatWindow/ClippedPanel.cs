@@ -12,7 +12,7 @@ using UnityEngine.UI;
     </Contents>
 </UITemplate>
 ")]
-public class ClippedPanel : UIElement, IDrawable {
+public class ClippedPanel : UIElement, IMeshProvider {
 
     private static readonly VertexHelper s_VertexHelper = new VertexHelper();
 
@@ -38,7 +38,6 @@ public class ClippedPanel : UIElement, IDrawable {
     
     public void OnAllocatedSizeChanged() {
         isMeshDirty = true;
-        onMeshDirty?.Invoke(this);
     }
 
     public void OnStylePropertyChanged(StyleProperty property) {
@@ -192,23 +191,7 @@ public class ClippedPanel : UIElement, IDrawable {
         s_VertexHelper.Clear();
         return mesh;
     }
-
-
-    public Material GetMaterial() {
-        return Graphic.defaultGraphicMaterial;
-    }
-
-    public event Action<IDrawable> onMeshDirty;
-    public event Action<IDrawable> onMaterialDirty;
-
-    public int Id => id;
-    public bool IsMaterialDirty => isMaterialDirty;
-    public bool IsGeometryDirty => isMeshDirty;
-
-    public Texture GetMainTexture() {
-        return Texture2D.whiteTexture;
-    }
-    
+  
     [Flags]
     public enum ClippedCorner {
 

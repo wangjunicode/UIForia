@@ -6,7 +6,7 @@ using UnityEngine.UI;
 
 namespace Src.Elements {
 
-    public class UIGraphicElement : UIElement, IDrawable {
+    public class UIGraphicElement : UIElement, IMeshProvider {
 
         public Action<Mesh> rebuildGeometry;
         public Action<Material> rebuildMaterial;
@@ -22,8 +22,7 @@ namespace Src.Elements {
             IsMaterialDirty = true;
         }
 
-        public event Action<IDrawable> onMeshDirty;
-        public event Action<IDrawable> onMaterialDirty;
+      
         
         public float width => mesh.bounds.extents.x;
         public float height => mesh.bounds.extents.y;
@@ -51,17 +50,14 @@ namespace Src.Elements {
         public void RebuildMaterial() {
             rebuildMaterial?.Invoke(material);
             IsMaterialDirty = true;
-            onMaterialDirty?.Invoke(this);
         }
 
         public void MarkMaterialDirty() {
             IsMaterialDirty = true;
-            onMeshDirty?.Invoke(this);
         }
 
         public void MarkGeometryDirty() {
             IsGeometryDirty = true;
-            onMeshDirty?.Invoke(this);
         }
 
         public void OnStylePropertyChanged(StyleProperty property) {
@@ -102,7 +98,10 @@ namespace Src.Elements {
                 mesh.Clear();
             }
             IsGeometryDirty = true;
-            onMaterialDirty?.Invoke(this);
+        }
+
+        public ElementRenderer GetRenderer() {
+            throw new NotImplementedException();
         }
 
     }

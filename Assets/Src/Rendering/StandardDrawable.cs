@@ -6,12 +6,10 @@ using UnityEngine.UI;
 
 namespace Src.Systems {
 
-    public class StandardDrawable : IDrawable {
+    public class StandardDrawable {
 
         private static readonly ObjectPool<Mesh> s_MeshPool = new ObjectPool<Mesh>(null, (m) => m.Clear());
 
-        public event Action<IDrawable> onMeshDirty;
-        public event Action<IDrawable> onMaterialDirty;
         
         public readonly UIElement element;
 
@@ -33,7 +31,6 @@ namespace Src.Systems {
 
         public void OnAllocatedSizeChanged() {
             isMeshDirty = true;
-            onMeshDirty?.Invoke(this);
         }
 
         public void OnStylePropertyChanged(StyleProperty property) {
@@ -111,12 +108,10 @@ namespace Src.Systems {
 
         private void SetVerticesDirty() {
             isMeshDirty = true;
-            onMeshDirty?.Invoke(this);
         }
 
         private void SetMaterialDirty() {
             isMaterialDirty = true;
-            onMaterialDirty?.Invoke(this);
         }
 
         private static Material s_BorderRadiusMaterial;
@@ -127,6 +122,10 @@ namespace Src.Systems {
             }
 
             return s_BorderRadiusMaterial;
+        }
+
+        public ElementRenderer GetRenderer() {
+            throw new NotImplementedException();
         }
 
     }

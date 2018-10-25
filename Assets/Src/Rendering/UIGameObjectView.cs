@@ -11,7 +11,7 @@ namespace Rendering {
         public UIGameObjectView(Type elementType, RectTransform viewTransform) : base(elementType) {
             this.rectTransform = viewTransform;
             layoutSystem = new LayoutSystem(styleSystem);
-            renderSystem = new DirectRenderSystem(Camera.main, styleSystem);
+            renderSystem = new DirectRenderSystem(Camera.main, layoutSystem, styleSystem);
 //            renderSystem = new GORenderSystem(layoutSystem, styleSystem, viewTransform);
             inputSystem = new GOInputSystem(layoutSystem, styleSystem);
             systems.Add(inputSystem);

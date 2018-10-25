@@ -11,6 +11,7 @@ using UnityEngine;
 
 namespace Rendering {
 
+    // todo -- have some way of seeing if any properties changed in a given frame
     public class ComputedStyle {
 
         private UIStyleSet styleSet;

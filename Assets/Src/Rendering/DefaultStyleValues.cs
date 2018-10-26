@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using Shapes2D;
 using Src;
 using Src.Layout;
 using Src.Layout.LayoutTypes;
@@ -19,6 +20,7 @@ namespace Rendering {
         public static readonly Color BorderColor = ColorUtil.UnsetValue;
         public static readonly Color BackgroundColor = ColorUtil.UnsetValue;
         public static readonly Texture2D BackgroundImage = null;
+        public static readonly Color BackgroundColorSecondary = Color.white;
 
         public static readonly Overflow OverflowX = Overflow.None;
         public static readonly Overflow OverflowY = Overflow.None;
@@ -111,6 +113,13 @@ namespace Rendering {
         public const int ZIndex = 0;
         public const RenderLayer RenderLayer = Rendering.RenderLayer.Default;
         public const int LayerOffset = 0;
+
+        public const float BackgroundFillRotation = 0f;
+        public const GradientType BackgroundGradientType = GradientType.Linear;
+        public const GradientAxis BackgroundGradientAxis = GradientAxis.Horizontal;
+        public const float BackgroundGradientStart = 0;
+        public const BackgroundShapeType BackgroundShapeType = Src.Rendering.BackgroundShapeType.Rectangle;
+
 
     }
 

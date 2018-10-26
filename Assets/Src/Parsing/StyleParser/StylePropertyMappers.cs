@@ -35,11 +35,18 @@ namespace Src.Parsing.StyleParser {
                 case "overflowy":
                     context.targetStyle.OverflowY = ParseUtil.ParseOverflow(context.variables, propertyValue);
                     break;
+                case "backgroundfilltype":
+                    throw new INeedToGoToBedException();
+//                    context.targetStyle.BackgroundFillType = ParseUtil.ParseBackgroundFillType(context.variables, propertyValue);
+                    break;
+                
                 default:
                     throw new ParseException("Unknown display property: " + propertyName);
             }
         }
-        
+
+        public class INeedToGoToBedException : Exception { }
+
         public static void MarginMapper(StyleParserContext context, string propertyName, string propertyValue) {
             switch (propertyName) {
                 case "margin":

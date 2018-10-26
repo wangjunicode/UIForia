@@ -6,16 +6,6 @@ using Src.Systems;
 using UnityEngine;
 
 namespace Src.Systems {
-
-    public struct DrawInfo {
-        
-        public UIElement element;
-        public Vector4 clipVector;
-        public Vector3 renderPosition;
-        public Mesh mesh;
-        public Material material;
-        
-    }
     
     [DebuggerDisplay("{" + nameof(element) + ".ToString()}")]
     public class RenderData {
@@ -25,11 +15,14 @@ namespace Src.Systems {
         public Material material;
         public Vector4 clipVector;
         public Vector3 renderPosition;
-        
-        private bool isElementDrawable;
+
+        public readonly bool isMeshProvider;
+        public readonly bool isMaterialProvider;
         
         public RenderData(UIElement element) {
             this.element = element;
+            this.isMeshProvider = this.element is IMeshProvider;
+            this.isMaterialProvider = this.element is IMaterialProvider;
         }
 
         public ElementRenderer Renderer => element.Renderer;

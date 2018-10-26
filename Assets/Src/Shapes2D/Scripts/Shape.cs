@@ -777,65 +777,7 @@
 
         }
 
-        public class BaseShape {
-
-            public float outlineSize = 0.03f;
-            public float blur = 0.027f;
-            public Color outlineColor = new Color(1, 1, 1, 1);
-            public FillType fillType = FillType.MatchOutlineColor;
-            public Color fillColor = new Color(1, 1, 1, 1);
-            public Color fillColor2 = new Color(1, 1, 1, 1);
-            public float fillRotation = 0f;
-            public Vector2 fillOffset = new Vector2(0, 0);
-            public Vector2 fillScale = new Vector2(1, 1);
-            public GradientType gradientType = GradientType.Linear;
-            public GradientAxis gradientAxis = GradientAxis.Horizontal;
-            public float gradientStart = 0f;
-            public Texture2D fillTexture;
-            public float gridSize = 0.5f;
-            public float lineSize = 0.1f;
-
-        }
-
-        public class RectangleShape : BaseShape {
-
-            public Vector4 roundnessVec = Vector4.zero;
-
-        }
-
-        public class TriangleShape : BaseShape {
-
-            public float triangleOffset = 0.5f;
-
-        }
-
-        public class EllipseShape : BaseShape {
-
-            public Vector4 innerRadii;
-            public float arcMinAngle;
-            public float arcMaxAngle;
-            public bool invertArc;
-            public bool useArc;
-            public bool correctScaling;
-
-        }
-
-        public class PolygonShape : BaseShape {
-
-            public int numPolyVerts;
-            public Vector4[] polyVertices;
-
-        }
-
-        public class PathShape : BaseShape {
-
-            public float pathThickness;
-            public int numPathSegments;
-            public Vector4[] pathPoints;
-            public bool fillPathLoops;
-
-        }
-
+      
         protected class ShaderProps {
 
             // we'll get scale from the object's scale in unity

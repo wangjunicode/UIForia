@@ -426,6 +426,17 @@ namespace Rendering {
 
             computedStyle.SetProperty(GetPropertyValue(propertyId));
         }
+        
+        private void SetFloatProperty(StylePropertyId propertyId, float value, StyleState state) {
+            UIStyle style = GetOrCreateInstanceStyle(state);
+            style.SetFloatProperty(propertyId, value);
+            if ((state & currentState) == 0) {
+                return;
+            }
+
+            computedStyle.SetProperty(GetPropertyValue(propertyId));
+        }
+        
 
         private void SetEnumProperty(StylePropertyId propertyId, int value, StyleState state) {
             UIStyle style = GetOrCreateInstanceStyle(state);

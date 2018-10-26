@@ -4,6 +4,7 @@ using System.Configuration;
 using Src;
 using UnityEngine;
 using System.Diagnostics;
+using Shapes2D;
 using Src.Layout;
 using Src.Layout.LayoutTypes;
 using Src.Rendering;
@@ -98,6 +99,61 @@ namespace Rendering {
             set { SetObjectProperty(StylePropertyId.BackgroundImage, value); }
         }
 
+        public BackgroundFillType BackgroundFillType {
+            get { return (BackgroundFillType) FindIntProperty(StylePropertyId.BackgroundFillType); }
+            set { SetIntProperty(StylePropertyId.BackgroundFillType, (int) value); }
+        }
+        
+        public BackgroundShapeType BackgroundShapeType {
+            get { return (BackgroundShapeType) FindIntProperty(StylePropertyId.BackgroundShapeType); }
+            set { SetIntProperty(StylePropertyId.BackgroundShapeType, (int) value); }
+        }
+        
+        public GradientType BackgroundGradientType {
+            get { return (GradientType) FindIntProperty(StylePropertyId.BackgroundGradientType); }
+            set { SetIntProperty(StylePropertyId.BackgroundGradientType, (int) value); }
+        }
+
+        public GradientAxis BackgroundGradientAxis {
+            get { return (GradientAxis) FindIntProperty(StylePropertyId.BackgroundGradientAxis); }
+            set { SetIntProperty(StylePropertyId.BackgroundGradientAxis, (int) value); }
+        }
+        
+        public float BackgroundGradientStart {
+            get { return FindFloatProperty(StylePropertyId.BackgroundGradientStart); }
+            set { SetFloatProperty(StylePropertyId.BackgroundGradientStart,  value); }
+        }
+
+        public float BackgroundGridSize {
+            get { return FindFloatProperty(StylePropertyId.BackgroundGridSize); }
+            set { SetFloatProperty(StylePropertyId.BackgroundGridSize,  value); }
+        }
+
+        public float BackgroundLineSize {
+            get { return FindFloatProperty(StylePropertyId.BackgroundLineSize); }
+            set { SetFloatProperty(StylePropertyId.BackgroundLineSize,  value); }
+        }
+        
+        public float BackgroundFillOffsetX {
+            get { return FindFloatProperty(StylePropertyId.BackgroundFillOffsetX); }
+            set { SetFloatProperty(StylePropertyId.BackgroundFillOffsetX,  value); }
+        }
+        
+        public float BackgroundFillOffsetY {
+            get { return FindFloatProperty(StylePropertyId.BackgroundFillOffsetY); }
+            set { SetFloatProperty(StylePropertyId.BackgroundFillOffsetY,  value); }
+        }
+        
+        public float BackgroundFillScaleX {
+            get { return FindFloatProperty(StylePropertyId.BackgroundFillScaleX); }
+            set { SetFloatProperty(StylePropertyId.BackgroundFillScaleX,  value); }
+        }
+        
+        public float BackgroundFillScaleY {
+            get { return FindFloatProperty(StylePropertyId.BackgroundFillScaleY); }
+            set { SetFloatProperty(StylePropertyId.BackgroundFillScaleY,  value); }
+        }
+        
 #endregion
 
 #region Grid Item Properties

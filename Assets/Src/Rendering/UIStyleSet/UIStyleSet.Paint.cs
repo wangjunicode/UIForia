@@ -1,6 +1,8 @@
 using JetBrains.Annotations;
+using Shapes2D;
 using Src;
 using Src.Extensions;
+using Src.Rendering;
 using UnityEngine;
 
 namespace Rendering {
@@ -44,15 +46,53 @@ namespace Rendering {
 
         [PublicAPI]
         public void SetBorderColor(Color color, StyleState state) {
-            UIStyle style = GetOrCreateInstanceStyle(state);
-            style.BorderColor = color;
-            if ((state & currentState) != 0 && style == GetActiveStyleForProperty(StylePropertyId.BorderColor)) {
-                computedStyle.BorderColor = color;
-            }
+            SetColorProperty(StylePropertyId.BorderColor, color, state);
+        }
+        
+        public void SetBackgroundColorSecondary(Color color, StyleState state) {
+            SetColorProperty(StylePropertyId.BackgroundColorSecondary, color, state);
         }
 
+        public void SetBackgroundShapeType(BackgroundShapeType shapeType, StyleState state) {
+            SetEnumProperty(StylePropertyId.BackgroundShapeType, (int)shapeType, state);
+        }
+        
+        public void SetBackgroundGradientType(GradientType gradientType, StyleState state) {
+            SetEnumProperty(StylePropertyId.BackgroundGradientType, (int)gradientType, state);
+        }
+        
+        public void SetBackgroundGradientAxis(GradientAxis gradientAxis, StyleState state) {
+            SetEnumProperty(StylePropertyId.BackgroundGradientAxis, (int)gradientAxis, state);
+        }
+        
+        public void SetBackgroundGradientStart(float gradientStart, StyleState state) {
+            SetFloatProperty(StylePropertyId.BackgroundGradientStart, gradientStart, state);
+        }
+        
+        public void SetBackgroundGridSize(float gridSize, StyleState state) {
+            SetFloatProperty(StylePropertyId.BackgroundGridSize, gridSize, state);
+        }
 
-
+        public void SetBackgroundLineSize(float lineSize, StyleState state) {
+            SetFloatProperty(StylePropertyId.BackgroundLineSize, lineSize, state);
+        }
+        
+        public void SetBackgroundFillOffsetX(float offset, StyleState state) {
+            SetFloatProperty(StylePropertyId.BackgroundFillOffsetX, offset, state);
+        }
+        
+        public void SetBackgroundFillOffsetY(float offset, StyleState state) {
+            SetFloatProperty(StylePropertyId.BackgroundFillOffsetY, offset, state);
+        }
+        
+        public void SetBackgroundFillScaleX(float scale, StyleState state) {
+            SetFloatProperty(StylePropertyId.BackgroundFillScaleX, scale, state);
+        }
+        
+        public void SetBackgroundFillScaleY(float scale, StyleState state) {
+            SetFloatProperty(StylePropertyId.BackgroundFillScaleY, scale, state);
+        }
+        
     }
 
 }

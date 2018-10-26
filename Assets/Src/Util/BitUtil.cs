@@ -19,6 +19,10 @@ namespace Rendering {
             return input & 0xffff;
         }
 
+        public static int ExtractBits(int number, int bitCount, int offset) {
+            return (((1 << bitCount) - 1) & (number >> (offset - 1)));
+        }
+
     }
 
 }

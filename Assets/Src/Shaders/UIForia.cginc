@@ -1,26 +1,20 @@
 #define PI 3.141592653
 #define PI2 6.283185307
 
+#define red fixed4(1, 0, 0, 1)
+#define green fixed4(0, 1, 0, 1)
+#define blue fixed4(0, 0, 1, 1)
+#define yellow fixed4(1, 1, 0, 1)
+
 #define OrthoCameraWidth unity_OrthoParams.x
 #define OrthoCameraHeight unity_OrthoParams.y
-
-struct BlurSettings {
-    float innerBlur;
-    float outerBlur;
-    float outlineSize;
-    int hasOutline;
-};
 
 struct FillSettings {
     fixed4 fillColor1;
     fixed4 fillColor2;
-    fixed4 outlineColor;
     float fillRotation;
-    float fillOffsetX;
-    float fillOffsetY;
-    float fillScaleX;
-    float fillScaleY;
-    int gradientType;
+    float2 fillOffset;
+    float2 fillScale;
     int gradientAxis;
     float gradientStart;
     float gridSize;
@@ -110,124 +104,105 @@ float2 rotate_fill(float2 fpos, float rotation) {
     return fpos;
 }
 
-fixed4 color_from_distance(float dist, fixed4 fillColor, fixed4 outlineColor, BlurSettings settings) {
-        return fill_blend(dist, fillColor, settings.blur);
-    if (settings.hasOutline == 0) {
-    } else {
-        float outline = settings.outerBlur + settings.outlineSize;
-        float innerBlur = outline + settings.innerBlur;
-        return outline_fill_blend(dist, fillColor, outlineColor, settings.outerBlur, outline, innerBlur);
-    }
-}
-
-
 // returns the fill color for the given uv point in the quad.
 // @param uv the uv coords from -0.5 to 0.5
-fixed4 fill(float2 uv, FillSettings settings) {
-    float2 fpos = float2(uv.x, uv.y);
+fixed4 fill(float2 uv, float2 size, FillSettings settings) {
+    float2 fpos = uv * size;
     
-    #if FILL_NONE
-        return fixed4(0, 0, 0, 0);
-        
-    #elif FILL_OUTLINE_COLOR
-        return settings.outlineColor;
-        
-    #elif FILL_SOLID_COLOR
+    #if UIFORIA_FILLTYPE_COLOR
         return settings.fillColor1;
-    #else
-        return settings.fillColor1;
+   
+    #elif defined(UIFORIA_FILLTYPE_LINEAR_GRADIENT) | defined(UIFORIA_FILLTYPE_RADIAL_GRADIENT) | defined(UIFORIA_FILLTYPE_CYLINDRICAL_GRADIENT)
         
-        /*
-    #elif FILL_GRADIENT
-        // gradient
-        // todo - simplify and try to remove conditionals
-        fpos = rotate_fill(fpos);
-        fpos += float2(_FillOffsetX, _FillOffsetY);
-        float gmin = 0, gmax = 0, current = 0;
-        if (_GradientType == 0) {
-            // linear gradient
-            if (_GradientAxis == 0) {
-                gmin = -_XScale / 2 + _GradientStart * _XScale;
-                gmax = _XScale / 2;
+        fpos = rotate_fill(fpos, settings.fillRotation);
+        fpos += settings.fillOffset;
+        float gmin = 0;
+        float gmax = 0;
+        float current = 0;
+
+        #if UIFORIA_FILLTYPE_LINEAR_GRADIENT
+        
+            if (settings.gradientAxis == 0) {
+                gmin = -size.x * 0.5 + settings.gradientStart * size.x;
+                gmax = size.x * 0.5;
                 current = fpos.x;
             } else {
-                gmin = -_YScale / 2 + _GradientStart * _YScale;
-                gmax = _YScale / 2;
+                gmin = -size.y * 0.5 + settings.gradientStart * size.y;
+                gmax = size.y * 0.5;
                 current = fpos.y;
             }
-        } else if (_GradientType == 1) {
-            // cylindrical gradient
-            if (_GradientAxis == 0) {
-                gmin = _GradientStart / 2 * _XScale;
-                gmax = _XScale / 2;
+            
+        #elif UIFORIA_FILLTYPE_CYLINDRICAL_GRADIENT
+            
+            if (settings.gradientAxis == 0) {
+                gmin = settings.gradientStart * 0.5 * size.x;
+                gmax = size.x * 0.5;
                 current = abs(fpos.x);
             } else {
-                gmin = _GradientStart / 2 * _YScale;
-                gmax = _YScale / 2;
+                gmin = settings.gradientStart * 0.5 * size.y;
+                gmax = size.y * 0.5;
                 current = abs(fpos.y);
             }
-        } else {
-            // radial gradient
+            
+        #elif UIFORIA_FILLTYPE_RADIAL_GRADIENT
+            
             gmax = length(float2(0.5, 0.5));
-            gmin = gmax * _GradientStart;
+            gmin = gmax * settings.gradientStart;
             current = length(fpos);
-        }
+            
+        #endif
         
         if (current < gmin) {
-            return _FillColor;
+            return settings.fillColor1;
         }
         
         if (gmax == gmin) {
-            return _FillColor2;
+            return settings.fillColor2;
         }
         
-        return lerp(_FillColor, _FillColor2, (current - gmin) / (gmax - gmin));
-    #elif FILL_GRID
-        // grid - background is _FillColor, lines are _FillColor2
-        fpos = rotate_fill(fpos);
-        fpos += float2(_FillOffsetX, _FillOffsetY);
-        // float edge = min(fwidth(fpos) * 2, _GridSize);
-        float edge = min(_PixelSize * 2, _GridSize);
-        // webgl breaks with component-wise ops for some reason and only shows vertical
-        // grid lines...sigh
-        // float2 p = abs(frac(fpos / _GridSize) * _GridSize * 2 - _GridSize);
-        // float2 mix = smoothstep(_GridSize - _LineSize - edge, _GridSize - _LineSize, p);
-        // return lerp(_FillColor, _FillColor2, max(mix.x, mix.y));
-        float px = abs(frac(fpos.x / _GridSize) * _GridSize * 2 - _GridSize);
-        float py = abs(frac(fpos.y / _GridSize) * _GridSize * 2 - _GridSize);
-        float mixx = smoothstep(_GridSize - _LineSize - edge, _GridSize - _LineSize, px);
-        float mixy = smoothstep(_GridSize - _LineSize - edge, _GridSize - _LineSize, py);
-        return lerp(_FillColor, _FillColor2, max(mixx, mixy));
-    #elif FILL_CHECKERBOARD
-        // checkerboard
-        fpos = rotate_fill(fpos);
-        fpos += float2(_FillOffsetX, _FillOffsetY);
-        // float edge = min(fwidth(fpos), _GridSize);
-        float edge = min(_PixelSize, _GridSize);
-        float2 p = frac(fpos / _GridSize);
-        float2 mix = smoothstep(0, edge / _GridSize, p);
-        float tile = abs(floor(fpos.y / _GridSize) + floor(fpos.x / _GridSize)) % 2;
-        fixed4 color1 = tile * _FillColor + (1 - tile) * _FillColor2;
-        fixed4 color2 = tile * _FillColor2 + (1 - tile) * _FillColor;
+        return lerp(settings.fillColor1, settings.fillColor2, (current - gmin) / (gmax - gmin));
+    
+    #elif UIFORIA_FILLTYPE_GRID
+        
+        fpos = rotate_fill(fpos, settings.fillRotation);
+        fpos += settings.fillOffset;
+        float gridSize = settings.gridSize;
+        float lineSize = settings.lineSize;
+        float edge = min(2, gridSize);
+        
+        float px = abs(frac(fpos.x / gridSize) * gridSize * 2 - gridSize;
+        float py = abs(frac(fpos.y / gridSize) * gridSize * 2 - gridSize;
+        
+        float mixx = smoothstep(gridSize - lineSize - edge, gridSize - lineSize, px);
+        float mixy = smoothstep(gridSize - lineSize - edge, gridSize - lineSize, py);
+    
+        return lerp(settings.fillColor1, settings.fillColor2, max(mixx, mixy));
+    
+    #elif UIFORIA_FILLTYPE_CHECKER
+        
+        fpos = rotate_fill(fpos, settings.fillRotation);
+        fpos += fillOffset;
+        float edge = min(1, settings.gridSize);
+        float2 p = frac(fpos / settings.gridSize);
+        float2 mix = smoothstep(0, edge / settings.gridSize,p);
+        float tile = abs(floor(fpos.y / settings.gridSize) + floor(fpos.x / settings.gridSize)) % 2;
+        fixed4 color1 = tile * settings.fillColor1 + (1 - tile) * settings.fillColor2;
+        fixed4 color2 = tile * settings.fillColor2 + (1 - tile) * settings.fillColor1;
         return lerp(color1, color2, min(mix.x, mix.y));
-    #elif FILL_STRIPES
-        // stripes
-        fpos = rotate_fill(fpos);
-        fpos += float2(_FillOffsetX, _FillOffsetY);
-        // float edge = min(fwidth(fpos) * 2, _GridSize);
-        float edge = min(_PixelSize * 2, _GridSize);
-        float p = abs(frac(fpos.x / _GridSize) * _GridSize * 2 - _GridSize);
-        float mix = smoothstep(_GridSize - _LineSize - edge, _GridSize - _LineSize, p);
-        return lerp(_FillColor, _FillColor2, mix);
-    #elif FILL_TEXTURE
-        // texture
-        fpos = rotate_fill(fpos);
-        fpos /= float2(_XScale, _YScale);
-        fpos += float2(0.5, 0.5);
-        fpos += float2(_FillOffsetX, _FillOffsetY);
-        fpos /= float2(_FillScaleX, _FillScaleY);
-        return tex2D(_FillTexture, fpos);
-        */
+    
+    #elif UIFORIA_FILLTYPE_STRIPES
+    
+        fpos = rotate_fill(fpos, settings.fillRotation);
+        fpos += settings.fillOffset;
+        float edge = min(2, settings.gridSize);
+        float p = abs(frac(fpos.x / settings.gridSize) * settings.gridSize * 2 - settings.gridSize);
+        float mix = smoothstep(settings.gridSize - settings.lineSize - edge, settings.gridSize - settings.lineSize, p);
+        return lerp(settings.fillColor1, settings.fillColor2, mix); 
+            
+    #else
+        return fixed4(0, 0, 0, 1);
+           
     #endif
+            
+    
 }
-

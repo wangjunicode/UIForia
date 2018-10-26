@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
+using Shapes2D;
 using Src;
 using Src.Layout;
 using Src.Layout.LayoutTypes;
@@ -63,6 +64,18 @@ namespace Rendering {
             }
         }
 
+        public Color BackgroundColorSecondary {
+            [DebuggerStepThrough] get { return ReadColorProperty(StylePropertyId.BackgroundColorSecondary, DefaultStyleValues.BackgroundColorSecondary); }
+            internal set {
+                if (value == backgroundColor) {
+                    return;
+                }
+
+                backgroundColor = value;
+                SendEvent(new StyleProperty(StylePropertyId.BackgroundColorSecondary, new StyleColor(backgroundColor).rgba));
+            }
+        }
+        
         public Texture2D BackgroundImage {
             [DebuggerStepThrough] get { return backgroundImage; }
             internal set {
@@ -74,6 +87,27 @@ namespace Rendering {
                 SendEvent(new StyleProperty(StylePropertyId.BackgroundImage, 0, 0, backgroundImage));
             }
         }
+        
+        public GradientType GradientType {
+            get { return (GradientType) ReadInt(StylePropertyId.BackgroundGradientType, (int) DefaultStyleValues.BackgroundGradientType); }
+            internal set { WriteInt(StylePropertyId.BackgroundGradientType, (int) value); }
+        }
+
+        public GradientAxis GradientAxis {
+            get { return (GradientAxis) ReadInt(StylePropertyId.BackgroundGradientAxis, (int) DefaultStyleValues.BackgroundGradientAxis); }
+            internal set { WriteInt(StylePropertyId.BackgroundGradientAxis, (int) value); }
+        }
+
+        public float GradientStart {
+            get { return ReadFloat(StylePropertyId.BackgroundGradientStart, DefaultStyleValues.BackgroundGradientStart); }
+            internal set { WriteFloat(StylePropertyId.BackgroundGradientStart, value); }
+        }
+
+        public float BackgroundRotation {
+            get { return ReadFloat(StylePropertyId.BackgroundFillRotation, DefaultStyleValues.BackgroundFillRotation); }
+            internal set { WriteFloat(StylePropertyId.BackgroundFillRotation, value); }
+        }
+
 
 #endregion
 
@@ -483,29 +517,60 @@ namespace Rendering {
         public BorderRadius BorderRadius => new BorderRadius(BorderRadiusTopLeft, BorderRadiusTopRight, BorderRadiusBottomRight, BorderRadiusBottomLeft);
 
         public Vector4 ResolvedBorderRadius => new Vector4(
-            ResolveBorderRadiusComponent(BorderRadiusTopLeft), 
-            ResolveBorderRadiusComponent(BorderRadiusTopRight),
-            ResolveBorderRadiusComponent(BorderRadiusBottomRight),
-            ResolveBorderRadiusComponent(BorderRadiusBottomLeft)
+            ResolveHorizontalFixedLength(BorderRadiusTopLeft),
+            ResolveHorizontalFixedLength(BorderRadiusTopRight),
+            ResolveHorizontalFixedLength(BorderRadiusBottomRight),
+            ResolveHorizontalFixedLength(BorderRadiusBottomLeft)
         );
 
-        private float ResolveBorderRadiusComponent(UIFixedLength borderRadius) {
-            switch (borderRadius.unit) {
+        public Vector4 ResolvedBorder => new Vector4(
+            ResolveVerticalFixedLength(BorderTop),
+            ResolveHorizontalFixedLength(BorderRight),
+            ResolveVerticalFixedLength(BorderBottom),
+            ResolveHorizontalFixedLength(BorderLeft)
+        );
+
+        // I don't love having this here
+        private float ResolveHorizontalFixedLength(UIFixedLength length) {
+            switch (length.unit) {
                 case UIFixedUnit.Pixel:
-                    return borderRadius.value;
-                
+                    return length.value;
+
                 case UIFixedUnit.Percent:
-                    return styleSet.element.layoutResult.AllocatedWidth * borderRadius.value;
-                
+                    return styleSet.element.layoutResult.AllocatedWidth * length.value;
+
                 case UIFixedUnit.Em:
-                    return 0;
-                
+                    return EmSize * length.value;
+
                 case UIFixedUnit.ViewportWidth:
                     return 0;
-                
+
                 case UIFixedUnit.ViewportHeight:
                     return 0;
-                
+
+                default:
+                    return 0;
+            }
+        }
+
+        // I don't love having this here
+        private float ResolveVerticalFixedLength(UIFixedLength length) {
+            switch (length.unit) {
+                case UIFixedUnit.Pixel:
+                    return length.value;
+
+                case UIFixedUnit.Percent:
+                    return styleSet.element.layoutResult.AllocatedHeight * length.value;
+
+                case UIFixedUnit.Em:
+                    return EmSize * length.value;
+
+                case UIFixedUnit.ViewportWidth:
+                    return 0;
+
+                case UIFixedUnit.ViewportHeight:
+                    return 0;
+
                 default:
                     return 0;
             }
@@ -1274,7 +1339,6 @@ namespace Rendering {
         [DebuggerStepThrough]
         private UIFixedLength ReadFixedLength(StylePropertyId propertyId, UIFixedLength defaultValue) {
             StyleProperty retn;
-            properties = properties ?? new IntMap<StyleProperty>();
             if (properties.TryGetValue((int) propertyId, out retn)) {
                 return retn.AsFixedLength;
             }
@@ -1285,7 +1349,6 @@ namespace Rendering {
 //        [DebuggerStepThrough]
         private void WriteFixedLength(StylePropertyId propertyId, UIFixedLength newValue) {
             StyleProperty retn;
-            properties = properties ?? new IntMap<StyleProperty>();
             if (properties.TryGetValue((int) propertyId, out retn)) {
                 if (retn.AsInt == newValue) return;
             }
@@ -1298,7 +1361,6 @@ namespace Rendering {
         [DebuggerStepThrough]
         private int ReadInt(StylePropertyId propertyId, int defaultValue) {
             StyleProperty retn;
-            properties = properties ?? new IntMap<StyleProperty>();
             if (properties.TryGetValue((int) propertyId, out retn)) {
                 return retn.AsInt;
             }
@@ -1306,9 +1368,28 @@ namespace Rendering {
             return defaultValue;
         }
 
+        private Color ReadColorProperty(StylePropertyId propertyId, Color defaultValue) {
+            StyleProperty retn;
+            if (properties.TryGetValue((int) propertyId, out retn)) {
+                return retn.AsColor;
+            }
+
+            return defaultValue;
+        }
+        
+        private void WriteColorProperty(StylePropertyId propertyId, Color newValue) {
+            StyleProperty retn;
+            if (properties.TryGetValue((int) propertyId, out retn)) {
+                if (retn.AsColor == newValue) return;
+            }
+
+            StyleProperty property = new StyleProperty(propertyId, newValue);
+            properties[(int) propertyId] = property;
+            SendEvent(property);
+        }
+        
         private void WriteInt(StylePropertyId propertyId, int newValue) {
             StyleProperty retn;
-            properties = properties ?? new IntMap<StyleProperty>();
             if (properties.TryGetValue((int) propertyId, out retn)) {
                 if (retn.AsInt == newValue) return;
             }
@@ -1321,7 +1402,6 @@ namespace Rendering {
         [DebuggerStepThrough]
         private float ReadFloat(StylePropertyId propertyId, float defaultValue) {
             StyleProperty retn;
-            properties = properties ?? new IntMap<StyleProperty>();
             if (properties.TryGetValue((int) propertyId, out retn)) {
                 return retn.AsFloat;
             }

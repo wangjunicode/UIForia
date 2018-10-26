@@ -361,6 +361,7 @@ namespace Src.Parsing.StyleParser {
                     }
 
                     MapAction action;
+                    // I think this should be replaced with a huge switch statement
                     if (s_StylePropertyMappers.TryGetValue(id.ToLower(), out action)) {
                         action(context, id, value);
                     }
@@ -555,6 +556,17 @@ namespace Src.Parsing.StyleParser {
             new StylePropertyMapper("TextLayoutStyle", StylePropertyMappers.TextMapper),
             new StylePropertyMapper("TextAutoSize", StylePropertyMappers.TextMapper),
             new StylePropertyMapper("TextTransform", StylePropertyMappers.TextMapper),
+            
+            new StylePropertyMapper("BackgroundFillType", null), 
+            new StylePropertyMapper("BackgroundShapeType", null), 
+            new StylePropertyMapper("BackgroundSecondaryColor", null), 
+            new StylePropertyMapper("BackgroundGradientStart", null), 
+            new StylePropertyMapper("BackgroundGradientAxis", null), 
+            new StylePropertyMapper("BackgroundGradientType", null), 
+            new StylePropertyMapper("BackgroundFillRotation", null), 
+            new StylePropertyMapper("BackgroundFillOffset", null), 
+            new StylePropertyMapper("BackgroundGridSize", null), 
+            new StylePropertyMapper("BackgroundLineSize", null), 
         };
 
         private struct StylePropertyMapper {

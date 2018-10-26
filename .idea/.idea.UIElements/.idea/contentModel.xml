@@ -367,6 +367,8 @@
           <e p="PropAttribute.cs" t="Include" />
           <e p="Rendering" t="Include">
             <e p="AnchorTarget.cs" t="Include" />
+            <e p="BackgroundFillType.cs" t="Include" />
+            <e p="BackgroundShapeType.cs" t="Include" />
             <e p="BorderedImage.cs" t="Include" />
             <e p="BorderRadius.cs" t="Include" />
             <e p="BorderStyle.cs" t="Include" />
@@ -431,6 +433,9 @@
             <e p="ProceduralImage.shader" t="Include" />
             <e p="SimpleBorder.shader" t="Include" />
             <e p="UIForia.cginc" t="Include" />
+            <e p="UIForiaFragBody.cginc" t="Include" />
+            <e p="UIForiaFragDefines.cginc" t="Include" />
+            <e p="UIForiaVertDefines.cginc" t="Include" />
             <e p="UIStandardInstanced.shader" t="Include" />
             <e p="UIStandardShader.shader" t="Include" />
           </e>
@@ -502,7 +507,6 @@
           </e>
           <e p="todo.txt" t="Include" />
           <e p="UIForia.cs" t="Include" />
-          <e p="UIRoot.cs" t="Include" />
           <e p="Util" t="Include">
             <e p="ArrayPool.cs" t="Include" />
             <e p="ArrayUtil.cs" t="Include" />

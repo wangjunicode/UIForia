@@ -15,6 +15,7 @@ namespace Src.Compilers {
         private static readonly Dictionary<Type, List<IAliasSource>> aliasMap = new Dictionary<Type, List<IAliasSource>>();
 
         public static readonly string EvtArgDefaultName = "$event";
+        private static readonly Dictionary<Type, Dictionary<string, LightList<object>>> m_TypeMap = new Dictionary<Type, Dictionary<string, LightList<object>>>();
 
         public static readonly string[] EvtArgNames = {
             "$eventArg0",
@@ -51,17 +52,6 @@ namespace Src.Compilers {
             list.Add(aliasSource);
         }
 
-        [AttributeUsage(AttributeTargets.Method, AllowMultiple = true)]
-        public class OnPropertyChanged : Attribute {
-
-            public readonly string propertyName;
-
-            public OnPropertyChanged(string propertyName) {
-                this.propertyName = propertyName;
-            }
-
-        }
-
         public Binding CompileAttribute(Type targetType, AttributeDefinition attributeDefinition) {
             string attrKey = attributeDefinition.key;
             string attrValue = attributeDefinition.value;
@@ -69,7 +59,7 @@ namespace Src.Compilers {
             EventInfo eventInfo = targetType.GetEvent(attrKey);
 
             if (eventInfo != null) {
-                return CompileCallbackAttribute(attrKey, attrValue, eventInfo);
+                return CompileCallbackAttribute(attrValue, eventInfo);
             }
 
             FieldInfo fieldInfo = ReflectionUtil.GetFieldInfoOrThrow(targetType, attrKey);
@@ -97,10 +87,10 @@ namespace Src.Compilers {
             ReflectionUtil.TypeArray2[0] = targetType;
             ReflectionUtil.TypeArray2[1] = fieldInfo.FieldType;
 
-            Dictionary<string, LightList<ElementCallback>> actionMap = null;
+            Dictionary<string, LightList<object>> actionMap = null;
             if (!m_TypeMap.ContainsKey(targetType)) {
                 MethodInfo[] methods = targetType.GetMethods(ReflectionUtil.InstanceBindFlags);
-
+                
                 for (int i = 0; i < methods.Length; i++) {
                     MethodInfo info = methods[i];
                     object[] customAttributes = info.GetCustomAttributes(typeof(OnPropertyChanged), true);
@@ -114,25 +104,28 @@ namespace Src.Compilers {
                         }
 
                         if (actionMap == null) {
-                            actionMap = new Dictionary<string, LightList<ElementCallback>>();
+                            actionMap = new Dictionary<string, LightList<object>>();
                             m_TypeMap.Add(targetType, actionMap);
                         }
 
                         for (int j = 0; j < customAttributes.Length; j++) {
                             OnPropertyChanged attr = (OnPropertyChanged) customAttributes[j];
-                            GetHandlerList(actionMap, attr.propertyName).Add((ElementCallback) ReflectionUtil.GetDelegate(typeof(UIElement), info));
+                            Type a = ReflectionUtil.GetOpenDelegateType(info);
+                            GetHandlerList(actionMap, attr.propertyName).Add(ReflectionUtil.GetDelegate(a, info));
                         }
                     }
                 }
+                // use null as a marker in the dictionary regardless of whether or not we have actions registered
+                m_TypeMap[targetType] = actionMap;
             }
 
-            LightList<ElementCallback> list = actionMap?.GetOrDefault(attrKey);
+            LightList<object> list = actionMap?.GetOrDefault(attrKey);
             if (list != null) {
                 ReflectionUtil.ObjectArray5[0] = attrKey;
                 ReflectionUtil.ObjectArray5[1] = expression;
                 ReflectionUtil.ObjectArray5[2] = accessor.fieldGetter;
                 ReflectionUtil.ObjectArray5[3] = accessor.fieldSetter;
-                ReflectionUtil.ObjectArray5[4] = list.List;
+                ReflectionUtil.ObjectArray5[4] = list;
 
                 return (Binding) ReflectionUtil.CreateGenericInstanceFromOpenType(
                     typeof(FieldSetterBinding_WithCallbacks<,>),
@@ -152,19 +145,18 @@ namespace Src.Compilers {
             );
         }
 
-        private static readonly Dictionary<Type, Dictionary<string, LightList<ElementCallback>>> m_TypeMap = new Dictionary<Type, Dictionary<string, LightList<ElementCallback>>>();
 
-        private static LightList<ElementCallback> GetHandlerList(Dictionary<string, LightList<ElementCallback>> map, string name) {
-            LightList<ElementCallback> list = map.GetOrDefault(name);
+        private static LightList<object> GetHandlerList(Dictionary<string, LightList<object>> map, string name) {
+            LightList<object> list = map.GetOrDefault(name);
             if (list == null) {
-                list = new LightList<ElementCallback>();
+                list = new LightList<object>();
                 map[name] = list;
             }
 
             return list;
         }
 
-        private Binding CompileCallbackAttribute(string key, string value, EventInfo eventInfo) {
+        private Binding CompileCallbackAttribute(string value, EventInfo eventInfo) {
             MethodInfo info = eventInfo.EventHandlerType.GetMethod("Invoke");
             Debug.Assert(info != null, nameof(info) + " != null");
 

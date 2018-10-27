@@ -155,14 +155,13 @@ namespace Src {
             return expression;
         }
 
-        private void ValidateParameterTypes(ParameterInfo[] parameters, Expression[] arguments) {
+        private static void ValidateParameterTypes(ParameterInfo[] parameters, Expression[] arguments) {
             for (int i = 0; i < parameters.Length; i++) {
                 if (!parameters[i].ParameterType.IsAssignableFrom(arguments[i].YieldedType)) {
                     throw new Exception($"Cannot use parameter of type {arguments[i].YieldedType} for parameter of type {parameters[i].ParameterType}");
                 }
             }
         }
-
 
         private Expression VisitMethodCallExpression(MethodCallNode node) {
             string methodName = node.identifierNode.identifier;
@@ -181,7 +180,6 @@ namespace Src {
 
             if (info.IsStatic) {
                 methodType |= MethodType.Static;
-                //return VisitMethodCallExpression_Static(info, node);
             }
             else {
                 methodType |= MethodType.Instance;
@@ -254,7 +252,7 @@ namespace Src {
 
         }
 
-        private Type GetMethodCallType(string methodName, int argumentCount, Type[] genericArguments, MethodType methodType) {
+        private static Type GetMethodCallType(string methodName, int argumentCount, Type[] genericArguments, MethodType methodType) {
             switch (argumentCount) {
                 case 0:
 

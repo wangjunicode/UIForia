@@ -16,11 +16,7 @@ namespace Rendering {
 
         [PublicAPI]
         public void SetTransformPositionX(UIFixedLength x, StyleState state) {
-            UIStyle style = GetOrCreateInstanceStyle(state);
-            style.TransformPositionX = x;
-            if ((state & currentState) != 0 && style == GetActiveStyleForProperty(StylePropertyId.TransformPositionX)) {
-                computedStyle.TransformPositionX = x;
-            }
+            SetFixedLengthProperty(StylePropertyId.TransformPositionX, x, state);
         }
 
         [PublicAPI]
@@ -33,11 +29,7 @@ namespace Rendering {
 
         [PublicAPI]
         public void SetTransformPositionY(UIFixedLength y, StyleState state) {
-            UIStyle style = GetOrCreateInstanceStyle(state);
-            style.TransformPositionY = y;
-            if ((state & currentState) != 0 && style == GetActiveStyleForProperty(StylePropertyId.TransformPositionY)) {
-                computedStyle.TransformPositionY = y;
-            }
+            SetFixedLengthProperty(StylePropertyId.TransformPositionY, y, state);
         }
 
         public void SetTransformPosition(FixedLengthVector position, StyleState state) {
@@ -55,67 +47,48 @@ namespace Rendering {
 
         [PublicAPI]
         public void SetTransformRotation(float rotationDeg, StyleState state) {
-            UIStyle style = GetOrCreateInstanceStyle(state);
-            style.TransformRotation = rotationDeg;
-            if ((state & currentState) != 0 && style == GetActiveStyleForProperty(StylePropertyId.TransformRotation)) {
-                computedStyle.TransformRotation = rotationDeg;
-            }
+           SetFloatProperty(StylePropertyId.TransformRotation, rotationDeg, state);
         }
 
         [PublicAPI]
         public float GetTransformScaleX(StyleState state) {
-            return GetFloatValue(StylePropertyId.TransformScaleX, state);
+            return GetPropertyValueInState(StylePropertyId.TransformScaleX, state).AsFloat;
         }
 
         [PublicAPI]
         public void SetTransformScaleX(float x, StyleState state) {
-            UIStyle style = GetOrCreateInstanceStyle(state);
-            style.TransformScaleX = x;
-            if ((state & currentState) != 0 && style == GetActiveStyleForProperty(StylePropertyId.TransformScaleX)) {
-                computedStyle.TransformScaleX = x;
-            }
+         SetFloatProperty(StylePropertyId.TransformScaleX, x, state);
         }
 
         [PublicAPI]
         public float GetTransformScaleY(StyleState state) {
-            return GetFloatValue(StylePropertyId.TransformScaleY, state);
+            return GetPropertyValueInState(StylePropertyId.TransformScaleY, state).AsFloat;
         }
 
         [PublicAPI]
         public void SetTransformScaleY(float y, StyleState state) {
-            UIStyle style = GetOrCreateInstanceStyle(state);
-            style.TransformScaleY = y;
-            if ((state & currentState) != 0 && style == GetActiveStyleForProperty(StylePropertyId.TransformScaleY)) {
-                computedStyle.TransformScaleY = y;
-            }
+            SetFloatProperty(StylePropertyId.TransformScaleY, y, state);
+
         }
 
         [PublicAPI]
-        public UIMeasurement GetTransformPivotX(StyleState state) {
-            return GetUIMeasurementValue(StylePropertyId.TransformPivotX, state);
+        public float GetTransformPivotX(StyleState state) {
+            return GetPropertyValueInState(StylePropertyId.TransformPivotX, state).AsFloat;
         }
 
         [PublicAPI]
         public void SetTransformPivotX(float x, StyleState state) {
-            UIStyle style = GetOrCreateInstanceStyle(state);
-            style.TransformPivotX = x;
-            if ((state & currentState) != 0 && style == GetActiveStyleForProperty(StylePropertyId.TransformPivotX)) {
-                computedStyle.TransformPivotX = x;
-            }
+            SetFloatProperty(StylePropertyId.TransformPivotX, x, state);
         }
 
         [PublicAPI]
-        public UIMeasurement GetTransformPivotY(StyleState state) {
-            return GetUIMeasurementValue(StylePropertyId.TransformPivotY, state);
+        public float GetTransformPivotY(StyleState state) {
+            return GetPropertyValueInState(StylePropertyId.TransformPivotX, state).AsFloat;
         }
 
         [PublicAPI]
         public void SetTransformPivotY(float y, StyleState state) {
-            UIStyle style = GetOrCreateInstanceStyle(state);
-            style.TransformPivotY = y;
-            if ((state & currentState) != 0 && style == GetActiveStyleForProperty(StylePropertyId.TransformPivotY)) {
-                computedStyle.TransformPivotY = y;
-            }
+            SetFloatProperty(StylePropertyId.TransformPivotY, y, state);
         }
 
         public void SetTransformPosition(Vector2 position, StyleState state) {
@@ -137,11 +110,11 @@ namespace Rendering {
         }
 
         public TransformBehavior GetTransformBehaviorX(StyleState state) {
-            return (TransformBehavior) GetEnumProperty(StylePropertyId.TransformBehaviorX, state);
+            return (TransformBehavior) GetPropertyValueInState(StylePropertyId.TransformBehaviorX, state).AsInt;
         }
 
         public TransformBehavior GetTransformBehaviorY(StyleState state) {
-            return (TransformBehavior) GetEnumProperty(StylePropertyId.TransformBehaviorX, state);
+            return (TransformBehavior) GetPropertyValueInState(StylePropertyId.TransformBehaviorX, state).AsInt;
         }
 
     }

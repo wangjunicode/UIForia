@@ -5,19 +5,19 @@ namespace Rendering {
     public partial class UIStyleSet {
 
         public int GetFlexItemGrowthFactor(StyleState state) {
-            return GetIntValue(StylePropertyId.FlexItemGrow, state);
+            return GetPropertyValueInState(StylePropertyId.FlexItemGrow, state).AsInt;
         }
 
         public int GetFlexItemShrinkFactor(StyleState state) {
-            return GetIntValue(StylePropertyId.FlexItemShrink, state);
+            return GetPropertyValueInState(StylePropertyId.FlexItemShrink, state).AsInt;
         }
 
         public int GetFlexItemOrderOverride(StyleState state) {
-            return GetIntValue(StylePropertyId.FlexItemOrder, state);
+            return GetPropertyValueInState(StylePropertyId.FlexItemOrder, state).AsInt;
         }
 
         public CrossAxisAlignment GetFlexItemSelfAlignment(StyleState state) {
-            return (CrossAxisAlignment)GetEnumProperty(StylePropertyId.FlexItemSelfAlignment, state);
+            return GetPropertyValueInState(StylePropertyId.FlexItemSelfAlignment, state).AsCrossAxisAlignment;
         }
 
         public void SetFlexItemGrowFactor(int growthFactor, StyleState state) {

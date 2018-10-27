@@ -152,10 +152,10 @@ namespace Src.Systems {
                         continue;
                     }
 
-                    if (forceLayout || box.markedForLayout) {
+                   // if (forceLayout || box.markedForLayout) {
                         box.RunLayout();
                         box.markedForLayout = false;
-                    }
+                  //  }
 
                     depth = element.depth;
                     computedLayer = ResolveRenderLayer(element) - element.ComputedStyle.LayerOffset;
@@ -172,8 +172,8 @@ namespace Src.Systems {
                     Rect oldScreenRect = layoutResult.ScreenRect;
 
                     if (box.IsIgnored) {
-                        box.allocatedWidth = box.actualWidth;
-                        box.allocatedHeight = box.actualHeight;
+                        box.allocatedWidth = box.GetWidths().clampedSize;
+                        box.allocatedHeight = box.GetHeights(box.actualHeight).clampedSize;
                     }
 
                     LayoutBox parentBox = box.parent;

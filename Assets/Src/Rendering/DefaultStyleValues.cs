@@ -120,6 +120,7 @@ namespace Rendering {
         public const float BackgroundGradientStart = 0;
         public const BackgroundShapeType BackgroundShapeType = Src.Rendering.BackgroundShapeType.Rectangle;
 
+        public const BackgroundFillType BackgroundFillType = Src.Rendering.BackgroundFillType.Normal;
 
     }
 

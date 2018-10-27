@@ -24,7 +24,6 @@ Shader "UIForia/Instanced"
             "IgnoreProjector"="True"
             "RenderType"="Transparent"
             "PreviewType"="Plane"
-            "CanUseSpriteAtlas"="True"
         }
 
         Stencil
@@ -39,13 +38,13 @@ Shader "UIForia/Instanced"
         Cull Off
         Lighting Off
         ZWrite Off
-        ZTest [unity_GUIZTestMode]
-        Blend SrcAlpha OneMinusSrcAlpha
+        ZClip False
+        Blend Off//SrcAlpha OneMinusSrcAlpha
         ColorMask [_ColorMask]
 
         Pass
         {
-            Name "Default"
+            name "default"
         CGPROGRAM
             #pragma vertex vert
             #pragma fragment frag
@@ -90,6 +89,7 @@ Shader "UIForia/Instanced"
                 float2 size = UNITY_ACCESS_INSTANCED_PROP(Props, _SizeRotationGradientStart).xy;
                 v.vertex.x += v.normal.x * size.x;
                 v.vertex.y -= v.normal.y * size.y;
+                v.vertex.z = size.x == 800 ? 1 : -1;
                 OUT.vertex = UnityObjectToClipPos(v.vertex);
                 OUT.texcoord = v.texcoord;
                 return OUT;

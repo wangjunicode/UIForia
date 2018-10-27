@@ -134,5 +134,35 @@ public class BindingCompilerTests {
         childElement.InvokeEvtArg4("hello", "there", "buddy", "boy");
         Assert.AreEqual(new [] { "hello", "there", "buddy", "boy"}, rootElement.arg4Params);
     }
+    
+    public class TestedThing1 : UIElement {
+
+        public string prop0;
+        public bool didProp0Change;
+        
+        [OnPropertyChanged(nameof(prop0))]
+        public void OnProp0Changed(string prop) {
+            didProp0Change = true;
+        }
+
+    }
+
+    [Test]
+    public void OnPropertyChanged() {
+        AttributeDefinition attrDef = new AttributeDefinition("prop0", "'some-string'");
+        PropertyBindingCompiler c = new PropertyBindingCompiler(new ContextDefinition(typeof(TestedThing1)));
+        Binding b = c.CompileAttribute(typeof(TestedThing1), attrDef);
+        Assert.IsInstanceOf<FieldSetterBinding_WithCallbacks<TestedThing1, string>>(b);
+        TestedThing1 t = new TestedThing1();
+        Assert.IsFalse(t.didProp0Change);
+        Assert.AreEqual(t.prop0, null);
+        b.Execute(t, new UITemplateContext(null));
+        Assert.AreEqual(t.prop0, "some-string");
+        Assert.IsTrue(t.didProp0Change);
+        t.didProp0Change = false;
+        b.Execute(t, new UITemplateContext(null));
+        Assert.AreEqual(t.prop0, "some-string");
+        Assert.IsFalse(t.didProp0Change);
+    }
 
 }

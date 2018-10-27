@@ -4,6 +4,17 @@ using Src.Util;
 using UnityEngine;
 
 namespace Src {
+    
+    [AttributeUsage(AttributeTargets.Method, AllowMultiple = true)]
+    public class OnPropertyChanged : Attribute {
+
+        public readonly string propertyName;
+
+        public OnPropertyChanged(string propertyName) {
+            this.propertyName = propertyName;
+        }
+
+    }
 
     [AttributeUsage(AttributeTargets.Class)]
     public class AcceptFocus : Attribute { }

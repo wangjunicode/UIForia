@@ -5,6 +5,7 @@ using Src;
 using Src.Animation;
 using Src.Elements;
 using Src.Layout;
+using Src.Layout.LayoutTypes;
 using Src.Rendering;
 using Src.Systems;
 using Src.Util;
@@ -38,6 +39,7 @@ namespace Rendering {
             this.containedStates = StyleState.Normal;
             this.styleSystem = styleSystem;
             this.computedStyle = new ComputedStyle(this);
+            this.appliedStyles = ArrayPool<StyleEntry>.Empty;
         }       
 
         public void EnterState(StyleState state) {
@@ -47,7 +49,7 @@ namespace Rendering {
 
             currentState |= state;
 
-            if (appliedStyles == null || (containedStates & state) == 0) {
+            if ((containedStates & state) == 0) {
                 return;
             }
 
@@ -72,7 +74,7 @@ namespace Rendering {
             currentState &= ~(state);
             currentState |= StyleState.Normal;
 
-            if (appliedStyles == null || (containedStates & state) == 0) {
+            if ((containedStates & state) == 0) {
                 return;
             }
 
@@ -125,7 +127,6 @@ namespace Rendering {
 
         public bool HasBaseStyles {
             get {
-                if (appliedStyles == null) return false;
                 for (int i = 0; i < appliedStyles.Length; i++) {
                     if (appliedStyles[i].type == StyleType.Shared) {
                         return true;
@@ -138,7 +139,6 @@ namespace Rendering {
 
         public string GetBaseStyleNames() {
             string output = string.Empty;
-            if (appliedStyles == null) return output;
             for (int i = 0; i < appliedStyles.Length; i++) {
                 if (appliedStyles[i].type == StyleType.Shared) {
                     output += appliedStyles[i].style.Id;
@@ -216,8 +216,8 @@ namespace Rendering {
         public void AddBaseStyle(UIStyle style, StyleState state) {
             // todo -- check for duplicates
             containedStates |= state;
-            if (appliedStyles == null) {
-                appliedStyles = new StyleEntry[1];
+            if (appliedStyles.Length == 0) {
+                appliedStyles = ArrayPool<StyleEntry>.GetExactSize(1);
             }
             else {
                 Array.Resize(ref appliedStyles, appliedStyles.Length + 1);
@@ -231,10 +231,6 @@ namespace Rendering {
         }
 
         public void RemoveBaseStyle(UIStyle style, StyleState state = StyleState.Normal) {
-            if (appliedStyles == null) {
-                return;
-            }
-
             for (int i = 0; i < appliedStyles.Length; i++) {
                 if (appliedStyles[i].style == style && state == appliedStyles[i].state) {
                     appliedStyles[i] = appliedStyles[appliedStyles.Length - 1];
@@ -302,7 +298,7 @@ namespace Rendering {
         }
 
         private UIStyle GetOrCreateInstanceStyle(StyleState state) {
-            if (appliedStyles == null) {
+            if (appliedStyles.Length == 0) {
                 UIStyle newStyle = new UIStyle();
                 appliedStyles = new[] {
                     new StyleEntry(newStyle, StyleType.Instance, state),
@@ -322,7 +318,6 @@ namespace Rendering {
         }
 
         internal void Initialize() {
-            if (appliedStyles == null) return;
 
             for (int i = 0; i < appliedStyles.Length; i++) {
                 StyleEntry entry = appliedStyles[i];
@@ -343,46 +338,16 @@ namespace Rendering {
             s_DefinedMap.Clear();
         }
 
-        private float GetFloatValue(StylePropertyId propertyId, StyleState state) {
-            StyleProperty property = GetPropertyValueInState(propertyId, state);
-            return property.IsDefined
-                ? FloatUtil.DecodeToFloat(property.valuePart0)
-                : FloatUtil.UnsetValue;
-        }
+        private void SetGridTrackSizeProperty(StylePropertyId propertyId, GridTrackSize size, StyleState state) {
+            UIStyle style = GetOrCreateInstanceStyle(state);
+            style.SetGridTrackSizeProperty(propertyId, size);
+            if ((state & currentState) == 0) {
+                return;
+            }
 
-        private Color GetColorValue(StylePropertyId propertyId, StyleState state) {
-            StyleProperty property = GetPropertyValueInState(propertyId, state);
-            return property.IsDefined ? (Color) new StyleColor(property.valuePart0) : ColorUtil.UnsetValue;
+            computedStyle.SetProperty(GetPropertyValue(propertyId));
         }
-
-        private int GetIntValue(StylePropertyId propertyId, StyleState state) {
-            StyleProperty property = GetPropertyValueInState(propertyId, state);
-            return property.IsDefined
-                ? property.valuePart0
-                : IntUtil.UnsetValue;
-        }
-
-        private int GetEnumProperty(StylePropertyId propertyId, StyleState state) {
-            StyleProperty property = GetPropertyValueInState(propertyId, state);
-            return property.IsDefined
-                ? property.valuePart0
-                : IntUtil.UnsetValue;
-        }
-
-        private UIMeasurement GetUIMeasurementValue(StylePropertyId propertyId, StyleState state) {
-            StyleProperty property = GetPropertyValueInState(propertyId, state);
-            return property.IsDefined
-                ? UIMeasurement.Decode(property.valuePart0, property.valuePart1)
-                : UIMeasurement.Unset;
-        }
-
-        private UIFixedLength GetFixedLengthValue(StylePropertyId propertyId, StyleState state) {
-            StyleProperty property = GetPropertyValueInState(propertyId, state);
-            return property.IsDefined
-                ? UIFixedLength.Decode(property.valuePart0, property.valuePart1)
-                : UIFixedLength.Unset;
-        }
-
+        
         private UIStyle GetActiveStyleForProperty(StylePropertyId stylePropertyId) {
             for (int i = 0; i < appliedStyles.Length; i++) {
                 if ((appliedStyles[i].state & currentState) == 0) {
@@ -410,6 +375,16 @@ namespace Rendering {
         private void SetUIMeasurementProperty(StylePropertyId propertyId, UIMeasurement measurement, StyleState state) {
             UIStyle style = GetOrCreateInstanceStyle(state);
             style.SetUIMeasurementProperty(propertyId, measurement);
+            if ((state & currentState) == 0) {
+                return;
+            }
+
+            computedStyle.SetProperty(GetPropertyValue(propertyId));
+        }
+
+        private void SetObjectProperty(StylePropertyId propertyId, object value, StyleState state) {
+            UIStyle style = GetOrCreateInstanceStyle(state);
+            style.SetObjectProperty(propertyId, value);
             if ((state & currentState) == 0) {
                 return;
             }

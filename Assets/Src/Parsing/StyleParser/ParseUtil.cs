@@ -112,7 +112,7 @@ namespace Src.Parsing.StyleParser {
             char current = input[ptr];
             int startIndex = ptr;
 
-            if (!IsIdentifierCharacter(current)) {
+            if (current == '-' || !IsIdentifierCharacter(current)) {
                 return null;
             }
 
@@ -133,7 +133,7 @@ namespace Src.Parsing.StyleParser {
         }
 
         public static bool IsIdentifierCharacter(char character) {
-            return !char.IsWhiteSpace(character) && (char.IsLetterOrDigit(character) || character == '_');
+            return !char.IsWhiteSpace(character) && (char.IsLetterOrDigit(character) || character== '-' || character == '_');
         }
 
         public static int ConsumeWhiteSpace(int start, string input) {
@@ -239,6 +239,10 @@ namespace Src.Parsing.StyleParser {
                 throw new ParseException("Unknown measurement unit: " + propertyValue);
             }
 
+            if (propertyValue.IndexOf('%') != -1) {
+                value = value * 0.01f;
+            }
+
             return new UIMeasurement(value, unit);
         }
 
@@ -264,7 +268,15 @@ namespace Src.Parsing.StyleParser {
                 return UIMeasurementUnit.ParentSize;
             }
 
+            if (TryReadCharacters(input, "%", ref ptr)) {
+                return UIMeasurementUnit.ParentSize;
+            }
+            
             if (TryReadCharacters(input, "pca", ref ptr)) {
+                return UIMeasurementUnit.ParentContentArea;
+            }
+            
+            if (TryReadCharacters(input, "%cnt", ref ptr)) {
                 return UIMeasurementUnit.ParentContentArea;
             }
 

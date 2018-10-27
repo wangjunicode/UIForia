@@ -25,22 +25,22 @@ namespace Rendering {
 
         [PublicAPI]
         public UIFixedLength GetBorderRadiusTopLeft(StyleState state) {
-            return GetFixedLengthValue(StylePropertyId.BorderRadiusTopLeft, state);
+            return GetPropertyValueInState(StylePropertyId.BorderRadiusTopLeft, state).AsFixedLength;
         }
 
         [PublicAPI]
         public UIFixedLength GetBorderRadiusTopRight(StyleState state) {
-            return GetFixedLengthValue(StylePropertyId.BorderRadiusTopRight, state);
+            return GetPropertyValueInState(StylePropertyId.BorderRadiusTopRight, state).AsFixedLength;
         }
 
         [PublicAPI]
         public UIFixedLength GetBorderRadiusBottomLeft(StyleState state) {
-            return GetFixedLengthValue(StylePropertyId.BorderRadiusBottomLeft, state);
+            return GetPropertyValueInState(StylePropertyId.BorderRadiusBottomLeft, state).AsFixedLength;
         }
 
         [PublicAPI]
         public UIFixedLength GetBorderRadiusBottomRight(StyleState state) {
-            return GetFixedLengthValue(StylePropertyId.BorderRadiusBottomRight, state);
+            return GetPropertyValueInState(StylePropertyId.BorderRadiusBottomRight, state).AsFixedLength;
         }
 
         [PublicAPI]

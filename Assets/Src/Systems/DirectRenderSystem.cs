@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using System.Linq;
 using Rendering;
 using Src.Elements;
 using Src.Util;
@@ -193,9 +194,10 @@ namespace Src.Systems {
                 }
             }
 
-            for (int z = 0; z < renderList.Count; z++) {
-                Vector2 screenPosition = list[z].element.layoutResult.screenPosition;
-                list[z].renderPosition = new Vector3(screenPosition.x, -screenPosition.y, z);
+            int z = renderList.Count;
+            for (int i = 0; i < renderList.Count; i++) {
+                Vector2 screenPosition = list[i].element.layoutResult.screenPosition;
+                list[i].renderPosition = new Vector3(screenPosition.x, -screenPosition.y, z--);
             }
             
         }
@@ -211,14 +213,14 @@ namespace Src.Systems {
                 if (first.layoutResult.zIndex == second.layoutResult.zIndex) {
                     // if original depths are the same, resolve using depth index
                     if (first.depth == second.depth) {
-                        return first.depthIndex > second.depthIndex ? 1 : -1;
+                        return first.depthIndex > second.depthIndex ? -1 : 1;
                     }
 
                     // otherwise resolve using raw depth
-                    return first.depth > second.depth ? 1 : -1;
+                    return first.depth > second.depth ? -1 : 1;
                 }
                 else {
-                    return first.layoutResult.zIndex > second.layoutResult.zIndex ? 1 : -1;
+                    return first.layoutResult.zIndex > second.layoutResult.zIndex ? -1 : 1;
                 }
             }
 

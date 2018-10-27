@@ -1,0 +1,19 @@
+style container {
+    FlexLayoutDirection = Row;
+    FlexLayoutMainAxisAlignment = Start;
+    PreferredWidth = 800;
+    PreferredHeight = 800;
+    OverflowY = Scroll;
+    BackgroundColor = red;
+    LayoutBehavior = Ignored;
+    TransformPositionX = 200
+    RenderLayerOffset = 1
+}
+
+style top-bar {
+
+    PreferredWidth = 1000px
+    PreferredHeight = 64px;
+    BackgroundColor = black;
+    
+}

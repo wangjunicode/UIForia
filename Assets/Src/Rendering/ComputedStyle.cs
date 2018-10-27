@@ -75,7 +75,7 @@ namespace Rendering {
                 SendEvent(new StyleProperty(StylePropertyId.BackgroundColorSecondary, new StyleColor(backgroundColor).rgba));
             }
         }
-        
+
         public Texture2D BackgroundImage {
             [DebuggerStepThrough] get { return backgroundImage; }
             internal set {
@@ -87,7 +87,7 @@ namespace Rendering {
                 SendEvent(new StyleProperty(StylePropertyId.BackgroundImage, 0, 0, backgroundImage));
             }
         }
-        
+
         public GradientType GradientType {
             get { return (GradientType) ReadInt(StylePropertyId.BackgroundGradientType, (int) DefaultStyleValues.BackgroundGradientType); }
             internal set { WriteInt(StylePropertyId.BackgroundGradientType, (int) value); }
@@ -108,6 +108,15 @@ namespace Rendering {
             internal set { WriteFloat(StylePropertyId.BackgroundFillRotation, value); }
         }
 
+        public BackgroundFillType BackgroundFillType {
+            get { return (BackgroundFillType) ReadInt(StylePropertyId.BackgroundFillType, (int) DefaultStyleValues.BackgroundFillType); }
+            internal set { WriteInt(StylePropertyId.BackgroundFillType, (int) value); }
+        }
+        
+        public BackgroundShapeType BackgroundShapeType {
+            get { return (BackgroundShapeType) ReadInt(StylePropertyId.BackgroundShapeType, (int) DefaultStyleValues.BackgroundShapeType); }
+            internal set { WriteInt(StylePropertyId.BackgroundShapeType, (int) value); }
+        }
 
 #endregion
 
@@ -881,6 +890,7 @@ namespace Rendering {
             internal set { WriteInt(StylePropertyId.RenderLayerOffset, value); }
         }
 
+
 #endregion
 
         private void SendEvent(StyleProperty property) {
@@ -1376,7 +1386,7 @@ namespace Rendering {
 
             return defaultValue;
         }
-        
+
         private void WriteColorProperty(StylePropertyId propertyId, Color newValue) {
             StyleProperty retn;
             if (properties.TryGetValue((int) propertyId, out retn)) {
@@ -1387,7 +1397,7 @@ namespace Rendering {
             properties[(int) propertyId] = property;
             SendEvent(property);
         }
-        
+
         private void WriteInt(StylePropertyId propertyId, int newValue) {
             StyleProperty retn;
             if (properties.TryGetValue((int) propertyId, out retn)) {

@@ -48,6 +48,9 @@ Shader "UIForia/Default"
             #pragma fragment frag
             #pragma target 2.0
 
+            #pragma multi_compile UIFORIA_FILLTYPE_COLOR UIFORIA_FILLTYPE_LINEAR_GRADIENT UIFORIA_FILLTYPE_CYLINDRICAL_GRADIENT UIFORIA_FILLTYPE_RADIAL_GRADIENT UIFORIA_FILLTYPE_STRIPES UIFORIA_FILLTYPE_GRID UIFORIA_FILLTYPE_CHECKER
+            #pragma multi_compile UIFORIA_USE_BORDER 
+            
             #include "UnityCG.cginc"
             #include "UnityUI.cginc"
             #include "UIForia.cginc"

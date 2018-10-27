@@ -8,6 +8,7 @@ using Src.Extensions;
 using Src.Rendering;
 using Src.Util;
 using UIForia;
+using UnityEditor;
 using UnityEngine;
 using MapAction = System.Action<Src.Parsing.StyleParser.StyleParserContext, string, string>;
 
@@ -75,6 +76,13 @@ namespace Src.Parsing.StyleParser {
                 return sheet.GetStyleGroup(styleName);
             }
 
+            if (File.Exists(Application.dataPath + "/" + uniqueStyleId)) {
+                string contents = File.ReadAllText(Application.dataPath + "/" + uniqueStyleId);
+                sheet = ParseFromString(contents);
+                s_CompiledStyles[uniqueStyleId] = sheet;
+                return sheet.GetStyleGroup(styleName);
+            }
+            
             sheet = TryParseStyleFromClassPath(Path.GetFileNameWithoutExtension(uniqueStyleId));
 
             if (sheet != null) {

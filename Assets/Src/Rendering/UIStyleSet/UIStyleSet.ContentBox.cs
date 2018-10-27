@@ -9,64 +9,31 @@ namespace Rendering {
 
         [PublicAPI]
         public UIMeasurement GetMarginTop(StyleState state) {
-            StyleProperty property = GetPropertyValueInState(StylePropertyId.MarginTop, state);
-            return property.IsDefined
-                ? UIMeasurement.Decode(property.valuePart0, property.valuePart1)
-                : UIMeasurement.Unset;
+            return GetPropertyValueInState(StylePropertyId.MarginTop, state).AsMeasurement;
         }
 
         [PublicAPI]
         public UIMeasurement GetMarginRight(StyleState state) {
-            StyleProperty property = GetPropertyValueInState(StylePropertyId.MarginRight, state);
-            return property.IsDefined
-                ? UIMeasurement.Decode(property.valuePart0, property.valuePart1)
-                : UIMeasurement.Unset;
+            return GetPropertyValueInState(StylePropertyId.MarginRight, state).AsMeasurement;
         }
 
         [PublicAPI]
         public UIMeasurement GetMarginBottom(StyleState state) {
-            StyleProperty property = GetPropertyValueInState(StylePropertyId.MarginBottom, state);
-            return property.IsDefined
-                ? UIMeasurement.Decode(property.valuePart0, property.valuePart1)
-                : UIMeasurement.Unset;
+            return GetPropertyValueInState(StylePropertyId.MarginBottom, state).AsMeasurement;
         }
 
         [PublicAPI]
         public UIMeasurement GetMarginLeft(StyleState state) {
-            StyleProperty property = GetPropertyValueInState(StylePropertyId.MarginLeft, state);
-            return property.IsDefined
-                ? UIMeasurement.Decode(property.valuePart0, property.valuePart1)
-                : UIMeasurement.Unset;
+            return GetPropertyValueInState(StylePropertyId.MarginLeft, state).AsMeasurement;
         }
 
         [PublicAPI]
         public void SetMargin(ContentBoxRect value, StyleState state) {
-            UIStyle style = GetOrCreateInstanceStyle(state);
-            style.MarginTop = value.top;
-            style.MarginRight = value.right;
-            style.MarginBottom = value.bottom;
-            style.MarginLeft = value.left;
-
-            if ((state & currentState) != 0) {
-                return;
-            }
-
-            if (style == GetActiveStyleForProperty(StylePropertyId.MarginTop)) {
-                computedStyle.MarginTop = value.top;
-            }
-
-            if (style == GetActiveStyleForProperty(StylePropertyId.MarginRight)) {
-                computedStyle.MarginRight = value.right;
-            }
-
-            if (style == GetActiveStyleForProperty(StylePropertyId.MarginBottom)) {
-                computedStyle.MarginBottom = value.bottom;
-            }
-
-            if (style == GetActiveStyleForProperty(StylePropertyId.MarginLeft)) {
-                computedStyle.MarginLeft = value.left;
-            }
-
+            
+            SetMarginTop(value.top, state);
+            SetMarginRight(value.right, state);
+            SetMarginBottom(value.bottom, state);
+            SetMarginLeft(value.bottom, state);
         }
 
         [PublicAPI]
@@ -81,38 +48,22 @@ namespace Rendering {
 
         [PublicAPI]
         public void SetMarginTop(UIMeasurement value, StyleState state) {
-            UIStyle style = GetOrCreateInstanceStyle(state);
-            style.MarginTop = value;
-            if ((state & currentState) != 0 && style == GetActiveStyleForProperty(StylePropertyId.MarginTop)) {
-                computedStyle.MarginTop = value;
-            }
+            SetUIMeasurementProperty(StylePropertyId.MarginTop, value, state);
         }
 
         [PublicAPI]
         public void SetMarginRight(UIMeasurement value, StyleState state) {
-            UIStyle style = GetOrCreateInstanceStyle(state);
-            style.MarginRight = value;
-            if ((state & currentState) != 0 && style == GetActiveStyleForProperty(StylePropertyId.MarginRight)) {
-                computedStyle.MarginRight = value;
-            }
+            SetUIMeasurementProperty(StylePropertyId.MarginRight, value, state);
         }
 
         [PublicAPI]
         public void SetMarginBottom(UIMeasurement value, StyleState state) {
-            UIStyle style = GetOrCreateInstanceStyle(state);
-            style.MarginBottom = value;
-            if ((state & currentState) != 0 && style == GetActiveStyleForProperty(StylePropertyId.MarginBottom)) {
-                computedStyle.MarginBottom = value;
-            }
+            SetUIMeasurementProperty(StylePropertyId.MarginBottom, value, state);
         }
 
         [PublicAPI]
         public void SetMarginLeft(UIMeasurement value, StyleState state) {
-            UIStyle style = GetOrCreateInstanceStyle(state);
-            style.MarginLeft = value;
-            if ((state & currentState) != 0 && style == GetActiveStyleForProperty(StylePropertyId.MarginLeft)) {
-                computedStyle.MarginLeft = value;
-            }
+            SetUIMeasurementProperty(StylePropertyId.MarginLeft, value, state);
         }
 
 #endregion
@@ -121,64 +72,30 @@ namespace Rendering {
 
         [PublicAPI]
         public UIFixedLength GetPaddingTop(StyleState state) {
-            StyleProperty property = GetPropertyValueInState(StylePropertyId.PaddingTop, state);
-            return property.IsDefined
-                ? UIFixedLength.Decode(property.valuePart0, property.valuePart1)
-                : UIFixedLength.Unset;
+            return GetPropertyValueInState(StylePropertyId.PaddingTop, state).AsFixedLength;
         }
 
         [PublicAPI]
         public UIFixedLength GetPaddingRight(StyleState state) {
-            StyleProperty property = GetPropertyValueInState(StylePropertyId.PaddingRight, state);
-            return property.IsDefined
-                ? UIFixedLength.Decode(property.valuePart0, property.valuePart1)
-                : UIFixedLength.Unset;
+            return GetPropertyValueInState(StylePropertyId.PaddingRight, state).AsFixedLength;
         }
 
         [PublicAPI]
         public UIFixedLength GetPaddingBottom(StyleState state) {
-            StyleProperty property = GetPropertyValueInState(StylePropertyId.PaddingBottom, state);
-            return property.IsDefined
-                ? UIFixedLength.Decode(property.valuePart0, property.valuePart1)
-                : UIFixedLength.Unset;
+            return GetPropertyValueInState(StylePropertyId.PaddingBottom, state).AsFixedLength;
         }
 
         [PublicAPI]
         public UIFixedLength GetPaddingLeft(StyleState state) {
-            StyleProperty property = GetPropertyValueInState(StylePropertyId.PaddingLeft, state);
-            return property.IsDefined
-                ? UIFixedLength.Decode(property.valuePart0, property.valuePart1)
-                : UIFixedLength.Unset;
+            return GetPropertyValueInState(StylePropertyId.PaddingLeft, state).AsFixedLength;
         }
 
         [PublicAPI]
         public void SetPadding(FixedLengthRect value, StyleState state) {
-            UIStyle style = GetOrCreateInstanceStyle(state);
-            style.PaddingTop = value.top;
-            style.PaddingRight = value.right;
-            style.PaddingBottom = value.bottom;
-            style.PaddingLeft = value.left;
-
-            if ((state & currentState) != 0) {
-                return;
-            }
-
-            if ((state & currentState) != 0 && style == GetActiveStyleForProperty(StylePropertyId.PaddingTop)) {
-                computedStyle.PaddingTop = value.top;
-            }
-
-            if ((state & currentState) != 0 && style == GetActiveStyleForProperty(StylePropertyId.PaddingRight)) {
-                computedStyle.PaddingRight = value.right;
-            }
-
-            if ((state & currentState) != 0 && style == GetActiveStyleForProperty(StylePropertyId.PaddingBottom)) {
-                computedStyle.PaddingBottom = value.bottom;
-            }
-
-            if ((state & currentState) != 0 && style == GetActiveStyleForProperty(StylePropertyId.PaddingLeft)) {
-                computedStyle.PaddingLeft = value.left;
-            }
-
+            SetPaddingTop(value.top, state);
+            SetPaddingRight(value.right, state);
+            SetPaddingBottom(value.bottom, state);
+            SetPaddingLeft(value.left, state);
         }
 
         [PublicAPI]
@@ -193,38 +110,22 @@ namespace Rendering {
 
         [PublicAPI]
         public void SetPaddingTop(UIFixedLength value, StyleState state) {
-            UIStyle style = GetOrCreateInstanceStyle(state);
-            style.PaddingTop = value;
-            if ((state & currentState) != 0 && style == GetActiveStyleForProperty(StylePropertyId.PaddingTop)) {
-                computedStyle.PaddingTop = value;
-            }
+            SetFixedLengthProperty(StylePropertyId.PaddingTop, value, state);
         }
 
         [PublicAPI]
         public void SetPaddingRight(UIFixedLength value, StyleState state) {
-            UIStyle style = GetOrCreateInstanceStyle(state);
-            style.PaddingRight = value;
-            if ((state & currentState) != 0 && style == GetActiveStyleForProperty(StylePropertyId.PaddingRight)) {
-                computedStyle.PaddingRight = value;
-            }
+            SetFixedLengthProperty(StylePropertyId.PaddingRight, value, state);
         }
 
         [PublicAPI]
         public void SetPaddingBottom(UIFixedLength value, StyleState state) {
-            UIStyle style = GetOrCreateInstanceStyle(state);
-            style.PaddingBottom = value;
-            if ((state & currentState) != 0 && style == GetActiveStyleForProperty(StylePropertyId.PaddingBottom)) {
-                computedStyle.PaddingBottom = value;
-            }
+            SetFixedLengthProperty(StylePropertyId.PaddingBottom, value, state);
         }
 
         [PublicAPI]
         public void SetPaddingLeft(UIFixedLength value, StyleState state) {
-            UIStyle style = GetOrCreateInstanceStyle(state);
-            style.PaddingLeft = value;
-            if ((state & currentState) != 0 && style == GetActiveStyleForProperty(StylePropertyId.PaddingLeft)) {
-                computedStyle.PaddingLeft = value;
-            }
+            SetFixedLengthProperty(StylePropertyId.PaddingLeft, value, state);
         }
 
 #endregion
@@ -233,64 +134,30 @@ namespace Rendering {
 
         [PublicAPI]
         public UIFixedLength GetBorderTop(StyleState state) {
-            StyleProperty property = GetPropertyValueInState(StylePropertyId.BorderTop, state);
-            return property.IsDefined
-                ? UIFixedLength.Decode(property.valuePart0, property.valuePart1)
-                : UIFixedLength.Unset;
+            return GetPropertyValueInState(StylePropertyId.BorderTop, state).AsFixedLength;
         }
 
         [PublicAPI]
         public UIFixedLength GetBorderRight(StyleState state) {
-            StyleProperty property = GetPropertyValueInState(StylePropertyId.BorderRight, state);
-            return property.IsDefined
-                ? UIFixedLength.Decode(property.valuePart0, property.valuePart1)
-                : UIFixedLength.Unset;
+            return GetPropertyValueInState(StylePropertyId.BorderRight, state).AsFixedLength;
         }
 
         [PublicAPI]
         public UIFixedLength GetBorderBottom(StyleState state) {
-            StyleProperty property = GetPropertyValueInState(StylePropertyId.BorderBottom, state);
-            return property.IsDefined
-                ? UIFixedLength.Decode(property.valuePart0, property.valuePart1)
-                : UIFixedLength.Unset;
+            return GetPropertyValueInState(StylePropertyId.BorderBottom, state).AsFixedLength;
         }
 
         [PublicAPI]
         public UIFixedLength GetBorderLeft(StyleState state) {
-            StyleProperty property = GetPropertyValueInState(StylePropertyId.BorderLeft, state);
-            return property.IsDefined
-                ? UIFixedLength.Decode(property.valuePart0, property.valuePart1)
-                : UIFixedLength.Unset;
+            return GetPropertyValueInState(StylePropertyId.BorderLeft, state).AsFixedLength;
         }
 
         [PublicAPI]
         public void SetBorder(FixedLengthRect value, StyleState state) {
-            UIStyle style = GetOrCreateInstanceStyle(state);
-            style.BorderTop = value.top;
-            style.BorderRight = value.right;
-            style.BorderBottom = value.bottom;
-            style.BorderLeft = value.left;
-
-            if ((state & currentState) != 0) {
-                return;
-            }
-
-            if ((state & currentState) != 0 && style == GetActiveStyleForProperty(StylePropertyId.BorderTop)) {
-                computedStyle.BorderTop = value.top;
-            }
-
-            if ((state & currentState) != 0 && style == GetActiveStyleForProperty(StylePropertyId.BorderRight)) {
-                computedStyle.BorderRight = value.right;
-            }
-
-            if ((state & currentState) != 0 && style == GetActiveStyleForProperty(StylePropertyId.BorderBottom)) {
-                computedStyle.BorderBottom = value.bottom;
-            }
-
-            if ((state & currentState) != 0 && style == GetActiveStyleForProperty(StylePropertyId.BorderLeft)) {
-                computedStyle.BorderLeft = value.left;
-            }
-
+            SetBorderTop(value.top, state);
+            SetBorderRight(value.right, state);
+            SetBorderBottom(value.bottom, state);
+            SetBorderLeft(value.left, state);
         }
 
         [PublicAPI]
@@ -305,38 +172,22 @@ namespace Rendering {
 
         [PublicAPI]
         public void SetBorderTop(UIFixedLength value, StyleState state) {
-            UIStyle style = GetOrCreateInstanceStyle(state);
-            style.BorderTop = value;
-            if ((state & currentState) != 0 && style == GetActiveStyleForProperty(StylePropertyId.BorderTop)) {
-                computedStyle.BorderTop = value;
-            }
+            SetFixedLengthProperty(StylePropertyId.BorderTop, value, state);
         }
 
         [PublicAPI]
         public void SetBorderRight(UIFixedLength value, StyleState state) {
-            UIStyle style = GetOrCreateInstanceStyle(state);
-            style.BorderRight = value;
-            if ((state & currentState) != 0 && style == GetActiveStyleForProperty(StylePropertyId.BorderRight)) {
-                computedStyle.BorderRight = value;
-            }
+            SetFixedLengthProperty(StylePropertyId.BorderRight, value, state);
         }
 
         [PublicAPI]
         public void SetBorderBottom(UIFixedLength value, StyleState state) {
-            UIStyle style = GetOrCreateInstanceStyle(state);
-            style.BorderBottom = value;
-            if ((state & currentState) != 0 && style == GetActiveStyleForProperty(StylePropertyId.BorderBottom)) {
-                computedStyle.BorderBottom = value;
-            }
+            SetFixedLengthProperty(StylePropertyId.BorderBottom, value, state);
         }
 
         [PublicAPI]
         public void SetBorderLeft(UIFixedLength value, StyleState state) {
-            UIStyle style = GetOrCreateInstanceStyle(state);
-            style.BorderLeft = value;
-            if ((state & currentState) != 0 && style == GetActiveStyleForProperty(StylePropertyId.BorderLeft)) {
-                computedStyle.BorderLeft = value;
-            }
+            SetFixedLengthProperty(StylePropertyId.BorderLeft, value, state);
         }
 
 #endregion

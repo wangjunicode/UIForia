@@ -12,6 +12,8 @@ namespace Src.Editor {
         public static void Refresh() {
             StyleParser.Reset();
             TemplateParser.Reset();
+            UIForia.ResourceManager.Reset();
+            
             List<UIViewBehavior> viewBehaviors = FindObjectOfType<UIViewBehavior>();
             for (int i = 0; i < viewBehaviors.Count; i++) {
                 viewBehaviors[i].RefreshView();

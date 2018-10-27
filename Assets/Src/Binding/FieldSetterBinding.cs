@@ -48,13 +48,16 @@ namespace Src {
         private readonly Expression<T> expression;
         private readonly Func<U, T> getter;
         private readonly Func<U, T, T> setter;
-        private readonly Action<string>[] callbacks;
+        private readonly Action<U, string>[] callbacks;
         
-        public FieldSetterBinding_WithCallbacks(string bindingId, Expression<T> expression, Func<U, T> getter, Func<U, T, T> setter, Action<string>[] callbacks) : base(bindingId) {
+        public FieldSetterBinding_WithCallbacks(string bindingId, Expression<T> expression, Func<U, T> getter, Func<U, T, T> setter, LightList<object> callbacks) : base(bindingId) {
             this.expression = expression;
             this.getter = getter;
             this.setter = setter;
-            this.callbacks = callbacks;
+            this.callbacks = new Action<U, string>[callbacks.Count];
+            for (int i = 0; i < callbacks.Count; i++) {
+                this.callbacks[i] = (Action<U, string>) callbacks[i];
+            }
         }
 
         public override void Execute(UIElement element, UITemplateContext context) {
@@ -65,7 +68,7 @@ namespace Src {
             if (!Equals(currentValue, newValue)){
                 setter(castElement, newValue);
                 for (int i = 0; i < callbacks.Length; i++) {
-                    callbacks[i].Invoke(bindingId);
+                    callbacks[i].Invoke(castElement, bindingId);
                 }
                 IPropertyChangedHandler changedHandler = element as IPropertyChangedHandler;
                 changedHandler?.OnPropertyChanged(bindingId, currentValue);

@@ -114,7 +114,6 @@ public abstract partial class InputSystem {
                             Debug.Log("Duplicate");
                             continue;
                         case "Find":
-                            Debug.Log("Find");
                             continue;
 //                            "Copy", "Cut", "Paste", "Delete", "SoftDelete", "Duplicate", "FrameSelected", "FrameSelectedWithLock", "SelectAll", "Find"
                 }

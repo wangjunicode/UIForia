@@ -7,9 +7,7 @@
     <e p="C:\Users\matth\RiderProjects\UIElements" t="IncludeRecursive">
       <e p="_DemoAsmDef.csproj" t="IncludeRecursive" />
       <e p="Assembly-CSharp-Editor.csproj" t="IncludeRecursive" />
-      <e p="Assembly-CSharp.csproj" t="IncludeRecursive" />
       <e p="Assets" t="Include">
-        <e p="Clip.cs" t="Include" />
         <e p="Demos" t="Include">
           <e p="_DemoAsmDef.asmdef" t="Include" />
           <e p="AddChatButton.xml" t="Include" />
@@ -26,8 +24,10 @@
           <e p="DirectMessageListEntry.cs" t="Include" />
           <e p="SeedUIElements.cs" t="Include" />
           <e p="UIViewBehavior.cs" t="Include" />
-          <e p="WindowFrame.cs" t="Include" />
-          <e p="WindowFrame.xml" t="Include" />
+          <e p="WindowFrame" t="Include">
+            <e p="WindowFrame.cs" t="Include" />
+            <e p="WindowFrame.xml" t="Include" />
+          </e>
         </e>
         <e p="Editor" t="Include">
           <e p="BorderedImageInspector.cs" t="Include" />
@@ -38,19 +38,6 @@
           <e p="StyleDebugView.cs" t="Include" />
           <e p="UIForiaWindow.cs" t="Include" />
           <e p="UIViewWindow.cs" t="Include" />
-        </e>
-        <e p="notes.txt" t="Include" />
-        <e p="ShadersTemp" t="Include">
-          <e p="DeferredFog.shader" t="Include" />
-          <e p="DeferredShading.shader" t="Include" />
-          <e p="My First Lighting Shader.shader" t="Include" />
-          <e p="My First Shader.shader" t="Include" />
-          <e p="My Lighting.cginc" t="Include" />
-          <e p="My Lightmapping.cginc" t="Include" />
-          <e p="My Shadows.cginc" t="Include" />
-          <e p="MyDeferredShading.cginc" t="Include" />
-          <e p="Texture Splatting.shader" t="Include" />
-          <e p="Textured With Detail.shader" t="Include" />
         </e>
         <e p="Shapes2D" t="Include">
           <e p="Editor" t="Include">
@@ -139,6 +126,7 @@
               </e>
               <e p="StyleBinding.cs" t="Include" />
               <e p="Text" t="Include">
+                <e p="StyleBinding_Font.cs" t="Include" />
                 <e p="StyleBinding_FontSize.cs" t="Include" />
                 <e p="StyleBinding_TextColor.cs" t="Include" />
                 <e p="StyleBinding_Whitespace.cs" t="Include" />
@@ -377,7 +365,12 @@
             <e p="ContentBoxRect.cs" t="Include" />
             <e p="DefaultStyleValues.cs" t="Include" />
             <e p="Easing.cs" t="Include" />
-            <e p="ElementRenderer.cs" t="Include" />
+            <e p="ElementRendering" t="Include">
+              <e p="ElementRenderer.cs" t="Include" />
+              <e p="StandardInstancedRenderer.cs" t="Include" />
+              <e p="StandardRenderer.cs" t="Include" />
+              <e p="StandardTextRenderer.cs" t="Include" />
+            </e>
             <e p="HorizontalScrollbarAttachment.cs" t="Include" />
             <e p="IMaterialProvider.cs" t="Include" />
             <e p="IMeshProvider.cs" t="Include" />
@@ -389,8 +382,6 @@
             <e p="RenderData.cs" t="Include" />
             <e p="RenderLayer.cs" t="Include" />
             <e p="StandardDrawable.cs" t="Include" />
-            <e p="StandardInstancedRenderer.cs" t="Include" />
-            <e p="StandardRenderer.cs" t="Include" />
             <e p="StyleColor.cs" t="Include" />
             <e p="StyleProperty.cs" t="Include" />
             <e p="StylePropertyId.cs" t="Include" />
@@ -425,16 +416,13 @@
             <e p="VerticalScrollbarAttachment.cs" t="Include" />
             <e p="WhitespaceMode.cs" t="Include" />
           </e>
+          <e p="ResourceManager.cs" t="Include" />
           <e p="SDFText.cs" t="Include" />
           <e p="Shaders" t="Include">
-            <e p="GUIRoundedRect.shader" t="Include" />
-            <e p="GUITexture.shader" t="Include" />
-            <e p="MattUISimpleRoundedBorder.shader" t="Include" />
-            <e p="ProceduralImage.shader" t="Include" />
-            <e p="SimpleBorder.shader" t="Include" />
             <e p="UIForia.cginc" t="Include" />
             <e p="UIForiaFragBody.cginc" t="Include" />
             <e p="UIForiaFragDefines.cginc" t="Include" />
+            <e p="UIForiaTextShader.shader" t="Include" />
             <e p="UIForiaVertDefines.cginc" t="Include" />
             <e p="UIStandardInstanced.shader" t="Include" />
             <e p="UIStandardShader.shader" t="Include" />
@@ -531,10 +519,6 @@
             <e p="TextUtil.cs" t="Include" />
           </e>
         </e>
-        <e p="Templates" t="Include">
-          <e p="InputField.xml" t="Include" />
-          <e p="UIPanel.xml" t="Include" />
-        </e>
         <e p="Tests" t="Include">
           <e p="BindingCompilerTests.cs" t="Include" />
           <e p="BindingTests.cs" t="Include" />
@@ -558,6 +542,7 @@
           </e>
           <e p="ReflectionUtilTests.cs" t="Include" />
           <e p="SkipTreeTests.cs" t="Include" />
+          <e p="StyleBindingTests.cs" t="Include" />
           <e p="StyleParserTests.cs" t="Include" />
           <e p="StyleTests.cs" t="Include" />
           <e p="TemplateParsingTests.cs" t="Include" />
@@ -592,31 +577,6 @@
           <e p="TypeCheckTests.cs" t="Include" />
           <e p="UIView_Tests.cs" t="Include" />
           <e p="WhitespaceProcessorTests.cs" t="Include" />
-        </e>
-        <e p="TextMesh Pro" t="Include">
-          <e p="Resources" t="Include">
-            <e p="LineBreaking Following Characters.txt" t="Include" />
-            <e p="LineBreaking Leading Characters.txt" t="Include" />
-            <e p="Shaders" t="Include">
-              <e p="TMP_Bitmap-Custom-Atlas.shader" t="Include" />
-              <e p="TMP_Bitmap-Mobile.shader" t="Include" />
-              <e p="TMP_Bitmap.shader" t="Include" />
-              <e p="TMP_SDF Overlay.shader" t="Include" />
-              <e p="TMP_SDF-Mobile Masking.shader" t="Include" />
-              <e p="TMP_SDF-Mobile Overlay.shader" t="Include" />
-              <e p="TMP_SDF-Mobile.shader" t="Include" />
-              <e p="TMP_SDF-Surface-Mobile.shader" t="Include" />
-              <e p="TMP_SDF-Surface.shader" t="Include" />
-              <e p="TMP_SDF.shader" t="Include" />
-              <e p="TMP_Sprite.shader" t="Include" />
-              <e p="TMPro.cginc" t="Include" />
-              <e p="TMPro_Properties.cginc" t="Include" />
-              <e p="TMPro_Surface.cginc" t="Include" />
-            </e>
-          </e>
-          <e p="Sprites" t="Include">
-            <e p="EmojiOne Attribution.txt" t="Include" />
-          </e>
         </e>
       </e>
       <e p="Library" t="ExcludeRecursive" />

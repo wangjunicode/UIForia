@@ -235,6 +235,7 @@ SubShader {
 			float	weight	= input.param.w;
 			float	sd = (bias - c) * scale;
 
+
 			float outline = (_OutlineWidth * _ScaleRatioA) * scale;
 			float softness = (_OutlineSoftness * _ScaleRatioA) * scale;
 

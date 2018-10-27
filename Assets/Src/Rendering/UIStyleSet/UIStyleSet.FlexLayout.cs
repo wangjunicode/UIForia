@@ -5,19 +5,19 @@ namespace Rendering {
     public partial class UIStyleSet {
 
         public LayoutWrap GetFlexWrapMode(StyleState state) {
-            return (LayoutWrap) GetEnumProperty(StylePropertyId.FlexLayoutWrap, state);
+            return GetPropertyValueInState(StylePropertyId.FlexLayoutWrap, state).AsLayoutWrap;
         }
 
         public LayoutDirection GetFlexLayoutDirection(StyleState state) {
-            return (LayoutDirection) GetEnumProperty(StylePropertyId.FlexLayoutDirection, state);
+            return GetPropertyValueInState(StylePropertyId.FlexLayoutDirection, state).AsLayoutDirection;
         }
 
         public MainAxisAlignment GetFlexLayoutMainAlignment(StyleState state) {
-            return (MainAxisAlignment) GetEnumProperty(StylePropertyId.FlexLayoutMainAxisAlignment, state);
+            return GetPropertyValueInState(StylePropertyId.FlexLayoutMainAxisAlignment, state).AsMainAxisAlignment;
         }
 
         public CrossAxisAlignment GetFlexLayoutCrossAlignment(StyleState state) {
-            return (CrossAxisAlignment) GetEnumProperty(StylePropertyId.FlexLayoutCrossAxisAlignment, state);
+            return GetPropertyValueInState(StylePropertyId.FlexLayoutCrossAxisAlignment, state).AsCrossAxisAlignment;
         }
 
         public void SetFlexWrapMode(LayoutWrap wrapMode, StyleState state) {

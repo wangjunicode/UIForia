@@ -8,17 +8,17 @@ namespace Rendering {
 
         [PublicAPI]
         public UIMeasurement GetMinWidth(StyleState state) {
-            return GetUIMeasurementValue(StylePropertyId.MinWidth, state);
+            return GetPropertyValueInState(StylePropertyId.MinWidth, state).AsMeasurement;
         }
 
         [PublicAPI]
         public UIMeasurement GetMaxWidth(StyleState state) {
-            return GetUIMeasurementValue(StylePropertyId.MaxWidth, state);
+            return GetPropertyValueInState(StylePropertyId.MaxWidth, state).AsMeasurement;
         }
 
         [PublicAPI]
         public UIMeasurement GetPreferredWidth(StyleState state) {
-            return GetUIMeasurementValue(StylePropertyId.PreferredWidth, state);
+            return GetPropertyValueInState(StylePropertyId.PreferredWidth, state).AsMeasurement;
         }
 
         [PublicAPI]
@@ -38,17 +38,17 @@ namespace Rendering {
 
         [PublicAPI]
         public UIMeasurement GetMinHeight(StyleState state) {
-            return GetUIMeasurementValue(StylePropertyId.MinHeight, state);
+            return GetPropertyValueInState(StylePropertyId.MinHeight, state).AsMeasurement;
         }
 
         [PublicAPI]
         public UIMeasurement GetMaxHeight(StyleState state) {
-            return GetUIMeasurementValue(StylePropertyId.MaxHeight, state);
+            return GetPropertyValueInState(StylePropertyId.MaxHeight, state).AsMeasurement;
         }
 
         [PublicAPI]
         public UIMeasurement GetPreferredHeight(StyleState state) {
-            return GetUIMeasurementValue(StylePropertyId.PreferredHeight, state);
+            return GetPropertyValueInState(StylePropertyId.PreferredHeight, state).AsMeasurement;
         }
 
         [PublicAPI]

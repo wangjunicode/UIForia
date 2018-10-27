@@ -3,6 +3,7 @@ using Shapes2D;
 using Src;
 using Src.Extensions;
 using Src.Rendering;
+using Src.StyleBindings;
 using UnityEngine;
 
 namespace Rendering {
@@ -37,11 +38,7 @@ namespace Rendering {
 
         [PublicAPI]
         public void SetBackgroundImage(Texture2D image, StyleState state) {
-            UIStyle style = GetOrCreateInstanceStyle(state);
-            style.BackgroundImage = image;
-            if ((state & currentState) != 0 && style == GetActiveStyleForProperty(StylePropertyId.BackgroundImage)) {
-                computedStyle.BackgroundImage = image;
-            }
+            SetObjectProperty(StylePropertyId.BackgroundImage, image, state);
         }
 
         [PublicAPI]

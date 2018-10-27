@@ -15,11 +15,7 @@ namespace Rendering {
         }
 
         public void SetLayoutType(LayoutType layoutType, StyleState state) {
-            UIStyle style = GetOrCreateInstanceStyle(state);
-            style.LayoutType = layoutType;
-            if ((state & currentState) != 0 && style == GetActiveStyleForProperty(StylePropertyId.LayoutType)) {
-                computedStyle.LayoutType = layoutType;
-            }
+            SetEnumProperty(StylePropertyId.LayoutType, (int)layoutType, state);
         }
 
         public LayoutBehavior GetLayoutBehavior(StyleState state) {
@@ -28,11 +24,7 @@ namespace Rendering {
         }
 
         public void SetLayoutBehavior(LayoutBehavior behavior, StyleState state) {
-            UIStyle style = GetOrCreateInstanceStyle(state);
-            style.LayoutBehavior = behavior;
-            if ((state & currentState) != 0 && style == GetActiveStyleForProperty(StylePropertyId.LayoutBehavior)) {
-                computedStyle.LayoutBehavior = behavior;
-            }
+            SetEnumProperty(StylePropertyId.LayoutBehavior, (int)behavior, state);
         }
 
         public void SetOverflowX(Overflow value, StyleState state) {
@@ -40,7 +32,7 @@ namespace Rendering {
         }
 
         public Overflow GetOverflowX(StyleState state) {
-            return (Overflow) GetEnumProperty(StylePropertyId.OverflowX, state);
+            return GetPropertyValueInState(StylePropertyId.OverflowX, state).AsOverflow;
         }
 
         public void SetOverflowY(Overflow value, StyleState state) {
@@ -48,7 +40,7 @@ namespace Rendering {
         }
 
         public Overflow GetOverflowY(StyleState state) {
-            return (Overflow) GetEnumProperty(StylePropertyId.OverflowY, state);
+            return GetPropertyValueInState(StylePropertyId.OverflowY, state).AsOverflow;
         }
 
         public void SetRenderLayer(RenderLayer layer, StyleState state) {
@@ -56,7 +48,7 @@ namespace Rendering {
         }
 
         public RenderLayer GetRenderLayer(StyleState state) {
-            return (RenderLayer) GetEnumProperty(StylePropertyId.RenderLayer, state);
+            return GetPropertyValueInState(StylePropertyId.RenderLayer, state).AsRenderLayer;
         }
 
         public void SetRenderLayerOffset(int offset, StyleState state) {
@@ -64,7 +56,7 @@ namespace Rendering {
         }
 
         public int GetRenderLayerOffset(StyleState state) {
-            return GetIntValue(StylePropertyId.RenderLayerOffset, state);
+            return GetPropertyValueInState(StylePropertyId.RenderLayerOffset, state).AsInt;
         }
 
         public void SetZIndex(int zIndex, StyleState state) {
@@ -72,7 +64,7 @@ namespace Rendering {
         }
 
         public int GetZIndex(StyleState state) {
-            return GetIntValue(StylePropertyId.ZIndex, state);
+            return GetPropertyValueInState(StylePropertyId.ZIndex, state).AsInt;
         }
 
         public void SetAnchorTopLeft(FixedLengthVector anchor, StyleState state) {
@@ -102,19 +94,19 @@ namespace Rendering {
         }
 
         public UIFixedLength GetAnchorTop(StyleState state) {
-            return GetFixedLengthValue(StylePropertyId.AnchorTop, state);
+            return GetPropertyValueInState(StylePropertyId.AnchorTop, state).AsFixedLength;
         }
 
         public UIFixedLength GetAnchorRight(StyleState state) {
-            return GetFixedLengthValue(StylePropertyId.AnchorRight, state);
+            return GetPropertyValueInState(StylePropertyId.AnchorRight, state).AsFixedLength;
         }
 
         public UIFixedLength GetAnchorBottom(StyleState state) {
-            return GetFixedLengthValue(StylePropertyId.AnchorBottom, state);
+            return GetPropertyValueInState(StylePropertyId.AnchorBottom, state).AsFixedLength;
         }
 
         public UIFixedLength GetAnchorLeft(StyleState state) {
-            return GetFixedLengthValue(StylePropertyId.AnchorLeft, state);
+            return GetPropertyValueInState(StylePropertyId.AnchorLeft, state).AsFixedLength;
         }
 
         public void SetAnchorTarget(AnchorTarget target, StyleState state) {
@@ -122,7 +114,7 @@ namespace Rendering {
         }
 
         public AnchorTarget GetAnchorTarget(StyleState state) {
-            return (AnchorTarget) GetEnumProperty(StylePropertyId.AnchorTarget, state);
+            return GetPropertyValueInState(StylePropertyId.AnchorTarget, state).AsAnchorTarget;
         }
 
     }

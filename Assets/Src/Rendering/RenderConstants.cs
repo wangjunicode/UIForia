@@ -52,6 +52,7 @@ namespace Src.Rendering {
         public const string LayoutWrap = "layoutWrap";
 
         public const string TextColor = "textColor";
+        public const string Font = "font";
         public const string FontSize = "fontSize";
         public const string Whitespace = "whiteSpace";
 
@@ -59,6 +60,7 @@ namespace Src.Rendering {
         public const string Rotation = "rotation";
         public const string Pivot = "pivot";
         public const string Scale = "scale";
+
 
     }
 

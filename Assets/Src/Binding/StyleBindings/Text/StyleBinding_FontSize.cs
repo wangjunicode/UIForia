@@ -13,10 +13,11 @@ namespace Src.StyleBindings.Text {
         }
 
         public override void Execute(UIElement element, UITemplateContext context) {
-            int currentSize = element.style.GetFontSize(state);
+            if (!element.style.IsInState(state)) return;
+
+            int currentSize = element.ComputedStyle.FontSize;
             int newSize = expression.EvaluateTyped(context);
             if (currentSize != newSize) {
-            Debug.Log("current: " + currentSize + " new " + newSize);
                 element.style.SetFontSize(newSize, state);
             }
         }

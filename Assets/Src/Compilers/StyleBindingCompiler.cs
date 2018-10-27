@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using JetBrains.Annotations;
 using Rendering;
 using Src.Compilers.AliasSource;
@@ -7,7 +8,11 @@ using Src.Rendering;
 using Src.StyleBindings;
 using Src.StyleBindings.Src.StyleBindings;
 using Src.StyleBindings.Text;
+using TMPro;
+using UnityEditor;
+using UnityEditor.Experimental;
 using UnityEngine;
+using Object = System.Object;
 
 namespace Src.Compilers {
 
@@ -37,8 +42,10 @@ namespace Src.Compilers {
         private static readonly MethodAliasSource pixelMeasurementSource;
 
         private static readonly ColorAliasSource colorSource;
-        private static readonly ValueAliasSource<UIMeasurement> autoKeywordSource;
+
         private static readonly MethodAliasSource textureUrlSource;
+        private static readonly MethodAliasSource fontUrlSource;
+
         private static readonly EnumAliasSource<LayoutType> layoutTypeSource;
         private static readonly EnumAliasSource<LayoutDirection> layoutDirectionSource;
         private static readonly EnumAliasSource<LayoutFlowType> layoutFlowSource;
@@ -47,6 +54,7 @@ namespace Src.Compilers {
         private static readonly EnumAliasSource<CrossAxisAlignment> crossAxisAlignmentSource;
         private static readonly EnumAliasSource<WhitespaceMode> whiteSpaceSource;
 
+        // todo 
         private static readonly ValueAliasSource<int> siblingIndexSource;
         private static readonly ValueAliasSource<int> activeSiblingIndexSource;
         private static readonly ValueAliasSource<int> childCountSource;
@@ -55,16 +63,18 @@ namespace Src.Compilers {
         private static readonly ValueAliasSource<int> templateChildChildCountSource;
 
         private static readonly IAliasSource[] fixedSources;
+        private static readonly IAliasSource[] measurementSources;
 
+        
         // todo implement these globally in bindings
         private static readonly string[] k_ElementProperties = {
-            "$childIndex", 
-            "$childCount", 
-            "$activeChildIndex", 
+            "$childIndex",
+            "$childCount",
+            "$activeChildIndex",
             "$inactiveChildCount",
             "$activeChildCount",
-            "$hasActiveChildren", 
-            "$hasInactiveChildren", 
+            "$hasActiveChildren",
+            "$hasInactiveChildren",
             "$hasChildren"
         };
 
@@ -78,6 +88,7 @@ namespace Src.Compilers {
             rect4Source = new MethodAliasSource("rect", type.GetMethod(nameof(Rect), new[] {typeof(float), typeof(float), typeof(float), typeof(float)}));
 
             textureUrlSource = new MethodAliasSource("url", type.GetMethod(nameof(TextureUrl)));
+            fontUrlSource = new MethodAliasSource("url", type.GetMethod(nameof(FontUrl)));
 
             sizeAliasSource = new MethodAliasSource("size", type.GetMethod(nameof(Size)));
             vec2MeasurementSource = new MethodAliasSource("vec2", type.GetMethod(nameof(Vec2Measurement)));
@@ -92,12 +103,20 @@ namespace Src.Compilers {
             viewportHeightMeasurementSource = new MethodAliasSource("viewHeight", type.GetMethod(nameof(ViewportHeightMeasurement), new[] {typeof(float)}));
             contentMeasurementSource = new MethodAliasSource("content", type.GetMethod(nameof(ContentMeasurement), new[] {typeof(float)}));
 
-            var percentageLengthSource = new MethodAliasSource("percent", type.GetMethod(nameof(PercentageLength), new[] {typeof(float)}));
-            var emLengthSource = new MethodAliasSource("em", type.GetMethod(nameof(EmLength), new[] {typeof(float)}));
-            var viewportWidthLengthSource = new MethodAliasSource("vw", type.GetMethod(nameof(ViewportWidthLength)));
-            var viewportHeightLengthSource = new MethodAliasSource("vh", type.GetMethod(nameof(ViewportHeightLength)));
-            var pixelLengthSource = new MethodAliasSource("px", type.GetMethod(nameof(PixelLength)));
+            MethodAliasSource percentageLengthSource = new MethodAliasSource("percent", type.GetMethod(nameof(PercentageLength), new[] {typeof(float)}));
+            MethodAliasSource emLengthSource = new MethodAliasSource("em", type.GetMethod(nameof(EmLength), new[] {typeof(float)}));
+            MethodAliasSource viewportWidthLengthSource = new MethodAliasSource("vw", type.GetMethod(nameof(ViewportWidthLength)));
+            MethodAliasSource viewportHeightLengthSource = new MethodAliasSource("vh", type.GetMethod(nameof(ViewportHeightLength)));
+            MethodAliasSource pixelLengthSource = new MethodAliasSource("px", type.GetMethod(nameof(PixelLength)));
 
+            measurementSources = new IAliasSource[] {
+                pixelMeasurementSource,
+                parentMeasurementSource,
+                viewportWidthMeasurementSource,
+                viewportHeightMeasurementSource,
+                contentMeasurementSource,
+            };
+            
             fixedSources = new IAliasSource[] {
                 pixelLengthSource,
                 percentageLengthSource,
@@ -113,10 +132,8 @@ namespace Src.Compilers {
             layoutWrapSource = new EnumAliasSource<LayoutWrap>();
             mainAxisAlignmentSource = new EnumAliasSource<MainAxisAlignment>();
             crossAxisAlignmentSource = new EnumAliasSource<CrossAxisAlignment>();
-            autoKeywordSource = new ValueAliasSource<UIMeasurement>("auto", UIMeasurement.ContentArea);
             whiteSpaceSource = new EnumAliasSource<WhitespaceMode>();
         }
-
 
         public StyleBindingCompiler(ContextDefinition context) {
             this.context = context;
@@ -200,66 +217,24 @@ namespace Src.Compilers {
                     ));
 
                 case RenderConstants.Width:
-                    return new StyleBinding_Width(targetState.state, Compile<UIMeasurement>(
-                        value,
-                        autoKeywordSource,
-                        pixelMeasurementSource,
-                        viewportWidthMeasurementSource,
-                        parentMeasurementSource,
-                        contentMeasurementSource
-                    ));
+                    return new StyleBinding_Width(targetState.state, Compile<UIMeasurement>(value,measurementSources));
 
                 case RenderConstants.Height:
-                    return new StyleBinding_Height(targetState.state, Compile<UIMeasurement>(
-                        value,
-                        autoKeywordSource,
-                        pixelMeasurementSource,
-                        viewportWidthMeasurementSource,
-                        parentMeasurementSource,
-                        contentMeasurementSource
-                    ));
+                    return new StyleBinding_Height(targetState.state, Compile<UIMeasurement>(value,measurementSources));
 
                 // Constraints
 
                 case RenderConstants.MinWidth:
-                    return new StyleBinding_MinWidth(targetState.state, Compile<UIMeasurement>(
-                        value,
-                        autoKeywordSource,
-                        pixelMeasurementSource,
-                        viewportWidthMeasurementSource,
-                        parentMeasurementSource,
-                        contentMeasurementSource
-                    ));
+                    return new StyleBinding_MinWidth(targetState.state, Compile<UIMeasurement>(value,measurementSources));
 
                 case RenderConstants.MaxWidth:
-                    return new StyleBinding_MaxWidth(targetState.state, Compile<UIMeasurement>(
-                        value,
-                        autoKeywordSource,
-                        pixelMeasurementSource,
-                        viewportWidthMeasurementSource,
-                        parentMeasurementSource,
-                        contentMeasurementSource
-                    ));
+                    return new StyleBinding_MaxWidth(targetState.state, Compile<UIMeasurement>(value,measurementSources));
 
                 case RenderConstants.MinHeight:
-                    return new StyleBinding_MinHeight(targetState.state, Compile<UIMeasurement>(
-                        value,
-                        autoKeywordSource,
-                        pixelMeasurementSource,
-                        viewportWidthMeasurementSource,
-                        parentMeasurementSource,
-                        contentMeasurementSource
-                    ));
+                    return new StyleBinding_MinHeight(targetState.state, Compile<UIMeasurement>(value,measurementSources));
 
                 case RenderConstants.MaxHeight:
-                    return new StyleBinding_MaxHeight(targetState.state, Compile<UIMeasurement>(
-                        value,
-                        autoKeywordSource,
-                        pixelMeasurementSource,
-                        viewportWidthMeasurementSource,
-                        parentMeasurementSource,
-                        contentMeasurementSource
-                    ));
+                    return new StyleBinding_MaxHeight(targetState.state, Compile<UIMeasurement>(value,measurementSources));
 
                 case RenderConstants.GrowthFactor:
                     return new StyleBinding_GrowthFactor(targetState.state, Compile<int>(value));
@@ -268,7 +243,7 @@ namespace Src.Compilers {
                     return new StyleBinding_ShrinkFactor(targetState.state, Compile<int>(value));
 
                 // Layout
-                
+
 //                case RenderConstants.OverflowX:
 //                    return new StyleBinding_OverflowX(targetState.state);
 
@@ -327,33 +302,17 @@ namespace Src.Compilers {
                     return new StyleBinding_Margin(targetState.state, Compile<ContentBoxRect>(value, rect1Source, rect2Source, rect4Source));
 
                 case RenderConstants.MarginTop:
-                    return new StyleBinding_MarginTop(targetState.state, Compile<UIMeasurement>(value,
-                        pixelMeasurementSource,
-                        viewportWidthMeasurementSource,
-                        parentMeasurementSource,
-                        contentMeasurementSource));
+                    return new StyleBinding_MarginTop(targetState.state, Compile<UIMeasurement>(value, measurementSources));
 
                 case RenderConstants.MarginRight:
-                    return new StyleBinding_MarginRight(targetState.state, Compile<UIMeasurement>(value,
-                        pixelMeasurementSource,
-                        viewportWidthMeasurementSource,
-                        parentMeasurementSource,
-                        contentMeasurementSource));
+                    return new StyleBinding_MarginRight(targetState.state, Compile<UIMeasurement>(value, measurementSources));
 
                 case RenderConstants.MarginBottom:
-                    return new StyleBinding_MarginBottom(targetState.state, Compile<UIMeasurement>(value,
-                        pixelMeasurementSource,
-                        viewportWidthMeasurementSource,
-                        parentMeasurementSource,
-                        contentMeasurementSource));
+                    return new StyleBinding_MarginBottom(targetState.state, Compile<UIMeasurement>(value, measurementSources));
 
                 case RenderConstants.MarginLeft:
-                    return new StyleBinding_MarginLeft(targetState.state, Compile<UIMeasurement>(value,
-                        pixelMeasurementSource,
-                        viewportWidthMeasurementSource,
-                        parentMeasurementSource,
-                        contentMeasurementSource));
-
+                    return new StyleBinding_MarginLeft(targetState.state, Compile<UIMeasurement>(value, measurementSources));
+                
                 // Text
 
                 case RenderConstants.TextColor:
@@ -365,6 +324,9 @@ namespace Src.Compilers {
                 case RenderConstants.Whitespace:
                     return new StyleBinding_Whitespace(targetState.state, Compile<WhitespaceMode>(value, whiteSpaceSource));
 
+                case RenderConstants.Font:
+                    return new StyleBinding_Font(targetState.state, Compile<TMP_FontAsset>(value, fontUrlSource));
+                    
                 default: return null;
             }
         }
@@ -407,7 +369,6 @@ namespace Src.Compilers {
 
             return expression;
         }
-
 
         [Pure]
         public static Color Rgb(float r, float g, float b) {
@@ -492,8 +453,13 @@ namespace Src.Compilers {
         }
 
         [Pure]
+        public static TMP_FontAsset FontUrl(string url) {
+            return UIForia.ResourceManager.GetFont(url);
+        }
+        
+        [Pure]
         public static Texture2D TextureUrl(string url) {
-            throw new NotImplementedException();
+            return UIForia.ResourceManager.GetTexture(url);
         }
 
         [Pure]

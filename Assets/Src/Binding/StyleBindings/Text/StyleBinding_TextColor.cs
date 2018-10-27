@@ -13,7 +13,8 @@ namespace Src.StyleBindings.Text {
         }
 
         public override void Execute(UIElement element, UITemplateContext context) {
-            Color currentColor = element.style.GetTextColor(state);
+            if (element.style.IsInState(state)) return;
+            Color currentColor = element.ComputedStyle.TextColor;
             Color newColor = expression.EvaluateTyped(context);
             if (newColor != currentColor) {
                 element.style.SetTextColor(newColor, state);

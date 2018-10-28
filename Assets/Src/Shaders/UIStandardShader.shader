@@ -33,10 +33,10 @@ Shader "UIForia/Default"
             WriteMask [_StencilWriteMask]
         }
 
-        Cull Off
+        Cull Front
         Lighting Off
-        ZWrite Off
-        ZTest [unity_GUIZTestMode]
+        ZWrite On
+        ZTest LEqual
         Blend SrcAlpha OneMinusSrcAlpha
         ColorMask [_ColorMask]
 
@@ -48,20 +48,21 @@ Shader "UIForia/Default"
             #pragma fragment frag
             #pragma target 2.0
 
-            #pragma multi_compile UIFORIA_FILLTYPE_COLOR UIFORIA_FILLTYPE_LINEAR_GRADIENT UIFORIA_FILLTYPE_CYLINDRICAL_GRADIENT UIFORIA_FILLTYPE_RADIAL_GRADIENT UIFORIA_FILLTYPE_STRIPES UIFORIA_FILLTYPE_GRID UIFORIA_FILLTYPE_CHECKER
-            #pragma multi_compile UIFORIA_USE_BORDER 
+            #pragma multi_compile UIFORIA_FILLTYPE_COLOR UIFORIA_FILLTYPE_TEXTURE UIFORIA_FILLTYPE_LINEAR_GRADIENT UIFORIA_FILLTYPE_CYLINDRICAL_GRADIENT UIFORIA_FILLTYPE_RADIAL_GRADIENT UIFORIA_FILLTYPE_STRIPES UIFORIA_FILLTYPE_GRID UIFORIA_FILLTYPE_CHECKER
+            #pragma multi_compile __ UIFORIA_USE_BORDER 
             
             #include "UnityCG.cginc"
             #include "UnityUI.cginc"
             #include "UIForia.cginc"
             
-            sampler2D _MainTex;
-            fixed4 _Color;
-            float4 _ClipRect;         
-            float4 _Size;
-            float4 _BorderSize;
-            float4 _BorderRadius;
-            fixed4 _BorderColor;
+            uniform sampler2D _MainTex;
+            uniform fixed4 _Color;
+            uniform float4 _ClipRect;         
+            uniform float4 _Size;
+            uniform float4 _BorderSize;
+            uniform float4 _BorderRadius;
+            uniform fixed4 _BorderColor;
+            uniform float4 _FillOffsetScale;
             
             struct appdata_t {
                 float4 vertex   : POSITION;

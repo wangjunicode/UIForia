@@ -15,8 +15,8 @@ namespace Rendering {
     // todo -- have some way of seeing if any properties changed in a given frame
     public class ComputedStyle {
 
-        private UIStyleSet styleSet;
-        private IntMap<StyleProperty> properties;
+        private readonly UIStyleSet styleSet;
+        private readonly IntMap<StyleProperty> properties;
 
         public ComputedStyle(UIStyleSet styleSet) {
             this.styleSet = styleSet;
@@ -36,49 +36,27 @@ namespace Rendering {
 
 #region Paint
 
-        private Color borderColor = DefaultStyleValues.BorderColor;
-        private Color backgroundColor = DefaultStyleValues.BackgroundColor;
         private Texture2D backgroundImage = DefaultStyleValues.BackgroundImage;
 
         public Color BorderColor {
-            [DebuggerStepThrough] get { return borderColor; }
-            internal set {
-                if (value == borderColor) {
-                    return;
-                }
-
-                borderColor = value;
-                SendEvent(new StyleProperty(StylePropertyId.BorderColor, new StyleColor(borderColor).rgba));
-            }
+            [DebuggerStepThrough] get { return ReadColorProperty(StylePropertyId.BorderColor, DefaultStyleValues.BorderColor); }
+            internal set { WriteColorProperty(StylePropertyId.BorderColor, value); }
         }
 
         public Color BackgroundColor {
-            [DebuggerStepThrough] get { return backgroundColor; }
-            internal set {
-                if (value == backgroundColor) {
-                    return;
-                }
-
-                backgroundColor = value;
-                SendEvent(new StyleProperty(StylePropertyId.BackgroundColor, new StyleColor(backgroundColor).rgba));
-            }
+            [DebuggerStepThrough] get { return ReadColorProperty(StylePropertyId.BackgroundColor, DefaultStyleValues.BorderColor);; }
+            internal set { WriteColorProperty(StylePropertyId.BackgroundColor, value); }
         }
 
         public Color BackgroundColorSecondary {
             [DebuggerStepThrough] get { return ReadColorProperty(StylePropertyId.BackgroundColorSecondary, DefaultStyleValues.BackgroundColorSecondary); }
-            internal set {
-                if (value == backgroundColor) {
-                    return;
-                }
-
-                backgroundColor = value;
-                SendEvent(new StyleProperty(StylePropertyId.BackgroundColorSecondary, new StyleColor(backgroundColor).rgba));
-            }
+            internal set { WriteColorProperty(StylePropertyId.BackgroundColorSecondary, value); }
         }
 
         public Texture2D BackgroundImage {
             [DebuggerStepThrough] get { return backgroundImage; }
             internal set {
+                
                 if (backgroundImage == value) {
                     return;
                 }
@@ -112,10 +90,40 @@ namespace Rendering {
             get { return (BackgroundFillType) ReadInt(StylePropertyId.BackgroundFillType, (int) DefaultStyleValues.BackgroundFillType); }
             internal set { WriteInt(StylePropertyId.BackgroundFillType, (int) value); }
         }
-        
+
         public BackgroundShapeType BackgroundShapeType {
             get { return (BackgroundShapeType) ReadInt(StylePropertyId.BackgroundShapeType, (int) DefaultStyleValues.BackgroundShapeType); }
             internal set { WriteInt(StylePropertyId.BackgroundShapeType, (int) value); }
+        }
+
+        public Vector2 BackgroundFillOffset => new Vector2(
+            ReadFloat(StylePropertyId.BackgroundFillOffsetX, DefaultStyleValues.BackgroundFillOffsetX),
+            ReadFloat(StylePropertyId.BackgroundFillOffsetY, DefaultStyleValues.BackgroundFillOffsetY)
+        );
+
+        public float BackgroundFillOffsetX {
+            get { return ReadFloat(StylePropertyId.BackgroundFillOffsetX, DefaultStyleValues.BackgroundFillOffsetX); }
+            internal set { WriteFloat(StylePropertyId.BackgroundFillOffsetX, value); }
+        }
+
+        public float BackgroundFillOffsetY {
+            get { return ReadFloat(StylePropertyId.BackgroundFillOffsetY, DefaultStyleValues.BackgroundFillOffsetY); }
+            internal set { WriteFloat(StylePropertyId.BackgroundFillOffsetY, value); }
+        }
+
+        public Vector2 BackgroundFillScale => new Vector2(
+            ReadFloat(StylePropertyId.BackgroundFillScaleX, DefaultStyleValues.BackgroundFillScaleX),
+            ReadFloat(StylePropertyId.BackgroundFillScaleY, DefaultStyleValues.BackgroundFillScaleY)
+        );
+
+        public float BackgroundFillScaleX {
+            get { return ReadFloat(StylePropertyId.BackgroundFillScaleX, DefaultStyleValues.BackgroundFillScaleX); }
+            internal set { WriteFloat(StylePropertyId.BackgroundFillScaleX, value); }
+        }
+
+        public float BackgroundFillScaleY {
+            get { return ReadFloat(StylePropertyId.BackgroundFillScaleY, DefaultStyleValues.BackgroundFillScaleY); }
+            internal set { WriteFloat(StylePropertyId.BackgroundFillScaleY, value); }
         }
 
 #endregion
@@ -890,7 +898,6 @@ namespace Rendering {
             internal set { WriteInt(StylePropertyId.RenderLayerOffset, value); }
         }
 
-
 #endregion
 
         private void SendEvent(StyleProperty property) {
@@ -950,6 +957,19 @@ namespace Rendering {
                     break;
                 case StylePropertyId.BorderRadiusBottomRight:
                     BorderRadiusBottomRight = property.IsDefined ? UIFixedLength.Decode(value0, value1) : DefaultStyleValues.BorderRadiusBottomRight;
+                    break;
+
+                case StylePropertyId.BackgroundFillOffsetX:
+                    BackgroundFillOffsetX = property.IsDefined ? property.AsFloat : DefaultStyleValues.BackgroundFillOffsetX;
+                    break;
+                case StylePropertyId.BackgroundFillOffsetY:
+                    BackgroundFillOffsetY = property.IsDefined ? property.AsFloat : DefaultStyleValues.BackgroundFillOffsetY;
+                    break;
+                case StylePropertyId.BackgroundFillScaleX:
+                    BackgroundFillScaleX = property.IsDefined ? property.AsFloat : DefaultStyleValues.BackgroundFillScaleX;
+                    break;
+                case StylePropertyId.BackgroundFillScaleY:
+                    BackgroundFillScaleY = property.IsDefined ? property.AsFloat : DefaultStyleValues.BackgroundFillScaleX;
                     break;
 
 #endregion
@@ -1412,16 +1432,13 @@ namespace Rendering {
         [DebuggerStepThrough]
         private float ReadFloat(StylePropertyId propertyId, float defaultValue) {
             StyleProperty retn;
-            if (properties.TryGetValue((int) propertyId, out retn)) {
-                return retn.AsFloat;
-            }
-
-            return defaultValue;
+            return properties.TryGetValue((int) propertyId, out retn) ? retn.AsFloat : defaultValue;
         }
 
         private void WriteFloat(StylePropertyId propertyId, float newValue) {
             StyleProperty retn;
             if (properties.TryGetValue((int) propertyId, out retn)) {
+                // ReSharper disable once CompareOfFloatsByEqualityOperator
                 if (retn.AsFloat == newValue) return;
             }
 

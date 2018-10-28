@@ -1,5 +1,3 @@
-// Upgrade NOTE: upgraded instancing buffer 'Props' to new syntax.
-
 Shader "UIForia/Instanced"
 {
     Properties
@@ -39,7 +37,7 @@ Shader "UIForia/Instanced"
         Lighting Off
         ZWrite Off
         ZClip False
-        Blend Off//SrcAlpha OneMinusSrcAlpha
+        Blend SrcAlpha OneMinusSrcAlpha
         ColorMask [_ColorMask]
 
         Pass
@@ -69,6 +67,8 @@ Shader "UIForia/Instanced"
             UNITY_DEFINE_INSTANCED_PROP(float4, _GridAndLineSize) 
             UNITY_INSTANCING_BUFFER_END(Props)
             
+            sampler2D sampler;
+            
             struct appdata_t {
                 float4 vertex   : POSITION;
                 float2 texcoord : TEXCOORD0;
@@ -89,7 +89,6 @@ Shader "UIForia/Instanced"
                 float2 size = UNITY_ACCESS_INSTANCED_PROP(Props, _SizeRotationGradientStart).xy;
                 v.vertex.x += v.normal.x * size.x;
                 v.vertex.y -= v.normal.y * size.y;
-                v.vertex.z = size.x == 800 ? 1 : -1;
                 OUT.vertex = UnityObjectToClipPos(v.vertex);
                 OUT.texcoord = v.texcoord;
                 return OUT;

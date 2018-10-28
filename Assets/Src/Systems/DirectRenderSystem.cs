@@ -111,14 +111,14 @@ namespace Src.Systems {
                 }
 
                 if (layoutResult.allocatedSize.height < layoutResult.actualSize.height) {
-                    clipHAdjustment = layoutResult.allocatedSize.height / layoutResult.actualSize.height;
+                    clipHAdjustment = 1 - (layoutResult.allocatedSize.height / layoutResult.actualSize.height);
                     if (clipHAdjustment >= 1) {
                         continue;
                     }
                 }
 
                 if (layoutResult.allocatedSize.width < layoutResult.actualSize.width) {
-                    clipWAdjustment = layoutResult.allocatedSize.width / layoutResult.actualSize.width;
+                    clipWAdjustment = 1 - (layoutResult.allocatedSize.width / layoutResult.actualSize.width);
                     if (clipWAdjustment >= 1) {
                         continue;
                     }

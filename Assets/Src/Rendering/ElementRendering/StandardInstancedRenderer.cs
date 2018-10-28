@@ -109,15 +109,15 @@ namespace Src.Rendering {
             MaterialBatchKey fillType = batchKey & MaterialBatchKey.FillMask;
             MaterialBatchKey shapeType = batchKey & MaterialBatchKey.ShapeMask;
 
-            if (end - start >= 3) {
-                entries[0].renderData.renderPosition = new Vector3(entries[0].renderData.renderPosition.x, entries[0].renderData.renderPosition.y, -2);
-                entries[1].renderData.renderPosition = new Vector3(entries[1].renderData.renderPosition.x, entries[1].renderData.renderPosition.y, -1);
-                entries[2].renderData.renderPosition = new Vector3(entries[2].renderData.renderPosition.x, entries[2].renderData.renderPosition.y, 0);
-
-                // things that might be happening: painting 2 things at the same x/y causes culling internally
+//            if (end - start >= 3) {
+//                entries[0].renderData.renderPosition = new Vector3(entries[0].renderData.renderPosition.x, entries[0].renderData.renderPosition.y, -2);
+//                entries[1].renderData.renderPosition = new Vector3(entries[1].renderData.renderPosition.x, entries[1].renderData.renderPosition.y, -1);
+//                entries[2].renderData.renderPosition = new Vector3(entries[2].renderData.renderPosition.x, entries[2].renderData.renderPosition.y, 0);
+//
+//                // things that might be happening: painting 2 things at the same x/y causes culling internally
                 // pushing the layer up manually seems to work (but child doesn't go with it)
                 // ignored thing takes size of content even though it shouldn't check flexbox impl 
-            }
+//            }
 
             for (int i = end - 1; i >= start; i--) {
                 RenderData data = entries[i].renderData;
@@ -388,7 +388,8 @@ namespace Src.Rendering {
                 ComputedStyle style = data.element.ComputedStyle;
 
                 Texture2D background = style.BackgroundImage;
-                if (background != null) {
+                // todo! remove this
+                if (true || background != null) {
                     // todo -- pack textures into Texture2DArray and use sampling in shader instead of using standard renderer
                     m_SpecialRenderList.Add(data);
                     continue;

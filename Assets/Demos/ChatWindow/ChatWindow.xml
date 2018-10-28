@@ -11,20 +11,48 @@
             OverflowY = Scroll;
         }
         
-        style childStyle {
-            BackgroundColor = blue;
+        style div1 {
             PreferredWidth = 200px;
-            PreferredHeight = 300px;
+            PreferredHeight = 200px;
+            BackgroundImage = icon_1;
+        }
+
+        style div2 {
+            PreferredWidth = 200px;
+            PreferredHeight = 200px;
+            BackgroundImage = icon_1;
+            LayoutBehavior = Ignored;
+            TransformPositionX = 100px;
+            TransformPositionY = 100px;
         }
         
+        style div3 {
+            PreferredWidth = 100%;
+            PreferredHeight = 64px;
+            BackgroundColor = red;
+        }
+        
+        style rightbar {
+            PreferredWidth = 200px;
+            PreferredHeight = 200px;
+            BackgroundColor = black;
+        }
+
     </Style>
 
     <Import value="ClippedPanel+ClippedCorner" as="ClippedCorner"/>
 
     <Contents style="container">
         
-        <WindowFrame/>
-        <WindowFrame/>
+        <!--<Div style="div2" style.backgroundColor="white">-->
+            <!--<Div style="div3"/>-->
+        <!--</Div>-->
+        <!---->
+        <!--<Div style="div1" style.backgroundColor="green"/>-->
+       
+        <ClippedPanel style="rightbar" clippedCorner="{@ClippedCorner.TopLeft}">
+            
+        </ClippedPanel>
         
     </Contents>
 

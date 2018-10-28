@@ -436,12 +436,10 @@ namespace Rendering {
         internal void InitializeScrollbar(VirtualScrollbar scrollbar) {
             UIStyleSet styleSet = new UIStyleSet(scrollbar, styleSystem);
             styleSet.SetBackgroundColor(Color.green, StyleState.Normal);
-            styleSet.SetBackgroundColor(Color.yellow, StyleState.Hover);
             styleSet.SetLayoutBehavior(LayoutBehavior.Ignored, StyleState.Normal);
             scrollbar.style = styleSet;
             UIStyleSet handleStyle = new UIStyleSet(scrollbar.handle, styleSystem);
-            handleStyle.SetBackgroundColor(Color.blue, StyleState.Normal);
-            handleStyle.SetBackgroundColor(Color.black, StyleState.Hover);
+            handleStyle.SetBackgroundColor(Color.magenta, StyleState.Normal);
             handleStyle.SetLayoutBehavior(LayoutBehavior.Ignored, StyleState.Normal);
             scrollbar.handle.style = handleStyle;
         }

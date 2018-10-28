@@ -8,6 +8,11 @@ namespace Src.Compilers.AliasSource {
     public class ColorAliasSource : IAliasSource {
 
         public object ResolveAlias(string alias, object data = null) {
+            Color color;
+            if (ColorUtility.TryParseHtmlString(alias, out color)) {
+                return color;
+            }
+
             switch (alias) {
                 case "black":
                 case "Black":

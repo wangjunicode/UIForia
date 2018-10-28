@@ -114,13 +114,17 @@ namespace Rendering {
         public const RenderLayer RenderLayer = Rendering.RenderLayer.Default;
         public const int LayerOffset = 0;
 
-        public const float BackgroundFillRotation = 0f;
         public const GradientType BackgroundGradientType = GradientType.Linear;
         public const GradientAxis BackgroundGradientAxis = GradientAxis.Horizontal;
-        public const float BackgroundGradientStart = 0;
         public const BackgroundShapeType BackgroundShapeType = Src.Rendering.BackgroundShapeType.Rectangle;
-
         public const BackgroundFillType BackgroundFillType = Src.Rendering.BackgroundFillType.Normal;
+
+        public const float BackgroundFillRotation = 0f;
+        public const float BackgroundGradientStart = 0;
+        public const float BackgroundFillOffsetX = 0;
+        public const float BackgroundFillOffsetY = 0;
+        public const float BackgroundFillScaleX = 1;
+        public const float BackgroundFillScaleY = 1;
 
     }
 

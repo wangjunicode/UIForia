@@ -4,6 +4,7 @@ using Rendering;
 using Src.Elements;
 using Src.Layout;
 using Src.Layout.LayoutTypes;
+using Src.Rendering;
 using Src.Util;
 using UnityEngine;
 
@@ -96,6 +97,11 @@ namespace Src.Systems {
 
             LayoutBox box = m_LayoutBoxMap.GetOrDefault(element.id);
 
+            if (box.IsIgnored) {
+                box.allocatedWidth = box.GetWidths().clampedSize;
+                box.allocatedHeight = box.GetHeights(box.actualHeight).clampedSize;
+            }
+            
             if (forceLayout || box.markedForLayout) {
                 box.RunLayout();
                 box.markedForLayout = false;
@@ -110,11 +116,6 @@ namespace Src.Systems {
             }
             else if (depth < computedLayer) {
                 zIndex += -2000;
-            }
-
-            if (box.IsIgnored) {
-                box.allocatedWidth = box.actualWidth;
-                box.allocatedHeight = box.actualHeight;
             }
 
             layoutResult.ActualSize = new Size(box.actualWidth, box.actualHeight);
@@ -152,10 +153,15 @@ namespace Src.Systems {
                         continue;
                     }
 
-                   // if (forceLayout || box.markedForLayout) {
+                    if (box.IsIgnored) {
+                        box.allocatedWidth = box.GetWidths().clampedSize;
+                        box.allocatedHeight = box.GetHeights(box.actualHeight).clampedSize;
+                    }
+
+                    if (forceLayout || box.markedForLayout) {
                         box.RunLayout();
                         box.markedForLayout = false;
-                  //  }
+                    }
 
                     depth = element.depth;
                     computedLayer = ResolveRenderLayer(element) - element.ComputedStyle.LayerOffset;
@@ -171,16 +177,11 @@ namespace Src.Systems {
                     layoutResult = element.layoutResult;
                     Rect oldScreenRect = layoutResult.ScreenRect;
 
-                    if (box.IsIgnored) {
-                        box.allocatedWidth = box.GetWidths().clampedSize;
-                        box.allocatedHeight = box.GetHeights(box.actualHeight).clampedSize;
-                    }
-
                     LayoutBox parentBox = box.parent;
                     Vector2 scrollOffset = new Vector2();
                     scrollOffset.x = (parentBox.actualWidth - parentBox.allocatedWidth) * parentBox.element.scrollOffset.x;
                     scrollOffset.y = (parentBox.actualHeight - parentBox.allocatedHeight) * parentBox.element.scrollOffset.y;
-                    
+
                     layoutResult.LocalPosition = ResolveLocalPosition(box) - scrollOffset;
                     layoutResult.ContentOffset = new Vector2(box.ContentOffsetLeft, box.ContentOffsetTop);
                     layoutResult.ActualSize = new Size(box.actualWidth, box.actualHeight);
@@ -246,7 +247,6 @@ namespace Src.Systems {
             UpdateScrollbarLayouts();
             StackPool<UIElement>.Release(stack);
         }
-
 
         private void UpdateQueryGrid(UIElement element, Rect oldRect) {
             int x = (int) oldRect.x;
@@ -335,11 +335,13 @@ namespace Src.Systems {
                 }
             }
             else {
-                if (vertical == null) {
+                Overflow verticalOverflow = box.style.OverflowY;
+
+                if (vertical == null && verticalOverflow == Overflow.Scroll || verticalOverflow == Overflow.ScrollAndAutoHide) {
                     vertical = new VirtualScrollbar(element, ScrollbarOrientation.Vertical);
                     element.style.InitializeScrollbar(vertical);
                     // todo -- depth index needs to be set
-                    
+
                     m_Elements.Add(vertical);
                     m_Elements.Add(vertical.handle);
 

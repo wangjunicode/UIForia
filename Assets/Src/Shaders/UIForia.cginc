@@ -19,6 +19,7 @@ struct FillSettings {
     float gradientStart;
     float gridSize;
     float lineSize;
+    sampler2D fillTexture;
 };
 
 // ***** 
@@ -112,6 +113,14 @@ fixed4 fill(float2 uv, float2 size, FillSettings settings) {
     #if UIFORIA_FILLTYPE_COLOR
         return settings.fillColor1;
    
+    #elif UIFORIA_FILLTYPE_TEXTURE
+        fpos = rotate_fill(fpos, settings.fillRotation);
+        fpos /= size;
+        fpos += float2(0.5, 0.5);
+        fpos += settings.fillOffset;
+        fpos /= settings.fillScale;
+        return tex2D(settings.fillTexture, fpos) * settings.fillColor1;
+        
     #elif defined(UIFORIA_FILLTYPE_LINEAR_GRADIENT) | defined(UIFORIA_FILLTYPE_RADIAL_GRADIENT) | defined(UIFORIA_FILLTYPE_CYLINDRICAL_GRADIENT)
         
         fpos = rotate_fill(fpos, settings.fillRotation);

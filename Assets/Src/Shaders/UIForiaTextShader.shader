@@ -178,10 +178,7 @@ Shader "UIForia/Text"
                 fixed faceAlpha = 1 - saturate((sd + (softness * 0.5)) / (1.0 + softness));
                 faceColor.rgb *= faceColor.a;
                 faceColor *= faceAlpha;
-                clip(faceColor.a - 0.001);
                 
-                return faceColor;//return fixed4(1, 0, 0, 1);
-
             #endif
             
             #ifdef UIFORIA_USE_UNDERLAY

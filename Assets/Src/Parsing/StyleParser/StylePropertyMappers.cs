@@ -23,7 +23,8 @@ namespace Src.Parsing.StyleParser {
                 case "cursor":
                     throw new NotImplementedException();
                 case "backgroundimage":
-                    throw new NotImplementedException();
+                    context.targetStyle.BackgroundImage = UIForia.ResourceManager.GetTexture(propertyValue);
+                    break;
                 case "overflow":
                     Overflow overflow = ParseUtil.ParseOverflow(context.variables, propertyValue);
                     context.targetStyle.OverflowX = overflow;

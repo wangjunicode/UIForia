@@ -18,7 +18,8 @@
      
      #define m_GridSize UNITY_ACCESS_INSTANCED_PROP(Props, _GridAndLineSize).xy
      #define m_LineSize UNITY_ACCESS_INSTANCED_PROP(Props, _GridAndLineSize).zw
-     
+     #define m_FillTexture sampler
+
 #else
      
      #define m_Size _Size
@@ -39,5 +40,8 @@
      
      #define m_GridSize _BorderRadius
      #define m_LineSize _BorderRadius
+     #define m_FillOffset _FillOffsetScale.zw
+     #define m_FillScale _FillOffsetScale.zw
+     #define m_FillTexture _MainTex
      
 #endif

@@ -3,8 +3,8 @@
     // texcoord origin is bottom left, invert to match
     float2 p = float2(IN.texcoord.x, 1 - IN.texcoord.y);
     float4 clipRect = m_ClipRect;
-    
-    //clip(step(clipRect.xy, p) * step(p, clipRect.zw));
+    return m_FillColor;
+    //clip((step(clipRect.xy, p) * step(p, clipRect.zw)) - 0.01);
     
     float blur = 1.414;
     float2 size = m_Size;
@@ -16,6 +16,7 @@
     float2 centerOffset = texcoordMinusHalf * size;
     
     FillSettings fillSettings;
+    fillSettings.fillTexture = m_FillTexture;
     fillSettings.fillColor1 = m_FillColor;
     fillSettings.fillColor2 = m_FillColor2;
     fillSettings.fillRotation = m_FillRotation;
@@ -62,11 +63,11 @@
 
     float2 delta = abs(centerOffset) - halfSize;
     float dist = -(min(max(delta.x, delta.y), 0) + length(max(delta, 0)));
-    fixed4 color = fill_blend(dist, fillColor, blur);
+    fixed4 color = fill_blend(dist, fillColor, 0 /*blur*/); //using blur here makes a 1px gap on the edges for some reason
     
 #endif
 
-  //  clip(color.a - 0.001);
+   // clip(color.a - 0.001);
     
     color.rgb *= color.a;
-    return color;
+    return fillSettings.fillColor1;

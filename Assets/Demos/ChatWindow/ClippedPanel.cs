@@ -1,53 +1,38 @@
 using System;
 using Rendering;
 using Src;
+using Src.Elements;
 using Src.Systems;
+using Src.Util;
 using UnityEngine;
 using UnityEngine.UI;
 
-[Template(TemplateType.String, @"
-<UITemplate>
-    <Contents>
-        <Children/>
-    </Contents>
-</UITemplate>
-")]
-public class ClippedPanel : UIElement, IMeshProvider {
+//[Template(TemplateType.String, @"
+//<UITemplate>
+//    <Contents>
+//        <Children/>
+//    </Contents>
+//</UITemplate>
+//")]
+public class ClippedPanel : UIContainerElement, IMeshProvider {
 
     private static readonly VertexHelper s_VertexHelper = new VertexHelper();
 
     protected Mesh mesh;
     protected bool isMeshDirty;
-    protected bool isMaterialDirty;
     public float clipSize = 10f;
 
     public ClippedCorner clippedCorner = ClippedCorner.None;
 
     public override void OnReady() {
         isMeshDirty = true;
-        isMaterialDirty = true;
     }
 
-    public ClippedCorner prev;
-    public override void OnUpdate() {
-        if (clippedCorner != prev) {
-            prev = clippedCorner;
-            OnAllocatedSizeChanged();
-        }
-    }
-    
-    public void OnAllocatedSizeChanged() {
+    [OnPropertyChanged(nameof(clippedCorner))]
+    public void OnClipChanged() {
         isMeshDirty = true;
     }
-
-    public void OnStylePropertyChanged(StyleProperty property) {
-        
-        if (property.propertyId == StylePropertyId.BackgroundColor) {
-            isMaterialDirty = true;
-        }
-        
-    }
-
+    
     public Mesh GetMesh() {
         /*
          * Generate a mesh with optionally clipped corners
@@ -61,23 +46,31 @@ public class ClippedPanel : UIElement, IMeshProvider {
          *
          * 6    7            9     10
          */
-        if (!isMeshDirty) return mesh;
 
-        if (mesh == null) mesh = new Mesh();
+        if (!isMeshDirty && !layoutResult.ActualSizeChanged) {
+            return mesh;
+        }
+
+        if (mesh == null) {
+            mesh = new Mesh();
+        }
+        
+        isMeshDirty = false;
 
         Color32 color32 = style.computedStyle.BackgroundColor;
-        Size size = layoutResult.allocatedSize;
+        Size size = layoutResult.actualSize;
 
         if (clippedCorner == ClippedCorner.None || clipSize <= 0f) {
-            s_VertexHelper.AddVert(new Vector3(0, 0), color32, new Vector2(0f, 0f));
-            s_VertexHelper.AddVert(new Vector3(0, size.height), color32, new Vector2(0f, 1f));
-            s_VertexHelper.AddVert(new Vector3(size.width, size.height), color32, new Vector2(1f, 1f));
-            s_VertexHelper.AddVert(new Vector3(size.width, 0), color32, new Vector2(1f, 0f));
-
-            s_VertexHelper.AddTriangle(0, 1, 2);
-            s_VertexHelper.AddTriangle(2, 3, 0);
-            s_VertexHelper.FillMesh(mesh);
-            s_VertexHelper.Clear();
+            mesh = MeshUtil.CreateStandardUIMesh(size, color32);
+//            s_VertexHelper.AddVert(new Vector3(0, 0), color32, new Vector2(0f, 0f));
+//            s_VertexHelper.AddVert(new Vector3(0, -size.height), color32, new Vector2(0f, 1f));
+//            s_VertexHelper.AddVert(new Vector3(size.width, -size.height), color32, new Vector2(1f, 1f));
+//            s_VertexHelper.AddVert(new Vector3(size.width, 0), color32, new Vector2(1f, 0f));
+//
+//            s_VertexHelper.AddTriangle(0, 1, 2);
+//            s_VertexHelper.AddTriangle(2, 3, 0);
+//            s_VertexHelper.FillMesh(mesh);
+//            s_VertexHelper.Clear();
             return mesh;
         }
 
@@ -145,47 +138,47 @@ public class ClippedPanel : UIElement, IMeshProvider {
         s_VertexHelper.AddVert(v15, color32, new Vector2());
 
         // top left
-        s_VertexHelper.AddTriangle(1, 2, 3);
+        s_VertexHelper.AddTriangle(3, 2, 1);
         if ((clippedCorner & ClippedCorner.TopLeft) == 0) {
-            s_VertexHelper.AddTriangle(3, 0, 1);
+            s_VertexHelper.AddTriangle(1, 0, 3);
         }
 
         // left center
-        s_VertexHelper.AddTriangle(3, 2, 5);
-        s_VertexHelper.AddTriangle(5, 4, 3);
+        s_VertexHelper.AddTriangle(5, 2, 3);
+        s_VertexHelper.AddTriangle(3, 4, 5);
         // bottom left
-        s_VertexHelper.AddTriangle(4, 5, 7);
+        s_VertexHelper.AddTriangle(7, 5, 4);
         if ((clippedCorner & ClippedCorner.BottomLeft) == 0) {
-            s_VertexHelper.AddTriangle(7, 6, 4);
+            s_VertexHelper.AddTriangle(4, 6, 7);
         }
 
         // bottom center
-        s_VertexHelper.AddTriangle(8, 9, 7);
-        s_VertexHelper.AddTriangle(7, 5, 8);
+        s_VertexHelper.AddTriangle(7, 9, 8);
+        s_VertexHelper.AddTriangle(8, 5, 7);
 
         // bottom right
         if ((clippedCorner & ClippedCorner.BottomRight) == 0) {
-            s_VertexHelper.AddTriangle(11, 10, 9);
+            s_VertexHelper.AddTriangle(9, 10, 11);
         }
-
-        s_VertexHelper.AddTriangle(9, 8, 11);
+        s_VertexHelper.AddTriangle(11, 8, 9);
 
         // center right
-        s_VertexHelper.AddTriangle(15, 11, 8);
-        s_VertexHelper.AddTriangle(8, 12, 15);
+        s_VertexHelper.AddTriangle(8, 11, 15);
+        s_VertexHelper.AddTriangle(15, 12, 8);
+        
         // top right
         if ((clippedCorner & ClippedCorner.TopRight) == 0) {
-            s_VertexHelper.AddTriangle(13, 14, 15);
+            s_VertexHelper.AddTriangle(15, 14, 13);
         }
-
-        s_VertexHelper.AddTriangle(15, 12, 13);
+        s_VertexHelper.AddTriangle(13, 12, 15);
 
         // top center
-        s_VertexHelper.AddTriangle(13, 12, 2);
-        s_VertexHelper.AddTriangle(2, 1, 13);
+        s_VertexHelper.AddTriangle(2, 12, 13);
+        s_VertexHelper.AddTriangle(13, 1, 2);
+        
         // center center
-        s_VertexHelper.AddTriangle(12, 8, 5);
-        s_VertexHelper.AddTriangle(5, 2, 12);
+        s_VertexHelper.AddTriangle(5, 8, 12);
+        s_VertexHelper.AddTriangle(12, 2, 5);
 
         s_VertexHelper.FillMesh(mesh);
         s_VertexHelper.Clear();

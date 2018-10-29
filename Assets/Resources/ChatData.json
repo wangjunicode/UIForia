@@ -10,7 +10,23 @@
           "threads": [
             {
               "name": "Announcements",
-              "messages": []
+              "messages": [
+                {
+                  "from": "SNAER",
+                  "time": "Today at 14:21",
+                  "payload": "They could rebel"                  
+                },
+                {
+                  "from": "EMILSSON",
+                  "time": "Today at 14:23",
+                  "payload": "How's that?"
+                },
+                {
+                  "from": "SNAER",
+                  "time": "Today at 14:22",
+                  "payload": "I mean you could arm yourself and overthrow the king, or emigrate to another nation. Or something like that"
+                }
+              ]
             },
             {
               "name": "Colony Chat",

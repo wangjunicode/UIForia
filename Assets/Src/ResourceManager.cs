@@ -48,7 +48,6 @@ namespace UIForia {
             return AddResource(path, font, s_FontMap);
         }
 
-
         public static AudioClip AddAudioClip(AudioClip clip) {
             return AddResource(clip, s_AudioMap);
         }

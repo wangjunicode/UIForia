@@ -7,7 +7,7 @@
 
         style container {
             PreferredWidth = 1400px;
-            PreferredHeight = 864px;
+            PreferredHeight = 100%;
         }
 
         style left-bar {
@@ -104,7 +104,7 @@
                 
             </Group>
             
-            <ChatTextDisplay/>
+            <ChatTextDisplay thread="{chatData.chatGroups[selectedGroupIdx].threadGroups[selectedThreadGroupIdx].threads[selectedThreadIdx]}"/>
             
             <ChatGroupRosterDisplay/>
             

@@ -5,8 +5,7 @@
         style container {
             FlexLayoutDirection = Row;
             PreferredWidth = 800px;
-            PreferredHeight = 864px;
-            <!--BackgroundColor = white;-->
+            PreferredHeight = 764px;
             OverflowY = Scroll;
         }
 

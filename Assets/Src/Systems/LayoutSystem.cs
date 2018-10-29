@@ -554,10 +554,10 @@ namespace Src.Systems {
             if ((element is UITextElement)) {
                 return new TextLayoutBox(this, element);
             }
-//
-//            if ((element is UIImageElement)) {
-//                return new ImageLayoutBox(this, element);
-//            }
+
+            if ((element is UIImageElement)) {
+                return new ImageLayoutBox(this, element);
+            }
 
             switch (element.style.computedStyle.LayoutType) {
                 case LayoutType.Flex:

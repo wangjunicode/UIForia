@@ -13,8 +13,42 @@ namespace Src.Layout.LayoutTypes {
             image = (UIImageElement) element;
         }
 
-        public override void RunLayout() { }
+        public override void RunLayout() {
+            Texture2D texture = image.texture;
+            if (style.PreferredWidth.unit == UIMeasurementUnit.Content) {
+                if (texture != null) {
+                    actualWidth = texture.width;
+                }
+                else {
+                    actualWidth = 0;
+                }
+            }
+            else {
+                actualWidth = GetWidths().clampedSize;
+            }
+            if (style.PreferredHeight.unit == UIMeasurementUnit.Content) {
+                if (texture != null) {
+                    actualHeight = texture.height;
+                }
+                else {
+                    actualHeight = 0;
+                }
+            }
+            else {
+                actualHeight = GetHeights(actualWidth).clampedSize;
+            }
+        }
 
+        protected override float ComputeContentWidth() {
+            return image.texture == null ? 0 : image.texture.width;
+        }
+
+        protected override float ComputeContentHeight(float width) {
+            // todo -- preserve aspect ratio
+//            float scale = width / image.texture.width;
+//            float aspect = image.texture.width / image.texture.height;
+            return image.texture == null ? 0 : image.texture.height;
+        }
 
     }
 

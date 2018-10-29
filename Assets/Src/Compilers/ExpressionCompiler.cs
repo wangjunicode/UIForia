@@ -603,6 +603,11 @@ namespace Src {
                         }
                         else {
                             PropertyInfo propertyInfo = ReflectionUtil.GetInstanceOrStaticPropertyInfo(lastType, fieldName);
+                            
+                            if (propertyInfo == null) {
+                                throw new UIForia.ParseException($"Unable to find field with name '{fieldName}' on type {lastType}");    
+                            }
+                            
                             lastType = propertyInfo.PropertyType;
                             if (ReflectionUtil.IsPropertyStatic(propertyInfo)) {
                                 parts[i] = new AccessExpressionPart_StaticProperty(propertyInfo);
@@ -641,6 +646,9 @@ namespace Src {
                         }
                         else {
                             PropertyInfo propertyInfo = ReflectionUtil.GetInstanceOrStaticPropertyInfo(lastType, fieldName);
+                            if (propertyInfo == null) {
+                                throw new UIForia.ParseException($"Unable to find field or property with name '{fieldName}' on type {lastType}");
+                            }
                             lastType = propertyInfo.PropertyType;
                             if (ReflectionUtil.IsPropertyStatic(propertyInfo)) {
                                 parts[i] = new AccessExpressionPart_StaticProperty(propertyInfo);

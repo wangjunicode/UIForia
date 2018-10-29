@@ -10,15 +10,21 @@ namespace Src {
     public class UIImageElement : UIElement {
 
         public string src;
-
+        public Texture2D texture;
+        
         public UIImageElement() {
             flags |= UIElementFlags.Image;
             flags |= UIElementFlags.Primitive;
         }
 
+        public override void OnReady() {
+            
+        }
+        
         [OnPropertyChanged(nameof(src))]
-        public void OnSrcChanged() {
-            style.SetBackgroundImage(UIForia.ResourceManager.GetTexture(src), StyleState.Normal);
+        public void OnSrcChanged(string name) {
+            texture = UIForia.ResourceManager.GetTexture(src);
+            style.SetBackgroundImage(texture, StyleState.Normal);
         }
 
     }

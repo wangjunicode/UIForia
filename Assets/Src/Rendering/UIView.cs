@@ -92,7 +92,13 @@ public abstract class UIView {
         foreach (ISystem system in systems) {
             system.OnReset();
         }
-
+        elementTree.Clear();
+        for (int i = 0; i < depthMap.Count; i++) {
+            depthMap[i].Clear();
+            List<UIElement> map = depthMap[i];
+            ListPool<UIElement>.Release(ref map);
+        }
+        depthMap.Clear();
         rootElement = null;
         Initialize(true);
         onRefresh?.Invoke();

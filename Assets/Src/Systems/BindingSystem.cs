@@ -23,6 +23,7 @@ namespace Src.Systems {
         }
 
         public void OnReset() {
+            this.isTreeDirty = true;
             bindingSkipTree.Clear();
             repeatNodes.Clear();
         }

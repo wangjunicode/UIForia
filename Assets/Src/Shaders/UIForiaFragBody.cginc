@@ -38,6 +38,9 @@
     indexer += and(1 - top, 1 - left) * 2;
     indexer += and(1 - top, left) * 3;
     
+    int borderIndexer = 0;
+    // todo -- border needs it own indexer / rect compare
+    
     // subtract the AA blur from the outline so sizes stay mostly 
     // correct and outlines don't look too thick when scaled down.
     float outlineSize = max(0, m_BorderSize[indexer] - blur);

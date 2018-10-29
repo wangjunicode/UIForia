@@ -91,8 +91,8 @@ namespace Src.Compilers {
                 UnityEngine.Debug.Log($"Error compiling binding: {attrKey}={attrValue}, Type {fieldInfo.FieldType} is not assignable from {expression.YieldedType}");
                 return null;
             }
-            Dictionary<string, LightList<object>> actionMap = null;
-            if (!m_TypeMap.ContainsKey(targetType)) {
+            Dictionary<string, LightList<object>> actionMap;
+            if(!m_TypeMap.TryGetValue(targetType, out actionMap)) {
                 MethodInfo[] methods = targetType.GetMethods(ReflectionUtil.InstanceBindFlags);
                 
                 for (int i = 0; i < methods.Length; i++) {

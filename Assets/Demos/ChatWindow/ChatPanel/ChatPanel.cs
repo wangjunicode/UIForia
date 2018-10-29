@@ -4,18 +4,13 @@ using UnityEngine;
 
 namespace Demo {
 
-    public class DataStore {
-
-        public ChatData chatData;
-        public int selectedChatGroup;
-
-    }
-
     [Template("Demos/ChatWindow/ChatPanel/ChatPanel.xml")]
     public class ChatPanel : UIElement {
 
         public ChatData chatData;
         public int selectedGroupIdx;
+        public int selectedThreadGroupIdx;
+        public int selectedThreadIdx;
 
         public void SetSelectedChatGroup(int index) {
             Debug.Log("Set to: " + index);

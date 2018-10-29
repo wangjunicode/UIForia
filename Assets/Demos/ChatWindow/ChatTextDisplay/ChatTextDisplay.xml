@@ -5,12 +5,15 @@
             
         style container {
             MinWidth = 300px;
+            PreferredWidth = 0;
             PreferredHeight = 1pca;
             FlexItemGrow = 1;
             BackgroundColor = white;
         }
         
-        style chat-log {}
+        style chat-log {
+            PreferredWidth = 100%;
+        }
         
         style chat-input {}
         
@@ -19,6 +22,10 @@
     <Contents style="container">
         
         <Group style="chat-log">
+            
+            <Repeat list="{thread.messages}">
+                <ChatMessageDisplay message="{$item}"/>
+            </Repeat>
             
         </Group>
         

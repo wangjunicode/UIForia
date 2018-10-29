@@ -1,0 +1,165 @@
+{
+  "chatGroups": [
+    {
+      "name": "Group 0",
+      "iconUrl": "icon_1",
+      "unreadCount": 5,
+      "threadGroups": [
+        {
+          "name": "IMPORTANT",
+          "threads": [
+            {
+              "name": "Announcements",
+              "messages": []
+            },
+            {
+              "name": "Colony Chat",
+              "messages": []
+            },
+            {
+              "name": "Government",
+              "messages": []
+            }
+          ]
+        },
+        {
+          "name": "THE GOVERNMENT",
+          "threads": [
+            {
+              "name": "Defense Department",
+              "messages": []
+            },
+            {
+              "name": "National Council",
+              "messages": []
+            },
+            {
+              "name": "Government",
+              "messages": []
+            }
+          ]
+        },
+        {
+          "name": "OTHER",
+          "threads": [
+            {
+              "name": "Off Topic",
+              "messages": []
+            },
+            {
+              "name": "Recruitment",
+              "messages": []
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "Group 1",
+      "iconUrl": "Icon_2",
+      "unreadCount": 15,
+      "threadGroups": [
+        {
+          "name": "Important",
+          "threads": [
+            {
+              "name": "Announcements",
+              "messages": []
+            },
+            {
+              "name": "Colony Chat",
+              "messages": []
+            },
+            {
+              "name": "Government",
+              "messages": []
+            }
+          ]
+        },
+        {
+          "name": "The Government",
+          "threads": [
+            {
+              "name": "Defense Department",
+              "messages": []
+            },
+            {
+              "name": "National Council",
+              "messages": []
+            },
+            {
+              "name": "Government",
+              "messages": []
+            }
+          ]
+        },
+        {
+          "name": "Other",
+          "threads": [
+            {
+              "name": "Off Topic",
+              "messages": []
+            },
+            {
+              "name": "Recruitment",
+              "messages": []
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "Group 2",
+      "iconUrl": "icon_3",
+      "threadGroups": [
+        {
+          "name": "Important",
+          "threads": [
+            {
+              "name": "Announcements",
+              "messages": []
+            },
+            {
+              "name": "Colony Chat",
+              "messages": []
+            },
+            {
+              "name": "Government",
+              "messages": []
+            }
+          ]
+        },
+        {
+          "name": "The Government",
+          "threads": [
+            {
+              "name": "Defense Department",
+              "messages": []
+            },
+            {
+              "name": "National Council",
+              "messages": []
+            },
+            {
+              "name": "Government",
+              "messages": []
+            }
+          ]
+        },
+        {
+          "name": "Other",
+          "threads": [
+            {
+              "name": "Off Topic",
+              "messages": []
+            },
+            {
+              "name": "Recruitment",
+              "messages": []
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

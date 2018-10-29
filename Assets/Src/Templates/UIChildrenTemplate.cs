@@ -9,7 +9,7 @@ namespace Src {
             : base(childTemplates, attributes) { }
         
         // This class is generally just a marker, it shouldn't do anything on it's own
-        public override Type elementType => typeof(UIChildrenTemplate);
+        public override Type elementType => typeof(UIElement);
 
         public override MetaData CreateScoped(TemplateScope inputScope) {
             throw new NotImplementedException();

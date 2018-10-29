@@ -3,6 +3,8 @@ Shader "UIForia/Default"
     Properties
     {
 
+        _MainTex ("Sprite Texture", 2D) = "white" {}
+        
         _StencilComp ("Stencil Comparison", Float) = 8
         _Stencil ("Stencil ID", Float) = 0
         _StencilOp ("Stencil Operation", Float) = 0
@@ -33,7 +35,7 @@ Shader "UIForia/Default"
             WriteMask [_StencilWriteMask]
         }
 
-        Cull Front
+        Cull Off // Front
         Lighting Off
         ZWrite On
         ZTest LEqual
@@ -55,7 +57,7 @@ Shader "UIForia/Default"
             #include "UnityUI.cginc"
             #include "UIForia.cginc"
             
-            uniform sampler2D _MainTex;
+            sampler2D _MainTex;
             uniform fixed4 _Color;
             uniform float4 _ClipRect;         
             uniform float4 _Size;

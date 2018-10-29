@@ -397,10 +397,10 @@ namespace Src {
 
                     if (leftType == typeof(string) || rightType == typeof(string)) {
                         Type openType = typeof(OperatorExpression_StringConcat<,>);
-                        ReflectionUtil.TypeArray2[0] = leftType;
-                        ReflectionUtil.TypeArray2[1] = rightType;
                         leftExpression = Visit(node.left);
                         rightExpression = Visit(node.right);
+                        ReflectionUtil.TypeArray2[0] = leftType;
+                        ReflectionUtil.TypeArray2[1] = rightType;
                         ReflectionUtil.ObjectArray2[0] = leftExpression;
                         ReflectionUtil.ObjectArray2[1] = rightExpression;
 
@@ -446,15 +446,16 @@ namespace Src {
                 case OperatorType.NotEquals:
 
                     Type openEqualityType = typeof(OperatorExpression_Equality<,>);
-                    ReflectionUtil.TypeArray2[0] = node.left.GetYieldedType(context);
-                    ReflectionUtil.TypeArray2[1] = node.right.GetYieldedType(context);
+                    Type leftNodeType = node.left.GetYieldedType(context);
+                    Type rightNodeType = node.right.GetYieldedType(context);
 
                     leftExpression = Visit(node.left);
                     rightExpression = Visit(node.right);
                     ReflectionUtil.ObjectArray3[0] = node.OpType;
                     ReflectionUtil.ObjectArray3[1] = leftExpression;
                     ReflectionUtil.ObjectArray3[2] = rightExpression;
-
+                    ReflectionUtil.TypeArray2[0] = leftNodeType;
+                    ReflectionUtil.TypeArray2[1] = rightNodeType;
                     return (Expression) ReflectionUtil.CreateGenericInstanceFromOpenType(
                         openEqualityType,
                         ReflectionUtil.TypeArray2,
@@ -750,7 +751,7 @@ namespace Src {
 
             if (commonBase == null || commonBase == typeof(ValueType) || commonBase == typeof(object)) {
                 throw new Exception(
-                    "Types in ternary don't match: {right.YieldedType.Name} is not {left.YieldedType.Name}");
+                    $"Types in ternary don't match: {right.YieldedType.Name} is not {left.YieldedType.Name}");
             }
 
             if (commonBase == typeof(int)) {

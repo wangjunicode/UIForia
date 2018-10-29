@@ -72,6 +72,8 @@ namespace Src.Parsing.StyleParser {
 
             if (!string.IsNullOrEmpty(body) && !string.IsNullOrWhiteSpace(body)) {
                 sheet = ParseFromString(body);
+                sheet.id = uniqueStyleId;
+
                 s_CompiledStyles[uniqueStyleId] = sheet;
                 return sheet.GetStyleGroup(styleName);
             }
@@ -79,6 +81,7 @@ namespace Src.Parsing.StyleParser {
             if (File.Exists(Application.dataPath + "/" + uniqueStyleId)) {
                 string contents = File.ReadAllText(Application.dataPath + "/" + uniqueStyleId);
                 sheet = ParseFromString(contents);
+                sheet.id = uniqueStyleId;
                 s_CompiledStyles[uniqueStyleId] = sheet;
                 return sheet.GetStyleGroup(styleName);
             }
@@ -232,6 +235,10 @@ namespace Src.Parsing.StyleParser {
             List<StyleComponent> output = new List<StyleComponent>();
             int ptr = 0;
 
+            if (input.Length == 0) {
+                return retn;
+            }
+            
             while (ptr < input.Length) {
                 int start = ptr;
                 ptr = ReadStyleDefinition(ptr, input, output);

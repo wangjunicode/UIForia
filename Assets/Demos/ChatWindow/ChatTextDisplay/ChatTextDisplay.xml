@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="utf-8"?>
+<UITemplate>
+    
+    <Style>
+            
+        style container {
+            MinWidth = 300px;
+            PreferredHeight = 1pca;
+            FlexItemGrow = 1;
+            BackgroundColor = white;
+        }
+        
+        style chat-log {}
+        
+        style chat-input {}
+        
+    </Style>
+    
+    <Contents style="container">
+        
+        <Group style="chat-log">
+            
+        </Group>
+        
+        <Group style="chat-input">
+            
+        </Group>
+        
+    </Contents>
+    
+</UITemplate>

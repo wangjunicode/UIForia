@@ -158,10 +158,10 @@ namespace Src.Systems {
                         box.allocatedHeight = box.GetHeights(box.actualHeight).clampedSize;
                     }
 
-                    if (forceLayout || box.markedForLayout) {
+                  //  if (forceLayout || box.markedForLayout) {
                         box.RunLayout();
                         box.markedForLayout = false;
-                    }
+                   // }
 
                     depth = element.depth;
                     computedLayer = ResolveRenderLayer(element) - element.ComputedStyle.LayerOffset;
@@ -186,7 +186,7 @@ namespace Src.Systems {
                     layoutResult.ContentOffset = new Vector2(box.ContentOffsetLeft, box.ContentOffsetTop);
                     layoutResult.ActualSize = new Size(box.actualWidth, box.actualHeight);
                     layoutResult.AllocatedSize = new Size(box.allocatedWidth, box.allocatedHeight);
-                    layoutResult.ScreenPosition = current.layoutResult.screenPosition + layoutResult.localPosition;
+                    layoutResult.ScreenPosition = box.parent.element.layoutResult.screenPosition + layoutResult.localPosition;
                     layoutResult.Scale = new Vector2(box.style.TransformScaleX, box.style.TransformScaleY);
                     layoutResult.Rotation = box.style.TransformRotation;
                     layoutResult.Layer = computedLayer;
@@ -194,9 +194,20 @@ namespace Src.Systems {
 
                     Rect clipRect = new Rect(0, 0, ViewportRect.width, ViewportRect.height);
                     UIElement ptr = element.parent;
-
                     // find ancestor where layer is higher, might not be our parent
-                    while (ptr != null && ptr.layoutResult.layer > computedLayer) {
+                    
+                    // while parent is higher layer and requires layout
+                    while (ptr != null) {
+                        
+                        if (((ptr.flags & UIElementFlags.RequiresLayout) == 0)) {
+                            ptr = ptr.parent;
+                            continue;
+                        }
+
+                        if (ptr.layoutResult.layer > computedLayer) {
+                            break;
+                        }
+                        
                         ptr = ptr.parent;
                     }
 
@@ -543,10 +554,10 @@ namespace Src.Systems {
             if ((element is UITextElement)) {
                 return new TextLayoutBox(this, element);
             }
-
-            if ((element is UIImageElement)) {
-                return new ImageLayoutBox(this, element);
-            }
+//
+//            if ((element is UIImageElement)) {
+//                return new ImageLayoutBox(this, element);
+//            }
 
             switch (element.style.computedStyle.LayoutType) {
                 case LayoutType.Flex:

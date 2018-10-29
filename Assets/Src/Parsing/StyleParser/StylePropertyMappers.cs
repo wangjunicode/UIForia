@@ -49,7 +49,7 @@ namespace Src.Parsing.StyleParser {
         public class INeedToGoToBedException : Exception { }
 
         public static void MarginMapper(StyleParserContext context, string propertyName, string propertyValue) {
-            switch (propertyName) {
+            switch (propertyName.ToLower()) {
                 case "margin":
                     context.targetStyle.Margin = ParseUtil.ParseMeasurementRect(context.variables, propertyValue);
                     break;
@@ -71,7 +71,7 @@ namespace Src.Parsing.StyleParser {
         }
 
         public static void PaddingBorderMapper(StyleParserContext context, string propertyName, string propertyValue) {
-            switch (propertyName) {
+            switch (propertyName.ToLower()) {
                 case "padding":
                     context.targetStyle.Padding = ParseUtil.ParseFixedLengthRect(context.variables, propertyValue);
                     break;
@@ -266,7 +266,7 @@ namespace Src.Parsing.StyleParser {
                     context.targetStyle.TransformBehaviorX = ParseUtil.ParseTransformBehavior(context.variables, propertyValue);
                     break;
                 case "transformbehaviory":
-                    context.targetStyle.TransformBehaviorX = ParseUtil.ParseTransformBehavior(context.variables, propertyValue);
+                    context.targetStyle.TransformBehaviorY = ParseUtil.ParseTransformBehavior(context.variables, propertyValue);
                     break;
                 default:
                     throw new ParseException("Unknown border radius property: " + propertyName);
@@ -335,13 +335,13 @@ namespace Src.Parsing.StyleParser {
                 case "textcolor":
                     context.targetStyle.TextColor = ParseUtil.ParseColor(context.variables, propertyValue);
                     break;
-                case "font":
+                case "textfontasset":
                     context.targetStyle.FontAsset = ParseUtil.ParseFont(context.variables, propertyValue);
                     break;
-                case "fontstyle":
+                case "textfontstyle":
                     context.targetStyle.FontStyle = ParseUtil.ParseFontStyle(context.variables, propertyValue);
                     break;
-                case "fontsize":
+                case "textfontsize":
                     context.targetStyle.FontSize = ParseUtil.ParseInt(context.variables, propertyValue);
                     break;
                 default:

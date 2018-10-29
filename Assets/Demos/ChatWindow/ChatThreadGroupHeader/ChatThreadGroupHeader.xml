@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="utf-8"?>
+<UITemplate>
+    <Style>
+
+        style thread-group-header {
+            PreferredWidth = 1pca;
+            FlexLayoutDirection = Column;
+            FlexLayoutCrossAxisAlignment = Center;
+            PaddingTop = 12px;
+            PaddingBottom = 12px;
+        }
+
+        style thread-group-header-text {
+            TextFontSize = 18;
+            TextFontAsset = GothamNarrow-Medium SDF;
+            FlexItemGrow = 1;
+            TextColor = #898989;
+            PaddingLeft = 12px;
+        }
+        
+        style collapse {
+            PreferredWidth = 8px;
+            PreferredHeight = 10px;
+            BackgroundImage = small_chevron;
+        }
+
+        style plus {
+            PreferredWidth = 16px;
+            PreferredHeight = 16px;
+            BackgroundImage = plus_icon;
+        }
+        
+    </Style>
+    
+    <Contents style="thread-group-header">
+        <Div style="collapse"/>
+        <Text style="thread-group-header-text">{title}</Text>
+        <Div style="plus"/>
+    </Contents>
+    
+</UITemplate>

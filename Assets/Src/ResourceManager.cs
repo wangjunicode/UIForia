@@ -143,6 +143,9 @@ namespace UIForia {
 
         private static T GetResource<T>(string path, IntMap<AssetEntry<T>> map) where T : UnityEngine.Object {
             T resource;
+            if (path == null) {
+                return null;
+            }
             AssetEntry<T> pathEntry;
             int pathId = path.GetHashCode();
             if (map.TryGetValue(pathId, out pathEntry)) {

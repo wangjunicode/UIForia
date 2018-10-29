@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="utf-8"?>
+<UITemplate>
+    <Style>
+        
+        style container {
+            PreferredWidth = 1pca;
+        }
+        
+        style message-container {
+            PreferredWidth = 100%;
+            Padding = 12px;
+        }
+        
+    </Style>
+    <Contents>
+    
+        <Group>
+            
+            <Icon size="64" src="{chatMessage.sender.iconUrl}"/>
+            
+            <Group style="message-container">
+                
+                <Group style="header">
+                    <Text>Sender</Text>
+                    <Text>Timestamp</Text>
+                </Group>
+                
+                <Text>Message Contents</Text>
+                
+            </Group>
+        </Group>
+        
+    </Contents>
+    
+</UITemplate>

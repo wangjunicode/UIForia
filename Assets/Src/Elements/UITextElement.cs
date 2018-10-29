@@ -26,7 +26,7 @@ namespace Src {
 
     public class UITextElement : UIElement, IMeshProvider, IMaterialProvider {
 
-        private string text;
+        public string text;
         public TextInfo textInfo;
         private Mesh mesh;
         private Material material; // todo -- see if there is a way to do material sharing, most text can use the same materials

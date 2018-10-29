@@ -10,6 +10,7 @@ using Src.InputBindings;
 using Src.Rendering;
 using Src.StyleBindings;
 using Src.Systems;
+using UnityEngine;
 
 namespace Src {
 
@@ -92,6 +93,10 @@ namespace Src {
         }
 
         public virtual bool Compile(ParsedTemplate template) {
+            if (!(typeof(UIElement).IsAssignableFrom(elementType))) {
+                Debug.Log($"{elementType} must be a subclass of {typeof(UIElement)} in order to be used in templates");
+                return false;
+            }
             ResolveBaseStyles(template);
             CompileStyleBindings(template);
             CompileInputBindings(template);
@@ -170,19 +175,25 @@ namespace Src {
 
         protected virtual void CompilePropertyBindings(ParsedTemplate template) {
             if (attributes == null || attributes.Count == 0) return;
-          
-            propCompiler.SetContext(template.contextDefinition);
 
-            for (int i = 0; i < attributes.Count; i++) {
-                if(attributes[i].isCompiled) continue;
-                if (attributes[i].key.StartsWith("x-") || attributes[i].key == "style") {
-                    continue;
+            try {
+                propCompiler.SetContext(template.contextDefinition);
+
+                for (int i = 0; i < attributes.Count; i++) {
+                    if (attributes[i].isCompiled) continue;
+                    if (attributes[i].key.StartsWith("x-") || attributes[i].key == "style") {
+                        continue;
+                    }
+
+                    attributes[i].isCompiled = true;
+                    Binding binding = propCompiler.CompileAttribute(elementType, attributes[i]);
+                    if (binding != null) {
+                        bindingList.Add(binding);
+                    }
                 }
-                attributes[i].isCompiled = true;
-                Binding binding = propCompiler.CompileAttribute(elementType, attributes[i]);
-                if (binding != null) {
-                    bindingList.Add(binding);
-                }
+            }
+            catch (Exception e) {
+                Debug.Log(e);
             }
         }
         

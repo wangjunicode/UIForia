@@ -109,7 +109,7 @@ float2 rotate_fill(float2 fpos, float rotation) {
 // @param uv the uv coords from -0.5 to 0.5
 fixed4 fill(float2 uv, float2 size, FillSettings settings) {
     float2 fpos = uv * size;
-    
+
     #if UIFORIA_FILLTYPE_COLOR
         return settings.fillColor1;
    
@@ -119,7 +119,7 @@ fixed4 fill(float2 uv, float2 size, FillSettings settings) {
         fpos += float2(0.5, 0.5);
         fpos += settings.fillOffset;
         fpos /= settings.fillScale;
-        return tex2D(settings.fillTexture, fpos) * settings.fillColor1;
+        return tex2D(settings.fillTexture, fpos);// * settings.fillColor1;
         
     #elif defined(UIFORIA_FILLTYPE_LINEAR_GRADIENT) | defined(UIFORIA_FILLTYPE_RADIAL_GRADIENT) | defined(UIFORIA_FILLTYPE_CYLINDRICAL_GRADIENT)
         

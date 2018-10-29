@@ -151,6 +151,7 @@ namespace Src.Layout.LayoutTypes {
                 if (ptr.markedForLayout) {
                     return;
                 }
+
                 ptr.markedForLayout = true;
                 ptr.InvalidatePreferredSizeCache();
                 ptr = ptr.parent;
@@ -392,12 +393,23 @@ namespace Src.Layout.LayoutTypes {
             return cachedHeight;
         }
 
+        public static float ResolveHorizontalMargin(UIMeasurement margin) {
+            
+            switch (margin.unit) {
+                case UIMeasurementUnit.Pixel:
+                    return margin.value;
+                default:
+                    throw new NotImplementedException();
+            }
+          
+        }
+        
         public float GetPreferredWidth() {
             AnchorTarget anchorTarget;
             UIMeasurement widthMeasurement = style.PreferredWidth;
             switch (widthMeasurement.unit) {
                 case UIMeasurementUnit.Pixel:
-                    return Mathf.Max(0, widthMeasurement.value);
+                    return Mathf.Max(0, widthMeasurement.value) + ResolveHorizontalMargin(style.MarginLeft) + ResolveHorizontalMargin(style.MarginRight);
 
                 case UIMeasurementUnit.Content:
                     if (cachedPreferredWidth == -1) {

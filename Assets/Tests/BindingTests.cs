@@ -210,6 +210,33 @@ public class BindingTests {
     }
     
     [Test]
+    public void RunRepeat_ChildSetItem() {
+        string template = @"
+        <UITemplate>
+            <Contents>
+                <Repeat list='{list}' as='item'>
+                    <Group>
+                        <Text>{$item}</Text>
+                    </Group>
+                </Repeat>
+            </Contents>
+        </UITemplate>
+        ";
+        MockView view = new MockView(typeof(BindingTestThing), template);
+        view.Initialize();
+        BindingTestThing root = (BindingTestThing) view.RootElement;
+        root.list = new List<int>();
+        root.list.Add(1);
+        root.list.Add(2);
+        root.list.Add(3);
+        view.Update();
+        List<UITextElement> children = root.FindByType<UITextElement>();
+        Assert.AreEqual(3, children.Count);
+        Assert.AreEqual("1", children[0].text);
+       
+    }
+    
+    [Test]
     public void HandleMultipleNonNestedRepeats() {
         string template = @"
         <UITemplate>

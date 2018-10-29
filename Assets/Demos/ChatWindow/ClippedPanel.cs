@@ -62,15 +62,6 @@ public class ClippedPanel : UIContainerElement, IMeshProvider {
 
         if (clippedCorner == ClippedCorner.None || clipSize <= 0f) {
             mesh = MeshUtil.CreateStandardUIMesh(size, color32);
-//            s_VertexHelper.AddVert(new Vector3(0, 0), color32, new Vector2(0f, 0f));
-//            s_VertexHelper.AddVert(new Vector3(0, -size.height), color32, new Vector2(0f, 1f));
-//            s_VertexHelper.AddVert(new Vector3(size.width, -size.height), color32, new Vector2(1f, 1f));
-//            s_VertexHelper.AddVert(new Vector3(size.width, 0), color32, new Vector2(1f, 0f));
-//
-//            s_VertexHelper.AddTriangle(0, 1, 2);
-//            s_VertexHelper.AddTriangle(2, 3, 0);
-//            s_VertexHelper.FillMesh(mesh);
-//            s_VertexHelper.Clear();
             return mesh;
         }
 
@@ -119,23 +110,24 @@ public class ClippedPanel : UIContainerElement, IMeshProvider {
         v14.y =  -v14.y;
         v15.y =  -v15.y;
 
-        // todo -- compute UVs
-        s_VertexHelper.AddVert(v0, color32, new Vector2());
-        s_VertexHelper.AddVert(v1, color32, new Vector2());
-        s_VertexHelper.AddVert(v2, color32, new Vector2());
-        s_VertexHelper.AddVert(v3, color32, new Vector2());
-        s_VertexHelper.AddVert(v4, color32, new Vector2());
-        s_VertexHelper.AddVert(v5, color32, new Vector2());
-        s_VertexHelper.AddVert(v6, color32, new Vector2());
-        s_VertexHelper.AddVert(v7, color32, new Vector2());
-        s_VertexHelper.AddVert(v8, color32, new Vector2());
-        s_VertexHelper.AddVert(v9, color32, new Vector2());
-        s_VertexHelper.AddVert(v10, color32, new Vector2());
-        s_VertexHelper.AddVert(v11, color32, new Vector2());
-        s_VertexHelper.AddVert(v12, color32, new Vector2());
-        s_VertexHelper.AddVert(v13, color32, new Vector2());
-        s_VertexHelper.AddVert(v14, color32, new Vector2());
-        s_VertexHelper.AddVert(v15, color32, new Vector2());
+        float clipOverWidth = clipSize / width;
+        float clipOverHeight = clipSize / height;
+        s_VertexHelper.AddVert(v0, color32, new Vector2(0, 0));
+        s_VertexHelper.AddVert(v1, color32, new Vector2(clipOverWidth, 0));
+        s_VertexHelper.AddVert(v2, color32, new Vector2(clipOverWidth, clipOverHeight));
+        s_VertexHelper.AddVert(v3, color32, new Vector2(0, clipOverHeight));
+        s_VertexHelper.AddVert(v4, color32, new Vector2(0, 1 - clipOverHeight));
+        s_VertexHelper.AddVert(v5, color32, new Vector2(clipOverWidth, 1 - clipOverHeight));
+        s_VertexHelper.AddVert(v6, color32, new Vector2(0, 1));
+        s_VertexHelper.AddVert(v7, color32, new Vector2(clipOverWidth, 1));
+        s_VertexHelper.AddVert(v8, color32, new Vector2(1 - clipOverWidth, 1 - clipOverHeight));
+        s_VertexHelper.AddVert(v9, color32, new Vector2(1 - clipOverWidth, 1));
+        s_VertexHelper.AddVert(v10, color32, new Vector2(1, 1));
+        s_VertexHelper.AddVert(v11, color32, new Vector2(1, 1 - clipOverHeight));
+        s_VertexHelper.AddVert(v12, color32, new Vector2(1 - clipOverWidth, clipOverHeight));
+        s_VertexHelper.AddVert(v13, color32, new Vector2(1 - clipOverWidth, 0));
+        s_VertexHelper.AddVert(v14, color32, new Vector2(1, 0));
+        s_VertexHelper.AddVert(v15, color32, new Vector2(1 , clipOverHeight));
 
         // top left
         s_VertexHelper.AddTriangle(3, 2, 1);

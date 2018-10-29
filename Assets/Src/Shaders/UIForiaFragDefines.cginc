@@ -18,7 +18,7 @@
      
      #define m_GridSize UNITY_ACCESS_INSTANCED_PROP(Props, _GridAndLineSize).xy
      #define m_LineSize UNITY_ACCESS_INSTANCED_PROP(Props, _GridAndLineSize).zw
-     #define m_FillTexture sampler
+     #define m_FillTexture _MainTex
 
 #else
      

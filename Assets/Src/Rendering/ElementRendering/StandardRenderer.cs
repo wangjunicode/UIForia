@@ -19,7 +19,7 @@ namespace Src.Systems {
         public const string k_FillType_Grid = "UIFORIA_FILLTYPE_GRID";
         public const string k_FillType_Checker = "UIFORIA_FILLTYPE_CHECKER";
         public const string k_FillType_Stripes = "UIFORIA_FILLTYPE_STRIPES";
-        
+
         private static readonly int s_ColorKey;
         private static readonly int s_ClipRectKey;
         private static readonly int s_SizeKey;
@@ -27,7 +27,7 @@ namespace Src.Systems {
         private static readonly int s_BorderRadiusKey;
         private static readonly int s_BorderColorKey;
         private static readonly int s_FillOffsetScaleKey;
-        
+
         private static readonly Material s_BaseMaterial;
 
         static StandardRenderer() {
@@ -47,6 +47,7 @@ namespace Src.Systems {
                 UIElement element = data.element;
 
                 data.renderPosition = new Vector3(data.renderPosition.x, data.renderPosition.y, -data.renderPosition.z);
+
                 if (data.isMaterialProvider) {
                     data.material = ((IMaterialProvider) element).GetMaterial();
                 }
@@ -61,7 +62,7 @@ namespace Src.Systems {
                 if (data.isMeshProvider) {
                     data.mesh = ((IMeshProvider) element).GetMesh();
                 }
-                else if (data.mesh == null) {
+                else if (data.mesh == null || element.layoutResult.ActualSizeChanged) {
                     data.mesh = MeshUtil.CreateStandardUIMesh(element.layoutResult.actualSize, Color.white);
                 }
 
@@ -95,7 +96,6 @@ namespace Src.Systems {
                         break;
                     case BackgroundFillType.Gradient:
 
-                       
                         switch (style.GradientType) {
                             case GradientType.Linear:
                                 material.EnableKeyword(k_FillType_LinearGradient);

@@ -13,60 +13,8 @@ namespace Src.Layout.LayoutTypes {
             image = (UIImageElement) element;
         }
 
-//        public float PreferredWidth {
-//            get {
-//                if (image.Asset == null) return PaddingHorizontal + BorderHorizontal;
-//                if (image.useNativeSize) return PaddingHorizontal + BorderHorizontal + image.Asset.width;
-//                return PaddingHorizontal + BorderHorizontal + ResolveMinOrMaxWidth(style.PreferredWidth);
-//            }
-//        }
-//
-//        public float MinWidth {
-//            get {
-//                if (image.useNativeSize && image.Asset != null) return PaddingHorizontal + BorderHorizontal + image.Asset.width;
-//                return base.MinWidth;
-//            }
-//        }
-//
-//        public float MaxWidth {
-//            get {
-//                if (image.useNativeSize && image.Asset != null) return PaddingHorizontal + BorderHorizontal + image.Asset.width;
-//                return base.MaxWidth;
-//            }
-//        }
-
-//        public override float PreferredHeight {
-//            get {
-//                if (image.Asset == null) return base.PreferredHeight;
-//                if (image.useNativeSize) return PaddingVertical + BorderVertical + image.Asset.height;
-//                return base.PreferredHeight;
-//            }
-//        }
-
         public override void RunLayout() { }
 
-//        public override float MinHeight {
-//            get {
-//                if (image.useNativeSize && image.Asset != null) return PaddingVertical + BorderVertical + image.Asset.height;
-//                return base.MinHeight;
-//            }
-//        }
-//
-//        public override float MaxHeight {
-//            get {
-//                if (image.useNativeSize && image.Asset != null) return PaddingVertical + BorderVertical + image.Asset.height;
-//                return base.MaxHeight;
-//            }
-//        }
-
-        protected Size RunContentSizeLayout() {
-            Texture2D asset = image.Asset;
-            if (asset == null) {
-                return new Size();
-            }
-
-            return new Size(asset.width, asset.height);
-        }
 
     }
 

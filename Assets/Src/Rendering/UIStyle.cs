@@ -51,7 +51,7 @@ namespace Rendering {
         // todo    that is keyed by BitUtil.SetHighLowBits((int)propertyId, Id);
         private static readonly IntMap<StyleProperty> s_PropertyMap = new IntMap<StyleProperty>();
 
-        public int Id { get; } = NextStyleId++;
+        public int Id { get; set; } = NextStyleId++;
 
         public UIStyle() {
             m_StyleProperties = ListPool<StyleProperty>.Get();

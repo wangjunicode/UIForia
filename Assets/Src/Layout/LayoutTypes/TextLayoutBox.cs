@@ -25,7 +25,7 @@ namespace Src.Layout.LayoutTypes {
 
             ListPool<LineInfo>.Release(ref lineInfos);
             
-            return maxWidth;
+            return maxWidth + PaddingHorizontal;
         }
 
         protected override float ComputeContentHeight(float width) {
@@ -60,7 +60,7 @@ namespace Src.Layout.LayoutTypes {
 
         // todo -- when starting a new line, if the last line has spaces as the final characters, consider stripping them
 
-        private static List<LineInfo> RunLayout(TextInfo textInfo, float width) {
+        private List<LineInfo> RunLayout(TextInfo textInfo, float width) {
             float lineOffset = 0;
             SpanInfo spanInfo = textInfo.spanInfos[0];
 
@@ -74,6 +74,10 @@ namespace Src.Layout.LayoutTypes {
             float lineHeight = (font.fontInfo.LineHeight + lineGap) * baseScale;
             // todo -- might want to use an optional 'lineHeight' setting instead of just computing the line height
 
+            float paddingBorderOffset = PaddingLeft + BorderLeft;
+            currentLine.position = new Vector2(paddingBorderOffset, 0);
+            width = Mathf.Max(width - PaddingHorizontal + BorderHorizontal, 0);
+            
             for (int w = 0; w < textInfo.wordCount; w++) {
                 WordInfo currentWord = wordInfos[w];
 
@@ -81,7 +85,7 @@ namespace Src.Layout.LayoutTypes {
                     lineInfos.Add(currentLine);
                     lineOffset -= (currentLine.maxDescender + textInfo.charInfos[currentWord.startChar + currentWord.VisibleCharCount - 1].ascender + lineGap) * baseScale;
                     currentLine = new LineInfo();
-                    currentLine.position = new Vector2(currentLine.position.x, lineOffset);
+                    currentLine.position = new Vector2(paddingBorderOffset, lineOffset);
                     currentLine.wordStart = w + 1;
                     continue;
                 }
@@ -96,7 +100,7 @@ namespace Src.Layout.LayoutTypes {
                     }
 
                     currentLine = new LineInfo();
-                    currentLine.position = new Vector2(0, lineOffset);
+                    currentLine.position = new Vector2(paddingBorderOffset, lineOffset);
                     currentLine.wordStart = w;
                     currentLine.wordCount = 1;
                     currentLine.maxAscender = currentWord.ascender;
@@ -107,7 +111,7 @@ namespace Src.Layout.LayoutTypes {
                     lineOffset -= -currentLine.maxDescender + textInfo.charInfos[currentWord.startChar + currentWord.VisibleCharCount - 1].ascender + (lineGap) * baseScale;
                     currentLine = new LineInfo();
                     currentLine.wordStart = w + 1;
-                    currentLine.position = new Vector2(currentLine.position.x, lineOffset);
+                    currentLine.position = new Vector2(paddingBorderOffset, lineOffset);
                 }
 
                 else if (currentLine.width + currentWord.size.x > width + 0.01f) {
@@ -124,7 +128,7 @@ namespace Src.Layout.LayoutTypes {
                         lineOffset -= -currentLine.maxDescender + textInfo.charInfos[currentWord.startChar + currentWord.VisibleCharCount - 1].ascender + (lineGap) * baseScale;
 
                         currentLine = new LineInfo();
-                        currentLine.position = new Vector2(currentLine.position.x, lineOffset);
+                        currentLine.position = new Vector2(paddingBorderOffset, lineOffset);
                         currentLine.wordStart = w + 1;
                         continue;
                     }
@@ -132,7 +136,7 @@ namespace Src.Layout.LayoutTypes {
                     lineInfos.Add(currentLine);
                     lineOffset -= -currentLine.maxDescender + textInfo.charInfos[currentWord.startChar + currentWord.VisibleCharCount - 1].ascender + (lineGap) * baseScale;
                     currentLine = new LineInfo();
-                    currentLine.position = new Vector2(currentLine.position.x, lineOffset);
+                    currentLine.position = new Vector2(paddingBorderOffset, lineOffset);
                     currentLine.wordStart = w;
                     currentLine.wordCount = 1;
                     currentLine.width = currentWord.size.x;

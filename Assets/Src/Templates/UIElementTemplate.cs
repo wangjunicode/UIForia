@@ -157,14 +157,10 @@ namespace Src {
 
         private void AssignContext(UIElement element, UITemplateContext context) {
             element.templateContext = context;
-
+                
             if (element.ownChildren == null) return;
 
             for (int i = 0; i < element.ownChildren.Length; i++) {
-                if (element.ownChildren[i] == element) {
-                    Debug.Log("BAAAD");
-                    continue;
-                }
                 AssignContext(element.ownChildren[i], context);
             }
         }

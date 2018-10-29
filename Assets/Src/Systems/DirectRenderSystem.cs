@@ -13,13 +13,13 @@ namespace Src.Systems {
         private readonly IStyleSystem m_StyleSystem;
 
         private readonly LightList<UIElement> m_ToInitialize;
-        
-        private readonly LightList<RenderData> m_WillRenderList; 
+
+        private readonly LightList<RenderData> m_WillRenderList;
         private readonly LightList<RenderData> m_RenderDataList;
-        
+
         private readonly Camera m_Camera;
         private readonly List<VirtualScrollbar> m_Scrollbars;
-        
+
         private static readonly RenderZIndexComparerAscending s_ZIndexComparer = new RenderZIndexComparerAscending();
 
         public DirectRenderSystem(Camera camera, ILayoutSystem layoutSystem, IStyleSystem styleSystem) {
@@ -32,28 +32,27 @@ namespace Src.Systems {
             layoutSystem.onCreateVirtualScrollbar += HandleScrollbarCreated;
             layoutSystem.onDestroyVirtualScrollbar += HandleScrollbarDestroyed;
         }
-       
+
         private void HandleScrollbarCreated(VirtualScrollbar scrollbar) {
             m_ToInitialize.Add(scrollbar);
             m_ToInitialize.Add(scrollbar.handle);
             m_Scrollbars.Add(scrollbar);
         }
-        
+
         private void HandleScrollbarDestroyed(VirtualScrollbar scrollbar) {
             m_ToInitialize.Remove(scrollbar);
             m_ToInitialize.Remove(scrollbar.handle);
             m_Scrollbars.Remove(scrollbar);
         }
-        
+
         private void InitializeRenderables() {
-            
             if (m_ToInitialize.Count == 0) return;
-            
+
             m_RenderDataList.EnsureAdditionalCapacity(m_ToInitialize.Count);
             m_WillRenderList.EnsureAdditionalCapacity(m_ToInitialize.Count);
-            
+
             UIElement[] list = m_ToInitialize.List;
-            
+
             for (int i = 0; i < m_ToInitialize.Count; i++) {
                 UIElement element = list[i];
 
@@ -62,7 +61,6 @@ namespace Src.Systems {
                 }
 
                 m_RenderDataList.AddUnchecked(new RenderData(element));
-                
             }
 
             m_ToInitialize.Clear();
@@ -90,8 +88,10 @@ namespace Src.Systems {
 
 
             m_WillRenderList.Clear();
+            m_WillRenderList.EnsureCapacity(m_RenderDataList.Count);
+
             RenderData[] renderList = m_RenderDataList.List;
-            
+
             for (int i = 0; i < m_RenderDataList.Count; i++) {
                 RenderData data = renderList[i];
                 LayoutResult layoutResult = data.element.layoutResult;
@@ -135,16 +135,23 @@ namespace Src.Systems {
 
                 data.clipVector = new Vector4(clipX, clipY, clipW, clipH);
                 m_WillRenderList.AddUnchecked(data);
-                
             }
 
             if (m_WillRenderList.Count == 0) {
                 return;
             }
-            
+
             ComputePositions(m_WillRenderList);
-            
-            m_WillRenderList.Sort((a, b) => a.Renderer.id > b.Renderer.id ? 1 : -1);
+
+            m_WillRenderList.Sort((a, b) => {
+                int idA = a.Renderer.id;
+                int idB = b.Renderer.id;
+                if (idA == idB) {
+                    return 0;
+                }
+
+                return idA > idB ? 1 : -1;
+            });
 
             int start = 0;
             RenderData[] willRender = m_WillRenderList.List;
@@ -157,9 +164,9 @@ namespace Src.Systems {
                     start = i;
                 }
             }
+
             renderer.Render(willRender, start, m_WillRenderList.Count, origin, m_Camera);
             m_WillRenderList.Clear();
-
         }
 
         private static Rect RectIntersect(Rect a, Rect b) {
@@ -179,7 +186,15 @@ namespace Src.Systems {
                 return;
             }
 
-            renderList.Sort((a, b) => (a.element.layoutResult.layer < b.element.layoutResult.layer) ? 1 : -1);
+            renderList.Sort((a, b) => {
+                int layerA = a.element.layoutResult.layer;
+                int layerB = b.element.layoutResult.layer;
+                if (layerA == layerB) {
+                    return 0;
+                }
+
+                return (layerA < layerB) ? 1 : -1;
+            });
 
             int layerStart = 0;
             int currentLayer = renderList[0].element.layoutResult.layer;
@@ -199,7 +214,6 @@ namespace Src.Systems {
                 Vector2 screenPosition = list[i].element.layoutResult.screenPosition;
                 list[i].renderPosition = new Vector3(screenPosition.x, -screenPosition.y, z--);
             }
-            
         }
 
         //sort each group by z-index, use depth index to resolve ties, use origin layer if still tied
@@ -236,9 +250,7 @@ namespace Src.Systems {
             this.m_StyleSystem.onStylePropertyChanged += HandleStylePropertyChanged;
         }
 
-        private void HandleStylePropertyChanged(UIElement element, StyleProperty property) {
-
-        }
+        private void HandleStylePropertyChanged(UIElement element, StyleProperty property) { }
 
         public void OnReset() {
             m_WillRenderList.Clear();
@@ -247,16 +259,53 @@ namespace Src.Systems {
             m_StyleSystem.onStylePropertyChanged -= HandleStylePropertyChanged;
         }
 
-        public void OnElementEnabled(UIElement element) { }
+        public void OnElementEnabled(UIElement element) {
+            Stack<UIElement> stack = StackPool<UIElement>.Get();
+            stack.Push(element);
+            while (stack.Count > 0) {
+                UIElement current = stack.Pop();
+
+                m_ToInitialize.Add(element);
+
+                for (int i = 0; i < current.ownChildren.Length; i++) {
+                    stack.Push(current.ownChildren[i]);
+                }
+            }
+
+            StackPool<UIElement>.Release(stack);
+        }
 
         public void OnElementDisabled(UIElement element) {
-            // todo -- remove from render list
-            // remember to recurse, maybe rename to OnElementHierarchyDisabled
+            Stack<UIElement> stack = StackPool<UIElement>.Get();
+            stack.Push(element);
+            while (stack.Count > 0) {
+                UIElement current = stack.Pop();
+
+                int idx = m_RenderDataList.FindIndex(current, (item, el) => item.element == el);
+
+                if (idx != -1) {
+                    RenderData data = m_RenderDataList[idx];
+                    data.mesh = null;
+                    data.element = null;
+                    data.material = null;
+                    m_RenderDataList.RemoveAt(idx);
+                }
+                else {
+                    m_ToInitialize.Remove(element);
+                }
+
+                if (current.ownChildren != null) {
+                    for (int i = 0; i < current.ownChildren.Length; i++) {
+                        stack.Push(current.ownChildren[i]);
+                    }
+                }
+            }
+
+            StackPool<UIElement>.Release(stack);
         }
 
         public void OnElementDestroyed(UIElement element) {
-            // todo -- remove from render list
-            // remember to recurse, maybe rename to OnElementHierarchyDestroyed
+            OnElementDisabled(element);
         }
 
         public void OnElementCreatedFromTemplate(MetaData creationData) {
@@ -268,4 +317,4 @@ namespace Src.Systems {
 
     }
 
-}  
+}

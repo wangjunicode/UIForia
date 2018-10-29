@@ -257,6 +257,7 @@ namespace Src.Layout.LayoutTypes {
 
             Array.Sort(heights, 0, children.Count);
 
+            float paddingTop = PaddingTop + BorderTop;
             if (tracks.Count > 1) {
                 for (int i = 0; i < tracks.Count; i++) {
                     FlexTrack track = tracks[i];
@@ -269,7 +270,7 @@ namespace Src.Layout.LayoutTypes {
                         }
                     }
 
-                    trackCrossAxisStart = PositionCrossAxisColumn(trackCrossAxisStart, track, targetHeight);
+                    trackCrossAxisStart = PositionCrossAxisColumn(trackCrossAxisStart, paddingTop, track, targetHeight);
 
                     for (int j = track.startItem; j < track.startItem + track.itemCount; j++) {
                         children[widths[j].childIndex].SetAllocatedRect(
@@ -284,7 +285,7 @@ namespace Src.Layout.LayoutTypes {
             else {
                 FlexTrack track = tracks[0];
 
-                trackCrossAxisStart = PositionCrossAxisColumn(trackCrossAxisStart, track, allocatedHeight - PaddingVertical - BorderVertical);
+                trackCrossAxisStart = PositionCrossAxisColumn(trackCrossAxisStart, paddingTop, track, allocatedHeight - PaddingVertical - BorderVertical);
 
                 for (int j = track.startItem; j < track.startItem + track.itemCount; j++) {
                     children[widths[j].childIndex].SetAllocatedRect(
@@ -324,6 +325,7 @@ namespace Src.Layout.LayoutTypes {
                 }
             }
 
+            float paddingBorderLeft = PaddingLeft + BorderLeft;
             float adjustedWidth = allocatedWidth - PaddingHorizontal - BorderHorizontal;
             float adjustedHeight = allocatedHeight - PaddingVertical - BorderVertical;
             float paddingBorderTop = PaddingTop + BorderTop;
@@ -356,7 +358,7 @@ namespace Src.Layout.LayoutTypes {
                 }
 
                 AlignMainAxis(track, heights, style.FlexLayoutMainAxisAlignment, paddingBorderTop);
-                trackCrossAxisStart = PositionCrossAxisRow(trackCrossAxisStart, track, tracks.Count > 1 ? track.crossSize : adjustedWidth);
+                trackCrossAxisStart = PositionCrossAxisRow(trackCrossAxisStart, paddingBorderLeft, track, tracks.Count > 1 ? track.crossSize : adjustedWidth);
 
                 for (int j = track.startItem; j < track.startItem + track.itemCount; j++) {
                     children[widths[j].childIndex].SetAllocatedXAndWidth(widths[j].axisStart, widths[j].outputSize);
@@ -637,8 +639,9 @@ namespace Src.Layout.LayoutTypes {
             ArrayPool<float>.Release(ref tmpHeights);
         }
 
-        private float PositionCrossAxisRow(float axisOffset, FlexTrack track, float targetSize) {
+        private float PositionCrossAxisRow(float axisOffset, float padding, FlexTrack track, float targetSize) {
             float crossSize = 0;
+            axisOffset += padding;
             for (int i = track.startItem; i < track.startItem + track.itemCount; i++) {
                 switch (widths[i].crossAxisAlignment) {
                     case CrossAxisAlignment.Center:
@@ -669,8 +672,9 @@ namespace Src.Layout.LayoutTypes {
             return axisOffset + crossSize;
         }
 
-        private float PositionCrossAxisColumn(float axisOffset, FlexTrack track, float targetSize) {
+        private float PositionCrossAxisColumn(float axisOffset, float paddingTop, FlexTrack track, float targetSize) {
             float maxHeight = 0;
+            axisOffset += paddingTop;
             for (int i = track.startItem; i < track.startItem + track.itemCount; i++) {
                 switch (heights[i].crossAxisAlignment) {
                     case CrossAxisAlignment.Center:

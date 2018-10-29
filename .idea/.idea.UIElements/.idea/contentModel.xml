@@ -1,10 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project version="4">
   <component name="ContentModelStore">
-    <e p="C:\Users\matth\.Rider2018.2\config\extensions" t="IncludeRecursive" />
-    <e p="C:\Users\matth\.Rider2018.2\system\extResources" t="IncludeRecursive" />
-    <e p="C:\Users\matth\.Rider2018.2\system\resharper-host\local\Transient\ReSharperHost\v182\SolutionCaches\_UIElements.-1987582547.00" t="ExcludeRecursive" />
-    <e p="C:\Users\matth\RiderProjects\UIElements" t="IncludeRecursive">
+    <e p="C:\Seed\UIElements" t="IncludeRecursive">
       <e p="_DemoAsmDef.csproj" t="IncludeRecursive" />
       <e p="Assembly-CSharp-Editor.csproj" t="IncludeRecursive" />
       <e p="Assets" t="Include">
@@ -13,13 +10,51 @@
           <e p="AddChatButton.xml" t="Include" />
           <e p="ChatData.cs" t="Include" />
           <e p="ChatGroup.cs" t="Include" />
+          <e p="ChatGroupIcon.cs" t="Include" />
           <e p="ChatGroupIcon.xml" t="Include" />
+          <e p="ChatThreadGroup.cs" t="Include" />
           <e p="ChatWindow" t="Include">
+            <e p="ChatGroupDisplay" t="Include">
+              <e p="ChatGroupDisplay.cs" t="Include" />
+              <e p="ChatGroupDisplay.xml" t="Include" />
+            </e>
+            <e p="ChatGroupRosterDisplay" t="Include">
+              <e p="ChatGroupRosterDisplay.cs" t="Include" />
+              <e p="ChatGroupRosterDisplay.xml" t="Include" />
+            </e>
+            <e p="ChatMessage.cs" t="Include" />
+            <e p="ChatMessageDisplay" t="Include">
+              <e p="ChatMessageDisplay.cs" t="Include" />
+              <e p="ChatMessageDisplay.xml" t="Include" />
+            </e>
+            <e p="ChatPanel" t="Include">
+              <e p="ChatPanel.cs" t="Include" />
+              <e p="ChatPanel.xml" t="Include" />
+            </e>
+            <e p="ChatTextDisplay" t="Include">
+              <e p="ChatTextDisplay.cs" t="Include" />
+              <e p="ChatTextDisplay.xml" t="Include" />
+            </e>
+            <e p="ChatThread.cs" t="Include" />
+            <e p="ChatThreadGroupDisplay" t="Include">
+              <e p="ChatThreadGroupDisplay.cs" t="Include" />
+              <e p="ChatThreadGroupDisplay.xml" t="Include" />
+            </e>
+            <e p="ChatThreadGroupHeader" t="Include">
+              <e p="ChatThreadGroupHeader.cs" t="Include" />
+              <e p="ChatThreadGroupHeader.xml" t="Include" />
+            </e>
+            <e p="ChatThreadList" t="Include">
+              <e p="ChatThreadList.cs" t="Include" />
+              <e p="ChatThreadList.xml" t="Include" />
+            </e>
             <e p="ChatWindow.cs" t="Include" />
             <e p="ChatWindow.xml" t="Include" />
             <e p="ChatWindow_Styles.cs" t="Include" />
             <e p="ClippedPanel.cs" t="Include" />
-            <e p="Icon.cs" t="Include" />
+            <e p="ExpandableList" t="Include">
+              <e p="ExpandableList.cs" t="Include" />
+            </e>
           </e>
           <e p="DirectMessageListEntry.cs" t="Include" />
           <e p="SeedUIElements.cs" t="Include" />
@@ -589,5 +624,8 @@
       <e p="TestAsm.csproj" t="IncludeRecursive" />
       <e p="UIElements.sln" t="IncludeFlat" />
     </e>
+    <e p="C:\Users\Matt\.Rider2018.2\config\extensions" t="IncludeRecursive" />
+    <e p="C:\Users\Matt\.Rider2018.2\system\extResources" t="IncludeRecursive" />
+    <e p="C:\Users\Matt\.Rider2018.2\system\resharper-host\local\Transient\ReSharperHost\v182\SolutionCaches\_UIElements.1439856042.00" t="ExcludeRecursive" />
   </component>
 </project>

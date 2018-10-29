@@ -55,6 +55,8 @@ Shader "UIForia/Instanced"
             #include "UnityUI.cginc"
             #include "UIForia.cginc"
                         
+            uniform sampler2D _MainTex;
+
             UNITY_INSTANCING_BUFFER_START(Props)
             UNITY_DEFINE_INSTANCED_PROP(fixed4, _PrimaryColor) 
             UNITY_DEFINE_INSTANCED_PROP(fixed4, _SecondaryColor) 
@@ -67,7 +69,6 @@ Shader "UIForia/Instanced"
             UNITY_DEFINE_INSTANCED_PROP(float4, _GridAndLineSize) 
             UNITY_INSTANCING_BUFFER_END(Props)
             
-            sampler2D sampler;
             
             struct appdata_t {
                 float4 vertex   : POSITION;

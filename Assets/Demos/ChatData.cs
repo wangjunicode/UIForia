@@ -1,18 +1,13 @@
-namespace Src {
+using System;
+using System.Collections.Generic;
 
+namespace Demo {
+
+    [Serializable]
     public class ChatData {
 
-        public string name;
-        public string iconUrl;
-        public int unreadCount;
-        public bool activityStatus;
+        public List<ChatGroup> chatGroups;
 
-        public ChatData(string name, string iconUrl, bool isActive, int unreadCount) {
-            this.name = name;
-            this.iconUrl = iconUrl;
-            this.activityStatus = isActive;
-            this.unreadCount = unreadCount;
-        }
     }
 
 }

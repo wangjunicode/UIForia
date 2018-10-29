@@ -4,55 +4,19 @@
     <Style>
         style container {
             FlexLayoutDirection = Row;
-            FlexLayoutMainAxisAlignment = Start;
             PreferredWidth = 800px;
-            PreferredHeight = 500px;
-            BackgroundColor = white;
+            PreferredHeight = 864px;
+            <!--BackgroundColor = white;-->
             OverflowY = Scroll;
         }
-        
-        style div1 {
-            PreferredWidth = 200px;
-            PreferredHeight = 200px;
-            BackgroundImage = icon_1;
-        }
 
-        style div2 {
-            PreferredWidth = 200px;
-            PreferredHeight = 200px;
-            BackgroundImage = icon_1;
-            LayoutBehavior = Ignored;
-            TransformPositionX = 100px;
-            TransformPositionY = 100px;
-        }
-        
-        style div3 {
-            PreferredWidth = 100%;
-            PreferredHeight = 64px;
-            BackgroundColor = red;
-        }
-        
-        style rightbar {
-            PreferredWidth = 200px;
-            PreferredHeight = 200px;
-            BackgroundColor = black;
-        }
 
     </Style>
 
-    <Import value="ClippedPanel+ClippedCorner" as="ClippedCorner"/>
 
     <Contents style="container">
-        
-        <!--<Div style="div2" style.backgroundColor="white">-->
-            <!--<Div style="div3"/>-->
-        <!--</Div>-->
-        <!---->
-        <!--<Div style="div1" style.backgroundColor="green"/>-->
-       
-        <ClippedPanel style="rightbar" clippedCorner="{@ClippedCorner.TopLeft}">
-            
-        </ClippedPanel>
+
+        <ChatPanel selectedGroupIdx="{selectedChatGroup}" chatData="{chatData}"/>
         
     </Contents>
 

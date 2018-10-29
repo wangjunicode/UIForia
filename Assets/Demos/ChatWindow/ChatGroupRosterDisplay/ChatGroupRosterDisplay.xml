@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="utf-8"?>
+<UITemplate>
+    
+    <Import value="ClippedPanel+ClippedCorner" as="ClippedCorner"/>
+    
+    <Style>
+        
+        style container {
+            PreferredWidth = 300px;
+            PreferredHeight = 1pca;
+        }
+        
+        style roster-container {
+            PreferredWidth = 100%;
+            PreferredHeight = 100%;
+            BackgroundColor = #F2F2F2;
+        }
+        
+    </Style>
+    
+    <Contents style="container">
+            
+        <ClippedPanel style="roster-container" clipSize="30f" clippedCorner="{@ClippedCorner.BottomRight}">
+            
+        </ClippedPanel>
+        
+    </Contents>
+    
+</UITemplate>

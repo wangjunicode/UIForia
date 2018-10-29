@@ -69,10 +69,10 @@ namespace Rendering {
         public const float TransformScaleY = 1;
         public const float TransformRotation = 0;
 
-        public static readonly UIFixedLength AnchorTop = 0f;
-        public static readonly UIFixedLength AnchorRight = 1f;
-        public static readonly UIFixedLength AnchorBottom = 1f;
-        public static readonly UIFixedLength AnchorLeft = 0f;
+        public static readonly UIFixedLength AnchorTop = new UIFixedLength(0f, UIFixedUnit.Percent);
+        public static readonly UIFixedLength AnchorRight = new UIFixedLength(1f, UIFixedUnit.Percent);
+        public static readonly UIFixedLength AnchorBottom = new UIFixedLength(1f, UIFixedUnit.Percent);
+        public static readonly UIFixedLength AnchorLeft = new UIFixedLength(0f, UIFixedUnit.Percent);
         public const AnchorTarget AnchorTarget = Rendering.AnchorTarget.Parent;
         
         public static readonly LayoutType LayoutType = LayoutType.Flex;

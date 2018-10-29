@@ -87,6 +87,10 @@ namespace Src.Compilers {
             ReflectionUtil.TypeArray2[0] = targetType;
             ReflectionUtil.TypeArray2[1] = fieldInfo.FieldType;
 
+            if (!fieldInfo.FieldType.IsAssignableFrom(expression.YieldedType)) {
+                UnityEngine.Debug.Log($"Error compiling binding: {attrKey}={attrValue}, Type {fieldInfo.FieldType} is not assignable from {expression.YieldedType}");
+                return null;
+            }
             Dictionary<string, LightList<object>> actionMap = null;
             if (!m_TypeMap.ContainsKey(targetType)) {
                 MethodInfo[] methods = targetType.GetMethods(ReflectionUtil.InstanceBindFlags);

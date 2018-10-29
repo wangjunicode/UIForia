@@ -111,7 +111,9 @@ namespace Src {
                 isLiteralExpression = true;
                 return ParseLoop(ParseLiteralExpressionOperand);
             }
-
+            else {
+                isLiteralExpression = false;
+            }
             tokenStream.Advance();
 
             if (tokenStream.Last != TokenType.ExpressionClose) {

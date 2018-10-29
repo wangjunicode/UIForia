@@ -3,8 +3,8 @@
     // texcoord origin is bottom left, invert to match
     float2 p = float2(IN.texcoord.x, 1 - IN.texcoord.y);
     float4 clipRect = m_ClipRect;
-    return m_FillColor;
-    //clip((step(clipRect.xy, p) * step(p, clipRect.zw)) - 0.01);
+
+    clip((step(clipRect.xy, p) * step(p, clipRect.zw)) - 0.01);
     
     float blur = 1.414;
     float2 size = m_Size;
@@ -67,7 +67,7 @@
     
 #endif
 
-   // clip(color.a - 0.001);
+    clip(color.a - 0.001);
     
     color.rgb *= color.a;
-    return fillSettings.fillColor1;
+    return color;

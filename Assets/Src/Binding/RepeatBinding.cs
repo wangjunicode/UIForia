@@ -32,9 +32,17 @@ public class RepeatBindingNode<T, U> : RepeatBindingNode where T : class, IList<
 
         previousReference.Clear();
         previousReference = null;
-        
-        context.view.DestroyChildren(element);
 
+        context.view.DestroyChildren(element);
+    }
+
+    private static void AssignTemplateParents(UIElement parent) {
+        if (parent.templateChildren != null) {
+            for (int i = 0; i < parent.templateChildren.Length; i++) {
+                parent.templateChildren[i].templateParent = parent;
+                AssignTemplateParents(parent.templateChildren[i]);
+            }
+        }
     }
 
     public override void Validate() {
@@ -49,31 +57,31 @@ public class RepeatBindingNode<T, U> : RepeatBindingNode where T : class, IList<
             previousReference = new T();
             element.ownChildren = ArrayPool<UIElement>.GetExactSize(list.Count);
             element.templateChildren = ArrayPool<UIElement>.GetExactSize(list.Count);
-            
+
             for (int i = 0; i < list.Count; i++) {
                 previousReference.Add(list[i]);
                 MetaData newItem = template.CreateScoped(scope);
-                
+
                 newItem.element.parent = element;
                 newItem.element.templateParent = element;
-                
+
                 element.ownChildren[i] = newItem.element;
                 element.templateChildren[i] = newItem.element;
-                
                 context.view.CreateElementFromTemplate(newItem, element);
             }
 
+            AssignTemplateParents(element);
         }
         else if (list.Count > previousReference.Count) {
             UIElement[] oldChildren = element.ownChildren;
             UIElement[] oldTemplateChildren = element.templateChildren;
-            
+
             UIElement[] ownChildren = ArrayPool<UIElement>.GetExactSize(list.Count);
             UIElement[] templateChildren = ArrayPool<UIElement>.GetExactSize(list.Count);
-            
+
             element.ownChildren = ownChildren;
             element.templateChildren = templateChildren;
-            
+
             for (int i = 0; i < oldChildren.Length; i++) {
                 ownChildren[i] = oldChildren[i];
                 templateChildren[i] = oldChildren[i];
@@ -81,26 +89,26 @@ public class RepeatBindingNode<T, U> : RepeatBindingNode where T : class, IList<
 
             int previousCount = previousReference.Count;
             int diff = list.Count - previousCount;
-            
+
             for (int i = 0; i < diff; i++) {
                 previousReference.Add(list[previousCount + i]);
                 MetaData newItem = template.CreateScoped(scope);
-                
+
                 newItem.element.parent = element;
                 newItem.element.templateParent = element;
-                
+
                 ownChildren[previousCount + i] = newItem.element;
                 templateChildren[previousCount + i] = newItem.element;
                 context.view.CreateElementFromTemplate(newItem, element);
             }
-            
+
+            AssignTemplateParents(element);
             ArrayPool<UIElement>.Release(ref oldChildren);
             ArrayPool<UIElement>.Release(ref oldTemplateChildren);
         }
         else if (previousReference.Count > list.Count) {
-
             // todo -- this is potentially way faster w/ a DestroyChildren(start, end) method
-            
+
             int diff = previousReference.Count - list.Count;
             for (int i = 0; i < diff; i++) {
                 int index = previousReference.Count - 1;
@@ -115,7 +123,7 @@ public class RepeatBindingNode<T, U> : RepeatBindingNode where T : class, IList<
             context.SetContextValue(element.ownChildren[i], itemAlias, list[i]);
             context.SetContextValue(element.ownChildren[i], indexAlias, i);
         }
-        
+
         context.SetContextValue(element, lengthAlias, previousReference.Count);
     }
 
@@ -135,7 +143,6 @@ public class RepeatBindingNode<T, U> : RepeatBindingNode where T : class, IList<
         for (int i = 0; i < children.Length; i++) {
             children[i].item.OnUpdate(children[i].children);
         }
-
     }
 
 }

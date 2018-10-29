@@ -173,7 +173,12 @@ namespace Src {
                 if (styleGroups[i].alias == alias) {
                     return styleGroups[i];
                 }
-            }    
+            }
+
+            if (alias == StyleDefinition.k_EmptyAliasName) {
+                throw new UIForia.ParseException("Unable to find a default style group");   
+            }
+            
             throw new UIForia.ParseException("Unable to find a style with the alias: " + alias);
         }
         

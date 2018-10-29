@@ -22,7 +22,7 @@ namespace Src {
         public UIRepeatTemplate(List<UITemplate> childTemplates, List<AttributeDefinition> attributes = null)
             : base(childTemplates, attributes) { }
 
-        public override Type elementType => typeof(UIRepeatTemplate);
+        public override Type elementType => typeof(UIRepeatElement);
 
         public override MetaData CreateScoped(TemplateScope inputScope) {
             UIRepeatElement instance = new UIRepeatElement(childTemplates[0], inputScope);

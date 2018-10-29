@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="utf-8"?>
+<UITemplate>
+    
+    <Style>
+        
+        style container {
+            PreferredWidth = 1pca;
+            PreferredHeight = 1cnt;
+            BackgroundColor = #F2F2F2;
+        }
+        
+        style thread-container {
+            PreferredWidth = 100%;
+            Padding = 8px, 36px;
+        
+            [hover] {
+                BackgroundColor = #CCCCCC;
+            }            
+        }
+        
+        style thread-name {
+            TextFontSize = 14;
+            TextFontAsset = Gotham-Medium SDF;
+            PreferredWidth = 100%;
+        }
+        
+    </Style>
+    
+    <Contents style="container">
+        
+        <ChatThreadGroupHeader title="{threadGroup.name}"/>
+
+        <Repeat list="{threadGroup.threads}">
+            
+            <Div style="thread-container">
+                <Text style="thread-name">{$item.name}</Text>
+            </Div>
+        
+        </Repeat>
+
+
+    </Contents>
+    
+</UITemplate>

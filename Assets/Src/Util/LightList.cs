@@ -48,7 +48,7 @@ namespace Src.Util {
         public bool Remove(T item) {
             for (int i = 0; i < size; i++) {
                 if (list[i].Equals(item)) {
-                    for (int j = i; j < size; j++) {
+                    for (int j = i; j < size - 1; j++) {
                         list[j] = list[j + 1];
                     }
 
@@ -90,6 +90,47 @@ namespace Src.Util {
             size--;
         }
 
+        public int FindIndex(Predicate<T> fn) {
+            for (int i = 0; i < size; i++) {
+                if (fn(list[i])) {
+                    return i;
+                }
+            }
+
+            return -1;
+        }
+        
+        public int FindIndex<U>(U closureArg, Func<T, U, bool> fn) {
+            for (int i = 0; i < size; i++) {
+                if (fn(list[i], closureArg)) {
+                    return i;
+                }
+            }
+
+            return -1;
+        }
+
+        public T Find(Predicate<T> fn) {
+            for (int i = 0; i < size; i++) {
+                if (fn(list[i])) {
+                    return list[i];
+                }
+            }
+
+            return default(T);
+        }
+        
+        public T Find<U>(U closureArg, Func<T, U, bool> fn) {
+            for (int i = 0; i < size; i++) {
+                if (fn(list[i], closureArg)) {
+                    return list[i];
+                }
+            }
+
+            return default(T);
+        }
+
+        
         public T this[int index] {
             get { return list[index]; }
             set { list[index] = value; }

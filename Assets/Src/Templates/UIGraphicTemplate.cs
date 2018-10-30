@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using Src.Elements;
+using Src.Util;
 
 namespace Src {
 
@@ -11,7 +12,10 @@ namespace Src {
         public override Type elementType => typeof(UIGraphicElement);
         
         public override MetaData CreateScoped(TemplateScope inputScope) {
-            return GetCreationData(new UIGraphicElement(), inputScope.context);
+            UIGraphicElement graphic = new UIGraphicElement();
+            graphic.ownChildren = ArrayPool<UIElement>.Empty;
+            graphic.templateChildren = ArrayPool<UIElement>.Empty;
+            return GetCreationData(graphic, inputScope.context);
         }
 
     }

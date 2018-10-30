@@ -53,7 +53,9 @@ namespace Src.Util {
 
         public static int ProcessWrap(string input, bool collapseSpaceAndTab, bool preserveNewLine, ref char[] buffer, TextTransform textTransform) {
             bool collapsing = collapseSpaceAndTab;
-
+            
+            input = input ?? string.Empty;
+            
             if (buffer == null) {
                 buffer = ArrayPool<char>.GetMinSize(input.Length);
             }

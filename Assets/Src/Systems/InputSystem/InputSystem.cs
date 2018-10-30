@@ -93,19 +93,20 @@ public abstract partial class InputSystem : IInputSystem, IInputProvider {
             }
 
             IFocusable focusable = (IFocusable) m_FocusedElement;
+            m_FocusedElement.style.ExitState(StyleState.Focused);
             focusable.Blur();
         }
 
-        // todo -- use this EventSystem.current.SetSelectedGameObject(gameObject, eventData);
-
         m_FocusedElement = (UIElement) target;
         target.Focus();
+        m_FocusedElement.style.EnterState(StyleState.Focused);
         return true;
     }
 
     public void ReleaseFocus(IFocusable target) {
         if (m_FocusedElement == (UIElement) target) {
             IFocusable focusable = (IFocusable) m_FocusedElement;
+            m_FocusedElement.style.ExitState(StyleState.Focused);
             focusable.Blur();
             // todo -- if focus handlers added via template invoke them
             m_FocusedElement = null;

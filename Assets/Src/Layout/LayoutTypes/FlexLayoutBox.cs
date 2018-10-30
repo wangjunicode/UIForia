@@ -718,8 +718,8 @@ namespace Src.Layout.LayoutTypes {
                     case MainAxisAlignment.Start:
                         break;
                     case MainAxisAlignment.Center:
-                        mainAxisOffset *= 0.5f;
-                        offset = track.remainingSpace * 0.5f;
+                        mainAxisOffset *= 0.5f; //todo seems wrong to add this twice
+                        offset = mainAxisOffset + track.remainingSpace * 0.5f;
                         break;
                     case MainAxisAlignment.End:
                         offset = track.remainingSpace;

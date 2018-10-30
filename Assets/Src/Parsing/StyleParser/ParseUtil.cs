@@ -133,7 +133,7 @@ namespace Src.Parsing.StyleParser {
         }
 
         public static bool IsIdentifierCharacter(char character) {
-            return !char.IsWhiteSpace(character) && (char.IsLetterOrDigit(character) || character== '-' || character == '_');
+            return !char.IsWhiteSpace(character) && (char.IsLetterOrDigit(character) || character == '-' || character == '_');
         }
 
         public static int ConsumeWhiteSpace(int start, string input) {
@@ -271,11 +271,11 @@ namespace Src.Parsing.StyleParser {
             if (TryReadCharacters(input, "%", ref ptr)) {
                 return UIMeasurementUnit.ParentSize;
             }
-            
+
             if (TryReadCharacters(input, "pca", ref ptr)) {
                 return UIMeasurementUnit.ParentContentArea;
             }
-            
+
             if (TryReadCharacters(input, "%cnt", ref ptr)) {
                 return UIMeasurementUnit.ParentContentArea;
             }
@@ -855,6 +855,21 @@ namespace Src.Parsing.StyleParser {
             }
 
             return val;
+        }
+
+        public static AnchorTarget ParseAnchorTarget(List<StyleVariable> variables, string propertyValue) {
+            switch (propertyValue.ToLower()) {
+                case "parent":
+                    return AnchorTarget.Parent;
+                case "parentcontentarea":
+                    return AnchorTarget.ParentContentArea;
+                case "screen":
+                    return AnchorTarget.Screen;
+                case "viewport":
+                    return AnchorTarget.Viewport;
+                default:
+                    throw new ParseException($"Unknown value for {nameof(AnchorTarget)}: {propertyValue}");
+            }
         }
 
     }

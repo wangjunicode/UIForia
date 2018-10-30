@@ -544,7 +544,7 @@ namespace Src.Layout.LayoutTypes {
                     throw new InvalidArgumentException();
             }
         }
-
+        
         protected float ResolveHorizontalAnchor(UIFixedLength anchor) {
             switch (anchor.unit) {
                 case UIFixedUnit.Pixel:
@@ -560,7 +560,12 @@ namespace Src.Layout.LayoutTypes {
                             return parent.allocatedWidth * anchor.value;
 
                         case AnchorTarget.ParentContentArea:
-                            return (parent.allocatedWidth - parent.PaddingHorizontal - parent.BorderHorizontal) * anchor.value;
+                            float paddingLeft = parent.PaddingLeft;
+                            float borderLeft = parent.BorderLeft;
+                            float start = paddingLeft + borderLeft;
+                            float end = parent.allocatedWidth - parent.PaddingHorizontal - parent.BorderHorizontal;
+                            float range = end - start;
+                            return start + (range * anchor.value);
 
                         case AnchorTarget.Screen:
                             return Screen.width * anchor.value;
@@ -601,7 +606,12 @@ namespace Src.Layout.LayoutTypes {
                             return parent.allocatedHeight * anchor.value;
 
                         case AnchorTarget.ParentContentArea:
-                            return (parent.allocatedHeight - parent.PaddingVertical - parent.BorderVertical) * anchor.value;
+                            float paddingTop = parent.PaddingTop;
+                            float borderTop = parent.BorderTop;
+                            float start = paddingTop + borderTop;
+                            float end = parent.allocatedHeight - parent.PaddingVertical - parent.BorderVertical;
+                            float range = end - start;
+                            return start + (range * anchor.value);
 
                         case AnchorTarget.Screen:
                             return Screen.height * anchor.value;

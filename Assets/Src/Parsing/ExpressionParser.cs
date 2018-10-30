@@ -270,6 +270,7 @@ namespace Src {
             tokenStream.Advance();
 
             switch (tokenStream.Previous.tokenType) {
+                
                 case TokenType.Plus:
                     return new OperatorNode(1, OperatorType.Plus);
 
@@ -394,8 +395,9 @@ namespace Src {
 
             if ((tokenStream.Current & TokenType.UnaryOperator) != 0) {
                 OperatorType opType;
-
-                if (tokenStream.HasPrevious && (tokenStream.Previous & TokenType.UnaryRequiresCheck) == 0) {
+                
+                
+                if (tokenStream.Current != TokenType.Not && tokenStream.HasPrevious && (tokenStream.Previous & TokenType.UnaryRequiresCheck) == 0) {
                     tokenStream.Restore();
                     return false;
                 }

@@ -443,8 +443,7 @@ namespace Src {
                     return new OperatorExpression_Comparison(node.OpType, Visit(node.left), Visit(node.right));
 
                 case OperatorType.Equals:
-                case OperatorType.NotEquals:
-
+                case OperatorType.NotEquals: {
                     Type openEqualityType = typeof(OperatorExpression_Equality<,>);
                     Type leftNodeType = node.left.GetYieldedType(context);
                     Type rightNodeType = node.right.GetYieldedType(context);
@@ -461,6 +460,52 @@ namespace Src {
                         ReflectionUtil.TypeArray2,
                         ReflectionUtil.ObjectArray3
                     );
+                }
+                case OperatorType.And:
+                case OperatorType.Or: {
+                    Type leftNodeType = node.left.GetYieldedType(context);
+                    Type rightNodeType = node.right.GetYieldedType(context);
+                    if (leftNodeType == typeof(bool) && rightNodeType == typeof(bool)) {
+                        return new OperatorExpression_AndOrBool(node.OpType, (Expression<bool>) Visit(node.left), (Expression<bool>) Visit(node.right));
+                    }
+                    else if (leftNodeType.IsClass && rightNodeType.IsClass) {
+                        ReflectionUtil.ObjectArray3[0] = node.OpType;
+                        ReflectionUtil.ObjectArray3[1] = Visit(node.left);
+                        ReflectionUtil.ObjectArray3[2] = Visit(node.right);
+                        ReflectionUtil.TypeArray2[0] = leftNodeType;
+                        ReflectionUtil.TypeArray2[1] = rightNodeType;
+                        return (Expression) ReflectionUtil.CreateGenericInstanceFromOpenType(
+                            typeof(OperatorExpression_AndOrObject<,>),
+                            ReflectionUtil.TypeArray2,
+                            ReflectionUtil.ObjectArray3
+                        );
+                    }
+                    else if (leftNodeType.IsClass && rightNodeType == typeof(bool)) {
+                        ReflectionUtil.ObjectArray3[0] = node.OpType;
+                        ReflectionUtil.ObjectArray3[1] = Visit(node.left);
+                        ReflectionUtil.ObjectArray3[2] = Visit(node.right);
+                        ReflectionUtil.TypeArray1[0] = leftNodeType;
+                        return (Expression) ReflectionUtil.CreateGenericInstanceFromOpenType(
+                            typeof(OperatorExpression_AndOrObjectBool<>),
+                            ReflectionUtil.TypeArray1,
+                            ReflectionUtil.ObjectArray3
+                        );
+
+                    }
+                    else if (leftNodeType == typeof(bool) && rightNodeType.IsClass) {
+                        ReflectionUtil.ObjectArray3[0] = node.OpType;
+                        ReflectionUtil.ObjectArray3[1] = Visit(node.left);
+                        ReflectionUtil.ObjectArray3[2] = Visit(node.right);
+                        ReflectionUtil.TypeArray1[0] = rightNodeType;
+                        return (Expression) ReflectionUtil.CreateGenericInstanceFromOpenType(
+                            typeof(OperatorExpression_AndOrBoolObject<>),
+                            ReflectionUtil.TypeArray1,
+                            ReflectionUtil.ObjectArray3
+                        );
+                    }
+
+                    break;
+                }
             }
 
             throw new Exception("Bad operator expression");
@@ -476,7 +521,20 @@ namespace Src {
                 throw new Exception("Unary but not boolean operator");
             }
 
+            if (yieldType == typeof(string)) {
+                if (node.op == OperatorType.Not) {
+                    return new UnaryExpression_StringBoolean((Expression<string>) Visit(node.expression));
+                }
+            }
+
+            if (yieldType.IsClass) {
+                if (node.op == OperatorType.Not) {
+                    return new UnaryExpression_ObjectBoolean((Expression<object>) Visit(node.expression));
+                }
+            }
+
             if (!IsNumericType(yieldType)) {
+                // todo -- error here for struct case?
                 return null;
             }
 
@@ -603,11 +661,11 @@ namespace Src {
                         }
                         else {
                             PropertyInfo propertyInfo = ReflectionUtil.GetInstanceOrStaticPropertyInfo(lastType, fieldName);
-                            
+
                             if (propertyInfo == null) {
-                                throw new UIForia.ParseException($"Unable to find field with name '{fieldName}' on type {lastType}");    
+                                throw new UIForia.ParseException($"Unable to find field with name '{fieldName}' on type {lastType}");
                             }
-                            
+
                             lastType = propertyInfo.PropertyType;
                             if (ReflectionUtil.IsPropertyStatic(propertyInfo)) {
                                 parts[i] = new AccessExpressionPart_StaticProperty(propertyInfo);
@@ -649,6 +707,7 @@ namespace Src {
                             if (propertyInfo == null) {
                                 throw new UIForia.ParseException($"Unable to find field or property with name '{fieldName}' on type {lastType}");
                             }
+
                             lastType = propertyInfo.PropertyType;
                             if (ReflectionUtil.IsPropertyStatic(propertyInfo)) {
                                 parts[i] = new AccessExpressionPart_StaticProperty(propertyInfo);

@@ -1,15 +1,31 @@
 <?xml version="1.0" encoding="utf-8"?>
 <UITemplate>
     
-    <Style classPath="UIInputFieldElement2+Styles"/>
+    <Style>
+        
+        style ignored {
+            LayoutBehavior = Ignored;
+            TransformBehaviorX = AnchorMinOffset;
+            TransformBehaviorY = AnchorMinOffset;
+            AnchorTarget = ParentContentArea;
+        }
+        
+        style text {
+            TextFontSize = 24;
+            MaxWidth = 1pca; 
+        }
+        
+    </Style>
     
     <Contents>
         
-        <Graphic x-id="highlight" style="highlight"/>
+        <Graphic x-id="highlight" style="ignored"/>
         
         <Text style='text' x-id="text"/>
         
-        <Graphic x-id="cursor" style="caret"/>
+        <!--<Text x-if="{!text}">PlaceHolder</Text>-->
+        
+        <Graphic x-id="cursor" style="ignored"/>
         
     </Contents>
 

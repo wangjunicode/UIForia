@@ -9,14 +9,34 @@
             OverflowY = Scroll;
         }
 
-
+        style bordered {
+            TransformBehaviorX = LayoutOffset;
+            TransformBehaviorY = LayoutOffset;
+            TransformPositionX = 100px;
+            TransformPositionY = 100px;
+            PreferredWidth = 300px;
+            PreferredHeight = 40px;
+            BorderColor = black;
+            Border = 1px;
+            BackgroundColor = red;
+            BorderRadius = 8px;
+            Padding = 8px;
+            FlexLayoutMainAxisAlignment = Center;
+            [focused] {
+                BackgroundColor = white;
+                BorderColor = #0095ff;
+            }
+        }
+        
     </Style>
 
 
     <Contents style="container">
 
-        <ChatPanel selectedGroupIdx="{selectedChatGroup}" chatData="{chatData}"/>
-        
+        <Input style="bordered"/>
+        text
+        <!--<ChatPanel selectedGroupIdx="{selectedChatGroup}" chatData="{chatData}"/>-->
+        <!--<Div style="bordered"/>-->
     </Contents>
 
 </UITemplate>

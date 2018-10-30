@@ -298,7 +298,7 @@ namespace Src {
 
         private static UITemplate ParseInputElement(XElement element) {
             return new UIElementTemplate(
-                typeof(UIInputFieldElement2),
+                typeof(UIInputFieldElement),
                 ParseNodes(element.Nodes()),
                 ParseAttributes(element.Attributes())
             );

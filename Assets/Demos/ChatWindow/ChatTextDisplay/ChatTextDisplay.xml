@@ -9,13 +9,28 @@
             PreferredHeight = 1pca;
             FlexItemGrow = 1;
             BackgroundColor = white;
+            Padding = 12px;
+            
         }
         
         style chat-log {
-            PreferredWidth = 100%;
+            PreferredWidth = 1pca;
+            PreferredHeight = 0;
+            FlexItemGrow = 1;
         }
         
-        style chat-input {}
+        style chat-input {
+            PreferredWidth = 1pca;
+            PreferredHeight = 48px;
+            BackgroundColor = red;
+            BorderRadius = 10px;
+        }
+        
+        style input {
+            PreferredWidth = 1pca;
+            PreferredHeight = 1pca;
+            BackgroundColor = #F2F2F2;
+        }
         
     </Style>
     
@@ -30,7 +45,7 @@
         </Group>
         
         <Group style="chat-input">
-            
+            <Input style="input" placeholder="'Placeholder'"/>
         </Group>
         
     </Contents>

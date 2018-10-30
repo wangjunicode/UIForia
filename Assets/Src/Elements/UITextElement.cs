@@ -292,14 +292,15 @@ namespace Src {
             }
         }
 
-        protected static void ApplyLineAndWordOffsets(TextInfo textInfo) {
+        protected void ApplyLineAndWordOffsets(TextInfo textInfo) {
             LineInfo[] lineInfos = textInfo.lineInfos;
             WordInfo[] wordInfos = textInfo.wordInfos;
             CharInfo[] charInfos = textInfo.charInfos;
-
+            ComputedStyle computed = ComputedStyle;
+            TMP_FontAsset asset = computed.FontAsset;
             for (int lineIdx = 0; lineIdx < textInfo.lineCount; lineIdx++) {
                 LineInfo currentLine = lineInfos[lineIdx];
-                float lineOffset = currentLine.maxAscender - currentLine.position.y;
+                float lineOffset = -currentLine.position.y;
                 float wordAdvance = currentLine.position.x;
 
                 for (int w = currentLine.wordStart; w < currentLine.wordStart + currentLine.wordCount; w++) {
@@ -481,6 +482,9 @@ namespace Src {
         }
 
         private TextEdge FindCursorEdge(int charIndex, Vector2 point) {
+            if (string.IsNullOrEmpty(text) || charIndex >= text.Length - 1) {
+                return TextEdge.Left;
+            }
             CharInfo charInfo = textInfo.charInfos[charIndex];
             float width = charInfo.bottomRight.x - charInfo.topLeft.x;
             if (point.x > charInfo.topLeft.x + (width * 0.5f)) {
@@ -532,30 +536,31 @@ namespace Src {
 
         private int FindNearestLineIndex(Vector2 point) {
             int closestIndex = 0;
-            float closestDistance = float.MaxValue;
-            for (int i = 0; i < textInfo.lineCount; i++) {
-                LineInfo line = textInfo.lineInfos[i];
-                float y1 = -line.maxAscender;
-                float y2 = -line.maxDescender;
-
-                if (point.y >= y1 && point.y <= y2) {
-                    return i;
-                }
-
-                float distToY1 = Mathf.Abs(point.y - y1);
-                float distToY2 = Mathf.Abs(point.y - y2);
-                if (distToY1 < closestDistance) {
-                    closestIndex = i;
-                    closestDistance = distToY1;
-                }
-
-                if (distToY2 < closestDistance) {
-                    closestIndex = i;
-                    closestDistance = distToY2;
-                }
-            }
-
-            return closestIndex;
+            return 0;
+//            float closestDistance = float.MaxValue;
+//            for (int i = 0; i < textInfo.lineCount; i++) {
+//                LineInfo line = textInfo.lineInfos[i];
+//                float y1 = -line.maxAscender;
+//                float y2 = -line.maxDescender;
+//
+//                if (point.y >= y1 && point.y <= y2) {
+//                    return i;
+//                }
+//
+//                float distToY1 = Mathf.Abs(point.y - y1);
+//                float distToY2 = Mathf.Abs(point.y - y2);
+//                if (distToY1 < closestDistance) {
+//                    closestIndex = i;
+//                    closestDistance = distToY1;
+//                }
+//
+//                if (distToY2 < closestDistance) {
+//                    closestIndex = i;
+//                    closestDistance = distToY2;
+//                }
+//            }
+//
+//            return closestIndex;
         }
 
         private WordInfo FindNearestWord(LineInfo line, Vector2 point) {
@@ -586,6 +591,11 @@ namespace Src {
         }
 
         public Mesh GetHighlightMesh(SelectionRange selectionRange) {
+            
+            if (string.IsNullOrEmpty(text)) {
+                return null;
+            }
+            
             Color32 selectionColor = new Color32(168, 206, 255, 192);
 
             int startIndex = selectionRange.selectIndex;
@@ -603,12 +613,13 @@ namespace Src {
             CharInfo startCharInfo = textInfo.charInfos[startIndex];
             CharInfo endCharInfo = textInfo.charInfos[endIndex];
 
+            float height = 0;
             if (startCharInfo.lineIndex == endCharInfo.lineIndex) {
                 LineInfo currentLine = textInfo.lineInfos[startCharInfo.lineIndex];
                 float minX = startEdge == TextEdge.Right ? startCharInfo.bottomRight.x : startCharInfo.topLeft.x;
                 float maxX = endEdge == TextEdge.Right ? endCharInfo.bottomRight.x : endCharInfo.topLeft.x;
                 float minY = currentLine.position.y - layoutResult.localPosition.y;
-                float maxY = currentLine.position.y - currentLine.Height - layoutResult.localPosition.y;
+                float maxY = currentLine.position.y - height - layoutResult.localPosition.y;
                 Vector3 v0 = new Vector3(minX, minY);
                 Vector3 v1 = new Vector3(maxX, minY);
                 Vector3 v2 = new Vector3(maxX, maxY);
@@ -634,6 +645,9 @@ namespace Src {
         }
 
         public SelectionRange GetSelectionAtPoint(Vector2 point) {
+            if (string.IsNullOrEmpty(text)) {
+                return new SelectionRange(0, TextEdge.Left, -1, TextEdge.Left);
+            }
             int charIndex = FindNearestCharacterIndex(point);
             return new SelectionRange(
                 FindNearestCharacterIndex(point),
@@ -725,6 +739,10 @@ namespace Src {
         }
 
         public Vector2 GetCursorPosition(SelectionRange selectionRange) {
+            if (string.IsNullOrEmpty(text)) {
+                return Vector2.zero;
+            }
+
             CharInfo charInfo = textInfo.charInfos[selectionRange.cursorIndex];
             LineInfo lineInfo = textInfo.lineInfos[charInfo.lineIndex];
             return new Vector2(selectionRange.cursorEdge == TextEdge.Right
@@ -732,6 +750,7 @@ namespace Src {
                     : charInfo.topLeft.x,
                 -lineInfo.position.y
             );
+            
         }
 
         public SelectionRange BeginSelection(Vector2 point) {
@@ -741,7 +760,14 @@ namespace Src {
         }
 
         public float GetLineHeightAtCursor(SelectionRange selectionRange) {
-            return textInfo.lineInfos[textInfo.charInfos[selectionRange.cursorIndex].lineIndex].Height;
+            TMP_FontAsset asset = ComputedStyle.FontAsset;
+            return asset.fontInfo.LineHeight * (ComputedStyle.FontSize / asset.fontInfo.PointSize) * asset.fontInfo.Scale;
+
+            if (string.IsNullOrEmpty(text)) {
+                return ComputedStyle.FontAsset.fontInfo.LineHeight;
+            }
+            return asset.fontInfo.LineHeight * (ComputedStyle.FontSize / asset.fontInfo.PointSize) * asset.fontInfo.Scale;
+//            return textInfo.lineInfos[textInfo.charInfos[selectionRange.cursorIndex].lineIndex].Height;
         }
 
     }

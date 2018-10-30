@@ -9,7 +9,7 @@
             FlexLayoutCrossAxisAlignment = Center;
             Padding = 12px;
             BorderBottom = 1px;
-            BorderColor = black;
+            BorderColor = #F2F2F2;
         }
         
         style message-container {

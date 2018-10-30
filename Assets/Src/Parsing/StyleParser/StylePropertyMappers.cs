@@ -306,6 +306,9 @@ namespace Src.Parsing.StyleParser {
                 case "layoutbehavior":
                     context.targetStyle.LayoutBehavior = ParseUtil.ParseLayoutBehavior(context.variables, propertyValue);
                     break;
+                case "anchortarget":
+                    context.targetStyle.AnchorTarget = ParseUtil.ParseAnchorTarget(context.variables, propertyValue);
+                    break;
                 case "anchortop":
                     context.targetStyle.AnchorTop = ParseUtil.ParseFixedLength(context.variables, propertyValue);
                     break;

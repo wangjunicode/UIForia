@@ -206,7 +206,10 @@ Shader "UIForia/Text"
 			    faceColor.rgb += glowColor.rgb * glowColor.a;
 			    
             #endif
-                
+//                
+//                if(faceColor.a - 0.001 < 0) {
+//                    return fixed4(0, 1, 0, 1);
+//                }
                 clip(faceColor.a - 0.001);
                 return faceColor;
             }

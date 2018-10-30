@@ -10,8 +10,8 @@
         }
 
         style bordered {
-            TransformBehaviorX = LayoutOffset;
-            TransformBehaviorY = LayoutOffset;
+            <!--TransformBehaviorX = LayoutOffset;-->
+           <!-- TransformBehaviorY = LayoutOffset;-->
             TransformPositionX = 100px;
             TransformPositionY = 100px;
             PreferredWidth = 300px;
@@ -28,13 +28,20 @@
             }
         }
         
+        style text {
+            TextFontAsset = Whitney-Book SDF;
+            TextFontSize = 36;
+        }
+        
     </Style>
 
 
     <Contents style="container">
 
         <Input style="bordered"/>
-        text
+        <Text style="text">this is a string of text</Text>
+        <Text style="text">more text here</Text>
+        <Text style="text">Some CrazY Uela;k3n;l61h;1h63;l1h3lb1;61</Text>
         <!--<ChatPanel selectedGroupIdx="{selectedChatGroup}" chatData="{chatData}"/>-->
         <!--<Div style="bordered"/>-->
     </Contents>

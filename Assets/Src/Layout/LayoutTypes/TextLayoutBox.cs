@@ -34,8 +34,10 @@ namespace Src.Layout.LayoutTypes {
             LineInfo lastLine = lineInfos[lineInfos.Count - 1];
             ListPool<LineInfo>.Release(ref lineInfos);
             TMP_FontAsset asset = style.FontAsset;
+            float s =  (style.FontSize / asset.fontInfo.PointSize) * asset.fontInfo.Scale;;
             float lh = asset.fontInfo.LineHeight * (style.FontSize / asset.fontInfo.PointSize) * asset.fontInfo.Scale;
-            return -lastLine.position.y + lh;//lastLine.Height;
+            lh += (asset.fontInfo.Descender) * s;
+            return lastLine.position.y + lh;//lastLine.Height;
         }
 
         public override void RunLayout() {
@@ -54,8 +56,11 @@ namespace Src.Layout.LayoutTypes {
 
             actualWidth = maxWidth;
             TMP_FontAsset asset = style.FontAsset;
-            float lh = asset.fontInfo.LineHeight * (style.FontSize / asset.fontInfo.PointSize) * asset.fontInfo.Scale;
-            actualHeight = -lastLine.position.y + lh;//lastLine.Height;
+            float s =  (style.FontSize / asset.fontInfo.PointSize) * asset.fontInfo.Scale;;
+            float lh = asset.fontInfo.LineHeight * s;//(style.FontSize / asset.fontInfo.PointSize) * asset.fontInfo.Scale;
+           // lh -= 16f;//asset.fontInfo.Descender * s;
+            lh += (asset.fontInfo.Descender) * s;
+            actualHeight = lastLine.position.y + lh;//lastLine.Height;
 
             ApplyTextAlignment(allocatedWidth, textInfo, style.TextAlignment);
 

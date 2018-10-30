@@ -225,9 +225,9 @@ namespace Src {
                         // idea for auto sizing: multiply scale later on and just save base unscaled vertices
 
                         topLeft.x = xAdvance + (glyph.xOffset - padding - stylePadding + glyphAdjustments.xPlacement) * currentElementScale;
-                        topLeft.y = yAdvance + (glyph.yOffset + padding + glyphAdjustments.yPlacement) * currentElementScale;
+                        topLeft.y = (((fontAsset.fontInfo.Ascender) - glyph.yOffset) * currentElementScale);//yAdvance + ((() + padding + glyphAdjustments.yPlacement)) * currentElementScale;
                         bottomRight.x = topLeft.x + (glyph.width + padding * 2) * currentElementScale;
-                        bottomRight.y = topLeft.y - (glyph.height + padding * 2 + stylePadding * 2) * currentElementScale;
+                        bottomRight.y = topLeft.y + (glyph.height) * currentElementScale; // + padding * 2 + stylePadding * 2
 
                         if (currentWord.startChar + currentWord.VisibleCharCount >= i) {
                             if (topLeft.y > currentWord.maxCharTop) {
@@ -300,7 +300,7 @@ namespace Src {
             TMP_FontAsset asset = computed.FontAsset;
             for (int lineIdx = 0; lineIdx < textInfo.lineCount; lineIdx++) {
                 LineInfo currentLine = lineInfos[lineIdx];
-                float lineOffset = -currentLine.position.y;
+                float lineOffset = currentLine.position.y;
                 float wordAdvance = currentLine.position.x;
 
                 for (int w = currentLine.wordStart; w < currentLine.wordStart + currentLine.wordCount; w++) {
@@ -311,8 +311,8 @@ namespace Src {
                     for (int i = currentWord.startChar; i < currentWord.startChar + currentWord.charCount; i++) {
                         float x0 = charInfos[i].topLeft.x + wordAdvance;
                         float x1 = charInfos[i].bottomRight.x + wordAdvance;
-                        float y0 = charInfos[i].topLeft.y - lineOffset;
-                        float y1 = charInfos[i].bottomRight.y - lineOffset;
+                        float y0 = charInfos[i].topLeft.y + lineOffset;
+                        float y1 = charInfos[i].bottomRight.y + lineOffset;
                         charInfos[i].wordIndex = w;
                         charInfos[i].lineIndex = lineIdx;
                         charInfos[i].topLeft = new Vector2(x0, y0);
@@ -371,10 +371,10 @@ namespace Src {
                 Vector2 topLeft = charInfos[i].topLeft;
                 Vector2 bottomRight = charInfos[i].bottomRight;
 
-                positions[idx_x4 + 0] = new Vector3(topLeft.x, bottomRight.y, 0); // Bottom Left
-                positions[idx_x4 + 1] = new Vector3(topLeft.x, topLeft.y, 0); // Top Left
-                positions[idx_x4 + 2] = new Vector3(bottomRight.x, topLeft.y, 0); // Top Right
-                positions[idx_x4 + 3] = new Vector3(bottomRight.x, bottomRight.y); // Bottom Right
+                positions[idx_x4 + 0] = new Vector3(topLeft.x, -bottomRight.y, 0); // Bottom Left
+                positions[idx_x4 + 1] = new Vector3(topLeft.x, -topLeft.y, 0); // Top Left
+                positions[idx_x4 + 2] = new Vector3(bottomRight.x, -topLeft.y, 0); // Top Right
+                positions[idx_x4 + 3] = new Vector3(bottomRight.x, -bottomRight.y); // Bottom Right
 
                 uvs0[idx_x4 + 0] = new Vector2(charInfos[i].uv0.x, charInfos[i].uv0.y);
                 uvs0[idx_x4 + 1] = new Vector2(charInfos[i].uv0.x, charInfos[i].uv1.y);

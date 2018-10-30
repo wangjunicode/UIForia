@@ -13,6 +13,7 @@
         style text {
             TextFontSize = 24;
             MaxWidth = 1pca; 
+            BackgroundColor = blue;
         }
         
     </Style>

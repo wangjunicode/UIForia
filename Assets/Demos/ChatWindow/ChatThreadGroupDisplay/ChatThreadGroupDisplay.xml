@@ -11,7 +11,7 @@
         
         style thread-container {
             PreferredWidth = 100%;
-            Padding = 8px, 36px;
+            Padding = 4px, 16px;
         
             [hover] {
                 BackgroundColor = #CCCCCC;

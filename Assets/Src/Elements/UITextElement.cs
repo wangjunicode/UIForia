@@ -223,11 +223,15 @@ namespace Src {
                         Vector2 bottomRight;
 
                         // idea for auto sizing: multiply scale later on and just save base unscaled vertices
+//                        topLeft.x = xAdvance + (glyph.xOffset - padding - stylePadding + glyphAdjustments.xPlacement) * currentElementScale;
+//                        topLeft.y = yAdvance + (glyph.yOffset + padding + glyphAdjustments.yPlacement) * currentElementScale;
+//                        bottomRight.x = topLeft.x + (glyph.width + padding * 2) * currentElementScale;
+//                        bottomRight.y = topLeft.y - (glyph.height + padding * 2 + stylePadding * 2) * currentElementScale;
 
                         topLeft.x = xAdvance + (glyph.xOffset - padding - stylePadding + glyphAdjustments.xPlacement) * currentElementScale;
-                        topLeft.y = (((fontAsset.fontInfo.Ascender) - glyph.yOffset) * currentElementScale);//yAdvance + ((() + padding + glyphAdjustments.yPlacement)) * currentElementScale;
+                        topLeft.y = ((fontAsset.fontInfo.Ascender) - ( glyph.yOffset + padding)) * currentElementScale;//yAdvance + ((() + padding + glyphAdjustments.yPlacement)) * currentElementScale;
                         bottomRight.x = topLeft.x + (glyph.width + padding * 2) * currentElementScale;
-                        bottomRight.y = topLeft.y + (glyph.height) * currentElementScale; // + padding * 2 + stylePadding * 2
+                        bottomRight.y = topLeft.y + (glyph.height + padding * 2 + stylePadding * 2) * currentElementScale; // 
 
                         if (currentWord.startChar + currentWord.VisibleCharCount >= i) {
                             if (topLeft.y > currentWord.maxCharTop) {

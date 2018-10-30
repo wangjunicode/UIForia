@@ -7,7 +7,7 @@
             FlexLayoutDirection = Column;
             FlexLayoutCrossAxisAlignment = Center;
             PaddingTop = 12px;
-            PaddingBottom = 12px;
+            PaddingBottom = 0px;
         }
 
         style thread-group-header-text {

@@ -20,7 +20,7 @@
             TransformBehaviorY = AnchorMaxOffset;
             TransformPositionX = -26px;
             TransformPositionY = -26px;
-            FlexLayoutMainAxisAlignment = Center;
+            FlexLayoutMainAxisAlignment = Start;
             FlexLayoutCrossAxisAlignment = Center;
         }
         

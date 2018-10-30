@@ -38,11 +38,11 @@
 
     <Contents style="container">
 
-        <Input style="bordered"/>
-        <Text style="text">this is a string of text</Text>
-        <Text style="text">more text here</Text>
-        <Text style="text">Some CrazY Uela;k3n;l61h;1h63;l1h3lb1;61</Text>
-        <!--<ChatPanel selectedGroupIdx="{selectedChatGroup}" chatData="{chatData}"/>-->
+        <!--<Input style="bordered"/>-->
+        <!--<Text style="text">this is a string of text</Text>-->
+        <!--<Text style="text">more text here</Text>-->
+        <!--<Text style="text">Some CrazY Uela;k3n;l61h;1h63;l1h3lb1;61</Text>-->
+        <ChatPanel selectedGroupIdx="{selectedChatGroup}" chatData="{chatData}"/>
         <!--<Div style="bordered"/>-->
     </Contents>
 

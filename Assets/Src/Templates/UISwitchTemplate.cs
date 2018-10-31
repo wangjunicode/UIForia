@@ -29,26 +29,27 @@ namespace Src {
         }
 
         public override bool Compile(ParsedTemplate template) {
-            id = ParsedTemplate.MakeId();
-            AttributeDefinition valueAttr = GetAttribute(SwitchValueAttribute);
-
-            Expression valueExpression = template.compiler.Compile(valueAttr.value);
-
-            Type yieldedType = valueExpression.YieldedType;
-
-//            AssertType(yieldedType, typeof(string), typeof(int), typeof(Enum));
-
-            if (yieldedType == typeof(string)) {
-                CompileStringVersion(template);
-            }
-            else if (yieldedType == typeof(int)) {
-                CompileIntVersion(template, (Expression<int>) valueExpression);
-            }
-            else if (yieldedType.IsEnum) {
-                throw new NotImplementedException();
-            }
-
-            return true;
+            throw new NotImplementedException();
+//            id = ParsedTemplate.MakeId();
+//            AttributeDefinition valueAttr = GetAttribute(SwitchValueAttribute);
+//
+//            Expression valueExpression = template.compiler.Compile(valueAttr.value);
+//
+//            Type yieldedType = valueExpression.YieldedType;
+//
+////            AssertType(yieldedType, typeof(string), typeof(int), typeof(Enum));
+//
+//            if (yieldedType == typeof(string)) {
+//                CompileStringVersion(template);
+//            }
+//            else if (yieldedType == typeof(int)) {
+//                CompileIntVersion(template, (Expression<int>) valueExpression);
+//            }
+//            else if (yieldedType.IsEnum) {
+//                throw new NotImplementedException();
+//            }
+//
+//            return true;
         }
 
         private void CompileStringVersion(ParsedTemplate template) { }

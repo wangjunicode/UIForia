@@ -14,20 +14,61 @@ using UnityEngine;
 
 namespace Rendering {
 
+    public enum StyleChangeGroup1 {
+
+        
+
+    }
+
     [DebuggerDisplay("id = {element.id} state = {currentState}")]
     public partial class UIStyleSet {
 
-        private string content;
         private int baseCounter;
         private StyleState currentState;
         private StyleEntry[] appliedStyles;
         private StyleState containedStates;
-
+        private string styleNames;
+        
+        // temp -- replace w/ IntMap & remove computed style
+        private List<UIStyleGroup> styleGroups;
+        
+        /*
+         * BaseStyleGroup[Instance]
+         * StyleGroup[Image]
+         * GetXInState(key = (int)propertyId | (int)state)
+         * GetComputedX(key = (int)propertyId | k_Computed);
+         */
         public readonly UIElement element;
         public readonly ComputedStyle computedStyle;
 
+        // StyleState currentState;
+        // StyleSystem styleSystem
+        // UIElement element
+        // StyleGroup[] baseStyles
+        // StyleGroup InstanceStyle
+        // IntMap<StyleProperty>
+        // Computed = for each style
+        
+        // instance state -> base state -> instance -> base
+        // Enter State
+        //     recompute all?
+        //     for each property
+        //        for each style group
+        //            for each state
+         //                break if defined
+        
+        // change checking
+        //     just another key offset?
+        //     use bitwise integers as maps (needs 4 or 5 ints at 32 bits per int)
+        
+        // key offsets
+            // 1 per state
+            // 1 for computed
+            // 1 for previous computed?
+        
         internal IStyleSystem styleSystem;
 
+        // todo -- remove and replace w/ style
         public HorizontalScrollbarAttachment horizontalScrollbarAttachment => HorizontalScrollbarAttachment.Bottom;
         public VerticalScrollbarAttachment verticalScrollbarAttachment => VerticalScrollbarAttachment.Right;
 
@@ -38,10 +79,13 @@ namespace Rendering {
             this.currentState = StyleState.Normal;
             this.containedStates = StyleState.Normal;
             this.styleSystem = styleSystem;
-            this.computedStyle = new ComputedStyle(this);
+            this.computedStyle = new ComputedStyle(this); // todo -- get rid of computed style? use 1 intmap for all styles
             this.appliedStyles = ArrayPool<StyleEntry>.Empty;
-        }       
+            this.styleGroups = new List<UIStyleGroup>();
+        }
 
+        public string BaseStyleNames => styleNames;
+        
         public void EnterState(StyleState state) {
             if (state == StyleState.Normal || (currentState & state) != 0) {
                 return;
@@ -137,12 +181,10 @@ namespace Rendering {
             }
         }
 
-        public string GetBaseStyleNames() {
+        private static string GetBaseStyleNames(UIStyleSet styleSet) {
             string output = string.Empty;
-            for (int i = 0; i < appliedStyles.Length; i++) {
-                if (appliedStyles[i].type == StyleType.Shared) {
-                    output += appliedStyles[i].style.Id;
-                }
+            for (int i = 0; i < styleSet.styleGroups.Count; i++) {
+                output += styleSet.styleGroups[i].name;
             }
 
             return output;
@@ -205,7 +247,9 @@ namespace Rendering {
             }
         }
 
-        public void AddBaseStyleGroup(UIBaseStyleGroup group) {
+        public void AddStyleGroup(UIStyleGroup group) {
+            styleGroups.Add(group);
+            styleNames = GetBaseStyleNames(this);
             if (group.normal != null) AddBaseStyle(group.normal, StyleState.Normal);
             if (group.active != null) AddBaseStyle(group.active, StyleState.Active);
             if (group.disabled != null) AddBaseStyle(group.disabled, StyleState.Disabled);
@@ -213,7 +257,7 @@ namespace Rendering {
             if (group.hover != null) AddBaseStyle(group.hover, StyleState.Hover);
         }
 
-        public void AddBaseStyle(UIStyle style, StyleState state) {
+        private void AddBaseStyle(UIStyle style, StyleState state) {
             // todo -- check for duplicates
             containedStates |= state;
             if (appliedStyles.Length == 0) {
@@ -230,6 +274,7 @@ namespace Rendering {
             }
         }
 
+        // todo remove and replace w/ RemoveStyleGroup
         public void RemoveBaseStyle(UIStyle style, StyleState state = StyleState.Normal) {
             for (int i = 0; i < appliedStyles.Length; i++) {
                 if (appliedStyles[i].style == style && state == appliedStyles[i].state) {

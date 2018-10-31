@@ -68,6 +68,10 @@ namespace Src {
             onTextChanged?.Invoke(this, text);
         }
 
+        protected override string GetDisplayName() {
+            return "Text";
+        }
+
         private void UpdateTextInfo() {
             bool collapseSpaces = true; //style.computedStyle.TextCollapseWhiteSpace;
             bool preserveNewlines = false; //style.computedStyle.TextPreserveNewLines;

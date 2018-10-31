@@ -203,7 +203,11 @@ public class UIInputFieldElement : UIElement, IFocusable, IPropertyChangedHandle
             selectionRange = textElement.ValidateSelectionRange(selectionRange);
         }
     }
-    
+
+    protected override string GetDisplayName() {
+        return "TextInput";
+    }
+
     public class TextSelectDragEvent : CallbackDragEvent { }
 
 }

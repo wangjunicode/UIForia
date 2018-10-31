@@ -18,7 +18,7 @@ public enum QueryOptions {
 
 }
 
-[DebuggerDisplay("{ToString()}")]
+[DebuggerDisplay("{" + nameof(ToString) + "()}")]
 public class UIElement : IHierarchical, IExpressionContextProvider {
 
     // todo some of this stuff isn't used often or present for many elements. may make sense to move to dictionaries so we keep things compact
@@ -28,11 +28,13 @@ public class UIElement : IHierarchical, IExpressionContextProvider {
     public UIElementFlags flags; // todo make internal but available for testing
     public UIStyleSet style;
 
+    // todo -- move to the template
     internal IReadOnlyList<ValueTuple<string, string>> templateAttributes;
 
     // todo make readonly but assignable via style system
 
     public UIElement parent;
+    internal TemplateReference templateRef;
 
     protected UIElement() {
         this.id = UIView.NextElementId;
@@ -52,6 +54,7 @@ public class UIElement : IHierarchical, IExpressionContextProvider {
 
     private ElementRenderer renderer = ElementRenderer.DefaultInstanced;
 
+    
     public ElementRenderer Renderer {
         get { return renderer; }
         set {
@@ -261,20 +264,24 @@ public class UIElement : IHierarchical, IExpressionContextProvider {
     public override string ToString() {
         string retn = string.Empty;
         if (HasAttribute("id")) {
-            retn += "<" + GetType().Name + ":" + GetAttribute("id") + " " + id + ">";
+            retn += "<" + GetDisplayName() + ":" + GetAttribute("id") + " " + id + ">";
         }
 
         if (name != null) {
-            retn += "<" + name + ":" + GetType().Name + " " + id + ">";
+            retn += "<" + name + ":" + GetDisplayName() + " " + id + ">";
         }
         else if (style != null && style.HasBaseStyles) {
-            return "<" + GetType().Name + ": " + style.GetBaseStyleNames() + ">";
+            return "<" + GetDisplayName() + "> " + style.BaseStyleNames;
         }
         else {
-            retn += "<" + GetType().Name + " " + id + ">";
+            retn += "<" + GetDisplayName() + " " + id + ">";
         }
 
         return retn;
+    }
+
+    protected virtual string GetDisplayName() {
+        return GetType().Name;
     }
 
     protected bool HasAttribute(string attr) {
@@ -316,6 +323,14 @@ public class UIElement : IHierarchical, IExpressionContextProvider {
             return a.parent.siblingIndex < b.parent.siblingIndex ? 1 : -1;
         }
 
+    }
+
+    public ParsedTemplate GetTemplate() {
+        return ParsedTemplate.GetTemplate(templateRef.templateId);
+    }
+
+    public UITemplate GetTemplateData() {
+        return GetTemplate().GetTemplateData(templateRef.memberId);
     }
 
 }

@@ -50,21 +50,15 @@ namespace Src.Parsing.StyleParser {
         private static readonly Dictionary<string, MapAction> s_StylePropertyMappers;
         private static readonly List<string> s_CurrentlyParsingList;
 
-        static StyleParser() {
-            s_CurrentlyParsingList = new List<string>();
-            s_StylePropertyMappers = new Dictionary<string, MapAction>();
-            s_CompiledStyles = new Dictionary<string, ParsedStyleSheet>();
-            for (int i = 0; i < s_StyleIdentifiers.Length; i++) {
-                s_StylePropertyMappers[s_StyleIdentifiers[i].propertyName.ToLower()] = s_StyleIdentifiers[i].mapFn;
-            }
-        }
-
+       
         public static void Reset() {
             s_CompiledStyles.Clear();
             s_CurrentlyParsingList.Clear();
         }
 
-        public static UIBaseStyleGroup GetParsedStyle(string uniqueStyleId, string body, string styleName) {
+        public static UIStyleGroup GetParsedStyle(string uniqueStyleId, string body, string styleName) {
+            uniqueStyleId = uniqueStyleId.Trim();
+            styleName = styleName.Trim();
             ParsedStyleSheet sheet = s_CompiledStyles.GetOrDefault(uniqueStyleId);
             if (sheet != null) {
                 return sheet.GetStyleGroup(styleName);
@@ -100,7 +94,7 @@ namespace Src.Parsing.StyleParser {
 
             if (styleType == null) return null;
             ParsedStyleSheet sheet = new ParsedStyleSheet();
-            List<UIBaseStyleGroup> groups = new List<UIBaseStyleGroup>();
+            List<UIStyleGroup> groups = new List<UIStyleGroup>();
 
             MethodInfo[] methods = styleType.GetMethods(BindingFlags.Public | BindingFlags.Instance | BindingFlags.NonPublic | BindingFlags.Static);
             for (int i = 0; i < methods.Length; i++) {
@@ -119,18 +113,18 @@ namespace Src.Parsing.StyleParser {
                 }
 
                 if (methodInfo.ReturnType == typeof(UIStyle)) {
-                    UIBaseStyleGroup group = new UIBaseStyleGroup();
+                    UIStyleGroup group = new UIStyleGroup();
                     group.name = attr.name;
                     group.normal = (UIStyle) methodInfo.Invoke(null, null);
                     groups.Add(group);
                 }
-                else if (methodInfo.ReturnType == typeof(UIBaseStyleGroup)) {
-                    UIBaseStyleGroup group = (UIBaseStyleGroup) methodInfo.Invoke(null, null);
+                else if (methodInfo.ReturnType == typeof(UIStyleGroup)) {
+                    UIStyleGroup group = (UIStyleGroup) methodInfo.Invoke(null, null);
                     group.name = attr.name;
                     groups.Add(group);
                 }
                 else {
-                    throw new Exception($"Methods annotated with {nameof(ExportStyleAttribute)} must return {nameof(UIStyle)} or {nameof(UIBaseStyleGroup)}");
+                    throw new Exception($"Methods annotated with {nameof(ExportStyleAttribute)} must return {nameof(UIStyle)} or {nameof(UIStyleGroup)}");
                 }
             }
 
@@ -250,7 +244,7 @@ namespace Src.Parsing.StyleParser {
                 }
             }
 
-            List<UIBaseStyleGroup> styleList = ListPool<UIBaseStyleGroup>.Get();
+            List<UIStyleGroup> styleList = ListPool<UIStyleGroup>.Get();
             List<StyleVariable> localVariables = ListPool<StyleVariable>.Get();
             List<StyleVariable> variables = ListPool<StyleVariable>.Get();
             List<ImportDefinition> imports = ListPool<ImportDefinition>.Get();
@@ -297,7 +291,7 @@ namespace Src.Parsing.StyleParser {
             retn.styles = styleList.ToArray();
             retn.variables = localVariables;
 
-            ListPool<UIBaseStyleGroup>.Release(ref styleList);
+            ListPool<UIStyleGroup>.Release(ref styleList);
             ListPool<ImportDefinition>.Release(ref imports);
             ListPool<StyleVariable>.Release(ref variables);
             return retn;
@@ -308,12 +302,12 @@ namespace Src.Parsing.StyleParser {
             return null;
         }
 
-        private static UIBaseStyleGroup ParseStyle(StyleComponent styleComponent, List<StyleVariable> variables, List<ImportDefinition> imports) {
+        private static UIStyleGroup ParseStyle(StyleComponent styleComponent, List<StyleVariable> variables, List<ImportDefinition> imports) {
             int ptr = 0;
             string input = styleComponent.body;
 
             UIStyle currentStyle = new UIStyle();
-            UIBaseStyleGroup styleGroup = new UIBaseStyleGroup();
+            UIStyleGroup styleGroup = new UIStyleGroup();
             styleGroup.name = styleComponent.name;
             styleGroup.normal = currentStyle;
 
@@ -462,127 +456,137 @@ namespace Src.Parsing.StyleParser {
             return null;
         }
 
-        private static readonly StylePropertyMapper[] s_StyleIdentifiers = {
-            new StylePropertyMapper("Overflow", StylePropertyMappers.DisplayMapper),
-            new StylePropertyMapper("OverflowX", StylePropertyMappers.DisplayMapper),
-            new StylePropertyMapper("OverflowY", StylePropertyMappers.DisplayMapper),
+        static StyleParser() {
+            s_CurrentlyParsingList = new List<string>();
+            s_StylePropertyMappers = new Dictionary<string, MapAction>();
+            StylePropertyMapper[] sStyleIdentifiers = new[] {
+                new StylePropertyMapper("Overflow", StylePropertyMappers.DisplayMapper),
+                new StylePropertyMapper("OverflowX", StylePropertyMappers.DisplayMapper),
+                new StylePropertyMapper("OverflowY", StylePropertyMappers.DisplayMapper),
 
-            new StylePropertyMapper("BackgroundColor", StylePropertyMappers.DisplayMapper),
-            new StylePropertyMapper("BorderColor", StylePropertyMappers.DisplayMapper),
-            new StylePropertyMapper("BackgroundImage", StylePropertyMappers.DisplayMapper),
-            new StylePropertyMapper("Opacity", StylePropertyMappers.DisplayMapper),
-            new StylePropertyMapper("Cursor", StylePropertyMappers.DisplayMapper),
+                new StylePropertyMapper("BackgroundColor", StylePropertyMappers.DisplayMapper),
+                new StylePropertyMapper("BorderColor", StylePropertyMappers.DisplayMapper),
+                new StylePropertyMapper("BackgroundImage", StylePropertyMappers.DisplayMapper),
+                new StylePropertyMapper("Opacity", StylePropertyMappers.DisplayMapper),
+                new StylePropertyMapper("Cursor", StylePropertyMappers.DisplayMapper),
 
-            new StylePropertyMapper("GridItemColStart", StylePropertyMappers.GridItemMapper),
-            new StylePropertyMapper("GridItemColSpan", StylePropertyMappers.GridItemMapper),
-            new StylePropertyMapper("GridItemRowStart", StylePropertyMappers.GridItemMapper),
-            new StylePropertyMapper("GridItemRowSpan", StylePropertyMappers.GridItemMapper),
-            new StylePropertyMapper("GridItemColSelfAlignment", StylePropertyMappers.GridItemMapper),
-            new StylePropertyMapper("GridItemRowSelfAlignment", StylePropertyMappers.GridItemMapper),
+                new StylePropertyMapper("GridItemColStart", StylePropertyMappers.GridItemMapper),
+                new StylePropertyMapper("GridItemColSpan", StylePropertyMappers.GridItemMapper),
+                new StylePropertyMapper("GridItemRowStart", StylePropertyMappers.GridItemMapper),
+                new StylePropertyMapper("GridItemRowSpan", StylePropertyMappers.GridItemMapper),
+                new StylePropertyMapper("GridItemColSelfAlignment", StylePropertyMappers.GridItemMapper),
+                new StylePropertyMapper("GridItemRowSelfAlignment", StylePropertyMappers.GridItemMapper),
 
-            new StylePropertyMapper("GridLayoutDirection", StylePropertyMappers.GridLayoutMapper),
-            new StylePropertyMapper("GridLayoutDensity", StylePropertyMappers.GridLayoutMapper),
-            new StylePropertyMapper("GridLayoutColTemplate", StylePropertyMappers.GridLayoutMapper),
-            new StylePropertyMapper("GridLayoutRowTemplate", StylePropertyMappers.GridLayoutMapper),
-            new StylePropertyMapper("GridLayoutColAutoSize", StylePropertyMappers.GridLayoutMapper),
-            new StylePropertyMapper("GridLayoutRowAutoSize", StylePropertyMappers.GridLayoutMapper),
-            new StylePropertyMapper("GridLayoutColGap", StylePropertyMappers.GridLayoutMapper),
-            new StylePropertyMapper("GridLayoutRowGap", StylePropertyMappers.GridLayoutMapper),
-            new StylePropertyMapper("GridLayoutColAlignment", StylePropertyMappers.GridLayoutMapper),
-            new StylePropertyMapper("GridLayoutRowAlignment", StylePropertyMappers.GridLayoutMapper),
+                new StylePropertyMapper("GridLayoutDirection", StylePropertyMappers.GridLayoutMapper),
+                new StylePropertyMapper("GridLayoutDensity", StylePropertyMappers.GridLayoutMapper),
+                new StylePropertyMapper("GridLayoutColTemplate", StylePropertyMappers.GridLayoutMapper),
+                new StylePropertyMapper("GridLayoutRowTemplate", StylePropertyMappers.GridLayoutMapper),
+                new StylePropertyMapper("GridLayoutColAutoSize", StylePropertyMappers.GridLayoutMapper),
+                new StylePropertyMapper("GridLayoutRowAutoSize", StylePropertyMappers.GridLayoutMapper),
+                new StylePropertyMapper("GridLayoutColGap", StylePropertyMappers.GridLayoutMapper),
+                new StylePropertyMapper("GridLayoutRowGap", StylePropertyMappers.GridLayoutMapper),
+                new StylePropertyMapper("GridLayoutColAlignment", StylePropertyMappers.GridLayoutMapper),
+                new StylePropertyMapper("GridLayoutRowAlignment", StylePropertyMappers.GridLayoutMapper),
 
-            new StylePropertyMapper("FlexLayoutWrap", StylePropertyMappers.FlexLayoutMapper),
-            new StylePropertyMapper("FlexLayoutDirection", StylePropertyMappers.FlexLayoutMapper),
-            new StylePropertyMapper("FlexLayoutMainAxisAlignment", StylePropertyMappers.FlexLayoutMapper),
-            new StylePropertyMapper("FlexLayoutCrossAxisAlignment", StylePropertyMappers.FlexLayoutMapper),
+                new StylePropertyMapper("FlexLayoutWrap", StylePropertyMappers.FlexLayoutMapper),
+                new StylePropertyMapper("FlexLayoutDirection", StylePropertyMappers.FlexLayoutMapper),
+                new StylePropertyMapper("FlexLayoutMainAxisAlignment", StylePropertyMappers.FlexLayoutMapper),
+                new StylePropertyMapper("FlexLayoutCrossAxisAlignment", StylePropertyMappers.FlexLayoutMapper),
 
-            new StylePropertyMapper("FlexItemSelfAlignment", StylePropertyMappers.FlexItemMapper),
-            new StylePropertyMapper("FlexItemOrder", StylePropertyMappers.FlexItemMapper),
-            new StylePropertyMapper("FlexItemGrow", StylePropertyMappers.FlexItemMapper),
-            new StylePropertyMapper("FlexItemShrink", StylePropertyMappers.FlexItemMapper),
+                new StylePropertyMapper("FlexItemSelfAlignment", StylePropertyMappers.FlexItemMapper),
+                new StylePropertyMapper("FlexItemOrder", StylePropertyMappers.FlexItemMapper),
+                new StylePropertyMapper("FlexItemGrow", StylePropertyMappers.FlexItemMapper),
+                new StylePropertyMapper("FlexItemShrink", StylePropertyMappers.FlexItemMapper),
 
-            new StylePropertyMapper("Margin", StylePropertyMappers.MarginMapper),
-            new StylePropertyMapper("MarginTop", StylePropertyMappers.MarginMapper),
-            new StylePropertyMapper("MarginRight", StylePropertyMappers.MarginMapper),
-            new StylePropertyMapper("MarginBottom", StylePropertyMappers.MarginMapper),
-            new StylePropertyMapper("MarginLeft", StylePropertyMappers.MarginMapper),
+                new StylePropertyMapper("Margin", StylePropertyMappers.MarginMapper),
+                new StylePropertyMapper("MarginTop", StylePropertyMappers.MarginMapper),
+                new StylePropertyMapper("MarginRight", StylePropertyMappers.MarginMapper),
+                new StylePropertyMapper("MarginBottom", StylePropertyMappers.MarginMapper),
+                new StylePropertyMapper("MarginLeft", StylePropertyMappers.MarginMapper),
 
-            new StylePropertyMapper("Border", StylePropertyMappers.PaddingBorderMapper),
-            new StylePropertyMapper("BorderTop", StylePropertyMappers.PaddingBorderMapper),
-            new StylePropertyMapper("BorderRight", StylePropertyMappers.PaddingBorderMapper),
-            new StylePropertyMapper("BorderBottom", StylePropertyMappers.PaddingBorderMapper),
-            new StylePropertyMapper("BorderLeft", StylePropertyMappers.PaddingBorderMapper),
+                new StylePropertyMapper("Border", StylePropertyMappers.PaddingBorderMapper),
+                new StylePropertyMapper("BorderTop", StylePropertyMappers.PaddingBorderMapper),
+                new StylePropertyMapper("BorderRight", StylePropertyMappers.PaddingBorderMapper),
+                new StylePropertyMapper("BorderBottom", StylePropertyMappers.PaddingBorderMapper),
+                new StylePropertyMapper("BorderLeft", StylePropertyMappers.PaddingBorderMapper),
 
-            new StylePropertyMapper("Padding", StylePropertyMappers.PaddingBorderMapper),
-            new StylePropertyMapper("PaddingTop", StylePropertyMappers.PaddingBorderMapper),
-            new StylePropertyMapper("PaddingRight", StylePropertyMappers.PaddingBorderMapper),
-            new StylePropertyMapper("PaddingBottom", StylePropertyMappers.PaddingBorderMapper),
-            new StylePropertyMapper("PaddingLeft", StylePropertyMappers.PaddingBorderMapper),
+                new StylePropertyMapper("Padding", StylePropertyMappers.PaddingBorderMapper),
+                new StylePropertyMapper("PaddingTop", StylePropertyMappers.PaddingBorderMapper),
+                new StylePropertyMapper("PaddingRight", StylePropertyMappers.PaddingBorderMapper),
+                new StylePropertyMapper("PaddingBottom", StylePropertyMappers.PaddingBorderMapper),
+                new StylePropertyMapper("PaddingLeft", StylePropertyMappers.PaddingBorderMapper),
 
-            new StylePropertyMapper("BorderRadius", StylePropertyMappers.BorderRadiusMapper),
-            new StylePropertyMapper("BorderRadiusTopLeft", StylePropertyMappers.BorderRadiusMapper),
-            new StylePropertyMapper("BorderRadiusTopRight", StylePropertyMappers.BorderRadiusMapper),
-            new StylePropertyMapper("BorderRadiusBottomLeft", StylePropertyMappers.BorderRadiusMapper),
-            new StylePropertyMapper("BorderRadiusBottomRight", StylePropertyMappers.BorderRadiusMapper),
+                new StylePropertyMapper("BorderRadius", StylePropertyMappers.BorderRadiusMapper),
+                new StylePropertyMapper("BorderRadiusTopLeft", StylePropertyMappers.BorderRadiusMapper),
+                new StylePropertyMapper("BorderRadiusTopRight", StylePropertyMappers.BorderRadiusMapper),
+                new StylePropertyMapper("BorderRadiusBottomLeft", StylePropertyMappers.BorderRadiusMapper),
+                new StylePropertyMapper("BorderRadiusBottomRight", StylePropertyMappers.BorderRadiusMapper),
 
-            new StylePropertyMapper("TransformPosition", StylePropertyMappers.TransformMapper),
-            new StylePropertyMapper("TransformPositionX", StylePropertyMappers.TransformMapper),
-            new StylePropertyMapper("TransformPositionY", StylePropertyMappers.TransformMapper),
-            new StylePropertyMapper("TransformScale", StylePropertyMappers.TransformMapper),
-            new StylePropertyMapper("TransformScaleX", StylePropertyMappers.TransformMapper),
-            new StylePropertyMapper("TransformScaleY", StylePropertyMappers.TransformMapper),
-            new StylePropertyMapper("TransformPivot", StylePropertyMappers.TransformMapper),
-            new StylePropertyMapper("TransformPivotX", StylePropertyMappers.TransformMapper),
-            new StylePropertyMapper("TransformPivotY", StylePropertyMappers.TransformMapper),
-            new StylePropertyMapper("TransformRotation", StylePropertyMappers.TransformMapper),
-            new StylePropertyMapper("TransformBehavior", StylePropertyMappers.TransformMapper),
-            new StylePropertyMapper("TransformBehaviorX", StylePropertyMappers.TransformMapper),
-            new StylePropertyMapper("TransformBehaviorY", StylePropertyMappers.TransformMapper),
+                new StylePropertyMapper("TransformPosition", StylePropertyMappers.TransformMapper),
+                new StylePropertyMapper("TransformPositionX", StylePropertyMappers.TransformMapper),
+                new StylePropertyMapper("TransformPositionY", StylePropertyMappers.TransformMapper),
+                new StylePropertyMapper("TransformScale", StylePropertyMappers.TransformMapper),
+                new StylePropertyMapper("TransformScaleX", StylePropertyMappers.TransformMapper),
+                new StylePropertyMapper("TransformScaleY", StylePropertyMappers.TransformMapper),
+                new StylePropertyMapper("TransformPivot", StylePropertyMappers.TransformMapper),
+                new StylePropertyMapper("TransformPivotX", StylePropertyMappers.TransformMapper),
+                new StylePropertyMapper("TransformPivotY", StylePropertyMappers.TransformMapper),
+                new StylePropertyMapper("TransformRotation", StylePropertyMappers.TransformMapper),
+                new StylePropertyMapper("TransformBehavior", StylePropertyMappers.TransformMapper),
+                new StylePropertyMapper("TransformBehaviorX", StylePropertyMappers.TransformMapper),
+                new StylePropertyMapper("TransformBehaviorY", StylePropertyMappers.TransformMapper),
 
-            new StylePropertyMapper("MinWidth", StylePropertyMappers.SizeMapper),
-            new StylePropertyMapper("MaxWidth", StylePropertyMappers.SizeMapper),
-            new StylePropertyMapper("PreferredWidth", StylePropertyMappers.SizeMapper),
-            new StylePropertyMapper("MinHeight", StylePropertyMappers.SizeMapper),
-            new StylePropertyMapper("MaxHeight", StylePropertyMappers.SizeMapper),
-            new StylePropertyMapper("PreferredHeight", StylePropertyMappers.SizeMapper),
+                new StylePropertyMapper("MinWidth", StylePropertyMappers.SizeMapper),
+                new StylePropertyMapper("MaxWidth", StylePropertyMappers.SizeMapper),
+                new StylePropertyMapper("PreferredWidth", StylePropertyMappers.SizeMapper),
+                new StylePropertyMapper("MinHeight", StylePropertyMappers.SizeMapper),
+                new StylePropertyMapper("MaxHeight", StylePropertyMappers.SizeMapper),
+                new StylePropertyMapper("PreferredHeight", StylePropertyMappers.SizeMapper),
 
-            new StylePropertyMapper("LayoutType", StylePropertyMappers.LayoutMapper),
-            new StylePropertyMapper("LayoutBehavior", StylePropertyMappers.LayoutMapper),
-            new StylePropertyMapper("AnchorTop", StylePropertyMappers.LayoutMapper),
-            new StylePropertyMapper("AnchorRight", StylePropertyMappers.LayoutMapper),
-            new StylePropertyMapper("AnchorBottom", StylePropertyMappers.LayoutMapper),
-            new StylePropertyMapper("AnchorLeft", StylePropertyMappers.LayoutMapper),
-            new StylePropertyMapper("AnchorTarget", StylePropertyMappers.LayoutMapper),
-            new StylePropertyMapper("ZIndex", StylePropertyMappers.LayoutMapper),
-            new StylePropertyMapper("RenderLayer", StylePropertyMappers.LayoutMapper),
-            new StylePropertyMapper("RenderLayerOffset", StylePropertyMappers.LayoutMapper),
+                new StylePropertyMapper("LayoutType", StylePropertyMappers.LayoutMapper),
+                new StylePropertyMapper("LayoutBehavior", StylePropertyMappers.LayoutMapper),
+                new StylePropertyMapper("AnchorTop", StylePropertyMappers.LayoutMapper),
+                new StylePropertyMapper("AnchorRight", StylePropertyMappers.LayoutMapper),
+                new StylePropertyMapper("AnchorBottom", StylePropertyMappers.LayoutMapper),
+                new StylePropertyMapper("AnchorLeft", StylePropertyMappers.LayoutMapper),
+                new StylePropertyMapper("AnchorTarget", StylePropertyMappers.LayoutMapper),
+                new StylePropertyMapper("ZIndex", StylePropertyMappers.LayoutMapper),
+                new StylePropertyMapper("RenderLayer", StylePropertyMappers.LayoutMapper),
+                new StylePropertyMapper("RenderLayerOffset", StylePropertyMappers.LayoutMapper),
 
-            new StylePropertyMapper("TextColor", StylePropertyMappers.TextMapper),
-            new StylePropertyMapper("TextFontAsset", StylePropertyMappers.TextMapper),
-            new StylePropertyMapper("TextFontSize", StylePropertyMappers.TextMapper),
-            new StylePropertyMapper("TextFontStyle", StylePropertyMappers.TextMapper),
-            new StylePropertyMapper("TextAnchor", StylePropertyMappers.TextMapper),
-            new StylePropertyMapper("TextWhitespaceMode", StylePropertyMappers.TextMapper),
-            new StylePropertyMapper("TextWrapMode", StylePropertyMappers.TextMapper),
-            new StylePropertyMapper("TextHorizontalOverflow", StylePropertyMappers.TextMapper),
-            new StylePropertyMapper("TextVerticalOverflow", StylePropertyMappers.TextMapper),
-            new StylePropertyMapper("TextIndentFirstLine", StylePropertyMappers.TextMapper),
-            new StylePropertyMapper("TextIndentNewLine", StylePropertyMappers.TextMapper),
-            new StylePropertyMapper("TextLayoutStyle", StylePropertyMappers.TextMapper),
-            new StylePropertyMapper("TextAutoSize", StylePropertyMappers.TextMapper),
-            new StylePropertyMapper("TextTransform", StylePropertyMappers.TextMapper),
+                new StylePropertyMapper("TextColor", StylePropertyMappers.TextMapper),
+                new StylePropertyMapper("TextFontAsset", StylePropertyMappers.TextMapper),
+                new StylePropertyMapper("TextFontSize", StylePropertyMappers.TextMapper),
+                new StylePropertyMapper("TextFontStyle", StylePropertyMappers.TextMapper),
+                new StylePropertyMapper("TextAnchor", StylePropertyMappers.TextMapper),
+                new StylePropertyMapper("TextWhitespaceMode", StylePropertyMappers.TextMapper),
+                new StylePropertyMapper("TextWrapMode", StylePropertyMappers.TextMapper),
+                new StylePropertyMapper("TextHorizontalOverflow", StylePropertyMappers.TextMapper),
+                new StylePropertyMapper("TextVerticalOverflow", StylePropertyMappers.TextMapper),
+                new StylePropertyMapper("TextIndentFirstLine", StylePropertyMappers.TextMapper),
+                new StylePropertyMapper("TextIndentNewLine", StylePropertyMappers.TextMapper),
+                new StylePropertyMapper("TextLayoutStyle", StylePropertyMappers.TextMapper),
+                new StylePropertyMapper("TextAutoSize", StylePropertyMappers.TextMapper),
+                new StylePropertyMapper("TextTransform", StylePropertyMappers.TextMapper),
+
+                new StylePropertyMapper("BackgroundFillType", null),
+                new StylePropertyMapper("BackgroundShapeType", null),
+                new StylePropertyMapper("BackgroundSecondaryColor", null),
+                new StylePropertyMapper("BackgroundGradientStart", null),
+                new StylePropertyMapper("BackgroundGradientAxis", null),
+                new StylePropertyMapper("BackgroundGradientType", null),
+                new StylePropertyMapper("BackgroundFillRotation", null),
+                new StylePropertyMapper("BackgroundFillOffset", null),
+                new StylePropertyMapper("BackgroundGridSize", null),
+                new StylePropertyMapper("BackgroundLineSize", null),
+            };
             
-            new StylePropertyMapper("BackgroundFillType", null), 
-            new StylePropertyMapper("BackgroundShapeType", null), 
-            new StylePropertyMapper("BackgroundSecondaryColor", null), 
-            new StylePropertyMapper("BackgroundGradientStart", null), 
-            new StylePropertyMapper("BackgroundGradientAxis", null), 
-            new StylePropertyMapper("BackgroundGradientType", null), 
-            new StylePropertyMapper("BackgroundFillRotation", null), 
-            new StylePropertyMapper("BackgroundFillOffset", null), 
-            new StylePropertyMapper("BackgroundGridSize", null), 
-            new StylePropertyMapper("BackgroundLineSize", null), 
-        };
+            
+            s_CompiledStyles = new Dictionary<string, ParsedStyleSheet>();
+            for (int i = 0; i < sStyleIdentifiers.Length; i++) {
+                s_StylePropertyMappers[sStyleIdentifiers[i].propertyName.ToLower()] = sStyleIdentifiers[i].mapFn;
+            }
+        }
 
         private struct StylePropertyMapper {
 

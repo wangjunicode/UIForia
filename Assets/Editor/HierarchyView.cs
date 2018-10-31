@@ -4,32 +4,43 @@ using UnityEditor.IMGUI.Controls;
 using System.Collections.Generic;
 using UnityEditor;
 using UnityEngine;
-using ElementTreeItem = System.ValueTuple<UIElement, UnityEditor.IMGUI.Controls.TreeViewItem>;
 
 public class HierarchyView : TreeView {
 
     public UIView view;
     public UIElement rootElement;
-    public RectTransform viewTransform;
 
+    public event Action<UIElement> onSelectionChanged;
+    
+    public class ElementTreeItem : TreeViewItem {
+
+        public UIElement element;
+        public bool isExpanded;
+        public bool isTemplate;
+
+        public ElementTreeItem(UIElement element) : base(element.id, element.depth) {
+            this.element = element;
+        }
+
+    }
+    
     public HierarchyView(UIElement rootElement, TreeViewState state) : base(state) {
         this.rootElement = rootElement;
     }
 
     public HierarchyView(TreeViewState state, MultiColumnHeader multiColumnHeader) : base(state, multiColumnHeader) { }
-
+    
     protected override TreeViewItem BuildRoot() {
         Stack<ElementTreeItem> stack = StackPool<ElementTreeItem>.Get();
 
         TreeViewItem root = new TreeViewItem(-9999, -1);
-        TreeViewItem firstChild = new TreeViewItem(rootElement.id, rootElement.depth);
+        ElementTreeItem firstChild = new ElementTreeItem(rootElement);
         firstChild.displayName = rootElement.ToString();
-        stack.Push(ValueTuple.Create(rootElement, firstChild));
+        stack.Push(firstChild);
 
         while (stack.Count > 0) {
             ElementTreeItem current = stack.Pop();
-            UIElement element = current.Item1;
-            TreeViewItem item = current.Item2;
+            UIElement element = current.element;
 
             UIElement[] ownChildren = element.ownChildren;
 
@@ -38,11 +49,10 @@ public class HierarchyView : TreeView {
             }
 
             for (int i = 0; i < ownChildren.Length; i++) {
-                TreeViewItem childItem = new TreeViewItem(ownChildren[i].id);
+                ElementTreeItem childItem = new ElementTreeItem(ownChildren[i]);
                 childItem.displayName = ownChildren[i].ToString();
-
-                item.AddChild(childItem);
-                stack.Push(ValueTuple.Create(ownChildren[i], childItem));
+                current.AddChild(childItem);
+                stack.Push(childItem);
             }
         }
 
@@ -57,6 +67,7 @@ public class HierarchyView : TreeView {
     protected override void SelectionChanged(IList<int> selectedIds) {
         int id = selectedIds[0];
         UIElement element = view.GetElement(id);
+        onSelectionChanged?.Invoke(element);
     }
 
     public void OnSceneGUI() {

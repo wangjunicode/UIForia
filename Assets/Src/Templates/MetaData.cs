@@ -31,7 +31,7 @@ namespace Src {
         // of having so many fields on these objects is worth it
         public Binding[] bindings;
         public Binding[] constantBindings;
-        public List<UIBaseStyleGroup> baseStyles;
+        public List<UIStyleGroup> baseStyles;
         public List<StyleBinding> constantStyleBindings;
         
         // cannot combine handlers because the arrays are shared and used directly by the input system

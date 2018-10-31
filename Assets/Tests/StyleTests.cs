@@ -3,6 +3,7 @@ using System.Reflection;
 using NUnit.Framework;
 using Rendering;
 using Src;
+using Src.Rendering;
 using Src.Systems;
 using Tests.Mocks;
 using UnityEditor.VersionControl;
@@ -194,7 +195,10 @@ public class StyleTests {
             UIStyle baseStyle = new UIStyle();
             SetStyleValue(baseStyle, propName, 5);
 
-            root.style.AddBaseStyle(baseStyle, StyleState.Normal);
+            UIStyleGroup group = new UIStyleGroup();
+            group.name = "Name";
+            group.normal = baseStyle;
+            root.style.AddStyleGroup(group);
 
             Assert.AreEqual(5, ComputedValue<int>(root, propName));
 
@@ -217,8 +221,10 @@ public class StyleTests {
             SetStyleValue(baseStyle, propName, 5);
 
             CallMethod(root.style, setFnName, 15, StyleState.Normal);
-            root.style.AddBaseStyle(baseStyle, StyleState.Normal);
-
+            UIStyleGroup group = new UIStyleGroup();
+            group.name = "Name";
+            group.normal = baseStyle;
+            root.style.AddStyleGroup(group);
             Assert.AreEqual(15, ComputedValue<int>(root, propName));
 
             root.style.RemoveBaseStyle(baseStyle);
@@ -239,8 +245,10 @@ public class StyleTests {
             SetStyleValue(baseStyle, propName, 5);
 
             CallMethod(root.style, setFnName, 15, StyleState.Hover);
-            root.style.AddBaseStyle(baseStyle, StyleState.Normal);
-
+            UIStyleGroup group = new UIStyleGroup();
+            group.name = "Name";
+            group.normal = baseStyle;
+            root.style.AddStyleGroup(group);
             Assert.AreEqual(5, ComputedValue<int>(root, propName));
 
             root.style.EnterState(StyleState.Hover);
@@ -361,8 +369,10 @@ public class StyleTests {
             UIStyle baseStyle = new UIStyle();
             SetStyleValue(baseStyle, propName, new UIMeasurement(5000));
 
-            root.style.AddBaseStyle(baseStyle, StyleState.Normal);
-
+            UIStyleGroup group = new UIStyleGroup();
+            group.name = "Name";
+            group.normal = baseStyle;
+            root.style.AddStyleGroup(group);
             Assert.AreEqual(new UIMeasurement(5000), ComputedValue<UIMeasurement>(root, propName));
 
             root.style.RemoveBaseStyle(baseStyle);
@@ -384,8 +394,10 @@ public class StyleTests {
             SetStyleValue(baseStyle, propName, new UIMeasurement(5000));
 
             CallMethod(root.style, setFnName, new UIMeasurement(1500), StyleState.Normal);
-            root.style.AddBaseStyle(baseStyle, StyleState.Normal);
-
+            UIStyleGroup group = new UIStyleGroup();
+            group.name = "Name";
+            group.normal = baseStyle;
+            root.style.AddStyleGroup(group);
             Assert.AreEqual(new UIMeasurement(1500), ComputedValue<UIMeasurement>(root, propName));
 
             root.style.RemoveBaseStyle(baseStyle);
@@ -406,8 +418,10 @@ public class StyleTests {
             SetStyleValue(baseStyle, propName, new UIMeasurement(500));
 
             CallMethod(root.style, setFnName, new UIMeasurement(1500), StyleState.Hover);
-            root.style.AddBaseStyle(baseStyle, StyleState.Normal);
-
+            UIStyleGroup group = new UIStyleGroup();
+            group.name = "Name";
+            group.normal = baseStyle;
+            root.style.AddStyleGroup(group);
             Assert.AreEqual(new UIMeasurement(500), ComputedValue<UIMeasurement>(root, propName));
 
             root.style.EnterState(StyleState.Hover);

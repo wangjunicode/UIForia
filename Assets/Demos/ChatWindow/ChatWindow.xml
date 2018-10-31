@@ -16,16 +16,20 @@
             TransformPositionY = 500px;
             PreferredWidth = 300px;
             PreferredHeight = 40px;
+            <!--PreferredSize = 300px, 400px;-->
             BorderColor = black;
-            Border = 1px;
+            <!--Border = 1px white 4px;-->
             BackgroundColor = red;
             BorderRadius = 8px;
             Padding = 8px;
+            <!-- Layout = Flex Row Center, Center, nowrap, -->
             FlexLayoutMainAxisAlignment = Center;
+        
             [focused] {
                 BackgroundColor = white;
                 BorderColor = #0095ff;
             }
+        
         }
         
         style text {
@@ -35,7 +39,30 @@
         
     </Style>
 
-
+    <!--Template {-->
+        <!--string name;-->
+        <!--Import[] imports;-->
+        <!--Style[] styles;-->
+        <!--IntMap<CreationData> data;-->
+        <!--IntMap<int> repeatMap; -> link from repeat child to creation data -->
+    <!--}-->
+    <!---->
+    <!--struct TemplateElementId {-->
+        <!--ushort templateId; // 10 = 512, 11 = 1024, 12 = 2048, -->
+        <!--ushort templateParentId;-->
+        <!--get / set bindings-->
+        <!--get / set attributes-->
+        <!--get / set styles-->
+        <!--bit isRepeatChild / isGenerated (manual creation) -> id = parent template id-->
+    <!---->
+        <!--// element.template.FindById();-->
+        <!--// element.template.FindByType();-->
+        <!--// element.template.FindWhere();-->
+    <!---->
+    <!--}-->
+    <!---->
+    <!--// element Id = (templateId, templateElementId = is repeat child? repeatId + , elementId)-->
+    
     <Contents style="container">
 
 

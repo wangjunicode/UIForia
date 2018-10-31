@@ -40,7 +40,7 @@ namespace Src.Systems {
             }
 
             UITemplateContext context = elementData.context;
-            List<UIBaseStyleGroup> baseStyles = elementData.baseStyles;
+            List<UIStyleGroup> baseStyles = elementData.baseStyles;
             List<StyleBinding> constantStyleBindings = elementData.constantStyleBindings;
 
             element.style = new UIStyleSet(element, this);
@@ -49,7 +49,7 @@ namespace Src.Systems {
             }
 
             for (int i = 0; i < baseStyles.Count; i++) {
-                element.style.AddBaseStyleGroup(baseStyles[i]);
+                element.style.AddStyleGroup(baseStyles[i]);
             }
 
             element.style.Initialize();

@@ -1,7 +1,10 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project version="4">
   <component name="ContentModelStore">
-    <e p="C:\Seed\UIElements" t="IncludeRecursive">
+    <e p="C:\Users\matth\.Rider2018.2\config\extensions" t="IncludeRecursive" />
+    <e p="C:\Users\matth\.Rider2018.2\system\extResources" t="IncludeRecursive" />
+    <e p="C:\Users\matth\.Rider2018.2\system\resharper-host\local\Transient\ReSharperHost\v182\SolutionCaches\_UIElements.-1987582547.00" t="ExcludeRecursive" />
+    <e p="C:\Users\matth\RiderProjects\UIElements" t="IncludeRecursive">
       <e p="_DemoAsmDef.csproj" t="IncludeRecursive" />
       <e p="Assembly-CSharp-Editor.csproj" t="IncludeRecursive" />
       <e p="Assets" t="Include">
@@ -68,11 +71,14 @@
           <e p="BorderedImageInspector.cs" t="Include" />
           <e p="CameraViewer.cs" t="Include" />
           <e p="DebuggerWindow.cs" t="Include" />
+          <e p="GUIRect.cs" t="Include" />
           <e p="HierarchyView.cs" t="Include" />
           <e p="RefreshTemplates.cs" t="Include" />
           <e p="StyleDebugView.cs" t="Include" />
-          <e p="UIForiaWindow.cs" t="Include" />
+          <e p="UIForiaHierarchyWindow.cs" t="Include" />
+          <e p="UIForiaInspectorWindow.cs" t="Include" />
           <e p="UIViewWindow.cs" t="Include" />
+          <e p="WindowMenuItems.cs" t="Include" />
         </e>
         <e p="Shapes2D" t="Include">
           <e p="Editor" t="Include">
@@ -222,6 +228,7 @@
             <e p="Panel.cs" t="Include" />
             <e p="ScrollbarDragEvent.cs" t="Include" />
             <e p="ScrollbarOrientation.cs" t="Include" />
+            <e p="TemplateReference.cs" t="Include" />
             <e p="UIContainerElement.cs" t="Include" />
             <e p="UIElement.cs" t="Include" />
             <e p="UIElementFlags.cs" t="Include" />
@@ -423,12 +430,12 @@
             <e p="TextOverflow.cs" t="Include" />
             <e p="TextStyle.cs" t="Include" />
             <e p="TransformBehavior.cs" t="Include" />
-            <e p="UIBaseStyleGroup.cs" t="Include" />
             <e p="UIFixedLength.cs" t="Include" />
             <e p="UIFixedUnit.cs" t="Include" />
             <e p="UIGameObjectView.cs" t="Include" />
             <e p="UIMeasurement.cs" t="Include" />
             <e p="UIStyle.cs" t="Include" />
+            <e p="UIStyleGroup.cs" t="Include" />
             <e p="UIStyleSet" t="Include">
               <e p="StyleState.cs" t="Include" />
               <e p="UIStyleSet.BorderRadius.cs" t="Include" />
@@ -624,8 +631,5 @@
       <e p="TestAsm.csproj" t="IncludeRecursive" />
       <e p="UIElements.sln" t="IncludeFlat" />
     </e>
-    <e p="C:\Users\Matt\.Rider2018.2\config\extensions" t="IncludeRecursive" />
-    <e p="C:\Users\Matt\.Rider2018.2\system\extResources" t="IncludeRecursive" />
-    <e p="C:\Users\Matt\.Rider2018.2\system\resharper-host\local\Transient\ReSharperHost\v182\SolutionCaches\_UIElements.1439856042.00" t="ExcludeRecursive" />
   </component>
 </project>

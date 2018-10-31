@@ -66,7 +66,7 @@ namespace Src.Parsing.StyleParser {
                 throw new ParseException("Expected a valid style identifier while parsing style: " + input.Substring(ptr));
             }
 
-            return retn;
+            return retn.Trim();
         }
 
         public static string ReadBlockOrThrow(string input, ref int ptr, char open, char close) {

@@ -149,7 +149,7 @@ namespace Src {
             output.imports = imports;
 
             foreach (XElement styleElement in styleElements) {
-                styleTemplates.Add(ParseStyleSheet(output.templateId, styleElement));
+                styleTemplates.Add(ParseStyleSheet(output.templatePath, styleElement));
             }
 
             output.SetStyleGroups(styleTemplates);

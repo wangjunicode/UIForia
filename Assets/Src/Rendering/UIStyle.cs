@@ -65,6 +65,7 @@ namespace Rendering {
 
         public IReadOnlyList<StyleProperty> Properties => m_StyleProperties;
 
+
 #region Overflow Properties
 
         public Overflow OverflowX {

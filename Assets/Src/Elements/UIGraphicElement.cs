@@ -48,7 +48,11 @@ namespace Src.Elements {
         public void SetMesh(Mesh mesh) {
             this.mesh = mesh;
             MarkGeometryDirty();
-        }      
+        }
+
+        protected override string GetDisplayName() {
+            return "Graphic";
+        }
 
     }
 

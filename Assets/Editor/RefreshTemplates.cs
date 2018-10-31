@@ -13,6 +13,7 @@ namespace Src.Editor {
             StyleParser.Reset();
             TemplateParser.Reset();
             UIForia.ResourceManager.Reset();
+            ParsedTemplate.Reset(); // todo -- roll all parsers into one place
             
             List<UIViewBehavior> viewBehaviors = FindObjectOfType<UIViewBehavior>();
             for (int i = 0; i < viewBehaviors.Count; i++) {

@@ -113,6 +113,7 @@ namespace Src {
                     for (int i = 0; i < scopedChildren.Count; i++) {
                         MetaData child = scopedChildren[i];
                         instanceData.element.templateChildren[i] = child.element;
+                        child.element.templateRef = new TemplateReference(instanceData.element.templateRef.templateId, );
                         instanceData.AddChild(child);
                     }
 

@@ -21,24 +21,25 @@ namespace Src {
         public List<UITemplate> childTemplates;
         public readonly List<AttributeDefinition> attributes;
 
-        protected internal Binding[] bindings;
-        protected internal Binding[] constantBindings;
+        public Binding[] bindings;
+        public Binding[] constantBindings;
 
-        protected List<UIBaseStyleGroup> baseStyles;
-        protected List<StyleBinding> constantStyleBindings;
+        public List<UIStyleGroup> baseStyles;
+        public List<StyleBinding> constantStyleBindings;
         
-        protected DragEventCreator[] dragEventCreators;
-        protected DragEventHandler[] dragEventHandlers;
-        protected MouseEventHandler[] mouseEventHandlers;
-        protected KeyboardEventHandler[] keyboardEventHandlers;
+        public DragEventCreator[] dragEventCreators;
+        public DragEventHandler[] dragEventHandlers;
+        public MouseEventHandler[] mouseEventHandlers;
+        public KeyboardEventHandler[] keyboardEventHandlers;
         
-        protected List<Binding> bindingList;
-        protected List<ValueTuple<string, string>> templateAttributes;
+        public List<Binding> bindingList;
+        public List<ValueTuple<string, string>> templateAttributes;
 
         public bool acceptFocus;
         private static readonly StyleBindingCompiler styleCompiler = new StyleBindingCompiler(null);
         private static readonly InputBindingCompiler inputCompiler = new InputBindingCompiler(null);
         private static readonly PropertyBindingCompiler propCompiler = new PropertyBindingCompiler(null);
+        public ushort memberId;
 
         public abstract Type elementType { get; }
         
@@ -46,7 +47,7 @@ namespace Src {
             this.childTemplates = childTemplates;
             this.attributes = attributes;
 
-            this.baseStyles = new List<UIBaseStyleGroup>();
+            this.baseStyles = new List<UIStyleGroup>();
             this.bindingList = new List<Binding>();
             this.constantStyleBindings = new List<StyleBinding>();
 
@@ -225,14 +226,14 @@ namespace Src {
             if (styleAttr.value.IndexOf(' ') != -1) {
                 string[] names = styleAttr.value.Split(' ');
                 foreach (string part in names) {
-                    UIBaseStyleGroup style = template.ResolveStyleGroup(part.Trim());
+                    UIStyleGroup style = template.ResolveStyleGroup(part.Trim());
                     if (style != null) {
                         baseStyles.Add(style);
                     }
                 }
             }
             else {
-                UIBaseStyleGroup style = template.ResolveStyleGroup(styleAttr.value);
+                UIStyleGroup style = template.ResolveStyleGroup(styleAttr.value);
                 if (style != null) {
                     baseStyles.Add(style);
                 }

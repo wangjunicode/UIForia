@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using Rendering;
 using Src.Compilers.AliasSources;
 using Src.Parsing.StyleParser;
 using Src.Rendering;
@@ -10,32 +11,41 @@ namespace Src {
 
     public class ParsedTemplate {
 
+        private static readonly IntMap<ParsedTemplate> s_ParsedTemplates = new IntMap<ParsedTemplate>();
         private static readonly List<MetaData> EmptyElementList = new List<MetaData>(0);
 
         public List<ImportDeclaration> imports;
-        public readonly string templateId;
+        public readonly string templatePath;
+        public readonly int templateId;
+
+        private ushort m_MemberIdGenerator; // for elements
+        private static int s_TemplateIdGenerator; // for templates
+        
         public readonly ExpressionCompiler compiler;
         public readonly ContextDefinition contextDefinition;
 
         public readonly UIElementTemplate rootElementTemplate;
 
-        private static int idGenerator;
         private bool isCompiled;
         private List<StyleDefinition> styleGroups;
+
+        private readonly IntMap<UITemplate> m_TemplateMap;
         
         public ParsedTemplate(UIElementTemplate rootElement, string filePath = null) {
-            if (filePath != null) {
-                templateId = filePath;
-            }
-            else {
-                templateId = "Template" + (++idGenerator);
-            }
+            templateId = ++s_TemplateIdGenerator;
+            templatePath = filePath ?? "Template" + templateId;
             this.rootElementTemplate = rootElement;
             this.styleGroups = new List<StyleDefinition>();
             this.contextDefinition = new ContextDefinition(rootElement.RootType);
             this.compiler = new ExpressionCompiler(contextDefinition);
+            this.m_TemplateMap = new IntMap<UITemplate>();
+            s_ParsedTemplates[templateId] = this;
         }
 
+        public static void Reset() {
+            s_ParsedTemplates.Clear();    
+        }
+        
         public List<UITemplate> childTemplates => rootElementTemplate.childTemplates;
 
         // todo -- ensure we have a <Children/> tag somewhere in our template if there are input children
@@ -66,9 +76,10 @@ namespace Src {
                     instanceData.AddChild(template.CreateScoped(scope));
                 }
             }
+            
             instanceData.element.ownChildren = instanceData.children.Select(c => c.element).ToArray();
-
-            AssignContext(instance, scope.context);
+            
+            AssignContext(rootElementTemplate, instance, scope.context);
 
             return instanceData;
         }
@@ -92,17 +103,18 @@ namespace Src {
             rootData.element.templateChildren = rootData.children.Select(c => c.element).ToArray();
             rootData.element.ownChildren = rootData.element.templateChildren;
 
-            AssignContext(instance, scope.context);
+            AssignContext(rootElementTemplate, instance, scope.context);
 
             return rootData;
         }
 
-        private static void AssignContext(UIElement element, UITemplateContext context) {
+        private void AssignContext(UITemplate template, UIElement element, UITemplateContext context) {
             element.templateContext = context;
+            element.templateRef = new TemplateReference((ushort)templateId, template.memberId);
             if (element.templateChildren != null) {
                 for (int i = 0; i < element.templateChildren.Length; i++) {
                     element.templateChildren[i].templateParent = element;
-                    AssignContext(element.templateChildren[i], context);
+                    AssignContext(template.childTemplates[i], element.templateChildren[i], context);
                 }
             }
         }
@@ -121,6 +133,8 @@ namespace Src {
         }
 
         private void CompileStep(UITemplate template) {
+            template.memberId = ++m_MemberIdGenerator;
+            m_TemplateMap[template.memberId] = template;
             template.Compile(this);
             if (template.childTemplates != null) {
                 for (int i = 0; i < template.childTemplates.Count; i++) {
@@ -129,7 +143,7 @@ namespace Src {
             }
         }
 
-        public UIBaseStyleGroup ResolveStyleGroup(string styleName) {
+        public UIStyleGroup ResolveStyleGroup(string styleName) {
             StyleDefinition def;
             // if no dot in path then the style name is the alias
             if (styleName.IndexOf('.') == -1) {
@@ -144,10 +158,6 @@ namespace Src {
 
             def = GetStyleDefinitionFromAlias(path[0]);
             return StyleParser.GetParsedStyle(def.importPath, null, path[0]);
-        }
-
-        public static int MakeId() {
-            return idGenerator++;
         }
 
         public void SetStyleGroups(List<StyleDefinition> styleDefinitions) {
@@ -181,7 +191,15 @@ namespace Src {
             
             throw new UIForia.ParseException("Unable to find a style with the alias: " + alias);
         }
-        
+
+        public static ParsedTemplate GetTemplate(ushort id) {
+            return s_ParsedTemplates.GetOrDefault(id);
+        }
+
+        public UITemplate GetTemplateData(ushort memberId) {
+            return m_TemplateMap.GetOrDefault(memberId);
+        }
+
     }
 
 }

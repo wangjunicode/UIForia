@@ -15,8 +15,9 @@
         
         style chat-log {
             PreferredWidth = 1pca;
-            PreferredHeight = 0;
+            PreferredHeight = 600px;
             FlexItemGrow = 1;
+            OverflowY = Scroll;
         }
         
         style chat-input {

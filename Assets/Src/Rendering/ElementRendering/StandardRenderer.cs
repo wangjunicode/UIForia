@@ -134,7 +134,7 @@ namespace Src.Systems {
                 material.SetVector(s_BorderRadiusKey, style.ResolvedBorderRadius);
                 material.SetVector(s_BorderColorKey, style.BorderColor);
                 material.SetVector(s_SizeKey, new Vector4(size.width, size.height, 0, 0));
-                Graphics.DrawMesh(data.mesh, origin + data.renderPosition, Quaternion.identity, material, 0, camera, 0, null, false, false, false);
+                Graphics.DrawMesh(data.mesh, origin + data.renderPosition, Quaternion.AngleAxis(style.TransformRotation, Vector3.forward), material, 0, camera, 0, null, false, false, false);
             }
         }
 

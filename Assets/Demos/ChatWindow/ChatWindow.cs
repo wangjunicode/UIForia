@@ -16,7 +16,13 @@ namespace Demo {
             TextAsset json = Resources.Load<TextAsset>("ChatData");
             chatData = JsonUtility.FromJson<ChatData>(json.text);
             selectedChatGroup = 0;
+            
+            UIElement child = FindById("child-to-animate");
+            if (child != null) {
+                child.style.PlayAnimation(ChatWindow_Styles.KeyFrameAnimateTransform());
+            }
         }
+        
 
     }
 

@@ -18,8 +18,7 @@ namespace Src {
         public readonly string templatePath;
         public readonly int templateId;
 
-        private ushort m_MemberIdGenerator; // for elements
-        private static int s_TemplateIdGenerator; // for templates
+        private static int s_TemplateIdGenerator;
         
         public readonly ExpressionCompiler compiler;
         public readonly ContextDefinition contextDefinition;
@@ -110,7 +109,7 @@ namespace Src {
 
         private void AssignContext(UITemplate template, UIElement element, UITemplateContext context) {
             element.templateContext = context;
-            element.templateRef = new TemplateReference((ushort)templateId, template.memberId);
+            element.templateRef = new TemplateReference((ushort)templateId, template.id);
             if (element.templateChildren != null) {
                 for (int i = 0; i < element.templateChildren.Length; i++) {
                     element.templateChildren[i].templateParent = element;
@@ -133,8 +132,7 @@ namespace Src {
         }
 
         private void CompileStep(UITemplate template) {
-            template.memberId = ++m_MemberIdGenerator;
-            m_TemplateMap[template.memberId] = template;
+            m_TemplateMap[template.id] = template;
             template.Compile(this);
             if (template.childTemplates != null) {
                 for (int i = 0; i < template.childTemplates.Count; i++) {

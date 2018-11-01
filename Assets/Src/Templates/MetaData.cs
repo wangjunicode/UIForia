@@ -14,7 +14,7 @@ namespace Src {
     // itself and the context, all other fields are references
     // to lists setup via template.Compile()
 
-    // todo -- pool these
+    // todo -- reduce this to be a pair of <UIElement, UIElementTemplate>
     [DebuggerDisplay("{" + nameof(element) + "}")]
     public class MetaData {
 

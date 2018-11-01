@@ -18,14 +18,16 @@ namespace Src {
 
         public const string k_SpecialAttrPrefix = "x-";
         
-        public List<UITemplate> childTemplates;
+        public ushort id;
+        public bool acceptFocus;
+        public readonly List<UITemplate> childTemplates;
         public readonly List<AttributeDefinition> attributes;
 
         public Binding[] bindings;
         public Binding[] constantBindings;
 
-        public List<UIStyleGroup> baseStyles;
-        public List<StyleBinding> constantStyleBindings;
+        public readonly List<UIStyleGroup> baseStyles;
+        public readonly List<StyleBinding> constantStyleBindings;
         
         public DragEventCreator[] dragEventCreators;
         public DragEventHandler[] dragEventHandlers;
@@ -35,18 +37,19 @@ namespace Src {
         public List<Binding> bindingList;
         public List<ValueTuple<string, string>> templateAttributes;
 
-        public bool acceptFocus;
+        
+        private static ushort s_IdGenerator;
         private static readonly StyleBindingCompiler styleCompiler = new StyleBindingCompiler(null);
         private static readonly InputBindingCompiler inputCompiler = new InputBindingCompiler(null);
         private static readonly PropertyBindingCompiler propCompiler = new PropertyBindingCompiler(null);
-        public ushort memberId;
 
-        public abstract Type elementType { get; }
         
         protected UITemplate(List<UITemplate> childTemplates, List<AttributeDefinition> attributes = null) {
+            this.id = ++s_IdGenerator;
             this.childTemplates = childTemplates;
             this.attributes = attributes;
 
+            // todo -- remove allocations
             this.baseStyles = new List<UIStyleGroup>();
             this.bindingList = new List<Binding>();
             this.constantStyleBindings = new List<StyleBinding>();
@@ -54,6 +57,8 @@ namespace Src {
             this.bindings = Binding.EmptyArray;
             this.constantBindings = Binding.EmptyArray;
         }
+        
+        public abstract Type elementType { get; }
 
         public MetaData GetCreationData(UIElement element, UITemplateContext context) {
             MetaData data = new MetaData(element, context);

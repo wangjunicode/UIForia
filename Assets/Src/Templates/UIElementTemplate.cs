@@ -28,13 +28,7 @@ namespace Src {
 
         public Type RootType => rootType;
 
-        private enum TemplateType {
-
-            Primitive,
-            Container,
-            Template
-
-        }
+    
 
         public override bool Compile(ParsedTemplate template) {
             
@@ -113,7 +107,6 @@ namespace Src {
                     for (int i = 0; i < scopedChildren.Count; i++) {
                         MetaData child = scopedChildren[i];
                         instanceData.element.templateChildren[i] = child.element;
-                        child.element.templateRef = new TemplateReference(instanceData.element.templateRef.templateId, );
                         instanceData.AddChild(child);
                     }
 
@@ -164,6 +157,14 @@ namespace Src {
             for (int i = 0; i < element.ownChildren.Length; i++) {
                 AssignContext(element.ownChildren[i], context);
             }
+        }
+        
+        private enum TemplateType {
+
+            Primitive,
+            Container,
+            Template
+
         }
 
     }

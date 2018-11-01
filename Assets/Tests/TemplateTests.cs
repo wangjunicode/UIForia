@@ -133,7 +133,6 @@ public class TemplateTests {
 
     [Test]
     public void General_AssignTemplateRef() {
-        ParsedTemplate.Reset();
         MockView view = new MockView(typeof(Thing));
         view.Initialize();
         ParsedTemplate template = view.RootElement.GetTemplate();
@@ -145,7 +144,6 @@ public class TemplateTests {
 
     [Test]
     public void General_ScopedTemplateRef() {
-        ParsedTemplate.Reset();
         MockView view = new MockView(typeof(Thing));
         view.Initialize();
         ParsedTemplate template = view.RootElement.GetTemplate();

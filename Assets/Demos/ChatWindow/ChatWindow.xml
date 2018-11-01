@@ -65,9 +65,7 @@
     
     <Contents style="container">
 
-
         <ChatPanel selectedGroupIdx="{selectedChatGroup}" chatData="{chatData}"/>
-        <!--<Div x-id="child-to-animate" style="bordered"/>-->
     
     </Contents>
 

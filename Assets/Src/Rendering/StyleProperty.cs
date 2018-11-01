@@ -52,6 +52,13 @@ namespace Rendering {
             this.valuePart1 = (int) measurement.unit;
             this.objectField = null;
         }
+        
+        public StyleProperty(StylePropertyId propertyId, GridTrackSize trackSize) {
+            this.propertyId = propertyId;
+            this.valuePart0 = FloatUtil.EncodeToInt(trackSize.minValue);
+            this.valuePart1 = (int) trackSize.minUnit;
+            this.objectField = null;
+        }
 
         public StyleProperty(StylePropertyId propertyId, float floatValue) {
             this.propertyId = propertyId;

@@ -29,8 +29,8 @@ namespace Src.Editor {
         }
 
         private static MethodInfo s_GameWindowSizeMethod;
+        public static UIView UIView;
 
-    
         public void OnEnable() {
             zoomLevel = 0;
             panning = Vector2.zero;
@@ -63,11 +63,13 @@ namespace Src.Editor {
                 playing = true;
                 UIViewBehavior[] views = FindObjectsOfType<UIViewBehavior>();
                 if (views.Length == 0) {
+                    UIView = null;
                     return;
                 }
                 treeView = new HierarchyView(views[0].view.RootElement, state);
                 treeView.onSelectionChanged += OnElementSelectionChanged;
                 targetView = views[0].view;
+                UIView = targetView;
                 needsReload = true;
                 targetView.onElementCreated += OnElementCreated;
                 treeView.view = targetView;
@@ -89,7 +91,7 @@ namespace Src.Editor {
                 if (camera != null) {
                     DestroyImmediate(camera.gameObject);
                 }
-
+                UIView = null;
                 SelectedElement = null;
             }
         }
@@ -185,7 +187,7 @@ namespace Src.Editor {
                     treeView.SetExpandedRecursive(0, true);
                 }
 
-                treeView.OnGUI(GUILayoutUtility.GetRect(0, 10000, 0, 10000));
+                needsReload = treeView.RunGUI();
             }
 
             EditorGUILayout.EndVertical();

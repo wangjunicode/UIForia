@@ -337,7 +337,7 @@ namespace Src.Compilers {
             }
 
             if (key.StartsWith("style.disabled.")) {
-                return new Target(key.Substring("style.disabled.".Length), StyleState.Disabled);
+                return new Target(key.Substring("style.disabled.".Length), StyleState.Inactive);
             }
 
             if (key.StartsWith("style.focused.")) {

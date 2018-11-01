@@ -94,7 +94,7 @@ namespace Rendering {
 
         public Texture2D BackgroundImage {
             get {
-                StyleProperty property = FindProperty(StylePropertyId.BackgroundImage);
+                StyleProperty property = GetProperty(StylePropertyId.BackgroundImage);
                 return property.AsTexture;
             }
             set { SetObjectProperty(StylePropertyId.BackgroundImage, value); }
@@ -569,13 +569,13 @@ namespace Rendering {
         }
 
         public int FontSize {
-            get { return FindProperty(StylePropertyId.TextFontSize).valuePart0; }
+            get { return GetProperty(StylePropertyId.TextFontSize).valuePart0; }
             set { SetIntProperty(StylePropertyId.TextFontSize, value); }
         }
 
         public TMP_FontAsset FontAsset {
             get {
-                StyleProperty property = FindProperty(StylePropertyId.TextFontAsset);
+                StyleProperty property = GetProperty(StylePropertyId.TextFontAsset);
                 return property.IsDefined
                     ? property.AsFont
                     : null;
@@ -748,7 +748,7 @@ namespace Rendering {
             }
         }
 
-        internal StyleProperty FindProperty(StylePropertyId propertyId) {
+        public StyleProperty GetProperty(StylePropertyId propertyId) {
             for (int i = 0; i < m_StyleProperties.Count; i++) {
                 if (m_StyleProperties[i].propertyId == propertyId) {
                     return m_StyleProperties[i];
@@ -759,22 +759,22 @@ namespace Rendering {
         }
 
         private float FindFloatProperty(StylePropertyId propertyId) {
-            StyleProperty property = FindProperty(propertyId);
+            StyleProperty property = GetProperty(propertyId);
             return property.IsDefined ? FloatUtil.DecodeToFloat(property.valuePart0) : FloatUtil.UnsetValue;
         }
 
         private int FindIntProperty(StylePropertyId propertyId) {
-            StyleProperty property = FindProperty(propertyId);
+            StyleProperty property = GetProperty(propertyId);
             return property.IsDefined ? property.valuePart0 : IntUtil.UnsetValue;
         }
 
         private int FindEnumProperty(StylePropertyId propertyId) {
-            StyleProperty property = FindProperty(propertyId);
+            StyleProperty property = GetProperty(propertyId);
             return property.IsDefined ? property.valuePart0 : 0;
         }
 
         private Color FindColorProperty(StylePropertyId propertyId) {
-            StyleProperty property = FindProperty(propertyId);
+            StyleProperty property = GetProperty(propertyId);
             return property.IsDefined ? (Color) new StyleColor(property.valuePart0) : ColorUtil.UnsetValue;
         }
 

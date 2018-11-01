@@ -50,7 +50,7 @@ namespace Src.Elements {
             MarkGeometryDirty();
         }
 
-        protected override string GetDisplayName() {
+        public override string GetDisplayName() {
             return "Graphic";
         }
 

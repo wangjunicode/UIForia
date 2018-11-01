@@ -18,9 +18,8 @@ namespace Rendering {
         Normal = 1 << 0,
         Hover = 1 << 1,
         Active = 1 << 2,
-        Disabled = 1 << 3,
+        Inactive = 1 << 3,
         Focused = 1 << 4,
-        Animation = 1 << 5,
 
     }
 

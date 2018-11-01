@@ -8,8 +8,12 @@ namespace Src.Rendering {
         public UIStyle hover;
         public UIStyle normal;
         public UIStyle active;
-        public UIStyle disabled;
+        public UIStyle inactive;
         public UIStyle focused;
+
+        public bool TryGetValue(StylePropertyId propertyId, out StyleProperty retn) {
+            throw new System.NotImplementedException();
+        }
 
     }
 

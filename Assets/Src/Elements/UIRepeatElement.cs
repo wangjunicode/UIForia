@@ -21,7 +21,7 @@ namespace Src {
             flags &= ~(UIElementFlags.RequiresLayout | UIElementFlags.RequiresRendering);
         }
 
-        protected override string GetDisplayName() {
+        public override string GetDisplayName() {
             return "Repeat";
         }
 

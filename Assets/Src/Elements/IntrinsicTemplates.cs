@@ -5,7 +5,7 @@ namespace Src {
 
     public class UIGroupElement : UIContainerElement {
 
-        protected override string GetDisplayName() {
+        public override string GetDisplayName() {
             return "Group";
         }
 
@@ -13,7 +13,7 @@ namespace Src {
 
     public class UIPanelElement : UIContainerElement {
 
-        protected override string GetDisplayName() {
+        public override string GetDisplayName() {
             return "Panel";
         }
 
@@ -21,7 +21,7 @@ namespace Src {
 
     public class UISectionElement : UIContainerElement {
 
-        protected override string GetDisplayName() {
+        public override string GetDisplayName() {
             return "Section";
         }
 
@@ -29,7 +29,7 @@ namespace Src {
 
     public class UIDivElement : UIContainerElement {
 
-        protected override string GetDisplayName() {
+        public override string GetDisplayName() {
             return "Div";
         }
 
@@ -37,7 +37,7 @@ namespace Src {
 
     public class UIHeaderElement : UIContainerElement {
 
-        protected override string GetDisplayName() {
+        public override string GetDisplayName() {
             return "Header";
         }
 
@@ -45,7 +45,7 @@ namespace Src {
 
     public class UIFooterElement : UIContainerElement {
 
-        protected override string GetDisplayName() {
+        public override string GetDisplayName() {
             return "Footer";
         }
 
@@ -53,7 +53,7 @@ namespace Src {
 
     public class UILabelElement : UITextElement {
 
-        protected override string GetDisplayName() {
+        public override string GetDisplayName() {
             return "Label";
         }
 
@@ -61,7 +61,7 @@ namespace Src {
 
     public class UIParagraphElement : UITextElement {
 
-        protected override string GetDisplayName() {
+        public override string GetDisplayName() {
             return "Paragraph";
         }
 
@@ -69,7 +69,7 @@ namespace Src {
 
     public class UIHeading1Element : UITextElement {
 
-        protected override string GetDisplayName() {
+        public override string GetDisplayName() {
             return "Heading1";
         }
 
@@ -77,7 +77,7 @@ namespace Src {
 
     public class UIHeading2Element : UITextElement {
 
-        protected override string GetDisplayName() {
+        public override string GetDisplayName() {
             return "Heading2";
         }
 
@@ -85,8 +85,7 @@ namespace Src {
 
     public class UIHeading3Element : UITextElement {
 
-        
-        protected override string GetDisplayName() {
+        public override string GetDisplayName() {
             return "Heading3";
         }
 
@@ -94,8 +93,7 @@ namespace Src {
 
     public class UIHeading4Element : UITextElement {
 
-        
-        protected override string GetDisplayName() {
+        public override string GetDisplayName() {
             return "Heading4";
         }
 
@@ -103,8 +101,7 @@ namespace Src {
 
     public class UIHeading5Element : UITextElement {
 
-        
-        protected override string GetDisplayName() {
+        public override string GetDisplayName() {
             return "Heading5";
         }
 
@@ -112,8 +109,7 @@ namespace Src {
 
     public class UIHeading6Element : UITextElement {
 
-        
-        protected override string GetDisplayName() {
+        public override string GetDisplayName() {
             return "Heading6";
         }
 

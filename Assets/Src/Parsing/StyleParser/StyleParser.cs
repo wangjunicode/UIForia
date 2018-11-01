@@ -332,9 +332,9 @@ namespace Src.Parsing.StyleParser {
                         case "normal":
                             context.targetStyle = styleGroup.normal;
                             break;
-                        case "disabled":
-                            styleGroup.disabled = styleGroup.disabled ?? new UIStyle();
-                            context.targetStyle = styleGroup.disabled;
+                        case "inactive":
+                            styleGroup.inactive = styleGroup.inactive ?? new UIStyle();
+                            context.targetStyle = styleGroup.inactive;
                             break;
                         case "focused":
                             styleGroup.focused = styleGroup.focused ?? new UIStyle();
@@ -345,8 +345,8 @@ namespace Src.Parsing.StyleParser {
                             context.targetStyle = styleGroup.hover;
                             break;
                         case "active":
-                            styleGroup.active = styleGroup.active ?? new UIStyle();
-                            context.targetStyle = styleGroup.active;
+                            styleGroup.inactive = styleGroup.inactive ?? new UIStyle();
+                            context.targetStyle = styleGroup.inactive;
                             break;
                         default:
                             throw new ParseException("Unknown style state: " + stateName);

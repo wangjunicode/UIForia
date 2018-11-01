@@ -68,7 +68,7 @@ namespace Src {
             onTextChanged?.Invoke(this, text);
         }
 
-        protected override string GetDisplayName() {
+        public override string GetDisplayName() {
             return "Text";
         }
 
@@ -437,7 +437,8 @@ namespace Src {
                 material.SetFloat(ShaderUtilities.ID_ScaleRatio_C, fontMaterial.GetFloat(ShaderUtilities.ID_ScaleRatio_A));
                 material.SetVector("_TextureSize", new Vector4(material.mainTexture.width, material.mainTexture.height));
             }
-
+            float fontScale = (computedStyle.FontSize / fontAsset.fontInfo.PointSize) * fontAsset.fontInfo.Scale;;
+            material.SetFloat("_FontScale", fontScale);
             // todo -- text styles & keywords, try to use the same materials where possible
 //            material.SetVector("_OutlineColor", computedStyle.TextOutlineColor);
 //            material.SetVector("_OutlineSettings", new Vector4(computedStyle.TextOutlineWidth, computedStyle.TextOutlineSoftness));

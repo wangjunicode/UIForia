@@ -13,7 +13,7 @@ public abstract partial class InputSystem : IInputSystem, IInputProvider {
     private const float k_DragThreshold = 5f;
     private const string k_EventAlias = "$event";
     private const string k_ElementAlias = "$element";
-    
+
     private readonly IStyleSystem m_StyleSystem;
     private readonly ILayoutSystem m_LayoutSystem;
 
@@ -42,6 +42,8 @@ public abstract partial class InputSystem : IInputSystem, IInputProvider {
     private readonly List<ValueTuple<MouseEventHandler, UIElement, UITemplateContext>> m_MouseEventCaptureList;
     private readonly List<ValueTuple<DragEventHandler, UIElement, UITemplateContext>> m_DragEventCaptureList;
     protected static readonly UIElement.DepthComparerAscending s_DepthComparer = new UIElement.DepthComparerAscending();
+
+    public bool debugMode;
 
     protected InputSystem(ILayoutSystem layoutSystem, IStyleSystem styleSystem) {
         this.m_LayoutSystem = layoutSystem;
@@ -72,15 +74,13 @@ public abstract partial class InputSystem : IInputSystem, IInputProvider {
     protected abstract MouseState GetMouseState();
 
     private static readonly UITemplateContext s_DummyContext = new UITemplateContext(null);
-    
+
     private void HandleCreateScrollbar(VirtualScrollbar scrollbar) {
         m_DragCreatorMap.Add(scrollbar.id, new DragCreatorGroup(s_DummyContext, new DragEventCreator[] {
-            
             new DragEventCreator_WithEvent<VirtualScrollbar>(KeyboardModifiers.None, EventPhase.Bubble, (instance, evt) => instance.CreateDragEvent(evt)),
-            
         }));
     }
-    
+
     public bool RequestFocus(IFocusable target) {
         if (!(target is UIElement)) {
             return false;
@@ -116,14 +116,19 @@ public abstract partial class InputSystem : IInputSystem, IInputProvider {
     public virtual void OnUpdate() {
         m_MouseState = GetMouseState();
 
-        ProcessKeyboardEvents();
-        ProcessMouseInput();
+        if (!debugMode) {
+            ProcessKeyboardEvents();
+            ProcessMouseInput();
 
-        if (!IsDragging) {
-            ProcessMouseEvents();
+            if (!IsDragging) {
+                ProcessMouseEvents();
+            }
+
+            ProcessDragEvents();
         }
-
-        ProcessDragEvents();
+        else {
+            ProcessMouseInput();
+        }
 
         List<UIElement> temp = m_ElementsLastFrame;
         m_ElementsLastFrame = m_ElementsThisFrame;
@@ -139,14 +144,14 @@ public abstract partial class InputSystem : IInputSystem, IInputProvider {
     }
 
     private void ProcessMouseInput() {
-        List <UIElement> queryResults = m_LayoutSystem.QueryPoint(m_MouseState.mousePosition, ListPool<UIElement>.Get());
-        
+        List<UIElement> queryResults = m_LayoutSystem.QueryPoint(m_MouseState.mousePosition, ListPool<UIElement>.Get());
+
         for (int i = 0; i < queryResults.Count; i++) {
             UIElement element = queryResults[i];
 
             // todo -- handle masking here
             m_ElementsThisFrame.Add(element);
-       
+
             if (!m_ElementsLastFrame.Contains(element)) {
                 m_EnteredElements.Add(element);
                 element.style?.EnterState(StyleState.Hover);
@@ -166,6 +171,7 @@ public abstract partial class InputSystem : IInputSystem, IInputProvider {
         if (m_MouseState.isLeftMouseDownThisFrame) {
             m_MouseDownElements.AddRange(m_ElementsThisFrame);
         }
+
         ListPool<UIElement>.Release(ref queryResults);
     }
 

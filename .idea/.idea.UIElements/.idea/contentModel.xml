@@ -435,6 +435,7 @@
             <e p="UIStyleGroup.cs" t="Include" />
             <e p="UIStyleSet" t="Include">
               <e p="StyleState.cs" t="Include" />
+              <e p="StyleUtil.cs" t="Include" />
               <e p="UIStyleSet.BorderRadius.cs" t="Include" />
               <e p="UIStyleSet.ContentBox.cs" t="Include" />
               <e p="UIStyleSet.cs" t="Include" />

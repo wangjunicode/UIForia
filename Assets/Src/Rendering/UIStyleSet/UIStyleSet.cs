@@ -9,63 +9,24 @@ using Src.Layout.LayoutTypes;
 using Src.Rendering;
 using Src.Systems;
 using Src.Util;
-using TMPro;
 using UnityEngine;
 
 namespace Rendering {
-
-    public enum StyleChangeGroup1 {
-
-        
-
-    }
 
     [DebuggerDisplay("id = {element.id} state = {currentState}")]
     public partial class UIStyleSet {
 
         private int baseCounter;
         private StyleState currentState;
-        private StyleEntry[] appliedStyles;
+        private UIStyleGroup instanceStyle;
+        private LightList<StyleEntry> appliedStyles;
         private StyleState containedStates;
         private string styleNames;
-        
+
         // temp -- replace w/ IntMap & remove computed style
         private List<UIStyleGroup> styleGroups;
-        
-        /*
-         * BaseStyleGroup[Instance]
-         * StyleGroup[Image]
-         * GetXInState(key = (int)propertyId | (int)state)
-         * GetComputedX(key = (int)propertyId | k_Computed);
-         */
         public readonly UIElement element;
-        public readonly ComputedStyle computedStyle;
-
-        // StyleState currentState;
-        // StyleSystem styleSystem
-        // UIElement element
-        // StyleGroup[] baseStyles
-        // StyleGroup InstanceStyle
-        // IntMap<StyleProperty>
-        // Computed = for each style
-        
-        // instance state -> base state -> instance -> base
-        // Enter State
-        //     recompute all?
-        //     for each property
-        //        for each style group
-        //            for each state
-         //                break if defined
-        
-        // change checking
-        //     just another key offset?
-        //     use bitwise integers as maps (needs 4 or 5 ints at 32 bits per int)
-        
-        // key offsets
-            // 1 per state
-            // 1 for computed
-            // 1 for previous computed?
-        
+        public readonly ComputedStyle computedStyle;     
         internal IStyleSystem styleSystem;
 
         // todo -- remove and replace w/ style
@@ -80,12 +41,22 @@ namespace Rendering {
             this.containedStates = StyleState.Normal;
             this.styleSystem = styleSystem;
             this.computedStyle = new ComputedStyle(this); // todo -- get rid of computed style? use 1 intmap for all styles
-            this.appliedStyles = ArrayPool<StyleEntry>.Empty;
+            this.appliedStyles = new LightList<StyleEntry>();
             this.styleGroups = new List<UIStyleGroup>();
         }
 
         public string BaseStyleNames => styleNames;
-        
+        public StyleState CurrentState => currentState;
+
+        public List<UIStyleGroup> GetBaseStyles() {
+            List<UIStyleGroup> retn = ListPool<UIStyleGroup>.Get();
+            for (int i = 0; i < styleGroups.Count; i++) {
+                retn.Add(styleGroups[i]);
+            }
+
+            return retn;
+        }
+
         public void EnterState(StyleState state) {
             if (state == StyleState.Normal || (currentState & state) != 0) {
                 return;
@@ -97,7 +68,7 @@ namespace Rendering {
                 return;
             }
 
-            for (int i = 0; i < appliedStyles.Length; i++) {
+            for (int i = 0; i < appliedStyles.Count; i++) {
                 if ((appliedStyles[i].state != state)) {
                     continue;
                 }
@@ -122,7 +93,7 @@ namespace Rendering {
                 return;
             }
 
-            for (int i = 0; i < appliedStyles.Length; i++) {
+            for (int i = 0; i < appliedStyles.Count; i++) {
                 if ((appliedStyles[i].state != state)) {
                     continue;
                 }
@@ -132,30 +103,6 @@ namespace Rendering {
         }
 
         public bool HasHoverStyle => (containedStates & StyleState.Hover) != 0;
-
-//        public UIStyleProxy hover {
-//            get { return new UIStyleProxy(this, StyleState.Hover); }
-//            // ReSharper disable once ValueParameterNotUsed
-//            set { SetHoverStyle(UIStyleProxy.hack); }
-//        }
-//
-//        public UIStyleProxy active {
-//            get { return new UIStyleProxy(this, StyleState.Active); }
-//            // ReSharper disable once ValueParameterNotUsed
-//            set { SetActiveStyle(UIStyleProxy.hack); }
-//        }
-//
-//        public UIStyleProxy focused {
-//            get { return new UIStyleProxy(this, StyleState.Focused); }
-//            // ReSharper disable once ValueParameterNotUsed
-//            set { SetFocusedStyle(UIStyleProxy.hack); }
-//        }
-//
-//        public UIStyleProxy disabled {
-//            get { return new UIStyleProxy(this, StyleState.Disabled); }
-//            // ReSharper disable once ValueParameterNotUsed
-//            set { SetDisabledStyle(UIStyleProxy.hack); }
-//        }
 
         public void PlayAnimation(string name) { }
 
@@ -169,17 +116,7 @@ namespace Rendering {
 
         public bool HandlesOverflowY => computedStyle.OverflowY != Overflow.None;
 
-        public bool HasBaseStyles {
-            get {
-                for (int i = 0; i < appliedStyles.Length; i++) {
-                    if (appliedStyles[i].type == StyleType.Shared) {
-                        return true;
-                    }
-                }
-
-                return false;
-            }
-        }
+        public bool HasBaseStyles => styleGroups.Count > 0;
 
         private static string GetBaseStyleNames(UIStyleSet styleSet) {
             string output = string.Empty;
@@ -192,54 +129,6 @@ namespace Rendering {
 
         public void OnAnimationStart() { }
 
-        public void SetNormalStyle(UIStyle style) {
-            SetInstanceStyle(style, StyleState.Normal);
-        }
-
-        public void SetActiveStyle(UIStyle style) {
-            SetInstanceStyle(style, StyleState.Active);
-        }
-
-        public void SetFocusedStyle(UIStyle style) {
-            SetInstanceStyle(style, StyleState.Focused);
-        }
-
-        public void SetHoverStyle(UIStyle style) {
-            SetInstanceStyle(style, StyleState.Hover);
-        }
-
-        public void SetDisabledStyle(UIStyle style) {
-            SetInstanceStyle(style, StyleState.Disabled);
-        }
-
-        private void SetInstanceStyle(UIStyle style, StyleState state) {
-            containedStates |= state;
-
-            for (int i = 0; i < appliedStyles.Length; i++) {
-                StyleState target = appliedStyles[i].state & state;
-                if ((target != state) || appliedStyles[i].type != StyleType.Instance) {
-                    continue;
-                }
-
-                UIStyle oldStyle = appliedStyles[i].style;
-                appliedStyles[i] = new StyleEntry(new UIStyle(style), StyleType.Instance, state);
-
-                if (IsInState(state)) {
-                    UpdateStyleProperties(oldStyle);
-                    UpdateStyleProperties(style);
-                }
-
-                return;
-            }
-
-            Array.Resize(ref appliedStyles, appliedStyles.Length + 1);
-            appliedStyles[appliedStyles.Length - 1] = new StyleEntry(style, StyleType.Instance, state);
-            SortStyles();
-            if (IsInState(state)) {
-                UpdateStyleProperties(style);
-            }
-        }
-
         private void UpdateStyleProperties(UIStyle style) {
             IReadOnlyList<StyleProperty> properties = style.Properties;
             for (int j = 0; j < properties.Count; j++) {
@@ -248,26 +137,22 @@ namespace Rendering {
         }
 
         public void AddStyleGroup(UIStyleGroup group) {
+            if (styleGroups.Contains(group)) {
+                return;
+            }
+            // todo -- subscribe to changes?
             styleGroups.Add(group);
             styleNames = GetBaseStyleNames(this);
             if (group.normal != null) AddBaseStyle(group.normal, StyleState.Normal);
             if (group.active != null) AddBaseStyle(group.active, StyleState.Active);
-            if (group.disabled != null) AddBaseStyle(group.disabled, StyleState.Disabled);
+            if (group.inactive != null) AddBaseStyle(group.inactive, StyleState.Inactive);
             if (group.focused != null) AddBaseStyle(group.focused, StyleState.Focused);
             if (group.hover != null) AddBaseStyle(group.hover, StyleState.Hover);
         }
 
         private void AddBaseStyle(UIStyle style, StyleState state) {
-            // todo -- check for duplicates
             containedStates |= state;
-            if (appliedStyles.Length == 0) {
-                appliedStyles = ArrayPool<StyleEntry>.GetExactSize(1);
-            }
-            else {
-                Array.Resize(ref appliedStyles, appliedStyles.Length + 1);
-            }
-
-            appliedStyles[appliedStyles.Length - 1] = new StyleEntry(style, StyleType.Shared, state, baseCounter++);
+            appliedStyles.Add(new StyleEntry(style, StyleType.Shared, state, styleGroups.Count));
             SortStyles();
             if (IsInState(state)) {
                 UpdateStyleProperties(style);
@@ -276,17 +161,17 @@ namespace Rendering {
 
         // todo remove and replace w/ RemoveStyleGroup
         public void RemoveBaseStyle(UIStyle style, StyleState state = StyleState.Normal) {
-            for (int i = 0; i < appliedStyles.Length; i++) {
+            for (int i = 0; i < appliedStyles.Count; i++) {
                 if (appliedStyles[i].style == style && state == appliedStyles[i].state) {
-                    appliedStyles[i] = appliedStyles[appliedStyles.Length - 1];
+                    appliedStyles[i] = appliedStyles[appliedStyles.Count - 1];
                     break;
                 }
             }
 
-            Array.Resize(ref appliedStyles, appliedStyles.Length - 1);
+            appliedStyles.RemoveAt(appliedStyles.Count - 1);
             SortStyles();
 
-            for (int i = 0; i < appliedStyles.Length; i++) {
+            for (int i = 0; i < appliedStyles.Count; i++) {
                 containedStates |= appliedStyles[i].state;
             }
 
@@ -296,31 +181,21 @@ namespace Rendering {
         }
 
         private void SortStyles() {
-            Array.Sort(appliedStyles, (a, b) => a.priority > b.priority ? -1 : 1);
+            appliedStyles.Sort((a, b) => a.priority > b.priority ? -1 : 1);
         }
 
         public StyleProperty GetPropertyValue(StylePropertyId propertyId) {
-            for (int i = 0; i < appliedStyles.Length; i++) {
-                if ((int) appliedStyles[i].state != -1 && (appliedStyles[i].state & currentState) == 0) {
-                    continue;
-                }
-
-                StyleProperty property = appliedStyles[i].style.FindProperty(propertyId);
-                if (property.IsDefined) {
-                    return property;
-                }
-            }
-
-            return new StyleProperty(propertyId, IntUtil.UnsetValue, IntUtil.UnsetValue);
+            // can't use ComputedStyle here because this is used to compute that value
+            return GetPropertyValueInState(propertyId, currentState);
         }
 
-        private StyleProperty GetPropertyValueInState(StylePropertyId propertyId, StyleState state) {
-            for (int i = 0; i < appliedStyles.Length; i++) {
+        public StyleProperty GetPropertyValueInState(StylePropertyId propertyId, StyleState state) {
+
+            for (int i = 0; i < appliedStyles.Count; i++) {
                 if ((appliedStyles[i].state & state) == 0) {
                     continue;
                 }
-
-                StyleProperty property = appliedStyles[i].style.FindProperty(propertyId);
+                StyleProperty property = appliedStyles[i].style.GetProperty(propertyId);
                 if (property.IsDefined) {
                     return property;
                 }
@@ -329,48 +204,73 @@ namespace Rendering {
             return new StyleProperty(propertyId, IntUtil.UnsetValue, IntUtil.UnsetValue);
         }
 
-        private UIStyle GetInstanceStyle(StyleState state) {
-            for (int i = 0; i < appliedStyles.Length; i++) {
-                StyleState checkFlag = appliedStyles[i].state;
-                UIStyle style = appliedStyles[i].style;
-
-                if ((checkFlag & state) != 0 && appliedStyles[i].type == StyleType.Instance) {
-                    return style;
-                }
-            }
-
-            return null;
-        }
-
+        
         private UIStyle GetOrCreateInstanceStyle(StyleState state) {
-            if (appliedStyles.Length == 0) {
-                UIStyle newStyle = new UIStyle();
-                appliedStyles = new[] {
-                    new StyleEntry(newStyle, StyleType.Instance, state),
-                };
-                containedStates |= state;
-                return newStyle;
+            if (instanceStyle == null) {
+                instanceStyle = new UIStyleGroup();
             }
 
-            UIStyle retn = GetInstanceStyle(state);
-            if (retn != null) {
-                return retn;
+            switch (state) {
+                case StyleState.Normal:
+                    if (instanceStyle.normal == null) {
+                        instanceStyle.normal = new UIStyle();
+                        appliedStyles.Add(new StyleEntry(instanceStyle.normal, StyleType.Instance, StyleState.Normal));
+                        containedStates |= StyleState.Normal;
+                        SortStyles();
+                    }
+                    return instanceStyle.normal;
+                
+                case StyleState.Hover:
+                    if (instanceStyle.hover == null) {
+                        instanceStyle.hover = new UIStyle();
+                        appliedStyles.Add(new StyleEntry(instanceStyle.hover, StyleType.Instance, StyleState.Hover));
+                        SortStyles();
+                        containedStates |= StyleState.Hover;
+                    }
+                    return instanceStyle.hover;
+                
+                case StyleState.Active:
+                    if (instanceStyle.active == null) {
+                        instanceStyle.active = new UIStyle();
+                        appliedStyles.Add(new StyleEntry(instanceStyle.active, StyleType.Instance, StyleState.Active));
+                        SortStyles();
+                        containedStates |= StyleState.Active;
+                    }
+                    return instanceStyle.active;
+                
+                case StyleState.Inactive:
+                    if (instanceStyle.inactive == null) {
+                        instanceStyle.inactive = new UIStyle();
+                        appliedStyles.Add(new StyleEntry(instanceStyle.inactive, StyleType.Instance, StyleState.Inactive));
+                        SortStyles();
+                        containedStates |= StyleState.Inactive;
+                    }
+                    return instanceStyle.inactive;
+                
+                case StyleState.Focused:
+                    if (instanceStyle.focused == null) {
+                        instanceStyle.focused = new UIStyle();
+                        appliedStyles.Add(new StyleEntry(instanceStyle.focused, StyleType.Instance, StyleState.Focused));
+                        SortStyles();
+                        containedStates |= StyleState.Focused;
+                    }
+                    return instanceStyle.focused;
+                
+                default:
+                    throw new ArgumentOutOfRangeException(nameof(state), state, null);
             }
 
-            UIStyle style = new UIStyle();
-            SetInstanceStyle(style, state);
-            return style;
         }
-
+        
         internal void Initialize() {
-
-            for (int i = 0; i < appliedStyles.Length; i++) {
+            for (int i = 0; i < appliedStyles.Count; i++) {
                 StyleEntry entry = appliedStyles[i];
                 containedStates |= entry.state;
                 if ((entry.state & currentState) == 0) {
                     continue;
                 }
 
+                // todo fix this
                 IReadOnlyList<StyleProperty> properties = entry.style.Properties;
                 for (int j = 0; j < properties.Count; j++) {
                     if (!s_DefinedMap.Contains(properties[j].propertyId)) {
@@ -392,9 +292,9 @@ namespace Rendering {
 
             computedStyle.SetProperty(GetPropertyValue(propertyId));
         }
-        
+
         private UIStyle GetActiveStyleForProperty(StylePropertyId stylePropertyId) {
-            for (int i = 0; i < appliedStyles.Length; i++) {
+            for (int i = 0; i < appliedStyles.Count; i++) {
                 if ((appliedStyles[i].state & currentState) == 0) {
                     continue;
                 }
@@ -446,7 +346,7 @@ namespace Rendering {
 
             computedStyle.SetProperty(GetPropertyValue(propertyId));
         }
-        
+
         private void SetFloatProperty(StylePropertyId propertyId, float value, StyleState state) {
             UIStyle style = GetOrCreateInstanceStyle(state);
             style.SetFloatProperty(propertyId, value);
@@ -456,7 +356,6 @@ namespace Rendering {
 
             computedStyle.SetProperty(GetPropertyValue(propertyId));
         }
-        
 
         private void SetEnumProperty(StylePropertyId propertyId, int value, StyleState state) {
             UIStyle style = GetOrCreateInstanceStyle(state);
@@ -491,161 +390,7 @@ namespace Rendering {
 
         public void SetProperty(StyleProperty property, StyleState state) {
             throw new NotImplementedException();
-            switch (property.propertyId) {
-                case StylePropertyId.OverflowX:
-                    break;
-                case StylePropertyId.OverflowY:
-                    break;
-                case StylePropertyId.BackgroundColor:
-                    break;
-                case StylePropertyId.BorderColor:
-                    break;
-                case StylePropertyId.BackgroundImage:
-                    break;
-                case StylePropertyId.GridItemColStart:
-                    break;
-                case StylePropertyId.GridItemColSpan:
-                    break;
-                case StylePropertyId.GridItemRowStart:
-                    break;
-                case StylePropertyId.GridItemRowSpan:
-                    break;
-                case StylePropertyId.GridLayoutDirection:
-                    break;
-                case StylePropertyId.GridLayoutDensity:
-                    break;
-                case StylePropertyId.GridLayoutColTemplate:
-                    break;
-                case StylePropertyId.GridLayoutRowTemplate:
-                    break;
-                case StylePropertyId.GridLayoutColAutoSize:
-                    break;
-                case StylePropertyId.GridLayoutRowAutoSize:
-                    break;
-                case StylePropertyId.GridLayoutColGap:
-                    break;
-                case StylePropertyId.GridLayoutRowGap:
-                    break;
-                case StylePropertyId.GridLayoutColAlignment:
-                    break;
-                case StylePropertyId.GridLayoutRowAlignment:
-                    break;
-                case StylePropertyId.FlexLayoutWrap:
-                    break;
-                case StylePropertyId.FlexLayoutDirection:
-                    break;
-                case StylePropertyId.FlexLayoutMainAxisAlignment:
-                    break;
-                case StylePropertyId.FlexLayoutCrossAxisAlignment:
-                    break;
-                case StylePropertyId.FlexItemSelfAlignment:
-                    break;
-                case StylePropertyId.FlexItemOrder:
-                    break;
-                case StylePropertyId.FlexItemGrow:
-                    break;
-                case StylePropertyId.FlexItemShrink:
-                    break;
-                case StylePropertyId.MarginTop:
-                    break;
-                case StylePropertyId.MarginRight:
-                    break;
-                case StylePropertyId.MarginBottom:
-                    break;
-                case StylePropertyId.MarginLeft:
-                    break;
-                case StylePropertyId.BorderTop:
-                    break;
-                case StylePropertyId.BorderRight:
-                    break;
-                case StylePropertyId.BorderBottom:
-                    break;
-                case StylePropertyId.BorderLeft:
-                    break;
-                case StylePropertyId.PaddingTop:
-                    break;
-                case StylePropertyId.PaddingRight:
-                    break;
-                case StylePropertyId.PaddingBottom:
-                    break;
-                case StylePropertyId.PaddingLeft:
-                    break;
-                case StylePropertyId.BorderRadiusTopLeft:
-                    break;
-                case StylePropertyId.BorderRadiusTopRight:
-                    break;
-                case StylePropertyId.BorderRadiusBottomLeft:
-                    break;
-                case StylePropertyId.BorderRadiusBottomRight:
-                    break;
-                case StylePropertyId.TransformPositionX:
-                    break;
-                case StylePropertyId.TransformPositionY:
-                    break;
-                case StylePropertyId.TransformScaleX:
-                    break;
-                case StylePropertyId.TransformScaleY:
-                    break;
-                case StylePropertyId.TransformPivotX:
-                    break;
-                case StylePropertyId.TransformPivotY:
-                    break;
-                case StylePropertyId.TransformRotation:
-                    break;
-                case StylePropertyId.__TextPropertyStart__:
-                    break;
-                case StylePropertyId.TextColor:
-                    break;
-                case StylePropertyId.TextFontAsset:
-                    break;
-                case StylePropertyId.TextFontSize:
-                    break;
-                case StylePropertyId.TextFontStyle:
-                    break;
-                case StylePropertyId.TextAnchor:
-                    break;
-                case StylePropertyId.TextWhitespaceMode:
-                    break;
-                case StylePropertyId.TextWrapMode:
-                    break;
-                case StylePropertyId.TextHorizontalOverflow:
-                    break;
-                case StylePropertyId.TextVerticalOverflow:
-                    break;
-                case StylePropertyId.TextIndentFirstLine:
-                    break;
-                case StylePropertyId.TextIndentNewLine:
-                    break;
-                case StylePropertyId.TextLayoutStyle:
-                    break;
-                case StylePropertyId.TextAutoSize:
-                    break;
-                case StylePropertyId.TextTransform:
-                    break;
-                case StylePropertyId.__TextPropertyEnd__:
-                    break;
-                case StylePropertyId.MinWidth:
-                    break;
-                case StylePropertyId.MaxWidth:
-                    break;
-                case StylePropertyId.PreferredWidth:
-                    break;
-                case StylePropertyId.MinHeight:
-                    break;
-                case StylePropertyId.MaxHeight:
-                    break;
-                case StylePropertyId.PreferredHeight:
-                    break;
-                case StylePropertyId.LayoutType:
-                    break;
-                case StylePropertyId.LayoutBehavior:
-                    break;
-                default:
-                    throw new ArgumentOutOfRangeException();
-            }
         }
-
-        // todo -- add an opacity property
 
         public void SetAnimatedProperty(StyleProperty property) {
             switch (property.propertyId) {

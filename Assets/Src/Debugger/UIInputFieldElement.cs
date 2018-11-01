@@ -204,7 +204,7 @@ public class UIInputFieldElement : UIElement, IFocusable, IPropertyChangedHandle
         }
     }
 
-    protected override string GetDisplayName() {
+    public override string GetDisplayName() {
         return "TextInput";
     }
 

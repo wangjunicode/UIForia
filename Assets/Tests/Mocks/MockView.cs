@@ -2,6 +2,8 @@ using System;
 using Rendering;
 using Src;
 using Src.Systems;
+using Src.Util;
+using UnityEngine;
 
 namespace Tests.Mocks {
 
@@ -84,7 +86,9 @@ namespace Tests.Mocks {
             
         }
 
-      
+
+        public event Action<LightList<RenderData>, LightList<RenderData>, Vector3, Camera> DrawDebugOverlay;
+
     }
 
 

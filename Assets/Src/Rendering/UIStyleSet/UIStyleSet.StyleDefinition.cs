@@ -48,7 +48,7 @@ namespace Rendering {
                         retn += 40;
                     }
 
-                    else if ((state & StyleState.Disabled) != 0) {
+                    else if ((state & StyleState.Inactive) != 0) {
                         retn += 30;
                     }
                    

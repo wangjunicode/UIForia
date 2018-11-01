@@ -53,7 +53,8 @@ namespace Src {
             if (!isCompiled) Compile();
 
             UIElement instance = (UIElement) Activator.CreateInstance(rootElementTemplate.RootType);
-
+            instance.flags |= UIElementFlags.TemplateRoot;
+            
             MetaData instanceData = rootElementTemplate.GetCreationData(instance, scope.context);
             instanceData.element.templateChildren = ArrayPool<UIElement>.Empty;
 
@@ -92,7 +93,9 @@ namespace Src {
 
             UIElement instance = (UIElement) Activator.CreateInstance(rootElementTemplate.RootType);
             scope.context.rootElement = instance;
-
+            instance.flags |= UIElementFlags.TemplateRoot;
+//            instance.templateOrigin = this;
+            
             MetaData rootData = rootElementTemplate.GetCreationData(instance, scope.context);
 
             for (int i = 0; i < childTemplates.Count; i++) {
@@ -109,7 +112,6 @@ namespace Src {
 
         private void AssignContext(UITemplate template, UIElement element, UITemplateContext context) {
             element.templateContext = context;
-            element.templateRef = new TemplateReference((ushort)templateId, template.id);
             if (element.templateChildren != null) {
                 for (int i = 0; i < element.templateChildren.Length; i++) {
                     element.templateChildren[i].templateParent = element;

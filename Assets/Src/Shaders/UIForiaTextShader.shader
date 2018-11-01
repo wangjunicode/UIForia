@@ -67,7 +67,7 @@ Shader "UIForia/Text"
 
             // defined by render system
             uniform float4 _ClipRect;
-     
+            
             // defined by font       
             uniform sampler2D _MainTex;
             uniform float _WeightNormal;
@@ -80,6 +80,7 @@ Shader "UIForia/Text"
             
             // defined by user
             uniform int _Bold;
+            uniform float _FontScale;
             uniform fixed4 _FaceColor;
             uniform fixed4 _OutlineColor;
             uniform float2 _OutlineSettings;
@@ -103,9 +104,12 @@ Shader "UIForia/Text"
             pixel_t vert (vertex_t v) {
                 pixel_t o;
         		
+        		float pixelSize = 1;
+        		pixelSize /= float2(1, 1) * abs(mul((float2x2)UNITY_MATRIX_P, _ScreenParams.xy));
         		float scale = rsqrt(dot(1, 1));
-			    scale *= _GradientScale * 1.5;
-
+        		
+        		
+			    scale *= _FontScale * _GradientScale * 1.5;
                 float weight = lerp(_WeightNormal, _WeightBold, _Bold) / 4.0;
 			    weight = (weight) * _ScaleRatioA * 0.5;
        			float bias = (0.5 - weight) + (0.5 / scale);
@@ -119,7 +123,7 @@ Shader "UIForia/Text"
   
             #endif
             
-                alphaClip = alphaClip * 0.5 - ( 0.5 / scale) - weight;
+			    alphaClip = alphaClip / 2.0 - ( .5 / scale) - weight;
             
             #if defined(UIFORIA_USE_UNDERLAY) | defined(UIFORIA_USE_UNDERLAY_INNER)
                 // todo this can all be a uniform input

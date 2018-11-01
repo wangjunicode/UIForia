@@ -34,7 +34,7 @@ namespace Src.Layout.LayoutTypes {
             LineInfo lastLine = lineInfos[lineInfos.Count - 1];
             ListPool<LineInfo>.Release(ref lineInfos);
             TMP_FontAsset asset = style.FontAsset;
-            float s =  (style.FontSize / asset.fontInfo.PointSize) * asset.fontInfo.Scale;;
+            float s =  (style.FontSize / asset.fontInfo.PointSize) * asset.fontInfo.Scale;
             float lh = asset.fontInfo.LineHeight * (style.FontSize / asset.fontInfo.PointSize) * asset.fontInfo.Scale;
             lh += (asset.fontInfo.Descender) * s;
             return lastLine.position.y + lh;//lastLine.Height;

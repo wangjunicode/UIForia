@@ -18,6 +18,12 @@ namespace Src.Editor {
             rect.height -= (lineHeight * EditorGUIUtility.singleLineHeight + 1);
             return retn;
         }
+        
+        public Rect PeekFieldRect(int lineHeight = 1) {
+            Rect retn = new Rect(rect);
+            retn.height = lineHeight * EditorGUIUtility.singleLineHeight + 1;
+            return retn;
+        }
 
         public Rect SliceHeight(float height) {
             Rect retn = new Rect(rect);

@@ -20,13 +20,13 @@ namespace Src.Systems {
         public const string k_FillType_Checker = "UIFORIA_FILLTYPE_CHECKER";
         public const string k_FillType_Stripes = "UIFORIA_FILLTYPE_STRIPES";
 
-        private static readonly int s_ColorKey;
-        private static readonly int s_ClipRectKey;
-        private static readonly int s_SizeKey;
-        private static readonly int s_BorderSizeKey;
-        private static readonly int s_BorderRadiusKey;
-        private static readonly int s_BorderColorKey;
-        private static readonly int s_FillOffsetScaleKey;
+        public static readonly int s_ColorKey;
+        public static readonly int s_ClipRectKey;
+        public static readonly int s_SizeKey;
+        public static readonly int s_BorderSizeKey;
+        public static readonly int s_BorderRadiusKey;
+        public static readonly int s_BorderColorKey;
+        public static readonly int s_FillOffsetScaleKey;
 
         private static readonly Material s_BaseMaterial;
 
@@ -40,7 +40,7 @@ namespace Src.Systems {
             s_FillOffsetScaleKey = Shader.PropertyToID("_FillOffsetScale");
             s_SizeKey = Shader.PropertyToID("_Size");
         }
-
+        
         public override void Render(RenderData[] drawList, int start, int end, Vector3 origin, Camera camera) {
             for (int i = start; i < end; i++) {
                 RenderData data = drawList[i];

@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using Rendering;
@@ -22,6 +23,8 @@ namespace Src.Systems {
 
         private static readonly RenderZIndexComparerAscending s_ZIndexComparer = new RenderZIndexComparerAscending();
 
+        public event Action<LightList<RenderData>, LightList<RenderData>, Vector3, Camera> DrawDebugOverlay;
+        
         public DirectRenderSystem(Camera camera, ILayoutSystem layoutSystem, IStyleSystem styleSystem) {
             this.m_Camera = camera;
             this.m_StyleSystem = styleSystem;
@@ -166,6 +169,9 @@ namespace Src.Systems {
             }
 
             renderer.Render(willRender, start, m_WillRenderList.Count, origin, m_Camera);
+            
+            DrawDebugOverlay?.Invoke(m_RenderDataList, m_WillRenderList, origin, m_Camera);
+            
             m_WillRenderList.Clear();
         }
 

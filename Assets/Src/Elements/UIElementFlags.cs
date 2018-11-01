@@ -33,7 +33,7 @@ public enum UIElementFlags {
     Initialized = 1 << 17,
     Created = 1 << 18,
     VirtualElement = 1 << 19,
-    
+    TemplateRoot = 1 << 20,
     SelfAndAncestorShown = Shown | AncestorShown,
     SelfAndAncestorEnabled = Enabled | AncestorEnabled,
 

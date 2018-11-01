@@ -34,7 +34,7 @@ public class UIElement : IHierarchical, IExpressionContextProvider {
     // todo make readonly but assignable via style system
 
     public UIElement parent;
-    internal TemplateReference templateRef;
+    public UITemplate templateRef;
 
     protected UIElement() {
         this.id = UIView.NextElementId;
@@ -280,7 +280,7 @@ public class UIElement : IHierarchical, IExpressionContextProvider {
         return retn;
     }
 
-    protected virtual string GetDisplayName() {
+    public virtual string GetDisplayName() {
         return GetType().Name;
     }
 
@@ -323,14 +323,6 @@ public class UIElement : IHierarchical, IExpressionContextProvider {
             return a.parent.siblingIndex < b.parent.siblingIndex ? 1 : -1;
         }
 
-    }
-
-    public ParsedTemplate GetTemplate() {
-        return ParsedTemplate.GetTemplate(templateRef.templateId);
-    }
-
-    public UITemplate GetTemplateData() {
-        return GetTemplate().GetTemplateData(templateRef.memberId);
     }
 
 }

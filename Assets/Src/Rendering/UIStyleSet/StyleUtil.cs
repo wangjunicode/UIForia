@@ -32,6 +32,12 @@ namespace Rendering {
             s_NameMap.TryGetValue((int) property.propertyId, out name);
             return name;
         }
+        
+        public static string GetPropertyName(StylePropertyId propertyId) {
+            string name;
+            s_NameMap.TryGetValue((int) propertyId, out name);
+            return name;
+        }
 
     }
 

@@ -14,7 +14,7 @@ namespace Src.StyleBindings {
         public override void Execute(UIElement element, UITemplateContext context) {
             if (!element.style.IsInState(state)) return;
 
-            int value = element.style.computedStyle.FlexItemShrinkFactor;
+            int value = element.style.computedStyle.FlexItemShrink;
             int newValue = expression.EvaluateTyped(context);
             if (value != newValue) {
                 element.style.SetFlexItemShrinkFactor(value, state);

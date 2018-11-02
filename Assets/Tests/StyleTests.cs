@@ -50,13 +50,13 @@ public class StyleTests {
 
         TestBody(
             nameof(UIStyleSet.SetFlexItemGrowFactor),
-            nameof(ComputedStyle.FlexItemGrowthFactor),
+            nameof(ComputedStyle.FlexItemGrow),
             nameof(DefaultStyleValues.FlexItemGrow)
         );
 
         TestBody(
             nameof(UIStyleSet.SetFlexItemShrinkFactor),
-            nameof(ComputedStyle.FlexItemShrinkFactor),
+            nameof(ComputedStyle.FlexItemShrink),
             nameof(DefaultStyleValues.FlexItemShrink)
         );
 

@@ -1,8 +1,5 @@
 using System;
-using System.Collections.Generic;
 using System.Reflection;
-using Src.Systems;
-using Src.Util;
 using UnityEditor;
 using UnityEditor.IMGUI.Controls;
 using UnityEngine;
@@ -41,10 +38,10 @@ namespace Src.Editor {
             wantsMouseEnterLeaveWindow = true;
         }
 
-        public void Update() {
-        //    Repaint();
+        public void OnRefresh() {
+            SelectedElement = null;
+            treeView.SetRootElement(targetView.RootElement);
         }
-        
 
         private void OnElementSelectionChanged(UIElement element) {
             SelectedElement = element;
@@ -71,8 +68,9 @@ namespace Src.Editor {
                 targetView = views[0].view;
                 UIView = targetView;
                 needsReload = true;
-                targetView.onElementCreated += OnElementCreated;
                 treeView.view = targetView;
+                targetView.onElementCreated += OnElementCreated;
+                targetView.onRefresh += OnRefresh;
             }
             else if (obj == PlayModeStateChange.ExitingPlayMode) {
                 playing = false;
@@ -82,6 +80,7 @@ namespace Src.Editor {
 
                 if (targetView != null) {
                     targetView.onElementCreated -= OnElementCreated;
+                    targetView.onRefresh -= OnRefresh;
                 }
 
                 if (treeView != null) {
@@ -115,12 +114,8 @@ namespace Src.Editor {
 
         public void OnGUI() {
             EditorGUILayout.BeginVertical();
-            //  titleContent = new GUIContent(position.width + ", " + position.height);
-            // height = orthosize * 2
-            // width = height*Camera.main.aspect
-            // aspect = 
+           
             if (playing) {
-                //SceneView.RepaintAll();
 
                 switch (Event.current.type) {
                     case EventType.MouseDown:
@@ -184,7 +179,7 @@ namespace Src.Editor {
                 if (needsReload) {
                     needsReload = false;
                     treeView.Reload();
-                    treeView.SetExpandedRecursive(0, true);
+                    treeView.ExpandAll();
                 }
 
                 needsReload = treeView.RunGUI();

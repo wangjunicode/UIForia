@@ -101,7 +101,7 @@ namespace Src.Systems {
                 box.allocatedWidth = box.GetWidths().clampedSize;
                 box.allocatedHeight = box.GetHeights(box.actualHeight).clampedSize;
             }
-            
+
             if (forceLayout || box.markedForLayout) {
                 box.RunLayout();
                 box.markedForLayout = false;
@@ -158,10 +158,10 @@ namespace Src.Systems {
                         box.allocatedHeight = box.GetHeights(box.actualHeight).clampedSize;
                     }
 
-                  //  if (forceLayout || box.markedForLayout) {
-                        box.RunLayout();
-                        box.markedForLayout = false;
-                   // }
+                    //  if (forceLayout || box.markedForLayout) {
+                    box.RunLayout();
+                    box.markedForLayout = false;
+                    // }
 
                     depth = element.depth;
                     computedLayer = ResolveRenderLayer(element) - element.ComputedStyle.LayerOffset;
@@ -195,10 +195,9 @@ namespace Src.Systems {
                     Rect clipRect = new Rect(0, 0, ViewportRect.width, ViewportRect.height);
                     UIElement ptr = element.parent;
                     // find ancestor where layer is higher, might not be our parent
-                    
+
                     // while parent is higher layer and requires layout
                     while (ptr != null) {
-                        
                         if (((ptr.flags & UIElementFlags.RequiresLayout) == 0)) {
                             ptr = ptr.parent;
                             continue;
@@ -207,7 +206,7 @@ namespace Src.Systems {
                         if (ptr.layoutResult.layer > computedLayer) {
                             break;
                         }
-                        
+
                         ptr = ptr.parent;
                     }
 
@@ -690,6 +689,32 @@ namespace Src.Systems {
             }
 
             return retn;
+        }
+
+        public OffsetRect GetPaddingRect(UIElement element) {
+            LayoutBox box = m_LayoutBoxMap.GetOrDefault(element.id);
+            if (box == null) return new OffsetRect();
+            return new OffsetRect(
+                box.PaddingTop,
+                box.PaddingRight,
+                box.PaddingBottom,
+                box.PaddingLeft
+            );
+        }
+
+        public OffsetRect GetMarginRect(UIElement element) {
+            return new OffsetRect();
+        }
+
+        public OffsetRect GetBorderRect(UIElement element) {
+            LayoutBox box = m_LayoutBoxMap.GetOrDefault(element.id);
+            if (box == null) return new OffsetRect();
+            return new OffsetRect(
+                box.BorderTop,
+                box.BorderRight,
+                box.BorderBottom,
+                box.BorderLeft
+            );
         }
 
         private static int ResolveRenderLayer(UIElement element) {

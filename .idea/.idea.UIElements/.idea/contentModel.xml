@@ -338,6 +338,7 @@
             <e p="UIDimensions.cs" t="Include" />
             <e p="UIMeasurementUnit.cs" t="Include" />
           </e>
+          <e p="OffsetRect.cs" t="Include" />
           <e p="ParsedTemplate.cs" t="Include" />
           <e p="Parsing" t="Include">
             <e p="AstNodes" t="Include">
@@ -459,6 +460,7 @@
           <e p="ResourceManager.cs" t="Include" />
           <e p="SDFText.cs" t="Include" />
           <e p="Shaders" t="Include">
+            <e p="Debug.shader" t="Include" />
             <e p="UIForia.cginc" t="Include" />
             <e p="UIForiaFragBody.cginc" t="Include" />
             <e p="UIForiaFragDefines.cginc" t="Include" />

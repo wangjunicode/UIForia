@@ -589,8 +589,8 @@ namespace Rendering {
         }
 
         public TextUtil.TextAlignment TextAlignment {
-            get { return (TextUtil.TextAlignment) FindEnumProperty(StylePropertyId.TextAnchor); }
-            set { SetEnumProperty(StylePropertyId.TextAnchor, (int) value); }
+            get { return (TextUtil.TextAlignment) FindEnumProperty(StylePropertyId.TextAlignment); }
+            set { SetEnumProperty(StylePropertyId.TextAlignment, (int) value); }
         }
 
         public WhitespaceMode WhitespaceMode {
@@ -603,15 +603,15 @@ namespace Rendering {
         // todo -- layout style
         // todo -- auto sizing
 
-        public float TextIndentFirstLine {
-            get { return FindFloatProperty(StylePropertyId.TextIndentFirstLine); }
-            set { SetFloatProperty(StylePropertyId.TextIndentFirstLine, value); }
-        }
-
-        public float TextIndentNewLine {
-            get { return FindFloatProperty(StylePropertyId.TextIndentNewLine); }
-            set { SetFloatProperty(StylePropertyId.TextIndentNewLine, value); }
-        }
+//        public float TextIndentFirstLine {
+//            get { return FindFloatProperty(StylePropertyId.TextIndentFirstLine); }
+//            set { SetFloatProperty(StylePropertyId.TextIndentFirstLine, value); }
+//        }
+//
+//        public float TextIndentNewLine {
+//            get { return FindFloatProperty(StylePropertyId.TextIndentNewLine); }
+//            set { SetFloatProperty(StylePropertyId.TextIndentNewLine, value); }
+//        }
 
         public BorderRadius BorderRadius {
             set {

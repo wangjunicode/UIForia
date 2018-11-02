@@ -15,6 +15,10 @@ namespace Src.Systems {
 
         List<UIElement> QueryPoint(Vector2 point, List<UIElement> retn);
 
+        OffsetRect GetPaddingRect(UIElement element);
+        OffsetRect GetMarginRect(UIElement element);
+        OffsetRect GetBorderRect(UIElement element);
+
     }
 
 }

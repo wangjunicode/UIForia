@@ -2,13 +2,16 @@ using System;
 using System.Collections.Generic;
 using Rendering;
 using Shapes2D;
+using Src.Extensions;
 using Src.Layout;
 using Src.Layout.LayoutTypes;
 using Src.Rendering;
 using Src.StyleBindings;
 using Src.Systems;
 using Src.Util;
+using TMPro;
 using UnityEditor;
+using UnityEditor.IMGUI.Controls;
 using UnityEngine;
 
 namespace Src.Editor {
@@ -19,9 +22,34 @@ namespace Src.Editor {
         private Vector2 scrollPosition;
         private UIView view;
         private bool drawDebugBox;
+        private Color overlayColor;
+        private Vector3 drawPos;
+        private float overlayBorderSize;
+        private Color overlayBorderColor;
+
+        private Color contentColor = new Color32(140, 182, 193, 175);
+        private Color borderColor = new Color32(253, 221, 155, 175);
+        private Color marginColor = new Color32(249, 204, 157, 175);
+        private Color paddingColor = new Color32(196, 208, 139, 175);
+        private Color outlineColor = new Color32(196, 208, 139, 175);
+
+        private readonly Dictionary<UIStyle, bool> m_ExpandedMap = new Dictionary<UIStyle, bool>();
+        private static readonly GUIContent s_Content = new GUIContent();
+        private static readonly StylePropertyIdComparer s_StyleCompare = new StylePropertyIdComparer();
+        private static readonly Dictionary<Type, ValueTuple<int[], GUIContent[]>> m_EnumValueMap = new Dictionary<Type, ValueTuple<int[], GUIContent[]>>();
         
+        private Mesh mesh;
+        private Material material;
+        private int tab;
+
+        public static readonly string[] s_TabNames = {
+            "Layout Result",
+            "Applied Styles",
+            "Computed Style",
+            "Settings"
+        };
+
         public void Update() {
-            
             if (UIForiaHierarchyWindow.UIView != null) {
                 if (view == null) {
                     view = UIForiaHierarchyWindow.UIView;
@@ -39,16 +67,146 @@ namespace Src.Editor {
                 selectedElement = UIForiaHierarchyWindow.SelectedElement != null
                     ? UIForiaHierarchyWindow.SelectedElement
                     : null;
+                m_ExpandedMap.Clear();
                 Repaint();
             }
         }
 
-        private Mesh mesh;
-        private Material material;
-        private void DrawDebugOverlay(LightList<RenderData> renderData, LightList<RenderData> drawList, Vector3 origin, Camera camera) {
+        private bool showAllComputedStyles;
+        private bool showComputedSources;
 
+        private SearchField searchField;
+        private string searchString = string.Empty;
+
+        private void OnEnable() {
+            searchField = new SearchField();
+            if (!ColorUtility.TryParseHtmlString(EditorPrefs.GetString("UIForia.Inspector.ContentColor"), out contentColor)) {
+                contentColor = new Color32(140, 182, 193, 175);
+            }
+
+            if (!ColorUtility.TryParseHtmlString(EditorPrefs.GetString("UIForia.Inspector.PaddingColor"), out borderColor)) {
+                borderColor = new Color32(253, 221, 155, 175);
+            }
+
+            if (!ColorUtility.TryParseHtmlString(EditorPrefs.GetString("UIForia.Inspector.BorderColor"), out paddingColor)) {
+                paddingColor = new Color32(253, 221, 155, 175);
+            }
+
+            if (!ColorUtility.TryParseHtmlString(EditorPrefs.GetString("UIForia.Inspector.MarginColor"), out marginColor)) {
+                marginColor = new Color32(253, 221, 155, 175);
+            }
+        }
+
+        private void DrawComputedStyle() {
+            // style name, style value, source
+
+            ComputedStyle style = selectedElement.ComputedStyle;
+
+            GUILayout.BeginHorizontal();
+            DrawStyleStateButton("Hover", StyleState.Hover);
+            DrawStyleStateButton("Focus", StyleState.Focused);
+            GUILayout.EndHorizontal();
+
+            GUILayout.BeginHorizontal();
+            DrawStyleStateButton("Active", StyleState.Active);
+            DrawStyleStateButton("Inactive", StyleState.Inactive);
+            GUILayout.EndHorizontal();
+
+            EditorGUILayout.BeginHorizontal();
+            showAllComputedStyles = EditorGUILayout.Toggle("Show All", showAllComputedStyles);
+            showComputedSources = EditorGUILayout.Toggle("Show Sources", showComputedSources);
+            EditorGUILayout.EndHorizontal();
+
+            GUILayout.Space(4);
+            searchString = searchField.OnGUI(searchString);
+            GUILayout.Space(4);
+
+            List<ValueTuple<string, StyleProperty>> properties = ListPool<ValueTuple<string, StyleProperty>>.Get();
+
+            string lowerSearch = searchString.ToLower();
+
+            for (int i = 0; i < StyleUtil.StylePropertyIdList.Length; i++) {
+                StylePropertyId propertyId = StyleUtil.StylePropertyIdList[i];
+                if (showAllComputedStyles || style.IsDefined(propertyId)) {
+                    if (!string.IsNullOrEmpty(searchString)) {
+                        string propertyName = StyleUtil.GetPropertyName(propertyId).ToLower();
+                        if (!propertyName.Contains(lowerSearch)) {
+                            continue;
+                        }
+                    }
+
+                    string source = selectedElement.style.GetPropertySource(propertyId);
+                    properties.Add(ValueTuple.Create(source, style.GetProperty(propertyId)));
+                }
+            }
+
+            if (properties.Count == 0) {
+                return;
+            }
+
+            if (showComputedSources) {
+                properties.Sort((a, b) => {
+                    if (a.Item1 == b.Item1) return 0;
+
+                    bool aInstance = a.Item1.Contains("Instance");
+                    bool bInstance = b.Item1.Contains("Instance");
+
+                    if (aInstance && bInstance) {
+                        return string.Compare(a.Item1, b.Item1, StringComparison.Ordinal);
+                    }
+
+                    if (aInstance) return -1;
+                    if (bInstance) return 1;
+
+                    bool aDefault = a.Item1.Contains("Default");
+                    bool bDefault = b.Item1.Contains("Default");
+
+                    if (aDefault && bDefault) {
+                        return string.Compare(a.Item1, b.Item1, StringComparison.Ordinal);
+                    }
+
+                    if (aDefault) return 1;
+                    if (bDefault) return -1;
+
+                    return string.Compare(a.Item1, b.Item1, StringComparison.Ordinal);
+                });
+
+                GUILayout.Space(10);
+                string currentSource = properties[0].Item1;
+                EditorGUILayout.LabelField(currentSource);
+                int start = 0;
+                for (int i = 0; i < properties.Count; i++) {
+                    if (currentSource != properties[i].Item1) {
+                        properties.Sort(start, i - start, s_StyleCompare);
+
+                        for (int j = start; j < i; j++) {
+                            DrawStyleProperty(properties[j].Item2, false);
+                        }
+
+                        start = i;
+                        currentSource = properties[i].Item1;
+                        GUILayout.Space(10);
+                        EditorGUILayout.LabelField(currentSource);
+                    }
+                }
+
+                properties.Sort(start, properties.Count - start, s_StyleCompare);
+                for (int j = start; j < properties.Count; j++) {
+                    DrawStyleProperty(properties[j].Item2, false);
+                }
+            }
+            else {
+                properties.Sort(0, properties.Count - 1, s_StyleCompare);
+                for (int i = 0; i < properties.Count; i++) {
+                    DrawStyleProperty(properties[i].Item2, false);
+                }
+            }
+        }
+
+
+        private void DrawDebugOverlay(LightList<RenderData> renderData, LightList<RenderData> drawList, Vector3 origin, Camera camera) {
             if (material == null) {
-                material = new Material(Resources.Load<Material>("Materials/UIForia"));
+                material = new Material(Resources.Load<Material>("Materials/UIForiaDebug"));
             }
 
             if (selectedElement != null) {
@@ -56,150 +214,276 @@ namespace Src.Editor {
                 if (data == null) {
                     return;
                 }
+
                 LayoutResult result = selectedElement.layoutResult;
-                mesh = MeshUtil.ResizeStandardUIMesh(mesh, result.actualSize);
-                material.EnableKeyword(StandardRenderer.k_FillType_Color);
-                material.EnableKeyword(StandardRenderer.k_UseBorder);
-                material.SetVector(StandardRenderer.s_ClipRectKey, new Vector4(0, 0, 1, 1));
-                material.SetVector(StandardRenderer.s_ColorKey, drawColor);
-                material.SetVector(StandardRenderer.s_FillOffsetScaleKey, new Vector4(0, 0, 1, 1));
-                material.SetVector(StandardRenderer.s_BorderSizeKey, new Vector4(3, 3, 3, 3));
-                material.SetVector(StandardRenderer.s_BorderRadiusKey, new Vector4());
-                material.SetVector(StandardRenderer.s_BorderColorKey, Color.blue);
-                material.SetVector(StandardRenderer.s_SizeKey, new Vector4(result.actualSize.width, result.actualSize.height, 0, 0));
+
                 Vector3 renderPosition = data.renderPosition;
                 renderPosition.z = drawPos.z;
-                Graphics.DrawMesh(mesh, renderPosition + origin , Quaternion.identity, material, 0, camera, 0, null, false, false, false);
+
+                OffsetRect padding = view.LayoutSystem.GetPaddingRect(selectedElement);
+                OffsetRect margin = view.LayoutSystem.GetMarginRect(selectedElement);
+                OffsetRect border = view.LayoutSystem.GetBorderRect(selectedElement);
+
+                mesh = MeshUtil.ResizeStandardUIMesh(mesh, result.actualSize);
+                float width = result.actualSize.width;
+                float height = result.actualSize.height;
+
+                material.SetVector("_Size", new Vector4(width, height, 0, 0));
+                material.SetColor("_ContentColor", contentColor);
+                material.SetColor("_PaddingColor", paddingColor);
+                material.SetColor("_BorderColor", borderColor);
+                material.SetColor("_MarginColor", marginColor);
+
+                material.SetVector("_MarginRect", new Vector4(
+                    0, 0, width, height
+                ));
+
+                material.SetVector("_BorderRect", new Vector4(
+                    margin.left,
+                    margin.top,
+                    width - margin.right - margin.left,
+                    height - margin.bottom - margin.top
+                ));
+
+                material.SetVector("_PaddingRect", new Vector4(
+                    border.left,
+                    border.top,
+                    width - border.right - border.left,
+                    height - border.bottom - border.top
+                ));
+
+                material.SetVector("_ContentRect", new Vector4(
+                    border.left + padding.left,
+                    border.top + padding.top,
+                    width - border.right - border.left - padding.right - padding.left,
+                    height - border.bottom - border.top - padding.bottom - padding.top
+                ));
+
+                Graphics.DrawMesh(mesh, renderPosition + origin, Quaternion.identity, material, 0, camera, 0, null, false, false, false);
             }
-            
         }
 
-        private Color drawColor;
-        private Vector3 drawPos;
-        private static readonly GUIRect s_GUIRect = new GUIRect();
+        private void DrawSettings() {
+            drawPos = EditorGUILayout.Vector3Field("draw", drawPos);
 
-        public void OnGUI() {
-            if (selectedElement == null) {
-                GUILayout.Label("Select an element in the UIForia Hierarchy Window");
-                return;
+//            overlayBorderSize = EditorGUILayout.FloatField("Border Size", overlayBorderSize);
+//            Color newOutlineColor = EditorGUILayout.ColorField("Outline Color", contentColor);
+
+            Color newContentColor = EditorGUILayout.ColorField("Content Color", contentColor);
+            Color newPaddingColor = EditorGUILayout.ColorField("Padding Color", paddingColor);
+            Color newBorderColor = EditorGUILayout.ColorField("Border Color", borderColor);
+            Color newMarginColor = EditorGUILayout.ColorField("Margin Color", marginColor);
+
+            if (newContentColor != contentColor) {
+                contentColor = newContentColor;
+                EditorPrefs.SetString("UIForia.Inspector.ContentColor", ColorUtility.ToHtmlStringRGBA(contentColor));
             }
 
-            s_GUIRect.SetRect(new Rect(0, 0, position.width - 20f, 20000f));
+            if (newPaddingColor != paddingColor) {
+                paddingColor = newPaddingColor;
+                EditorPrefs.SetString("UIForia.Inspector.PaddingColor", ColorUtility.ToHtmlStringRGBA(paddingColor));
+            }
 
-            scrollPosition = GUI.BeginScrollView(new Rect(0, 0, position.width, position.height), scrollPosition, new Rect(0, 0, position.width - 20f, position.height * 10));
-            LayoutResult layoutResult = selectedElement.layoutResult;
+            if (newBorderColor != borderColor) {
+                borderColor = newBorderColor;
+                EditorPrefs.SetString("UIForia.Inspector.BorderColor", ColorUtility.ToHtmlStringRGBA(borderColor));
+            }
 
-            EditorGUIUtility.wideMode = true;
+            if (marginColor != newMarginColor) {
+                marginColor = newMarginColor;
+                EditorPrefs.SetString("UIForia.Inspector.MarginColor", ColorUtility.ToHtmlStringRGBA(marginColor));
+            }
+        }
 
-            drawPos = EditorGUI.Vector3Field(s_GUIRect.GetFieldRect(), "draw", drawPos);
-            drawColor = EditorGUI.ColorField(s_GUIRect.GetFieldRect(), "overlay", drawColor);
-            
-            GUI.enabled = false;
-            
-            GUI.Label(s_GUIRect.GetFieldRect(), "Layout Result");
-            s_GUIRect.GetFieldRect();
+        private static void DrawLabel(string label, string value) {
+            GUILayout.BeginHorizontal();
+            EditorGUILayout.PrefixLabel(label);
+            EditorGUILayout.LabelField(value);
+            GUILayout.EndHorizontal();
+        }
 
-            EditorGUI.Vector2Field(s_GUIRect.GetFieldRect(), "Local Position", layoutResult.localPosition);
-            EditorGUI.Vector2Field(s_GUIRect.GetFieldRect(), "Screen Position", layoutResult.ScreenPosition);
-            EditorGUI.Vector2Field(s_GUIRect.GetFieldRect(), "Scale", layoutResult.scale);
-            EditorGUI.Vector2Field(s_GUIRect.GetFieldRect(), "Content Offset", layoutResult.contentOffset);
+        private static void DrawVector2Value(string label, Vector2 value) {
+            DrawLabel(label, $"X: {value.x}, Y: {value.y}");
+        }
 
-            EditorGUI.FloatField(s_GUIRect.GetFieldRect(), "Rotation", layoutResult.rotation);
-            EditorGUI.Vector2Field(s_GUIRect.GetFieldRect(), "Allocated Size", layoutResult.allocatedSize);
-            EditorGUI.Vector2Field(s_GUIRect.GetFieldRect(), "Actual Size", layoutResult.actualSize);
+        private static void DrawSizeValue(string label, Size value) {
+            DrawLabel(label, $"Width: {value.width}, Height: {value.height}");
+        }
 
-            s_GUIRect.GetFieldRect();
-            EditorGUI.RectField(s_GUIRect.GetFieldRect(2), "Clip Rect", layoutResult.clipRect);
-            EditorGUI.IntField(s_GUIRect.GetFieldRect(), "Render Layer", layoutResult.layer);
-            EditorGUI.IntField(s_GUIRect.GetFieldRect(), "Z Index", layoutResult.zIndex);
-
+        private void DrawLayoutResult() {
             GUI.enabled = true;
+            LayoutResult layoutResult = selectedElement.layoutResult;
+            float labelWidth = EditorGUIUtility.labelWidth;
+            EditorGUIUtility.labelWidth = 100;
 
-            ComputedStyle style = selectedElement.ComputedStyle;
-            StyleState current = selectedElement.style.CurrentState;
+            Rect clipRect = layoutResult.clipRect;
+            
+            EditorGUILayout.HelpBox("Overflowing Horizontal", MessageType.Warning, true);
+            DrawVector2Value("Local Position", layoutResult.localPosition);
+            DrawVector2Value("Screen Position", layoutResult.screenPosition);
+            DrawVector2Value("Scale", layoutResult.scale);
+            DrawSizeValue("Allocated Size", layoutResult.allocatedSize);
+            DrawSizeValue("Actual Size", layoutResult.actualSize);
 
+            DrawLabel("Rotation", layoutResult.rotation.ToString());
+            DrawLabel("Clip Rect", $"X: {clipRect.x}, Y: {clipRect.y}, W: {clipRect.width}, H: {clipRect.height}");
+
+            DrawLabel("Render Layer", layoutResult.layer.ToString());
+            DrawLabel("Z Index", layoutResult.zIndex.ToString());
+
+            GUILayout.Space(16);
+
+            OffsetRect margin = view.LayoutSystem.GetMarginRect(selectedElement);
+            DrawLabel("Margin Top", margin.top.ToString());
+            DrawLabel("Margin Right", margin.right.ToString());
+            DrawLabel("Margin Bottom", margin.bottom.ToString());
+            DrawLabel("Margin Left", margin.left.ToString());
+
+            GUILayout.Space(16);
+
+            OffsetRect border = view.LayoutSystem.GetBorderRect(selectedElement);
+
+            DrawLabel("Border Top", border.top.ToString());
+            DrawLabel("Border Right", border.right.ToString());
+            DrawLabel("Border Bottom", border.bottom.ToString());
+            DrawLabel("Border Left", border.left.ToString());
+
+            GUILayout.Space(16);
+
+            OffsetRect padding = view.LayoutSystem.GetPaddingRect(selectedElement);
+            DrawLabel("Padding Top", padding.top.ToString());
+            DrawLabel("Padding Right", padding.right.ToString());
+            DrawLabel("Padding Bottom", padding.bottom.ToString());
+            DrawLabel("Padding Left", padding.left.ToString());
+
+            EditorGUIUtility.labelWidth = labelWidth;
+        }
+
+        private void DrawStyleStateButton(string name, StyleState styleState) {
+            bool isInState = selectedElement.style.IsInState(styleState);
+            s_Content.text = "Force " + name;
+            bool toggle = EditorGUILayout.Toggle(s_Content, isInState);
+            if (!isInState && toggle) {
+                selectedElement.style.EnterState(styleState);
+            }
+            else if (isInState && !toggle) {
+                selectedElement.style.ExitState(styleState);
+            }
+        }
+
+        private void DrawStyles() {
             UIStyleSet styleSet = selectedElement.style;
 
             List<UIStyleGroup> baseStyles = styleSet.GetBaseStyles();
 
-            GUIStyle boxStyle = GUI.skin.box;
-            GUIStyleState cachedBoxState = boxStyle.normal;
-            Color oldColor = cachedBoxState.textColor;
-            cachedBoxState.textColor = Color.white;
+            float labelWidth = EditorGUIUtility.labelWidth;
+            EditorGUIUtility.labelWidth = 100;
 
-            bool isHovered = selectedElement.style.IsInState(StyleState.Hover);
-            bool toggle = EditorGUI.Toggle(s_GUIRect.GetFieldRect(), s_Content, isHovered);
-            if (!isHovered && toggle) {
-                selectedElement.style.EnterState(StyleState.Hover);
+            GUILayout.BeginHorizontal();
+            DrawStyleStateButton("Hover", StyleState.Hover);
+            DrawStyleStateButton("Focus", StyleState.Focused);
+            GUILayout.EndHorizontal();
+
+            GUILayout.BeginHorizontal();
+            DrawStyleStateButton("Active", StyleState.Active);
+            DrawStyleStateButton("Inactive", StyleState.Inactive);
+            GUILayout.EndHorizontal();
+
+            GUILayout.Space(10f);
+
+            EditorGUIUtility.labelWidth = labelWidth;
+
+            EditorGUILayout.BeginVertical();
+
+            UIStyleGroup instanceStyle = styleSet.GetInstanceStyle();
+            if (instanceStyle != null) {
+                baseStyles.Insert(0, instanceStyle);
             }
-            else if (isHovered && !toggle) {
-                selectedElement.style.ExitState(StyleState.Hover);
-            }
-
-//            List<StyleBinding> constantStyleBindings = selectedElement.templateRef.constantStyleBindings;
-
-//            if (constantStyleBindings != null) {
-//                
-//            }
 
             for (int i = 0; i < baseStyles.Count; i++) {
                 UIStyleGroup group = baseStyles[i];
                 s_Content.text = group.name;
 
-                int fieldCount = 0;
                 if (group.normal != null) {
-                    fieldCount += group.normal.Properties.Count + 2;
+                    DrawStyle(group.name + " [Normal]", group.normal);
                 }
 
                 if (group.hover != null) {
-                    fieldCount += group.hover.Properties.Count + 2;
+                    DrawStyle(group.name + " [Hover]", group.hover);
                 }
 
                 if (group.focused != null) {
-                    fieldCount += group.focused.Properties.Count + 2;
-                }
-
-                Rect boxRect = s_GUIRect.PeekFieldRect(fieldCount);
-                GUI.Box(boxRect, s_Content);
-                s_GUIRect.GetFieldRect();
-
-                if (group.normal != null) {
-                    DrawStyle("[Normal]", group.normal);
-                }
-
-                if (group.hover != null) {
-                    DrawStyle("[Hover]", group.hover);
-                }
-
-                if (group.focused != null) {
-                    DrawStyle("[Focus]", group.focused);
+                    DrawStyle(group.name + " [Focus]", group.focused);
                 }
 
                 if (group.active != null) {
-                    DrawStyle("[Active]", group.active);
+                    DrawStyle(group.name + " [Active]", group.active);
                 }
 
                 if (group.inactive != null) {
-                    DrawStyle("[Inactive]", group.inactive);
+                    DrawStyle(group.name + " [Inactive]", group.inactive);
                 }
             }
 
-            // set from code = defined & not in template & not in bound style 
-            boxStyle.normal.textColor = oldColor;
-
-            GUI.EndScrollView();
+            ListPool<UIStyleGroup>.Release(ref baseStyles);
+            GUILayout.EndVertical();
         }
 
-        private static void DrawStyle(string name, UIStyle style) {
-            EditorGUI.Foldout(s_GUIRect.GetFieldRect(), true, name);
-            s_GUIRect.Indent(14f);
-            IReadOnlyList<StyleProperty> properties = style.Properties;
-            // todo -- sort? 
-            for (int i = 0; i < properties.Count; i++) {
-                DrawStyleProperty(properties[i], false);
+        public void OnGUI() {
+            EditorGUIUtility.wideMode = true;
+
+            if (selectedElement == null) {
+                GUILayout.Label("Select an element in the UIForia Hierarchy Window");
+                return;
             }
 
-            s_GUIRect.Indent(-14f);
+
+            tab = GUILayout.Toolbar(tab, s_TabNames);
+
+            EditorGUIUtility.labelWidth += 50;
+            scrollPosition = GUILayout.BeginScrollView(scrollPosition);
+            switch (tab) {
+                case 0:
+                    DrawLayoutResult();
+                    break;
+                case 1:
+                    DrawStyles();
+                    break;
+                case 2:
+                    DrawComputedStyle();
+                    break;
+                case 3:
+                    DrawSettings();
+                    break;
+            }
+
+            EditorGUIUtility.labelWidth -= 50;
+
+            // set from code = defined & not in template & not in bound style 
+
+            GUILayout.EndScrollView();
+        }
+
+        private void DrawStyle(string name, UIStyle style) {
+            bool expanded = true;
+
+            if (m_ExpandedMap.ContainsKey(style)) {
+                m_ExpandedMap.TryGetValue(style, out expanded);
+            }
+
+            expanded = EditorGUILayout.Foldout(expanded, name);
+            m_ExpandedMap[style] = expanded;
+
+            if (expanded) {
+                EditorGUI.indentLevel++;
+                IReadOnlyList<StyleProperty> properties = style.Properties;
+                // todo -- sort? 
+                for (int i = 0; i < properties.Count; i++) {
+                    DrawStyleProperty(properties[i], false);
+                }
+
+                EditorGUI.indentLevel--;
+            }
         }
 
         private static StyleProperty DrawStyleProperty(StyleProperty property, bool isEditable) {
@@ -241,7 +525,7 @@ namespace Src.Editor {
                 case StylePropertyId.BackgroundImage:
                 case StylePropertyId.BackgroundImage1:
                 case StylePropertyId.BackgroundImage2:
-                    break;
+                    return DrawTextureAsset(property, isEditable);
 
                 case StylePropertyId.BackgroundShapeType:
                 case StylePropertyId.Opacity:
@@ -249,6 +533,7 @@ namespace Src.Editor {
 
                 case StylePropertyId.Cursor:
                     break;
+
                 case StylePropertyId.GridItemColStart:
                 case StylePropertyId.GridItemColSpan:
                 case StylePropertyId.GridItemRowStart:
@@ -267,7 +552,7 @@ namespace Src.Editor {
 
                 case StylePropertyId.GridLayoutColTemplate:
                 case StylePropertyId.GridLayoutRowTemplate:
-                    break;
+                    return DrawGridTemplate(property, isEditable);
 
                 case StylePropertyId.GridLayoutColAutoSize:
                 case StylePropertyId.GridLayoutRowAutoSize:
@@ -347,33 +632,21 @@ namespace Src.Editor {
                     return DrawColor(property, isEditable);
 
                 case StylePropertyId.TextFontAsset:
-                    break;
+                    return DrawFontAsset(property, isEditable);
+
                 case StylePropertyId.TextFontSize:
                     return DrawInt(property, isEditable);
 
                 case StylePropertyId.TextFontStyle:
+                    // todo -- this needs to be an EnumFlags popup
                     return DrawEnum<TextUtil.FontStyle>(property, isEditable);
 
-                case StylePropertyId.TextAnchor:
+                case StylePropertyId.TextAlignment:
                     return DrawEnum<TextUtil.TextAlignment>(property, isEditable);
 
                 case StylePropertyId.TextWhitespaceMode:
                     return DrawEnum<WhitespaceMode>(property, isEditable);
 
-                case StylePropertyId.TextWrapMode:
-                    return DrawEnum<WrapMode>(property, isEditable);
-
-                case StylePropertyId.TextHorizontalOverflow:
-                case StylePropertyId.TextVerticalOverflow:
-                    break;
-                case StylePropertyId.TextIndentFirstLine:
-                    break;
-                case StylePropertyId.TextIndentNewLine:
-                    break;
-                case StylePropertyId.TextLayoutStyle:
-                    break;
-                case StylePropertyId.TextAutoSize:
-                    break;
                 case StylePropertyId.TextTransform:
                     return DrawEnum<TextUtil.TextTransform>(property, isEditable);
 
@@ -414,9 +687,7 @@ namespace Src.Editor {
             return StyleProperty.Unset(property.propertyId);
         }
 
-        private static readonly GUIContent s_Content = new GUIContent();
 
-        private static Dictionary<Type, ValueTuple<int[], GUIContent[]>> m_EnumValueMap = new Dictionary<Type, ValueTuple<int[], GUIContent[]>>();
 
         private static ValueTuple<int[], GUIContent[]> GetEnumValues<T>() {
             ValueTuple<int[], GUIContent[]> retn;
@@ -438,84 +709,125 @@ namespace Src.Editor {
         }
 
         private static StyleProperty DrawEnum<T>(StyleProperty property, bool isEditable) {
-            Rect rect = s_GUIRect.GetFieldRect();
             s_Content.text = StyleUtil.GetPropertyName(property);
-            rect.width = EditorGUIUtility.labelWidth + 100;
             GUI.enabled = isEditable;
             ValueTuple<int[], GUIContent[]> tuple = GetEnumValues<T>();
 
             int[] values = tuple.Item1;
             GUIContent[] displayOptions = tuple.Item2;
             int index = Array.IndexOf(values, property.valuePart0);
-            int output = EditorGUI.IntPopup(rect, s_Content, index, displayOptions, values);
-
+            int output = EditorGUILayout.IntPopup(s_Content, index, displayOptions, values);
+            // unclear if output is a value or an index, I suspect index
+            GUI.enabled = true;
             return isEditable ? new StyleProperty(property.propertyId, output) : property;
         }
 
         private static StyleProperty DrawColor(StyleProperty property, bool isEditable) {
-            Rect rect = s_GUIRect.GetFieldRect();
             s_Content.text = StyleUtil.GetPropertyName(property);
-            rect.width = EditorGUIUtility.labelWidth + 100;
             GUI.enabled = isEditable;
-            Color value = EditorGUI.ColorField(rect, s_Content, property.AsColor);
+            Color value = EditorGUILayout.ColorField(s_Content, property.AsColor);
+            GUI.enabled = true;
             return isEditable ? new StyleProperty(property.propertyId, value) : property;
         }
 
         private static StyleProperty DrawInt(StyleProperty property, bool isEditable) {
-            Rect rect = s_GUIRect.GetFieldRect();
             s_Content.text = StyleUtil.GetPropertyName(property);
-            rect.width = EditorGUIUtility.labelWidth + 100;
             GUI.enabled = isEditable;
-            float value = EditorGUI.IntField(rect, s_Content, property.AsInt);
+            float value = EditorGUILayout.IntField(s_Content, property.AsInt);
+            GUI.enabled = true;
             return isEditable ? new StyleProperty(property.propertyId, value) : property;
         }
 
         private static StyleProperty DrawFloat(StyleProperty property, bool isEditable) {
-            Rect rect = s_GUIRect.GetFieldRect();
             s_Content.text = StyleUtil.GetPropertyName(property);
-            rect.width = EditorGUIUtility.labelWidth + 100;
             GUI.enabled = isEditable;
-            float value = EditorGUI.FloatField(rect, s_Content, property.AsFloat);
+            float value = EditorGUILayout.FloatField(s_Content, property.AsFloat);
+            GUI.enabled = true;
             return isEditable ? new StyleProperty(property.propertyId, value) : property;
         }
 
         private static StyleProperty DrawFixedLength(StyleProperty property, bool isEditable) {
-            Rect rect = s_GUIRect.GetFieldRect();
             s_Content.text = StyleUtil.GetPropertyName(property);
-            rect.width = EditorGUIUtility.labelWidth + 100;
+            GUILayout.BeginHorizontal();
             GUI.enabled = isEditable;
-            float value = EditorGUI.FloatField(rect, s_Content, property.AsFixedLength.value);
-            rect.x += 100 + EditorGUIUtility.labelWidth;
-            rect.width = 100;
-            UIFixedUnit unit = (UIFixedUnit) EditorGUI.EnumPopup(rect, property.AsFixedLength.unit);
+            float value = EditorGUILayout.FloatField(s_Content, property.AsFixedLength.value);
+            UIFixedUnit unit = (UIFixedUnit) EditorGUILayout.EnumPopup(property.AsFixedLength.unit);
             GUI.enabled = true;
+            GUILayout.EndHorizontal();
             return isEditable ? new StyleProperty(property.propertyId, new UIFixedLength(value, unit)) : property;
         }
 
         private static StyleProperty DrawGridTrackSize(StyleProperty property, bool isEditable) {
-            Rect rect = s_GUIRect.GetFieldRect();
-            s_Content.text = StyleUtil.GetPropertyName(property);
-            rect.width = EditorGUIUtility.labelWidth + 100;
             GUI.enabled = isEditable;
-            float value = EditorGUI.FloatField(rect, s_Content, property.AsGridTrackSize.minValue);
-            rect.x += 100 + EditorGUIUtility.labelWidth;
-            rect.width = 100;
-            GridTemplateUnit unit = (GridTemplateUnit) EditorGUI.EnumPopup(rect, property.AsGridTrackSize.minUnit);
+            GUILayout.BeginHorizontal();
+            float value = EditorGUILayout.FloatField(s_Content, property.AsGridTrackSize.minValue);
+            GridTemplateUnit unit = (GridTemplateUnit) EditorGUILayout.EnumPopup(property.AsGridTrackSize.minUnit);
             GUI.enabled = true;
+            GUILayout.EndHorizontal();
             return isEditable ? new StyleProperty(property.propertyId, new GridTrackSize(value, unit)) : property;
         }
 
         private static StyleProperty DrawMeasurement(StyleProperty property, bool isEditable) {
-            Rect rect = s_GUIRect.GetFieldRect();
             s_Content.text = StyleUtil.GetPropertyName(property);
-            rect.width = EditorGUIUtility.labelWidth + 100;
             GUI.enabled = isEditable;
-            float value = EditorGUI.FloatField(rect, s_Content, property.AsMeasurement.value);
-            rect.x += 100 + EditorGUIUtility.labelWidth;
-            rect.width = 100;
-            UIMeasurementUnit unit = (UIMeasurementUnit) EditorGUI.EnumPopup(rect, property.AsMeasurement.unit);
+            GUILayout.BeginHorizontal();
+            float value = EditorGUILayout.FloatField(s_Content, property.AsMeasurement.value);
+            UIMeasurementUnit unit = (UIMeasurementUnit) EditorGUILayout.EnumPopup(property.AsMeasurement.unit);
             GUI.enabled = true;
+            GUILayout.EndHorizontal();
             return isEditable ? new StyleProperty(property.propertyId, new UIMeasurement(value, unit)) : property;
+        }
+
+        private static StyleProperty DrawTextureAsset(StyleProperty property, bool isEditable) {
+            GUI.enabled = isEditable;
+            GUILayout.BeginHorizontal();
+            Texture2D texture = property.AsTexture;
+
+            Texture2D newTexture = (Texture2D) EditorGUILayout.ObjectField(StyleUtil.GetPropertyName(property), texture, typeof(Texture2D), false);
+
+            GUI.enabled = true;
+            GUILayout.EndHorizontal();
+            return isEditable ? new StyleProperty(property.propertyId, 0, 0, newTexture) : property;
+        }
+
+        private static StyleProperty DrawFontAsset(StyleProperty property, bool isEditable) {
+            GUI.enabled = isEditable;
+            GUILayout.BeginHorizontal();
+            TMP_FontAsset fontAsset = property.AsFont;
+
+            TMP_FontAsset newFont = (TMP_FontAsset) EditorGUILayout.ObjectField(StyleUtil.GetPropertyName(property), fontAsset, typeof(TMP_FontAsset), false);
+
+            GUI.enabled = true;
+            GUILayout.EndHorizontal();
+            return isEditable ? new StyleProperty(property.propertyId, 0, 0, newFont) : property;
+        }
+
+        private static StyleProperty DrawGridTemplate(StyleProperty property, bool isEditable) {
+            s_Content.text = StyleUtil.GetPropertyName(property);
+            GUI.enabled = isEditable;
+            GUILayout.BeginHorizontal();
+            IReadOnlyList<GridTrackSize> template = property.AsGridTrackTemplate;
+            if (template == null) {
+                EditorGUILayout.LabelField("Undefined");
+            }
+            else {
+                for (int i = 0; i < template.Count; i++) {
+                    float value = EditorGUILayout.FloatField(s_Content, property.AsGridTrackSize.minValue);
+                    GridTemplateUnit unit = (GridTemplateUnit) EditorGUILayout.EnumPopup(property.AsGridTrackSize.minUnit);
+                }
+            }
+
+            GUI.enabled = true;
+            GUILayout.EndHorizontal();
+            return isEditable ? new StyleProperty(property.propertyId, 0, 0, null) : property;
+        }
+
+    }
+
+    public class StylePropertyIdComparer : IComparer<ValueTuple<string, StyleProperty>> {
+
+        public int Compare(ValueTuple<string, StyleProperty> x, ValueTuple<string, StyleProperty> y) {
+            return (int) x.Item2.propertyId > (int) y.Item2.propertyId ? 1 : -1;
         }
 
     }

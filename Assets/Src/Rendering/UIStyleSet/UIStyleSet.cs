@@ -26,7 +26,7 @@ namespace Rendering {
         // temp -- replace w/ IntMap & remove computed style
         private List<UIStyleGroup> styleGroups;
         public readonly UIElement element;
-        public readonly ComputedStyle computedStyle;     
+        public readonly ComputedStyle computedStyle;
         internal IStyleSystem styleSystem;
 
         // todo -- remove and replace w/ style
@@ -140,6 +140,7 @@ namespace Rendering {
             if (styleGroups.Contains(group)) {
                 return;
             }
+
             // todo -- subscribe to changes?
             styleGroups.Add(group);
             styleNames = GetBaseStyleNames(this);
@@ -190,11 +191,11 @@ namespace Rendering {
         }
 
         public StyleProperty GetPropertyValueInState(StylePropertyId propertyId, StyleState state) {
-
             for (int i = 0; i < appliedStyles.Count; i++) {
                 if ((appliedStyles[i].state & state) == 0) {
                     continue;
                 }
+
                 StyleProperty property = appliedStyles[i].style.GetProperty(propertyId);
                 if (property.IsDefined) {
                     return property;
@@ -204,10 +205,11 @@ namespace Rendering {
             return new StyleProperty(propertyId, IntUtil.UnsetValue, IntUtil.UnsetValue);
         }
 
-        
+
         private UIStyle GetOrCreateInstanceStyle(StyleState state) {
             if (instanceStyle == null) {
                 instanceStyle = new UIStyleGroup();
+                instanceStyle.name = "Instance";
             }
 
             switch (state) {
@@ -218,8 +220,9 @@ namespace Rendering {
                         containedStates |= StyleState.Normal;
                         SortStyles();
                     }
+
                     return instanceStyle.normal;
-                
+
                 case StyleState.Hover:
                     if (instanceStyle.hover == null) {
                         instanceStyle.hover = new UIStyle();
@@ -227,8 +230,9 @@ namespace Rendering {
                         SortStyles();
                         containedStates |= StyleState.Hover;
                     }
+
                     return instanceStyle.hover;
-                
+
                 case StyleState.Active:
                     if (instanceStyle.active == null) {
                         instanceStyle.active = new UIStyle();
@@ -236,8 +240,9 @@ namespace Rendering {
                         SortStyles();
                         containedStates |= StyleState.Active;
                     }
+
                     return instanceStyle.active;
-                
+
                 case StyleState.Inactive:
                     if (instanceStyle.inactive == null) {
                         instanceStyle.inactive = new UIStyle();
@@ -245,8 +250,9 @@ namespace Rendering {
                         SortStyles();
                         containedStates |= StyleState.Inactive;
                     }
+
                     return instanceStyle.inactive;
-                
+
                 case StyleState.Focused:
                     if (instanceStyle.focused == null) {
                         instanceStyle.focused = new UIStyle();
@@ -254,14 +260,14 @@ namespace Rendering {
                         SortStyles();
                         containedStates |= StyleState.Focused;
                     }
+
                     return instanceStyle.focused;
-                
+
                 default:
                     throw new ArgumentOutOfRangeException(nameof(state), state, null);
             }
-
         }
-        
+
         internal void Initialize() {
             for (int i = 0; i < appliedStyles.Count; i++) {
                 StyleEntry entry = appliedStyles[i];
@@ -422,8 +428,8 @@ namespace Rendering {
                 case StylePropertyId.TransformRotation:
                 case StylePropertyId.TextColor:
                 case StylePropertyId.TextFontSize:
-                case StylePropertyId.TextIndentFirstLine:
-                case StylePropertyId.TextIndentNewLine:
+//                case StylePropertyId.TextIndentFirstLine:
+//                case StylePropertyId.TextIndentNewLine:
                 case StylePropertyId.PreferredWidth:
                 case StylePropertyId.PreferredHeight:
                 case StylePropertyId.AnchorTop:
@@ -435,6 +441,71 @@ namespace Rendering {
                 default:
                     throw new Exception(property.propertyId + " is not able to be animated");
             }
+        }
+
+        public string GetPropertySource(StylePropertyId propertyId) {
+            if (!computedStyle.IsDefined(propertyId)) {
+                return "Default";
+            }
+
+            for (int i = 0; i < appliedStyles.Count; i++) {
+                if ((currentState & appliedStyles[i].state) == 0) {
+                    continue;
+                }
+
+                if (appliedStyles[i].style.DefinesProperty(propertyId)) {
+                    if (appliedStyles[i].type == StyleType.Instance) {
+                        switch (appliedStyles[i].state) {
+                            case StyleState.Normal:
+                                return "Instance [Normal]";
+
+                            case StyleState.Hover:
+                                return "Instance [Hover]";
+
+                            case StyleState.Active:
+                                return "Instance [Active]";
+
+                            case StyleState.Inactive:
+                                return "Instance [Inactive]";
+
+                            case StyleState.Focused:
+                                return "Instance [Focused]";
+
+                            default:
+                                throw new ArgumentOutOfRangeException();
+                        }
+                    }
+
+                    UIStyle style = appliedStyles[i].style;
+
+                    for (int j = 0; j < styleGroups.Count; j++) {
+                        UIStyleGroup group = styleGroups[j];
+
+                        if (style == group.normal) {
+                            return group.name + " [Normal]";
+                        }
+
+                        if (style == group.hover) {
+                            return group.name + " [Hover]";
+                        }
+
+                        if (style == group.active) {
+                            return group.name + " [Active]";
+                        }
+
+                        if (style == group.active) {
+                            return group.name + " [Inactive]";
+                        }
+                    }
+                }
+            }
+
+            return "Unknown";
+            
+        }
+
+        public UIStyleGroup GetInstanceStyle() {
+            return instanceStyle;
         }
 
     }

@@ -30,6 +30,7 @@ public abstract class UIView {
     public event Action<UIElement> onElementEnabled;
     public event Action<UIElement> onElementDisabled;
 
+    public event Action onWillRefresh;
     public event Action onRefresh;
     public event Action onUpdate;
     public event Action onReady;
@@ -88,7 +89,7 @@ public abstract class UIView {
     }
 
     public void Refresh() {
-        onRefresh?.Invoke();
+        onWillRefresh?.Invoke();
         foreach (ISystem system in systems) {
             system.OnReset();
         }

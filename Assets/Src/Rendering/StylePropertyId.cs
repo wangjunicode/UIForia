@@ -93,15 +93,15 @@ namespace Rendering {
         TextFontAsset = __TextPropertyStart__ + UIStyle.TextPropertyIdFlag.TextFontAsset,
         TextFontSize = __TextPropertyStart__ + UIStyle.TextPropertyIdFlag.TextFontSize,
         TextFontStyle = __TextPropertyStart__ + UIStyle.TextPropertyIdFlag.TextFontStyle,
-        TextAnchor = __TextPropertyStart__ + UIStyle.TextPropertyIdFlag.TextAnchor,
+        TextAlignment = __TextPropertyStart__ + UIStyle.TextPropertyIdFlag.TextAnchor,
         TextWhitespaceMode = __TextPropertyStart__ + UIStyle.TextPropertyIdFlag.TextWhitespaceMode,
-        TextWrapMode = __TextPropertyStart__ + UIStyle.TextPropertyIdFlag.TextWrapMode,
-        TextHorizontalOverflow = __TextPropertyStart__ + UIStyle.TextPropertyIdFlag.TextHorizontalOverflow, // Truncate | Overflow | Wrap
-        TextVerticalOverflow = __TextPropertyStart__ + UIStyle.TextPropertyIdFlag.TextVerticalOverflow, // Truncate | Overflow | Ellipsis
-        TextIndentFirstLine = __TextPropertyStart__ + UIStyle.TextPropertyIdFlag.TextIndentFirstLine,
-        TextIndentNewLine = __TextPropertyStart__ + UIStyle.TextPropertyIdFlag.TextIndentNewLine,
-        TextLayoutStyle = __TextPropertyStart__ + UIStyle.TextPropertyIdFlag.TextLayoutStyle, // UseKerning | Monospace
-        TextAutoSize = __TextPropertyStart__ + UIStyle.TextPropertyIdFlag.TextAutoSize,
+//        TextWrapMode = __TextPropertyStart__ + UIStyle.TextPropertyIdFlag.TextWrapMode,
+//        TextHorizontalOverflow = __TextPropertyStart__ + UIStyle.TextPropertyIdFlag.TextHorizontalOverflow, // Truncate | Overflow | Wrap
+//        TextVerticalOverflow = __TextPropertyStart__ + UIStyle.TextPropertyIdFlag.TextVerticalOverflow, // Truncate | Overflow | Ellipsis
+       // TextIndentFirstLine = __TextPropertyStart__ + UIStyle.TextPropertyIdFlag.TextIndentFirstLine,
+//        TextIndentNewLine = __TextPropertyStart__ + UIStyle.TextPropertyIdFlag.TextIndentNewLine,
+//        TextLayoutStyle = __TextPropertyStart__ + UIStyle.TextPropertyIdFlag.TextLayoutStyle, // UseKerning | Monospace
+//        TextAutoSize = __TextPropertyStart__ + UIStyle.TextPropertyIdFlag.TextAutoSize,
         TextTransform = __TextPropertyStart__ + UIStyle.TextPropertyIdFlag.TextTransform,
         __TextPropertyEnd__ = 1013,
 

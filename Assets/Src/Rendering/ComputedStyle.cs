@@ -23,10 +23,10 @@ namespace Rendering {
             this.properties = new IntMap<StyleProperty>();
         }
 
-        public FixedLengthRect border => new FixedLengthRect(borderTop, borderRight, borderBottom, borderLeft);
-        public ContentBoxRect margin => new ContentBoxRect(MarginTop, marginRight, marginBottom, marginLeft);
+        public FixedLengthRect border => new FixedLengthRect(BorderTop, BorderRight, BorderBottom, BorderLeft);
+        public ContentBoxRect margin => new ContentBoxRect(MarginTop, MarginRight, MarginBottom, MarginLeft);
 
-        public FixedLengthRect padding => new FixedLengthRect(paddingTop, paddingRight, paddingBottom, paddingLeft);
+        public FixedLengthRect padding => new FixedLengthRect(PaddingTop, PaddingRight, PaddingBottom, PaddingLeft);
 
         public bool HasBorderRadius =>
             BorderRadiusTopLeft.value > 0 ||
@@ -34,9 +34,7 @@ namespace Rendering {
             BorderRadiusTopRight.value > 0 ||
             BorderRadiusBottomLeft.value > 0;
 
-#region Paint
-
-        private Texture2D backgroundImage = DefaultStyleValues.BackgroundImage;
+        #region Paint
 
         public Color BorderColor {
             [DebuggerStepThrough] get { return ReadColorProperty(StylePropertyId.BorderColor, DefaultStyleValues.BorderColor); }
@@ -44,7 +42,11 @@ namespace Rendering {
         }
 
         public Color BackgroundColor {
-            [DebuggerStepThrough] get { return ReadColorProperty(StylePropertyId.BackgroundColor, DefaultStyleValues.BorderColor);; }
+            [DebuggerStepThrough]
+            get {
+                return ReadColorProperty(StylePropertyId.BackgroundColor, DefaultStyleValues.BorderColor);
+                ;
+            }
             internal set { WriteColorProperty(StylePropertyId.BackgroundColor, value); }
         }
 
@@ -54,16 +56,8 @@ namespace Rendering {
         }
 
         public Texture2D BackgroundImage {
-            [DebuggerStepThrough] get { return backgroundImage; }
-            internal set {
-                
-                if (backgroundImage == value) {
-                    return;
-                }
-
-                backgroundImage = value;
-                SendEvent(new StyleProperty(StylePropertyId.BackgroundImage, 0, 0, backgroundImage));
-            }
+            [DebuggerStepThrough] get { return (Texture2D) ReadObject(StylePropertyId.BackgroundImage, DefaultStyleValues.BackgroundImage); }
+            internal set { WriteObject(StylePropertyId.BackgroundImage, value); }
         }
 
         public GradientType GradientType {
@@ -126,127 +120,71 @@ namespace Rendering {
             internal set { WriteFloat(StylePropertyId.BackgroundFillScaleY, value); }
         }
 
-#endregion
+        #endregion
 
-#region Overflow
-
-        private Overflow overflowX = DefaultStyleValues.OverflowX;
-        private Overflow overflowY = DefaultStyleValues.OverflowY;
+        #region Overflow
 
         public Overflow OverflowX {
-            [DebuggerStepThrough] get { return overflowX; }
-            internal set {
-                if (value == overflowX) return;
-                overflowX = value;
-                SendEvent(new StyleProperty(StylePropertyId.OverflowX, (int) overflowX));
-            }
+            [DebuggerStepThrough] get { return (Overflow) ReadInt(StylePropertyId.OverflowX, (int) DefaultStyleValues.OverflowX); }
+            internal set { WriteInt(StylePropertyId.OverflowX, (int) value); }
         }
 
         public Overflow OverflowY {
-            [DebuggerStepThrough] get { return overflowY; }
-            internal set {
-                if (value == overflowY) return;
-                overflowY = value;
-                SendEvent(new StyleProperty(StylePropertyId.OverflowY, (int) overflowY));
-            }
+            [DebuggerStepThrough] get { return (Overflow) ReadInt(StylePropertyId.OverflowY, (int) DefaultStyleValues.OverflowY); }
+            internal set { WriteInt(StylePropertyId.OverflowY, (int) value); }
         }
 
-#endregion
+        #endregion
 
-#region Flex Item 
-
-        private int flexGrowthFactor = DefaultStyleValues.FlexItemGrow;
-        private int flexShrinkFactor = DefaultStyleValues.FlexItemShrink;
-        private int flexOrderOverride = DefaultStyleValues.FlexItemOrder;
-        private CrossAxisAlignment flexSelfAlignment = DefaultStyleValues.FlexItemSelfAlignment;
+        #region Flex Item 
 
         public int FlexItemOrder {
-            [DebuggerStepThrough] get { return flexOrderOverride; }
-            internal set {
-                if (value < 0) value = 0;
-                if (flexOrderOverride == value) return;
-                flexOrderOverride = value;
-                SendEvent(new StyleProperty(StylePropertyId.FlexItemOrder, flexOrderOverride));
-            }
+            [DebuggerStepThrough] get { return ReadInt(StylePropertyId.FlexItemOrder, DefaultStyleValues.FlexItemOrder); }
+            internal set { WriteInt(StylePropertyId.FlexItemOrder, value); }
         }
 
-        public int FlexItemGrowthFactor {
-            [DebuggerStepThrough] get { return flexGrowthFactor; }
-            internal set {
-                if (value < 0) value = 0;
-                if (flexGrowthFactor == value) return;
-                flexGrowthFactor = value;
-                SendEvent(new StyleProperty(StylePropertyId.FlexItemGrow, flexGrowthFactor));
-            }
+        public int FlexItemGrow {
+            [DebuggerStepThrough] get { return ReadInt(StylePropertyId.FlexItemGrow, DefaultStyleValues.FlexItemGrow); }
+            internal set { WriteInt(StylePropertyId.FlexItemGrow, value); }
         }
 
-        public int FlexItemShrinkFactor {
-            [DebuggerStepThrough] get { return flexShrinkFactor; }
-            internal set {
-                if (value < 0) value = 0;
-                if (flexShrinkFactor == value) return;
-                flexShrinkFactor = value;
-                SendEvent(new StyleProperty(StylePropertyId.FlexItemShrink, flexShrinkFactor));
-            }
+        public int FlexItemShrink {
+            [DebuggerStepThrough] get { return ReadInt(StylePropertyId.FlexItemShrink, DefaultStyleValues.FlexItemShrink); }
+            internal set { WriteInt(StylePropertyId.FlexItemShrink, value); }
         }
 
         public CrossAxisAlignment FlexItemSelfAlignment {
-            [DebuggerStepThrough] get { return flexSelfAlignment; }
-            internal set {
-                if (value == flexSelfAlignment) return;
-                flexSelfAlignment = value;
-                SendEvent(new StyleProperty(StylePropertyId.FlexItemSelfAlignment, (int) flexSelfAlignment));
-            }
+            [DebuggerStepThrough] get { return (CrossAxisAlignment) ReadInt(StylePropertyId.FlexItemSelfAlignment, (int) DefaultStyleValues.FlexItemSelfAlignment); }
+            internal set { WriteInt(StylePropertyId.FlexItemSelfAlignment, (int) value); }
         }
 
-#endregion
+        #endregion
 
-#region Flex Layout
-
-        private LayoutWrap flexLayoutWrap = DefaultStyleValues.FlexWrap;
-        private LayoutDirection flexLayoutDirection = DefaultStyleValues.FlexLayoutDirection;
-        private MainAxisAlignment flexLayoutMainAxisAlignment = DefaultStyleValues.FlexLayoutMainAxisAlignment;
-        private CrossAxisAlignment flexLayoutCrossAxisAlignment = DefaultStyleValues.FlexLayoutCrossAxisAlignment;
+        #region Flex Layout
 
         public LayoutDirection FlexLayoutDirection {
-            [DebuggerStepThrough] get { return flexLayoutDirection; }
-            internal set {
-                if (flexLayoutDirection == value) return;
-                flexLayoutDirection = value;
-                SendEvent(new StyleProperty(StylePropertyId.FlexLayoutDirection, (int) flexLayoutDirection));
-            }
+            [DebuggerStepThrough] get { return (LayoutDirection) ReadInt(StylePropertyId.FlexLayoutDirection, (int) DefaultStyleValues.FlexLayoutDirection); }
+            internal set { WriteInt(StylePropertyId.FlexLayoutDirection, (int) value); }
         }
 
         public LayoutWrap FlexLayoutWrap {
-            [DebuggerStepThrough] get { return flexLayoutWrap; }
-            internal set {
-                if (flexLayoutWrap == value) return;
-                flexLayoutWrap = value;
-                SendEvent(new StyleProperty(StylePropertyId.FlexLayoutWrap, (int) flexLayoutWrap));
-            }
+            [DebuggerStepThrough] get { return (LayoutWrap) ReadInt(StylePropertyId.FlexLayoutWrap, (int) DefaultStyleValues.FlexLayoutWrap); }
+            internal set { WriteInt(StylePropertyId.FlexLayoutWrap, (int) value); }
         }
 
         public MainAxisAlignment FlexLayoutMainAxisAlignment {
-            [DebuggerStepThrough] get { return flexLayoutMainAxisAlignment; }
-            internal set {
-                if (flexLayoutMainAxisAlignment == value) return;
-                flexLayoutMainAxisAlignment = value;
-                SendEvent(new StyleProperty(StylePropertyId.FlexLayoutMainAxisAlignment, (int) flexLayoutMainAxisAlignment));
-            }
+            [DebuggerStepThrough] get { return (MainAxisAlignment) ReadInt(StylePropertyId.FlexLayoutMainAxisAlignment, (int) DefaultStyleValues.FlexLayoutMainAxisAlignment); }
+            internal set { WriteInt(StylePropertyId.FlexLayoutMainAxisAlignment, (int) value); }
         }
 
         public CrossAxisAlignment FlexLayoutCrossAxisAlignment {
-            [DebuggerStepThrough] get { return flexLayoutCrossAxisAlignment; }
-            internal set {
-                if (flexLayoutCrossAxisAlignment == value) return;
-                flexLayoutCrossAxisAlignment = value;
-                SendEvent(new StyleProperty(StylePropertyId.FlexLayoutCrossAxisAlignment, (int) flexLayoutCrossAxisAlignment));
-            }
+            [DebuggerStepThrough] get { return (CrossAxisAlignment) ReadInt(StylePropertyId.FlexLayoutCrossAxisAlignment, (int) DefaultStyleValues.FlexLayoutCrossAxisAlignment); }
+            internal set { WriteInt(StylePropertyId.FlexLayoutCrossAxisAlignment, (int) value); }
         }
 
-#endregion
+        #endregion
 
-#region Grid Item
+        #region Grid Item
 
         public int GridItemColStart {
             [DebuggerStepThrough] get { return ReadInt(StylePropertyId.GridItemColStart, DefaultStyleValues.GridItemColStart); }
@@ -278,15 +216,9 @@ namespace Rendering {
             internal set { WriteInt(StylePropertyId.GridItemRowSelfAlignment, (int) value); }
         }
 
-#endregion
+        #endregion
 
-#region Grid Layout
-
-        private IReadOnlyList<GridTrackSize> gridLayoutColTemplate = DefaultStyleValues.GridLayoutColTemplate;
-        private IReadOnlyList<GridTrackSize> gridLayoutRowTemplate = DefaultStyleValues.GridLayoutRowTemplate;
-
-        private GridTrackSize gridLayoutColAutoSize = DefaultStyleValues.GridLayoutColAutoSize;
-        private GridTrackSize gridLayoutRowAutoSize = DefaultStyleValues.GridLayoutRowAutoSize;
+        #region Grid Layout
 
         public LayoutDirection GridLayoutDirection {
             [DebuggerStepThrough] get { return (LayoutDirection) ReadInt(StylePropertyId.GridLayoutDirection, (int) DefaultStyleValues.GridLayoutDirection); }
@@ -299,51 +231,23 @@ namespace Rendering {
         }
 
         public IReadOnlyList<GridTrackSize> GridLayoutColTemplate {
-            [DebuggerStepThrough] get { return gridLayoutColTemplate; }
-            set {
-                if (Equals(gridLayoutColTemplate, value)) {
-                    return;
-                }
-
-                gridLayoutColTemplate = value;
-                SendEvent(new StyleProperty(StylePropertyId.GridLayoutColTemplate, 0, 0, gridLayoutColTemplate));
-            }
+            [DebuggerStepThrough] get { return (IReadOnlyList<GridTrackSize>) ReadObject(StylePropertyId.GridLayoutColTemplate, DefaultStyleValues.GridLayoutColTemplate); }
+            set { WriteObject(StylePropertyId.GridLayoutColTemplate, value); }
         }
 
         public IReadOnlyList<GridTrackSize> GridLayoutRowTemplate {
-            [DebuggerStepThrough] get { return gridLayoutRowTemplate; }
-            set {
-                if (Equals(gridLayoutRowTemplate, value)) {
-                    return;
-                }
-
-                gridLayoutRowTemplate = value;
-                SendEvent(new StyleProperty(StylePropertyId.GridLayoutRowTemplate, 0, 0, gridLayoutRowTemplate));
-            }
+            [DebuggerStepThrough] get { return (IReadOnlyList<GridTrackSize>) ReadObject(StylePropertyId.GridLayoutRowTemplate, DefaultStyleValues.GridLayoutRowTemplate); }
+            set { WriteObject(StylePropertyId.GridLayoutRowTemplate, value); }
         }
 
         public GridTrackSize GridLayoutColAutoSize {
-            [DebuggerStepThrough] get { return gridLayoutColAutoSize; }
-            set {
-                if (gridLayoutColAutoSize == value) {
-                    return;
-                }
-
-                gridLayoutColAutoSize = value;
-                SendEvent(new StyleProperty(StylePropertyId.GridLayoutColAutoSize, FloatUtil.EncodeToInt(value.minValue), (int) value.minUnit));
-            }
+            [DebuggerStepThrough] get { return ReadGridTrackSize(StylePropertyId.GridLayoutColAutoSize, DefaultStyleValues.GridLayoutColAutoSize); }
+            set { WriteGridTrackSize(StylePropertyId.GridLayoutColAutoSize, value); }
         }
 
         public GridTrackSize GridLayoutRowAutoSize {
-            [DebuggerStepThrough] get { return gridLayoutRowAutoSize; }
-            set {
-                if (gridLayoutRowAutoSize == value) {
-                    return;
-                }
-
-                gridLayoutRowAutoSize = value;
-                SendEvent(new StyleProperty(StylePropertyId.GridLayoutRowAutoSize, FloatUtil.EncodeToInt(value.minValue), (int) value.minUnit));
-            }
+            [DebuggerStepThrough] get { return ReadGridTrackSize(StylePropertyId.GridLayoutRowAutoSize, DefaultStyleValues.GridLayoutRowAutoSize); }
+            set { WriteGridTrackSize(StylePropertyId.GridLayoutRowAutoSize, value); }
         }
 
         public float GridLayoutColGap {
@@ -366,70 +270,38 @@ namespace Rendering {
             set { WriteInt(StylePropertyId.GridLayoutRowAlignment, (int) value); }
         }
 
-#endregion
+        #endregion
 
-#region Size       
-
-        private UIMeasurement minWidth = DefaultStyleValues.MinWidth;
-        private UIMeasurement maxWidth = DefaultStyleValues.MaxWidth;
-        private UIMeasurement preferredWidth = DefaultStyleValues.PreferredWidth;
-
-        private UIMeasurement minHeight = DefaultStyleValues.MinHeight;
-        private UIMeasurement maxHeight = DefaultStyleValues.MaxHeight;
-        private UIMeasurement preferredHeight = DefaultStyleValues.PreferredHeight;
+        #region Size       
 
         public UIMeasurement MinWidth {
-            [DebuggerStepThrough] get { return minWidth; }
-            internal set {
-                if (minWidth == value) return;
-                minWidth = value;
-                SendEvent(new StyleProperty(StylePropertyId.MinWidth, FloatUtil.EncodeToInt(minWidth.value), (int) minWidth.unit));
-            }
+            [DebuggerStepThrough] get { return ReadMeasurement(StylePropertyId.MinWidth, DefaultStyleValues.MinWidth); }
+            internal set { WriteMeasurement(StylePropertyId.MinWidth, value); }
         }
 
         public UIMeasurement MaxWidth {
-            [DebuggerStepThrough] get { return maxWidth; }
-            internal set {
-                if (maxWidth == value) return;
-                maxWidth = value;
-                SendEvent(new StyleProperty(StylePropertyId.MaxWidth, FloatUtil.EncodeToInt(maxWidth.value), (int) maxWidth.unit));
-            }
+            [DebuggerStepThrough] get { return ReadMeasurement(StylePropertyId.MaxWidth, DefaultStyleValues.MaxWidth); }
+            internal set { WriteMeasurement(StylePropertyId.MaxWidth, value); }
         }
 
         public UIMeasurement PreferredWidth {
-            [DebuggerStepThrough] get { return preferredWidth; }
-            internal set {
-                if (preferredWidth == value) return;
-                preferredWidth = value;
-                SendEvent(new StyleProperty(StylePropertyId.PreferredWidth, FloatUtil.EncodeToInt(preferredWidth.value), (int) preferredWidth.unit));
-            }
+            [DebuggerStepThrough] get { return ReadMeasurement(StylePropertyId.PreferredWidth, DefaultStyleValues.PreferredWidth); }
+            internal set { WriteMeasurement(StylePropertyId.PreferredWidth, value); }
         }
 
         public UIMeasurement MinHeight {
-            [DebuggerStepThrough] get { return minHeight; }
-            internal set {
-                if (minHeight == value) return;
-                minHeight = value;
-                SendEvent(new StyleProperty(StylePropertyId.MinHeight, FloatUtil.EncodeToInt(minHeight.value), (int) minHeight.unit));
-            }
+            [DebuggerStepThrough] get { return ReadMeasurement(StylePropertyId.MinHeight, DefaultStyleValues.MinHeight); }
+            internal set { WriteMeasurement(StylePropertyId.MinHeight, value); }
         }
 
         public UIMeasurement MaxHeight {
-            [DebuggerStepThrough] get { return maxHeight; }
-            internal set {
-                if (maxHeight == value) return;
-                maxHeight = value;
-                SendEvent(new StyleProperty(StylePropertyId.MaxHeight, FloatUtil.EncodeToInt(maxHeight.value), (int) maxHeight.unit));
-            }
+            [DebuggerStepThrough] get { return ReadMeasurement(StylePropertyId.MaxHeight, DefaultStyleValues.MaxHeight); }
+            internal set { WriteMeasurement(StylePropertyId.MaxHeight, value); }
         }
 
         public UIMeasurement PreferredHeight {
-            [DebuggerStepThrough] get { return preferredHeight; }
-            internal set {
-                if (preferredHeight == value) return;
-                preferredHeight = value;
-                SendEvent(new StyleProperty(StylePropertyId.PreferredHeight, FloatUtil.EncodeToInt(preferredHeight.value), (int) preferredHeight.unit));
-            }
+            [DebuggerStepThrough] get { return ReadMeasurement(StylePropertyId.PreferredHeight, DefaultStyleValues.PreferredHeight); }
+            internal set { WriteMeasurement(StylePropertyId.PreferredHeight, value); }
         }
 
         public bool WidthIsParentBased => MinWidth.IsParentBased || MaxWidth.IsParentBased || PreferredWidth.IsParentBased;
@@ -441,94 +313,52 @@ namespace Rendering {
         public bool IsWidthFixed => MinWidth.IsFixed && MaxWidth.IsFixed && PreferredWidth.IsFixed;
         public bool IsHeightFixed => MinHeight.IsFixed && MaxHeight.IsFixed && PreferredHeight.IsFixed;
 
-#endregion
+        #endregion
 
-#region Margin
-
-        private UIMeasurement marginTop = DefaultStyleValues.MarginTop;
-        private UIMeasurement marginRight = DefaultStyleValues.MarginRight;
-        private UIMeasurement marginBottom = DefaultStyleValues.MarginBottom;
-        private UIMeasurement marginLeft = DefaultStyleValues.MarginLeft;
+        #region Margin
 
         public UIMeasurement MarginTop {
-            [DebuggerStepThrough] get { return marginTop; }
-            internal set {
-                if (marginTop == value) return;
-                marginTop = value;
-                SendEvent(new StyleProperty(StylePropertyId.MarginTop, FloatUtil.EncodeToInt(marginTop.value), (int) marginTop.unit));
-            }
+            [DebuggerStepThrough] get { return ReadMeasurement(StylePropertyId.MarginTop, DefaultStyleValues.MarginTop); }
+            internal set { WriteMeasurement(StylePropertyId.MarginTop, value); }
         }
 
         public UIMeasurement MarginRight {
-            [DebuggerStepThrough] get { return marginRight; }
-            internal set {
-                if (marginRight == value) return;
-                marginRight = value;
-                SendEvent(new StyleProperty(StylePropertyId.MarginRight, FloatUtil.EncodeToInt(MarginRight.value), (int) MarginRight.unit));
-            }
+            [DebuggerStepThrough] get { return ReadMeasurement(StylePropertyId.MarginRight, DefaultStyleValues.MarginRight); }
+            internal set { WriteMeasurement(StylePropertyId.MarginRight, value); }
         }
 
         public UIMeasurement MarginBottom {
-            [DebuggerStepThrough] get { return marginBottom; }
-            internal set {
-                if (marginBottom == value) return;
-                marginBottom = value;
-                SendEvent(new StyleProperty(StylePropertyId.MarginBottom, FloatUtil.EncodeToInt(marginBottom.value), (int) marginBottom.unit));
-            }
+            [DebuggerStepThrough] get { return ReadMeasurement(StylePropertyId.MarginBottom, DefaultStyleValues.MarginBottom); }
+            internal set { WriteMeasurement(StylePropertyId.MarginBottom, value); }
         }
 
         public UIMeasurement MarginLeft {
-            [DebuggerStepThrough] get { return marginLeft; }
-            internal set {
-                if (marginLeft == value) return;
-                marginLeft = value;
-                SendEvent(new StyleProperty(StylePropertyId.MarginLeft, FloatUtil.EncodeToInt(marginLeft.value), (int) marginLeft.unit));
-            }
+            [DebuggerStepThrough] get { return ReadMeasurement(StylePropertyId.MarginLeft, DefaultStyleValues.MarginLeft); }
+            internal set { WriteMeasurement(StylePropertyId.MarginLeft, value); }
         }
 
-#endregion
+        #endregion
 
-#region Border
-
-        private UIFixedLength borderTop = DefaultStyleValues.BorderTop;
-        private UIFixedLength borderRight = DefaultStyleValues.BorderRight;
-        private UIFixedLength borderBottom = DefaultStyleValues.BorderBottom;
-        private UIFixedLength borderLeft = DefaultStyleValues.BorderLeft;
+        #region Border
 
         public UIFixedLength BorderTop {
-            [DebuggerStepThrough] get { return borderTop; }
-            internal set {
-                if (borderTop == value) return;
-                borderTop = value;
-                SendEvent(new StyleProperty(StylePropertyId.BorderTop, FloatUtil.EncodeToInt(borderTop.value), (int) borderTop.unit));
-            }
+            [DebuggerStepThrough] get { return ReadFixedLength(StylePropertyId.BorderTop, DefaultStyleValues.BorderTop); }
+            internal set { WriteFixedLength(StylePropertyId.BorderTop, value); }
         }
 
         public UIFixedLength BorderRight {
-            [DebuggerStepThrough] get { return borderRight; }
-            internal set {
-                if (borderRight == value) return;
-                borderRight = value;
-                SendEvent(new StyleProperty(StylePropertyId.BorderRight, FloatUtil.EncodeToInt(borderRight.value), (int) borderRight.unit));
-            }
+            [DebuggerStepThrough] get { return ReadFixedLength(StylePropertyId.BorderRight, DefaultStyleValues.BorderRight); }
+            internal set { WriteFixedLength(StylePropertyId.BorderRight, value); }
         }
 
         public UIFixedLength BorderBottom {
-            [DebuggerStepThrough] get { return borderBottom; }
-            internal set {
-                if (borderBottom == value) return;
-                borderBottom = value;
-                SendEvent(new StyleProperty(StylePropertyId.BorderBottom, FloatUtil.EncodeToInt(borderBottom.value), (int) borderBottom.unit));
-            }
+            [DebuggerStepThrough] get { return ReadFixedLength(StylePropertyId.BorderBottom, DefaultStyleValues.BorderBottom); }
+            internal set { WriteFixedLength(StylePropertyId.BorderBottom, value); }
         }
 
         public UIFixedLength BorderLeft {
-            [DebuggerStepThrough] get { return borderLeft; }
-            internal set {
-                if (borderLeft == value) return;
-                borderLeft = value;
-                SendEvent(new StyleProperty(StylePropertyId.BorderLeft, FloatUtil.EncodeToInt(borderLeft.value), (int) borderLeft.unit));
-            }
+            [DebuggerStepThrough] get { return ReadFixedLength(StylePropertyId.BorderLeft, DefaultStyleValues.BorderLeft); }
+            internal set { WriteFixedLength(StylePropertyId.BorderLeft, value); }
         }
 
         public BorderRadius BorderRadius => new BorderRadius(BorderRadiusTopLeft, BorderRadiusTopRight, BorderRadiusBottomRight, BorderRadiusBottomLeft);
@@ -613,119 +443,67 @@ namespace Rendering {
             internal set { WriteFixedLength(StylePropertyId.BorderRadiusBottomLeft, value); }
         }
 
-#endregion
+        #endregion
 
-#region Padding
-
-        private UIFixedLength paddingTop = DefaultStyleValues.PaddingTop;
-        private UIFixedLength paddingRight = DefaultStyleValues.PaddingRight;
-        private UIFixedLength paddingBottom = DefaultStyleValues.PaddingBottom;
-        private UIFixedLength paddingLeft = DefaultStyleValues.PaddingLeft;
+        #region Padding
 
         public UIFixedLength PaddingTop {
-            [DebuggerStepThrough] get { return paddingTop; }
-            internal set {
-                if (paddingTop == value) return;
-                paddingTop = value;
-                SendEvent(new StyleProperty(StylePropertyId.PaddingTop, FloatUtil.EncodeToInt(paddingTop.value), (int) paddingTop.unit));
-            }
+            [DebuggerStepThrough] get { return ReadFixedLength(StylePropertyId.PaddingTop, DefaultStyleValues.PaddingTop); }
+            internal set { WriteFixedLength(StylePropertyId.PaddingTop, value); }
         }
 
         public UIFixedLength PaddingRight {
-            [DebuggerStepThrough] get { return paddingRight; }
-            internal set {
-                if (paddingRight == value) return;
-                paddingRight = value;
-                SendEvent(new StyleProperty(StylePropertyId.PaddingRight, FloatUtil.EncodeToInt(paddingRight.value), (int) paddingRight.unit));
-            }
+            [DebuggerStepThrough] get { return ReadFixedLength(StylePropertyId.PaddingRight, DefaultStyleValues.PaddingRight); }
+            internal set { WriteFixedLength(StylePropertyId.PaddingRight, value); }
         }
 
         public UIFixedLength PaddingBottom {
-            [DebuggerStepThrough] get { return paddingBottom; }
-            internal set {
-                if (paddingBottom == value) return;
-                paddingBottom = value;
-                SendEvent(new StyleProperty(StylePropertyId.PaddingBottom, FloatUtil.EncodeToInt(paddingBottom.value), (int) paddingBottom.unit));
-            }
+            [DebuggerStepThrough] get { return ReadFixedLength(StylePropertyId.PaddingBottom, DefaultStyleValues.PaddingBottom); }
+            internal set { WriteFixedLength(StylePropertyId.PaddingBottom, value); }
         }
 
         public UIFixedLength PaddingLeft {
-            [DebuggerStepThrough] get { return paddingLeft; }
-            internal set {
-                if (paddingLeft == value) return;
-                paddingLeft = value;
-                SendEvent(new StyleProperty(StylePropertyId.PaddingLeft, FloatUtil.EncodeToInt(paddingLeft.value), (int) paddingLeft.unit));
-            }
+            [DebuggerStepThrough] get { return ReadFixedLength(StylePropertyId.PaddingLeft, DefaultStyleValues.PaddingLeft); }
+            internal set { WriteFixedLength(StylePropertyId.PaddingLeft, value); }
         }
 
-#endregion
+        #endregion
 
-#region Text Properties
-
-        private int fontSize = DefaultStyleValues.TextFontSize;
-        private Color textColor = DefaultStyleValues.TextColor;
-        private TMP_FontAsset fontAsset = DefaultStyleValues.TextFontAsset;
-        private TextUtil.FontStyle fontStyle = DefaultStyleValues.TextFontStyle;
-        private TextUtil.TextAlignment m_TextAlignment = DefaultStyleValues.TextAlignment;
-        private TextUtil.TextTransform textTransform = DefaultStyleValues.TextTransform;
+        #region Text Properties
 
         public Color TextColor {
-            [DebuggerStepThrough] get { return textColor; }
-            internal set {
-                if (textColor == value) return;
-                textColor = value;
-                SendEvent(new StyleProperty(StylePropertyId.TextColor, new StyleColor(textColor).rgba));
-            }
+            [DebuggerStepThrough] get { return ReadColorProperty(StylePropertyId.TextColor, DefaultStyleValues.TextColor); }
+            internal set { WriteColorProperty(StylePropertyId.TextColor, value); }
         }
 
         public TMP_FontAsset FontAsset {
-            [DebuggerStepThrough] get { return fontAsset; }
-            internal set {
-                if (fontAsset == value) return;
-                fontAsset = value;
-                SendEvent(StyleProperty.Font(fontAsset));
-            }
+            [DebuggerStepThrough] get { return (TMP_FontAsset) ReadObject(StylePropertyId.TextFontAsset, DefaultStyleValues.TextFontAsset); }
+            internal set { WriteObject(StylePropertyId.TextFontAsset, value); }
         }
 
         public int FontSize {
-            [DebuggerStepThrough] get { return fontSize; }
-            internal set {
-                if (fontSize == value) return;
-                fontSize = value;
-                SendEvent(new StyleProperty(StylePropertyId.TextFontSize, fontSize));
-            }
+            [DebuggerStepThrough] get { return ReadInt(StylePropertyId.TextFontSize, DefaultStyleValues.TextFontSize); }
+            internal set { WriteInt(StylePropertyId.TextFontSize, value); }
         }
 
         public TextUtil.FontStyle FontStyle {
-            [DebuggerStepThrough] get { return fontStyle; }
-            internal set {
-                if (fontStyle == value) return;
-                fontStyle = value;
-                SendEvent(new StyleProperty(StylePropertyId.TextFontStyle, (int) fontStyle));
-            }
+            [DebuggerStepThrough] get { return (TextUtil.FontStyle) ReadInt(StylePropertyId.TextFontStyle, (int) DefaultStyleValues.TextFontStyle); }
+            internal set { WriteInt(StylePropertyId.TextFontStyle, (int) value); }
         }
 
         public TextUtil.TextAlignment TextAlignment {
-            [DebuggerStepThrough] get { return m_TextAlignment; }
-            internal set {
-                if (m_TextAlignment == value) return;
-                m_TextAlignment = value;
-                SendEvent(new StyleProperty(StylePropertyId.TextAnchor, (int) m_TextAlignment));
-            }
+            [DebuggerStepThrough] get { return (TextUtil.TextAlignment) ReadInt(StylePropertyId.TextAlignment, (int) DefaultStyleValues.TextAlignment); }
+            internal set { WriteInt(StylePropertyId.TextAlignment, (int) value); }
         }
 
         public TextUtil.TextTransform TextTransform {
-            [DebuggerStepThrough] get { return textTransform; }
-            internal set {
-                if (textTransform == value) return;
-                textTransform = value;
-                SendEvent(new StyleProperty(StylePropertyId.TextTransform, (int) textTransform));
-            }
+            [DebuggerStepThrough] get { return (TextUtil.TextTransform) ReadInt(StylePropertyId.TextTransform, (int) DefaultStyleValues.TextTransform); }
+            internal set { WriteInt(StylePropertyId.TextTransform, (int) value); }
         }
 
-#endregion
+        #endregion
 
-#region Anchor Properties
+        #region Anchor Properties
 
         public UIFixedLength AnchorTop {
             get { return ReadFixedLength(StylePropertyId.AnchorTop, DefaultStyleValues.AnchorTop); }
@@ -752,90 +530,47 @@ namespace Rendering {
             internal set { WriteInt(StylePropertyId.AnchorTarget, (int) value); }
         }
 
-#endregion
+        #endregion
 
-#region Transform
-
-        private UIFixedLength transformPositionX = DefaultStyleValues.TransformPositionX;
-        private UIFixedLength transformPositionY = DefaultStyleValues.TransformPositionY;
-        private UIFixedLength transformPivotX = DefaultStyleValues.TransformPivotX;
-        private UIFixedLength transformPivotY = DefaultStyleValues.TransformPivotY;
-        private float transformScaleX = DefaultStyleValues.TransformScaleX;
-        private float transformScaleY = DefaultStyleValues.TransformScaleY;
-        private float transformRotation = DefaultStyleValues.TransformRotation;
+        #region Transform
 
         public UIFixedLength TransformPositionX {
-            [DebuggerStepThrough] get { return transformPositionX; }
-            internal set {
-                if (value == UIFixedLength.Unset) value = DefaultStyleValues.TransformPositionX;
-                if (transformPositionX == value) return;
-                transformPositionX = value;
-                SendEvent(new StyleProperty(StylePropertyId.TransformPositionX, FloatUtil.EncodeToInt(transformPositionX.value), (int) transformPositionX.unit));
-            }
+            [DebuggerStepThrough] get { return ReadFixedLength(StylePropertyId.TransformPositionX, DefaultStyleValues.TransformPositionX); }
+            internal set { WriteFixedLength(StylePropertyId.TransformPositionX, value); }
         }
 
         public UIFixedLength TransformPositionY {
-            [DebuggerStepThrough] get { return transformPositionY; }
-            internal set {
-                if (value == UIFixedLength.Unset) value = DefaultStyleValues.TransformPositionY;
-                if (transformPositionY == value) return;
-                transformPositionY = value;
-                SendEvent(new StyleProperty(StylePropertyId.TransformPositionY, FloatUtil.EncodeToInt(transformPositionY.value), (int) transformPositionY.unit));
-            }
+            [DebuggerStepThrough] get { return ReadFixedLength(StylePropertyId.TransformPositionY, DefaultStyleValues.TransformPositionY); }
+            internal set { WriteFixedLength(StylePropertyId.TransformPositionY, value); }
         }
 
         public UIFixedLength TransformPivotX {
-            [DebuggerStepThrough] get { return transformPivotX; }
-            internal set {
-                if (value == UIFixedLength.Unset) value = DefaultStyleValues.TransformPivotX;
-                if (transformPivotX == value) return;
-                transformPivotX = value;
-                SendEvent(new StyleProperty(StylePropertyId.TransformPivotX, FloatUtil.EncodeToInt(transformPivotX.value), (int) transformPivotX.unit));
-            }
+            [DebuggerStepThrough] get { return ReadFixedLength(StylePropertyId.TransformPivotX, DefaultStyleValues.TransformPivotX); }
+            internal set { WriteFixedLength(StylePropertyId.TransformPivotX, value); }
         }
 
         public UIFixedLength TransformPivotY {
-            [DebuggerStepThrough] get { return transformPivotY; }
-            internal set {
-                if (value == UIFixedLength.Unset) value = DefaultStyleValues.TransformPivotY;
-                if (transformPivotY == value) return;
-                transformPivotY = value;
-                SendEvent(new StyleProperty(StylePropertyId.TransformPivotY, FloatUtil.EncodeToInt(transformPivotY.value), (int) transformPivotY.unit));
-            }
+            [DebuggerStepThrough] get { return ReadFixedLength(StylePropertyId.TransformPivotY, DefaultStyleValues.TransformPivotY); }
+            internal set { WriteFixedLength(StylePropertyId.TransformPivotY, value); }
         }
 
         public float TransformScaleX {
-            [DebuggerStepThrough] get { return transformScaleX; }
-            internal set {
-                if (!FloatUtil.IsDefined(value)) value = DefaultStyleValues.TransformScaleX;
-                if (Mathf.Approximately(value, transformScaleX)) return;
-                transformScaleX = value;
-                SendEvent(new StyleProperty(StylePropertyId.TransformScaleX, FloatUtil.EncodeToInt(transformScaleX)));
-            }
+            [DebuggerStepThrough] get { return ReadFloat(StylePropertyId.TransformScaleX, DefaultStyleValues.TransformScaleX); }
+            internal set { WriteFloat(StylePropertyId.TransformScaleX, value);}
         }
 
         public float TransformScaleY {
-            [DebuggerStepThrough] get { return transformScaleY; }
-            internal set {
-                if (!FloatUtil.IsDefined(value)) value = DefaultStyleValues.TransformScaleY;
-                if (Mathf.Approximately(value, transformScaleY)) return;
-                transformScaleY = value;
-                SendEvent(new StyleProperty(StylePropertyId.TransformScaleY, FloatUtil.EncodeToInt(transformScaleY)));
-            }
+            [DebuggerStepThrough] get { return ReadFloat(StylePropertyId.TransformScaleY, DefaultStyleValues.TransformScaleY); }
+            internal set { WriteFloat(StylePropertyId.TransformScaleY, value);}
         }
 
         public float TransformRotation {
-            [DebuggerStepThrough] get { return transformRotation; }
-            internal set {
-                if (!FloatUtil.IsDefined(value)) value = DefaultStyleValues.TransformRotation;
-                if (Mathf.Approximately(value, transformRotation)) return;
-                transformRotation = value;
-                SendEvent(new StyleProperty(StylePropertyId.TransformRotation, FloatUtil.EncodeToInt(transformRotation)));
-            }
+            [DebuggerStepThrough] get { return ReadFloat(StylePropertyId.TransformRotation, DefaultStyleValues.TransformRotation); }
+            internal set { WriteFloat(StylePropertyId.TransformRotation, value);}
         }
 
         public FixedLengthVector TransformPosition {
-            [DebuggerStepThrough] get { return new FixedLengthVector(transformPositionX, transformPositionY); }
+            [DebuggerStepThrough] get { return new FixedLengthVector(TransformPositionX, TransformPositionY); }
             internal set {
                 TransformPositionX = value.x;
                 TransformPositionY = value.y;
@@ -852,36 +587,26 @@ namespace Rendering {
             internal set { WriteInt(StylePropertyId.TransformBehaviorY, (int) value); }
         }
 
-#endregion
+        #endregion
 
-#region Layout
+        #region Layout
 
-        private LayoutType layoutType = DefaultStyleValues.LayoutType;
-        private LayoutBehavior layoutBehavior = DefaultStyleValues.LayoutBehavior;
 
         public LayoutType LayoutType {
-            [DebuggerStepThrough] get { return layoutType; }
-            internal set {
-                if (layoutType == value) return;
-                layoutType = value;
-                SendEvent(new StyleProperty(StylePropertyId.LayoutType, (int) layoutType));
-            }
+            [DebuggerStepThrough] get { return (LayoutType)ReadInt(StylePropertyId.LayoutType, (int)DefaultStyleValues.LayoutType); }
+            internal set { WriteInt(StylePropertyId.LayoutType, (int)value);}
         }
 
         public LayoutBehavior LayoutBehavior {
-            [DebuggerStepThrough] get { return layoutBehavior; }
-            internal set {
-                if (layoutBehavior == value) return;
-                layoutBehavior = value;
-                SendEvent(new StyleProperty(StylePropertyId.LayoutBehavior, (int) layoutBehavior));
-            }
+            [DebuggerStepThrough] get { return (LayoutBehavior)ReadInt(StylePropertyId.LayoutBehavior, (int)DefaultStyleValues.LayoutBehavior); }
+            internal set { WriteInt(StylePropertyId.LayoutBehavior, (int)value);}
         }
 
-        public float EmSize => fontAsset.fontInfo.PointSize;
+        public float EmSize => FontAsset.fontInfo.PointSize;
 
-#endregion
+        #endregion
 
-#region Layer
+        #region Layer
 
         public int ZIndex {
             get { return ReadInt(StylePropertyId.ZIndex, DefaultStyleValues.ZIndex); }
@@ -894,11 +619,11 @@ namespace Rendering {
         }
 
         public int LayerOffset {
-            get { return ReadInt(StylePropertyId.RenderLayerOffset, DefaultStyleValues.LayerOffset); }
+            get { return ReadInt(StylePropertyId.RenderLayerOffset, DefaultStyleValues.RenderLayerOffset); }
             internal set { WriteInt(StylePropertyId.RenderLayerOffset, value); }
         }
 
-#endregion
+        #endregion
 
         private void SendEvent(StyleProperty property) {
             styleSet.styleSystem.SetStyleProperty(styleSet.element, property);
@@ -912,7 +637,7 @@ namespace Rendering {
                 case StylePropertyId.Opacity:
                     throw new NotImplementedException();
 
-#region  Layout
+                #region  Layout
 
                 case StylePropertyId.LayoutBehavior:
                     LayoutBehavior = property.IsDefined ? (LayoutBehavior) property.valuePart0 : DefaultStyleValues.LayoutBehavior;
@@ -922,20 +647,20 @@ namespace Rendering {
                     LayoutType = property.IsDefined ? (LayoutType) value0 : DefaultStyleValues.LayoutType;
                     break;
 
-#endregion
+                #endregion
 
-#region Overflow
+                #region Overflow
 
                 case StylePropertyId.OverflowX:
-                    overflowX = property.IsDefined ? (Overflow) value0 : DefaultStyleValues.OverflowX;
+                    OverflowX = property.IsDefined ? (Overflow) value0 : DefaultStyleValues.OverflowX;
                     break;
                 case StylePropertyId.OverflowY:
-                    overflowY = property.IsDefined ? (Overflow) value0 : DefaultStyleValues.OverflowY;
+                    OverflowY = property.IsDefined ? (Overflow) value0 : DefaultStyleValues.OverflowY;
                     break;
 
-#endregion
+                #endregion
 
-#region Paint
+                #region Paint
 
                 case StylePropertyId.BackgroundColor:
                     BackgroundColor = property.IsDefined ? (Color) new StyleColor(value0) : DefaultStyleValues.BackgroundColor;
@@ -972,9 +697,9 @@ namespace Rendering {
                     BackgroundFillScaleY = property.IsDefined ? property.AsFloat : DefaultStyleValues.BackgroundFillScaleX;
                     break;
 
-#endregion
+                #endregion
 
-#region Grid Item
+                #region Grid Item
 
                 case StylePropertyId.GridItemColStart:
                     GridItemColStart = property.IsDefined ? value0 : DefaultStyleValues.GridItemColStart;
@@ -995,9 +720,9 @@ namespace Rendering {
                     GridItemRowSelfAlignment = property.IsDefined ? property.AsCrossAxisAlignment : DefaultStyleValues.GridItemRowSelfAlignment;
                     break;
 
-#endregion
+                #endregion
 
-#region Grid Layout
+                #region Grid Layout
 
                 case StylePropertyId.GridLayoutDirection:
                     GridLayoutDirection = property.IsDefined ? (LayoutDirection) value0 : DefaultStyleValues.GridLayoutDirection;
@@ -1030,12 +755,12 @@ namespace Rendering {
                     GridLayoutRowAlignment = property.IsDefined ? property.AsCrossAxisAlignment : DefaultStyleValues.GridLayoutRowAlignment;
                     break;
 
-#endregion
+                #endregion
 
-#region Flex Layout
+                #region Flex Layout
 
                 case StylePropertyId.FlexLayoutWrap:
-                    FlexLayoutWrap = property.IsDefined ? (LayoutWrap) value0 : DefaultStyleValues.FlexWrap;
+                    FlexLayoutWrap = property.IsDefined ? (LayoutWrap) value0 : DefaultStyleValues.FlexLayoutWrap;
                     break;
                 case StylePropertyId.FlexLayoutDirection:
                     FlexLayoutDirection = property.IsDefined ? (LayoutDirection) value0 : DefaultStyleValues.FlexLayoutDirection;
@@ -1047,9 +772,9 @@ namespace Rendering {
                     FlexLayoutCrossAxisAlignment = property.IsDefined ? (CrossAxisAlignment) value0 : DefaultStyleValues.FlexLayoutCrossAxisAlignment;
                     break;
 
-#endregion
+                #endregion
 
-#region Flex Item
+                #region Flex Item
 
                 case StylePropertyId.FlexItemSelfAlignment:
                     FlexItemSelfAlignment = property.IsDefined ? (CrossAxisAlignment) value0 : DefaultStyleValues.FlexItemSelfAlignment;
@@ -1058,15 +783,15 @@ namespace Rendering {
                     FlexItemOrder = property.IsDefined ? value0 : DefaultStyleValues.FlexItemOrder;
                     break;
                 case StylePropertyId.FlexItemGrow:
-                    FlexItemGrowthFactor = property.IsDefined ? value0 : DefaultStyleValues.FlexItemGrow;
+                    FlexItemGrow = property.IsDefined ? value0 : DefaultStyleValues.FlexItemGrow;
                     break;
                 case StylePropertyId.FlexItemShrink:
-                    FlexItemShrinkFactor = property.IsDefined ? value0 : DefaultStyleValues.FlexItemShrink;
+                    FlexItemShrink = property.IsDefined ? value0 : DefaultStyleValues.FlexItemShrink;
                     break;
 
-#endregion
+                #endregion
 
-#region Margin
+                #region Margin
 
                 case StylePropertyId.MarginTop:
                     MarginTop = property.IsDefined ? UIMeasurement.Decode(value0, value1) : DefaultStyleValues.MarginTop;
@@ -1084,9 +809,9 @@ namespace Rendering {
                     MarginLeft = property.IsDefined ? UIMeasurement.Decode(value0, value1) : DefaultStyleValues.MarginLeft;
                     break;
 
-#endregion
+                #endregion
 
-#region Border
+                #region Border
 
                 case StylePropertyId.BorderTop:
                     BorderTop = property.IsDefined ? UIFixedLength.Decode(value0, value1) : DefaultStyleValues.BorderTop;
@@ -1101,9 +826,9 @@ namespace Rendering {
                     BorderLeft = property.IsDefined ? UIFixedLength.Decode(value0, value1) : DefaultStyleValues.BorderLeft;
                     break;
 
-#endregion
+                #endregion
 
-#region Padding
+                #region Padding
 
                 case StylePropertyId.PaddingTop:
                     PaddingTop = property.IsDefined ? UIFixedLength.Decode(value0, value1) : DefaultStyleValues.PaddingTop;
@@ -1118,9 +843,9 @@ namespace Rendering {
                     PaddingLeft = property.IsDefined ? UIFixedLength.Decode(value0, value1) : DefaultStyleValues.PaddingLeft;
                     break;
 
-#endregion
+                #endregion
 
-#region Transform
+                #region Transform
 
                 case StylePropertyId.TransformPositionX:
                     TransformPositionX = property.IsDefined ? UIFixedLength.Decode(value0, value1) : DefaultStyleValues.TransformPositionX;
@@ -1135,7 +860,7 @@ namespace Rendering {
                     TransformScaleY = property.IsDefined ? FloatUtil.DecodeToFloat(value0) : DefaultStyleValues.TransformScaleY;
                     break;
                 case StylePropertyId.TransformPivotX:
-                    transformPivotX = property.IsDefined ? UIFixedLength.Decode(value0, value1) : DefaultStyleValues.TransformPivotX;
+                    TransformPivotX = property.IsDefined ? UIFixedLength.Decode(value0, value1) : DefaultStyleValues.TransformPivotX;
                     break;
                 case StylePropertyId.TransformPivotY:
                     TransformPivotY = property.IsDefined ? UIFixedLength.Decode(value0, value1) : DefaultStyleValues.TransformPivotY;
@@ -1151,9 +876,9 @@ namespace Rendering {
                     TransformBehaviorY = property.IsDefined ? (TransformBehavior) value0 : DefaultStyleValues.TransformBehaviorY;
                     break;
 
-#endregion
+                #endregion
 
-#region Text
+                #region Text
 
                 case StylePropertyId.TextColor:
                     TextColor = property.IsDefined ? (Color) new StyleColor(value0) : DefaultStyleValues.TextColor;
@@ -1167,7 +892,7 @@ namespace Rendering {
                 case StylePropertyId.TextFontStyle:
                     FontStyle = property.IsDefined ? (TextUtil.FontStyle) value0 : DefaultStyleValues.TextFontStyle;
                     break;
-                case StylePropertyId.TextAnchor:
+                case StylePropertyId.TextAlignment:
                     TextAlignment = property.IsDefined ? (TextUtil.TextAlignment) value0 : DefaultStyleValues.TextAlignment;
                     break;
                 case StylePropertyId.TextTransform:
@@ -1175,32 +900,10 @@ namespace Rendering {
                     break;
                 case StylePropertyId.TextWhitespaceMode:
                     throw new NotImplementedException();
-                    break;
-                case StylePropertyId.TextWrapMode:
-                    throw new NotImplementedException();
-                    break;
-                case StylePropertyId.TextHorizontalOverflow:
-                    throw new NotImplementedException();
-                    break;
-                case StylePropertyId.TextVerticalOverflow:
-                    throw new NotImplementedException();
-                    break;
-                case StylePropertyId.TextIndentFirstLine:
-                    throw new NotImplementedException();
-                    break;
-                case StylePropertyId.TextIndentNewLine:
-                    throw new NotImplementedException();
-                    break;
-                case StylePropertyId.TextLayoutStyle:
-                    throw new NotImplementedException();
-                    break;
-                case StylePropertyId.TextAutoSize:
-                    throw new NotImplementedException();
-                    break;
 
-#endregion
+                #endregion
 
-#region Size
+                #region Size
 
                 case StylePropertyId.MinWidth:
                     MinWidth = property.IsDefined ? UIMeasurement.Decode(value0, value1) : DefaultStyleValues.MinWidth;
@@ -1226,23 +929,23 @@ namespace Rendering {
                     PreferredHeight = property.IsDefined ? UIMeasurement.Decode(value0, value1) : DefaultStyleValues.PreferredHeight;
                     break;
 
-#endregion
+                #endregion
 
-#region Layer
+                #region Layer
 
                 case StylePropertyId.ZIndex:
                     ZIndex = property.IsDefined ? property.AsInt : DefaultStyleValues.ZIndex;
                     break;
                 case StylePropertyId.RenderLayerOffset:
-                    LayerOffset = property.IsDefined ? property.AsInt : DefaultStyleValues.LayerOffset;
+                    LayerOffset = property.IsDefined ? property.AsInt : DefaultStyleValues.RenderLayerOffset;
                     break;
                 case StylePropertyId.RenderLayer:
                     RenderLayer = property.IsDefined ? property.AsRenderLayer : DefaultStyleValues.RenderLayer;
                     break;
 
-#endregion
+                #endregion
 
-#region  Anchors
+                #region  Anchors
 
                 case StylePropertyId.AnchorTarget:
                     AnchorTarget = property.IsDefined ? property.AsAnchorTarget : DefaultStyleValues.AnchorTarget;
@@ -1260,7 +963,7 @@ namespace Rendering {
                     AnchorLeft = property.IsDefined ? property.AsFixedLength : DefaultStyleValues.AnchorLeft;
                     break;
 
-#endregion
+                #endregion
 
                 case StylePropertyId.__TextPropertyStart__:
                 case StylePropertyId.__TextPropertyEnd__:
@@ -1269,101 +972,18 @@ namespace Rendering {
             }
         }
 
-        internal StyleProperty GetProperty(StylePropertyId propertyId) {
-            switch (propertyId) {
-                case StylePropertyId.TransformRotation:
-                    return StyleProperty.TransformRotation(TransformRotation);
+        public bool IsDefined(StylePropertyId propertyId) {
+            return properties.ContainsKey((int) propertyId);
+        }
 
-                case StylePropertyId.TransformPositionX:
-                    return StyleProperty.TransformPositionX(TransformPositionX);
+        public StyleProperty GetProperty(StylePropertyId propertyId) {
+            StyleProperty property;
 
-                case StylePropertyId.TransformPositionY:
-                    return StyleProperty.TransformPositionY(TransformPositionY);
-
-                case StylePropertyId.MinWidth:
-                    return StyleProperty.MinWidth(MinWidth);
-
-                case StylePropertyId.MaxWidth:
-                    return StyleProperty.MaxWidth(MaxWidth);
-
-                case StylePropertyId.PreferredWidth:
-                    return StyleProperty.PreferredWidth(PreferredWidth);
-
-                case StylePropertyId.MinHeight:
-                    return StyleProperty.MinHeight(MinHeight);
-
-                case StylePropertyId.MaxHeight:
-                    return StyleProperty.MaxHeight(MaxHeight);
-
-                case StylePropertyId.PreferredHeight:
-                    return StyleProperty.PreferredHeight(PreferredHeight);
-
-                case StylePropertyId.BackgroundColor:
-                    return StyleProperty.BackgroundColor(BackgroundColor);
-
-                case StylePropertyId.PaddingTop:
-                    return StyleProperty.PaddingTop(PaddingTop);
-
-                case StylePropertyId.PaddingRight:
-                    return StyleProperty.PaddingRight(PaddingRight);
-
-                case StylePropertyId.PaddingBottom:
-                    return StyleProperty.PaddingBottom(PaddingBottom);
-
-                case StylePropertyId.PaddingLeft:
-                    return StyleProperty.PaddingLeft(PaddingLeft);
-
-                case StylePropertyId.BorderTop:
-                    return StyleProperty.BorderTop(BorderTop);
-
-                case StylePropertyId.BorderRight:
-                    return StyleProperty.BorderRight(BorderRight);
-
-                case StylePropertyId.BorderBottom:
-                    return StyleProperty.BorderBottom(BorderBottom);
-
-                case StylePropertyId.BorderLeft:
-                    return StyleProperty.BorderLeft(BorderLeft);
-
-                case StylePropertyId.MarginTop:
-                    return StyleProperty.MarginTop(MarginTop);
-
-                case StylePropertyId.MarginRight:
-                    return StyleProperty.MarginRight(MarginRight);
-
-                case StylePropertyId.MarginBottom:
-                    return StyleProperty.MarginBottom(MarginBottom);
-
-                case StylePropertyId.MarginLeft:
-                    return StyleProperty.MarginLeft(MarginLeft);
-
-                case StylePropertyId.AnchorTop:
-                    return StyleProperty.AnchorTop(AnchorTop);
-
-                case StylePropertyId.AnchorRight:
-                    return StyleProperty.AnchorRight(AnchorRight);
-
-                case StylePropertyId.AnchorBottom:
-                    return StyleProperty.AnchorBottom(AnchorBottom);
-
-                case StylePropertyId.AnchorLeft:
-                    return StyleProperty.AnchorLeft(AnchorLeft);
-
-                case StylePropertyId.AnchorTarget:
-                    return StyleProperty.AnchorTarget(AnchorTarget);
-
-                case StylePropertyId.ZIndex:
-                    return StyleProperty.ZIndex(ZIndex);
-
-                case StylePropertyId.RenderLayerOffset:
-                    return StyleProperty.LayerOffset(LayerOffset);
-
-                case StylePropertyId.RenderLayer:
-                    return StyleProperty.RenderLayer(RenderLayer);
-
-                default:
-                    throw new ArgumentOutOfRangeException("Missing: " + propertyId);
+            if (properties.TryGetValue((int) propertyId, out property)) {
+                return property;
             }
+
+            return DefaultStyleValues.GetPropertyValue(propertyId);
         }
 
         [DebuggerStepThrough]
@@ -1376,7 +996,29 @@ namespace Rendering {
             return defaultValue;
         }
 
-//        [DebuggerStepThrough]
+        [DebuggerStepThrough]
+        private UIMeasurement ReadMeasurement(StylePropertyId propertyId, UIMeasurement defaultValue) {
+            StyleProperty retn;
+            if (properties.TryGetValue((int) propertyId, out retn)) {
+                return retn.AsMeasurement;
+            }
+
+            return defaultValue;
+        }
+        
+        [DebuggerStepThrough]
+        private void WriteMeasurement(StylePropertyId propertyId, UIMeasurement newValue) {
+            StyleProperty retn;
+            if (properties.TryGetValue((int) propertyId, out retn)) {
+                if (retn.AsMeasurement == newValue) return;
+            }
+
+            StyleProperty property = new StyleProperty(propertyId, newValue);
+            properties[(int) propertyId] = property;
+            SendEvent(property);
+        }
+        
+        [DebuggerStepThrough]
         private void WriteFixedLength(StylePropertyId propertyId, UIFixedLength newValue) {
             StyleProperty retn;
             if (properties.TryGetValue((int) propertyId, out retn)) {
@@ -1398,6 +1040,15 @@ namespace Rendering {
             return defaultValue;
         }
 
+        private GridTrackSize ReadGridTrackSize(StylePropertyId propertyId, GridTrackSize defaultValue) {
+            StyleProperty retn;
+            if (properties.TryGetValue((int) propertyId, out retn)) {
+                return retn.AsGridTrackSize;
+            }
+
+            return defaultValue;
+        }
+
         private Color ReadColorProperty(StylePropertyId propertyId, Color defaultValue) {
             StyleProperty retn;
             if (properties.TryGetValue((int) propertyId, out retn)) {
@@ -1405,6 +1056,39 @@ namespace Rendering {
             }
 
             return defaultValue;
+        }
+
+        private object ReadObject(StylePropertyId propertyId, object defaultValue) {
+            StyleProperty retn;
+            if (properties.TryGetValue((int) propertyId, out retn)) {
+                return retn.objectField;
+            }
+
+            return defaultValue;
+        }
+
+        private void WriteObject(StylePropertyId propertyId, object newValue) {
+            StyleProperty retn;
+            if (properties.TryGetValue((int) propertyId, out retn)) { // todo -- null?
+                if (retn.objectField == newValue) {
+                    return;
+                }
+            }
+
+            StyleProperty property = new StyleProperty(propertyId, 0, 0, newValue);
+            properties[(int) propertyId] = property;
+            SendEvent(property);
+        }
+
+        private void WriteGridTrackSize(StylePropertyId propertyId, GridTrackSize newValue) {
+            StyleProperty retn;
+            if (properties.TryGetValue((int) propertyId, out retn)) {
+                if (retn.AsGridTrackSize == newValue) return;
+            }
+
+            StyleProperty property = new StyleProperty(propertyId, FloatUtil.EncodeToInt(newValue.minValue), (int) newValue.minUnit, null);
+            properties[(int) propertyId] = property;
+            SendEvent(property);
         }
 
         private void WriteColorProperty(StylePropertyId propertyId, Color newValue) {

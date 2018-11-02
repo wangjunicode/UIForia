@@ -57,6 +57,12 @@ public class HierarchyView : TreeView {
         throw new NotImplementedException();
     }
 
+    public void SetRootElement(UIElement element) {
+        this.rootElement = element;
+        m_ViewState.Clear();
+        Reload();
+    }
+
     protected override TreeViewItem BuildRoot() {
         Stack<ElementTreeItem> stack = StackPool<ElementTreeItem>.Get();
 

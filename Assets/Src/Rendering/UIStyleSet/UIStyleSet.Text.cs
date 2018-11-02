@@ -40,7 +40,7 @@ namespace Rendering {
         }
 
         public TextUtil.TextAlignment GetTextAnchor(StyleState state) {
-            return GetPropertyValueInState(StylePropertyId.TextAnchor, state).AsTextAlignment;
+            return GetPropertyValueInState(StylePropertyId.TextAlignment, state).AsTextAlignment;
         }
 
         public void SetTextAnchor(TextUtil.TextAlignment newTextAlignment, StyleState state) {

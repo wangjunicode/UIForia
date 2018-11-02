@@ -20,12 +20,12 @@
             BorderColor = black;
             <!--Border = 1px white 4px;-->
             BackgroundColor = red;
-            BorderRadius = 8px;
+            <!--BorderRadius = 8px;-->
             Padding = 8px;
             <!-- Layout = Flex Row Center, Center, nowrap, -->
             FlexLayoutMainAxisAlignment = Center;
         
-            [focused] {
+            [hover] {
                 BackgroundColor = white;
                 BorderColor = #0095ff;
             }
@@ -39,34 +39,11 @@
         
     </Style>
 
-    <!--Template {-->
-        <!--string name;-->
-        <!--Import[] imports;-->
-        <!--Style[] styles;-->
-        <!--IntMap<CreationData> data;-->
-        <!--IntMap<int> repeatMap; -> link from repeat child to creation data -->
-    <!--}-->
-    <!---->
-    <!--struct TemplateElementId {-->
-        <!--ushort templateId; // 10 = 512, 11 = 1024, 12 = 2048, -->
-        <!--ushort templateParentId;-->
-        <!--get / set bindings-->
-        <!--get / set attributes-->
-        <!--get / set styles-->
-        <!--bit isRepeatChild / isGenerated (manual creation) -> id = parent template id-->
-    <!---->
-        <!--// element.template.FindById();-->
-        <!--// element.template.FindByType();-->
-        <!--// element.template.FindWhere();-->
-    <!---->
-    <!--}-->
-    <!---->
-    <!--// element Id = (templateId, templateElementId = is repeat child? repeatId + , elementId)-->
-    
     <Contents style="container">
 
-        <ChatPanel selectedGroupIdx="{selectedChatGroup}" chatData="{chatData}"/>
+        <ChatPanel style.borderColor="red" selectedGroupIdx="{selectedChatGroup}" chatData="{chatData}"/>
     
+        
     </Contents>
 
 </UITemplate>

@@ -69,6 +69,12 @@ namespace Src.Layout.LayoutTypes {
         public float PaddingTop => ResolveFixedHeight(style.PaddingTop);
         public float BorderTop => ResolveFixedHeight(style.BorderTop);
 
+        public float PaddingBottom => ResolveFixedHeight(style.PaddingBottom);
+        public float PaddingRight => ResolveFixedWidth(style.PaddingRight);
+
+        public float BorderBottom => ResolveFixedHeight(style.BorderBottom);
+        public float BorderRight => ResolveFixedWidth(style.BorderRight);
+
         public bool IsInitialized { get; set; }
         public bool IsIgnored => (style.LayoutBehavior & LayoutBehavior.Ignored) != 0;
 

@@ -111,8 +111,8 @@ namespace Src.Layout.LayoutTypes {
                     widths[i] = new FlexItem();
                     widths[i].childIndex = i;
                     widths[i].order = BitUtil.SetHighLowBits(child.style.FlexItemOrder, i);
-                    widths[i].growthFactor = child.style.FlexItemGrowthFactor;
-                    widths[i].shrinkFactor = child.style.FlexItemShrinkFactor;
+                    widths[i].growthFactor = child.style.FlexItemGrow;
+                    widths[i].shrinkFactor = child.style.FlexItemShrink;
                     LayoutBoxSize widthSize = child.GetWidths();
                     widths[i].minSize = widthSize.minSize;
                     widths[i].maxSize = widthSize.maxSize;
@@ -198,8 +198,8 @@ namespace Src.Layout.LayoutTypes {
                 widths[i] = new FlexItem();
                 widths[i].childIndex = i;
                 widths[i].order = BitUtil.SetHighLowBits(child.style.FlexItemOrder, i);
-                widths[i].growthFactor = child.style.FlexItemGrowthFactor;
-                widths[i].shrinkFactor = child.style.FlexItemShrinkFactor;
+                widths[i].growthFactor = child.style.FlexItemGrow;
+                widths[i].shrinkFactor = child.style.FlexItemShrink;
                 LayoutBoxSize widthSize = child.GetWidths();
                 widths[i].minSize = widthSize.minSize;
                 widths[i].maxSize = widthSize.maxSize;
@@ -463,8 +463,8 @@ namespace Src.Layout.LayoutTypes {
                     heights[i] = new FlexItem();
                     heights[i].childIndex = i;
                     heights[i].order = BitUtil.SetHighLowBits(child.style.FlexItemOrder, i);
-                    heights[i].growthFactor = child.style.FlexItemGrowthFactor;
-                    heights[i].shrinkFactor = child.style.FlexItemShrinkFactor;
+                    heights[i].growthFactor = child.style.FlexItemGrow;
+                    heights[i].shrinkFactor = child.style.FlexItemShrink;
                     CrossAxisAlignment itemAlignment = child.style.FlexItemSelfAlignment;
                     if (itemAlignment == CrossAxisAlignment.Unset) {
                         itemAlignment = alignment;
@@ -509,8 +509,8 @@ namespace Src.Layout.LayoutTypes {
                 heights[i] = new FlexItem();
                 heights[i].childIndex = i;
                 heights[i].order = BitUtil.SetHighLowBits(child.style.FlexItemOrder, i);
-                heights[i].growthFactor = child.style.FlexItemGrowthFactor;
-                heights[i].shrinkFactor = child.style.FlexItemShrinkFactor;
+                heights[i].growthFactor = child.style.FlexItemGrow;
+                heights[i].shrinkFactor = child.style.FlexItemShrink;
 
                 float prfSize = children[i].GetPreferredHeight(widths[i].outputSize);
                 float minSize = children[i].GetMinHeight(prfSize);

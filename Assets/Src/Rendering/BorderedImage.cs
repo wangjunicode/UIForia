@@ -1,7 +1,7 @@
 using UnityEngine;
 using UnityEngine.UI;
 
-namespace Rendering {
+namespace Src.Rendering {
 
     [AddComponentMenu("UIElement/BorderedImage")]
     public class BorderedImage : Image {

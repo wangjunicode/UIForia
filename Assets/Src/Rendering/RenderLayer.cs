@@ -1,4 +1,4 @@
-namespace Rendering {
+namespace Src.Rendering {
 
     public enum RenderLayer {
 

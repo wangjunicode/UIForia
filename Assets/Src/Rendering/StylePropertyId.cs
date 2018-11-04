@@ -1,4 +1,4 @@
-namespace Rendering {
+namespace Src.Rendering {
 
     public enum StylePropertyId {
 
@@ -138,7 +138,43 @@ namespace Rendering {
         ZIndex = 1401,
         RenderLayer = 1402,
         RenderLayerOffset = 1403,
+        
+//        ScrollbarVerticalAttachment = 1501,
+//        ScrollbarHorizontalAttachment = 1501,
+//        ScrollbarVerticalButtonPlacement,
+//        ScrollbarHorizontalButtonPlacement,
+//        ScrollbarVerticalBackgroundFillType,
+//        ScrollbarVertical,
+        
+//        BackgroundColor = 100,
+//        BorderColor = 101,
+//        BackgroundImage = 102,
+//        BackgroundFillType = 103,
+//        BackgroundGradientType = 104,
+//        BackgroundGradientAxis = 105,
+//        BackgroundGradientStart = 106,
+//        BackgroundGridSize = 107,
+//        BackgroundLineSize = 108,
+//        BackgroundFillOffsetX = 109,
+//        BackgroundFillOffsetY = 110,
+//        BackgroundFillScaleX = 111,
+//        BackgroundFillScaleY = 112,
+//        BackgroundFillRotation = 113,
+//        BackgroundImageTileX = 114,
+//        BackgroundImageTileY = 115,
+//        BackgroundImageOffsetX = 116,
+//        BackgroundImageOffsetY = 117,
+//        BackgroundColorSecondary = 120,
+//        BackgroundShapeType = 121,
+//        Opacity = 122,
+//        Cursor = 123,
 
     }
 
 }
+
+/*
+ *    style.Scrollbar.VerticalTrack.BackgroundColor = 
+ *
+ * 
+*/

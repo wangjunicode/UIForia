@@ -106,7 +106,7 @@ Shader "UIForia/Debug"
                 }
                 
                 if(PointInRect(p, _MarginRect) == 1) {
-                       return _MarginColor;
+                    return _MarginColor;
                 }
              
                 return fixed4(1, 0, 0, 1);

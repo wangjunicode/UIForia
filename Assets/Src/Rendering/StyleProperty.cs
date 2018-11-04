@@ -1,14 +1,15 @@
 using System.Collections.Generic;
 using System.Diagnostics;
-using Src;
+using Shapes2D;
 using Src.Layout;
 using Src.Layout.LayoutTypes;
-using Src.Rendering;
-using Src.Util;
+using Src.Text;
 using TMPro;
 using UnityEngine;
+using FontStyle = Src.Text.FontStyle;
+using TextAlignment = Src.Text.TextAlignment;
 
-namespace Rendering {
+namespace Src.Rendering {
 
     public struct StyleProperty {
 
@@ -52,7 +53,7 @@ namespace Rendering {
             this.valuePart1 = (int) measurement.unit;
             this.objectField = null;
         }
-        
+
         public StyleProperty(StylePropertyId propertyId, GridTrackSize trackSize) {
             this.propertyId = propertyId;
             this.valuePart0 = FloatUtil.EncodeToInt(trackSize.minValue);
@@ -101,7 +102,7 @@ namespace Rendering {
 
         public int AsInt => valuePart0;
         public float AsFloat => FloatUtil.DecodeToFloat(valuePart0);
-        public UIMeasurement AsMeasurement => UIMeasurement.Decode(valuePart0, valuePart1);
+        public UIMeasurement AsUIMeasurement => UIMeasurement.Decode(valuePart0, valuePart1);
         public CrossAxisAlignment AsCrossAxisAlignment => (CrossAxisAlignment) valuePart0;
         public MainAxisAlignment AsMainAxisAlignment => (MainAxisAlignment) valuePart0;
         public Overflow AsOverflow => (Overflow) valuePart0;
@@ -110,20 +111,30 @@ namespace Rendering {
         public TMP_FontAsset AsFont => (TMP_FontAsset) objectField;
         public Texture2D AsTexture => (Texture2D) objectField;
 
-        public TextUtil.FontStyle AsFontStyle => (TextUtil.FontStyle) valuePart0;
-        public TextUtil.TextAlignment AsTextAlignment => (TextUtil.TextAlignment) valuePart0;
+        public FontStyle AsFontStyle => (FontStyle) valuePart0;
+        public TextAlignment AsTextAlignment => (TextAlignment) valuePart0;
         public LayoutDirection AsLayoutDirection => (LayoutDirection) valuePart0;
         public LayoutWrap AsLayoutWrap => (LayoutWrap) valuePart0;
         public GridTrackSize AsGridTrackSize => new GridTrackSize(FloatUtil.DecodeToFloat(valuePart0), (GridTemplateUnit) valuePart1);
 
         public IReadOnlyList<GridTrackSize> AsGridTrackTemplate => (IReadOnlyList<GridTrackSize>) objectField;
-        public UIFixedLength AsFixedLength => new UIFixedLength(FloatUtil.DecodeToFloat(valuePart0), (UIFixedUnit) valuePart1);
-
-        public Src.Rendering.Gradient AsGradient => (Src.Rendering.Gradient) objectField;
+        public UIFixedLength AsUIFixedLength => new UIFixedLength(FloatUtil.DecodeToFloat(valuePart0), (UIFixedUnit) valuePart1);
 
         public bool IsGradient => objectField != null && (ColorType) valuePart1 == ColorType.Gradient;
         public AnchorTarget AsAnchorTarget => (AnchorTarget) valuePart0;
         public RenderLayer AsRenderLayer => (RenderLayer) valuePart0;
+        public Texture2D AsTexture2D => (Texture2D) objectField;
+        public GradientType AsGradientType => (GradientType) valuePart0;
+        public GradientAxis AsGradientAxis => (GradientAxis) valuePart0;
+        public BackgroundFillType AsBackgroundFillType => (BackgroundFillType) valuePart0;
+        public BackgroundShapeType AsBackgroundShapeType => (BackgroundShapeType) valuePart0;
+        public GridLayoutDensity AsGridLayoutDensity => (GridLayoutDensity) valuePart0;
+        public TransformBehavior AsTransformBehavior => (TransformBehavior) valuePart0;
+        public LayoutType AsLayoutType => (LayoutType) valuePart0;
+        public TextTransform AsTextTransform => (TextTransform) valuePart0;
+        public LayoutBehavior AsLayoutBehavior => (LayoutBehavior) valuePart0;
+        
+        public IReadOnlyList<GridTrackSize> AsGridTemplate => (IReadOnlyList<GridTrackSize>)objectField;
 
         [DebuggerStepThrough]
         public static StyleProperty Unset(StylePropertyId propertyId) {

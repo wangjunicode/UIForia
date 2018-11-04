@@ -10,8 +10,9 @@ using Src.Rendering;
 using Src.Systems;
 using Src.Util;
 using UnityEngine;
+using UnityEngine.UI;
 
-namespace Rendering {
+namespace Src.Rendering {
 
     [DebuggerDisplay("id = {element.id} state = {currentState}")]
     public partial class UIStyleSet {
@@ -130,6 +131,7 @@ namespace Rendering {
         public void OnAnimationStart() { }
 
         private void UpdateStyleProperties(UIStyle style) {
+
             IReadOnlyList<StyleProperty> properties = style.Properties;
             for (int j = 0; j < properties.Count; j++) {
                 computedStyle.SetProperty(GetPropertyValueInState(properties[j].propertyId, currentState));
@@ -204,7 +206,6 @@ namespace Rendering {
 
             return new StyleProperty(propertyId, IntUtil.UnsetValue, IntUtil.UnsetValue);
         }
-
 
         private UIStyle GetOrCreateInstanceStyle(StyleState state) {
             if (instanceStyle == null) {
@@ -501,11 +502,53 @@ namespace Rendering {
             }
 
             return "Unknown";
-            
         }
 
         public UIStyleGroup GetInstanceStyle() {
             return instanceStyle;
+        }
+
+    }
+
+    public struct ScrollbarButtonStyle { }
+
+    public struct ScrollbarTrackStyle { }
+
+    public struct ScrollbarHandleStyle { }
+
+    public enum ScrollbarButtonPlacement {
+
+        Unset = 0,
+        TogetherBefore = 1,
+        TogetherAfter = 1,
+        Apart = 2
+
+    }
+
+    public struct ScrollbarStyleSet {
+
+        public VerticalScrollbarAttachment verticalAttachment;
+        public ScrollbarButtonPlacement verticalButtonPlacement;
+        public ScrollbarButtonPlacement horizontalButtonPlacement;
+
+        public void SetVerticalTrackSize(UIFixedLength trackSize) {
+            // styles[StylePropertyId.VerticalTrackSize] = trackSize;
+        }
+
+        public ScrollbarTrackStyle VerticalTrack {
+            get { return new ScrollbarTrackStyle(); }
+        }
+
+        public ScrollbarHandleStyle VerticalHandler {
+            get { return new ScrollbarHandleStyle(); }
+        }
+
+        public ScrollbarButtonStyle VerticalButtonTop {
+            get { return new ScrollbarButtonStyle(); }
+        }
+
+        public ScrollbarButtonStyle VerticalButtonBottom {
+            get { return new ScrollbarButtonStyle(); }
         }
 
     }

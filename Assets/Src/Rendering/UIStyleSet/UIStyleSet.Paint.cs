@@ -6,7 +6,7 @@ using Src.Rendering;
 using Src.StyleBindings;
 using UnityEngine;
 
-namespace Rendering {
+namespace Src.Rendering {
 
     public partial class UIStyleSet {
 

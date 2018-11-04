@@ -1,7 +1,7 @@
 using JetBrains.Annotations;
 using Src;
 
-namespace Rendering {
+namespace Src.Rendering {
 
     public partial class UIStyleSet {
 
@@ -9,22 +9,22 @@ namespace Rendering {
 
         [PublicAPI]
         public UIMeasurement GetMarginTop(StyleState state) {
-            return GetPropertyValueInState(StylePropertyId.MarginTop, state).AsMeasurement;
+            return GetPropertyValueInState(StylePropertyId.MarginTop, state).AsUIMeasurement;
         }
 
         [PublicAPI]
         public UIMeasurement GetMarginRight(StyleState state) {
-            return GetPropertyValueInState(StylePropertyId.MarginRight, state).AsMeasurement;
+            return GetPropertyValueInState(StylePropertyId.MarginRight, state).AsUIMeasurement;
         }
 
         [PublicAPI]
         public UIMeasurement GetMarginBottom(StyleState state) {
-            return GetPropertyValueInState(StylePropertyId.MarginBottom, state).AsMeasurement;
+            return GetPropertyValueInState(StylePropertyId.MarginBottom, state).AsUIMeasurement;
         }
 
         [PublicAPI]
         public UIMeasurement GetMarginLeft(StyleState state) {
-            return GetPropertyValueInState(StylePropertyId.MarginLeft, state).AsMeasurement;
+            return GetPropertyValueInState(StylePropertyId.MarginLeft, state).AsUIMeasurement;
         }
 
         [PublicAPI]
@@ -72,22 +72,22 @@ namespace Rendering {
 
         [PublicAPI]
         public UIFixedLength GetPaddingTop(StyleState state) {
-            return GetPropertyValueInState(StylePropertyId.PaddingTop, state).AsFixedLength;
+            return GetPropertyValueInState(StylePropertyId.PaddingTop, state).AsUIFixedLength;
         }
 
         [PublicAPI]
         public UIFixedLength GetPaddingRight(StyleState state) {
-            return GetPropertyValueInState(StylePropertyId.PaddingRight, state).AsFixedLength;
+            return GetPropertyValueInState(StylePropertyId.PaddingRight, state).AsUIFixedLength;
         }
 
         [PublicAPI]
         public UIFixedLength GetPaddingBottom(StyleState state) {
-            return GetPropertyValueInState(StylePropertyId.PaddingBottom, state).AsFixedLength;
+            return GetPropertyValueInState(StylePropertyId.PaddingBottom, state).AsUIFixedLength;
         }
 
         [PublicAPI]
         public UIFixedLength GetPaddingLeft(StyleState state) {
-            return GetPropertyValueInState(StylePropertyId.PaddingLeft, state).AsFixedLength;
+            return GetPropertyValueInState(StylePropertyId.PaddingLeft, state).AsUIFixedLength;
         }
 
         [PublicAPI]
@@ -134,22 +134,22 @@ namespace Rendering {
 
         [PublicAPI]
         public UIFixedLength GetBorderTop(StyleState state) {
-            return GetPropertyValueInState(StylePropertyId.BorderTop, state).AsFixedLength;
+            return GetPropertyValueInState(StylePropertyId.BorderTop, state).AsUIFixedLength;
         }
 
         [PublicAPI]
         public UIFixedLength GetBorderRight(StyleState state) {
-            return GetPropertyValueInState(StylePropertyId.BorderRight, state).AsFixedLength;
+            return GetPropertyValueInState(StylePropertyId.BorderRight, state).AsUIFixedLength;
         }
 
         [PublicAPI]
         public UIFixedLength GetBorderBottom(StyleState state) {
-            return GetPropertyValueInState(StylePropertyId.BorderBottom, state).AsFixedLength;
+            return GetPropertyValueInState(StylePropertyId.BorderBottom, state).AsUIFixedLength;
         }
 
         [PublicAPI]
         public UIFixedLength GetBorderLeft(StyleState state) {
-            return GetPropertyValueInState(StylePropertyId.BorderLeft, state).AsFixedLength;
+            return GetPropertyValueInState(StylePropertyId.BorderLeft, state).AsUIFixedLength;
         }
 
         [PublicAPI]

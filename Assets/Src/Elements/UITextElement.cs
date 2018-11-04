@@ -1,11 +1,12 @@
 using System;
-using Rendering;
+using Src.Rendering;
 using Src.Layout.LayoutTypes;
 using Src.Systems;
 using Src.Text;
 using Src.Util;
 using TMPro;
 using UnityEngine;
+using FontStyle = Src.Text.FontStyle;
 
 namespace Src {
 
@@ -86,10 +87,10 @@ namespace Src {
             textInfo.spanCount = 1;
             textInfo.spanInfos = ArrayPool<SpanInfo>.GetMinSize(1);
             textInfo.spanInfos[0].wordCount = textInfo.wordCount;
-            textInfo.spanInfos[0].font = style.computedStyle.FontAsset;
+            textInfo.spanInfos[0].font = style.computedStyle.TextFontAsset;
             textInfo.spanInfos[0].charCount = textInfo.charCount;
-            textInfo.spanInfos[0].fontSize = style.computedStyle.FontSize;
-            textInfo.spanInfos[0].fontStyle = style.computedStyle.FontStyle;
+            textInfo.spanInfos[0].fontSize = style.computedStyle.TextFontSize;
+            textInfo.spanInfos[0].fontStyle = style.computedStyle.TextFontStyle;
             textInfo.spanInfos[0].alignment = style.computedStyle.TextAlignment;
 
             ComputeCharacterAndWordSizes(textInfo);
@@ -112,7 +113,7 @@ namespace Src {
         public void InsertText(int characterIndex, string str) { }
 
         private static TMP_FontAsset GetFontAssetForWeight(SpanInfo spanInfo, int fontWeight) {
-            bool isItalic = (spanInfo.fontStyle & TextUtil.FontStyle.Italic) != 0;
+            bool isItalic = (spanInfo.fontStyle & FontStyle.Italic) != 0;
 
             int weightIndex = fontWeight / 100;
             TMP_FontWeights weights = spanInfo.font.fontWeights[weightIndex];
@@ -138,13 +139,13 @@ namespace Src {
                 bool isUsingAltTypeface = false;
                 float boldAdvanceMultiplier = 1;
 
-                if ((spanInfo.fontStyle & TextUtil.FontStyle.Bold) != 0) {
+                if ((spanInfo.fontStyle & FontStyle.Bold) != 0) {
                     fontAsset = GetFontAssetForWeight(spanInfo, 700);
                     isUsingAltTypeface = true;
                     boldAdvanceMultiplier = 1 + fontAsset.boldSpacing * 0.01f;
                 }
 
-                float smallCapsMultiplier = (spanInfo.fontStyle & TextUtil.FontStyle.SmallCaps) == 0 ? 1.0f : 0.8f;
+                float smallCapsMultiplier = (spanInfo.fontStyle & FontStyle.SmallCaps) == 0 ? 1.0f : 0.8f;
                 float fontScale = spanInfo.fontSize * smallCapsMultiplier / fontAsset.fontInfo.PointSize * fontAsset.fontInfo.Scale;
 
                 float yAdvance = fontAsset.fontInfo.Baseline * fontScale * fontAsset.fontInfo.Scale;
@@ -156,7 +157,7 @@ namespace Src {
                 float padding = ShaderUtilities.GetPadding(fontAsset.material, enableExtraPadding: false, isBold: false);
                 float stylePadding = 0;
 
-                if (!isUsingAltTypeface && (spanInfo.fontStyle & TextUtil.FontStyle.Bold) == TextUtil.FontStyle.Bold) {
+                if (!isUsingAltTypeface && (spanInfo.fontStyle & FontStyle.Bold) == FontStyle.Bold) {
                     if (fontAssetMaterial.HasProperty(ShaderUtilities.ID_GradientScale)) {
                         float gradientScale = fontAssetMaterial.GetFloat(ShaderUtilities.ID_GradientScale);
                         stylePadding = fontAsset.boldStyle / 4.0f * gradientScale * fontAssetMaterial.GetFloat(ShaderUtilities.ID_ScaleRatio_A);
@@ -217,7 +218,7 @@ namespace Src {
                         float topShear = 0;
                         float bottomShear = 0;
 
-                        if (!isUsingAltTypeface && ((spanInfo.fontStyle & TextUtil.FontStyle.Italic) != 0)) {
+                        if (!isUsingAltTypeface && ((spanInfo.fontStyle & FontStyle.Italic) != 0)) {
                             float shearValue = fontAsset.italicStyle * 0.01f;
                             topShear = glyph.yOffset * shearValue;
                             bottomShear = (glyph.yOffset - glyph.height) * shearValue;
@@ -276,7 +277,7 @@ namespace Src {
                         currentWord.ascender = elementAscender > currentWord.ascender ? elementAscender : currentWord.ascender;
                         currentWord.descender = elementDescender < currentWord.descender ? elementDescender : currentWord.descender;
 
-                        if ((spanInfo.fontStyle & (TextUtil.FontStyle.Superscript | TextUtil.FontStyle.Subscript)) != 0) {
+                        if ((spanInfo.fontStyle & (FontStyle.Superscript | FontStyle.Subscript)) != 0) {
                             float baseAscender = elementAscender / fontAsset.fontInfo.SubSize;
                             float baseDescender = elementDescender / fontAsset.fontInfo.SubSize;
 
@@ -304,8 +305,7 @@ namespace Src {
             LineInfo[] lineInfos = textInfo.lineInfos;
             WordInfo[] wordInfos = textInfo.wordInfos;
             CharInfo[] charInfos = textInfo.charInfos;
-            ComputedStyle computed = ComputedStyle;
-            TMP_FontAsset asset = computed.FontAsset;
+
             for (int lineIdx = 0; lineIdx < textInfo.lineCount; lineIdx++) {
                 LineInfo currentLine = lineInfos[lineIdx];
                 float lineOffset = currentLine.position.y;
@@ -424,10 +424,10 @@ namespace Src {
 
         public Material GetMaterial() {
             ComputedStyle computedStyle = ComputedStyle;
-            Material fontMaterial = computedStyle.FontAsset.material;
+            Material fontMaterial = computedStyle.TextFontAsset.material;
             
-            if (fontAsset != computedStyle.FontAsset) {
-                fontAsset = computedStyle.FontAsset;
+            if (fontAsset != computedStyle.TextFontAsset) {
+                fontAsset = computedStyle.TextFontAsset;
                 material.mainTexture = fontMaterial.mainTexture;
                 material.SetFloat(ShaderUtilities.ID_GradientScale, fontMaterial.GetFloat(ShaderUtilities.ID_GradientScale));
                 material.SetFloat(ShaderUtilities.ID_WeightNormal, fontMaterial.GetFloat(ShaderUtilities.ID_WeightNormal));
@@ -437,7 +437,7 @@ namespace Src {
                 material.SetFloat(ShaderUtilities.ID_ScaleRatio_C, fontMaterial.GetFloat(ShaderUtilities.ID_ScaleRatio_A));
                 material.SetVector("_TextureSize", new Vector4(material.mainTexture.width, material.mainTexture.height));
             }
-            float fontScale = (computedStyle.FontSize / fontAsset.fontInfo.PointSize) * fontAsset.fontInfo.Scale;;
+            float fontScale = (computedStyle.TextFontSize / fontAsset.fontInfo.PointSize) * fontAsset.fontInfo.Scale;;
             material.SetFloat("_FontScale", fontScale);
             // todo -- text styles & keywords, try to use the same materials where possible
 //            material.SetVector("_OutlineColor", computedStyle.TextOutlineColor);
@@ -769,14 +769,8 @@ namespace Src {
         }
 
         public float GetLineHeightAtCursor(SelectionRange selectionRange) {
-            TMP_FontAsset asset = ComputedStyle.FontAsset;
-            return asset.fontInfo.LineHeight * (ComputedStyle.FontSize / asset.fontInfo.PointSize) * asset.fontInfo.Scale;
-
-            if (string.IsNullOrEmpty(text)) {
-                return ComputedStyle.FontAsset.fontInfo.LineHeight;
-            }
-            return asset.fontInfo.LineHeight * (ComputedStyle.FontSize / asset.fontInfo.PointSize) * asset.fontInfo.Scale;
-//            return textInfo.lineInfos[textInfo.charInfos[selectionRange.cursorIndex].lineIndex].Height;
+            TMP_FontAsset asset = ComputedStyle.TextFontAsset;
+            return asset.fontInfo.LineHeight * (ComputedStyle.TextFontSize / asset.fontInfo.PointSize) * asset.fontInfo.Scale;     
         }
 
     }

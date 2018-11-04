@@ -1,24 +1,24 @@
 using JetBrains.Annotations;
 using Src;
 
-namespace Rendering {
+namespace Src.Rendering {
 
     [PublicAPI]
     public partial class UIStyleSet {
 
         [PublicAPI]
         public UIMeasurement GetMinWidth(StyleState state) {
-            return GetPropertyValueInState(StylePropertyId.MinWidth, state).AsMeasurement;
+            return GetPropertyValueInState(StylePropertyId.MinWidth, state).AsUIMeasurement;
         }
 
         [PublicAPI]
         public UIMeasurement GetMaxWidth(StyleState state) {
-            return GetPropertyValueInState(StylePropertyId.MaxWidth, state).AsMeasurement;
+            return GetPropertyValueInState(StylePropertyId.MaxWidth, state).AsUIMeasurement;
         }
 
         [PublicAPI]
         public UIMeasurement GetPreferredWidth(StyleState state) {
-            return GetPropertyValueInState(StylePropertyId.PreferredWidth, state).AsMeasurement;
+            return GetPropertyValueInState(StylePropertyId.PreferredWidth, state).AsUIMeasurement;
         }
 
         [PublicAPI]
@@ -38,17 +38,17 @@ namespace Rendering {
 
         [PublicAPI]
         public UIMeasurement GetMinHeight(StyleState state) {
-            return GetPropertyValueInState(StylePropertyId.MinHeight, state).AsMeasurement;
+            return GetPropertyValueInState(StylePropertyId.MinHeight, state).AsUIMeasurement;
         }
 
         [PublicAPI]
         public UIMeasurement GetMaxHeight(StyleState state) {
-            return GetPropertyValueInState(StylePropertyId.MaxHeight, state).AsMeasurement;
+            return GetPropertyValueInState(StylePropertyId.MaxHeight, state).AsUIMeasurement;
         }
 
         [PublicAPI]
         public UIMeasurement GetPreferredHeight(StyleState state) {
-            return GetPropertyValueInState(StylePropertyId.PreferredHeight, state).AsMeasurement;
+            return GetPropertyValueInState(StylePropertyId.PreferredHeight, state).AsUIMeasurement;
         }
 
         [PublicAPI]

@@ -1,6 +1,6 @@
 ﻿using System;
 using System.Diagnostics;
-using Rendering;
+using Src.Rendering;
 using Src.Elements;
 using Src.Systems;
 using UnityEngine;
@@ -15,10 +15,12 @@ namespace Src.Systems {
         public Material material;
         public Vector4 clipVector;
         public Vector3 renderPosition;
+        private CullResult cullResult;
+        private CullResult previousCullResult;
 
         public readonly bool isMeshProvider;
         public readonly bool isMaterialProvider;
-        
+
         public RenderData(UIElement element) {
             this.element = element;
             this.isMeshProvider = this.element is IMeshProvider;
@@ -26,6 +28,15 @@ namespace Src.Systems {
         }
 
         public ElementRenderer Renderer => element.Renderer;
+        public bool CullResultChanged => previousCullResult != cullResult;
+
+        public CullResult CullResult {
+            get { return cullResult; }
+            set {
+                previousCullResult = cullResult;
+                cullResult = value;
+            }
+        }
 
     }
 

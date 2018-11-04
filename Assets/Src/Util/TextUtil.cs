@@ -1,49 +1,11 @@
-using System;
 using System.Collections.Generic;
 using System.Text;
-using Rendering;
+using Src.Rendering;
 using Src.Text;
 
 namespace Src.Util {
 
     public static class TextUtil {
-
-        [Flags]
-        public enum FontStyle {
-
-            Unset = 0,
-            Normal = 1 << 1,
-            Bold = 1 << 2,
-            Italic = 1 << 3,
-            Underline = 1 << 4,
-            LowerCase = 1 << 5,
-            UpperCase = 1 << 6,
-            SmallCaps = 1 << 7,
-            StrikeThrough = 1 << 8,
-            Superscript = 1 << 9,
-            Subscript = 1 << 10,
-            Highlight = 1 << 11,
-
-        }
-
-        public enum TextAlignment {
-
-            Unset = 0,
-            Left = 1,
-            Right = 2,
-            Center = 3
-
-        }
-
-        public enum TextTransform {
-
-            None = 0,
-            UpperCase = 1,
-            LowerCase = 2,
-            SmallCaps = 3,
-            TitleCase = 4
-
-        }
 
         public static string ProcessWrapString(string input, bool collapseSpaceAndTab = true, bool preserveNewLine = false, TextTransform textTransform = TextTransform.None) {
             char[] buffer = null;

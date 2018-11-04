@@ -1,15 +1,16 @@
 using System;
 using System.Collections.Generic;
 using Shapes2D;
-using Src;
 using Src.Layout;
 using Src.Layout.LayoutTypes;
-using Src.Rendering;
+using Src.Text;
 using Src.Util;
 using TMPro;
 using UnityEngine;
+using FontStyle = Src.Text.FontStyle;
+using TextAlignment = Src.Text.TextAlignment;
 
-namespace Rendering {
+namespace Src.Rendering {
 
     public static class DefaultStyleValues {
 
@@ -79,10 +80,10 @@ namespace Rendering {
         public static readonly LayoutType LayoutType = LayoutType.Flex;
         public const int TextFontSize = 18;
         public static readonly Color TextColor = Color.black;
-        public const TextUtil.FontStyle TextFontStyle = TextUtil.FontStyle.Normal;
+        public const FontStyle TextFontStyle = FontStyle.Normal;
         public static readonly TMP_FontAsset TextFontAsset = TMP_FontAsset.defaultFontAsset;
-        public const TextUtil.TextAlignment TextAlignment = TextUtil.TextAlignment.Left;
-        public const TextUtil.TextTransform TextTransform = TextUtil.TextTransform.None;
+        public const TextAlignment TextAlignment = Src.Text.TextAlignment.Left;
+        public const TextTransform TextTransform = Src.Text.TextTransform.None;
 
         public static readonly LayoutBehavior LayoutBehavior = LayoutBehavior.Normal;
         public const int GridItemColStart = IntUtil.UnsetValue;
@@ -139,7 +140,7 @@ namespace Rendering {
 
         public const Texture2D Cursor = null;
 
-        public const TextUtil.TextAlignment TextAnchor = TextUtil.TextAlignment.Left;
+        public const TextAlignment TextAnchor = Src.Text.TextAlignment.Left;
         public const WhitespaceMode TextWhitespaceMode = WhitespaceMode.Preserve;
 
         public static StyleProperty GetPropertyValue(StylePropertyId propertyId) {

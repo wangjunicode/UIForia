@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Reflection;
-using Rendering;
 using Src.Extensions;
 using Src.Rendering;
 using Src.Util;
@@ -542,6 +541,9 @@ namespace Src.Parsing.StyleParser {
                 new StylePropertyMapper("MinHeight", StylePropertyMappers.SizeMapper),
                 new StylePropertyMapper("MaxHeight", StylePropertyMappers.SizeMapper),
                 new StylePropertyMapper("PreferredHeight", StylePropertyMappers.SizeMapper),
+                new StylePropertyMapper("PreferredSize", StylePropertyMappers.SizeMapper),
+                new StylePropertyMapper("MinSize", StylePropertyMappers.SizeMapper),
+                new StylePropertyMapper("MaxSize", StylePropertyMappers.SizeMapper),
 
                 new StylePropertyMapper("LayoutType", StylePropertyMappers.LayoutMapper),
                 new StylePropertyMapper("LayoutBehavior", StylePropertyMappers.LayoutMapper),

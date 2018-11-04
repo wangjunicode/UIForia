@@ -2,7 +2,7 @@ using System.Diagnostics;
 using Src.Extensions;
 using UnityEngine;
 
-namespace Rendering {
+namespace Src.Rendering {
 
     public static class ColorUtil {
 

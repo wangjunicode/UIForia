@@ -1,5 +1,7 @@
 using System;
 using System.Reflection;
+using Src.Systems;
+using Src.Util;
 using UnityEditor;
 using UnityEditor.IMGUI.Controls;
 using UnityEngine;
@@ -20,7 +22,7 @@ namespace Src.Editor {
         private float zoomLevel = 0;
         private float zoomSpeed = 10;
         public static UIElement SelectedElement;
-        
+
         private void OnInspectorUpdate() {
             Repaint();
         }
@@ -46,7 +48,7 @@ namespace Src.Editor {
         private void OnElementSelectionChanged(UIElement element) {
             SelectedElement = element;
         }
-        
+
         private void OnDisable() {
             if (camera != null) {
                 DestroyImmediate(camera.gameObject);
@@ -63,6 +65,7 @@ namespace Src.Editor {
                     UIView = null;
                     return;
                 }
+
                 treeView = new HierarchyView(views[0].view.RootElement, state);
                 treeView.onSelectionChanged += OnElementSelectionChanged;
                 targetView = views[0].view;
@@ -71,6 +74,7 @@ namespace Src.Editor {
                 treeView.view = targetView;
                 targetView.onElementCreated += OnElementCreated;
                 targetView.onRefresh += OnRefresh;
+                targetView.RenderSystem.DrawDebugOverlay += HandleDrawCallback;
             }
             else if (obj == PlayModeStateChange.ExitingPlayMode) {
                 playing = false;
@@ -81,6 +85,7 @@ namespace Src.Editor {
                 if (targetView != null) {
                     targetView.onElementCreated -= OnElementCreated;
                     targetView.onRefresh -= OnRefresh;
+                    targetView.RenderSystem.DrawDebugOverlay -= HandleDrawCallback;
                 }
 
                 if (treeView != null) {
@@ -90,10 +95,13 @@ namespace Src.Editor {
                 if (camera != null) {
                     DestroyImmediate(camera.gameObject);
                 }
+
                 UIView = null;
                 SelectedElement = null;
             }
         }
+
+        private void HandleDrawCallback(LightList<RenderData> renderData, LightList<RenderData> didDrawList, Vector3 origin, Camera camera) { }
 
         private void InitCamera() {
             if (camera != null) {
@@ -114,9 +122,8 @@ namespace Src.Editor {
 
         public void OnGUI() {
             EditorGUILayout.BeginVertical();
-           
-            if (playing) {
 
+            if (playing) {
                 switch (Event.current.type) {
                     case EventType.MouseDown:
                         break;
@@ -165,17 +172,10 @@ namespace Src.Editor {
                         throw new ArgumentOutOfRangeException();
                 }
 
-                // important: only render during the repaint event
-                //   if (Event.current.type == EventType.Repaint) {
-//                    if (renderTexture != null) {
-//                        GUI.DrawTexture(new Rect(0.0f, 0.0f, position.width, position.height), renderTexture);
-//                    }
-                //  }
-
                 if (treeView == null) {
                     return;
                 }
-                
+
                 if (needsReload) {
                     needsReload = false;
                     treeView.Reload();
@@ -187,7 +187,7 @@ namespace Src.Editor {
 
             EditorGUILayout.EndVertical();
         }
-        
+
         private static Vector2 GetMainGameViewSize() {
             if (s_GameWindowSizeMethod == null) {
                 Type windowType = Type.GetType("UnityEditor.GameView,UnityEditor");
@@ -200,86 +200,3 @@ namespace Src.Editor {
     }
 
 }
-//
-//        private void OnSceneGUI(SceneView sceneView) {
-//            if (m_RenderList == null || camera == null) return;
-//
-//            if (renderTexture == null || (renderTexture.width != position.width ||
-//                                          renderTexture.height != position.height)) {
-//                if (renderTexture != null) {
-//                    DestroyImmediate(renderTexture);
-//                }
-//
-//                renderTexture = new RenderTexture(
-//                    (int) position.width,
-//                    (int) position.height,
-//                    24
-//                );
-//            }
-//
-//            Material mat = Resources.Load<Material>("Materials/UIForia");
-//            mat.color = Color.white;
-//            Vector3 origin = camera.transform.position;
-//            origin.x -= 0.5f * position.width;
-//            origin.y += 0.5f * position.height;
-//            origin.z = 10f;
-//
-////            SortGeometry();
-//
-//            // need to know:
-//            // base scale
-//            // zoom level = 1
-//            // width / height
-//
-//            float z = -m_RenderList.Count;
-////            camera.orthographicSize = Camera.main.orthographicSize;
-//            camera.targetTexture = renderTexture;
-//            camera.targetDisplay = 2;
-//            camera.transform.position = new Vector3(0, 0, -10);
-//            for (int i = 0; i < m_RenderList.Count; i++) {
-//                RenderData data = m_RenderList[i];
-//                LayoutResult layoutResult = data.element.layoutResult;
-//
-//                Vector3 position = layoutResult.screenPosition;
-//                position.z = z++;
-//                position.y = -position.y;
-//
-//                Rect clipRect = data.element.layoutResult.clipRect;
-//
-//                if (clipRect.width <= 0 || clipRect.height <= 0) {
-//                    continue;
-//                }
-//
-//                if (layoutResult.actualSize.width == 0 || layoutResult.actualSize.height == 0) {
-//                    continue;
-//                }
-//
-//                float clipX = (clipRect.x - position.x) / layoutResult.actualSize.width;
-//                float clipY = ((clipRect.y - position.y) / layoutResult.actualSize.height);
-//                float clipW = clipX + (clipRect.width / layoutResult.actualSize.width);
-//                float clipH = clipY + (clipRect.height / layoutResult.actualSize.height);
-//                //   mat.SetVector("_ClipRect", new Vector4(clipX, clipY, clipW, clipH));
-//            }
-//
-//            float size = (zoomLevel) + 250f;
-//            if (size < 0.5) size = 0.5f;
-//            camera.orthographicSize = size;
-//
-//            mesh = mesh ? mesh : MeshUtil.CreateStandardUIMesh(new Size(100, 100), Color.white);
-//            
-//            Graphics.DrawMesh(mesh, new Vector3(-200, 200, 0) + new Vector3(panning.x, panning.y, 0), Quaternion.identity, mat, 0, camera, 0, null, false, false, false);
-//            Graphics.DrawMesh(mesh, new Vector3(-200, 200, 1) + new Vector3(panning.x, panning.y, 0), Quaternion.identity, mat, 0, camera, 0, null, false, false, false);
-//
-//            /*
-//             * draw on top of scene (or maybe into)
-//             * highlight / select on mouse over and click
-//             * move?
-//             * move anchors
-//             * see properties
-//             * show clipped sections
-//             * click hierarchy -> highlight view
-//             */
-//            
-//            camera.Render();
-//            camera.targetTexture = null;
-//        }

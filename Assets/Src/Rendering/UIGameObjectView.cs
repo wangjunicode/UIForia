@@ -2,7 +2,7 @@
 using Src.Systems;
 using UnityEngine;
 
-namespace Rendering {
+namespace Src.Rendering {
 
     public sealed class UIGameObjectView : UIView {
 
@@ -11,7 +11,7 @@ namespace Rendering {
         public UIGameObjectView(Type elementType, RectTransform viewTransform) : base(elementType) {
             this.rectTransform = viewTransform;
             layoutSystem = new LayoutSystem(styleSystem);
-            renderSystem = new DirectRenderSystem(Camera.main, layoutSystem, styleSystem);
+            renderSystem = new RenderSystem(Camera.main, layoutSystem, styleSystem);
 //            renderSystem = new GORenderSystem(layoutSystem, styleSystem, viewTransform);
             inputSystem = new GOInputSystem(layoutSystem, styleSystem);
             systems.Add(inputSystem);

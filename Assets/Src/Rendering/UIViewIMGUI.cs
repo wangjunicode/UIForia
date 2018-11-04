@@ -2,7 +2,7 @@
 using Src.Systems;
 using UnityEngine;
 
-namespace Rendering {
+namespace Src.Rendering {
 
     public sealed class UIViewIMGUI : UIView {
 

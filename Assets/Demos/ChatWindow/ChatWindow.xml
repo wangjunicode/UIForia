@@ -33,8 +33,21 @@
         }
         
         style text {
+            PreferredWidth = 1300px;
+            Padding = 14px, 12px, 4px, 12px;
             TextFontAsset = Whitney-Book SDF;
-            TextFontSize = 36;
+            TextFontSize = 26;
+        }
+        
+        style parent {
+            PreferredSize = 1300px, 300px;
+            BackgroundColor = white;
+            OverflowY = Scroll;
+        }
+        
+        style child {
+            PreferredSize = 500px, 500px;
+            BackgroundColor = Yellow;
         }
         
     </Style>
@@ -43,6 +56,13 @@
 
         <ChatPanel style.borderColor="red" selectedGroupIdx="{selectedChatGroup}" chatData="{chatData}"/>
     
+        <!--<Div style="parent">-->
+            
+            <!--< style="child"/>-->
+            
+            <!--<Text style="text">Here is text, ja hallk</Text>-->
+            
+        <!--</Div>-->
         
     </Contents>
 

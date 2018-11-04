@@ -1,6 +1,6 @@
 ﻿using System.Collections.Generic;
 
-namespace Rendering {
+namespace Src.Rendering {
 
     public static class ArrayUtil {
 

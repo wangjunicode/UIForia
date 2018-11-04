@@ -1,6 +1,5 @@
 using System;
 using System.Collections.Generic;
-using Rendering;
 using Src.Rendering;
 using Src.Util;
 using UnityEngine;
@@ -111,7 +110,7 @@ namespace Src.Animation {
                 case StylePropertyId.BorderRight:
                 case StylePropertyId.MarginLeft:
                 case StylePropertyId.MarginRight:
-                    return new AnimationStatus(ResolveFixedWidth(element, viewport, startProperty.AsFixedLength));
+                    return new AnimationStatus(ResolveFixedWidth(element, viewport, startProperty.AsUIFixedLength));
 
                 case StylePropertyId.TransformPivotY:
                 case StylePropertyId.TransformPositionY:
@@ -121,13 +120,13 @@ namespace Src.Animation {
                 case StylePropertyId.BorderBottom:
                 case StylePropertyId.MarginTop:
                 case StylePropertyId.MarginBottom:
-                    return new AnimationStatus(ResolveFixedHeight(element, viewport, startProperty.AsFixedLength));
+                    return new AnimationStatus(ResolveFixedHeight(element, viewport, startProperty.AsUIFixedLength));
 
                 case StylePropertyId.PreferredWidth:
-                    return new AnimationStatus(ResolveWidthMeasurement(element, viewport, startProperty.AsMeasurement));
+                    return new AnimationStatus(ResolveWidthMeasurement(element, viewport, startProperty.AsUIMeasurement));
 
                 case StylePropertyId.PreferredHeight:
-                    return new AnimationStatus(ResolveHeightMeasurement(element, viewport, startProperty.AsMeasurement));
+                    return new AnimationStatus(ResolveHeightMeasurement(element, viewport, startProperty.AsUIMeasurement));
 
                 case StylePropertyId.Opacity:
                 case StylePropertyId.TransformScaleX:
@@ -138,26 +137,27 @@ namespace Src.Animation {
                     return new AnimationStatus(startProperty.AsFloat);
 
                 case StylePropertyId.AnchorTop:
-                    return new AnimationStatus(ResolveAnchorTop(element, viewport, startProperty.AsFixedLength));
+                    return new AnimationStatus(ResolveAnchorTop(element, viewport, startProperty.AsUIFixedLength));
 
                 case StylePropertyId.AnchorRight:
-                    return new AnimationStatus(ResolveAnchorRight(element, viewport, startProperty.AsFixedLength));
+                    return new AnimationStatus(ResolveAnchorRight(element, viewport, startProperty.AsUIFixedLength));
 
                 case StylePropertyId.AnchorBottom:
-                    return new AnimationStatus(ResolveAnchorBottom(element, viewport, startProperty.AsFixedLength));
+                    return new AnimationStatus(ResolveAnchorBottom(element, viewport, startProperty.AsUIFixedLength));
 
                 case StylePropertyId.AnchorLeft:
-                    return new AnimationStatus(ResolveAnchorLeft(element, viewport, startProperty.AsFixedLength));
+                    return new AnimationStatus(ResolveAnchorLeft(element, viewport, startProperty.AsUIFixedLength));
 
                 case StylePropertyId.BorderColor:
                 case StylePropertyId.BackgroundColor:
                 case StylePropertyId.TextColor:
-                    if (startProperty.IsGradient) {
-                        return new AnimationStatus((int) ColorType.Gradient, startProperty.AsGradient);
-                    }
-                    else {
+                    // todo gradient works differently now
+//                    if (startProperty.IsGradient) {
+//                        return new AnimationStatus((int) ColorType.Gradient, startProperty.AsGradient);
+//                    }
+//                    else {
                         return new AnimationStatus((int) ColorType.Color, new StyleColor(startProperty.AsColor).rgba);
-                    }
+//                    }
 
                 default: throw new UIForia.InvalidArgumentException(m_TargetValue.propertyId + " is not a supported animation property");
             }
@@ -238,7 +238,7 @@ namespace Src.Animation {
                 case StylePropertyId.BorderRight:
                 case StylePropertyId.MarginLeft:
                 case StylePropertyId.MarginRight:
-                    v = Mathf.Lerp(status.floatValue, ResolveFixedWidth(element, viewport, m_TargetValue.AsFixedLength), adjustedT);
+                    v = Mathf.Lerp(status.floatValue, ResolveFixedWidth(element, viewport, m_TargetValue.AsUIFixedLength), adjustedT);
                     element.style.SetAnimatedProperty(new StyleProperty(propertyId, new UIFixedLength(v)));
                     break;
                 case StylePropertyId.TransformPivotY:
@@ -249,15 +249,15 @@ namespace Src.Animation {
                 case StylePropertyId.BorderBottom:
                 case StylePropertyId.MarginTop:
                 case StylePropertyId.MarginBottom:
-                    v = Mathf.Lerp(status.floatValue, ResolveFixedHeight(element, viewport, m_TargetValue.AsFixedLength), adjustedT);
+                    v = Mathf.Lerp(status.floatValue, ResolveFixedHeight(element, viewport, m_TargetValue.AsUIFixedLength), adjustedT);
                     element.style.SetAnimatedProperty(new StyleProperty(propertyId, new UIFixedLength(v)));
                     break;
                 case StylePropertyId.PreferredWidth:
-                    v = Mathf.Lerp(status.floatValue, ResolveWidthMeasurement(element, viewport, m_TargetValue.AsMeasurement), adjustedT);
+                    v = Mathf.Lerp(status.floatValue, ResolveWidthMeasurement(element, viewport, m_TargetValue.AsUIMeasurement), adjustedT);
                     element.style.SetAnimatedProperty(new StyleProperty(propertyId, new UIMeasurement(v)));
                     break;
                 case StylePropertyId.PreferredHeight:
-                    v = Mathf.Lerp(status.floatValue, ResolveHeightMeasurement(element, viewport, m_TargetValue.AsMeasurement), adjustedT);
+                    v = Mathf.Lerp(status.floatValue, ResolveHeightMeasurement(element, viewport, m_TargetValue.AsUIMeasurement), adjustedT);
                     element.style.SetAnimatedProperty(new StyleProperty(propertyId, new UIMeasurement(v)));
                     break;
                 case StylePropertyId.Opacity:
@@ -270,79 +270,79 @@ namespace Src.Animation {
                     element.style.SetAnimatedProperty(new StyleProperty(propertyId, v));
                     break;
                 case StylePropertyId.AnchorTop:
-                    v = Mathf.Lerp(status.floatValue, ResolveAnchorTop(element, viewport, m_TargetValue.AsFixedLength), adjustedT);
+                    v = Mathf.Lerp(status.floatValue, ResolveAnchorTop(element, viewport, m_TargetValue.AsUIFixedLength), adjustedT);
                     element.style.SetAnimatedProperty(StyleProperty.AnchorTop(v));
                     break;
 
                 case StylePropertyId.AnchorRight:
-                    float val = ResolveAnchorRight(element, viewport, m_TargetValue.AsFixedLength);
+                    float val = ResolveAnchorRight(element, viewport, m_TargetValue.AsUIFixedLength);
                     v = Mathf.Lerp(status.floatValue, val, adjustedT);
                     element.style.SetAnimatedProperty(StyleProperty.AnchorRight(v));
                     break;
 
                 case StylePropertyId.AnchorBottom:
-                    v = Mathf.Lerp(status.floatValue, ResolveAnchorBottom(element, viewport, m_TargetValue.AsFixedLength), adjustedT);
+                    v = Mathf.Lerp(status.floatValue, ResolveAnchorBottom(element, viewport, m_TargetValue.AsUIFixedLength), adjustedT);
                     element.style.SetAnimatedProperty(StyleProperty.AnchorBottom(v));
                     break;
 
                 case StylePropertyId.AnchorLeft:
-                    v = Mathf.Lerp(status.floatValue, ResolveAnchorLeft(element, viewport, m_TargetValue.AsFixedLength), adjustedT);
+                    v = Mathf.Lerp(status.floatValue, ResolveAnchorLeft(element, viewport, m_TargetValue.AsUIFixedLength), adjustedT);
                     element.style.SetAnimatedProperty(StyleProperty.AnchorLeft(v));
                     break;
 
                 case StylePropertyId.BorderColor:
                 case StylePropertyId.BackgroundColor:
                 case StylePropertyId.TextColor:
-                    if (m_TargetValue.IsGradient) {
-                        Rendering.Gradient targetGradient = m_TargetValue.AsGradient;
-                        if ((int) status.floatValue == (int) ColorType.Gradient) {
-                            Rendering.Gradient startGradient = (Rendering.Gradient) status.startValueAsObject;
-                            Rendering.Gradient finalGradient = new Rendering.Gradient();
-
-                            finalGradient.start = Mathf.Lerp(startGradient.start, targetGradient.start, adjustedT);
-                            finalGradient.rotation = Mathf.Lerp(startGradient.rotation, targetGradient.rotation, adjustedT);
-                            finalGradient.color0 = Color.Lerp(startGradient.color0, targetGradient.color0, adjustedT);
-                            finalGradient.color1 = Color.Lerp(startGradient.color1, targetGradient.color1, adjustedT);
-                            finalGradient.offset = Vector2.Lerp(startGradient.offset, targetGradient.offset, adjustedT);
-                            finalGradient.axis = targetGradient.axis;
-                            finalGradient.type = targetGradient.type;
-                            element.style.SetAnimatedProperty(new StyleProperty(propertyId, finalGradient));
-                        }
-                        else {
-                            Color color = new StyleColor((int) status.floatValue);
-
-                            Rendering.Gradient finalGradient = new Rendering.Gradient();
-
-                            finalGradient.start = Mathf.Lerp(0, targetGradient.start, adjustedT);
-                            finalGradient.rotation = Mathf.Lerp(0, targetGradient.rotation, adjustedT);
-                            finalGradient.color0 = Color.Lerp(color, targetGradient.color0, adjustedT);
-                            finalGradient.color1 = Color.Lerp(color, targetGradient.color1, adjustedT);
-                            finalGradient.offset = Vector2.Lerp(Vector2.zero, targetGradient.offset, adjustedT);
-                            finalGradient.axis = targetGradient.axis;
-                            finalGradient.type = targetGradient.type;
-
-                            element.style.SetAnimatedProperty(new StyleProperty(propertyId, finalGradient));
-                        }
-                    }
-                    else {
-                        if ((int) status.floatValue == (int) ColorType.Gradient) {
-                            Rendering.Gradient startGradient = (Rendering.Gradient) status.startValueAsObject;
-                            Rendering.Gradient finalGradient = new Rendering.Gradient();
-                            Color targetColor = m_TargetValue.AsColor;
-                            finalGradient.start = Mathf.Lerp(startGradient.start, 0, adjustedT);
-                            finalGradient.rotation = Mathf.Lerp(startGradient.rotation, 0, adjustedT);
-                            finalGradient.color0 = Color.Lerp(startGradient.color0, targetColor, adjustedT);
-                            finalGradient.color1 = Color.Lerp(startGradient.color1, targetColor, adjustedT);
-                            finalGradient.offset = Vector2.Lerp(startGradient.offset, Vector2.zero, adjustedT);
-                            finalGradient.axis = startGradient.axis;
-                            finalGradient.type = startGradient.type;
-                            element.style.SetAnimatedProperty(new StyleProperty(propertyId, finalGradient));
-                        }
-                        else {
-                            Color c = Color.Lerp(new StyleColor((int) status.floatValue), m_TargetValue.AsColor, adjustedT);
-                            element.style.SetAnimatedProperty(new StyleProperty(propertyId, c));
-                        }
-                    }
+//                    if (m_TargetValue.IsGradient) {
+//                        Rendering.Gradient targetGradient = m_TargetValue.AsGradient;
+//                        if ((int) status.floatValue == (int) ColorType.Gradient) {
+//                            Rendering.Gradient startGradient = (Rendering.Gradient) status.startValueAsObject;
+//                            Rendering.Gradient finalGradient = new Rendering.Gradient();
+//
+//                            finalGradient.start = Mathf.Lerp(startGradient.start, targetGradient.start, adjustedT);
+//                            finalGradient.rotation = Mathf.Lerp(startGradient.rotation, targetGradient.rotation, adjustedT);
+//                            finalGradient.color0 = Color.Lerp(startGradient.color0, targetGradient.color0, adjustedT);
+//                            finalGradient.color1 = Color.Lerp(startGradient.color1, targetGradient.color1, adjustedT);
+//                            finalGradient.offset = Vector2.Lerp(startGradient.offset, targetGradient.offset, adjustedT);
+//                            finalGradient.axis = targetGradient.axis;
+//                            finalGradient.type = targetGradient.type;
+//                            element.style.SetAnimatedProperty(new StyleProperty(propertyId, finalGradient));
+//                        }
+//                        else {
+//                            Color color = new StyleColor((int) status.floatValue);
+//
+//                            Rendering.Gradient finalGradient = new Rendering.Gradient();
+//
+//                            finalGradient.start = Mathf.Lerp(0, targetGradient.start, adjustedT);
+//                            finalGradient.rotation = Mathf.Lerp(0, targetGradient.rotation, adjustedT);
+//                            finalGradient.color0 = Color.Lerp(color, targetGradient.color0, adjustedT);
+//                            finalGradient.color1 = Color.Lerp(color, targetGradient.color1, adjustedT);
+//                            finalGradient.offset = Vector2.Lerp(Vector2.zero, targetGradient.offset, adjustedT);
+//                            finalGradient.axis = targetGradient.axis;
+//                            finalGradient.type = targetGradient.type;
+//
+//                            element.style.SetAnimatedProperty(new StyleProperty(propertyId, finalGradient));
+//                        }
+//                    }
+//                    else {
+//                        if ((int) status.floatValue == (int) ColorType.Gradient) {
+//                            Rendering.Gradient startGradient = (Rendering.Gradient) status.startValueAsObject;
+//                            Rendering.Gradient finalGradient = new Rendering.Gradient();
+//                            Color targetColor = m_TargetValue.AsColor;
+//                            finalGradient.start = Mathf.Lerp(startGradient.start, 0, adjustedT);
+//                            finalGradient.rotation = Mathf.Lerp(startGradient.rotation, 0, adjustedT);
+//                            finalGradient.color0 = Color.Lerp(startGradient.color0, targetColor, adjustedT);
+//                            finalGradient.color1 = Color.Lerp(startGradient.color1, targetColor, adjustedT);
+//                            finalGradient.offset = Vector2.Lerp(startGradient.offset, Vector2.zero, adjustedT);
+//                            finalGradient.axis = startGradient.axis;
+//                            finalGradient.type = startGradient.type;
+//                            element.style.SetAnimatedProperty(new StyleProperty(propertyId, finalGradient));
+//                        }
+//                        else {
+//                            Color c = Color.Lerp(new StyleColor((int) status.floatValue), m_TargetValue.AsColor, adjustedT);
+//                            element.style.SetAnimatedProperty(new StyleProperty(propertyId, c));
+//                        }
+//                    }
 
                     break;
 

@@ -1,6 +1,6 @@
 using System.Collections.Generic;
 using NUnit.Framework;
-using Rendering;
+using Src.Rendering;
 using Src;
 using Src.Layout;
 using Src.Layout.LayoutTypes;

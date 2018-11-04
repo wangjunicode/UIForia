@@ -1,6 +1,5 @@
 using System;
 using System.Diagnostics.CodeAnalysis;
-using Rendering;
 using Src.Rendering;
 using UIForia;
 using UnityEngine;
@@ -51,7 +50,11 @@ namespace Src.Parsing.StyleParser {
         public static void MarginMapper(StyleParserContext context, string propertyName, string propertyValue) {
             switch (propertyName.ToLower()) {
                 case "margin":
-                    context.targetStyle.Margin = ParseUtil.ParseMeasurementRect(context.variables, propertyValue);
+                    ContentBoxRect rect = ParseUtil.ParseMeasurementRect(context.variables, propertyValue);
+                    context.targetStyle.MarginTop = rect.top;
+                    context.targetStyle.MarginRight = rect.right;
+                    context.targetStyle.MarginBottom = rect.bottom;
+                    context.targetStyle.MarginLeft = rect.left;
                     break;
                 case "margintop":
                     context.targetStyle.MarginTop = ParseUtil.ParseMeasurement(context.variables, propertyValue);
@@ -73,7 +76,11 @@ namespace Src.Parsing.StyleParser {
         public static void PaddingBorderMapper(StyleParserContext context, string propertyName, string propertyValue) {
             switch (propertyName.ToLower()) {
                 case "padding":
-                    context.targetStyle.Padding = ParseUtil.ParseFixedLengthRect(context.variables, propertyValue);
+                    FixedLengthRect rect  = ParseUtil.ParseFixedLengthRect(context.variables, propertyValue);
+                    context.targetStyle.PaddingTop = rect.top;
+                    context.targetStyle.PaddingRight = rect.right;
+                    context.targetStyle.PaddingBottom = rect.bottom;
+                    context.targetStyle.PaddingLeft = rect.left;
                     break;
                 case "paddingtop":
                     context.targetStyle.PaddingTop = ParseUtil.ParseFixedLength(context.variables, propertyValue);
@@ -88,7 +95,11 @@ namespace Src.Parsing.StyleParser {
                     context.targetStyle.PaddingLeft = ParseUtil.ParseFixedLength(context.variables, propertyValue);
                     break;
                 case "border":
-                    context.targetStyle.Border = ParseUtil.ParseFixedLengthRect(context.variables, propertyValue);
+                    rect = ParseUtil.ParseFixedLengthRect(context.variables, propertyValue);
+                    context.targetStyle.BorderTop = rect.top;
+                    context.targetStyle.BorderRight = rect.right;
+                    context.targetStyle.BorderBottom = rect.bottom;
+                    context.targetStyle.BorderLeft = rect.left;
                     break;
                 case "bordertop":
                     context.targetStyle.BorderTop = ParseUtil.ParseFixedLength(context.variables, propertyValue);
@@ -138,7 +149,7 @@ namespace Src.Parsing.StyleParser {
                     context.targetStyle.GridLayoutDirection = ParseUtil.ParseLayoutDirection(context.variables, propertyValue);
                     break;
                 case "gridlayoutdensity":
-                    context.targetStyle.GridLayoutPlacementDensity = ParseUtil.ParseDensity(context.variables, propertyValue);
+                    context.targetStyle.GridLayoutDensity = ParseUtil.ParseDensity(context.variables, propertyValue);
                     break;
                 case "gridlayoutcoltemplate":
                     context.targetStyle.GridLayoutColTemplate = ParseUtil.ParseGridTemplate(context.variables, propertyValue);
@@ -153,10 +164,10 @@ namespace Src.Parsing.StyleParser {
                     context.targetStyle.GridLayoutRowAutoSize = ParseUtil.ParseGridTrackSize(context.variables, propertyValue);
                     break;
                 case "gridlayoutcolgap":
-                    context.targetStyle.GridLayoutColGapSize = ParseUtil.ParseFloat(context.variables, propertyValue);
+                    context.targetStyle.GridLayoutColGap = ParseUtil.ParseFloat(context.variables, propertyValue);
                     break;
                 case "gridlayoutrowgap":
-                    context.targetStyle.GridLayoutRowGapSize = ParseUtil.ParseFloat(context.variables, propertyValue);
+                    context.targetStyle.GridLayoutColGap = ParseUtil.ParseFloat(context.variables, propertyValue);
                     break;
                 case "gridlayoutcolalignment":
                     context.targetStyle.GridLayoutColAlignment = ParseUtil.ParseCrossAxisAlignment(context.variables, propertyValue);
@@ -172,16 +183,16 @@ namespace Src.Parsing.StyleParser {
         public static void FlexItemMapper(StyleParserContext context, string propertyName, string propertyValue) {
             switch (propertyName.ToLower()) {
                 case "flexitemselfalignment":
-                    context.targetStyle.FlexItemSelfAlign = ParseUtil.ParseCrossAxisAlignment(context.variables, propertyValue);
+                    context.targetStyle.FlexItemSelfAlignment = ParseUtil.ParseCrossAxisAlignment(context.variables, propertyValue);
                     break;
                 case "flexitemorder":
                     context.targetStyle.FlexItemOrder = ParseUtil.ParseInt(context.variables, propertyValue);
                     break;
                 case "flexitemgrow":
-                    context.targetStyle.FlexItemGrowthFactor = ParseUtil.ParseInt(context.variables, propertyValue);
+                    context.targetStyle.FlexItemGrow = ParseUtil.ParseInt(context.variables, propertyValue);
                     break;
                 case "flexitemshrink":
-                    context.targetStyle.FlexItemShrinkFactor = ParseUtil.ParseInt(context.variables, propertyValue);
+                    context.targetStyle.FlexItemShrink = ParseUtil.ParseInt(context.variables, propertyValue);
                     break;
                 default:
                     throw new ParseException("Unknown flex item property: " + propertyName);
@@ -274,6 +285,7 @@ namespace Src.Parsing.StyleParser {
         }
 
         public static void SizeMapper(StyleParserContext context, string propertyName, string propertyValue) {
+            MeasurementPair pair;
             switch (propertyName.ToLower()) {
                 case "minwidth":
                     context.targetStyle.MinWidth = ParseUtil.ParseMeasurement(context.variables, propertyValue);
@@ -292,6 +304,21 @@ namespace Src.Parsing.StyleParser {
                     break;
                 case "maxheight":
                     context.targetStyle.MaxHeight = ParseUtil.ParseMeasurement(context.variables, propertyValue);
+                    break;
+                case "preferredsize":
+                    pair = ParseUtil.ParseMeasurementPair(context.variables, propertyValue);
+                    context.targetStyle.PreferredWidth = pair.x;
+                    context.targetStyle.PreferredHeight = pair.y;
+                    break;
+                case "minsize":
+                    pair = ParseUtil.ParseMeasurementPair(context.variables, propertyValue);
+                    context.targetStyle.MinWidth = pair.x;
+                    context.targetStyle.MinHeight = pair.y;
+                    break;
+                case "maxsize":
+                    pair = ParseUtil.ParseMeasurementPair(context.variables, propertyValue);
+                    context.targetStyle.MaxWidth = pair.x;
+                    context.targetStyle.MaxHeight = pair.y;
                     break;
                 default:
                     throw new ParseException("Unknown size property: " + propertyName);
@@ -328,7 +355,7 @@ namespace Src.Parsing.StyleParser {
                     context.targetStyle.RenderLayer = ParseUtil.ParseRenderLayer(context.variables, propertyValue);
                     break;
                 case "renderlayeroffset":
-                    context.targetStyle.LayerOffset = ParseUtil.ParseInt(context.variables, propertyValue);
+                    context.targetStyle.RenderLayerOffset = ParseUtil.ParseInt(context.variables, propertyValue);
                     break;
             }
         }
@@ -339,13 +366,13 @@ namespace Src.Parsing.StyleParser {
                     context.targetStyle.TextColor = ParseUtil.ParseColor(context.variables, propertyValue);
                     break;
                 case "textfontasset":
-                    context.targetStyle.FontAsset = ParseUtil.ParseFont(context.variables, propertyValue);
+                    context.targetStyle.TextFontAsset = ParseUtil.ParseFont(context.variables, propertyValue);
                     break;
                 case "textfontstyle":
-                    context.targetStyle.FontStyle = ParseUtil.ParseFontStyle(context.variables, propertyValue);
+                    context.targetStyle.TextFontStyle = ParseUtil.ParseFontStyle(context.variables, propertyValue);
                     break;
                 case "textfontsize":
-                    context.targetStyle.FontSize = ParseUtil.ParseInt(context.variables, propertyValue);
+                    context.targetStyle.TextFontSize = ParseUtil.ParseInt(context.variables, propertyValue);
                     break;
                 default:
                     throw new NotImplementedException();

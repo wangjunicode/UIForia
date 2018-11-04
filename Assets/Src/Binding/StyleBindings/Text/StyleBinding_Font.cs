@@ -1,4 +1,3 @@
-using Rendering;
 using Src.Rendering;
 using TMPro;
 
@@ -15,7 +14,7 @@ namespace Src.StyleBindings.Text {
         public override void Execute(UIElement element, UITemplateContext context) {
             if (!element.style.IsInState(state)) return;
             
-            TMP_FontAsset current = element.ComputedStyle.FontAsset;
+            TMP_FontAsset current = element.ComputedStyle.TextFontAsset;
             TMP_FontAsset newFont = expression.EvaluateTyped(context);
             if (current != newFont) {
                 element.style.SetFont(newFont, state);
@@ -27,7 +26,7 @@ namespace Src.StyleBindings.Text {
         }
 
         public override void Apply(UIStyle style, UITemplateContext context) {
-            style.FontAsset = expression.EvaluateTyped(context);
+            style.TextFontAsset = expression.EvaluateTyped(context);
         }
 
         public override void Apply(UIStyleSet styleSet, UITemplateContext context) {

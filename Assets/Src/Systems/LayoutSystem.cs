@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
-using Rendering;
 using Src.Elements;
+using Src.Extensions;
 using Src.Layout;
 using Src.Layout.LayoutTypes;
 using Src.Rendering;
@@ -105,10 +105,13 @@ namespace Src.Systems {
             if (forceLayout || box.markedForLayout) {
                 box.RunLayout();
                 box.markedForLayout = false;
+#if DEBUG
+                box.layoutCalls++;
+#endif
             }
 
             int depth = 0;
-            int computedLayer = ResolveRenderLayer(element) - element.ComputedStyle.LayerOffset;
+            int computedLayer = ResolveRenderLayer(element) - element.ComputedStyle.RenderLayerOffset;
             int zIndex = element.ComputedStyle.ZIndex;
 
             if (depth > computedLayer) {
@@ -117,6 +120,8 @@ namespace Src.Systems {
             else if (depth < computedLayer) {
                 zIndex += -2000;
             }
+
+            // actual size should probably be the box containing all children, ignored or not
 
             layoutResult.ActualSize = new Size(box.actualWidth, box.actualHeight);
             layoutResult.AllocatedSize = new Size(box.allocatedWidth, box.allocatedHeight);
@@ -158,13 +163,16 @@ namespace Src.Systems {
                         box.allocatedHeight = box.GetHeights(box.actualHeight).clampedSize;
                     }
 
-                    //  if (forceLayout || box.markedForLayout) {
-                    box.RunLayout();
-                    box.markedForLayout = false;
-                    // }
+                    if (forceLayout || box.markedForLayout) {
+                        box.RunLayout();
+                        box.markedForLayout = false;
+#if DEBUG
+                        box.layoutCalls++;
+#endif
+                    }
 
                     depth = element.depth;
-                    computedLayer = ResolveRenderLayer(element) - element.ComputedStyle.LayerOffset;
+                    computedLayer = ResolveRenderLayer(element) - element.ComputedStyle.RenderLayerOffset;
                     zIndex = element.ComputedStyle.ZIndex;
 
                     if (depth > computedLayer) {
@@ -215,7 +223,7 @@ namespace Src.Systems {
                         bool handlesVertical = ptr.style.HandlesOverflowY;
                         if (handlesHorizontal && handlesVertical) {
                             Rect r = new Rect(ptr.layoutResult.screenPosition, ptr.layoutResult.allocatedSize);
-                            clipRect = RectIntersect(clipRect, RectIntersect(r, ptr.layoutResult.clipRect));
+                            clipRect = clipRect.Intersect(r.Intersect(ptr.layoutResult.clipRect));
                         }
                         else if (handlesHorizontal) {
                             Rect r = new Rect(
@@ -224,7 +232,7 @@ namespace Src.Systems {
                                 ptr.layoutResult.AllocatedWidth,
                                 ptr.layoutResult.clipRect.height
                             );
-                            clipRect = RectIntersect(r, clipRect);
+                            clipRect = r.Intersect(clipRect);
                         }
                         else if (handlesVertical) {
                             Rect r = new Rect(
@@ -233,7 +241,7 @@ namespace Src.Systems {
                                 ptr.layoutResult.clipRect.width,
                                 ptr.layoutResult.AllocatedHeight
                             );
-                            clipRect = RectIntersect(r, clipRect);
+                            clipRect = r.Intersect(clipRect);
                         }
                         else {
                             clipRect = ptr.layoutResult.clipRect;
@@ -361,6 +369,11 @@ namespace Src.Systems {
                     float offsetY = (childExtents.min.y < 0) ? -childExtents.min.y / box.allocatedHeight : 0f;
                     element.scrollOffset = new Vector2(element.scrollOffset.x, offsetY);
 
+                    
+                    // create buttons
+                   // ScrollbarButtonStyle verticalButtonTop = element.style.Scrollbars.VerticalButtonTop;
+                   // ScrollbarButtonStyle verticalButtonBottom = element.style.Scrollbars.VerticalButtonBottom;
+                    
                     onCreateVirtualScrollbar?.Invoke(vertical);
                     box.verticalScrollbar = vertical;
                 }
@@ -395,15 +408,6 @@ namespace Src.Systems {
                 scrollbar.layoutResult = scrollbarResult;
                 handle.layoutResult = handleResult;
             }
-        }
-
-        private static Rect RectIntersect(Rect a, Rect b) {
-            float xMin = a.x > b.x ? a.x : b.x;
-            float xMax = a.x + a.width < b.x + b.width ? a.x + a.width : b.x + b.width;
-            float yMin = a.y > b.y ? a.y : b.y;
-            float yMax = a.y + a.height < b.y + b.height ? a.y + a.height : b.y + b.height;
-
-            return new Rect(xMin, yMin, xMax - xMin, yMax - yMin);
         }
 
         private void LayoutSticky() {

@@ -6,27 +6,45 @@ using UnityEngine;
 
 namespace Src.Elements {
 
+    public class VirtualScrollbarButton : VirtualElement { }
+
     public class VirtualScrollbar : VirtualElement {
 
+        public float trackSize;
+        public float handleSize;
         public readonly UIElement targetElement;
         public readonly ScrollbarOrientation orientation;
-        public float handleSize;
-        public float trackSize;
-        public VirtualScrollbarHandle handle;
-
+        
+        public readonly VirtualScrollbarHandle handle;
+        public readonly VirtualScrollbarButton incrementButton;
+        public readonly VirtualScrollbarButton decrementButton;
+        
         public VirtualScrollbar(UIElement target, ScrollbarOrientation orientation) {
             this.targetElement = target;
+            this.parent = target;
             this.handle = new VirtualScrollbarHandle();
+            this.incrementButton = new VirtualScrollbarButton();
+            this.decrementButton = new VirtualScrollbarButton();
+            
             this.handle.parent = this;
-            this.ownChildren = ArrayPool<UIElement>.GetExactSize(1);
+            this.incrementButton.parent = this;
+            this.decrementButton.parent = this;
+            
+            this.siblingIndex = int.MaxValue - (orientation == ScrollbarOrientation.Horizontal ? 1 : 0);
+            
+            this.ownChildren = ArrayPool<UIElement>.GetExactSize(3);
             this.ownChildren[0] = handle;
+            this.ownChildren[1] = incrementButton;
+            this.ownChildren[2] = decrementButton;
+            
             this.orientation = orientation;
             this.trackSize = 15f;
             this.handleSize = 15f;
-            this.depth = target.depth;
-            this.parent = target;
-            this.siblingIndex = int.MaxValue - (orientation == ScrollbarOrientation.Horizontal ? 1 : 0);
-            this.handle.depth = depth + 1;
+            
+            this.depth = target.depth + 1;
+            this.incrementButton.depth = target.depth + 1;
+            this.decrementButton.depth = target.depth + 1;
+            
             if (target.isEnabled) {
                 flags |= UIElementFlags.AncestorEnabled;
             }
@@ -61,14 +79,16 @@ namespace Src.Elements {
 
             return null;
         }
-
+        
         public Rect TrackRect {
             get {
                 LayoutResult targetElementLayoutResult = targetElement.layoutResult;
                 Vector2 parentWorld = targetElement.layoutResult.screenPosition;
                 if (orientation == ScrollbarOrientation.Vertical) {
+                    bool isXOverflowing = targetElement.ComputedStyle.OverflowX != Overflow.None;
                     if (targetElement.style.verticalScrollbarAttachment == VerticalScrollbarAttachment.Right) {
-                        float x = parentWorld.x + targetElementLayoutResult.AllocatedWidth - trackSize;
+                        float xOffset = isXOverflowing ? targetElementLayoutResult.allocatedSize.width : targetElementLayoutResult.actualSize.width;
+                        float x = parentWorld.x + xOffset - trackSize;
                         float y = parentWorld.y;
                         float w = trackSize;
                         float h = targetElementLayoutResult.AllocatedHeight;

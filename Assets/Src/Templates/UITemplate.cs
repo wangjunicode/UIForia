@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
 using JetBrains.Annotations;
-using Rendering;
 using Src.Compilers;
 using Src.Input;
 using Src.InputBindings;

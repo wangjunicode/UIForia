@@ -1,7 +1,7 @@
 using System.Diagnostics;
 using UnityEngine;
 
-namespace Rendering {
+namespace Src.Rendering {
 
     public struct Paint {
 

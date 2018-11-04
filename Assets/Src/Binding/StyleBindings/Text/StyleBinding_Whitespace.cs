@@ -1,5 +1,4 @@
 using System;
-using Rendering;
 using Src.Rendering;
 
 namespace Src.StyleBindings.Text {
@@ -27,7 +26,7 @@ namespace Src.StyleBindings.Text {
         }
 
         public override void Apply(UIStyle style, UITemplateContext context) {
-            style.WhitespaceMode = expression.EvaluateTyped(context);
+            throw new NotImplementedException();
         }
 
         public override void Apply(UIStyleSet styleSet, UITemplateContext context) {

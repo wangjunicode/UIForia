@@ -1,5 +1,4 @@
-﻿using Rendering;
-using Src.Rendering;
+﻿using Src.Rendering;
 
 namespace Src.StyleBindings {
 
@@ -26,7 +25,7 @@ namespace Src.StyleBindings {
         }
 
         public override void Apply(UIStyle style, UITemplateContext context) {
-            style.FlexItemShrinkFactor = expression.EvaluateTyped(context);
+            style.FlexItemShrink = expression.EvaluateTyped(context);
         }
 
         public override void Apply(UIStyleSet styleSet, UITemplateContext context) {

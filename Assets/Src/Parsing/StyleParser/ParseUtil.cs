@@ -1,15 +1,12 @@
 using System;
 using System.Collections.Generic;
-using System.Linq;
-using Rendering;
-using Src.Extensions;
 using Src.Layout;
 using Src.Layout.LayoutTypes;
 using Src.Rendering;
-using Src.Util;
 using TMPro;
 using UIForia;
 using UnityEngine;
+using FontStyle = Src.Text.FontStyle;
 
 namespace Src.Parsing.StyleParser {
 
@@ -246,6 +243,44 @@ namespace Src.Parsing.StyleParser {
             return new UIMeasurement(value, unit);
         }
 
+        public static MeasurementPair ParseMeasurementPair(List<StyleVariable> variables, string propertyValue) {
+            MeasurementPair retn;
+            
+            if (propertyValue.IndexOf(',') != -1) {
+                string[] split = propertyValue.Split(',');
+                retn.x = ParseMeasurement(variables, split[0]);
+                retn.y = ParseMeasurement(variables, split[1]);
+                return retn;
+            }
+
+            
+            if (TryResolveVariable(variables, propertyValue, out retn)) {
+                return retn;
+            }
+            
+            int ptr = 0;
+            float value = ParseFloat(propertyValue, ref ptr);
+            ptr = ConsumeWhiteSpace(ptr, propertyValue);
+            
+            if (ptr == propertyValue.Length) {
+                return new MeasurementPair(new UIMeasurement(value), new UIMeasurement(value));
+            }
+
+            UIMeasurementUnit unit = ParseMeasurementUnit(propertyValue, ref ptr);
+            if (unit == UIMeasurementUnit.Unset) {
+                throw new ParseException("Unknown measurement unit: " + propertyValue);
+            }
+
+            if (propertyValue.IndexOf('%') != -1) {
+                value = value * 0.01f;
+            }
+            retn.x = new UIMeasurement(value, unit);
+            retn.y = new UIMeasurement(value, unit);
+            
+            return retn;
+            
+        }
+
         public static UIMeasurementUnit ParseMeasurementUnit(string input, ref int ptr) {
             ptr = ConsumeWhiteSpace(ptr, input);
             if (TryReadCharacters(input, "px", ref ptr)) {
@@ -429,7 +464,8 @@ namespace Src.Parsing.StyleParser {
         public static float ParseFloat(string input, ref int ptr) {
             bool foundDot = false;
             int startIndex = ptr;
-
+            ptr = ConsumeWhiteSpace(ptr, input);
+            
             if (input[ptr] != '-' && !char.IsDigit(input[ptr])) {
                 throw new ParseException("Unable to parse float from: " + input.Substring(startIndex));
             }
@@ -652,47 +688,47 @@ namespace Src.Parsing.StyleParser {
             }
         }
 
-        public static TextUtil.FontStyle ParseFontStyle(List<StyleVariable> variables, string propertyValue) {
-            TextUtil.FontStyle fontStyle;
+        public static FontStyle ParseFontStyle(List<StyleVariable> variables, string propertyValue) {
+            FontStyle fontStyle;
             if (TryResolveVariable(variables, propertyValue, out fontStyle)) {
                 return fontStyle;
             }
 
-            TextUtil.FontStyle style = TextUtil.FontStyle.Normal;
+            FontStyle style = FontStyle.Normal;
 
             if (propertyValue.Contains("bold")) {
-                style |= TextUtil.FontStyle.Bold;
+                style |= FontStyle.Bold;
             }
 
             if (propertyValue.Contains("italic")) {
-                style |= TextUtil.FontStyle.Italic;
+                style |= FontStyle.Italic;
             }
 
             if (propertyValue.Contains("highlight")) {
-                style |= TextUtil.FontStyle.Highlight;
+                style |= FontStyle.Highlight;
             }
 
             if (propertyValue.Contains("smallcaps")) {
-                style |= TextUtil.FontStyle.SmallCaps;
+                style |= FontStyle.SmallCaps;
             }
 
             if (propertyValue.Contains("superscript")) {
-                style |= TextUtil.FontStyle.Superscript;
+                style |= FontStyle.Superscript;
             }
 
             if (propertyValue.Contains("subscript")) {
-                style |= TextUtil.FontStyle.Subscript;
+                style |= FontStyle.Subscript;
             }
 
             if (propertyValue.Contains("underline")) {
-                style |= TextUtil.FontStyle.Underline;
+                style |= FontStyle.Underline;
             }
 
             if (propertyValue.Contains("strikethrough")) {
-                style |= TextUtil.FontStyle.StrikeThrough;
+                style |= FontStyle.StrikeThrough;
             }
 
-            if ((style & TextUtil.FontStyle.Superscript) != 0 && (style & TextUtil.FontStyle.Subscript) != 0) {
+            if ((style & FontStyle.Superscript) != 0 && (style & FontStyle.Subscript) != 0) {
                 throw new ParseException("Font style cannot be both superscript and subscript");
             }
 

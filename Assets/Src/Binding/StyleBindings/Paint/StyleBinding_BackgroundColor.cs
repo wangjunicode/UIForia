@@ -1,4 +1,3 @@
-using Rendering;
 using Src.Rendering;
 using UnityEngine;
 

@@ -170,6 +170,29 @@ namespace Src {
             buckets[targetBucket] = index;
         }
 
+        public int CopyKeyValuesToArray(ref KeyValuePair<int, T>[] array, int index = 0) {
+            if (array == null) {
+                array = ArrayPool<KeyValuePair<int, T>>.GetMinSize(Count);
+            }  
+            if (index < 0) {
+                index = 0;
+            }
+            
+            if (index + Count > array.Length ) {
+                ArrayPool<KeyValuePair<int, T>>.Resize(ref array, index + Count);
+            }
+           
+            // count not Count -> we don't know if there are holes in the array
+            // hashcode will be < 0 if empty
+            for (int i = 0; i < count; i++) {
+                if (entries[i].hashCode >= 0) {
+                    array[index++] = new KeyValuePair<int, T>(entries[i].key, entries[i].value);
+                }
+            }
+            
+            return index + Count;
+        }
+        
         public int CopyValuesToArray(ref T[] array, int index = 0) {
             if (array == null) {
                 array = ArrayPool<T>.GetMinSize(Count);
@@ -256,7 +279,7 @@ namespace Src {
             return min;
         }
 
-        public static bool IsPrime(int candidate) {
+        private static bool IsPrime(int candidate) {
             if ((candidate & 1) != 0) {
                 int limit = (int) Math.Sqrt(candidate);
                 for (int divisor = 3; divisor <= limit; divisor += 2) {
@@ -269,7 +292,7 @@ namespace Src {
             return candidate == 2;
         }
 
-        public static readonly int[] s_Primes = new int[72] {
+        private static readonly int[] s_Primes = new int[72] {
             3,
             7,
             11,

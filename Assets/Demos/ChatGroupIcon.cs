@@ -1,8 +1,10 @@
-using Rendering;
+using Src.Rendering;
 using Src;
 using Src.Layout;
 using Src.Util;
 using UnityEngine;
+using Src.Text;
+using TextAlignment = Src.Text.TextAlignment;
 
 namespace Demo {
 
@@ -50,8 +52,8 @@ namespace Demo {
             public static UIStyle UnreadCount() {
                 return new UIStyle() {
                     TextColor = Color.white,
-                    TextAlignment = TextUtil.TextAlignment.Center,
-                    FontSize = 20
+                    TextAlignment = TextAlignment.Center,
+                    TextFontSize = 20
                 };
             }
 

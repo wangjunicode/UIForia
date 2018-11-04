@@ -1,7 +1,7 @@
 using JetBrains.Annotations;
 using Src;
 
-namespace Rendering {
+namespace Src.Rendering {
 
     public partial class UIStyleSet {
 
@@ -25,22 +25,22 @@ namespace Rendering {
 
         [PublicAPI]
         public UIFixedLength GetBorderRadiusTopLeft(StyleState state) {
-            return GetPropertyValueInState(StylePropertyId.BorderRadiusTopLeft, state).AsFixedLength;
+            return GetPropertyValueInState(StylePropertyId.BorderRadiusTopLeft, state).AsUIFixedLength;
         }
 
         [PublicAPI]
         public UIFixedLength GetBorderRadiusTopRight(StyleState state) {
-            return GetPropertyValueInState(StylePropertyId.BorderRadiusTopRight, state).AsFixedLength;
+            return GetPropertyValueInState(StylePropertyId.BorderRadiusTopRight, state).AsUIFixedLength;
         }
 
         [PublicAPI]
         public UIFixedLength GetBorderRadiusBottomLeft(StyleState state) {
-            return GetPropertyValueInState(StylePropertyId.BorderRadiusBottomLeft, state).AsFixedLength;
+            return GetPropertyValueInState(StylePropertyId.BorderRadiusBottomLeft, state).AsUIFixedLength;
         }
 
         [PublicAPI]
         public UIFixedLength GetBorderRadiusBottomRight(StyleState state) {
-            return GetPropertyValueInState(StylePropertyId.BorderRadiusBottomRight, state).AsFixedLength;
+            return GetPropertyValueInState(StylePropertyId.BorderRadiusBottomRight, state).AsUIFixedLength;
         }
 
         [PublicAPI]

@@ -1,5 +1,5 @@
 using System;
-using Rendering;
+using Src.Rendering;
 using UnityEngine;
 
 namespace Src.Animation {
@@ -33,7 +33,7 @@ namespace Src.Animation {
                     return viewport.width * width.value;
 
                 case UIFixedUnit.Em:
-                    return element.style.computedStyle.FontAsset.fontInfo.PointSize * width.value;
+                    return element.style.computedStyle.TextFontAsset.fontInfo.PointSize * width.value;
 
                 default:
                     return 0;
@@ -55,7 +55,7 @@ namespace Src.Animation {
                     return viewport.width * height.value;
 
                 case UIFixedUnit.Em:
-                    return element.style.computedStyle.FontAsset.fontInfo.PointSize * height.value;
+                    return element.style.computedStyle.TextFontAsset.fontInfo.PointSize * height.value;
 
                 default:
                     return 0;
@@ -99,7 +99,7 @@ namespace Src.Animation {
                                          - ResolveFixedWidth(element, viewport, parentStyle.BorderRight)
                                          - ResolveFixedWidth(element, viewport, parentStyle.BorderLeft)));
                 case UIMeasurementUnit.Em:
-                    return Mathf.Max(0, element.style.computedStyle.FontAsset.fontInfo.PointSize * measurement.value);
+                    return Mathf.Max(0, element.style.computedStyle.TextFontAsset.fontInfo.PointSize * measurement.value);
 
                 default:
                     throw new ArgumentOutOfRangeException();
@@ -142,7 +142,7 @@ namespace Src.Animation {
                                          - ResolveFixedWidth(element, viewport, parentStyle.BorderBottom)
                                          - ResolveFixedWidth(element, viewport, parentStyle.BorderTop)));
                 case UIMeasurementUnit.Em:
-                    return Mathf.Max(0, element.style.computedStyle.FontAsset.fontInfo.PointSize * measurement.value);
+                    return Mathf.Max(0, element.style.computedStyle.TextFontAsset.fontInfo.PointSize * measurement.value);
 
                 default:
                     throw new ArgumentOutOfRangeException();
@@ -296,7 +296,7 @@ namespace Src.Animation {
                     return viewport.width * anchor.value;
 
                 case UIFixedUnit.Em:
-                    return element.ComputedStyle.FontAsset.fontInfo.PointSize * anchor.value;
+                    return element.ComputedStyle.EmSize;
 
                 default:
                     return 0;
@@ -318,7 +318,7 @@ namespace Src.Animation {
                     return viewport.width * anchor.value;
 
                 case UIFixedUnit.Em:
-                    return element.ComputedStyle.FontAsset.fontInfo.PointSize * anchor.value;
+                    return element.ComputedStyle.EmSize;
 
                 default:
                     return 0;

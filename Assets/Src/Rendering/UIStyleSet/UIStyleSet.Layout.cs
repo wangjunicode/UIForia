@@ -5,7 +5,7 @@ using Src.Layout.LayoutTypes;
 using Src.Rendering;
 using UnityEngine;
 
-namespace Rendering {
+namespace Src.Rendering {
 
     public partial class UIStyleSet {
 
@@ -94,19 +94,19 @@ namespace Rendering {
         }
 
         public UIFixedLength GetAnchorTop(StyleState state) {
-            return GetPropertyValueInState(StylePropertyId.AnchorTop, state).AsFixedLength;
+            return GetPropertyValueInState(StylePropertyId.AnchorTop, state).AsUIFixedLength;
         }
 
         public UIFixedLength GetAnchorRight(StyleState state) {
-            return GetPropertyValueInState(StylePropertyId.AnchorRight, state).AsFixedLength;
+            return GetPropertyValueInState(StylePropertyId.AnchorRight, state).AsUIFixedLength;
         }
 
         public UIFixedLength GetAnchorBottom(StyleState state) {
-            return GetPropertyValueInState(StylePropertyId.AnchorBottom, state).AsFixedLength;
+            return GetPropertyValueInState(StylePropertyId.AnchorBottom, state).AsUIFixedLength;
         }
 
         public UIFixedLength GetAnchorLeft(StyleState state) {
-            return GetPropertyValueInState(StylePropertyId.AnchorLeft, state).AsFixedLength;
+            return GetPropertyValueInState(StylePropertyId.AnchorLeft, state).AsUIFixedLength;
         }
 
         public void SetAnchorTarget(AnchorTarget target, StyleState state) {

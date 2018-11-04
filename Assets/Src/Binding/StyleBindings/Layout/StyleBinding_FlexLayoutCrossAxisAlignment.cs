@@ -1,5 +1,4 @@
-﻿using Rendering;
-using Src.Layout;
+﻿using Src.Layout;
 using Src.Rendering;
 
 namespace Src.StyleBindings {

@@ -1,6 +1,6 @@
 ﻿using Src;
 
-namespace Rendering {
+namespace Src.Rendering {
 
     public interface ISystem {
 

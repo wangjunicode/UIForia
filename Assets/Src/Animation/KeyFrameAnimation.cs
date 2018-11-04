@@ -1,6 +1,6 @@
 using System;
 using System.Collections.Generic;
-using Rendering;
+using Src.Rendering;
 using Src.Util;
 using UnityEngine;
 
@@ -90,8 +90,8 @@ namespace Src.Animation {
                     case StylePropertyId.BorderRight:
                     case StylePropertyId.MarginLeft:
                     case StylePropertyId.MarginRight:
-                        v0 = ResolveFixedWidth(element, viewport, prev.property.AsFixedLength);
-                        v1 = ResolveFixedWidth(element, viewport, next.property.AsFixedLength);
+                        v0 = ResolveFixedWidth(element, viewport, prev.property.AsUIFixedLength);
+                        v1 = ResolveFixedWidth(element, viewport, next.property.AsUIFixedLength);
                         element.style.SetAnimatedProperty(new StyleProperty(propertyId, new UIFixedLength(Mathf.Lerp(v0, v1, t))));
                         break;
                     case StylePropertyId.TransformPivotY:
@@ -102,18 +102,18 @@ namespace Src.Animation {
                     case StylePropertyId.BorderBottom:
                     case StylePropertyId.MarginTop:
                     case StylePropertyId.MarginBottom:
-                        v0 = ResolveFixedHeight(element, viewport, prev.property.AsFixedLength);
-                        v1 = ResolveFixedHeight(element, viewport, next.property.AsFixedLength);
+                        v0 = ResolveFixedHeight(element, viewport, prev.property.AsUIFixedLength);
+                        v1 = ResolveFixedHeight(element, viewport, next.property.AsUIFixedLength);
                         element.style.SetAnimatedProperty(new StyleProperty(propertyId, new UIFixedLength(Mathf.Lerp(v0, v1, t))));
                         break;
                     case StylePropertyId.PreferredWidth:
-                        v0 = ResolveWidthMeasurement(element, viewport, prev.property.AsMeasurement);
-                        v1 = ResolveWidthMeasurement(element, viewport, next.property.AsMeasurement);
+                        v0 = ResolveWidthMeasurement(element, viewport, prev.property.AsUIMeasurement);
+                        v1 = ResolveWidthMeasurement(element, viewport, next.property.AsUIMeasurement);
                         element.style.SetAnimatedProperty(new StyleProperty(propertyId, new UIMeasurement(Mathf.Lerp(v0, v1, t))));
                         break;
                     case StylePropertyId.PreferredHeight:
-                        v0 = ResolveHeightMeasurement(element, viewport, prev.property.AsMeasurement);
-                        v1 = ResolveHeightMeasurement(element, viewport, next.property.AsMeasurement);
+                        v0 = ResolveHeightMeasurement(element, viewport, prev.property.AsUIMeasurement);
+                        v1 = ResolveHeightMeasurement(element, viewport, next.property.AsUIMeasurement);
                         element.style.SetAnimatedProperty(new StyleProperty(propertyId, new UIMeasurement(Mathf.Lerp(v0, v1, t))));
                         break;
                     case StylePropertyId.Opacity:

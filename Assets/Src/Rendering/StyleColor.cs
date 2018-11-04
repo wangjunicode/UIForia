@@ -1,7 +1,7 @@
 using System.Runtime.InteropServices;
 using UnityEngine;
 
-namespace Rendering {
+namespace Src.Rendering {
 
     [StructLayout(LayoutKind.Explicit)]
     public struct StyleColor {

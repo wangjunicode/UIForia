@@ -1,6 +1,6 @@
 using Src.Layout;
 
-namespace Rendering {
+namespace Src.Rendering {
 
     public partial class UIStyleSet {
 

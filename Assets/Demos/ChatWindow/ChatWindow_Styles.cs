@@ -1,12 +1,11 @@
-using Rendering;
 using Src;
 using Src.Animation;
 using Src.Layout;
 using Src.Layout.LayoutTypes;
 using Src.Rendering;
 using UnityEngine;
-using static Rendering.StyleProperty;
-using AnchorTarget = Rendering.AnchorTarget;
+using static Src.Rendering.StyleProperty;
+using AnchorTarget = Src.Rendering.AnchorTarget;
 
 public class ChatWindow_Styles {
 
@@ -69,8 +68,8 @@ public class ChatWindow_Styles {
     public static UIStyle Grid() {
         return new UIStyle() {
             LayoutType = LayoutType.Grid,
-            GridLayoutColGapSize = 12f,
-            GridLayoutRowGapSize = 12f,
+            GridLayoutColGap = 12f,
+            GridLayoutRowGap = 12f,
             GridLayoutRowTemplate = new[] {
                 GridTrackSize.MaxContent,
                 new GridTrackSize(100f),
@@ -189,7 +188,7 @@ public class ChatWindow_Styles {
     public static UIStyle HeaderText() {
         return new UIStyle() {
             Padding = new FixedLengthRect(20f),
-            FontSize = 32,
+            TextFontSize = 32,
             TextColor = Color.white
         };
     }

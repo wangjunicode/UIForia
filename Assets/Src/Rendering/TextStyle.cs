@@ -1,6 +1,6 @@
 using UnityEngine;
 
-namespace Rendering {
+namespace Src.Rendering {
 
     public struct TextStyle {
 

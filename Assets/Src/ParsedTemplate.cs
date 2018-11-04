@@ -1,7 +1,6 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using Rendering;
 using Src.Compilers.AliasSources;
 using Src.Parsing.StyleParser;
 using Src.Rendering;

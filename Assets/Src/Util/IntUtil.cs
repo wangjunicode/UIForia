@@ -1,6 +1,6 @@
 using System.Diagnostics;
 
-namespace Rendering {
+namespace Src.Rendering {
 
     public static class IntUtil {
 

@@ -1,6 +1,6 @@
 using System;
 using System.Collections.Generic;
-using Rendering;
+using Src.Rendering;
 using Shapes2D;
 using Src.Extensions;
 using Src.Systems;
@@ -130,10 +130,8 @@ namespace Src.Rendering {
                     m_BorderColors[instanceId] = style.BorderColor;
                 }
 
-                data.renderPosition = new Vector3(data.renderPosition.x, data.renderPosition.y, -data.renderPosition.z);
-
                 Size size = element.layoutResult.actualSize;
-                m_SizeRotations[instanceId] = new Vector4(size.width, size.height, style.BackgroundRotation, 0);
+                m_SizeRotations[instanceId] = new Vector4(size.width, size.height, style.BackgroundFillRotation, 0);
                 m_ClipRects[instanceId] = data.clipVector;
                 m_Matrices[instanceId] = Matrix4x4.TRS(origin + data.renderPosition, Quaternion.identity, Vector3.one);
                 m_PrimaryColors[instanceId] = style.BackgroundColor;
@@ -158,7 +156,7 @@ namespace Src.Rendering {
                     case MaterialBatchKey.FillType_GradientLinear:
                     case MaterialBatchKey.FillType_GradientRadial:
                     case MaterialBatchKey.FillType_GradientCylindrical:
-                        m_GradientAxisAndStart[instanceId] = new Vector4((int)style.GradientAxis, style.GradientStart);
+                        m_GradientAxisAndStart[instanceId] = new Vector4((int)style.BackgroundGradientAxis, style.BackgroundGradientStart);
                         break;
                 }
 
@@ -459,7 +457,7 @@ namespace Src.Rendering {
                         // todo check if textured
                         break;
                     case BackgroundFillType.Gradient:
-                        GradientType gradientType = style.GradientType;
+                        GradientType gradientType = style.BackgroundGradientType;
                         gradientType = GradientType.Linear;
                         switch (gradientType) {
                             case GradientType.Linear:

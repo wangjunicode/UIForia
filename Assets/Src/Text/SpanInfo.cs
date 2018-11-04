@@ -1,4 +1,4 @@
-using Rendering;
+using Src.Rendering;
 using Src.Util;
 using TMPro;
 
@@ -9,7 +9,7 @@ namespace Src.Text {
         public int startChar;
         public int charCount;
         public TMP_FontAsset font;
-        public TextUtil.FontStyle fontStyle;
+        public FontStyle fontStyle;
         public int pointSize;
         public WhitespaceMode whitespaceMode;
         public float firstLineIndent;
@@ -20,7 +20,7 @@ namespace Src.Text {
         public float fontSize;
         public int startWord;
         public int wordCount;
-        public TextUtil.TextAlignment alignment;
+        public TextAlignment alignment;
 
     }
 

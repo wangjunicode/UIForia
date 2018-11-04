@@ -1,6 +1,5 @@
 using System.Collections.Generic;
 using System.Diagnostics;
-using Rendering;
 using Src.Input;
 using Src.InputBindings;
 using Src.Rendering;

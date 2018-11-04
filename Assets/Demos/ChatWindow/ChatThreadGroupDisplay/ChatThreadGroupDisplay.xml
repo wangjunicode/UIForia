@@ -10,7 +10,7 @@
         }
         
         style thread-container {
-            PreferredWidth = 100%;
+            PreferredWidth = 1pca;
             Padding = 4px, 16px;
         
             [hover] {
@@ -22,6 +22,7 @@
             TextFontSize = 14;
             TextFontAsset = Gotham-Medium SDF;
             PreferredWidth = 100%;
+            <!--TextColor = black;-->
         }
         
     </Style>

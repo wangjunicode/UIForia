@@ -11,19 +11,19 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 71c1514a6bd24e1e882cebbe1904ce04, type: 3}
   m_Name: Whitney-Book SDF
   m_EditorClassIdentifier: 
-  hashCode: 0
+  hashCode: -2073591963
   material: {fileID: 21763877239179454}
-  materialHashCode: 0
+  materialHashCode: -1041678258
   fontAssetType: 1
   m_fontInfo:
     Name: Whitney Book
     PointSize: 78
-    Scale: 0
+    Scale: 1
     CharacterCount: 97
     LineHeight: 88.8125
     Baseline: 0
     Ascender: 73.25
-    CapHeight: 0
+    CapHeight: 53.875
     Descender: -15.625
     CenterLine: 0
     SuperscriptOffset: 73.25
@@ -33,7 +33,7 @@ MonoBehaviour:
     UnderlineThickness: 1.5600001
     strikethrough: 20.954546
     strikethroughThickness: 1.5600001
-    TabWidth: 0
+    TabWidth: 176.25
     Padding: 5
     AtlasWidth: 512
     AtlasHeight: 512
@@ -42,10 +42,10 @@ MonoBehaviour:
   - id: 32
     x: 6
     y: 517
-    width: 0
-    height: 0
+    width: 17.625
+    height: 88.875
     xOffset: 0
-    yOffset: 0
+    yOffset: 73.25
     xAdvance: 17.625
     scale: 1
   - id: 33
@@ -1039,9 +1039,9 @@ Material:
     - _OutlineWidth: 0
     - _PerspectiveFilter: 0.875
     - _Reflectivity: 10
-    - _ScaleRatioA: 1
-    - _ScaleRatioB: 1
-    - _ScaleRatioC: 1
+    - _ScaleRatioA: 0.8333333
+    - _ScaleRatioB: 0.6770833
+    - _ScaleRatioC: 0.6770833
     - _ScaleX: 1
     - _ScaleY: 1
     - _ShaderFlags: 0

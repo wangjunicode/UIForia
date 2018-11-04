@@ -2,7 +2,7 @@ using System.Collections.Generic;
 using Src.Layout;
 using Src.Layout.LayoutTypes;
 
-namespace Rendering {
+namespace Src.Rendering {
 
     public partial class UIStyleSet {
 

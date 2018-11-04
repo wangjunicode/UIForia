@@ -1,7 +1,7 @@
 using System;
 using Src;
 
-namespace Rendering {
+namespace Src.Rendering {
 
     public static class StyleUtil {
 

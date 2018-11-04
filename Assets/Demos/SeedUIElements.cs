@@ -1,5 +1,5 @@
 using JetBrains.Annotations;
-using Rendering;
+using Src.Rendering;
 using UnityEngine;
 
 namespace Src {
@@ -25,7 +25,7 @@ namespace Src {
                 return new UIStyle() {
                     TextColor = new Color32(138, 138, 138, 255),
 //                    FontAsset = new FontAssetReference("Gotham-Medium SDF"),
-                    FontSize = 20
+                    TextFontSize = 20
                 };
             }
 

@@ -1,5 +1,5 @@
 using NUnit.Framework;
-using Rendering;
+using Src.Rendering;
 using Src;
 using Tests.Mocks;
 using UnityEngine;

@@ -25,8 +25,6 @@ namespace Src.Rendering.ElementRendering {
                 Quaternion rotation = Quaternion.AngleAxis(data.element.ComputedStyle.TransformRotation, Vector3.forward);
                 material.color = Color.white;
                 
-                data.renderPosition = new Vector3(data.renderPosition.x, data.renderPosition.y, -data.renderPosition.z);
-
                 Graphics.DrawMesh(mesh, origin + data.renderPosition, rotation, material, 0, camera, 0, m_PropertyBlock, false, false, false);
             }
             

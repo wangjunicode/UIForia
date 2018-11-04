@@ -1,7 +1,10 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project version="4">
   <component name="ContentModelStore">
-    <e p="C:\Seed\UIElements" t="IncludeRecursive">
+    <e p="C:\Users\matth\.Rider2018.2\config\extensions" t="IncludeRecursive" />
+    <e p="C:\Users\matth\.Rider2018.2\system\extResources" t="IncludeRecursive" />
+    <e p="C:\Users\matth\.Rider2018.2\system\resharper-host\local\Transient\ReSharperHost\v182\SolutionCaches\_UIElements.2091774103.00" t="ExcludeRecursive" />
+    <e p="C:\Users\matth\DownloadsUIForia\UIElements" t="IncludeRecursive">
       <e p="_DemoAsmDef.csproj" t="IncludeRecursive" />
       <e p="Assembly-CSharp-Editor.csproj" t="IncludeRecursive" />
       <e p="Assets" t="Include">
@@ -67,6 +70,7 @@
         <e p="Editor" t="Include">
           <e p="BorderedImageInspector.cs" t="Include" />
           <e p="CameraViewer.cs" t="Include" />
+          <e p="CodeGen.cs" t="Include" />
           <e p="DebuggerWindow.cs" t="Include" />
           <e p="GUIRect.cs" t="Include" />
           <e p="HierarchyView.cs" t="Include" />
@@ -278,7 +282,7 @@
             <e p="ColorExtensions.cs" t="Include" />
             <e p="DictionaryExtensions.cs" t="Include" />
             <e p="ListExtensions.cs" t="Include" />
-            <e p="RectTransformExtensions.cs" t="Include" />
+            <e p="RectExtensions.cs" t="Include" />
           </e>
           <e p="ImportDeclaration.cs" t="Include" />
           <e p="Input" t="Include">
@@ -402,8 +406,10 @@
             <e p="BorderStyle.cs" t="Include" />
             <e p="ColorType.cs" t="Include" />
             <e p="ComputedStyle.cs" t="Include" />
+            <e p="ComputedStyle_Generated.cs" t="Include" />
             <e p="ContentBoxRect.cs" t="Include" />
             <e p="DefaultStyleValues.cs" t="Include" />
+            <e p="DefaultStyleValues_Generated.cs" t="Include" />
             <e p="Easing.cs" t="Include" />
             <e p="ElementRendering" t="Include">
               <e p="ElementRenderer.cs" t="Include" />
@@ -421,6 +427,7 @@
             <e p="RenderConstants.cs" t="Include" />
             <e p="RenderData.cs" t="Include" />
             <e p="RenderLayer.cs" t="Include" />
+            <e p="ScrollbarPartId.cs" t="Include" />
             <e p="StandardDrawable.cs" t="Include" />
             <e p="StyleColor.cs" t="Include" />
             <e p="StyleProperty.cs" t="Include" />
@@ -433,6 +440,7 @@
             <e p="UIGameObjectView.cs" t="Include" />
             <e p="UIMeasurement.cs" t="Include" />
             <e p="UIStyle.cs" t="Include" />
+            <e p="UIStyle_Generated.cs" t="Include" />
             <e p="UIStyleGroup.cs" t="Include" />
             <e p="UIStyleSet" t="Include">
               <e p="StyleState.cs" t="Include" />
@@ -462,6 +470,7 @@
           <e p="Shaders" t="Include">
             <e p="Debug.shader" t="Include" />
             <e p="UIForia.cginc" t="Include" />
+            <e p="UIForiaDebutText.shader" t="Include" />
             <e p="UIForiaFragBody.cginc" t="Include" />
             <e p="UIForiaFragDefines.cginc" t="Include" />
             <e p="UIForiaTextShader.shader" t="Include" />
@@ -490,7 +499,6 @@
           <e p="StyleDefinition.cs" t="Include" />
           <e p="Systems" t="Include">
             <e p="BindingSystem.cs" t="Include" />
-            <e p="DirectRenderSystem.cs" t="Include" />
             <e p="GOInputSystem.cs" t="Include" />
             <e p="GORenderSystem.cs" t="Include" />
             <e p="Gradient.cs" t="Include" />
@@ -509,6 +517,7 @@
             <e p="IStyleSystem.cs" t="Include" />
             <e p="ISystem.cs" t="Include" />
             <e p="LayoutSystem.cs" t="Include" />
+            <e p="RenderSystem.cs" t="Include" />
             <e p="StyleSystem.cs" t="Include" />
           </e>
           <e p="Temp_SpecFixtures.cs" t="Include" />
@@ -544,12 +553,13 @@
             <e p="ColorUtil.cs" t="Include" />
             <e p="FixedLengthVector.cs" t="Include" />
             <e p="FloatUtil.cs" t="Include" />
+            <e p="FontStyle.cs" t="Include" />
             <e p="IntUtil.cs" t="Include" />
             <e p="KeyCodeUtil.cs" t="Include" />
             <e p="LightList.cs" t="Include" />
             <e p="ListPool.cs" t="Include" />
             <e p="MathUtil.cs" t="Include" />
-            <e p="MeasurementVector2.cs" t="Include" />
+            <e p="MeasurementPair.cs" t="Include" />
             <e p="MeshUtil.cs" t="Include" />
             <e p="ObjectPool.cs" t="Include" />
             <e p="QueuePool.cs" t="Include" />
@@ -557,7 +567,9 @@
             <e p="ReflectionUtil.cs" t="Include" />
             <e p="SkipTree.cs" t="Include" />
             <e p="StackPool.cs" t="Include" />
+            <e p="TextAlignment.cs" t="Include" />
             <e p="TextMeshProUtil.cs" t="Include" />
+            <e p="TextTransform.cs" t="Include" />
             <e p="TextUtil.cs" t="Include" />
           </e>
         </e>
@@ -579,7 +591,6 @@
           <e p="Mocks" t="Include">
             <e p="MockInputSystem.cs" t="Include" />
             <e p="MockLayoutSystem.cs" t="Include" />
-            <e p="MockTextSizeCalculator.cs" t="Include" />
             <e p="MockView.cs" t="Include" />
           </e>
           <e p="ReflectionUtilTests.cs" t="Include" />
@@ -631,8 +642,5 @@
       <e p="TestAsm.csproj" t="IncludeRecursive" />
       <e p="UIElements.sln" t="IncludeFlat" />
     </e>
-    <e p="C:\Users\Matt\.Rider2018.2\config\extensions" t="IncludeRecursive" />
-    <e p="C:\Users\Matt\.Rider2018.2\system\extResources" t="IncludeRecursive" />
-    <e p="C:\Users\Matt\.Rider2018.2\system\resharper-host\local\Transient\ReSharperHost\v182\SolutionCaches\_UIElements.1439856042.00" t="ExcludeRecursive" />
   </component>
 </project>

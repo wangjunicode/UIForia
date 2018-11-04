@@ -1,4 +1,3 @@
-using Rendering;
 using Src.Rendering;
 using UnityEngine;
 
@@ -15,7 +14,7 @@ namespace Src.StyleBindings.Text {
         public override void Execute(UIElement element, UITemplateContext context) {
             if (!element.style.IsInState(state)) return;
 
-            int currentSize = element.ComputedStyle.FontSize;
+            int currentSize = element.ComputedStyle.TextFontSize;
             int newSize = expression.EvaluateTyped(context);
             if (currentSize != newSize) {
                 element.style.SetFontSize(newSize, state);
@@ -27,7 +26,7 @@ namespace Src.StyleBindings.Text {
         }
 
         public override void Apply(UIStyle style, UITemplateContext context) {
-            style.FontSize = expression.EvaluateTyped(context);
+            style.TextFontSize = expression.EvaluateTyped(context);
         }
 
         public override void Apply(UIStyleSet styleSet, UITemplateContext context) {

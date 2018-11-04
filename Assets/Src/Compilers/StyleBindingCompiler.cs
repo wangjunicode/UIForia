@@ -1,7 +1,6 @@
 using System;
 using System.Collections.Generic;
 using JetBrains.Annotations;
-using Rendering;
 using Src.Compilers.AliasSource;
 using Src.Layout;
 using Src.Rendering;
@@ -443,8 +442,8 @@ namespace Src.Compilers {
 
         // todo -- support UIMeasurement as arguments here
         [Pure]
-        public static MeasurementVector2 Vec2Measurement(float x, float y) {
-            return new MeasurementVector2(new UIMeasurement(x), new UIMeasurement(y));
+        public static MeasurementPair Vec2Measurement(float x, float y) {
+            return new MeasurementPair(new UIMeasurement(x), new UIMeasurement(y));
         }
 
         [Pure]

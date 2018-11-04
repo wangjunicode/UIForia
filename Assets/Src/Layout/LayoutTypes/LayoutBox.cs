@@ -1,7 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
-using Rendering;
+using Src.Rendering;
 using Src.Elements;
 using Src.Systems;
 using Src.Util;
@@ -31,6 +31,11 @@ namespace Src.Layout.LayoutTypes {
         public VirtualScrollbar verticalScrollbar;
 
         protected LayoutSystem layoutSystem;
+
+#if DEBUG
+        public int layoutCalls;
+        public int contentSizeCacheHits;
+#endif
 
         // todo compress w/ flags
         public bool markedForLayout;
@@ -211,7 +216,7 @@ namespace Src.Layout.LayoutTypes {
                     return layoutSystem.ViewportRect.width * width.value;
 
                 case UIFixedUnit.Em:
-                    return style.FontAsset.fontInfo.PointSize * width.value;
+                    return style.EmSize * width.value;
 
                 default:
                     return 0;
@@ -234,7 +239,7 @@ namespace Src.Layout.LayoutTypes {
                     return layoutSystem.ViewportRect.width * height.value;
 
                 case UIFixedUnit.Em:
-                    return style.FontAsset.fontInfo.PointSize * height.value;
+                    return style.EmSize * height.value;
 
                 default:
                     return 0;
@@ -354,14 +359,23 @@ namespace Src.Layout.LayoutTypes {
             int intWidth = (int) width;
             if (s_HeightForWidthCache.TryGetValue(element.id, out retn)) {
                 if (retn.width0 == intWidth) {
+#if DEBUG
+                    contentSizeCacheHits++;
+#endif
                     return retn.height0;
                 }
 
                 if (retn.width1 == intWidth) {
+#if DEBUG
+                    contentSizeCacheHits++;
+#endif
                     return retn.height1;
                 }
 
                 if (retn.width2 == intWidth) {
+#if DEBUG
+                    contentSizeCacheHits++;
+#endif
                     return retn.height2;
                 }
 
@@ -384,6 +398,11 @@ namespace Src.Layout.LayoutTypes {
             if (cachedPreferredWidth == -1) {
                 cachedPreferredWidth = ComputeContentWidth();
             }
+#if DEBUG
+            else {
+                contentSizeCacheHits++;
+            }
+#endif
 
             return cachedPreferredWidth;
         }
@@ -400,16 +419,14 @@ namespace Src.Layout.LayoutTypes {
         }
 
         public static float ResolveHorizontalMargin(UIMeasurement margin) {
-            
             switch (margin.unit) {
                 case UIMeasurementUnit.Pixel:
                     return margin.value;
                 default:
                     throw new NotImplementedException();
             }
-          
         }
-        
+
         public float GetPreferredWidth() {
             AnchorTarget anchorTarget;
             UIMeasurement widthMeasurement = style.PreferredWidth;
@@ -418,10 +435,7 @@ namespace Src.Layout.LayoutTypes {
                     return Mathf.Max(0, widthMeasurement.value) + ResolveHorizontalMargin(style.MarginLeft) + ResolveHorizontalMargin(style.MarginRight);
 
                 case UIMeasurementUnit.Content:
-                    if (cachedPreferredWidth == -1) {
-                        cachedPreferredWidth = ComputeContentWidth();
-                    }
-
+                    cachedPreferredWidth = GetContentWidth();
                     return Mathf.Max(0, PaddingHorizontal + BorderHorizontal + (cachedPreferredWidth * widthMeasurement.value));
 
                 case UIMeasurementUnit.ParentSize:
@@ -441,11 +455,11 @@ namespace Src.Layout.LayoutTypes {
                     if (parent.style.PreferredWidth.IsContentBased) {
                         return 0f;
                     }
-
-                    return Mathf.Max(0, parent.allocatedWidth * widthMeasurement.value - (parent.style == null ? 0 : parent.PaddingHorizontal - parent.BorderHorizontal));
+                    
+                    return Mathf.Max(0, parent.allocatedWidth - parent.PaddingHorizontal - parent.BorderHorizontal) * widthMeasurement.value;
 
                 case UIMeasurementUnit.Em:
-                    return Math.Max(0, style.FontAsset.fontInfo.PointSize * widthMeasurement.value);
+                    return Math.Max(0, style.EmSize * widthMeasurement.value);
 
                 case UIMeasurementUnit.AnchorWidth:
                     anchorTarget = style.AnchorTarget;
@@ -544,13 +558,13 @@ namespace Src.Layout.LayoutTypes {
                     return layoutSystem.ViewportRect.width * anchor.value;
 
                 case UIFixedUnit.Em:
-                    return style.FontAsset.fontInfo.PointSize * anchor.value;
+                    return style.EmSize * anchor.value;
 
                 default:
                     throw new InvalidArgumentException();
             }
         }
-        
+
         protected float ResolveHorizontalAnchor(UIFixedLength anchor) {
             switch (anchor.unit) {
                 case UIFixedUnit.Pixel:
@@ -590,7 +604,7 @@ namespace Src.Layout.LayoutTypes {
                     return layoutSystem.ViewportRect.width * anchor.value;
 
                 case UIFixedUnit.Em:
-                    return style.FontAsset.fontInfo.PointSize * anchor.value;
+                    return style.EmSize * anchor.value;
 
                 default:
                     throw new InvalidArgumentException();
@@ -636,7 +650,7 @@ namespace Src.Layout.LayoutTypes {
                     return layoutSystem.ViewportRect.width * anchor.value;
 
                 case UIFixedUnit.Em:
-                    return style.FontAsset.fontInfo.PointSize * anchor.value;
+                    return style.EmSize * anchor.value;
 
                 default:
                     throw new InvalidArgumentException();
@@ -658,7 +672,6 @@ namespace Src.Layout.LayoutTypes {
                         SetCachedHeightForWidth(contentWidth, contentHeight);
                         allocatedWidth = cachedWidth;
                     }
-
                     return PaddingVertical + BorderVertical + contentHeight * height.value;
 
                 case UIMeasurementUnit.ParentSize:
@@ -682,7 +695,7 @@ namespace Src.Layout.LayoutTypes {
                     return Mathf.Max(0, parent.allocatedHeight * height.value - (parent.style == null ? 0 : parent.PaddingVertical - parent.BorderVertical));
 
                 case UIMeasurementUnit.Em:
-                    return Mathf.Max(0, style.FontAsset.fontInfo.PointSize * height.value);
+                    return Mathf.Max(0, style.EmSize * height.value);
 
                 case UIMeasurementUnit.AnchorWidth:
                     anchorTarget = style.AnchorTarget;
@@ -745,7 +758,7 @@ namespace Src.Layout.LayoutTypes {
                     return Mathf.Max(0, parent.allocatedWidth * widthMeasurement.value - (parent.style == null ? 0 : parent.PaddingHorizontal - parent.BorderHorizontal));
 
                 case UIMeasurementUnit.Em:
-                    return Math.Max(0, style.FontAsset.fontInfo.PointSize * widthMeasurement.value);
+                    return Math.Max(0, style.EmSize * widthMeasurement.value);
 
                 case UIMeasurementUnit.AnchorWidth:
                     anchorTarget = style.AnchorTarget;
@@ -799,7 +812,7 @@ namespace Src.Layout.LayoutTypes {
                     return Mathf.Max(0, parent.allocatedHeight * heightMeasurement.value - (parent.style == null ? 0 : parent.PaddingVertical - parent.BorderVertical));
 
                 case UIMeasurementUnit.Em:
-                    return Mathf.Max(0, style.FontAsset.fontInfo.PointSize * heightMeasurement.value);
+                    return Mathf.Max(0, style.EmSize * heightMeasurement.value);
 
                 case UIMeasurementUnit.AnchorWidth:
                     anchorTarget = style.AnchorTarget;

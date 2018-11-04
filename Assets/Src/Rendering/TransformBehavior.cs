@@ -1,6 +1,6 @@
 using System;
 
-namespace Rendering {
+namespace Src.Rendering {
 
     [Flags]
     public enum TransformBehavior {

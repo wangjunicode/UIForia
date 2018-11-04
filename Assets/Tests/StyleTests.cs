@@ -1,7 +1,6 @@
 using System;
 using System.Reflection;
 using NUnit.Framework;
-using Rendering;
 using Src;
 using Src.Rendering;
 using Src.Systems;
@@ -30,7 +29,7 @@ public class StyleTests {
     }
 
     public T DefaultValue<T>(string propertyName) {
-        return (T) typeof(DefaultStyleValues).GetField(propertyName, BindingFlags.Static | BindingFlags.Public).GetValue(null);
+        return (T) typeof(DefaultStyleValues_Generated).GetField(propertyName, BindingFlags.Static | BindingFlags.Public).GetValue(null);
     }
 
     public void CallMethod(object target, string methodName, object arg0, object arg1) {
@@ -44,32 +43,32 @@ public class StyleTests {
     private void RunIntTests(Action<string, string, string> TestBody) {
         TestBody(
             nameof(UIStyleSet.SetFontSize),
-            nameof(ComputedStyle.FontSize),
-            nameof(DefaultStyleValues.TextFontSize)
+            nameof(ComputedStyle.TextFontSize),
+            nameof(DefaultStyleValues_Generated.TextFontSize)
         );
 
         TestBody(
             nameof(UIStyleSet.SetFlexItemGrowFactor),
             nameof(ComputedStyle.FlexItemGrow),
-            nameof(DefaultStyleValues.FlexItemGrow)
+            nameof(DefaultStyleValues_Generated.FlexItemGrow)
         );
 
         TestBody(
             nameof(UIStyleSet.SetFlexItemShrinkFactor),
             nameof(ComputedStyle.FlexItemShrink),
-            nameof(DefaultStyleValues.FlexItemShrink)
+            nameof(DefaultStyleValues_Generated.FlexItemShrink)
         );
 
         TestBody(
             nameof(UIStyleSet.SetFlexItemOrderOverride),
             nameof(ComputedStyle.FlexItemOrder),
-            nameof(DefaultStyleValues.FlexItemOrder)
+            nameof(DefaultStyleValues_Generated.FlexItemOrder)
         );
 
         TestBody(
             nameof(UIStyleSet.SetFlexItemOrderOverride),
             nameof(ComputedStyle.FlexItemOrder),
-            nameof(DefaultStyleValues.FlexItemOrder)
+            nameof(DefaultStyleValues_Generated.FlexItemOrder)
         );
     }
 

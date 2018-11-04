@@ -4,6 +4,7 @@ using Src.Text;
 using Src.Util;
 using TMPro;
 using UnityEngine;
+using TextAlignment = Src.Text.TextAlignment;
 
 namespace Src.Layout.LayoutTypes {
 
@@ -25,7 +26,7 @@ namespace Src.Layout.LayoutTypes {
 
             ListPool<LineInfo>.Release(ref lineInfos);
             
-            return maxWidth + PaddingHorizontal;
+            return maxWidth + PaddingHorizontal + BorderHorizontal;
         }
 
         protected override float ComputeContentHeight(float width) {
@@ -33,18 +34,15 @@ namespace Src.Layout.LayoutTypes {
             List<LineInfo> lineInfos = RunLayout(textInfo, width);
             LineInfo lastLine = lineInfos[lineInfos.Count - 1];
             ListPool<LineInfo>.Release(ref lineInfos);
-            TMP_FontAsset asset = style.FontAsset;
-            float s =  (style.FontSize / asset.fontInfo.PointSize) * asset.fontInfo.Scale;
-            float lh = asset.fontInfo.LineHeight * (style.FontSize / asset.fontInfo.PointSize) * asset.fontInfo.Scale;
-            lh += (asset.fontInfo.Descender) * s;
-            return lastLine.position.y + lh;//lastLine.Height;
+            TMP_FontAsset asset = style.TextFontAsset;
+            float lh = asset.fontInfo.LineHeight * (style.TextFontSize / asset.fontInfo.PointSize) * asset.fontInfo.Scale;
+            return lastLine.position.y + lh + PaddingBottom + BorderBottom; 
         }
 
         public override void RunLayout() {
             TextInfo textInfo = ((UITextElement) element).textInfo;
             List<LineInfo> lineInfos = RunLayout(textInfo, allocatedWidth);
             LineInfo lastLine = lineInfos[lineInfos.Count - 1];
-
             textInfo.lineInfos = ArrayPool<LineInfo>.CopyFromList(lineInfos);
             textInfo.lineCount = lineInfos.Count;
             ((UITextElement) element).textInfo = textInfo;
@@ -54,13 +52,11 @@ namespace Src.Layout.LayoutTypes {
                 maxWidth = Mathf.Max(maxWidth, lineInfos[i].width);
             }
 
-            actualWidth = maxWidth;
-            TMP_FontAsset asset = style.FontAsset;
-            float s =  (style.FontSize / asset.fontInfo.PointSize) * asset.fontInfo.Scale;;
-            float lh = asset.fontInfo.LineHeight * s;//(style.FontSize / asset.fontInfo.PointSize) * asset.fontInfo.Scale;
-           // lh -= 16f;//asset.fontInfo.Descender * s;
-            lh += (asset.fontInfo.Descender) * s;
-            actualHeight = lastLine.position.y + lh;//lastLine.Height;
+            actualWidth = maxWidth + PaddingHorizontal;
+            TMP_FontAsset asset = style.TextFontAsset;
+            float s =  (style.TextFontSize / asset.fontInfo.PointSize) * asset.fontInfo.Scale;;
+            float lh = asset.fontInfo.LineHeight * s;
+            actualHeight = lastLine.position.y + lh + PaddingBottom + BorderBottom;
 
             ApplyTextAlignment(allocatedWidth, textInfo, style.TextAlignment);
 
@@ -70,23 +66,16 @@ namespace Src.Layout.LayoutTypes {
         // todo -- when starting a new line, if the last line has spaces as the final characters, consider stripping them
 
         private List<LineInfo> RunLayout(TextInfo textInfo, float width) {
-            float lineOffset = 0;
-            SpanInfo spanInfo = textInfo.spanInfos[0];
-            TMP_FontAsset asset = style.FontAsset;
-            float lh = asset.fontInfo.LineHeight * (style.FontSize / asset.fontInfo.PointSize) * asset.fontInfo.Scale;
+            float lineOffset = PaddingTop + BorderTop;
+            TMP_FontAsset asset = style.TextFontAsset;
+            float lh = asset.fontInfo.LineHeight * (style.TextFontSize / asset.fontInfo.PointSize) * asset.fontInfo.Scale;
 
             LineInfo currentLine = new LineInfo();
             WordInfo[] wordInfos = textInfo.wordInfos;
             List<LineInfo> lineInfos = ListPool<LineInfo>.Get();
 
-            TMP_FontAsset font = spanInfo.font ? spanInfo.font : TMP_FontAsset.defaultFontAsset;
-            float lineGap = font.fontInfo.LineHeight - (font.fontInfo.Ascender - font.fontInfo.Descender);
-            float baseScale = (spanInfo.fontSize / font.fontInfo.PointSize * font.fontInfo.Scale);
-            float lineHeight = (font.fontInfo.LineHeight + lineGap) * baseScale;
-            // todo -- might want to use an optional 'lineHeight' setting instead of just computing the line height
-
             float paddingBorderOffset = PaddingLeft + BorderLeft;
-            currentLine.position = new Vector2(paddingBorderOffset, 0);
+            currentLine.position = new Vector2(paddingBorderOffset, lineOffset);
             width = Mathf.Max(width - PaddingHorizontal + BorderHorizontal, 0);
             
             for (int w = 0; w < textInfo.wordCount; w++) {
@@ -176,7 +165,7 @@ namespace Src.Layout.LayoutTypes {
             return lineInfos;
         }
 
-        private static void ApplyTextAlignment(float allocatedWidth, TextInfo textInfo, TextUtil.TextAlignment alignment) {
+        private static void ApplyTextAlignment(float allocatedWidth, TextInfo textInfo, TextAlignment alignment) {
             LineInfo[] lineInfos = textInfo.lineInfos;
 
             // find max line width
@@ -188,7 +177,7 @@ namespace Src.Layout.LayoutTypes {
             }
 
             switch (alignment) {
-                case TextUtil.TextAlignment.Center:
+                case TextAlignment.Center:
 
                     for (int i = 0; i < textInfo.lineCount; i++) {
                         float offset = (lineWidth - lineInfos[i].width) * 0.5f;
@@ -197,7 +186,7 @@ namespace Src.Layout.LayoutTypes {
                     }
 
                     break;
-                case TextUtil.TextAlignment.Right:
+                case TextAlignment.Right:
 
                     for (int i = 0; i < textInfo.lineCount; i++) {
                         float offset = (lineWidth - lineInfos[i].width);

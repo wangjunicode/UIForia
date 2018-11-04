@@ -2,7 +2,7 @@ using JetBrains.Annotations;
 using Src;
 using UnityEngine;
 
-namespace Rendering {
+namespace Src.Rendering {
 
     public partial class UIStyleSet {
 

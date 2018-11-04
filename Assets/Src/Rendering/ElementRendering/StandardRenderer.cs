@@ -1,5 +1,4 @@
 using System;
-using Rendering;
 using Shapes2D;
 using Src.Extensions;
 using Src.Rendering;
@@ -46,9 +45,8 @@ namespace Src.Systems {
                 RenderData data = drawList[i];
                 UIElement element = data.element;
 
-                data.renderPosition = new Vector3(data.renderPosition.x, data.renderPosition.y, -data.renderPosition.z);
-
                 if (data.isMaterialProvider) {
+                    // todo -- this isn't used right now, its overwritten immediately by following code
                     data.material = ((IMaterialProvider) element).GetMaterial();
                 }
                 else if (data.material == null) {
@@ -96,7 +94,7 @@ namespace Src.Systems {
                         break;
                     case BackgroundFillType.Gradient:
 
-                        switch (style.GradientType) {
+                        switch (style.BackgroundGradientType) {
                             case GradientType.Linear:
                                 material.EnableKeyword(k_FillType_LinearGradient);
                                 break;
@@ -125,8 +123,8 @@ namespace Src.Systems {
                 }
 
                 // todo -- see if [PerRendererData] can stop us from needing unique materials
-                Vector2 fillScale = style.BackgroundFillScale;
-                Vector2 fillOffset = style.BackgroundFillOffset;
+                Vector2 fillScale = new Vector2(style.BackgroundFillScaleX, style.BackgroundFillScaleY);
+                Vector2 fillOffset = new Vector2(style.BackgroundFillOffsetX, style.BackgroundFillOffsetY);
                 material.SetColor(s_ColorKey, style.BackgroundColor);
                 material.SetVector(s_ClipRectKey, data.clipVector);
                 material.SetVector(s_FillOffsetScaleKey, new Vector4(fillOffset.x, fillOffset.y, fillScale.x, fillScale.y));

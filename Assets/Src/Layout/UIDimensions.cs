@@ -2,7 +2,7 @@ using System;
 using System.Diagnostics;
 using Src;
 
-namespace Rendering {
+namespace Src.Rendering {
 
     [DebuggerDisplay("{width}, {height}")]
     public struct Dimensions {

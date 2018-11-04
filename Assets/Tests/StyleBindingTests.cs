@@ -1,5 +1,5 @@
 using NUnit.Framework;
-using Rendering;
+using Src.Rendering;
 using Src;
 using Tests.Mocks;
 using TMPro;
@@ -86,10 +86,10 @@ public class StyleBindingTests {
         view.Initialize();
         StyleTestThing root = (StyleTestThing) view.RootElement;
         UIElement panel = root.FindFirstByType<UIElement>();
-        Assert.AreEqual(font1, panel.ComputedStyle.FontAsset);
+        Assert.AreEqual(font1, panel.ComputedStyle.TextFontAsset);
         UIForia.ResourceManager.RemoveFont(font1);
         view.Update();
-        Assert.AreEqual(font1, panel.ComputedStyle.FontAsset);
+        Assert.AreEqual(font1, panel.ComputedStyle.TextFontAsset);
         Object.DestroyImmediate(font1);
     }
     
@@ -110,13 +110,13 @@ public class StyleBindingTests {
         root.fontName = "font1";
         view.Update();
         UIElement panel = root.FindFirstByType<UIElement>();
-        Assert.AreEqual(font1, panel.ComputedStyle.FontAsset);
+        Assert.AreEqual(font1, panel.ComputedStyle.TextFontAsset);
         root.fontName = "not-there";
         view.Update();
-        Assert.AreEqual(DefaultStyleValues.TextFontAsset, panel.ComputedStyle.FontAsset);
+        Assert.AreEqual(DefaultStyleValues.TextFontAsset, panel.ComputedStyle.TextFontAsset);
         root.fontName = "font1";
         view.Update();
-        Assert.AreEqual(font1, panel.ComputedStyle.FontAsset);
+        Assert.AreEqual(font1, panel.ComputedStyle.TextFontAsset);
         Object.DestroyImmediate(font1);
 
     }

@@ -155,10 +155,10 @@ namespace Src {
             return expression;
         }
 
-        private static void ValidateParameterTypes(ParameterInfo[] parameters, Expression[] arguments) {
+        private static void ValidateParameterTypes(Type[] parameters, Expression[] arguments) {
             for (int i = 0; i < parameters.Length; i++) {
-                if (!parameters[i].ParameterType.IsAssignableFrom(arguments[i].YieldedType)) {
-                    throw new Exception($"Cannot use parameter of type {arguments[i].YieldedType} for parameter of type {parameters[i].ParameterType}");
+                if (!parameters[i].IsAssignableFrom(arguments[i].YieldedType)) {
+                    throw new Exception($"Cannot use parameter of type {arguments[i].YieldedType} for parameter of type {parameters[i]}");
                 }
             }
         }
@@ -211,6 +211,7 @@ namespace Src {
 
             Expression[] args = new Expression[signatureParts.Count];
             Type[] genericArguments = new Type[signatureParts.Count + extraArgumentCount];
+            Type[] parameterTypes = new Type[parameters.Length];
 
             if ((methodType & MethodType.Instance) != 0) {
                 genericArguments[0] = context.rootType; // todo -- this means root functions only, no chaining right now! 
@@ -219,6 +220,7 @@ namespace Src {
 
             for (int i = 0; i < args.Length; i++) {
                 Type requiredType = parameters[i].ParameterType;
+                parameterTypes[i] = requiredType;
                 ExpressionNode argumentNode = signatureParts[i];
                 Expression argumentExpression = Visit(argumentNode);
                 args[i] = HandleCasting(requiredType, argumentExpression);
@@ -230,7 +232,7 @@ namespace Src {
                 genericArguments[genericArguments.Length - 1] = info.ReturnType;
             }
 
-            ValidateParameterTypes(parameters, args);
+            ValidateParameterTypes(parameterTypes, args);
 
             Type callType = GetMethodCallType(methodName, args.Length, genericArguments, methodType);
 
@@ -490,7 +492,6 @@ namespace Src {
                             ReflectionUtil.TypeArray1,
                             ReflectionUtil.ObjectArray3
                         );
-
                     }
                     else if (leftNodeType == typeof(bool) && rightNodeType.IsClass) {
                         ReflectionUtil.ObjectArray3[0] = node.OpType;
@@ -728,6 +729,55 @@ namespace Src {
                         continue;
                     }
 
+                    MethodAccessExpressionPartNode methodPart = part as MethodAccessExpressionPartNode;
+                    if (methodPart != null) {
+                        // todo only supports Action and Func right now, not actual methods
+
+                        Type methodType = null;
+                        Type targetType = headType;
+                        AccessExpressionPart prev = parts[i - 1];
+                        
+                        // todo -- use the array element type as the action/func type 
+                        // todo -- this only supports actions right that have names
+                        // todo -- we only support 1 level of dot right now, need to get type from parts list - 2 || head
+
+                        if (prev is AccessExpressionPart_List) {
+                            throw new Exception("Array method access in expressions is not yet supported");
+                        }
+
+                        if (prev is AccessExpressionPart_Field) {
+                            string fieldName = (prev as AccessExpressionPart_Field).fieldName;
+                            methodType = ReflectionUtil.GetFieldType(targetType, fieldName);
+                            
+                        }
+                        else if (prev is AccessExpressionPart_Property) {
+                            string propertyName = (prev as AccessExpressionPart_Property).propertyName;
+                            methodType = ReflectionUtil.GetPropertyType(targetType, propertyName);
+                        }
+
+                        if (methodType == null) {
+                            // todo fix this terrible error message
+                            throw new Exception("Error parsing method access expression");
+                        }
+                        
+
+                        if (ReflectionUtil.IsAction(methodType)) {
+                            parts[i] = CreateActionAccessPart(methodType, methodPart.signatureNode);
+                            lastType = typeof(Terminal);
+                            if (i != partCount - 1) {
+                                throw new Exception("Encountered void return type but access chain continues");
+                            }
+                            break;
+                        }
+                        else {
+                            AccessExpressionPart_Func fn = CreateFuncAccessPart(methodType, methodPart.signatureNode);
+                            parts[i] = fn;
+                            lastType = fn.RetnType;
+                        }
+
+                        continue;
+                    }
+
                     throw new Exception("Unknown AccessExpression Type: " + part.GetType());
                 }
             }
@@ -771,6 +821,125 @@ namespace Src {
                 case AccessExpressionType.Constant:
                 default:
                     throw new ArgumentOutOfRangeException();
+            }
+        }
+
+        private AccessExpressionPart_Func CreateFuncAccessPart(Type type, MethodSignatureNode signatureNode) {
+            Type[] argTypes = type.GetGenericArguments();
+            if (argTypes.Length == 1) {
+                return (AccessExpressionPart_Func) ReflectionUtil.CreateGenericInstanceFromOpenType(
+                    typeof(AccessExpressionPart_Func<>),
+                    argTypes,
+                    ReflectionUtil.ObjectArray0
+                );
+            }
+
+            Expression[] expressions = new Expression[signatureNode.parts.Count];
+
+            for (int i = 1; i < argTypes.Length; i++) {
+                Type requiredType = argTypes[i];
+                ExpressionNode argumentNode = signatureNode.parts[i - 1];
+                Expression argumentExpression = Visit(argumentNode);
+                expressions[i - 1] = HandleCasting(requiredType, argumentExpression);
+                if (!requiredType.IsAssignableFrom(expressions[i - 1].YieldedType)) {
+                    throw new Exception($"Cannot use parameter of type {expressions[i - 1].YieldedType} for parameter of type {requiredType}");
+                }
+            }
+
+            switch (argTypes.Length) {
+                case 2:
+                    ReflectionUtil.ObjectArray1[0] = expressions[0];
+                    return (AccessExpressionPart_Func) ReflectionUtil.CreateGenericInstanceFromOpenType(
+                        typeof(AccessExpressionPart_Func<,>),
+                        argTypes,
+                        ReflectionUtil.ObjectArray1
+                    );
+                case 3:
+                    ReflectionUtil.ObjectArray2[0] = expressions[0];
+                    ReflectionUtil.ObjectArray2[1] = expressions[1];
+                    return (AccessExpressionPart_Func) ReflectionUtil.CreateGenericInstanceFromOpenType(
+                        typeof(AccessExpressionPart_Func<,,>),
+                        argTypes,
+                        ReflectionUtil.ObjectArray2
+                    );
+                case 4:
+                    ReflectionUtil.ObjectArray3[0] = expressions[0];
+                    ReflectionUtil.ObjectArray3[1] = expressions[1];
+                    ReflectionUtil.ObjectArray3[2] = expressions[2];
+                    return (AccessExpressionPart_Func) ReflectionUtil.CreateGenericInstanceFromOpenType(
+                        typeof(AccessExpressionPart_Func<,,,>),
+                        argTypes,
+                        ReflectionUtil.ObjectArray3
+                    );
+                case 5:
+                    ReflectionUtil.ObjectArray4[0] = expressions[0];
+                    ReflectionUtil.ObjectArray4[1] = expressions[1];
+                    ReflectionUtil.ObjectArray4[2] = expressions[2];
+                    ReflectionUtil.ObjectArray4[3] = expressions[3];
+                    return (AccessExpressionPart_Func) ReflectionUtil.CreateGenericInstanceFromOpenType(
+                        typeof(AccessExpressionPart_Func<,,,,>),
+                        argTypes,
+                        ReflectionUtil.ObjectArray4
+                    );
+                default:
+                    throw new Exception("Expression only support Actions with 4 arguments");
+            }
+        }
+
+        private AccessExpressionPart_Method CreateActionAccessPart(Type type, MethodSignatureNode signatureNode) {
+            Type[] argTypes = type.GetGenericArguments();
+            if (argTypes.Length == 0) {
+                return new AccessExpressionPart_Method();
+            }
+
+            Expression[] expressions = new Expression[signatureNode.parts.Count];
+
+            for (int i = 0; i < argTypes.Length; i++) {
+                Type requiredType = argTypes[i];
+                ExpressionNode argumentNode = signatureNode.parts[i];
+                Expression argumentExpression = Visit(argumentNode);
+                expressions[i] = HandleCasting(requiredType, argumentExpression);
+            }
+
+            ValidateParameterTypes(argTypes, expressions);
+
+            switch (argTypes.Length) {
+                case 1:
+                    ReflectionUtil.ObjectArray1[0] = expressions[0];
+                    return (AccessExpressionPart_Method) ReflectionUtil.CreateGenericInstanceFromOpenType(
+                        typeof(AccessExpressionPart_Method<>),
+                        argTypes,
+                        ReflectionUtil.ObjectArray1
+                    );
+                case 2:
+                    ReflectionUtil.ObjectArray2[0] = expressions[0];
+                    ReflectionUtil.ObjectArray2[1] = expressions[1];
+                    return (AccessExpressionPart_Method) ReflectionUtil.CreateGenericInstanceFromOpenType(
+                        typeof(AccessExpressionPart_Method<,>),
+                        argTypes,
+                        ReflectionUtil.ObjectArray2
+                    );
+                case 3:
+                    ReflectionUtil.ObjectArray3[0] = expressions[0];
+                    ReflectionUtil.ObjectArray3[1] = expressions[1];
+                    ReflectionUtil.ObjectArray3[2] = expressions[2];
+                    return (AccessExpressionPart_Method) ReflectionUtil.CreateGenericInstanceFromOpenType(
+                        typeof(AccessExpressionPart_Method<,,>),
+                        argTypes,
+                        ReflectionUtil.ObjectArray3
+                    );
+                case 4:
+                    ReflectionUtil.ObjectArray4[0] = expressions[0];
+                    ReflectionUtil.ObjectArray4[1] = expressions[1];
+                    ReflectionUtil.ObjectArray4[2] = expressions[2];
+                    ReflectionUtil.ObjectArray4[3] = expressions[3];
+                    return (AccessExpressionPart_Method) ReflectionUtil.CreateGenericInstanceFromOpenType(
+                        typeof(AccessExpressionPart_Method<,,,>),
+                        argTypes,
+                        ReflectionUtil.ObjectArray4
+                    );
+                default:
+                    throw new Exception("Expression only support Actions with 4 arguments");
             }
         }
 
@@ -871,62 +1040,3 @@ namespace Src {
     }
 
 }
-//
-//private Expression VisitMethodCallExpression_Static(MethodInfo info, MethodCallNode node) {
-//            string methodName = node.identifierNode.identifier;
-//
-//            IReadOnlyList<ExpressionNode> signatureParts = node.signatureNode.parts;
-//
-//            ParameterInfo[] parameters = info.GetParameters();
-//
-//            if (parameters.Length != signatureParts.Count) {
-//                throw new Exception("Argument count is wrong");
-//            }
-//
-//            Expression[] args = new Expression[signatureParts.Count];
-//            Type[] genericArguments = new Type[signatureParts.Count + 1];
-//
-//            for (int i = 0; i < args.Length; i++) {
-//                Type requiredType = parameters[i].ParameterType;
-//                ExpressionNode argumentNode = signatureParts[i];
-//                Expression argumentExpression = Visit(argumentNode);
-//                args[i] = HandleCasting(requiredType, argumentExpression);
-//
-//                genericArguments[i] = args[i].YieldedType;
-//            }
-//
-//            genericArguments[genericArguments.Length - 1] = info.ReturnType;
-//
-//            ValidateParameterTypes(parameters, args);
-//
-//            Type callType;
-//            switch (args.Length) {
-//                case 0:
-//                    callType = ReflectionUtil.CreateGenericType(typeof(MethodCallExpression_Static<>), genericArguments);
-//                    break;
-//
-//                case 1:
-//                    callType = ReflectionUtil.CreateGenericType(typeof(MethodCallExpression_Static<,>), genericArguments);
-//                    break;
-//
-//                case 2:
-//                    callType = ReflectionUtil.CreateGenericType(typeof(MethodCallExpression_Static<,,>), genericArguments);
-//                    break;
-//
-//                case 3:
-//                    callType = ReflectionUtil.CreateGenericType(typeof(MethodCallExpression_Static<,,,>), genericArguments);
-//                    break;
-//
-//                case 4:
-//                    callType = ReflectionUtil.CreateGenericType(typeof(MethodCallExpression_Static<,,,,>), genericArguments);
-//                    break;
-//
-//                default:
-//                    throw new Exception($"Expressions only support functions with up to 4 arguments. {methodName} is supplying {args.Length} ");
-//            }
-//
-//            ReflectionUtil.ObjectArray2[0] = info;
-//            ReflectionUtil.ObjectArray2[1] = args;
-//
-//            return (Expression) ReflectionUtil.CreateGenericInstance(callType, ReflectionUtil.ObjectArray2);
-//        }

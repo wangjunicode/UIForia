@@ -1,0 +1,103 @@
+<?xml version="1.0" encoding="utf-8"?>
+<UITemplate>
+    <Style>
+    
+        style container {
+            PreferredSize = 1pca;
+            FlexLayoutDirection = Column;
+        }
+        
+        style menubar {
+            PreferredSize = 1pca, 32px;
+            BackgroundColor = black;
+            FlexLayoutDirection = Column;
+            FlexLayoutMainAxisAlignment = SpaceBetween;
+            FlexLayoutCrossAxisAlignment = Center;
+        }    
+        
+        style tab-container {
+            FlexLayoutDirection = Column;
+            FlexLayoutCrossAxisAlignment = Center;
+        }
+        
+        style side-bar-container {
+            PreferredWidth = 88px;
+            Padding = 12px;
+            BackgroundColor = black;
+        }
+        
+        style body-container {
+            PreferredSize = 1pca, 1cnt;
+        }
+        
+        style tab-text {
+            TextColor = white;
+            Padding = 0px, 12px;
+            TextFontAsset = Gotham-Bold SDF;
+        }
+        
+        style status-icon {
+            PreferredWidth = 22px;
+            PreferredHeight = 22px;
+            BorderRadius = 50%;
+            BorderColor = red;
+            Border = 3px;
+        }
+        
+        style status-container {
+            Padding = 0px, 12px;
+        }
+        
+        style tab-runner {
+            PreferredSize = 30px, 8px;
+            BackgroundColor = white;
+            LayoutBehavior = Ignored;
+            TransformBehaviorY = AnchorMaxOffset;
+            <!--AnchorBottom = 0;-->
+        }
+        
+    </Style>
+<Contents style="container">
+
+    <Div style="side-bar-container">
+        
+        <Repeat list="{sideBarEntries}">
+    
+            <Div style='side-bar' onMouseDown="{$item.onClick()}">
+                {$item.imageUrl}
+            </Div>    
+    
+        </Repeat>
+
+    </Div>
+    
+    <Div style="body-container">
+        
+        <Panel style='menubar'>
+            
+            <Div x-id="tab-container" style="tab-container">
+                
+                <Repeat list='{tabs}'>
+                    
+                    <Div style='tab' onMouseDown="MenuItem_MouseDown($index)">
+                        <Text style="tab-text">{$item.text}</Text>
+                    </Div>
+                    
+                </Repeat>
+                
+            </Div>
+            
+            <Div x-id="tab-runner" style="tab-runner"/>
+
+            <Div style="status-container">
+                <Div style="status-icon"/>
+            </Div>
+            
+        </Panel>
+        
+        <!--<Children/>-->
+        
+    </Div>
+    
+</Contents>
+</UITemplate>

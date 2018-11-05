@@ -34,7 +34,8 @@ namespace Src.Editor {
         private Color baseLineColor = Color.red;
         private Color descenderColor = Color.blue;
         private Color outlineColor = new Color32(196, 208, 139, 175);
-
+        private Material lineMaterial;
+        private Mesh baselineMesh;
         private bool showTextBaseline;
         private bool showTextDescender;
 
@@ -277,21 +278,23 @@ namespace Src.Editor {
                 Graphics.DrawMesh(mesh, renderPosition + origin, Quaternion.identity, material, 0, camera, 0, null, false, false, false);
 
                 if (selectedElement is UITextElement && (showTextBaseline || showTextDescender)) {
-                    baselineMesh = MeshUtil.ResizeStandardUIMesh(baselineMesh, new Size(width, 100));
+                    baselineMesh = MeshUtil.ResizeStandardUIMesh(baselineMesh, new Size(width, height + 100));
                     ComputedStyle style = selectedElement.ComputedStyle;
                     TMP_FontAsset asset = style.TextFontAsset;
                     float s = (style.TextFontSize / asset.fontInfo.PointSize) * asset.fontInfo.Scale;
 
                     lineMaterial = lineMaterial ? lineMaterial : Resources.Load<Material>("Materials/UIForiaTextDebug");
                     if (showTextBaseline) {
-                        lineMaterial.SetFloat("_BaseLine", s * selectedElement.ComputedStyle.TextFontAsset.fontInfo.Ascender);
+                        lineMaterial.SetFloat("_BaseLine", padding.top + border.top + (s * selectedElement.ComputedStyle.TextFontAsset.fontInfo.Ascender));
                     }
                     else {
                         lineMaterial.SetFloat("_BaseLine", -1);
                     }
 
                     if (showTextDescender) {
-                        lineMaterial.SetFloat("_Descender", (s * selectedElement.ComputedStyle.TextFontAsset.fontInfo.Ascender) + (s * -selectedElement.ComputedStyle.TextFontAsset.fontInfo.Descender));
+                        lineMaterial.SetFloat("_Descender",
+                            padding.top + border.top + (s * selectedElement.ComputedStyle.TextFontAsset.fontInfo.Ascender) +
+                            (s * -selectedElement.ComputedStyle.TextFontAsset.fontInfo.Descender));
                     }
                     else {
                         lineMaterial.SetFloat("_Descender", -1);
@@ -299,32 +302,25 @@ namespace Src.Editor {
 
                     lineMaterial.SetColor("_BaseLineColor", baseLineColor);
                     lineMaterial.SetColor("_DescenderColor", descenderColor);
-                    lineMaterial.SetVector("_Size", new Vector4(width, height, 0, 0));
+                    lineMaterial.SetVector("_Size", new Vector4(width, height + 100, 0, 0));
 
                     Graphics.DrawMesh(baselineMesh, renderPosition + origin, Quaternion.identity, lineMaterial, 0, camera, 0, null, false, false, false);
                 }
             }
         }
 
-        private Material lineMaterial;
-        private Mesh baselineMesh;
 
         private void DrawSettings() {
-//            drawPos = EditorGUILayout.Vector3Field("draw", drawPos);
-
-//            overlayBorderSize = EditorGUILayout.FloatField("Border Size", overlayBorderSize);
-//            Color newOutlineColor = EditorGUILayout.ColorField("Outline Color", contentColor);
-
             bool newShowBaseLine = EditorGUILayout.Toggle("Show Text Baseline", showTextBaseline);
-            bool newShowDescenderLine = EditorGUILayout.Toggle("Show Text Baseline", showTextBaseline);
+            bool newShowDescenderLine = EditorGUILayout.Toggle("Show Text Descender", showTextDescender);
 
             Color newContentColor = EditorGUILayout.ColorField("Content Color", contentColor);
             Color newPaddingColor = EditorGUILayout.ColorField("Padding Color", paddingColor);
             Color newBorderColor = EditorGUILayout.ColorField("Border Color", borderColor);
             Color newMarginColor = EditorGUILayout.ColorField("Margin Color", marginColor);
 
-            Color newBaseLineColor = EditorGUILayout.ColorField("Text Baseline Color", contentColor);
-            Color newDescenderColor = EditorGUILayout.ColorField("Text Descender Color", contentColor);
+            Color newBaseLineColor = EditorGUILayout.ColorField("Text Baseline Color", baseLineColor);
+            Color newDescenderColor = EditorGUILayout.ColorField("Text Descender Color", descenderColor);
 
             if (newContentColor != contentColor) {
                 contentColor = newContentColor;
@@ -360,7 +356,7 @@ namespace Src.Editor {
                 showTextBaseline = newShowBaseLine;
                 EditorPrefs.SetBool("UIForia.Inspector.ShowTextBaseline", showTextBaseline);
             }
-            
+
             if (newShowDescenderLine != showTextDescender) {
                 showTextDescender = newShowDescenderLine;
                 EditorPrefs.SetBool("UIForia.Inspector.ShowTextDescender", showTextDescender);
@@ -389,6 +385,7 @@ namespace Src.Editor {
             EditorGUIUtility.labelWidth = 100;
 
             Rect clipRect = layoutResult.clipRect;
+            Rect contentRect = layoutResult.contentRect;
 
             EditorGUILayout.HelpBox("Overflowing Horizontal", MessageType.Warning, true);
             DrawVector2Value("Local Position", layoutResult.localPosition);
@@ -399,6 +396,7 @@ namespace Src.Editor {
 
             DrawLabel("Rotation", layoutResult.rotation.ToString());
             DrawLabel("Clip Rect", $"X: {clipRect.x}, Y: {clipRect.y}, W: {clipRect.width}, H: {clipRect.height}");
+            DrawLabel("Content Rect", $"X: {contentRect.x}, Y: {contentRect.y}, W: {contentRect.width}, H: {contentRect.height}");
 
             DrawLabel("Render Layer", layoutResult.layer.ToString());
             DrawLabel("Z Index", layoutResult.zIndex.ToString());

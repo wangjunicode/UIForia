@@ -27,7 +27,7 @@
     fillSettings.gridSize = m_GridSize;
     fillSettings.lineSize = m_LineSize;
     
-    fixed4 fillColor = fill(texcoordMinusHalf, size, fillSettings);
+    fixed4 fillColor = fill(texcoordMinusHalf, size, m_ContentRect, fillSettings);
     
 #if defined(UIFORIA_USE_BORDER)    
     int left = step(0.5, IN.texcoord.x);
@@ -65,6 +65,8 @@
     // second is distance to the rounded part when in a corner circle
     half dist = radius - (min(max(delta.x, delta.y), 0) + length(max(delta, 0)));
     half outline = outerBlur + outlineSize;
+
+    // todo -- support roundness w/ padding 
 
     if(roundness == 0) {
         // borderSize == trbl

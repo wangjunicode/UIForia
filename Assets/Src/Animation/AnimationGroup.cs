@@ -6,13 +6,11 @@ namespace Src.Animation {
     public class AnimationGroup : StyleAnimation {
 
         private StyleAnimation[] animations;
-
-        public AnimationGroup(AnimationOptions options, params StyleAnimation[] animations) {
-            this.animations = animations;
-        }
-
+        private bool[] state;
+        
         public AnimationGroup(params StyleAnimation[] animations) {
             this.animations = animations;
+            this.state = new bool[animations.Length];
         }
 
         public override void OnStart(UIStyleSet styleSet, Rect viewport) {
@@ -23,9 +21,16 @@ namespace Src.Animation {
 
         public override bool Update(UIStyleSet styleSet, Rect viewport, float deltaTime) {
             for (int i = 0; i < animations.Length; i++) {
-                animations[i].Update(styleSet, viewport, deltaTime);
+                if (!state[i]) {
+                    state[i] = animations[i].Update(styleSet, viewport, deltaTime);
+                }
             }
-            return false;
+
+            for (int i = 0; i < state.Length; i++) {
+                if (!state[i]) return false;
+            }
+
+            return true;
         }
 
     }

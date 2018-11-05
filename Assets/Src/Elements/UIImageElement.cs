@@ -1,30 +1,35 @@
-using System;
 using Src.Rendering;
 using Src.Systems;
 using Src.Util;
+using UIForia;
 using UnityEngine;
-using UnityEngine.UI;
 
 namespace Src {
 
-    public class UIImageElement : UIElement {
+    public class UIImageElement : UIElement, IMeshProvider {
 
         public string src;
         public Texture2D texture;
+        private Mesh mesh;
         
         public UIImageElement() {
             flags |= UIElementFlags.Image;
             flags |= UIElementFlags.Primitive;
         }
-
-        public override void OnReady() {
-            
-        }
         
         [OnPropertyChanged(nameof(src))]
         public void OnSrcChanged(string name) {
-            texture = UIForia.ResourceManager.GetTexture(src);
+            texture = ResourceManager.GetTexture(src);
             style.SetBackgroundImage(texture, StyleState.Normal);
+        }
+
+        public override string GetDisplayName() {
+            return "Image";
+        }
+
+        public Mesh GetMesh() {
+            mesh = MeshUtil.ResizeStandardUIMesh(mesh, layoutResult.actualSize);
+            return mesh;
         }
 
     }

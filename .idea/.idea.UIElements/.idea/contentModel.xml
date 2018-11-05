@@ -1,10 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project version="4">
   <component name="ContentModelStore">
-    <e p="C:\Users\matth\.Rider2018.2\config\extensions" t="IncludeRecursive" />
-    <e p="C:\Users\matth\.Rider2018.2\system\extResources" t="IncludeRecursive" />
-    <e p="C:\Users\matth\.Rider2018.2\system\resharper-host\local\Transient\ReSharperHost\v182\SolutionCaches\_UIElements.2091774103.00" t="ExcludeRecursive" />
-    <e p="C:\Users\matth\DownloadsUIForia\UIElements" t="IncludeRecursive">
+    <e p="C:\Seed\UIForia\UIElements" t="IncludeRecursive">
       <e p="_DemoAsmDef.csproj" t="IncludeRecursive" />
       <e p="Assembly-CSharp-Editor.csproj" t="IncludeRecursive" />
       <e p="Assets" t="Include">
@@ -59,8 +56,11 @@
               <e p="ExpandableList.cs" t="Include" />
             </e>
           </e>
-          <e p="DirectMessageListEntry.cs" t="Include" />
-          <e p="SeedUIElements.cs" t="Include" />
+          <e p="ResourcePanel" t="Include">
+            <e p="ResourcePanel.cs" t="Include" />
+          </e>
+          <e p="SeedWindowFrame.cs" t="Include" />
+          <e p="SeedWindowFrame.xml" t="Include" />
           <e p="UIViewBehavior.cs" t="Include" />
           <e p="WindowFrame" t="Include">
             <e p="WindowFrame.cs" t="Include" />
@@ -68,8 +68,6 @@
           </e>
         </e>
         <e p="Editor" t="Include">
-          <e p="BorderedImageInspector.cs" t="Include" />
-          <e p="CameraViewer.cs" t="Include" />
           <e p="CodeGen.cs" t="Include" />
           <e p="DebuggerWindow.cs" t="Include" />
           <e p="GUIRect.cs" t="Include" />
@@ -642,5 +640,8 @@
       <e p="TestAsm.csproj" t="IncludeRecursive" />
       <e p="UIElements.sln" t="IncludeFlat" />
     </e>
+    <e p="C:\Users\Matt\.Rider2018.2\config\extensions" t="IncludeRecursive" />
+    <e p="C:\Users\Matt\.Rider2018.2\system\extResources" t="IncludeRecursive" />
+    <e p="C:\Users\Matt\.Rider2018.2\system\resharper-host\local\Transient\ReSharperHost\v182\SolutionCaches\_UIElements.120647963.00" t="ExcludeRecursive" />
   </component>
 </project>

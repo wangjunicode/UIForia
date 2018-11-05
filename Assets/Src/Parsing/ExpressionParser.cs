@@ -480,8 +480,37 @@ namespace Src {
             tokenStream.Save();
 
             if (ParseDotAccessExpression(ref retn)) return true;
+            if (ParseMethodAccessExpression(ref retn)) return true;
             if (ParseArrayBracketExpression(ref retn)) return true;
 
+            tokenStream.Restore();
+            return false;
+        }
+
+        private bool ParseMethodAccessExpression(ref AccessExpressionPartNode retn) {
+            tokenStream.Save();
+            
+            if (tokenStream.Current == TokenType.ParenOpen) {
+            
+                if (tokenStream.Next == TokenType.ParenClose) {
+                    tokenStream.Advance(2);
+                    retn = new MethodAccessExpressionPartNode(new MethodSignatureNode());
+                    return true;
+                }
+                
+
+                int advance = FindMatchingBraceIndex(TokenType.ParenOpen, TokenType.ParenClose);
+                if (advance == -1) {
+                    throw new Exception("Unmatched paren");
+                }
+
+                ExpressionParser subParser = CreateSubParser(advance);
+                MethodSignatureNode signature = subParser.ParseMethodSignature();
+
+                retn = new MethodAccessExpressionPartNode(signature);
+                return true;
+               
+            }
             tokenStream.Restore();
             return false;
         }

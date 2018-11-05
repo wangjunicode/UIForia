@@ -33,14 +33,18 @@
         }
         
         style text {
-            PreferredWidth = 1300px;
-            Padding = 14px, 12px, 4px, 12px;
+            PaddingLeft = 10;
+            PaddingRight = 10;
+            PaddingTop = 10;
+            PaddingBottom = 10;
             TextFontAsset = Whitney-Book SDF;
             TextFontSize = 26;
+            PreferredWidth = 1pca;
         }
         
         style parent {
-            PreferredSize = 1300px, 300px;
+            FlexLayoutDirection = Column;
+            <!--PreferredWidth = 100px;-->
             BackgroundColor = white;
             OverflowY = Scroll;
         }
@@ -50,19 +54,42 @@
             BackgroundColor = Yellow;
         }
         
+        style img {
+            PreferredSize = 1cnt, 1cnt;
+            PaddingLeft = 2px;
+            PaddingRight = 2px;
+            PaddingTop = 2px;
+            PaddingBottom = 2px;
+            <!--BorderColor = green;-->
+            <!--Border = 18px;-->
+            BackgroundColor = green;
+        }
+        
+          style status-icon {
+            PreferredWidth = 22px;
+            PreferredHeight = 22px;
+            BorderRadius = 50%;
+            BorderColor = red;
+            Border = 3px;
+            PaddingRight = 12px;
+        }
+        
     </Style>
 
     <Contents style="container">
 
-        <ChatPanel style.borderColor="red" selectedGroupIdx="{selectedChatGroup}" chatData="{chatData}"/>
-    
+        <!--<ChatPanel style.borderColor="red" selectedGroupIdx="{selectedChatGroup}" chatData="{chatData}"/>-->
+    <!---->
         <!--<Div style="parent">-->
-            
-            <!--< style="child"/>-->
-            
-            <!--<Text style="text">Here is text, ja hallk</Text>-->
-            
+            <!---->
+         <!---->
+                        <!--<Div style="status-icon"/>-->
+
+            <!--&lt;!&ndash;<Text style="text">Here is text, ja hallk</Text>&ndash;&gt;-->
+            <!---->
         <!--</Div>-->
+        <!---->
+        <SeedWindowFrame style.width="500"/>
         
     </Contents>
 

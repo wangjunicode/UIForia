@@ -65,6 +65,7 @@ Shader "UIForia/Default"
             uniform float4 _BorderRadius;
             uniform fixed4 _BorderColor;
             uniform float4 _FillOffsetScale;
+            uniform float4 _ContentRect;
             
             struct appdata_t {
                 float4 vertex   : POSITION;

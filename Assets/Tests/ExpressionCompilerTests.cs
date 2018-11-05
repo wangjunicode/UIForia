@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using System.Reflection;
 using JetBrains.Annotations;
@@ -27,6 +28,7 @@ public class ExpressionCompilerTests {
         public object objectVal;
         public ValueContainer valueContainer;
         public List<int> someArray;
+        public MethodThing methodThing;
 
         public float valueProperty {
             get { return value; }
@@ -1119,6 +1121,183 @@ public class ExpressionCompilerTests {
         Assert.AreEqual(false, expression.Evaluate(ctx));
     }
 
+    public class MethodThing {
+
+        public Action action0;
+        public Action<int> action1;
+        public Action<int, string> action2;
+        public Action<int, float, string> action3;
+        public Action<int, float, string, string> action4;
+        public Func<int> func1;
+        public Func<int, int> func2;
+        public Func<int, int, int> func3;
+        public Func<int, int, int, int> func4;
+        public Func<int, int, int, int, int> func5;
+
+
+    }
+    
+    [Test]
+    public void AccessExpression_Action_NoArg() {
+        TestRoot target = new TestRoot();
+        bool didCall = false;
+        target.methodThing = new MethodThing();
+        target.methodThing.action0 = () => { didCall = true; };
+        ExpressionContext ctx = new ExpressionContext(target);
+        ExpressionParser parser = new ExpressionParser("{methodThing.action0()}");
+        ExpressionCompiler compiler = new ExpressionCompiler(testContextDef);
+        Expression expression = compiler.Compile(parser.Parse());
+        expression.Evaluate(ctx);
+        Assert.IsTrue(didCall);
+    }
+    
+    [Test]
+    public void AccessExpression_Func_NoArg() {
+        TestRoot target = new TestRoot();
+        target.methodThing = new MethodThing();
+        target.methodThing.func1 = () => { return 5; };
+        ExpressionContext ctx = new ExpressionContext(target);
+        ExpressionParser parser = new ExpressionParser("{methodThing.func1()}");
+        ExpressionCompiler compiler = new ExpressionCompiler(testContextDef);
+        Expression expression = compiler.Compile(parser.Parse());
+        expression.Evaluate(ctx);
+        Assert.AreEqual(5, expression.Evaluate(ctx));
+    }
+
+    [Test]
+    public void AccessExpression_Func_OneArg() {
+        TestRoot target = new TestRoot();
+        target.methodThing = new MethodThing();
+        target.methodThing.func2 = (int x) => { return x + 5; };
+        ExpressionContext ctx = new ExpressionContext(target);
+        ExpressionParser parser = new ExpressionParser("{methodThing.func2(5)}");
+        ExpressionCompiler compiler = new ExpressionCompiler(testContextDef);
+        Expression expression = compiler.Compile(parser.Parse());
+        expression.Evaluate(ctx);
+        Assert.AreEqual(10, expression.Evaluate(ctx));
+    }
+    
+    [Test]
+    public void AccessExpression_Func_TwoArgs() {
+        TestRoot target = new TestRoot();
+        target.methodThing = new MethodThing();
+        target.methodThing.func3 = (int x, int y) => { return x + y + 5; };
+        ExpressionContext ctx = new ExpressionContext(target);
+        ExpressionParser parser = new ExpressionParser("{methodThing.func3(5, 5)}");
+        ExpressionCompiler compiler = new ExpressionCompiler(testContextDef);
+        Expression expression = compiler.Compile(parser.Parse());
+        expression.Evaluate(ctx);
+        Assert.AreEqual(15, expression.Evaluate(ctx));
+    }
+    
+        
+    [Test]
+    public void AccessExpression_Func_ThreeArgs() {
+        TestRoot target = new TestRoot();
+        target.methodThing = new MethodThing();
+        target.methodThing.func4 = (int x, int y, int z) => { return x + y + z + 5; };
+        ExpressionContext ctx = new ExpressionContext(target);
+        ExpressionParser parser = new ExpressionParser("{methodThing.func4(5, 5, 5)}");
+        ExpressionCompiler compiler = new ExpressionCompiler(testContextDef);
+        Expression expression = compiler.Compile(parser.Parse());
+        expression.Evaluate(ctx);
+        Assert.AreEqual(20, expression.Evaluate(ctx));
+    }
+    
+    [Test]
+    public void AccessExpression_Func_FourArgs() {
+        TestRoot target = new TestRoot();
+        target.methodThing = new MethodThing();
+        target.methodThing.func5 = (int x, int y, int z, int w) => { return x + y + z + 5 + w; };
+        ExpressionContext ctx = new ExpressionContext(target);
+        ExpressionParser parser = new ExpressionParser("{methodThing.func5(5, 5, 5, 1)}");
+        ExpressionCompiler compiler = new ExpressionCompiler(testContextDef);
+        Expression expression = compiler.Compile(parser.Parse());
+        expression.Evaluate(ctx);
+        Assert.AreEqual(21, expression.Evaluate(ctx));
+    }
+
+    
+    [Test]
+    public void AccessExpression_Action_OneArg() {
+        TestRoot target = new TestRoot();
+        int val = 0;
+        target.methodThing = new MethodThing();
+        target.methodThing.action1 = (int v) => { val = v; };
+        ExpressionContext ctx = new ExpressionContext(target);
+        ExpressionParser parser = new ExpressionParser("{methodThing.action1(5)}");
+        ExpressionCompiler compiler = new ExpressionCompiler(testContextDef);
+        Expression expression = compiler.Compile(parser.Parse());
+        expression.Evaluate(ctx);
+        Assert.AreEqual(5, val);
+    }
+    
+    [Test]
+    public void AccessExpression_Action_TwoArgs() {
+        TestRoot target = new TestRoot();
+        int val = 0;
+        string strVal = "";
+        target.methodThing = new MethodThing();
+        target.methodThing.action2 = (int v, string x) => {
+            val = v;
+            strVal = x;
+        };
+        ExpressionContext ctx = new ExpressionContext(target);
+        ExpressionParser parser = new ExpressionParser("{methodThing.action2(5, 'str')}");
+        ExpressionCompiler compiler = new ExpressionCompiler(testContextDef);
+        Expression expression = compiler.Compile(parser.Parse());
+        expression.Evaluate(ctx);
+        Assert.AreEqual(5, val);
+        Assert.AreEqual("str", strVal);
+    }
+    
+    [Test]
+    public void AccessExpression_Action_ThreeArgs() {
+        TestRoot target = new TestRoot();
+        int val = 0;
+        float fVal = 0;
+        string strVal = "";
+        target.methodThing = new MethodThing();
+        target.methodThing.action3 = (int v, float f, string x) => {
+            val = v;
+            strVal = x;
+            fVal = f;
+        };
+        ExpressionContext ctx = new ExpressionContext(target);
+        ExpressionParser parser = new ExpressionParser("{methodThing.action3(5, 7.6f, 'str')}");
+        ExpressionCompiler compiler = new ExpressionCompiler(testContextDef);
+        Expression expression = compiler.Compile(parser.Parse());
+        expression.Evaluate(ctx);
+        Assert.AreEqual(5, val);
+        Assert.AreEqual("str", strVal);
+        Assert.AreEqual(7.6f, fVal);
+    }
+    
+    [Test]
+    public void AccessExpression_Action_FourArgs() {
+        TestRoot target = new TestRoot();
+        int val = 0;
+        float fVal = 0;
+        string strVal = "";
+        string strVal2 = "";
+        target.methodThing = new MethodThing();
+        target.methodThing.action4 = (int v, float f, string x, string y) => {
+            val = v;
+            strVal = x;
+            strVal2 = y;
+            fVal = f;
+        };
+        ExpressionContext ctx = new ExpressionContext(target);
+        ExpressionParser parser = new ExpressionParser("{methodThing.action4(5, 7.6f, 'str', 'str2')}");
+        ExpressionCompiler compiler = new ExpressionCompiler(testContextDef);
+        Expression expression = compiler.Compile(parser.Parse());
+        expression.Evaluate(ctx);
+        Assert.AreEqual(5, val);
+        Assert.AreEqual(7.6f, fVal);
+        Assert.AreEqual("str", strVal);
+        Assert.AreEqual("str2", strVal2);
+    }
+    
     private static Expression GetLiteralExpression(string input) {
         ExpressionParser parser = new ExpressionParser(input);
         ExpressionCompiler compiler = new ExpressionCompiler(nullContext);

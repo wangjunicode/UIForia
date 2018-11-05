@@ -107,19 +107,26 @@ float2 rotate_fill(float2 fpos, float rotation) {
 
 // returns the fill color for the given uv point in the quad.
 // @param uv the uv coords from -0.5 to 0.5
-fixed4 fill(float2 uv, float2 size, FillSettings settings) {
+fixed4 fill(float2 uv, float2 size, float4 contentRect, FillSettings settings) {
     float2 fpos = uv * size;
 
     #if UIFORIA_FILLTYPE_COLOR
         return settings.fillColor1;
    
     #elif UIFORIA_FILLTYPE_TEXTURE
-        fpos = rotate_fill(fpos, settings.fillRotation);
-        fpos /= size;
-        fpos += float2(0.5, 0.5);
-        fpos += settings.fillOffset;
-        fpos /= settings.fillScale;
-        return tex2D(settings.fillTexture, fpos);// * settings.fillColor1;
+        float2 p = (uv + 0.5) * size;
+        
+        if(p.x <= contentRect.x || p.x >= contentRect.x + contentRect.z || p.y <= contentRect.y || p.y >= contentRect.y + contentRect.w) {
+            return settings.fillColor1;
+        }
+        float2 uv2 = float2(
+            (p.x - contentRect.x) / contentRect.z, 
+            (p.y - contentRect.y) / contentRect.w
+        );
+        uv2 = rotate_fill(uv2, settings.fillRotation);
+        uv2 += settings.fillOffset;
+        uv2 /= settings.fillScale;
+        return tex2D(settings.fillTexture, uv2);// * settings.fillColor1;
         
     #elif defined(UIFORIA_FILLTYPE_LINEAR_GRADIENT) | defined(UIFORIA_FILLTYPE_RADIAL_GRADIENT) | defined(UIFORIA_FILLTYPE_CYLINDRICAL_GRADIENT)
         

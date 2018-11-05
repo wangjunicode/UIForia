@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using Src.Util;
 
 namespace Src {
@@ -28,10 +29,12 @@ namespace Src {
 
         public int Count => count - freeCount;
 
+        [DebuggerStepThrough]
         public void Add(int key, T value) {
             Insert(key, value, true);
         }
 
+        [DebuggerStepThrough]
         public bool TryGetValue(int key, out T value) {
             int i = FindEntry(key);
             if (i >= 0) {
@@ -42,6 +45,7 @@ namespace Src {
             return false;
         }
 
+        [DebuggerStepThrough]
         public bool Remove(int key) {
 
             int hashCode = key & 0x7FFFFFFF;
@@ -69,6 +73,7 @@ namespace Src {
         }
 
         public T this[int key] {
+            [DebuggerStepThrough]
             get {
                 int i = FindEntry(key);
                 if (i >= 0) {
@@ -76,9 +81,12 @@ namespace Src {
                 }
                 return default(T);
             }
+            [DebuggerStepThrough]
+
             set { Insert(key, value, false); }
         }
 
+        [DebuggerStepThrough]
         public T GetOrDefault(int key, T defaultValue = default(T)) {
             int i = FindEntry(key);
             if (i >= 0) {
@@ -87,6 +95,7 @@ namespace Src {
             return defaultValue;
         }
 
+        [DebuggerStepThrough]
         public void Clear() {
             if (count > 0) {
                 for (int i = 0; i < capacity; i++) {
@@ -99,6 +108,7 @@ namespace Src {
             }
         }
 
+        [DebuggerStepThrough]
         public bool ContainsKey(int key) {
             return FindEntry(key) >= 0;
         }
@@ -124,6 +134,7 @@ namespace Src {
             entries = newEntries;
         }
 
+        [DebuggerStepThrough]
         private int FindEntry(int key) {
             int hashCode = key & 0x7FFFFFFF;
             for (int i = buckets[hashCode % capacity]; i >= 0; i = entries[i].next) {
@@ -134,6 +145,7 @@ namespace Src {
             return -1;
         }
 
+        [DebuggerStepThrough]
         private void Insert(int key, T value, bool add) {
 
             int hashCode = key & 0x7FFFFFFF;
@@ -170,6 +182,7 @@ namespace Src {
             buckets[targetBucket] = index;
         }
 
+        [DebuggerStepThrough]
         public int CopyKeyValuesToArray(ref KeyValuePair<int, T>[] array, int index = 0) {
             if (array == null) {
                 array = ArrayPool<KeyValuePair<int, T>>.GetMinSize(Count);
@@ -193,6 +206,7 @@ namespace Src {
             return index + Count;
         }
         
+        [DebuggerStepThrough]
         public int CopyValuesToArray(ref T[] array, int index = 0) {
             if (array == null) {
                 array = ArrayPool<T>.GetMinSize(Count);

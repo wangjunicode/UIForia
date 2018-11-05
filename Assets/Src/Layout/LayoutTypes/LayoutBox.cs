@@ -91,6 +91,28 @@ namespace Src.Layout.LayoutTypes {
         public float AnchorTop => ResolveVerticalAnchor(style.AnchorTop);
         public float AnchorBottom => ResolveVerticalAnchor(style.AnchorBottom);
 
+        public float PaddingBorderHorizontal =>
+            ResolveFixedWidth(style.PaddingLeft) +
+            ResolveFixedWidth(style.PaddingRight) +
+            ResolveFixedWidth(style.BorderRight) +
+            ResolveFixedWidth(style.BorderLeft);
+
+        public float PaddingBorderVertical =>
+            ResolveFixedHeight(style.PaddingTop) +
+            ResolveFixedHeight(style.PaddingBottom) +
+            ResolveFixedHeight(style.BorderBottom) +
+            ResolveFixedHeight(style.BorderTop);
+
+        public Rect ContentRect {
+            get {
+                float x = PaddingLeft + BorderLeft;
+                float y = PaddingTop + BorderTop;
+                float width = allocatedWidth - x - PaddingRight - BorderRight;
+                float height = allocatedHeight - y - PaddingBottom - BorderBottom;
+                return new Rect(x, y, Mathf.Max(0, width), Mathf.Max(0, height));
+            }
+        }
+
         public virtual void OnInitialize() { }
 
         public void SetParent(LayoutBox parent) {
@@ -436,7 +458,7 @@ namespace Src.Layout.LayoutTypes {
 
                 case UIMeasurementUnit.Content:
                     cachedPreferredWidth = GetContentWidth();
-                    return Mathf.Max(0, PaddingHorizontal + BorderHorizontal + (cachedPreferredWidth * widthMeasurement.value));
+                    return Mathf.Max(0, PaddingBorderHorizontal + (cachedPreferredWidth * widthMeasurement.value));
 
                 case UIMeasurementUnit.ParentSize:
                     if (parent.style.PreferredWidth.IsContentBased) {
@@ -455,8 +477,8 @@ namespace Src.Layout.LayoutTypes {
                     if (parent.style.PreferredWidth.IsContentBased) {
                         return 0f;
                     }
-                    
-                    return Mathf.Max(0, parent.allocatedWidth - parent.PaddingHorizontal - parent.BorderHorizontal) * widthMeasurement.value;
+
+                    return Mathf.Max(0, parent.allocatedWidth - parent.PaddingBorderHorizontal) * widthMeasurement.value;
 
                 case UIMeasurementUnit.Em:
                     return Math.Max(0, style.EmSize * widthMeasurement.value);
@@ -583,7 +605,7 @@ namespace Src.Layout.LayoutTypes {
                             float paddingLeft = parent.PaddingLeft;
                             float borderLeft = parent.BorderLeft;
                             float start = paddingLeft + borderLeft;
-                            float end = parent.allocatedWidth - parent.PaddingHorizontal - parent.BorderHorizontal;
+                            float end = parent.allocatedWidth - parent.PaddingBorderHorizontal;
                             float range = end - start;
                             return start + (range * anchor.value);
 
@@ -629,7 +651,7 @@ namespace Src.Layout.LayoutTypes {
                             float paddingTop = parent.PaddingTop;
                             float borderTop = parent.BorderTop;
                             float start = paddingTop + borderTop;
-                            float end = parent.allocatedHeight - parent.PaddingVertical - parent.BorderVertical;
+                            float end = parent.allocatedHeight - parent.PaddingBorderVertical;
                             float range = end - start;
                             return start + (range * anchor.value);
 
@@ -672,7 +694,8 @@ namespace Src.Layout.LayoutTypes {
                         SetCachedHeightForWidth(contentWidth, contentHeight);
                         allocatedWidth = cachedWidth;
                     }
-                    return PaddingVertical + BorderVertical + contentHeight * height.value;
+
+                    return Mathf.Max(0, PaddingBorderVertical + (contentHeight * height.value));
 
                 case UIMeasurementUnit.ParentSize:
                     if (parent.style.PreferredHeight.IsContentBased) {
@@ -692,7 +715,7 @@ namespace Src.Layout.LayoutTypes {
                         return 0f;
                     }
 
-                    return Mathf.Max(0, parent.allocatedHeight * height.value - (parent.style == null ? 0 : parent.PaddingVertical - parent.BorderVertical));
+                    return Mathf.Max(0, parent.allocatedHeight * height.value - (parent.style == null ? 0 : parent.PaddingBorderVertical));
 
                 case UIMeasurementUnit.Em:
                     return Mathf.Max(0, style.EmSize * height.value);
@@ -735,7 +758,7 @@ namespace Src.Layout.LayoutTypes {
                     return Mathf.Max(0, widthMeasurement.value);
 
                 case UIMeasurementUnit.Content:
-                    return Mathf.Max(0, PaddingHorizontal + BorderHorizontal + (GetContentWidth() * widthMeasurement.value));
+                    return Mathf.Max(0, PaddingBorderHorizontal + (GetContentWidth() * widthMeasurement.value));
 
                 case UIMeasurementUnit.ParentSize:
                     if (parent.style.PreferredWidth.IsContentBased) {
@@ -789,7 +812,7 @@ namespace Src.Layout.LayoutTypes {
                     return Mathf.Max(0, heightMeasurement.value);
 
                 case UIMeasurementUnit.Content:
-                    return Mathf.Max(0, GetContentHeight(width) * heightMeasurement.value);
+                    return Mathf.Max(0, PaddingBorderVertical + (GetContentHeight(width) * heightMeasurement.value));
 
                 case UIMeasurementUnit.ParentSize:
                     if (parent.style.PreferredHeight.IsContentBased) {
@@ -853,13 +876,11 @@ namespace Src.Layout.LayoutTypes {
 
             public readonly float minSize;
             public readonly float maxSize;
-            public readonly float prfSize;
             public readonly float clampedSize;
 
             public LayoutBoxSize(float minSize, float maxSize, float prfSize) {
                 this.minSize = minSize;
                 this.maxSize = maxSize;
-                this.prfSize = prfSize;
                 this.clampedSize = Mathf.Max(minSize, Mathf.Min(prfSize, maxSize));
             }
 

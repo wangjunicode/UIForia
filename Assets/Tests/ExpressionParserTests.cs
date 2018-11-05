@@ -495,6 +495,30 @@ using static Tests.TestUtils;
             Assert.AreEqual(-64.8, b.value);
         }
         
+        [Test]
+        public void Parse_ChainedMethodCallExpressionNoArgs() {
+            ExpressionParser parser = new ExpressionParser("{thing.action()}");
+            ExpressionNode root = parser.Parse();
+            AccessExpressionNode node = AssertInstanceOfAndReturn<AccessExpressionNode>(root);
+            Assert.AreEqual(2, node.parts.Count);
+        }
+        
+        [Test]
+        public void Parse_ChainedMethodCallExpression1Arg() {
+            ExpressionParser parser = new ExpressionParser("{thing.action(1)}");
+            ExpressionNode root = parser.Parse();
+            AccessExpressionNode node = AssertInstanceOfAndReturn<AccessExpressionNode>(root);
+            Assert.AreEqual(2, node.parts.Count);
+        }
+        
+        [Test]
+        public void Parse_ChainedMethodCallExpression2Arg() {
+            ExpressionParser parser = new ExpressionParser("{$thing.action(1, thing.action2())}");
+            ExpressionNode root = parser.Parse();
+            AccessExpressionNode node = AssertInstanceOfAndReturn<AccessExpressionNode>(root);
+            Assert.AreEqual(2, node.parts.Count);
+        }
+        
         public static string GetIdentifierName(ASTNode node) {
             if (node is IdentifierNode) {
                 return ((IdentifierNode) node).identifier;

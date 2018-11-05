@@ -358,7 +358,7 @@ namespace Src.Layout.LayoutTypes {
                 }
 
                 AlignMainAxis(track, heights, style.FlexLayoutMainAxisAlignment, paddingBorderTop);
-                trackCrossAxisStart = PositionCrossAxisRow(trackCrossAxisStart, paddingBorderLeft, track, tracks.Count > 1 ? track.crossSize : adjustedWidth);
+                trackCrossAxisStart = PositionCrossAxisRow(trackCrossAxisStart, paddingBorderLeft, track, adjustedWidth);
 
                 for (int j = track.startItem; j < track.startItem + track.itemCount; j++) {
                     children[widths[j].childIndex].SetAllocatedXAndWidth(widths[j].axisStart, widths[j].outputSize);
@@ -373,8 +373,8 @@ namespace Src.Layout.LayoutTypes {
                 }
             }
 
-            actualWidth = Mathf.Max(allocatedWidth, maxWidth);
-            actualHeight = Mathf.Max(allocatedHeight, largestTrackSize);
+            actualWidth = Mathf.Max(allocatedWidth, maxWidth - PaddingRight - BorderRight);
+            actualHeight = Mathf.Max(allocatedHeight, largestTrackSize); // padding / border?
         }
 
         private void FillColumnTracks(float targetSize) {

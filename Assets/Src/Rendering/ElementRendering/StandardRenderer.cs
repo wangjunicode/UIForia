@@ -25,6 +25,7 @@ namespace Src.Systems {
         public static readonly int s_BorderSizeKey;
         public static readonly int s_BorderRadiusKey;
         public static readonly int s_BorderColorKey;
+        public static readonly int s_ContentRectKey;
         public static readonly int s_FillOffsetScaleKey;
 
         private static readonly Material s_BaseMaterial;
@@ -37,6 +38,7 @@ namespace Src.Systems {
             s_BorderSizeKey = Shader.PropertyToID("_BorderSize");
             s_BorderRadiusKey = Shader.PropertyToID("_BorderRadius");
             s_FillOffsetScaleKey = Shader.PropertyToID("_FillOffsetScale");
+            s_ContentRectKey = Shader.PropertyToID("_ContentRect");
             s_SizeKey = Shader.PropertyToID("_Size");
         }
         
@@ -125,6 +127,8 @@ namespace Src.Systems {
                 // todo -- see if [PerRendererData] can stop us from needing unique materials
                 Vector2 fillScale = new Vector2(style.BackgroundFillScaleX, style.BackgroundFillScaleY);
                 Vector2 fillOffset = new Vector2(style.BackgroundFillOffsetX, style.BackgroundFillOffsetY);
+                Rect contentRect = element.layoutResult.ContentRect;
+                material.SetVector(s_ContentRectKey, new Vector4(contentRect.x, contentRect.y, contentRect.width, contentRect.height));
                 material.SetColor(s_ColorKey, style.BackgroundColor);
                 material.SetVector(s_ClipRectKey, data.clipVector);
                 material.SetVector(s_FillOffsetScaleKey, new Vector4(fillOffset.x, fillOffset.y, fillScale.x, fillScale.y));

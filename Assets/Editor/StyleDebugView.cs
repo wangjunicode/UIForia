@@ -51,7 +51,7 @@ namespace Src.Editor {
             EditorGUILayout.RectField("ScreenOverflowRect", element.layoutResult.ScreenOverflowRect);
             EditorGUILayout.Vector2Field("Actual Size", element.layoutResult.actualSize);
             EditorGUILayout.Vector2Field("Allocated Size", element.layoutResult.allocatedSize);
-            EditorGUILayout.Vector2Field("Content Offset", element.layoutResult.contentOffset);
+//            EditorGUILayout.Vector2Field("Content Offset", element.layoutResult.contentOffset);
 
             EditorGUILayout.Space();
 

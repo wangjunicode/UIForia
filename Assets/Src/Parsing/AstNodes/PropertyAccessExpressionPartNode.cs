@@ -15,5 +15,19 @@ namespace Src {
         }
 
     }
+    
+    public class MethodAccessExpressionPartNode : AccessExpressionPartNode {
+
+        public readonly MethodSignatureNode signatureNode;
+        
+        public MethodAccessExpressionPartNode(MethodSignatureNode signatureNode) : base (ExpressionNodeType.Accessor) {
+            this.signatureNode = signatureNode;
+        }
+
+        public override Type GetYieldedType(ContextDefinition context) {
+            throw new NotImplementedException();
+        }
+
+    }
 
 }

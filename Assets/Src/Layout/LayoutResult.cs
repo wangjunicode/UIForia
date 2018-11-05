@@ -10,10 +10,10 @@ namespace Src.Systems {
         public Vector2 scale;
         public Vector2 localPosition;
         public Vector2 screenPosition;
-        public Vector2 contentOffset;
 
         public Size actualSize;
         public Size allocatedSize;
+        public Rect contentRect;
 
         public int layer;
         public int zIndex;
@@ -31,6 +31,9 @@ namespace Src.Systems {
         
         public float ActualWidth => actualSize.width;
         public float ActualHeight => actualSize.height;
+
+        public float ContentWidth => contentRect.width;
+        public float ContentHeight => contentRect.height;
         
         public bool SizeChanged => (flags & LayoutResultFlags.SizeChanged) != 0;
         public bool TransformChanged => (flags & LayoutResultFlags.TransformChanged) != 0;
@@ -88,18 +91,18 @@ namespace Src.Systems {
             }
         }
 
-        public Vector2 ContentOffset {
-            get { return contentOffset; }
-            internal set {
-                if (value != contentOffset) {
-                    contentOffset = value;
-                    flags |= LayoutResultFlags.ContentOffsetChanged;
-                }
-                else {
-                    flags &= ~LayoutResultFlags.ContentOffsetChanged;
-                }
-            }
-        }
+//        public Vector2 ContentOffset {
+//            get { return contentOffset; }
+//            internal set {
+//                if (value != contentOffset) {
+//                    contentOffset = value;
+//                    flags |= LayoutResultFlags.ContentRectChanged;
+//                }
+//                else {
+//                    flags &= ~LayoutResultFlags.ContentRectChanged;
+//                }
+//            }
+//        }
 
         public Vector2 Scale {
             get { return scale; }
@@ -190,10 +193,10 @@ namespace Src.Systems {
         }
 
         public bool ContentOffsetChanged {
-            get { return (flags & LayoutResultFlags.ContentOffsetChanged) != 0; }
+            get { return (flags & LayoutResultFlags.ContentRectChanged) != 0; }
             internal set {
                 if (value) {
-                    flags |= LayoutResultFlags.ContentOffsetChanged;
+                    flags |= LayoutResultFlags.ContentRectChanged;
                 }
             }
         }
@@ -217,6 +220,20 @@ namespace Src.Systems {
             }
         }
 
+        public Rect ContentRect {
+            get { return contentRect; }
+            set {
+                if (value != contentRect) {
+                    contentRect = value;
+                    flags |= LayoutResultFlags.ContentRectChanged;
+                }
+                else {
+                    flags &= ~LayoutResultFlags.ContentRectChanged;
+                }
+            }
+
+        }
+
         [Flags]
         private enum LayoutResultFlags {
 
@@ -225,7 +242,7 @@ namespace Src.Systems {
             ActualSizeChanged = 1 << 1,
             LayerChanged = 1 << 2,
             ZIndexChanged = 1 << 3,
-            ContentOffsetChanged = 1 << 4,
+            ContentRectChanged = 1 << 4,
             RotationChanged = 1 << 5,
             ScaleChanged = 1 << 6,
             LocalPositionChanged = 1 << 7,

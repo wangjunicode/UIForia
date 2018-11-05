@@ -26,6 +26,7 @@ namespace Src.Layout.LayoutTypes {
             else {
                 actualWidth = GetWidths().clampedSize;
             }
+
             if (style.PreferredHeight.unit == UIMeasurementUnit.Content) {
                 if (texture != null) {
                     actualHeight = texture.height;
@@ -37,17 +38,20 @@ namespace Src.Layout.LayoutTypes {
             else {
                 actualHeight = GetHeights(actualWidth).clampedSize;
             }
+
+            actualWidth += PaddingBorderHorizontal;
+            actualHeight += PaddingBorderVertical;
         }
 
         protected override float ComputeContentWidth() {
-            return image.texture == null ? 0 : image.texture.width;
+            return (image.texture == null ? 0 : image.texture.width);
         }
 
         protected override float ComputeContentHeight(float width) {
             // todo -- preserve aspect ratio
 //            float scale = width / image.texture.width;
 //            float aspect = image.texture.width / image.texture.height;
-            return image.texture == null ? 0 : image.texture.height;
+            return (image.texture == null ? 0 : image.texture.height);
         }
 
     }

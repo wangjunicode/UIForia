@@ -86,11 +86,11 @@ public static class ReflectionUtil {
     public static FieldInfo GetFieldInfo(Type type, string fieldName) {
         return type.GetField(fieldName, InstanceBindFlags);
     }
-    
+
     public static FieldInfo GetStaticFieldInfo(Type type, string fieldName) {
         return type.GetField(fieldName, StaticFlags);
     }
-    
+
     public static FieldInfo GetInstanceOrStaticFieldInfo(Type type, string fieldName) {
         return type.GetField(fieldName, StaticFlags | InstanceBindFlags);
     }
@@ -102,11 +102,11 @@ public static class ReflectionUtil {
     public static PropertyInfo GetStaticPropertyInfo(Type type, string fieldName) {
         return type.GetProperty(fieldName, StaticFlags);
     }
-    
+
     public static PropertyInfo GetInstanceOrStaticPropertyInfo(Type type, string propertyType) {
         return type.GetProperty(propertyType, StaticFlags | InstanceBindFlags);
     }
-    
+
     public static FieldInfo GetFieldInfoOrThrow(Type type, string fieldName) {
         FieldInfo fieldInfo = type.GetField(fieldName, InstanceBindFlags);
         if (fieldInfo == null) {
@@ -115,7 +115,7 @@ public static class ReflectionUtil {
 
         return fieldInfo;
     }
-    
+
     public static PropertyInfo GetPropertyInfoOrThrow(Type type, string propertyName) {
         PropertyInfo propertyInfo = type.GetProperty(propertyName, InstanceBindFlags);
         if (propertyInfo == null) {
@@ -123,25 +123,24 @@ public static class ReflectionUtil {
         }
 
         return propertyInfo;
-        
     }
 
     public static bool IsField(Type type, string fieldName) {
         return type.GetField(fieldName, InstanceBindFlags) != null;
     }
-    
+
     public static bool IsProperty(Type type, string propertyName) {
         return type.GetProperty(propertyName, InstanceBindFlags) != null;
     }
-    
+
     public static Type GetFieldType(Type type, string fieldName) {
         return GetFieldInfoOrThrow(type, fieldName).FieldType;
     }
-    
+
     public static Type GetPropertyType(Type type, string propertyName) {
         return GetPropertyInfoOrThrow(type, propertyName).PropertyType;
     }
-    
+
     public static Type GetCommonBaseClass(params Type[] types) {
         if (types.Length == 0) {
             return null;
@@ -407,7 +406,7 @@ public static class ReflectionUtil {
         ParameterInfo[] parameters = info.GetParameters();
 
         int additionalSize = info.ReturnType == typeof(void) ? 0 : 1;
-        
+
         Type[] signatureTypes = new Type[parameters.Length + additionalSize];
 
         for (int i = 0; i < parameters.Length; i++) {
@@ -415,9 +414,8 @@ public static class ReflectionUtil {
         }
 
         if (info.ReturnType != typeof(void)) {
-            
             signatureTypes[parameters.Length + 1] = info.ReturnType;
-            
+
             switch (signatureTypes.Length) {
                 case 1:
                     return typeof(Func<>).MakeGenericType(signatureTypes);
@@ -721,5 +719,26 @@ public static class ReflectionUtil {
     }
 
 
+    public static bool IsAction(Type type) {
+        if (type == typeof(Action)) {
+            return true;
+        }
+        Type generic = null;
+        if (type.IsGenericTypeDefinition) {
+            generic = type;
+        }
+        else if (type.IsGenericType) {
+            generic = type.GetGenericTypeDefinition();
+        }
+
+        if (generic == typeof(Action<>)) return true;
+        if (generic == typeof(Action<,>)) return true;
+        if (generic == typeof(Action<,,>)) return true;
+        if (generic == typeof(Action<,,,>)) return true;
+        if (generic == typeof(Action<,,,,>)) return true;
+        if (generic == typeof(Action<,,,,,>)) return true;
+        if (generic == typeof(Action<,,,,,,>)) return true;
+        return false;
+    }
 
 }

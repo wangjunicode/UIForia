@@ -19,12 +19,13 @@
      #define m_GridSize UNITY_ACCESS_INSTANCED_PROP(Props, _GridAndLineSize).xy
      #define m_LineSize UNITY_ACCESS_INSTANCED_PROP(Props, _GridAndLineSize).zw
      #define m_FillTexture _MainTex
-
+     // todo change this
+     #define m_ContentRect float4(0, 0, 100, 100) 
 #else
      
      #define m_Size _Size
      #define m_ClipRect _ClipRect
-     
+     #define m_ContentRect _ContentRect
      #define m_FillRotation 0
      #define m_GradientStart 0
      #define m_GradientAxis 0

@@ -26,7 +26,7 @@ namespace Src.Layout.LayoutTypes {
 
             ListPool<LineInfo>.Release(ref lineInfos);
             
-            return maxWidth + PaddingHorizontal + BorderHorizontal;
+            return maxWidth;
         }
 
         protected override float ComputeContentHeight(float width) {
@@ -36,7 +36,7 @@ namespace Src.Layout.LayoutTypes {
             ListPool<LineInfo>.Release(ref lineInfos);
             TMP_FontAsset asset = style.TextFontAsset;
             float lh = asset.fontInfo.LineHeight * (style.TextFontSize / asset.fontInfo.PointSize) * asset.fontInfo.Scale;
-            return lastLine.position.y + lh + PaddingBottom + BorderBottom; 
+            return lastLine.position.y + lh;
         }
 
         public override void RunLayout() {
@@ -48,15 +48,21 @@ namespace Src.Layout.LayoutTypes {
             ((UITextElement) element).textInfo = textInfo;
 
             float maxWidth = 0;
+            float topOffset = PaddingTop + BorderTop;
+            float leftOffset = PaddingLeft + BorderLeft;
             for (int i = 0; i < lineInfos.Count; i++) {
+                textInfo.lineInfos[i].position = new Vector2(
+                    lineInfos[i].position.x + leftOffset,
+                    lineInfos[i].position.y + topOffset
+                );
                 maxWidth = Mathf.Max(maxWidth, lineInfos[i].width);
             }
 
-            actualWidth = maxWidth + PaddingHorizontal;
+            actualWidth = maxWidth + PaddingHorizontal + BorderHorizontal;
             TMP_FontAsset asset = style.TextFontAsset;
             float s =  (style.TextFontSize / asset.fontInfo.PointSize) * asset.fontInfo.Scale;;
             float lh = asset.fontInfo.LineHeight * s;
-            actualHeight = lastLine.position.y + lh + PaddingBottom + BorderBottom;
+            actualHeight = textInfo.lineInfos[textInfo.lineInfos.Length - 1].position.y + lh + PaddingBottom + BorderBottom;
 
             ApplyTextAlignment(allocatedWidth, textInfo, style.TextAlignment);
 
@@ -66,7 +72,7 @@ namespace Src.Layout.LayoutTypes {
         // todo -- when starting a new line, if the last line has spaces as the final characters, consider stripping them
 
         private List<LineInfo> RunLayout(TextInfo textInfo, float width) {
-            float lineOffset = PaddingTop + BorderTop;
+            float lineOffset = 0;
             TMP_FontAsset asset = style.TextFontAsset;
             float lh = asset.fontInfo.LineHeight * (style.TextFontSize / asset.fontInfo.PointSize) * asset.fontInfo.Scale;
 
@@ -74,8 +80,7 @@ namespace Src.Layout.LayoutTypes {
             WordInfo[] wordInfos = textInfo.wordInfos;
             List<LineInfo> lineInfos = ListPool<LineInfo>.Get();
 
-            float paddingBorderOffset = PaddingLeft + BorderLeft;
-            currentLine.position = new Vector2(paddingBorderOffset, lineOffset);
+            currentLine.position = new Vector2(0, 0);
             width = Mathf.Max(width - PaddingHorizontal + BorderHorizontal, 0);
             
             for (int w = 0; w < textInfo.wordCount; w++) {
@@ -83,10 +88,10 @@ namespace Src.Layout.LayoutTypes {
 
                 if (currentWord.isNewLine) {
                     lineInfos.Add(currentLine);
-                    lineOffset -= lh;
+                    lineOffset += lh;
                     //(currentLine.maxDescender + textInfo.charInfos[currentWord.startChar + currentWord.VisibleCharCount - 1].ascender + lineGap) * baseScale;
                     currentLine = new LineInfo();
-                    currentLine.position = new Vector2(paddingBorderOffset, lineOffset);
+                    currentLine.position = new Vector2(0, lineOffset);
                     currentLine.wordStart = w + 1;
                     continue;
                 }
@@ -97,12 +102,12 @@ namespace Src.Layout.LayoutTypes {
                     // line offset needs to to be bumped
                     if (currentLine.wordCount > 0) {
                         lineInfos.Add(currentLine);
-                        lineOffset -= lh;
+                        lineOffset += lh;
                         //-currentLine.maxDescender + textInfo.charInfos[currentWord.startChar + currentWord.VisibleCharCount - 1].ascender + (lineGap) * baseScale;
                     }
 
                     currentLine = new LineInfo();
-                    currentLine.position = new Vector2(paddingBorderOffset, lineOffset);
+                    currentLine.position = new Vector2(0, lineOffset);
                     currentLine.wordStart = w;
                     currentLine.wordCount = 1;
                   //  currentLine.maxAscender = currentWord.ascender;
@@ -110,11 +115,11 @@ namespace Src.Layout.LayoutTypes {
                     currentLine.width = currentWord.size.x;
                     lineInfos.Add(currentLine);
 
-                    lineOffset -= lh;
+                    lineOffset += lh;
                     //-currentLine.maxDescender + textInfo.charInfos[currentWord.startChar + currentWord.VisibleCharCount - 1].ascender + (lineGap) * baseScale;
                     currentLine = new LineInfo();
                     currentLine.wordStart = w + 1;
-                    currentLine.position = new Vector2(paddingBorderOffset, lineOffset);
+                    currentLine.position = new Vector2(0, lineOffset);
                 }
 
                 else if (currentLine.width + currentWord.size.x > width + 0.01f) {
@@ -127,20 +132,20 @@ namespace Src.Layout.LayoutTypes {
                         currentLine.width += currentWord.characterSize;
                         lineInfos.Add(currentLine);
 
-                        lineOffset -= lh;
+                        lineOffset += lh;
                         //-currentLine.maxDescender + textInfo.charInfos[currentWord.startChar + currentWord.VisibleCharCount - 1].ascender + (lineGap) * baseScale;
 
                         currentLine = new LineInfo();
-                        currentLine.position = new Vector2(paddingBorderOffset, lineOffset);
+                        currentLine.position = new Vector2(0, lineOffset);
                         currentLine.wordStart = w + 1;
                         continue;
                     }
 
                     lineInfos.Add(currentLine);
-                    lineOffset -= lh;
+                    lineOffset += lh;
                     //-currentLine.maxDescender + textInfo.charInfos[currentWord.startChar + currentWord.VisibleCharCount - 1].ascender + (lineGap) * baseScale;
                     currentLine = new LineInfo();
-                    currentLine.position = new Vector2(paddingBorderOffset, lineOffset);
+                    currentLine.position = new Vector2(0, lineOffset);
                     currentLine.wordStart = w;
                     currentLine.wordCount = 1;
                     currentLine.width = currentWord.size.x;

@@ -34,17 +34,18 @@
         }
 
         style settings-icon {
-            PreferredWidth = 32px;
+            PreferredWidth = 42px;
             PreferredHeight = 32px;
-            BackgroundImage = settings_icon;
+            PaddingRight = 12px;
         }
 
         style status-icon {
             PreferredWidth = 32px;
-            PreferredHeight = 32px;
+            PreferredHeight = 22px;
             BorderRadius = 50%;
             BorderColor = red;
             Border = 3px;
+            PaddingRight = 12px;
         }
 
         style add-chat-group {
@@ -58,7 +59,6 @@
             BackgroundColor = #F2F2F2;
             Padding = 0px, 12px;
             PreferredHeight = 100%;
-
         }
    
         style panel-group {
@@ -73,14 +73,14 @@
 
         <Panel style="topbar">
 
-        <Text style="topbar-text">
-            KLANG GANG
-        </Text>
-
-        <Div style.layoutDirection="Column">
-            <Div style="settings-icon"/>
-            <Div style="status-icon"/>
-        </Div>
+            <Text style="topbar-text">
+                KLANG GANG
+            </Text>
+    
+            <Div style.layoutDirection="Column" style.crossAxisAlignment="Center">
+                <Image style="settings-icon" src="'settings_icon'"/>
+                <Div style="status-icon"/>
+            </Div>
 
         </Panel>
 

@@ -125,7 +125,9 @@ namespace Src.Systems {
 
             layoutResult.ActualSize = new Size(box.actualWidth, box.actualHeight);
             layoutResult.AllocatedSize = new Size(box.allocatedWidth, box.allocatedHeight);
-            layoutResult.ContentOffset = new Vector2(box.ContentOffsetLeft, box.ContentOffsetTop);
+
+            layoutResult.ContentRect = box.ContentRect;
+            
             layoutResult.Scale = new Vector2(box.style.TransformScaleX, box.style.TransformScaleY);
             layoutResult.LocalPosition = ResolveLocalPosition(box);
             layoutResult.ScreenPosition = layoutResult.localPosition;
@@ -191,7 +193,7 @@ namespace Src.Systems {
                     scrollOffset.y = (parentBox.actualHeight - parentBox.allocatedHeight) * parentBox.element.scrollOffset.y;
 
                     layoutResult.LocalPosition = ResolveLocalPosition(box) - scrollOffset;
-                    layoutResult.ContentOffset = new Vector2(box.ContentOffsetLeft, box.ContentOffsetTop);
+                    layoutResult.ContentRect = box.ContentRect;// = new Vector2(box.ContentOffsetLeft, box.ContentOffsetTop);
                     layoutResult.ActualSize = new Size(box.actualWidth, box.actualHeight);
                     layoutResult.AllocatedSize = new Size(box.allocatedWidth, box.allocatedHeight);
                     layoutResult.ScreenPosition = box.parent.element.layoutResult.screenPosition + layoutResult.localPosition;

@@ -6,7 +6,8 @@ namespace Src {
 
         public UITemplateContext context;
         public List<MetaData> inputChildren;
-        
+        // add slots
+
     }
 
 }

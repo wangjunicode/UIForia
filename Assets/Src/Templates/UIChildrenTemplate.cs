@@ -11,7 +11,10 @@ namespace Src {
         public override Type elementType => typeof(UIChildrenElement);
 
         public override MetaData CreateScoped(TemplateScope inputScope) {
-            throw new NotImplementedException();
+            
+            UIChildrenElement element = new UIChildrenElement();
+            element.ownChildren = new UIElement[inputScope.inputChildren.Count];
+            return null;
         }
 
 

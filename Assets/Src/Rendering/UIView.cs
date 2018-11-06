@@ -213,7 +213,6 @@ public abstract class UIView {
             list[i].depthIndex = i;
         }
 
-
         for (int i = 0; i < systems.Count; i++) {
             systems[i].OnElementCreatedFromTemplate(data);
         }

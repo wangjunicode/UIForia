@@ -39,8 +39,8 @@ namespace Src.Layout.LayoutTypes {
                 actualHeight = GetHeights(actualWidth).clampedSize;
             }
 
-            actualWidth += PaddingBorderHorizontal;
-            actualHeight += PaddingBorderVertical;
+//            actualWidth += PaddingBorderHorizontal;
+//            actualHeight += PaddingBorderVertical;
         }
 
         protected override float ComputeContentWidth() {

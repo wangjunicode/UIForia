@@ -94,7 +94,7 @@
         
         style resource-container-label {
             TextFontAsset = GothamNarrow-Book SDF;
-            TextFontSize = 32;
+            TextFontSize = 24;
             TextColor = #A4A4A4;
         }
         
@@ -188,6 +188,7 @@
   
         </ClippedPanel>
         
+        <Children/>
       
     </Div>
     

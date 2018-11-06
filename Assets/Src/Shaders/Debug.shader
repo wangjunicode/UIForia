@@ -109,7 +109,7 @@ Shader "UIForia/Debug"
                     return _MarginColor;
                 }
              
-                return fixed4(1, 0, 0, 1);
+                return fixed4(0, 0, 0, 0);
             }
             
             

@@ -1,7 +1,10 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project version="4">
   <component name="ContentModelStore">
-    <e p="C:\Seed\UIForia\UIElements" t="IncludeRecursive">
+    <e p="C:\Users\matth\.Rider2018.2\config\extensions" t="IncludeRecursive" />
+    <e p="C:\Users\matth\.Rider2018.2\system\extResources" t="IncludeRecursive" />
+    <e p="C:\Users\matth\.Rider2018.2\system\resharper-host\local\Transient\ReSharperHost\v182\SolutionCaches\_UIElements.-1987582547.00" t="ExcludeRecursive" />
+    <e p="C:\Users\matth\RiderProjects\UIElements" t="IncludeRecursive">
       <e p="_DemoAsmDef.csproj" t="IncludeRecursive" />
       <e p="Assembly-CSharp-Editor.csproj" t="IncludeRecursive" />
       <e p="Assets" t="Include">
@@ -71,7 +74,6 @@
         </e>
         <e p="Editor" t="Include">
           <e p="CodeGen.cs" t="Include" />
-          <e p="DebuggerWindow.cs" t="Include" />
           <e p="GUIRect.cs" t="Include" />
           <e p="HierarchyView.cs" t="Include" />
           <e p="RefreshTemplates.cs" t="Include" />
@@ -216,14 +218,6 @@
             <e p="PropertyBindingCompiler.cs" t="Include" />
             <e p="StyleBindingCompiler.cs" t="Include" />
           </e>
-          <e p="Debugger" t="Include">
-            <e p="GOInputFieldRender.cs" t="Include" />
-            <e p="Inspector.cs" t="Include" />
-            <e p="Inspector.xml" t="Include" />
-            <e p="UIButton.cs" t="Include" />
-            <e p="UIButton.xml" t="Include" />
-            <e p="UIInputFieldElement.cs" t="Include" />
-          </e>
           <e p="Elements" t="Include">
             <e p="IntrinsicTemplates.cs" t="Include" />
             <e p="Panel.cs" t="Include" />
@@ -236,6 +230,7 @@
             <e p="UIElementFlags.cs" t="Include" />
             <e p="UIGraphicElement.cs" t="Include" />
             <e p="UIImageElement.cs" t="Include" />
+            <e p="UIInputFieldElement.cs" t="Include" />
             <e p="UIPanel.cs" t="Include" />
             <e p="UIPrimitiveElement.cs" t="Include" />
             <e p="UIRepeatElement.cs" t="Include" />
@@ -642,8 +637,5 @@
       <e p="TestAsm.csproj" t="IncludeRecursive" />
       <e p="UIElements.sln" t="IncludeFlat" />
     </e>
-    <e p="C:\Users\Matt\.Rider2018.2\config\extensions" t="IncludeRecursive" />
-    <e p="C:\Users\Matt\.Rider2018.2\system\extResources" t="IncludeRecursive" />
-    <e p="C:\Users\Matt\.Rider2018.2\system\resharper-host\local\Transient\ReSharperHost\v182\SolutionCaches\_UIElements.120647963.00" t="ExcludeRecursive" />
   </component>
 </project>

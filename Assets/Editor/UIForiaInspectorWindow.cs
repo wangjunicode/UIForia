@@ -234,7 +234,7 @@ namespace Src.Editor {
                 LayoutResult result = selectedElement.layoutResult;
 
                 Vector3 renderPosition = data.renderPosition;
-                renderPosition.z = 5; //drawPos.z;
+                renderPosition.z = 5;
 
                 OffsetRect padding = view.LayoutSystem.GetPaddingRect(selectedElement);
                 OffsetRect margin = view.LayoutSystem.GetMarginRect(selectedElement);
@@ -284,8 +284,9 @@ namespace Src.Editor {
                     float s = (style.TextFontSize / asset.fontInfo.PointSize) * asset.fontInfo.Scale;
 
                     lineMaterial = lineMaterial ? lineMaterial : Resources.Load<Material>("Materials/UIForiaTextDebug");
+                    float offset = TextLayoutBox.GetLineOffset(selectedElement.ComputedStyle.TextFontAsset);
                     if (showTextBaseline) {
-                        lineMaterial.SetFloat("_BaseLine", padding.top + border.top + (s * selectedElement.ComputedStyle.TextFontAsset.fontInfo.Ascender));
+                        lineMaterial.SetFloat("_BaseLine", offset + padding.top + border.top + (s * selectedElement.ComputedStyle.TextFontAsset.fontInfo.Ascender));
                     }
                     else {
                         lineMaterial.SetFloat("_BaseLine", -1);
@@ -293,8 +294,10 @@ namespace Src.Editor {
 
                     if (showTextDescender) {
                         lineMaterial.SetFloat("_Descender",
-                            padding.top + border.top + (s * selectedElement.ComputedStyle.TextFontAsset.fontInfo.Ascender) +
-                            (s * -selectedElement.ComputedStyle.TextFontAsset.fontInfo.Descender));
+                            offset +  padding.top + border.top +
+                            (s * selectedElement.ComputedStyle.TextFontAsset.fontInfo.Ascender) +
+                            (s * -selectedElement.ComputedStyle.TextFontAsset.fontInfo.Descender)
+                        );
                     }
                     else {
                         lineMaterial.SetFloat("_Descender", -1);

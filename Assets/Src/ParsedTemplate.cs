@@ -57,23 +57,9 @@ namespace Src {
             MetaData instanceData = rootElementTemplate.GetCreationData(instance, scope.context);
             instanceData.element.templateChildren = ArrayPool<UIElement>.Empty;
 
-            // todo -- ensure only one <Children/> element
             for (int i = 0; i < rootElementTemplate.childTemplates.Count; i++) {
                 UITemplate template = rootElementTemplate.childTemplates[i];
-                if (template is UIChildrenTemplate) {
-                    if (scope.inputChildren != null) {
-                        instanceData.element.templateChildren = new UIElement[scope.inputChildren.Count];
-                        for (int j = 0; j < scope.inputChildren.Count; j++) {
-                            instanceData.AddChild(scope.inputChildren[j]);
-                            instanceData.element.templateChildren[j] = scope.inputChildren[j].element;
-                        }
-                    }
-
-                    scope.inputChildren = null;
-                }
-                else {
-                    instanceData.AddChild(template.CreateScoped(scope));
-                }
+                instanceData.AddChild(template.CreateScoped(scope));
             }
             
             instanceData.element.ownChildren = instanceData.children.Select(c => c.element).ToArray();
@@ -93,7 +79,6 @@ namespace Src {
             UIElement instance = (UIElement) Activator.CreateInstance(rootElementTemplate.RootType);
             scope.context.rootElement = instance;
             instance.flags |= UIElementFlags.TemplateRoot;
-//            instance.templateOrigin = this;
             
             MetaData rootData = rootElementTemplate.GetCreationData(instance, scope.context);
 
@@ -189,14 +174,6 @@ namespace Src {
             }
             
             throw new UIForia.ParseException("Unable to find a style with the alias: " + alias);
-        }
-
-        public static ParsedTemplate GetTemplate(ushort id) {
-            return s_ParsedTemplates.GetOrDefault(id);
-        }
-
-        public UITemplate GetTemplateData(ushort memberId) {
-            return m_TemplateMap.GetOrDefault(memberId);
         }
 
     }

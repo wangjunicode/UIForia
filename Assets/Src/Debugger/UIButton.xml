@@ -1,8 +1,0 @@
-<?xml version="1.0" encoding="utf-8"?>
-<UITemplate>
-    <Contents>
-        <Group style.rectWidth="content(100)" style.backgroundColor="rgb(128, 128, 128)">
-            {buttonText}
-        </Group>
-    </Contents>
-</UITemplate>

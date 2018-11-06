@@ -104,10 +104,7 @@ namespace Src.Systems {
         public void OnReady() { }
 
         public void OnInitialize() { }
-        public void OnElementCreated(UIElement element) { }
-
-        public void OnElementMoved(UIElement element, int newIndex, int oldIndex) { }
-
+        
         public void OnElementCreatedFromTemplate(MetaData data) {
             UIElement element = data.element;
             isTreeDirty = true;
@@ -164,13 +161,6 @@ namespace Src.Systems {
         public void OnElementEnabled(UIElement element) { }
 
         public void OnElementDisabled(UIElement element) { }
-
-
-        public void OnElementShown(UIElement element) { }
-
-        public void OnElementHidden(UIElement element) { }
-
-        public void OnElementParentChanged(UIElement element, UIElement oldParent, UIElement newParent) { }
 
     }
 

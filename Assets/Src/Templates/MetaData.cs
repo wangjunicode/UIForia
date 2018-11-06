@@ -8,6 +8,13 @@ using Src.Util;
 
 namespace Src {
 
+    public struct MetaData2 {
+
+        public UIElement element;
+        public UITemplateContext context;
+        public UITemplate template;
+
+    }
     // this class contains all the data a system needs to create
     // and instance of an element. Except for the element instance
     // itself and the context, all other fields are references

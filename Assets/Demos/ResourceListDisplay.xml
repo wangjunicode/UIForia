@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <UITemplate>
+    
     <Style>
         style resource-container-contents {
             PaddingLeft = 64px;
@@ -10,12 +11,13 @@
             BackgroundColor = white;
             FlexLayoutDirection = Column;
             FlexLayoutMainAxisAlignment = SpaceBetween;
+            <!--FlexLayoutCrossAxisAlignment = Center;-->
             PreferredWidth = 1pca;
         }
         
         style resource-name {
             TextFontAsset = GothamNarrow-Medium SDF;
-            TextFontSize = 20;
+            TextFontSize = 24;
         }
         
          style resource-count {
@@ -24,8 +26,18 @@
             TextFontSize = 24;
             TextFontAsset = GothamNarrow-Book SDF;
         }
+    
+        <!--implicit style p {-->
+            <!---->
+        <!--}-->
+        <!---->
+        <!--implicit style Group {-->
+            <!---->
+        <!--}-->
         
     </Style>
+    
+    
     <Contents style="resource-container-contents">
             
         <Repeat list="{contents}">

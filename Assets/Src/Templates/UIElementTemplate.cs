@@ -88,12 +88,14 @@ namespace Src {
                         throw new Exception("Primitive elements cannot have children. Children were passed to " + rootType.Name);
                     }
 
+                    // todo -- replace w/ switch on type & regular new()
                     instanceData.element = (UIElement) Activator.CreateInstance(rootType);
                     instanceData.element.ownChildren = ArrayPool<UIElement>.Empty;
                     instanceData.element.templateChildren = ArrayPool<UIElement>.Empty;
                     
                     break;
                 case TemplateType.Container:
+                    // todo -- replace w/ switch on type & regular new()
                     instanceData.element = (UIElement) Activator.CreateInstance(rootType);
                     
                     if (scopedChildren.Count == 0) {

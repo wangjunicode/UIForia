@@ -24,18 +24,16 @@ namespace Src {
 
         public override Type elementType => typeof(UIRepeatElement);
 
-        public override MetaData CreateScoped(TemplateScope inputScope) {
-            UIRepeatElement instance = new UIRepeatElement(childTemplates[0], inputScope);
-            instance.listExpression = listExpression;
-            instance.itemType = itemType;
-            instance.listType = listType;
-            instance.indexAlias = indexAlias;
-            instance.lengthAlias = lengthAlias;
-            instance.itemAlias = itemAlias;
-            
-            MetaData data = GetCreationData(instance, inputScope.context);
-
-            return data;
+        public override UIElement CreateScoped(TemplateScope inputScope) {
+            UIRepeatElement element = new UIRepeatElement(childTemplates[0], inputScope);
+            element.listExpression = listExpression;
+            element.itemType = itemType;
+            element.listType = listType;
+            element.indexAlias = indexAlias;
+            element.lengthAlias = lengthAlias;
+            element.itemAlias = itemAlias;
+            element.templateRef = this;
+            return element;
         }
 
         public override bool Compile(ParsedTemplate template) {

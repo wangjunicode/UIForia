@@ -6,7 +6,7 @@ namespace Src.Elements {
 
         public VirtualScrollbarHandle() {
             flags |= UIElementFlags.Enabled | UIElementFlags.AncestorEnabled;
-            ownChildren = ArrayPool<UIElement>.Empty;
+            children = ArrayPool<UIElement>.Empty;
         }
 
     }

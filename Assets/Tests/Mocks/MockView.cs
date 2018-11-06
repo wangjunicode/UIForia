@@ -33,25 +33,13 @@ namespace Tests.Mocks {
 
         public void OnInitialize() { }
 
-        public void OnElementCreated(UIElement element) { }
-
-        public void OnElementMoved(UIElement element, int newIndex, int oldIndex) { }
-
         public void OnElementEnabled(UIElement element) { }
 
         public void OnElementDisabled(UIElement element) { }
 
         public void OnElementDestroyed(UIElement element) { }
-
-        public void OnElementShown(UIElement element) { }
-
-        public void OnElementHidden(UIElement element) { }
-
-        public void OnElementCreatedFromTemplate(MetaData elementData) { }
-
-        public void OnElementParentChanged(UIElement element, UIElement oldParent, UIElement newParent) { }
-
-        public void OnRender() { }
+        
+        public void OnElementCreatedFromTemplate(UIElement element) { }
 
         public event Action<LightList<RenderData>, LightList<RenderData>, Vector3, Camera> DrawDebugOverlay;
 

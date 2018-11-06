@@ -37,24 +37,12 @@ public abstract partial class InputSystem {
         m_DragHandlerMap.Remove(element.id);
     }
 
-
-    public void OnElementCreated(UIElement element) { }
-
-    public void OnElementMoved(UIElement element, int newIndex, int oldIndex) { }
-
-    public void OnElementParentChanged(UIElement element, UIElement oldParent, UIElement newParent) {
-        // no-op, maybe need to do something w/ dragged element
-    }
-
-    public void OnElementShown(UIElement element) { }
-
-    public void OnElementHidden(UIElement element) { }
-
-    public void OnElementCreatedFromTemplate(MetaData elementData) {
-        MouseEventHandler[] mouseHandlers = elementData.mouseEventHandlers;
-        DragEventCreator[] dragEventCreators = elementData.dragEventCreators;
-        DragEventHandler[] dragEventHandlers = elementData.dragEventHandlers;
-        KeyboardEventHandler[] keyboardHandlers = elementData.keyboardEventHandlers;
+    public void OnElementCreatedFromTemplate(UIElement element) {
+        UITemplate template = element.templateRef;
+        MouseEventHandler[] mouseHandlers = template.mouseEventHandlers;
+        DragEventCreator[] dragEventCreators = template.dragEventCreators;
+        DragEventHandler[] dragEventHandlers = template.dragEventHandlers;
+        KeyboardEventHandler[] keyboardHandlers = template.keyboardEventHandlers;
 
         if (mouseHandlers != null && mouseHandlers.Length > 0) {
             InputEventType handledEvents = 0;
@@ -63,7 +51,7 @@ public abstract partial class InputSystem {
                 handledEvents |= mouseHandlers[i].eventType;
             }
 
-            m_MouseHandlerMap[elementData.elementId] = new MouseHandlerGroup(elementData.context, mouseHandlers, handledEvents);
+            m_MouseHandlerMap[element.id] = new MouseHandlerGroup(element.templateContext, mouseHandlers, handledEvents);
         }
 
         if (dragEventHandlers != null && dragEventHandlers.Length > 0) {
@@ -73,22 +61,27 @@ public abstract partial class InputSystem {
                 handledEvents |= dragEventHandlers[i].eventType;
             }
 
-            m_DragHandlerMap[elementData.elementId] = new DragHandlerGroup(elementData.context, dragEventHandlers, handledEvents);
+            m_DragHandlerMap[element.id] = new DragHandlerGroup(element.templateContext, dragEventHandlers, handledEvents);
         }
 
         if (keyboardHandlers != null && keyboardHandlers.Length > 0) {
-            m_KeyboardEventTree.AddItem(new KeyboardEventTreeNode(elementData.element, keyboardHandlers));
+            m_KeyboardEventTree.AddItem(new KeyboardEventTreeNode(element, keyboardHandlers));
         }
 
         if (dragEventCreators != null) {
-            m_DragCreatorMap[elementData.elementId] = new DragCreatorGroup(elementData.context, dragEventCreators);
+            m_DragCreatorMap[element.id] = new DragCreatorGroup(element.templateContext, dragEventCreators);
         }
 
-        elementData.element.Input = this;
+        element.Input = this;
 
-        for (int i = 0; i < elementData.children.Count; i++) {
-            OnElementCreatedFromTemplate(elementData.children[i]);
+        if (element.children == null) {
+            return;
         }
+        
+        for (int i = 0; i < element.children.Length; i++) {
+            OnElementCreatedFromTemplate(element.children[i]);
+        }
+        
     }
 
 }

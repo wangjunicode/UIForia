@@ -32,10 +32,10 @@ namespace Src.Elements {
             
             this.siblingIndex = int.MaxValue - (orientation == ScrollbarOrientation.Horizontal ? 1 : 0);
             
-            this.ownChildren = ArrayPool<UIElement>.GetExactSize(3);
-            this.ownChildren[0] = handle;
-            this.ownChildren[1] = incrementButton;
-            this.ownChildren[2] = decrementButton;
+            this.children = ArrayPool<UIElement>.GetExactSize(3);
+            this.children[0] = handle;
+            this.children[1] = incrementButton;
+            this.children[2] = decrementButton;
             
             this.orientation = orientation;
             this.trackSize = 15f;

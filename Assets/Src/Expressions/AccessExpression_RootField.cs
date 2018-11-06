@@ -6,14 +6,12 @@ namespace Src {
     public class AccessExpression_RootField<T> : Expression<T> {
 
         private readonly FieldInfo cachedFieldInfo;
-      //  private readonly Func<U, T> getter;
         
         public AccessExpression_RootField(Type type, string fieldName) {
             cachedFieldInfo = ReflectionUtil.GetFieldInfoOrThrow(type, fieldName);
         }
 
         public override T EvaluateTyped(ExpressionContext context) {
-            // return ReflectionUtil.GetValue<U,T>(accessor, context.rootContext);
             return (T)cachedFieldInfo.GetValue(context.rootContext);
         }
 

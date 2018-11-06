@@ -1,13 +1,19 @@
 using System.Collections.Generic;
+using Src.Util;
 
 namespace Src {
 
     public struct TemplateScope {
 
         public UITemplateContext context;
-        public List<MetaData> inputChildren;
         // add slots
-
+        public readonly UIElement rootElement;
+        
+        public TemplateScope(UIElement rootElement, UITemplateContext context) {
+            this.rootElement = rootElement;
+            this.context = context;
+        }
+        
     }
 
 }

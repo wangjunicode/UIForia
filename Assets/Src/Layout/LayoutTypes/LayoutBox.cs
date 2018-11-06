@@ -322,8 +322,8 @@ namespace Src.Layout.LayoutTypes {
             if (element.parent == null) return 0;
 
             int idx = 0;
-            for (int i = 0; i < element.parent.ownChildren.Length; i++) {
-                UIElement sibling = element.parent.ownChildren[i];
+            for (int i = 0; i < element.parent.children.Length; i++) {
+                UIElement sibling = element.parent.children[i];
                 if (sibling == element) {
                     break;
                 }

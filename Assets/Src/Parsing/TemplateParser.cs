@@ -191,7 +191,7 @@ namespace Src {
         }
 
         private static UITemplate ParseContainerElement(Type type, XElement element) {
-            UIElementTemplate template = new UIElementTemplate(
+            UIContainerTemplate template = new UIContainerTemplate(
                 type,
                 ParseNodes(element.Nodes()),
                 ParseAttributes(element.Attributes())
@@ -295,11 +295,12 @@ namespace Src {
         }
 
         private static UITemplate ParseInputElement(XElement element) {
-            return new UIElementTemplate(
-                typeof(UIInputFieldElement),
-                ParseNodes(element.Nodes()),
-                ParseAttributes(element.Attributes())
-            );
+            throw new NotImplementedException();
+//            return new UIElementTemplate(
+//                typeof(UIInputFieldElement),
+//                ParseNodes(element.Nodes()),
+//                ParseAttributes(element.Attributes())
+//            );
         }
 
         private static UITemplate ParseElement(XElement element) {

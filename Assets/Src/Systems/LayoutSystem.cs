@@ -146,12 +146,12 @@ namespace Src.Systems {
                     continue;
                 }
 
-                if (current.ownChildren == null) {
+                if (current.children == null) {
                     continue;
                 }
 
-                for (int i = 0; i < current.ownChildren.Length; i++) {
-                    element = current.ownChildren[i];
+                for (int i = 0; i < current.children.Length; i++) {
+                    element = current.children[i];
 
                     box = m_LayoutBoxMap.GetOrDefault(element.id);
 
@@ -487,7 +487,7 @@ namespace Src.Systems {
             LayoutBox box;
             if (m_LayoutBoxMap.TryGetValue(element.id, out box)) {
                 TextLayoutBox textBox = box as TextLayoutBox;
-                textBox?.OnTextContentUpdated();
+                textBox?.OnTextContentUpdated(); // todo -- remove this
             }
         }
 
@@ -537,10 +537,6 @@ namespace Src.Systems {
             // update map to hold new box
         }
 
-        public void OnElementCreated(UIElement element) { }
-
-        public void OnElementMoved(UIElement element, int newIndex, int oldIndex) { }
-
         public void OnElementEnabled(UIElement element) {
             LayoutBox child = m_LayoutBoxMap.GetOrDefault(element.id);
             if (child == null) return;
@@ -554,10 +550,6 @@ namespace Src.Systems {
         }
 
         public void OnElementDestroyed(UIElement element) { }
-
-        public void OnElementShown(UIElement element) { }
-
-        public void OnElementHidden(UIElement element) { }
 
         // todo pool boxes
         private LayoutBox CreateLayoutBox(UIElement element) {
@@ -587,14 +579,14 @@ namespace Src.Systems {
             }
         }
 
-        public void OnElementCreatedFromTemplate(MetaData elementData) {
-            LayoutBox layoutBox = CreateLayoutBox(elementData.element);
-            Stack<ValueTuple<MetaData, LayoutBox>> stack = StackPool<ValueTuple<MetaData, LayoutBox>>.Get();
+        public void OnElementCreatedFromTemplate(UIElement element) {
+            LayoutBox layoutBox = CreateLayoutBox(element);
+            Stack<ValueTuple<UIElement, LayoutBox>> stack = StackPool<ValueTuple<UIElement, LayoutBox>>.Get();
 
             LayoutBox parent = m_Root;
-            if (elementData.element.parent != null) {
+            if (element.parent != null) {
                 LayoutBox ptr = null;
-                UIElement e = elementData.element.parent;
+                UIElement e = element.parent;
                 while (ptr == null) {
                     e = e.parent;
                     ptr = m_LayoutBoxMap.GetOrDefault(e.id);
@@ -604,20 +596,20 @@ namespace Src.Systems {
             }
 
             layoutBox.SetParent(parent);
-            m_LayoutBoxMap.Add(elementData.element.id, layoutBox);
-            stack.Push(ValueTuple.Create(elementData, layoutBox));
+            m_LayoutBoxMap.Add(element.id, layoutBox);
+            stack.Push(ValueTuple.Create(element, layoutBox));
 
-            m_Elements.Add(elementData.element);
+            m_Elements.Add(element);
             m_PendingInitialization.Add(layoutBox);
 
             while (stack.Count > 0) {
-                ValueTuple<MetaData, LayoutBox> item = stack.Pop();
-                MetaData parentData = item.Item1;
+                ValueTuple<UIElement, LayoutBox> item = stack.Pop();
+                UIElement parentElement = item.Item1;
                 LayoutBox parentBox = item.Item2;
 
                 if (parentBox == null) {
                     LayoutBox ptr = null;
-                    UIElement e = parentData.element;
+                    UIElement e = parentElement;
                     while (ptr == null) {
                         e = e.parent;
                         ptr = m_LayoutBoxMap.GetOrDefault(e.id);
@@ -626,27 +618,25 @@ namespace Src.Systems {
                     parentBox = ptr;
                 }
 
-                for (int i = 0; i < parentData.children.Count; i++) {
-                    MetaData childData = parentData.children[i];
-                    if ((childData.element.flags & UIElementFlags.RequiresLayout) == 0) {
+                for (int i = 0; i < parentElement.children.Length; i++) {
+                    UIElement child = parentElement.children[i];
+                    if ((child.flags & UIElementFlags.RequiresLayout) == 0) {
                         // don't create a layout box but do process the children
-                        stack.Push(ValueTuple.Create(childData, (LayoutBox) null));
+                        stack.Push(ValueTuple.Create(child, (LayoutBox) null));
                     }
                     else {
-                        LayoutBox childBox = CreateLayoutBox(childData.element);
+                        LayoutBox childBox = CreateLayoutBox(child);
                         childBox.SetParent(parentBox);
-                        m_LayoutBoxMap.Add(childData.element.id, childBox);
-                        stack.Push(ValueTuple.Create(childData, childBox));
-                        m_Elements.Add(childData.element);
+                        m_LayoutBoxMap.Add(child.id, childBox);
+                        stack.Push(ValueTuple.Create(child, childBox));
+                        m_Elements.Add(child);
                         m_PendingInitialization.Add(childBox);
                     }
                 }
             }
 
-            StackPool<ValueTuple<MetaData, LayoutBox>>.Release(stack);
+            StackPool<ValueTuple<UIElement, LayoutBox>>.Release(stack);
         }
-
-        public void OnElementParentChanged(UIElement element, UIElement oldParent, UIElement newParent) { }
 
         public void SetViewportRect(Rect viewportRect) {
             if (ViewportRect != viewportRect) {

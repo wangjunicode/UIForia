@@ -54,18 +54,18 @@ public class RepeatBindingNode<T, U> : RepeatBindingNode where T : class, IList<
 
         if (previousReference == null) {
             previousReference = new T();
-            element.ownChildren = ArrayPool<UIElement>.GetExactSize(list.Count);
+            element.children = ArrayPool<UIElement>.GetExactSize(list.Count);
             element.templateChildren = ArrayPool<UIElement>.GetExactSize(list.Count);
 
             for (int i = 0; i < list.Count; i++) {
                 previousReference.Add(list[i]);
-                MetaData newItem = template.CreateScoped(scope);
+                UIElement newItem = template.CreateScoped(scope);
 
-                newItem.element.parent = element;
-                newItem.element.templateParent = element;
+                newItem.parent = element;
+                newItem.templateParent = element;
 
-                element.ownChildren[i] = newItem.element;
-                element.templateChildren[i] = newItem.element;
+                element.children[i] = newItem;
+                element.templateChildren[i] = newItem;
                 context.view.CreateElementFromTemplate(newItem, element);
             }
 
@@ -76,13 +76,13 @@ public class RepeatBindingNode<T, U> : RepeatBindingNode where T : class, IList<
             
             ((UIRepeatElement) element).listBecamePopulated = previousReference.Count == 0;
             
-            UIElement[] oldChildren = element.ownChildren;
+            UIElement[] oldChildren = element.children;
             UIElement[] oldTemplateChildren = element.templateChildren;
 
             UIElement[] ownChildren = ArrayPool<UIElement>.GetExactSize(list.Count);
             UIElement[] templateChildren = ArrayPool<UIElement>.GetExactSize(list.Count);
 
-            element.ownChildren = ownChildren;
+            element.children = ownChildren;
             element.templateChildren = templateChildren;
 
             for (int i = 0; i < oldChildren.Length; i++) {
@@ -95,13 +95,13 @@ public class RepeatBindingNode<T, U> : RepeatBindingNode where T : class, IList<
 
             for (int i = 0; i < diff; i++) {
                 previousReference.Add(list[previousCount + i]);
-                MetaData newItem = template.CreateScoped(scope);
+                UIElement newItem = template.CreateScoped(scope);
 
-                newItem.element.parent = element;
-                newItem.element.templateParent = element;
+                newItem.parent = element;
+                newItem.templateParent = element;
 
-                ownChildren[previousCount + i] = newItem.element;
-                templateChildren[previousCount + i] = newItem.element;
+                ownChildren[previousCount + i] = newItem;
+                templateChildren[previousCount + i] = newItem;
                 context.view.CreateElementFromTemplate(newItem, element);
             }
 
@@ -115,17 +115,17 @@ public class RepeatBindingNode<T, U> : RepeatBindingNode where T : class, IList<
             int diff = previousReference.Count - list.Count;
             for (int i = 0; i < diff; i++) {
                 int index = previousReference.Count - 1;
-                context.RemoveContextValue(element.ownChildren[index], itemAlias, previousReference[index]);
-                context.RemoveContextValue(element.ownChildren[index], indexAlias, index);
+                context.RemoveContextValue(element.children[index], itemAlias, previousReference[index]);
+                context.RemoveContextValue(element.children[index], indexAlias, index);
                 previousReference.RemoveAt(index);
-                context.view.DestroyElement(element.ownChildren[index]);
+                context.view.DestroyElement(element.children[index]);
             }
 
         }
 
-        for (int i = 0; i < element.ownChildren.Length; i++) {
-            context.SetContextValue(element.ownChildren[i], itemAlias, list[i]);
-            context.SetContextValue(element.ownChildren[i], indexAlias, i);
+        for (int i = 0; i < element.children.Length; i++) {
+            context.SetContextValue(element.children[i], itemAlias, list[i]);
+            context.SetContextValue(element.children[i], indexAlias, i);
         }
 
         context.SetContextValue(element, lengthAlias, previousReference.Count);

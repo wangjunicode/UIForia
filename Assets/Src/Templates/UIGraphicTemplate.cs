@@ -11,11 +11,12 @@ namespace Src {
 
         public override Type elementType => typeof(UIGraphicElement);
         
-        public override MetaData CreateScoped(TemplateScope inputScope) {
+        public override UIElement CreateScoped(TemplateScope inputScope) {
             UIGraphicElement graphic = new UIGraphicElement();
-            graphic.ownChildren = ArrayPool<UIElement>.Empty;
+            graphic.children = ArrayPool<UIElement>.Empty;
             graphic.templateChildren = ArrayPool<UIElement>.Empty;
-            return GetCreationData(graphic, inputScope.context);
+            graphic.templateRef = this;
+            return graphic;
         }
 
     }

@@ -209,8 +209,8 @@ namespace Src.Systems {
 
                 m_ToInitialize.Add(element);
 
-                for (int i = 0; i < current.ownChildren.Length; i++) {
-                    stack.Push(current.ownChildren[i]);
+                for (int i = 0; i < current.children.Length; i++) {
+                    stack.Push(current.children[i]);
                 }
             }
 
@@ -236,9 +236,9 @@ namespace Src.Systems {
                     m_ToInitialize.Remove(element);
                 }
 
-                if (current.ownChildren != null) {
-                    for (int i = 0; i < current.ownChildren.Length; i++) {
-                        stack.Push(current.ownChildren[i]);
+                if (current.children != null) {
+                    for (int i = 0; i < current.children.Length; i++) {
+                        stack.Push(current.children[i]);
                     }
                 }
             }
@@ -250,10 +250,13 @@ namespace Src.Systems {
             OnElementDisabled(element);
         }
 
-        public void OnElementCreatedFromTemplate(MetaData creationData) {
-            m_ToInitialize.Add(creationData.element);
-            for (int i = 0; i < creationData.children.Count; i++) {
-                OnElementCreatedFromTemplate(creationData.children[i]);
+        public void OnElementCreatedFromTemplate(UIElement element) {
+            m_ToInitialize.Add(element);
+            if (element.children == null) {
+                return;
+            }
+            for (int i = 0; i < element.children.Length; i++) {
+                OnElementCreatedFromTemplate(element.children[i]);
             }
         }
 

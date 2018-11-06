@@ -26,23 +26,10 @@ namespace Src {
             return true;
         }
 
-        public override MetaData CreateScoped(TemplateScope inputScope) {
-            UIImageElement instance = new UIImageElement();
-
-            MetaData instanceData = GetCreationData(instance, inputScope.context);
-            instanceData.constantBindings = constantBindings;
-            instanceData.bindings = bindings;
-            instanceData.context = inputScope.context;
-            instanceData.constantStyleBindings = constantStyleBindings;
-            instanceData.element.templateAttributes = templateAttributes;
-            instanceData.baseStyles = baseStyles;
-            instanceData.mouseEventHandlers = mouseEventHandlers;
-            instanceData.dragEventCreators = dragEventCreators;
-            instanceData.dragEventHandlers = dragEventHandlers;
-            instanceData.keyboardEventHandlers = keyboardEventHandlers;
-            instanceData.element.templateChildren = inputScope.inputChildren.Select(c => c.element).ToArray();
-            instanceData.element.ownChildren = instanceData.children.Select(c => c.element).ToArray();
-            return instanceData;
+        public override UIElement CreateScoped(TemplateScope inputScope) {
+            UIImageElement element = new UIImageElement();
+            element.templateRef = this;
+            return element;
         }
 
         public static Texture2D TextureUrl(string url) {

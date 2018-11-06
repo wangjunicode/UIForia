@@ -42,7 +42,7 @@ public class TemplateTests {
         Assert.IsNotEmpty(data.constantBindings);
         Assert.AreEqual(1, data.constantBindings.Length);
         Assert.IsInstanceOf<TextBinding_Multiple>(data.constantBindings[0]);
-        data.element.style = new UIStyleSet(data.element, new StyleSystem());
+        data.element.style = new UIStyleSet(data.element);
         data.constantBindings[0].Execute(data.element, data.context);
         Assert.AreEqual("hello there", As<UITextElement>(data.element).GetText());
     }
@@ -57,7 +57,7 @@ public class TemplateTests {
         UITextTemplate template = new UITextTemplate("'hello {stringValue}!'");
         template.Compile(dummyTemplate);
         MetaData data = template.GetCreationData(new UITextElement(), ctx);
-        data.element.style = new UIStyleSet(data.element, new StyleSystem());
+        data.element.style = new UIStyleSet(data.element);
         Assert.IsNotEmpty(data.bindings);
         Assert.AreEqual(1, data.bindings.Length);
         Assert.IsInstanceOf<TextBinding_Multiple>(data.bindings[0]);
@@ -75,7 +75,7 @@ public class TemplateTests {
         UITextTemplate template = new UITextTemplate("'hello {stringValue}!'");
         template.Compile(dummyTemplate);
         MetaData data = template.GetCreationData(new UITextElement(), ctx);
-        data.element.style = new UIStyleSet(data.element, new StyleSystem());
+        data.element.style = new UIStyleSet(data.element);
         int callCount = 0;
         As<UITextElement>(data.element).onTextChanged += (element, text) => callCount++;
         data.bindings[0].Execute(data.element, data.context);
@@ -92,7 +92,7 @@ public class TemplateTests {
         UITextTemplate template = new UITextTemplate("'hello {stringValue}!'");
         template.Compile(dummyTemplate);
         MetaData data = template.GetCreationData(new UITextElement(), ctx);
-        data.element.style = new UIStyleSet(data.element, new StyleSystem());
+        data.element.style = new UIStyleSet(data.element);
         int callCount = 0;
         As<UITextElement>(data.element).onTextChanged += (element, text) => callCount++;
         data.bindings[0].Execute(data.element, data.context);

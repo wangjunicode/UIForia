@@ -29,7 +29,7 @@ public class UIElement : IHierarchical, IExpressionContextProvider {
     public UIStyleSet style;
 
     // todo -- move to the template
-    internal IReadOnlyList<ValueTuple<string, string>> templateAttributes;
+//    internal IReadOnlyList<ValueTuple<string, string>> templateAttributes;
 
     // todo make readonly but assignable via style system
 
@@ -38,6 +38,7 @@ public class UIElement : IHierarchical, IExpressionContextProvider {
 
     protected UIElement() {
         this.id = UIView.NextElementId;
+        this.style = new UIStyleSet(this);
         this.flags = UIElementFlags.Enabled
                      | UIElementFlags.Shown
                      | UIElementFlags.RequiresLayout
@@ -45,15 +46,15 @@ public class UIElement : IHierarchical, IExpressionContextProvider {
     }
 
     // todo -- work on this interface
-    public UIElement templateParent;
-    public UIElement[] templateChildren;
-    public UIElement[] ownChildren;
-    public UITemplateContext templateContext;
+    public UIElement templateParent;                // remove or move to cold data
+    public UIElement[] templateChildren;            // remove
+    public UIElement[] children;        
+    public UITemplateContext templateContext;     // move to cold data
+    public UIChildrenElement transcludedChildren; // move to cold data
 
     public LayoutResult layoutResult { get; internal set; }
 
     private ElementRenderer renderer = ElementRenderer.DefaultInstanced;
-
     
     public ElementRenderer Renderer {
         get { return renderer; }
@@ -77,7 +78,7 @@ public class UIElement : IHierarchical, IExpressionContextProvider {
 
     public IInputProvider Input { get; internal set; }
     
-    public int ChildCount => ownChildren?.Length ?? 0;
+    public int ChildCount => children?.Length ?? 0;
 
     public bool isShown => (flags & UIElementFlags.SelfAndAncestorShown) == UIElementFlags.SelfAndAncestorShown;
 
@@ -138,92 +139,57 @@ public class UIElement : IHierarchical, IExpressionContextProvider {
     }
 
     public UIElement FindById(string id) {
-        if (isPrimitive || ownChildren == null) {
-            return null;
-        }
-
-        for (int i = 0; i < ownChildren.Length; i++) {
-            if (ownChildren[i].GetAttribute("id") == id) {
-                return ownChildren[i];
-            }
-
-            UIElement childResult = ownChildren[i].FindByIdTemplateScoped(id);
-            if (childResult != null) {
-                return childResult;
-            }
-        }
-
-        return null;
+        return FindById<UIElement>(id);
     }
 
     public T FindById<T>(string id) where T : UIElement {
-        if (isPrimitive || ownChildren == null) {
+        if (isPrimitive || children == null) {
             return null;
         }
 
-        for (int i = 0; i < ownChildren.Length; i++) {
-            if (ownChildren[i].GetAttribute("id") == id) {
-                return ownChildren[i] as T;
+        for (int i = 0; i < children.Length; i++) {
+            if (children[i].GetAttribute("id") == id) {
+                return children[i] as T;
             }
 
-            UIElement childResult = ownChildren[i].FindByIdTemplateScoped(id);
+            if (children[i] is UIChildrenElement) {
+                continue;
+            }
+
+            if (children[i]?.templateRef is UIElementTemplate) {
+                continue;
+            }
+            
+            UIElement childResult = children[i].FindById(id);
+            
             if (childResult != null) {
                 return childResult as T;
             }
+            
         }
 
         return null;
-    }
-
-    private UIElement FindByIdTemplateScoped(string id) {
-        if (isPrimitive || templateChildren == null) {
-            return null;
-        }
-
-        for (int i = 0; i < templateChildren.Length; i++) {
-            if (templateChildren[i].GetAttribute("id") == id) {
-                return templateChildren[i];
-            }
-
-            UIElement childResult = templateChildren[i].FindByIdTemplateScoped(id);
-            if (childResult != null) {
-                return childResult;
-            }
-        }
-
-        return null;
-    }
+    }   
 
     public T FindFirstByType<T>() where T : UIElement {
-        if (isPrimitive || ownChildren == null) {
+        if (isPrimitive || children == null) {
             return null;
         }
 
-        for (int i = 0; i < ownChildren.Length; i++) {
-            if (ownChildren[i] is T) {
-                return (T) ownChildren[i];
+        for (int i = 0; i < children.Length; i++) {
+            if (children[i] is T) {
+                return (T) children[i];
             }
 
-            UIElement childResult = ownChildren[i].FindFirstByTypeTemplateScoped<T>();
-            if (childResult != null) {
-                return (T) childResult;
-            }
-        }
-
-        return null;
-    }
-
-    protected UIElement FindFirstByTypeTemplateScoped<T>() where T : UIElement {
-        if (isPrimitive || templateChildren == null) {
-            return null;
-        }
-
-        for (int i = 0; i < templateChildren.Length; i++) {
-            if (templateChildren[i] is T) {
-                return (T) templateChildren[i];
+            if (children[i] is UIChildrenElement) {
+                continue;
             }
 
-            UIElement childResult = templateChildren[i].FindFirstByTypeTemplateScoped<T>();
+            if (children[i]?.templateRef is UIElementTemplate) {
+                continue;
+            }
+            
+            UIElement childResult = children[i].FindFirstByType<T>();
             if (childResult != null) {
                 return (T) childResult;
             }
@@ -234,33 +200,28 @@ public class UIElement : IHierarchical, IExpressionContextProvider {
 
     public List<T> FindByType<T>(List<T> retn = null) where T : UIElement {
         retn = retn ?? new List<T>();
-        if (isPrimitive || ownChildren == null) {
+        if (isPrimitive || children == null) {
             return retn;
         }
 
-        for (int i = 0; i < ownChildren.Length; i++) {
-            if (ownChildren[i] is T) {
-                retn.Add((T) ownChildren[i]);
+        for (int i = 0; i < children.Length; i++) {
+            if (children[i] is T) {
+                retn.Add((T) children[i]);
             }
 
-            ownChildren[i].FindByTypeTemplateScoped<T>(retn);
+            
+            if (children[i] is UIChildrenElement) {
+                continue;
+            }
+
+            if (children[i]?.templateRef is UIElementTemplate) {
+                continue;
+            }
+            
+            children[i].FindByType<T>(retn);
         }
 
         return retn;
-    }
-
-    protected void FindByTypeTemplateScoped<T>(List<T> retn) where T : UIElement {
-        if (isPrimitive || ownChildren == null || templateChildren == null) {
-            return;
-        }
-
-        for (int i = 0; i < templateChildren.Length; i++) {
-            if (templateChildren[i] is T) {
-                retn.Add((T) templateChildren[i]);
-            }
-
-            templateChildren[i].FindByTypeTemplateScoped(retn);
-        }
     }
 
     public override string ToString() {
@@ -291,7 +252,11 @@ public class UIElement : IHierarchical, IExpressionContextProvider {
     }
 
     protected string GetAttribute(string attr) {
-        if (templateAttributes == null) return null;
+        if (templateRef?.templateAttributes == null) {
+            return null;
+        }
+
+        List<ValueTuple<string, string>> templateAttributes = templateRef.templateAttributes;
         for (int i = 0; i < templateAttributes.Count; i++) {
             if (templateAttributes[i].Item1 == attr) {
                 return templateAttributes[i].Item2;
@@ -329,11 +294,11 @@ public class UIElement : IHierarchical, IExpressionContextProvider {
     }
 
     public UIElement GetChild(int index) {
-        if(ownChildren == null || (uint)index >= (uint)ownChildren.Length) {
+        if(children == null || (uint)index >= (uint)children.Length) {
             return null;
         }
 
-        return ownChildren[index];
+        return children[index];
 
     }
 

@@ -69,14 +69,14 @@ namespace Src {
             data.mouseEventHandlers = mouseEventHandlers;
             data.dragEventCreators = dragEventCreators;
             data.dragEventHandlers = dragEventHandlers;
-            element.templateAttributes = templateAttributes;
+//            element.templateAttributes = templateAttributes;
             if (acceptFocus) {
                 element.flags |= UIElementFlags.AcceptFocus;
             }
             return data;
         }
 
-        public abstract MetaData CreateScoped(TemplateScope inputScope);
+        public abstract UIElement CreateScoped(TemplateScope inputScope);
 
         public void CompileStyleBindings(ParsedTemplate template) {
             if (attributes == null || attributes.Count == 0) return;

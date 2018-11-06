@@ -73,7 +73,7 @@ public abstract partial class InputSystem : IInputSystem, IInputProvider {
 
     protected abstract MouseState GetMouseState();
 
-    private static readonly UITemplateContext s_DummyContext = new UITemplateContext(null);
+    private static readonly UITemplateContext s_DummyContext = new UITemplateContext(null, null);
 
     private void HandleCreateScrollbar(VirtualScrollbar scrollbar) {
         m_DragCreatorMap.Add(scrollbar.id, new DragCreatorGroup(s_DummyContext, new DragEventCreator[] {

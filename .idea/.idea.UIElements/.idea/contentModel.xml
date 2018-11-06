@@ -77,7 +77,6 @@
           <e p="GUIRect.cs" t="Include" />
           <e p="HierarchyView.cs" t="Include" />
           <e p="RefreshTemplates.cs" t="Include" />
-          <e p="StyleDebugView.cs" t="Include" />
           <e p="UIForiaHierarchyWindow.cs" t="Include" />
           <e p="UIForiaInspectorWindow.cs" t="Include" />
           <e p="UIViewWindow.cs" t="Include" />
@@ -220,7 +219,6 @@
           </e>
           <e p="Elements" t="Include">
             <e p="IntrinsicTemplates.cs" t="Include" />
-            <e p="Panel.cs" t="Include" />
             <e p="ScrollbarDragEvent.cs" t="Include" />
             <e p="ScrollbarOrientation.cs" t="Include" />
             <e p="TemplateReference.cs" t="Include" />
@@ -231,16 +229,12 @@
             <e p="UIGraphicElement.cs" t="Include" />
             <e p="UIImageElement.cs" t="Include" />
             <e p="UIInputFieldElement.cs" t="Include" />
-            <e p="UIPanel.cs" t="Include" />
             <e p="UIPrimitiveElement.cs" t="Include" />
             <e p="UIRepeatElement.cs" t="Include" />
-            <e p="UIShapeElement.cs" t="Include" />
             <e p="UISwitchCaseElement.cs" t="Include" />
             <e p="UISwitchDefaultElement.cs" t="Include" />
             <e p="UISwitchElement.cs" t="Include" />
-            <e p="UITextContainerElement.cs" t="Include" />
             <e p="UITextElement.cs" t="Include" />
-            <e p="UITransform.cs" t="Include" />
             <e p="VirtualElement.cs" t="Include" />
             <e p="VirtualScrollBar.cs" t="Include" />
             <e p="VirtualScrollbarHandle.cs" t="Include" />
@@ -365,7 +359,6 @@
               <e p="UnaryExpressionNode.cs" t="Include" />
             </e>
             <e p="AttributeDefinition.cs" t="Include" />
-            <e p="ChildrenSlotWithChildrenException.cs" t="Include" />
             <e p="ContextDefinition.cs" t="Include" />
             <e p="ExpressionAlias.cs" t="Include" />
             <e p="ExpressionParser.cs" t="Include" />
@@ -391,7 +384,6 @@
             <e p="TypeProcessor.cs" t="Include" />
             <e p="XMLExtensions.cs" t="Include" />
           </e>
-          <e p="PropAttribute.cs" t="Include" />
           <e p="Rendering" t="Include">
             <e p="AnchorTarget.cs" t="Include" />
             <e p="BackgroundFillType.cs" t="Include" />
@@ -461,7 +453,6 @@
             <e p="WhitespaceMode.cs" t="Include" />
           </e>
           <e p="ResourceManager.cs" t="Include" />
-          <e p="SDFText.cs" t="Include" />
           <e p="Shaders" t="Include">
             <e p="Debug.shader" t="Include" />
             <e p="UIForia.cginc" t="Include" />
@@ -490,7 +481,6 @@
             </e>
           </e>
           <e p="SrcAsm.asmdef" t="Include" />
-          <e p="StyleDebugView.cs" t="Include" />
           <e p="StyleDefinition.cs" t="Include" />
           <e p="Systems" t="Include">
             <e p="BindingSystem.cs" t="Include" />
@@ -521,11 +511,11 @@
             <e p="MetaData.cs" t="Include" />
             <e p="TemplateScope.cs" t="Include" />
             <e p="UIChildrenTemplate.cs" t="Include" />
+            <e p="UIContainerTemplate.cs" t="Include" />
             <e p="UIElementTemplate.cs" t="Include" />
             <e p="UIGraphicTemplate.cs" t="Include" />
             <e p="UIImageTemplate.cs" t="Include" />
             <e p="UIRepeatTemplate.cs" t="Include" />
-            <e p="UIShapeTemplate.cs" t="Include" />
             <e p="UISwitchCaseTemplate.cs" t="Include" />
             <e p="UISwitchDefaultTemplate.cs" t="Include" />
             <e p="UISwitchTemplate.cs" t="Include" />

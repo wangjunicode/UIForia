@@ -28,29 +28,10 @@ namespace Src {
 
         public Type RootType => rootType;
 
-    
-
         public override bool Compile(ParsedTemplate template) {
-            
             if (rootType == null) {
                 rootType = TypeProcessor.GetType(typeName, template.imports).rawType;
             }
-            
-            if (typeof(UIPrimitiveElement).IsAssignableFrom(rootType)) {
-                // assert no children
-                // assert no template
-                templateType = TemplateType.Primitive;
-                base.Compile(template);
-                return true;
-            }
-
-            if (typeof(UIContainerElement).IsAssignableFrom(rootType)) {
-                templateType = TemplateType.Container;
-                base.Compile(template);
-                return true;
-            }
-
-            templateType = TemplateType.Template;
 
             templateToExpand = TemplateParser.GetParsedTemplate(rootType);
             templateToExpand.Compile();
@@ -67,106 +48,88 @@ namespace Src {
 
         public override Type elementType => rootType;
 
-        public override MetaData CreateScoped(TemplateScope inputScope) {
-            List<MetaData> scopedChildren = new List<MetaData>(childTemplates.Count);
-
-            for (int i = 0; i < childTemplates.Count; i++) {
-                scopedChildren.Add(childTemplates[i].CreateScoped(inputScope));
-            }
-
-            TemplateScope outputScope = new TemplateScope();
-
+        // children of this element are transcluded
+        // actual children are built from parsed template's root children
+        public override UIElement CreateScoped(TemplateScope inputScope) {
+            //   Compile(null);
             // todo -- some templates don't need their own scope
-            outputScope.context = new UITemplateContext(inputScope.context.view);
-            outputScope.inputChildren = scopedChildren;
 
-            MetaData instanceData = MetaData.GetFromPool();
+            UIElement element = (UIElement) Activator.CreateInstance(rootType);
+            element.flags |= UIElementFlags.TemplateRoot;
+            element.templateRef = this;
+            templateToExpand.Compile();
+// if is root then we need use childTemplates as non transcluded
+            List<UITemplate> transcludedTemplates = childTemplates;
+            List<UITemplate> actualChildren = templateToExpand.childTemplates;
 
-            switch (templateType) {
-                case TemplateType.Primitive:
-                    if (scopedChildren.Count > 0) {
-                        throw new Exception("Primitive elements cannot have children. Children were passed to " + rootType.Name);
-                    }
+            UITemplateContext context = new UITemplateContext(element, null);
+            TemplateScope scope = new TemplateScope(element, context);
 
-                    // todo -- replace w/ switch on type & regular new()
-                    instanceData.element = (UIElement) Activator.CreateInstance(rootType);
-                    instanceData.element.ownChildren = ArrayPool<UIElement>.Empty;
-                    instanceData.element.templateChildren = ArrayPool<UIElement>.Empty;
-                    
-                    break;
-                case TemplateType.Container:
-                    // todo -- replace w/ switch on type & regular new()
-                    instanceData.element = (UIElement) Activator.CreateInstance(rootType);
-                    
-                    if (scopedChildren.Count == 0) {
-                        instanceData.element.ownChildren = ArrayPool<UIElement>.Empty;
-                        instanceData.element.templateChildren = ArrayPool<UIElement>.Empty;
-                        break;
-                    }
+            element.children = ArrayPool<UIElement>.GetExactSize(actualChildren.Count);
 
-                    instanceData.element.templateChildren = ArrayPool<UIElement>.GetExactSize(scopedChildren.Count);
-                    instanceData.element.ownChildren = instanceData.element.templateChildren;
-                    for (int i = 0; i < scopedChildren.Count; i++) {
-                        MetaData child = scopedChildren[i];
-                        instanceData.element.templateChildren[i] = child.element;
-                        instanceData.AddChild(child);
-                    }
-
-                    outputScope.inputChildren = null;
-                    break;
-                case TemplateType.Template:
-                    instanceData = templateToExpand.CreateWithScope(outputScope);
-                    break;
-                default:
-                    throw new ArgumentOutOfRangeException();
+            for (int i = 0; i < element.children.Length; i++) {
+                element.children[i] = actualChildren[i].CreateScoped(scope);
+                element.children[i].parent = element;
+                element.children[i].templateParent = element; // try to get rid of this
             }
 
-            if (templateType == TemplateType.Template) {
-                // todo -- merge bindings here
+            UIChildrenElement childrenElement = element.transcludedChildren;
+
+            if (childrenElement != null) {
+                childrenElement.children = new UIElement[transcludedTemplates.Count];
+                for (int i = 0; i < childrenElement.children.Length; i++) {
+                    childrenElement.children[i] = transcludedTemplates[i].CreateScoped(inputScope);
+                    childrenElement.children[i].parent = childrenElement;
+                    childrenElement.children[i].templateParent = element;
+                }
             }
-            else {
-                // todo -- used un-merged bindings
-            }
+
+            AssignContext(element, context);
+
+            
+            // find <Slot>
+            //     -> attach from input
 
             // todo -- not sure this is safe to overwrite bindings here probably need to merge
             // actually the only bindings allowed on <Contents> tag should be styles
             // which would make this ok. need to merge styles though, maybe input handlers though?
-            instanceData.bindings = bindings;
-            instanceData.context = inputScope.context;
-            instanceData.constantBindings = constantBindings;
-            instanceData.constantStyleBindings = constantStyleBindings;
-            instanceData.element.templateAttributes = templateAttributes;
-            
-            instanceData.baseStyles = baseStyles;
-            
-            instanceData.mouseEventHandlers = mouseEventHandlers;
-            instanceData.dragEventCreators = dragEventCreators;
-            instanceData.dragEventHandlers = dragEventHandlers;
-            instanceData.keyboardEventHandlers = keyboardEventHandlers;
+//            instanceData.bindings = bindings;
+//            instanceData.context = inputScope.context;
+//            instanceData.constantBindings = constantBindings;
+//            instanceData.constantStyleBindings = constantStyleBindings;
+//            instanceData.element.templateAttributes = templateAttributes;
+//            
+//            instanceData.baseStyles = baseStyles;
+//            
+//            instanceData.mouseEventHandlers = mouseEventHandlers;
+//            instanceData.dragEventCreators = dragEventCreators;
+//            instanceData.dragEventHandlers = dragEventHandlers;
+//            instanceData.keyboardEventHandlers = keyboardEventHandlers;
+//
+//            outputScope.context.rootElement = instanceData.element;
+//
 
-            outputScope.context.rootElement = instanceData.element;
-
-            AssignContext(instanceData.element, outputScope.context);
-
-            return instanceData;
+            return element;
         }
-
+        
         private void AssignContext(UIElement element, UITemplateContext context) {
             element.templateContext = context;
                 
-            if (element.ownChildren == null) return;
+            if (element.children == null) return;
 
-            for (int i = 0; i < element.ownChildren.Length; i++) {
-                AssignContext(element.ownChildren[i], context);
+            for (int i = 0; i < element.children.Length; i++) {
+                
+                if (element.children[i].templateRef is UIElementTemplate) {
+                    element.children[i].templateContext = context;
+                    continue;
+                }
+                
+                if (element.children[i] is UIChildrenElement) {
+                    continue;
+                }
+                
+                AssignContext(element.children[i], context);
             }
-        }
-        
-        private enum TemplateType {
-
-            Primitive,
-            Container,
-            Template
-
         }
 
     }

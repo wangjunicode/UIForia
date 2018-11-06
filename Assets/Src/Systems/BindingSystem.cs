@@ -105,13 +105,13 @@ namespace Src.Systems {
 
         public void OnInitialize() { }
         
-        public void OnElementCreatedFromTemplate(MetaData data) {
-            UIElement element = data.element;
+        public void OnElementCreatedFromTemplate(UIElement element) {
             isTreeDirty = true;
 
-            if (data.constantBindings.Length != 0) {
-                for (int i = 0; i < data.constantBindings.Length; i++) {
-                    data.constantBindings[i].Execute(element, data.context);
+            UITemplate template = element.templateRef;
+            if (template.constantBindings.Length != 0) {
+                for (int i = 0; i < template.constantBindings.Length; i++) {
+                    template.constantBindings[i].Execute(element, element.templateContext);
                 }
             }
 
@@ -131,25 +131,27 @@ namespace Src.Systems {
                     ReflectionUtil.ObjectArray4
                 );
 
-                node.bindings = data.bindings;
-                node.element = data.element;
-                node.context = data.context;
+                node.bindings = template.bindings;
+                node.element = element;
+                node.context = element.templateContext;
                 node.template = repeat.template;
                 node.scope = repeat.scope;
                 repeatNodes.Add(node);
                 bindingSkipTree.AddItem(node);
             }
 
-            if (repeat == null && data.bindings.Length > 0) {
+            if (repeat == null && template.bindings.Length > 0) {
                 BindingNode node = new BindingNode();
-                node.bindings = data.bindings;
-                node.element = data.element;
-                node.context = data.context;
+                node.bindings = template.bindings;
+                node.element = element;
+                node.context = element.templateContext;
                 bindingSkipTree.AddItem(node);
             }
 
-            for (int i = 0; i < data.children.Count; i++) {
-                OnElementCreatedFromTemplate(data.children[i]);
+            if (element.children != null && element.children.Length > 0) {
+                for (int i = 0; i < element.children.Length; i++) {
+                    OnElementCreatedFromTemplate(element.children[i]);
+                }
             }
         }
 

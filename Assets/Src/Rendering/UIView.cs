@@ -75,10 +75,10 @@ public abstract class UIView {
         }
 
         if (template != null) {
-            CreateElementFromTemplate(TemplateParser.ParseTemplateFromString(elementType, template).CreateWithoutScope(this), null);
+            CreateElementFromTemplate(TemplateParser.ParseTemplateFromString(elementType, template).Create(this), null);
         }
         else {
-            CreateElementFromTemplate(TemplateParser.GetParsedTemplate(elementType, forceTemplateReparse).CreateWithoutScope(this), null);
+            CreateElementFromTemplate(TemplateParser.GetParsedTemplate(elementType, forceTemplateReparse).Create(this), null);
         }
 
         foreach (ISystem system in systems) {
@@ -123,7 +123,7 @@ public abstract class UIView {
 
         elementTree.AddItem(element);
 
-        UIElement[] children = element.ownChildren;
+        UIElement[] children = element.children;
 
         if (children == null || children.Length == 0) {
             return;
@@ -139,7 +139,7 @@ public abstract class UIView {
             list = depthMap[element.depth + 1];
         }
 
-        int idx = ~list.BinarySearch(0, list.Count, element.ownChildren[0], s_DepthIndexComparer);
+        int idx = ~list.BinarySearch(0, list.Count, element.children[0], s_DepthIndexComparer);
 
         list.InsertRange(idx, children);
 
@@ -176,8 +176,7 @@ public abstract class UIView {
     }
 
     // todo take a template instead of an init data instance? (and scope)
-    public void CreateElementFromTemplate(MetaData data, UIElement parent) {
-        UIElement element = data.element;
+    public void CreateElementFromTemplate(UIElement element, UIElement parent) {
         if (parent == null) {
             Debug.Assert(rootElement == null, nameof(rootElement) + " must be null if providing a null parent");
 
@@ -203,7 +202,7 @@ public abstract class UIView {
             list = depthMap[element.depth];
         }
 
-        InitHierarchy(data.element);
+        InitHierarchy(element);
 
         int index = ~list.BinarySearch(0, list.Count, element, s_DepthIndexComparer);
 
@@ -214,18 +213,18 @@ public abstract class UIView {
         }
 
         for (int i = 0; i < systems.Count; i++) {
-            systems[i].OnElementCreatedFromTemplate(data);
+            systems[i].OnElementCreatedFromTemplate(element);
         }
 
-        InvokeOnCreate(data.element);
-        InvokeOnReady(data.element);
-        onElementCreated?.Invoke(data.element);
+        InvokeOnCreate(element);
+        InvokeOnReady(element);
+        onElementCreated?.Invoke(element);
     }
 
     private static void InvokeOnCreate(UIElement element) {
-        if (element.ownChildren != null) {
-            for (int i = 0; i < element.ownChildren.Length; i++) {
-                InvokeOnCreate(element.ownChildren[i]);
+        if (element.children != null) {
+            for (int i = 0; i < element.children.Length; i++) {
+                InvokeOnCreate(element.children[i]);
             }
         }
 
@@ -234,9 +233,9 @@ public abstract class UIView {
     }
 
     private static void InvokeOnReady(UIElement element) {
-        if (element.ownChildren != null) {
-            for (int i = 0; i < element.ownChildren.Length; i++) {
-                InvokeOnReady(element.ownChildren[i]);
+        if (element.children != null) {
+            for (int i = 0; i < element.children.Length; i++) {
+                InvokeOnReady(element.children[i]);
             }
         }
 
@@ -253,7 +252,7 @@ public abstract class UIView {
         element.flags |= UIElementFlags.Destroyed;
         element.flags &= ~(UIElementFlags.Enabled);
 
-        if (element.ownChildren != null && element.ownChildren.Length != 0) {
+        if (element.children != null && element.children.Length != 0) {
             elementTree.TraversePostOrder(element, (node) => {
                 node.flags |= UIElementFlags.Destroyed;
                 node.flags &= ~(UIElementFlags.Enabled);
@@ -272,12 +271,12 @@ public abstract class UIView {
 
         RemoveUpdateDepthIndices(element);
 
-        UIElement[] newChildList = ArrayPool<UIElement>.GetExactSize(element.parent.ownChildren.Length - 1);
-        UIElement[] oldChildList = element.parent.ownChildren;
+        UIElement[] newChildList = ArrayPool<UIElement>.GetExactSize(element.parent.children.Length - 1);
+        UIElement[] oldChildList = element.parent.children;
         UIElement[] oldTemplateChildList = null;
         if (element.parent != null) {
-            newChildList = new UIElement[element.parent.ownChildren.Length - 1]; 
-            oldChildList = element.parent.ownChildren;
+            newChildList = new UIElement[element.parent.children.Length - 1]; 
+            oldChildList = element.parent.children;
 
             int idx = 0;
             for (int i = 0; i < oldChildList.Length; i++) {
@@ -288,7 +287,7 @@ public abstract class UIView {
                 }
             }
 
-            element.parent.ownChildren = newChildList;
+            element.parent.children = newChildList;
 
             if (element.templateParent == element.parent) {
                 if (element.parent.templateChildren == oldChildList) {
@@ -314,7 +313,7 @@ public abstract class UIView {
         }
 
         elementTree.TraversePreOrder(element, (node) => {
-            ArrayPool<UIElement>.Release(ref node.ownChildren);
+            ArrayPool<UIElement>.Release(ref node.children);
             ArrayPool<UIElement>.Release(ref node.templateChildren);
             // todo -- if child is poolable, pool it here
         }, true);
@@ -332,12 +331,12 @@ public abstract class UIView {
             return;
         }
 
-        if (element.ownChildren == null || element.ownChildren.Length == 0) {
+        if (element.children == null || element.children.Length == 0) {
             return;
         }
 
-        for (int i = 0; i < element.ownChildren.Length; i++) {
-            UIElement child = element.ownChildren[i];
+        for (int i = 0; i < element.children.Length; i++) {
+            UIElement child = element.children[i];
             child.flags |= UIElementFlags.Destroyed;
             child.flags &= ~(UIElementFlags.Enabled);
 
@@ -355,21 +354,21 @@ public abstract class UIView {
 
         RemoveUpdateDepthIndicesStep(element);
 
-        for (int i = 0; i < element.ownChildren.Length; i++) {
+        for (int i = 0; i < element.children.Length; i++) {
             for (int j = 0; j < systems.Count; j++) {
-                systems[j].OnElementDestroyed(element.ownChildren[i]);
+                systems[j].OnElementDestroyed(element.children[i]);
             }
         }
 
-        for (int i = 0; i < element.ownChildren.Length; i++) {
-            elementTree.TraversePostOrder(element.ownChildren[i], (node) => {
-                ArrayPool<UIElement>.Release(ref node.ownChildren);
+        for (int i = 0; i < element.children.Length; i++) {
+            elementTree.TraversePostOrder(element.children[i], (node) => {
+                ArrayPool<UIElement>.Release(ref node.children);
                 ArrayPool<UIElement>.Release(ref node.templateChildren);
             }, true);
-            elementTree.RemoveHierarchy(element.ownChildren[i]);
+            elementTree.RemoveHierarchy(element.children[i]);
         }
 
-        element.ownChildren = ArrayPool<UIElement>.Empty;
+        element.children = ArrayPool<UIElement>.Empty;
         element.templateChildren = ArrayPool<UIElement>.Empty;
     }
 
@@ -384,20 +383,20 @@ public abstract class UIView {
     }
 
     protected void RemoveUpdateDepthIndicesStep(UIElement element) {
-        if (element.ownChildren == null || element.ownChildren.Length == 0) {
+        if (element.children == null || element.children.Length == 0) {
             return;
         }
 
         List<UIElement> list = depthMap[element.depth + 1];
-        int idx = element.ownChildren[0].depthIndex;
-        list.RemoveRange(idx, element.ownChildren.Length);
+        int idx = element.children[0].depthIndex;
+        list.RemoveRange(idx, element.children.Length);
 
         for (int i = idx; i < list.Count; i++) {
             list[i].depthIndex = i;
         }
 
-        for (int i = idx; i < element.ownChildren.Length; i++) {
-            RemoveUpdateDepthIndicesStep(element.ownChildren[i]);
+        for (int i = idx; i < element.children.Length; i++) {
+            RemoveUpdateDepthIndicesStep(element.children[i]);
         }
     }
 

@@ -30,19 +30,20 @@ namespace Src.Systems {
             animator.Reset();
         }
 
-        public void OnElementCreatedFromTemplate(MetaData elementData) {
-            UIElement element = elementData.element;
+        public void OnElementCreatedFromTemplate(UIElement element) {
 
 
             if ((element.flags & UIElementFlags.TextElement) != 0) {
                 ((UITextElement) element).onTextChanged += HandleTextChanged;
             }
 
-            UITemplateContext context = elementData.context;
-            List<UIStyleGroup> baseStyles = elementData.baseStyles;
-            List<StyleBinding> constantStyleBindings = elementData.constantStyleBindings;
+            UITemplateContext context = element.templateContext;
+            List<UIStyleGroup> baseStyles = element.templateRef.baseStyles;
+            List<StyleBinding> constantStyleBindings = element.templateRef.constantStyleBindings;
 
-            element.style = new UIStyleSet(element, this);
+            element.style.styleSystem = this;
+            
+            // todo -- push to style buffer & apply later on first run
             for (int i = 0; i < constantStyleBindings.Count; i++) {
                 constantStyleBindings[i].Apply(element.style, context);
             }
@@ -53,9 +54,8 @@ namespace Src.Systems {
 
             element.style.Initialize();
 
-
-            for (int i = 0; i < elementData.children.Count; i++) {
-                OnElementCreatedFromTemplate(elementData.children[i]);
+            for (int i = 0; i < element.children.Length; i++) {
+                OnElementCreatedFromTemplate(element.children[i]);
             }
         }
 
@@ -69,67 +69,14 @@ namespace Src.Systems {
 
         public void OnInitialize() { }
 
-        public void OnElementCreated(UIElement element) {
-            if (element.style == null) {
-                element.style = new UIStyleSet(element, this);
-            }
-        }
-
-        public void OnElementMoved(UIElement element, int newIndex, int oldIndex) { }
-
         public void OnElementEnabled(UIElement element) { }
 
         public void OnElementDisabled(UIElement element) { }
 
         public void OnElementDestroyed(UIElement element) { }
 
-        public void OnElementShown(UIElement element) { }
-
-        public void OnElementHidden(UIElement element) { }
-
-        public void OnElementParentChanged(UIElement element, UIElement oldParent, UIElement newParent) {
-            if (element.style == null) {
-                element.style = new UIStyleSet(element, this);
-            }
-        }
-
         // todo -- buffer & flush these instead of doing it all at once
         public void SetStyleProperty(UIElement element, StyleProperty property) {
-//            if (IsTextProperty(property.propertyId)) {
-//                Stack<UIElement> stack = StackPool<UIElement>.Get();
-//                
-//                switch (property.propertyId) {
-//                    case StylePropertyId.TextAnchor:
-//                        break;
-//                    case StylePropertyId.TextColor:
-//                        stack.Push(element);
-//                        Color color = property.AsColor;
-//                        while (stack.Count > 0) {
-//                            UIElement current = stack.Pop();
-//                            if (!current.style.DefinesTextProperty(UIStyle.TextPropertyIdFlag.TextColor)) {
-//                                current.style.SetInheritedTextColor(color);
-//                            }
-//                        }
-//
-//                        break;
-//                    case StylePropertyId.TextAutoSize:
-//                        break;
-//                    case StylePropertyId.TextFontAsset:
-//                        break;
-//                    case StylePropertyId.TextFontSize:
-//                        break;
-//                    case StylePropertyId.TextFontStyle:
-//                        break;
-//                    case StylePropertyId.TextHorizontalOverflow:
-//                        break;
-//                    case StylePropertyId.TextVerticalOverflow:
-//                        break;
-//                    case StylePropertyId.TextWhitespaceMode:
-//                        break;
-//                }
-//
-//                StackPool<UIElement>.Release(stack);
-//            }
             onStylePropertyChanged?.Invoke(element, property);
         }
 

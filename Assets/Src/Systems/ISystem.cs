@@ -14,7 +14,7 @@ namespace Src.Rendering {
         void OnElementDisabled(UIElement element);
         void OnElementDestroyed(UIElement element);
 
-        void OnElementCreatedFromTemplate(MetaData elementData);
+        void OnElementCreatedFromTemplate(UIElement element);
 
     }
 

@@ -75,7 +75,7 @@ public class HierarchyView : TreeView {
             ElementTreeItem current = stack.Pop();
             UIElement element = current.element;
 
-            UIElement[] ownChildren = element.ownChildren;
+            UIElement[] ownChildren = element.children;
 
             if (ownChildren == null) {
                 continue;

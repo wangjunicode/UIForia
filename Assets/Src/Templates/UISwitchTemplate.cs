@@ -17,15 +17,8 @@ namespace Src {
 
         public override Type elementType => typeof(UISwitchTemplate);
 
-        public override MetaData CreateScoped(TemplateScope inputScope) {
-            UISwitchElement instance = new UISwitchElement();
-            MetaData data = GetCreationData(instance, inputScope.context);
-
-            for (int i = 0; i < childTemplates.Count; i++) {
-                data.AddChild(childTemplates[i].CreateScoped(inputScope));
-            }
-
-            return data;
+        public override UIElement CreateScoped(TemplateScope inputScope) {
+            throw new NotImplementedException();
         }
 
         public override bool Compile(ParsedTemplate template) {
@@ -70,7 +63,7 @@ namespace Src {
                     values[count++] = expression.EvaluateTyped(null);
                 }
                 else {
-                    ((UISwitchDefaultTemplate) childTemplates[i]).switchId = id;
+//                    ((UISwitchDefaultTemplate) childTemplates[i]).switchId = id;
                 }
             }
 

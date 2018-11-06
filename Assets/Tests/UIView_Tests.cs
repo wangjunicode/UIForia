@@ -127,11 +127,11 @@ public class UIView_Tests {
 
         public TestView(Type elementType) : base(elementType) { }
 
-        public MetaData TestCreate() {
-            MetaData data = TemplateParser.GetParsedTemplate(elementType, true).CreateWithoutScope(this);
-            data.element.flags |= UIElementFlags.AncestorEnabled;
-            InitHierarchy(data.element);
-            return data;
+        public UIElement TestCreate() {
+            UIElement element = TemplateParser.GetParsedTemplate(elementType, true).Create(this);
+            element.flags |= UIElementFlags.AncestorEnabled;
+            InitHierarchy(element);
+            return element;
         }
 
     }
@@ -141,11 +141,11 @@ public class UIView_Tests {
     public void InitializesHierarchyInTreeOrder() {
         TestView testView = new TestView(typeof(ViewTestThing));
 
-        MetaData data = testView.TestCreate();
+        UIElement element = testView.TestCreate();
 
-        Assert.IsInstanceOf<ViewTestThing>(data.element);
+        Assert.IsInstanceOf<ViewTestThing>(element);
 
-        AssertHierarchy(data, new TypeAssert(typeof(ViewTestThing), 0, new[] {
+        AssertHierarchy(element, new TypeAssert(typeof(ViewTestThing), 0, new[] {
             new TypeAssert(typeof(UIGroupElement), 0, new[] {
                 new TypeAssert(typeof(TranscludedThing), 0, new[] {
                     new TypeAssert(typeof(UITextElement), 0),
@@ -161,15 +161,15 @@ public class UIView_Tests {
     public void SetsFlagsForHierarchyChildren() {
         TestView testView = new TestView(typeof(ViewTestThing));
 
-        MetaData data = testView.TestCreate();
-        data.children[0].children[0].element.flags &= ~(UIElementFlags.Enabled);
+        UIElement element = testView.TestCreate();
+        element.children[0].children[0].flags &= ~(UIElementFlags.Enabled);
 
-        Assert.IsInstanceOf<TranscludedThing>(data.children[0].children[0].element);
+        Assert.IsInstanceOf<TranscludedThing>(element.children[0].children[0]);
 
-        Assert.IsInstanceOf<ViewTestThing>(data.element);
-        data.element.flags |= UIElementFlags.AncestorEnabled;
+        Assert.IsInstanceOf<ViewTestThing>(element);
+        element.flags |= UIElementFlags.AncestorEnabled;
 
-        AssertHierarchyFlags(data, new TypeAssert(typeof(ViewTestThing), enabled, new[] {
+        AssertHierarchyFlags(element, new TypeAssert(typeof(ViewTestThing), enabled, new[] {
             new TypeAssert(typeof(UIGroupElement), enabled, new[] {
                 new TypeAssert(typeof(TranscludedThing), disabledSelf, new[] {
                     new TypeAssert(typeof(UITextElement), disabledAncestor),
@@ -183,12 +183,12 @@ public class UIView_Tests {
     [Test]
     public void DisableElement() {
         TestView testView = new TestView(typeof(ViewTestThing));
-        MetaData data = testView.TestCreate();
-        TranscludedThing thing = As<TranscludedThing>(data.children[0].children[0].element);
+        UIElement element = testView.TestCreate();
+        TranscludedThing thing = As<TranscludedThing>(element.children[0].children[0]);
 
         testView.DisableElement(thing);
 
-        AssertHierarchyFlags(data, new TypeAssert(typeof(ViewTestThing), enabled, new[] {
+        AssertHierarchyFlags(element, new TypeAssert(typeof(ViewTestThing), enabled, new[] {
             new TypeAssert(typeof(UIGroupElement), enabled, new[] {
                 new TypeAssert(typeof(TranscludedThing), disabledSelf, new[] {
                     new TypeAssert(typeof(UITextElement), disabledAncestor),
@@ -200,17 +200,17 @@ public class UIView_Tests {
 
         TestView testView2 = new TestView(typeof(ViewTestThing));
 
-        data = testView2.TestCreate();
+        element = testView2.TestCreate();
 
-        UITextElement text0 = As<UITextElement>(data.children[0].children[0].children[0].element);
-        UITextElement text1 = As<UITextElement>(data.children[0].children[0].children[1].element);
-        UITextElement text2 = As<UITextElement>(data.children[0].children[0].children[2].element);
-        UIGroupElement group = As<UIGroupElement>(data.children[0].element);
+        UITextElement text0 = As<UITextElement>(element.children[0].children[0].children[0]);
+        UITextElement text1 = As<UITextElement>(element.children[0].children[0].children[1]);
+        UITextElement text2 = As<UITextElement>(element.children[0].children[0].children[2]);
+        UIGroupElement group = As<UIGroupElement>(element.children[0]);
 
-        thing = As<TranscludedThing>(data.children[0].children[0].element);
+        thing = As<TranscludedThing>(element.children[0].children[0]);
 
         testView2.DisableElement(text1);
-        AssertHierarchyFlags(data, new TypeAssert(typeof(ViewTestThing), enabled, new[] {
+        AssertHierarchyFlags(element, new TypeAssert(typeof(ViewTestThing), enabled, new[] {
             new TypeAssert(typeof(UIGroupElement), enabled, new[] {
                 new TypeAssert(typeof(TranscludedThing), enabled, new[] {
                     new TypeAssert(typeof(UITextElement), enabled),
@@ -222,7 +222,7 @@ public class UIView_Tests {
 
 
         testView2.DisableElement(text0);
-        AssertHierarchyFlags(data, new TypeAssert(typeof(ViewTestThing), enabled, new[] {
+        AssertHierarchyFlags(element, new TypeAssert(typeof(ViewTestThing), enabled, new[] {
             new TypeAssert(typeof(UIGroupElement), enabled, new[] {
                 new TypeAssert(typeof(TranscludedThing), enabled, new[] {
                     new TypeAssert(typeof(UITextElement), disabledSelf),
@@ -233,7 +233,7 @@ public class UIView_Tests {
         }));
 
         testView2.DisableElement(group);
-        AssertHierarchyFlags(data, new TypeAssert(typeof(ViewTestThing), enabled, new[] {
+        AssertHierarchyFlags(element, new TypeAssert(typeof(ViewTestThing), enabled, new[] {
             new TypeAssert(typeof(UIGroupElement), disabledSelf, new[] {
                 new TypeAssert(typeof(TranscludedThing), disabledAncestor, new[] {
                     new TypeAssert(typeof(UITextElement), disabledSelf),
@@ -247,8 +247,8 @@ public class UIView_Tests {
     [Test]
     public void Callback_OnDisable() {
         TestView testView = new TestView(typeof(ViewTestThing));
-        MetaData data = testView.TestCreate();
-        TranscludedThing thing = As<TranscludedThing>(data.children[0].children[0].element);
+        UIElement element = testView.TestCreate();
+        TranscludedThing thing = As<TranscludedThing>(element.children[0].children[0]);
 
         int callCount = 0;
 
@@ -257,12 +257,12 @@ public class UIView_Tests {
         Assert.AreEqual(1, callCount);
 
         TestView testView2 = new TestView(typeof(ViewTestThing));
-        data = testView2.TestCreate();
-        thing = As<TranscludedThing>(data.children[0].children[0].element);
+        element = testView2.TestCreate();
+        thing = As<TranscludedThing>(element.children[0].children[0]);
         thing.onDisableCallback = () => { callCount++; };
-        testView2.DisableElement(data.children[0].element);
+        testView2.DisableElement(element.children[0]);
         Assert.AreEqual(2, callCount);
-        testView2.DisableElement(data.children[0].element);
+        testView2.DisableElement(element.children[0]);
         Assert.AreEqual(2, callCount);
     }
 
@@ -270,12 +270,12 @@ public class UIView_Tests {
     [Test]
     public void EnableElement() {
         TestView testView = new TestView(typeof(ViewTestThing));
-        MetaData data = testView.TestCreate();
-        TranscludedThing thing = As<TranscludedThing>(data.children[0].children[0].element);
+        UIElement element = testView.TestCreate();
+        TranscludedThing thing = As<TranscludedThing>(element.children[0].children[0]);
 
         testView.DisableElement(thing);
 
-        AssertHierarchyFlags(data, new TypeAssert(typeof(ViewTestThing), enabled, new[] {
+        AssertHierarchyFlags(element, new TypeAssert(typeof(ViewTestThing), enabled, new[] {
             new TypeAssert(typeof(UIGroupElement), enabled, new[] {
                 new TypeAssert(typeof(TranscludedThing), disabledSelf, new[] {
                     new TypeAssert(typeof(UITextElement), disabledAncestor),
@@ -286,7 +286,7 @@ public class UIView_Tests {
         }));
 
         testView.EnableElement(thing);
-        AssertHierarchyFlags(data, new TypeAssert(typeof(ViewTestThing), enabled, new[] {
+        AssertHierarchyFlags(element, new TypeAssert(typeof(ViewTestThing), enabled, new[] {
             new TypeAssert(typeof(UIGroupElement), enabled, new[] {
                 new TypeAssert(typeof(TranscludedThing), enabled, new[] {
                     new TypeAssert(typeof(UITextElement), enabled),
@@ -295,11 +295,11 @@ public class UIView_Tests {
                 }),
             })
         }));
-        UIGroupElement group = As<UIGroupElement>(data.children[0].element);
-        UITextElement text2 = As<UITextElement>(data.children[0].children[0].children[2].element);
+        UIGroupElement group = As<UIGroupElement>(element.children[0]);
+        UITextElement text2 = As<UITextElement>(element.children[0].children[0].children[2]);
 
         testView.DisableElement(group);
-        AssertHierarchyFlags(data, new TypeAssert(typeof(ViewTestThing), enabled, new[] {
+        AssertHierarchyFlags(element, new TypeAssert(typeof(ViewTestThing), enabled, new[] {
             new TypeAssert(typeof(UIGroupElement), disabledSelf, new[] {
                 new TypeAssert(typeof(TranscludedThing), disabledAncestor, new[] {
                     new TypeAssert(typeof(UITextElement), disabledAncestor),
@@ -309,7 +309,7 @@ public class UIView_Tests {
             })
         }));
         testView.DisableElement(text2);
-        AssertHierarchyFlags(data, new TypeAssert(typeof(ViewTestThing), enabled, new[] {
+        AssertHierarchyFlags(element, new TypeAssert(typeof(ViewTestThing), enabled, new[] {
             new TypeAssert(typeof(UIGroupElement), disabledSelf, new[] {
                 new TypeAssert(typeof(TranscludedThing), disabledAncestor, new[] {
                     new TypeAssert(typeof(UITextElement), disabledAncestor),
@@ -319,7 +319,7 @@ public class UIView_Tests {
             })
         }));
         testView.EnableElement(group);
-        AssertHierarchyFlags(data, new TypeAssert(typeof(ViewTestThing), enabled, new[] {
+        AssertHierarchyFlags(element, new TypeAssert(typeof(ViewTestThing), enabled, new[] {
             new TypeAssert(typeof(UIGroupElement), enabled, new[] {
                 new TypeAssert(typeof(TranscludedThing), enabled, new[] {
                     new TypeAssert(typeof(UITextElement), enabled),
@@ -333,9 +333,9 @@ public class UIView_Tests {
     [Test]
     public void Callback_OnEnable() {
         TestView testView = new TestView(typeof(ViewTestThing));
-        MetaData data = testView.TestCreate();
-        TranscludedThing thing = As<TranscludedThing>(data.children[0].children[0].element);
-        UIGroupElement group = As<UIGroupElement>(data.children[0].element);
+        UIElement element = testView.TestCreate();
+        TranscludedThing thing = As<TranscludedThing>(element.children[0].children[0]);
+        UIGroupElement group = As<UIGroupElement>(element.children[0]);
         int callCount = 0;
         thing.onEnableCallback = () => callCount++;
         testView.DisableElement(thing);
@@ -418,10 +418,10 @@ public class UIView_Tests {
         testView.Initialize();
         ViewTestThing root = (ViewTestThing) testView.RootElement;
         UIElement parent = root.FindById("L1-3").parent;
-        int childCount = parent.ownChildren.Length;
+        int childCount = parent.children.Length;
         testView.DestroyElement(root.FindById("L1-3"));
         Assert.IsNull(root.FindById("L1-3"));
-        Assert.AreEqual(childCount - 1, parent.ownChildren.Length);
+        Assert.AreEqual(childCount - 1, parent.children.Length);
     }
     
     private struct TypeAssert {
@@ -449,60 +449,60 @@ public class UIView_Tests {
 
     }
 
-    private static void AssertHierarchy(MetaData data, TypeAssert assertRoot, int depth = 0) {
-        Assert.AreEqual(data.element.GetType(), assertRoot.parentType);
-        if (data.children.Count != assertRoot.childTypes.Length) {
+    private static void AssertHierarchy(UIElement element, TypeAssert assertRoot, int depth = 0) {
+        Assert.AreEqual(element.GetType(), assertRoot.parentType);
+        if (element.children.Length != assertRoot.childTypes.Length) {
             Assert.Fail("Child Count did not match at depth: " + depth);
         }
 
-        for (int i = 0; i < data.children.Count; i++) {
-            if (data.children[i].element.GetType() != assertRoot.childTypes[i].parentType) {
+        for (int i = 0; i < element.children.Length; i++) {
+            if (element.children[i].GetType() != assertRoot.childTypes[i].parentType) {
                 Assert.Fail("Types did not match for child number " + i + " at depth " + depth);
             }
 
-            AssertHierarchy(data.children[i], assertRoot.childTypes[i], depth + 1);
+            AssertHierarchy(element.children[i], assertRoot.childTypes[i], depth + 1);
         }
     }
 
-    private static void AssertHierarchyFlags(MetaData data, TypeAssert assertRoot, int depth = 0) {
-        Assert.AreEqual(data.element.GetType(), assertRoot.parentType);
+    private static void AssertHierarchyFlags(UIElement element, TypeAssert assertRoot, int depth = 0) {
+        Assert.AreEqual(element.GetType(), assertRoot.parentType);
 
         switch (assertRoot.flags) {
             case TestEnableFlags.Disabled:
-                Assert.IsTrue(data.element.isDisabled);
-                Assert.IsFalse(data.element.isEnabled);
+                Assert.IsTrue(element.isDisabled);
+                Assert.IsFalse(element.isEnabled);
                 break;
             case TestEnableFlags.DisabledSelf:
-                Assert.IsTrue(data.element.isSelfDisabled);
-                Assert.IsFalse(data.element.isSelfEnabled);
+                Assert.IsTrue(element.isSelfDisabled);
+                Assert.IsFalse(element.isSelfEnabled);
                 break;
             case TestEnableFlags.DisabledAncestor:
-                Assert.IsTrue(data.element.isDisabled);
-                Assert.IsTrue(data.element.isSelfEnabled);
-                Assert.IsFalse(data.element.isEnabled);
+                Assert.IsTrue(element.isDisabled);
+                Assert.IsTrue(element.isSelfEnabled);
+                Assert.IsFalse(element.isEnabled);
                 break;
             case TestEnableFlags.Enabled:
-                Assert.IsTrue(data.element.isEnabled);
-                Assert.IsTrue(data.element.isSelfEnabled);
-                Assert.IsFalse(data.element.isSelfDisabled);
+                Assert.IsTrue(element.isEnabled);
+                Assert.IsTrue(element.isSelfEnabled);
+                Assert.IsFalse(element.isSelfDisabled);
                 break;
             case TestEnableFlags.EnabledAncestor:
                 break;
             case TestEnableFlags.EnabledSelf:
-                Assert.IsTrue(data.element.isSelfEnabled);
+                Assert.IsTrue(element.isSelfEnabled);
                 break;
         }
 
-        if (data.children.Count != assertRoot.childTypes.Length) {
+        if (element.children.Length != assertRoot.childTypes.Length) {
             Assert.Fail("Child Count did not match at depth: " + depth);
         }
 
-        for (int i = 0; i < data.children.Count; i++) {
-            if (data.children[i].element.GetType() != assertRoot.childTypes[i].parentType) {
+        for (int i = 0; i < element.children.Length; i++) {
+            if (element.children[i].GetType() != assertRoot.childTypes[i].parentType) {
                 Assert.Fail("Types did not match for child number " + i + " at depth " + depth);
             }
 
-            AssertHierarchy(data.children[i], assertRoot.childTypes[i], depth + 1);
+            AssertHierarchy(element.children[i], assertRoot.childTypes[i], depth + 1);
         }
     }
 

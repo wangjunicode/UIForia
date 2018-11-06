@@ -36,11 +36,10 @@ namespace Src.Rendering {
 
         private static readonly HashSet<StylePropertyId> s_DefinedMap = new HashSet<StylePropertyId>();
 
-        public UIStyleSet(UIElement element, IStyleSystem styleSystem) {
+        public UIStyleSet(UIElement element) {
             this.element = element;
             this.currentState = StyleState.Normal;
             this.containedStates = StyleState.Normal;
-            this.styleSystem = styleSystem;
             this.computedStyle = new ComputedStyle(this); // todo -- get rid of computed style? use 1 intmap for all styles
             this.appliedStyles = new LightList<StyleEntry>();
             this.styleGroups = new List<UIStyleGroup>();
@@ -385,14 +384,14 @@ namespace Src.Rendering {
         }
 
         internal void InitializeScrollbar(VirtualScrollbar scrollbar) {
-            UIStyleSet styleSet = new UIStyleSet(scrollbar, styleSystem);
-            styleSet.SetBackgroundColor(Color.green, StyleState.Normal);
-            styleSet.SetLayoutBehavior(LayoutBehavior.Ignored, StyleState.Normal);
-            scrollbar.style = styleSet;
-            UIStyleSet handleStyle = new UIStyleSet(scrollbar.handle, styleSystem);
-            handleStyle.SetBackgroundColor(Color.magenta, StyleState.Normal);
-            handleStyle.SetLayoutBehavior(LayoutBehavior.Ignored, StyleState.Normal);
-            scrollbar.handle.style = handleStyle;
+//            UIStyleSet styleSet = new UIStyleSet(scrollbar, styleSystem);
+//            styleSet.SetBackgroundColor(Color.green, StyleState.Normal);
+//            styleSet.SetLayoutBehavior(LayoutBehavior.Ignored, StyleState.Normal);
+//            scrollbar.style = styleSet;
+//            UIStyleSet handleStyle = new UIStyleSet(scrollbar.handle, styleSystem);
+//            handleStyle.SetBackgroundColor(Color.magenta, StyleState.Normal);
+//            handleStyle.SetLayoutBehavior(LayoutBehavior.Ignored, StyleState.Normal);
+//            scrollbar.handle.style = handleStyle;
         }
 
         public void SetProperty(StyleProperty property, StyleState state) {

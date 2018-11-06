@@ -12,7 +12,7 @@ namespace Src {
         public readonly UIView view;
         public UIElement currentElement;
 
-        public UITemplateContext(UIView view) : base(null) {
+        public UITemplateContext(UIElement rootContext, UIView view = null) : base(rootContext) {
             this.view = view;
         }
 

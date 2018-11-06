@@ -11,7 +11,7 @@ namespace Src {
     public class ParsedTemplate {
 
         private static readonly IntMap<ParsedTemplate> s_ParsedTemplates = new IntMap<ParsedTemplate>();
-        private static readonly List<MetaData> EmptyElementList = new List<MetaData>(0);
+        private static readonly IReadOnlyList<UIElement> EmptyElementList = ListPool<UIElement>.Empty;
 
         public List<ImportDeclaration> imports;
         public readonly string templatePath;
@@ -45,71 +45,51 @@ namespace Src {
         }
         
         public List<UITemplate> childTemplates => rootElementTemplate.childTemplates;
-
-        // todo -- ensure we have a <Children/> tag somewhere in our template if there are input children
         
-        public MetaData CreateWithScope(TemplateScope scope) {
-            if (!isCompiled) Compile();
-
-            UIElement instance = (UIElement) Activator.CreateInstance(rootElementTemplate.RootType);
-            instance.flags |= UIElementFlags.TemplateRoot;
-            
-            MetaData instanceData = rootElementTemplate.GetCreationData(instance, scope.context);
-            instanceData.element.templateChildren = ArrayPool<UIElement>.Empty;
-
-            for (int i = 0; i < rootElementTemplate.childTemplates.Count; i++) {
-                UITemplate template = rootElementTemplate.childTemplates[i];
-                instanceData.AddChild(template.CreateScoped(scope));
-            }
-            
-            instanceData.element.ownChildren = instanceData.children.Select(c => c.element).ToArray();
-            
-            AssignContext(rootElementTemplate, instance, scope.context);
-
-            return instanceData;
+        public UIElement Create(UIView view) {
+            Compile();
+            return rootElementTemplate.CreateScoped(new TemplateScope());
+//            
+//            UITemplateContext context = new UITemplateContext(view);
+//            UIElement instance = (UIElement) Activator.CreateInstance(rootElementTemplate.RootType);
+//            TemplateScope scope = new TemplateScope(instance, context);
+//
+//            scope.context.rootElement = instance;
+//            instance.flags |= UIElementFlags.TemplateRoot;
+//            
+//
+//            for (int i = 0; i < childTemplates.Count; i++) {
+//                rootData.AddChild(childTemplates[i].CreateScoped(scope));
+//            }
+//
+//            rootData.element.templateChildren = rootData.children.Select(c => c.element).ToArray();
+//            rootData.element.ownChildren = rootData.element.templateChildren;
+//
+//            AssignContext(rootElementTemplate, instance, scope.context);
+//
+//            return rootData;
         }
 
-        public MetaData CreateWithoutScope(UIView view) {
-            if (!isCompiled) Compile();
-
-            TemplateScope scope = new TemplateScope();
-            scope.context = new UITemplateContext(view);
-            scope.inputChildren = EmptyElementList;
-
-            UIElement instance = (UIElement) Activator.CreateInstance(rootElementTemplate.RootType);
-            scope.context.rootElement = instance;
-            instance.flags |= UIElementFlags.TemplateRoot;
-            
-            MetaData rootData = rootElementTemplate.GetCreationData(instance, scope.context);
-
-            for (int i = 0; i < childTemplates.Count; i++) {
-                rootData.AddChild(childTemplates[i].CreateScoped(scope));
-            }
-
-            rootData.element.templateChildren = rootData.children.Select(c => c.element).ToArray();
-            rootData.element.ownChildren = rootData.element.templateChildren;
-
-            AssignContext(rootElementTemplate, instance, scope.context);
-
-            return rootData;
-        }
-
-        private void AssignContext(UITemplate template, UIElement element, UITemplateContext context) {
-            element.templateContext = context;
-            if (element.templateChildren != null) {
-                for (int i = 0; i < element.templateChildren.Length; i++) {
-                    element.templateChildren[i].templateParent = element;
-                    AssignContext(template.childTemplates[i], element.templateChildren[i], context);
-                }
-            }
-        }
+//        private void AssignContext(UITemplate template, UIElement element, UITemplateContext context) {
+//            element.templateContext = context;
+//            if (element.templateChildren != null) {
+//                for (int i = 0; i < element.templateChildren.Length; i++) {
+//                    element.templateChildren[i].templateParent = element;
+//                    AssignContext(template.childTemplates[i], element.templateChildren[i], context);
+//                }
+//            }
+//        }
 
         public void Compile() {
             if (isCompiled) return;
             isCompiled = true;
             for (int i = 0; i < imports.Count; i++) {
                 Type type = TypeProcessor.GetRuntimeType(imports[i].path);
-                if(type == null) throw new Exception("Could not find type for: " + imports[i].path);
+                
+                if (type == null) {
+                    throw new Exception("Could not find type for: " + imports[i].path);
+                }
+                
                 imports[i].type = type;
                 contextDefinition.AddConstAliasSource(new ExternalReferenceAliasSource(imports[i].alias, type));
             }

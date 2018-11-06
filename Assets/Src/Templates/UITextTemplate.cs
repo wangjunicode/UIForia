@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using Src.Parsing;
+using Src.Util;
 
 namespace Src {
 
@@ -76,8 +77,11 @@ namespace Src {
 
         public override Type elementType => typeof(UITextElement);
 
-        public override MetaData CreateScoped(TemplateScope inputScope) {
-            return GetCreationData(new UITextElement(), inputScope.context);
+        public override UIElement CreateScoped(TemplateScope inputScope) {
+            UIElement retn = new UITextElement();
+            retn.templateRef = this;
+            retn.children = ArrayPool<UIElement>.Empty;
+            return retn;
         }
 
     }

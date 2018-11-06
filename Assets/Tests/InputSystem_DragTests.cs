@@ -14,7 +14,7 @@ public class InputSystem_DragTests {
 
         public string source;
 
-        public TestDragEvent(string source) {
+        public TestDragEvent(string source) : base(null) {
             this.source = source;
         }
 

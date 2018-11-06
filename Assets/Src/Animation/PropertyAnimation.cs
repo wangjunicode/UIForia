@@ -3,10 +3,11 @@ using System.Collections.Generic;
 using Src.Rendering;
 using Src.Util;
 using UnityEngine;
+using Debug = System.Diagnostics.Debug;
 
 namespace Src.Animation {
 
-    public struct AnimationStatus {
+    public struct AnimationState {
 
         public int iterationCount;
         public float elapsedTime;
@@ -15,7 +16,7 @@ namespace Src.Animation {
         public AnimationDirection direction;
         public bool isDelaying;
 
-        public AnimationStatus(float floatValue, object value) {
+        public AnimationState(float floatValue, object value) {
             this.elapsedTime = 0;
             this.iterationCount = 0;
             this.startValueAsObject = value;
@@ -24,7 +25,7 @@ namespace Src.Animation {
             this.isDelaying = false;
         }
 
-        public AnimationStatus(object value) {
+        public AnimationState(object value) {
             this.elapsedTime = 0;
             this.iterationCount = 0;
             this.floatValue = 0;
@@ -33,7 +34,7 @@ namespace Src.Animation {
             this.isDelaying = false;
         }
 
-        public AnimationStatus(float value) {
+        public AnimationState(float value) {
             this.iterationCount = 0;
             this.elapsedTime = 0;
             this.floatValue = value;
@@ -48,20 +49,20 @@ namespace Src.Animation {
 
         public StyleProperty m_StartValue;
         public StyleProperty m_TargetValue;
-        private readonly List<ValueTuple<int, AnimationStatus>> m_StatusList;
+        private readonly List<ValueTuple<int, AnimationState>> m_StatusList;
 
         public PropertyAnimation(StyleProperty targetValue, AnimationOptions options) {
             m_Options = options;
             m_TargetValue = targetValue;
             m_StartValue = StyleProperty.Unset(m_TargetValue.propertyId);
-            m_StatusList = ListPool<ValueTuple<int, AnimationStatus>>.Get();
+            m_StatusList = ListPool<ValueTuple<int, AnimationState>>.Get();
         }
 
         public PropertyAnimation(StyleProperty startValue, StyleProperty targetValue, AnimationOptions options) {
             m_Options = options;
             m_StartValue = startValue;
             m_TargetValue = targetValue;
-            m_StatusList = ListPool<ValueTuple<int, AnimationStatus>>.Get();
+            m_StatusList = ListPool<ValueTuple<int, AnimationState>>.Get();
         }
 
         public override void OnStart(UIStyleSet styleSet, Rect viewport) {
@@ -83,7 +84,7 @@ namespace Src.Animation {
                     startValue = styleSet.computedStyle.GetProperty(m_TargetValue.propertyId);
                 }
 
-                AnimationStatus status = ResolveStartValue(styleSet, viewport, startValue);
+                AnimationState status = ResolveStartValue(styleSet, viewport, startValue);
                 if (m_Options.direction == AnimationDirection.Reverse) {
                     status.direction = AnimationDirection.Reverse;
                 }
@@ -99,7 +100,7 @@ namespace Src.Animation {
             }
         }
 
-        private AnimationStatus ResolveStartValue(UIStyleSet styleSet, Rect viewport, StyleProperty startProperty) {
+        private AnimationState ResolveStartValue(UIStyleSet styleSet, Rect viewport, StyleProperty startProperty) {
             UIElement element = styleSet.element;
             switch (m_TargetValue.propertyId) {
                 case StylePropertyId.TransformPivotX:
@@ -110,7 +111,7 @@ namespace Src.Animation {
                 case StylePropertyId.BorderRight:
                 case StylePropertyId.MarginLeft:
                 case StylePropertyId.MarginRight:
-                    return new AnimationStatus(ResolveFixedWidth(element, viewport, startProperty.AsUIFixedLength));
+                    return new AnimationState(ResolveFixedWidth(element, viewport, startProperty.AsUIFixedLength));
 
                 case StylePropertyId.TransformPivotY:
                 case StylePropertyId.TransformPositionY:
@@ -120,13 +121,13 @@ namespace Src.Animation {
                 case StylePropertyId.BorderBottom:
                 case StylePropertyId.MarginTop:
                 case StylePropertyId.MarginBottom:
-                    return new AnimationStatus(ResolveFixedHeight(element, viewport, startProperty.AsUIFixedLength));
+                    return new AnimationState(ResolveFixedHeight(element, viewport, startProperty.AsUIFixedLength));
 
                 case StylePropertyId.PreferredWidth:
-                    return new AnimationStatus(ResolveWidthMeasurement(element, viewport, startProperty.AsUIMeasurement));
+                    return new AnimationState(ResolveWidthMeasurement(element, viewport, startProperty.AsUIMeasurement));
 
                 case StylePropertyId.PreferredHeight:
-                    return new AnimationStatus(ResolveHeightMeasurement(element, viewport, startProperty.AsUIMeasurement));
+                    return new AnimationState(ResolveHeightMeasurement(element, viewport, startProperty.AsUIMeasurement));
 
                 case StylePropertyId.Opacity:
                 case StylePropertyId.TransformScaleX:
@@ -134,19 +135,19 @@ namespace Src.Animation {
                 case StylePropertyId.TransformRotation:
                 case StylePropertyId.GridLayoutColGap:
                 case StylePropertyId.GridLayoutRowGap:
-                    return new AnimationStatus(startProperty.AsFloat);
+                    return new AnimationState(startProperty.AsFloat);
 
                 case StylePropertyId.AnchorTop:
-                    return new AnimationStatus(ResolveAnchorTop(element, viewport, startProperty.AsUIFixedLength));
+                    return new AnimationState(ResolveAnchorTop(element, viewport, startProperty.AsUIFixedLength));
 
                 case StylePropertyId.AnchorRight:
-                    return new AnimationStatus(ResolveAnchorRight(element, viewport, startProperty.AsUIFixedLength));
+                    return new AnimationState(ResolveAnchorRight(element, viewport, startProperty.AsUIFixedLength));
 
                 case StylePropertyId.AnchorBottom:
-                    return new AnimationStatus(ResolveAnchorBottom(element, viewport, startProperty.AsUIFixedLength));
+                    return new AnimationState(ResolveAnchorBottom(element, viewport, startProperty.AsUIFixedLength));
 
                 case StylePropertyId.AnchorLeft:
-                    return new AnimationStatus(ResolveAnchorLeft(element, viewport, startProperty.AsUIFixedLength));
+                    return new AnimationState(ResolveAnchorLeft(element, viewport, startProperty.AsUIFixedLength));
 
                 case StylePropertyId.BorderColor:
                 case StylePropertyId.BackgroundColor:
@@ -156,14 +157,14 @@ namespace Src.Animation {
 //                        return new AnimationStatus((int) ColorType.Gradient, startProperty.AsGradient);
 //                    }
 //                    else {
-                        return new AnimationStatus((int) ColorType.Color, new StyleColor(startProperty.AsColor).rgba);
+                        return new AnimationState((int) ColorType.Color, new StyleColor(startProperty.AsColor).rgba);
 //                    }
 
                 default: throw new UIForia.InvalidArgumentException(m_TargetValue.propertyId + " is not a supported animation property");
             }
         }
 
-        public override bool Update(UIStyleSet styleSet, Rect viewport, float deltaTime) {
+        public override AnimationStatus Update(UIStyleSet styleSet, Rect viewport, float deltaTime) {
             UIElement element = styleSet.element;
             int idx = -1;
             for (int i = 0; i < m_StatusList.Count; i++) {
@@ -174,12 +175,13 @@ namespace Src.Animation {
             }
 
             if (idx == -1) {
-                return true;
+                // invalid
+                return AnimationStatus.Completed;
             }
 
             float duration = (m_Options.duration - m_Options.delay) / Mathf.Max(1, m_Options.iterations);
 
-            AnimationStatus status = m_StatusList[idx].Item2;
+            AnimationState status = m_StatusList[idx].Item2;
             status.elapsedTime += deltaTime;
             StylePropertyId propertyId = m_TargetValue.propertyId;
 
@@ -187,7 +189,7 @@ namespace Src.Animation {
                 if (status.isDelaying) {
                     if (status.elapsedTime < m_Options.delay) {
                         m_StatusList[idx] = ValueTuple.Create(element.id, status);
-                        return false;
+                        return AnimationStatus.Running;
                     }
                     else {
                         status.isDelaying = false;
@@ -204,7 +206,7 @@ namespace Src.Animation {
                         }
                         else {
                             m_StatusList[idx] = ValueTuple.Create(element.id, status);
-                            return false;
+                            return AnimationStatus.Running;
                         }
                     }
                     else {
@@ -214,7 +216,7 @@ namespace Src.Animation {
                         }
                         else {
                             m_StatusList[idx] = ValueTuple.Create(element.id, status);
-                            return false;
+                            return AnimationStatus.Running;
                         }
                     }
                 }
@@ -375,7 +377,7 @@ namespace Src.Animation {
             }
 
             m_StatusList[idx] = ValueTuple.Create(element.id, status);
-            return status.iterationCount == Mathf.Max(1, m_Options.iterations) && t == 1;
+            return status.iterationCount == Mathf.Max(1, m_Options.iterations) && t == 1 ? AnimationStatus.Completed : AnimationStatus.Running;
         }
 
         public override void OnEnd(UIStyleSet styleSet) {

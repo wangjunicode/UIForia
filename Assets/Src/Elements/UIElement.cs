@@ -76,6 +76,8 @@ public class UIElement : IHierarchical, IExpressionContextProvider {
     public int siblingIndex { get; internal set; }
 
     public IInputProvider Input { get; internal set; }
+    
+    public int ChildCount => ownChildren?.Length ?? 0;
 
     public bool isShown => (flags & UIElementFlags.SelfAndAncestorShown) == UIElementFlags.SelfAndAncestorShown;
 
@@ -309,6 +311,7 @@ public class UIElement : IHierarchical, IExpressionContextProvider {
     public class DepthComparerAscending : IComparer<UIElement> {
 
         public int Compare(UIElement a, UIElement b) {
+            
             if (a.depth != b.depth) {
                 return a.depth < b.depth ? 1 : -1;
             }
@@ -322,6 +325,15 @@ public class UIElement : IHierarchical, IExpressionContextProvider {
 
             return a.parent.siblingIndex < b.parent.siblingIndex ? 1 : -1;
         }
+
+    }
+
+    public UIElement GetChild(int index) {
+        if(ownChildren == null || (uint)index >= (uint)ownChildren.Length) {
+            return null;
+        }
+
+        return ownChildren[index];
 
     }
 

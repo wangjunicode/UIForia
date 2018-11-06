@@ -186,6 +186,23 @@ public class TemplateParsingTests {
     }
 
     [Test]
+    public void Repeat_CanNest() {
+        Assert.DoesNotThrow(() => {
+            TemplateParser.ParseTemplateFromString<Spec.Test1>(@"
+                <UITemplate>
+                    <Contents>
+                       <Repeat list='{something}'>
+                            <Repeat list='{other}' as='thing'>
+                                <Group>text</Group>                            
+                            </Repeat>
+                        </Repeat>
+                    </Contents>
+                </UITemplate>
+            ");
+        });
+    }
+    
+    [Test]
     public void Text_ParsesExpressionParts() {
         TextElementParser parser = new TextElementParser();
         string[] output1 = parser.Parse("'one expression'");

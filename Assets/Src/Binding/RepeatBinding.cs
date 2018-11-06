@@ -25,17 +25,6 @@ public class RepeatBindingNode<T, U> : RepeatBindingNode where T : class, IList<
         this.lengthAlias = lengthAlias;
     }
 
-    private void Reset() {
-        if (previousReference == null) {
-            return;
-        }
-
-        previousReference.Clear();
-        previousReference = null;
-
-        context.view.DestroyChildren(element);
-    }
-
     private static void AssignTemplateParents(UIElement parent) {
         if (parent.templateChildren != null) {
             for (int i = 0; i < parent.templateChildren.Length; i++) {
@@ -48,8 +37,18 @@ public class RepeatBindingNode<T, U> : RepeatBindingNode where T : class, IList<
     public override void Validate() {
         T list = listExpression.EvaluateTyped(context);
 
-        if (list == null) {
-            Reset();
+        if (list == null || list.Count == 0) {
+            
+            if (previousReference == null) {
+                return;
+            }
+
+            ((UIRepeatElement) element).listBecameEmpty = previousReference.Count > 0;
+
+            previousReference.Clear();
+            previousReference = null;
+
+            context.view.DestroyChildren(element);
             return;
         }
 
@@ -71,8 +70,12 @@ public class RepeatBindingNode<T, U> : RepeatBindingNode where T : class, IList<
             }
 
             AssignTemplateParents(element);
+            ((UIRepeatElement) element).listBecamePopulated = true;
         }
         else if (list.Count > previousReference.Count) {
+            
+            ((UIRepeatElement) element).listBecamePopulated = previousReference.Count == 0;
+            
             UIElement[] oldChildren = element.ownChildren;
             UIElement[] oldTemplateChildren = element.templateChildren;
 
@@ -117,6 +120,7 @@ public class RepeatBindingNode<T, U> : RepeatBindingNode where T : class, IList<
                 previousReference.RemoveAt(index);
                 context.view.DestroyElement(element.ownChildren[index]);
             }
+
         }
 
         for (int i = 0; i < element.ownChildren.Length; i++) {

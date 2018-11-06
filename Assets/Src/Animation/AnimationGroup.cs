@@ -1,4 +1,5 @@
 using Src.Rendering;
+using Src.Util;
 using UnityEngine;
 
 namespace Src.Animation {
@@ -6,31 +7,37 @@ namespace Src.Animation {
     public class AnimationGroup : StyleAnimation {
 
         private StyleAnimation[] animations;
-        private bool[] state;
+        private AnimationStatus[] state;
         
         public AnimationGroup(params StyleAnimation[] animations) {
             this.animations = animations;
-            this.state = new bool[animations.Length];
+            this.state = ArrayPool<AnimationStatus>.GetExactSize(animations.Length);
+            for (int i = 0; i < state.Length; i++) {
+                state[i] = AnimationStatus.Pending;
+            }
         }
 
         public override void OnStart(UIStyleSet styleSet, Rect viewport) {
             for (int i = 0; i < animations.Length; i++) {
                 animations[i].OnStart(styleSet, viewport);
+                state[i] = AnimationStatus.Running;
             }
         }
 
-        public override bool Update(UIStyleSet styleSet, Rect viewport, float deltaTime) {
+        public override AnimationStatus Update(UIStyleSet styleSet, Rect viewport, float deltaTime) {
             for (int i = 0; i < animations.Length; i++) {
-                if (!state[i]) {
+                if (state[i] == AnimationStatus.Running) {
                     state[i] = animations[i].Update(styleSet, viewport, deltaTime);
                 }
             }
 
             for (int i = 0; i < state.Length; i++) {
-                if (!state[i]) return false;
+                if (state[i] == AnimationStatus.Running) {
+                    return AnimationStatus.Running;
+                }
             }
 
-            return true;
+            return AnimationStatus.Completed;
         }
 
     }

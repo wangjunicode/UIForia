@@ -74,22 +74,23 @@
             PaddingRight = 12px;
         }
         
+        style window-frame-temp {
+            PreferredWidth = 500px;
+            TransformBehaviorX = LayoutOffset;
+            TransformBehaviorY = LayoutOffset;
+            TransformPositionX = 100px;
+            TransformPositionY = 100px;
+        }
+        
     </Style>
 
     <Contents style="container">
 
         <!--<ChatPanel style.borderColor="red" selectedGroupIdx="{selectedChatGroup}" chatData="{chatData}"/>-->
-    <!---->
-        <!--<Div style="parent">-->
-            <!---->
-         <!---->
-                        <!--<Div style="status-icon"/>-->
 
-            <!--&lt;!&ndash;<Text style="text">Here is text, ja hallk</Text>&ndash;&gt;-->
-            <!---->
-        <!--</Div>-->
-        <!---->
-        <SeedWindowFrame style.width="500"/>
+        <SeedWindowFrame style="window-frame-temp">
+            <!--<Div>Text</Div>-->
+        </SeedWindowFrame>
         
     </Contents>
 

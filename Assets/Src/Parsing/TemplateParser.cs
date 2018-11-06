@@ -180,8 +180,6 @@ namespace Src {
 
         private static UITemplate ParseRepeatElement(XElement element) {
             EnsureAttribute(element, "list");
-            // this isn't actually a restriction anymore
-            EnsureNotInsideTagName(element, "Repeat");
             EnsureOnlyAttributes(element, RepeatAttributes);
 
             UIRepeatTemplate template = new UIRepeatTemplate(

@@ -7,10 +7,11 @@ namespace Src.Input {
 
         public readonly Type type;
         internal EventPropagator source;
-
-
-        protected DragEvent() {
+        public readonly UIElement origin;
+        
+        protected DragEvent(UIElement origin) {
             this.type = GetType();
+            this.origin = origin;
         }
 
         public Vector2 MousePosition { get; internal set; }
@@ -47,6 +48,8 @@ namespace Src.Input {
     public class CallbackDragEvent : DragEvent {
 
         public event Action<DragEvent> onUpdate;
+        
+        public CallbackDragEvent(UIElement origin) : base(origin) { }
 
         public override void Update() {
             onUpdate?.Invoke(this);
@@ -60,6 +63,7 @@ namespace Src.Input {
             IsCanceled = true;
             onUpdate = null;
         }
+
 
     }
 

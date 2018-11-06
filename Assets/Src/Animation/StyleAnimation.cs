@@ -6,9 +6,17 @@ namespace Src.Animation {
 
     public abstract class StyleAnimation {
 
+        public enum AnimationStatus {
+
+            Pending,
+            Running,
+            Completed
+
+        }
+        
         public AnimationOptions m_Options;
 
-        public abstract bool Update(UIStyleSet styleSet, Rect viewport, float deltaTime);
+        public abstract AnimationStatus Update(UIStyleSet styleSet, Rect viewport, float deltaTime);
 
         public virtual void OnStart(UIStyleSet styleSet, Rect viewport) { }
 
@@ -18,7 +26,7 @@ namespace Src.Animation {
 
         public virtual void OnResume(UIStyleSet styleSet) { }
 
-        protected float ResolveFixedWidth(UIElement element, Rect viewport, UIFixedLength width) {
+        protected static float ResolveFixedWidth(UIElement element, Rect viewport, UIFixedLength width) {
             switch (width.unit) {
                 case UIFixedUnit.Pixel:
                     return width.value;
@@ -40,7 +48,7 @@ namespace Src.Animation {
             }
         }
 
-        protected float ResolveFixedHeight(UIElement element, Rect viewport, UIFixedLength height) {
+        protected static float ResolveFixedHeight(UIElement element, Rect viewport, UIFixedLength height) {
             switch (height.unit) {
                 case UIFixedUnit.Pixel:
                     return height.value;
@@ -63,7 +71,7 @@ namespace Src.Animation {
         }
 
 
-        public float ResolveWidthMeasurement(UIElement element, Rect viewport, UIMeasurement measurement) {
+        public static float ResolveWidthMeasurement(UIElement element, Rect viewport, UIMeasurement measurement) {
             switch (measurement.unit) {
                 case UIMeasurementUnit.Unset:
                     return 0;
@@ -106,7 +114,7 @@ namespace Src.Animation {
             }
         }
 
-        public float ResolveHeightMeasurement(UIElement element, Rect viewport, UIMeasurement measurement) {
+        public static float ResolveHeightMeasurement(UIElement element, Rect viewport, UIMeasurement measurement) {
             switch (measurement.unit) {
                 case UIMeasurementUnit.Unset:
                     return 0;
@@ -149,7 +157,7 @@ namespace Src.Animation {
             }
         }
 
-        private UIElement ResolveLayoutParent(UIElement element) {
+        private static UIElement ResolveLayoutParent(UIElement element) {
             UIElement ptr = element.parent;
             while ((ptr.flags & UIElementFlags.RequiresLayout) == 0) {
                 ptr = ptr.parent;
@@ -158,7 +166,7 @@ namespace Src.Animation {
             return ptr;
         }
 
-        private float ResolveVerticalAnchorBaseHeight(UIElement element, Rect viewport) {
+        private static float ResolveVerticalAnchorBaseHeight(UIElement element, Rect viewport) {
             switch (element.ComputedStyle.AnchorTarget) {
                 case AnchorTarget.Parent:
                     return ResolveLayoutParent(element).layoutResult.AllocatedHeight;
@@ -183,7 +191,7 @@ namespace Src.Animation {
             }
         }
 
-        private float ResolveHorizontalAnchorBaseWidth(UIElement element, Rect viewport) {
+        private static float ResolveHorizontalAnchorBaseWidth(UIElement element, Rect viewport) {
             switch (element.ComputedStyle.AnchorTarget) {
                 case AnchorTarget.Parent:
                     return ResolveLayoutParent(element).layoutResult.AllocatedWidth;
@@ -324,6 +332,8 @@ namespace Src.Animation {
                     return 0;
             }
         }
+
+        public virtual void OnComplete() {}
 
     }
 

@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using Src;
 using Src.Input;
 using UnityEngine;
+using Debug = System.Diagnostics.Debug;
 
 public abstract partial class InputSystem {
 
@@ -11,7 +12,7 @@ public abstract partial class InputSystem {
     private void ProcessDragEvents() {
         if (IsDragging) {
             if (m_MouseState.isLeftMouseUpThisFrame) {
-                EndDrag();
+                EndDrag(InputEventType.DragDrop);
                 m_MouseDownElements.Clear();
             }
             else {
@@ -52,11 +53,11 @@ public abstract partial class InputSystem {
         }
 
         if (m_CurrentDragEvent.IsCanceled) {
-            EndDrag();
+            EndDrag(InputEventType.DragCancel);
         }
 
         if (m_CurrentDragEvent.IsDropped) {
-            // evt.Drop(success);         
+            EndDrag(InputEventType.DragDrop);
         }
     }
 
@@ -75,10 +76,12 @@ public abstract partial class InputSystem {
 
             // todo -- figure out if these should respect propagation
             dragCreatorGroup.context.SetContextValue(element, k_EventAlias, mouseEvent);
+            dragCreatorGroup.context.SetContextValue(element, k_ElementAlias, element);
 
             m_CurrentDragEvent = dragCreatorGroup.TryCreateEvent(element, mouseEvent);
 
             dragCreatorGroup.context.RemoveContextValue<MouseInputEvent>(element, k_EventAlias);
+            dragCreatorGroup.context.RemoveContextValue<UIElement>(element, k_ElementAlias);
 
             if (m_CurrentDragEvent == null) {
                 continue;
@@ -92,22 +95,36 @@ public abstract partial class InputSystem {
         }
     }
 
-    private void EndDrag() {
+    private void EndDrag(InputEventType evtType) {
         IsDragging = false;
+
         if (m_CurrentDragEvent == null) {
             return;
         }
+
+        m_CurrentDragEvent.MousePosition = MousePosition;
+        m_CurrentDragEvent.Modifiers = modifiersThisFrame;
+        
+        if (evtType == InputEventType.DragCancel) {
+            RunDragEvent(m_ElementsThisFrame, InputEventType.DragCancel);
+        }
+        else if (evtType == InputEventType.DragDrop) {
+            RunDragEvent(m_ElementsThisFrame, InputEventType.DragDrop);
+            m_CurrentDragEvent.Drop(true);
+        }
+
     }
 
     private void RunDragEvent(List<UIElement> elements, InputEventType eventType) {
-        if (m_CurrentDragEvent.IsCanceled) return;
+        if (m_CurrentDragEvent.IsCanceled && eventType != InputEventType.DragCancel) {
+            return;
+        }
 
         m_CurrentDragEvent.CurrentEventType = eventType;
         m_CurrentDragEvent.source = m_EventPropagator;
 
         m_EventPropagator.Reset(m_MouseState);
-//        MouseInputEvent mouseEvent = new MouseInputEvent(m_EventPropagator, eventType, modifiersThisFrame);
-//        object boxedEvent = mouseEvent;
+
         for (int i = 0; i < elements.Count; i++) {
             UIElement element = elements[i];
             DragHandlerGroup dragHandlerGroup;

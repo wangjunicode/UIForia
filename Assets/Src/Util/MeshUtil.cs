@@ -230,7 +230,7 @@ namespace Src.Util {
             if (bounds.size.x == size.width && bounds.size.y == size.height) {
                 return mesh;
             }
-
+            
             Vector2 uv1 = new Vector2();
             Vector4 tangent = new Vector4();
 
@@ -242,8 +242,8 @@ namespace Src.Util {
             Color32 color32 = Color.white;
             s_VertexHelper.AddVert(new Vector3(0, 0), color32, new Vector2(0f, 1f), uv1, normal0, tangent);
             s_VertexHelper.AddVert(new Vector3(0, -size.height), color32, new Vector2(0f, 0f), uv1, normal1, tangent);
-            s_VertexHelper.AddVert(new Vector3(size.width, -size.height), color32, new Vector2(1f, 0f), uv1, normal2, tangent);
-            s_VertexHelper.AddVert(new Vector3(size.width, 0), color32, new Vector2(1f, 1f), uv1, normal3, tangent);
+            s_VertexHelper.AddVert(new Vector3(size.width + 1, -size.height), color32, new Vector2(1f, 0f), uv1, normal2, tangent);
+            s_VertexHelper.AddVert(new Vector3(size.width + 1, 0), color32, new Vector2(1f, 1f), uv1, normal3, tangent);
 
             s_VertexHelper.AddTriangle(0, 1, 2);
             s_VertexHelper.AddTriangle(2, 3, 0);

@@ -13,7 +13,7 @@ namespace Src.Animation {
             this.animations = animations;
         }
         
-        public override bool Update(UIStyleSet styleSet, Rect viewport, float deltaTime) {
+        public override AnimationStatus Update(UIStyleSet styleSet, Rect viewport, float deltaTime) {
 
             float progress = 1f / m_Options.duration;
             int count = animations.Length;
@@ -31,7 +31,7 @@ namespace Src.Animation {
             
             animations[currentIndex].Update(styleSet, viewport, deltaTime);
 
-            return true;
+            return AnimationStatus.Running;
         }
 
         public override void OnStart(UIStyleSet styleSet, Rect viewport) {

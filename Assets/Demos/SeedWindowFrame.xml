@@ -1,5 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?>
 <UITemplate>
+    
+    <Import value="ClippedPanel+ClippedCorner" as="ClippedCorner"/>
+
     <Style>
     
         style container {
@@ -8,7 +11,7 @@
         }
         
         style menubar {
-            PreferredSize = 1pca, 32px;
+            PreferredSize = 1pca, 64px;
             BackgroundColor = black;
             FlexLayoutDirection = Column;
             FlexLayoutMainAxisAlignment = SpaceBetween;
@@ -21,13 +24,17 @@
         }
         
         style side-bar-container {
-            PreferredWidth = 88px;
-            Padding = 12px;
+            PreferredWidth = 1.1cnt;
+            PreferredHeight = 1.2cnt;
+            FlexLayoutMainAxisAlignment = SpaceBetween;
+            FlexLayoutCrossAxisAlignment = Center;
+            Padding = 36px, 12px;
             BackgroundColor = black;
         }
         
         style body-container {
             PreferredSize = 1pca, 1cnt;
+            FlexItemSelfAlignment = Stretch;
         }
         
         style tab-text {
@@ -49,27 +56,81 @@
         }
         
         style tab-runner {
-            PreferredSize = 30px, 8px;
+            PreferredSize = 30px, 10px;
             BackgroundColor = white;
             LayoutBehavior = Ignored;
             TransformBehaviorY = AnchorMaxOffset;
-            <!--AnchorBottom = 0;-->
+            TransformPositionY = -100%;
         }
         
-    </Style>
+        style sidebar-runner {
+            PreferredSize = 6px, 48px;
+            BackgroundColor = red;
+            LayoutBehavior = Ignored;
+        }
+        
+        style side-bar-item {
+            PreferredSize = 64px;
+        }
+        
+        style contents {
+            BackgroundColor= white;
+            Padding = 12px, 0px;
+            FlexItemGrow = 1;
+            PreferredWidth = 100%;
+            PreferredHeight = 0;
+        }
+        
+        style resource-container-group {
+            PreferredWidth = 1pca;
+        }
+        
+        style resource-container-header {
+            PreferredWidth = 1pca;
+            BackgroundColor = #F7F7F7;
+            FlexLayoutDirection = Column;
+            FlexLayoutCrossAxisAlignment = Center;
+        }
+        
+        style resource-container-label {
+            TextFontAsset = GothamNarrow-Book SDF;
+            TextFontSize = 32;
+            TextColor = #A4A4A4;
+        }
+        
+        style resource-container-image {
+            PreferredSize = 32px, 24px;
+            PaddingLeft = 8px;
+        }
+        
+        style resource-count {
+            PaddingRight = 12px;
+            TextColor = #6C6C6C;
+            TextFontSize = 24;
+            TextFontAsset = GothamNarrow-Book SDF;
+        }
+        
+        style flex-spacer {
+            FlexItemGrow = 1;
+            PreferredWidth = 1;
+        }
+        
+        
+        
+</Style>
 <Contents style="container">
 
-    <Div style="side-bar-container">
+    <ClippedPanel style="side-bar-container" clipSize="30f" clippedCorner="{@ClippedCorner.BottomLeft}">
         
-        <Repeat list="{sideBarEntries}">
+        <Repeat x-id="sidebar-repeater" list="{sideBarEntries}">
     
-            <Div style='side-bar' onMouseDown="{$item.onClick()}">
-                {$item.imageUrl}
-            </Div>    
+            <Image style="side-bar-item" src="{$item.imageUrl}" onMouseDown="Sidebar_MouseDown($index)"/>
     
         </Repeat>
+        
+        <Div x-id="sidebar-runner" x-if="false" style="sidebar-runner"/>
 
-    </Div>
+    </ClippedPanel>
     
     <Div style="body-container">
         
@@ -77,7 +138,7 @@
             
             <Div x-id="tab-container" style="tab-container">
                 
-                <Repeat list='{tabs}'>
+                <Repeat x-id="tab-repeater" list='{tabs}'>
                     
                     <Div style='tab' onMouseDown="MenuItem_MouseDown($index)">
                         <Text style="tab-text">{$item.text}</Text>
@@ -85,18 +146,49 @@
                     
                 </Repeat>
                 
+                
             </Div>
             
-            <Div x-id="tab-runner" style="tab-runner"/>
+            <Div x-id="tab-runner" x-if="false" style="tab-runner"/>
 
             <Div style="status-container">
                 <Div style="status-icon"/>
             </Div>
             
         </Panel>
-        
+
         <!--<Children/>-->
+        <!--Todo this should be replaced with a transcluded <Children/> element-->
+
+        <ClippedPanel style="contents" clipSize="30f" clippedCorner="{@ClippedCorner.BottomLeft}">
+                
+            <Repeat list="{groups}">
+                <Group style="resource-container-group">
+                    
+                    <Group style="resource-container-header">
+                        
+                        <Image style="resource-container-image"
+                               src="'ui_icon_inventory_container_location_marker'"/>
+                    
+                        <Image onMouseDown="{ToggleResourceGroup($index)}"
+                               style="resource-container-image"
+                               src="'ui_icon_inventory_group_open'"/>
+                    
+                        <Text style="resource-container-label">{$item.name}</Text>
+                        <Div style="flex-spacer"/>
+                        <Text style="resource-count">{$item.total}</Text>
+    
+                    </Group>
+                    
+                    <ResourceListDisplay contents="{$item.contents}"/>
+                    
+                </Group>
+               
+            </Repeat>
+  
+        </ClippedPanel>
         
+      
     </Div>
     
 </Contents>

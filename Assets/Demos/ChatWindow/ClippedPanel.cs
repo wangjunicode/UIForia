@@ -1,5 +1,4 @@
 using System;
-using Src.Rendering;
 using Src;
 using Src.Elements;
 using Src.Systems;
@@ -7,13 +6,6 @@ using Src.Util;
 using UnityEngine;
 using UnityEngine.UI;
 
-//[Template(TemplateType.String, @"
-//<UITemplate>
-//    <Contents>
-//        <Children/>
-//    </Contents>
-//</UITemplate>
-//")]
 public class ClippedPanel : UIContainerElement, IMeshProvider {
 
     private static readonly VertexHelper s_VertexHelper = new VertexHelper();
@@ -59,7 +51,6 @@ public class ClippedPanel : UIContainerElement, IMeshProvider {
 
         Color32 color32 = style.computedStyle.BackgroundColor;
         Size size = layoutResult.actualSize;
-
         if (clippedCorner == ClippedCorner.None || clipSize <= 0f) {
             mesh = MeshUtil.CreateStandardUIMesh(size, color32);
             return mesh;
@@ -67,7 +58,7 @@ public class ClippedPanel : UIContainerElement, IMeshProvider {
 
         clipSize = Mathf.Min(clipSize, size.height);
 
-        float width = size.width;
+        float width = size.width + 1;
         float height = size.height;
 
         Vector3 v0 = new Vector3(0, 0);

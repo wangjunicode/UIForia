@@ -9,7 +9,7 @@ namespace Src.Elements {
         public readonly float baseOffset;
         public readonly VirtualScrollbar scrollbar;
 
-        public ScrollbarDragEvent(float baseOffset, VirtualScrollbar scrollbar) {
+        public ScrollbarDragEvent(float baseOffset, VirtualScrollbar scrollbar) : base(scrollbar.targetElement) {
             this.baseOffset = baseOffset;
             this.scrollbar = scrollbar;
         }

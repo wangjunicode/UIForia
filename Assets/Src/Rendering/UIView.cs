@@ -86,6 +86,7 @@ public abstract class UIView {
         }
 
         onReady?.Invoke();
+        
     }
 
     public void Refresh() {

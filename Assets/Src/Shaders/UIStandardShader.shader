@@ -35,7 +35,7 @@ Shader "UIForia/Default"
             WriteMask [_StencilWriteMask]
         }
 
-        Cull Off // Front
+        Cull Front
         Lighting Off
         ZWrite On
         ZTest LEqual

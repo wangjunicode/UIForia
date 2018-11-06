@@ -161,8 +161,13 @@ namespace Src.Systems {
                     }
 
                     if (box.IsIgnored) {
+                        float currentWidth = box.allocatedWidth;
+                        float currentHeight = box.allocatedHeight;
                         box.allocatedWidth = box.GetWidths().clampedSize;
                         box.allocatedHeight = box.GetHeights(box.actualHeight).clampedSize;
+                        if (box.allocatedWidth != currentWidth || box.allocatedHeight != currentHeight) {
+                            box.markedForLayout = true;
+                        }
                     }
 
                     if (forceLayout || box.markedForLayout) {

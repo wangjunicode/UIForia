@@ -1,27 +1,9 @@
 
 // Todo 
-
-- Create Inspector / Debugger
-- Support Out of Flow layout
-- Support <Style>
-- Support <Import>
-- Support Destroying Elements
-- Support references to globals in templates
 - Support style skinning
 - Support handlers for list events (add, remove, move)
 - Support <Slot> elements
-- Support <Prefab> tag, goes against unity-agnostic design
 - Filter Lists
-- Create / Destroy List Elements
-- Support <Image>
-- Support backgroundImage
-- Support shapes
-- Support gradients
-- Support grid layout
-- Support layout wrapping
-- Support layout ordering
-- Support out of flow
-- Support animation
 - Support arbitrary creation of child nodes?
 
  Optimizations
@@ -30,3 +12,28 @@
 - Support .once bindings and dependent bindings (::someotherbinding)
 - Support function calls in dirty checking
 - Reduce boxing
+
+
+LayoutDefault to Flow
+Implement Flow
+Improve Grid w/ flex tracks
+Margin
+Cursors
+rotation
+fill modes
+shapes
+Scroll Styles
+Fix layers
+masks?
+<Children/>
+finish drag implementation
+make false mouse cursor for debug
+handle multiple view roots
+handle nested repeat being null bug
+finish animations
+reuse / import style sheets
+animations in style sheet
+attributes + eventing
+Clone methods
+scaling
+zooming in inspector

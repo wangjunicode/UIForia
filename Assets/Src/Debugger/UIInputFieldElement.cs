@@ -160,7 +160,7 @@ public class UIInputFieldElement : UIElement, IFocusable, IPropertyChangedHandle
 
     [OnDragCreate]
     public TextSelectDragEvent CreateDragEvent(MouseInputEvent evt) {
-        TextSelectDragEvent retn = new TextSelectDragEvent();
+        TextSelectDragEvent retn = new TextSelectDragEvent(this);
         retn.onUpdate += HandleDragUpdate;
         Vector2 mouse = evt.MousePosition - layoutResult.screenPosition;
         selectionRange = textElement.BeginSelection(mouse);
@@ -208,7 +208,11 @@ public class UIInputFieldElement : UIElement, IFocusable, IPropertyChangedHandle
         return "TextInput";
     }
 
-    public class TextSelectDragEvent : CallbackDragEvent { }
+    public class TextSelectDragEvent : CallbackDragEvent {
+
+        public TextSelectDragEvent(UIElement origin) : base(origin) { }
+
+    }
 
 }
 //

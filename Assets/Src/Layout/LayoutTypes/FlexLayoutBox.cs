@@ -179,8 +179,8 @@ namespace Src.Layout.LayoutTypes {
 
         public override void RunLayout() {
             if (children.Count == 0) {
-                actualWidth = GetWidths().clampedSize;
-                actualHeight = GetHeights(actualWidth).clampedSize;
+                actualWidth = allocatedWidth;//GetWidths().clampedSize;
+                actualHeight = allocatedHeight;//GetHeights(actualWidth).clampedSize;
                 return;
             }
             tracks.Clear(); // todo -- recycle theses

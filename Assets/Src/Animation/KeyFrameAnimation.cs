@@ -48,14 +48,10 @@ namespace Src.Animation {
             }
         }
         
-        public override bool Update(UIStyleSet styleSet, Rect viewport, float deltaTime) {
+        public override AnimationStatus Update(UIStyleSet styleSet, Rect viewport, float deltaTime) {
             elapsedTime += deltaTime;
             float progress = Mathf.Clamp01(elapsedTime / options.duration);
-            
-            if (progress == 1f) {
-                
-            }
-
+          
             UIElement element = styleSet.element;
             // todo - insert an implicit frame for 0% and 100% if not provided
 
@@ -139,7 +135,9 @@ namespace Src.Animation {
                         throw new UIForia.InvalidArgumentException(propertyId + " is not a supported animation property");
                 }
             }
-            return false;
+            
+            return progress == 1f ? AnimationStatus.Completed : AnimationStatus.Running;
+            
         }
 
        

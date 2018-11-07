@@ -1,9 +1,9 @@
 ﻿using System;
-using Src.Rendering;
-using Src.Animation;
+using UIForia.Animation;
+using UIForia.Rendering;
 using UnityEngine;
 
-namespace Src.Systems {
+namespace UIForia.Systems {
 
     public interface IStyleSystem : ISystem {
 

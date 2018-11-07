@@ -1,6 +1,6 @@
-using Src.Rendering;
+using UIForia.Rendering;
 
-namespace Src.Rendering {
+namespace UIForia.Rendering {
 
     public class UIStyleGroup {
 

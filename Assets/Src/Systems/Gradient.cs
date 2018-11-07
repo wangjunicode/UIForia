@@ -1,7 +1,7 @@
 ﻿using Shapes2D;
 using UnityEngine;
 
-namespace Src.Rendering {
+namespace UIForia.Rendering {
 
     public struct Gradient {
 

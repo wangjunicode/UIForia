@@ -1,7 +1,7 @@
 ﻿using System;
 using UnityEngine;
 
-namespace Src.Systems {
+namespace UIForia.Systems {
 
     public struct LayoutResult {
 

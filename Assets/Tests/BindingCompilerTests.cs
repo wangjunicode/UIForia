@@ -1,6 +1,6 @@
 ﻿using NUnit.Framework;
-using Src;
-using Src.Compilers;
+using UIForia;
+using UIForia.Compilers;
 using Tests;
 using static Tests.TestUtils;
 

@@ -1,9 +1,9 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Diagnostics;
-using Src.Util;
+using UIForia.Util;
 
-namespace Src {
+namespace UIForia {
 
     public class IntMap<T> {
 

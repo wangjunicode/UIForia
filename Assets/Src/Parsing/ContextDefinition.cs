@@ -1,9 +1,9 @@
 using System;
 using System.Collections.Generic;
 using System.Reflection;
-using Src.Compilers.AliasSource;
+using UIForia.Compilers.AliasSource;
 
-namespace Src {
+namespace UIForia {
 
     public class ContextDefinition {
 

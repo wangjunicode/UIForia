@@ -1,16 +1,16 @@
 using System;
 using System.Collections.Generic;
 using Shapes2D;
-using Src.Layout;
-using Src.Layout.LayoutTypes;
-using Src.Text;
-using Src.Util;
 using TMPro;
+using UIForia.Layout;
+using UIForia.Layout.LayoutTypes;
+using UIForia.Text;
+using UIForia.Util;
 using UnityEngine;
-using FontStyle = Src.Text.FontStyle;
-using TextAlignment = Src.Text.TextAlignment;
+using FontStyle = UIForia.Text.FontStyle;
+using TextAlignment = UIForia.Text.TextAlignment;
 
-namespace Src.Rendering {
+namespace UIForia.Rendering {
 
     public static class DefaultStyleValues {
 
@@ -80,10 +80,10 @@ namespace Src.Rendering {
         public static readonly LayoutType LayoutType = LayoutType.Flex;
         public const int TextFontSize = 18;
         public static readonly Color TextColor = Color.black;
-        public const FontStyle TextFontStyle = FontStyle.Normal;
+        public const Text.FontStyle TextFontStyle = Text.FontStyle.Normal;
         public static readonly TMP_FontAsset TextFontAsset = TMP_FontAsset.defaultFontAsset;
-        public const TextAlignment TextAlignment = Src.Text.TextAlignment.Left;
-        public const TextTransform TextTransform = Src.Text.TextTransform.None;
+        public const Text.TextAlignment TextAlignment = Text.TextAlignment.Left;
+        public const TextTransform TextTransform = Text.TextTransform.None;
 
         public static readonly LayoutBehavior LayoutBehavior = LayoutBehavior.Normal;
         public const int GridItemColStart = IntUtil.UnsetValue;
@@ -118,8 +118,8 @@ namespace Src.Rendering {
 
         public const GradientType BackgroundGradientType = GradientType.Linear;
         public const GradientAxis BackgroundGradientAxis = GradientAxis.Horizontal;
-        public const BackgroundShapeType BackgroundShapeType = Src.Rendering.BackgroundShapeType.Rectangle;
-        public const BackgroundFillType BackgroundFillType = Src.Rendering.BackgroundFillType.Normal;
+        public const BackgroundShapeType BackgroundShapeType = Rendering.BackgroundShapeType.Rectangle;
+        public const BackgroundFillType BackgroundFillType = Rendering.BackgroundFillType.Normal;
 
         public const float BackgroundFillRotation = 0f;
         public const float BackgroundGradientStart = 0;
@@ -140,7 +140,7 @@ namespace Src.Rendering {
 
         public const Texture2D Cursor = null;
 
-        public const TextAlignment TextAnchor = Src.Text.TextAlignment.Left;
+        public const Text.TextAlignment TextAnchor = Text.TextAlignment.Left;
         public const WhitespaceMode TextWhitespaceMode = WhitespaceMode.Preserve;
 
         public static StyleProperty GetPropertyValue(StylePropertyId propertyId) {

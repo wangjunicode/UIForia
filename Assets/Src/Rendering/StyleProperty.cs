@@ -1,15 +1,15 @@
 using System.Collections.Generic;
 using System.Diagnostics;
 using Shapes2D;
-using Src.Layout;
-using Src.Layout.LayoutTypes;
-using Src.Text;
 using TMPro;
+using UIForia.Layout;
+using UIForia.Layout.LayoutTypes;
+using UIForia.Text;
 using UnityEngine;
-using FontStyle = Src.Text.FontStyle;
-using TextAlignment = Src.Text.TextAlignment;
+using FontStyle = UIForia.Text.FontStyle;
+using TextAlignment = UIForia.Text.TextAlignment;
 
-namespace Src.Rendering {
+namespace UIForia.Rendering {
 
     public struct StyleProperty {
 
@@ -33,7 +33,7 @@ namespace Src.Rendering {
             this.objectField = null;
         }
 
-        public StyleProperty(StylePropertyId propertyId, Src.Rendering.Gradient gradient) {
+        public StyleProperty(StylePropertyId propertyId, Gradient gradient) {
             this.propertyId = propertyId;
             this.valuePart0 = 0;
             this.valuePart1 = (int) ColorType.Gradient;
@@ -111,8 +111,8 @@ namespace Src.Rendering {
         public TMP_FontAsset AsFont => (TMP_FontAsset) objectField;
         public Texture2D AsTexture => (Texture2D) objectField;
 
-        public FontStyle AsFontStyle => (FontStyle) valuePart0;
-        public TextAlignment AsTextAlignment => (TextAlignment) valuePart0;
+        public Text.FontStyle AsFontStyle => (Text.FontStyle) valuePart0;
+        public Text.TextAlignment AsTextAlignment => (Text.TextAlignment) valuePart0;
         public LayoutDirection AsLayoutDirection => (LayoutDirection) valuePart0;
         public LayoutWrap AsLayoutWrap => (LayoutWrap) valuePart0;
         public GridTrackSize AsGridTrackSize => new GridTrackSize(FloatUtil.DecodeToFloat(valuePart0), (GridTemplateUnit) valuePart1);
@@ -173,7 +173,7 @@ namespace Src.Rendering {
             return new StyleProperty(StylePropertyId.BackgroundColor, color);
         }
 
-        public static StyleProperty BackgroundColor(Src.Rendering.Gradient gradient) {
+        public static StyleProperty BackgroundColor(Gradient gradient) {
             return new StyleProperty(StylePropertyId.BackgroundColor, 0, (int) ColorType.Gradient, gradient);
         }
 

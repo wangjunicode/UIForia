@@ -1,7 +1,7 @@
 using System;
-using Src;
+using UIForia;
 
-namespace Src.Rendering {
+namespace UIForia.Rendering {
 
     public static class StyleUtil {
 

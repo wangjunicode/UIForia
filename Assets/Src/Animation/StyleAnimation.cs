@@ -1,8 +1,8 @@
 using System;
-using Src.Rendering;
+using UIForia.Rendering;
 using UnityEngine;
 
-namespace Src.Animation {
+namespace UIForia.Animation {
 
     public abstract class StyleAnimation {
 

@@ -2,7 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Reflection;
 
-namespace Src {
+namespace UIForia {
 
     public class AccessExpressionNode : ExpressionNode {
 

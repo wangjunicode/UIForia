@@ -1,6 +1,6 @@
 using System;
 
-namespace Src.Layout.LayoutTypes {
+namespace UIForia.Layout.LayoutTypes {
 
     [Flags]
     public enum GridTemplateUnit {

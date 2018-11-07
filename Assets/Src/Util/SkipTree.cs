@@ -2,10 +2,10 @@
 using System.Collections.Generic;
 using System.Diagnostics;
 using JetBrains.Annotations;
-using Src.Rendering;
-using Src.Util;
+using UIForia.Rendering;
+using UIForia.Util;
 
-namespace Src {
+namespace UIForia {
 
     public interface IHierarchical {
 

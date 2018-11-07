@@ -1,4 +1,4 @@
-namespace Src.Layout.LayoutTypes {
+namespace UIForia.Layout.LayoutTypes {
 
     public struct GridTrackSize {
 

@@ -1,9 +1,9 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Reflection;
-using Src.Input;
+using UIForia.Input;
 
-namespace Src.Compilers {
+namespace UIForia.Compilers {
 
     public class InputBindingCompiler {
 

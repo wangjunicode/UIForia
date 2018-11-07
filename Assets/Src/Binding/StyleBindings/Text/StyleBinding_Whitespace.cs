@@ -1,7 +1,7 @@
 using System;
-using Src.Rendering;
+using UIForia.Rendering;
 
-namespace Src.StyleBindings.Text {
+namespace UIForia.StyleBindings.Text {
 
     public class StyleBinding_Whitespace : StyleBinding {
 

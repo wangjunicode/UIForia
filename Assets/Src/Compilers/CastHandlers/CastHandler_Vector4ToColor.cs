@@ -1,7 +1,7 @@
 using System;
 using UnityEngine;
 
-namespace Src.Compilers.CastHandlers {
+namespace UIForia.Compilers.CastHandlers {
 
     public class CastHandler_Vector4ToColor : ICastHandler {
 

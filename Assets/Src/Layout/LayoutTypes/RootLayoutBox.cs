@@ -1,7 +1,7 @@
-using Src.Systems;
+using UIForia.Systems;
 using UnityEngine;
 
-namespace Src.Layout.LayoutTypes {
+namespace UIForia.Layout.LayoutTypes {
 
     public class RootLayoutBox : LayoutBox {
 
@@ -14,8 +14,8 @@ namespace Src.Layout.LayoutTypes {
                 return;
             }
             
-            actualWidth = layoutSystem.ViewportRect.width;
-            actualHeight = layoutSystem.ViewportRect.height;
+            actualWidth = element.view.Viewport.width;
+            actualHeight = element.view.Viewport.height;
             
             children[0].SetAllocatedXAndWidth(0, Mathf.Min(children[0].GetWidths().clampedSize, actualWidth));
             children[0].SetAllocatedYAndHeight(0, Mathf.Min(children[0].GetHeights(actualWidth).clampedSize, actualHeight));

@@ -1,6 +1,6 @@
-using Src.Util;
+using UIForia.Util;
 
-namespace Src.Elements {
+namespace UIForia.Elements {
 
     public class VirtualScrollbarHandle : VirtualElement {
 

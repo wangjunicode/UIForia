@@ -1,7 +1,7 @@
-using Src.Rendering;
-using Src.Layout;
-using Src.Layout.LayoutTypes;
-using Src.Systems;
+using UIForia.Rendering;
+using UIForia.Layout;
+using UIForia.Layout.LayoutTypes;
+using UIForia.Systems;
 
 namespace Tests.Mocks {
 

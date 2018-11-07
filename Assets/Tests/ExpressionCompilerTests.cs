@@ -3,9 +3,9 @@ using System.Collections.Generic;
 using System.Reflection;
 using JetBrains.Annotations;
 using NUnit.Framework;
-using Src;
-using Src.Compilers.AliasSource;
-using Src.Compilers.AliasSources;
+using UIForia;
+using UIForia.Compilers.AliasSource;
+using UIForia.Compilers.AliasSources;
 using Tests;
 using UnityEngine;
 

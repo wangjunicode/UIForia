@@ -1,6 +1,6 @@
-﻿using Src.Rendering;
+﻿using UIForia.Rendering;
 
-namespace Src.StyleBindings.Src.StyleBindings {
+namespace UIForia.StyleBindings.Src.StyleBindings {
 
     public class StyleBinding_MaxWidth : StyleBinding {
 

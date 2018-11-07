@@ -1,17 +1,15 @@
 ﻿using System;
 using System.Collections.Generic;
-using Src.Rendering;
-using Src.Elements;
+using UIForia.Elements;
+using UIForia.Rendering;
 using UnityEngine;
 
-namespace Src.Systems {
+namespace UIForia.Systems {
 
     public interface ILayoutSystem : ISystem {
 
         event Action<VirtualScrollbar> onCreateVirtualScrollbar;
         event Action<VirtualScrollbar> onDestroyVirtualScrollbar;
-
-        void SetViewportRect(Rect viewportRect);
 
         List<UIElement> QueryPoint(Vector2 point, List<UIElement> retn);
 

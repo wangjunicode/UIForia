@@ -1,10 +1,10 @@
 using System.Collections.Generic;
 using NUnit.Framework;
-using Src.Rendering;
-using Src;
-using Src.Layout;
-using Src.Layout.LayoutTypes;
-using Src.Util;
+using UIForia.Rendering;
+using UIForia;
+using UIForia.Layout;
+using UIForia.Layout.LayoutTypes;
+using UIForia.Util;
 using Tests.Mocks;
 using UnityEngine;
 
@@ -62,8 +62,7 @@ public class GridLayoutTests {
 
     [Test]
     public void ExplicitPlaced_Fixed3x1() {
-        MockView mockView = new MockView(typeof(GridLayoutThing3x1));
-        mockView.Initialize();
+        MockApplication mockView = new MockApplication(typeof(GridLayoutThing3x1));
         GridLayoutThing3x1 root = (GridLayoutThing3x1) mockView.RootElement;
         root.child0.style.SetGridItemPlacement(0, 1, 0, 1, StyleState.Normal);
         root.child1.style.SetGridItemPlacement(1, 1, 0, 1, StyleState.Normal);
@@ -91,8 +90,7 @@ public class GridLayoutTests {
 
     [Test]
     public void ExplicitPlaced_Fixed3x1Overlap() {
-        MockView mockView = new MockView(typeof(GridLayoutThing3x1));
-        mockView.Initialize();
+        MockApplication mockView = new MockApplication(typeof(GridLayoutThing3x1));
         GridLayoutThing3x1 root = (GridLayoutThing3x1) mockView.RootElement;
 
         root.child0.style.SetGridItemColStart(0, StyleState.Normal);
@@ -124,8 +122,7 @@ public class GridLayoutTests {
 
     [Test]
     public void ExplicitPlaced_AlignCenter() {
-        MockView mockView = new MockView(typeof(GridLayoutThing3x1));
-        mockView.Initialize();
+        MockApplication mockView = new MockApplication(typeof(GridLayoutThing3x1));
         GridLayoutThing3x1 root = (GridLayoutThing3x1) mockView.RootElement;
 
         root.child0.style.SetGridItemColStart(0, StyleState.Normal);
@@ -157,8 +154,7 @@ public class GridLayoutTests {
 
     [Test]
     public void ExplicitPlaced_AlignEnd() {
-        MockView mockView = new MockView(typeof(GridLayoutThing3x1));
-        mockView.Initialize();
+        MockApplication mockView = new MockApplication(typeof(GridLayoutThing3x1));
         GridLayoutThing3x1 root = (GridLayoutThing3x1) mockView.RootElement;
 
         root.child0.style.SetGridItemColStart(0, StyleState.Normal);
@@ -191,8 +187,7 @@ public class GridLayoutTests {
 
     [Test]
     public void ExplicitPlaced_AlignStretch() {
-        MockView mockView = new MockView(typeof(GridLayoutThing3x1));
-        mockView.Initialize();
+        MockApplication mockView = new MockApplication(typeof(GridLayoutThing3x1));
         GridLayoutThing3x1 root = (GridLayoutThing3x1) mockView.RootElement;
 
         root.child0.style.SetGridItemColStart(0, StyleState.Normal);
@@ -225,8 +220,7 @@ public class GridLayoutTests {
 
     [Test]
     public void ExplicitPlaced_MinWidthSingleColumn() {
-        MockView mockView = new MockView(typeof(GridLayoutThing3x1));
-        mockView.Initialize();
+        MockApplication mockView = new MockApplication(typeof(GridLayoutThing3x1));
         GridLayoutThing3x1 root = (GridLayoutThing3x1) mockView.RootElement;
 
         root.child0.style.SetGridItemPlacement(0, 1, 0, 1, StyleState.Normal);
@@ -254,8 +248,7 @@ public class GridLayoutTests {
 
     [Test]
     public void ExplicitPlaced_MinWidthMultiColumn() {
-        MockView mockView = new MockView(typeof(GridLayoutThing3x1));
-        mockView.Initialize();
+        MockApplication mockView = new MockApplication(typeof(GridLayoutThing3x1));
         GridLayoutThing3x1 root = (GridLayoutThing3x1) mockView.RootElement;
 
         root.child0.style.SetPreferredWidth(50f, StyleState.Normal);
@@ -287,11 +280,10 @@ public class GridLayoutTests {
 
     [Test]
     public void ExplicitPlaced_Flex() {
-        MockView mockView = new MockView(typeof(GridLayoutThing3x1));
-        mockView.Initialize();
+        MockApplication mockView = new MockApplication(typeof(GridLayoutThing3x1));
         GridLayoutThing3x1 root = (GridLayoutThing3x1) mockView.RootElement;
 
-        mockView.LayoutSystem.SetViewportRect(new Rect(0, 0, 1000, 1000));
+        mockView.SetViewportRect(new Rect(0, 0, 1000, 1000));
         root.child0.style.SetPreferredWidth(50f, StyleState.Normal);
         root.child1.style.SetPreferredWidth(100f, StyleState.Normal);
         root.child2.style.SetPreferredWidth(100f, StyleState.Normal);
@@ -324,8 +316,7 @@ public class GridLayoutTests {
 
     [Test]
     public void ImplicitRowPlaced_Fixed3x1() {
-        MockView mockView = new MockView(typeof(GridLayoutThing3x1));
-        mockView.Initialize();
+        MockApplication mockView = new MockApplication(typeof(GridLayoutThing3x1));
         GridLayoutThing3x1 root = (GridLayoutThing3x1) mockView.RootElement;
 
         root.child0.style.SetGridItemPlacement(IntUtil.UnsetValue, 1, 0, 1, StyleState.Normal);
@@ -342,8 +333,7 @@ public class GridLayoutTests {
 
     [Test]
     public void PartialImplicitPlaced() {
-        MockView mockView = new MockView(typeof(GridLayoutThing3x1));
-        mockView.Initialize();
+        MockApplication mockView = new MockApplication(typeof(GridLayoutThing3x1));
         GridLayoutThing3x1 root = (GridLayoutThing3x1) mockView.RootElement;
 
         root.child0.style.SetGridItemPlacement(0, 1, 0, 1, StyleState.Normal);
@@ -360,8 +350,7 @@ public class GridLayoutTests {
 
     [Test]
     public void PartialImplicitPlaced_Dense() {
-        MockView mockView = new MockView(typeof(GridLayoutThing3x1));
-        mockView.Initialize();
+        MockApplication mockView = new MockApplication(typeof(GridLayoutThing3x1));
         GridLayoutThing3x1 root = (GridLayoutThing3x1) mockView.RootElement;
 
         root.child0.style.SetGridItemPlacement(0, 1, 0, 1, StyleState.Normal);
@@ -381,8 +370,7 @@ public class GridLayoutTests {
 
     [Test]
     public void MixImplicitAndExplicit() {
-        MockView mockView = new MockView(typeof(GridLayoutRepeat));
-        mockView.Initialize();
+        MockApplication mockView = new MockApplication(typeof(GridLayoutRepeat));
         GridLayoutRepeat root = (GridLayoutRepeat) mockView.RootElement;
         root.SetChildCount(6);
         mockView.Update();
@@ -414,8 +402,7 @@ public class GridLayoutTests {
 
     [Test]
     public void DefiningAGrid_WithGaps() {
-        MockView mockView = new MockView(typeof(GridLayoutRepeat));
-        mockView.Initialize();
+        MockApplication mockView = new MockApplication(typeof(GridLayoutRepeat));
         GridLayoutRepeat root = (GridLayoutRepeat) mockView.RootElement;
         root.SetChildCount(6);
 
@@ -441,8 +428,7 @@ public class GridLayoutTests {
 
     [Test]
     public void ColSize_MaxContent() {
-        MockView mockView = new MockView(typeof(GridLayoutRepeat));
-        mockView.Initialize();
+        MockApplication mockView = new MockApplication(typeof(GridLayoutRepeat));
         GridLayoutRepeat root = (GridLayoutRepeat) mockView.RootElement;
         root.SetChildCount(6);
         mockView.Update();
@@ -470,8 +456,7 @@ public class GridLayoutTests {
 
     [Test]
     public void ColSize_MinContent() {
-        MockView mockView = new MockView(typeof(GridLayoutRepeat));
-        mockView.Initialize();
+        MockApplication mockView = new MockApplication(typeof(GridLayoutRepeat));
         GridLayoutRepeat root = (GridLayoutRepeat) mockView.RootElement;
         root.SetChildCount(6);
         mockView.Update();
@@ -500,8 +485,7 @@ public class GridLayoutTests {
 
     [Test]
     public void RowSize_MaxContent() {
-        MockView mockView = new MockView(typeof(GridLayoutRepeat));
-        mockView.Initialize();
+        MockApplication mockView = new MockApplication(typeof(GridLayoutRepeat));
         GridLayoutRepeat root = (GridLayoutRepeat) mockView.RootElement;
         root.SetChildCount(4);
         mockView.Update();
@@ -532,8 +516,7 @@ public class GridLayoutTests {
 
     [Test]
     public void RowSize_MinContent() {
-        MockView mockView = new MockView(typeof(GridLayoutRepeat));
-        mockView.Initialize();
+        MockApplication mockView = new MockApplication(typeof(GridLayoutRepeat));
         GridLayoutRepeat root = (GridLayoutRepeat) mockView.RootElement;
         root.SetChildCount(4);
         mockView.Update();

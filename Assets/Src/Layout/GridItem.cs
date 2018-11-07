@@ -1,6 +1,6 @@
-using Src.Rendering;
+using UIForia.Rendering;
 
-namespace Src.Layout {
+namespace UIForia.Layout {
 
     public struct GridItem {
 

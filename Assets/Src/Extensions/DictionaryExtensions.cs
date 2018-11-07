@@ -1,7 +1,7 @@
 using System.Collections.Generic;
 using System.Diagnostics;
 
-namespace Src.Extensions {
+namespace UIForia.Extensions {
 
     public static class DictionaryExtensions {
 

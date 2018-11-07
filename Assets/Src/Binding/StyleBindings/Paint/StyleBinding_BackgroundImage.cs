@@ -1,8 +1,8 @@
 ﻿using System;
-using Src.Rendering;
+using UIForia.Rendering;
 using UnityEngine;
 
-namespace Src.StyleBindings {
+namespace UIForia.StyleBindings {
 
     public class StyleBinding_BackgroundImage : StyleBinding {
 

@@ -1,7 +1,7 @@
 using System;
 using System.Collections.Generic;
-using Src;
-using Src.Util;
+using UIForia;
+using UIForia.Util;
 
 public class RepeatBindingNode : BindingNode {
 
@@ -38,7 +38,6 @@ public class RepeatBindingNode<T, U> : RepeatBindingNode where T : class, IList<
         T list = listExpression.EvaluateTyped(context);
 
         if (list == null || list.Count == 0) {
-            
             if (previousReference == null) {
                 return;
             }
@@ -48,7 +47,7 @@ public class RepeatBindingNode<T, U> : RepeatBindingNode where T : class, IList<
             previousReference.Clear();
             previousReference = null;
 
-            context.view.DestroyChildren(element);
+            element.view.Application.DestroyChildren(element);
             return;
         }
 
@@ -63,17 +62,16 @@ public class RepeatBindingNode<T, U> : RepeatBindingNode where T : class, IList<
                 newItem.parent = element;
                 newItem.templateParent = element;
 
+//                AssignTemplateParents()
                 element.children[i] = newItem;
-                context.view.CreateElementFromTemplate(newItem, element);
+                context.view.Application.RegisterElement(newItem);
             }
 
-//            AssignTemplateParents(element);
             ((UIRepeatElement) element).listBecamePopulated = true;
         }
         else if (list.Count > previousReference.Count) {
-            
             ((UIRepeatElement) element).listBecamePopulated = previousReference.Count == 0;
-            
+
             UIElement[] oldChildren = element.children;
 
             UIElement[] ownChildren = ArrayPool<UIElement>.GetExactSize(list.Count);
@@ -96,7 +94,7 @@ public class RepeatBindingNode<T, U> : RepeatBindingNode where T : class, IList<
                 newItem.templateParent = element;
 
                 ownChildren[previousCount + i] = newItem;
-                context.view.CreateElementFromTemplate(newItem, element);
+                element.view.Application.RegisterElement(newItem);
             }
 
 //            AssignTemplateParents(element);
@@ -111,9 +109,8 @@ public class RepeatBindingNode<T, U> : RepeatBindingNode where T : class, IList<
                 context.RemoveContextValue(element.children[index], itemAlias, previousReference[index]);
                 context.RemoveContextValue(element.children[index], indexAlias, index);
                 previousReference.RemoveAt(index);
-                context.view.DestroyElement(element.children[index]);
+                Application.DestroyElement(element.children[index]);
             }
-
         }
 
         for (int i = 0; i < element.children.Length; i++) {

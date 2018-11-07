@@ -1,4 +1,4 @@
-namespace Src.Compilers.AliasSource {
+namespace UIForia.Compilers.AliasSource {
 
     public interface IAliasSource {
 

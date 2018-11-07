@@ -2,7 +2,7 @@ using System;
 using System.Reflection;
 using JetBrains.Annotations;
 
-namespace Src {
+namespace UIForia {
 
     public class MethodCallExpression_StaticVoid : Expression<Terminal> {
 

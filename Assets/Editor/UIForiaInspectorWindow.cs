@@ -1,20 +1,20 @@
 using System;
 using System.Collections.Generic;
 using Shapes2D;
-using Src.Layout;
-using Src.Layout.LayoutTypes;
-using Src.Rendering;
-using Src.Systems;
-using Src.Text;
-using Src.Util;
 using TMPro;
+using UIForia.Layout;
+using UIForia.Layout.LayoutTypes;
+using UIForia.Rendering;
+using UIForia.Systems;
+using UIForia.Text;
+using UIForia.Util;
 using UnityEditor;
 using UnityEditor.IMGUI.Controls;
 using UnityEngine;
-using FontStyle = Src.Text.FontStyle;
-using TextAlignment = Src.Text.TextAlignment;
+using FontStyle = UIForia.Text.FontStyle;
+using TextAlignment = UIForia.Text.TextAlignment;
 
-namespace Src.Editor {
+namespace UIForia.Editor {
 
     public class UIForiaInspectorWindow : EditorWindow {
 
@@ -59,12 +59,12 @@ namespace Src.Editor {
             if (UIForiaHierarchyWindow.UIView != null) {
                 if (view == null) {
                     view = UIForiaHierarchyWindow.UIView;
-                    view.RenderSystem.DrawDebugOverlay += DrawDebugOverlay;
+                    view.Application.RenderSystem.DrawDebugOverlay += DrawDebugOverlay;
                 }
             }
             else {
                 if (view != null) {
-                    view.RenderSystem.DrawDebugOverlay -= DrawDebugOverlay;
+                    view.Application.RenderSystem.DrawDebugOverlay -= DrawDebugOverlay;
                     view = null;
                 }
             }
@@ -236,9 +236,9 @@ namespace Src.Editor {
                 Vector3 renderPosition = data.renderPosition;
                 renderPosition.z = 5;
 
-                OffsetRect padding = view.LayoutSystem.GetPaddingRect(selectedElement);
-                OffsetRect margin = view.LayoutSystem.GetMarginRect(selectedElement);
-                OffsetRect border = view.LayoutSystem.GetBorderRect(selectedElement);
+                OffsetRect padding = view.Application.LayoutSystem.GetPaddingRect(selectedElement);
+                OffsetRect margin = view.Application.LayoutSystem.GetMarginRect(selectedElement);
+                OffsetRect border = view.Application.LayoutSystem.GetBorderRect(selectedElement);
 
                 mesh = MeshUtil.ResizeStandardUIMesh(mesh, result.actualSize);
                 float width = result.actualSize.width;
@@ -406,7 +406,7 @@ namespace Src.Editor {
 
             GUILayout.Space(16);
 
-            OffsetRect margin = view.LayoutSystem.GetMarginRect(selectedElement);
+            OffsetRect margin = view.Application.LayoutSystem.GetMarginRect(selectedElement);
             DrawLabel("Margin Top", margin.top.ToString());
             DrawLabel("Margin Right", margin.right.ToString());
             DrawLabel("Margin Bottom", margin.bottom.ToString());
@@ -414,7 +414,7 @@ namespace Src.Editor {
 
             GUILayout.Space(16);
 
-            OffsetRect border = view.LayoutSystem.GetBorderRect(selectedElement);
+            OffsetRect border = view.Application.LayoutSystem.GetBorderRect(selectedElement);
 
             DrawLabel("Border Top", border.top.ToString());
             DrawLabel("Border Right", border.right.ToString());
@@ -423,7 +423,7 @@ namespace Src.Editor {
 
             GUILayout.Space(16);
 
-            OffsetRect padding = view.LayoutSystem.GetPaddingRect(selectedElement);
+            OffsetRect padding = view.Application.LayoutSystem.GetPaddingRect(selectedElement);
             DrawLabel("Padding Top", padding.top.ToString());
             DrawLabel("Padding Right", padding.right.ToString());
             DrawLabel("Padding Bottom", padding.bottom.ToString());
@@ -711,10 +711,10 @@ namespace Src.Editor {
 
                 case StylePropertyId.TextFontStyle:
                     // todo -- this needs to be an EnumFlags popup
-                    return DrawEnum<FontStyle>(property, isEditable);
+                    return DrawEnum<Text.FontStyle>(property, isEditable);
 
                 case StylePropertyId.TextAlignment:
-                    return DrawEnum<TextAlignment>(property, isEditable);
+                    return DrawEnum<Text.TextAlignment>(property, isEditable);
 
                 case StylePropertyId.TextWhitespaceMode:
                     return DrawEnum<WhitespaceMode>(property, isEditable);

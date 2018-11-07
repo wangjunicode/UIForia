@@ -1,8 +1,8 @@
 using System;
 using System.Collections.Generic;
-using Src;
-using Src.Animation;
-using Src.Rendering;
+using UIForia;
+using UIForia.Animation;
+using UIForia.Rendering;
 using UnityEngine;
 using Debug = UnityEngine.Debug;
 

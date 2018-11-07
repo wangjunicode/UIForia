@@ -1,11 +1,11 @@
 using System.Collections.Generic;
-using Src;
-using Src.Layout;
-using Src.Layout.LayoutTypes;
-using Src.Rendering;
+using UIForia;
+using UIForia.Layout.LayoutTypes;
+using UIForia.Rendering;
+using UIForia.Layout;
 using UnityEngine;
 
-namespace Src.Rendering {
+namespace UIForia.Rendering {
 
     public partial class UIStyleSet {
 

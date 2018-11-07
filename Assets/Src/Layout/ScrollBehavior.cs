@@ -1,6 +1,6 @@
 using System;
 
-namespace Src.Layout {
+namespace UIForia.Layout {
 
     [Flags]
     public enum ScrollBehavior {

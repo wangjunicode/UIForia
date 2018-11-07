@@ -1,12 +1,14 @@
 ﻿using System;
-using Src.Util;
+using UIForia.Util;
 using UnityEditor.IMGUI.Controls;
 using System.Collections.Generic;
-using Src;
-using Src.Editor;
-using Src.Systems;
+using UIForia;
+using UIForia.Editor;
+using UIForia.Rendering;
+using UIForia.Systems;
 using UnityEditor;
 using UnityEngine;
+using Application = UIForia.Application;
 
 public class HierarchyView : TreeView {
 
@@ -81,9 +83,9 @@ public class HierarchyView : TreeView {
                 continue;
             }
 
-            if ((element.flags & UIElementFlags.TemplateRoot) != 0) {
-                ViewState viewState;
-                if (m_ViewState.TryGetValue(element.id, out viewState) && viewState.showTemplateContents) {
+//            if ((element.flags & UIElementFlags.TemplateRoot) != 0) {
+//                ViewState viewState;
+//                if (m_ViewState.TryGetValue(element.id, out viewState) && viewState.showTemplateContents) {
 //                    UIElement[] templateChildren = element.templateChildren;
 //
 //                    if (templateChildren != null) {
@@ -96,8 +98,8 @@ public class HierarchyView : TreeView {
 //                    }
 //
 //                    continue;
-                }
-            }
+//                }
+//            }
 
             for (int i = 0; i < ownChildren.Length; i++) {
                 ElementTreeItem childItem = new ElementTreeItem(ownChildren[i]);
@@ -144,8 +146,13 @@ public class HierarchyView : TreeView {
         GUIStyleState textStyle = s_ElementNameStyle.normal;
 
         bool isTemplateRoot = (item.element.flags & UIElementFlags.TemplateRoot) != 0;
+
+        bool isChildren = item.element is UIChildrenElement;
         
         Color mainColor = isTemplateRoot ? Color.green : Color.white;
+        if (isChildren) {
+            mainColor = new Color32(255, 0, 99, 255);
+        }
         
         textStyle.textColor = AdjustColor(mainColor, item.element);
 
@@ -165,7 +172,7 @@ public class HierarchyView : TreeView {
 
         GUI.Label(r, s_Content, s_ElementNameStyle);
 
-        RenderData renderData = view.RenderSystem.GetRenderData(item.element);
+        RenderData renderData = Application.Game.RenderSystem.GetRenderData(item.element);
 
         if (renderData != null && renderData.CullResult != CullResult.NotCulled) {
             v = s_ElementNameStyle.CalcSize(s_Content);
@@ -203,7 +210,7 @@ public class HierarchyView : TreeView {
 
     protected override void SelectionChanged(IList<int> selectedIds) {
         int id = selectedIds[0];
-        UIElement element = view.GetElement(id);
+        UIElement element = Application.Game.GetElement(id);
         onSelectionChanged?.Invoke(element);
     }
 

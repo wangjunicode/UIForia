@@ -1,12 +1,12 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using Src.Compilers.AliasSources;
-using Src.Parsing.StyleParser;
-using Src.Rendering;
-using Src.Util;
+using UIForia.Compilers.AliasSources;
+using UIForia.Parsing.StyleParser;
+using UIForia.Rendering;
+using UIForia.Util;
 
-namespace Src {
+namespace UIForia {
 
     public class ParsedTemplate {
 

@@ -1,12 +1,13 @@
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
-using Src.Rendering;
-using Src.Systems;
-using Src.Util;
+using System.Linq;
+using UIForia.Rendering;
+using UIForia.Systems;
+using UIForia.Util;
 using UnityEngine;
 
-namespace Src.Layout.LayoutTypes {
+namespace UIForia.Layout.LayoutTypes {
 
     // todo -- pool this
     // todo -- handle incremental layout, ie no layout when not required or only run partial like alignment change
@@ -34,7 +35,7 @@ namespace Src.Layout.LayoutTypes {
                     LayoutBox child = children[i];
 
                     widths[i] = new FlexItem();
-                    widths[i].order = BitUtil.SetHighLowBits(child.style.FlexItemOrder, i);
+                    widths[i].order = child.style.FlexItemOrder;
                     widths[i].childIndex = i;
                     widths[i].outputSize = child.GetWidths().clampedSize;
 
@@ -81,7 +82,7 @@ namespace Src.Layout.LayoutTypes {
                     LayoutBox child = children[i];
 
                     widths[i] = new FlexItem();
-                    widths[i].order = BitUtil.SetHighLowBits(child.style.FlexItemOrder, i);
+                    widths[i].order = child.style.FlexItemOrder;
                     widths[i].childIndex = i;
                     widths[i].outputSize = child.GetWidths().clampedSize;
                 }
@@ -110,7 +111,7 @@ namespace Src.Layout.LayoutTypes {
                     LayoutBox child = children[i];
                     widths[i] = new FlexItem();
                     widths[i].childIndex = i;
-                    widths[i].order = BitUtil.SetHighLowBits(child.style.FlexItemOrder, i);
+                    widths[i].order = child.style.FlexItemOrder;
                     widths[i].growthFactor = child.style.FlexItemGrow;
                     widths[i].shrinkFactor = child.style.FlexItemShrink;
                     LayoutBoxSize widthSize = child.GetWidths();
@@ -197,7 +198,7 @@ namespace Src.Layout.LayoutTypes {
                 LayoutBox child = children[i];
                 widths[i] = new FlexItem();
                 widths[i].childIndex = i;
-                widths[i].order = BitUtil.SetHighLowBits(child.style.FlexItemOrder, i);
+                widths[i].order = child.style.FlexItemOrder;
                 widths[i].growthFactor = child.style.FlexItemGrow;
                 widths[i].shrinkFactor = child.style.FlexItemShrink;
                 LayoutBoxSize widthSize = child.GetWidths();
@@ -242,7 +243,7 @@ namespace Src.Layout.LayoutTypes {
 
                 heights[i] = new FlexItem();
                 heights[i].childIndex = i;
-                heights[i].order = BitUtil.SetHighLowBits(child.style.FlexItemOrder, i);
+                heights[i].order = child.style.FlexItemOrder;
 
                 LayoutBoxSize childHeights = child.GetHeights(widths[i].outputSize);
 
@@ -308,7 +309,7 @@ namespace Src.Layout.LayoutTypes {
                 LayoutBox child = children[i];
 
                 widths[i] = new FlexItem();
-                widths[i].order = BitUtil.SetHighLowBits(child.style.FlexItemOrder, i);
+                widths[i].order = child.style.FlexItemOrder;
                 widths[i].childIndex = i;
                 widths[i].outputSize = child.GetWidths().clampedSize;
 
@@ -358,7 +359,7 @@ namespace Src.Layout.LayoutTypes {
                 }
 
                 AlignMainAxis(track, heights, style.FlexLayoutMainAxisAlignment, paddingBorderTop);
-                trackCrossAxisStart = PositionCrossAxisRow(trackCrossAxisStart, paddingBorderLeft, track, adjustedWidth);
+                trackCrossAxisStart = PositionCrossAxisRow(trackCrossAxisStart, paddingBorderLeft, track, tracks.Count == 1 ? adjustedWidth : track.crossSize);
 
                 for (int j = track.startItem; j < track.startItem + track.itemCount; j++) {
                     children[widths[j].childIndex].SetAllocatedXAndWidth(widths[j].axisStart, widths[j].outputSize);
@@ -462,7 +463,7 @@ namespace Src.Layout.LayoutTypes {
                     LayoutBox child = children[i];
                     heights[i] = new FlexItem();
                     heights[i].childIndex = i;
-                    heights[i].order = BitUtil.SetHighLowBits(child.style.FlexItemOrder, i);
+                    heights[i].order = child.style.FlexItemOrder;
                     heights[i].growthFactor = child.style.FlexItemGrow;
                     heights[i].shrinkFactor = child.style.FlexItemShrink;
                     CrossAxisAlignment itemAlignment = child.style.FlexItemSelfAlignment;
@@ -508,7 +509,7 @@ namespace Src.Layout.LayoutTypes {
 
                 heights[i] = new FlexItem();
                 heights[i].childIndex = i;
-                heights[i].order = BitUtil.SetHighLowBits(child.style.FlexItemOrder, i);
+                heights[i].order = child.style.FlexItemOrder;
                 heights[i].growthFactor = child.style.FlexItemGrow;
                 heights[i].shrinkFactor = child.style.FlexItemShrink;
 
@@ -943,14 +944,11 @@ namespace Src.Layout.LayoutTypes {
             public float AxisEnd => axisStart + outputSize;
 
             public int CompareTo(FlexItem other) {
-                int styleOrder = BitUtil.GetHighBits(order);
-                int otherStyleOrder = BitUtil.GetHighBits(other.order);
-                if (styleOrder != otherStyleOrder) {
-                    return styleOrder < otherStyleOrder ? -1 : 1;
+                if (order == other.order) {
+                    return childIndex > other.childIndex ? 1 : -1;
                 }
 
-                int sourceOrder = BitUtil.GetLowBits(order);
-                return sourceOrder < BitUtil.GetLowBits(other.order) ? -1 : 1;
+                return order > other.order ? 1 : -1;
             }
 
         }

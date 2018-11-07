@@ -1,6 +1,6 @@
 using UnityEditor;
 
-namespace Src.Editor {
+namespace UIForia.Editor {
 
     public static class WindowMenuItems {
 

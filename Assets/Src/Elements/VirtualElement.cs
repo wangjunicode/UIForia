@@ -1,4 +1,4 @@
-namespace Src.Elements {
+namespace UIForia.Elements {
 
     // virtual element means element knows about parent but not vice versa
 

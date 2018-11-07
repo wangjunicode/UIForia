@@ -1,9 +1,9 @@
-using Src.Rendering;
-using Src.Elements;
-using Src.Systems;
+using UIForia.Elements;
+using UIForia.Rendering;
+using UIForia.Systems;
 using UnityEngine;
 
-namespace Src.Layout.LayoutTypes {
+namespace UIForia.Layout.LayoutTypes {
 
     public class ScrollbarLayoutBox : LayoutBox {
 

@@ -1,6 +1,6 @@
 using System;
 
-namespace Src.Input {
+namespace UIForia.Input {
 
     [AttributeUsage(AttributeTargets.Method)]
     public class OnDragCreateAttribute : Attribute {

@@ -2,7 +2,7 @@ using System.Text;
 using System.Collections.Generic;
 using System.Linq;
 
-namespace Src.Parsing {
+namespace UIForia.Parsing {
 
     public class TextElementParser {
 

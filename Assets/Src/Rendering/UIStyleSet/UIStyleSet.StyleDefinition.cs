@@ -1,6 +1,6 @@
 using System.Collections.Generic;
 
-namespace Src.Rendering {
+namespace UIForia.Rendering {
 
     public partial class UIStyleSet {
 

@@ -1,7 +1,7 @@
 using System;
-using Src.Compilers.AliasSource;
+using UIForia.Compilers.AliasSource;
 
-namespace Src.Compilers.AliasSources {
+namespace UIForia.Compilers.AliasSources {
 
     public class ExternalReferenceAliasSource : IAliasSource {
 

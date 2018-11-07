@@ -1,8 +1,8 @@
 using System.Diagnostics;
 using JetBrains.Annotations;
-using Src.Rendering;
+using UIForia.Rendering;
 
-namespace Src {
+namespace UIForia {
 
     public struct UIFixedLength {
 

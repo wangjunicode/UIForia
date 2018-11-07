@@ -1,6 +1,6 @@
 ﻿using System.Collections.Generic;
 
-namespace Src {
+namespace UIForia {
 
     public class MethodSignatureNode : ASTNode {
 

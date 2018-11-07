@@ -1,11 +1,11 @@
-using Src;
-using Src.Animation;
-using Src.Layout;
-using Src.Layout.LayoutTypes;
-using Src.Rendering;
+using UIForia;
+using UIForia.Animation;
+using UIForia.Layout;
+using UIForia.Layout.LayoutTypes;
+using UIForia.Rendering;
 using UnityEngine;
-using static Src.Rendering.StyleProperty;
-using AnchorTarget = Src.Rendering.AnchorTarget;
+using static UIForia.Rendering.StyleProperty;
+using AnchorTarget = UIForia.Rendering.AnchorTarget;
 
 public class ChatWindow_Styles {
 
@@ -102,8 +102,8 @@ public class ChatWindow_Styles {
     public static UIStyle Overflow() {
         return new UIStyle() {
             BackgroundColor = Color.red,
-            OverflowX = Src.Rendering.Overflow.Scroll,
-            OverflowY = Src.Rendering.Overflow.Scroll
+            OverflowX = UIForia.Rendering.Overflow.Scroll,
+            OverflowY = UIForia.Rendering.Overflow.Scroll
         };
     }
 
@@ -142,7 +142,7 @@ public class ChatWindow_Styles {
             FlexLayoutMainAxisAlignment = MainAxisAlignment.Start,
             PreferredWidth = 800f,
             PreferredHeight = 600f,
-            OverflowY = Src.Rendering.Overflow.Scroll
+            OverflowY = UIForia.Rendering.Overflow.Scroll
         };
     }
 

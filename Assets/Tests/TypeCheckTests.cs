@@ -1,7 +1,7 @@
 ﻿using System;
 using JetBrains.Annotations;
 using NUnit.Framework;
-using Src;
+using UIForia;
 using UnityEngine;
 
 [TestFixture]

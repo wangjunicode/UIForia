@@ -2,7 +2,7 @@ using System;
 using System.Collections;
 using System.Reflection;
 
-namespace Src {
+namespace UIForia {
 
     // todo more generic version for part types?
     public class AccessExpression<T, U> : Expression<T> {

@@ -1,11 +1,11 @@
 ﻿using System;
 using System.Diagnostics;
-using Src.Rendering;
-using Src.Elements;
-using Src.Systems;
+using UIForia.Rendering;
+using UIForia.Elements;
+using UIForia.Systems;
 using UnityEngine;
 
-namespace Src.Systems {
+namespace UIForia.Systems {
     
     [DebuggerDisplay("{" + nameof(element) + ".ToString()}")]
     public class RenderData {

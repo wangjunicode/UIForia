@@ -1,8 +1,8 @@
 using System.Collections.Generic;
-using Src.Layout.LayoutTypes;
-using Src.Util;
+using UIForia.Layout.LayoutTypes;
+using UIForia.Util;
 
-namespace Src.Layout {
+namespace UIForia.Layout {
 
     public struct GridTrack {
 

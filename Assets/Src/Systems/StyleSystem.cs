@@ -1,16 +1,16 @@
 ﻿using System;
 using System.Collections.Generic;
-using Src.Animation;
-using Src.Rendering;
-using Src.StyleBindings;
+using UIForia.Animation;
+using UIForia.Rendering;
+using UIForia.StyleBindings;
 using UnityEngine;
 
-namespace Src.Systems {
+namespace UIForia.Systems {
 
     public class StyleSystem : IStyleSystem {
 
         protected readonly StyleAnimator animator;
-        
+
         public event Action<UIElement, string> onTextContentChanged;
         public event Action<UIElement, StyleProperty> onStylePropertyChanged;
 
@@ -30,19 +30,17 @@ namespace Src.Systems {
             animator.Reset();
         }
 
-        public void OnElementCreatedFromTemplate(UIElement element) {
-
-
+        public void OnElementCreated(UIElement element) {
             if ((element.flags & UIElementFlags.TextElement) != 0) {
                 ((UITextElement) element).onTextChanged += HandleTextChanged;
             }
 
-            UITemplateContext context = element.templateContext;
+            UITemplateContext context = element.TemplateContext;
             List<UIStyleGroup> baseStyles = element.templateRef.baseStyles;
             List<StyleBinding> constantStyleBindings = element.templateRef.constantStyleBindings;
 
             element.style.styleSystem = this;
-            
+
             // todo -- push to style buffer & apply later on first run
             for (int i = 0; i < constantStyleBindings.Count; i++) {
                 constantStyleBindings[i].Apply(element.style, context);
@@ -56,7 +54,7 @@ namespace Src.Systems {
 
             if (element.children != null) {
                 for (int i = 0; i < element.children.Length; i++) {
-                    OnElementCreatedFromTemplate(element.children[i]);
+                    OnElementCreated(element.children[i]);
                 }
             }
         }
@@ -66,10 +64,9 @@ namespace Src.Systems {
         }
 
         public void OnDestroy() { }
+        public void OnViewAdded(UIView view) { }
 
-        public void OnReady() { }
-
-        public void OnInitialize() { }
+        public void OnViewRemoved(UIView view) { }
 
         public void OnElementEnabled(UIElement element) { }
 

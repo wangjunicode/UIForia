@@ -1,8 +1,8 @@
 using System.Diagnostics;
 using JetBrains.Annotations;
-using Src.Rendering;
+using UIForia.Rendering;
 
-namespace Src {
+namespace UIForia {
 
 //    todo -- make varieties of UIMeasurement w/ conversions for different scenarios, ie only fixed + percent but no content    
 

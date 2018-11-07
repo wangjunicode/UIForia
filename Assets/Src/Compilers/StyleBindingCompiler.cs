@@ -1,19 +1,19 @@
 using System;
 using System.Collections.Generic;
 using JetBrains.Annotations;
-using Src.Compilers.AliasSource;
-using Src.Layout;
-using Src.Rendering;
-using Src.StyleBindings;
-using Src.StyleBindings.Src.StyleBindings;
-using Src.StyleBindings.Text;
 using TMPro;
+using UIForia.Compilers.AliasSource;
+using UIForia.Layout;
+using UIForia.Rendering;
+using UIForia.StyleBindings;
+using UIForia.StyleBindings.Src.StyleBindings;
+using UIForia.StyleBindings.Text;
 using UnityEditor;
 using UnityEditor.Experimental;
 using UnityEngine;
 using Object = System.Object;
 
-namespace Src.Compilers {
+namespace UIForia.Compilers {
 
     public class StyleBindingCompiler {
 

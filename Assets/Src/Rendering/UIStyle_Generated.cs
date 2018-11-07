@@ -1,18 +1,18 @@
 using System.Collections.Generic;
 using System.Diagnostics;
 using Shapes2D;
-using Src;
-using Src.Layout;
-using Src.Layout.LayoutTypes;
-using Src.Rendering;
-using Src.Text;
+using UIForia;
+using UIForia.Rendering;
 using TMPro;
-using Src.Util;
+using UIForia.Util;
+using UIForia.Layout;
+using UIForia.Layout.LayoutTypes;
+using UIForia.Text;
 using UnityEngine;
-using FontStyle = Src.Text.FontStyle;
-using TextAlignment = Src.Text.TextAlignment;
+using FontStyle = UIForia.Text.FontStyle;
+using TextAlignment = UIForia.Text.TextAlignment;
 
-namespace Src.Rendering {
+namespace UIForia.Rendering {
 
 public partial class UIStyle {		public Overflow OverflowX {
 			[DebuggerStepThrough] get { return (Overflow)FindEnumProperty(StylePropertyId.OverflowX); }
@@ -349,13 +349,13 @@ public partial class UIStyle {		public Overflow OverflowX {
 		set { SetIntProperty(StylePropertyId.TextFontSize, value); } 
 		}
 
-		public FontStyle TextFontStyle {
-			[DebuggerStepThrough] get { return (FontStyle)FindEnumProperty(StylePropertyId.TextFontStyle); }
+		public Text.FontStyle TextFontStyle {
+			[DebuggerStepThrough] get { return (Text.FontStyle)FindEnumProperty(StylePropertyId.TextFontStyle); }
 		set { SetEnumProperty(StylePropertyId.TextFontStyle, (int)value); } 
 		}
 
-		public TextAlignment TextAlignment {
-			[DebuggerStepThrough] get { return (TextAlignment)FindEnumProperty(StylePropertyId.TextAlignment); }
+		public Text.TextAlignment TextAlignment {
+			[DebuggerStepThrough] get { return (Text.TextAlignment)FindEnumProperty(StylePropertyId.TextAlignment); }
 		set { SetEnumProperty(StylePropertyId.TextAlignment, (int)value); } 
 		}
 

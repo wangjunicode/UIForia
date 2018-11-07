@@ -1,9 +1,9 @@
 using TMPro;
 using UnityEngine;
-using FontStyle = Src.Text.FontStyle;
-using TextAlignment = Src.Text.TextAlignment;
+using FontStyle = UIForia.Text.FontStyle;
+using TextAlignment = UIForia.Text.TextAlignment;
 
-namespace Src.Rendering {
+namespace UIForia.Rendering {
 
     public partial class UIStyleSet {
 
@@ -31,19 +31,19 @@ namespace Src.Rendering {
             SetIntProperty(StylePropertyId.TextFontSize, newFontSize, state);
         }
 
-        public FontStyle GetFontStyle(StyleState state) {
+        public Text.FontStyle GetFontStyle(StyleState state) {
             return GetPropertyValueInState(StylePropertyId.TextFontStyle, state).AsFontStyle;
         }
 
-        public void SetFontStyle(FontStyle newFontStyle, StyleState state) {
+        public void SetFontStyle(Text.FontStyle newFontStyle, StyleState state) {
             SetEnumProperty(StylePropertyId.TextFontStyle, (int) newFontStyle, state);
         }
 
-        public TextAlignment GetTextAnchor(StyleState state) {
+        public Text.TextAlignment GetTextAnchor(StyleState state) {
             return GetPropertyValueInState(StylePropertyId.TextAlignment, state).AsTextAlignment;
         }
 
-        public void SetTextAnchor(TextAlignment newTextAlignment, StyleState state) {
+        public void SetTextAnchor(Text.TextAlignment newTextAlignment, StyleState state) {
             SetEnumProperty(StylePropertyId.TextFontStyle, (int) newTextAlignment, state);
         }
 

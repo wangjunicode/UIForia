@@ -1,10 +1,10 @@
 using NUnit.Framework;
-using Src;
-using Src.Compilers;
+using UIForia;
+using UIForia.Compilers;
 using System.Collections.Generic;
 using System.Reflection;
-using Src.Input;
-using Src.Util;
+using UIForia.Input;
+using UIForia.Util;
 using UnityEngine;
 
 // todo -- test mouse and drag and focus annotations

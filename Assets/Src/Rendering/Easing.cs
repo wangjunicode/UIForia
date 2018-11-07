@@ -1,7 +1,7 @@
 using System;
 using UnityEngine;
 
-namespace Src.Rendering {
+namespace UIForia.Rendering {
 
     public enum EasingFunction {
 

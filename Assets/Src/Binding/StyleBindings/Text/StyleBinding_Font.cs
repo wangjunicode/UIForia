@@ -1,7 +1,7 @@
-using Src.Rendering;
 using TMPro;
+using UIForia.Rendering;
 
-namespace Src.StyleBindings.Text {
+namespace UIForia.StyleBindings.Text {
 
     public class StyleBinding_Font : StyleBinding {
 

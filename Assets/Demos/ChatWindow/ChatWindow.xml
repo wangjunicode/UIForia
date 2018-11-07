@@ -8,71 +8,32 @@
             PreferredHeight = 764px;
             OverflowY = Scroll;
         }
-
-        style bordered {
-            TransformBehaviorX = LayoutOffset;
-            TransformBehaviorY = LayoutOffset;
-            TransformPositionX = 500px;
-            TransformPositionY = 500px;
-            PreferredWidth = 300px;
-            PreferredHeight = 40px;
-            <!--PreferredSize = 300px, 400px;-->
-            BorderColor = black;
-            <!--Border = 1px white 4px;-->
-            BackgroundColor = red;
-            <!--BorderRadius = 8px;-->
-            Padding = 8px;
-            <!-- Layout = Flex Row Center, Center, nowrap, -->
-            FlexLayoutMainAxisAlignment = Center;
-        
-            [hover] {
-                BackgroundColor = white;
-                BorderColor = #0095ff;
-            }
-        
-        }
-        
-        style text {
-            PaddingLeft = 10;
-            PaddingRight = 10;
-            PaddingTop = 10;
-            PaddingBottom = 10;
-            TextFontAsset = Whitney-Book SDF;
-            TextFontSize = 26;
-            PreferredWidth = 1pca;
-        }
-        
+                
         style parent {
             FlexLayoutDirection = Column;
+            PreferredSize = 100px;
             <!--PreferredWidth = 100px;-->
             BackgroundColor = white;
             OverflowY = Scroll;
         }
         
         style child {
-            PreferredSize = 500px, 500px;
+            PreferredSize = 100px;
+            TransformBehavior = LayoutOffset;
+            TransformPosition = 32px, 32px;
             BackgroundColor = Yellow;
+            RenderLayer = Modal;
         }
         
-        style img {
-            PreferredSize = 1cnt, 1cnt;
-            PaddingLeft = 2px;
-            PaddingRight = 2px;
-            PaddingTop = 2px;
-            PaddingBottom = 2px;
-            <!--BorderColor = green;-->
-            <!--Border = 18px;-->
-            BackgroundColor = green;
+        style child2 {
+            PreferredSize = 100px;
+            TransformBehavior = LayoutOffset;
+            TransformPosition = 16px, 16px;
+            BackgroundColor = Blue;
+            <!--RenderLayerOffset = -;-->
+
         }
-        
-          style status-icon {
-            PreferredWidth = 22px;
-            PreferredHeight = 22px;
-            BorderRadius = 50%;
-            BorderColor = red;
-            Border = 3px;
-            PaddingRight = 12px;
-        }
+
         
         style window-frame-temp {
             PreferredWidth = 500px;
@@ -86,11 +47,15 @@
 
     <Contents style="container">
 
+        <Div style="parent">
+            <Div style="child"/>
+            <Div style="child2"/>
+        </Div>
         <!--<ChatPanel style.borderColor="red" selectedGroupIdx="{selectedChatGroup}" chatData="{chatData}"/>-->
 
-        <SeedWindowFrame style="window-frame-temp">
+        <!--<SeedWindowFrame style="window-frame-temp">-->
             <!--<Div>Text</Div>-->
-        </SeedWindowFrame>
+        <!--</SeedWindowFrame>-->
         
     </Contents>
 

@@ -1,8 +1,8 @@
 using System.Collections.Generic;
 using NUnit.Framework;
-using Src.Rendering;
-using Src;
-using Src.Parsing.StyleParser;
+using UIForia.Rendering;
+using UIForia;
+using UIForia.Parsing.StyleParser;
 using UnityEngine;
 
 [TestFixture]

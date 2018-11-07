@@ -1,15 +1,17 @@
 ﻿using System;
-using Src.Systems;
-using Src.Util;
+using UIForia.Systems;
+using UIForia.Util;
 using UnityEngine;
 
-namespace Src.Rendering {
+namespace UIForia.Rendering {
 
     public interface IRenderSystem : ISystem {
 
         event Action<LightList<RenderData>, LightList<RenderData>, Vector3, Camera> DrawDebugOverlay ;
 
         RenderData GetRenderData(UIElement element);
+
+        void SetCamera(Camera camera);
 
     }
 

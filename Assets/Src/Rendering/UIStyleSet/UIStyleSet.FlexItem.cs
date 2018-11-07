@@ -1,6 +1,6 @@
-using Src.Layout;
+using UIForia.Layout;
 
-namespace Src.Rendering {
+namespace UIForia.Rendering {
 
     public partial class UIStyleSet {
 

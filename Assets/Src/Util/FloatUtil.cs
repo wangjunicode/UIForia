@@ -1,7 +1,7 @@
 using System.Diagnostics;
 using System.Runtime.InteropServices;
 
-namespace Src.Rendering {
+namespace UIForia.Rendering {
 
     public static class FloatUtil {
 

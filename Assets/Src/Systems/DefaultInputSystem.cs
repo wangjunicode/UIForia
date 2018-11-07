@@ -1,8 +1,8 @@
 using UnityEngine;
 
-namespace Src.Systems {
+namespace UIForia.Systems {
 
-    public class GOInputSystem : InputSystem {
+    public class DefaultInputSystem : InputSystem {
 
         public const float k_DoubleClickDelay = 0.5f;
 
@@ -11,7 +11,7 @@ namespace Src.Systems {
         private bool m_IsDoubleClick;
         private bool m_IsTripleClick;
 
-        public GOInputSystem(ILayoutSystem layoutSystem, IStyleSystem styleSystem)
+        public DefaultInputSystem(ILayoutSystem layoutSystem, IStyleSystem styleSystem)
             : base(layoutSystem, styleSystem) { }
 
         protected override MouseState GetMouseState() {

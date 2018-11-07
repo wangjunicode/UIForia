@@ -1,8 +1,8 @@
 using JetBrains.Annotations;
-using Src;
+using UIForia;
 using UnityEngine;
 
-namespace Src.Rendering {
+namespace UIForia.Rendering {
 
     public partial class UIStyleSet {
 

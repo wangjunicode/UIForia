@@ -1,12 +1,12 @@
 using System;
 using System.Reflection;
-using Src.Systems;
-using Src.Util;
+using UIForia.Systems;
+using UIForia.Util;
 using UnityEditor;
 using UnityEditor.IMGUI.Controls;
 using UnityEngine;
 
-namespace Src.Editor {
+namespace UIForia.Editor {
 
     public class UIForiaHierarchyWindow : EditorWindow {
 
@@ -73,8 +73,8 @@ namespace Src.Editor {
                 needsReload = true;
                 treeView.view = targetView;
                 targetView.onElementCreated += OnElementCreated;
-                targetView.onRefresh += OnRefresh;
-                targetView.RenderSystem.DrawDebugOverlay += HandleDrawCallback;
+                targetView.Application.onRefresh += OnRefresh;
+                targetView.Application.RenderSystem.DrawDebugOverlay += HandleDrawCallback;
             }
             else if (obj == PlayModeStateChange.ExitingPlayMode) {
                 playing = false;
@@ -84,8 +84,8 @@ namespace Src.Editor {
 
                 if (targetView != null) {
                     targetView.onElementCreated -= OnElementCreated;
-                    targetView.onRefresh -= OnRefresh;
-                    targetView.RenderSystem.DrawDebugOverlay -= HandleDrawCallback;
+                    targetView.Application.onRefresh -= OnRefresh;
+                    targetView.Application.RenderSystem.DrawDebugOverlay -= HandleDrawCallback;
                 }
 
                 if (treeView != null) {

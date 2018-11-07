@@ -4,7 +4,7 @@ using System.IO;
 using System.Reflection;
 using UnityEngine;
 
-namespace Src {
+namespace UIForia {
 
     [DebuggerDisplay("{rawType.Name}")]
     public struct ProcessedType {
@@ -23,7 +23,7 @@ namespace Src {
             }
 
             if (templateAttr.templateType == TemplateType.File) {
-                return File.ReadAllText(Application.dataPath + "/" + templateAttr.template);
+                return File.ReadAllText(UnityEngine.Application.dataPath + "/" + templateAttr.template);
             }
 
             return templateAttr.template;

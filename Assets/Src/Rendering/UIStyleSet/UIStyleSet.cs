@@ -1,18 +1,18 @@
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
-using Src;
-using Src.Animation;
-using Src.Elements;
-using Src.Layout;
-using Src.Layout.LayoutTypes;
-using Src.Rendering;
-using Src.Systems;
-using Src.Util;
+using UIForia;
+using UIForia.Layout;
+using UIForia.Rendering;
+using UIForia.Animation;
+using UIForia.Elements;
+using UIForia.Layout.LayoutTypes;
+using UIForia.Systems;
+using UIForia.Util;
 using UnityEngine;
 using UnityEngine.UI;
 
-namespace Src.Rendering {
+namespace UIForia.Rendering {
 
     [DebuggerDisplay("id = {element.id} state = {currentState}")]
     public partial class UIStyleSet {

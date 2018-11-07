@@ -1,6 +1,6 @@
 using NUnit.Framework;
-using Src.Text;
-using Src.Util;
+using UIForia.Text;
+using UIForia.Util;
 
 [TestFixture]
 public class TextProcessor {

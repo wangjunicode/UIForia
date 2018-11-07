@@ -1,7 +1,7 @@
-using Src.Rendering;
+using UIForia.Rendering;
 using UnityEngine;
 
-namespace Src.StyleBindings.Text {
+namespace UIForia.StyleBindings.Text {
 
     public class StyleBinding_TextColor : StyleBinding {
 

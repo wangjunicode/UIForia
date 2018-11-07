@@ -1,10 +1,10 @@
 using System.Collections.Generic;
-using Src.Animation;
-using Src.Rendering;
 using TMPro;
+using UIForia.Animation;
+using UIForia.Rendering;
 using UnityEngine;
 
-namespace Src.Parsing.StyleParser {
+namespace UIForia.Parsing.StyleParser {
 
     public class ParsedStyleSheet {
 

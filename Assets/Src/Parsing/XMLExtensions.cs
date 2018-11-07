@@ -3,7 +3,7 @@ using System.Linq;
 using System.Xml;
 using System.Xml.Linq;
 
-namespace Src.Style {
+namespace UIForia.Style {
 
     public static class XMLExtensions {
 

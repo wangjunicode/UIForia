@@ -1,11 +1,11 @@
 using System;
 using System.Collections.Generic;
-using Src.Rendering;
-using Src.Systems;
-using Src.Util;
+using UIForia.Rendering;
+using UIForia.Systems;
+using UIForia.Util;
 using UnityEngine;
 
-namespace Src.Layout.LayoutTypes {
+namespace UIForia.Layout.LayoutTypes {
 
     public class GridLayoutBox : LayoutBox {
 
@@ -519,9 +519,9 @@ namespace Src.Layout.LayoutTypes {
                 case GridTemplateUnit.Em:
                     return value * style.EmSize;
                 case GridTemplateUnit.ViewportWidth:
-                    return value * layoutSystem.ViewportRect.width;
+                    return value * element.view.Viewport.width;
                 case GridTemplateUnit.ViewportHeight:
-                    return value * layoutSystem.ViewportRect.height;
+                    return value * element.view.Viewport.height;
                 case GridTemplateUnit.Container:
                     return parent.allocatedWidth * value;
                 case GridTemplateUnit.ContainerContentArea:
@@ -552,9 +552,9 @@ namespace Src.Layout.LayoutTypes {
                 case GridTemplateUnit.Em:
                     return value * style.EmSize;
                 case GridTemplateUnit.ViewportWidth:
-                    return value * layoutSystem.ViewportRect.width;
+                    return value * element.view.Viewport.width;
                 case GridTemplateUnit.ViewportHeight:
-                    return value * layoutSystem.ViewportRect.height;
+                    return value * element.view.Viewport.height;
                 case GridTemplateUnit.Container:
                     return parent.allocatedHeight * value;
                 case GridTemplateUnit.ContainerContentArea:

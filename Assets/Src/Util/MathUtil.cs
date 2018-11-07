@@ -1,4 +1,4 @@
-namespace Src.Util {
+namespace UIForia.Util {
 
     public static class MathUtil {
 

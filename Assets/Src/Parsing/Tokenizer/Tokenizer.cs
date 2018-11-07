@@ -1,7 +1,7 @@
 using System;
 using System.Collections.Generic;
 
-namespace Src {
+namespace UIForia {
 
     // todo support ternary, Math, some other globals
 

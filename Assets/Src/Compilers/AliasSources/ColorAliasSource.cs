@@ -3,7 +3,7 @@ using System.Reflection;
 using JetBrains.Annotations;
 using UnityEngine;
 
-namespace Src.Compilers.AliasSource {
+namespace UIForia.Compilers.AliasSource {
 
     public class ColorAliasSource : IAliasSource {
 

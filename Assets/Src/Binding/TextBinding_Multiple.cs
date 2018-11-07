@@ -1,6 +1,6 @@
 using System.Text;
 
-namespace Src {
+namespace UIForia {
 
     public class TextBinding_Multiple : Binding {
 

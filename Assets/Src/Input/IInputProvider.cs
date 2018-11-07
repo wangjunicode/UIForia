@@ -1,7 +1,7 @@
-﻿using Src.Input;
+﻿using UIForia.Input;
 using UnityEngine;
 
-namespace Src.Systems {
+namespace UIForia.Systems {
 
     public interface IInputProvider {
 

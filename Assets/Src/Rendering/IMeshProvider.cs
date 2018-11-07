@@ -1,6 +1,6 @@
 using UnityEngine;
 
-namespace Src.Systems {
+namespace UIForia.Systems {
 
     public interface IMeshProvider {
 

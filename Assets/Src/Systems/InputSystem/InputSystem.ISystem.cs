@@ -1,12 +1,8 @@
-using Src;
-using Src.Input;
-using Src.Systems;
+using UIForia;
+using UIForia.Input;
+using UIForia.Systems;
 
 public abstract partial class InputSystem {
-
-    public void OnReady() { }
-
-    public void OnInitialize() { }
 
     public void OnReset() {
         // don't clear key states
@@ -21,6 +17,10 @@ public abstract partial class InputSystem {
     }
 
     public void OnDestroy() { }
+    
+    public void OnViewAdded(UIView view) { }
+
+    public void OnViewRemoved(UIView view) { }
 
     public void OnElementEnabled(UIElement element) { }
 
@@ -37,7 +37,7 @@ public abstract partial class InputSystem {
         m_DragHandlerMap.Remove(element.id);
     }
 
-    public void OnElementCreatedFromTemplate(UIElement element) {
+    public void OnElementCreated(UIElement element) {
         UITemplate template = element.templateRef;
         MouseEventHandler[] mouseHandlers = template.mouseEventHandlers;
         DragEventCreator[] dragEventCreators = template.dragEventCreators;
@@ -51,7 +51,7 @@ public abstract partial class InputSystem {
                 handledEvents |= mouseHandlers[i].eventType;
             }
 
-            m_MouseHandlerMap[element.id] = new MouseHandlerGroup(element.templateContext, mouseHandlers, handledEvents);
+            m_MouseHandlerMap[element.id] = new MouseHandlerGroup(element.TemplateContext, mouseHandlers, handledEvents);
         }
 
         if (dragEventHandlers != null && dragEventHandlers.Length > 0) {
@@ -61,7 +61,7 @@ public abstract partial class InputSystem {
                 handledEvents |= dragEventHandlers[i].eventType;
             }
 
-            m_DragHandlerMap[element.id] = new DragHandlerGroup(element.templateContext, dragEventHandlers, handledEvents);
+            m_DragHandlerMap[element.id] = new DragHandlerGroup(element.TemplateContext, dragEventHandlers, handledEvents);
         }
 
         if (keyboardHandlers != null && keyboardHandlers.Length > 0) {
@@ -69,7 +69,7 @@ public abstract partial class InputSystem {
         }
 
         if (dragEventCreators != null) {
-            m_DragCreatorMap[element.id] = new DragCreatorGroup(element.templateContext, dragEventCreators);
+            m_DragCreatorMap[element.id] = new DragCreatorGroup(element.TemplateContext, dragEventCreators);
         }
 
         element.Input = this;
@@ -77,11 +77,10 @@ public abstract partial class InputSystem {
         if (element.children == null) {
             return;
         }
-        
+
         for (int i = 0; i < element.children.Length; i++) {
-            OnElementCreatedFromTemplate(element.children[i]);
+            OnElementCreated(element.children[i]);
         }
-        
     }
 
 }

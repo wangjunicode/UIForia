@@ -1,7 +1,7 @@
 using System;
 using System.Reflection;
 
-namespace Src.Compilers.AliasSource {
+namespace UIForia.Compilers.AliasSource {
 
     public class ReflectionAliasSource : IAliasSource {
 

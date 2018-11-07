@@ -1,10 +1,10 @@
 using System;
 using System.Diagnostics.CodeAnalysis;
-using Src.Rendering;
 using UIForia;
+using UIForia.Rendering;
 using UnityEngine;
 
-namespace Src.Parsing.StyleParser {
+namespace UIForia.Parsing.StyleParser {
 
     [SuppressMessage("ReSharper", "StringLiteralTypo")]
     public static class StylePropertyMappers {
@@ -39,7 +39,7 @@ namespace Src.Parsing.StyleParser {
                     throw new INeedToGoToBedException();
 //                    context.targetStyle.BackgroundFillType = ParseUtil.ParseBackgroundFillType(context.variables, propertyValue);
                     break;
-                
+
                 default:
                     throw new ParseException("Unknown display property: " + propertyName);
             }
@@ -76,7 +76,7 @@ namespace Src.Parsing.StyleParser {
         public static void PaddingBorderMapper(StyleParserContext context, string propertyName, string propertyValue) {
             switch (propertyName.ToLower()) {
                 case "padding":
-                    FixedLengthRect rect  = ParseUtil.ParseFixedLengthRect(context.variables, propertyValue);
+                    FixedLengthRect rect = ParseUtil.ParseFixedLengthRect(context.variables, propertyValue);
                     context.targetStyle.PaddingTop = rect.top;
                     context.targetStyle.PaddingRight = rect.right;
                     context.targetStyle.PaddingBottom = rect.bottom;
@@ -245,7 +245,10 @@ namespace Src.Parsing.StyleParser {
         public static void TransformMapper(StyleParserContext context, string propertyName, string propertyValue) {
             switch (propertyName.ToLower()) {
                 case "transformposition":
-                    throw new NotImplementedException();
+                    FixedLengthVector length = ParseUtil.ParseFixedLengthPair(context.variables, propertyValue);
+                    context.targetStyle.TransformPositionX = length.x;
+                    context.targetStyle.TransformPositionY = length.y;
+                    break;
                 case "transformpositionx":
                     context.targetStyle.TransformPositionX = ParseUtil.ParseFixedLength(context.variables, propertyValue);
                     break;
@@ -273,6 +276,12 @@ namespace Src.Parsing.StyleParser {
                     // todo -- handle deg / rad / and maybe %
                     context.targetStyle.TransformRotation = ParseUtil.ParseFloat(context.variables, propertyValue);
                     break;
+                case "transformbehavior":
+                    TransformBehavior behavior = ParseUtil.ParseTransformBehavior(context.variables, propertyValue);
+                    context.targetStyle.TransformBehaviorX = behavior;
+                    context.targetStyle.TransformBehaviorY = behavior;
+                    break;
+
                 case "transformbehaviorx":
                     context.targetStyle.TransformBehaviorX = ParseUtil.ParseTransformBehavior(context.variables, propertyValue);
                     break;

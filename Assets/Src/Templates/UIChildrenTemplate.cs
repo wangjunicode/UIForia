@@ -1,7 +1,7 @@
 using System;
 using System.Collections.Generic;
 
-namespace Src {
+namespace UIForia {
 
     public class UIChildrenTemplate : UITemplate {
 
@@ -13,7 +13,7 @@ namespace Src {
         public override UIElement CreateScoped(TemplateScope inputScope) {
             
             UIChildrenElement element = new UIChildrenElement();
-            inputScope.rootElement.transcludedChildren = element;
+            inputScope.rootElement.TranscludedChildren = element;
             element.templateRef = this;
             return element;
             

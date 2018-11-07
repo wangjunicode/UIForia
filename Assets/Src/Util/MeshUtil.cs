@@ -1,9 +1,9 @@
 using System.Collections.Generic;
-using Src.Systems;
+using UIForia.Systems;
 using UnityEngine;
 using UnityEngine.UI;
 
-namespace Src.Util {
+namespace UIForia.Util {
 
     public static class MeshUtil {
 

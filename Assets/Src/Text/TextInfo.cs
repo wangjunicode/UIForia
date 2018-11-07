@@ -1,4 +1,4 @@
-namespace Src.Text {
+namespace UIForia.Text {
 
     public struct TextInfo {
 

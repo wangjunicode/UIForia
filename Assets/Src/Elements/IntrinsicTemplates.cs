@@ -1,7 +1,7 @@
-﻿using Src.Elements;
-using Src.Rendering;
+﻿using UIForia.Elements;
+using UIForia.Rendering;
 
-namespace Src {
+namespace UIForia {
 
     public class UIGroupElement : UIContainerElement {
 

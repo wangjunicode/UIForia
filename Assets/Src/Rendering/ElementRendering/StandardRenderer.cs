@@ -1,11 +1,11 @@
 using System;
 using Shapes2D;
-using Src.Extensions;
-using Src.Rendering;
-using Src.Util;
+using UIForia.Extensions;
+using UIForia.Rendering;
+using UIForia.Util;
 using UnityEngine;
 
-namespace Src.Systems {
+namespace UIForia.Systems {
 
     public class StandardRenderer : ElementRenderer {
 

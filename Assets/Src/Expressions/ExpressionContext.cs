@@ -1,10 +1,10 @@
 ﻿using System;
 using System.Collections;
 using System.Collections.Generic;
-using Src.Extensions;
-using Src.Util;
+using UIForia.Extensions;
+using UIForia.Util;
 
-namespace Src {
+namespace UIForia {
 
     public interface IExpressionContextProvider {
 

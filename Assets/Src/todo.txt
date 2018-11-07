@@ -25,7 +25,6 @@ shapes
 Scroll Styles
 Fix layers
 masks?
-<Children/>
 finish drag implementation
 make false mouse cursor for debug
 handle multiple view roots

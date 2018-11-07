@@ -1,9 +1,9 @@
 using System.Collections.Generic;
-using Src.Rendering;
-using Src.Extensions;
+using UIForia.Extensions;
+using UIForia.Rendering;
 using UnityEngine;
 
-namespace Src.Animation {
+namespace UIForia.Animation {
 
     public enum AnimationDirection {
 

@@ -1,7 +1,7 @@
 ﻿using System;
-using Src.Input;
+using UIForia.Input;
 
-namespace Src.InputBindings {
+namespace UIForia.InputBindings {
 
     public class InputBinding : Binding {
 

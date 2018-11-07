@@ -1,9 +1,9 @@
 using System;
-using Src.Rendering;
-using Src.Systems;
+using UIForia.Rendering;
+using UIForia.Systems;
 using UnityEngine;
 
-namespace Src.Layout.LayoutTypes {
+namespace UIForia.Layout.LayoutTypes {
 
     public class FixedLayoutBox : LayoutBox {
 

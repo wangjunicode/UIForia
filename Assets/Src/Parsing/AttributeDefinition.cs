@@ -1,7 +1,7 @@
 using System;
 using System.Diagnostics;
 
-namespace Src {
+namespace UIForia {
 
     [DebuggerDisplay("{key}={value}")]
     public class AttributeDefinition {

@@ -1,7 +1,7 @@
 using System;
 using NUnit.Framework;
-using Src.Compilers;
-using Src.Compilers.AliasSource;
+using UIForia.Compilers;
+using UIForia.Compilers.AliasSource;
 
 namespace Tests {
 

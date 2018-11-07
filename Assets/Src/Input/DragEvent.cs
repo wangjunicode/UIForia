@@ -1,7 +1,7 @@
 using System;
 using UnityEngine;
 
-namespace Src.Input {
+namespace UIForia.Input {
 
     public abstract class DragEvent {
 

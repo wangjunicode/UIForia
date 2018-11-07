@@ -1,5 +1,6 @@
 using NUnit.Framework;
-using Src;
+using Tests.Mocks;
+using UIForia;
 
 [TestFixture]
 public class ElementTests {
@@ -53,9 +54,8 @@ public class ElementTests {
 
     [Test]
     public void ProperDepth() {
-        UIView_Tests.TestView view = new UIView_Tests.TestView(typeof(DepthThing));
-        view.Initialize();
-        DepthThing root = (DepthThing) view.RootElement;
+        MockApplication app = new MockApplication(typeof(DepthThing));
+        DepthThing root = (DepthThing) app.RootElement;
         Assert.AreEqual(0, root.depth);
         Assert.AreEqual(1, root.g1.depth);
         Assert.AreEqual(2, root.g1_1.depth);
@@ -66,9 +66,8 @@ public class ElementTests {
     
     [Test]
     public void ProperDepthNested() {
-        UIView_Tests.TestView view = new UIView_Tests.TestView(typeof(DepthThing));
-        view.Initialize();
-        DepthThing root = (DepthThing) view.RootElement;
+        MockApplication app = new MockApplication(typeof(DepthThing));
+        DepthThing root = (DepthThing) app.RootElement;
         DepthThingChild child = root.FindFirstByType<DepthThingChild>();
         Assert.AreEqual(1, child.depth);
         Assert.AreEqual(2, child.FindById("g1").depth);
@@ -80,9 +79,8 @@ public class ElementTests {
     
     [Test]
     public void ProperSiblingIndex() {
-        UIView_Tests.TestView view = new UIView_Tests.TestView(typeof(DepthThing));
-        view.Initialize();
-        DepthThing root = (DepthThing) view.RootElement;
+        MockApplication app = new MockApplication(typeof(DepthThing));
+        DepthThing root = (DepthThing) app.RootElement;
         Assert.AreEqual(0, root.siblingIndex);
         Assert.AreEqual(0, root.g1.siblingIndex);
         Assert.AreEqual(0, root.g1_1.siblingIndex);

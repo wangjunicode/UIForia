@@ -1,7 +1,7 @@
 using NUnit.Framework;
-using Src.Rendering;
-using Src;
-using Src.Systems;
+using UIForia.Rendering;
+using UIForia;
+using UIForia.Systems;
 using Tests.Mocks;
 using static Tests.TestUtils;
 

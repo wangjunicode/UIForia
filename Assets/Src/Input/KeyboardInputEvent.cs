@@ -1,6 +1,6 @@
 ﻿using UnityEngine;
 
-namespace Src.Input {
+namespace UIForia.Input {
 
     public class KeyboardInputEvent : InputEvent {
 

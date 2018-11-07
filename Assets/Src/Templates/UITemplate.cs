@@ -3,15 +3,15 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
 using JetBrains.Annotations;
-using Src.Compilers;
-using Src.Input;
-using Src.InputBindings;
-using Src.Rendering;
-using Src.StyleBindings;
-using Src.Systems;
+using UIForia.InputBindings;
+using UIForia.Systems;
+using UIForia.Compilers;
+using UIForia.Input;
+using UIForia.Rendering;
+using UIForia.StyleBindings;
 using UnityEngine;
 
-namespace Src {
+namespace UIForia {
 
     public abstract class UITemplate {
 
@@ -245,14 +245,14 @@ namespace Src {
         }
 
         public static void AssignContext(UIElement element, UITemplateContext context) {
-            element.templateContext = context;
+            element.TemplateContext = context;
                 
             if (element.children == null) return;
 
             for (int i = 0; i < element.children.Length; i++) {
                 
                 if (element.children[i].templateRef is UIElementTemplate) {
-                    element.children[i].templateContext = context;
+                    element.children[i].TemplateContext = context;
                     continue;
                 }
                 

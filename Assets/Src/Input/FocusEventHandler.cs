@@ -1,4 +1,4 @@
-namespace Src.Input {
+namespace UIForia.Input {
 
     public class FocusEventHandler {
 

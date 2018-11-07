@@ -1,4 +1,4 @@
-namespace Src {
+namespace UIForia {
 
     public class UISwitchDefaultElement : UIElement {
 

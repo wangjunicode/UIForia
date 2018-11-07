@@ -1,6 +1,6 @@
 using UnityEngine;
 
-namespace Src.Text {
+namespace UIForia.Text {
 
     public struct LineInfo {
 

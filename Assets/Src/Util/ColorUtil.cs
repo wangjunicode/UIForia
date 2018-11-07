@@ -1,8 +1,8 @@
 using System.Diagnostics;
-using Src.Extensions;
+using UIForia.Extensions;
 using UnityEngine;
 
-namespace Src.Rendering {
+namespace UIForia.Rendering {
 
     public static class ColorUtil {
 

@@ -1,8 +1,8 @@
 using System;
 using System.Collections.Generic;
-using Src.Rendering;
-using Src;
-using Src.Input;
+using UIForia.Rendering;
+using UIForia;
+using UIForia.Input;
 using UnityEngine;
 
 public abstract partial class InputSystem {

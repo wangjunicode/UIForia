@@ -1,7 +1,7 @@
 using System;
 using System.Reflection;
 
-namespace Src.Input {
+namespace UIForia.Input {
 
     public abstract class DragEventHandler : IComparable<DragEventHandler> {
 

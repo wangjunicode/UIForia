@@ -1,7 +1,7 @@
 ﻿using System.Collections.Generic;
-using Src.Rendering;
+using UIForia.Rendering;
 
-namespace Src.Systems {
+namespace UIForia.Systems {
 
     public class BindingSystem : ISystem {
 
@@ -101,17 +101,17 @@ namespace Src.Systems {
             repeatNodes.Clear();
         }
 
-        public void OnReady() { }
+        public void OnViewAdded(UIView view) { }
 
-        public void OnInitialize() { }
-        
-        public void OnElementCreatedFromTemplate(UIElement element) {
+        public void OnViewRemoved(UIView view) { }
+
+        public void OnElementCreated(UIElement element) {
             isTreeDirty = true;
 
             UITemplate template = element.templateRef;
             if (template.constantBindings.Length != 0) {
                 for (int i = 0; i < template.constantBindings.Length; i++) {
-                    template.constantBindings[i].Execute(element, element.templateContext);
+                    template.constantBindings[i].Execute(element, element.TemplateContext);
                 }
             }
 
@@ -133,7 +133,7 @@ namespace Src.Systems {
 
                 node.bindings = template.bindings;
                 node.element = element;
-                node.context = element.templateContext;
+                node.context = element.TemplateContext;
                 node.template = repeat.template;
                 node.scope = repeat.scope;
                 repeatNodes.Add(node);
@@ -144,13 +144,13 @@ namespace Src.Systems {
                 BindingNode node = new BindingNode();
                 node.bindings = template.bindings;
                 node.element = element;
-                node.context = element.templateContext;
+                node.context = element.TemplateContext;
                 bindingSkipTree.AddItem(node);
             }
 
             if (element.children != null && element.children.Length > 0) {
                 for (int i = 0; i < element.children.Length; i++) {
-                    OnElementCreatedFromTemplate(element.children[i]);
+                    OnElementCreated(element.children[i]);
                 }
             }
         }

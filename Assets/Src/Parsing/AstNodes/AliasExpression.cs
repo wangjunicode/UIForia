@@ -2,7 +2,7 @@
 using System.Diagnostics;
 using System.Reflection;
 
-namespace Src {
+namespace UIForia {
 
     [DebuggerDisplay("{identifierNode.identifier}")]
     public class AliasExpressionNode : ExpressionNode {

@@ -1,8 +1,8 @@
 using System;
 using System.Diagnostics;
-using Src;
+using UIForia;
 
-namespace Src.Rendering {
+namespace UIForia.Rendering {
 
     [DebuggerDisplay("{width}, {height}")]
     public struct Dimensions {

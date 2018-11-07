@@ -1,7 +1,7 @@
 using System;
 using System.Collections.Generic;
-using Src;
-using Src.Input;
+using UIForia;
+using UIForia.Input;
 using UnityEngine;
 using Debug = System.Diagnostics.Debug;
 

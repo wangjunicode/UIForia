@@ -3,15 +3,15 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Reflection;
-using Src.Extensions;
-using Src.Rendering;
-using Src.Util;
+using UIForia.Extensions;
 using UIForia;
+using UIForia.Rendering;
+using UIForia.Util;
 using UnityEditor;
 using UnityEngine;
-using MapAction = System.Action<Src.Parsing.StyleParser.StyleParserContext, string, string>;
+using MapAction = System.Action<UIForia.Parsing.StyleParser.StyleParserContext, string, string>;
 
-namespace Src.Parsing.StyleParser {
+namespace UIForia.Parsing.StyleParser {
 
     public struct StyleParserContext {
 
@@ -71,8 +71,8 @@ namespace Src.Parsing.StyleParser {
                 return sheet.GetStyleGroup(styleName);
             }
 
-            if (File.Exists(Application.dataPath + "/" + uniqueStyleId)) {
-                string contents = File.ReadAllText(Application.dataPath + "/" + uniqueStyleId);
+            if (File.Exists(UnityEngine.Application.dataPath + "/" + uniqueStyleId)) {
+                string contents = File.ReadAllText(UnityEngine.Application.dataPath + "/" + uniqueStyleId);
                 sheet = ParseFromString(contents);
                 sheet.id = uniqueStyleId;
                 s_CompiledStyles[uniqueStyleId] = sheet;
@@ -188,7 +188,7 @@ namespace Src.Parsing.StyleParser {
             ImportDefinition import = new ImportDefinition();
             ParsedStyleSheet sheet;
             if (!s_CompiledStyles.TryGetValue(path, out sheet)) {
-                string filePath = Application.dataPath + "/" + path;
+                string filePath = UnityEngine.Application.dataPath + "/" + path;
                 if (!File.Exists(filePath)) {
                     throw new ParseException("File at " + path + " does not exist or is a not a .style file");
                 }

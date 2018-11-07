@@ -4,10 +4,10 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
 using System.Xml.Linq;
-using Src.Elements;
-using Src.Style;
+using UIForia.Style;
+using UIForia.Elements;
 
-namespace Src {
+namespace UIForia {
 
     public class TemplateParser {
 

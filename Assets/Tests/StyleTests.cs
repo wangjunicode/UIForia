@@ -1,9 +1,9 @@
 using System;
 using System.Reflection;
 using NUnit.Framework;
-using Src;
-using Src.Rendering;
-using Src.Systems;
+using UIForia;
+using UIForia.Rendering;
+using UIForia.Systems;
 using Tests.Mocks;
 using UnityEditor.VersionControl;
 using UnityEngine;
@@ -85,8 +85,7 @@ public class StyleTests {
     [Test]
     public void IntProperties_UpdateComputedStyleWithValue() {
         Action<string, string, string> TestBody = (setFnName, computedPropertyName, defaultName) => {
-            MockView view = new MockView(typeof(StyleSetTestThing));
-            view.Initialize();
+            MockApplication view = new MockApplication(typeof(StyleSetTestThing));
             StyleSetTestThing root = (StyleSetTestThing) view.RootElement;
 
             Assert.AreEqual(DefaultValue<int>(defaultName), ComputedValue<int>(root, computedPropertyName));
@@ -102,8 +101,7 @@ public class StyleTests {
     [Test]
     public void IntProperties_UpdateComputedStyleWithUnsetValue() {
         Action<string, string, string> TestBody = (setFnName, computedPropertyName, defaultName) => {
-            MockView view = new MockView(typeof(StyleSetTestThing));
-            view.Initialize();
+            MockApplication view = new MockApplication(typeof(StyleSetTestThing));
             StyleSetTestThing root = (StyleSetTestThing) view.RootElement;
 
             Assert.AreEqual(DefaultValue<int>(defaultName), ComputedValue<int>(root, computedPropertyName));
@@ -120,8 +118,7 @@ public class StyleTests {
     [Test]
     public void IntProperties_EnterState() {
         Action<string, string, string> TestBody = (setFnName, propName, defaultName) => {
-            MockView view = new MockView(typeof(StyleSetTestThing));
-            view.Initialize();
+            MockApplication view = new MockApplication(typeof(StyleSetTestThing));
             StyleSetTestThing root = (StyleSetTestThing) view.RootElement;
 
             CallMethod(root.style, setFnName, DefaultValue<int>(defaultName) + 1, StyleState.Hover);
@@ -139,8 +136,7 @@ public class StyleTests {
     [Test]
     public void IntProperties_EnterSecondState() {
         Action<string, string, string> TestBody = (setFnName, propName, defaultName) => {
-            MockView view = new MockView(typeof(StyleSetTestThing));
-            view.Initialize();
+            MockApplication view = new MockApplication(typeof(StyleSetTestThing));
             StyleSetTestThing root = (StyleSetTestThing) view.RootElement;
 
             CallMethod(root.style, setFnName, DefaultValue<int>(defaultName) + 1, StyleState.Hover);
@@ -164,8 +160,7 @@ public class StyleTests {
     [Test]
     public void IntProperties_ExitState() {
         Action<string, string, string> TestBody = (setFnName, propName, defaultName) => {
-            MockView view = new MockView(typeof(StyleSetTestThing));
-            view.Initialize();
+            MockApplication view = new MockApplication(typeof(StyleSetTestThing));
             StyleSetTestThing root = (StyleSetTestThing) view.RootElement;
 
             CallMethod(root.style, setFnName, DefaultValue<int>(defaultName) + 1, StyleState.Normal);
@@ -187,8 +182,7 @@ public class StyleTests {
     [Test]
     public void IntProperties_FromBaseStyle() {
         Action<string, string, string> TestBody = (setFnName, propName, defaultName) => {
-            MockView view = new MockView(typeof(StyleSetTestThing));
-            view.Initialize();
+            MockApplication view = new MockApplication(typeof(StyleSetTestThing));
             StyleSetTestThing root = (StyleSetTestThing) view.RootElement;
 
             UIStyle baseStyle = new UIStyle();
@@ -212,8 +206,7 @@ public class StyleTests {
     [Test]
     public void IntProperties_OverrideBaseStyle() {
         Action<string, string, string> TestBody = (setFnName, propName, defaultName) => {
-            MockView view = new MockView(typeof(StyleSetTestThing));
-            view.Initialize();
+            MockApplication view = new MockApplication(typeof(StyleSetTestThing));
             StyleSetTestThing root = (StyleSetTestThing) view.RootElement;
 
             UIStyle baseStyle = new UIStyle();
@@ -236,8 +229,7 @@ public class StyleTests {
     [Test]
     public void IntProperties_OverrideBaseStyleInState() {
         Action<string, string, string> TestBody = (setFnName, propName, defaultName) => {
-            MockView view = new MockView(typeof(StyleSetTestThing));
-            view.Initialize();
+            MockApplication view = new MockApplication(typeof(StyleSetTestThing));
             StyleSetTestThing root = (StyleSetTestThing) view.RootElement;
 
             UIStyle baseStyle = new UIStyle();
@@ -259,8 +251,7 @@ public class StyleTests {
     [Test]
     public void SizeProperties_UpdateComputedValue() {
         Action<string, string, string> TestBody = (setFnName, computedPropertyName, defaultName) => {
-            MockView view = new MockView(typeof(StyleSetTestThing));
-            view.Initialize();
+            MockApplication view = new MockApplication(typeof(StyleSetTestThing));
             StyleSetTestThing root = (StyleSetTestThing) view.RootElement;
 
             Assert.AreEqual(DefaultValue<UIMeasurement>(defaultName), ComputedValue<UIMeasurement>(root, computedPropertyName));
@@ -276,8 +267,7 @@ public class StyleTests {
     [Test]
     public void SizeProperties_UpdateComputedStyleWithUnsetValue() {
         Action<string, string, string> TestBody = (setFnName, computedPropertyName, defaultName) => {
-            MockView view = new MockView(typeof(StyleSetTestThing));
-            view.Initialize();
+            MockApplication view = new MockApplication(typeof(StyleSetTestThing));
             StyleSetTestThing root = (StyleSetTestThing) view.RootElement;
 
             Assert.AreEqual(DefaultValue<UIMeasurement>(defaultName), ComputedValue<UIMeasurement>(root, computedPropertyName));
@@ -294,8 +284,7 @@ public class StyleTests {
     [Test]
     public void SizeProperties_EnterState() {
         Action<string, string, string> TestBody = (setFnName, propName, defaultName) => {
-            MockView view = new MockView(typeof(StyleSetTestThing));
-            view.Initialize();
+            MockApplication view = new MockApplication(typeof(StyleSetTestThing));
             StyleSetTestThing root = (StyleSetTestThing) view.RootElement;
 
             CallMethod(root.style, setFnName, new UIMeasurement(99999), StyleState.Hover);
@@ -313,8 +302,7 @@ public class StyleTests {
     [Test]
     public void SizeProperties_EnterSecondState() {
         Action<string, string, string> TestBody = (setFnName, propName, defaultName) => {
-            MockView view = new MockView(typeof(StyleSetTestThing));
-            view.Initialize();
+            MockApplication view = new MockApplication(typeof(StyleSetTestThing));
             StyleSetTestThing root = (StyleSetTestThing) view.RootElement;
 
             CallMethod(root.style, setFnName, new UIMeasurement(1000), StyleState.Hover);
@@ -338,8 +326,7 @@ public class StyleTests {
     [Test]
     public void SizeProperties_ExitState() {
         Action<string, string, string> TestBody = (setFnName, propName, defaultName) => {
-            MockView view = new MockView(typeof(StyleSetTestThing));
-            view.Initialize();
+            MockApplication view = new MockApplication(typeof(StyleSetTestThing));
             StyleSetTestThing root = (StyleSetTestThing) view.RootElement;
 
             CallMethod(root.style, setFnName, new UIMeasurement(1000), StyleState.Normal);
@@ -361,8 +348,7 @@ public class StyleTests {
     [Test]
     public void SizeProperties_FromBaseStyle() {
         Action<string, string, string> TestBody = (setFnName, propName, defaultName) => {
-            MockView view = new MockView(typeof(StyleSetTestThing));
-            view.Initialize();
+            MockApplication view = new MockApplication(typeof(StyleSetTestThing));
             StyleSetTestThing root = (StyleSetTestThing) view.RootElement;
 
             UIStyle baseStyle = new UIStyle();
@@ -385,8 +371,7 @@ public class StyleTests {
     [Test]
     public void SizeProperties_OverrideBaseStyle() {
         Action<string, string, string> TestBody = (setFnName, propName, defaultName) => {
-            MockView view = new MockView(typeof(StyleSetTestThing));
-            view.Initialize();
+            MockApplication view = new MockApplication(typeof(StyleSetTestThing));
             StyleSetTestThing root = (StyleSetTestThing) view.RootElement;
 
             UIStyle baseStyle = new UIStyle();
@@ -409,8 +394,7 @@ public class StyleTests {
     [Test]
     public void SizeProperties_OverrideBaseStyleInState() {
         Action<string, string, string> TestBody = (setFnName, propName, defaultName) => {
-            MockView view = new MockView(typeof(StyleSetTestThing));
-            view.Initialize();
+            MockApplication view = new MockApplication(typeof(StyleSetTestThing));
             StyleSetTestThing root = (StyleSetTestThing) view.RootElement;
 
             UIStyle baseStyle = new UIStyle();

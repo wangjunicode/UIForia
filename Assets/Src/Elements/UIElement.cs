@@ -2,9 +2,10 @@
 using System.Collections.Generic;
 using System.Diagnostics;
 using JetBrains.Annotations;
-using Src.Rendering;
-using Src;
-using Src.Systems;
+using UIForia.Rendering;
+using UIForia;
+using UIForia.Systems;
+using UIForia.Util;
 using UnityEngine;
 using Debug = UnityEngine.Debug;
 
@@ -16,6 +17,30 @@ public enum QueryOptions {
     IgnoreNonRendered = 1 << 2,
     IgnoreImplicit = 1 << 3,
     IgnoreActive = 1 << 4,
+
+}
+
+public struct ElementAttribute {
+
+    public readonly string name;
+    public readonly string value;
+    
+    public ElementAttribute(string name, string value) {
+        this.name = name;
+        this.value = value;
+    }
+
+}
+
+public class ElementColdData {
+
+    public UITemplate templateRef;
+    public ElementRenderer renderer;
+    public UIElement templateParent;
+    public UITemplateContext templateContext;
+    public LightList<ElementAttribute> attributes;
+    public UIChildrenElement transcludedChildren;
+    public Vector2 scrollOffset;
 
 }
 
@@ -32,9 +57,13 @@ public class UIElement : IHierarchical, IExpressionContextProvider {
 
     public UIElement parent;
     public UITemplate templateRef;
-
+    public UIView view;
+    
+    internal static IntMap<LightList<Attribute>> s_AttributeMap = new IntMap<LightList<Attribute>>();
+    internal static IntMap<ElementColdData> s_ColdDataMap = new IntMap<ElementColdData>();
+    
     protected UIElement() {
-        this.id = UIView.NextElementId;
+        this.id = UIForia.Application.NextElementId;
         this.style = new UIStyleSet(this);
         this.flags = UIElementFlags.Enabled
                      | UIElementFlags.Shown
@@ -45,12 +74,12 @@ public class UIElement : IHierarchical, IExpressionContextProvider {
     // todo -- work on this interface
     public UIElement templateParent; // remove or move to cold data
     public UIElement[] children;
-    public UITemplateContext templateContext; // move to cold data
-    public UIChildrenElement transcludedChildren; // move to cold data
+    public UITemplateContext TemplateContext; // move to cold data
+    public UIChildrenElement TranscludedChildren; // move to cold data
 
     public LayoutResult layoutResult { get; internal set; }
 
-    private ElementRenderer renderer = ElementRenderer.DefaultInstanced;
+    private ElementRenderer renderer = ElementRenderer.DefaultInstanced; // cold data
 
     public ElementRenderer Renderer {
         get { return renderer; }
@@ -64,7 +93,7 @@ public class UIElement : IHierarchical, IExpressionContextProvider {
         }
     }
 
-    public Vector2 scrollOffset { get; internal set; }
+    public Vector2 scrollOffset { get; internal set; } // cold data
 
     public ComputedStyle ComputedStyle => style.computedStyle;
 
@@ -121,10 +150,10 @@ public class UIElement : IHierarchical, IExpressionContextProvider {
 
     public void SetEnabled(bool active) {
         if (active && isSelfDisabled) {
-            templateContext.view.EnableElement(this);
+            view.Application.DoEnableElement(this);
         }
         else if (!active && isSelfEnabled) {
-            templateContext.view.DisableElement(this);
+            view.Application.DoDisableElement(this);
         }
     }
     

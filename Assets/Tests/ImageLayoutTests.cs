@@ -1,6 +1,6 @@
 using NUnit.Framework;
-using Src.Rendering;
-using Src;
+using UIForia.Rendering;
+using UIForia;
 using Tests.Mocks;
 using UnityEngine;
 

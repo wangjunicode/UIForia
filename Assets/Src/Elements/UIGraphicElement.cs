@@ -1,9 +1,9 @@
 using System;
-using Src.Rendering;
-using Src.Systems;
+using UIForia.Rendering;
+using UIForia.Systems;
 using UnityEngine;
 
-namespace Src.Elements {
+namespace UIForia.Elements {
 
     public class UIGraphicElement : UIElement, IMeshProvider {
 

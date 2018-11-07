@@ -1,9 +1,9 @@
 using System.Collections.Generic;
 using System.Text;
-using Src.Rendering;
-using Src.Text;
+using UIForia.Rendering;
+using UIForia.Text;
 
-namespace Src.Util {
+namespace UIForia.Util {
 
     public static class TextUtil {
 

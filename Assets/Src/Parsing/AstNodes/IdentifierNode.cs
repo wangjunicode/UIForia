@@ -1,6 +1,6 @@
 using System.Diagnostics;
 
-namespace Src {
+namespace UIForia {
 
     [DebuggerDisplay("{" + nameof(identifier) + "}")]
     public class IdentifierNode : ASTNode {

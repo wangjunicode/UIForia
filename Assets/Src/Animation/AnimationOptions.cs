@@ -1,6 +1,6 @@
-using Src.Rendering;
+using UIForia.Rendering;
 
-namespace Src.Animation {
+namespace UIForia.Animation {
 
     public struct AnimationOptions {      
 

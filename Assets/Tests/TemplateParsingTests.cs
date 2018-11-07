@@ -1,6 +1,6 @@
-﻿using Src;
+﻿using UIForia;
 using NUnit.Framework;
-using Src.Parsing;
+using UIForia.Parsing;
 
 [TestFixture]
 public class TemplateParsingTests {

@@ -1,7 +1,7 @@
 ﻿using System;
-using Src.Rendering;
+using UIForia.Rendering;
 
-namespace Src.StyleBindings {
+namespace UIForia.StyleBindings {
 
     public abstract class StyleBinding : Binding {
 

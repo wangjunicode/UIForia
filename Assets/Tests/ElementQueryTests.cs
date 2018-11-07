@@ -1,6 +1,7 @@
 using JetBrains.Annotations;
 using NUnit.Framework;
-using Src;
+using Tests.Mocks;
+using UIForia;
 
 [TestFixture]
 public class ElementQueryTests {
@@ -27,7 +28,7 @@ public class ElementQueryTests {
             target = FindById("target");
             shouldBeNull = FindById("only-find-from-self");
             findMe = FindById("find-me");
-            child = (FindTestThingScoped)FindById("child");
+            child = (FindTestThingScoped) FindById("child");
         }
 
     }
@@ -43,7 +44,7 @@ public class ElementQueryTests {
     public class FindTestThingScoped : UIElement {
 
         public UIElement childThing;
-        
+
         public override void OnCreate() {
             childThing = FindById("only-find-from-self");
         }
@@ -52,33 +53,33 @@ public class ElementQueryTests {
 
     [Test]
     public void Query_FindById() {
-        UIView_Tests.TestView testView = new UIView_Tests.TestView(typeof(FindTestThing));
-        testView.Initialize(true);
-        FindTestThing root = (FindTestThing) testView.RootElement;
+        MockApplication app = new MockApplication(typeof(FindTestThing));
+
+        FindTestThing root = (FindTestThing) app.RootElement;
         Assert.IsInstanceOf<UIElement>(root.target);
     }
 
     [Test]
     public void Query_FindById_DoNotSearchChildTemplates() {
-        UIView_Tests.TestView testView = new UIView_Tests.TestView(typeof(FindTestThing));
-        testView.Initialize(true);
-        FindTestThing root = (FindTestThing) testView.RootElement;
+        MockApplication app = new MockApplication(typeof(FindTestThing));
+
+        FindTestThing root = (FindTestThing) app.RootElement;
         Assert.IsNull(root.shouldBeNull);
     }
 
     [Test]
     public void Query_FindById_SearchChildren() {
-        UIView_Tests.TestView testView = new UIView_Tests.TestView(typeof(FindTestThing));
-        testView.Initialize(true);
-        FindTestThing root = (FindTestThing) testView.RootElement;
+        MockApplication app = new MockApplication(typeof(FindTestThing));
+
+        FindTestThing root = (FindTestThing) app.RootElement;
         Assert.IsNotNull(root.findMe);
     }
 
     [Test]
     public void Query_FindById_FromChild() {
-        UIView_Tests.TestView testView = new UIView_Tests.TestView(typeof(FindTestThing));
-        testView.Initialize(true);
-        FindTestThing root = (FindTestThing) testView.RootElement;
+        MockApplication app = new MockApplication(typeof(FindTestThing));
+        FindTestThing root = (FindTestThing) app.RootElement;
         Assert.IsNotNull(root.child.childThing);
     }
+
 }

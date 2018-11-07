@@ -1,10 +1,10 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using Src.Compilers.AliasSource;
+using UIForia.Compilers.AliasSource;
 using UnityEngine;
 
-namespace Src {
+namespace UIForia {
 
     public class UIImageTemplate : UITemplate {
 

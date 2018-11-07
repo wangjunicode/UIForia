@@ -1,7 +1,7 @@
 ﻿using System.Collections.Generic;
 using System.Diagnostics;
 using NUnit.Framework;
-using Src;
+using UIForia;
 
 // ReSharper disable HeapView.CanAvoidClosure
 

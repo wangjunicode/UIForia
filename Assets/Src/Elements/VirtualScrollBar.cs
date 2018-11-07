@@ -1,10 +1,10 @@
-using Src.Input;
-using Src.Rendering;
-using Src.Systems;
-using Src.Util;
+using UIForia.Input;
+using UIForia.Rendering;
+using UIForia.Systems;
+using UIForia.Util;
 using UnityEngine;
 
-namespace Src.Elements {
+namespace UIForia.Elements {
 
     public class VirtualScrollbarButton : VirtualElement { }
 

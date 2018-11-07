@@ -1,6 +1,6 @@
 using System.Collections.Generic;
 
-namespace Src.Util {
+namespace UIForia.Util {
 
     public static class StackPool<T> {
 

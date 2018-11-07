@@ -1,5 +1,5 @@
 using NUnit.Framework;
-using Src;
+using UIForia;
 using static Tests.TestUtils;
 
     [TestFixture]

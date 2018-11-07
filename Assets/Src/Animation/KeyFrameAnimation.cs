@@ -1,10 +1,10 @@
 using System;
 using System.Collections.Generic;
-using Src.Rendering;
-using Src.Util;
+using UIForia.Rendering;
+using UIForia.Util;
 using UnityEngine;
 
-namespace Src.Animation {
+namespace UIForia.Animation {
 
     public class KeyFrameAnimation : StyleAnimation {
 

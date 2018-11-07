@@ -1,6 +1,6 @@
 using UnityEngine;
 
-namespace Src.Util {
+namespace UIForia.Util {
 
     public static class KeyCodeUtil {
 

@@ -1,4 +1,4 @@
-namespace Src.Parsing.StyleParser {
+namespace UIForia.Parsing.StyleParser {
 
     public enum StyleTokenType {
 

@@ -1,12 +1,12 @@
 using JetBrains.Annotations;
 using Shapes2D;
-using Src;
-using Src.Extensions;
-using Src.Rendering;
-using Src.StyleBindings;
+using UIForia;
+using UIForia.Extensions;
+using UIForia.Rendering;
+using UIForia.StyleBindings;
 using UnityEngine;
 
-namespace Src.Rendering {
+namespace UIForia.Rendering {
 
     public partial class UIStyleSet {
 

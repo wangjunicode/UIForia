@@ -1,4 +1,4 @@
-namespace Src {
+namespace UIForia {
 
     public class TextBinding_Single : Binding {
 

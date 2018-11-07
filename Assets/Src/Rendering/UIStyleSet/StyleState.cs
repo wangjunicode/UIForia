@@ -1,6 +1,6 @@
 using System;
 
-namespace Src.Rendering {
+namespace UIForia.Rendering {
 
     [Flags]
     public enum StyleType {

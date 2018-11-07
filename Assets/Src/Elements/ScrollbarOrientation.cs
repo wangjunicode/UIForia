@@ -1,4 +1,4 @@
-namespace Src.Elements {
+namespace UIForia.Elements {
 
     public enum ScrollbarOrientation {
 

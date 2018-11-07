@@ -1,5 +1,5 @@
 using NUnit.Framework;
-using Src.Util;
+using UIForia.Util;
 
 [TestFixture]
 public class WhitespaceProcessorTests {

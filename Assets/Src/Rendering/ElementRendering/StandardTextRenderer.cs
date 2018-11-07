@@ -1,8 +1,8 @@
 using System;
-using Src.Systems;
+using UIForia.Systems;
 using UnityEngine;
 
-namespace Src.Rendering.ElementRendering {
+namespace UIForia.Rendering.ElementRendering {
 
     public class StandardTextRenderer : ElementRenderer {
 

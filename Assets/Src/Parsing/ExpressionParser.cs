@@ -20,7 +20,7 @@ using System.Globalization;
 *     ParenExpression = ( Expression )
 *     ParameterList = Expression (, Expression)*
 */
-namespace Src {
+namespace UIForia {
 
     public class ExpressionParser {
 

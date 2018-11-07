@@ -1,6 +1,6 @@
 using System;
 
-namespace Src {
+namespace UIForia {
 
     [Flags]
     public enum TokenType {

@@ -1,7 +1,7 @@
 using System.Collections.Generic;
 using System.Diagnostics;
 
-namespace Src {
+namespace UIForia {
 
     public class TokenStream {
 

@@ -2,7 +2,7 @@ using System;
 using System.Collections.Generic;
 using UnityEngine;
 
-namespace Src.Util {
+namespace UIForia.Util {
 
     public class ObjectPool<T> where T : class, new() {
 

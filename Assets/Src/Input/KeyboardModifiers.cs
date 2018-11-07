@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace Src.Input {
+namespace UIForia.Input {
 
     [Flags]
     public enum KeyboardModifiers {

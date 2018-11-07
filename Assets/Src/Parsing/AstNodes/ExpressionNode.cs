@@ -1,6 +1,6 @@
 using System;
 
-namespace Src {
+namespace UIForia {
 
     public abstract class ExpressionNode : ASTNode {
 

@@ -1,6 +1,6 @@
-﻿using Src.Rendering;
+﻿using UIForia.Rendering;
 
-namespace Src.StyleBindings {
+namespace UIForia.StyleBindings {
 
 //    public class StyleBinding_RectY : StyleBinding {
 //

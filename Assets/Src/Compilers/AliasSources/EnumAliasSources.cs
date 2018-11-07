@@ -1,6 +1,6 @@
 using System;
 
-namespace Src.Compilers.AliasSource {
+namespace UIForia.Compilers.AliasSource {
 
     public class EnumAliasSource<T> : IAliasSource where T : IConvertible {
 

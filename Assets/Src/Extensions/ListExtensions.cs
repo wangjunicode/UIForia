@@ -4,7 +4,7 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
 
-namespace Src.Extensions {
+namespace UIForia.Extensions {
 
     public static class ListExtensions {
 

@@ -1,12 +1,12 @@
 using System;
 using System.Collections.Generic;
-using Src.Rendering;
-using Src.Elements;
-using Src.Extensions;
-using Src.Util;
+using UIForia.Extensions;
+using UIForia.Elements;
+using UIForia.Rendering;
+using UIForia.Util;
 using UnityEngine;
 
-namespace Src.Systems {
+namespace UIForia.Systems {
 
     [Flags]
     public enum CullResult {
@@ -14,33 +14,34 @@ namespace Src.Systems {
         NotCulled,
         ClipRectIsZero,
         ActualSizeZero,
-        
-    }
-    
-    public class RenderSystem : IRenderSystem {
 
-        private readonly IStyleSystem m_StyleSystem;
+    }
+
+    public class RenderSystem : IRenderSystem {
 
         private readonly LightList<UIElement> m_ToInitialize;
         private readonly LightList<RenderData> m_WillRenderList;
         private readonly LightList<RenderData> m_RenderDataList;
 
-        private readonly Camera m_Camera;
+        private Camera m_Camera;
         private readonly List<VirtualScrollbar> m_Scrollbars;
 
         private static readonly RenderZIndexComparerAscending s_ZIndexComparer = new RenderZIndexComparerAscending();
 
         public event Action<LightList<RenderData>, LightList<RenderData>, Vector3, Camera> DrawDebugOverlay;
 
-        public RenderSystem(Camera camera, ILayoutSystem layoutSystem, IStyleSystem styleSystem) {
+        public RenderSystem(Camera camera, ILayoutSystem layoutSystem) {
             this.m_Camera = camera;
-            this.m_StyleSystem = styleSystem;
             this.m_WillRenderList = new LightList<RenderData>();
             this.m_RenderDataList = new LightList<RenderData>();
             this.m_ToInitialize = new LightList<UIElement>();
             this.m_Scrollbars = new List<VirtualScrollbar>();
             layoutSystem.onCreateVirtualScrollbar += HandleScrollbarCreated;
             layoutSystem.onDestroyVirtualScrollbar += HandleScrollbarDestroyed;
+        }
+
+        public void SetCamera(Camera camera) {
+            m_Camera = camera;
         }
 
         private void HandleScrollbarCreated(VirtualScrollbar scrollbar) {
@@ -79,7 +80,7 @@ namespace Src.Systems {
         public RenderData GetRenderData(UIElement element) {
             return m_RenderDataList.Find(element, (d, el) => d.element == el);
         }
-        
+
         public void OnUpdate() {
             InitializeRenderables();
 
@@ -148,7 +149,7 @@ namespace Src.Systems {
 
                 data.clipVector = new Vector4(clipX, clipY, clipW, clipH);
                 data.CullResult = CullResult.NotCulled;
-                
+
                 m_WillRenderList.AddUnchecked(data);
             }
 
@@ -191,9 +192,9 @@ namespace Src.Systems {
             OnReset();
         }
 
-        public void OnReady() { }
+        public void OnViewAdded(UIView view) { }
 
-        public void OnInitialize() { }
+        public void OnViewRemoved(UIView view) { }
 
         public void OnReset() {
             m_WillRenderList.Clear();
@@ -250,13 +251,14 @@ namespace Src.Systems {
             OnElementDisabled(element);
         }
 
-        public void OnElementCreatedFromTemplate(UIElement element) {
+        public void OnElementCreated(UIElement element) {
             m_ToInitialize.Add(element);
             if (element.children == null) {
                 return;
             }
+
             for (int i = 0; i < element.children.Length; i++) {
-                OnElementCreatedFromTemplate(element.children[i]);
+                OnElementCreated(element.children[i]);
             }
         }
 

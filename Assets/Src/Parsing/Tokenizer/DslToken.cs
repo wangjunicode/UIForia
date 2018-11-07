@@ -1,6 +1,6 @@
 using System.Diagnostics;
 
-namespace Src {
+namespace UIForia {
 
     [DebuggerDisplay("{value} -> {tokenType}")]
     public struct DslToken {

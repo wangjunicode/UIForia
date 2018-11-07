@@ -3,7 +3,7 @@ using System.Diagnostics.CodeAnalysis;
 using System.Reflection;
 using JetBrains.Annotations;
 
-namespace Src.Compilers {
+namespace UIForia.Compilers {
 
     public class CallbackBinding : Binding {
 

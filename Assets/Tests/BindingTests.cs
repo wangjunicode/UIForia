@@ -1,7 +1,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using NUnit.Framework;
-using Src;
+using UIForia;
 using Tests.Mocks;
 
 [TestFixture]
@@ -37,12 +37,11 @@ public class BindingTests {
 
     [Test]
     public void RunAnActiveBinding() {
-        MockView view = new MockView(typeof(BindingTestThing));
-        view.Initialize();
-        BindingTestThing root = (BindingTestThing) view.RootElement;
+        MockApplication app = new MockApplication(typeof(BindingTestThing));
+        BindingTestThing root = (BindingTestThing) app.RootElement;
         BindingTestThingChild child = (BindingTestThingChild) root.FindById("child");
         root.intProperty = 11;
-        view.Update();
+        app.Update();
         Assert.AreEqual(11, child.intProperty);
     }
 
@@ -55,16 +54,15 @@ public class BindingTests {
             </Contents>
         </UITemplate>
         ";
-        MockView view = new MockView(typeof(BindingTestThing), template);
-        view.Initialize();
-        BindingTestThing root = (BindingTestThing) view.RootElement;
+        MockApplication app = new MockApplication(typeof(BindingTestThing), template);
+        BindingTestThing root = (BindingTestThing) app.RootElement;
         BindingTestThingChild child = (BindingTestThingChild) root.FindById("child");
         root.intProperty = 2;
-        view.Update();
+        app.Update();
         Assert.AreEqual(2, child.intProperty);
         Assert.IsTrue(child.isDisabled);
         root.intProperty = 4;
-        view.Update();
+        app.Update();
         Assert.AreEqual(4, child.intProperty);
         Assert.IsTrue(child.isEnabled);
     }
@@ -80,21 +78,20 @@ public class BindingTests {
             </Contents>
         </UITemplate>
         ";
-        MockView view = new MockView(typeof(BindingTestThing), template);
-        view.Initialize();
-        BindingTestThing root = (BindingTestThing) view.RootElement;
+        MockApplication app = new MockApplication(typeof(BindingTestThing), template);
+        BindingTestThing root = (BindingTestThing) app.RootElement;
         root.list = new List<int>();
         root.list.Add(1);
         root.list.Add(2);
         root.list.Add(3);
-        view.Update();
+        app.Update();
         List<BindingTestThingChild> children = root.FindByType<BindingTestThingChild>();
         Assert.AreEqual(3, children.Count);
         Assert.AreEqual(0, children[0].intProperty);
         Assert.AreEqual(1, children[1].intProperty);
         Assert.AreEqual(2, children[2].intProperty);
         root.list.RemoveAt(1);
-        view.Update();
+        app.Update();
         children = root.FindByType<BindingTestThingChild>();
         Assert.AreEqual(2, children.Count);
         Assert.AreEqual(children[0].intProperty, 0);
@@ -112,20 +109,19 @@ public class BindingTests {
             </Contents>
         </UITemplate>
         ";
-        MockView view = new MockView(typeof(BindingTestThing), template);
-        view.Initialize();
-        BindingTestThing root = (BindingTestThing) view.RootElement;
+        MockApplication app = new MockApplication(typeof(BindingTestThing), template);
+        BindingTestThing root = (BindingTestThing) app.RootElement;
         root.list = new List<int>();
         root.list.Add(1);
         root.list.Add(2);
         root.list.Add(3);
-        view.Update();
+        app.Update();
         List<BindingTestThingChild> children = root.FindByType<BindingTestThingChild>();
         var child = children[2];
         Assert.AreEqual(3, children.Count);
         Assert.IsTrue(children.Contains(child));
         root.list.RemoveAt(1);
-        view.Update();
+        app.Update();
         children = root.FindByType<BindingTestThingChild>();
         Assert.IsFalse(children.Contains(child));
         Assert.IsTrue(child.isDestroyed);
@@ -142,18 +138,17 @@ public class BindingTests {
             </Contents>
         </UITemplate>
         ";
-        MockView view = new MockView(typeof(BindingTestThing), template);
-        view.Initialize();
-        BindingTestThing root = (BindingTestThing) view.RootElement;
+        MockApplication app = new MockApplication(typeof(BindingTestThing), template);
+        BindingTestThing root = (BindingTestThing) app.RootElement;
         root.list = new List<int>();
         root.list.Add(1);
         root.list.Add(2);
         root.list.Add(3);
-        view.Update();
+        app.Update();
         List<BindingTestThingChild> children = root.FindByType<BindingTestThingChild>();
         Assert.AreEqual(3, children.Count);
         root.list = null;
-        view.Update();
+        app.Update();
         children = root.FindByType<BindingTestThingChild>();
         Assert.IsTrue(children.Count == 0);
     }
@@ -169,18 +164,17 @@ public class BindingTests {
             </Contents>
         </UITemplate>
         ";
-        MockView view = new MockView(typeof(BindingTestThing), template);
-        view.Initialize();
-        BindingTestThing root = (BindingTestThing) view.RootElement;
+        MockApplication app = new MockApplication(typeof(BindingTestThing), template);
+        BindingTestThing root = (BindingTestThing) app.RootElement;
         root.list = new List<int>();
         root.list.Add(1);
         root.list.Add(2);
         root.list.Add(3);
-        view.Update();
+        app.Update();
         List<BindingTestThingChild> children = root.FindByType<BindingTestThingChild>();
         Assert.AreEqual(3, children.Count);
         root.list.Add(4);
-        view.Update();
+        app.Update();
         children = root.FindByType<BindingTestThingChild>();
         Assert.AreEqual(4, children.Count);
     }
@@ -196,14 +190,13 @@ public class BindingTests {
             </Contents>
         </UITemplate>
         ";
-        MockView view = new MockView(typeof(BindingTestThing), template);
-        view.Initialize();
-        BindingTestThing root = (BindingTestThing) view.RootElement;
+        MockApplication app = new MockApplication(typeof(BindingTestThing), template);
+        BindingTestThing root = (BindingTestThing) app.RootElement;
         root.list = new List<int>();
         root.list.Add(1);
         root.list.Add(2);
         root.list.Add(3);
-        view.Update();
+        app.Update();
         List<UITextElement> children = root.FindByType<UITextElement>();
         Assert.AreEqual(3, children.Count);
        
@@ -222,18 +215,16 @@ public class BindingTests {
             </Contents>
         </UITemplate>
         ";
-        MockView view = new MockView(typeof(BindingTestThing), template);
-        view.Initialize();
-        BindingTestThing root = (BindingTestThing) view.RootElement;
+        MockApplication app = new MockApplication(typeof(BindingTestThing), template);
+        BindingTestThing root = (BindingTestThing) app.RootElement;
         root.list = new List<int>();
         root.list.Add(1);
         root.list.Add(2);
         root.list.Add(3);
-        view.Update();
+        app.Update();
         List<UITextElement> children = root.FindByType<UITextElement>();
         Assert.AreEqual(3, children.Count);
         Assert.AreEqual("1", children[0].text);
-       
     }
     
     [Test]
@@ -250,9 +241,8 @@ public class BindingTests {
             </Contents>
         </UITemplate>
         ";
-        MockView view = new MockView(typeof(BindingTestThing), template);
-        view.Initialize();
-        BindingTestThing root = (BindingTestThing) view.RootElement;
+        MockApplication app = new MockApplication(typeof(BindingTestThing), template);
+        BindingTestThing root = (BindingTestThing) app.RootElement;
         root.list = new List<int>();
         root.list2 = new List<int>();
         root.list.Add(1);
@@ -261,7 +251,7 @@ public class BindingTests {
         root.list2.Add(4);
         root.list2.Add(5);
         root.list2.Add(6);
-        view.Update();
+        app.Update();
         List<UITextElement> children = root.FindByType<UITextElement>();
         Assert.AreEqual(6, children.Count);
        

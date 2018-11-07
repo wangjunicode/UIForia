@@ -1,6 +1,6 @@
 using System;
 using NUnit.Framework;
-using Src;
+using UIForia;
 using Tests.Mocks;
 using static Tests.TestUtils;
 
@@ -122,26 +122,27 @@ public class UIView_Tests {
     const TestEnableFlags enabled = TestEnableFlags.Enabled;
     const TestEnableFlags disabledAncestor = TestEnableFlags.DisabledAncestor;
     const TestEnableFlags disabledSelf = TestEnableFlags.DisabledSelf;
-
-    public class TestView : UIView {
-
-        public TestView(Type elementType) : base(elementType) { }
-
-        public UIElement TestCreate() {
-            UIElement element = TemplateParser.GetParsedTemplate(elementType, true).Create(this);
-            element.flags |= UIElementFlags.AncestorEnabled;
-            InitHierarchy(element);
-            return element;
-        }
-
-    }
+//
+//    public class TestView : UIView {
+//
+//        public TestView(Type elementType) : base(elementType) { }
+//
+//        public UIElement TestCreate() {
+//            UIElement element = TemplateParser.GetParsedTemplate(elementType, true).Create(this);
+//            element.flags |= UIElementFlags.AncestorEnabled;
+//            return element;
+//        }
+//
+//        
+//
+//    }
 
 
     [Test]
     public void InitializesHierarchyInTreeOrder() {
-        TestView testView = new TestView(typeof(ViewTestThing));
+        MockApplication app = new MockApplication(typeof(ViewTestThing));
 
-        UIElement element = testView.TestCreate();
+        UIElement element = app.RootElement;
 
         Assert.IsInstanceOf<ViewTestThing>(element);
 
@@ -158,12 +159,11 @@ public class UIView_Tests {
         }));
     }
 
-
     [Test]
     public void SetsFlagsForHierarchyChildren() {
-        TestView testView = new TestView(typeof(ViewTestThing));
+        MockApplication application = new MockApplication(typeof(ViewTestThing));
 
-        UIElement element = testView.TestCreate();
+        UIElement element = application.RootElement;
         element.children[0].children[0].flags &= ~(UIElementFlags.Enabled);
 
         Assert.IsInstanceOf<TranscludedThing>(element.children[0].children[0]);
@@ -186,11 +186,11 @@ public class UIView_Tests {
 
     [Test]
     public void DisableElement() {
-        TestView testView = new TestView(typeof(ViewTestThing));
-        UIElement element = testView.TestCreate();
+        MockApplication testView = new MockApplication(typeof(ViewTestThing));
+        UIElement element = testView.RootElement;
         TranscludedThing thing = As<TranscludedThing>(element.children[0].children[0]);
 
-        testView.DisableElement(thing);
+        Application.DisableElement(thing);
 
         AssertHierarchyFlags(element, new TypeAssert(typeof(ViewTestThing), enabled, new[] {
             new TypeAssert(typeof(UIGroupElement), enabled, new[] {
@@ -204,9 +204,9 @@ public class UIView_Tests {
             })
         }));
 
-        TestView testView2 = new TestView(typeof(ViewTestThing));
+        MockApplication testView2 = new MockApplication(typeof(ViewTestThing));
 
-        element = testView2.TestCreate();
+        element = testView2.RootElement;
 
         UITextElement text0 = As<UITextElement>(element.children[0].children[0].children[0]);
         UIChildrenElement children = As<UIChildrenElement>(element.children[0].children[0].children[1]);
@@ -215,7 +215,8 @@ public class UIView_Tests {
 
         thing = As<TranscludedThing>(element.children[0].children[0]);
 
-        testView2.DisableElement(children);
+        Application.DisableElement(children);
+        
         AssertHierarchyFlags(element, new TypeAssert(typeof(ViewTestThing), enabled, new[] {
             new TypeAssert(typeof(UIGroupElement), enabled, new[] {
                 new TypeAssert(typeof(TranscludedThing), enabled, new[] {
@@ -228,7 +229,7 @@ public class UIView_Tests {
             })
         }));
 
-        testView2.DisableElement(text0);
+        Application.DisableElement(text0);
         AssertHierarchyFlags(element, new TypeAssert(typeof(ViewTestThing), enabled, new[] {
             new TypeAssert(typeof(UIGroupElement), enabled, new[] {
                 new TypeAssert(typeof(TranscludedThing), enabled, new[] {
@@ -241,7 +242,7 @@ public class UIView_Tests {
             })
         }));
 
-        testView2.DisableElement(group);
+        Application.DisableElement(group);
         AssertHierarchyFlags(element, new TypeAssert(typeof(ViewTestThing), enabled, new[] {
             new TypeAssert(typeof(UIGroupElement), disabledSelf, new[] {
                 new TypeAssert(typeof(TranscludedThing), disabledAncestor, new[] {
@@ -257,34 +258,34 @@ public class UIView_Tests {
 
     [Test]
     public void Callback_OnDisable() {
-        TestView testView = new TestView(typeof(ViewTestThing));
-        UIElement element = testView.TestCreate();
+        MockApplication application = new MockApplication(typeof(ViewTestThing));
+        UIElement element = application.RootElement;
         TranscludedThing thing = As<TranscludedThing>(element.children[0].children[0]);
 
         int callCount = 0;
 
         thing.onDisableCallback = () => { callCount++; };
-        testView.DisableElement(thing);
+        Application.DisableElement(thing);
         Assert.AreEqual(1, callCount);
 
-        TestView testView2 = new TestView(typeof(ViewTestThing));
-        element = testView2.TestCreate();
+        MockApplication testView2 = new MockApplication(typeof(ViewTestThing));
+        element = testView2.RootElement;
         thing = As<TranscludedThing>(element.children[0].children[0]);
         thing.onDisableCallback = () => { callCount++; };
-        testView2.DisableElement(element.children[0]);
+        Application.DisableElement(element.children[0]);
         Assert.AreEqual(2, callCount);
-        testView2.DisableElement(element.children[0]);
+        Application.DisableElement(element.children[0]);
         Assert.AreEqual(2, callCount);
     }
 
 
     [Test]
     public void EnableElement() {
-        TestView testView = new TestView(typeof(ViewTestThing));
-        UIElement element = testView.TestCreate();
+        MockApplication testView = new MockApplication(typeof(ViewTestThing));
+        UIElement element = testView.RootElement;
         TranscludedThing thing = As<TranscludedThing>(element.children[0].children[0]);
 
-        testView.DisableElement(thing);
+        Application.DisableElement(thing);
 
         AssertHierarchyFlags(element, new TypeAssert(typeof(ViewTestThing), enabled, new[] {
             new TypeAssert(typeof(UIGroupElement), enabled, new[] {
@@ -298,7 +299,7 @@ public class UIView_Tests {
             })
         }));
 
-        testView.EnableElement(thing);
+        Application.EnableElement(thing);
         AssertHierarchyFlags(element, new TypeAssert(typeof(ViewTestThing), enabled, new[] {
             new TypeAssert(typeof(UIGroupElement), enabled, new[] {
                 new TypeAssert(typeof(TranscludedThing), enabled, new[] {
@@ -313,7 +314,7 @@ public class UIView_Tests {
         UIGroupElement group = As<UIGroupElement>(element.children[0]);
         UITextElement text2 = As<UITextElement>(element.children[0].children[0].children[2]);
 
-        testView.DisableElement(group);
+        Application.DisableElement(group);
         AssertHierarchyFlags(element, new TypeAssert(typeof(ViewTestThing), enabled, new[] {
             new TypeAssert(typeof(UIGroupElement), disabledSelf, new[] {
                 new TypeAssert(typeof(TranscludedThing), disabledAncestor, new[] {
@@ -325,7 +326,7 @@ public class UIView_Tests {
                 }),
             })
         }));
-        testView.DisableElement(text2);
+        Application.DisableElement(text2);
         AssertHierarchyFlags(element, new TypeAssert(typeof(ViewTestThing), enabled, new[] {
             new TypeAssert(typeof(UIGroupElement), disabledSelf, new[] {
                 new TypeAssert(typeof(TranscludedThing), disabledAncestor, new[] {
@@ -337,7 +338,7 @@ public class UIView_Tests {
                 }),
             })
         }));
-        testView.EnableElement(group);
+        Application.EnableElement(group);
         AssertHierarchyFlags(element, new TypeAssert(typeof(ViewTestThing), enabled, new[] {
             new TypeAssert(typeof(UIGroupElement), enabled, new[] {
                 new TypeAssert(typeof(TranscludedThing), enabled, new[] {
@@ -353,36 +354,34 @@ public class UIView_Tests {
 
     [Test]
     public void Callback_OnEnable() {
-        TestView testView = new TestView(typeof(ViewTestThing));
-        UIElement element = testView.TestCreate();
+        MockApplication testView = new MockApplication(typeof(ViewTestThing));
+        UIElement element = testView.RootElement;
         TranscludedThing thing = As<TranscludedThing>(element.children[0].children[0]);
         UIGroupElement group = As<UIGroupElement>(element.children[0]);
         int callCount = 0;
         thing.onEnableCallback = () => callCount++;
-        testView.DisableElement(thing);
-        testView.EnableElement(thing);
+        Application.DisableElement(thing);
+        Application.EnableElement(thing);
         Assert.AreEqual(1, callCount);
-        testView.DisableElement(group);
+        Application.DisableElement(group);
         Assert.IsTrue(thing.isDisabled);
-        testView.EnableElement(thing);
+        Application.EnableElement(thing);
         Assert.AreEqual(1, callCount);
-        testView.EnableElement(group);
+        Application.EnableElement(group);
         Assert.AreEqual(2, callCount);
     }
 
 
     [Test]
     public void LifeCycle_OnCreate() {
-        TestView testView = new TestView(typeof(ViewTestThing));
-        testView.Initialize(true);
+        MockApplication testView = new MockApplication(typeof(ViewTestThing));
         ViewTestThing thing = (ViewTestThing) testView.RootElement;
         Assert.IsTrue(thing.didCreate);
     }
 
     [Test]
     public void LifeCycle_OnUpdate() {
-        MockView testView = new MockView(typeof(ViewTestThing));
-        testView.Initialize(true);
+        MockApplication testView = new MockApplication(typeof(ViewTestThing));
         ViewTestThing thing = (ViewTestThing) testView.RootElement;
         Assert.AreEqual(0, thing.updateCount);
         testView.Update();
@@ -391,8 +390,7 @@ public class UIView_Tests {
 
     [Test]
     public void SetDepthIndex() {
-        MockView testView = new MockView(typeof(ViewTestThing), template);
-        testView.Initialize();
+        MockApplication testView = new MockApplication(typeof(ViewTestThing), template);
         ViewTestThing root = (ViewTestThing) testView.RootElement;
         for (int i = 0; i < 5; i++) {
             Assert.AreEqual(root.FindById("L1-" + i).depthIndex, i);
@@ -409,10 +407,10 @@ public class UIView_Tests {
 
     [Test]
     public void UpdateDepthIndexOnDestroy() {
-        MockView testView = new MockView(typeof(ViewTestThing), template);
-        testView.Initialize();
+        MockApplication testView = new MockApplication(typeof(ViewTestThing), template);
+        
         ViewTestThing root = (ViewTestThing) testView.RootElement;
-        testView.DestroyElement(root.FindById("L1-3"));
+        Application.DestroyElement(root.FindById("L1-3"));
 
         Assert.AreEqual(0, root.FindById("L1-0").depthIndex);
         Assert.AreEqual(1, root.FindById("L1-1").depthIndex);
@@ -434,12 +432,12 @@ public class UIView_Tests {
 
     [Test]
     public void RemoveFromChildrenOnDestroy() {
-        MockView testView = new MockView(typeof(ViewTestThing), template);
-        testView.Initialize();
+        MockApplication testView = new MockApplication(typeof(ViewTestThing), template);
+        
         ViewTestThing root = (ViewTestThing) testView.RootElement;
         UIElement parent = root.FindById("L1-3").parent;
         int childCount = parent.children.Length;
-        testView.DestroyElement(root.FindById("L1-3"));
+        Application.DestroyElement(root.FindById("L1-3"));
         Assert.IsNull(root.FindById("L1-3"));
         Assert.AreEqual(childCount - 1, parent.children.Length);
     }

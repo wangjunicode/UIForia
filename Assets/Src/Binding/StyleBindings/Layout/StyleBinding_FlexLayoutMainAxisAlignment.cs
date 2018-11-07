@@ -1,7 +1,7 @@
-﻿using Src.Layout;
-using Src.Rendering;
+﻿using UIForia.Layout;
+using UIForia.Rendering;
 
-namespace Src.StyleBindings {
+namespace UIForia.StyleBindings {
 
     public class StyleBinding_FlexLayoutMainAxisAlignment : StyleBinding {
 

@@ -4,7 +4,7 @@ using UnityEngine;
 using UnityEngine.Assertions;
 using Assembly = System.Reflection.Assembly;
 
-namespace Src {
+namespace UIForia {
 
     public static class TypeProcessor {
 

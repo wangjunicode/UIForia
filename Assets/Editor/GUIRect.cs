@@ -1,7 +1,7 @@
 using UnityEditor;
 using UnityEngine;
 
-namespace Src.Editor {
+namespace UIForia.Editor {
 
     public class GUIRect {
 

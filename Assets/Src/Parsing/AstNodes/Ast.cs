@@ -1,5 +1,5 @@
 
-namespace Src {
+namespace UIForia {
 
     public enum ExpressionNodeType {
 

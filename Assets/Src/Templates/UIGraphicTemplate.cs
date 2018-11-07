@@ -1,9 +1,9 @@
 using System;
 using System.Collections.Generic;
-using Src.Elements;
-using Src.Util;
+using UIForia.Elements;
+using UIForia.Util;
 
-namespace Src {
+namespace UIForia {
 
     public class UIGraphicTemplate : UITemplate {
 

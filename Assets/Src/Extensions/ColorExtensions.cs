@@ -1,6 +1,6 @@
 using UnityEngine;
 
-namespace Src.Extensions {
+namespace UIForia.Extensions {
 
     public static class ColorExtensions {
 

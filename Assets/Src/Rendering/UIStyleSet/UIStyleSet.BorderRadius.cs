@@ -1,7 +1,7 @@
 using JetBrains.Annotations;
-using Src;
+using UIForia;
 
-namespace Src.Rendering {
+namespace UIForia.Rendering {
 
     public partial class UIStyleSet {
 

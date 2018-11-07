@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Diagnostics;
 
-namespace Src {
+namespace UIForia {
 
     [DebuggerDisplay("{" + nameof(identifier) + "}")]
     public class SpecialIdentifierNode : IdentifierNode {

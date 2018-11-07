@@ -1,6 +1,6 @@
 ﻿using System.Diagnostics;
-using Src.Rendering;
-using Src;
+using UIForia.Rendering;
+using UIForia;
 using UnityEngine;
 
 [DebuggerDisplay("{top}, {right}, {bottom}, {left}")]

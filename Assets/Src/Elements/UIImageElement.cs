@@ -1,10 +1,10 @@
-using Src.Rendering;
-using Src.Systems;
-using Src.Util;
 using UIForia;
+using UIForia.Rendering;
+using UIForia.Systems;
+using UIForia.Util;
 using UnityEngine;
 
-namespace Src {
+namespace UIForia {
 
     public class UIImageElement : UIElement, IMeshProvider {
 

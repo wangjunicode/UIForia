@@ -1,11 +1,11 @@
 using System;
 using System.Collections.Generic;
-using Src.Rendering;
-using Src.Util;
+using UIForia.Rendering;
+using UIForia.Util;
 using UnityEngine;
 using Debug = System.Diagnostics.Debug;
 
-namespace Src.Animation {
+namespace UIForia.Animation {
 
     public struct AnimationState {
 

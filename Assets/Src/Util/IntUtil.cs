@@ -1,6 +1,6 @@
 using System.Diagnostics;
 
-namespace Src.Rendering {
+namespace UIForia.Rendering {
 
     public static class IntUtil {
 

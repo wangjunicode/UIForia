@@ -1,6 +1,6 @@
 using NUnit.Framework;
-using Src.Rendering;
-using Src;
+using UIForia.Rendering;
+using UIForia;
 using Tests.Mocks;
 using TMPro;
 using UnityEngine;
@@ -37,8 +37,7 @@ public class StyleBindingTests {
         ";
         Texture2D tex1 = new Texture2D(1, 1);
         UIForia.ResourceManager.AddTexture("path/to/tex1", tex1);
-        MockView view = new MockView(typeof(StyleTestThing), template);
-        view.Initialize();
+        MockApplication view = new MockApplication(typeof(StyleTestThing), template);
         StyleTestThing root = (StyleTestThing) view.RootElement;
         UIElement panel = root.FindFirstByType<UIElement>();
         Assert.AreEqual(tex1, panel.ComputedStyle.BackgroundImage);
@@ -55,8 +54,7 @@ public class StyleBindingTests {
         ";
         Texture2D tex1 = new Texture2D(1, 1);
         UIForia.ResourceManager.AddTexture("path/to/tex1", tex1);
-        MockView view = new MockView(typeof(StyleTestThing), template);
-        view.Initialize();
+        MockApplication view = new MockApplication(typeof(StyleTestThing), template);
         StyleTestThing root = (StyleTestThing) view.RootElement;
         root.textureName = "tex1";
         view.Update();
@@ -82,8 +80,7 @@ public class StyleBindingTests {
         ";
         TMP_FontAsset font1 = ScriptableObject.CreateInstance<TMP_FontAsset>();
         UIForia.ResourceManager.AddFont("path/to/font1", font1);
-        MockView view = new MockView(typeof(StyleTestThing), template);
-        view.Initialize();
+        MockApplication view = new MockApplication(typeof(StyleTestThing), template);
         StyleTestThing root = (StyleTestThing) view.RootElement;
         UIElement panel = root.FindFirstByType<UIElement>();
         Assert.AreEqual(font1, panel.ComputedStyle.TextFontAsset);
@@ -104,8 +101,7 @@ public class StyleBindingTests {
         ";
         TMP_FontAsset font1 = ScriptableObject.CreateInstance<TMP_FontAsset>();
         UIForia.ResourceManager.AddFont("path/to/font1", font1);
-        MockView view = new MockView(typeof(StyleTestThing), template);
-        view.Initialize();
+        MockApplication view = new MockApplication(typeof(StyleTestThing), template);
         StyleTestThing root = (StyleTestThing) view.RootElement;
         root.fontName = "font1";
         view.Update();

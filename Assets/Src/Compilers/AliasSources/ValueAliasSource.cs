@@ -1,6 +1,6 @@
-using Src.Compilers.AliasSource;
+using UIForia.Compilers.AliasSource;
 
-namespace Src.Compilers {
+namespace UIForia.Compilers {
 
     public class ValueAliasSource<T> : IAliasSource {
 

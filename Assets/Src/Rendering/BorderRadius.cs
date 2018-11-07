@@ -1,9 +1,9 @@
 using System.Diagnostics;
 using JetBrains.Annotations;
-using Src;
+using UIForia;
 using UnityEngine;
 
-namespace Src.Rendering {
+namespace UIForia.Rendering {
 
     public struct BorderRadius {
 

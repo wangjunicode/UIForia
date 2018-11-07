@@ -1,12 +1,12 @@
 using System.Collections.Generic;
-using Src.Systems;
-using Src.Text;
-using Src.Util;
 using TMPro;
+using UIForia.Systems;
+using UIForia.Text;
+using UIForia.Util;
 using UnityEngine;
-using TextAlignment = Src.Text.TextAlignment;
+using TextAlignment = UIForia.Text.TextAlignment;
 
-namespace Src.Layout.LayoutTypes {
+namespace UIForia.Layout.LayoutTypes {
 
     public class TextLayoutBox : LayoutBox {
 
@@ -177,7 +177,7 @@ namespace Src.Layout.LayoutTypes {
             return lineInfos;
         }
 
-        private static void ApplyTextAlignment(float allocatedWidth, TextInfo textInfo, TextAlignment alignment) {
+        private static void ApplyTextAlignment(float allocatedWidth, TextInfo textInfo, Text.TextAlignment alignment) {
             LineInfo[] lineInfos = textInfo.lineInfos;
 
             // find max line width

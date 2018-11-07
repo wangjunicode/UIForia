@@ -1,4 +1,4 @@
-namespace Src.Layout {
+namespace UIForia.Layout {
 
     public enum MainAxisAlignment {
         

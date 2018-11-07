@@ -1,14 +1,14 @@
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
-using Src.Rendering;
-using Src.Elements;
-using Src.Systems;
-using Src.Util;
 using UIForia;
+using UIForia.Elements;
+using UIForia.Rendering;
+using UIForia.Systems;
+using UIForia.Util;
 using UnityEngine;
 
-namespace Src.Layout.LayoutTypes {
+namespace UIForia.Layout.LayoutTypes {
 
     public abstract class LayoutBox {
 
@@ -232,10 +232,10 @@ namespace Src.Layout.LayoutTypes {
                     return allocatedWidth * width.value;
 
                 case UIFixedUnit.ViewportHeight:
-                    return layoutSystem.ViewportRect.height * width.value;
+                    return element.view.Viewport.height * width.value;
 
                 case UIFixedUnit.ViewportWidth:
-                    return layoutSystem.ViewportRect.width * width.value;
+                    return element.view.Viewport.width * width.value;
 
                 case UIFixedUnit.Em:
                     return style.EmSize * width.value;
@@ -255,10 +255,10 @@ namespace Src.Layout.LayoutTypes {
                     return allocatedHeight * height.value;
 
                 case UIFixedUnit.ViewportHeight:
-                    return layoutSystem.ViewportRect.height * height.value;
+                    return element.view.Viewport.height * height.value;
 
                 case UIFixedUnit.ViewportWidth:
-                    return layoutSystem.ViewportRect.width * height.value;
+                    return element.view.Viewport.width * height.value;
 
                 case UIFixedUnit.Em:
                     return style.EmSize * height.value;
@@ -468,10 +468,10 @@ namespace Src.Layout.LayoutTypes {
                     return Mathf.Max(0, parent.allocatedWidth * widthMeasurement.value);
 
                 case UIMeasurementUnit.ViewportWidth:
-                    return Mathf.Max(0, layoutSystem.ViewportRect.width * widthMeasurement.value);
+                    return Mathf.Max(0, element.view.Viewport.width * widthMeasurement.value);
 
                 case UIMeasurementUnit.ViewportHeight:
-                    return Mathf.Max(0, layoutSystem.ViewportRect.height * widthMeasurement.value);
+                    return Mathf.Max(0, element.view.Viewport.height * widthMeasurement.value);
 
                 case UIMeasurementUnit.ParentContentArea:
                     if (parent.style.PreferredWidth.IsContentBased) {
@@ -525,8 +525,8 @@ namespace Src.Layout.LayoutTypes {
                     return Mathf.Max(0, (right - left) * widthMeasurement.value);
 
                 case AnchorTarget.Viewport:
-                    left = ResolveAnchor(layoutSystem.ViewportRect.width, style.AnchorLeft);
-                    right = ResolveAnchor(layoutSystem.ViewportRect.width, style.AnchorRight);
+                    left = ResolveAnchor(element.view.Viewport.width, style.AnchorLeft);
+                    right = ResolveAnchor(element.view.Viewport.width, style.AnchorRight);
                     return Mathf.Max(0, (right - left) * widthMeasurement.value);
 
                 default:
@@ -556,8 +556,8 @@ namespace Src.Layout.LayoutTypes {
                     return Mathf.Max(0, (bottom - top) * heightMeasurement.value);
 
                 case AnchorTarget.Viewport:
-                    top = ResolveAnchor(layoutSystem.ViewportRect.height, style.AnchorTop);
-                    bottom = layoutSystem.ViewportRect.height - ResolveAnchor(layoutSystem.ViewportRect.height, style.AnchorBottom);
+                    top = ResolveAnchor(element.view.Viewport.height, style.AnchorTop);
+                    bottom = element.view.Viewport.height - ResolveAnchor(element.view.Viewport.height, style.AnchorBottom);
                     return Mathf.Max(0, (bottom - top) * heightMeasurement.value);
 
                 default:
@@ -574,10 +574,10 @@ namespace Src.Layout.LayoutTypes {
                     return baseWidth * anchor.value;
 
                 case UIFixedUnit.ViewportHeight:
-                    return layoutSystem.ViewportRect.height * anchor.value;
+                    return element.view.Viewport.height * anchor.value;
 
                 case UIFixedUnit.ViewportWidth:
-                    return layoutSystem.ViewportRect.width * anchor.value;
+                    return element.view.Viewport.width * anchor.value;
 
                 case UIFixedUnit.Em:
                     return style.EmSize * anchor.value;
@@ -613,17 +613,17 @@ namespace Src.Layout.LayoutTypes {
                             return Screen.width * anchor.value;
 
                         case AnchorTarget.Viewport:
-                            return layoutSystem.ViewportRect.width * anchor.value;
+                            return element.view.Viewport.width * anchor.value;
 
                         default:
                             throw new InvalidArgumentException();
                     }
 
                 case UIFixedUnit.ViewportHeight:
-                    return layoutSystem.ViewportRect.height * anchor.value;
+                    return element.view.Viewport.height * anchor.value;
 
                 case UIFixedUnit.ViewportWidth:
-                    return layoutSystem.ViewportRect.width * anchor.value;
+                    return element.view.Viewport.width * anchor.value;
 
                 case UIFixedUnit.Em:
                     return style.EmSize * anchor.value;
@@ -659,17 +659,17 @@ namespace Src.Layout.LayoutTypes {
                             return Screen.height * anchor.value;
 
                         case AnchorTarget.Viewport:
-                            return layoutSystem.ViewportRect.height * anchor.value;
+                            return element.view.Viewport.height * anchor.value;
 
                         default:
                             throw new InvalidArgumentException();
                     }
 
                 case UIFixedUnit.ViewportHeight:
-                    return layoutSystem.ViewportRect.height * anchor.value;
+                    return element.view.Viewport.height * anchor.value;
 
                 case UIFixedUnit.ViewportWidth:
-                    return layoutSystem.ViewportRect.width * anchor.value;
+                    return element.view.Viewport.width * anchor.value;
 
                 case UIFixedUnit.Em:
                     return style.EmSize * anchor.value;
@@ -705,10 +705,10 @@ namespace Src.Layout.LayoutTypes {
                     return Mathf.Max(0, parent.allocatedHeight * height.value);
 
                 case UIMeasurementUnit.ViewportWidth:
-                    return Mathf.Max(0, layoutSystem.ViewportRect.width * height.value);
+                    return Mathf.Max(0, element.view.Viewport.width * height.value);
 
                 case UIMeasurementUnit.ViewportHeight:
-                    return Mathf.Max(0, layoutSystem.ViewportRect.height * height.value);
+                    return Mathf.Max(0, element.view.Viewport.height * height.value);
 
                 case UIMeasurementUnit.ParentContentArea:
                     if (parent.style.PreferredHeight.IsContentBased) {
@@ -768,10 +768,10 @@ namespace Src.Layout.LayoutTypes {
                     return Mathf.Max(0, parent.allocatedWidth * widthMeasurement.value);
 
                 case UIMeasurementUnit.ViewportWidth:
-                    return Mathf.Max(0, layoutSystem.ViewportRect.width * widthMeasurement.value);
+                    return Mathf.Max(0, element.view.Viewport.width * widthMeasurement.value);
 
                 case UIMeasurementUnit.ViewportHeight:
-                    return Mathf.Max(0, layoutSystem.ViewportRect.height * widthMeasurement.value);
+                    return Mathf.Max(0, element.view.Viewport.height * widthMeasurement.value);
 
                 case UIMeasurementUnit.ParentContentArea:
                     if (parent.style.PreferredWidth.IsContentBased) {
@@ -822,10 +822,10 @@ namespace Src.Layout.LayoutTypes {
                     return Mathf.Max(0, parent.allocatedHeight * heightMeasurement.value);
 
                 case UIMeasurementUnit.ViewportWidth:
-                    return Mathf.Max(0, layoutSystem.ViewportRect.width * heightMeasurement.value);
+                    return Mathf.Max(0, element.view.Viewport.width * heightMeasurement.value);
 
                 case UIMeasurementUnit.ViewportHeight:
-                    return Mathf.Max(0, layoutSystem.ViewportRect.height * heightMeasurement.value);
+                    return Mathf.Max(0, element.view.Viewport.height * heightMeasurement.value);
 
                 case UIMeasurementUnit.ParentContentArea:
                     if (parent.style.PreferredHeight.IsContentBased) {

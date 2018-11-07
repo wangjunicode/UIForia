@@ -1,6 +1,6 @@
 using System;
 
-namespace Src {
+namespace UIForia {
 
     // Note: the Unary + operator in C# is basically a no-op. It does turn a negative number positive
     public static class UnaryExpression_PlusFactory {

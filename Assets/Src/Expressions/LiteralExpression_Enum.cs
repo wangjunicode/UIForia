@@ -1,6 +1,6 @@
 using System;
 
-namespace Src {
+namespace UIForia {
 
     public class LiteralExpression_Enum<T> : Expression<T> where T : IConvertible {
 

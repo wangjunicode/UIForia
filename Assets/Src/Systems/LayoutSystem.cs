@@ -1,45 +1,54 @@
 ﻿using System;
 using System.Collections.Generic;
-using Src.Elements;
-using Src.Extensions;
-using Src.Layout;
-using Src.Layout.LayoutTypes;
-using Src.Rendering;
-using Src.Util;
+using UIForia.Extensions;
+using UIForia.Elements;
+using UIForia.Layout;
+using UIForia.Layout.LayoutTypes;
+using UIForia.Rendering;
+using UIForia.Util;
 using UnityEngine;
 
-namespace Src.Systems {
+namespace UIForia.Systems {
 
     public class LayoutSystem : ILayoutSystem {
 
+        public struct ViewRect {
+
+            public readonly UIView view;
+            public readonly Rect previousViewport;
+            
+            public ViewRect(UIView view, Rect previousViewport) {
+                this.view = view;
+                this.previousViewport = previousViewport;
+            }
+
+        }
+        
         public event Action<VirtualScrollbar> onCreateVirtualScrollbar;
         public event Action<VirtualScrollbar> onDestroyVirtualScrollbar;
 
-        protected readonly RootLayoutBox m_Root;
-
         // todo -- use arrays instead
-        protected readonly List<LayoutBox> m_PendingInitialization;
-        protected readonly IntMap<LayoutBox> m_LayoutBoxMap;
         protected readonly IStyleSystem m_StyleSystem;
         protected readonly IntMap<UIElement[]> m_QueryGrid;
+        protected readonly IntMap<LayoutBox> m_LayoutBoxMap;
         protected readonly List<VirtualElement> m_VirtualElements;
+        protected readonly List<LayoutBox> m_PendingInitialization;
 
-        private readonly List<UIElement> m_Elements;
-        private bool m_RootRequiresLayout;
         private Size m_ScreenSize;
-
+        private readonly List<UIElement> m_Elements;
+        private readonly LightList<ViewRect> m_Views;
+    
         public LayoutSystem(IStyleSystem styleSystem) {
-            this.m_Root = new RootLayoutBox(this);
             this.m_StyleSystem = styleSystem;
             this.m_LayoutBoxMap = new IntMap<LayoutBox>();
             this.m_Elements = new List<UIElement>();
             this.m_PendingInitialization = new List<LayoutBox>();
             this.m_VirtualElements = new List<VirtualElement>();
             this.m_QueryGrid = new IntMap<UIElement[]>();
-            this.m_RootRequiresLayout = true;
+            this.m_Views = new LightList<ViewRect>();
+            m_StyleSystem.onTextContentChanged += HandleTextContentChanged;
+            m_StyleSystem.onStylePropertyChanged += HandleStylePropertyChanged;
         }
-
-        public Rect ViewportRect { get; private set; }
 
         public void OnReset() {
             m_LayoutBoxMap.Clear();
@@ -47,8 +56,7 @@ namespace Src.Systems {
             m_PendingInitialization.Clear();
             m_VirtualElements.Clear();
             m_QueryGrid.Clear();
-            m_RootRequiresLayout = true;
-            m_Root.children.Clear();
+            m_Views.Clear();
         }
 
         protected void InitializeLayoutBoxes() {
@@ -69,20 +77,31 @@ namespace Src.Systems {
         public void OnUpdate() {
             InitializeLayoutBoxes();
 
-            if (m_RootRequiresLayout) {
-                m_RootRequiresLayout = false;
-                m_Root.RunLayout();
-            }
-
-            RunLayout();
-        }
-
-        private void RunLayout() {
             bool forceLayout = false;
             Size screen = new Size(Screen.width, Screen.height);
             if (m_ScreenSize != screen) {
                 m_ScreenSize = screen;
                 forceLayout = true;
+            }
+
+            for (int i = 0; i < m_Views.Count; i++) {
+                RunLayout(forceLayout, m_Views[i]);
+                m_Views[i] = new ViewRect(m_Views[i].view, m_Views[i].view.Viewport);
+            }
+        }
+
+        public void RunLayout(bool forceLayout, ViewRect viewRect) {
+            Rect rect = viewRect.previousViewport;
+            UIView view = viewRect.view;
+            
+            LayoutBox root = m_LayoutBoxMap.GetOrDefault(view.RootElement.id);
+
+            if (rect != view.Viewport) {
+                
+                root.allocatedWidth = Mathf.Min(root.GetWidths().clampedSize, view.Viewport.width);
+                root.allocatedHeight = Mathf.Min(root.GetHeights(root.allocatedWidth).clampedSize, view.Viewport.height);
+                root.markedForLayout = true;
+                
             }
 
             Stack<UIElement> stack = StackPool<UIElement>.Get();
@@ -91,22 +110,20 @@ namespace Src.Systems {
             // if we don't allow reparenting, could just use a flat sorted list
             // as long as the parent is laid out before the child that should be fine
 
-            UIElement element = m_Root.children[0].element;
+            UIElement element = view.RootElement;
             LayoutResult layoutResult = element.layoutResult;
             stack.Push(element);
 
-            LayoutBox box = m_LayoutBoxMap.GetOrDefault(element.id);
-
-            if (box.IsIgnored) {
-                box.allocatedWidth = box.GetWidths().clampedSize;
-                box.allocatedHeight = box.GetHeights(box.actualHeight).clampedSize;
+            if (root.IsIgnored) {
+                root.allocatedWidth = root.GetWidths().clampedSize;
+                root.allocatedHeight = root.GetHeights(root.allocatedWidth).clampedSize;
             }
 
-            if (forceLayout || box.markedForLayout) {
-                box.RunLayout();
-                box.markedForLayout = false;
+            if (forceLayout || root.markedForLayout) {
+                root.RunLayout();
+                root.markedForLayout = false;
 #if DEBUG
-                box.layoutCalls++;
+                root.layoutCalls++;
 #endif
             }
 
@@ -121,23 +138,23 @@ namespace Src.Systems {
                 zIndex += -2000;
             }
 
-            // actual size should probably be the box containing all children, ignored or not
+            // actual size should probably be the root containing all children, ignored or not
 
-            layoutResult.ActualSize = new Size(box.actualWidth, box.actualHeight);
-            layoutResult.AllocatedSize = new Size(box.allocatedWidth, box.allocatedHeight);
+            layoutResult.ActualSize = new Size(root.actualWidth, root.actualHeight);
+            layoutResult.AllocatedSize = new Size(root.allocatedWidth, root.allocatedHeight);
 
-            layoutResult.ContentRect = box.ContentRect;
-            
-            layoutResult.Scale = new Vector2(box.style.TransformScaleX, box.style.TransformScaleY);
-            layoutResult.LocalPosition = ResolveLocalPosition(box);
+            layoutResult.ContentRect = root.ContentRect;
+
+            layoutResult.Scale = new Vector2(root.style.TransformScaleX, root.style.TransformScaleY);
+            layoutResult.LocalPosition = ResolveLocalPosition(root);
             layoutResult.ScreenPosition = layoutResult.localPosition;
-            layoutResult.Rotation = box.style.TransformRotation;
+            layoutResult.Rotation = root.style.TransformRotation;
             layoutResult.Layer = computedLayer;
             layoutResult.ZIndex = zIndex;
-            layoutResult.clipRect = new Rect(0, 0, ViewportRect.width, ViewportRect.height);
+            layoutResult.clipRect = new Rect(0, 0, element.view.Viewport.width, element.view.Viewport.height);
             element.layoutResult = layoutResult;
 
-            CreateOrDestroyScrollbars(box);
+            CreateOrDestroyScrollbars(root);
 
             while (stack.Count > 0) {
                 UIElement current = stack.Pop();
@@ -153,7 +170,7 @@ namespace Src.Systems {
                 for (int i = 0; i < current.children.Length; i++) {
                     element = current.children[i];
 
-                    box = m_LayoutBoxMap.GetOrDefault(element.id);
+                    LayoutBox box = m_LayoutBoxMap.GetOrDefault(element.id);
 
                     if (box == null) {
                         stack.Push(element);
@@ -198,7 +215,7 @@ namespace Src.Systems {
                     scrollOffset.y = (parentBox.actualHeight - parentBox.allocatedHeight) * parentBox.element.scrollOffset.y;
 
                     layoutResult.LocalPosition = ResolveLocalPosition(box) - scrollOffset;
-                    layoutResult.ContentRect = box.ContentRect;// = new Vector2(box.ContentOffsetLeft, box.ContentOffsetTop);
+                    layoutResult.ContentRect = box.ContentRect; // = new Vector2(box.ContentOffsetLeft, box.ContentOffsetTop);
                     layoutResult.ActualSize = new Size(box.actualWidth, box.actualHeight);
                     layoutResult.AllocatedSize = new Size(box.allocatedWidth, box.allocatedHeight);
                     layoutResult.ScreenPosition = box.parent.element.layoutResult.screenPosition + layoutResult.localPosition;
@@ -207,7 +224,7 @@ namespace Src.Systems {
                     layoutResult.Layer = computedLayer;
                     layoutResult.ZIndex = zIndex;
 
-                    Rect clipRect = new Rect(0, 0, ViewportRect.width, ViewportRect.height);
+                    Rect clipRect = new Rect(0, 0, element.view.Viewport.width, element.view.Viewport.height);
                     UIElement ptr = element.parent;
                     // find ancestor where layer is higher, might not be our parent
 
@@ -218,7 +235,7 @@ namespace Src.Systems {
                             continue;
                         }
 
-                        if (ptr.layoutResult.layer > computedLayer) {
+                        if (ptr.layoutResult.layer < computedLayer) {
                             break;
                         }
 
@@ -376,11 +393,11 @@ namespace Src.Systems {
                     float offsetY = (childExtents.min.y < 0) ? -childExtents.min.y / box.allocatedHeight : 0f;
                     element.scrollOffset = new Vector2(element.scrollOffset.x, offsetY);
 
-                    
+
                     // create buttons
-                   // ScrollbarButtonStyle verticalButtonTop = element.style.Scrollbars.VerticalButtonTop;
-                   // ScrollbarButtonStyle verticalButtonBottom = element.style.Scrollbars.VerticalButtonBottom;
-                    
+                    // ScrollbarButtonStyle verticalButtonTop = element.style.Scrollbars.VerticalButtonTop;
+                    // ScrollbarButtonStyle verticalButtonBottom = element.style.Scrollbars.VerticalButtonBottom;
+
                     onCreateVirtualScrollbar?.Invoke(vertical);
                     box.verticalScrollbar = vertical;
                 }
@@ -440,12 +457,13 @@ namespace Src.Systems {
 
         public void OnDestroy() { }
 
-        public void OnReady() {
-            m_StyleSystem.onTextContentChanged += HandleTextContentChanged;
-            m_StyleSystem.onStylePropertyChanged += HandleStylePropertyChanged;
+        public void OnViewAdded(UIView view) {
+            m_Views.Add(new ViewRect(view, new Rect()));
         }
 
-        public void OnInitialize() { }
+        public void OnViewRemoved(UIView view) {
+//            m_Views.Remove(view);
+        }
 
         private void HandleStylePropertyChanged(UIElement element, StyleProperty property) {
             // todo early-out if we haven't had a layout pass for the element yet
@@ -579,11 +597,10 @@ namespace Src.Systems {
             }
         }
 
-        public void OnElementCreatedFromTemplate(UIElement element) {
+        public void OnElementCreated(UIElement element) {
             LayoutBox layoutBox = CreateLayoutBox(element);
             Stack<ValueTuple<UIElement, LayoutBox>> stack = StackPool<ValueTuple<UIElement, LayoutBox>>.Get();
 
-            LayoutBox parent = m_Root;
             if (element.parent != null) {
                 LayoutBox ptr = null;
                 UIElement e = element.parent;
@@ -592,10 +609,9 @@ namespace Src.Systems {
                     ptr = m_LayoutBoxMap.GetOrDefault(e.id);
                 }
 
-                parent = ptr;
+                layoutBox.SetParent(ptr);
             }
 
-            layoutBox.SetParent(parent);
             m_LayoutBoxMap.Add(element.id, layoutBox);
             stack.Push(ValueTuple.Create(element, layoutBox));
 
@@ -621,7 +637,7 @@ namespace Src.Systems {
                 if (parentElement.children == null) {
                     continue;
                 }
-                
+
                 for (int i = 0; i < parentElement.children.Length; i++) {
                     UIElement child = parentElement.children[i];
                     if ((child.flags & UIElementFlags.RequiresLayout) == 0) {
@@ -640,19 +656,6 @@ namespace Src.Systems {
             }
 
             StackPool<ValueTuple<UIElement, LayoutBox>>.Release(stack);
-        }
-
-        public void SetViewportRect(Rect viewportRect) {
-            if (ViewportRect != viewportRect) {
-                ViewportRect = viewportRect;
-                m_Root.allocatedWidth = viewportRect.width;
-                m_Root.allocatedHeight = viewportRect.height;
-                m_Root.actualWidth = viewportRect.width;
-                m_Root.actualHeight = viewportRect.height;
-                m_RootRequiresLayout = true;
-
-                // todo -- tell all layout boxes / run full layout
-            }
         }
 
         public List<UIElement> QueryPoint(Vector2 point, List<UIElement> retn) {
@@ -733,16 +736,16 @@ namespace Src.Systems {
                     return element.depth - 1;
 
                 case RenderLayer.Template:
-                    return element.templateParent.depth;
+                    throw new NotImplementedException(); // need to save template root element somehow
 
                 case RenderLayer.Modal:
-                    return -1000;
+                    return 100000;
 
                 case RenderLayer.View:
-                    return -500;
+                    return 500000;
 
                 case RenderLayer.Screen:
-                    return -2000;
+                    return 1000000;
 
                 default:
                     throw new ArgumentOutOfRangeException();

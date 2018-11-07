@@ -1,8 +1,8 @@
-using Src.Rendering;
-using Src.Util;
+using UIForia.Util;
 using TMPro;
+using UIForia.Rendering;
 
-namespace Src.Text {
+namespace UIForia.Text {
 
     public struct SpanInfo {
 

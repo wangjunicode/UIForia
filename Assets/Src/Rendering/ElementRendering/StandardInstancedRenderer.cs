@@ -1,14 +1,14 @@
 using System;
 using System.Collections.Generic;
-using Src.Rendering;
+using UIForia.Rendering;
 using Shapes2D;
-using Src.Extensions;
-using Src.Systems;
-using Src.Util;
+using UIForia.Extensions;
+using UIForia.Systems;
+using UIForia.Util;
 using UnityEngine;
 using UnityEngine.Rendering;
 
-namespace Src.Rendering {
+namespace UIForia.Rendering {
 
     public class StandardInstancedRenderer : ElementRenderer {
 

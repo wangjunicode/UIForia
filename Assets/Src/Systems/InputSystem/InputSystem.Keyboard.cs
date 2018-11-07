@@ -1,6 +1,6 @@
 using System.Collections.Generic;
-using Src.Input;
-using Src.Systems;
+using UIForia.Input;
+using UIForia.Systems;
 using UnityEngine;
 
 public abstract partial class InputSystem {

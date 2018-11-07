@@ -1,10 +1,10 @@
-using Src.Rendering;
-using Src;
-using Src.Layout;
-using Src.Util;
+using UIForia.Rendering;
+using UIForia;
+using UIForia.Layout;
+using UIForia.Util;
 using UnityEngine;
-using Src.Text;
-using TextAlignment = Src.Text.TextAlignment;
+using UIForia.Text;
+using TextAlignment = UIForia.Text.TextAlignment;
 
 namespace Demo {
 

@@ -1,7 +1,7 @@
-using Src.Rendering;
-using Src.Util;
+using UIForia.Rendering;
+using UIForia.Util;
 
-namespace Src.Animation {
+namespace UIForia.Animation {
 
     public struct AnimationKeyFrame {
 

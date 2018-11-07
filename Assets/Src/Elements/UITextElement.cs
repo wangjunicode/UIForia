@@ -1,14 +1,14 @@
 using System;
-using Src.Rendering;
-using Src.Layout.LayoutTypes;
-using Src.Systems;
-using Src.Text;
-using Src.Util;
+using UIForia.Layout.LayoutTypes;
 using TMPro;
+using UIForia.Rendering;
+using UIForia.Systems;
+using UIForia.Text;
+using UIForia.Util;
 using UnityEngine;
-using FontStyle = Src.Text.FontStyle;
+using FontStyle = UIForia.Text.FontStyle;
 
-namespace Src {
+namespace UIForia {
 
     // <Paragraph/>
     // <Header1/>

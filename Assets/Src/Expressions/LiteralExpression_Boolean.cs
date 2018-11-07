@@ -1,6 +1,6 @@
 using System;
 
-namespace Src {
+namespace UIForia {
 
     public class LiteralExpression_Boolean : Expression<bool> {
 

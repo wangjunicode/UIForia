@@ -4,18 +4,18 @@ using System.Globalization;
 using System.IO;
 using System.Linq;
 using Shapes2D;
-using Src.Layout;
-using Src.Layout.LayoutTypes;
-using Src.Rendering;
-using Src.Text;
-using Src.Util;
 using TMPro;
+using UIForia.Layout;
+using UIForia.Layout.LayoutTypes;
+using UIForia.Rendering;
+using UIForia.Text;
+using UIForia.Util;
 using UnityEditor;
 using UnityEngine;
-using FontStyle = Src.Text.FontStyle;
-using TextAlignment = Src.Text.TextAlignment;
+using FontStyle = UIForia.Text.FontStyle;
+using TextAlignment = UIForia.Text.TextAlignment;
 
-namespace Src.Editor {
+namespace UIForia.Editor {
 
     public static class CodeGen {
 
@@ -109,8 +109,8 @@ namespace Src.Editor {
             new AnimatedPropertyGenerator<Color>(StylePropertyId.TextColor, Color.black),
             new PropertyGenerator<TMP_FontAsset>(StylePropertyId.TextFontAsset, null, "TMP_FontAsset.defaultFontAsset"),
             new AnimatedPropertyGenerator<int>(StylePropertyId.TextFontSize, 18),
-            new PropertyGenerator<FontStyle>(StylePropertyId.TextFontStyle, FontStyle.Normal),
-            new PropertyGenerator<TextAlignment>(StylePropertyId.TextAlignment, TextAlignment.Left),
+            new PropertyGenerator<Text.FontStyle>(StylePropertyId.TextFontStyle, Text.FontStyle.Normal),
+            new PropertyGenerator<Text.TextAlignment>(StylePropertyId.TextAlignment, Text.TextAlignment.Left),
             new PropertyGenerator<TextTransform>(StylePropertyId.TextTransform, TextTransform.None),
 
             // Anchors
@@ -141,9 +141,9 @@ namespace Src.Editor {
 
         [MenuItem("UIForia/Generate")]
         public static void Generate() {
-            string styleSetPath = Application.dataPath + "/Src/Rendering/ComputedStyle_Generated.cs";
-            string defaultStyleValuesPath = Application.dataPath + "/Src/Rendering/DefaultStyleValues_Generated.cs";
-            string stylePath = Application.dataPath + "/Src/Rendering/UIStyle_Generated.cs";
+            string styleSetPath = UnityEngine.Application.dataPath + "/Src/Rendering/ComputedStyle_Generated.cs";
+            string defaultStyleValuesPath = UnityEngine.Application.dataPath + "/Src/Rendering/DefaultStyleValues_Generated.cs";
+            string stylePath = UnityEngine.Application.dataPath + "/Src/Rendering/UIStyle_Generated.cs";
             string code = @"using System;
 using System.Diagnostics;
 using Shapes2D;

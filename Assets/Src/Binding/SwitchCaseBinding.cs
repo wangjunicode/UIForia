@@ -1,6 +1,6 @@
 
 
-namespace Src {
+namespace UIForia {
 
     public class SwitchCaseBinding : Binding {
 

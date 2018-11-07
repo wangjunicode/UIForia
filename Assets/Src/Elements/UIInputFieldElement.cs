@@ -1,9 +1,9 @@
-using Src.Rendering;
-using Src;
-using Src.Elements;
-using Src.Input;
-using Src.Systems;
-using Src.Util;
+using UIForia.Rendering;
+using UIForia;
+using UIForia.Elements;
+using UIForia.Input;
+using UIForia.Systems;
+using UIForia.Util;
 using UnityEngine;
 
 // todo -- enforce 1 child 

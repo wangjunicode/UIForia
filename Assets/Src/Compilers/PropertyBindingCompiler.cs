@@ -1,14 +1,14 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Reflection;
-using Src.Compilers.AliasSource;
-using Src.Extensions;
-using Src.Util;
+using UIForia.Extensions;
+using UIForia.Compilers.AliasSource;
+using UIForia.Util;
 using UnityEngine;
 using Debug = System.Diagnostics.Debug;
 using ElementCallback = System.Action<UIElement, string>;
 
-namespace Src.Compilers {
+namespace UIForia.Compilers {
 
     public class PropertyBindingCompiler {
 

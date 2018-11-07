@@ -2,15 +2,15 @@ using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using Shapes2D;
-using Src.Layout;
-using Src.Layout.LayoutTypes;
-using Src.Text;
 using TMPro;
+using UIForia.Layout;
+using UIForia.Layout.LayoutTypes;
+using UIForia.Text;
 using UnityEngine;
-using FontStyle = Src.Text.FontStyle;
-using TextAlignment = Src.Text.TextAlignment;
+using FontStyle = UIForia.Text.FontStyle;
+using TextAlignment = UIForia.Text.TextAlignment;
 
-namespace Src.Rendering {
+namespace UIForia.Rendering {
 
     // todo -- have some way of seeing if any properties changed in a given frame
     public partial class ComputedStyle {
@@ -303,10 +303,10 @@ namespace Src.Rendering {
                     TextFontSize = property.IsDefined ? value0 : DefaultStyleValues.TextFontSize;
                     break;
                 case StylePropertyId.TextFontStyle:
-                    TextFontStyle = property.IsDefined ? (FontStyle) value0 : DefaultStyleValues.TextFontStyle;
+                    TextFontStyle = property.IsDefined ? (Text.FontStyle) value0 : DefaultStyleValues.TextFontStyle;
                     break;
                 case StylePropertyId.TextAlignment:
-                    TextAlignment = property.IsDefined ? (TextAlignment) value0 : DefaultStyleValues.TextAlignment;
+                    TextAlignment = property.IsDefined ? (Text.TextAlignment) value0 : DefaultStyleValues.TextAlignment;
                     break;
                 case StylePropertyId.TextTransform:
                     TextTransform = property.IsDefined ? (TextTransform) value0 : DefaultStyleValues.TextTransform;

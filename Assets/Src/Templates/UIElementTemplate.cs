@@ -1,8 +1,8 @@
 using System;
 using System.Collections.Generic;
-using Src.Util;
+using UIForia.Util;
 
-namespace Src {
+namespace UIForia {
 
     // wraps a ParsedTemplate, this is what is created by parent templates
     // properties need to be merged from the parsed template <Content/> tag (root)
@@ -64,7 +64,7 @@ namespace Src {
                 element.children[i].templateParent = element; // try to get rid of this
             }
 
-            UIChildrenElement childrenElement = element.transcludedChildren;
+            UIChildrenElement childrenElement = element.TranscludedChildren;
             if (childrenElement != null) {
                 childrenElement.children = ArrayPool<UIElement>.Empty;
             }
@@ -98,7 +98,7 @@ namespace Src {
                 element.children[i].templateParent = element; // try to get rid of this
             }
 
-            UIChildrenElement childrenElement = element.transcludedChildren;
+            UIChildrenElement childrenElement = element.TranscludedChildren;
 
             if (childrenElement != null) {
                 childrenElement.children = new UIElement[transcludedTemplates.Count];
@@ -110,12 +110,9 @@ namespace Src {
             }
 
             AssignContext(element, context);
-
             
             // find <Slot>
             //     -> attach from input
-
-
 
             return element;
         }

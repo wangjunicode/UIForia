@@ -1,10 +1,10 @@
 using System;
 using System.Collections.Generic;
-using Src.Elements;
-using Src.Util;
+using UIForia.Elements;
+using UIForia.Util;
 using UnityEngine.Assertions;
 
-namespace Src {
+namespace UIForia {
 
     public class UIContainerTemplate : UITemplate {
 
@@ -52,7 +52,7 @@ namespace Src {
                 element.children[i].templateParent = element;
             }
 
-            element.templateContext = inputScope.context;
+            element.TemplateContext = inputScope.context;
             element.templateRef = this;
             return element;
         }
@@ -100,7 +100,7 @@ namespace Src {
 
             element.children = ArrayPool<UIElement>.Empty;
             element.templateRef = this;
-            element.templateContext = inputScope.context;
+            element.TemplateContext = inputScope.context;
             
             return element;
 

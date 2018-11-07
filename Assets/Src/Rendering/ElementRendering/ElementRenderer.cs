@@ -1,8 +1,8 @@
-using Src.Rendering;
-using Src.Rendering.ElementRendering;
+using UIForia.Rendering;
+using UIForia.Rendering.ElementRendering;
 using UnityEngine;
 
-namespace Src.Systems {
+namespace UIForia.Systems {
 
     public abstract class ElementRenderer {
 

@@ -1,12 +1,12 @@
 using System.Collections.Generic;
 using System.Diagnostics;
-using Src.Input;
-using Src.InputBindings;
-using Src.Rendering;
-using Src.StyleBindings;
-using Src.Util;
+using UIForia.InputBindings;
+using UIForia.Input;
+using UIForia.Rendering;
+using UIForia.StyleBindings;
+using UIForia.Util;
 
-namespace Src {
+namespace UIForia {
 
     public struct MetaData2 {
 

@@ -2,7 +2,7 @@ using System;
 using System.Reflection;
 using UnityEngine;
 
-namespace Src.Input {
+namespace UIForia.Input {
 
     public abstract class MouseEventHandler : IComparable<MouseEventHandler> {
 

@@ -1,5 +1,11 @@
-namespace Src {
+namespace UIForia {
 
-    public class UIChildrenElement : UIElement { }
+    public class UIChildrenElement : UIElement {
+
+        public override string GetDisplayName() {
+            return "Children";
+        }
+
+    }
 
 }

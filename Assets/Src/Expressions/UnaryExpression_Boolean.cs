@@ -1,6 +1,6 @@
 using System;
 
-namespace Src {
+namespace UIForia {
 
     public class UnaryExpression_Boolean : Expression<bool> {
 

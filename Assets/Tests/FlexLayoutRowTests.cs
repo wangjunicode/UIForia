@@ -1,7 +1,7 @@
 using NUnit.Framework;
-using Src.Rendering;
-using Src;
-using Src.Layout;
+using UIForia.Rendering;
+using UIForia;
+using UIForia.Layout;
 using Tests.Mocks;
 using UnityEditor.VersionControl;
 using UnityEngine;
@@ -12,7 +12,7 @@ public class FlexLayoutRowTests {
     
     [Template(TemplateType.String, @"
         <UITemplate>
-            <Style path='LayoutSystemTests+LayoutTestThing+Style'/>
+            <Style path='ests+LayoutTestThing+Style'/>
             <Contents style.layoutType='Flex'>
               
             </Contents>
@@ -57,9 +57,8 @@ public class FlexLayoutRowTests {
             </Contents>
         </UITemplate>
         ";
-        MockView mockView = new MockView(typeof(FlexRowLayoutThing), template);
-        mockView.Initialize();
-        mockView.LayoutSystem.SetViewportRect(new Rect(0, 0, 1000f, 1000f));
+        MockApplication mockView = new MockApplication(typeof(FlexRowLayoutThing), template);
+        mockView.SetViewportRect(new Rect(0, 0, 1000f, 1000f));
         FlexRowLayoutThing root = (FlexRowLayoutThing) mockView.RootElement;
         root.style.SetFlexCrossAxisAlignment(CrossAxisAlignment.Start, StyleState.Normal);
         mockView.Update();
@@ -83,9 +82,8 @@ public class FlexLayoutRowTests {
             </Contents>
         </UITemplate>
         ";
-        MockView mockView = new MockView(typeof(FlexRowLayoutThing), template);
-        mockView.Initialize();
-        mockView.LayoutSystem.SetViewportRect(new Rect(0, 0, 1000f, 1000f));
+        MockApplication mockView = new MockApplication(typeof(FlexRowLayoutThing), template);
+        mockView.SetViewportRect(new Rect(0, 0, 1000f, 1000f));
         FlexRowLayoutThing root = (FlexRowLayoutThing) mockView.RootElement;
         root.style.SetFlexCrossAxisAlignment(CrossAxisAlignment.End, StyleState.Normal);
         mockView.Update();
@@ -109,9 +107,8 @@ public class FlexLayoutRowTests {
             </Contents>
         </UITemplate>
         ";
-        MockView mockView = new MockView(typeof(FlexRowLayoutThing), template);
-        mockView.Initialize();
-        mockView.LayoutSystem.SetViewportRect(new Rect(0, 0, 1000f, 1000f));
+        MockApplication mockView = new MockApplication(typeof(FlexRowLayoutThing), template);
+        mockView.SetViewportRect(new Rect(0, 0, 1000f, 1000f));
         FlexRowLayoutThing root = (FlexRowLayoutThing) mockView.RootElement;
         root.style.SetFlexCrossAxisAlignment(CrossAxisAlignment.Center, StyleState.Normal);
         mockView.Update();
@@ -135,9 +132,8 @@ public class FlexLayoutRowTests {
             </Contents>
         </UITemplate>
         ";
-        MockView mockView = new MockView(typeof(FlexRowLayoutThing), template);
-        mockView.Initialize();
-        mockView.LayoutSystem.SetViewportRect(new Rect(0, 0, 1000f, 1000f));
+        MockApplication mockView = new MockApplication(typeof(FlexRowLayoutThing), template);
+        mockView.SetViewportRect(new Rect(0, 0, 1000f, 1000f));
         FlexRowLayoutThing root = (FlexRowLayoutThing) mockView.RootElement;
         root.style.SetFlexCrossAxisAlignment(CrossAxisAlignment.Stretch, StyleState.Normal);
         mockView.Update();
@@ -160,9 +156,8 @@ public class FlexLayoutRowTests {
             </Contents>
         </UITemplate>
         ";
-        MockView mockView = new MockView(typeof(FlexRowLayoutThing), template);
-        mockView.Initialize();
-        mockView.LayoutSystem.SetViewportRect(new Rect(0, 0, 1000f, 1000f));
+        MockApplication mockView = new MockApplication(typeof(FlexRowLayoutThing), template);
+        mockView.SetViewportRect(new Rect(0, 0, 1000f, 1000f));
         FlexRowLayoutThing root = (FlexRowLayoutThing) mockView.RootElement;
         root.style.SetFlexMainAxisAlignment(MainAxisAlignment.End, StyleState.Normal);
         mockView.Update();
@@ -184,9 +179,8 @@ public class FlexLayoutRowTests {
             </Contents>
         </UITemplate>
         ";
-        MockView mockView = new MockView(typeof(FlexRowLayoutThing), template);
-        mockView.Initialize();
-        mockView.LayoutSystem.SetViewportRect(new Rect(0, 0, 1000f, 1000f));
+        MockApplication mockView = new MockApplication(typeof(FlexRowLayoutThing), template);
+        mockView.SetViewportRect(new Rect(0, 0, 1000f, 1000f));
         FlexRowLayoutThing root = (FlexRowLayoutThing) mockView.RootElement;
         root.style.SetFlexMainAxisAlignment(MainAxisAlignment.Start, StyleState.Normal);
         mockView.Update();
@@ -208,9 +202,8 @@ public class FlexLayoutRowTests {
             </Contents>
         </UITemplate>
         ";
-        MockView mockView = new MockView(typeof(FlexRowLayoutThing), template);
-        mockView.Initialize();
-        mockView.LayoutSystem.SetViewportRect(new Rect(0, 0, 1000f, 1000f));
+        MockApplication mockView = new MockApplication(typeof(FlexRowLayoutThing), template);
+        mockView.SetViewportRect(new Rect(0, 0, 1000f, 1000f));
         FlexRowLayoutThing root = (FlexRowLayoutThing) mockView.RootElement;
         root.style.SetFlexMainAxisAlignment(MainAxisAlignment.SpaceBetween, StyleState.Normal);
         mockView.Update();
@@ -232,9 +225,8 @@ public class FlexLayoutRowTests {
             </Contents>
         </UITemplate>
         ";
-        MockView mockView = new MockView(typeof(FlexRowLayoutThing), template);
-        mockView.Initialize();
-        mockView.LayoutSystem.SetViewportRect(new Rect(0, 0, 1000f, 1000f));
+        MockApplication mockView = new MockApplication(typeof(FlexRowLayoutThing), template);
+        mockView.SetViewportRect(new Rect(0, 0, 1000f, 1000f));
         FlexRowLayoutThing root = (FlexRowLayoutThing) mockView.RootElement;
         root.style.SetFlexMainAxisAlignment(MainAxisAlignment.SpaceAround, StyleState.Normal);
         mockView.Update();
@@ -258,9 +250,8 @@ public class FlexLayoutRowTests {
             </Contents>
         </UITemplate>
         ";
-        MockView mockView = new MockView(typeof(FlexRowLayoutThing), template);
-        mockView.Initialize();
-        mockView.LayoutSystem.SetViewportRect(new Rect(0, 0, 1000f, 1000f));
+        MockApplication mockView = new MockApplication(typeof(FlexRowLayoutThing), template);
+        mockView.SetViewportRect(new Rect(0, 0, 1000f, 1000f));
         FlexRowLayoutThing root = (FlexRowLayoutThing) mockView.RootElement;
         root.child1.style.SetFlexItemOrderOverride(-1, StyleState.Normal);
         mockView.Update();
@@ -283,9 +274,8 @@ public class FlexLayoutRowTests {
             </Contents>
         </UITemplate>
         ";
-        MockView mockView = new MockView(typeof(FlexRowLayoutThing), template);
-        mockView.Initialize();
-        mockView.LayoutSystem.SetViewportRect(new Rect(0, 0, 1000f, 1000f));
+        MockApplication mockView = new MockApplication(typeof(FlexRowLayoutThing), template);
+        mockView.SetViewportRect(new Rect(0, 0, 1000f, 1000f));
         FlexRowLayoutThing root = (FlexRowLayoutThing) mockView.RootElement;
         root.style.SetFlexCrossAxisAlignment(CrossAxisAlignment.Center, StyleState.Normal);
         root.child1.style.SetFlexItemSelfAlignment(CrossAxisAlignment.Start, StyleState.Normal);
@@ -308,9 +298,8 @@ public class FlexLayoutRowTests {
             </Contents>
         </UITemplate>
         ";
-        MockView mockView = new MockView(typeof(FlexRowLayoutThing), template);
-        mockView.Initialize();
-        mockView.LayoutSystem.SetViewportRect(new Rect(0, 0, 1000f, 1000f));
+        MockApplication mockView = new MockApplication(typeof(FlexRowLayoutThing), template);
+        mockView.SetViewportRect(new Rect(0, 0, 1000f, 1000f));
         FlexRowLayoutThing root = (FlexRowLayoutThing) mockView.RootElement;
         mockView.Update();
         
@@ -331,9 +320,8 @@ public class FlexLayoutRowTests {
             </Contents>
         </UITemplate>
         ";
-        MockView mockView = new MockView(typeof(FlexRowLayoutThing), template);
-        mockView.Initialize();
-        mockView.LayoutSystem.SetViewportRect(new Rect(0, 0, 1000f, 1000f));
+        MockApplication mockView = new MockApplication(typeof(FlexRowLayoutThing), template);
+        mockView.SetViewportRect(new Rect(0, 0, 1000f, 1000f));
         FlexRowLayoutThing root = (FlexRowLayoutThing) mockView.RootElement;
         mockView.Update();
         
@@ -354,9 +342,8 @@ public class FlexLayoutRowTests {
             </Contents>
         </UITemplate>
         ";
-        MockView mockView = new MockView(typeof(FlexRowLayoutThing), template);
-        mockView.Initialize();
-        mockView.LayoutSystem.SetViewportRect(new Rect(0, 0, 1000f, 1000f));
+        MockApplication mockView = new MockApplication(typeof(FlexRowLayoutThing), template);
+        mockView.SetViewportRect(new Rect(0, 0, 1000f, 1000f));
         FlexRowLayoutThing root = (FlexRowLayoutThing) mockView.RootElement;
         root.style.SetFlexWrapMode(LayoutWrap.Wrap, StyleState.Normal);
         mockView.Update();
@@ -377,9 +364,8 @@ public class FlexLayoutRowTests {
             </Contents>
         </UITemplate>
         ";
-        MockView mockView = new MockView(typeof(FlexRowLayoutThing), template);
-        mockView.Initialize();
-        mockView.LayoutSystem.SetViewportRect(new Rect(0, 0, 1000f, 1000f));
+        MockApplication mockView = new MockApplication(typeof(FlexRowLayoutThing), template);
+        mockView.SetViewportRect(new Rect(0, 0, 1000f, 1000f));
         FlexRowLayoutThing root = (FlexRowLayoutThing) mockView.RootElement;
         root.style.SetFlexWrapMode(LayoutWrap.Wrap, StyleState.Normal);
         mockView.Update();
@@ -401,9 +387,8 @@ public class FlexLayoutRowTests {
             </Contents>
         </UITemplate>
         ";
-        MockView mockView = new MockView(typeof(FlexRowLayoutThing), template);
-        mockView.Initialize();
-        mockView.LayoutSystem.SetViewportRect(new Rect(0, 0, 1000f, 1000f));
+        MockApplication mockView = new MockApplication(typeof(FlexRowLayoutThing), template);
+        mockView.SetViewportRect(new Rect(0, 0, 1000f, 1000f));
         FlexRowLayoutThing root = (FlexRowLayoutThing) mockView.RootElement;
         root.style.SetFlexWrapMode(LayoutWrap.Wrap, StyleState.Normal);
         mockView.Update();
@@ -424,9 +409,8 @@ public class FlexLayoutRowTests {
             </Contents>
         </UITemplate>
         ";
-        MockView mockView = new MockView(typeof(FlexRowLayoutThing), template);
-        mockView.Initialize();
-        mockView.LayoutSystem.SetViewportRect(new Rect(0, 0, 1000f, 1000f));
+        MockApplication mockView = new MockApplication(typeof(FlexRowLayoutThing), template);
+        mockView.SetViewportRect(new Rect(0, 0, 1000f, 1000f));
         FlexRowLayoutThing root = (FlexRowLayoutThing) mockView.RootElement;
         root.style.SetFlexWrapMode(LayoutWrap.Wrap, StyleState.Normal);
         mockView.Update();
@@ -447,9 +431,8 @@ public class FlexLayoutRowTests {
             </Contents>
         </UITemplate>
         ";
-        MockView mockView = new MockView(typeof(FlexRowLayoutThing), template);
-        mockView.Initialize();
-        mockView.LayoutSystem.SetViewportRect(new Rect(0, 0, 1000f, 1000f));
+        MockApplication mockView = new MockApplication(typeof(FlexRowLayoutThing), template);
+        mockView.SetViewportRect(new Rect(0, 0, 1000f, 1000f));
         FlexRowLayoutThing root = (FlexRowLayoutThing) mockView.RootElement;
         root.style.SetFlexWrapMode(LayoutWrap.Wrap, StyleState.Normal);
         mockView.Update();
@@ -470,9 +453,8 @@ public class FlexLayoutRowTests {
             </Contents>
         </UITemplate>
         ";
-        MockView mockView = new MockView(typeof(FlexRowLayoutThing), template);
-        mockView.Initialize();
-        mockView.LayoutSystem.SetViewportRect(new Rect(0, 0, 1000f, 1000f));
+        MockApplication mockView = new MockApplication(typeof(FlexRowLayoutThing), template);
+        mockView.SetViewportRect(new Rect(0, 0, 1000f, 1000f));
         FlexRowLayoutThing root = (FlexRowLayoutThing) mockView.RootElement;
         mockView.Update();
         Assert.AreEqual(new Rect(0, 0, 500, 310), root.layoutResult.ScreenRect);
@@ -493,9 +475,8 @@ public class FlexLayoutRowTests {
             </Contents>
         </UITemplate>
         ";
-        MockView mockView = new MockView(typeof(FlexRowLayoutThing), template);
-        mockView.Initialize();
-        mockView.LayoutSystem.SetViewportRect(new Rect(0, 0, 1000f, 1000f));
+        MockApplication mockView = new MockApplication(typeof(FlexRowLayoutThing), template);
+        mockView.SetViewportRect(new Rect(0, 0, 1000f, 1000f));
         FlexRowLayoutThing root = (FlexRowLayoutThing) mockView.RootElement;
         root.style.SetFlexWrapMode(LayoutWrap.Wrap, StyleState.Normal);
         mockView.Update();
@@ -516,9 +497,8 @@ public class FlexLayoutRowTests {
             </Contents>
         </UITemplate>
         ";
-        MockView mockView = new MockView(typeof(FlexRowLayoutThing), template);
-        mockView.Initialize();
-        mockView.LayoutSystem.SetViewportRect(new Rect(0, 0, 1000f, 1000f));
+        MockApplication mockView = new MockApplication(typeof(FlexRowLayoutThing), template);
+        mockView.SetViewportRect(new Rect(0, 0, 1000f, 1000f));
         FlexRowLayoutThing root = (FlexRowLayoutThing) mockView.RootElement;
         root.style.SetFlexWrapMode(LayoutWrap.Wrap, StyleState.Normal);
         root.style.SetFlexCrossAxisAlignment(CrossAxisAlignment.Center, StyleState.Normal);
@@ -540,9 +520,8 @@ public class FlexLayoutRowTests {
             </Contents>
         </UITemplate>
         ";
-        MockView mockView = new MockView(typeof(FlexRowLayoutThing), template);
-        mockView.Initialize();
-        mockView.LayoutSystem.SetViewportRect(new Rect(0, 0, 1000f, 1000f));
+        MockApplication mockView = new MockApplication(typeof(FlexRowLayoutThing), template);
+        mockView.SetViewportRect(new Rect(0, 0, 1000f, 1000f));
         FlexRowLayoutThing root = (FlexRowLayoutThing) mockView.RootElement;
         mockView.Update();
         Assert.AreEqual(100, root.layoutResult.ActualWidth);

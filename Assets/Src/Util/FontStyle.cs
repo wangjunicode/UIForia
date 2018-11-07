@@ -1,6 +1,6 @@
 using System;
 
-namespace Src.Text {
+namespace UIForia.Text {
 
     [Flags]
     public enum FontStyle {

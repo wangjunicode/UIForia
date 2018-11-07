@@ -76,7 +76,6 @@
           <e p="RefreshTemplates.cs" t="Include" />
           <e p="UIForiaHierarchyWindow.cs" t="Include" />
           <e p="UIForiaInspectorWindow.cs" t="Include" />
-          <e p="UIViewWindow.cs" t="Include" />
           <e p="WindowMenuItems.cs" t="Include" />
         </e>
         <e p="Shapes2D" t="Include">
@@ -445,7 +444,6 @@
               <e p="UIStyleSet.UIStyleProxy.cs" t="Include" />
             </e>
             <e p="UIView.cs" t="Include" />
-            <e p="UIViewIMGUI.cs" t="Include" />
             <e p="VerticalScrollbarAttachment.cs" t="Include" />
             <e p="WhitespaceMode.cs" t="Include" />
           </e>
@@ -481,7 +479,7 @@
           <e p="StyleDefinition.cs" t="Include" />
           <e p="Systems" t="Include">
             <e p="BindingSystem.cs" t="Include" />
-            <e p="GOInputSystem.cs" t="Include" />
+            <e p="DefaultInputSystem.cs" t="Include" />
             <e p="GORenderSystem.cs" t="Include" />
             <e p="Gradient.cs" t="Include" />
             <e p="IInputSystem.cs" t="Include" />
@@ -571,9 +569,9 @@
           <e p="InputSystem_MouseTests.cs" t="Include" />
           <e p="LayoutSystemTests.cs" t="Include" />
           <e p="Mocks" t="Include">
+            <e p="MockApplication.cs" t="Include" />
             <e p="MockInputSystem.cs" t="Include" />
             <e p="MockLayoutSystem.cs" t="Include" />
-            <e p="MockView.cs" t="Include" />
           </e>
           <e p="ReflectionUtilTests.cs" t="Include" />
           <e p="SkipTreeTests.cs" t="Include" />

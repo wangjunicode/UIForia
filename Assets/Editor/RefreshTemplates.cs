@@ -1,10 +1,10 @@
 using System.Collections.Generic;
-using Src.Parsing.StyleParser;
+using UIForia.Parsing.StyleParser;
 using UnityEditor;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 
-namespace Src.Editor {
+namespace UIForia.Editor {
 
     public static class RefreshTemplates {
 

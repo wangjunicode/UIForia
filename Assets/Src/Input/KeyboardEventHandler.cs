@@ -1,9 +1,9 @@
 ﻿using System;
 using System.Reflection;
-using Src.Util;
+using UIForia.Util;
 using UnityEngine;
 
-namespace Src.Input {
+namespace UIForia.Input {
 
     public abstract class KeyboardEventHandler : IComparable<KeyboardEventHandler> {
 

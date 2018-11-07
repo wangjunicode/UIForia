@@ -1,8 +1,8 @@
-using Src.Rendering;
-using Src.Input;
+using UIForia.Input;
+using UIForia.Rendering;
 using UnityEngine;
 
-namespace Src.Elements {
+namespace UIForia.Elements {
 
     public class ScrollbarDragEvent : DragEvent {
 

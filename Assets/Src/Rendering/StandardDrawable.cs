@@ -1,10 +1,10 @@
 ﻿using System;
-using Src.Rendering;
-using Src.Util;
+using UIForia.Rendering;
+using UIForia.Util;
 using UnityEngine;
 using UnityEngine.UI;
 
-namespace Src.Systems {
+namespace UIForia.Systems {
 
     public class StandardDrawable {
 

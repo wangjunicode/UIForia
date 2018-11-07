@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Reflection;
 
-namespace Src {
+namespace UIForia {
 
     public class MethodCallNode : ExpressionNode {
 

@@ -1,7 +1,7 @@
 using System.Collections.Generic;
 using NUnit.Framework;
-using Src;
-using Src.Input;
+using UIForia;
+using UIForia.Input;
 using Tests.Mocks;
 using UnityEngine;
 
@@ -204,38 +204,36 @@ public class InputSystemTests {
 
     [Test]
     public void MouseDown_WithPropagation() {
-        MockView testView = new MockView(typeof(InputSystemTestThing));
-        testView.Initialize();
-        testView.LayoutSystem.SetViewportRect(new Rect(0, 0, 1000, 1000));
-        InputSystemTestThing root = (InputSystemTestThing) testView.RootElement;
-        testView.Update();
+        MockApplication application = new MockApplication(typeof(InputSystemTestThing));
+        application.SetViewportRect(new Rect(0, 0, 1000, 1000));
+        InputSystemTestThing root = (InputSystemTestThing) application.RootElement;
+        application.Update();
 
-        testView.InputSystem.MouseDown(new Vector2(20, 10));
-        testView.Update();
+        application.InputSystem.MouseDown(new Vector2(20, 10));
+        application.Update();
         
         Assert.AreEqual(0, root.clickedChildIndex);
         Assert.IsTrue(root.wasMouseDown);
 
-        testView.InputSystem.ClearClickState();
-        testView.Update();
+        application.InputSystem.ClearClickState();
+        application.Update();
         
-        testView.InputSystem.MouseDown(new Vector2(120, 10));
-        testView.Update();
+        application.InputSystem.MouseDown(new Vector2(120, 10));
+        application.Update();
         Assert.AreEqual(1, root.clickedChildIndex);
 
-        testView.InputSystem.ClearClickState();
-        testView.Update();
+        application.InputSystem.ClearClickState();
+        application.Update();
         
-        testView.InputSystem.MouseDown(new Vector2(220, 10));
-        testView.Update();
+        application.InputSystem.MouseDown(new Vector2(220, 10));
+        application.Update();
         Assert.AreEqual(2, root.clickedChildIndex);
     }
 
     [Test]
     public void MouseDown_StopPropagation() {
-        MockView testView = new MockView(typeof(InputSystemTestThing2));
-        testView.Initialize();
-        testView.LayoutSystem.SetViewportRect(new Rect(0, 0, 1000, 1000));
+        MockApplication testView = new MockApplication(typeof(InputSystemTestThing2));
+        testView.SetViewportRect(new Rect(0, 0, 1000, 1000));
         InputSystemTestThing2 root = (InputSystemTestThing2) testView.RootElement;
 
         testView.InputSystem.MouseDown(new Vector2(20, 10));
@@ -259,9 +257,8 @@ public class InputSystemTests {
 
     [Test]
     public void MouseDown_StopPropagationInBubble() {
-        MockView testView = new MockView(typeof(InputSystemTestThing2));
-        testView.Initialize();
-        testView.LayoutSystem.SetViewportRect(new Rect(0, 0, 1000, 1000));
+        MockApplication testView = new MockApplication(typeof(InputSystemTestThing2));
+        testView.SetViewportRect(new Rect(0, 0, 1000, 1000));
         InputSystemTestThing2 root = (InputSystemTestThing2) testView.RootElement;
 
         testView.InputSystem.MouseDown( new Vector2(120, 10));
@@ -286,9 +283,8 @@ public class InputSystemTests {
 
     [Test]
     public void MouseDown_BubbleThenCapture() {
-        MockView testView = new MockView(typeof(InputSystemTestThing2));
-        testView.Initialize();
-        testView.LayoutSystem.SetViewportRect(new Rect(0, 0, 1000, 1000));
+        MockApplication testView = new MockApplication(typeof(InputSystemTestThing2));
+        testView.SetViewportRect(new Rect(0, 0, 1000, 1000));
         InputSystemTestThing2 root = (InputSystemTestThing2) testView.RootElement;
 
         MouseState mouseState = new MouseState();
@@ -304,9 +300,8 @@ public class InputSystemTests {
 
     [Test]
     public void MouseDown_OutOfBounds() {
-        MockView testView = new MockView(typeof(InputSystemTestThing2));
-        testView.Initialize();
-        testView.LayoutSystem.SetViewportRect(new Rect(0, 0, 1000, 1000));
+        MockApplication testView = new MockApplication(typeof(InputSystemTestThing2));
+        testView.SetViewportRect(new Rect(0, 0, 1000, 1000));
         InputSystemTestThing2 root = (InputSystemTestThing2) testView.RootElement;
 
         MouseState mouseState = new MouseState();
@@ -322,9 +317,8 @@ public class InputSystemTests {
 
     [Test]
     public void MouseUp_FiresAndPropagates() {
-        MockView testView = new MockView(typeof(InputSystemTestThing2));
-        testView.Initialize();
-        testView.LayoutSystem.SetViewportRect(new Rect(0, 0, 1000, 1000));
+        MockApplication testView = new MockApplication(typeof(InputSystemTestThing2));
+        testView.SetViewportRect(new Rect(0, 0, 1000, 1000));
         InputSystemTestThing2 root = (InputSystemTestThing2) testView.RootElement;
 
         MouseState mouseState = new MouseState();
@@ -338,9 +332,8 @@ public class InputSystemTests {
 
     [Test]
     public void MouseUp_StopPropagation() {
-        MockView testView = new MockView(typeof(InputSystemTestThing2));
-        testView.Initialize();
-        testView.LayoutSystem.SetViewportRect(new Rect(0, 0, 1000, 1000));
+        MockApplication testView = new MockApplication(typeof(InputSystemTestThing2));
+        testView.SetViewportRect(new Rect(0, 0, 1000, 1000));
         InputSystemTestThing2 root = (InputSystemTestThing2) testView.RootElement;
 
         MouseState mouseState = new MouseState();
@@ -355,9 +348,8 @@ public class InputSystemTests {
 
     [Test]
     public void MouseUp_StopPropagationInBubble() {
-        MockView testView = new MockView(typeof(InputSystemTestThing2));
-        testView.Initialize();
-        testView.LayoutSystem.SetViewportRect(new Rect(0, 0, 1000, 1000));
+        MockApplication testView = new MockApplication(typeof(InputSystemTestThing2));
+        testView.SetViewportRect(new Rect(0, 0, 1000, 1000));
         InputSystemTestThing2 root = (InputSystemTestThing2) testView.RootElement;
 
         MouseState mouseState = new MouseState();
@@ -372,9 +364,8 @@ public class InputSystemTests {
 
     [Test]
     public void MouseUp_OutOfBounds() {
-        MockView testView = new MockView(typeof(InputSystemTestThing2));
-        testView.Initialize();
-        testView.LayoutSystem.SetViewportRect(new Rect(0, 0, 1000, 1000));
+        MockApplication testView = new MockApplication(typeof(InputSystemTestThing2));
+        testView.SetViewportRect(new Rect(0, 0, 1000, 1000));
         InputSystemTestThing2 root = (InputSystemTestThing2) testView.RootElement;
 
         MouseState mouseState = new MouseState();
@@ -389,9 +380,8 @@ public class InputSystemTests {
 
     [Test]
     public void MouseEnter_FiresAndPropagates() {
-        MockView testView = new MockView(typeof(InputSystemTestThing2));
-        testView.Initialize();
-        testView.LayoutSystem.SetViewportRect(new Rect(0, 0, 1000, 1000));
+        MockApplication testView = new MockApplication(typeof(InputSystemTestThing2));
+        testView.SetViewportRect(new Rect(0, 0, 1000, 1000));
         InputSystemTestThing2 root = (InputSystemTestThing2) testView.RootElement;
         root.ignoreEnter = false;
         MouseState mouseState = new MouseState();
@@ -403,9 +393,8 @@ public class InputSystemTests {
 
     [Test]
     public void MouseEnter_DoesNotFireAgainForSamePosition() {
-        MockView testView = new MockView(typeof(InputSystemTestThing2));
-        testView.Initialize();
-        testView.LayoutSystem.SetViewportRect(new Rect(0, 0, 1000, 1000));
+        MockApplication testView = new MockApplication(typeof(InputSystemTestThing2));
+        testView.SetViewportRect(new Rect(0, 0, 1000, 1000));
         InputSystemTestThing2 root = (InputSystemTestThing2) testView.RootElement;
         root.ignoreEnter = false;
         MouseState mouseState = new MouseState();
@@ -419,9 +408,8 @@ public class InputSystemTests {
 
     [Test]
     public void MouseEnter_DoesNotFireAgainForPositionSameElement() {
-        MockView testView = new MockView(typeof(InputSystemTestThing2));
-        testView.Initialize();
-        testView.LayoutSystem.SetViewportRect(new Rect(0, 0, 1000, 1000));
+        MockApplication testView = new MockApplication(typeof(InputSystemTestThing2));
+        testView.SetViewportRect(new Rect(0, 0, 1000, 1000));
         InputSystemTestThing2 root = (InputSystemTestThing2) testView.RootElement;
         root.ignoreEnter = false;
         MouseState mouseState = new MouseState();
@@ -437,9 +425,8 @@ public class InputSystemTests {
 
     [Test]
     public void MouseEnter_FiresForNewElement() {
-        MockView testView = new MockView(typeof(InputSystemTestThing2));
-        testView.Initialize();
-        testView.LayoutSystem.SetViewportRect(new Rect(0, 0, 1000, 1000));
+        MockApplication testView = new MockApplication(typeof(InputSystemTestThing2));
+        testView.SetViewportRect(new Rect(0, 0, 1000, 1000));
         InputSystemTestThing2 root = (InputSystemTestThing2) testView.RootElement;
         root.ignoreEnter = false;
         MouseState mouseState = new MouseState();
@@ -455,9 +442,8 @@ public class InputSystemTests {
 
     [Test]
     public void MouseEnter_FiresForReEnteringElement() {
-        MockView testView = new MockView(typeof(InputSystemTestThing2));
-        testView.Initialize();
-        testView.LayoutSystem.SetViewportRect(new Rect(0, 0, 1000, 1000));
+        MockApplication testView = new MockApplication(typeof(InputSystemTestThing2));
+        testView.SetViewportRect(new Rect(0, 0, 1000, 1000));
         InputSystemTestThing2 root = (InputSystemTestThing2) testView.RootElement;
         root.ignoreEnter = false;
         MouseState mouseState = new MouseState();
@@ -479,9 +465,8 @@ public class InputSystemTests {
 
     [Test]
     public void MouseExit_FiresAndPropagates() {
-        MockView testView = new MockView(typeof(InputSystemTestThing2));
-        testView.Initialize();
-        testView.LayoutSystem.SetViewportRect(new Rect(0, 0, 1000, 1000));
+        MockApplication testView = new MockApplication(typeof(InputSystemTestThing2));
+        testView.SetViewportRect(new Rect(0, 0, 1000, 1000));
         InputSystemTestThing2 root = (InputSystemTestThing2) testView.RootElement;
         root.ignoreExit = false;
 
@@ -498,9 +483,8 @@ public class InputSystemTests {
 
     [Test]
     public void MouseExit_FireOnlyForExitedElement() {
-        MockView testView = new MockView(typeof(InputSystemTestThing2));
-        testView.Initialize();
-        testView.LayoutSystem.SetViewportRect(new Rect(0, 0, 1000, 1000));
+        MockApplication testView = new MockApplication(typeof(InputSystemTestThing2));
+        testView.SetViewportRect(new Rect(0, 0, 1000, 1000));
         InputSystemTestThing2 root = (InputSystemTestThing2) testView.RootElement;
         root.ignoreExit = false;
 
@@ -517,9 +501,8 @@ public class InputSystemTests {
 
     [Test]
     public void MouseExit_FireAgainWhenReenteredElement() {
-        MockView testView = new MockView(typeof(InputSystemTestThing2));
-        testView.Initialize();
-        testView.LayoutSystem.SetViewportRect(new Rect(0, 0, 1000, 1000));
+        MockApplication testView = new MockApplication(typeof(InputSystemTestThing2));
+        testView.SetViewportRect(new Rect(0, 0, 1000, 1000));
         InputSystemTestThing2 root = (InputSystemTestThing2) testView.RootElement;
         root.ignoreExit = false;
 
@@ -542,9 +525,8 @@ public class InputSystemTests {
 
     [Test]
     public void MouseMove_FiresAndPropagates() {
-        MockView testView = new MockView(typeof(InputSystemTestThing2));
-        testView.Initialize();
-        testView.LayoutSystem.SetViewportRect(new Rect(0, 0, 1000, 1000));
+        MockApplication testView = new MockApplication(typeof(InputSystemTestThing2));
+        testView.SetViewportRect(new Rect(0, 0, 1000, 1000));
         InputSystemTestThing2 root = (InputSystemTestThing2) testView.RootElement;
         root.ignoreMove = false;
 
@@ -556,9 +538,8 @@ public class InputSystemTests {
 
     [Test]
     public void MouseMove_FiresAgainWhenMovedAndContains() {
-        MockView testView = new MockView(typeof(InputSystemTestThing2));
-        testView.Initialize();
-        testView.LayoutSystem.SetViewportRect(new Rect(0, 0, 1000, 1000));
+        MockApplication testView = new MockApplication(typeof(InputSystemTestThing2));
+        testView.SetViewportRect(new Rect(0, 0, 1000, 1000));
         InputSystemTestThing2 root = (InputSystemTestThing2) testView.RootElement;
         root.ignoreMove = false;
 
@@ -575,9 +556,8 @@ public class InputSystemTests {
 
     [Test]
     public void MouseMove_DoesNotFireAgainWhenNotMovedAndContains() {
-        MockView testView = new MockView(typeof(InputSystemTestThing2));
-        testView.Initialize();
-        testView.LayoutSystem.SetViewportRect(new Rect(0, 0, 1000, 1000));
+        MockApplication testView = new MockApplication(typeof(InputSystemTestThing2));
+        testView.SetViewportRect(new Rect(0, 0, 1000, 1000));
         InputSystemTestThing2 root = (InputSystemTestThing2) testView.RootElement;
         root.ignoreMove = false;
 
@@ -592,9 +572,8 @@ public class InputSystemTests {
 
     [Test]
     public void MouseHover_FiresAndPropagates() {
-        MockView testView = new MockView(typeof(InputSystemTestThing2));
-        testView.Initialize();
-        testView.LayoutSystem.SetViewportRect(new Rect(0, 0, 1000, 1000));
+        MockApplication testView = new MockApplication(typeof(InputSystemTestThing2));
+        testView.SetViewportRect(new Rect(0, 0, 1000, 1000));
         InputSystemTestThing2 root = (InputSystemTestThing2) testView.RootElement;
         root.ignoreHover = false;
 
@@ -611,9 +590,8 @@ public class InputSystemTests {
     
     [Test]
     public void MouseHover_DoesNotFireAfterMove() {
-        MockView testView = new MockView(typeof(InputSystemTestThing2));
-        testView.Initialize();
-        testView.LayoutSystem.SetViewportRect(new Rect(0, 0, 1000, 1000));
+        MockApplication testView = new MockApplication(typeof(InputSystemTestThing2));
+        testView.SetViewportRect(new Rect(0, 0, 1000, 1000));
         InputSystemTestThing2 root = (InputSystemTestThing2) testView.RootElement;
         root.ignoreHover = false;
 

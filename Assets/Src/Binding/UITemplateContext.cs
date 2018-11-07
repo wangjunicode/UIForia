@@ -1,9 +1,9 @@
 ﻿using System;
 using System.Collections;
 using System.Collections.Generic;
-using Src.Util;
+using UIForia.Util;
 
-namespace Src {
+namespace UIForia {
 
     public class UITemplateContext : ExpressionContext {
 

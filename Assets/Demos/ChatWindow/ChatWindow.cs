@@ -1,7 +1,7 @@
 using System.Collections.Generic;
-using Src.Rendering;
-using Src;
-using Src.Layout;
+using UIForia.Rendering;
+using UIForia;
+using UIForia.Layout;
 using UnityEngine;
 
 namespace Demo {

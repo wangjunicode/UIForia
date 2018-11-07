@@ -1,8 +1,8 @@
 using System.Collections.Generic;
-using Src.Layout;
-using Src.Layout.LayoutTypes;
+using UIForia.Layout;
+using UIForia.Layout.LayoutTypes;
 
-namespace Src.Rendering {
+namespace UIForia.Rendering {
 
     public partial class UIStyleSet {
 

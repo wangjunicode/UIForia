@@ -1,9 +1,9 @@
 using System;
-using Src.Input;
-using Src.Util;
+using UIForia.Input;
+using UIForia.Util;
 using UnityEngine;
 
-namespace Src {
+namespace UIForia {
     
     [AttributeUsage(AttributeTargets.Method, AllowMultiple = true)]
     public class OnPropertyChanged : Attribute {

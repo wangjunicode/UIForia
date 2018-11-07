@@ -1,14 +1,14 @@
 using System;
 using System.Collections.Generic;
-using Src.Layout;
-using Src.Layout.LayoutTypes;
-using Src.Rendering;
 using TMPro;
 using UIForia;
+using UIForia.Layout;
+using UIForia.Layout.LayoutTypes;
+using UIForia.Rendering;
 using UnityEngine;
-using FontStyle = Src.Text.FontStyle;
+using FontStyle = UIForia.Text.FontStyle;
 
-namespace Src.Parsing.StyleParser {
+namespace UIForia.Parsing.StyleParser {
 
     public static class ParseUtil {
 
@@ -243,6 +243,45 @@ namespace Src.Parsing.StyleParser {
             return new UIMeasurement(value, unit);
         }
 
+        public static FixedLengthVector ParseFixedLengthPair(List<StyleVariable> variables, string propertyValue) {
+            FixedLengthVector retn;
+            
+            if (propertyValue.IndexOf(',') != -1) {
+                string[] split = propertyValue.Split(',');
+                return new FixedLengthVector(
+                    ParseFixedLength(variables, split[0]),
+                    ParseFixedLength(variables, split[0])
+                );
+            }
+
+            
+            if (TryResolveVariable(variables, propertyValue, out retn)) {
+                return retn;
+            }
+            
+            int ptr = 0;
+            float value = ParseFloat(propertyValue, ref ptr);
+            ptr = ConsumeWhiteSpace(ptr, propertyValue);
+            
+            if (ptr == propertyValue.Length) {
+                return new FixedLengthVector(new UIFixedLength(value), new UIFixedLength(value));
+            }
+
+            UIFixedUnit unit = ParseFixedUnit(propertyValue, ref ptr);
+            if (unit == UIFixedUnit.Unset) {
+                throw new ParseException("Unknown fixed length unit: " + propertyValue);
+            }
+
+            if (propertyValue.IndexOf('%') != -1) {
+                value = value * 0.01f;
+            }
+
+            return new FixedLengthVector(
+                new UIFixedLength(value, unit), 
+                new UIFixedLength(value, unit)
+             );
+        }
+        
         public static MeasurementPair ParseMeasurementPair(List<StyleVariable> variables, string propertyValue) {
             MeasurementPair retn;
             
@@ -688,47 +727,47 @@ namespace Src.Parsing.StyleParser {
             }
         }
 
-        public static FontStyle ParseFontStyle(List<StyleVariable> variables, string propertyValue) {
-            FontStyle fontStyle;
+        public static Text.FontStyle ParseFontStyle(List<StyleVariable> variables, string propertyValue) {
+            Text.FontStyle fontStyle;
             if (TryResolveVariable(variables, propertyValue, out fontStyle)) {
                 return fontStyle;
             }
 
-            FontStyle style = FontStyle.Normal;
+            Text.FontStyle style = Text.FontStyle.Normal;
 
             if (propertyValue.Contains("bold")) {
-                style |= FontStyle.Bold;
+                style |= Text.FontStyle.Bold;
             }
 
             if (propertyValue.Contains("italic")) {
-                style |= FontStyle.Italic;
+                style |= Text.FontStyle.Italic;
             }
 
             if (propertyValue.Contains("highlight")) {
-                style |= FontStyle.Highlight;
+                style |= Text.FontStyle.Highlight;
             }
 
             if (propertyValue.Contains("smallcaps")) {
-                style |= FontStyle.SmallCaps;
+                style |= Text.FontStyle.SmallCaps;
             }
 
             if (propertyValue.Contains("superscript")) {
-                style |= FontStyle.Superscript;
+                style |= Text.FontStyle.Superscript;
             }
 
             if (propertyValue.Contains("subscript")) {
-                style |= FontStyle.Subscript;
+                style |= Text.FontStyle.Subscript;
             }
 
             if (propertyValue.Contains("underline")) {
-                style |= FontStyle.Underline;
+                style |= Text.FontStyle.Underline;
             }
 
             if (propertyValue.Contains("strikethrough")) {
-                style |= FontStyle.StrikeThrough;
+                style |= Text.FontStyle.StrikeThrough;
             }
 
-            if ((style & FontStyle.Superscript) != 0 && (style & FontStyle.Subscript) != 0) {
+            if ((style & Text.FontStyle.Superscript) != 0 && (style & Text.FontStyle.Subscript) != 0) {
                 throw new ParseException("Font style cannot be both superscript and subscript");
             }
 

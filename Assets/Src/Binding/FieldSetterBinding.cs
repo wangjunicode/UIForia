@@ -1,7 +1,7 @@
 ﻿using System;
-using Src.Util;
+using UIForia.Util;
 
-namespace Src {
+namespace UIForia {
     
     // todo [OnPropChanged(nameof(someproperty))]
     // todo enable OnPropChanged annotations

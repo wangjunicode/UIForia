@@ -2,16 +2,16 @@ using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using Shapes2D;
-using Src.Layout;
-using Src.Layout.LayoutTypes;
-using Src.Text;
-using Src.Util;
+using UIForia.Layout;
+using UIForia.Text;
 using TMPro;
+using UIForia.Layout.LayoutTypes;
+using UIForia.Util;
 using UnityEngine;
-using FontStyle = Src.Text.FontStyle;
-using TextAlignment = Src.Text.TextAlignment;
+using FontStyle = UIForia.Text.FontStyle;
+using TextAlignment = UIForia.Text.TextAlignment;
 
-namespace Src.Rendering {
+namespace UIForia.Rendering {
 
     [DebuggerDisplay("{nameof(Id)}")]
     public partial class UIStyle {

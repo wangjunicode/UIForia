@@ -1,6 +1,6 @@
 using System.Diagnostics;
 
-namespace Src.Layout {
+namespace UIForia.Layout {
 
     [DebuggerDisplay("(id = {id} ({colItem.trackStart}, {colItem.trackSpan}), ({rowItem.trackStart}, {rowItem.trackSpan})")]
     public struct GridPlacement {

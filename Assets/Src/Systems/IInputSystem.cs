@@ -1,6 +1,6 @@
-﻿using Src.Rendering;
+﻿using UIForia.Rendering;
 
-namespace Src.Systems {
+namespace UIForia.Systems {
 
     public interface IInputSystem : ISystem {
 

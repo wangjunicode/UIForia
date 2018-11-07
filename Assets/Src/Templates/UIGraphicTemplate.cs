@@ -14,7 +14,6 @@ namespace Src {
         public override UIElement CreateScoped(TemplateScope inputScope) {
             UIGraphicElement graphic = new UIGraphicElement();
             graphic.children = ArrayPool<UIElement>.Empty;
-            graphic.templateChildren = ArrayPool<UIElement>.Empty;
             graphic.templateRef = this;
             return graphic;
         }

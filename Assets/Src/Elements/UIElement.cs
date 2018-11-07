@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Diagnostics;
+using JetBrains.Annotations;
 using Src.Rendering;
 using Src;
 using Src.Systems;
@@ -24,12 +25,8 @@ public class UIElement : IHierarchical, IExpressionContextProvider {
     // todo some of this stuff isn't used often or present for many elements. may make sense to move to dictionaries so we keep things compact
 
     public readonly int id;
-    public string name;
     public UIElementFlags flags; // todo make internal but available for testing
     public UIStyleSet style;
-
-    // todo -- move to the template
-//    internal IReadOnlyList<ValueTuple<string, string>> templateAttributes;
 
     // todo make readonly but assignable via style system
 
@@ -46,16 +43,15 @@ public class UIElement : IHierarchical, IExpressionContextProvider {
     }
 
     // todo -- work on this interface
-    public UIElement templateParent;                // remove or move to cold data
-    public UIElement[] templateChildren;            // remove
-    public UIElement[] children;        
-    public UITemplateContext templateContext;     // move to cold data
+    public UIElement templateParent; // remove or move to cold data
+    public UIElement[] children;
+    public UITemplateContext templateContext; // move to cold data
     public UIChildrenElement transcludedChildren; // move to cold data
 
     public LayoutResult layoutResult { get; internal set; }
 
     private ElementRenderer renderer = ElementRenderer.DefaultInstanced;
-    
+
     public ElementRenderer Renderer {
         get { return renderer; }
         set {
@@ -77,7 +73,7 @@ public class UIElement : IHierarchical, IExpressionContextProvider {
     public int siblingIndex { get; internal set; }
 
     public IInputProvider Input { get; internal set; }
-    
+
     public int ChildCount => children?.Length ?? 0;
 
     public bool isShown => (flags & UIElementFlags.SelfAndAncestorShown) == UIElementFlags.SelfAndAncestorShown;
@@ -106,12 +102,6 @@ public class UIElement : IHierarchical, IExpressionContextProvider {
 
     public virtual void OnDisable() { }
 
-    public virtual void OnPropsChanged() { }
-
-    public virtual void OnShown() { }
-
-    public virtual void OnHidden() { }
-
     public virtual void OnDestroy() { }
 
     public bool EnableBinding(string propertyName) {
@@ -137,11 +127,20 @@ public class UIElement : IHierarchical, IExpressionContextProvider {
             templateContext.view.DisableElement(this);
         }
     }
+    
+    public UIElement GetChild(int index) {
+        if (children == null || (uint) index >= (uint) children.Length) {
+            return null;
+        }
+
+        return children[index];
+    }
 
     public UIElement FindById(string id) {
         return FindById<UIElement>(id);
     }
 
+    [PublicAPI]
     public T FindById<T>(string id) where T : UIElement {
         if (isPrimitive || children == null) {
             return null;
@@ -159,18 +158,18 @@ public class UIElement : IHierarchical, IExpressionContextProvider {
             if (children[i]?.templateRef is UIElementTemplate) {
                 continue;
             }
-            
+
             UIElement childResult = children[i].FindById(id);
-            
+
             if (childResult != null) {
                 return childResult as T;
             }
-            
         }
 
         return null;
-    }   
+    }
 
+    [PublicAPI]
     public T FindFirstByType<T>() where T : UIElement {
         if (isPrimitive || children == null) {
             return null;
@@ -188,7 +187,7 @@ public class UIElement : IHierarchical, IExpressionContextProvider {
             if (children[i]?.templateRef is UIElementTemplate) {
                 continue;
             }
-            
+
             UIElement childResult = children[i].FindFirstByType<T>();
             if (childResult != null) {
                 return (T) childResult;
@@ -209,7 +208,7 @@ public class UIElement : IHierarchical, IExpressionContextProvider {
                 retn.Add((T) children[i]);
             }
 
-            
+
             if (children[i] is UIChildrenElement) {
                 continue;
             }
@@ -217,7 +216,7 @@ public class UIElement : IHierarchical, IExpressionContextProvider {
             if (children[i]?.templateRef is UIElementTemplate) {
                 continue;
             }
-            
+
             children[i].FindByType<T>(retn);
         }
 
@@ -225,22 +224,18 @@ public class UIElement : IHierarchical, IExpressionContextProvider {
     }
 
     public override string ToString() {
-        string retn = string.Empty;
+        
         if (HasAttribute("id")) {
-            retn += "<" + GetDisplayName() + ":" + GetAttribute("id") + " " + id + ">";
+            return "<" + GetDisplayName() + ":" + GetAttribute("id") + " " + id + ">";
         }
 
-        if (name != null) {
-            retn += "<" + name + ":" + GetDisplayName() + " " + id + ">";
-        }
-        else if (style != null && style.HasBaseStyles) {
+        if (style != null && style.HasBaseStyles) {
             return "<" + GetDisplayName() + "> " + style.BaseStyleNames;
         }
         else {
-            retn += "<" + GetDisplayName() + " " + id + ">";
+            return "<" + GetDisplayName() + " " + id + ">";
         }
 
-        return retn;
     }
 
     public virtual string GetDisplayName() {
@@ -276,7 +271,6 @@ public class UIElement : IHierarchical, IExpressionContextProvider {
     public class DepthComparerAscending : IComparer<UIElement> {
 
         public int Compare(UIElement a, UIElement b) {
-            
             if (a.depth != b.depth) {
                 return a.depth < b.depth ? 1 : -1;
             }
@@ -293,13 +287,6 @@ public class UIElement : IHierarchical, IExpressionContextProvider {
 
     }
 
-    public UIElement GetChild(int index) {
-        if(children == null || (uint)index >= (uint)children.Length) {
-            return null;
-        }
-
-        return children[index];
-
-    }
+ 
 
 }

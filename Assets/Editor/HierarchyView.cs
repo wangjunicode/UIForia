@@ -84,18 +84,18 @@ public class HierarchyView : TreeView {
             if ((element.flags & UIElementFlags.TemplateRoot) != 0) {
                 ViewState viewState;
                 if (m_ViewState.TryGetValue(element.id, out viewState) && viewState.showTemplateContents) {
-                    UIElement[] templateChildren = element.templateChildren;
-
-                    if (templateChildren != null) {
-                        for (int i = 0; i < templateChildren.Length; i++) {
-                            ElementTreeItem childItem = new ElementTreeItem(templateChildren[i]);
-                            childItem.displayName = childItem.element.ToString();
-                            current.AddChild(childItem);
-                            stack.Push(childItem);
-                        }
-                    }
-
-                    continue;
+//                    UIElement[] templateChildren = element.templateChildren;
+//
+//                    if (templateChildren != null) {
+//                        for (int i = 0; i < templateChildren.Length; i++) {
+//                            ElementTreeItem childItem = new ElementTreeItem(templateChildren[i]);
+//                            childItem.displayName = childItem.element.ToString();
+//                            current.AddChild(childItem);
+//                            stack.Push(childItem);
+//                        }
+//                    }
+//
+//                    continue;
                 }
             }
 

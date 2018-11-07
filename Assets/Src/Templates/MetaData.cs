@@ -57,7 +57,6 @@ namespace Src {
         }
 
         public int elementId => element.id;
-        public string name => element.name;
 
         public void AddChild(MetaData child) {
             children.Add(child);

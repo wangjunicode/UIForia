@@ -25,14 +25,14 @@ public class RepeatBindingNode<T, U> : RepeatBindingNode where T : class, IList<
         this.lengthAlias = lengthAlias;
     }
 
-    private static void AssignTemplateParents(UIElement parent) {
-        if (parent.templateChildren != null) {
-            for (int i = 0; i < parent.templateChildren.Length; i++) {
-                parent.templateChildren[i].templateParent = parent;
-                AssignTemplateParents(parent.templateChildren[i]);
-            }
-        }
-    }
+//    private static void AssignTemplateParents(UIElement parent) {
+////        if (parent.templateChildren != null) {
+////            for (int i = 0; i < parent.templateChildren.Length; i++) {
+////                parent.templateChildren[i].templateParent = parent;
+////                AssignTemplateParents(parent.templateChildren[i]);
+////            }
+////        }
+//    }
 
     public override void Validate() {
         T list = listExpression.EvaluateTyped(context);
@@ -55,21 +55,19 @@ public class RepeatBindingNode<T, U> : RepeatBindingNode where T : class, IList<
         if (previousReference == null) {
             previousReference = new T();
             element.children = ArrayPool<UIElement>.GetExactSize(list.Count);
-            element.templateChildren = ArrayPool<UIElement>.GetExactSize(list.Count);
 
             for (int i = 0; i < list.Count; i++) {
                 previousReference.Add(list[i]);
                 UIElement newItem = template.CreateScoped(scope);
-
+                UITemplate.AssignContext(newItem, context);
                 newItem.parent = element;
                 newItem.templateParent = element;
 
                 element.children[i] = newItem;
-                element.templateChildren[i] = newItem;
                 context.view.CreateElementFromTemplate(newItem, element);
             }
 
-            AssignTemplateParents(element);
+//            AssignTemplateParents(element);
             ((UIRepeatElement) element).listBecamePopulated = true;
         }
         else if (list.Count > previousReference.Count) {
@@ -77,17 +75,13 @@ public class RepeatBindingNode<T, U> : RepeatBindingNode where T : class, IList<
             ((UIRepeatElement) element).listBecamePopulated = previousReference.Count == 0;
             
             UIElement[] oldChildren = element.children;
-            UIElement[] oldTemplateChildren = element.templateChildren;
 
             UIElement[] ownChildren = ArrayPool<UIElement>.GetExactSize(list.Count);
-            UIElement[] templateChildren = ArrayPool<UIElement>.GetExactSize(list.Count);
 
             element.children = ownChildren;
-            element.templateChildren = templateChildren;
 
             for (int i = 0; i < oldChildren.Length; i++) {
                 ownChildren[i] = oldChildren[i];
-                templateChildren[i] = oldChildren[i];
             }
 
             int previousCount = previousReference.Count;
@@ -96,18 +90,17 @@ public class RepeatBindingNode<T, U> : RepeatBindingNode where T : class, IList<
             for (int i = 0; i < diff; i++) {
                 previousReference.Add(list[previousCount + i]);
                 UIElement newItem = template.CreateScoped(scope);
+                UITemplate.AssignContext(newItem, context);
 
                 newItem.parent = element;
                 newItem.templateParent = element;
 
                 ownChildren[previousCount + i] = newItem;
-                templateChildren[previousCount + i] = newItem;
                 context.view.CreateElementFromTemplate(newItem, element);
             }
 
-            AssignTemplateParents(element);
+//            AssignTemplateParents(element);
             ArrayPool<UIElement>.Release(ref oldChildren);
-            ArrayPool<UIElement>.Release(ref oldTemplateChildren);
         }
         else if (previousReference.Count > list.Count) {
             // todo -- this is potentially way faster w/ a DestroyChildren(start, end) method

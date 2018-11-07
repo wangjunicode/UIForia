@@ -38,6 +38,9 @@ namespace Src {
             else if (elementType == typeof(UIFooterElement)) {
                 element = new UIFooterElement();
             }
+            else {
+                element = (UIContainerElement) Activator.CreateInstance(elementType);
+            }
             
             Assert.IsNotNull(element);
             
@@ -46,6 +49,7 @@ namespace Src {
             for (int i = 0; i < childTemplates.Count; i++) {
                 element.children[i] = childTemplates[i].CreateScoped(inputScope);
                 element.children[i].parent = element;
+                element.children[i].templateParent = element;
             }
 
             element.templateContext = inputScope.context;

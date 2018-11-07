@@ -48,7 +48,7 @@ namespace Src {
         
         public UIElement Create(UIView view) {
             Compile();
-            return rootElementTemplate.CreateScoped(new TemplateScope());
+            return rootElementTemplate.CreateUnscoped(view);
 //            
 //            UITemplateContext context = new UITemplateContext(view);
 //            UIElement instance = (UIElement) Activator.CreateInstance(rootElementTemplate.RootType);

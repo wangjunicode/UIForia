@@ -62,11 +62,11 @@ public class ViewTestThing : UIElement {
 
 }
 
-       
+
 [TestFixture]
 public class UIView_Tests {
 
-     const string template = @"
+    const string template = @"
         <UITemplate>
             <Contents>
                 <Panel x-id='L0-0'>
@@ -118,7 +118,7 @@ public class UIView_Tests {
         </UITemplate>
     ";
 
-    
+
     const TestEnableFlags enabled = TestEnableFlags.Enabled;
     const TestEnableFlags disabledAncestor = TestEnableFlags.DisabledAncestor;
     const TestEnableFlags disabledSelf = TestEnableFlags.DisabledSelf;
@@ -149,7 +149,9 @@ public class UIView_Tests {
             new TypeAssert(typeof(UIGroupElement), 0, new[] {
                 new TypeAssert(typeof(TranscludedThing), 0, new[] {
                     new TypeAssert(typeof(UITextElement), 0),
-                    new TypeAssert(typeof(UITextElement), 0),
+                    new TypeAssert(typeof(UIChildrenElement), 0, new[] {
+                        new TypeAssert(typeof(UITextElement), 0)
+                    }),
                     new TypeAssert(typeof(UITextElement), 0)
                 }),
             })
@@ -173,7 +175,9 @@ public class UIView_Tests {
             new TypeAssert(typeof(UIGroupElement), enabled, new[] {
                 new TypeAssert(typeof(TranscludedThing), disabledSelf, new[] {
                     new TypeAssert(typeof(UITextElement), disabledAncestor),
-                    new TypeAssert(typeof(UITextElement), disabledAncestor),
+                    new TypeAssert(typeof(UIChildrenElement), disabledAncestor, new[] {
+                        new TypeAssert(typeof(UITextElement), disabledAncestor)
+                    }),
                     new TypeAssert(typeof(UITextElement), disabledAncestor)
                 }),
             })
@@ -192,7 +196,9 @@ public class UIView_Tests {
             new TypeAssert(typeof(UIGroupElement), enabled, new[] {
                 new TypeAssert(typeof(TranscludedThing), disabledSelf, new[] {
                     new TypeAssert(typeof(UITextElement), disabledAncestor),
-                    new TypeAssert(typeof(UITextElement), disabledAncestor),
+                    new TypeAssert(typeof(UIChildrenElement), disabledAncestor, new[] {
+                        new TypeAssert(typeof(UITextElement), disabledAncestor)
+                    }),
                     new TypeAssert(typeof(UITextElement), disabledAncestor)
                 }),
             })
@@ -203,30 +209,33 @@ public class UIView_Tests {
         element = testView2.TestCreate();
 
         UITextElement text0 = As<UITextElement>(element.children[0].children[0].children[0]);
-        UITextElement text1 = As<UITextElement>(element.children[0].children[0].children[1]);
+        UIChildrenElement children = As<UIChildrenElement>(element.children[0].children[0].children[1]);
         UITextElement text2 = As<UITextElement>(element.children[0].children[0].children[2]);
         UIGroupElement group = As<UIGroupElement>(element.children[0]);
 
         thing = As<TranscludedThing>(element.children[0].children[0]);
 
-        testView2.DisableElement(text1);
+        testView2.DisableElement(children);
         AssertHierarchyFlags(element, new TypeAssert(typeof(ViewTestThing), enabled, new[] {
             new TypeAssert(typeof(UIGroupElement), enabled, new[] {
                 new TypeAssert(typeof(TranscludedThing), enabled, new[] {
                     new TypeAssert(typeof(UITextElement), enabled),
-                    new TypeAssert(typeof(UITextElement), disabledSelf),
+                    new TypeAssert(typeof(UIChildrenElement), disabledSelf, new[] {
+                        new TypeAssert(typeof(UITextElement), disabledAncestor)
+                    }),
                     new TypeAssert(typeof(UITextElement), enabled)
                 }),
             })
         }));
-
 
         testView2.DisableElement(text0);
         AssertHierarchyFlags(element, new TypeAssert(typeof(ViewTestThing), enabled, new[] {
             new TypeAssert(typeof(UIGroupElement), enabled, new[] {
                 new TypeAssert(typeof(TranscludedThing), enabled, new[] {
                     new TypeAssert(typeof(UITextElement), disabledSelf),
-                    new TypeAssert(typeof(UITextElement), disabledSelf),
+                    new TypeAssert(typeof(UIChildrenElement), disabledSelf, new[] {
+                        new TypeAssert(typeof(UITextElement), disabledAncestor)
+                    }),
                     new TypeAssert(typeof(UITextElement), enabled)
                 }),
             })
@@ -237,7 +246,9 @@ public class UIView_Tests {
             new TypeAssert(typeof(UIGroupElement), disabledSelf, new[] {
                 new TypeAssert(typeof(TranscludedThing), disabledAncestor, new[] {
                     new TypeAssert(typeof(UITextElement), disabledSelf),
-                    new TypeAssert(typeof(UITextElement), disabledSelf),
+                    new TypeAssert(typeof(UIChildrenElement), disabledSelf, new[] {
+                        new TypeAssert(typeof(UITextElement), disabledAncestor)
+                    }),
                     new TypeAssert(typeof(UITextElement), disabledAncestor)
                 }),
             })
@@ -279,9 +290,11 @@ public class UIView_Tests {
             new TypeAssert(typeof(UIGroupElement), enabled, new[] {
                 new TypeAssert(typeof(TranscludedThing), disabledSelf, new[] {
                     new TypeAssert(typeof(UITextElement), disabledAncestor),
-                    new TypeAssert(typeof(UITextElement), disabledAncestor),
+                    new TypeAssert(typeof(UIChildrenElement), disabledAncestor, new[] {
+                        new TypeAssert(typeof(UITextElement), disabledAncestor)
+                    }),
                     new TypeAssert(typeof(UITextElement), disabledAncestor)
-                }),
+                })
             })
         }));
 
@@ -290,7 +303,9 @@ public class UIView_Tests {
             new TypeAssert(typeof(UIGroupElement), enabled, new[] {
                 new TypeAssert(typeof(TranscludedThing), enabled, new[] {
                     new TypeAssert(typeof(UITextElement), enabled),
-                    new TypeAssert(typeof(UITextElement), enabled),
+                    new TypeAssert(typeof(UIChildrenElement), enabled, new[] {
+                        new TypeAssert(typeof(UITextElement), enabled)
+                    }),
                     new TypeAssert(typeof(UITextElement), enabled)
                 }),
             })
@@ -303,7 +318,9 @@ public class UIView_Tests {
             new TypeAssert(typeof(UIGroupElement), disabledSelf, new[] {
                 new TypeAssert(typeof(TranscludedThing), disabledAncestor, new[] {
                     new TypeAssert(typeof(UITextElement), disabledAncestor),
-                    new TypeAssert(typeof(UITextElement), disabledAncestor),
+                    new TypeAssert(typeof(UIChildrenElement), disabledAncestor, new[] {
+                        new TypeAssert(typeof(UITextElement), disabledAncestor)
+                    }),
                     new TypeAssert(typeof(UITextElement), disabledAncestor)
                 }),
             })
@@ -313,7 +330,9 @@ public class UIView_Tests {
             new TypeAssert(typeof(UIGroupElement), disabledSelf, new[] {
                 new TypeAssert(typeof(TranscludedThing), disabledAncestor, new[] {
                     new TypeAssert(typeof(UITextElement), disabledAncestor),
-                    new TypeAssert(typeof(UITextElement), disabledAncestor),
+                    new TypeAssert(typeof(UIChildrenElement), disabledAncestor, new[] {
+                        new TypeAssert(typeof(UITextElement), disabledAncestor)
+                    }),
                     new TypeAssert(typeof(UITextElement), disabledSelf)
                 }),
             })
@@ -323,7 +342,9 @@ public class UIView_Tests {
             new TypeAssert(typeof(UIGroupElement), enabled, new[] {
                 new TypeAssert(typeof(TranscludedThing), enabled, new[] {
                     new TypeAssert(typeof(UITextElement), enabled),
-                    new TypeAssert(typeof(UITextElement), enabled),
+                    new TypeAssert(typeof(UIChildrenElement), enabled, new[] {
+                        new TypeAssert(typeof(UITextElement), enabled)
+                    }),
                     new TypeAssert(typeof(UITextElement), disabledSelf)
                 }),
             })
@@ -376,11 +397,11 @@ public class UIView_Tests {
         for (int i = 0; i < 5; i++) {
             Assert.AreEqual(root.FindById("L1-" + i).depthIndex, i);
         }
-        
+
         for (int i = 0; i < 15; i++) {
             Assert.AreEqual(root.FindById("L2-" + i).depthIndex, i);
         }
-        
+
         for (int i = 0; i < 13; i++) {
             Assert.AreEqual(root.FindById("L3-" + i).depthIndex, i);
         }
@@ -388,17 +409,16 @@ public class UIView_Tests {
 
     [Test]
     public void UpdateDepthIndexOnDestroy() {
-
         MockView testView = new MockView(typeof(ViewTestThing), template);
         testView.Initialize();
         ViewTestThing root = (ViewTestThing) testView.RootElement;
         testView.DestroyElement(root.FindById("L1-3"));
 
-         Assert.AreEqual(0, root.FindById("L1-0").depthIndex);
-         Assert.AreEqual(1, root.FindById("L1-1").depthIndex);
-         Assert.AreEqual(2, root.FindById("L1-2").depthIndex);
-         Assert.AreEqual(3, root.FindById("L1-4").depthIndex);
-        
+        Assert.AreEqual(0, root.FindById("L1-0").depthIndex);
+        Assert.AreEqual(1, root.FindById("L1-1").depthIndex);
+        Assert.AreEqual(2, root.FindById("L1-2").depthIndex);
+        Assert.AreEqual(3, root.FindById("L1-4").depthIndex);
+
 //        for (int i = 0; i < 5; i++) {
 //            Assert.AreEqual(root.FindById("L1-" + i).depthIndex, i);
 //        }
@@ -423,7 +443,7 @@ public class UIView_Tests {
         Assert.IsNull(root.FindById("L1-3"));
         Assert.AreEqual(childCount - 1, parent.children.Length);
     }
-    
+
     private struct TypeAssert {
 
         public readonly Type parentType;
@@ -457,7 +477,7 @@ public class UIView_Tests {
 
         for (int i = 0; i < element.children.Length; i++) {
             if (element.children[i].GetType() != assertRoot.childTypes[i].parentType) {
-                Assert.Fail("Types did not match for child number " + i + " at depth " + depth);
+                Assert.Fail($"Types did not match for child number {i} at depth {depth}. {element.children[i].GetType()} is not {assertRoot.childTypes[i].parentType}");
             }
 
             AssertHierarchy(element.children[i], assertRoot.childTypes[i], depth + 1);

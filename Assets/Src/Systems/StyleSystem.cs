@@ -54,8 +54,10 @@ namespace Src.Systems {
 
             element.style.Initialize();
 
-            for (int i = 0; i < element.children.Length; i++) {
-                OnElementCreatedFromTemplate(element.children[i]);
+            if (element.children != null) {
+                for (int i = 0; i < element.children.Length; i++) {
+                    OnElementCreatedFromTemplate(element.children[i]);
+                }
             }
         }
 

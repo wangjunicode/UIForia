@@ -154,7 +154,7 @@ namespace Src {
             }
         }
         
-        protected virtual void CompileInputBindings(ParsedTemplate template) {
+        protected void CompileInputBindings(ParsedTemplate template) {
             inputCompiler.SetContext(template.contextDefinition);
             List<MouseEventHandler> mouseHandlers = inputCompiler.CompileMouseEventHandlers(elementType, attributes);
             List<KeyboardEventHandler> keyboardHandlers = inputCompiler.CompileKeyboardEventHandlers(elementType, attributes);
@@ -178,7 +178,7 @@ namespace Src {
         }
 
 
-        protected virtual void CompilePropertyBindings(ParsedTemplate template) {
+        protected void CompilePropertyBindings(ParsedTemplate template) {
             if (attributes == null || attributes.Count == 0) return;
 
             try {
@@ -203,7 +203,7 @@ namespace Src {
         }
         
         // todo -- show / hide / disable
-        protected virtual void CompileConditionalBindings(ParsedTemplate template) {
+        protected void CompileConditionalBindings(ParsedTemplate template) {
             AttributeDefinition ifDef = GetAttribute("x-if");
             AttributeDefinition unlessDef = GetAttribute("x-unless");
             AttributeDefinition showDef = GetAttribute("x-show");
@@ -241,6 +241,26 @@ namespace Src {
                 if (style != null) {
                     baseStyles.Add(style);
                 }
+            }
+        }
+
+        public static void AssignContext(UIElement element, UITemplateContext context) {
+            element.templateContext = context;
+                
+            if (element.children == null) return;
+
+            for (int i = 0; i < element.children.Length; i++) {
+                
+                if (element.children[i].templateRef is UIElementTemplate) {
+                    element.children[i].templateContext = context;
+                    continue;
+                }
+                
+                if (element.children[i] is UIChildrenElement) {
+                    continue;
+                }
+                
+                AssignContext(element.children[i], context);
             }
         }
 

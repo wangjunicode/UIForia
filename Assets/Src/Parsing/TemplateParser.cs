@@ -1,6 +1,7 @@
 using System;
 using System.Xml;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 using System.Xml.Linq;
 using Src.Elements;
@@ -252,6 +253,23 @@ namespace Src {
         }
 
         private static UITemplate ParseTemplateElement(XElement element) {
+            ProcessedType elementType = TypeProcessor.GetType(element.Name.LocalName);
+            if (typeof(UIContainerElement).IsAssignableFrom(elementType.rawType)) {
+                return new UIContainerTemplate(
+                    elementType.rawType, 
+                    ParseNodes(element.Nodes()), 
+                    ParseAttributes(element.Attributes())
+                );
+            }
+
+            if (typeof(UITextElement).IsAssignableFrom(elementType.rawType)) {
+                return ParseTextElement(elementType.rawType, element);
+            }
+
+//            if (typeof(UIPrimitiveElement).IsAssignableFrom(elementType.rawType)) {
+//                return ParsePrimitiveElement(elementType.rawType, element);
+//            }
+            
             UITemplate template = new UIElementTemplate(
                 element.Name.LocalName,
                 ParseNodes(element.Nodes()),

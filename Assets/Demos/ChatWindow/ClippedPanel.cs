@@ -6,7 +6,7 @@ using Src.Util;
 using UnityEngine;
 using UnityEngine.UI;
 
-public class ClippedPanel : UIContainerElement, IMeshProvider {
+public sealed class ClippedPanel : UIContainerElement, IMeshProvider {
 
     private static readonly VertexHelper s_VertexHelper = new VertexHelper();
 

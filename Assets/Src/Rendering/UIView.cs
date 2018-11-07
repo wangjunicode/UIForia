@@ -289,32 +289,10 @@ public abstract class UIView {
 
             element.parent.children = newChildList;
 
-            if (element.templateParent == element.parent) {
-                if (element.parent.templateChildren == oldChildList) {
-                    element.parent.templateChildren = newChildList;
-                }
-                else {
-                    idx = 0;
-                    UIElement[] newTemplateChildList = new UIElement[element.parent.templateChildren.Length - 1];
-                    oldTemplateChildList = element.parent.templateChildren;
-                    if (oldTemplateChildList != null) {
-                        for (int i = 0; i < oldTemplateChildList.Length; i++) {
-                            if (oldTemplateChildList[i] != element) {
-                                newTemplateChildList[idx] = oldTemplateChildList[i];
-                                // todo -- template sibling index?
-                                idx++;
-                            }
-                        }
-                    }
-
-                    element.parent.templateChildren = newTemplateChildList;
-                }
-            }
         }
 
         elementTree.TraversePreOrder(element, (node) => {
             ArrayPool<UIElement>.Release(ref node.children);
-            ArrayPool<UIElement>.Release(ref node.templateChildren);
             // todo -- if child is poolable, pool it here
         }, true);
 
@@ -363,13 +341,11 @@ public abstract class UIView {
         for (int i = 0; i < element.children.Length; i++) {
             elementTree.TraversePostOrder(element.children[i], (node) => {
                 ArrayPool<UIElement>.Release(ref node.children);
-                ArrayPool<UIElement>.Release(ref node.templateChildren);
             }, true);
             elementTree.RemoveHierarchy(element.children[i]);
         }
 
         element.children = ArrayPool<UIElement>.Empty;
-        element.templateChildren = ArrayPool<UIElement>.Empty;
     }
 
     protected void RemoveUpdateDepthIndices(UIElement element) {

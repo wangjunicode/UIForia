@@ -618,6 +618,10 @@ namespace Src.Systems {
                     parentBox = ptr;
                 }
 
+                if (parentElement.children == null) {
+                    continue;
+                }
+                
                 for (int i = 0; i < parentElement.children.Length; i++) {
                     UIElement child = parentElement.children[i];
                     if ((child.flags & UIElementFlags.RequiresLayout) == 0) {

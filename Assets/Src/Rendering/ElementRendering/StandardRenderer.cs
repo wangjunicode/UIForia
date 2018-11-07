@@ -136,7 +136,12 @@ namespace UIForia.Systems {
                 material.SetVector(s_BorderRadiusKey, style.ResolvedBorderRadius);
                 material.SetVector(s_BorderColorKey, style.BorderColor);
                 material.SetVector(s_SizeKey, new Vector4(size.width, size.height, 0, 0));
-                Graphics.DrawMesh(data.mesh, origin + data.renderPosition - new Vector3(1, 0, 0), Quaternion.AngleAxis(style.TransformRotation, Vector3.forward), material, 0, camera, 0, null, false, false, false);
+                Matrix4x4 matrix = Matrix4x4.TRS(
+                    origin + data.renderPosition - new Vector3(1, 0, 0),
+                    Quaternion.AngleAxis(style.TransformRotation, Vector3.forward),
+                    new Vector3(1, 1, 1)
+                );
+                Graphics.DrawMesh(data.mesh, matrix, material, 0, camera, 0, null, false, false, false);
             }
         }
 

@@ -518,9 +518,10 @@ namespace UIForia.Rendering {
     public enum ScrollbarButtonPlacement {
 
         Unset = 0,
-        TogetherBefore = 1,
-        TogetherAfter = 1,
-        Apart = 2
+        Hidden = 1, 
+        TogetherBefore = 2,
+        TogetherAfter = 3,
+        Apart = 4
 
     }
 

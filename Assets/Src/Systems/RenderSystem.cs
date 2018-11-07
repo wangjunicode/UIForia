@@ -262,6 +262,39 @@ namespace UIForia.Systems {
             }
         }
 
+        private void DrawScrollbars() {
+
+//            for (int i = 0; i < m_Scrollbars.Count; i++) {
+//                VirtualScrollbar bar = m_Scrollbars[i];
+//                VirtualScrollbarHandle handle = bar.handle;
+//                if (bar.orientation == ScrollbarOrientation.Horizontal) {
+                    
+//                    ComputedStyle style = bar.targetElement.ComputedStyle;
+                    
+//                    ScrollbarButtonPlacement horizontalPlacement = style.ScrollbarHorizontalButtonPlacement;
+//                    
+//                    switch (horizontalPlacement) {
+//                        case ScrollbarButtonPlacement.Unset:
+//                            break;
+//                        case ScrollbarButtonPlacement.Hidden:
+//                            break;
+//                        case ScrollbarButtonPlacement.TogetherBefore:
+//                            break;
+//                        case ScrollbarButtonPlacement.TogetherAfter:
+//                            break;
+//                        case ScrollbarButtonPlacement.Apart:
+//                            break;
+//                        default:
+//                            throw new ArgumentOutOfRangeException();
+//                    }
+//                    
+//                    // ScrollbarHorizontalIncrementButtonWidth 
+//                    // ScrollbarHorizontalIncrementButtonHeight
+//                    
+//                }
+//            }
+        }
+        
         private static void ComputePositions(LightList<RenderData> renderList) {
             if (renderList.Count == 0) {
                 return;

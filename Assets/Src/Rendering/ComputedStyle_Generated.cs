@@ -1,12 +1,12 @@
 using System;
 using System.Diagnostics;
 using Shapes2D;
+using UIForia.Layout;
+using UIForia.Layout.LayoutTypes;
 using TMPro;
 using System.Collections.Generic;
 using UnityEngine;
 using UIForia.Util;
-using UIForia.Layout;
-using UIForia.Layout.LayoutTypes;
 using UIForia.Text;
 using FontStyle = UIForia.Text.FontStyle;
 using TextAlignment = UIForia.Text.TextAlignment;
@@ -351,13 +351,13 @@ namespace UIForia.Rendering {
 			internal set { WriteIntProperty(StylePropertyId.TextFontSize, value); } 
 		}
 
-		public Text.FontStyle TextFontStyle {
-			[DebuggerStepThrough] get { return (Text.FontStyle)ReadIntProperty(StylePropertyId.TextFontStyle, (int)DefaultStyleValues_Generated.TextFontStyle); }
+		public FontStyle TextFontStyle {
+			[DebuggerStepThrough] get { return (FontStyle)ReadIntProperty(StylePropertyId.TextFontStyle, (int)DefaultStyleValues_Generated.TextFontStyle); }
 			internal set { WriteIntProperty(StylePropertyId.TextFontStyle, (int)value); } 
 		}
 
-		public Text.TextAlignment TextAlignment {
-			[DebuggerStepThrough] get { return (Text.TextAlignment)ReadIntProperty(StylePropertyId.TextAlignment, (int)DefaultStyleValues_Generated.TextAlignment); }
+		public TextAlignment TextAlignment {
+			[DebuggerStepThrough] get { return (TextAlignment)ReadIntProperty(StylePropertyId.TextAlignment, (int)DefaultStyleValues_Generated.TextAlignment); }
 			internal set { WriteIntProperty(StylePropertyId.TextAlignment, (int)value); } 
 		}
 

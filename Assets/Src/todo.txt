@@ -13,7 +13,6 @@
 - Support function calls in dirty checking
 - Reduce boxing
 
-
 LayoutDefault to Flow
 Implement Flow
 Improve Grid w/ flex tracks
@@ -23,11 +22,9 @@ rotation
 fill modes
 shapes
 Scroll Styles
-Fix layers
 masks?
 finish drag implementation
 make false mouse cursor for debug
-handle multiple view roots
 handle nested repeat being null bug
 finish animations
 reuse / import style sheets
@@ -37,3 +34,16 @@ implicit styles & maybe selectors
 Clone methods
 scaling
 zooming in inspector
+
+cursor Pointer {
+    Texture = path/to/texture
+    UVRect = rect
+    HotPoint = point;
+}
+
+public class CursorSettings {
+
+    public Texture2D texture;
+    public Vector2 point;
+    
+}

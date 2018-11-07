@@ -49,7 +49,7 @@ namespace UIForia.Parsing.StyleParser {
         private static readonly Dictionary<string, MapAction> s_StylePropertyMappers;
         private static readonly List<string> s_CurrentlyParsingList;
 
-       
+
         public static void Reset() {
             s_CompiledStyles.Clear();
             s_CurrentlyParsingList.Clear();
@@ -78,7 +78,7 @@ namespace UIForia.Parsing.StyleParser {
                 s_CompiledStyles[uniqueStyleId] = sheet;
                 return sheet.GetStyleGroup(styleName);
             }
-            
+
             sheet = TryParseStyleFromClassPath(Path.GetFileNameWithoutExtension(uniqueStyleId));
 
             if (sheet != null) {
@@ -231,12 +231,13 @@ namespace UIForia.Parsing.StyleParser {
             if (input.Length == 0) {
                 return retn;
             }
-            
+
             while (ptr < input.Length) {
                 int start = ptr;
                 ptr = ReadStyleDefinition(ptr, input, output);
                 ptr = ReadVariableDefinition(ptr, input, output);
                 ptr = ReadImportDefinition(ptr, input, output);
+                ptr = ReadCursorDefinition(ptr, input, output);
                 ptr = ParseUtil.ConsumeWhiteSpace(ptr, input);
                 if (ptr == start && ptr < input.Length) {
                     throw new ParseException("Style Tokenizer failed on string: " + input);
@@ -451,6 +452,25 @@ namespace UIForia.Parsing.StyleParser {
             return ptr;
         }
 
+        private static int ReadCursorDefinition(int ptr, string input, List<StyleComponent> output) {
+            int start = ptr;
+            ptr = ParseUtil.ConsumeWhiteSpace(ptr, input);
+            if (!ParseUtil.TryReadCharacters(input, "cursor ", ref ptr)) {
+                return start;
+            }
+
+            StyleComponent retn = new StyleComponent(
+                StyleComponentType.Cursor,
+                ParseUtil.ReadIdentifierOrThrow(input, ref ptr),
+                null,
+                ParseUtil.ReadBlockOrThrow(input, ref ptr, '{', '}')
+            );
+
+            output.Add(retn);
+
+            return ptr;
+        }
+
         private static string[] ReadInheritanceList(string input, ref int ptr) {
             return null;
         }
@@ -458,7 +478,7 @@ namespace UIForia.Parsing.StyleParser {
         static StyleParser() {
             s_CurrentlyParsingList = new List<string>();
             s_StylePropertyMappers = new Dictionary<string, MapAction>();
-            StylePropertyMapper[] sStyleIdentifiers = new[] {
+            StylePropertyMapper[] styleIdentifiers = {
                 new StylePropertyMapper("Overflow", StylePropertyMappers.DisplayMapper),
                 new StylePropertyMapper("OverflowX", StylePropertyMappers.DisplayMapper),
                 new StylePropertyMapper("OverflowY", StylePropertyMappers.DisplayMapper),
@@ -582,11 +602,11 @@ namespace UIForia.Parsing.StyleParser {
                 new StylePropertyMapper("BackgroundGridSize", null),
                 new StylePropertyMapper("BackgroundLineSize", null),
             };
-            
-            
+
+
             s_CompiledStyles = new Dictionary<string, ParsedStyleSheet>();
-            for (int i = 0; i < sStyleIdentifiers.Length; i++) {
-                s_StylePropertyMappers[sStyleIdentifiers[i].propertyName.ToLower()] = sStyleIdentifiers[i].mapFn;
+            for (int i = 0; i < styleIdentifiers.Length; i++) {
+                s_StylePropertyMappers[styleIdentifiers[i].propertyName.ToLower()] = styleIdentifiers[i].mapFn;
             }
         }
 
@@ -601,6 +621,22 @@ namespace UIForia.Parsing.StyleParser {
             }
 
         }
+
+//        public struct CursorComponent {
+//
+//            public readonly string name;
+//            public readonly string texturePath;
+//            public readonly Vector2 hotPoint;
+//            public readonly StyleComponentType type;
+//            
+//            public CursorComponent(StyleComponentType type, string name, string texturePath, Vector2 hotPoint) {
+//                this.type = type;
+//                this.name = name;
+//                this.texturePath = texturePath;
+//                this.hotPoint = hotPoint;
+//            }
+//
+//        }
 
         public struct StyleComponent {
 

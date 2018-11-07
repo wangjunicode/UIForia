@@ -109,6 +109,10 @@ public abstract partial class InputSystem {
         }
 
         RunMouseEvents(m_ElementsThisFrame, m_MouseState.DidMove ? InputEventType.MouseMove : InputEventType.MouseHover);
+        //for each element
+        // if element defines cursor
+        // take cursor
+        // RequestCursorLock(element);
 
     }
 

@@ -1,10 +1,7 @@
 using System.Collections.Generic;
 using System.Diagnostics;
 using Shapes2D;
-using UIForia;
-using UIForia.Rendering;
 using TMPro;
-using UIForia.Util;
 using UIForia.Layout;
 using UIForia.Layout.LayoutTypes;
 using UIForia.Text;
@@ -349,13 +346,13 @@ public partial class UIStyle {		public Overflow OverflowX {
 		set { SetIntProperty(StylePropertyId.TextFontSize, value); } 
 		}
 
-		public Text.FontStyle TextFontStyle {
-			[DebuggerStepThrough] get { return (Text.FontStyle)FindEnumProperty(StylePropertyId.TextFontStyle); }
+		public FontStyle TextFontStyle {
+			[DebuggerStepThrough] get { return (FontStyle)FindEnumProperty(StylePropertyId.TextFontStyle); }
 		set { SetEnumProperty(StylePropertyId.TextFontStyle, (int)value); } 
 		}
 
-		public Text.TextAlignment TextAlignment {
-			[DebuggerStepThrough] get { return (Text.TextAlignment)FindEnumProperty(StylePropertyId.TextAlignment); }
+		public TextAlignment TextAlignment {
+			[DebuggerStepThrough] get { return (TextAlignment)FindEnumProperty(StylePropertyId.TextAlignment); }
 		set { SetEnumProperty(StylePropertyId.TextAlignment, (int)value); } 
 		}
 

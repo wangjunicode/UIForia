@@ -121,8 +121,15 @@ namespace UIForia.Rendering {
         AnchorLeft = 1304,
         AnchorTarget = 1305,
 
-//        ScrollBarVerticalTrackSize = 1301,
-//        ScrollBarVerticalHandleSize = 1303,
+        ScrollbarVerticalTrackSize = 1301,
+        ScrollbarVerticalTrackRadius = 1302,
+        ScrollbarVerticalHandleSize = 1303,
+        ScrollbarVerticalHandleRadius = 1304,
+        ScrollbarVerticalTrackColor = 1305,
+        ScrollbarVerticalHandleColor = 1306,
+        ScrollbarVerticalAttachment = 1307,
+        ScrollbarVerticalButtonPlacement = 1308,
+        
 //        ScrollBarVerticalFadeDelay = 1305,
 //        ScrollBarVerticalHoverTrackSize = 1305,
 //        ScrollBarVerticalHoverHandleSize = 1305,

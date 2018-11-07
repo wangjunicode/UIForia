@@ -1,11 +1,11 @@
 using Shapes2D;
+using UIForia.Layout;
+using UIForia.Layout.LayoutTypes;
 using TMPro;
 using System.Collections.Generic;
 using UnityEngine;
-using UIForia.Layout;
-using UIForia.Layout.LayoutTypes;
-using UIForia.Text;
 using UIForia.Util;
+using UIForia.Text;
 using FontStyle = UIForia.Text.FontStyle;
 using TextAlignment = UIForia.Text.TextAlignment;
 
@@ -15,8 +15,8 @@ namespace UIForia.Rendering {
 
     public static class DefaultStyleValues_Generated {
 
-        public const Overflow OverflowX = Overflow.None;
-        public const Overflow OverflowY = Overflow.None;
+        public const Overflow OverflowX = UIForia.Rendering.Overflow.None;
+        public const Overflow OverflowY = UIForia.Rendering.Overflow.None;
         public static readonly Color BorderColor = new Color(-1f, -1f, -1f, -1f);
         public static readonly Color BackgroundColor = new Color(-1f, -1f, -1f, -1f);
         public static readonly Color BackgroundColorSecondary = new Color(-1f, -1f, -1f, -1f);
@@ -27,36 +27,36 @@ namespace UIForia.Rendering {
         public const GradientAxis BackgroundGradientAxis = Shapes2D.GradientAxis.Horizontal;
         public const float BackgroundGradientStart = 0;
         public const float BackgroundFillRotation = 0;
-        public const BackgroundFillType BackgroundFillType = Rendering.BackgroundFillType.Normal;
-        public const BackgroundShapeType BackgroundShapeType = Rendering.BackgroundShapeType.Rectangle;
+        public const BackgroundFillType BackgroundFillType = UIForia.Rendering.BackgroundFillType.Normal;
+        public const BackgroundShapeType BackgroundShapeType = UIForia.Rendering.BackgroundShapeType.Rectangle;
         public const float BackgroundFillOffsetX = 0;
         public const float BackgroundFillOffsetY = 0;
         public const float BackgroundFillScaleX = 1;
         public const float BackgroundFillScaleY = 1;
-        public const int FlexItemOrder = 0;//65535;
+        public const int FlexItemOrder = 0;
         public const int FlexItemGrow = 0;
         public const int FlexItemShrink = 0;
-        public const CrossAxisAlignment FlexItemSelfAlignment = CrossAxisAlignment.Unset;
-        public const LayoutDirection FlexLayoutDirection = LayoutDirection.Row;
-        public const LayoutWrap FlexLayoutWrap = LayoutWrap.None;
-        public const MainAxisAlignment FlexLayoutMainAxisAlignment = MainAxisAlignment.Start;
-        public const CrossAxisAlignment FlexLayoutCrossAxisAlignment = CrossAxisAlignment.Start;
+        public const CrossAxisAlignment FlexItemSelfAlignment = UIForia.Layout.CrossAxisAlignment.Unset;
+        public const LayoutDirection FlexLayoutDirection = UIForia.Rendering.LayoutDirection.Row;
+        public const LayoutWrap FlexLayoutWrap = UIForia.Rendering.LayoutWrap.None;
+        public const MainAxisAlignment FlexLayoutMainAxisAlignment = UIForia.Layout.MainAxisAlignment.Start;
+        public const CrossAxisAlignment FlexLayoutCrossAxisAlignment = UIForia.Layout.CrossAxisAlignment.Start;
         public const int GridItemColStart = 2147483647;
         public const int GridItemColSpan = 1;
         public const int GridItemRowStart = 2147483647;
         public const int GridItemRowSpan = 1;
-        public const CrossAxisAlignment GridItemColSelfAlignment = CrossAxisAlignment.Unset;
-        public const CrossAxisAlignment GridItemRowSelfAlignment = CrossAxisAlignment.Unset;
-        public const LayoutDirection GridLayoutDirection = LayoutDirection.Row;
-        public const GridLayoutDensity GridLayoutDensity = Layout.GridLayoutDensity.Sparse;
+        public const CrossAxisAlignment GridItemColSelfAlignment = UIForia.Layout.CrossAxisAlignment.Unset;
+        public const CrossAxisAlignment GridItemRowSelfAlignment = UIForia.Layout.CrossAxisAlignment.Unset;
+        public const LayoutDirection GridLayoutDirection = UIForia.Rendering.LayoutDirection.Row;
+        public const GridLayoutDensity GridLayoutDensity = UIForia.Layout.GridLayoutDensity.Sparse;
         public static readonly IReadOnlyList<GridTrackSize> GridLayoutColTemplate = ListPool<GridTrackSize>.Empty;
         public static readonly IReadOnlyList<GridTrackSize> GridLayoutRowTemplate = ListPool<GridTrackSize>.Empty;
         public static readonly GridTrackSize GridLayoutColAutoSize = new GridTrackSize(1, GridTemplateUnit.MaxContent);
         public static readonly GridTrackSize GridLayoutRowAutoSize = new GridTrackSize(1, GridTemplateUnit.MaxContent);
         public const float GridLayoutColGap = 0;
         public const float GridLayoutRowGap = 0;
-        public const CrossAxisAlignment GridLayoutColAlignment = CrossAxisAlignment.Start;
-        public const CrossAxisAlignment GridLayoutRowAlignment = CrossAxisAlignment.Start;
+        public const CrossAxisAlignment GridLayoutColAlignment = UIForia.Layout.CrossAxisAlignment.Start;
+        public const CrossAxisAlignment GridLayoutRowAlignment = UIForia.Layout.CrossAxisAlignment.Start;
         public static readonly UIMeasurement MinWidth = new UIMeasurement(0, UIMeasurementUnit.Pixel);
         public static readonly UIMeasurement MaxWidth = new UIMeasurement(3.402823E+38, UIMeasurementUnit.Pixel);
         public static readonly UIMeasurement PreferredWidth = new UIMeasurement(1, UIMeasurementUnit.Content);
@@ -82,14 +82,14 @@ namespace UIForia.Rendering {
         public static readonly Color TextColor = new Color(0f, 0f, 0f, 1f);
         public static readonly TMP_FontAsset TextFontAsset = TMP_FontAsset.defaultFontAsset;
         public const int TextFontSize = 18;
-        public const Text.FontStyle TextFontStyle = Text.FontStyle.Normal;
-        public const Text.TextAlignment TextAlignment = Text.TextAlignment.Left;
-        public const TextTransform TextTransform = Text.TextTransform.None;
+        public const FontStyle TextFontStyle = UIForia.Text.FontStyle.Normal;
+        public const TextAlignment TextAlignment = UIForia.Text.TextAlignment.Left;
+        public const TextTransform TextTransform = UIForia.Text.TextTransform.None;
         public static readonly UIFixedLength AnchorTop = new UIFixedLength(0, UIFixedUnit.Percent);
         public static readonly UIFixedLength AnchorRight = new UIFixedLength(1, UIFixedUnit.Percent);
         public static readonly UIFixedLength AnchorBottom = new UIFixedLength(1, UIFixedUnit.Percent);
         public static readonly UIFixedLength AnchorLeft = new UIFixedLength(0, UIFixedUnit.Percent);
-        public const AnchorTarget AnchorTarget = Rendering.AnchorTarget.Parent;
+        public const AnchorTarget AnchorTarget = UIForia.Rendering.AnchorTarget.Parent;
         public static readonly UIFixedLength TransformPositionX = new UIFixedLength(0, UIFixedUnit.Pixel);
         public static readonly UIFixedLength TransformPositionY = new UIFixedLength(0, UIFixedUnit.Pixel);
         public static readonly UIFixedLength TransformPivotX = new UIFixedLength(0, UIFixedUnit.Pixel);
@@ -97,20 +97,20 @@ namespace UIForia.Rendering {
         public const float TransformScaleX = 1;
         public const float TransformScaleY = 1;
         public const float TransformRotation = 0;
-        public const TransformBehavior TransformBehaviorX = TransformBehavior.Default;
-        public const TransformBehavior TransformBehaviorY = TransformBehavior.Default;
-        public const LayoutType LayoutType = Rendering.LayoutType.Flex;
-        public const LayoutBehavior LayoutBehavior = Layout.LayoutBehavior.Normal;
+        public const TransformBehavior TransformBehaviorX = UIForia.Rendering.TransformBehavior.Default;
+        public const TransformBehavior TransformBehaviorY = UIForia.Rendering.TransformBehavior.Default;
+        public const LayoutType LayoutType = UIForia.Rendering.LayoutType.Flex;
+        public const LayoutBehavior LayoutBehavior = UIForia.Layout.LayoutBehavior.Normal;
         public const int ZIndex = 0;
         public const int RenderLayerOffset = 0;
-        public const RenderLayer RenderLayer = Rendering.RenderLayer.Default;
+        public const RenderLayer RenderLayer = UIForia.Rendering.RenderLayer.Default;
 
         public static StyleProperty GetPropertyValue(StylePropertyId propertyId) {
             switch (propertyId) {
                 case StylePropertyId.OverflowX:
-                    return new StyleProperty(StylePropertyId.OverflowX, (int) Overflow.None);
+                    return new StyleProperty(StylePropertyId.OverflowX, (int) UIForia.Rendering.Overflow.None);
                 case StylePropertyId.OverflowY:
-                    return new StyleProperty(StylePropertyId.OverflowY, (int) Overflow.None);
+                    return new StyleProperty(StylePropertyId.OverflowY, (int) UIForia.Rendering.Overflow.None);
                 case StylePropertyId.BorderColor:
                     return new StyleProperty(StylePropertyId.BorderColor, new Color(-1f, -1f, -1f, -1f));
                 case StylePropertyId.BackgroundColor:
@@ -150,15 +150,15 @@ namespace UIForia.Rendering {
                 case StylePropertyId.FlexItemShrink:
                     return new StyleProperty(StylePropertyId.FlexItemShrink, 0);
                 case StylePropertyId.FlexItemSelfAlignment:
-                    return new StyleProperty(StylePropertyId.FlexItemSelfAlignment, (int) CrossAxisAlignment.Unset);
+                    return new StyleProperty(StylePropertyId.FlexItemSelfAlignment, (int) UIForia.Layout.CrossAxisAlignment.Unset);
                 case StylePropertyId.FlexLayoutDirection:
-                    return new StyleProperty(StylePropertyId.FlexLayoutDirection, (int) LayoutDirection.Row);
+                    return new StyleProperty(StylePropertyId.FlexLayoutDirection, (int) UIForia.Rendering.LayoutDirection.Row);
                 case StylePropertyId.FlexLayoutWrap:
-                    return new StyleProperty(StylePropertyId.FlexLayoutWrap, (int) LayoutWrap.None);
+                    return new StyleProperty(StylePropertyId.FlexLayoutWrap, (int) UIForia.Rendering.LayoutWrap.None);
                 case StylePropertyId.FlexLayoutMainAxisAlignment:
-                    return new StyleProperty(StylePropertyId.FlexLayoutMainAxisAlignment, (int) MainAxisAlignment.Start);
+                    return new StyleProperty(StylePropertyId.FlexLayoutMainAxisAlignment, (int) UIForia.Layout.MainAxisAlignment.Start);
                 case StylePropertyId.FlexLayoutCrossAxisAlignment:
-                    return new StyleProperty(StylePropertyId.FlexLayoutCrossAxisAlignment, (int) CrossAxisAlignment.Start);
+                    return new StyleProperty(StylePropertyId.FlexLayoutCrossAxisAlignment, (int) UIForia.Layout.CrossAxisAlignment.Start);
                 case StylePropertyId.GridItemColStart:
                     return new StyleProperty(StylePropertyId.GridItemColStart, 2147483647);
                 case StylePropertyId.GridItemColSpan:
@@ -168,11 +168,11 @@ namespace UIForia.Rendering {
                 case StylePropertyId.GridItemRowSpan:
                     return new StyleProperty(StylePropertyId.GridItemRowSpan, 1);
                 case StylePropertyId.GridItemColSelfAlignment:
-                    return new StyleProperty(StylePropertyId.GridItemColSelfAlignment, (int) CrossAxisAlignment.Unset);
+                    return new StyleProperty(StylePropertyId.GridItemColSelfAlignment, (int) UIForia.Layout.CrossAxisAlignment.Unset);
                 case StylePropertyId.GridItemRowSelfAlignment:
-                    return new StyleProperty(StylePropertyId.GridItemRowSelfAlignment, (int) CrossAxisAlignment.Unset);
+                    return new StyleProperty(StylePropertyId.GridItemRowSelfAlignment, (int) UIForia.Layout.CrossAxisAlignment.Unset);
                 case StylePropertyId.GridLayoutDirection:
-                    return new StyleProperty(StylePropertyId.GridLayoutDirection, (int) LayoutDirection.Row);
+                    return new StyleProperty(StylePropertyId.GridLayoutDirection, (int) UIForia.Rendering.LayoutDirection.Row);
                 case StylePropertyId.GridLayoutDensity:
                     return new StyleProperty(StylePropertyId.GridLayoutDensity, (int) UIForia.Layout.GridLayoutDensity.Sparse);
                 case StylePropertyId.GridLayoutColTemplate:
@@ -188,9 +188,9 @@ namespace UIForia.Rendering {
                 case StylePropertyId.GridLayoutRowGap:
                     return new StyleProperty(StylePropertyId.GridLayoutRowGap, 0);
                 case StylePropertyId.GridLayoutColAlignment:
-                    return new StyleProperty(StylePropertyId.GridLayoutColAlignment, (int) CrossAxisAlignment.Start);
+                    return new StyleProperty(StylePropertyId.GridLayoutColAlignment, (int) UIForia.Layout.CrossAxisAlignment.Start);
                 case StylePropertyId.GridLayoutRowAlignment:
-                    return new StyleProperty(StylePropertyId.GridLayoutRowAlignment, (int) CrossAxisAlignment.Start);
+                    return new StyleProperty(StylePropertyId.GridLayoutRowAlignment, (int) UIForia.Layout.CrossAxisAlignment.Start);
                 case StylePropertyId.MinWidth:
                     return new StyleProperty(StylePropertyId.MinWidth, new UIMeasurement(0, UIMeasurementUnit.Pixel));
                 case StylePropertyId.MaxWidth:
@@ -242,9 +242,9 @@ namespace UIForia.Rendering {
                 case StylePropertyId.TextFontSize:
                     return new StyleProperty(StylePropertyId.TextFontSize, 18);
                 case StylePropertyId.TextFontStyle:
-                    return new StyleProperty(StylePropertyId.TextFontStyle, (int) Text.FontStyle.Normal);
+                    return new StyleProperty(StylePropertyId.TextFontStyle, (int) UIForia.Text.FontStyle.Normal);
                 case StylePropertyId.TextAlignment:
-                    return new StyleProperty(StylePropertyId.TextAlignment, (int) Text.TextAlignment.Left);
+                    return new StyleProperty(StylePropertyId.TextAlignment, (int) UIForia.Text.TextAlignment.Left);
                 case StylePropertyId.TextTransform:
                     return new StyleProperty(StylePropertyId.TextTransform, (int) UIForia.Text.TextTransform.None);
                 case StylePropertyId.AnchorTop:
@@ -272,9 +272,9 @@ namespace UIForia.Rendering {
                 case StylePropertyId.TransformRotation:
                     return new StyleProperty(StylePropertyId.TransformRotation, 0);
                 case StylePropertyId.TransformBehaviorX:
-                    return new StyleProperty(StylePropertyId.TransformBehaviorX, (int) TransformBehavior.Default);
+                    return new StyleProperty(StylePropertyId.TransformBehaviorX, (int) UIForia.Rendering.TransformBehavior.Default);
                 case StylePropertyId.TransformBehaviorY:
-                    return new StyleProperty(StylePropertyId.TransformBehaviorY, (int) TransformBehavior.Default);
+                    return new StyleProperty(StylePropertyId.TransformBehaviorY, (int) UIForia.Rendering.TransformBehavior.Default);
                 case StylePropertyId.LayoutType:
                     return new StyleProperty(StylePropertyId.LayoutType, (int) UIForia.Rendering.LayoutType.Flex);
                 case StylePropertyId.LayoutBehavior:

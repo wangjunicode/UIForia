@@ -404,13 +404,11 @@
             <e p="IMaterialProvider.cs" t="Include" />
             <e p="IMeshProvider.cs" t="Include" />
             <e p="IRenderSystem.cs" t="Include" />
-            <e p="ITextSizeCalculator.cs" t="Include" />
             <e p="Overflow.cs" t="Include" />
             <e p="Paint.cs" t="Include" />
             <e p="RenderConstants.cs" t="Include" />
             <e p="RenderData.cs" t="Include" />
             <e p="RenderLayer.cs" t="Include" />
-            <e p="ScrollbarPartId.cs" t="Include" />
             <e p="StandardDrawable.cs" t="Include" />
             <e p="StyleColor.cs" t="Include" />
             <e p="StyleProperty.cs" t="Include" />

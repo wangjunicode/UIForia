@@ -1,10 +1,13 @@
 using System.Collections.Generic;
 using System.Diagnostics;
 using Shapes2D;
-using TMPro;
+using UIForia;
 using UIForia.Layout;
 using UIForia.Layout.LayoutTypes;
+using UIForia.Rendering;
 using UIForia.Text;
+using TMPro;
+using UIForia.Util;
 using UnityEngine;
 using FontStyle = UIForia.Text.FontStyle;
 using TextAlignment = UIForia.Text.TextAlignment;
@@ -454,6 +457,266 @@ public partial class UIStyle {		public Overflow OverflowX {
 		public RenderLayer RenderLayer {
 			[DebuggerStepThrough] get { return (RenderLayer)FindEnumProperty(StylePropertyId.RenderLayer); }
 		set { SetEnumProperty(StylePropertyId.RenderLayer, (int)value); } 
+		}
+
+		public VerticalScrollbarAttachment ScrollbarVerticalAttachment {
+			[DebuggerStepThrough] get { return (VerticalScrollbarAttachment)FindEnumProperty(StylePropertyId.ScrollbarVerticalAttachment); }
+		set { SetEnumProperty(StylePropertyId.ScrollbarVerticalAttachment, (int)value); } 
+		}
+
+		public ScrollbarButtonPlacement ScrollbarVerticalButtonPlacement {
+			[DebuggerStepThrough] get { return (ScrollbarButtonPlacement)FindEnumProperty(StylePropertyId.ScrollbarVerticalButtonPlacement); }
+		set { SetEnumProperty(StylePropertyId.ScrollbarVerticalButtonPlacement, (int)value); } 
+		}
+
+		public float ScrollbarVerticalTrackSize {
+			[DebuggerStepThrough] get { return FindFloatProperty(StylePropertyId.ScrollbarVerticalTrackSize); }
+		set { SetFloatProperty(StylePropertyId.ScrollbarVerticalTrackSize, value); } 
+		}
+
+		public float ScrollbarVerticalTrackBorderRadius {
+			[DebuggerStepThrough] get { return FindFloatProperty(StylePropertyId.ScrollbarVerticalTrackBorderRadius); }
+		set { SetFloatProperty(StylePropertyId.ScrollbarVerticalTrackBorderRadius, value); } 
+		}
+
+		public float ScrollbarVerticalTrackBorderSize {
+			[DebuggerStepThrough] get { return FindFloatProperty(StylePropertyId.ScrollbarVerticalTrackBorderSize); }
+		set { SetFloatProperty(StylePropertyId.ScrollbarVerticalTrackBorderSize, value); } 
+		}
+
+		public Color ScrollbarVerticalTrackBorderColor {
+			[DebuggerStepThrough] get { return FindColorProperty(StylePropertyId.ScrollbarVerticalTrackBorderColor); }
+		set { SetColorProperty(StylePropertyId.ScrollbarVerticalTrackBorderColor, value); } 
+		}
+
+		public Texture2D ScrollbarVerticalTrackImage {
+			[DebuggerStepThrough] get { return GetProperty(StylePropertyId.ScrollbarVerticalTrackImage).AsTexture2D; }
+		set { SetObjectProperty(StylePropertyId.ScrollbarVerticalTrackImage, value); } 
+		}
+
+		public Color ScrollbarVerticalTrackColor {
+			[DebuggerStepThrough] get { return FindColorProperty(StylePropertyId.ScrollbarVerticalTrackColor); }
+		set { SetColorProperty(StylePropertyId.ScrollbarVerticalTrackColor, value); } 
+		}
+
+		public float ScrollbarVerticalHandleSize {
+			[DebuggerStepThrough] get { return FindFloatProperty(StylePropertyId.ScrollbarVerticalHandleSize); }
+		set { SetFloatProperty(StylePropertyId.ScrollbarVerticalHandleSize, value); } 
+		}
+
+		public float ScrollbarVerticalHandleBorderRadius {
+			[DebuggerStepThrough] get { return FindFloatProperty(StylePropertyId.ScrollbarVerticalHandleBorderRadius); }
+		set { SetFloatProperty(StylePropertyId.ScrollbarVerticalHandleBorderRadius, value); } 
+		}
+
+		public float ScrollbarVerticalHandleBorderSize {
+			[DebuggerStepThrough] get { return FindFloatProperty(StylePropertyId.ScrollbarVerticalHandleBorderSize); }
+		set { SetFloatProperty(StylePropertyId.ScrollbarVerticalHandleBorderSize, value); } 
+		}
+
+		public Color ScrollbarVerticalHandleBorderColor {
+			[DebuggerStepThrough] get { return FindColorProperty(StylePropertyId.ScrollbarVerticalHandleBorderColor); }
+		set { SetColorProperty(StylePropertyId.ScrollbarVerticalHandleBorderColor, value); } 
+		}
+
+		public Texture2D ScrollbarVerticalHandleImage {
+			[DebuggerStepThrough] get { return GetProperty(StylePropertyId.ScrollbarVerticalHandleImage).AsTexture2D; }
+		set { SetObjectProperty(StylePropertyId.ScrollbarVerticalHandleImage, value); } 
+		}
+
+		public Color ScrollbarVerticalHandleColor {
+			[DebuggerStepThrough] get { return FindColorProperty(StylePropertyId.ScrollbarVerticalHandleColor); }
+		set { SetColorProperty(StylePropertyId.ScrollbarVerticalHandleColor, value); } 
+		}
+
+		public float ScrollbarVerticalIncrementSize {
+			[DebuggerStepThrough] get { return FindFloatProperty(StylePropertyId.ScrollbarVerticalIncrementSize); }
+		set { SetFloatProperty(StylePropertyId.ScrollbarVerticalIncrementSize, value); } 
+		}
+
+		public float ScrollbarVerticalIncrementBorderRadius {
+			[DebuggerStepThrough] get { return FindFloatProperty(StylePropertyId.ScrollbarVerticalIncrementBorderRadius); }
+		set { SetFloatProperty(StylePropertyId.ScrollbarVerticalIncrementBorderRadius, value); } 
+		}
+
+		public float ScrollbarVerticalIncrementBorderSize {
+			[DebuggerStepThrough] get { return FindFloatProperty(StylePropertyId.ScrollbarVerticalIncrementBorderSize); }
+		set { SetFloatProperty(StylePropertyId.ScrollbarVerticalIncrementBorderSize, value); } 
+		}
+
+		public Color ScrollbarVerticalIncrementBorderColor {
+			[DebuggerStepThrough] get { return FindColorProperty(StylePropertyId.ScrollbarVerticalIncrementBorderColor); }
+		set { SetColorProperty(StylePropertyId.ScrollbarVerticalIncrementBorderColor, value); } 
+		}
+
+		public Texture2D ScrollbarVerticalIncrementImage {
+			[DebuggerStepThrough] get { return GetProperty(StylePropertyId.ScrollbarVerticalIncrementImage).AsTexture2D; }
+		set { SetObjectProperty(StylePropertyId.ScrollbarVerticalIncrementImage, value); } 
+		}
+
+		public Color ScrollbarVerticalIncrementColor {
+			[DebuggerStepThrough] get { return FindColorProperty(StylePropertyId.ScrollbarVerticalIncrementColor); }
+		set { SetColorProperty(StylePropertyId.ScrollbarVerticalIncrementColor, value); } 
+		}
+
+		public float ScrollbarVerticalDecrementSize {
+			[DebuggerStepThrough] get { return FindFloatProperty(StylePropertyId.ScrollbarVerticalDecrementSize); }
+		set { SetFloatProperty(StylePropertyId.ScrollbarVerticalDecrementSize, value); } 
+		}
+
+		public float ScrollbarVerticalDecrementBorderRadius {
+			[DebuggerStepThrough] get { return FindFloatProperty(StylePropertyId.ScrollbarVerticalDecrementBorderRadius); }
+		set { SetFloatProperty(StylePropertyId.ScrollbarVerticalDecrementBorderRadius, value); } 
+		}
+
+		public float ScrollbarVerticalDecrementBorderSize {
+			[DebuggerStepThrough] get { return FindFloatProperty(StylePropertyId.ScrollbarVerticalDecrementBorderSize); }
+		set { SetFloatProperty(StylePropertyId.ScrollbarVerticalDecrementBorderSize, value); } 
+		}
+
+		public Color ScrollbarVerticalDecrementBorderColor {
+			[DebuggerStepThrough] get { return FindColorProperty(StylePropertyId.ScrollbarVerticalDecrementBorderColor); }
+		set { SetColorProperty(StylePropertyId.ScrollbarVerticalDecrementBorderColor, value); } 
+		}
+
+		public Texture2D ScrollbarVerticalDecrementImage {
+			[DebuggerStepThrough] get { return GetProperty(StylePropertyId.ScrollbarVerticalDecrementImage).AsTexture2D; }
+		set { SetObjectProperty(StylePropertyId.ScrollbarVerticalDecrementImage, value); } 
+		}
+
+		public Color ScrollbarVerticalDecrementColor {
+			[DebuggerStepThrough] get { return FindColorProperty(StylePropertyId.ScrollbarVerticalDecrementColor); }
+		set { SetColorProperty(StylePropertyId.ScrollbarVerticalDecrementColor, value); } 
+		}
+
+		public HorizontalScrollbarAttachment ScrollbarHorizontalAttachment {
+			[DebuggerStepThrough] get { return (HorizontalScrollbarAttachment)FindEnumProperty(StylePropertyId.ScrollbarHorizontalAttachment); }
+		set { SetEnumProperty(StylePropertyId.ScrollbarHorizontalAttachment, (int)value); } 
+		}
+
+		public ScrollbarButtonPlacement ScrollbarHorizontalButtonPlacement {
+			[DebuggerStepThrough] get { return (ScrollbarButtonPlacement)FindEnumProperty(StylePropertyId.ScrollbarHorizontalButtonPlacement); }
+		set { SetEnumProperty(StylePropertyId.ScrollbarHorizontalButtonPlacement, (int)value); } 
+		}
+
+		public float ScrollbarHorizontalTrackSize {
+			[DebuggerStepThrough] get { return FindFloatProperty(StylePropertyId.ScrollbarHorizontalTrackSize); }
+		set { SetFloatProperty(StylePropertyId.ScrollbarHorizontalTrackSize, value); } 
+		}
+
+		public float ScrollbarHorizontalTrackBorderRadius {
+			[DebuggerStepThrough] get { return FindFloatProperty(StylePropertyId.ScrollbarHorizontalTrackBorderRadius); }
+		set { SetFloatProperty(StylePropertyId.ScrollbarHorizontalTrackBorderRadius, value); } 
+		}
+
+		public float ScrollbarHorizontalTrackBorderSize {
+			[DebuggerStepThrough] get { return FindFloatProperty(StylePropertyId.ScrollbarHorizontalTrackBorderSize); }
+		set { SetFloatProperty(StylePropertyId.ScrollbarHorizontalTrackBorderSize, value); } 
+		}
+
+		public Color ScrollbarHorizontalTrackBorderColor {
+			[DebuggerStepThrough] get { return FindColorProperty(StylePropertyId.ScrollbarHorizontalTrackBorderColor); }
+		set { SetColorProperty(StylePropertyId.ScrollbarHorizontalTrackBorderColor, value); } 
+		}
+
+		public Texture2D ScrollbarHorizontalTrackImage {
+			[DebuggerStepThrough] get { return GetProperty(StylePropertyId.ScrollbarHorizontalTrackImage).AsTexture2D; }
+		set { SetObjectProperty(StylePropertyId.ScrollbarHorizontalTrackImage, value); } 
+		}
+
+		public Color ScrollbarHorizontalTrackColor {
+			[DebuggerStepThrough] get { return FindColorProperty(StylePropertyId.ScrollbarHorizontalTrackColor); }
+		set { SetColorProperty(StylePropertyId.ScrollbarHorizontalTrackColor, value); } 
+		}
+
+		public float ScrollbarHorizontalHandleSize {
+			[DebuggerStepThrough] get { return FindFloatProperty(StylePropertyId.ScrollbarHorizontalHandleSize); }
+		set { SetFloatProperty(StylePropertyId.ScrollbarHorizontalHandleSize, value); } 
+		}
+
+		public float ScrollbarHorizontalHandleBorderRadius {
+			[DebuggerStepThrough] get { return FindFloatProperty(StylePropertyId.ScrollbarHorizontalHandleBorderRadius); }
+		set { SetFloatProperty(StylePropertyId.ScrollbarHorizontalHandleBorderRadius, value); } 
+		}
+
+		public float ScrollbarHorizontalHandleBorderSize {
+			[DebuggerStepThrough] get { return FindFloatProperty(StylePropertyId.ScrollbarHorizontalHandleBorderSize); }
+		set { SetFloatProperty(StylePropertyId.ScrollbarHorizontalHandleBorderSize, value); } 
+		}
+
+		public Color ScrollbarHorizontalHandleBorderColor {
+			[DebuggerStepThrough] get { return FindColorProperty(StylePropertyId.ScrollbarHorizontalHandleBorderColor); }
+		set { SetColorProperty(StylePropertyId.ScrollbarHorizontalHandleBorderColor, value); } 
+		}
+
+		public Texture2D ScrollbarHorizontalHandleImage {
+			[DebuggerStepThrough] get { return GetProperty(StylePropertyId.ScrollbarHorizontalHandleImage).AsTexture2D; }
+		set { SetObjectProperty(StylePropertyId.ScrollbarHorizontalHandleImage, value); } 
+		}
+
+		public Color ScrollbarHorizontalHandleColor {
+			[DebuggerStepThrough] get { return FindColorProperty(StylePropertyId.ScrollbarHorizontalHandleColor); }
+		set { SetColorProperty(StylePropertyId.ScrollbarHorizontalHandleColor, value); } 
+		}
+
+		public float ScrollbarHorizontalIncrementSize {
+			[DebuggerStepThrough] get { return FindFloatProperty(StylePropertyId.ScrollbarHorizontalIncrementSize); }
+		set { SetFloatProperty(StylePropertyId.ScrollbarHorizontalIncrementSize, value); } 
+		}
+
+		public float ScrollbarHorizontalIncrementBorderRadius {
+			[DebuggerStepThrough] get { return FindFloatProperty(StylePropertyId.ScrollbarHorizontalIncrementBorderRadius); }
+		set { SetFloatProperty(StylePropertyId.ScrollbarHorizontalIncrementBorderRadius, value); } 
+		}
+
+		public float ScrollbarHorizontalIncrementBorderSize {
+			[DebuggerStepThrough] get { return FindFloatProperty(StylePropertyId.ScrollbarHorizontalIncrementBorderSize); }
+		set { SetFloatProperty(StylePropertyId.ScrollbarHorizontalIncrementBorderSize, value); } 
+		}
+
+		public Color ScrollbarHorizontalIncrementBorderColor {
+			[DebuggerStepThrough] get { return FindColorProperty(StylePropertyId.ScrollbarHorizontalIncrementBorderColor); }
+		set { SetColorProperty(StylePropertyId.ScrollbarHorizontalIncrementBorderColor, value); } 
+		}
+
+		public Texture2D ScrollbarHorizontalIncrementImage {
+			[DebuggerStepThrough] get { return GetProperty(StylePropertyId.ScrollbarHorizontalIncrementImage).AsTexture2D; }
+		set { SetObjectProperty(StylePropertyId.ScrollbarHorizontalIncrementImage, value); } 
+		}
+
+		public Color ScrollbarHorizontalIncrementColor {
+			[DebuggerStepThrough] get { return FindColorProperty(StylePropertyId.ScrollbarHorizontalIncrementColor); }
+		set { SetColorProperty(StylePropertyId.ScrollbarHorizontalIncrementColor, value); } 
+		}
+
+		public float ScrollbarHorizontalDecrementSize {
+			[DebuggerStepThrough] get { return FindFloatProperty(StylePropertyId.ScrollbarHorizontalDecrementSize); }
+		set { SetFloatProperty(StylePropertyId.ScrollbarHorizontalDecrementSize, value); } 
+		}
+
+		public float ScrollbarHorizontalDecrementBorderRadius {
+			[DebuggerStepThrough] get { return FindFloatProperty(StylePropertyId.ScrollbarHorizontalDecrementBorderRadius); }
+		set { SetFloatProperty(StylePropertyId.ScrollbarHorizontalDecrementBorderRadius, value); } 
+		}
+
+		public float ScrollbarHorizontalDecrementBorderSize {
+			[DebuggerStepThrough] get { return FindFloatProperty(StylePropertyId.ScrollbarHorizontalDecrementBorderSize); }
+		set { SetFloatProperty(StylePropertyId.ScrollbarHorizontalDecrementBorderSize, value); } 
+		}
+
+		public Color ScrollbarHorizontalDecrementBorderColor {
+			[DebuggerStepThrough] get { return FindColorProperty(StylePropertyId.ScrollbarHorizontalDecrementBorderColor); }
+		set { SetColorProperty(StylePropertyId.ScrollbarHorizontalDecrementBorderColor, value); } 
+		}
+
+		public Texture2D ScrollbarHorizontalDecrementImage {
+			[DebuggerStepThrough] get { return GetProperty(StylePropertyId.ScrollbarHorizontalDecrementImage).AsTexture2D; }
+		set { SetObjectProperty(StylePropertyId.ScrollbarHorizontalDecrementImage, value); } 
+		}
+
+		public Color ScrollbarHorizontalDecrementColor {
+			[DebuggerStepThrough] get { return FindColorProperty(StylePropertyId.ScrollbarHorizontalDecrementColor); }
+		set { SetColorProperty(StylePropertyId.ScrollbarHorizontalDecrementColor, value); } 
 		}
 
 }}

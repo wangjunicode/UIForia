@@ -76,9 +76,18 @@ public abstract partial class InputSystem : IInputSystem, IInputProvider {
     private static readonly UITemplateContext s_DummyContext = new UITemplateContext(null, null);
 
     private void HandleCreateScrollbar(VirtualScrollbar scrollbar) {
+        
         m_DragCreatorMap.Add(scrollbar.id, new DragCreatorGroup(s_DummyContext, new DragEventCreator[] {
             new DragEventCreator_WithEvent<VirtualScrollbar>(KeyboardModifiers.None, EventPhase.Bubble, (instance, evt) => instance.CreateDragEvent(evt)),
         }));
+        
+        m_MouseHandlerMap.Add(scrollbar.id, new MouseHandlerGroup(s_DummyContext, new MouseEventHandler[] {
+            new MouseEventHandler_IgnoreEvent<VirtualScrollbar>(InputEventType.MouseEnter, KeyboardModifiers.None, EventPhase.Bubble, (instance) => instance.OnMouseEnter()),
+            new MouseEventHandler_IgnoreEvent<VirtualScrollbar>(InputEventType.MouseHover, KeyboardModifiers.None, EventPhase.Bubble, (instance) => instance.OnMouseMoveOrHover()),
+            new MouseEventHandler_IgnoreEvent<VirtualScrollbar>(InputEventType.MouseMove, KeyboardModifiers.None, EventPhase.Bubble, (instance) => instance.OnMouseMoveOrHover()),
+            new MouseEventHandler_IgnoreEvent<VirtualScrollbar>(InputEventType.MouseExit, KeyboardModifiers.None, EventPhase.Bubble, (instance) => instance.OnMouseExit()),
+        }, InputEventType.MouseEnter | InputEventType.MouseHover | InputEventType.MouseMove | InputEventType.MouseExit));
+        
     }
 
     public bool RequestFocus(IFocusable target) {

@@ -136,23 +136,73 @@ namespace UIForia.Editor {
             new AnimatedPropertyGenerator<int>(StylePropertyId.RenderLayerOffset, 0),
             new AnimatedPropertyGenerator<RenderLayer>(StylePropertyId.RenderLayer, RenderLayer.Default),
             
-            // Scroll Bar Vertical
+            // Scrollbar Vertical
             new PropertyGenerator<VerticalScrollbarAttachment>(StylePropertyId.ScrollbarVerticalAttachment, VerticalScrollbarAttachment.Right),
             new PropertyGenerator<ScrollbarButtonPlacement>(StylePropertyId.ScrollbarVerticalButtonPlacement, ScrollbarButtonPlacement.Hidden),
-            new PropertyGenerator<UIFixedLength>(StylePropertyId.ScrollbarVerticalTrackSize, new UIFixedLength(5f)),
-            new PropertyGenerator<UIFixedLength>(StylePropertyId.ScrollbarVerticalTrackRadius, new UIFixedLength(3f)),
-            new PropertyGenerator<UIFixedLength>(StylePropertyId.ScrollbarVerticalHandleSize, new UIFixedLength(5f)),
-            new PropertyGenerator<UIFixedLength>(StylePropertyId.ScrollbarVerticalHandleRadius, new UIFixedLength(3f)),
+            
+            new PropertyGenerator<float>(StylePropertyId.ScrollbarVerticalTrackSize, 10f),
+            new PropertyGenerator<float>(StylePropertyId.ScrollbarVerticalTrackBorderRadius, 0),
+            new PropertyGenerator<float>(StylePropertyId.ScrollbarVerticalTrackBorderSize, 0),
+            new PropertyGenerator<Color>(StylePropertyId.ScrollbarVerticalTrackBorderColor, ColorUtil.UnsetValue),
+            new PropertyGenerator<Texture2D>(StylePropertyId.ScrollbarVerticalTrackImage, null),
             new PropertyGenerator<Color>(StylePropertyId.ScrollbarVerticalTrackColor, Color.gray),
-            new PropertyGenerator<Color>(StylePropertyId.ScrollbarVerticalHandleColor, Color.white),
-            // button texture
-            // button size
-            // button padding
-            // button border
-            // button radius
-            // 
+            
+            new PropertyGenerator<float>(StylePropertyId.ScrollbarVerticalHandleSize, 10f),
+            new PropertyGenerator<float>(StylePropertyId.ScrollbarVerticalHandleBorderRadius, 0),
+            new PropertyGenerator<float>(StylePropertyId.ScrollbarVerticalHandleBorderSize, 0),
+            new PropertyGenerator<Color>(StylePropertyId.ScrollbarVerticalHandleBorderColor, ColorUtil.UnsetValue),
+            new PropertyGenerator<Texture2D>(StylePropertyId.ScrollbarVerticalHandleImage, null),
+            new PropertyGenerator<Color>(StylePropertyId.ScrollbarVerticalHandleColor, Color.gray),
+            
+            new PropertyGenerator<float>(StylePropertyId.ScrollbarVerticalIncrementSize, 10f),
+            new PropertyGenerator<float>(StylePropertyId.ScrollbarVerticalIncrementBorderRadius, 0),
+            new PropertyGenerator<float>(StylePropertyId.ScrollbarVerticalIncrementBorderSize, 0),
+            new PropertyGenerator<Color>(StylePropertyId.ScrollbarVerticalIncrementBorderColor, ColorUtil.UnsetValue),
+            new PropertyGenerator<Texture2D>(StylePropertyId.ScrollbarVerticalIncrementImage, null),
+            new PropertyGenerator<Color>(StylePropertyId.ScrollbarVerticalIncrementColor, Color.gray),
+            
+            new PropertyGenerator<float>(StylePropertyId.ScrollbarVerticalDecrementSize, 10f),
+            new PropertyGenerator<float>(StylePropertyId.ScrollbarVerticalDecrementBorderRadius, 0),
+            new PropertyGenerator<float>(StylePropertyId.ScrollbarVerticalDecrementBorderSize, 0),
+            new PropertyGenerator<Color>(StylePropertyId.ScrollbarVerticalDecrementBorderColor, ColorUtil.UnsetValue),
+            new PropertyGenerator<Texture2D>(StylePropertyId.ScrollbarVerticalDecrementImage, null),
+            new PropertyGenerator<Color>(StylePropertyId.ScrollbarVerticalDecrementColor, Color.gray),
+            
+            // Scrollbar Horizontal
+            new PropertyGenerator<HorizontalScrollbarAttachment>(StylePropertyId.ScrollbarHorizontalAttachment, HorizontalScrollbarAttachment.Bottom),
+            new PropertyGenerator<ScrollbarButtonPlacement>(StylePropertyId.ScrollbarHorizontalButtonPlacement, ScrollbarButtonPlacement.Hidden),
+            
+            new PropertyGenerator<float>(StylePropertyId.ScrollbarHorizontalTrackSize, 10f),
+            new PropertyGenerator<float>(StylePropertyId.ScrollbarHorizontalTrackBorderRadius, 0),
+            new PropertyGenerator<float>(StylePropertyId.ScrollbarHorizontalTrackBorderSize, 0),
+            new PropertyGenerator<Color>(StylePropertyId.ScrollbarHorizontalTrackBorderColor, ColorUtil.UnsetValue),
+            new PropertyGenerator<Texture2D>(StylePropertyId.ScrollbarHorizontalTrackImage, null),
+            new PropertyGenerator<Color>(StylePropertyId.ScrollbarHorizontalTrackColor, Color.gray),
+            
+            new PropertyGenerator<float>(StylePropertyId.ScrollbarHorizontalHandleSize, 10f),
+            new PropertyGenerator<float>(StylePropertyId.ScrollbarHorizontalHandleBorderRadius, 0),
+            new PropertyGenerator<float>(StylePropertyId.ScrollbarHorizontalHandleBorderSize, 0),
+            new PropertyGenerator<Color>(StylePropertyId.ScrollbarHorizontalHandleBorderColor, ColorUtil.UnsetValue),
+            new PropertyGenerator<Texture2D>(StylePropertyId.ScrollbarHorizontalHandleImage, null),
+            new PropertyGenerator<Color>(StylePropertyId.ScrollbarHorizontalHandleColor, Color.gray),
+            
+            new PropertyGenerator<float>(StylePropertyId.ScrollbarHorizontalIncrementSize, 10f),
+            new PropertyGenerator<float>(StylePropertyId.ScrollbarHorizontalIncrementBorderRadius, 0),
+            new PropertyGenerator<float>(StylePropertyId.ScrollbarHorizontalIncrementBorderSize, 0),
+            new PropertyGenerator<Color>(StylePropertyId.ScrollbarHorizontalIncrementBorderColor, ColorUtil.UnsetValue),
+            new PropertyGenerator<Texture2D>(StylePropertyId.ScrollbarHorizontalIncrementImage, null),
+            new PropertyGenerator<Color>(StylePropertyId.ScrollbarHorizontalIncrementColor, Color.gray),
+            
+            new PropertyGenerator<float>(StylePropertyId.ScrollbarHorizontalDecrementSize, 10f),
+            new PropertyGenerator<float>(StylePropertyId.ScrollbarHorizontalDecrementBorderRadius, 0),
+            new PropertyGenerator<float>(StylePropertyId.ScrollbarHorizontalDecrementBorderSize, 0),
+            new PropertyGenerator<Color>(StylePropertyId.ScrollbarHorizontalDecrementBorderColor, ColorUtil.UnsetValue),
+            new PropertyGenerator<Texture2D>(StylePropertyId.ScrollbarHorizontalDecrementImage, null),
+            new PropertyGenerator<Color>(StylePropertyId.ScrollbarHorizontalDecrementColor, Color.gray),
+            
         };
 
+        
         [MenuItem("UIForia/Generate")]
         public static void Generate() {
             string styleSetPath = UnityEngine.Application.dataPath + "/Src/Rendering/ComputedStyle_Generated.cs";

@@ -7,31 +7,29 @@
             PreferredWidth = 800px;
             PreferredHeight = 764px;
             OverflowY = Scroll;
+            BackgroundColor = orange;
         }
                 
         style parent {
-            FlexLayoutDirection = Column;
-            PreferredSize = 100px;
-            <!--PreferredWidth = 100px;-->
+            FlexLayoutDirection = Row;
+            PreferredSize = 400px;
+            PreferredWidth = 200px;
             BackgroundColor = white;
             OverflowY = Scroll;
+            ScrollbarVerticalTrackColor = red;
+            ScrollbarVerticalHandleBorderRadius = 10;
+            ScrollbarVerticalHandleSize = 12;
+            <!--ScrollbarVerticalTrackSize = 30;-->
         }
         
         style child {
-            PreferredSize = 100px;
-            TransformBehavior = LayoutOffset;
-            TransformPosition = 32px, 32px;
+            PreferredSize = 500px;
             BackgroundColor = Yellow;
-            RenderLayer = Modal;
         }
         
         style child2 {
-            PreferredSize = 100px;
-            TransformBehavior = LayoutOffset;
-            TransformPosition = 16px, 16px;
+            PreferredSize = 500px;
             BackgroundColor = Blue;
-            <!--RenderLayerOffset = -;-->
-
         }
 
         

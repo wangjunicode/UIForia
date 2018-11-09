@@ -38,7 +38,7 @@ namespace UIForia {
         private static readonly Material s_BaseTextMaterial;
 
         static UITextElement() {
-            s_BaseTextMaterial = Resources.Load<Material>("Materials/UIForiaText");
+            s_BaseTextMaterial = Resources.Load<Material>("UIForia/Materials/UIForiaText");
         }
 
         public UITextElement(string text = "") {

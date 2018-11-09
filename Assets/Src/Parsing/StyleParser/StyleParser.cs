@@ -325,6 +325,43 @@ namespace UIForia.Parsing.StyleParser {
                 int start = ptr;
                 char current = input[ptr];
 
+//                if (current == ':' && ptr + 1 < input.Length && input[ptr + 1] == ':') {
+//                    ptr++;
+//                    string sectionName = ParseUtil.ReadIdentifier(input, ref ptr);
+//                    switch (sectionName.ToLower()) {
+//                        case "scrollbar-track":
+//                            break;
+//                        case "scrollbar-track-vertical":
+//                            break;
+//                        case "scrollbar-track-horizontal":
+//                            break;
+//                        case "scrollbar-handle":
+//                            break;
+//                        case "scrollbar-handle-vertical":
+//                            break;
+//                        case "scrollbar-handle-horizontal":
+//                            break;
+//                        case "scrollbar-increment":
+//                            break;
+//                        case "scrollbar-increment-vertical":
+//                            break;
+//                        case "scrollbar-increment-horizontal":
+//                            break;
+//                        case "scrollbar-decrement":
+//                            break;
+//                        case "scrollbar-decrement-vertical":
+//                            break;
+//                        case "scrollbar-decrement-horizontal":
+//                            break;
+//                        case "scrollbar-buttons":
+//                            break;
+//                        case "scrollbar-buttons-vertical:
+//                            break;
+//                        case "scrollbar-buttons-horizontal":
+//                            break;
+//                    }
+//                }
+
                 if (current == '[') {
                     string stateName = ParseUtil.ReadBlock(input, ref ptr, '[', ']');
                     ParseUtil.ConsumeString("{", input, ref ptr);
@@ -601,6 +638,90 @@ namespace UIForia.Parsing.StyleParser {
                 new StylePropertyMapper("BackgroundFillOffset", null),
                 new StylePropertyMapper("BackgroundGridSize", null),
                 new StylePropertyMapper("BackgroundLineSize", null),
+
+                new StylePropertyMapper("ScrollbarVerticalTrackSize", StylePropertyMappers.ScrollMapper),
+                new StylePropertyMapper("ScrollbarVerticalTrackColor", StylePropertyMappers.ScrollMapper),
+                new StylePropertyMapper("ScrollbarVerticalTrackBorderRadius", StylePropertyMappers.ScrollMapper),
+                new StylePropertyMapper("ScrollbarVerticalTrackBorderSize", StylePropertyMappers.ScrollMapper),
+                new StylePropertyMapper("ScrollbarVerticalTrackBorderColor", StylePropertyMappers.ScrollMapper),
+                new StylePropertyMapper("ScrollbarVerticalTrackImage", StylePropertyMappers.ScrollMapper),
+
+                new StylePropertyMapper("ScrollbarVerticalHandleSize", StylePropertyMappers.ScrollMapper),
+                new StylePropertyMapper("ScrollbarVerticalHandleColor", StylePropertyMappers.ScrollMapper),
+                new StylePropertyMapper("ScrollbarVerticalHandleBorderRadius", StylePropertyMappers.ScrollMapper),
+                new StylePropertyMapper("ScrollbarVerticalHandleBorderSize", StylePropertyMappers.ScrollMapper),
+                new StylePropertyMapper("ScrollbarVerticalHandleBorderColor", StylePropertyMappers.ScrollMapper),
+                new StylePropertyMapper("ScrollbarVerticalHandleImage", StylePropertyMappers.ScrollMapper),
+
+                new StylePropertyMapper("ScrollbarVerticalIncrementSize", StylePropertyMappers.ScrollMapper),
+                new StylePropertyMapper("ScrollbarVerticalIncrementColor", StylePropertyMappers.ScrollMapper),
+                new StylePropertyMapper("ScrollbarVerticalIncrementBorderRadius", StylePropertyMappers.ScrollMapper),
+                new StylePropertyMapper("ScrollbarVerticalIncrementBorderSize", StylePropertyMappers.ScrollMapper),
+                new StylePropertyMapper("ScrollbarVerticalIncrementBorderColor", StylePropertyMappers.ScrollMapper),
+                new StylePropertyMapper("ScrollbarVerticalIncrementImage", StylePropertyMappers.ScrollMapper),
+
+                new StylePropertyMapper("ScrollbarVerticalDecrementSize", StylePropertyMappers.ScrollMapper),
+                new StylePropertyMapper("ScrollbarVerticalDecrementColor", StylePropertyMappers.ScrollMapper),
+                new StylePropertyMapper("ScrollbarVerticalDecrementBorderRadius", StylePropertyMappers.ScrollMapper),
+                new StylePropertyMapper("ScrollbarVerticalDecrementBorderSize", StylePropertyMappers.ScrollMapper),
+                new StylePropertyMapper("ScrollbarVerticalDecrementBorderColor", StylePropertyMappers.ScrollMapper),
+                new StylePropertyMapper("ScrollbarVerticalDecrementImage", StylePropertyMappers.ScrollMapper),
+
+                new StylePropertyMapper("ScrollbarHorizontalTrackSize", StylePropertyMappers.ScrollMapper),
+                new StylePropertyMapper("ScrollbarHorizontalTrackColor", StylePropertyMappers.ScrollMapper),
+                new StylePropertyMapper("ScrollbarHorizontalTrackBorderRadius", StylePropertyMappers.ScrollMapper),
+                new StylePropertyMapper("ScrollbarHorizontalTrackBorderSize", StylePropertyMappers.ScrollMapper),
+                new StylePropertyMapper("ScrollbarHorizontalTrackBorderColor", StylePropertyMappers.ScrollMapper),
+                new StylePropertyMapper("ScrollbarHorizontalTrackImage", StylePropertyMappers.ScrollMapper),
+
+                new StylePropertyMapper("ScrollbarHorizontalHandleSize", StylePropertyMappers.ScrollMapper),
+                new StylePropertyMapper("ScrollbarHorizontalHandleColor", StylePropertyMappers.ScrollMapper),
+                new StylePropertyMapper("ScrollbarHorizontalHandleBorderRadius", StylePropertyMappers.ScrollMapper),
+                new StylePropertyMapper("ScrollbarHorizontalHandleBorderSize", StylePropertyMappers.ScrollMapper),
+                new StylePropertyMapper("ScrollbarHorizontalHandleBorderColor", StylePropertyMappers.ScrollMapper),
+                new StylePropertyMapper("ScrollbarHorizontalHandleImage", StylePropertyMappers.ScrollMapper),
+
+                new StylePropertyMapper("ScrollbarHorizontalIncrementSize", StylePropertyMappers.ScrollMapper),
+                new StylePropertyMapper("ScrollbarHorizontalIncrementColor", StylePropertyMappers.ScrollMapper),
+                new StylePropertyMapper("ScrollbarHorizontalIncrementBorderRadius", StylePropertyMappers.ScrollMapper),
+                new StylePropertyMapper("ScrollbarHorizontalIncrementBorderSize", StylePropertyMappers.ScrollMapper),
+                new StylePropertyMapper("ScrollbarHorizontalIncrementBorderColor", StylePropertyMappers.ScrollMapper),
+                new StylePropertyMapper("ScrollbarHorizontalIncrementImage", StylePropertyMappers.ScrollMapper),
+
+                new StylePropertyMapper("ScrollbarHorizontalDecrementSize", StylePropertyMappers.ScrollMapper),
+                new StylePropertyMapper("ScrollbarHorizontalDecrementColor", StylePropertyMappers.ScrollMapper),
+                new StylePropertyMapper("ScrollbarHorizontalDecrementBorderRadius", StylePropertyMappers.ScrollMapper),
+                new StylePropertyMapper("ScrollbarHorizontalDecrementBorderSize", StylePropertyMappers.ScrollMapper),
+                new StylePropertyMapper("ScrollbarHorizontalDecrementBorderColor", StylePropertyMappers.ScrollMapper),
+                new StylePropertyMapper("ScrollbarHorizontalDecrementImage", StylePropertyMappers.ScrollMapper),
+
+                new StylePropertyMapper("ScrollbarTrackSize", StylePropertyMappers.ScrollMapper),
+                new StylePropertyMapper("ScrollbarTrackColor", StylePropertyMappers.ScrollMapper),
+                new StylePropertyMapper("ScrollbarTrackBorderRadius", StylePropertyMappers.ScrollMapper),
+                new StylePropertyMapper("ScrollbarTrackBorderSize", StylePropertyMappers.ScrollMapper),
+                new StylePropertyMapper("ScrollbarTrackBorderColor", StylePropertyMappers.ScrollMapper),
+                new StylePropertyMapper("ScrollbarTrackImage", StylePropertyMappers.ScrollMapper),
+
+                new StylePropertyMapper("ScrollbarHandleSize", StylePropertyMappers.ScrollMapper),
+                new StylePropertyMapper("ScrollbarHandleColor", StylePropertyMappers.ScrollMapper),
+                new StylePropertyMapper("ScrollbarHandleBorderRadius", StylePropertyMappers.ScrollMapper),
+                new StylePropertyMapper("ScrollbarHandleBorderSize", StylePropertyMappers.ScrollMapper),
+                new StylePropertyMapper("ScrollbarHandleBorderColor", StylePropertyMappers.ScrollMapper),
+                new StylePropertyMapper("ScrollbarHandleImage", StylePropertyMappers.ScrollMapper),
+
+                new StylePropertyMapper("ScrollbarIncrementSize", StylePropertyMappers.ScrollMapper),
+                new StylePropertyMapper("ScrollbarIncrementColor", StylePropertyMappers.ScrollMapper),
+                new StylePropertyMapper("ScrollbarIncrementBorderRadius", StylePropertyMappers.ScrollMapper),
+                new StylePropertyMapper("ScrollbarIncrementBorderSize", StylePropertyMappers.ScrollMapper),
+                new StylePropertyMapper("ScrollbarIncrementBorderColor", StylePropertyMappers.ScrollMapper),
+                new StylePropertyMapper("ScrollbarIncrementImage", StylePropertyMappers.ScrollMapper),
+
+                new StylePropertyMapper("ScrollbarDecrementSize", StylePropertyMappers.ScrollMapper),
+                new StylePropertyMapper("ScrollbarDecrementColor", StylePropertyMappers.ScrollMapper),
+                new StylePropertyMapper("ScrollbarDecrementBorderRadius", StylePropertyMappers.ScrollMapper),
+                new StylePropertyMapper("ScrollbarDecrementBorderSize", StylePropertyMappers.ScrollMapper),
+                new StylePropertyMapper("ScrollbarDecrementBorderColor", StylePropertyMappers.ScrollMapper),
+                new StylePropertyMapper("ScrollbarDecrementImage", StylePropertyMappers.ScrollMapper),
             };
 
 
@@ -621,22 +742,6 @@ namespace UIForia.Parsing.StyleParser {
             }
 
         }
-
-//        public struct CursorComponent {
-//
-//            public readonly string name;
-//            public readonly string texturePath;
-//            public readonly Vector2 hotPoint;
-//            public readonly StyleComponentType type;
-//            
-//            public CursorComponent(StyleComponentType type, string name, string texturePath, Vector2 hotPoint) {
-//                this.type = type;
-//                this.name = name;
-//                this.texturePath = texturePath;
-//                this.hotPoint = hotPoint;
-//            }
-//
-//        }
 
         public struct StyleComponent {
 
@@ -662,9 +767,7 @@ namespace UIForia.Parsing.StyleParser {
             Texture,
             Font,
             Query,
-
             Variable,
-
             Import
 
         }

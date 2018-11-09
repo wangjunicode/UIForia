@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using Src.Rendering;
 using UIForia.Extensions;
 using UIForia.Elements;
 using UIForia.Rendering;
@@ -45,15 +46,14 @@ namespace UIForia.Systems {
         }
 
         private void HandleScrollbarCreated(VirtualScrollbar scrollbar) {
-            m_ToInitialize.Add(scrollbar);
-            m_ToInitialize.Add(scrollbar.handle);
+            m_RenderDataList.EnsureAdditionalCapacity(1);
+            m_WillRenderList.EnsureAdditionalCapacity(1);
+            RenderData data = new RenderData(scrollbar);
+            m_RenderDataList.AddUnchecked(data);
             m_Scrollbars.Add(scrollbar);
         }
 
         private void HandleScrollbarDestroyed(VirtualScrollbar scrollbar) {
-            m_ToInitialize.Remove(scrollbar);
-            m_ToInitialize.Remove(scrollbar.handle);
-            m_Scrollbars.Remove(scrollbar);
         }
 
         private void InitializeRenderables() {
@@ -99,7 +99,7 @@ namespace UIForia.Systems {
             m_WillRenderList.EnsureCapacity(m_RenderDataList.Count);
 
             RenderData[] renderList = m_RenderDataList.List;
-
+            
             // todo -- can be easily jobified
             for (int i = 0; i < m_RenderDataList.Count; i++) {
                 RenderData data = renderList[i];
@@ -261,39 +261,6 @@ namespace UIForia.Systems {
                 OnElementCreated(element.children[i]);
             }
         }
-
-        private void DrawScrollbars() {
-
-//            for (int i = 0; i < m_Scrollbars.Count; i++) {
-//                VirtualScrollbar bar = m_Scrollbars[i];
-//                VirtualScrollbarHandle handle = bar.handle;
-//                if (bar.orientation == ScrollbarOrientation.Horizontal) {
-                    
-//                    ComputedStyle style = bar.targetElement.ComputedStyle;
-                    
-//                    ScrollbarButtonPlacement horizontalPlacement = style.ScrollbarHorizontalButtonPlacement;
-//                    
-//                    switch (horizontalPlacement) {
-//                        case ScrollbarButtonPlacement.Unset:
-//                            break;
-//                        case ScrollbarButtonPlacement.Hidden:
-//                            break;
-//                        case ScrollbarButtonPlacement.TogetherBefore:
-//                            break;
-//                        case ScrollbarButtonPlacement.TogetherAfter:
-//                            break;
-//                        case ScrollbarButtonPlacement.Apart:
-//                            break;
-//                        default:
-//                            throw new ArgumentOutOfRangeException();
-//                    }
-//                    
-//                    // ScrollbarHorizontalIncrementButtonWidth 
-//                    // ScrollbarHorizontalIncrementButtonHeight
-//                    
-//                }
-//            }
-        }
         
         private static void ComputePositions(LightList<RenderData> renderList) {
             if (renderList.Count == 0) {
@@ -330,6 +297,15 @@ namespace UIForia.Systems {
             }
         }
 
+//        private void DrawScrollbars(Vector3 origin) {
+//            for (int i = 0; i < m_Scrollbars.Count; i++) {
+//                VirtualScrollbar scrollbar = m_Scrollbars[i];
+//                Rect trackRect = scrollbar.trackRect;
+//                Rect handleRect = scrollbar.handleRect;
+//                scrollbar.trackMesh = MeshUtil.ResizeStandardUIMesh(scrollbar.trackMesh, new Size(trackRect.size));
+//            }        
+//        }
+        
         //sort each group by z-index, use depth index to resolve ties, use origin layer if still tied
         private class RenderZIndexComparerAscending : IComparer<RenderData> {
 

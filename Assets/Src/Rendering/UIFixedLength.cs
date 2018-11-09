@@ -69,6 +69,27 @@ namespace UIForia {
             return new UIFixedLength(value, UIFixedUnit.Percent);
         }
 
+        public static float Resolve(UIFixedLength length, float refValue, float emSize, float viewportWidth, float viewportHeight) {
+            switch (length.unit) {
+                case UIFixedUnit.Pixel:
+                    return length.value;
+
+                case UIFixedUnit.Percent:
+                    return refValue * length.value;
+
+                case UIFixedUnit.ViewportHeight:
+                    return viewportHeight * length.value;
+
+                case UIFixedUnit.ViewportWidth:
+                    return viewportWidth * length.value;
+
+                case UIFixedUnit.Em:
+                    return emSize * length.value;
+
+                default:
+                    return 0;
+            }
+        }
     }
 
 }

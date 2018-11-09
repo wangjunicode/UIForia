@@ -13,6 +13,11 @@ namespace UIForia.Systems {
             this.height = height;
         }
 
+        public Size(Vector2 size) {
+            this.width = size.x;
+            this.height = size.y;
+        }
+
         public static implicit operator Vector2(Size size) {
             return new Vector2(size.width, size.height);
         }

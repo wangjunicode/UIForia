@@ -222,7 +222,7 @@ namespace UIForia.Editor {
 
         private void DrawDebugOverlay(LightList<RenderData> renderData, LightList<RenderData> drawList, Vector3 origin, Camera camera) {
             if (material == null) {
-                material = new Material(Resources.Load<Material>("Materials/UIForiaDebug"));
+                material = new Material(Resources.Load<Material>("UIForia/Materials/UIForiaDebug"));
             }
 
             if (selectedElement != null) {

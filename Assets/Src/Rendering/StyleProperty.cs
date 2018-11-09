@@ -111,8 +111,8 @@ namespace UIForia.Rendering {
         public TMP_FontAsset AsFont => (TMP_FontAsset) objectField;
         public Texture2D AsTexture => (Texture2D) objectField;
 
-        public Text.FontStyle AsFontStyle => (Text.FontStyle) valuePart0;
-        public Text.TextAlignment AsTextAlignment => (Text.TextAlignment) valuePart0;
+        public FontStyle AsFontStyle => (FontStyle) valuePart0;
+        public TextAlignment AsTextAlignment => (TextAlignment) valuePart0;
         public LayoutDirection AsLayoutDirection => (LayoutDirection) valuePart0;
         public LayoutWrap AsLayoutWrap => (LayoutWrap) valuePart0;
         public GridTrackSize AsGridTrackSize => new GridTrackSize(FloatUtil.DecodeToFloat(valuePart0), (GridTemplateUnit) valuePart1);
@@ -135,6 +135,9 @@ namespace UIForia.Rendering {
         public LayoutBehavior AsLayoutBehavior => (LayoutBehavior) valuePart0;
         
         public IReadOnlyList<GridTrackSize> AsGridTemplate => (IReadOnlyList<GridTrackSize>)objectField;
+        public VerticalScrollbarAttachment AsVerticalScrollbarAttachment => (VerticalScrollbarAttachment) valuePart0;
+        public HorizontalScrollbarAttachment AsHorizontalScrollbarAttachment => (HorizontalScrollbarAttachment) valuePart0;
+        public ScrollbarButtonPlacement AsScrollbarButtonPlacement => (ScrollbarButtonPlacement) valuePart0;
 
         [DebuggerStepThrough]
         public static StyleProperty Unset(StylePropertyId propertyId) {

@@ -388,6 +388,302 @@ namespace UIForia.Parsing.StyleParser {
             }
         }
 
+        public static void ScrollMapper(StyleParserContext context, string propertyName, string propertyValue) {
+            switch (propertyName.ToLower()) {
+                // General
+                case "scrollbarbuttonplacement":
+                    context.targetStyle.ScrollbarVerticalButtonPlacement = ParseUtil.ParseScrollbarButtonPlacement(context.variables, propertyValue);
+                    context.targetStyle.ScrollbarHorizontalButtonPlacement = ParseUtil.ParseScrollbarButtonPlacement(context.variables, propertyValue);
+                    break;
+//                case "scrollbarattachment":
+////                    context.targetStyle.ScrollbarVerticalAttachment = ParseUtil.ParseScrollbarVerticalAttachment(context.variables, propertyValue);
+//                    break;
+
+                // Track
+                case "scrollbartracksize":
+                    float size = ParseUtil.ParseFloat(context.variables, propertyValue);
+                    context.targetStyle.ScrollbarVerticalTrackSize = size;
+                    context.targetStyle.ScrollbarHorizontalTrackSize = size;
+                    break;
+                case "scrollbartrackcolor":
+                    Color trackColor = ParseUtil.ParseColor(context.variables, propertyValue);
+                    context.targetStyle.ScrollbarVerticalTrackColor = trackColor;
+                    context.targetStyle.ScrollbarHorizontalTrackColor = trackColor;
+                    break;
+                case "scrollbartrackborderradius":
+                    context.targetStyle.ScrollbarVerticalTrackBorderRadius = ParseUtil.ParseFloat(context.variables, propertyValue);
+                    context.targetStyle.ScrollbarHorizontalTrackBorderRadius = ParseUtil.ParseFloat(context.variables, propertyValue);
+                    break;
+                case "scrollbartrackbordersize":
+                    context.targetStyle.ScrollbarVerticalTrackBorderSize = ParseUtil.ParseFloat(context.variables, propertyValue);
+                    context.targetStyle.ScrollbarHorizontalTrackBorderSize = ParseUtil.ParseFloat(context.variables, propertyValue);
+                    break;
+                case "scrollbartrackbordercolor":
+                    context.targetStyle.ScrollbarVerticalTrackBorderColor = ParseUtil.ParseColor(context.variables, propertyValue);
+                    context.targetStyle.ScrollbarHorizontalTrackBorderColor = ParseUtil.ParseColor(context.variables, propertyValue);
+                    break;
+                case "scrollbartrackimage":
+                    context.targetStyle.ScrollbarVerticalTrackImage = ParseUtil.ParseTexture(context.variables, propertyValue);
+                    context.targetStyle.ScrollbarHorizontalTrackImage = ParseUtil.ParseTexture(context.variables, propertyValue);
+                    break;
+
+                // Handle
+                case "scrollbarhandlesize":
+                    context.targetStyle.ScrollbarVerticalHandleSize = ParseUtil.ParseFloat(context.variables, propertyValue);
+                    context.targetStyle.ScrollbarHorizontalHandleSize = ParseUtil.ParseFloat(context.variables, propertyValue);
+                    break;
+                case "scrollbarhandlecolor":
+                    context.targetStyle.ScrollbarVerticalHandleColor = ParseUtil.ParseColor(context.variables, propertyValue);
+                    context.targetStyle.ScrollbarHorizontalHandleColor = ParseUtil.ParseColor(context.variables, propertyValue);
+                    break;
+                case "scrollbarhandleborderradius":
+                    context.targetStyle.ScrollbarVerticalHandleBorderRadius = ParseUtil.ParseFloat(context.variables, propertyValue);
+                    context.targetStyle.ScrollbarHorizontalHandleBorderRadius = ParseUtil.ParseFloat(context.variables, propertyValue);
+                    break;
+                case "scrollbarhandlebordersize":
+                    context.targetStyle.ScrollbarVerticalHandleBorderSize = ParseUtil.ParseFloat(context.variables, propertyValue);
+                    context.targetStyle.ScrollbarHorizontalHandleBorderSize = ParseUtil.ParseFloat(context.variables, propertyValue);
+                    break;
+                case "scrollbarhandlebordercolor":
+                    context.targetStyle.ScrollbarVerticalHandleBorderColor = ParseUtil.ParseColor(context.variables, propertyValue);
+                    context.targetStyle.ScrollbarHorizontalHandleBorderColor = ParseUtil.ParseColor(context.variables, propertyValue);
+                    break;
+                case "scrollbarhandleimage":
+                    context.targetStyle.ScrollbarVerticalTrackImage = ParseUtil.ParseTexture(context.variables, propertyValue);
+                    context.targetStyle.ScrollbarHorizontalTrackImage = ParseUtil.ParseTexture(context.variables, propertyValue);
+                    break;
+
+                // Increment
+                case "scrollbarincrementsize":
+                    context.targetStyle.ScrollbarVerticalIncrementSize = ParseUtil.ParseFloat(context.variables, propertyValue);
+                    context.targetStyle.ScrollbarHorizontalIncrementSize = ParseUtil.ParseFloat(context.variables, propertyValue);
+                    break;
+                case "scrollbarincrementcolor":
+                    context.targetStyle.ScrollbarVerticalIncrementColor = ParseUtil.ParseColor(context.variables, propertyValue);
+                    context.targetStyle.ScrollbarHorizontalIncrementColor = ParseUtil.ParseColor(context.variables, propertyValue);
+                    break;
+                case "scrollbarincrementborderradius":
+                    context.targetStyle.ScrollbarVerticalIncrementBorderRadius = ParseUtil.ParseFloat(context.variables, propertyValue);
+                    context.targetStyle.ScrollbarHorizontalIncrementBorderRadius = ParseUtil.ParseFloat(context.variables, propertyValue);
+                    break;
+                case "scrollbarincrementbordersize":
+                    context.targetStyle.ScrollbarVerticalIncrementBorderSize = ParseUtil.ParseFloat(context.variables, propertyValue);
+                    context.targetStyle.ScrollbarHorizontalIncrementBorderSize = ParseUtil.ParseFloat(context.variables, propertyValue);
+                    break;
+                case "scrollbarincrementbordercolor":
+                    context.targetStyle.ScrollbarVerticalIncrementBorderColor = ParseUtil.ParseColor(context.variables, propertyValue);
+                    context.targetStyle.ScrollbarHorizontalIncrementBorderColor = ParseUtil.ParseColor(context.variables, propertyValue);
+                    break;
+                case "scrollbarincrementimage":
+                    context.targetStyle.ScrollbarVerticalIncrementImage = ParseUtil.ParseTexture(context.variables, propertyValue);
+                    context.targetStyle.ScrollbarHorizontalIncrementImage = ParseUtil.ParseTexture(context.variables, propertyValue);
+                    break;
+
+                // Decrement
+                case "scrollbardecrementsize":
+                    context.targetStyle.ScrollbarVerticalDecrementSize = ParseUtil.ParseFloat(context.variables, propertyValue);
+                    context.targetStyle.ScrollbarHorizontalDecrementSize = ParseUtil.ParseFloat(context.variables, propertyValue);
+                    break;
+                case "scrollbardecrementcolor":
+                    context.targetStyle.ScrollbarVerticalDecrementColor = ParseUtil.ParseColor(context.variables, propertyValue);
+                    context.targetStyle.ScrollbarHorizontalDecrementColor = ParseUtil.ParseColor(context.variables, propertyValue);
+                    break;
+                case "scrollbardecrementborderradius":
+                    context.targetStyle.ScrollbarVerticalDecrementBorderRadius = ParseUtil.ParseFloat(context.variables, propertyValue);
+                    context.targetStyle.ScrollbarHorizontalDecrementBorderRadius = ParseUtil.ParseFloat(context.variables, propertyValue);
+                    break;
+                case "scrollbardecrementbordersize":
+                    context.targetStyle.ScrollbarVerticalDecrementBorderSize = ParseUtil.ParseFloat(context.variables, propertyValue);
+                    context.targetStyle.ScrollbarHorizontalDecrementBorderSize = ParseUtil.ParseFloat(context.variables, propertyValue);
+                    break;
+                case "scrollbardecrementbordercolor":
+                    context.targetStyle.ScrollbarVerticalDecrementBorderColor = ParseUtil.ParseColor(context.variables, propertyValue);
+                    context.targetStyle.ScrollbarHorizontalDecrementBorderColor = ParseUtil.ParseColor(context.variables, propertyValue);
+                    break;
+                case "scrollbardecrementimage":
+                    context.targetStyle.ScrollbarVerticalDecrementImage = ParseUtil.ParseTexture(context.variables, propertyValue);
+                    context.targetStyle.ScrollbarHorizontalDecrementImage = ParseUtil.ParseTexture(context.variables, propertyValue);
+                    break;
+
+                // General
+                case "scrollbarverticalbuttonplacement":
+                    context.targetStyle.ScrollbarVerticalButtonPlacement = ParseUtil.ParseScrollbarButtonPlacement(context.variables, propertyValue);
+                    break;
+                case "scrollbarverticalattachment":
+                    context.targetStyle.ScrollbarVerticalAttachment = ParseUtil.ParseScrollbarVerticalAttachment(context.variables, propertyValue);
+                    break;
+
+                // Track
+                case "scrollbarverticaltracksize":
+                    context.targetStyle.ScrollbarVerticalTrackSize = ParseUtil.ParseFloat(context.variables, propertyValue);
+                    break;
+                case "scrollbarverticaltrackcolor":
+                    context.targetStyle.ScrollbarVerticalTrackColor = ParseUtil.ParseColor(context.variables, propertyValue);
+                    break;
+                case "scrollbarverticaltrackborderradius":
+                    context.targetStyle.ScrollbarVerticalTrackBorderRadius = ParseUtil.ParseFloat(context.variables, propertyValue);
+                    break;
+                case "scrollbarverticaltrackbordersize":
+                    context.targetStyle.ScrollbarVerticalTrackBorderSize = ParseUtil.ParseFloat(context.variables, propertyValue);
+                    break;
+                case "scrollbarverticaltrackbordercolor":
+                    context.targetStyle.ScrollbarVerticalTrackBorderColor = ParseUtil.ParseColor(context.variables, propertyValue);
+                    break;
+                case "scrollbarverticaltrackimage":
+                    context.targetStyle.ScrollbarVerticalTrackImage = ParseUtil.ParseTexture(context.variables, propertyValue);
+                    break;
+
+                // Handle
+                case "scrollbarverticalhandlesize":
+                    context.targetStyle.ScrollbarVerticalHandleSize = ParseUtil.ParseFloat(context.variables, propertyValue);
+                    break;
+                case "scrollbarverticalhandlecolor":
+                    context.targetStyle.ScrollbarVerticalHandleColor = ParseUtil.ParseColor(context.variables, propertyValue);
+                    break;
+                case "scrollbarverticalhandleborderradius":
+                    context.targetStyle.ScrollbarVerticalHandleBorderRadius = ParseUtil.ParseFloat(context.variables, propertyValue);
+                    break;
+                case "scrollbarverticalhandlebordersize":
+                    context.targetStyle.ScrollbarVerticalHandleBorderSize = ParseUtil.ParseFloat(context.variables, propertyValue);
+                    break;
+                case "scrollbarverticalhandlebordercolor":
+                    context.targetStyle.ScrollbarVerticalHandleBorderColor = ParseUtil.ParseColor(context.variables, propertyValue);
+                    break;
+                case "scrollbarverticalhandleimage":
+                    context.targetStyle.ScrollbarVerticalHandleImage = ParseUtil.ParseTexture(context.variables, propertyValue);
+                    break;
+
+                // Increment
+                case "scrollbarverticalincrementsize":
+                    context.targetStyle.ScrollbarVerticalIncrementSize = ParseUtil.ParseFloat(context.variables, propertyValue);
+                    break;
+                case "scrollbarverticalincrementcolor":
+                    context.targetStyle.ScrollbarVerticalIncrementColor = ParseUtil.ParseColor(context.variables, propertyValue);
+                    break;
+                case "scrollbarverticalincrementborderradius":
+                    context.targetStyle.ScrollbarVerticalIncrementBorderRadius = ParseUtil.ParseFloat(context.variables, propertyValue);
+                    break;
+                case "scrollbarverticalincrementbordersize":
+                    context.targetStyle.ScrollbarVerticalIncrementBorderSize = ParseUtil.ParseFloat(context.variables, propertyValue);
+                    break;
+                case "scrollbarverticalincrementbordercolor":
+                    context.targetStyle.ScrollbarVerticalIncrementBorderColor = ParseUtil.ParseColor(context.variables, propertyValue);
+                    break;
+                case "scrollbarverticalincrementimage":
+                    context.targetStyle.ScrollbarVerticalIncrementImage = ParseUtil.ParseTexture(context.variables, propertyValue);
+                    break;
+
+                // Decrement
+                case "scrollbarverticaldecrementsize":
+                    context.targetStyle.ScrollbarVerticalDecrementSize = ParseUtil.ParseFloat(context.variables, propertyValue);
+                    break;
+                case "scrollbarverticaldecrementcolor":
+                    context.targetStyle.ScrollbarVerticalDecrementColor = ParseUtil.ParseColor(context.variables, propertyValue);
+                    break;
+                case "scrollbarverticaldecrementborderradius":
+                    context.targetStyle.ScrollbarVerticalDecrementBorderRadius = ParseUtil.ParseFloat(context.variables, propertyValue);
+                    break;
+                case "scrollbarverticaldecrementbordersize":
+                    context.targetStyle.ScrollbarVerticalDecrementBorderSize = ParseUtil.ParseFloat(context.variables, propertyValue);
+                    break;
+                case "scrollbarverticaldecrementbordercolor":
+                    context.targetStyle.ScrollbarVerticalDecrementBorderColor = ParseUtil.ParseColor(context.variables, propertyValue);
+                    break;
+                case "scrollbarverticaldecrementimage":
+                    context.targetStyle.ScrollbarVerticalDecrementImage = ParseUtil.ParseTexture(context.variables, propertyValue);
+                    break;
+
+
+                // General
+                case "scrollbarhorizontalbuttonplacement":
+                    context.targetStyle.ScrollbarHorizontalButtonPlacement = ParseUtil.ParseScrollbarButtonPlacement(context.variables, propertyValue);
+                    break;
+                case "scrollbarhorizontalattachment":
+                    context.targetStyle.ScrollbarHorizontalAttachment = ParseUtil.ParseScrollbarHorizontalAttachment(context.variables, propertyValue);
+                    break;
+
+                // Track
+                case "scrollbarhorizontaltracksize":
+                    context.targetStyle.ScrollbarHorizontalTrackSize = ParseUtil.ParseFloat(context.variables, propertyValue);
+                    break;
+                case "scrollbarhorizontaltrackcolor":
+                    context.targetStyle.ScrollbarHorizontalTrackColor = ParseUtil.ParseColor(context.variables, propertyValue);
+                    break;
+                case "scrollbarhorizontaltrackborderradius":
+                    context.targetStyle.ScrollbarHorizontalTrackBorderRadius = ParseUtil.ParseFloat(context.variables, propertyValue);
+                    break;
+                case "scrollbarhorizontaltrackbordersize":
+                    context.targetStyle.ScrollbarHorizontalTrackBorderSize = ParseUtil.ParseFloat(context.variables, propertyValue);
+                    break;
+                case "scrollbarhorizontaltrackbordercolor":
+                    context.targetStyle.ScrollbarHorizontalTrackBorderColor = ParseUtil.ParseColor(context.variables, propertyValue);
+                    break;
+                case "scrollbarhorizontaltrackimage":
+                    context.targetStyle.ScrollbarHorizontalTrackImage = ParseUtil.ParseTexture(context.variables, propertyValue);
+                    break;
+
+                // Handle
+                case "scrollbarhorizontalhandlesize":
+                    context.targetStyle.ScrollbarHorizontalHandleSize = ParseUtil.ParseFloat(context.variables, propertyValue);
+                    break;
+                case "scrollbarhorizontalhandlecolor":
+                    context.targetStyle.ScrollbarHorizontalHandleColor = ParseUtil.ParseColor(context.variables, propertyValue);
+                    break;
+                case "scrollbarhorizontalhandleborderradius":
+                    context.targetStyle.ScrollbarHorizontalHandleBorderRadius = ParseUtil.ParseFloat(context.variables, propertyValue);
+                    break;
+                case "scrollbarhorizontalhandlebordersize":
+                    context.targetStyle.ScrollbarHorizontalHandleBorderSize = ParseUtil.ParseFloat(context.variables, propertyValue);
+                    break;
+                case "scrollbarhorizontalhandlebordercolor":
+                    context.targetStyle.ScrollbarHorizontalHandleBorderColor = ParseUtil.ParseColor(context.variables, propertyValue);
+                    break;
+                case "scrollbarhorizontalhandleimage":
+                    context.targetStyle.ScrollbarHorizontalHandleImage = ParseUtil.ParseTexture(context.variables, propertyValue);
+                    break;
+
+                // Increment
+                case "scrollbarhorizontalincrementsize":
+                    context.targetStyle.ScrollbarHorizontalIncrementSize = ParseUtil.ParseFloat(context.variables, propertyValue);
+                    break;
+                case "scrollbarhorizontalincrementcolor":
+                    context.targetStyle.ScrollbarHorizontalIncrementColor = ParseUtil.ParseColor(context.variables, propertyValue);
+                    break;
+                case "scrollbarhorizontalincrementborderradius":
+                    context.targetStyle.ScrollbarHorizontalIncrementBorderRadius = ParseUtil.ParseFloat(context.variables, propertyValue);
+                    break;
+                case "scrollbarhorizontalincrementbordersize":
+                    context.targetStyle.ScrollbarHorizontalIncrementBorderSize = ParseUtil.ParseFloat(context.variables, propertyValue);
+                    break;
+                case "scrollbarhorizontalincrementbordercolor":
+                    context.targetStyle.ScrollbarHorizontalIncrementBorderColor = ParseUtil.ParseColor(context.variables, propertyValue);
+                    break;
+                case "scrollbarhorizontalincrementimage":
+                    context.targetStyle.ScrollbarHorizontalIncrementImage = ParseUtil.ParseTexture(context.variables, propertyValue);
+                    break;
+
+                // Decrement
+                case "scrollbarhorizontaldecrementsize":
+                    context.targetStyle.ScrollbarHorizontalDecrementSize = ParseUtil.ParseFloat(context.variables, propertyValue);
+                    break;
+                case "scrollbarhorizontaldecrementcolor":
+                    context.targetStyle.ScrollbarHorizontalDecrementColor = ParseUtil.ParseColor(context.variables, propertyValue);
+                    break;
+                case "scrollbarhorizontaldecrementborderradius":
+                    context.targetStyle.ScrollbarHorizontalDecrementBorderRadius = ParseUtil.ParseFloat(context.variables, propertyValue);
+                    break;
+                case "scrollbarhorizontaldecrementbordersize":
+                    context.targetStyle.ScrollbarHorizontalDecrementBorderSize = ParseUtil.ParseFloat(context.variables, propertyValue);
+                    break;
+                case "scrollbarhorizontaldecrementbordercolor":
+                    context.targetStyle.ScrollbarHorizontalDecrementBorderColor = ParseUtil.ParseColor(context.variables, propertyValue);
+                    break;
+                case "scrollbarhorizontaldecrementimage":
+                    context.targetStyle.ScrollbarHorizontalDecrementImage = ParseUtil.ParseTexture(context.variables, propertyValue);
+                    break;
+            }
+        }
+
     }
 
 }

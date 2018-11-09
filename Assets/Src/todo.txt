@@ -13,27 +13,30 @@
 - Support function calls in dirty checking
 - Reduce boxing
 
-LayoutDefault to Flow
-Implement Flow
-Improve Grid w/ flex tracks
-Margin
-Cursors
-rotation
-fill modes
-shapes
-Scroll Styles
-masks?
-finish drag implementation
-make false mouse cursor for debug
-handle nested repeat being null bug
-finish animations
-reuse / import style sheets
-animations in style sheet
-attributes + eventing
-implicit styles & maybe selectors
-Clone methods
-scaling
-zooming in inspector
+Critical
+    scaling
+    Margin
+    rotation
+    Cursors
+    Scroll Styles
+    finish drag implementation
+
+Nice to have
+    LayoutDefault to Flow
+    Implement Flow
+    Improve Grid w/ flex tracks
+    fill modes
+    shapes
+    masks?
+    make false mouse cursor for debug
+    handle nested repeat being null bug
+    finish animations
+    reuse / import style sheets
+    animations in style sheet
+    attributes + eventing
+    implicit styles & maybe selectors
+    Clone methods
+    zooming in inspector
 
 cursor Pointer {
     Texture = path/to/texture
@@ -47,3 +50,26 @@ public class CursorSettings {
     public Vector2 point;
     
 }
+
+style {
+
+    [Scroll-Vertical] {
+    
+        [Norma] {
+            
+            ::Button-Increment {
+            
+                
+            
+            }
+            
+        }
+        
+        [Button-Increment] {}
+        
+        [Button-Decrement] {}
+        
+        
+    }
+    
+    

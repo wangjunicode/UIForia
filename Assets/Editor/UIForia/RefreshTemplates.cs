@@ -12,13 +12,11 @@ namespace UIForia.Editor {
         public static void Refresh() {
             StyleParser.Reset();
             TemplateParser.Reset();
-            UIForia.ResourceManager.Reset();
+            ResourceManager.Reset();
             ParsedTemplate.Reset(); // todo -- roll all parsers into one place
             
-            List<UIViewBehavior> viewBehaviors = FindObjectOfType<UIViewBehavior>();
-            for (int i = 0; i < viewBehaviors.Count; i++) {
-                viewBehaviors[i].RefreshView();
-            }
+            Application.Game.Refresh();
+            
         }
 
         public static List<T> FindObjectOfType<T>(bool inactive = true) where T : Object {

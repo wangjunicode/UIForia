@@ -121,14 +121,7 @@ namespace UIForia.Rendering {
         AnchorLeft = 1304,
         AnchorTarget = 1305,
 
-        ScrollbarVerticalTrackSize = 1301,
-        ScrollbarVerticalTrackRadius = 1302,
-        ScrollbarVerticalHandleSize = 1303,
-        ScrollbarVerticalHandleRadius = 1304,
-        ScrollbarVerticalTrackColor = 1305,
-        ScrollbarVerticalHandleColor = 1306,
-        ScrollbarVerticalAttachment = 1307,
-        ScrollbarVerticalButtonPlacement = 1308,
+
         
 //        ScrollBarVerticalFadeDelay = 1305,
 //        ScrollBarVerticalHoverTrackSize = 1305,
@@ -141,47 +134,74 @@ namespace UIForia.Rendering {
 //        ScrollBarHorizontalHandleSize = 1304,
 //        ScrollBarHorizontalFadeDelay = 1305,
 
-
         ZIndex = 1401,
         RenderLayer = 1402,
         RenderLayerOffset = 1403,
         
-//        ScrollbarVerticalAttachment = 1501,
-//        ScrollbarHorizontalAttachment = 1501,
-//        ScrollbarVerticalButtonPlacement,
-//        ScrollbarHorizontalButtonPlacement,
-//        ScrollbarVerticalBackgroundFillType,
-//        ScrollbarVertical,
+        // Scrollbar Vertical
+        ScrollbarVerticalTrackSize = 1501,
+        ScrollbarVerticalTrackBorderRadius = 1502,
+        ScrollbarVerticalTrackBorderSize = 1503,
+        ScrollbarVerticalTrackBorderColor = 1504,
+        ScrollbarVerticalTrackImage = 1505,
+        ScrollbarVerticalTrackColor = 1506,
         
-//        BackgroundColor = 100,
-//        BorderColor = 101,
-//        BackgroundImage = 102,
-//        BackgroundFillType = 103,
-//        BackgroundGradientType = 104,
-//        BackgroundGradientAxis = 105,
-//        BackgroundGradientStart = 106,
-//        BackgroundGridSize = 107,
-//        BackgroundLineSize = 108,
-//        BackgroundFillOffsetX = 109,
-//        BackgroundFillOffsetY = 110,
-//        BackgroundFillScaleX = 111,
-//        BackgroundFillScaleY = 112,
-//        BackgroundFillRotation = 113,
-//        BackgroundImageTileX = 114,
-//        BackgroundImageTileY = 115,
-//        BackgroundImageOffsetX = 116,
-//        BackgroundImageOffsetY = 117,
-//        BackgroundColorSecondary = 120,
-//        BackgroundShapeType = 121,
-//        Opacity = 122,
-//        Cursor = 123,
-
+        ScrollbarVerticalHandleSize = 1521,
+        ScrollbarVerticalHandleBorderRadius = 1522,
+        ScrollbarVerticalHandleBorderSize = 1523,
+        ScrollbarVerticalHandleBorderColor = 1524,
+        ScrollbarVerticalHandleImage = 1525,
+        ScrollbarVerticalHandleColor = 1526,
+        
+        ScrollbarVerticalAttachment = 1540,
+        ScrollbarVerticalButtonPlacement = 1541,
+        
+        ScrollbarVerticalIncrementSize = 1551,
+        ScrollbarVerticalIncrementBorderRadius = 1552,
+        ScrollbarVerticalIncrementBorderSize = 1553,
+        ScrollbarVerticalIncrementBorderColor = 1554,
+        ScrollbarVerticalIncrementImage = 1555,
+        ScrollbarVerticalIncrementColor = 1556,
+        
+        ScrollbarVerticalDecrementSize = 1571,
+        ScrollbarVerticalDecrementBorderRadius = 1572,
+        ScrollbarVerticalDecrementBorderSize = 1573,
+        ScrollbarVerticalDecrementBorderColor = 1574,
+        ScrollbarVerticalDecrementImage = 1575,
+        ScrollbarVerticalDecrementColor = 1576,
+        
+        // Scrollbar Horizontal
+        ScrollbarHorizontalTrackSize = 1601,
+        ScrollbarHorizontalTrackBorderRadius = 1602,
+        ScrollbarHorizontalTrackBorderSize = 1603,
+        ScrollbarHorizontalTrackBorderColor = 1604,
+        ScrollbarHorizontalTrackImage = 1605,
+        ScrollbarHorizontalTrackColor = 1606,
+        
+        ScrollbarHorizontalHandleSize = 1621,
+        ScrollbarHorizontalHandleBorderRadius = 1622,
+        ScrollbarHorizontalHandleBorderSize = 1623,
+        ScrollbarHorizontalHandleBorderColor = 1624,
+        ScrollbarHorizontalHandleImage = 1625,
+        ScrollbarHorizontalHandleColor = 1626,
+        
+        ScrollbarHorizontalAttachment = 1640,
+        ScrollbarHorizontalButtonPlacement = 1641,
+        
+        ScrollbarHorizontalIncrementSize = 1651,
+        ScrollbarHorizontalIncrementBorderRadius = 1652,
+        ScrollbarHorizontalIncrementBorderSize = 1653,
+        ScrollbarHorizontalIncrementBorderColor = 1654,
+        ScrollbarHorizontalIncrementImage = 1655,
+        ScrollbarHorizontalIncrementColor = 1656,
+        
+        ScrollbarHorizontalDecrementSize = 1671,
+        ScrollbarHorizontalDecrementBorderRadius = 1672,
+        ScrollbarHorizontalDecrementBorderSize = 1673,
+        ScrollbarHorizontalDecrementBorderColor = 1674,
+        ScrollbarHorizontalDecrementImage = 1675,
+        ScrollbarHorizontalDecrementColor = 1676,
+ 
     }
 
 }
-
-/*
- *    style.Scrollbar.VerticalTrack.BackgroundColor = 
- *
- * 
-*/

@@ -71,12 +71,14 @@
         </e>
         <e p="Editor" t="Include">
           <e p="CodeGen.cs" t="Include" />
-          <e p="GUIRect.cs" t="Include" />
-          <e p="HierarchyView.cs" t="Include" />
-          <e p="RefreshTemplates.cs" t="Include" />
-          <e p="UIForiaHierarchyWindow.cs" t="Include" />
-          <e p="UIForiaInspectorWindow.cs" t="Include" />
-          <e p="WindowMenuItems.cs" t="Include" />
+          <e p="UIForia" t="Include">
+            <e p="GUIRect.cs" t="Include" />
+            <e p="HierarchyView.cs" t="Include" />
+            <e p="RefreshTemplates.cs" t="Include" />
+            <e p="UIForiaHierarchyWindow.cs" t="Include" />
+            <e p="UIForiaInspectorWindow.cs" t="Include" />
+            <e p="WindowMenuItems.cs" t="Include" />
+          </e>
         </e>
         <e p="Shapes2D" t="Include">
           <e p="Editor" t="Include">
@@ -233,7 +235,6 @@
             <e p="UITextElement.cs" t="Include" />
             <e p="VirtualElement.cs" t="Include" />
             <e p="VirtualScrollBar.cs" t="Include" />
-            <e p="VirtualScrollbarHandle.cs" t="Include" />
           </e>
           <e p="ExportStyleAttribute.cs" t="Include" />
           <e p="Expressions" t="Include">
@@ -317,7 +318,6 @@
               <e p="LayoutBox.cs" t="Include" />
               <e p="RadialLayoutBox.cs" t="Include" />
               <e p="RootLayoutBox.cs" t="Include" />
-              <e p="ScrollbarLayoutBox.cs" t="Include" />
               <e p="TextLayoutBox.cs" t="Include" />
             </e>
             <e p="LayoutWrap.cs" t="Include" />
@@ -396,6 +396,7 @@
             <e p="Easing.cs" t="Include" />
             <e p="ElementRendering" t="Include">
               <e p="ElementRenderer.cs" t="Include" />
+              <e p="ScrollbarRenderer.cs" t="Include" />
               <e p="StandardInstancedRenderer.cs" t="Include" />
               <e p="StandardRenderer.cs" t="Include" />
               <e p="StandardTextRenderer.cs" t="Include" />
@@ -405,7 +406,6 @@
             <e p="IMeshProvider.cs" t="Include" />
             <e p="IRenderSystem.cs" t="Include" />
             <e p="Overflow.cs" t="Include" />
-            <e p="Paint.cs" t="Include" />
             <e p="RenderConstants.cs" t="Include" />
             <e p="RenderData.cs" t="Include" />
             <e p="RenderLayer.cs" t="Include" />

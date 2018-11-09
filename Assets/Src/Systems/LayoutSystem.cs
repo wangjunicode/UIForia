@@ -7,6 +7,7 @@ using UIForia.Layout.LayoutTypes;
 using UIForia.Rendering;
 using UIForia.Util;
 using UnityEngine;
+using Debug = System.Diagnostics.Debug;
 
 namespace UIForia.Systems {
 
@@ -96,6 +97,9 @@ namespace UIForia.Systems {
             
             LayoutBox root = m_LayoutBoxMap.GetOrDefault(view.RootElement.id);
 
+            if (root == null) {
+                Debug.Assert(false);
+            }
             if (rect != view.Viewport) {
                 
                 root.allocatedWidth = Mathf.Min(root.GetWidths().clampedSize, view.Viewport.width);
@@ -385,7 +389,6 @@ namespace UIForia.Systems {
                     // todo -- depth index needs to be set
 
                     m_Elements.Add(vertical);
-                    m_Elements.Add(vertical.handle);
 
                     m_VirtualElements.Add(vertical);
 
@@ -393,44 +396,59 @@ namespace UIForia.Systems {
                     float offsetY = (childExtents.min.y < 0) ? -childExtents.min.y / box.allocatedHeight : 0f;
                     element.scrollOffset = new Vector2(element.scrollOffset.x, offsetY);
 
-
-                    // create buttons
-                    // ScrollbarButtonStyle verticalButtonTop = element.style.Scrollbars.VerticalButtonTop;
-                    // ScrollbarButtonStyle verticalButtonBottom = element.style.Scrollbars.VerticalButtonBottom;
-
                     onCreateVirtualScrollbar?.Invoke(vertical);
                     box.verticalScrollbar = vertical;
                 }
             }
+
+            if (box.actualWidth <= box.allocatedWidth) {
+                if (horizontal != null) {
+                    onDestroyVirtualScrollbar?.Invoke(horizontal);
+                    m_Elements.Remove(horizontal);
+                    m_VirtualElements.Remove(horizontal);
+                    box.horizontalScrollbar = null; // todo -- pool
+                }
+            }
+            else {
+                Overflow horizontalOverflow = box.style.OverflowX;
+                if (horizontal == null && horizontalOverflow == Overflow.Scroll || horizontalOverflow == Overflow.ScrollAndAutoHide) {
+                    horizontal = new VirtualScrollbar(element, ScrollbarOrientation.Horizontal);
+                    element.style.InitializeScrollbar(horizontal);
+                    // todo -- depth index needs to be set
+
+                    m_Elements.Add(horizontal);
+
+                    m_VirtualElements.Add(horizontal);
+
+                    Extents childExtents = GetLocalExtents(box.children);
+                    float offsetX = (childExtents.min.x < 0) ? -childExtents.min.x / box.allocatedWidth : 0f;
+                    element.scrollOffset = new Vector2(element.scrollOffset.y, offsetX);
+
+                    onCreateVirtualScrollbar?.Invoke(horizontal);
+                    box.horizontalScrollbar = horizontal;
+                }
+            }
+            
         }
 
         private void UpdateScrollbarLayouts() {
             for (int i = 0; i < m_VirtualElements.Count; i++) {
                 VirtualScrollbar scrollbar = (VirtualScrollbar) m_VirtualElements[i];
-                VirtualScrollbarHandle handle = scrollbar.handle;
-
+                scrollbar.RunLayout();
+//
                 LayoutResult scrollbarResult = scrollbar.layoutResult;
-                LayoutResult handleResult = handle.layoutResult;
                 LayoutResult targetResult = scrollbar.targetElement.layoutResult;
-
-                Rect trackRect = scrollbar.TrackRect;
+//
+                Rect trackRect = scrollbar.trackRect;
                 scrollbarResult.layer = targetResult.layer + 1;
+                scrollbarResult.zIndex = 999999;
                 scrollbarResult.localPosition = new Vector2(trackRect.x, trackRect.y);
                 scrollbarResult.screenPosition = targetResult.screenPosition + scrollbarResult.localPosition;
                 scrollbarResult.clipRect = targetResult.clipRect;
                 scrollbarResult.actualSize = new Size(trackRect.width, trackRect.height);
                 scrollbarResult.allocatedSize = scrollbarResult.actualSize;
 
-                Rect handleRect = scrollbar.HandleRect;
-                handleResult.layer = scrollbarResult.layer + 1;
-                handleResult.localPosition = new Vector2(handleRect.x, handleRect.y);
-                handleResult.screenPosition = scrollbarResult.screenPosition + handleResult.localPosition;
-                handleResult.clipRect = targetResult.clipRect;
-                handleResult.actualSize = new Size(handleRect.width, handleRect.height);
-                handleResult.allocatedSize = handleResult.actualSize;
-
                 scrollbar.layoutResult = scrollbarResult;
-                handle.layoutResult = handleResult;
             }
         }
 

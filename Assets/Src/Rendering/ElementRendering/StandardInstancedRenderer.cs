@@ -57,7 +57,7 @@ namespace UIForia.Rendering {
 
         static StandardInstancedRenderer() {
             s_Mesh = MeshUtil.CreateStandardUIMesh(new Size(1, 1), Color.white);
-            s_InstancedMaterial = new Material(Resources.Load<Material>("Materials/UIForiaInstanced"));
+            s_InstancedMaterial = new Material(Resources.Load<Material>("UIForia/Materials/UIForiaInstanced"));
             s_InstancedMaterial.enableInstancing = true;
 
             s_ClipRectKey = Shader.PropertyToID("_ClipRect");

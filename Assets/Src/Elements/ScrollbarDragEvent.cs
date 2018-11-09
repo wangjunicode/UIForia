@@ -15,18 +15,22 @@ namespace UIForia.Elements {
         }
 
         public override void Update() {
-            Rect trackRect = scrollbar.TrackRect;
+            Rect trackRect = scrollbar.trackRect;
             if (scrollbar.orientation == ScrollbarOrientation.Vertical) {
                 float max = trackRect.height - scrollbar.handleHeight;
                 float offset = Mathf.Clamp(MousePosition.y - trackRect.y - baseOffset, 0, max);
                 scrollbar.targetElement.scrollOffset = new Vector2(scrollbar.targetElement.scrollOffset.x, offset / max);
-                scrollbar.handle.style.SetTransformPosition(new Vector2(0f, offset), StyleState.Normal);
+                scrollbar.handleRect = new Rect(scrollbar.handleRect) {
+                    y = offset
+                };
             }
             else {
                 float max = trackRect.width - scrollbar.handleWidth;
                 float offset = Mathf.Clamp(MousePosition.x - trackRect.x - baseOffset, 0, max);
                 scrollbar.targetElement.scrollOffset = new Vector2(offset / max, scrollbar.targetElement.scrollOffset.y);
-                scrollbar.handle.style.SetTransformPosition(new Vector2(offset, 0f), StyleState.Normal);
+                scrollbar.handleRect = new Rect(scrollbar.handleRect) {
+                    x = offset
+                };
             }
         }
 

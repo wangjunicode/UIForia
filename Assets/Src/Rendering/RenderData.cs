@@ -1,8 +1,4 @@
-﻿using System;
-using System.Diagnostics;
-using UIForia.Rendering;
-using UIForia.Elements;
-using UIForia.Systems;
+﻿using System.Diagnostics;
 using UnityEngine;
 
 namespace UIForia.Systems {

@@ -33,7 +33,7 @@ namespace UIForia {
         protected ILayoutSystem m_LayoutSystem;
         protected IRenderSystem m_RenderSystem;
         protected IInputSystem m_InputSystem;
-        
+
         protected readonly SkipTree<UIElement> m_ElementTree;
 
         protected readonly List<ISystem> m_Systems;
@@ -57,7 +57,7 @@ namespace UIForia {
         protected static readonly DepthIndexComparer s_DepthIndexComparer = new DepthIndexComparer();
 
         public static readonly Application Game = new GameApplication();
-        
+
         static Application() {
             ArrayPool<UIElement>.SetMaxPoolSize(64);
         }
@@ -89,30 +89,28 @@ namespace UIForia {
         public void SetCamera(Camera camera) {
             RenderSystem.SetCamera(camera);
         }
-        
+
         public UIView AddView(Rect rect, Type type, string template = null) {
             UIView view = new UIView(this, rect, m_Views.Count, type, template);
-            
+
             m_Views.Add(view);
-            
+
             RegisterElement(view.RootElement);
 
             for (int i = 0; i < m_Systems.Count; i++) {
-                m_Systems[i].OnViewAdded(view);    
+                m_Systems[i].OnViewAdded(view);
             }
-            
+
             onViewAdded?.Invoke(view);
             return view;
         }
 
         internal void RegisterElement(UIElement element) {
             if (element.parent == null) {
-                
                 Debug.Assert(element.view.RootElement == element, nameof(element.view.RootElement) + " must be null if providing a null parent");
 
                 element.flags |= UIElementFlags.AncestorEnabled;
                 element.depth = 0;
-                
             }
             else {
                 if (element.parent.isEnabled) {
@@ -149,7 +147,7 @@ namespace UIForia {
             InvokeOnReady(element);
             onElementCreated?.Invoke(element);
         }
-        
+
         public void Refresh() {
             onWillRefresh?.Invoke();
             foreach (ISystem system in m_Systems) {
@@ -164,7 +162,16 @@ namespace UIForia {
             }
 
             m_DepthMap.Clear();
-//            Initialize(true);
+
+            for (int i = 0; i < m_Views.Count; i++) {
+                m_Views[i].Refresh();
+                RegisterElement(m_Views[i].RootElement);
+                
+                for (int j = 0; j < m_Systems.Count; j++) {
+                    m_Systems[j].OnViewAdded(m_Views[i]);
+                }
+            }
+
             onRefresh?.Invoke();
         }
 
@@ -214,7 +221,7 @@ namespace UIForia {
                 InitHierarchy(children[i]);
             }
         }
-        
+
         private static void InvokeOnCreate(UIElement element) {
             if (element.children != null) {
                 for (int i = 0; i < element.children.Length; i++) {
@@ -388,15 +395,14 @@ namespace UIForia {
         }
 
         public static void EnableElement(UIElement element) {
-            element.view.Application.DoEnableElement(element);    
+            element.view.Application.DoEnableElement(element);
         }
-        
-        public static void DisableElement(UIElement element) {
-            element.view.Application.DoDisableElement(element);    
-        }
-        
-        public void DoEnableElement(UIElement element) {
 
+        public static void DisableElement(UIElement element) {
+            element.view.Application.DoDisableElement(element);
+        }
+
+        public void DoEnableElement(UIElement element) {
             // no-op for already enabled elements
             if (element.isSelfEnabled) return;
 
@@ -436,7 +442,7 @@ namespace UIForia {
             }
 
             element.OnDisable();
-            
+
             m_ElementTree.ConditionalTraversePreOrder(element, (child) => {
                 child.flags &= ~(UIElementFlags.AncestorEnabled);
                 if (child.isSelfDisabled) return false;
@@ -480,8 +486,6 @@ namespace UIForia {
 
     }
 
-    public class GameApplication : Application {
-        
-    }
+    public class GameApplication : Application { }
 
 }

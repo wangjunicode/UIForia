@@ -245,7 +245,7 @@ namespace UIForia.Parsing.StyleParser {
 
         public static FixedLengthVector ParseFixedLengthPair(List<StyleVariable> variables, string propertyValue) {
             FixedLengthVector retn;
-            
+
             if (propertyValue.IndexOf(',') != -1) {
                 string[] split = propertyValue.Split(',');
                 return new FixedLengthVector(
@@ -254,15 +254,15 @@ namespace UIForia.Parsing.StyleParser {
                 );
             }
 
-            
+
             if (TryResolveVariable(variables, propertyValue, out retn)) {
                 return retn;
             }
-            
+
             int ptr = 0;
             float value = ParseFloat(propertyValue, ref ptr);
             ptr = ConsumeWhiteSpace(ptr, propertyValue);
-            
+
             if (ptr == propertyValue.Length) {
                 return new FixedLengthVector(new UIFixedLength(value), new UIFixedLength(value));
             }
@@ -277,14 +277,14 @@ namespace UIForia.Parsing.StyleParser {
             }
 
             return new FixedLengthVector(
-                new UIFixedLength(value, unit), 
+                new UIFixedLength(value, unit),
                 new UIFixedLength(value, unit)
-             );
+            );
         }
-        
+
         public static MeasurementPair ParseMeasurementPair(List<StyleVariable> variables, string propertyValue) {
             MeasurementPair retn;
-            
+
             if (propertyValue.IndexOf(',') != -1) {
                 string[] split = propertyValue.Split(',');
                 retn.x = ParseMeasurement(variables, split[0]);
@@ -292,15 +292,15 @@ namespace UIForia.Parsing.StyleParser {
                 return retn;
             }
 
-            
+
             if (TryResolveVariable(variables, propertyValue, out retn)) {
                 return retn;
             }
-            
+
             int ptr = 0;
             float value = ParseFloat(propertyValue, ref ptr);
             ptr = ConsumeWhiteSpace(ptr, propertyValue);
-            
+
             if (ptr == propertyValue.Length) {
                 return new MeasurementPair(new UIMeasurement(value), new UIMeasurement(value));
             }
@@ -313,11 +313,11 @@ namespace UIForia.Parsing.StyleParser {
             if (propertyValue.IndexOf('%') != -1) {
                 value = value * 0.01f;
             }
+
             retn.x = new UIMeasurement(value, unit);
             retn.y = new UIMeasurement(value, unit);
-            
+
             return retn;
-            
         }
 
         public static UIMeasurementUnit ParseMeasurementUnit(string input, ref int ptr) {
@@ -504,7 +504,7 @@ namespace UIForia.Parsing.StyleParser {
             bool foundDot = false;
             int startIndex = ptr;
             ptr = ConsumeWhiteSpace(ptr, input);
-            
+
             if (input[ptr] != '-' && !char.IsDigit(input[ptr])) {
                 throw new ParseException("Unable to parse float from: " + input.Substring(startIndex));
             }
@@ -788,6 +788,20 @@ namespace UIForia.Parsing.StyleParser {
             return Resources.Load<TMP_FontAsset>(propertyValue);
         }
 
+        public static Texture2D ParseTexture(List<StyleVariable> variables, string propertyValue) {
+            Texture2D texture;
+            if (TryResolveVariable(variables, propertyValue, out texture)) {
+                return texture;
+            }
+
+            propertyValue = propertyValue.ToLower();
+            if (propertyValue == "unset" || propertyValue == "default" || propertyValue == "null") {
+                return null;
+            }
+
+            return Resources.Load<Texture2D>(propertyValue);
+        }
+
         public static Overflow ParseOverflow(List<StyleVariable> variables, string propertyValue) {
             Overflow val;
             if (TryResolveVariable(variables, propertyValue, out val)) {
@@ -946,6 +960,46 @@ namespace UIForia.Parsing.StyleParser {
                     throw new ParseException($"Unknown value for {nameof(AnchorTarget)}: {propertyValue}");
             }
         }
+
+        public static ScrollbarButtonPlacement ParseScrollbarButtonPlacement(List<StyleVariable> variables, string propertyValue) {
+            switch (propertyValue.ToLower()) {
+                case "hidden":
+                case "none":
+                    return ScrollbarButtonPlacement.Hidden;
+                case "apart":
+                case "separate":
+                    return ScrollbarButtonPlacement.Apart;
+                case "before":
+                case "togetherbefore":
+                    return ScrollbarButtonPlacement.TogetherBefore;
+                case "after":
+                case "togetherafter":
+                    return ScrollbarButtonPlacement.TogetherAfter;
+                default:
+                    throw new ParseException($"Unknown value for {nameof(ScrollbarButtonPlacement)}: {propertyValue}");
+            }
+        }
+
+        public static VerticalScrollbarAttachment ParseScrollbarVerticalAttachment(List<StyleVariable> contextVariables, string propertyValue) {
+            switch (propertyValue.ToLower()) {
+                case "left":
+                    return VerticalScrollbarAttachment.Left;
+                case "right":
+                    return VerticalScrollbarAttachment.Right;
+                default:
+                    throw new ParseException($"Unknown value for {nameof(VerticalScrollbarAttachment)}: {propertyValue}");
+            }
+        }
+
+        public static HorizontalScrollbarAttachment ParseScrollbarHorizontalAttachment(List<StyleVariable> contextVariables, string propertyValue) {
+            switch (propertyValue.ToLower()) {
+                case "top":
+                    return HorizontalScrollbarAttachment.Top;
+                case "bottom":
+                    return HorizontalScrollbarAttachment.Bottom;
+                default:
+                    throw new ParseException($"Unknown value for {nameof(HorizontalScrollbarAttachment)}: {propertyValue}");
+            }        }
 
     }
 

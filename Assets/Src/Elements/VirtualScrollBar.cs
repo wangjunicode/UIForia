@@ -1,3 +1,4 @@
+using System;
 using UIForia.Input;
 using UIForia.Rendering;
 using UIForia.Systems;
@@ -6,49 +7,59 @@ using UnityEngine;
 
 namespace UIForia.Elements {
 
-    public class VirtualScrollbarButton : VirtualElement { }
+    public enum ScrollState {
+
+        Normal,
+        Hover,
+        Drag,
+        Fading,
+        Hidden
+
+    }
 
     public class VirtualScrollbar : VirtualElement {
 
-        public float trackSize;
-        public float handleSize;
         public readonly UIElement targetElement;
         public readonly ScrollbarOrientation orientation;
-        
-        public readonly VirtualScrollbarHandle handle;
-        public readonly VirtualScrollbarButton incrementButton;
-        public readonly VirtualScrollbarButton decrementButton;
+
+        public Rect trackRect;
+        public Rect handleRect;
+        public Rect incrementButtonRect;
+        public Rect decrementButtonRect;
+
+        public Mesh trackMesh;
+        public Mesh handleMesh;
+        public Mesh incrementButtonMesh;
+        public Mesh decrementButtonMesh;
+
+        public Material trackMaterial;
+        public Material handleMaterial;
+        public Material incrementButtonMaterial;
+        public Material decrementButtonMaterial;
+
+        public ScrollState scrollState;
         
         public VirtualScrollbar(UIElement target, ScrollbarOrientation orientation) {
             this.targetElement = target;
             this.parent = target;
-            this.handle = new VirtualScrollbarHandle();
-            this.incrementButton = new VirtualScrollbarButton();
-            this.decrementButton = new VirtualScrollbarButton();
-            
-            this.handle.parent = this;
-            this.incrementButton.parent = this;
-            this.decrementButton.parent = this;
-            
+
             this.siblingIndex = int.MaxValue - (orientation == ScrollbarOrientation.Horizontal ? 1 : 0);
-            
-            this.children = ArrayPool<UIElement>.GetExactSize(3);
-            this.children[0] = handle;
-            this.children[1] = incrementButton;
-            this.children[2] = decrementButton;
-            
+
+            this.children = ArrayPool<UIElement>.Empty;
             this.orientation = orientation;
-            this.trackSize = 15f;
-            this.handleSize = 15f;
-            
-            this.depth = target.depth + 1;
-            this.incrementButton.depth = target.depth + 1;
-            this.decrementButton.depth = target.depth + 1;
-            
+
             if (target.isEnabled) {
                 flags |= UIElementFlags.AncestorEnabled;
             }
+
+            scrollState = ScrollState.Normal;
+            Renderer = ElementRenderer.DefaultScrollbar;
+            trackMaterial = StandardRenderer.CreateMaterial();
+            handleMaterial = StandardRenderer.CreateMaterial();
+            incrementButtonMaterial = StandardRenderer.CreateMaterial();
+            decrementButtonMaterial = StandardRenderer.CreateMaterial();
         }
+
 
         public Vector2 handlePosition => new Vector2(
             orientation == ScrollbarOrientation.Vertical ? 0 : targetElement.scrollOffset.x * (targetElement.layoutResult.AllocatedWidth - handleWidth),
@@ -56,22 +67,24 @@ namespace UIForia.Elements {
         );
 
         public float handleWidth => orientation == ScrollbarOrientation.Vertical
-            ? handleSize
+            ? 0
             : (targetElement.layoutResult.AllocatedWidth / targetElement.layoutResult.actualSize.width) * targetElement.layoutResult.AllocatedWidth;
 
         public float handleHeight => orientation == ScrollbarOrientation.Horizontal
-            ? handleSize
+            ? 0
             : (targetElement.layoutResult.AllocatedHeight / targetElement.layoutResult.actualSize.height) * targetElement.layoutResult.AllocatedHeight;
+
+        public bool IsVertical => orientation == ScrollbarOrientation.Vertical;
 
         [OnDragCreate]
         public ScrollbarDragEvent CreateDragEvent(MouseInputEvent evt) {
-            if (handle.layoutResult.ScreenRect.Contains(evt.MouseDownPosition)) {
+            if (handleRect.Contains(evt.MouseDownPosition)) {
                 float baseOffset;
                 if (orientation == ScrollbarOrientation.Vertical) {
-                    baseOffset = evt.MouseDownPosition.y - (TrackRect.y + handlePosition.y);
+                    baseOffset = evt.MouseDownPosition.y - (trackRect.y + handlePosition.y);
                 }
                 else {
-                    baseOffset = evt.MouseDownPosition.x - (TrackRect.x + handlePosition.x);
+                    baseOffset = evt.MouseDownPosition.x - (trackRect.x + handlePosition.x);
                 }
 
                 return new ScrollbarDragEvent(baseOffset, this);
@@ -79,80 +92,158 @@ namespace UIForia.Elements {
 
             return null;
         }
-        
-        public Rect TrackRect {
-            get {
-                LayoutResult targetElementLayoutResult = targetElement.layoutResult;
-                Vector2 parentWorld = targetElement.layoutResult.screenPosition;
-                if (orientation == ScrollbarOrientation.Vertical) {
-                    bool isXOverflowing = targetElement.ComputedStyle.OverflowX != Overflow.None;
-                    if (targetElement.style.verticalScrollbarAttachment == VerticalScrollbarAttachment.Right) {
-                        float xOffset = isXOverflowing ? targetElementLayoutResult.allocatedSize.width : targetElementLayoutResult.actualSize.width;
-                        float x = parentWorld.x + xOffset - trackSize;
-                        float y = parentWorld.y;
-                        float w = trackSize;
-                        float h = targetElementLayoutResult.AllocatedHeight;
-                        return new Rect(x, y, w, h);
-                    }
-                    else {
-                        float x = parentWorld.x;
-                        float y = parentWorld.y;
-                        float w = trackSize;
-                        float h = targetElementLayoutResult.AllocatedHeight;
-                        return new Rect(x, y, w, h);
-                    }
-                }
 
-                if (targetElement.style.horizontalScrollbarAttachment == HorizontalScrollbarAttachment.Top) {
-                    float x = parentWorld.x;
-                    float y = parentWorld.y;
-                    float w = targetElementLayoutResult.AllocatedWidth;
-                    float h = trackSize;
-                    return new Rect(x, y, w, h);
-                }
-                else {
-                    float x = parentWorld.x;
-                    float y = parentWorld.y + targetElementLayoutResult.AllocatedHeight - trackSize;
-                    float w = targetElementLayoutResult.AllocatedWidth;
-                    float h = trackSize;
-                    return new Rect(x, y, w, h);
-                }
-            }
+        internal void OnMouseEnter() {
+            scrollState = ScrollState.Normal;
         }
 
-        public Rect HandleRect {
-            get {
-                if (orientation == ScrollbarOrientation.Vertical) {
-                    if (targetElement.style.verticalScrollbarAttachment == VerticalScrollbarAttachment.Right) {
-                        float x = 0;
-                        float y = handlePosition.y;
-                        float w = handleSize;
-                        float h = handleHeight;
-                        return new Rect(x, y, w, h);
-                    }
-                    else {
-                        float x = 0;
-                        float y = 0;
-                        float w = handleSize;
-                        float h = handleHeight;
-                        return new Rect(x, y, w, h);
-                    }
+        internal void OnMouseMoveOrHover() {
+            scrollState = ScrollState.Hover;
+        }
+
+        internal void OnMouseExit() {
+            scrollState = ScrollState.Normal;
+        }
+        
+        public void RunLayout() {
+            ComputedStyle targetStyle = targetElement.ComputedStyle;
+            LayoutResult targetResult = targetElement.layoutResult;
+
+            if (orientation == ScrollbarOrientation.Vertical) {
+                float trackSize = targetStyle.ScrollbarVerticalTrackSize;
+                float incrementButtonSize = targetStyle.ScrollbarVerticalIncrementSize;
+                float decrementButtonSize = targetStyle.ScrollbarVerticalDecrementSize;
+                float totalTrackHeight = targetResult.allocatedSize.height;
+
+                if (targetStyle.OverflowX != Overflow.None && targetStyle.OverflowX != Overflow.Hidden) {
+                    totalTrackHeight -= targetStyle.ScrollbarHorizontalTrackSize;
+                }
+                
+                ScrollbarButtonPlacement placement = targetStyle.ScrollbarVerticalButtonPlacement;
+
+                switch (placement) {
+                    case ScrollbarButtonPlacement.Unset:
+                    case ScrollbarButtonPlacement.Hidden:
+                        trackRect.y = 0;
+                        trackRect.height = totalTrackHeight;
+                        incrementButtonRect.height = 0;
+                        decrementButtonRect.height = 0;
+                        break;
+                    case ScrollbarButtonPlacement.TogetherAfter:
+                        trackRect.y = 0;
+                        trackRect.height = totalTrackHeight - (incrementButtonSize + decrementButtonSize);
+                        incrementButtonRect.y = trackRect.height;
+                        incrementButtonRect.height = incrementButtonSize;
+                        decrementButtonRect.y = trackRect.height + incrementButtonSize;
+                        decrementButtonRect.height = decrementButtonSize;
+                        break;
+                    case ScrollbarButtonPlacement.TogetherBefore:
+                        trackRect.y = incrementButtonSize + decrementButtonSize;
+                        trackRect.height = totalTrackHeight - trackRect.y;
+                        incrementButtonRect.y = 0;
+                        incrementButtonRect.height = incrementButtonSize;
+                        decrementButtonRect.y = incrementButtonSize;
+                        decrementButtonRect.height = decrementButtonSize;
+                        break;
+                    case ScrollbarButtonPlacement.Apart:
+                        trackRect.y = decrementButtonSize;
+                        trackRect.height = totalTrackHeight - trackRect.y;
+                        incrementButtonRect.y = 0;
+                        incrementButtonRect.height = incrementButtonSize;
+                        decrementButtonRect.y = incrementButtonSize + trackRect.height;
+                        decrementButtonRect.height = decrementButtonSize;
+                        break;
+                    default:
+                        throw new ArgumentOutOfRangeException();
                 }
 
-                if (targetElement.style.horizontalScrollbarAttachment == HorizontalScrollbarAttachment.Top) {
-                    float x = 0;
-                    float y = 0;
-                    float w = handleWidth;
-                    float h = handleSize;
-                    return new Rect(x, y, w, h);
+                handleRect.height = (targetResult.AllocatedHeight / targetResult.actualSize.height) * targetResult.AllocatedHeight;
+                trackRect.width = trackSize;
+                incrementButtonRect.width = trackSize;
+                decrementButtonRect.width = trackSize;
+                handleRect.width = targetStyle.ScrollbarVerticalHandleSize;
+
+                float elementWidth = targetStyle.OverflowX == Overflow.None
+                    ? targetElement.layoutResult.actualSize.width
+                    : targetElement.layoutResult.allocatedSize.width;
+
+                float offsetX = targetStyle.ScrollbarVerticalAttachment == VerticalScrollbarAttachment.Left
+                    ? 0
+                    : elementWidth - trackRect.width;
+
+                trackRect.x = offsetX;
+                handleRect.x = offsetX;
+                incrementButtonRect.x = offsetX;
+                decrementButtonRect.x = offsetX;
+            }
+            else {
+                float trackSize = targetStyle.ScrollbarHorizontalTrackSize;
+                float incrementButtonSize = targetStyle.ScrollbarHorizontalIncrementSize;
+                float decrementButtonSize = targetStyle.ScrollbarHorizontalDecrementSize;
+                float totalTrackWidth = targetResult.allocatedSize.width;
+
+                if (targetStyle.OverflowY != Overflow.None && targetStyle.OverflowY != Overflow.Hidden) {
+                    totalTrackWidth -= targetStyle.ScrollbarVerticalTrackSize;
                 }
-                else {
-                    float x = 0;
-                    float y = targetElement.layoutResult.AllocatedHeight - trackSize;
-                    float w = handleWidth;
-                    float h = handleSize;
-                    return new Rect(x, y, w, h);
+                
+                ScrollbarButtonPlacement placement = targetStyle.ScrollbarHorizontalButtonPlacement;
+
+                switch (placement) {
+                    case ScrollbarButtonPlacement.Unset:
+                    case ScrollbarButtonPlacement.Hidden:
+                        trackRect.x = 0;
+                        trackRect.width = totalTrackWidth;
+                        incrementButtonRect.width = 0;
+                        decrementButtonRect.width = 0;
+                        break;
+                    case ScrollbarButtonPlacement.TogetherAfter:
+                        trackRect.x = 0;
+                        trackRect.width = totalTrackWidth - (incrementButtonSize + decrementButtonSize);
+                        incrementButtonRect.x = trackRect.width;
+                        incrementButtonRect.width = incrementButtonSize;
+                        decrementButtonRect.x = trackRect.width + incrementButtonSize;
+                        decrementButtonRect.width = decrementButtonSize;
+                        break;
+                    case ScrollbarButtonPlacement.TogetherBefore:
+                        trackRect.x = incrementButtonSize + decrementButtonSize;
+                        trackRect.width = totalTrackWidth - trackRect.x;
+                        incrementButtonRect.x = 0;
+                        incrementButtonRect.width = incrementButtonSize;
+                        decrementButtonRect.x = incrementButtonSize;
+                        decrementButtonRect.width = decrementButtonSize;
+                        break;
+                    case ScrollbarButtonPlacement.Apart:
+                        trackRect.x = incrementButtonSize;
+                        trackRect.width = totalTrackWidth - trackRect.x;
+                        incrementButtonRect.x = 0;
+                        incrementButtonRect.width = incrementButtonSize;
+                        decrementButtonRect.x = incrementButtonSize + trackRect.width;
+                        decrementButtonRect.width = decrementButtonSize;
+                        break;
+                    default:
+                        throw new ArgumentOutOfRangeException();
                 }
+
+                handleRect.width = (targetResult.AllocatedWidth / targetResult.ActualWidth) * targetResult.AllocatedWidth;
+                
+                trackRect.height = trackSize;
+                incrementButtonRect.height = trackSize;
+                decrementButtonRect.height = trackSize;
+                handleRect.height = targetStyle.ScrollbarHorizontalHandleSize;
+
+                float elementHeight = targetStyle.OverflowY == Overflow.None
+                    ? targetElement.layoutResult.ContentRect.height
+//                    ? targetElement.layoutResult.actualSize.height
+                    : targetElement.layoutResult.allocatedSize.height;
+
+                float offsetY = targetStyle.ScrollbarHorizontalAttachment == HorizontalScrollbarAttachment.Top
+                    ? 0
+                    : elementHeight - trackRect.height;
+
+                trackRect.y = offsetY;
+                handleRect.y = offsetY;
+                incrementButtonRect.y = offsetY;
+                decrementButtonRect.y = offsetY;
             }
         }
 

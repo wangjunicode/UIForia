@@ -10,8 +10,8 @@ public sealed class ClippedPanel : UIContainerElement, IMeshProvider {
 
     private static readonly VertexHelper s_VertexHelper = new VertexHelper();
 
-    protected Mesh mesh;
-    protected bool isMeshDirty;
+    private Mesh mesh;
+    private bool isMeshDirty;
     public float clipSize = 10f;
 
     public ClippedCorner clippedCorner = ClippedCorner.None;

@@ -226,6 +226,7 @@ SubShader {
 		fixed4 PixShader(pixel_t input) : SV_Target
 		{
 			float c = tex2D(_MainTex, input.atlas).a;
+		
 		#ifndef UNDERLAY_ON
 			clip(c - input.param.x);
 		#endif
@@ -234,7 +235,6 @@ SubShader {
 			float	bias	= input.param.z;
 			float	weight	= input.param.w;
 			float	sd = (bias - c) * scale;
-
 
 			float outline = (_OutlineWidth * _ScaleRatioA) * scale;
 			float softness = (_OutlineSoftness * _ScaleRatioA) * scale;

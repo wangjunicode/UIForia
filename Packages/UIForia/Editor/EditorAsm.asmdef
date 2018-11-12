@@ -1,0 +1,14 @@
+{
+    "name": "EditorAsm",
+    "references": [
+        "SrcAsm",
+        "Unity.TextMeshPro",
+        "_DemoAsmDef"
+    ],
+    "optionalUnityReferences": [],
+    "includePlatforms": [
+        "Editor"
+    ],
+    "excludePlatforms": [],
+    "allowUnsafeCode": false
+}

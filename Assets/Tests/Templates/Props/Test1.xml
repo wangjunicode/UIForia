@@ -1,8 +1,0 @@
-﻿<?xml version="1.0" encoding="utf-8"?>
-
-<UITemplate>
-    <Contents>
-       <Spec.Props.Test1Thing intValue="8494" floatValue="8494.5" boolValue="true" stringValue="hello"/>
-       <Spec.Props.Test1Thing intValue="-8494" floatValue="-8494.5" boolValue="false" stringValue="hello"/>
-    </Contents>
-</UITemplate>

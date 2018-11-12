@@ -1,0 +1,12 @@
+{
+    "name": "com.klang.uiforia",
+    "displayName": "Klang UI",
+    "version": "0.0.1",
+    "unity": "2018.2",
+    "description": "",
+    "keywords": ["UI"],
+    "category": "UI",
+    "dependencies": {
+      
+    }
+}

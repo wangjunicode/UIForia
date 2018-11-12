@@ -18,9 +18,7 @@ namespace Demo {
             selectedChatGroup = 0;
             
             UIElement child = FindById("child-to-animate");
-            if (child != null) {
-                child.style.PlayAnimation(ChatWindow_Styles.KeyFrameAnimateTransform());
-            }
+            child?.style.PlayAnimation(ChatWindow_Styles.KeyFrameAnimateTransform());
         }
         
 

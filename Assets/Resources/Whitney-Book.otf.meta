@@ -1,5 +1,5 @@
 fileFormatVersion: 2
-guid: 8175ca53f15a86b4685beef9765bba82
+guid: eba4b73135a5b1149a98b1e3d5b22e4f
 TrueTypeFontImporter:
   externalObjects: {}
   serializedVersion: 4
@@ -11,7 +11,8 @@ TrueTypeFontImporter:
   fontName: Whitney Book
   fontNames:
   - Whitney Book
-  fallbackFontReferences: []
+  fallbackFontReferences:
+  - {fileID: 12800000, guid: 8175ca53f15a86b4685beef9765bba82, type: 3}
   customCharacters: 
   fontRenderingMode: 0
   ascentCalculationMode: 1

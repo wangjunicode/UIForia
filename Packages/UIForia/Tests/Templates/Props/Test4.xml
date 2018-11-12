@@ -1,0 +1,251 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+
+<UITemplate>
+    <Import path="./thing" as="blah"/>
+    <Style extends="id" from="./path/to/thing">
+
+        <Text>
+            <FontSize value="12"/>
+            <FontAsset url=""/>
+            <FontStyle/>
+            <FontOverflow/>
+            <FontColor/>
+            <TextAnchor/>
+            
+            <State.Disabled>
+                
+            </State.Disabled>
+            
+            <State.Hover>
+                
+            </State.Hover>
+            
+        </Text>
+        
+        <Transform>
+            
+            <Position value="4, 5"/>
+            
+        </Transform>
+
+        <Size>
+            <Margin value="4px, 4px, 4px, 4px"/>
+
+        </Size>
+
+        <Paint>
+            <BackgroundColor value="rgba(4, 5, 6, 7)"/>
+        </Paint>
+        Text {
+        fontSize: 11px;
+        fontAsset: url(path/to/asset.font)
+        overflow: Hidden | Visible
+        }
+
+        Material {
+        backgroundColor: blue;
+        borderStyle
+        borderRadius
+        backgroundImage
+        material: url(path/to/material.mat)
+        backgroundFill
+        backgroundTile
+        shadow
+        opacity
+        visibility
+        }
+
+        Animations {
+
+        }
+
+        Transform {
+        relativeTo: View | Parent | Canvas | TemplateRoot
+        offsetX
+        offsetY
+        rotation
+        scale
+        }
+
+        Size {
+        padding: % of container
+        margin:
+        border:
+        width: px | % if fit == none % -> treat as pixel width
+        height:
+        fitWidth: None | FitFixedContent | FillParent
+        fitHeight: None | FitFixedContent | FillParent
+        }
+
+        Layout {
+        type: Flex | Grid | Radial | Stack | None
+        alignmentMainAxis
+        alignmentCrossAxis
+        direction
+        wrap
+        ...grid properties
+        }
+
+        LayoutItem {
+
+        inFlow: false
+        minWidth: parent(40%) //300px
+        maxWidth: content(50%);
+        minHeight:
+        maxHeight:
+        grow: 1
+        shrink 1
+        basisWidth = parent(40%)
+        basisHeight = content(100%)
+
+        ancestor:hover {
+
+        }
+
+        parent:hover {
+
+        }
+
+        parent:mouseEnter {}
+        }
+
+        fixed parent
+        width: 50%
+        parent child relative
+        width: 50% makes no sense
+        parent parent relative
+        width: 50% -> fine
+
+        width: implicit -> implicit width
+
+
+    </Style>
+    <Contents>
+
+        <UITemplate id="Section">
+            Hello There
+            <Children/>
+            Good bye
+        </UITemplate>
+
+        <!--<ColorSelector selected="{index}">-->
+        <Color value="{Color.red}"/>
+        <Color value="{Color.red}"/>
+        <Color value="{Color.red}"/>
+        <Color value="{Color.red}"/>
+
+        <Section>
+            More Text
+        </Section>
+
+        <Children/>
+        Create(template.children.createAll(context))
+        <!--</ColorSelector>-->
+
+        InstantiateColorSelector(view, parent, scopedChildren) ->
+        create instance
+        assign props
+
+        for each child in ACTUAL template
+        create(view, instance, localContext
+
+        create color selector
+        -> create scoped children
+        -> get template for child
+        -> pass in props from definition
+        -> pass in children from definition
+        -> return created child
+        -> get template for color selector
+        -> pass in props
+        -> pass in children
+        -> return created color selector template
+
+        <Using key="{Math}" as=""/>
+        
+        <UseFunction name="global::Math.Max(float, float)" as="Max"/>
+        
+        <Section>
+            Text
+            <Children/>
+
+            <Switch value="4">
+
+                <Case when="4"/>
+
+                <Case when="5"/>
+
+                <Case when="6"/>
+
+                <Case when="7"/>
+
+            </Switch>
+
+            more text
+            <SomeThingElse something="2">
+                Even more children
+                Even more children
+                Even more children
+                <Slot id="1"/>
+                Even more children
+            </SomeThingElse>
+        </Section>
+
+        <SlotInput id="1">
+            dafeafeafa
+        </SlotInput>
+
+        <Panel>
+            Child 1 {text}
+            <ColorSelector>Child 2</ColorSelector>
+        </Panel>
+
+        <Spec.Props.Test1Thing intValue="{value}"/>
+
+        <Switch value="{someEnum}">
+
+            <Case when="Constant.Value0">Text here</Case>
+
+            <Case when="Constant.Value1">Text here</Case>
+
+            <Case when="Constant.Value2">Text here</Case>
+
+            <Case when="Constant.Value3">Text here</Case>
+
+            <Default>Text here</Default>
+
+        </Switch>
+
+        <ColorSelector onClick="{Alert('hello')}" onColorChanged="{}">
+            <Repeat list="{colors}">
+                <Text style.margin="{StyleRect(px(1), content(2), 3, parent(4)}">
+                    {item.rgb + this.alpha}
+                </Text>
+            </Repeat>
+        </ColorSelector>
+
+        <Repeat filter="" list="{valueList}" x-bindOnce="" x-updateRate="" alias="item" onItemMoved="{}" onItemAdded="{}"
+                onItemRemoved="{}">
+            <Implicit.RepeatChild>-> context.currentList.$index = 1;
+                {item.something :: someObservedProperty} -- only check for updates when property changed
+                {someRootProperty}
+                {valuelist[$i].y}
+                <ElementWithSomeNestedList>
+                    <thing id="{$index}"/>
+                    -> context.currentList.$index
+                </ElementWithSomeNestedList>
+                {$valueListLength}
+            </Implicit.RepeatChild>
+        </Repeat>
+
+        <Repeat list="{item.things}">
+            {item.more.thing[value].x}
+            <UIImage src="{item.basePath + root.path}"/>
+
+            <Slot id="1">
+
+            </Slot>
+
+        </Repeat>
+
+    </Contents>
+</UITemplate>

@@ -1,0 +1,13 @@
+{
+    "name": "TestAsm",
+    "references": [
+        "SrcAsm",
+        "Unity.TextMeshPro"
+    ],
+    "optionalUnityReferences": [
+        "TestAssemblies"
+    ],
+    "includePlatforms": [],
+    "excludePlatforms": [],
+    "allowUnsafeCode": false
+}

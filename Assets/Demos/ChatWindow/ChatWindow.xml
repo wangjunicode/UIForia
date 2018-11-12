@@ -41,14 +41,26 @@
             TransformPositionY = 100px;
         }
         
+        style input {
+            PreferredSize = 200px, 32px;
+            BackgroundColor = white;
+            TransformBehavior = LayoutOffset;
+            TransformPosition = 20px;
+        }
+        
+        
+        
     </Style>
 
     <Contents style="container">
 
-        <Div style="parent">
-            <Div style="child"/>
-            <Div style="child2"/>
-        </Div>
+        text
+        <Input style="input"/>
+        
+        <!--<Div style="parent">-->
+            <!--<Div style="child"/>-->
+            <!--<Div style="child2"/>-->
+        <!--</Div>-->
         <!--<ChatPanel style.borderColor="red" selectedGroupIdx="{selectedChatGroup}" chatData="{chatData}"/>-->
 
         <!--<SeedWindowFrame style="window-frame-temp">-->

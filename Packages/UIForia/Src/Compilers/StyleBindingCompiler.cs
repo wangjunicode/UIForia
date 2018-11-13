@@ -210,10 +210,12 @@ namespace UIForia.Compilers {
 
                 // Rect
                 case RenderConstants.Size:
-                    return new StyleBinding_Dimensions(targetState.state, Compile<Dimensions>(
-                        value,
-                        sizeAliasSource
-                    ));
+                    throw new NotImplementedException();
+//                    return new StyleBinding_Dimensions(targetState.state, Compile<Dimensions>(
+//                        value,
+//                        sizeAliasSource
+//                    ));
+                    break;
 
                 case RenderConstants.Width:
                     return new StyleBinding_Width(targetState.state, Compile<UIMeasurement>(value,measurementSources));
@@ -434,11 +436,11 @@ namespace UIForia.Compilers {
             return new BorderRadius(topLeft, topRight, bottomRight, bottomLeft);
         }
 
-        // todo -- support UIMeasurement as arguments here
-        [Pure]
-        public static Dimensions Size(float width, float height) {
-            return new Dimensions(new UIMeasurement(width), new UIMeasurement(height));
-        }
+//        // todo -- support UIMeasurement as arguments here
+//        [Pure]
+//        public static Dimensions Size(float width, float height) {
+//            return new Dimensions(new UIMeasurement(width), new UIMeasurement(height));
+//        }
 
         // todo -- support UIMeasurement as arguments here
         [Pure]

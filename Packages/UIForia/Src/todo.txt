@@ -18,13 +18,11 @@ Critical
     Margin
     rotation
     Cursors
-    Scroll Styles
     finish drag implementation
 
 Nice to have
     LayoutDefault to Flow
     Implement Flow
-    Improve Grid w/ flex tracks
     fill modes
     shapes
     masks?

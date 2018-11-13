@@ -1,10 +1,12 @@
 using System;
+using System.Diagnostics.Eventing.Reader;
 using UIForia.Layout.LayoutTypes;
 using TMPro;
 using UIForia.Rendering;
 using UIForia.Systems;
 using UIForia.Text;
 using UIForia.Util;
+using UnityEditor;
 using UnityEngine;
 using FontStyle = UIForia.Text.FontStyle;
 
@@ -30,7 +32,10 @@ namespace UIForia {
         public string text;
         public TextInfo textInfo;
         private Mesh mesh;
-        private Material material; // todo -- see if there is a way to do material sharing, most text can use the same materials
+
+        // todo -- see if there is a way to do material sharing, most text can use the same materials
+        private Material material;
+
         private TMP_FontAsset fontAsset;
 
         public event Action<UITextElement, string> onTextChanged;
@@ -44,11 +49,12 @@ namespace UIForia {
         }
 
         public UITextElement(string text = "") {
-            this.text = text;
+            this.text = text ?? string.Empty;
             Renderer = ElementRenderer.DefaultText;
             material = new Material(s_BaseTextMaterial);
             flags = flags | UIElementFlags.TextElement
                           | UIElementFlags.Primitive;
+            UpdateTextInfo();
         }
 
         public override void OnReady() {
@@ -108,9 +114,148 @@ namespace UIForia {
             return new SelectionRange(textInfo.charCount - 1, TextEdge.Right);
         }
 
-        public void DeleteText(int characterIndex, int count) { }
+        public SelectionRange DeleteTextBackwards(SelectionRange range) {
+            if (text.Length == 0) {
+                return range;
+            }
 
-        public void InsertText(int characterIndex, char character) { }
+            int cursorIndex = Mathf.Clamp(range.cursorIndex, 0, textInfo.charCount - 1);
+            if (range.HasSelection) {
+                int min = (range.cursorIndex < range.selectIndex ? range.cursorIndex : range.selectIndex) + 1;
+                int max = (range.cursorIndex > range.selectIndex ? range.cursorIndex : range.selectIndex) + 1;
+
+                string part0 = text.Substring(0, min);
+                string part1 = text.Substring(max);
+                SetText(part0 + part1);
+                return new SelectionRange(min, TextEdge.Left);
+            }
+            else {
+                if (cursorIndex == 0 && range.cursorEdge == TextEdge.Left) {
+                    return range;
+                }
+
+                // assume same line for the moment
+                if (range.cursorEdge == TextEdge.Left) {
+                    cursorIndex--;
+                }
+
+                cursorIndex = Mathf.Max(0, cursorIndex);
+
+                if (cursorIndex == 0) {
+                    SetText(text.Substring(1));
+                    return new SelectionRange(0, TextEdge.Left);
+                }
+                else if (cursorIndex == textInfo.charCount - 1) {
+                    SetText(text.Substring(0, text.Length - 1));
+                    return new SelectionRange(range.cursorIndex - 1, TextEdge.Right);
+                }
+                else {
+                    string part0 = text.Substring(0, cursorIndex);
+                    string part1 = text.Substring(cursorIndex + 1);
+                    SetText(part0 + part1);
+
+                    return new SelectionRange(cursorIndex - 1, TextEdge.Right);
+                }
+            }
+        }
+
+        public SelectionRange DeleteTextForwards(SelectionRange range) {
+            if (text.Length == 0) {
+                return range;
+            }
+
+            int cursorIndex = Mathf.Clamp(range.cursorIndex, 0, textInfo.charCount - 1);
+            if (range.HasSelection) {
+                int min = (range.cursorIndex < range.selectIndex ? range.cursorIndex : range.selectIndex) + 1;
+                int max = (range.cursorIndex > range.selectIndex ? range.cursorIndex : range.selectIndex) + 1;
+
+                string part0 = text.Substring(0, min);
+                string part1 = text.Substring(max);
+                SetText(part0 + part1);
+                return new SelectionRange(min, TextEdge.Left);
+            }
+            else {
+                if (cursorIndex == textInfo.charCount - 1 && range.cursorEdge == TextEdge.Right) {
+                    return range;
+                }                
+                else {
+                    if (cursorIndex == textInfo.charCount - 1) {
+                        SetText(text.Remove(textInfo.charCount - 1));
+                        return new SelectionRange(textInfo.charCount - 1, TextEdge.Right);
+                    }
+                    else {
+                        string part0 = text.Substring(0, cursorIndex + 1);
+                        string part1 = text.Substring(cursorIndex + 2);
+                        SetText(part0 + part1);
+                        return new SelectionRange(cursorIndex, TextEdge.Right);
+                    }
+                }
+            }
+        }
+
+        public SelectionRange MoveCursorLeft(SelectionRange range, bool maintainSelection) {
+            int selectionIndex = range.selectIndex;
+            TextEdge selectionEdge = range.selectEdge;
+
+            if (!maintainSelection && range.HasSelection) {
+                selectionIndex = -1;
+                return new SelectionRange(range.cursorIndex, range.cursorEdge);
+            }
+            else if (!maintainSelection) {
+                selectionIndex = -1;
+            }
+            else if (!range.HasSelection) {
+                selectionIndex = range.cursorIndex;
+                selectionEdge = range.cursorEdge;
+            }
+
+            if (range.cursorEdge == TextEdge.Left) {
+                if (range.cursorIndex == 0) {
+                    return new SelectionRange(range.cursorIndex, range.cursorEdge, selectionIndex, selectionEdge);
+                }
+
+                return new SelectionRange(Mathf.Max(0, range.cursorIndex - 2), TextEdge.Right, selectionIndex, selectionEdge);
+            }
+
+            if (range.cursorIndex - 1 < 0) {
+                return new SelectionRange(0, TextEdge.Left, selectionIndex, selectionEdge);
+            }
+
+            return new SelectionRange(range.cursorIndex - 1, TextEdge.Right, selectionIndex, selectionEdge);
+        }
+
+        public SelectionRange MoveCursorRight(SelectionRange range, bool maintainSelection) {
+            int selectionIndex = range.selectIndex;
+            TextEdge selectionEdge = range.selectEdge;
+
+            if (!maintainSelection && range.HasSelection) {
+                selectionIndex = -1;
+                return new SelectionRange(range.cursorIndex, range.cursorEdge);
+            }
+            else if (!maintainSelection) {
+                selectionIndex = -1;
+            }
+            else if (!range.HasSelection) {
+                selectionIndex = range.cursorIndex;
+                selectionEdge = range.cursorEdge;
+            }
+
+            if (range.cursorEdge == TextEdge.Left) {
+                return new SelectionRange(range.cursorIndex, TextEdge.Right, selectionIndex, selectionEdge);    
+            }
+
+            int cursorIndex = Mathf.Min(range.cursorIndex + 1, textInfo.charCount - 1);
+
+            if (cursorIndex == textInfo.charCount - 1) {
+                return new SelectionRange(cursorIndex, TextEdge.Right, selectionIndex, selectionEdge);    
+            }
+            
+            return new SelectionRange(cursorIndex, TextEdge.Right, selectionIndex, selectionEdge);
+        }
+
+        public void InsertText(SelectionRange range, char character) {
+            
+        }
 
         public void InsertText(int characterIndex, string str) { }
 
@@ -120,13 +265,6 @@ namespace UIForia {
             int weightIndex = fontWeight / 100;
             TMP_FontWeights weights = spanInfo.font.fontWeights[weightIndex];
             return isItalic ? weights.italicTypeface : weights.regularTypeface;
-        }
-
-        private static bool IsTextProperty(StylePropertyId propertyId) {
-            int intId = (int) propertyId;
-            const int start = (int) StylePropertyId.__TextPropertyStart__;
-            const int end = (int) StylePropertyId.__TextPropertyEnd__;
-            return intId > start && intId < end;
         }
 
         private static void ComputeCharacterAndWordSizes(TextInfo textInfo) {
@@ -148,21 +286,24 @@ namespace UIForia {
                 }
 
                 float smallCapsMultiplier = (spanInfo.fontStyle & FontStyle.SmallCaps) == 0 ? 1.0f : 0.8f;
-                float fontScale = spanInfo.fontSize * smallCapsMultiplier / fontAsset.fontInfo.PointSize * fontAsset.fontInfo.Scale;
+                float fontScale = spanInfo.fontSize * smallCapsMultiplier / fontAsset.fontInfo.PointSize *
+                                  fontAsset.fontInfo.Scale;
 
-                float yAdvance = fontAsset.fontInfo.Baseline * fontScale * fontAsset.fontInfo.Scale;
-                float monoAdvance = 0;
+                //float yAdvance = fontAsset.fontInfo.Baseline * fontScale * fontAsset.fontInfo.Scale;
+                //float monoAdvance = 0;
 
                 float minWordSize = float.MaxValue;
                 float maxWordSize = float.MinValue;
 
-                float padding = ShaderUtilities.GetPadding(fontAsset.material, enableExtraPadding: false, isBold: false);
+                float padding =
+                    ShaderUtilities.GetPadding(fontAsset.material, enableExtraPadding: false, isBold: false);
                 float stylePadding = 0;
 
                 if (!isUsingAltTypeface && (spanInfo.fontStyle & FontStyle.Bold) == FontStyle.Bold) {
                     if (fontAssetMaterial.HasProperty(ShaderUtilities.ID_GradientScale)) {
                         float gradientScale = fontAssetMaterial.GetFloat(ShaderUtilities.ID_GradientScale);
-                        stylePadding = fontAsset.boldStyle / 4.0f * gradientScale * fontAssetMaterial.GetFloat(ShaderUtilities.ID_ScaleRatio_A);
+                        stylePadding = fontAsset.boldStyle / 4.0f * gradientScale *
+                                       fontAssetMaterial.GetFloat(ShaderUtilities.ID_ScaleRatio_A);
 
                         // Clamp overall padding to Gradient Scale size.
                         if (stylePadding + padding > gradientScale) {
@@ -174,7 +315,8 @@ namespace UIForia {
                 }
                 else if (fontAssetMaterial.HasProperty(ShaderUtilities.ID_GradientScale)) {
                     float gradientScale = fontAssetMaterial.GetFloat(ShaderUtilities.ID_GradientScale);
-                    stylePadding = fontAsset.normalStyle / 4.0f * gradientScale * fontAssetMaterial.GetFloat(ShaderUtilities.ID_ScaleRatio_A);
+                    stylePadding = fontAsset.normalStyle / 4.0f * gradientScale *
+                                   fontAssetMaterial.GetFloat(ShaderUtilities.ID_ScaleRatio_A);
 
                     // Clamp overall padding to Gradient Scale size.
                     if (stylePadding + padding > gradientScale) {
@@ -194,7 +336,8 @@ namespace UIForia {
                         int current = charInfos[i].character;
 
                         TMP_Glyph glyph;
-                        TMP_FontAsset fontForGlyph = TMP_FontUtilities.SearchForGlyph(spanInfo.font, charInfos[i].character, out glyph);
+                        TMP_FontAsset fontForGlyph =
+                            TMP_FontUtilities.SearchForGlyph(spanInfo.font, charInfos[i].character, out glyph);
 
                         KerningPair adjustmentPair;
                         GlyphValueRecord glyphAdjustments = new GlyphValueRecord();
@@ -235,10 +378,12 @@ namespace UIForia {
 //                        bottomRight.x = topLeft.x + (glyph.width + padding * 2) * currentElementScale;
 //                        bottomRight.y = topLeft.y - (glyph.height + padding * 2 + stylePadding * 2) * currentElementScale;
 
-                        topLeft.x = xAdvance + (glyph.xOffset - padding - stylePadding + glyphAdjustments.xPlacement) * currentElementScale;
-                        topLeft.y = ((fontAsset.fontInfo.Ascender) - ( glyph.yOffset + padding)) * currentElementScale;//yAdvance + ((() + padding + glyphAdjustments.yPlacement)) * currentElementScale;
+                        topLeft.x = xAdvance + (glyph.xOffset - padding - stylePadding + glyphAdjustments.xPlacement) *
+                                    currentElementScale;
+                        topLeft.y = ((fontAsset.fontInfo.Ascender) - (glyph.yOffset + padding)) * currentElementScale;
                         bottomRight.x = topLeft.x + (glyph.width + padding * 2) * currentElementScale;
-                        bottomRight.y = topLeft.y + (glyph.height + padding * 2 + stylePadding * 2) * currentElementScale; // 
+                        bottomRight.y =
+                            topLeft.y + (glyph.height + padding * 2 + stylePadding * 2) * currentElementScale;
 
                         if (currentWord.startChar + currentWord.VisibleCharCount >= i) {
                             if (topLeft.y > currentWord.maxCharTop) {
@@ -271,27 +416,37 @@ namespace UIForia {
                         charInfos[i].uv3 = Vector2.one;
 
                         float elementAscender = fontAsset.fontInfo.Ascender * currentElementScale / smallCapsMultiplier;
-                        float elementDescender = fontAsset.fontInfo.Descender * currentElementScale / smallCapsMultiplier;
+                        float elementDescender =
+                            fontAsset.fontInfo.Descender * currentElementScale / smallCapsMultiplier;
 
                         charInfos[i].ascender = elementAscender;
                         charInfos[i].descender = elementDescender;
 
-                        currentWord.ascender = elementAscender > currentWord.ascender ? elementAscender : currentWord.ascender;
-                        currentWord.descender = elementDescender < currentWord.descender ? elementDescender : currentWord.descender;
+                        currentWord.ascender = elementAscender > currentWord.ascender
+                            ? elementAscender
+                            : currentWord.ascender;
+                        currentWord.descender = elementDescender < currentWord.descender
+                            ? elementDescender
+                            : currentWord.descender;
 
                         if ((spanInfo.fontStyle & (FontStyle.Superscript | FontStyle.Subscript)) != 0) {
                             float baseAscender = elementAscender / fontAsset.fontInfo.SubSize;
                             float baseDescender = elementDescender / fontAsset.fontInfo.SubSize;
 
-                            currentWord.ascender = baseAscender > currentWord.ascender ? baseAscender : currentWord.ascender;
-                            currentWord.descender = baseDescender < currentWord.descender ? baseDescender : currentWord.descender;
+                            currentWord.ascender = baseAscender > currentWord.ascender
+                                ? baseAscender
+                                : currentWord.ascender;
+                            currentWord.descender = baseDescender < currentWord.descender
+                                ? baseDescender
+                                : currentWord.descender;
                         }
 
                         if (i < currentWord.startChar + currentWord.spaceStart) {
                             currentWord.characterSize = charInfos[i].bottomRight.x;
                         }
 
-                        xAdvance += (glyph.xAdvance * boldAdvanceMultiplier + fontAsset.normalSpacingOffset + glyphAdjustments.xAdvance) * currentElementScale;
+                        xAdvance += (glyph.xAdvance * boldAdvanceMultiplier + fontAsset.normalSpacingOffset +
+                                     glyphAdjustments.xAdvance) * currentElementScale;
                     }
 
                     currentWord.xAdvance = xAdvance;
@@ -303,7 +458,7 @@ namespace UIForia {
             }
         }
 
-        protected void ApplyLineAndWordOffsets(TextInfo textInfo) {
+        protected static void ApplyLineAndWordOffsets(TextInfo textInfo) {
             LineInfo[] lineInfos = textInfo.lineInfos;
             WordInfo[] wordInfos = textInfo.wordInfos;
             CharInfo[] charInfos = textInfo.charInfos;
@@ -335,10 +490,6 @@ namespace UIForia {
             }
         }
 
-//        public override Texture GetMainTexture() {
-//            return textInfo.spanInfos[0].font.material.mainTexture;
-//        }
-//
         public Mesh GetMesh() {
             if (mesh != null && !layoutResult.SizeChanged) {
                 return mesh;
@@ -426,19 +577,27 @@ namespace UIForia {
         public Material GetMaterial() {
             ComputedStyle computedStyle = ComputedStyle;
             Material fontMaterial = computedStyle.TextFontAsset.material;
-            
+
             if (fontAsset != computedStyle.TextFontAsset) {
                 fontAsset = computedStyle.TextFontAsset;
                 material.mainTexture = fontMaterial.mainTexture;
-                material.SetFloat(ShaderUtilities.ID_GradientScale, fontMaterial.GetFloat(ShaderUtilities.ID_GradientScale));
-                material.SetFloat(ShaderUtilities.ID_WeightNormal, fontMaterial.GetFloat(ShaderUtilities.ID_WeightNormal));
+                material.SetFloat(ShaderUtilities.ID_GradientScale,
+                    fontMaterial.GetFloat(ShaderUtilities.ID_GradientScale));
+                material.SetFloat(ShaderUtilities.ID_WeightNormal,
+                    fontMaterial.GetFloat(ShaderUtilities.ID_WeightNormal));
                 material.SetFloat(ShaderUtilities.ID_WeightBold, fontMaterial.GetFloat(ShaderUtilities.ID_WeightBold));
-                material.SetFloat(ShaderUtilities.ID_ScaleRatio_A, fontMaterial.GetFloat(ShaderUtilities.ID_ScaleRatio_A));
-                material.SetFloat(ShaderUtilities.ID_ScaleRatio_B, fontMaterial.GetFloat(ShaderUtilities.ID_ScaleRatio_B));
-                material.SetFloat(ShaderUtilities.ID_ScaleRatio_C, fontMaterial.GetFloat(ShaderUtilities.ID_ScaleRatio_A));
-                material.SetVector(s_TextureSizeKey, new Vector4(material.mainTexture.width, material.mainTexture.height));
+                material.SetFloat(ShaderUtilities.ID_ScaleRatio_A,
+                    fontMaterial.GetFloat(ShaderUtilities.ID_ScaleRatio_A));
+                material.SetFloat(ShaderUtilities.ID_ScaleRatio_B,
+                    fontMaterial.GetFloat(ShaderUtilities.ID_ScaleRatio_B));
+                material.SetFloat(ShaderUtilities.ID_ScaleRatio_C,
+                    fontMaterial.GetFloat(ShaderUtilities.ID_ScaleRatio_A));
+                material.SetVector(s_TextureSizeKey,
+                    new Vector4(material.mainTexture.width, material.mainTexture.height));
             }
-            float fontScale = (computedStyle.TextFontSize / fontAsset.fontInfo.PointSize) * fontAsset.fontInfo.Scale;;
+
+            float fontScale = (computedStyle.TextFontSize / fontAsset.fontInfo.PointSize) * fontAsset.fontInfo.Scale;
+            ;
             material.SetFloat(s_FontScaleKey, fontScale);
             // todo -- text styles & keywords, try to use the same materials where possible
 //            material.SetVector("_OutlineColor", computedStyle.TextOutlineColor);
@@ -458,7 +617,7 @@ namespace UIForia {
 //            material.SetVector("_UnderlayColor", underlayColor);
 //            
 //            material.SetTexture("_FaceTexture", computedStyle.TextFaceTexture);
-            
+
             return material;
         }
 
@@ -495,6 +654,7 @@ namespace UIForia {
             if (string.IsNullOrEmpty(text) || charIndex > text.Length - 1) {
                 return TextEdge.Left;
             }
+
             CharInfo charInfo = textInfo.charInfos[charIndex];
             float width = charInfo.bottomRight.x - charInfo.topLeft.x;
             if (point.x > charInfo.topLeft.x + (width * 0.5f)) {
@@ -544,29 +704,31 @@ namespace UIForia {
             return textInfo.lineInfos[FindNearestLineIndex(point)];
         }
 
-        private int FindNearestLineIndex(Vector2 point) {
+        public float GetLineHeight() {
             TMP_FontAsset asset = ComputedStyle.TextFontAsset;
             float scale = (ComputedStyle.TextFontSize / asset.fontInfo.PointSize) * asset.fontInfo.Scale;
-            float lh = (asset.fontInfo.Ascender - asset.fontInfo.Descender) * scale;
+            return (asset.fontInfo.Ascender - asset.fontInfo.Descender) * scale;
+        }
 
+        private int FindNearestLineIndex(Vector2 point) {
+            float lh = GetLineHeight();
             if (point.y <= textInfo.lineInfos[0].position.y) {
                 return 0;
             }
-            
+
             if (point.y >= textInfo.lineInfos[textInfo.lineInfos.Length - 1].position.y) {
                 return textInfo.lineInfos.Length - 1;
             }
-            
+
             for (int i = 0; i < textInfo.lineCount; i++) {
                 LineInfo line = textInfo.lineInfos[i];
-                
+
                 if (line.position.y <= point.y && line.position.y + lh >= point.y) {
                     return i;
                 }
-                
             }
 
-           
+
             return 0; // should never reach this
 //            float closestDistance = float.MaxValue;
 //            for (int i = 0; i < textInfo.lineCount; i++) {
@@ -621,12 +783,11 @@ namespace UIForia {
             return textInfo.wordInfos[closestIndex];
         }
 
-        public Mesh GetHighlightMesh(SelectionRange selectionRange) {
-            
+        public Mesh GetHighlightMesh(SelectionRange selectionRange, Mesh highlightMesh = null) {
             if (string.IsNullOrEmpty(text)) {
                 return null;
             }
-            
+
             Color32 selectionColor = new Color32(168, 206, 255, 192);
 
             int startIndex = selectionRange.selectIndex;
@@ -644,17 +805,19 @@ namespace UIForia {
             CharInfo startCharInfo = textInfo.charInfos[startIndex];
             CharInfo endCharInfo = textInfo.charInfos[endIndex];
 
-            float height = 0;
+            // todo -- needs to handle all lines not just first
+            float height = GetLineHeight();
             if (startCharInfo.lineIndex == endCharInfo.lineIndex) {
+                // what space is this in?
                 LineInfo currentLine = textInfo.lineInfos[startCharInfo.lineIndex];
                 float minX = startEdge == TextEdge.Right ? startCharInfo.bottomRight.x : startCharInfo.topLeft.x;
                 float maxX = endEdge == TextEdge.Right ? endCharInfo.bottomRight.x : endCharInfo.topLeft.x;
                 float minY = currentLine.position.y - layoutResult.localPosition.y;
                 float maxY = currentLine.position.y - height - layoutResult.localPosition.y;
                 Vector3 v0 = new Vector3(minX, minY);
-                Vector3 v1 = new Vector3(maxX, minY);
+                Vector3 v1 = new Vector3(minX, maxY);
                 Vector3 v2 = new Vector3(maxX, maxY);
-                Vector3 v3 = new Vector3(minX, maxY);
+                Vector3 v3 = new Vector3(maxX, minY);
 
                 MeshUtil.s_VertexHelper.AddVert(v0, selectionColor, new Vector2(0, 1));
                 MeshUtil.s_VertexHelper.AddVert(v1, selectionColor, new Vector2(0, 0));
@@ -664,13 +827,16 @@ namespace UIForia {
                 MeshUtil.s_VertexHelper.AddTriangle(0, 1, 2);
                 MeshUtil.s_VertexHelper.AddTriangle(2, 3, 0);
 
-                Mesh highlightMesh = new Mesh();
+                highlightMesh = highlightMesh ? highlightMesh : new Mesh();
 
                 MeshUtil.s_VertexHelper.FillMesh(highlightMesh);
                 MeshUtil.s_VertexHelper.Clear();
 
                 return highlightMesh;
             }
+
+            int lineCount = endCharInfo.lineIndex = startCharInfo.lineIndex;
+            for (int i = startCharInfo.lineIndex; i < lineCount; i++) { }
 
             return null;
         }
@@ -679,6 +845,7 @@ namespace UIForia {
             if (string.IsNullOrEmpty(text)) {
                 return new SelectionRange(0, TextEdge.Left, -1, TextEdge.Left);
             }
+
             int charIndex = FindNearestCharacterIndex(point);
             return new SelectionRange(charIndex, FindCursorEdge(charIndex, point));
         }
@@ -708,6 +875,39 @@ namespace UIForia {
             );
         }
 
+        public Mesh GetCursorMesh(SelectionRange selectionRange, float cursorWidth = 1f, Mesh cursorMesh = null) {
+            if (cursorMesh == null) {
+                cursorMesh = new Mesh();
+            }
+
+            if (textInfo.charCount == 0) { }
+
+            CharInfo info = textInfo.charInfos[selectionRange.cursorIndex];
+            TextEdge edge = selectionRange.cursorEdge;
+            LineInfo currentLine = textInfo.lineInfos[info.lineIndex];
+
+            float minX = edge == TextEdge.Left ? info.topLeft.x : info.bottomRight.x;
+            float maxX = minX + cursorWidth;
+            float minY = currentLine.position.y - layoutResult.localPosition.y;
+            float maxY = currentLine.position.y - GetLineHeight() - layoutResult.localPosition.y;
+            Vector3 v0 = new Vector3(minX, minY);
+            Vector3 v1 = new Vector3(minX, maxY);
+            Vector3 v2 = new Vector3(maxX, maxY);
+            Vector3 v3 = new Vector3(maxX, minY);
+
+            MeshUtil.s_VertexHelper.AddVert(v0, new Color32(), new Vector2(0, 1));
+            MeshUtil.s_VertexHelper.AddVert(v1, new Color32(), new Vector2(0, 0));
+            MeshUtil.s_VertexHelper.AddVert(v2, new Color32(), new Vector2(1, 0));
+            MeshUtil.s_VertexHelper.AddVert(v3, new Color32(), new Vector2(1, 1));
+
+            MeshUtil.s_VertexHelper.AddTriangle(0, 1, 2);
+            MeshUtil.s_VertexHelper.AddTriangle(2, 3, 0);
+
+            MeshUtil.s_VertexHelper.FillMesh(cursorMesh);
+            MeshUtil.s_VertexHelper.Clear();
+            return cursorMesh;
+        }
+
         public enum TextEdge {
 
             Right,
@@ -722,14 +922,15 @@ namespace UIForia {
             public readonly TextEdge cursorEdge;
             public readonly TextEdge selectEdge;
 
-            public SelectionRange(int cursorIndex, TextEdge cursorEdge, int selectIndex = -1, TextEdge selectEdge = TextEdge.Left) {
+            public SelectionRange(int cursorIndex, TextEdge cursorEdge, int selectIndex = -1,
+                TextEdge selectEdge = TextEdge.Left) {
                 this.cursorIndex = cursorIndex;
                 this.cursorEdge = cursorEdge;
                 this.selectIndex = selectIndex;
                 this.selectEdge = selectEdge;
             }
 
-            public bool HasSelection => selectIndex != -1;
+            public bool HasSelection => selectIndex != -1 && selectIndex != cursorIndex;
 
             public override bool Equals(object obj) {
                 if (ReferenceEquals(null, obj)) return false;
@@ -767,7 +968,7 @@ namespace UIForia {
         }
 
         public Vector2 GetCursorPosition(SelectionRange selectionRange) {
-            if (string.IsNullOrEmpty(text)) {
+            if (string.IsNullOrEmpty(text) || selectionRange.cursorIndex >= textInfo.charCount) {
                 return Vector2.zero;
             }
 
@@ -778,18 +979,12 @@ namespace UIForia {
                     : charInfo.topLeft.x,
                 -lineInfo.position.y
             );
-            
         }
 
         public SelectionRange BeginSelection(Vector2 point) {
             int selectIdx = FindNearestCharacterIndex(point);
             TextEdge selectEdge = FindCursorEdge(selectIdx, point);
             return new SelectionRange(selectIdx, selectEdge, selectIdx, selectEdge);
-        }
-
-        public float GetLineHeightAtCursor(SelectionRange selectionRange) {
-            TMP_FontAsset asset = ComputedStyle.TextFontAsset;
-            return asset.fontInfo.LineHeight * (ComputedStyle.TextFontSize / asset.fontInfo.PointSize) * asset.fontInfo.Scale;     
         }
 
     }

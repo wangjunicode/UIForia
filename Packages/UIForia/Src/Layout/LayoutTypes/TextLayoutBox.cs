@@ -1,6 +1,5 @@
 using System.Collections.Generic;
 using TMPro;
-using UIForia.Systems;
 using UIForia.Text;
 using UIForia.Util;
 using UnityEngine;
@@ -10,8 +9,7 @@ namespace UIForia.Layout.LayoutTypes {
 
     public class TextLayoutBox : LayoutBox {
 
-        public TextLayoutBox(LayoutSystem layoutSystem, UIElement element)
-            : base(layoutSystem, element) { }
+        public TextLayoutBox(UIElement element): base(element) { }
 
         protected override float ComputeContentWidth() {
             TextInfo textInfo = ((UITextElement) element).textInfo;

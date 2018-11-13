@@ -21,14 +21,26 @@ using UnityEngine;
         style text {
             TextFontSize = 24;
             MaxWidth = 1pca; 
-            BackgroundColor = blue;
+        }
+
+        style highlight {
+            LayoutBehavior = Ignored;
+            TransformBehaviorX = AnchorMinOffset;
+            TransformBehaviorY = AnchorMinOffset;
+            AnchorTarget = ParentContentArea;
+            BackgroundColor = #A8CEFF;
         }
         
+        style container {
+            FlexLayoutMainAxisAlignment = 'Center';
+            
+        }
+
     </Style>
     
-    <Contents>
+    <Contents style='container'>
         
-        <Graphic x-id=""highlight"" style=""ignored""/>
+        <Graphic x-id=""highlight"" style=""highlight""/>
         
         <Text style='text' x-id=""text""/>
         
@@ -53,6 +65,7 @@ public class UIInputFieldElement : UIElement, IFocusable, IPropertyChangedHandle
     private bool selectAllOnFocus;
     private float blinkStartTime;
     private bool hasFocus;
+    private bool canSetCaret;
 
     protected static string clipboard {
         get { return GUIUtility.systemCopyBuffer; }
@@ -72,13 +85,12 @@ public class UIInputFieldElement : UIElement, IFocusable, IPropertyChangedHandle
         textElement.SetText(text);
     }
 
-    private bool canSetCaret;
     public override void OnUpdate() {
         
         if (!hasFocus) return;
 
         if (selectionRange != previousSelectionRange) {
-            if (text.Length > 0) {
+            if (textElement.text.Length > 0) {
                 if (selectionRange.HasSelection) {
                     highlight.SetEnabled(true);
                     highlight.MarkGeometryDirty();
@@ -95,7 +107,8 @@ public class UIInputFieldElement : UIElement, IFocusable, IPropertyChangedHandle
         float blinkPeriod = 1f / caretBlinkRate;
         bool blinkState = (Time.unscaledTime - blinkStartTime) % blinkPeriod < blinkPeriod / 2;
         if (canSetCaret) {
-            caret.style.SetTransformPosition(textElement.GetCursorPosition(selectionRange), StyleState.Normal);
+            caret.style.SetTransformPositionX(textElement.GetCursorPosition(selectionRange).x, StyleState.Normal);
+            caret.style.SetTransformPositionY(textElement.layoutResult.localPosition.y, StyleState.Normal);
         }
         caret.style.SetBackgroundColor(Color.black, StyleState.Normal);
         caret.SetEnabled(blinkState);
@@ -112,7 +125,7 @@ public class UIInputFieldElement : UIElement, IFocusable, IPropertyChangedHandle
 
         if (selectionRange.HasSelection) {
             selectionRange = textElement.DeleteRange(selectionRange);
-            textElement.InsertText(selectionRange.cursorIndex, c);
+            textElement.InsertText(selectionRange, c);
         }
         else {
             selectionRange = textElement.AppendText(c);
@@ -154,6 +167,7 @@ public class UIInputFieldElement : UIElement, IFocusable, IPropertyChangedHandle
         if (evt.onlyControl) {
             SelectAll();
             evt.StopPropagation();
+            canSetCaret = false;
         }
     }
 
@@ -162,6 +176,7 @@ public class UIInputFieldElement : UIElement, IFocusable, IPropertyChangedHandle
         if (evt.onlyControl && selectionRange.HasSelection) {
             clipboard = textElement.GetSubstring(selectionRange);
             evt.StopPropagation();
+            canSetCaret = false;
         }
     }
 
@@ -170,6 +185,7 @@ public class UIInputFieldElement : UIElement, IFocusable, IPropertyChangedHandle
         if (evt.onlyControl) {
             textElement.AppendText(clipboard);
             evt.StopPropagation();
+            canSetCaret = false;
         }
     }
 
@@ -178,11 +194,37 @@ public class UIInputFieldElement : UIElement, IFocusable, IPropertyChangedHandle
         if (evt.onlyControl && selectionRange.HasSelection) {
             clipboard = textElement.GetSubstring(selectionRange);
             DeleteSelection();
+            canSetCaret = false;
         }
+    }
+    
+    [OnKeyDownWithFocus(KeyCode.Backspace)]
+    private void HandleBackspace(KeyboardInputEvent evt) {
+        selectionRange = textElement.DeleteTextBackwards(selectionRange);
+        canSetCaret = false;
+    }
+    
+    [OnKeyDownWithFocus(KeyCode.Delete)]
+    private void HandleDelete(KeyboardInputEvent evt) {
+        selectionRange = textElement.DeleteTextForwards(selectionRange);
+        canSetCaret = false;
+    }
+    
+    [OnKeyDownWithFocus(KeyCode.LeftArrow)]
+    private void HandleLeftArrow(KeyboardInputEvent evt) {
+        selectionRange = textElement.MoveCursorLeft(selectionRange, evt.shift);
+        canSetCaret = false;
+    }
+    
+    [OnKeyDownWithFocus(KeyCode.RightArrow)]
+    private void HandleRightArrow(KeyboardInputEvent evt) {
+        selectionRange = textElement.MoveCursorRight(selectionRange, evt.shift);
+        canSetCaret = false;
     }
 
     private void SelectAll() {
         selectionRange = textElement.SelectAll();
+        canSetCaret = false;
     }
 
     private void DeleteSelection() { }
@@ -208,7 +250,7 @@ public class UIInputFieldElement : UIElement, IFocusable, IPropertyChangedHandle
     }
 
     private void UpdateCaretVertices(Mesh obj) {
-        caret.SetMesh(MeshUtil.CreateStandardUIMesh(new Size(1f, textElement.GetLineHeightAtCursor(selectionRange)), Color.black));
+        caret.SetMesh(MeshUtil.CreateStandardUIMesh(new Size(1f, textElement.GetLineHeight())));
     }
 
     public void Focus() {
@@ -222,7 +264,6 @@ public class UIInputFieldElement : UIElement, IFocusable, IPropertyChangedHandle
         caret.SetEnabled(false);
         highlight.SetEnabled(false);
     }
-
 
     public void OnPropertyChanged(string propertyName, object oldValue) {
         if (textElement == null) return;

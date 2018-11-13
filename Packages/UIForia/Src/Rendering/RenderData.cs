@@ -25,7 +25,7 @@ namespace UIForia.Systems {
 
         public ElementRenderer Renderer => element.Renderer;
         public bool CullResultChanged => previousCullResult != cullResult;
-
+       
         public CullResult CullResult {
             get { return cullResult; }
             set {

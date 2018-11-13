@@ -12,7 +12,7 @@ namespace UIForia.Util {
         private static readonly Vector2 s_UVEmpty = Vector2.zero;
         private static readonly Vector4 s_TangentEmpty = new Vector4();
 
-        public static Mesh CreateStandardUIMesh(Size size, Color32 color32) {
+        public static Mesh CreateStandardUIMesh(Size size, Color32 color32 = default(Color32)) {
             Mesh mesh = new Mesh();
 
             Vector2 uv1 = new Vector2();
@@ -35,7 +35,6 @@ namespace UIForia.Util {
             s_VertexHelper.Clear();
             return mesh;
         }
-
 
         public static Mesh CreateStandardUIMesh(Vector2 offset, Size size, Color32 color32) {
             Mesh mesh = new Mesh();

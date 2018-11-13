@@ -1,14 +1,11 @@
-using System;
 using UIForia.Rendering;
-using UIForia.Systems;
 using UnityEngine;
 
 namespace UIForia.Layout.LayoutTypes {
 
     public class FixedLayoutBox : LayoutBox {
 
-        public FixedLayoutBox(LayoutSystem layoutSystem, UIElement element)
-            : base(layoutSystem, element) { }
+        public FixedLayoutBox(UIElement element): base(element) { }
 
         protected override float ComputeContentWidth() {
             float minX = 0;

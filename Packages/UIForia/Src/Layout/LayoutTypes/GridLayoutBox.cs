@@ -20,8 +20,7 @@ namespace UIForia.Layout.LayoutTypes {
 
         private bool m_IsPlacementDirty;
 
-        public GridLayoutBox(LayoutSystem layoutSystem, UIElement element)
-            : base(layoutSystem, element) {
+        public GridLayoutBox(UIElement element) : base(element) {
             this.m_IsPlacementDirty = true;
             this.m_Widths = new List<float>(4);
             this.m_Heights = new List<float>(4);

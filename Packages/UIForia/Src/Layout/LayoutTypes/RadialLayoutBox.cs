@@ -32,7 +32,7 @@ namespace UIForia.Layout.LayoutTypes {
 
         }
 
-        public RadialLayoutBox(LayoutSystem layoutSystem, UIElement element) : base(layoutSystem, element) { }
+        public RadialLayoutBox(UIElement element) : base(element) { }
 
         public override void RunLayout() {
             List<float> widths = new List<float>();

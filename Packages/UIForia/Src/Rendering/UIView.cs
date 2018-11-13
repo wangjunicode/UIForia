@@ -16,6 +16,8 @@ public class UIView {
     public int Depth { get; set; }
     public Rect Viewport { get; set; }
     public UIElement RootElement { get; private set; }
+    public float ScaleFactor { get; set; } = 1f;
+
     public readonly Application Application;
 
     internal UIView(Application app, Rect rect, int depth, Type elementType, string template = null) {

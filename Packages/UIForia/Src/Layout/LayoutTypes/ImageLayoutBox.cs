@@ -9,7 +9,7 @@ namespace UIForia.Layout.LayoutTypes {
 
         private readonly UIImageElement image;
 
-        public ImageLayoutBox(LayoutSystem layoutSystem, UIElement element) : base(layoutSystem, element) {
+        public ImageLayoutBox(UIElement element) : base(element) {
             image = (UIImageElement) element;
         }
 

@@ -506,16 +506,6 @@ namespace UIForia.Systems {
             }
         }
 
-        private void HandleScrollBehaviorChanged(LayoutBox box) {
-//            switch (box.style.ScrollBehavior) {
-//                case ScrollBehavior.Normal:
-//                case ScrollBehavior.Fixed:
-//                case ScrollBehavior.Sticky:
-//                    break;
-//
-//            }
-        }
-
         // todo -- remove, let textbox handle this
         private void HandleTextContentChanged(UIElement element, string content) {
             LayoutBox box;
@@ -537,25 +527,25 @@ namespace UIForia.Systems {
             switch (element.style.computedStyle.LayoutType) {
                 case LayoutType.Radial:
                     if (!(box is RadialLayoutBox)) {
-                        replace = new RadialLayoutBox(this, element);
+                        replace = new RadialLayoutBox(element);
                     }
 
                     break;
                 case LayoutType.Fixed:
                     if (!(box is FixedLayoutBox)) {
-                        replace = new FixedLayoutBox(this, element);
+                        replace = new FixedLayoutBox(element);
                     }
 
                     break;
                 case LayoutType.Flex:
                     if (!(box is FlexLayoutBox)) {
-                        replace = new FlexLayoutBox(this, element);
+                        replace = new FlexLayoutBox(element);
                     }
 
                     break;
                 case LayoutType.Grid:
                     if (!(box is GridLayoutBox)) {
-                        replace = new GridLayoutBox(this, element);
+                        replace = new GridLayoutBox(element);
                     }
 
                     break;
@@ -588,25 +578,25 @@ namespace UIForia.Systems {
         // todo pool boxes
         private LayoutBox CreateLayoutBox(UIElement element) {
             if ((element is UITextElement)) {
-                return new TextLayoutBox(this, element);
+                return new TextLayoutBox(element);
             }
 
             if ((element is UIImageElement)) {
-                return new ImageLayoutBox(this, element);
+                return new ImageLayoutBox(element);
             }
 
             switch (element.style.computedStyle.LayoutType) {
                 case LayoutType.Flex:
-                    return new FlexLayoutBox(this, element);
+                    return new FlexLayoutBox(element);
 
                 case LayoutType.Fixed:
-                    return new FixedLayoutBox(this, element);
+                    return new FixedLayoutBox(element);
 
                 case LayoutType.Grid:
-                    return new GridLayoutBox(this, element);
+                    return new GridLayoutBox(element);
 
                 case LayoutType.Radial:
-                    return new RadialLayoutBox(this, element);
+                    return new RadialLayoutBox(element);
 
                 default:
                     throw new ArgumentOutOfRangeException();

@@ -1,10 +1,8 @@
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
-using UIForia;
 using UIForia.Elements;
 using UIForia.Rendering;
-using UIForia.Systems;
 using UIForia.Util;
 using UnityEngine;
 
@@ -30,7 +28,6 @@ namespace UIForia.Layout.LayoutTypes {
         public VirtualScrollbar horizontalScrollbar;
         public VirtualScrollbar verticalScrollbar;
 
-        protected LayoutSystem layoutSystem;
 
 #if DEBUG
         public int layoutCalls;
@@ -49,9 +46,8 @@ namespace UIForia.Layout.LayoutTypes {
          * Don't always re-calculate preferred width
          * 
          */
-        protected LayoutBox(LayoutSystem layoutSystem, UIElement element) {
+        protected LayoutBox(UIElement element) {
             this.element = element;
-            this.layoutSystem = layoutSystem;
             this.style = element?.style?.computedStyle;
             this.children = ListPool<LayoutBox>.Get();
             this.cachedPreferredWidth = -1;
@@ -111,6 +107,30 @@ namespace UIForia.Layout.LayoutTypes {
                 float height = allocatedHeight - y - PaddingBottom - BorderBottom;
                 return new Rect(x, y, Mathf.Max(0, width), Mathf.Max(0, height));
             }
+        }
+
+        public float GetVerticalMargin(float width) {
+            return ResolveMarginVertical(width, style.MarginTop) + ResolveMarginVertical(width, style.MarginBottom);
+        }
+
+        public float GetMarginHorizontal() {
+            return ResolveMarginHorizontal(style.MarginLeft) + ResolveMarginHorizontal(style.MarginRight);
+        }
+
+        public float GetMarginTop(float width) {
+            return ResolveMarginVertical(width, style.MarginTop);
+        }
+
+        public float GetMarginBottom(float width) {
+            return ResolveMarginVertical(width, style.MarginBottom);
+        }
+
+        public float GetMarginLeft() {
+            return ResolveMarginHorizontal(style.MarginLeft);
+        }
+
+        public float GetMarginRight() {
+            return ResolveMarginHorizontal(style.MarginRight);
         }
 
         public virtual void OnInitialize() { }
@@ -268,6 +288,115 @@ namespace UIForia.Layout.LayoutTypes {
             }
         }
 
+        protected float ResolveMarginVertical(float width, UIMeasurement margin) {
+            AnchorTarget anchorTarget;
+            switch (margin.unit) {
+                case UIMeasurementUnit.Pixel:
+                    return margin.value;
+                
+                case UIMeasurementUnit.Content:
+                    return GetContentHeight(width) * margin.value;
+                
+                case UIMeasurementUnit.ParentSize:
+                    if (parent.style.PreferredWidth.IsContentBased) {
+                        return 0f;
+                    }
+
+                    return parent.allocatedHeight * margin.value;
+                    
+                case UIMeasurementUnit.ViewportWidth:
+                    return element.view.Viewport.width * margin.value;
+                
+                case UIMeasurementUnit.ViewportHeight:
+                    return element.view.Viewport.height * margin.value;
+                
+                case UIMeasurementUnit.ParentContentArea:
+                    if (parent.style.PreferredHeight.IsContentBased) {
+                        return 0f;
+                    }
+
+                    return parent.allocatedHeight * margin.value - (parent.style == null ? 0 : parent.PaddingBorderVertical);
+
+                case UIMeasurementUnit.Em:
+                    return style.EmSize * margin.value;
+                
+                case UIMeasurementUnit.AnchorWidth:
+                    anchorTarget = style.AnchorTarget;
+                    if (parent.style.PreferredHeight.IsContentBased && anchorTarget == AnchorTarget.Parent || anchorTarget == AnchorTarget.ParentContentArea) {
+                        return 0f;
+                    }
+
+                    return ResolveAnchorWidth(margin.value);
+                
+                case UIMeasurementUnit.AnchorHeight:
+                    anchorTarget = style.AnchorTarget;
+                    if (parent.style.PreferredHeight.IsContentBased && anchorTarget == AnchorTarget.Parent || anchorTarget == AnchorTarget.ParentContentArea) {
+                        return 0f;
+                    }
+
+                    return ResolveAnchorHeight(margin.value);
+                
+                case UIMeasurementUnit.Unset:
+                default:
+                    throw new ArgumentOutOfRangeException();
+            }
+            
+        }
+
+        public float ResolveMarginHorizontal(UIMeasurement margin) {
+            AnchorTarget anchorTarget;
+
+            switch (margin.unit) {
+                case UIMeasurementUnit.Pixel:
+                    return margin.value;
+                
+                case UIMeasurementUnit.Content:
+                    return GetContentWidth() * margin.value;
+                
+                case UIMeasurementUnit.ParentSize:
+                    if (parent.style.PreferredWidth.IsContentBased) {
+                        return 0f;
+                    }
+
+                    return parent.allocatedHeight * margin.value;
+                
+                case UIMeasurementUnit.ViewportWidth:
+                    return element.view.Viewport.width * margin.value;
+
+                case UIMeasurementUnit.ViewportHeight:
+                    return element.view.Viewport.height * margin.value;
+
+                case UIMeasurementUnit.ParentContentArea:
+                    if (parent.style.PreferredWidth.IsContentBased) {
+                        return 0f;
+                    }
+                    return parent.allocatedWidth * margin.value - (parent.style == null ? 0 : parent.PaddingBorderHorizontal);
+
+                case UIMeasurementUnit.Em:
+                    return style.EmSize * margin.value;
+
+                case UIMeasurementUnit.AnchorWidth:
+                    anchorTarget = style.AnchorTarget;
+                    if (parent.style.PreferredWidth.IsContentBased && anchorTarget == AnchorTarget.Parent || anchorTarget == AnchorTarget.ParentContentArea) {
+                        return 0f;
+                    }
+
+                    return ResolveAnchorWidth(margin.value);
+                case UIMeasurementUnit.AnchorHeight:
+                    anchorTarget = style.AnchorTarget;
+                    if (parent.style.PreferredWidth.IsContentBased && anchorTarget == AnchorTarget.Parent || anchorTarget == AnchorTarget.ParentContentArea) {
+                        return 0f;
+                    }
+
+                    return ResolveAnchorHeight(margin.value);
+                
+                case UIMeasurementUnit.Unset:
+                default:
+                    throw new ArgumentOutOfRangeException();
+            }
+
+        }
+
         public virtual void OnStylePropertyChanged(StyleProperty property) {
             switch (property.propertyId) {
                 case StylePropertyId.MinWidth:
@@ -311,6 +440,7 @@ namespace UIForia.Layout.LayoutTypes {
                     InvalidatePreferredSizeCache();
                     break;
             }
+            
         }
 
         protected static int FindLayoutSiblingIndex(UIElement element) {
@@ -440,25 +570,16 @@ namespace UIForia.Layout.LayoutTypes {
             return cachedHeight;
         }
 
-        public static float ResolveHorizontalMargin(UIMeasurement margin) {
-            switch (margin.unit) {
-                case UIMeasurementUnit.Pixel:
-                    return margin.value;
-                default:
-                    throw new NotImplementedException();
-            }
-        }
-
+     
         public float GetPreferredWidth() {
             AnchorTarget anchorTarget;
             UIMeasurement widthMeasurement = style.PreferredWidth;
             switch (widthMeasurement.unit) {
                 case UIMeasurementUnit.Pixel:
-                    return Mathf.Max(0, widthMeasurement.value) + ResolveHorizontalMargin(style.MarginLeft) + ResolveHorizontalMargin(style.MarginRight);
+                    return element.view.ScaleFactor * Mathf.Max(0, widthMeasurement.value);
 
                 case UIMeasurementUnit.Content:
-                    cachedPreferredWidth = GetContentWidth();
-                    return Mathf.Max(0, PaddingBorderHorizontal + (cachedPreferredWidth * widthMeasurement.value));
+                    return Mathf.Max(0, PaddingBorderHorizontal + (GetContentWidth() * widthMeasurement.value));
 
                 case UIMeasurementUnit.ParentSize:
                     if (parent.style.PreferredWidth.IsContentBased) {

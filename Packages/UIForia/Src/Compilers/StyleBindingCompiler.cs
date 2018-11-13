@@ -89,7 +89,7 @@ namespace UIForia.Compilers {
             textureUrlSource = new MethodAliasSource("url", type.GetMethod(nameof(TextureUrl)));
             fontUrlSource = new MethodAliasSource("url", type.GetMethod(nameof(FontUrl)));
 
-            sizeAliasSource = new MethodAliasSource("size", type.GetMethod(nameof(Size)));
+//            sizeAliasSource = new MethodAliasSource("size", type.GetMethod(nameof(Size)));
             vec2MeasurementSource = new MethodAliasSource("vec2", type.GetMethod(nameof(Vec2Measurement)));
             vec2FixedLengthSource = new MethodAliasSource("vec2", type.GetMethod(nameof(Vec2FixedLength)));
             borderRadiusRect1Source = new MethodAliasSource("radius", type.GetMethod(nameof(Radius), new[] {typeof(float)}));

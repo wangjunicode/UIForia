@@ -16,6 +16,7 @@ namespace UIForia.Util {
 
         public T[] List => list;
         public int Count => size;
+        public int Length => size;
         public int Capacity => list.Length;
 
         public void Add(T item) {
@@ -34,6 +35,10 @@ namespace UIForia.Util {
 
         public void Clear() {
             Array.Clear(list, 0, list.Length);
+            size = 0;
+        }
+        
+        public void DangerousClear() {
             size = 0;
         }
 

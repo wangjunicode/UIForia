@@ -27,7 +27,6 @@ namespace UIForia.Compilers {
         private static readonly MethodAliasSource rect4Source;
 
         private static readonly MethodAliasSource sizeAliasSource;
-        private static readonly MethodAliasSource vec2MeasurementSource;
         private static readonly MethodAliasSource vec2FixedLengthSource;
 
         private static readonly MethodAliasSource borderRadiusRect1Source;
@@ -47,7 +46,6 @@ namespace UIForia.Compilers {
 
         private static readonly EnumAliasSource<LayoutType> layoutTypeSource;
         private static readonly EnumAliasSource<LayoutDirection> layoutDirectionSource;
-        private static readonly EnumAliasSource<LayoutFlowType> layoutFlowSource;
         private static readonly EnumAliasSource<LayoutWrap> layoutWrapSource;
         private static readonly EnumAliasSource<MainAxisAlignment> mainAxisAlignmentSource;
         private static readonly EnumAliasSource<CrossAxisAlignment> crossAxisAlignmentSource;
@@ -89,8 +87,6 @@ namespace UIForia.Compilers {
             textureUrlSource = new MethodAliasSource("url", type.GetMethod(nameof(TextureUrl)));
             fontUrlSource = new MethodAliasSource("url", type.GetMethod(nameof(FontUrl)));
 
-//            sizeAliasSource = new MethodAliasSource("size", type.GetMethod(nameof(Size)));
-            vec2MeasurementSource = new MethodAliasSource("vec2", type.GetMethod(nameof(Vec2Measurement)));
             vec2FixedLengthSource = new MethodAliasSource("vec2", type.GetMethod(nameof(Vec2FixedLength)));
             borderRadiusRect1Source = new MethodAliasSource("radius", type.GetMethod(nameof(Radius), new[] {typeof(float)}));
             borderRadiusRect2Source = new MethodAliasSource("radius", type.GetMethod(nameof(Radius), new[] {typeof(float), typeof(float)}));
@@ -127,7 +123,6 @@ namespace UIForia.Compilers {
             colorSource = new ColorAliasSource();
             layoutTypeSource = new EnumAliasSource<LayoutType>();
             layoutDirectionSource = new EnumAliasSource<LayoutDirection>();
-            layoutFlowSource = new EnumAliasSource<LayoutFlowType>();
             layoutWrapSource = new EnumAliasSource<LayoutWrap>();
             mainAxisAlignmentSource = new EnumAliasSource<MainAxisAlignment>();
             crossAxisAlignmentSource = new EnumAliasSource<CrossAxisAlignment>();

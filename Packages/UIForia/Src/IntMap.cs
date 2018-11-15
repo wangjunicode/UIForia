@@ -260,6 +260,22 @@ namespace UIForia {
 
         }
 
+        public void ForEach(Action<int, T> action) {
+            for (int i = 0; i < count; i++) {
+                if (entries[i].hashCode >= 0) {
+                    action.Invoke(entries[i].key, entries[i].value);
+                }
+            }
+        }
+        
+        public void ForEach<U>(U closureArg, Action<int, T, U> action) {
+            for (int i = 0; i < count; i++) {
+                if (entries[i].hashCode >= 0) {
+                    action.Invoke(entries[i].key, entries[i].value, closureArg);
+                }
+            }
+        }
+
     }
 
     internal static class HashHelpers {

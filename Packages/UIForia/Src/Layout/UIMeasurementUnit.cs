@@ -14,7 +14,8 @@ namespace UIForia.Rendering {
         ParentContentArea = 1 << 5,
         Em = 1 << 6,
         AnchorWidth = 1 << 7,
-        AnchorHeight = 1 << 8
+        AnchorHeight = 1 << 8,
+        LineHeight = 1 << 9,
 
     }
 

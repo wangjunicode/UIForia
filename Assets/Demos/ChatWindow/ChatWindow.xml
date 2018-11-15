@@ -11,27 +11,27 @@
         }
                 
         style parent {
-            FlexLayoutDirection = Row;
+            LayoutType = Flow;
+            FlexLayoutDirection = Column;
             PreferredSize = 400px;
-            PreferredWidth = 200px;
             BackgroundColor = white;
-            OverflowY = Scroll;
-            ScrollbarVerticalTrackColor = red;
-            ScrollbarVerticalHandleBorderRadius = 10;
-            ScrollbarVerticalHandleSize = 12;
-            <!--ScrollbarVerticalTrackSize = 30;-->
         }
         
         style child {
-            PreferredSize = 500px;
-            BackgroundColor = Yellow;
+            PreferredSize = 100px;
+            MarginLeft = 5px;
+            MarginTop = 5px;
+            MarginRight = 30px;
+            MarginBottom = 10px;
+            BackgroundColor = Red;
+            Padding = 5px;
+            Border = 5px;
         }
         
         style child2 {
-            PreferredSize = 500px;
+            PreferredSize = 100px;
             BackgroundColor = Blue;
         }
-
         
         style window-frame-temp {
             PreferredWidth = 500px;
@@ -54,13 +54,12 @@
 
     <Contents style="container">
 
-        text
-        <Input style="input"/>
+        <!--<Input style="input"/>-->
         
-        <!--<Div style="parent">-->
-            <!--<Div style="child"/>-->
-            <!--<Div style="child2"/>-->
-        <!--</Div>-->
+        <Div style="parent">
+            <Div style="child"/>
+            <Div style="child2"/>
+        </Div>
         <!--<ChatPanel style.borderColor="red" selectedGroupIdx="{selectedChatGroup}" chatData="{chatData}"/>-->
 
         <!--<SeedWindowFrame style="window-frame-temp">-->

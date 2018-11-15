@@ -27,8 +27,29 @@ namespace UIForia.Rendering {
             return GetPropertyValueInState(StylePropertyId.TextFontSize, state).AsInt;
         }
 
+        public bool Defines(StylePropertyId propertyId) {
+            return false;//return m_DefinedStyles.Contains(propertyId);
+        }
+        
         public void SetFontSize(int newFontSize, StyleState state) {
-            SetIntProperty(StylePropertyId.TextFontSize, newFontSize, state);
+            if (newFontSize == IntUtil.UnsetValue) {
+                UIElement ptr = element.parent;
+
+                while (ptr != null) {
+                    if (ptr.style.Defines(StylePropertyId.TextFontSize)) {
+                        break;
+                    }
+
+                    ptr = ptr.parent;
+                }
+
+                if (ptr != null) {
+                   // ptr.style.UpdateInheritedProperty(StylePropertyId.TextFontSize);
+                }
+            }
+            else {
+//                SetIntProperty(StylePropertyId.TextFontSize, newFontSize, state);
+            }
         }
 
         public Text.FontStyle GetFontStyle(StyleState state) {

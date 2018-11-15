@@ -66,6 +66,9 @@ namespace UIForia.Editor {
                     return;
                 }
 
+                if (views[0].view.RootElement == null) {
+                    return;
+                }
                 treeView = new HierarchyView(views[0].view.RootElement, state);
                 treeView.onSelectionChanged += OnElementSelectionChanged;
                 targetView = views[0].view;

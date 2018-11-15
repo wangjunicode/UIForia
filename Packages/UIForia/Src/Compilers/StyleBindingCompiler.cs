@@ -210,7 +210,6 @@ namespace UIForia.Compilers {
 //                        value,
 //                        sizeAliasSource
 //                    ));
-                    break;
 
                 case RenderConstants.Width:
                     return new StyleBinding_Width(targetState.state, Compile<UIMeasurement>(value,measurementSources));

@@ -85,8 +85,10 @@ namespace UIForia {
         public IRenderSystem RenderSystem => m_RenderSystem;
         public ILayoutSystem LayoutSystem => m_LayoutSystem;
         public IInputSystem InputSystem => m_InputSystem;
-
+        public Camera Camera { get; private set; }
+        
         public void SetCamera(Camera camera) {
+            Camera = camera;
             RenderSystem.SetCamera(camera);
         }
 
@@ -378,8 +380,8 @@ namespace UIForia {
         }
 
         public void Update() {
-            m_StyleSystem.OnUpdate();
             m_BindingSystem.OnUpdate();
+            m_StyleSystem.OnUpdate();
             m_LayoutSystem.OnUpdate();
             m_InputSystem.OnUpdate();
             m_RenderSystem.OnUpdate();

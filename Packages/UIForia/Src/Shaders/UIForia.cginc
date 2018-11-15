@@ -126,7 +126,7 @@ fixed4 fill(float2 uv, float2 size, float4 contentRect, FillSettings settings) {
         uv2 = rotate_fill(uv2, settings.fillRotation);
         uv2 += settings.fillOffset;
         uv2 /= settings.fillScale;
-        return tex2D(settings.fillTexture, uv2);// * settings.fillColor1;
+        return tex2D(settings.fillTexture, uv2) * settings.fillColor1;
         
     #elif defined(UIFORIA_FILLTYPE_LINEAR_GRADIENT) | defined(UIFORIA_FILLTYPE_RADIAL_GRADIENT) | defined(UIFORIA_FILLTYPE_CYLINDRICAL_GRADIENT)
         

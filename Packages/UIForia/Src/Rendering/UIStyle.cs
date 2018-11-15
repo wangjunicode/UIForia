@@ -1,15 +1,9 @@
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
-using Shapes2D;
-using UIForia.Layout;
-using UIForia.Text;
-using TMPro;
 using UIForia.Layout.LayoutTypes;
 using UIForia.Util;
 using UnityEngine;
-using FontStyle = UIForia.Text.FontStyle;
-using TextAlignment = UIForia.Text.TextAlignment;
 
 namespace UIForia.Rendering {
 
@@ -37,7 +31,8 @@ namespace UIForia.Rendering {
         }
 
         private static int NextStyleId;
-        private List<StyleProperty> m_StyleProperties;
+        // todo -- make this a LightList<StyleProperty> and keep sorted, 
+        private readonly List<StyleProperty> m_StyleProperties;
 
         public int Id { get; set; } = NextStyleId++;
 
@@ -68,14 +63,6 @@ namespace UIForia.Rendering {
                 PaddingBottom = value.bottom;
                 PaddingLeft = value.left;
             }
-        }
-
-        internal void OnSpawn() {
-            m_StyleProperties = ListPool<StyleProperty>.Get();
-        }
-
-        internal void OnDestroy() {
-            ListPool<StyleProperty>.Release(ref m_StyleProperties);
         }
 
         public bool DefinesProperty(StylePropertyId propertyId) {
@@ -207,6 +194,23 @@ namespace UIForia.Rendering {
             }
         }
 
+        internal void SetProperty(StyleProperty property) {
+            if (property.IsUnset) {
+                m_StyleProperties.Remove(property);
+                return;
+            }
+            // todo -- binary search or int map
+            StylePropertyId propertyId = property.propertyId;
+            for (int i = 0; i < m_StyleProperties.Count; i++) {
+                if (m_StyleProperties[i].propertyId == propertyId) {
+                    m_StyleProperties[i] = property;
+                    return;
+                }
+            }
+
+            m_StyleProperties.Add(property);
+        }
+        
         internal void SetProperty(StylePropertyId propertyId, int value0, int value1 = 0) {
             for (int i = 0; i < m_StyleProperties.Count; i++) {
                 if (m_StyleProperties[i].propertyId == propertyId) {

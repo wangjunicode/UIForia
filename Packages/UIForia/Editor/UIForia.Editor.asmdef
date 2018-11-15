@@ -1,9 +1,8 @@
 {
-    "name": "EditorAsm",
+    "name": "UIForia.Editor",
     "references": [
-        "SrcAsm",
-        "Unity.TextMeshPro",
-        "_DemoAsmDef"
+        "UIForia.Src",
+        "Unity.TextMeshPro"
     ],
     "optionalUnityReferences": [],
     "includePlatforms": [

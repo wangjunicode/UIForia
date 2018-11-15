@@ -41,7 +41,7 @@
      
      #define m_GridSize _BorderRadius
      #define m_LineSize _BorderRadius
-     #define m_FillOffset _FillOffsetScale.zw
+     #define m_FillOffset _FillOffsetScale.xy
      #define m_FillScale _FillOffsetScale.zw
      #define m_FillTexture _MainTex
      

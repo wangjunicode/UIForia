@@ -62,7 +62,7 @@ public class StyleBindingTests {
         Assert.AreEqual(tex1, panel.ComputedStyle.BackgroundImage);
         root.textureName = "not-there";
         view.Update();
-        Assert.AreEqual(DefaultStyleValues.BackgroundImage, panel.ComputedStyle.BackgroundImage);
+        Assert.AreEqual(DefaultStyleValues_Generated.BackgroundImage, panel.ComputedStyle.BackgroundImage);
         root.textureName = "tex1";
         view.Update();
         Assert.AreEqual(tex1, panel.ComputedStyle.BackgroundImage);
@@ -109,7 +109,7 @@ public class StyleBindingTests {
         Assert.AreEqual(font1, panel.ComputedStyle.TextFontAsset);
         root.fontName = "not-there";
         view.Update();
-        Assert.AreEqual(DefaultStyleValues.TextFontAsset, panel.ComputedStyle.TextFontAsset);
+        Assert.AreEqual(DefaultStyleValues_Generated.TextFontAsset, panel.ComputedStyle.TextFontAsset);
         root.fontName = "font1";
         view.Update();
         Assert.AreEqual(font1, panel.ComputedStyle.TextFontAsset);

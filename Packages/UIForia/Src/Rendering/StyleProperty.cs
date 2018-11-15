@@ -1,5 +1,6 @@
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.Runtime.InteropServices;
 using Shapes2D;
 using TMPro;
 using UIForia.Layout;
@@ -11,36 +12,49 @@ using TextAlignment = UIForia.Text.TextAlignment;
 
 namespace UIForia.Rendering {
 
-    public struct StyleProperty {
+    [StructLayout(LayoutKind.Explicit)]
+    public partial struct StyleProperty {
 
+        [FieldOffset(0)]
         public readonly StylePropertyId propertyId;
+        [FieldOffset(4)]
         public readonly int valuePart0;
+        [FieldOffset(4)]
+        public readonly float floatValue;
+        [FieldOffset(8)]
         public readonly int valuePart1;
+        [FieldOffset(12)]
         public readonly object objectField;
 
         [DebuggerStepThrough]
         public StyleProperty(StylePropertyId propertyId, int value0, int value1 = 0, object objectField = null) {
             this.propertyId = propertyId;
+            this.floatValue = 0;
             this.valuePart0 = value0;
             this.valuePart1 = value1;
             this.objectField = objectField;
         }
+        
+        [DebuggerStepThrough]
+        public StyleProperty(StylePropertyId propertyId, float value0, int value1 = 0, object objectField = null) {
+            this.propertyId = propertyId;
+            this.valuePart0 = 0;
+            this.floatValue = value0;
+            this.valuePart1 = value1;
+            this.objectField = objectField;
+        }
+
 
         public StyleProperty(StylePropertyId propertyId, Color color) {
+            this.floatValue = 0;
             this.propertyId = propertyId;
             this.valuePart0 = new StyleColor(color).rgba;
             this.valuePart1 = 0;
             this.objectField = null;
         }
 
-        public StyleProperty(StylePropertyId propertyId, Gradient gradient) {
-            this.propertyId = propertyId;
-            this.valuePart0 = 0;
-            this.valuePart1 = (int) ColorType.Gradient;
-            this.objectField = gradient;
-        }
-
         public StyleProperty(StylePropertyId propertyId, UIFixedLength length) {
+            this.floatValue = 0;
             this.propertyId = propertyId;
             this.valuePart0 = FloatUtil.EncodeToInt(length.value);
             this.valuePart1 = (int) length.unit;
@@ -48,6 +62,7 @@ namespace UIForia.Rendering {
         }
 
         public StyleProperty(StylePropertyId propertyId, UIMeasurement measurement) {
+            this.floatValue = 0;
             this.propertyId = propertyId;
             this.valuePart0 = FloatUtil.EncodeToInt(measurement.value);
             this.valuePart1 = (int) measurement.unit;
@@ -55,6 +70,7 @@ namespace UIForia.Rendering {
         }
 
         public StyleProperty(StylePropertyId propertyId, GridTrackSize trackSize) {
+            this.floatValue = 0;
             this.propertyId = propertyId;
             this.valuePart0 = FloatUtil.EncodeToInt(trackSize.minValue);
             this.valuePart1 = (int) trackSize.minUnit;
@@ -63,12 +79,14 @@ namespace UIForia.Rendering {
 
         public StyleProperty(StylePropertyId propertyId, float floatValue) {
             this.propertyId = propertyId;
-            this.valuePart0 = FloatUtil.EncodeToInt(floatValue);
+            this.valuePart0 = 0;
+            this.floatValue = floatValue;
             this.valuePart1 = 0;
             this.objectField = null;
         }
 
         public StyleProperty(StylePropertyId propertyId, int intValue) {
+            this.floatValue = 0;
             this.propertyId = propertyId;
             this.valuePart0 = intValue;
             this.valuePart1 = 0;
@@ -76,6 +94,7 @@ namespace UIForia.Rendering {
         }
 
         public StyleProperty(StylePropertyId propertyId, CrossAxisAlignment alignment) {
+            this.floatValue = 0;
             this.propertyId = propertyId;
             this.valuePart0 = (int) alignment;
             this.valuePart1 = 0;
@@ -83,6 +102,7 @@ namespace UIForia.Rendering {
         }
 
         public StyleProperty(StylePropertyId propertyId, MainAxisAlignment alignment) {
+            this.floatValue = 0;
             this.propertyId = propertyId;
             this.valuePart0 = (int) alignment;
             this.valuePart1 = 0;
@@ -90,6 +110,7 @@ namespace UIForia.Rendering {
         }
 
         public StyleProperty(StylePropertyId propertyId, LayoutDirection direction) {
+            this.floatValue = 0;
             this.propertyId = propertyId;
             this.valuePart0 = (int) direction;
             this.valuePart1 = 0;
@@ -101,7 +122,7 @@ namespace UIForia.Rendering {
         }
 
         public int AsInt => valuePart0;
-        public float AsFloat => FloatUtil.DecodeToFloat(valuePart0);
+        public float AsFloat => floatValue;
         public UIMeasurement AsUIMeasurement => UIMeasurement.Decode(valuePart0, valuePart1);
         public CrossAxisAlignment AsCrossAxisAlignment => (CrossAxisAlignment) valuePart0;
         public MainAxisAlignment AsMainAxisAlignment => (MainAxisAlignment) valuePart0;
@@ -115,12 +136,11 @@ namespace UIForia.Rendering {
         public TextAlignment AsTextAlignment => (TextAlignment) valuePart0;
         public LayoutDirection AsLayoutDirection => (LayoutDirection) valuePart0;
         public LayoutWrap AsLayoutWrap => (LayoutWrap) valuePart0;
-        public GridTrackSize AsGridTrackSize => new GridTrackSize(FloatUtil.DecodeToFloat(valuePart0), (GridTemplateUnit) valuePart1);
+        public GridTrackSize AsGridTrackSize => new GridTrackSize(floatValue, (GridTemplateUnit) valuePart1);
 
         public IReadOnlyList<GridTrackSize> AsGridTrackTemplate => (IReadOnlyList<GridTrackSize>) objectField;
-        public UIFixedLength AsUIFixedLength => new UIFixedLength(FloatUtil.DecodeToFloat(valuePart0), (UIFixedUnit) valuePart1);
+        public UIFixedLength AsUIFixedLength => new UIFixedLength(floatValue, (UIFixedUnit) valuePart1);
 
-        public bool IsGradient => objectField != null && (ColorType) valuePart1 == ColorType.Gradient;
         public AnchorTarget AsAnchorTarget => (AnchorTarget) valuePart0;
         public RenderLayer AsRenderLayer => (RenderLayer) valuePart0;
         public Texture2D AsTexture2D => (Texture2D) objectField;
@@ -133,11 +153,45 @@ namespace UIForia.Rendering {
         public LayoutType AsLayoutType => (LayoutType) valuePart0;
         public TextTransform AsTextTransform => (TextTransform) valuePart0;
         public LayoutBehavior AsLayoutBehavior => (LayoutBehavior) valuePart0;
-        
-        public IReadOnlyList<GridTrackSize> AsGridTemplate => (IReadOnlyList<GridTrackSize>)objectField;
+
+        public IReadOnlyList<GridTrackSize> AsGridTemplate => (IReadOnlyList<GridTrackSize>) objectField;
         public VerticalScrollbarAttachment AsVerticalScrollbarAttachment => (VerticalScrollbarAttachment) valuePart0;
         public HorizontalScrollbarAttachment AsHorizontalScrollbarAttachment => (HorizontalScrollbarAttachment) valuePart0;
         public ScrollbarButtonPlacement AsScrollbarButtonPlacement => (ScrollbarButtonPlacement) valuePart0;
+
+        public static bool operator ==(StyleProperty a, StyleProperty b) {
+            return a.propertyId == b.propertyId &&
+                   a.valuePart0 == b.valuePart0 &&
+                   a.valuePart1 == b.valuePart1 &&
+                   a.objectField == b.objectField;
+        }
+
+        public static bool operator !=(StyleProperty a, StyleProperty b) {
+            return a.propertyId != b.propertyId ||
+                   a.valuePart0 != b.valuePart0 ||
+                   a.valuePart1 != b.valuePart1 ||
+                   a.objectField != b.objectField;
+        }
+
+
+        public bool Equals(StyleProperty other) {
+            return propertyId == other.propertyId && valuePart0 == other.valuePart0 && valuePart1 == other.valuePart1 && Equals(objectField, other.objectField);
+        }
+
+        public override bool Equals(object obj) {
+            if (ReferenceEquals(null, obj)) return false;
+            return obj is StyleProperty && Equals((StyleProperty) obj);
+        }
+
+        public override int GetHashCode() {
+            unchecked {
+                var hashCode = (int) propertyId;
+                hashCode = (hashCode * 397) ^ valuePart0;
+                hashCode = (hashCode * 397) ^ valuePart1;
+                hashCode = (hashCode * 397) ^ (objectField != null ? objectField.GetHashCode() : 0);
+                return hashCode;
+            }
+        }
 
         [DebuggerStepThrough]
         public static StyleProperty Unset(StylePropertyId propertyId) {
@@ -174,10 +228,6 @@ namespace UIForia.Rendering {
 
         public static StyleProperty BackgroundColor(Color color) {
             return new StyleProperty(StylePropertyId.BackgroundColor, color);
-        }
-
-        public static StyleProperty BackgroundColor(Gradient gradient) {
-            return new StyleProperty(StylePropertyId.BackgroundColor, 0, (int) ColorType.Gradient, gradient);
         }
 
         public static StyleProperty BackgroundImage(Texture2D texture) {
@@ -237,19 +287,19 @@ namespace UIForia.Rendering {
         }
 
         public static StyleProperty GridLayoutColAutoSize(GridTrackSize autoColSize) {
-            return new StyleProperty(StylePropertyId.GridLayoutColAutoSize, FloatUtil.EncodeToInt(autoColSize.minValue), (int) autoColSize.minUnit);
+            return new StyleProperty(StylePropertyId.GridLayoutColAutoSize, autoColSize.minValue, (int) autoColSize.minUnit);
         }
 
         public static StyleProperty GridLayoutRowAutoSize(GridTrackSize autoRowSize) {
-            return new StyleProperty(StylePropertyId.GridLayoutRowAutoSize, FloatUtil.EncodeToInt(autoRowSize.minValue), (int) autoRowSize.minUnit);
+            return new StyleProperty(StylePropertyId.GridLayoutRowAutoSize, autoRowSize.minValue, (int) autoRowSize.minUnit);
         }
 
         public static StyleProperty GridLayoutColGap(float colGap) {
-            return new StyleProperty(StylePropertyId.GridLayoutColGap, FloatUtil.EncodeToInt(colGap));
+            return new StyleProperty(StylePropertyId.GridLayoutColGap, colGap);
         }
 
         public static StyleProperty GridLayoutRowGap(float rowGap) {
-            return new StyleProperty(StylePropertyId.GridLayoutRowGap, FloatUtil.EncodeToInt(rowGap));
+            return new StyleProperty(StylePropertyId.GridLayoutRowGap, rowGap);
         }
 
         public static StyleProperty GridLayoutColAlignment(CrossAxisAlignment alignment) {
@@ -349,19 +399,19 @@ namespace UIForia.Rendering {
         }
 
         public static StyleProperty AnchorTop(UIFixedLength anchor) {
-            return new StyleProperty(StylePropertyId.AnchorTop, FloatUtil.EncodeToInt(anchor.value), (int) anchor.unit);
+            return new StyleProperty(StylePropertyId.AnchorTop, anchor.value, (int) anchor.unit);
         }
 
         public static StyleProperty AnchorRight(UIFixedLength anchor) {
-            return new StyleProperty(StylePropertyId.AnchorRight, FloatUtil.EncodeToInt(anchor.value), (int) anchor.unit);
+            return new StyleProperty(StylePropertyId.AnchorRight, anchor.value, (int) anchor.unit);
         }
 
         public static StyleProperty AnchorBottom(UIFixedLength anchor) {
-            return new StyleProperty(StylePropertyId.AnchorBottom, FloatUtil.EncodeToInt(anchor.value), (int) anchor.unit);
+            return new StyleProperty(StylePropertyId.AnchorBottom, anchor.value, (int) anchor.unit);
         }
 
         public static StyleProperty AnchorLeft(UIFixedLength anchor) {
-            return new StyleProperty(StylePropertyId.AnchorLeft, FloatUtil.EncodeToInt(anchor.value), (int) anchor.unit);
+            return new StyleProperty(StylePropertyId.AnchorLeft, anchor.value, (int) anchor.unit);
         }
 
         public static StyleProperty AnchorTarget(AnchorTarget anchorTarget) {

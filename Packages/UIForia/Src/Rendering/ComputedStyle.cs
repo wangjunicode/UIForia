@@ -1,4 +1,5 @@
 using System.Diagnostics;
+using TMPro;
 using UIForia.Layout.LayoutTypes;
 using UnityEngine;
 
@@ -21,6 +22,14 @@ namespace UIForia.Rendering {
         public FixedLengthRect padding => new FixedLengthRect(PaddingTop, PaddingRight, PaddingBottom, PaddingLeft);
 
         public float EmSize = 16f;
+
+        public float LineHeightSize {
+            get {
+                TMP_FontAsset asset = TextFontAsset;
+                float scale = (TextFontSize / asset.fontInfo.PointSize) * asset.fontInfo.Scale;
+                return (asset.fontInfo.Ascender - asset.fontInfo.Descender) * scale;
+            }
+        }
 
         public FixedLengthVector TransformPosition => new FixedLengthVector(TransformPositionX, TransformPositionY);
 
@@ -109,7 +118,7 @@ namespace UIForia.Rendering {
                 return property;
             }
 
-            return DefaultStyleValues.GetPropertyValue(propertyId);
+            return DefaultStyleValues_Generated.GetPropertyValue(propertyId);
         }
 
         [DebuggerStepThrough]
@@ -119,6 +128,8 @@ namespace UIForia.Rendering {
                 return retn.AsUIFixedLength;
             }
 
+            // if(properties.TryGetValue(BitUtil.SetHighLowBits((int)propertyId), inheirtedBit), out retn) return retn;
+            
             return defaultValue;
         }
 
@@ -230,6 +241,11 @@ namespace UIForia.Rendering {
 
         private void WriteIntProperty(StylePropertyId propertyId, int newValue) {
             StyleProperty retn;
+            // if is unset value
+            // remove from map
+            // else get & check 
+            // if is inherited & set
+            // remove inherited value
             if (properties.TryGetValue((int) propertyId, out retn)) {
                 if (retn.AsInt == newValue) return;
             }

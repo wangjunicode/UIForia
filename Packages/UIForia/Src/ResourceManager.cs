@@ -1,5 +1,3 @@
-using System;
-using UIForia;
 using TMPro;
 using UnityEngine;
 

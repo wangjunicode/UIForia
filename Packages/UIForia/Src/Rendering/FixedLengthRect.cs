@@ -1,10 +1,9 @@
 ﻿using System.Diagnostics;
-using UIForia.Rendering;
 using UIForia;
-using UnityEngine;
+using UIForia.Rendering;
 
 [DebuggerDisplay("{top}, {right}, {bottom}, {left}")]
-public struct ContentBoxRect {
+public struct FixedLengthRect {
 
     public override int GetHashCode() {
         unchecked {
@@ -16,35 +15,35 @@ public struct ContentBoxRect {
         }
     }
 
-    public UIMeasurement top;
-    public UIMeasurement right;
-    public UIMeasurement bottom;
-    public UIMeasurement left;
+    public UIFixedLength top;
+    public UIFixedLength right;
+    public UIFixedLength bottom;
+    public UIFixedLength left;
 
     public static readonly ContentBoxRect Unset = new ContentBoxRect(FloatUtil.UnsetValue);
 
-    public ContentBoxRect(float value) {
+    public FixedLengthRect(float value) {
         this.top = value;
         this.right = value;
         this.bottom = value;
         this.left = value;
     }
 
-    public ContentBoxRect(float top, float right, float bottom, float left) {
+    public FixedLengthRect(float top, float right, float bottom, float left) {
         this.top = top;
         this.right = right;
         this.bottom = bottom;
         this.left = left;
     }
 
-    public ContentBoxRect(UIMeasurement top, UIMeasurement right, UIMeasurement bottom, UIMeasurement left) {
+    public FixedLengthRect(UIFixedLength top, UIFixedLength right, UIFixedLength bottom, UIFixedLength left) {
         this.top = top;
         this.right = right;
         this.bottom = bottom;
         this.left = left;
     }
    
-    public bool Equals(ContentBoxRect other) {
+    public bool Equals(FixedLengthRect other) {
         return top == other.top
                && right == other.right
                && bottom == other.bottom
@@ -53,11 +52,11 @@ public struct ContentBoxRect {
 
     public override bool Equals(object obj) {
         if (ReferenceEquals(null, obj)) return false;
-        return obj is ContentBoxRect && Equals((ContentBoxRect) obj);
+        return obj is FixedLengthRect && Equals((FixedLengthRect) obj);
     }
 
     [DebuggerStepThrough]
-    public static bool operator ==(ContentBoxRect self, ContentBoxRect other) {
+    public static bool operator ==(FixedLengthRect self, FixedLengthRect other) {
         return self.top == other.top
                && self.left == other.left
                && self.right == other.right
@@ -65,7 +64,7 @@ public struct ContentBoxRect {
     }
 
     [DebuggerStepThrough]
-    public static bool operator !=(ContentBoxRect self, ContentBoxRect other) {
+    public static bool operator !=(FixedLengthRect self, FixedLengthRect other) {
         return !(self == other);
     }
 

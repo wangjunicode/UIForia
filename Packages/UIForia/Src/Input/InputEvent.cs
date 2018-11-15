@@ -10,17 +10,6 @@
             this.type = type;
         }
 
-        public bool ShouldStopPropagation => m_ShouldStopPropagation;
-        public bool ShouldStopPropagationImmediately => m_ShouldStopLateralPropagation;
-
-        public void StopPropagation() {
-            m_ShouldStopPropagation = true;
-        }
-
-        public void StopPropagationImmediately() {
-            m_ShouldStopLateralPropagation = true;
-        }
-
     }
 
 }

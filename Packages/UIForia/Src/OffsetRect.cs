@@ -14,6 +14,10 @@ namespace UIForia {
             this.left = left;
         }
 
+        public float Horizontal => left + right;
+
+        public float Vertical => top + bottom;
+
     }
 
 }

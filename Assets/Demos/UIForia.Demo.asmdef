@@ -1,0 +1,11 @@
+{
+    "name": "UIForia.Demo",
+    "references": [
+        "UIForia.Src",
+        "Unity.TextMeshPro"
+    ],
+    "optionalUnityReferences": [],
+    "includePlatforms": [],
+    "excludePlatforms": [],
+    "allowUnsafeCode": false
+}

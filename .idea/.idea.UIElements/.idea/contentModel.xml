@@ -2,10 +2,8 @@
 <project version="4">
   <component name="ContentModelStore">
     <e p="C:\Seed\UIForia\UIElements" t="IncludeRecursive">
-      <e p="_DemoAsmDef.csproj" t="IncludeRecursive" />
       <e p="Assets" t="Include">
         <e p="Demos" t="Include">
-          <e p="_DemoAsmDef.asmdef" t="Include" />
           <e p="AddChatButton.xml" t="Include" />
           <e p="ChatData.cs" t="Include" />
           <e p="ChatGroup.cs" t="Include" />
@@ -60,9 +58,11 @@
           <e p="ResourcePanel" t="Include">
             <e p="ResourcePanel.cs" t="Include" />
           </e>
+          <e p="Root.cs" t="Include" />
+          <e p="Root.xml" t="Include" />
           <e p="SeedWindowFrame.cs" t="Include" />
           <e p="SeedWindowFrame.xml" t="Include" />
-          <e p="UIViewBehavior.cs" t="Include" />
+          <e p="UIForia.Demo.asmdef" t="Include" />
           <e p="WindowFrame" t="Include">
             <e p="WindowFrame.cs" t="Include" />
             <e p="WindowFrame.xml" t="Include" />
@@ -70,7 +70,6 @@
         </e>
       </e>
       <e p="com.klang.uiforia.csproj" t="IncludeRecursive" />
-      <e p="EditorAsm.csproj" t="IncludeRecursive" />
       <e p="Library" t="ExcludeRecursive" />
       <e p="obj" t="ExcludeRecursive" />
       <e p="packages" t="ExcludeRecursive">
@@ -78,18 +77,19 @@
           <e p="AssemblyInfo.cs" t="Include" />
           <e p="Editor" t="Include">
             <e p="CodeGen.cs" t="Include" />
-            <e p="EditorAsm.asmdef" t="Include" />
             <e p="UIForia" t="Include">
               <e p="GUIRect.cs" t="Include" />
               <e p="HierarchyView.cs" t="Include" />
-              <e p="RefreshTemplates.cs" t="Include" />
               <e p="UIForiaHierarchyWindow.cs" t="Include" />
               <e p="UIForiaInspectorWindow.cs" t="Include" />
+              <e p="UIViewBehaviorInspector.cs" t="Include" />
               <e p="WindowMenuItems.cs" t="Include" />
             </e>
+            <e p="UIForia.Editor.asmdef" t="Include" />
           </e>
           <e p="notes.txt" t="Include" />
           <e p="Src" t="Include">
+            <e p="_Generated.cs" t="Include" />
             <e p="Animation" t="Include">
               <e p="AnimationGroup.cs" t="Include" />
               <e p="AnimationKeyFrame.cs" t="Include" />
@@ -388,7 +388,6 @@
               <e p="BorderedImage.cs" t="Include" />
               <e p="BorderRadius.cs" t="Include" />
               <e p="BorderStyle.cs" t="Include" />
-              <e p="ColorType.cs" t="Include" />
               <e p="ComputedStyle.cs" t="Include" />
               <e p="ComputedStyle_Generated.cs" t="Include" />
               <e p="ContentBoxRect.cs" t="Include" />
@@ -402,6 +401,7 @@
                 <e p="StandardRenderer.cs" t="Include" />
                 <e p="StandardTextRenderer.cs" t="Include" />
               </e>
+              <e p="FixedLengthRect.cs" t="Include" />
               <e p="HorizontalScrollbarAttachment.cs" t="Include" />
               <e p="IMaterialProvider.cs" t="Include" />
               <e p="IMeshProvider.cs" t="Include" />
@@ -441,7 +441,7 @@
                 <e p="UIStyleSet.StyleDefinition.cs" t="Include" />
                 <e p="UIStyleSet.Text.cs" t="Include" />
                 <e p="UIStyleSet.Transform.cs" t="Include" />
-                <e p="UIStyleSet.UIStyleProxy.cs" t="Include" />
+                <e p="UIStyleSetStateProxy.cs" t="Include" />
               </e>
               <e p="UIView.cs" t="Include" />
               <e p="VerticalScrollbarAttachment.cs" t="Include" />
@@ -475,7 +475,6 @@
                 <e p="Triangle.cginc" t="Include" />
               </e>
             </e>
-            <e p="SrcAsm.asmdef" t="Include" />
             <e p="StyleDefinition.cs" t="Include" />
             <e p="Systems" t="Include">
               <e p="BindingSystem.cs" t="Include" />
@@ -528,6 +527,8 @@
             </e>
             <e p="todo.txt" t="Include" />
             <e p="UIForia.cs" t="Include" />
+            <e p="UIForia.Src.asmdef" t="Include" />
+            <e p="UIViewBehavior.cs" t="Include" />
             <e p="Util" t="Include">
               <e p="ArrayPool.cs" t="Include" />
               <e p="ArrayUtil.cs" t="Include" />
@@ -539,6 +540,7 @@
               <e p="IntUtil.cs" t="Include" />
               <e p="KeyCodeUtil.cs" t="Include" />
               <e p="LightList.cs" t="Include" />
+              <e p="LightListPool.cs" t="Include" />
               <e p="ListPool.cs" t="Include" />
               <e p="MathUtil.cs" t="Include" />
               <e p="MeasurementPair.cs" t="Include" />
@@ -602,22 +604,24 @@
               </e>
             </e>
             <e p="TemplateTests.cs" t="Include" />
-            <e p="TestAsm.asmdef" t="Include" />
             <e p="TestUtils.cs" t="Include" />
             <e p="TextProcessor.cs" t="Include" />
             <e p="TokenizingTests.cs" t="Include" />
             <e p="TypeCheckTests.cs" t="Include" />
+            <e p="UIForia.Test.asmdef" t="Include" />
             <e p="UIView_Tests.cs" t="Include" />
             <e p="WhitespaceProcessorTests.cs" t="Include" />
           </e>
         </e>
       </e>
-      <e p="SrcAsm.csproj" t="IncludeRecursive" />
       <e p="Temp" t="ExcludeRecursive">
         <e p="bin" t="ExcludeRecursive" />
       </e>
-      <e p="TestAsm.csproj" t="IncludeRecursive" />
       <e p="UIElements.sln" t="IncludeFlat" />
+      <e p="UIForia.Demo.csproj" t="IncludeRecursive" />
+      <e p="UIForia.Editor.csproj" t="IncludeRecursive" />
+      <e p="UIForia.Src.csproj" t="IncludeRecursive" />
+      <e p="UIForia.Test.csproj" t="IncludeRecursive" />
     </e>
     <e p="C:\Users\Matt\.Rider2018.3\config\extensions" t="IncludeRecursive" />
     <e p="C:\Users\Matt\.Rider2018.3\system\extResources" t="IncludeRecursive" />

@@ -392,103 +392,103 @@ namespace UIForia.Rendering {
                     m_SpecialRenderList.Add(data);
                     continue;
                 }
-
-                BackgroundFillType fillType = style.BackgroundFillType;
-                BackgroundShapeType shapeType = style.BackgroundShapeType;
-                MaterialBatchKey materialKey = 0;
-
-                if (style.HasBorderRadius || style.BorderColor.IsDefined()) {
-                    materialKey |= MaterialBatchKey.Border;
-                }
-
-                // todo -- replace with mask
-                switch (shapeType) {
-                    case BackgroundShapeType.Triangle:
-                        materialKey |= MaterialBatchKey.Shape_Triangle;
-                        break;
-                    case BackgroundShapeType.Diamond:
-                        materialKey |= MaterialBatchKey.Shape_Diamond;
-                        break;
-                    case BackgroundShapeType.Pentagon:
-                        materialKey |= MaterialBatchKey.Shape_Pentagon;
-                        break;
-                    case BackgroundShapeType.Hexagon:
-                        materialKey |= MaterialBatchKey.Shape_Hexagon;
-                        break;
-                    case BackgroundShapeType.Heptagon:
-                        materialKey |= MaterialBatchKey.Shape_Heptagon;
-                        break;
-                    case BackgroundShapeType.Octagon:
-                        materialKey |= MaterialBatchKey.Shape_Octagon;
-                        break;
-                    case BackgroundShapeType.Nonagon:
-                        materialKey |= MaterialBatchKey.Shape_Nonagon;
-                        break;
-                    case BackgroundShapeType.Decagon:
-                        materialKey |= MaterialBatchKey.Shape_Decagon;
-                        break;
-                    case BackgroundShapeType.Hendecagon:
-                        materialKey |= MaterialBatchKey.Shape_Hendecagon;
-                        break;
-                    case BackgroundShapeType.Dodecagon:
-                        materialKey |= MaterialBatchKey.Shape_Dodecagon;
-                        break;
-                    case BackgroundShapeType.Star:
-                        materialKey |= MaterialBatchKey.Shape_Star;
-                        break;
-                    case BackgroundShapeType.Arrow:
-                        materialKey |= MaterialBatchKey.Shape_Arrow;
-                        break;
-                    case BackgroundShapeType.Chevron:
-                        materialKey |= MaterialBatchKey.Shape_Chevron;
-                        break;
-                    case BackgroundShapeType.Rectangle:
-                        materialKey |= MaterialBatchKey.Shape_Rectangle;
-                        break;
-                    default:
-                        throw new ArgumentOutOfRangeException();
-                }
-
-                switch (fillType) {
-                    case BackgroundFillType.Unset:
-                    case BackgroundFillType.None:
-                    case BackgroundFillType.Normal:
-                        materialKey |= MaterialBatchKey.FillType_Color;
-                        // todo check if textured
-                        break;
-                    case BackgroundFillType.Gradient:
-                        GradientType gradientType = style.BackgroundGradientType;
-                        gradientType = GradientType.Linear;
-                        switch (gradientType) {
-                            case GradientType.Linear:
-                                materialKey |= MaterialBatchKey.FillType_GradientLinear;
-                                break;
-                            case GradientType.Cylindrical:
-                                materialKey |= MaterialBatchKey.FillType_GradientCylindrical;
-                                break;
-                            case GradientType.Radial:
-                                materialKey |= MaterialBatchKey.FillType_GradientRadial;
-                                break;
-                            default:
-                                materialKey |= MaterialBatchKey.FillType_GradientLinear;
-                                break;
-                        }
-
-                        break;
-                    case BackgroundFillType.Grid:
-                        materialKey |= MaterialBatchKey.FillType_Grid;
-                        break;
-                    case BackgroundFillType.Checker:
-                        materialKey |= MaterialBatchKey.FillType_Checker;
-                        break;
-                    case BackgroundFillType.Stripes:
-                        materialKey |= MaterialBatchKey.FillType_Stripes;
-                        break;
-                    default:
-                        throw new ArgumentOutOfRangeException();
-                }
-
-                m_BatchEntries.AddUnchecked(new BatchEntry(materialKey, data));
+//
+//                BackgroundFillType fillType = style.BackgroundFillType;
+//                BackgroundShapeType shapeType = style.BackgroundShapeType;
+//                MaterialBatchKey materialKey = 0;
+//
+//                if (style.HasBorderRadius || style.BorderColor.IsDefined()) {
+//                    materialKey |= MaterialBatchKey.Border;
+//                }
+//
+//                // todo -- replace with mask
+//                switch (shapeType) {
+//                    case BackgroundShapeType.Triangle:
+//                        materialKey |= MaterialBatchKey.Shape_Triangle;
+//                        break;
+//                    case BackgroundShapeType.Diamond:
+//                        materialKey |= MaterialBatchKey.Shape_Diamond;
+//                        break;
+//                    case BackgroundShapeType.Pentagon:
+//                        materialKey |= MaterialBatchKey.Shape_Pentagon;
+//                        break;
+//                    case BackgroundShapeType.Hexagon:
+//                        materialKey |= MaterialBatchKey.Shape_Hexagon;
+//                        break;
+//                    case BackgroundShapeType.Heptagon:
+//                        materialKey |= MaterialBatchKey.Shape_Heptagon;
+//                        break;
+//                    case BackgroundShapeType.Octagon:
+//                        materialKey |= MaterialBatchKey.Shape_Octagon;
+//                        break;
+//                    case BackgroundShapeType.Nonagon:
+//                        materialKey |= MaterialBatchKey.Shape_Nonagon;
+//                        break;
+//                    case BackgroundShapeType.Decagon:
+//                        materialKey |= MaterialBatchKey.Shape_Decagon;
+//                        break;
+//                    case BackgroundShapeType.Hendecagon:
+//                        materialKey |= MaterialBatchKey.Shape_Hendecagon;
+//                        break;
+//                    case BackgroundShapeType.Dodecagon:
+//                        materialKey |= MaterialBatchKey.Shape_Dodecagon;
+//                        break;
+//                    case BackgroundShapeType.Star:
+//                        materialKey |= MaterialBatchKey.Shape_Star;
+//                        break;
+//                    case BackgroundShapeType.Arrow:
+//                        materialKey |= MaterialBatchKey.Shape_Arrow;
+//                        break;
+//                    case BackgroundShapeType.Chevron:
+//                        materialKey |= MaterialBatchKey.Shape_Chevron;
+//                        break;
+//                    case BackgroundShapeType.Rectangle:
+//                        materialKey |= MaterialBatchKey.Shape_Rectangle;
+//                        break;
+//                    default:
+//                        throw new ArgumentOutOfRangeException();
+//                }
+//
+//                switch (fillType) {
+//                    case BackgroundFillType.Unset:
+//                    case BackgroundFillType.None:
+//                    case BackgroundFillType.Normal:
+//                        materialKey |= MaterialBatchKey.FillType_Color;
+//                        // todo check if textured
+//                        break;
+//                    case BackgroundFillType.Gradient:
+//                        GradientType gradientType = style.BackgroundGradientType;
+//                        gradientType = GradientType.Linear;
+//                        switch (gradientType) {
+//                            case GradientType.Linear:
+//                                materialKey |= MaterialBatchKey.FillType_GradientLinear;
+//                                break;
+//                            case GradientType.Cylindrical:
+//                                materialKey |= MaterialBatchKey.FillType_GradientCylindrical;
+//                                break;
+//                            case GradientType.Radial:
+//                                materialKey |= MaterialBatchKey.FillType_GradientRadial;
+//                                break;
+//                            default:
+//                                materialKey |= MaterialBatchKey.FillType_GradientLinear;
+//                                break;
+//                        }
+//
+//                        break;
+//                    case BackgroundFillType.Grid:
+//                        materialKey |= MaterialBatchKey.FillType_Grid;
+//                        break;
+//                    case BackgroundFillType.Checker:
+//                        materialKey |= MaterialBatchKey.FillType_Checker;
+//                        break;
+//                    case BackgroundFillType.Stripes:
+//                        materialKey |= MaterialBatchKey.FillType_Stripes;
+//                        break;
+//                    default:
+//                        throw new ArgumentOutOfRangeException();
+//                }
+//
+//                m_BatchEntries.AddUnchecked(new BatchEntry(materialKey, data));
             }
         }
 

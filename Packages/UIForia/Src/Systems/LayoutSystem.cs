@@ -247,8 +247,8 @@ namespace UIForia.Systems {
                     }
 
                     if (ptr != null) {
-                        bool handlesHorizontal = ptr.style.HandlesOverflowX;
-                        bool handlesVertical = ptr.style.HandlesOverflowY;
+                        bool handlesHorizontal = ptr.style.computedStyle.OverflowX != Overflow.None;
+                        bool handlesVertical =  ptr.style.computedStyle.OverflowY != Overflow.None;
                         if (handlesHorizontal && handlesVertical) {
                             Rect r = new Rect(ptr.layoutResult.screenPosition, ptr.layoutResult.allocatedSize);
                             clipRect = clipRect.Intersect(r.Intersect(ptr.layoutResult.clipRect));
@@ -549,6 +549,13 @@ namespace UIForia.Systems {
                     }
 
                     break;
+                case LayoutType.Flow:
+                    if (!(box is FlowLayoutBox)) {
+                        replace = new FlowLayoutBox(element);
+                    }
+
+                    break;
+
             }
 
             if (replace != box) {
@@ -589,6 +596,9 @@ namespace UIForia.Systems {
                 case LayoutType.Flex:
                     return new FlexLayoutBox(element);
 
+                case LayoutType.Flow:
+                    return new FlowLayoutBox(element);
+                
                 case LayoutType.Fixed:
                     return new FixedLayoutBox(element);
 
@@ -682,13 +692,13 @@ namespace UIForia.Systems {
                 UIElement ptr = element.parent;
                 while (ptr != null) {
                     Vector2 screenPosition = ptr.layoutResult.screenPosition;
-                    if (ptr.style.HandlesOverflowX) {
+                    if (ptr.style.computedStyle.OverflowX != Overflow.None) {
                         if (point.x < screenPosition.x || point.x > screenPosition.x + ptr.layoutResult.AllocatedWidth) {
                             break;
                         }
                     }
 
-                    if (ptr.style.HandlesOverflowY) {
+                    if (ptr.style.computedStyle.OverflowY != Overflow.None) {
                         if (point.y < screenPosition.y || point.y > screenPosition.y + ptr.layoutResult.AllocatedHeight) {
                             break;
                         }
@@ -717,7 +727,14 @@ namespace UIForia.Systems {
         }
 
         public OffsetRect GetMarginRect(UIElement element) {
-            return new OffsetRect();
+            LayoutBox box = m_LayoutBoxMap.GetOrDefault(element.id);
+            if (box == null) return new OffsetRect();
+            return new OffsetRect(
+                box.GetMarginTop(box.actualWidth),
+                box.GetMarginRight(),
+                box.GetMarginBottom(box.actualWidth),
+                box.GetMarginLeft()
+            );
         }
 
         public OffsetRect GetBorderRect(UIElement element) {

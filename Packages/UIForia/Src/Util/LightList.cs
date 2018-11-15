@@ -1,10 +1,11 @@
 using System;
+using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
 namespace UIForia.Util {
 
-    public class LightList<T> {
+    public class LightList<T> : IReadOnlyList<T> {
 
         private int size;
         private T[] list;
@@ -28,6 +29,17 @@ namespace UIForia.Util {
             size++;
         }
 
+        public void AddRange(IEnumerable<T> collection) {
+            if (collection == null || Equals(collection, this)) {
+                return;
+            }
+
+            foreach (var item in collection) {
+                Add(item);
+            }
+            
+        }
+
         public void AddUnchecked(T item) {
             list[size] = item;
             size++;
@@ -37,8 +49,8 @@ namespace UIForia.Util {
             Array.Clear(list, 0, list.Length);
             size = 0;
         }
-        
-        public void DangerousClear() {
+
+        public void ResetSize() {
             size = 0;
         }
 
@@ -104,7 +116,7 @@ namespace UIForia.Util {
 
             return -1;
         }
-        
+
         public int FindIndex<U>(U closureArg, Func<T, U, bool> fn) {
             for (int i = 0; i < size; i++) {
                 if (fn(list[i], closureArg)) {
@@ -124,7 +136,7 @@ namespace UIForia.Util {
 
             return default(T);
         }
-        
+
         public T Find<U>(U closureArg, Func<T, U, bool> fn) {
             for (int i = 0; i < size; i++) {
                 if (fn(list[i], closureArg)) {
@@ -135,7 +147,7 @@ namespace UIForia.Util {
             return default(T);
         }
 
-        
+
         public T this[int index] {
             get { return list[index]; }
             set { list[index] = value; }
@@ -156,19 +168,19 @@ namespace UIForia.Util {
         public void Sort(int start, int end, IComparer<T> comparison) {
             Array.Sort(list, start, end, comparison);
         }
-        
+
         public void Sort(int start, int end, Comparison<T> comparison) {
             s_Compare.comparison = comparison;
             Array.Sort(list, start, end, s_Compare);
             s_Compare.comparison = null;
         }
-        
+
         public void Sort(Comparison<T> comparison) {
             s_Compare.comparison = comparison;
             Array.Sort(list, 0, size, s_Compare);
             s_Compare.comparison = null;
         }
-        
+
         public void Sort(IComparer<T> comparison) {
             Array.Sort(list, 0, size, comparison);
         }
@@ -356,6 +368,55 @@ namespace UIForia.Util {
 //            }
 //
 //        }
+
+        public Enumerator GetEnumerator() {
+            return new Enumerator(this);
+        }
+
+        IEnumerator<T> IEnumerable<T>.GetEnumerator() {
+            return new Enumerator(this);
+        }
+
+        IEnumerator IEnumerable.GetEnumerator() {
+            return new Enumerator(this);
+        }
+
+        public class Enumerator : IEnumerator<T> {
+
+            private int index;
+            private T current;
+            private readonly LightList<T> list;
+
+            internal Enumerator(LightList<T> list) {
+                this.list = list;
+                this.index = 0;
+                this.current = default(T);
+            }
+
+            public void Dispose() { }
+
+            public bool MoveNext() {
+                if ((uint) index >= (uint) list.size) {
+                    index = list.size + 1;
+                    current = default(T);
+                    return false;
+                }
+
+                current = list.list[index];
+                ++index;
+                return true;
+            }
+
+            public T Current => current;
+
+            object IEnumerator.Current => Current;
+
+            void IEnumerator.Reset() {
+                index = 0;
+                current = default(T);
+            }
+
+        }
 
     }
 

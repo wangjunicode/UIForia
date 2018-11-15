@@ -1,13 +1,10 @@
 using System;
 using System.Collections.Generic;
 using System.IO;
-using System.Linq;
 using System.Reflection;
 using UIForia.Extensions;
-using UIForia;
 using UIForia.Rendering;
 using UIForia.Util;
-using UnityEditor;
 using UnityEngine;
 using MapAction = System.Action<UIForia.Parsing.StyleParser.StyleParserContext, string, string>;
 

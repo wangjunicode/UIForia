@@ -38,7 +38,6 @@ namespace UIForia.Parsing.StyleParser {
                 case "backgroundfilltype":
                     throw new INeedToGoToBedException();
 //                    context.targetStyle.BackgroundFillType = ParseUtil.ParseBackgroundFillType(context.variables, propertyValue);
-                    break;
 
                 default:
                     throw new ParseException("Unknown display property: " + propertyName);

@@ -1,12 +1,9 @@
 using System;
-using System.Diagnostics.Eventing.Reader;
-using UIForia.Layout.LayoutTypes;
 using TMPro;
 using UIForia.Rendering;
 using UIForia.Systems;
 using UIForia.Text;
 using UIForia.Util;
-using UnityEditor;
 using UnityEngine;
 using FontStyle = UIForia.Text.FontStyle;
 
@@ -177,7 +174,7 @@ namespace UIForia {
             else {
                 if (cursorIndex == textInfo.charCount - 1 && range.cursorEdge == TextEdge.Right) {
                     return range;
-                }                
+                }
                 else {
                     if (cursorIndex == textInfo.charCount - 1) {
                         SetText(text.Remove(textInfo.charCount - 1));
@@ -241,21 +238,19 @@ namespace UIForia {
             }
 
             if (range.cursorEdge == TextEdge.Left) {
-                return new SelectionRange(range.cursorIndex, TextEdge.Right, selectionIndex, selectionEdge);    
+                return new SelectionRange(range.cursorIndex, TextEdge.Right, selectionIndex, selectionEdge);
             }
 
             int cursorIndex = Mathf.Min(range.cursorIndex + 1, textInfo.charCount - 1);
 
             if (cursorIndex == textInfo.charCount - 1) {
-                return new SelectionRange(cursorIndex, TextEdge.Right, selectionIndex, selectionEdge);    
+                return new SelectionRange(cursorIndex, TextEdge.Right, selectionIndex, selectionEdge);
             }
-            
+
             return new SelectionRange(cursorIndex, TextEdge.Right, selectionIndex, selectionEdge);
         }
 
-        public void InsertText(SelectionRange range, char character) {
-            
-        }
+        public void InsertText(SelectionRange range, char character) { }
 
         public void InsertText(int characterIndex, string str) { }
 
@@ -581,19 +576,13 @@ namespace UIForia {
             if (fontAsset != computedStyle.TextFontAsset) {
                 fontAsset = computedStyle.TextFontAsset;
                 material.mainTexture = fontMaterial.mainTexture;
-                material.SetFloat(ShaderUtilities.ID_GradientScale,
-                    fontMaterial.GetFloat(ShaderUtilities.ID_GradientScale));
-                material.SetFloat(ShaderUtilities.ID_WeightNormal,
-                    fontMaterial.GetFloat(ShaderUtilities.ID_WeightNormal));
+                material.SetFloat(ShaderUtilities.ID_GradientScale, fontMaterial.GetFloat(ShaderUtilities.ID_GradientScale));
+                material.SetFloat(ShaderUtilities.ID_WeightNormal, fontMaterial.GetFloat(ShaderUtilities.ID_WeightNormal));
                 material.SetFloat(ShaderUtilities.ID_WeightBold, fontMaterial.GetFloat(ShaderUtilities.ID_WeightBold));
-                material.SetFloat(ShaderUtilities.ID_ScaleRatio_A,
-                    fontMaterial.GetFloat(ShaderUtilities.ID_ScaleRatio_A));
-                material.SetFloat(ShaderUtilities.ID_ScaleRatio_B,
-                    fontMaterial.GetFloat(ShaderUtilities.ID_ScaleRatio_B));
-                material.SetFloat(ShaderUtilities.ID_ScaleRatio_C,
-                    fontMaterial.GetFloat(ShaderUtilities.ID_ScaleRatio_A));
-                material.SetVector(s_TextureSizeKey,
-                    new Vector4(material.mainTexture.width, material.mainTexture.height));
+                material.SetFloat(ShaderUtilities.ID_ScaleRatio_A, fontMaterial.GetFloat(ShaderUtilities.ID_ScaleRatio_A));
+                material.SetFloat(ShaderUtilities.ID_ScaleRatio_B, fontMaterial.GetFloat(ShaderUtilities.ID_ScaleRatio_B));
+                material.SetFloat(ShaderUtilities.ID_ScaleRatio_C, fontMaterial.GetFloat(ShaderUtilities.ID_ScaleRatio_A));
+                material.SetVector(s_TextureSizeKey, new Vector4(material.mainTexture.width, material.mainTexture.height));
             }
 
             float fontScale = (computedStyle.TextFontSize / fontAsset.fontInfo.PointSize) * fontAsset.fontInfo.Scale;

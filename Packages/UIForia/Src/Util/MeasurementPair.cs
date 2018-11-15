@@ -2,6 +2,21 @@
 
 public struct MeasurementPair {
 
+    public bool Equals(MeasurementPair other) {
+        return x.Equals(other.x) && y.Equals(other.y);
+    }
+
+    public override bool Equals(object obj) {
+        if (ReferenceEquals(null, obj)) return false;
+        return obj is MeasurementPair && Equals((MeasurementPair) obj);
+    }
+
+    public override int GetHashCode() {
+        unchecked {
+            return (x.GetHashCode() * 397) ^ y.GetHashCode();
+        }
+    }
+
     public UIMeasurement x;
     public UIMeasurement y;
 

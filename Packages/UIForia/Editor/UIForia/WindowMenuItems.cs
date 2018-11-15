@@ -1,3 +1,4 @@
+using UIForia.Parsing.StyleParser;
 using UnityEditor;
 
 namespace UIForia.Editor {
@@ -15,6 +16,16 @@ namespace UIForia.Editor {
             EditorWindow.GetWindow<UIForiaInspectorWindow>("UIForia Inspector");
         }
 
+        [MenuItem("UIForia/Refresh UI Templates %g")]
+        public static void Refresh() {
+            StyleParser.Reset();
+            TemplateParser.Reset();
+            ResourceManager.Reset();
+            ParsedTemplate.Reset(); // todo -- roll all parsers into one place
+            
+            Application.Game.Refresh();
+            
+        }
     }
 
 }

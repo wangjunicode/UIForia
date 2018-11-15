@@ -28,7 +28,6 @@ namespace UIForia.Layout.LayoutTypes {
         public VirtualScrollbar horizontalScrollbar;
         public VirtualScrollbar verticalScrollbar;
 
-
 #if DEBUG
         public int layoutCalls;
         public int contentSizeCacheHits;
@@ -242,11 +241,11 @@ namespace UIForia.Layout.LayoutTypes {
             RequestContentSizeChangeLayout();
         }
 
-        [DebuggerStepThrough]
+//        [DebuggerStepThrough]
         protected float ResolveFixedWidth(UIFixedLength width) {
             switch (width.unit) {
                 case UIFixedUnit.Pixel:
-                    return width.value;
+                    return width.value * element.view.ScaleFactor;
 
                 case UIFixedUnit.Percent:
                     return allocatedWidth * width.value;
@@ -258,18 +257,21 @@ namespace UIForia.Layout.LayoutTypes {
                     return element.view.Viewport.width * width.value;
 
                 case UIFixedUnit.Em:
-                    return style.EmSize * width.value;
+                    return style.EmSize * width.value * element.view.ScaleFactor;
 
+                case UIFixedUnit.LineHeight:
+                    return style.LineHeightSize * width.value;
+                
                 default:
                     return 0;
             }
         }
 
-        [DebuggerStepThrough]
+//        [DebuggerStepThrough]
         protected float ResolveFixedHeight(UIFixedLength height) {
             switch (height.unit) {
                 case UIFixedUnit.Pixel:
-                    return height.value;
+                    return height.value * element.view.ScaleFactor;
 
                 case UIFixedUnit.Percent:
                     return allocatedHeight * height.value;
@@ -281,8 +283,11 @@ namespace UIForia.Layout.LayoutTypes {
                     return element.view.Viewport.width * height.value;
 
                 case UIFixedUnit.Em:
-                    return style.EmSize * height.value;
-
+                    return style.EmSize * height.value * element.view.ScaleFactor;
+                
+                case UIFixedUnit.LineHeight:
+                    return style.LineHeightSize * height.value;
+                
                 default:
                     return 0;
             }
@@ -292,74 +297,79 @@ namespace UIForia.Layout.LayoutTypes {
             AnchorTarget anchorTarget;
             switch (margin.unit) {
                 case UIMeasurementUnit.Pixel:
-                    return margin.value;
-                
+                    return margin.value * element.view.ScaleFactor;
+
                 case UIMeasurementUnit.Content:
                     return GetContentHeight(width) * margin.value;
-                
+
                 case UIMeasurementUnit.ParentSize:
                     if (parent.style.PreferredWidth.IsContentBased) {
                         return 0f;
                     }
 
                     return parent.allocatedHeight * margin.value;
-                    
+
                 case UIMeasurementUnit.ViewportWidth:
                     return element.view.Viewport.width * margin.value;
-                
+
                 case UIMeasurementUnit.ViewportHeight:
                     return element.view.Viewport.height * margin.value;
-                
+
                 case UIMeasurementUnit.ParentContentArea:
                     if (parent.style.PreferredHeight.IsContentBased) {
                         return 0f;
                     }
 
-                    return parent.allocatedHeight * margin.value - (parent.style == null ? 0 : parent.PaddingBorderVertical);
+                    return parent.allocatedHeight * margin.value -
+                           (parent.style == null ? 0 : parent.PaddingBorderVertical);
 
                 case UIMeasurementUnit.Em:
-                    return style.EmSize * margin.value;
-                
+                    return style.EmSize * margin.value * element.view.ScaleFactor;
+
                 case UIMeasurementUnit.AnchorWidth:
                     anchorTarget = style.AnchorTarget;
-                    if (parent.style.PreferredHeight.IsContentBased && anchorTarget == AnchorTarget.Parent || anchorTarget == AnchorTarget.ParentContentArea) {
+                    if (parent.style.PreferredHeight.IsContentBased && anchorTarget == AnchorTarget.Parent ||
+                        anchorTarget == AnchorTarget.ParentContentArea) {
                         return 0f;
                     }
 
                     return ResolveAnchorWidth(margin.value);
-                
+
                 case UIMeasurementUnit.AnchorHeight:
                     anchorTarget = style.AnchorTarget;
-                    if (parent.style.PreferredHeight.IsContentBased && anchorTarget == AnchorTarget.Parent || anchorTarget == AnchorTarget.ParentContentArea) {
+                    if (parent.style.PreferredHeight.IsContentBased && anchorTarget == AnchorTarget.Parent ||
+                        anchorTarget == AnchorTarget.ParentContentArea) {
                         return 0f;
                     }
 
                     return ResolveAnchorHeight(margin.value);
-                
+
                 case UIMeasurementUnit.Unset:
                 default:
                     throw new ArgumentOutOfRangeException();
             }
-            
         }
-
+        
         public float ResolveMarginHorizontal(UIMeasurement margin) {
             AnchorTarget anchorTarget;
 
             switch (margin.unit) {
                 case UIMeasurementUnit.Pixel:
-                    return margin.value;
+                    return margin.value * element.view.ScaleFactor;
+
+                case UIMeasurementUnit.Em:
+                    return style.EmSize * margin.value * element.view.ScaleFactor;
                 
                 case UIMeasurementUnit.Content:
                     return GetContentWidth() * margin.value;
-                
+
                 case UIMeasurementUnit.ParentSize:
                     if (parent.style.PreferredWidth.IsContentBased) {
                         return 0f;
                     }
 
                     return parent.allocatedHeight * margin.value;
-                
+
                 case UIMeasurementUnit.ViewportWidth:
                     return element.view.Viewport.width * margin.value;
 
@@ -370,31 +380,33 @@ namespace UIForia.Layout.LayoutTypes {
                     if (parent.style.PreferredWidth.IsContentBased) {
                         return 0f;
                     }
-                    return parent.allocatedWidth * margin.value - (parent.style == null ? 0 : parent.PaddingBorderHorizontal);
 
-                case UIMeasurementUnit.Em:
-                    return style.EmSize * margin.value;
+                    return parent.allocatedWidth * margin.value -
+                           (parent.style == null ? 0 : parent.PaddingBorderHorizontal);
+
+             
 
                 case UIMeasurementUnit.AnchorWidth:
                     anchorTarget = style.AnchorTarget;
-                    if (parent.style.PreferredWidth.IsContentBased && anchorTarget == AnchorTarget.Parent || anchorTarget == AnchorTarget.ParentContentArea) {
+                    if (parent.style.PreferredWidth.IsContentBased && anchorTarget == AnchorTarget.Parent ||
+                        anchorTarget == AnchorTarget.ParentContentArea) {
                         return 0f;
                     }
 
                     return ResolveAnchorWidth(margin.value);
                 case UIMeasurementUnit.AnchorHeight:
                     anchorTarget = style.AnchorTarget;
-                    if (parent.style.PreferredWidth.IsContentBased && anchorTarget == AnchorTarget.Parent || anchorTarget == AnchorTarget.ParentContentArea) {
+                    if (parent.style.PreferredWidth.IsContentBased && anchorTarget == AnchorTarget.Parent ||
+                        anchorTarget == AnchorTarget.ParentContentArea) {
                         return 0f;
                     }
 
                     return ResolveAnchorHeight(margin.value);
-                
+
                 case UIMeasurementUnit.Unset:
                 default:
                     throw new ArgumentOutOfRangeException();
             }
-
         }
 
         public virtual void OnStylePropertyChanged(StyleProperty property) {
@@ -440,7 +452,6 @@ namespace UIForia.Layout.LayoutTypes {
                     InvalidatePreferredSizeCache();
                     break;
             }
-            
         }
 
         protected static int FindLayoutSiblingIndex(UIElement element) {
@@ -458,7 +469,8 @@ namespace UIForia.Layout.LayoutTypes {
                     break;
                 }
 
-                if ((sibling.flags & UIElementFlags.RequiresLayout) != 0 && (sibling.style.computedStyle.LayoutBehavior & LayoutBehavior.Ignored) == 0) {
+                if ((sibling.flags & UIElementFlags.RequiresLayout) != 0 &&
+                    (sibling.style.computedStyle.LayoutBehavior & LayoutBehavior.Ignored) == 0) {
                     idx++;
                 }
             }
@@ -570,7 +582,7 @@ namespace UIForia.Layout.LayoutTypes {
             return cachedHeight;
         }
 
-     
+
         public float GetPreferredWidth() {
             AnchorTarget anchorTarget;
             UIMeasurement widthMeasurement = style.PreferredWidth;
@@ -599,14 +611,16 @@ namespace UIForia.Layout.LayoutTypes {
                         return 0f;
                     }
 
-                    return Mathf.Max(0, parent.allocatedWidth - parent.PaddingBorderHorizontal) * widthMeasurement.value;
+                    return Mathf.Max(0, parent.allocatedWidth - parent.PaddingBorderHorizontal) *
+                           widthMeasurement.value;
 
                 case UIMeasurementUnit.Em:
-                    return Math.Max(0, style.EmSize * widthMeasurement.value);
+                    return Math.Max(0, style.EmSize * widthMeasurement.value) * element.view.ScaleFactor;
 
                 case UIMeasurementUnit.AnchorWidth:
                     anchorTarget = style.AnchorTarget;
-                    if (parent.style.PreferredWidth.IsContentBased && anchorTarget == AnchorTarget.Parent || anchorTarget == AnchorTarget.ParentContentArea) {
+                    if (parent.style.PreferredWidth.IsContentBased && anchorTarget == AnchorTarget.Parent ||
+                        anchorTarget == AnchorTarget.ParentContentArea) {
                         return 0f;
                     }
 
@@ -614,7 +628,8 @@ namespace UIForia.Layout.LayoutTypes {
 
                 case UIMeasurementUnit.AnchorHeight:
                     anchorTarget = style.AnchorTarget;
-                    if (parent.style.PreferredWidth.IsContentBased && anchorTarget == AnchorTarget.Parent || anchorTarget == AnchorTarget.ParentContentArea) {
+                    if (parent.style.PreferredWidth.IsContentBased && anchorTarget == AnchorTarget.Parent ||
+                        anchorTarget == AnchorTarget.ParentContentArea) {
                         return 0f;
                     }
 
@@ -678,7 +693,8 @@ namespace UIForia.Layout.LayoutTypes {
 
                 case AnchorTarget.Viewport:
                     top = ResolveAnchor(element.view.Viewport.height, style.AnchorTop);
-                    bottom = element.view.Viewport.height - ResolveAnchor(element.view.Viewport.height, style.AnchorBottom);
+                    bottom = element.view.Viewport.height -
+                             ResolveAnchor(element.view.Viewport.height, style.AnchorBottom);
                     return Mathf.Max(0, (bottom - top) * heightMeasurement.value);
 
                 default:
@@ -689,7 +705,7 @@ namespace UIForia.Layout.LayoutTypes {
         protected float ResolveAnchor(float baseWidth, UIFixedLength anchor) {
             switch (anchor.unit) {
                 case UIFixedUnit.Pixel:
-                    return anchor.value;
+                    return anchor.value * element.view.ScaleFactor;
 
                 case UIFixedUnit.Percent:
                     return baseWidth * anchor.value;
@@ -701,7 +717,7 @@ namespace UIForia.Layout.LayoutTypes {
                     return element.view.Viewport.width * anchor.value;
 
                 case UIFixedUnit.Em:
-                    return style.EmSize * anchor.value;
+                    return style.EmSize * anchor.value * element.view.ScaleFactor;
 
                 default:
                     throw new InvalidArgumentException();
@@ -711,7 +727,7 @@ namespace UIForia.Layout.LayoutTypes {
         protected float ResolveHorizontalAnchor(UIFixedLength anchor) {
             switch (anchor.unit) {
                 case UIFixedUnit.Pixel:
-                    return anchor.value;
+                    return anchor.value * element.view.ScaleFactor;
 
                 case UIFixedUnit.Percent:
                     switch (style.AnchorTarget) {
@@ -757,7 +773,7 @@ namespace UIForia.Layout.LayoutTypes {
         protected float ResolveVerticalAnchor(UIFixedLength anchor) {
             switch (anchor.unit) {
                 case UIFixedUnit.Pixel:
-                    return anchor.value;
+                    return anchor.value * element.view.ScaleFactor;
 
                 case UIFixedUnit.Percent:
                     switch (style.AnchorTarget) {
@@ -793,7 +809,7 @@ namespace UIForia.Layout.LayoutTypes {
                     return element.view.Viewport.width * anchor.value;
 
                 case UIFixedUnit.Em:
-                    return style.EmSize * anchor.value;
+                    return style.EmSize * anchor.value * element.view.ScaleFactor;
 
                 default:
                     throw new InvalidArgumentException();
@@ -805,7 +821,7 @@ namespace UIForia.Layout.LayoutTypes {
             UIMeasurement height = style.PreferredHeight;
             switch (height.unit) {
                 case UIMeasurementUnit.Pixel:
-                    return Mathf.Max(0, height.value);
+                    return Mathf.Max(0, height.value * element.view.ScaleFactor);
 
                 case UIMeasurementUnit.Content:
                     float contentHeight = GetCachedHeightForWidth(contentWidth);
@@ -836,14 +852,17 @@ namespace UIForia.Layout.LayoutTypes {
                         return 0f;
                     }
 
-                    return Mathf.Max(0, parent.allocatedHeight * height.value - (parent.style == null ? 0 : parent.PaddingBorderVertical));
+                    return Mathf.Max(0,
+                        parent.allocatedHeight * height.value -
+                        (parent.style == null ? 0 : parent.PaddingBorderVertical));
 
                 case UIMeasurementUnit.Em:
                     return Mathf.Max(0, style.EmSize * height.value);
 
                 case UIMeasurementUnit.AnchorWidth:
                     anchorTarget = style.AnchorTarget;
-                    if (parent.style.PreferredHeight.IsContentBased && anchorTarget == AnchorTarget.Parent || anchorTarget == AnchorTarget.ParentContentArea) {
+                    if (parent.style.PreferredHeight.IsContentBased && anchorTarget == AnchorTarget.Parent ||
+                        anchorTarget == AnchorTarget.ParentContentArea) {
                         return 0f;
                     }
 
@@ -851,7 +870,8 @@ namespace UIForia.Layout.LayoutTypes {
 
                 case UIMeasurementUnit.AnchorHeight:
                     anchorTarget = style.AnchorTarget;
-                    if (parent.style.PreferredHeight.IsContentBased && anchorTarget == AnchorTarget.Parent || anchorTarget == AnchorTarget.ParentContentArea) {
+                    if (parent.style.PreferredHeight.IsContentBased && anchorTarget == AnchorTarget.Parent ||
+                        anchorTarget == AnchorTarget.ParentContentArea) {
                         return 0f;
                     }
 
@@ -899,14 +919,18 @@ namespace UIForia.Layout.LayoutTypes {
                         return 0f;
                     }
 
-                    return Mathf.Max(0, parent.allocatedWidth * widthMeasurement.value - (parent.style == null ? 0 : parent.PaddingHorizontal - parent.BorderHorizontal));
+                    return Mathf.Max(0,
+                        parent.allocatedWidth * widthMeasurement.value - (parent.style == null
+                            ? 0
+                            : parent.PaddingHorizontal - parent.BorderHorizontal));
 
                 case UIMeasurementUnit.Em:
                     return Math.Max(0, style.EmSize * widthMeasurement.value);
 
                 case UIMeasurementUnit.AnchorWidth:
                     anchorTarget = style.AnchorTarget;
-                    if (parent.style.PreferredWidth.IsContentBased && anchorTarget == AnchorTarget.Parent || anchorTarget == AnchorTarget.ParentContentArea) {
+                    if (parent.style.PreferredWidth.IsContentBased && anchorTarget == AnchorTarget.Parent ||
+                        anchorTarget == AnchorTarget.ParentContentArea) {
                         return 0f;
                     }
 
@@ -914,7 +938,8 @@ namespace UIForia.Layout.LayoutTypes {
 
                 case UIMeasurementUnit.AnchorHeight:
                     anchorTarget = style.AnchorTarget;
-                    if (parent.style.PreferredWidth.IsContentBased && anchorTarget == AnchorTarget.Parent || anchorTarget == AnchorTarget.ParentContentArea) {
+                    if (parent.style.PreferredWidth.IsContentBased && anchorTarget == AnchorTarget.Parent ||
+                        anchorTarget == AnchorTarget.ParentContentArea) {
                         return 0f;
                     }
 
@@ -930,7 +955,7 @@ namespace UIForia.Layout.LayoutTypes {
             AnchorTarget anchorTarget;
             switch (heightMeasurement.unit) {
                 case UIMeasurementUnit.Pixel:
-                    return Mathf.Max(0, heightMeasurement.value);
+                    return Mathf.Max(0, heightMeasurement.value) * element.view.ScaleFactor;
 
                 case UIMeasurementUnit.Content:
                     return Mathf.Max(0, PaddingBorderVertical + (GetContentHeight(width) * heightMeasurement.value));
@@ -953,14 +978,18 @@ namespace UIForia.Layout.LayoutTypes {
                         return 0f;
                     }
 
-                    return Mathf.Max(0, parent.allocatedHeight * heightMeasurement.value - (parent.style == null ? 0 : parent.PaddingVertical - parent.BorderVertical));
+                    return Mathf.Max(0,
+                        parent.allocatedHeight * heightMeasurement.value - (parent.style == null
+                            ? 0
+                            : parent.PaddingVertical - parent.BorderVertical));
 
                 case UIMeasurementUnit.Em:
                     return Mathf.Max(0, style.EmSize * heightMeasurement.value);
 
                 case UIMeasurementUnit.AnchorWidth:
                     anchorTarget = style.AnchorTarget;
-                    if (parent.style.PreferredHeight.IsContentBased && anchorTarget == AnchorTarget.Parent || anchorTarget == AnchorTarget.ParentContentArea) {
+                    if (parent.style.PreferredHeight.IsContentBased && anchorTarget == AnchorTarget.Parent ||
+                        anchorTarget == AnchorTarget.ParentContentArea) {
                         return 0f;
                     }
 
@@ -968,7 +997,8 @@ namespace UIForia.Layout.LayoutTypes {
 
                 case UIMeasurementUnit.AnchorHeight:
                     anchorTarget = style.AnchorTarget;
-                    if (parent.style.PreferredHeight.IsContentBased && anchorTarget == AnchorTarget.Parent || anchorTarget == AnchorTarget.ParentContentArea) {
+                    if (parent.style.PreferredHeight.IsContentBased && anchorTarget == AnchorTarget.Parent ||
+                        anchorTarget == AnchorTarget.ParentContentArea) {
                         return 0f;
                     }
 
@@ -1019,6 +1049,15 @@ namespace UIForia.Layout.LayoutTypes {
             public float height1;
             public float height2;
 
+        }
+
+        public OffsetRect GetMargin(float width) {
+            return new OffsetRect(
+                GetMarginTop(width),
+                GetMarginRight(),
+                GetMarginBottom(width),
+                GetMarginLeft()
+            );
         }
 
     }

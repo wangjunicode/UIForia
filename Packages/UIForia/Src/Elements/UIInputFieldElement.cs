@@ -15,7 +15,7 @@ using UnityEngine;
             LayoutBehavior = Ignored;
             TransformBehaviorX = AnchorMinOffset;
             TransformBehaviorY = AnchorMinOffset;
-            AnchorTarget = ParentContentArea;
+            AnchorTarget = Parent;
         }
         
         style text {
@@ -32,8 +32,7 @@ using UnityEngine;
         }
         
         style container {
-            FlexLayoutMainAxisAlignment = 'Center';
-            
+            FlexLayoutMainAxisAlignment = Center;
         }
 
     </Style>
@@ -54,6 +53,7 @@ public class UIInputFieldElement : UIElement, IFocusable, IPropertyChangedHandle
 
     public string text;
     public string placeholder;
+    public bool selectAllOnFocus;
     public float caretBlinkRate = 0.85f;
 
     private UIGraphicElement caret;
@@ -62,7 +62,6 @@ public class UIInputFieldElement : UIElement, IFocusable, IPropertyChangedHandle
     private UITextElement.SelectionRange selectionRange = new UITextElement.SelectionRange(0, UITextElement.TextEdge.Right);
     private UITextElement.SelectionRange previousSelectionRange = new UITextElement.SelectionRange(0, UITextElement.TextEdge.Right);
 
-    private bool selectAllOnFocus;
     private float blinkStartTime;
     private bool hasFocus;
     private bool canSetCaret;
@@ -72,6 +71,15 @@ public class UIInputFieldElement : UIElement, IFocusable, IPropertyChangedHandle
         set { GUIUtility.systemCopyBuffer = value; }
     }
 
+    [OnPropertyChanged(nameof(text))]
+    public void OnTextPropChanged(string field) {
+        textElement.SetText(text);
+    }
+    
+    public string GetText() {
+        return textElement.text;
+    }
+    
     public override void OnCreate() {
         text = string.Empty;
         caret = FindById<UIGraphicElement>("cursor");
@@ -107,7 +115,7 @@ public class UIInputFieldElement : UIElement, IFocusable, IPropertyChangedHandle
         float blinkPeriod = 1f / caretBlinkRate;
         bool blinkState = (Time.unscaledTime - blinkStartTime) % blinkPeriod < blinkPeriod / 2;
         if (canSetCaret) {
-            caret.style.SetTransformPositionX(textElement.GetCursorPosition(selectionRange).x, StyleState.Normal);
+            caret.style.SetTransformPositionX(layoutResult.contentRect.x + textElement.GetCursorPosition(selectionRange).x, StyleState.Normal);
             caret.style.SetTransformPositionY(textElement.layoutResult.localPosition.y, StyleState.Normal);
         }
         caret.style.SetBackgroundColor(Color.black, StyleState.Normal);
@@ -119,7 +127,7 @@ public class UIInputFieldElement : UIElement, IFocusable, IPropertyChangedHandle
     private void EnterText(KeyboardInputEvent evt) {
         char c = evt.character;
 
-        if (!textElement.textInfo.spanInfos[0].font.HasCharacter(c)) {
+        if (!textElement.ComputedStyle.TextFontAsset.characterDictionary.ContainsKey(c)) {
             return;
         }
 
@@ -148,8 +156,7 @@ public class UIInputFieldElement : UIElement, IFocusable, IPropertyChangedHandle
 
         evt.StopPropagation();
 
-        Vector2 mouse = evt.MousePosition - layoutResult.screenPosition;
-
+        Vector2 mouse = evt.MousePosition - layoutResult.screenPosition - layoutResult.contentRect.position;
         
         if (evt.IsDoubleClick) {
             selectionRange = textElement.SelectWordAtPoint(mouse);
@@ -233,13 +240,13 @@ public class UIInputFieldElement : UIElement, IFocusable, IPropertyChangedHandle
     public TextSelectDragEvent CreateDragEvent(MouseInputEvent evt) {
         TextSelectDragEvent retn = new TextSelectDragEvent(this);
         retn.onUpdate += HandleDragUpdate;
-        Vector2 mouse = evt.MousePosition - layoutResult.screenPosition;
+        Vector2 mouse = evt.MousePosition - layoutResult.screenPosition - layoutResult.contentRect.position;
         selectionRange = textElement.BeginSelection(mouse);
         return retn;
     }
 
     private void HandleDragUpdate(DragEvent obj) {
-        Vector2 mouse = obj.MousePosition - layoutResult.screenPosition;
+        Vector2 mouse = obj.MousePosition - layoutResult.screenPosition - layoutResult.contentRect.position;
         selectionRange = textElement.SelectToPoint(selectionRange, mouse);
     }
 

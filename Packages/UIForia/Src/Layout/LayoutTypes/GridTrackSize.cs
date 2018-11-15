@@ -2,6 +2,25 @@ namespace UIForia.Layout.LayoutTypes {
 
     public struct GridTrackSize {
 
+        public bool Equals(GridTrackSize other) {
+            return minValue.Equals(other.minValue) && maxValue.Equals(other.maxValue) && minUnit == other.minUnit && maxUnit == other.maxUnit;
+        }
+
+        public override bool Equals(object obj) {
+            if (ReferenceEquals(null, obj)) return false;
+            return obj is GridTrackSize && Equals((GridTrackSize) obj);
+        }
+
+        public override int GetHashCode() {
+            unchecked {
+                var hashCode = minValue.GetHashCode();
+                hashCode = (hashCode * 397) ^ maxValue.GetHashCode();
+                hashCode = (hashCode * 397) ^ (int) minUnit;
+                hashCode = (hashCode * 397) ^ (int) maxUnit;
+                return hashCode;
+            }
+        }
+
         public readonly float minValue;
         public readonly float maxValue;
 

@@ -157,7 +157,7 @@ namespace UIForia.Animation {
 //                        return new AnimationStatus((int) ColorType.Gradient, startProperty.AsGradient);
 //                    }
 //                    else {
-                        return new AnimationState((int) ColorType.Color, new StyleColor(startProperty.AsColor).rgba);
+//                        return new AnimationState((int) ColorType.Color, new StyleColor(startProperty.AsColor).rgba);
 //                    }
 
                 default: throw new UIForia.InvalidArgumentException(m_TargetValue.propertyId + " is not a supported animation property");

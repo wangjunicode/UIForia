@@ -66,13 +66,13 @@ namespace UIForia.Rendering {
             SetFloatProperty(StylePropertyId.BackgroundGradientStart, gradientStart, state);
         }
         
-        public void SetBackgroundGridSize(float gridSize, StyleState state) {
-            SetFloatProperty(StylePropertyId.BackgroundGridSize, gridSize, state);
-        }
-
-        public void SetBackgroundLineSize(float lineSize, StyleState state) {
-            SetFloatProperty(StylePropertyId.BackgroundLineSize, lineSize, state);
-        }
+//        public void SetBackgroundGridSize(float gridSize, StyleState state) {
+//            SetFloatProperty(StylePropertyId.BackgroundGridSize, gridSize, state);
+//        }
+//
+//        public void SetBackgroundLineSize(float lineSize, StyleState state) {
+//            SetFloatProperty(StylePropertyId.BackgroundLineSize, lineSize, state);
+//        }
         
         public void SetBackgroundFillOffsetX(float offset, StyleState state) {
             SetFloatProperty(StylePropertyId.BackgroundFillOffsetX, offset, state);

@@ -1,6 +1,5 @@
 using System;
 using Shapes2D;
-using UIForia.Elements;
 using UIForia.Extensions;
 using UIForia.Rendering;
 using UIForia.Util;
@@ -44,7 +43,6 @@ namespace UIForia.Systems {
         }
 
         public override void Render(RenderData[] drawList, int start, int end, Vector3 origin, Camera camera) {
-
             for (int i = start; i < end; i++) {
                 RenderData data = drawList[i];
                 UIElement element = data.element;
@@ -53,7 +51,11 @@ namespace UIForia.Systems {
                     data.mesh = ((IMeshProvider) element).GetMesh();
                 }
                 else if (data.mesh == null || element.layoutResult.ActualSizeChanged) {
-                    data.mesh = MeshUtil.ResizeStandardUIMesh(data.mesh, element.layoutResult.actualSize);
+                    LayoutResult result = element.layoutResult;
+                    data.mesh = MeshUtil.ResizeStandardUIMesh(data.mesh, new Size(
+                        Mathf.Max(result.actualSize.width, result.allocatedSize.width),
+                        Mathf.Max(result.actualSize.height, result.allocatedSize.height))
+                    );
                 }
 
                 if (data.mesh == null) {
@@ -66,9 +68,6 @@ namespace UIForia.Systems {
                 else {
                     data.material = InitDefaultMaterial(data);
                 }
-//                else if (data.material == null) {
-//                    data.material = new Material(s_BaseMaterial);
-//                }
 
                 if (data.material == null) {
                     continue;
@@ -88,11 +87,11 @@ namespace UIForia.Systems {
             ComputedStyle style = data.element.ComputedStyle;
             Size size = data.element.layoutResult.actualSize;
             Material material = data.material;
-            
+
             if (material == null) {
                 material = new Material(s_BaseMaterial);
             }
-            
+
             if (style.HasBorderRadius || style.BorderColor.IsDefined()) {
                 material.EnableKeyword(k_UseBorder);
             }
@@ -148,7 +147,8 @@ namespace UIForia.Systems {
             Vector2 fillScale = new Vector2(style.BackgroundFillScaleX, style.BackgroundFillScaleY);
             Vector2 fillOffset = new Vector2(style.BackgroundFillOffsetX, style.BackgroundFillOffsetY);
             Rect contentRect = data.element.layoutResult.ContentRect;
-            material.SetVector(s_ContentRectKey, new Vector4(contentRect.x, contentRect.y, contentRect.width, contentRect.height));
+            material.SetVector(s_ContentRectKey,
+                new Vector4(contentRect.x, contentRect.y, contentRect.width, contentRect.height));
             material.SetColor(s_ColorKey, style.BackgroundColor);
             material.SetVector(s_ClipRectKey, data.clipVector);
             material.SetVector(s_FillOffsetScaleKey, new Vector4(fillOffset.x, fillOffset.y, fillScale.x, fillScale.y));

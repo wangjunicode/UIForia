@@ -3,7 +3,7 @@ using UIForia;
 
 namespace UIForia.Rendering {
 
-    public static class StyleUtil {
+    public static partial class StyleUtil {
 
         public static readonly StylePropertyId[] StylePropertyIdList;
         private static readonly IntMap<string> s_NameMap;
@@ -37,6 +37,18 @@ namespace UIForia.Rendering {
             string name;
             s_NameMap.TryGetValue((int) propertyId, out name);
             return name;
+        }
+
+        public static bool IsPropertyInherited(StylePropertyId propertyId) {
+            switch (propertyId) {
+                case StylePropertyId.Opacity: return true;
+                case StylePropertyId.TextFontSize: return true;    
+                case StylePropertyId.TextFontAsset: return true;    
+                case StylePropertyId.TextFontStyle: return true;    
+                case StylePropertyId.TextTransform: return true;    
+            }
+
+            return false;
         }
 
     }

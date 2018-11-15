@@ -121,7 +121,7 @@ namespace UIForia {
             }
 
             def = GetStyleDefinitionFromAlias(path[0]);
-            return StyleParser.GetParsedStyle(def.importPath, null, path[0]);
+            return StyleParser.GetParsedStyle(def.importPath, null, path[1]);
         }
 
         public void SetStyleGroups(List<StyleDefinition> styleDefinitions) {

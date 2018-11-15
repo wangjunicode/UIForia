@@ -10,8 +10,6 @@ namespace UIForia {
         public const string CaseKeyAttribute = "when";
         public const string SwitchValueAttribute = "value";
 
-        private int id;
-
         public UISwitchTemplate(List<UITemplate> childTemplates, List<AttributeDefinition> attributes = null)
             : base(childTemplates, attributes) { }
 

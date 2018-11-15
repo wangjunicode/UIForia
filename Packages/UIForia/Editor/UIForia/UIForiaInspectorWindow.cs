@@ -42,7 +42,9 @@ namespace UIForia.Editor {
         private readonly Dictionary<UIStyle, bool> m_ExpandedMap = new Dictionary<UIStyle, bool>();
         private static readonly GUIContent s_Content = new GUIContent();
         private static readonly StylePropertyIdComparer s_StyleCompare = new StylePropertyIdComparer();
-        private static readonly Dictionary<Type, ValueTuple<int[], GUIContent[]>> m_EnumValueMap = new Dictionary<Type, ValueTuple<int[], GUIContent[]>>();
+
+        private static readonly Dictionary<Type, ValueTuple<int[], GUIContent[]>> m_EnumValueMap =
+            new Dictionary<Type, ValueTuple<int[], GUIContent[]>>();
 
         private Mesh mesh;
         private Material material;
@@ -83,6 +85,19 @@ namespace UIForia.Editor {
 
         private SearchField searchField;
         private string searchString = string.Empty;
+        private static readonly int s_SizeKey = Shader.PropertyToID("_Size");
+        private static readonly int s_ContentColorKey = Shader.PropertyToID("_ContentColor");
+        private static readonly int s_PaddingColorKey = Shader.PropertyToID("_PaddingColor");
+        private static readonly int s_BorderColorKey = Shader.PropertyToID("_BorderColor");
+        private static readonly int s_MarginColorKey = Shader.PropertyToID("_MarginColor");
+        private static readonly int s_MarginRectKey = Shader.PropertyToID("_MarginRect");
+        private static readonly int s_BorderRectKey = Shader.PropertyToID("_BorderRect");
+        private static readonly int s_PaddingRectKey = Shader.PropertyToID("_PaddingRect");
+        private static readonly int s_ContentRectKey = Shader.PropertyToID("_ContentRect");
+        private static readonly int s_BaseLineKey = Shader.PropertyToID("_BaseLine");
+        private static readonly int s_DescenderKey = Shader.PropertyToID("_Descender");
+        private static readonly int s_BaseLineColorKey = Shader.PropertyToID("_BaseLineColor");
+        private static readonly int s_DescenderColorKey = Shader.PropertyToID("_DescenderColor");
 
         private void OnEnable() {
             searchField = new SearchField();
@@ -112,6 +127,7 @@ namespace UIForia.Editor {
 
             showTextBaseline = EditorPrefs.GetBool("UIForia.Inspector.ShowTextBaseline", false);
             showTextDescender = EditorPrefs.GetBool("UIForia.Inspector.ShowTextDescender", false);
+            drawDebugBox = EditorPrefs.GetBool("UIForia.Inspector.DrawDebugBox", true);
         }
 
         private void DrawComputedStyle() {
@@ -221,6 +237,7 @@ namespace UIForia.Editor {
         }
 
         private void DrawDebugOverlay(LightList<RenderData> renderData, LightList<RenderData> drawList, Vector3 origin, Camera camera) {
+            if (!drawDebugBox) return;
             if (material == null) {
                 material = new Material(Resources.Load<Material>("UIForia/Materials/UIForiaDebug"));
             }
@@ -240,42 +257,49 @@ namespace UIForia.Editor {
                 OffsetRect margin = view.Application.LayoutSystem.GetMarginRect(selectedElement);
                 OffsetRect border = view.Application.LayoutSystem.GetBorderRect(selectedElement);
 
-                mesh = MeshUtil.ResizeStandardUIMesh(mesh, result.actualSize);
                 float width = result.actualSize.width;
                 float height = result.actualSize.height;
 
-                material.SetVector("_Size", new Vector4(width, height, 0, 0));
-                material.SetColor("_ContentColor", contentColor);
-                material.SetColor("_PaddingColor", paddingColor);
-                material.SetColor("_BorderColor", borderColor);
-                material.SetColor("_MarginColor", marginColor);
+                Size renderSize = new Size(
+                    width + margin.left + margin.right,
+                    height + margin.top + margin.bottom
+                );
 
-                material.SetVector("_MarginRect", new Vector4(
-                    0, 0, width, height
+                material.SetVector(s_SizeKey, new Vector4(renderSize.width, renderSize.height, 0, 0));
+                material.SetColor(s_ContentColorKey, contentColor);
+                material.SetColor(s_PaddingColorKey, paddingColor);
+                material.SetColor(s_BorderColorKey, borderColor);
+                material.SetColor(s_MarginColorKey, marginColor);
+
+                mesh = MeshUtil.ResizeStandardUIMesh(mesh, renderSize);
+
+                material.SetVector(s_MarginRectKey, new Vector4(
+                    0, 0, width + margin.right + margin.left, height + margin.top + margin.bottom
                 ));
 
-                material.SetVector("_BorderRect", new Vector4(
+                material.SetVector(s_BorderRectKey, new Vector4(
                     margin.left,
                     margin.top,
-                    width - margin.right - margin.left,
-                    height - margin.bottom - margin.top
+                    renderSize.width - margin.Horizontal,
+                    renderSize.height - margin.Vertical
                 ));
 
-                material.SetVector("_PaddingRect", new Vector4(
-                    border.left,
-                    border.top,
-                    width - border.right - border.left,
-                    height - border.bottom - border.top
+                material.SetVector(s_PaddingRectKey, new Vector4(
+                    margin.left + border.left,
+                    margin.top + border.top,
+                    renderSize.width - margin.Horizontal - border.Horizontal,
+                    renderSize.height - margin.Vertical - border.Vertical
                 ));
 
-                material.SetVector("_ContentRect", new Vector4(
-                    border.left + padding.left,
-                    border.top + padding.top,
-                    width - border.right - border.left - padding.right - padding.left,
-                    height - border.bottom - border.top - padding.bottom - padding.top
+                material.SetVector(s_ContentRectKey, new Vector4(
+                    margin.left + border.left + padding.left,
+                    margin.top + border.top + padding.top,
+                    renderSize.width - margin.Horizontal - border.Horizontal - padding.Horizontal,
+                    renderSize.height - margin.Vertical - border.Vertical - padding.Vertical
                 ));
 
-                Graphics.DrawMesh(mesh, renderPosition + origin, Quaternion.identity, material, 0, camera, 0, null, false, false, false);
+                Graphics.DrawMesh(mesh, renderPosition + origin - new Vector3(margin.left, -margin.top),
+                    Quaternion.identity, material, 0, camera, 0, null, false, false, false);
 
                 if (selectedElement is UITextElement && (showTextBaseline || showTextDescender)) {
                     baselineMesh = MeshUtil.ResizeStandardUIMesh(baselineMesh, new Size(width, height + 100));
@@ -286,28 +310,31 @@ namespace UIForia.Editor {
                     lineMaterial = lineMaterial ? lineMaterial : Resources.Load<Material>("Materials/UIForiaTextDebug");
                     float offset = TextLayoutBox.GetLineOffset(selectedElement.ComputedStyle.TextFontAsset);
                     if (showTextBaseline) {
-                        lineMaterial.SetFloat("_BaseLine", offset + padding.top + border.top + (s * selectedElement.ComputedStyle.TextFontAsset.fontInfo.Ascender));
+                        lineMaterial.SetFloat(s_BaseLineKey,
+                            offset + padding.top + border.top +
+                            (s * selectedElement.ComputedStyle.TextFontAsset.fontInfo.Ascender));
                     }
                     else {
-                        lineMaterial.SetFloat("_BaseLine", -1);
+                        lineMaterial.SetFloat(s_BaseLineKey, -1);
                     }
 
                     if (showTextDescender) {
-                        lineMaterial.SetFloat("_Descender",
-                            offset +  padding.top + border.top +
+                        lineMaterial.SetFloat(s_DescenderKey,
+                            offset + padding.top + border.top +
                             (s * selectedElement.ComputedStyle.TextFontAsset.fontInfo.Ascender) +
                             (s * -selectedElement.ComputedStyle.TextFontAsset.fontInfo.Descender)
                         );
                     }
                     else {
-                        lineMaterial.SetFloat("_Descender", -1);
+                        lineMaterial.SetFloat(s_DescenderKey, -1);
                     }
 
-                    lineMaterial.SetColor("_BaseLineColor", baseLineColor);
-                    lineMaterial.SetColor("_DescenderColor", descenderColor);
-                    lineMaterial.SetVector("_Size", new Vector4(width, height + 100, 0, 0));
+                    lineMaterial.SetColor(s_BaseLineColorKey, baseLineColor);
+                    lineMaterial.SetColor(s_DescenderColorKey, descenderColor);
+                    lineMaterial.SetVector(s_SizeKey, new Vector4(width, height + 100, 0, 0));
 
-                    Graphics.DrawMesh(baselineMesh, renderPosition + origin, Quaternion.identity, lineMaterial, 0, camera, 0, null, false, false, false);
+                    Graphics.DrawMesh(baselineMesh, renderPosition + origin, Quaternion.identity, lineMaterial, 0,
+                        camera, 0, null, false, false, false);
                 }
             }
         }
@@ -317,6 +344,8 @@ namespace UIForia.Editor {
             bool newShowBaseLine = EditorGUILayout.Toggle("Show Text Baseline", showTextBaseline);
             bool newShowDescenderLine = EditorGUILayout.Toggle("Show Text Descender", showTextDescender);
 
+            drawDebugBox = EditorGUILayout.Toggle("Draw Debug Box", drawDebugBox);
+            
             Color newContentColor = EditorGUILayout.ColorField("Content Color", contentColor);
             Color newPaddingColor = EditorGUILayout.ColorField("Padding Color", paddingColor);
             Color newBorderColor = EditorGUILayout.ColorField("Border Color", borderColor);
@@ -327,32 +356,33 @@ namespace UIForia.Editor {
 
             if (newContentColor != contentColor) {
                 contentColor = newContentColor;
-                EditorPrefs.SetString("UIForia.Inspector.ContentColor", ColorUtility.ToHtmlStringRGBA(contentColor));
+                EditorPrefs.SetString("UIForia.Inspector.ContentColor", "#" + ColorUtility.ToHtmlStringRGBA(contentColor));
             }
 
             if (newPaddingColor != paddingColor) {
                 paddingColor = newPaddingColor;
-                EditorPrefs.SetString("UIForia.Inspector.PaddingColor", ColorUtility.ToHtmlStringRGBA(paddingColor));
+                EditorPrefs.SetString("UIForia.Inspector.PaddingColor", "#" + ColorUtility.ToHtmlStringRGBA(paddingColor));
             }
 
             if (newBorderColor != borderColor) {
                 borderColor = newBorderColor;
-                EditorPrefs.SetString("UIForia.Inspector.BorderColor", ColorUtility.ToHtmlStringRGBA(borderColor));
+                EditorPrefs.SetString("UIForia.Inspector.BorderColor", "#" + ColorUtility.ToHtmlStringRGBA(borderColor));
             }
 
             if (marginColor != newMarginColor) {
                 marginColor = newMarginColor;
-                EditorPrefs.SetString("UIForia.Inspector.MarginColor", ColorUtility.ToHtmlStringRGBA(marginColor));
+                EditorPrefs.SetString("UIForia.Inspector.MarginColor", "#" + ColorUtility.ToHtmlStringRGBA(marginColor));
             }
 
             if (baseLineColor != newBaseLineColor) {
                 baseLineColor = newBaseLineColor;
-                EditorPrefs.SetString("UIForia.Inspector.BaseLineColor", ColorUtility.ToHtmlStringRGBA(baseLineColor));
+                EditorPrefs.SetString("UIForia.Inspector.BaseLineColor", "#" + ColorUtility.ToHtmlStringRGBA(baseLineColor));
             }
 
             if (descenderColor != newDescenderColor) {
                 descenderColor = newDescenderColor;
-                EditorPrefs.SetString("UIForia.Inspector.DescenderColor", ColorUtility.ToHtmlStringRGBA(descenderColor));
+                EditorPrefs.SetString("UIForia.Inspector.DescenderColor",
+                    ColorUtility.ToHtmlStringRGBA(descenderColor));
             }
 
             if (newShowBaseLine != showTextBaseline) {
@@ -364,6 +394,8 @@ namespace UIForia.Editor {
                 showTextDescender = newShowDescenderLine;
                 EditorPrefs.SetBool("UIForia.Inspector.ShowTextDescender", showTextDescender);
             }
+            
+            EditorPrefs.SetBool("UIForia.Inspector.DrawDebugBox", drawDebugBox);
         }
 
         private static void DrawLabel(string label, string value) {
@@ -390,7 +422,7 @@ namespace UIForia.Editor {
             Rect clipRect = layoutResult.clipRect;
             Rect contentRect = layoutResult.contentRect;
 
-            EditorGUILayout.HelpBox("Overflowing Horizontal", MessageType.Warning, true);
+//            EditorGUILayout.HelpBox("Overflowing Horizontal", MessageType.Warning, true);
             DrawVector2Value("Local Position", layoutResult.localPosition);
             DrawVector2Value("Screen Position", layoutResult.screenPosition);
             DrawVector2Value("Scale", layoutResult.scale);
@@ -399,7 +431,8 @@ namespace UIForia.Editor {
 
             DrawLabel("Rotation", layoutResult.rotation.ToString());
             DrawLabel("Clip Rect", $"X: {clipRect.x}, Y: {clipRect.y}, W: {clipRect.width}, H: {clipRect.height}");
-            DrawLabel("Content Rect", $"X: {contentRect.x}, Y: {contentRect.y}, W: {contentRect.width}, H: {contentRect.height}");
+            DrawLabel("Content Rect",
+                $"X: {contentRect.x}, Y: {contentRect.y}, W: {contentRect.width}, H: {contentRect.height}");
 
             DrawLabel("Render Layer", layoutResult.layer.ToString());
             DrawLabel("Z Index", layoutResult.zIndex.ToString());
@@ -579,8 +612,8 @@ namespace UIForia.Editor {
                     return DrawEnum<GradientAxis>(property, isEditable);
 
                 case StylePropertyId.BackgroundGradientStart:
-                case StylePropertyId.BackgroundGridSize:
-                case StylePropertyId.BackgroundLineSize:
+//                case StylePropertyId.BackgroundGridSize:
+//                case StylePropertyId.BackgroundLineSize:
                 case StylePropertyId.BackgroundFillOffsetX:
                 case StylePropertyId.BackgroundFillOffsetY:
                 case StylePropertyId.BackgroundFillScaleX:
@@ -588,23 +621,21 @@ namespace UIForia.Editor {
                     return DrawFloat(property, isEditable);
 
                 case StylePropertyId.BackgroundFillRotation:
-                case StylePropertyId.BackgroundImageTileX:
-                case StylePropertyId.BackgroundImageTileY:
-                case StylePropertyId.BackgroundImageOffsetX:
-                case StylePropertyId.BackgroundImageOffsetY:
+//                case StylePropertyId.BackgroundImageTileX:
+//                case StylePropertyId.BackgroundImageTileY:
+//                case StylePropertyId.BackgroundImageOffsetX:
+//                case StylePropertyId.BackgroundImageOffsetY:
                     return DrawFloat(property, isEditable);
 
                 case StylePropertyId.BackgroundImage:
                 case StylePropertyId.BackgroundImage1:
                 case StylePropertyId.BackgroundImage2:
+                case StylePropertyId.Cursor:
                     return DrawTextureAsset(property, isEditable);
 
                 case StylePropertyId.BackgroundShapeType:
                 case StylePropertyId.Opacity:
                     return DrawFloat(property, isEditable);
-
-                case StylePropertyId.Cursor:
-                    break;
 
                 case StylePropertyId.GridItemColStart:
                 case StylePropertyId.GridItemColSpan:
@@ -716,9 +747,9 @@ namespace UIForia.Editor {
                 case StylePropertyId.TextAlignment:
                     return DrawEnum<Text.TextAlignment>(property, isEditable);
 
-                case StylePropertyId.TextWhitespaceMode:
-                    return DrawEnum<WhitespaceMode>(property, isEditable);
-
+//                case StylePropertyId.TextWhitespaceMode:
+//                    return DrawEnum<WhitespaceMode>(property, isEditable);
+//
                 case StylePropertyId.TextTransform:
                     return DrawEnum<TextTransform>(property, isEditable);
 
@@ -752,8 +783,8 @@ namespace UIForia.Editor {
                 case StylePropertyId.RenderLayer:
                     return DrawEnum<RenderLayer>(property, isEditable);
 
-                default:
-                    throw new ArgumentOutOfRangeException();
+//                default:
+                    //throw new ArgumentOutOfRangeException(property.propertyId.ToString());
             }
 
             return StyleProperty.Unset(property.propertyId);
@@ -868,7 +899,8 @@ namespace UIForia.Editor {
             GUILayout.BeginHorizontal();
             TMP_FontAsset fontAsset = property.AsFont;
 
-            TMP_FontAsset newFont = (TMP_FontAsset) EditorGUILayout.ObjectField(StyleUtil.GetPropertyName(property), fontAsset, typeof(TMP_FontAsset), false);
+            TMP_FontAsset newFont = (TMP_FontAsset) EditorGUILayout.ObjectField(StyleUtil.GetPropertyName(property),
+                fontAsset, typeof(TMP_FontAsset), false);
 
             GUI.enabled = true;
             GUILayout.EndHorizontal();
@@ -886,7 +918,8 @@ namespace UIForia.Editor {
             else {
                 for (int i = 0; i < template.Count; i++) {
                     float value = EditorGUILayout.FloatField(s_Content, property.AsGridTrackSize.minValue);
-                    GridTemplateUnit unit = (GridTemplateUnit) EditorGUILayout.EnumPopup(property.AsGridTrackSize.minUnit);
+                    GridTemplateUnit unit =
+                        (GridTemplateUnit) EditorGUILayout.EnumPopup(property.AsGridTrackSize.minUnit);
                 }
             }
 

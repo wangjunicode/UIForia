@@ -11,7 +11,8 @@ namespace UIForia {
         private static readonly Dictionary<string, ProcessedType> typeMap = new Dictionary<string, ProcessedType>();
         private static List<Assembly> filteredAssemblies;
         private static List<Type> loadedTypes;
-
+        private static Type[] templateTypes;
+        
         private static void FilterAssemblies() {
             if (filteredAssemblies != null) return;
             
@@ -116,6 +117,33 @@ namespace UIForia {
             }
 
             return name.IndexOf("-firstpass", StringComparison.Ordinal) == -1;
+        }
+
+        public static Type[] GetTemplateTypes() {
+            if (templateTypes == null) {
+                FilterAssemblies();
+                List<Type> types = new List<Type>();
+                for (int i = 0; i < loadedTypes.Count; i++) {
+                    if (typeof(UIElement).IsAssignableFrom(loadedTypes[i])) {
+
+                        if (loadedTypes[i].Assembly.FullName.Contains("UIForia.Demo")) {
+                            types.Add(loadedTypes[i]);   
+                            continue;
+                        }
+                        
+                        if (loadedTypes[i].Assembly.FullName.Contains("UIForia")) {
+                            continue;
+                        }
+                        
+                        types.Add(loadedTypes[i]);
+
+                    }
+                }
+
+                templateTypes = types.ToArray();
+            }
+
+            return templateTypes;
         }
 
     }

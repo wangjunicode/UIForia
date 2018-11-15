@@ -29,6 +29,11 @@ namespace UIForia.Layout.LayoutTypes {
 
         protected override float ComputeContentHeight(float width) {
             TextInfo textInfo = ((UITextElement) element).textInfo;
+            
+            if (string.IsNullOrEmpty(((UITextElement) element).text)) {
+                return style.LineHeightSize;
+            }
+            
             List<LineInfo> lineInfos = RunLayout(textInfo, width);
             LineInfo lastLine = lineInfos[lineInfos.Count - 1];
             ListPool<LineInfo>.Release(ref lineInfos);

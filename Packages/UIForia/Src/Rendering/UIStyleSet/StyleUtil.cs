@@ -39,18 +39,6 @@ namespace UIForia.Rendering {
             return name;
         }
 
-        public static bool IsPropertyInherited(StylePropertyId propertyId) {
-            switch (propertyId) {
-                case StylePropertyId.Opacity: return true;
-                case StylePropertyId.TextFontSize: return true;    
-                case StylePropertyId.TextFontAsset: return true;    
-                case StylePropertyId.TextFontStyle: return true;    
-                case StylePropertyId.TextTransform: return true;    
-            }
-
-            return false;
-        }
-
     }
 
 }

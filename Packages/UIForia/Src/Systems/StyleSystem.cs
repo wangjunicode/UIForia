@@ -116,10 +116,29 @@ namespace UIForia.Systems {
         public void SetStyleProperty(UIElement element, StyleProperty property) {
             AddToChangeSet(element, property);
 
-            if (!StyleUtil.IsPropertyInherited(property.propertyId)) {
+            if (!StyleUtil.IsInherited(property.propertyId)) {
                 return;
             }
 
+            if (property.IsUnset) {
+                UIElement ptr = element.parent;
+                StyleProperty parentProperty = StyleProperty.Unset(property.propertyId);
+                
+                while (ptr != null) {
+                    parentProperty = ptr.style.GetPropertyValue(property.propertyId);
+                    if (parentProperty.IsDefined) {
+                        break;
+                    }
+                    ptr = ptr.parent;
+                }
+
+                if (!parentProperty.IsDefined) {
+                    parentProperty = DefaultStyleValues_Generated.GetPropertyValue(property.propertyId);
+                }
+
+                property = parentProperty;
+            }
+            
             for (int i = 0; i < element.children.Length; i++) {
                 s_ElementStack.Push(element.children[i]);
             }

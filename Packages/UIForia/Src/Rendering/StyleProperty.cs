@@ -52,7 +52,7 @@ namespace UIForia.Rendering {
             this.floatValue = 0;
             this.propertyId = propertyId;
             this.valuePart0 = new StyleColor(color).rgba;
-            this.valuePart1 = 0;
+            this.valuePart1 = ColorUtil.IsDefined(color) ? 1 : 0;
             this.objectField = null;
         }
 
@@ -110,7 +110,7 @@ namespace UIForia.Rendering {
         public CrossAxisAlignment AsCrossAxisAlignment => (CrossAxisAlignment) valuePart0;
         public MainAxisAlignment AsMainAxisAlignment => (MainAxisAlignment) valuePart0;
         public Overflow AsOverflow => (Overflow) valuePart0;
-        public Color AsColor => new StyleColor(valuePart0);
+        public Color AsColor => valuePart1 == 0 ? ColorUtil.UnsetValue : (Color)new StyleColor(valuePart0);
 
         public TMP_FontAsset AsFont => (TMP_FontAsset) objectField;
         public Texture2D AsTexture => (Texture2D) objectField;

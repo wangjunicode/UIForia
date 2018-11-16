@@ -109,7 +109,7 @@ namespace UIForia.Editor {
             }
 
             if (type == typeof(Color)) {
-                return $"!ColorUtil.IsDefined(new StyleColor({nameof(StyleProperty.valuePart0)}))";
+                return $"{nameof(StyleProperty.valuePart1)} == 0";
             }
 
             return $"{nameof(StyleProperty.objectField)} == null";
@@ -184,7 +184,7 @@ namespace UIForia.Editor {
         }
 
         public string GetStyleSetSetter() {
-            return $"SetPropertyValueInState({StylePropertyConstructor}, state)";
+            return $"SetProperty({StylePropertyConstructor}, state)";
         }
 
         public string GetStyleSetGetter() {

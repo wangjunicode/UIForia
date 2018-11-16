@@ -5,6 +5,7 @@ using UIForia;
 using UIForia.Rendering;
 using UIForia.Systems;
 using Tests.Mocks;
+using TMPro;
 using UnityEditor.VersionControl;
 using UnityEngine;
 
@@ -14,11 +15,11 @@ public class StyleTests {
     [Template(TemplateType.String, @"
         <UITemplate>
             <Contents>
-                <Group x-name='group1'>
-                    <Group x-name='group2'/>
+                <Group x-id='group1'>
+                    <Group x-id='group2'/>
                 </Group>                  
-                <Group x-name='group3'/>                  
-                <Group x-name='group4'/>                  
+                <Group x-id='group3'/>                  
+                <Group x-id='group4'/>                  
             </Contents>
         </UITemplate>
     ")]
@@ -417,8 +418,65 @@ public class StyleTests {
     public void ConvertColorToStyleColor() {
         Color32 c = new Color32(128, 128, 128, 1);
         StyleColor styleColor = new StyleColor(c);
-        Assert.AreEqual((Color)c, (Color)styleColor);
-
+        Assert.AreEqual((Color) c, (Color) styleColor);
     }
 
+    [Test]
+    public void Inherit_FontSize() {
+        MockApplication app = new MockApplication(typeof(StyleSetTestThing));
+        StyleSetTestThing root = (StyleSetTestThing) app.RootElement;
+        UIStyleSetStateProxy normal = root.style.Normal;
+        normal.TextFontSize = 8;
+        app.Update();
+        Assert.AreEqual(8, root.FindById("group1").style.TextFontSize);
+        Assert.AreEqual(8, root.FindById("group2").style.TextFontSize);
+        root.FindById("group1").style.SetTextFontSize(12, StyleState.Normal);
+        app.Update();
+        Assert.AreEqual(12, root.FindById("group1").style.TextFontSize);
+        Assert.AreEqual(12, root.FindById("group2").style.TextFontSize);
+        root.FindById("group1").style.SetTextFontSize(IntUtil.UnsetValue, StyleState.Normal);
+        app.Update();
+        Assert.AreEqual(8, root.FindById("group1").style.TextFontSize);
+        Assert.AreEqual(8, root.FindById("group2").style.TextFontSize);
+    }
+    
+    [Test]
+    public void Inherit_TextColor() {
+        MockApplication app = new MockApplication(typeof(StyleSetTestThing));
+        StyleSetTestThing root = (StyleSetTestThing) app.RootElement;
+        UIStyleSetStateProxy normal = root.style.Normal;
+        normal.TextColor = Color.red;
+        app.Update();
+        Assert.AreEqual(Color.red, root.FindById("group1").style.TextColor);
+        Assert.AreEqual(Color.red, root.FindById("group2").style.TextColor);
+        root.FindById("group1").style.SetTextColor(Color.blue, StyleState.Normal);
+        app.Update();
+        Assert.AreEqual(Color.blue, root.FindById("group1").style.TextColor);
+        Assert.AreEqual(Color.blue, root.FindById("group2").style.TextColor);
+        root.FindById("group1").style.SetTextColor(ColorUtil.UnsetValue, StyleState.Normal);
+        app.Update();
+        Assert.AreEqual(Color.red, root.FindById("group1").style.TextColor);
+        Assert.AreEqual(Color.red, root.FindById("group2").style.TextColor);
+    }
+
+    [Test]
+    public void Inherit_FontAsset() {
+        MockApplication app = new MockApplication(typeof(StyleSetTestThing));
+        StyleSetTestThing root = (StyleSetTestThing) app.RootElement;
+        UIStyleSetStateProxy normal = root.style.Normal;
+        var font0 = ScriptableObject.CreateInstance<TMP_FontAsset>();
+        var font1 = ScriptableObject.CreateInstance<TMP_FontAsset>();
+        normal.TextFontAsset = font0;
+        app.Update();
+        Assert.AreEqual(font0, root.FindById("group1").style.TextFontAsset);
+        Assert.AreEqual(font0, root.FindById("group2").style.TextFontAsset);
+        root.FindById("group1").style.SetTextFontAsset(font1, StyleState.Normal);
+        app.Update();
+        Assert.AreEqual(font1, root.FindById("group1").style.TextFontAsset);
+        Assert.AreEqual(font1, root.FindById("group2").style.TextFontAsset);
+        root.FindById("group1").style.SetTextFontAsset(null, StyleState.Normal);
+        app.Update();
+        Assert.AreEqual(font0, root.FindById("group1").style.TextFontAsset);
+        Assert.AreEqual(font0, root.FindById("group2").style.TextFontAsset);
+    }
 }

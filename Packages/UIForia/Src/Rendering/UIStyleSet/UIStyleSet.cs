@@ -15,7 +15,6 @@ namespace UIForia.Rendering {
         // instance styles, instance states, 
         private string styleNames;
         private UIStyle queryStyle;
-        private UIStyle inheritedStyle;
         private StyleState currentState;
         private UIStyleGroup instanceStyle;
         private UIStyleGroup implicitStyle;
@@ -37,13 +36,16 @@ namespace UIForia.Rendering {
             this.appliedStyles = new LightList<StyleEntry>();
             this.styleGroups = new List<UIStyleGroup>();
             this.m_PropertyMap = new IntMap<StyleProperty>();
-            this.inheritedStyle = new UIStyle(); // add to group list
         }
 
         public string BaseStyleNames => styleNames;
         public StyleState CurrentState => currentState;
 
+        public UIStyleSetStateProxy Normal => new UIStyleSetStateProxy(this, StyleState.Normal);
         public UIStyleSetStateProxy Hover => new UIStyleSetStateProxy(this, StyleState.Hover);
+        public UIStyleSetStateProxy Focus => new UIStyleSetStateProxy(this, StyleState.Focused);
+        public UIStyleSetStateProxy Active => new UIStyleSetStateProxy(this, StyleState.Active);
+        public UIStyleSetStateProxy InActive => new UIStyleSetStateProxy(this, StyleState.Inactive);
 
         public void SetGridItemPlacement(int colStart, int colSpan, int rowStart, int rowSpan, StyleState state) {
             SetGridItemColStart(colStart, state);
@@ -298,13 +300,20 @@ namespace UIForia.Rendering {
                 return false;
             }
 
-            StyleProperty current = inheritedStyle.GetProperty(property.propertyId);
-            if (current != property) {
-                inheritedStyle.SetProperty(current);
+            int key = BitUtil.SetHighLowBits(1, (int) property.propertyId);
+            StyleProperty current;
+            if (m_PropertyMap.TryGetValue(key, out current)) {
+                if (current != property) {
+                    m_PropertyMap[key] = property;
+                    return true;
+                }
+
+                return false;
+            }
+            else {
+                m_PropertyMap[key] = property;
                 return true;
             }
-
-            return false;
         }
 
         public bool DidPropertyChange(StylePropertyId property) {
@@ -482,11 +491,11 @@ namespace UIForia.Rendering {
                     break;
                 }
             }
-           
+
             if (index == -1) {
                 return;
             }
-            
+
             appliedStyles.RemoveAt(appliedStyles.Count - 1);
             SortStyles();
 
@@ -698,30 +707,26 @@ namespace UIForia.Rendering {
                 return;
             }
 
-            // todo -- faster to find style that currently defines the property & compare priorities
-
             StyleProperty oldValue = GetPropertyValue(property.propertyId);
 
             style.SetProperty(property);
 
-            StyleProperty currentValue = GetPropertyValue(property.propertyId);
-
-            if (oldValue != currentValue) {
-                if (currentValue.IsDefined) {
+            StyleProperty currentValue;
+            if (TryGetPropertyValueInState(property.propertyId, currentState, out currentValue)) {
+                if (oldValue != currentValue) {
                     m_PropertyMap[(int) property.propertyId] = currentValue;
+                    styleSystem.SetStyleProperty(element, currentValue);
                 }
-                else {
-                    m_PropertyMap.Remove((int) property.propertyId);
-                }
-
-                styleSystem.SetStyleProperty(element, currentValue);
+            }
+            else {
+                m_PropertyMap.Remove((int) property.propertyId);
+                styleSystem.SetStyleProperty(element, property);
             }
         }
 
         public void SetAnimatedProperty(StyleProperty p0) {
             throw new NotImplementedException();
         }
-       
 
     }
 

@@ -8,6 +8,8 @@
             PreferredHeight = 764px;
             OverflowY = Scroll;
             BackgroundColor = orange;
+            TextColor = white;
+            TextFontSize = 76;
         }
                 
         style parent {
@@ -57,7 +59,7 @@
         <!--<Input style="input"/>-->
         
         <Div style="parent">
-            <Div style="child"/>
+            <Div style="child">Text</Div>
             <Div style="child2"/>
         </Div>
         <!--<ChatPanel style.borderColor="red" selectedGroupIdx="{selectedChatGroup}" chatData="{chatData}"/>-->

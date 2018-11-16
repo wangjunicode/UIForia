@@ -385,7 +385,7 @@ __REPLACE_StyleBindingCompiler_DoCompile
             var oldValue = element.style.m_PropertyMap[(int)propertyId].As__CAST_TYPE__;
             var value = expression.EvaluateTyped(context);
             if (value != oldValue) {
-                element.style.SetPropertyValueInState(__STYLE_PROPERTY_CONSTRUCTOR__, state);
+                element.style.SetProperty(__STYLE_PROPERTY_CONSTRUCTOR__, state);
             }
         }
 
@@ -400,7 +400,7 @@ __REPLACE_StyleBindingCompiler_DoCompile
 
         public override void Apply(UIStyleSet styleSet, UITemplateContext context) {
             var value = expression.EvaluateTyped(context);
-            styleSet.SetPropertyValueInState(__STYLE_PROPERTY_CONSTRUCTOR__, state);
+            styleSet.SetProperty(__STYLE_PROPERTY_CONSTRUCTOR__, state);
         }
 
     }
@@ -482,7 +482,7 @@ __REPLACE_StyleBindingCompiler_DoCompile
             [System.Diagnostics.DebuggerStepThrough]
             get { return m_StyleSet.GetPropertyValueInState(StylePropertyId.__NAME__, state).As__CAST_TYPE__; }
             [System.Diagnostics.DebuggerStepThrough]
-            set { m_StyleSet.SetPropertyValueInState(__CONSTRUCTOR__, state); }
+            set { m_StyleSet.SetProperty(__CONSTRUCTOR__, state); }
         }
         ";
 

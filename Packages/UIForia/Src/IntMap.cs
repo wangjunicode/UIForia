@@ -82,7 +82,6 @@ namespace UIForia {
                 return default(T);
             }
             [DebuggerStepThrough]
-
             set { Insert(key, value, false); }
         }
 

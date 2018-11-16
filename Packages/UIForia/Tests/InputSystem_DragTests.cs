@@ -24,7 +24,7 @@ public class InputSystem_DragTests {
     
         <UITemplate>
             <Contents style.layoutType='Fixed'>
-                <Group onDragCreate='{CreateDragFromChild($event, 0)}' style.translation='vec2(0, 0)'   style.size='size(100, 100)'/>
+                <Group onDragCreate='{CreateDragFromChild($event, 0)}' style.preferredWidth='100f' style.preferredHeight='100f'/>
             </Contents>
         </UITemplate>
 
@@ -108,9 +108,9 @@ public class InputSystem_DragTests {
     
         <UITemplate>
             <Contents style.layoutType='Fixed'>
-                <Group onDragEnter='{HandleDragEnterChild(0)}' onDragExit='{HandleDragExitChild(0)}' style.translation='vec2(0,   0)' style.size='size(100, 100)'/>
-                <Group onDragEnter='{HandleDragEnterChild(1)}' onDragExit='{HandleDragExitChild(1)}' style.translation='vec2(100, 0)' style.size='size(100, 100)'/>
-                <Group onDragEnter='{HandleDragEnterChild(2)}' onDragExit='{HandleDragExitChild(2)}' style.translation='vec2(200, 0)' style.size='size(100, 100)'/>
+                <Group onDragEnter='{HandleDragEnterChild(0)}' onDragExit='{HandleDragExitChild(0)}' style.translation='vec2(0,   0)' style.preferredSize='size(100, 100)'/>
+                <Group onDragEnter='{HandleDragEnterChild(1)}' onDragExit='{HandleDragExitChild(1)}' style.translation='vec2(100, 0)' style.preferredSize='size(100, 100)'/>
+                <Group onDragEnter='{HandleDragEnterChild(2)}' onDragExit='{HandleDragExitChild(2)}' style.translation='vec2(200, 0)' style.preferredSize='size(100, 100)'/>
             </Contents>
         </UITemplate>
 
@@ -302,9 +302,9 @@ public class InputSystem_DragTests {
     
         <UITemplate>
             <Contents style.layoutType='Fixed'>
-                <Group onDragMove='{HandleDragMoveChild(0)}' onDragHover='{HandleDragHoverChild(0)}' style.translation='vec2(0,   0)' style.size='size(100, 100)'/>
-                <Group onDragMove='{HandleDragMoveChild(1)}' onDragHover='{HandleDragHoverChild(1)}' style.translation='vec2(100, 0)' style.size='size(100, 100)'/>
-                <Group onDragMove='{HandleDragMoveChild(2)}' onDragHover='{HandleDragHoverChild(2)}' style.translation='vec2(200, 0)' style.size='size(100, 100)'/>
+                <Group onDragMove='{HandleDragMoveChild(0)}' onDragHover='{HandleDragHoverChild(0)}' style.translation='vec2(0,   0)' style.preferredSize='size(100, 100)'/>
+                <Group onDragMove='{HandleDragMoveChild(1)}' onDragHover='{HandleDragHoverChild(1)}' style.translation='vec2(100, 0)' style.preferredSize='size(100, 100)'/>
+                <Group onDragMove='{HandleDragMoveChild(2)}' onDragHover='{HandleDragHoverChild(2)}' style.translation='vec2(200, 0)' style.preferredSize='size(100, 100)'/>
             </Contents>
         </UITemplate>
 

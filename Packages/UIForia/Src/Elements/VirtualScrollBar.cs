@@ -106,7 +106,7 @@ namespace UIForia.Elements {
         }
         
         public void RunLayout() {
-            ComputedStyle targetStyle = targetElement.ComputedStyle;
+            UIStyleSet targetStyle = targetElement.style;
             LayoutResult targetResult = targetElement.layoutResult;
 
             if (orientation == ScrollbarOrientation.Vertical) {

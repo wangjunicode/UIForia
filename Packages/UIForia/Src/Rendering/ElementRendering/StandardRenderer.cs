@@ -75,7 +75,7 @@ namespace UIForia.Systems {
 
                 Matrix4x4 matrix = Matrix4x4.TRS(
                     origin + data.renderPosition - new Vector3(1, 0, 0),
-                    Quaternion.AngleAxis(data.element.ComputedStyle.TransformRotation, Vector3.forward),
+                    Quaternion.AngleAxis(data.element.style.TransformRotation, Vector3.forward),
                     new Vector3(1, 1, 1)
                 );
 
@@ -84,7 +84,7 @@ namespace UIForia.Systems {
         }
 
         protected static Material InitDefaultMaterial(RenderData data) {
-            ComputedStyle style = data.element.ComputedStyle;
+            UIStyleSet style = data.element.style;
             Size size = data.element.layoutResult.actualSize;
             Material material = data.material;
 

@@ -76,7 +76,9 @@
         <e p="UIForia" t="Include">
           <e p="AssemblyInfo.cs" t="Include" />
           <e p="Editor" t="Include">
+            <e p="AnimatedPropertyGenerator.cs" t="Include" />
             <e p="CodeGen.cs" t="Include" />
+            <e p="PropertyGenerator.cs" t="Include" />
             <e p="UIForia" t="Include">
               <e p="GUIRect.cs" t="Include" />
               <e p="HierarchyView.cs" t="Include" />
@@ -90,6 +92,7 @@
           <e p="notes.txt" t="Include" />
           <e p="Src" t="Include">
             <e p="_Generated.cs" t="Include" />
+            <e p="_Generated2.cs" t="Include" />
             <e p="Animation" t="Include">
               <e p="AnimationGroup.cs" t="Include" />
               <e p="AnimationKeyFrame.cs" t="Include" />
@@ -113,69 +116,8 @@
               </e>
               <e p="RepeatBinding.cs" t="Include" />
               <e p="StyleBindings" t="Include">
-                <e p="Border" t="Include">
-                  <e p="StyleBinding_Border.cs" t="Include" />
-                  <e p="StyleBinding_BorderBottom.cs" t="Include" />
-                  <e p="StyleBinding_BorderLeft.cs" t="Include" />
-                  <e p="StyleBinding_BorderRight.cs" t="Include" />
-                  <e p="StyleBinding_BorderTop.cs" t="Include" />
-                </e>
-                <e p="Constraints" t="Include">
-                  <e p="StyleBinding_GrowthFactor.cs" t="Include" />
-                  <e p="StyleBinding_MaxHeight.cs" t="Include" />
-                  <e p="StyleBinding_MaxWidth.cs" t="Include" />
-                  <e p="StyleBinding_MinHeight.cs" t="Include" />
-                  <e p="StyleBinding_MinWidth.cs" t="Include" />
-                  <e p="StyleBinding_ShrinkFactor.cs" t="Include" />
-                </e>
-                <e p="Layout" t="Include">
-                  <e p="StyleBinding_FlexLayoutCrossAxisAlignment.cs" t="Include" />
-                  <e p="StyleBinding_FlexLayoutDirection.cs" t="Include" />
-                  <e p="StyleBinding_FlexLayoutMainAxisAlignment.cs" t="Include" />
-                  <e p="StyleBinding_FlexLayoutWrap.cs" t="Include" />
-                  <e p="StyleBinding_LayoutType.cs" t="Include" />
-                </e>
-                <e p="Margin" t="Include">
-                  <e p="StyleBinding_Margin.cs" t="Include" />
-                  <e p="StyleBinding_MarginBottom.cs" t="Include" />
-                  <e p="StyleBinding_MarginLeft.cs" t="Include" />
-                  <e p="StyleBinding_MarginRight.cs" t="Include" />
-                  <e p="StyleBinding_MarginTop.cs" t="Include" />
-                </e>
-                <e p="Padding" t="Include">
-                  <e p="StyleBinding_Padding.cs" t="Include" />
-                  <e p="StyleBinding_PaddingBottom.cs" t="Include" />
-                  <e p="StyleBinding_PaddingLeft.cs" t="Include" />
-                  <e p="StyleBinding_PaddingRight.cs" t="Include" />
-                  <e p="StyleBinding_PaddingTop.cs" t="Include" />
-                </e>
-                <e p="Paint" t="Include">
-                  <e p="StyleBinding_BackgroundColor.cs" t="Include" />
-                  <e p="StyleBinding_BackgroundImage.cs" t="Include" />
-                  <e p="StyleBinding_BorderColor.cs" t="Include" />
-                  <e p="StyleBinding_BorderRadius.cs" t="Include" />
-                  <e p="StyleBinding_BorderRadius_BottomLeft.cs" t="Include" />
-                  <e p="StyleBinding_BorderRadius_BottomRight.cs" t="Include" />
-                  <e p="StyleBinding_BorderRadius_TopLeft.cs" t="Include" />
-                  <e p="StyleBinding_BorderRadius_TopRight.cs" t="Include" />
-                </e>
-                <e p="Rect" t="Include">
-                  <e p="StyleBinding_Dimensions.cs" t="Include" />
-                  <e p="StyleBinding_Height.cs" t="Include" />
-                  <e p="StyleBinding_RectX.cs" t="Include" />
-                  <e p="StyleBinding_RectY.cs" t="Include" />
-                  <e p="StyleBinding_Width.cs" t="Include" />
-                </e>
                 <e p="StyleBinding.cs" t="Include" />
-                <e p="Text" t="Include">
-                  <e p="StyleBinding_Font.cs" t="Include" />
-                  <e p="StyleBinding_FontSize.cs" t="Include" />
-                  <e p="StyleBinding_TextColor.cs" t="Include" />
-                  <e p="StyleBinding_Whitespace.cs" t="Include" />
-                </e>
-                <e p="Transform" t="Include">
-                  <e p="StyleBinding_Translation.cs" t="Include" />
-                </e>
+                <e p="StyleBinding_Translation.cs" t="Include" />
               </e>
               <e p="SwitchBindingInt.cs" t="Include" />
               <e p="SwitchCaseBinding.cs" t="Include" />
@@ -410,7 +352,6 @@
               <e p="RenderConstants.cs" t="Include" />
               <e p="RenderData.cs" t="Include" />
               <e p="RenderLayer.cs" t="Include" />
-              <e p="StandardDrawable.cs" t="Include" />
               <e p="StyleColor.cs" t="Include" />
               <e p="StyleProperty.cs" t="Include" />
               <e p="StylePropertyId.cs" t="Include" />
@@ -438,7 +379,7 @@
                 <e p="UIStyleSet.Layout.cs" t="Include" />
                 <e p="UIStyleSet.Paint.cs" t="Include" />
                 <e p="UIStyleSet.Size.cs" t="Include" />
-                <e p="UIStyleSet.StyleDefinition.cs" t="Include" />
+                <e p="UIStyleSet.StyleEntry.cs" t="Include" />
                 <e p="UIStyleSet.Text.cs" t="Include" />
                 <e p="UIStyleSet.Transform.cs" t="Include" />
                 <e p="UIStyleSetStateProxy.cs" t="Include" />

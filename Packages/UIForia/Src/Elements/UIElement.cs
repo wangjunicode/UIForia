@@ -95,7 +95,7 @@ public class UIElement : IHierarchical, IExpressionContextProvider {
 
     public Vector2 scrollOffset { get; internal set; } // cold data
 
-    public ComputedStyle ComputedStyle => style.computedStyle;
+//    public ComputedStyle ComputedStyle => style.computedStyle;
 
     public int depth { get; internal set; }
     public int depthIndex { get; internal set; }

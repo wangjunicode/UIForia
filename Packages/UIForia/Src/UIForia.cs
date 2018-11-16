@@ -61,7 +61,7 @@ namespace UIForia {
         static Application() {
             ArrayPool<UIElement>.SetMaxPoolSize(64);
         }
-
+        
         protected Application() {
             this.m_Systems = new List<ISystem>();
             this.m_ElementTree = new SkipTree<UIElement>();

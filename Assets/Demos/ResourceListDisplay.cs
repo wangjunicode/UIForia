@@ -15,13 +15,13 @@ namespace Demos {
 
         public ResourceDragEvent(UIElement resourceItem, UIElement origin) : base(origin) {
             this.resourceItem = resourceItem;
-            resourceItem.style.SetTransformBehavior(TransformBehavior.LayoutOffset, StyleState.Normal);
+           // resourceItem.style.SetTransformBehavior(TransformBehavior.LayoutOffset, StyleState.Normal);
             resourceItem.style.SetRenderLayer(RenderLayer.Modal, StyleState.Normal);
             resourceItem.style.SetZIndex(5000, StyleState.Normal);
         }
 
         public override void Update() {
-            resourceItem.style.SetTransformPosition(MousePosition - DragStartPosition, StyleState.Normal);
+           // resourceItem.style.SetTransformPosition(MousePosition - DragStartPosition, StyleState.Normal);
         }
 
         public override void Drop(bool success) {

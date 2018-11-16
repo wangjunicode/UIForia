@@ -41,7 +41,7 @@ namespace UIForia.Animation {
                     return viewport.width * width.value;
 
                 case UIFixedUnit.Em:
-                    return element.style.computedStyle.TextFontAsset.fontInfo.PointSize * width.value;
+                    return element.style.TextFontAsset.fontInfo.PointSize * width.value;
 
                 default:
                     return 0;
@@ -63,7 +63,7 @@ namespace UIForia.Animation {
                     return viewport.width * height.value;
 
                 case UIFixedUnit.Em:
-                    return element.style.computedStyle.TextFontAsset.fontInfo.PointSize * height.value;
+                    return element.style.TextFontAsset.fontInfo.PointSize * height.value;
 
                 default:
                     return 0;
@@ -83,7 +83,7 @@ namespace UIForia.Animation {
                     return element.layoutResult.actualSize.width * measurement.value;
 
                 case UIMeasurementUnit.ParentSize:
-                    if (element.parent.style.computedStyle.PreferredWidth.IsContentBased) {
+                    if (element.parent.style.PreferredWidth.IsContentBased) {
                         return 0f;
                     }
 
@@ -96,7 +96,7 @@ namespace UIForia.Animation {
                     return Mathf.Max(0, viewport.height * measurement.value);
 
                 case UIMeasurementUnit.ParentContentArea:
-                    ComputedStyle parentStyle = element.parent.style.computedStyle;
+                    UIStyleSet parentStyle = element.parent.style;
                     if (parentStyle.PreferredWidth.IsContentBased) {
                         return 0f;
                     }
@@ -107,7 +107,7 @@ namespace UIForia.Animation {
                                          - ResolveFixedWidth(element, viewport, parentStyle.BorderRight)
                                          - ResolveFixedWidth(element, viewport, parentStyle.BorderLeft)));
                 case UIMeasurementUnit.Em:
-                    return Mathf.Max(0, element.style.computedStyle.TextFontAsset.fontInfo.PointSize * measurement.value);
+                    return Mathf.Max(0, element.style.TextFontAsset.fontInfo.PointSize * measurement.value);
 
                 default:
                     throw new ArgumentOutOfRangeException();
@@ -126,7 +126,7 @@ namespace UIForia.Animation {
                     return element.layoutResult.actualSize.height * measurement.value;
 
                 case UIMeasurementUnit.ParentSize:
-                    if (element.parent.style.computedStyle.PreferredHeight.IsContentBased) {
+                    if (element.parent.style.PreferredHeight.IsContentBased) {
                         return 0f;
                     }
 
@@ -139,7 +139,7 @@ namespace UIForia.Animation {
                     return Mathf.Max(0, viewport.height * measurement.value);
 
                 case UIMeasurementUnit.ParentContentArea:
-                    ComputedStyle parentStyle = element.parent.style.computedStyle;
+                    UIStyleSet parentStyle = element.parent.style;
                     if (parentStyle.PreferredHeight.IsContentBased) {
                         return 0f;
                     }
@@ -150,7 +150,7 @@ namespace UIForia.Animation {
                                          - ResolveFixedWidth(element, viewport, parentStyle.BorderBottom)
                                          - ResolveFixedWidth(element, viewport, parentStyle.BorderTop)));
                 case UIMeasurementUnit.Em:
-                    return Mathf.Max(0, element.style.computedStyle.TextFontAsset.fontInfo.PointSize * measurement.value);
+                    return Mathf.Max(0, element.style.TextFontAsset.fontInfo.PointSize * measurement.value);
 
                 default:
                     throw new ArgumentOutOfRangeException();
@@ -167,13 +167,13 @@ namespace UIForia.Animation {
         }
 
         private static float ResolveVerticalAnchorBaseHeight(UIElement element, Rect viewport) {
-            switch (element.ComputedStyle.AnchorTarget) {
+            switch (element.style.AnchorTarget) {
                 case AnchorTarget.Parent:
                     return ResolveLayoutParent(element).layoutResult.AllocatedHeight;
 
                 case AnchorTarget.ParentContentArea:
                     UIElement layoutParent = ResolveLayoutParent(element);
-                    ComputedStyle parentStyle = layoutParent.ComputedStyle;
+                    UIStyleSet parentStyle = layoutParent.style;
                     return Mathf.Max(0, (element.parent.layoutResult.AllocatedHeight
                                          - ResolveFixedWidth(element, viewport, parentStyle.PaddingTop)
                                          - ResolveFixedWidth(element, viewport, parentStyle.PaddingBottom)
@@ -192,13 +192,13 @@ namespace UIForia.Animation {
         }
 
         private static float ResolveHorizontalAnchorBaseWidth(UIElement element, Rect viewport) {
-            switch (element.ComputedStyle.AnchorTarget) {
+            switch (element.style.AnchorTarget) {
                 case AnchorTarget.Parent:
                     return ResolveLayoutParent(element).layoutResult.AllocatedWidth;
 
                 case AnchorTarget.ParentContentArea:
                     UIElement layoutParent = ResolveLayoutParent(element);
-                    ComputedStyle parentStyle = layoutParent.ComputedStyle;
+                    UIStyleSet parentStyle = layoutParent.style;
                     return Mathf.Max(0, (element.parent.layoutResult.AllocatedWidth
                                          - ResolveFixedWidth(element, viewport, parentStyle.PaddingRight)
                                          - ResolveFixedWidth(element, viewport, parentStyle.PaddingLeft)
@@ -217,7 +217,7 @@ namespace UIForia.Animation {
         }
 
         public float ResolveAnchorTop(UIElement element, Rect viewport, UIFixedLength anchor) {
-            switch (element.ComputedStyle.AnchorTarget) {
+            switch (element.style.AnchorTarget) {
                 case AnchorTarget.Parent:
                     return ResolveVerticalAnchor(element, viewport, anchor);
 
@@ -234,7 +234,7 @@ namespace UIForia.Animation {
 
         public float ResolveAnchorBottom(UIElement element, Rect viewport, UIFixedLength anchor) {
             UIElement layoutParent = ResolveLayoutParent(element);
-            switch (element.ComputedStyle.AnchorTarget) {
+            switch (element.style.AnchorTarget) {
                 case AnchorTarget.Parent:
                     return ResolveVerticalAnchor(element, viewport, anchor);
 
@@ -252,7 +252,7 @@ namespace UIForia.Animation {
         }
 
         public float ResolveAnchorLeft(UIElement element, Rect viewport, UIFixedLength anchor) {
-            switch (element.ComputedStyle.AnchorTarget) {
+            switch (element.style.AnchorTarget) {
                 case AnchorTarget.Parent:
                     return ResolveHorizontalAnchor(element, viewport, anchor);
 
@@ -304,7 +304,7 @@ namespace UIForia.Animation {
                     return viewport.width * anchor.value;
 
                 case UIFixedUnit.Em:
-                    return element.ComputedStyle.EmSize;
+                    return element.style.EmSize;
 
                 default:
                     return 0;
@@ -326,7 +326,7 @@ namespace UIForia.Animation {
                     return viewport.width * anchor.value;
 
                 case UIFixedUnit.Em:
-                    return element.ComputedStyle.EmSize;
+                    return element.style.EmSize;
 
                 default:
                     return 0;

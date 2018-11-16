@@ -14,9 +14,9 @@ public class GridLayoutTests {
     [Template(TemplateType.String, @"
         <UITemplate>
             <Contents style.layoutType='Grid'>
-                <Group x-id='child0' style.width='100f' style.height='100f'/>
-                <Group x-id='child1' style.width='100f' style.height='100f'/>
-                <Group x-id='child2' style.width='100f' style.height='100f'/>
+                <Group x-id='child0' style.preferredWidth='100f' style.preferredHeight='100f'/>
+                <Group x-id='child1' style.preferredWidth='100f' style.preferredHeight='100f'/>
+                <Group x-id='child2' style.preferredWidth='100f' style.preferredHeight='100f'/>
             </Contents>
         </UITemplate>
     ")]
@@ -38,7 +38,7 @@ public class GridLayoutTests {
         <UITemplate>
             <Contents style.layoutType='Grid'>
                 <Repeat list='{gridItems}'>
-                    <Group style.width='100f' style.height='100f'/>
+                    <Group style.preferredWidth='100f' style.preferredHeight='100f'/>
                 </Repeat>
             </Contents>
         </UITemplate>

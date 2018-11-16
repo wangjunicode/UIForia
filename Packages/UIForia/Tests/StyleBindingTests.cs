@@ -40,7 +40,7 @@ public class StyleBindingTests {
         MockApplication view = new MockApplication(typeof(StyleTestThing), template);
         StyleTestThing root = (StyleTestThing) view.RootElement;
         UIElement panel = root.FindFirstByType<UIElement>();
-        Assert.AreEqual(tex1, panel.ComputedStyle.BackgroundImage);
+        Assert.AreEqual(tex1, panel.style.BackgroundImage);
     }
     
     [Test]
@@ -59,13 +59,13 @@ public class StyleBindingTests {
         root.textureName = "tex1";
         view.Update();
         UIElement panel = root.FindFirstByType<UIElement>();
-        Assert.AreEqual(tex1, panel.ComputedStyle.BackgroundImage);
+        Assert.AreEqual(tex1, panel.style.BackgroundImage);
         root.textureName = "not-there";
         view.Update();
-        Assert.AreEqual(DefaultStyleValues_Generated.BackgroundImage, panel.ComputedStyle.BackgroundImage);
+        Assert.AreEqual(DefaultStyleValues_Generated.BackgroundImage, panel.style.BackgroundImage);
         root.textureName = "tex1";
         view.Update();
-        Assert.AreEqual(tex1, panel.ComputedStyle.BackgroundImage);
+        Assert.AreEqual(tex1, panel.style.BackgroundImage);
 
     }
     
@@ -74,7 +74,7 @@ public class StyleBindingTests {
         const string template = @"
         <UITemplate>
             <Contents>
-                <Panel style.font=""url('path/to/font1')""/>
+                <Panel style.textFontAsset=""url('path/to/font1')""/>
             </Contents>
         </UITemplate>
         ";
@@ -83,10 +83,10 @@ public class StyleBindingTests {
         MockApplication view = new MockApplication(typeof(StyleTestThing), template);
         StyleTestThing root = (StyleTestThing) view.RootElement;
         UIElement panel = root.FindFirstByType<UIElement>();
-        Assert.AreEqual(font1, panel.ComputedStyle.TextFontAsset);
+        Assert.AreEqual(font1, panel.style.TextFontAsset);
         UIForia.ResourceManager.RemoveFont(font1);
         view.Update();
-        Assert.AreEqual(font1, panel.ComputedStyle.TextFontAsset);
+        Assert.AreEqual(font1, panel.style.TextFontAsset);
         Object.DestroyImmediate(font1);
     }
     
@@ -95,7 +95,7 @@ public class StyleBindingTests {
         const string template = @"
         <UITemplate>
             <Contents>
-                <Panel style.font=""url('path/to/' + fontName)""/>
+                <Panel style.textFontAsset=""url('path/to/' + fontName)""/>
             </Contents>
         </UITemplate>
         ";
@@ -106,13 +106,13 @@ public class StyleBindingTests {
         root.fontName = "font1";
         view.Update();
         UIElement panel = root.FindFirstByType<UIElement>();
-        Assert.AreEqual(font1, panel.ComputedStyle.TextFontAsset);
+        Assert.AreEqual(font1, panel.style.TextFontAsset);
         root.fontName = "not-there";
         view.Update();
-        Assert.AreEqual(DefaultStyleValues_Generated.TextFontAsset, panel.ComputedStyle.TextFontAsset);
+        Assert.AreEqual(DefaultStyleValues_Generated.TextFontAsset, panel.style.TextFontAsset);
         root.fontName = "font1";
         view.Update();
-        Assert.AreEqual(font1, panel.ComputedStyle.TextFontAsset);
+        Assert.AreEqual(font1, panel.style.TextFontAsset);
         Object.DestroyImmediate(font1);
 
     }

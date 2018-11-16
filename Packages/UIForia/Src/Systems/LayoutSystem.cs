@@ -97,9 +97,6 @@ namespace UIForia.Systems {
             
             LayoutBox root = m_LayoutBoxMap.GetOrDefault(view.RootElement.id);
 
-            if (root == null) {
-                Debug.Assert(false);
-            }
             if (rect != view.Viewport) {
                 
                 root.allocatedWidth = Mathf.Min(root.GetWidths().clampedSize, view.Viewport.width);
@@ -132,8 +129,8 @@ namespace UIForia.Systems {
             }
 
             int depth = 0;
-            int computedLayer = ResolveRenderLayer(element) - element.ComputedStyle.RenderLayerOffset;
-            int zIndex = element.ComputedStyle.ZIndex;
+            int computedLayer = ResolveRenderLayer(element) - element.style.RenderLayerOffset;
+            int zIndex = element.style.ZIndex;
 
             if (depth > computedLayer) {
                 zIndex -= 2000;
@@ -200,8 +197,8 @@ namespace UIForia.Systems {
                     }
 
                     depth = element.depth;
-                    computedLayer = ResolveRenderLayer(element) - element.ComputedStyle.RenderLayerOffset;
-                    zIndex = element.ComputedStyle.ZIndex;
+                    computedLayer = ResolveRenderLayer(element) - element.style.RenderLayerOffset;
+                    zIndex = element.style.ZIndex;
 
                     if (depth > computedLayer) {
                         zIndex -= 2000;
@@ -247,8 +244,8 @@ namespace UIForia.Systems {
                     }
 
                     if (ptr != null) {
-                        bool handlesHorizontal = ptr.style.computedStyle.OverflowX != Overflow.None;
-                        bool handlesVertical =  ptr.style.computedStyle.OverflowY != Overflow.None;
+                        bool handlesHorizontal = ptr.style.OverflowX != Overflow.None;
+                        bool handlesVertical =  ptr.style.OverflowY != Overflow.None;
                         if (handlesHorizontal && handlesVertical) {
                             Rect r = new Rect(ptr.layoutResult.screenPosition, ptr.layoutResult.allocatedSize);
                             clipRect = clipRect.Intersect(r.Intersect(ptr.layoutResult.clipRect));
@@ -524,7 +521,7 @@ namespace UIForia.Systems {
             LayoutBox parent = box.parent;
             LayoutBox replace = box;
 
-            switch (element.style.computedStyle.LayoutType) {
+            switch (element.style.LayoutType) {
                 case LayoutType.Radial:
                     if (!(box is RadialLayoutBox)) {
                         replace = new RadialLayoutBox(element);
@@ -592,7 +589,7 @@ namespace UIForia.Systems {
                 return new ImageLayoutBox(element);
             }
 
-            switch (element.style.computedStyle.LayoutType) {
+            switch (element.style.LayoutType) {
                 case LayoutType.Flex:
                     return new FlexLayoutBox(element);
 
@@ -692,13 +689,13 @@ namespace UIForia.Systems {
                 UIElement ptr = element.parent;
                 while (ptr != null) {
                     Vector2 screenPosition = ptr.layoutResult.screenPosition;
-                    if (ptr.style.computedStyle.OverflowX != Overflow.None) {
+                    if (ptr.style.OverflowX != Overflow.None) {
                         if (point.x < screenPosition.x || point.x > screenPosition.x + ptr.layoutResult.AllocatedWidth) {
                             break;
                         }
                     }
 
-                    if (ptr.style.computedStyle.OverflowY != Overflow.None) {
+                    if (ptr.style.OverflowY != Overflow.None) {
                         if (point.y < screenPosition.y || point.y > screenPosition.y + ptr.layoutResult.AllocatedHeight) {
                             break;
                         }
@@ -749,7 +746,7 @@ namespace UIForia.Systems {
         }
 
         private static int ResolveRenderLayer(UIElement element) {
-            RenderLayer layer = element.style.computedStyle.RenderLayer;
+            RenderLayer layer = element.style.RenderLayer;
             switch (layer) {
                 case RenderLayer.Unset:
                 case RenderLayer.Default:

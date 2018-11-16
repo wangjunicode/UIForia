@@ -101,7 +101,7 @@ namespace Src.Rendering {
                 Matrix4x4 matrix;
                 Vector3 renderPosition;
                 MaterialData materialData;
-                ComputedStyle style = scrollbar.targetElement.ComputedStyle;
+                UIStyleSet style = scrollbar.targetElement.style;
 
                 scrollbar.trackMesh = MeshUtil.ResizeStandardUIMesh(scrollbar.trackMesh, new Size(trackRect.size));
 
@@ -119,7 +119,7 @@ namespace Src.Rendering {
 
                     matrix = Matrix4x4.TRS(
                         origin + renderPosition - new Vector3(1, 0, 0),
-                        Quaternion.AngleAxis(data.element.ComputedStyle.TransformRotation, Vector3.forward),
+                        Quaternion.AngleAxis(data.element.style.TransformRotation, Vector3.forward),
                         new Vector3(1, 1, 1)
                     );
 
@@ -141,7 +141,7 @@ namespace Src.Rendering {
 
                     matrix = Matrix4x4.TRS(
                         origin + renderPosition - new Vector3(1, 0, 0),
-                        Quaternion.AngleAxis(data.element.ComputedStyle.TransformRotation, Vector3.forward),
+                        Quaternion.AngleAxis(data.element.style.TransformRotation, Vector3.forward),
                         new Vector3(1, 1, 1)
                     );
 
@@ -162,7 +162,7 @@ namespace Src.Rendering {
 
                 matrix = Matrix4x4.TRS(
                     origin + renderPosition - new Vector3(1, 0, 0),
-                    Quaternion.AngleAxis(data.element.ComputedStyle.TransformRotation, Vector3.forward),
+                    Quaternion.AngleAxis(data.element.style.TransformRotation, Vector3.forward),
                     new Vector3(1, 1, 1)
                 );
 
@@ -181,7 +181,7 @@ namespace Src.Rendering {
 
                 matrix = Matrix4x4.TRS(
                     origin + renderPosition - new Vector3(1, 0, 0),
-                    Quaternion.AngleAxis(data.element.ComputedStyle.TransformRotation, Vector3.forward),
+                    Quaternion.AngleAxis(data.element.style.TransformRotation, Vector3.forward),
                     new Vector3(1, 1, 1)
                 );
 
@@ -189,7 +189,7 @@ namespace Src.Rendering {
             }
         }
 
-        private static void GetHandleMaterialData(ComputedStyle style, bool isVertical, ref MaterialData materialData) {
+        private static void GetHandleMaterialData(UIStyleSet style, bool isVertical, ref MaterialData materialData) {
             if (isVertical) {
                 float radius = style.ScrollbarVerticalHandleBorderRadius;
                 float borderSize = style.ScrollbarVerticalHandleBorderSize;
@@ -212,7 +212,7 @@ namespace Src.Rendering {
             }
         }
 
-        private static void GetTrackMaterialData(ComputedStyle style, bool isVertical, ref MaterialData materialData) {
+        private static void GetTrackMaterialData(UIStyleSet style, bool isVertical, ref MaterialData materialData) {
             if (isVertical) {
                 float radius = style.ScrollbarVerticalTrackBorderRadius;
                 float borderSize = style.ScrollbarVerticalTrackBorderSize;
@@ -235,7 +235,7 @@ namespace Src.Rendering {
             }
         }
 
-        private static void GetIncrementMaterialData(ComputedStyle style, bool isVertical, ref MaterialData materialData) {
+        private static void GetIncrementMaterialData(UIStyleSet style, bool isVertical, ref MaterialData materialData) {
             if (isVertical) {
                 float radius = style.ScrollbarVerticalIncrementBorderRadius;
                 float borderSize = style.ScrollbarVerticalIncrementBorderSize;
@@ -258,7 +258,7 @@ namespace Src.Rendering {
             }
         }
 
-        private static void GetDecrementMaterialData(ComputedStyle style, bool isVertical, ref MaterialData materialData) {
+        private static void GetDecrementMaterialData(UIStyleSet style, bool isVertical, ref MaterialData materialData) {
             if (isVertical) {
                 float radius = style.ScrollbarVerticalDecrementBorderRadius;
                 float borderSize = style.ScrollbarVerticalDecrementBorderSize;

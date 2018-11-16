@@ -49,7 +49,7 @@ public sealed class ClippedPanel : UIContainerElement, IMeshProvider {
         
         isMeshDirty = false;
 
-        Color32 color32 = style.computedStyle.BackgroundColor;
+        Color32 color32 = style.BackgroundColor;
         Size size = layoutResult.actualSize;
         if (clippedCorner == ClippedCorner.None || clipSize <= 0f) {
             mesh = MeshUtil.CreateStandardUIMesh(size, color32);

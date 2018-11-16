@@ -12,20 +12,23 @@ using TextAlignment = UIForia.Text.TextAlignment;
 
 namespace UIForia.Rendering {
 
-    [StructLayout(LayoutKind.Explicit)]
     public partial struct StyleProperty {
 
-        [FieldOffset(0)]
-        public readonly StylePropertyId propertyId;
-        [FieldOffset(4)]
-        public readonly int valuePart0;
-        [FieldOffset(4)]
-        public readonly float floatValue;
-        [FieldOffset(8)]
-        public readonly int valuePart1;
-        [FieldOffset(12)]
         public readonly object objectField;
+        public readonly StylePropertyId propertyId;
+        public readonly int valuePart0;
+        public readonly int valuePart1;
+        public readonly float floatValue;
 
+        [DebuggerStepThrough]
+        public StyleProperty(StylePropertyId propertyId, int value0, int value1, float floatValue, object objectField) {
+            this.propertyId = propertyId;
+            this.floatValue = floatValue;
+            this.valuePart0 = value0;
+            this.valuePart1 = value1;
+            this.objectField = objectField;
+        }
+        
         [DebuggerStepThrough]
         public StyleProperty(StylePropertyId propertyId, int value0, int value1 = 0, object objectField = null) {
             this.propertyId = propertyId;
@@ -34,7 +37,7 @@ namespace UIForia.Rendering {
             this.valuePart1 = value1;
             this.objectField = objectField;
         }
-        
+
         [DebuggerStepThrough]
         public StyleProperty(StylePropertyId propertyId, float value0, int value1 = 0, object objectField = null) {
             this.propertyId = propertyId;
@@ -44,7 +47,7 @@ namespace UIForia.Rendering {
             this.objectField = objectField;
         }
 
-
+        [DebuggerStepThrough]
         public StyleProperty(StylePropertyId propertyId, Color color) {
             this.floatValue = 0;
             this.propertyId = propertyId;
@@ -53,30 +56,34 @@ namespace UIForia.Rendering {
             this.objectField = null;
         }
 
+        [DebuggerStepThrough]
         public StyleProperty(StylePropertyId propertyId, UIFixedLength length) {
-            this.floatValue = 0;
+            this.valuePart0 = 0;
             this.propertyId = propertyId;
-            this.valuePart0 = FloatUtil.EncodeToInt(length.value);
+            this.floatValue = length.value;
             this.valuePart1 = (int) length.unit;
             this.objectField = null;
         }
 
+        [DebuggerStepThrough]
         public StyleProperty(StylePropertyId propertyId, UIMeasurement measurement) {
-            this.floatValue = 0;
             this.propertyId = propertyId;
-            this.valuePart0 = FloatUtil.EncodeToInt(measurement.value);
+            this.valuePart0 = 0;
+            this.floatValue = measurement.value;
             this.valuePart1 = (int) measurement.unit;
             this.objectField = null;
         }
 
+        [DebuggerStepThrough]
         public StyleProperty(StylePropertyId propertyId, GridTrackSize trackSize) {
-            this.floatValue = 0;
+            this.valuePart0 = 0;
             this.propertyId = propertyId;
-            this.valuePart0 = FloatUtil.EncodeToInt(trackSize.minValue);
+            this.floatValue = trackSize.minValue;
             this.valuePart1 = (int) trackSize.minUnit;
             this.objectField = null;
         }
 
+        [DebuggerStepThrough]
         public StyleProperty(StylePropertyId propertyId, float floatValue) {
             this.propertyId = propertyId;
             this.valuePart0 = 0;
@@ -85,6 +92,7 @@ namespace UIForia.Rendering {
             this.objectField = null;
         }
 
+        [DebuggerStepThrough]
         public StyleProperty(StylePropertyId propertyId, int intValue) {
             this.floatValue = 0;
             this.propertyId = propertyId;
@@ -93,37 +101,12 @@ namespace UIForia.Rendering {
             this.objectField = null;
         }
 
-        public StyleProperty(StylePropertyId propertyId, CrossAxisAlignment alignment) {
-            this.floatValue = 0;
-            this.propertyId = propertyId;
-            this.valuePart0 = (int) alignment;
-            this.valuePart1 = 0;
-            this.objectField = null;
-        }
-
-        public StyleProperty(StylePropertyId propertyId, MainAxisAlignment alignment) {
-            this.floatValue = 0;
-            this.propertyId = propertyId;
-            this.valuePart0 = (int) alignment;
-            this.valuePart1 = 0;
-            this.objectField = null;
-        }
-
-        public StyleProperty(StylePropertyId propertyId, LayoutDirection direction) {
-            this.floatValue = 0;
-            this.propertyId = propertyId;
-            this.valuePart0 = (int) direction;
-            this.valuePart1 = 0;
-            this.objectField = null;
-        }
-
         public bool IsDefined {
-            [DebuggerStepThrough] get { return IntUtil.IsDefined(valuePart0) && IntUtil.IsDefined(valuePart1); }
+            [DebuggerStepThrough] get { return !IsUnset; }
         }
 
         public int AsInt => valuePart0;
         public float AsFloat => floatValue;
-        public UIMeasurement AsUIMeasurement => UIMeasurement.Decode(valuePart0, valuePart1);
         public CrossAxisAlignment AsCrossAxisAlignment => (CrossAxisAlignment) valuePart0;
         public MainAxisAlignment AsMainAxisAlignment => (MainAxisAlignment) valuePart0;
         public Overflow AsOverflow => (Overflow) valuePart0;
@@ -136,10 +119,12 @@ namespace UIForia.Rendering {
         public TextAlignment AsTextAlignment => (TextAlignment) valuePart0;
         public LayoutDirection AsLayoutDirection => (LayoutDirection) valuePart0;
         public LayoutWrap AsLayoutWrap => (LayoutWrap) valuePart0;
+
         public GridTrackSize AsGridTrackSize => new GridTrackSize(floatValue, (GridTemplateUnit) valuePart1);
+        public UIMeasurement AsUIMeasurement => new UIMeasurement(floatValue, (UIMeasurementUnit) valuePart1);
+        public UIFixedLength AsUIFixedLength => new UIFixedLength(floatValue, (UIFixedUnit) valuePart1);
 
         public IReadOnlyList<GridTrackSize> AsGridTrackTemplate => (IReadOnlyList<GridTrackSize>) objectField;
-        public UIFixedLength AsUIFixedLength => new UIFixedLength(floatValue, (UIFixedUnit) valuePart1);
 
         public AnchorTarget AsAnchorTarget => (AnchorTarget) valuePart0;
         public RenderLayer AsRenderLayer => (RenderLayer) valuePart0;
@@ -160,17 +145,29 @@ namespace UIForia.Rendering {
         public ScrollbarButtonPlacement AsScrollbarButtonPlacement => (ScrollbarButtonPlacement) valuePart0;
 
         public static bool operator ==(StyleProperty a, StyleProperty b) {
-            return a.propertyId == b.propertyId &&
-                   a.valuePart0 == b.valuePart0 &&
-                   a.valuePart1 == b.valuePart1 &&
-                   a.objectField == b.objectField;
+            bool baseCase =
+                a.propertyId == b.propertyId &&
+                a.valuePart0 == b.valuePart0 &&
+                a.valuePart1 == b.valuePart1 &&
+                a.objectField == b.objectField;
+
+            if (baseCase) return true;
+            bool aIsNan = float.IsNaN(a.floatValue);
+            bool bIsNan = float.IsNaN(b.floatValue);
+            return aIsNan == bIsNan && Mathf.Approximately(a.floatValue, b.floatValue);       
         }
 
         public static bool operator !=(StyleProperty a, StyleProperty b) {
-            return a.propertyId != b.propertyId ||
-                   a.valuePart0 != b.valuePart0 ||
-                   a.valuePart1 != b.valuePart1 ||
-                   a.objectField != b.objectField;
+            bool baseCase =
+                a.propertyId != b.propertyId ||
+                a.valuePart0 != b.valuePart0 ||
+                a.valuePart1 != b.valuePart1 ||
+                a.objectField != b.objectField;
+
+            if (baseCase) return true;
+            bool aIsNan = float.IsNaN(a.floatValue);
+            bool bIsNan = float.IsNaN(b.floatValue);
+            return aIsNan != bIsNan || !Mathf.Approximately(a.floatValue, b.floatValue);       
         }
 
 
@@ -263,11 +260,11 @@ namespace UIForia.Rendering {
         }
 
         public static StyleProperty GridItemColSelfAlignment(CrossAxisAlignment alignment) {
-            return new StyleProperty(StylePropertyId.GridItemColSelfAlignment, alignment);
+            return new StyleProperty(StylePropertyId.GridItemColSelfAlignment, (int) alignment);
         }
 
         public static StyleProperty GridItemRowSelfAlignment(CrossAxisAlignment alignment) {
-            return new StyleProperty(StylePropertyId.GridItemRowSelfAlignment, alignment);
+            return new StyleProperty(StylePropertyId.GridItemRowSelfAlignment, (int) alignment);
         }
 
         public static StyleProperty GridLayoutDensity(GridLayoutDensity density) {
@@ -283,7 +280,7 @@ namespace UIForia.Rendering {
         }
 
         public static StyleProperty GridLayoutDirection(LayoutDirection direction) {
-            return new StyleProperty(StylePropertyId.GridLayoutDirection, direction);
+            return new StyleProperty(StylePropertyId.GridLayoutDirection, (int) direction);
         }
 
         public static StyleProperty GridLayoutColAutoSize(GridTrackSize autoColSize) {
@@ -303,11 +300,11 @@ namespace UIForia.Rendering {
         }
 
         public static StyleProperty GridLayoutColAlignment(CrossAxisAlignment alignment) {
-            return new StyleProperty(StylePropertyId.GridLayoutColAlignment, alignment);
+            return new StyleProperty(StylePropertyId.GridLayoutColAlignment, (int) alignment);
         }
 
         public static StyleProperty GridLayoutRowAlignment(CrossAxisAlignment alignment) {
-            return new StyleProperty(StylePropertyId.GridLayoutRowAlignment, alignment);
+            return new StyleProperty(StylePropertyId.GridLayoutRowAlignment, (int) alignment);
         }
 
         public static StyleProperty MarginTop(UIMeasurement marginTop) {

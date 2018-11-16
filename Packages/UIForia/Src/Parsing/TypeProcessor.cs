@@ -23,10 +23,21 @@ namespace UIForia {
             for (int i = 0; i < assemblies.Length; i++) {
                 Assembly assembly = assemblies[i];
 
+                if (assembly == null) {
+                    continue;
+                }
+                
                 if (!FilterAssembly(assembly)) continue;
 
                 filteredAssemblies.Add(assembly);
-                loadedTypes.AddRange(assembly.GetTypes());
+                Type[] types = assembly.GetTypes();
+                for (int j = 0; j < types.Length; j++) {
+                    // can be null if assembly referenced is unavailable
+                    // ReSharper disable once ConditionIsAlwaysTrueOrFalse
+                    if (types[j] != null) {
+                        loadedTypes.Add(types[j]);
+                    }
+                }
             }
             
             loadedTypes.Add(typeof(Color));

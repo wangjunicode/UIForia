@@ -3,7 +3,6 @@ using UIForia.Rendering;
 using UIForia;
 using UIForia.Layout;
 using Tests.Mocks;
-using UnityEditor.VersionControl;
 using UnityEngine;
 
 [TestFixture]
@@ -48,7 +47,7 @@ public class FlexLayoutColTests {
         string template = @"
         <UITemplate>
             <Style path='FlexLayoutColTests+FlexColLayoutThing+Style'/>
-            <Contents style.layoutType='Flex' style.layoutDirection='Column' style.width='500f'>
+            <Contents style.layoutType='Flex' style.flexLayoutDirection='Column' style.preferredWidth='500f'>
                 <Group x-id='child0' style='w100h100'/>
                 <Group x-id='child1' style='w100h100'/>
                 <Group x-id='child2' style='w100h100'/>
@@ -58,7 +57,7 @@ public class FlexLayoutColTests {
         MockApplication app = new MockApplication(typeof(FlexColLayoutThing), template);
         app.SetViewportRect(new Rect(0, 0, 1000f, 1000f));
         FlexColLayoutThing root = (FlexColLayoutThing) app.RootElement;
-        root.style.SetFlexCrossAxisAlignment(CrossAxisAlignment.Start, StyleState.Normal);
+        root.style.SetFlexLayoutCrossAxisAlignment(CrossAxisAlignment.Start, StyleState.Normal);
         app.Update();
 
         Assert.AreEqual(new Rect(000, 0, 100, 100), root.child0.layoutResult.ScreenRect);
@@ -71,7 +70,7 @@ public class FlexLayoutColTests {
         string template = @"
         <UITemplate>
             <Style path='FlexLayoutColTests+FlexColLayoutThing+Style'/>
-            <Contents style.layoutType='Flex' style.layoutDirection='Column' style.height='500f'>
+            <Contents style.layoutType='Flex' style.flexLayoutDirection='Column' style.preferredHeight='500f'>
                 <Group x-id='child0' style='w100h100'/>
                 <Group x-id='child1' style='w100h100'/>
                 <Group x-id='child2' style='w100h100'/>
@@ -81,7 +80,7 @@ public class FlexLayoutColTests {
         MockApplication app = new MockApplication(typeof(FlexColLayoutThing), template);
         app.SetViewportRect(new Rect(0, 0, 1000f, 1000f));
         FlexColLayoutThing root = (FlexColLayoutThing) app.RootElement;
-        root.style.SetFlexCrossAxisAlignment(CrossAxisAlignment.End, StyleState.Normal);
+        root.style.SetFlexLayoutCrossAxisAlignment(CrossAxisAlignment.End, StyleState.Normal);
         app.Update();
 
         Assert.AreEqual(new Rect(000, 400, 100, 100), root.child0.layoutResult.ScreenRect);
@@ -94,7 +93,7 @@ public class FlexLayoutColTests {
         string template = @"
         <UITemplate>
             <Style path='FlexLayoutColTests+FlexColLayoutThing+Style'/>
-            <Contents style.layoutType='Flex' style.layoutDirection='Column' style.width='500f' style.height='500f'>
+            <Contents style.layoutType='Flex' style.flexLayoutDirection='Column' style.preferredWidth='500f' style.preferredHeight='500f'>
                 <Group x-id='child0' style='w100h100'/>
                 <Group x-id='child1' style='w100h100'/>
                 <Group x-id='child2' style='w100h100'/>
@@ -104,7 +103,7 @@ public class FlexLayoutColTests {
         MockApplication app = new MockApplication(typeof(FlexColLayoutThing), template);
         app.SetViewportRect(new Rect(0, 0, 1000f, 1000f));
         FlexColLayoutThing root = (FlexColLayoutThing) app.RootElement;
-        root.style.SetFlexCrossAxisAlignment(CrossAxisAlignment.Center, StyleState.Normal);
+        root.style.SetFlexLayoutCrossAxisAlignment(CrossAxisAlignment.Center, StyleState.Normal);
         app.Update();
 
         Assert.AreEqual(new Rect(0, 200, 100, 100), root.child0.layoutResult.ScreenRect);
@@ -117,7 +116,7 @@ public class FlexLayoutColTests {
         string template = @"
         <UITemplate>
             <Style path='FlexLayoutColTests+FlexColLayoutThing+Style'/>
-            <Contents style.layoutType='Flex' style.layoutDirection='Column' style.width='500f' style.height='500f'>
+            <Contents style.layoutType='Flex' style.flexLayoutDirection='Column' style.preferredWidth='500f' style.preferredHeight='500f'>
                 <Group x-id='child0' style='w100h100'/>
                 <Group x-id='child1' style='w100h100'/>
                 <Group x-id='child2' style='w100h100'/>
@@ -127,7 +126,7 @@ public class FlexLayoutColTests {
         MockApplication app = new MockApplication(typeof(FlexColLayoutThing), template);
         app.SetViewportRect(new Rect(0, 0, 1000f, 1000f));
         FlexColLayoutThing root = (FlexColLayoutThing) app.RootElement;
-        root.style.SetFlexCrossAxisAlignment(CrossAxisAlignment.Stretch, StyleState.Normal);
+        root.style.SetFlexLayoutCrossAxisAlignment(CrossAxisAlignment.Stretch, StyleState.Normal);
         app.Update();
 
         Assert.AreEqual(new Rect(0, 0, 100, 500), root.child0.layoutResult.ScreenRect);
@@ -140,7 +139,7 @@ public class FlexLayoutColTests {
         string template = @"
         <UITemplate>
             <Style path='FlexLayoutColTests+FlexColLayoutThing+Style'/>
-            <Contents style.layoutType='Flex' style.layoutDirection='Column' style.width='500f' style.height='500f'>
+            <Contents style.layoutType='Flex' style.flexLayoutDirection='Column' style.preferredWidth='500f' style.preferredHeight='500f'>
                 <Group x-id='child0' style='w100h100'/>
                 <Group x-id='child1' style='w100h100'/>
                 <Group x-id='child2' style='w100h100'/>
@@ -150,7 +149,7 @@ public class FlexLayoutColTests {
         MockApplication app = new MockApplication(typeof(FlexColLayoutThing), template);
         app.SetViewportRect(new Rect(0, 0, 1000f, 1000f));
         FlexColLayoutThing root = (FlexColLayoutThing) app.RootElement;
-        root.style.SetFlexMainAxisAlignment(MainAxisAlignment.End, StyleState.Normal);
+        root.style.SetFlexLayoutMainAxisAlignment(MainAxisAlignment.End, StyleState.Normal);
         app.Update();
 
         Assert.AreEqual(new Rect(200, 0, 100, 100), root.child0.layoutResult.ScreenRect);
@@ -163,7 +162,7 @@ public class FlexLayoutColTests {
         string template = @"
         <UITemplate>
             <Style path='FlexLayoutColTests+FlexColLayoutThing+Style'/>
-            <Contents style.layoutType='Flex' style.layoutDirection='Column' style.width='500f' style.height='500f'>
+            <Contents style.layoutType='Flex' style.flexLayoutDirection='Column' style.preferredWidth='500f' style.preferredHeight='500f'>
                 <Group x-id='child0' style='w100h100'/>
                 <Group x-id='child1' style='w100h100'/>
                 <Group x-id='child2' style='w100h100'/>
@@ -173,7 +172,7 @@ public class FlexLayoutColTests {
         MockApplication app = new MockApplication(typeof(FlexColLayoutThing), template);
         app.SetViewportRect(new Rect(0, 0, 1000f, 1000f));
         FlexColLayoutThing root = (FlexColLayoutThing) app.RootElement;
-        root.style.SetFlexMainAxisAlignment(MainAxisAlignment.Start, StyleState.Normal);
+        root.style.SetFlexLayoutMainAxisAlignment(MainAxisAlignment.Start, StyleState.Normal);
         app.Update();
 
         Assert.AreEqual(new Rect(0, 0, 100, 100), root.child0.layoutResult.ScreenRect);
@@ -186,7 +185,7 @@ public class FlexLayoutColTests {
         string template = @"
         <UITemplate>
             <Style path='FlexLayoutColTests+FlexColLayoutThing+Style'/>
-            <Contents style.layoutType='Flex' style.layoutDirection='Column' style.width='500f' style.height='500f'>
+            <Contents style.layoutType='Flex' style.flexLayoutDirection='Column' style.preferredWidth='500f' style.preferredHeight='500f'>
                 <Group x-id='child0' style='w100h100'/>
                 <Group x-id='child1' style='w100h100'/>
                 <Group x-id='child2' style='w100h100'/>
@@ -196,7 +195,7 @@ public class FlexLayoutColTests {
         MockApplication app = new MockApplication(typeof(FlexColLayoutThing), template);
         app.SetViewportRect(new Rect(0, 0, 1000f, 1000f));
         FlexColLayoutThing root = (FlexColLayoutThing) app.RootElement;
-        root.style.SetFlexMainAxisAlignment(MainAxisAlignment.SpaceBetween, StyleState.Normal);
+        root.style.SetFlexLayoutMainAxisAlignment(MainAxisAlignment.SpaceBetween, StyleState.Normal);
         app.Update();
 
         Assert.AreEqual(new Rect(0, 0, 100, 100), root.child0.layoutResult.ScreenRect);
@@ -209,7 +208,7 @@ public class FlexLayoutColTests {
         string template = @"
         <UITemplate>
             <Style path='FlexLayoutColTests+FlexColLayoutThing+Style'/>
-            <Contents style.layoutType='Flex' style.layoutDirection='Column' style.width='600f' style.height='600f'>
+            <Contents style.layoutType='Flex' style.flexLayoutDirection='Column' style.preferredWidth='600f' style.preferredHeight='600f'>
                 <Group x-id='child0' style='w100h100'/>
                 <Group x-id='child1' style='w100h100'/>
                 <Group x-id='child2' style='w100h100'/>
@@ -219,7 +218,7 @@ public class FlexLayoutColTests {
         MockApplication app = new MockApplication(typeof(FlexColLayoutThing), template);
         app.SetViewportRect(new Rect(0, 0, 1000f, 1000f));
         FlexColLayoutThing root = (FlexColLayoutThing) app.RootElement;
-        root.style.SetFlexMainAxisAlignment(MainAxisAlignment.SpaceAround, StyleState.Normal);
+        root.style.SetFlexLayoutMainAxisAlignment(MainAxisAlignment.SpaceAround, StyleState.Normal);
         app.Update();
 
         Assert.AreEqual(new Rect(50, 0, 100, 100), root.child0.layoutResult.ScreenRect);
@@ -234,7 +233,7 @@ public class FlexLayoutColTests {
         string template = @"
         <UITemplate>
             <Style path='FlexLayoutColTests+FlexColLayoutThing+Style'/>
-            <Contents style.layoutType='Flex' style.layoutDirection='Column' style.width='500f'>
+            <Contents style.layoutType='Flex' style.flexLayoutDirection='Column' style.preferredWidth='500f'>
                 <Group x-id='child0' style='w100h100'/>
                 <Group x-id='child1' style='w100h100' />
                 <Group x-id='child2' style='w100h100'/>
@@ -244,7 +243,7 @@ public class FlexLayoutColTests {
         MockApplication app = new MockApplication(typeof(FlexColLayoutThing), template);
         app.SetViewportRect(new Rect(0, 0, 1000f, 1000f));
         FlexColLayoutThing root = (FlexColLayoutThing) app.RootElement;
-        root.child1.style.SetFlexItemOrderOverride(-1, StyleState.Normal);
+        root.child1.style.SetFlexItemOrder(-1, StyleState.Normal);
         app.Update();
 
         Assert.AreEqual(new Rect(0, 0, 100, 100), root.child1.layoutResult.ScreenRect);
@@ -258,7 +257,7 @@ public class FlexLayoutColTests {
         string template = @"
         <UITemplate>
             <Style path='FlexLayoutColTests+FlexColLayoutThing+Style'/>
-            <Contents style.layoutType='Flex' style.layoutDirection='Column' style.width='500f' style.height='500f'>
+            <Contents style.layoutType='Flex' style.flexLayoutDirection='Column' style.preferredWidth='500f' style.preferredHeight='500f'>
                 <Group x-id='child0' style='w100h100'/>
                 <Group x-id='child1' style='w100h100' />
                 <Group x-id='child2' style='w100h100'/>
@@ -268,7 +267,7 @@ public class FlexLayoutColTests {
         MockApplication app = new MockApplication(typeof(FlexColLayoutThing), template);
         app.SetViewportRect(new Rect(0, 0, 1000f, 1000f));
         FlexColLayoutThing root = (FlexColLayoutThing) app.RootElement;
-        root.style.SetFlexCrossAxisAlignment(CrossAxisAlignment.Center, StyleState.Normal);
+        root.style.SetFlexLayoutCrossAxisAlignment(CrossAxisAlignment.Center, StyleState.Normal);
         root.child1.style.SetFlexItemSelfAlignment(CrossAxisAlignment.Start, StyleState.Normal);
         app.Update();
 
@@ -282,9 +281,9 @@ public class FlexLayoutColTests {
         string template = @"
         <UITemplate>
             <Style path='FlexLayoutColTests+FlexColLayoutThing+Style'/>
-            <Contents style.layoutType='Flex' style.layoutDirection='Column' style.width='500f' style.height='500f'>
+            <Contents style.layoutType='Flex' style.flexLayoutDirection='Column' style.preferredWidth='500f' style.preferredHeight='500f'>
                 <Group x-id='child0' style='w100h100'/>
-                <Group x-id='child1' style='w100h100' style.growthFactor='1' />
+                <Group x-id='child1' style='w100h100' style.flexItemGrow='1' />
                 <Group x-id='child2' style='w100h100'/>
             </Contents>
         </UITemplate>
@@ -304,9 +303,9 @@ public class FlexLayoutColTests {
         string template = @"
         <UITemplate>
             <Style path='FlexLayoutColTests+FlexColLayoutThing+Style'/>
-            <Contents style.layoutType='Flex' style.layoutDirection='Column' style.width='250f' style.height='600f'>
+            <Contents style.layoutType='Flex' style.flexLayoutDirection='Column' style.preferredWidth='250f' style.preferredHeight='600f'>
                 <Group x-id='child0' style='w100h100'/>
-                <Group x-id='child1' style='w100h100' style.shrinkFactor='1' />
+                <Group x-id='child1' style='w100h100' style.flexItemShrink='1' />
                 <Group x-id='child2' style='w100h100'/>
             </Contents>
         </UITemplate>
@@ -326,8 +325,8 @@ public class FlexLayoutColTests {
         string template = @"
         <UITemplate>
             <Style path='FlexLayoutColTests+FlexColLayoutThing+Style'/>
-            <Contents style.layoutType='Flex' style.layoutDirection='Column' style.width='500f' style.height='500f'>
-                <Group x-id='child0' style.width='500f' style.height='100f'/>
+            <Contents style.layoutType='Flex' style.flexLayoutDirection='Column' style.preferredWidth='500f' style.preferredHeight='500f'>
+                <Group x-id='child0' style.preferredWidth='500f' style.preferredHeight='100f'/>
                 <Group x-id='child1' style='w100h100'/>
                 <Group x-id='child2' style='w100h100'/>
             </Contents>
@@ -336,7 +335,7 @@ public class FlexLayoutColTests {
         MockApplication app = new MockApplication(typeof(FlexColLayoutThing), template);
         app.SetViewportRect(new Rect(0, 0, 1000f, 1000f));
         FlexColLayoutThing root = (FlexColLayoutThing) app.RootElement;
-        root.style.SetFlexWrapMode(LayoutWrap.Wrap, StyleState.Normal);
+        root.style.SetFlexLayoutWrap(LayoutWrap.Wrap, StyleState.Normal);
         app.Update();
         Assert.AreEqual(new Rect(0, 0, 500, 100), root.child0.layoutResult.ScreenRect);
         Assert.AreEqual(new Rect(0, 100, 100, 100), root.child1.layoutResult.ScreenRect);
@@ -348,8 +347,8 @@ public class FlexLayoutColTests {
         string template = @"
         <UITemplate>
             <Style path='FlexLayoutColTests+FlexColLayoutThing+Style'/>
-            <Contents style.layoutType='Flex' style.layoutDirection='Column' style.width='500f' style.height='500f'>
-                <Group x-id='child0' style.width='450f' style.height='100f'/>
+            <Contents style.layoutType='Flex' style.flexLayoutDirection='Column' style.preferredWidth='500f' style.preferredHeight='500f'>
+                <Group x-id='child0' style.preferredWidth='450f' style.preferredHeight='100f'/>
                 <Group x-id='child1' style='w100h100'/>
                 <Group x-id='child2' style='w100h100'/>
             </Contents>
@@ -358,7 +357,7 @@ public class FlexLayoutColTests {
         MockApplication app = new MockApplication(typeof(FlexColLayoutThing), template);
         app.SetViewportRect(new Rect(0, 0, 1000f, 1000f));
         FlexColLayoutThing root = (FlexColLayoutThing) app.RootElement;
-        root.style.SetFlexWrapMode(LayoutWrap.Wrap, StyleState.Normal);
+        root.style.SetFlexLayoutWrap(LayoutWrap.Wrap, StyleState.Normal);
         app.Update();
         Assert.AreEqual(new Rect(0, 0, 450, 100), root.child0.layoutResult.ScreenRect);
         Assert.AreEqual(new Rect(0, 100, 100, 100), root.child1.layoutResult.ScreenRect);
@@ -370,8 +369,8 @@ public class FlexLayoutColTests {
         string template = @"
         <UITemplate>
             <Style path='FlexLayoutColTests+FlexColLayoutThing+Style'/>
-            <Contents style.layoutType='Flex' style.layoutDirection='Column' style.width='500f' style.height='500f'>
-                <Group x-id='child0' style.width='550f' style.height='100f'/>
+            <Contents style.layoutType='Flex' style.flexLayoutDirection='Column' style.preferredWidth='500f' style.preferredHeight='500f'>
+                <Group x-id='child0' style.preferredWidth='550f' style.preferredHeight='100f'/>
                 <Group x-id='child1' style='w100h100'/>
                 <Group x-id='child2' style='w100h100'/>
             </Contents>
@@ -380,7 +379,7 @@ public class FlexLayoutColTests {
         MockApplication app = new MockApplication(typeof(FlexColLayoutThing), template);
         app.SetViewportRect(new Rect(0, 0, 1000f, 1000f));
         FlexColLayoutThing root = (FlexColLayoutThing) app.RootElement;
-        root.style.SetFlexWrapMode(LayoutWrap.Wrap, StyleState.Normal);
+        root.style.SetFlexLayoutWrap(LayoutWrap.Wrap, StyleState.Normal);
         app.Update();
         Assert.AreEqual(new Rect(0, 0, 550, 100), root.child0.layoutResult.ScreenRect);
         Assert.AreEqual(new Rect(0, 100, 100, 100), root.child1.layoutResult.ScreenRect);
@@ -392,17 +391,17 @@ public class FlexLayoutColTests {
         string template = @"
         <UITemplate>
             <Style path='FlexLayoutColTests+FlexColLayoutThing+Style'/>
-            <Contents style.layoutType='Flex' style.layoutDirection='Column' style.width='500f' style.height='500f'>
-                <Group x-id='child0' style.height='100f' style.width='450f' style.growthFactor='1'/>
-                <Group x-id='child1' style='w100h100' style.growthFactor='1'/>
-                <Group x-id='child2' style='w100h100' style.growthFactor='1'/>
+            <Contents style.layoutType='Flex' style.flexLayoutDirection='Column' style.preferredWidth='500f' style.preferredHeight='500f'>
+                <Group x-id='child0' style.preferredHeight='100f' style.preferredWidth='450f' style.flexItemGrow='1'/>
+                <Group x-id='child1' style='w100h100' style.flexItemGrow='1'/>
+                <Group x-id='child2' style='w100h100' style.flexItemGrow='1'/>
             </Contents>
         </UITemplate>
         ";
         MockApplication app = new MockApplication(typeof(FlexColLayoutThing), template);
         app.SetViewportRect(new Rect(0, 0, 1000f, 1000f));
         FlexColLayoutThing root = (FlexColLayoutThing) app.RootElement;
-        root.style.SetFlexWrapMode(LayoutWrap.Wrap, StyleState.Normal);
+        root.style.SetFlexLayoutWrap(LayoutWrap.Wrap, StyleState.Normal);
         app.Update();
         Assert.AreEqual(new Rect(0, 0, 500, 100), root.child0.layoutResult.ScreenRect);
         Assert.AreEqual(new Rect(0, 100, 250, 100), root.child1.layoutResult.ScreenRect);
@@ -414,17 +413,17 @@ public class FlexLayoutColTests {
         string template = @"
         <UITemplate>
             <Style path='FlexLayoutColTests+FlexColLayoutThing+Style'/>
-            <Contents style.layoutType='Flex' style.layoutDirection='Column' style.width='400f' style.height='600f'>
-                <Group x-id='child0' style.height='100f' style.width='450f' style.shrinkFactor='1'/>
-                <Group x-id='child1' style.height='100f' style.width='300f' style.shrinkFactor='1'/>
-                <Group x-id='child2' style.height='100f' style.width='300f' style.shrinkFactor='1'/>
+            <Contents style.layoutType='Flex' style.flexLayoutDirection='Column' style.preferredWidth='400f' style.preferredHeight='600f'>
+                <Group x-id='child0' style.preferredHeight='100f' style.preferredWidth='450f' style.flexItemShrink='1'/>
+                <Group x-id='child1' style.preferredHeight='100f' style.preferredWidth='300f' style.flexItemShrink='1'/>
+                <Group x-id='child2' style.preferredHeight='100f' style.preferredWidth='300f' style.flexItemShrink='1'/>
             </Contents>
         </UITemplate>
         ";
         MockApplication app = new MockApplication(typeof(FlexColLayoutThing), template);
         app.SetViewportRect(new Rect(0, 0, 1000f, 1000f));
         FlexColLayoutThing root = (FlexColLayoutThing) app.RootElement;
-        root.style.SetFlexWrapMode(LayoutWrap.Wrap, StyleState.Normal);
+        root.style.SetFlexLayoutWrap(LayoutWrap.Wrap, StyleState.Normal);
         app.Update();
         Assert.AreEqual(new Rect(0, 0, 400, 100), root.child0.layoutResult.ScreenRect);
         Assert.AreEqual(new Rect(0, 100, 200, 100), root.child1.layoutResult.ScreenRect);
@@ -436,7 +435,7 @@ public class FlexLayoutColTests {
         string template = @"
         <UITemplate>
             <Style path='FlexLayoutColTests+FlexColLayoutThing+Style'/>
-            <Contents style.layoutType='Flex' style.layoutDirection='Column' style.width='content(100)' style.height='500f' style.paddingLeft='5f' style.paddingRight='5f'>
+            <Contents style.layoutType='Flex' style.flexLayoutDirection='Column' style.preferredWidth='content(100)' style.preferredHeight='500f' style.paddingLeft='5f' style.paddingRight='5f'>
                 <Group x-id='child0' style='w100h100'/>
                 <Group x-id='child1' style='w100h100'/>
                 <Group x-id='child2' style='w100h100'/>
@@ -458,7 +457,7 @@ public class FlexLayoutColTests {
         string template = @"
         <UITemplate>
             <Style path='FlexLayoutColTests+FlexColLayoutThing+Style'/>
-            <Contents style.layoutType='Flex' style.layoutDirection='Column' style.width='content(100)' style.height='500f'>
+            <Contents style.layoutType='Flex' style.flexLayoutDirection='Column' style.preferredWidth='content(100)' style.preferredHeight='500f'>
                 <Group x-id='child0' style='w100h100' style.paddingLeft='5f' style.paddingRight='5f'/>
                 <Group x-id='child1' style='w100h100' style.paddingLeft='5f' style.paddingRight='5f'/>
                 <Group x-id='child2' style='w100h100' style.paddingLeft='5f' style.paddingRight='5f'/>
@@ -480,7 +479,7 @@ public class FlexLayoutColTests {
         string template = @"
         <UITemplate>
             <Style path='FlexLayoutColTests+FlexColLayoutThing+Style'/>
-            <Contents style.layoutType='Flex' style.layoutDirection='Column' style.width='content(100)' style.height='content(100)'>
+            <Contents style.layoutType='Flex' style.flexLayoutDirection='Column' style.preferredWidth='content(100)' style.preferredHeight='content(100)'>
                 <Group x-id='child0' style='w100h100' style.paddingLeft='5f' style.paddingRight='5f'/>
                 <Group x-id='child1' style='w100h100' style.paddingLeft='5f' style.paddingRight='5f'/>
                 <Group x-id='child2' style='w100h100' style.paddingLeft='5f' style.paddingRight='5f'/>

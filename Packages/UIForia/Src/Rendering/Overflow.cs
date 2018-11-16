@@ -2,10 +2,11 @@ namespace UIForia.Rendering {
 
     public enum Overflow {
 
-        None = 0,
-        Hidden  = 1 << 0,
-        Scroll = 1 << 1,
-        ScrollAndAutoHide = 1 << 2
+        Unset = 0,
+        None = 1 << 0, 
+        Hidden  = 1 << 1,
+        Scroll = 1 << 2,
+        ScrollAndAutoHide = 1 << 3
 
     }
 

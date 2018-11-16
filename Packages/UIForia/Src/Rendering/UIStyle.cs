@@ -31,6 +31,7 @@ namespace UIForia.Rendering {
         }
 
         private static int NextStyleId;
+
         // todo -- make this a LightList<StyleProperty> and keep sorted, 
         private readonly List<StyleProperty> m_StyleProperties;
 
@@ -48,10 +49,10 @@ namespace UIForia.Rendering {
 
         public BorderRadius BorderRadius {
             set {
-                SetUIFixedLengthProperty(StylePropertyId.BorderRadiusTopLeft, value.topLeft);
-                SetUIFixedLengthProperty(StylePropertyId.BorderRadiusTopRight, value.topRight);
-                SetUIFixedLengthProperty(StylePropertyId.BorderRadiusBottomLeft, value.bottomLeft);
-                SetUIFixedLengthProperty(StylePropertyId.BorderRadiusBottomRight, value.bottomRight);
+                SetProperty(new StyleProperty(StylePropertyId.BorderRadiusTopLeft, value.topLeft));
+                SetProperty(new StyleProperty(StylePropertyId.BorderRadiusTopRight, value.topRight));
+                SetProperty(new StyleProperty(StylePropertyId.BorderRadiusBottomLeft, value.bottomLeft));
+                SetProperty(new StyleProperty(StylePropertyId.BorderRadiusBottomRight, value.bottomRight));
             }
         }
 
@@ -77,7 +78,7 @@ namespace UIForia.Rendering {
             for (int i = 0; i < m_StyleProperties.Count; i++) {
                 if (m_StyleProperties[i].propertyId == propertyId) {
                     return new GridTrackSize(
-                        FloatUtil.DecodeToFloat(m_StyleProperties[i].valuePart0),
+                        m_StyleProperties[i].floatValue,
                         (GridTemplateUnit) m_StyleProperties[i].valuePart1
                     );
                 }
@@ -90,7 +91,7 @@ namespace UIForia.Rendering {
             for (int i = 0; i < m_StyleProperties.Count; i++) {
                 if (m_StyleProperties[i].propertyId == propertyId) {
                     return new UIMeasurement(
-                        FloatUtil.DecodeToFloat(m_StyleProperties[i].valuePart0),
+                        m_StyleProperties[i].floatValue,
                         (UIMeasurementUnit) m_StyleProperties[i].valuePart1
                     );
                 }
@@ -103,7 +104,7 @@ namespace UIForia.Rendering {
             for (int i = 0; i < m_StyleProperties.Count; i++) {
                 if (m_StyleProperties[i].propertyId == propertyId) {
                     return new UIFixedLength(
-                        FloatUtil.DecodeToFloat(m_StyleProperties[i].valuePart0),
+                        m_StyleProperties[i].floatValue,
                         (UIFixedUnit) m_StyleProperties[i].valuePart1
                     );
                 }
@@ -112,95 +113,39 @@ namespace UIForia.Rendering {
             return UIFixedLength.Unset;
         }
 
-        private void RemoveProperty(StylePropertyId propertyId) {
-            for (int i = 0; i < m_StyleProperties.Count; i++) {
-                if (m_StyleProperties[i].propertyId == propertyId) {
-                    m_StyleProperties.RemoveAt(i);
-                    return;
-                }
-            }
-        }
-
-        public StyleProperty GetProperty(StylePropertyId propertyId) {
-            for (int i = 0; i < m_StyleProperties.Count; i++) {
-                if (m_StyleProperties[i].propertyId == propertyId) {
-                    return m_StyleProperties[i];
-                }
-            }
-
-            return new StyleProperty(propertyId, int.MaxValue, int.MaxValue);
-        }
-
         private float FindFloatProperty(StylePropertyId propertyId) {
             StyleProperty property = GetProperty(propertyId);
-            return property.IsDefined ? FloatUtil.DecodeToFloat(property.valuePart0) : FloatUtil.UnsetValue;
+            return property.IsUnset ? FloatUtil.UnsetValue : property.AsFloat;
         }
 
         private int FindIntProperty(StylePropertyId propertyId) {
             StyleProperty property = GetProperty(propertyId);
-            return property.IsDefined ? property.valuePart0 : IntUtil.UnsetValue;
+            return property.IsUnset ?  property.valuePart0 : IntUtil.UnsetValue;
         }
 
         private int FindEnumProperty(StylePropertyId propertyId) {
             StyleProperty property = GetProperty(propertyId);
-            return property.IsDefined ? property.valuePart0 : 0;
+            return property.IsUnset ? 0 : property.valuePart0;
         }
 
         private Color FindColorProperty(StylePropertyId propertyId) {
             StyleProperty property = GetProperty(propertyId);
-            return property.IsDefined ? (Color) new StyleColor(property.valuePart0) : ColorUtil.UnsetValue;
+            return property.IsUnset ?  ColorUtil.UnsetValue :(Color) new StyleColor(property.valuePart0);
         }
-
-        internal void SetUIMeasurementProperty(StylePropertyId propertyId, UIMeasurement measurement) {
-            if (measurement.unit == UIMeasurementUnit.Unset || !FloatUtil.IsDefined(measurement.value)) {
-                RemoveProperty(propertyId);
-            }
-            else {
-                SetProperty(propertyId, FloatUtil.EncodeToInt(measurement.value), (int) measurement.unit);
-            }
-        }
-
-        internal void SetGridTrackSizeProperty(StylePropertyId propertyId, GridTrackSize size) {
-            if (size.minUnit == GridTemplateUnit.Unset || !FloatUtil.IsDefined(size.minValue)) {
-                RemoveProperty(propertyId);
-            }
-            else {
-                SetProperty(propertyId, FloatUtil.EncodeToInt(size.minValue), (int) size.minUnit);
-            }
-        }
-
-        internal void SetObjectProperty(StylePropertyId propertyId, object value) {
-            if (value == null) {
-                RemoveProperty(propertyId);
-            }
-            else {
+        
+        internal void SetProperty(StyleProperty property) {
+            StylePropertyId propertyId = property.propertyId;
+            if (property.IsUnset) {
                 for (int i = 0; i < m_StyleProperties.Count; i++) {
                     if (m_StyleProperties[i].propertyId == propertyId) {
-                        m_StyleProperties[i] = new StyleProperty(propertyId, 0, 0, value);
+                        m_StyleProperties.RemoveAt(i);
                         return;
                     }
                 }
-
-                m_StyleProperties.Add(new StyleProperty(propertyId, 0, 0, value));
-            }
-        }
-
-        internal void SetUIFixedLengthProperty(StylePropertyId propertyId, UIFixedLength length) {
-            if (length.unit == UIFixedUnit.Unset || !FloatUtil.IsDefined(length.value)) {
-                RemoveProperty(propertyId);
-            }
-            else {
-                SetProperty(propertyId, FloatUtil.EncodeToInt(length.value), (int) length.unit);
-            }
-        }
-
-        internal void SetProperty(StyleProperty property) {
-            if (property.IsUnset) {
-                m_StyleProperties.Remove(property);
                 return;
             }
+
             // todo -- binary search or int map
-            StylePropertyId propertyId = property.propertyId;
             for (int i = 0; i < m_StyleProperties.Count; i++) {
                 if (m_StyleProperties[i].propertyId == propertyId) {
                     m_StyleProperties[i] = property;
@@ -211,51 +156,26 @@ namespace UIForia.Rendering {
             m_StyleProperties.Add(property);
         }
         
-        internal void SetProperty(StylePropertyId propertyId, int value0, int value1 = 0) {
+        public StyleProperty GetProperty(StylePropertyId propertyId) {
             for (int i = 0; i < m_StyleProperties.Count; i++) {
                 if (m_StyleProperties[i].propertyId == propertyId) {
-                    m_StyleProperties[i] = new StyleProperty(propertyId, value0, value1);
-                    return;
+                    return m_StyleProperties[i];
                 }
             }
 
-            m_StyleProperties.Add(new StyleProperty(propertyId, value0, value1));
+            return new StyleProperty(propertyId, int.MaxValue, int.MaxValue);
         }
-
-        internal void SetIntProperty(StylePropertyId propertyId, int value) {
-            if (!IntUtil.IsDefined(value)) {
-                RemoveProperty(propertyId);
-                return;
+       
+        public bool TryGetProperty(StylePropertyId propertyId, out StyleProperty property) {
+            for (int i = 0; i < m_StyleProperties.Count; i++) {
+                if (m_StyleProperties[i].propertyId == propertyId) {
+                    property = m_StyleProperties[i];
+                    return true;
+                }
             }
 
-            SetProperty(propertyId, value);
-        }
-
-        internal void SetFloatProperty(StylePropertyId propertyId, float value) {
-            if (!FloatUtil.IsDefined(value)) {
-                RemoveProperty(propertyId);
-                return;
-            }
-
-            SetProperty(propertyId, FloatUtil.EncodeToInt(value));
-        }
-
-        internal void SetEnumProperty(StylePropertyId propertyId, int value0) {
-            if (value0 == 0 || !IntUtil.IsDefined(value0)) {
-                RemoveProperty(propertyId);
-                return;
-            }
-
-            SetProperty(propertyId, value0);
-        }
-
-        internal void SetColorProperty(StylePropertyId propertyId, Color color) {
-            if (!ColorUtil.IsDefined(color)) {
-                RemoveProperty(propertyId);
-                return;
-            }
-
-            SetProperty(propertyId, new StyleColor(color).rgba);
+            property = default(StyleProperty);
+            return false;
         }
 
     }

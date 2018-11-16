@@ -1,8 +1,4 @@
 using System;
-using System.Collections.Generic;
-using UIForia.Rendering;
-using Shapes2D;
-using UIForia.Extensions;
 using UIForia.Systems;
 using UIForia.Util;
 using UnityEngine;
@@ -122,7 +118,7 @@ namespace UIForia.Rendering {
             for (int i = end - 1; i >= start; i--) {
                 RenderData data = entries[i].renderData;
                 UIElement element = data.element;
-                ComputedStyle style = element.ComputedStyle;
+                UIStyleSet style = element.style;
                 
                 if ((batchKey & MaterialBatchKey.Border) != 0) {
                     m_BorderSizes[instanceId] = style.ResolvedBorder;
@@ -383,7 +379,7 @@ namespace UIForia.Rendering {
 
             for (int i = start; i < end; i++) {
                 RenderData data = drawList[i];
-                ComputedStyle style = data.element.ComputedStyle;
+                UIStyleSet style = data.element.style;
 
                 Texture2D background = style.BackgroundImage;
                 // todo! remove this

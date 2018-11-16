@@ -11,8 +11,6 @@ namespace UIForia.Rendering {
             this.state = state;
         }
 
-       
-        
     }
 
 }

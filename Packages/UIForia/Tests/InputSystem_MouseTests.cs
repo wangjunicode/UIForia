@@ -12,9 +12,9 @@ public class InputSystemTests {
     
         <UITemplate>
             <Contents style.layoutType='Fixed'>
-                <Group onMouseDown='{HandleClickedChild(0)}' style.translation='vec2(0, 0)'   style.size='size(100, 20)'/>
-                <Group onMouseDown='{HandleClickedChild(1)}' style.translation='vec2(100, 0)' style.size='size(100, 20)'/>
-                <Group onMouseDown='{HandleClickedChild(2)}' style.translation='vec2(200, 0)' style.size='size(100, 20)'/>
+                <Group onMouseDown='{HandleClickedChild(0)}' style.translation='vec2(0, 0)'   style.preferredSize='size(100, 20)'/>
+                <Group onMouseDown='{HandleClickedChild(1)}' style.translation='vec2(100, 0)' style.preferredSize='size(100, 20)'/>
+                <Group onMouseDown='{HandleClickedChild(2)}' style.translation='vec2(200, 0)' style.preferredSize='size(100, 20)'/>
             </Contents>
         </UITemplate>
 
@@ -46,21 +46,21 @@ public class InputSystemTests {
                        onMouseMove='{HandleMouseMoveChild($event, 0)}'
                        onMouseHover='{HandleMouseHoverChild($event, 0)}'
                        style.translation='vec2(0, 0)' 
-                       style.size='size(100, 20)'
+                       style.preferredSize='size(100, 20)'
                 />
                 <Group onMouseDown.capture='{HandleMouseDownChild($event, 1)}'
                        onMouseUp.capture='{HandleMouseUpChild($event, 1)}'
                        onMouseEnter.capture='{HandleMouseEnterChild($event, 1)}'
                        onMouseMove='{HandleMouseMoveChild($event, 1)}'
                        style.translation='vec2(100, 0)' 
-                       style.size='size(100, 20)'
+                       style.preferredSize='size(100, 20)'
                 />
                 <Group onMouseDown='{HandleMouseDownChild($event, 2)}' 
                        onMouseUp='{HandleMouseUpChild($event, 2)}'
                        onMouseEnter='{HandleMouseEnterChild($event, 2)}'
                        onMouseExit='{HandleMouseExitChild($event, 2)}'
                        style.translation='vec2(200, 0)'
-                       style.size='size(100, 20)'
+                       style.preferredSize='size(100, 20)'
                 />
             </Contents>
         </UITemplate>

@@ -1,8 +1,6 @@
 using System;
 using System.Collections.Generic;
-using System.Globalization;
 using System.IO;
-using System.Linq;
 using Shapes2D;
 using TMPro;
 using UIForia.Layout;
@@ -20,10 +18,12 @@ namespace UIForia.Editor {
         NotInherited,
         Inherited
 
-    }
-
+    }    
+    
     public static class CodeGen {
 
+        // new Struct("preferredSize", typeof(UIMeasurement), "aliases", "bindingName");
+        
         private static readonly PropertyGenerator[] properties = {
             // Overflow
             new PropertyGenerator<Overflow>(StylePropertyId.OverflowX, Overflow.None),
@@ -215,6 +215,7 @@ namespace UIForia.Editor {
         [MenuItem("UIForia/Regenerate Style Proxy")]
         public static void GenerateStyleProxies() {
             string generatedPath = Path.GetFullPath(Path.Combine(UnityEngine.Application.dataPath, "../Packages/UIForia/Src/_Generated.cs"));
+            string generatedPath2 = Path.GetFullPath(Path.Combine(UnityEngine.Application.dataPath, "../Packages/UIForia/Src/_Generated2.cs"));
 
             string template = @"
 namespace UIForia.Rendering {
@@ -236,7 +237,7 @@ namespace UIForia.Rendering {
 
     }
 
-    public partial class UIStyle2 {
+    public partial class UIStyle {
     
         __REPLACE__UIStyle
         
@@ -244,7 +245,9 @@ namespace UIForia.Rendering {
 
     public partial class UIStyleSet {
     
-        __REPLACE__UIStyleSet
+        __REPLACE__UIStyleSet_Properties
+
+        __REPLACE__UIStyleSet_Methods
 
     }
 
@@ -272,6 +275,32 @@ __REPLACE_StyleUtil__IsInherited
 
 }";
 
+            const string StyleBindingTemplate = @"using UIForia.Compilers.AliasSource;
+using UIForia.Rendering;    
+
+namespace UIForia.StyleBindings {
+    __REPLACE_StyleBindingClasses
+}
+
+namespace UIForia.Compilers {
+
+    public partial class StyleBindingCompiler {
+
+__REPLACE_StyleBindingCompiler_EnumSources
+
+        private StyleBindings.StyleBinding DoCompile(string key, string value, Target targetState) {
+            switch(targetState.property.ToLower()) {
+
+__REPLACE_StyleBindingCompiler_DoCompile
+
+            }
+            return null;
+        }
+
+    }
+
+}";
+
             string retn = "";
             for (int i = 0; i < properties.Length; i++) {
                 retn += InflatePropertyTemplate(properties[i]);
@@ -292,15 +321,22 @@ __REPLACE_StyleUtil__IsInherited
                 retn += InflateUIStyleSetProperties(properties[i]);
             }
 
-            template = template.Replace("__REPLACE__UIStyleSet", retn);
+            template = template.Replace("__REPLACE__UIStyleSet_Properties", retn);
             retn = "";
-            
+
+            for (int i = 0; i < properties.Length; i++) {
+                retn += InflateStyleSetMethods(properties[i]);
+            }
+
+            template = template.Replace("__REPLACE__UIStyleSet_Methods", retn);
+            retn = "";
+
             for (int i = 0; i < properties.Length; i++) {
                 if (properties[i].inheritanceType == InheritanceType.Inherited) {
                     retn += $"                    case StylePropertyId.{properties[i].propertyIdName}: return true;\n";
                 }
             }
-            
+
             template = template.Replace("__REPLACE_StyleUtil__IsInherited", retn);
             retn = "";
 
@@ -309,18 +345,131 @@ __REPLACE_StyleUtil__IsInherited
                     retn += $"                    case StylePropertyId.{properties[i].propertyIdName}: return true;\n";
                 }
             }
-            
+
             template = template.Replace("__REPLACE_StyleUtil__CanAnimate", retn);
             retn = "";
 
             for (int i = 0; i < properties.Length; i++) {
                 retn += UIStyle_Property(properties[i]);
             }
-            
+
             template = template.Replace("__REPLACE__UIStyle", retn);
 
-            
             File.WriteAllText(generatedPath, template);
+
+            template = StyleBindingTemplate;
+            template = template.Replace("__REPLACE_StyleBindingClasses", CreateStyleBindingClasses());
+            retn = InflateStyleBindingCompilerDoCompile();
+            template = template.Replace("__REPLACE_StyleBindingCompiler_DoCompile", retn);
+            retn = CreateEnumAliasSources();
+            template = template.Replace("__REPLACE_StyleBindingCompiler_EnumSources", retn);
+
+            File.WriteAllText(generatedPath2, template);
+        }
+
+        private const string BaseStyleBindingTemplate = @"        
+    public class StyleBinding___NAME__ : StyleBinding {
+
+        public readonly Expression<__TYPE__> expression;
+        public readonly StylePropertyId propertyId;
+        
+        public StyleBinding___NAME__(string propertyName, StylePropertyId propertyId, StyleState state, Expression<__TYPE__> expression)
+            : base(propertyName, state) {
+            this.propertyId = propertyId;
+            this.expression = expression;
+        }
+
+        public override void Execute(UIElement element, UITemplateContext context) {
+            if (!element.style.IsInState(state)) return;
+
+            var oldValue = element.style.m_PropertyMap[(int)propertyId].As__CAST_TYPE__;
+            var value = expression.EvaluateTyped(context);
+            if (value != oldValue) {
+                element.style.SetPropertyValueInState(__STYLE_PROPERTY_CONSTRUCTOR__, state);
+            }
+        }
+
+        public override bool IsConstant() {
+            return expression.IsConstant();
+        }
+
+        public override void Apply(UIStyle style, UITemplateContext context) {
+            var value = expression.EvaluateTyped(context);
+            style.SetProperty(__STYLE_PROPERTY_CONSTRUCTOR__);
+        }
+
+        public override void Apply(UIStyleSet styleSet, UITemplateContext context) {
+            var value = expression.EvaluateTyped(context);
+            styleSet.SetPropertyValueInState(__STYLE_PROPERTY_CONSTRUCTOR__, state);
+        }
+
+    }
+";
+
+        private static string CreateStyleBindingClasses() {
+            HashSet<string> templates = new HashSet<string>();
+            string retn = "";
+            for (int i = 0; i < properties.Length; i++) {
+                PropertyGenerator generator = properties[i];
+                string key = generator.GetFullTypeName();
+
+
+                if (!templates.Contains(key)) {
+                    retn += BaseStyleBindingTemplate
+                        .Replace("__NAME__", generator.GetPrintableTypeName())
+                        .Replace("__TYPE__", generator.GetFullTypeName())
+                        .Replace("__CAST_TYPE__", generator.GetCastAccessor())
+                        .Replace("__STYLE_PROPERTY_CONSTRUCTOR__", generator.StylePropertyConstructorParameterized("propertyId"));
+                }
+
+                templates.Add(key);
+            }
+
+            return retn;
+        }
+
+        private static string CreateEnumAliasSources() {
+            string retn = "";
+            HashSet<Type> templates = new HashSet<Type>();
+            for (int i = 0; i < properties.Length; i++) {
+                PropertyGenerator generator = properties[i];
+                if (generator.type.IsEnum) {
+                    if (!templates.Contains(generator.type)) {
+                        templates.Add(generator.type);
+                        retn += $"        private static readonly EnumAliasSource<{generator.GetFullTypeName()}> s_EnumSource_{generator.GetPrintableTypeName()} = new EnumAliasSource<{generator.GetFullTypeName()}>();\n";
+                    }
+                }
+            }
+
+            return retn;
+        }
+
+        private static string InflateStyleBindingCompilerDoCompile() {
+            string retn = "";
+            for (int i = 0; i < properties.Length; i++) {
+                PropertyGenerator generator = properties[i];
+
+                string name = "UIForia.Rendering.StylePropertyId." + generator.propertyIdName;
+                string bindingName = generator.GetPrintableTypeName();
+                string type = generator.GetFullTypeName();
+                retn += $@"case ""{generator.propertyIdName.ToLower()}"":
+                    return new UIForia.StyleBindings.StyleBinding_{bindingName}(""{generator.propertyIdName}"", {name}, targetState.state, Compile<{type}>(value, {generator.GetAliasSources()}));                
+                ";
+            }
+
+            return retn;
+        }
+
+        private static string InflateStyleSetMethods(PropertyGenerator propertyGenerator) {
+            return $@"
+        public void Set{propertyGenerator.propertyIdName}({propertyGenerator.GetFullTypeName()} value, {nameof(StyleState)} state) {{
+            {propertyGenerator.GetStyleSetSetter()};
+        }}
+
+        public {propertyGenerator.GetFullTypeName()} Get{propertyGenerator.propertyIdName}({nameof(StyleState)} state) {{
+            return {propertyGenerator.GetStyleSetGetter()};
+        }}
+        ";
         }
 
         private static string InflateStylePropertyUnset(PropertyGenerator propertyGenerator) {
@@ -346,7 +495,7 @@ __REPLACE_StyleUtil__IsInherited
 
         private static string InflateUIStyleSetProperties(PropertyGenerator propertyGenerator) {
             string propertyTemplate;
-            
+
             if (propertyGenerator.inheritanceType == InheritanceType.Inherited) {
                 propertyTemplate = @"
 
@@ -506,16 +655,12 @@ public partial class UIStyle {";
             [System.Diagnostics.DebuggerStepThrough]
             get {{ return {UIStyle_GetReaderType(propertyGenerator)} }}
             [System.Diagnostics.DebuggerStepThrough]
-            set {{ {UIStyle_GetWriterType(propertyGenerator)} }}
+            set {{ SetProperty({propertyGenerator.StylePropertyConstructor}); }}
         }}
             ";
             return template
                 .Replace("__TYPE__", propertyGenerator.GetFullTypeName())
                 .Replace("__NAME__", propertyGenerator.propertyIdName);
-//            return $"public {propertyGenerator.GetTypeName()} {propertyGenerator.propertyIdName} {{\n\t\t" +
-//                   $"\t[DebuggerStepThrough] get {{ return {UIStyle_GetReaderType(propertyGenerator)} }}\n" +
-//                   $"\t\tset {{ {UIStyle_GetWriterType(propertyGenerator)} }} " +
-//                   "\n\t\t}\n\n";
         }
 
         private static string DefaultValue(PropertyGenerator propertyGenerator) {
@@ -672,225 +817,6 @@ public partial class UIStyle {";
             }
 
             throw new ArgumentOutOfRangeException();
-        }
-
-    }
-
-    public abstract class AnimatedPropertyGenerator : PropertyGenerator {
-
-        protected AnimatedPropertyGenerator(StylePropertyId propertyId, Type type, object defaultValue, InheritanceType inheritanceType, string defaultValueOverride)
-            : base(propertyId, type, defaultValue, inheritanceType, defaultValueOverride) { }
-
-    }
-
-    public class AnimatedPropertyGenerator<T> : AnimatedPropertyGenerator {
-
-        public AnimatedPropertyGenerator(StylePropertyId propertyId, T defaultValue, InheritanceType inheritanceType = InheritanceType.NotInherited, string defaultValueOverride = null)
-            : base(propertyId, typeof(T), defaultValue, inheritanceType, defaultValueOverride) { }
-
-    }
-
-    public class PropertyGenerator<T> : PropertyGenerator {
-
-        public PropertyGenerator(StylePropertyId propertyId, T defaultValue, InheritanceType inheritanceType = InheritanceType.NotInherited, string defaultValueOverride = null)
-            : base(propertyId, typeof(T), defaultValue, inheritanceType, defaultValueOverride) { }
-
-    }
-
-    public class PropertyGenerator {
-
-        public StylePropertyId propertyId;
-        public readonly Type type;
-        public readonly InheritanceType inheritanceType;
-        public readonly string propertyIdName;
-        private readonly object defaultValue;
-        private readonly string defaultValueOverride;
-
-        protected PropertyGenerator(StylePropertyId propertyId, Type type, object defaultValue, InheritanceType inheritanceType, string defaultValueOverride) {
-            this.propertyId = propertyId;
-            this.propertyIdName = StyleUtil.GetPropertyName(propertyId);
-            this.type = type;
-            this.inheritanceType = inheritanceType;
-            this.defaultValue = defaultValue;
-            this.defaultValueOverride = defaultValueOverride;
-        }
-
-        public string AsStyleProperty {
-            get {
-                string preamble = $"new StyleProperty({nameof(StylePropertyId)}.{propertyIdName}, ";
-                if (typeof(int) == type
-                    || typeof(float) == type
-                    || typeof(UIMeasurement) == type
-                    || typeof(UIFixedLength) == type
-                    || typeof(GridTrackSize) == type
-                    || typeof(Color) == type
-                ) {
-                    return preamble + $"{GetDefaultValue()})";
-                }
-
-                if (type.IsEnum) {
-                    return preamble + $"(int){GetDefaultValue()})";
-                }
-
-                return preamble + $"0, 0, {GetDefaultValue()})";
-            }
-        }
-
-        public string StylePropertyConstructor {
-            get {
-                if (type.IsEnum) {
-                    return $"new StyleProperty(StylePropertyId.{propertyIdName}, (int)value)";
-                }
-
-                if (type == typeof(int)) {
-                    return $"new StyleProperty(StylePropertyId.{propertyIdName}, value)";
-                }
-
-                if (type == typeof(float)) {
-                    return $"new StyleProperty(StylePropertyId.{propertyIdName}, value)";
-                }
-
-                if (typeof(UIMeasurement) == type
-                    || typeof(UIFixedLength) == type
-                    || typeof(GridTrackSize) == type
-                    || typeof(Color) == type
-                ) {
-                    return $"new StyleProperty(StylePropertyId.{propertyIdName}, value)";
-                }
-
-                return $"new StyleProperty(StylePropertyId.{propertyIdName}, 0, 0, value)";
-            }
-        }
-
-        public string GetIsUnset() {
-            if (type.IsEnum) {
-                return $"(int){nameof(StyleProperty.valuePart0)} == 0";
-            }
-
-            if (type == typeof(float)) {
-                return $"!FloatUtil.IsDefined({nameof(StyleProperty.floatValue)})";
-            }
-
-            if (type == typeof(int)) {
-                return $"!IntUtil.IsDefined({nameof(StyleProperty.valuePart0)})";
-            }
-
-            if (type == typeof(UIMeasurement)) {
-                return $"!FloatUtil.IsDefined({nameof(StyleProperty.valuePart0)}) || {nameof(StyleProperty.valuePart1)} == 0";
-            }
-
-            if (type == typeof(UIFixedLength)) {
-                return $"!FloatUtil.IsDefined({nameof(StyleProperty.valuePart0)}) || {nameof(StyleProperty.valuePart1)} == 0";
-            }
-
-            if (type == typeof(GridTrackSize)) {
-                return $"!FloatUtil.IsDefined({nameof(StyleProperty.valuePart0)}) || {nameof(StyleProperty.valuePart1)} == 0";
-            }
-
-            if (type == typeof(Color)) {
-                return $"!ColorUtil.IsDefined(new StyleColor({nameof(StyleProperty.valuePart0)}))";
-            }
-
-            return $"{nameof(StyleProperty.objectField)} == null";
-        }
-
-        public string GetUIStyleSetProperty() {
-            if (type.IsEnum) {
-                return $"SetEnumProperty(StylePropertyId.{propertyIdName}, property.valuePart0);";
-            }
-
-            if (type == typeof(int)) {
-                return $"SetIntProperty(StylePropertyId.{propertyIdName}, property.valuePart0);";
-            }
-
-            if (type == typeof(float)) {
-                return $"SetIntProperty(StylePropertyId.{propertyIdName}, property.floatValue);";
-            }
-
-            if (type == typeof(UIMeasurement)) {
-                return $"SetUIMeasurementProperty(StylePropertyId.{propertyIdName}, property);";
-            }
-
-            if (type == typeof(UIFixedLength)) { }
-
-
-            if (typeof(UIMeasurement) == type
-                || typeof(UIFixedLength) == type
-                || typeof(GridTrackSize) == type
-                || typeof(Color) == type
-            ) {
-                return $"new StyleProperty(StylePropertyId.{propertyIdName}, value)";
-            }
-
-            return $"new StyleProperty(StylePropertyId.{propertyIdName}, 0, 0, value)";
-        }
-
-        public string GetTypeName() {
-            if (type == typeof(IReadOnlyList<GridTrackSize>)) {
-                return "IReadOnlyList<UIForia.Layout.LayoutTypes.GridTrackSize>";
-            }
-
-            if (type == typeof(float)) return "float";
-            if (type == typeof(int)) return "int";
-            return type.Name;
-        }
-
-        public string GetFullTypeName() {
-            if (type == typeof(IReadOnlyList<GridTrackSize>)) {
-                return "System.Collections.Generic.IReadOnlyList<UIForia.Layout.LayoutTypes.GridTrackSize>";
-            }
-
-            if (type == typeof(float)) return "float";
-            if (type == typeof(int)) return "int";
-            return type.FullName;
-        }
-
-        public string GetDefaultValue() {
-            if (defaultValueOverride != null) {
-                return defaultValueOverride;
-            }
-
-            if (type.IsEnum) {
-                return $"{type.FullName}.{Enum.GetName(type, defaultValue)}";
-            }
-
-            if (defaultValue is UIMeasurement) {
-                UIMeasurement measurement = (UIMeasurement) defaultValue;
-                return $"new {nameof(UIMeasurement)}({measurement.value.ToString(CultureInfo.InvariantCulture)}, {nameof(UIMeasurementUnit)}.{Enum.GetName(typeof(UIMeasurementUnit), measurement.unit)})";
-            }
-
-            if (defaultValue is UIFixedLength) {
-                UIFixedLength length = (UIFixedLength) defaultValue;
-                string v = Enum.GetName(typeof(UIFixedUnit), length.unit);
-                return $"new {nameof(UIFixedLength)}({length.value.ToString(CultureInfo.InvariantCulture)}, {nameof(UIFixedUnit)}.{v})";
-            }
-
-            if (defaultValue is GridTrackSize) {
-                GridTrackSize size = (GridTrackSize) defaultValue;
-                return $"new {nameof(GridTrackSize)}({size.minValue.ToString(CultureInfo.InvariantCulture)}, {nameof(GridTemplateUnit)}.{Enum.GetName(typeof(GridTemplateUnit), size.minUnit)})";
-            }
-
-            if (defaultValue is Color) {
-                Color c = (Color) defaultValue;
-                return $"new Color({c.r.ToString(CultureInfo.InvariantCulture)}f, {c.g.ToString(CultureInfo.InvariantCulture)}f, {c.b.ToString(CultureInfo.InvariantCulture)}f, {c.a.ToString(CultureInfo.InvariantCulture)}f)";
-            }
-
-            if (defaultValue == null) return "null";
-
-            return defaultValue.ToString();
-        }
-
-        public string GetCastAccessor() {
-            if (typeof(IReadOnlyList<GridTrackSize>) == type) {
-                return "GridTemplate";
-            }
-
-            if (typeof(TMP_FontAsset) == type) {
-                return "Font";
-            }
-
-            string n = GetTypeName();
-            return n.First().ToString().ToUpper() + n.Substring(1);
         }
 
     }

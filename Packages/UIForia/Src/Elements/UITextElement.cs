@@ -88,15 +88,15 @@ namespace UIForia {
             if (textInfo.charInfos != null) ArrayPool<CharInfo>.Release(ref textInfo.charInfos);
 
             // todo release text stuff
-            textInfo = TextUtil.ProcessText(text, collapseSpaces, preserveNewlines, style.computedStyle.TextTransform);
+            textInfo = TextUtil.ProcessText(text, collapseSpaces, preserveNewlines, style.TextTransform);
             textInfo.spanCount = 1;
             textInfo.spanInfos = ArrayPool<SpanInfo>.GetMinSize(1);
             textInfo.spanInfos[0].wordCount = textInfo.wordCount;
-            textInfo.spanInfos[0].font = style.computedStyle.TextFontAsset;
+            textInfo.spanInfos[0].font = style.TextFontAsset;
             textInfo.spanInfos[0].charCount = textInfo.charCount;
-            textInfo.spanInfos[0].fontSize = style.computedStyle.TextFontSize;
-            textInfo.spanInfos[0].fontStyle = style.computedStyle.TextFontStyle;
-            textInfo.spanInfos[0].alignment = style.computedStyle.TextAlignment;
+            textInfo.spanInfos[0].fontSize = style.TextFontSize;
+            textInfo.spanInfos[0].fontStyle = style.TextFontStyle;
+            textInfo.spanInfos[0].alignment = style.TextAlignment;
 
             ComputeCharacterAndWordSizes(textInfo);
         }
@@ -507,7 +507,7 @@ namespace UIForia {
             Vector4[] tangents = new Vector4[sizeX4];
             Color32[] colors = new Color32[sizeX4];
 
-            Color32 color = style.computedStyle.TextColor;
+            Color32 color = style.TextColor;
 
             int idx_x4 = 0;
             int idx_x6 = 0;
@@ -570,11 +570,10 @@ namespace UIForia {
         }
 
         public Material GetMaterial() {
-            ComputedStyle computedStyle = ComputedStyle;
-            Material fontMaterial = computedStyle.TextFontAsset.material;
+            Material fontMaterial = style.TextFontAsset.material;
 
-            if (fontAsset != computedStyle.TextFontAsset) {
-                fontAsset = computedStyle.TextFontAsset;
+            if (fontAsset != style.TextFontAsset) {
+                fontAsset = style.TextFontAsset;
                 material.mainTexture = fontMaterial.mainTexture;
                 material.SetFloat(ShaderUtilities.ID_GradientScale, fontMaterial.GetFloat(ShaderUtilities.ID_GradientScale));
                 material.SetFloat(ShaderUtilities.ID_WeightNormal, fontMaterial.GetFloat(ShaderUtilities.ID_WeightNormal));
@@ -585,11 +584,11 @@ namespace UIForia {
                 material.SetVector(s_TextureSizeKey, new Vector4(material.mainTexture.width, material.mainTexture.height));
             }
 
-            float fontScale = (computedStyle.TextFontSize / fontAsset.fontInfo.PointSize) * fontAsset.fontInfo.Scale;
+            float fontScale = (style.TextFontSize / fontAsset.fontInfo.PointSize) * fontAsset.fontInfo.Scale;
             ;
             material.SetFloat(s_FontScaleKey, fontScale);
             // todo -- text styles & keywords, try to use the same materials where possible
-//            material.SetVector("_OutlineColor", computedStyle.TextOutlineColor);
+//            material.SetVector("_OutlineColor", style.TextOutlineColor);
 //            material.SetVector("_OutlineSettings", new Vector4(computedStyle.TextOutlineWidth, computedStyle.TextOutlineSoftness));
 //            
 //            Vector4 glowSettings = new Vector4(
@@ -694,8 +693,8 @@ namespace UIForia {
         }
 
         public float GetLineHeight() {
-            TMP_FontAsset asset = ComputedStyle.TextFontAsset;
-            float scale = (ComputedStyle.TextFontSize / asset.fontInfo.PointSize) * asset.fontInfo.Scale;
+            TMP_FontAsset asset = style.TextFontAsset;
+            float scale = (style.TextFontSize / asset.fontInfo.PointSize) * asset.fontInfo.Scale;
             return (asset.fontInfo.Ascender - asset.fontInfo.Descender) * scale;
         }
 

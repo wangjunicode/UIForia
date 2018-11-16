@@ -133,7 +133,7 @@ namespace UIForia.Editor {
         private void DrawComputedStyle() {
             // style name, style value, source
 
-            ComputedStyle style = selectedElement.ComputedStyle;
+            UIStyleSet style = selectedElement.style;
 
             GUILayout.BeginHorizontal();
             DrawStyleStateButton("Hover", StyleState.Hover);
@@ -169,7 +169,8 @@ namespace UIForia.Editor {
                     }
 
                     string source = selectedElement.style.GetPropertySource(propertyId);
-                    properties.Add(ValueTuple.Create(source, style.GetProperty(propertyId)));
+                    // todo double check this is right
+                    properties.Add(ValueTuple.Create(source, style.GetPropertyValue(propertyId)));
                 }
             }
 
@@ -303,16 +304,16 @@ namespace UIForia.Editor {
 
                 if (selectedElement is UITextElement && (showTextBaseline || showTextDescender)) {
                     baselineMesh = MeshUtil.ResizeStandardUIMesh(baselineMesh, new Size(width, height + 100));
-                    ComputedStyle style = selectedElement.ComputedStyle;
+                    UIStyleSet style = selectedElement.style;
                     TMP_FontAsset asset = style.TextFontAsset;
                     float s = (style.TextFontSize / asset.fontInfo.PointSize) * asset.fontInfo.Scale;
 
                     lineMaterial = lineMaterial ? lineMaterial : Resources.Load<Material>("Materials/UIForiaTextDebug");
-                    float offset = TextLayoutBox.GetLineOffset(selectedElement.ComputedStyle.TextFontAsset);
+                    float offset = TextLayoutBox.GetLineOffset(style.TextFontAsset);
                     if (showTextBaseline) {
                         lineMaterial.SetFloat(s_BaseLineKey,
                             offset + padding.top + border.top +
-                            (s * selectedElement.ComputedStyle.TextFontAsset.fontInfo.Ascender));
+                            (s * style.TextFontAsset.fontInfo.Ascender));
                     }
                     else {
                         lineMaterial.SetFloat(s_BaseLineKey, -1);
@@ -321,8 +322,8 @@ namespace UIForia.Editor {
                     if (showTextDescender) {
                         lineMaterial.SetFloat(s_DescenderKey,
                             offset + padding.top + border.top +
-                            (s * selectedElement.ComputedStyle.TextFontAsset.fontInfo.Ascender) +
-                            (s * -selectedElement.ComputedStyle.TextFontAsset.fontInfo.Descender)
+                            (s * style.TextFontAsset.fontInfo.Ascender) +
+                            (s * -style.TextFontAsset.fontInfo.Descender)
                         );
                     }
                     else {

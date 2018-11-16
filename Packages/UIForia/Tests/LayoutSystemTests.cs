@@ -14,9 +14,9 @@ public class LayoutSystemTests {
         <UITemplate>
             <Style path='LayoutSystemTests+LayoutTestThing+Style'/>
             <Contents style.layoutType='Flex'>
-                <Group x-id='child0' style='child1' style.width='100f' style.height='100f'/>
-                <Group x-id='child1' style.width='100f' style.height='100f'/>
-                <Group x-id='child2' style.width='100f' style.height='100f'/>
+                <Group x-id='child0' style='child1' style.preferredWidth='100f' style.preferredHeight='100f'/>
+                <Group x-id='child1' style.preferredWidth='100f' style.preferredHeight='100f'/>
+                <Group x-id='child2' style.preferredWidth='100f' style.preferredHeight='100f'/>
             </Contents>
         </UITemplate>
     ")]
@@ -95,11 +95,11 @@ public class LayoutSystemTests {
         <UITemplate>
             <Style path='LayoutSystemTests+LayoutTestThing+Style'/>
             <Contents style.layoutType='Flex'>
-                <Group x-id='child0' style.width='100f' style.height='100f'/>
-                <Group x-id='child1' style.width='content(100)' style.height='content(100)'>
-                    <Group x-id='nested-child' style.width='300f' style.height='50f'/>
+                <Group x-id='child0' style.preferredWidth='100f' style.preferredHeight='100f'/>
+                <Group x-id='child1' style.preferredWidth='content(100)' style.preferredHeight='content(100)'>
+                    <Group x-id='nested-child' style.preferredWidth='300f' style.preferredHeight='50f'/>
                 </Group>
-                <Group x-id='child2' style.width='100f' style.height='100f'/>
+                <Group x-id='child2' style.preferredWidth='100f' style.preferredHeight='100f'/>
             </Contents>
         </UITemplate>
         ";
@@ -115,11 +115,11 @@ public class LayoutSystemTests {
         <UITemplate>
             <Style path='LayoutSystemTests+LayoutTestThing+Style'/>
             <Contents style.layoutType='Flex'>
-                <Group x-id='child0' style.width='100f' style.height='100f'/>
-                <Group x-id='child1' style.width='content(100)' style.height='content(100)'>
-                    <Group x-id='nested-child' style.width='300f' style.height='50f'/>
+                <Group x-id='child0' style.preferredWidth='100f' style.preferredHeight='100f'/>
+                <Group x-id='child1' style.preferredWidth='content(100)' style.preferredHeight='content(100)'>
+                    <Group x-id='nested-child' style.preferredWidth='300f' style.preferredHeight='50f'/>
                 </Group>
-                <Group x-id='child2' style.width='100f' style.height='100f'/>
+                <Group x-id='child2' style.preferredWidth='100f' style.preferredHeight='100f'/>
             </Contents>
         </UITemplate>
         ";
@@ -138,11 +138,11 @@ public class LayoutSystemTests {
         <UITemplate>
             <Style path='LayoutSystemTests+LayoutTestThing+Style'/>
             <Contents style.layoutType='Flex'>
-                <Group x-id='child0' style.width='100f' style.height='100f'/>
-                <Group x-id='child1' style.width='400f' style.height='content(100)'>
-                    <Group x-id='nested-child' style.width='300f' style.height='50f'/>
+                <Group x-id='child0' style.preferredWidth='100f' style.preferredHeight='100f'/>
+                <Group x-id='child1' style.preferredWidth='400f' style.preferredHeight='content(100)'>
+                    <Group x-id='nested-child' style.preferredWidth='300f' style.preferredHeight='50f'/>
                 </Group>
-                <Group x-id='child2' style.width='100f' style.height='100f'/>
+                <Group x-id='child2' style.preferredWidth='100f' style.preferredHeight='100f'/>
             </Contents>
         </UITemplate>
         ";
@@ -164,11 +164,11 @@ public class LayoutSystemTests {
         <UITemplate>
             <Style path='LayoutSystemTests+LayoutTestThing+Style'/>
             <Contents style.layoutType='Flex'>
-                <Group x-id='child0' style.width='100f' style.height='100f'/>
-                <Group x-id='child1' style.width='400f' style.height='300f'>
-                    <Group x-id='nested-child' style.width='300f' style.height='50f'/>
+                <Group x-id='child0' style.preferredWidth='100f' style.preferredHeight='100f'/>
+                <Group x-id='child1' style.preferredWidth='400f' style.preferredHeight='300f'>
+                    <Group x-id='nested-child' style.preferredWidth='300f' style.preferredHeight='50f'/>
                 </Group>
-                <Group x-id='child2' style.width='100f' style.height='100f'/>
+                <Group x-id='child2' style.preferredWidth='100f' style.preferredHeight='100f'/>
             </Contents>
         </UITemplate>
         ";
@@ -190,11 +190,11 @@ public class LayoutSystemTests {
         <UITemplate>
             <Style path='LayoutSystemTests+LayoutTestThing+Style'/>
             <Contents style.layoutType='Flex'>
-                <Group x-id='child0' style.width='100f' style.height='100f'/>
-                <Group x-id='child1' style.width='400f' style.height='300f'>
-                    <Group x-id='nested-child' style.width='300f' style.height='500f'/>
+                <Group x-id='child0' style.preferredWidth='100f' style.preferredHeight='100f'/>
+                <Group x-id='child1' style.preferredWidth='400f' style.preferredHeight='300f'>
+                    <Group x-id='nested-child' style.preferredWidth='300f' style.preferredHeight='500f'/>
                 </Group>
-                <Group x-id='child2' style.width='100f' style.height='100f'/>
+                <Group x-id='child2' style.preferredWidth='100f' style.preferredHeight='100f'/>
             </Contents>
         </UITemplate>
         ";
@@ -216,12 +216,12 @@ public class LayoutSystemTests {
         <UITemplate>
             <Style path='LayoutSystemTests+LayoutTestThing+Style'/>
             <Contents style.layoutType='Flex'>
-                <Group x-id='child0' style.width='100f' style.height='100f'/>
-                <Group x-id='child1' style.width='content(100)' style.height='content(100)'>
-                    <Group x-if='false' x-id='nested-child-1' style.width='300f' style.height='50f'/>
-                    <Group x-id='nested-child-2' style.width='200f' style.height='50f'/>
+                <Group x-id='child0' style.preferredWidth='100f' style.preferredHeight='100f'/>
+                <Group x-id='child1' style.preferredWidth='content(100)' style.preferredHeight='content(100)'>
+                    <Group x-if='false' x-id='nested-child-1' style.preferredWidth='300f' style.preferredHeight='50f'/>
+                    <Group x-id='nested-child-2' style.preferredWidth='200f' style.preferredHeight='50f'/>
                 </Group>
-                <Group x-id='child2' style.width='100f' style.height='100f'/>
+                <Group x-id='child2' style.preferredWidth='100f' style.preferredHeight='100f'/>
             </Contents>
         </UITemplate>
         ";
@@ -243,12 +243,12 @@ public class LayoutSystemTests {
         <UITemplate>
             <Style path='LayoutSystemTests+LayoutTestThing+Style'/>
             <Contents style.layoutType='Flex'>
-                <Group x-id='child0' style.width='100f' style.height='100f'/>
-                <Group x-id='child1' style.width='content(100)' style.height='content(100)'>
-                    <Group x-id='nested-child-1' style.width='300f' style.height='50f'/>
-                    <Group x-id='nested-child-2' style.width='200f' style.height='50f'/>
+                <Group x-id='child0' style.preferredWidth='100f' style.preferredHeight='100f'/>
+                <Group x-id='child1' style.preferredWidth='content(100)' style.preferredHeight='content(100)'>
+                    <Group x-id='nested-child-1' style.preferredWidth='300f' style.preferredHeight='50f'/>
+                    <Group x-id='nested-child-2' style.preferredWidth='200f' style.preferredHeight='50f'/>
                 </Group>
-                <Group x-id='child2' style.width='100f' style.height='100f'/>
+                <Group x-id='child2' style.preferredWidth='100f' style.preferredHeight='100f'/>
             </Contents>
         </UITemplate>
         ";
@@ -272,12 +272,12 @@ public class LayoutSystemTests {
         <UITemplate>
             <Style path='LayoutSystemTests+LayoutTestThing+Style'/>
             <Contents style.layoutType='Flex'>
-                <Group x-id='child0' style.width='100f' style.height='100f'/>
-                <Group x-id='child1' style='marker' style.width='content(100)' style.height='content(100)'>
-                    <Group x-id='nested-child-1' style.width='300f' style.height='50f'/>
-                    <Group x-id='nested-child-2' style.width='200f' style.height='50f'/>
+                <Group x-id='child0' style.preferredWidth='100f' style.preferredHeight='100f'/>
+                <Group x-id='child1' style='marker' style.preferredWidth='content(100)' style.preferredHeight='content(100)'>
+                    <Group x-id='nested-child-1' style.preferredWidth='300f' style.preferredHeight='50f'/>
+                    <Group x-id='nested-child-2' style.preferredWidth='200f' style.preferredHeight='50f'/>
                 </Group>
-                <Group x-id='child2' style.width='100f' style.height='100f'/>
+                <Group x-id='child2' style.preferredWidth='100f' style.preferredHeight='100f'/>
             </Contents>
         </UITemplate>
         ";
@@ -307,11 +307,11 @@ public class LayoutSystemTests {
         <UITemplate>
             <Style path='LayoutSystemTests+LayoutTestThing+Style'/>
             <Contents style.layoutType='Flex'>
-                <Group x-id='child0' style.width='100f' style.height='100f'/>
+                <Group x-id='child0' style.preferredWidth='100f' style.preferredHeight='100f'/>
                 <Repeat x-id='repeat' list='{list}'>
-                    <Group x-id='repeat-child-1' style.width='300f' style.height='50f'/>
+                    <Group x-id='repeat-child-1' style.preferredWidth='300f' style.preferredHeight='50f'/>
                 </Repeat>
-                <Group x-id='child2' style.width='100f' style.height='100f'/>
+                <Group x-id='child2' style.preferredWidth='100f' style.preferredHeight='100f'/>
             </Contents>
         </UITemplate>
         ";
@@ -326,9 +326,9 @@ public class LayoutSystemTests {
     public void AssignsProperClipRects_WithoutLayers() {
         string template = @"
         <UITemplate>
-            <Contents style.width='100f' style.height='200f'>
-                <Group x-id='child0' style.width='100f' style.height='100f'/>
-                <Group x-id='child1' style.width='100f' style.height='100f'/>
+            <Contents style.preferredWidth='100f' style.preferredHeight='200f'>
+                <Group x-id='child0' style.preferredWidth='100f' style.preferredHeight='100f'/>
+                <Group x-id='child1' style.preferredWidth='100f' style.preferredHeight='100f'/>
             </Contents>
         </UITemplate>
         ";
@@ -352,11 +352,11 @@ public class LayoutSystemTests {
         string template = @"
         <UITemplate>
             <Style path='LayoutSystemTests+LayoutTestThing+Style'/>
-            <Contents style.width='100f' style.height='200f'>
-                <Group x-id='child0' style.width='100f' style.height='100f'>
-                    <Group x-id='nested-child0' style.width='100f' style.height='100f'/>
+            <Contents style.preferredWidth='100f' style.preferredHeight='200f'>
+                <Group x-id='child0' style.preferredWidth='100f' style.preferredHeight='100f'>
+                    <Group x-id='nested-child0' style.preferredWidth='100f' style.preferredHeight='100f'/>
                 </Group>
-                <Group x-id='child1' style.width='100f' style.height='100f'/>
+                <Group x-id='child1' style.preferredWidth='100f' style.preferredHeight='100f'/>
             </Contents>
         </UITemplate>
         ";
@@ -374,11 +374,11 @@ public class LayoutSystemTests {
         string template = @"
         <UITemplate>
             <Style path='LayoutSystemTests+LayoutTestThing+Style'/>
-            <Contents style.width='100f' style.height='200f'>
-                <Group x-id='child0' style.width='50f' style.height='100f'>
-                    <Group x-id='nested-child0' style.width='100f' style.height='100f'/>
+            <Contents style.preferredWidth='100f' style.preferredHeight='200f'>
+                <Group x-id='child0' style.preferredWidth='50f' style.preferredHeight='100f'>
+                    <Group x-id='nested-child0' style.preferredWidth='100f' style.preferredHeight='100f'/>
                 </Group>
-                <Group x-id='child1' style.width='100f' style.height='100f'/>
+                <Group x-id='child1' style.preferredWidth='100f' style.preferredHeight='100f'/>
             </Contents>
         </UITemplate>
         ";
@@ -400,9 +400,9 @@ public class LayoutSystemTests {
         string template = @"
         <UITemplate>
             <Style path='LayoutSystemTests+LayoutTestThing+Style'/>
-            <Contents style.width='100f' style.height='200f'>
-                <Group x-id='child0' style.width='100f' style.height='100f'/>
-                <Group x-id='child1' style.width='100f' style.height='100f'/>
+            <Contents style.preferredWidth='100f' style.preferredHeight='200f'>
+                <Group x-id='child0' style.preferredWidth='100f' style.preferredHeight='100f'/>
+                <Group x-id='child1' style.preferredWidth='100f' style.preferredHeight='100f'/>
             </Contents>
         </UITemplate>
         ";
@@ -421,9 +421,9 @@ public class LayoutSystemTests {
         string template = @"
         <UITemplate>
             <Style path='LayoutSystemTests+LayoutTestThing+Style'/>
-            <Contents style.width='100f' style.height='200f'>
-                <Group x-id='child0' style.width='100f' style.height='100f'/>
-                <Group x-id='child1' style.width='100f' style.height='100f'/>
+            <Contents style.preferredWidth='100f' style.preferredHeight='200f'>
+                <Group x-id='child0' style.preferredWidth='100f' style.preferredHeight='100f'/>
+                <Group x-id='child1' style.preferredWidth='100f' style.preferredHeight='100f'/>
             </Contents>
         </UITemplate>
         ";
@@ -445,11 +445,11 @@ public class LayoutSystemTests {
         string template = @"
         <UITemplate>
             <Style path='LayoutSystemTests+LayoutTestThing+Style'/>
-            <Contents style.width='100f' style.height='200f'>
-                <Group x-id='child0' style.width='100f' style.height='100f'/>
-                <Group x-id='child1' style.width='100f' style.height='100f'/>
-                <Group x-id='child2' style.width='100f' style.height='100f'/>
-                <Group x-id='child3' style.width='100f' style.height='100f'/>
+            <Contents style.preferredWidth='100f' style.preferredHeight='200f'>
+                <Group x-id='child0' style.preferredWidth='100f' style.preferredHeight='100f'/>
+                <Group x-id='child1' style.preferredWidth='100f' style.preferredHeight='100f'/>
+                <Group x-id='child2' style.preferredWidth='100f' style.preferredHeight='100f'/>
+                <Group x-id='child3' style.preferredWidth='100f' style.preferredHeight='100f'/>
             </Contents>
         </UITemplate>
         ";

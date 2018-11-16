@@ -43,7 +43,7 @@ namespace UIForia.Animation {
                 StylePropertyId property = processedFrames[i].Item1;
                 List<ProcessedKeyFrame> frames = processedFrames[i].Item2;
                 if (frames[0].key != 0f) {
-                    frames.Insert(0, new ProcessedKeyFrame(0f, styleSet.computedStyle.GetProperty(property)));
+                    frames.Insert(0, new ProcessedKeyFrame(0f, styleSet.GetPropertyValue(property)));
                 }
             }
         }

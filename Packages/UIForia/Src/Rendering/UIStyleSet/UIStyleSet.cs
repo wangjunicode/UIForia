@@ -2,7 +2,6 @@ using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using UIForia.Animation;
-using UIForia.Layout.LayoutTypes;
 using UIForia.Systems;
 using UIForia.Util;
 using UnityEngine;
@@ -23,12 +22,10 @@ namespace UIForia.Rendering {
         private StyleState containedStates;
         private LightList<StyleEntry> appliedStyles;
 
-        private IntMap<StyleProperty> m_PropertyMap;
+        internal IntMap<StyleProperty> m_PropertyMap;
 
-        // temp -- replace w/ IntMap & remove computed style
         private List<UIStyleGroup> styleGroups;
         public readonly UIElement element;
-        public readonly ComputedStyle computedStyle;
         internal IStyleSystem styleSystem;
 
         private static readonly HashSet<StylePropertyId> s_DefinedMap = new HashSet<StylePropertyId>();
@@ -37,15 +34,102 @@ namespace UIForia.Rendering {
             this.element = element;
             this.currentState = StyleState.Normal;
             this.containedStates = StyleState.Normal;
-            this.computedStyle = new ComputedStyle(this);
             this.appliedStyles = new LightList<StyleEntry>();
             this.styleGroups = new List<UIStyleGroup>();
+            this.m_PropertyMap = new IntMap<StyleProperty>();
+            this.inheritedStyle = new UIStyle(); // add to group list
         }
 
         public string BaseStyleNames => styleNames;
         public StyleState CurrentState => currentState;
 
         public UIStyleSetStateProxy Hover => new UIStyleSetStateProxy(this, StyleState.Hover);
+
+        public void SetGridItemPlacement(int colStart, int colSpan, int rowStart, int rowSpan, StyleState state) {
+            SetGridItemColStart(colStart, state);
+            SetGridItemColSpan(colSpan, state);
+            SetGridItemRowStart(rowStart, state);
+            SetGridItemRowSpan(rowSpan, state);
+        }
+
+        public BorderRadius GetBorderRadius(StyleState state) {
+            return new BorderRadius(
+                GetBorderRadiusTopLeft(state),
+                GetBorderRadiusTopRight(state),
+                GetBorderRadiusBottomRight(state),
+                GetBorderRadiusBottomLeft(state)
+            );
+        }
+
+        public void SetBorder(FixedLengthRect value, StyleState state) {
+            SetBorderTop(value.top, state);
+            SetBorderRight(value.right, state);
+            SetBorderBottom(value.bottom, state);
+            SetBorderLeft(value.left, state);
+        }
+
+        public FixedLengthRect GetBorder(StyleState state) {
+            return new FixedLengthRect(
+                GetBorderTop(state),
+                GetBorderRight(state),
+                GetBorderBottom(state),
+                GetBorderLeft(state)
+            );
+        }
+
+        public void SetMargin(ContentBoxRect value, StyleState state) {
+            SetMarginTop(value.top, state);
+            SetMarginRight(value.right, state);
+            SetMarginBottom(value.bottom, state);
+            SetMarginLeft(value.bottom, state);
+        }
+
+        public ContentBoxRect GetMargin(StyleState state) {
+            return new ContentBoxRect(
+                GetMarginTop(state),
+                GetMarginRight(state),
+                GetMarginBottom(state),
+                GetMarginLeft(state)
+            );
+        }
+
+        public void SetPadding(FixedLengthRect value, StyleState state) {
+            SetPaddingTop(value.top, state);
+            SetPaddingRight(value.right, state);
+            SetPaddingBottom(value.bottom, state);
+            SetPaddingLeft(value.left, state);
+        }
+
+        public FixedLengthRect GetPadding(StyleState state) {
+            return new FixedLengthRect(
+                GetPaddingTop(state),
+                GetPaddingRight(state),
+                GetPaddingBottom(state),
+                GetPaddingLeft(state)
+            );
+        }
+
+        public void SetTransformPosition(FixedLengthVector position, StyleState state) {
+            SetTransformPositionX(position.x, state);
+            SetTransformPositionY(position.y, state);
+        }
+
+        public void SetBorderRadius(BorderRadius newBorderRadius, StyleState state) {
+            SetBorderRadiusBottomLeft(newBorderRadius.bottomLeft, state);
+            SetBorderRadiusBottomRight(newBorderRadius.bottomRight, state);
+            SetBorderRadiusTopRight(newBorderRadius.topRight, state);
+            SetBorderRadiusTopLeft(newBorderRadius.topLeft, state);
+        }
+
+        public void SetTransformPosition(Vector2 position, StyleState state) {
+            SetTransformPositionX(position.x, state);
+            SetTransformPositionY(position.y, state);
+        }
+
+        public void SetTransformBehavior(TransformBehavior behavior, StyleState state) {
+            SetTransformBehaviorX(behavior, state);
+            SetTransformBehaviorY(behavior, state);
+        }
 
         public List<UIStyleGroup> GetBaseStyles() {
             List<UIStyleGroup> retn = ListPool<UIStyleGroup>.Get();
@@ -54,6 +138,36 @@ namespace UIForia.Rendering {
             }
 
             return retn;
+        }
+
+        internal void Initialize() {
+            List<StylePropertyId> toUpdate = ListPool<StylePropertyId>.Get();
+
+            for (int i = 0; i < appliedStyles.Count; i++) {
+                StyleEntry entry = appliedStyles[i];
+                containedStates |= entry.state;
+                if ((entry.state & currentState) == 0) {
+                    continue;
+                }
+
+                // todo fix this
+                IReadOnlyList<StyleProperty> properties = entry.style.Properties;
+                for (int j = 0; j < properties.Count; j++) {
+                    if (!s_DefinedMap.Contains(properties[j].propertyId)) {
+                        s_DefinedMap.Add(properties[j].propertyId);
+                        toUpdate.Add(properties[j].propertyId);
+                        // todo -- set SetProperty(properties[j]);
+                    }
+                }
+            }
+
+            for (int i = 0; i < toUpdate.Count; i++) {
+                m_PropertyMap[(int) toUpdate[i]] = GetPropertyValueInState(toUpdate[i], currentState);
+            }
+
+            // inheritance?
+            ListPool<StylePropertyId>.Release(ref toUpdate);
+            s_DefinedMap.Clear();
         }
 
         public void EnterState(StyleState state) {
@@ -69,15 +183,17 @@ namespace UIForia.Rendering {
             }
 
             List<StylePropertyId> toUpdate = ListPool<StylePropertyId>.Get();
+
             for (int i = 0; i < appliedStyles.Count; i++) {
                 StyleEntry entry = appliedStyles[i];
 
+                // if this is a state we had not been in before, mark it's properties for update
                 if ((entry.state & oldState) == 0 && (entry.state & state) != 0) {
                     IReadOnlyList<StyleProperty> properties = appliedStyles[i].style.Properties;
                     for (int j = 0; j < properties.Count; j++) {
-                        if (!s_DefinedMap.Contains(properties[i].propertyId)) {
-                            s_DefinedMap.Add(properties[i].propertyId);
-                            toUpdate.Add(properties[i].propertyId);
+                        if (!s_DefinedMap.Contains(properties[j].propertyId)) {
+                            s_DefinedMap.Add(properties[j].propertyId);
+                            toUpdate.Add(properties[j].propertyId);
                         }
                     }
                 }
@@ -85,27 +201,93 @@ namespace UIForia.Rendering {
 
             //LightList<StyleProperty> changeSet = styleSystem.GetChangeSet(element.id);
 
+            // todo batch apply changes
             for (int i = 0; i < toUpdate.Count; i++) {
-                StyleProperty property = GetPropertyValueInState(toUpdate[i], currentState);
-                if (property.IsDefined) {
-                    StyleProperty currentProperty;
-                    if (m_PropertyMap.TryGetValue((int) property.propertyId, out currentProperty)) {
-                        if (currentProperty != property) {
-                            m_PropertyMap[(int) property.propertyId] = property;
-                            styleSystem.SetStyleProperty(element, property);
-                        }
+                StyleProperty property;
+
+                // for each property we are updating
+                // if it wasn't set before, set it 
+
+                // if it was set before
+                // compare values
+                // update if changed
+
+                if (!m_PropertyMap.TryGetValue((int) toUpdate[i], out property)) {
+                    property = GetPropertyValueInState(toUpdate[i], currentState);
+                    m_PropertyMap[(int) property.propertyId] = property;
+                    styleSystem.SetStyleProperty(element, property);
+                    continue;
+                }
+
+                // will be defined because of the new styles defined it
+                StyleProperty currentProperty = GetPropertyValueInState(property.propertyId, currentState);
+
+                if (currentProperty != property) {
+                    m_PropertyMap[(int) property.propertyId] = currentProperty;
+                    styleSystem.SetStyleProperty(element, currentProperty);
+                }
+                // if they are the same and was previously inherited, override the inheritance
+                else if (StyleUtil.IsInherited(property.propertyId)) {
+                    throw new Exception("test this");
+                }
+            }
+
+            // styleSystem.SetChangeSet(element.id, changeSet);
+
+            ListPool<StylePropertyId>.Release(ref toUpdate);
+            s_DefinedMap.Clear();
+        }
+
+
+        public void ExitState(StyleState state) {
+            if (state == StyleState.Normal || (currentState & state) == 0) {
+                return;
+            }
+
+            currentState &= ~(state);
+            currentState |= StyleState.Normal;
+
+            if ((containedStates & state) == 0) {
+                return;
+            }
+
+            List<StylePropertyId> toUpdate = ListPool<StylePropertyId>.Get();
+
+            for (int i = 0; i < appliedStyles.Count; i++) {
+                if ((appliedStyles[i].state != state)) {
+                    continue;
+                }
+
+                IReadOnlyList<StyleProperty> properties = appliedStyles[i].style.Properties;
+                for (int j = 0; j < properties.Count; j++) {
+                    if (!s_DefinedMap.Contains(properties[j].propertyId)) {
+                        s_DefinedMap.Add(properties[j].propertyId);
+                        toUpdate.Add(properties[j].propertyId);
                     }
-                    else {
+                }
+            }
+
+            for (int i = 0; i < toUpdate.Count; i++) {
+                StyleProperty property;
+                // get old value
+                // get new value
+
+                // will always be defined
+                StyleProperty oldValue = m_PropertyMap[(int) toUpdate[i]];
+
+                if (TryGetPropertyValueInState(toUpdate[i], currentState, out property)) {
+                    if (oldValue != property) {
                         m_PropertyMap[(int) property.propertyId] = property;
                         styleSystem.SetStyleProperty(element, property);
                     }
                 }
                 else {
-                    styleSystem.SetStyleProperty(element, property);
+                    // if was inherited, do that
+                    m_PropertyMap.Remove((int) toUpdate[i]);
                 }
             }
 
-            // styleSystem.SetChangeSet(element.id, changeSet);
+            // todo handle inherited that are no longer defined
 
             ListPool<StylePropertyId>.Release(ref toUpdate);
             s_DefinedMap.Clear();
@@ -126,68 +308,27 @@ namespace UIForia.Rendering {
         }
 
         public bool DidPropertyChange(StylePropertyId property) {
-            return false; // styleSystem.GetChangeSet(element.id).DidChange(property);
+            return false; //styleSystem.GetChangeSet(element.id).DidChange(property);
         }
 
         public bool IsInState(StyleState state) {
             return (currentState & state) != 0;
         }
 
-        public float Get(StylePropertyId propertyId, float defaultValue) {
-            StyleProperty property;
-            if (m_PropertyMap.TryGetValue((int) propertyId, out property)) return property.AsFloat;
-            return defaultValue;
-        }
-
-        public float GetInheritedProperty(StylePropertyId propertyId, float defaultValue) {
-            StyleProperty property;
-            if (m_PropertyMap.TryGetValue((int) propertyId, out property)) return property.AsFloat;
-            if (m_PropertyMap.TryGetValue(BitUtil.SetHighLowBits(1, (int) propertyId), out property)) return property.AsFloat;
-            return defaultValue;
-        }
-
-        public void ExitState(StyleState state) {
-            if (state == StyleState.Normal || (currentState & state) == 0) {
-                return;
-            }
-
-            currentState &= ~(state);
-            currentState |= StyleState.Normal;
-
-            // if any style did apply to state and now doesn't
-            // get a list of those styles
-            // for each one
-            // update
-            // 
-            if ((containedStates & state) == 0) {
-                return;
-            }
-
-            for (int i = 0; i < appliedStyles.Count; i++) {
-                if ((appliedStyles[i].state != state)) {
-                    continue;
-                }
-
-                // add each property to defined map
-                // run through defined map and apply styles
-                // 
-
-                UpdateStyleProperties(appliedStyles[i].style);
-            }
-
-            // for each inherited style
-            // if !m_DefinedMap.ContainsKey((int)styleId)
-            // inheritedStyles[styleId] = FindInheritedProperty(styleId)
-            // if value changed -> add to change list        
-        }
-
-        public bool HasHoverStyle => (containedStates & StyleState.Hover) != 0;
 
         public void PlayAnimation(StyleAnimation animation) {
             styleSystem.PlayAnimation(this, animation, default(AnimationOptions));
         }
 
         public bool HasBaseStyles => styleGroups.Count > 0;
+        public float EmSize => 16f;
+        public float LineHeightSize => 16f;
+
+        public bool HasBorderRadius =>
+            BorderRadiusTopLeft.value > 0 ||
+            BorderRadiusBottomLeft.value > 0 ||
+            BorderRadiusTopRight.value > 0 ||
+            BorderRadiusBottomLeft.value > 0;
 
         private static string GetBaseStyleNames(UIStyleSet styleSet) {
             string output = string.Empty;
@@ -198,12 +339,70 @@ namespace UIForia.Rendering {
             return output;
         }
 
-        public void OnAnimationStart() { }
+        public BorderRadius BorderRadius => new BorderRadius(BorderRadiusTopLeft, BorderRadiusTopRight, BorderRadiusBottomRight, BorderRadiusBottomLeft);
 
-        private void UpdateStyleProperties(UIStyle style) {
-            IReadOnlyList<StyleProperty> properties = style.Properties;
-            for (int j = 0; j < properties.Count; j++) {
-                computedStyle.SetProperty(GetPropertyValueInState(properties[j].propertyId, currentState));
+        public Vector4 ResolvedBorderRadius => new Vector4(
+            ResolveHorizontalFixedLength(BorderRadiusTopLeft),
+            ResolveHorizontalFixedLength(BorderRadiusTopRight),
+            ResolveHorizontalFixedLength(BorderRadiusBottomRight),
+            ResolveHorizontalFixedLength(BorderRadiusBottomLeft)
+        );
+
+        public Vector4 ResolvedBorder => new Vector4(
+            ResolveVerticalFixedLength(BorderTop),
+            ResolveHorizontalFixedLength(BorderRight),
+            ResolveVerticalFixedLength(BorderBottom),
+            ResolveHorizontalFixedLength(BorderLeft)
+        );
+
+        // todo -- handle inherited?
+        public bool IsDefined(StylePropertyId propertyId) {
+            return m_PropertyMap.ContainsKey((int) propertyId);
+        }
+
+        // I don't love having this here
+        private float ResolveHorizontalFixedLength(UIFixedLength length) {
+            switch (length.unit) {
+                case UIFixedUnit.Pixel:
+                    return length.value;
+
+                case UIFixedUnit.Percent:
+                    return element.layoutResult.AllocatedWidth * length.value;
+
+                case UIFixedUnit.Em:
+                    return EmSize * length.value;
+
+                case UIFixedUnit.ViewportWidth:
+                    return 0;
+
+                case UIFixedUnit.ViewportHeight:
+                    return 0;
+
+                default:
+                    return 0;
+            }
+        }
+
+        // I don't love having this here
+        private float ResolveVerticalFixedLength(UIFixedLength length) {
+            switch (length.unit) {
+                case UIFixedUnit.Pixel:
+                    return length.value;
+
+                case UIFixedUnit.Percent:
+                    return element.layoutResult.AllocatedHeight * length.value;
+
+                case UIFixedUnit.Em:
+                    return EmSize * length.value;
+
+                case UIFixedUnit.ViewportWidth:
+                    return 0;
+
+                case UIFixedUnit.ViewportHeight:
+                    return 0;
+
+                default:
+                    return 0;
             }
         }
 
@@ -224,22 +423,70 @@ namespace UIForia.Rendering {
 
         private void AddBaseStyle(UIStyle style, StyleState state) {
             containedStates |= state;
-            appliedStyles.Add(new StyleEntry(style, StyleType.Shared, state, styleGroups.Count));
-            SortStyles();
-            if (IsInState(state)) {
-                UpdateStyleProperties(style);
+            StyleEntry newEntry = new StyleEntry(style, StyleType.Shared, state, styleGroups.Count);
+            if (!IsInState(state)) {
+                appliedStyles.Add(newEntry);
+                SortStyles();
+                return;
             }
+
+            // todo -- use change list
+            IReadOnlyList<StyleProperty> properties = style.Properties;
+
+            for (int i = 0; i < properties.Count; i++) {
+                StyleProperty property = properties[i];
+
+                StyleEntry entry;
+
+                if (TryGetActiveStyleForProperty(properties[i].propertyId, out entry)) {
+                    if (entry.priority < newEntry.priority) {
+                        m_PropertyMap[(int) property.propertyId] = property;
+                        styleSystem.SetStyleProperty(element, property);
+                    }
+                }
+                else {
+                    if (StyleUtil.IsInherited(property.propertyId)) {
+                        m_PropertyMap.Remove(BitUtil.SetHighLowBits(1, (int) property.propertyId));
+                    }
+
+                    m_PropertyMap[(int) property.propertyId] = property;
+                    styleSystem.SetStyleProperty(element, property);
+                }
+            }
+
+            appliedStyles.Add(newEntry);
+            SortStyles();
+        }
+
+        private bool TryGetActiveStyleForProperty(StylePropertyId propertyId, out StyleEntry retn) {
+            for (int i = 0; i < appliedStyles.Count; i++) {
+                if ((appliedStyles[i].state & currentState) != 0 && appliedStyles[i].style.DefinesProperty(propertyId)) {
+                    retn = appliedStyles[i];
+                    return true;
+                }
+            }
+
+            retn = default(StyleEntry);
+            return false;
         }
 
         // todo remove and replace w/ RemoveStyleGroup
         public void RemoveBaseStyle(UIStyle style, StyleState state = StyleState.Normal) {
+            StyleEntry toRemove = default(StyleEntry);
+            int index = -1;
             for (int i = 0; i < appliedStyles.Count; i++) {
                 if (appliedStyles[i].style == style && state == appliedStyles[i].state) {
+                    toRemove = appliedStyles[i];
                     appliedStyles[i] = appliedStyles[appliedStyles.Count - 1];
+                    index = i;
                     break;
                 }
             }
-
+           
+            if (index == -1) {
+                return;
+            }
+            
             appliedStyles.RemoveAt(appliedStyles.Count - 1);
             SortStyles();
 
@@ -247,8 +494,31 @@ namespace UIForia.Rendering {
                 containedStates |= appliedStyles[i].state;
             }
 
-            if (IsInState(state)) {
-                UpdateStyleProperties(style);
+            if (!IsInState(state)) {
+                return;
+            }
+
+            List<StylePropertyId> toUpdate = ListPool<StylePropertyId>.Get();
+
+            IReadOnlyList<StyleProperty> properties = toRemove.style.Properties;
+            for (int i = 0; i < properties.Count; i++) {
+                toUpdate.Add(properties[i].propertyId);
+            }
+
+            for (int i = 0; i < toUpdate.Count; i++) {
+                StyleProperty property;
+                StyleProperty oldValue = m_PropertyMap[(int) toUpdate[i]];
+
+                if (TryGetPropertyValueInState(toUpdate[i], currentState, out property)) {
+                    if (oldValue != property) {
+                        m_PropertyMap[(int) property.propertyId] = property;
+                        styleSystem.SetStyleProperty(element, property);
+                    }
+                }
+                else {
+                    // todo -- if was inherited, do that
+                    m_PropertyMap.Remove((int) toUpdate[i]);
+                }
             }
         }
 
@@ -268,13 +538,29 @@ namespace UIForia.Rendering {
                     continue;
                 }
 
-                StyleProperty property = appliedStyles[i].style.GetProperty(propertyId);
-                if (property.IsDefined) {
+                StyleProperty property;
+                if (appliedStyles[i].style.TryGetProperty(propertyId, out property)) {
                     return property;
                 }
             }
 
-            return new StyleProperty(propertyId, IntUtil.UnsetValue, IntUtil.UnsetValue);
+            return new StyleProperty(propertyId, IntUtil.UnsetValue, IntUtil.UnsetValue, FloatUtil.UnsetValue, null);
+        }
+
+        // I think this won't return normal or inherited styles right now, should it?
+        public bool TryGetPropertyValueInState(StylePropertyId propertyId, StyleState state, out StyleProperty property) {
+            for (int i = 0; i < appliedStyles.Count; i++) {
+                if ((appliedStyles[i].state & state) == 0) {
+                    continue;
+                }
+
+                if (appliedStyles[i].style.TryGetProperty(propertyId, out property)) {
+                    return true;
+                }
+            }
+
+            property = default(StyleProperty);
+            return false;
         }
 
         private UIStyle GetOrCreateInstanceStyle(StyleState state) {
@@ -341,171 +627,8 @@ namespace UIForia.Rendering {
             }
         }
 
-        internal void Initialize() {
-            for (int i = 0; i < appliedStyles.Count; i++) {
-                StyleEntry entry = appliedStyles[i];
-                containedStates |= entry.state;
-                if ((entry.state & currentState) == 0) {
-                    continue;
-                }
-
-                // todo fix this
-                IReadOnlyList<StyleProperty> properties = entry.style.Properties;
-                for (int j = 0; j < properties.Count; j++) {
-                    if (!s_DefinedMap.Contains(properties[j].propertyId)) {
-                        s_DefinedMap.Add(properties[j].propertyId);
-                        computedStyle.SetProperty(properties[j]);
-                    }
-                }
-            }
-
-            s_DefinedMap.Clear();
-        }
-
-        private void SetGridTrackSizeProperty(StylePropertyId propertyId, GridTrackSize size, StyleState state) {
-            UIStyle style = GetOrCreateInstanceStyle(state);
-            style.SetGridTrackSizeProperty(propertyId, size);
-            if ((state & currentState) == 0) {
-                return;
-            }
-
-            computedStyle.SetProperty(GetPropertyValue(propertyId));
-        }
-
-        private UIStyle GetActiveStyleForProperty(StylePropertyId stylePropertyId) {
-            for (int i = 0; i < appliedStyles.Count; i++) {
-                if ((appliedStyles[i].state & currentState) == 0) {
-                    continue;
-                }
-
-                if ((appliedStyles[i].style.DefinesProperty(stylePropertyId))) {
-                    return appliedStyles[i].style;
-                }
-            }
-
-            return null;
-        }
-
-        private void SetColorProperty(StylePropertyId propertyId, Color color, StyleState state) {
-            UIStyle style = GetOrCreateInstanceStyle(state);
-            style.SetColorProperty(propertyId, color);
-            if ((state & currentState) == 0) {
-                return;
-            }
-
-            computedStyle.SetProperty(GetPropertyValue(propertyId));
-        }
-
-        private void SetUIMeasurementProperty(StylePropertyId propertyId, UIMeasurement measurement, StyleState state) {
-            UIStyle style = GetOrCreateInstanceStyle(state);
-            style.SetUIMeasurementProperty(propertyId, measurement);
-            if ((state & currentState) == 0) {
-                return;
-            }
-
-            computedStyle.SetProperty(GetPropertyValue(propertyId));
-        }
-
-        private void SetObjectProperty(StylePropertyId propertyId, object value, StyleState state) {
-            UIStyle style = GetOrCreateInstanceStyle(state);
-            style.SetObjectProperty(propertyId, value);
-            if ((state & currentState) == 0) {
-                return;
-            }
-
-            computedStyle.SetProperty(GetPropertyValue(propertyId));
-        }
-
-        private void SetIntProperty(StylePropertyId propertyId, int value, StyleState state) {
-            UIStyle style = GetOrCreateInstanceStyle(state);
-            style.SetIntProperty(propertyId, value);
-            if ((state & currentState) == 0) {
-                return;
-            }
-
-            computedStyle.SetProperty(GetPropertyValue(propertyId));
-        }
-
-        private void SetFloatProperty(StylePropertyId propertyId, float value, StyleState state) {
-            UIStyle style = GetOrCreateInstanceStyle(state);
-            style.SetFloatProperty(propertyId, value);
-            if ((state & currentState) == 0) {
-                return;
-            }
-
-            computedStyle.SetProperty(GetPropertyValue(propertyId));
-        }
-
-        private void SetEnumProperty(StylePropertyId propertyId, int value, StyleState state) {
-            UIStyle style = GetOrCreateInstanceStyle(state);
-            style.SetEnumProperty(propertyId, value);
-            if ((state & currentState) == 0) {
-                return;
-            }
-
-            computedStyle.SetProperty(GetPropertyValue(propertyId));
-        }
-
-        private void SetFixedLengthProperty(StylePropertyId propertyId, UIFixedLength fixedLength, StyleState state) {
-            UIStyle style = GetOrCreateInstanceStyle(state);
-            style.SetUIFixedLengthProperty(propertyId, fixedLength);
-            if ((state & currentState) == 0) {
-                return;
-            }
-
-            computedStyle.SetProperty(GetPropertyValue(propertyId));
-        }
-
-        public void SetProperty(StyleProperty property, StyleState state) {
-            throw new NotImplementedException();
-        }
-
-        // todo -- remove & generate
-        public void SetAnimatedProperty(StyleProperty property) {
-            switch (property.propertyId) {
-                case StylePropertyId.BackgroundColor:
-                case StylePropertyId.BorderColor:
-                case StylePropertyId.BackgroundImage:
-                case StylePropertyId.MarginTop:
-                case StylePropertyId.MarginRight:
-                case StylePropertyId.MarginBottom:
-                case StylePropertyId.MarginLeft:
-                case StylePropertyId.BorderTop:
-                case StylePropertyId.BorderRight:
-                case StylePropertyId.BorderBottom:
-                case StylePropertyId.BorderLeft:
-                case StylePropertyId.PaddingTop:
-                case StylePropertyId.PaddingRight:
-                case StylePropertyId.PaddingBottom:
-                case StylePropertyId.PaddingLeft:
-                case StylePropertyId.BorderRadiusTopLeft:
-                case StylePropertyId.BorderRadiusTopRight:
-                case StylePropertyId.BorderRadiusBottomLeft:
-                case StylePropertyId.BorderRadiusBottomRight:
-                case StylePropertyId.TransformPositionX:
-                case StylePropertyId.TransformPositionY:
-                case StylePropertyId.TransformScaleX:
-                case StylePropertyId.TransformScaleY:
-                case StylePropertyId.TransformPivotX:
-                case StylePropertyId.TransformPivotY:
-                case StylePropertyId.TransformRotation:
-                case StylePropertyId.TextColor:
-                case StylePropertyId.TextFontSize:
-                case StylePropertyId.PreferredWidth:
-                case StylePropertyId.PreferredHeight:
-                case StylePropertyId.AnchorTop:
-                case StylePropertyId.AnchorRight:
-                case StylePropertyId.AnchorBottom:
-                case StylePropertyId.AnchorLeft:
-                    computedStyle.SetProperty(property);
-                    break;
-                default:
-                    throw new Exception(property.propertyId + " is not able to be animated");
-            }
-        }
-
         public string GetPropertySource(StylePropertyId propertyId) {
-            if (!computedStyle.IsDefined(propertyId)) {
+            if (!IsDefined(propertyId)) {
                 return "Default";
             }
 
@@ -568,12 +691,14 @@ namespace UIForia.Rendering {
             return instanceStyle;
         }
 
-        public void SetPropertyValueInState(StyleProperty property, StyleState state) {
+        public void SetProperty(StyleProperty property, StyleState state) {
             UIStyle style = GetOrCreateInstanceStyle(state);
             if ((state & currentState) == 0) {
                 style.SetProperty(property);
                 return;
             }
+
+            // todo -- faster to find style that currently defines the property & compare priorities
 
             StyleProperty oldValue = GetPropertyValue(property.propertyId);
 
@@ -592,6 +717,11 @@ namespace UIForia.Rendering {
                 styleSystem.SetStyleProperty(element, currentValue);
             }
         }
+
+        public void SetAnimatedProperty(StyleProperty p0) {
+            throw new NotImplementedException();
+        }
+       
 
     }
 

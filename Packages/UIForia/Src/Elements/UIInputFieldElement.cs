@@ -127,7 +127,7 @@ public class UIInputFieldElement : UIElement, IFocusable, IPropertyChangedHandle
     private void EnterText(KeyboardInputEvent evt) {
         char c = evt.character;
 
-        if (!textElement.ComputedStyle.TextFontAsset.characterDictionary.ContainsKey(c)) {
+        if (!textElement.style.TextFontAsset.characterDictionary.ContainsKey(c)) {
             return;
         }
 

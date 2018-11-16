@@ -58,6 +58,7 @@ namespace UIForia.Systems {
 
             element.style.Initialize();
 
+            var x = element.style.PreferredWidth;
             if (element.children != null) {
                 for (int i = 0; i < element.children.Length; i++) {
                     OnElementCreated(element.children[i]);

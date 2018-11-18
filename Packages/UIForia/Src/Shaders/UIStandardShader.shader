@@ -4,7 +4,6 @@ Shader "UIForia/Default"
     {
 
         _MainTex ("Sprite Texture", 2D) = "white" {}
-        
         _StencilComp ("Stencil Comparison", Float) = 8
         _Stencil ("Stencil ID", Float) = 0
         _StencilOp ("Stencil Operation", Float) = 0
@@ -24,6 +23,7 @@ Shader "UIForia/Default"
             "RenderType"="Transparent"
             "PreviewType"="Plane"
             "CanUseSpriteAtlas"="True"
+            "DisableBatching" = "True" 
         }
 
         Stencil
@@ -67,6 +67,9 @@ Shader "UIForia/Default"
             uniform float4 _FillOffsetScale;
             uniform float4 _ContentRect;
             
+            uniform float4 _Pivot;
+            uniform float _Rotation;
+            
             struct appdata_t {
                 float4 vertex   : POSITION;
                 float2 texcoord : TEXCOORD0;
@@ -79,7 +82,28 @@ Shader "UIForia/Default"
 
             v2f vert(appdata_t v)  {
                 v2f OUT;
-                OUT.vertex = UnityObjectToClipPos(v.vertex);
+                
+                if(_Rotation != 0) {
+                    
+                    float4 rotated = v.vertex;
+                    float s = sin(_Rotation);
+                    float c = cos(_Rotation);
+                    
+                    rotated.x -= _Pivot.x;
+                    rotated.y -= _Pivot.y;
+                    
+                    float newX = (c * rotated.x) - (s * rotated.y);
+                    float newY = (s * rotated.x) + (c * rotated.y);
+                    
+                    rotated.x = newX + _Pivot.x;
+                    rotated.y = newY + _Pivot.y;
+                    OUT.vertex = UnityObjectToClipPos(rotated);
+                    
+                }
+                else {
+                    OUT.vertex = UnityObjectToClipPos(v.vertex);
+                }
+                
                 OUT.texcoord = v.texcoord;
                 return OUT;
             }

@@ -29,17 +29,17 @@ namespace UIForia.Layout.LayoutTypes {
 
         protected override float ComputeContentHeight(float width) {
             TextInfo textInfo = ((UITextElement) element).textInfo;
+            TMP_FontAsset asset = style.TextFontAsset;
+            float scale = (style.TextFontSize / asset.fontInfo.PointSize) * asset.fontInfo.Scale;
+            float lh = (asset.fontInfo.Ascender - asset.fontInfo.Descender) * scale;
             
             if (string.IsNullOrEmpty(((UITextElement) element).text)) {
-                return style.LineHeightSize;
+                return lh;
             }
             
             List<LineInfo> lineInfos = RunLayout(textInfo, width);
             LineInfo lastLine = lineInfos[lineInfos.Count - 1];
             ListPool<LineInfo>.Release(ref lineInfos);
-            TMP_FontAsset asset = style.TextFontAsset;
-            float scale = (style.TextFontSize / asset.fontInfo.PointSize) * asset.fontInfo.Scale;
-            float lh = (asset.fontInfo.Ascender - asset.fontInfo.Descender) * scale;
             return lastLine.position.y + lh;
         }
 
@@ -70,7 +70,7 @@ namespace UIForia.Layout.LayoutTypes {
                            BorderBottom;
 
             ApplyTextAlignment(allocatedWidth, textInfo, style.TextAlignment);
-
+            
             ListPool<LineInfo>.Release(ref lineInfos);
         }
 

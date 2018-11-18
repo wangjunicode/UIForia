@@ -212,6 +212,7 @@
               <e p="DictionaryExtensions.cs" t="Include" />
               <e p="ListExtensions.cs" t="Include" />
               <e p="RectExtensions.cs" t="Include" />
+              <e p="Vector2Extensions.cs" t="Include" />
             </e>
             <e p="ImportDeclaration.cs" t="Include" />
             <e p="Input" t="Include">
@@ -487,6 +488,7 @@
               <e p="MeasurementPair.cs" t="Include" />
               <e p="MeshUtil.cs" t="Include" />
               <e p="ObjectPool.cs" t="Include" />
+              <e p="PolygonUtil.cs" t="Include" />
               <e p="QueuePool.cs" t="Include" />
               <e p="ReadOnlyVector2.cs" t="Include" />
               <e p="ReflectionUtil.cs" t="Include" />

@@ -1,3 +1,4 @@
+using System;
 using UIForia.Rendering;
 using UIForia;
 using UIForia.Elements;
@@ -55,7 +56,8 @@ public class UIInputFieldElement : UIElement, IFocusable, IPropertyChangedHandle
     public string placeholder;
     public bool selectAllOnFocus;
     public float caretBlinkRate = 0.85f;
-
+    public event Action<string> onValueChanged;
+    
     private UIGraphicElement caret;
     private UIGraphicElement highlight;
     private UITextElement textElement;
@@ -73,7 +75,7 @@ public class UIInputFieldElement : UIElement, IFocusable, IPropertyChangedHandle
 
     [OnPropertyChanged(nameof(text))]
     public void OnTextPropChanged(string field) {
-        textElement.SetText(text);
+        textElement?.SetText(text);
     }
     
     public string GetText() {
@@ -81,7 +83,7 @@ public class UIInputFieldElement : UIElement, IFocusable, IPropertyChangedHandle
     }
     
     public override void OnCreate() {
-        text = string.Empty;
+        text = text ?? string.Empty;
         caret = FindById<UIGraphicElement>("cursor");
         highlight = FindById<UIGraphicElement>("highlight");
         textElement = FindById<UITextElement>("text");
@@ -116,7 +118,9 @@ public class UIInputFieldElement : UIElement, IFocusable, IPropertyChangedHandle
         bool blinkState = (Time.unscaledTime - blinkStartTime) % blinkPeriod < blinkPeriod / 2;
         if (canSetCaret) {
             caret.style.SetTransformPositionX(layoutResult.contentRect.x + textElement.GetCursorPosition(selectionRange).x, StyleState.Normal);
-            caret.style.SetTransformPositionY(textElement.layoutResult.localPosition.y, StyleState.Normal);
+            caret.style.SetTransformPositionY(textElement.GetCursorPosition(selectionRange).y, StyleState.Normal);
+//            caret.style.SetTransformPositionX(layoutResult.contentRect.x + textElement.GetCursorPosition(selectionRange).x, StyleState.Normal);
+//            caret.style.SetTransformPositionY(textElement.layoutResult.localPosition.y, StyleState.Normal);
         }
         caret.style.SetBackgroundColor(Color.black, StyleState.Normal);
         caret.SetEnabled(blinkState);
@@ -139,6 +143,8 @@ public class UIInputFieldElement : UIElement, IFocusable, IPropertyChangedHandle
             selectionRange = textElement.AppendText(c);
         }
 
+        onValueChanged?.Invoke(textElement.text);
+        
         canSetCaret = false;
     }
 

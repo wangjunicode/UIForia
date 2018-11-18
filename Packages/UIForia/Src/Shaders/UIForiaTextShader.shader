@@ -77,6 +77,8 @@ Shader "UIForia/Text"
             uniform float _ScaleRatioB;
             uniform float _ScaleRatioC;
             uniform float2 _TextureSize;
+            uniform float _Rotation;
+            uniform float2 _Pivot;
             
             // defined by user
             uniform int _Bold;
@@ -104,7 +106,7 @@ Shader "UIForia/Text"
             pixel_t vert (vertex_t v) {
                 pixel_t o;
         		
-        		float pixelSize = 1;
+        		float pixelSize = 1; // maybe change this to reflect view scale
         		pixelSize /= float2(1, 1) * abs(mul((float2x2)UNITY_MATRIX_P, _ScreenParams.xy));
         		float scale = rsqrt(dot(1, 1));
         		
@@ -142,6 +144,27 @@ Shader "UIForia/Text"
 			    
 			#endif 
 			
+			    if(_Rotation != 0) {
+                
+                    float4 rotated = v.vertex;
+                    float s = sin(_Rotation);
+                    float c = cos(_Rotation);
+                    
+                    rotated.x -= _Pivot.x;
+                    rotated.y -= _Pivot.y;
+                    
+                    float newX = (c * rotated.x) - (s * rotated.y);
+                    float newY = (s * rotated.x) + (c * rotated.y);
+                    
+                    rotated.x = newX + _Pivot.x;
+                    rotated.y = newY + _Pivot.y;
+                    o.vertex = UnityObjectToClipPos(rotated);
+                    
+                }
+                else {
+                    o.vertex = UnityObjectToClipPos(v.vertex);
+                }
+                
                 o.vertex = UnityObjectToClipPos(v.vertex);
                 o.atlas = v.texcoord;
                 o.params = params;

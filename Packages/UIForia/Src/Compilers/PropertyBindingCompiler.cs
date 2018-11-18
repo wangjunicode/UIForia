@@ -17,6 +17,8 @@ namespace UIForia.Compilers {
         public static readonly string EvtArgDefaultName = "$event";
         private static readonly Dictionary<Type, Dictionary<string, LightList<object>>> m_TypeMap = new Dictionary<Type, Dictionary<string, LightList<object>>>();
 
+        public const string k_BindTo = "bindTo";
+
         public static readonly string[] EvtArgNames = {
             "$eventArg0",
             "$eventArg1",
@@ -52,6 +54,91 @@ namespace UIForia.Compilers {
             list.Add(aliasSource);
         }
 
+        private Binding CompileBoundProperty(Type rootType, Type targetType, string property, string value) {
+            // bind pointer is a field or property on the target element
+            // target field/property type must match bind type
+            EventInfo eventInfo = targetType.GetEvent(value);
+            if (eventInfo == null) {
+                throw new ParseException("Error compiling 'bindTo' expression. Tried to find an event with " +
+                                         $"the name {value} on type {targetType.FullName} but none was found");
+            }
+
+            MethodInfo info = eventInfo.EventHandlerType.GetMethod("Invoke");
+            Debug.Assert(info != null, nameof(info) + " != null");
+
+            ParameterInfo[] parameters = info.GetParameters();
+            if (parameters.Length != 1) {
+                throw new ParseException($"Error compiling 'bindTo' expression on type {targetType.FullName}. " +
+                                         "The bind target must be an event of type Action<T>, actual event type " +
+                                         "has more than one parameter.");
+            }
+
+            Type genericArgument = parameters[0].ParameterType;
+
+            FieldInfo fieldInfo = ReflectionUtil.GetFieldInfo(rootType, property);
+
+            Dictionary<string, LightList<object>> actionMap = GetActionMap(rootType);
+            
+            if (fieldInfo != null) {
+               
+                LightList<object> list = actionMap?.GetOrDefault(property);
+                if (list != null) {
+
+                    ReflectionUtil.ObjectArray3[0] = fieldInfo;
+                    ReflectionUtil.ObjectArray3[1] = eventInfo;
+                    ReflectionUtil.ObjectArray3[2] = list;
+
+                    ReflectionUtil.TypeArray2[0] = genericArgument;
+                    ReflectionUtil.TypeArray2[1] = rootType;
+                    return (Binding) ReflectionUtil.CreateGenericInstanceFromOpenType(
+                        typeof(AssignmentCallbackBinding_Root_Field_WithCallbacks<,>),
+                        ReflectionUtil.TypeArray2,
+                        ReflectionUtil.ObjectArray3
+                    );
+                }
+
+                ReflectionUtil.ObjectArray2[0] = fieldInfo;
+                ReflectionUtil.ObjectArray2[1] = eventInfo;
+                return (Binding) ReflectionUtil.CreateGenericInstanceFromOpenType(
+                    typeof(AssignmentCallbackBinding_Root_Field<>),
+                    genericArgument,
+                    ReflectionUtil.ObjectArray2
+                );
+            }
+
+            PropertyInfo propertyInfo = ReflectionUtil.GetPropertyInfo(rootType, property);
+            if (propertyInfo != null) {
+                
+                LightList<object> list = actionMap?.GetOrDefault(property);
+                if (list != null) {
+
+                    ReflectionUtil.ObjectArray3[0] = propertyInfo;
+                    ReflectionUtil.ObjectArray3[1] = eventInfo;
+                    ReflectionUtil.ObjectArray3[2] = list;
+
+                    ReflectionUtil.TypeArray2[0] = genericArgument;
+                    ReflectionUtil.TypeArray2[1] = rootType;
+                    return (Binding) ReflectionUtil.CreateGenericInstanceFromOpenType(
+                        typeof(AssignmentCallbackBinding_Root_Property_WithCallbacks<,>),
+                        ReflectionUtil.TypeArray2,
+                        ReflectionUtil.ObjectArray3
+                    );
+                }
+                
+                ReflectionUtil.ObjectArray2[0] = propertyInfo;
+                ReflectionUtil.ObjectArray2[1] = eventInfo;
+
+                return (Binding) ReflectionUtil.CreateGenericInstanceFromOpenType(
+                    typeof(AssignmentCallbackBinding_Root_Property<>),
+                    genericArgument,
+                    ReflectionUtil.ObjectArray2
+                );
+            }
+
+            throw new ParseException($"Error compiling 'bindTo' expression on type {targetType.FullName}. " +
+                                     $"Unable to find field or property called {property} on type {rootType.FullName}");
+        }
+
         public Binding CompileAttribute(Type targetType, AttributeDefinition attributeDefinition) {
             string attrKey = attributeDefinition.key;
             string attrValue = attributeDefinition.value;
@@ -62,9 +149,17 @@ namespace UIForia.Compilers {
                 return CompileCallbackAttribute(attrValue, eventInfo);
             }
 
-            FieldInfo fieldInfo = ReflectionUtil.GetFieldInfoOrThrow(targetType, attrKey);
+            if (attrKey.IndexOf(".", StringComparison.Ordinal) != -1) {
+                string[] parts = attrKey.Split('.');
+                string property = parts[0];
+                string modifier = parts[1];
+                if (modifier == k_BindTo) {
+                    return CompileBoundProperty(compiler.context.rootType, targetType, property, attrValue);
+                }
+                throw new ParseException($"Unsupported attribute binding extension: '{attrKey}'");
+            }
 
-            //todo -- figure out how to handle Func and Action fields
+            FieldInfo fieldInfo = ReflectionUtil.GetFieldInfoOrThrow(targetType, attrKey);
 
             List<IAliasSource> aliasSources = aliasMap.GetOrDefault(fieldInfo.FieldType);
 
@@ -91,37 +186,8 @@ namespace UIForia.Compilers {
                 UnityEngine.Debug.Log($"Error compiling binding: {attrKey}={attrValue}, Type {fieldInfo.FieldType} is not assignable from {expression.YieldedType}");
                 return null;
             }
-            Dictionary<string, LightList<object>> actionMap;
-            if(!m_TypeMap.TryGetValue(targetType, out actionMap)) {
-                MethodInfo[] methods = targetType.GetMethods(ReflectionUtil.InstanceBindFlags);
-                
-                for (int i = 0; i < methods.Length; i++) {
-                    MethodInfo info = methods[i];
-                    object[] customAttributes = info.GetCustomAttributes(typeof(OnPropertyChanged), true);
 
-                    if (customAttributes.Length == 0) continue;
-
-                    ParameterInfo[] parameterInfos = info.GetParameters();
-                    if (!info.IsStatic && parameterInfos.Length == 1 && parameterInfos[0].ParameterType == typeof(string)) {
-                        if (actionMap == null) {
-                            actionMap = m_TypeMap.GetOrDefault(targetType);
-                        }
-
-                        if (actionMap == null) {
-                            actionMap = new Dictionary<string, LightList<object>>();
-                            m_TypeMap.Add(targetType, actionMap);
-                        }
-
-                        for (int j = 0; j < customAttributes.Length; j++) {
-                            OnPropertyChanged attr = (OnPropertyChanged) customAttributes[j];
-                            Type a = ReflectionUtil.GetOpenDelegateType(info);
-                            GetHandlerList(actionMap, attr.propertyName).Add(ReflectionUtil.GetDelegate(a, info));
-                        }
-                    }
-                }
-                // use null as a marker in the dictionary regardless of whether or not we have actions registered
-                m_TypeMap[targetType] = actionMap;
-            }
+            Dictionary<string, LightList<object>> actionMap = GetActionMap(targetType);
 
             LightList<object> list = actionMap?.GetOrDefault(attrKey);
             if (list != null) {
@@ -160,6 +226,43 @@ namespace UIForia.Compilers {
             return list;
         }
 
+        private Dictionary<string, LightList<object>> GetActionMap(Type targetType) {
+            Dictionary<string, LightList<object>> actionMap;
+            if (!m_TypeMap.TryGetValue(targetType, out actionMap)) {
+                MethodInfo[] methods = targetType.GetMethods(ReflectionUtil.InstanceBindFlags);
+
+                for (int i = 0; i < methods.Length; i++) {
+                    MethodInfo info = methods[i];
+                    object[] customAttributes = info.GetCustomAttributes(typeof(OnPropertyChanged), true);
+
+                    if (customAttributes.Length == 0) continue;
+
+                    ParameterInfo[] parameterInfos = info.GetParameters();
+                    if (!info.IsStatic && parameterInfos.Length == 1 && parameterInfos[0].ParameterType == typeof(string)) {
+                        if (actionMap == null) {
+                            actionMap = m_TypeMap.GetOrDefault(targetType);
+                        }
+
+                        if (actionMap == null) {
+                            actionMap = new Dictionary<string, LightList<object>>();
+                            m_TypeMap.Add(targetType, actionMap);
+                        }
+
+                        for (int j = 0; j < customAttributes.Length; j++) {
+                            OnPropertyChanged attr = (OnPropertyChanged) customAttributes[j];
+                            Type a = ReflectionUtil.GetOpenDelegateType(info);
+                            GetHandlerList(actionMap, attr.propertyName).Add(ReflectionUtil.GetDelegate(a, info));
+                        }
+                    }
+                }
+
+                // use null as a marker in the dictionary regardless of whether or not we have actions registered
+                m_TypeMap[targetType] = actionMap;
+            }
+
+            return actionMap;
+        }
+
         private Binding CompileCallbackAttribute(string value, EventInfo eventInfo) {
             MethodInfo info = eventInfo.EventHandlerType.GetMethod("Invoke");
             Debug.Assert(info != null, nameof(info) + " != null");
@@ -178,6 +281,7 @@ namespace UIForia.Compilers {
             }
 
             Expression<Terminal> expression = compiler.Compile<Terminal>(value);
+
             if (argTypes.Length > 0) {
                 compiler.RemoveRuntimeAlias(EvtArgDefaultName);
             }

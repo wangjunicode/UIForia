@@ -21,12 +21,17 @@ namespace UIForia.Util {
             Vector3 normal0 = new Vector3(0, 0, 0);
             Vector3 normal1 = new Vector3(0, 1, 0);
             Vector3 normal2 = new Vector3(1, 1, 0);
-            Vector3 normal3 = new Vector3(1, 0, 0);
+            Vector3 normal3 = new Vector3(1, 0, 0);            
 
-            s_VertexHelper.AddVert(new Vector3(0, 0), color32, new Vector2(0f, 1f), uv1, normal0, tangent);
-            s_VertexHelper.AddVert(new Vector3(0, -size.height), color32, new Vector2(0f, 0f), uv1, normal1, tangent);
-            s_VertexHelper.AddVert(new Vector3(size.width, -size.height), color32, new Vector2(1f, 0f), uv1, normal2, tangent);
-            s_VertexHelper.AddVert(new Vector3(size.width, 0), color32, new Vector2(1f, 1f), uv1, normal3, tangent);
+            Vector3 v0 = new Vector3(0, 0);
+            Vector3 v1 = new Vector3(0, -size.height);
+            Vector3 v2 = new Vector3(size.width, -size.height);
+            Vector3 v3 = new Vector3(size.width, 0);
+            
+            s_VertexHelper.AddVert(v0, color32, new Vector2(0f, 1f), uv1, normal0, tangent);
+            s_VertexHelper.AddVert(v1, color32, new Vector2(0f, 0f), uv1, normal1, tangent);
+            s_VertexHelper.AddVert(v2, color32, new Vector2(1f, 0f), uv1, normal2, tangent);
+            s_VertexHelper.AddVert(v3, color32, new Vector2(1f, 1f), uv1, normal3, tangent);
 
             s_VertexHelper.AddTriangle(0, 1, 2);
             s_VertexHelper.AddTriangle(2, 3, 0);
@@ -238,11 +243,16 @@ namespace UIForia.Util {
             Vector3 normal2 = new Vector3(1, 1, 0);
             Vector3 normal3 = new Vector3(1, 0, 0);
 
+            Vector3 v0 = new Vector3(0, 0);
+            Vector3 v1 = new Vector3(0, -size.height);
+            Vector3 v2 = new Vector3(size.width, -size.height);
+            Vector3 v3 = new Vector3(size.width, 0);
+
             Color32 color32 = Color.white;
-            s_VertexHelper.AddVert(new Vector3(0, 0), color32, new Vector2(0f, 1f), uv1, normal0, tangent);
-            s_VertexHelper.AddVert(new Vector3(0, -size.height), color32, new Vector2(0f, 0f), uv1, normal1, tangent);
-            s_VertexHelper.AddVert(new Vector3(size.width + 1, -size.height), color32, new Vector2(1f, 0f), uv1, normal2, tangent);
-            s_VertexHelper.AddVert(new Vector3(size.width + 1, 0), color32, new Vector2(1f, 1f), uv1, normal3, tangent);
+            s_VertexHelper.AddVert(v0, color32, new Vector2(0f, 1f), uv1, normal0, tangent);
+            s_VertexHelper.AddVert(v1, color32, new Vector2(0f, 0f), uv1, normal1, tangent);
+            s_VertexHelper.AddVert(v2, color32, new Vector2(1f, 0f), uv1, normal2, tangent);
+            s_VertexHelper.AddVert(v3, color32, new Vector2(1f, 1f), uv1, normal3, tangent);
 
             s_VertexHelper.AddTriangle(0, 1, 2);
             s_VertexHelper.AddTriangle(2, 3, 0);

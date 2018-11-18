@@ -1,4 +1,5 @@
 using System;
+using JetBrains.Annotations;
 using UIForia.Rendering;
 using UIForia.Systems;
 using UnityEngine;
@@ -15,10 +16,10 @@ namespace UIForia.Elements {
             flags |= UIElementFlags.Primitive;
             mesh = new Mesh();
             IsGeometryDirty = true;
-        }      
-        
-        public float width => mesh.bounds.extents.x;
-        public float height => mesh.bounds.extents.y;
+        }
+
+        public float width => (mesh != null) ? mesh.bounds.extents.x : 0;
+        public float height => (mesh != null) ? mesh.bounds.extents.y : 0;
 
         public bool IsGeometryDirty { get; private set; }
        

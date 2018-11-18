@@ -29,6 +29,7 @@ namespace UIForia.Systems {
         public static readonly int s_FillOffsetScaleKey;
 
         protected static readonly Material s_BaseMaterial;
+        private static readonly int s_RotationKey = Shader.PropertyToID("_Rotation");
 
         static StandardRenderer() {
             s_BaseMaterial = Resources.Load<Material>("UIForia/Materials/UIForia");
@@ -50,12 +51,13 @@ namespace UIForia.Systems {
                 if (data.isMeshProvider) {
                     data.mesh = ((IMeshProvider) element).GetMesh();
                 }
-                else if (data.mesh == null || element.layoutResult.ActualSizeChanged) {
+                else if (data.mesh == null || element.layoutResult.ActualSizeChanged || element.layoutResult.RotationChanged) {
                     LayoutResult result = element.layoutResult;
                     data.mesh = MeshUtil.ResizeStandardUIMesh(data.mesh, new Size(
-                        Mathf.Max(result.actualSize.width, result.allocatedSize.width),
-                        Mathf.Max(result.actualSize.height, result.allocatedSize.height))
-                    );
+                                Mathf.Max(result.actualSize.width, result.allocatedSize.width),
+                                Mathf.Max(result.actualSize.height, result.allocatedSize.height)
+                            )
+                        );
                 }
 
                 if (data.mesh == null) {
@@ -73,9 +75,10 @@ namespace UIForia.Systems {
                     continue;
                 }
 
+                data.material.SetFloat(s_RotationKey, element.layoutResult.rotation * Mathf.Deg2Rad);
                 Matrix4x4 matrix = Matrix4x4.TRS(
                     origin + data.renderPosition - new Vector3(1, 0, 0),
-                    Quaternion.AngleAxis(data.element.style.TransformRotation, Vector3.forward),
+                    Quaternion.AngleAxis(0, Vector3.forward),
                     new Vector3(1, 1, 1)
                 );
 
@@ -146,6 +149,7 @@ namespace UIForia.Systems {
             // todo -- see if [PerRendererData] can stop us from needing unique materials
             Vector2 fillScale = new Vector2(style.BackgroundFillScaleX, style.BackgroundFillScaleY);
             Vector2 fillOffset = new Vector2(style.BackgroundFillOffsetX, style.BackgroundFillOffsetY);
+            Vector2 pivot = data.element.layoutResult.Pivot;
             Rect contentRect = data.element.layoutResult.ContentRect;
             material.SetVector(s_ContentRectKey,
                 new Vector4(contentRect.x, contentRect.y, contentRect.width, contentRect.height));
@@ -155,7 +159,7 @@ namespace UIForia.Systems {
             material.SetVector(s_BorderSizeKey, style.ResolvedBorder);
             material.SetVector(s_BorderRadiusKey, style.ResolvedBorderRadius);
             material.SetVector(s_BorderColorKey, style.BorderColor);
-            material.SetVector(s_SizeKey, new Vector4(size.width, size.height, 0, 0));
+            material.SetVector(s_SizeKey, new Vector4(size.width, size.height, pivot.x, pivot.y));
             return material;
         }
 

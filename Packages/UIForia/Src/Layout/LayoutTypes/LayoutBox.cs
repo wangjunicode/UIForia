@@ -108,6 +108,11 @@ namespace UIForia.Layout.LayoutTypes {
             }
         }
 
+        public Vector2 Pivot => new Vector2(
+            ResolveFixedWidth(style.TransformPivotX),
+            ResolveFixedHeight(style.TransformPivotY)
+        );
+
         public float GetVerticalMargin(float width) {
             return ResolveMarginVertical(width, style.MarginTop) + ResolveMarginVertical(width, style.MarginBottom);
         }
@@ -261,7 +266,7 @@ namespace UIForia.Layout.LayoutTypes {
 
                 case UIFixedUnit.LineHeight:
                     return style.LineHeightSize * width.value;
-                
+
                 default:
                     return 0;
             }
@@ -284,10 +289,10 @@ namespace UIForia.Layout.LayoutTypes {
 
                 case UIFixedUnit.Em:
                     return style.EmSize * height.value * element.view.ScaleFactor;
-                
+
                 case UIFixedUnit.LineHeight:
                     return style.LineHeightSize * height.value;
-                
+
                 default:
                     return 0;
             }
@@ -823,7 +828,7 @@ namespace UIForia.Layout.LayoutTypes {
             }
         }
 
-                
+
         public float ResolveMarginHorizontal(UIMeasurement margin) {
             AnchorTarget anchorTarget;
 
@@ -833,7 +838,7 @@ namespace UIForia.Layout.LayoutTypes {
 
                 case UIMeasurementUnit.Em:
                     return style.EmSize * margin.value * element.view.ScaleFactor;
-                
+
                 case UIMeasurementUnit.Content:
                     return GetContentWidth() * margin.value;
 
@@ -858,7 +863,6 @@ namespace UIForia.Layout.LayoutTypes {
                     return parent.allocatedWidth * margin.value -
                            (parent.style == null ? 0 : parent.PaddingBorderHorizontal);
 
-             
 
                 case UIMeasurementUnit.AnchorWidth:
                     anchorTarget = style.AnchorTarget;
@@ -882,7 +886,7 @@ namespace UIForia.Layout.LayoutTypes {
                     throw new ArgumentOutOfRangeException();
             }
         }
-        
+
         [DebuggerStepThrough]
         public float GetMinHeight(float contentHeight) {
             return ResolveMinOrMaxHeight(style.MinHeight, contentHeight);

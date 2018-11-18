@@ -4,12 +4,17 @@
     <Style>
         style container {
             FlexLayoutDirection = Row;
-            PreferredWidth = 800px;
-            PreferredHeight = 764px;
+            PreferredWidth = 600;
+            PreferredHeight = 600;
             OverflowY = Scroll;
             BackgroundColor = orange;
-            TextColor = white;
             TextFontSize = 76;
+            TransformPositionX = 300;
+            TransformPositionY = 300;
+            LayoutBehavior = Ignored;
+            TransformRotation = 0;
+            TransformPivotX = 0;
+            TransformPivotY = 0;
         }
                 
         style parent {
@@ -28,6 +33,9 @@
             BackgroundColor = Red;
             Padding = 5px;
             Border = 5px;
+            <!--TransformRotation = 60;-->
+            TransformPivotX = 50%;
+            TransformPivotY = 50%;
         }
         
         style child2 {
@@ -44,7 +52,7 @@
         }
         
         style input {
-            PreferredSize = 200px, 32px;
+            PreferredSize = 100px, 32px;
             BackgroundColor = white;
             TransformBehavior = LayoutOffset;
             TransformPosition = 20px;
@@ -56,12 +64,13 @@
 
     <Contents style="container">
 
-        <!--<Input style="input"/>-->
+        <Input style="input" textValue.bindTo="onValueChanged"/>
         
-        <Div style="parent">
-            <Div style="child">Text</Div>
-            <Div style="child2"/>
-        </Div>
+        <!--<Div style="parent">-->
+            <!--&lt;!&ndash;<Div style="child">Text</Div>&ndash;&gt;-->
+            <!--&lt;!&ndash;<Div style="child2"/>&ndash;&gt;-->
+        <!--</Div>-->
+        
         <!--<ChatPanel style.borderColor="red" selectedGroupIdx="{selectedChatGroup}" chatData="{chatData}"/>-->
 
         <!--<SeedWindowFrame style="window-frame-temp">-->

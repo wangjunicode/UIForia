@@ -94,6 +94,7 @@ namespace UIForia.Systems {
         public void RunLayout(bool forceLayout, ViewRect viewRect) {
             Rect rect = viewRect.previousViewport;
             UIView view = viewRect.view;
+            Rect viewportRect = view.Viewport;
             
             LayoutBox root = m_LayoutBoxMap.GetOrDefault(view.RootElement.id);
 
@@ -152,7 +153,7 @@ namespace UIForia.Systems {
             layoutResult.Rotation = root.style.TransformRotation;
             layoutResult.Layer = computedLayer;
             layoutResult.ZIndex = zIndex;
-            layoutResult.clipRect = new Rect(0, 0, element.view.Viewport.width, element.view.Viewport.height);
+            layoutResult.clipRect = new Rect(0, 0, viewportRect.width, viewportRect.height);
             element.layoutResult = layoutResult;
 
             CreateOrDestroyScrollbars(root);
@@ -188,7 +189,7 @@ namespace UIForia.Systems {
                         }
                     }
 
-                    if (forceLayout || box.markedForLayout) {
+                    if (true || forceLayout || box.markedForLayout) {
                         box.RunLayout();
                         box.markedForLayout = false;
 #if DEBUG
@@ -221,11 +222,13 @@ namespace UIForia.Systems {
                     layoutResult.AllocatedSize = new Size(box.allocatedWidth, box.allocatedHeight);
                     layoutResult.ScreenPosition = box.parent.element.layoutResult.screenPosition + layoutResult.localPosition;
                     layoutResult.Scale = new Vector2(box.style.TransformScaleX, box.style.TransformScaleY);
-                    layoutResult.Rotation = box.style.TransformRotation;
+                    layoutResult.Rotation = parentBox.style.TransformRotation + box.style.TransformRotation;
+                    layoutResult.Pivot = box.Pivot;
                     layoutResult.Layer = computedLayer;
                     layoutResult.ZIndex = zIndex;
 
-                    Rect clipRect = new Rect(0, 0, element.view.Viewport.width, element.view.Viewport.height);
+                    // should be able to sort by view
+                    Rect clipRect = new Rect(0, 0, viewportRect.width, viewportRect.height);
                     UIElement ptr = element.parent;
                     // find ancestor where layer is higher, might not be our parent
 
@@ -679,9 +682,8 @@ namespace UIForia.Systems {
 
             for (int i = 0; i < m_Elements.Count; i++) {
                 LayoutResult layoutResult = m_Elements[i].layoutResult;
-                UIElement element = m_Elements[i];
-
-                // todo -- replace w/ quad tree
+                UIElement element = m_Elements[i];               
+               
                 if (!layoutResult.ScreenRect.Contains(point)) {
                     continue;
                 }

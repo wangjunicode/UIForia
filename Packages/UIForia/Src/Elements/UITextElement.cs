@@ -792,6 +792,7 @@ namespace UIForia {
 
             CharInfo startCharInfo = textInfo.charInfos[startIndex];
             CharInfo endCharInfo = textInfo.charInfos[endIndex];
+            highlightMesh = highlightMesh ? highlightMesh : new Mesh();
 
             // todo -- needs to handle all lines not just first
             float height = GetLineHeight();
@@ -815,7 +816,6 @@ namespace UIForia {
                 MeshUtil.s_VertexHelper.AddTriangle(0, 1, 2);
                 MeshUtil.s_VertexHelper.AddTriangle(2, 3, 0);
 
-                highlightMesh = highlightMesh ? highlightMesh : new Mesh();
 
                 MeshUtil.s_VertexHelper.FillMesh(highlightMesh);
                 MeshUtil.s_VertexHelper.Clear();
@@ -824,9 +824,10 @@ namespace UIForia {
             }
 
             int lineCount = endCharInfo.lineIndex = startCharInfo.lineIndex;
+            Debug.Log("Multi line");
             for (int i = startCharInfo.lineIndex; i < lineCount; i++) { }
 
-            return null;
+            return highlightMesh;
         }
 
         public SelectionRange GetSelectionAtPoint(Vector2 point) {
@@ -954,18 +955,19 @@ namespace UIForia {
             }
 
         }
-
+        
         public Vector2 GetCursorPosition(SelectionRange selectionRange) {
             if (string.IsNullOrEmpty(text) || selectionRange.cursorIndex >= textInfo.charCount) {
                 return Vector2.zero;
             }
-
+            
             CharInfo charInfo = textInfo.charInfos[selectionRange.cursorIndex];
             LineInfo lineInfo = textInfo.lineInfos[charInfo.lineIndex];
+            
             return new Vector2(selectionRange.cursorEdge == TextEdge.Right
                     ? charInfo.bottomRight.x
                     : charInfo.topLeft.x,
-                -lineInfo.position.y
+                lineInfo.position.y
             );
         }
 

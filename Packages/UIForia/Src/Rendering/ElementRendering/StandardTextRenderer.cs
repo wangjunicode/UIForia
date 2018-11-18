@@ -22,7 +22,7 @@ namespace UIForia.Rendering.ElementRendering {
                 Mesh mesh = textElement.GetMesh();
                 Material material = textElement.GetMaterial();
                 m_PropertyBlock.SetVector(s_FaceColorKey, textElement.style.TextColor);
-                Quaternion rotation = Quaternion.AngleAxis(data.element.style.TransformRotation, Vector3.forward);
+                Quaternion rotation = Quaternion.identity;
                 material.color = Color.white;
                 
                 Graphics.DrawMesh(mesh, origin + data.renderPosition, rotation, material, 0, camera, 0, m_PropertyBlock, false, false, false);

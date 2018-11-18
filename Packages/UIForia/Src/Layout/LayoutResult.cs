@@ -10,6 +10,7 @@ namespace UIForia.Systems {
         public Vector2 scale;
         public Vector2 localPosition;
         public Vector2 screenPosition;
+        public Vector2 pivot;
 
         public Size actualSize;
         public Size allocatedSize;
@@ -120,8 +121,11 @@ namespace UIForia.Systems {
         public float Rotation {
             get { return rotation; }
             internal set {
-                if (!Mathf.Approximately(rotation, value)) {
-                    rotation = value;
+                float r = value;
+                r = (r) % 360;
+                if (r < 0) r += 360;
+                if (!Mathf.Approximately(rotation, r)) {
+                    rotation = r;
                     flags |= LayoutResultFlags.RotationChanged;
                 }
                 else {
@@ -234,6 +238,19 @@ namespace UIForia.Systems {
 
         }
 
+        public Vector2 Pivot {
+            get { return pivot; }
+            set {
+                if (value != pivot) {
+                    pivot = value;
+                    flags |= LayoutResultFlags.PivotChanged;
+                }
+                else {
+                    flags &= ~LayoutResultFlags.PivotChanged;
+                }
+            }
+        }
+
         [Flags]
         private enum LayoutResultFlags {
 
@@ -247,9 +264,10 @@ namespace UIForia.Systems {
             ScaleChanged = 1 << 6,
             LocalPositionChanged = 1 << 7,
             ScreenPositionChanged = 1 << 8,
+            PivotChanged = 1 << 9,
 
             PositionChanged = LocalPositionChanged | ScreenPositionChanged,
-            TransformChanged = PositionChanged | ScaleChanged | RotationChanged,
+            TransformChanged = PositionChanged | ScaleChanged | RotationChanged | PivotChanged,
             SizeChanged = AllocatedSizeChanged | ActualSizeChanged
 
         }

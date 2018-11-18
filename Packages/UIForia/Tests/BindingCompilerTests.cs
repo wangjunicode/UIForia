@@ -1,7 +1,11 @@
-﻿using NUnit.Framework;
+﻿using System;
+using NUnit.Framework;
 using UIForia;
 using UIForia.Compilers;
 using Tests;
+using Tests.Mocks;
+using UIForia.Elements;
+using UnityEditor.VersionControl;
 using static Tests.TestUtils;
 
 [TestFixture]
@@ -38,7 +42,7 @@ public class BindingCompilerTests {
         childElement.InvokeEvtArg0();
         Assert.AreEqual(1, rootElement.arg0CallCount);
     }
-    
+
     [Test]
     public void CreatesBinding_Event_1Args() {
         // <RootElement>
@@ -60,9 +64,9 @@ public class BindingCompilerTests {
         binding.Execute(childElement, ctx);
 
         childElement.InvokeEvtArg1("hello");
-        Assert.AreEqual(new [] { "hello"}, rootElement.arg1Params);
+        Assert.AreEqual(new[] {"hello"}, rootElement.arg1Params);
     }
-    
+
     [Test]
     public void CreatesBinding_Event_2Args() {
         // <RootElement>
@@ -84,9 +88,9 @@ public class BindingCompilerTests {
         binding.Execute(childElement, ctx);
 
         childElement.InvokeEvtArg2("hello", "there");
-        Assert.AreEqual(new [] { "hello", "there"}, rootElement.arg2Params);
+        Assert.AreEqual(new[] {"hello", "there"}, rootElement.arg2Params);
     }
-    
+
     [Test]
     public void CreatesBinding_Event_3Args() {
         // <RootElement>
@@ -108,9 +112,9 @@ public class BindingCompilerTests {
         binding.Execute(childElement, ctx);
 
         childElement.InvokeEvtArg3("hello", "there", "buddy");
-        Assert.AreEqual(new [] { "hello", "there", "buddy"}, rootElement.arg3Params);
+        Assert.AreEqual(new[] {"hello", "there", "buddy"}, rootElement.arg3Params);
     }
-    
+
     [Test]
     public void CreatesBinding_Event_4Args() {
         // <RootElement>
@@ -132,20 +136,21 @@ public class BindingCompilerTests {
         binding.Execute(childElement, ctx);
 
         childElement.InvokeEvtArg4("hello", "there", "buddy", "boy");
-        Assert.AreEqual(new [] { "hello", "there", "buddy", "boy"}, rootElement.arg4Params);
+        Assert.AreEqual(new[] {"hello", "there", "buddy", "boy"}, rootElement.arg4Params);
     }
-    
-    public class TestedThing1 : UIElement {
+
+    private class TestedThing1 : UIElement {
 
         public string prop0;
         public bool didProp0Change;
-        
+
         [OnPropertyChanged(nameof(prop0))]
         public void OnProp0Changed(string prop) {
             didProp0Change = true;
         }
 
     }
+
 
     [Test]
     public void OnPropertyChanged() {
@@ -163,6 +168,101 @@ public class BindingCompilerTests {
         b.Execute(t, new UITemplateContext(null));
         Assert.AreEqual(t.prop0, "some-string");
         Assert.IsFalse(t.didProp0Change);
+    }
+
+    private class EventedThing : UIContainerElement {
+
+        public event Action<string> onValueChanged;
+
+        public void Invoke(string value) {
+            onValueChanged?.Invoke(value);
+        }
+
+    }
+
+    [Template(TemplateType.String, @"
+    <UITemplate>
+        <Contents>
+            <EventedThing textValue.bindTo='onValueChanged'/>
+        </Contents>
+    </UITemplate>
+    ")]
+    private class TestedThing2 : UIElement {
+
+        public string textValue;
+
+        public bool didProp0Change;
+
+        [OnPropertyChanged(nameof(textValue))]
+        public void OnProp0Changed(string prop) {
+            didProp0Change = true;
+        }
+
+    }
+    
+    [Template(TemplateType.String, @"
+    <UITemplate>
+        <Contents>
+            <EventedThing textValue.bindTo='onValueChanged'/>
+        </Contents>
+    </UITemplate>
+    ")]
+    private class TestedThing3 : UIElement {
+
+        public string textValue { get; set; }
+        
+        public bool didProp0Change;
+
+        [OnPropertyChanged(nameof(textValue))]
+        public void OnProp0Changed(string prop) {
+            didProp0Change = true;
+        }
+
+    }
+
+    [Template(TemplateType.String, @"
+    <UITemplate>
+        <Contents>
+            <EventedThing textValue.bindTo='onValueChanged'/>
+        </Contents>
+    </UITemplate>
+    ")]
+    private class TestedThing4 : UIElement {
+
+        public string textValue;
+
+    }
+    
+    [Test]
+    public void BindTo_Field() {
+        MockApplication app = new MockApplication(typeof(TestedThing4));
+        TestedThing4 thing = (TestedThing4) app.RootElement;
+        EventedThing evtThing = (EventedThing)thing.GetChild(0);
+        Assert.AreEqual(null, thing.textValue);
+        evtThing.Invoke("some value");
+        Assert.AreEqual("some value", thing.textValue);
+    }
+    
+    [Test]
+    public void BindTo_Field_Callbacks() {
+        MockApplication app = new MockApplication(typeof(TestedThing2));
+        TestedThing2 thing2 = (TestedThing2) app.RootElement;
+        EventedThing evtThing = (EventedThing)thing2.GetChild(0);
+        Assert.AreEqual(null, thing2.textValue);
+        evtThing.Invoke("some value");
+        Assert.AreEqual("some value", thing2.textValue);
+        Assert.IsTrue(thing2.didProp0Change);
+    }
+
+    [Test]
+    public void BindTo_Property() {
+        MockApplication app = new MockApplication(typeof(TestedThing3));
+        TestedThing3 thing3 = (TestedThing3) app.RootElement;
+        EventedThing evtThing = (EventedThing)thing3.GetChild(0);
+        Assert.AreEqual(null, thing3.textValue);
+        evtThing.Invoke("some value");
+        Assert.AreEqual("some value", thing3.textValue);
+        Assert.IsTrue(thing3.didProp0Change);
     }
 
 }

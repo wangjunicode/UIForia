@@ -108,6 +108,8 @@ namespace UIForia {
                     childrenElement.children[i].templateParent = element;
                 }
             }
+            
+            // todo -- create slots here
 
             AssignContext(element, context);
             

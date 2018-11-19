@@ -2,6 +2,7 @@
 <UITemplate>
 
     <Style>
+        
         style container {
             FlexLayoutDirection = Row;
             PreferredWidth = 600;
@@ -23,26 +24,19 @@
             BackgroundColor = white;
         }
         
-        
     </Style>
-
+    
     <Contents style="container">
 
         <Input style="input" textValue.bindTo="onValueChanged"/>
         
-        <Router path="/">
-            <Route path="/si"
-        </Router>
-        <!--<Div style="parent">-->
-            <!--&lt;!&ndash;<Div style="child">Text</Div>&ndash;&gt;-->
-            <!--&lt;!&ndash;<Div style="child2"/>&ndash;&gt;-->
-        <!--</Div>-->
-        
-        <!--<ChatPanel style.borderColor="red" selectedGroupIdx="{selectedChatGroup}" chatData="{chatData}"/>-->
+        <Router>
 
-        <!--<SeedWindowFrame style="window-frame-temp">-->
-            <!--<Div>Text</Div>-->
-        <!--</SeedWindowFrame>-->
+            <Route path="/signup/*/">
+                
+            </Route>
+            
+        </Router>
         
     </Contents>
 

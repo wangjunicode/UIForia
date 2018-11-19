@@ -37,7 +37,6 @@ namespace UIForia.Util {
             foreach (var item in collection) {
                 Add(item);
             }
-            
         }
 
         public void AddUnchecked(T item) {
@@ -77,7 +76,6 @@ namespace UIForia.Util {
 
             return false;
         }
-
 
         public int IndexOf(T item) {
             for (int i = 0; i < size; i++) {
@@ -147,7 +145,6 @@ namespace UIForia.Util {
             return default(T);
         }
 
-
         public T this[int index] {
             get { return list[index]; }
             set { list[index] = value; }
@@ -185,9 +182,39 @@ namespace UIForia.Util {
             Array.Sort(list, 0, size, comparison);
         }
 
+        public int BinarySearch(T value, IComparer<T> comparer) {
+            return InternalBinarySearch(list, 0, size, value, comparer);
+        }
+
+        public int BinarySearch(T value) {
+            return InternalBinarySearch(list, 0, size, value, Comparer<T>.Default);
+        }
+        
+        private static int InternalBinarySearch(T[] array, int index, int length, T value, IComparer<T> comparer) {
+            int num1 = index;
+            int num2 = index + length - 1;
+            while (num1 <= num2) {
+                int index1 = num1 + (num2 - num1 >> 1);
+                int num3 = comparer.Compare(array[index1], value);
+                
+                if (num3 == 0) {
+                    return index1;
+                }
+
+                if (num3 < 0) {
+                    num1 = index1 + 1;
+                }
+                else {
+                    num2 = index1 - 1;
+                }
+            }
+
+            return ~num1;
+        }
+
         private static readonly FunctorComparer s_Compare = new FunctorComparer();
 
-        internal sealed class FunctorComparer : IComparer<T> {
+        private sealed class FunctorComparer : IComparer<T> {
 
             public Comparison<T> comparison;
 
@@ -196,7 +223,6 @@ namespace UIForia.Util {
             }
 
         }
-
 
 //        internal class ArraySortHelper<T> {
 //

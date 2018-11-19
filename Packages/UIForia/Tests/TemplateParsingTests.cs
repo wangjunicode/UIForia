@@ -5,9 +5,13 @@ using UIForia.Parsing;
 [TestFixture]
 public class TemplateParsingTests {
 
+    
+    [Template("Tests/Templates/Parsing/Test1.xml")]
+    public class Test1 : UIElement { }
+    
     [Test]
     public void Children_ParsesCorrectly() {
-        ParsedTemplate parsedTemplate = TemplateParser.ParseTemplateFromString<Spec.Test1>(@"
+        ParsedTemplate parsedTemplate = TemplateParser.ParseTemplateFromString<Test1>(@"
             <UITemplate>
                 <Contents>
                     <Children/>
@@ -20,7 +24,7 @@ public class TemplateParsingTests {
     [Test]
     public void Children_CannotAppearInsideRepeat() {
         var x = Assert.Throws<InvalidTemplateException>(() => {
-            TemplateParser.ParseTemplateFromString<Spec.Test1>(@"
+            TemplateParser.ParseTemplateFromString<Test1>(@"
                 <UITemplate>
                     <Contents>
                         <Repeat list='{null}'>
@@ -36,7 +40,7 @@ public class TemplateParsingTests {
     [Test]
     public void Children_MustBeEmpty() {
         var x = Assert.Throws<InvalidTemplateException>(() => {
-            TemplateParser.ParseTemplateFromString<Spec.Test1>(@"
+            TemplateParser.ParseTemplateFromString<Test1>(@"
                 <UITemplate>
                     <Contents>
                             <Children>text</Children>
@@ -50,7 +54,7 @@ public class TemplateParsingTests {
     [Test]
     public void Switch_CanOnlyContainCaseAndDefault() {
         var x = Assert.Throws<InvalidTemplateException>(() => {
-            TemplateParser.ParseTemplateFromString<Spec.Test1>(@"
+            TemplateParser.ParseTemplateFromString<Test1>(@"
                 <UITemplate>
                     <Contents>
                         <Switch value='1'>
@@ -66,7 +70,7 @@ public class TemplateParsingTests {
     [Test]
     public void Switch_CanOnlyContainOneDefault() {
         var x = Assert.Throws<InvalidTemplateException>(() => {
-            TemplateParser.ParseTemplateFromString<Spec.Test1>(@"
+            TemplateParser.ParseTemplateFromString<Test1>(@"
                 <UITemplate>
                     <Contents>
                         <Switch value='1'>
@@ -83,7 +87,7 @@ public class TemplateParsingTests {
     [Test]
     public void Switch_CanContainOnlyCases() {
         Assert.DoesNotThrow(() => {
-            TemplateParser.ParseTemplateFromString<Spec.Test1>(@"
+            TemplateParser.ParseTemplateFromString<Test1>(@"
                 <UITemplate>
                     <Contents>
                         <Switch value='1'>
@@ -99,7 +103,7 @@ public class TemplateParsingTests {
     [Test]
     public void Switch_CanContainOnlyDefault() {
         Assert.DoesNotThrow(() => {
-            TemplateParser.ParseTemplateFromString<Spec.Test1>(@"
+            TemplateParser.ParseTemplateFromString<Test1>(@"
                 <UITemplate>
                     <Contents>
                         <Switch value='1'>
@@ -114,7 +118,7 @@ public class TemplateParsingTests {
     [Test]
     public void Switch_CannotBeEmpty() {
         var x = Assert.Throws<InvalidTemplateException>(() => {
-            TemplateParser.ParseTemplateFromString<Spec.Test1>(@"
+            TemplateParser.ParseTemplateFromString<Test1>(@"
                 <UITemplate>
                     <Contents>
                         <Switch value='1'>
@@ -130,7 +134,7 @@ public class TemplateParsingTests {
     [Test]
     public void Case_MustHaveWhenAttribute() {
         var x = Assert.Throws<InvalidTemplateException>(() => {
-            TemplateParser.ParseTemplateFromString<Spec.Test1>(@"
+            TemplateParser.ParseTemplateFromString<Test1>(@"
                 <UITemplate>
                     <Contents>
                         <Switch value='1'>
@@ -147,7 +151,7 @@ public class TemplateParsingTests {
 //    [Test]
 //    public void Prefab_MustBeEmpty() {
 //        var x = Assert.Throws<InvalidTemplateException>(() => {
-//            TemplateParser.ParseTemplateFromString<Spec.Test1>(@"
+//            TemplateParser.ParseTemplateFromString<Test1>(@"
 //                <UITemplate>
 //                    <Contents>
 //                            <Prefab>text</Prefab>
@@ -161,7 +165,7 @@ public class TemplateParsingTests {
     [Test]
     public void Text_Parses() {
         Assert.DoesNotThrow(() => {
-            TemplateParser.ParseTemplateFromString<Spec.Test1>(@"
+            TemplateParser.ParseTemplateFromString<Test1>(@"
                 <UITemplate>
                     <Contents>
                             <Group>text</Group>
@@ -173,7 +177,7 @@ public class TemplateParsingTests {
 
     [Test]
     public void Text_AssignsRawString() {
-        ParsedTemplate parsedTemplate = TemplateParser.ParseTemplateFromString<Spec.Test1>(@"
+        ParsedTemplate parsedTemplate = TemplateParser.ParseTemplateFromString<Test1>(@"
                 <UITemplate>
                     <Contents>
                             <Group>text {value} is here</Group>
@@ -188,7 +192,7 @@ public class TemplateParsingTests {
     [Test]
     public void Repeat_CanNest() {
         Assert.DoesNotThrow(() => {
-            TemplateParser.ParseTemplateFromString<Spec.Test1>(@"
+            TemplateParser.ParseTemplateFromString<Test1>(@"
                 <UITemplate>
                     <Contents>
                        <Repeat list='{something}'>

@@ -59,22 +59,22 @@ namespace UIForia {
         
         public abstract Type elementType { get; }
 
-        public MetaData GetCreationData(UIElement element, UITemplateContext context) {
-            MetaData data = new MetaData(element, context);
-            data.baseStyles = baseStyles;
-            data.bindings = bindings;
-            data.constantBindings = constantBindings;
-            data.constantStyleBindings = constantStyleBindings;
-            data.keyboardEventHandlers = keyboardEventHandlers;
-            data.mouseEventHandlers = mouseEventHandlers;
-            data.dragEventCreators = dragEventCreators;
-            data.dragEventHandlers = dragEventHandlers;
-//            element.templateAttributes = templateAttributes;
-            if (acceptFocus) {
-                element.flags |= UIElementFlags.AcceptFocus;
-            }
-            return data;
-        }
+//        public MetaData GetCreationData(UIElement element, UITemplateContext context) {
+//            MetaData data = new MetaData(element, context);
+//            data.baseStyles = baseStyles;
+//            data.bindings = bindings;
+//            data.constantBindings = constantBindings;
+//            data.constantStyleBindings = constantStyleBindings;
+//            data.keyboardEventHandlers = keyboardEventHandlers;
+//            data.mouseEventHandlers = mouseEventHandlers;
+//            data.dragEventCreators = dragEventCreators;
+//            data.dragEventHandlers = dragEventHandlers;
+////            element.templateAttributes = templateAttributes;
+//            if (acceptFocus) {
+//                element.flags |= UIElementFlags.AcceptFocus;
+//            }
+//            return data;
+//        }
 
         public abstract UIElement CreateScoped(TemplateScope inputScope);
 

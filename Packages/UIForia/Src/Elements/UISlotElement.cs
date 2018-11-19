@@ -2,7 +2,11 @@ namespace UIForia {
 
     public class UISlotElement : UIElement {
 
-        public void SetContent(UIElement content) { }
+        public readonly string slotId;
+        
+        public UISlotElement(string slotId) {
+            this.slotId = slotId;
+        }
 
     }
 

@@ -25,7 +25,7 @@ namespace UIForia {
         public static void Reset() {
             parsedTemplates.Clear();
         }
-        
+
         public static ParsedTemplate GetParsedTemplate(Type elementType, bool forceReload = false) {
             if (!forceReload && parsedTemplates.ContainsKey(elementType)) {
                 return parsedTemplates[elementType];
@@ -201,10 +201,14 @@ namespace UIForia {
         }
 
         private static UITemplate ParseSlotElement(XElement element) {
-            Abort("<Slot> not yet implemented");
+            EnsureAttribute(element, "slotId");
             EnsureNotInsideTagName(element, "Repeat");
-            EnsureOnlyAttributes(element, ChildrenAttributes);
-            return null;
+            EnsureNotInsideTagName(element, "Slot");
+//            EnsureOnlyAttributes(element, ChildrenAttributes);
+            return new UISlotTemplate(
+                ParseNodes(element.Nodes()),
+                ParseAttributes(element.Attributes())
+            );
         }
 
         private static UITemplate ParseChildrenElement(XElement element) {
@@ -256,8 +260,8 @@ namespace UIForia {
             ProcessedType elementType = TypeProcessor.GetType(element.Name.LocalName);
             if (typeof(UIContainerElement).IsAssignableFrom(elementType.rawType)) {
                 return new UIContainerTemplate(
-                    elementType.rawType, 
-                    ParseNodes(element.Nodes()), 
+                    elementType.rawType,
+                    ParseNodes(element.Nodes()),
                     ParseAttributes(element.Attributes())
                 );
             }
@@ -269,7 +273,7 @@ namespace UIForia {
 //            if (typeof(UIPrimitiveElement).IsAssignableFrom(elementType.rawType)) {
 //                return ParsePrimitiveElement(elementType.rawType, element);
 //            }
-            
+
             UITemplate template = new UIElementTemplate(
                 element.Name.LocalName,
                 ParseNodes(element.Nodes()),
@@ -321,34 +325,30 @@ namespace UIForia {
         }
 
         private static UITemplate ParseRouterElement(XElement element) {
-            
             EnsureAttribute(element, "path");
             // todo -- ensure path is a string & constant
             return new UIRouterTemplate(
                 ParseNodes(element.Nodes()),
                 ParseAttributes(element.Attributes())
-             );
-            
+            );
         }
-        
+
         private static UITemplate ParseUnmatchedRouteElement(XElement element) {
             return new UIUnmatchedRouteTemplate(
                 ParseNodes(element.Nodes()),
                 ParseAttributes(element.Attributes())
             );
         }
-        
+
         private static UITemplate ParseRouteElement(XElement element) {
-            
             EnsureAttribute(element, "path");
             // todo -- ensure path is a string & constant
             return new UIRouteTemplate(
                 ParseNodes(element.Nodes()),
                 ParseAttributes(element.Attributes())
             );
-            
         }
-        
+
         private static UITemplate ParseElement(XElement element) {
             if (element.Name == "Children") {
                 return ParseChildrenElement(element);
@@ -393,11 +393,11 @@ namespace UIForia {
             if (element.Name == "Route") {
                 return ParseRouteElement(element);
             }
-            
+
             if (element.Name == "UnmatchedRoute") {
                 return ParseUnmatchedRouteElement(element);
             }
-            
+
             for (int i = 0; i < IntrinsicElementTypes.Length; i++) {
                 if (IntrinsicElementTypes[i].name == element.Name) {
                     if (IntrinsicElementTypes[i].isContainer) {

@@ -1,7 +1,10 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project version="4">
   <component name="ContentModelStore">
-    <e p="C:\Seed\UIForia\UIElements" t="IncludeRecursive">
+    <e p="C:\Users\matth\.Rider2018.3\config\extensions" t="IncludeRecursive" />
+    <e p="C:\Users\matth\.Rider2018.3\system\extResources" t="IncludeRecursive" />
+    <e p="C:\Users\matth\.Rider2018.3\system\resharper-host\local\Transient\ReSharperHost\v183\SolutionCaches\_UIElements.-1987582547.00" t="ExcludeRecursive" />
+    <e p="C:\Users\matth\RiderProjects\UIElements" t="IncludeRecursive">
       <e p="Assets" t="Include">
         <e p="Demos" t="Include">
           <e p="AddChatButton.xml" t="Include" />
@@ -69,12 +72,10 @@
           </e>
         </e>
       </e>
-      <e p="com.klang.uiforia.csproj" t="IncludeRecursive" />
       <e p="Library" t="ExcludeRecursive" />
       <e p="obj" t="ExcludeRecursive" />
       <e p="packages" t="ExcludeRecursive">
         <e p="UIForia" t="Include">
-          <e p="AssemblyInfo.cs" t="Include" />
           <e p="Editor" t="Include">
             <e p="AnimatedPropertyGenerator.cs" t="Include" />
             <e p="CodeGen.cs" t="Include" />
@@ -89,7 +90,6 @@
             </e>
             <e p="UIForia.Editor.asmdef" t="Include" />
           </e>
-          <e p="notes.txt" t="Include" />
           <e p="Src" t="Include">
             <e p="_Generated.cs" t="Include" />
             <e p="_Generated2.cs" t="Include" />
@@ -104,6 +104,7 @@
               <e p="StyleAnimator.cs" t="Include" />
             </e>
             <e p="Application.cs" t="Include" />
+            <e p="AssemblyInfo.cs" t="Include" />
             <e p="Attributes.cs" t="Include" />
             <e p="Binding" t="Include">
               <e p="Binding.cs" t="Include" />
@@ -339,10 +340,7 @@
               <e p="BorderedImage.cs" t="Include" />
               <e p="BorderRadius.cs" t="Include" />
               <e p="BorderStyle.cs" t="Include" />
-              <e p="ComputedStyle.cs" t="Include" />
-              <e p="ComputedStyle_Generated.cs" t="Include" />
               <e p="ContentBoxRect.cs" t="Include" />
-              <e p="DefaultStyleValues.cs" t="Include" />
               <e p="DefaultStyleValues_Generated.cs" t="Include" />
               <e p="Easing.cs" t="Include" />
               <e p="ElementRendering" t="Include">
@@ -372,7 +370,6 @@
               <e p="UIGameObjectView.cs" t="Include" />
               <e p="UIMeasurement.cs" t="Include" />
               <e p="UIStyle.cs" t="Include" />
-              <e p="UIStyle_Generated.cs" t="Include" />
               <e p="UIStyleGroup.cs" t="Include" />
               <e p="UIStyleSet" t="Include">
                 <e p="ScrollbarButtonPlacement.cs" t="Include" />
@@ -453,10 +450,8 @@
               <e p="RenderSystem.cs" t="Include" />
               <e p="StyleSystem.cs" t="Include" />
             </e>
-            <e p="Temp_SpecFixtures.cs" t="Include" />
             <e p="TemplateAttribute.cs" t="Include" />
             <e p="Templates" t="Include">
-              <e p="MetaData.cs" t="Include" />
               <e p="TemplateScope.cs" t="Include" />
               <e p="UIChildrenTemplate.cs" t="Include" />
               <e p="UIContainerTemplate.cs" t="Include" />
@@ -466,6 +461,7 @@
               <e p="UIRepeatTemplate.cs" t="Include" />
               <e p="UIRouterTemplate.cs" t="Include" />
               <e p="UIRouteTemplate.cs" t="Include" />
+              <e p="UISlotTemplate.cs" t="Include" />
               <e p="UISwitchCaseTemplate.cs" t="Include" />
               <e p="UISwitchDefaultTemplate.cs" t="Include" />
               <e p="UISwitchTemplate.cs" t="Include" />
@@ -581,8 +577,5 @@
       <e p="UIForia.Src.csproj" t="IncludeRecursive" />
       <e p="UIForia.Test.csproj" t="IncludeRecursive" />
     </e>
-    <e p="C:\Users\Matt\.Rider2018.3\config\extensions" t="IncludeRecursive" />
-    <e p="C:\Users\Matt\.Rider2018.3\system\extResources" t="IncludeRecursive" />
-    <e p="C:\Users\Matt\.Rider2018.3\system\resharper-host\local\Transient\ReSharperHost\v183\SolutionCaches\_UIElements.120647963.00" t="ExcludeRecursive" />
   </component>
 </project>

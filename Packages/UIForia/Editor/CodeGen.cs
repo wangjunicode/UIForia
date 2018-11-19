@@ -212,10 +212,10 @@ namespace UIForia.Editor {
             new PropertyGenerator<Color>(StylePropertyId.ScrollbarHorizontalDecrementColor, Color.gray),
         };
 
-        [MenuItem("UIForia/Regenerate Style Proxy")]
+        [MenuItem("UIForia/Regenerate Style Stuff")]
         public static void GenerateStyleProxies() {
-            string generatedPath = Path.GetFullPath(Path.Combine(UnityEngine.Application.dataPath, "../Packages/UIForia/Src/_Generated.cs"));
-            string generatedPath2 = Path.GetFullPath(Path.Combine(UnityEngine.Application.dataPath, "../Packages/UIForia/Src/_Generated2.cs"));
+            string generatedPath = Path.GetFullPath(Path.Combine(UnityEngine.Application.dataPath, "../Packages/KlangUI/Src/_Generated.cs"));
+            string generatedPath2 = Path.GetFullPath(Path.Combine(UnityEngine.Application.dataPath, "../Packages/KlangUI/Src/_Generated2.cs"));
 
             string template = @"
 namespace UIForia.Rendering {
@@ -529,7 +529,7 @@ __REPLACE_StyleBindingCompiler_DoCompile
                 .Replace("__CONSTRUCTOR__", propertyGenerator.StylePropertyConstructor);
         }
 
-        [MenuItem("UIForia/Regenerate Style Properties (don't)")]
+       // [MenuItem("UIForia/Regenerate Style Properties (don't)")]
         public static void Generate() {
             string styleSetPath = Path.GetFullPath(Path.Combine(UnityEngine.Application.dataPath, "../Packages/UIForia/Src/Rendering/ComputedStyle_Generated.cs"));
             string defaultStyleValuesPath = Path.GetFullPath(Path.Combine(UnityEngine.Application.dataPath, "../Packages/UIForia/Src/Rendering/DefaultStyleValues_Generated.cs"));

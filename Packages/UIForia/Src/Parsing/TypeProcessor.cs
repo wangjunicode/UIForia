@@ -60,7 +60,7 @@ namespace UIForia {
 
             if (type == null) {
                 for (int i = 0; i < loadedTypes.Count; i++) {
-                    if (loadedTypes[i].Name.EndsWith(typeName)) {
+                    if (loadedTypes[i].Name == typeName) {
                         type = loadedTypes[i];
                         break;
                     }

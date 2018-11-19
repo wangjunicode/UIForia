@@ -264,6 +264,18 @@ namespace UIForia {
             }
         }
 
+        protected void AssignChildrenAndTemplate(TemplateScope scope, UIElement element) {
+            element.children = new UIElement[childTemplates.Count];
+            
+            for (int i = 0; i < childTemplates.Count; i++) {
+                element.children[i] = childTemplates[i].CreateScoped(scope);
+                element.children[i].parent = element;
+                element.children[i].templateParent = element;
+            }
+
+            element.TemplateContext = scope.context;
+            element.templateRef = this;
+        }
     }
 
 }

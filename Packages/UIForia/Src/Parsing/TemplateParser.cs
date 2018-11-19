@@ -320,6 +320,35 @@ namespace UIForia {
             );
         }
 
+        private static UITemplate ParseRouterElement(XElement element) {
+            
+            EnsureAttribute(element, "path");
+            // todo -- ensure path is a string & constant
+            return new UIRouterTemplate(
+                ParseNodes(element.Nodes()),
+                ParseAttributes(element.Attributes())
+             );
+            
+        }
+        
+        private static UITemplate ParseUnmatchedRouteElement(XElement element) {
+            return new UIUnmatchedRouteTemplate(
+                ParseNodes(element.Nodes()),
+                ParseAttributes(element.Attributes())
+            );
+        }
+        
+        private static UITemplate ParseRouteElement(XElement element) {
+            
+            EnsureAttribute(element, "path");
+            // todo -- ensure path is a string & constant
+            return new UIRouteTemplate(
+                ParseNodes(element.Nodes()),
+                ParseAttributes(element.Attributes())
+            );
+            
+        }
+        
         private static UITemplate ParseElement(XElement element) {
             if (element.Name == "Children") {
                 return ParseChildrenElement(element);
@@ -357,6 +386,18 @@ namespace UIForia {
                 return ParseInputElement(element);
             }
 
+            if (element.Name == "Router") {
+                return ParseRouterElement(element);
+            }
+
+            if (element.Name == "Route") {
+                return ParseRouteElement(element);
+            }
+            
+            if (element.Name == "UnmatchedRoute") {
+                return ParseUnmatchedRouteElement(element);
+            }
+            
             for (int i = 0; i < IntrinsicElementTypes.Length; i++) {
                 if (IntrinsicElementTypes[i].name == element.Name) {
                     if (IntrinsicElementTypes[i].isContainer) {

@@ -4,6 +4,7 @@ using System.Diagnostics;
 using JetBrains.Annotations;
 using UIForia.Rendering;
 using UIForia;
+using UIForia.Routing;
 using UIForia.Systems;
 using UIForia.Util;
 using UnityEngine;
@@ -290,6 +291,20 @@ public class UIElement : IHierarchical, IExpressionContextProvider {
         return null;
     }
 
+    public RouteParameter GetRouteParameter(string name) {
+        UIElement ptr = this;
+
+        while (ptr != null) {
+            UIRouteElement routeElement = ptr as UIRouteElement;
+            if (routeElement != null) {
+                return routeElement.CurrentMatch.GetParameter(name);
+            }
+            ptr = ptr.parent;
+        }
+
+        return default(RouteParameter);
+    }
+    
     public int UniqueId => id;
 
     IExpressionContextProvider IExpressionContextProvider.ExpressionParent => templateParent;

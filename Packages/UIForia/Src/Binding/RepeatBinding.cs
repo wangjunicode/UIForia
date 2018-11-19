@@ -25,15 +25,6 @@ public class RepeatBindingNode<T, U> : RepeatBindingNode where T : class, IList<
         this.lengthAlias = lengthAlias;
     }
 
-//    private static void AssignTemplateParents(UIElement parent) {
-////        if (parent.templateChildren != null) {
-////            for (int i = 0; i < parent.templateChildren.Length; i++) {
-////                parent.templateChildren[i].templateParent = parent;
-////                AssignTemplateParents(parent.templateChildren[i]);
-////            }
-////        }
-//    }
-
     public override void Validate() {
         T list = listExpression.EvaluateTyped(context);
 
@@ -62,7 +53,6 @@ public class RepeatBindingNode<T, U> : RepeatBindingNode where T : class, IList<
                 newItem.parent = element;
                 newItem.templateParent = element;
 
-//                AssignTemplateParents()
                 element.children[i] = newItem;
                 context.view.Application.RegisterElement(newItem);
             }
@@ -97,7 +87,6 @@ public class RepeatBindingNode<T, U> : RepeatBindingNode where T : class, IList<
                 element.view.Application.RegisterElement(newItem);
             }
 
-//            AssignTemplateParents(element);
             ArrayPool<UIElement>.Release(ref oldChildren);
         }
         else if (previousReference.Count > list.Count) {

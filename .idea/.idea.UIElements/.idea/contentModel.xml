@@ -103,6 +103,7 @@
               <e p="StyleAnimation.cs" t="Include" />
               <e p="StyleAnimator.cs" t="Include" />
             </e>
+            <e p="Application.cs" t="Include" />
             <e p="Attributes.cs" t="Include" />
             <e p="Binding" t="Include">
               <e p="Binding.cs" t="Include" />
@@ -115,6 +116,7 @@
                 <e p="InputBinding.cs" t="Include" />
               </e>
               <e p="RepeatBinding.cs" t="Include" />
+              <e p="RouteBinding.cs" t="Include" />
               <e p="StyleBindings" t="Include">
                 <e p="StyleBinding.cs" t="Include" />
                 <e p="StyleBinding_Translation.cs" t="Include" />
@@ -159,7 +161,9 @@
               <e p="StyleBindingCompiler.cs" t="Include" />
             </e>
             <e p="Elements" t="Include">
+              <e p="ChildRouterElement.cs" t="Include" />
               <e p="IntrinsicTemplates.cs" t="Include" />
+              <e p="RouteMatch.cs" t="Include" />
               <e p="ScrollbarDragEvent.cs" t="Include" />
               <e p="ScrollbarOrientation.cs" t="Include" />
               <e p="TemplateReference.cs" t="Include" />
@@ -172,10 +176,14 @@
               <e p="UIInputFieldElement.cs" t="Include" />
               <e p="UIPrimitiveElement.cs" t="Include" />
               <e p="UIRepeatElement.cs" t="Include" />
+              <e p="UIRouteElement.cs" t="Include" />
+              <e p="UIRouterElement.cs" t="Include" />
+              <e p="UISlotElement.cs" t="Include" />
               <e p="UISwitchCaseElement.cs" t="Include" />
               <e p="UISwitchDefaultElement.cs" t="Include" />
               <e p="UISwitchElement.cs" t="Include" />
               <e p="UITextElement.cs" t="Include" />
+              <e p="UIUnmatchedRoute.cs" t="Include" />
               <e p="VirtualElement.cs" t="Include" />
               <e p="VirtualScrollBar.cs" t="Include" />
             </e>
@@ -390,6 +398,10 @@
               <e p="WhitespaceMode.cs" t="Include" />
             </e>
             <e p="ResourceManager.cs" t="Include" />
+            <e p="Routing" t="Include">
+              <e p="RouteParameter.cs" t="Include" />
+              <e p="Router.cs" t="Include" />
+            </e>
             <e p="Shaders" t="Include">
               <e p="Debug.shader" t="Include" />
               <e p="UIForia.cginc" t="Include" />
@@ -452,6 +464,8 @@
               <e p="UIGraphicTemplate.cs" t="Include" />
               <e p="UIImageTemplate.cs" t="Include" />
               <e p="UIRepeatTemplate.cs" t="Include" />
+              <e p="UIRouterTemplate.cs" t="Include" />
+              <e p="UIRouteTemplate.cs" t="Include" />
               <e p="UISwitchCaseTemplate.cs" t="Include" />
               <e p="UISwitchDefaultTemplate.cs" t="Include" />
               <e p="UISwitchTemplate.cs" t="Include" />
@@ -518,6 +532,7 @@
               <e p="MockLayoutSystem.cs" t="Include" />
             </e>
             <e p="ReflectionUtilTests.cs" t="Include" />
+            <e p="RouterTests.cs" t="Include" />
             <e p="SkipTreeTests.cs" t="Include" />
             <e p="StyleBindingTests.cs" t="Include" />
             <e p="StyleParserTests.cs" t="Include" />

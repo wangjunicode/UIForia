@@ -169,8 +169,11 @@ namespace UIForia.Editor {
                     }
 
                     string source = selectedElement.style.GetPropertySource(propertyId);
-                    // todo double check this is right
-                    properties.Add(ValueTuple.Create(source, style.GetPropertyValue(propertyId)));
+                    StyleProperty property = style.GetPropertyValue(propertyId);
+                    if (property.IsUnset) {
+                        property = DefaultStyleValues_Generated.GetPropertyValue(propertyId);
+                    }
+                    properties.Add(ValueTuple.Create(source, property));
                 }
             }
 
@@ -635,6 +638,8 @@ namespace UIForia.Editor {
                     return DrawTextureAsset(property, isEditable);
 
                 case StylePropertyId.BackgroundShapeType:
+                    return DrawEnum<BackgroundShapeType>(property, isEditable);
+                
                 case StylePropertyId.Opacity:
                     return DrawFloat(property, isEditable);
 

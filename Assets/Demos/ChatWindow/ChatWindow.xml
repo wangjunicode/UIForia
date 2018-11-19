@@ -15,49 +15,13 @@
             TransformRotation = 0;
             TransformPivotX = 0;
             TransformPivotY = 0;
+            Padding = 20px;
         }
-                
-        style parent {
-            LayoutType = Flow;
-            FlexLayoutDirection = Column;
-            PreferredSize = 400px;
-            BackgroundColor = white;
-        }
-        
-        style child {
-            PreferredSize = 100px;
-            MarginLeft = 5px;
-            MarginTop = 5px;
-            MarginRight = 30px;
-            MarginBottom = 10px;
-            BackgroundColor = Red;
-            Padding = 5px;
-            Border = 5px;
-            <!--TransformRotation = 60;-->
-            TransformPivotX = 50%;
-            TransformPivotY = 50%;
-        }
-        
-        style child2 {
-            PreferredSize = 100px;
-            BackgroundColor = Blue;
-        }
-        
-        style window-frame-temp {
-            PreferredWidth = 500px;
-            TransformBehaviorX = LayoutOffset;
-            TransformBehaviorY = LayoutOffset;
-            TransformPositionX = 100px;
-            TransformPositionY = 100px;
-        }
-        
+
         style input {
-            PreferredSize = 100px, 32px;
+            PreferredSize = 1pca, 1cnt;
             BackgroundColor = white;
-            TransformBehavior = LayoutOffset;
-            TransformPosition = 20px;
         }
-        
         
         
     </Style>
@@ -66,6 +30,9 @@
 
         <Input style="input" textValue.bindTo="onValueChanged"/>
         
+        <Router path="/">
+            <Route path="/si"
+        </Router>
         <!--<Div style="parent">-->
             <!--&lt;!&ndash;<Div style="child">Text</Div>&ndash;&gt;-->
             <!--&lt;!&ndash;<Div style="child2"/>&ndash;&gt;-->

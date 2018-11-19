@@ -85,7 +85,7 @@ namespace UIForia.Editor {
 
         public string GetIsUnset() {
             if (type.IsEnum) {
-                return $"(int){nameof(StyleProperty.valuePart0)} == 0";
+                return $"{nameof(StyleProperty.valuePart0)} == 0 || IntUtil.UnsetValue == {nameof(StyleProperty.valuePart0)}";
             }
 
             if (type == typeof(float)) {

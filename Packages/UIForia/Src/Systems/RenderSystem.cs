@@ -212,8 +212,10 @@ namespace UIForia.Systems {
 
                 m_ToInitialize.Add(element);
 
-                for (int i = 0; i < current.children.Length; i++) {
-                    stack.Push(current.children[i]);
+                if (current.children != null) {
+                    for (int i = 0; i < current.children.Length; i++) {
+                        stack.Push(current.children[i]);
+                    }
                 }
             }
 

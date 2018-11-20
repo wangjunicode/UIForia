@@ -1,4 +1,5 @@
 ﻿using UIForia.Elements;
+using UIForia.Parsing.StyleParser;
 using UIForia.Rendering;
 
 namespace UIForia {
@@ -84,6 +85,10 @@ namespace UIForia {
     }
 
     public class UIHeading3Element : UITextElement {
+
+        public override void OnReady() {
+//            style.AddImplicitStyleGroup(StyleParser.GetImplicitStyleGroup(""));
+        }
 
         public override string GetDisplayName() {
             return "Heading3";

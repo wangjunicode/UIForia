@@ -18,7 +18,6 @@ namespace UIForia {
             this.rootType = rootType;
             this.runtimeTypeAliases = new List<ExpressionAlias<Type>>();
             this.constAliasSources = new List<IAliasSource>();
-//            this.constAliasSources.Add(new ReflectionAliasSource(rootType));
         }
 
         public object ResolveConstAlias(string name, object data = null) {

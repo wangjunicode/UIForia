@@ -68,6 +68,11 @@ namespace UIForia.Routing {
             return GoTo(new Route(path));
         }
 
+        public void Animate() {
+            // new AnimatedTransition(from: "path", to: "path", AnimationToPlay, animationOptions);
+            // Route newRoute = 
+        }
+        
         public bool GoTo(Route route) {
             if (IsTransitionBlocked(route)) {
                 return false;

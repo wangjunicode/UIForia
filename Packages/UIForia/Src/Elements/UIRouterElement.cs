@@ -2,8 +2,6 @@ using System;
 using System.Collections.Generic;
 using UIForia.Elements;
 using UIForia.Routing;
-using UIForia.Util;
-using UnityEngine;
 
 namespace UIForia {
 
@@ -16,6 +14,7 @@ namespace UIForia {
 
         private UIRouteElement current;
         private readonly List<UIRouteElement> m_Routes;
+        public string initial;
 
         public UIRouterElement(string path) {
             this.path = path;
@@ -35,6 +34,10 @@ namespace UIForia {
                 if (guard != null) {
                     view.Application.Router.AddRouteGuard(guard);
                 }
+            }
+
+            if (initial != null) {
+                OnRouteChanged(new Route(initial));
             }
         }
 

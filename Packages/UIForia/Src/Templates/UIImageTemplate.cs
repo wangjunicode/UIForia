@@ -17,7 +17,7 @@ namespace UIForia {
            s_UrlSource = new MethodAliasSource("url", typeof(UIImageTemplate).GetMethod(nameof(TextureUrl)));
         }
 
-        public override Type elementType => typeof(UIImageElement);
+        protected override Type elementType => typeof(UIImageElement);
 
         public override bool Compile(ParsedTemplate template) {
             template.contextDefinition.AddConstAliasSource(s_UrlSource);
@@ -28,7 +28,7 @@ namespace UIForia {
 
         public override UIElement CreateScoped(TemplateScope inputScope) {
             UIImageElement element = new UIImageElement();
-            element.templateRef = this;
+            element.OriginTemplate = this;
             return element;
         }
 

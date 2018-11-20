@@ -55,8 +55,7 @@ namespace UIForia.Systems {
             m_Scrollbars.Add(scrollbar);
         }
 
-        private void HandleScrollbarDestroyed(VirtualScrollbar scrollbar) {
-        }
+        private void HandleScrollbarDestroyed(VirtualScrollbar scrollbar) { }
 
         private void InitializeRenderables() {
             if (m_ToInitialize.Count == 0) return;
@@ -71,8 +70,8 @@ namespace UIForia.Systems {
 
                 if ((element.flags & UIElementFlags.RequiresRendering) == 0) {
                     continue;
-                }
-
+                }             
+                
                 m_RenderDataList.AddUnchecked(new RenderData(element));
             }
 
@@ -101,7 +100,7 @@ namespace UIForia.Systems {
             m_WillRenderList.EnsureCapacity(m_RenderDataList.Count);
 
             RenderData[] renderList = m_RenderDataList.List;
-            
+
             // todo -- can be easily jobified
             for (int i = 0; i < m_RenderDataList.Count; i++) {
                 RenderData data = renderList[i];
@@ -204,13 +203,13 @@ namespace UIForia.Systems {
             m_ToInitialize.Clear();
         }
 
-        public void OnElementEnabled(UIElement element) {
+        public void OnElementEnabled(UIElement element) {            
             Stack<UIElement> stack = StackPool<UIElement>.Get();
             stack.Push(element);
             while (stack.Count > 0) {
                 UIElement current = stack.Pop();
 
-                m_ToInitialize.Add(element);
+                m_ToInitialize.Add(current);
 
                 if (current.children != null) {
                     for (int i = 0; i < current.children.Length; i++) {
@@ -223,6 +222,7 @@ namespace UIForia.Systems {
         }
 
         public void OnElementDisabled(UIElement element) {
+           
             Stack<UIElement> stack = StackPool<UIElement>.Get();
             stack.Push(element);
             while (stack.Count > 0) {
@@ -238,7 +238,7 @@ namespace UIForia.Systems {
                     m_RenderDataList.RemoveAt(idx);
                 }
                 else {
-                    m_ToInitialize.Remove(element);
+                    m_ToInitialize.Remove(current);
                 }
 
                 if (current.children != null) {
@@ -256,6 +256,7 @@ namespace UIForia.Systems {
         }
 
         public void OnElementCreated(UIElement element) {
+
             m_ToInitialize.Add(element);
             if (element.children == null) {
                 return;
@@ -265,7 +266,7 @@ namespace UIForia.Systems {
                 OnElementCreated(element.children[i]);
             }
         }
-        
+
         private static void ComputePositions(LightList<RenderData> renderList) {
             if (renderList.Count == 0) {
                 return;
@@ -309,7 +310,7 @@ namespace UIForia.Systems {
 //                scrollbar.trackMesh = MeshUtil.ResizeStandardUIMesh(scrollbar.trackMesh, new Size(trackRect.size));
 //            }        
 //        }
-        
+
         //sort each group by z-index, use depth index to resolve ties, use origin layer if still tied
         private class RenderZIndexComparerAscending : IComparer<RenderData> {
 

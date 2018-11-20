@@ -22,7 +22,7 @@ namespace UIForia {
         public UIRepeatTemplate(List<UITemplate> childTemplates, List<AttributeDefinition> attributes = null)
             : base(childTemplates, attributes) { }
 
-        public override Type elementType => typeof(UIRepeatElement);
+        protected override Type elementType => typeof(UIRepeatElement);
 
         public override UIElement CreateScoped(TemplateScope inputScope) {
             UIRepeatElement element = new UIRepeatElement(childTemplates[0], inputScope);
@@ -32,7 +32,7 @@ namespace UIForia {
             element.indexAlias = indexAlias;
             element.lengthAlias = lengthAlias;
             element.itemAlias = itemAlias;
-            element.templateRef = this;
+            element.OriginTemplate = this;
             return element;
         }
 

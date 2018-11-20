@@ -42,8 +42,8 @@ namespace UIForia.Systems {
             }
 
             UITemplateContext context = element.TemplateContext;
-            List<UIStyleGroup> baseStyles = element.templateRef.baseStyles;
-            List<StyleBinding> constantStyleBindings = element.templateRef.constantStyleBindings;
+            List<UIStyleGroup> baseStyles = element.OriginTemplate.baseStyles;
+            List<StyleBinding> constantStyleBindings = element.OriginTemplate.constantStyleBindings;
 
             element.style.styleSystem = this;
 

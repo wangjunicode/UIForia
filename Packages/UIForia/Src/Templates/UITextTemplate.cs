@@ -79,12 +79,12 @@ namespace UIForia {
             return base.Compile(template);
         }
 
-        public override Type elementType => typeof(UITextElement);
+        protected override Type elementType => typeof(UITextElement);
 
         public override UIElement CreateScoped(TemplateScope inputScope) {
             UIElement retn = new UITextElement();
             retn.children = ArrayPool<UIElement>.Empty;
-            retn.templateRef = this;
+            retn.OriginTemplate = this;
             return retn;
         }
 

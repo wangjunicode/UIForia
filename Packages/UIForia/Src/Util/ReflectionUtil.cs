@@ -634,7 +634,30 @@ public static class ReflectionUtil {
 
     }
 
-    public static LinqAccessor GetLinqAccessors(Type baseType, Type fieldType, string fieldName) {
+    public static LinqAccessor GetLinqPropertyAccessors(Type baseType, Type propertyType, string propertyName) {
+        List<LinqAccessor> linqList;
+
+        if (linqDelegates.TryGetValue(baseType, out linqList)) {
+            for (int i = 0; i < linqList.Count; i++) {
+                if (linqList[i].fieldName == propertyName) {
+                    return linqList[i];
+                }
+            }
+        }
+        else {
+            linqList = new List<LinqAccessor>();
+            linqDelegates[baseType] = linqList;
+        }
+
+        Delegate getter = CreatePropertyGetter(baseType, propertyName);
+        Delegate setter = CreatePropertySetter(baseType, propertyType, propertyName);
+        LinqAccessor linqEntry = new LinqAccessor(propertyName, getter, setter);
+        linqList.Add(linqEntry);
+
+        return linqEntry;
+    }
+    
+    public static LinqAccessor GetLinqFieldAccessors(Type baseType, Type fieldType, string fieldName) {
         List<LinqAccessor> linqList;
 
         if (linqDelegates.TryGetValue(baseType, out linqList)) {
@@ -657,22 +680,22 @@ public static class ReflectionUtil {
         return linqEntry;
     }
 
-    public static Action<TObject, TProperty> GetPropSetter<TObject, TProperty>(string propertyName) {
-        ParameterExpression paramExpression0 = Expression.Parameter(typeof(TObject));
-        ParameterExpression paramExpression1 = Expression.Parameter(typeof(TProperty), propertyName);
-        MemberExpression propertyGetterExpression = Expression.Field(paramExpression0, propertyName);
+    public static Delegate CreatePropertySetter(Type objectType, Type propertyType, string propertyName) {
+        ParameterExpression paramExpression0 = Expression.Parameter(objectType);
+        ParameterExpression paramExpression1 = Expression.Parameter(propertyType, propertyName);
+        MemberExpression propertyGetterExpression = Expression.Property(paramExpression0, propertyName);
 
-        return Expression.Lambda<Action<TObject, TProperty>>(
+        return Expression.Lambda(
             Expression.Assign(propertyGetterExpression, paramExpression1),
             paramExpression0,
             paramExpression1
         ).Compile();
     }
 
-    public static Func<TObject, TProperty> GetPropGetter<TObject, TProperty>(string propertyName) {
-        ParameterExpression paramExpression = Expression.Parameter(typeof(TObject), "value");
+    public static Delegate CreatePropertyGetter(Type objectType, string propertyName) {
+        ParameterExpression paramExpression = Expression.Parameter(objectType, "value");
         Expression propertyGetterExpression = Expression.Property(paramExpression, propertyName);
-        return Expression.Lambda<Func<TObject, TProperty>>(propertyGetterExpression, paramExpression).Compile();
+        return Expression.Lambda(propertyGetterExpression, paramExpression).Compile();
     }
 
     // todo -- need some parameter matching at least

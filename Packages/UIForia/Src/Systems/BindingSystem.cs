@@ -108,7 +108,7 @@ namespace UIForia.Systems {
         public void OnElementCreated(UIElement element) {
             isTreeDirty = true;
 
-            UITemplate template = element.templateRef;
+            UITemplate template = element.OriginTemplate;
             if (template.constantBindings.Length != 0) {
                 for (int i = 0; i < template.constantBindings.Length; i++) {
                     template.constantBindings[i].Execute(element, element.TemplateContext);

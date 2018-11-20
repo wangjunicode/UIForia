@@ -13,7 +13,7 @@ namespace UIForia.Systems {
         public Vector3 renderPosition;
         private CullResult cullResult;
         private CullResult previousCullResult;
-
+        
         public readonly bool isMeshProvider;
         public readonly bool isMaterialProvider;
 

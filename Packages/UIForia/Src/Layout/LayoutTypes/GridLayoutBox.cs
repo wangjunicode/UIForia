@@ -518,9 +518,9 @@ namespace UIForia.Layout.LayoutTypes {
                 case GridTemplateUnit.Em:
                     return value * style.EmSize;
                 case GridTemplateUnit.ViewportWidth:
-                    return value * element.view.Viewport.width;
+                    return value * view.Viewport.width;
                 case GridTemplateUnit.ViewportHeight:
-                    return value * element.view.Viewport.height;
+                    return value * view.Viewport.height;
                 case GridTemplateUnit.Container:
                     return parent.allocatedWidth * value;
                 case GridTemplateUnit.ContainerContentArea:
@@ -551,9 +551,9 @@ namespace UIForia.Layout.LayoutTypes {
                 case GridTemplateUnit.Em:
                     return value * style.EmSize;
                 case GridTemplateUnit.ViewportWidth:
-                    return value * element.view.Viewport.width;
+                    return value * view.Viewport.width;
                 case GridTemplateUnit.ViewportHeight:
-                    return value * element.view.Viewport.height;
+                    return value * view.Viewport.height;
                 case GridTemplateUnit.Container:
                     return parent.allocatedHeight * value;
                 case GridTemplateUnit.ContainerContentArea:

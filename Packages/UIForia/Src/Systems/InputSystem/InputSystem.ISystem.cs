@@ -38,7 +38,7 @@ public abstract partial class InputSystem {
     }
 
     public void OnElementCreated(UIElement element) {
-        UITemplate template = element.templateRef;
+        UITemplate template = element.OriginTemplate;
         MouseEventHandler[] mouseHandlers = template.mouseEventHandlers;
         DragEventCreator[] dragEventCreators = template.dragEventCreators;
         DragEventHandler[] dragEventHandlers = template.dragEventHandlers;

@@ -1,4 +1,3 @@
-using System.Collections.Generic;
 
 namespace UIForia.Rendering {
 
@@ -27,34 +26,38 @@ namespace UIForia.Rendering {
                 }
 
                 if ((type & StyleType.Instance) != 0) {
-                    retn += 10000;
+                    retn = 10000;
                 }
-                else {
-                    retn += styleNumber;
+                else if ((type & StyleType.Implicit) != 0) {
+                    retn = 100000;
+                }
+                else if((type & StyleType.Shared) != 0) {
+                    retn = styleNumber;
                 }
 
+                int bonus = 0;
                 if (state != StyleState.Normal) {
-                    retn += 500;
+                    bonus += 500;
 
                     if ((state & StyleState.Focused) != 0) {
-                        retn += 60;
+                        bonus += 60;
                     }
                     
                     else if ((state & StyleState.Hover) != 0) {
-                        retn += 50;
+                        bonus += 50;
                     }
 
                     else if ((state & StyleState.Active) != 0) {
-                        retn += 40;
+                        bonus += 40;
                     }
 
                     else if ((state & StyleState.Inactive) != 0) {
-                        retn += 30;
+                        bonus += 30;
                     }
                    
                 }
 
-                return retn;
+                return retn + bonus;
             }
 
         }

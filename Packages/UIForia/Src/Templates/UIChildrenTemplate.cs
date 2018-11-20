@@ -7,14 +7,14 @@ namespace UIForia {
 
         public UIChildrenTemplate(List<UITemplate> childTemplates = null, List<AttributeDefinition> attributes = null) 
             : base(childTemplates, attributes) { }
-        
-        public override Type elementType => typeof(UIChildrenElement);
+
+        protected override Type elementType => typeof(UIChildrenElement);
 
         public override UIElement CreateScoped(TemplateScope inputScope) {
             
             UIChildrenElement element = new UIChildrenElement();
             inputScope.rootElement.TranscludedChildren = element;
-            element.templateRef = this;
+            element.OriginTemplate = this;
             return element;
             
         }

@@ -10,7 +10,7 @@ namespace UIForia {
         public UISlotTemplate(List<UITemplate> childTemplates, List<AttributeDefinition> attributes = null)
             : base(childTemplates, attributes) { }
 
-        public override Type elementType => typeof(UISlotElement);
+        protected override Type elementType => typeof(UISlotElement);
 
         public override bool Compile(ParsedTemplate template) {
             slotIdAttr = GetAttribute("slotId");
@@ -19,10 +19,11 @@ namespace UIForia {
         }
 
         public override UIElement CreateScoped(TemplateScope inputScope) {
-            UISlotElement element = new UISlotElement(slotIdAttr.value);
-            inputScope.rootElement.SetSlotContent(slotIdAttr, element);
-            AssignChildrenAndTemplate(inputScope, element);
-            return element;
+            throw new NotImplementedException();
+//            UISlotElement element = new UISlotElement(slotIdAttr.value);
+//            inputScope.rootElement.SetSlotContent(slotIdAttr, element);
+//            AssignChildrenAndTemplate(inputScope, element);
+//            return element;
         }
 
     }

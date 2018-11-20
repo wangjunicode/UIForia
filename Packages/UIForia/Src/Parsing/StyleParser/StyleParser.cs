@@ -232,6 +232,7 @@ namespace UIForia.Parsing.StyleParser {
             while (ptr < input.Length) {
                 int start = ptr;
                 ptr = ReadStyleDefinition(ptr, input, output);
+                ptr = ReadImplicitStyleDefinition(ptr, input, output);
                 ptr = ReadVariableDefinition(ptr, input, output);
                 ptr = ReadImportDefinition(ptr, input, output);
                 ptr = ReadCursorDefinition(ptr, input, output);
@@ -267,6 +268,9 @@ namespace UIForia.Parsing.StyleParser {
                     case StyleComponentType.Style:
                         styleList.Add(ParseStyle(current, variables, imports));
                         break;
+                    case StyleComponentType.ImplicitStyle:
+                        throw new NotImplementedException();
+                    
                     case StyleComponentType.Animation:
                         break;
                     case StyleComponentType.Cursor:
@@ -287,7 +291,7 @@ namespace UIForia.Parsing.StyleParser {
 
             retn.styles = styleList.ToArray();
             retn.variables = localVariables;
-
+            
             ListPool<UIStyleGroup>.Release(ref styleList);
             ListPool<ImportDefinition>.Release(ref imports);
             ListPool<StyleVariable>.Release(ref variables);
@@ -476,6 +480,29 @@ namespace UIForia.Parsing.StyleParser {
 
             StyleComponent retn = new StyleComponent(
                 StyleComponentType.Style,
+                ParseUtil.ReadIdentifierOrThrow(input, ref ptr),
+                ReadInheritanceList(input, ref ptr),
+                ParseUtil.ReadBlockOrThrow(input, ref ptr, '{', '}')
+            );
+
+            output.Add(retn);
+
+            return ptr;
+        }
+        
+        // style space string (space*) (colon? identifier+) (space*) open-brace (space*) .* (space*) close-brace
+        private static int ReadImplicitStyleDefinition(int ptr, string input, List<StyleComponent> output) {
+            int start = ptr;
+
+            ptr = ParseUtil.ConsumeWhiteSpace(ptr, input);
+
+            // if we get past here we can assume what we are parsing is actually a style definition
+            if (!ParseUtil.TryReadCharacters(input, "implicit style ", ref ptr)) {
+                return start;
+            }
+
+            StyleComponent retn = new StyleComponent(
+                StyleComponentType.ImplicitStyle,
                 ParseUtil.ReadIdentifierOrThrow(input, ref ptr),
                 ReadInheritanceList(input, ref ptr),
                 ParseUtil.ReadBlockOrThrow(input, ref ptr, '{', '}')
@@ -765,7 +792,8 @@ namespace UIForia.Parsing.StyleParser {
             Font,
             Query,
             Variable,
-            Import
+            Import,
+            ImplicitStyle
 
         }
 

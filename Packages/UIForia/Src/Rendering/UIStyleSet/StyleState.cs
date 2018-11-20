@@ -7,7 +7,8 @@ namespace UIForia.Rendering {
 
         Default = 1 << 0,
         Shared = 1 << 1,
-        Instance = 1 << 2
+        Instance = 1 << 2,
+        Implicit = 1 << 3
 
     }
 

@@ -2,7 +2,7 @@ using System;
 using System.Collections.Generic;
 
 namespace UIForia {
-
+    
     public class UIRouterTemplate : UITemplate {
 
         private AttributeDefinition pathAttr;
@@ -11,7 +11,7 @@ namespace UIForia {
             : base(childTemplates, attributes) {
         }
 
-        public override Type elementType => typeof(UIRouterElement);
+        protected override Type elementType => typeof(UIRouterElement);
         
         public override bool Compile(ParsedTemplate template) {
             pathAttr = GetAttribute("path");

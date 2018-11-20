@@ -9,12 +9,12 @@ namespace UIForia {
 
         public UIGraphicTemplate(List<UITemplate> childTemplates, List<AttributeDefinition> attributes = null) : base(childTemplates, attributes) { }
 
-        public override Type elementType => typeof(UIGraphicElement);
+        protected override Type elementType => typeof(UIGraphicElement);
         
         public override UIElement CreateScoped(TemplateScope inputScope) {
             UIGraphicElement graphic = new UIGraphicElement();
             graphic.children = ArrayPool<UIElement>.Empty;
-            graphic.templateRef = this;
+            graphic.OriginTemplate = this;
             return graphic;
         }
 

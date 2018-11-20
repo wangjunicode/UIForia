@@ -103,7 +103,10 @@ namespace UIForia.Input {
 
         // can probably merge a bunch of flags & just do 1 check
         public override void Invoke(object target, UITemplateContext context, KeyboardInputEvent evt) {
-            context.current = (IExpressionContextProvider) target;
+
+            if (context != null) {
+                context.current = (IExpressionContextProvider) target;
+            }
             if (ShouldRun(evt)) {
                 handler((T) target);
             }

@@ -29,13 +29,13 @@ Nice to have
     make false mouse cursor for debug
     handle nested repeat being null bug
     finish animations
-    reuse / import style sheets
     animations in style sheet
     attributes + eventing
     implicit styles & maybe selectors
     Clone methods
     zooming in inspector
-
+    
+    
 cursor Pointer {
     Texture = path/to/texture
     UVRect = rect

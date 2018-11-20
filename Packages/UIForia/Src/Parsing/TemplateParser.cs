@@ -332,6 +332,16 @@ namespace UIForia {
                 ParseAttributes(element.Attributes())
             );
         }
+        
+        private static UITemplate ParseRouterLinkElement(XElement element) {
+            EnsureAttribute(element, "path");
+            // todo -- ensure path is a string & constant
+            return new UIContainerTemplate(
+                typeof(UIRouterLinkElement),
+                ParseNodes(element.Nodes()),
+                ParseAttributes(element.Attributes())
+            );
+        }
 
         private static UITemplate ParseUnmatchedRouteElement(XElement element) {
             return new UIUnmatchedRouteTemplate(
@@ -398,6 +408,10 @@ namespace UIForia {
                 return ParseUnmatchedRouteElement(element);
             }
 
+            if (element.Name == "RouterLink") {
+                return ParseRouterLinkElement(element);
+            }
+            
             for (int i = 0; i < IntrinsicElementTypes.Length; i++) {
                 if (IntrinsicElementTypes[i].name == element.Name) {
                     if (IntrinsicElementTypes[i].isContainer) {

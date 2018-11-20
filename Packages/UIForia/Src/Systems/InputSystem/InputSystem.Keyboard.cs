@@ -130,7 +130,6 @@ public abstract partial class InputSystem {
                     continue;
                 }
             }
-
             ProcessKeyEvent(s_Event.rawType, s_Event.keyCode, s_Event.character);
         }
     }

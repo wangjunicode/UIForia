@@ -25,23 +25,11 @@ public struct ElementAttribute {
 
     public readonly string name;
     public readonly string value;
-    
+
     public ElementAttribute(string name, string value) {
         this.name = name;
         this.value = value;
     }
-
-}
-
-public class ElementColdData {
-
-    public UITemplate templateRef;
-    public ElementRenderer renderer;
-    public UIElement templateParent;
-    public UITemplateContext templateContext;
-    public LightList<ElementAttribute> attributes;
-    public UIChildrenElement transcludedChildren;
-    public Vector2 scrollOffset;
 
 }
 
@@ -51,18 +39,18 @@ public class UIElement : IHierarchical, IExpressionContextProvider {
     // todo some of this stuff isn't used often or present for many elements. may make sense to move to dictionaries so we keep things compact
 
     public readonly int id;
-    public UIElementFlags flags; // todo make internal but available for testing
-    public UIStyleSet style;
-
-    // todo make readonly but assignable via style system
-
-    public UIElement parent;
-    public UITemplate templateRef;
-    public UIView view;
+    public readonly UIStyleSet style;
+    public UIElement templateParent; // remove or move to cold data
+    public UIElement[] children;  // make readonly somehow, should never be modified by user
     
-    internal static IntMap<LightList<Attribute>> s_AttributeMap = new IntMap<LightList<Attribute>>();
+    internal UIElementFlags flags;
+    internal UIElement parent;
+
+    public LayoutResult layoutResult { get; internal set; }
+    private ElementRenderer renderer = ElementRenderer.DefaultInstanced; // cold data?
+
     internal static IntMap<ElementColdData> s_ColdDataMap = new IntMap<ElementColdData>();
-    
+
     protected UIElement() {
         this.id = UIForia.Application.NextElementId;
         this.style = new UIStyleSet(this);
@@ -72,15 +60,43 @@ public class UIElement : IHierarchical, IExpressionContextProvider {
                      | UIElementFlags.RequiresRendering;
     }
 
-    // todo -- work on this interface
-    public UIElement templateParent; // remove or move to cold data
-    public UIElement[] children;
-    public UITemplateContext TemplateContext; // move to cold data
-    public UIChildrenElement TranscludedChildren; // move to cold data
+    public UIView view {
+        get { return s_ColdDataMap.GetOrDefault(id).view; }
+        internal set {
+            ElementColdData coldData = s_ColdDataMap.GetOrDefault(id);
+            coldData.view = value;
+            s_ColdDataMap[id] = coldData;
+        }
+    }
 
-    public LayoutResult layoutResult { get; internal set; }
+    public UITemplateContext TemplateContext {
+        get { return s_ColdDataMap.GetOrDefault(id).templateContext; }
+        internal set {
+            ElementColdData coldData = s_ColdDataMap.GetOrDefault(id);
+            coldData.templateContext = value;
+            s_ColdDataMap[id] = coldData;
+        }
+    }
 
-    private ElementRenderer renderer = ElementRenderer.DefaultInstanced; // cold data
+    public UIChildrenElement TranscludedChildren {
+        get { return s_ColdDataMap.GetOrDefault(id).transcludedChildren; }
+        internal set {
+            ElementColdData coldData = s_ColdDataMap.GetOrDefault(id);
+            coldData.transcludedChildren = value;
+            s_ColdDataMap[id] = coldData;
+        }
+    }
+
+    public UITemplate OriginTemplate {
+        get { return s_ColdDataMap.GetOrDefault(id).templateRef; }
+        internal set {
+            ElementColdData coldData = s_ColdDataMap.GetOrDefault(id);
+            coldData.templateRef = value;
+            s_ColdDataMap[id] = coldData;
+        }
+    }
+
+
 
     public ElementRenderer Renderer {
         get { return renderer; }
@@ -94,15 +110,13 @@ public class UIElement : IHierarchical, IExpressionContextProvider {
         }
     }
 
-    public Vector2 scrollOffset { get; internal set; } // cold data
-
-//    public ComputedStyle ComputedStyle => style.computedStyle;
+    public Vector2 scrollOffset { get; internal set; }
 
     public int depth { get; internal set; }
     public int depthIndex { get; internal set; }
     public int siblingIndex { get; internal set; }
 
-    public IInputProvider Input { get; internal set; }
+    public IInputProvider Input { get; internal set; } // remove?
 
     public int ChildCount => children?.Length ?? 0;
 
@@ -157,7 +171,7 @@ public class UIElement : IHierarchical, IExpressionContextProvider {
             view.Application.DoDisableElement(this);
         }
     }
-    
+
     public UIElement GetChild(int index) {
         if (children == null || (uint) index >= (uint) children.Length) {
             return null;
@@ -185,7 +199,7 @@ public class UIElement : IHierarchical, IExpressionContextProvider {
                 continue;
             }
 
-            if (children[i]?.templateRef is UIElementTemplate) {
+            if (children[i]?.OriginTemplate is UIElementTemplate) {
                 continue;
             }
 
@@ -214,7 +228,7 @@ public class UIElement : IHierarchical, IExpressionContextProvider {
                 continue;
             }
 
-            if (children[i]?.templateRef is UIElementTemplate) {
+            if (children[i]?.OriginTemplate is UIElementTemplate) {
                 continue;
             }
 
@@ -243,7 +257,7 @@ public class UIElement : IHierarchical, IExpressionContextProvider {
                 continue;
             }
 
-            if (children[i]?.templateRef is UIElementTemplate) {
+            if (children[i]?.OriginTemplate is UIElementTemplate) {
                 continue;
             }
 
@@ -254,7 +268,6 @@ public class UIElement : IHierarchical, IExpressionContextProvider {
     }
 
     public override string ToString() {
-        
         if (HasAttribute("id")) {
             return "<" + GetDisplayName() + ":" + GetAttribute("id") + " " + id + ">";
         }
@@ -265,32 +278,57 @@ public class UIElement : IHierarchical, IExpressionContextProvider {
         else {
             return "<" + GetDisplayName() + " " + id + ">";
         }
-
     }
 
     public virtual string GetDisplayName() {
         return GetType().Name;
     }
 
-    protected bool HasAttribute(string attr) {
-        return GetAttribute(attr) != null;
+    public List<ElementAttribute> GetAttributes(List<ElementAttribute> retn = null) {
+        return s_ColdDataMap.GetOrDefault(id).GetAttributes(retn);
+    }
+
+    public void SetAttribute(string name, string value) {
+        ElementColdData coldData = s_ColdDataMap.GetOrDefault(id);
+        coldData.SetAttribute(name, value);
+        s_ColdDataMap[id] = coldData;
     }
 
     protected string GetAttribute(string attr) {
-        if (templateRef?.templateAttributes == null) {
-            return null;
-        }
-
-        List<ValueTuple<string, string>> templateAttributes = templateRef.templateAttributes;
+        List<ElementAttribute> templateAttributes = OriginTemplate.templateAttributes;
         for (int i = 0; i < templateAttributes.Count; i++) {
-            if (templateAttributes[i].Item1 == attr) {
-                return templateAttributes[i].Item2;
+            if (templateAttributes[i].name == attr) {
+                return templateAttributes[i].value;
             }
         }
 
         return null;
     }
 
+    public void OnAttributeAdded(Action<ElementAttribute> handler) {
+        ElementColdData coldData = s_ColdDataMap.GetOrDefault(id);
+        coldData.onAttributeAdded += handler;
+        s_ColdDataMap[id] = coldData;
+    }
+
+    public void OnAttributeChanged(Action<ElementAttribute> handler) {
+        ElementColdData coldData = s_ColdDataMap.GetOrDefault(id);
+        coldData.onAttributeChanged += handler;
+        s_ColdDataMap[id] = coldData;
+    }
+
+    public void OnAttributeRemoved(Action<ElementAttribute> handler) {
+        ElementColdData coldData = s_ColdDataMap.GetOrDefault(id);
+        coldData.onAttributeRemoved += handler;
+        s_ColdDataMap[id] = coldData;
+    }
+
+    public bool HasAttribute(string name) {
+        return s_ColdDataMap.GetOrDefault(id).GetAttribute(name).value != null;
+    }
+
+
+    // todo improve this
     public RouteParameter GetRouteParameter(string name) {
         UIElement ptr = this;
 
@@ -299,12 +337,13 @@ public class UIElement : IHierarchical, IExpressionContextProvider {
             if (routeElement != null) {
                 return routeElement.CurrentMatch.GetParameter(name);
             }
+
             ptr = ptr.parent;
         }
 
         return default(RouteParameter);
     }
-    
+
     public int UniqueId => id;
 
     IExpressionContextProvider IExpressionContextProvider.ExpressionParent => templateParent;
@@ -330,7 +369,5 @@ public class UIElement : IHierarchical, IExpressionContextProvider {
         }
 
     }
-
- 
 
 }

@@ -118,7 +118,7 @@ public class UIInputFieldElement : UIElement, IFocusable, IPropertyChangedHandle
         bool blinkState = (Time.unscaledTime - blinkStartTime) % blinkPeriod < blinkPeriod / 2;
         if (canSetCaret) {
             caret.style.SetTransformPositionX(layoutResult.contentRect.x + textElement.GetCursorPosition(selectionRange).x, StyleState.Normal);
-            caret.style.SetTransformPositionY(textElement.GetCursorPosition(selectionRange).y, StyleState.Normal);
+            caret.style.SetTransformPositionY(textElement.layoutResult.localPosition.y, StyleState.Normal);
 //            caret.style.SetTransformPositionX(layoutResult.contentRect.x + textElement.GetCursorPosition(selectionRange).x, StyleState.Normal);
 //            caret.style.SetTransformPositionY(textElement.layoutResult.localPosition.y, StyleState.Normal);
         }
@@ -127,7 +127,7 @@ public class UIInputFieldElement : UIElement, IFocusable, IPropertyChangedHandle
         canSetCaret = true;
     }
 
-    [OnKeyDown]
+    [OnKeyDownWithFocus]
     private void EnterText(KeyboardInputEvent evt) {
         char c = evt.character;
 

@@ -189,7 +189,7 @@ namespace UIForia.Systems {
                         }
                     }
 
-                    if (true || forceLayout || box.markedForLayout) {
+                    if (forceLayout || box.markedForLayout) {
                         box.RunLayout();
                         box.markedForLayout = false;
 #if DEBUG

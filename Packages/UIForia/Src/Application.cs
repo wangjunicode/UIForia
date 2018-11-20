@@ -230,6 +230,16 @@ namespace UIForia {
 
             element.flags |= UIElementFlags.Created;
             element.OnCreate();
+            
+            UITemplateContext context = element.TemplateContext;
+            Binding[] enabledBindings = element.OriginTemplate?.enabledBindings;
+                
+            if (enabledBindings != null) {
+                for (int i = 0; i < enabledBindings.Length; i++) {
+                    enabledBindings[i].Execute(element, context);
+                }
+            }
+            
         }
 
         private static void InvokeOnReady(UIElement element) {
@@ -419,6 +429,15 @@ namespace UIForia {
 
                 child.OnEnable(); // todo -- maybe enqueue and flush calls after so we don't have buffer problems
 
+                UITemplateContext context = child.TemplateContext;
+                Binding[] enabledBindings = child.OriginTemplate?.enabledBindings;
+                
+                if (enabledBindings != null) {
+                    for (int i = 0; i < enabledBindings.Length; i++) {
+                        enabledBindings[i].Execute(child, context);
+                    }
+                }
+                
                 return true;
             });
 

@@ -11,7 +11,7 @@ namespace UIForia {
         public UISwitchCaseTemplate(List<UITemplate> childTemplates, List<AttributeDefinition> attributes = null)
             : base(childTemplates, attributes) { }
 
-        public override Type elementType => typeof(UISwitchCaseElement);
+        protected override Type elementType => typeof(UISwitchCaseElement);
 
         public override UIElement CreateScoped(TemplateScope inputScope) {
             throw new NotImplementedException();

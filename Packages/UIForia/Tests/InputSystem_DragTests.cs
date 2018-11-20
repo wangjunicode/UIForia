@@ -12,10 +12,10 @@ public class InputSystem_DragTests {
 
     public class TestDragEvent : DragEvent {
 
-        public string source;
+        public string sourceName;
 
-        public TestDragEvent(string source) : base(null) {
-            this.source = source;
+        public TestDragEvent(string sourceName) : base(null) {
+            this.sourceName = sourceName;
         }
 
     }
@@ -75,7 +75,7 @@ public class InputSystem_DragTests {
         testView.Update();
 
         Assert.IsInstanceOf<TestDragEvent>(testView.InputSystem.CurrentDragEvent);
-        Assert.AreEqual("root", As<TestDragEvent>(testView.InputSystem.CurrentDragEvent).source);
+        Assert.AreEqual("root", As<TestDragEvent>(testView.InputSystem.CurrentDragEvent).sourceName);
     }
     
     [Test]
@@ -92,7 +92,7 @@ public class InputSystem_DragTests {
         testView.Update();
 
         Assert.IsInstanceOf<TestDragEvent>(testView.InputSystem.CurrentDragEvent);
-        Assert.AreEqual("child0", As<TestDragEvent>(testView.InputSystem.CurrentDragEvent).source);
+        Assert.AreEqual("child0", As<TestDragEvent>(testView.InputSystem.CurrentDragEvent).sourceName);
 
     }
     

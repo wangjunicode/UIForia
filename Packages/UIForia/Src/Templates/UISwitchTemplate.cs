@@ -13,7 +13,7 @@ namespace UIForia {
         public UISwitchTemplate(List<UITemplate> childTemplates, List<AttributeDefinition> attributes = null)
             : base(childTemplates, attributes) { }
 
-        public override Type elementType => typeof(UISwitchTemplate);
+        protected override Type elementType => typeof(UISwitchTemplate);
 
         public override UIElement CreateScoped(TemplateScope inputScope) {
             throw new NotImplementedException();

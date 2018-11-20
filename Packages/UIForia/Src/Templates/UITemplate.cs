@@ -3,12 +3,11 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
 using JetBrains.Annotations;
-using UIForia.InputBindings;
-using UIForia.Systems;
 using UIForia.Compilers;
 using UIForia.Input;
 using UIForia.Rendering;
 using UIForia.StyleBindings;
+using UIForia.Util;
 using UnityEngine;
 
 namespace UIForia {
@@ -16,33 +15,32 @@ namespace UIForia {
     public abstract class UITemplate {
 
         public const string k_SpecialAttrPrefix = "x-";
-        
+
         public ushort id;
-        public bool acceptFocus;
         public readonly List<UITemplate> childTemplates;
         public readonly List<AttributeDefinition> attributes;
 
         public Binding[] bindings;
         public Binding[] constantBindings;
+        public Binding[] enabledBindings;
 
         public readonly List<UIStyleGroup> baseStyles;
         public readonly List<StyleBinding> constantStyleBindings;
-        
+
         public DragEventCreator[] dragEventCreators;
         public DragEventHandler[] dragEventHandlers;
         public MouseEventHandler[] mouseEventHandlers;
         public KeyboardEventHandler[] keyboardEventHandlers;
-        
-        public List<Binding> bindingList;
-        public List<ValueTuple<string, string>> templateAttributes;
 
-        
+        public List<Binding> bindingList;
+        public List<ElementAttribute> templateAttributes;
+
         private static ushort s_IdGenerator;
         private static readonly StyleBindingCompiler styleCompiler = new StyleBindingCompiler(null);
         private static readonly InputBindingCompiler inputCompiler = new InputBindingCompiler(null);
         private static readonly PropertyBindingCompiler propCompiler = new PropertyBindingCompiler(null);
 
-        
+
         protected UITemplate(List<UITemplate> childTemplates, List<AttributeDefinition> attributes = null) {
             this.id = ++s_IdGenerator;
             this.childTemplates = childTemplates;
@@ -56,25 +54,8 @@ namespace UIForia {
             this.bindings = Binding.EmptyArray;
             this.constantBindings = Binding.EmptyArray;
         }
-        
-        public abstract Type elementType { get; }
 
-//        public MetaData GetCreationData(UIElement element, UITemplateContext context) {
-//            MetaData data = new MetaData(element, context);
-//            data.baseStyles = baseStyles;
-//            data.bindings = bindings;
-//            data.constantBindings = constantBindings;
-//            data.constantStyleBindings = constantStyleBindings;
-//            data.keyboardEventHandlers = keyboardEventHandlers;
-//            data.mouseEventHandlers = mouseEventHandlers;
-//            data.dragEventCreators = dragEventCreators;
-//            data.dragEventHandlers = dragEventHandlers;
-////            element.templateAttributes = templateAttributes;
-//            if (acceptFocus) {
-//                element.flags |= UIElementFlags.AcceptFocus;
-//            }
-//            return data;
-//        }
+        protected abstract Type elementType { get; }
 
         public abstract UIElement CreateScoped(TemplateScope inputScope);
 
@@ -91,6 +72,16 @@ namespace UIForia {
                 if (binding.IsConstant()) {
                     constantStyleBindings.Add(binding);
                 }
+                else if (binding.IsOnce || binding.IsOnEnable) {
+                    if (enabledBindings == null) {
+                        enabledBindings = ArrayPool<Binding>.GetExactSize(1);
+                    }
+                    else {
+                        ArrayPool<Binding>.Resize(ref enabledBindings, enabledBindings.Length + 1);
+                    }
+
+                    enabledBindings[enabledBindings.Length - 1] = binding;
+                }
                 else {
                     bindingList.Add(binding);
                 }
@@ -102,6 +93,7 @@ namespace UIForia {
                 Debug.Log($"{elementType} must be a subclass of {typeof(UIElement)} in order to be used in templates");
                 return false;
             }
+
             ResolveBaseStyles(template);
             CompileStyleBindings(template);
             CompileInputBindings(template);
@@ -109,7 +101,6 @@ namespace UIForia {
             CompileConditionalBindings(template);
             ResolveActualAttributes();
             ResolveConstantBindings();
-            acceptFocus = elementType.GetCustomAttribute(typeof(AcceptFocus)) != null;
             return true;
         }
 
@@ -135,25 +126,22 @@ namespace UIForia {
             // todo enforce constant-ness of attr values
             IEnumerable<AttributeDefinition> realAttributes = attributes.Where(a => a.isRealAttribute).ToArray();
             if (realAttributes.Any()) {
-                templateAttributes = new List<ValueTuple<string, string>>();
-                foreach (var s in realAttributes) {
-                    templateAttributes.Add(ValueTuple.Create(s.key.Substring(k_SpecialAttrPrefix.Length), s.value));
+                templateAttributes = new List<ElementAttribute>();
+                foreach (AttributeDefinition s in realAttributes) {
+                    templateAttributes.Add(new ElementAttribute(s.key.Substring(k_SpecialAttrPrefix.Length), s.value));
                 }
             }
         }
-        
+
         protected void AddConditionalBinding(Binding binding) {
             if (binding.IsConstant()) {
                 bindingList.Add(binding);
             }
             else {
-//                Array.Resize(ref conditionalBindings, conditionalBindings.Length + 1);
-//                conditionalBindings[conditionalBindings.Length - 1] = binding;
                 bindingList.Add(binding);
-
             }
         }
-        
+
         protected void CompileInputBindings(ParsedTemplate template) {
             inputCompiler.SetContext(template.contextDefinition);
             List<MouseEventHandler> mouseHandlers = inputCompiler.CompileMouseEventHandlers(elementType, attributes);
@@ -201,7 +189,7 @@ namespace UIForia {
                 Debug.Log(e);
             }
         }
-        
+
         // todo -- show / hide / disable
         protected void CompileConditionalBindings(ParsedTemplate template) {
             AttributeDefinition ifDef = GetAttribute("x-if");
@@ -246,27 +234,26 @@ namespace UIForia {
 
         public static void AssignContext(UIElement element, UITemplateContext context) {
             element.TemplateContext = context;
-                
+
             if (element.children == null) return;
 
             for (int i = 0; i < element.children.Length; i++) {
-                
-                if (element.children[i].templateRef is UIElementTemplate) {
+                if (element.children[i].OriginTemplate is UIElementTemplate) {
                     element.children[i].TemplateContext = context;
                     continue;
                 }
-                
+
                 if (element.children[i] is UIChildrenElement) {
                     continue;
                 }
-                
+
                 AssignContext(element.children[i], context);
             }
         }
 
         protected void AssignChildrenAndTemplate(TemplateScope scope, UIElement element) {
             element.children = new UIElement[childTemplates.Count];
-            
+
             for (int i = 0; i < childTemplates.Count; i++) {
                 element.children[i] = childTemplates[i].CreateScoped(scope);
                 element.children[i].parent = element;
@@ -274,8 +261,13 @@ namespace UIForia {
             }
 
             element.TemplateContext = scope.context;
-            element.templateRef = this;
+            element.OriginTemplate = this;
         }
+
+        public bool HasAttribute(string name) {
+            return GetAttribute(name) != null;
+        }
+
     }
 
 }

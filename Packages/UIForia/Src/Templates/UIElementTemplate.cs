@@ -43,12 +43,12 @@ namespace UIForia {
             return true;
         }
 
-        public override Type elementType => rootType;
+        protected override Type elementType => rootType;
 
         public UIElement CreateUnscoped(UIView view) {
             UIElement element = (UIElement) Activator.CreateInstance(rootType);
             element.flags |= UIElementFlags.TemplateRoot;
-            element.templateRef = this;
+            element.OriginTemplate = this;
             templateToExpand.Compile();
             
             List<UITemplate> actualChildren = childTemplates;
@@ -81,7 +81,7 @@ namespace UIForia {
 
             UIElement element = (UIElement) Activator.CreateInstance(rootType);
             element.flags |= UIElementFlags.TemplateRoot;
-            element.templateRef = this;
+            element.OriginTemplate = this;
             templateToExpand.Compile();
             
             List<UITemplate> transcludedTemplates = childTemplates;

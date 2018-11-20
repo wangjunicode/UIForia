@@ -28,6 +28,8 @@ namespace UIForia.Layout.LayoutTypes {
         public VirtualScrollbar horizontalScrollbar;
         public VirtualScrollbar verticalScrollbar;
 
+        public UIView view;
+        
 #if DEBUG
         public int layoutCalls;
         public int contentSizeCacheHits;
@@ -50,6 +52,7 @@ namespace UIForia.Layout.LayoutTypes {
             this.style = element?.style;
             this.children = ListPool<LayoutBox>.Get();
             this.cachedPreferredWidth = -1;
+            this.view = element.view;
         }
 
         public abstract void RunLayout();
@@ -250,19 +253,19 @@ namespace UIForia.Layout.LayoutTypes {
         protected float ResolveFixedWidth(UIFixedLength width) {
             switch (width.unit) {
                 case UIFixedUnit.Pixel:
-                    return width.value * element.view.ScaleFactor;
+                    return width.value * view.ScaleFactor;
 
                 case UIFixedUnit.Percent:
                     return allocatedWidth * width.value;
 
                 case UIFixedUnit.ViewportHeight:
-                    return element.view.Viewport.height * width.value;
+                    return view.Viewport.height * width.value;
 
                 case UIFixedUnit.ViewportWidth:
-                    return element.view.Viewport.width * width.value;
+                    return view.Viewport.width * width.value;
 
                 case UIFixedUnit.Em:
-                    return style.EmSize * width.value * element.view.ScaleFactor;
+                    return style.EmSize * width.value * view.ScaleFactor;
 
                 case UIFixedUnit.LineHeight:
                     return style.LineHeightSize * width.value;
@@ -276,19 +279,19 @@ namespace UIForia.Layout.LayoutTypes {
         protected float ResolveFixedHeight(UIFixedLength height) {
             switch (height.unit) {
                 case UIFixedUnit.Pixel:
-                    return height.value * element.view.ScaleFactor;
+                    return height.value * view.ScaleFactor;
 
                 case UIFixedUnit.Percent:
                     return allocatedHeight * height.value;
 
                 case UIFixedUnit.ViewportHeight:
-                    return element.view.Viewport.height * height.value;
+                    return view.Viewport.height * height.value;
 
                 case UIFixedUnit.ViewportWidth:
-                    return element.view.Viewport.width * height.value;
+                    return view.Viewport.width * height.value;
 
                 case UIFixedUnit.Em:
-                    return style.EmSize * height.value * element.view.ScaleFactor;
+                    return style.EmSize * height.value * view.ScaleFactor;
 
                 case UIFixedUnit.LineHeight:
                     return style.LineHeightSize * height.value;
@@ -302,7 +305,7 @@ namespace UIForia.Layout.LayoutTypes {
             AnchorTarget anchorTarget;
             switch (margin.unit) {
                 case UIMeasurementUnit.Pixel:
-                    return margin.value * element.view.ScaleFactor;
+                    return margin.value * view.ScaleFactor;
 
                 case UIMeasurementUnit.Content:
                     return GetContentHeight(width) * margin.value;
@@ -315,10 +318,10 @@ namespace UIForia.Layout.LayoutTypes {
                     return parent.allocatedHeight * margin.value;
 
                 case UIMeasurementUnit.ViewportWidth:
-                    return element.view.Viewport.width * margin.value;
+                    return view.Viewport.width * margin.value;
 
                 case UIMeasurementUnit.ViewportHeight:
-                    return element.view.Viewport.height * margin.value;
+                    return view.Viewport.height * margin.value;
 
                 case UIMeasurementUnit.ParentContentArea:
                     if (parent.style.PreferredHeight.IsContentBased) {
@@ -329,7 +332,7 @@ namespace UIForia.Layout.LayoutTypes {
                            (parent.style == null ? 0 : parent.PaddingBorderVertical);
 
                 case UIMeasurementUnit.Em:
-                    return style.EmSize * margin.value * element.view.ScaleFactor;
+                    return style.EmSize * margin.value * view.ScaleFactor;
 
                 case UIMeasurementUnit.AnchorWidth:
                     anchorTarget = style.AnchorTarget;
@@ -535,7 +538,7 @@ namespace UIForia.Layout.LayoutTypes {
             UIMeasurement widthMeasurement = style.PreferredWidth;
             switch (widthMeasurement.unit) {
                 case UIMeasurementUnit.Pixel:
-                    return element.view.ScaleFactor * Mathf.Max(0, widthMeasurement.value);
+                    return view.ScaleFactor * Mathf.Max(0, widthMeasurement.value);
 
                 case UIMeasurementUnit.Content:
                     return Mathf.Max(0, PaddingBorderHorizontal + (GetContentWidth() * widthMeasurement.value));
@@ -548,10 +551,10 @@ namespace UIForia.Layout.LayoutTypes {
                     return Mathf.Max(0, parent.allocatedWidth * widthMeasurement.value);
 
                 case UIMeasurementUnit.ViewportWidth:
-                    return Mathf.Max(0, element.view.Viewport.width * widthMeasurement.value);
+                    return Mathf.Max(0, view.Viewport.width * widthMeasurement.value);
 
                 case UIMeasurementUnit.ViewportHeight:
-                    return Mathf.Max(0, element.view.Viewport.height * widthMeasurement.value);
+                    return Mathf.Max(0, view.Viewport.height * widthMeasurement.value);
 
                 case UIMeasurementUnit.ParentContentArea:
                     if (parent.style.PreferredWidth.IsContentBased) {
@@ -562,7 +565,7 @@ namespace UIForia.Layout.LayoutTypes {
                            widthMeasurement.value;
 
                 case UIMeasurementUnit.Em:
-                    return Math.Max(0, style.EmSize * widthMeasurement.value) * element.view.ScaleFactor;
+                    return Math.Max(0, style.EmSize * widthMeasurement.value) * view.ScaleFactor;
 
                 case UIMeasurementUnit.AnchorWidth:
                     anchorTarget = style.AnchorTarget;
@@ -608,8 +611,8 @@ namespace UIForia.Layout.LayoutTypes {
                     return Mathf.Max(0, (right - left) * widthMeasurement.value);
 
                 case AnchorTarget.Viewport:
-                    left = ResolveAnchor(element.view.Viewport.width, style.AnchorLeft);
-                    right = ResolveAnchor(element.view.Viewport.width, style.AnchorRight);
+                    left = ResolveAnchor(view.Viewport.width, style.AnchorLeft);
+                    right = ResolveAnchor(view.Viewport.width, style.AnchorRight);
                     return Mathf.Max(0, (right - left) * widthMeasurement.value);
 
                 default:
@@ -639,9 +642,9 @@ namespace UIForia.Layout.LayoutTypes {
                     return Mathf.Max(0, (bottom - top) * heightMeasurement.value);
 
                 case AnchorTarget.Viewport:
-                    top = ResolveAnchor(element.view.Viewport.height, style.AnchorTop);
-                    bottom = element.view.Viewport.height -
-                             ResolveAnchor(element.view.Viewport.height, style.AnchorBottom);
+                    top = ResolveAnchor(view.Viewport.height, style.AnchorTop);
+                    bottom = view.Viewport.height -
+                             ResolveAnchor(view.Viewport.height, style.AnchorBottom);
                     return Mathf.Max(0, (bottom - top) * heightMeasurement.value);
 
                 default:
@@ -652,19 +655,19 @@ namespace UIForia.Layout.LayoutTypes {
         protected float ResolveAnchor(float baseWidth, UIFixedLength anchor) {
             switch (anchor.unit) {
                 case UIFixedUnit.Pixel:
-                    return anchor.value * element.view.ScaleFactor;
+                    return anchor.value * view.ScaleFactor;
 
                 case UIFixedUnit.Percent:
                     return baseWidth * anchor.value;
 
                 case UIFixedUnit.ViewportHeight:
-                    return element.view.Viewport.height * anchor.value;
+                    return view.Viewport.height * anchor.value;
 
                 case UIFixedUnit.ViewportWidth:
-                    return element.view.Viewport.width * anchor.value;
+                    return view.Viewport.width * anchor.value;
 
                 case UIFixedUnit.Em:
-                    return style.EmSize * anchor.value * element.view.ScaleFactor;
+                    return style.EmSize * anchor.value * view.ScaleFactor;
 
                 default:
                     throw new InvalidArgumentException();
@@ -674,7 +677,7 @@ namespace UIForia.Layout.LayoutTypes {
         protected float ResolveHorizontalAnchor(UIFixedLength anchor) {
             switch (anchor.unit) {
                 case UIFixedUnit.Pixel:
-                    return anchor.value * element.view.ScaleFactor;
+                    return anchor.value * view.ScaleFactor;
 
                 case UIFixedUnit.Percent:
                     switch (style.AnchorTarget) {
@@ -697,17 +700,17 @@ namespace UIForia.Layout.LayoutTypes {
                             return Screen.width * anchor.value;
 
                         case AnchorTarget.Viewport:
-                            return element.view.Viewport.width * anchor.value;
+                            return view.Viewport.width * anchor.value;
 
                         default:
                             throw new InvalidArgumentException();
                     }
 
                 case UIFixedUnit.ViewportHeight:
-                    return element.view.Viewport.height * anchor.value;
+                    return view.Viewport.height * anchor.value;
 
                 case UIFixedUnit.ViewportWidth:
-                    return element.view.Viewport.width * anchor.value;
+                    return view.Viewport.width * anchor.value;
 
                 case UIFixedUnit.Em:
                     return style.EmSize * anchor.value;
@@ -720,7 +723,7 @@ namespace UIForia.Layout.LayoutTypes {
         protected float ResolveVerticalAnchor(UIFixedLength anchor) {
             switch (anchor.unit) {
                 case UIFixedUnit.Pixel:
-                    return anchor.value * element.view.ScaleFactor;
+                    return anchor.value * view.ScaleFactor;
 
                 case UIFixedUnit.Percent:
                     switch (style.AnchorTarget) {
@@ -743,20 +746,20 @@ namespace UIForia.Layout.LayoutTypes {
                             return Screen.height * anchor.value;
 
                         case AnchorTarget.Viewport:
-                            return element.view.Viewport.height * anchor.value;
+                            return view.Viewport.height * anchor.value;
 
                         default:
                             throw new InvalidArgumentException();
                     }
 
                 case UIFixedUnit.ViewportHeight:
-                    return element.view.Viewport.height * anchor.value;
+                    return view.Viewport.height * anchor.value;
 
                 case UIFixedUnit.ViewportWidth:
-                    return element.view.Viewport.width * anchor.value;
+                    return view.Viewport.width * anchor.value;
 
                 case UIFixedUnit.Em:
-                    return style.EmSize * anchor.value * element.view.ScaleFactor;
+                    return style.EmSize * anchor.value * view.ScaleFactor;
 
                 default:
                     throw new InvalidArgumentException();
@@ -768,7 +771,7 @@ namespace UIForia.Layout.LayoutTypes {
             UIMeasurement height = style.PreferredHeight;
             switch (height.unit) {
                 case UIMeasurementUnit.Pixel:
-                    return Mathf.Max(0, height.value * element.view.ScaleFactor);
+                    return Mathf.Max(0, height.value * view.ScaleFactor);
 
                 case UIMeasurementUnit.Content:
                     float contentHeight = GetCachedHeightForWidth(contentWidth);
@@ -789,10 +792,10 @@ namespace UIForia.Layout.LayoutTypes {
                     return Mathf.Max(0, parent.allocatedHeight * height.value);
 
                 case UIMeasurementUnit.ViewportWidth:
-                    return Mathf.Max(0, element.view.Viewport.width * height.value);
+                    return Mathf.Max(0, view.Viewport.width * height.value);
 
                 case UIMeasurementUnit.ViewportHeight:
-                    return Mathf.Max(0, element.view.Viewport.height * height.value);
+                    return Mathf.Max(0, view.Viewport.height * height.value);
 
                 case UIMeasurementUnit.ParentContentArea:
                     if (parent.style.PreferredHeight.IsContentBased) {
@@ -834,10 +837,10 @@ namespace UIForia.Layout.LayoutTypes {
 
             switch (margin.unit) {
                 case UIMeasurementUnit.Pixel:
-                    return margin.value * element.view.ScaleFactor;
+                    return margin.value * view.ScaleFactor;
 
                 case UIMeasurementUnit.Em:
-                    return style.EmSize * margin.value * element.view.ScaleFactor;
+                    return style.EmSize * margin.value * view.ScaleFactor;
 
                 case UIMeasurementUnit.Content:
                     return GetContentWidth() * margin.value;
@@ -850,10 +853,10 @@ namespace UIForia.Layout.LayoutTypes {
                     return parent.allocatedHeight * margin.value;
 
                 case UIMeasurementUnit.ViewportWidth:
-                    return element.view.Viewport.width * margin.value;
+                    return view.Viewport.width * margin.value;
 
                 case UIMeasurementUnit.ViewportHeight:
-                    return element.view.Viewport.height * margin.value;
+                    return view.Viewport.height * margin.value;
 
                 case UIMeasurementUnit.ParentContentArea:
                     if (parent.style.PreferredWidth.IsContentBased) {
@@ -915,10 +918,10 @@ namespace UIForia.Layout.LayoutTypes {
                     return Mathf.Max(0, parent.allocatedWidth * widthMeasurement.value);
 
                 case UIMeasurementUnit.ViewportWidth:
-                    return Mathf.Max(0, element.view.Viewport.width * widthMeasurement.value);
+                    return Mathf.Max(0, view.Viewport.width * widthMeasurement.value);
 
                 case UIMeasurementUnit.ViewportHeight:
-                    return Mathf.Max(0, element.view.Viewport.height * widthMeasurement.value);
+                    return Mathf.Max(0, view.Viewport.height * widthMeasurement.value);
 
                 case UIMeasurementUnit.ParentContentArea:
                     if (parent.style.PreferredWidth.IsContentBased) {
@@ -961,7 +964,7 @@ namespace UIForia.Layout.LayoutTypes {
             AnchorTarget anchorTarget;
             switch (heightMeasurement.unit) {
                 case UIMeasurementUnit.Pixel:
-                    return Mathf.Max(0, heightMeasurement.value) * element.view.ScaleFactor;
+                    return Mathf.Max(0, heightMeasurement.value) * view.ScaleFactor;
 
                 case UIMeasurementUnit.Content:
                     return Mathf.Max(0, PaddingBorderVertical + (GetContentHeight(width) * heightMeasurement.value));
@@ -974,10 +977,10 @@ namespace UIForia.Layout.LayoutTypes {
                     return Mathf.Max(0, parent.allocatedHeight * heightMeasurement.value);
 
                 case UIMeasurementUnit.ViewportWidth:
-                    return Mathf.Max(0, element.view.Viewport.width * heightMeasurement.value);
+                    return Mathf.Max(0, view.Viewport.width * heightMeasurement.value);
 
                 case UIMeasurementUnit.ViewportHeight:
-                    return Mathf.Max(0, element.view.Viewport.height * heightMeasurement.value);
+                    return Mathf.Max(0, view.Viewport.height * heightMeasurement.value);
 
                 case UIMeasurementUnit.ParentContentArea:
                     if (parent.style.PreferredHeight.IsContentBased) {

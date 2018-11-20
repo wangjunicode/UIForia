@@ -15,7 +15,7 @@ namespace UIForia {
             elementType = rootType;
         }
 
-        public override Type elementType { get; }
+        protected override Type elementType { get; }
         
         public override UIElement CreateScoped(TemplateScope inputScope) {
             UIContainerElement element = null;
@@ -38,6 +38,9 @@ namespace UIForia {
             else if (elementType == typeof(UIFooterElement)) {
                 element = new UIFooterElement();
             }
+            else if (elementType == typeof(UIRouterLinkElement)) {
+                element = new UIRouterLinkElement();
+            }
             else {
                 element = (UIContainerElement) Activator.CreateInstance(elementType);
             }
@@ -53,7 +56,7 @@ namespace UIForia {
             }
 
             element.TemplateContext = inputScope.context;
-            element.templateRef = this;
+            element.OriginTemplate = this;
             return element;
         }
 
@@ -66,7 +69,7 @@ namespace UIForia {
             this.elementType = elementType;
         }
 
-        public override Type elementType { get; }
+        protected override Type elementType { get; }
         
         public override UIElement CreateScoped(TemplateScope inputScope) {
 
@@ -99,7 +102,7 @@ namespace UIForia {
             Assert.IsNotNull(element);
 
             element.children = ArrayPool<UIElement>.Empty;
-            element.templateRef = this;
+            element.OriginTemplate = this;
             element.TemplateContext = inputScope.context;
             
             return element;

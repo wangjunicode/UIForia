@@ -7,7 +7,7 @@ namespace UIForia {
 
         public UIUnmatchedRouteTemplate(List<UITemplate> childTemplates, List<AttributeDefinition> attributes = null) : base(childTemplates, attributes) { }
 
-        public override Type elementType => typeof(UIUnmatchedRoute);
+        protected override Type elementType => typeof(UIUnmatchedRoute);
         
         public override UIElement CreateScoped(TemplateScope inputScope) {
             UIRouteElement element = new UIUnmatchedRoute();
@@ -23,7 +23,7 @@ namespace UIForia {
         
         public UIRouteTemplate(List<UITemplate> childTemplates, List<AttributeDefinition> attributes = null) : base(childTemplates, attributes) { }
 
-        public override Type elementType => typeof(UIRouteElement);
+        protected override Type elementType => typeof(UIRouteElement);
 
         public override bool Compile(ParsedTemplate template) {
             pathAttr = GetAttribute("path");

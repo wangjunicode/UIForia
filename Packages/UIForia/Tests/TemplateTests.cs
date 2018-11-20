@@ -1,8 +1,5 @@
 using NUnit.Framework;
-using UIForia.Rendering;
 using UIForia;
-using UIForia.Systems;
-using Tests.Mocks;
 using static Tests.TestUtils;
 
 [TestFixture]
@@ -42,7 +39,6 @@ public class TemplateTests {
         Assert.IsNotEmpty(template.constantBindings);
         Assert.AreEqual(1, template.constantBindings.Length);
         Assert.IsInstanceOf<TextBinding_Multiple>(template.constantBindings[0]);
-        element.style = new UIStyleSet(element);
         template.constantBindings[0].Execute(element, new UITemplateContext(null));
         Assert.AreEqual("hello there", As<UITextElement>(element).GetText());
     }
@@ -58,7 +54,6 @@ public class TemplateTests {
         template.Compile(dummyTemplate);
         UIElement element = template.CreateScoped(new TemplateScope());
 //        MetaData data = template.GetCreationData(new UITextElement(), ctx);
-        element.style = new UIStyleSet(element);
         Assert.IsNotEmpty(template.bindings);
         Assert.AreEqual(1, template.bindings.Length);
         Assert.IsInstanceOf<TextBinding_Multiple>(template.bindings[0]);
@@ -76,7 +71,6 @@ public class TemplateTests {
         UITextTemplate template = new UITextTemplate("'hello {stringValue}!'");
         template.Compile(dummyTemplate);
         UIElement el = template.CreateScoped(new TemplateScope());
-        el.style = new UIStyleSet(el);
         int callCount = 0;
         As<UITextElement>(el).onTextChanged += (element, text) => callCount++;
         template.bindings[0].Execute(el, ctx);
@@ -93,7 +87,6 @@ public class TemplateTests {
         UITextTemplate template = new UITextTemplate("'hello {stringValue}!'");
         template.Compile(dummyTemplate);
         UIElement el = template.CreateScoped(new TemplateScope());
-        el.style = new UIStyleSet(el);
         int callCount = 0;
         As<UITextElement>(el).onTextChanged += (element, text) => callCount++;
         template.bindings[0].Execute(el, ctx);

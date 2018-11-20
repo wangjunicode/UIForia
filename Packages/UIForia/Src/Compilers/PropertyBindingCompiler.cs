@@ -15,9 +15,11 @@ namespace UIForia.Compilers {
         private static readonly Dictionary<Type, List<IAliasSource>> aliasMap = new Dictionary<Type, List<IAliasSource>>();
 
         public static readonly string EvtArgDefaultName = "$event";
+        
         private static readonly Dictionary<Type, Dictionary<string, LightList<object>>> m_TypeMap = new Dictionary<Type, Dictionary<string, LightList<object>>>();
 
         public const string k_BindTo = "bindTo";
+        public const string k_Once = "once";
 
         public static readonly string[] EvtArgNames = {
             "$eventArg0",
@@ -78,12 +80,10 @@ namespace UIForia.Compilers {
             FieldInfo fieldInfo = ReflectionUtil.GetFieldInfo(rootType, property);
 
             Dictionary<string, LightList<object>> actionMap = GetActionMap(rootType);
-            
+
             if (fieldInfo != null) {
-               
                 LightList<object> list = actionMap?.GetOrDefault(property);
                 if (list != null) {
-
                     ReflectionUtil.ObjectArray3[0] = fieldInfo;
                     ReflectionUtil.ObjectArray3[1] = eventInfo;
                     ReflectionUtil.ObjectArray3[2] = list;
@@ -108,10 +108,8 @@ namespace UIForia.Compilers {
 
             PropertyInfo propertyInfo = ReflectionUtil.GetPropertyInfo(rootType, property);
             if (propertyInfo != null) {
-                
                 LightList<object> list = actionMap?.GetOrDefault(property);
                 if (list != null) {
-
                     ReflectionUtil.ObjectArray3[0] = propertyInfo;
                     ReflectionUtil.ObjectArray3[1] = eventInfo;
                     ReflectionUtil.ObjectArray3[2] = list;
@@ -124,7 +122,7 @@ namespace UIForia.Compilers {
                         ReflectionUtil.ObjectArray3
                     );
                 }
-                
+
                 ReflectionUtil.ObjectArray2[0] = propertyInfo;
                 ReflectionUtil.ObjectArray2[1] = eventInfo;
 
@@ -156,11 +154,84 @@ namespace UIForia.Compilers {
                 if (modifier == k_BindTo) {
                     return CompileBoundProperty(compiler.context.rootType, targetType, property, attrValue);
                 }
+
+                if (modifier == k_Once) {
+                    Binding binding = CompileBinding(targetType, property, attrValue);
+                    if (binding == null) {
+                        return null;
+                    }
+
+                    binding.bindingType = BindingType.Once;
+                }
+                
+                if (property == "style") return null;
+
                 throw new ParseException($"Unsupported attribute binding extension: '{attrKey}'");
             }
 
-            FieldInfo fieldInfo = ReflectionUtil.GetFieldInfoOrThrow(targetType, attrKey);
+            return CompileBinding(targetType, attrKey, attrValue);
+        }
 
+        private Binding CompileBinding(Type targetType, string attrKey, string attrValue) {
+            
+            FieldInfo fieldInfo = ReflectionUtil.GetFieldInfo(targetType, attrKey);
+
+            if (fieldInfo != null) {
+                return CompileFieldAttribute(fieldInfo, targetType, attrKey, attrValue);
+            }
+
+            PropertyInfo propertyInfo = ReflectionUtil.GetPropertyInfo(targetType, attrKey);
+            if (propertyInfo != null) {
+                return CompilePropertyAttribute(propertyInfo, targetType, attrKey, attrValue);
+            }
+            
+            throw new ParseException(attrKey + " is a not a field or property on type " + targetType);
+        }
+
+        private Binding CompilePropertyAttribute(PropertyInfo propertyInfo, Type targetType, string attrKey, string attrValue) {
+            List<IAliasSource> aliasSources = aliasMap.GetOrDefault(propertyInfo.PropertyType);
+
+            if (aliasSources != null) {
+                for (int i = 0; i < aliasSources.Count; i++) {
+                    compiler.context.AddConstAliasSource(aliasSources[i]);
+                }
+            }
+
+            Expression expression = compiler.Compile(attrValue);
+
+            if (aliasSources != null) {
+                for (int i = 0; i < aliasSources.Count; i++) {
+                    compiler.context.RemoveConstAliasSource(aliasSources[i]);
+                }
+            }
+
+            ReflectionUtil.LinqAccessor accessor = ReflectionUtil.GetLinqPropertyAccessors(targetType, propertyInfo.PropertyType, attrKey);
+
+            ReflectionUtil.TypeArray2[0] = targetType;
+            ReflectionUtil.TypeArray2[1] = propertyInfo.PropertyType;
+
+            if (!propertyInfo.PropertyType.IsAssignableFrom(expression.YieldedType)) {
+                UnityEngine.Debug.Log($"Error compiling binding: {attrKey}={attrValue}, Type {propertyInfo.PropertyType} is not assignable from {expression.YieldedType}");
+                return null;
+            }
+
+            Dictionary<string, LightList<object>> actionMap = GetActionMap(targetType);
+            
+            // todo -- with callbacks
+            
+            ReflectionUtil.ObjectArray4[0] = attrKey;
+            ReflectionUtil.ObjectArray4[1] = expression;
+            ReflectionUtil.ObjectArray4[2] = accessor.fieldGetter;
+            ReflectionUtil.ObjectArray4[3] = accessor.fieldSetter;
+            return (Binding) ReflectionUtil.CreateGenericInstanceFromOpenType(
+                typeof(PropertySetterBinding<,>),
+                ReflectionUtil.TypeArray2,
+                ReflectionUtil.ObjectArray4
+            );
+        }
+        
+
+        private Binding CompileFieldAttribute(FieldInfo fieldInfo, Type targetType, string attrKey, string attrValue) {
             List<IAliasSource> aliasSources = aliasMap.GetOrDefault(fieldInfo.FieldType);
 
             if (aliasSources != null) {
@@ -177,7 +248,7 @@ namespace UIForia.Compilers {
                 }
             }
 
-            ReflectionUtil.LinqAccessor accessor = ReflectionUtil.GetLinqAccessors(targetType, fieldInfo.FieldType, attrKey);
+            ReflectionUtil.LinqAccessor accessor = ReflectionUtil.GetLinqFieldAccessors(targetType, fieldInfo.FieldType, attrKey);
 
             ReflectionUtil.TypeArray2[0] = targetType;
             ReflectionUtil.TypeArray2[1] = fieldInfo.FieldType;
@@ -214,7 +285,6 @@ namespace UIForia.Compilers {
                 ReflectionUtil.ObjectArray4
             );
         }
-
 
         private static LightList<object> GetHandlerList(Dictionary<string, LightList<object>> map, string name) {
             LightList<object> list = map.GetOrDefault(name);

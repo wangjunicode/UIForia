@@ -170,6 +170,7 @@ public class BindingCompilerTests {
         Assert.IsFalse(t.didProp0Change);
     }
 
+    [TemplateTagName("EventedThing")]
     private class EventedThing : UIContainerElement {
 
         public event Action<string> onValueChanged;

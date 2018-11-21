@@ -34,12 +34,16 @@ namespace UIForia.Routing {
         private readonly LightList<IRouteHandler> m_Handlers;
 
         public Router() {
-            current = new Route("/");
+            current = new Route("");
             m_HistoryStack = new LightList<Route>();
             m_Guards = new LightList<IRouteGuard>();
             m_Handlers = new LightList<IRouteHandler>();
             m_HistoryStack.Add(current);
         }
+
+        public string CurrentUrl => current.path;
+        public bool CanGoBack => historyIndex > 1;
+        public bool CanGoForwards => m_HistoryStack.Count > 1 && historyIndex != m_HistoryStack.Count - 1;
 
         public void AddRouteHandler(IRouteHandler handler) {
             m_Handlers.Add(handler);    
@@ -49,10 +53,8 @@ namespace UIForia.Routing {
             m_Guards.Add(guard);
         }
 
-        public void RemoveRouteGuard() { }
-
         public void GoForwards() {
-            // todo list instead of stack
+            
         }
 
         public void GoBack() {
@@ -61,17 +63,17 @@ namespace UIForia.Routing {
             }
 
             historyIndex--;
-            GoTo(m_HistoryStack[historyIndex]);
+            Route route = m_HistoryStack[historyIndex];
+            for (int i = 0; i < m_Handlers.Length; i++) {
+                m_Handlers[i].OnRouteChanged(route);
+            }
+
+            current = route;
         }
 
         public bool GoTo(string path) {
             return GoTo(new Route(path));
-        }
-
-        public void Animate() {
-            // new AnimatedTransition(from: "path", to: "path", AnimationToPlay, animationOptions);
-            // Route newRoute = 
-        }
+        }      
         
         public bool GoTo(Route route) {
             if (IsTransitionBlocked(route)) {
@@ -82,6 +84,8 @@ namespace UIForia.Routing {
                 m_Handlers[i].OnRouteChanged(route);
             }
 
+            current = route;
+            historyIndex++;
             m_HistoryStack.Add(route);
 
             return false;

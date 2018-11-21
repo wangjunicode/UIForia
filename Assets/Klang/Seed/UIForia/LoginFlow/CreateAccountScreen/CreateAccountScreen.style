@@ -1,0 +1,16 @@
+
+style container {
+
+}
+
+style create-input {
+    PreferredSize = 350px, 62px;
+    BackgroundColor = white;
+    BorderRadius = 30px;
+    Margin = 20px;
+    Padding = 10px, 15px;
+}
+
+style head {
+    TextFontSize = 32;
+}

@@ -1,7 +1,6 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Reflection;
 using JetBrains.Annotations;
 using UIForia.Compilers;
 using UIForia.Input;
@@ -39,7 +38,6 @@ namespace UIForia {
         private static readonly StyleBindingCompiler styleCompiler = new StyleBindingCompiler(null);
         private static readonly InputBindingCompiler inputCompiler = new InputBindingCompiler(null);
         private static readonly PropertyBindingCompiler propCompiler = new PropertyBindingCompiler(null);
-
 
         protected UITemplate(List<UITemplate> childTemplates, List<AttributeDefinition> attributes = null) {
             this.id = ++s_IdGenerator;
@@ -95,10 +93,10 @@ namespace UIForia {
             }
 
             ResolveBaseStyles(template);
+            CompileConditionalBindings(template);
             CompileStyleBindings(template);
             CompileInputBindings(template);
             CompilePropertyBindings(template);
-            CompileConditionalBindings(template);
             ResolveActualAttributes();
             ResolveConstantBindings();
             return true;
@@ -122,8 +120,6 @@ namespace UIForia {
 
         protected void ResolveActualAttributes() {
             if (attributes == null) return;
-            // todo maybe can be shared
-            // todo enforce constant-ness of attr values
             IEnumerable<AttributeDefinition> realAttributes = attributes.Where(a => a.isRealAttribute).ToArray();
             if (realAttributes.Any()) {
                 templateAttributes = new List<ElementAttribute>();
@@ -190,12 +186,8 @@ namespace UIForia {
             }
         }
 
-        // todo -- show / hide / disable
         protected void CompileConditionalBindings(ParsedTemplate template) {
-            AttributeDefinition ifDef = GetAttribute("x-if");
-            AttributeDefinition unlessDef = GetAttribute("x-unless");
-            AttributeDefinition showDef = GetAttribute("x-show");
-            AttributeDefinition hideDef = GetAttribute("x-hide");
+            AttributeDefinition ifDef = GetAttribute("if");
 
             if (ifDef != null) {
                 Expression<bool> ifExpression = template.compiler.Compile<bool>(ifDef.value);

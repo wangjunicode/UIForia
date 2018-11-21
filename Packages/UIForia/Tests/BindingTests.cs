@@ -14,6 +14,7 @@ public class BindingTests {
             </Contents>
         </UITemplate>
     ")]
+    [TemplateTagName("BindingTestThingChild")]
     public class BindingTestThingChild : UIElement {
 
         public int intProperty;
@@ -27,6 +28,7 @@ public class BindingTests {
             </Contents>
         </UITemplate>
     ")]
+    [TemplateTagName("BindingTestThing")]
     public class BindingTestThing : UIElement {
 
         public int intProperty;
@@ -50,7 +52,7 @@ public class BindingTests {
         string template = @"
         <UITemplate>
             <Contents>
-                <BindingTestThingChild x-id=""child"" x-if='{intProperty > 3}' intProperty='{intProperty}'/>
+                <BindingTestThingChild x-id=""child"" if='{intProperty > 3}' intProperty='{intProperty}'/>
             </Contents>
         </UITemplate>
         ";

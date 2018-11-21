@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using UnityEditor;
 
 namespace UIForia.Editor {
@@ -10,11 +11,21 @@ namespace UIForia.Editor {
         private string[] names;
         
         public void OnEnable() {
-            types = TypeProcessor.GetTemplateTypes();
+            TypeProcessor.TypeData[] typeData = TypeProcessor.GetTemplateTypes();
+
+            List<Type> validTypes = new List<Type>();
+            for (int i = 0; i < typeData.Length; i++) {
+                if (typeData[i].type.Assembly.FullName.StartsWith("UIForia")) {
+                    continue;
+                }
+                validTypes.Add(typeData[i].type);
+            }
             
+            types = new Type[validTypes.Count];
             names = new string[types.Length];
             for (int i = 0; i < types.Length; i++) {
-                names[i] = types[i].FullName;
+                types[i] = validTypes[i];
+                names[i] = validTypes[i].FullName;
             }
         }
         

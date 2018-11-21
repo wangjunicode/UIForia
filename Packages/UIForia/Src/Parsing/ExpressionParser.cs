@@ -107,6 +107,10 @@ namespace UIForia {
             expressionStack.Clear();
             operatorStack.Clear();
 
+            if (!tokenStream.HasMoreTokens) {
+                throw new ParseException("Failed trying to parse empty expression");
+            }
+            
             if (tokenStream.Current != TokenType.ExpressionOpen) {
                 isLiteralExpression = true;
                 return ParseLoop(ParseLiteralExpressionOperand);

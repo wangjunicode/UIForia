@@ -1,0 +1,17 @@
+style horizontal {
+    FlexLayoutDirection = Column;
+    LayoutType = Flow;
+}
+
+style horizontal-center {
+    FlexLayoutDirection = Column;
+    LayoutType = Flow;
+    FlexLayoutMainAxisAlignment = Center;
+    FlexLayoutCrossAxisAlignment = Center;
+}
+
+style vertical-center {
+    FlexLayoutDirection = Row;
+    FlexLayoutMainAxisAlignment = Center;
+    FlexLayoutCrossAxisAlignment = Center;
+}

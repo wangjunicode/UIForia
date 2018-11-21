@@ -1,6 +1,6 @@
 using System;
 using System.Collections.Generic;
-using System.Linq;
+using UIForia.Compilers;
 using UIForia.Compilers.AliasSources;
 using UIForia.Parsing.StyleParser;
 using UIForia.Rendering;
@@ -49,40 +49,16 @@ namespace UIForia {
         public UIElement Create(UIView view) {
             Compile();
             return rootElementTemplate.CreateUnscoped(view);
-//            
-//            UITemplateContext context = new UITemplateContext(view);
-//            UIElement instance = (UIElement) Activator.CreateInstance(rootElementTemplate.RootType);
-//            TemplateScope scope = new TemplateScope(instance, context);
-//
-//            scope.context.rootElement = instance;
-//            instance.flags |= UIElementFlags.TemplateRoot;
-//            
-//
-//            for (int i = 0; i < childTemplates.Count; i++) {
-//                rootData.AddChild(childTemplates[i].CreateScoped(scope));
-//            }
-//
-//            rootData.element.templateChildren = rootData.children.Select(c => c.element).ToArray();
-//            rootData.element.ownChildren = rootData.element.templateChildren;
-//
-//            AssignContext(rootElementTemplate, instance, scope.context);
-//
-//            return rootData;
         }
-
-//        private void AssignContext(UITemplate template, UIElement element, UITemplateContext context) {
-//            element.templateContext = context;
-//            if (element.templateChildren != null) {
-//                for (int i = 0; i < element.templateChildren.Length; i++) {
-//                    element.templateChildren[i].templateParent = element;
-//                    AssignContext(template.childTemplates[i], element.templateChildren[i], context);
-//                }
-//            }
-//        }
-
+        
         public void Compile() {
             if (isCompiled) return;
             isCompiled = true;
+            
+            compiler.AddExpressionResolver(new ElementResolver("element"));
+            compiler.AddExpressionResolver(new ParentElementResolver("parent"));
+            compiler.AddExpressionResolver(new RouteResolver("route"));
+            
             for (int i = 0; i < imports.Count; i++) {
                 Type type = TypeProcessor.GetRuntimeType(imports[i].path);
                 

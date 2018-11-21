@@ -776,8 +776,10 @@ namespace UIForia.Rendering {
             }
         }
 
-        public void SetAnimatedProperty(StyleProperty p0) {
-            throw new NotImplementedException();
+        public void SetAnimatedProperty(StyleProperty property) {
+            if (StyleUtil.CanAnimate(property.propertyId)) {
+                SetProperty(property, StyleState.Normal); // todo -- need another priority group for this
+            }
         }
 
     }

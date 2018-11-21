@@ -5,6 +5,7 @@ using UIForia;
 [TestFixture]
 public class ElementTests {
 
+    [TemplateTagName("DepthThing")]
     [Template(TemplateType.String, @"
     <UITemplate>
         <Contents>
@@ -37,6 +38,7 @@ public class ElementTests {
 
     }
     
+    [TemplateTagName("DepthThingChild")]
     [Template(TemplateType.String, @"
     <UITemplate>
         <Contents>

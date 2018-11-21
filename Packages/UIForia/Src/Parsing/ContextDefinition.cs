@@ -74,6 +74,12 @@ namespace UIForia {
                 return fieldInfo.FieldType;
             }
 
+            PropertyInfo propertyInfo = rootType.GetProperty(alias, bindFlags);
+
+            if (propertyInfo != null) {
+                return propertyInfo.PropertyType;
+            }
+
             return null;
         }
 

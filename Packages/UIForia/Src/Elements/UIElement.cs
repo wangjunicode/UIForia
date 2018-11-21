@@ -6,9 +6,7 @@ using UIForia.Rendering;
 using UIForia;
 using UIForia.Routing;
 using UIForia.Systems;
-using UIForia.Util;
 using UnityEngine;
-using Debug = UnityEngine.Debug;
 
 [Flags]
 public enum QueryOptions {
@@ -294,8 +292,11 @@ public class UIElement : IHierarchical, IExpressionContextProvider {
         s_ColdDataMap[id] = coldData;
     }
 
-    protected string GetAttribute(string attr) {
+    public string GetAttribute(string attr) {
         List<ElementAttribute> templateAttributes = OriginTemplate.templateAttributes;
+        
+        if (templateAttributes == null) return null;
+        
         for (int i = 0; i < templateAttributes.Count; i++) {
             if (templateAttributes[i].name == attr) {
                 return templateAttributes[i].value;
@@ -327,21 +328,39 @@ public class UIElement : IHierarchical, IExpressionContextProvider {
         return s_ColdDataMap.GetOrDefault(id).GetAttribute(name).value != null;
     }
 
+    public IRouterElement GetNearestRouter() {
+        UIElement ptr = this;
+        ElementColdData coldData = s_ColdDataMap.GetOrDefault(id);
+        if (coldData.nearestRouter != null) {
+            return coldData.nearestRouter;
+        }
+        
+        while (ptr != null) {
+            if (ptr is IRouterElement routeElement) {
+                coldData.nearestRouter = routeElement;
+                s_ColdDataMap[id] = coldData;
+                return routeElement;
+            }
+
+            ptr = ptr.parent;
+        }
+
+        return null;
+    }
 
     // todo improve this
     public RouteParameter GetRouteParameter(string name) {
         UIElement ptr = this;
 
         while (ptr != null) {
-            UIRouteElement routeElement = ptr as UIRouteElement;
-            if (routeElement != null) {
+            if (ptr is RouteElement routeElement) {
                 return routeElement.CurrentMatch.GetParameter(name);
             }
 
             ptr = ptr.parent;
         }
 
-        return default(RouteParameter);
+        return default;
     }
 
     public int UniqueId => id;

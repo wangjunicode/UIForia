@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="utf-8"?>
+<UITemplate>
+    
+    <Style path="Klang/Seed/UIForia/URLNavBar/URLNavBar.style"/>
+    
+    <Contents style="url-nav-bar">
+    
+        <RouterLinkBack style="back-button">
+            <Image style="icon" src="'arrow_left'"/>
+        </RouterLinkBack>
+        
+        <RouterLink>
+            <Image style="icon" src="'arrow_right'"/>
+        </RouterLink>
+        
+        <Text>URL: {$route.url}</Text>
+            
+    </Contents>
+    
+</UITemplate>

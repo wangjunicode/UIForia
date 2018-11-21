@@ -1,0 +1,17 @@
+
+style baseButton {
+    MinWidth = 32px;
+    MinHeight = 32px;
+    TextFontSize = 36;
+    BackgroundColor = white;
+    BorderRadius = 30px;
+    Padding = 10px, 60px;
+    PreferredSize = 1cnt;
+    FlexLayoutMainAxisAlignment = Center;
+    FlexLayoutCrossAxisAlignment = Center;
+}
+
+style black {
+    BackgroundColor = black;
+    TextColor = white;
+}

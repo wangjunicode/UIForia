@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="utf-8"?>
+<UITemplate>
+   
+    <Style path="Klang/Seed/UIForia/KlangButton/KlangButton.style" alias="klang-button"/>
+    
+    <Contents style="klang-button.baseButton">
+        
+        <Text x-id="text"/>
+        
+    </Contents>
+    
+</UITemplate>
+    

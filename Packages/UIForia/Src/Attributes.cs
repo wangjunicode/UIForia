@@ -4,6 +4,17 @@ using UIForia.Util;
 using UnityEngine;
 
 namespace UIForia {
+
+    [AttributeUsage(AttributeTargets.Class)]
+    public class TemplateTagNameAttribute : Attribute {
+
+        public readonly string tagName;
+
+        public TemplateTagNameAttribute(string tagName) {
+            this.tagName = tagName;
+        }
+
+    }
     
     [AttributeUsage(AttributeTargets.Method, AllowMultiple = true)]
     public class OnPropertyChanged : Attribute {

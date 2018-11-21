@@ -4,6 +4,7 @@ using UIForia;
 using Tests.Mocks;
 using static Tests.TestUtils;
 
+[TemplateTagName("TranscludedThing")]
 [Template(TemplateType.String, @"
 
         <UITemplate>
@@ -36,6 +37,7 @@ public class TranscludedThing : UIElement {
 
 }
 
+[TemplateTagName("ViewTestThing")]
 [Template(TemplateType.String, @"
         <UITemplate>
             <Contents>

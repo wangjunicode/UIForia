@@ -1,0 +1,18 @@
+style seed-logo {
+    BackgroundColor = black;
+}
+
+style login-input {
+    PreferredSize = 350px, 62px;
+    BackgroundColor = white;
+    BorderRadius = 30px;
+    Margin = 20px;
+    Padding = 10px, 15px;
+}
+
+style container {
+    TextFontAsset = Fonts/EurostileLTPro SDF;
+    TextFontSize = 48;
+    FlexLayoutMainAxisAlignment = Center;
+    FlexLayoutCrossAxisAlignment = Center;
+}

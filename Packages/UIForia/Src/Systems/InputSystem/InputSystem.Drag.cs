@@ -1,9 +1,8 @@
-using System;
 using System.Collections.Generic;
 using UIForia;
 using UIForia.Input;
 using UnityEngine;
-using Debug = System.Diagnostics.Debug;
+using System;
 
 public abstract partial class InputSystem {
 

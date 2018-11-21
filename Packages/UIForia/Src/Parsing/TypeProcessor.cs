@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Reflection;
 using UnityEngine;
 using UnityEngine.Assertions;
 using Assembly = System.Reflection.Assembly;
@@ -8,10 +9,29 @@ namespace UIForia {
 
     public static class TypeProcessor {
 
+        public struct TypeData {
+
+            public readonly Type type;
+            public readonly string tagName;
+            
+            public TypeData(Type type) {
+                this.type = type;
+                object attr = type.GetCustomAttribute(typeof(TemplateTagNameAttribute), false);
+                if (attr != null) {
+                    tagName = ((TemplateTagNameAttribute) attr).tagName;
+                }
+                else {
+                    tagName = type.Name;
+                }
+            }
+
+        }
+        
         private static readonly Dictionary<string, ProcessedType> typeMap = new Dictionary<string, ProcessedType>();
         private static List<Assembly> filteredAssemblies;
         private static List<Type> loadedTypes;
-        private static Type[] templateTypes;
+        private static TypeData[] templateTypes;
+        private static readonly Dictionary<string, ProcessedType> templateTypeMap = new Dictionary<string, ProcessedType>();
         
         private static void FilterAssemblies() {
             if (filteredAssemblies != null) return;
@@ -72,6 +92,18 @@ namespace UIForia {
             return GetType(type);
         }
 
+        // todo -- handle imports
+        public static ProcessedType GetTemplateType(string tagName) {
+            GetTemplateTypes();
+
+            ProcessedType processedType;
+            if (templateTypeMap.TryGetValue(tagName, out processedType)) {
+                return processedType;
+            }
+            
+            throw new ParseException("Unable to find type for tag name: " + tagName);
+        }
+        
         public static Type GetRuntimeType(string typeName) {
             FilterAssemblies();
 
@@ -130,28 +162,27 @@ namespace UIForia {
             return name.IndexOf("-firstpass", StringComparison.Ordinal) == -1;
         }
 
-        public static Type[] GetTemplateTypes() {
+        public static TypeData[] GetTemplateTypes() {
             if (templateTypes == null) {
                 FilterAssemblies();
                 List<Type> types = new List<Type>();
                 for (int i = 0; i < loadedTypes.Count; i++) {
                     if (typeof(UIElement).IsAssignableFrom(loadedTypes[i])) {
-
-                        if (loadedTypes[i].Assembly.FullName.Contains("UIForia.Demo")) {
-                            types.Add(loadedTypes[i]);   
-                            continue;
-                        }
-                        
-                        if (loadedTypes[i].Assembly.FullName.Contains("UIForia")) {
-                            continue;
-                        }
+//                        
+//                        if (loadedTypes[i].Assembly.FullName.StartsWith("UIForia")) {
+//                            continue;
+//                        }
                         
                         types.Add(loadedTypes[i]);
 
                     }
                 }
 
-                templateTypes = types.ToArray();
+                templateTypes = new TypeData[types.Count];
+                for (int i = 0; i < templateTypes.Length; i++) {
+                    templateTypes[i] = new TypeData(types[i]);
+                    templateTypeMap.Add(templateTypes[i].tagName, new ProcessedType(templateTypes[i].type));
+                }
             }
 
             return templateTypes;

@@ -218,7 +218,7 @@ public class LayoutSystemTests {
             <Contents style.layoutType='Flex'>
                 <Group x-id='child0' style.preferredWidth='100f' style.preferredHeight='100f'/>
                 <Group x-id='child1' style.preferredWidth='content(100)' style.preferredHeight='content(100)'>
-                    <Group x-if='false' x-id='nested-child-1' style.preferredWidth='300f' style.preferredHeight='50f'/>
+                    <Group if='false' x-id='nested-child-1' style.preferredWidth='300f' style.preferredHeight='50f'/>
                     <Group x-id='nested-child-2' style.preferredWidth='200f' style.preferredHeight='50f'/>
                 </Group>
                 <Group x-id='child2' style.preferredWidth='100f' style.preferredHeight='100f'/>

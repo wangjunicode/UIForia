@@ -9,8 +9,6 @@
  Optimizations
 - Reduce memory usage
 - Improve memory layout
-- Support .once bindings and dependent bindings (::someotherbinding)
-- Support function calls in dirty checking
 - Reduce boxing
 
 Critical
@@ -35,39 +33,6 @@ Nice to have
     Clone methods
     zooming in inspector
     
-    
-cursor Pointer {
-    Texture = path/to/texture
-    UVRect = rect
-    HotPoint = point;
-}
 
-public class CursorSettings {
-
-    public Texture2D texture;
-    public Vector2 point;
-    
-}
-
-style {
-
-    [Scroll-Vertical] {
-    
-        [Norma] {
-            
-            ::Button-Increment {
-            
-                
-            
-            }
-            
-        }
-        
-        [Button-Increment] {}
-        
-        [Button-Decrement] {}
-        
-        
-    }
     
     

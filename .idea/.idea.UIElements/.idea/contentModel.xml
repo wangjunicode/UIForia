@@ -1,10 +1,8 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project version="4">
   <component name="ContentModelStore">
-    <e p="C:\Users\matth\.Rider2018.3\config\extensions" t="IncludeRecursive" />
-    <e p="C:\Users\matth\.Rider2018.3\system\extResources" t="IncludeRecursive" />
-    <e p="C:\Users\matth\.Rider2018.3\system\resharper-host\local\Transient\ReSharperHost\v183\SolutionCaches\_UIElements.-1987582547.00" t="ExcludeRecursive" />
-    <e p="C:\Users\matth\RiderProjects\UIElements" t="IncludeRecursive">
+    <e p="C:\Seed\UIForia\UIElements" t="IncludeRecursive">
+      <e p="Assembly-CSharp.csproj" t="IncludeRecursive" />
       <e p="Assets" t="Include">
         <e p="Demos" t="Include">
           <e p="AddChatButton.xml" t="Include" />
@@ -61,14 +59,66 @@
           <e p="ResourcePanel" t="Include">
             <e p="ResourcePanel.cs" t="Include" />
           </e>
-          <e p="Root.cs" t="Include" />
-          <e p="Root.xml" t="Include" />
           <e p="SeedWindowFrame.cs" t="Include" />
           <e p="SeedWindowFrame.xml" t="Include" />
           <e p="UIForia.Demo.asmdef" t="Include" />
           <e p="WindowFrame" t="Include">
             <e p="WindowFrame.cs" t="Include" />
             <e p="WindowFrame.xml" t="Include" />
+          </e>
+        </e>
+        <e p="Klang" t="Include">
+          <e p="Seed" t="Include">
+            <e p="UIForia" t="Include">
+              <e p="KlangButton" t="Include">
+                <e p="KlangButton.cs" t="Include" />
+                <e p="KlangButton.xml" t="Include" />
+                <e p="KlangLinkButton.xml" t="Include" />
+              </e>
+              <e p="LoginFlow" t="Include">
+                <e p="CreateAccountScreen" t="Include">
+                  <e p="CreateAccountContainer.cs" t="Include" />
+                  <e p="CreateAccountContainer.xml" t="Include" />
+                  <e p="CreateAccountScreen.cs" t="Include" />
+                  <e p="CreateAccountScreen.xml" t="Include" />
+                </e>
+                <e p="LoginScreen" t="Include">
+                  <e p="LoginScreen.cs" t="Include" />
+                  <e p="LoginScreen.xml" t="Include" />
+                </e>
+              </e>
+              <e p="Root.cs" t="Include" />
+              <e p="Root.xml" t="Include" />
+              <e p="URLNavBar" t="Include">
+                <e p="URLNavBar.cs" t="Include" />
+                <e p="URLNavBar.xml" t="Include" />
+              </e>
+            </e>
+          </e>
+        </e>
+        <e p="TextMesh Pro" t="Include">
+          <e p="Resources" t="Include">
+            <e p="LineBreaking Following Characters.txt" t="Include" />
+            <e p="LineBreaking Leading Characters.txt" t="Include" />
+            <e p="Shaders" t="Include">
+              <e p="TMP_Bitmap-Custom-Atlas.shader" t="Include" />
+              <e p="TMP_Bitmap-Mobile.shader" t="Include" />
+              <e p="TMP_Bitmap.shader" t="Include" />
+              <e p="TMP_SDF Overlay.shader" t="Include" />
+              <e p="TMP_SDF-Mobile Masking.shader" t="Include" />
+              <e p="TMP_SDF-Mobile Overlay.shader" t="Include" />
+              <e p="TMP_SDF-Mobile.shader" t="Include" />
+              <e p="TMP_SDF-Surface-Mobile.shader" t="Include" />
+              <e p="TMP_SDF-Surface.shader" t="Include" />
+              <e p="TMP_SDF.shader" t="Include" />
+              <e p="TMP_Sprite.shader" t="Include" />
+              <e p="TMPro.cginc" t="Include" />
+              <e p="TMPro_Properties.cginc" t="Include" />
+              <e p="TMPro_Surface.cginc" t="Include" />
+            </e>
+          </e>
+          <e p="Sprites" t="Include">
+            <e p="EmojiOne Attribution.txt" t="Include" />
           </e>
         </e>
       </e>
@@ -157,14 +207,25 @@
                 <e p="ICastHandler.cs" t="Include" />
               </e>
               <e p="ExpressionCompiler.cs" t="Include" />
+              <e p="ExpressionResolvers" t="Include">
+                <e p="ExpressionResolver.cs" t="Include" />
+              </e>
               <e p="InputBindingCompiler.cs" t="Include" />
               <e p="PropertyBindingCompiler.cs" t="Include" />
               <e p="StyleBindingCompiler.cs" t="Include" />
             </e>
             <e p="Elements" t="Include">
-              <e p="ChildRouterElement.cs" t="Include" />
+              <e p="ElementColdData.cs" t="Include" />
               <e p="IntrinsicTemplates.cs" t="Include" />
               <e p="RouteMatch.cs" t="Include" />
+              <e p="Routing" t="Include">
+                <e p="ChildRouterElement.cs" t="Include" />
+                <e p="GuardedRoute.cs" t="Include" />
+                <e p="IRouterElement.cs" t="Include" />
+                <e p="RouteElement.cs" t="Include" />
+                <e p="RouterElement.cs" t="Include" />
+                <e p="UnmatchedRoute.cs" t="Include" />
+              </e>
               <e p="ScrollbarDragEvent.cs" t="Include" />
               <e p="ScrollbarOrientation.cs" t="Include" />
               <e p="TemplateReference.cs" t="Include" />
@@ -177,14 +238,12 @@
               <e p="UIInputFieldElement.cs" t="Include" />
               <e p="UIPrimitiveElement.cs" t="Include" />
               <e p="UIRepeatElement.cs" t="Include" />
-              <e p="UIRouteElement.cs" t="Include" />
-              <e p="UIRouterElement.cs" t="Include" />
+              <e p="UIRouterLinkElement.cs" t="Include" />
               <e p="UISlotElement.cs" t="Include" />
               <e p="UISwitchCaseElement.cs" t="Include" />
               <e p="UISwitchDefaultElement.cs" t="Include" />
               <e p="UISwitchElement.cs" t="Include" />
               <e p="UITextElement.cs" t="Include" />
-              <e p="UIUnmatchedRoute.cs" t="Include" />
               <e p="VirtualElement.cs" t="Include" />
               <e p="VirtualScrollBar.cs" t="Include" />
             </e>
@@ -452,6 +511,7 @@
             </e>
             <e p="TemplateAttribute.cs" t="Include" />
             <e p="Templates" t="Include">
+              <e p="BindingType.cs" t="Include" />
               <e p="TemplateScope.cs" t="Include" />
               <e p="UIChildrenTemplate.cs" t="Include" />
               <e p="UIContainerTemplate.cs" t="Include" />
@@ -459,8 +519,6 @@
               <e p="UIGraphicTemplate.cs" t="Include" />
               <e p="UIImageTemplate.cs" t="Include" />
               <e p="UIRepeatTemplate.cs" t="Include" />
-              <e p="UIRouterTemplate.cs" t="Include" />
-              <e p="UIRouteTemplate.cs" t="Include" />
               <e p="UISlotTemplate.cs" t="Include" />
               <e p="UISwitchCaseTemplate.cs" t="Include" />
               <e p="UISwitchDefaultTemplate.cs" t="Include" />
@@ -577,5 +635,8 @@
       <e p="UIForia.Src.csproj" t="IncludeRecursive" />
       <e p="UIForia.Test.csproj" t="IncludeRecursive" />
     </e>
+    <e p="C:\Users\Matt\.Rider2018.3\config\extensions" t="IncludeRecursive" />
+    <e p="C:\Users\Matt\.Rider2018.3\system\extResources" t="IncludeRecursive" />
+    <e p="C:\Users\Matt\.Rider2018.3\system\resharper-host\local\Transient\ReSharperHost\v183\SolutionCaches\_UIElements.120647963.00" t="ExcludeRecursive" />
   </component>
 </project>

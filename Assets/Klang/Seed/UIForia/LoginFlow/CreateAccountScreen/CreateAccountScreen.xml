@@ -1,0 +1,66 @@
+<?xml version="1.0" encoding="utf-8"?>
+<UITemplate>
+    
+    <Style path="Klang/Seed/UIForia/LoginFlow/CreateAccountScreen/CreateAccountScreen.style"/>
+    
+    <Style path="Klang/Seed/UIForia/Util.style" alias="util"/>
+    <Style path="Klang/Seed/UIForia/KlangButton/KlangButton.style" alias="klang-button"/>
+    
+    <Contents style="container">
+        
+        <ChildRouter onRouteChanged="{AnimateTransition()}">
+            
+            <Route>
+                
+                <CreateAccountContainer label="'Create Account'">
+
+                    <Group style="util.vertical-center">
+                        <!--<Input username.bindTo="onValueChanged" text="{$route.username}" style="create-input"/>-->
+                        <!--<Input password.bindTo="onValueChanged" text="{$route.password}" style="create-input"/>-->
+                    </Group>
+
+                    <RouterLink path="'/character_creator'"
+                                x-validators.username="'required, length > 3'"
+                                x-parameters.username="{username}"
+                                x-parameters.password="{password}">
+
+                        <KlangButton style="klang-button.black" label="'Next'"/>
+
+                    </RouterLink>
+
+                    <RouterLinkBack>
+                        Go Back
+                    </RouterLinkBack>
+                    
+                </CreateAccountContainer>
+                
+            </Route>
+            
+            <Route path="'/join_or_start_colony'">
+
+
+                <CreateAccountContainer label="'Create Account'">
+                    <KlangLinkButton style="klang-button.blue" label="'Join Existing Colony'" path="'/join_colony'"/>
+                    <Text>Recommended for new players</Text>
+                    <KlangLinkButton style="klang-button.black" label="'Start new Colony'" path="'/create_colony'"/>
+                </CreateAccountContainer>
+                
+            </Route>
+            
+            <Route path="'/join_colony'">
+                
+            </Route>
+            
+            <Route path="'/create_colony'">
+                
+            </Route>
+            
+            <Route path="'/character_creator'">
+                
+            </Route>
+            
+        </ChildRouter>
+        
+    </Contents>
+    
+</UITemplate>

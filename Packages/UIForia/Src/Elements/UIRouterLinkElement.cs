@@ -1,11 +1,13 @@
 using System;
 using System.Collections.Generic;
 using UIForia.Elements;
+using UIForia.Rendering;
 using UIForia.Util;
 using UnityEngine;
 
 namespace UIForia {
 
+    [TemplateTagName("RouterLink")]
     public class UIRouterLinkElement : UIContainerElement {
 
         public string path;
@@ -23,6 +25,26 @@ namespace UIForia {
             view.Application.Router.GoTo(path);
             
             ListPool<ElementAttribute>.Release(ref attrs);
+        }
+        
+    }
+    
+    [TemplateTagName("RouterLinkBack")]
+    public class UIRouterLinkBackElement : UIContainerElement {
+
+        public override void OnUpdate() {
+            bool canGoBack = view.Application.Router.CanGoBack;
+            if (canGoBack) {
+                style.ExitState(StyleState.Inactive);
+            }
+            else {
+                style.EnterState(StyleState.Inactive);
+            }
+        }
+        
+        [OnMouseDown]
+        public void GoBack() {
+            view.Application.Router.GoBack();
         }
         
     }

@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="utf-8"?>
+<UITemplate>
+
+    <Style path="Klang/Seed/UIForia/LoginFlow/CreateAccountScreen/CreateAccountScreen.style"/>
+    <Style path="Klang/Seed/UIForia/Util.style" alias="util"/>
+
+    <Contents style="container">
+
+        <Heading3 style="head">
+            {label}
+        </Heading3>
+        
+        <Group style="util.vertical-center">
+            <Children/>
+        </Group>
+        
+    </Contents>
+
+</UITemplate>

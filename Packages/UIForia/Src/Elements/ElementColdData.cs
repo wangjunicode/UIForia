@@ -18,7 +18,8 @@ public struct ElementColdData {
     public LightList<ElementAttribute> attributes;
     public UIChildrenElement transcludedChildren;
     public UIView view;
-
+    public IRouterElement nearestRouter;
+    
     private void InitializeAttributes() {
         if (attributes == null && templateRef?.attributes != null) {
             attributes = LightListPool<ElementAttribute>.Get();

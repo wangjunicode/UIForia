@@ -3,7 +3,9 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
 using JetBrains.Annotations;
+using UIForia.Compilers;
 using UIForia.Compilers.CastHandlers;
+using UIForia.Util;
 using UnityEngine;
 
 namespace UIForia {
@@ -15,6 +17,8 @@ namespace UIForia {
 
         public ContextDefinition context;
         private List<ICastHandler> userCastHandlers;
+        private LightList<ExpressionAliasResolver> expressionAliasResolvers;
+
 
         private static readonly ExpressionParser parser = new ExpressionParser();
 
@@ -70,6 +74,12 @@ namespace UIForia {
         [PublicAPI]
         public Expression<T> Compile<T>(string source) {
             return (Expression<T>) HandleCasting(typeof(T), Visit(parser.Parse(source)));
+        }
+
+        [PublicAPI]
+        public void AddExpressionResolver(ExpressionAliasResolver resolver) {
+            expressionAliasResolvers = expressionAliasResolvers ?? new LightList<ExpressionAliasResolver>(4);
+            expressionAliasResolvers.Add(resolver);
         }
 
         [PublicAPI]
@@ -242,17 +252,6 @@ namespace UIForia {
             return (Expression) ReflectionUtil.CreateGenericInstance(callType, ReflectionUtil.ObjectArray2);
         }
 
-        [Flags]
-        private enum MethodType {
-
-            Static = 1 << 0,
-            Instance = 1 << 1,
-            Void = 1 << 2,
-
-            InstanceVoid = Instance | Void,
-            StaticVoid = Static | Void
-
-        }
 
         private static Type GetMethodCallType(string methodName, int argumentCount, Type[] genericArguments, MethodType methodType) {
             switch (argumentCount) {
@@ -556,23 +555,25 @@ namespace UIForia {
                    || type == typeof(double);
         }
 
-        private enum AccessExpressionType {
-
-            Constant,
-            RootLookup,
-            StaticField,
-            StaticProperty,
-
-            AliasLookup
-
-        }
-
         private Expression VisitAccessExpression(AccessExpressionNode node) {
             string contextName = node.identifierNode.identifier;
             Type headType;
             object arg0 = contextName;
             AccessExpressionType expressionType = AccessExpressionType.AliasLookup;
             bool isStaticReferenceExpression = false;
+
+            if (contextName.StartsWith("$") && expressionAliasResolvers != null) {
+                for (int i = 0; i < expressionAliasResolvers.Count; i++) {
+                    if (contextName == expressionAliasResolvers[i].aliasName) {
+                        Expression retn = expressionAliasResolvers[i].Compile(context, node, Visit);
+                        if (retn == null) {
+                            throw new ParseException($"Resolver {expressionAliasResolvers[i]} failed to parse {contextName}");
+                        }
+
+                        return retn;
+                    }
+                }
+            }
 
             if (node.identifierNode is ExternalReferenceIdentifierNode) {
                 isStaticReferenceExpression = true;
@@ -736,7 +737,7 @@ namespace UIForia {
                         Type methodType = null;
                         Type targetType = headType;
                         AccessExpressionPart prev = parts[i - 1];
-                        
+
                         // todo -- use the array element type as the action/func type 
                         // todo -- this only supports actions right that have names
                         // todo -- we only support 1 level of dot right now, need to get type from parts list - 2 || head
@@ -748,7 +749,6 @@ namespace UIForia {
                         if (prev is AccessExpressionPart_Field) {
                             string fieldName = (prev as AccessExpressionPart_Field).fieldName;
                             methodType = ReflectionUtil.GetFieldType(targetType, fieldName);
-                            
                         }
                         else if (prev is AccessExpressionPart_Property) {
                             string propertyName = (prev as AccessExpressionPart_Property).propertyName;
@@ -759,7 +759,7 @@ namespace UIForia {
                             // todo fix this terrible error message
                             throw new Exception("Error parsing method access expression");
                         }
-                        
+
 
                         if (ReflectionUtil.IsAction(methodType)) {
                             parts[i] = CreateActionAccessPart(methodType, methodPart.signatureNode);
@@ -767,6 +767,7 @@ namespace UIForia {
                             if (i != partCount - 1) {
                                 throw new Exception("Encountered void return type but access chain continues");
                             }
+
                             break;
                         }
                         else {
@@ -960,12 +961,12 @@ namespace UIForia {
         }
 
         private static Expression VisitNumericLiteralNode(NumericLiteralNode node) {
-            if (node is FloatLiteralNode) {
-                return new ConstantExpression<float>(((FloatLiteralNode) node).value);
+            if (node is FloatLiteralNode literalNode) {
+                return new ConstantExpression<float>(literalNode.value);
             }
 
-            if (node is IntLiteralNode) {
-                return new ConstantExpression<int>(((IntLiteralNode) node).value);
+            if (node is IntLiteralNode intLiteralNode) {
+                return new ConstantExpression<int>(intLiteralNode.value);
             }
 
             return new ConstantExpression<double>(((DoubleLiteralNode) node).value);
@@ -1035,6 +1036,28 @@ namespace UIForia {
             ReflectionUtil.ObjectArray3[1] = left;
             ReflectionUtil.ObjectArray3[2] = right;
             return (Expression) ReflectionUtil.CreateGenericInstanceFromOpenType(openType, commonBase, ReflectionUtil.ObjectArray3);
+        }
+
+        [Flags]
+        private enum MethodType {
+
+            Static = 1 << 0,
+            Instance = 1 << 1,
+            Void = 1 << 2,
+
+            InstanceVoid = Instance | Void,
+            StaticVoid = Static | Void
+
+        }
+
+        private enum AccessExpressionType {
+
+            Constant,
+            RootLookup,
+            StaticField,
+            StaticProperty,
+            AliasLookup
+
         }
 
     }

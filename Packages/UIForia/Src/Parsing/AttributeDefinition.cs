@@ -1,4 +1,3 @@
-using System;
 using System.Diagnostics;
 
 namespace UIForia {
@@ -11,14 +10,10 @@ namespace UIForia {
         public readonly string value;
         public readonly bool isRealAttribute;
 
-        private static readonly string[] s_BuiltInAttributes = {
-            "x-if", "x-show"
-        };
-        
         public AttributeDefinition(string key, string value) {
             this.key = key.Trim();
             this.value = value.Trim();
-            this.isRealAttribute = key.StartsWith("x-") && Array.IndexOf(s_BuiltInAttributes, key) == -1;
+            this.isRealAttribute = key.StartsWith("x-");
         }
 
     }

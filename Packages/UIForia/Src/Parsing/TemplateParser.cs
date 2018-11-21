@@ -1,7 +1,6 @@
 using System;
 using System.Xml;
 using System.Collections.Generic;
-using System.Diagnostics;
 using System.Linq;
 using System.Xml.Linq;
 using UIForia.Style;
@@ -15,9 +14,9 @@ namespace UIForia {
 
         private static readonly Dictionary<Type, ParsedTemplate> parsedTemplates = new Dictionary<Type, ParsedTemplate>();
 
-        private static readonly string[] RepeatAttributes = {"x-if", "x-id", "list", "as", "filter", "onItemAdded", "onItemRemoved"};
+        private static readonly string[] RepeatAttributes = {"if", "x-id", "list", "as", "filter", "onItemAdded", "onItemRemoved"};
         private static readonly string[] CaseAttributes = {"when"};
-        private static readonly string[] SwitchAttributes = {"x-if", "value"};
+        private static readonly string[] SwitchAttributes = {"if", "value"};
         private static readonly string[] DefaultAttributes = { };
         private static readonly string[] ChildrenAttributes = { };
         private static readonly string[] TextAttributes = { };
@@ -257,7 +256,7 @@ namespace UIForia {
         }
 
         private static UITemplate ParseTemplateElement(XElement element) {
-            ProcessedType elementType = TypeProcessor.GetType(element.Name.LocalName);
+            ProcessedType elementType = TypeProcessor.GetTemplateType(element.Name.LocalName);
             if (typeof(UIContainerElement).IsAssignableFrom(elementType.rawType)) {
                 return new UIContainerTemplate(
                     elementType.rawType,
@@ -324,40 +323,40 @@ namespace UIForia {
             );
         }
 
-        private static UITemplate ParseRouterElement(XElement element) {
-            EnsureAttribute(element, "path");
-            // todo -- ensure path is a string & constant
-            return new UIRouterTemplate(
-                ParseNodes(element.Nodes()),
-                ParseAttributes(element.Attributes())
-            );
-        }
-        
-        private static UITemplate ParseRouterLinkElement(XElement element) {
-            EnsureAttribute(element, "path");
-            // todo -- ensure path is a string & constant
-            return new UIContainerTemplate(
-                typeof(UIRouterLinkElement),
-                ParseNodes(element.Nodes()),
-                ParseAttributes(element.Attributes())
-            );
-        }
-
-        private static UITemplate ParseUnmatchedRouteElement(XElement element) {
-            return new UIUnmatchedRouteTemplate(
-                ParseNodes(element.Nodes()),
-                ParseAttributes(element.Attributes())
-            );
-        }
-
-        private static UITemplate ParseRouteElement(XElement element) {
-            EnsureAttribute(element, "path");
-            // todo -- ensure path is a string & constant
-            return new UIRouteTemplate(
-                ParseNodes(element.Nodes()),
-                ParseAttributes(element.Attributes())
-            );
-        }
+//        private static UITemplate ParseRouterElement(XElement element) {
+//            EnsureAttribute(element, "path");
+//            // todo -- ensure path is a string & constant
+//            return new UIRouterTemplate(
+//                ParseNodes(element.Nodes()),
+//                ParseAttributes(element.Attributes())
+//            );
+//        }
+//        
+//        private static UITemplate ParseRouterLinkElement(XElement element) {
+//            EnsureAttribute(element, "path");
+//            // todo -- ensure path is a string & constant
+//            return new UIContainerTemplate(
+//                typeof(UIRouterLinkElement),
+//                ParseNodes(element.Nodes()),
+//                ParseAttributes(element.Attributes())
+//            );
+//        }
+//
+//        private static UITemplate ParseUnmatchedRouteElement(XElement element) {
+//            return new UIUnmatchedRouteTemplate(
+//                ParseNodes(element.Nodes()),
+//                ParseAttributes(element.Attributes())
+//            );
+//        }
+//
+//        private static UITemplate ParseRouteElement(XElement element) {
+//            EnsureAttribute(element, "path");
+//            // todo -- ensure path is a string & constant
+//            return new UIRouteTemplate(
+//                ParseNodes(element.Nodes()),
+//                ParseAttributes(element.Attributes())
+//            );
+//        }
 
         private static UITemplate ParseElement(XElement element) {
             if (element.Name == "Children") {
@@ -396,21 +395,21 @@ namespace UIForia {
                 return ParseInputElement(element);
             }
 
-            if (element.Name == "Router") {
-                return ParseRouterElement(element);
-            }
-
-            if (element.Name == "Route") {
-                return ParseRouteElement(element);
-            }
-
-            if (element.Name == "UnmatchedRoute") {
-                return ParseUnmatchedRouteElement(element);
-            }
-
-            if (element.Name == "RouterLink") {
-                return ParseRouterLinkElement(element);
-            }
+//            if (element.Name == "Router") {
+//                return ParseRouterElement(element);
+//            }
+//
+//            if (element.Name == "Route") {
+//                return ParseRouteElement(element);
+//            }
+//
+//            if (element.Name == "UnmatchedRoute") {
+//                return ParseUnmatchedRouteElement(element);
+//            }
+//
+//            if (element.Name == "RouterLink") {
+//                return ParseRouterLinkElement(element);
+//            }
             
             for (int i = 0; i < IntrinsicElementTypes.Length; i++) {
                 if (IntrinsicElementTypes[i].name == element.Name) {

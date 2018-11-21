@@ -85,7 +85,7 @@ namespace UIForia {
                     toMatch.matchProgress = -1;
                     return toMatch;
                 }
-                
+
                 char matchCurrent = toMatch.url[matchPtr];
 
                 if (current == matchCurrent) {

@@ -125,7 +125,7 @@ public class HierarchyView : TreeView {
         return needsReload;
     }
 
-    private string GetCullText(CullResult result) {
+    private static string GetCullText(CullResult result) {
         switch (result) {
             
             case CullResult.NotCulled:
@@ -178,14 +178,11 @@ public class HierarchyView : TreeView {
 
         RenderData renderData = Application.Game.RenderSystem.GetRenderData(item.element);
 
-        if (renderData != null && renderData.CullResult != CullResult.NotCulled) {
-            v = s_ElementNameStyle.CalcSize(s_Content);
-            r.x += v.x + 5f;
-            r.width -= v.x + 5f;
-            s_Content.text = GetCullText(renderData.CullResult);
-            textStyle.textColor = AdjustColor(Color.red, item.element);
-            GUI.Label(r, s_Content, s_ElementNameStyle);
-        }
+        v = s_ElementNameStyle.CalcSize(s_Content);
+        r.x += v.x + 5f;
+        r.width -= v.x + 5f;
+        
+        r = DrawAdditionalInfo(item.element, renderData, r);
         
         if (!isTemplateRoot) {
             return;
@@ -206,6 +203,55 @@ public class HierarchyView : TreeView {
                 needsReload = true;
             }
         }
+    }
+
+    private static Rect DrawAdditionalInfo(UIElement element, RenderData renderData, Rect rect) {
+
+        if (element is UITextElement textElement) {
+            if (textElement.text.Length != 0) {
+                if (textElement.text.Length <= 10) {
+                    s_Content.text = '"' + textElement.text + '"';
+                }
+                else {
+                    s_Content.text = '"' + textElement.text.Substring(0, 10) + "...\"";
+                }
+
+                s_ElementNameStyle.normal.textColor = AdjustColor(Color.white, element);
+                GUI.Label(rect, s_Content, s_ElementNameStyle);
+                Vector2 size = s_ElementNameStyle.CalcSize(s_Content);
+                rect.x += size.x;
+                rect.width -= size.x;
+            }
+        }
+        
+        if (element is RouteElement routeElement) {
+            s_Content.text = routeElement.path;
+            s_ElementNameStyle.normal.textColor = AdjustColor(new Color32(255, 113, 0, 255), element);
+            GUI.Label(rect, s_Content, s_ElementNameStyle);
+            Vector2 size = s_ElementNameStyle.CalcSize(s_Content);
+            rect.x += size.x;
+            rect.width -= size.x;
+        }
+        
+        if (element is RouterElement) {
+            s_Content.text = "url: " + element.view.Application.Router.CurrentUrl;
+            s_ElementNameStyle.normal.textColor = AdjustColor(new Color32(255, 113, 0, 255), element);
+            GUI.Label(rect, s_Content, s_ElementNameStyle);
+            Vector2 size = s_ElementNameStyle.CalcSize(s_Content);
+            rect.x += size.x;
+            rect.width -= size.x;
+        }
+
+        if (renderData != null && renderData.CullResult != CullResult.NotCulled) {
+            s_Content.text = GetCullText(renderData.CullResult);
+            s_ElementNameStyle.normal.textColor = AdjustColor(Color.red, element);
+            GUI.Label(rect, s_Content, s_ElementNameStyle);
+            Vector2 size = s_ElementNameStyle.CalcSize(s_Content);
+            rect.x += size.x;
+            rect.width -= size.x;
+        }
+        
+        return rect;
     }
 
     private static Color AdjustColor(Color color, UIElement element) {

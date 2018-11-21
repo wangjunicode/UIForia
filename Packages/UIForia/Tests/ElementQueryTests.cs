@@ -6,6 +6,7 @@ using UIForia;
 [TestFixture]
 public class ElementQueryTests {
 
+    [TemplateTagName("FindTestThing")]
     [Template(TemplateType.String, @"
         <UITemplate>
             <Contents>
@@ -33,6 +34,7 @@ public class ElementQueryTests {
 
     }
 
+    [TemplateTagName("FindTestThingScoped")]
     [Template(TemplateType.String, @"
         <UITemplate>
             <Contents>

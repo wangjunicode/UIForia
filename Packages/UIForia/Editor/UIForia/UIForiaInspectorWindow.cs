@@ -51,7 +51,7 @@ namespace UIForia.Editor {
         private int tab;
 
         public static readonly string[] s_TabNames = {
-            "Layout Result",
+            "Element",
             "Applied Styles",
             "Computed Style",
             "Settings"
@@ -343,7 +343,6 @@ namespace UIForia.Editor {
             }
         }
 
-
         private void DrawSettings() {
             bool newShowBaseLine = EditorGUILayout.Toggle("Show Text Baseline", showTextBaseline);
             bool newShowDescenderLine = EditorGUILayout.Toggle("Show Text Descender", showTextDescender);
@@ -417,7 +416,20 @@ namespace UIForia.Editor {
             DrawLabel(label, $"Width: {value.width}, Height: {value.height}");
         }
 
-        private void DrawLayoutResult() {
+        private void DrawAttributes(List<ElementAttribute> attributes) {
+            DrawLabel("Attributes", "");
+            EditorGUI.indentLevel++;
+            for (int i = 0; i < attributes.Count; i++) {
+                DrawLabel(attributes[i].name, attributes[i].value);
+            }
+            EditorGUI.indentLevel--;
+        }
+        
+        private void DrawElementInfo() {
+            List<ElementAttribute> attributes = selectedElement.GetAttributes();
+            if (attributes != null) {
+                DrawAttributes(attributes);
+            }
             GUI.enabled = true;
             LayoutResult layoutResult = selectedElement.layoutResult;
             float labelWidth = EditorGUIUtility.labelWidth;
@@ -426,7 +438,6 @@ namespace UIForia.Editor {
             Rect clipRect = layoutResult.clipRect;
             Rect contentRect = layoutResult.contentRect;
 
-//            EditorGUILayout.HelpBox("Overflowing Horizontal", MessageType.Warning, true);
             DrawVector2Value("Local Position", layoutResult.localPosition);
             DrawVector2Value("Screen Position", layoutResult.screenPosition);
             DrawVector2Value("Scale", layoutResult.scale);
@@ -553,7 +564,7 @@ namespace UIForia.Editor {
             scrollPosition = GUILayout.BeginScrollView(scrollPosition);
             switch (tab) {
                 case 0:
-                    DrawLayoutResult();
+                    DrawElementInfo();
                     break;
                 case 1:
                     DrawStyles();

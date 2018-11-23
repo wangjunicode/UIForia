@@ -15,26 +15,31 @@ namespace UIForia {
 
         public const string k_SpecialAttrPrefix = "x-";
 
+        protected int perFrameBindingCount;
+        protected int triggeredBindingCount;
+
+        public bool isCompiled;
+        
         public ushort id;
         public readonly List<UITemplate> childTemplates;
         public readonly List<AttributeDefinition> attributes;
 
-        public Binding[] bindings;
-        public Binding[] constantBindings;
-        public Binding[] enabledBindings;
+        public Binding[] perFrameBindings;
+        public Binding[] triggeredBindings;
 
-        public readonly List<UIStyleGroup> baseStyles;
-        public readonly List<StyleBinding> constantStyleBindings;
+        public UIStyleGroup[] baseStyles;
 
         public DragEventCreator[] dragEventCreators;
         public DragEventHandler[] dragEventHandlers;
         public MouseEventHandler[] mouseEventHandlers;
         public KeyboardEventHandler[] keyboardEventHandlers;
 
-        public List<Binding> bindingList;
         public List<ElementAttribute> templateAttributes;
 
         private static ushort s_IdGenerator;
+
+        protected static readonly LightList<Binding> s_BindingList = new LightList<Binding>();
+
         private static readonly StyleBindingCompiler styleCompiler = new StyleBindingCompiler(null);
         private static readonly InputBindingCompiler inputCompiler = new InputBindingCompiler(null);
         private static readonly PropertyBindingCompiler propCompiler = new PropertyBindingCompiler(null);
@@ -43,63 +48,94 @@ namespace UIForia {
             this.id = ++s_IdGenerator;
             this.childTemplates = childTemplates;
             this.attributes = attributes;
-
-            // todo -- remove allocations
-            this.baseStyles = new List<UIStyleGroup>();
-            this.bindingList = new List<Binding>();
-            this.constantStyleBindings = new List<StyleBinding>();
-
-            this.bindings = Binding.EmptyArray;
-            this.constantBindings = Binding.EmptyArray;
+            this.perFrameBindings = Binding.EmptyArray;
+            this.triggeredBindings = Binding.EmptyArray;
+            this.baseStyles = ArrayPool<UIStyleGroup>.Empty;
+            this.dragEventCreators = ArrayPool<DragEventCreator>.Empty;
+            this.dragEventHandlers = ArrayPool<DragEventHandler>.Empty;
+            this.mouseEventHandlers = ArrayPool<MouseEventHandler>.Empty;
+            this.keyboardEventHandlers = ArrayPool<KeyboardEventHandler>.Empty;
         }
 
         protected abstract Type elementType { get; }
 
         public abstract UIElement CreateScoped(TemplateScope inputScope);
 
-        public void CompileStyleBindings(ParsedTemplate template) {
+
+        public virtual void Compile(ParsedTemplate template) {
+            if(isCompiled) return;
+            isCompiled = true;
+            if (!(typeof(UIElement).IsAssignableFrom(elementType))) {
+                Debug.Log($"{elementType} must be a subclass of {typeof(UIElement)} in order to be used in templates");
+                return;
+            }
+            ResolveBaseStyles(template);
+            CompileStyleBindings(template);
+            CompileInputBindings(template);
+            CompilePropertyBindings(template);
+            ResolveActualAttributes();
+
+            int triggeredCount = 0;
+            int perFrameCount = 0;
+
+            for (int i = 0; i < s_BindingList.Count; i++) {
+                if (s_BindingList[i].IsTriggered) {
+                    triggeredCount++;
+                }
+                else {
+                    perFrameCount++;
+                }
+            }
+
+            if (triggeredCount > 0) {
+                triggeredBindings = new Binding[triggeredCount];
+            }
+
+            if (perFrameCount > 0) {
+                perFrameBindings = new Binding[perFrameCount];
+            }
+
+            perFrameCount = 0;
+            triggeredCount = 0;
+            
+            for (int i = 0; i < s_BindingList.Count; i++) {
+                if (s_BindingList[i].IsTriggered) {
+                    triggeredBindings[triggeredCount++] = s_BindingList[i];
+                }
+                else {
+                    // swap enabled binding to the front
+                    perFrameBindings[perFrameCount++] = s_BindingList[i];
+                    if (s_BindingList[i] is EnabledBinding) {
+                        Binding tmp = perFrameBindings[0];
+                        perFrameBindings[0] = s_BindingList[i];
+                        perFrameBindings[perFrameCount - 1] = tmp;
+                    }
+                }
+            }
+            
+            s_BindingList.Clear();
+
+        }
+
+        protected void CompileStyleBindings(ParsedTemplate template) {
             if (attributes == null || attributes.Count == 0) return;
 
             styleCompiler.SetContext(template.contextDefinition);
             for (int i = 0; i < attributes.Count; i++) {
                 AttributeDefinition attr = attributes[i];
                 StyleBinding binding = styleCompiler.Compile(attr);
-                if (binding == null) continue;
+
+                if (binding == null) {
+                    continue;
+                }
+
+                s_BindingList.Add(binding);
                 attr.isCompiled = true;
 
                 if (binding.IsConstant()) {
-                    constantStyleBindings.Add(binding);
-                }
-                else if (binding.IsOnce || binding.IsOnEnable) {
-                    if (enabledBindings == null) {
-                        enabledBindings = ArrayPool<Binding>.GetExactSize(1);
-                    }
-                    else {
-                        ArrayPool<Binding>.Resize(ref enabledBindings, enabledBindings.Length + 1);
-                    }
-
-                    enabledBindings[enabledBindings.Length - 1] = binding;
-                }
-                else {
-                    bindingList.Add(binding);
+                    binding.bindingType = BindingType.Constant;
                 }
             }
-        }
-
-        public virtual bool Compile(ParsedTemplate template) {
-            if (!(typeof(UIElement).IsAssignableFrom(elementType))) {
-                Debug.Log($"{elementType} must be a subclass of {typeof(UIElement)} in order to be used in templates");
-                return false;
-            }
-
-            ResolveBaseStyles(template);
-            CompileConditionalBindings(template);
-            CompileStyleBindings(template);
-            CompileInputBindings(template);
-            CompilePropertyBindings(template);
-            ResolveActualAttributes();
-            ResolveConstantBindings();
-            return true;
         }
 
         [PublicAPI]
@@ -129,21 +165,14 @@ namespace UIForia {
             }
         }
 
-        protected void AddConditionalBinding(Binding binding) {
-            if (binding.IsConstant()) {
-                bindingList.Add(binding);
-            }
-            else {
-                bindingList.Add(binding);
-            }
-        }
-
         protected void CompileInputBindings(ParsedTemplate template) {
             inputCompiler.SetContext(template.contextDefinition);
+
             List<MouseEventHandler> mouseHandlers = inputCompiler.CompileMouseEventHandlers(elementType, attributes);
             List<KeyboardEventHandler> keyboardHandlers = inputCompiler.CompileKeyboardEventHandlers(elementType, attributes);
             List<DragEventCreator> dragCreators = inputCompiler.CompileDragEventCreators(elementType, attributes);
             List<DragEventHandler> dragHandlers = inputCompiler.CompileDragEventHandlers(elementType, attributes);
+
             if (mouseHandlers != null) {
                 mouseEventHandlers = mouseHandlers.ToArray();
             }
@@ -161,15 +190,16 @@ namespace UIForia {
             }
         }
 
-
         protected void CompilePropertyBindings(ParsedTemplate template) {
             if (attributes == null || attributes.Count == 0) return;
 
             try {
-                propCompiler.SetContext(template.contextDefinition);
+                template.compiler.SetContext(template.contextDefinition);
+                propCompiler.SetCompiler(template.compiler);
 
                 for (int i = 0; i < attributes.Count; i++) {
                     if (attributes[i].isCompiled) continue;
+
                     if (attributes[i].key.StartsWith("x-") || attributes[i].key == "style") {
                         continue;
                     }
@@ -177,7 +207,7 @@ namespace UIForia {
                     attributes[i].isCompiled = true;
                     Binding binding = propCompiler.CompileAttribute(elementType, attributes[i]);
                     if (binding != null) {
-                        bindingList.Add(binding);
+                        s_BindingList.Add(binding);
                     }
                 }
             }
@@ -186,42 +216,36 @@ namespace UIForia {
             }
         }
 
-        protected void CompileConditionalBindings(ParsedTemplate template) {
-            AttributeDefinition ifDef = GetAttribute("if");
-
-            if (ifDef != null) {
-                Expression<bool> ifExpression = template.compiler.Compile<bool>(ifDef.value);
-                ifDef.isCompiled = true;
-                AddConditionalBinding(new EnabledBinding(ifExpression));
-            }
-        }
-
-        protected void ResolveConstantBindings() {
-            bindings = bindingList.Where((binding) => !binding.IsConstant()).ToArray();
-            constantBindings = bindingList.Where((binding) => binding.IsConstant()).ToArray();
-            bindingList = null;
-        }
-
         private void ResolveBaseStyles(ParsedTemplate template) {
             AttributeDefinition styleAttr = GetAttribute("style");
-            if (styleAttr == null) return;
+            if (styleAttr == null) {
+                return;
+            }
 
+            List<UIStyleGroup> list = ListPool<UIStyleGroup>.Get();
+            
             // todo -- handle + and - instead of space
             if (styleAttr.value.IndexOf(' ') != -1) {
                 string[] names = styleAttr.value.Split(' ');
                 foreach (string part in names) {
                     UIStyleGroup style = template.ResolveStyleGroup(part.Trim());
                     if (style != null) {
-                        baseStyles.Add(style);
+                        list.Add(style);
                     }
                 }
             }
             else {
                 UIStyleGroup style = template.ResolveStyleGroup(styleAttr.value);
                 if (style != null) {
-                    baseStyles.Add(style);
+                    list.Add(style);
                 }
             }
+
+            if (list.Count > 0) {
+                baseStyles = list.ToArray();
+            }
+            
+            ListPool<UIStyleGroup>.Release(ref list);
         }
 
         public static void AssignContext(UIElement element, UITemplateContext context) {
@@ -230,6 +254,7 @@ namespace UIForia {
             if (element.children == null) return;
 
             for (int i = 0; i < element.children.Length; i++) {
+
                 if (element.children[i].OriginTemplate is UIElementTemplate) {
                     element.children[i].TemplateContext = context;
                     continue;
@@ -241,24 +266,10 @@ namespace UIForia {
 
                 AssignContext(element.children[i], context);
             }
+            
         }
 
-        protected void AssignChildrenAndTemplate(TemplateScope scope, UIElement element) {
-            element.children = new UIElement[childTemplates.Count];
-
-            for (int i = 0; i < childTemplates.Count; i++) {
-                element.children[i] = childTemplates[i].CreateScoped(scope);
-                element.children[i].parent = element;
-                element.children[i].templateParent = element;
-            }
-
-            element.TemplateContext = scope.context;
-            element.OriginTemplate = this;
-        }
-
-        public bool HasAttribute(string name) {
-            return GetAttribute(name) != null;
-        }
+        public virtual void PostCompile(ParsedTemplate template) {}
 
     }
 

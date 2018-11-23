@@ -39,6 +39,7 @@ public class RouterTests {
     [Test]
     public void ParsesRouterWithSubRoutes() {
         MockApplication app = new MockApplication(typeof(ParsersRouterNestedThing));
+        app.Update();
         Assert.IsInstanceOf<RouterElement>(app.RootElement.GetChild(0));
         RouterElement router = (RouterElement) app.RootElement.GetChild(0);
         Assert.AreEqual("/options/:id", router.FindByType<RouteElement>()[0].path);
@@ -54,6 +55,7 @@ public class RouterTests {
         RouterElement router = (RouterElement) app.RootElement.GetChild(0);
         bool didEnter = false;
         router.onRouteEnter += () => { didEnter = true; };
+        app.Update();
         app.Router.GoTo("/options/1");
         Assert.IsTrue(didEnter);
         Assert.IsTrue(router.FindByType<RouteElement>()[0].isEnabled);
@@ -67,6 +69,7 @@ public class RouterTests {
         RouterElement router = (RouterElement) app.RootElement.GetChild(0);
         bool didExit = false;
         router.onRouteExit += () => { didExit = true; };
+        app.Update();
         app.Router.GoTo("/options/1");
         app.Router.GoTo("/options2/4");
         Assert.IsTrue(didExit);
@@ -79,6 +82,7 @@ public class RouterTests {
     public void MatchesUnmatchedRoute() {
         MockApplication app = new MockApplication(typeof(ParsersRouterNestedThing));
         RouterElement router = (RouterElement) app.RootElement.GetChild(0);
+        app.Update();
         app.Router.GoTo("/opt");
         Assert.IsTrue(router.FindByType<RouteElement>()[0].isDisabled);
         Assert.IsTrue(router.FindByType<RouteElement>()[1].isDisabled);
@@ -109,6 +113,7 @@ public class RouterTests {
     public void MatchChildRouter() {
         MockApplication app = new MockApplication(typeof(ParsersRouterChildNestedThing));
         RouterElement router = (RouterElement) app.RootElement.GetChild(0);
+        app.Update();
         app.Router.GoTo("/users/settings");
         ChildRouterElement childRouter = router.FindFirstByType<ChildRouterElement>();
 
@@ -121,6 +126,7 @@ public class RouterTests {
     public void UpdateChildRouter() {
         MockApplication app = new MockApplication(typeof(ParsersRouterChildNestedThing));
         RouterElement router = (RouterElement) app.RootElement.GetChild(0);
+        app.Update();
         app.Router.GoTo("/users/settings");
 
         ChildRouterElement childRouter = router.FindFirstByType<ChildRouterElement>();
@@ -145,6 +151,7 @@ public class RouterTests {
     public void ExitReEnterChildRouter() {
         MockApplication app = new MockApplication(typeof(ParsersRouterChildNestedThing));
         RouterElement router = (RouterElement) app.RootElement.GetChild(0);
+        app.Update();
         app.Router.GoTo("/users/settings");
 
         ChildRouterElement childRouter = router.FindFirstByType<ChildRouterElement>();
@@ -169,6 +176,7 @@ public class RouterTests {
     public void ChangeParameterChildRouter() {
         MockApplication app = new MockApplication(typeof(ParsersRouterChildNestedThing));
         RouterElement router = (RouterElement) app.RootElement.GetChild(0);
+        app.Update();
         app.Router.GoTo("/users/settings");
 
         ChildRouterElement childRouter = router.FindFirstByType<ChildRouterElement>();
@@ -191,6 +199,7 @@ public class RouterTests {
     public void ChildRouterOnRouteChanged() {
         MockApplication app = new MockApplication(typeof(ParsersRouterChildNestedThing));
         RouterElement router = (RouterElement) app.RootElement.GetChild(0);
+        app.Update();
 
         RouteElement current = null;
         int callCount = 0;
@@ -240,7 +249,7 @@ public class RouterTests {
     public void ChildRouterWithPath() {
         MockApplication app = new MockApplication(typeof(ParsersRouterChildWithPathNestedThing));
         RouterElement router = (RouterElement) app.RootElement.GetChild(0);
-//        app.Router.GoTo("/users");
+        app.Update();
         app.Router.GoTo("/users/extra/settings");
 
         ChildRouterElement childRouter = router.FindFirstByType<ChildRouterElement>();

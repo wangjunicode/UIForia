@@ -5,7 +5,7 @@ using UnityEngine;
 
 namespace UIForia.Util {
 
-    public class LightList<T> : IReadOnlyList<T> {
+    public class LightList<T> : IReadOnlyList<T>, IList<T> {
 
         private int size;
         private T[] list;
@@ -17,6 +17,8 @@ namespace UIForia.Util {
 
         public T[] List => list;
         public int Count => size;
+        public bool IsReadOnly => false;
+
         public int Length => size;
         public int Capacity => list.Length;
 
@@ -61,6 +63,12 @@ namespace UIForia.Util {
             return false;
         }
 
+        public void CopyTo(T[] array, int arrayIndex) {
+            for (int i = 0; i < size; i++) {
+                array[arrayIndex + i] = list[i];
+            }
+        }
+
         public bool Remove(T item) {
             for (int i = 0; i < size; i++) {
                 if (list[i].Equals(item)) {
@@ -93,6 +101,42 @@ namespace UIForia.Util {
             }
 
             list[index] = list[size - 1];
+        }
+
+        public void InsertRange(int index, IEnumerable<T> collection) {
+            if (collection == null) {
+                return;
+            }
+
+            if ((uint) index > (uint) size) {
+                throw new IndexOutOfRangeException();
+            }
+
+            if (collection is ICollection<T> objs) {
+                int count = objs.Count;
+                if (count > 0) {
+                    this.EnsureCapacity(size + count);
+                    if (index < size)
+                        Array.Copy(list, index, list, index + count, size - index);
+                    if (Equals(this, objs)) {
+                        Array.Copy(list, 0, list, index, index);
+                        Array.Copy(list, index + count, list, index * 2, size - index);
+                    }
+                    else {
+                        T[] array = ArrayPool<T>.GetExactSize(count);
+                        objs.CopyTo(array, 0);
+                        array.CopyTo(list, index);
+                        ArrayPool<T>.Release(ref array);
+                    }
+
+                    size += count;
+                }
+            }
+            else {
+                foreach (T obj in collection) {
+                    this.Insert(index++, obj);
+                }
+            }
         }
 
         public void RemoveAt(int index) {
@@ -189,14 +233,14 @@ namespace UIForia.Util {
         public int BinarySearch(T value) {
             return InternalBinarySearch(list, 0, size, value, Comparer<T>.Default);
         }
-        
+
         private static int InternalBinarySearch(T[] array, int index, int length, T value, IComparer<T> comparer) {
             int num1 = index;
             int num2 = index + length - 1;
             while (num1 <= num2) {
                 int index1 = num1 + (num2 - num1 >> 1);
                 int num3 = comparer.Compare(array[index1], value);
-                
+
                 if (num3 == 0) {
                     return index1;
                 }
@@ -223,177 +267,6 @@ namespace UIForia.Util {
             }
 
         }
-
-//        internal class ArraySortHelper<T> {
-//
-//            public void Sort(T[] keys, int index, int length, IComparer<T> comparer) {
-//                if (comparer == null)
-//                    comparer = (IComparer<T>) Comparer<T>.Default;
-//                ArraySortHelper<T>.IntrospectiveSort(keys, index, length, comparer);
-//            }
-//
-//            public int BinarySearch(T[] array, int index, int length, T value, IComparer<T> comparer) {
-//                try {
-//                    if (comparer == null)
-//                        comparer = (IComparer<T>) Comparer<T>.Default;
-//                    return ArraySortHelper<T>.InternalBinarySearch(array, index, length, value, comparer);
-//                }
-//                catch (Exception ex) {
-//                    throw new InvalidOperationException(Environment.GetResourceString("InvalidOperation_IComparerFailed"), ex);
-//                }
-//            }
-//
-//            internal static int InternalBinarySearch(T[] array, int index, int length, T value, IComparer<T> comparer) {
-//                int num1 = index;
-//                int num2 = index + length - 1;
-//                while (num1 <= num2) {
-//                    int index1 = num1 + (num2 - num1 >> 1);
-//                    int num3 = comparer.Compare(array[index1], value);
-//                    if (num3 == 0)
-//                        return index1;
-//                    if (num3 < 0)
-//                        num1 = index1 + 1;
-//                    else
-//                        num2 = index1 - 1;
-//                }
-//
-//                return ~num1;
-//            }
-//
-//            private static void SwapIfGreater(T[] keys, IComparer<T> comparer, int a, int b) {
-//                if (a == b || comparer.Compare(keys[a], keys[b]) <= 0)
-//                    return;
-//                T key = keys[a];
-//                keys[a] = keys[b];
-//                keys[b] = key;
-//            }
-//
-//            private static void Swap(T[] a, int i, int j) {
-//                if (i == j)
-//                    return;
-//                T obj = a[i];
-//                a[i] = a[j];
-//                a[j] = obj;
-//            }
-//
-//
-//            internal static void IntrospectiveSort(T[] keys, int left, int length, IComparer<T> comparer) {
-//                if (length < 2)
-//                    return;
-//                IntroSort(keys, left, length + left - 1, 2 * FloorLog2(keys.Length), comparer);
-//            }
-//
-//            internal static int FloorLog2(int n) {
-//                int num = 0;
-//                while (n >= 1) {
-//                    ++num;
-//                    n /= 2;
-//                }
-//
-//                return num;
-//            }
-//
-//            private static void IntroSort(T[] keys, int lo, int hi, int depthLimit, IComparer<T> comparer) {
-//                while (hi > lo) {
-//                    int partitionSize = hi - lo + 1;
-//                    if (partitionSize <= 16) {
-//                        if (partitionSize == 1) {
-//                            return;
-//                        }
-//
-//                        if (partitionSize == 2) {
-//                            SwapIfGreater(keys, comparer, lo, hi);
-//                            return;
-//                        }
-//
-//                        if (partitionSize == 3) {
-//                            SwapIfGreater(keys, comparer, lo, hi - 1);
-//                            SwapIfGreater(keys, comparer, lo, hi);
-//                            SwapIfGreater(keys, comparer, hi - 1, hi);
-//                            return;
-//                        }
-//
-//                        InsertionSort(keys, lo, hi, comparer);
-//                        return;
-//                    }
-//
-//                    if (depthLimit == 0) {
-//                        Heapsort(keys, lo, hi, comparer);
-//                        return;
-//                    }
-//
-//                    depthLimit--;
-//
-//                    int p = PickPivotAndPartition(keys, lo, hi, comparer);
-//                    // Note we've already partitioned around the pivot and do not have to move the pivot again.
-//                    IntroSort(keys, p + 1, hi, depthLimit, comparer);
-//                    hi = p - 1;
-//                }
-//            }
-//
-//            private static int PickPivotAndPartition(T[] keys, int lo, int hi, IComparer<T> comparer) {
-//                int index = lo + (hi - lo) / 2;
-//                ArraySortHelper<T>.SwapIfGreater(keys, comparer, lo, index);
-//                ArraySortHelper<T>.SwapIfGreater(keys, comparer, lo, hi);
-//                ArraySortHelper<T>.SwapIfGreater(keys, comparer, index, hi);
-//                T key = keys[index];
-//                ArraySortHelper<T>.Swap(keys, index, hi - 1);
-//                int i = lo;
-//                int j = hi - 1;
-//                while (i < j) {
-//                    do
-//                        ;
-//                    while (comparer.Compare(keys[++i], key) < 0);
-//                    do
-//                        ;
-//                    while (comparer.Compare(key, keys[--j]) < 0);
-//                    if (i < j)
-//                        ArraySortHelper<T>.Swap(keys, i, j);
-//                    else
-//                        break;
-//                }
-//
-//                ArraySortHelper<T>.Swap(keys, i, hi - 1);
-//                return i;
-//            }
-//
-//            private static void Heapsort(T[] keys, int lo, int hi, IComparer<T> comparer) {
-//                int n = hi - lo + 1;
-//                for (int i = n / 2; i >= 1; --i)
-//                    ArraySortHelper<T>.DownHeap(keys, i, n, lo, comparer);
-//                for (int index = n; index > 1; --index) {
-//                    ArraySortHelper<T>.Swap(keys, lo, lo + index - 1);
-//                    ArraySortHelper<T>.DownHeap(keys, 1, index - 1, lo, comparer);
-//                }
-//            }
-//
-//            private static void DownHeap(T[] keys, int i, int n, int lo, IComparer<T> comparer) {
-//                T key = keys[lo + i - 1];
-//                int num;
-//                for (; i <= n / 2; i = num) {
-//                    num = 2 * i;
-//                    if (num < n && comparer.Compare(keys[lo + num - 1], keys[lo + num]) < 0)
-//                        ++num;
-//                    if (comparer.Compare(key, keys[lo + num - 1]) < 0)
-//                        keys[lo + i - 1] = keys[lo + num - 1];
-//                    else
-//                        break;
-//                }
-//
-//                keys[lo + i - 1] = key;
-//            }
-//
-//            private static void InsertionSort(T[] keys, int lo, int hi, IComparer<T> comparer) {
-//                for (int index1 = lo; index1 < hi; ++index1) {
-//                    int index2 = index1;
-//                    T key;
-//                    for (key = keys[index1 + 1]; index2 >= lo && comparer.Compare(key, keys[index2]) < 0; --index2)
-//                        keys[index2 + 1] = keys[index2];
-//                    keys[index2 + 1] = key;
-//                }
-//            }
-//
-//        }
 
         public Enumerator GetEnumerator() {
             return new Enumerator(this);

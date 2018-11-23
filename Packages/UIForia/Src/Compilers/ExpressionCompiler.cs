@@ -79,8 +79,19 @@ namespace UIForia {
         [PublicAPI]
         public void AddExpressionResolver(ExpressionAliasResolver resolver) {
             expressionAliasResolvers = expressionAliasResolvers ?? new LightList<ExpressionAliasResolver>(4);
+            for (int i = 0; i < expressionAliasResolvers.Count; i++) {
+                if (expressionAliasResolvers[i].aliasName == resolver.aliasName) {
+                    throw new ParseException("Duplicate alias registered: " + resolver.aliasName);
+                }
+            }
             expressionAliasResolvers.Add(resolver);
         }
+
+        [PublicAPI]
+        public void RemoveExpressionResolver(ExpressionAliasResolver resolver) {
+            expressionAliasResolvers?.Remove(resolver);
+        }
+
 
         [PublicAPI]
         public void AddCastHandler(ICastHandler handler) {
@@ -336,6 +347,20 @@ namespace UIForia {
                 throw new Exception("Unable to resolve alias: " + node.alias);
             }
 
+            string contextName = node.alias;
+            if (contextName.StartsWith("$") && expressionAliasResolvers != null) {
+                for (int i = 0; i < expressionAliasResolvers.Count; i++) {
+                    if (contextName == expressionAliasResolvers[i].aliasName) {
+                        Expression retn = expressionAliasResolvers[i].Compile(context, node, Visit);
+                        if (retn == null) {
+                            throw new ParseException($"Resolver {expressionAliasResolvers[i]} failed to parse {contextName}");
+                        }
+
+                        return retn;
+                    }
+                }
+            }
+            
             return (Expression) ReflectionUtil.CreateGenericInstanceFromOpenType(
                 typeof(ResolveExpression_Alias<>),
                 aliasedType,

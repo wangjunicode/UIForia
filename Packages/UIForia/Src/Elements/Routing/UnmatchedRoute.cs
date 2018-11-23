@@ -2,10 +2,6 @@ namespace UIForia.Routing {
 
     public class UnmatchedRoute : RouteElement {
 
-        public override void OnCreate() {
-            base.OnCreate();
-        }
-
         public override bool TryMatch(RouteMatch match, out RouteMatch result) {
             result = RouteMatch.Match(path, match);
             result.matchProgress = result.url.Length - 1;

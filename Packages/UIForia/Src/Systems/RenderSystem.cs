@@ -1,6 +1,5 @@
 using System;
 using System.Collections.Generic;
-using Src.Rendering;
 using UIForia.Extensions;
 using UIForia.Elements;
 using UIForia.Rendering;
@@ -15,7 +14,6 @@ namespace UIForia.Systems {
         NotCulled,
         ClipRectIsZero,
         ActualSizeZero,
-
         OpacityZero
 
     }
@@ -68,9 +66,9 @@ namespace UIForia.Systems {
             for (int i = 0; i < m_ToInitialize.Count; i++) {
                 UIElement element = list[i];
 
-                if ((element.flags & UIElementFlags.RequiresRendering) == 0) {
+                if (element.isDisabled || (element.flags & UIElementFlags.RequiresRendering) == 0) {
                     continue;
-                }             
+                }
                 
                 m_RenderDataList.AddUnchecked(new RenderData(element));
             }
@@ -209,6 +207,10 @@ namespace UIForia.Systems {
             while (stack.Count > 0) {
                 UIElement current = stack.Pop();
 
+                if (current.isDisabled) {
+                    continue;
+                }
+                
                 m_ToInitialize.Add(current);
 
                 if (current.children != null) {
@@ -257,6 +259,10 @@ namespace UIForia.Systems {
 
         public void OnElementCreated(UIElement element) {
 
+            if (element.isDisabled) {
+                return;
+            }
+            
             m_ToInitialize.Add(element);
             if (element.children == null) {
                 return;

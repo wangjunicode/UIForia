@@ -11,6 +11,10 @@ namespace UI {
             view.Application.Router.GoTo("/login");
         }
 
+        public void AnimateTransition() {
+            Debug.Log("Click");
+        }
+
     }
 
 }

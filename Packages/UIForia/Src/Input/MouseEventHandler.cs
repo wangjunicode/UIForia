@@ -9,6 +9,8 @@ namespace UIForia.Input {
         public readonly InputEventType eventType;
         public readonly KeyboardModifiers requiredModifiers;
         public readonly EventPhase eventPhase;
+        public readonly UITemplateContext ctx;
+        
 #if DEBUG
         public MethodInfo methodInfo;
 #endif
@@ -52,7 +54,6 @@ namespace UIForia.Input {
         }
 
         public override void Invoke(object target, UITemplateContext context, MouseInputEvent evt) {
-            context.current = (IExpressionContextProvider) target;
             if (ShouldRun(evt)) {
                 expression.EvaluateTyped(context);
             }
@@ -70,7 +71,6 @@ namespace UIForia.Input {
         }
 
         public override void Invoke(object target, UITemplateContext context, MouseInputEvent evt) {
-            context.current = (IExpressionContextProvider) target;
             if (ShouldRun(evt)) {
                 handler((T) target);
             }
@@ -88,7 +88,6 @@ namespace UIForia.Input {
         }
 
         public override void Invoke(object target, UITemplateContext context, MouseInputEvent evt) {
-            context.current = (IExpressionContextProvider) target;
             if (ShouldRun(evt)) {
                 handler((T) target, evt);
             }

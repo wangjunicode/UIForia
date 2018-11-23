@@ -1,5 +1,7 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using UIForia.Rendering;
+using UIForia.Util;
 
 namespace UIForia.Systems {
 
@@ -9,12 +11,15 @@ namespace UIForia.Systems {
         private readonly List<BindingNode> repeatNodes;
         private readonly SkipTree<BindingNode> bindingSkipTree;
 
+        private readonly LightList<BindingNode> m_Nodes;
+
         private bool isTreeDirty;
 
         public BindingSystem() {
             this.isTreeDirty = true;
             this.repeatNodes = new List<BindingNode>();
             this.bindingSkipTree = new SkipTree<BindingNode>();
+            this.m_Nodes = new LightList<BindingNode>();
             this.bindingSkipTree.onTreeChanged += HandleTreeChanged;
         }
 
@@ -29,71 +34,9 @@ namespace UIForia.Systems {
         }
 
         public void OnUpdate() {
-            for (int i = 0; i < repeatNodes.Count; i++) {
-                repeatNodes[i].Validate();
+            for (int i = 0; i < m_Nodes.Count; i++) {
+                m_Nodes[i].OnUpdate();
             }
-
-            if (isTreeDirty) {
-                isTreeDirty = false;
-                bindingSkipTree.RecycleTree(treeRoot);
-                treeRoot = bindingSkipTree.GetTraversableTree();
-            }
-
-            if (treeRoot.children != null && treeRoot.children.Length > 0) {
-                for (int i = 0; i < treeRoot.children.Length; i++) {
-                    treeRoot.children[i].item?.OnUpdate(treeRoot.children[i].children);
-                }
-            }
-        }
-
-        public bool EnableBinding(UIElement element, string bindingId) {
-            BindingNode binding = bindingSkipTree.GetItem(element);
-            if (binding == null) return false;
-            for (int i = 0; i < binding.bindings.Length; i++) {
-                if (binding.bindings[i].bindingId == bindingId) {
-                    binding.bindings[i].isEnabled = true;
-                    return true;
-                }
-            }
-
-            return false;
-        }
-
-        public bool DisableBinding(UIElement element, string bindingId) {
-            BindingNode binding = bindingSkipTree.GetItem(element);
-            if (binding == null) return false;
-            for (int i = 0; i < binding.bindings.Length; i++) {
-                if (binding.bindings[i].bindingId == bindingId) {
-                    binding.bindings[i].isEnabled = false;
-                    return true;
-                }
-            }
-
-            return false;
-        }
-
-        public bool HasBinding(UIElement element, string bindingId) {
-            BindingNode binding = bindingSkipTree.GetItem(element);
-            if (binding == null) return false;
-            for (int i = 0; i < binding.bindings.Length; i++) {
-                if (binding.bindings[i].bindingId == bindingId) {
-                    return true;
-                }
-            }
-
-            return false;
-        }
-
-        public bool IsBindingEnabled(UIElement element, string bindingId) {
-            BindingNode binding = bindingSkipTree.GetItem(element);
-            if (binding == null) return false;
-            for (int i = 0; i < binding.bindings.Length; i++) {
-                if (binding.bindings[i].bindingId == bindingId) {
-                    return binding.bindings[i].isEnabled;
-                }
-            }
-
-            return false;
         }
 
         public void OnDestroy() {
@@ -105,59 +48,128 @@ namespace UIForia.Systems {
 
         public void OnViewRemoved(UIView view) { }
 
-        public void OnElementCreated(UIElement element) {
-            isTreeDirty = true;
+        private void Step(UIElement current, LightList<BindingNode> nodes) {
+            UITemplate template = current.OriginTemplate;
 
-            UITemplate template = element.OriginTemplate;
-            if (template.constantBindings.Length != 0) {
-                for (int i = 0; i < template.constantBindings.Length; i++) {
-                    template.constantBindings[i].Execute(element, element.TemplateContext);
+            for (int i = 0; i < template.triggeredBindings.Length; i++) {
+                if (template.triggeredBindings[i].bindingType == BindingType.Constant) {
+                    UITemplateContext context = template.triggeredBindings[i].useRootContext
+                        ? current.TemplateContext
+                        : new UITemplateContext(current.templateRoot);
+
+                    template.triggeredBindings[i].Execute(current, context);
                 }
             }
 
-            UIRepeatElement repeat = element as UIRepeatElement;
-            if (repeat != null) {
+            if (current is UIRepeatElement repeat) {
                 ReflectionUtil.TypeArray2[0] = repeat.listType;
                 ReflectionUtil.TypeArray2[1] = repeat.itemType;
 
-                ReflectionUtil.ObjectArray4[0] = repeat.listExpression;
-                ReflectionUtil.ObjectArray4[1] = repeat.itemAlias;
-                ReflectionUtil.ObjectArray4[2] = repeat.indexAlias;
-                ReflectionUtil.ObjectArray4[3] = repeat.lengthAlias;
+                ReflectionUtil.ObjectArray2[0] = repeat;
+                ReflectionUtil.ObjectArray2[1] = repeat.listExpression;
 
                 RepeatBindingNode node = (RepeatBindingNode) ReflectionUtil.CreateGenericInstanceFromOpenType(
                     typeof(RepeatBindingNode<,>),
                     ReflectionUtil.TypeArray2,
-                    ReflectionUtil.ObjectArray4
+                    ReflectionUtil.ObjectArray2
                 );
 
-                node.bindings = template.bindings;
-                node.element = element;
-                node.context = element.TemplateContext;
+                node.context = current.TemplateContext;
+                node.element = current;
                 node.template = repeat.template;
-                node.scope = repeat.scope;
-                repeatNodes.Add(node);
-                bindingSkipTree.AddItem(node);
+                
+                nodes.Add(node); // repeat spawns w/o children
             }
+            else {
+                if (template.perFrameBindings.Length > 0) {
+                    BindingNode node = new BindingNode();
+                    node.bindings = template.perFrameBindings;
+                    node.element = current;
+                    node.context = current.TemplateContext; // todo fix this
+                    nodes.Add(node);
+                }
 
-            if (repeat == null && template.bindings.Length > 0) {
-                BindingNode node = new BindingNode();
-                node.bindings = template.bindings;
-                node.element = element;
-                node.context = element.TemplateContext;
-                bindingSkipTree.AddItem(node);
-            }
-
-            if (element.children != null && element.children.Length > 0) {
-                for (int i = 0; i < element.children.Length; i++) {
-                    OnElementCreated(element.children[i]);
+                if (current.children != null) {
+                    for (int i = 0; i < current.children.Length; i++) {
+                        Step(current.children[i], nodes);
+                    }
                 }
             }
         }
 
+        // to disable, need to remove from list since we don't have tree culling
+        // or while(depth != currentDepth) ptr++
+        
+        // assumption, bindings are always active
+        // assumption, parent will always exist 
+        public void OnElementCreated(UIElement element) {
+            LightList<BindingNode> nodes = LightListPool<BindingNode>.Get();
+
+            Step(element, nodes);
+
+            // need to find where to insert the list of nodes
+            // obvious if repeat node parent
+            if (element.parent != null && element.parent is UIRepeatElement repeatElement) {
+                RepeatBindingNode bindingNode = m_Nodes.Find(repeatElement, (e, p) => e.element == p) as RepeatBindingNode;
+                if (bindingNode == null) {
+                    throw new Exception("Repeat parent not found");
+                }
+                bindingNode.AddChildNodes(nodes);
+                m_Nodes.Add(bindingNode);
+            }
+            else {
+                UIElement ptr = element.parent;
+                while (ptr != null) {
+                    int idx = m_Nodes.FindIndex(ptr, (e, p) => e.element == p);
+                    if (idx != -1) {
+                        m_Nodes.InsertRange(idx, nodes);
+                        break;
+                    }
+                    ptr = ptr.parent;
+                }
+
+                if (ptr == null) {
+                    m_Nodes.AddRange(nodes);
+                }
+                LightListPool<BindingNode>.Release(ref nodes);
+            }
+
+        }
+
         public void OnElementDestroyed(UIElement element) {
-            bindingSkipTree.RemoveHierarchy(element);
-            isTreeDirty = true;
+            if (element.parent is UIRepeatElement repeatElement) {
+                RepeatBindingNode bindingNode = m_Nodes.Find(repeatElement, (e, p) => e.element == p) as RepeatBindingNode;
+                if (bindingNode == null) {
+                    throw new Exception("Repeat parent not found");
+                }
+
+                bindingNode.RemoveNodes(element);
+            }
+            else {
+                UIElement ptr = element.parent;
+                while (ptr != null) {
+                    int idx = m_Nodes.FindIndex(ptr, (e, p) => e.element == p);
+                    if (idx != -1) {
+                        // remove while next binding depth < current depth
+                        // todo -- implement block array operations on light list instead of shifting down all the time
+                        int depth = element.depth;
+                        for (int i = idx + 1; i < m_Nodes.Count; i++) {
+                            int d = m_Nodes[i].element.depth;
+                            if (d >= depth) {
+                                break;
+                            }       
+                            m_Nodes.RemoveAt(idx + 1);
+                        }
+                        m_Nodes.RemoveAt(idx);
+                        break;
+                    }
+                    ptr = ptr.parent;
+                }
+
+//                if (ptr == null) {
+//                    m_Nodes.AddRange(nodes);
+//                }
+            }
         }
 
         public void OnElementEnabled(UIElement element) { }

@@ -14,3 +14,12 @@ style create-input {
 style head {
     TextFontSize = 32;
 }
+
+style fade-panel {
+    LayoutBehavior = ignored;
+    BackgroundColor = black;
+    PreferredSize = 1vw, 1vh;
+    AnchorTarget = Screen;
+    TransformBehaviorX = AnchorMinOffset;
+    TransformBehaviorY = AnchorMinOffset;
+}

@@ -7,40 +7,46 @@
     <Style>
 
         style container {
-            PreferredSize = 100vw, 100vh;
-            BackgroundColor = Red;
+        PreferredSize = 100vw, 100vh;
+        BackgroundColor = Red;
         }
-        
+
         style app-body {
-            FlexLayoutMainAxisAlignment = Center;
-            FlexLayoutCrossAxisAlignment = Center;
-            FlexItemSelfAlignment = Center;
+        FlexLayoutMainAxisAlignment = Center;
+        FlexLayoutCrossAxisAlignment = Center;
+        FlexItemSelfAlignment = Center;
         }
 
     </Style>
 
     <Contents style="container">
 
-        <URLNavBar/>
-        <Group style="app-body">
+        <CreateAccountContainer label="'Create Account'">
+            <KlangButton onMouseDown="{AnimateTransition()}" style="klang-button.black" label="'Next'"/>
+        </CreateAccountContainer>
+        
+        <KlangButton onMouseDown="{AnimateTransition()}" style="klang-button.black" label="'Next'"/>
 
-            <Router>
-                
-                <Route path="'/login'">
+        <!--<URLNavBar/>-->
+        <!--<Group style="app-body">-->
 
-                    <LoginScreen/>
+            <!--<Router>-->
 
-                </Route>
+                <!--<Route path="'/login'">-->
 
-                <Route path="'/create_account'">
+                    <!--<LoginScreen/>-->
 
-                    <CreateAccountScreen/>
+                <!--</Route>-->
 
-                </Route>
+                <!--<Route path="'/create_account'">-->
 
-            </Router>
+                    <!--<CreateAccountScreen/>-->
 
-        </Group>
+                <!--</Route>-->
+
+            <!--</Router>-->
+
+        <!--</Group>-->
 
     </Contents>
 

@@ -15,11 +15,12 @@ namespace UIForia.Compilers {
         private static readonly Dictionary<Type, List<IAliasSource>> aliasMap = new Dictionary<Type, List<IAliasSource>>();
 
         public static readonly string EvtArgDefaultName = "$event";
-        
+
         private static readonly Dictionary<Type, Dictionary<string, LightList<object>>> m_TypeMap = new Dictionary<Type, Dictionary<string, LightList<object>>>();
 
         public const string k_BindTo = "bindTo";
         public const string k_Once = "once";
+        public const string k_Initialize = "initialize";
 
         public static readonly string[] EvtArgNames = {
             "$eventArg0",
@@ -28,7 +29,7 @@ namespace UIForia.Compilers {
             "$eventArg3"
         };
 
-        private readonly ExpressionCompiler compiler;
+        private ExpressionCompiler compiler;
 
         public PropertyBindingCompiler(ContextDefinition context) {
             this.compiler = new ExpressionCompiler(context);
@@ -41,9 +42,13 @@ namespace UIForia.Compilers {
             AddTypedAliasSource(typeof(Color), new MethodAliasSource("rgba", ColorAliasSource.ColorConstructorAlpha));
         }
 
-        public void SetContext(ContextDefinition context) {
-            this.compiler.SetContext(context);
+        public void SetCompiler(ExpressionCompiler compiler) {
+            this.compiler = compiler;
         }
+        
+//        public void SetContext(ContextDefinition context) {
+//            this.compiler.SetContext(context);
+//        }
 
         public static void AddTypedAliasSource(Type type, IAliasSource aliasSource) {
             if (type == null || aliasSource == null) return;
@@ -151,19 +156,31 @@ namespace UIForia.Compilers {
                 string[] parts = attrKey.Split('.');
                 string property = parts[0];
                 string modifier = parts[1];
-                if (modifier == k_BindTo) {
-                    return CompileBoundProperty(compiler.context.rootType, targetType, property, attrValue);
-                }
-
-                if (modifier == k_Once) {
-                    Binding binding = CompileBinding(targetType, property, attrValue);
-                    if (binding == null) {
-                        return null;
-                    }
-
-                    binding.bindingType = BindingType.Once;
-                }
                 
+                switch (modifier) {
+                    case k_BindTo:
+                        return CompileBoundProperty(compiler.context.rootType, targetType, property, attrValue);
+                
+                    case k_Initialize: {
+                        Binding binding = CompileBinding(targetType, property, attrValue);
+                        if (binding == null) {
+                            return null;
+                        }
+
+                        binding.bindingType = BindingType.OnEnable;
+                        return binding;
+                    }
+                    case k_Once: {
+                        Binding binding = CompileBinding(targetType, property, attrValue);
+                        if (binding == null) {
+                            return null;
+                        }
+
+                        binding.bindingType = BindingType.Once;
+                        return binding;
+                    }
+                }
+
                 if (property == "style") return null;
 
                 throw new ParseException($"Unsupported attribute binding extension: '{attrKey}'");
@@ -173,7 +190,6 @@ namespace UIForia.Compilers {
         }
 
         private Binding CompileBinding(Type targetType, string attrKey, string attrValue) {
-            
             FieldInfo fieldInfo = ReflectionUtil.GetFieldInfo(targetType, attrKey);
 
             if (fieldInfo != null) {
@@ -183,6 +199,11 @@ namespace UIForia.Compilers {
             PropertyInfo propertyInfo = ReflectionUtil.GetPropertyInfo(targetType, attrKey);
             if (propertyInfo != null) {
                 return CompilePropertyAttribute(propertyInfo, targetType, attrKey, attrValue);
+            }
+
+            if (attrKey == "if") {
+                Expression<bool> ifExpression = compiler.Compile<bool>(attrValue);
+                return new EnabledBinding(ifExpression);
             }
             
             throw new ParseException(attrKey + " is a not a field or property on type " + targetType);
@@ -216,9 +237,9 @@ namespace UIForia.Compilers {
             }
 
             Dictionary<string, LightList<object>> actionMap = GetActionMap(targetType);
-            
+
             // todo -- with callbacks
-            
+
             ReflectionUtil.ObjectArray4[0] = attrKey;
             ReflectionUtil.ObjectArray4[1] = expression;
             ReflectionUtil.ObjectArray4[2] = accessor.fieldGetter;
@@ -229,7 +250,7 @@ namespace UIForia.Compilers {
                 ReflectionUtil.ObjectArray4
             );
         }
-        
+
 
         private Binding CompileFieldAttribute(FieldInfo fieldInfo, Type targetType, string attrKey, string attrValue) {
             List<IAliasSource> aliasSources = aliasMap.GetOrDefault(fieldInfo.FieldType);
@@ -395,6 +416,8 @@ namespace UIForia.Compilers {
 
             throw new Exception("Can't handle callbacks with more than four parameters");
         }
+
+  
 
     }
 

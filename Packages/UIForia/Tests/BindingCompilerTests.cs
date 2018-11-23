@@ -31,7 +31,7 @@ public class BindingCompilerTests {
         FakeElement childElement = new FakeElement();
         UITemplateContext ctx = new UITemplateContext(null);
 
-        ctx.rootElement = rootElement;
+        ctx.rootObject = rootElement;
 
         AttributeDefinition attrDef = new AttributeDefinition("onSomeEventArg0", "{HandleSomeEventArg0()}");
 
@@ -55,7 +55,7 @@ public class BindingCompilerTests {
         FakeElement childElement = new FakeElement();
         UITemplateContext ctx = new UITemplateContext(null);
 
-        ctx.rootElement = rootElement;
+        ctx.rootObject = rootElement;
 
         AttributeDefinition attrDef = new AttributeDefinition("onSomeEventArg1", "{HandleSomeEventArg1($eventArg0)}");
 
@@ -79,7 +79,7 @@ public class BindingCompilerTests {
         FakeElement childElement = new FakeElement();
         UITemplateContext ctx = new UITemplateContext(null);
 
-        ctx.rootElement = rootElement;
+        ctx.rootObject = rootElement;
 
         AttributeDefinition attrDef = new AttributeDefinition("onSomeEventArg2", "{HandleSomeEventArg2($eventArg0, $eventArg1)}");
 
@@ -103,7 +103,7 @@ public class BindingCompilerTests {
         FakeElement childElement = new FakeElement();
         UITemplateContext ctx = new UITemplateContext(null);
 
-        ctx.rootElement = rootElement;
+        ctx.rootObject = rootElement;
 
         AttributeDefinition attrDef = new AttributeDefinition("onSomeEventArg3", "{HandleSomeEventArg3($eventArg0, $eventArg1, $eventArg2)}");
 
@@ -127,7 +127,7 @@ public class BindingCompilerTests {
         FakeElement childElement = new FakeElement();
         UITemplateContext ctx = new UITemplateContext(null);
 
-        ctx.rootElement = rootElement;
+        ctx.rootObject = rootElement;
 
         AttributeDefinition attrDef = new AttributeDefinition("onSomeEventArg4", "{HandleSomeEventArg4($eventArg0, $eventArg1, $eventArg2, $eventArg3)}");
 

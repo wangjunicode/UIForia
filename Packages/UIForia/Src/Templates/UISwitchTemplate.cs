@@ -19,7 +19,7 @@ namespace UIForia {
             throw new NotImplementedException();
         }
 
-        public override bool Compile(ParsedTemplate template) {
+        public override void Compile(ParsedTemplate template) {
             throw new NotImplementedException();
 //            id = ParsedTemplate.MakeId();
 //            AttributeDefinition valueAttr = GetAttribute(SwitchValueAttribute);
@@ -70,7 +70,7 @@ namespace UIForia {
                 throw new Exception("All switch case elements need to have compile-time constant unique values");
             }
 
-            AddConditionalBinding(new SwitchBindingInt(id, values, valueExpression));
+            //AddConditionalBinding(new SwitchBindingInt(id, values, valueExpression));
         }
 
         private int GetValueCount() {

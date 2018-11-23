@@ -1,12 +1,19 @@
+using JetBrains.Annotations;
 using UIForia;
 using UIForia.Elements;
 
 namespace UI {
 
+    public class OptionalPropAttribute : System.Attribute {}
+    public class RequiredPropAttribute : System.Attribute {}
+
     [Template("Klang/Seed/UIForia/KlangButton/KlangButton.xml")]
     public class KlangButton : UIElement {
 
         public string path;
+        
+        [RequiredProp]
+        [OptionalProp]
         private string _label;
         private UITextElement textElement;
         

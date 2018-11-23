@@ -22,7 +22,7 @@ namespace UIForia {
 
         public string RawText { get; }
 
-        public override bool Compile(ParsedTemplate template) {
+        public override void Compile(ParsedTemplate template) {
             // todo -- if part is constant and value is empty string, remove it
             string[] expressionParts = textParser.Parse(RawText);
 
@@ -41,42 +41,25 @@ namespace UIForia {
             // todo    because we need to have access to the element and an expression context
 
             if (expressionList.Count == 1) {
-                bindingList.Add(new TextBinding_Single(expressionList[0]));
+                Binding binding = new TextBinding_Single(expressionList[0]);
+                if (binding.IsConstant()) {
+                    binding.bindingType = BindingType.Constant;
+                }
+                s_BindingList.Add(binding);
             }
             else if (expressionList.Count > 1) {
-                bindingList.Add(new TextBinding_Multiple(expressionList.ToArray()));
+                Binding binding = new TextBinding_Multiple(expressionList.ToArray());
+                if (binding.IsConstant()) {
+                    binding.bindingType = BindingType.Constant;
+                }
+                s_BindingList.Add(binding);
             }
 
             ListPool<Expression<string>>.Release(ref expressionList);
 
             // todo -- might ask template root for the style for element and default to DefaultIntrinsicStyles if not provided
 
-//            if (textElementType == typeof(UILabelElement)) {
-//                baseStyles.Add(DefaultIntrinsicStyles.LabelStyle);
-//            }
-//            else if (textElementType == typeof(UIParagraphElement)) {
-//                baseStyles.Add(DefaultIntrinsicStyles.ParagraphStyle);
-//            }
-//            else if (textElementType == typeof(UIHeading1Element)) {
-//                baseStyles.Add(DefaultIntrinsicStyles.Heading1Style);
-//            }
-//            else if (textElementType == typeof(UIHeading2Element)) {
-//                baseStyles.Add(DefaultIntrinsicStyles.Heading2Style);
-//            }
-//            else if (textElementType == typeof(UIHeading3Element)) {
-//                baseStyles.Add(DefaultIntrinsicStyles.Heading3Style);
-//            }
-//            else if (textElementType == typeof(UIHeading4Element)) {
-//                baseStyles.Add(DefaultIntrinsicStyles.Heading4Style);
-//            }
-//            else if (textElementType == typeof(UIHeading5Element)) {
-//                baseStyles.Add(DefaultIntrinsicStyles.Heading5Style);
-//            }
-//            else if (textElementType == typeof(UIHeading6Element)) {
-//                baseStyles.Add(DefaultIntrinsicStyles.Heading6Style);
-//            }
-
-            return base.Compile(template);
+            base.Compile(template);
         }
 
         protected override Type elementType => typeof(UITextElement);

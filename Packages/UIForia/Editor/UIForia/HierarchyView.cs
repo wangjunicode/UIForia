@@ -208,7 +208,7 @@ public class HierarchyView : TreeView {
     private static Rect DrawAdditionalInfo(UIElement element, RenderData renderData, Rect rect) {
 
         if (element is UITextElement textElement) {
-            if (textElement.text.Length != 0) {
+            if (!string.IsNullOrEmpty(textElement.text)) {
                 if (textElement.text.Length <= 10) {
                     s_Content.text = '"' + textElement.text + '"';
                 }

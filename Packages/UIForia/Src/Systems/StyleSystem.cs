@@ -41,24 +41,18 @@ namespace UIForia.Systems {
                 ((UITextElement) element).onTextChanged += HandleTextChanged;
             }
 
-            UITemplateContext context = element.TemplateContext;
-            List<UIStyleGroup> baseStyles = element.OriginTemplate.baseStyles;
-            List<StyleBinding> constantStyleBindings = element.OriginTemplate.constantStyleBindings;
+            UIStyleGroup[] baseStyles = element.OriginTemplate.baseStyles;
 
             element.style.styleSystem = this;
 
             // todo -- push to style buffer & apply later on first run
-            for (int i = 0; i < constantStyleBindings.Count; i++) {
-                constantStyleBindings[i].Apply(element.style, context);
-            }
 
-            for (int i = 0; i < baseStyles.Count; i++) {
+            for (int i = 0; i < baseStyles.Length; i++) {
                 element.style.AddStyleGroup(baseStyles[i]);
             }
 
             element.style.Initialize();
 
-            var x = element.style.PreferredWidth;
             if (element.children != null) {
                 for (int i = 0; i < element.children.Length; i++) {
                     OnElementCreated(element.children[i]);

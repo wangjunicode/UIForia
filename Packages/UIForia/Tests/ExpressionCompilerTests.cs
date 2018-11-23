@@ -21,7 +21,7 @@ public class ExpressionCompilerTests {
 
     private class EmptyTarget { }
 
-    private class TestRoot : IExpressionContextProvider {
+    private class TestRoot {
 
         public float value;
         public string stringVal;
@@ -132,7 +132,6 @@ public class ExpressionCompilerTests {
         }
 
         public int UniqueId => 0;
-        public IExpressionContextProvider ExpressionParent => null;
 
     }
 
@@ -365,7 +364,7 @@ public class ExpressionCompilerTests {
 
         ExpressionContext ctx = new ExpressionContext(target);
 
-        ctx.SetContextValue(target, "$item", target.valueContainer);
+       //  ctx.SetContextValue(target, "$item", target.valueContainer);
 
         testContextDef.AddRuntimeAlias("$item", typeof(ValueContainer));
 
@@ -385,7 +384,7 @@ public class ExpressionCompilerTests {
         target.someArray.Add(111);
         ExpressionContext ctx = new ExpressionContext(target);
         testContextDef.AddRuntimeAlias("$i", typeof(int));
-        ctx.SetContextValue(target, "$i", 2);
+        // ctx.SetContextValue(target, "$i", 2);
 
         ExpressionParser parser = new ExpressionParser("{someArray[$i]}");
         ExpressionCompiler compiler = new ExpressionCompiler(testContextDef);
@@ -403,7 +402,7 @@ public class ExpressionCompilerTests {
         target.someArray.Add(111);
         ExpressionContext ctx = new ExpressionContext(target);
         testContextDef.AddRuntimeAlias("$i", typeof(int));
-        ctx.SetContextValue(target, "$i", 2);
+        // ctx.SetContextValue(target, "$i", 2);
 
         ExpressionParser parser = new ExpressionParser("{someArray[$i - 1]}");
         ExpressionCompiler compiler = new ExpressionCompiler(testContextDef);

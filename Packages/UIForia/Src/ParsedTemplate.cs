@@ -75,12 +75,16 @@ namespace UIForia {
 
         private void CompileStep(UITemplate template) {
             m_TemplateMap[template.id] = template;
+            
             template.Compile(this);
+            
             if (template.childTemplates != null) {
                 for (int i = 0; i < template.childTemplates.Count; i++) {
                     CompileStep(template.childTemplates[i]);
                 }
             }
+
+            template.PostCompile(this);
         }
 
         public UIStyleGroup ResolveStyleGroup(string styleName) {

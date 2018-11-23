@@ -17,10 +17,6 @@ namespace UIForia {
             throw new NotImplementedException();
         }
 
-        public override bool Compile(ParsedTemplate template) {
-            AddConditionalBinding(new SwitchCaseBinding(switchId, index));
-            return base.Compile(template);
-        }
 
     }
 

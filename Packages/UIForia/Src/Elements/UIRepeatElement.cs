@@ -1,15 +1,16 @@
 using System;
+using System.Collections.Generic;
 
 namespace UIForia {
 
-    public class UIRepeatElement : UIElement {
+    public interface IRequireBindingSetup {
+
+    }
+
+    public abstract class UIRepeatElement : UIElement {
         
-        public event Action onListPopulated;
-        public event Action onListEmptied;
-
-        internal readonly UITemplate template;
-        internal readonly TemplateScope scope;
-
+        internal bool listBecamePopulated;
+        internal bool listBecameEmpty;
         internal Expression listExpression;
 
         internal Type listType;
@@ -17,17 +18,12 @@ namespace UIForia {
         internal string itemAlias;
         internal string indexAlias;
         internal string lengthAlias;
-
-        internal bool listBecamePopulated;
-        internal bool listBecameEmpty;
+        internal UITemplate template;
+        internal TemplateScope scope;
+        internal int currentIndex;
         
-
-        public UIRepeatElement(UITemplate template, TemplateScope scope) {
-            this.template = template;
-            this.scope = scope;
-            flags &= ~(UIElementFlags.RequiresLayout | UIElementFlags.RequiresRendering);
-        }
-
+        public event Action onListPopulated;
+        public event Action onListEmptied;
 
         public override void OnUpdate() {
             if (listBecamePopulated) {
@@ -41,38 +37,43 @@ namespace UIForia {
             }
         }
 
-        public override string GetDisplayName() {
-            return "Repeat";
-        }
-
         public override void OnDestroy() {
             onListEmptied = null;
             onListPopulated = null;
         }
 
+        public abstract void Next();
+        public abstract void Reset();
+
     }
 
-//    public class ObservableList<T> {
-//
-//        private int size;
-//        private T[] list;
-//
-//        public int Count => size;
-//        
-//        public event Action<T> onItemAdded;
-//        public event Action<T> onItemMoved;
-//        public event Action<T> onItemRemoved;
-//
-//        public void Insert(int index, T item) {
-//            
-//        }
-//
-//        public T this[int index] {
-//            get { return list[index]; }
-//            set {
-//                list[index] = value;
-//            }
-//        }
-//        
-//    }
+    public class UIRepeatElement<T> : UIRepeatElement, IRequireBindingSetup {
+
+        internal T currentItem;
+        internal IList<T> list;
+        
+        public UIRepeatElement(UITemplate template, TemplateScope scope) {
+            this.template = template;
+            this.scope = scope;
+            this.currentIndex = -1;
+            flags &= ~(UIElementFlags.RequiresLayout | UIElementFlags.RequiresRendering);
+        }
+        
+        public override void Next() {
+            currentItem = list[++currentIndex];
+        }
+
+        public override void Reset() {
+            currentItem = default;
+            currentIndex = -1;
+        }
+
+        public override string GetDisplayName() {
+            return "Repeat";
+        }
+
+
+
+    }
+
 }

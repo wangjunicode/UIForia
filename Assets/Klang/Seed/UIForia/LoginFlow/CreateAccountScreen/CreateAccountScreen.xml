@@ -10,34 +10,7 @@
         
         <ChildRouter onRouteChanged="{AnimateTransition()}">
             
-            <Route>
-                
-                <CreateAccountContainer label="'Create Account'">
-
-                    <Group style="util.vertical-center">
-                        <!--<Input username.bindTo="onValueChanged" text="{$route.username}" style="create-input"/>-->
-                        <!--<Input password.bindTo="onValueChanged" text="{$route.password}" style="create-input"/>-->
-                    </Group>
-
-                    <RouterLink path="'/character_creator'"
-                                x-validators.username="'required, length > 3'"
-                                x-parameters.username="{username}"
-                                x-parameters.password="{password}">
-
-                        <KlangButton style="klang-button.black" label="'Next'"/>
-
-                    </RouterLink>
-
-                    <RouterLinkBack>
-                        Go Back
-                    </RouterLinkBack>
-                    
-                </CreateAccountContainer>
-                
-            </Route>
-            
             <Route path="'/join_or_start_colony'">
-
 
                 <CreateAccountContainer label="'Create Account'">
                     <KlangLinkButton style="klang-button.blue" label="'Join Existing Colony'" path="'/join_colony'"/>
@@ -58,8 +31,36 @@
             <Route path="'/character_creator'">
                 
             </Route>
+
+            <UnmatchedRoute>
+
+                <CreateAccountContainer label="'Create Account'">
+
+                    <Group style="util.vertical-center">
+                        <Input username.bindTo="onValueChanged" text.initialize="{$route.param.username}" style="create-input"/>
+                        <Input password.bindTo="onValueChanged" text.initialize="{$route.param.password}" style="create-input"/>
+                    </Group>
+
+                    <!--<RouterLink path="'/create_account/join_or_start_colony'"-->
+                                <!--x-validators.username="'required, length > 3'"-->
+                                <!--x-query.username="{username}"-->
+                                <!--x-query.password="{password}">-->
+
+                        <KlangButton onMouseDown="{AnimateTransition()}" style="klang-button.black" label="'Next'"/>
+
+                    <!--</RouterLink>-->
+
+                    <RouterLinkBack>
+                        Go Back
+                    </RouterLinkBack>
+
+                </CreateAccountContainer>
+
+            </UnmatchedRoute>
             
         </ChildRouter>
+        
+        <Panel style="fade-panel" x-id="fader"/>
         
     </Contents>
     

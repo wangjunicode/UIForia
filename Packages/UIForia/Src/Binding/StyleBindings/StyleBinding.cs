@@ -10,6 +10,7 @@ namespace UIForia.StyleBindings {
             this.state = state;
         }
 
+
         public virtual bool ShouldExecute(UIElement element) {
             return element.style.IsInState(state);
         }

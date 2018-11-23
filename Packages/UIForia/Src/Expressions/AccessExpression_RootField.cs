@@ -12,13 +12,13 @@ namespace UIForia {
         }
 
         public override T EvaluateTyped(ExpressionContext context) {
-            return (T)cachedFieldInfo.GetValue(context.rootContext);
+            return (T)cachedFieldInfo.GetValue(context.rootObject);
         }
 
         public override Type YieldedType => cachedFieldInfo.FieldType;
 
         public override object Evaluate(ExpressionContext context) {
-            return cachedFieldInfo.GetValue(context.rootContext);
+            return cachedFieldInfo.GetValue(context.rootObject);
         }
 
         public override bool IsConstant() {
@@ -37,14 +37,14 @@ namespace UIForia {
         }
 
         public override T EvaluateTyped(ExpressionContext context) {
-            // return ReflectionUtil.GetValue<U,T>(accessor, context.rootContext);
-            return (T)cachedPropertyInfo.GetValue(context.rootContext);
+            // return ReflectionUtil.GetValue<U,T>(accessor, context.rootObject);
+            return (T)cachedPropertyInfo.GetValue(context.rootObject);
         }
 
         public override Type YieldedType => cachedPropertyInfo.PropertyType;
 
         public override object Evaluate(ExpressionContext context) {
-            return cachedPropertyInfo.GetValue(context.rootContext);
+            return cachedPropertyInfo.GetValue(context.rootObject);
         }
 
         public override bool IsConstant() {

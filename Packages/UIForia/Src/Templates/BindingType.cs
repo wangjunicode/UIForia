@@ -4,7 +4,6 @@ namespace UIForia {
 
         Constant,
         Once,
-        Initialize,
         OnEnable,
         Debounced,
         Normal

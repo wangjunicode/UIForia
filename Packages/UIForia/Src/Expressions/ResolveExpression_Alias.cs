@@ -1,7 +1,7 @@
 ﻿using System;
 
 namespace UIForia {
-    
+
     public class ResolveExpression_Alias<T> : Expression<T> {
 
         private readonly string alias;
@@ -13,19 +13,19 @@ namespace UIForia {
         public override Type YieldedType => typeof(T);
 
         public override T EvaluateTyped(ExpressionContext context) {
-            T resolved;
-            // todo find a more elegant place for this that is still fast, maybe GetContextValue can be virtual?
-            // maybe used hooks in the compiler to extend alias resolution?
-            if (alias == "$element") return (T)context.current;
-            context.GetContextValue(context.current, alias, out resolved);
-            return resolved;
+//            T resolved;
+//            // todo find a more elegant place for this that is still fast, maybe GetContextValue can be virtual?
+//            // maybe used hooks in the compiler to extend alias resolution?
+//            context.GetContextValue(context.current, alias, out resolved);
+//            return resolved;
+            throw new NotImplementedException();
         }
 
         public override object Evaluate(ExpressionContext context) {
-            T resolved;
-            if (alias == "$element") return context.current;
-            context.GetContextValue(context.current, alias, out resolved);
-            return resolved;
+            throw new NotImplementedException();
+//            T resolved;
+//            context.GetContextValue(context.current, alias, out resolved);
+//            return resolved;
         }
 
         public override bool IsConstant() {

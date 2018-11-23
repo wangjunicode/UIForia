@@ -14,6 +14,9 @@ namespace UIForia.Compilers {
         private static readonly Dictionary<Type, List<DragEventCreator>> s_DragCreatorCache = new Dictionary<Type, List<DragEventCreator>>();
         private static readonly Dictionary<Type, List<DragEventHandler>> s_DragHandlerCache = new Dictionary<Type, List<DragEventHandler>>();
 
+        private static readonly MouseEventResolver s_MouseEventResolver = new MouseEventResolver("$event");
+        private static readonly KeyboardEventResolver s_KeyboardEventResolver = new KeyboardEventResolver("$event");
+        
         public InputBindingCompiler(ContextDefinition context) {
             this.compiler = new ExpressionCompiler(context);
         }
@@ -111,7 +114,6 @@ namespace UIForia.Compilers {
             return retn;
         }
 
-
         private List<KeyboardEventHandler> CompileKeyboardTemplateAttributes(List<AttributeDefinition> attributeDefinitions) {
             if (attributeDefinitions == null) return null;
 
@@ -144,11 +146,9 @@ namespace UIForia.Compilers {
                     }
 
                     compiler.AddRuntimeAlias(tuple.alias.Item1, tuple.alias.Item2);
-                    compiler.AddRuntimeAlias(s_ElementAlias.Item1, s_ElementAlias.Item2);
                     
                     Expression<Terminal> expression = compiler.Compile<Terminal>(source);
                     
-                    compiler.RemoveRuntimeAlias(s_ElementAlias.Item1);
                     compiler.RemoveRuntimeAlias(tuple.alias.Item1);
                     
                     attr.isCompiled = true;
@@ -225,13 +225,14 @@ namespace UIForia.Compilers {
                         source = '{' + attr.value + '}';
                     }
 
+                    compiler.AddExpressionResolver(s_MouseEventResolver);
                     compiler.AddRuntimeAlias(tuple.alias.Item1, tuple.alias.Item2);
-                    compiler.AddRuntimeAlias(s_ElementAlias.Item1, s_ElementAlias.Item2);
                     
                     Expression<Terminal> expression = compiler.Compile<Terminal>(source);
                     
+                    compiler.RemoveExpressionResolver(s_MouseEventResolver);
+                    
                     compiler.RemoveRuntimeAlias(tuple.alias.Item1);
-                    compiler.RemoveRuntimeAlias(s_ElementAlias.Item1);
                     
                     attr.isCompiled = true;
                     return new MouseEventHandler_Expression(tuple.eventType, expression, modifiers, phase);
@@ -405,11 +406,9 @@ namespace UIForia.Compilers {
                 }
 
                 compiler.AddRuntimeAlias(s_MouseEventAlias.Item1, s_MouseEventAlias.Item2);
-                compiler.AddRuntimeAlias(s_ElementAlias.Item1, s_ElementAlias.Item2);
 
                 Expression<Terminal> expression = compiler.Compile<Terminal>(source);
                 
-                compiler.RemoveRuntimeAlias(s_ElementAlias.Item1);
                 compiler.RemoveRuntimeAlias(s_MouseEventAlias.Item1);
                 
                 attr.isCompiled = true;
@@ -512,11 +511,9 @@ namespace UIForia.Compilers {
             }
 
             compiler.AddRuntimeAlias(s_MouseEventAlias.Item1, s_MouseEventAlias.Item2);
-            compiler.AddRuntimeAlias(s_ElementAlias.Item1, s_ElementAlias.Item2);
 
             Expression<DragEvent> expression = compiler.Compile<DragEvent>(source);
 
-            compiler.RemoveRuntimeAlias(s_ElementAlias.Item1);
             compiler.RemoveRuntimeAlias(s_MouseEventAlias.Item1);
             
             attr.isCompiled = true;
@@ -585,7 +582,6 @@ namespace UIForia.Compilers {
         private static readonly ValueTuple<string, Type> s_MouseEventAlias = ValueTuple.Create("$event", typeof(MouseInputEvent));
         private static readonly ValueTuple<string, Type> s_KeyboardEventAlias = ValueTuple.Create("$event", typeof(KeyboardInputEvent));
         private static readonly ValueTuple<string, Type> s_FocusEventAlias = ValueTuple.Create("$event", typeof(FocusEvent));
-        private static readonly ValueTuple<string, Type> s_ElementAlias = ValueTuple.Create("$element", typeof(UIElement));
 
         private static readonly InputAttributeTuple[] s_MouseAttributeDefs = {
             new InputAttributeTuple("onMouseEnter", InputEventType.MouseEnter, s_MouseEventAlias),

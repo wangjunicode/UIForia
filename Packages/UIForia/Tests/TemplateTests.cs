@@ -7,12 +7,11 @@ public class TemplateTests {
 
     public ParsedTemplate dummyTemplate;
 
-    class TestTarget : IExpressionContextProvider {
+    class TestTarget  {
 
         public string stringValue;
 
         public int UniqueId => 0;
-        public IExpressionContextProvider ExpressionParent => null;
 
     }
 
@@ -26,9 +25,9 @@ public class TemplateTests {
         UITextTemplate template = new UITextTemplate("'hello'");
         template.Compile(dummyTemplate);
         template.CreateScoped(new TemplateScope());
-        Assert.IsNotEmpty(template.constantBindings);
-        Assert.AreEqual(1, template.constantBindings.Length);
-        Assert.IsInstanceOf<TextBinding_Single>(template.constantBindings[0]);
+        Assert.IsNotEmpty(template.triggeredBindings);
+        Assert.AreEqual(1, template.triggeredBindings.Length);
+        Assert.IsInstanceOf<TextBinding_Single>(template.triggeredBindings[0]);
     }
 
     [Test]
@@ -36,10 +35,10 @@ public class TemplateTests {
         UITextTemplate template = new UITextTemplate("'hello {'there'}'");
         template.Compile(dummyTemplate);
         UIElement element = template.CreateScoped(new TemplateScope());
-        Assert.IsNotEmpty(template.constantBindings);
-        Assert.AreEqual(1, template.constantBindings.Length);
-        Assert.IsInstanceOf<TextBinding_Multiple>(template.constantBindings[0]);
-        template.constantBindings[0].Execute(element, new UITemplateContext(null));
+        Assert.IsNotEmpty(template.triggeredBindings);
+        Assert.AreEqual(1, template.triggeredBindings.Length);
+        Assert.IsInstanceOf<TextBinding_Multiple>(template.triggeredBindings[0]);
+        template.triggeredBindings[0].Execute(element, new UITemplateContext(null));
         Assert.AreEqual("hello there", As<UITextElement>(element).GetText());
     }
 
@@ -47,17 +46,17 @@ public class TemplateTests {
     public void TextElement_CompileMultipartDynamicBinding() {
         TestTarget target = new TestTarget();
         UITemplateContext ctx = new UITemplateContext(null);
-        ctx.rootContext = target;
+        ctx.rootObject = target;
 
         target.stringValue = "world";
         UITextTemplate template = new UITextTemplate("'hello {stringValue}!'");
         template.Compile(dummyTemplate);
         UIElement element = template.CreateScoped(new TemplateScope());
 //        MetaData data = template.GetCreationData(new UITextElement(), ctx);
-        Assert.IsNotEmpty(template.bindings);
-        Assert.AreEqual(1, template.bindings.Length);
-        Assert.IsInstanceOf<TextBinding_Multiple>(template.bindings[0]);
-        template.bindings[0].Execute(element, ctx);
+        Assert.IsNotEmpty(template.perFrameBindings);
+        Assert.AreEqual(1, template.perFrameBindings.Length);
+        Assert.IsInstanceOf<TextBinding_Multiple>(template.perFrameBindings[0]);
+        template.perFrameBindings[0].Execute(element, ctx);
         Assert.AreEqual("hello world!", As<UITextElement>(element).GetText());
     }
 
@@ -65,7 +64,7 @@ public class TemplateTests {
     public void TextElement_EventOnChange() {
         TestTarget target = new TestTarget();
         UITemplateContext ctx = new UITemplateContext(null);
-        ctx.rootContext = target;
+        ctx.rootObject = target;
 
         target.stringValue = "world";
         UITextTemplate template = new UITextTemplate("'hello {stringValue}!'");
@@ -73,7 +72,7 @@ public class TemplateTests {
         UIElement el = template.CreateScoped(new TemplateScope());
         int callCount = 0;
         As<UITextElement>(el).onTextChanged += (element, text) => callCount++;
-        template.bindings[0].Execute(el, ctx);
+        template.perFrameBindings[0].Execute(el, ctx);
         Assert.AreEqual(1, callCount);
     }
 
@@ -81,7 +80,7 @@ public class TemplateTests {
     public void TextElement_NoEventWithoutChange() {
         TestTarget target = new TestTarget();
         UITemplateContext ctx = new UITemplateContext(null);
-        ctx.rootContext = target;
+        ctx.rootObject = target;
 
         target.stringValue = "world";
         UITextTemplate template = new UITextTemplate("'hello {stringValue}!'");
@@ -89,8 +88,8 @@ public class TemplateTests {
         UIElement el = template.CreateScoped(new TemplateScope());
         int callCount = 0;
         As<UITextElement>(el).onTextChanged += (element, text) => callCount++;
-        template.bindings[0].Execute(el, ctx);
-        template.bindings[0].Execute(el, ctx);
+        template.perFrameBindings[0].Execute(el, ctx);
+        template.perFrameBindings[0].Execute(el, ctx);
         Assert.AreEqual(1, callCount);
     }
 

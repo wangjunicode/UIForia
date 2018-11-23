@@ -31,10 +31,10 @@ namespace UIForia.Compilers {
         private class Handler {
 
             private readonly UITemplateContext ctx;
-            private readonly IExpressionContextProvider target;
+            private readonly object target;
             private readonly FieldInfo fieldInfo;
             
-            public Handler(UITemplateContext ctx, IExpressionContextProvider target, FieldInfo fieldInfo) {
+            public Handler(UITemplateContext ctx, object target, FieldInfo fieldInfo) {
                 this.ctx = ctx;
                 this.target = target;
                 this.fieldInfo = fieldInfo;
@@ -42,7 +42,7 @@ namespace UIForia.Compilers {
 
             [UsedImplicitly]
             public void Run(T evtArg0) {
-                ctx.current = target;
+                ctx.currentObject = target;
 
                 object oldValue = fieldInfo.GetValue(ctx.rootElement);
                 fieldInfo.SetValue(ctx.rootElement, evtArg0);
@@ -85,11 +85,11 @@ namespace UIForia.Compilers {
         private class Handler {
 
             private readonly UITemplateContext ctx;
-            private readonly IExpressionContextProvider target;
+            private readonly object target;
             private readonly FieldInfo fieldInfo;
             private readonly Action<U, string>[] callbacks;
 
-            public Handler(UITemplateContext ctx, IExpressionContextProvider target, FieldInfo fieldInfo, Action<U, string>[] callbacks) {
+            public Handler(UITemplateContext ctx, object target, FieldInfo fieldInfo, Action<U, string>[] callbacks) {
                 this.ctx = ctx;
                 this.target = target;
                 this.fieldInfo = fieldInfo;
@@ -98,7 +98,7 @@ namespace UIForia.Compilers {
 
             [UsedImplicitly]
             public void Run(T evtArg0) {
-                ctx.current = target;
+                ctx.currentObject = target;
 
                 object oldValue = fieldInfo.GetValue(ctx.rootElement);
                 fieldInfo.SetValue(ctx.rootElement, evtArg0);
@@ -141,10 +141,10 @@ namespace UIForia.Compilers {
         private class Handler {
 
             private readonly UITemplateContext ctx;
-            private readonly IExpressionContextProvider target;
+            private readonly object target;
             private readonly PropertyInfo property;
             
-            public Handler(UITemplateContext ctx, IExpressionContextProvider target, PropertyInfo property) {
+            public Handler(UITemplateContext ctx, object target, PropertyInfo property) {
                 this.ctx = ctx;
                 this.target = target;
                 this.property = property;
@@ -152,7 +152,7 @@ namespace UIForia.Compilers {
 
             [UsedImplicitly]
             public void Run(T evtArg0) {
-                ctx.current = target;
+                ctx.currentObject = target;
 
                 object oldValue = property.GetValue(ctx.rootElement);
                 property.SetValue(ctx.rootElement, evtArg0);
@@ -195,11 +195,11 @@ namespace UIForia.Compilers {
         private class Handler {
 
             private readonly UITemplateContext ctx;
-            private readonly IExpressionContextProvider target;
+            private readonly object target;
             private readonly PropertyInfo propertyInfo;
             private readonly Action<U, string>[] callbacks;
 
-            public Handler(UITemplateContext ctx, IExpressionContextProvider target, PropertyInfo propertyInfo, Action<U, string>[] callbacks) {
+            public Handler(UITemplateContext ctx, object target, PropertyInfo propertyInfo, Action<U, string>[] callbacks) {
                 this.ctx = ctx;
                 this.target = target;
                 this.propertyInfo = propertyInfo;
@@ -208,7 +208,7 @@ namespace UIForia.Compilers {
 
             [UsedImplicitly]
             public void Run(T evtArg0) {
-                ctx.current = target;
+                ctx.currentObject = target;
 
                 object oldValue = propertyInfo.GetValue(ctx.rootElement);
                 propertyInfo.SetValue(ctx.rootElement, evtArg0);
@@ -254,9 +254,9 @@ namespace UIForia.Compilers {
 
             private readonly UITemplateContext ctx;
             private readonly Expression<Terminal> expression;
-            private readonly IExpressionContextProvider target;
+            private readonly object target;
 
-            public Handler(Expression<Terminal> expression, UITemplateContext ctx, IExpressionContextProvider target) {
+            public Handler(Expression<Terminal> expression, UITemplateContext ctx, object target) {
                 this.expression = expression;
                 this.ctx = ctx;
                 this.target = target;
@@ -264,7 +264,7 @@ namespace UIForia.Compilers {
 
             [UsedImplicitly]
             public void Run() {
-                ctx.current = target;
+                ctx.currentObject = target;
                 expression.EvaluateTyped(ctx);
             }
 
@@ -298,9 +298,9 @@ namespace UIForia.Compilers {
 
             private readonly UITemplateContext ctx;
             private readonly Expression<Terminal> expression;
-            private readonly IExpressionContextProvider target;
+            private readonly object target;
 
-            public Handler(Expression<Terminal> expression, UITemplateContext ctx, IExpressionContextProvider target) {
+            public Handler(Expression<Terminal> expression, UITemplateContext ctx, object target) {
                 this.expression = expression;
                 this.ctx = ctx;
                 this.target = target;
@@ -308,14 +308,14 @@ namespace UIForia.Compilers {
 
             [UsedImplicitly]
             public void Run(T evtArg0) {
-                ctx.current = target;
-                ctx.SetContextValue(target, PropertyBindingCompiler.EvtArgDefaultName, evtArg0);
-                ctx.SetContextValue(target, PropertyBindingCompiler.EvtArgNames[0], evtArg0);
+                ctx.currentObject = target;
+               // ctx.SetContextValue(target, PropertyBindingCompiler.EvtArgDefaultName, evtArg0);
+              //  ctx.SetContextValue(target, PropertyBindingCompiler.EvtArgNames[0], evtArg0);
 
                 expression.EvaluateTyped(ctx);
 
-                ctx.RemoveContextValue<T>(target, PropertyBindingCompiler.EvtArgDefaultName);
-                ctx.RemoveContextValue<T>(target, PropertyBindingCompiler.EvtArgNames[0]);
+               // ctx.RemoveContextValue<T>(target, PropertyBindingCompiler.EvtArgDefaultName);
+               // ctx.RemoveContextValue<T>(target, PropertyBindingCompiler.EvtArgNames[0]);
             }
 
         }
@@ -348,9 +348,9 @@ namespace UIForia.Compilers {
 
             private readonly UITemplateContext ctx;
             private readonly Expression<Terminal> expression;
-            private readonly IExpressionContextProvider target;
+            private readonly object target;
 
-            public Handler(Expression<Terminal> expression, UITemplateContext ctx, IExpressionContextProvider target) {
+            public Handler(Expression<Terminal> expression, UITemplateContext ctx, object target) {
                 this.expression = expression;
                 this.ctx = ctx;
                 this.target = target;
@@ -358,14 +358,14 @@ namespace UIForia.Compilers {
 
             [UsedImplicitly]
             public void Run(T evtArg0, U evtArg1) {
-                ctx.current = target;
-                ctx.SetContextValue(target, PropertyBindingCompiler.EvtArgDefaultName, evtArg0);
-                ctx.SetContextValue(target, PropertyBindingCompiler.EvtArgNames[0], evtArg0);
-                ctx.SetContextValue(target, PropertyBindingCompiler.EvtArgNames[1], evtArg1);
+                ctx.currentObject = target;
+//                ctx.SetContextValue(target, PropertyBindingCompiler.EvtArgDefaultName, evtArg0);
+//                ctx.SetContextValue(target, PropertyBindingCompiler.EvtArgNames[0], evtArg0);
+//                ctx.SetContextValue(target, PropertyBindingCompiler.EvtArgNames[1], evtArg1);
                 expression.EvaluateTyped(ctx);
-                ctx.RemoveContextValue<T>(target, PropertyBindingCompiler.EvtArgDefaultName);
-                ctx.RemoveContextValue<T>(target, PropertyBindingCompiler.EvtArgNames[0]);
-                ctx.RemoveContextValue<T>(target, PropertyBindingCompiler.EvtArgNames[1]);
+//                ctx.RemoveContextValue<T>(target, PropertyBindingCompiler.EvtArgDefaultName);
+//                ctx.RemoveContextValue<T>(target, PropertyBindingCompiler.EvtArgNames[0]);
+//                ctx.RemoveContextValue<T>(target, PropertyBindingCompiler.EvtArgNames[1]);
             }
 
         }
@@ -398,9 +398,9 @@ namespace UIForia.Compilers {
 
             private readonly UITemplateContext ctx;
             private readonly Expression<Terminal> expression;
-            private readonly IExpressionContextProvider target;
+            private readonly object target;
 
-            public Handler(Expression<Terminal> expression, UITemplateContext ctx, IExpressionContextProvider target) {
+            public Handler(Expression<Terminal> expression, UITemplateContext ctx, object target) {
                 this.expression = expression;
                 this.ctx = ctx;
                 this.target = target;
@@ -408,16 +408,16 @@ namespace UIForia.Compilers {
 
             [UsedImplicitly]
             public void Run(T evtArg0, U evtArg1, V evtArg2) {
-                ctx.current = target;
-                ctx.SetContextValue(target, PropertyBindingCompiler.EvtArgDefaultName, evtArg0);
-                ctx.SetContextValue(target, PropertyBindingCompiler.EvtArgNames[0], evtArg0);
-                ctx.SetContextValue(target, PropertyBindingCompiler.EvtArgNames[1], evtArg1);
-                ctx.SetContextValue(target, PropertyBindingCompiler.EvtArgNames[2], evtArg2);
+                ctx.currentObject = target;
+//                ctx.SetContextValue(target, PropertyBindingCompiler.EvtArgDefaultName, evtArg0);
+//                ctx.SetContextValue(target, PropertyBindingCompiler.EvtArgNames[0], evtArg0);
+//                ctx.SetContextValue(target, PropertyBindingCompiler.EvtArgNames[1], evtArg1);
+//                ctx.SetContextValue(target, PropertyBindingCompiler.EvtArgNames[2], evtArg2);
                 expression.EvaluateTyped(ctx);
-                ctx.RemoveContextValue<T>(target, PropertyBindingCompiler.EvtArgDefaultName);
-                ctx.RemoveContextValue<T>(target, PropertyBindingCompiler.EvtArgNames[0]);
-                ctx.RemoveContextValue<T>(target, PropertyBindingCompiler.EvtArgNames[1]);
-                ctx.RemoveContextValue<T>(target, PropertyBindingCompiler.EvtArgNames[2]);
+//                ctx.RemoveContextValue<T>(target, PropertyBindingCompiler.EvtArgDefaultName);
+//                ctx.RemoveContextValue<T>(target, PropertyBindingCompiler.EvtArgNames[0]);
+//                ctx.RemoveContextValue<T>(target, PropertyBindingCompiler.EvtArgNames[1]);
+//                ctx.RemoveContextValue<T>(target, PropertyBindingCompiler.EvtArgNames[2]);
             }
 
         }
@@ -450,9 +450,9 @@ namespace UIForia.Compilers {
 
             private readonly UITemplateContext ctx;
             private readonly Expression<Terminal> expression;
-            private readonly IExpressionContextProvider target;
+            private readonly object target;
 
-            public Handler(Expression<Terminal> expression, UITemplateContext ctx, IExpressionContextProvider target) {
+            public Handler(Expression<Terminal> expression, UITemplateContext ctx, object target) {
                 this.expression = expression;
                 this.ctx = ctx;
                 this.target = target;
@@ -460,18 +460,18 @@ namespace UIForia.Compilers {
 
             [UsedImplicitly]
             public void Run(T evtArg0, U evtArg1, V evtArg2, W evtArg3) {
-                ctx.current = target;
-                ctx.SetContextValue(target, PropertyBindingCompiler.EvtArgDefaultName, evtArg0);
-                ctx.SetContextValue(target, PropertyBindingCompiler.EvtArgNames[0], evtArg0);
-                ctx.SetContextValue(target, PropertyBindingCompiler.EvtArgNames[1], evtArg1);
-                ctx.SetContextValue(target, PropertyBindingCompiler.EvtArgNames[2], evtArg2);
-                ctx.SetContextValue(target, PropertyBindingCompiler.EvtArgNames[3], evtArg3);
+                ctx.currentObject = target;
+//                ctx.SetContextValue(target, PropertyBindingCompiler.EvtArgDefaultName, evtArg0);
+//                ctx.SetContextValue(target, PropertyBindingCompiler.EvtArgNames[0], evtArg0);
+//                ctx.SetContextValue(target, PropertyBindingCompiler.EvtArgNames[1], evtArg1);
+//                ctx.SetContextValue(target, PropertyBindingCompiler.EvtArgNames[2], evtArg2);
+//                ctx.SetContextValue(target, PropertyBindingCompiler.EvtArgNames[3], evtArg3);
                 expression.EvaluateTyped(ctx);
-                ctx.RemoveContextValue<T>(target, PropertyBindingCompiler.EvtArgDefaultName);
-                ctx.RemoveContextValue<T>(target, PropertyBindingCompiler.EvtArgNames[0]);
-                ctx.RemoveContextValue<T>(target, PropertyBindingCompiler.EvtArgNames[1]);
-                ctx.RemoveContextValue<T>(target, PropertyBindingCompiler.EvtArgNames[2]);
-                ctx.RemoveContextValue<T>(target, PropertyBindingCompiler.EvtArgNames[3]);
+//                ctx.RemoveContextValue<T>(target, PropertyBindingCompiler.EvtArgDefaultName);
+//                ctx.RemoveContextValue<T>(target, PropertyBindingCompiler.EvtArgNames[0]);
+//                ctx.RemoveContextValue<T>(target, PropertyBindingCompiler.EvtArgNames[1]);
+//                ctx.RemoveContextValue<T>(target, PropertyBindingCompiler.EvtArgNames[2]);
+//                ctx.RemoveContextValue<T>(target, PropertyBindingCompiler.EvtArgNames[3]);
             }
 
         }

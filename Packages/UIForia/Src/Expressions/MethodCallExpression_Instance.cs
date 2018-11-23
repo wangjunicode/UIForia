@@ -14,12 +14,12 @@ namespace UIForia {
         }
 
         public override object Evaluate(ExpressionContext context) {
-            method((T) context.rootContext);
+            method((T) context.rootObject);
             return null;
         }
 
         public override Terminal EvaluateTyped(ExpressionContext context) {
-            method((T) context.rootContext);
+            method((T) context.rootObject);
             return null;
         }
 
@@ -41,12 +41,12 @@ namespace UIForia {
         }
 
         public override object Evaluate(ExpressionContext context) {
-            method((T) context.rootContext, argument0.EvaluateTyped(context));
+            method((T) context.rootObject, argument0.EvaluateTyped(context));
             return null;
         }
 
         public override Terminal EvaluateTyped(ExpressionContext context) {
-            method((T) context.rootContext, argument0.EvaluateTyped(context));
+            method((T) context.rootObject, argument0.EvaluateTyped(context));
             return null;
         }
 
@@ -70,12 +70,12 @@ namespace UIForia {
         }
 
         public override object Evaluate(ExpressionContext context) {
-            method((T) context.rootContext, argument0.EvaluateTyped(context), argument1.EvaluateTyped(context));
+            method((T) context.rootObject, argument0.EvaluateTyped(context), argument1.EvaluateTyped(context));
             return null;
         }
 
         public override Terminal EvaluateTyped(ExpressionContext context) {
-            method((T) context.rootContext, argument0.EvaluateTyped(context), argument1.EvaluateTyped(context));
+            method((T) context.rootObject, argument0.EvaluateTyped(context), argument1.EvaluateTyped(context));
             return null;
         }
 
@@ -101,7 +101,7 @@ namespace UIForia {
         }
 
         public override object Evaluate(ExpressionContext context) {
-            method((T) context.rootContext,
+            method((T) context.rootObject,
                 argument0.EvaluateTyped(context),
                 argument1.EvaluateTyped(context),
                 argument2.EvaluateTyped(context)
@@ -110,7 +110,7 @@ namespace UIForia {
         }
 
         public override Terminal EvaluateTyped(ExpressionContext context) {
-            method((T) context.rootContext,
+            method((T) context.rootObject,
                 argument0.EvaluateTyped(context),
                 argument1.EvaluateTyped(context),
                 argument2.EvaluateTyped(context)
@@ -142,7 +142,7 @@ namespace UIForia {
         }
 
         public override object Evaluate(ExpressionContext context) {
-            method((T) context.rootContext,
+            method((T) context.rootObject,
                 argument0.EvaluateTyped(context),
                 argument1.EvaluateTyped(context),
                 argument2.EvaluateTyped(context),
@@ -152,7 +152,7 @@ namespace UIForia {
         }
 
         public override Terminal EvaluateTyped(ExpressionContext context) {
-            method((T) context.rootContext,
+            method((T) context.rootObject,
                 argument0.EvaluateTyped(context),
                 argument1.EvaluateTyped(context),
                 argument2.EvaluateTyped(context),
@@ -183,11 +183,11 @@ namespace UIForia {
         public override Type YieldedType => typeof(T);
 
         public override object Evaluate(ExpressionContext context) {
-            return method((U) context.rootContext);
+            return method((U) context.rootObject);
         }
 
         public override T EvaluateTyped(ExpressionContext context) {
-            return method((U) context.rootContext);
+            return method((U) context.rootObject);
         }
 
         public override bool IsConstant() {
@@ -217,14 +217,14 @@ namespace UIForia {
 
         public override object Evaluate(ExpressionContext context) {
             return method(
-                (U) context.rootContext,
+                (U) context.rootObject,
                 argument0.EvaluateTyped(context)
             );
         }
 
         public override T EvaluateTyped(ExpressionContext context) {
             return method(
-                (U) context.rootContext,
+                (U) context.rootObject,
                 argument0.EvaluateTyped(context)
             );
         }
@@ -258,7 +258,7 @@ namespace UIForia {
 
         public override object Evaluate(ExpressionContext context) {
             return method(
-                (U) context.rootContext,
+                (U) context.rootObject,
                 argument0.EvaluateTyped(context),
                 argument1.EvaluateTyped(context)
             );
@@ -266,7 +266,7 @@ namespace UIForia {
 
         public override T EvaluateTyped(ExpressionContext context) {
             return method(
-                (U) context.rootContext,
+                (U) context.rootObject,
                 argument0.EvaluateTyped(context),
                 argument1.EvaluateTyped(context)
             );
@@ -304,7 +304,7 @@ namespace UIForia {
 
         public override object Evaluate(ExpressionContext context) {
             return method(
-                (U) context.rootContext,
+                (U) context.rootObject,
                 argument0.EvaluateTyped(context),
                 argument1.EvaluateTyped(context),
                 argument2.EvaluateTyped(context)
@@ -313,7 +313,7 @@ namespace UIForia {
 
         public override T EvaluateTyped(ExpressionContext context) {
             return method(
-                (U) context.rootContext,
+                (U) context.rootObject,
                 argument0.EvaluateTyped(context),
                 argument1.EvaluateTyped(context),
                 argument2.EvaluateTyped(context)
@@ -356,7 +356,7 @@ namespace UIForia {
 
         public override object Evaluate(ExpressionContext context) {
             return method(
-                (U) context.rootContext,
+                (U) context.rootObject,
                 argument0.EvaluateTyped(context),
                 argument1.EvaluateTyped(context),
                 argument2.EvaluateTyped(context),
@@ -366,7 +366,7 @@ namespace UIForia {
 
         public override T EvaluateTyped(ExpressionContext context) {
             return method(
-                (U) context.rootContext,
+                (U) context.rootObject,
                 argument0.EvaluateTyped(context),
                 argument1.EvaluateTyped(context),
                 argument2.EvaluateTyped(context),

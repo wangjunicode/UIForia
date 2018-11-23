@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using UIForia.Compilers;
 
 namespace UIForia {
 
@@ -18,14 +19,32 @@ namespace UIForia {
         private string indexAlias;
         private string lengthAlias;
         private string itemAlias;
-        
+        private RepeatItemAliasResolver itemResolver;
+        private RepeatIndexAliasResolver indexResolver;
+        private RepeatLengthAliasResolver lengthResolver;
+
         public UIRepeatTemplate(List<UITemplate> childTemplates, List<AttributeDefinition> attributes = null)
             : base(childTemplates, attributes) { }
 
-        protected override Type elementType => typeof(UIRepeatElement);
+        protected override Type elementType {
+            get {
+                return typeof(UIRepeatElement);
+            }
+        }
 
         public override UIElement CreateScoped(TemplateScope inputScope) {
-            UIRepeatElement element = new UIRepeatElement(childTemplates[0], inputScope);
+            
+            // todo -- support multiple children?
+            
+            ReflectionUtil.ObjectArray2[0] = childTemplates[0];
+            ReflectionUtil.ObjectArray2[1] = inputScope;
+            
+            UIRepeatElement element = (UIRepeatElement)ReflectionUtil.CreateGenericInstanceFromOpenType(
+                typeof(UIRepeatElement<>),
+                itemType,
+                ReflectionUtil.ObjectArray2
+            );
+            
             element.listExpression = listExpression;
             element.itemType = itemType;
             element.listType = listType;
@@ -36,7 +55,7 @@ namespace UIForia {
             return element;
         }
 
-        public override bool Compile(ParsedTemplate template) {
+        public override void Compile(ParsedTemplate template) {
             // todo -- check conflicts 
             AttributeDefinition listAttr = GetAttribute(ListAttrName);
             AttributeDefinition aliasAttr = GetAttribute(AliasAttrName);
@@ -57,7 +76,7 @@ namespace UIForia {
                 itemAlias = "$" + aliasAttr.value;
                 aliasAttr.isCompiled = true;
             }
-            
+
             if (lengthAttr != null) {
                 lengthAlias = "$" + lengthAttr.value;
                 lengthAttr.isCompiled = true;
@@ -78,7 +97,22 @@ namespace UIForia {
             template.contextDefinition.AddRuntimeAlias(lengthAlias, typeof(int));
             template.contextDefinition.AddRuntimeAlias(itemAlias, itemType);
 
-            return base.Compile(template);
+            itemResolver = new RepeatItemAliasResolver(itemAlias, itemType);
+            indexResolver = new RepeatIndexAliasResolver(indexAlias);
+            lengthResolver = new RepeatLengthAliasResolver(lengthAlias);
+
+            template.compiler.AddExpressionResolver(itemResolver);
+            template.compiler.AddExpressionResolver(indexResolver);
+            template.compiler.AddExpressionResolver(lengthResolver);
+
+            base.Compile(template);
+         
+        }
+
+        public override void PostCompile(ParsedTemplate template) {
+            template.compiler.RemoveExpressionResolver(itemResolver);
+            template.compiler.RemoveExpressionResolver(indexResolver);
+            template.compiler.RemoveExpressionResolver(lengthResolver);
         }
 
     }

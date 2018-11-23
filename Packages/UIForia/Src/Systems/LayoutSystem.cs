@@ -17,14 +17,14 @@ namespace UIForia.Systems {
 
             public readonly UIView view;
             public readonly Rect previousViewport;
-            
+
             public ViewRect(UIView view, Rect previousViewport) {
                 this.view = view;
                 this.previousViewport = previousViewport;
             }
 
         }
-        
+
         public event Action<VirtualScrollbar> onCreateVirtualScrollbar;
         public event Action<VirtualScrollbar> onDestroyVirtualScrollbar;
 
@@ -38,7 +38,7 @@ namespace UIForia.Systems {
         private Size m_ScreenSize;
         private readonly List<UIElement> m_Elements;
         private readonly LightList<ViewRect> m_Views;
-    
+
         public LayoutSystem(IStyleSystem styleSystem) {
             this.m_StyleSystem = styleSystem;
             this.m_LayoutBoxMap = new IntMap<LayoutBox>();
@@ -95,15 +95,13 @@ namespace UIForia.Systems {
             Rect rect = viewRect.previousViewport;
             UIView view = viewRect.view;
             Rect viewportRect = view.Viewport;
-            
+
             LayoutBox root = m_LayoutBoxMap.GetOrDefault(view.RootElement.id);
 
             if (rect != view.Viewport) {
-                
                 root.allocatedWidth = Mathf.Min(root.GetWidths().clampedSize, view.Viewport.width);
                 root.allocatedHeight = Mathf.Min(root.GetHeights(root.allocatedWidth).clampedSize, view.Viewport.height);
                 root.markedForLayout = true;
-                
             }
 
             Stack<UIElement> stack = StackPool<UIElement>.Get();
@@ -248,7 +246,7 @@ namespace UIForia.Systems {
 
                     if (ptr != null) {
                         bool handlesHorizontal = ptr.style.OverflowX != Overflow.None;
-                        bool handlesVertical =  ptr.style.OverflowY != Overflow.None;
+                        bool handlesVertical = ptr.style.OverflowY != Overflow.None;
                         if (handlesHorizontal && handlesVertical) {
                             Rect r = new Rect(ptr.layoutResult.screenPosition, ptr.layoutResult.allocatedSize);
                             clipRect = clipRect.Intersect(r.Intersect(ptr.layoutResult.clipRect));
@@ -426,7 +424,6 @@ namespace UIForia.Systems {
                     box.horizontalScrollbar = horizontal;
                 }
             }
-            
         }
 
         private void UpdateScrollbarLayouts() {
@@ -555,7 +552,6 @@ namespace UIForia.Systems {
                     }
 
                     break;
-
             }
 
             if (replace != box) {
@@ -598,7 +594,7 @@ namespace UIForia.Systems {
 
                 case LayoutType.Flow:
                     return new FlowLayoutBox(element);
-                
+
                 case LayoutType.Fixed:
                     return new FixedLayoutBox(element);
 
@@ -682,8 +678,8 @@ namespace UIForia.Systems {
 
             for (int i = 0; i < m_Elements.Count; i++) {
                 LayoutResult layoutResult = m_Elements[i].layoutResult;
-                UIElement element = m_Elements[i];               
-               
+                UIElement element = m_Elements[i];
+
                 if (!layoutResult.ScreenRect.Contains(point)) {
                     continue;
                 }

@@ -40,11 +40,11 @@ using UnityEngine;
     
     <Contents style='container'>
         
-        <Graphic x-id=""highlight"" style=""highlight""/>
+        <Graphic if='false' x-id=""highlight"" style=""highlight""/>
         
         <Text style='text' x-id=""text""/>
         
-        <Graphic x-id='cursor' style='ignored'/>
+        <Graphic if='false' x-id='cursor' style='ignored'/>
         
 </Contents>
 
@@ -268,6 +268,7 @@ public class UIInputFieldElement : UIElement, IFocusable, IPropertyChangedHandle
 
     public void Focus() {
         hasFocus = true;
+        blinkStartTime = Time.unscaledTime;
         caret.SetEnabled(true);
         caret.MarkGeometryDirty();
     }
@@ -276,6 +277,7 @@ public class UIInputFieldElement : UIElement, IFocusable, IPropertyChangedHandle
         hasFocus = false;
         caret.SetEnabled(false);
         highlight.SetEnabled(false);
+        
     }
 
     public void OnPropertyChanged(string propertyName, object oldValue) {

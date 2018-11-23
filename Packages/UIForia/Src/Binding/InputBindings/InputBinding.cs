@@ -16,7 +16,6 @@ namespace UIForia.InputBindings {
         }
 
         public override void Execute(UIElement element, UITemplateContext context) {
-            context.currentElement = element;
             expression.EvaluateTyped(context);
         }
 

@@ -232,7 +232,7 @@ namespace UIForia {
             element.OnCreate();
             
             UITemplateContext context = element.TemplateContext;
-            Binding[] enabledBindings = element.OriginTemplate?.enabledBindings;
+            Binding[] enabledBindings = element.OriginTemplate?.triggeredBindings;
                 
             if (enabledBindings != null) {
                 for (int i = 0; i < enabledBindings.Length; i++) {
@@ -411,6 +411,19 @@ namespace UIForia {
             element.view.Application.DoDisableElement(element);
         }
 
+        private static void RunEnableBinding(UIElement element) {
+            UITemplateContext context = element.TemplateContext;
+            Binding[] enabledBindings = element.OriginTemplate?.triggeredBindings;
+                
+            if (enabledBindings != null) {
+                for (int i = 0; i < enabledBindings.Length; i++) {
+                    if (enabledBindings[i].bindingType == BindingType.OnEnable) {
+                        enabledBindings[i].Execute(element, context);
+                    }
+                }
+            }
+        }
+        
         public void DoEnableElement(UIElement element) {
             // no-op for already enabled elements
             if (element.isSelfEnabled) return;
@@ -421,6 +434,8 @@ namespace UIForia {
             if (!element.isEnabled) return;
 
             element.OnEnable();
+            RunEnableBinding(element);
+           
             // if element is now enabled we need to walk it's children
             // and set enabled ancestor flags until we find a self-disabled child
             m_ElementTree.ConditionalTraversePreOrder(element, (child) => {
@@ -428,16 +443,8 @@ namespace UIForia {
                 if (child.isSelfDisabled) return false;
 
                 child.OnEnable(); // todo -- maybe enqueue and flush calls after so we don't have buffer problems
-
-                UITemplateContext context = child.TemplateContext;
-                Binding[] enabledBindings = child.OriginTemplate?.enabledBindings;
-                
-                if (enabledBindings != null) {
-                    for (int i = 0; i < enabledBindings.Length; i++) {
-                        enabledBindings[i].Execute(child, context);
-                    }
-                }
-                
+                RunEnableBinding(child);
+              
                 return true;
             });
 

@@ -12,10 +12,10 @@ namespace UIForia {
 
         protected override Type elementType => typeof(UISlotElement);
 
-        public override bool Compile(ParsedTemplate template) {
+        public override void Compile(ParsedTemplate template) {
             slotIdAttr = GetAttribute("slotId");
             slotIdAttr.isCompiled = true;
-            return base.Compile(template);
+            base.Compile(template);
         }
 
         public override UIElement CreateScoped(TemplateScope inputScope) {

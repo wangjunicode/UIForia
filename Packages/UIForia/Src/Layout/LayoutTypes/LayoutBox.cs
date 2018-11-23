@@ -697,7 +697,7 @@ namespace UIForia.Layout.LayoutTypes {
                             return start + (range * anchor.value);
 
                         case AnchorTarget.Screen:
-                            return Screen.width * anchor.value;
+                            return -parent.element.layoutResult.ScreenPosition.x + (Screen.width * anchor.value);
 
                         case AnchorTarget.Viewport:
                             return view.Viewport.width * anchor.value;
@@ -743,7 +743,7 @@ namespace UIForia.Layout.LayoutTypes {
                             return start + (range * anchor.value);
 
                         case AnchorTarget.Screen:
-                            return Screen.height * anchor.value;
+                            return -parent.element.layoutResult.ScreenPosition.y + (Screen.width * anchor.value);
 
                         case AnchorTarget.Viewport:
                             return view.Viewport.height * anchor.value;

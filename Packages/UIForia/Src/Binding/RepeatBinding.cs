@@ -5,29 +5,37 @@ using UIForia.Util;
 
 public class RepeatBindingNode : BindingNode {
 
-    public string itemAlias;
-    public string indexAlias;
-    public string lengthAlias;
     public UITemplate template;
     public TemplateScope scope;
+
+    public LightList<LightList<BindingNode>> m_Nodes = new LightList<LightList<BindingNode>>();
+    
+    public void AddChildNodes(LightList<BindingNode> nodes) {
+        m_Nodes.Add(nodes);   
+    }
+
+    public void RemoveNodes(UIElement element) {
+        int idx = Array.IndexOf(this.element.children, element);
+        m_Nodes.RemoveAt(idx);
+    }
 
 }
 
 public class RepeatBindingNode<T, U> : RepeatBindingNode where T : class, IList<U>, new() {
 
+    private UIRepeatElement<U> repeat;
     private readonly Expression<T> listExpression;
     private T previousReference;
 
-    public RepeatBindingNode(Expression<T> listExpression, string itemAlias, string indexAlias, string lengthAlias) {
+    public RepeatBindingNode(UIRepeatElement<U> repeat, Expression<T> listExpression) {
+        this.repeat = repeat;
         this.listExpression = listExpression;
-        this.itemAlias = itemAlias;
-        this.indexAlias = indexAlias;
-        this.lengthAlias = lengthAlias;
     }
 
-    public override void Validate() {
+    public void Validate() {
         T list = listExpression.EvaluateTyped(context);
-
+        repeat.list = list;
+        
         if (list == null || list.Count == 0) {
             if (previousReference == null) {
                 return;
@@ -54,7 +62,7 @@ public class RepeatBindingNode<T, U> : RepeatBindingNode where T : class, IList<
                 newItem.templateParent = element;
 
                 element.children[i] = newItem;
-                context.view.Application.RegisterElement(newItem);
+                element.view.Application.RegisterElement(newItem);
             }
 
             ((UIRepeatElement) element).listBecamePopulated = true;
@@ -95,37 +103,30 @@ public class RepeatBindingNode<T, U> : RepeatBindingNode where T : class, IList<
             int diff = previousReference.Count - list.Count;
             for (int i = 0; i < diff; i++) {
                 int index = previousReference.Count - 1;
-                context.RemoveContextValue(element.children[index], itemAlias, previousReference[index]);
-                context.RemoveContextValue(element.children[index], indexAlias, index);
                 previousReference.RemoveAt(index);
                 Application.DestroyElement(element.children[index]);
             }
         }
 
-        for (int i = 0; i < element.children.Length; i++) {
-            context.SetContextValue(element.children[i], itemAlias, list[i]);
-            context.SetContextValue(element.children[i], indexAlias, i);
-        }
-
-        context.SetContextValue(element, lengthAlias, previousReference.Count);
     }
 
-    public override void OnUpdate(SkipTree<BindingNode>.TreeNode[] children) {
-        context.current = element;
+    public override void OnUpdate() {
+        context.currentObject = element;
+        Validate();
 
-        for (int i = 0; i < bindings.Length; i++) {
-            if (bindings[i].isEnabled) {
-                bindings[i].Execute(element, context);
-            }
-        }
-
-        if (!element.isEnabled || children == null || previousReference == null) {
+        if (!element.isEnabled || element.children == null || previousReference == null) {
             return;
         }
 
-        for (int i = 0; i < children.Length; i++) {
-            children[i].item.OnUpdate(children[i].children);
+        UIRepeatElement repeatElement = (UIRepeatElement) element;
+        for (int i = 0; i < m_Nodes.Count; i++) {
+            repeatElement.Next();
+            for (int j = 0; j < m_Nodes[i].Count; j++) {
+                m_Nodes[i][j].OnUpdate();
+            }
         }
+
+        repeatElement.Reset();
     }
 
 }

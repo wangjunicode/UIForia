@@ -1,6 +1,5 @@
 using System;
-using System.Collections.Generic;
-using UIForia.Routing;
+using UIForia.Input;
 
 namespace UIForia.Compilers {
 
@@ -24,31 +23,32 @@ namespace UIForia.Compilers {
 
     }
 
+    public class MouseEventResolver : ExpressionAliasResolver {
 
-    public class ElementResolver : ExpressionAliasResolver {
+        public MouseEventResolver(string aliasName) : base(aliasName) { }
 
-        public ElementResolver(string aliasName) : base(aliasName) { }
-
-        private static readonly UIElementExpression<UIElement> s_Expression = new UIElementExpression<UIElement>();
-
+        private static readonly MouseEventAliasExpression s_Expression = new MouseEventAliasExpression();
+        
         public override Expression Compile(ContextDefinition context, ExpressionNode node, Func<ExpressionNode, Expression> visit) {
-            if (node.expressionType == ExpressionNodeType.Accessor) {
+            if (node.expressionType == ExpressionNodeType.AliasAccessor) {
                 return s_Expression;
             }
 
             return null;
         }
 
-        public class UIElementExpression<T> : Expression<T> {
+        public class MouseEventAliasExpression : Expression<MouseInputEvent> {
 
-            public override Type YieldedType => typeof(T);
-
+            public override Type YieldedType => typeof(MouseInputEvent);
+            
             public override object Evaluate(ExpressionContext context) {
-                return context.current;
+                UIElement element = (UIElement) context.currentObject;
+                return element.view.Application.InputSystem.CurrentMouseEvent;
             }
 
-            public override T EvaluateTyped(ExpressionContext context) {
-                return (T) context.current;
+            public override MouseInputEvent EvaluateTyped(ExpressionContext context) {
+                UIElement element = (UIElement) context.currentObject;
+                return element.view.Application.InputSystem.CurrentMouseEvent;
             }
 
             public override bool IsConstant() {
@@ -58,33 +58,33 @@ namespace UIForia.Compilers {
         }
 
     }
+    
+    public class KeyboardEventResolver : ExpressionAliasResolver {
 
-    public class ParentElementResolver : ExpressionAliasResolver {
+        public KeyboardEventResolver(string aliasName) : base(aliasName) { }
 
-        public ParentElementResolver(string aliasName) : base(aliasName) { }
-
-        private static readonly UIParentElementExpression<UIElement> s_Expression = new UIParentElementExpression<UIElement>();
-
+        private static readonly KeyboardEventAliasExpression s_Expression = new KeyboardEventAliasExpression();
+        
         public override Expression Compile(ContextDefinition context, ExpressionNode node, Func<ExpressionNode, Expression> visit) {
-            if (node.expressionType == ExpressionNodeType.Accessor) {
+            if (node.expressionType == ExpressionNodeType.AliasAccessor) {
                 return s_Expression;
             }
 
-            if (node.expressionType == ExpressionNodeType.AliasAccessor) { }
-
             return null;
         }
 
-        public class UIParentElementExpression<T> : Expression<T> where T : UIElement {
+        public class KeyboardEventAliasExpression : Expression<KeyboardInputEvent> {
 
-            public override Type YieldedType => typeof(T);
-
+            public override Type YieldedType => typeof(MouseInputEvent);
+            
             public override object Evaluate(ExpressionContext context) {
-                return ((UIElement) context.current).parent;
+                UIElement element = (UIElement) context.currentObject;
+                return element.view.Application.InputSystem.CurrentKeyboardEvent;
             }
 
-            public override T EvaluateTyped(ExpressionContext context) {
-                return (T) ((UIElement) context.current).parent;
+            public override KeyboardInputEvent EvaluateTyped(ExpressionContext context) {
+                UIElement element = (UIElement) context.currentObject;
+                return element.view.Application.InputSystem.CurrentKeyboardEvent;
             }
 
             public override bool IsConstant() {
@@ -94,72 +94,4 @@ namespace UIForia.Compilers {
         }
 
     }
-
-    public class RouteResolver : ExpressionAliasResolver {
-
-        public RouteResolver(string aliasName) : base(aliasName) { }
-
-        private static readonly UrlReaderExpression s_UrlReaderExpression = new UrlReaderExpression();
-
-        public override Expression Compile(ContextDefinition context, ExpressionNode node, Func<ExpressionNode, Expression> visit) {
-            if (node.expressionType == ExpressionNodeType.Accessor) {
-                AccessExpressionNode accessExpressionNode = (AccessExpressionNode) node;
-                List<AccessExpressionPartNode> parts = accessExpressionNode.parts;
-             
-                if (parts.Count > 1) {
-                    return null;
-                }
-
-                if (parts[0] is PropertyAccessExpressionPartNode field) {
-                    if (field.fieldName == "url") {
-                        return s_UrlReaderExpression;
-                    }
-                    
-                }
-                
-            }
-
-            return null;
-        }
-
-        public class UrlReaderExpression : Expression<string> {
-
-            public override Type YieldedType => typeof(string);
-
-            public override object Evaluate(ExpressionContext context) {
-                UIElement element = (UIElement) context.current;
-                return element.view.Application.Router.CurrentUrl;
-            }
-
-            public override string EvaluateTyped(ExpressionContext context) {
-                UIElement element = (UIElement) context.current;
-                return element.view.Application.Router.CurrentUrl;
-            }
-
-            public override bool IsConstant() {
-                return false;
-            }
-
-        }
-
-        public class RouteResolverExpression : Expression<IRouterElement> {
-
-            public override Type YieldedType => typeof(Router);
-
-            public override object Evaluate(ExpressionContext context) {
-                return ((UIElement) context.current).GetNearestRouter();
-            }
-
-            public override IRouterElement EvaluateTyped(ExpressionContext context) {
-                return ((UIElement) context.current).GetNearestRouter();
-            }
-
-            public override bool IsConstant() {
-                return false;
-            }
-
-        }
-
-    }
-
 }

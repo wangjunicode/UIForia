@@ -17,7 +17,8 @@ Critical
     rotation
     Cursors
     finish drag implementation
-
+    Opacity
+    
 Nice to have
     LayoutDefault to Flow
     Implement Flow

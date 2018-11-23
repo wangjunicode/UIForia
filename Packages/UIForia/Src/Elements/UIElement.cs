@@ -32,7 +32,7 @@ public struct ElementAttribute {
 }
 
 [DebuggerDisplay("{" + nameof(ToString) + "()}")]
-public class UIElement : IHierarchical, IExpressionContextProvider {
+public class UIElement : IHierarchical {
 
     // todo some of this stuff isn't used often or present for many elements. may make sense to move to dictionaries so we keep things compact
 
@@ -44,6 +44,8 @@ public class UIElement : IHierarchical, IExpressionContextProvider {
     internal UIElementFlags flags;
     internal UIElement parent;
 
+    public UIElement templateRoot;
+    
     public LayoutResult layoutResult { get; internal set; }
     private ElementRenderer renderer = ElementRenderer.DefaultInstanced; // cold data?
 
@@ -364,9 +366,6 @@ public class UIElement : IHierarchical, IExpressionContextProvider {
     }
 
     public int UniqueId => id;
-
-    IExpressionContextProvider IExpressionContextProvider.ExpressionParent => templateParent;
-
     public IHierarchical Element => this;
     public IHierarchical Parent => parent;
 

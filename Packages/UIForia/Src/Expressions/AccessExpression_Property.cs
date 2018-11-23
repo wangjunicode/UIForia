@@ -22,13 +22,8 @@ namespace UIForia {
         }
 
         public override object Evaluate(ExpressionContext context) {
-            U contextHead;
-            if (contextName[0] == '$') {
-                context.GetContextValue(context.current, contextName, out contextHead);
-            }
-            else {
-                contextHead = (U) context.rootContext;
-            }
+            U contextHead = (U) context.rootObject;
+
 
             object last = contextHead;
             for (int i = 0; i < parts.Length; i++) {
@@ -42,16 +37,7 @@ namespace UIForia {
         }
 
         public override T EvaluateTyped(ExpressionContext context) {
-            U contextHead;
-            if (contextName[0] == '$') {
-                context.GetContextValue(context.current, contextName, out contextHead);
-            }
-            else if (contextName[0] == '@') {
-                contextHead = (U) context.rootContext;
-            }
-            else {
-                contextHead = (U) context.rootContext;
-            }
+            U contextHead = (U) context.rootObject;
 
             object last = contextHead;
 
@@ -185,7 +171,7 @@ namespace UIForia {
             Func<T> fn = (Func<T>) target;
             return fn == null ? null : (object) fn.Invoke();
         }
-        
+
         public override Type RetnType => typeof(T);
 
     }
@@ -206,7 +192,7 @@ namespace UIForia {
         }
 
     }
-    
+
     public class AccessExpressionPart_Func<T, U, V> : AccessExpressionPart_Func {
 
         private readonly Expression<U> arg0;
@@ -221,10 +207,12 @@ namespace UIForia {
 
         public override object Evaluate(object target, ExpressionContext context) {
             Func<U, V, T> fn = (Func<U, V, T>) target;
-            return fn == null ? null : (object) fn.Invoke(
-                arg0.EvaluateTyped(context),
-                arg1.EvaluateTyped(context)
-            );
+            return fn == null
+                ? null
+                : (object) fn.Invoke(
+                    arg0.EvaluateTyped(context),
+                    arg1.EvaluateTyped(context)
+                );
         }
 
     }
@@ -245,15 +233,17 @@ namespace UIForia {
 
         public override object Evaluate(object target, ExpressionContext context) {
             Func<U, V, W, T> fn = (Func<U, V, W, T>) target;
-            return fn == null ? null : (object) fn.Invoke(
-                arg0.EvaluateTyped(context),
-                arg1.EvaluateTyped(context),
-                arg2.EvaluateTyped(context)
-            );
+            return fn == null
+                ? null
+                : (object) fn.Invoke(
+                    arg0.EvaluateTyped(context),
+                    arg1.EvaluateTyped(context),
+                    arg2.EvaluateTyped(context)
+                );
         }
 
     }
-    
+
     public class AccessExpressionPart_Func<T, U, V, W, X> : AccessExpressionPart_Func {
 
         private readonly Expression<U> arg0;
@@ -267,21 +257,23 @@ namespace UIForia {
             this.arg2 = arg2;
             this.arg3 = arg3;
         }
-        
+
         public override Type RetnType => typeof(T);
 
         public override object Evaluate(object target, ExpressionContext context) {
             Func<U, V, W, X, T> fn = (Func<U, V, W, X, T>) target;
-            return fn == null ? null : (object) fn.Invoke(
-                arg0.EvaluateTyped(context),
-                arg1.EvaluateTyped(context),
-                arg2.EvaluateTyped(context),
-                arg3.EvaluateTyped(context)
-            );
+            return fn == null
+                ? null
+                : (object) fn.Invoke(
+                    arg0.EvaluateTyped(context),
+                    arg1.EvaluateTyped(context),
+                    arg2.EvaluateTyped(context),
+                    arg3.EvaluateTyped(context)
+                );
         }
 
     }
-    
+
     public class AccessExpressionPart_Method : AccessExpressionPart {
 
         public override object Evaluate(object target, ExpressionContext context) {

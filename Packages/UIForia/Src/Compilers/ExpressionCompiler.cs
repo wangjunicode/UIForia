@@ -19,9 +19,6 @@ namespace UIForia {
         private List<ICastHandler> userCastHandlers;
         private LightList<ExpressionAliasResolver> expressionAliasResolvers;
 
-
-        private static readonly ExpressionParser parser = new ExpressionParser();
-
         private static readonly List<ICastHandler> builtInCastHandlers = new List<ICastHandler>() {
             new CastHandler_ToString(),
             new CastHandler_ColorToVector4(),
@@ -53,11 +50,11 @@ namespace UIForia {
         public Expression<T> Compile<T>(ExpressionNode root) {
             return (Expression<T>) HandleCasting(typeof(T), Visit(root));
         }
-
+        
         [PublicAPI]
         public Expression Compile(string source) {
             try {
-                return Visit(parser.Parse(source));
+                return Visit(ExpressionParser.Parse(source));
             }
             catch (Exception e) {
                 Debug.Log("Error compiling: " + source);
@@ -68,12 +65,12 @@ namespace UIForia {
 
         [PublicAPI]
         public Expression Compile(Type outputType, string source) {
-            return HandleCasting(outputType, Visit(parser.Parse(source)));
+            return HandleCasting(outputType, Visit(ExpressionParser.Parse(source)));
         }
 
         [PublicAPI]
         public Expression<T> Compile<T>(string source) {
-            return (Expression<T>) HandleCasting(typeof(T), Visit(parser.Parse(source)));
+            return (Expression<T>) HandleCasting(typeof(T), Visit(ExpressionParser.Parse(source)));
         }
 
         [PublicAPI]
@@ -84,6 +81,7 @@ namespace UIForia {
                     throw new ParseException("Duplicate alias registered: " + resolver.aliasName);
                 }
             }
+
             expressionAliasResolvers.Add(resolver);
         }
 
@@ -91,7 +89,6 @@ namespace UIForia {
         public void RemoveExpressionResolver(ExpressionAliasResolver resolver) {
             expressionAliasResolvers?.Remove(resolver);
         }
-
 
         [PublicAPI]
         public void AddCastHandler(ICastHandler handler) {
@@ -110,16 +107,6 @@ namespace UIForia {
         [PublicAPI]
         public void SetContext(ContextDefinition contextDefinition) {
             this.context = contextDefinition;
-        }
-
-        [PublicAPI]
-        public void AddRuntimeAlias(string aliasName, Type aliasType) {
-            context.AddRuntimeAlias(aliasName, aliasType);
-        }
-
-        [PublicAPI]
-        public void RemoveRuntimeAlias(string aliasName) {
-            context.RemoveRuntimeAlias(aliasName);
         }
 
         private Expression Visit(ExpressionNode node) {
@@ -184,13 +171,31 @@ namespace UIForia {
             }
         }
 
+        private Expression VisitMethodAliasExpression(string alias, MethodCallNode node) {
+            if (expressionAliasResolvers != null) {
+                for (int i = 0; i < expressionAliasResolvers.Count; i++) {
+                    if (expressionAliasResolvers[i].aliasName == alias) {
+                        Expression retn = expressionAliasResolvers[i].CompileAsMethodExpression(node, Visit);
+                        if (retn == null) {
+                            throw new ParseException($"Resolver {expressionAliasResolvers[i]} failed to parse {alias}");
+                        }
+
+                        return retn;
+                    }
+                }
+            }
+
+            throw new ParseException();
+        }
+
         private Expression VisitMethodCallExpression(MethodCallNode node) {
             string methodName = node.identifierNode.identifier;
 
-            Type[] yieldedTypes = node.signatureNode.parts.Select(p => p.GetYieldedType(context)).ToArray();
-            MethodInfo info = (MethodInfo) context.ResolveConstAlias(methodName, yieldedTypes);
+            if (methodName[0] == '$') {
+                return VisitMethodAliasExpression(methodName, node);
+            }
 
-            info = info ?? ReflectionUtil.GetMethodInfo(context.rootType, methodName);
+            MethodInfo info = ReflectionUtil.GetMethodInfo(context.rootType, methodName);
 
             if (info == null) {
                 throw new Exception($"Cannot find method {methodName} on type {context.rootType.Name} or any registered aliases");
@@ -262,7 +267,6 @@ namespace UIForia {
 
             return (Expression) ReflectionUtil.CreateGenericInstance(callType, ReflectionUtil.ObjectArray2);
         }
-
 
         private static Type GetMethodCallType(string methodName, int argumentCount, Type[] genericArguments, MethodType methodType) {
             switch (argumentCount) {
@@ -341,17 +345,17 @@ namespace UIForia {
         }
 
         private Expression VisitAliasNode(AliasExpressionNode node) {
-            Type aliasedType = context.ResolveRuntimeAliasType(node.alias);
-
-            if (aliasedType == null) {
-                throw new Exception("Unable to resolve alias: " + node.alias);
-            }
+//            Type aliasedType = context.ResolveRuntimeAliasType(node.alias);
+//
+//            if (aliasedType == null) {
+//                throw new Exception("Unable to resolve alias: " + node.alias);
+//            }
 
             string contextName = node.alias;
             if (contextName.StartsWith("$") && expressionAliasResolvers != null) {
                 for (int i = 0; i < expressionAliasResolvers.Count; i++) {
                     if (contextName == expressionAliasResolvers[i].aliasName) {
-                        Expression retn = expressionAliasResolvers[i].Compile(context, node, Visit);
+                        Expression retn = expressionAliasResolvers[i].CompileAsValueExpression(context, node, Visit);
                         if (retn == null) {
                             throw new ParseException($"Resolver {expressionAliasResolvers[i]} failed to parse {contextName}");
                         }
@@ -360,28 +364,29 @@ namespace UIForia {
                     }
                 }
             }
-            
-            return (Expression) ReflectionUtil.CreateGenericInstanceFromOpenType(
-                typeof(ResolveExpression_Alias<>),
-                aliasedType,
-                node.alias
-            );
+
+            throw new ParseException($"Unable to resolve alias {contextName}");
+//            return (Expression) ReflectionUtil.CreateGenericInstanceFromOpenType(
+//                typeof(ResolveExpression_Alias<>),
+//                aliasedType,
+//                node.alias
+//            );
         }
 
         private Expression VisitRootContextAccessor(RootContextLookupNode node) {
             string fieldName = node.idNode.identifier;
-            // todo -- alias is resolved before field access, might be an issue
-            object constantAlias = context.ResolveConstAlias(fieldName);
-            if (constantAlias != null) {
-                Type aliasType = constantAlias.GetType();
-
-                ReflectionUtil.ObjectArray1[0] = constantAlias;
-                return (Expression) ReflectionUtil.CreateGenericInstanceFromOpenType(
-                    typeof(ConstantExpression<>),
-                    aliasType,
-                    ReflectionUtil.ObjectArray1
-                );
-            }
+//            // todo -- alias is resolved before field access, might be an issue
+//            object constantAlias = context.ResolveConstAlias(fieldName);
+//            if (constantAlias != null) {
+//                Type aliasType = constantAlias.GetType();
+//
+//                ReflectionUtil.ObjectArray1[0] = constantAlias;
+//                return (Expression) ReflectionUtil.CreateGenericInstanceFromOpenType(
+//                    typeof(ConstantExpression<>),
+//                    aliasType,
+//                    ReflectionUtil.ObjectArray1
+//                );
+//            }
 
             if (ReflectionUtil.IsField(context.rootType, fieldName)) {
                 Type fieldType = ReflectionUtil.GetFieldType(context.rootType, fieldName);
@@ -587,10 +592,10 @@ namespace UIForia {
             AccessExpressionType expressionType = AccessExpressionType.AliasLookup;
             bool isStaticReferenceExpression = false;
 
-            if (contextName.StartsWith("$") && expressionAliasResolvers != null) {
+            if (contextName[0] == '$') {
                 for (int i = 0; i < expressionAliasResolvers.Count; i++) {
                     if (contextName == expressionAliasResolvers[i].aliasName) {
-                        Expression retn = expressionAliasResolvers[i].Compile(context, node, Visit);
+                        Expression retn = expressionAliasResolvers[i].CompileAsAccessExpression(context, node, Visit);
                         if (retn == null) {
                             throw new ParseException($"Resolver {expressionAliasResolvers[i]} failed to parse {contextName}");
                         }
@@ -601,15 +606,16 @@ namespace UIForia {
             }
 
             if (node.identifierNode is ExternalReferenceIdentifierNode) {
-                isStaticReferenceExpression = true;
-                headType = (Type) context.ResolveConstAlias(contextName);
-                // todo -- this will break for non type references... its possible that we want a constant value or something else here
-                if (headType == null) {
-                    throw new Exception("Unable to resolve alias: " + contextName);
-                }
+                throw new NotImplementedException();
+//                isStaticReferenceExpression = true;
+//                headType = (Type) context.ResolveConstAlias(contextName);
+//                // todo -- this will break for non type references... its possible that we want a constant value or something else here
+//                if (headType == null) {
+//                    throw new Exception("Unable to resolve alias: " + contextName);
+//                }
             }
             else {
-                headType = context.ResolveRuntimeAliasType(contextName);
+                headType = ReflectionUtil.ResolveFieldOrPropertyType(context.rootType, contextName);
             }
 
             if (headType == null) {
@@ -784,7 +790,6 @@ namespace UIForia {
                             // todo fix this terrible error message
                             throw new Exception("Error parsing method access expression");
                         }
-
 
                         if (ReflectionUtil.IsAction(methodType)) {
                             parts[i] = CreateActionAccessPart(methodType, methodPart.signatureNode);

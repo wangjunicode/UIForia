@@ -247,6 +247,21 @@ public static class ReflectionUtil {
                 return false;
         }
     }
+    
+    public static Type ResolveFieldOrPropertyType(Type type, string name) {
+        FieldInfo fieldInfo = GetFieldInfo(type, name);
+        if (fieldInfo != null) {
+            return fieldInfo.FieldType;
+        }
+
+        PropertyInfo propertyInfo = GetPropertyInfo(type, name);
+
+        if (propertyInfo != null) {
+            return propertyInfo.PropertyType;
+        }
+
+        return null;
+    }
 
     public static bool IsOverride(MethodInfo m) {
         return m.GetBaseDefinition().DeclaringType != m.DeclaringType;
@@ -732,7 +747,6 @@ public static class ReflectionUtil {
         return false;
     }
 
-
     public static bool IsPropertyStatic(PropertyInfo propertyInfo) {
         return propertyInfo.GetMethod?.IsStatic ?? false;
     }
@@ -740,7 +754,6 @@ public static class ReflectionUtil {
     public static bool IsPropertyReadOnly(PropertyInfo propertyInfo) {
         return propertyInfo.SetMethod == null;
     }
-
 
     public static bool IsAction(Type type) {
         if (type == typeof(Action)) {

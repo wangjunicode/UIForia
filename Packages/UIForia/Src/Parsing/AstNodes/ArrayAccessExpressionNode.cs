@@ -10,10 +10,6 @@ namespace UIForia {
             this.expressionNode = expressionNode;
         }
 
-        public override bool TypeCheck(ContextDefinition contextDefinition) {
-            return typeof(int) == expressionNode.GetYieldedType(contextDefinition);
-        }
-        
         public override Type GetYieldedType(ContextDefinition context) {
             return typeof(int);
         }

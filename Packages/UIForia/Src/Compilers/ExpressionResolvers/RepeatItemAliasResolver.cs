@@ -10,7 +10,7 @@ namespace UIForia.Compilers {
             this.itemType = itemType;
         }
 
-        public override Expression Compile(ContextDefinition context, ExpressionNode node, Func<ExpressionNode, Expression> visit) {
+        public override Expression CompileAsValueExpression(ContextDefinition context, ExpressionNode node, Func<ExpressionNode, Expression> visit) {
             if (node.expressionType == ExpressionNodeType.AliasAccessor) {
                 ReflectionUtil.ObjectArray1[0] = aliasName;
                 return (Expression) ReflectionUtil.CreateGenericInstanceFromOpenType(

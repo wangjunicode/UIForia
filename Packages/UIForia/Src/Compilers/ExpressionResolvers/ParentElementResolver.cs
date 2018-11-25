@@ -8,7 +8,7 @@ namespace UIForia.Compilers {
 
         private static readonly UIParentElementExpression<UIElement> s_Expression = new UIParentElementExpression<UIElement>();
 
-        public override Expression Compile(ContextDefinition context, ExpressionNode node, Func<ExpressionNode, Expression> visit) {
+        public override Expression CompileAsValueExpression(ContextDefinition context, ExpressionNode node, Func<ExpressionNode, Expression> visit) {
             if (node.expressionType == ExpressionNodeType.Accessor) {
                 return s_Expression;
             }

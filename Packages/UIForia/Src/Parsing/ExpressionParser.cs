@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Globalization;
+using UIForia.Util;
 
 /*
 * Grammar
@@ -22,121 +23,56 @@ using System.Globalization;
 */
 namespace UIForia {
 
-    public class ExpressionParser {
+    public struct ExpressionParser {
 
         private TokenStream tokenStream;
-        private readonly Stack<ExpressionNode> expressionStack;
-        private readonly Stack<IOperatorNode> operatorStack;
+        private Stack<ExpressionNode> expressionStack;
+        private Stack<IOperatorNode> operatorStack;
 
-        private static readonly TokenStream EmptyTokenStream = new TokenStream(new List<DslToken>());
-
-        private bool isLiteralExpression;
-
-        public ExpressionParser() {
-            tokenStream = EmptyTokenStream;
-            expressionStack = new Stack<ExpressionNode>();
-            operatorStack = new Stack<IOperatorNode>();
+        private ExpressionParser(TokenStream stream) {
+            tokenStream     = stream;
+            operatorStack   = StackPool<IOperatorNode>.Get();
+            expressionStack = StackPool<ExpressionNode>.Get();
         }
 
-        public ExpressionParser(TokenStream tokenStream) {
-            this.tokenStream = tokenStream;
-            expressionStack = new Stack<ExpressionNode>();
-            operatorStack = new Stack<IOperatorNode>();
+        private void Release() {
+            tokenStream.Release();
+            StackPool<IOperatorNode>.Release(operatorStack);
+            StackPool<ExpressionNode>.Release(expressionStack);
         }
 
-        public ExpressionParser(string input) {
-            tokenStream = new TokenStream(Tokenizer.Tokenize(input));
-            expressionStack = new Stack<ExpressionNode>();
-            operatorStack = new Stack<IOperatorNode>();
-        }
-
-        [DebuggerStepThrough]
-        private int FindNextIndex(TokenType targetTokenType) {
-            int i = 0;
-            int counter = 0;
-            while (tokenStream.HasTokenAt(i)) {
-                TokenType token = tokenStream.Peek(i);
-                if (token == TokenType.ParenOpen) {
-                    counter++;
-                }
-                else if (token == TokenType.ParenClose) {
-                    counter--;
-                }
-                else if (token == targetTokenType && counter == 0) {
-                    return i;
-                }
-                i++;
-            }
-            return -1;
-        }
-
-        [DebuggerStepThrough]
-        private int FindMatchingBraceIndex(TokenType braceOpen, TokenType braceClose) {
-            if (tokenStream.Current != braceOpen) {
-                return -1;
-            }
-
-            tokenStream.Save();
-
-            int i = -1;
-            int counter = 0;
-            while (tokenStream.HasMoreTokens) {
-                i++;
-
-                if (tokenStream.Current == braceOpen) {
-                    counter++;
-                }
-
-                if (tokenStream.Current == braceClose) {
-                    counter--;
-                    if (counter == 0) {
-                        tokenStream.Restore();
-                        return i;
-                    }
-                }
-
+        private ExpressionNode ParseInternal(string input) {
+            tokenStream = new TokenStream(Tokenizer.Tokenize(input, ListPool<DslToken>.Get()));
+            expressionStack = expressionStack ?? StackPool<ExpressionNode>.Get();
+            operatorStack = operatorStack ?? StackPool<IOperatorNode>.Get();
+            
+            if (tokenStream.Current == TokenType.ExpressionOpen) {
                 tokenStream.Advance();
             }
-
-            tokenStream.Restore();
-            return -1;
-        }
-
-        public ExpressionNode Parse() {
-
-            expressionStack.Clear();
-            operatorStack.Clear();
 
             if (!tokenStream.HasMoreTokens) {
                 throw new ParseException("Failed trying to parse empty expression");
             }
-            
-            if (tokenStream.Current != TokenType.ExpressionOpen) {
-                isLiteralExpression = true;
-                return ParseLoop(ParseLiteralExpressionOperand);
-            }
-            else {
-                isLiteralExpression = false;
-            }
-            tokenStream.Advance();
 
-            if (tokenStream.Last != TokenType.ExpressionClose) {
-                throw new Exception("Expected dynamic expression to be wrapped in braces { }");
+            if (tokenStream.Last == TokenType.ExpressionClose) {
+                tokenStream.Chop();
             }
 
-            tokenStream.Chop();
+            ExpressionNode retn = ParseLoop();
 
-            return ParseLoop(ParseDynamicExpressionOperand);
+            Release();
+
+            return retn;
         }
 
-        public ExpressionNode Parse(string input) {
-            tokenStream = new TokenStream(Tokenizer.Tokenize(input));
-            return Parse();
+        public static ExpressionNode Parse(string input) {
+            return new ExpressionParser().ParseInternal(input);
         }
 
-        private ExpressionNode ParseLoop(Func<ExpressionNode> parseFn) {
+        private ExpressionNode ParseLoop() {
             while (tokenStream.HasMoreTokens) {
-                ExpressionNode operand = parseFn();
+                ExpressionNode operand = null;
+                ParseExpression(ref operand);
 
                 if (operand != null) {
                     expressionStack.Push(operand);
@@ -145,7 +81,6 @@ namespace UIForia {
 
                 OperatorNode op = ParseOperatorExpression();
                 if (op != null) {
-                    
                     while (operatorStack.Count != 0 && op.precedence <= operatorStack.Peek().Precedence) {
                         expressionStack.Push(new OperatorExpressionNode(
                                 expressionStack.Pop(),
@@ -154,7 +89,7 @@ namespace UIForia {
                             )
                         );
                     }
-                    
+
                     operatorStack.Push(op);
                     continue;
                 }
@@ -170,7 +105,7 @@ namespace UIForia {
                     )
                 );
             }
-            
+
             if (expressionStack.Count != 1) {
                 Abort();
             }
@@ -179,10 +114,10 @@ namespace UIForia {
         }
 
         private void Abort() {
-            string additionalInfo = isLiteralExpression
-                ? "This might be because you are referencing non literal values in a string not wrapped in braces."
-                : string.Empty;
-            throw new Exception($"Failed to parse {tokenStream}. {additionalInfo}");
+//            string additionalInfo = isLiteralExpression
+//                ? "This might be because you are referencing non literal values in a string not wrapped in braces."
+//                : string.Empty;
+            throw new Exception($"Failed to parse {tokenStream}");
         }
 
         private bool ParseArrayBracketExpression(ref AccessExpressionPartNode retn) {
@@ -190,17 +125,13 @@ namespace UIForia {
                 return false;
             }
 
-            int advance = FindMatchingBraceIndex(TokenType.ArrayAccessOpen, TokenType.ArrayAccessClose);
+            int advance = tokenStream.FindMatchingBraceIndex(TokenType.ArrayAccessOpen, TokenType.ArrayAccessClose);
             if (advance == -1) throw new Exception("Unmatched array bracket");
 
             ExpressionParser subParser = CreateSubParser(advance);
+            retn = new ArrayAccessExpressionNode(subParser.ParseLoop());
+            subParser.Release();
 
-            if (isLiteralExpression) {
-                retn = new ArrayAccessExpressionNode(subParser.ParseLoop(subParser.ParseLiteralExpressionOperand));
-            }
-            else {
-                retn = new ArrayAccessExpressionNode(subParser.ParseLoop(subParser.ParseDynamicExpressionOperand));
-            }
             return true;
         }
 
@@ -209,17 +140,13 @@ namespace UIForia {
                 return false;
             }
 
-            int advance = FindMatchingBraceIndex(TokenType.ParenOpen, TokenType.ParenClose);
+            int advance = tokenStream.FindMatchingBraceIndex(TokenType.ParenOpen, TokenType.ParenClose);
             if (advance == -1) throw new Exception("Unmatched paren");
 
             ExpressionParser subParser = CreateSubParser(advance);
+            retn = new ParenExpressionNode(subParser.ParseLoop());
+            subParser.Release();
 
-            if (isLiteralExpression) {
-                retn = new ParenExpressionNode(subParser.ParseLoop(subParser.ParseLiteralExpressionOperand));
-            }
-            else {
-                retn = new ParenExpressionNode(subParser.ParseLoop(subParser.ParseDynamicExpressionOperand));
-            }
             return true;
         }
 
@@ -229,28 +156,12 @@ namespace UIForia {
             TokenStream stream = tokenStream.AdvanceAndReturnSubStream(advance - 1);
             // step over closing paren
             tokenStream.Advance();
-            ExpressionParser subParser = new ExpressionParser(stream);
-            subParser.isLiteralExpression = isLiteralExpression;
 
-            return subParser;
-        }
-
-        private ExpressionNode ParseLiteralExpressionOperand() {
-            ExpressionNode retn = null;
-
-            if (ParseParenExpression(ref retn)) return retn;
-            if (ParseLiteralValue(ref retn)) return retn;
-
-            return null;
-        }
-
-        private ExpressionNode ParseDynamicExpressionOperand() {
-            ExpressionNode retn = null;
-            return ParseExpression(ref retn) ? retn : null;
+            return new ExpressionParser(stream);
         }
 
         private bool ParseExpression(ref ExpressionNode retn) {
-
+            //      if (ParseStringLiteralExpression(ref retn)) return true;
             if (ParseMethodExpression(ref retn)) return true;
             if (ParseAccessExpression(ref retn)) return true;
             if (ParseParenExpression(ref retn)) return true;
@@ -260,13 +171,23 @@ namespace UIForia {
 
             return false;
         }
-        
-     
+
+//        private bool ParseNewExpression(ref ExpressionNode retn) {
+//            
+//        }
+//        
+//        private bool ParsePrefixCastExpression(ref ExpressionNode retn) {
+//            
+//        }
+//
+//        private bool ParseStringLiteralExpression(ref ExpressionNode retn) {
+//                
+//        }
 
         private OperatorNode ParseOperatorExpression() {
             tokenStream.Save();
 
-            if ((tokenStream.Current & TokenType.Operator) == 0) {
+            if (!tokenStream.Current.IsOperator) {
                 tokenStream.Restore();
                 return null;
             }
@@ -274,7 +195,6 @@ namespace UIForia {
             tokenStream.Advance();
 
             switch (tokenStream.Previous.tokenType) {
-                
                 case TokenType.Plus:
                     return new OperatorNode(1, OperatorType.Plus);
 
@@ -336,6 +256,10 @@ namespace UIForia {
                 return false;
             }
 
+            if (idNode.identifier == "typeof") {
+                throw new NotImplementedException();
+            }
+
             if (!tokenStream.HasMoreTokens) {
                 tokenStream.Restore();
                 return false;
@@ -352,7 +276,7 @@ namespace UIForia {
                 return true;
             }
 
-            int advance = FindMatchingBraceIndex(TokenType.ParenOpen, TokenType.ParenClose);
+            int advance = tokenStream.FindMatchingBraceIndex(TokenType.ParenOpen, TokenType.ParenClose);
             if (advance == -1) {
                 throw new Exception("Unmatched paren");
             }
@@ -370,16 +294,17 @@ namespace UIForia {
             List<ExpressionNode> parts = new List<ExpressionNode>(2);
 
             while (tokenStream.HasMoreTokens) {
-                int nextComma = FindNextIndex(TokenType.Comma);
+                int nextComma = tokenStream.FindNextIndex(TokenType.Comma);
 
                 if (nextComma == -1) {
-                    parts.Add(ParseLoop(ParseDynamicExpressionOperand));
+                    parts.Add(ParseLoop());
                 }
                 else {
                     TokenStream subStream = tokenStream.AdvanceAndReturnSubStream(nextComma);
                     ExpressionParser subParser = new ExpressionParser(subStream);
-                    parts.Add(subParser.ParseLoop(subParser.ParseDynamicExpressionOperand));
+                    parts.Add(subParser.ParseLoop());
                 }
+
                 tokenStream.Advance();
             }
 
@@ -397,11 +322,10 @@ namespace UIForia {
                 return true;
             }
 
-            if ((tokenStream.Current & TokenType.UnaryOperator) != 0) {
+            if (tokenStream.Current.IsUnaryOperator) {
                 OperatorType opType;
-                
-                
-                if (tokenStream.Current != TokenType.Not && tokenStream.HasPrevious && (tokenStream.Previous & TokenType.UnaryRequiresCheck) == 0) {
+
+                if (tokenStream.Current != TokenType.Not && tokenStream.HasPrevious && !tokenStream.Previous.UnaryRequiresCheck) {
                     tokenStream.Restore();
                     return false;
                 }
@@ -427,15 +351,13 @@ namespace UIForia {
                     retn = new UnaryExpressionNode(expressionNode, opType);
                     return true;
                 }
-
             }
 
             tokenStream.Restore();
             return false;
         }
-        
-        private bool ParseLookupExpression(ref ExpressionNode retn) {
 
+        private bool ParseLookupExpression(ref ExpressionNode retn) {
             IdentifierNode idNode = null;
 
             if (!ParseIdentifier(ref idNode)) {
@@ -448,27 +370,25 @@ namespace UIForia {
             else {
                 retn = new RootContextLookupNode(idNode);
             }
-            
+
             return true;
         }
 
-       
-        
         [DebuggerStepThrough]
         private bool ParseIdentifier(ref IdentifierNode node) {
             tokenStream.Save();
 
-            if (tokenStream.Current != TokenType.Identifier 
+            if (tokenStream.Current != TokenType.Identifier
                 && tokenStream.Current != TokenType.At
-                && tokenStream.Current != TokenType.SpecialIdentifier) {
+                && tokenStream.Current != TokenType.Alias) {
                 tokenStream.Restore();
                 return false;
             }
 
-            if (tokenStream.Current == TokenType.SpecialIdentifier) {
+            if (tokenStream.Current == TokenType.Alias) {
                 node = new SpecialIdentifierNode(tokenStream.Current);
             }
-            else if(tokenStream.Current == TokenType.At) {
+            else if (tokenStream.Current == TokenType.At) {
                 tokenStream.Advance();
                 node = new ExternalReferenceIdentifierNode("@" + tokenStream.Current);
             }
@@ -493,17 +413,15 @@ namespace UIForia {
 
         private bool ParseMethodAccessExpression(ref AccessExpressionPartNode retn) {
             tokenStream.Save();
-            
+
             if (tokenStream.Current == TokenType.ParenOpen) {
-            
                 if (tokenStream.Next == TokenType.ParenClose) {
                     tokenStream.Advance(2);
                     retn = new MethodAccessExpressionPartNode(new MethodSignatureNode());
                     return true;
                 }
-                
 
-                int advance = FindMatchingBraceIndex(TokenType.ParenOpen, TokenType.ParenClose);
+                int advance = tokenStream.FindMatchingBraceIndex(TokenType.ParenOpen, TokenType.ParenClose);
                 if (advance == -1) {
                     throw new Exception("Unmatched paren");
                 }
@@ -513,8 +431,8 @@ namespace UIForia {
 
                 retn = new MethodAccessExpressionPartNode(signature);
                 return true;
-               
             }
+
             tokenStream.Restore();
             return false;
         }
@@ -535,6 +453,7 @@ namespace UIForia {
 
                 return true;
             }
+
             tokenStream.Restore();
             return false;
         }
@@ -565,7 +484,6 @@ namespace UIForia {
             parts.Add(head);
 
             while (tokenStream.HasMoreTokens) {
-
                 AccessExpressionPartNode partNode = null;
                 if (ParseAccessExpressionPart(ref partNode)) {
                     parts.Add(partNode);
@@ -588,16 +506,15 @@ namespace UIForia {
                 retn = new UnaryExpressionNode(parenExpressionNode, operatorType);
                 return true;
             }
+
             tokenStream.Restore();
             return false;
         }
 
         private bool ParseUnaryLiteralValue(ref ExpressionNode retn) {
-            
             if (!tokenStream.HasMoreTokens) return false;
-            
+
             if (tokenStream.Current == TokenType.Not) {
-                
                 if (tokenStream.Next == TokenType.Boolean) {
                     bool value = bool.Parse(tokenStream.Next.value);
                     tokenStream.Advance(2);
@@ -608,18 +525,14 @@ namespace UIForia {
                 if (ParseUnaryParenExpression(ref retn, OperatorType.Not)) {
                     return true;
                 }
-
             }
 
-            if (!tokenStream.HasPrevious ||
-                (tokenStream.HasPrevious && (tokenStream.Previous.tokenType & TokenType.ArithmeticOperator) != 0)) {
-
+            if (!tokenStream.HasPrevious || (tokenStream.HasPrevious && tokenStream.Previous.IsArithmeticOperator)) {
                 if (tokenStream.Current == TokenType.Minus || tokenStream.Current == TokenType.Plus) {
-
                     OperatorType operatorType = tokenStream.Current == TokenType.Minus
                         ? OperatorType.Minus
                         : OperatorType.Plus;
-                    
+
                     if (tokenStream.Next == TokenType.Number) {
                         bool isNegative = tokenStream.Current == TokenType.Minus;
 
@@ -631,9 +544,7 @@ namespace UIForia {
                     if (ParseUnaryParenExpression(ref retn, operatorType)) {
                         return true;
                     }
-
                 }
-
             }
 
             return false;

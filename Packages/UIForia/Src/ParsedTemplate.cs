@@ -67,7 +67,8 @@ namespace UIForia {
                 }
                 
                 imports[i].type = type;
-                contextDefinition.AddConstAliasSource(new ExternalReferenceAliasSource(imports[i].alias, type));
+                throw new NotImplementedException();
+//                contextDefinition.AddConstAliasSource(new ExternalReferenceAliasSource(imports[i].alias, type));
             }
 
             CompileStep(rootElementTemplate);

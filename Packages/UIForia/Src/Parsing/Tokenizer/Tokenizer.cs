@@ -72,7 +72,7 @@ namespace UIForia {
             }
 
             output.Add(first == '$'
-                ? new DslToken(TokenType.SpecialIdentifier, input.Substring(start, ptr - start))
+                ? new DslToken(TokenType.Alias, input.Substring(start, ptr - start))
                 : new DslToken(TokenType.Identifier, input.Substring(start, ptr - start)));
 
             return TryConsumeWhiteSpace(ptr, input);
@@ -104,8 +104,9 @@ namespace UIForia {
             return TryConsumeWhiteSpace(ptr, input);
         }
 
-        public static List<DslToken> Tokenize(string input) {
-            List<DslToken> output = new List<DslToken>();
+        // todo take optional file / line number for error message
+        public static List<DslToken> Tokenize(string input, List<DslToken> retn = null) {
+            List<DslToken> output = retn ?? new List<DslToken>();
 
             int ptr = TryConsumeWhiteSpace(0, input);
             while (ptr < input.Length) {
@@ -140,6 +141,9 @@ namespace UIForia {
                 ptr = TryReadCharacters(ptr, input, "true", TokenType.Boolean, output);
                 ptr = TryReadCharacters(ptr, input, "false", TokenType.Boolean, output);
                 ptr = TryReadCharacters(ptr, input, "@", TokenType.At, output);
+                ptr = TryReadCharacters(ptr, input, "as", TokenType.As, output);
+                ptr = TryReadCharacters(ptr, input, "is", TokenType.Is, output);
+                ptr = TryReadCharacters(ptr, input, "new", TokenType.New, output);
 
                 ptr = TryReadString(ptr, input, output);
                 ptr = TryReadDigit(ptr, input, output);
@@ -147,11 +151,24 @@ namespace UIForia {
                 ptr = TryConsumeWhiteSpace(ptr, input);
 
                 if (ptr == start && ptr < input.Length) {
-                    throw new Exception("Tokenizer failed on string: " + input);
+                    throw new ParseException($"Tokenizer failed on string: {input}." +
+                                        $" Processed {input.Substring(0, ptr)} as ({PrintTokenList(output)})" +
+                                        $" but then got stuck on {input.Substring(ptr)}");
                 }
             }
 
             return output;
+        }
+
+        private static string PrintTokenList(List<DslToken> tokens) {
+            string retn = "";
+            for (int i = 0; i < tokens.Count; i++) {
+                retn += tokens[i].ToString();
+                if (i != tokens.Count - 1) {
+                    retn += ", ";
+                }
+            }
+            return retn;
         }
 
     }

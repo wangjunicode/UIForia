@@ -16,7 +16,9 @@ namespace UIForia {
         public string alias => identifierNode.identifier;
 
         public override Type GetYieldedType(ContextDefinition context) {
-            return context.ResolveRuntimeAliasType(identifierNode.identifier);
+            throw new NotImplementedException();
+            // needs to be the return type of the alias resolver
+            //context.ResolveRuntimeAliasType(identifierNode.identifier);
         }
 
     }

@@ -27,7 +27,48 @@ namespace UIForia {
         public static implicit operator string(DslToken token) {
             return token.value;
         }
+
+        public bool IsArithmeticOperator =>
+            tokenType == TokenType.Plus ||
+            tokenType == TokenType.Minus ||
+            tokenType == TokenType.Times ||
+            tokenType == TokenType.Divide ||
+            tokenType == TokenType.Mod;
         
+        public bool IsComparator => 
+            tokenType == TokenType.Equals ||
+            tokenType == TokenType.NotEquals ||
+            tokenType == TokenType.GreaterThan || 
+            tokenType == TokenType.GreaterThanEqualTo || 
+            tokenType == TokenType.LessThan || 
+            tokenType == TokenType.LessThanEqualTo;
+
+        public bool IsBooleanTest =>
+            tokenType == TokenType.And ||
+            tokenType == TokenType.Or ||
+            tokenType == TokenType.Not;
+        
+        public bool IsOperator =>
+            IsArithmeticOperator ||
+            IsComparator ||
+            IsBooleanTest || 
+            tokenType == TokenType.QuestionMark ||
+            tokenType == TokenType.Colon;
+
+        public bool IsUnaryOperator =>
+            tokenType == TokenType.Plus ||
+            tokenType == TokenType.Minus ||
+            tokenType == TokenType.Not;
+
+        public bool UnaryRequiresCheck =>
+            tokenType == TokenType.Comma ||
+            tokenType == TokenType.Colon ||
+            tokenType == TokenType.QuestionMark ||
+            tokenType == TokenType.ParenOpen ||
+            tokenType == TokenType.ArrayAccessOpen ||
+            IsArithmeticOperator ||
+            IsComparator;
+
     }
 
 }

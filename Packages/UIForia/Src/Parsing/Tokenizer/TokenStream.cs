@@ -1,18 +1,20 @@
 using System.Collections.Generic;
 using System.Diagnostics;
+using UIForia.Util;
 
 namespace UIForia {
 
-    public class TokenStream {
+    public struct TokenStream {
 
         private int ptr;
 
-        private readonly Stack<int> stack;
-        private readonly List<DslToken> tokens;
+        private Stack<int> stack;
+        private List<DslToken> tokens;
 
         public TokenStream(List<DslToken> tokens) {
+            ptr = 0;
             this.tokens = tokens;
-            stack = new Stack<int>();
+            stack = StackPool<int>.Get();
         }
 
         public DslToken Current => tokens[ptr];
@@ -51,7 +53,61 @@ namespace UIForia {
 
             return retn;
         }
+        
+        [DebuggerStepThrough]
+        public int FindNextIndex(TokenType targetTokenType) {
+            int i = 0;
+            int counter = 0;
+            while (HasTokenAt(i)) {
+                TokenType token = Peek(i);
+                if (token == TokenType.ParenOpen) {
+                    counter++;
+                }
+                else if (token == TokenType.ParenClose) {
+                    counter--;
+                }
+                else if (token == targetTokenType && counter == 0) {
+                    return i;
+                }
 
+                i++;
+            }
+
+            return -1;
+        }
+
+        [DebuggerStepThrough]
+        public int FindMatchingBraceIndex(TokenType braceOpen, TokenType braceClose) {
+            if (Current != braceOpen) {
+                return -1;
+            }
+
+            Save();
+
+            int i = -1;
+            int counter = 0;
+            while (HasMoreTokens) {
+                i++;
+
+                if (Current == braceOpen) {
+                    counter++;
+                }
+
+                if (Current == braceClose) {
+                    counter--;
+                    if (counter == 0) {
+                        Restore();
+                        return i;
+                    }
+                }
+
+                Advance();
+            }
+
+            Restore();
+            return -1;
+        }
+        
         [DebuggerStepThrough]
         public TokenStream AdvanceAndReturnSubStream(int advance) {
             List<DslToken> subStreamTokens = tokens.GetRange(ptr, advance);
@@ -69,6 +125,12 @@ namespace UIForia {
             return ptr + p0 < tokens.Count;
         }
 
+        public void Release() {
+            StackPool<int>.Release(stack);
+            ListPool<DslToken>.Release(ref tokens);
+            stack = null;
+            tokens = null;
+        }
     }
 
 }

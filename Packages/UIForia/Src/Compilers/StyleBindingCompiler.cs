@@ -168,172 +168,6 @@ namespace UIForia.Compilers {
 
             return null;
         }
-//        switch (targetState.property) {
-//                // Paint
-//                case RenderConstants.BackgroundImage:
-//                    return new StyleBinding_BackgroundImage(targetState.state, Compile<Texture2D>(value, textureUrlSource));
-//
-//                case RenderConstants.BackgroundColor:
-//                    return new StyleBinding_BackgroundColor(targetState.state, null);
-//
-//                case RenderConstants.BorderColor:
-//                    return new StyleBinding_BorderColor(targetState.state, Compile<Color>(value, null));
-//
-//                case RenderConstants.BorderRadius:
-//                    return new StyleBinding_BorderRadius(targetState.state, Compile<BorderRadius>(
-//                        value,
-//                        borderRadiusRect1Source,
-//                        borderRadiusRect2Source,
-//                        borderRadiusRect4Source
-//                    ));
-//
-//                case RenderConstants.BorderRadiusTopLeft:
-//                    return new StyleBinding_BorderRadius_TopLeft(targetState.state, Compile<UIFixedLength>(value));
-//
-//                case RenderConstants.BorderRadiusTopRight:
-//                    return new StyleBinding_BorderRadius_TopRight(targetState.state, Compile<UIFixedLength>(value));
-//
-//                case RenderConstants.BorderRadiusBottomRight:
-//                    return new StyleBinding_BorderRadius_BottomRight(targetState.state, Compile<UIFixedLength>(value));
-//
-//                case RenderConstants.BorderRadiusBottomLeft:
-//                    return new StyleBinding_BorderRadius_BottomLeft(targetState.state, Compile<UIFixedLength>(value));
-//
-//                // Transform
-//                case RenderConstants.Translation:
-//                    return new StyleBinding_Translation(targetState.state, Compile<FixedLengthVector>(value, vec2FixedLengthSource));
-//
-//                case RenderConstants.Rotation:
-//                    throw new NotImplementedException();
-//
-//                case RenderConstants.Pivot:
-//                    throw new NotImplementedException();
-//
-//                case RenderConstants.Scale:
-//                    throw new NotImplementedException();
-//
-//                // Rect
-//                case RenderConstants.Size:
-//                    throw new NotImplementedException();
-////                    return new StyleBinding_Dimensions(targetState.state, Compile<Dimensions>(
-////                        value,
-////                        sizeAliasSource
-////                    ));
-//
-//                case RenderConstants.Width:
-//                    return new StyleBinding_Width(targetState.state, Compile<UIMeasurement>(value, measurementSources));
-//
-//                case RenderConstants.Height:
-//                    return new StyleBinding_Height(targetState.state, Compile<UIMeasurement>(value, measurementSources));
-//
-//                // Constraints
-//
-//                case RenderConstants.MinWidth:
-//                    return new StyleBinding_MinWidth(targetState.state, Compile<UIMeasurement>(value, measurementSources));
-//
-//                case RenderConstants.MaxWidth:
-//                    return new StyleBinding_MaxWidth(targetState.state, Compile<UIMeasurement>(value, measurementSources));
-//
-//                case RenderConstants.MinHeight:
-//                    return new StyleBinding_MinHeight(targetState.state, Compile<UIMeasurement>(value, measurementSources));
-//
-//                case RenderConstants.MaxHeight:
-//                    return new StyleBinding_MaxHeight(targetState.state, Compile<UIMeasurement>(value, measurementSources));
-//
-//                case RenderConstants.GrowthFactor:
-//                    return new StyleBinding_GrowthFactor(targetState.state, Compile<int>(value));
-//
-//                case RenderConstants.ShrinkFactor:
-//                    return new StyleBinding_ShrinkFactor(targetState.state, Compile<int>(value));
-//
-//                // Layout
-//
-////                case RenderConstants.OverflowX:
-////                    return new StyleBinding_OverflowX(targetState.state);
-//
-//                case RenderConstants.MainAxisAlignment:
-//                    return new StyleBinding_FlexLayoutMainAxisAlignment(targetState.state, Compile<MainAxisAlignment>(value, mainAxisAlignmentSource));
-//
-//                case RenderConstants.CrossAxisAlignment:
-//                    return new StyleBinding_FlexLayoutCrossAxisAlignment(targetState.state, Compile<CrossAxisAlignment>(value, crossAxisAlignmentSource));
-//
-//                case RenderConstants.LayoutDirection:
-//                    return new StyleBinding_FlexLayoutDirection(targetState.state, Compile<LayoutDirection>(value, layoutDirectionSource));
-//
-//                case RenderConstants.LayoutType:
-//               //     return new StyleBinding_LayoutType(targetState.state, Compile<LayoutType>(value, layoutTypeSource));
-//
-//                case RenderConstants.LayoutWrap:
-//                    return new StyleBinding_FlexLayoutWrap(targetState.state, Compile<LayoutWrap>(value, layoutWrapSource));
-//
-//                // Padding
-//
-//                case RenderConstants.Padding:
-//                    return new StyleBinding_Padding(targetState.state, Compile<FixedLengthRect>(value, rect1Source, rect2Source, rect4Source));
-//
-//                case RenderConstants.PaddingTop:
-//                    return new StyleBinding_PaddingTop(targetState.state, Compile<UIFixedLength>(value, fixedSources));
-//
-//                case RenderConstants.PaddingRight:
-//                    return new StyleBinding_PaddingRight(targetState.state, Compile<UIFixedLength>(value, fixedSources));
-//
-//                case RenderConstants.PaddingBottom:
-//                    return new StyleBinding_PaddingBottom(targetState.state, Compile<UIFixedLength>(value, fixedSources));
-//
-//                case RenderConstants.PaddingLeft:
-//                    return new StyleBinding_PaddingLeft(targetState.state, Compile<UIFixedLength>(value, fixedSources));
-//
-//                // Border
-//
-//                case RenderConstants.Border:
-//                    return new StyleBinding_Border(targetState.state, Compile<FixedLengthRect>(value, rect1Source, rect2Source, rect4Source));
-//
-//                case RenderConstants.BorderTop:
-//                    return new StyleBinding_BorderTop(targetState.state, Compile<UIFixedLength>(value, fixedSources));
-//
-//                case RenderConstants.BorderRight:
-//                    return new StyleBinding_BorderRight(targetState.state, Compile<UIFixedLength>(value, fixedSources));
-//
-//                case RenderConstants.BorderBottom:
-//                    return new StyleBinding_BorderBottom(targetState.state, Compile<UIFixedLength>(value, fixedSources));
-//
-//                case RenderConstants.BorderLeft:
-//                    return new StyleBinding_BorderLeft(targetState.state, Compile<UIFixedLength>(value, fixedSources));
-//
-//                // Margin
-//
-//                case RenderConstants.Margin:
-//                    return new StyleBinding_Margin(targetState.state, Compile<ContentBoxRect>(value, rect1Source, rect2Source, rect4Source));
-//
-//                case RenderConstants.MarginTop:
-//                    return new StyleBinding_MarginTop(targetState.state, Compile<UIMeasurement>(value, measurementSources));
-//
-//                case RenderConstants.MarginRight:
-//                    return new StyleBinding_MarginRight(targetState.state, Compile<UIMeasurement>(value, measurementSources));
-//
-//                case RenderConstants.MarginBottom:
-//                    return new StyleBinding_MarginBottom(targetState.state, Compile<UIMeasurement>(value, measurementSources));
-//
-//                case RenderConstants.MarginLeft:
-//                    return new StyleBinding_MarginLeft(targetState.state, Compile<UIMeasurement>(value, measurementSources));
-//
-//                // Text
-//
-//                case RenderConstants.TextColor:
-//                    return new StyleBinding_TextColor(targetState.state, Compile<Color>(value));
-//
-//                case RenderConstants.FontSize:
-//                    return new StyleBinding_FontSize(targetState.state, Compile<int>(value));
-//
-//                case RenderConstants.Whitespace:
-//                    return new StyleBinding_Whitespace(targetState.state, Compile<WhitespaceMode>(value, whiteSpaceSource));
-//
-//                case RenderConstants.Font:
-//                    return new StyleBinding_Font(targetState.state, Compile<TMP_FontAsset>(value, fontUrlSource));
-//
-//                default: return null;
-//            }
-//        }
 
         private static Target GetTargetState(string key) {
             if (key.StartsWith("style.hover.")) {
@@ -360,20 +194,20 @@ namespace UIForia.Compilers {
         }
 
         private Expression<T> Compile<T>(string value, params IAliasSource[] sources) {
-            if (sources != null) {
-                for (int i = 0; i < sources.Length; i++) {
-                    context.AddConstAliasSource(sources[i]);
-                }
-            }
+//            if (sources != null) {
+//                for (int i = 0; i < sources.Length; i++) {
+//                    context.AddConstAliasSource(sources[i]);
+//                    compiler.AddExpressionResolver(new ValueResolver<>());
+//                }
+//            }
 
-            // for each intrinsic 
             Expression<T> expression = compiler.Compile<T>(value);
 
-            if (sources != null) {
-                for (int i = 0; i < sources.Length; i++) {
-                    context.RemoveConstAliasSource(sources[i]);
-                }
-            }
+//            if (sources != null) {
+//                for (int i = 0; i < sources.Length; i++) {
+//                    context.RemoveConstAliasSource(sources[i]);
+//                }
+//            }
 
             return expression;
         }

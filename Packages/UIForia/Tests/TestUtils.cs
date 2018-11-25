@@ -62,16 +62,13 @@ namespace Tests {
                 arg1Params = new[] {val};
             }
 
-
             public void HandleSomeEventArg2(string arg0, string arg1) {
                 arg2Params = new[] {arg0, arg1};
             }
 
-
             public void HandleSomeEventArg3(string arg0, string arg1, string arg2) {
                 arg3Params = new[] {arg0, arg1, arg2};
             }
-
 
             public void HandleSomeEventArg4(string arg0, string arg1, string arg2, string arg3) {
                 arg4Params = new[] {arg0, arg1, arg2, arg3};

@@ -268,7 +268,7 @@ using UIForia;
             List<TokenType> types = new List<TokenType>();
             types.Add(TokenType.Number);
             types.Add(TokenType.Plus);
-            types.Add(TokenType.SpecialIdentifier);
+            types.Add(TokenType.Alias);
             
             AssertTokenTypes(types, tokens);
         }

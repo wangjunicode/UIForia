@@ -46,10 +46,6 @@ namespace UIForia.Compilers {
             this.compiler = compiler;
         }
         
-//        public void SetContext(ContextDefinition context) {
-//            this.compiler.SetContext(context);
-//        }
-
         public static void AddTypedAliasSource(Type type, IAliasSource aliasSource) {
             if (type == null || aliasSource == null) return;
             List<IAliasSource> list = aliasMap.GetOrDefault(type);
@@ -211,20 +207,20 @@ namespace UIForia.Compilers {
 
         private Binding CompilePropertyAttribute(PropertyInfo propertyInfo, Type targetType, string attrKey, string attrValue) {
             List<IAliasSource> aliasSources = aliasMap.GetOrDefault(propertyInfo.PropertyType);
-
-            if (aliasSources != null) {
-                for (int i = 0; i < aliasSources.Count; i++) {
-                    compiler.context.AddConstAliasSource(aliasSources[i]);
-                }
-            }
+//
+//            if (aliasSources != null) {
+//                for (int i = 0; i < aliasSources.Count; i++) {
+//                    compiler.context.AddConstAliasSource(aliasSources[i]);
+//                }
+//            }
 
             Expression expression = compiler.Compile(attrValue);
 
-            if (aliasSources != null) {
-                for (int i = 0; i < aliasSources.Count; i++) {
-                    compiler.context.RemoveConstAliasSource(aliasSources[i]);
-                }
-            }
+//            if (aliasSources != null) {
+//                for (int i = 0; i < aliasSources.Count; i++) {
+//                    compiler.context.RemoveConstAliasSource(aliasSources[i]);
+//                }
+//            }
 
             ReflectionUtil.LinqAccessor accessor = ReflectionUtil.GetLinqPropertyAccessors(targetType, propertyInfo.PropertyType, attrKey);
 
@@ -255,19 +251,19 @@ namespace UIForia.Compilers {
         private Binding CompileFieldAttribute(FieldInfo fieldInfo, Type targetType, string attrKey, string attrValue) {
             List<IAliasSource> aliasSources = aliasMap.GetOrDefault(fieldInfo.FieldType);
 
-            if (aliasSources != null) {
-                for (int i = 0; i < aliasSources.Count; i++) {
-                    compiler.context.AddConstAliasSource(aliasSources[i]);
-                }
-            }
+//            if (aliasSources != null) {
+//                for (int i = 0; i < aliasSources.Count; i++) {
+//                    compiler.context.AddConstAliasSource(aliasSources[i]);
+//                }
+//            }
 
             Expression expression = compiler.Compile(attrValue);
 
-            if (aliasSources != null) {
-                for (int i = 0; i < aliasSources.Count; i++) {
-                    compiler.context.RemoveConstAliasSource(aliasSources[i]);
-                }
-            }
+//            if (aliasSources != null) {
+//                for (int i = 0; i < aliasSources.Count; i++) {
+//                    compiler.context.RemoveConstAliasSource(aliasSources[i]);
+//                }
+//            }
 
             ReflectionUtil.LinqAccessor accessor = ReflectionUtil.GetLinqFieldAccessors(targetType, fieldInfo.FieldType, attrKey);
 
@@ -364,21 +360,21 @@ namespace UIForia.Compilers {
 
             for (int i = 0; i < delegateParameters.Length; i++) {
                 argTypes[i] = delegateParameters[i].ParameterType;
-                compiler.AddRuntimeAlias(EvtArgNames[i], typeof(string));
+               // compiler.AddRuntimeAlias(EvtArgNames[i], typeof(string));
             }
 
             if (argTypes.Length > 0) {
-                compiler.AddRuntimeAlias(EvtArgDefaultName, argTypes[0]);
+               // compiler.AddRuntimeAlias(EvtArgDefaultName, argTypes[0]);
             }
 
             Expression<Terminal> expression = compiler.Compile<Terminal>(value);
 
             if (argTypes.Length > 0) {
-                compiler.RemoveRuntimeAlias(EvtArgDefaultName);
+//                compiler.RemoveRuntimeAlias(EvtArgDefaultName);
             }
 
             for (int i = 0; i < delegateParameters.Length; i++) {
-                compiler.RemoveRuntimeAlias(EvtArgNames[i]);
+//                compiler.RemoveRuntimeAlias(EvtArgNames[i]);
             }
 
             ReflectionUtil.ObjectArray2[0] = expression;

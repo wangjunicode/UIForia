@@ -145,11 +145,11 @@ namespace UIForia.Compilers {
                         source = '{' + attr.value + '}';
                     }
 
-                    compiler.AddRuntimeAlias(tuple.alias.Item1, tuple.alias.Item2);
+                    compiler.AddExpressionResolver(s_KeyboardEventResolver);
                     
                     Expression<Terminal> expression = compiler.Compile<Terminal>(source);
                     
-                    compiler.RemoveRuntimeAlias(tuple.alias.Item1);
+                    compiler.RemoveExpressionResolver(s_KeyboardEventResolver);
                     
                     attr.isCompiled = true;
                     return new KeyboardEventHandler_Expression(tuple.eventType, expression);
@@ -226,13 +226,10 @@ namespace UIForia.Compilers {
                     }
 
                     compiler.AddExpressionResolver(s_MouseEventResolver);
-                    compiler.AddRuntimeAlias(tuple.alias.Item1, tuple.alias.Item2);
                     
                     Expression<Terminal> expression = compiler.Compile<Terminal>(source);
                     
                     compiler.RemoveExpressionResolver(s_MouseEventResolver);
-                    
-                    compiler.RemoveRuntimeAlias(tuple.alias.Item1);
                     
                     attr.isCompiled = true;
                     return new MouseEventHandler_Expression(tuple.eventType, expression, modifiers, phase);
@@ -405,11 +402,12 @@ namespace UIForia.Compilers {
                     source = '{' + attr.value + '}';
                 }
 
-                compiler.AddRuntimeAlias(s_MouseEventAlias.Item1, s_MouseEventAlias.Item2);
-
+                compiler.AddExpressionResolver(s_MouseEventResolver);
+                
                 Expression<Terminal> expression = compiler.Compile<Terminal>(source);
                 
-                compiler.RemoveRuntimeAlias(s_MouseEventAlias.Item1);
+                compiler.RemoveExpressionResolver(s_MouseEventResolver);
+                
                 
                 attr.isCompiled = true;
                 return new DragEventHandler_Expression(tuple.eventType, expression, modifiers, phase);
@@ -510,11 +508,11 @@ namespace UIForia.Compilers {
                 source = '{' + attr.value + '}';
             }
 
-            compiler.AddRuntimeAlias(s_MouseEventAlias.Item1, s_MouseEventAlias.Item2);
+            compiler.AddExpressionResolver(s_MouseEventResolver);
 
             Expression<DragEvent> expression = compiler.Compile<DragEvent>(source);
 
-            compiler.RemoveRuntimeAlias(s_MouseEventAlias.Item1);
+            compiler.RemoveExpressionResolver(s_MouseEventResolver);
             
             attr.isCompiled = true;
             return new DragEventCreator_Expression(expression, modifiers, phase);

@@ -10,7 +10,7 @@ namespace UIForia.Compilers {
 
         private static readonly UrlReaderExpression s_UrlReaderExpression = new UrlReaderExpression();
 
-        public override Expression Compile(ContextDefinition context, ExpressionNode node, Func<ExpressionNode, Expression> visit) {
+        public override Expression CompileAsValueExpression(ContextDefinition context, ExpressionNode node, Func<ExpressionNode, Expression> visit) {
             if (node.expressionType == ExpressionNodeType.Accessor) {
                 AccessExpressionNode accessExpressionNode = (AccessExpressionNode) node;
                 List<AccessExpressionPartNode> parts = accessExpressionNode.parts;

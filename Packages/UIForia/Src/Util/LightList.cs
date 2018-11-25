@@ -139,6 +139,21 @@ namespace UIForia.Util {
             }
         }
 
+        public T RemoveLast() {
+            T retn = list[size - 1];
+            list[size - 1] = default;
+            size--;
+            return retn;
+        }
+
+        public void RemovePast(int index) {
+            for (int i = index; i < size; i++) {
+                list[i] = default;
+            }
+
+            size = size - index;
+        }
+        
         public void RemoveAt(int index) {
             if ((uint) index >= (uint) size) return;
             for (int j = index; j < size; j++) {

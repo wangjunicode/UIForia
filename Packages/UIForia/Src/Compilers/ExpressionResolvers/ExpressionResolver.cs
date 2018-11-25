@@ -1,5 +1,5 @@
 using System;
-using UIForia.Input;
+using System.Reflection;
 
 namespace UIForia.Compilers {
 
@@ -15,80 +15,77 @@ namespace UIForia.Compilers {
             this.aliasName = aliasName;
         }
 
-        public virtual bool CanCompile(ExpressionNode node) {
-            return true;
-        }
-
-        public abstract Expression Compile(ContextDefinition context, ExpressionNode node, Func<ExpressionNode, Expression> visit);
-
-    }
-
-    public class MouseEventResolver : ExpressionAliasResolver {
-
-        public MouseEventResolver(string aliasName) : base(aliasName) { }
-
-        private static readonly MouseEventAliasExpression s_Expression = new MouseEventAliasExpression();
-        
-        public override Expression Compile(ContextDefinition context, ExpressionNode node, Func<ExpressionNode, Expression> visit) {
-            if (node.expressionType == ExpressionNodeType.AliasAccessor) {
-                return s_Expression;
-            }
-
+        public virtual Expression CompileAsValueExpression(ContextDefinition context, ExpressionNode node, Func<ExpressionNode, Expression> visit) {
             return null;
         }
 
-        public class MouseEventAliasExpression : Expression<MouseInputEvent> {
+        public virtual Expression CompileAsAccessExpression(ContextDefinition context, ExpressionNode node, Func<ExpressionNode, Expression> visit) {
+            return null;
+        }
 
-            public override Type YieldedType => typeof(MouseInputEvent);
-            
-            public override object Evaluate(ExpressionContext context) {
-                UIElement element = (UIElement) context.currentObject;
-                return element.view.Application.InputSystem.CurrentMouseEvent;
-            }
-
-            public override MouseInputEvent EvaluateTyped(ExpressionContext context) {
-                UIElement element = (UIElement) context.currentObject;
-                return element.view.Application.InputSystem.CurrentMouseEvent;
-            }
-
-            public override bool IsConstant() {
-                return false;
-            }
-
+        public virtual Expression CompileAsMethodExpression(MethodCallNode node, Func<ExpressionNode, Expression> visit) {
+            return null;
         }
 
     }
+
+    public class ValueResolver<T> : ExpressionAliasResolver {
+
+        public readonly T value;
+        
+        public ValueResolver(string aliasName, T value) : base(aliasName) {
+            this.value = value;
+        }
+
+        public override Expression CompileAsValueExpression(ContextDefinition context, ExpressionNode node, Func<ExpressionNode, Expression> visit) {
+            return new ConstantExpression<T>(value);
+        }
+
+    }
+
+    public class MethodResolver : ExpressionAliasResolver {
+
+        public readonly MethodInfo info;
+
+        public MethodResolver(string aliasName, MethodInfo info) : base(aliasName) {
+            this.info = info;
+        }
+
+        public override Expression CompileAsValueExpression(ContextDefinition context, ExpressionNode node, Func<ExpressionNode, Expression> visit) {
+            return null;
+        }
+
+    }
+
     
-    public class KeyboardEventResolver : ExpressionAliasResolver {
+    public class EnumResolver<T> : ExpressionAliasResolver {
 
-        public KeyboardEventResolver(string aliasName) : base(aliasName) { }
+        public EnumResolver(string aliasName) : base(aliasName) { }
 
-        private static readonly KeyboardEventAliasExpression s_Expression = new KeyboardEventAliasExpression();
-        
-        public override Expression Compile(ContextDefinition context, ExpressionNode node, Func<ExpressionNode, Expression> visit) {
-            if (node.expressionType == ExpressionNodeType.AliasAccessor) {
-                return s_Expression;
+        public override Expression CompileAsAccessExpression(ContextDefinition context, ExpressionNode node, Func<ExpressionNode, Expression> visit) {
+
+            AccessExpressionNode x = node as AccessExpressionNode;
+            if (x.parts.Count != 1) {
+                return null;
             }
-
-            return null;
+            
+            return new ConstantExpression<T>(default);
         }
 
-        public class KeyboardEventAliasExpression : Expression<KeyboardInputEvent> {
+        public class EnumValueExpression : Expression<T> {
 
-            public override Type YieldedType => typeof(MouseInputEvent);
+            public override Type YieldedType => typeof(T);
             
             public override object Evaluate(ExpressionContext context) {
-                UIElement element = (UIElement) context.currentObject;
-                return element.view.Application.InputSystem.CurrentKeyboardEvent;
+                throw new NotImplementedException();
             }
 
-            public override KeyboardInputEvent EvaluateTyped(ExpressionContext context) {
-                UIElement element = (UIElement) context.currentObject;
-                return element.view.Application.InputSystem.CurrentKeyboardEvent;
+            public override T EvaluateTyped(ExpressionContext context) {
+                throw new NotImplementedException();
             }
 
             public override bool IsConstant() {
-                return false;
+                return true;
             }
 
         }

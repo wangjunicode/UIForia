@@ -20,9 +20,10 @@ namespace UIForia {
         protected override Type elementType => typeof(UIImageElement);
 
         public override void Compile(ParsedTemplate template) {
-            template.contextDefinition.AddConstAliasSource(s_UrlSource);
+            // template.contextDefinition.AddConstAliasSource(s_UrlSource);
+            // template.compiler.AddExpressionResolver("$url");
             base.Compile(template);
-            template.contextDefinition.RemoveConstAliasSource(s_UrlSource);
+            // template.contextDefinition.RemoveConstAliasSource(s_UrlSource);
         }
 
         public override UIElement CreateScoped(TemplateScope inputScope) {

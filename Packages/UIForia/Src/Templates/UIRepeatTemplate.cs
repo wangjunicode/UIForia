@@ -93,9 +93,9 @@ namespace UIForia {
             listType = genericArgType;
             itemType = genericTypes[0];
 
-            template.contextDefinition.AddRuntimeAlias(indexAlias, typeof(int));
-            template.contextDefinition.AddRuntimeAlias(lengthAlias, typeof(int));
-            template.contextDefinition.AddRuntimeAlias(itemAlias, itemType);
+//            template.contextDefinition.AddRuntimeAlias(indexAlias, typeof(int));
+//            template.contextDefinition.AddRuntimeAlias(lengthAlias, typeof(int));
+//            template.contextDefinition.AddRuntimeAlias(itemAlias, itemType);
 
             itemResolver = new RepeatItemAliasResolver(itemAlias, itemType);
             indexResolver = new RepeatIndexAliasResolver(indexAlias);

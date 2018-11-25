@@ -20,7 +20,8 @@ namespace UIForia {
         // if is array access -> return currentType.GetElementType()
         // if is property access -> return currentType.GetField("identifier").FieldType
         public override Type GetYieldedType(ContextDefinition context) {
-            Type partType = context.ResolveRuntimeAliasType(identifierNode.identifier);
+            Type partType = ReflectionUtil.ResolveFieldOrPropertyType(context.rootType, identifierNode.identifier);
+//            context.ResolveRuntimeAliasType(identifierNode.identifier);
 
             if (partType == null) {
                 throw new Exception($"Unable to resolve '{identifierNode.identifier}'");
@@ -65,3 +66,4 @@ namespace UIForia {
     }
 
 }
+

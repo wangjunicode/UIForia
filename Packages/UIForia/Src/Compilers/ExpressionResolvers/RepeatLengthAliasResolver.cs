@@ -6,8 +6,8 @@ namespace UIForia.Compilers {
 
         public RepeatLengthAliasResolver(string aliasName) : base(aliasName) { }
 
-        public override Expression CompileAsValueExpression(ContextDefinition context, ExpressionNode node, Func<ExpressionNode, Expression> visit) {
-            if (node.expressionType == ExpressionNodeType.AliasAccessor) {
+        public override Expression CompileAsValueExpression(ContextDefinition context, ExpressionNodeOld nodeOld, Func<ExpressionNodeOld, Expression> visit) {
+            if (nodeOld.expressionType == ExpressionNodeType.AliasAccessor) {
                 return new RepeatLengthExpression(aliasName);
             }
 

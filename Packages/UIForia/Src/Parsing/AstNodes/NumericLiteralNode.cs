@@ -2,18 +2,18 @@ using System;
 
 namespace UIForia {
 
-    public abstract class NumericLiteralNode : LiteralValueNode {
+    public abstract class NumericLiteralNodeOld : LiteralValueNodeOld {
 
         
-        protected NumericLiteralNode() : base(ExpressionNodeType.LiteralValue) {}
+        protected NumericLiteralNodeOld() : base(ExpressionNodeType.LiteralValue) {}
 
     }
 
-    public class FloatLiteralNode : NumericLiteralNode {
+    public class FloatLiteralNodeOld : NumericLiteralNodeOld {
 
         public readonly float value;
 
-        public FloatLiteralNode(float value) {
+        public FloatLiteralNodeOld(float value) {
             this.value = value;
         }
 
@@ -23,11 +23,11 @@ namespace UIForia {
 
     }
     
-    public class IntLiteralNode : NumericLiteralNode {
+    public class IntLiteralNodeOld : NumericLiteralNodeOld {
 
         public readonly int value;
 
-        public IntLiteralNode(int value) {
+        public IntLiteralNodeOld(int value) {
             this.value = value;
         }
 
@@ -37,11 +37,11 @@ namespace UIForia {
 
     }
     
-    public class DoubleLiteralNode : NumericLiteralNode {
+    public class DoubleLiteralNodeOld : NumericLiteralNodeOld {
 
         public readonly double value;
 
-        public DoubleLiteralNode(double value) {
+        public DoubleLiteralNodeOld(double value) {
             this.value = value;
         }
 

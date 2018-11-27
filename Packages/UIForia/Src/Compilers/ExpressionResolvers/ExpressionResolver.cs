@@ -15,15 +15,15 @@ namespace UIForia.Compilers {
             this.aliasName = aliasName;
         }
 
-        public virtual Expression CompileAsValueExpression(ContextDefinition context, ExpressionNode node, Func<ExpressionNode, Expression> visit) {
+        public virtual Expression CompileAsValueExpression(ContextDefinition context, ExpressionNodeOld nodeOld, Func<ExpressionNodeOld, Expression> visit) {
             return null;
         }
 
-        public virtual Expression CompileAsAccessExpression(ContextDefinition context, ExpressionNode node, Func<ExpressionNode, Expression> visit) {
+        public virtual Expression CompileAsAccessExpression(ContextDefinition context, ExpressionNodeOld nodeOld, Func<ExpressionNodeOld, Expression> visit) {
             return null;
         }
 
-        public virtual Expression CompileAsMethodExpression(MethodCallNode node, Func<ExpressionNode, Expression> visit) {
+        public virtual Expression CompileAsMethodExpression(MethodCallNodeOld nodeOld, Func<ExpressionNodeOld, Expression> visit) {
             return null;
         }
 
@@ -37,7 +37,7 @@ namespace UIForia.Compilers {
             this.value = value;
         }
 
-        public override Expression CompileAsValueExpression(ContextDefinition context, ExpressionNode node, Func<ExpressionNode, Expression> visit) {
+        public override Expression CompileAsValueExpression(ContextDefinition context, ExpressionNodeOld nodeOld, Func<ExpressionNodeOld, Expression> visit) {
             return new ConstantExpression<T>(value);
         }
 
@@ -51,7 +51,7 @@ namespace UIForia.Compilers {
             this.info = info;
         }
 
-        public override Expression CompileAsValueExpression(ContextDefinition context, ExpressionNode node, Func<ExpressionNode, Expression> visit) {
+        public override Expression CompileAsValueExpression(ContextDefinition context, ExpressionNodeOld nodeOld, Func<ExpressionNodeOld, Expression> visit) {
             return null;
         }
 
@@ -62,9 +62,9 @@ namespace UIForia.Compilers {
 
         public EnumResolver(string aliasName) : base(aliasName) { }
 
-        public override Expression CompileAsAccessExpression(ContextDefinition context, ExpressionNode node, Func<ExpressionNode, Expression> visit) {
+        public override Expression CompileAsAccessExpression(ContextDefinition context, ExpressionNodeOld nodeOld, Func<ExpressionNodeOld, Expression> visit) {
 
-            AccessExpressionNode x = node as AccessExpressionNode;
+            AccessExpressionNodeOld x = nodeOld as AccessExpressionNodeOld;
             if (x.parts.Count != 1) {
                 return null;
             }

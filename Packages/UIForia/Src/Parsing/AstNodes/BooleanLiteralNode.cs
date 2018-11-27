@@ -2,11 +2,11 @@ using System;
 
 namespace UIForia {
 
-    public class BooleanLiteralNode : LiteralValueNode {
+    public class BooleanLiteralNodeOld : LiteralValueNodeOld {
 
         public readonly bool value;
         
-        public BooleanLiteralNode(bool value) : base(ExpressionNodeType.LiteralValue) {
+        public BooleanLiteralNodeOld(bool value) : base(ExpressionNodeType.LiteralValue) {
             this.value = value;
         }
 

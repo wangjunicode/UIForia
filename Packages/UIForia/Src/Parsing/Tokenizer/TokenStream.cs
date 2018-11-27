@@ -16,14 +16,38 @@ namespace UIForia {
             this.tokens = tokens;
             stack = StackPool<int>.Get();
         }
+        
+        public int CurrentIndex => ptr;
+        
+        public DslToken Current {
+            [DebuggerStepThrough]
+            get { return (ptr >= tokens.Count) ? DslToken.Invalid : tokens[ptr]; }
+        }
 
-        public DslToken Current => tokens[ptr];
-        public DslToken Next => tokens[ptr + 1];
-        public DslToken Previous => tokens[ptr - 1];
-        public DslToken Last => tokens[tokens.Count - 1];
+        public DslToken Next {
+            [DebuggerStepThrough]
+            get { return (ptr + 1 >= tokens.Count) ? DslToken.Invalid : tokens[ptr + 1]; }
+        }
 
-        public bool HasMoreTokens => ptr < tokens.Count;
-        public bool HasPrevious => ptr - 1 >= 0;
+        public DslToken Previous {
+            [DebuggerStepThrough]
+            get { return (ptr - 1 < 0) ? DslToken.Invalid : tokens[ptr - 1]; }
+        }
+
+        public DslToken Last {
+            [DebuggerStepThrough]
+            get { return (tokens.Count == 0) ? DslToken.Invalid : tokens[tokens.Count - 1]; }
+        }
+
+        public bool HasMoreTokens {
+            [DebuggerStepThrough]
+            get { return ptr < tokens.Count; }
+        }
+
+        public bool HasPrevious {
+            [DebuggerStepThrough]
+            get { return ptr - 1 >= 0; }
+        }
 
         [DebuggerStepThrough]
         public void Advance(int count = 1) {
@@ -131,6 +155,11 @@ namespace UIForia {
             stack = null;
             tokens = null;
         }
+
+        public void Rewind(int count = 1) {
+            ptr -= count;
+        }
+
     }
 
 }

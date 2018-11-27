@@ -2,16 +2,16 @@ using System;
 
 namespace UIForia {
 
-    public class ParenExpressionNode : ExpressionNode {
+    public class ParenExpressionNodeOld : ExpressionNodeOld {
 
-        public readonly ExpressionNode expressionNode;
+        public readonly ExpressionNodeOld expressionNodeOld;
         
-        public ParenExpressionNode(ExpressionNode expressionNode) : base (ExpressionNodeType.Paren) {
-            this.expressionNode = expressionNode;
+        public ParenExpressionNodeOld(ExpressionNodeOld expressionNodeOld) : base (ExpressionNodeType.Paren) {
+            this.expressionNodeOld = expressionNodeOld;
         }
 
         public override Type GetYieldedType(ContextDefinition context) {
-            return expressionNode.GetYieldedType(context);
+            return expressionNodeOld.GetYieldedType(context);
         }
 
     }

@@ -4,16 +4,16 @@ using System.Reflection;
 
 namespace UIForia {
 
-    [DebuggerDisplay("{identifierNode.identifier}")]
-    public class AliasExpressionNode : ExpressionNode {
+    [DebuggerDisplay("{identifierNodeOld.identifier}")]
+    public class AliasExpressionNodeOld : ExpressionNodeOld {
 
-        public readonly IdentifierNode identifierNode;
+        public readonly IdentifierNodeOld identifierNodeOld;
 
-        public AliasExpressionNode(IdentifierNode identifierNode) : base(ExpressionNodeType.AliasAccessor) {
-            this.identifierNode = identifierNode;
+        public AliasExpressionNodeOld(IdentifierNodeOld identifierNodeOld) : base(ExpressionNodeType.AliasAccessor) {
+            this.identifierNodeOld = identifierNodeOld;
         }
         
-        public string alias => identifierNode.identifier;
+        public string alias => identifierNodeOld.identifier;
 
         public override Type GetYieldedType(ContextDefinition context) {
             throw new NotImplementedException();

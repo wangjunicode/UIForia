@@ -69,6 +69,8 @@ namespace UIForia {
             IsArithmeticOperator ||
             IsComparator;
 
+        public static DslToken Invalid => new DslToken(TokenType.Invalid, string.Empty);
+
     }
 
 }

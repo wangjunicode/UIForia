@@ -2,13 +2,13 @@ using System;
 
 namespace UIForia {
 
-    public class OperatorExpressionNode : ExpressionNode {
+    public class OperatorExpressionNodeOld : ExpressionNodeOld {
 
-        public ExpressionNode left;
-        public ExpressionNode right;
-        public IOperatorNode op;
+        public ExpressionNodeOld left;
+        public ExpressionNodeOld right;
+        public object op;
 
-        public OperatorExpressionNode(ExpressionNode right, ExpressionNode left, IOperatorNode op)
+        public OperatorExpressionNodeOld(ExpressionNodeOld right, ExpressionNodeOld left, object op)
             : base(ExpressionNodeType.Operator) {
             this.left = left;
             this.right = right;
@@ -87,7 +87,7 @@ namespace UIForia {
             throw new Exception("Invalid types");
         }
 
-        public OperatorType OpType => op.OpType;
+        public OperatorType OpType => default;//op.OpType;
 
         
 

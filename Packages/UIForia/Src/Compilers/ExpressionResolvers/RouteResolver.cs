@@ -10,13 +10,13 @@ namespace UIForia.Compilers {
 
         private static readonly UrlReaderExpression s_UrlReaderExpression = new UrlReaderExpression();
 
-        public override Expression CompileAsValueExpression(ContextDefinition context, ExpressionNode node, Func<ExpressionNode, Expression> visit) {
-            if (node.expressionType == ExpressionNodeType.Accessor) {
-                AccessExpressionNode accessExpressionNode = (AccessExpressionNode) node;
-                List<AccessExpressionPartNode> parts = accessExpressionNode.parts;
+        public override Expression CompileAsValueExpression(ContextDefinition context, ExpressionNodeOld nodeOld, Func<ExpressionNodeOld, Expression> visit) {
+            if (nodeOld.expressionType == ExpressionNodeType.Accessor) {
+                AccessExpressionNodeOld accessExpressionNodeOld = (AccessExpressionNodeOld) nodeOld;
+                List<AccessExpressionPartNodeOld> parts = accessExpressionNodeOld.parts;
              
 
-                if (parts.Count == 1 && parts[0] is PropertyAccessExpressionPartNode field) {
+                if (parts.Count == 1 && parts[0] is PropertyAccessExpressionPartNodeOld field) {
                     if (field.fieldName == "url") {
                         return s_UrlReaderExpression;
                     }
@@ -24,13 +24,13 @@ namespace UIForia.Compilers {
                 }
 
                 if (parts.Count == 2) {
-                    PropertyAccessExpressionPartNode paramPart = parts[0] as PropertyAccessExpressionPartNode;
+                    PropertyAccessExpressionPartNodeOld paramPart = parts[0] as PropertyAccessExpressionPartNodeOld;
                     if (paramPart == null || (paramPart.fieldName != "query" && paramPart.fieldName != "param")) {
                         throw new ParseException("Expected $route.xxx to be url, param, or query, was " + paramPart?.fieldName);
                     }
 
                     if (paramPart.fieldName == "param") {
-                        PropertyAccessExpressionPartNode argPart = parts[1] as PropertyAccessExpressionPartNode;
+                        PropertyAccessExpressionPartNodeOld argPart = parts[1] as PropertyAccessExpressionPartNodeOld;
                         if (argPart == null) {
                             return null;
                         }

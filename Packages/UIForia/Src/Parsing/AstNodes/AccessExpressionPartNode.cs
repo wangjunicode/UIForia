@@ -1,8 +1,8 @@
 namespace UIForia {
 
-    public abstract class AccessExpressionPartNode : ExpressionNode {
+    public abstract class AccessExpressionPartNodeOld : ExpressionNodeOld {
 
-        protected AccessExpressionPartNode(ExpressionNodeType expressionType) : base(expressionType) { }
+        protected AccessExpressionPartNodeOld(ExpressionNodeType expressionType) : base(expressionType) { }
 
     }
 

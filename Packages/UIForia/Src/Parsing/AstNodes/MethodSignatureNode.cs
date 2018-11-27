@@ -2,17 +2,17 @@
 
 namespace UIForia {
 
-    public class MethodSignatureNode : ASTNode {
+    public class MethodSignatureNodeOld : ASTNode_Old {
 
-        public readonly IReadOnlyList<ExpressionNode> parts;
+        public readonly IReadOnlyList<ExpressionNodeOld> parts;
 
-        private static readonly IReadOnlyList<ExpressionNode> EmptyParts = new List<ExpressionNode>(0);
+        private static readonly IReadOnlyList<ExpressionNodeOld> EmptyParts = new List<ExpressionNodeOld>(0);
         
-        public MethodSignatureNode() {
+        public MethodSignatureNodeOld() {
             this.parts = EmptyParts;
         }
         
-        public MethodSignatureNode(List<ExpressionNode> parts) {
+        public MethodSignatureNodeOld(List<ExpressionNodeOld> parts) {
             this.parts = parts;
         }
 

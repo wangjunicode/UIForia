@@ -1,6 +1,6 @@
 using System;
 using System.Collections.Generic;
-using System.Linq;
+using System.Linq.Expressions;
 using System.Reflection;
 using JetBrains.Annotations;
 using UIForia.Compilers;
@@ -42,15 +42,15 @@ namespace UIForia {
         }
 
         [PublicAPI]
-        public Expression Compile(ExpressionNode root) {
+        public Expression Compile(ExpressionNodeOld root) {
             return Visit(root);
         }
 
         [PublicAPI]
-        public Expression<T> Compile<T>(ExpressionNode root) {
+        public Expression<T> Compile<T>(ExpressionNodeOld root) {
             return (Expression<T>) HandleCasting(typeof(T), Visit(root));
         }
-        
+
         [PublicAPI]
         public Expression Compile(string source) {
             try {
@@ -109,31 +109,31 @@ namespace UIForia {
             this.context = contextDefinition;
         }
 
-        private Expression Visit(ExpressionNode node) {
-            switch (node.expressionType) {
+        private Expression Visit(ExpressionNodeOld nodeOld) {
+            switch (nodeOld.expressionType) {
                 case ExpressionNodeType.AliasAccessor:
-                    return VisitAliasNode((AliasExpressionNode) node);
+                    return VisitAliasNode((AliasExpressionNodeOld) nodeOld);
 
                 case ExpressionNodeType.Paren:
-                    return VisitParenNode((ParenExpressionNode) node);
+                    return VisitParenNode((ParenExpressionNodeOld) nodeOld);
 
                 case ExpressionNodeType.RootContextAccessor:
-                    return VisitRootContextAccessor((RootContextLookupNode) node);
+                    return VisitRootContextAccessor((RootContextLookupNodeOld) nodeOld);
 
                 case ExpressionNodeType.LiteralValue:
-                    return VisitConstant((LiteralValueNode) node);
+                    return VisitConstant((LiteralValueNodeOld) nodeOld);
 
                 case ExpressionNodeType.Accessor:
-                    return VisitAccessExpression((AccessExpressionNode) node);
+                    return VisitAccessExpression((AccessExpressionNodeOld) nodeOld);
 
                 case ExpressionNodeType.Unary:
-                    return VisitUnaryExpression((UnaryExpressionNode) node);
+                    return VisitUnaryExpression((UnaryExpressionNodeOld) nodeOld);
 
                 case ExpressionNodeType.Operator:
-                    return VisitOperatorExpression((OperatorExpressionNode) node);
+                    return VisitOperatorExpression((OperatorExpressionNodeOld) nodeOld);
 
                 case ExpressionNodeType.MethodCall:
-                    return VisitMethodCallExpression((MethodCallNode) node);
+                    return VisitMethodCallExpression((MethodCallNodeOld) nodeOld);
             }
 
             return null;
@@ -171,11 +171,11 @@ namespace UIForia {
             }
         }
 
-        private Expression VisitMethodAliasExpression(string alias, MethodCallNode node) {
+        private Expression VisitMethodAliasExpression(string alias, MethodCallNodeOld nodeOld) {
             if (expressionAliasResolvers != null) {
                 for (int i = 0; i < expressionAliasResolvers.Count; i++) {
                     if (expressionAliasResolvers[i].aliasName == alias) {
-                        Expression retn = expressionAliasResolvers[i].CompileAsMethodExpression(node, Visit);
+                        Expression retn = expressionAliasResolvers[i].CompileAsMethodExpression(nodeOld, Visit);
                         if (retn == null) {
                             throw new ParseException($"Resolver {expressionAliasResolvers[i]} failed to parse {alias}");
                         }
@@ -188,11 +188,27 @@ namespace UIForia {
             throw new ParseException();
         }
 
-        private Expression VisitMethodCallExpression(MethodCallNode node) {
-            string methodName = node.identifierNode.identifier;
+        private struct Parameter {
+
+            public Type type;
+            public Expression expression;
+
+        }
+
+        private struct MethodCall {
+
+            public Type returnType;
+            public int parameterCount;
+            public Parameter p0;
+            public bool isStatic;
+
+        }
+
+        private Expression VisitMethodCallExpression(MethodCallNodeOld nodeOld) {
+            string methodName = nodeOld.identifierNodeOld.identifier;
 
             if (methodName[0] == '$') {
-                return VisitMethodAliasExpression(methodName, node);
+                return VisitMethodAliasExpression(methodName, nodeOld);
             }
 
             MethodInfo info = ReflectionUtil.GetMethodInfo(context.rootType, methodName);
@@ -216,7 +232,7 @@ namespace UIForia {
             }
 
             ParameterInfo[] parameters = info.GetParameters();
-            IReadOnlyList<ExpressionNode> signatureParts = node.signatureNode.parts;
+            IReadOnlyList<ExpressionNodeOld> signatureParts = nodeOld.signatureNodeOld.parts;
 
             if (parameters.Length != signatureParts.Count) {
                 throw new Exception("Argument count is wrong for method "
@@ -247,8 +263,8 @@ namespace UIForia {
             for (int i = 0; i < args.Length; i++) {
                 Type requiredType = parameters[i].ParameterType;
                 parameterTypes[i] = requiredType;
-                ExpressionNode argumentNode = signatureParts[i];
-                Expression argumentExpression = Visit(argumentNode);
+                ExpressionNodeOld argumentNodeOld = signatureParts[i];
+                Expression argumentExpression = Visit(argumentNodeOld);
                 args[i] = HandleCasting(requiredType, argumentExpression);
 
                 genericArguments[i + genericOffset] = args[i].YieldedType;
@@ -344,18 +360,18 @@ namespace UIForia {
             }
         }
 
-        private Expression VisitAliasNode(AliasExpressionNode node) {
+        private Expression VisitAliasNode(AliasExpressionNodeOld nodeOld) {
 //            Type aliasedType = context.ResolveRuntimeAliasType(node.alias);
 //
 //            if (aliasedType == null) {
 //                throw new Exception("Unable to resolve alias: " + node.alias);
 //            }
 
-            string contextName = node.alias;
+            string contextName = nodeOld.alias;
             if (contextName.StartsWith("$") && expressionAliasResolvers != null) {
                 for (int i = 0; i < expressionAliasResolvers.Count; i++) {
                     if (contextName == expressionAliasResolvers[i].aliasName) {
-                        Expression retn = expressionAliasResolvers[i].CompileAsValueExpression(context, node, Visit);
+                        Expression retn = expressionAliasResolvers[i].CompileAsValueExpression(context, nodeOld, Visit);
                         if (retn == null) {
                             throw new ParseException($"Resolver {expressionAliasResolvers[i]} failed to parse {contextName}");
                         }
@@ -373,8 +389,8 @@ namespace UIForia {
 //            );
         }
 
-        private Expression VisitRootContextAccessor(RootContextLookupNode node) {
-            string fieldName = node.idNode.identifier;
+        private Expression VisitRootContextAccessor(RootContextLookupNodeOld nodeOld) {
+            string fieldName = nodeOld.idNodeOld.identifier;
 //            // todo -- alias is resolved before field access, might be an issue
 //            object constantAlias = context.ResolveConstAlias(fieldName);
 //            if (constantAlias != null) {
@@ -413,23 +429,23 @@ namespace UIForia {
             throw new Exception($"Cannot resolve {fieldName} as a field or property on type {context.rootType.Name}");
         }
 
-        private Expression VisitParenNode(ParenExpressionNode node) {
-            return ParenExpressionFactory.CreateParenExpression(Visit(node.expressionNode));
+        private Expression VisitParenNode(ParenExpressionNodeOld nodeOld) {
+            return ParenExpressionFactory.CreateParenExpression(Visit(nodeOld.expressionNodeOld));
         }
 
-        private Expression VisitOperatorExpression(OperatorExpressionNode node) {
-            Type leftType = node.left.GetYieldedType(context);
-            Type rightType = node.right.GetYieldedType(context);
+        private Expression VisitOperatorExpression(OperatorExpressionNodeOld nodeOld) {
+            Type leftType = nodeOld.left.GetYieldedType(context);
+            Type rightType = nodeOld.right.GetYieldedType(context);
             object leftExpression = null;
             object rightExpression = null;
 
-            switch (node.OpType) {
+            switch (nodeOld.OpType) {
                 case OperatorType.Plus:
 
                     if (leftType == typeof(string) || rightType == typeof(string)) {
                         Type openType = typeof(OperatorExpression_StringConcat<,>);
-                        leftExpression = Visit(node.left);
-                        rightExpression = Visit(node.right);
+                        leftExpression = Visit(nodeOld.left);
+                        rightExpression = Visit(nodeOld.right);
                         ReflectionUtil.TypeArray2[0] = leftType;
                         ReflectionUtil.TypeArray2[1] = rightType;
                         ReflectionUtil.ObjectArray2[0] = leftExpression;
@@ -443,8 +459,8 @@ namespace UIForia {
                     }
 
                     if (ReflectionUtil.AreNumericTypesCompatible(leftType, rightType)) {
-                        return OperatorExpression_Arithmetic.Create(OperatorType.Plus, Visit(node.left),
-                            Visit(node.right));
+                        return OperatorExpression_Arithmetic.Create(OperatorType.Plus, Visit(nodeOld.left),
+                            Visit(nodeOld.right));
                     }
 
                     break;
@@ -455,14 +471,14 @@ namespace UIForia {
                 case OperatorType.Mod:
 
                     if (ReflectionUtil.AreNumericTypesCompatible(leftType, rightType)) {
-                        return OperatorExpression_Arithmetic.Create(node.OpType, Visit(node.left), Visit(node.right));
+                        return OperatorExpression_Arithmetic.Create(nodeOld.OpType, Visit(nodeOld.left), Visit(nodeOld.right));
                     }
 
                     break;
 
                 case OperatorType.TernaryCondition:
 
-                    return VisitOperator_TernaryCondition(node);
+                    return VisitOperator_TernaryCondition(nodeOld);
 
                 case OperatorType.TernarySelection:
                     throw new Exception("Should never visit a TernarySelection operator");
@@ -471,17 +487,17 @@ namespace UIForia {
                 case OperatorType.GreaterThanEqualTo:
                 case OperatorType.LessThan:
                 case OperatorType.LessThanEqualTo:
-                    return new OperatorExpression_Comparison(node.OpType, Visit(node.left), Visit(node.right));
+                    return new OperatorExpression_Comparison(nodeOld.OpType, Visit(nodeOld.left), Visit(nodeOld.right));
 
                 case OperatorType.Equals:
                 case OperatorType.NotEquals: {
                     Type openEqualityType = typeof(OperatorExpression_Equality<,>);
-                    Type leftNodeType = node.left.GetYieldedType(context);
-                    Type rightNodeType = node.right.GetYieldedType(context);
+                    Type leftNodeType = nodeOld.left.GetYieldedType(context);
+                    Type rightNodeType = nodeOld.right.GetYieldedType(context);
 
-                    leftExpression = Visit(node.left);
-                    rightExpression = Visit(node.right);
-                    ReflectionUtil.ObjectArray3[0] = node.OpType;
+                    leftExpression = Visit(nodeOld.left);
+                    rightExpression = Visit(nodeOld.right);
+                    ReflectionUtil.ObjectArray3[0] = nodeOld.OpType;
                     ReflectionUtil.ObjectArray3[1] = leftExpression;
                     ReflectionUtil.ObjectArray3[2] = rightExpression;
                     ReflectionUtil.TypeArray2[0] = leftNodeType;
@@ -494,15 +510,15 @@ namespace UIForia {
                 }
                 case OperatorType.And:
                 case OperatorType.Or: {
-                    Type leftNodeType = node.left.GetYieldedType(context);
-                    Type rightNodeType = node.right.GetYieldedType(context);
+                    Type leftNodeType = nodeOld.left.GetYieldedType(context);
+                    Type rightNodeType = nodeOld.right.GetYieldedType(context);
                     if (leftNodeType == typeof(bool) && rightNodeType == typeof(bool)) {
-                        return new OperatorExpression_AndOrBool(node.OpType, (Expression<bool>) Visit(node.left), (Expression<bool>) Visit(node.right));
+                        return new OperatorExpression_AndOrBool(nodeOld.OpType, (Expression<bool>) Visit(nodeOld.left), (Expression<bool>) Visit(nodeOld.right));
                     }
                     else if (leftNodeType.IsClass && rightNodeType.IsClass) {
-                        ReflectionUtil.ObjectArray3[0] = node.OpType;
-                        ReflectionUtil.ObjectArray3[1] = Visit(node.left);
-                        ReflectionUtil.ObjectArray3[2] = Visit(node.right);
+                        ReflectionUtil.ObjectArray3[0] = nodeOld.OpType;
+                        ReflectionUtil.ObjectArray3[1] = Visit(nodeOld.left);
+                        ReflectionUtil.ObjectArray3[2] = Visit(nodeOld.right);
                         ReflectionUtil.TypeArray2[0] = leftNodeType;
                         ReflectionUtil.TypeArray2[1] = rightNodeType;
                         return (Expression) ReflectionUtil.CreateGenericInstanceFromOpenType(
@@ -512,9 +528,9 @@ namespace UIForia {
                         );
                     }
                     else if (leftNodeType.IsClass && rightNodeType == typeof(bool)) {
-                        ReflectionUtil.ObjectArray3[0] = node.OpType;
-                        ReflectionUtil.ObjectArray3[1] = Visit(node.left);
-                        ReflectionUtil.ObjectArray3[2] = Visit(node.right);
+                        ReflectionUtil.ObjectArray3[0] = nodeOld.OpType;
+                        ReflectionUtil.ObjectArray3[1] = Visit(nodeOld.left);
+                        ReflectionUtil.ObjectArray3[2] = Visit(nodeOld.right);
                         ReflectionUtil.TypeArray1[0] = leftNodeType;
                         return (Expression) ReflectionUtil.CreateGenericInstanceFromOpenType(
                             typeof(OperatorExpression_AndOrObjectBool<>),
@@ -523,9 +539,9 @@ namespace UIForia {
                         );
                     }
                     else if (leftNodeType == typeof(bool) && rightNodeType.IsClass) {
-                        ReflectionUtil.ObjectArray3[0] = node.OpType;
-                        ReflectionUtil.ObjectArray3[1] = Visit(node.left);
-                        ReflectionUtil.ObjectArray3[2] = Visit(node.right);
+                        ReflectionUtil.ObjectArray3[0] = nodeOld.OpType;
+                        ReflectionUtil.ObjectArray3[1] = Visit(nodeOld.left);
+                        ReflectionUtil.ObjectArray3[2] = Visit(nodeOld.right);
                         ReflectionUtil.TypeArray1[0] = rightNodeType;
                         return (Expression) ReflectionUtil.CreateGenericInstanceFromOpenType(
                             typeof(OperatorExpression_AndOrBoolObject<>),
@@ -541,25 +557,25 @@ namespace UIForia {
             throw new Exception("Bad operator expression");
         }
 
-        private Expression VisitUnaryExpression(UnaryExpressionNode node) {
-            Type yieldType = node.expression.GetYieldedType(context);
+        private Expression VisitUnaryExpression(UnaryExpressionNodeOld nodeOld) {
+            Type yieldType = nodeOld.expression.GetYieldedType(context);
             if (yieldType == typeof(bool)) {
-                if (node.op == OperatorType.Not) {
-                    return new UnaryExpression_Boolean((Expression<bool>) Visit(node.expression));
+                if (nodeOld.op == OperatorType.Not) {
+                    return new UnaryExpression_Boolean((Expression<bool>) Visit(nodeOld.expression));
                 }
 
                 throw new Exception("Unary but not boolean operator");
             }
 
             if (yieldType == typeof(string)) {
-                if (node.op == OperatorType.Not) {
-                    return new UnaryExpression_StringBoolean((Expression<string>) Visit(node.expression));
+                if (nodeOld.op == OperatorType.Not) {
+                    return new UnaryExpression_StringBoolean((Expression<string>) Visit(nodeOld.expression));
                 }
             }
 
             if (yieldType.IsClass) {
-                if (node.op == OperatorType.Not) {
-                    return new UnaryExpression_ObjectBoolean((Expression<object>) Visit(node.expression));
+                if (nodeOld.op == OperatorType.Not) {
+                    return new UnaryExpression_ObjectBoolean((Expression<object>) Visit(nodeOld.expression));
                 }
             }
 
@@ -568,12 +584,12 @@ namespace UIForia {
                 return null;
             }
 
-            switch (node.op) {
+            switch (nodeOld.op) {
                 case OperatorType.Plus:
-                    return UnaryExpression_PlusFactory.Create(Visit(node.expression));
+                    return UnaryExpression_PlusFactory.Create(Visit(nodeOld.expression));
 
                 case OperatorType.Minus:
-                    return UnaryExpression_MinusFactory.Create(Visit(node.expression));
+                    return UnaryExpression_MinusFactory.Create(Visit(nodeOld.expression));
             }
 
             return null;
@@ -585,8 +601,8 @@ namespace UIForia {
                    || type == typeof(double);
         }
 
-        private Expression VisitAccessExpression(AccessExpressionNode node) {
-            string contextName = node.identifierNode.identifier;
+        private Expression VisitAccessExpression(AccessExpressionNodeOld nodeOld) {
+            string contextName = nodeOld.identifierNodeOld.identifier;
             Type headType;
             object arg0 = contextName;
             AccessExpressionType expressionType = AccessExpressionType.AliasLookup;
@@ -595,7 +611,7 @@ namespace UIForia {
             if (contextName[0] == '$') {
                 for (int i = 0; i < expressionAliasResolvers.Count; i++) {
                     if (contextName == expressionAliasResolvers[i].aliasName) {
-                        Expression retn = expressionAliasResolvers[i].CompileAsAccessExpression(context, node, Visit);
+                        Expression retn = expressionAliasResolvers[i].CompileAsAccessExpression(context, nodeOld, Visit);
                         if (retn == null) {
                             throw new ParseException($"Resolver {expressionAliasResolvers[i]} failed to parse {contextName}");
                         }
@@ -605,7 +621,7 @@ namespace UIForia {
                 }
             }
 
-            if (node.identifierNode is ExternalReferenceIdentifierNode) {
+            if (nodeOld.identifierNodeOld is ExternalReferenceIdentifierNodeOld) {
                 throw new NotImplementedException();
 //                isStaticReferenceExpression = true;
 //                headType = (Type) context.ResolveConstAlias(contextName);
@@ -628,30 +644,30 @@ namespace UIForia {
             }
 
             if (headType.IsEnum) {
-                if (node.parts.Count != 1) {
+                if (nodeOld.parts.Count != 1) {
                     throw new Exception("Trying to reference nested Enum value, which is not possible");
                 }
 
-                if (!(node.parts[0] is PropertyAccessExpressionPartNode)) {
+                if (!(nodeOld.parts[0] is PropertyAccessExpressionPartNodeOld)) {
                     throw new Exception("Trying to read enum value but encountered array access");
                 }
 
-                object val = Enum.Parse(headType, ((PropertyAccessExpressionPartNode) node.parts[0]).fieldName);
+                object val = Enum.Parse(headType, ((PropertyAccessExpressionPartNodeOld) nodeOld.parts[0]).fieldName);
                 ReflectionUtil.ObjectArray1[0] = val;
                 return (Expression) ReflectionUtil.CreateGenericInstanceFromOpenType(typeof(ConstantExpression<>), headType, ReflectionUtil.ObjectArray1);
             }
 
-            bool isRootContext = !(node.identifierNode is SpecialIdentifierNode) && !(node.identifierNode is ExternalReferenceIdentifierNode);
+            bool isRootContext = !(nodeOld.identifierNodeOld is SpecialIdentifierNodeOld) && !(nodeOld.identifierNodeOld is ExternalReferenceIdentifierNodeOld);
             int startOffset = isRootContext ? 1 : 0;
-            int partCount = node.parts.Count;
+            int partCount = nodeOld.parts.Count;
             if (isRootContext) {
-                partCount = node.parts.Count + 1;
+                partCount = nodeOld.parts.Count + 1;
             }
             else if (isStaticReferenceExpression) {
-                partCount = node.parts.Count; //== 1 ? 1 : node.parts.Count - 1;// 1;
+                partCount = nodeOld.parts.Count; //== 1 ? 1 : node.parts.Count - 1;// 1;
             }
             else {
-                partCount = node.parts.Count;
+                partCount = nodeOld.parts.Count;
             }
 
             Type lastType = headType;
@@ -659,7 +675,7 @@ namespace UIForia {
 
             if (isStaticReferenceExpression) {
                 startOffset = 1;
-                PropertyAccessExpressionPartNode propertyPart = node.parts[0] as PropertyAccessExpressionPartNode;
+                PropertyAccessExpressionPartNodeOld propertyPart = nodeOld.parts[0] as PropertyAccessExpressionPartNodeOld;
                 if (propertyPart != null) {
                     FieldInfo fieldInfo = ReflectionUtil.GetStaticFieldInfo(headType, propertyPart.fieldName);
                     if (fieldInfo != null) {
@@ -683,8 +699,8 @@ namespace UIForia {
                 }
 
                 for (int i = startOffset; i < partCount; i++) {
-                    AccessExpressionPartNode part = node.parts[i];
-                    propertyPart = part as PropertyAccessExpressionPartNode;
+                    AccessExpressionPartNodeOld part = nodeOld.parts[i];
+                    propertyPart = part as PropertyAccessExpressionPartNodeOld;
                     if (propertyPart != null) {
                         string fieldName = propertyPart.fieldName;
                         FieldInfo fieldInfo = ReflectionUtil.GetInstanceOrStaticFieldInfo(lastType, fieldName);
@@ -711,9 +727,9 @@ namespace UIForia {
                         continue;
                     }
 
-                    ArrayAccessExpressionNode arrayPart = part as ArrayAccessExpressionNode;
+                    ArrayAccessExpressionNodeOld arrayPart = part as ArrayAccessExpressionNodeOld;
                     if (arrayPart != null) {
-                        Expression<int> indexExpression = (Expression<int>) Visit(arrayPart.expressionNode);
+                        Expression<int> indexExpression = (Expression<int>) Visit(arrayPart.expressionNodeOld);
                         lastType = ReflectionUtil.GetArrayElementTypeOrThrow(lastType);
                         parts[i] = new AccessExpressionPart_List(indexExpression);
                         continue;
@@ -724,9 +740,9 @@ namespace UIForia {
             }
             else {
                 for (int i = startOffset; i < partCount; i++) {
-                    AccessExpressionPartNode part = node.parts[i - startOffset];
+                    AccessExpressionPartNodeOld part = nodeOld.parts[i - startOffset];
 
-                    PropertyAccessExpressionPartNode propertyPart = part as PropertyAccessExpressionPartNode;
+                    PropertyAccessExpressionPartNodeOld propertyPart = part as PropertyAccessExpressionPartNodeOld;
 
                     if (propertyPart != null) {
                         string fieldName = propertyPart.fieldName;
@@ -753,15 +769,15 @@ namespace UIForia {
                         continue;
                     }
 
-                    ArrayAccessExpressionNode arrayPart = part as ArrayAccessExpressionNode;
+                    ArrayAccessExpressionNodeOld arrayPart = part as ArrayAccessExpressionNodeOld;
                     if (arrayPart != null) {
-                        Expression<int> indexExpression = (Expression<int>) Visit(arrayPart.expressionNode);
+                        Expression<int> indexExpression = (Expression<int>) Visit(arrayPart.expressionNodeOld);
                         lastType = ReflectionUtil.GetArrayElementTypeOrThrow(lastType);
                         parts[i] = new AccessExpressionPart_List(indexExpression);
                         continue;
                     }
 
-                    MethodAccessExpressionPartNode methodPart = part as MethodAccessExpressionPartNode;
+                    MethodAccessExpressionPartNodeOld methodPart = part as MethodAccessExpressionPartNodeOld;
                     if (methodPart != null) {
                         // todo only supports Action and Func right now, not actual methods
 
@@ -792,7 +808,7 @@ namespace UIForia {
                         }
 
                         if (ReflectionUtil.IsAction(methodType)) {
-                            parts[i] = CreateActionAccessPart(methodType, methodPart.signatureNode);
+                            parts[i] = CreateActionAccessPart(methodType, methodPart.signatureNodeOld);
                             lastType = typeof(Terminal);
                             if (i != partCount - 1) {
                                 throw new Exception("Encountered void return type but access chain continues");
@@ -801,7 +817,7 @@ namespace UIForia {
                             break;
                         }
                         else {
-                            AccessExpressionPart_Func fn = CreateFuncAccessPart(methodType, methodPart.signatureNode);
+                            AccessExpressionPart_Func fn = CreateFuncAccessPart(methodType, methodPart.signatureNodeOld);
                             parts[i] = fn;
                             lastType = fn.RetnType;
                         }
@@ -855,7 +871,7 @@ namespace UIForia {
             }
         }
 
-        private AccessExpressionPart_Func CreateFuncAccessPart(Type type, MethodSignatureNode signatureNode) {
+        private AccessExpressionPart_Func CreateFuncAccessPart(Type type, MethodSignatureNodeOld signatureNodeOld) {
             Type[] argTypes = type.GetGenericArguments();
             if (argTypes.Length == 1) {
                 return (AccessExpressionPart_Func) ReflectionUtil.CreateGenericInstanceFromOpenType(
@@ -865,12 +881,12 @@ namespace UIForia {
                 );
             }
 
-            Expression[] expressions = new Expression[signatureNode.parts.Count];
+            Expression[] expressions = new Expression[signatureNodeOld.parts.Count];
 
             for (int i = 1; i < argTypes.Length; i++) {
                 Type requiredType = argTypes[i];
-                ExpressionNode argumentNode = signatureNode.parts[i - 1];
-                Expression argumentExpression = Visit(argumentNode);
+                ExpressionNodeOld argumentNodeOld = signatureNodeOld.parts[i - 1];
+                Expression argumentExpression = Visit(argumentNodeOld);
                 expressions[i - 1] = HandleCasting(requiredType, argumentExpression);
                 if (!requiredType.IsAssignableFrom(expressions[i - 1].YieldedType)) {
                     throw new Exception($"Cannot use parameter of type {expressions[i - 1].YieldedType} for parameter of type {requiredType}");
@@ -917,18 +933,18 @@ namespace UIForia {
             }
         }
 
-        private AccessExpressionPart_Method CreateActionAccessPart(Type type, MethodSignatureNode signatureNode) {
+        private AccessExpressionPart_Method CreateActionAccessPart(Type type, MethodSignatureNodeOld signatureNodeOld) {
             Type[] argTypes = type.GetGenericArguments();
             if (argTypes.Length == 0) {
                 return new AccessExpressionPart_Method();
             }
 
-            Expression[] expressions = new Expression[signatureNode.parts.Count];
+            Expression[] expressions = new Expression[signatureNodeOld.parts.Count];
 
             for (int i = 0; i < argTypes.Length; i++) {
                 Type requiredType = argTypes[i];
-                ExpressionNode argumentNode = signatureNode.parts[i];
-                Expression argumentExpression = Visit(argumentNode);
+                ExpressionNodeOld argumentNodeOld = signatureNodeOld.parts[i];
+                Expression argumentExpression = Visit(argumentNodeOld);
                 expressions[i] = HandleCasting(requiredType, argumentExpression);
             }
 
@@ -974,37 +990,37 @@ namespace UIForia {
             }
         }
 
-        private static Expression VisitConstant(LiteralValueNode node) {
-            if (node is NumericLiteralNode) {
-                return VisitNumericLiteralNode((NumericLiteralNode) node);
+        private static Expression VisitConstant(LiteralValueNodeOld nodeOld) {
+            if (nodeOld is NumericLiteralNodeOld) {
+                return VisitNumericLiteralNode((NumericLiteralNodeOld) nodeOld);
             }
 
-            if (node is BooleanLiteralNode) {
-                return new ConstantExpression<bool>(((BooleanLiteralNode) node).value);
+            if (nodeOld is BooleanLiteralNodeOld) {
+                return new ConstantExpression<bool>(((BooleanLiteralNodeOld) nodeOld).value);
             }
 
-            if (node is StringLiteralNode) {
-                return new ConstantExpression<string>(((StringLiteralNode) node).value);
+            if (nodeOld is StringLiteralNodeOld) {
+                return new ConstantExpression<string>(((StringLiteralNodeOld) nodeOld).value);
             }
 
             return null;
         }
 
-        private static Expression VisitNumericLiteralNode(NumericLiteralNode node) {
-            if (node is FloatLiteralNode literalNode) {
+        private static Expression VisitNumericLiteralNode(NumericLiteralNodeOld nodeOld) {
+            if (nodeOld is FloatLiteralNodeOld literalNode) {
                 return new ConstantExpression<float>(literalNode.value);
             }
 
-            if (node is IntLiteralNode intLiteralNode) {
+            if (nodeOld is IntLiteralNodeOld intLiteralNode) {
                 return new ConstantExpression<int>(intLiteralNode.value);
             }
 
-            return new ConstantExpression<double>(((DoubleLiteralNode) node).value);
+            return new ConstantExpression<double>(((DoubleLiteralNodeOld) nodeOld).value);
         }
 
-        private Expression VisitOperator_TernaryCondition(OperatorExpressionNode node) {
-            Expression<bool> condition = (Expression<bool>) Visit(node.left);
-            OperatorExpressionNode select = (OperatorExpressionNode) node.right;
+        private Expression VisitOperator_TernaryCondition(OperatorExpressionNodeOld nodeOld) {
+            Expression<bool> condition = (Expression<bool>) Visit(nodeOld.left);
+            OperatorExpressionNodeOld select = (OperatorExpressionNodeOld) nodeOld.right;
 
             if (select.OpType != OperatorType.TernarySelection) {
                 throw new Exception("Bad ternary");

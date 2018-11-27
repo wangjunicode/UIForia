@@ -3,16 +3,16 @@ using System.Reflection;
 
 namespace UIForia {
 
-    public class MethodCallNode : ExpressionNode {
+    public class MethodCallNodeOld : ExpressionNodeOld {
 
         private const BindingFlags flags = BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic;
 
-        public readonly IdentifierNode identifierNode;
-        public readonly MethodSignatureNode signatureNode;
+        public readonly IdentifierNodeOld identifierNodeOld;
+        public readonly MethodSignatureNodeOld signatureNodeOld;
         
-        public MethodCallNode(IdentifierNode identifierNode, MethodSignatureNode signatureNode) : base(ExpressionNodeType.MethodCall) {
-            this.identifierNode = identifierNode;
-            this.signatureNode = signatureNode;
+        public MethodCallNodeOld(IdentifierNodeOld identifierNodeOld, MethodSignatureNodeOld signatureNodeOld) : base(ExpressionNodeType.MethodCall) {
+            this.identifierNodeOld = identifierNodeOld;
+            this.signatureNodeOld = signatureNodeOld;
         }
 
         public override Type GetYieldedType(ContextDefinition context) {
@@ -20,21 +20,21 @@ namespace UIForia {
             if (yieldedType != null) {
                 return yieldedType;
             }
-            if (signatureNode.parts.Count == 0) {
-                info = context.rootType.GetMethod(identifierNode.identifier, flags);
+            if (signatureNodeOld.parts.Count == 0) {
+                info = context.rootType.GetMethod(identifierNodeOld.identifier, flags);
                 if (info == null) {
                     throw new Exception("Method missing");
                 }
                 yieldedType = info.ReturnType;
                 return info.ReturnType;
             }
-            Type[] types = new Type[signatureNode.parts.Count];
+            Type[] types = new Type[signatureNodeOld.parts.Count];
             for (int i = 0; i < types.Length; i++) {
-                types[i] = signatureNode.parts[i].GetYieldedType(context);
+                types[i] = signatureNodeOld.parts[i].GetYieldedType(context);
             }
-            info = context.rootType.GetMethod(identifierNode.identifier, flags, null, types, null);
+            info = context.rootType.GetMethod(identifierNodeOld.identifier, flags, null, types, null);
             if (info == null) {
-                throw new Exception("Method missing: " + identifierNode.identifier);
+                throw new Exception("Method missing: " + identifierNodeOld.identifier);
             }
 
             yieldedType = info.ReturnType;

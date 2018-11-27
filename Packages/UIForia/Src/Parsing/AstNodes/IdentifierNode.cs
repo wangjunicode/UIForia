@@ -3,11 +3,11 @@ using System.Diagnostics;
 namespace UIForia {
 
     [DebuggerDisplay("{" + nameof(identifier) + "}")]
-    public class IdentifierNode : ASTNode {
+    public class IdentifierNodeOld : ASTNode_Old {
 
         public readonly string identifier;
     
-        public IdentifierNode(string identifier) {
+        public IdentifierNodeOld(string identifier) {
             this.identifier = identifier;
         }
 

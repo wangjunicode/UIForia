@@ -4,9 +4,9 @@ using System.Diagnostics;
 namespace UIForia {
 
     [DebuggerDisplay("{" + nameof(identifier) + "}")]
-    public class SpecialIdentifierNode : IdentifierNode {
+    public class SpecialIdentifierNodeOld : IdentifierNodeOld {
 
-        public SpecialIdentifierNode(string identifier) : base(identifier) {}
+        public SpecialIdentifierNodeOld(string identifier) : base(identifier) {}
 
      
     }

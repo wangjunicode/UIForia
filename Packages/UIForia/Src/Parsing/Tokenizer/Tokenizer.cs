@@ -99,7 +99,8 @@ namespace UIForia {
 
             ptr++;
 
-            output.Add(new DslToken(TokenType.String, input.Substring(start, ptr - start)));
+            // strip the quotes
+            output.Add(new DslToken(TokenType.String, input.Substring(start + 1, ptr - start - 2)));
 
             return TryConsumeWhiteSpace(ptr, input);
         }
@@ -144,9 +145,12 @@ namespace UIForia {
                 ptr = TryReadCharacters(ptr, input, "as", TokenType.As, output);
                 ptr = TryReadCharacters(ptr, input, "is", TokenType.Is, output);
                 ptr = TryReadCharacters(ptr, input, "new", TokenType.New, output);
+                ptr = TryReadCharacters(ptr, input, "typeof", TokenType.TypeOf, output);
+                ptr = TryReadCharacters(ptr, input, "default", TokenType.Default, output);
+                ptr = TryReadCharacters(ptr, input, "null", TokenType.Null, output);
 
-                ptr = TryReadString(ptr, input, output);
                 ptr = TryReadDigit(ptr, input, output);
+                ptr = TryReadString(ptr, input, output);
                 ptr = TryReadIdentifier(ptr, input, output);
                 ptr = TryConsumeWhiteSpace(ptr, input);
 

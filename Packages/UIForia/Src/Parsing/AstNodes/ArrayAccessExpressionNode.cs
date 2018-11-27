@@ -2,12 +2,12 @@
 
 namespace UIForia {
 
-    public class ArrayAccessExpressionNode : AccessExpressionPartNode {
+    public class ArrayAccessExpressionNodeOld : AccessExpressionPartNodeOld {
 
-        public readonly ExpressionNode expressionNode;
+        public readonly ExpressionNodeOld expressionNodeOld;
 
-        public ArrayAccessExpressionNode(ExpressionNode expressionNode) : base(ExpressionNodeType.ArrayAccess) {
-            this.expressionNode = expressionNode;
+        public ArrayAccessExpressionNodeOld(ExpressionNodeOld expressionNodeOld) : base(ExpressionNodeType.ArrayAccess) {
+            this.expressionNodeOld = expressionNodeOld;
         }
 
         public override Type GetYieldedType(ContextDefinition context) {

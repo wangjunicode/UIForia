@@ -2,11 +2,11 @@ using System;
 
 namespace UIForia {
 
-    public class PropertyAccessExpressionPartNode : AccessExpressionPartNode {
+    public class PropertyAccessExpressionPartNodeOld : AccessExpressionPartNodeOld {
 
         public readonly string fieldName;
 
-        public PropertyAccessExpressionPartNode(string fieldName) : base (ExpressionNodeType.Accessor) {
+        public PropertyAccessExpressionPartNodeOld(string fieldName) : base (ExpressionNodeType.Accessor) {
             this.fieldName = fieldName;
         }
 
@@ -16,12 +16,12 @@ namespace UIForia {
 
     }
     
-    public class MethodAccessExpressionPartNode : AccessExpressionPartNode {
+    public class MethodAccessExpressionPartNodeOld : AccessExpressionPartNodeOld {
 
-        public readonly MethodSignatureNode signatureNode;
+        public readonly MethodSignatureNodeOld signatureNodeOld;
         
-        public MethodAccessExpressionPartNode(MethodSignatureNode signatureNode) : base (ExpressionNodeType.Accessor) {
-            this.signatureNode = signatureNode;
+        public MethodAccessExpressionPartNodeOld(MethodSignatureNodeOld signatureNodeOld) : base (ExpressionNodeType.Accessor) {
+            this.signatureNodeOld = signatureNodeOld;
         }
 
         public override Type GetYieldedType(ContextDefinition context) {

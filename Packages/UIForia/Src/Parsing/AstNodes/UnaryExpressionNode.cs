@@ -2,12 +2,12 @@ using System;
 
 namespace UIForia {
 
-    public class UnaryExpressionNode : ExpressionNode {
+    public class UnaryExpressionNodeOld : ExpressionNodeOld {
 
         public readonly OperatorType op;
-        public readonly ExpressionNode expression;
+        public readonly ExpressionNodeOld expression;
 
-        public UnaryExpressionNode(ExpressionNode expression, OperatorType op) : base(ExpressionNodeType.Unary) {
+        public UnaryExpressionNodeOld(ExpressionNodeOld expression, OperatorType op) : base(ExpressionNodeType.Unary) {
             this.expression = expression;
             this.op = op;
         }

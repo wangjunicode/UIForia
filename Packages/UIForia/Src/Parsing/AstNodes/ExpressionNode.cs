@@ -2,13 +2,13 @@ using System;
 
 namespace UIForia {
 
-    public abstract class ExpressionNode : ASTNode {
+    public abstract class ExpressionNodeOld : ASTNode_Old {
 
         public readonly ExpressionNodeType expressionType;
 
         protected Type yieldedType;
         
-        protected ExpressionNode(ExpressionNodeType expressionType) {
+        protected ExpressionNodeOld(ExpressionNodeType expressionType) {
             this.expressionType = expressionType;
         }
         

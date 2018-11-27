@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using System.Diagnostics;
 
 namespace UIForia.Util {
 
@@ -9,6 +10,7 @@ namespace UIForia.Util {
         
         public static readonly IReadOnlyList<T> Empty = new List<T>(0);
 
+        [DebuggerStepThrough]
         public static List<T> Get() {
             if (s_ListPool.Count > 0) {
                 s_Contained.Remove(s_ListPool.Peek());
@@ -18,6 +20,7 @@ namespace UIForia.Util {
             return new List<T>();
         }
 
+        [DebuggerStepThrough]
         public static void Release(ref List<T> toRelease) {
             
             if (toRelease == null || Equals(toRelease, Empty) || s_Contained.Contains(toRelease)) {

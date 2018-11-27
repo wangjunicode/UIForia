@@ -4,22 +4,22 @@ using System.Reflection;
 
 namespace UIForia {
 
-    [DebuggerDisplay("{idNode.identifier}")]
-    public class RootContextLookupNode : ExpressionNode {
+    [DebuggerDisplay("{idNodeOld.identifier}")]
+    public class RootContextLookupNodeOld : ExpressionNodeOld {
 
         private FieldInfo fieldInfo;
-        public readonly IdentifierNode idNode;
+        public readonly IdentifierNodeOld idNodeOld;
 
-        public RootContextLookupNode(IdentifierNode idNode) : base(ExpressionNodeType.RootContextAccessor) {
-            this.idNode = idNode;
+        public RootContextLookupNodeOld(IdentifierNodeOld idNodeOld) : base(ExpressionNodeType.RootContextAccessor) {
+            this.idNodeOld = idNodeOld;
         }
 
         public override Type GetYieldedType(ContextDefinition context) {
             if (this.fieldInfo == null) {
-                fieldInfo = context.rootType.GetField(idNode.identifier, ReflectionUtil.InstanceBindFlags);
+                fieldInfo = context.rootType.GetField(idNodeOld.identifier, ReflectionUtil.InstanceBindFlags);
             }
             if (fieldInfo == null) {
-                throw new FieldNotDefinedException(context.rootType, idNode.identifier);
+                throw new FieldNotDefinedException(context.rootType, idNodeOld.identifier);
             }
             return fieldInfo.FieldType;
         }

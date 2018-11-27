@@ -24,7 +24,6 @@ namespace UIForia {
         public override object Evaluate(ExpressionContext context) {
             U contextHead = (U) context.rootObject;
 
-
             object last = contextHead;
             for (int i = 0; i < parts.Length; i++) {
                 last = parts[i].Evaluate(last, context);

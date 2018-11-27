@@ -3,10 +3,9 @@ using System;
 namespace UIForia {
 
     public enum TokenType {
-
-        ExpressionOpen,
-        ExpressionClose,
-
+        
+        Invalid,
+        
         // operators
         Plus,
         Minus,
@@ -20,10 +19,13 @@ namespace UIForia {
         New, 
         Null,
         Default,
+        TypeOf,
         
         // accessors
         Dot,
         Comma,
+        ExpressionOpen,
+        ExpressionClose,
         ArrayAccessOpen,
         ArrayAccessClose,
         ParenOpen,
@@ -64,6 +66,8 @@ namespace UIForia {
 //        Operator = ArithmeticOperator | QuestionMark | Colon | Comparator | BooleanTest,
 
 //        UnaryRequiresCheck = Comma | Colon | QuestionMark | BooleanTest | ArithmeticOperator | Comparator | ParenOpen | ArrayAccessOpen
+
+
 
     }
 

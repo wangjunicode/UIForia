@@ -1,8 +1,8 @@
 namespace UIForia {
 
-    public abstract class LiteralValueNode : ExpressionNode {
+    public abstract class LiteralValueNodeOld : ExpressionNodeOld {
 
-        protected LiteralValueNode(ExpressionNodeType expressionType) : base(expressionType) { }
+        protected LiteralValueNodeOld(ExpressionNodeType expressionType) : base(expressionType) { }
 
     }
 

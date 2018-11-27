@@ -56,7 +56,7 @@ Bitwise ops => cast to true / false?
 Inline Array / Dictionary
 Casting
 Lambdas
-Operator overloads
+Operator overloads in expressions
 new for structs
 typeof
 using

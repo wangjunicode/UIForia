@@ -15,6 +15,6 @@ namespace UIForia {
 
     }
 
-    public abstract class ASTNode { }
+    public abstract class ASTNode_Old { }
 
 }

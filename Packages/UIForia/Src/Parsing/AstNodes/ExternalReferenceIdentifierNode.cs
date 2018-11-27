@@ -2,9 +2,9 @@ using System;
 
 namespace UIForia {
 
-    public class ExternalReferenceIdentifierNode : IdentifierNode {
+    public class ExternalReferenceIdentifierNodeOld : IdentifierNodeOld {
 
-        public ExternalReferenceIdentifierNode(string identifier) : base(identifier) { }
+        public ExternalReferenceIdentifierNodeOld(string identifier) : base(identifier) { }
         
 
     }

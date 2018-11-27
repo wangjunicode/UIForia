@@ -9,6 +9,16 @@ using UnityEditor.VersionControl;
 using static Tests.TestUtils;
 
 [TestFixture]
+public class __REMOVE__ {
+
+    [Test]
+    public void Runs() {
+        new TreePlayground().Run();
+    }
+
+
+}
+[TestFixture]
 public class BindingCompilerTests {
 
     [Test]

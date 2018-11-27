@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
-using UnityEngine;
+using System.Diagnostics;
+using Debug = UnityEngine.Debug;
 
 namespace UIForia.Util {
 
@@ -10,6 +11,7 @@ namespace UIForia.Util {
         private readonly Action<T> m_ActionOnGet;
         private readonly Action<T> m_ActionOnRelease;
 
+        [DebuggerStepThrough]
         public ObjectPool(Action<T> actionOnGet = null, Action<T> actionOnRelease = null) {
             this.m_ActionOnGet = actionOnGet;
             this.m_ActionOnRelease = actionOnRelease;

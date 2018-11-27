@@ -2,11 +2,11 @@ using System;
 
 namespace UIForia {
 
-    public class StringLiteralNode : LiteralValueNode {
+    public class StringLiteralNodeOld : LiteralValueNodeOld {
 
         public readonly string value;
         
-        public StringLiteralNode(string value) : base(ExpressionNodeType.LiteralValue) {
+        public StringLiteralNodeOld(string value) : base(ExpressionNodeType.LiteralValue) {
             this.value = value;
         }
 

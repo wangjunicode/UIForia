@@ -9,7 +9,7 @@ namespace UIForia.Compilers {
 
         private static readonly MouseEventAliasExpression s_Expression = new MouseEventAliasExpression();
 
-        public override Expression CompileAsValueExpression(ContextDefinition context, ExpressionNode node, Func<ExpressionNode, Expression> visit) {
+        public override Expression CompileAsValueExpression(ContextDefinition context, ExpressionNodeOld nodeOld, Func<ExpressionNodeOld, Expression> visit) {
             return s_Expression;
         }
 

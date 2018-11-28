@@ -468,10 +468,46 @@ public class ExpressionParserTests2 {
         Assert.AreEqual(ASTNodeType.UnaryMinus, node.type);
         Assert.IsInstanceOf<ParenNode>(node.expression);
     }
+
+    [Test]
+    public void Parse_UnaryExpression_DirectCast() {
+        ASTNode root = Parser2.Parse("(int)5.6f");
+        UnaryExpressionNode node = AssertInstanceOfAndReturn<UnaryExpressionNode>(root);
+        Assert.AreEqual(ASTNodeType.DirectCast, node.type);
+        Assert.AreEqual("int", node.typePath.path[0]);
+        
+        root = Parser2.Parse("(UnityEngine.Vector3)5.6f");
+        node = AssertInstanceOfAndReturn<UnaryExpressionNode>(root);
+        Assert.AreEqual(ASTNodeType.DirectCast, node.type);
+        Assert.AreEqual("UnityEngine", node.typePath.path[0]);
+        Assert.AreEqual("Vector3", node.typePath.path[1]);
+    }
     
-//
-//    [Test]
-//    public void Parse_UnaryExpression_DirectCast() { }
+    [Test]
+    public void Parse_UnaryExpression_DirectCastGeneric() {
+        ASTNode root = Parser2.Parse("(List<float, int>)someIdentifier");
+        UnaryExpressionNode node = AssertInstanceOfAndReturn<UnaryExpressionNode>(root);
+        Assert.AreEqual(ASTNodeType.DirectCast, node.type);
+        Assert.AreEqual("List", node.typePath.path[0]);
+        Assert.AreEqual("float", node.typePath.genericArguments[0].path[0]);
+        Assert.AreEqual("int", node.typePath.genericArguments[1].path[0]);
+    }
+    
+    [Test]
+    public void Parse_UnaryExpression_DirectCastGenericList() {
+        ASTNode root = Parser2.Parse("(List<Something.Tuple<int, ValueTuple>>");//"<float, UnityEngine.Vector3>>>)someIdentifier");
+        UnaryExpressionNode node = AssertInstanceOfAndReturn<UnaryExpressionNode>(root);
+        Assert.AreEqual("List", node.typePath.path[0]);
+        TypePath head = node.typePath;
+        TypePath outerTuple = node.typePath.genericArguments[0];
+        TypePath outerGen0 = outerTuple.genericArguments[0];
+        TypePath outerGen1 = outerTuple.genericArguments[1];
+        
+        Assert.AreEqual("Something", outerTuple.path[0]);
+        Assert.AreEqual("Tuple", outerTuple.path[1]);
+        Assert.AreEqual("int", outerGen0.path[0]);
+        Assert.AreEqual("ValueTuple", outerGen1.path[0]);
+    }
 
 //    [Test]
 //    public void Parse_TypeOfExpression() { }

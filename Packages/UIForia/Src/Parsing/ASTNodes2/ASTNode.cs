@@ -140,30 +140,48 @@ namespace UIForia.Parsing {
             return unaryNode;
         }
 
-        public static TypePathNode TypePathNode(string identifier, List<ASTNode> parts) {
-            TypePathNode typePathNode = s_TypePathNodePool.Get();
-            typePathNode.identifier = identifier;
-            typePathNode.parts = parts;
-            return typePathNode;
+        public static UnaryExpressionNode DirectCastNode(TypePath typePath, ASTNode expression) {
+            UnaryExpressionNode unaryNode = s_UnaryNodePool.Get();
+            unaryNode.type = ASTNodeType.DirectCast;
+            unaryNode.typePath = typePath;
+            unaryNode.expression = expression;
+            return unaryNode;
         }
         
     }
 
+    public struct TypePath {
+
+        public List<string> path;
+        public List<TypePath> genericArguments;
+
+        public void Release() {
+            ListPool<string>.Release(ref path);
+            ReleaseGenerics();
+        }
+
+        public void ReleaseGenerics() {
+            if (genericArguments != null && genericArguments.Count > 0) {
+                for (int i = 0; i < genericArguments.Count; i++) {
+                    genericArguments[i].Release();
+                }
+                ListPool<TypePath>.Release(ref genericArguments);
+                genericArguments = null;
+            }
+        }
+
+    }
+    
     public class TypePathNode : ASTNode {
 
-        public string identifier;
-        public List<ASTNode> parts;
+        public TypePath typePath;
         
         public TypePathNode() {
             type = ASTNodeType.TypePath;
         }
         
         public override void Release() {
-            s_TypePathNodePool.Release(this);
-            for (int i = 0; i < parts.Count; i++) {
-                parts[i].Release();
-            }
-            ListPool<ASTNode>.Release(ref parts);
+            typePath.Release();
         }
 
     }
@@ -171,8 +189,10 @@ namespace UIForia.Parsing {
     public class UnaryExpressionNode : ASTNode {
 
         public ASTNode expression;
+        public TypePath typePath;
         
         public override void Release() {
+            typePath.Release();
             expression?.Release();
             s_UnaryNodePool.Release(this);
         }

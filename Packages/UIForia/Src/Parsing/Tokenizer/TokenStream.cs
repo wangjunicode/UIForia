@@ -1,6 +1,7 @@
 using System.Collections.Generic;
 using System.Diagnostics;
 using UIForia.Util;
+using UnityEngine;
 
 namespace UIForia {
 
@@ -16,42 +17,37 @@ namespace UIForia {
             this.tokens = tokens;
             stack = StackPool<int>.Get();
         }
-        
+
         public int CurrentIndex => ptr;
-        
+
         public DslToken Current {
-            [DebuggerStepThrough]
-            get { return (ptr >= tokens.Count) ? DslToken.Invalid : tokens[ptr]; }
+            [DebuggerStepThrough] get { return (ptr >= tokens.Count || tokens.Count == 0) ? DslToken.Invalid : tokens[ptr]; }
         }
 
         public DslToken Next {
-            [DebuggerStepThrough]
-            get { return (ptr + 1 >= tokens.Count) ? DslToken.Invalid : tokens[ptr + 1]; }
+            [DebuggerStepThrough] get { return (ptr + 1 >= tokens.Count) ? DslToken.Invalid : tokens[ptr + 1]; }
         }
 
         public DslToken Previous {
-            [DebuggerStepThrough]
-            get { return (ptr - 1 < 0) ? DslToken.Invalid : tokens[ptr - 1]; }
+//            [DebuggerStepThrough]
+            get { return (ptr - 1 < 0 || tokens.Count == 0) ? DslToken.Invalid : tokens[ptr - 1]; }
         }
 
         public DslToken Last {
-            [DebuggerStepThrough]
-            get { return (tokens.Count == 0) ? DslToken.Invalid : tokens[tokens.Count - 1]; }
+            [DebuggerStepThrough] get { return (tokens.Count == 0) ? DslToken.Invalid : tokens[tokens.Count - 1]; }
         }
 
         public bool HasMoreTokens {
-            [DebuggerStepThrough]
-            get { return ptr < tokens.Count; }
+            [DebuggerStepThrough] get { return ptr < tokens.Count; }
         }
 
         public bool HasPrevious {
-            [DebuggerStepThrough]
-            get { return ptr - 1 >= 0; }
+            [DebuggerStepThrough] get { return ptr - 1 >= 0; }
         }
 
         [DebuggerStepThrough]
         public void Advance(int count = 1) {
-            ptr += count;
+            ptr = Mathf.Min(ptr + count, tokens.Count);
         }
 
         [DebuggerStepThrough]
@@ -75,9 +71,9 @@ namespace UIForia {
                 retn += tokens[i].value;
             }
 
-            return retn;
+            return retn + $" (idx: {ptr}, {Current.value} -> {Current.tokenType})";
         }
-        
+
         [DebuggerStepThrough]
         public int FindNextIndex(TokenType targetTokenType) {
             int i = 0;
@@ -110,7 +106,7 @@ namespace UIForia {
 
             int i = -1;
             int counter = 0;
-            while (HasMoreTokens) {
+            while (ptr != tokens.Count) {
                 i++;
 
                 if (Current == braceOpen) {
@@ -131,7 +127,7 @@ namespace UIForia {
             Restore();
             return -1;
         }
-        
+
         [DebuggerStepThrough]
         public TokenStream AdvanceAndReturnSubStream(int advance) {
             List<DslToken> subStreamTokens = tokens.GetRange(ptr, advance);

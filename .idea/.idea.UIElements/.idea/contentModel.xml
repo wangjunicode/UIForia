@@ -587,6 +587,7 @@
             <e p="ElementQueryTests.cs" t="Include" />
             <e p="ElementTests.cs" t="Include" />
             <e p="ExpressionCompilerTests.cs" t="Include" />
+            <e p="ExpressionCompilerTests2.cs" t="Include" />
             <e p="ExpressionParserTests.cs" t="Include" />
             <e p="ExpressionParserTests2.cs" t="Include" />
             <e p="FlexLayoutColTests.cs" t="Include" />

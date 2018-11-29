@@ -52,6 +52,8 @@ namespace UIForia {
             IsArithmeticOperator ||
             IsComparator ||
             IsBooleanTest || 
+            tokenType == TokenType.As ||
+            tokenType == TokenType.Is ||
             tokenType == TokenType.QuestionMark ||
             tokenType == TokenType.Colon;
 

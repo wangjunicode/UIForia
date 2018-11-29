@@ -133,6 +133,30 @@ namespace UIForia.Parsing {
                     operatorNode = ASTNode.OperatorNode(OperatorType.TernarySelection);
                     return true;
 
+                case TokenType.As: {
+                    operatorNode = ASTNode.OperatorNode(OperatorType.As);
+                    TypePath typePath = default;
+                    if (!ParseTypePath(ref typePath)) {
+                        Abort();
+                    }
+
+                    // being lazy :(
+                    expressionStack.Push(ASTNode.TypeOfNode(typePath));
+                    return true;
+                }
+
+                case TokenType.Is: {
+                    operatorNode = ASTNode.OperatorNode(OperatorType.Is);
+                    TypePath typePath = default;
+                    if (!ParseTypePath(ref typePath)) {
+                        Abort();
+                    }
+
+                    // being lazy :(
+                    expressionStack.Push(ASTNode.TypeOfNode(typePath));
+                    return true;
+                }
+
                 default:
                     throw new Exception("Unknown op type");
             }
@@ -190,6 +214,7 @@ namespace UIForia.Parsing {
         private bool ParseExpression(ref ASTNode retn) {
             if (ParseDirectCastExpression(ref retn)) return true;
             if (ParseTypeOfExpression(ref retn)) return true;
+            if (ParseArrayLiteralExpression(ref retn)) return true;
             if (ParseAccessExpression(ref retn)) return true;
             if (ParseParenExpression(ref retn)) return true;
             if (ParseIdentifier(ref retn)) return true;
@@ -197,6 +222,23 @@ namespace UIForia.Parsing {
             if (ParseUnaryExpression(ref retn)) return true;
 
             return false;
+        }
+
+        private bool ParseArrayLiteralExpression(ref ASTNode retn) {
+            if (tokenStream.Current != TokenType.ArrayAccessOpen) {
+                return false;
+            }
+
+            List<ASTNode> list = null;
+            bool valid = ParseListExpression(ref list, TokenType.ArrayAccessOpen, TokenType.ArrayAccessClose);
+
+            if (!valid) {
+                return false;
+            }
+
+            retn = ASTNode.ListInitializerNode(list);
+
+            return true;
         }
 
         private bool ParseUnaryExpression(ref ASTNode retn) {
@@ -240,31 +282,37 @@ namespace UIForia.Parsing {
                 return false;
             }
 
-            int advance = tokenStream.FindMatchingBraceIndex(TokenType.LessThan, TokenType.GreaterThan);
+            int advance = tokenStream.FindMatchingIndex(TokenType.LessThan, TokenType.GreaterThan);
             if (advance == -1) {
                 Abort();
                 return false;
             }
 
-            int end = tokenStream.CurrentIndex + advance;
 
             tokenStream.Save();
-            tokenStream.Advance();
+
+            Parser2 subParser = CreateSubParser(advance);
+            bool valid = subParser.ParseTypePathGenericStep(ref retn);
+            subParser.Release();
+
+            if (!valid) {
+                Abort();
+            }
+
+            //tokenStream.Advance();
+            return true;
+        }
+
+        private bool ParseTypePathGenericStep(ref TypePath retn) {
             TypePath arg = default;
 
-            while (tokenStream.CurrentIndex < end) {
-                // parse head
-                // if < parse generics recursive
-                // if comma keep going
-                // error
-
+            while (tokenStream.HasMoreTokens) {
                 if (tokenStream.Current == TokenType.Identifier) {
                     if (!ParseTypePathHead(ref arg)) {
                         tokenStream.Restore();
                         return false;
                     }
 
-                    retn.genericArguments = retn.genericArguments ?? ListPool<TypePath>.Get();
                     retn.genericArguments.Add(arg);
                     continue;
                 }
@@ -274,8 +322,10 @@ namespace UIForia.Parsing {
                     continue;
                 }
 
-                if (tokenStream.Current == TokenType.LessThan && ParseTypePathGenerics(ref arg)) {
-                    continue;
+                if (tokenStream.Current == TokenType.LessThan) {
+                    if (ParseTypePathGenerics(ref arg)) {
+                        continue;
+                    }
                 }
 
                 tokenStream.Restore();
@@ -283,7 +333,6 @@ namespace UIForia.Parsing {
                 return false;
             }
 
-            tokenStream.Advance();
             return true;
         }
 
@@ -298,6 +347,7 @@ namespace UIForia.Parsing {
             tokenStream.Advance();
 
             retn.path = ListPool<string>.Get();
+            retn.genericArguments = ListPool<TypePath>.Get();
 
             retn.path.Add(identifier);
 
@@ -348,35 +398,29 @@ namespace UIForia.Parsing {
                 return false;
             }
 
+            tokenStream.Advance();
+
+            int advance = tokenStream.FindMatchingIndex(TokenType.ParenOpen, TokenType.ParenClose);
+            if (advance == -1) {
+                Abort();
+                return false;
+            }
+
             tokenStream.Save();
 
-            tokenStream.Advance(2);
-            ASTNode node = null;
-            if (!ParseIdentifier(ref node) && !ParseDotAccessExpression(ref node)) {
+            Parser2 subParser = CreateSubParser(advance);
+            TypePath typePath = new TypePath();
+            bool valid = subParser.ParseTypePath(ref typePath);
+            subParser.Release();
+
+            if (!valid) {
+                Abort(); // hard fail since typeof token has no other paths to go 
                 tokenStream.Restore();
                 return false;
             }
 
-            if (tokenStream.Current != TokenType.ParenClose) {
-                node.Release();
-                tokenStream.Restore();
-                return false;
-            }
-
-            retn = ASTNode.TypeOfNode(node);
+            retn = ASTNode.TypeOfNode(typePath);
             return true;
-        }
-
-        private bool ParseDotAccessExpression(ref ASTNode node) {
-            return false;
-        }
-
-        private bool ParseInvokeExpression(ref InvokeNode retn) {
-            return false;
-        }
-
-        private bool ParseTypeExpression(ref TypeNode retn) {
-            return false;
         }
 
         // something.someValue
@@ -405,7 +449,7 @@ namespace UIForia.Parsing {
                     }
                 }
                 else if (tokenStream.Current == TokenType.ArrayAccessOpen) {
-                    int advance = tokenStream.FindMatchingBraceIndex(TokenType.ArrayAccessOpen, TokenType.ArrayAccessClose);
+                    int advance = tokenStream.FindMatchingIndex(TokenType.ArrayAccessOpen, TokenType.ArrayAccessClose);
                     if (advance == -1) {
                         Abort();
                         throw new Exception("Unmatched array bracket"); // todo abort
@@ -448,7 +492,7 @@ namespace UIForia.Parsing {
                 return false;
             }
 
-            int advance = tokenStream.FindMatchingBraceIndex(TokenType.ParenOpen, TokenType.ParenClose);
+            int advance = tokenStream.FindMatchingIndex(TokenType.ParenOpen, TokenType.ParenClose);
             if (advance == -1) throw new Exception("Unmatched paren"); // todo just abort
             Parser2 subParser = CreateSubParser(advance);
             retn = subParser.ParseLoop();
@@ -467,29 +511,7 @@ namespace UIForia.Parsing {
                 return false;
             }
 
-            tokenStream.Save();
-            tokenStream.Advance();
-            TypeNode typeNode = null;
-            InvokeNode invokeNode = null;
-            if (!ParseTypeExpression(ref typeNode) && !ParseInvokeExpression(ref invokeNode)) {
-                typeNode?.Release();
-                invokeNode?.Release();
-                tokenStream.Restore();
-                return false;
-            }
-
-            retn = ASTNode.NewExpressionNode(typeNode, invokeNode);
-            return true;
-        }
-
-        private bool ParseValueExpression(ref ASTNode retn) {
-            if (tokenStream.Current != TokenType.Identifier) {
-                return false;
-            }
-
-            retn = ASTNode.IdentifierNode(tokenStream.Current.value);
-            tokenStream.Advance();
-            return true;
+            throw new NotImplementedException();
         }
 
         // (int)something
@@ -500,7 +522,7 @@ namespace UIForia.Parsing {
 
             ASTNode expression = null;
 
-            int advance = tokenStream.FindMatchingBraceIndex(TokenType.ParenOpen, TokenType.ParenClose);
+            int advance = tokenStream.FindMatchingIndex(TokenType.ParenOpen, TokenType.ParenClose);
             if (advance == -1) {
                 Abort();
                 return false;
@@ -534,7 +556,7 @@ namespace UIForia.Parsing {
                 return false;
             }
 
-            int range = tokenStream.FindMatchingBraceIndex(openToken, closeToken);
+            int range = tokenStream.FindMatchingIndex(openToken, closeToken);
             tokenStream.Save();
             tokenStream.Advance();
             if (range == 1) {
@@ -668,7 +690,13 @@ namespace UIForia.Parsing {
         UnaryNot,
         UnaryMinus,
         DirectCast,
-        TypePath
+        TypePath,
+
+        ListInitializer,
+
+        New,
+
+        Paren
 
     }
 

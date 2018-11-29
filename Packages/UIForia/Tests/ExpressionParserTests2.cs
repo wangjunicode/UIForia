@@ -263,7 +263,7 @@ public class ExpressionParserTests2 {
         Assert.AreEqual("someValue", dotNode.propertyName);
         Assert.AreEqual("someProperty", node.identifier);
     }
-    
+
     [Test]
     public void Parse_DotAccessExpression_Multiple() {
         ASTNode root = Parser2.Parse("someProperty.someValue.someOtherValue.evenMore");
@@ -271,9 +271,9 @@ public class ExpressionParserTests2 {
         MemberAccessExpressionNode node = (MemberAccessExpressionNode) root;
         Assert.AreEqual(3, node.parts.Count);
         Assert.AreEqual("someProperty", node.identifier);
-        Assert.AreEqual("someValue", ((DotAccessNode)node.parts[0]).propertyName);
-        Assert.AreEqual("someOtherValue", ((DotAccessNode)node.parts[1]).propertyName);
-        Assert.AreEqual("evenMore", ((DotAccessNode)node.parts[2]).propertyName);
+        Assert.AreEqual("someValue", ((DotAccessNode) node.parts[0]).propertyName);
+        Assert.AreEqual("someOtherValue", ((DotAccessNode) node.parts[1]).propertyName);
+        Assert.AreEqual("evenMore", ((DotAccessNode) node.parts[2]).propertyName);
     }
 
     [Test]
@@ -293,7 +293,7 @@ public class ExpressionParserTests2 {
         Assert.AreEqual(1, node.parts.Count);
         Assert.IsInstanceOf<InvokeNode>(node.parts[0]);
     }
-    
+
     [Test]
     public void Parse_InvokeAccessExpression_1Arg() {
         ASTNode root = Parser2.Parse("someProperty(1)");
@@ -305,7 +305,7 @@ public class ExpressionParserTests2 {
         Assert.AreEqual(1, invokeNode.parameters.Count);
         Assert.IsInstanceOf<LiteralNode>(invokeNode.parameters[0]);
     }
-    
+
     [Test]
     public void Parse_InvokeAccessExpression_2Arg() {
         ASTNode root = Parser2.Parse("someProperty(1, something)");
@@ -318,7 +318,7 @@ public class ExpressionParserTests2 {
         Assert.IsInstanceOf<LiteralNode>(invokeNode.parameters[0]);
         Assert.IsInstanceOf<IdentifierNode>(invokeNode.parameters[1]);
     }
-    
+
     [Test]
     public void Parse_InvokeAccessExpression_2Arg_Chained() {
         ASTNode root = Parser2.Parse("someProperty(1, something)()");
@@ -332,7 +332,7 @@ public class ExpressionParserTests2 {
         Assert.IsInstanceOf<LiteralNode>(invokeNode.parameters[0]);
         Assert.IsInstanceOf<IdentifierNode>(invokeNode.parameters[1]);
     }
-    
+
     [Test]
     public void Parse_Ternary() {
         ASTNode root = Parser2.Parse("{x ? y : 1}");
@@ -344,7 +344,7 @@ public class ExpressionParserTests2 {
         Assert.IsInstanceOf<IdentifierNode>(selection.left);
         Assert.IsInstanceOf<LiteralNode>(selection.right);
     }
-    
+
     [Test]
     public void Parse_Ternary_NestedExpression() {
         ASTNode root = Parser2.Parse("{x ? y + z : 1}");
@@ -352,21 +352,21 @@ public class ExpressionParserTests2 {
         Assert.AreEqual(OperatorType.TernaryCondition, ternary.operatorType);
         OperatorNode selection = AssertInstanceOfAndReturn<OperatorNode>(ternary.right);
         Assert.IsInstanceOf<IdentifierNode>(ternary.left);
-        Assert.AreEqual("x", ((IdentifierNode)ternary.left).name);
+        Assert.AreEqual("x", ((IdentifierNode) ternary.left).name);
 
         Assert.AreEqual(OperatorType.TernarySelection, selection.operatorType);
 
         OperatorNode nestedOp = AssertInstanceOfAndReturn<OperatorNode>(selection.left);
         Assert.AreEqual(OperatorType.Plus, nestedOp.operatorType);
 
-        Assert.AreEqual("y", ((IdentifierNode)nestedOp.left).name);
-        Assert.AreEqual("z", ((IdentifierNode)nestedOp.right).name);
+        Assert.AreEqual("y", ((IdentifierNode) nestedOp.left).name);
+        Assert.AreEqual("z", ((IdentifierNode) nestedOp.right).name);
 
         Assert.AreEqual(OperatorType.Plus, nestedOp.operatorType);
 
         Assert.IsInstanceOf<LiteralNode>(selection.right);
     }
-    
+
     [Test]
     public void Parse_ArrayAccess_RootContext_LiteralExpression() {
         ASTNode root = Parser2.Parse("{rootContext[ 1 + 1 ]}");
@@ -381,7 +381,7 @@ public class ExpressionParserTests2 {
         Assert.IsInstanceOf<LiteralNode>(opNode.left);
         Assert.IsInstanceOf<LiteralNode>(opNode.right);
     }
-    
+
     [Test]
     public void Parse_ArrayAccess_ParenExpression() {
         ASTNode root = Parser2.Parse("{rootContext[ (1 + 1) ]}");
@@ -399,7 +399,7 @@ public class ExpressionParserTests2 {
         Assert.IsInstanceOf<LiteralNode>(opNode.left);
         Assert.IsInstanceOf<LiteralNode>(opNode.right);
     }
-    
+
     [Test]
     public void Parse_ArrayAccess_NestedArrayAccess() {
         ASTNode root = Parser2.Parse("{rootContext[ rootContext[3] ]}");
@@ -410,7 +410,7 @@ public class ExpressionParserTests2 {
         Assert.IsInstanceOf<IndexExpressionNode>(node.parts[0]);
         Assert.IsInstanceOf<MemberAccessExpressionNode>(((IndexExpressionNode) node.parts[0]).expression);
     }
-    
+
     [Test]
     public void Parse_PropertyAccessMixedArrayAccess() {
         ASTNode root = Parser2.Parse("{rootContext.list[1].property1.property2}");
@@ -423,7 +423,7 @@ public class ExpressionParserTests2 {
         Assert.IsInstanceOf<DotAccessNode>(node.parts[2]);
         Assert.IsInstanceOf<DotAccessNode>(node.parts[3]);
     }
-    
+
     [Test]
     public void Parse_PropertyAccessMixedArrayAccessWithInvoke() {
         ASTNode root = Parser2.Parse("{rootContext()[1].property1.property2}");
@@ -444,7 +444,7 @@ public class ExpressionParserTests2 {
         Assert.AreEqual(ASTNodeType.UnaryNot, node.type);
         Assert.IsInstanceOf<IdentifierNode>(node.expression);
     }
-    
+
     [Test]
     public void Parse_UnaryExpression_Not_Complex() {
         ASTNode root = Parser2.Parse("!(someValue > 4)");
@@ -452,7 +452,7 @@ public class ExpressionParserTests2 {
         Assert.AreEqual(ASTNodeType.UnaryNot, node.type);
         Assert.IsInstanceOf<ParenNode>(node.expression);
     }
-    
+
     [Test]
     public void Parse_UnaryExpression_Minus() {
         ASTNode root = Parser2.Parse("-someValue");
@@ -460,7 +460,7 @@ public class ExpressionParserTests2 {
         Assert.AreEqual(ASTNodeType.UnaryMinus, node.type);
         Assert.IsInstanceOf<IdentifierNode>(node.expression);
     }
-    
+
     [Test]
     public void Parse_UnaryExpression_Minus_Complex() {
         ASTNode root = Parser2.Parse("-(someValue + 4)");
@@ -475,14 +475,14 @@ public class ExpressionParserTests2 {
         UnaryExpressionNode node = AssertInstanceOfAndReturn<UnaryExpressionNode>(root);
         Assert.AreEqual(ASTNodeType.DirectCast, node.type);
         Assert.AreEqual("int", node.typePath.path[0]);
-        
+
         root = Parser2.Parse("(UnityEngine.Vector3)5.6f");
         node = AssertInstanceOfAndReturn<UnaryExpressionNode>(root);
         Assert.AreEqual(ASTNodeType.DirectCast, node.type);
         Assert.AreEqual("UnityEngine", node.typePath.path[0]);
         Assert.AreEqual("Vector3", node.typePath.path[1]);
     }
-    
+
     [Test]
     public void Parse_UnaryExpression_DirectCastGeneric() {
         ASTNode root = Parser2.Parse("(List<float, int>)someIdentifier");
@@ -492,30 +492,56 @@ public class ExpressionParserTests2 {
         Assert.AreEqual("float", node.typePath.genericArguments[0].path[0]);
         Assert.AreEqual("int", node.typePath.genericArguments[1].path[0]);
     }
-    
+
     [Test]
     public void Parse_UnaryExpression_DirectCastGenericList() {
-        ASTNode root = Parser2.Parse("(List<Something.Tuple<int, ValueTuple>>");//"<float, UnityEngine.Vector3>>>)someIdentifier");
+        ASTNode root = Parser2.Parse("(List<Something.Tuple<int, ValueTuple>>)expr"); //"<float, UnityEngine.Vector3>>>)someIdentifier");
         UnaryExpressionNode node = AssertInstanceOfAndReturn<UnaryExpressionNode>(root);
         Assert.AreEqual("List", node.typePath.path[0]);
-        TypePath head = node.typePath;
         TypePath outerTuple = node.typePath.genericArguments[0];
         TypePath outerGen0 = outerTuple.genericArguments[0];
         TypePath outerGen1 = outerTuple.genericArguments[1];
-        
+
         Assert.AreEqual("Something", outerTuple.path[0]);
         Assert.AreEqual("Tuple", outerTuple.path[1]);
         Assert.AreEqual("int", outerGen0.path[0]);
         Assert.AreEqual("ValueTuple", outerGen1.path[0]);
     }
 
-//    [Test]
-//    public void Parse_TypeOfExpression() { }
-//
-//    [Test]
-//    public void Parse_NewExpression() { }
-//    
-//    [Test]
-//    public void Parse_ArrayLiteralExpression() {}
+    [Test]
+    public void Parse_TypeOfExpression() {
+        ASTNode root = Parser2.Parse("typeof(UnityEngine.Vector3)");
+        TypeNode node = AssertInstanceOfAndReturn<TypeNode>(root);
+        Assert.AreEqual("UnityEngine", node.typePath.path[0]);
+        Assert.AreEqual("Vector3", node.typePath.path[1]);
+    }
+
+    [Test]
+    public void Parse_ArrayLiteralExpression() {
+        ASTNode root = Parser2.Parse("[1, 3, 4]");
+        Assert.IsInstanceOf<ListInitializerNode>(root);
+        ListInitializerNode node = (ListInitializerNode) root;
+        Assert.AreEqual(3, node.list.Count);
+        Assert.IsInstanceOf<LiteralNode>(node.list[0]);
+        Assert.IsInstanceOf<LiteralNode>(node.list[1]);
+        Assert.IsInstanceOf<LiteralNode>(node.list[2]);
+    }
+
+    [Test]
+    public void Parse_IsOperator() {
+        ASTNode root = Parser2.Parse("something is Vector3");
+        OperatorNode node = AssertInstanceOfAndReturn<OperatorNode>(root);
+        Assert.AreEqual(OperatorType.Is, node.operatorType);
+        Assert.IsInstanceOf<IdentifierNode>(node.left);
+        Assert.IsInstanceOf<TypeNode>(node.right);    }
+    
+    [Test]
+    public void Parse_AsOperator() {
+        ASTNode root = Parser2.Parse("something as Vector3");
+        OperatorNode node = AssertInstanceOfAndReturn<OperatorNode>(root);
+        Assert.AreEqual(OperatorType.As, node.operatorType);
+        Assert.IsInstanceOf<IdentifierNode>(node.left);
+        Assert.IsInstanceOf<TypeNode>(node.right);
+    }
 
 }

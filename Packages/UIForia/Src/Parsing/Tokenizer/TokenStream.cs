@@ -97,7 +97,7 @@ namespace UIForia {
         }
 
         [DebuggerStepThrough]
-        public int FindMatchingBraceIndex(TokenType braceOpen, TokenType braceClose) {
+        public int FindMatchingIndex(TokenType braceOpen, TokenType braceClose) {
             if (Current != braceOpen) {
                 return -1;
             }

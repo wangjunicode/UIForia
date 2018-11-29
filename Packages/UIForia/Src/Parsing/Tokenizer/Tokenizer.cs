@@ -78,6 +78,12 @@ namespace UIForia {
             return TryConsumeWhiteSpace(ptr, input);
         }
 
+        // todo handle {} inside of strings
+        // read until end or unescaped {
+        // if unescaped { found, find matching index
+        // add token for string 0 to index({)
+        // add + token
+        // run parse loop on contents of {}
         private static int TryReadString(int ptr, string input, List<DslToken> output) {
             int start = ptr;
             if (ptr >= input.Length) return input.Length;

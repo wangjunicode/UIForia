@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using UIForia.Util;
 
@@ -8,7 +9,7 @@ namespace UIForia.Parsing {
         protected static readonly ObjectPool<LiteralNode> s_LiteralPool = new ObjectPool<LiteralNode>();
         protected static readonly ObjectPool<OperatorNode> s_OperatorPool = new ObjectPool<OperatorNode>();
         protected static readonly ObjectPool<IdentifierNode> s_IdentifierPool = new ObjectPool<IdentifierNode>();
-        protected static readonly ObjectPool<TypeOfNode> s_TypeOfPool = new ObjectPool<TypeOfNode>();
+        protected static readonly ObjectPool<TypeNode> s_TypeNodePool = new ObjectPool<TypeNode>();
         protected static readonly ObjectPool<MethodCallNode> s_MethodCallPool = new ObjectPool<MethodCallNode>();
         protected static readonly ObjectPool<ParenNode> s_ParenPool = new ObjectPool<ParenNode>();
         protected static readonly ObjectPool<DotAccessNode> s_DotAccessPool = new ObjectPool<DotAccessNode>();
@@ -16,7 +17,7 @@ namespace UIForia.Parsing {
         protected static readonly ObjectPool<IndexExpressionNode> s_IndexExpressionPool = new ObjectPool<IndexExpressionNode>();
         protected static readonly ObjectPool<InvokeNode> s_InvokeNodePool = new ObjectPool<InvokeNode>();
         protected static readonly ObjectPool<UnaryExpressionNode> s_UnaryNodePool = new ObjectPool<UnaryExpressionNode>();
-        protected static readonly ObjectPool<TypePathNode> s_TypePathNodePool = new ObjectPool<TypePathNode>();
+        protected static readonly ObjectPool<ListInitializerNode> s_ListInitializerPool = new ObjectPool<ListInitializerNode>();
 
         public ASTNodeType type;
 
@@ -81,17 +82,18 @@ namespace UIForia.Parsing {
             return idNode;
         }
 
-        public static TypeOfNode TypeOfNode(ASTNode expression) {
-            TypeOfNode typeOfNode = s_TypeOfPool.Get();
-            typeOfNode.expression = expression;
+        public static TypeNode TypeOfNode(TypePath typePath) {
+            TypeNode typeOfNode = s_TypeNodePool.Get();
+            typeOfNode.typePath = typePath;
+            typeOfNode.type = ASTNodeType.TypeOf;
             return typeOfNode;
         }
-
-        public static MethodCallNode MethodCallNode(string methodName, ASTNode[] signature = null) {
-            MethodCallNode methodCallNode = s_MethodCallPool.Get();
-            methodCallNode.methodName = methodName;
-            methodCallNode.signature = signature;
-            return methodCallNode;
+        
+        public static TypeNode NewExpressionNode(TypePath typePath) {
+            TypeNode typeOfNode = s_TypeNodePool.Get();
+            typeOfNode.typePath = typePath;
+            typeOfNode.type = ASTNodeType.New;
+            return typeOfNode;
         }
 
         public static ParenNode ParenNode(ASTNode expression) {
@@ -118,13 +120,11 @@ namespace UIForia.Parsing {
             accessExpressionNode.parts = parts;
             return accessExpressionNode;
         }
-        
-        public static NewExpressionNode NewExpressionNode(TypeNode typeNode, InvokeNode invokeNode) {
-            return null;
-        }
-        
-        public static ListInitializerNode ListInitializerNode(ASTNode[] list) {
-            return null;
+      
+        public static ListInitializerNode ListInitializerNode(List<ASTNode> list) {
+            ListInitializerNode listInitializerNode = s_ListInitializerPool.Get();
+            listInitializerNode.list = list;
+            return listInitializerNode;
         }
 
         public static IndexExpressionNode IndexExpressionNode(ASTNode expression) {
@@ -172,20 +172,6 @@ namespace UIForia.Parsing {
 
     }
     
-    public class TypePathNode : ASTNode {
-
-        public TypePath typePath;
-        
-        public TypePathNode() {
-            type = ASTNodeType.TypePath;
-        }
-        
-        public override void Release() {
-            typePath.Release();
-        }
-
-    }
-
     public class UnaryExpressionNode : ASTNode {
 
         public ASTNode expression;
@@ -221,6 +207,10 @@ namespace UIForia.Parsing {
     public class ParenNode : ASTNode {
 
         public ASTNode expression;
+
+        public ParenNode() {
+            type = ASTNodeType.Paren;
+        }
         
         public override void Release() {
             expression?.Release();
@@ -231,8 +221,11 @@ namespace UIForia.Parsing {
 
     public class TypeNode : ASTNode {
 
+        public TypePath typePath;
+
         public override void Release() {
-            
+            s_TypeNodePool.Release(this);
+            typePath.Release();            
         }
 
     }
@@ -253,16 +246,32 @@ namespace UIForia.Parsing {
 
     public class NewExpressionNode : ASTNode {
 
+        public TypePath typePath;
+        
+        public NewExpressionNode() {
+            type = ASTNodeType.New;
+        }
+        
         public override void Release() {
-            
+            throw new NotImplementedException();
         }
 
     }
 
     public class ListInitializerNode : ASTNode {
 
+        public List<ASTNode> list;
+
+        public ListInitializerNode() {
+            type = ASTNodeType.ListInitializer;
+        }
+        
         public override void Release() {
-            
+            for (int i = 0; i < list.Count; i++) {
+                list[i].Release();
+            }
+            ListPool<ASTNode>.Release(ref list);
+            s_ListInitializerPool.Release(this);
         }
 
     }
@@ -312,21 +321,6 @@ namespace UIForia.Parsing {
             }
         }
 
-    }
-
-    public class TypeOfNode : ASTNode {
-
-        public ASTNode expression;
-
-        public TypeOfNode() {
-            type = ASTNodeType.TypeOf;
-        }
-
-        public override void Release() {
-            expression.Release();
-            s_TypeOfPool.Release(this);
-        }
-
-    }
+    }    
 
 }

@@ -31,6 +31,8 @@ public interface IExpression<out T> {
 public class Compiler {
 
     protected List<AliasResolver> m_AliasResolvers;
+
+    private float Array;
     
     public IExpression<T> Compile<T>(Type rootContext, string expression) {
         try {
@@ -39,6 +41,7 @@ public class Compiler {
         catch (ParseException ex) {
             
         }
+
         return default;
     }
     

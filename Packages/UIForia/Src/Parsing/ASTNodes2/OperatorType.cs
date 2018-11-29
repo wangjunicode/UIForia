@@ -20,11 +20,12 @@ namespace UIForia.Parsing {
         And = 1 << 13,
         Or = 1 << 14,
         Not = 1 << 15,
-
+        As = 1 << 16,
+        Is = 1 << 17,
+        
         Boolean = And | Or | Not,
         Arithmetic = Plus | Minus | Times | Divide | Mod,
         Comparator = Equals | NotEquals | GreaterThan | GreaterThanEqualTo | LessThan | LessThanEqualTo,
-
 
     }
 }

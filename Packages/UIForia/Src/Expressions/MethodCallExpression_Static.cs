@@ -19,12 +19,7 @@ namespace UIForia {
 
         public override Type YieldedType => typeof(Terminal);
 
-        public override object Evaluate(ExpressionContext context) {
-            method();
-            return null;
-        }
-
-        public override Terminal EvaluateTyped(ExpressionContext context) {
+        public override Terminal Evaluate(ExpressionContext context) {
             method();
             return null;
         }
@@ -53,13 +48,8 @@ namespace UIForia {
 
         public override Type YieldedType => typeof(Terminal);
 
-        public override object Evaluate(ExpressionContext context) {
-            method(argument0.EvaluateTyped(context));
-            return null;
-        }
-
-        public override Terminal EvaluateTyped(ExpressionContext context) {
-            method(argument0.EvaluateTyped(context));
+        public override Terminal Evaluate(ExpressionContext context) {
+            method(argument0.Evaluate(context));
             return null;
         }
 
@@ -90,18 +80,10 @@ namespace UIForia {
 
         public override Type YieldedType => typeof(Terminal);
 
-        public override object Evaluate(ExpressionContext context) {
+        public override Terminal Evaluate(ExpressionContext context) {
             method(
-                argument0.EvaluateTyped(context),
-                argument1.EvaluateTyped(context)
-            );
-            return null;
-        }
-
-        public override Terminal EvaluateTyped(ExpressionContext context) {
-            method(
-                argument0.EvaluateTyped(context),
-                argument1.EvaluateTyped(context)
+                argument0.Evaluate(context),
+                argument1.Evaluate(context)
             );
             return null;
         }
@@ -136,20 +118,11 @@ namespace UIForia {
 
         public override Type YieldedType => typeof(Terminal);
 
-        public override object Evaluate(ExpressionContext context) {
+        public override Terminal Evaluate(ExpressionContext context) {
             method(
-                argument0.EvaluateTyped(context),
-                argument1.EvaluateTyped(context),
-                argument2.EvaluateTyped(context)
-            );
-            return null;
-        }
-
-        public override Terminal EvaluateTyped(ExpressionContext context) {
-            method(
-                argument0.EvaluateTyped(context),
-                argument1.EvaluateTyped(context),
-                argument2.EvaluateTyped(context)
+                argument0.Evaluate(context),
+                argument1.Evaluate(context),
+                argument2.Evaluate(context)
             );
             return null;
         }
@@ -187,22 +160,12 @@ namespace UIForia {
 
         public override Type YieldedType => typeof(Terminal);
 
-        public override object Evaluate(ExpressionContext context) {
+        public override Terminal Evaluate(ExpressionContext context) {
             method(
-                argument0.EvaluateTyped(context),
-                argument1.EvaluateTyped(context),
-                argument2.EvaluateTyped(context),
-                argument3.EvaluateTyped(context)
-            );
-            return null;
-        }
-
-        public override Terminal EvaluateTyped(ExpressionContext context) {
-            method(
-                argument0.EvaluateTyped(context),
-                argument1.EvaluateTyped(context),
-                argument2.EvaluateTyped(context),
-                argument3.EvaluateTyped(context)
+                argument0.Evaluate(context),
+                argument1.Evaluate(context),
+                argument2.Evaluate(context),
+                argument3.Evaluate(context)
             );
             return null;
         }
@@ -228,11 +191,7 @@ namespace UIForia {
 
         public override Type YieldedType => typeof(T);
 
-        public override object Evaluate(ExpressionContext context) {
-            return method();
-        }
-
-        public override T EvaluateTyped(ExpressionContext context) {
+        public override T Evaluate(ExpressionContext context) {
             return method();
         }
 
@@ -261,12 +220,8 @@ namespace UIForia {
 
         public override Type YieldedType => typeof(T);
 
-        public override object Evaluate(ExpressionContext context) {
-            return method(argument0.EvaluateTyped(context));
-        }
-
-        public override T EvaluateTyped(ExpressionContext context) {
-            return method(argument0.EvaluateTyped(context));
+        public override T Evaluate(ExpressionContext context) {
+            return method(argument0.Evaluate(context));
         }
 
         public override bool IsConstant() {
@@ -297,17 +252,10 @@ namespace UIForia {
 
         public override Type YieldedType => typeof(T);
 
-        public override object Evaluate(ExpressionContext context) {
+        public override T Evaluate(ExpressionContext context) {
             return method(
-                argument0.EvaluateTyped(context),
-                argument1.EvaluateTyped(context)
-            );
-        }
-
-        public override T EvaluateTyped(ExpressionContext context) {
-            return method(
-                argument0.EvaluateTyped(context),
-                argument1.EvaluateTyped(context)
+                argument0.Evaluate(context),
+                argument1.Evaluate(context)
             );
         }
 
@@ -341,19 +289,11 @@ namespace UIForia {
 
         public override Type YieldedType => typeof(T);
 
-        public override object Evaluate(ExpressionContext context) {
+        public override T Evaluate(ExpressionContext context) {
             return method(
-                argument0.EvaluateTyped(context),
-                argument1.EvaluateTyped(context),
-                argument2.EvaluateTyped(context)
-            );
-        }
-
-        public override T EvaluateTyped(ExpressionContext context) {
-            return method(
-                argument0.EvaluateTyped(context),
-                argument1.EvaluateTyped(context),
-                argument2.EvaluateTyped(context)
+                argument0.Evaluate(context),
+                argument1.Evaluate(context),
+                argument2.Evaluate(context)
             );
         }
 
@@ -389,22 +329,13 @@ namespace UIForia {
         }
 
         public override Type YieldedType => typeof(T);
-
-        public override object Evaluate(ExpressionContext context) {
+       
+        public override T Evaluate(ExpressionContext context) {
             return method(
-                argument0.EvaluateTyped(context),
-                argument1.EvaluateTyped(context),
-                argument2.EvaluateTyped(context),
-                argument3.EvaluateTyped(context)
-            );
-        }
-
-        public override T EvaluateTyped(ExpressionContext context) {
-            return method(
-                argument0.EvaluateTyped(context),
-                argument1.EvaluateTyped(context),
-                argument2.EvaluateTyped(context),
-                argument3.EvaluateTyped(context)
+                argument0.Evaluate(context),
+                argument1.Evaluate(context),
+                argument2.Evaluate(context),
+                argument3.Evaluate(context)
             );
         }
 

@@ -12,11 +12,7 @@ namespace UIForia {
         
         public override Type YieldedType => typeof(T);
         
-        public override object Evaluate(ExpressionContext context) {
-            return value;
-        }
-
-        public override T EvaluateTyped(ExpressionContext context) {
+        public override T Evaluate(ExpressionContext context) {
             return value;
         }
 

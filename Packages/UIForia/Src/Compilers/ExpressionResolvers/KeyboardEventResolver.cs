@@ -17,12 +17,8 @@ namespace UIForia.Compilers {
 
             public override Type YieldedType => typeof(MouseInputEvent);
 
-            public override object Evaluate(ExpressionContext context) {
-                UIElement element = (UIElement) context.currentObject;
-                return element.view.Application.InputSystem.CurrentKeyboardEvent;
-            }
 
-            public override KeyboardInputEvent EvaluateTyped(ExpressionContext context) {
+            public override KeyboardInputEvent Evaluate(ExpressionContext context) {
                 UIElement element = (UIElement) context.currentObject;
                 return element.view.Application.InputSystem.CurrentKeyboardEvent;
             }

@@ -15,18 +15,14 @@ namespace UIForia {
 
         public override Type YieldedType => typeof(string);
         
-        public override string EvaluateTyped(ExpressionContext context) {
-            U leftVal = left.EvaluateTyped(context);
-            V rightVal = right.EvaluateTyped(context);
+        public override string Evaluate(ExpressionContext context) {
+            U leftVal = left.Evaluate(context);
+            V rightVal = right.Evaluate(context);
             string leftString = leftVal != null ? leftVal.ToString() :string.Empty;
             string rightString = rightVal != null ? rightVal.ToString() :string.Empty;
             return leftString + rightString;
         }
-        
-        public override object Evaluate(ExpressionContext context) {
-            return EvaluateTyped(context);
-        }
-
+   
         public override bool IsConstant() {
             return left.IsConstant() && right.IsConstant();
         }

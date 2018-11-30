@@ -265,7 +265,7 @@ namespace UIForia.Compilers {
             [UsedImplicitly]
             public void Run() {
                 ctx.currentObject = target;
-                expression.EvaluateTyped(ctx);
+                expression.Evaluate(ctx);
             }
 
         }
@@ -312,7 +312,7 @@ namespace UIForia.Compilers {
                // ctx.SetContextValue(target, PropertyBindingCompiler.EvtArgDefaultName, evtArg0);
               //  ctx.SetContextValue(target, PropertyBindingCompiler.EvtArgNames[0], evtArg0);
 
-                expression.EvaluateTyped(ctx);
+                expression.Evaluate(ctx);
 
                // ctx.RemoveContextValue<T>(target, PropertyBindingCompiler.EvtArgDefaultName);
                // ctx.RemoveContextValue<T>(target, PropertyBindingCompiler.EvtArgNames[0]);
@@ -362,7 +362,7 @@ namespace UIForia.Compilers {
 //                ctx.SetContextValue(target, PropertyBindingCompiler.EvtArgDefaultName, evtArg0);
 //                ctx.SetContextValue(target, PropertyBindingCompiler.EvtArgNames[0], evtArg0);
 //                ctx.SetContextValue(target, PropertyBindingCompiler.EvtArgNames[1], evtArg1);
-                expression.EvaluateTyped(ctx);
+                expression.Evaluate(ctx);
 //                ctx.RemoveContextValue<T>(target, PropertyBindingCompiler.EvtArgDefaultName);
 //                ctx.RemoveContextValue<T>(target, PropertyBindingCompiler.EvtArgNames[0]);
 //                ctx.RemoveContextValue<T>(target, PropertyBindingCompiler.EvtArgNames[1]);
@@ -413,7 +413,7 @@ namespace UIForia.Compilers {
 //                ctx.SetContextValue(target, PropertyBindingCompiler.EvtArgNames[0], evtArg0);
 //                ctx.SetContextValue(target, PropertyBindingCompiler.EvtArgNames[1], evtArg1);
 //                ctx.SetContextValue(target, PropertyBindingCompiler.EvtArgNames[2], evtArg2);
-                expression.EvaluateTyped(ctx);
+                expression.Evaluate(ctx);
 //                ctx.RemoveContextValue<T>(target, PropertyBindingCompiler.EvtArgDefaultName);
 //                ctx.RemoveContextValue<T>(target, PropertyBindingCompiler.EvtArgNames[0]);
 //                ctx.RemoveContextValue<T>(target, PropertyBindingCompiler.EvtArgNames[1]);
@@ -466,7 +466,7 @@ namespace UIForia.Compilers {
 //                ctx.SetContextValue(target, PropertyBindingCompiler.EvtArgNames[1], evtArg1);
 //                ctx.SetContextValue(target, PropertyBindingCompiler.EvtArgNames[2], evtArg2);
 //                ctx.SetContextValue(target, PropertyBindingCompiler.EvtArgNames[3], evtArg3);
-                expression.EvaluateTyped(ctx);
+                expression.Evaluate(ctx);
 //                ctx.RemoveContextValue<T>(target, PropertyBindingCompiler.EvtArgDefaultName);
 //                ctx.RemoveContextValue<T>(target, PropertyBindingCompiler.EvtArgNames[0]);
 //                ctx.RemoveContextValue<T>(target, PropertyBindingCompiler.EvtArgNames[1]);

@@ -55,7 +55,7 @@ namespace UIForia.Input {
 
         public override void Invoke(object target, UITemplateContext context, MouseInputEvent evt) {
             if (ShouldRun(evt)) {
-                expression.EvaluateTyped(context);
+                expression.Evaluate(context);
             }
         }
 

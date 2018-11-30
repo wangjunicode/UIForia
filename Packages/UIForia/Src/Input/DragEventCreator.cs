@@ -47,7 +47,7 @@ namespace UIForia.Input {
         }
 
         public override DragEvent Invoke(object target, UITemplateContext context, MouseInputEvent evt) {
-            return ShouldRun(evt) ? expression.EvaluateTyped(context) : null;
+            return ShouldRun(evt) ? expression.Evaluate(context) : null;
         }
 
     }

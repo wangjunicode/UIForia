@@ -1,4 +1,5 @@
 ﻿using System;
+using UIForia.Parsing;
 
 namespace UIForia {
 
@@ -16,18 +17,20 @@ namespace UIForia {
 
         public override Type YieldedType => typeof(bool);
 
-        public override bool EvaluateTyped(ExpressionContext context) {
+        public override bool Evaluate(ExpressionContext context) {
+            
+            // these mostly run via class types so no boxing, but if a struct type does not
+            // define an equality operator for the target type then this will be used, which will box 
+            // not sure how to avoid it
+            
             if (operatorType == OperatorType.Equals) {
-                return left.EvaluateTyped(context).Equals(right.EvaluateTyped(context));
+                return Equals(left.Evaluate(context), right.Evaluate(context));
             }
             else if (operatorType == OperatorType.NotEquals) {
-                return !(left.EvaluateTyped(context).Equals(right.EvaluateTyped(context)));
+                return !Equals(left.Evaluate(context), right.Evaluate(context));
             }
+            
             throw new Exception("Invalid equality operator: " + operatorType);
-        }
-
-        public override object Evaluate(ExpressionContext context) {
-            return EvaluateTyped(context);
         }
 
         public override bool IsConstant() {
@@ -50,18 +53,14 @@ namespace UIForia {
 
         public override Type YieldedType => typeof(bool);
 
-        public override bool EvaluateTyped(ExpressionContext context) {
+        public override bool Evaluate(ExpressionContext context) {
             if (operatorType == OperatorType.And) {
-                return left.EvaluateTyped(context) != null && right.EvaluateTyped(context) != null;
+                return left.Evaluate(context) != null && right.Evaluate(context) != null;
             }
             else if (operatorType == OperatorType.Or) {
-                return left.EvaluateTyped(context) != null || right.EvaluateTyped(context) != null;
+                return left.Evaluate(context) != null || right.Evaluate(context) != null;
             }
             throw new Exception("Invalid and or operator: " + operatorType);
-        }
-
-        public override object Evaluate(ExpressionContext context) {
-            return EvaluateTyped(context);
         }
 
         public override bool IsConstant() {
@@ -84,18 +83,14 @@ namespace UIForia {
 
         public override Type YieldedType => typeof(bool);
 
-        public override bool EvaluateTyped(ExpressionContext context) {
+        public override bool Evaluate(ExpressionContext context) {
             if (operatorType == OperatorType.And) {
-                return left.EvaluateTyped(context) && right.EvaluateTyped(context);
+                return left.Evaluate(context) && right.Evaluate(context);
             }
             else if (operatorType == OperatorType.Or) {
-                return left.EvaluateTyped(context)  || right.EvaluateTyped(context) ;
+                return left.Evaluate(context)  || right.Evaluate(context) ;
             }
             throw new Exception("Invalid and or operator: " + operatorType);
-        }
-
-        public override object Evaluate(ExpressionContext context) {
-            return EvaluateTyped(context);
         }
 
         public override bool IsConstant() {
@@ -118,18 +113,14 @@ namespace UIForia {
 
         public override Type YieldedType => typeof(bool);
 
-        public override bool EvaluateTyped(ExpressionContext context) {
+        public override bool Evaluate(ExpressionContext context) {
             if (operatorType == OperatorType.And) {
-                return left.EvaluateTyped(context) != null && right.EvaluateTyped(context);
+                return left.Evaluate(context) != null && right.Evaluate(context);
             }
             else if (operatorType == OperatorType.Or) {
-                return left.EvaluateTyped(context) != null || right.EvaluateTyped(context);
+                return left.Evaluate(context) != null || right.Evaluate(context);
             }
             throw new Exception("Invalid and or operator: " + operatorType);
-        }
-
-        public override object Evaluate(ExpressionContext context) {
-            return EvaluateTyped(context);
         }
 
         public override bool IsConstant() {
@@ -152,18 +143,14 @@ namespace UIForia {
 
         public override Type YieldedType => typeof(bool);
 
-        public override bool EvaluateTyped(ExpressionContext context) {
+        public override bool Evaluate(ExpressionContext context) {
             if (operatorType == OperatorType.And) {
-                return left.EvaluateTyped(context) && right.EvaluateTyped(context) != null;
+                return left.Evaluate(context) && right.Evaluate(context) != null;
             }
             else if (operatorType == OperatorType.Or) {
-                return left.EvaluateTyped(context)  || right.EvaluateTyped(context) != null;
+                return left.Evaluate(context)  || right.Evaluate(context) != null;
             }
             throw new Exception("Invalid and or operator: " + operatorType);
-        }
-
-        public override object Evaluate(ExpressionContext context) {
-            return EvaluateTyped(context);
         }
 
         public override bool IsConstant() {

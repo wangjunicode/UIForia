@@ -238,8 +238,8 @@ namespace UIForia.Compilers {
 
             ReflectionUtil.ObjectArray4[0] = attrKey;
             ReflectionUtil.ObjectArray4[1] = expression;
-            ReflectionUtil.ObjectArray4[2] = accessor.fieldGetter;
-            ReflectionUtil.ObjectArray4[3] = accessor.fieldSetter;
+            ReflectionUtil.ObjectArray4[2] = accessor.getter;
+            ReflectionUtil.ObjectArray4[3] = accessor.setter;
             return (Binding) ReflectionUtil.CreateGenericInstanceFromOpenType(
                 typeof(PropertySetterBinding<,>),
                 ReflectionUtil.TypeArray2,
@@ -281,8 +281,8 @@ namespace UIForia.Compilers {
             if (list != null) {
                 ReflectionUtil.ObjectArray5[0] = attrKey;
                 ReflectionUtil.ObjectArray5[1] = expression;
-                ReflectionUtil.ObjectArray5[2] = accessor.fieldGetter;
-                ReflectionUtil.ObjectArray5[3] = accessor.fieldSetter;
+                ReflectionUtil.ObjectArray5[2] = accessor.getter;
+                ReflectionUtil.ObjectArray5[3] = accessor.setter;
                 ReflectionUtil.ObjectArray5[4] = list;
 
                 return (Binding) ReflectionUtil.CreateGenericInstanceFromOpenType(
@@ -294,8 +294,8 @@ namespace UIForia.Compilers {
 
             ReflectionUtil.ObjectArray4[0] = attrKey;
             ReflectionUtil.ObjectArray4[1] = expression;
-            ReflectionUtil.ObjectArray4[2] = accessor.fieldGetter;
-            ReflectionUtil.ObjectArray4[3] = accessor.fieldSetter;
+            ReflectionUtil.ObjectArray4[2] = accessor.getter;
+            ReflectionUtil.ObjectArray4[3] = accessor.setter;
             return (Binding) ReflectionUtil.CreateGenericInstanceFromOpenType(
                 typeof(FieldSetterBinding<,>),
                 ReflectionUtil.TypeArray2,

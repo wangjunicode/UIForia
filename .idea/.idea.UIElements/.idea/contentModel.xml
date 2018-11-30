@@ -222,7 +222,9 @@
                 <e p="RepeatLengthAliasResolver.cs" t="Include" />
                 <e p="RouteResolver.cs" t="Include" />
               </e>
+              <e p="ImplicitCastExpression.cs" t="Include" />
               <e p="InputBindingCompiler.cs" t="Include" />
+              <e p="OperatorOverloadExpression.cs" t="Include" />
               <e p="PropertyBindingCompiler.cs" t="Include" />
               <e p="StyleBindingCompiler.cs" t="Include" />
             </e>
@@ -292,6 +294,7 @@
               <e p="DictionaryExtensions.cs" t="Include" />
               <e p="ListExtensions.cs" t="Include" />
               <e p="RectExtensions.cs" t="Include" />
+              <e p="TypeExtensions.cs" t="Include" />
               <e p="Vector2Extensions.cs" t="Include" />
             </e>
             <e p="ImportDeclaration.cs" t="Include" />

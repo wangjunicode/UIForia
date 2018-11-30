@@ -16,7 +16,7 @@ namespace UIForia {
             UITextElement textElement = (UITextElement) element;
             
             for (int i = 0; i < expressions.Length; i++) {
-                builder.Append(expressions[i].EvaluateTyped(context));
+                builder.Append(expressions[i].Evaluate(context));
             }
 
             textElement.SetText(builder.ToString());

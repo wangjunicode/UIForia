@@ -4,6 +4,8 @@ namespace UIForia.Parsing {
 
         public string name;
         
+        public bool IsAlias => name[0] == '$';
+
         public override void Release() {
             s_IdentifierPool.Release(this);
         }

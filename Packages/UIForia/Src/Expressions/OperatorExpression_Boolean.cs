@@ -1,4 +1,5 @@
 ﻿using System;
+using UIForia.Parsing;
 
 namespace UIForia {
 
@@ -16,20 +17,16 @@ namespace UIForia {
 
         public override Type YieldedType => typeof(bool);
 
-        public override bool EvaluateTyped(ExpressionContext context) {
+        public override bool Evaluate(ExpressionContext context) {
             if (operatorType == OperatorType.And) {
-                return left.EvaluateTyped(context) && right.EvaluateTyped(context);
+                return left.Evaluate(context) && right.Evaluate(context);
             }
             else if (operatorType == OperatorType.Or) {
-                return left.EvaluateTyped(context) || right.EvaluateTyped(context);
+                return left.Evaluate(context) || right.Evaluate(context);
             }
 
             throw new Exception("Invalid boolean operator: " + operatorType);
 
-        }
-
-        public override object Evaluate(ExpressionContext context) {
-            return EvaluateTyped(context);
         }
 
         public override bool IsConstant() {

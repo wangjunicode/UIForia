@@ -78,7 +78,7 @@ namespace UIForia.Parsing {
         public static IdentifierNode IdentifierNode(string name) {
             IdentifierNode idNode = s_IdentifierPool.Get();
             idNode.name = name;
-            idNode.type = name[0] == '$' ? ASTNodeType.Alias : ASTNodeType.Identifier;
+            idNode.type = ASTNodeType.Identifier;
             return idNode;
         }
 
@@ -168,6 +168,10 @@ namespace UIForia.Parsing {
                 ListPool<TypePath>.Release(ref genericArguments);
                 genericArguments = null;
             }
+        }
+
+        public string GetConstructedPath() {
+            return path[0]; // todo make this actually resolve stuff, will need type inputs
         }
 
     }

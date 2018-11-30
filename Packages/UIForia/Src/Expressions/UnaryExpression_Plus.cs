@@ -31,12 +31,8 @@ namespace UIForia {
 
         public override Type YieldedType => typeof(int);
 
-        public override int EvaluateTyped(ExpressionContext context) {
-            return +(expression.EvaluateTyped(context));
-        }
-
-        public override object Evaluate(ExpressionContext context) {
-            return +(expression.EvaluateTyped(context));
+        public override int Evaluate(ExpressionContext context) {
+            return +(expression.Evaluate(context));
         }
 
         public override bool IsConstant() {
@@ -55,12 +51,8 @@ namespace UIForia {
 
         public override Type YieldedType => typeof(float);
 
-        public override float EvaluateTyped(ExpressionContext context) {
-            return +(expression.EvaluateTyped(context));
-        }
-
-        public override object Evaluate(ExpressionContext context) {
-            return +(expression.EvaluateTyped(context));
+        public override float Evaluate(ExpressionContext context) {
+            return +(expression.Evaluate(context));
         }
 
         public override bool IsConstant() {
@@ -79,12 +71,8 @@ namespace UIForia {
 
         public override Type YieldedType => typeof(double);
 
-        public override double EvaluateTyped(ExpressionContext context) {
-            return +(expression.EvaluateTyped(context));
-        }
-
-        public override object Evaluate(ExpressionContext context) {
-            return +(expression.EvaluateTyped(context));
+        public override double Evaluate(ExpressionContext context) {
+            return +(expression.Evaluate(context));
         }
 
         public override bool IsConstant() {

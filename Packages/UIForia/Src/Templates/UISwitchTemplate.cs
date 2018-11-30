@@ -58,7 +58,7 @@ namespace UIForia {
                     AttributeDefinition attr = child.GetAttribute(CaseKeyAttribute);
                     Expression<int> expression = template.compiler.Compile<int>(attr.value);
                     EnsureConstCompatibleExpression(typeof(int), expression);
-                    values[count++] = expression.EvaluateTyped(null);
+                    values[count++] = expression.Evaluate(null);
                 }
                 else {
 //                    ((UISwitchDefaultTemplate) childTemplates[i]).switchId = id;

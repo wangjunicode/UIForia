@@ -20,12 +20,8 @@ namespace UIForia.Compilers {
         public class UIElementExpression<T> : Expression<T> {
 
             public override Type YieldedType => typeof(T);
-
-            public override object Evaluate(ExpressionContext context) {
-                return context.currentObject;
-            }
-
-            public override T EvaluateTyped(ExpressionContext context) {
+       
+            public override T Evaluate(ExpressionContext context) {
                 return (T) context.currentObject;
             }
 

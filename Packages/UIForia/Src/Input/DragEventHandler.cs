@@ -56,7 +56,7 @@ namespace UIForia.Input {
 
         public override void Invoke(object target, UITemplateContext context, DragEvent evt) {
             if (ShouldRun(evt)) {
-                expression.EvaluateTyped(context);
+                expression.Evaluate(context);
             }
         }
 

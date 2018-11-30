@@ -16,7 +16,7 @@ namespace UIForia.InputBindings {
         }
 
         public override void Execute(UIElement element, UITemplateContext context) {
-            expression.EvaluateTyped(context);
+            expression.Evaluate(context);
         }
 
         public override bool IsConstant() {

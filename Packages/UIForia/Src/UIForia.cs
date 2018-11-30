@@ -12,6 +12,12 @@ namespace UIForia {
 
     }
 
+    public class CompileException : System.Exception {
+
+        public CompileException(string message = null) : base(message) { }
+
+    }
+    
     public class GameApplication : Application { }
 
 }

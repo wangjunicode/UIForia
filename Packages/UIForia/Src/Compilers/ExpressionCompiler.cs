@@ -5,6 +5,7 @@ using System.Reflection;
 using JetBrains.Annotations;
 using UIForia.Compilers;
 using UIForia.Compilers.CastHandlers;
+using UIForia.Parsing;
 using UIForia.Util;
 using UnityEngine;
 
@@ -459,8 +460,7 @@ namespace UIForia {
                     }
 
                     if (ReflectionUtil.AreNumericTypesCompatible(leftType, rightType)) {
-                        return OperatorExpression_Arithmetic.Create(OperatorType.Plus, Visit(nodeOld.left),
-                            Visit(nodeOld.right));
+                        return OperatorExpression_Arithmetic.Create(OperatorType.Plus, Visit(nodeOld.left), Visit(nodeOld.right));
                     }
 
                     break;
@@ -487,7 +487,7 @@ namespace UIForia {
                 case OperatorType.GreaterThanEqualTo:
                 case OperatorType.LessThan:
                 case OperatorType.LessThanEqualTo:
-                    return new OperatorExpression_Comparison(nodeOld.OpType, Visit(nodeOld.left), Visit(nodeOld.right));
+                    return null;//new OperatorExpression_Comparison(nodeOld.OpType, Visit(nodeOld.left), Visit(nodeOld.right));
 
                 case OperatorType.Equals:
                 case OperatorType.NotEquals: {

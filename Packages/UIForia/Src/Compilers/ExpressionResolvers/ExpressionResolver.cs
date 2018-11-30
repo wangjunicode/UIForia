@@ -1,5 +1,6 @@
 using System;
 using System.Reflection;
+using UIForia.Parsing;
 
 namespace UIForia.Compilers {
 
@@ -15,6 +16,10 @@ namespace UIForia.Compilers {
             this.aliasName = aliasName;
         }
 
+        public virtual Expression CompileAsValueExpression2(CompilerContext context, IdentifierNode node, Func<ASTNode, Expression> visit) {
+            return null;
+        }
+        
         public virtual Expression CompileAsValueExpression(ContextDefinition context, ExpressionNodeOld nodeOld, Func<ExpressionNodeOld, Expression> visit) {
             return null;
         }
@@ -76,11 +81,7 @@ namespace UIForia.Compilers {
 
             public override Type YieldedType => typeof(T);
             
-            public override object Evaluate(ExpressionContext context) {
-                throw new NotImplementedException();
-            }
-
-            public override T EvaluateTyped(ExpressionContext context) {
+            public override T Evaluate(ExpressionContext context) {
                 throw new NotImplementedException();
             }
 

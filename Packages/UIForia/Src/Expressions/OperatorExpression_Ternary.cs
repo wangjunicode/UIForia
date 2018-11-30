@@ -16,12 +16,8 @@ namespace UIForia {
 
         public override Type YieldedType => typeof(T);
 
-        public override T EvaluateTyped(ExpressionContext context) {
-            return condition.EvaluateTyped(context) ? left.EvaluateTyped(context) : right.EvaluateTyped(context);
-        }
-
-        public override object Evaluate(ExpressionContext context) {
-            return condition.EvaluateTyped(context) ? left.Evaluate(context) : right.Evaluate(context);
+        public override T Evaluate(ExpressionContext context) {
+            return condition.Evaluate(context) ? left.Evaluate(context) : right.Evaluate(context);
         }
 
         public override bool IsConstant() {

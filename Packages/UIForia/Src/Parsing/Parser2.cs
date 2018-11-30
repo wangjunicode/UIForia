@@ -50,6 +50,7 @@ namespace UIForia.Parsing {
             return retn;
         }
 
+        // consider replacing with access expression since this will always be a root property access
         private bool ParseIdentifier(ref ASTNode node) {
             if (tokenStream.Current != TokenType.Identifier && tokenStream.Current != TokenType.Alias) {
                 return false;
@@ -680,7 +681,6 @@ namespace UIForia.Parsing {
         StringLiteral,
         Operator,
         TypeOf,
-        Alias,
         Identifier,
         Invalid,
         MethodCall,

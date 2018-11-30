@@ -21,21 +21,7 @@ namespace UIForia {
             return false;
         }
 
-        public override object Evaluate(ExpressionContext context) {
-            U contextHead = (U) context.rootObject;
-
-            object last = contextHead;
-            for (int i = 0; i < parts.Length; i++) {
-                last = parts[i].Evaluate(last, context);
-                if (last == null) {
-                    return null;
-                }
-            }
-
-            return last;
-        }
-
-        public override T EvaluateTyped(ExpressionContext context) {
+        public override T Evaluate(ExpressionContext context) {
             U contextHead = (U) context.rootObject;
 
             object last = contextHead;
@@ -68,19 +54,7 @@ namespace UIForia {
             return false;
         }
 
-        public override object Evaluate(ExpressionContext context) {
-            object last = propertyInfo.GetValue(null);
-            for (int i = 0; i < parts.Length; i++) {
-                last = parts[i].Evaluate(last, context);
-                if (last == null) {
-                    return null;
-                }
-            }
-
-            return last;
-        }
-
-        public override T EvaluateTyped(ExpressionContext context) {
+        public override T Evaluate(ExpressionContext context) {
             object last = propertyInfo.GetValue(null);
             for (int i = 0; i < parts.Length; i++) {
                 last = parts[i].Evaluate(last, context);
@@ -110,19 +84,7 @@ namespace UIForia {
             return false;
         }
 
-        public override object Evaluate(ExpressionContext context) {
-            object last = fieldInfo.GetValue(null);
-            for (int i = 0; i < parts.Length; i++) {
-                last = parts[i].Evaluate(last, context);
-                if (last == null) {
-                    return null;
-                }
-            }
-
-            return last;
-        }
-
-        public override T EvaluateTyped(ExpressionContext context) {
+        public override T Evaluate(ExpressionContext context) {
             object last = fieldInfo.GetValue(null);
             for (int i = 0; i < parts.Length; i++) {
                 last = parts[i].Evaluate(last, context);
@@ -152,7 +114,7 @@ namespace UIForia {
 
         public override object Evaluate(object target, ExpressionContext context) {
             IList targetList = (IList) target;
-            int index = indexExpression.EvaluateTyped(context);
+            int index = indexExpression.Evaluate(context);
             return targetList[index];
         }
 
@@ -187,7 +149,7 @@ namespace UIForia {
 
         public override object Evaluate(object target, ExpressionContext context) {
             Func<U, T> fn = (Func<U, T>) target;
-            return fn == null ? null : (object) fn.Invoke(arg0.EvaluateTyped(context));
+            return fn == null ? null : (object) fn.Invoke(arg0.Evaluate(context));
         }
 
     }
@@ -209,8 +171,8 @@ namespace UIForia {
             return fn == null
                 ? null
                 : (object) fn.Invoke(
-                    arg0.EvaluateTyped(context),
-                    arg1.EvaluateTyped(context)
+                    arg0.Evaluate(context),
+                    arg1.Evaluate(context)
                 );
         }
 
@@ -235,9 +197,9 @@ namespace UIForia {
             return fn == null
                 ? null
                 : (object) fn.Invoke(
-                    arg0.EvaluateTyped(context),
-                    arg1.EvaluateTyped(context),
-                    arg2.EvaluateTyped(context)
+                    arg0.Evaluate(context),
+                    arg1.Evaluate(context),
+                    arg2.Evaluate(context)
                 );
         }
 
@@ -264,10 +226,10 @@ namespace UIForia {
             return fn == null
                 ? null
                 : (object) fn.Invoke(
-                    arg0.EvaluateTyped(context),
-                    arg1.EvaluateTyped(context),
-                    arg2.EvaluateTyped(context),
-                    arg3.EvaluateTyped(context)
+                    arg0.Evaluate(context),
+                    arg1.Evaluate(context),
+                    arg2.Evaluate(context),
+                    arg3.Evaluate(context)
                 );
         }
 
@@ -293,7 +255,7 @@ namespace UIForia {
 
         public override object Evaluate(object target, ExpressionContext context) {
             Action<T> action = (Action<T>) target;
-            action?.Invoke(arg0.EvaluateTyped(context));
+            action?.Invoke(arg0.Evaluate(context));
             return null;
         }
 
@@ -312,8 +274,8 @@ namespace UIForia {
         public override object Evaluate(object target, ExpressionContext context) {
             Action<T, U> action = (Action<T, U>) target;
             action?.Invoke(
-                arg0.EvaluateTyped(context),
-                arg1.EvaluateTyped(context)
+                arg0.Evaluate(context),
+                arg1.Evaluate(context)
             );
             return null;
         }
@@ -335,9 +297,9 @@ namespace UIForia {
         public override object Evaluate(object target, ExpressionContext context) {
             Action<T, U, V> action = (Action<T, U, V>) target;
             action?.Invoke(
-                arg0.EvaluateTyped(context),
-                arg1.EvaluateTyped(context),
-                arg2.EvaluateTyped(context)
+                arg0.Evaluate(context),
+                arg1.Evaluate(context),
+                arg2.Evaluate(context)
             );
             return null;
         }
@@ -361,10 +323,10 @@ namespace UIForia {
         public override object Evaluate(object target, ExpressionContext context) {
             Action<T, U, V, W> action = (Action<T, U, V, W>) target;
             action?.Invoke(
-                arg0.EvaluateTyped(context),
-                arg1.EvaluateTyped(context),
-                arg2.EvaluateTyped(context),
-                arg3.EvaluateTyped(context)
+                arg0.Evaluate(context),
+                arg1.Evaluate(context),
+                arg2.Evaluate(context),
+                arg3.Evaluate(context)
             );
             return null;
         }

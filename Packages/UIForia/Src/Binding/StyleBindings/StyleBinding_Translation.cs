@@ -18,7 +18,7 @@ namespace UIForia.StyleBindings {
                 element.style.TransformPositionX,
                 element.style.TransformPositionY
             );
-            FixedLengthVector value = expression.EvaluateTyped(context);
+            FixedLengthVector value = expression.Evaluate(context);
             if (value != oldValue) {
                 element.style.SetTransformPositionX(value.x, state);
                 element.style.SetTransformPositionY(value.y, state);
@@ -30,13 +30,13 @@ namespace UIForia.StyleBindings {
         }
 
         public override void Apply(UIStyle style, UITemplateContext context) {
-            FixedLengthVector value = expression.EvaluateTyped(context);
+            FixedLengthVector value = expression.Evaluate(context);
             style.SetProperty(new StyleProperty(StylePropertyId.TransformPositionX, value.x));
             style.SetProperty(new StyleProperty(StylePropertyId.TransformPositionY, value.y));
         }
 
         public override void Apply(UIStyleSet styleSet, UITemplateContext context) {
-            FixedLengthVector value = expression.EvaluateTyped(context);
+            FixedLengthVector value = expression.Evaluate(context);
             styleSet.SetProperty(new StyleProperty(StylePropertyId.TransformPositionX, value.x), state);
             styleSet.SetProperty(new StyleProperty(StylePropertyId.TransformPositionY, value.y), state);
         }
@@ -59,7 +59,7 @@ namespace UIForia.StyleBindings {
                 element.style.PreferredWidth,
                 element.style.PreferredHeight
             );
-            MeasurementPair value = expression.EvaluateTyped(context);
+            MeasurementPair value = expression.Evaluate(context);
             if (value != oldValue) {
                 element.style.SetPreferredWidth(value.x, state);
                 element.style.SetPreferredHeight(value.y, state);
@@ -71,13 +71,13 @@ namespace UIForia.StyleBindings {
         }
 
         public override void Apply(UIStyle style, UITemplateContext context) {
-            MeasurementPair value = expression.EvaluateTyped(context);
+            MeasurementPair value = expression.Evaluate(context);
             style.SetProperty(new StyleProperty(StylePropertyId.PreferredWidth, value.x));
             style.SetProperty(new StyleProperty(StylePropertyId.PreferredHeight, value.y));
         }
 
         public override void Apply(UIStyleSet styleSet, UITemplateContext context) {
-            MeasurementPair value = expression.EvaluateTyped(context);
+            MeasurementPair value = expression.Evaluate(context);
             styleSet.SetProperty(new StyleProperty(StylePropertyId.PreferredWidth, value.x), state);
             styleSet.SetProperty(new StyleProperty(StylePropertyId.PreferredHeight, value.y), state);
         }

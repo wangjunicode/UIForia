@@ -12,7 +12,7 @@ namespace UIForia.Compilers.CastHandlers {
             Expression<double> doubleExpression = (Expression<double>) expression;
 
             return new CastExpression<double, UIMeasurement>(doubleExpression,
-                (exp, ctx) => new UIMeasurement(exp.EvaluateTyped(ctx)));
+                (exp, ctx) => new UIMeasurement(exp.Evaluate(ctx)));
         }
 
     }

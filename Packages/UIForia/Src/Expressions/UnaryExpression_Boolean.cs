@@ -12,14 +12,8 @@ namespace UIForia {
 
         public override Type YieldedType => typeof(bool);
 
-        public override bool EvaluateTyped(ExpressionContext context) {
-            return !(expression.EvaluateTyped(context));
-        }
-
-        public override object Evaluate(ExpressionContext context) {
-            object value = expression.Evaluate(context);
-            if (value is bool) return !((bool) value);
-            return value != null;
+        public override bool Evaluate(ExpressionContext context) {
+            return !(expression.Evaluate(context));
         }
 
         public override bool IsConstant() {
@@ -38,12 +32,8 @@ namespace UIForia {
 
         public override Type YieldedType => typeof(bool);
 
-        public override bool EvaluateTyped(ExpressionContext context) {
-            return (string.IsNullOrEmpty(expression.EvaluateTyped(context)));
-        }
-
-        public override object Evaluate(ExpressionContext context) {
-            return (string.IsNullOrEmpty(expression.EvaluateTyped(context)));
+        public override bool Evaluate(ExpressionContext context) {
+            return (string.IsNullOrEmpty(expression.Evaluate(context)));
         }
 
         public override bool IsConstant() {
@@ -62,12 +52,8 @@ namespace UIForia {
 
         public override Type YieldedType => typeof(bool);
 
-        public override bool EvaluateTyped(ExpressionContext context) {
-            return expression.EvaluateTyped(context) == null;
-        }
-
-        public override object Evaluate(ExpressionContext context) {
-            return expression.EvaluateTyped(context) == null;
+        public override bool Evaluate(ExpressionContext context) {
+            return expression.Evaluate(context) == null;
         }
 
         public override bool IsConstant() {

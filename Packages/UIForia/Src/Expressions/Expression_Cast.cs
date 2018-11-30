@@ -12,12 +12,8 @@ namespace UIForia {
 
         public override Type YieldedType => typeof(string);
 
-        public override object Evaluate(ExpressionContext context) {
+        public override string Evaluate(ExpressionContext context) {
             return expression.Evaluate(context)?.ToString();
-        }
-
-        public override string EvaluateTyped(ExpressionContext context) {
-            return expression.EvaluateTyped(context)?.ToString();
         }
 
         public override bool IsConstant() {
@@ -38,11 +34,7 @@ namespace UIForia {
 
         public override Type YieldedType => typeof(TToType);
 
-        public override TToType EvaluateTyped(ExpressionContext context) {
-            return fn(expression, context);
-        }
-
-        public override object Evaluate(ExpressionContext context) {
+        public override TToType Evaluate(ExpressionContext context) {
             return fn(expression, context);
         }
 

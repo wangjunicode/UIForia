@@ -9,7 +9,7 @@ namespace UIForia {
         }
 
         public override void Execute(UIElement element, UITemplateContext context) {
-            element.SetEnabled(!expression.EvaluateTyped(context));
+            element.SetEnabled(!expression.Evaluate(context));
         }
 
         public override bool IsConstant() {

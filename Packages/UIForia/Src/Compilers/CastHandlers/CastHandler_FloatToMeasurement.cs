@@ -12,7 +12,7 @@ namespace UIForia.Compilers.CastHandlers {
             Expression<float> floatExpression = (Expression<float>) expression;
 
             return new CastExpression<float, UIMeasurement>(floatExpression,
-                (measurementExpression, ctx) => { return new UIMeasurement(floatExpression.EvaluateTyped(ctx)); });
+                (measurementExpression, ctx) => { return new UIMeasurement(floatExpression.Evaluate(ctx)); });
         }
 
     }

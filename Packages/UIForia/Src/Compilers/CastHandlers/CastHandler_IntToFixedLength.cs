@@ -11,7 +11,7 @@ namespace UIForia.Compilers.CastHandlers {
         public Expression Cast(Type requiredType, Expression expression) {
             Expression<int> intExpression = (Expression<int>) expression;
 
-            return new CastExpression<int, UIFixedLength>(intExpression, (exp, ctx) => new UIFixedLength(exp.EvaluateTyped(ctx)));
+            return new CastExpression<int, UIFixedLength>(intExpression, (exp, ctx) => new UIFixedLength(exp.Evaluate(ctx)));
         }
 
     }

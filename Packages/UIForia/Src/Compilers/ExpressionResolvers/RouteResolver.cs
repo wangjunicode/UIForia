@@ -60,12 +60,7 @@ namespace UIForia.Compilers {
             
             public override Type YieldedType => typeof(string);
             
-            public override object Evaluate(ExpressionContext context) {
-                UIElement element  = (UIElement) context.currentObject;
-                return element.GetRouteParameter(parameterName);
-            }
-
-            public override string EvaluateTyped(ExpressionContext context) {
+            public override string Evaluate(ExpressionContext context) {
                 UIElement element  = (UIElement) context.currentObject;
                 return element.GetRouteParameter(parameterName);
             }
@@ -79,13 +74,8 @@ namespace UIForia.Compilers {
         public class UrlReaderExpression : Expression<string> {
 
             public override Type YieldedType => typeof(string);
-
-            public override object Evaluate(ExpressionContext context) {
-                UIElement element = (UIElement) context.currentObject;
-                return element.view.Application.Router.CurrentUrl;
-            }
-
-            public override string EvaluateTyped(ExpressionContext context) {
+           
+            public override string Evaluate(ExpressionContext context) {
                 UIElement element = (UIElement) context.currentObject;
                 return element.view.Application.Router.CurrentUrl;
             }
@@ -98,13 +88,9 @@ namespace UIForia.Compilers {
 
         public class RouteResolverExpression : Expression<IRouterElement> {
 
-            public override Type YieldedType => typeof(Router);
+            public override Type YieldedType => typeof(Router);         
 
-            public override object Evaluate(ExpressionContext context) {
-                return ((UIElement) context.currentObject).GetNearestRouter();
-            }
-
-            public override IRouterElement EvaluateTyped(ExpressionContext context) {
+            public override IRouterElement Evaluate(ExpressionContext context) {
                 return ((UIElement) context.currentObject).GetNearestRouter();
             }
 

@@ -23,12 +23,8 @@ namespace UIForia {
         
         public override Type YieldedType => expression.YieldedType;
 
-        public override object Evaluate(ExpressionContext context) {
+        public override T Evaluate(ExpressionContext context) {
             return expression.Evaluate(context);
-        }
-        
-        public override T EvaluateTyped(ExpressionContext context) {
-            return expression.EvaluateTyped(context);
         }
 
         public override bool IsConstant() {

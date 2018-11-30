@@ -11,7 +11,7 @@ namespace UIForia.Compilers.CastHandlers {
         public Expression Cast(Type requiredType, Expression expression) {
             Expression<float> floatExpression = (Expression<float>) expression;
 
-            return new CastExpression<float, UIFixedLength>(floatExpression, (measurementExpression, ctx) => new UIFixedLength(floatExpression.EvaluateTyped(ctx)));
+            return new CastExpression<float, UIFixedLength>(floatExpression, (measurementExpression, ctx) => new UIFixedLength(floatExpression.Evaluate(ctx)));
         }
 
     }

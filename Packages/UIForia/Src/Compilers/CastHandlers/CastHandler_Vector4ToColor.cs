@@ -12,7 +12,7 @@ namespace UIForia.Compilers.CastHandlers {
         public Expression Cast(Type requiredType, Expression expression) {
             Expression<Vector4> vec4Expression = (Expression<Vector4>) expression;
             return new CastExpression<Vector4, Color>(vec4Expression,
-                (exp, ctx) => { return (Color) exp.EvaluateTyped(ctx); });
+                (exp, ctx) => { return (Color) exp.Evaluate(ctx); });
         }
 
     }

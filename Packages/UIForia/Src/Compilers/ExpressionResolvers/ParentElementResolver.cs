@@ -22,11 +22,7 @@ namespace UIForia.Compilers {
 
             public override Type YieldedType => typeof(T);
 
-            public override object Evaluate(ExpressionContext context) {
-                return ((UIElement) context.currentObject).parent;
-            }
-
-            public override T EvaluateTyped(ExpressionContext context) {
+            public override T Evaluate(ExpressionContext context) {
                 return (T) ((UIElement) context.currentObject).parent;
             }
 

@@ -10,7 +10,7 @@ namespace UIForia {
 
         public override void Execute(UIElement element, UITemplateContext context) {
             UITextElement textElement = (UITextElement) element;
-            textElement.SetText(expression.EvaluateTyped(context));
+            textElement.SetText(expression.Evaluate(context));
         }
 
         public override bool IsConstant() {

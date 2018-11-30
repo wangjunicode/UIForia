@@ -1,22 +1,12 @@
 ﻿using System;
+using UIForia.Parsing;
 
 namespace UIForia {
 
     public static class OperatorExpression_Arithmetic {
 
         public static Expression Create(OperatorType operatorType, Expression left, Expression right) {
-
-            Expression retn = CreateOperatorExpression(operatorType, left, right);
-
-            if (IsNumericLiteralExpression(left) && IsNumericLiteralExpression(right)) {
-                return CreateNumericLiteralExpression(retn.Evaluate(null));
-            }
-
-            return retn;
-        }
-
-        private static bool IsNumericLiteralExpression(Expression expression) {
-            return expression is ConstantExpression<int> || expression is ConstantExpression<float> || expression is ConstantExpression<double>;
+            return CreateOperatorExpression(operatorType, left, right);
         }
 
         private static Expression CreateOperatorExpression(OperatorType operatorType, Expression left, Expression right) {
@@ -25,7 +15,6 @@ namespace UIForia {
             TypeCode leftCode = Type.GetTypeCode(leftType);
             TypeCode rightCode = Type.GetTypeCode(rightType);
             switch (leftCode) {
-
                 case TypeCode.Int32:
                     Expression<int> leftInt = (Expression<int>) left;
                     switch (rightCode) {
@@ -74,13 +63,10 @@ namespace UIForia {
                             return new OperatorExpression_Arithmetic_DoubleDouble(operatorType, leftDouble, (Expression<double>) right);
 
                         default: throw new Exception("Operand types are not compatible");
-
                     }
 
                 default: throw new Exception("Operand types are not compatible");
-
             }
-
         }
 
         private static Expression CreateNumericLiteralExpression(object value) {
@@ -116,30 +102,25 @@ namespace UIForia {
 
         public override Type YieldedType => typeof(double);
 
-        public override double EvaluateTyped(ExpressionContext context) {
+        public override double Evaluate(ExpressionContext context) {
             switch (operatorType) {
-
                 case OperatorType.Plus:
-                    return left.EvaluateTyped(context) + right.EvaluateTyped(context);
+                    return left.Evaluate(context) + right.Evaluate(context);
 
                 case OperatorType.Minus:
-                    return left.EvaluateTyped(context) - right.EvaluateTyped(context);
+                    return left.Evaluate(context) - right.Evaluate(context);
 
                 case OperatorType.Times:
-                    return left.EvaluateTyped(context) * right.EvaluateTyped(context);
+                    return left.Evaluate(context) * right.Evaluate(context);
 
                 case OperatorType.Divide:
-                    return left.EvaluateTyped(context) / right.EvaluateTyped(context);
+                    return left.Evaluate(context) / right.Evaluate(context);
 
                 case OperatorType.Mod:
-                    return left.EvaluateTyped(context) % right.EvaluateTyped(context);
+                    return left.Evaluate(context) % right.Evaluate(context);
             }
 
             return 0;
-        }
-
-        public override object Evaluate(ExpressionContext context) {
-            return EvaluateTyped(context);
         }
 
         public override bool IsConstant() {
@@ -162,31 +143,27 @@ namespace UIForia {
 
         public override Type YieldedType => typeof(double);
 
-        public override double EvaluateTyped(ExpressionContext context) {
+        public override double Evaluate(ExpressionContext context) {
             switch (operatorType) {
-
                 case OperatorType.Plus:
-                    return left.EvaluateTyped(context) + right.EvaluateTyped(context);
+                    return left.Evaluate(context) + right.Evaluate(context);
 
                 case OperatorType.Minus:
-                    return left.EvaluateTyped(context) - right.EvaluateTyped(context);
+                    return left.Evaluate(context) - right.Evaluate(context);
 
                 case OperatorType.Times:
-                    return left.EvaluateTyped(context) * right.EvaluateTyped(context);
+                    return left.Evaluate(context) * right.Evaluate(context);
 
                 case OperatorType.Divide:
-                    return left.EvaluateTyped(context) / right.EvaluateTyped(context);
+                    return left.Evaluate(context) / right.Evaluate(context);
 
                 case OperatorType.Mod:
-                    return left.EvaluateTyped(context) % right.EvaluateTyped(context);
+                    return left.Evaluate(context) % right.Evaluate(context);
             }
 
             return 0;
         }
 
-        public override object Evaluate(ExpressionContext context) {
-            return EvaluateTyped(context);
-        }
 
         public override bool IsConstant() {
             return left.IsConstant() && right.IsConstant();
@@ -208,30 +185,25 @@ namespace UIForia {
 
         public override Type YieldedType => typeof(double);
 
-        public override double EvaluateTyped(ExpressionContext context) {
+        public override double Evaluate(ExpressionContext context) {
             switch (operatorType) {
-
                 case OperatorType.Plus:
-                    return left.EvaluateTyped(context) + right.EvaluateTyped(context);
+                    return left.Evaluate(context) + right.Evaluate(context);
 
                 case OperatorType.Minus:
-                    return left.EvaluateTyped(context) - right.EvaluateTyped(context);
+                    return left.Evaluate(context) - right.Evaluate(context);
 
                 case OperatorType.Times:
-                    return left.EvaluateTyped(context) * right.EvaluateTyped(context);
+                    return left.Evaluate(context) * right.Evaluate(context);
 
                 case OperatorType.Divide:
-                    return left.EvaluateTyped(context) / right.EvaluateTyped(context);
+                    return left.Evaluate(context) / right.Evaluate(context);
 
                 case OperatorType.Mod:
-                    return left.EvaluateTyped(context) % right.EvaluateTyped(context);
+                    return left.Evaluate(context) % right.Evaluate(context);
             }
 
             return 0;
-        }
-
-        public override object Evaluate(ExpressionContext context) {
-            return EvaluateTyped(context);
         }
 
         public override bool IsConstant() {
@@ -258,31 +230,25 @@ namespace UIForia {
 
         public override Type YieldedType => typeof(float);
 
-        public override float EvaluateTyped(ExpressionContext context) {
-
+        public override float Evaluate(ExpressionContext context) {
             switch (operatorType) {
-
                 case OperatorType.Plus:
-                    return left.EvaluateTyped(context) + right.EvaluateTyped(context);
+                    return left.Evaluate(context) + right.Evaluate(context);
 
                 case OperatorType.Minus:
-                    return left.EvaluateTyped(context) - right.EvaluateTyped(context);
+                    return left.Evaluate(context) - right.Evaluate(context);
 
                 case OperatorType.Times:
-                    return left.EvaluateTyped(context) * right.EvaluateTyped(context);
+                    return left.Evaluate(context) * right.Evaluate(context);
 
                 case OperatorType.Divide:
-                    return left.EvaluateTyped(context) / right.EvaluateTyped(context);
+                    return left.Evaluate(context) / right.Evaluate(context);
 
                 case OperatorType.Mod:
-                    return left.EvaluateTyped(context) % right.EvaluateTyped(context);
+                    return left.Evaluate(context) % right.Evaluate(context);
             }
 
             return 0;
-        }
-
-        public override object Evaluate(ExpressionContext context) {
-            return EvaluateTyped(context);
         }
 
         public override bool IsConstant() {
@@ -305,31 +271,25 @@ namespace UIForia {
 
         public override Type YieldedType => typeof(float);
 
-        public override float EvaluateTyped(ExpressionContext context) {
-
+        public override float Evaluate(ExpressionContext context) {
             switch (operatorType) {
-
                 case OperatorType.Plus:
-                    return left.EvaluateTyped(context) + right.EvaluateTyped(context);
+                    return left.Evaluate(context) + right.Evaluate(context);
 
                 case OperatorType.Minus:
-                    return left.EvaluateTyped(context) - right.EvaluateTyped(context);
+                    return left.Evaluate(context) - right.Evaluate(context);
 
                 case OperatorType.Times:
-                    return left.EvaluateTyped(context) * right.EvaluateTyped(context);
+                    return left.Evaluate(context) * right.Evaluate(context);
 
                 case OperatorType.Divide:
-                    return left.EvaluateTyped(context) / right.EvaluateTyped(context);
+                    return left.Evaluate(context) / right.Evaluate(context);
 
                 case OperatorType.Mod:
-                    return left.EvaluateTyped(context) % right.EvaluateTyped(context);
+                    return left.Evaluate(context) % right.Evaluate(context);
             }
 
             return 0;
-        }
-
-        public override object Evaluate(ExpressionContext context) {
-            return EvaluateTyped(context);
         }
 
         public override bool IsConstant() {
@@ -356,30 +316,25 @@ namespace UIForia {
 
         public override Type YieldedType => typeof(int);
 
-        public override int EvaluateTyped(ExpressionContext context) {
+        public override int Evaluate(ExpressionContext context) {
             switch (operatorType) {
-
                 case OperatorType.Plus:
-                    return left.EvaluateTyped(context) + right.EvaluateTyped(context);
+                    return left.Evaluate(context) + right.Evaluate(context);
 
                 case OperatorType.Minus:
-                    return left.EvaluateTyped(context) - right.EvaluateTyped(context);
+                    return left.Evaluate(context) - right.Evaluate(context);
 
                 case OperatorType.Times:
-                    return left.EvaluateTyped(context) * right.EvaluateTyped(context);
+                    return left.Evaluate(context) * right.Evaluate(context);
 
                 case OperatorType.Divide:
-                    return left.EvaluateTyped(context) / right.EvaluateTyped(context);
+                    return left.Evaluate(context) / right.Evaluate(context);
 
                 case OperatorType.Mod:
-                    return left.EvaluateTyped(context) % right.EvaluateTyped(context);
+                    return left.Evaluate(context) % right.Evaluate(context);
             }
 
             return 0;
-        }
-
-        public override object Evaluate(ExpressionContext context) {
-            return EvaluateTyped(context);
         }
 
         public override bool IsConstant() {
@@ -402,30 +357,27 @@ namespace UIForia {
 
         public override Type YieldedType => typeof(int);
 
-        public override int EvaluateTyped(ExpressionContext context) {
+        public override int Evaluate(ExpressionContext context) {
             switch (operatorType) {
-
                 case OperatorType.Plus:
-                    return left.EvaluateTyped(context) + right.EvaluateTyped(context);
+                    return left.Evaluate(context) + right.Evaluate(context);
 
                 case OperatorType.Minus:
-                    return left.EvaluateTyped(context) - right.EvaluateTyped(context);
+                    return left.Evaluate(context) - right.Evaluate(context);
 
                 case OperatorType.Times:
-                    return left.EvaluateTyped(context) * right.EvaluateTyped(context);
+                    return left.Evaluate(context) * right.Evaluate(context);
 
                 case OperatorType.Divide:
-                    return left.EvaluateTyped(context) / right.EvaluateTyped(context);
+                    return left.Evaluate(context) / right.Evaluate(context);
 
                 case OperatorType.Mod:
-                    return left.EvaluateTyped(context) % right.EvaluateTyped(context);
+                    return left.Evaluate(context) % right.Evaluate(context);
             }
+
             return 0;
         }
 
-        public override object Evaluate(ExpressionContext context) {
-            return EvaluateTyped(context);
-        }
 
         public override bool IsConstant() {
             return left.IsConstant() && right.IsConstant();
@@ -447,33 +399,27 @@ namespace UIForia {
 
         public override Type YieldedType => typeof(long);
 
-        public override long EvaluateTyped(ExpressionContext context) {
-
+        public override long Evaluate(ExpressionContext context) {
             switch (operatorType) {
-
                 case OperatorType.Plus:
-                    return left.EvaluateTyped(context) + right.EvaluateTyped(context);
+                    return left.Evaluate(context) + right.Evaluate(context);
 
                 case OperatorType.Minus:
-                    return left.EvaluateTyped(context) - right.EvaluateTyped(context);
+                    return left.Evaluate(context) - right.Evaluate(context);
 
                 case OperatorType.Times:
-                    return left.EvaluateTyped(context) * right.EvaluateTyped(context);
+                    return left.Evaluate(context) * right.Evaluate(context);
 
                 case OperatorType.Divide:
-                    return left.EvaluateTyped(context) / right.EvaluateTyped(context);
+                    return left.Evaluate(context) / right.Evaluate(context);
 
                 case OperatorType.Mod:
-                    return left.EvaluateTyped(context) % right.EvaluateTyped(context);
-
+                    return left.Evaluate(context) % right.Evaluate(context);
             }
 
             return 0;
         }
 
-        public override object Evaluate(ExpressionContext context) {
-            return EvaluateTyped(context);
-        }
 
         public override bool IsConstant() {
             return left.IsConstant() && right.IsConstant();
@@ -495,30 +441,27 @@ namespace UIForia {
 
         public override Type YieldedType => typeof(float);
 
-        public override float EvaluateTyped(ExpressionContext context) {
+        public override float Evaluate(ExpressionContext context) {
             switch (operatorType) {
-
                 case OperatorType.Plus:
-                    return left.EvaluateTyped(context) + right.EvaluateTyped(context);
+                    return left.Evaluate(context) + right.Evaluate(context);
 
                 case OperatorType.Minus:
-                    return left.EvaluateTyped(context) - right.EvaluateTyped(context);
+                    return left.Evaluate(context) - right.Evaluate(context);
 
                 case OperatorType.Times:
-                    return left.EvaluateTyped(context) * right.EvaluateTyped(context);
+                    return left.Evaluate(context) * right.Evaluate(context);
 
                 case OperatorType.Divide:
-                    return left.EvaluateTyped(context) / right.EvaluateTyped(context);
+                    return left.Evaluate(context) / right.Evaluate(context);
 
                 case OperatorType.Mod:
-                    return left.EvaluateTyped(context) % right.EvaluateTyped(context);
+                    return left.Evaluate(context) % right.Evaluate(context);
             }
+
             return 0;
         }
 
-        public override object Evaluate(ExpressionContext context) {
-            return EvaluateTyped(context);
-        }
 
         public override bool IsConstant() {
             return left.IsConstant() && right.IsConstant();
@@ -540,29 +483,25 @@ namespace UIForia {
 
         public override Type YieldedType => typeof(double);
 
-        public override double EvaluateTyped(ExpressionContext context) {
+        public override double Evaluate(ExpressionContext context) {
             switch (operatorType) {
-
                 case OperatorType.Plus:
-                    return left.EvaluateTyped(context) + right.EvaluateTyped(context);
+                    return left.Evaluate(context) + right.Evaluate(context);
 
                 case OperatorType.Minus:
-                    return left.EvaluateTyped(context) - right.EvaluateTyped(context);
+                    return left.Evaluate(context) - right.Evaluate(context);
 
                 case OperatorType.Times:
-                    return left.EvaluateTyped(context) * right.EvaluateTyped(context);
+                    return left.Evaluate(context) * right.Evaluate(context);
 
                 case OperatorType.Divide:
-                    return left.EvaluateTyped(context) / right.EvaluateTyped(context);
+                    return left.Evaluate(context) / right.Evaluate(context);
 
                 case OperatorType.Mod:
-                    return left.EvaluateTyped(context) % right.EvaluateTyped(context);
+                    return left.Evaluate(context) % right.Evaluate(context);
             }
-            return 0;
-        }
 
-        public override object Evaluate(ExpressionContext context) {
-            return EvaluateTyped(context);
+            return 0;
         }
 
         public override bool IsConstant() {

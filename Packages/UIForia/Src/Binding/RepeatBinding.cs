@@ -33,7 +33,7 @@ public class RepeatBindingNode<T, U> : RepeatBindingNode where T : class, IList<
     }
 
     public void Validate() {
-        T list = listExpression.EvaluateTyped(context);
+        T list = listExpression.Evaluate(context);
         repeat.list = list;
         
         if (list == null || list.Count == 0) {

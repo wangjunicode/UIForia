@@ -14,12 +14,8 @@ namespace UIForia {
 
         public override Type YieldedType => typeof(double);
 
-        public override double EvaluateTyped(ExpressionContext context) {
+        public override double Evaluate(ExpressionContext context) {
             return value;
-        }
-
-        public override object Evaluate(ExpressionContext context) {
-            return boxedValue;
         }
 
         public override bool IsConstant() {

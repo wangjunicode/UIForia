@@ -10,15 +10,11 @@ namespace UIForia {
             this.value = value;
         }
 
-        public override string EvaluateTyped(ExpressionContext context) {
+        public override string Evaluate(ExpressionContext context) {
             return value;
         }
 
         public override Type YieldedType => typeof(string);
-
-        public override object Evaluate(ExpressionContext context) {
-            return value;
-        }
 
         public override bool IsConstant() {
             return true;

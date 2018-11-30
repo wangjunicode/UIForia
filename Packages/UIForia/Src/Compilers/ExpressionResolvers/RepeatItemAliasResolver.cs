@@ -33,11 +33,7 @@ namespace UIForia.Compilers {
 
             public override Type YieldedType => typeof(T);
 
-            public override object Evaluate(ExpressionContext context) {
-                return EvaluateTyped(context);
-            }
-
-            public override T EvaluateTyped(ExpressionContext context) {
+            public override T Evaluate(ExpressionContext context) {
                 UIElement ptr = ((UIElement) context.currentObject).parent;
                 while (ptr != null) {
                     if (ptr is UIRepeatElement<T> repeatElement && repeatElement.itemAlias == itemAlias) {

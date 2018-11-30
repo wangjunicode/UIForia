@@ -5,8 +5,7 @@ namespace UIForia {
     public interface IExpression<out T> {
 
         Type YieldedType { get; }
-        object Evaluate(ExpressionContext context);
-        T EvaluateTyped(ExpressionContext context);
+        T Evaluate(ExpressionContext context);
 
     }
     
@@ -14,7 +13,7 @@ namespace UIForia {
 
         public abstract Type YieldedType { get; }
         
-        public abstract object Evaluate(ExpressionContext context);
+        //public abstract object Evaluate(ExpressionContext context);
 
         public abstract bool IsConstant();
 
@@ -22,7 +21,7 @@ namespace UIForia {
 
     public abstract class Expression<T> : Expression, IExpression<T> {
 
-        public abstract T EvaluateTyped(ExpressionContext context);
+        public abstract T Evaluate(ExpressionContext context);
 
     }
     

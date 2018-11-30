@@ -5,6 +5,8 @@ using System.Linq;
 using System.Linq.Expressions;
 using System.Reflection;
 using UIForia;
+using UIForia.Parsing;
+using UnityEngine;
 using Expression = System.Linq.Expressions.Expression;
 
 public static class ReflectionUtil {
@@ -57,6 +59,7 @@ public static class ReflectionUtil {
     public static readonly Type[] TypeArray1 = new Type[1];
     public static readonly Type[] TypeArray2 = new Type[2];
     public static readonly Type[] TypeArray3 = new Type[3];
+    public static readonly Type[] TypeArray4 = new Type[4];
 
 //    private static Dictionary<Type, object[]> methodAttributeCache;
 
@@ -247,7 +250,7 @@ public static class ReflectionUtil {
                 return false;
         }
     }
-    
+
     public static Type ResolveFieldOrPropertyType(Type type, string name) {
         FieldInfo fieldInfo = GetFieldInfo(type, name);
         if (fieldInfo != null) {
@@ -429,7 +432,7 @@ public static class ReflectionUtil {
         }
 
         if (info.ReturnType != typeof(void)) {
-            signatureTypes[parameters.Length + 1] = info.ReturnType;
+            signatureTypes[parameters.Length] = info.ReturnType;
 
             switch (signatureTypes.Length) {
                 case 1:
@@ -638,13 +641,13 @@ public static class ReflectionUtil {
     public struct LinqAccessor {
 
         public readonly string fieldName;
-        public readonly Delegate fieldSetter;
-        public readonly Delegate fieldGetter;
+        public readonly Delegate setter;
+        public readonly Delegate getter;
 
-        public LinqAccessor(string fieldName, Delegate fieldGetter, Delegate fieldSetter) {
+        public LinqAccessor(string fieldName, Delegate getter, Delegate setter) {
             this.fieldName = fieldName;
-            this.fieldGetter = fieldGetter;
-            this.fieldSetter = fieldSetter;
+            this.getter = getter;
+            this.setter = setter;
         }
 
     }
@@ -671,7 +674,7 @@ public static class ReflectionUtil {
 
         return linqEntry;
     }
-    
+
     public static LinqAccessor GetLinqFieldAccessors(Type baseType, Type fieldType, string fieldName) {
         List<LinqAccessor> linqList;
 
@@ -759,6 +762,7 @@ public static class ReflectionUtil {
         if (type == typeof(Action)) {
             return true;
         }
+
         Type generic = null;
         if (type.IsGenericTypeDefinition) {
             generic = type;
@@ -775,6 +779,241 @@ public static class ReflectionUtil {
         if (generic == typeof(Action<,,,,,>)) return true;
         if (generic == typeof(Action<,,,,,,>)) return true;
         return false;
+    }
+
+    public static MethodInfo GetImplicitConversion(Type targetType, Type inputType) {
+        MethodInfo[] infos = targetType.GetMethods(BindingFlags.Public | BindingFlags.Static);
+        for (int i = 0; i < infos.Length; i++) {
+            if (infos[i].Name == "op_Implicit" && infos[i].ReturnType == targetType) {
+                ParameterInfo pi = infos[i].GetParameters().FirstOrDefault();
+                if (pi != null && pi.ParameterType == inputType) {
+                    return infos[i];
+                }
+            }
+        }
+
+        return null;
+    }
+
+    public static MethodInfo GetBinaryOperator(string opName, Type leftType, Type rightType) {
+        MethodInfo[] infos = leftType.GetMethods(BindingFlags.Public | BindingFlags.Static);
+        for (int i = 0; i < infos.Length; i++) {
+            if (infos[i].Name == opName && infos[i].ReturnType == leftType) {
+                ParameterInfo[] pi = infos[i].GetParameters();
+                if (pi.Length != 2) {
+                    continue;
+                }
+
+                if (pi[0].ParameterType == leftType && pi[1].ParameterType == rightType) {
+                    return infos[i];
+                }
+            }
+        }
+
+        return null;
+    }
+
+    // todo don't require bool return type
+    public static MethodInfo GetComparisonOperator(string opName, Type leftType, Type rightType) {
+        MethodInfo[] infos = leftType.GetMethods(BindingFlags.Public | BindingFlags.Static);
+        for (int i = 0; i < infos.Length; i++) {
+            if (infos[i].Name == opName && infos[i].ReturnType == typeof(bool)) {
+                ParameterInfo[] pi = infos[i].GetParameters();
+                if (pi.Length != 2) {
+                    continue;
+                }
+
+                if (pi[0].ParameterType == leftType && pi[1].ParameterType == rightType) {
+                    return infos[i];
+                }
+            }
+        }
+
+        return null;
+    }
+
+    public static MethodInfo GetUnaryOperator(string opName, Type type) {
+        MethodInfo[] infos = type.GetMethods(BindingFlags.Public | BindingFlags.Static);
+        for (int i = 0; i < infos.Length; i++) {
+            if (infos[i].Name == opName) {
+                ParameterInfo[] pi = infos[i].GetParameters();
+                if (pi.Length != 1) {
+                    continue;
+                }
+
+                if (pi[0].ParameterType == type) {
+                    return infos[i];
+                }
+            }
+        }
+
+        return null;
+    }
+
+}
+
+public struct ConstructorArguments {
+
+    public readonly object arg0;
+    public readonly object arg1;
+    public readonly object arg2;
+    public readonly object arg3;
+    public readonly object arg4;
+    public int count;
+
+    public ConstructorArguments(object arg0) {
+        this.arg0 = arg0;
+        this.arg1 = null;
+        this.arg2 = null;
+        this.arg3 = null;
+        this.arg4 = null;
+        count = 1;
+    }
+
+    public ConstructorArguments(object arg0, object arg1) {
+        this.arg0 = arg0;
+        this.arg1 = arg1;
+        this.arg2 = null;
+        this.arg3 = null;
+        this.arg4 = null;
+        count = 2;
+    }
+
+    public ConstructorArguments(object arg0, object arg1, object arg2) {
+        this.arg0 = arg0;
+        this.arg1 = arg1;
+        this.arg2 = arg2;
+        this.arg3 = null;
+        this.arg4 = null;
+        count = 3;
+    }
+
+    public ConstructorArguments(object arg0, object arg1, object arg2, object arg3) {
+        this.arg0 = arg0;
+        this.arg1 = arg1;
+        this.arg2 = arg2;
+        this.arg3 = arg3;
+        this.arg4 = null;
+        count = 4;
+    }
+
+    public ConstructorArguments(object arg0, object arg1, object arg2, object arg3, object arg4) {
+        this.arg0 = arg0;
+        this.arg1 = arg1;
+        this.arg2 = arg2;
+        this.arg3 = arg3;
+        this.arg4 = arg4;
+        count = 5;
+    }
+
+    public object[] GetArguments() {
+        switch (count) {
+            case 0:
+                return ReflectionUtil.ObjectArray0;
+            case 1:
+                ReflectionUtil.ObjectArray1[0] = arg0;
+                return ReflectionUtil.ObjectArray1;
+            case 2:
+                ReflectionUtil.ObjectArray2[0] = arg0;
+                ReflectionUtil.ObjectArray2[1] = arg1;
+                return ReflectionUtil.ObjectArray2;
+            case 3:
+                ReflectionUtil.ObjectArray3[0] = arg0;
+                ReflectionUtil.ObjectArray3[1] = arg1;
+                ReflectionUtil.ObjectArray3[2] = arg2;
+                return ReflectionUtil.ObjectArray3;
+            case 4:
+                ReflectionUtil.ObjectArray4[0] = arg0;
+                ReflectionUtil.ObjectArray4[1] = arg1;
+                ReflectionUtil.ObjectArray4[2] = arg2;
+                ReflectionUtil.ObjectArray4[3] = arg3;
+                return ReflectionUtil.ObjectArray4;
+            case 5:
+                ReflectionUtil.ObjectArray5[0] = arg0;
+                ReflectionUtil.ObjectArray5[1] = arg1;
+                ReflectionUtil.ObjectArray5[2] = arg2;
+                ReflectionUtil.ObjectArray5[3] = arg3;
+                ReflectionUtil.ObjectArray5[4] = arg4;
+                return ReflectionUtil.ObjectArray5;
+        }
+
+        return null;
+    }
+
+
+    public static implicit operator object[](ConstructorArguments arguments) {
+        return arguments.GetArguments();
+    }
+
+}
+
+public struct GenericArguments {
+
+    public readonly Type arg0;
+    public readonly Type arg1;
+    public readonly Type arg2;
+    public readonly Type arg3;
+    public int count;
+
+    public GenericArguments(Type arg0) {
+        this.arg0 = arg0;
+        this.arg1 = null;
+        this.arg2 = null;
+        this.arg3 = null;
+        count = 1;
+    }
+
+    public GenericArguments(Type arg0, Type arg1) {
+        this.arg0 = arg0;
+        this.arg1 = arg1;
+        this.arg2 = null;
+        this.arg3 = null;
+        count = 2;
+    }
+
+    public GenericArguments(Type arg0, Type arg1, Type arg2) {
+        this.arg0 = arg0;
+        this.arg1 = arg1;
+        this.arg2 = arg2;
+        this.arg3 = null;
+        count = 3;
+    }
+
+    public GenericArguments(Type arg0, Type arg1, Type arg2, Type arg3) {
+        this.arg0 = arg0;
+        this.arg1 = arg1;
+        this.arg2 = arg2;
+        this.arg3 = arg3;
+        count = 4;
+    }
+
+    public Type[] GetArguments() {
+        switch (count) {
+            case 1:
+                ReflectionUtil.TypeArray1[0] = arg0;
+                return ReflectionUtil.TypeArray1;
+            case 2:
+                ReflectionUtil.TypeArray2[0] = arg0;
+                ReflectionUtil.TypeArray2[1] = arg1;
+                return ReflectionUtil.TypeArray2;
+            case 3:
+                ReflectionUtil.TypeArray3[0] = arg0;
+                ReflectionUtil.TypeArray3[1] = arg1;
+                ReflectionUtil.TypeArray3[2] = arg2;
+                return ReflectionUtil.TypeArray3;
+            case 4:
+                ReflectionUtil.TypeArray4[0] = arg0;
+                ReflectionUtil.TypeArray4[1] = arg1;
+                ReflectionUtil.TypeArray4[2] = arg2;
+                ReflectionUtil.TypeArray4[3] = arg3;
+                return ReflectionUtil.TypeArray4;
+        }
+
+        return null;
+    }
+
+    public static implicit operator Type[](GenericArguments arguments) {
+        return arguments.GetArguments();
     }
 
 }

@@ -10,7 +10,7 @@ namespace UIForia.Compilers.CastHandlers {
 
         public Expression Cast(Type requiredType, Expression expression) {
             Expression<int> intExpression = (Expression<int>) expression;
-            return new CastExpression<int, float>(intExpression, (exp, ctx) => (float) exp.EvaluateTyped(ctx));
+            return new CastExpression<int, float>(intExpression, (exp, ctx) => (float) exp.Evaluate(ctx));
         }
 
     }

@@ -22,13 +22,9 @@ namespace UIForia.Compilers {
                 this.indexAlias = indexAlias;
             }
             
-            public override Type YieldedType => typeof(int);
+            public override Type YieldedType => typeof(int);           
 
-            public override object Evaluate(ExpressionContext context) {
-                return EvaluateTyped(context);
-            }
-
-            public override int EvaluateTyped(ExpressionContext context) {
+            public override int Evaluate(ExpressionContext context) {
                 UIElement ptr = ((UIElement)context.currentObject).parent;
                 while (ptr != null) {
                     if (ptr is UIRepeatElement repeatElement) {

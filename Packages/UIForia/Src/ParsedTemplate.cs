@@ -19,7 +19,7 @@ namespace UIForia {
 
         private static int s_TemplateIdGenerator;
         
-        public readonly ExpressionCompiler compiler;
+        public readonly ExpressionCompiler2 compiler;
         public readonly ContextDefinition contextDefinition;
 
         public readonly UIElementTemplate rootElementTemplate;
@@ -35,7 +35,7 @@ namespace UIForia {
             this.rootElementTemplate = rootElement;
             this.styleGroups = new List<StyleDefinition>();
             this.contextDefinition = new ContextDefinition(rootElement.RootType);
-            this.compiler = new ExpressionCompiler(contextDefinition);
+            this.compiler = new ExpressionCompiler2();
             this.m_TemplateMap = new IntMap<UITemplate>();
             s_ParsedTemplates[templateId] = this;
         }
@@ -55,9 +55,9 @@ namespace UIForia {
             if (isCompiled) return;
             isCompiled = true;
             
-            compiler.AddExpressionResolver(new ElementResolver("element"));
-            compiler.AddExpressionResolver(new ParentElementResolver("parent"));
-            compiler.AddExpressionResolver(new RouteResolver("route"));
+            compiler.AddAliasResolver(new ElementResolver("element"));
+            compiler.AddAliasResolver(new ParentElementResolver("parent"));
+            compiler.AddAliasResolver(new RouteResolver("route"));
             
             for (int i = 0; i < imports.Count; i++) {
                 Type type = TypeProcessor.GetRuntimeType(imports[i].path);

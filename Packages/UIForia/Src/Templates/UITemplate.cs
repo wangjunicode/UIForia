@@ -15,9 +15,6 @@ namespace UIForia {
 
         public const string k_SpecialAttrPrefix = "x-";
 
-        protected int perFrameBindingCount;
-        protected int triggeredBindingCount;
-
         public bool isCompiled;
         
         public ushort id;
@@ -194,7 +191,6 @@ namespace UIForia {
             if (attributes == null || attributes.Count == 0) return;
 
             try {
-                template.compiler.SetContext(template.contextDefinition);
                 propCompiler.SetCompiler(template.compiler);
 
                 for (int i = 0; i < attributes.Count; i++) {
@@ -205,7 +201,7 @@ namespace UIForia {
                     }
 
                     attributes[i].isCompiled = true;
-                    Binding binding = propCompiler.CompileAttribute(elementType, attributes[i]);
+                    Binding binding = propCompiler.CompileAttribute(template.rootElementTemplate.RootType, elementType, attributes[i]);
                     if (binding != null) {
                         s_BindingList.Add(binding);
                     }

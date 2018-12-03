@@ -1,8 +1,10 @@
 using System;
+using System.Collections.Generic;
 using NUnit.Framework;
 using UIForia;
 using UIForia.Compilers;
 using UIForia.Parsing;
+using UnityEngine;
 
 [TestFixture]
 public class ExpressionCompilerTests2 {
@@ -14,6 +16,14 @@ public class ExpressionCompilerTests2 {
         public int ValueProp { get; set; }
         public object obj1;
         public object obj2;
+        public List<Vector3> vectors;
+        public float[] floats;
+
+        public ConvertThing ConvertThingProperty {
+            get => convertThing;
+            set => convertThing = value;
+        }
+
 
     }
 
@@ -94,6 +104,9 @@ public class ExpressionCompilerTests2 {
         public double doubleVal;
         public string stringVal;
         public bool boolVal;
+        public static float s_StaticVal = 0;
+
+        public Vector3 vectorProp { get; set; }
 
         public static implicit operator ConvertThing(bool f) {
             return new ConvertThing() {boolVal = f};
@@ -729,8 +742,132 @@ public class ExpressionCompilerTests2 {
         ExpressionCompiler2 compiler = new ExpressionCompiler2();
         Expression<float> expression = compiler.Compile<float>(typeof(TestType0), "-convertThing");
         Assert.AreEqual(-5f, expression.Evaluate(ctx));
-        
-      
+    }
+
+    [Test]
+    public void Compile_AccessExpression_Field() {
+        TestType0 target = new TestType0();
+        target.convertThing.floatVal = 5;
+        ExpressionContext ctx = new ExpressionContext(target);
+        ExpressionCompiler2 compiler = new ExpressionCompiler2();
+        Expression<float> expression = compiler.Compile<float>(typeof(TestType0), "convertThing.floatVal");
+        Assert.AreEqual(5f, expression.Evaluate(ctx));
+    }
+    
+    [Test]
+    public void Compile_AccessExpression_Property() {
+        TestType0 target = new TestType0();
+        target.convertThing.vectorProp = new Vector3(5, 5, 5);
+        ExpressionContext ctx = new ExpressionContext(target);
+        ExpressionCompiler2 compiler = new ExpressionCompiler2();
+        Expression<Vector3> expression = compiler.Compile<Vector3>(typeof(TestType0), "convertThing.vectorProp");
+        Assert.AreEqual(new Vector3(5, 5, 5), expression.Evaluate(ctx));
+    }
+    
+    [Test]
+    public void Compile_AccessExpression_PropertyHead() {
+        TestType0 target = new TestType0();
+        target.convertThing.vectorProp = new Vector3(5, 5, 5);
+        ExpressionContext ctx = new ExpressionContext(target);
+        ExpressionCompiler2 compiler = new ExpressionCompiler2();
+        Expression<float> expression = compiler.Compile<float>(typeof(TestType0), "ConvertThingProperty.vectorProp.x");
+        Assert.AreEqual(5f, expression.Evaluate(ctx));
+    }
+    
+    [Test]
+    public void Compile_AccessExpression_StaticField() {
+        TestType0 target = new TestType0();
+        ConvertThing.s_StaticVal = 11f;
+        ExpressionContext ctx = new ExpressionContext(target);
+        ExpressionCompiler2 compiler = new ExpressionCompiler2();
+        compiler.AddNamespace("UnityEngine");
+        Expression<Vector3> expression = compiler.Compile<Vector3>(typeof(TestType0), "UnityEngine.Vector3.up");
+        Assert.AreEqual(new Vector3(0, 1, 0), expression.Evaluate(ctx));
+    }
+
+    [Test]
+    public void Compile_AccessExpression_ListIndex() {
+        TestType0 target = new TestType0();
+        target.vectors = new List<Vector3>();
+        target.vectors.Add(Vector2.up);
+        target.vectors.Add(Vector2.down);
+        ExpressionContext ctx = new ExpressionContext(target);
+        ExpressionCompiler2 compiler = new ExpressionCompiler2();
+        Expression<Vector3> expression = compiler.Compile<Vector3>(typeof(TestType0), "vectors[1]");
+        Assert.AreEqual(new Vector3(0, -1, 0), expression.Evaluate(ctx));
+    }
+    
+    [Test]
+    public void Compile_AccessExpression_ArrayIndex() {
+        TestType0 target = new TestType0();
+        target.floats = new float[2];
+        target.floats[0] = 11f;
+        target.floats[1] = 12f;
+        ExpressionContext ctx = new ExpressionContext(target);
+        ExpressionCompiler2 compiler = new ExpressionCompiler2();
+        Expression<float> expression = compiler.Compile<float>(typeof(TestType0), "floats[1]");
+        Assert.AreEqual(12f, expression.Evaluate(ctx));
+    }
+    
+    [Test]
+    public void Compile_AccessExpression_IndexList_Field() {
+        TestType0 target = new TestType0();
+        target.vectors = new List<Vector3>();
+        target.vectors.Add(Vector2.up);
+        target.vectors.Add(Vector2.down);
+        ExpressionContext ctx = new ExpressionContext(target);
+        ExpressionCompiler2 compiler = new ExpressionCompiler2();
+        Expression<float> expression = compiler.Compile<float>(typeof(TestType0), "vectors[1].y");
+        Assert.AreEqual(-1f, expression.Evaluate(ctx));
+    }
+    
+    [Test]
+    public void Compile_AccessExpression_IndexList_ExpressionIndex() {
+        TestType0 target = new TestType0();
+        target.convertThing.intVal = 2;
+        target.vectors = new List<Vector3>();
+        target.vectors.Add(Vector2.up);
+        target.vectors.Add(Vector2.down);
+        target.vectors.Add(Vector2.right);
+        ExpressionContext ctx = new ExpressionContext(target);
+        ExpressionCompiler2 compiler = new ExpressionCompiler2();
+        Expression<float> expression = compiler.Compile<float>(typeof(TestType0), "vectors[convertThing.intVal].x");
+        Assert.AreEqual(1f, expression.Evaluate(ctx));
+    }
+    
+    [Test]
+    public void Compile_AccessExpression_IndexList_ExpressionIndexOutOfBounds() {
+        TestType0 target = new TestType0();
+        target.convertThing.intVal = 2;
+        target.vectors = new List<Vector3>();
+        target.vectors.Add(Vector2.up);
+        target.vectors.Add(Vector2.down);
+        target.vectors.Add(Vector2.right);
+        ExpressionContext ctx = new ExpressionContext(target);
+        ExpressionCompiler2 compiler = new ExpressionCompiler2();
+        Expression<float> expression = compiler.Compile<float>(typeof(TestType0), "vectors[10].x");
+        Assert.AreEqual(0f, expression.Evaluate(ctx));
+    }
+    
+    [Test]
+    public void Compile_TernaryExpression_Literals() {
+        TestType0 target = new TestType0();
+        ExpressionContext ctx = new ExpressionContext(target);
+        ExpressionCompiler2 compiler = new ExpressionCompiler2();
+        Expression<int> expression = compiler.Compile<int>(typeof(TestType0), " 1 > 2 ? 5 : 6");
+        Assert.IsInstanceOf<OperatorExpression_Ternary<int>>(expression);
+        Assert.AreEqual(6, expression.Evaluate(ctx));
+    }
+
+    [Test]
+    public void Compile_TernaryExpression_Lookup() {
+        TestType0 target = new TestType0();
+        target.value = "matt";
+        ExpressionContext ctx = new ExpressionContext(target);
+        ExpressionCompiler2 compiler = new ExpressionCompiler2();
+        Expression<int> expression = compiler.Compile<int>(typeof(TestType0), "{ value.Length > 2 ? 5 : 6}");
+        Assert.IsInstanceOf<OperatorExpression_Ternary<int>>(expression);
+        Assert.AreEqual(5, expression.Evaluate(ctx));
     }
     
 }

@@ -29,10 +29,10 @@ namespace UIForia.Compilers {
             "$eventArg3"
         };
 
-        private ExpressionCompiler compiler;
+        private ExpressionCompiler2 compiler;
 
         public PropertyBindingCompiler(ContextDefinition context) {
-            this.compiler = new ExpressionCompiler(context);
+            this.compiler = new ExpressionCompiler2();
         }
 
         // todo -- maybe move this to the compiler itself so it can be used per-expression 
@@ -42,7 +42,7 @@ namespace UIForia.Compilers {
             AddTypedAliasSource(typeof(Color), new MethodAliasSource("rgba", ColorAliasSource.ColorConstructorAlpha));
         }
 
-        public void SetCompiler(ExpressionCompiler compiler) {
+        public void SetCompiler(ExpressionCompiler2 compiler) {
             this.compiler = compiler;
         }
         
@@ -138,7 +138,7 @@ namespace UIForia.Compilers {
                                      $"Unable to find field or property called {property} on type {rootType.FullName}");
         }
 
-        public Binding CompileAttribute(Type targetType, AttributeDefinition attributeDefinition) {
+        public Binding CompileAttribute(Type rootType, Type targetType, AttributeDefinition attributeDefinition) {
             string attrKey = attributeDefinition.key;
             string attrValue = attributeDefinition.value;
 
@@ -155,7 +155,7 @@ namespace UIForia.Compilers {
                 
                 switch (modifier) {
                     case k_BindTo:
-                        return CompileBoundProperty(compiler.context.rootType, targetType, property, attrValue);
+                        return CompileBoundProperty(rootType, targetType, property, attrValue);
                 
                     case k_Initialize: {
                         Binding binding = CompileBinding(targetType, property, attrValue);
@@ -198,7 +198,7 @@ namespace UIForia.Compilers {
             }
 
             if (attrKey == "if") {
-                Expression<bool> ifExpression = compiler.Compile<bool>(attrValue);
+                Expression<bool> ifExpression = compiler.Compile<bool>(targetType, attrValue);
                 return new EnabledBinding(ifExpression);
             }
             
@@ -214,7 +214,7 @@ namespace UIForia.Compilers {
 //                }
 //            }
 
-            Expression expression = compiler.Compile(attrValue);
+            Expression expression = compiler.Compile(targetType, attrValue, propertyInfo.PropertyType);
 
 //            if (aliasSources != null) {
 //                for (int i = 0; i < aliasSources.Count; i++) {
@@ -257,7 +257,7 @@ namespace UIForia.Compilers {
 //                }
 //            }
 
-            Expression expression = compiler.Compile(attrValue);
+            Expression expression = compiler.Compile(targetType, attrValue, fieldInfo.FieldType);
 
 //            if (aliasSources != null) {
 //                for (int i = 0; i < aliasSources.Count; i++) {
@@ -367,7 +367,8 @@ namespace UIForia.Compilers {
                // compiler.AddRuntimeAlias(EvtArgDefaultName, argTypes[0]);
             }
 
-            Expression<Terminal> expression = compiler.Compile<Terminal>(value);
+            // todo -- probably shouldn't be null
+            Expression<Terminal> expression = compiler.Compile<Terminal>(null, value);
 
             if (argTypes.Length > 0) {
 //                compiler.RemoveRuntimeAlias(EvtArgDefaultName);

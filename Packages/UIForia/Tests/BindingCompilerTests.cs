@@ -2,22 +2,10 @@
 using NUnit.Framework;
 using UIForia;
 using UIForia.Compilers;
-using Tests;
 using Tests.Mocks;
 using UIForia.Elements;
-using UnityEditor.VersionControl;
 using static Tests.TestUtils;
 
-[TestFixture]
-public class __REMOVE__ {
-
-    [Test]
-    public void Runs() {
-        new TreePlayground().Run();
-    }
-
-
-}
 [TestFixture]
 public class BindingCompilerTests {
 
@@ -25,7 +13,11 @@ public class BindingCompilerTests {
     public void CreatesBinding_FieldSetter() {
         ContextDefinition context = new ContextDefinition(typeof(TestUIElementType));
         PropertyBindingCompiler compiler = new PropertyBindingCompiler(context);
-        Binding binding = compiler.CompileAttribute(typeof(TestUtils.TestUIElementType), new AttributeDefinition("intValue", "{1 + 1}"));
+        Binding binding = compiler.CompileAttribute(
+            typeof(TestUIElementType),
+            typeof(TestUIElementType),
+            new AttributeDefinition("intValue", "{1 + 1}")
+        );
         Assert.IsNotNull(binding);
     }
 
@@ -45,7 +37,7 @@ public class BindingCompilerTests {
 
         AttributeDefinition attrDef = new AttributeDefinition("onSomeEventArg0", "{HandleSomeEventArg0()}");
 
-        Binding binding = compiler.CompileAttribute(typeof(FakeElement), attrDef);
+        Binding binding = compiler.CompileAttribute(typeof(FakeElement), typeof(FakeElement), attrDef);
 
         binding.Execute(childElement, ctx);
 
@@ -69,7 +61,7 @@ public class BindingCompilerTests {
 
         AttributeDefinition attrDef = new AttributeDefinition("onSomeEventArg1", "{HandleSomeEventArg1($eventArg0)}");
 
-        Binding binding = compiler.CompileAttribute(typeof(FakeElement), attrDef);
+        Binding binding = compiler.CompileAttribute(typeof(FakeElement), typeof(FakeElement), attrDef);
 
         binding.Execute(childElement, ctx);
 
@@ -93,7 +85,7 @@ public class BindingCompilerTests {
 
         AttributeDefinition attrDef = new AttributeDefinition("onSomeEventArg2", "{HandleSomeEventArg2($eventArg0, $eventArg1)}");
 
-        Binding binding = compiler.CompileAttribute(typeof(FakeElement), attrDef);
+        Binding binding = compiler.CompileAttribute(typeof(FakeElement), typeof(FakeElement), attrDef);
 
         binding.Execute(childElement, ctx);
 
@@ -117,7 +109,7 @@ public class BindingCompilerTests {
 
         AttributeDefinition attrDef = new AttributeDefinition("onSomeEventArg3", "{HandleSomeEventArg3($eventArg0, $eventArg1, $eventArg2)}");
 
-        Binding binding = compiler.CompileAttribute(typeof(FakeElement), attrDef);
+        Binding binding = compiler.CompileAttribute(typeof(FakeElement),typeof(FakeElement), attrDef);
 
         binding.Execute(childElement, ctx);
 
@@ -141,7 +133,7 @@ public class BindingCompilerTests {
 
         AttributeDefinition attrDef = new AttributeDefinition("onSomeEventArg4", "{HandleSomeEventArg4($eventArg0, $eventArg1, $eventArg2, $eventArg3)}");
 
-        Binding binding = compiler.CompileAttribute(typeof(FakeElement), attrDef);
+        Binding binding = compiler.CompileAttribute(typeof(FakeElement), typeof(FakeElement), attrDef);
 
         binding.Execute(childElement, ctx);
 
@@ -166,7 +158,7 @@ public class BindingCompilerTests {
     public void OnPropertyChanged() {
         AttributeDefinition attrDef = new AttributeDefinition("prop0", "'some-string'");
         PropertyBindingCompiler c = new PropertyBindingCompiler(new ContextDefinition(typeof(TestedThing1)));
-        Binding b = c.CompileAttribute(typeof(TestedThing1), attrDef);
+        Binding b = c.CompileAttribute(typeof(TestedThing1), typeof(FakeElement), attrDef);
         Assert.IsInstanceOf<FieldSetterBinding_WithCallbacks<TestedThing1, string>>(b);
         TestedThing1 t = new TestedThing1();
         Assert.IsFalse(t.didProp0Change);
@@ -210,7 +202,7 @@ public class BindingCompilerTests {
         }
 
     }
-    
+
     [Template(TemplateType.String, @"
     <UITemplate>
         <Contents>
@@ -221,7 +213,7 @@ public class BindingCompilerTests {
     private class TestedThing3 : UIElement {
 
         public string textValue { get; set; }
-        
+
         public bool didProp0Change;
 
         [OnPropertyChanged(nameof(textValue))]
@@ -243,22 +235,22 @@ public class BindingCompilerTests {
         public string textValue;
 
     }
-    
+
     [Test]
     public void BindTo_Field() {
         MockApplication app = new MockApplication(typeof(TestedThing4));
         TestedThing4 thing = (TestedThing4) app.RootElement;
-        EventedThing evtThing = (EventedThing)thing.GetChild(0);
+        EventedThing evtThing = (EventedThing) thing.GetChild(0);
         Assert.AreEqual(null, thing.textValue);
         evtThing.Invoke("some value");
         Assert.AreEqual("some value", thing.textValue);
     }
-    
+
     [Test]
     public void BindTo_Field_Callbacks() {
         MockApplication app = new MockApplication(typeof(TestedThing2));
         TestedThing2 thing2 = (TestedThing2) app.RootElement;
-        EventedThing evtThing = (EventedThing)thing2.GetChild(0);
+        EventedThing evtThing = (EventedThing) thing2.GetChild(0);
         Assert.AreEqual(null, thing2.textValue);
         evtThing.Invoke("some value");
         Assert.AreEqual("some value", thing2.textValue);
@@ -269,7 +261,7 @@ public class BindingCompilerTests {
     public void BindTo_Property() {
         MockApplication app = new MockApplication(typeof(TestedThing3));
         TestedThing3 thing3 = (TestedThing3) app.RootElement;
-        EventedThing evtThing = (EventedThing)thing3.GetChild(0);
+        EventedThing evtThing = (EventedThing) thing3.GetChild(0);
         Assert.AreEqual(null, thing3.textValue);
         evtThing.Invoke("some value");
         Assert.AreEqual("some value", thing3.textValue);

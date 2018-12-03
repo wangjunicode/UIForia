@@ -652,6 +652,10 @@ public static class ReflectionUtil {
 
     }
 
+    public static LinqAccessor GetLinqPropertyAccessors(Type baseType, PropertyInfo propertyInfo) {
+        return GetLinqPropertyAccessors(baseType, propertyInfo.PropertyType, propertyInfo.Name);
+    }
+
     public static LinqAccessor GetLinqPropertyAccessors(Type baseType, Type propertyType, string propertyName) {
         List<LinqAccessor> linqList;
 
@@ -675,6 +679,10 @@ public static class ReflectionUtil {
         return linqEntry;
     }
 
+    public static LinqAccessor GetLinqFieldAccessors(Type baseType, FieldInfo fieldInfo) {
+        return GetLinqFieldAccessors(baseType, fieldInfo.FieldType, fieldInfo.Name);
+    }
+    
     public static LinqAccessor GetLinqFieldAccessors(Type baseType, Type fieldType, string fieldName) {
         List<LinqAccessor> linqList;
 
@@ -699,15 +707,20 @@ public static class ReflectionUtil {
     }
 
     public static Delegate CreatePropertySetter(Type objectType, Type propertyType, string propertyName) {
-        ParameterExpression paramExpression0 = Expression.Parameter(objectType);
-        ParameterExpression paramExpression1 = Expression.Parameter(propertyType, propertyName);
-        MemberExpression propertyGetterExpression = Expression.Property(paramExpression0, propertyName);
+        try {
+            ParameterExpression paramExpression0 = Expression.Parameter(objectType);
+            ParameterExpression paramExpression1 = Expression.Parameter(propertyType, propertyName);
+            MemberExpression propertyGetterExpression = Expression.Property(paramExpression0, propertyName);
 
-        return Expression.Lambda(
-            Expression.Assign(propertyGetterExpression, paramExpression1),
-            paramExpression0,
-            paramExpression1
-        ).Compile();
+            return Expression.Lambda(
+                Expression.Assign(propertyGetterExpression, paramExpression1),
+                paramExpression0,
+                paramExpression1
+            ).Compile();
+        }
+        catch (Exception ex) {
+            return null;
+        }
     }
 
     public static Delegate CreatePropertyGetter(Type objectType, string propertyName) {

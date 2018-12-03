@@ -140,8 +140,6 @@ namespace UIForia.Animation {
             
         }
 
-       
-
         private struct ProcessedKeyFrame {
 
             public readonly float key;

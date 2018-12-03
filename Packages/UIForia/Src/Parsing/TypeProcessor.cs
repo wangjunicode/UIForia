@@ -1,6 +1,9 @@
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Reflection;
+using UIForia.Extensions;
+using UIForia.Util;
 using UnityEngine;
 using UnityEngine.Assertions;
 using Assembly = System.Reflection.Assembly;
@@ -13,7 +16,7 @@ namespace UIForia {
 
             public readonly Type type;
             public readonly string tagName;
-            
+
             public TypeData(Type type) {
                 this.type = type;
                 object attr = type.GetCustomAttribute(typeof(TemplateTagNameAttribute), false);
@@ -26,16 +29,17 @@ namespace UIForia {
             }
 
         }
-        
+
         private static readonly Dictionary<string, ProcessedType> typeMap = new Dictionary<string, ProcessedType>();
         private static List<Assembly> filteredAssemblies;
         private static List<Type> loadedTypes;
         private static TypeData[] templateTypes;
         private static readonly Dictionary<string, ProcessedType> templateTypeMap = new Dictionary<string, ProcessedType>();
-        
+        private static readonly Dictionary<string, LightList<Assembly>> s_NamespaceMap = new Dictionary<string, LightList<Assembly>>();
+
         private static void FilterAssemblies() {
             if (filteredAssemblies != null) return;
-            
+
             Assembly[] assemblies = AppDomain.CurrentDomain.GetAssemblies();
             filteredAssemblies = new List<Assembly>();
             loadedTypes = new List<Type>();
@@ -46,22 +50,68 @@ namespace UIForia {
                 if (assembly == null) {
                     continue;
                 }
-                
+
                 if (!FilterAssembly(assembly)) continue;
 
                 filteredAssemblies.Add(assembly);
                 Type[] types = assembly.GetTypes();
+
                 for (int j = 0; j < types.Length; j++) {
                     // can be null if assembly referenced is unavailable
                     // ReSharper disable once ConditionIsAlwaysTrueOrFalse
-                    if (types[j] != null) {
-                        loadedTypes.Add(types[j]);
+                    if (types[j] == null) {
+                        continue;
                     }
+
+                    loadedTypes.Add(types[j]);
+
+                    if (!s_NamespaceMap.TryGetValue(types[i].Namespace ?? "null", out LightList<Assembly> list)) {
+                        list = new LightList<Assembly>();
+                        s_NamespaceMap.Add(types[i].Namespace ?? "null", list);
+                    }
+
+                    if (!list.Contains(assembly)) {
+                        list.Add(assembly);
+                    }
+                    
                 }
             }
-            
+
             loadedTypes.Add(typeof(Color));
-            
+        }
+
+        public static bool IsNamespace(string name) {
+            return s_NamespaceMap.ContainsKey(name);
+        }
+
+        private static Dictionary<string, Type> typeCache = new Dictionary<string, Type>();
+
+        public static bool TryFindType(string typeName, out Type t) {
+            if (!typeCache.TryGetValue(typeName, out t)) {
+                foreach (Assembly a in AppDomain.CurrentDomain.GetAssemblies()) {
+                    if (a.IsDynamic) {
+                        continue;
+                    }
+
+                    t = a.GetType(typeName);
+                    if (t != null)
+                        break;
+                }
+
+                typeCache[typeName] = t;
+            }
+
+            return t != null;
+        }
+
+        public static Type ResolveType(string name, IList<string> namespaces) {
+            for (int i = 0; i < namespaces.Count; i++) {
+                if (TryFindType(namespaces[i] + "." + name, out Type retn)) {
+                    return retn;
+                }
+            }
+
+            return null;
         }
 
         public static ProcessedType GetType(string typeName, List<ImportDeclaration> importPaths = null) {
@@ -73,9 +123,9 @@ namespace UIForia {
             for (int i = 0; i < TemplateParser.IntrinsicElementTypes.Length; i++) {
                 if (typeName == TemplateParser.IntrinsicElementTypes[i].name) {
                     return new ProcessedType(TemplateParser.IntrinsicElementTypes[i].type);
-                }    
+                }
             }
-            
+
             Type type = Type.GetType(typeName);
 
             if (type == null) {
@@ -100,10 +150,10 @@ namespace UIForia {
             if (templateTypeMap.TryGetValue(tagName, out processedType)) {
                 return processedType;
             }
-            
+
             throw new ParseException("Unable to find type for tag name: " + tagName);
         }
-        
+
         public static Type GetRuntimeType(string typeName) {
             FilterAssemblies();
 
@@ -137,7 +187,7 @@ namespace UIForia {
 
             return type;
         }
-        
+
         public static ProcessedType GetType(Type type) {
             ProcessedType processedType = new ProcessedType(type);
             typeMap[type.Name] = processedType;
@@ -146,7 +196,7 @@ namespace UIForia {
 
         private static bool FilterAssembly(Assembly assembly) {
             string name = assembly.FullName;
-            
+
             if (assembly.IsDynamic
                 || name.StartsWith("System,")
                 || name.StartsWith("nunit")
@@ -172,9 +222,8 @@ namespace UIForia {
 //                        if (loadedTypes[i].Assembly.FullName.StartsWith("UIForia")) {
 //                            continue;
 //                        }
-                        
-                        types.Add(loadedTypes[i]);
 
+                        types.Add(loadedTypes[i]);
                     }
                 }
 
@@ -186,6 +235,12 @@ namespace UIForia {
             }
 
             return templateTypes;
+        }
+
+        public static void FindNamespace(string namespaceName) { }
+
+        public static bool IsTypeName(string name) {
+            return Type.GetType(name) != null;
         }
 
     }

@@ -64,7 +64,8 @@ namespace UIForia {
 
             listAttr.isCompiled = true;
 
-            listExpression = template.compiler.Compile(listAttr.value);
+            throw new NotImplementedException();
+//            listExpression = template.compiler.Compile(null, null, listAttr.value);
 
             genericArgType = listExpression.YieldedType;
 
@@ -101,18 +102,18 @@ namespace UIForia {
             indexResolver = new RepeatIndexAliasResolver(indexAlias);
             lengthResolver = new RepeatLengthAliasResolver(lengthAlias);
 
-            template.compiler.AddExpressionResolver(itemResolver);
-            template.compiler.AddExpressionResolver(indexResolver);
-            template.compiler.AddExpressionResolver(lengthResolver);
+            template.compiler.AddAliasResolver(itemResolver);
+            template.compiler.AddAliasResolver(indexResolver);
+            template.compiler.AddAliasResolver(lengthResolver);
 
             base.Compile(template);
          
         }
 
         public override void PostCompile(ParsedTemplate template) {
-            template.compiler.RemoveExpressionResolver(itemResolver);
-            template.compiler.RemoveExpressionResolver(indexResolver);
-            template.compiler.RemoveExpressionResolver(lengthResolver);
+            template.compiler.RemoveAliasResolver(itemResolver);
+            template.compiler.RemoveAliasResolver(indexResolver);
+            template.compiler.RemoveAliasResolver(lengthResolver);
         }
 
     }

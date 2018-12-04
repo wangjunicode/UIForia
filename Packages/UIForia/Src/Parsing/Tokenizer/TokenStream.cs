@@ -95,6 +95,28 @@ namespace UIForia {
 
             return -1;
         }
+        
+        [DebuggerStepThrough]
+        public int FindNextIndexAtSameLevel(TokenType targetTokenType) {
+            int i = 0;
+            int level = 0;
+            while (HasTokenAt(i)) {
+                TokenType token = Peek(i);
+                if (token == TokenType.ParenOpen || token == TokenType.ArrayAccessOpen || token == TokenType.LessThan) {
+                    level++;
+                }
+                else if (token == TokenType.ParenClose || token == TokenType.ArrayAccessClose || token == TokenType.GreaterThan) {
+                    level--;
+                }
+                else if (token == targetTokenType && level == 0) {
+                    return i;
+                }
+
+                i++;
+            }
+
+            return -1;
+        }
 
         [DebuggerStepThrough]
         public int FindMatchingIndex(TokenType braceOpen, TokenType braceClose) {

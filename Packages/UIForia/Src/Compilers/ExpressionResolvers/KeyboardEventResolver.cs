@@ -1,5 +1,6 @@
 using System;
 using UIForia.Input;
+using UIForia.Parsing;
 
 namespace UIForia.Compilers {
 
@@ -9,7 +10,7 @@ namespace UIForia.Compilers {
 
         private static readonly KeyboardEventAliasExpression s_Expression = new KeyboardEventAliasExpression();
 
-        public override Expression CompileAsValueExpression(ContextDefinition context, ExpressionNodeOld nodeOld, Func<ExpressionNodeOld, Expression> visit) {
+        public override Expression CompileAsValueExpression(ASTNode nodeOld, Func<ASTNode, Expression> visit) {
             return s_Expression;
         }
 

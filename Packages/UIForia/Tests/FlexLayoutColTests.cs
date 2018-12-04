@@ -10,8 +10,8 @@ public class FlexLayoutColTests {
 
     [Template(TemplateType.String, @"
         <UITemplate>
-            <Style path='ests+LayoutTestThing+Style'/>
-            <Contents style.layoutType='Flex'>
+            <Style path='LayoutTestThing+Style'/>
+            <Contents style.layoutType='LayoutType.Flex'>
               
             </Contents>
         </UITemplate>
@@ -47,7 +47,7 @@ public class FlexLayoutColTests {
         string template = @"
         <UITemplate>
             <Style path='FlexLayoutColTests+FlexColLayoutThing+Style'/>
-            <Contents style.layoutType='Flex' style.flexLayoutDirection='Column' style.preferredWidth='500f'>
+            <Contents style.layoutType='LayoutType.Flex' style.flexLayoutDirection='LayoutDirection.Column' style.preferredWidth='500f'>
                 <Group x-id='child0' style='w100h100'/>
                 <Group x-id='child1' style='w100h100'/>
                 <Group x-id='child2' style='w100h100'/>
@@ -70,7 +70,7 @@ public class FlexLayoutColTests {
         string template = @"
         <UITemplate>
             <Style path='FlexLayoutColTests+FlexColLayoutThing+Style'/>
-            <Contents style.layoutType='Flex' style.flexLayoutDirection='Column' style.preferredHeight='500f'>
+            <Contents style.layoutType='LayoutType.Flex' style.flexLayoutDirection='LayoutDirection.Column' style.preferredHeight='500f'>
                 <Group x-id='child0' style='w100h100'/>
                 <Group x-id='child1' style='w100h100'/>
                 <Group x-id='child2' style='w100h100'/>
@@ -93,7 +93,7 @@ public class FlexLayoutColTests {
         string template = @"
         <UITemplate>
             <Style path='FlexLayoutColTests+FlexColLayoutThing+Style'/>
-            <Contents style.layoutType='Flex' style.flexLayoutDirection='Column' style.preferredWidth='500f' style.preferredHeight='500f'>
+            <Contents style.layoutType='LayoutType.Flex' style.flexLayoutDirection='LayoutDirection.Column' style.preferredWidth='500f' style.preferredHeight='500f'>
                 <Group x-id='child0' style='w100h100'/>
                 <Group x-id='child1' style='w100h100'/>
                 <Group x-id='child2' style='w100h100'/>
@@ -116,7 +116,7 @@ public class FlexLayoutColTests {
         string template = @"
         <UITemplate>
             <Style path='FlexLayoutColTests+FlexColLayoutThing+Style'/>
-            <Contents style.layoutType='Flex' style.flexLayoutDirection='Column' style.preferredWidth='500f' style.preferredHeight='500f'>
+            <Contents style.layoutType='LayoutType.Flex' style.flexLayoutDirection='LayoutDirection.Column' style.preferredWidth='500f' style.preferredHeight='500f'>
                 <Group x-id='child0' style='w100h100'/>
                 <Group x-id='child1' style='w100h100'/>
                 <Group x-id='child2' style='w100h100'/>
@@ -139,7 +139,7 @@ public class FlexLayoutColTests {
         string template = @"
         <UITemplate>
             <Style path='FlexLayoutColTests+FlexColLayoutThing+Style'/>
-            <Contents style.layoutType='Flex' style.flexLayoutDirection='Column' style.preferredWidth='500f' style.preferredHeight='500f'>
+            <Contents style.layoutType='LayoutType.Flex' style.flexLayoutDirection='LayoutDirection.Column' style.preferredWidth='500f' style.preferredHeight='500f'>
                 <Group x-id='child0' style='w100h100'/>
                 <Group x-id='child1' style='w100h100'/>
                 <Group x-id='child2' style='w100h100'/>
@@ -162,7 +162,7 @@ public class FlexLayoutColTests {
         string template = @"
         <UITemplate>
             <Style path='FlexLayoutColTests+FlexColLayoutThing+Style'/>
-            <Contents style.layoutType='Flex' style.flexLayoutDirection='Column' style.preferredWidth='500f' style.preferredHeight='500f'>
+            <Contents style.layoutType='LayoutType.Flex' style.flexLayoutDirection='LayoutDirection.Column' style.preferredWidth='500f' style.preferredHeight='500f'>
                 <Group x-id='child0' style='w100h100'/>
                 <Group x-id='child1' style='w100h100'/>
                 <Group x-id='child2' style='w100h100'/>
@@ -185,7 +185,7 @@ public class FlexLayoutColTests {
         string template = @"
         <UITemplate>
             <Style path='FlexLayoutColTests+FlexColLayoutThing+Style'/>
-            <Contents style.layoutType='Flex' style.flexLayoutDirection='Column' style.preferredWidth='500f' style.preferredHeight='500f'>
+            <Contents style.layoutType='LayoutType.Flex' style.flexLayoutDirection='LayoutDirection.Column' style.preferredWidth='500f' style.preferredHeight='500f'>
                 <Group x-id='child0' style='w100h100'/>
                 <Group x-id='child1' style='w100h100'/>
                 <Group x-id='child2' style='w100h100'/>
@@ -208,7 +208,7 @@ public class FlexLayoutColTests {
         string template = @"
         <UITemplate>
             <Style path='FlexLayoutColTests+FlexColLayoutThing+Style'/>
-            <Contents style.layoutType='Flex' style.flexLayoutDirection='Column' style.preferredWidth='600f' style.preferredHeight='600f'>
+            <Contents style.layoutType='LayoutType.Flex' style.flexLayoutDirection='LayoutDirection.Column' style.preferredWidth='600f' style.preferredHeight='600f'>
                 <Group x-id='child0' style='w100h100'/>
                 <Group x-id='child1' style='w100h100'/>
                 <Group x-id='child2' style='w100h100'/>
@@ -233,7 +233,7 @@ public class FlexLayoutColTests {
         string template = @"
         <UITemplate>
             <Style path='FlexLayoutColTests+FlexColLayoutThing+Style'/>
-            <Contents style.layoutType='Flex' style.flexLayoutDirection='Column' style.preferredWidth='500f'>
+            <Contents style.layoutType='LayoutType.Flex' style.flexLayoutDirection='LayoutDirection.Column' style.preferredWidth='500f'>
                 <Group x-id='child0' style='w100h100'/>
                 <Group x-id='child1' style='w100h100' />
                 <Group x-id='child2' style='w100h100'/>
@@ -257,7 +257,7 @@ public class FlexLayoutColTests {
         string template = @"
         <UITemplate>
             <Style path='FlexLayoutColTests+FlexColLayoutThing+Style'/>
-            <Contents style.layoutType='Flex' style.flexLayoutDirection='Column' style.preferredWidth='500f' style.preferredHeight='500f'>
+            <Contents style.layoutType='LayoutType.Flex' style.flexLayoutDirection='LayoutDirection.Column' style.preferredWidth='500f' style.preferredHeight='500f'>
                 <Group x-id='child0' style='w100h100'/>
                 <Group x-id='child1' style='w100h100' />
                 <Group x-id='child2' style='w100h100'/>
@@ -281,7 +281,7 @@ public class FlexLayoutColTests {
         string template = @"
         <UITemplate>
             <Style path='FlexLayoutColTests+FlexColLayoutThing+Style'/>
-            <Contents style.layoutType='Flex' style.flexLayoutDirection='Column' style.preferredWidth='500f' style.preferredHeight='500f'>
+            <Contents style.layoutType='LayoutType.Flex' style.flexLayoutDirection='LayoutDirection.Column' style.preferredWidth='500f' style.preferredHeight='500f'>
                 <Group x-id='child0' style='w100h100'/>
                 <Group x-id='child1' style='w100h100' style.flexItemGrow='1' />
                 <Group x-id='child2' style='w100h100'/>
@@ -303,7 +303,7 @@ public class FlexLayoutColTests {
         string template = @"
         <UITemplate>
             <Style path='FlexLayoutColTests+FlexColLayoutThing+Style'/>
-            <Contents style.layoutType='Flex' style.flexLayoutDirection='Column' style.preferredWidth='250f' style.preferredHeight='600f'>
+            <Contents style.layoutType='LayoutType.Flex' style.flexLayoutDirection='LayoutDirection.Column' style.preferredWidth='250f' style.preferredHeight='600f'>
                 <Group x-id='child0' style='w100h100'/>
                 <Group x-id='child1' style='w100h100' style.flexItemShrink='1' />
                 <Group x-id='child2' style='w100h100'/>
@@ -325,7 +325,7 @@ public class FlexLayoutColTests {
         string template = @"
         <UITemplate>
             <Style path='FlexLayoutColTests+FlexColLayoutThing+Style'/>
-            <Contents style.layoutType='Flex' style.flexLayoutDirection='Column' style.preferredWidth='500f' style.preferredHeight='500f'>
+            <Contents style.layoutType='LayoutType.Flex' style.flexLayoutDirection='LayoutDirection.Column' style.preferredWidth='500f' style.preferredHeight='500f'>
                 <Group x-id='child0' style.preferredWidth='500f' style.preferredHeight='100f'/>
                 <Group x-id='child1' style='w100h100'/>
                 <Group x-id='child2' style='w100h100'/>
@@ -347,7 +347,7 @@ public class FlexLayoutColTests {
         string template = @"
         <UITemplate>
             <Style path='FlexLayoutColTests+FlexColLayoutThing+Style'/>
-            <Contents style.layoutType='Flex' style.flexLayoutDirection='Column' style.preferredWidth='500f' style.preferredHeight='500f'>
+            <Contents style.layoutType='LayoutType.Flex' style.flexLayoutDirection='LayoutDirection.Column' style.preferredWidth='500f' style.preferredHeight='500f'>
                 <Group x-id='child0' style.preferredWidth='450f' style.preferredHeight='100f'/>
                 <Group x-id='child1' style='w100h100'/>
                 <Group x-id='child2' style='w100h100'/>
@@ -369,7 +369,7 @@ public class FlexLayoutColTests {
         string template = @"
         <UITemplate>
             <Style path='FlexLayoutColTests+FlexColLayoutThing+Style'/>
-            <Contents style.layoutType='Flex' style.flexLayoutDirection='Column' style.preferredWidth='500f' style.preferredHeight='500f'>
+            <Contents style.layoutType='LayoutType.Flex' style.flexLayoutDirection='LayoutDirection.Column' style.preferredWidth='500f' style.preferredHeight='500f'>
                 <Group x-id='child0' style.preferredWidth='550f' style.preferredHeight='100f'/>
                 <Group x-id='child1' style='w100h100'/>
                 <Group x-id='child2' style='w100h100'/>
@@ -391,7 +391,7 @@ public class FlexLayoutColTests {
         string template = @"
         <UITemplate>
             <Style path='FlexLayoutColTests+FlexColLayoutThing+Style'/>
-            <Contents style.layoutType='Flex' style.flexLayoutDirection='Column' style.preferredWidth='500f' style.preferredHeight='500f'>
+            <Contents style.layoutType='LayoutType.Flex' style.flexLayoutDirection='LayoutDirection.Column' style.preferredWidth='500f' style.preferredHeight='500f'>
                 <Group x-id='child0' style.preferredHeight='100f' style.preferredWidth='450f' style.flexItemGrow='1'/>
                 <Group x-id='child1' style='w100h100' style.flexItemGrow='1'/>
                 <Group x-id='child2' style='w100h100' style.flexItemGrow='1'/>
@@ -413,7 +413,7 @@ public class FlexLayoutColTests {
         string template = @"
         <UITemplate>
             <Style path='FlexLayoutColTests+FlexColLayoutThing+Style'/>
-            <Contents style.layoutType='Flex' style.flexLayoutDirection='Column' style.preferredWidth='400f' style.preferredHeight='600f'>
+            <Contents style.layoutType='LayoutType.Flex' style.flexLayoutDirection='LayoutDirection.Column' style.preferredWidth='400f' style.preferredHeight='600f'>
                 <Group x-id='child0' style.preferredHeight='100f' style.preferredWidth='450f' style.flexItemShrink='1'/>
                 <Group x-id='child1' style.preferredHeight='100f' style.preferredWidth='300f' style.flexItemShrink='1'/>
                 <Group x-id='child2' style.preferredHeight='100f' style.preferredWidth='300f' style.flexItemShrink='1'/>
@@ -435,7 +435,12 @@ public class FlexLayoutColTests {
         string template = @"
         <UITemplate>
             <Style path='FlexLayoutColTests+FlexColLayoutThing+Style'/>
-            <Contents style.layoutType='Flex' style.flexLayoutDirection='Column' style.preferredWidth='content(100)' style.preferredHeight='500f' style.paddingLeft='5f' style.paddingRight='5f'>
+            <Contents style.layoutType='LayoutType.Flex' 
+                      style.flexLayoutDirection='LayoutDirection.Column'
+                      style.preferredWidth='$contentSize(100)' 
+                      style.preferredHeight='500f' 
+                      style.paddingLeft='5f'
+                      style.paddingRight='5f'>
                 <Group x-id='child0' style='w100h100'/>
                 <Group x-id='child1' style='w100h100'/>
                 <Group x-id='child2' style='w100h100'/>
@@ -457,7 +462,7 @@ public class FlexLayoutColTests {
         string template = @"
         <UITemplate>
             <Style path='FlexLayoutColTests+FlexColLayoutThing+Style'/>
-            <Contents style.layoutType='Flex' style.flexLayoutDirection='Column' style.preferredWidth='content(100)' style.preferredHeight='500f'>
+            <Contents style.layoutType='LayoutType.Flex' style.flexLayoutDirection='LayoutDirection.Column' style.preferredWidth='content(100)' style.preferredHeight='500f'>
                 <Group x-id='child0' style='w100h100' style.paddingLeft='5f' style.paddingRight='5f'/>
                 <Group x-id='child1' style='w100h100' style.paddingLeft='5f' style.paddingRight='5f'/>
                 <Group x-id='child2' style='w100h100' style.paddingLeft='5f' style.paddingRight='5f'/>
@@ -479,7 +484,7 @@ public class FlexLayoutColTests {
         string template = @"
         <UITemplate>
             <Style path='FlexLayoutColTests+FlexColLayoutThing+Style'/>
-            <Contents style.layoutType='Flex' style.flexLayoutDirection='Column' style.preferredWidth='content(100)' style.preferredHeight='content(100)'>
+            <Contents style.layoutType='LayoutType.Flex' style.flexLayoutDirection='LayoutDirection.Column' style.preferredWidth='content(100)' style.preferredHeight='content(100)'>
                 <Group x-id='child0' style='w100h100' style.paddingLeft='5f' style.paddingRight='5f'/>
                 <Group x-id='child1' style='w100h100' style.paddingLeft='5f' style.paddingRight='5f'/>
                 <Group x-id='child2' style='w100h100' style.paddingLeft='5f' style.paddingRight='5f'/>

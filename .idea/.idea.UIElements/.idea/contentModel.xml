@@ -360,10 +360,7 @@
               <e p="AstNodes" t="Include">
                 <e p="AccessExpressionNode.cs" t="Include" />
                 <e p="AccessExpressionPartNode.cs" t="Include" />
-                <e p="AliasExpression.cs" t="Include" />
-                <e p="ArrayAccessExpressionNode.cs" t="Include" />
                 <e p="Ast.cs" t="Include" />
-                <e p="BooleanLiteralNode.cs" t="Include" />
                 <e p="ExpressionNode.cs" t="Include" />
                 <e p="ExternalReferenceIdentifierNode.cs" t="Include" />
                 <e p="FieldNotDefinedException.cs" t="Include" />
@@ -371,7 +368,6 @@
                 <e p="LiteralValueNode.cs" t="Include" />
                 <e p="MethodCallNode.cs" t="Include" />
                 <e p="MethodSignatureNode.cs" t="Include" />
-                <e p="NumericLiteralNode.cs" t="Include" />
                 <e p="OperatorExpressionNode.cs" t="Include" />
                 <e p="OperatorNode.cs" t="Include" />
                 <e p="ParenExpressionNode.cs" t="Include" />
@@ -394,7 +390,6 @@
               <e p="ExpressionParser.cs" t="Include" />
               <e p="InvalidTemplateException.cs" t="Include" />
               <e p="OperatorType.cs" t="Include" />
-              <e p="Parser2.cs" t="Include" />
               <e p="ProcessedType.cs" t="Include" />
               <e p="StyleParser" t="Include">
                 <e p="ParsedStyleSheet.cs" t="Include" />
@@ -641,6 +636,7 @@
             <e p="TextProcessor.cs" t="Include" />
             <e p="TokenizingTests.cs" t="Include" />
             <e p="TypeCheckTests.cs" t="Include" />
+            <e p="TypeProcessorTests.cs" t="Include" />
             <e p="UIForia.Test.asmdef" t="Include" />
             <e p="UIView_Tests.cs" t="Include" />
             <e p="WhitespaceProcessorTests.cs" t="Include" />

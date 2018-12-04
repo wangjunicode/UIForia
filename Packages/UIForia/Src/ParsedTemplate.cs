@@ -20,7 +20,6 @@ namespace UIForia {
         private static int s_TemplateIdGenerator;
         
         public readonly ExpressionCompiler2 compiler;
-        public readonly ContextDefinition contextDefinition;
 
         public readonly UIElementTemplate rootElementTemplate;
 
@@ -34,7 +33,6 @@ namespace UIForia {
             templatePath = filePath ?? "Template" + templateId;
             this.rootElementTemplate = rootElement;
             this.styleGroups = new List<StyleDefinition>();
-            this.contextDefinition = new ContextDefinition(rootElement.RootType);
             this.compiler = new ExpressionCompiler2();
             this.m_TemplateMap = new IntMap<UITemplate>();
             s_ParsedTemplates[templateId] = this;
@@ -45,7 +43,8 @@ namespace UIForia {
         }
         
         public List<UITemplate> childTemplates => rootElementTemplate.childTemplates;
-        
+        public Type RootType => rootElementTemplate.RootType;
+
         public UIElement Create(UIView view) {
             Compile();
             return rootElementTemplate.CreateUnscoped(view);

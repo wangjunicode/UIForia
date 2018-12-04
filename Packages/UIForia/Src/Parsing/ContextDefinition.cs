@@ -5,15 +5,15 @@ using UIForia.Compilers.AliasSource;
 
 namespace UIForia {
 
-    public class ContextDefinition {
-
-        public readonly Type rootType;
-
-        public ContextDefinition(Type rootType) {
-            this.rootType = rootType;
-        }
-
-    }
+//    public class ContextDefinition {
+//
+//        public readonly Type rootType;
+//
+//        public ContextDefinition(Type rootType) {
+//            this.rootType = rootType;
+//        }
+//
+//    }
 
 }
 //

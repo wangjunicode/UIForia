@@ -10,9 +10,7 @@ namespace UIForia {
             this.fieldName = fieldName;
         }
 
-        public override Type GetYieldedType(ContextDefinition context) {
-            throw new NotImplementedException();
-        }
+      
 
     }
     
@@ -22,10 +20,6 @@ namespace UIForia {
         
         public MethodAccessExpressionPartNodeOld(MethodSignatureNodeOld signatureNodeOld) : base (ExpressionNodeType.Accessor) {
             this.signatureNodeOld = signatureNodeOld;
-        }
-
-        public override Type GetYieldedType(ContextDefinition context) {
-            throw new NotImplementedException();
         }
 
     }

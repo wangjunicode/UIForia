@@ -79,7 +79,7 @@ using UIForia;
             string input = "'some string'";
             List<DslToken> tokens = Tokenizer.Tokenize(input);
             Assert.AreEqual(1, tokens.Count);
-            Assert.AreEqual("'some string'", tokens[0].value);
+            Assert.AreEqual("some string", tokens[0].value);
         }
 
         [Test]
@@ -268,7 +268,7 @@ using UIForia;
             List<TokenType> types = new List<TokenType>();
             types.Add(TokenType.Number);
             types.Add(TokenType.Plus);
-            types.Add(TokenType.Alias);
+            types.Add(TokenType.Identifier);
             
             AssertTokenTypes(types, tokens);
         }
@@ -306,7 +306,7 @@ using UIForia;
         
         [Test]
         public void FailsToTokenizeUnterminatedString() {
-            Assert.Throws<Exception>(() => {
+            Assert.Throws<ParseException>(() => {
                 Tokenizer.Tokenize("'havelstring");
             });
         }

@@ -11,8 +11,7 @@ namespace UIForia.Compilers {
 
     public partial class StyleBindingCompiler {
 
-        private ContextDefinition context;
-        private readonly ExpressionCompiler compiler;
+        private readonly ExpressionCompiler2 compiler;
 
         internal static readonly MethodAliasSource rect1Source;
         internal static readonly MethodAliasSource rect2Source;
@@ -65,6 +64,9 @@ namespace UIForia.Compilers {
             "$hasInactiveChildren",
             "$hasChildren"
         };
+
+        private Type rootType;
+        private Type elementType;
 
         static StyleBindingCompiler() {
             Type type = typeof(StyleBindingCompiler);
@@ -124,27 +126,20 @@ namespace UIForia.Compilers {
             whiteSpaceSource = new EnumAliasSource<WhitespaceMode>();
         }
 
-        public StyleBindingCompiler(ContextDefinition context) {
-            this.context = context;
-            this.compiler = new ExpressionCompiler(context);
+        public StyleBindingCompiler() {
+            this.compiler = new ExpressionCompiler2();
+            compiler.AddAliasResolver(new MethodResolver("$contentSize", typeof(StyleBindingCompiler).GetMethod(nameof(ContentMeasurement), new[] {typeof(float)})));
+            compiler.AddAliasResolver(new MethodResolver("$px", typeof(StyleBindingCompiler).GetMethod(nameof(PixelLength), new[] {typeof(float)})));
         }
 
-        public void SetContext(ContextDefinition context) {
-            this.context = context;
-            this.compiler.SetContext(context);
+        public StyleBinding Compile(Type rootType, Type elementType, AttributeDefinition attributeDefinition) {
+            return Compile(rootType, elementType, attributeDefinition.key, attributeDefinition.value);
         }
 
-        public StyleBinding Compile(AttributeDefinition attributeDefinition) {
-            return Compile(context, attributeDefinition.key, attributeDefinition.value);
-        }
-
-        public StyleBinding Compile(ContextDefinition context, string key, string value) {
-            SetContext(context);
-            return Compile(key, value);
-        }
-
-        public StyleBinding Compile(string key, string value) {
+        public StyleBinding Compile(Type rootType, Type elementType, string key, string value) {
             if (!key.StartsWith("style.")) return null;
+            this.rootType = rootType;
+            this.elementType = elementType;
 
             // todo -- drop this restriction if possible
             if (value[0] != '{') {
@@ -152,7 +147,7 @@ namespace UIForia.Compilers {
             }
 
             Target targetState = GetTargetState(key);
-            
+
             StyleBinding retn = DoCompile(key, value, targetState);
             if (retn != null) {
                 return retn;
@@ -161,7 +156,7 @@ namespace UIForia.Compilers {
             switch (targetState.property.ToLower()) {
                 case "translation":
                     return new StyleBinding_Translation("Translation", targetState.state, Compile<FixedLengthVector>(value, vec2FixedLengthSource));
-                
+
                 case "preferredsize":
                     return new StyleBinding_PreferredSize("PreferredSize", targetState.state, Compile<MeasurementPair>(value, sizeAliasSource));
             }
@@ -201,7 +196,11 @@ namespace UIForia.Compilers {
 //                }
 //            }
 
-            Expression<T> expression = compiler.Compile<T>(value);
+            compiler.AddNamespace("UIForia.Rendering");
+
+            Expression<T> expression = compiler.Compile<T>(rootType, elementType, value);
+            
+            compiler.RemoveNamespace("UIForia.Rendering");
 
 //            if (sources != null) {
 //                for (int i = 0; i < sources.Length; i++) {

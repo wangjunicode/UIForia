@@ -252,12 +252,13 @@ public static class ReflectionUtil {
     }
 
     public static Type ResolveFieldOrPropertyType(Type type, string name) {
-        FieldInfo fieldInfo = GetFieldInfo(type, name);
+       
+        FieldInfo fieldInfo =  GetInstanceOrStaticFieldInfo(type, name);
         if (fieldInfo != null) {
             return fieldInfo.FieldType;
         }
 
-        PropertyInfo propertyInfo = GetPropertyInfo(type, name);
+        PropertyInfo propertyInfo = GetInstanceOrStaticPropertyInfo(type, name);
 
         if (propertyInfo != null) {
             return propertyInfo.PropertyType;
@@ -723,6 +724,16 @@ public static class ReflectionUtil {
         }
     }
 
+    public static Delegate CreateStaticPropertyGetter(Type objectType, string propertyName) {
+        Expression propertyGetterExpression = Expression.Property(null, objectType, propertyName);
+        return Expression.Lambda(propertyGetterExpression, null).Compile();
+    }
+    
+    public static Delegate CreateStaticFieldGetter(Type objectType, string propertyName) {
+        Expression propertyGetterExpression = Expression.Field(null, objectType, propertyName);
+        return Expression.Lambda(propertyGetterExpression, null).Compile();
+    }
+    
     public static Delegate CreatePropertyGetter(Type objectType, string propertyName) {
         ParameterExpression paramExpression = Expression.Parameter(objectType, "value");
         Expression propertyGetterExpression = Expression.Property(paramExpression, propertyName);

@@ -24,6 +24,11 @@ public class ExpressionCompilerTests2 {
             set => convertThing = value;
         }
 
+    }
+
+    public class TestType1 {
+
+        public static float s_FloatVal;
 
     }
 
@@ -91,7 +96,7 @@ public class ExpressionCompilerTests2 {
             this.value = value;
         }
 
-        public override Expression CompileAsValueExpression2(CompilerContext context, IdentifierNode node, Func<ASTNode, Expression> visit) {
+        public override Expression CompileAsValueExpression2(IdentifierNode node, Func<ASTNode, Expression> visit) {
             return new ConstantExpression<T>(value);
         }
 
@@ -601,7 +606,6 @@ public class ExpressionCompilerTests2 {
         target.obj1 = new TestType0();
         target.obj2 = new TestType0();
         ExpressionContext ctx = new ExpressionContext(target);
-        ExpressionParser parser = new ExpressionParser();
         ExpressionCompiler2 compiler = new ExpressionCompiler2();
         Expression<bool> expression = compiler.Compile<bool>(typeof(TestType0), "obj1 && obj2");
         Assert.IsInstanceOf<OperatorExpression_AndOrObject<object, object>>(expression);
@@ -781,10 +785,31 @@ public class ExpressionCompilerTests2 {
         ExpressionContext ctx = new ExpressionContext(target);
         ExpressionCompiler2 compiler = new ExpressionCompiler2();
         compiler.AddNamespace("UnityEngine");
-        Expression<Vector3> expression = compiler.Compile<Vector3>(typeof(TestType0), "UnityEngine.Vector3.up");
+        Expression<float> expression = compiler.Compile<float>(typeof(TestType0), "ConvertThingProperty.s_StaticVal");
+        Assert.AreEqual(11f, expression.Evaluate(ctx));
+    }
+    
+    [Test]
+    public void Compile_AccessExpression_StaticTypeRefProperty() {
+        TestType0 target = new TestType0();
+        ConvertThing.s_StaticVal = 11f;
+        ExpressionContext ctx = new ExpressionContext(target);
+        ExpressionCompiler2 compiler = new ExpressionCompiler2();
+        compiler.AddNamespace("UnityEngine");
+        Expression<Vector3> expression = compiler.Compile<Vector3>(typeof(TestType0), "Vector3.up");
         Assert.AreEqual(new Vector3(0, 1, 0), expression.Evaluate(ctx));
     }
 
+    [Test]
+    public void Compile_AccessExpression_StaticTypeRefField() {
+        TestType0 target = new TestType0();
+        ExpressionContext ctx = new ExpressionContext(target);
+        ExpressionCompiler2 compiler = new ExpressionCompiler2();
+        TestType1.s_FloatVal = 6;
+        Expression<float> expression = compiler.Compile<float>(typeof(TestType0), "TestType1.s_FloatVal");
+        Assert.AreEqual(6f, expression.Evaluate(ctx));
+    }
+    
     [Test]
     public void Compile_AccessExpression_ListIndex() {
         TestType0 target = new TestType0();

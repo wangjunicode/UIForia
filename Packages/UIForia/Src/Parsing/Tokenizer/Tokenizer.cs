@@ -71,9 +71,7 @@ namespace UIForia {
                 ptr++;
             }
 
-            output.Add(first == '$'
-                ? new DslToken(TokenType.Alias, input.Substring(start, ptr - start))
-                : new DslToken(TokenType.Identifier, input.Substring(start, ptr - start)));
+            output.Add(new DslToken(TokenType.Identifier, input.Substring(start, ptr - start)));
 
             return TryConsumeWhiteSpace(ptr, input);
         }

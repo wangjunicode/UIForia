@@ -13,14 +13,14 @@ namespace UIForia {
             this.op = op;
         }
 
-        public override Type GetYieldedType(ContextDefinition context) {
-            switch (op) {
-                case OperatorType.Not:
-                    return typeof(bool);
-                default:
-                    return expression.GetYieldedType(context);
-            }
-        }
+//        public override Type GetYieldedType(ContextDefinition context) {
+//            switch (op) {
+//                case OperatorType.Not:
+//                    return typeof(bool);
+//                default:
+//                    return expression.GetYieldedType(context);
+//            }
+//        }
 
     }
 

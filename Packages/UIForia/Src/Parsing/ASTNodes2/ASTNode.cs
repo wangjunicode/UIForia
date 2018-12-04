@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Text;
 using UIForia.Util;
 
 namespace UIForia.Parsing {
@@ -170,8 +171,38 @@ namespace UIForia.Parsing {
             }
         }
 
+        private static readonly StringBuilder s_Builder = new StringBuilder(128);
+
+        private void GetConstructedPathStep() {
+            for (int i = 0; i < path.Count - 1; i++) {
+                s_Builder.Append(path[i]);
+                s_Builder.Append('.');
+            }
+
+            s_Builder.Append(path[path.Count - 1]);
+            if (genericArguments != null && genericArguments.Count > 0) {
+                s_Builder.Append('`');
+                s_Builder.Append(genericArguments.Count);
+                s_Builder.Append('[');
+                for (int i = 0; i < genericArguments.Count; i++) {
+                    genericArguments[i].GetConstructedPathStep();
+                    if(i != genericArguments.Count - 1) {
+                        s_Builder.Append(',');
+                    }
+                }
+
+                s_Builder.Append(']');
+            }
+        }
+        
         public string GetConstructedPath() {
-            return path[0]; // todo make this actually resolve stuff, will need type inputs
+            if (path == null) {
+                return string.Empty;
+            }
+            GetConstructedPathStep();
+            string retn = s_Builder.ToString();
+            s_Builder.Clear();
+            return retn;
         }
 
     }

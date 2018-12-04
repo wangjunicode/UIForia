@@ -3,9 +3,11 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
 using UIForia.Extensions;
+using UIForia.Parsing;
 using UIForia.Util;
 using UnityEngine;
 using UnityEngine.Assertions;
+using UnityEngine.UI;
 using Assembly = System.Reflection.Assembly;
 
 namespace UIForia {
@@ -51,7 +53,9 @@ namespace UIForia {
                     continue;
                 }
 
-                if (!FilterAssembly(assembly)) continue;
+                if(assembly.IsDynamic) continue;
+                                
+                // if (!FilterAssembly(assembly)) continue;
 
                 filteredAssemblies.Add(assembly);
                 Type[] types = assembly.GetTypes();
@@ -65,9 +69,9 @@ namespace UIForia {
 
                     loadedTypes.Add(types[j]);
 
-                    if (!s_NamespaceMap.TryGetValue(types[i].Namespace ?? "null", out LightList<Assembly> list)) {
+                    if (!s_NamespaceMap.TryGetValue(types[j].Namespace ?? "null", out LightList<Assembly> list)) {
                         list = new LightList<Assembly>();
-                        s_NamespaceMap.Add(types[i].Namespace ?? "null", list);
+                        s_NamespaceMap.Add(types[j].Namespace ?? "null", list);
                     }
 
                     if (!list.Contains(assembly)) {
@@ -104,13 +108,75 @@ namespace UIForia {
             return t != null;
         }
 
-        public static Type ResolveType(string name, IList<string> namespaces) {
-            for (int i = 0; i < namespaces.Count; i++) {
-                if (TryFindType(namespaces[i] + "." + name, out Type retn)) {
-                    return retn;
+        public static Type ResolveType(Type originType, string name, IList<string> namespaces) {
+            string subtypeName = originType.FullName + "+" + name;
+            subtypeName = subtypeName + ", " + originType.Assembly.FullName;
+            Type retn = Type.GetType(subtypeName);
+            
+            if (retn != null) {
+                return retn;
+            }
+            
+            FilterAssemblies();
+
+            LightList<Assembly> assemblies = s_NamespaceMap.GetOrDefault(originType.Namespace ?? "null");
+            if (assemblies != null) {
+
+                string typeName = originType.Namespace ?? "null" + "." + name + ", ";
+                foreach (Assembly assembly in assemblies) {
+                    string fullTypeName = typeName + assembly.FullName;
+
+                    retn = Type.GetType(fullTypeName);
+
+                    if (retn != null) {
+                        return retn;
+                    }
                 }
+                
             }
 
+            if (originType.FullName.Contains("+")) {
+                Assembly assembly = originType.Assembly;
+                string[] parentTypePath = originType.FullName.Split('+');
+                string typeName = string.Empty;
+                string assemblyName = ", " + assembly.FullName;
+                for (int i = 0; i < parentTypePath.Length - 1; i++) {
+                    typeName += parentTypePath[i] + "+";
+                    string fullTypeName = typeName + name + assemblyName;
+                    retn = Type.GetType(fullTypeName);
+                    if (retn != null) {
+                        return retn;
+                    }
+                }
+                
+            }
+
+            return ResolveType(name, namespaces);
+        }
+        
+        // todo -- handle generics too 
+        // todo -- handle nested types
+        public static Type ResolveType(string name, IList<string> namespaces) {
+            FilterAssemblies();
+
+            for (int i = 0; i < namespaces.Count; i++) {
+                LightList<Assembly> assemblies = s_NamespaceMap.GetOrDefault(namespaces[i]);
+                if (assemblies == null) {
+                    continue;
+                }
+
+                string typeName = namespaces[i] + "." + name + ", ";
+                foreach (Assembly assembly in assemblies) {
+                    string fullTypeName = typeName + assembly.FullName;
+                    
+                    Type retn = Type.GetType(fullTypeName);
+                    
+                    if (retn != null) {
+                        return retn;
+                    }
+                }
+            }          
+            
             return null;
         }
 

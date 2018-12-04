@@ -1,4 +1,5 @@
 using System;
+using UIForia.Parsing;
 
 namespace UIForia.Compilers {
 
@@ -10,17 +11,13 @@ namespace UIForia.Compilers {
             this.itemType = itemType;
         }
 
-        public override Expression CompileAsValueExpression(ContextDefinition context, ExpressionNodeOld nodeOld, Func<ExpressionNodeOld, Expression> visit) {
-            if (nodeOld.expressionType == ExpressionNodeType.AliasAccessor) {
-                ReflectionUtil.ObjectArray1[0] = aliasName;
-                return (Expression) ReflectionUtil.CreateGenericInstanceFromOpenType(
-                    typeof(RepeatItemExpression<>),
-                    itemType,
-                    ReflectionUtil.ObjectArray1
-                );
-            }
-
-            return null;
+        public override Expression CompileAsValueExpression(ASTNode node, Func<ASTNode, Expression> visit) {
+            ReflectionUtil.ObjectArray1[0] = aliasName;
+            return (Expression) ReflectionUtil.CreateGenericInstanceFromOpenType(
+                typeof(RepeatItemExpression<>),
+                itemType,
+                ReflectionUtil.ObjectArray1
+            );
         }
 
         public class RepeatItemExpression<T> : Expression<T> {

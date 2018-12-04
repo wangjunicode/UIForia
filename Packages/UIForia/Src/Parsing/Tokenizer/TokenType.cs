@@ -33,7 +33,7 @@ namespace UIForia {
 
         // identifiers
         Identifier,
-        Alias,
+//        Alias,
         At,
 
         // constants

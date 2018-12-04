@@ -10,9 +10,7 @@ namespace UIForia {
             this.expressionNodeOld = expressionNodeOld;
         }
 
-        public override Type GetYieldedType(ContextDefinition context) {
-            return expressionNodeOld.GetYieldedType(context);
-        }
+    
 
     }
 

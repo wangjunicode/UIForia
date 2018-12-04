@@ -1,4 +1,5 @@
 using System;
+using UIForia.Parsing;
 
 namespace UIForia.Compilers {
 
@@ -6,10 +7,7 @@ namespace UIForia.Compilers {
 
         public RepeatIndexAliasResolver(string aliasName) : base(aliasName) { }
 
-        public override Expression CompileAsValueExpression(ContextDefinition context, ExpressionNodeOld nodeOld, Func<ExpressionNodeOld, Expression> visit) {
-            if (nodeOld.expressionType == ExpressionNodeType.AliasAccessor) {
-                return new RepeatIndexExpression(aliasName);
-            }
+        public override Expression CompileAsValueExpression(ASTNode node, Func<ASTNode, Expression> visit) {
 
             return null;
         }

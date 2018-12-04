@@ -31,7 +31,7 @@ namespace UIForia.Compilers {
 
         private ExpressionCompiler2 compiler;
 
-        public PropertyBindingCompiler(ContextDefinition context) {
+        public PropertyBindingCompiler() {
             this.compiler = new ExpressionCompiler2();
         }
 
@@ -45,7 +45,7 @@ namespace UIForia.Compilers {
         public void SetCompiler(ExpressionCompiler2 compiler) {
             this.compiler = compiler;
         }
-        
+
         public static void AddTypedAliasSource(Type type, IAliasSource aliasSource) {
             if (type == null || aliasSource == null) return;
             List<IAliasSource> list = aliasMap.GetOrDefault(type);
@@ -152,11 +152,16 @@ namespace UIForia.Compilers {
                 string[] parts = attrKey.Split('.');
                 string property = parts[0];
                 string modifier = parts[1];
-                
+
                 switch (modifier) {
-                    case k_BindTo:
-                        return CompileBoundProperty(rootType, targetType, property, attrValue);
-                
+                    case k_BindTo: {
+                        Binding binding = CompileBoundProperty(rootType, targetType, property, attrValue);
+                        if (binding == null) {
+                            return null;
+                        }
+                        binding.bindingType = BindingType.Constant;
+                        return binding;
+                    }
                     case k_Initialize: {
                         Binding binding = CompileBinding(targetType, property, attrValue);
                         if (binding == null) {
@@ -201,7 +206,7 @@ namespace UIForia.Compilers {
                 Expression<bool> ifExpression = compiler.Compile<bool>(targetType, attrValue);
                 return new EnabledBinding(ifExpression);
             }
-            
+
             throw new ParseException(attrKey + " is a not a field or property on type " + targetType);
         }
 
@@ -360,11 +365,11 @@ namespace UIForia.Compilers {
 
             for (int i = 0; i < delegateParameters.Length; i++) {
                 argTypes[i] = delegateParameters[i].ParameterType;
-               // compiler.AddRuntimeAlias(EvtArgNames[i], typeof(string));
+                // compiler.AddRuntimeAlias(EvtArgNames[i], typeof(string));
             }
 
             if (argTypes.Length > 0) {
-               // compiler.AddRuntimeAlias(EvtArgDefaultName, argTypes[0]);
+                // compiler.AddRuntimeAlias(EvtArgDefaultName, argTypes[0]);
             }
 
             // todo -- probably shouldn't be null
@@ -413,8 +418,6 @@ namespace UIForia.Compilers {
 
             throw new Exception("Can't handle callbacks with more than four parameters");
         }
-
-  
 
     }
 

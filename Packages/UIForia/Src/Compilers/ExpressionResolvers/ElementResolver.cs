@@ -1,4 +1,5 @@
 using System;
+using UIForia.Parsing;
 
 namespace UIForia.Compilers {
 
@@ -8,12 +9,7 @@ namespace UIForia.Compilers {
 
         private static readonly UIElementExpression<UIElement> s_Expression = new UIElementExpression<UIElement>();
 
-        public override Expression CompileAsValueExpression(ContextDefinition context, ExpressionNodeOld nodeOld, Func<ExpressionNodeOld, Expression> visit) {
-            
-            if (nodeOld.expressionType == ExpressionNodeType.Accessor) {
-                return s_Expression;
-            }
-
+        public override Expression CompileAsValueExpression(ASTNode node, Func<ASTNode, Expression> visit) {
             return null;
         }
 

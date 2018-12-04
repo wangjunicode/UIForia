@@ -14,15 +14,7 @@ namespace UIForia {
             this.idNodeOld = idNodeOld;
         }
 
-        public override Type GetYieldedType(ContextDefinition context) {
-            if (this.fieldInfo == null) {
-                fieldInfo = context.rootType.GetField(idNodeOld.identifier, ReflectionUtil.InstanceBindFlags);
-            }
-            if (fieldInfo == null) {
-                throw new FieldNotDefinedException(context.rootType, idNodeOld.identifier);
-            }
-            return fieldInfo.FieldType;
-        }
+     
 
     }
 

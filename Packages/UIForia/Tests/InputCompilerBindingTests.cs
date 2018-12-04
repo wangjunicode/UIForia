@@ -54,9 +54,8 @@ public class InputCompiler_KeyUpAttributes {
 
     [SetUp]
     public void Setup() {
-        ContextDefinition ctx = new ContextDefinition(typeof(KeyUpTestThing));
-        InputBindingCompiler compiler = new InputBindingCompiler(ctx);
-        handlers = compiler.CompileKeyboardEventHandlers(typeof(KeyUpTestThing), null);
+        InputBindingCompiler compiler = new InputBindingCompiler();
+        handlers = compiler.CompileKeyboardEventHandlers(typeof(KeyUpTestThing), typeof(KeyUpTestThing), null);
     }
 
     public List<KeyboardEventHandler> handlers;
@@ -258,9 +257,8 @@ public class InputCompiler_KeyDownAttributes {
 
     [SetUp]
     public void Setup() {
-        ContextDefinition ctx = new ContextDefinition(typeof(KeyDownTestThing));
-        InputBindingCompiler compiler = new InputBindingCompiler(ctx);
-        handlers = compiler.CompileKeyboardEventHandlers(typeof(KeyDownTestThing), null);
+        InputBindingCompiler compiler = new InputBindingCompiler();
+        handlers = compiler.CompileKeyboardEventHandlers(typeof(KeyDownTestThing), typeof(KeyDownTestThing), null);
     }
 
     [Test]

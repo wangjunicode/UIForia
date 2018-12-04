@@ -5,6 +5,7 @@ using System.Linq;
 using System.Xml.Linq;
 using UIForia.Style;
 using UIForia.Elements;
+using UIForia.Util;
 
 namespace UIForia {
 
@@ -133,6 +134,13 @@ namespace UIForia {
                 imports.Add(new ImportDeclaration(valueAttr.Value, alias));
             }
 
+            List<string> usings = ListPool<string>.Get();
+            
+            IEnumerable<XElement> usingElements = doc.Root.GetChildren("Using");
+            foreach (XElement usingElement in usingElements) {
+                usings.Add(ParseUsing(usingElement));       
+            }
+            
             IEnumerable<XElement> styleElements = doc.Root.GetChildren("Style");
 
             XElement contentElement = doc.Root.GetChild("Contents");
@@ -156,6 +164,19 @@ namespace UIForia {
             return output;
         }
 
+        private static string ParseUsing(XElement element) {
+            var namespaceAttr = element.GetAttribute("namespace");
+            if (namespaceAttr == null) {
+                throw new ParseException("<Using/> tags require a 'namespace' attribute");
+            }
+
+            string value = namespaceAttr.Value.Trim();
+            if (string.IsNullOrEmpty(value)) {
+                throw new ParseException("<Using/> tags require a 'namespace' attribute with a value");
+            }
+
+            return value;
+        }
         private static UITemplate ParseCaseElement(XElement element) {
             EnsureAttribute(element, "when");
             EnsureOnlyAttributes(element, CaseAttributes);

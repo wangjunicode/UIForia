@@ -11,8 +11,7 @@ public class BindingCompilerTests {
 
     [Test]
     public void CreatesBinding_FieldSetter() {
-        ContextDefinition context = new ContextDefinition(typeof(TestUIElementType));
-        PropertyBindingCompiler compiler = new PropertyBindingCompiler(context);
+        PropertyBindingCompiler compiler = new PropertyBindingCompiler();
         Binding binding = compiler.CompileAttribute(
             typeof(TestUIElementType),
             typeof(TestUIElementType),
@@ -27,8 +26,7 @@ public class BindingCompilerTests {
         //     <FakeElement onSomething="{HandleSomething($event)}"/>
         // </RootElement>
 
-        ContextDefinition context = new ContextDefinition(typeof(FakeRootElement));
-        PropertyBindingCompiler compiler = new PropertyBindingCompiler(context);
+        PropertyBindingCompiler compiler = new PropertyBindingCompiler();
         FakeRootElement rootElement = new FakeRootElement();
         FakeElement childElement = new FakeElement();
         UITemplateContext ctx = new UITemplateContext(null);
@@ -51,8 +49,7 @@ public class BindingCompilerTests {
         //     <FakeElement onSomething="{HandleSomething($event)}"/>
         // </RootElement>
 
-        ContextDefinition context = new ContextDefinition(typeof(FakeRootElement));
-        PropertyBindingCompiler compiler = new PropertyBindingCompiler(context);
+        PropertyBindingCompiler compiler = new PropertyBindingCompiler();
         FakeRootElement rootElement = new FakeRootElement();
         FakeElement childElement = new FakeElement();
         UITemplateContext ctx = new UITemplateContext(null);
@@ -75,8 +72,7 @@ public class BindingCompilerTests {
         //     <FakeElement onSomething="{HandleSomething($event)}"/>
         // </RootElement>
 
-        ContextDefinition context = new ContextDefinition(typeof(FakeRootElement));
-        PropertyBindingCompiler compiler = new PropertyBindingCompiler(context);
+        PropertyBindingCompiler compiler = new PropertyBindingCompiler();
         FakeRootElement rootElement = new FakeRootElement();
         FakeElement childElement = new FakeElement();
         UITemplateContext ctx = new UITemplateContext(null);
@@ -99,8 +95,7 @@ public class BindingCompilerTests {
         //     <FakeElement onSomething="{HandleSomething($event)}"/>
         // </RootElement>
 
-        ContextDefinition context = new ContextDefinition(typeof(FakeRootElement));
-        PropertyBindingCompiler compiler = new PropertyBindingCompiler(context);
+        PropertyBindingCompiler compiler = new PropertyBindingCompiler();
         FakeRootElement rootElement = new FakeRootElement();
         FakeElement childElement = new FakeElement();
         UITemplateContext ctx = new UITemplateContext(null);
@@ -123,8 +118,7 @@ public class BindingCompilerTests {
         //     <FakeElement onSomething="{HandleSomething($event)}"/>
         // </RootElement>
 
-        ContextDefinition context = new ContextDefinition(typeof(FakeRootElement));
-        PropertyBindingCompiler compiler = new PropertyBindingCompiler(context);
+        PropertyBindingCompiler compiler = new PropertyBindingCompiler();
         FakeRootElement rootElement = new FakeRootElement();
         FakeElement childElement = new FakeElement();
         UITemplateContext ctx = new UITemplateContext(null);
@@ -157,8 +151,8 @@ public class BindingCompilerTests {
     [Test]
     public void OnPropertyChanged() {
         AttributeDefinition attrDef = new AttributeDefinition("prop0", "'some-string'");
-        PropertyBindingCompiler c = new PropertyBindingCompiler(new ContextDefinition(typeof(TestedThing1)));
-        Binding b = c.CompileAttribute(typeof(TestedThing1), typeof(FakeElement), attrDef);
+        PropertyBindingCompiler c = new PropertyBindingCompiler();
+        Binding b = c.CompileAttribute(typeof(FakeElement), typeof(TestedThing1), attrDef);
         Assert.IsInstanceOf<FieldSetterBinding_WithCallbacks<TestedThing1, string>>(b);
         TestedThing1 t = new TestedThing1();
         Assert.IsFalse(t.didProp0Change);

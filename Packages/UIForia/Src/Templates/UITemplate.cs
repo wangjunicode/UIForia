@@ -37,9 +37,9 @@ namespace UIForia {
 
         protected static readonly LightList<Binding> s_BindingList = new LightList<Binding>();
 
-        private static readonly StyleBindingCompiler styleCompiler = new StyleBindingCompiler(null);
-        private static readonly InputBindingCompiler inputCompiler = new InputBindingCompiler(null);
-        private static readonly PropertyBindingCompiler propCompiler = new PropertyBindingCompiler(null);
+        private static readonly StyleBindingCompiler styleCompiler = new StyleBindingCompiler();
+        private static readonly InputBindingCompiler inputCompiler = new InputBindingCompiler();
+        private static readonly PropertyBindingCompiler propCompiler = new PropertyBindingCompiler();
 
         protected UITemplate(List<UITemplate> childTemplates, List<AttributeDefinition> attributes = null) {
             this.id = ++s_IdGenerator;
@@ -85,7 +85,7 @@ namespace UIForia {
             }
 
             if (triggeredCount > 0) {
-                triggeredBindings = new Binding[triggeredCount];
+                 triggeredBindings= new Binding[triggeredCount];
             }
 
             if (perFrameCount > 0) {
@@ -117,10 +117,9 @@ namespace UIForia {
         protected void CompileStyleBindings(ParsedTemplate template) {
             if (attributes == null || attributes.Count == 0) return;
 
-            styleCompiler.SetContext(template.contextDefinition);
             for (int i = 0; i < attributes.Count; i++) {
                 AttributeDefinition attr = attributes[i];
-                StyleBinding binding = styleCompiler.Compile(attr);
+                StyleBinding binding = styleCompiler.Compile(template.RootType, elementType, attr);
 
                 if (binding == null) {
                     continue;
@@ -163,12 +162,12 @@ namespace UIForia {
         }
 
         protected void CompileInputBindings(ParsedTemplate template) {
-            inputCompiler.SetContext(template.contextDefinition);
 
-            List<MouseEventHandler> mouseHandlers = inputCompiler.CompileMouseEventHandlers(elementType, attributes);
-            List<KeyboardEventHandler> keyboardHandlers = inputCompiler.CompileKeyboardEventHandlers(elementType, attributes);
-            List<DragEventCreator> dragCreators = inputCompiler.CompileDragEventCreators(elementType, attributes);
-            List<DragEventHandler> dragHandlers = inputCompiler.CompileDragEventHandlers(elementType, attributes);
+            Type rootType = template.RootType;
+            List<MouseEventHandler> mouseHandlers = inputCompiler.CompileMouseEventHandlers(rootType, elementType, attributes);
+            List<KeyboardEventHandler> keyboardHandlers = inputCompiler.CompileKeyboardEventHandlers(rootType, elementType, attributes);
+            List<DragEventCreator> dragCreators = inputCompiler.CompileDragEventCreators(rootType, elementType, attributes);
+            List<DragEventHandler> dragHandlers = inputCompiler.CompileDragEventHandlers(rootType, elementType, attributes);
 
             if (mouseHandlers != null) {
                 mouseEventHandlers = mouseHandlers.ToArray();

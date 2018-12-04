@@ -10,9 +10,7 @@ namespace UIForia {
             this.value = value;
         }
 
-        public override Type GetYieldedType(ContextDefinition context) {
-            return typeof(string);
-        }
+ 
 
     }
 

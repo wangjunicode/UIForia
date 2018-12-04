@@ -12,7 +12,7 @@ namespace UIForia {
             this.expressionType = expressionType;
         }
         
-        public abstract Type GetYieldedType(ContextDefinition context);
+//        public abstract Type GetYieldedType(ContextDefinition context);
 
     }
 

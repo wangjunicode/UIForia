@@ -7,6 +7,13 @@ using UIForia.Extensions;
 using UIForia.Parsing;
 using UIForia.Util;
 using UnityEngine;
+using Debug = System.Diagnostics.Debug;
+
+namespace UIForia {
+
+    public sealed class Terminal { }
+
+}
 
 namespace UIForia.Compilers {
 
@@ -18,6 +25,15 @@ namespace UIForia.Compilers {
         public readonly string fileName;
         public readonly int lineNumber;
         public readonly int columnNumber;
+
+        public CompilerContext(Type rootType, Type currentType) {
+            this.rootType = rootType;
+            this.currentType = currentType;
+            this.targetType = null;
+            this.fileName = string.Empty;
+            this.lineNumber = -1;
+            this.columnNumber = -1;
+        }
 
         public CompilerContext(Type rootType, Type targetType, Type currentType) {
             this.rootType = rootType;
@@ -68,6 +84,10 @@ namespace UIForia.Compilers {
             namespaces.Add(namespaceName);
         }
 
+        public void RemoveNamespace(string namespaceName) {
+            namespaces.Remove(namespaceName);
+        }
+
         public void AddAliasResolver(ExpressionAliasResolver resolver) {
             for (int i = 0; i < aliasResolvers.Count; i++) {
                 if (aliasResolvers[i].aliasName == resolver.aliasName) {
@@ -87,19 +107,19 @@ namespace UIForia.Compilers {
             this.rootType = rootType;
             this.currentType = currentType;
 
-            ASTNode astRoot = Parser2.Parse(input);
+            ASTNode astRoot = ExpressionParser.Parse(input);
             return (Expression<T>) Visit(astRoot);
         }
 
         public Expression<T> Compile<T>(Type rootType, string input) {
             return Compile<T>(rootType, rootType, input);
         }
-        
+
         public Expression Compile(Type rootType, string input, Type targetType) {
-            this.targetType = targetType; 
+            this.targetType = targetType;
             this.rootType = rootType;
             this.currentType = rootType;
-            ASTNode astRoot = Parser2.Parse(input);
+            ASTNode astRoot = ExpressionParser.Parse(input);
             return Visit(astRoot);
         }
 
@@ -159,7 +179,7 @@ namespace UIForia.Compilers {
                     break;
 
                 case ASTNodeType.Paren:
-                    return ParenExpressionFactory.CreateParenExpression(Visit(((ParenNode)node).expression));
+                    return ParenExpressionFactory.CreateParenExpression(Visit(((ParenNode) node).expression));
 
                 default:
                     throw new ArgumentOutOfRangeException();
@@ -168,71 +188,10 @@ namespace UIForia.Compilers {
             return null;
         }
 
-        private Expression VisitAccessExpression(MemberAccessExpressionNode node) {
-            Type headType = ReflectionUtil.ResolveFieldOrPropertyType(rootType, node.identifier);
-
-            if (headType == null) {
-                // using Vector3;
-
-                // Vector3.up
-                // UnityEngine.Vector3
-                // for each using 
-                // get assemblies
-                // check each assembly for the type
-
-                // UIForia.Demo.Package.Rendering.Camera -> end is type name, or value?
-
-                // check sub type of root
-                // check enum of type
-                // for each namespace
-                //     for each . property
-                //     check if is namespace
-
-                // todo -- handle things like ListPool<Vector3>.Empty 
-
-                // if TypeProcessor.IsTypeName()
-//                string typeName = node.identifier;
-//                string namespaceString = string.Empty;
-//                
-//                for (int i = 0; i < namespaces.Count; i++) {
-//                
-//                    typeName = namespaceString[i] + node.identifier;
-//                    
-//                    if (TypeProcessor.IsTypeName(typeName)) {
-//                                
-//                    }
-//                    
-//                }
-//
-//                for (int j = 0; j < node.parts.Count; j++) {
-//                    ASTNode part = node.parts[j];
-//                    if (part.type == ASTNodeType.DotAccess) {
-//                        if (!TypeProcessor.IsTypeName(typeName)) {
-//                            
-//                        }
-//                        string next = namespaceString + ((DotAccessNode) part).propertyName;
-//                    }
-//                                        
-//                    break;
-//                }
-//                
-//                for (int i = 0; i < namespaces.Count; i++) {
-//                    string namespaceString = node.identifier;
-//                    for (int j = 0; j < node.parts.Count; j++) {
-//                        ASTNode part = node.parts[j];
-//                        if (part.type == ASTNodeType.DotAccess) {
-//                            string next = namespaceString + ((DotAccessNode) part).propertyName;
-//                        }
-//                                        
-//                        break;
-//                    }
-//                }
-            }
-
+        private LightList<Type> GetInputTypes(Type headType, MemberAccessExpressionNode node) {
             LightList<Type> inputTypes = LightListPool<Type>.Get();
             inputTypes.Add(headType);
-
-
+            
             for (int i = 0; i < node.parts.Count; i++) {
                 ASTNode part = node.parts[i];
 
@@ -251,8 +210,42 @@ namespace UIForia.Compilers {
                 else if (part.type == ASTNodeType.MethodCall) { }
             }
 
+            return inputTypes;
+        }
+
+        private Expression VisitStaticAccessExpression(Type headType, MemberAccessExpressionNode node) {
+            LightList<Type> inputTypes = GetInputTypes(headType, node);
+            
             Type outputType = inputTypes[inputTypes.Length - 1];
-            FieldInfo rootFieldInfo = ReflectionUtil.GetFieldInfo(rootType, node.identifier);
+
+            object p = MakeAccessPart(0, node.parts, outputType, inputTypes);
+            
+            LightListPool<Type>.Release(ref inputTypes);
+            
+            Expression expr = (Expression) ReflectionUtil.CreateGenericInstanceFromOpenType(
+                typeof(AccessExpression_Static<,>),
+                new GenericArguments(outputType, headType),
+                new ConstructorArguments(p)
+            );
+
+            return expr;
+        }
+
+        private Expression VisitAccessExpression(MemberAccessExpressionNode node) {
+            Type headType = ReflectionUtil.ResolveFieldOrPropertyType(rootType, node.identifier);
+
+            if (headType == null) {
+                headType = TypeProcessor.ResolveType(rootType, node.identifier, namespaces);
+                if (headType == null) {
+                    throw new CompileException("Can't resolve type for " + node.identifier);
+                }
+
+                return VisitStaticAccessExpression(headType, node);
+            }
+
+            LightList<Type> inputTypes = GetInputTypes(headType, node);
+            Type outputType = inputTypes[inputTypes.Length - 1];
+            FieldInfo rootFieldInfo = ReflectionUtil.GetInstanceOrStaticFieldInfo(rootType, node.identifier);
 
             object head = null;
             object p = MakeAccessPart(0, node.parts, outputType, inputTypes);
@@ -267,7 +260,7 @@ namespace UIForia.Compilers {
                 );
             }
             else {
-                PropertyInfo rootPropertyInfo = ReflectionUtil.GetPropertyInfo(rootType, node.identifier);
+                PropertyInfo rootPropertyInfo = ReflectionUtil.GetInstanceOrStaticPropertyInfo(rootType, node.identifier);
                 if (rootPropertyInfo != null) {
                     head = ReflectionUtil.CreateGenericInstanceFromOpenType(
                         typeof(AccessExpressionPart_FieldProperty_Property<,,>),
@@ -292,24 +285,25 @@ namespace UIForia.Compilers {
 
         private object MakeAccessPart(int u, List<ASTNode> parts, Type outputType, LightList<Type> inputTypes) {
             object retn = null;
-            
+
             retn = MakeFieldAccessor(u, parts, outputType, inputTypes);
             retn = retn ?? MakePropertyAccessor(u, parts, outputType, inputTypes);
             retn = retn ?? MakeIndexAccessor(u, parts, outputType, inputTypes);
             retn = retn ?? MakeMethodAccessor(u, parts, outputType, inputTypes);
-            
+
             return retn;
         }
 
         private object MakeMethodAccessor(int u, List<ASTNode> parts, Type outputType, LightList<Type> inputTypes) {
             return null;
         }
-        
+
 
         private object MakeIndexAccessor(int u, List<ASTNode> parts, Type outputType, LightList<Type> inputTypes) {
             if (u == parts.Count || parts[u].type != ASTNodeType.IndexExpression) {
                 return null;
             }
+
             object next = MakeAccessPart(u + 1, parts, outputType, inputTypes);
             // todo -- this should handle dictionary indexing as well, pick up target type 
 
@@ -322,12 +316,15 @@ namespace UIForia.Compilers {
                 new ConstructorArguments(next, indexExpr)
             );
         }
-        
+
         private object MakePropertyAccessor(int u, List<ASTNode> parts, Type outputType, LightList<Type> inputTypes) {
             if (u == parts.Count || parts[u].type != ASTNodeType.DotAccess) {
                 return null;
             }
-            PropertyInfo propertyInfo = ReflectionUtil.GetPropertyInfo(inputTypes[u], ((DotAccessNode) parts[u]).propertyName);
+
+            string propertyName = ((DotAccessNode) parts[u]).propertyName;
+
+            PropertyInfo propertyInfo = ReflectionUtil.GetInstanceOrStaticPropertyInfo(inputTypes[u], propertyName);
             if (propertyInfo != null) {
                 object next = MakeAccessPart(u + 1, parts, outputType, inputTypes);
                 return ReflectionUtil.CreateGenericInstanceFromOpenType(
@@ -344,7 +341,8 @@ namespace UIForia.Compilers {
             if (u == parts.Count || parts[u].type != ASTNodeType.DotAccess) {
                 return null;
             }
-            FieldInfo fieldInfo = ReflectionUtil.GetFieldInfo(inputTypes[u], ((DotAccessNode) parts[u]).propertyName);
+
+            FieldInfo fieldInfo = ReflectionUtil.GetInstanceOrStaticFieldInfo(inputTypes[u], ((DotAccessNode) parts[u]).propertyName);
             if (fieldInfo != null) {
                 object next = MakeAccessPart(u + 1, parts, outputType, inputTypes);
                 return ReflectionUtil.CreateGenericInstanceFromOpenType(
@@ -434,15 +432,17 @@ namespace UIForia.Compilers {
             Type oldTarget = targetType;
             targetType = null;
 
-         
+
             if (node.operatorType == OperatorType.TernaryCondition) {
                 return VisitOperator_TernaryCondition(node);
             }
-            
+
             Expression left = Visit(node.left);
             Type leftType = left.YieldedType;
-            Expression right = Visit(node.right);;
-            Type rightType =  right.YieldedType;;
+            Expression right = Visit(node.right);
+            ;
+            Type rightType = right.YieldedType;
+            ;
 
             targetType = oldTarget;
 
@@ -482,11 +482,11 @@ namespace UIForia.Compilers {
 
                     throw new CompileException($"Invalid expression types ({leftType}, {rightType}) for arithmetic operator {node.operatorType}");
                 }
-                
+
                 case OperatorType.TernaryCondition:
                 case OperatorType.TernarySelection:
                     break;
-                
+
                 case OperatorType.Equals:
                 case OperatorType.NotEquals: {
                     MethodInfo info = ReflectionUtil.GetComparisonOperator(GetOpMethodName(node.operatorType), left.YieldedType, right.YieldedType);
@@ -587,7 +587,7 @@ namespace UIForia.Compilers {
 
                     throw new CompileException($"Invalid expression types ({leftType}, {rightType}) for comparison operator {node.operatorType}");
                 }
-                
+
                 case OperatorType.As:
                 case OperatorType.Is:
                     // todo -- implement these when type resolution works
@@ -762,7 +762,7 @@ namespace UIForia.Compilers {
             throw new NotImplementedException();
         }
 
-         private Expression VisitOperator_TernaryCondition(OperatorNode node) {
+        private Expression VisitOperator_TernaryCondition(OperatorNode node) {
             Expression<bool> condition = (Expression<bool>) Visit(node.left);
             OperatorNode select = (OperatorNode) node.right;
 
@@ -828,7 +828,7 @@ namespace UIForia.Compilers {
             return (Expression) ReflectionUtil.CreateGenericInstanceFromOpenType(openType, commonBase, ReflectionUtil.ObjectArray3);
         }
 
-         
+
         private Expression VisitSimpleRootAccess(IdentifierNode node) {
             string fieldName = node.name;
             Expression retn = null;
@@ -838,9 +838,9 @@ namespace UIForia.Compilers {
                     if (aliasResolvers[i].aliasName == fieldName) {
                         // root type, target type, element type
                         CompilerContext context = new CompilerContext(rootType, targetType, currentType);
-                        retn = aliasResolvers[i].CompileAsValueExpression2(context, node, visit);
+                        retn = aliasResolvers[i].CompileAsValueExpression2(node, visit);
                         if (retn == null) {
-                            throw new ParseException();
+                            throw new CompileException($"Alias Resolver of type {aliasResolvers[i]} failed to resolve {fieldName}");
                         }
 
                         break;
@@ -943,7 +943,28 @@ namespace UIForia.Compilers {
 
             return null;
         }
-        
+
+
+    }
+    
+    public class AccessExpression_Static<T, U> : Expression<T> {
+
+        public override Type YieldedType => typeof(T);
+
+        public AccessExpressionPart<T, U> headExpression;
+
+        public AccessExpression_Static(AccessExpressionPart<T, U> headExpression) {
+            this.headExpression = headExpression;
+        }
+
+        public override T Evaluate(ExpressionContext context) {
+            return headExpression.Execute(default(U), context);
+        }
+
+        public override bool IsConstant() {
+            return false;
+        }
+
     }
 
     public class AccessExpression<T, U> : Expression<T> {
@@ -987,6 +1008,7 @@ namespace UIForia.Compilers {
                 if (previous == null) {
                     return default;
                 }
+
                 int index = expression.Evaluate(context);
                 IList<TReturn> target = (IList<TReturn>) previous;
                 if (index < target.Count) {
@@ -999,6 +1021,7 @@ namespace UIForia.Compilers {
                 if (previous == null) {
                     return default;
                 }
+
                 int index = expression.Evaluate(context);
                 IList<TNext> target = (IList<TNext>) previous;
                 if (index < target.Count) {
@@ -1017,6 +1040,7 @@ namespace UIForia.Compilers {
         protected Func<TInput, TReturn> terminalGetter;
         protected readonly AccessExpressionPart<TReturn, TNext> next;
         protected readonly bool previousCanBeNull;
+        protected bool isStatic;
 
         protected AccessExpressionPart_FieldProperty(AccessExpressionPart<TReturn, TNext> next) {
             this.next = next;
@@ -1026,7 +1050,7 @@ namespace UIForia.Compilers {
         public override TReturn Execute(TInput previous, ExpressionContext context) {
             if (next != null) {
                 TNext value = getter(previous);
-                if (previousCanBeNull && ReferenceEquals(value, null)) {
+                if (!isStatic && previousCanBeNull && ReferenceEquals(value, null)) {
                     return default;
                 }
 
@@ -1034,23 +1058,36 @@ namespace UIForia.Compilers {
             }
 
             // check should avoid boxing 
-            if (previousCanBeNull && ReferenceEquals(previous, null)) {
+            if (!isStatic && previousCanBeNull && ReferenceEquals(previous, null)) {
                 return default;
             }
 
             return terminalGetter(previous);
-        }
+        } 
 
     }
 
     public class AccessExpressionPart_FieldProperty_Property<TReturn, TInput, TNext> : AccessExpressionPart_FieldProperty<TReturn, TInput, TNext> {
 
         public AccessExpressionPart_FieldProperty_Property(PropertyInfo propertyInfo, AccessExpressionPart<TReturn, TNext> next) : base(next) {
-            if (next != null) {
-                getter = (Func<TInput, TNext>) ReflectionUtil.GetLinqPropertyAccessors(typeof(TInput), propertyInfo).getter;
+            if (propertyInfo.GetGetMethod().IsStatic) {
+                isStatic = true;
+                if (next != null) {
+                    Func<TNext> x = (Func<TNext>) ReflectionUtil.CreateStaticPropertyGetter(typeof(TInput), propertyInfo.Name);
+                    getter = (input) => x();
+                }
+                else {
+                    Func<TReturn> x = (Func<TReturn>) ReflectionUtil.CreateStaticPropertyGetter(typeof(TInput), propertyInfo.Name);
+                    terminalGetter = (input) => x();
+                }
             }
             else {
-                terminalGetter = (Func<TInput, TReturn>) ReflectionUtil.GetLinqPropertyAccessors(typeof(TInput), propertyInfo).getter;
+                if (next != null) {
+                    getter = (Func<TInput, TNext>) ReflectionUtil.GetLinqPropertyAccessors(typeof(TInput), propertyInfo).getter;
+                }
+                else {
+                    terminalGetter = (Func<TInput, TReturn>) ReflectionUtil.GetLinqPropertyAccessors(typeof(TInput), propertyInfo).getter;
+                }
             }
         }
 
@@ -1059,11 +1096,24 @@ namespace UIForia.Compilers {
     public class AccessExpressionPart_FieldProperty_Field<TReturn, TInput, TNext> : AccessExpressionPart_FieldProperty<TReturn, TInput, TNext> {
 
         public AccessExpressionPart_FieldProperty_Field(FieldInfo fieldInfo, AccessExpressionPart<TReturn, TNext> next) : base(next) {
-            if (next != null) {
-                getter = (Func<TInput, TNext>) ReflectionUtil.GetLinqFieldAccessors(typeof(TInput), fieldInfo).getter;
+            if (fieldInfo.IsStatic) {
+                isStatic = true;
+                if (next != null) {
+                    Func<TNext> x = (Func<TNext>) ReflectionUtil.CreateStaticFieldGetter(typeof(TInput), fieldInfo.Name);
+                    getter = (input) => x();
+                }
+                else {
+                    Func<TReturn> x = (Func<TReturn>) ReflectionUtil.CreateStaticFieldGetter(typeof(TInput), fieldInfo.Name);
+                    terminalGetter = (input) => x();
+                }
             }
             else {
-                terminalGetter = (Func<TInput, TReturn>) ReflectionUtil.GetLinqFieldAccessors(typeof(TInput), fieldInfo).getter;
+                if (next != null) {
+                    getter = (Func<TInput, TNext>) ReflectionUtil.GetLinqFieldAccessors(typeof(TInput), fieldInfo).getter;
+                }
+                else {
+                    terminalGetter = (Func<TInput, TReturn>) ReflectionUtil.GetLinqFieldAccessors(typeof(TInput), fieldInfo).getter;
+                }
             }
         }
 

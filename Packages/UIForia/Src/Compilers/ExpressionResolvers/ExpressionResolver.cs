@@ -16,19 +16,19 @@ namespace UIForia.Compilers {
             this.aliasName = aliasName;
         }
 
-        public virtual Expression CompileAsValueExpression2(CompilerContext context, IdentifierNode node, Func<ASTNode, Expression> visit) {
+        public virtual Expression CompileAsValueExpression2(IdentifierNode node, Func<ASTNode, Expression> visit) {
             return null;
         }
         
-        public virtual Expression CompileAsValueExpression(ContextDefinition context, ExpressionNodeOld nodeOld, Func<ExpressionNodeOld, Expression> visit) {
+        public virtual Expression CompileAsValueExpression(ASTNode node, Func<ASTNode, Expression> visit) {
             return null;
         }
 
-        public virtual Expression CompileAsAccessExpression(ContextDefinition context, ExpressionNodeOld nodeOld, Func<ExpressionNodeOld, Expression> visit) {
+        public virtual Expression CompileAsAccessExpression(ASTNode node, Func<ASTNode, Expression> visit) {
             return null;
         }
 
-        public virtual Expression CompileAsMethodExpression(MethodCallNodeOld nodeOld, Func<ExpressionNodeOld, Expression> visit) {
+        public virtual Expression CompileAsMethodExpression(MethodCallNodeOld node, Func<ASTNode, Expression> visit) {
             return null;
         }
 
@@ -42,7 +42,7 @@ namespace UIForia.Compilers {
             this.value = value;
         }
 
-        public override Expression CompileAsValueExpression(ContextDefinition context, ExpressionNodeOld nodeOld, Func<ExpressionNodeOld, Expression> visit) {
+        public override Expression CompileAsValueExpression(ASTNode node, Func<ASTNode, Expression> visit) {
             return new ConstantExpression<T>(value);
         }
 
@@ -56,7 +56,7 @@ namespace UIForia.Compilers {
             this.info = info;
         }
 
-        public override Expression CompileAsValueExpression(ContextDefinition context, ExpressionNodeOld nodeOld, Func<ExpressionNodeOld, Expression> visit) {
+        public override Expression CompileAsValueExpression(ASTNode node, Func<ASTNode, Expression> visit) {
             return null;
         }
 
@@ -67,13 +67,7 @@ namespace UIForia.Compilers {
 
         public EnumResolver(string aliasName) : base(aliasName) { }
 
-        public override Expression CompileAsAccessExpression(ContextDefinition context, ExpressionNodeOld nodeOld, Func<ExpressionNodeOld, Expression> visit) {
-
-            AccessExpressionNodeOld x = nodeOld as AccessExpressionNodeOld;
-            if (x.parts.Count != 1) {
-                return null;
-            }
-            
+        public override Expression CompileAsAccessExpression(ASTNode node, Func<ASTNode, Expression> visit) {
             return new ConstantExpression<T>(default);
         }
 

@@ -11,7 +11,7 @@ namespace UIForia.Compilers {
 
         private static readonly UrlReaderExpression s_UrlReaderExpression = new UrlReaderExpression();
 
-        public override Expression CompileAsValueExpression(ASTNode node, Func<ASTNode, Expression> visit) {
+       // public override Expression CompileAsValueExpression(ASTNode node, Func<Type, ASTNode, Expression> visit) {
 //            if (node.expressionType == ExpressionNodeType.Accessor) {
 //                AccessASTNode accessASTNode = (AccessASTNode) node;
 //                List<AccessExpressionPartNodeOld> parts = accessASTNode.parts;
@@ -48,8 +48,8 @@ namespace UIForia.Compilers {
 //                
 //            }
 
-            return null;
-        }
+          //  return null;
+        //}
 
         public class ParameterReaderExpression : Expression<string> {
 

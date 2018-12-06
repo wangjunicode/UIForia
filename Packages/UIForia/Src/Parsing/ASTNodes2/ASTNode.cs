@@ -11,11 +11,10 @@ namespace UIForia.Parsing {
         protected static readonly ObjectPool<OperatorNode> s_OperatorPool = new ObjectPool<OperatorNode>();
         protected static readonly ObjectPool<IdentifierNode> s_IdentifierPool = new ObjectPool<IdentifierNode>();
         protected static readonly ObjectPool<TypeNode> s_TypeNodePool = new ObjectPool<TypeNode>();
-        protected static readonly ObjectPool<MethodCallNode> s_MethodCallPool = new ObjectPool<MethodCallNode>();
         protected static readonly ObjectPool<ParenNode> s_ParenPool = new ObjectPool<ParenNode>();
         protected static readonly ObjectPool<DotAccessNode> s_DotAccessPool = new ObjectPool<DotAccessNode>();
         protected static readonly ObjectPool<MemberAccessExpressionNode> s_MemberAccessExpressionPool = new ObjectPool<MemberAccessExpressionNode>();
-        protected static readonly ObjectPool<IndexExpressionNode> s_IndexExpressionPool = new ObjectPool<IndexExpressionNode>();
+        protected static readonly ObjectPool<IndexNode> s_IndexExpressionPool = new ObjectPool<IndexNode>();
         protected static readonly ObjectPool<InvokeNode> s_InvokeNodePool = new ObjectPool<InvokeNode>();
         protected static readonly ObjectPool<UnaryExpressionNode> s_UnaryNodePool = new ObjectPool<UnaryExpressionNode>();
         protected static readonly ObjectPool<ListInitializerNode> s_ListInitializerPool = new ObjectPool<ListInitializerNode>();
@@ -128,10 +127,10 @@ namespace UIForia.Parsing {
             return listInitializerNode;
         }
 
-        public static IndexExpressionNode IndexExpressionNode(ASTNode expression) {
-            IndexExpressionNode indexExpressionNode = s_IndexExpressionPool.Get();
-            indexExpressionNode.expression = expression;
-            return indexExpressionNode;
+        public static IndexNode IndexExpressionNode(ASTNode expression) {
+            IndexNode indexNode = s_IndexExpressionPool.Get();
+            indexNode.expression = expression;
+            return indexNode;
         }
 
         public static UnaryExpressionNode UnaryExpressionNode(ASTNodeType nodeType, ASTNode expr) {
@@ -148,7 +147,7 @@ namespace UIForia.Parsing {
             unaryNode.expression = expression;
             return unaryNode;
         }
-        
+
     }
 
     public struct TypePath {
@@ -311,11 +310,11 @@ namespace UIForia.Parsing {
 
     }
     
-    public class IndexExpressionNode : ASTNode {
+    public class IndexNode : ASTNode {
 
         public ASTNode expression;
 
-        public IndexExpressionNode() {
+        public IndexNode() {
             type = ASTNodeType.IndexExpression;
         }
         
@@ -340,22 +339,6 @@ namespace UIForia.Parsing {
 
     }
     
-    public class MethodCallNode : ASTNode {
-
-        public string methodName;
-        public ASTNode[] signature;
-
-        public MethodCallNode() {
-            type = ASTNodeType.MethodCall;
-        }
-
-        public override void Release() {
-            s_MethodCallPool.Release(this);
-            if (signature != null && signature.Length > 0) {
-                ArrayPool<ASTNode>.Release(ref signature);
-            }
-        }
-
-    }    
+    
 
 }

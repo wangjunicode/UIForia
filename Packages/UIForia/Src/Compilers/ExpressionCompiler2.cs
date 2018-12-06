@@ -3,11 +3,10 @@ using System.Collections.Generic;
 using System.Globalization;
 using System.Reflection;
 using UIForia.Compilers.CastHandlers;
+using UIForia.Exceptions;
 using UIForia.Extensions;
 using UIForia.Parsing;
 using UIForia.Util;
-using UnityEngine;
-using Debug = System.Diagnostics.Debug;
 
 namespace UIForia {
 
@@ -17,7 +16,7 @@ namespace UIForia {
 
 namespace UIForia.Compilers {
 
-    public struct CompilerContext {
+    public class CompilerContext {
 
         public readonly Type rootType;
         public readonly Type targetType;
@@ -25,14 +24,16 @@ namespace UIForia.Compilers {
         public readonly string fileName;
         public readonly int lineNumber;
         public readonly int columnNumber;
+        private readonly ExpressionCompiler2 compiler;
 
-        public CompilerContext(Type rootType, Type currentType) {
+        internal CompilerContext(ExpressionCompiler2 compiler, Type rootType, Type currentType) {
             this.rootType = rootType;
             this.currentType = currentType;
             this.targetType = null;
             this.fileName = string.Empty;
             this.lineNumber = -1;
             this.columnNumber = -1;
+            this.compiler = compiler;
         }
 
         public CompilerContext(Type rootType, Type targetType, Type currentType) {
@@ -44,6 +45,10 @@ namespace UIForia.Compilers {
             this.columnNumber = -1;
         }
 
+        public Expression Visit(Type targetType, ASTNode node) {
+            return compiler.Visit(targetType, node);
+        }
+
     }
 
     public class ExpressionCompiler2 {
@@ -53,7 +58,7 @@ namespace UIForia.Compilers {
         private Type currentType;
 
         private readonly bool allowLinq;
-        private readonly Func<ASTNode, Expression> visit;
+        private readonly Func<Type, ASTNode, Expression> visit;
         private readonly LightList<ExpressionAliasResolver> aliasResolvers;
         private readonly LightList<string> namespaces = new LightList<string>();
 
@@ -123,7 +128,7 @@ namespace UIForia.Compilers {
             return Visit(astRoot);
         }
 
-        private Expression Visit(Type targetType, ASTNode node) {
+        internal Expression Visit(Type targetType, ASTNode node) {
             Type oldTargetType = this.targetType;
             this.targetType = targetType;
             Expression retn = Visit(node);
@@ -157,26 +162,19 @@ namespace UIForia.Compilers {
                 case ASTNodeType.Identifier:
                     return VisitSimpleRootAccess((IdentifierNode) node);
 
-                case ASTNodeType.MethodCall:
-                    break;
-
                 case ASTNodeType.UnaryNot:
                     return VisitUnaryNot((UnaryExpressionNode) node);
 
                 case ASTNodeType.UnaryMinus:
                     return VisitUnaryMinus((UnaryExpressionNode) node);
 
+                case ASTNodeType.New:
                 case ASTNodeType.DirectCast:
-                    break;
-
                 case ASTNodeType.ListInitializer:
-                    break;
+                    throw new NotImplementedException();
 
                 case ASTNodeType.AccessExpression:
                     return VisitAccessExpression((MemberAccessExpressionNode) node);
-
-                case ASTNodeType.New:
-                    break;
 
                 case ASTNodeType.Paren:
                     return ParenExpressionFactory.CreateParenExpression(Visit(((ParenNode) node).expression));
@@ -184,14 +182,161 @@ namespace UIForia.Compilers {
                 default:
                     throw new ArgumentOutOfRangeException();
             }
-
-            return null;
         }
 
-        private LightList<Type> GetInputTypes(Type headType, MemberAccessExpressionNode node) {
+        public struct AccessInfo {
+
+            public string identifier;
+            public FieldInfo fieldInfo;
+            public PropertyInfo propertyInfo;
+            public MethodInfo methodInfo;
+            public List<Expression> arguments;
+            public Type outputType;
+            public AccessInfoType type;
+            public Type inputType;
+
+            public static void CreateMethodCall(ref AccessInfo accessInfo, MethodInfo info, List<Expression> arguments) {
+                accessInfo.type = AccessInfoType.MethodInvoke;
+                accessInfo.identifier = info.Name;
+                accessInfo.arguments = arguments;
+                accessInfo.methodInfo = info;
+                accessInfo.outputType = info.ReturnType;
+                accessInfo.inputType = info.DeclaringType;
+            }
+
+            public static bool CreateField(ref AccessInfo accessInfo, Type lastType, DotAccessNode dotAccessNode) {
+                FieldInfo fieldInfo = ReflectionUtil.GetInstanceOrStaticFieldInfo(lastType, dotAccessNode.propertyName);
+                if (fieldInfo == null) {
+                    return false;
+                }
+
+                accessInfo.inputType = lastType;
+                accessInfo.identifier = dotAccessNode.propertyName;
+                accessInfo.fieldInfo = fieldInfo;
+                accessInfo.outputType = fieldInfo.FieldType;
+                accessInfo.type = AccessInfoType.Field;
+                return true;
+            }
+
+            public static bool CreateProperty(ref AccessInfo accessInfo, Type lastType, DotAccessNode dotAccessNode) {
+                PropertyInfo propertyInfo = ReflectionUtil.GetInstanceOrStaticPropertyInfo(lastType, dotAccessNode.propertyName);
+                if (propertyInfo == null) {
+                    return false;
+                }
+
+                accessInfo.inputType = lastType;
+                accessInfo.identifier = dotAccessNode.propertyName;
+                accessInfo.propertyInfo = propertyInfo;
+                accessInfo.outputType = propertyInfo.PropertyType;
+                accessInfo.type = AccessInfoType.Property;
+                return true;
+            }
+
+            public static bool CreateIndexer(ref AccessInfo accessInfo, Type lastType, Expression indexExpression) {
+                accessInfo.inputType = lastType;
+                accessInfo.outputType = GetListElementType(lastType);
+                accessInfo.arguments = new List<Expression>();
+                accessInfo.arguments.Add(indexExpression);
+                accessInfo.type = AccessInfoType.Index;
+                return true;
+            }
+
+        }
+
+        public enum AccessInfoType {
+
+            Invalid,
+            MethodInvoke,
+            FuncInvoke,
+            ActionInvoke,
+            Field,
+            Property,
+            Index
+
+        }
+
+        private LightList<AccessInfo> GetAccessInfoList(Type rootType, MemberAccessExpressionNode node) {
+            LightList<AccessInfo> accessInfoList = LightListPool<AccessInfo>.Get();
+
+            Type lastType = rootType;
+
+            node.parts.Insert(0, ASTNode.DotAccessNode(node.identifier));
+
+            for (int i = 0; i < node.parts.Count; i++) {
+                ASTNode part = node.parts[i];
+                AccessInfo accessInfo = new AccessInfo();
+                switch (part) {
+                    case DotAccessNode dotAccessNode: {
+                        if (i != node.parts.Count - 1) {
+                            ASTNode nextPart = node.parts[i + 1];
+                            if (nextPart is InvokeNode invokeNode) {
+                                MethodInfo info;
+                                List<Expression> arguments = VisitMethodArguments(lastType, dotAccessNode.propertyName, invokeNode.parameters, out info);
+                                if (info == null) {
+                                    throw new CompileException("bad method info");
+                                }
+
+                                AccessInfo.CreateMethodCall(ref accessInfo, info, arguments);
+                                lastType = accessInfo.outputType;
+                                accessInfoList.Add(accessInfo);
+                                i++;
+                                continue;
+                            }
+                        }
+
+                        if (AccessInfo.CreateField(ref accessInfo, lastType, dotAccessNode) || AccessInfo.CreateProperty(ref accessInfo, lastType, dotAccessNode)) {
+                            lastType = accessInfo.outputType;
+                            accessInfoList.Add(accessInfo);
+                            continue;
+                        }
+
+                        if (i == 0) {
+                            node.parts.RemoveAt(0);
+                            return null;
+                        }
+
+                        throw CompileExceptions.FieldOrPropertyNotFound(lastType, dotAccessNode.propertyName);
+                    }
+
+                    case InvokeNode invokeNode: {
+                        // last type
+                        if (ReflectionUtil.IsAction(lastType)) { }
+                        else {
+                            Type outputType = null;
+                            List<Expression> arguments = VisitFuncArguments(lastType, invokeNode.parameters, out outputType);
+                            accessInfo.type = AccessInfoType.FuncInvoke;
+                            accessInfo.arguments = arguments;
+                            accessInfo.inputType = lastType;
+                            accessInfo.outputType = outputType;
+                            lastType = outputType;
+                            accessInfoList.Add(accessInfo);
+                            continue;
+                        }
+
+                        throw new CompileException("Invoke node was not an action or a func type");
+                    }
+
+                    case IndexNode indexNode: {
+                        // todo allow index operator overloads here
+                        Expression indexExpression = Visit(typeof(int), indexNode.expression);
+                        if (AccessInfo.CreateIndexer(ref accessInfo, lastType, indexExpression)) {
+                            lastType = accessInfo.outputType;
+                            accessInfoList.Add(accessInfo);
+                            continue;
+                        }
+
+                        throw new CompileException("Invalid index accessor");
+                    }
+                }
+            }
+
+            return accessInfoList;
+        }
+
+        private static LightList<Type> GetInputTypes(Type headType, MemberAccessExpressionNode node) {
             LightList<Type> inputTypes = LightListPool<Type>.Get();
             inputTypes.Add(headType);
-            
+
             for (int i = 0; i < node.parts.Count; i++) {
                 ASTNode part = node.parts[i];
 
@@ -207,7 +352,7 @@ namespace UIForia.Compilers {
                     // get array / list element type / index expression type given
                     inputTypes.Add(GetListElementType(inputTypes[i]));
                 }
-                else if (part.type == ASTNodeType.MethodCall) { }
+                else if (part is InvokeNode invokeNode) { }
             }
 
             return inputTypes;
@@ -215,13 +360,13 @@ namespace UIForia.Compilers {
 
         private Expression VisitStaticAccessExpression(Type headType, MemberAccessExpressionNode node) {
             LightList<Type> inputTypes = GetInputTypes(headType, node);
-            
+
             Type outputType = inputTypes[inputTypes.Length - 1];
 
             object p = MakeAccessPart(0, node.parts, outputType, inputTypes);
-            
+
             LightListPool<Type>.Release(ref inputTypes);
-            
+
             Expression expr = (Expression) ReflectionUtil.CreateGenericInstanceFromOpenType(
                 typeof(AccessExpression_Static<,>),
                 new GenericArguments(outputType, headType),
@@ -231,93 +376,226 @@ namespace UIForia.Compilers {
             return expr;
         }
 
-        private Expression VisitAccessExpression(MemberAccessExpressionNode node) {
-            Type headType = ReflectionUtil.ResolveFieldOrPropertyType(rootType, node.identifier);
+        private Expression VisitAliasAccessExpression(MemberAccessExpressionNode node) {
+            ExpressionAliasResolver resolver = GetResolver(node.identifier);
+            if (resolver == null) {
+                throw new CompileException("Unable to find a resolver for alias " + node.identifier);
+            }
 
-            if (headType == null) {
-                headType = TypeProcessor.ResolveType(rootType, node.identifier, namespaces);
-                if (headType == null) {
+            if (node.parts[0] is InvokeNode invokeNode) {
+                CompilerContext context = new CompilerContext(this, rootType, currentType);
+                return resolver.CompileAsMethodExpression(context, invokeNode);
+            }
+
+            return resolver.CompileAsAccessExpression(node, visit);
+        }
+
+        private ExpressionAliasResolver GetResolver(string alias) {
+            for (int i = 0; i < aliasResolvers.Count; i++) {
+                if (aliasResolvers[i].aliasName == alias) {
+                    return aliasResolvers[i];
+                }
+            }
+
+            return null;
+        }
+
+        private List<Expression> VisitFuncArguments(Type funcType, List<ASTNode> arguments, out Type outputType) {
+            Type[] funcParameterTypes = funcType.GetGenericArguments();
+
+            if (arguments.Count + 1 != funcParameterTypes.Length) {
+                throw new CompileException($"parameter count mismatch when compiling func invocation {funcType}");
+            }
+
+            List<Expression> expressionArguments = new List<Expression>();
+
+            for (int i = 0; i < arguments.Count; i++) {
+                Expression argument = Visit(funcParameterTypes[i], arguments[i]);
+                if (argument != null) {
+                    expressionArguments.Add(argument);
+                }
+                else {
+                    throw new CompileException("Func parameter type mismatch");
+                }
+            }
+
+            outputType = funcParameterTypes[funcParameterTypes.Length - 1];
+            return expressionArguments;
+        }
+
+        private List<Expression> VisitMethodArguments(Type originType, string methodName, List<ASTNode> arguments, out MethodInfo methodInfo) {
+            List<MethodInfo> infos = ReflectionUtil.GetMethodsWithName(originType, methodName);
+            List<Expression> expressionArguments = new List<Expression>();
+
+            for (int i = 0; i < infos.Count; i++) {
+                ParameterInfo[] parameterInfos = infos[i].GetParameters();
+                if (parameterInfos.Length != arguments.Count) {
+                    continue;
+                }
+
+                expressionArguments.Clear();
+                bool valid = true;
+                for (int j = 0; j < parameterInfos.Length; j++) {
+                    Expression argument = Visit(parameterInfos[j].ParameterType, arguments[j]);
+                    if (argument != null) {
+                        expressionArguments.Add(argument);
+                    }
+                    else {
+                        valid = false;
+                        break;
+                    }
+                }
+
+                if (valid) {
+                    methodInfo = infos[i];
+                    return expressionArguments;
+                }
+            }
+
+            methodInfo = null;
+            return null;
+        }
+
+        private Expression VisitAccessExpression(MemberAccessExpressionNode node) {
+            if (node.identifier[0] == '$') {
+                return VisitAliasAccessExpression(node);
+            }
+
+            LightList<AccessInfo> accessInfos = GetAccessInfoList(rootType, node);
+
+            if (accessInfos == null) {
+                Type staticType = TypeProcessor.ResolveType(rootType, node.identifier, namespaces);
+                if (staticType == null) {
                     throw new CompileException("Can't resolve type for " + node.identifier);
                 }
 
-                return VisitStaticAccessExpression(headType, node);
+                return VisitStaticAccessExpression(staticType, node);
             }
 
-            LightList<Type> inputTypes = GetInputTypes(headType, node);
-            Type outputType = inputTypes[inputTypes.Length - 1];
-            FieldInfo rootFieldInfo = ReflectionUtil.GetInstanceOrStaticFieldInfo(rootType, node.identifier);
+            AccessExpressionPart retn = MakeAccessPartFromInfo(accessInfos, 0);
 
-            object head = null;
-            object p = MakeAccessPart(0, node.parts, outputType, inputTypes);
-
-            LightListPool<Type>.Release(ref inputTypes);
-
-            if (rootFieldInfo != null) {
-                head = ReflectionUtil.CreateGenericInstanceFromOpenType(
-                    typeof(AccessExpressionPart_FieldProperty_Field<,,>),
-                    new GenericArguments(outputType, rootType, headType),
-                    new ConstructorArguments(rootFieldInfo, p)
-                );
-            }
-            else {
-                PropertyInfo rootPropertyInfo = ReflectionUtil.GetInstanceOrStaticPropertyInfo(rootType, node.identifier);
-                if (rootPropertyInfo != null) {
-                    head = ReflectionUtil.CreateGenericInstanceFromOpenType(
-                        typeof(AccessExpressionPart_FieldProperty_Property<,,>),
-                        new GenericArguments(outputType, rootType, headType),
-                        new ConstructorArguments(rootPropertyInfo, p)
-                    );
-                }
-            }
-
-            if (head == null) {
-                throw new CompileException($"{node.identifier} is not a field or property on {rootType}");
-            }
-
-            Expression expr = (Expression) ReflectionUtil.CreateGenericInstanceFromOpenType(
+            return (Expression) ReflectionUtil.CreateGenericInstanceFromOpenType(
                 typeof(AccessExpression<,>),
-                new GenericArguments(outputType, rootType),
-                new ConstructorArguments(head)
+                new GenericArguments(retn.YieldedType, rootType),
+                new ConstructorArguments(retn)
             );
-
-            return expr;
         }
 
-        private object MakeAccessPart(int u, List<ASTNode> parts, Type outputType, LightList<Type> inputTypes) {
-            object retn = null;
+        private AccessExpressionPart MakeAccessPartFromInfo(LightList<AccessInfo> infos, int index) {
+            if (index == infos.Count) {
+                return null;
+            }
 
-            retn = MakeFieldAccessor(u, parts, outputType, inputTypes);
-            retn = retn ?? MakePropertyAccessor(u, parts, outputType, inputTypes);
-            retn = retn ?? MakeIndexAccessor(u, parts, outputType, inputTypes);
-            retn = retn ?? MakeMethodAccessor(u, parts, outputType, inputTypes);
+            Type finalOutputType = infos[infos.Count - 1].outputType;
 
-            return retn;
-        }
+            AccessExpressionPart next = MakeAccessPartFromInfo(infos, index + 1);
+            AccessInfo info = infos[index];
 
-        private object MakeMethodAccessor(int u, List<ASTNode> parts, Type outputType, LightList<Type> inputTypes) {
+            switch (info.type) {
+                case AccessInfoType.Invalid:
+                    return null;
+
+                case AccessInfoType.MethodInvoke:
+                    Expression expr = MethodExpressionFactory.CreateMethodExpression(info.methodInfo, info.arguments);
+                    return (AccessExpressionPart) ReflectionUtil.CreateGenericInstanceFromOpenType(
+                        typeof(AccessExpressionPart_Method<,,>),
+                        new GenericArguments(finalOutputType, info.inputType, info.outputType),
+                        new ConstructorArguments(expr, next)
+                    );
+
+                case AccessInfoType.FuncInvoke:
+                    Type t0 = info.arguments.Count > 0 ? info.arguments[0].YieldedType : typeof(Terminal);
+                    Type t1 = info.arguments.Count > 1 ? info.arguments[1].YieldedType : typeof(Terminal);
+                    Type t2 = info.arguments.Count > 2 ? info.arguments[2].YieldedType : typeof(Terminal);
+                    Type t3 = info.arguments.Count > 3 ? info.arguments[3].YieldedType : typeof(Terminal);
+                    return (AccessExpressionPart) ReflectionUtil.CreateGenericInstanceFromOpenType(
+                        typeof(AccessExpressionPart_Func<,,,,,,>),
+                        new[] {finalOutputType, info.inputType, info.outputType, t0, t1, t2, t3},
+                        new ConstructorArguments(info.arguments, next)
+                    );
+
+                case AccessInfoType.ActionInvoke:
+                    break;
+
+                case AccessInfoType.Field:
+                    return (AccessExpressionPart) ReflectionUtil.CreateGenericInstanceFromOpenType(
+                        typeof(AccessExpressionPart_FieldProperty_Field<,,>),
+                        new GenericArguments(finalOutputType, info.inputType, info.outputType),
+                        new ConstructorArguments(info.fieldInfo, next)
+                    );
+
+                case AccessInfoType.Property:
+                    return (AccessExpressionPart) ReflectionUtil.CreateGenericInstanceFromOpenType(
+                        typeof(AccessExpressionPart_FieldProperty_Property<,,>),
+                        new GenericArguments(finalOutputType, info.inputType, info.outputType),
+                        new ConstructorArguments(info.propertyInfo, next)
+                    );
+
+                case AccessInfoType.Index:
+                    return (AccessExpressionPart) ReflectionUtil.CreateGenericInstanceFromOpenType(
+                        typeof(AccessExpressionPart_Index<,,>),
+                        new GenericArguments(finalOutputType, info.inputType, info.outputType),
+                        new ConstructorArguments(next, info.arguments[0])
+                    );
+
+                default:
+                    throw new ArgumentOutOfRangeException();
+            }
+
             return null;
         }
 
 
-        private object MakeIndexAccessor(int u, List<ASTNode> parts, Type outputType, LightList<Type> inputTypes) {
+        private AccessExpressionPart MakeAccessPart(int u, List<ASTNode> parts, Type outputType, LightList<Type> inputTypes) {
+            AccessExpressionPart retn = null;
+
+            retn = MakeFieldAccessor(u, parts, outputType, inputTypes); // todo -- field could be a func / action 
+            retn = retn ?? MakePropertyAccessor(u, parts, outputType, inputTypes);
+            retn = retn ?? MakeMethodAccessor(u, parts, outputType, inputTypes);
+//            retn = retn ?? MakeFuncActionAccessor(u, parts, outputType, inputTypes);
+            retn = retn ?? MakeIndexAccessor(u, parts, outputType, inputTypes);
+
+            return retn;
+        }
+
+        private AccessExpressionPart MakeMethodAccessor(int u, List<ASTNode> parts, Type outputType, LightList<Type> inputTypes) {
+            if (u >= parts.Count - 1) {
+                return null;
+            }
+
+            DotAccessNode dotAccessNode = parts[u] as DotAccessNode;
+            if (dotAccessNode == null) {
+                return null;
+            }
+            // next needs to be an invoke node
+
+            if ((parts[u + 1] is InvokeNode invokeNode)) {
+                // find method info for type and make method
+                MethodInfo info = ReflectionUtil.GetMethodInfo(inputTypes[u], dotAccessNode.propertyName);
+            }
+
+            return null;
+        }
+
+        private AccessExpressionPart MakeIndexAccessor(int u, List<ASTNode> parts, Type outputType, LightList<Type> inputTypes) {
             if (u == parts.Count || parts[u].type != ASTNodeType.IndexExpression) {
                 return null;
             }
 
-            object next = MakeAccessPart(u + 1, parts, outputType, inputTypes);
+            AccessExpressionPart next = MakeAccessPart(u + 1, parts, outputType, inputTypes);
             // todo -- this should handle dictionary indexing as well, pick up target type 
 
-            IndexExpressionNode indexNode = (IndexExpressionNode) parts[u];
+            IndexNode indexNode = (IndexNode) parts[u];
             Expression indexExpr = Visit(typeof(int), indexNode.expression);
 
-            return ReflectionUtil.CreateGenericInstanceFromOpenType(
+            return (AccessExpressionPart) ReflectionUtil.CreateGenericInstanceFromOpenType(
                 typeof(AccessExpressionPart_Index<,,>),
                 new GenericArguments(outputType, inputTypes[u], inputTypes[u + 1]),
                 new ConstructorArguments(next, indexExpr)
             );
         }
 
-        private object MakePropertyAccessor(int u, List<ASTNode> parts, Type outputType, LightList<Type> inputTypes) {
+        private AccessExpressionPart MakePropertyAccessor(int u, List<ASTNode> parts, Type outputType, LightList<Type> inputTypes) {
             if (u == parts.Count || parts[u].type != ASTNodeType.DotAccess) {
                 return null;
             }
@@ -326,8 +604,8 @@ namespace UIForia.Compilers {
 
             PropertyInfo propertyInfo = ReflectionUtil.GetInstanceOrStaticPropertyInfo(inputTypes[u], propertyName);
             if (propertyInfo != null) {
-                object next = MakeAccessPart(u + 1, parts, outputType, inputTypes);
-                return ReflectionUtil.CreateGenericInstanceFromOpenType(
+                AccessExpressionPart next = MakeAccessPart(u + 1, parts, outputType, inputTypes);
+                return (AccessExpressionPart) ReflectionUtil.CreateGenericInstanceFromOpenType(
                     typeof(AccessExpressionPart_FieldProperty_Property<,,>),
                     new GenericArguments(outputType, inputTypes[u], inputTypes[u + 1]),
                     new ConstructorArguments(propertyInfo, next)
@@ -337,15 +615,15 @@ namespace UIForia.Compilers {
             return null;
         }
 
-        private object MakeFieldAccessor(int u, List<ASTNode> parts, Type outputType, LightList<Type> inputTypes) {
+        private AccessExpressionPart MakeFieldAccessor(int u, List<ASTNode> parts, Type outputType, LightList<Type> inputTypes) {
             if (u == parts.Count || parts[u].type != ASTNodeType.DotAccess) {
                 return null;
             }
 
             FieldInfo fieldInfo = ReflectionUtil.GetInstanceOrStaticFieldInfo(inputTypes[u], ((DotAccessNode) parts[u]).propertyName);
             if (fieldInfo != null) {
-                object next = MakeAccessPart(u + 1, parts, outputType, inputTypes);
-                return ReflectionUtil.CreateGenericInstanceFromOpenType(
+                AccessExpressionPart next = MakeAccessPart(u + 1, parts, outputType, inputTypes);
+                return (AccessExpressionPart) ReflectionUtil.CreateGenericInstanceFromOpenType(
                     typeof(AccessExpressionPart_FieldProperty_Field<,,>),
                     new GenericArguments(outputType, inputTypes[u], inputTypes[u + 1]),
                     new ConstructorArguments(fieldInfo, next)
@@ -942,179 +1220,6 @@ namespace UIForia.Compilers {
             }
 
             return null;
-        }
-
-
-    }
-    
-    public class AccessExpression_Static<T, U> : Expression<T> {
-
-        public override Type YieldedType => typeof(T);
-
-        public AccessExpressionPart<T, U> headExpression;
-
-        public AccessExpression_Static(AccessExpressionPart<T, U> headExpression) {
-            this.headExpression = headExpression;
-        }
-
-        public override T Evaluate(ExpressionContext context) {
-            return headExpression.Execute(default(U), context);
-        }
-
-        public override bool IsConstant() {
-            return false;
-        }
-
-    }
-
-    public class AccessExpression<T, U> : Expression<T> {
-
-        public override Type YieldedType => typeof(T);
-
-        public AccessExpressionPart<T, U> headExpression;
-
-        public AccessExpression(AccessExpressionPart<T, U> headExpression) {
-            this.headExpression = headExpression;
-        }
-
-        public override T Evaluate(ExpressionContext context) {
-            return headExpression.Execute((U) context.rootObject, context);
-        }
-
-        public override bool IsConstant() {
-            return false;
-        }
-
-    }
-
-    public abstract class AccessExpressionPart<TReturn, TInput> {
-
-        public abstract TReturn Execute(TInput input, ExpressionContext context);
-
-    }
-
-    public class AccessExpressionPart_Index<TReturn, TInput, TNext> : AccessExpressionPart<TReturn, TInput> {
-
-        protected readonly Expression<int> expression;
-        protected readonly AccessExpressionPart<TReturn, TNext> next;
-
-        public AccessExpressionPart_Index(AccessExpressionPart<TReturn, TNext> next, Expression<int> expression) {
-            this.next = next;
-            this.expression = expression;
-        }
-
-        public override TReturn Execute(TInput previous, ExpressionContext context) {
-            if (next == null) {
-                if (previous == null) {
-                    return default;
-                }
-
-                int index = expression.Evaluate(context);
-                IList<TReturn> target = (IList<TReturn>) previous;
-                if (index < target.Count) {
-                    return target[index];
-                }
-
-                return default;
-            }
-            else {
-                if (previous == null) {
-                    return default;
-                }
-
-                int index = expression.Evaluate(context);
-                IList<TNext> target = (IList<TNext>) previous;
-                if (index < target.Count) {
-                    return next.Execute(target[index], context);
-                }
-
-                return default;
-            }
-        }
-
-    }
-
-    public class AccessExpressionPart_FieldProperty<TReturn, TInput, TNext> : AccessExpressionPart<TReturn, TInput> {
-
-        protected Func<TInput, TNext> getter;
-        protected Func<TInput, TReturn> terminalGetter;
-        protected readonly AccessExpressionPart<TReturn, TNext> next;
-        protected readonly bool previousCanBeNull;
-        protected bool isStatic;
-
-        protected AccessExpressionPart_FieldProperty(AccessExpressionPart<TReturn, TNext> next) {
-            this.next = next;
-            this.previousCanBeNull = typeof(TInput).IsClass;
-        }
-
-        public override TReturn Execute(TInput previous, ExpressionContext context) {
-            if (next != null) {
-                TNext value = getter(previous);
-                if (!isStatic && previousCanBeNull && ReferenceEquals(value, null)) {
-                    return default;
-                }
-
-                return next.Execute(value, context);
-            }
-
-            // check should avoid boxing 
-            if (!isStatic && previousCanBeNull && ReferenceEquals(previous, null)) {
-                return default;
-            }
-
-            return terminalGetter(previous);
-        } 
-
-    }
-
-    public class AccessExpressionPart_FieldProperty_Property<TReturn, TInput, TNext> : AccessExpressionPart_FieldProperty<TReturn, TInput, TNext> {
-
-        public AccessExpressionPart_FieldProperty_Property(PropertyInfo propertyInfo, AccessExpressionPart<TReturn, TNext> next) : base(next) {
-            if (propertyInfo.GetGetMethod().IsStatic) {
-                isStatic = true;
-                if (next != null) {
-                    Func<TNext> x = (Func<TNext>) ReflectionUtil.CreateStaticPropertyGetter(typeof(TInput), propertyInfo.Name);
-                    getter = (input) => x();
-                }
-                else {
-                    Func<TReturn> x = (Func<TReturn>) ReflectionUtil.CreateStaticPropertyGetter(typeof(TInput), propertyInfo.Name);
-                    terminalGetter = (input) => x();
-                }
-            }
-            else {
-                if (next != null) {
-                    getter = (Func<TInput, TNext>) ReflectionUtil.GetLinqPropertyAccessors(typeof(TInput), propertyInfo).getter;
-                }
-                else {
-                    terminalGetter = (Func<TInput, TReturn>) ReflectionUtil.GetLinqPropertyAccessors(typeof(TInput), propertyInfo).getter;
-                }
-            }
-        }
-
-    }
-
-    public class AccessExpressionPart_FieldProperty_Field<TReturn, TInput, TNext> : AccessExpressionPart_FieldProperty<TReturn, TInput, TNext> {
-
-        public AccessExpressionPart_FieldProperty_Field(FieldInfo fieldInfo, AccessExpressionPart<TReturn, TNext> next) : base(next) {
-            if (fieldInfo.IsStatic) {
-                isStatic = true;
-                if (next != null) {
-                    Func<TNext> x = (Func<TNext>) ReflectionUtil.CreateStaticFieldGetter(typeof(TInput), fieldInfo.Name);
-                    getter = (input) => x();
-                }
-                else {
-                    Func<TReturn> x = (Func<TReturn>) ReflectionUtil.CreateStaticFieldGetter(typeof(TInput), fieldInfo.Name);
-                    terminalGetter = (input) => x();
-                }
-            }
-            else {
-                if (next != null) {
-                    getter = (Func<TInput, TNext>) ReflectionUtil.GetLinqFieldAccessors(typeof(TInput), fieldInfo).getter;
-                }
-                else {
-                    terminalGetter = (Func<TInput, TReturn>) ReflectionUtil.GetLinqFieldAccessors(typeof(TInput), fieldInfo).getter;
-                }
-            }
         }
 
     }

@@ -128,7 +128,9 @@ namespace UIForia.Compilers {
 
         public StyleBindingCompiler() {
             this.compiler = new ExpressionCompiler2();
-            compiler.AddAliasResolver(new MethodResolver("$contentSize", typeof(StyleBindingCompiler).GetMethod(nameof(ContentMeasurement), new[] {typeof(float)})));
+            compiler.AddAliasResolver(new MethodResolver("$contentSize", typeof(StyleBindingCompiler).GetMethod(nameof(ContentMeasurement), new[] {
+                typeof(float)
+            })));
             compiler.AddAliasResolver(new MethodResolver("$px", typeof(StyleBindingCompiler).GetMethod(nameof(PixelLength), new[] {typeof(float)})));
         }
 

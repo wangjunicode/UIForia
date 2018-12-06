@@ -3,12 +3,26 @@ using System.Collections.Generic;
 using NUnit.Framework;
 using UIForia;
 using UIForia.Compilers;
+using UIForia.Exceptions;
 using UIForia.Parsing;
 using UnityEngine;
 
 [TestFixture]
 public class ExpressionCompilerTests2 {
 
+    public class Thing {
+
+        public float value;
+
+        public Thing(float value) {
+            this.value = value;
+        }
+
+        public override string ToString() {
+            return value.ToString();
+        }
+
+    }
     private class TestType0 {
 
         public ConvertThing convertThing;
@@ -17,7 +31,39 @@ public class ExpressionCompilerTests2 {
         public object obj1;
         public object obj2;
         public List<Vector3> vectors;
+        public List<Thing> things;
         public float[] floats;
+
+        public string StringValueProp => value;
+        
+        public string GetValue() {
+            return value;
+        }
+
+        public string GetValue(string val) {
+            return value + val;
+        }
+
+        public string GetValue(string val, string val1) {
+            return value + val + val1;
+        }
+
+        public string GetValue(string val, string val1, string val2) {
+            return value + val + val1 + val2;
+        }
+
+
+        public string GetValue(string val, string val1, string val2, string val3) {
+            return value + val + val1 + val2 + val3;
+        }
+
+        public string GetValue(string val, string val1, string val2, string val3, string val4) {
+            return value + val + val1 + val2 + val3 + val4;
+        }
+
+        public Func<string, string> GetSomeFunc() {
+            return (string str) => str;
+        }
 
         public ConvertThing ConvertThingProperty {
             get => convertThing;
@@ -96,7 +142,7 @@ public class ExpressionCompilerTests2 {
             this.value = value;
         }
 
-        public override Expression CompileAsValueExpression2(IdentifierNode node, Func<ASTNode, Expression> visit) {
+        public override Expression CompileAsValueExpression2(IdentifierNode node, Func<Type, ASTNode, Expression> visit) {
             return new ConstantExpression<T>(value);
         }
 
@@ -166,10 +212,11 @@ public class ExpressionCompilerTests2 {
         public static string operator !(ConvertThing a) {
             return a.intVal + a.stringVal;
         }
-        
+
         public static float operator -(ConvertThing a) {
             return -a.floatVal;
         }
+
     }
 
     [Test]
@@ -479,31 +526,31 @@ public class ExpressionCompilerTests2 {
         Assert.IsInstanceOf<OperatorExpression_AndOrBool>(expression);
         Assert.AreEqual(true, expression.Evaluate(ctx));
 
-        expression = compiler.Compile<bool>(typeof(TestType0), "{true && false}");
+        expression = compiler.Compile<bool>(typeof(TestType0), "true && false");
         Assert.IsInstanceOf<OperatorExpression_AndOrBool>(expression);
         Assert.AreEqual(false, expression.Evaluate(ctx));
 
-        expression = compiler.Compile<bool>(typeof(TestType0), "{false && true}");
+        expression = compiler.Compile<bool>(typeof(TestType0), "false && true");
         Assert.IsInstanceOf<OperatorExpression_AndOrBool>(expression);
         Assert.AreEqual(false, expression.Evaluate(ctx));
 
-        expression = compiler.Compile<bool>(typeof(TestType0), "{false && false}");
+        expression = compiler.Compile<bool>(typeof(TestType0), "false && false");
         Assert.IsInstanceOf<OperatorExpression_AndOrBool>(expression);
         Assert.AreEqual(false, expression.Evaluate(ctx));
 
-        expression = compiler.Compile<bool>(typeof(TestType0), "{true || true}");
+        expression = compiler.Compile<bool>(typeof(TestType0), "true || true");
         Assert.IsInstanceOf<OperatorExpression_AndOrBool>(expression);
         Assert.AreEqual(true, expression.Evaluate(ctx));
 
-        expression = compiler.Compile<bool>(typeof(TestType0), "{true || false}");
+        expression = compiler.Compile<bool>(typeof(TestType0), "true || false");
         Assert.IsInstanceOf<OperatorExpression_AndOrBool>(expression);
         Assert.AreEqual(true, expression.Evaluate(ctx));
 
-        expression = compiler.Compile<bool>(typeof(TestType0), "{false || true}");
+        expression = compiler.Compile<bool>(typeof(TestType0), "false || true");
         Assert.IsInstanceOf<OperatorExpression_AndOrBool>(expression);
         Assert.AreEqual(true, expression.Evaluate(ctx));
 
-        expression = compiler.Compile<bool>(typeof(TestType0), "{false || false}");
+        expression = compiler.Compile<bool>(typeof(TestType0), "false || false");
         Assert.IsInstanceOf<OperatorExpression_AndOrBool>(expression);
         Assert.AreEqual(false, expression.Evaluate(ctx));
     }
@@ -514,42 +561,42 @@ public class ExpressionCompilerTests2 {
         target.obj1 = new TestType0();
         ExpressionContext ctx = new ExpressionContext(target);
         ExpressionCompiler2 compiler = new ExpressionCompiler2();
-        Expression<bool> expression = compiler.Compile<bool>(typeof(TestType0), "{obj1 && true}");
+        Expression<bool> expression = compiler.Compile<bool>(typeof(TestType0), "obj1 && true");
         Assert.IsInstanceOf<OperatorExpression_AndOrObjectBool<object>>(expression);
         Assert.AreEqual(true, expression.Evaluate(ctx));
 
         target.obj1 = new TestType0();
-        expression = compiler.Compile<bool>(typeof(TestType0), "{obj1 && false}");
+        expression = compiler.Compile<bool>(typeof(TestType0), "obj1 && false");
         Assert.IsInstanceOf<OperatorExpression_AndOrObjectBool<object>>(expression);
         Assert.AreEqual(false, expression.Evaluate(ctx));
 
         target.obj1 = null;
-        expression = compiler.Compile<bool>(typeof(TestType0), "{obj1 && true}");
+        expression = compiler.Compile<bool>(typeof(TestType0), "obj1 && true");
         Assert.IsInstanceOf<OperatorExpression_AndOrObjectBool<object>>(expression);
         Assert.AreEqual(false, expression.Evaluate(ctx));
 
         target.obj1 = null;
-        expression = compiler.Compile<bool>(typeof(TestType0), "{obj1 && false}");
+        expression = compiler.Compile<bool>(typeof(TestType0), "obj1 && false");
         Assert.IsInstanceOf<OperatorExpression_AndOrObjectBool<object>>(expression);
         Assert.AreEqual(false, expression.Evaluate(ctx));
 
         target.obj1 = new TestType0();
-        expression = compiler.Compile<bool>(typeof(TestType0), "{obj1 || true}");
+        expression = compiler.Compile<bool>(typeof(TestType0), "obj1 || true");
         Assert.IsInstanceOf<OperatorExpression_AndOrObjectBool<object>>(expression);
         Assert.AreEqual(true, expression.Evaluate(ctx));
 
         target.obj1 = new TestType0();
-        expression = compiler.Compile<bool>(typeof(TestType0), "{obj1 || false}");
+        expression = compiler.Compile<bool>(typeof(TestType0), "obj1 || false");
         Assert.IsInstanceOf<OperatorExpression_AndOrObjectBool<object>>(expression);
         Assert.AreEqual(true, expression.Evaluate(ctx));
 
         target.obj1 = null;
-        expression = compiler.Compile<bool>(typeof(TestType0), "{obj1 || true}");
+        expression = compiler.Compile<bool>(typeof(TestType0), "obj1 || true");
         Assert.IsInstanceOf<OperatorExpression_AndOrObjectBool<object>>(expression);
         Assert.AreEqual(true, expression.Evaluate(ctx));
 
         target.obj1 = null;
-        expression = compiler.Compile<bool>(typeof(TestType0), "{obj1 || false}");
+        expression = compiler.Compile<bool>(typeof(TestType0), "obj1 || false");
         Assert.IsInstanceOf<OperatorExpression_AndOrObjectBool<object>>(expression);
         Assert.AreEqual(false, expression.Evaluate(ctx));
     }
@@ -565,37 +612,37 @@ public class ExpressionCompilerTests2 {
         Assert.AreEqual(true, expression.Evaluate(ctx));
 
         target.obj1 = null;
-        expression = compiler.Compile<bool>(typeof(TestType0), ("{true && obj1}"));
+        expression = compiler.Compile<bool>(typeof(TestType0), ("true && obj1"));
         Assert.IsInstanceOf<OperatorExpression_AndOrBoolObject<object>>(expression);
         Assert.AreEqual(false, expression.Evaluate(ctx));
 
         target.obj1 = new TestType0();
-        expression = compiler.Compile<bool>(typeof(TestType0), ("{false && obj1}"));
+        expression = compiler.Compile<bool>(typeof(TestType0), ("false && obj1"));
         Assert.IsInstanceOf<OperatorExpression_AndOrBoolObject<object>>(expression);
         Assert.AreEqual(false, expression.Evaluate(ctx));
 
         target.obj1 = null;
-        expression = compiler.Compile<bool>(typeof(TestType0), ("{false && obj1}"));
+        expression = compiler.Compile<bool>(typeof(TestType0), ("false && obj1"));
         Assert.IsInstanceOf<OperatorExpression_AndOrBoolObject<object>>(expression);
         Assert.AreEqual(false, expression.Evaluate(ctx));
 
         target.obj1 = new TestType0();
-        expression = compiler.Compile<bool>(typeof(TestType0), ("{true || obj1}"));
+        expression = compiler.Compile<bool>(typeof(TestType0), ("true || obj1"));
         Assert.IsInstanceOf<OperatorExpression_AndOrBoolObject<object>>(expression);
         Assert.AreEqual(true, expression.Evaluate(ctx));
 
         target.obj1 = null;
-        expression = compiler.Compile<bool>(typeof(TestType0), ("{true || obj1}"));
+        expression = compiler.Compile<bool>(typeof(TestType0), ("true || obj1"));
         Assert.IsInstanceOf<OperatorExpression_AndOrBoolObject<object>>(expression);
         Assert.AreEqual(true, expression.Evaluate(ctx));
 
         target.obj1 = new TestType0();
-        expression = compiler.Compile<bool>(typeof(TestType0), ("{false || obj1}"));
+        expression = compiler.Compile<bool>(typeof(TestType0), ("false || obj1"));
         Assert.IsInstanceOf<OperatorExpression_AndOrBoolObject<object>>(expression);
         Assert.AreEqual(true, expression.Evaluate(ctx));
 
         target.obj1 = null;
-        expression = compiler.Compile<bool>(typeof(TestType0), ("{false || obj1}"));
+        expression = compiler.Compile<bool>(typeof(TestType0), ("false || obj1"));
         Assert.IsInstanceOf<OperatorExpression_AndOrBoolObject<object>>(expression);
         Assert.AreEqual(false, expression.Evaluate(ctx));
     }
@@ -613,54 +660,54 @@ public class ExpressionCompilerTests2 {
 
         target.obj1 = new TestType0();
         target.obj2 = null;
-        expression = compiler.Compile<bool>(typeof(TestType0),("{obj1 && obj2}"));
+        expression = compiler.Compile<bool>(typeof(TestType0), ("obj1 && obj2"));
         Assert.IsInstanceOf<OperatorExpression_AndOrObject<object, object>>(expression);
         Assert.AreEqual(false, expression.Evaluate(ctx));
 
         target.obj1 = null;
         target.obj2 = new TestType0();
-        expression = compiler.Compile<bool>(typeof(TestType0),("{obj1 && obj2}"));
+        expression = compiler.Compile<bool>(typeof(TestType0), ("obj1 && obj2"));
         Assert.IsInstanceOf<OperatorExpression_AndOrObject<object, object>>(expression);
         Assert.AreEqual(false, expression.Evaluate(ctx));
 
         target.obj1 = null;
         target.obj2 = null;
-        expression = compiler.Compile<bool>(typeof(TestType0),("{obj1 && obj2}"));
+        expression = compiler.Compile<bool>(typeof(TestType0), ("obj1 && obj2"));
         Assert.IsInstanceOf<OperatorExpression_AndOrObject<object, object>>(expression);
         Assert.AreEqual(false, expression.Evaluate(ctx));
 
         target.obj1 = new TestType0();
         target.obj2 = new TestType0();
-        expression = compiler.Compile<bool>(typeof(TestType0),("{obj1 || obj2}"));
+        expression = compiler.Compile<bool>(typeof(TestType0), ("obj1 || obj2"));
         Assert.IsInstanceOf<OperatorExpression_AndOrObject<object, object>>(expression);
         Assert.AreEqual(true, expression.Evaluate(ctx));
 
         target.obj1 = new TestType0();
         target.obj2 = null;
-        expression = compiler.Compile<bool>(typeof(TestType0),("{obj1 || obj2}"));
+        expression = compiler.Compile<bool>(typeof(TestType0), ("obj1 || obj2"));
         Assert.IsInstanceOf<OperatorExpression_AndOrObject<object, object>>(expression);
         Assert.AreEqual(true, expression.Evaluate(ctx));
 
         target.obj1 = null;
         target.obj2 = new TestType0();
-        expression = compiler.Compile<bool>(typeof(TestType0),("{obj1 || obj2}"));
+        expression = compiler.Compile<bool>(typeof(TestType0), ("obj1 || obj2"));
         Assert.IsInstanceOf<OperatorExpression_AndOrObject<object, object>>(expression);
         Assert.AreEqual(true, expression.Evaluate(ctx));
 
         target.obj1 = null;
         target.obj2 = null;
-        expression = compiler.Compile<bool>(typeof(TestType0),("{obj1 || obj2}"));
+        expression = compiler.Compile<bool>(typeof(TestType0), ("obj1 || obj2"));
         Assert.IsInstanceOf<OperatorExpression_AndOrObject<object, object>>(expression);
         Assert.AreEqual(false, expression.Evaluate(ctx));
     }
 
 
-     [Test]
+    [Test]
     public void Compile_StringNotWithNull() {
         TestType0 target = new TestType0();
         ExpressionContext ctx = new ExpressionContext(target);
         ExpressionCompiler2 compiler = new ExpressionCompiler2();
-        Expression<bool> expression = compiler.Compile<bool>(typeof(TestType0), "{!value}");
+        Expression<bool> expression = compiler.Compile<bool>(typeof(TestType0), "!value");
         Assert.IsInstanceOf<UnaryExpression_StringBoolean>(expression);
         Assert.AreEqual(true, expression.Evaluate(ctx));
     }
@@ -671,7 +718,7 @@ public class ExpressionCompilerTests2 {
         target.value = string.Empty;
         ExpressionContext ctx = new ExpressionContext(target);
         ExpressionCompiler2 compiler = new ExpressionCompiler2();
-        Expression<bool> expression = compiler.Compile<bool>(typeof(TestType0), "{!value}");
+        Expression<bool> expression = compiler.Compile<bool>(typeof(TestType0), "!value");
         Assert.IsInstanceOf<UnaryExpression_StringBoolean>(expression);
         Assert.AreEqual(true, expression.Evaluate(ctx));
     }
@@ -682,7 +729,7 @@ public class ExpressionCompilerTests2 {
         target.value = "yup";
         ExpressionContext ctx = new ExpressionContext(target);
         ExpressionCompiler2 compiler = new ExpressionCompiler2();
-        Expression<bool> expression = compiler.Compile<bool>(typeof(TestType0), "{!value}");
+        Expression<bool> expression = compiler.Compile<bool>(typeof(TestType0), "!value");
         Assert.IsInstanceOf<UnaryExpression_StringBoolean>(expression);
         Assert.AreEqual(false, expression.Evaluate(ctx));
     }
@@ -708,7 +755,7 @@ public class ExpressionCompilerTests2 {
         Assert.IsInstanceOf<UnaryExpression_ObjectBoolean>(expression);
         Assert.AreEqual(false, expression.Evaluate(ctx));
     }
-    
+
     [Test]
     public void Compile_OverloadedNot() {
         TestType0 target = new TestType0();
@@ -728,11 +775,11 @@ public class ExpressionCompilerTests2 {
         Expression<float> expression = compiler.Compile<float>(typeof(TestType0), "-(5f)");
         Assert.IsInstanceOf<UnaryExpression_Minus_Float>(expression);
         Assert.AreEqual(-5f, expression.Evaluate(ctx));
-        
+
         Expression<double> expressionD = compiler.Compile<double>(typeof(TestType0), "-(5.0)");
         Assert.IsInstanceOf<UnaryExpression_Minus_Double>(expressionD);
         Assert.AreEqual(-5.0, expressionD.Evaluate(ctx));
-        
+
         Expression<int> expressionI = compiler.Compile<int>(typeof(TestType0), "-(5)");
         Assert.IsInstanceOf<UnaryExpression_Minus_Int>(expressionI);
         Assert.AreEqual(-5, expressionI.Evaluate(ctx));
@@ -757,7 +804,7 @@ public class ExpressionCompilerTests2 {
         Expression<float> expression = compiler.Compile<float>(typeof(TestType0), "convertThing.floatVal");
         Assert.AreEqual(5f, expression.Evaluate(ctx));
     }
-    
+
     [Test]
     public void Compile_AccessExpression_Property() {
         TestType0 target = new TestType0();
@@ -767,7 +814,7 @@ public class ExpressionCompilerTests2 {
         Expression<Vector3> expression = compiler.Compile<Vector3>(typeof(TestType0), "convertThing.vectorProp");
         Assert.AreEqual(new Vector3(5, 5, 5), expression.Evaluate(ctx));
     }
-    
+
     [Test]
     public void Compile_AccessExpression_PropertyHead() {
         TestType0 target = new TestType0();
@@ -777,7 +824,7 @@ public class ExpressionCompilerTests2 {
         Expression<float> expression = compiler.Compile<float>(typeof(TestType0), "ConvertThingProperty.vectorProp.x");
         Assert.AreEqual(5f, expression.Evaluate(ctx));
     }
-    
+
     [Test]
     public void Compile_AccessExpression_StaticField() {
         TestType0 target = new TestType0();
@@ -788,7 +835,7 @@ public class ExpressionCompilerTests2 {
         Expression<float> expression = compiler.Compile<float>(typeof(TestType0), "ConvertThingProperty.s_StaticVal");
         Assert.AreEqual(11f, expression.Evaluate(ctx));
     }
-    
+
     [Test]
     public void Compile_AccessExpression_StaticTypeRefProperty() {
         TestType0 target = new TestType0();
@@ -809,7 +856,7 @@ public class ExpressionCompilerTests2 {
         Expression<float> expression = compiler.Compile<float>(typeof(TestType0), "TestType1.s_FloatVal");
         Assert.AreEqual(6f, expression.Evaluate(ctx));
     }
-    
+
     [Test]
     public void Compile_AccessExpression_ListIndex() {
         TestType0 target = new TestType0();
@@ -821,7 +868,7 @@ public class ExpressionCompilerTests2 {
         Expression<Vector3> expression = compiler.Compile<Vector3>(typeof(TestType0), "vectors[1]");
         Assert.AreEqual(new Vector3(0, -1, 0), expression.Evaluate(ctx));
     }
-    
+
     [Test]
     public void Compile_AccessExpression_ArrayIndex() {
         TestType0 target = new TestType0();
@@ -833,7 +880,7 @@ public class ExpressionCompilerTests2 {
         Expression<float> expression = compiler.Compile<float>(typeof(TestType0), "floats[1]");
         Assert.AreEqual(12f, expression.Evaluate(ctx));
     }
-    
+
     [Test]
     public void Compile_AccessExpression_IndexList_Field() {
         TestType0 target = new TestType0();
@@ -845,7 +892,7 @@ public class ExpressionCompilerTests2 {
         Expression<float> expression = compiler.Compile<float>(typeof(TestType0), "vectors[1].y");
         Assert.AreEqual(-1f, expression.Evaluate(ctx));
     }
-    
+
     [Test]
     public void Compile_AccessExpression_IndexList_ExpressionIndex() {
         TestType0 target = new TestType0();
@@ -859,7 +906,7 @@ public class ExpressionCompilerTests2 {
         Expression<float> expression = compiler.Compile<float>(typeof(TestType0), "vectors[convertThing.intVal].x");
         Assert.AreEqual(1f, expression.Evaluate(ctx));
     }
-    
+
     [Test]
     public void Compile_AccessExpression_IndexList_ExpressionIndexOutOfBounds() {
         TestType0 target = new TestType0();
@@ -873,7 +920,7 @@ public class ExpressionCompilerTests2 {
         Expression<float> expression = compiler.Compile<float>(typeof(TestType0), "vectors[10].x");
         Assert.AreEqual(0f, expression.Evaluate(ctx));
     }
-    
+
     [Test]
     public void Compile_TernaryExpression_Literals() {
         TestType0 target = new TestType0();
@@ -890,9 +937,115 @@ public class ExpressionCompilerTests2 {
         target.value = "matt";
         ExpressionContext ctx = new ExpressionContext(target);
         ExpressionCompiler2 compiler = new ExpressionCompiler2();
-        Expression<int> expression = compiler.Compile<int>(typeof(TestType0), "{ value.Length > 2 ? 5 : 6}");
+        Expression<int> expression = compiler.Compile<int>(typeof(TestType0), " value.Length > 2 ? 5 : 6");
         Assert.IsInstanceOf<OperatorExpression_Ternary<int>>(expression);
         Assert.AreEqual(5, expression.Evaluate(ctx));
     }
+
+    [Test]
+    public void Compile_AccessExpression_Method0Args() {
+        TestType0 target = new TestType0();
+        target.value = "0";
+        ExpressionContext ctx = new ExpressionContext(target);
+        ExpressionCompiler2 compiler = new ExpressionCompiler2();
+        Expression<string> expression = compiler.Compile<string>(typeof(TestType0), "GetValue()");
+        Assert.IsInstanceOf<AccessExpression<string, TestType0>>(expression);
+        Assert.AreEqual("0", expression.Evaluate(ctx));
+    }
+
+    [Test]
+    public void Compile_AccessExpression_Method1Arg() {
+        TestType0 target = new TestType0();
+        target.value = "0";
+        ExpressionContext ctx = new ExpressionContext(target);
+        ExpressionCompiler2 compiler = new ExpressionCompiler2();
+        Expression<string> expression = compiler.Compile<string>(typeof(TestType0), "GetValue('1')");
+        Assert.IsInstanceOf<AccessExpression<string, TestType0>>(expression);
+        Assert.AreEqual("01", expression.Evaluate(ctx));
+    }
+
+    [Test]
+    public void Compile_AccessExpression_Method2Args() {
+        TestType0 target = new TestType0();
+        target.value = "0";
+        ExpressionContext ctx = new ExpressionContext(target);
+        ExpressionCompiler2 compiler = new ExpressionCompiler2();
+        Expression<string> expression = compiler.Compile<string>(typeof(TestType0), "GetValue('1', '2')");
+        Assert.IsInstanceOf<AccessExpression<string, TestType0>>(expression);
+        Assert.AreEqual("012", expression.Evaluate(ctx));
+    }
+
+    [Test]
+    public void Compile_AccessExpression_Method3Args() {
+        TestType0 target = new TestType0();
+        target.value = "0";
+        ExpressionContext ctx = new ExpressionContext(target);
+        ExpressionCompiler2 compiler = new ExpressionCompiler2();
+        Expression<string> expression = compiler.Compile<string>(typeof(TestType0), "GetValue('1', '2', '3')");
+        Assert.IsInstanceOf<AccessExpression<string, TestType0>>(expression);
+        Assert.AreEqual("0123", expression.Evaluate(ctx));
+    }
+
+    [Test]
+    public void Compile_AccessExpression_Method4Args() {
+        TestType0 target = new TestType0();
+        target.value = "0";
+        ExpressionContext ctx = new ExpressionContext(target);
+        ExpressionCompiler2 compiler = new ExpressionCompiler2();
+        Expression<string> expression = compiler.Compile<string>(typeof(TestType0), "GetValue('1', '2', '3', '4')");
+        Assert.IsInstanceOf<AccessExpression<string, TestType0>>(expression);
+        Assert.AreEqual("01234", expression.Evaluate(ctx));
+    }
+
+    [Test]
+    public void Compile_AccessExpression_Method5Args() {
+        CompileException ex = Assert.Throws<CompileException>(() => { new ExpressionCompiler2().Compile<string>(typeof(TestType0), "GetValue('1', '2', '3', '4', '5')"); });
+        Assert.AreEqual(CompileExceptions.TooManyArgumentsException("GetValue", 5).Message, ex.Message);
+    }
     
+    [Test]
+    public void Compile_AccessExpression_MethodChained() {
+        TestType0 target = new TestType0();
+        ExpressionContext ctx = new ExpressionContext(target);
+        ExpressionCompiler2 compiler = new ExpressionCompiler2();
+        Expression<string> expression = compiler.Compile<string>(typeof(TestType0), "GetSomeFunc()('funky')");
+        Assert.IsInstanceOf<AccessExpression<string, TestType0>>(expression);
+        Assert.AreEqual("funky", expression.Evaluate(ctx));
+    }
+    
+    [Test]
+    public void Compile_AccessExpression_MethodOnField() {
+        TestType0 target = new TestType0();
+        target.value = "matt";
+        ExpressionContext ctx = new ExpressionContext(target);
+        ExpressionCompiler2 compiler = new ExpressionCompiler2();
+        Expression<string> expression = compiler.Compile<string>(typeof(TestType0), "value.ToString()");
+        Assert.IsInstanceOf<AccessExpression<string, TestType0>>(expression);
+        Assert.AreEqual("matt", expression.Evaluate(ctx));
+    }
+
+    [Test]
+    public void Compile_AccessExpression_MethodOnProperty() {
+        TestType0 target = new TestType0();
+        target.value = "matt";
+        ExpressionContext ctx = new ExpressionContext(target);
+        ExpressionCompiler2 compiler = new ExpressionCompiler2();
+        Expression<string> expression = compiler.Compile<string>(typeof(TestType0), "StringValueProp.ToString()");
+        Assert.IsInstanceOf<AccessExpression<string, TestType0>>(expression);
+        Assert.AreEqual("matt", expression.Evaluate(ctx));
+    }
+    
+    [Test]
+    public void Compile_AccessExpression_MethodOnIndex() {
+        TestType0 target = new TestType0();
+        target.things = new List<Thing>();
+        target.things.Add(new Thing(5));
+        target.things.Add(new Thing(6));
+        ExpressionContext ctx = new ExpressionContext(target);
+        ExpressionCompiler2 compiler = new ExpressionCompiler2();
+        Expression<string> expression = compiler.Compile<string>(typeof(TestType0), "things[1].ToString()");
+        Assert.IsInstanceOf<AccessExpression<string, TestType0>>(expression);
+        Assert.AreEqual((6f).ToString(), expression.Evaluate(ctx));
+    }
+
 }

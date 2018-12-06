@@ -11,10 +11,10 @@ namespace UIForia {
 
         public MethodCallExpression_InstanceVoid(MethodInfo methodInfo, Expression[] argumentExpressions) {
             this.method = (Action<T>) ReflectionUtil.GetDelegate(typeof(Action<T>), methodInfo);
-        }   
+        }
 
         public override Terminal Evaluate(ExpressionContext context) {
-            method((T) context.rootObject);
+            method((T) context.aux);
             return null;
         }
 
@@ -36,7 +36,7 @@ namespace UIForia {
         }
 
         public override Terminal Evaluate(ExpressionContext context) {
-            method((T) context.rootObject, argument0.Evaluate(context));
+            method((T) context.aux, argument0.Evaluate(context));
             return null;
         }
 
@@ -60,7 +60,7 @@ namespace UIForia {
         }
 
         public override Terminal Evaluate(ExpressionContext context) {
-            method((T) context.rootObject, argument0.Evaluate(context), argument1.Evaluate(context));
+            method((T) context.aux, argument0.Evaluate(context), argument1.Evaluate(context));
             return null;
         }
 
@@ -84,9 +84,9 @@ namespace UIForia {
             this.argument1 = (Expression<V>) argumentExpressions[1];
             this.argument2 = (Expression<W>) argumentExpressions[2];
         }
-      
+
         public override Terminal Evaluate(ExpressionContext context) {
-            method((T) context.rootObject,
+            method((T) context.aux,
                 argument0.Evaluate(context),
                 argument1.Evaluate(context),
                 argument2.Evaluate(context)
@@ -118,7 +118,7 @@ namespace UIForia {
         }
 
         public override Terminal Evaluate(ExpressionContext context) {
-            method((T) context.rootObject,
+            method((T) context.aux,
                 argument0.Evaluate(context),
                 argument1.Evaluate(context),
                 argument2.Evaluate(context),
@@ -132,6 +132,8 @@ namespace UIForia {
         }
 
     }
+
+
     // used for methods with 0 arguments, U = context type, T = return type
     public class MethodCallExpression_Instance<U, T> : Expression<T> {
 
@@ -147,9 +149,9 @@ namespace UIForia {
         }
 
         public override Type YieldedType => typeof(T);
-       
+
         public override T Evaluate(ExpressionContext context) {
-            return method((U) context.rootObject);
+            return method((U) context.aux);
         }
 
         public override bool IsConstant() {
@@ -179,7 +181,7 @@ namespace UIForia {
 
         public override T Evaluate(ExpressionContext context) {
             return method(
-                (U) context.rootObject,
+                (U) context.aux,
                 argument0.Evaluate(context)
             );
         }
@@ -213,7 +215,7 @@ namespace UIForia {
 
         public override T Evaluate(ExpressionContext context) {
             return method(
-                (U) context.rootObject,
+                (U) context.aux,
                 argument0.Evaluate(context),
                 argument1.Evaluate(context)
             );
@@ -251,7 +253,7 @@ namespace UIForia {
 
         public override T Evaluate(ExpressionContext context) {
             return method(
-                (U) context.rootObject,
+                (U) context.aux,
                 argument0.Evaluate(context),
                 argument1.Evaluate(context),
                 argument2.Evaluate(context)
@@ -294,7 +296,7 @@ namespace UIForia {
 
         public override T Evaluate(ExpressionContext context) {
             return method(
-                (U) context.rootObject,
+                (U) context.aux,
                 argument0.Evaluate(context),
                 argument1.Evaluate(context),
                 argument2.Evaluate(context),

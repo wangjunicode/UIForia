@@ -17,7 +17,8 @@ namespace UIForia {
 
         public object rootObject;
         public object currentObject;
-        
+        public object aux;
+
 //        private Dictionary<string, List<ValueTuple<Type, IList>>> aliasMap;
 //
 //        public IExpressionContextProvider rootContext;
@@ -26,6 +27,7 @@ namespace UIForia {
         public ExpressionContext(object rootObject) {
             this.rootObject = rootObject;
             this.currentObject = rootObject;
+            this.aux = rootObject;
         }
 
 //        public void SetContextValue<T>(string alias, T value) {

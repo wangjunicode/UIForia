@@ -10,9 +10,9 @@ namespace UIForia.Compilers {
 
         private static readonly MouseEventAliasExpression s_Expression = new MouseEventAliasExpression();
 
-        public override Expression CompileAsValueExpression(ASTNode nodeOld, Func<ASTNode, Expression> visit) {
-            return s_Expression;
-        }
+//        public override Expression CompileAsValueExpression(ASTNode nodeOld, Func<Type, ASTNode, Expression> visit) {
+//            return s_Expression;
+//        }
 
         public class MouseEventAliasExpression : Expression<MouseInputEvent> {
 

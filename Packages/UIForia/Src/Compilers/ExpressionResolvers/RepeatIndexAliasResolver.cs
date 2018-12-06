@@ -7,11 +7,11 @@ namespace UIForia.Compilers {
 
         public RepeatIndexAliasResolver(string aliasName) : base(aliasName) { }
 
-        public override Expression CompileAsValueExpression(ASTNode node, Func<ASTNode, Expression> visit) {
-
-            return null;
-        }
-        
+//        public override Expression CompileAsValueExpression(ASTNode node, Func<Type, ASTNode, Expression> visit) {
+//
+//            return null;
+//        }
+//        
         public class RepeatIndexExpression : Expression<int> {
 
             public readonly string indexAlias;

@@ -214,6 +214,10 @@ namespace UIForia.Parsing {
             return expressionStack.Pop();
         }
 
+        private ExpressionParser CreateUndelimitedSubParser(int advance) {
+            return new ExpressionParser(tokenStream.AdvanceAndReturnSubStream(advance));
+        }
+
         private ExpressionParser CreateSubParser(int advance) {
             tokenStream.Advance(); // step over the open brace
             // -1 to drop the closing paren token from sub stream
@@ -226,6 +230,7 @@ namespace UIForia.Parsing {
 
         // todo string concat expression "string {nested expression}"
         private bool ParseExpression(ref ASTNode retn) {
+            
             if (ParseDirectCastExpression(ref retn)) return true;
             if (ParseTypeOfExpression(ref retn)) return true;
             if (ParseArrayLiteralExpression(ref retn)) return true;
@@ -237,7 +242,7 @@ namespace UIForia.Parsing {
 
             return false;
         }
-
+        
         private bool ParseArrayLiteralExpression(ref ASTNode retn) {
             if (tokenStream.Current != TokenType.ArrayAccessOpen) {
                 return false;
@@ -481,7 +486,6 @@ namespace UIForia.Parsing {
                     if (!ParseListExpression(ref parameters, TokenType.ParenOpen, TokenType.ParenClose)) {
                         Abort();
                     }
-
                     parts.Add(ASTNode.InvokeNode(parameters));
                     if (tokenStream.HasMoreTokens) {
                         continue;
@@ -566,18 +570,18 @@ namespace UIForia.Parsing {
         }
 
         private bool ParseListExpressionStep(ref List<ASTNode> retn) {
-            bool loopCondition = true;
-            retn = ListPool<ASTNode>.Get();
-            while (loopCondition) {
+            while (true) {
                 int commaIndex = tokenStream.FindNextIndexAtSameLevel(TokenType.Comma);
                 if (commaIndex != -1) {
-                    ExpressionParser parser = CreateSubParser(commaIndex);
-                    bool valid = !parser.ParseListExpressionStep(ref retn);
+                    ExpressionParser parser = CreateUndelimitedSubParser(commaIndex);
+                    tokenStream.Advance();
+                    bool valid = parser.ParseListExpressionStep(ref retn);
                     parser.Release();
                     if (!valid) {
                         ReleaseList(retn);
                         return false;
                     }
+                    
                 }
                 else {
                     ASTNode node = ParseLoop();
@@ -590,7 +594,6 @@ namespace UIForia.Parsing {
                 }
             }
 
-            return false;
         }
 
         private bool ParseListExpression(ref List<ASTNode> retn, TokenType openToken, TokenType closeToken) {
@@ -602,8 +605,8 @@ namespace UIForia.Parsing {
             tokenStream.Save();
 
             if (range == 1) {
-                tokenStream.Advance();
-                retn = null;
+                tokenStream.Advance(2);
+                retn = ListPool<ASTNode>.Get();
                 return true;
             }
 
@@ -611,6 +614,7 @@ namespace UIForia.Parsing {
                 ListPool<ASTNode>.Release(ref retn);
             }
 
+            retn = ListPool<ASTNode>.Get();
             //todo find next comma at same level (meaning not inside [ or ( or <
 
             ExpressionParser parser = CreateSubParser(range);
@@ -618,7 +622,9 @@ namespace UIForia.Parsing {
             parser.Release();
 
             if (!valid) {
+                tokenStream.Restore();
                 ReleaseList(retn);
+                return false;
             }
 
             return true;
@@ -669,7 +675,7 @@ namespace UIForia.Parsing {
 
             tokenStream.Advance();
             return true;
-        }
+        }  
 
         private void Abort() {
 //            string additionalInfo = isLiteralExpression
@@ -701,7 +707,6 @@ namespace UIForia.Parsing {
         TypeOf,
         Identifier,
         Invalid,
-        MethodCall,
         DotAccess,
         AccessExpression,
         IndexExpression,

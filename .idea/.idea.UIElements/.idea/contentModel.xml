@@ -183,6 +183,15 @@
               <e p="UITemplateContext.cs" t="Include" />
             </e>
             <e p="Compilers" t="Include">
+              <e p="AccessExpression.cs" t="Include" />
+              <e p="AccessExpression_Static.cs" t="Include" />
+              <e p="AccessExpressionPart.cs" t="Include" />
+              <e p="AccessExpressionPart_FieldProperty.cs" t="Include" />
+              <e p="AccessExpressionPart_FieldProperty_Field.cs" t="Include" />
+              <e p="AccessExpressionPart_FieldProperty_Property.cs" t="Include" />
+              <e p="AccessExpressionPart_Func.cs" t="Include" />
+              <e p="AccessExpressionPart_Index.cs" t="Include" />
+              <e p="AccessExpressionPart_Method.cs" t="Include" />
               <e p="AliasSources" t="Include">
                 <e p="ColorAliasSource.cs" t="Include" />
                 <e p="EnumAliasSources.cs" t="Include" />
@@ -261,6 +270,9 @@
               <e p="VirtualElement.cs" t="Include" />
               <e p="VirtualScrollBar.cs" t="Include" />
             </e>
+            <e p="Exceptions" t="Include">
+              <e p="CompileExceptions.cs" t="Include" />
+            </e>
             <e p="ExportStyleAttribute.cs" t="Include" />
             <e p="Expressions" t="Include">
               <e p="AccessExpression_Property.cs" t="Include" />
@@ -277,6 +289,7 @@
               <e p="LiteralExpression_String.cs" t="Include" />
               <e p="MethodCallExpression_Instance.cs" t="Include" />
               <e p="MethodCallExpression_Static.cs" t="Include" />
+              <e p="MethodExpressionFactory.cs" t="Include" />
               <e p="OperatorExpression_Arithmetic.cs" t="Include" />
               <e p="OperatorExpression_Boolean.cs" t="Include" />
               <e p="OperatorExpression_Comparison.cs" t="Include" />

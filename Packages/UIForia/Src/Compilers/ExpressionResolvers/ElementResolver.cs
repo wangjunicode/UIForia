@@ -9,7 +9,7 @@ namespace UIForia.Compilers {
 
         private static readonly UIElementExpression<UIElement> s_Expression = new UIElementExpression<UIElement>();
 
-        public override Expression CompileAsValueExpression(ASTNode node, Func<ASTNode, Expression> visit) {
+        public override Expression CompileAsValueExpression(ASTNode node, Func<Type, ASTNode, Expression> visit) {
             return null;
         }
 

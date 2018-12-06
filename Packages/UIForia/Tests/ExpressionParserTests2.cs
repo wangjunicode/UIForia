@@ -282,7 +282,7 @@ public class ExpressionParserTests2 {
         Assert.IsInstanceOf<MemberAccessExpressionNode>(root);
         MemberAccessExpressionNode node = (MemberAccessExpressionNode) root;
         Assert.AreEqual(1, node.parts.Count);
-        Assert.IsInstanceOf<IndexExpressionNode>(node.parts[0]);
+        Assert.IsInstanceOf<IndexNode>(node.parts[0]);
     }
 
     [Test]
@@ -374,9 +374,9 @@ public class ExpressionParserTests2 {
         MemberAccessExpressionNode node = (MemberAccessExpressionNode) root;
         Assert.AreEqual("rootContext", node.identifier);
         Assert.AreEqual(1, node.parts.Count);
-        Assert.IsInstanceOf<IndexExpressionNode>(node.parts[0]);
-        Assert.IsInstanceOf<OperatorNode>(((IndexExpressionNode) node.parts[0]).expression);
-        OperatorNode opNode = (OperatorNode) ((IndexExpressionNode) node.parts[0]).expression;
+        Assert.IsInstanceOf<IndexNode>(node.parts[0]);
+        Assert.IsInstanceOf<OperatorNode>(((IndexNode) node.parts[0]).expression);
+        OperatorNode opNode = (OperatorNode) ((IndexNode) node.parts[0]).expression;
         Assert.AreEqual(OperatorType.Plus, opNode.operatorType);
         Assert.IsInstanceOf<LiteralNode>(opNode.left);
         Assert.IsInstanceOf<LiteralNode>(opNode.right);
@@ -389,11 +389,11 @@ public class ExpressionParserTests2 {
         MemberAccessExpressionNode node = (MemberAccessExpressionNode) root;
         Assert.AreEqual("rootContext", node.identifier);
         Assert.AreEqual(1, node.parts.Count);
-        Assert.IsInstanceOf<IndexExpressionNode>(node.parts[0]);
-        Assert.IsInstanceOf<ParenNode>(((IndexExpressionNode) node.parts[0]).expression);
+        Assert.IsInstanceOf<IndexNode>(node.parts[0]);
+        Assert.IsInstanceOf<ParenNode>(((IndexNode) node.parts[0]).expression);
 
-        Assert.IsInstanceOf<ParenNode>(((IndexExpressionNode) node.parts[0]).expression);
-        ParenNode parenNodeOld = (ParenNode) ((IndexExpressionNode) node.parts[0]).expression;
+        Assert.IsInstanceOf<ParenNode>(((IndexNode) node.parts[0]).expression);
+        ParenNode parenNodeOld = (ParenNode) ((IndexNode) node.parts[0]).expression;
         OperatorNode opNode = (OperatorNode) parenNodeOld.expression;
         Assert.AreEqual(OperatorType.Plus, opNode.operatorType);
         Assert.IsInstanceOf<LiteralNode>(opNode.left);
@@ -407,8 +407,8 @@ public class ExpressionParserTests2 {
         MemberAccessExpressionNode node = (MemberAccessExpressionNode) root;
         Assert.AreEqual("rootContext", node.identifier);
         Assert.AreEqual(1, node.parts.Count);
-        Assert.IsInstanceOf<IndexExpressionNode>(node.parts[0]);
-        Assert.IsInstanceOf<MemberAccessExpressionNode>(((IndexExpressionNode) node.parts[0]).expression);
+        Assert.IsInstanceOf<IndexNode>(node.parts[0]);
+        Assert.IsInstanceOf<MemberAccessExpressionNode>(((IndexNode) node.parts[0]).expression);
     }
 
     [Test]
@@ -419,7 +419,7 @@ public class ExpressionParserTests2 {
         Assert.AreEqual("rootContext", node.identifier);
         Assert.AreEqual(4, node.parts.Count);
         Assert.IsInstanceOf<DotAccessNode>(node.parts[0]);
-        Assert.IsInstanceOf<IndexExpressionNode>(node.parts[1]);
+        Assert.IsInstanceOf<IndexNode>(node.parts[1]);
         Assert.IsInstanceOf<DotAccessNode>(node.parts[2]);
         Assert.IsInstanceOf<DotAccessNode>(node.parts[3]);
     }
@@ -432,7 +432,7 @@ public class ExpressionParserTests2 {
         Assert.AreEqual("rootContext", node.identifier);
         Assert.AreEqual(4, node.parts.Count);
         Assert.IsInstanceOf<InvokeNode>(node.parts[0]);
-        Assert.IsInstanceOf<IndexExpressionNode>(node.parts[1]);
+        Assert.IsInstanceOf<IndexNode>(node.parts[1]);
         Assert.IsInstanceOf<DotAccessNode>(node.parts[2]);
         Assert.IsInstanceOf<DotAccessNode>(node.parts[3]);
     }
@@ -549,6 +549,6 @@ public class ExpressionParserTests2 {
         ASTNode root = ExpressionParser.Parse("$something(4 + 1)");
         var node = AssertInstanceOfAndReturn<MemberAccessExpressionNode>(root);
         Assert.IsInstanceOf<InvokeNode>(node.parts[0]);
-
     }
+    
 }

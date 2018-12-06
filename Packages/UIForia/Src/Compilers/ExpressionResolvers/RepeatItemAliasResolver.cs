@@ -11,14 +11,14 @@ namespace UIForia.Compilers {
             this.itemType = itemType;
         }
 
-        public override Expression CompileAsValueExpression(ASTNode node, Func<ASTNode, Expression> visit) {
-            ReflectionUtil.ObjectArray1[0] = aliasName;
-            return (Expression) ReflectionUtil.CreateGenericInstanceFromOpenType(
-                typeof(RepeatItemExpression<>),
-                itemType,
-                ReflectionUtil.ObjectArray1
-            );
-        }
+//        public override Expression CompileAsValueExpression(ASTNode node, Func<Type, ASTNode, Expression> visit) {
+//            ReflectionUtil.ObjectArray1[0] = aliasName;
+//            return (Expression) ReflectionUtil.CreateGenericInstanceFromOpenType(
+//                typeof(RepeatItemExpression<>),
+//                itemType,
+//                ReflectionUtil.ObjectArray1
+//            );
+//        }
 
         public class RepeatItemExpression<T> : Expression<T> {
 

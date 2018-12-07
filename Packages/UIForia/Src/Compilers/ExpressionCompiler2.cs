@@ -8,12 +8,6 @@ using UIForia.Extensions;
 using UIForia.Parsing;
 using UIForia.Util;
 
-namespace UIForia {
-
-    public sealed class Terminal { }
-
-}
-
 namespace UIForia.Compilers {
 
     public class CompilerContext {
@@ -26,10 +20,10 @@ namespace UIForia.Compilers {
         public readonly int columnNumber;
         private readonly ExpressionCompiler2 compiler;
 
-        internal CompilerContext(ExpressionCompiler2 compiler, Type rootType, Type currentType) {
+        internal CompilerContext(ExpressionCompiler2 compiler, Type rootType, Type currentType, Type targetType) {
             this.rootType = rootType;
             this.currentType = currentType;
-            this.targetType = null;
+            this.targetType = targetType;
             this.fileName = string.Empty;
             this.lineNumber = -1;
             this.columnNumber = -1;
@@ -58,14 +52,12 @@ namespace UIForia.Compilers {
         private Type currentType;
 
         private readonly bool allowLinq;
-        private readonly Func<Type, ASTNode, Expression> visit;
         private readonly LightList<ExpressionAliasResolver> aliasResolvers;
         private readonly LightList<string> namespaces = new LightList<string>();
 
         public ExpressionCompiler2(bool allowLinq = false) {
             this.allowLinq = allowLinq;
             this.aliasResolvers = new LightList<ExpressionAliasResolver>();
-            this.visit = Visit;
         }
 
         private static readonly List<ICastHandler> builtInCastHandlers = new List<ICastHandler>() {
@@ -124,6 +116,14 @@ namespace UIForia.Compilers {
             this.targetType = targetType;
             this.rootType = rootType;
             this.currentType = rootType;
+            ASTNode astRoot = ExpressionParser.Parse(input);
+            return Visit(astRoot);
+        }
+        
+        public Expression Compile(Type rootType, Type currentType, string input, Type targetType) {
+            this.targetType = targetType;
+            this.rootType = rootType;
+            this.currentType = currentType;
             ASTNode astRoot = ExpressionParser.Parse(input);
             return Visit(astRoot);
         }
@@ -186,7 +186,6 @@ namespace UIForia.Compilers {
 
         public struct AccessInfo {
 
-            public string identifier;
             public FieldInfo fieldInfo;
             public PropertyInfo propertyInfo;
             public MethodInfo methodInfo;
@@ -197,10 +196,9 @@ namespace UIForia.Compilers {
 
             public static void CreateMethodCall(ref AccessInfo accessInfo, MethodInfo info, List<Expression> arguments) {
                 accessInfo.type = AccessInfoType.MethodInvoke;
-                accessInfo.identifier = info.Name;
                 accessInfo.arguments = arguments;
                 accessInfo.methodInfo = info;
-                accessInfo.outputType = info.ReturnType;
+                accessInfo.outputType = info.ReturnType == typeof(void) ? typeof(Terminal) : info.ReturnType;
                 accessInfo.inputType = info.DeclaringType;
             }
 
@@ -211,7 +209,6 @@ namespace UIForia.Compilers {
                 }
 
                 accessInfo.inputType = lastType;
-                accessInfo.identifier = dotAccessNode.propertyName;
                 accessInfo.fieldInfo = fieldInfo;
                 accessInfo.outputType = fieldInfo.FieldType;
                 accessInfo.type = AccessInfoType.Field;
@@ -225,7 +222,6 @@ namespace UIForia.Compilers {
                 }
 
                 accessInfo.inputType = lastType;
-                accessInfo.identifier = dotAccessNode.propertyName;
                 accessInfo.propertyInfo = propertyInfo;
                 accessInfo.outputType = propertyInfo.PropertyType;
                 accessInfo.type = AccessInfoType.Property;
@@ -273,7 +269,7 @@ namespace UIForia.Compilers {
                                 MethodInfo info;
                                 List<Expression> arguments = VisitMethodArguments(lastType, dotAccessNode.propertyName, invokeNode.parameters, out info);
                                 if (info == null) {
-                                    throw new CompileException("bad method info");
+                                    throw CompileExceptions.MethodNotFound(lastType, dotAccessNode.propertyName);
                                 }
 
                                 AccessInfo.CreateMethodCall(ref accessInfo, info, arguments);
@@ -300,8 +296,10 @@ namespace UIForia.Compilers {
 
                     case InvokeNode invokeNode: {
                         // last type
-                        if (ReflectionUtil.IsAction(lastType)) { }
-                        else {
+                        if (ReflectionUtil.IsAction(lastType)) {
+                            throw new NotImplementedException();
+                        }
+                        else { // func
                             Type outputType = null;
                             List<Expression> arguments = VisitFuncArguments(lastType, invokeNode.parameters, out outputType);
                             accessInfo.type = AccessInfoType.FuncInvoke;
@@ -363,31 +361,49 @@ namespace UIForia.Compilers {
 
             Type outputType = inputTypes[inputTypes.Length - 1];
 
-            object p = MakeAccessPart(0, node.parts, outputType, inputTypes);
+            AccessExpressionPart p = MakeAccessPart(0, node.parts, outputType, inputTypes);
 
             LightListPool<Type>.Release(ref inputTypes);
+           
+            if(headType.IsEnum) {
+                    
+            }
 
+            bool isConstant = headType.IsEnum;
             Expression expr = (Expression) ReflectionUtil.CreateGenericInstanceFromOpenType(
                 typeof(AccessExpression_Static<,>),
                 new GenericArguments(outputType, headType),
-                new ConstructorArguments(p)
+                new ConstructorArguments(p, isConstant)
             );
 
             return expr;
         }
 
         private Expression VisitAliasAccessExpression(MemberAccessExpressionNode node) {
+            
             ExpressionAliasResolver resolver = GetResolver(node.identifier);
+            
             if (resolver == null) {
                 throw new CompileException("Unable to find a resolver for alias " + node.identifier);
             }
 
+            // find the return type to find the head type
+            // access info list needs to replace first node with 
+            CompilerContext context = new CompilerContext(this, rootType, currentType, targetType);
+
             if (node.parts[0] is InvokeNode invokeNode) {
-                CompilerContext context = new CompilerContext(this, rootType, currentType);
-                return resolver.CompileAsMethodExpression(context, invokeNode);
+                return resolver.CompileAsMethodExpression(context, invokeNode.parameters);
             }
 
-            return resolver.CompileAsAccessExpression(node, visit);
+            if (node.parts[0] is DotAccessNode dotAccessNode) {
+                return resolver.CompileAsDotExpression(context, dotAccessNode.propertyName);
+            }
+
+            if (node.parts[0] is IndexNode indexNode) {
+                return resolver.CompileAsIndexExpression(context, indexNode.expression);
+            }
+
+            return null;
         }
 
         private ExpressionAliasResolver GetResolver(string alias) {
@@ -488,6 +504,10 @@ namespace UIForia.Compilers {
 
             Type finalOutputType = infos[infos.Count - 1].outputType;
 
+            if (finalOutputType == typeof(void)) {
+                finalOutputType = typeof(Terminal);
+            }
+            
             AccessExpressionPart next = MakeAccessPartFromInfo(infos, index + 1);
             AccessInfo info = infos[index];
 
@@ -515,7 +535,7 @@ namespace UIForia.Compilers {
                     );
 
                 case AccessInfoType.ActionInvoke:
-                    break;
+                    throw new NotImplementedException();
 
                 case AccessInfoType.Field:
                     return (AccessExpressionPart) ReflectionUtil.CreateGenericInstanceFromOpenType(
@@ -542,7 +562,6 @@ namespace UIForia.Compilers {
                     throw new ArgumentOutOfRangeException();
             }
 
-            return null;
         }
 
 
@@ -1116,13 +1135,16 @@ namespace UIForia.Compilers {
                     if (aliasResolvers[i].aliasName == fieldName) {
                         // root type, target type, element type
                         CompilerContext context = new CompilerContext(rootType, targetType, currentType);
-                        retn = aliasResolvers[i].CompileAsValueExpression2(node, visit);
+                        retn = aliasResolvers[i].CompileAsValueExpression(context);
                         if (retn == null) {
                             throw new CompileException($"Alias Resolver of type {aliasResolvers[i]} failed to resolve {fieldName}");
                         }
 
                         break;
                     }
+                }
+                if (retn == null) {
+                    throw new ParseException($"Unknown alias {fieldName}");
                 }
             }
             else {

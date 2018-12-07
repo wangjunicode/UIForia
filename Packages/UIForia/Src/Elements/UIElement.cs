@@ -40,11 +40,13 @@ public class UIElement : IHierarchical {
     public readonly UIStyleSet style;
     public UIElement templateParent; // remove or move to cold data
     public UIElement[] children;  // make readonly somehow, should never be modified by user
+
+    public ExpressionContext templateContext;
     
     internal UIElementFlags flags;
     internal UIElement parent;
 
-    public UIElement templateRoot;
+//    public UIElement templateRoot;
     
     public LayoutResult layoutResult { get; internal set; }
     private ElementRenderer renderer = ElementRenderer.DefaultInstanced; // cold data?
@@ -69,14 +71,14 @@ public class UIElement : IHierarchical {
         }
     }
 
-    public UITemplateContext TemplateContext {
-        get { return s_ColdDataMap.GetOrDefault(id).templateContext; }
-        internal set {
-            ElementColdData coldData = s_ColdDataMap.GetOrDefault(id);
-            coldData.templateContext = value;
-            s_ColdDataMap[id] = coldData;
-        }
-    }
+//    public ExpressionContext TemplateContext {
+//        get { return s_ColdDataMap.GetOrDefault(id).templateContext; }
+//        internal set {
+//            ElementColdData coldData = s_ColdDataMap.GetOrDefault(id);
+//            coldData.templateContext = value;
+//            s_ColdDataMap[id] = coldData;
+//        }
+//    }
 
     public UIChildrenElement TranscludedChildren {
         get { return s_ColdDataMap.GetOrDefault(id).transcludedChildren; }

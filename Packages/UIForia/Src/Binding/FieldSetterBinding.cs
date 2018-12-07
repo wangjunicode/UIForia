@@ -25,7 +25,7 @@ namespace UIForia {
             this.setter = setter;
         }
 
-        public override void Execute(UIElement element, UITemplateContext context) {
+        public override void Execute(UIElement element, ExpressionContext context) {
             U castElement = (U) element;
             T currentValue = getter(castElement);
             T newValue = expression.Evaluate(context);
@@ -55,7 +55,7 @@ namespace UIForia {
             this.setter = setter;
         }
 
-        public override void Execute(UIElement element, UITemplateContext context) {
+        public override void Execute(UIElement element, ExpressionContext context) {
             U castElement = (U) element;
             T currentValue = getter(castElement);
             T newValue = expression.Evaluate(context);
@@ -90,7 +90,7 @@ namespace UIForia {
             }
         }
 
-        public override void Execute(UIElement element, UITemplateContext context) {
+        public override void Execute(UIElement element, ExpressionContext context) {
             U castElement = (U) element;
             T currentValue = getter(castElement);
             T newValue = expression.Evaluate(context);

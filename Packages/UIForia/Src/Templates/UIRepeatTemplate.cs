@@ -1,5 +1,7 @@
 using System;
+using System.Collections;
 using System.Collections.Generic;
+using System.Reflection;
 using UIForia.Compilers;
 
 namespace UIForia {
@@ -52,6 +54,7 @@ namespace UIForia {
             element.lengthAlias = lengthAlias;
             element.itemAlias = itemAlias;
             element.OriginTemplate = this;
+            element.templateContext = new ExpressionContext(inputScope.rootElement, element);
             return element;
         }
 
@@ -64,8 +67,7 @@ namespace UIForia {
 
             listAttr.isCompiled = true;
 
-            throw new NotImplementedException();
-//            listExpression = template.compiler.Compile(null, null, listAttr.value);
+            listExpression = template.compiler.Compile(template.RootType, elementType, listAttr.value, null);
 
             genericArgType = listExpression.YieldedType;
 
@@ -93,10 +95,6 @@ namespace UIForia {
 
             listType = genericArgType;
             itemType = genericTypes[0];
-
-//            template.contextDefinition.AddRuntimeAlias(indexAlias, typeof(int));
-//            template.contextDefinition.AddRuntimeAlias(lengthAlias, typeof(int));
-//            template.contextDefinition.AddRuntimeAlias(itemAlias, itemType);
 
             itemResolver = new RepeatItemAliasResolver(itemAlias, itemType);
             indexResolver = new RepeatIndexAliasResolver(indexAlias);

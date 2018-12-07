@@ -133,7 +133,6 @@ namespace UIForia {
 
     }
 
-
     // used for methods with 0 arguments, U = context type, T = return type
     public class MethodCallExpression_Instance<U, T> : Expression<T> {
 

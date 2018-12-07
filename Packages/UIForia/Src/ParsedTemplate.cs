@@ -1,7 +1,6 @@
 using System;
 using System.Collections.Generic;
 using UIForia.Compilers;
-using UIForia.Compilers.AliasSources;
 using UIForia.Parsing.StyleParser;
 using UIForia.Rendering;
 using UIForia.Util;
@@ -47,7 +46,7 @@ namespace UIForia {
 
         public UIElement Create(UIView view) {
             Compile();
-            return rootElementTemplate.CreateUnscoped(view);
+            return rootElementTemplate.CreateUnscoped();
         }
         
         public void Compile() {
@@ -57,6 +56,7 @@ namespace UIForia {
             compiler.AddAliasResolver(new ElementResolver("element"));
             compiler.AddAliasResolver(new ParentElementResolver("parent"));
             compiler.AddAliasResolver(new RouteResolver("route"));
+            compiler.AddAliasResolver(new RouteParameterResolver("$routeParams"));
             
             for (int i = 0; i < imports.Count; i++) {
                 Type type = TypeProcessor.GetRuntimeType(imports[i].path);

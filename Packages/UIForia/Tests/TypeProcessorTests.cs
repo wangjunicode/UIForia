@@ -56,7 +56,6 @@ public class TypeProcessorTests {
 
     [Test]
     public void ResolveWithNamespace() {
-        Debug.Log(typeof(Vector3).AssemblyQualifiedName);
         Type t = TypeProcessor.ResolveType(typeof(Thing), "Vector3", new List<string>() {"UnityEngine"});
         Assert.AreEqual(typeof(Vector3), t);
     }

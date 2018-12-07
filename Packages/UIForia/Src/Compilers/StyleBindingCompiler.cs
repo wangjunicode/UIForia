@@ -124,13 +124,15 @@ namespace UIForia.Compilers {
             mainAxisAlignmentSource = new EnumAliasSource<MainAxisAlignment>();
             crossAxisAlignmentSource = new EnumAliasSource<CrossAxisAlignment>();
             whiteSpaceSource = new EnumAliasSource<WhitespaceMode>();
+            
         }
 
         public StyleBindingCompiler() {
             this.compiler = new ExpressionCompiler2();
-            compiler.AddAliasResolver(new MethodResolver("$contentSize", typeof(StyleBindingCompiler).GetMethod(nameof(ContentMeasurement), new[] {
-                typeof(float)
-            })));
+            compiler.AddAliasResolver(new ContentSizeResolver());
+            compiler.AddAliasResolver(new UrlResolver("$url"));
+            compiler.AddAliasResolver(new SizeResolver("$size"));
+            compiler.AddAliasResolver(new LengthResolver("$length"));
             compiler.AddAliasResolver(new MethodResolver("$px", typeof(StyleBindingCompiler).GetMethod(nameof(PixelLength), new[] {typeof(float)})));
         }
 
@@ -191,24 +193,14 @@ namespace UIForia.Compilers {
         }
 
         private Expression<T> Compile<T>(string value, params IAliasSource[] sources) {
-//            if (sources != null) {
-//                for (int i = 0; i < sources.Length; i++) {
-//                    context.AddConstAliasSource(sources[i]);
-//                    compiler.AddExpressionResolver(new ValueResolver<>());
-//                }
-//            }
 
             compiler.AddNamespace("UIForia.Rendering");
+            compiler.AddNamespace("UIForia");
 
             Expression<T> expression = compiler.Compile<T>(rootType, elementType, value);
             
             compiler.RemoveNamespace("UIForia.Rendering");
-
-//            if (sources != null) {
-//                for (int i = 0; i < sources.Length; i++) {
-//                    context.RemoveConstAliasSource(sources[i]);
-//                }
-//            }
+            compiler.RemoveNamespace("UIForia");
 
             return expression;
         }

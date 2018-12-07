@@ -19,9 +19,9 @@ namespace UIForia.StyleBindings {
 
         public virtual void AfterExecute() { }
 
-        public abstract void Apply(UIStyle style, UITemplateContext context);
+        public abstract void Apply(UIStyle style, ExpressionContext context);
 
-        public abstract void Apply(UIStyleSet styleSet, UITemplateContext context);
+        public abstract void Apply(UIStyleSet styleSet, ExpressionContext context);
 
     }
 

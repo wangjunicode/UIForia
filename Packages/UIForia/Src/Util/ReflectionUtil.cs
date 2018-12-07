@@ -742,7 +742,7 @@ public static class ReflectionUtil {
 
     // todo -- need some parameter matching at least
     public static MethodInfo GetMethodInfo(Type type, string methodName) {
-        return type.GetMethod(methodName);
+        return type.GetMethod(methodName, StaticFlags | InstanceBindFlags);
     }
 
     public static bool IsCallbackType(Type type) {

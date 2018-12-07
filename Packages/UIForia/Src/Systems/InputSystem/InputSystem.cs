@@ -41,15 +41,15 @@ public abstract class InputSystem : IInputSystem, IInputProvider {
     private readonly List<KeyCode> m_UpThisFrame;
 
     private readonly EventPropagator m_EventPropagator;
-    private readonly List<ValueTuple<MouseEventHandler, UIElement, UITemplateContext>> m_MouseEventCaptureList;
-    private readonly List<ValueTuple<DragEventHandler, UIElement, UITemplateContext>> m_DragEventCaptureList;
+    private readonly List<ValueTuple<MouseEventHandler, UIElement, ExpressionContext>> m_MouseEventCaptureList;
+    private readonly List<ValueTuple<DragEventHandler, UIElement, ExpressionContext>> m_DragEventCaptureList;
     protected static readonly UIElement.DepthComparerAscending s_DepthComparer = new UIElement.DepthComparerAscending();
     private static readonly Event s_Event = new Event();
 
     public KeyboardModifiers KeyboardModifiers => modifiersThisFrame;
     public bool debugMode;
 
-    private static readonly UITemplateContext s_DummyContext = new UITemplateContext(null);
+    private static readonly ExpressionContext s_DummyContext = new ExpressionContext(null);
 
     protected InputSystem(ILayoutSystem layoutSystem, IStyleSystem styleSystem) {
         this.m_LayoutSystem = layoutSystem;
@@ -69,8 +69,8 @@ public abstract class InputSystem : IInputSystem, IInputProvider {
         this.m_KeyStates = new Dictionary<KeyCode, KeyState>();
         this.m_KeyboardEventTree = new SkipTree<KeyboardEventTreeNode>();
         this.m_EventPropagator = new EventPropagator();
-        this.m_MouseEventCaptureList = new List<ValueTuple<MouseEventHandler, UIElement, UITemplateContext>>();
-        this.m_DragEventCaptureList = new List<ValueTuple<DragEventHandler, UIElement, UITemplateContext>>();
+        this.m_MouseEventCaptureList = new List<ValueTuple<MouseEventHandler, UIElement, ExpressionContext>>();
+        this.m_DragEventCaptureList = new List<ValueTuple<DragEventHandler, UIElement, ExpressionContext>>();
         this.m_FocusedElement = null;
 
         this.m_LayoutSystem.onCreateVirtualScrollbar += HandleCreateScrollbar;
@@ -365,7 +365,7 @@ public abstract class InputSystem : IInputSystem, IInputProvider {
         for (int i = 0; i < m_DragEventCaptureList.Count; i++) {
             DragEventHandler handler = m_DragEventCaptureList[i].Item1;
             UIElement element = m_DragEventCaptureList[i].Item2;
-            UITemplateContext context = m_DragEventCaptureList[i].Item3;
+            ExpressionContext context = m_DragEventCaptureList[i].Item3;
 
             handler.Invoke(element, context, m_CurrentDragEvent);
 
@@ -425,7 +425,7 @@ public abstract class InputSystem : IInputSystem, IInputProvider {
                 handledEvents |= mouseHandlers[i].eventType;
             }
 
-            m_MouseHandlerMap[element.id] = new MouseHandlerGroup(element.TemplateContext, mouseHandlers, handledEvents);
+            m_MouseHandlerMap[element.id] = new MouseHandlerGroup(element.templateContext, mouseHandlers, handledEvents);
         }
 
         if (dragEventHandlers != null && dragEventHandlers.Length > 0) {
@@ -435,15 +435,15 @@ public abstract class InputSystem : IInputSystem, IInputProvider {
                 handledEvents |= dragEventHandlers[i].eventType;
             }
 
-            m_DragHandlerMap[element.id] = new DragHandlerGroup(element.TemplateContext, dragEventHandlers, handledEvents);
+            m_DragHandlerMap[element.id] = new DragHandlerGroup(element.templateContext, dragEventHandlers, handledEvents);
         }
 
         if (keyboardHandlers != null && keyboardHandlers.Length > 0) {
             m_KeyboardEventTree.AddItem(new KeyboardEventTreeNode(element, keyboardHandlers));
         }
 
-        if (dragEventCreators != null) {
-            m_DragCreatorMap[element.id] = new DragCreatorGroup(element.TemplateContext, dragEventCreators);
+        if (dragEventCreators != null && dragEventCreators.Length > 0) {
+            m_DragCreatorMap[element.id] = new DragCreatorGroup(element.templateContext, dragEventCreators);
         }
 
         element.Input = this;
@@ -495,7 +495,7 @@ public abstract class InputSystem : IInputSystem, IInputProvider {
                 IReadOnlyList<KeyboardEventHandler> handlers = item.handlers;
                 for (int i = 0; i < handlers.Count; i++) {
                     if (evt.stopPropagationImmediately) break;
-                    handlers[i].Invoke(item.Element, null, evt);
+                    handlers[i].Invoke(item.Element, default, evt);
                 }
 
                 if (evt.stopPropagationImmediately) {
@@ -510,7 +510,7 @@ public abstract class InputSystem : IInputSystem, IInputProvider {
             IReadOnlyList<KeyboardEventHandler> handlers = focusedNode.handlers;
             for (int i = 0; i < handlers.Count; i++) {
                 if (keyEvent.stopPropagationImmediately) break;
-                handlers[i].Invoke(focusedNode.Element, null, keyEvent);
+                handlers[i].Invoke(focusedNode.Element, default, keyEvent);
             }
         }
     }
@@ -784,7 +784,7 @@ public abstract class InputSystem : IInputSystem, IInputProvider {
         for (int i = 0; i < m_MouseEventCaptureList.Count; i++) {
             MouseEventHandler handler = m_MouseEventCaptureList[i].Item1;
             UIElement element = m_MouseEventCaptureList[i].Item2;
-            UITemplateContext context = m_MouseEventCaptureList[i].Item3;
+            ExpressionContext context = m_MouseEventCaptureList[i].Item3;
 
             handler.Invoke(element, context, mouseEvent);
 

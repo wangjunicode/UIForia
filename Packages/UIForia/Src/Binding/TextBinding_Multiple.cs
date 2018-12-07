@@ -12,7 +12,7 @@ namespace UIForia {
             this.expressions = expressions;
         }
         
-        public override void Execute(UIElement element, UITemplateContext context) {
+        public override void Execute(UIElement element, ExpressionContext context) {
             UITextElement textElement = (UITextElement) element;
             
             for (int i = 0; i < expressions.Length; i++) {

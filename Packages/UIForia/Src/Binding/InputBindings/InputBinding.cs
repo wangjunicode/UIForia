@@ -15,7 +15,7 @@ namespace UIForia.InputBindings {
             this.expression = expression;
         }
 
-        public override void Execute(UIElement element, UITemplateContext context) {
+        public override void Execute(UIElement element, ExpressionContext context) {
             expression.Evaluate(context);
         }
 

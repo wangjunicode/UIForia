@@ -7,7 +7,6 @@ using UIForia.Layout.LayoutTypes;
 using UIForia.Rendering;
 using UIForia.Util;
 using UnityEngine;
-using Debug = System.Diagnostics.Debug;
 
 namespace UIForia.Systems {
 
@@ -555,7 +554,7 @@ namespace UIForia.Systems {
             }
 
             if (replace != box) {
-                parent.ReplaceChild(box, replace);
+                parent?.ReplaceChild(box, replace);
                 // release(box)
                 m_LayoutBoxMap[element.id] = replace;
             }

@@ -24,7 +24,7 @@ public class BindingTests {
     [Template(TemplateType.String, @"
         <UITemplate>
             <Contents>
-                <BindingTestThingChild x-id=""child"" intProperty='{intProperty}'/>
+                <BindingTestThingChild x-id=""child"" intProperty='intProperty'/>
             </Contents>
         </UITemplate>
     ")]
@@ -52,7 +52,7 @@ public class BindingTests {
         string template = @"
         <UITemplate>
             <Contents>
-                <BindingTestThingChild x-id=""child"" if='{intProperty > 3}' intProperty='{intProperty}'/>
+                <BindingTestThingChild x-id=""child"" if='{intProperty > 3}' intProperty='intProperty'/>
             </Contents>
         </UITemplate>
         ";

@@ -9,7 +9,7 @@ namespace UIForia.Input {
         public readonly InputEventType eventType;
         public readonly KeyboardModifiers requiredModifiers;
         public readonly EventPhase eventPhase;
-        public readonly UITemplateContext ctx;
+        public readonly ExpressionContext ctx;
         
 #if DEBUG
         public MethodInfo methodInfo;
@@ -20,7 +20,7 @@ namespace UIForia.Input {
             this.eventPhase = eventPhase;
         }
 
-        public abstract void Invoke(object target, UITemplateContext context, MouseInputEvent evt);
+        public abstract void Invoke(object target, ExpressionContext context, MouseInputEvent evt);
 
         public int CompareTo(MouseEventHandler other) {
             int modifierResult = CompareModifiers(other);
@@ -53,7 +53,7 @@ namespace UIForia.Input {
             this.expression = expression;
         }
 
-        public override void Invoke(object target, UITemplateContext context, MouseInputEvent evt) {
+        public override void Invoke(object target, ExpressionContext context, MouseInputEvent evt) {
             if (ShouldRun(evt)) {
                 expression.Evaluate(context);
             }
@@ -70,7 +70,7 @@ namespace UIForia.Input {
             this.handler = handler;
         }
 
-        public override void Invoke(object target, UITemplateContext context, MouseInputEvent evt) {
+        public override void Invoke(object target, ExpressionContext context, MouseInputEvent evt) {
             if (ShouldRun(evt)) {
                 handler((T) target);
             }
@@ -87,7 +87,7 @@ namespace UIForia.Input {
             this.handler = handler;
         }
 
-        public override void Invoke(object target, UITemplateContext context, MouseInputEvent evt) {
+        public override void Invoke(object target, ExpressionContext context, MouseInputEvent evt) {
             if (ShouldRun(evt)) {
                 handler((T) target, evt);
             }

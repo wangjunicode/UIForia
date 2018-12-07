@@ -20,7 +20,7 @@ namespace UIForia.Compilers {
             runInfo = runInfo ?? typeof(Handler).GetMethod(nameof(Handler.Run));
         }
 
-        public override void Execute(UIElement element, UITemplateContext context) {
+        public override void Execute(UIElement element, ExpressionContext context) {
             evtInfo.AddEventHandler(element, Delegate.CreateDelegate(evtInfo.EventHandlerType, new Handler(context, element, fieldInfo), runInfo));
         }
 
@@ -30,11 +30,11 @@ namespace UIForia.Compilers {
 
         private class Handler {
 
-            private readonly UITemplateContext ctx;
+            private readonly ExpressionContext ctx;
             private readonly object target;
             private readonly FieldInfo fieldInfo;
             
-            public Handler(UITemplateContext ctx, object target, FieldInfo fieldInfo) {
+            public Handler(ExpressionContext ctx, object target, FieldInfo fieldInfo) {
                 this.ctx = ctx;
                 this.target = target;
                 this.fieldInfo = fieldInfo;
@@ -42,12 +42,11 @@ namespace UIForia.Compilers {
 
             [UsedImplicitly]
             public void Run(T evtArg0) {
-                ctx.currentObject = target;
 
-                object oldValue = fieldInfo.GetValue(ctx.rootElement);
-                fieldInfo.SetValue(ctx.rootElement, evtArg0);
+                object oldValue = fieldInfo.GetValue(ctx.rootObject);
+                fieldInfo.SetValue(ctx.rootObject, evtArg0);
 
-                IPropertyChangedHandler changedHandler = ctx.rootElement as IPropertyChangedHandler;
+                IPropertyChangedHandler changedHandler = ctx.rootObject as IPropertyChangedHandler;
                 changedHandler?.OnPropertyChanged(fieldInfo.Name, oldValue);
              
             }
@@ -74,7 +73,7 @@ namespace UIForia.Compilers {
             runInfo = runInfo ?? typeof(Handler).GetMethod(nameof(Handler.Run));
         }
 
-        public override void Execute(UIElement element, UITemplateContext context) {
+        public override void Execute(UIElement element, ExpressionContext context) {
             evtInfo.AddEventHandler(element, Delegate.CreateDelegate(evtInfo.EventHandlerType, new Handler(context, element, fieldInfo, callbacks), runInfo));
         }
 
@@ -84,12 +83,12 @@ namespace UIForia.Compilers {
 
         private class Handler {
 
-            private readonly UITemplateContext ctx;
+            private readonly ExpressionContext ctx;
             private readonly object target;
             private readonly FieldInfo fieldInfo;
             private readonly Action<U, string>[] callbacks;
 
-            public Handler(UITemplateContext ctx, object target, FieldInfo fieldInfo, Action<U, string>[] callbacks) {
+            public Handler(ExpressionContext ctx, object target, FieldInfo fieldInfo, Action<U, string>[] callbacks) {
                 this.ctx = ctx;
                 this.target = target;
                 this.fieldInfo = fieldInfo;
@@ -98,16 +97,15 @@ namespace UIForia.Compilers {
 
             [UsedImplicitly]
             public void Run(T evtArg0) {
-                ctx.currentObject = target;
 
-                object oldValue = fieldInfo.GetValue(ctx.rootElement);
-                fieldInfo.SetValue(ctx.rootElement, evtArg0);
+                object oldValue = fieldInfo.GetValue(ctx.rootObject);
+                fieldInfo.SetValue(ctx.rootObject, evtArg0);
 
                 for (int i = 0; i < callbacks.Length; i++) {
-                    callbacks[i].Invoke((U)(object)ctx.rootElement, fieldInfo.Name);
+                    callbacks[i].Invoke((U)ctx.rootObject, fieldInfo.Name);
                 }
                 
-                IPropertyChangedHandler changedHandler = ctx.rootElement as IPropertyChangedHandler;
+                IPropertyChangedHandler changedHandler = ctx.rootObject as IPropertyChangedHandler;
                 changedHandler?.OnPropertyChanged(fieldInfo.Name, oldValue);
              
             }
@@ -130,7 +128,7 @@ namespace UIForia.Compilers {
             runInfo = runInfo ?? typeof(Handler).GetMethod(nameof(Handler.Run));
         }
 
-        public override void Execute(UIElement element, UITemplateContext context) {
+        public override void Execute(UIElement element, ExpressionContext context) {
             evtInfo.AddEventHandler(element, Delegate.CreateDelegate(evtInfo.EventHandlerType, new Handler(context, element, property), runInfo));
         }
 
@@ -140,11 +138,11 @@ namespace UIForia.Compilers {
 
         private class Handler {
 
-            private readonly UITemplateContext ctx;
+            private readonly ExpressionContext ctx;
             private readonly object target;
             private readonly PropertyInfo property;
             
-            public Handler(UITemplateContext ctx, object target, PropertyInfo property) {
+            public Handler(ExpressionContext ctx, object target, PropertyInfo property) {
                 this.ctx = ctx;
                 this.target = target;
                 this.property = property;
@@ -152,12 +150,11 @@ namespace UIForia.Compilers {
 
             [UsedImplicitly]
             public void Run(T evtArg0) {
-                ctx.currentObject = target;
 
-                object oldValue = property.GetValue(ctx.rootElement);
-                property.SetValue(ctx.rootElement, evtArg0);
+                object oldValue = property.GetValue(ctx.rootObject);
+                property.SetValue(ctx.rootObject, evtArg0);
 
-                IPropertyChangedHandler changedHandler = ctx.rootElement as IPropertyChangedHandler;
+                IPropertyChangedHandler changedHandler = ctx.rootObject as IPropertyChangedHandler;
                 changedHandler?.OnPropertyChanged(property.Name, oldValue);
              
             }
@@ -184,7 +181,7 @@ namespace UIForia.Compilers {
             runInfo = runInfo ?? typeof(Handler).GetMethod(nameof(Handler.Run));
         }
 
-        public override void Execute(UIElement element, UITemplateContext context) {
+        public override void Execute(UIElement element, ExpressionContext context) {
             evtInfo.AddEventHandler(element, Delegate.CreateDelegate(evtInfo.EventHandlerType, new Handler(context, element, propertyInfo, callbacks), runInfo));
         }
 
@@ -194,12 +191,12 @@ namespace UIForia.Compilers {
 
         private class Handler {
 
-            private readonly UITemplateContext ctx;
+            private readonly ExpressionContext ctx;
             private readonly object target;
             private readonly PropertyInfo propertyInfo;
             private readonly Action<U, string>[] callbacks;
 
-            public Handler(UITemplateContext ctx, object target, PropertyInfo propertyInfo, Action<U, string>[] callbacks) {
+            public Handler(ExpressionContext ctx, object target, PropertyInfo propertyInfo, Action<U, string>[] callbacks) {
                 this.ctx = ctx;
                 this.target = target;
                 this.propertyInfo = propertyInfo;
@@ -208,16 +205,15 @@ namespace UIForia.Compilers {
 
             [UsedImplicitly]
             public void Run(T evtArg0) {
-                ctx.currentObject = target;
 
-                object oldValue = propertyInfo.GetValue(ctx.rootElement);
-                propertyInfo.SetValue(ctx.rootElement, evtArg0);
+                object oldValue = propertyInfo.GetValue(ctx.rootObject);
+                propertyInfo.SetValue(ctx.rootObject, evtArg0);
 
                 for (int i = 0; i < callbacks.Length; i++) {
-                    callbacks[i].Invoke((U)(object)ctx.rootElement, propertyInfo.Name);
+                    callbacks[i].Invoke((U)ctx.rootObject, propertyInfo.Name);
                 }
                 
-                IPropertyChangedHandler changedHandler = ctx.rootElement as IPropertyChangedHandler;
+                IPropertyChangedHandler changedHandler = ctx.rootObject as IPropertyChangedHandler;
                 changedHandler?.OnPropertyChanged(propertyInfo.Name, oldValue);
              
             }
@@ -241,7 +237,7 @@ namespace UIForia.Compilers {
             runInfo = runInfo ?? typeof(Handler).GetMethod(nameof(Handler.Run));
         }
 
-        public override void Execute(UIElement element, UITemplateContext context) {
+        public override void Execute(UIElement element, ExpressionContext context) {
             evtInfo.AddEventHandler(element, Delegate.CreateDelegate(evtInfo.EventHandlerType, new Handler(expression, context, element), runInfo));
         }
 
@@ -252,11 +248,11 @@ namespace UIForia.Compilers {
         // todo -- can this be a struct?
         private class Handler {
 
-            private readonly UITemplateContext ctx;
+            private readonly ExpressionContext ctx;
             private readonly Expression<Terminal> expression;
             private readonly object target;
 
-            public Handler(Expression<Terminal> expression, UITemplateContext ctx, object target) {
+            public Handler(Expression<Terminal> expression, ExpressionContext ctx, object target) {
                 this.expression = expression;
                 this.ctx = ctx;
                 this.target = target;
@@ -264,7 +260,6 @@ namespace UIForia.Compilers {
 
             [UsedImplicitly]
             public void Run() {
-                ctx.currentObject = target;
                 expression.Evaluate(ctx);
             }
 
@@ -286,7 +281,7 @@ namespace UIForia.Compilers {
             runInfo = runInfo ?? typeof(Handler).GetMethod(nameof(Handler.Run));
         }
 
-        public override void Execute(UIElement element, UITemplateContext context) {
+        public override void Execute(UIElement element, ExpressionContext context) {
             evtInfo.AddEventHandler(element, Delegate.CreateDelegate(evtInfo.EventHandlerType, new Handler(expression, context, element), runInfo));
         }
 
@@ -296,11 +291,11 @@ namespace UIForia.Compilers {
 
         private class Handler {
 
-            private readonly UITemplateContext ctx;
+            private readonly ExpressionContext ctx;
             private readonly Expression<Terminal> expression;
             private readonly object target;
 
-            public Handler(Expression<Terminal> expression, UITemplateContext ctx, object target) {
+            public Handler(Expression<Terminal> expression, ExpressionContext ctx, object target) {
                 this.expression = expression;
                 this.ctx = ctx;
                 this.target = target;
@@ -308,7 +303,6 @@ namespace UIForia.Compilers {
 
             [UsedImplicitly]
             public void Run(T evtArg0) {
-                ctx.currentObject = target;
                // ctx.SetContextValue(target, PropertyBindingCompiler.EvtArgDefaultName, evtArg0);
               //  ctx.SetContextValue(target, PropertyBindingCompiler.EvtArgNames[0], evtArg0);
 
@@ -336,8 +330,8 @@ namespace UIForia.Compilers {
             runInfo = runInfo ?? typeof(Handler).GetMethod(nameof(Handler.Run));
         }
 
-        public override void Execute(UIElement element, UITemplateContext context) {
-            evtInfo.AddEventHandler(element, Delegate.CreateDelegate(evtInfo.EventHandlerType, new Handler(expression, context, element), runInfo));
+        public override void Execute(UIElement element, ExpressionContext context) {
+            evtInfo.AddEventHandler(element, Delegate.CreateDelegate(evtInfo.EventHandlerType, new Handler(expression, context), runInfo));
         }
 
         public override bool IsConstant() {
@@ -346,26 +340,17 @@ namespace UIForia.Compilers {
 
         private class Handler {
 
-            private readonly UITemplateContext ctx;
+            private readonly ExpressionContext ctx;
             private readonly Expression<Terminal> expression;
-            private readonly object target;
 
-            public Handler(Expression<Terminal> expression, UITemplateContext ctx, object target) {
+            public Handler(Expression<Terminal> expression, ExpressionContext ctx) {
                 this.expression = expression;
                 this.ctx = ctx;
-                this.target = target;
             }
 
             [UsedImplicitly]
             public void Run(T evtArg0, U evtArg1) {
-                ctx.currentObject = target;
-//                ctx.SetContextValue(target, PropertyBindingCompiler.EvtArgDefaultName, evtArg0);
-//                ctx.SetContextValue(target, PropertyBindingCompiler.EvtArgNames[0], evtArg0);
-//                ctx.SetContextValue(target, PropertyBindingCompiler.EvtArgNames[1], evtArg1);
                 expression.Evaluate(ctx);
-//                ctx.RemoveContextValue<T>(target, PropertyBindingCompiler.EvtArgDefaultName);
-//                ctx.RemoveContextValue<T>(target, PropertyBindingCompiler.EvtArgNames[0]);
-//                ctx.RemoveContextValue<T>(target, PropertyBindingCompiler.EvtArgNames[1]);
             }
 
         }
@@ -386,8 +371,8 @@ namespace UIForia.Compilers {
             runInfo = runInfo ?? typeof(Handler).GetMethod(nameof(Handler.Run));
         }
 
-        public override void Execute(UIElement element, UITemplateContext context) {
-            evtInfo.AddEventHandler(element, Delegate.CreateDelegate(evtInfo.EventHandlerType, new Handler(expression, context, element), runInfo));
+        public override void Execute(UIElement element, ExpressionContext context) {
+            evtInfo.AddEventHandler(element, Delegate.CreateDelegate(evtInfo.EventHandlerType, new Handler(expression, context), runInfo));
         }
 
         public override bool IsConstant() {
@@ -396,28 +381,17 @@ namespace UIForia.Compilers {
 
         private class Handler {
 
-            private readonly UITemplateContext ctx;
+            private readonly ExpressionContext ctx;
             private readonly Expression<Terminal> expression;
-            private readonly object target;
 
-            public Handler(Expression<Terminal> expression, UITemplateContext ctx, object target) {
+            public Handler(Expression<Terminal> expression, ExpressionContext ctx) {
                 this.expression = expression;
                 this.ctx = ctx;
-                this.target = target;
             }
 
             [UsedImplicitly]
             public void Run(T evtArg0, U evtArg1, V evtArg2) {
-                ctx.currentObject = target;
-//                ctx.SetContextValue(target, PropertyBindingCompiler.EvtArgDefaultName, evtArg0);
-//                ctx.SetContextValue(target, PropertyBindingCompiler.EvtArgNames[0], evtArg0);
-//                ctx.SetContextValue(target, PropertyBindingCompiler.EvtArgNames[1], evtArg1);
-//                ctx.SetContextValue(target, PropertyBindingCompiler.EvtArgNames[2], evtArg2);
                 expression.Evaluate(ctx);
-//                ctx.RemoveContextValue<T>(target, PropertyBindingCompiler.EvtArgDefaultName);
-//                ctx.RemoveContextValue<T>(target, PropertyBindingCompiler.EvtArgNames[0]);
-//                ctx.RemoveContextValue<T>(target, PropertyBindingCompiler.EvtArgNames[1]);
-//                ctx.RemoveContextValue<T>(target, PropertyBindingCompiler.EvtArgNames[2]);
             }
 
         }
@@ -438,8 +412,8 @@ namespace UIForia.Compilers {
             runInfo = runInfo ?? typeof(Handler).GetMethod(nameof(Handler.Run));
         }
 
-        public override void Execute(UIElement element, UITemplateContext context) {
-            evtInfo.AddEventHandler(element, Delegate.CreateDelegate(evtInfo.EventHandlerType, new Handler(expression, context, element), runInfo));
+        public override void Execute(UIElement element, ExpressionContext context) {
+            evtInfo.AddEventHandler(element, Delegate.CreateDelegate(evtInfo.EventHandlerType, new Handler(expression, context), runInfo));
         }
 
         public override bool IsConstant() {
@@ -448,30 +422,17 @@ namespace UIForia.Compilers {
 
         private class Handler {
 
-            private readonly UITemplateContext ctx;
+            private readonly ExpressionContext ctx;
             private readonly Expression<Terminal> expression;
-            private readonly object target;
 
-            public Handler(Expression<Terminal> expression, UITemplateContext ctx, object target) {
+            public Handler(Expression<Terminal> expression, ExpressionContext ctx) {
                 this.expression = expression;
                 this.ctx = ctx;
-                this.target = target;
             }
 
             [UsedImplicitly]
             public void Run(T evtArg0, U evtArg1, V evtArg2, W evtArg3) {
-                ctx.currentObject = target;
-//                ctx.SetContextValue(target, PropertyBindingCompiler.EvtArgDefaultName, evtArg0);
-//                ctx.SetContextValue(target, PropertyBindingCompiler.EvtArgNames[0], evtArg0);
-//                ctx.SetContextValue(target, PropertyBindingCompiler.EvtArgNames[1], evtArg1);
-//                ctx.SetContextValue(target, PropertyBindingCompiler.EvtArgNames[2], evtArg2);
-//                ctx.SetContextValue(target, PropertyBindingCompiler.EvtArgNames[3], evtArg3);
                 expression.Evaluate(ctx);
-//                ctx.RemoveContextValue<T>(target, PropertyBindingCompiler.EvtArgDefaultName);
-//                ctx.RemoveContextValue<T>(target, PropertyBindingCompiler.EvtArgNames[0]);
-//                ctx.RemoveContextValue<T>(target, PropertyBindingCompiler.EvtArgNames[1]);
-//                ctx.RemoveContextValue<T>(target, PropertyBindingCompiler.EvtArgNames[2]);
-//                ctx.RemoveContextValue<T>(target, PropertyBindingCompiler.EvtArgNames[3]);
             }
 
         }

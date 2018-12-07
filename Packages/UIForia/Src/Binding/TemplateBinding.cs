@@ -4,9 +4,9 @@ public class TemplateBinding : IHierarchical {
 
     public readonly UIElement element;
     public readonly Binding[] bindings;
-    public readonly UITemplateContext context;
+    public readonly ExpressionContext context;
 
-    public TemplateBinding(UIElement element, Binding[] bindings, UITemplateContext context) {
+    public TemplateBinding(UIElement element, Binding[] bindings, ExpressionContext context) {
         this.element = element;
         this.bindings = bindings;
         this.context = context;

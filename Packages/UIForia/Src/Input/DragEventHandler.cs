@@ -20,7 +20,7 @@ namespace UIForia.Input {
             this.requiredType = requiredType;
         }
 
-        public abstract void Invoke(object target, UITemplateContext context, DragEvent evt);
+        public abstract void Invoke(object target, ExpressionContext context, DragEvent evt);
 
         public int CompareTo(DragEventHandler other) {
             int modifierResult = CompareModifiers(other);
@@ -54,7 +54,7 @@ namespace UIForia.Input {
             this.expression = expression;
         }
 
-        public override void Invoke(object target, UITemplateContext context, DragEvent evt) {
+        public override void Invoke(object target, ExpressionContext context, DragEvent evt) {
             if (ShouldRun(evt)) {
                 expression.Evaluate(context);
             }
@@ -71,7 +71,7 @@ namespace UIForia.Input {
             this.handler = handler;
         }
 
-        public override void Invoke(object target, UITemplateContext context, DragEvent evt) {
+        public override void Invoke(object target, ExpressionContext context, DragEvent evt) {
             if (ShouldRun(evt)) {
                 handler((T) target);
             }
@@ -88,7 +88,7 @@ namespace UIForia.Input {
             this.handler = handler;
         }
 
-        public override void Invoke(object target, UITemplateContext context, DragEvent evt) {
+        public override void Invoke(object target, ExpressionContext context, DragEvent evt) {
             if (ShouldRun(evt)) {
                 handler((T) target, evt);
             }

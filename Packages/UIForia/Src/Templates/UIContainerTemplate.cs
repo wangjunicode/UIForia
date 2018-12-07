@@ -48,14 +48,13 @@ namespace UIForia {
             Assert.IsNotNull(element);
             
             element.children = new UIElement[childTemplates.Count];
-            
+            element.templateContext = new ExpressionContext(inputScope.rootElement, element);
             for (int i = 0; i < childTemplates.Count; i++) {
                 element.children[i] = childTemplates[i].CreateScoped(inputScope);
                 element.children[i].parent = element;
                 element.children[i].templateParent = element;
             }
 
-            element.TemplateContext = inputScope.context;
             element.OriginTemplate = this;
             return element;
         }
@@ -100,10 +99,10 @@ namespace UIForia {
             }
 
             Assert.IsNotNull(element);
-
+            
+            element.templateContext = new ExpressionContext(inputScope.rootElement, element);
             element.children = ArrayPool<UIElement>.Empty;
             element.OriginTemplate = this;
-            element.TemplateContext = inputScope.context;
             
             return element;
 

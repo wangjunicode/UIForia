@@ -3,10 +3,10 @@ using UIForia.Input;
 
 public struct DragCreatorGroup {
 
-    public readonly UITemplateContext context;
+    public readonly ExpressionContext context;
     public readonly DragEventCreator[] creators;
 
-    public DragCreatorGroup(UITemplateContext context, DragEventCreator[] creators) {
+    public DragCreatorGroup(ExpressionContext context, DragEventCreator[] creators) {
         this.context = context;
         this.creators = creators;
     }

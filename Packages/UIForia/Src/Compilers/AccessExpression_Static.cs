@@ -7,9 +7,11 @@ namespace UIForia.Compilers {
         public override Type YieldedType => typeof(T);
 
         public AccessExpressionPart<T, U> headExpression;
-
-        public AccessExpression_Static(AccessExpressionPart<T, U> headExpression) {
+        public readonly bool isConstant;
+        
+        public AccessExpression_Static(AccessExpressionPart<T, U> headExpression, bool isConstant) {
             this.headExpression = headExpression;
+            this.isConstant = isConstant;
         }
 
         public override T Evaluate(ExpressionContext context) {
@@ -17,7 +19,7 @@ namespace UIForia.Compilers {
         }
 
         public override bool IsConstant() {
-            return false;
+            return isConstant;
         }
 
     }

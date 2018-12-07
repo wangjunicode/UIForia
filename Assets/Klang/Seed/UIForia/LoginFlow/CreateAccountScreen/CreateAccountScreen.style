@@ -22,4 +22,5 @@ style fade-panel {
     AnchorTarget = Screen;
     TransformBehaviorX = AnchorMinOffset;
     TransformBehaviorY = AnchorMinOffset;
+    RenderLayer = Modal;
 }

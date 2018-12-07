@@ -68,6 +68,7 @@ namespace UIForia {
             UIElement retn = new UITextElement();
             retn.children = ArrayPool<UIElement>.Empty;
             retn.OriginTemplate = this;
+            retn.templateContext = new ExpressionContext(inputScope.rootElement, retn);
             return retn;
         }
 

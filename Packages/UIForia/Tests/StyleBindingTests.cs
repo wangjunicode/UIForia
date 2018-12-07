@@ -31,14 +31,15 @@ public class StyleBindingTests {
         const string template = @"
         <UITemplate>
             <Contents>
-                <Panel style.backgroundImage=""url('path/to/tex1')""/>
+                <Panel style.backgroundImage=""$url('path/to/tex1')""/>
             </Contents>
         </UITemplate>
         ";
         Texture2D tex1 = new Texture2D(1, 1);
-        UIForia.ResourceManager.AddTexture("path/to/tex1", tex1);
+        ResourceManager.AddTexture("path/to/tex1", tex1);
         MockApplication view = new MockApplication(typeof(StyleTestThing), template);
         StyleTestThing root = (StyleTestThing) view.RootElement;
+        view.Update();
         UIElement panel = root.FindFirstByType<UIElement>();
         Assert.AreEqual(tex1, panel.style.BackgroundImage);
     }
@@ -48,12 +49,12 @@ public class StyleBindingTests {
         const string template = @"
         <UITemplate>
             <Contents>
-                <Panel style.backgroundImage=""url('path/to/' + textureName)""/>
+                <Panel style.backgroundImage=""$url('path/to/' + textureName)""/>
             </Contents>
         </UITemplate>
         ";
         Texture2D tex1 = new Texture2D(1, 1);
-        UIForia.ResourceManager.AddTexture("path/to/tex1", tex1);
+        ResourceManager.AddTexture("path/to/tex1", tex1);
         MockApplication view = new MockApplication(typeof(StyleTestThing), template);
         StyleTestThing root = (StyleTestThing) view.RootElement;
         root.textureName = "tex1";
@@ -74,18 +75,20 @@ public class StyleBindingTests {
         const string template = @"
         <UITemplate>
             <Contents>
-                <Panel style.textFontAsset=""url('path/to/font1')""/>
+                <Panel style.textFontAsset=""$url('path/to/font1')""/>
             </Contents>
         </UITemplate>
         ";
         TMP_FontAsset font1 = ScriptableObject.CreateInstance<TMP_FontAsset>();
-        UIForia.ResourceManager.AddFont("path/to/font1", font1);
+        font1.name = "new font";
+        ResourceManager.AddFont("path/to/font1", font1);
         MockApplication view = new MockApplication(typeof(StyleTestThing), template);
         StyleTestThing root = (StyleTestThing) view.RootElement;
         UIElement panel = root.FindFirstByType<UIElement>();
-        Assert.AreEqual(font1, panel.style.TextFontAsset);
-        UIForia.ResourceManager.RemoveFont(font1);
         view.Update();
+        Assert.AreEqual(font1, panel.style.TextFontAsset);
+        ResourceManager.RemoveFont(font1);
+        view.Update(); // should keep font after removing
         Assert.AreEqual(font1, panel.style.TextFontAsset);
         Object.DestroyImmediate(font1);
     }
@@ -95,12 +98,12 @@ public class StyleBindingTests {
         const string template = @"
         <UITemplate>
             <Contents>
-                <Panel style.textFontAsset=""url('path/to/' + fontName)""/>
+                <Panel style.textFontAsset=""$url('path/to/' + fontName)""/>
             </Contents>
         </UITemplate>
         ";
         TMP_FontAsset font1 = ScriptableObject.CreateInstance<TMP_FontAsset>();
-        UIForia.ResourceManager.AddFont("path/to/font1", font1);
+        ResourceManager.AddFont("path/to/font1", font1);
         MockApplication view = new MockApplication(typeof(StyleTestThing), template);
         StyleTestThing root = (StyleTestThing) view.RootElement;
         root.fontName = "font1";

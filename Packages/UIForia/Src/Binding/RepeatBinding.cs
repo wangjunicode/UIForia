@@ -57,7 +57,6 @@ public class RepeatBindingNode<T, U> : RepeatBindingNode where T : class, IList<
             for (int i = 0; i < list.Count; i++) {
                 previousReference.Add(list[i]);
                 UIElement newItem = template.CreateScoped(scope);
-                UITemplate.AssignContext(newItem, context);
                 newItem.parent = element;
                 newItem.templateParent = element;
 
@@ -86,8 +85,6 @@ public class RepeatBindingNode<T, U> : RepeatBindingNode where T : class, IList<
             for (int i = 0; i < diff; i++) {
                 previousReference.Add(list[previousCount + i]);
                 UIElement newItem = template.CreateScoped(scope);
-                UITemplate.AssignContext(newItem, context);
-
                 newItem.parent = element;
                 newItem.templateParent = element;
 
@@ -111,7 +108,6 @@ public class RepeatBindingNode<T, U> : RepeatBindingNode where T : class, IList<
     }
 
     public override void OnUpdate() {
-        context.currentObject = element;
         Validate();
 
         if (!element.isEnabled || element.children == null || previousReference == null) {

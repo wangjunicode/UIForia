@@ -4,12 +4,10 @@ public class BindingNode : IHierarchical {
 
     public Binding[] bindings;
     public UIElement element;
-    public UITemplateContext context;
+    public ExpressionContext context;
 
     public virtual void OnUpdate() {
-        
-        context.currentObject = element;
-        
+                
         for (int i = 0; i < bindings.Length; i++) {
             bindings[i].Execute(element, context);
         }

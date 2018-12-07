@@ -48,16 +48,12 @@ namespace UIForia.Systems {
 
         public void OnViewRemoved(UIView view) { }
 
-        private void Step(UIElement current, LightList<BindingNode> nodes) {
+        private static void Step(UIElement current, LightList<BindingNode> nodes) {
             UITemplate template = current.OriginTemplate;
 
             for (int i = 0; i < template.triggeredBindings.Length; i++) {
                 if (template.triggeredBindings[i].bindingType == BindingType.Constant) {
-                    UITemplateContext context = template.triggeredBindings[i].useRootContext
-                        ? current.TemplateContext
-                        : new UITemplateContext(current.templateRoot);
-
-                    template.triggeredBindings[i].Execute(current, context);
+                    template.triggeredBindings[i].Execute(current, current.templateContext);
                 }
             }
 
@@ -74,7 +70,7 @@ namespace UIForia.Systems {
                     ReflectionUtil.ObjectArray2
                 );
 
-                node.context = current.TemplateContext;
+                node.context = current.templateContext;
                 node.element = current;
                 node.template = repeat.template;
                 
@@ -85,7 +81,7 @@ namespace UIForia.Systems {
                     BindingNode node = new BindingNode();
                     node.bindings = template.perFrameBindings;
                     node.element = current;
-                    node.context = current.TemplateContext; // todo fix this
+                    node.context = current.templateContext;
                     nodes.Add(node);
                 }
 

@@ -37,8 +37,8 @@
                 <CreateAccountContainer label="'Create Account'">
 
                     <Group style="util.vertical-center">
-                        <Input username.bindTo="onValueChanged" text.initialize="{$route.param.username}" style="create-input"/>
-                        <Input password.bindTo="onValueChanged" text.initialize="{$route.param.password}" style="create-input"/>
+                        <Input username.bindTo="onValueChanged" style="create-input"/>
+                        <Input password.bindTo="onValueChanged" style="create-input"/>
                     </Group>
 
                     <!--<RouterLink path="'/create_account/join_or_start_colony'"-->

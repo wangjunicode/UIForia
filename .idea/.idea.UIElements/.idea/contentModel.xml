@@ -180,7 +180,6 @@
               <e p="TemplateBinding.cs" t="Include" />
               <e p="TextBinding_Multiple.cs" t="Include" />
               <e p="TextBinding_Single.cs" t="Include" />
-              <e p="UITemplateContext.cs" t="Include" />
             </e>
             <e p="Compilers" t="Include">
               <e p="AccessExpression.cs" t="Include" />
@@ -221,6 +220,7 @@
               <e p="ExpressionCompiler.cs" t="Include" />
               <e p="ExpressionCompiler2.cs" t="Include" />
               <e p="ExpressionResolvers" t="Include">
+                <e p="ContentSizeResolver.cs" t="Include" />
                 <e p="ElementResolver.cs" t="Include" />
                 <e p="ExpressionResolver.cs" t="Include" />
                 <e p="KeyboardEventResolver.cs" t="Include" />
@@ -230,13 +230,16 @@
                 <e p="RepeatItemAliasResolver.cs" t="Include" />
                 <e p="RepeatLengthAliasResolver.cs" t="Include" />
                 <e p="RouteResolver.cs" t="Include" />
+                <e p="UrlResolver.cs" t="Include" />
               </e>
               <e p="ImplicitCastExpression.cs" t="Include" />
               <e p="InputBindingCompiler.cs" t="Include" />
               <e p="OperatorOverloadExpression.cs" t="Include" />
               <e p="PropertyBindingCompiler.cs" t="Include" />
               <e p="StyleBindingCompiler.cs" t="Include" />
+              <e p="Terminal.cs" t="Include" />
             </e>
+            <e p="DataSource.cs" t="Include" />
             <e p="Elements" t="Include">
               <e p="ElementColdData.cs" t="Include" />
               <e p="IntrinsicTemplates.cs" t="Include" />

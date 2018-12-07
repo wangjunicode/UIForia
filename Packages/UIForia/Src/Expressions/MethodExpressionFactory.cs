@@ -43,7 +43,9 @@ namespace UIForia {
                 extraArgumentCount--;
             }
 
-            Type[] genericArguments = ArrayPool<Type>.GetExactSize(arguments.Count + extraArgumentCount);
+            // This wasn't working when array came from a pool.
+            // Not sure why, could be that the delegate method it gets input to retains a reference
+            Type[] genericArguments = new Type[arguments.Count + extraArgumentCount]; 
 
             if ((methodType & MethodType.Instance) != 0) {
                 genericArguments[0] = info.DeclaringType;
@@ -59,8 +61,6 @@ namespace UIForia {
             }
 
             Type callType = GetMethodCallType(info, arguments.Count, genericArguments, methodType);
-
-            ArrayPool<Type>.Release(ref genericArguments);
 
             ReflectionUtil.ObjectArray2[0] = info;
             ReflectionUtil.ObjectArray2[1] = arguments.ToArray();

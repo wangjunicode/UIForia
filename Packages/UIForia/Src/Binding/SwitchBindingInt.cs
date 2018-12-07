@@ -15,7 +15,7 @@ namespace UIForia {
             this.expression = expression;
         }
 
-        public override void Execute(UIElement element, UITemplateContext context) {
+        public override void Execute(UIElement element, ExpressionContext context) {
             throw new NotImplementedException();
 //            int value = expression.EvaluateTyped(context);
 //            

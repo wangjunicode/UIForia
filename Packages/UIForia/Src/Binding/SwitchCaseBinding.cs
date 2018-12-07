@@ -12,17 +12,21 @@ namespace UIForia {
             this.index = index;
         }
 
-        public override void Execute(UIElement element, UITemplateContext context) {
-//            if (index == context.GetSwitchValue(switchId)) {
-//                if ((element.flags & UIElementFlags.Enabled) == 0) {
-//                    context.view.EnableElement(element);
-//                }
-//            }
-//            else {
-//                if ((element.flags & UIElementFlags.Enabled) != 0) {
-//                    context.view.DisableElement(element);
-//                }
-//            }
+//        public override void Execute(UIElement element, UITemplateContext context) {
+////            if (index == context.GetSwitchValue(switchId)) {
+////                if ((element.flags & UIElementFlags.Enabled) == 0) {
+////                    context.view.EnableElement(element);
+////                }
+////            }
+////            else {
+////                if ((element.flags & UIElementFlags.Enabled) != 0) {
+////                    context.view.DisableElement(element);
+////                }
+////            }
+//        }
+
+        public override void Execute(UIElement element, ExpressionContext context) {
+            throw new System.NotImplementedException();
         }
 
         public override bool IsConstant() {

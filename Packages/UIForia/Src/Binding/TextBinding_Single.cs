@@ -8,7 +8,7 @@ namespace UIForia {
             this.expression = expression;
         }
 
-        public override void Execute(UIElement element, UITemplateContext context) {
+        public override void Execute(UIElement element, ExpressionContext context) {
             UITextElement textElement = (UITextElement) element;
             textElement.SetText(expression.Evaluate(context));
         }

@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using UIForia.Rendering;
 using UIForia.Util;
 using UnityEngine;
-using Debug = System.Diagnostics.Debug;
 
 namespace UIForia.Animation {
 

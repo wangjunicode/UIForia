@@ -15,6 +15,7 @@ namespace UIForia {
             UIChildrenElement element = new UIChildrenElement();
             inputScope.rootElement.TranscludedChildren = element;
             element.OriginTemplate = this;
+            element.templateContext = new ExpressionContext(inputScope.rootElement, element);
             return element;
             
         }

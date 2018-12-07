@@ -43,7 +43,6 @@ namespace UIForia {
             UITemplate expandedRoot = templateToExpand.rootElementTemplate;
             
             // todo solve roots added twice
-            int triggeredCount = triggeredBindings.Length;
             
             triggeredBindings = MergeBindingArray(triggeredBindings, expandedRoot.triggeredBindings);
             perFrameBindings = MergeBindingArray(perFrameBindings, expandedRoot.perFrameBindings);
@@ -54,18 +53,12 @@ namespace UIForia {
             baseStyles = MergeArray(baseStyles, expandedRoot.baseStyles);
             Array.Reverse(baseStyles);
 
-            for (int i = 0; i < triggeredCount; i++) {
-                triggeredBindings[i].useRootContext = true;
-            }
         }
 
         private static Binding[] MergeBindingArray(Binding[] a, Binding[] b) {
             int startCount = a.Length;
             a = ResizeToMerge(a, b);
             int idx = 0;
-            for (int i = 0; i < startCount; i++) {
-                a[i].useRootContext = true;
-            }
             for (int i = startCount; i < a.Length; i++) {
                 a[i] = b[idx++];
             }
@@ -105,12 +98,7 @@ namespace UIForia {
             return a;
         }
 
-        protected void ValidateProps() {
-//            ProcessedType processedType;
-//            processedType.ValidateProps(bindings);
-        }
-
-        public UIElement CreateUnscoped(UIView view) {
+        public UIElement CreateUnscoped() {
             UIElement element = (UIElement) Activator.CreateInstance(rootType);
             element.flags |= UIElementFlags.TemplateRoot;
             element.OriginTemplate = this;
@@ -118,19 +106,17 @@ namespace UIForia {
 
             List<UITemplate> actualChildren = childTemplates;
 
-            UITemplateContext context = new UITemplateContext(element);
-            TemplateScope scope = new TemplateScope(element, context);
+            TemplateScope scope = new TemplateScope(element);
 
             element.children = ArrayPool<UIElement>.GetExactSize(actualChildren.Count);
 
             element.templateParent = null;
-            element.templateRoot = element;
-
+            element.templateContext = new ExpressionContext(element, element);
+            
             for (int i = 0; i < element.children.Length; i++) {
                 element.children[i] = actualChildren[i].CreateScoped(scope);
                 element.children[i].parent = element;
                 element.children[i].templateParent = element;
-                element.children[i].templateRoot = element;
             }
 
             UIChildrenElement childrenElement = element.TranscludedChildren;
@@ -138,13 +124,12 @@ namespace UIForia {
                 childrenElement.children = ArrayPool<UIElement>.Empty;
             }
 
-            AssignContext(element, context);
-
             return element;
         }
 
         // children of this element are transcluded
         // actual children are built from parsed template's root children
+        // todo -- get rid of TemplateScope since it's really just a pointer to the root element
         public override UIElement CreateScoped(TemplateScope inputScope) {
             // todo -- some templates don't need their own scope
 
@@ -157,16 +142,15 @@ namespace UIForia {
             List<UITemplate> transcludedTemplates = childTemplates;
             List<UITemplate> actualChildren = templateToExpand.childTemplates;
 
-            UITemplateContext context = new UITemplateContext(element);
-            TemplateScope scope = new TemplateScope(element, context);
+            TemplateScope scope = new TemplateScope(element);
 
             element.children = ArrayPool<UIElement>.GetExactSize(actualChildren.Count);
-
+            element.templateContext = new ExpressionContext(inputScope.rootElement, element);
+            
             for (int i = 0; i < element.children.Length; i++) {
                 element.children[i] = actualChildren[i].CreateScoped(scope);
                 element.children[i].parent = element;
                 element.children[i].templateParent = element;
-                element.children[i].templateRoot = inputScope.rootElement;
             }
 
             UIChildrenElement childrenElement = element.TranscludedChildren;
@@ -177,13 +161,10 @@ namespace UIForia {
                     childrenElement.children[i] = transcludedTemplates[i].CreateScoped(inputScope);
                     childrenElement.children[i].parent = childrenElement;
                     childrenElement.children[i].templateParent = element;
-                    childrenElement.children[i].templateRoot = inputScope.rootElement;
                 }
             }
 
             // todo -- create slots here
-
-            AssignContext(element, context);
 
             // find <Slot>
             //     -> attach from input

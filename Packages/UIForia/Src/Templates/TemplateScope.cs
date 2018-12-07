@@ -3,12 +3,10 @@ namespace UIForia {
     public struct TemplateScope {
 
         // add slots
-        public UITemplateContext context;
         public readonly UIElement rootElement;
         
-        public TemplateScope(UIElement rootElement, UITemplateContext context) {
+        public TemplateScope(UIElement rootElement) {
             this.rootElement = rootElement;
-            this.context = context;
         }
         
     }

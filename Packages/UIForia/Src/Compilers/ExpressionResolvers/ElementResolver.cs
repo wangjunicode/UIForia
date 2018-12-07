@@ -1,5 +1,4 @@
 using System;
-using UIForia.Parsing;
 
 namespace UIForia.Compilers {
 
@@ -7,18 +6,18 @@ namespace UIForia.Compilers {
 
         public ElementResolver(string aliasName) : base(aliasName) { }
 
-        private static readonly UIElementExpression<UIElement> s_Expression = new UIElementExpression<UIElement>();
+        private static readonly UIElementExpression s_Expression = new UIElementExpression();
 
-        public override Expression CompileAsValueExpression(ASTNode node, Func<Type, ASTNode, Expression> visit) {
-            return null;
+        public override Expression CompileAsValueExpression(CompilerContext context) {
+            return s_Expression;
         }
 
-        public class UIElementExpression<T> : Expression<T> {
+        public class UIElementExpression : Expression<UIElement> {
 
-            public override Type YieldedType => typeof(T);
+            public override Type YieldedType => typeof(UIElement);
        
-            public override T Evaluate(ExpressionContext context) {
-                return (T) context.currentObject;
+            public override UIElement Evaluate(ExpressionContext context) {
+                return (UIElement) context.currentObject;
             }
 
             public override bool IsConstant() {

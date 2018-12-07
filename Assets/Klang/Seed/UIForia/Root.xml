@@ -21,32 +21,27 @@
 
     <Contents style="container">
 
-        <CreateAccountContainer label="'Create Account'">
-            <KlangButton onMouseDown="{AnimateTransition()}" style="klang-button.black" label="'Next'"/>
-        </CreateAccountContainer>
-        
-        <KlangButton onMouseDown="{AnimateTransition()}" style="klang-button.black" label="'Next'"/>
-
         <!--<URLNavBar/>-->
-        <!--<Group style="app-body">-->
+        
+        <Group style="app-body">
 
-            <!--<Router>-->
+            <Router>
 
-                <!--<Route path="'/login'">-->
+                <Route path="'/login'">
+        
+                    <LoginScreen/>
 
-                    <!--<LoginScreen/>-->
+                </Route>
 
-                <!--</Route>-->
+                <Route path="'/create_account'">
 
-                <!--<Route path="'/create_account'">-->
+                    <CreateAccountScreen/>
 
-                    <!--<CreateAccountScreen/>-->
+                </Route>
 
-                <!--</Route>-->
+            </Router>
 
-            <!--</Router>-->
-
-        <!--</Group>-->
+        </Group>
 
     </Contents>
 

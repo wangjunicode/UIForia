@@ -231,12 +231,11 @@ namespace UIForia {
             element.flags |= UIElementFlags.Created;
             element.OnCreate();
             
-            UITemplateContext context = element.TemplateContext;
             Binding[] enabledBindings = element.OriginTemplate?.triggeredBindings;
                 
             if (enabledBindings != null) {
                 for (int i = 0; i < enabledBindings.Length; i++) {
-                    enabledBindings[i].Execute(element, context);
+                    enabledBindings[i].Execute(element, element.templateContext);
                 }
             }
             
@@ -412,13 +411,12 @@ namespace UIForia {
         }
 
         private static void RunEnableBinding(UIElement element) {
-            UITemplateContext context = element.TemplateContext;
             Binding[] enabledBindings = element.OriginTemplate?.triggeredBindings;
                 
             if (enabledBindings != null) {
                 for (int i = 0; i < enabledBindings.Length; i++) {
                     if (enabledBindings[i].bindingType == BindingType.OnEnable) {
-                        enabledBindings[i].Execute(element, context);
+                        enabledBindings[i].Execute(element, element.templateContext);
                     }
                 }
             }

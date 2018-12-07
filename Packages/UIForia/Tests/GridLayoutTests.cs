@@ -13,7 +13,7 @@ public class GridLayoutTests {
 
     [Template(TemplateType.String, @"
         <UITemplate>
-            <Contents style.layoutType='Grid'>
+            <Contents style.layoutType='LayoutType.Grid'>
                 <Group x-id='child0' style.preferredWidth='100f' style.preferredHeight='100f'/>
                 <Group x-id='child1' style.preferredWidth='100f' style.preferredHeight='100f'/>
                 <Group x-id='child2' style.preferredWidth='100f' style.preferredHeight='100f'/>
@@ -36,7 +36,7 @@ public class GridLayoutTests {
 
     [Template(TemplateType.String, @"
         <UITemplate>
-            <Contents style.layoutType='Grid'>
+            <Contents style.layoutType='LayoutType.Grid'>
                 <Repeat list='{gridItems}'>
                     <Group style.preferredWidth='100f' style.preferredHeight='100f'/>
                 </Repeat>

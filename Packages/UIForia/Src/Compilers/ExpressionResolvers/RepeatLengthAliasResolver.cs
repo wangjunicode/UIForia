@@ -1,5 +1,4 @@
 using System;
-using UIForia.Parsing;
 
 namespace UIForia.Compilers {
 
@@ -7,9 +6,9 @@ namespace UIForia.Compilers {
 
         public RepeatLengthAliasResolver(string aliasName) : base(aliasName) { }
 
-//        public override Expression CompileAsValueExpression(ASTNode node, Func<Type, ASTNode, Expression> visit) {
-//            return new RepeatLengthExpression(aliasName);
-//        }
+        public override Expression CompileAsValueExpression(CompilerContext context) {
+            return new RepeatLengthExpression(aliasName);
+        }
 
         public class RepeatLengthExpression : Expression<int> {
 

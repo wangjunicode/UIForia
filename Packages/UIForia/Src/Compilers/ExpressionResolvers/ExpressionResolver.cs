@@ -1,4 +1,4 @@
-using System;
+using System.Collections.Generic;
 using System.Reflection;
 using UIForia.Parsing;
 using UIForia.Util;
@@ -9,7 +9,7 @@ namespace UIForia.Compilers {
 
         public string aliasName;
 
-        public ExpressionAliasResolver(string aliasName) {
+        protected ExpressionAliasResolver(string aliasName) {
             if (aliasName[0] != '$') {
                 aliasName = "$" + aliasName;
             }
@@ -17,20 +17,20 @@ namespace UIForia.Compilers {
             this.aliasName = aliasName;
         }
 
-        public virtual Expression CompileAsValueExpression2(IdentifierNode node, Func<Type, ASTNode, Expression> visit) {
-            return null;
-        }
-        
-        public virtual Expression CompileAsValueExpression(ASTNode node, Func<Type, ASTNode, Expression> visit) {
-            return null;
+        public virtual Expression CompileAsValueExpression(CompilerContext context) {
+            throw new CompileException($"Tried to invoke alias {aliasName} as a value in expression, but this is not supported");
         }
 
-        public virtual Expression CompileAsAccessExpression(ASTNode node, Func<Type, ASTNode, Expression> visit) {
-            return null;
+        public virtual Expression CompileAsDotExpression(CompilerContext context, string propertyName) {
+            throw new CompileException($"Tried to invoke alias {aliasName} as a dot expression, but this is not supported");
         }
 
-        public virtual Expression CompileAsMethodExpression(CompilerContext context, InvokeNode node) {
-            return null;
+        public virtual Expression CompileAsIndexExpression(CompilerContext context, ASTNode indexNode) {
+            throw new CompileException($"Tried to invoke alias {aliasName} as an index expression, but this is not supported");
+        }
+
+        public virtual Expression CompileAsMethodExpression(CompilerContext context, List<ASTNode> parameters) {
+            throw new CompileException($"Tried to invoke alias {aliasName} as a method expression, but this is not supported");
         }
 
     }
@@ -38,7 +38,7 @@ namespace UIForia.Compilers {
     public class ValueResolver<T> : ExpressionAliasResolver {
 
         public readonly T value;
-        
+
         public ValueResolver(string aliasName, T value) : base(aliasName) {
             this.value = value;
         }
@@ -61,45 +61,10 @@ namespace UIForia.Compilers {
             this.infos = new LightList<MethodInfo>(1);
             this.infos.Add(info);
         }
-      
-//        public override Expression CompileAsMethodExpression(CompilerContext context, InvokeNode invokeNode) {
-//            
-//            // need to figure out type signatures
-//            // for each method
-//            // if argument count matches
-//            // for each argument
-//            // compile expression w/ target type equal to parameter type
-//            
-//            // for each method info
-//            
-//            // Compile(parameters[i].ParameterType, node.parameters[i]);
-//            ParameterInfo[] parameterInfos = infos[0].GetParameters();
-//            
-//            Expression[] expressionParameters = new Expression[parameterInfos.Length];
-//            
-//            for (int i = 0; i < invokeNode.parameters.Count; i++) {
-//
-//                Expression arg = context.Visit(parameterInfos[i].ParameterType, invokeNode.parameters[i]);
-//                if (arg != null) {
-//                    expressionParameters[i] = arg;
-//                }
-//                
-//            }
-//
-//            if (infos[0].IsStatic) {
-//                
-//            }
-//
-//            if (infos[0].ReturnType == typeof(void)) {
-//                    
-//            }
-//            
-//            return MethodExpressionFactory.CreateMethodExpression(infos[0], expressionParameters);
-//        }
 
     }
 
-    
+
     public class EnumResolver<T> : ExpressionAliasResolver {
 
         public EnumResolver(string aliasName) : base(aliasName) { }
@@ -123,4 +88,5 @@ namespace UIForia.Compilers {
 //        }
 
     }
+
 }

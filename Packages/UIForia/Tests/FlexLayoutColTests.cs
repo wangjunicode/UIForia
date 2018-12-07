@@ -437,7 +437,7 @@ public class FlexLayoutColTests {
             <Style path='FlexLayoutColTests+FlexColLayoutThing+Style'/>
             <Contents style.layoutType='LayoutType.Flex' 
                       style.flexLayoutDirection='LayoutDirection.Column'
-                      style.preferredWidth='$contentSize(100)' 
+                      style.preferredWidth='$content(100)' 
                       style.preferredHeight='500f' 
                       style.paddingLeft='5f'
                       style.paddingRight='5f'>
@@ -462,7 +462,7 @@ public class FlexLayoutColTests {
         string template = @"
         <UITemplate>
             <Style path='FlexLayoutColTests+FlexColLayoutThing+Style'/>
-            <Contents style.layoutType='LayoutType.Flex' style.flexLayoutDirection='LayoutDirection.Column' style.preferredWidth='content(100)' style.preferredHeight='500f'>
+            <Contents style.layoutType='LayoutType.Flex' style.flexLayoutDirection='LayoutDirection.Column' style.preferredWidth='$content(100)' style.preferredHeight='500f'>
                 <Group x-id='child0' style='w100h100' style.paddingLeft='5f' style.paddingRight='5f'/>
                 <Group x-id='child1' style='w100h100' style.paddingLeft='5f' style.paddingRight='5f'/>
                 <Group x-id='child2' style='w100h100' style.paddingLeft='5f' style.paddingRight='5f'/>
@@ -484,7 +484,7 @@ public class FlexLayoutColTests {
         string template = @"
         <UITemplate>
             <Style path='FlexLayoutColTests+FlexColLayoutThing+Style'/>
-            <Contents style.layoutType='LayoutType.Flex' style.flexLayoutDirection='LayoutDirection.Column' style.preferredWidth='content(100)' style.preferredHeight='content(100)'>
+            <Contents style.layoutType='LayoutType.Flex' style.flexLayoutDirection='LayoutDirection.Column' style.preferredWidth='$content(100)' style.preferredHeight='$content(100)'>
                 <Group x-id='child0' style='w100h100' style.paddingLeft='5f' style.paddingRight='5f'/>
                 <Group x-id='child1' style='w100h100' style.paddingLeft='5f' style.paddingRight='5f'/>
                 <Group x-id='child2' style='w100h100' style.paddingLeft='5f' style.paddingRight='5f'/>

@@ -15,7 +15,7 @@ namespace UIForia.Input {
 #if DEBUG
         public MethodInfo methodInfo;
 #endif
-        public abstract void Invoke(object target, UITemplateContext context, KeyboardInputEvent evt);
+        public abstract void Invoke(object target, ExpressionContext context, KeyboardInputEvent evt);
 
         // keyboard event handlers should be sorted by require focus
         // then by require specific key
@@ -84,7 +84,7 @@ namespace UIForia.Input {
             this.keyCode = KeyCodeUtil.AnyKey;
         }
 
-        public override void Invoke(object target, UITemplateContext context, KeyboardInputEvent evt) {
+        public override void Invoke(object target, ExpressionContext context, KeyboardInputEvent evt) {
             if (ShouldRun(evt)) {
                 expression.Evaluate(context);
             }
@@ -101,7 +101,7 @@ namespace UIForia.Input {
         }
 
         // can probably merge a bunch of flags & just do 1 check
-        public override void Invoke(object target, UITemplateContext context, KeyboardInputEvent evt) {
+        public override void Invoke(object target, ExpressionContext context, KeyboardInputEvent evt) {
             if (ShouldRun(evt)) {
                 handler((T) target);
             }
@@ -117,7 +117,7 @@ namespace UIForia.Input {
             this.handler = handler;
         }
 
-        public override void Invoke(object target, UITemplateContext context, KeyboardInputEvent evt) {
+        public override void Invoke(object target, ExpressionContext context, KeyboardInputEvent evt) {
             if (ShouldRun(evt)) {
                 handler((T) target, evt);
             }

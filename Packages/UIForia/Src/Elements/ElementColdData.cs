@@ -14,7 +14,7 @@ public struct ElementColdData {
     public UITemplate templateRef;
     public ElementRenderer renderer;
     public UIElement templateParent;
-    public UITemplateContext templateContext;
+    public ExpressionContext templateContext;
     public LightList<ElementAttribute> attributes;
     public UIChildrenElement transcludedChildren;
     public UIView view;

@@ -18,6 +18,10 @@ public class ExpressionCompilerTests2 {
             this.value = value;
         }
 
+        public string Stuff() {
+            return value.ToString();
+        }
+        
         public override string ToString() {
             return value.ToString();
         }
@@ -142,7 +146,7 @@ public class ExpressionCompilerTests2 {
             this.value = value;
         }
 
-        public override Expression CompileAsValueExpression2(IdentifierNode node, Func<Type, ASTNode, Expression> visit) {
+        public override Expression CompileAsValueExpression(CompilerContext context) {
             return new ConstantExpression<T>(value);
         }
 
@@ -1043,7 +1047,7 @@ public class ExpressionCompilerTests2 {
         target.things.Add(new Thing(6));
         ExpressionContext ctx = new ExpressionContext(target);
         ExpressionCompiler2 compiler = new ExpressionCompiler2();
-        Expression<string> expression = compiler.Compile<string>(typeof(TestType0), "things[1].ToString()");
+        Expression<string> expression = compiler.Compile<string>(typeof(TestType0), "things[1].Stuff()");
         Assert.IsInstanceOf<AccessExpression<string, TestType0>>(expression);
         Assert.AreEqual((6f).ToString(), expression.Evaluate(ctx));
     }

@@ -58,7 +58,6 @@ namespace UIForia {
 
         public abstract UIElement CreateScoped(TemplateScope inputScope);
 
-
         public virtual void Compile(ParsedTemplate template) {
             if(isCompiled) return;
             isCompiled = true;
@@ -202,6 +201,9 @@ namespace UIForia {
                     attributes[i].isCompiled = true;
                     Binding binding = propCompiler.CompileAttribute(template.rootElementTemplate.RootType, elementType, attributes[i]);
                     if (binding != null) {
+                        if (binding.IsConstant()) {
+                            binding.bindingType = BindingType.Constant;
+                        }
                         s_BindingList.Add(binding);
                     }
                 }
@@ -241,27 +243,6 @@ namespace UIForia {
             }
             
             ListPool<UIStyleGroup>.Release(ref list);
-        }
-
-        public static void AssignContext(UIElement element, UITemplateContext context) {
-            element.TemplateContext = context;
-
-            if (element.children == null) return;
-
-            for (int i = 0; i < element.children.Length; i++) {
-
-                if (element.children[i].OriginTemplate is UIElementTemplate) {
-                    element.children[i].TemplateContext = context;
-                    continue;
-                }
-
-                if (element.children[i] is UIChildrenElement) {
-                    continue;
-                }
-
-                AssignContext(element.children[i], context);
-            }
-            
         }
 
         public virtual void PostCompile(ParsedTemplate template) {}

@@ -14,7 +14,7 @@ namespace UIForia.StyleBindings {
             this.expression = expression;
         }
 
-        public override void Execute(UIElement element, UITemplateContext context) {
+        public override void Execute(UIElement element, ExpressionContext context) {
             if (!element.style.IsInState(state)) return;
 
             var oldValue = element.style.m_PropertyMap[(int)propertyId].AsOverflow;
@@ -28,12 +28,12 @@ namespace UIForia.StyleBindings {
             return expression.IsConstant();
         }
 
-        public override void Apply(UIStyle style, UITemplateContext context) {
+        public override void Apply(UIStyle style, ExpressionContext context) {
             var value = expression.Evaluate(context);
             style.SetProperty(new StyleProperty(propertyId, (int)value));
         }
 
-        public override void Apply(UIStyleSet styleSet, UITemplateContext context) {
+        public override void Apply(UIStyleSet styleSet, ExpressionContext context) {
             var value = expression.Evaluate(context);
             styleSet.SetProperty(new StyleProperty(propertyId, (int)value), state);
         }
@@ -51,7 +51,7 @@ namespace UIForia.StyleBindings {
             this.expression = expression;
         }
 
-        public override void Execute(UIElement element, UITemplateContext context) {
+        public override void Execute(UIElement element, ExpressionContext context) {
             if (!element.style.IsInState(state)) return;
 
             var oldValue = element.style.m_PropertyMap[(int)propertyId].AsColor;
@@ -65,12 +65,12 @@ namespace UIForia.StyleBindings {
             return expression.IsConstant();
         }
 
-        public override void Apply(UIStyle style, UITemplateContext context) {
+        public override void Apply(UIStyle style, ExpressionContext context) {
             var value = expression.Evaluate(context);
             style.SetProperty(new StyleProperty(propertyId, value));
         }
 
-        public override void Apply(UIStyleSet styleSet, UITemplateContext context) {
+        public override void Apply(UIStyleSet styleSet, ExpressionContext context) {
             var value = expression.Evaluate(context);
             styleSet.SetProperty(new StyleProperty(propertyId, value), state);
         }
@@ -88,7 +88,7 @@ namespace UIForia.StyleBindings {
             this.expression = expression;
         }
 
-        public override void Execute(UIElement element, UITemplateContext context) {
+        public override void Execute(UIElement element, ExpressionContext context) {
             if (!element.style.IsInState(state)) return;
 
             var oldValue = element.style.m_PropertyMap[(int)propertyId].AsTexture2D;
@@ -102,12 +102,12 @@ namespace UIForia.StyleBindings {
             return expression.IsConstant();
         }
 
-        public override void Apply(UIStyle style, UITemplateContext context) {
+        public override void Apply(UIStyle style, ExpressionContext context) {
             var value = expression.Evaluate(context);
             style.SetProperty(new StyleProperty(propertyId, 0, 0, value));
         }
 
-        public override void Apply(UIStyleSet styleSet, UITemplateContext context) {
+        public override void Apply(UIStyleSet styleSet, ExpressionContext context) {
             var value = expression.Evaluate(context);
             styleSet.SetProperty(new StyleProperty(propertyId, 0, 0, value), state);
         }
@@ -125,7 +125,7 @@ namespace UIForia.StyleBindings {
             this.expression = expression;
         }
 
-        public override void Execute(UIElement element, UITemplateContext context) {
+        public override void Execute(UIElement element, ExpressionContext context) {
             if (!element.style.IsInState(state)) return;
 
             var oldValue = element.style.m_PropertyMap[(int)propertyId].AsGradientType;
@@ -139,12 +139,12 @@ namespace UIForia.StyleBindings {
             return expression.IsConstant();
         }
 
-        public override void Apply(UIStyle style, UITemplateContext context) {
+        public override void Apply(UIStyle style, ExpressionContext context) {
             var value = expression.Evaluate(context);
             style.SetProperty(new StyleProperty(propertyId, (int)value));
         }
 
-        public override void Apply(UIStyleSet styleSet, UITemplateContext context) {
+        public override void Apply(UIStyleSet styleSet, ExpressionContext context) {
             var value = expression.Evaluate(context);
             styleSet.SetProperty(new StyleProperty(propertyId, (int)value), state);
         }
@@ -162,7 +162,7 @@ namespace UIForia.StyleBindings {
             this.expression = expression;
         }
 
-        public override void Execute(UIElement element, UITemplateContext context) {
+        public override void Execute(UIElement element, ExpressionContext context) {
             if (!element.style.IsInState(state)) return;
 
             var oldValue = element.style.m_PropertyMap[(int)propertyId].AsGradientAxis;
@@ -176,12 +176,12 @@ namespace UIForia.StyleBindings {
             return expression.IsConstant();
         }
 
-        public override void Apply(UIStyle style, UITemplateContext context) {
+        public override void Apply(UIStyle style, ExpressionContext context) {
             var value = expression.Evaluate(context);
             style.SetProperty(new StyleProperty(propertyId, (int)value));
         }
 
-        public override void Apply(UIStyleSet styleSet, UITemplateContext context) {
+        public override void Apply(UIStyleSet styleSet, ExpressionContext context) {
             var value = expression.Evaluate(context);
             styleSet.SetProperty(new StyleProperty(propertyId, (int)value), state);
         }
@@ -199,7 +199,7 @@ namespace UIForia.StyleBindings {
             this.expression = expression;
         }
 
-        public override void Execute(UIElement element, UITemplateContext context) {
+        public override void Execute(UIElement element, ExpressionContext context) {
             if (!element.style.IsInState(state)) return;
 
             var oldValue = element.style.m_PropertyMap[(int)propertyId].AsFloat;
@@ -213,12 +213,12 @@ namespace UIForia.StyleBindings {
             return expression.IsConstant();
         }
 
-        public override void Apply(UIStyle style, UITemplateContext context) {
+        public override void Apply(UIStyle style, ExpressionContext context) {
             var value = expression.Evaluate(context);
             style.SetProperty(new StyleProperty(propertyId, value));
         }
 
-        public override void Apply(UIStyleSet styleSet, UITemplateContext context) {
+        public override void Apply(UIStyleSet styleSet, ExpressionContext context) {
             var value = expression.Evaluate(context);
             styleSet.SetProperty(new StyleProperty(propertyId, value), state);
         }
@@ -236,7 +236,7 @@ namespace UIForia.StyleBindings {
             this.expression = expression;
         }
 
-        public override void Execute(UIElement element, UITemplateContext context) {
+        public override void Execute(UIElement element, ExpressionContext context) {
             if (!element.style.IsInState(state)) return;
 
             var oldValue = element.style.m_PropertyMap[(int)propertyId].AsBackgroundFillType;
@@ -250,12 +250,12 @@ namespace UIForia.StyleBindings {
             return expression.IsConstant();
         }
 
-        public override void Apply(UIStyle style, UITemplateContext context) {
+        public override void Apply(UIStyle style, ExpressionContext context) {
             var value = expression.Evaluate(context);
             style.SetProperty(new StyleProperty(propertyId, (int)value));
         }
 
-        public override void Apply(UIStyleSet styleSet, UITemplateContext context) {
+        public override void Apply(UIStyleSet styleSet, ExpressionContext context) {
             var value = expression.Evaluate(context);
             styleSet.SetProperty(new StyleProperty(propertyId, (int)value), state);
         }
@@ -273,7 +273,7 @@ namespace UIForia.StyleBindings {
             this.expression = expression;
         }
 
-        public override void Execute(UIElement element, UITemplateContext context) {
+        public override void Execute(UIElement element, ExpressionContext context) {
             if (!element.style.IsInState(state)) return;
 
             var oldValue = element.style.m_PropertyMap[(int)propertyId].AsBackgroundShapeType;
@@ -287,12 +287,12 @@ namespace UIForia.StyleBindings {
             return expression.IsConstant();
         }
 
-        public override void Apply(UIStyle style, UITemplateContext context) {
+        public override void Apply(UIStyle style, ExpressionContext context) {
             var value = expression.Evaluate(context);
             style.SetProperty(new StyleProperty(propertyId, (int)value));
         }
 
-        public override void Apply(UIStyleSet styleSet, UITemplateContext context) {
+        public override void Apply(UIStyleSet styleSet, ExpressionContext context) {
             var value = expression.Evaluate(context);
             styleSet.SetProperty(new StyleProperty(propertyId, (int)value), state);
         }
@@ -310,7 +310,7 @@ namespace UIForia.StyleBindings {
             this.expression = expression;
         }
 
-        public override void Execute(UIElement element, UITemplateContext context) {
+        public override void Execute(UIElement element, ExpressionContext context) {
             if (!element.style.IsInState(state)) return;
 
             var oldValue = element.style.m_PropertyMap[(int)propertyId].AsInt;
@@ -324,12 +324,12 @@ namespace UIForia.StyleBindings {
             return expression.IsConstant();
         }
 
-        public override void Apply(UIStyle style, UITemplateContext context) {
+        public override void Apply(UIStyle style, ExpressionContext context) {
             var value = expression.Evaluate(context);
             style.SetProperty(new StyleProperty(propertyId, value));
         }
 
-        public override void Apply(UIStyleSet styleSet, UITemplateContext context) {
+        public override void Apply(UIStyleSet styleSet, ExpressionContext context) {
             var value = expression.Evaluate(context);
             styleSet.SetProperty(new StyleProperty(propertyId, value), state);
         }
@@ -347,7 +347,7 @@ namespace UIForia.StyleBindings {
             this.expression = expression;
         }
 
-        public override void Execute(UIElement element, UITemplateContext context) {
+        public override void Execute(UIElement element, ExpressionContext context) {
             if (!element.style.IsInState(state)) return;
 
             var oldValue = element.style.m_PropertyMap[(int)propertyId].AsCrossAxisAlignment;
@@ -361,12 +361,12 @@ namespace UIForia.StyleBindings {
             return expression.IsConstant();
         }
 
-        public override void Apply(UIStyle style, UITemplateContext context) {
+        public override void Apply(UIStyle style, ExpressionContext context) {
             var value = expression.Evaluate(context);
             style.SetProperty(new StyleProperty(propertyId, (int)value));
         }
 
-        public override void Apply(UIStyleSet styleSet, UITemplateContext context) {
+        public override void Apply(UIStyleSet styleSet, ExpressionContext context) {
             var value = expression.Evaluate(context);
             styleSet.SetProperty(new StyleProperty(propertyId, (int)value), state);
         }
@@ -384,7 +384,7 @@ namespace UIForia.StyleBindings {
             this.expression = expression;
         }
 
-        public override void Execute(UIElement element, UITemplateContext context) {
+        public override void Execute(UIElement element, ExpressionContext context) {
             if (!element.style.IsInState(state)) return;
 
             var oldValue = element.style.m_PropertyMap[(int)propertyId].AsLayoutDirection;
@@ -398,12 +398,12 @@ namespace UIForia.StyleBindings {
             return expression.IsConstant();
         }
 
-        public override void Apply(UIStyle style, UITemplateContext context) {
+        public override void Apply(UIStyle style, ExpressionContext context) {
             var value = expression.Evaluate(context);
             style.SetProperty(new StyleProperty(propertyId, (int)value));
         }
 
-        public override void Apply(UIStyleSet styleSet, UITemplateContext context) {
+        public override void Apply(UIStyleSet styleSet, ExpressionContext context) {
             var value = expression.Evaluate(context);
             styleSet.SetProperty(new StyleProperty(propertyId, (int)value), state);
         }
@@ -421,7 +421,7 @@ namespace UIForia.StyleBindings {
             this.expression = expression;
         }
 
-        public override void Execute(UIElement element, UITemplateContext context) {
+        public override void Execute(UIElement element, ExpressionContext context) {
             if (!element.style.IsInState(state)) return;
 
             var oldValue = element.style.m_PropertyMap[(int)propertyId].AsLayoutWrap;
@@ -435,12 +435,12 @@ namespace UIForia.StyleBindings {
             return expression.IsConstant();
         }
 
-        public override void Apply(UIStyle style, UITemplateContext context) {
+        public override void Apply(UIStyle style, ExpressionContext context) {
             var value = expression.Evaluate(context);
             style.SetProperty(new StyleProperty(propertyId, (int)value));
         }
 
-        public override void Apply(UIStyleSet styleSet, UITemplateContext context) {
+        public override void Apply(UIStyleSet styleSet, ExpressionContext context) {
             var value = expression.Evaluate(context);
             styleSet.SetProperty(new StyleProperty(propertyId, (int)value), state);
         }
@@ -458,7 +458,7 @@ namespace UIForia.StyleBindings {
             this.expression = expression;
         }
 
-        public override void Execute(UIElement element, UITemplateContext context) {
+        public override void Execute(UIElement element, ExpressionContext context) {
             if (!element.style.IsInState(state)) return;
 
             var oldValue = element.style.m_PropertyMap[(int)propertyId].AsMainAxisAlignment;
@@ -472,12 +472,12 @@ namespace UIForia.StyleBindings {
             return expression.IsConstant();
         }
 
-        public override void Apply(UIStyle style, UITemplateContext context) {
+        public override void Apply(UIStyle style, ExpressionContext context) {
             var value = expression.Evaluate(context);
             style.SetProperty(new StyleProperty(propertyId, (int)value));
         }
 
-        public override void Apply(UIStyleSet styleSet, UITemplateContext context) {
+        public override void Apply(UIStyleSet styleSet, ExpressionContext context) {
             var value = expression.Evaluate(context);
             styleSet.SetProperty(new StyleProperty(propertyId, (int)value), state);
         }
@@ -495,7 +495,7 @@ namespace UIForia.StyleBindings {
             this.expression = expression;
         }
 
-        public override void Execute(UIElement element, UITemplateContext context) {
+        public override void Execute(UIElement element, ExpressionContext context) {
             if (!element.style.IsInState(state)) return;
 
             var oldValue = element.style.m_PropertyMap[(int)propertyId].AsGridLayoutDensity;
@@ -509,12 +509,12 @@ namespace UIForia.StyleBindings {
             return expression.IsConstant();
         }
 
-        public override void Apply(UIStyle style, UITemplateContext context) {
+        public override void Apply(UIStyle style, ExpressionContext context) {
             var value = expression.Evaluate(context);
             style.SetProperty(new StyleProperty(propertyId, (int)value));
         }
 
-        public override void Apply(UIStyleSet styleSet, UITemplateContext context) {
+        public override void Apply(UIStyleSet styleSet, ExpressionContext context) {
             var value = expression.Evaluate(context);
             styleSet.SetProperty(new StyleProperty(propertyId, (int)value), state);
         }
@@ -532,7 +532,7 @@ namespace UIForia.StyleBindings {
             this.expression = expression;
         }
 
-        public override void Execute(UIElement element, UITemplateContext context) {
+        public override void Execute(UIElement element, ExpressionContext context) {
             if (!element.style.IsInState(state)) return;
 
             var oldValue = element.style.m_PropertyMap[(int)propertyId].AsGridTemplate;
@@ -546,12 +546,12 @@ namespace UIForia.StyleBindings {
             return expression.IsConstant();
         }
 
-        public override void Apply(UIStyle style, UITemplateContext context) {
+        public override void Apply(UIStyle style, ExpressionContext context) {
             var value = expression.Evaluate(context);
             style.SetProperty(new StyleProperty(propertyId, 0, 0, value));
         }
 
-        public override void Apply(UIStyleSet styleSet, UITemplateContext context) {
+        public override void Apply(UIStyleSet styleSet, ExpressionContext context) {
             var value = expression.Evaluate(context);
             styleSet.SetProperty(new StyleProperty(propertyId, 0, 0, value), state);
         }
@@ -569,7 +569,7 @@ namespace UIForia.StyleBindings {
             this.expression = expression;
         }
 
-        public override void Execute(UIElement element, UITemplateContext context) {
+        public override void Execute(UIElement element, ExpressionContext context) {
             if (!element.style.IsInState(state)) return;
 
             var oldValue = element.style.m_PropertyMap[(int)propertyId].AsGridTrackSize;
@@ -583,12 +583,12 @@ namespace UIForia.StyleBindings {
             return expression.IsConstant();
         }
 
-        public override void Apply(UIStyle style, UITemplateContext context) {
+        public override void Apply(UIStyle style, ExpressionContext context) {
             var value = expression.Evaluate(context);
             style.SetProperty(new StyleProperty(propertyId, value));
         }
 
-        public override void Apply(UIStyleSet styleSet, UITemplateContext context) {
+        public override void Apply(UIStyleSet styleSet, ExpressionContext context) {
             var value = expression.Evaluate(context);
             styleSet.SetProperty(new StyleProperty(propertyId, value), state);
         }
@@ -606,7 +606,7 @@ namespace UIForia.StyleBindings {
             this.expression = expression;
         }
 
-        public override void Execute(UIElement element, UITemplateContext context) {
+        public override void Execute(UIElement element, ExpressionContext context) {
             if (!element.style.IsInState(state)) return;
 
             var oldValue = element.style.m_PropertyMap[(int)propertyId].AsUIMeasurement;
@@ -620,12 +620,12 @@ namespace UIForia.StyleBindings {
             return expression.IsConstant();
         }
 
-        public override void Apply(UIStyle style, UITemplateContext context) {
+        public override void Apply(UIStyle style, ExpressionContext context) {
             var value = expression.Evaluate(context);
             style.SetProperty(new StyleProperty(propertyId, value));
         }
 
-        public override void Apply(UIStyleSet styleSet, UITemplateContext context) {
+        public override void Apply(UIStyleSet styleSet, ExpressionContext context) {
             var value = expression.Evaluate(context);
             styleSet.SetProperty(new StyleProperty(propertyId, value), state);
         }
@@ -643,7 +643,7 @@ namespace UIForia.StyleBindings {
             this.expression = expression;
         }
 
-        public override void Execute(UIElement element, UITemplateContext context) {
+        public override void Execute(UIElement element, ExpressionContext context) {
             if (!element.style.IsInState(state)) return;
 
             var oldValue = element.style.m_PropertyMap[(int)propertyId].AsUIFixedLength;
@@ -657,12 +657,12 @@ namespace UIForia.StyleBindings {
             return expression.IsConstant();
         }
 
-        public override void Apply(UIStyle style, UITemplateContext context) {
+        public override void Apply(UIStyle style, ExpressionContext context) {
             var value = expression.Evaluate(context);
             style.SetProperty(new StyleProperty(propertyId, value));
         }
 
-        public override void Apply(UIStyleSet styleSet, UITemplateContext context) {
+        public override void Apply(UIStyleSet styleSet, ExpressionContext context) {
             var value = expression.Evaluate(context);
             styleSet.SetProperty(new StyleProperty(propertyId, value), state);
         }
@@ -680,7 +680,7 @@ namespace UIForia.StyleBindings {
             this.expression = expression;
         }
 
-        public override void Execute(UIElement element, UITemplateContext context) {
+        public override void Execute(UIElement element, ExpressionContext context) {
             if (!element.style.IsInState(state)) return;
 
             var oldValue = element.style.m_PropertyMap[(int)propertyId].AsFont;
@@ -694,12 +694,12 @@ namespace UIForia.StyleBindings {
             return expression.IsConstant();
         }
 
-        public override void Apply(UIStyle style, UITemplateContext context) {
+        public override void Apply(UIStyle style, ExpressionContext context) {
             var value = expression.Evaluate(context);
             style.SetProperty(new StyleProperty(propertyId, 0, 0, value));
         }
 
-        public override void Apply(UIStyleSet styleSet, UITemplateContext context) {
+        public override void Apply(UIStyleSet styleSet, ExpressionContext context) {
             var value = expression.Evaluate(context);
             styleSet.SetProperty(new StyleProperty(propertyId, 0, 0, value), state);
         }
@@ -717,7 +717,7 @@ namespace UIForia.StyleBindings {
             this.expression = expression;
         }
 
-        public override void Execute(UIElement element, UITemplateContext context) {
+        public override void Execute(UIElement element, ExpressionContext context) {
             if (!element.style.IsInState(state)) return;
 
             var oldValue = element.style.m_PropertyMap[(int)propertyId].AsFontStyle;
@@ -731,12 +731,12 @@ namespace UIForia.StyleBindings {
             return expression.IsConstant();
         }
 
-        public override void Apply(UIStyle style, UITemplateContext context) {
+        public override void Apply(UIStyle style, ExpressionContext context) {
             var value = expression.Evaluate(context);
             style.SetProperty(new StyleProperty(propertyId, (int)value));
         }
 
-        public override void Apply(UIStyleSet styleSet, UITemplateContext context) {
+        public override void Apply(UIStyleSet styleSet, ExpressionContext context) {
             var value = expression.Evaluate(context);
             styleSet.SetProperty(new StyleProperty(propertyId, (int)value), state);
         }
@@ -754,7 +754,7 @@ namespace UIForia.StyleBindings {
             this.expression = expression;
         }
 
-        public override void Execute(UIElement element, UITemplateContext context) {
+        public override void Execute(UIElement element, ExpressionContext context) {
             if (!element.style.IsInState(state)) return;
 
             var oldValue = element.style.m_PropertyMap[(int)propertyId].AsTextAlignment;
@@ -768,12 +768,12 @@ namespace UIForia.StyleBindings {
             return expression.IsConstant();
         }
 
-        public override void Apply(UIStyle style, UITemplateContext context) {
+        public override void Apply(UIStyle style, ExpressionContext context) {
             var value = expression.Evaluate(context);
             style.SetProperty(new StyleProperty(propertyId, (int)value));
         }
 
-        public override void Apply(UIStyleSet styleSet, UITemplateContext context) {
+        public override void Apply(UIStyleSet styleSet, ExpressionContext context) {
             var value = expression.Evaluate(context);
             styleSet.SetProperty(new StyleProperty(propertyId, (int)value), state);
         }
@@ -791,7 +791,7 @@ namespace UIForia.StyleBindings {
             this.expression = expression;
         }
 
-        public override void Execute(UIElement element, UITemplateContext context) {
+        public override void Execute(UIElement element, ExpressionContext context) {
             if (!element.style.IsInState(state)) return;
 
             var oldValue = element.style.m_PropertyMap[(int)propertyId].AsTextTransform;
@@ -805,12 +805,12 @@ namespace UIForia.StyleBindings {
             return expression.IsConstant();
         }
 
-        public override void Apply(UIStyle style, UITemplateContext context) {
+        public override void Apply(UIStyle style, ExpressionContext context) {
             var value = expression.Evaluate(context);
             style.SetProperty(new StyleProperty(propertyId, (int)value));
         }
 
-        public override void Apply(UIStyleSet styleSet, UITemplateContext context) {
+        public override void Apply(UIStyleSet styleSet, ExpressionContext context) {
             var value = expression.Evaluate(context);
             styleSet.SetProperty(new StyleProperty(propertyId, (int)value), state);
         }
@@ -828,7 +828,7 @@ namespace UIForia.StyleBindings {
             this.expression = expression;
         }
 
-        public override void Execute(UIElement element, UITemplateContext context) {
+        public override void Execute(UIElement element, ExpressionContext context) {
             if (!element.style.IsInState(state)) return;
 
             var oldValue = element.style.m_PropertyMap[(int)propertyId].AsAnchorTarget;
@@ -842,12 +842,12 @@ namespace UIForia.StyleBindings {
             return expression.IsConstant();
         }
 
-        public override void Apply(UIStyle style, UITemplateContext context) {
+        public override void Apply(UIStyle style, ExpressionContext context) {
             var value = expression.Evaluate(context);
             style.SetProperty(new StyleProperty(propertyId, (int)value));
         }
 
-        public override void Apply(UIStyleSet styleSet, UITemplateContext context) {
+        public override void Apply(UIStyleSet styleSet, ExpressionContext context) {
             var value = expression.Evaluate(context);
             styleSet.SetProperty(new StyleProperty(propertyId, (int)value), state);
         }
@@ -865,7 +865,7 @@ namespace UIForia.StyleBindings {
             this.expression = expression;
         }
 
-        public override void Execute(UIElement element, UITemplateContext context) {
+        public override void Execute(UIElement element, ExpressionContext context) {
             if (!element.style.IsInState(state)) return;
 
             var oldValue = element.style.m_PropertyMap[(int)propertyId].AsTransformBehavior;
@@ -879,12 +879,12 @@ namespace UIForia.StyleBindings {
             return expression.IsConstant();
         }
 
-        public override void Apply(UIStyle style, UITemplateContext context) {
+        public override void Apply(UIStyle style, ExpressionContext context) {
             var value = expression.Evaluate(context);
             style.SetProperty(new StyleProperty(propertyId, (int)value));
         }
 
-        public override void Apply(UIStyleSet styleSet, UITemplateContext context) {
+        public override void Apply(UIStyleSet styleSet, ExpressionContext context) {
             var value = expression.Evaluate(context);
             styleSet.SetProperty(new StyleProperty(propertyId, (int)value), state);
         }
@@ -902,7 +902,7 @@ namespace UIForia.StyleBindings {
             this.expression = expression;
         }
 
-        public override void Execute(UIElement element, UITemplateContext context) {
+        public override void Execute(UIElement element, ExpressionContext context) {
             if (!element.style.IsInState(state)) return;
 
             var oldValue = element.style.m_PropertyMap[(int)propertyId].AsLayoutType;
@@ -916,12 +916,12 @@ namespace UIForia.StyleBindings {
             return expression.IsConstant();
         }
 
-        public override void Apply(UIStyle style, UITemplateContext context) {
+        public override void Apply(UIStyle style, ExpressionContext context) {
             var value = expression.Evaluate(context);
             style.SetProperty(new StyleProperty(propertyId, (int)value));
         }
 
-        public override void Apply(UIStyleSet styleSet, UITemplateContext context) {
+        public override void Apply(UIStyleSet styleSet, ExpressionContext context) {
             var value = expression.Evaluate(context);
             styleSet.SetProperty(new StyleProperty(propertyId, (int)value), state);
         }
@@ -939,7 +939,7 @@ namespace UIForia.StyleBindings {
             this.expression = expression;
         }
 
-        public override void Execute(UIElement element, UITemplateContext context) {
+        public override void Execute(UIElement element, ExpressionContext context) {
             if (!element.style.IsInState(state)) return;
 
             var oldValue = element.style.m_PropertyMap[(int)propertyId].AsLayoutBehavior;
@@ -953,12 +953,12 @@ namespace UIForia.StyleBindings {
             return expression.IsConstant();
         }
 
-        public override void Apply(UIStyle style, UITemplateContext context) {
+        public override void Apply(UIStyle style, ExpressionContext context) {
             var value = expression.Evaluate(context);
             style.SetProperty(new StyleProperty(propertyId, (int)value));
         }
 
-        public override void Apply(UIStyleSet styleSet, UITemplateContext context) {
+        public override void Apply(UIStyleSet styleSet, ExpressionContext context) {
             var value = expression.Evaluate(context);
             styleSet.SetProperty(new StyleProperty(propertyId, (int)value), state);
         }
@@ -976,7 +976,7 @@ namespace UIForia.StyleBindings {
             this.expression = expression;
         }
 
-        public override void Execute(UIElement element, UITemplateContext context) {
+        public override void Execute(UIElement element, ExpressionContext context) {
             if (!element.style.IsInState(state)) return;
 
             var oldValue = element.style.m_PropertyMap[(int)propertyId].AsRenderLayer;
@@ -990,12 +990,12 @@ namespace UIForia.StyleBindings {
             return expression.IsConstant();
         }
 
-        public override void Apply(UIStyle style, UITemplateContext context) {
+        public override void Apply(UIStyle style, ExpressionContext context) {
             var value = expression.Evaluate(context);
             style.SetProperty(new StyleProperty(propertyId, (int)value));
         }
 
-        public override void Apply(UIStyleSet styleSet, UITemplateContext context) {
+        public override void Apply(UIStyleSet styleSet, ExpressionContext context) {
             var value = expression.Evaluate(context);
             styleSet.SetProperty(new StyleProperty(propertyId, (int)value), state);
         }
@@ -1013,7 +1013,7 @@ namespace UIForia.StyleBindings {
             this.expression = expression;
         }
 
-        public override void Execute(UIElement element, UITemplateContext context) {
+        public override void Execute(UIElement element, ExpressionContext context) {
             if (!element.style.IsInState(state)) return;
 
             var oldValue = element.style.m_PropertyMap[(int)propertyId].AsVerticalScrollbarAttachment;
@@ -1027,12 +1027,12 @@ namespace UIForia.StyleBindings {
             return expression.IsConstant();
         }
 
-        public override void Apply(UIStyle style, UITemplateContext context) {
+        public override void Apply(UIStyle style, ExpressionContext context) {
             var value = expression.Evaluate(context);
             style.SetProperty(new StyleProperty(propertyId, (int)value));
         }
 
-        public override void Apply(UIStyleSet styleSet, UITemplateContext context) {
+        public override void Apply(UIStyleSet styleSet, ExpressionContext context) {
             var value = expression.Evaluate(context);
             styleSet.SetProperty(new StyleProperty(propertyId, (int)value), state);
         }
@@ -1050,7 +1050,7 @@ namespace UIForia.StyleBindings {
             this.expression = expression;
         }
 
-        public override void Execute(UIElement element, UITemplateContext context) {
+        public override void Execute(UIElement element, ExpressionContext context) {
             if (!element.style.IsInState(state)) return;
 
             var oldValue = element.style.m_PropertyMap[(int)propertyId].AsScrollbarButtonPlacement;
@@ -1064,12 +1064,12 @@ namespace UIForia.StyleBindings {
             return expression.IsConstant();
         }
 
-        public override void Apply(UIStyle style, UITemplateContext context) {
+        public override void Apply(UIStyle style, ExpressionContext context) {
             var value = expression.Evaluate(context);
             style.SetProperty(new StyleProperty(propertyId, (int)value));
         }
 
-        public override void Apply(UIStyleSet styleSet, UITemplateContext context) {
+        public override void Apply(UIStyleSet styleSet, ExpressionContext context) {
             var value = expression.Evaluate(context);
             styleSet.SetProperty(new StyleProperty(propertyId, (int)value), state);
         }
@@ -1087,7 +1087,7 @@ namespace UIForia.StyleBindings {
             this.expression = expression;
         }
 
-        public override void Execute(UIElement element, UITemplateContext context) {
+        public override void Execute(UIElement element, ExpressionContext context) {
             if (!element.style.IsInState(state)) return;
 
             var oldValue = element.style.m_PropertyMap[(int)propertyId].AsHorizontalScrollbarAttachment;
@@ -1101,12 +1101,12 @@ namespace UIForia.StyleBindings {
             return expression.IsConstant();
         }
 
-        public override void Apply(UIStyle style, UITemplateContext context) {
+        public override void Apply(UIStyle style, ExpressionContext context) {
             var value = expression.Evaluate(context);
             style.SetProperty(new StyleProperty(propertyId, (int)value));
         }
 
-        public override void Apply(UIStyleSet styleSet, UITemplateContext context) {
+        public override void Apply(UIStyleSet styleSet, ExpressionContext context) {
             var value = expression.Evaluate(context);
             styleSet.SetProperty(new StyleProperty(propertyId, (int)value), state);
         }

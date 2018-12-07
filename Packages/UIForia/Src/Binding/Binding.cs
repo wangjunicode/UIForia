@@ -4,7 +4,6 @@ namespace UIForia {
 
         public readonly string bindingId;
         public BindingType bindingType;
-        public bool useRootContext;
         
         protected Binding(string bindingId) {
             this.bindingId = bindingId;
@@ -16,7 +15,7 @@ namespace UIForia {
         public bool IsNormal => bindingType == BindingType.Normal;
         public bool IsTriggered => bindingType != BindingType.Normal;
         
-        public abstract void Execute(UIElement element, UITemplateContext context);
+        public abstract void Execute(UIElement element, ExpressionContext context);
 
         public abstract bool IsConstant();
 

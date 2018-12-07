@@ -38,15 +38,14 @@ public class TemplateTests {
         Assert.IsNotEmpty(template.triggeredBindings);
         Assert.AreEqual(1, template.triggeredBindings.Length);
         Assert.IsInstanceOf<TextBinding_Multiple>(template.triggeredBindings[0]);
-        template.triggeredBindings[0].Execute(element, new UITemplateContext(null));
+        template.triggeredBindings[0].Execute(element, new ExpressionContext(null));
         Assert.AreEqual("hello there", As<UITextElement>(element).GetText());
     }
 
     [Test]
     public void TextElement_CompileMultipartDynamicBinding() {
         TestTarget target = new TestTarget();
-        UITemplateContext ctx = new UITemplateContext(null);
-        ctx.rootObject = target;
+        ExpressionContext ctx = new ExpressionContext(target);
 
         target.stringValue = "world";
         UITextTemplate template = new UITextTemplate("'hello {stringValue}!'");
@@ -63,9 +62,7 @@ public class TemplateTests {
     [Test]
     public void TextElement_EventOnChange() {
         TestTarget target = new TestTarget();
-        UITemplateContext ctx = new UITemplateContext(null);
-        ctx.rootObject = target;
-
+        ExpressionContext ctx = new ExpressionContext(target);
         target.stringValue = "world";
         UITextTemplate template = new UITextTemplate("'hello {stringValue}!'");
         template.Compile(dummyTemplate);
@@ -79,8 +76,7 @@ public class TemplateTests {
     [Test]
     public void TextElement_NoEventWithoutChange() {
         TestTarget target = new TestTarget();
-        UITemplateContext ctx = new UITemplateContext(null);
-        ctx.rootObject = target;
+        ExpressionContext ctx = new ExpressionContext(target);
 
         target.stringValue = "world";
         UITextTemplate template = new UITextTemplate("'hello {stringValue}!'");

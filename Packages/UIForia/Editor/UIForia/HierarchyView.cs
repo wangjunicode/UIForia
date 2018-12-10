@@ -4,6 +4,7 @@ using UnityEditor.IMGUI.Controls;
 using System.Collections.Generic;
 using UIForia;
 using UIForia.Editor;
+using UIForia.Layout.LayoutTypes;
 using UIForia.Rendering;
 using UIForia.Systems;
 using UnityEditor;
@@ -140,6 +141,9 @@ public class HierarchyView : TreeView {
             case CullResult.OpacityZero:
                 return "[Culled - Opacity is zero]";
                 
+            case CullResult.VisibilityHidden:
+                return "[Culled - Visibility Hidden]";
+            
             default:
                 throw new ArgumentOutOfRangeException(nameof(result), result, null);
         }
@@ -170,8 +174,9 @@ public class HierarchyView : TreeView {
         GUI.Label(args.rowRect, s_Content, s_ElementNameStyle);
         r.x += v.x + 5f;
         r.width -= v.x + 5f;
-        s_Content.text = item.element.style.BaseStyleNames;
-
+        LayoutBox box = view.Application.LayoutSystem.GetBoxForElement(item.element);
+        s_Content.text = item.element.style.BaseStyleNames + "(children: " + box.children.Count + ")";
+            
         textStyle.textColor = AdjustColor(Color.yellow, item.element);
 
         GUI.Label(r, s_Content, s_ElementNameStyle);

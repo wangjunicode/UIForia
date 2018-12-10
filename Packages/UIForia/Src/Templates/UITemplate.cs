@@ -37,9 +37,9 @@ namespace UIForia {
 
         protected static readonly LightList<Binding> s_BindingList = new LightList<Binding>();
 
-        private static readonly StyleBindingCompiler styleCompiler = new StyleBindingCompiler();
-        private static readonly InputBindingCompiler inputCompiler = new InputBindingCompiler();
-        private static readonly PropertyBindingCompiler propCompiler = new PropertyBindingCompiler();
+        protected static readonly StyleBindingCompiler styleCompiler = new StyleBindingCompiler();
+        protected static readonly InputBindingCompiler inputCompiler = new InputBindingCompiler();
+        protected static readonly PropertyBindingCompiler propCompiler = new PropertyBindingCompiler();
 
         protected UITemplate(List<UITemplate> childTemplates, List<AttributeDefinition> attributes = null) {
             this.id = ++s_IdGenerator;

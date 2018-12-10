@@ -9,7 +9,8 @@ using UIForia.Util;
 using UnityEngine;
 
 namespace UIForia.Systems {
-
+ 
+    
     public class LayoutSystem : ILayoutSystem {
 
         public struct ViewRect {
@@ -118,7 +119,7 @@ namespace UIForia.Systems {
                 root.allocatedHeight = root.GetHeights(root.allocatedWidth).clampedSize;
             }
 
-            if (forceLayout || root.markedForLayout) {
+            if (true || forceLayout || root.markedForLayout) {
                 root.RunLayout();
                 root.markedForLayout = false;
 #if DEBUG
@@ -186,7 +187,7 @@ namespace UIForia.Systems {
                         }
                     }
 
-                    if (forceLayout || box.markedForLayout) {
+                    if (true || forceLayout || box.markedForLayout) {
                         box.RunLayout();
                         box.markedForLayout = false;
 #if DEBUG
@@ -231,10 +232,10 @@ namespace UIForia.Systems {
 
                     // while parent is higher layer and requires layout
                     while (ptr != null) {
-                        if (((ptr.flags & UIElementFlags.RequiresLayout) == 0)) {
-                            ptr = ptr.parent;
-                            continue;
-                        }
+//                        if (((ptr.flags & UIElementFlags.RequiresLayout) == 0)) {
+//                            ptr = ptr.parent;
+//                            continue;
+//                        }
 
                         if (ptr.layoutResult.layer < computedLayer) {
                             break;
@@ -565,14 +566,52 @@ namespace UIForia.Systems {
 
         public void OnElementEnabled(UIElement element) {
             LayoutBox child = m_LayoutBoxMap.GetOrDefault(element.id);
-            if (child == null) return;
-            m_LayoutBoxMap.GetOrDefault(element.parent.id)?.OnChildEnabled(child);
+            Stack<UIElement> elements = StackPool<UIElement>.Get();
+            LightList<LayoutBox> boxes = LightListPool<LayoutBox>.Get();
+            
+            elements.Push(element);
+            while (elements.Count != 0) {
+                UIElement current = elements.Pop();
+
+                LayoutBox box = m_LayoutBoxMap.GetOrDefault(current.id);
+                box.markedForLayout = true;
+
+                if (current.children == null) {
+                    continue;
+                }
+
+                box.InvalidatePreferredSizeCache();
+                boxes.Clear();
+                boxes.EnsureCapacity(current.children.Length);
+                for (int i = 0; i < current.children.Length; i++) {
+                    UIElement childElement = current.children[i];
+                    elements.Push(childElement);
+                    if (childElement.isDisabled || childElement.style.LayoutBehavior == LayoutBehavior.Ignored) {
+                        continue;
+                    }
+                    LayoutBox childBox = m_LayoutBoxMap.GetOrDefault(childElement.id);
+                    boxes.AddUnchecked(childBox);
+                }
+
+                box.SetChildren(boxes);
+
+            }
+
+            if (child.parent != null) {
+                child.parent.OnChildEnabled(child);
+                child.parent.RequestContentSizeChangeLayout();
+            }
+            LightListPool<LayoutBox>.Release(ref boxes);
+
         }
 
+      
         public void OnElementDisabled(UIElement element) {
             LayoutBox child = m_LayoutBoxMap.GetOrDefault(element.id);
-            if (child == null) return;
-            m_LayoutBoxMap.GetOrDefault(element.parent.id)?.OnChildDisabled(child);
+            if (child?.parent != null) {
+                child.parent.OnChildDisabled(child);
+                child.parent.RequestContentSizeChangeLayout();
+            }
         }
 
         public void OnElementDestroyed(UIElement element) { }
@@ -651,18 +690,18 @@ namespace UIForia.Systems {
 
                 for (int i = 0; i < parentElement.children.Length; i++) {
                     UIElement child = parentElement.children[i];
-                    if ((child.flags & UIElementFlags.RequiresLayout) == 0) {
+                  //  if ((child.flags & UIElementFlags.RequiresLayout) == 0) {
                         // don't create a layout box but do process the children
-                        stack.Push(ValueTuple.Create(child, (LayoutBox) null));
-                    }
-                    else {
+                  //      stack.Push(ValueTuple.Create(child, (LayoutBox) null));
+                  ///  }
+                   // else {
                         LayoutBox childBox = CreateLayoutBox(child);
                         childBox.SetParent(parentBox);
                         m_LayoutBoxMap.Add(child.id, childBox);
                         stack.Push(ValueTuple.Create(child, childBox));
                         m_Elements.Add(child);
                         m_PendingInitialization.Add(childBox);
-                    }
+                   // }
                 }
             }
 
@@ -740,6 +779,10 @@ namespace UIForia.Systems {
                 box.BorderBottom,
                 box.BorderLeft
             );
+        }
+
+        public LayoutBox GetBoxForElement(UIElement itemElement) {
+            return m_LayoutBoxMap.GetOrDefault(itemElement.id);
         }
 
         private static int ResolveRenderLayer(UIElement element) {

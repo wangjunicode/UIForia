@@ -15,3 +15,11 @@ style black {
     BackgroundColor = black;
     TextColor = white;
 }
+
+style grey {
+    
+}
+
+style blue {
+    
+}

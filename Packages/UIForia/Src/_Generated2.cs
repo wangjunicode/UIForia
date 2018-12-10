@@ -299,6 +299,43 @@ namespace UIForia.StyleBindings {
 
     }
         
+    public class StyleBinding_Visibility : StyleBinding {
+
+        public readonly Expression<UIForia.Rendering.Visibility> expression;
+        public readonly StylePropertyId propertyId;
+        
+        public StyleBinding_Visibility(string propertyName, StylePropertyId propertyId, StyleState state, Expression<UIForia.Rendering.Visibility> expression)
+            : base(propertyName, state) {
+            this.propertyId = propertyId;
+            this.expression = expression;
+        }
+
+        public override void Execute(UIElement element, ExpressionContext context) {
+            if (!element.style.IsInState(state)) return;
+
+            var oldValue = element.style.m_PropertyMap[(int)propertyId].AsVisibility;
+            var value = expression.Evaluate(context);
+            if (value != oldValue) {
+                element.style.SetProperty(new StyleProperty(propertyId, (int)value), state);
+            }
+        }
+
+        public override bool IsConstant() {
+            return expression.IsConstant();
+        }
+
+        public override void Apply(UIStyle style, ExpressionContext context) {
+            var value = expression.Evaluate(context);
+            style.SetProperty(new StyleProperty(propertyId, (int)value));
+        }
+
+        public override void Apply(UIStyleSet styleSet, ExpressionContext context) {
+            var value = expression.Evaluate(context);
+            styleSet.SetProperty(new StyleProperty(propertyId, (int)value), state);
+        }
+
+    }
+        
     public class StyleBinding_int : StyleBinding {
 
         public readonly Expression<int> expression;
@@ -1124,6 +1161,7 @@ namespace UIForia.Compilers {
         private static readonly EnumAliasSource<Shapes2D.GradientAxis> s_EnumSource_GradientAxis = new EnumAliasSource<Shapes2D.GradientAxis>();
         private static readonly EnumAliasSource<UIForia.Rendering.BackgroundFillType> s_EnumSource_BackgroundFillType = new EnumAliasSource<UIForia.Rendering.BackgroundFillType>();
         private static readonly EnumAliasSource<UIForia.Rendering.BackgroundShapeType> s_EnumSource_BackgroundShapeType = new EnumAliasSource<UIForia.Rendering.BackgroundShapeType>();
+        private static readonly EnumAliasSource<UIForia.Rendering.Visibility> s_EnumSource_Visibility = new EnumAliasSource<UIForia.Rendering.Visibility>();
         private static readonly EnumAliasSource<UIForia.Layout.CrossAxisAlignment> s_EnumSource_CrossAxisAlignment = new EnumAliasSource<UIForia.Layout.CrossAxisAlignment>();
         private static readonly EnumAliasSource<UIForia.Rendering.LayoutDirection> s_EnumSource_LayoutDirection = new EnumAliasSource<UIForia.Rendering.LayoutDirection>();
         private static readonly EnumAliasSource<UIForia.Rendering.LayoutWrap> s_EnumSource_LayoutWrap = new EnumAliasSource<UIForia.Rendering.LayoutWrap>();
@@ -1185,6 +1223,8 @@ case "overflowx":
                     return new UIForia.StyleBindings.StyleBinding_float("Opacity", UIForia.Rendering.StylePropertyId.Opacity, targetState.state, Compile<float>(value, null));                
                 case "cursor":
                     return new UIForia.StyleBindings.StyleBinding_Texture2D("Cursor", UIForia.Rendering.StylePropertyId.Cursor, targetState.state, Compile<UnityEngine.Texture2D>(value, textureUrlSource));                
+                case "visibility":
+                    return new UIForia.StyleBindings.StyleBinding_Visibility("Visibility", UIForia.Rendering.StylePropertyId.Visibility, targetState.state, Compile<UIForia.Rendering.Visibility>(value, s_EnumSource_Visibility));                
                 case "flexitemorder":
                     return new UIForia.StyleBindings.StyleBinding_int("FlexItemOrder", UIForia.Rendering.StylePropertyId.FlexItemOrder, targetState.state, Compile<int>(value, null));                
                 case "flexitemgrow":

@@ -143,6 +143,7 @@ namespace UIForia.Rendering {
         public VerticalScrollbarAttachment AsVerticalScrollbarAttachment => (VerticalScrollbarAttachment) valuePart0;
         public HorizontalScrollbarAttachment AsHorizontalScrollbarAttachment => (HorizontalScrollbarAttachment) valuePart0;
         public ScrollbarButtonPlacement AsScrollbarButtonPlacement => (ScrollbarButtonPlacement) valuePart0;
+        public Visibility AsVisibility => (Visibility) valuePart0;
 
         public static bool operator ==(StyleProperty a, StyleProperty b) {
             bool baseCase =

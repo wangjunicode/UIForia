@@ -539,6 +539,8 @@ namespace UIForia.Parsing.StyleParser {
         static StyleParser() {
             s_CurrentlyParsingList = new List<string>();
             s_StylePropertyMappers = new Dictionary<string, MapAction>();
+            // todo -- get rid of this, or at least don't allocate so many actions. 
+            
             StylePropertyMapper[] styleIdentifiers = {
                 new StylePropertyMapper("Overflow", StylePropertyMappers.DisplayMapper),
                 new StylePropertyMapper("OverflowX", StylePropertyMappers.DisplayMapper),
@@ -549,6 +551,7 @@ namespace UIForia.Parsing.StyleParser {
                 new StylePropertyMapper("BackgroundImage", StylePropertyMappers.DisplayMapper),
                 new StylePropertyMapper("Opacity", StylePropertyMappers.DisplayMapper),
                 new StylePropertyMapper("Cursor", StylePropertyMappers.DisplayMapper),
+                new StylePropertyMapper("Visibility", StylePropertyMappers.DisplayMapper), 
 
                 new StylePropertyMapper("GridItemColStart", StylePropertyMappers.GridItemMapper),
                 new StylePropertyMapper("GridItemColSpan", StylePropertyMappers.GridItemMapper),

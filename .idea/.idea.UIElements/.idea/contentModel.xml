@@ -145,8 +145,9 @@
             <e p="UIForia.Editor.asmdef" t="Include" />
           </e>
           <e p="Src" t="Include">
-            <e p="_Generated.cs" t="Include" />
+            <e p="_Generated1.cs" t="Include" />
             <e p="_Generated2.cs" t="Include" />
+            <e p="_Generated3.cs" t="Include" />
             <e p="Animation" t="Include">
               <e p="AnimationGroup.cs" t="Include" />
               <e p="AnimationKeyFrame.cs" t="Include" />
@@ -485,6 +486,7 @@
               </e>
               <e p="UIView.cs" t="Include" />
               <e p="VerticalScrollbarAttachment.cs" t="Include" />
+              <e p="Visibility.cs" t="Include" />
               <e p="WhitespaceMode.cs" t="Include" />
             </e>
             <e p="ResourceManager.cs" t="Include" />

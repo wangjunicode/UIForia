@@ -7,30 +7,50 @@
     <Style path="Klang/Seed/UIForia/KlangButton/KlangButton.style" alias="klang-button"/>
     
     <Contents style="container">
-        
-        <ChildRouter onRouteChanged="{AnimateTransition()}">
-            
-            <Route path="'/join_or_start_colony'">
+        <Panel style="fade-panel" x-id="fader"/>
 
-                <CreateAccountContainer label="'Create Account'">
-                    <KlangLinkButton style="klang-button.blue" label="'Join Existing Colony'" path="'/join_colony'"/>
-                    <Text>Recommended for new players</Text>
-                    <KlangLinkButton style="klang-button.black" label="'Start new Colony'" path="'/create_colony'"/>
-                </CreateAccountContainer>
-                
-            </Route>
+        <ChildRouter>
             
-            <Route path="'/join_colony'">
-                
-            </Route>
-            
-            <Route path="'/create_colony'">
-                
-            </Route>
-            
-            <Route path="'/character_creator'">
-                
-            </Route>
+            <!--<Route path="'/join_or_start_colony'">-->
+
+                <!--<CreateAccountContainer label="'Create Account'">-->
+                    <!---->
+                    <!--<KlangLinkButton style="klang-button.blue" label="'Join Existing Colony'" path="'/create_account/join_colony'"/>-->
+                    <!---->
+                    <!--<Text>Recommended for new players</Text>-->
+                    <!---->
+                    <!--<KlangLinkButton style="klang-button.black" label="'Start new Colony'" path="'/create_account/create_colony'"/>-->
+                <!---->
+                <!--</CreateAccountContainer>-->
+                <!---->
+            <!--</Route>-->
+            <!---->
+            <!--<Route path="'/join_colony'">-->
+                <!---->
+            <!--</Route>-->
+            <!---->
+            <!--<Route path="'/create_colony'">-->
+                <!---->
+                <!--<CreateAccountContainer label="'Start new Colony'">-->
+
+                    <!--<Group style="util.vertical-center">-->
+                        <!--<Input colonyName.bindTo="onValueChanged" style="create-input"/>-->
+                        <!--<Input colonyPassword.bindTo="onValueChanged" style="create-input-small"/>-->
+                    <!--</Group>-->
+                    <!---->
+                    <!--<KlangLinkButton style="klang-button.black" label="'Next'" path="'/create_account/join_colony'"/>-->
+
+                    <!--<RouterLinkBack>-->
+                        <!--<KlangLinkButton style="klang-button.grey" label="'Cancel'" path="'/create_account/create_colony'"/>-->
+                    <!--</RouterLinkBack>-->
+
+                <!--</CreateAccountContainer>-->
+                <!---->
+            <!--</Route>-->
+            <!---->
+            <!--<Route path="'/character_creator'">-->
+                <!---->
+            <!--</Route>-->
 
             <UnmatchedRoute>
 
@@ -41,14 +61,14 @@
                         <Input password.bindTo="onValueChanged" style="create-input"/>
                     </Group>
 
-                    <!--<RouterLink path="'/create_account/join_or_start_colony'"-->
-                                <!--x-validators.username="'required, length > 3'"-->
-                                <!--x-query.username="{username}"-->
-                                <!--x-query.password="{password}">-->
+                    <RouterLink path="'/create_account/join_or_start_colony'"
+                                x-validators.username="[Validator.Required(), Validator.MinLength(3)]"
+                                x-query.username="{username}"
+                                x-query.password="{password}">
 
-                        <KlangButton onMouseDown="{AnimateTransition()}" style="klang-button.black" label="'Next'"/>
+                        <KlangButton style="klang-button.black" label="'Next'"/>
 
-                    <!--</RouterLink>-->
+                    </RouterLink>
 
                     <RouterLinkBack>
                         Go Back
@@ -59,9 +79,7 @@
             </UnmatchedRoute>
             
         </ChildRouter>
-        
-        <Panel style="fade-panel" x-id="fader"/>
-        
+
     </Contents>
     
 </UITemplate>

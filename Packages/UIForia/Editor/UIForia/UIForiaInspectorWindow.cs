@@ -11,8 +11,6 @@ using UIForia.Util;
 using UnityEditor;
 using UnityEditor.IMGUI.Controls;
 using UnityEngine;
-using FontStyle = UIForia.Text.FontStyle;
-using TextAlignment = UIForia.Text.TextAlignment;
 
 namespace UIForia.Editor {
 
@@ -617,6 +615,9 @@ namespace UIForia.Editor {
                 case StylePropertyId.BorderColor:
                     return DrawColor(property, isEditable);
 
+                case StylePropertyId.Visibility:
+                    return DrawEnum<Visibility>(property, isEditable);
+                
                 case StylePropertyId.BackgroundFillType:
                     return DrawEnum<FillType>(property, isEditable);
 

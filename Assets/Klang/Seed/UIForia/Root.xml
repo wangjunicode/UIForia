@@ -7,21 +7,24 @@
     <Style>
 
         style container {
-        PreferredSize = 100vw, 100vh;
-        BackgroundColor = Red;
+            PreferredSize = 100vw, 100vh;
+            BackgroundColor = Red;
         }
 
         style app-body {
-        FlexLayoutMainAxisAlignment = Center;
-        FlexLayoutCrossAxisAlignment = Center;
-        FlexItemSelfAlignment = Center;
+            FlexLayoutMainAxisAlignment = Center;
+            FlexLayoutCrossAxisAlignment = Center;
+            FlexItemSelfAlignment = Center;
         }
-
+        
+        
     </Style>
 
     <Contents style="container">
 
-        <!--<URLNavBar/>-->
+
+        
+        <URLNavBar/>
         
         <Group style="app-body">
 

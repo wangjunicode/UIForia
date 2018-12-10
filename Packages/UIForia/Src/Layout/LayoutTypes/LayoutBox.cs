@@ -198,7 +198,7 @@ namespace UIForia.Layout.LayoutTypes {
             RequestContentSizeChangeLayout();
         }
 
-        protected void RequestContentSizeChangeLayout() {
+        public void RequestContentSizeChangeLayout() {
             if (markedForLayout) {
                 return;
             }
@@ -419,20 +419,20 @@ namespace UIForia.Layout.LayoutTypes {
                     break;
                 }
 
-                if ((sibling.flags & UIElementFlags.RequiresLayout) != 0 &&
-                    (sibling.style.LayoutBehavior & LayoutBehavior.Ignored) == 0) {
+//                if ((sibling.flags & UIElementFlags.RequiresLayout) != 0 &&
+                    if((sibling.style.LayoutBehavior & LayoutBehavior.Ignored) == 0) {
                     idx++;
                 }
             }
 
-            if ((element.parent.flags & UIElementFlags.RequiresLayout) == 0) {
-                idx += FindLayoutSiblingIndex(element.parent);
-            }
+//            if ((element.parent.flags & UIElementFlags.RequiresLayout) == 0) {
+//                idx += FindLayoutSiblingIndex(element.parent);
+//            }
 
             return idx;
         }
 
-        protected void InvalidatePreferredSizeCache() {
+        public void InvalidatePreferredSizeCache() {
             cachedPreferredWidth = -1;
             if (element != null) {
                 s_HeightForWidthCache.Remove(element.id);
@@ -1067,6 +1067,13 @@ namespace UIForia.Layout.LayoutTypes {
                 GetMarginBottom(width),
                 GetMarginLeft()
             );
+        }
+
+        public void SetChildren(LightList<LayoutBox> boxes) {
+           children.Clear();
+           for (int i = 0; i < boxes.Count; i++) {
+               OnChildAdded(boxes[i]);
+           }
         }
 
     }

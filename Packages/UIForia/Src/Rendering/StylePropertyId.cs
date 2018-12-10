@@ -29,7 +29,8 @@ namespace UIForia.Rendering {
         BackgroundShapeType = 121,
         Opacity = 122,
         Cursor = 123,
-
+        Visibility = 124, 
+        
         GridItemColStart = 200,
         GridItemColSpan = 201,
         GridItemRowStart = 202,

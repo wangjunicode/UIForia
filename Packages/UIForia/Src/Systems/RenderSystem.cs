@@ -14,7 +14,8 @@ namespace UIForia.Systems {
         NotCulled,
         ClipRectIsZero,
         ActualSizeZero,
-        OpacityZero
+        OpacityZero,
+        VisibilityHidden
 
     }
 
@@ -102,6 +103,14 @@ namespace UIForia.Systems {
             // todo -- can be easily jobified
             for (int i = 0; i < m_RenderDataList.Count; i++) {
                 RenderData data = renderList[i];
+                
+                if (data.element.style.Visibility == Visibility.Hidden) {
+                    data.CullResult = CullResult.VisibilityHidden;
+                    continue; 
+                }
+                
+                // todo -- if no background image & no background color or opacity is 0: cull
+                
                 LayoutResult layoutResult = data.element.layoutResult;
                 Rect screenRect = layoutResult.ScreenRect;
 

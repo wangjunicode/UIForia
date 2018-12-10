@@ -999,7 +999,19 @@ namespace UIForia.Parsing.StyleParser {
                     return HorizontalScrollbarAttachment.Bottom;
                 default:
                     throw new ParseException($"Unknown value for {nameof(HorizontalScrollbarAttachment)}: {propertyValue}");
-            }        }
+            }
+        }
+
+        public static Visibility ParseVisibility(List<StyleVariable> contextVariables, string propertyValue) {
+            switch (propertyValue.ToLower()) {
+                case "hidden":
+                    return Visibility.Hidden;
+                case "visible":
+                    return Visibility.Visible;
+                default:
+                    throw new ParseException($"Unknown value for {nameof(Visibility)}: {propertyValue}");
+            }
+        }
 
     }
 

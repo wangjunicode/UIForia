@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using UIForia.Input;
 using UIForia.Util;
 
 namespace UIForia {
@@ -27,6 +28,14 @@ namespace UIForia {
         protected override Type elementType => rootType;
 
         public override void Compile(ParsedTemplate template) {
+            if(isCompiled) return;
+            isCompiled = true;
+            
+            if (!(typeof(UIElement).IsAssignableFrom(elementType))) {
+                UnityEngine.Debug.Log($"{elementType} must be a subclass of {typeof(UIElement)} in order to be used in templates");
+                return;
+            }
+            
             if (rootType == null) {
                 rootType = TypeProcessor.GetType(typeName, template.imports).rawType;
             }
@@ -34,8 +43,10 @@ namespace UIForia {
             templateToExpand = TemplateParser.GetParsedTemplate(rootType);
             templateToExpand.Compile();
 
-            base.Compile(template);
+            // todo for tomorrow -- make this not suck, need to only compile attributes once
             
+            base.Compile(template);
+
             if (template.rootElementTemplate == this) {
                 return;
             }

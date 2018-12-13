@@ -15,3 +15,18 @@ style vertical-center {
     FlexLayoutMainAxisAlignment = Center;
     FlexLayoutCrossAxisAlignment = Center;
 }
+
+style fill-parent {
+    PreferredSize = 1pca, 1pca;
+}
+
+style vertical-padded48 {
+    PaddingTop = 48px;
+    PaddingBottom = 48px;
+}
+
+style vertical-button-group {
+    FlexLayoutCrossAxisAlignment = Center;
+    PreferredSize = 300px, 1cnt;
+    FlexItemSelfAlignment = Stretch;
+}

@@ -1,0 +1,53 @@
+<?xml version="1.0" encoding="utf-8"?>
+<UITemplate>
+
+    <Using namespace="Klang.Seed"/>
+    <Style path="Klang/Seed/UIForia/Util.style" alias="util"/>
+    <Style path="Klang/Seed/UIForia/KlangButton/KlangButton.style" alias="klang-button"/>
+    <Style path="Klang/Seed/UIForia/LoginFlow/JoinColonyScreen/JoinColonyScreen.style"/>
+
+    <Contents style="container">
+
+        <Group style="table">
+
+            <Group style="table-head">
+
+                <Text>Colony Name</Text>
+
+                <Text>Leader</Text>
+
+                <Text>Players</Text>
+
+                <Text>Seedlings</Text>
+
+            </Group>
+
+            <Repeat style="table-body" list="colonies">
+                
+                <Group style="table-row" onMouseClick="SelectColony($index)">
+                    <Text>{$item.colonyName}</Text>
+                    <Text>{$item.leaderName}</Text>
+                    <Text>{$item.playerCount}</Text>
+                    <Text>{$item.seedlingCount}</Text>
+                </Group>
+                
+            </Repeat>
+
+        </Group>
+
+        <Group style="table-footer">
+
+            <RouterLinkBack>
+                <KlangButton style="klang-button.black" label="'Cancel'"/>
+            </RouterLinkBack>
+
+            <KlangLinkButton if="selectedIndex != -1"
+                             path="Routes.CreateCharacters"
+                             style="klang-button.blue"
+                             label="'Join ' + SelectedColony.colonyName"/>
+
+        </Group>
+
+    </Contents>
+
+</UITemplate>

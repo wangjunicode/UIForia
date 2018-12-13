@@ -32,10 +32,10 @@ namespace UIForia.Compilers {
             "$eventArg3"
         };
 
-        private ExpressionCompiler2 compiler;
+        private ExpressionCompiler compiler;
 
         public PropertyBindingCompiler() {
-            this.compiler = new ExpressionCompiler2();
+            this.compiler = new ExpressionCompiler();
         }
 
         // todo -- maybe move this to the compiler itself so it can be used per-expression 
@@ -45,7 +45,7 @@ namespace UIForia.Compilers {
             AddTypedAliasSource(typeof(Color), new MethodAliasSource("rgba", ColorAliasSource.ColorConstructorAlpha));
         }
 
-        public void SetCompiler(ExpressionCompiler2 compiler) {
+        public void SetCompiler(ExpressionCompiler compiler) {
             this.compiler = compiler;
         }
 

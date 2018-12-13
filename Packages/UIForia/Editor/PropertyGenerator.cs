@@ -55,6 +55,32 @@ namespace UIForia.Editor {
             }
         }
 
+        public string StyleSetGetComputed {
+            get {
+                if (type.IsEnum) {
+                    return $"new StyleProperty(StylePropertyId.{propertyIdName}, (int){propertyIdName})";
+                }
+
+                if (type == typeof(int)) {
+                    return $"new StyleProperty(StylePropertyId.{propertyIdName}, {propertyIdName})";
+                }
+
+                if (type == typeof(float)) {
+                    return $"new StyleProperty(StylePropertyId.{propertyIdName}, {propertyIdName})";
+                }
+
+                if (typeof(UIMeasurement) == type
+                    || typeof(UIFixedLength) == type
+                    || typeof(GridTrackSize) == type
+                    || typeof(Color) == type
+                ) {
+                    return $"new StyleProperty(StylePropertyId.{propertyIdName}, {propertyIdName})";
+                }
+
+                return $"new StyleProperty(StylePropertyId.{propertyIdName}, 0, 0, {propertyIdName})";
+            }
+        }
+        
         public string StylePropertyConstructor {
             get {
                 if (type.IsEnum) {

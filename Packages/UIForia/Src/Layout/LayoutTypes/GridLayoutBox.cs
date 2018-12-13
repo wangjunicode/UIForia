@@ -1,12 +1,13 @@
 using System;
 using System.Collections.Generic;
 using UIForia.Rendering;
-using UIForia.Systems;
 using UIForia.Util;
 using UnityEngine;
 
 namespace UIForia.Layout.LayoutTypes {
 
+    // todo -- support padding and margin
+    
     public class GridLayoutBox : LayoutBox {
 
         private readonly List<GridTrack> m_RowTracks;
@@ -281,6 +282,7 @@ namespace UIForia.Layout.LayoutTypes {
                 }
             }
 
+            PositionColumnTracks();
             ListPool<ValueTuple<int, GridTrack>>.Release(ref intrinsics);
             ListPool<ValueTuple<int, GridTrack>>.Release(ref flexes);
         }

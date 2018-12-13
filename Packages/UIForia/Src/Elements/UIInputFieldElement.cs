@@ -134,7 +134,6 @@ public class UIInputFieldElement : UIElement, IFocusable, IPropertyChangedHandle
         if (!textElement.style.TextFontAsset.characterDictionary.ContainsKey(c)) {
             return;
         }
-        Debug.Log(c);
 
         if (selectionRange.HasSelection) {
             selectionRange = textElement.DeleteRange(selectionRange);

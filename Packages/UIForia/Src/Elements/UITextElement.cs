@@ -29,6 +29,7 @@ namespace UIForia {
         public string text;
         public TextInfo textInfo;
         private Mesh mesh;
+        private bool meshRequiresUpdate;
 
         // todo -- see if there is a way to do material sharing, most text can use the same materials
         private Material material;
@@ -70,6 +71,7 @@ namespace UIForia {
             this.text = newText;
 
             UpdateTextInfo();
+            meshRequiresUpdate = true;
 
             onTextChanged?.Invoke(this, text);
         }
@@ -486,12 +488,13 @@ namespace UIForia {
         }
 
         public Mesh GetMesh() {
-            if (mesh != null && !layoutResult.SizeChanged) {
+            if (!meshRequiresUpdate && (mesh != null && !layoutResult.SizeChanged)) {
                 return mesh;
             }
 
             if (mesh == null) mesh = new Mesh();
             mesh.Clear();
+            meshRequiresUpdate = false;
 
             ApplyLineAndWordOffsets(textInfo);
 

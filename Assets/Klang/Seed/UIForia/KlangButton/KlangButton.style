@@ -9,6 +9,8 @@ style baseButton {
     PreferredSize = 1cnt;
     FlexLayoutMainAxisAlignment = Center;
     FlexLayoutCrossAxisAlignment = Center;
+    BorderColor = white;
+    Border = 0;
 }
 
 style black {
@@ -21,5 +23,6 @@ style grey {
 }
 
 style blue {
-    
+    TextColor = white;
+    BackgroundColor = #64C1DF;
 }

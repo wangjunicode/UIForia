@@ -5,6 +5,7 @@ namespace UIForia.Systems {
     public class DefaultInputSystem : InputSystem {
 
         public const float k_DoubleClickDelay = 0.5f;
+        public const float k_SingleClickDelay = 0.3f;
 
         private Vector2 m_LastMouseDownPosition;
         private float m_LastMouseDownTimestamp;
@@ -48,6 +49,8 @@ namespace UIForia.Systems {
             else {
                 retn.mouseDownPosition = new Vector2();
             }
+
+            retn.isSingleClick = retn.isLeftMouseUpThisFrame && (now - m_LastMouseDownTimestamp < k_SingleClickDelay);
 
             retn.mousePosition = ConvertMousePosition(UnityEngine.Input.mousePosition);
             retn.scrollDelta = UnityEngine.Input.mouseScrollDelta;

@@ -4,16 +4,14 @@
     <Style path="Klang/Seed/UIForia/LoginFlow/CreateAccountScreen/CreateAccountScreen.style"/>
     <Style path="Klang/Seed/UIForia/Util.style" alias="util"/>
 
-    <Contents style="container">
+    <Contents style="container util.vertical-center">
 
         <Heading3 style="head">
             {label}
         </Heading3>
         
-        <Group style="util.vertical-center">
-            <Children/>
-        </Group>
-        
+        <Children style="util.vertical-center"/>
+
     </Contents>
 
 </UITemplate>

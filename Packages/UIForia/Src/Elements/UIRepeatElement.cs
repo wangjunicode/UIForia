@@ -56,7 +56,7 @@ namespace UIForia {
             this.template = template;
             this.scope = scope;
             this.currentIndex = -1;
-            flags &= ~(UIElementFlags.RequiresLayout | UIElementFlags.RequiresRendering);
+           // flags &= ~(UIElementFlags.RequiresLayout | UIElementFlags.RequiresRendering);
         }
         
         public override void Next() {

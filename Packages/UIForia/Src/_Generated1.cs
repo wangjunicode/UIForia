@@ -4645,6 +4645,300 @@ namespace UIForia.Rendering {
         }
         
 
+        public StyleProperty GetComputedStyleProperty(StylePropertyId propertyId) {
+        			switch(propertyId) {
+				case StylePropertyId.OverflowX:
+					 return new StyleProperty(StylePropertyId.OverflowX, (int)OverflowX);
+				case StylePropertyId.OverflowY:
+					 return new StyleProperty(StylePropertyId.OverflowY, (int)OverflowY);
+				case StylePropertyId.BorderColor:
+					 return new StyleProperty(StylePropertyId.BorderColor, BorderColor);
+				case StylePropertyId.BackgroundColor:
+					 return new StyleProperty(StylePropertyId.BackgroundColor, BackgroundColor);
+				case StylePropertyId.BackgroundColorSecondary:
+					 return new StyleProperty(StylePropertyId.BackgroundColorSecondary, BackgroundColorSecondary);
+				case StylePropertyId.BackgroundImage:
+					 return new StyleProperty(StylePropertyId.BackgroundImage, 0, 0, BackgroundImage);
+				case StylePropertyId.BackgroundImage1:
+					 return new StyleProperty(StylePropertyId.BackgroundImage1, 0, 0, BackgroundImage1);
+				case StylePropertyId.BackgroundImage2:
+					 return new StyleProperty(StylePropertyId.BackgroundImage2, 0, 0, BackgroundImage2);
+				case StylePropertyId.BackgroundGradientType:
+					 return new StyleProperty(StylePropertyId.BackgroundGradientType, (int)BackgroundGradientType);
+				case StylePropertyId.BackgroundGradientAxis:
+					 return new StyleProperty(StylePropertyId.BackgroundGradientAxis, (int)BackgroundGradientAxis);
+				case StylePropertyId.BackgroundGradientStart:
+					 return new StyleProperty(StylePropertyId.BackgroundGradientStart, BackgroundGradientStart);
+				case StylePropertyId.BackgroundFillRotation:
+					 return new StyleProperty(StylePropertyId.BackgroundFillRotation, BackgroundFillRotation);
+				case StylePropertyId.BackgroundFillType:
+					 return new StyleProperty(StylePropertyId.BackgroundFillType, (int)BackgroundFillType);
+				case StylePropertyId.BackgroundShapeType:
+					 return new StyleProperty(StylePropertyId.BackgroundShapeType, (int)BackgroundShapeType);
+				case StylePropertyId.BackgroundFillOffsetX:
+					 return new StyleProperty(StylePropertyId.BackgroundFillOffsetX, BackgroundFillOffsetX);
+				case StylePropertyId.BackgroundFillOffsetY:
+					 return new StyleProperty(StylePropertyId.BackgroundFillOffsetY, BackgroundFillOffsetY);
+				case StylePropertyId.BackgroundFillScaleX:
+					 return new StyleProperty(StylePropertyId.BackgroundFillScaleX, BackgroundFillScaleX);
+				case StylePropertyId.BackgroundFillScaleY:
+					 return new StyleProperty(StylePropertyId.BackgroundFillScaleY, BackgroundFillScaleY);
+				case StylePropertyId.Opacity:
+					 return new StyleProperty(StylePropertyId.Opacity, Opacity);
+				case StylePropertyId.Cursor:
+					 return new StyleProperty(StylePropertyId.Cursor, 0, 0, Cursor);
+				case StylePropertyId.Visibility:
+					 return new StyleProperty(StylePropertyId.Visibility, (int)Visibility);
+				case StylePropertyId.FlexItemOrder:
+					 return new StyleProperty(StylePropertyId.FlexItemOrder, FlexItemOrder);
+				case StylePropertyId.FlexItemGrow:
+					 return new StyleProperty(StylePropertyId.FlexItemGrow, FlexItemGrow);
+				case StylePropertyId.FlexItemShrink:
+					 return new StyleProperty(StylePropertyId.FlexItemShrink, FlexItemShrink);
+				case StylePropertyId.FlexItemSelfAlignment:
+					 return new StyleProperty(StylePropertyId.FlexItemSelfAlignment, (int)FlexItemSelfAlignment);
+				case StylePropertyId.FlexLayoutDirection:
+					 return new StyleProperty(StylePropertyId.FlexLayoutDirection, (int)FlexLayoutDirection);
+				case StylePropertyId.FlexLayoutWrap:
+					 return new StyleProperty(StylePropertyId.FlexLayoutWrap, (int)FlexLayoutWrap);
+				case StylePropertyId.FlexLayoutMainAxisAlignment:
+					 return new StyleProperty(StylePropertyId.FlexLayoutMainAxisAlignment, (int)FlexLayoutMainAxisAlignment);
+				case StylePropertyId.FlexLayoutCrossAxisAlignment:
+					 return new StyleProperty(StylePropertyId.FlexLayoutCrossAxisAlignment, (int)FlexLayoutCrossAxisAlignment);
+				case StylePropertyId.GridItemColStart:
+					 return new StyleProperty(StylePropertyId.GridItemColStart, GridItemColStart);
+				case StylePropertyId.GridItemColSpan:
+					 return new StyleProperty(StylePropertyId.GridItemColSpan, GridItemColSpan);
+				case StylePropertyId.GridItemRowStart:
+					 return new StyleProperty(StylePropertyId.GridItemRowStart, GridItemRowStart);
+				case StylePropertyId.GridItemRowSpan:
+					 return new StyleProperty(StylePropertyId.GridItemRowSpan, GridItemRowSpan);
+				case StylePropertyId.GridItemColSelfAlignment:
+					 return new StyleProperty(StylePropertyId.GridItemColSelfAlignment, (int)GridItemColSelfAlignment);
+				case StylePropertyId.GridItemRowSelfAlignment:
+					 return new StyleProperty(StylePropertyId.GridItemRowSelfAlignment, (int)GridItemRowSelfAlignment);
+				case StylePropertyId.GridLayoutDirection:
+					 return new StyleProperty(StylePropertyId.GridLayoutDirection, (int)GridLayoutDirection);
+				case StylePropertyId.GridLayoutDensity:
+					 return new StyleProperty(StylePropertyId.GridLayoutDensity, (int)GridLayoutDensity);
+				case StylePropertyId.GridLayoutColTemplate:
+					 return new StyleProperty(StylePropertyId.GridLayoutColTemplate, 0, 0, GridLayoutColTemplate);
+				case StylePropertyId.GridLayoutRowTemplate:
+					 return new StyleProperty(StylePropertyId.GridLayoutRowTemplate, 0, 0, GridLayoutRowTemplate);
+				case StylePropertyId.GridLayoutColAutoSize:
+					 return new StyleProperty(StylePropertyId.GridLayoutColAutoSize, GridLayoutColAutoSize);
+				case StylePropertyId.GridLayoutRowAutoSize:
+					 return new StyleProperty(StylePropertyId.GridLayoutRowAutoSize, GridLayoutRowAutoSize);
+				case StylePropertyId.GridLayoutColGap:
+					 return new StyleProperty(StylePropertyId.GridLayoutColGap, GridLayoutColGap);
+				case StylePropertyId.GridLayoutRowGap:
+					 return new StyleProperty(StylePropertyId.GridLayoutRowGap, GridLayoutRowGap);
+				case StylePropertyId.GridLayoutColAlignment:
+					 return new StyleProperty(StylePropertyId.GridLayoutColAlignment, (int)GridLayoutColAlignment);
+				case StylePropertyId.GridLayoutRowAlignment:
+					 return new StyleProperty(StylePropertyId.GridLayoutRowAlignment, (int)GridLayoutRowAlignment);
+				case StylePropertyId.MinWidth:
+					 return new StyleProperty(StylePropertyId.MinWidth, MinWidth);
+				case StylePropertyId.MaxWidth:
+					 return new StyleProperty(StylePropertyId.MaxWidth, MaxWidth);
+				case StylePropertyId.PreferredWidth:
+					 return new StyleProperty(StylePropertyId.PreferredWidth, PreferredWidth);
+				case StylePropertyId.MinHeight:
+					 return new StyleProperty(StylePropertyId.MinHeight, MinHeight);
+				case StylePropertyId.MaxHeight:
+					 return new StyleProperty(StylePropertyId.MaxHeight, MaxHeight);
+				case StylePropertyId.PreferredHeight:
+					 return new StyleProperty(StylePropertyId.PreferredHeight, PreferredHeight);
+				case StylePropertyId.MarginTop:
+					 return new StyleProperty(StylePropertyId.MarginTop, MarginTop);
+				case StylePropertyId.MarginRight:
+					 return new StyleProperty(StylePropertyId.MarginRight, MarginRight);
+				case StylePropertyId.MarginBottom:
+					 return new StyleProperty(StylePropertyId.MarginBottom, MarginBottom);
+				case StylePropertyId.MarginLeft:
+					 return new StyleProperty(StylePropertyId.MarginLeft, MarginLeft);
+				case StylePropertyId.BorderTop:
+					 return new StyleProperty(StylePropertyId.BorderTop, BorderTop);
+				case StylePropertyId.BorderRight:
+					 return new StyleProperty(StylePropertyId.BorderRight, BorderRight);
+				case StylePropertyId.BorderBottom:
+					 return new StyleProperty(StylePropertyId.BorderBottom, BorderBottom);
+				case StylePropertyId.BorderLeft:
+					 return new StyleProperty(StylePropertyId.BorderLeft, BorderLeft);
+				case StylePropertyId.BorderRadiusTopLeft:
+					 return new StyleProperty(StylePropertyId.BorderRadiusTopLeft, BorderRadiusTopLeft);
+				case StylePropertyId.BorderRadiusTopRight:
+					 return new StyleProperty(StylePropertyId.BorderRadiusTopRight, BorderRadiusTopRight);
+				case StylePropertyId.BorderRadiusBottomRight:
+					 return new StyleProperty(StylePropertyId.BorderRadiusBottomRight, BorderRadiusBottomRight);
+				case StylePropertyId.BorderRadiusBottomLeft:
+					 return new StyleProperty(StylePropertyId.BorderRadiusBottomLeft, BorderRadiusBottomLeft);
+				case StylePropertyId.PaddingTop:
+					 return new StyleProperty(StylePropertyId.PaddingTop, PaddingTop);
+				case StylePropertyId.PaddingRight:
+					 return new StyleProperty(StylePropertyId.PaddingRight, PaddingRight);
+				case StylePropertyId.PaddingBottom:
+					 return new StyleProperty(StylePropertyId.PaddingBottom, PaddingBottom);
+				case StylePropertyId.PaddingLeft:
+					 return new StyleProperty(StylePropertyId.PaddingLeft, PaddingLeft);
+				case StylePropertyId.TextColor:
+					 return new StyleProperty(StylePropertyId.TextColor, TextColor);
+				case StylePropertyId.TextFontAsset:
+					 return new StyleProperty(StylePropertyId.TextFontAsset, 0, 0, TextFontAsset);
+				case StylePropertyId.TextFontSize:
+					 return new StyleProperty(StylePropertyId.TextFontSize, TextFontSize);
+				case StylePropertyId.TextFontStyle:
+					 return new StyleProperty(StylePropertyId.TextFontStyle, (int)TextFontStyle);
+				case StylePropertyId.TextAlignment:
+					 return new StyleProperty(StylePropertyId.TextAlignment, (int)TextAlignment);
+				case StylePropertyId.TextTransform:
+					 return new StyleProperty(StylePropertyId.TextTransform, (int)TextTransform);
+				case StylePropertyId.AnchorTop:
+					 return new StyleProperty(StylePropertyId.AnchorTop, AnchorTop);
+				case StylePropertyId.AnchorRight:
+					 return new StyleProperty(StylePropertyId.AnchorRight, AnchorRight);
+				case StylePropertyId.AnchorBottom:
+					 return new StyleProperty(StylePropertyId.AnchorBottom, AnchorBottom);
+				case StylePropertyId.AnchorLeft:
+					 return new StyleProperty(StylePropertyId.AnchorLeft, AnchorLeft);
+				case StylePropertyId.AnchorTarget:
+					 return new StyleProperty(StylePropertyId.AnchorTarget, (int)AnchorTarget);
+				case StylePropertyId.TransformPositionX:
+					 return new StyleProperty(StylePropertyId.TransformPositionX, TransformPositionX);
+				case StylePropertyId.TransformPositionY:
+					 return new StyleProperty(StylePropertyId.TransformPositionY, TransformPositionY);
+				case StylePropertyId.TransformPivotX:
+					 return new StyleProperty(StylePropertyId.TransformPivotX, TransformPivotX);
+				case StylePropertyId.TransformPivotY:
+					 return new StyleProperty(StylePropertyId.TransformPivotY, TransformPivotY);
+				case StylePropertyId.TransformScaleX:
+					 return new StyleProperty(StylePropertyId.TransformScaleX, TransformScaleX);
+				case StylePropertyId.TransformScaleY:
+					 return new StyleProperty(StylePropertyId.TransformScaleY, TransformScaleY);
+				case StylePropertyId.TransformRotation:
+					 return new StyleProperty(StylePropertyId.TransformRotation, TransformRotation);
+				case StylePropertyId.TransformBehaviorX:
+					 return new StyleProperty(StylePropertyId.TransformBehaviorX, (int)TransformBehaviorX);
+				case StylePropertyId.TransformBehaviorY:
+					 return new StyleProperty(StylePropertyId.TransformBehaviorY, (int)TransformBehaviorY);
+				case StylePropertyId.LayoutType:
+					 return new StyleProperty(StylePropertyId.LayoutType, (int)LayoutType);
+				case StylePropertyId.LayoutBehavior:
+					 return new StyleProperty(StylePropertyId.LayoutBehavior, (int)LayoutBehavior);
+				case StylePropertyId.ZIndex:
+					 return new StyleProperty(StylePropertyId.ZIndex, ZIndex);
+				case StylePropertyId.RenderLayerOffset:
+					 return new StyleProperty(StylePropertyId.RenderLayerOffset, RenderLayerOffset);
+				case StylePropertyId.RenderLayer:
+					 return new StyleProperty(StylePropertyId.RenderLayer, (int)RenderLayer);
+				case StylePropertyId.ScrollbarVerticalAttachment:
+					 return new StyleProperty(StylePropertyId.ScrollbarVerticalAttachment, (int)ScrollbarVerticalAttachment);
+				case StylePropertyId.ScrollbarVerticalButtonPlacement:
+					 return new StyleProperty(StylePropertyId.ScrollbarVerticalButtonPlacement, (int)ScrollbarVerticalButtonPlacement);
+				case StylePropertyId.ScrollbarVerticalTrackSize:
+					 return new StyleProperty(StylePropertyId.ScrollbarVerticalTrackSize, ScrollbarVerticalTrackSize);
+				case StylePropertyId.ScrollbarVerticalTrackBorderRadius:
+					 return new StyleProperty(StylePropertyId.ScrollbarVerticalTrackBorderRadius, ScrollbarVerticalTrackBorderRadius);
+				case StylePropertyId.ScrollbarVerticalTrackBorderSize:
+					 return new StyleProperty(StylePropertyId.ScrollbarVerticalTrackBorderSize, ScrollbarVerticalTrackBorderSize);
+				case StylePropertyId.ScrollbarVerticalTrackBorderColor:
+					 return new StyleProperty(StylePropertyId.ScrollbarVerticalTrackBorderColor, ScrollbarVerticalTrackBorderColor);
+				case StylePropertyId.ScrollbarVerticalTrackImage:
+					 return new StyleProperty(StylePropertyId.ScrollbarVerticalTrackImage, 0, 0, ScrollbarVerticalTrackImage);
+				case StylePropertyId.ScrollbarVerticalTrackColor:
+					 return new StyleProperty(StylePropertyId.ScrollbarVerticalTrackColor, ScrollbarVerticalTrackColor);
+				case StylePropertyId.ScrollbarVerticalHandleSize:
+					 return new StyleProperty(StylePropertyId.ScrollbarVerticalHandleSize, ScrollbarVerticalHandleSize);
+				case StylePropertyId.ScrollbarVerticalHandleBorderRadius:
+					 return new StyleProperty(StylePropertyId.ScrollbarVerticalHandleBorderRadius, ScrollbarVerticalHandleBorderRadius);
+				case StylePropertyId.ScrollbarVerticalHandleBorderSize:
+					 return new StyleProperty(StylePropertyId.ScrollbarVerticalHandleBorderSize, ScrollbarVerticalHandleBorderSize);
+				case StylePropertyId.ScrollbarVerticalHandleBorderColor:
+					 return new StyleProperty(StylePropertyId.ScrollbarVerticalHandleBorderColor, ScrollbarVerticalHandleBorderColor);
+				case StylePropertyId.ScrollbarVerticalHandleImage:
+					 return new StyleProperty(StylePropertyId.ScrollbarVerticalHandleImage, 0, 0, ScrollbarVerticalHandleImage);
+				case StylePropertyId.ScrollbarVerticalHandleColor:
+					 return new StyleProperty(StylePropertyId.ScrollbarVerticalHandleColor, ScrollbarVerticalHandleColor);
+				case StylePropertyId.ScrollbarVerticalIncrementSize:
+					 return new StyleProperty(StylePropertyId.ScrollbarVerticalIncrementSize, ScrollbarVerticalIncrementSize);
+				case StylePropertyId.ScrollbarVerticalIncrementBorderRadius:
+					 return new StyleProperty(StylePropertyId.ScrollbarVerticalIncrementBorderRadius, ScrollbarVerticalIncrementBorderRadius);
+				case StylePropertyId.ScrollbarVerticalIncrementBorderSize:
+					 return new StyleProperty(StylePropertyId.ScrollbarVerticalIncrementBorderSize, ScrollbarVerticalIncrementBorderSize);
+				case StylePropertyId.ScrollbarVerticalIncrementBorderColor:
+					 return new StyleProperty(StylePropertyId.ScrollbarVerticalIncrementBorderColor, ScrollbarVerticalIncrementBorderColor);
+				case StylePropertyId.ScrollbarVerticalIncrementImage:
+					 return new StyleProperty(StylePropertyId.ScrollbarVerticalIncrementImage, 0, 0, ScrollbarVerticalIncrementImage);
+				case StylePropertyId.ScrollbarVerticalIncrementColor:
+					 return new StyleProperty(StylePropertyId.ScrollbarVerticalIncrementColor, ScrollbarVerticalIncrementColor);
+				case StylePropertyId.ScrollbarVerticalDecrementSize:
+					 return new StyleProperty(StylePropertyId.ScrollbarVerticalDecrementSize, ScrollbarVerticalDecrementSize);
+				case StylePropertyId.ScrollbarVerticalDecrementBorderRadius:
+					 return new StyleProperty(StylePropertyId.ScrollbarVerticalDecrementBorderRadius, ScrollbarVerticalDecrementBorderRadius);
+				case StylePropertyId.ScrollbarVerticalDecrementBorderSize:
+					 return new StyleProperty(StylePropertyId.ScrollbarVerticalDecrementBorderSize, ScrollbarVerticalDecrementBorderSize);
+				case StylePropertyId.ScrollbarVerticalDecrementBorderColor:
+					 return new StyleProperty(StylePropertyId.ScrollbarVerticalDecrementBorderColor, ScrollbarVerticalDecrementBorderColor);
+				case StylePropertyId.ScrollbarVerticalDecrementImage:
+					 return new StyleProperty(StylePropertyId.ScrollbarVerticalDecrementImage, 0, 0, ScrollbarVerticalDecrementImage);
+				case StylePropertyId.ScrollbarVerticalDecrementColor:
+					 return new StyleProperty(StylePropertyId.ScrollbarVerticalDecrementColor, ScrollbarVerticalDecrementColor);
+				case StylePropertyId.ScrollbarHorizontalAttachment:
+					 return new StyleProperty(StylePropertyId.ScrollbarHorizontalAttachment, (int)ScrollbarHorizontalAttachment);
+				case StylePropertyId.ScrollbarHorizontalButtonPlacement:
+					 return new StyleProperty(StylePropertyId.ScrollbarHorizontalButtonPlacement, (int)ScrollbarHorizontalButtonPlacement);
+				case StylePropertyId.ScrollbarHorizontalTrackSize:
+					 return new StyleProperty(StylePropertyId.ScrollbarHorizontalTrackSize, ScrollbarHorizontalTrackSize);
+				case StylePropertyId.ScrollbarHorizontalTrackBorderRadius:
+					 return new StyleProperty(StylePropertyId.ScrollbarHorizontalTrackBorderRadius, ScrollbarHorizontalTrackBorderRadius);
+				case StylePropertyId.ScrollbarHorizontalTrackBorderSize:
+					 return new StyleProperty(StylePropertyId.ScrollbarHorizontalTrackBorderSize, ScrollbarHorizontalTrackBorderSize);
+				case StylePropertyId.ScrollbarHorizontalTrackBorderColor:
+					 return new StyleProperty(StylePropertyId.ScrollbarHorizontalTrackBorderColor, ScrollbarHorizontalTrackBorderColor);
+				case StylePropertyId.ScrollbarHorizontalTrackImage:
+					 return new StyleProperty(StylePropertyId.ScrollbarHorizontalTrackImage, 0, 0, ScrollbarHorizontalTrackImage);
+				case StylePropertyId.ScrollbarHorizontalTrackColor:
+					 return new StyleProperty(StylePropertyId.ScrollbarHorizontalTrackColor, ScrollbarHorizontalTrackColor);
+				case StylePropertyId.ScrollbarHorizontalHandleSize:
+					 return new StyleProperty(StylePropertyId.ScrollbarHorizontalHandleSize, ScrollbarHorizontalHandleSize);
+				case StylePropertyId.ScrollbarHorizontalHandleBorderRadius:
+					 return new StyleProperty(StylePropertyId.ScrollbarHorizontalHandleBorderRadius, ScrollbarHorizontalHandleBorderRadius);
+				case StylePropertyId.ScrollbarHorizontalHandleBorderSize:
+					 return new StyleProperty(StylePropertyId.ScrollbarHorizontalHandleBorderSize, ScrollbarHorizontalHandleBorderSize);
+				case StylePropertyId.ScrollbarHorizontalHandleBorderColor:
+					 return new StyleProperty(StylePropertyId.ScrollbarHorizontalHandleBorderColor, ScrollbarHorizontalHandleBorderColor);
+				case StylePropertyId.ScrollbarHorizontalHandleImage:
+					 return new StyleProperty(StylePropertyId.ScrollbarHorizontalHandleImage, 0, 0, ScrollbarHorizontalHandleImage);
+				case StylePropertyId.ScrollbarHorizontalHandleColor:
+					 return new StyleProperty(StylePropertyId.ScrollbarHorizontalHandleColor, ScrollbarHorizontalHandleColor);
+				case StylePropertyId.ScrollbarHorizontalIncrementSize:
+					 return new StyleProperty(StylePropertyId.ScrollbarHorizontalIncrementSize, ScrollbarHorizontalIncrementSize);
+				case StylePropertyId.ScrollbarHorizontalIncrementBorderRadius:
+					 return new StyleProperty(StylePropertyId.ScrollbarHorizontalIncrementBorderRadius, ScrollbarHorizontalIncrementBorderRadius);
+				case StylePropertyId.ScrollbarHorizontalIncrementBorderSize:
+					 return new StyleProperty(StylePropertyId.ScrollbarHorizontalIncrementBorderSize, ScrollbarHorizontalIncrementBorderSize);
+				case StylePropertyId.ScrollbarHorizontalIncrementBorderColor:
+					 return new StyleProperty(StylePropertyId.ScrollbarHorizontalIncrementBorderColor, ScrollbarHorizontalIncrementBorderColor);
+				case StylePropertyId.ScrollbarHorizontalIncrementImage:
+					 return new StyleProperty(StylePropertyId.ScrollbarHorizontalIncrementImage, 0, 0, ScrollbarHorizontalIncrementImage);
+				case StylePropertyId.ScrollbarHorizontalIncrementColor:
+					 return new StyleProperty(StylePropertyId.ScrollbarHorizontalIncrementColor, ScrollbarHorizontalIncrementColor);
+				case StylePropertyId.ScrollbarHorizontalDecrementSize:
+					 return new StyleProperty(StylePropertyId.ScrollbarHorizontalDecrementSize, ScrollbarHorizontalDecrementSize);
+				case StylePropertyId.ScrollbarHorizontalDecrementBorderRadius:
+					 return new StyleProperty(StylePropertyId.ScrollbarHorizontalDecrementBorderRadius, ScrollbarHorizontalDecrementBorderRadius);
+				case StylePropertyId.ScrollbarHorizontalDecrementBorderSize:
+					 return new StyleProperty(StylePropertyId.ScrollbarHorizontalDecrementBorderSize, ScrollbarHorizontalDecrementBorderSize);
+				case StylePropertyId.ScrollbarHorizontalDecrementBorderColor:
+					 return new StyleProperty(StylePropertyId.ScrollbarHorizontalDecrementBorderColor, ScrollbarHorizontalDecrementBorderColor);
+				case StylePropertyId.ScrollbarHorizontalDecrementImage:
+					 return new StyleProperty(StylePropertyId.ScrollbarHorizontalDecrementImage, 0, 0, ScrollbarHorizontalDecrementImage);
+				case StylePropertyId.ScrollbarHorizontalDecrementColor:
+					 return new StyleProperty(StylePropertyId.ScrollbarHorizontalDecrementColor, ScrollbarHorizontalDecrementColor);
+				default: throw new System.ArgumentOutOfRangeException(nameof(propertyId), propertyId, null);
+				}  
+        }
+
     }
 
     public static partial class StyleUtil {

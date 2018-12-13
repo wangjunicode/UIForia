@@ -109,6 +109,9 @@ namespace UIForia {
                     element.flags |= UIElementFlags.AncestorEnabled;
                 }
 
+                // todo -- doesn't handle disabled index
+                element.siblingIndex = Array.IndexOf(element.parent.children, element);
+                
                 element.depth = element.parent.depth + 1;
             }
 

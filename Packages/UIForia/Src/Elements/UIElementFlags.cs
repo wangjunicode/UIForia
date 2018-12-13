@@ -7,7 +7,7 @@ public enum UIElementFlags {
     TextElement = 1 << 0,
     ImplicitElement = 1 << 1,
     
-    RequiresLayout = 1 << 2,
+//    RequiresLayout = 1 << 2,
     RequiresRendering = 1 << 3,
     
     Enabled = 1 << 4,

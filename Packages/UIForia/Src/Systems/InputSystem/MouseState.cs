@@ -22,7 +22,8 @@ public struct MouseState {
 
     public bool isDoubleClick;
     public bool isTripleClick;
-    
+    public bool isSingleClick;
+
     public Vector2 MouseDownDelta {
         get {
             if (mouseDownPosition.x < 0 || mouseDownPosition.y < 0) {

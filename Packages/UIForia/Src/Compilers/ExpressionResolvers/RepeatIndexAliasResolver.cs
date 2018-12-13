@@ -13,22 +13,22 @@ namespace UIForia.Compilers {
         public class RepeatIndexExpression : Expression<int> {
 
             public readonly string indexAlias;
-            
+
             public RepeatIndexExpression(string indexAlias) {
                 this.indexAlias = indexAlias;
             }
-            
-            public override Type YieldedType => typeof(int);           
+
+            public override Type YieldedType => typeof(int);
 
             public override int Evaluate(ExpressionContext context) {
-                UIElement ptr = ((UIElement)context.currentObject).parent;
+                UIElement trail = ((UIElement) context.currentObject);
+                UIElement ptr = trail.parent;
                 while (ptr != null) {
-                    if (ptr is UIRepeatElement repeatElement) {
-                        if (repeatElement.indexAlias == indexAlias) {
-                            return repeatElement.currentIndex;
-                        }
+                    if (ptr is UIRepeatElement repeatElement && repeatElement.indexAlias == indexAlias) {
+                        return trail.siblingIndex;
                     }
 
+                    trail = ptr;
                     ptr = ptr.parent;
                 }
 

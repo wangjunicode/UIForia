@@ -1,8 +1,8 @@
 ﻿namespace UIForia {
 
-    public struct ExpressionContext {
+    public class ExpressionContext {
 
-        public readonly object rootObject;
+        public object rootObject;
         public readonly object currentObject;
         public object aux;
 

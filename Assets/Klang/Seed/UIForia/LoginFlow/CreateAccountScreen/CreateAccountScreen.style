@@ -1,6 +1,6 @@
 
 style container {
-
+    PreferredSize = 1pca; 
 }
 
 style create-input {

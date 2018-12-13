@@ -4,11 +4,11 @@ namespace UIForia {
 
         public UISwitchCaseElement() {
             flags |= UIElementFlags.ImplicitElement;
-            flags &= ~(
-                UIElementFlags.Enabled |
-                UIElementFlags.RequiresRendering |
-                UIElementFlags.RequiresLayout
-            );
+//            flags &= ~(
+//                UIElementFlags.Enabled |
+//                UIElementFlags.RequiresRendering |
+//                UIElementFlags.RequiresLayout
+//            );
         }
 
     }

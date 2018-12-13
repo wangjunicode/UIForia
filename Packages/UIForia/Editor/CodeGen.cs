@@ -249,6 +249,10 @@ namespace UIForia.Rendering {
 
         __REPLACE__UIStyleSet_Methods
 
+        public StyleProperty GetComputedStyleProperty(StylePropertyId propertyId) {
+        __REPLACE_UIStyleSet_GetComputed  
+        }
+
     }
 
     public static partial class StyleUtil {
@@ -329,8 +333,11 @@ __REPLACE_StyleBindingCompiler_DoCompile
             }
 
             template = template.Replace("__REPLACE__UIStyleSet_Methods", retn);
+            retn = GetComputedStyle();
+            
+            template = template.Replace("__REPLACE_UIStyleSet_GetComputed", retn);
             retn = "";
-
+            
             for (int i = 0; i < properties.Length; i++) {
                 if (properties[i].inheritanceType == InheritanceType.Inherited) {
                     retn += $"                    case StylePropertyId.{properties[i].propertyIdName}: return true;\n";
@@ -487,6 +494,19 @@ namespace UIForia.Rendering {
             }
 
             return retn;
+        }
+
+        private static string GetComputedStyle() {
+            string code = "\t\t\tswitch(propertyId) {\n";
+
+            for (int i = 0; i < properties.Length; i++) {
+                code += $"\t\t\t\tcase {nameof(StylePropertyId)}.{properties[i].propertyIdName}:\n";
+                code += $"\t\t\t\t\t return {properties[i].StyleSetGetComputed};\n";
+            }
+
+            code += "\t\t\t\tdefault: throw new System.ArgumentOutOfRangeException(nameof(propertyId), propertyId, null);\n";
+            code += "\t\t\t\t}";
+            return code;
         }
 
         private static string InflateStyleSetMethods(PropertyGenerator propertyGenerator) {

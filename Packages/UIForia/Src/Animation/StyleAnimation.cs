@@ -158,12 +158,7 @@ namespace UIForia.Animation {
         }
 
         private static UIElement ResolveLayoutParent(UIElement element) {
-            UIElement ptr = element.parent;
-            while ((ptr.flags & UIElementFlags.RequiresLayout) == 0) {
-                ptr = ptr.parent;
-            }
-
-            return ptr;
+            return  element.parent;
         }
 
         private static float ResolveVerticalAnchorBaseHeight(UIElement element, Rect viewport) {

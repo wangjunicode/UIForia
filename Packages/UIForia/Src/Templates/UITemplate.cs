@@ -58,19 +58,7 @@ namespace UIForia {
 
         public abstract UIElement CreateScoped(TemplateScope inputScope);
 
-        public virtual void Compile(ParsedTemplate template) {
-            if(isCompiled) return;
-            isCompiled = true;
-            if (!(typeof(UIElement).IsAssignableFrom(elementType))) {
-                Debug.Log($"{elementType} must be a subclass of {typeof(UIElement)} in order to be used in templates");
-                return;
-            }
-            ResolveBaseStyles(template);
-            CompileStyleBindings(template);
-            CompileInputBindings(template);
-            CompilePropertyBindings(template);
-            ResolveActualAttributes();
-
+        protected void BuildBindings() {
             int triggeredCount = 0;
             int perFrameCount = 0;
 
@@ -84,7 +72,7 @@ namespace UIForia {
             }
 
             if (triggeredCount > 0) {
-                 triggeredBindings= new Binding[triggeredCount];
+                triggeredBindings= new Binding[triggeredCount];
             }
 
             if (perFrameCount > 0) {
@@ -111,6 +99,21 @@ namespace UIForia {
             
             s_BindingList.Clear();
 
+        }
+        
+        public virtual void Compile(ParsedTemplate template) {
+            if(isCompiled) return;
+            isCompiled = true;
+            if (!(typeof(UIElement).IsAssignableFrom(elementType))) {
+                Debug.Log($"{elementType} must be a subclass of {typeof(UIElement)} in order to be used in templates");
+                return;
+            }
+            ResolveBaseStyles(template);
+            CompileStyleBindings(template);
+            CompileInputBindings(template, false);
+            CompilePropertyBindings(template);
+            ResolveActualAttributes();
+            BuildBindings();
         }
 
         protected void CompileStyleBindings(ParsedTemplate template) {
@@ -160,13 +163,14 @@ namespace UIForia {
             }
         }
 
-        protected void CompileInputBindings(ParsedTemplate template) {
-
+        protected void CompileInputBindings(ParsedTemplate template, bool attributesOnly) {
+            // todo can't pool the lists since they get cached... make this better
             Type rootType = template.RootType;
-            List<MouseEventHandler> mouseHandlers = inputCompiler.CompileMouseEventHandlers(rootType, elementType, attributes);
-            List<KeyboardEventHandler> keyboardHandlers = inputCompiler.CompileKeyboardEventHandlers(rootType, elementType, attributes);
-            List<DragEventCreator> dragCreators = inputCompiler.CompileDragEventCreators(rootType, elementType, attributes);
-            List<DragEventHandler> dragHandlers = inputCompiler.CompileDragEventHandlers(rootType, elementType, attributes);
+            inputCompiler.SetCompiler(template.compiler);
+            List<MouseEventHandler> mouseHandlers = inputCompiler.CompileMouseEventHandlers(rootType, elementType, attributes, attributesOnly);
+            List<KeyboardEventHandler> keyboardHandlers = inputCompiler.CompileKeyboardEventHandlers(rootType, elementType, attributes, attributesOnly);
+            List<DragEventCreator> dragCreators = inputCompiler.CompileDragEventCreators(rootType, elementType, attributes, attributesOnly);
+            List<DragEventHandler> dragHandlers = inputCompiler.CompileDragEventHandlers(rootType, elementType, attributes, attributesOnly);
 
             if (mouseHandlers != null) {
                 mouseEventHandlers = mouseHandlers.ToArray();
@@ -213,7 +217,7 @@ namespace UIForia {
             }
         }
 
-        private void ResolveBaseStyles(ParsedTemplate template) {
+        protected void ResolveBaseStyles(ParsedTemplate template) {
             AttributeDefinition styleAttr = GetAttribute("style");
             if (styleAttr == null) {
                 return;

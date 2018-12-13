@@ -171,6 +171,7 @@ namespace UIForia.Editor {
                     if (property.IsUnset) {
                         property = DefaultStyleValues_Generated.GetPropertyValue(propertyId);
                     }
+
                     properties.Add(ValueTuple.Create(source, property));
                 }
             }
@@ -303,6 +304,8 @@ namespace UIForia.Editor {
                 Graphics.DrawMesh(mesh, renderPosition + origin - new Vector3(margin.left, -margin.top),
                     Quaternion.identity, material, 0, camera, 0, null, false, false, false);
 
+                // todo highlight underflow scenarios, visualize this somehow
+                
                 if (selectedElement is UITextElement && (showTextBaseline || showTextDescender)) {
                     baselineMesh = MeshUtil.ResizeStandardUIMesh(baselineMesh, new Size(width, height + 100));
                     UIStyleSet style = selectedElement.style;
@@ -346,7 +349,7 @@ namespace UIForia.Editor {
             bool newShowDescenderLine = EditorGUILayout.Toggle("Show Text Descender", showTextDescender);
 
             drawDebugBox = EditorGUILayout.Toggle("Draw Debug Box", drawDebugBox);
-            
+
             Color newContentColor = EditorGUILayout.ColorField("Content Color", contentColor);
             Color newPaddingColor = EditorGUILayout.ColorField("Padding Color", paddingColor);
             Color newBorderColor = EditorGUILayout.ColorField("Border Color", borderColor);
@@ -395,7 +398,7 @@ namespace UIForia.Editor {
                 showTextDescender = newShowDescenderLine;
                 EditorPrefs.SetBool("UIForia.Inspector.ShowTextDescender", showTextDescender);
             }
-            
+
             EditorPrefs.SetBool("UIForia.Inspector.DrawDebugBox", drawDebugBox);
         }
 
@@ -420,14 +423,16 @@ namespace UIForia.Editor {
             for (int i = 0; i < attributes.Count; i++) {
                 DrawLabel(attributes[i].name, attributes[i].value);
             }
+
             EditorGUI.indentLevel--;
         }
-        
+
         private void DrawElementInfo() {
             List<ElementAttribute> attributes = selectedElement.GetAttributes();
             if (attributes != null) {
                 DrawAttributes(attributes);
             }
+
             GUI.enabled = true;
             LayoutResult layoutResult = selectedElement.layoutResult;
             float labelWidth = EditorGUIUtility.labelWidth;
@@ -617,7 +622,7 @@ namespace UIForia.Editor {
 
                 case StylePropertyId.Visibility:
                     return DrawEnum<Visibility>(property, isEditable);
-                
+
                 case StylePropertyId.BackgroundFillType:
                     return DrawEnum<FillType>(property, isEditable);
 
@@ -651,7 +656,7 @@ namespace UIForia.Editor {
 
                 case StylePropertyId.BackgroundShapeType:
                     return DrawEnum<BackgroundShapeType>(property, isEditable);
-                
+
                 case StylePropertyId.Opacity:
                     return DrawFloat(property, isEditable);
 
@@ -802,7 +807,7 @@ namespace UIForia.Editor {
                     return DrawEnum<RenderLayer>(property, isEditable);
 
 //                default:
-                    //throw new ArgumentOutOfRangeException(property.propertyId.ToString());
+                //throw new ArgumentOutOfRangeException(property.propertyId.ToString());
             }
 
             return StyleProperty.Unset(property.propertyId);
@@ -928,21 +933,21 @@ namespace UIForia.Editor {
         private static StyleProperty DrawGridTemplate(StyleProperty property, bool isEditable) {
             s_Content.text = StyleUtil.GetPropertyName(property);
             GUI.enabled = isEditable;
-            GUILayout.BeginHorizontal();
             IReadOnlyList<GridTrackSize> template = property.AsGridTrackTemplate;
+            EditorGUILayout.BeginHorizontal();
             if (template == null) {
                 EditorGUILayout.LabelField("Undefined");
             }
             else {
+                EditorGUILayout.LabelField(s_Content);
                 for (int i = 0; i < template.Count; i++) {
-                    float value = EditorGUILayout.FloatField(s_Content, property.AsGridTrackSize.minValue);
-                    GridTemplateUnit unit =
-                        (GridTemplateUnit) EditorGUILayout.EnumPopup(property.AsGridTrackSize.minUnit);
+                    float value = EditorGUILayout.FloatField(template[i].minValue);
+                    GridTemplateUnit unit = (GridTemplateUnit) EditorGUILayout.EnumPopup(template[i].minUnit);
                 }
             }
 
+            EditorGUILayout.EndHorizontal();
             GUI.enabled = true;
-            GUILayout.EndHorizontal();
             return isEditable ? new StyleProperty(property.propertyId, 0, 0, null) : property;
         }
 

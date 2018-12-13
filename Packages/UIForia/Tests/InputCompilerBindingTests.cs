@@ -55,7 +55,7 @@ public class InputCompiler_KeyUpAttributes {
     [SetUp]
     public void Setup() {
         InputBindingCompiler compiler = new InputBindingCompiler();
-        handlers = compiler.CompileKeyboardEventHandlers(typeof(KeyUpTestThing), typeof(KeyUpTestThing), null);
+        handlers = compiler.CompileKeyboardEventHandlers(typeof(KeyUpTestThing), typeof(KeyUpTestThing), null, false);
     }
 
     public List<KeyboardEventHandler> handlers;
@@ -258,7 +258,7 @@ public class InputCompiler_KeyDownAttributes {
     [SetUp]
     public void Setup() {
         InputBindingCompiler compiler = new InputBindingCompiler();
-        handlers = compiler.CompileKeyboardEventHandlers(typeof(KeyDownTestThing), typeof(KeyDownTestThing), null);
+        handlers = compiler.CompileKeyboardEventHandlers(typeof(KeyDownTestThing), typeof(KeyDownTestThing), null, false);
     }
 
     [Test]

@@ -10,6 +10,12 @@ namespace UIForia {
 
         protected override Type elementType => typeof(UIChildrenElement);
 
+        public override void Compile(ParsedTemplate template) {
+            CompileStyleBindings(template);
+            ResolveBaseStyles(template);
+            BuildBindings();
+        }
+
         public override UIElement CreateScoped(TemplateScope inputScope) {
             
             UIChildrenElement element = new UIChildrenElement();

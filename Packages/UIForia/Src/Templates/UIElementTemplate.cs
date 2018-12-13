@@ -31,29 +31,31 @@ namespace UIForia {
             if(isCompiled) return;
             isCompiled = true;
             
+            if (rootType == null) {
+                rootType = TypeProcessor.GetType(typeName, template.imports).rawType;
+            }
+
             if (!(typeof(UIElement).IsAssignableFrom(elementType))) {
                 UnityEngine.Debug.Log($"{elementType} must be a subclass of {typeof(UIElement)} in order to be used in templates");
                 return;
             }
             
-            if (rootType == null) {
-                rootType = TypeProcessor.GetType(typeName, template.imports).rawType;
-            }
-
             templateToExpand = TemplateParser.GetParsedTemplate(rootType);
-            templateToExpand.Compile();
 
-            // todo for tomorrow -- make this not suck, need to only compile attributes once
+            ResolveBaseStyles(template);
+            CompileStyleBindings(template);
+            CompileInputBindings(template, templateToExpand.rootElementTemplate != this);
+            CompilePropertyBindings(template);
+            ResolveActualAttributes(); // todo combine with <Contents/> attrs
+            BuildBindings();
             
-            base.Compile(template);
-
-            if (template.rootElementTemplate == this) {
+            
+            if (templateToExpand.rootElementTemplate == this) {
                 return;
             }
-
-            UITemplate expandedRoot = templateToExpand.rootElementTemplate;
             
-            // todo solve roots added twice
+            templateToExpand.Compile();
+            UITemplate expandedRoot = templateToExpand.rootElementTemplate;
             
             triggeredBindings = MergeBindingArray(triggeredBindings, expandedRoot.triggeredBindings);
             perFrameBindings = MergeBindingArray(perFrameBindings, expandedRoot.perFrameBindings);

@@ -8,21 +8,21 @@
 
         style container {
             PreferredSize = 100vw, 100vh;
-            BackgroundColor = Red;
+            BackgroundColor = #EEEEEEFF;
         }
 
         style app-body {
             FlexLayoutMainAxisAlignment = Center;
             FlexLayoutCrossAxisAlignment = Center;
             FlexItemSelfAlignment = Center;
+            FlexItemGrow = 1;
+            PreferredSize = 1pca, 0;
         }
         
         
     </Style>
 
     <Contents style="container">
-
-
         
         <URLNavBar/>
         
@@ -30,7 +30,7 @@
 
             <Router>
 
-                <Route path="'/login'">
+                <Route style="util.vertical-center" path="'/login'">
         
                     <LoginScreen/>
 
@@ -40,6 +40,12 @@
 
                     <CreateAccountScreen/>
 
+                </Route>
+                
+                <Route path="'/game'">
+                    
+                    Playing the game
+                    
                 </Route>
 
             </Router>

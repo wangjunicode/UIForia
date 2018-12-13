@@ -73,6 +73,7 @@
         </e>
         <e p="Klang" t="Include">
           <e p="Seed" t="Include">
+            <e p="Routes.cs" t="Include" />
             <e p="UIForia" t="Include">
               <e p="KlangButton" t="Include">
                 <e p="KlangButton.cs" t="Include" />
@@ -85,6 +86,10 @@
                   <e p="CreateAccountContainer.xml" t="Include" />
                   <e p="CreateAccountScreen.cs" t="Include" />
                   <e p="CreateAccountScreen.xml" t="Include" />
+                </e>
+                <e p="JoinColonyScreen" t="Include">
+                  <e p="JoinColonyScreen.cs" t="Include" />
+                  <e p="JoinColonyScreen.xml" t="Include" />
                 </e>
                 <e p="LoginScreen" t="Include">
                   <e p="LoginScreen.cs" t="Include" />
@@ -192,6 +197,7 @@
               <e p="AccessExpressionPart_Func.cs" t="Include" />
               <e p="AccessExpressionPart_Index.cs" t="Include" />
               <e p="AccessExpressionPart_Method.cs" t="Include" />
+              <e p="AliasAccessBridge.cs" t="Include" />
               <e p="AliasSources" t="Include">
                 <e p="ColorAliasSource.cs" t="Include" />
                 <e p="EnumAliasSources.cs" t="Include" />
@@ -219,7 +225,6 @@
                 <e p="ICastHandler.cs" t="Include" />
               </e>
               <e p="ExpressionCompiler.cs" t="Include" />
-              <e p="ExpressionCompiler2.cs" t="Include" />
               <e p="ExpressionResolvers" t="Include">
                 <e p="ContentSizeResolver.cs" t="Include" />
                 <e p="ElementResolver.cs" t="Include" />

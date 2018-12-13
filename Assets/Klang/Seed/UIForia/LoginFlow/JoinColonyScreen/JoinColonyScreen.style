@@ -1,0 +1,37 @@
+style container {
+    PreferredSize = 1pca;
+    FlexLayoutCrossAxisAlignment = Center;
+    FlexLayoutMainAxisAlignment = SpaceBetween;
+}
+
+style table {
+    PreferredWidth = 1pca;
+}
+
+style table-head {
+    BackgroundColor = white;
+    PreferredSize = 1pca, 1cnt;
+    LayoutType = Grid;
+    GridLayoutColTemplate = 0.25pca, 0.25pca, 0.25pca, 0.25pca;
+    TextColor = #64C1DF;
+    TextFontSize = 32;
+    Padding = 24px;
+}
+
+style table-body {
+    PreferredWidth = 1pca;
+}
+
+style table-row {
+    LayoutType = Grid;
+    GridLayoutColTemplate = 0.25pca, 0.25pca, 0.25pca, 0.25pca;
+    Padding = 12px, 12px;
+}
+
+style table-footer {
+    FlexLayoutDirection = Column;
+    PreferredWidth = 1pca;
+    Padding = 12px, 24px;
+    BackgroundColor = white;
+    FlexLayoutMainAxisAlignment = center;
+}

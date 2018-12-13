@@ -80,7 +80,7 @@ namespace UIForia.Animation {
                     startValue = m_StartValue;
                 }
                 else {
-                    startValue = styleSet.GetPropertyValue(m_TargetValue.propertyId);
+                    startValue = styleSet.GetComputedStyleProperty(m_TargetValue.propertyId);
                 }
 
                 AnimationState status = ResolveStartValue(styleSet, viewport, startValue);

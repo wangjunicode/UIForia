@@ -12,7 +12,7 @@ namespace UIForia {
 
         public string path;
         
-        [OnMouseDown]
+        [OnMouseClick]
         public void GoToPath() {
             List<ElementAttribute> attrs = GetAttributes();
             for (int i = 0; i < attrs.Count; i++) {
@@ -42,7 +42,7 @@ namespace UIForia {
             }
         }
         
-        [OnMouseDown]
+        [OnMouseClick]
         public void GoBack() {
             view.Application.Router.GoBack();
         }

@@ -22,14 +22,26 @@ namespace UIForia.Compilers {
         }
 
         public virtual Expression CompileAsDotExpression(CompilerContext context, string propertyName) {
+            Expression expression = CompileAsValueExpression(context);
+            if (expression != null) {
+                return context.compiler.CompileRestOfChain(expression, context);
+            }
             throw new CompileException($"Tried to invoke alias {aliasName} as a dot expression, but this is not supported");
         }
 
         public virtual Expression CompileAsIndexExpression(CompilerContext context, ASTNode indexNode) {
+            Expression expression = CompileAsValueExpression(context);
+            if (expression != null) {
+                return context.compiler.CompileRestOfChain(expression, context);
+            }
             throw new CompileException($"Tried to invoke alias {aliasName} as an index expression, but this is not supported");
         }
 
         public virtual Expression CompileAsMethodExpression(CompilerContext context, List<ASTNode> parameters) {
+            Expression expression = CompileAsValueExpression(context);
+            if (expression != null) {
+                return context.compiler.CompileRestOfChain(expression, context);
+            }
             throw new CompileException($"Tried to invoke alias {aliasName} as a method expression, but this is not supported");
         }
 

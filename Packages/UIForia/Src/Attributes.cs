@@ -44,6 +44,17 @@ namespace UIForia {
         }
 
     }
+    
+    [AttributeUsage(AttributeTargets.Method)]
+    public class OnMouseClickAttribute : MouseEventHandlerAttribute {
+
+        public OnMouseClickAttribute(KeyboardModifiers modifiers = KeyboardModifiers.None, EventPhase phase = EventPhase.Bubble)
+            : base(modifiers, InputEventType.MouseClick, phase) { }
+
+        public OnMouseClickAttribute(EventPhase phase)
+            : base(KeyboardModifiers.None, InputEventType.MouseClick, phase) { }
+
+    }
 
     [AttributeUsage(AttributeTargets.Method)]
     public class OnMouseDownAttribute : MouseEventHandlerAttribute {

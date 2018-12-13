@@ -807,6 +807,9 @@ public abstract class InputSystem : IInputSystem, IInputProvider {
         }
         else if (m_MouseState.isLeftMouseUpThisFrame) {
             RunMouseEvents(m_ElementsThisFrame, InputEventType.MouseUp);
+            if (m_MouseState.isSingleClick) {
+                RunMouseEvents(m_ElementsThisFrame, InputEventType.MouseClick);
+            }
         }
 
         RunMouseEvents(m_ElementsThisFrame, m_MouseState.DidMove ? InputEventType.MouseMove : InputEventType.MouseHover);

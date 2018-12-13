@@ -1,6 +1,7 @@
 using UIForia.Util;
 using System;
 using JetBrains.Annotations;
+using UIForia.Rendering;
 
 namespace UIForia.Routing {
 
@@ -24,6 +25,8 @@ namespace UIForia.Routing {
         public override string FullPath => parentRoute.FullPath + path;
         
         public override void OnCreate() {
+            style.SetPreferredWidth(UIMeasurement.Parent100, StyleState.Normal);
+            style.SetPreferredHeight(UIMeasurement.Parent100, StyleState.Normal);
             UIElement ptr = parent;
             while (ptr != null) {
                 if (ptr is RouteElement routeParent) {

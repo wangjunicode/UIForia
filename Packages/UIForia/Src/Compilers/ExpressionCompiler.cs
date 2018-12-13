@@ -1,1036 +1,1283 @@
-//using System;
-//using System.Collections.Generic;
-//using System.Linq.Expressions;
-//using System.Reflection;
-//using JetBrains.Annotations;
-//using UIForia.Compilers;
-//using UIForia.Compilers.CastHandlers;
-//using UIForia.Parsing;
-//using UIForia.Util;
-//using UnityEngine;
-//
-//namespace UIForia {
-//
-//    // takes the place of void since generics can't use void types
-//
-//    public class ExpressionCompiler {
-//
-//        public ContextDefinition context;
-//        private List<ICastHandler> userCastHandlers;
-//        private LightList<ExpressionAliasResolver> expressionAliasResolvers;
-//
-//        private static readonly List<ICastHandler> builtInCastHandlers = new List<ICastHandler>() {
-//            new CastHandler_ToString(),
-//            new CastHandler_ColorToVector4(),
-//            new CastHandler_DoubleToMeasurement(),
-//            new CastHandler_FloatToInt(),
-//            new CastHandler_FloatToMeasurement(),
-//            new CastHandler_IntToDouble(),
-//            new CastHandler_IntToFloat(),
-//            new CastHandler_IntToMeasurement(),
-//            new CastHandler_FloatToFixedLength(),
-//            new CastHandler_DoubleToFixedLength(),
-//            new CastHandler_IntToFixedLength(),
-//            new CastHandler_Vector2ToVector3(),
-//            new CastHandler_Vector3ToVector2(),
-//            new CastHandler_Vector4ToColor()
-//        };
-//
-//        [PublicAPI]
-//        public ExpressionCompiler(ContextDefinition context) {
-//            this.context = context;
-//        }
-//
-//        [PublicAPI]
-//        public Expression Compile(ExpressionNodeOld root) {
-//            return Visit(root);
-//        }
-//
-//        [PublicAPI]
-//        public Expression<T> Compile<T>(ExpressionNodeOld root) {
-//            return (Expression<T>) HandleCasting(typeof(T), Visit(root));
-//        }
-//
-//        [PublicAPI]
-//        public Expression Compile(string source) {
-//            try {
-//                return Visit(ExpressionParser.Parse(source));
-//            }
-//            catch (Exception e) {
-//                Debug.Log("Error compiling: " + source);
-//                Debug.Log(e.StackTrace);
-//                throw e;
-//            }
-//        }
-//
-//        [PublicAPI]
-//        public Expression Compile(Type outputType, string source) {
-//            return HandleCasting(outputType, Visit(ExpressionParser.Parse(source)));
-//        }
-//
-//        [PublicAPI]
-//        public Expression<T> Compile<T>(string source) {
-//            return (Expression<T>) HandleCasting(typeof(T), Visit(ExpressionParser.Parse(source)));
-//        }
-//
-//        [PublicAPI]
-//        public void AddExpressionResolver(ExpressionAliasResolver resolver) {
-//            expressionAliasResolvers = expressionAliasResolvers ?? new LightList<ExpressionAliasResolver>(4);
-//            for (int i = 0; i < expressionAliasResolvers.Count; i++) {
-//                if (expressionAliasResolvers[i].aliasName == resolver.aliasName) {
-//                    throw new ParseException("Duplicate alias registered: " + resolver.aliasName);
-//                }
-//            }
-//
-//            expressionAliasResolvers.Add(resolver);
-//        }
-//
-//        [PublicAPI]
-//        public void RemoveExpressionResolver(ExpressionAliasResolver resolver) {
-//            expressionAliasResolvers?.Remove(resolver);
-//        }
-//
-//        [PublicAPI]
-//        public void AddCastHandler(ICastHandler handler) {
-//            if (userCastHandlers == null) {
-//                userCastHandlers = new List<ICastHandler>();
-//            }
-//
-//            userCastHandlers.Add(handler);
-//        }
-//
-//        [PublicAPI]
-//        public void RemoveCastHandler(ICastHandler handler) {
-//            userCastHandlers?.Remove(handler);
-//        }
-//
-//        [PublicAPI]
-//        public void SetContext(ContextDefinition contextDefinition) {
-//            this.context = contextDefinition;
-//        }
-//
-//        private Expression Visit(ExpressionNodeOld nodeOld) {
-//            switch (nodeOld.expressionType) {
-//                case ExpressionNodeType.AliasAccessor:
-//                    return VisitAliasNode((AliasExpressionNodeOld) nodeOld);
-//
-//                case ExpressionNodeType.Paren:
-//                    return VisitParenNode((ParenExpressionNodeOld) nodeOld);
-//
-//                case ExpressionNodeType.RootContextAccessor:
-//                    return VisitRootContextAccessor((RootContextLookupNodeOld) nodeOld);
-//
-//                case ExpressionNodeType.LiteralValue:
-//                    return VisitConstant((LiteralValueNodeOld) nodeOld);
-//
-//                case ExpressionNodeType.Accessor:
-//                    return VisitAccessExpression((AccessExpressionNodeOld) nodeOld);
-//
-//                case ExpressionNodeType.Unary:
-//                    return VisitUnaryExpression((UnaryExpressionNodeOld) nodeOld);
-//
-//                case ExpressionNodeType.Operator:
-//                    return VisitOperatorExpression((OperatorExpressionNodeOld) nodeOld);
-//
-//                case ExpressionNodeType.MethodCall:
-//                    return VisitMethodCallExpression((MethodCallNodeOld) nodeOld);
-//            }
-//
-//            return null;
-//        }
-//
-//        private Expression HandleCasting(Type requiredType, Expression expression) {
-//            Type yieldedType = expression.YieldedType;
-//
-//            if (yieldedType == requiredType) {
-//                return expression;
-//            }
-//
-//            if (userCastHandlers != null) {
-//                for (int i = 0; i < userCastHandlers.Count; i++) {
-//                    if (userCastHandlers[i].CanHandle(requiredType, yieldedType)) {
-//                        return userCastHandlers[i].Cast(requiredType, expression);
-//                    }
-//                }
-//            }
-//
-//            for (int i = 0; i < builtInCastHandlers.Count; i++) {
-//                if (builtInCastHandlers[i].CanHandle(requiredType, yieldedType)) {
-//                    return builtInCastHandlers[i].Cast(requiredType, expression);
-//                }
-//            }
-//
-//            return expression;
-//        }
-//
-//        private static void ValidateParameterTypes(Type[] parameters, Expression[] arguments) {
-//            for (int i = 0; i < parameters.Length; i++) {
-//                if (!parameters[i].IsAssignableFrom(arguments[i].YieldedType)) {
-//                    throw new Exception($"Cannot use parameter of type {arguments[i].YieldedType} for parameter of type {parameters[i]}");
-//                }
-//            }
-//        }
-//
-//        private Expression VisitMethodAliasExpression(string alias, MethodCallNodeOld nodeOld) {
-//            if (expressionAliasResolvers != null) {
-//                for (int i = 0; i < expressionAliasResolvers.Count; i++) {
-//                    if (expressionAliasResolvers[i].aliasName == alias) {
-//                        Expression retn = expressionAliasResolvers[i].CompileAsMethodExpression(nodeOld, Visit);
-//                        if (retn == null) {
-//                            throw new ParseException($"Resolver {expressionAliasResolvers[i]} failed to parse {alias}");
-//                        }
-//
-//                        return retn;
-//                    }
-//                }
-//            }
-//
-//            throw new ParseException();
-//        }
-//
-//        private struct Parameter {
-//
-//            public Type type;
-//            public Expression expression;
-//
-//        }
-//
-//        private struct MethodCall {
-//
-//            public Type returnType;
-//            public int parameterCount;
-//            public Parameter p0;
-//            public bool isStatic;
-//
-//        }
-//
-//        private Expression VisitMethodCallExpression(MethodCallNodeOld nodeOld) {
-//            string methodName = nodeOld.identifierNodeOld.identifier;
-//
-//            if (methodName[0] == '$') {
-//                return VisitMethodAliasExpression(methodName, nodeOld);
-//            }
-//
-//            MethodInfo info = ReflectionUtil.GetMethodInfo(context.rootType, methodName);
-//
-//            if (info == null) {
-//                throw new Exception($"Cannot find method {methodName} on type {context.rootType.Name} or any registered aliases");
-//            }
-//
-//            MethodType methodType = 0;
-//            bool isVoid = info.ReturnType == typeof(void);
-//
-//            if (info.IsStatic) {
-//                methodType |= MethodType.Static;
-//            }
-//            else {
-//                methodType |= MethodType.Instance;
-//            }
-//
-//            if (isVoid) {
-//                methodType |= MethodType.Void;
-//            }
-//
-//            ParameterInfo[] parameters = info.GetParameters();
-//            IReadOnlyList<ExpressionNodeOld> signatureParts = nodeOld.signatureNodeOld.parts;
-//
-//            if (parameters.Length != signatureParts.Count) {
-//                throw new Exception("Argument count is wrong for method "
-//                                    + methodName + " expected: " + parameters.Length
-//                                    + " but was provided: " + signatureParts.Count);
-//            }
-//
-//            int genericOffset = 0;
-//            int extraArgumentCount = 2;
-//
-//            if ((methodType & MethodType.Void) != 0) {
-//                extraArgumentCount--;
-//            }
-//
-//            if ((methodType & MethodType.Static) != 0) {
-//                extraArgumentCount--;
-//            }
-//
-//            Expression[] args = new Expression[signatureParts.Count];
-//            Type[] genericArguments = new Type[signatureParts.Count + extraArgumentCount];
-//            Type[] parameterTypes = new Type[parameters.Length];
-//
-//            if ((methodType & MethodType.Instance) != 0) {
-//                genericArguments[0] = context.rootType; // todo -- this means root functions only, no chaining right now! 
-//                genericOffset = 1;
-//            }
-//
-//            for (int i = 0; i < args.Length; i++) {
-//                Type requiredType = parameters[i].ParameterType;
-//                parameterTypes[i] = requiredType;
-//                ExpressionNodeOld argumentNodeOld = signatureParts[i];
-//                Expression argumentExpression = Visit(argumentNodeOld);
-//                args[i] = HandleCasting(requiredType, argumentExpression);
-//
-//                genericArguments[i + genericOffset] = args[i].YieldedType;
-//            }
-//
-//            if ((methodType & MethodType.Void) == 0) {
-//                genericArguments[genericArguments.Length - 1] = info.ReturnType;
-//            }
-//
-//            ValidateParameterTypes(parameterTypes, args);
-//
-//            Type callType = GetMethodCallType(methodName, args.Length, genericArguments, methodType);
-//
-//            ReflectionUtil.ObjectArray2[0] = info;
-//            ReflectionUtil.ObjectArray2[1] = args;
-//
-//            return (Expression) ReflectionUtil.CreateGenericInstance(callType, ReflectionUtil.ObjectArray2);
-//        }
-//
-//      
-//
-//        private Expression VisitAliasNode(AliasExpressionNodeOld nodeOld) {
-////            Type aliasedType = context.ResolveRuntimeAliasType(node.alias);
-////
-////            if (aliasedType == null) {
-////                throw new Exception("Unable to resolve alias: " + node.alias);
-////            }
-//
-//            string contextName = nodeOld.alias;
-//            if (contextName.StartsWith("$") && expressionAliasResolvers != null) {
-//                for (int i = 0; i < expressionAliasResolvers.Count; i++) {
-//                    if (contextName == expressionAliasResolvers[i].aliasName) {
-//                        Expression retn = expressionAliasResolvers[i].CompileAsValueExpression(context, nodeOld, Visit);
-//                        if (retn == null) {
-//                            throw new ParseException($"Resolver {expressionAliasResolvers[i]} failed to parse {contextName}");
-//                        }
-//
-//                        return retn;
-//                    }
-//                }
-//            }
-//
-//            throw new ParseException($"Unable to resolve alias {contextName}");
-////            return (Expression) ReflectionUtil.CreateGenericInstanceFromOpenType(
-////                typeof(ResolveExpression_Alias<>),
-////                aliasedType,
-////                node.alias
-////            );
-//        }
-//
-//        private Expression VisitRootContextAccessor(RootContextLookupNodeOld nodeOld) {
-//            string fieldName = nodeOld.idNodeOld.identifier;
-////            // todo -- alias is resolved before field access, might be an issue
-////            object constantAlias = context.ResolveConstAlias(fieldName);
-////            if (constantAlias != null) {
-////                Type aliasType = constantAlias.GetType();
-////
-////                ReflectionUtil.ObjectArray1[0] = constantAlias;
-////                return (Expression) ReflectionUtil.CreateGenericInstanceFromOpenType(
-////                    typeof(ConstantExpression<>),
-////                    aliasType,
-////                    ReflectionUtil.ObjectArray1
-////                );
-////            }
-//
-//            if (ReflectionUtil.IsField(context.rootType, fieldName)) {
-//                Type fieldType = ReflectionUtil.GetFieldType(context.rootType, fieldName);
-//                ReflectionUtil.ObjectArray2[0] = context.rootType;
-//                ReflectionUtil.ObjectArray2[1] = fieldName;
-//                return (Expression) ReflectionUtil.CreateGenericInstanceFromOpenType(
-//                    typeof(AccessExpression_RootField<>),
-//                    fieldType,
-//                    ReflectionUtil.ObjectArray2
-//                );
-//            }
-//
-//            if (ReflectionUtil.IsProperty(context.rootType, fieldName)) {
-//                Type propertyType = ReflectionUtil.GetPropertyType(context.rootType, fieldName);
-//                ReflectionUtil.ObjectArray2[0] = context.rootType;
-//                ReflectionUtil.ObjectArray2[1] = fieldName;
-//                return (Expression) ReflectionUtil.CreateGenericInstanceFromOpenType(
-//                    typeof(AccessExpression_RootProperty<>),
-//                    propertyType,
-//                    ReflectionUtil.ObjectArray2
-//                );
-//            }
-//
-//            throw new Exception($"Cannot resolve {fieldName} as a field or property on type {context.rootType.Name}");
-//        }
-//
-//        private Expression VisitParenNode(ParenExpressionNodeOld nodeOld) {
-//            return ParenExpressionFactory.CreateParenExpression(Visit(nodeOld.expressionNodeOld));
-//        }
-//
-//        private Expression VisitOperatorExpression(OperatorExpressionNodeOld nodeOld) {
-//            Type leftType = nodeOld.left.GetYieldedType(context);
-//            Type rightType = nodeOld.right.GetYieldedType(context);
-//            object leftExpression = null;
-//            object rightExpression = null;
-//
-//            switch (nodeOld.OpType) {
-//                case OperatorType.Plus:
-//
-//                    if (leftType == typeof(string) || rightType == typeof(string)) {
-//                        Type openType = typeof(OperatorExpression_StringConcat<,>);
-//                        leftExpression = Visit(nodeOld.left);
-//                        rightExpression = Visit(nodeOld.right);
-//                        ReflectionUtil.TypeArray2[0] = leftType;
-//                        ReflectionUtil.TypeArray2[1] = rightType;
-//                        ReflectionUtil.ObjectArray2[0] = leftExpression;
-//                        ReflectionUtil.ObjectArray2[1] = rightExpression;
-//
-//                        return (Expression) ReflectionUtil.CreateGenericInstanceFromOpenType(
-//                            openType,
-//                            ReflectionUtil.TypeArray2,
-//                            ReflectionUtil.ObjectArray2
-//                        );
-//                    }
-//
-//                    if (ReflectionUtil.AreNumericTypesCompatible(leftType, rightType)) {
-//                        return OperatorExpression_Arithmetic.Create(OperatorType.Plus, Visit(nodeOld.left), Visit(nodeOld.right));
-//                    }
-//
-//                    break;
-//
-//                case OperatorType.Minus:
-//                case OperatorType.Divide:
-//                case OperatorType.Times:
-//                case OperatorType.Mod:
-//
-//                    if (ReflectionUtil.AreNumericTypesCompatible(leftType, rightType)) {
-//                        return OperatorExpression_Arithmetic.Create(nodeOld.OpType, Visit(nodeOld.left), Visit(nodeOld.right));
-//                    }
-//
-//                    break;
-//
-//                case OperatorType.TernaryCondition:
-//
-//                    return VisitOperator_TernaryCondition(nodeOld);
-//
-//                case OperatorType.TernarySelection:
-//                    throw new Exception("Should never visit a TernarySelection operator");
-//
-//                case OperatorType.GreaterThan:
-//                case OperatorType.GreaterThanEqualTo:
-//                case OperatorType.LessThan:
-//                case OperatorType.LessThanEqualTo:
-//                    return null;//new OperatorExpression_Comparison(nodeOld.OpType, Visit(nodeOld.left), Visit(nodeOld.right));
-//
-//                case OperatorType.Equals:
-//                case OperatorType.NotEquals: {
-//                    Type openEqualityType = typeof(OperatorExpression_Equality<,>);
-//                    Type leftNodeType = nodeOld.left.GetYieldedType(context);
-//                    Type rightNodeType = nodeOld.right.GetYieldedType(context);
-//
-//                    leftExpression = Visit(nodeOld.left);
-//                    rightExpression = Visit(nodeOld.right);
-//                    ReflectionUtil.ObjectArray3[0] = nodeOld.OpType;
-//                    ReflectionUtil.ObjectArray3[1] = leftExpression;
-//                    ReflectionUtil.ObjectArray3[2] = rightExpression;
-//                    ReflectionUtil.TypeArray2[0] = leftNodeType;
-//                    ReflectionUtil.TypeArray2[1] = rightNodeType;
-//                    return (Expression) ReflectionUtil.CreateGenericInstanceFromOpenType(
-//                        openEqualityType,
-//                        ReflectionUtil.TypeArray2,
-//                        ReflectionUtil.ObjectArray3
-//                    );
-//                }
-//                case OperatorType.And:
-//                case OperatorType.Or: {
-//                    Type leftNodeType = nodeOld.left.GetYieldedType(context);
-//                    Type rightNodeType = nodeOld.right.GetYieldedType(context);
-//                    if (leftNodeType == typeof(bool) && rightNodeType == typeof(bool)) {
-//                        return new OperatorExpression_AndOrBool(nodeOld.OpType, (Expression<bool>) Visit(nodeOld.left), (Expression<bool>) Visit(nodeOld.right));
-//                    }
-//                    else if (leftNodeType.IsClass && rightNodeType.IsClass) {
-//                        ReflectionUtil.ObjectArray3[0] = nodeOld.OpType;
-//                        ReflectionUtil.ObjectArray3[1] = Visit(nodeOld.left);
-//                        ReflectionUtil.ObjectArray3[2] = Visit(nodeOld.right);
-//                        ReflectionUtil.TypeArray2[0] = leftNodeType;
-//                        ReflectionUtil.TypeArray2[1] = rightNodeType;
-//                        return (Expression) ReflectionUtil.CreateGenericInstanceFromOpenType(
-//                            typeof(OperatorExpression_AndOrObject<,>),
-//                            ReflectionUtil.TypeArray2,
-//                            ReflectionUtil.ObjectArray3
-//                        );
-//                    }
-//                    else if (leftNodeType.IsClass && rightNodeType == typeof(bool)) {
-//                        ReflectionUtil.ObjectArray3[0] = nodeOld.OpType;
-//                        ReflectionUtil.ObjectArray3[1] = Visit(nodeOld.left);
-//                        ReflectionUtil.ObjectArray3[2] = Visit(nodeOld.right);
-//                        ReflectionUtil.TypeArray1[0] = leftNodeType;
-//                        return (Expression) ReflectionUtil.CreateGenericInstanceFromOpenType(
-//                            typeof(OperatorExpression_AndOrObjectBool<>),
-//                            ReflectionUtil.TypeArray1,
-//                            ReflectionUtil.ObjectArray3
-//                        );
-//                    }
-//                    else if (leftNodeType == typeof(bool) && rightNodeType.IsClass) {
-//                        ReflectionUtil.ObjectArray3[0] = nodeOld.OpType;
-//                        ReflectionUtil.ObjectArray3[1] = Visit(nodeOld.left);
-//                        ReflectionUtil.ObjectArray3[2] = Visit(nodeOld.right);
-//                        ReflectionUtil.TypeArray1[0] = rightNodeType;
-//                        return (Expression) ReflectionUtil.CreateGenericInstanceFromOpenType(
-//                            typeof(OperatorExpression_AndOrBoolObject<>),
-//                            ReflectionUtil.TypeArray1,
-//                            ReflectionUtil.ObjectArray3
-//                        );
-//                    }
-//
-//                    break;
-//                }
-//            }
-//
-//            throw new Exception("Bad operator expression");
-//        }
-//
-//        private Expression VisitUnaryExpression(UnaryExpressionNodeOld nodeOld) {
-//            Type yieldType = nodeOld.expression.GetYieldedType(context);
-//            if (yieldType == typeof(bool)) {
-//                if (nodeOld.op == OperatorType.Not) {
-//                    return new UnaryExpression_Boolean((Expression<bool>) Visit(nodeOld.expression));
-//                }
-//
-//                throw new Exception("Unary but not boolean operator");
-//            }
-//
-//            if (yieldType == typeof(string)) {
-//                if (nodeOld.op == OperatorType.Not) {
-//                    return new UnaryExpression_StringBoolean((Expression<string>) Visit(nodeOld.expression));
-//                }
-//            }
-//
-//            if (yieldType.IsClass) {
-//                if (nodeOld.op == OperatorType.Not) {
-//                    return new UnaryExpression_ObjectBoolean((Expression<object>) Visit(nodeOld.expression));
-//                }
-//            }
-//
-//            if (!IsNumericType(yieldType)) {
-//                // todo -- error here for struct case?
-//                return null;
-//            }
-//
-//            switch (nodeOld.op) {
-//                case OperatorType.Plus:
-//                    return UnaryExpression_PlusFactory.Create(Visit(nodeOld.expression));
-//
-//                case OperatorType.Minus:
-//                    return UnaryExpression_MinusFactory.Create(Visit(nodeOld.expression));
-//            }
-//
-//            return null;
-//        }
-//
-//        private static bool IsNumericType(Type type) {
-//            return type == typeof(int)
-//                   || type == typeof(float)
-//                   || type == typeof(double);
-//        }
-//
-//        private Expression VisitAccessExpression(AccessExpressionNodeOld nodeOld) {
-//            string contextName = nodeOld.identifierNodeOld.identifier;
-//            Type headType;
-//            object arg0 = contextName;
-//            AccessExpressionType expressionType = AccessExpressionType.AliasLookup;
-//            bool isStaticReferenceExpression = false;
-//
-//            if (contextName[0] == '$') {
-//                for (int i = 0; i < expressionAliasResolvers.Count; i++) {
-//                    if (contextName == expressionAliasResolvers[i].aliasName) {
-//                        Expression retn = expressionAliasResolvers[i].CompileAsAccessExpression(context, nodeOld, Visit);
-//                        if (retn == null) {
-//                            throw new ParseException($"Resolver {expressionAliasResolvers[i]} failed to parse {contextName}");
-//                        }
-//
-//                        return retn;
-//                    }
-//                }
-//            }
-//
-//            if (nodeOld.identifierNodeOld is ExternalReferenceIdentifierNodeOld) {
-//                throw new NotImplementedException();
-////                isStaticReferenceExpression = true;
-////                headType = (Type) context.ResolveConstAlias(contextName);
-////                // todo -- this will break for non type references... its possible that we want a constant value or something else here
-////                if (headType == null) {
-////                    throw new Exception("Unable to resolve alias: " + contextName);
-////                }
-//            }
-//            else {
-//                headType = ReflectionUtil.ResolveFieldOrPropertyType(context.rootType, contextName);
-//            }
-//
-//            if (headType == null) {
-//                throw new Exception("Missing field or alias for access on context: " + contextName);
-//            }
-//
-//            if (headType.IsPrimitive) {
-//                throw new Exception(
-//                    $"Attempting property access on type {headType.Name} on a primitive field {contextName}");
-//            }
-//
+using System;
+using System.Collections.Generic;
+using System.Globalization;
+using System.Reflection;
+using UIForia.Compilers.CastHandlers;
+using UIForia.Exceptions;
+using UIForia.Extensions;
+using UIForia.Parsing;
+using UIForia.Util;
+
+namespace UIForia.Compilers {
+
+    public class CompilerContext {
+
+        public readonly Type rootType;
+        public readonly Type targetType;
+        public readonly Type currentType;
+        public readonly string fileName;
+        public readonly int lineNumber;
+        public readonly int columnNumber;
+        public readonly ASTNode firstNode;
+        public readonly ExpressionCompiler compiler;
+
+        internal CompilerContext(ExpressionCompiler compiler, Type rootType, Type currentType, Type targetType, ASTNode firstNode) {
+            this.rootType = rootType;
+            this.currentType = currentType;
+            this.targetType = targetType;
+            this.fileName = string.Empty;
+            this.lineNumber = -1;
+            this.columnNumber = -1;
+            this.compiler = compiler;
+            this.firstNode = firstNode;
+        }
+
+        public Expression Visit(Type targetType, ASTNode node) {
+            return compiler.Visit(targetType, node);
+        }
+
+    }
+
+    public enum AccessInfoType {
+
+        Invalid,
+        MethodInvoke,
+        FuncInvoke,
+        ActionInvoke,
+        Field,
+        Property,
+        Index
+
+    }
+
+    public class ExpressionCompiler {
+
+        private Type rootType;
+        private Type targetType;
+        private Type currentType;
+
+        private readonly bool allowLinq;
+        private readonly LightList<ExpressionAliasResolver> aliasResolvers;
+        private readonly LightList<string> namespaces = new LightList<string>();
+
+        public ExpressionCompiler(bool allowLinq = false) {
+            this.allowLinq = allowLinq;
+            this.aliasResolvers = new LightList<ExpressionAliasResolver>();
+        }
+
+        private static readonly List<ICastHandler> builtInCastHandlers = new List<ICastHandler>() {
+            new CastHandler_ToString(),
+            new CastHandler_ColorToVector4(),
+            new CastHandler_DoubleToMeasurement(),
+            new CastHandler_FloatToInt(),
+            new CastHandler_FloatToMeasurement(),
+            new CastHandler_IntToDouble(),
+            new CastHandler_IntToFloat(),
+            new CastHandler_IntToMeasurement(),
+            new CastHandler_FloatToFixedLength(),
+            new CastHandler_DoubleToFixedLength(),
+            new CastHandler_IntToFixedLength(),
+            new CastHandler_Vector2ToVector3(),
+            new CastHandler_Vector3ToVector2(),
+            new CastHandler_Vector4ToColor()
+        };
+
+        public void AddNamespace(string namespaceName) {
+            namespaces.Add(namespaceName);
+        }
+
+        public void RemoveNamespace(string namespaceName) {
+            namespaces.Remove(namespaceName);
+        }
+
+        public void AddAliasResolver(ExpressionAliasResolver resolver) {
+            for (int i = 0; i < aliasResolvers.Count; i++) {
+                if (aliasResolvers[i].aliasName == resolver.aliasName) {
+                    throw new ParseException($"Trying to add resolver with alias name {resolver.aliasName} but that alias is already registered");
+                }
+            }
+
+            aliasResolvers.Add(resolver);
+        }
+
+        public void RemoveAliasResolver(ExpressionAliasResolver resolver) {
+            aliasResolvers.Remove(resolver);
+        }
+
+        public Expression<T> Compile<T>(Type rootType, Type currentType, string input) {
+            this.targetType = typeof(T);
+            this.rootType = rootType;
+            this.currentType = currentType;
+
+            ASTNode astRoot = ExpressionParser.Parse(input);
+            return (Expression<T>) Visit(astRoot);
+        }
+
+        public Expression<T> Compile<T>(Type rootType, string input) {
+            return Compile<T>(rootType, rootType, input);
+        }
+
+        public Expression Compile(Type rootType, string input, Type targetType) {
+            this.targetType = targetType;
+            this.rootType = rootType;
+            this.currentType = rootType;
+            ASTNode astRoot = ExpressionParser.Parse(input);
+            return Visit(astRoot);
+        }
+
+        public Expression Compile(Type rootType, Type currentType, string input, Type targetType) {
+            this.targetType = targetType;
+            this.rootType = rootType;
+            this.currentType = currentType;
+            ASTNode astRoot = ExpressionParser.Parse(input);
+            return Visit(astRoot);
+        }
+
+        internal Expression Visit(Type targetType, ASTNode node) {
+            Type oldTargetType = this.targetType;
+            this.targetType = targetType;
+            Expression retn = Visit(node);
+            this.targetType = oldTargetType;
+            return retn;
+        }
+
+        private Expression Visit(ASTNode node) {
+            switch (node.type) {
+                case ASTNodeType.NullLiteral:
+                    return VisitNull((LiteralNode) node);
+
+                case ASTNodeType.BooleanLiteral:
+                    return VisitBoolean((LiteralNode) node);
+
+                case ASTNodeType.NumericLiteral:
+                    return VisitNumeric((LiteralNode) node);
+
+                case ASTNodeType.DefaultLiteral:
+                    return VisitDefault((LiteralNode) node);
+
+                case ASTNodeType.StringLiteral:
+                    return VisitString((LiteralNode) node);
+
+                case ASTNodeType.Operator:
+                    return VisitOperator((OperatorNode) node);
+
+                case ASTNodeType.TypeOf:
+                    return VisitTypeOf((TypeNode) node);
+
+                case ASTNodeType.Identifier:
+                    return VisitSimpleRootAccess((IdentifierNode) node);
+
+                case ASTNodeType.UnaryNot:
+                    return VisitUnaryNot((UnaryExpressionNode) node);
+
+                case ASTNodeType.UnaryMinus:
+                    return VisitUnaryMinus((UnaryExpressionNode) node);
+
+                case ASTNodeType.New:
+                case ASTNodeType.DirectCast:
+                case ASTNodeType.ListInitializer:
+                    throw new NotImplementedException();
+
+                case ASTNodeType.AccessExpression:
+                    return VisitAccessExpression((MemberAccessExpressionNode) node);
+
+                case ASTNodeType.Paren:
+                    return ParenExpressionFactory.CreateParenExpression(Visit(((ParenNode) node).expression));
+
+                default:
+                    throw new ArgumentOutOfRangeException();
+            }
+        }
+
+        public struct AccessInfo {
+
+            public FieldInfo fieldInfo;
+            public PropertyInfo propertyInfo;
+            public MethodInfo methodInfo;
+            public List<Expression> arguments;
+            public Type outputType;
+            public AccessInfoType type;
+            public Type inputType;
+
+            public static void CreateMethodCall(ref AccessInfo accessInfo, MethodInfo info, List<Expression> arguments) {
+                accessInfo.type = AccessInfoType.MethodInvoke;
+                accessInfo.arguments = arguments;
+                accessInfo.methodInfo = info;
+                accessInfo.outputType = info.ReturnType == typeof(void) ? typeof(Terminal) : info.ReturnType;
+                accessInfo.inputType = info.DeclaringType;
+            }
+
+            public static bool CreateField(ref AccessInfo accessInfo, Type lastType, DotAccessNode dotAccessNode) {
+                FieldInfo fieldInfo = ReflectionUtil.GetInstanceOrStaticFieldInfo(lastType, dotAccessNode.propertyName);
+                if (fieldInfo == null) {
+                    return false;
+                }
+
+                accessInfo.inputType = lastType;
+                accessInfo.fieldInfo = fieldInfo;
+                accessInfo.outputType = fieldInfo.FieldType;
+                accessInfo.type = AccessInfoType.Field;
+                return true;
+            }
+
+            public static bool CreateProperty(ref AccessInfo accessInfo, Type lastType, DotAccessNode dotAccessNode) {
+                PropertyInfo propertyInfo = ReflectionUtil.GetInstanceOrStaticPropertyInfo(lastType, dotAccessNode.propertyName);
+                if (propertyInfo == null) {
+                    return false;
+                }
+
+                accessInfo.inputType = lastType;
+                accessInfo.propertyInfo = propertyInfo;
+                accessInfo.outputType = propertyInfo.PropertyType;
+                accessInfo.type = AccessInfoType.Property;
+                return true;
+            }
+
+            public static bool CreateIndexer(ref AccessInfo accessInfo, Type lastType, Expression indexExpression) {
+                accessInfo.inputType = lastType;
+                accessInfo.outputType = GetListElementType(lastType);
+                accessInfo.arguments = new List<Expression>();
+                accessInfo.arguments.Add(indexExpression);
+                accessInfo.type = AccessInfoType.Index;
+                return true;
+            }
+
+        }
+
+
+        private LightList<AccessInfo> GetAccessInfoList(Type rootType, MemberAccessExpressionNode node, bool injectHead = true) {
+            LightList<AccessInfo> accessInfoList = LightListPool<AccessInfo>.Get();
+
+            Type lastType = rootType;
+
+            if (injectHead) {
+                node.parts.Insert(0, ASTNode.DotAccessNode(node.identifier));
+            }
+
+            for (int i = 0; i < node.parts.Count; i++) {
+                ASTNode part = node.parts[i];
+                AccessInfo accessInfo = new AccessInfo();
+                switch (part) {
+                    case DotAccessNode dotAccessNode: {
+                        if (i != node.parts.Count - 1) {
+                            ASTNode nextPart = node.parts[i + 1];
+                            if (nextPart is InvokeNode invokeNode) {
+                                MethodInfo info;
+                                List<Expression> arguments = VisitMethodArguments(lastType, dotAccessNode.propertyName, invokeNode.parameters, out info);
+                                if (info == null) {
+                                    throw CompileExceptions.MethodNotFound(lastType, dotAccessNode.propertyName);
+                                }
+
+                                AccessInfo.CreateMethodCall(ref accessInfo, info, arguments);
+                                lastType = accessInfo.outputType;
+                                accessInfoList.Add(accessInfo);
+                                i++;
+                                continue;
+                            }
+                        }
+
+                        if (AccessInfo.CreateField(ref accessInfo, lastType, dotAccessNode) || AccessInfo.CreateProperty(ref accessInfo, lastType, dotAccessNode)) {
+                            lastType = accessInfo.outputType;
+                            accessInfoList.Add(accessInfo);
+                            continue;
+                        }
+
+                        if (i == 0) {
+                            if (injectHead) {
+                                node.parts.RemoveAt(0);
+                            }
+
+                            return null;
+                        }
+
+                        throw CompileExceptions.FieldOrPropertyNotFound(lastType, dotAccessNode.propertyName);
+                    }
+
+                    case InvokeNode invokeNode: {
+                        // last type
+                        if (ReflectionUtil.IsAction(lastType)) {
+                            throw new NotImplementedException();
+                        }
+                        else { // func
+                            Type outputType = null;
+                            List<Expression> arguments = VisitFuncArguments(lastType, invokeNode.parameters, out outputType);
+                            accessInfo.type = AccessInfoType.FuncInvoke;
+                            accessInfo.arguments = arguments;
+                            accessInfo.inputType = lastType;
+                            accessInfo.outputType = outputType;
+                            lastType = outputType;
+                            accessInfoList.Add(accessInfo);
+                            continue;
+                        }
+                    }
+
+                    case IndexNode indexNode: {
+                        // todo allow index operator overloads here
+                        Expression indexExpression = Visit(typeof(int), indexNode.expression);
+                        if (AccessInfo.CreateIndexer(ref accessInfo, lastType, indexExpression)) {
+                            lastType = accessInfo.outputType;
+                            accessInfoList.Add(accessInfo);
+                            continue;
+                        }
+
+                        throw new CompileException("Invalid index accessor");
+                    }
+                }
+            }
+
+            return accessInfoList;
+        }
+
+        // todo remove this 
+        private static LightList<Type> GetInputTypes(Type headType, MemberAccessExpressionNode node) {
+            LightList<Type> inputTypes = LightListPool<Type>.Get();
+            inputTypes.Add(headType);
+
+            for (int i = 0; i < node.parts.Count; i++) {
+                ASTNode part = node.parts[i];
+
+                if (part.type == ASTNodeType.DotAccess) {
+                    Type partType = ReflectionUtil.ResolveFieldOrPropertyType(inputTypes[i], ((DotAccessNode) part).propertyName);
+                    if (partType == null) {
+                        throw new CompileException($"Unable to resolve field or property '{((DotAccessNode) part).propertyName}' on type {inputTypes[i]}");
+                    }
+
+                    inputTypes.Add(partType);
+                }
+                else if (part.type == ASTNodeType.IndexExpression) {
+                    // get array / list element type / index expression type given
+                    inputTypes.Add(GetListElementType(inputTypes[i]));
+                }
+                else if (part is InvokeNode invokeNode) { }
+            }
+
+            return inputTypes;
+        }
+
+        private Expression VisitStaticAccessExpression(Type headType, MemberAccessExpressionNode node) {
+            LightList<Type> inputTypes = GetInputTypes(headType, node);
+
+            Type outputType = inputTypes[inputTypes.Length - 1];
+
+            AccessExpressionPart p = MakeAccessPart(0, node.parts, outputType, inputTypes);
+
+            LightListPool<Type>.Release(ref inputTypes);
+
 //            if (headType.IsEnum) {
-//                if (nodeOld.parts.Count != 1) {
-//                    throw new Exception("Trying to reference nested Enum value, which is not possible");
-//                }
-//
-//                if (!(nodeOld.parts[0] is PropertyAccessExpressionPartNodeOld)) {
-//                    throw new Exception("Trying to read enum value but encountered array access");
-//                }
-//
-//                object val = Enum.Parse(headType, ((PropertyAccessExpressionPartNodeOld) nodeOld.parts[0]).fieldName);
-//                ReflectionUtil.ObjectArray1[0] = val;
-//                return (Expression) ReflectionUtil.CreateGenericInstanceFromOpenType(typeof(ConstantExpression<>), headType, ReflectionUtil.ObjectArray1);
+//                throw new NotImplementedException("Enum not yet implemented");
 //            }
-//
-//            bool isRootContext = !(nodeOld.identifierNodeOld is SpecialIdentifierNodeOld) && !(nodeOld.identifierNodeOld is ExternalReferenceIdentifierNodeOld);
-//            int startOffset = isRootContext ? 1 : 0;
-//            int partCount = nodeOld.parts.Count;
-//            if (isRootContext) {
-//                partCount = nodeOld.parts.Count + 1;
-//            }
-//            else if (isStaticReferenceExpression) {
-//                partCount = nodeOld.parts.Count; //== 1 ? 1 : node.parts.Count - 1;// 1;
-//            }
-//            else {
-//                partCount = nodeOld.parts.Count;
-//            }
-//
-//            Type lastType = headType;
-//            AccessExpressionPart[] parts = new AccessExpressionPart[partCount];
-//
-//            if (isStaticReferenceExpression) {
-//                startOffset = 1;
-//                PropertyAccessExpressionPartNodeOld propertyPart = nodeOld.parts[0] as PropertyAccessExpressionPartNodeOld;
-//                if (propertyPart != null) {
-//                    FieldInfo fieldInfo = ReflectionUtil.GetStaticFieldInfo(headType, propertyPart.fieldName);
-//                    if (fieldInfo != null) {
-//                        arg0 = fieldInfo;
-//                        expressionType = AccessExpressionType.StaticField;
-//                        lastType = fieldInfo.FieldType;
-//                        parts[0] = new AccessExpressionPart_StaticField(fieldInfo);
-//                    }
-//                    else {
-//                        PropertyInfo propertyInfo = ReflectionUtil.GetStaticPropertyInfo(headType, propertyPart.fieldName);
-//                        expressionType = AccessExpressionType.StaticProperty;
-//                        if (propertyInfo == null) {
-//                            throw new Exception("Imported values must be static fields or properties. " +
-//                                                $"Cannot find a static field or property called {propertyPart.fieldName} on type {headType}");
-//                        }
-//
-//                        arg0 = propertyInfo;
-//                        lastType = propertyInfo.PropertyType;
-//                        parts[0] = new AccessExpressionPart_StaticProperty(propertyInfo);
-//                    }
-//                }
-//
-//                for (int i = startOffset; i < partCount; i++) {
-//                    AccessExpressionPartNodeOld part = nodeOld.parts[i];
-//                    propertyPart = part as PropertyAccessExpressionPartNodeOld;
-//                    if (propertyPart != null) {
-//                        string fieldName = propertyPart.fieldName;
-//                        FieldInfo fieldInfo = ReflectionUtil.GetInstanceOrStaticFieldInfo(lastType, fieldName);
-//                        if (fieldInfo != null) {
-//                            lastType = fieldInfo.FieldType;
-//                            parts[i] = new AccessExpressionPart_Field(fieldName);
-//                        }
-//                        else {
-//                            PropertyInfo propertyInfo = ReflectionUtil.GetInstanceOrStaticPropertyInfo(lastType, fieldName);
-//
-//                            if (propertyInfo == null) {
-//                                throw new UIForia.ParseException($"Unable to find field with name '{fieldName}' on type {lastType}");
-//                            }
-//
-//                            lastType = propertyInfo.PropertyType;
-//                            if (ReflectionUtil.IsPropertyStatic(propertyInfo)) {
-//                                parts[i] = new AccessExpressionPart_StaticProperty(propertyInfo);
-//                            }
-//                            else {
-//                                parts[i] = new AccessExpressionPart_Property(fieldName);
-//                            }
-//                        }
-//
-//                        continue;
-//                    }
-//
-//                    ArrayAccessExpressionNodeOld arrayPart = part as ArrayAccessExpressionNodeOld;
-//                    if (arrayPart != null) {
-//                        Expression<int> indexExpression = (Expression<int>) Visit(arrayPart.expressionNodeOld);
-//                        lastType = ReflectionUtil.GetArrayElementTypeOrThrow(lastType);
-//                        parts[i] = new AccessExpressionPart_List(indexExpression);
-//                        continue;
-//                    }
-//
-//                    throw new Exception("Unknown AccessExpression Type: " + part.GetType());
-//                }
-//            }
-//            else {
-//                for (int i = startOffset; i < partCount; i++) {
-//                    AccessExpressionPartNodeOld part = nodeOld.parts[i - startOffset];
-//
-//                    PropertyAccessExpressionPartNodeOld propertyPart = part as PropertyAccessExpressionPartNodeOld;
-//
-//                    if (propertyPart != null) {
-//                        string fieldName = propertyPart.fieldName;
-//                        FieldInfo fieldInfo = ReflectionUtil.GetInstanceOrStaticFieldInfo(lastType, fieldName);
-//                        if (fieldInfo != null) {
-//                            lastType = fieldInfo.FieldType;
-//                            parts[i] = new AccessExpressionPart_Field(fieldName);
-//                        }
-//                        else {
-//                            PropertyInfo propertyInfo = ReflectionUtil.GetInstanceOrStaticPropertyInfo(lastType, fieldName);
-//                            if (propertyInfo == null) {
-//                                throw new UIForia.ParseException($"Unable to find field or property with name '{fieldName}' on type {lastType}");
-//                            }
-//
-//                            lastType = propertyInfo.PropertyType;
-//                            if (ReflectionUtil.IsPropertyStatic(propertyInfo)) {
-//                                parts[i] = new AccessExpressionPart_StaticProperty(propertyInfo);
-//                            }
-//                            else {
-//                                parts[i] = new AccessExpressionPart_Property(fieldName);
-//                            }
-//                        }
-//
-//                        continue;
-//                    }
-//
-//                    ArrayAccessExpressionNodeOld arrayPart = part as ArrayAccessExpressionNodeOld;
-//                    if (arrayPart != null) {
-//                        Expression<int> indexExpression = (Expression<int>) Visit(arrayPart.expressionNodeOld);
-//                        lastType = ReflectionUtil.GetArrayElementTypeOrThrow(lastType);
-//                        parts[i] = new AccessExpressionPart_List(indexExpression);
-//                        continue;
-//                    }
-//
-//                    MethodAccessExpressionPartNodeOld methodPart = part as MethodAccessExpressionPartNodeOld;
-//                    if (methodPart != null) {
-//                        // todo only supports Action and Func right now, not actual methods
-//
-//                        Type methodType = null;
-//                        Type targetType = headType;
-//                        AccessExpressionPart prev = parts[i - 1];
-//
-//                        // todo -- use the array element type as the action/func type 
-//                        // todo -- this only supports actions right that have names
-//                        // todo -- we only support 1 level of dot right now, need to get type from parts list - 2 || head
-//
-//                        if (prev is AccessExpressionPart_List) {
-//                            throw new Exception("Array method access in expressions is not yet supported");
-//                        }
-//
-//                        if (prev is AccessExpressionPart_Field) {
-//                            string fieldName = (prev as AccessExpressionPart_Field).fieldName;
-//                            methodType = ReflectionUtil.GetFieldType(targetType, fieldName);
-//                        }
-//                        else if (prev is AccessExpressionPart_Property) {
-//                            string propertyName = (prev as AccessExpressionPart_Property).propertyName;
-//                            methodType = ReflectionUtil.GetPropertyType(targetType, propertyName);
-//                        }
-//
-//                        if (methodType == null) {
-//                            // todo fix this terrible error message
-//                            throw new Exception("Error parsing method access expression");
-//                        }
-//
-//                        if (ReflectionUtil.IsAction(methodType)) {
-//                            parts[i] = CreateActionAccessPart(methodType, methodPart.signatureNodeOld);
-//                            lastType = typeof(Terminal);
-//                            if (i != partCount - 1) {
-//                                throw new Exception("Encountered void return type but access chain continues");
-//                            }
-//
-//                            break;
-//                        }
-//                        else {
-//                            AccessExpressionPart_Func fn = CreateFuncAccessPart(methodType, methodPart.signatureNodeOld);
-//                            parts[i] = fn;
-//                            lastType = fn.RetnType;
-//                        }
-//
-//                        continue;
-//                    }
-//
-//                    throw new Exception("Unknown AccessExpression Type: " + part.GetType());
-//                }
-//            }
-//
-//            if (isRootContext) {
-//                parts[0] = new AccessExpressionPart_Field(contextName);
-//            }
-//
-//            switch (expressionType) {
-//                case AccessExpressionType.AliasLookup:
-//                case AccessExpressionType.RootLookup:
-//                    ReflectionUtil.ObjectArray2[0] = arg0;
-//                    ReflectionUtil.ObjectArray2[1] = parts;
-//                    ReflectionUtil.TypeArray2[0] = lastType;
-//                    ReflectionUtil.TypeArray2[1] = isRootContext ? context.rootType : headType;
-//                    return (Expression) ReflectionUtil.CreateGenericInstanceFromOpenType(
-//                        typeof(AccessExpression<,>),
-//                        ReflectionUtil.TypeArray2,
-//                        ReflectionUtil.ObjectArray2
-//                    );
-//
-//                case AccessExpressionType.StaticField:
-//                    ReflectionUtil.ObjectArray2[0] = arg0;
-//                    ReflectionUtil.ObjectArray2[1] = parts;
-//                    ReflectionUtil.TypeArray1[0] = lastType;
-//                    return (Expression) ReflectionUtil.CreateGenericInstanceFromOpenType(
-//                        typeof(AccessExpressionStaticField<>),
-//                        ReflectionUtil.TypeArray1,
-//                        ReflectionUtil.ObjectArray2
-//                    );
-//
-//                case AccessExpressionType.StaticProperty:
-//                    ReflectionUtil.ObjectArray2[0] = arg0;
-//                    ReflectionUtil.ObjectArray2[1] = parts;
-//                    ReflectionUtil.TypeArray1[0] = lastType;
-//                    return (Expression) ReflectionUtil.CreateGenericInstanceFromOpenType(
-//                        typeof(AccessExpressionStaticProperty<>),
-//                        ReflectionUtil.TypeArray1,
-//                        ReflectionUtil.ObjectArray2
-//                    );
-//                case AccessExpressionType.Constant:
-//                default:
-//                    throw new ArgumentOutOfRangeException();
-//            }
-//        }
-//
-//        private AccessExpressionPart_Func CreateFuncAccessPart(Type type, MethodSignatureNodeOld signatureNodeOld) {
-//            Type[] argTypes = type.GetGenericArguments();
-//            if (argTypes.Length == 1) {
-//                return (AccessExpressionPart_Func) ReflectionUtil.CreateGenericInstanceFromOpenType(
-//                    typeof(AccessExpressionPart_Func<>),
-//                    argTypes,
-//                    ReflectionUtil.ObjectArray0
-//                );
-//            }
-//
-//            Expression[] expressions = new Expression[signatureNodeOld.parts.Count];
-//
-//            for (int i = 1; i < argTypes.Length; i++) {
-//                Type requiredType = argTypes[i];
-//                ExpressionNodeOld argumentNodeOld = signatureNodeOld.parts[i - 1];
-//                Expression argumentExpression = Visit(argumentNodeOld);
-//                expressions[i - 1] = HandleCasting(requiredType, argumentExpression);
-//                if (!requiredType.IsAssignableFrom(expressions[i - 1].YieldedType)) {
-//                    throw new Exception($"Cannot use parameter of type {expressions[i - 1].YieldedType} for parameter of type {requiredType}");
-//                }
-//            }
-//
-//            switch (argTypes.Length) {
-//                case 2:
-//                    ReflectionUtil.ObjectArray1[0] = expressions[0];
-//                    return (AccessExpressionPart_Func) ReflectionUtil.CreateGenericInstanceFromOpenType(
-//                        typeof(AccessExpressionPart_Func<,>),
-//                        argTypes,
-//                        ReflectionUtil.ObjectArray1
-//                    );
-//                case 3:
-//                    ReflectionUtil.ObjectArray2[0] = expressions[0];
-//                    ReflectionUtil.ObjectArray2[1] = expressions[1];
-//                    return (AccessExpressionPart_Func) ReflectionUtil.CreateGenericInstanceFromOpenType(
-//                        typeof(AccessExpressionPart_Func<,,>),
-//                        argTypes,
-//                        ReflectionUtil.ObjectArray2
-//                    );
-//                case 4:
-//                    ReflectionUtil.ObjectArray3[0] = expressions[0];
-//                    ReflectionUtil.ObjectArray3[1] = expressions[1];
-//                    ReflectionUtil.ObjectArray3[2] = expressions[2];
-//                    return (AccessExpressionPart_Func) ReflectionUtil.CreateGenericInstanceFromOpenType(
-//                        typeof(AccessExpressionPart_Func<,,,>),
-//                        argTypes,
-//                        ReflectionUtil.ObjectArray3
-//                    );
-//                case 5:
-//                    ReflectionUtil.ObjectArray4[0] = expressions[0];
-//                    ReflectionUtil.ObjectArray4[1] = expressions[1];
-//                    ReflectionUtil.ObjectArray4[2] = expressions[2];
-//                    ReflectionUtil.ObjectArray4[3] = expressions[3];
-//                    return (AccessExpressionPart_Func) ReflectionUtil.CreateGenericInstanceFromOpenType(
-//                        typeof(AccessExpressionPart_Func<,,,,>),
-//                        argTypes,
-//                        ReflectionUtil.ObjectArray4
-//                    );
-//                default:
-//                    throw new Exception("Expression only support Actions with 4 arguments");
-//            }
-//        }
-//
-//        private AccessExpressionPart_Method CreateActionAccessPart(Type type, MethodSignatureNodeOld signatureNodeOld) {
-//            Type[] argTypes = type.GetGenericArguments();
-//            if (argTypes.Length == 0) {
-//                return new AccessExpressionPart_Method();
-//            }
-//
-//            Expression[] expressions = new Expression[signatureNodeOld.parts.Count];
-//
-//            for (int i = 0; i < argTypes.Length; i++) {
-//                Type requiredType = argTypes[i];
-//                ExpressionNodeOld argumentNodeOld = signatureNodeOld.parts[i];
-//                Expression argumentExpression = Visit(argumentNodeOld);
-//                expressions[i] = HandleCasting(requiredType, argumentExpression);
-//            }
-//
-//            ValidateParameterTypes(argTypes, expressions);
-//
-//            switch (argTypes.Length) {
-//                case 1:
-//                    ReflectionUtil.ObjectArray1[0] = expressions[0];
-//                    return (AccessExpressionPart_Method) ReflectionUtil.CreateGenericInstanceFromOpenType(
-//                        typeof(AccessExpressionPart_Method<>),
-//                        argTypes,
-//                        ReflectionUtil.ObjectArray1
-//                    );
-//                case 2:
-//                    ReflectionUtil.ObjectArray2[0] = expressions[0];
-//                    ReflectionUtil.ObjectArray2[1] = expressions[1];
-//                    return (AccessExpressionPart_Method) ReflectionUtil.CreateGenericInstanceFromOpenType(
-//                        typeof(AccessExpressionPart_Method<,>),
-//                        argTypes,
-//                        ReflectionUtil.ObjectArray2
-//                    );
-//                case 3:
-//                    ReflectionUtil.ObjectArray3[0] = expressions[0];
-//                    ReflectionUtil.ObjectArray3[1] = expressions[1];
-//                    ReflectionUtil.ObjectArray3[2] = expressions[2];
-//                    return (AccessExpressionPart_Method) ReflectionUtil.CreateGenericInstanceFromOpenType(
-//                        typeof(AccessExpressionPart_Method<,,>),
-//                        argTypes,
-//                        ReflectionUtil.ObjectArray3
-//                    );
-//                case 4:
-//                    ReflectionUtil.ObjectArray4[0] = expressions[0];
-//                    ReflectionUtil.ObjectArray4[1] = expressions[1];
-//                    ReflectionUtil.ObjectArray4[2] = expressions[2];
-//                    ReflectionUtil.ObjectArray4[3] = expressions[3];
-//                    return (AccessExpressionPart_Method) ReflectionUtil.CreateGenericInstanceFromOpenType(
-//                        typeof(AccessExpressionPart_Method<,,,>),
-//                        argTypes,
-//                        ReflectionUtil.ObjectArray4
-//                    );
-//                default:
-//                    throw new Exception("Expression only support Actions with 4 arguments");
-//            }
-//        }
-//
-//        private static Expression VisitConstant(LiteralValueNodeOld nodeOld) {
-//            if (nodeOld is NumericLiteralNodeOld) {
-//                return VisitNumericLiteralNode((NumericLiteralNodeOld) nodeOld);
-//            }
-//
-//            if (nodeOld is BooleanLiteralNodeOld) {
-//                return new ConstantExpression<bool>(((BooleanLiteralNodeOld) nodeOld).value);
-//            }
-//
-//            if (nodeOld is StringLiteralNodeOld) {
-//                return new ConstantExpression<string>(((StringLiteralNodeOld) nodeOld).value);
-//            }
-//
-//            return null;
-//        }
-//
-//        private static Expression VisitNumericLiteralNode(NumericLiteralNodeOld nodeOld) {
-//            if (nodeOld is FloatLiteralNodeOld literalNode) {
-//                return new ConstantExpression<float>(literalNode.value);
-//            }
-//
-//            if (nodeOld is IntLiteralNodeOld intLiteralNode) {
-//                return new ConstantExpression<int>(intLiteralNode.value);
-//            }
-//
-//            return new ConstantExpression<double>(((DoubleLiteralNodeOld) nodeOld).value);
-//        }
-//
-//        private Expression VisitOperator_TernaryCondition(OperatorExpressionNodeOld nodeOld) {
-//            Expression<bool> condition = (Expression<bool>) Visit(nodeOld.left);
-//            OperatorExpressionNodeOld select = (OperatorExpressionNodeOld) nodeOld.right;
-//
-//            if (select.OpType != OperatorType.TernarySelection) {
-//                throw new Exception("Bad ternary");
-//            }
-//
-//            Expression right = Visit(select.right);
-//            Expression left = Visit(select.left);
-//
-//            // todo -- need to assert a type match here
-//            Type commonBase = ReflectionUtil.GetCommonBaseClass(right.YieldedType, left.YieldedType);
-//
-//            if (commonBase == null || commonBase == typeof(ValueType) || commonBase == typeof(object)) {
-//                throw new Exception(
-//                    $"Types in ternary don't match: {right.YieldedType.Name} is not {left.YieldedType.Name}");
-//            }
-//
-//            if (commonBase == typeof(int)) {
-//                return new OperatorExpression_Ternary<int>(
-//                    condition,
-//                    (Expression<int>) left,
-//                    (Expression<int>) right
-//                );
-//            }
-//
-//            if (commonBase == typeof(float)) {
-//                return new OperatorExpression_Ternary<float>(
-//                    condition,
-//                    (Expression<float>) left,
-//                    (Expression<float>) right
-//                );
-//            }
-//
-//            if (commonBase == typeof(double)) {
-//                return new OperatorExpression_Ternary<double>(
-//                    condition,
-//                    (Expression<double>) left,
-//                    (Expression<double>) right
-//                );
-//            }
-//
-//            if (commonBase == typeof(string)) {
-//                return new OperatorExpression_Ternary<string>(
-//                    condition,
-//                    (Expression<string>) left,
-//                    (Expression<string>) right
-//                );
-//            }
-//
-//            if (commonBase == typeof(bool)) {
-//                return new OperatorExpression_Ternary<bool>(
-//                    condition,
-//                    (Expression<bool>) left,
-//                    (Expression<bool>) right
-//                );
-//            }
-//
-//            Type openType = typeof(OperatorExpression_Ternary<>);
-//            ReflectionUtil.ObjectArray3[0] = condition;
-//            ReflectionUtil.ObjectArray3[1] = left;
-//            ReflectionUtil.ObjectArray3[2] = right;
-//            return (Expression) ReflectionUtil.CreateGenericInstanceFromOpenType(openType, commonBase, ReflectionUtil.ObjectArray3);
-//        }
-//
-//        [Flags]
-//        private enum MethodType {
-//
-//            Static = 1 << 0,
-//            Instance = 1 << 1,
-//            Void = 1 << 2,
-//
-//            InstanceVoid = Instance | Void,
-//            StaticVoid = Static | Void
-//
-//        }
-//
-//        private enum AccessExpressionType {
-//
-//            Constant,
-//            RootLookup,
-//            StaticField,
-//            StaticProperty,
-//            AliasLookup
-//
-//        }
-//
-//    }
-//
-//}
+
+            bool isConstant = headType.IsEnum;
+            Expression expr = (Expression) ReflectionUtil.CreateGenericInstanceFromOpenType(
+                typeof(AccessExpression_Static<,>),
+                new GenericArguments(outputType, headType),
+                new ConstructorArguments(p, isConstant)
+            );
+
+            return expr;
+        }
+
+        public Expression CompileRestOfChain(Expression root, CompilerContext context) {
+            Type yieldedType = root.YieldedType;
+            LightList<AccessInfo> accessInfos = GetAccessInfoList(yieldedType, context.firstNode as MemberAccessExpressionNode, false);
+
+            // need an expression that starts w/ alias 
+            // have <string, JoinInfo, string>
+            // need to handle root type
+
+            AccessExpressionPart retn = MakeAccessPartFromInfo(accessInfos, 0);
+
+            AccessExpressionPart bridge = (AccessExpressionPart) ReflectionUtil.CreateGenericInstanceFromOpenType(
+                typeof(AliasAccessBridge<,,>),
+                new GenericArguments(retn.YieldedType, rootType, root.YieldedType),
+                new ConstructorArguments(root, retn)
+            );
+
+            Expression expr = (Expression) ReflectionUtil.CreateGenericInstanceFromOpenType(
+                typeof(AccessExpression<,>),
+                new GenericArguments(retn.YieldedType, rootType),
+                new ConstructorArguments(bridge)
+            );
+
+            return HandleCasting(expr, targetType);
+        }
+
+        private Expression VisitAliasAccessExpression(MemberAccessExpressionNode node) {
+            ExpressionAliasResolver resolver = GetResolver(node.identifier);
+
+            if (resolver == null) {
+                throw new CompileException("Unable to find a resolver for alias " + node.identifier);
+            }
+
+            // find the return type to find the head type
+            // access info list needs to replace first node with 
+            CompilerContext context = new CompilerContext(this, rootType, currentType, targetType, node);
+
+            if (node.parts[0] is InvokeNode invokeNode) {
+                return resolver.CompileAsMethodExpression(context, invokeNode.parameters);
+            }
+
+            if (node.parts[0] is DotAccessNode dotAccessNode) {
+                return resolver.CompileAsDotExpression(context, dotAccessNode.propertyName);
+            }
+
+            if (node.parts[0] is IndexNode indexNode) {
+                return resolver.CompileAsIndexExpression(context, indexNode.expression);
+            }
+
+            return null;
+        }
+
+        private ExpressionAliasResolver GetResolver(string alias) {
+            for (int i = 0; i < aliasResolvers.Count; i++) {
+                if (aliasResolvers[i].aliasName == alias) {
+                    return aliasResolvers[i];
+                }
+            }
+
+            return null;
+        }
+
+        private List<Expression> VisitFuncArguments(Type funcType, List<ASTNode> arguments, out Type outputType) {
+            Type[] funcParameterTypes = funcType.GetGenericArguments();
+
+            if (arguments.Count + 1 != funcParameterTypes.Length) {
+                throw new CompileException($"parameter count mismatch when compiling func invocation {funcType}");
+            }
+
+            List<Expression> expressionArguments = new List<Expression>();
+
+            for (int i = 0; i < arguments.Count; i++) {
+                Expression argument = Visit(funcParameterTypes[i], arguments[i]);
+                if (argument != null) {
+                    expressionArguments.Add(argument);
+                }
+                else {
+                    throw new CompileException("Func parameter type mismatch");
+                }
+            }
+
+            outputType = funcParameterTypes[funcParameterTypes.Length - 1];
+            return expressionArguments;
+        }
+
+        private List<Expression> VisitMethodArguments(Type originType, string methodName, List<ASTNode> arguments, out MethodInfo methodInfo) {
+            List<MethodInfo> infos = ReflectionUtil.GetMethodsWithName(originType, methodName);
+            List<Expression> expressionArguments = new List<Expression>();
+
+            for (int i = 0; i < infos.Count; i++) {
+                ParameterInfo[] parameterInfos = infos[i].GetParameters();
+                if (parameterInfos.Length != arguments.Count) {
+                    continue;
+                }
+
+                expressionArguments.Clear();
+                bool valid = true;
+                for (int j = 0; j < parameterInfos.Length; j++) {
+                    Expression argument = Visit(parameterInfos[j].ParameterType, arguments[j]);
+                    if (argument != null) {
+                        expressionArguments.Add(argument);
+                    }
+                    else {
+                        valid = false;
+                        break;
+                    }
+                }
+
+                if (valid) {
+                    methodInfo = infos[i];
+                    return expressionArguments;
+                }
+            }
+
+            methodInfo = null;
+            return null;
+        }
+
+        private Expression VisitAccessExpression(MemberAccessExpressionNode node) {
+            if (node.identifier[0] == '$') {
+                return VisitAliasAccessExpression(node);
+            }
+
+            LightList<AccessInfo> accessInfos = GetAccessInfoList(rootType, node);
+
+            if (accessInfos == null) {
+                Type staticType = TypeProcessor.ResolveType(rootType, node.identifier, namespaces);
+                if (staticType == null) {
+                    throw new CompileException("Can't resolve type for " + node.identifier);
+                }
+
+                return VisitStaticAccessExpression(staticType, node);
+            }
+
+            AccessExpressionPart retn = MakeAccessPartFromInfo(accessInfos, 0);
+
+            return (Expression) ReflectionUtil.CreateGenericInstanceFromOpenType(
+                typeof(AccessExpression<,>),
+                new GenericArguments(retn.YieldedType, rootType),
+                new ConstructorArguments(retn)
+            );
+        }
+
+        private AccessExpressionPart MakeAccessPartFromInfo(LightList<AccessInfo> infos, int index) {
+            if (index == infos.Count) {
+                return null;
+            }
+
+            Type finalOutputType = infos[infos.Count - 1].outputType;
+
+            if (finalOutputType == typeof(void)) {
+                finalOutputType = typeof(Terminal);
+            }
+
+            AccessExpressionPart next = MakeAccessPartFromInfo(infos, index + 1);
+            AccessInfo info = infos[index];
+
+            switch (info.type) {
+                case AccessInfoType.Invalid:
+                    return null;
+
+                case AccessInfoType.MethodInvoke:
+                    Expression expr = MethodExpressionFactory.CreateMethodExpression(info.methodInfo, info.arguments);
+                    return (AccessExpressionPart) ReflectionUtil.CreateGenericInstanceFromOpenType(
+                        typeof(AccessExpressionPart_Method<,,>),
+                        new GenericArguments(finalOutputType, info.inputType, info.outputType),
+                        new ConstructorArguments(expr, next)
+                    );
+
+                case AccessInfoType.FuncInvoke:
+                    Type t0 = info.arguments.Count > 0 ? info.arguments[0].YieldedType : typeof(Terminal);
+                    Type t1 = info.arguments.Count > 1 ? info.arguments[1].YieldedType : typeof(Terminal);
+                    Type t2 = info.arguments.Count > 2 ? info.arguments[2].YieldedType : typeof(Terminal);
+                    Type t3 = info.arguments.Count > 3 ? info.arguments[3].YieldedType : typeof(Terminal);
+                    return (AccessExpressionPart) ReflectionUtil.CreateGenericInstanceFromOpenType(
+                        typeof(AccessExpressionPart_Func<,,,,,,>),
+                        new[] {finalOutputType, info.inputType, info.outputType, t0, t1, t2, t3},
+                        new ConstructorArguments(info.arguments, next)
+                    );
+
+                case AccessInfoType.ActionInvoke:
+                    throw new NotImplementedException();
+
+                case AccessInfoType.Field:
+                    return (AccessExpressionPart) ReflectionUtil.CreateGenericInstanceFromOpenType(
+                        typeof(AccessExpressionPart_FieldProperty_Field<,,>),
+                        new GenericArguments(finalOutputType, info.inputType, info.outputType),
+                        new ConstructorArguments(info.fieldInfo, next)
+                    );
+
+                case AccessInfoType.Property:
+                    return (AccessExpressionPart) ReflectionUtil.CreateGenericInstanceFromOpenType(
+                        typeof(AccessExpressionPart_FieldProperty_Property<,,>),
+                        new GenericArguments(finalOutputType, info.inputType, info.outputType),
+                        new ConstructorArguments(info.propertyInfo, next)
+                    );
+
+                case AccessInfoType.Index:
+                    return (AccessExpressionPart) ReflectionUtil.CreateGenericInstanceFromOpenType(
+                        typeof(AccessExpressionPart_Index<,,>),
+                        new GenericArguments(finalOutputType, info.inputType, info.outputType),
+                        new ConstructorArguments(next, info.arguments[0])
+                    );
+
+                default:
+                    throw new ArgumentOutOfRangeException();
+            }
+        }
+
+
+        private AccessExpressionPart MakeAccessPart(int u, List<ASTNode> parts, Type outputType, LightList<Type> inputTypes) {
+            AccessExpressionPart retn = null;
+
+            retn = MakeFieldAccessor(u, parts, outputType, inputTypes); // todo -- field could be a func / action 
+            retn = retn ?? MakePropertyAccessor(u, parts, outputType, inputTypes);
+            retn = retn ?? MakeMethodAccessor(u, parts, outputType, inputTypes);
+//            retn = retn ?? MakeFuncActionAccessor(u, parts, outputType, inputTypes);
+            retn = retn ?? MakeIndexAccessor(u, parts, outputType, inputTypes);
+
+            return retn;
+        }
+
+        private AccessExpressionPart MakeMethodAccessor(int u, List<ASTNode> parts, Type outputType, LightList<Type> inputTypes) {
+            if (u >= parts.Count - 1) {
+                return null;
+            }
+
+            DotAccessNode dotAccessNode = parts[u] as DotAccessNode;
+            if (dotAccessNode == null) {
+                return null;
+            }
+            // next needs to be an invoke node
+
+            if ((parts[u + 1] is InvokeNode invokeNode)) {
+                // find method info for type and make method
+                MethodInfo info = ReflectionUtil.GetMethodInfo(inputTypes[u], dotAccessNode.propertyName);
+            }
+
+            return null;
+        }
+
+        private AccessExpressionPart MakeIndexAccessor(int u, List<ASTNode> parts, Type outputType, LightList<Type> inputTypes) {
+            if (u == parts.Count || parts[u].type != ASTNodeType.IndexExpression) {
+                return null;
+            }
+
+            AccessExpressionPart next = MakeAccessPart(u + 1, parts, outputType, inputTypes);
+            // todo -- this should handle dictionary indexing as well, pick up target type 
+
+            IndexNode indexNode = (IndexNode) parts[u];
+            Expression indexExpr = Visit(typeof(int), indexNode.expression);
+
+            return (AccessExpressionPart) ReflectionUtil.CreateGenericInstanceFromOpenType(
+                typeof(AccessExpressionPart_Index<,,>),
+                new GenericArguments(outputType, inputTypes[u], inputTypes[u + 1]),
+                new ConstructorArguments(next, indexExpr)
+            );
+        }
+
+        private AccessExpressionPart MakePropertyAccessor(int u, List<ASTNode> parts, Type outputType, LightList<Type> inputTypes) {
+            if (u == parts.Count || parts[u].type != ASTNodeType.DotAccess) {
+                return null;
+            }
+
+            string propertyName = ((DotAccessNode) parts[u]).propertyName;
+
+            PropertyInfo propertyInfo = ReflectionUtil.GetInstanceOrStaticPropertyInfo(inputTypes[u], propertyName);
+            if (propertyInfo != null) {
+                AccessExpressionPart next = MakeAccessPart(u + 1, parts, outputType, inputTypes);
+                return (AccessExpressionPart) ReflectionUtil.CreateGenericInstanceFromOpenType(
+                    typeof(AccessExpressionPart_FieldProperty_Property<,,>),
+                    new GenericArguments(outputType, inputTypes[u], inputTypes[u + 1]),
+                    new ConstructorArguments(propertyInfo, next)
+                );
+            }
+
+            return null;
+        }
+
+        private AccessExpressionPart MakeFieldAccessor(int u, List<ASTNode> parts, Type outputType, LightList<Type> inputTypes) {
+            if (u == parts.Count || parts[u].type != ASTNodeType.DotAccess) {
+                return null;
+            }
+
+            FieldInfo fieldInfo = ReflectionUtil.GetInstanceOrStaticFieldInfo(inputTypes[u], ((DotAccessNode) parts[u]).propertyName);
+            if (fieldInfo != null) {
+                AccessExpressionPart next = MakeAccessPart(u + 1, parts, outputType, inputTypes);
+                return (AccessExpressionPart) ReflectionUtil.CreateGenericInstanceFromOpenType(
+                    typeof(AccessExpressionPart_FieldProperty_Field<,,>),
+                    new GenericArguments(outputType, inputTypes[u], inputTypes[u + 1]),
+                    new ConstructorArguments(fieldInfo, next)
+                );
+            }
+
+            return null;
+        }
+
+        private static Type GetListElementType(Type type) {
+            if (type.IsArray) {
+                return type.GetElementType();
+            }
+
+            if (!typeof(System.Collections.IList).IsAssignableFrom(type)) {
+                throw new CompileException($"{type} is not a list or array but is being used as in indexer");
+            }
+
+            return type.GetGenericArguments()[0];
+        }
+
+        private Expression VisitUnaryMinus(UnaryExpressionNode node) {
+            Type oldTargetType = targetType;
+            targetType = null;
+            Expression expr = Visit(node.expression);
+            targetType = oldTargetType;
+
+            Type yieldedType = expr.YieldedType;
+            if (IsNumericType(yieldedType)) {
+                return UnaryExpression_MinusFactory.Create(expr);
+            }
+
+            MethodInfo info = ReflectionUtil.GetUnaryOperator("op_UnaryNegation", yieldedType);
+            if (info != null) {
+                return (Expression) ReflectionUtil.CreateGenericInstanceFromOpenType(
+                    typeof(OperatorOverloadExpression<,>),
+                    new GenericArguments(yieldedType, info.ReturnType),
+                    new ConstructorArguments(expr, info)
+                );
+            }
+
+            throw new CompileException($"Invalid expression type for Unary Minus: {yieldedType}");
+        }
+
+        private Expression VisitUnaryNot(UnaryExpressionNode node) {
+            Type oldTargetType = targetType;
+            targetType = null;
+            Expression expr = Visit(node.expression);
+            targetType = oldTargetType;
+
+            Type yieldedType = expr.YieldedType;
+
+            if (yieldedType == typeof(bool)) {
+                return new UnaryExpression_Boolean((Expression<bool>) expr);
+            }
+
+            if (yieldedType == typeof(string)) {
+                return new UnaryExpression_StringBoolean((Expression<string>) expr);
+            }
+
+            MethodInfo info = ReflectionUtil.GetUnaryOperator(GetOpMethodName(OperatorType.Not), yieldedType);
+            if (info != null) {
+                return (Expression) ReflectionUtil.CreateGenericInstanceFromOpenType(
+                    typeof(OperatorOverloadExpression<,>),
+                    new GenericArguments(yieldedType, info.ReturnType),
+                    new ConstructorArguments(expr, info)
+                );
+            }
+
+            if (yieldedType.IsClass) {
+                return new UnaryExpression_ObjectBoolean((Expression<object>) expr);
+            }
+
+            throw new CompileException($"Invalid expression type for Unary Not: {yieldedType}");
+        }
+
+        private static bool IsNumericType(Type type) {
+            return type == typeof(int)
+                   || type == typeof(float)
+                   || type == typeof(double);
+        }
+
+        private Expression VisitOperator(OperatorNode node) {
+            Type oldTarget = targetType;
+            targetType = null;
+
+
+            if (node.operatorType == OperatorType.TernaryCondition) {
+                return VisitOperator_TernaryCondition(node);
+            }
+
+            Expression left = Visit(node.left);
+            Type leftType = left.YieldedType;
+            Expression right = Visit(node.right);
+            ;
+            Type rightType = right.YieldedType;
+            ;
+
+            targetType = oldTarget;
+
+            Expression retn = null;
+
+            switch (node.operatorType) {
+                case OperatorType.Plus:
+                case OperatorType.Minus:
+                case OperatorType.Mod:
+                case OperatorType.Times:
+                case OperatorType.Divide: {
+                    if (IsNumericType(left.YieldedType) && IsNumericType(right.YieldedType)) {
+                        if (ReflectionUtil.AreNumericTypesCompatible(leftType, rightType)) {
+                            retn = OperatorExpression_Arithmetic.Create(node.operatorType, left, right);
+                            break;
+                        }
+                    }
+
+                    MethodInfo info = ReflectionUtil.GetBinaryOperator(GetOpMethodName(node.operatorType), left.YieldedType, right.YieldedType);
+
+                    if (info != null) {
+                        retn = (Expression) ReflectionUtil.CreateGenericInstanceFromOpenType(typeof(OperatorOverloadExpression<,,>),
+                            new GenericArguments(leftType, rightType, leftType),
+                            new ConstructorArguments(left, right, info)
+                        );
+                        break;
+                    }
+
+                    if (node.operatorType == OperatorType.Plus && (leftType == typeof(string) || rightType == typeof(string))) {
+                        retn = (Expression) ReflectionUtil.CreateGenericInstanceFromOpenType(
+                            typeof(OperatorExpression_StringConcat<,>),
+                            new GenericArguments(leftType, rightType),
+                            new ConstructorArguments(left, right)
+                        );
+                        break;
+                    }
+
+                    throw new CompileException($"Invalid expression types ({leftType}, {rightType}) for arithmetic operator {node.operatorType}");
+                }
+
+                case OperatorType.TernaryCondition:
+                case OperatorType.TernarySelection:
+                    break;
+
+                case OperatorType.Equals:
+                case OperatorType.NotEquals: {
+                    MethodInfo info = ReflectionUtil.GetComparisonOperator(GetOpMethodName(node.operatorType), left.YieldedType, right.YieldedType);
+
+                    if (info != null) {
+                        retn = (Expression) ReflectionUtil.CreateGenericInstanceFromOpenType(typeof(OperatorOverloadExpression<,,>),
+                            new GenericArguments(leftType, rightType, typeof(bool)),
+                            new ConstructorArguments(left, right, info)
+                        );
+                        break;
+                    }
+
+                    if (IsNumericType(left.YieldedType) && IsNumericType(right.YieldedType)) {
+                        if (ReflectionUtil.AreNumericTypesCompatible(leftType, rightType)) {
+                            retn = OperatorExpression_Comparison.Create(node.operatorType, left, right);
+                            break;
+                        }
+                    }
+
+                    // only use the crappy version if we actually end up needing to
+                    // this version sucks because boxing is involved for structs
+
+                    retn = (Expression) ReflectionUtil.CreateGenericInstanceFromOpenType(
+                        typeof(OperatorExpression_Equality<,>),
+                        new GenericArguments(leftType, rightType),
+                        new ConstructorArguments(node.operatorType, left, right)
+                    );
+
+                    break;
+                }
+                case OperatorType.GreaterThan:
+                case OperatorType.GreaterThanEqualTo:
+                case OperatorType.LessThan:
+                case OperatorType.LessThanEqualTo: {
+                    if (IsNumericType(left.YieldedType) && IsNumericType(right.YieldedType)) {
+                        if (ReflectionUtil.AreNumericTypesCompatible(leftType, rightType)) {
+                            retn = OperatorExpression_Comparison.Create(node.operatorType, left, right);
+                            break;
+                        }
+                    }
+
+                    MethodInfo info = ReflectionUtil.GetComparisonOperator(GetOpMethodName(node.operatorType), left.YieldedType, right.YieldedType);
+
+                    if (info != null) {
+                        retn = (Expression) ReflectionUtil.CreateGenericInstanceFromOpenType(typeof(OperatorOverloadExpression<,,>),
+                            new GenericArguments(leftType, rightType, typeof(bool)),
+                            new ConstructorArguments(left, right, info)
+                        );
+                        break;
+                    }
+
+                    throw new CompileException($"Invalid expression types ({leftType}, {rightType}) for comparison operator {node.operatorType}");
+                }
+                case OperatorType.And:
+                case OperatorType.Or: {
+                    if (leftType == typeof(bool) && rightType == typeof(bool)) {
+                        retn = new OperatorExpression_AndOrBool(node.operatorType, (Expression<bool>) left, (Expression<bool>) right);
+                        break;
+                    }
+
+                    MethodInfo info = ReflectionUtil.GetComparisonOperator(GetOpMethodName(node.operatorType), left.YieldedType, right.YieldedType);
+
+                    if (info != null) {
+                        // todo maybe dont force the return type to be leftType, allow other types
+                        retn = (Expression) ReflectionUtil.CreateGenericInstanceFromOpenType(typeof(OperatorOverloadExpression<,,>),
+                            new GenericArguments(leftType, rightType, leftType),
+                            new ConstructorArguments(left, right, info)
+                        );
+                        break;
+                    }
+
+                    if (leftType.IsClass && rightType.IsClass) {
+                        retn = (Expression) ReflectionUtil.CreateGenericInstanceFromOpenType(
+                            typeof(OperatorExpression_AndOrObject<,>),
+                            new GenericArguments(leftType, rightType),
+                            new ConstructorArguments(node.operatorType, left, right)
+                        );
+                        break;
+                    }
+
+                    if (leftType.IsClass && rightType == typeof(bool)) {
+                        retn = (Expression) ReflectionUtil.CreateGenericInstanceFromOpenType(
+                            typeof(OperatorExpression_AndOrObjectBool<>),
+                            new GenericArguments(leftType),
+                            new ConstructorArguments(node.operatorType, left, right)
+                        );
+                        break;
+                    }
+
+                    if (leftType == typeof(bool) && rightType.IsClass) {
+                        retn = (Expression) ReflectionUtil.CreateGenericInstanceFromOpenType(
+                            typeof(OperatorExpression_AndOrBoolObject<>),
+                            new GenericArguments(rightType),
+                            new ConstructorArguments(node.operatorType, left, right)
+                        );
+                        break;
+                    }
+
+                    throw new CompileException($"Invalid expression types ({leftType}, {rightType}) for comparison operator {node.operatorType}");
+                }
+
+                case OperatorType.As:
+                case OperatorType.Is:
+                    // todo -- implement these when type resolution works
+                    break;
+
+                default:
+                    throw new ArgumentOutOfRangeException();
+            }
+
+            if (retn != null && targetType != null && !targetType.IsAssignableFrom(retn.YieldedType)) {
+                Expression cast = GetImplicitCast(retn, targetType);
+                if (cast != null) {
+                    return cast;
+                }
+
+                //return HandleCasting(retn, targetType);
+            }
+
+            return retn;
+        }
+
+        private string GetOpMethodName(OperatorType operatorType) {
+            switch (operatorType) {
+                case OperatorType.Plus:
+                    return "op_Addition";
+                case OperatorType.Minus:
+                    return "op_Subtraction";
+                case OperatorType.Divide:
+                    return "op_Division";
+                case OperatorType.Times:
+                    return "op_Multiply";
+                case OperatorType.Mod:
+                    return "op_Modulus";
+                case OperatorType.Equals:
+                    return "op_Equality";
+                case OperatorType.NotEquals:
+                    return "op_Inequality";
+                case OperatorType.GreaterThan:
+                    return "op_GreaterThan";
+                case OperatorType.GreaterThanEqualTo:
+                    return "op_GreaterThanOrEqual";
+                case OperatorType.LessThan:
+                    return "op_LessThan";
+                case OperatorType.LessThanEqualTo:
+                    return "op_LessThanOrEqual";
+                case OperatorType.And:
+                    return "op_LogicalAnd";
+                case OperatorType.Or:
+                    return "op_LogicalOr";
+                case OperatorType.Not:
+                    return "op_LogicalNot";
+                default:
+                    return string.Empty;
+            }
+        }
+
+        private Expression VisitNull(LiteralNode node) {
+            if (targetType != null && targetType.IsClass) {
+                return (Expression) ReflectionUtil.CreateGenericInstanceFromOpenType(typeof(ConstantExpression<>),
+                    new GenericArguments(targetType),
+                    new ConstructorArguments(null)
+                );
+            }
+            else if (targetType == null) {
+                return new ConstantExpression<object>(null);
+            }
+
+            throw new ParseException($"Unable to assign null value to {targetType} because {targetType} is not a reference type");
+        }
+
+        private Expression VisitDefault(LiteralNode node) {
+            return (Expression) ReflectionUtil.CreateGenericInstanceFromOpenType(typeof(ConstantExpression<>),
+                new GenericArguments(targetType),
+                new ConstructorArguments(Activator.CreateInstance(targetType))
+            );
+        }
+
+        private Expression VisitBoolean(LiteralNode node) {
+            bool value = bool.Parse(node.rawValue);
+            if (targetType == null || targetType == typeof(bool)) {
+                return new ConstantExpression<bool>(value);
+            }
+
+            Expression retn = GetImplicitCastConstant(value, targetType);
+            return retn ?? HandleCasting(new ConstantExpression<bool>(value), targetType);
+        }
+
+        private Expression VisitString(LiteralNode node) {
+            if (targetType == null || targetType == typeof(string)) {
+                return new ConstantExpression<string>(node.rawValue);
+            }
+
+            Expression retn = GetImplicitCastConstant(node.rawValue, targetType);
+
+            return retn ?? HandleCasting(new ConstantExpression<string>(node.rawValue), targetType);
+        }
+
+        private Expression VisitNumeric(LiteralNode node) {
+            if (targetType == null) {
+                if (node.rawValue.IndexOf('f') != -1) {
+                    return new ConstantExpression<float>(float.Parse(node.rawValue.Replace("f", "")));
+                }
+
+                if (node.rawValue.IndexOf('.') != -1) {
+                    return new ConstantExpression<double>(double.Parse(node.rawValue));
+                }
+
+                return new ConstantExpression<int>(int.Parse(node.rawValue));
+            }
+
+            if (targetType == typeof(float)) {
+                if (float.TryParse(node.rawValue.Replace("f", ""), out float f)) {
+                    return new ConstantExpression<float>(f);
+                }
+
+                throw new ParseException($"Unable to parse {node.rawValue} as a float value");
+            }
+
+            if (targetType == typeof(int)) {
+                if (int.TryParse(node.rawValue, out int f)) {
+                    return new ConstantExpression<int>(f);
+                }
+
+                throw new ParseException($"Unable to parse {node.rawValue} as an int value");
+            }
+
+            if (targetType == typeof(double)) {
+                if (double.TryParse(node.rawValue, out double f)) {
+                    return new ConstantExpression<double>(f);
+                }
+
+                throw new ParseException($"Unable to parse {node.rawValue} as a double value");
+            }
+
+            if (int.TryParse(node.rawValue, out int intVal)) {
+                return targetType == null ? new ConstantExpression<int>(intVal) : GetImplicitCastConstant(intVal, targetType);
+            }
+
+            if (double.TryParse(node.rawValue, out double dVal)) {
+                return targetType == null ? new ConstantExpression<double>(dVal) : GetImplicitCastConstant(dVal, targetType);
+            }
+
+            string floatString = node.rawValue.Replace("f", "");
+
+            if (float.TryParse(floatString, NumberStyles.Float, CultureInfo.InvariantCulture, out float fVal)) {
+                return targetType == null ? new ConstantExpression<float>(fVal) : GetImplicitCastConstant(fVal, targetType);
+            }
+
+            throw new ParseException($"Unable to handle node {node} as a numeric literal");
+        }
+
+        private Expression VisitTypeOf(TypeNode typeNode) {
+            TypePath typePath = typeNode.typePath;
+
+            // todo this method isn't fully working
+            string constructedTypePath = typePath.GetConstructedPath();
+
+            Type[] generics = rootType.GetGenericArguments();
+            for (int i = 0; i < generics.Length; i++) {
+                if (generics[i].Name == constructedTypePath) {
+                    return new ConstantExpression<Type>(generics[i]);
+                }
+            }
+
+            Type t = TypeExtensions.GetTypeFromSimpleName(constructedTypePath);
+            if (t != null) {
+                return new ConstantExpression<Type>(t);
+            }
+
+            // todo -- need to load ups from using path
+            // todo -- support generics 
+            throw new NotImplementedException();
+        }
+
+        private Expression VisitOperator_TernaryCondition(OperatorNode node) {
+            Expression<bool> condition = (Expression<bool>) Visit(node.left);
+            OperatorNode select = (OperatorNode) node.right;
+
+            if (select.operatorType != OperatorType.TernarySelection) {
+                throw new Exception("Bad ternary");
+            }
+
+            Expression right = Visit(select.right);
+            Expression left = Visit(select.left);
+
+            // todo -- need to assert a type match here
+            Type commonBase = ReflectionUtil.GetCommonBaseClass(right.YieldedType, left.YieldedType);
+
+            if (commonBase == null || commonBase == typeof(ValueType) || commonBase == typeof(object)) {
+                throw new Exception(
+                    $"Types in ternary don't match: {right.YieldedType.Name} is not {left.YieldedType.Name}");
+            }
+
+            if (commonBase == typeof(int)) {
+                return new OperatorExpression_Ternary<int>(
+                    condition,
+                    (Expression<int>) left,
+                    (Expression<int>) right
+                );
+            }
+
+            if (commonBase == typeof(float)) {
+                return new OperatorExpression_Ternary<float>(
+                    condition,
+                    (Expression<float>) left,
+                    (Expression<float>) right
+                );
+            }
+
+            if (commonBase == typeof(double)) {
+                return new OperatorExpression_Ternary<double>(
+                    condition,
+                    (Expression<double>) left,
+                    (Expression<double>) right
+                );
+            }
+
+            if (commonBase == typeof(string)) {
+                return new OperatorExpression_Ternary<string>(
+                    condition,
+                    (Expression<string>) left,
+                    (Expression<string>) right
+                );
+            }
+
+            if (commonBase == typeof(bool)) {
+                return new OperatorExpression_Ternary<bool>(
+                    condition,
+                    (Expression<bool>) left,
+                    (Expression<bool>) right
+                );
+            }
+
+            Type openType = typeof(OperatorExpression_Ternary<>);
+            ReflectionUtil.ObjectArray3[0] = condition;
+            ReflectionUtil.ObjectArray3[1] = left;
+            ReflectionUtil.ObjectArray3[2] = right;
+            return (Expression) ReflectionUtil.CreateGenericInstanceFromOpenType(openType, commonBase, ReflectionUtil.ObjectArray3);
+        }
+
+
+        private Expression VisitSimpleRootAccess(IdentifierNode node) {
+            string fieldName = node.name;
+            Expression retn = null;
+
+            if (node.IsAlias) {
+                for (int i = 0; i < aliasResolvers.Length; i++) {
+                    if (aliasResolvers[i].aliasName == fieldName) {
+                        // root type, target type, element type
+                        CompilerContext context = new CompilerContext(this, rootType, targetType, currentType, node);
+                        retn = aliasResolvers[i].CompileAsValueExpression(context);
+                        if (retn == null) {
+                            throw new CompileException($"Alias Resolver of type {aliasResolvers[i]} failed to resolve {fieldName}");
+                        }
+
+                        break;
+                    }
+                }
+
+                if (retn == null) {
+                    throw new ParseException($"Unknown alias {fieldName}");
+                }
+            }
+            else {
+                if (ReflectionUtil.IsField(rootType, fieldName)) {
+                    Type fieldType = ReflectionUtil.GetFieldType(rootType, fieldName);
+                    if (allowLinq) {
+                        retn = (Expression) ReflectionUtil.CreateGenericInstanceFromOpenType(
+                            typeof(AccessExpression_RootField_Linq<,>),
+                            new GenericArguments(fieldType, rootType),
+                            new ConstructorArguments(rootType, fieldName)
+                        );
+                    }
+                    else {
+                        retn = (Expression) ReflectionUtil.CreateGenericInstanceFromOpenType(
+                            typeof(AccessExpression_RootField<>),
+                            new GenericArguments(fieldType),
+                            new ConstructorArguments(rootType, fieldName)
+                        );
+                    }
+                }
+
+                if (ReflectionUtil.IsProperty(rootType, fieldName)) {
+                    Type propertyType = ReflectionUtil.GetPropertyType(rootType, fieldName);
+                    if (allowLinq) {
+                        retn = (Expression) ReflectionUtil.CreateGenericInstanceFromOpenType(
+                            typeof(AccessExpression_RootProperty_Linq<,>),
+                            new GenericArguments(propertyType, rootType),
+                            new ConstructorArguments(rootType, fieldName)
+                        );
+                    }
+                    else {
+                        retn = (Expression) ReflectionUtil.CreateGenericInstanceFromOpenType(
+                            typeof(AccessExpression_RootProperty<>),
+                            propertyType,
+                            new ConstructorArguments(rootType, fieldName)
+                        );
+                    }
+                }
+            }
+
+            if (retn == null) {
+                throw new ParseException($"Type {rootType} has no field or property with the name {fieldName}");
+            }
+
+            if (targetType != null && !targetType.IsAssignableFrom(retn.YieldedType)) {
+                Expression cast = GetImplicitCast(retn, targetType);
+                if (cast != null) {
+                    return cast;
+                }
+
+                throw new ParseException($"Type {rootType}.{fieldName} is not assignable to {targetType} and no implicit conversion exists");
+            }
+
+            return retn;
+        }
+
+        private static Expression GetImplicitCastConstant<T>(T value, Type targetType) {
+            MethodInfo info = ReflectionUtil.GetImplicitConversion(targetType, typeof(T));
+            if (info == null) {
+                return null;
+            }
+
+            ReflectionUtil.ObjectArray1[0] = value;
+            return (Expression) ReflectionUtil.CreateGenericInstanceFromOpenType(
+                typeof(ConstantExpression<>),
+                new GenericArguments(targetType),
+                new ConstructorArguments(info.Invoke(null, ReflectionUtil.ObjectArray1))
+            );
+        }
+
+        private static Expression GetImplicitCast(Expression input, Type targetType) {
+            MethodInfo info = ReflectionUtil.GetImplicitConversion(targetType, input.YieldedType);
+            if (info == null) {
+                return HandleCasting(input, targetType);
+            }
+
+            return (Expression) ReflectionUtil.CreateGenericInstanceFromOpenType(
+                typeof(ImplicitCastExpression<,>),
+                new GenericArguments(targetType, input.YieldedType),
+                new ConstructorArguments(input, info)
+            );
+        }
+
+        private static Expression HandleCasting(Expression input, Type requiredType) {
+            Type yieldedType = input.YieldedType;
+
+            if (yieldedType == requiredType) {
+                return input;
+            }
+
+            for (int i = 0; i < builtInCastHandlers.Count; i++) {
+                if (builtInCastHandlers[i].CanHandle(requiredType, yieldedType)) {
+                    return builtInCastHandlers[i].Cast(requiredType, input);
+                }
+            }
+
+            return null;
+        }
+
+        public void AddNamespaces(IList<string> usings) {
+            if (usings == null) return;
+            namespaces.AddRange(usings);
+        }
+
+        public void RemoveNamespaces(IList<string> usings) {
+            if (usings == null) return;
+            for (int i = 0; i < usings.Count; i++) {
+                namespaces.Remove(usings[i]);
+            }
+        }
+
+    }
+
+}

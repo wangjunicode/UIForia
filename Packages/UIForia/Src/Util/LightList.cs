@@ -42,8 +42,7 @@ namespace UIForia.Util {
         }
 
         public void AddUnchecked(T item) {
-            list[size] = item;
-            size++;
+            list[size++] = item;
         }
 
         public void Clear() {

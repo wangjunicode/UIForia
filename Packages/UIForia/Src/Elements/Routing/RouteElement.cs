@@ -1,5 +1,6 @@
 using System;
 using UIForia.Elements;
+using UIForia.Rendering;
 using UIForia.Routing;
 
 namespace UIForia {
@@ -17,11 +18,10 @@ namespace UIForia {
         public bool IsRouteMatched => match.IsMatch;
         public virtual string FullPath => path;
 
-        public RouteElement() {
-            flags &= ~(UIElementFlags.RequiresLayout | UIElementFlags.RequiresRendering);
-        }
-
         public override void OnCreate() {
+            style.SetPreferredWidth(UIMeasurement.Parent100, StyleState.Normal);
+            style.SetPreferredHeight(UIMeasurement.Parent100, StyleState.Normal);
+            
             UIElement ptr = parent;
             while (ptr != null) {
                 if (ptr is IRouterElement routerElement) {

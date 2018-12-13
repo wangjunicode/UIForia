@@ -413,7 +413,8 @@ namespace UIForia.Parsing.StyleParser {
                         action(context, id, value);
                     }
                     else {
-                        throw new ParseException("Encountered unknown style property name: " + id);
+                        Debug.Log("Encountered unknown style property name: " + id);
+                        return styleGroup;
                     }
                 }
                 else {

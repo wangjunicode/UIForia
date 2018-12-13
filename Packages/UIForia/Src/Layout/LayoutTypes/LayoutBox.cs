@@ -145,7 +145,9 @@ namespace UIForia.Layout.LayoutTypes {
         public void SetParent(LayoutBox parent) {
             this.parent?.OnChildRemoved(this);
             this.parent = parent;
-            this.parent?.OnChildAdded(this);
+            if (element.isEnabled && style.LayoutBehavior != LayoutBehavior.Ignored) {
+                this.parent?.OnChildAdded(this);
+            }
         }
 
         // need layout when
@@ -419,21 +421,24 @@ namespace UIForia.Layout.LayoutTypes {
                     break;
                 }
 
-//                if ((sibling.flags & UIElementFlags.RequiresLayout) != 0 &&
-                    if((sibling.style.LayoutBehavior & LayoutBehavior.Ignored) == 0) {
+                if ((sibling.style.LayoutBehavior & LayoutBehavior.Ignored) == 0) {
                     idx++;
                 }
             }
 
-//            if ((element.parent.flags & UIElementFlags.RequiresLayout) == 0) {
-//                idx += FindLayoutSiblingIndex(element.parent);
-//            }
+            //if ((element.parent.flags & UIElementFlags.RequiresLayout) == 0) {
+            //    idx += FindLayoutSiblingIndex(element.parent);
+            // }
 
             return idx;
         }
 
         public void InvalidatePreferredSizeCache() {
             cachedPreferredWidth = -1;
+            allocatedWidth = 0;
+            allocatedHeight = 0;
+            actualWidth = 0;
+            actualHeight = 0;
             if (element != null) {
                 s_HeightForWidthCache.Remove(element.id);
             }

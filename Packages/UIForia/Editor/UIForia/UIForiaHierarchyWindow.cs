@@ -75,7 +75,7 @@ namespace UIForia.Editor {
                 UIView = targetView;
                 needsReload = true;
                 treeView.view = targetView;
-                targetView.onElementCreated += OnElementCreated;
+                targetView.Application.onElementCreated += OnElementCreated;
                 targetView.Application.onRefresh += OnRefresh;
                 targetView.Application.RenderSystem.DrawDebugOverlay += HandleDrawCallback;
             }
@@ -86,7 +86,7 @@ namespace UIForia.Editor {
                 }
 
                 if (targetView != null) {
-                    targetView.onElementCreated -= OnElementCreated;
+                    targetView.Application.onElementCreated -= OnElementCreated;
                     targetView.Application.onRefresh -= OnRefresh;
                     targetView.Application.RenderSystem.DrawDebugOverlay -= HandleDrawCallback;
                 }

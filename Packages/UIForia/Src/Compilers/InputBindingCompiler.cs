@@ -7,7 +7,7 @@ namespace UIForia.Compilers {
 
     public class InputBindingCompiler {
 
-        private readonly ExpressionCompiler2 compiler;
+        private ExpressionCompiler compiler;
 
         private static readonly Dictionary<Type, List<KeyboardEventHandler>> s_KeyboardHandlerCache = new Dictionary<Type, List<KeyboardEventHandler>>();
         private static readonly Dictionary<Type, List<MouseEventHandler>> s_MouseHandlerCache = new Dictionary<Type, List<MouseEventHandler>>();
@@ -18,29 +18,41 @@ namespace UIForia.Compilers {
         private static readonly KeyboardEventResolver s_KeyboardEventResolver = new KeyboardEventResolver("$event");
         
         public InputBindingCompiler() {
-            this.compiler = new ExpressionCompiler2();
+            this.compiler = new ExpressionCompiler();
         }
 
-        public List<DragEventCreator> CompileDragEventCreators(Type rootType, Type elementType, List<AttributeDefinition> attributeDefinitions) {
+        public List<DragEventCreator> CompileDragEventCreators(Type rootType, Type elementType, List<AttributeDefinition> attributeDefinitions, bool attributesOnly) {
             List<DragEventCreator> creatorsFromTemplateAttrs = CompileDragCreatorTemplateAttributes(rootType, elementType, attributeDefinitions);
+            if (attributesOnly) {
+                return creatorsFromTemplateAttrs;
+            }
             List<DragEventCreator> creatorsFromClassAttrs = CompileDragCreatorClassAttributes(elementType);
             return Combine(creatorsFromClassAttrs, creatorsFromTemplateAttrs);
         }
-
-        public List<MouseEventHandler> CompileMouseEventHandlers(Type rootType, Type elementType, List<AttributeDefinition> attributeDefinitions) {
+  
+        public List<MouseEventHandler> CompileMouseEventHandlers(Type rootType, Type elementType, List<AttributeDefinition> attributeDefinitions, bool attributesOnly) {
             List<MouseEventHandler> handlersFromTemplateAttrs = CompileMouseEventTemplateAttributes(rootType, elementType, attributeDefinitions);
+            if (attributesOnly) {
+                return handlersFromTemplateAttrs;
+            }
             List<MouseEventHandler> handlersFromClassAttrs = CompileMouseEventClassAttributes(elementType);
             return Combine(handlersFromTemplateAttrs, handlersFromClassAttrs);
         }
 
-        public List<KeyboardEventHandler> CompileKeyboardEventHandlers(Type rootType, Type elementType, List<AttributeDefinition> attributeDefinitions) {
+        public List<KeyboardEventHandler> CompileKeyboardEventHandlers(Type rootType, Type elementType, List<AttributeDefinition> attributeDefinitions, bool attributesOnly) {
             List<KeyboardEventHandler> handlersFromTemplateAttrs = CompileKeyboardTemplateAttributes(rootType, elementType, attributeDefinitions);
+            if (attributesOnly) {
+                return handlersFromTemplateAttrs;
+            }
             List<KeyboardEventHandler> handlersFromClassAttrs = CompileKeyboardClassAttributes(elementType);
             return Combine(handlersFromTemplateAttrs, handlersFromClassAttrs);
         }
 
-        public List<DragEventHandler> CompileDragEventHandlers(Type rootType, Type elementType, List<AttributeDefinition> attributeDefinitions) {
+        public List<DragEventHandler> CompileDragEventHandlers(Type rootType, Type elementType, List<AttributeDefinition> attributeDefinitions, bool attributesOnly) {
             List<DragEventHandler> handlersFromTemplateAttrs = CompileDragEventHandlerTemplateAttributes(rootType, elementType, attributeDefinitions);
+            if (attributesOnly) {
+                return handlersFromTemplateAttrs;
+            }
             List<DragEventHandler> handlersFromClassAttrs = CompileDragEventHandlerClassAttributes(elementType);
             return Combine(handlersFromClassAttrs, handlersFromTemplateAttrs);
         }
@@ -110,7 +122,7 @@ namespace UIForia.Compilers {
             return retn;
         }
 
-        private List<KeyboardEventHandler> CompileKeyboardTemplateAttributes(Type rootType, Type elementType, List<AttributeDefinition> attributeDefinitions) {
+        public List<KeyboardEventHandler> CompileKeyboardTemplateAttributes(Type rootType, Type elementType, List<AttributeDefinition> attributeDefinitions) {
             if (attributeDefinitions == null) return null;
 
             List<KeyboardEventHandler> retn = null;
@@ -352,7 +364,7 @@ namespace UIForia.Compilers {
             return retn;
         }
 
-        private List<DragEventHandler> CompileDragEventHandlerTemplateAttributes(Type rootType, Type elementType, List<AttributeDefinition> attributeDefinitions) {
+        public List<DragEventHandler> CompileDragEventHandlerTemplateAttributes(Type rootType, Type elementType, List<AttributeDefinition> attributeDefinitions) {
             if (attributeDefinitions == null) return null;
 
             List<DragEventHandler> retn = null;
@@ -441,7 +453,7 @@ namespace UIForia.Compilers {
             return modifiers;
         }
 
-        private List<DragEventCreator> CompileDragCreatorTemplateAttributes(Type rootType, Type elementType, List<AttributeDefinition> attributeDefinitions) {
+        public List<DragEventCreator> CompileDragCreatorTemplateAttributes(Type rootType, Type elementType, List<AttributeDefinition> attributeDefinitions) {
             if (attributeDefinitions == null) return null;
 
             List<DragEventCreator> retn = null;
@@ -580,6 +592,7 @@ namespace UIForia.Compilers {
         private static readonly InputAttributeTuple[] s_MouseAttributeDefs = {
             new InputAttributeTuple("onMouseEnter", InputEventType.MouseEnter, s_MouseEventAlias),
             new InputAttributeTuple("onMouseExit", InputEventType.MouseExit, s_MouseEventAlias),
+            new InputAttributeTuple("onMouseClick", InputEventType.MouseClick, s_MouseEventAlias),
             new InputAttributeTuple("onMouseDown", InputEventType.MouseDown, s_MouseEventAlias),
             new InputAttributeTuple("onMouseUp", InputEventType.MouseUp, s_MouseEventAlias),
             new InputAttributeTuple("onMouseMove", InputEventType.MouseMove, s_MouseEventAlias),
@@ -632,6 +645,10 @@ namespace UIForia.Compilers {
 
             a.AddRange(b);
             return a;
+        }
+
+        public void SetCompiler(ExpressionCompiler templateCompiler) {
+            this.compiler = templateCompiler;
         }
 
     }

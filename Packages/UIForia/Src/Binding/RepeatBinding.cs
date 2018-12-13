@@ -6,7 +6,6 @@ using UIForia.Util;
 public class RepeatBindingNode : BindingNode {
 
     public UITemplate template;
-    public TemplateScope scope;
 
     public LightList<LightList<BindingNode>> m_Nodes = new LightList<LightList<BindingNode>>();
     
@@ -35,13 +34,13 @@ public class RepeatBindingNode<T, U> : RepeatBindingNode where T : class, IList<
     public void Validate() {
         T list = listExpression.Evaluate(context);
         repeat.list = list;
-        
+
         if (list == null || list.Count == 0) {
             if (previousReference == null) {
                 return;
             }
 
-            ((UIRepeatElement) element).listBecameEmpty = previousReference.Count > 0;
+            repeat.listBecameEmpty = previousReference.Count > 0;
 
             previousReference.Clear();
             previousReference = null;
@@ -56,18 +55,19 @@ public class RepeatBindingNode<T, U> : RepeatBindingNode where T : class, IList<
 
             for (int i = 0; i < list.Count; i++) {
                 previousReference.Add(list[i]);
-                UIElement newItem = template.CreateScoped(scope);
+                UIElement newItem = template.CreateScoped(repeat.scope);
                 newItem.parent = element;
                 newItem.templateParent = element;
-
+                // root object isn't being assigned. make it assigned 
+                newItem.templateContext.rootObject = element.templateContext.rootObject;
                 element.children[i] = newItem;
                 element.view.Application.RegisterElement(newItem);
             }
 
-            ((UIRepeatElement) element).listBecamePopulated = true;
+            repeat.listBecamePopulated = true;
         }
         else if (list.Count > previousReference.Count) {
-            ((UIRepeatElement) element).listBecamePopulated = previousReference.Count == 0;
+            repeat.listBecamePopulated = previousReference.Count == 0;
 
             UIElement[] oldChildren = element.children;
 
@@ -84,9 +84,10 @@ public class RepeatBindingNode<T, U> : RepeatBindingNode where T : class, IList<
 
             for (int i = 0; i < diff; i++) {
                 previousReference.Add(list[previousCount + i]);
-                UIElement newItem = template.CreateScoped(scope);
+                UIElement newItem = template.CreateScoped(repeat.scope);
                 newItem.parent = element;
                 newItem.templateParent = element;
+                newItem.templateContext.rootObject = element.templateContext.rootObject;
 
                 ownChildren[previousCount + i] = newItem;
                 element.view.Application.RegisterElement(newItem);

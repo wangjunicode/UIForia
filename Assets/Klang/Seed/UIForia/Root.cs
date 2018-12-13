@@ -1,6 +1,4 @@
 using UIForia;
-using UIForia.Input;
-using UnityEngine;
 
 namespace UI {
 
@@ -9,10 +7,6 @@ namespace UI {
 
         public override void OnCreate() {
             view.Application.Router.GoTo("/login");
-        }
-
-        public void AnimateTransition() {
-            Debug.Log("Click");
         }
 
     }

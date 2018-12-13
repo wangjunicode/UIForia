@@ -1,85 +1,91 @@
 <?xml version="1.0" encoding="utf-8"?>
 <UITemplate>
-    
+
     <Style path="Klang/Seed/UIForia/LoginFlow/CreateAccountScreen/CreateAccountScreen.style"/>
-    
+
     <Style path="Klang/Seed/UIForia/Util.style" alias="util"/>
     <Style path="Klang/Seed/UIForia/KlangButton/KlangButton.style" alias="klang-button"/>
-    
+
     <Contents style="container">
         <Panel style="fade-panel" x-id="fader"/>
 
         <ChildRouter>
-            
-            <!--<Route path="'/join_or_start_colony'">-->
 
-                <!--<CreateAccountContainer label="'Create Account'">-->
-                    <!---->
-                    <!--<KlangLinkButton style="klang-button.blue" label="'Join Existing Colony'" path="'/create_account/join_colony'"/>-->
-                    <!---->
-                    <!--<Text>Recommended for new players</Text>-->
-                    <!---->
-                    <!--<KlangLinkButton style="klang-button.black" label="'Start new Colony'" path="'/create_account/create_colony'"/>-->
-                <!---->
-                <!--</CreateAccountContainer>-->
-                <!---->
-            <!--</Route>-->
-            <!---->
-            <!--<Route path="'/join_colony'">-->
-                <!---->
-            <!--</Route>-->
-            <!---->
-            <!--<Route path="'/create_colony'">-->
-                <!---->
-                <!--<CreateAccountContainer label="'Start new Colony'">-->
+            <Route path="'/join_or_start_colony'">
 
-                    <!--<Group style="util.vertical-center">-->
-                        <!--<Input colonyName.bindTo="onValueChanged" style="create-input"/>-->
-                        <!--<Input colonyPassword.bindTo="onValueChanged" style="create-input-small"/>-->
-                    <!--</Group>-->
-                    <!---->
-                    <!--<KlangLinkButton style="klang-button.black" label="'Next'" path="'/create_account/join_colony'"/>-->
+                <CreateAccountContainer label="'Create Account'">
 
-                    <!--<RouterLinkBack>-->
-                        <!--<KlangLinkButton style="klang-button.grey" label="'Cancel'" path="'/create_account/create_colony'"/>-->
-                    <!--</RouterLinkBack>-->
+                    <KlangLinkButton style="klang-button.blue" style.marginTop="24f" style.marginBottom="24f" label="'Join Existing Colony'" path="'/create_account/join_colony'"/>
 
-                <!--</CreateAccountContainer>-->
-                <!---->
-            <!--</Route>-->
-            <!---->
-            <!--<Route path="'/character_creator'">-->
-                <!---->
-            <!--</Route>-->
+                    <Text>Recommended for new players</Text>
+
+                    <KlangLinkButton style="klang-button.black" style.marginTop="24f" style.marginBottom="24f" label="'Start new Colony'" path="'/create_account/create_colony'"/>
+
+                </CreateAccountContainer>
+
+            </Route>
+
+            <Route path="'/join_colony'">
+
+                <JoinColonyScreen/>
+
+            </Route>
+
+            <Route path="'/create_colony'">
+
+                <CreateAccountContainer label="'Start new Colony'">
+
+                    <Group style="util.vertical-center">
+                        <Input colonyName.bindTo="onValueChanged" style="create-input"/>
+                        <Input colonyPassword.bindTo="onValueChanged" style="create-input-small"/>
+                    </Group>
+
+                    <KlangLinkButton style="klang-button.black" label="'Next'" path="'/create_account/join_colony'"/>
+
+                    <RouterLinkBack>
+                        <KlangLinkButton style="klang-button.grey" label="'Cancel'" path="'/create_account/create_colony'"/>
+                    </RouterLinkBack>
+
+                </CreateAccountContainer>
+
+            </Route>
+
+            <Route path="'/create_characters'">
+                Character creator
+            </Route>
 
             <UnmatchedRoute>
 
                 <CreateAccountContainer label="'Create Account'">
 
-                    <Group style="util.vertical-center">
+                    <Group style="util.vertical-center util.vertical-padded48">
                         <Input username.bindTo="onValueChanged" style="create-input"/>
                         <Input password.bindTo="onValueChanged" style="create-input"/>
                     </Group>
 
-                    <RouterLink path="'/create_account/join_or_start_colony'"
-                                x-validators.username="[Validator.Required(), Validator.MinLength(3)]"
-                                x-query.username="{username}"
-                                x-query.password="{password}">
+                    <Group style="util.vertical-button-group">
 
-                        <KlangButton style="klang-button.black" label="'Next'"/>
+                        <RouterLink path="'/create_account/join_or_start_colony'"
+                                    x-validators.username="[Validator.Required(), Validator.MinLength(3)]"
+                                    x-query.username="{username}"
+                                    x-query.password="{password}">
 
-                    </RouterLink>
+                            <KlangButton style="klang-button.black" label="'Next'"/>
 
-                    <RouterLinkBack>
-                        Go Back
-                    </RouterLinkBack>
+                        </RouterLink>
 
+                        <RouterLinkBack>
+                            <KlangLinkButton style="klang-button.grey" label="'Cancel'"/>
+                        </RouterLinkBack>
+
+                    </Group>
+                    
                 </CreateAccountContainer>
 
             </UnmatchedRoute>
-            
+
         </ChildRouter>
 
     </Contents>
-    
+
 </UITemplate>

@@ -9,8 +9,7 @@ using UIForia.Util;
 using UnityEngine;
 
 namespace UIForia.Systems {
- 
-    
+
     public class LayoutSystem : ILayoutSystem {
 
         public struct ViewRect {
@@ -119,7 +118,7 @@ namespace UIForia.Systems {
                 root.allocatedHeight = root.GetHeights(root.allocatedWidth).clampedSize;
             }
 
-            if (true || forceLayout || root.markedForLayout) {
+            if (forceLayout || root.markedForLayout) {
                 root.RunLayout();
                 root.markedForLayout = false;
 #if DEBUG
@@ -187,7 +186,7 @@ namespace UIForia.Systems {
                         }
                     }
 
-                    if (true || forceLayout || box.markedForLayout) {
+                    if (forceLayout || box.markedForLayout) {
                         box.RunLayout();
                         box.markedForLayout = false;
 #if DEBUG
@@ -232,11 +231,6 @@ namespace UIForia.Systems {
 
                     // while parent is higher layer and requires layout
                     while (ptr != null) {
-//                        if (((ptr.flags & UIElementFlags.RequiresLayout) == 0)) {
-//                            ptr = ptr.parent;
-//                            continue;
-//                        }
-
                         if (ptr.layoutResult.layer < computedLayer) {
                             break;
                         }
@@ -494,11 +488,9 @@ namespace UIForia.Systems {
                     break;
             }
 
-            if (box.IsInitialized) {
-                box.OnStylePropertyChanged(property);
-            }
+            box.OnStylePropertyChanged(property);
 
-            if (box.parent != null && box.parent.IsInitialized && (box.style.LayoutBehavior & LayoutBehavior.Ignored) == 0) {
+            if (box.parent != null && (box.style.LayoutBehavior & LayoutBehavior.Ignored) == 0) {
                 box.parent.OnChildStylePropertyChanged(box, property);
             }
         }
@@ -535,8 +527,8 @@ namespace UIForia.Systems {
 
                     break;
                 case LayoutType.Flex:
-                    if (!(box is FlexLayoutBox)) {
-                        replace = new FlexLayoutBox(element);
+                    if (!(box is FlexLayoutBox2)) {
+                        replace = new FlexLayoutBox2(element);
                     }
 
                     break;
@@ -568,7 +560,7 @@ namespace UIForia.Systems {
             LayoutBox child = m_LayoutBoxMap.GetOrDefault(element.id);
             Stack<UIElement> elements = StackPool<UIElement>.Get();
             LightList<LayoutBox> boxes = LightListPool<LayoutBox>.Get();
-            
+
             elements.Push(element);
             while (elements.Count != 0) {
                 UIElement current = elements.Pop();
@@ -589,23 +581,23 @@ namespace UIForia.Systems {
                     if (childElement.isDisabled || childElement.style.LayoutBehavior == LayoutBehavior.Ignored) {
                         continue;
                     }
+
                     LayoutBox childBox = m_LayoutBoxMap.GetOrDefault(childElement.id);
                     boxes.AddUnchecked(childBox);
                 }
 
                 box.SetChildren(boxes);
-
             }
 
             if (child.parent != null) {
                 child.parent.OnChildEnabled(child);
                 child.parent.RequestContentSizeChangeLayout();
             }
-            LightListPool<LayoutBox>.Release(ref boxes);
 
+            LightListPool<LayoutBox>.Release(ref boxes);
         }
 
-      
+
         public void OnElementDisabled(UIElement element) {
             LayoutBox child = m_LayoutBoxMap.GetOrDefault(element.id);
             if (child?.parent != null) {
@@ -628,7 +620,7 @@ namespace UIForia.Systems {
 
             switch (element.style.LayoutType) {
                 case LayoutType.Flex:
-                    return new FlexLayoutBox(element);
+                    return new FlexLayoutBox2(element);
 
                 case LayoutType.Flow:
                     return new FlowLayoutBox(element);
@@ -652,14 +644,7 @@ namespace UIForia.Systems {
             Stack<ValueTuple<UIElement, LayoutBox>> stack = StackPool<ValueTuple<UIElement, LayoutBox>>.Get();
 
             if (element.parent != null) {
-                LayoutBox ptr = null;
-                UIElement e = element.parent;
-                while (ptr == null) {
-                    e = e.parent;
-                    ptr = m_LayoutBoxMap.GetOrDefault(e.id);
-                }
-
-                layoutBox.SetParent(ptr);
+                layoutBox.SetParent(m_LayoutBoxMap.GetOrDefault(element.parent.id));
             }
 
             m_LayoutBoxMap.Add(element.id, layoutBox);
@@ -690,18 +675,12 @@ namespace UIForia.Systems {
 
                 for (int i = 0; i < parentElement.children.Length; i++) {
                     UIElement child = parentElement.children[i];
-                  //  if ((child.flags & UIElementFlags.RequiresLayout) == 0) {
-                        // don't create a layout box but do process the children
-                  //      stack.Push(ValueTuple.Create(child, (LayoutBox) null));
-                  ///  }
-                   // else {
-                        LayoutBox childBox = CreateLayoutBox(child);
-                        childBox.SetParent(parentBox);
-                        m_LayoutBoxMap.Add(child.id, childBox);
-                        stack.Push(ValueTuple.Create(child, childBox));
-                        m_Elements.Add(child);
-                        m_PendingInitialization.Add(childBox);
-                   // }
+                    LayoutBox childBox = CreateLayoutBox(child);
+                    childBox.SetParent(parentBox);
+                    m_LayoutBoxMap.Add(child.id, childBox);
+                    stack.Push(ValueTuple.Create(child, childBox));
+                    m_Elements.Add(child);
+                    m_PendingInitialization.Add(childBox);
                 }
             }
 
@@ -718,7 +697,8 @@ namespace UIForia.Systems {
                 LayoutResult layoutResult = m_Elements[i].layoutResult;
                 UIElement element = m_Elements[i];
 
-                if (!layoutResult.ScreenRect.Contains(point)) {
+                // todo make this better
+                if (element.isDisabled || !layoutResult.ScreenRect.Contains(point)) {
                     continue;
                 }
 

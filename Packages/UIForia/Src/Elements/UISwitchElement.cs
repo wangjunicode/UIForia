@@ -5,7 +5,7 @@ namespace UIForia {
         public UISwitchElement() {
             flags |= UIElementFlags.Enabled;
             flags |= UIElementFlags.ImplicitElement;
-            flags &= ~(UIElementFlags.RequiresRendering | UIElementFlags.RequiresLayout);
+           // flags &= ~(UIElementFlags.RequiresRendering | UIElementFlags.RequiresLayout);
         }
 
     }

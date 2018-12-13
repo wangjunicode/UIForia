@@ -8,13 +8,11 @@ namespace UIForia.Layout.LayoutTypes {
 
     public class FlowLayoutBox : LayoutBox {
 
-        private static readonly LightList<FlexItem> items;
+        private readonly LightList<FlexItem> items;
 
-        static FlowLayoutBox() {
+        public FlowLayoutBox(UIElement element) : base(element) {
             items = new LightList<FlexItem>();
         }
-
-        public FlowLayoutBox(UIElement element) : base(element) { }
 
         public override void RunLayout() {
             if (children.Count == 0) {
@@ -39,7 +37,19 @@ namespace UIForia.Layout.LayoutTypes {
                 }
             }
             else {
-                RunRowLayout();
+                Size size = RunRowLayout();
+                actualWidth = size.width;
+                actualHeight = size.height;
+                for (int i = 0; i < children.Count; i++) {
+                    FlexItem item = items[i];
+
+                    children[i].SetAllocatedRect(
+                        item.crossAxisStart,
+                        item.mainAxisStart,
+                        Mathf.Max(0, item.crossSize - item.margin.left - item.margin.right),
+                        Mathf.Max(0, item.mainSize - item.margin.top - item.margin.bottom)
+                    );
+                }
             }
         }
 
@@ -84,9 +94,7 @@ namespace UIForia.Layout.LayoutTypes {
 
             CrossAxisAlignment crossAxisAlignment = style.FlexLayoutCrossAxisAlignment;
 
-            items.EnsureCapacity(children.Count);
-
-            items.ResetSize();
+            items.Clear();
 
             FlexTrack track = new FlexTrack(adjustedWidth);
 
@@ -103,7 +111,7 @@ namespace UIForia.Layout.LayoutTypes {
                     ? childAlignment
                     : crossAxisAlignment;
 
-                items.AddUnchecked(item);
+                items.Add(item);
                 track.remainingSpace -= item.mainSize;
                 track.mainSize += item.mainSize;
             }
@@ -125,10 +133,7 @@ namespace UIForia.Layout.LayoutTypes {
             float adjustedWidth = allocatedWidth - paddingBorderLeft - PaddingRight - BorderRight;
 
             CrossAxisAlignment crossAxisAlignment = style.FlexLayoutCrossAxisAlignment;
-
-            items.EnsureCapacity(children.Count);
-
-            items.ResetSize();
+            items.Clear();
 
             FlexTrack track = new FlexTrack(adjustedWidth);
             float maxWidth = 0f;
@@ -149,8 +154,8 @@ namespace UIForia.Layout.LayoutTypes {
                     ? childAlignment
                     : crossAxisAlignment;
 
-                items.AddUnchecked(item);
-                maxWidth = Mathf.Max(maxWidth, items[i].crossSize);
+                items.Add(item);
+                maxWidth = Mathf.Max(maxWidth, item.crossSize);
             }
 
             for (int i = 0; i < children.Count; i++) {
@@ -170,7 +175,7 @@ namespace UIForia.Layout.LayoutTypes {
 
                 item.margin = margin;
                 item.mainSize = child.GetHeights(item.crossSize).clampedSize + margin.top + margin.bottom;
-                items[i] = item;
+                items.Add(item);
             }
            
             return new Size(

@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using UIForia.Elements;
+using UIForia.Rendering;
 using UIForia.Routing;
 
 namespace UIForia {
@@ -17,11 +18,13 @@ namespace UIForia {
 
         public RouterElement() {
             this.m_Routes = new List<RouteElement>();
-            flags &= ~(UIElementFlags.RequiresLayout | UIElementFlags.RequiresRendering);
+           // flags &= ~(UIElementFlags.RequiresLayout | UIElementFlags.RequiresRendering);
             // todo -- validate child routes, can't re-use dynamic segment names
         }
 
         public override void OnReady() {
+            style.SetPreferredWidth(UIMeasurement.Parent100, StyleState.Normal);
+            style.SetPreferredHeight(UIMeasurement.Parent100, StyleState.Normal);
             OnRouteChanged(new Route(view.Application.Router.CurrentUrl));
         }
 

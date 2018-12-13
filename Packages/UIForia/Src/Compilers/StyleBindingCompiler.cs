@@ -11,7 +11,7 @@ namespace UIForia.Compilers {
 
     public partial class StyleBindingCompiler {
 
-        private readonly ExpressionCompiler2 compiler;
+        private readonly ExpressionCompiler compiler;
 
         internal static readonly MethodAliasSource rect1Source;
         internal static readonly MethodAliasSource rect2Source;
@@ -128,7 +128,7 @@ namespace UIForia.Compilers {
         }
 
         public StyleBindingCompiler() {
-            this.compiler = new ExpressionCompiler2();
+            this.compiler = new ExpressionCompiler();
             compiler.AddAliasResolver(new ContentSizeResolver());
             compiler.AddAliasResolver(new UrlResolver("$url"));
             compiler.AddAliasResolver(new SizeResolver("$size"));

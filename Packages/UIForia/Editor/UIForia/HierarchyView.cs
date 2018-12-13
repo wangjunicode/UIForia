@@ -175,7 +175,7 @@ public class HierarchyView : TreeView {
         r.x += v.x + 5f;
         r.width -= v.x + 5f;
         LayoutBox box = view.Application.LayoutSystem.GetBoxForElement(item.element);
-        s_Content.text = item.element.style.BaseStyleNames + "(children: " + box.children.Count + ")";
+        s_Content.text = item.element.style.BaseStyleNames + "(children: " + box.children.Count + ", id: " + item.element.id + ")";
             
         textStyle.textColor = AdjustColor(Color.yellow, item.element);
 
@@ -214,11 +214,11 @@ public class HierarchyView : TreeView {
 
         if (element is UITextElement textElement) {
             if (!string.IsNullOrEmpty(textElement.text)) {
-                if (textElement.text.Length <= 10) {
+                if (textElement.text.Length <= 20) {
                     s_Content.text = '"' + textElement.text + '"';
                 }
                 else {
-                    s_Content.text = '"' + textElement.text.Substring(0, 10) + "...\"";
+                    s_Content.text = '"' + textElement.text.Substring(0, 20) + "...\"";
                 }
 
                 s_ElementNameStyle.normal.textColor = AdjustColor(Color.white, element);

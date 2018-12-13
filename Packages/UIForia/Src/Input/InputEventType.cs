@@ -13,6 +13,7 @@ namespace UIForia.Input {
         MouseHover = 1 << 5,
         MouseContext = 1 << 6,
         MouseScroll = 1 << 7,
+        MouseClick = 1 << 19,
 
         KeyDown = 1 << 8,
         KeyUp = 1 << 9,
@@ -30,6 +31,7 @@ namespace UIForia.Input {
 
         DragUpdate = DragMove | DragHover,
         MouseUpdate = MouseMove | MouseHover,
+
 
     }
 

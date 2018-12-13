@@ -58,7 +58,7 @@ public class UIElement : IHierarchical {
         this.style = new UIStyleSet(this);
         this.flags = UIElementFlags.Enabled
                      | UIElementFlags.Shown
-                     | UIElementFlags.RequiresLayout
+                    // | UIElementFlags.RequiresLayout
                      | UIElementFlags.RequiresRendering;
     }
 

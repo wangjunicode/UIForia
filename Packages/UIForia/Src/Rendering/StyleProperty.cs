@@ -1,6 +1,5 @@
 using System.Collections.Generic;
 using System.Diagnostics;
-using System.Runtime.InteropServices;
 using Shapes2D;
 using TMPro;
 using UIForia.Layout;
@@ -193,7 +192,7 @@ namespace UIForia.Rendering {
 
         [DebuggerStepThrough]
         public static StyleProperty Unset(StylePropertyId propertyId) {
-            return new StyleProperty(propertyId, IntUtil.UnsetValue, IntUtil.UnsetValue);
+            return new StyleProperty(propertyId, IntUtil.UnsetValue, IntUtil.UnsetValue, FloatUtil.UnsetValue, null);
         }
 
         public static StyleProperty TransformPositionX(UIFixedLength length) {

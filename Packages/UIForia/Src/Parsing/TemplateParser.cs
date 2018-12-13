@@ -15,11 +15,11 @@ namespace UIForia {
 
         private static readonly Dictionary<Type, ParsedTemplate> parsedTemplates = new Dictionary<Type, ParsedTemplate>();
 
-        private static readonly string[] RepeatAttributes = {"if", "x-id", "list", "as", "filter", "onItemAdded", "onItemRemoved"};
+        private static readonly string[] RepeatAttributes = {"if", "style", "x-id", "list", "as", "filter", "onItemAdded", "onItemRemoved"};
         private static readonly string[] CaseAttributes = {"when"};
         private static readonly string[] SwitchAttributes = {"if", "value"};
         private static readonly string[] DefaultAttributes = { };
-        private static readonly string[] ChildrenAttributes = { };
+        private static readonly string[] ChildrenAttributes = { "style" };
         private static readonly string[] TextAttributes = { };
 
         public static void Reset() {
@@ -155,7 +155,8 @@ namespace UIForia {
 
             ParsedTemplate output = new ParsedTemplate(rootTemplate, templatePath);
             output.imports = imports;
-
+            output.usings = usings;
+            
             foreach (XElement styleElement in styleElements) {
                 styleTemplates.Add(ParseStyleSheet(output.templatePath, styleElement));
             }
@@ -234,8 +235,7 @@ namespace UIForia {
         private static UITemplate ParseChildrenElement(XElement element) {
             EnsureEmpty(element);
             EnsureNotInsideTagName(element, "Repeat");
-            EnsureOnlyAttributes(element, ChildrenAttributes);
-            return new UIChildrenTemplate();
+            return new UIChildrenTemplate(null, ParseAttributes(element.Attributes()));
         }
 
         private static UITemplate ParseSwitchElement(XElement element) {

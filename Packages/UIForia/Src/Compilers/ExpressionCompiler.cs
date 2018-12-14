@@ -374,7 +374,7 @@ namespace UIForia.Compilers {
                 new ConstructorArguments(p, isConstant)
             );
 
-            return expr;
+            return HandleCasting(expr, targetType);
         }
 
         public Expression CompileRestOfChain(Expression root, CompilerContext context) {

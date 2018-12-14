@@ -41,10 +41,10 @@ public class UIView {
     public void Refresh() {
         // todo allow hooks for custom context expressions here
         if (m_Template != null) {
-            this.RootElement = TemplateParser.ParseTemplateFromString(m_ElementType, m_Template).Create(this);
+            this.RootElement = TemplateParser.ParseTemplateFromString(m_ElementType, m_Template).Create();
         }
         else {
-            this.RootElement = TemplateParser.GetParsedTemplate(m_ElementType).Create(this);
+            this.RootElement = TemplateParser.GetParsedTemplate(m_ElementType).Create();
         }
 
         this.RootElement.view = this;

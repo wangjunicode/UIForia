@@ -37,12 +37,12 @@ namespace UIForia.Routing {
                 ptr = ptr.parent;
             }
 
-            parentRoute.onEnter += HandleParentEnter;
-            parentRoute.onExit += HandleParentExit;
-            parentRoute.onUpdate += HandleParentUpdate;
+            parentRoute.onRouteEnter += HandleParentRouteEnter;
+            parentRoute.onRouteExit += HandleParentRouteExit;
+            parentRoute.onRouteUpdate += HandleParentRouteUpdate;
         }
 
-        protected void HandleParentEnter() {
+        protected void HandleParentRouteEnter() {
             if (string.IsNullOrEmpty(path)) {
                 Enter(parentRoute.CurrentMatch);
             }
@@ -54,14 +54,14 @@ namespace UIForia.Routing {
             }
         }
 
-        protected void HandleParentExit() {
+        protected void HandleParentRouteExit() {
             if (activeChild != null) {
                 activeChild.Exit();
                 activeChild = null;
             }
         }
 
-        protected void HandleParentUpdate() {
+        protected void HandleParentRouteUpdate() {
 
             bool wasMatched = IsRouteMatched;
             

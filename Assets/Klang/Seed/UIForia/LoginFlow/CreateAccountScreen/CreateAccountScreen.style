@@ -7,7 +7,7 @@ style create-input {
     PreferredSize = 350px, 62px;
     BackgroundColor = white;
     BorderRadius = 30px;
-    Margin = 20px;
+    Margin = 10px;
     Padding = 10px, 15px;
 }
 
@@ -15,7 +15,7 @@ style create-input-small {
     PreferredSize = 150px, 42px;
     BackgroundColor = white;
     BorderRadius = 20px;
-    Margin = 10px;
+    Margin = 5px;
     Padding = 10px, 15px;
 }
 
@@ -32,4 +32,3 @@ style fade-panel {
     TransformBehaviorY = AnchorMinOffset;
     RenderLayer = Modal;
 }
-

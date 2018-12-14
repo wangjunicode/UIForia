@@ -105,7 +105,6 @@ namespace UIForia.Systems {
 
             Stack<UIElement> stack = StackPool<UIElement>.Get();
 
-            // todo -- use the skip tree! use it!
             // if we don't allow reparenting, could just use a flat sorted list
             // as long as the parent is laid out before the child that should be fine
 
@@ -527,8 +526,8 @@ namespace UIForia.Systems {
 
                     break;
                 case LayoutType.Flex:
-                    if (!(box is FlexLayoutBox2)) {
-                        replace = new FlexLayoutBox2(element);
+                    if (!(box is FlexLayoutBox)) {
+                        replace = new FlexLayoutBox(element);
                     }
 
                     break;
@@ -589,7 +588,7 @@ namespace UIForia.Systems {
                 box.SetChildren(boxes);
             }
 
-            if (child.parent != null) {
+            if (child.parent != null && child.element.style.LayoutBehavior != LayoutBehavior.Ignored) {
                 child.parent.OnChildEnabled(child);
                 child.parent.RequestContentSizeChangeLayout();
             }
@@ -620,7 +619,7 @@ namespace UIForia.Systems {
 
             switch (element.style.LayoutType) {
                 case LayoutType.Flex:
-                    return new FlexLayoutBox2(element);
+                    return new FlexLayoutBox(element);
 
                 case LayoutType.Flow:
                     return new FlowLayoutBox(element);

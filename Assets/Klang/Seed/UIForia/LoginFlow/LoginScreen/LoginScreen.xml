@@ -10,7 +10,7 @@
 
         <Image style="seed-logo" src="'Images/seed_pioneers_hgm_logo'"/>
 
-        <Text style="text">SEED Daeagea</Text>
+        <Text style="text">SEED</Text>
 
         <Group style="util.horizontal" style.paddingTop="24f" style.paddingBottom="24f">
             <Input style="login-input" username.bindTo="onValueChanged"/>

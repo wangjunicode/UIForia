@@ -238,7 +238,9 @@ namespace UIForia {
                 
             if (enabledBindings != null) {
                 for (int i = 0; i < enabledBindings.Length; i++) {
-                    enabledBindings[i].Execute(element, element.templateContext);
+                    if (enabledBindings[i].bindingType != BindingType.Constant) {
+                        enabledBindings[i].Execute(element, element.templateContext);
+                    }
                 }
             }
             

@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using UIForia.Input;
 using UIForia.Util;
+using UnityEngine;
 
 namespace UIForia {
 
@@ -28,9 +29,9 @@ namespace UIForia {
         protected override Type elementType => rootType;
 
         public override void Compile(ParsedTemplate template) {
-            if(isCompiled) return;
+            if (isCompiled) return;
             isCompiled = true;
-            
+
             if (rootType == null) {
                 rootType = TypeProcessor.GetType(typeName, template.imports).rawType;
             }
@@ -39,7 +40,7 @@ namespace UIForia {
                 UnityEngine.Debug.Log($"{elementType} must be a subclass of {typeof(UIElement)} in order to be used in templates");
                 return;
             }
-            
+
             templateToExpand = TemplateParser.GetParsedTemplate(rootType);
 
             ResolveBaseStyles(template);
@@ -48,15 +49,14 @@ namespace UIForia {
             CompilePropertyBindings(template);
             ResolveActualAttributes(); // todo combine with <Contents/> attrs
             BuildBindings();
-            
-            
+
             if (templateToExpand.rootElementTemplate == this) {
                 return;
             }
-            
+
             templateToExpand.Compile();
             UITemplate expandedRoot = templateToExpand.rootElementTemplate;
-            
+
             triggeredBindings = MergeBindingArray(triggeredBindings, expandedRoot.triggeredBindings);
             perFrameBindings = MergeBindingArray(perFrameBindings, expandedRoot.perFrameBindings);
             mouseEventHandlers = MergeArray(mouseEventHandlers, expandedRoot.mouseEventHandlers);
@@ -65,7 +65,6 @@ namespace UIForia {
             dragEventHandlers = MergeArray(dragEventHandlers, expandedRoot.dragEventHandlers);
             baseStyles = MergeArray(baseStyles, expandedRoot.baseStyles);
             Array.Reverse(baseStyles);
-
         }
 
         private static Binding[] MergeBindingArray(Binding[] a, Binding[] b) {
@@ -78,19 +77,19 @@ namespace UIForia {
 
             return a;
         }
-        
+
         private static T[] MergeArray<T>(T[] a, T[] b) {
             int startCount = a.Length;
             a = ResizeToMerge(a, b);
             int idx = 0;
-          
+
             for (int i = startCount; i < a.Length; i++) {
                 a[i] = b[idx++];
             }
 
             return a;
         }
-        
+
         private static T[] ResizeToMerge<T>(T[] a, T[] b) {
             if (a.Length == 0 && b.Length == 0) {
                 return a;
@@ -125,7 +124,7 @@ namespace UIForia {
 
             element.templateParent = null;
             element.templateContext = new ExpressionContext(element, element);
-            
+
             for (int i = 0; i < element.children.Length; i++) {
                 element.children[i] = actualChildren[i].CreateScoped(scope);
                 element.children[i].parent = element;
@@ -142,10 +141,7 @@ namespace UIForia {
 
         // children of this element are transcluded
         // actual children are built from parsed template's root children
-        // todo -- get rid of TemplateScope since it's really just a pointer to the root element
         public override UIElement CreateScoped(TemplateScope inputScope) {
-            // todo -- some templates don't need their own scope
-
             UIElement element = (UIElement) Activator.CreateInstance(rootType);
             element.flags |= UIElementFlags.TemplateRoot;
             element.OriginTemplate = this;
@@ -157,16 +153,39 @@ namespace UIForia {
 
             TemplateScope scope = new TemplateScope(element);
 
-            element.children = ArrayPool<UIElement>.GetExactSize(actualChildren.Count);
+            int childCount = actualChildren.Count;
+
+            element.children = ArrayPool<UIElement>.GetExactSize(childCount);
             element.templateContext = new ExpressionContext(inputScope.rootElement, element);
-            
+            LightList<UISlotContentTemplate> slotContentTemplates = new LightList<UISlotContentTemplate>();
+
+            for (int i = 0; i < transcludedTemplates.Count; i++) {
+                if (transcludedTemplates[i] is UISlotContentTemplate slotContent) {
+                    transcludedTemplates.RemoveAt(i--);
+                    slotContentTemplates.Add(slotContent);
+                }
+            }
+
             for (int i = 0; i < element.children.Length; i++) {
-                element.children[i] = actualChildren[i].CreateScoped(scope);
+                if (actualChildren[i] is UISlotTemplate slotTemplate) {
+                    UISlotContentTemplate contentTemplate = slotContentTemplates.Find(slotTemplate.slotNameAttr.value, (item, target) => item.slotNameAttr.value == target);
+                    if (contentTemplate != null) {
+                        element.children[i] = slotTemplate.CreateWithContent(scope, contentTemplate.childTemplates);
+                    }
+                    else {
+                        element.children[i] = slotTemplate.CreateWithDefault(scope);
+                    }
+                }
+                else {
+                    element.children[i] = actualChildren[i].CreateScoped(scope);
+                }
+
                 element.children[i].parent = element;
                 element.children[i].templateParent = element;
             }
 
             UIChildrenElement childrenElement = element.TranscludedChildren;
+
 
             if (childrenElement != null) {
                 childrenElement.children = new UIElement[transcludedTemplates.Count];
@@ -176,11 +195,6 @@ namespace UIForia {
                     childrenElement.children[i].templateParent = element;
                 }
             }
-
-            // todo -- create slots here
-
-            // find <Slot>
-            //     -> attach from input
 
             return element;
         }

@@ -45,7 +45,7 @@ namespace UIForia {
         public List<UITemplate> childTemplates => rootElementTemplate.childTemplates;
         public Type RootType => rootElementTemplate.RootType;
 
-        public UIElement Create(UIView view) {
+        public UIElement Create() {
             Compile();
             return rootElementTemplate.CreateUnscoped();
         }

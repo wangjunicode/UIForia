@@ -53,7 +53,6 @@
             <e p="ChatWindow.cs" t="Include" />
             <e p="ChatWindow.xml" t="Include" />
             <e p="ChatWindow_Styles.cs" t="Include" />
-            <e p="ClippedPanel.cs" t="Include" />
             <e p="ExpandableList" t="Include">
               <e p="ExpandableList.cs" t="Include" />
             </e>
@@ -75,10 +74,18 @@
           <e p="Seed" t="Include">
             <e p="Routes.cs" t="Include" />
             <e p="UIForia" t="Include">
+              <e p="ClippedPanel.cs" t="Include" />
               <e p="KlangButton" t="Include">
                 <e p="KlangButton.cs" t="Include" />
                 <e p="KlangButton.xml" t="Include" />
                 <e p="KlangLinkButton.xml" t="Include" />
+              </e>
+              <e p="KlangTextInput" t="Include">
+                <e p="KlangTextInput.cs" t="Include" />
+              </e>
+              <e p="KlangWindow" t="Include">
+                <e p="KlangWindow.cs" t="Include" />
+                <e p="KlangWindow.xml" t="Include" />
               </e>
               <e p="LoginFlow" t="Include">
                 <e p="CreateAccountScreen" t="Include">
@@ -101,6 +108,12 @@
               <e p="URLNavBar" t="Include">
                 <e p="URLNavBar.cs" t="Include" />
                 <e p="URLNavBar.xml" t="Include" />
+              </e>
+              <e p="Windows" t="Include">
+                <e p="SeedDebugWindow" t="Include">
+                  <e p="SeedDebugWindow.cs" t="Include" />
+                  <e p="SeedDebugWindow.xml" t="Include" />
+                </e>
               </e>
             </e>
           </e>

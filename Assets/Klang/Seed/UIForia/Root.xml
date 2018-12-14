@@ -7,45 +7,46 @@
     <Style>
 
         style container {
-            PreferredSize = 100vw, 100vh;
-            BackgroundColor = #EEEEEEFF;
+        PreferredSize = 100vw, 100vh;
+        BackgroundColor = #EEEEEEFF;
         }
 
         style app-body {
-            FlexLayoutMainAxisAlignment = Center;
-            FlexLayoutCrossAxisAlignment = Center;
-            FlexItemSelfAlignment = Center;
-            FlexItemGrow = 1;
-            PreferredSize = 1pca, 0;
+        FlexLayoutMainAxisAlignment = Center;
+        FlexLayoutCrossAxisAlignment = Center;
+        FlexItemSelfAlignment = Center;
+        FlexItemGrow = 1;
+        PreferredSize = 1pca, 0;
         }
-        
-        
+
     </Style>
 
     <Contents style="container">
-        
-        <URLNavBar/>
-        
+
+        <!--<URLNavBar/>-->
+
         <Group style="app-body">
 
+            <!--<KlangWindow/>-->
             <Router>
 
-                <Route style="util.vertical-center" path="'/login'">
-        
-                    <LoginScreen/>
+                <!--<Route style="util.vertical-center" path="'/login'">-->
+                <!--<CreateAccountScreen/>-->
 
-                </Route>
+                <!--&lt;!&ndash;<LoginScreen x-routePath="'/login'" x-onRouteEnter=""/>&ndash;&gt;-->
 
-                <Route path="'/create_account'">
+                <!--</Route>-->
 
-                    <CreateAccountScreen/>
+                <!--<Route path="'/create_account'">-->
 
-                </Route>
-                
-                <Route path="'/game'">
-                    
+                <!--<CreateAccountScreen/>-->
+
+                <!--</Route>-->
+
+                <Route path="'/game'" onRouteEnter="StartGame()">
+
                     Playing the game
-                    
+
                 </Route>
 
             </Router>

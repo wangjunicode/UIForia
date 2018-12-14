@@ -1,4 +1,5 @@
 using UIForia;
+using UnityEngine;
 
 namespace UI {
 
@@ -6,7 +7,12 @@ namespace UI {
     public class Root : UIElement {
 
         public override void OnCreate() {
-            view.Application.Router.GoTo("/login");
+            view.Application.Router.GoTo("/game");
+        }
+
+        public void StartGame() {
+            SeedDebugWindow windows = CreateChild<SeedDebugWindow>();
+            
         }
 
     }

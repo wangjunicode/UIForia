@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
 using UIForia.Rendering;
 using UIForia.Util;
 
@@ -7,31 +6,15 @@ namespace UIForia.Systems {
 
     public class BindingSystem : ISystem {
 
-        private SkipTree<BindingNode>.TreeNode treeRoot;
-        private readonly List<BindingNode> repeatNodes;
-        private readonly SkipTree<BindingNode> bindingSkipTree;
 
         private readonly LightList<BindingNode> m_Nodes;
 
-        private bool isTreeDirty;
 
         public BindingSystem() {
-            this.isTreeDirty = true;
-            this.repeatNodes = new List<BindingNode>();
-            this.bindingSkipTree = new SkipTree<BindingNode>();
             this.m_Nodes = new LightList<BindingNode>();
-            this.bindingSkipTree.onTreeChanged += HandleTreeChanged;
         }
 
-        private void HandleTreeChanged(SkipTree<BindingNode>.TreeChangeType changeType) {
-            isTreeDirty = true;
-        }
-
-        public void OnReset() {
-            this.isTreeDirty = true;
-            bindingSkipTree.Clear();
-            repeatNodes.Clear();
-        }
+        public void OnReset() {}
 
         public void OnUpdate() {
             for (int i = 0; i < m_Nodes.Count; i++) {
@@ -39,10 +22,7 @@ namespace UIForia.Systems {
             }
         }
 
-        public void OnDestroy() {
-            bindingSkipTree.Clear();
-            repeatNodes.Clear();
-        }
+        public void OnDestroy() {}
 
         public void OnViewAdded(UIView view) { }
 

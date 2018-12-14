@@ -1,0 +1,22 @@
+style window-container {
+    LayoutBehavior = Ignored;
+    PreferredSize = 800px;
+}
+
+style window-header {
+    TextColor = white;
+    TextFontSize = 24;
+    BackgroundColor = black;
+    PreferredWidth = 100%;
+    TextFontAsset = Gotham-Bold SDF;
+    PaddingTop = 8px;
+    PaddingBottom = 8px;
+}
+
+style window-title {
+    MarginLeft = 24px;
+}
+
+style window-bar-actions {
+    
+}

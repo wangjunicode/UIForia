@@ -9,9 +9,9 @@ namespace UIForia {
     public class RouteElement : UIContainerElement {
 
         public string path;
-        public event Action onEnter;
-        public event Action onExit;
-        public event Action onUpdate;
+        public event Action onRouteEnter;
+        public event Action onRouteExit;
+        public event Action onRouteUpdate;
         protected RouteMatch match;
         
         public RouteMatch CurrentMatch => match;
@@ -57,12 +57,12 @@ namespace UIForia {
 
         public virtual void Enter(RouteMatch match) {
             this.match = match;
-            onEnter?.Invoke();
+            onRouteEnter?.Invoke();
             SetEnabled(true);
         }
 
         public virtual void Exit() {
-            onExit?.Invoke();
+            onRouteExit?.Invoke();
             match = default;
             match.matchProgress = -1;
             SetEnabled(false);
@@ -70,7 +70,7 @@ namespace UIForia {
 
         public void Update(RouteMatch match) {
             this.match = match;
-            onUpdate?.Invoke();
+            onRouteUpdate?.Invoke();
         }
 
     }

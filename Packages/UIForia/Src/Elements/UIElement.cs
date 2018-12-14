@@ -6,6 +6,7 @@ using UIForia.Rendering;
 using UIForia;
 using UIForia.Routing;
 using UIForia.Systems;
+using UIForia.Util;
 using UnityEngine;
 
 [Flags]
@@ -39,15 +40,15 @@ public class UIElement : IHierarchical {
     public readonly int id;
     public readonly UIStyleSet style;
     public UIElement templateParent; // remove or move to cold data
-    public UIElement[] children;  // make readonly somehow, should never be modified by user
+    public UIElement[] children; // make readonly somehow, should never be modified by user
 
     public ExpressionContext templateContext;
-    
+
     internal UIElementFlags flags;
     internal UIElement parent;
 
 //    public UIElement templateRoot;
-    
+
     public LayoutResult layoutResult { get; internal set; }
     private ElementRenderer renderer = ElementRenderer.DefaultInstanced; // cold data?
 
@@ -58,7 +59,6 @@ public class UIElement : IHierarchical {
         this.style = new UIStyleSet(this);
         this.flags = UIElementFlags.Enabled
                      | UIElementFlags.Shown
-                    // | UIElementFlags.RequiresLayout
                      | UIElementFlags.RequiresRendering;
     }
 
@@ -70,15 +70,6 @@ public class UIElement : IHierarchical {
             s_ColdDataMap[id] = coldData;
         }
     }
-
-//    public ExpressionContext TemplateContext {
-//        get { return s_ColdDataMap.GetOrDefault(id).templateContext; }
-//        internal set {
-//            ElementColdData coldData = s_ColdDataMap.GetOrDefault(id);
-//            coldData.templateContext = value;
-//            s_ColdDataMap[id] = coldData;
-//        }
-//    }
 
     public UIChildrenElement TranscludedChildren {
         get { return s_ColdDataMap.GetOrDefault(id).transcludedChildren; }
@@ -97,8 +88,6 @@ public class UIElement : IHierarchical {
             s_ColdDataMap[id] = coldData;
         }
     }
-
-
 
     public ElementRenderer Renderer {
         get { return renderer; }
@@ -150,19 +139,42 @@ public class UIElement : IHierarchical {
 
     public virtual void OnDestroy() { }
 
-    public bool EnableBinding(string propertyName) {
-        throw new NotImplementedException();
-        //return templateContext.view.bindingSystem.EnableBinding(this, propertyName);
+    public UIElement CreateChild(Type type) {
+        // todo -- ensure we can accept children
+
+        if (!typeof(UIElement).IsAssignableFrom(type)) {
+            throw new Exception("Can't create child from non UIElement type");
+        }
+
+        ParsedTemplate template = TemplateParser.GetParsedTemplate(type);
+        if (template == null) {
+            throw new Exception("failed creating child");
+        }
+
+        UIElement child = template.Create();
+        child.parent = this;
+        child.templateParent = this;
+        child.templateContext.rootObject = templateContext.rootObject;
+        Array.Resize(ref children, children.Length + 1); // todo -- pool
+        children[children.Length - 1] = child;
+        view.Application.RegisterElement(child);
+        return child;
     }
 
-    public bool DisableBinding(string propertyName) {
-        return true;
-        // return templateContext.view.bindingSystem.DisableBinding(this, propertyName);
-    }
+    public T CreateChild<T>() where T : UIElement {
+        ParsedTemplate template = TemplateParser.GetParsedTemplate(typeof(T));
+        if (template == null) {
+            throw new Exception("failed creating child");
+        }
 
-    public bool HasBinding(string propertyName) {
-        return false;
-        //return templateContext.view.bindingSystem.HasBinding(this, propertyName);
+        UIElement child = template.Create();
+        child.parent = this;
+        child.templateParent = this;
+        child.templateContext.rootObject = templateContext.rootObject;
+        Array.Resize(ref children, children.Length + 1); // todo -- pool
+        children[children.Length - 1] = child;
+        view.Application.RegisterElement(child);
+        return child as T;
     }
 
     public void SetEnabled(bool active) {
@@ -298,9 +310,9 @@ public class UIElement : IHierarchical {
 
     public string GetAttribute(string attr) {
         List<ElementAttribute> templateAttributes = OriginTemplate.templateAttributes;
-        
+
         if (templateAttributes == null) return null;
-        
+
         for (int i = 0; i < templateAttributes.Count; i++) {
             if (templateAttributes[i].name == attr) {
                 return templateAttributes[i].value;
@@ -338,7 +350,7 @@ public class UIElement : IHierarchical {
         if (coldData.nearestRouter != null) {
             return coldData.nearestRouter;
         }
-        
+
         while (ptr != null) {
             if (ptr is IRouterElement routeElement) {
                 coldData.nearestRouter = routeElement;

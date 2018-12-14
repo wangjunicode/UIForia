@@ -36,8 +36,8 @@ public class GridLayoutTests {
 
     [Template(TemplateType.String, @"
         <UITemplate>
-            <Contents style.layoutType='LayoutType.Grid'>
-                <Repeat list='{gridItems}'>
+            <Contents>
+                <Repeat list='{gridItems}' style.layoutType='LayoutType.Grid'>
                     <Group style.preferredWidth='100f' style.preferredHeight='100f'/>
                 </Repeat>
             </Contents>

@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="utf-8"?>
+<UITemplate>
+
+    <Using namespace="UI"/>
+    
+    <Style path="Klang/Seed/UIForia/Util.style" alias="util"/>
+    <Style path="Klang/Seed/UIForia/KlangWindow/KlangWindow.style"/>
+    <Style path="Klang/Seed/UIForia/Windows/Window.style"/>
+
+    <Contents style="window-container">
+
+        <Group style="window-header">
+
+            <Group style="window-title">
+                <Slot name="titlebar"/>
+            </Group>
+
+            <Group style="window-bar-actions">
+                <Slot name="act"/>
+            </Group>
+
+        </Group>
+
+        <Group style="window-content">
+            <Children/>
+        </Group>
+
+    </Contents>
+
+</UITemplate>

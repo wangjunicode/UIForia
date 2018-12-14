@@ -144,23 +144,18 @@ namespace UIForia.Util {
             size--;
             return retn;
         }
-
-        public void RemovePast(int index) {
-            for (int i = index; i < size; i++) {
-                list[i] = default;
-            }
-
-            size = size - index;
-        }
         
         public void RemoveAt(int index) {
             if ((uint) index >= (uint) size) return;
-            for (int j = index; j < size; j++) {
-                list[j] = list[j + 1];
+            if (index == size - 1) {
+                list[--size] = default;
             }
-
-            list[size - 1] = default(T);
-            size--;
+            else {
+                for (int j = index; j < size - 1; j++) {
+                    list[j] = list[j + 1];
+                }
+                list[--size] = default(T);
+            }
         }
 
         public int FindIndex(Predicate<T> fn) {

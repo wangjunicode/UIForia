@@ -1,0 +1,9 @@
+
+style container {
+
+}
+
+style side-bar-container {
+    PreferredSize = 300px;
+    BackgroundColor = red;
+}

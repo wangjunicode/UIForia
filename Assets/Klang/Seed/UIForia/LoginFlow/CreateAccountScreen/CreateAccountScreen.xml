@@ -58,7 +58,7 @@
 
                 <CreateAccountContainer label="'Create Account'">
 
-                    <Group style="util.vertical-center util.vertical-padded48">
+                    <Group style="util.vertical-center">
                         <Input username.bindTo="onValueChanged" style="create-input"/>
                         <Input password.bindTo="onValueChanged" style="create-input"/>
                     </Group>
@@ -75,7 +75,9 @@
                         </RouterLink>
 
                         <RouterLinkBack>
-                            <KlangLinkButton style="klang-button.grey" label="'Cancel'"/>
+                            
+                            <KlangLinkButton x-styleActive="" style="klang-button.grey" label="'Cancel'"/>
+                            
                         </RouterLinkBack>
 
                     </Group>

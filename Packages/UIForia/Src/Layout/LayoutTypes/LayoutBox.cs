@@ -425,20 +425,12 @@ namespace UIForia.Layout.LayoutTypes {
                     idx++;
                 }
             }
-
-            //if ((element.parent.flags & UIElementFlags.RequiresLayout) == 0) {
-            //    idx += FindLayoutSiblingIndex(element.parent);
-            // }
-
+          
             return idx;
         }
 
         public void InvalidatePreferredSizeCache() {
             cachedPreferredWidth = -1;
-            allocatedWidth = 0;
-            allocatedHeight = 0;
-            actualWidth = 0;
-            actualHeight = 0;
             if (element != null) {
                 s_HeightForWidthCache.Remove(element.id);
             }

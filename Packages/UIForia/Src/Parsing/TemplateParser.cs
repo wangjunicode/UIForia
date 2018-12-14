@@ -202,7 +202,7 @@ namespace UIForia {
 
         private static UITemplate ParseRepeatElement(XElement element) {
             EnsureAttribute(element, "list");
-            EnsureOnlyAttributes(element, RepeatAttributes);
+//            EnsureOnlyAttributes(element, RepeatAttributes);
 
             UIRepeatTemplate template = new UIRepeatTemplate(
                 ParseNodes(element.Nodes()),
@@ -222,14 +222,26 @@ namespace UIForia {
         }
 
         private static UITemplate ParseSlotElement(XElement element) {
-            EnsureAttribute(element, "slotId");
+            EnsureAttribute(element, "name");
             EnsureNotInsideTagName(element, "Repeat");
             EnsureNotInsideTagName(element, "Slot");
-//            EnsureOnlyAttributes(element, ChildrenAttributes);
+            
             return new UISlotTemplate(
                 ParseNodes(element.Nodes()),
                 ParseAttributes(element.Attributes())
             );
+        }
+        
+        private static UITemplate ParseSlotContentElement(XElement element) {
+            EnsureAttribute(element, "name");
+            EnsureNotInsideTagName(element, "Repeat");
+            EnsureNotInsideTagName(element, "Slot");
+
+            return new UISlotContentTemplate(
+                ParseNodes(element.Nodes()),
+                ParseAttributes(element.Attributes())
+            );
+           
         }
 
         private static UITemplate ParseChildrenElement(XElement element) {
@@ -344,41 +356,6 @@ namespace UIForia {
             );
         }
 
-//        private static UITemplate ParseRouterElement(XElement element) {
-//            EnsureAttribute(element, "path");
-//            // todo -- ensure path is a string & constant
-//            return new UIRouterTemplate(
-//                ParseNodes(element.Nodes()),
-//                ParseAttributes(element.Attributes())
-//            );
-//        }
-//        
-//        private static UITemplate ParseRouterLinkElement(XElement element) {
-//            EnsureAttribute(element, "path");
-//            // todo -- ensure path is a string & constant
-//            return new UIContainerTemplate(
-//                typeof(UIRouterLinkElement),
-//                ParseNodes(element.Nodes()),
-//                ParseAttributes(element.Attributes())
-//            );
-//        }
-//
-//        private static UITemplate ParseUnmatchedRouteElement(XElement element) {
-//            return new UIUnmatchedRouteTemplate(
-//                ParseNodes(element.Nodes()),
-//                ParseAttributes(element.Attributes())
-//            );
-//        }
-//
-//        private static UITemplate ParseRouteElement(XElement element) {
-//            EnsureAttribute(element, "path");
-//            // todo -- ensure path is a string & constant
-//            return new UIRouteTemplate(
-//                ParseNodes(element.Nodes()),
-//                ParseAttributes(element.Attributes())
-//            );
-//        }
-
         private static UITemplate ParseElement(XElement element) {
             if (element.Name == "Children") {
                 return ParseChildrenElement(element);
@@ -399,6 +376,10 @@ namespace UIForia {
             if (element.Name == "Slot") {
                 return ParseSlotElement(element);
             }
+            
+            if (element.Name == "SlotContent") {
+                return ParseSlotContentElement(element);
+            }
 
             if (element.Name == "Switch") {
                 return ParseSwitchElement(element);
@@ -415,22 +396,6 @@ namespace UIForia {
             if (element.Name == "Input") {
                 return ParseInputElement(element);
             }
-
-//            if (element.Name == "Router") {
-//                return ParseRouterElement(element);
-//            }
-//
-//            if (element.Name == "Route") {
-//                return ParseRouteElement(element);
-//            }
-//
-//            if (element.Name == "UnmatchedRoute") {
-//                return ParseUnmatchedRouteElement(element);
-//            }
-//
-//            if (element.Name == "RouterLink") {
-//                return ParseRouterLinkElement(element);
-//            }
             
             for (int i = 0; i < IntrinsicElementTypes.Length; i++) {
                 if (IntrinsicElementTypes[i].name == element.Name) {

@@ -4,25 +4,6 @@ using UnityEngine;
 
 namespace UIForia {
 
-    public class UISlotContentTemplate : UITemplate {
-
-        public AttributeDefinition slotNameAttr;
-
-        public UISlotContentTemplate(List<UITemplate> childTemplates, List<AttributeDefinition> attributes = null)
-            : base(childTemplates, attributes) { }
-
-        protected override Type elementType => null;
-
-        public override void Compile(ParsedTemplate template) {
-            slotNameAttr = GetAttribute("name");
-        }
-
-        public override UIElement CreateScoped(TemplateScope inputScope) {
-            throw new Exception("Should never call CreateScoped on a UISlotContentTemplate");
-        }
-
-    }
-
     public class UISlotTemplate : UITemplate {
 
         public AttributeDefinition slotNameAttr;
@@ -31,6 +12,7 @@ namespace UIForia {
             : base(childTemplates, attributes) { }
 
         protected override Type elementType => typeof(UISlotElement);
+        public string SlotName => slotNameAttr.value;
 
         public override void Compile(ParsedTemplate template) {
             slotNameAttr = GetAttribute("name");

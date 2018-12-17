@@ -568,6 +568,7 @@
               <e p="UIGraphicTemplate.cs" t="Include" />
               <e p="UIImageTemplate.cs" t="Include" />
               <e p="UIRepeatTemplate.cs" t="Include" />
+              <e p="UISlotContentTemplate.cs" t="Include" />
               <e p="UISlotTemplate.cs" t="Include" />
               <e p="UISwitchCaseTemplate.cs" t="Include" />
               <e p="UISwitchDefaultTemplate.cs" t="Include" />

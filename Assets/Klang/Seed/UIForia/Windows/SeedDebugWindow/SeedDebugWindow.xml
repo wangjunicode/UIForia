@@ -1,43 +1,21 @@
 <?xml version="1.0" encoding="utf-8"?>
 <UITemplate>
-    
+
     <Using namespace="UI"/>
-    
+
     <Style path="Klang/Seed/UIForia/Windows/Window.style"/>
-    
-    <!--<InheritTemplateContents>-->
-        <!---->
-        <!--<SlotContent name="Header">-->
 
-        <!--</SlotContent>-->
-
-        <!--<SlotContent name="Body">-->
-
-        <!--</SlotContent>-->
-        <!---->
-    <!--</InheritTemplateContents>   -->
-    
     <Contents style="window-container">
-    
-        <KlangWindow options="">
-            
-            <SlotContent name="KlangWindow.Header"> 
-            
-                Window Header
-                
-            </SlotContent>
-            
-            <!--<Slot.TitleBarActions>-->
-                <!--Exit-->
-            <!--</Slot.TitleBarActions>-->
-            <!---->
-            <!--<Slot.Contents>-->
-                <!--<Repeat list="metrics">-->
-                <!--</Repeat>-->
-            <!--</Slot.Contents>-->
-            
-        </KlangWindow>
         
+        <KlangWindow>
+            <SlotContent name="KlangWindow.Header">
+
+                Window Header
+
+            </SlotContent>
+
+        </KlangWindow>
+
     </Contents>
-    
+
 </UITemplate>

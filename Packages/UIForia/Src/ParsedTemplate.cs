@@ -1,40 +1,39 @@
 using System;
 using System.Collections.Generic;
 using UIForia.Compilers;
+using UIForia.Extensions;
 using UIForia.Parsing.StyleParser;
 using UIForia.Rendering;
-using UIForia.Util;
 
 namespace UIForia {
 
     public class ParsedTemplate {
 
-        private static readonly IntMap<ParsedTemplate> s_ParsedTemplates = new IntMap<ParsedTemplate>();
-        private static readonly IReadOnlyList<UIElement> EmptyElementList = ListPool<UIElement>.Empty;
-
-        public List<ImportDeclaration> imports;
-        public readonly string templatePath;
-        public readonly int templateId;
-
         private static int s_TemplateIdGenerator;
-        
-        public readonly ExpressionCompiler compiler;
+        private static readonly IntMap<ParsedTemplate> s_ParsedTemplates;
 
-        public readonly UIElementTemplate rootElementTemplate;
+        public readonly int templateId;
+        public readonly string templatePath;
 
         private bool isCompiled;
-        private List<StyleDefinition> styleGroups;
 
-        private readonly IntMap<UITemplate> m_TemplateMap;
         public List<string> usings;
+        public List<StyleDefinition> styleGroups;
+        public List<ImportDeclaration> imports;
+        
+        public UIElementTemplate rootElementTemplate;
+        public readonly ExpressionCompiler compiler; // todo -- static?
 
+        static ParsedTemplate() {
+            s_ParsedTemplates = new IntMap<ParsedTemplate>();
+        }
+        
         public ParsedTemplate(UIElementTemplate rootElement, string filePath = null) {
-            templateId = ++s_TemplateIdGenerator;
-            templatePath = filePath ?? "Template" + templateId;
+            this.templateId = ++s_TemplateIdGenerator;
+            this.templatePath = filePath ?? "Template" + templateId;
             this.rootElementTemplate = rootElement;
             this.styleGroups = new List<StyleDefinition>();
             this.compiler = new ExpressionCompiler();
-            this.m_TemplateMap = new IntMap<UITemplate>();
             s_ParsedTemplates[templateId] = this;
         }
 
@@ -68,14 +67,12 @@ namespace UIForia {
                 
                 imports[i].type = type;
                 throw new NotImplementedException();
-//                contextDefinition.AddConstAliasSource(new ExternalReferenceAliasSource(imports[i].alias, type));
             }
 
             CompileStep(rootElementTemplate);
         }
 
         private void CompileStep(UITemplate template) {
-            m_TemplateMap[template.id] = template;
             
             template.Compile(this);
             
@@ -135,6 +132,14 @@ namespace UIForia {
             }
             
             throw new UIForia.ParseException("Unable to find a style with the alias: " + alias);
+        }
+
+        public ParsedTemplate Clone() {
+            ParsedTemplate retn = new ParsedTemplate(rootElementTemplate, templatePath);
+            imports.CopyToList(retn.imports);
+            styleGroups.CopyToList(retn.styleGroups);
+            usings.CopyToList(retn.usings);
+            return retn;
         }
 
     }

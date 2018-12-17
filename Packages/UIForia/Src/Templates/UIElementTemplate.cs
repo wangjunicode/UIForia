@@ -110,7 +110,7 @@ namespace UIForia {
             return a;
         }
 
-        public UIElement CreateUnscoped() {
+        public UIElement CreateUnscoped(LightList<UISlotContentTemplate> inputSlotContent = null) {
             UIElement element = (UIElement) Activator.CreateInstance(rootType);
             element.flags |= UIElementFlags.TemplateRoot;
             element.OriginTemplate = this;
@@ -119,7 +119,10 @@ namespace UIForia {
             List<UITemplate> actualChildren = childTemplates;
 
             TemplateScope scope = new TemplateScope(element);
-
+            if (inputSlotContent != null) {
+                scope.slotContents = inputSlotContent;
+            }
+            
             element.children = ArrayPool<UIElement>.GetExactSize(actualChildren.Count);
 
             element.templateParent = null;
@@ -157,7 +160,7 @@ namespace UIForia {
 
             element.children = ArrayPool<UIElement>.GetExactSize(childCount);
             element.templateContext = new ExpressionContext(inputScope.rootElement, element);
-            LightList<UISlotContentTemplate> slotContentTemplates = new LightList<UISlotContentTemplate>();
+            LightList<UISlotContentTemplate> slotContentTemplates = scope.slotContents;
 
             for (int i = 0; i < transcludedTemplates.Count; i++) {
                 if (transcludedTemplates[i] is UISlotContentTemplate slotContent) {
@@ -165,27 +168,10 @@ namespace UIForia {
                     slotContentTemplates.Add(slotContent);
                 }
             }
-
-            for (int i = 0; i < element.children.Length; i++) {
-                if (actualChildren[i] is UISlotTemplate slotTemplate) {
-                    UISlotContentTemplate contentTemplate = slotContentTemplates.Find(slotTemplate.slotNameAttr.value, (item, target) => item.slotNameAttr.value == target);
-                    if (contentTemplate != null) {
-                        element.children[i] = slotTemplate.CreateWithContent(scope, contentTemplate.childTemplates);
-                    }
-                    else {
-                        element.children[i] = slotTemplate.CreateWithDefault(scope);
-                    }
-                }
-                else {
-                    element.children[i] = actualChildren[i].CreateScoped(scope);
-                }
-
-                element.children[i].parent = element;
-                element.children[i].templateParent = element;
-            }
+            
+            CreateChildren(element, actualChildren, scope); // recycle scope here?
 
             UIChildrenElement childrenElement = element.TranscludedChildren;
-
 
             if (childrenElement != null) {
                 childrenElement.children = new UIElement[transcludedTemplates.Count];

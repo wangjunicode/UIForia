@@ -1,9 +1,31 @@
 
-style container {
-
+style window-container {
+    LayoutBehavior = Ignored;
+    PreferredSize = 400px;
 }
 
 style side-bar-container {
     PreferredSize = 300px;
     BackgroundColor = red;
+}
+
+style window-header {
+    TextColor = white;
+    TextFontSize = 24;
+    BackgroundColor = black;
+    PreferredWidth = 100%;
+    TextFontAsset = Gotham-Bold SDF;
+    PaddingTop = 8px;
+    PaddingBottom = 8px;
+}
+
+style window-content {
+    BackgroundColor = green;
+    PreferredWidth = 100%;
+    PreferredHeight = 0;
+    FlexItemGrow = 1;
+    BorderColor = red;
+    BorderLeft = 5px;
+    BorderRight = 5px;
+    BorderBottom = 5px;
 }

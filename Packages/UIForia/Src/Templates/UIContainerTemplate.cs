@@ -16,12 +16,12 @@ namespace UIForia {
         }
 
         protected override Type elementType { get; }
-        
+
         public override UIElement CreateScoped(TemplateScope inputScope) {
             UIContainerElement element = null;
-            
+
             if (elementType == typeof(UIGroupElement)) {
-                element = new UIGroupElement();    
+                element = new UIGroupElement();
             }
             else if (elementType == typeof(UIPanelElement)) {
                 element = new UIPanelElement();
@@ -44,18 +44,15 @@ namespace UIForia {
             else {
                 element = (UIContainerElement) Activator.CreateInstance(elementType);
             }
-            
+
             Assert.IsNotNull(element);
-            
+
             element.children = new UIElement[childTemplates.Count];
             element.templateContext = new ExpressionContext(inputScope.rootElement, element);
-            for (int i = 0; i < childTemplates.Count; i++) {
-                element.children[i] = childTemplates[i].CreateScoped(inputScope);
-                element.children[i].parent = element;
-                element.children[i].templateParent = element;
-            }
-
             element.OriginTemplate = this;
+
+            CreateChildren(element, childTemplates, inputScope);
+
             return element;
         }
 
@@ -69,13 +66,10 @@ namespace UIForia {
         }
 
         protected override Type elementType { get; }
-        
-        public override UIElement CreateScoped(TemplateScope inputScope) {
 
+        public override UIElement CreateScoped(TemplateScope inputScope) {
             UITextElement element = null;
-            if (elementType == typeof(UILabelElement)) {
-                
-            }
+            if (elementType == typeof(UILabelElement)) { }
             else if (elementType == typeof(UIParagraphElement)) {
                 element = new UIParagraphElement();
             }
@@ -99,13 +93,12 @@ namespace UIForia {
             }
 
             Assert.IsNotNull(element);
-            
+
             element.templateContext = new ExpressionContext(inputScope.rootElement, element);
             element.children = ArrayPool<UIElement>.Empty;
             element.OriginTemplate = this;
-            
-            return element;
 
+            return element;
         }
 
     }

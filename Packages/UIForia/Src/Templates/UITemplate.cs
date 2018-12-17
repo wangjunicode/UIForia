@@ -100,6 +100,27 @@ namespace UIForia {
             s_BindingList.Clear();
 
         }
+
+        protected static void CreateChildren(UIElement element, IList<UITemplate> templates, TemplateScope inputScope) {
+            for (int i = 0; i < templates.Count; i++) {
+                if (templates[i] is UISlotTemplate slotTemplate) {
+                    UISlotContentTemplate contentTemplate = inputScope.FindSlotContent(slotTemplate.SlotName);
+                    if (contentTemplate != null) {
+                        element.children[i] = slotTemplate.CreateWithContent(inputScope, contentTemplate.childTemplates);
+                    }
+                    else {
+                        element.children[i] = slotTemplate.CreateWithDefault(inputScope);
+                    }
+                }
+                else {
+                    element.children[i] = templates[i].CreateScoped(inputScope);
+                }
+
+                element.children[i].parent = element;
+                element.children[i].templateParent = element;
+            }
+
+        }
         
         public virtual void Compile(ParsedTemplate template) {
             if(isCompiled) return;

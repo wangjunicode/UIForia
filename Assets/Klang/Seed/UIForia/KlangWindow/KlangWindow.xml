@@ -8,13 +8,13 @@
 
     <Contents style="window-container">
 
-        <Group x-id="header" onDragCreate="PositionWindow($event)" style="window-header">
+        <Group x-id="header" style="window-header">
 
             <Slot style="window-title" name="KlangWindow.Header"/>
 
         </Group>
 
-        <Group x-id="content" onDragCreate="ResizeWindow($event)" style="window-content">
+        <Group x-id="content" style="window-content">
             <Children/>
         </Group>
 

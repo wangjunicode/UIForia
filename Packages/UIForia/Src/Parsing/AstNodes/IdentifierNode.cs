@@ -1,14 +1,13 @@
-using System.Diagnostics;
+namespace UIForia.Parsing {
 
-namespace UIForia {
+    public class IdentifierNode : ASTNode {
 
-    [DebuggerDisplay("{" + nameof(identifier) + "}")]
-    public class IdentifierNodeOld : ASTNode_Old {
+        public string name;
+        
+        public bool IsAlias => name[0] == '$';
 
-        public readonly string identifier;
-    
-        public IdentifierNodeOld(string identifier) {
-            this.identifier = identifier;
+        public override void Release() {
+            s_IdentifierPool.Release(this);
         }
 
     }

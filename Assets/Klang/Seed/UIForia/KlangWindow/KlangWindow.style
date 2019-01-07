@@ -21,7 +21,7 @@ style window-header {
 
 style window-content {
     BackgroundColor = green;
-    PreferredWidth = 100%;
+    PreferredWidth = 1pca;
     PreferredHeight = 0;
     FlexItemGrow = 1;
     BorderColor = red;

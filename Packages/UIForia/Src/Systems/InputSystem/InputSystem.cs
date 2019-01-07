@@ -308,6 +308,8 @@ public abstract class InputSystem : IInputSystem, IInputProvider {
             RunDragEvent(m_ElementsThisFrame, InputEventType.DragDrop);
             m_CurrentDragEvent.Drop(true);
         }
+
+        m_CurrentDragEvent = null;
     }
 
     private void RunDragEvent(List<UIElement> elements, InputEventType eventType) {

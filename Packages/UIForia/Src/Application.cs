@@ -150,6 +150,8 @@ namespace UIForia {
                 system.OnReset();
             }
 
+            m_ElementTree.TraversePreOrder((el) => el.OnDestroy());
+            
             m_ElementTree.Clear();
             for (int i = 0; i < m_DepthMap.Count; i++) {
                 m_DepthMap[i].Clear();
@@ -253,8 +255,11 @@ namespace UIForia {
                 }
             }
 
-            element.flags |= UIElementFlags.Initialized;
-            element.OnReady();
+            // when creating new children in create or read, this can be called twice
+            if ((element.flags & UIElementFlags.Initialized) == 0) {
+                element.flags |= UIElementFlags.Initialized;
+                element.OnReady();
+            }
         }
 
         public static void DestroyElement(UIElement element) {

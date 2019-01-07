@@ -1,5 +1,4 @@
 using UIForia;
-using UnityEngine;
 
 namespace UI {
 
@@ -11,8 +10,9 @@ namespace UI {
         }
 
         public void StartGame() {
-            SeedDebugWindow windows = CreateChild<SeedDebugWindow>();
-            
+            SeedDebugWindow window1 = CreateChild<SeedDebugWindow>();
+            SeedDebugWindow window2 = CreateChild<SeedDebugWindow>();
+            SeedDebugWindow window3 = CreateChild<SeedDebugWindow>();
         }
 
     }

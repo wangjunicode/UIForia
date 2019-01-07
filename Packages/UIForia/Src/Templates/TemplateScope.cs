@@ -9,10 +9,11 @@ namespace UIForia {
         
         public TemplateScope(UIElement rootElement) {
             this.rootElement = rootElement;
-            this.slotContents = new LightList<UISlotContentTemplate>();
+            this.slotContents = null;
         }
 
         public UISlotContentTemplate FindSlotContent(string slotName) {
+            if (slotContents == null) return null;
             for (int i = 0; i < slotContents.Count; i++) {
                 if (slotContents[i].SlotName == slotName) {
                     return slotContents[i];

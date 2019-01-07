@@ -12,6 +12,9 @@ namespace UIForia.Extensions {
             return new Rect(xMin, yMin, xMax - xMin, yMax - yMin);
         }
 
+        public static bool ContainOrOverlap(this Rect rect, Vector2 point) {
+            return point.x >= rect.xMin && point.x <= rect.xMax && point.y >= rect.yMin && point.y <= rect.yMax;
+        }
     }
 
 }

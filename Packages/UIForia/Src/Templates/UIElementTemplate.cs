@@ -14,7 +14,8 @@ namespace UIForia {
         private readonly string typeName;
         private ParsedTemplate templateToExpand;
         private TemplateType templateType;
-
+        private LightList<UISlotContentTemplate> slotContentTemplates;
+        
         public UIElementTemplate(string typeName, List<UITemplate> childTemplates, List<AttributeDefinition> attributes = null)
             : base(childTemplates, attributes) {
             this.typeName = typeName;
@@ -23,6 +24,7 @@ namespace UIForia {
         public UIElementTemplate(Type rootType, List<UITemplate> childTemplates, List<AttributeDefinition> attributes = null)
             : base(childTemplates, attributes) {
             this.rootType = rootType;
+            
         }
 
         public Type RootType => rootType;
@@ -37,24 +39,26 @@ namespace UIForia {
             }
 
             if (!(typeof(UIElement).IsAssignableFrom(elementType))) {
-                UnityEngine.Debug.Log($"{elementType} must be a subclass of {typeof(UIElement)} in order to be used in templates");
+                Debug.Log($"{elementType} must be a subclass of {typeof(UIElement)} in order to be used in templates");
                 return;
             }
 
             templateToExpand = TemplateParser.GetParsedTemplate(rootType);
-
+                        
             ResolveBaseStyles(template);
             CompileStyleBindings(template);
             CompileInputBindings(template, templateToExpand.rootElementTemplate != this);
             CompilePropertyBindings(template);
             ResolveActualAttributes(); // todo combine with <Contents/> attrs
-            BuildBindings();
+            BuildBindings();            
 
             if (templateToExpand.rootElementTemplate == this) {
                 return;
             }
 
             templateToExpand.Compile();
+          
+            
             UITemplate expandedRoot = templateToExpand.rootElementTemplate;
 
             triggeredBindings = MergeBindingArray(triggeredBindings, expandedRoot.triggeredBindings);
@@ -67,6 +71,17 @@ namespace UIForia {
             Array.Reverse(baseStyles);
         }
 
+        public override void PostCompile(ParsedTemplate template) {
+              
+            for (int i = 0; i < childTemplates.Count; i++) {
+                if (childTemplates[i] is UISlotContentTemplate slotContent) {
+                    childTemplates.RemoveAt(i--);
+                    slotContentTemplates = slotContentTemplates ?? new LightList<UISlotContentTemplate>(2);
+                    slotContentTemplates.Add(slotContent);
+                }
+            }
+        }
+        
         private static Binding[] MergeBindingArray(Binding[] a, Binding[] b) {
             int startCount = a.Length;
             a = ResizeToMerge(a, b);
@@ -116,7 +131,7 @@ namespace UIForia {
             element.OriginTemplate = this;
             templateToExpand.Compile();
 
-            List<UITemplate> actualChildren = childTemplates;
+            List<UITemplate> actualChildren = templateToExpand.childTemplates;
 
             TemplateScope scope = new TemplateScope(element);
             if (inputSlotContent != null) {
@@ -151,32 +166,22 @@ namespace UIForia {
 
             templateToExpand.Compile();
 
-            List<UITemplate> transcludedTemplates = childTemplates;
-            List<UITemplate> actualChildren = templateToExpand.childTemplates;
-
             TemplateScope scope = new TemplateScope(element);
 
-            int childCount = actualChildren.Count;
+            int childCount = templateToExpand.childTemplates.Count;
 
             element.children = ArrayPool<UIElement>.GetExactSize(childCount);
             element.templateContext = new ExpressionContext(inputScope.rootElement, element);
-            LightList<UISlotContentTemplate> slotContentTemplates = scope.slotContents;
-
-            for (int i = 0; i < transcludedTemplates.Count; i++) {
-                if (transcludedTemplates[i] is UISlotContentTemplate slotContent) {
-                    transcludedTemplates.RemoveAt(i--);
-                    slotContentTemplates.Add(slotContent);
-                }
-            }
+            scope.slotContents = slotContentTemplates;
             
-            CreateChildren(element, actualChildren, scope); // recycle scope here?
+            CreateChildren(element, templateToExpand.childTemplates, scope); // recycle scope here?
 
             UIChildrenElement childrenElement = element.TranscludedChildren;
 
             if (childrenElement != null) {
-                childrenElement.children = new UIElement[transcludedTemplates.Count];
+                childrenElement.children = new UIElement[childTemplates.Count];
                 for (int i = 0; i < childrenElement.children.Length; i++) {
-                    childrenElement.children[i] = transcludedTemplates[i].CreateScoped(inputScope);
+                    childrenElement.children[i] = childTemplates[i].CreateScoped(inputScope);
                     childrenElement.children[i].parent = childrenElement;
                     childrenElement.children[i].templateParent = element;
                 }

@@ -11,7 +11,7 @@ namespace UIForia {
             : base(childTemplates, attributes) { }
 
         protected override Type elementType => null;
-        public string SlotName => slotNameAttr.value;
+        public string SlotName => GetAttribute("name").value;
 
         public override void Compile(ParsedTemplate template) {
             slotNameAttr = GetAttribute("name");

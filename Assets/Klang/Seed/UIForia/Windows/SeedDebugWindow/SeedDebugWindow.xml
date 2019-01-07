@@ -10,7 +10,7 @@
         <KlangWindow>
             <SlotContent name="KlangWindow.Header">
 
-                Window Header
+                Window Header {id}
 
             </SlotContent>
 

@@ -81,7 +81,7 @@ namespace UIForia {
                     CompileStep(template.childTemplates[i]);
                 }
             }
-
+            
             template.PostCompile(this);
         }
 

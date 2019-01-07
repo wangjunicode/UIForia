@@ -697,7 +697,7 @@ namespace UIForia.Systems {
                 UIElement element = m_Elements[i];
 
                 // todo make this better
-                if (element.isDisabled || !layoutResult.ScreenRect.Contains(point)) {
+                if (element.isDisabled || !layoutResult.ScreenRect.ContainOrOverlap(point)) {
                     continue;
                 }
 

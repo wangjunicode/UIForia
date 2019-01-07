@@ -69,9 +69,9 @@ namespace UIForia.Systems {
         }
 
         private static Vector2 ConvertMousePosition(Vector2 position) {
-            // todo -- HACK I have no idea why but unity reports the mouse position as 4 pixels different in the editor
+            // todo -- HACK I have no idea why but unity reports the mouse position as 4 pixels different in the editor but apparently not in 4k res
 #if UNITY_EDITOR
-            return new Vector2(position.x, Screen.height - position.y + 4f);
+            return new Vector2(position.x, Screen.height - position.y);
 #else
             return new Vector2(position.x, Screen.height - position.y);
 #endif

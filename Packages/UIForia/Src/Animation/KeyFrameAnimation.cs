@@ -55,6 +55,8 @@ namespace UIForia.Animation {
             UIElement element = styleSet.element;
             // todo - insert an implicit frame for 0% and 100% if not provided
 
+            // todo handle delay, etc from options
+            
             for (int i = 0; i < processedFrames.Count; i++) {
                 StylePropertyId propertyId = processedFrames[i].Item1;
                 List<ProcessedKeyFrame> frames = processedFrames[i].Item2;

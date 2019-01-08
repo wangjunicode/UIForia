@@ -6,20 +6,20 @@ namespace UIForia.Systems {
 
     public class BindingSystem : ISystem {
 
-
-        private readonly LightList<BindingNode> m_Nodes;
-
-
+        private readonly SkipTree<BindingNode> m_BindingTree;
+        
         public BindingSystem() {
-            this.m_Nodes = new LightList<BindingNode>();
+            this.m_BindingTree = new SkipTree<BindingNode>();
         }
 
-        public void OnReset() {}
+        public void OnReset() {
+            m_BindingTree.Clear();
+        }
 
         public void OnUpdate() {
-            for (int i = 0; i < m_Nodes.Count; i++) {
-                m_Nodes[i].OnUpdate();
-            }
+            m_BindingTree.TraversePreOrder((node) => {
+                node.OnUpdate();
+            });
         }
 
         public void OnDestroy() {}
@@ -72,80 +72,56 @@ namespace UIForia.Systems {
                 }
             }
         }
-
-        // to disable, need to remove from list since we don't have tree culling
-        // or while(depth != currentDepth) ptr++
         
-        // assumption, bindings are always active
-        // assumption, parent will always exist 
         public void OnElementCreated(UIElement element) {
-            LightList<BindingNode> nodes = LightListPool<BindingNode>.Get();
 
-            Step(element, nodes);
+            UITemplate template = element.OriginTemplate;
 
-            // need to find where to insert the list of nodes
-            // obvious if repeat node parent
-            if (element.parent != null && element.parent is UIRepeatElement repeatElement) {
-                RepeatBindingNode bindingNode = m_Nodes.Find(repeatElement, (e, p) => e.element == p) as RepeatBindingNode;
-                if (bindingNode == null) {
-                    throw new Exception("Repeat parent not found");
+            for (int i = 0; i < template.triggeredBindings.Length; i++) {
+                if (template.triggeredBindings[i].bindingType == BindingType.Constant) {
+                    template.triggeredBindings[i].Execute(element, element.templateContext);
                 }
-                bindingNode.AddChildNodes(nodes);
-                m_Nodes.Add(bindingNode);
+            }
+
+            if (element is UIRepeatElement repeat) {
+                ReflectionUtil.TypeArray2[0] = repeat.listType;
+                ReflectionUtil.TypeArray2[1] = repeat.itemType;
+
+                ReflectionUtil.ObjectArray2[0] = repeat;
+                ReflectionUtil.ObjectArray2[1] = repeat.listExpression;
+
+                RepeatBindingNode node = (RepeatBindingNode) ReflectionUtil.CreateGenericInstanceFromOpenType(
+                    typeof(RepeatBindingNode<,>),
+                    ReflectionUtil.TypeArray2,
+                    ReflectionUtil.ObjectArray2
+                );
+
+                node.element = repeat;
+                node.template = repeat.template;
+                node.context = repeat.templateContext;
+                m_BindingTree.AddItem(node);
             }
             else {
-                UIElement ptr = element.parent;
-                while (ptr != null) {
-                    int idx = m_Nodes.FindIndex(ptr, (e, p) => e.element == p);
-                    if (idx != -1) {
-                        m_Nodes.InsertRange(idx, nodes);
-                        break;
-                    }
-                    ptr = ptr.parent;
+
+                if (template.perFrameBindings.Length > 0) {
+                    BindingNode node = new BindingNode();
+                    node.bindings = template.perFrameBindings;
+                    node.element = element;
+                    node.context = element.templateContext;
+                    m_BindingTree.AddItem(node);
                 }
 
-                if (ptr == null) {
-                    m_Nodes.AddRange(nodes);
+                if (element.children != null) {
+                    for (int i = 0; i < element.children.Length; i++) {
+                       OnElementCreated(element.children[i]);
+                    }
                 }
-                LightListPool<BindingNode>.Release(ref nodes);
             }
 
         }
 
         public void OnElementDestroyed(UIElement element) {
-            if (element.parent is UIRepeatElement repeatElement) {
-                RepeatBindingNode bindingNode = m_Nodes.Find(repeatElement, (e, p) => e.element == p) as RepeatBindingNode;
-                if (bindingNode == null) {
-                    throw new Exception("Repeat parent not found");
-                }
-
-                bindingNode.RemoveNodes(element);
-            }
-            else {
-                UIElement ptr = element.parent;
-                while (ptr != null) {
-                    int idx = m_Nodes.FindIndex(ptr, (e, p) => e.element == p);
-                    if (idx != -1) {
-                        // remove while next binding depth < current depth
-                        // todo -- implement block array operations on light list instead of shifting down all the time
-                        int depth = element.depth;
-                        for (int i = idx + 1; i < m_Nodes.Count; i++) {
-                            int d = m_Nodes[i].element.depth;
-                            if (d >= depth) {
-                                break;
-                            }       
-                            m_Nodes.RemoveAt(idx + 1);
-                        }
-                        m_Nodes.RemoveAt(idx);
-                        break;
-                    }
-                    ptr = ptr.parent;
-                }
-
-//                if (ptr == null) {
-//                    m_Nodes.AddRange(nodes);
-//                }
-            }
+            m_BindingTree.RemoveHierarchy(element);
         }
 
         public void OnElementEnabled(UIElement element) { }

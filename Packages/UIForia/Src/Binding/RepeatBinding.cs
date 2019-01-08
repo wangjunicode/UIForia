@@ -7,17 +7,6 @@ public class RepeatBindingNode : BindingNode {
 
     public UITemplate template;
 
-    public LightList<LightList<BindingNode>> m_Nodes = new LightList<LightList<BindingNode>>();
-    
-    public void AddChildNodes(LightList<BindingNode> nodes) {
-        m_Nodes.Add(nodes);   
-    }
-
-    public void RemoveNodes(UIElement element) {
-        int idx = Array.IndexOf(this.element.children, element);
-        m_Nodes.RemoveAt(idx);
-    }
-
 }
 
 public class RepeatBindingNode<T, U> : RepeatBindingNode where T : class, IList<U>, new() {
@@ -115,15 +104,12 @@ public class RepeatBindingNode<T, U> : RepeatBindingNode where T : class, IList<
             return;
         }
 
-        UIRepeatElement repeatElement = (UIRepeatElement) element;
-        for (int i = 0; i < m_Nodes.Count; i++) {
-            repeatElement.Next();
-            for (int j = 0; j < m_Nodes[i].Count; j++) {
-                m_Nodes[i][j].OnUpdate();
-            }
+        if (bindings == null) return;
+        
+        for (int i = 0; i < bindings.Length; i++) {
+            bindings[i].Execute(element, context);
         }
 
-        repeatElement.Reset();
     }
 
 }

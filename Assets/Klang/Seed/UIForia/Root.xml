@@ -19,40 +19,46 @@
         PreferredSize = 1pca, 0;
         }
 
+        
+        
     </Style>
 
     <Contents style="container">
 
         <!--<URLNavBar/>-->
 
-        <Group style="app-body">
+        <BuildMenu style="build-menu"/>
 
-            <!--<KlangWindow/>-->
-            <Router>
+        <!--<Group style="app-body">-->
 
-                <!--<Route style="util.vertical-center" path="'/login'">-->
-                <!--<CreateAccountScreen/>-->
+            <!--&lt;!&ndash;<KlangWindow/>&ndash;&gt;-->
+            <!--<Router>-->
 
-                <!--&lt;!&ndash;<LoginScreen x-routePath="'/login'" x-onRouteEnter=""/>&ndash;&gt;-->
+                <!--&lt;!&ndash;<Route style="util.vertical-center" path="'/login'">&ndash;&gt;-->
+                <!--&lt;!&ndash;<CreateAccountScreen/>&ndash;&gt;-->
 
+                <!--&lt;!&ndash;&lt;!&ndash;<LoginScreen x-routePath="'/login'" x-onRouteEnter=""/>&ndash;&gt;&ndash;&gt;-->
+
+                <!--&lt;!&ndash;</Route>&ndash;&gt;-->
+
+                <!--&lt;!&ndash;<Route path="'/create_account'">&ndash;&gt;-->
+
+                <!--&lt;!&ndash;<CreateAccountScreen/>&ndash;&gt;-->
+
+                <!--&lt;!&ndash;</Route>&ndash;&gt;-->
+
+                <!--<Route path="'/game'" onRouteEnter="StartGame()">-->
+
+                    <!--<ColonyInfoPanel/>-->
+                    <!--<CharacterList/>-->
+                    <!---->
+                    <!--<BuildMenu style="build-menu"/>-->
+                    <!---->
                 <!--</Route>-->
 
-                <!--<Route path="'/create_account'">-->
+            <!--</Router>-->
 
-                <!--<CreateAccountScreen/>-->
-
-                <!--</Route>-->
-
-                <Route path="'/game'" onRouteEnter="StartGame()">
-
-                    <ColonyInfoPanel/>
-                    <CharacterList/>
-                    <!--<BuildMenu/>-->
-                </Route>
-
-            </Router>
-
-        </Group>
+        <!--</Group>-->
 
     </Contents>
 

@@ -81,6 +81,8 @@
               <e p="BuildMenu" t="Include">
                 <e p="BuildMenu.cs" t="Include" />
                 <e p="BuildMenu.xml" t="Include" />
+                <e p="BuildMenuItemDisplay.cs" t="Include" />
+                <e p="BuildMenuItemDisplay.xml" t="Include" />
               </e>
               <e p="CharacterList" t="Include">
                 <e p="CharacterList.cs" t="Include" />

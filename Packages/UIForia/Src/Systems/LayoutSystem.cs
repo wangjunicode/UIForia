@@ -328,8 +328,10 @@ namespace UIForia.Systems {
                     if (transformBehaviorY == TransformBehavior.AnchorMinOffset) {
                         localPosition.y = box.AnchorTop + box.TransformY;
                     }
+                    // todo turn this into AnchorMaxMinusContentOffset;
+                    // or make transform aware of content size 
                     else if (transformBehaviorY == TransformBehavior.AnchorMaxOffset) {
-                        localPosition.y = box.AnchorBottom + box.TransformY;
+                        localPosition.y = box.AnchorBottom + box.TransformY - box.allocatedHeight; // todo remove the - here and move to AnchorMaxMinusContentOffset
                     }
                     else {
                         localPosition.y = box.TransformY;

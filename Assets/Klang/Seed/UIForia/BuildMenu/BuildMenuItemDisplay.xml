@@ -3,16 +3,16 @@
 
     <Style path="Klang/Seed/UIForia/BuildMenu/BuildMenu.style"/>
 
-    <Contents style="container">
+    <Contents style="build-item">
 
-        <Repeat style="build-item-row" list="buildMenuItems">
+        <Repeat style="build-item-row" list="item.childItems">
             
-            <KlangToolTip onMouseClick="Toggle($index)" style="build-root-tooltip" text="$item.name">
+            <KlangToolTip style="build-tooltip" text="$item.name">
                 
                 <BuildMenuItemDisplay item="$item"/>
                 
             </KlangToolTip>
-
+            
         </Repeat>
 
     </Contents>

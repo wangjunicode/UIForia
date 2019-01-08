@@ -317,15 +317,6 @@ namespace UIForia.Systems {
             }
         }
 
-//        private void DrawScrollbars(Vector3 origin) {
-//            for (int i = 0; i < m_Scrollbars.Count; i++) {
-//                VirtualScrollbar scrollbar = m_Scrollbars[i];
-//                Rect trackRect = scrollbar.trackRect;
-//                Rect handleRect = scrollbar.handleRect;
-//                scrollbar.trackMesh = MeshUtil.ResizeStandardUIMesh(scrollbar.trackMesh, new Size(trackRect.size));
-//            }        
-//        }
-
         //sort each group by z-index, use depth index to resolve ties, use origin layer if still tied
         private class RenderZIndexComparerAscending : IComparer<RenderData> {
 

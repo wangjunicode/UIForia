@@ -12,9 +12,9 @@ public class InputSystemTests {
     
         <UITemplate>
             <Contents style.layoutType='LayoutType.Fixed'>
-                <Group onMouseDown='{HandleClickedChild(0)}' style.translation='$length(0)'      style.preferredSize='$size(100, 20)'/>
-                <Group onMouseDown='{HandleClickedChild(1)}' style.translation='$length(100, 0)' style.preferredSize='$size(100, 20)'/>
-                <Group onMouseDown='{HandleClickedChild(2)}' style.translation='$length(200, 0)' style.preferredSize='$size(100, 20)'/>
+                <Group onMouseDown='{HandleClickedChild(0)}' style.translation='$fixedLength(0)'      style.preferredSize='$size(100, 20)'/>
+                <Group onMouseDown='{HandleClickedChild(1)}' style.translation='$fixedLength(100, 0)' style.preferredSize='$size(100, 20)'/>
+                <Group onMouseDown='{HandleClickedChild(2)}' style.translation='$fixedLength(200, 0)' style.preferredSize='$size(100, 20)'/>
             </Contents>
         </UITemplate>
 
@@ -45,21 +45,21 @@ public class InputSystemTests {
                        onMouseExit='{HandleMouseExitChild($event, 0)}'
                        onMouseMove='{HandleMouseMoveChild($event, 0)}'
                        onMouseHover='{HandleMouseHoverChild($event, 0)}'
-                       style.translation='$length(0)' 
+                       style.translation='$fixedLength(0)' 
                        style.preferredSize='$size(100, 20)'
                 />
                 <Group onMouseDown.capture='{HandleMouseDownChild($event, 1)}'
                        onMouseUp.capture='{HandleMouseUpChild($event, 1)}'
                        onMouseEnter.capture='{HandleMouseEnterChild($event, 1)}'
                        onMouseMove='{HandleMouseMoveChild($event, 1)}'
-                       style.translation='$length(100, 0)' 
+                       style.translation='$fixedLength(100, 0)' 
                        style.preferredSize='$size(100, 20)'
                 />
                 <Group onMouseDown='{HandleMouseDownChild($event, 2)}' 
                        onMouseUp='{HandleMouseUpChild($event, 2)}'
                        onMouseEnter='{HandleMouseEnterChild($event, 2)}'
                        onMouseExit='{HandleMouseExitChild($event, 2)}'
-                       style.translation='$length(200, 0)'
+                       style.translation='$fixedLength(200, 0)'
                        style.preferredSize='$size(100, 20)'
                 />
             </Contents>

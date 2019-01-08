@@ -1,4 +1,4 @@
-﻿using System;
+﻿﻿using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
@@ -886,6 +886,14 @@ public static class ReflectionUtil {
         return retn;
     }
 
+    public static bool IsConstantField(Type rootType, string fieldName) {
+        FieldInfo info = rootType.GetField(fieldName, BindingFlags.Public | BindingFlags.Static | BindingFlags.FlattenHierarchy);
+        return info != null && info.IsLiteral && !info.IsInitOnly;
+    }
+
+    public static FieldInfo GetConstantField(Type rootType, string fieldName) {
+        return rootType.GetField(fieldName, BindingFlags.Public | BindingFlags.Static | BindingFlags.FlattenHierarchy);
+    }
 }
 
 public struct ConstructorArguments {

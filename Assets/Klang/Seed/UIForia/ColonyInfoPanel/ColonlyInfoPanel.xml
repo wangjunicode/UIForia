@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="utf-8"?>
+<UITemplate>
+
+    <Style path="Klang/Seed/UIForia/ColonyInfoPanel/ColonyInfoPanel.style"/>
+    <Style path="Klang/Seed/UIForia/Util.style" alias="util"/>
+
+    <Contents style="container">
+        <Group style="primary-info">
+
+            <Text>Colony Name</Text>
+            
+            <Group style="util.horizontal">
+                <Image onMouseClick="ShowInfoWindow()" src="'SpriteSettingOverwrite/ui_icon_show_info'"/>
+                <Image src="'SpriteSettingOverwrite/ui_icon_location'"/>
+                <Image src="'SpriteSettingOverwrite/ui_icon_eye'"/>
+            </Group>
+        </Group>
+    </Contents>
+
+</UITemplate>

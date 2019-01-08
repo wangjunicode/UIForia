@@ -23,6 +23,7 @@ namespace UIForia {
             }
 
             if (templateAttr.templateType == TemplateType.File) {
+                // todo should probably be cached
                 return File.ReadAllText(UnityEngine.Application.dataPath + "/" + templateAttr.template);
             }
 
@@ -35,7 +36,7 @@ namespace UIForia {
 
         // path from Assets directory
         public string GetTemplatePath() {
-            return !HasTemplatePath() ? null : templateAttr.template;
+            return !HasTemplatePath() ? rawType.AssemblyQualifiedName : templateAttr.template;
         }
 
         public string GetTemplateName() {

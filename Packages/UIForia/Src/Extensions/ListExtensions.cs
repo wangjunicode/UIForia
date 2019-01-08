@@ -8,12 +8,6 @@ namespace UIForia.Extensions {
 
     public static class ListExtensions {
 
-        public static void CopyToList<T>(this List<T> list, IList<T> target) {
-            for (int i = 0; i < list.Count; i++) {
-                target.Add(list[i]);
-            }
-        }
-        
         public static T UnstableRemove<T>(this List<T> list, int index) {
             T value = list[list.Count - 1];
             list[index] = value;

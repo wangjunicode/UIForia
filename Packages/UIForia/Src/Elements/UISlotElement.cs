@@ -1,13 +1,11 @@
-using UIForia.Elements;
-
 namespace UIForia {
 
-    public class UISlotElement : UIContainerElement {
+    public class UISlotElement : UIElement {
 
-        public readonly string name;
+        public readonly string slotId;
         
-        public UISlotElement(string name) {
-            this.name = name;
+        public UISlotElement(string slotId) {
+            this.slotId = slotId;
         }
 
     }

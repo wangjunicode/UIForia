@@ -17,7 +17,7 @@ public class TemplateTests {
 
     [SetUp]
     public void Setup() {
-        dummyTemplate = new ParsedTemplate(new UIElementTemplate(typeof(TestTarget), null));
+        dummyTemplate = new ParsedTemplate(typeof(TestTarget), null, null, null, null, null);
     }
 
     [Test]

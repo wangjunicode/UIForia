@@ -33,7 +33,7 @@ namespace UIForia {
                     continue;
                 }
 
-                Expression<string> expression = template.compiler.Compile<string>(template.rootElementTemplate.RootType, textElementType, expressionParts[i]);
+                Expression<string> expression = template.compiler.Compile<string>(template.RootType, textElementType, expressionParts[i]);
                 expressionList.Add(expression);
             }
 

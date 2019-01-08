@@ -20,6 +20,7 @@ namespace UIForia {
         public void OnSrcChanged(string name) {
             texture = ResourceManager.GetTexture(src);
             style.SetBackgroundImage(texture, StyleState.Normal);
+            style.SetBackgroundColor(Color.white, StyleState.Normal);
         }
 
         public override string GetDisplayName() {

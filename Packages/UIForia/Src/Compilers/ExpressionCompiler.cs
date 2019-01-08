@@ -243,8 +243,7 @@ namespace UIForia.Compilers {
             }
 
         }
-
-
+        
         private LightList<AccessInfo> GetAccessInfoList(Type rootType, MemberAccessExpressionNode node, bool injectHead = true) {
             LightList<AccessInfo> accessInfoList = LightListPool<AccessInfo>.Get();
 
@@ -328,62 +327,24 @@ namespace UIForia.Compilers {
             return accessInfoList;
         }
 
-        // todo remove this 
-        private static LightList<Type> GetInputTypes(Type headType, MemberAccessExpressionNode node) {
-            LightList<Type> inputTypes = LightListPool<Type>.Get();
-            inputTypes.Add(headType);
-
-            for (int i = 0; i < node.parts.Count; i++) {
-                ASTNode part = node.parts[i];
-
-                if (part.type == ASTNodeType.DotAccess) {
-                    Type partType = ReflectionUtil.ResolveFieldOrPropertyType(inputTypes[i], ((DotAccessNode) part).propertyName);
-                    if (partType == null) {
-                        throw new CompileException($"Unable to resolve field or property '{((DotAccessNode) part).propertyName}' on type {inputTypes[i]}");
-                    }
-
-                    inputTypes.Add(partType);
-                }
-                else if (part.type == ASTNodeType.IndexExpression) {
-                    // get array / list element type / index expression type given
-                    inputTypes.Add(GetListElementType(inputTypes[i]));
-                }
-                else if (part is InvokeNode invokeNode) { }
-            }
-
-            return inputTypes;
-        }
-
         private Expression VisitStaticAccessExpression(Type headType, MemberAccessExpressionNode node) {
-            LightList<Type> inputTypes = GetInputTypes(headType, node);
+            LightList<AccessInfo> accessInfos = GetAccessInfoList(headType, node, false);
 
-            Type outputType = inputTypes[inputTypes.Length - 1];
+            AccessExpressionPart retn = MakeAccessPartFromInfo(accessInfos, 0);
 
-            AccessExpressionPart p = MakeAccessPart(0, node.parts, outputType, inputTypes);
+            LightListPool<AccessInfo>.Release(ref accessInfos);
 
-            LightListPool<Type>.Release(ref inputTypes);
-
-//            if (headType.IsEnum) {
-//                throw new NotImplementedException("Enum not yet implemented");
-//            }
-
-            bool isConstant = headType.IsEnum;
-            Expression expr = (Expression) ReflectionUtil.CreateGenericInstanceFromOpenType(
+            return (Expression) ReflectionUtil.CreateGenericInstanceFromOpenType(
                 typeof(AccessExpression_Static<,>),
-                new GenericArguments(outputType, headType),
-                new ConstructorArguments(p, isConstant)
+                new GenericArguments(retn.YieldedType, headType),
+                new ConstructorArguments(retn, headType.IsEnum)
             );
 
-            return HandleCasting(expr, targetType);
         }
 
         public Expression CompileRestOfChain(Expression root, CompilerContext context) {
             Type yieldedType = root.YieldedType;
             LightList<AccessInfo> accessInfos = GetAccessInfoList(yieldedType, context.firstNode as MemberAccessExpressionNode, false);
-
-            // need an expression that starts w/ alias 
-            // have <string, JoinInfo, string>
-            // need to handle root type
 
             AccessExpressionPart retn = MakeAccessPartFromInfo(accessInfos, 0);
 
@@ -1081,7 +1042,7 @@ namespace UIForia.Compilers {
         }
 
         private Expression VisitOperator_TernaryCondition(OperatorNode node) {
-            Expression<bool> condition = (Expression<bool>) Visit(node.left);
+            Expression<bool> condition = (Expression<bool>) Visit(typeof(bool), node.left);
             OperatorNode select = (OperatorNode) node.right;
 
             if (select.operatorType != OperatorType.TernarySelection) {
@@ -1204,6 +1165,15 @@ namespace UIForia.Compilers {
                             new ConstructorArguments(rootType, fieldName)
                         );
                     }
+                }
+
+                FieldInfo constantField = ReflectionUtil.GetConstantField(rootType, fieldName);
+                if (constantField != null) {
+                    retn = (Expression) ReflectionUtil.CreateGenericInstanceFromOpenType(
+                        typeof(ConstantExpression<>),
+                        new GenericArguments(constantField.FieldType),
+                        new ConstructorArguments(constantField.GetValue(null))
+                    );
                 }
             }
 

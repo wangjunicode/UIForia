@@ -1,0 +1,48 @@
+<?xml version="1.0" encoding="utf-8"?>
+<UITemplate>
+
+    <Style path="Klang/Seed/UIForia/CharacterList/CharacterList.style"/>
+    <Style path="Klang/Seed/UIForia/Util.style" alias="util"/>
+    
+    <Using namespace="UI"/>
+    
+    <Contents style="container">
+
+        <Repeat list="characters">
+            <Group onMouseClick="SelectCharacter($element)" style="character-entry">
+
+                <Group style="direct-control-switch" onMouseClick="ToggleDirectControl($item, $event)">
+                    <Image src="$item.isInDirectControl ? DirectControlIcon_On : DirectControlIcon_Off"/>
+                </Group>
+
+                <Group style="portrait">
+                    <Panel style="portrait-ring">
+                        <Image src="$item.iconUrl" style="portrait-image"/>
+                    </Panel>
+                </Group>
+
+                <Group style="character-status">
+
+                    <Text style="name-text">{$item.name}</Text>
+                    <Text>{$item.status}</Text>
+
+                    <Div style="status-bar-background">
+                        <Div style="status-bar-foreground status-bar-health" style.preferredWidth="UIMeasurement.ParentSize($item.health)"/>
+                    </Div>
+
+                    <Div style="status-bar-background">
+                        <Div style="status-bar-foreground status-bar-mood" style.preferredWidth="UIMeasurement.ParentSize($item.mood)"/>
+                    </Div>
+
+                </Group>
+
+                <KlangToolTip direction="ToolTipDirection.Right" style="status-icon" text="'Such content, much wow'">
+                    <Image src="$item.statusIconUrl"/>
+                </KlangToolTip>
+                
+            </Group>
+        </Repeat>
+
+    </Contents>
+
+</UITemplate>

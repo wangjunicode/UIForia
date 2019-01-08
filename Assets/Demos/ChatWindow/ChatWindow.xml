@@ -28,11 +28,11 @@
     
     <Contents style="container">
 
-        <Input style="input" textValue.bindTo="onValueChanged"/>
+        <!--<Input style="input" textValue.bindTo="onValueChanged"/>-->
         
         <Router>
 
-            <Route path="/signup/*/">
+            <Route path="'/signup/*/'">
                 
             </Route>
             

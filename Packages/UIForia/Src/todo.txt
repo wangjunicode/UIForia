@@ -34,5 +34,6 @@ Nice to have
     Clone methods
     zooming in inspector
     
-    Slots
-    Repeat.Once or Repeat.Enable some sort of repeat that only runs when triggered
+
+    
+    

@@ -1,4 +1,4 @@
-﻿using System;
+﻿﻿using System;
 using System.Collections.Generic;
 using UIForia.Animation;
 using UIForia.Rendering;
@@ -58,6 +58,13 @@ namespace UIForia.Systems {
                     OnElementCreated(element.children[i]);
                 }
             }
+            
+            // todo need to trickle inherited properties into newly created elements (repeat children, etc)
+        //    for (int i = 0; i < StyleUtil.InheritedProperties.Count; i++) {
+                // if ! element.style.Defines(properties[i])
+                    // 
+          //  }
+            
         }
 
         public void OnUpdate() {

@@ -184,6 +184,10 @@ namespace UIForia.Parsing {
                     continue;
                 }
 
+                if (expressionStack.Count == 0) {
+                    Abort();
+                }
+                
                 OperatorNode op;
                 if (!ParseOperatorExpression(out op)) {
                     Abort();

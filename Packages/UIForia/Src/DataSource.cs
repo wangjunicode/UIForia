@@ -1,4 +1,5 @@
 using System;
+using System.Data.Common;
 using UIForia.Util;
 
 namespace UIForia.Data {
@@ -12,6 +13,10 @@ namespace UIForia.Data {
         protected Record() {
             this.id = s_IdGenerator++;
         }
+
+        public virtual void Serialize() { }
+
+        public virtual void Deserialize() { }
 
     }
 
@@ -56,16 +61,6 @@ namespace UIForia.Data {
 
     }
 
-    public class AsyncElement : UIElement {
-
-        //[Inject] public IDataSource<User> users;
-        
-        public virtual void OnCreate2() {
-            //Injector.Inject(this);
-        }
-
-    }
-
     public class Adapter<T> where T : Record {
 
         public virtual void Serialize() { }
@@ -103,12 +98,6 @@ namespace UIForia.Data {
         public void AddRecord(T record) {
             
         }
-
-//        public ResultSet<T> Query() { }
-//
-//        public LiveResultSet<T> LiveQuery(Predicate<T> fn) {
-//            
-//        }
 
     }
 

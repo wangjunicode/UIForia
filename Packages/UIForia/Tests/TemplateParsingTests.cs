@@ -1,4 +1,4 @@
-﻿using UIForia;
+﻿﻿using UIForia;
 using NUnit.Framework;
 using Tests.Mocks;
 using UIForia.Parsing;

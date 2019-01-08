@@ -19,7 +19,7 @@ namespace UIForia {
         private static readonly string[] CaseAttributes = {"when"};
         private static readonly string[] SwitchAttributes = {"if", "value"};
         private static readonly string[] DefaultAttributes = { };
-        private static readonly string[] ChildrenAttributes = { "style" };
+        private static readonly string[] ChildrenAttributes = {"style"};
         private static readonly string[] TextAttributes = { };
 
         public static void Reset() {
@@ -43,7 +43,7 @@ namespace UIForia {
 
         public static ParsedTemplate ParseTemplateFromString(Type rootType, string input) {
             XDocument doc = XDocument.Parse(input);
-            return new TemplateParser().ParseTemplate(null, rootType, doc);
+            return new TemplateParser().ParseTemplate(rootType.AssemblyQualifiedName, rootType, doc);
         }
 
         private static ParsedTemplate ParseTemplateFromType(Type type) {
@@ -108,44 +108,19 @@ namespace UIForia {
             return new StyleDefinition(alias, importPathAttr.Value.Trim());
         }
 
-        private ParsedTemplate ParseInheritedContents(XElement element, Type type) {
-            throw new NotImplementedException();
-//            if (element == null) {
-//                throw new InvalidTemplateException(templateName, " missing a 'Contents' section");
-//            }
-//
-//            // do i need the type to be a base type?
-//            // need to compile with different imports and namespaces from inherited
-//            
-//            
-//            XAttribute pathAttr = element.GetAttribute("path");
-//            ParsedTemplate template = GetParsedTemplate(type.BaseType);
-//            // probably ok to treat as a separate template
-//            //
-//            // 
-//            if (template == null) {
-//                
-//            }
-//            
-//            ParsedTemplate retn = template.Clone();
-//            // inject children
-//            // inject slot content
-//            return retn;
-        }
-        
         private ParsedTemplate ParseTemplate(string templatePath, Type type, XDocument doc) {
             doc.MergeTextNodes();
 
             List<ImportDeclaration> imports = new List<ImportDeclaration>();
             List<StyleDefinition> styleTemplates = new List<StyleDefinition>();
-            
+
             IEnumerable<XElement> importElements = doc.Root.GetChildren("Import");
             IEnumerable<XElement> styleElements = doc.Root.GetChildren("Style");
             IEnumerable<XElement> usingElements = doc.Root.GetChildren("Using");
             XElement contentElement = doc.Root.GetChild("Contents");
 
             List<string> usings = ListPool<string>.Get();
-           
+
             foreach (XElement xElement in importElements) {
                 XAttribute valueAttr = xElement.GetAttribute("value");
                 XAttribute aliasAttr = xElement.GetAttribute("as");
@@ -163,28 +138,36 @@ namespace UIForia {
 
                 imports.Add(new ImportDeclaration(valueAttr.Value, alias));
             }
-            
+
             foreach (XElement usingElement in usingElements) {
-                usings.Add(ParseUsing(usingElement));       
+                usings.Add(ParseUsing(usingElement));
             }
 
-            if (contentElement == null) {
-                return ParseInheritedContents(doc.Root.GetChild("InheritedContents"), type);
-            }
-         
-            List<UITemplate> children = ParseNodes(contentElement.Nodes());
-            List<AttributeDefinition> attributes = ParseAttributes(contentElement.Attributes());
-            UIElementTemplate rootTemplate = new UIElementTemplate(type, children, attributes);           
-            
             foreach (XElement styleElement in styleElements) {
                 styleTemplates.Add(ParseStyleSheet(templatePath, styleElement));
             }
 
-            ParsedTemplate output = new ParsedTemplate(rootTemplate, templatePath);
-            output.imports = imports;
-            output.usings = usings;
-            output.SetStyleGroups(styleTemplates);
-            return output;
+            List<UITemplate> children = ParseNodes(contentElement.Nodes());
+            List<AttributeDefinition> attributes = ParseAttributes(contentElement.Attributes());
+
+            if (contentElement.GetAttribute("x-inherited") != null) {
+                // todo -- validate base type
+                ParsedTemplate baseTemplate = GetParsedTemplate(type.BaseType);
+                List<UISlotContentTemplate> contentTemplates = new List<UISlotContentTemplate>();
+
+                for (int i = 0; i < children.Count; i++) {
+                    if (!(children[i] is UISlotContentTemplate)) {
+                        throw new ParseException("When using inherited templates, all children must be <SlotContent/> elements");
+                    }
+
+                    contentTemplates.Add((UISlotContentTemplate) children[i]);
+                }
+
+                return baseTemplate.CreateInherited(type, usings, contentTemplates, styleTemplates, imports);
+            }
+
+//            UIElementTemplate rootTemplate = new UIElementTemplate(type, children, attributes);
+            return new ParsedTemplate(type, children, attributes, usings, styleTemplates, imports);
         }
 
         private static string ParseUsing(XElement element) {
@@ -200,7 +183,7 @@ namespace UIForia {
 
             return value;
         }
-        
+
         private static UITemplate ParseCaseElement(XElement element) {
             EnsureAttribute(element, "when");
             EnsureOnlyAttributes(element, CaseAttributes);
@@ -248,13 +231,13 @@ namespace UIForia {
             EnsureAttribute(element, "name");
             EnsureNotInsideTagName(element, "Repeat");
             EnsureNotInsideTagName(element, "Slot");
-            
+
             return new UISlotTemplate(
                 ParseNodes(element.Nodes()),
                 ParseAttributes(element.Attributes())
             );
         }
-        
+
         private static UITemplate ParseSlotContentElement(XElement element) {
             EnsureAttribute(element, "name");
             EnsureNotInsideTagName(element, "Repeat");
@@ -264,7 +247,6 @@ namespace UIForia {
                 ParseNodes(element.Nodes()),
                 ParseAttributes(element.Attributes())
             );
-           
         }
 
         private static UITemplate ParseChildrenElement(XElement element) {
@@ -399,7 +381,7 @@ namespace UIForia {
             if (element.Name == "Slot") {
                 return ParseSlotElement(element);
             }
-            
+
             if (element.Name == "SlotContent") {
                 return ParseSlotContentElement(element);
             }
@@ -419,7 +401,7 @@ namespace UIForia {
             if (element.Name == "Input") {
                 return ParseInputElement(element);
             }
-            
+
             for (int i = 0; i < IntrinsicElementTypes.Length; i++) {
                 if (IntrinsicElementTypes[i].name == element.Name) {
                     if (IntrinsicElementTypes[i].isContainer) {

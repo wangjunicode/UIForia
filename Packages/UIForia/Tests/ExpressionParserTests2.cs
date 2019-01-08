@@ -551,4 +551,12 @@ public class ExpressionParserTests2 {
         Assert.IsInstanceOf<InvokeNode>(node.parts[0]);
     }
     
+    [Test]
+    public void Parse_AliasInTernary() {
+        ASTNode root = ExpressionParser.Parse("$item.isInDirectControl ? '1' : '2'");
+        OperatorNode node = AssertInstanceOfAndReturn<OperatorNode>(root);
+        Assert.AreEqual(OperatorType.TernaryCondition, node.operatorType);
+        MemberAccessExpressionNode left = AssertInstanceOfAndReturn<MemberAccessExpressionNode>(node.left);
+    }
+    
 }

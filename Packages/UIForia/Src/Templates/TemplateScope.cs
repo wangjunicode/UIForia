@@ -1,3 +1,4 @@
+using System.Collections.Generic;
 using UIForia.Util;
 
 namespace UIForia {
@@ -5,7 +6,7 @@ namespace UIForia {
     public struct TemplateScope {
 
         public readonly UIElement rootElement;
-        public LightList<UISlotContentTemplate> slotContents;
+        public List<UISlotContentTemplate> slotContents;
         
         public TemplateScope(UIElement rootElement) {
             this.rootElement = rootElement;

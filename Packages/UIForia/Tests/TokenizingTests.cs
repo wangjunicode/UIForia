@@ -1,4 +1,4 @@
-﻿using System;
+﻿﻿using System;
 using System.Collections.Generic;
 using NUnit.Framework;
 using UIForia;
@@ -309,6 +309,28 @@ using UIForia;
             Assert.Throws<ParseException>(() => {
                 Tokenizer.Tokenize("'havelstring");
             });
+        }
+
+        [Test]
+        public void AllowKeyWordAsIdentifierPartInExpression() {
+            string input = "isThing ? 1 : 2";
+            List<DslToken> tokens = Tokenizer.Tokenize(input);
+            List<TokenType> types = new List<TokenType>();
+            types.Add(TokenType.Identifier);
+            types.Add(TokenType.QuestionMark);
+            types.Add(TokenType.Number);
+            types.Add(TokenType.Colon);
+            types.Add(TokenType.Number);
+            AssertTokenTypes(types, tokens);
+        }
+        
+        [Test]
+        public void AllowKeyWordAsIdentifierPart() {
+            string input = "isThing";
+            List<DslToken> tokens = Tokenizer.Tokenize(input);
+            List<TokenType> types = new List<TokenType>();
+            types.Add(TokenType.Identifier);
+            AssertTokenTypes(types, tokens);
         }
         
         private static void AssertTypesAndValues(List<DslToken> expectedTokens, List<DslToken> actualTokens) {

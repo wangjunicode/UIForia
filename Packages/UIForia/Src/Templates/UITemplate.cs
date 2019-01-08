@@ -17,7 +17,6 @@ namespace UIForia {
 
         public bool isCompiled;
         
-        public ushort id;
         public readonly List<UITemplate> childTemplates;
         public readonly List<AttributeDefinition> attributes;
 
@@ -33,16 +32,12 @@ namespace UIForia {
 
         public List<ElementAttribute> templateAttributes;
 
-        private static ushort s_IdGenerator;
-
         protected static readonly LightList<Binding> s_BindingList = new LightList<Binding>();
-
         protected static readonly StyleBindingCompiler styleCompiler = new StyleBindingCompiler();
         protected static readonly InputBindingCompiler inputCompiler = new InputBindingCompiler();
         protected static readonly PropertyBindingCompiler propCompiler = new PropertyBindingCompiler();
 
         protected UITemplate(List<UITemplate> childTemplates, List<AttributeDefinition> attributes = null) {
-            this.id = ++s_IdGenerator;
             this.childTemplates = childTemplates;
             this.attributes = attributes;
             this.perFrameBindings = Binding.EmptyArray;
@@ -140,6 +135,8 @@ namespace UIForia {
         protected void CompileStyleBindings(ParsedTemplate template) {
             if (attributes == null || attributes.Count == 0) return;
 
+            styleCompiler.SetCompiler(template.compiler);
+            
             for (int i = 0; i < attributes.Count; i++) {
                 AttributeDefinition attr = attributes[i];
                 StyleBinding binding = styleCompiler.Compile(template.RootType, elementType, attr);
@@ -215,7 +212,6 @@ namespace UIForia {
 
             try {
                 propCompiler.SetCompiler(template.compiler);
-
                 for (int i = 0; i < attributes.Count; i++) {
                     if (attributes[i].isCompiled) continue;
 

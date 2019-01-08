@@ -29,6 +29,7 @@ public class ExpressionCompilerTests2 {
     }
     private class TestType0 {
 
+        public const string ConstantFieldValue = "some constant value";
         public ConvertThing convertThing;
         public string value;
         public int ValueProp { get; set; }
@@ -1052,4 +1053,15 @@ public class ExpressionCompilerTests2 {
         Assert.AreEqual((6f).ToString(), expression.Evaluate(ctx));
     }
 
+    [Test]
+    public void Compile_AccessExpression_ConstantValue() {
+        TestType0 target = new TestType0();
+        ExpressionContext ctx = new ExpressionContext(target);
+        ExpressionCompiler compiler = new ExpressionCompiler();
+        Expression<string> expression = compiler.Compile<string>(typeof(TestType0), "ConstantFieldValue");
+        Assert.IsInstanceOf<ConstantExpression<string>>(expression);
+        Assert.AreEqual(TestType0.ConstantFieldValue, expression.Evaluate(ctx));
+    }
+
+    
 }

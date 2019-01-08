@@ -12,6 +12,8 @@ namespace UI {
 
         private static readonly List<KlangWindow> windowStack = new List<KlangWindow>();
 
+        private bool isPinned;
+        
         public override void OnDestroy() {
             windowStack.Remove(this);
         }
@@ -20,7 +22,19 @@ namespace UI {
             windowStack.Add(this);
             style.SetRenderLayer(RenderLayer.View, StyleState.Normal);
         }
-        
+
+        public void Pin() {
+            isPinned = !isPinned;
+        }
+
+        public void Minimize() { }
+
+        public void Maximize() { }
+
+        public void Close() {
+            
+        }
+
         [OnMouseDown]
         public void OnMouseDown(MouseInputEvent evt) {
             windowStack.Remove(this);
@@ -33,6 +47,9 @@ namespace UI {
 
         [OnDragCreate]
         public DragEvent PositionResizeWindow(MouseInputEvent evt) {
+            
+            if (isPinned) return null;
+            
             Rect screenRect = layoutResult.ScreenRect;
             Vector2 mouse = evt.MouseDownPosition;
 

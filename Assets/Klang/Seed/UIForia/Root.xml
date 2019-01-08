@@ -45,8 +45,9 @@
 
                 <Route path="'/game'" onRouteEnter="StartGame()">
 
-                    Playing the game
-
+                    <ColonyInfoPanel/>
+                    <CharacterList/>
+                    <!--<BuildMenu/>-->
                 </Route>
 
             </Router>

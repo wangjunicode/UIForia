@@ -10,6 +10,8 @@ style side-bar-container {
 }
 
 style window-header {
+    FlexLayoutDirection = Column;
+    FlexLayoutMainAxisAlignment = SpaceBetween;
     TextColor = white;
     TextFontSize = 24;
     BackgroundColor = black;
@@ -17,6 +19,18 @@ style window-header {
     TextFontAsset = Gotham-Bold SDF;
     PaddingTop = 8px;
     PaddingBottom = 8px;
+}
+
+style window-actions {
+    FlexLayoutDirection = Column;
+    FlexLayoutCrossAxisAlignment = Center;
+    FlexItemSelfAlignment = Center;
+    PaddingRight = 8px;
+}
+
+style window-action-icon {
+    PreferredSize = 12px;
+    Margin = 3px;
 }
 
 style window-content {

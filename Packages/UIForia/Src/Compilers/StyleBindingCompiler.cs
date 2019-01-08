@@ -11,18 +11,10 @@ namespace UIForia.Compilers {
 
     public partial class StyleBindingCompiler {
 
-        private readonly ExpressionCompiler compiler;
-
-        internal static readonly MethodAliasSource rect1Source;
-        internal static readonly MethodAliasSource rect2Source;
-        internal static readonly MethodAliasSource rect4Source;
+        private ExpressionCompiler compiler;
 
         internal static readonly MethodAliasSource sizeAliasSource;
         internal static readonly MethodAliasSource vec2FixedLengthSource;
-
-        internal static readonly MethodAliasSource borderRadiusRect1Source;
-        internal static readonly MethodAliasSource borderRadiusRect2Source;
-        internal static readonly MethodAliasSource borderRadiusRect4Source;
 
         internal static readonly MethodAliasSource parentMeasurementSource;
         internal static readonly MethodAliasSource contentMeasurementSource;
@@ -32,13 +24,6 @@ namespace UIForia.Compilers {
 
         internal static readonly MethodAliasSource textureUrlSource;
         internal static readonly MethodAliasSource fontUrlSource;
-
-        internal static readonly EnumAliasSource<LayoutType> layoutTypeSource;
-        internal static readonly EnumAliasSource<LayoutDirection> layoutDirectionSource;
-        internal static readonly EnumAliasSource<LayoutWrap> layoutWrapSource;
-        internal static readonly EnumAliasSource<MainAxisAlignment> mainAxisAlignmentSource;
-        internal static readonly EnumAliasSource<CrossAxisAlignment> crossAxisAlignmentSource;
-        internal static readonly EnumAliasSource<WhitespaceMode> whiteSpaceSource;
 
         // todo 
         internal static readonly ValueAliasSource<int> siblingIndexSource;
@@ -71,18 +56,11 @@ namespace UIForia.Compilers {
         static StyleBindingCompiler() {
             Type type = typeof(StyleBindingCompiler);
 
-            rect1Source = new MethodAliasSource("rect", type.GetMethod(nameof(Rect), new[] {typeof(float)}));
-            rect2Source = new MethodAliasSource("rect", type.GetMethod(nameof(Rect), new[] {typeof(float), typeof(float)}));
-            rect4Source = new MethodAliasSource("rect", type.GetMethod(nameof(Rect), new[] {typeof(float), typeof(float), typeof(float), typeof(float)}));
-
             textureUrlSource = new MethodAliasSource("url", type.GetMethod(nameof(TextureUrl)));
             fontUrlSource = new MethodAliasSource("url", type.GetMethod(nameof(FontUrl)));
 
             vec2FixedLengthSource = new MethodAliasSource("vec2", type.GetMethod(nameof(Vec2FixedLength)));
-            borderRadiusRect1Source = new MethodAliasSource("radius", type.GetMethod(nameof(Radius), new[] {typeof(float)}));
-            borderRadiusRect2Source = new MethodAliasSource("radius", type.GetMethod(nameof(Radius), new[] {typeof(float), typeof(float)}));
-            borderRadiusRect4Source = new MethodAliasSource("radius", type.GetMethod(nameof(Radius), new[] {typeof(float), typeof(float), typeof(float), typeof(float)}));
-
+          
             pixelMeasurementSource = new MethodAliasSource("pixels", type.GetMethod(nameof(PixelMeasurement), new[] {typeof(float)}));
             parentMeasurementSource = new MethodAliasSource("parent", type.GetMethod(nameof(ParentMeasurement), new[] {typeof(float)}));
             viewportWidthMeasurementSource = new MethodAliasSource("viewWidth", type.GetMethod(nameof(ViewportWidthMeasurement), new[] {typeof(float)}));
@@ -118,24 +96,16 @@ namespace UIForia.Compilers {
             };
 
             sizeAliasSource = new MethodAliasSource("size", type.GetMethod(nameof(Vec2Measurement)));
-            layoutTypeSource = new EnumAliasSource<LayoutType>();
-            layoutDirectionSource = new EnumAliasSource<LayoutDirection>();
-            layoutWrapSource = new EnumAliasSource<LayoutWrap>();
-            mainAxisAlignmentSource = new EnumAliasSource<MainAxisAlignment>();
-            crossAxisAlignmentSource = new EnumAliasSource<CrossAxisAlignment>();
-            whiteSpaceSource = new EnumAliasSource<WhitespaceMode>();
-            
         }
 
         public StyleBindingCompiler() {
             this.compiler = new ExpressionCompiler();
-            compiler.AddAliasResolver(new ContentSizeResolver());
-            compiler.AddAliasResolver(new UrlResolver("$url"));
-            compiler.AddAliasResolver(new SizeResolver("$size"));
-            compiler.AddAliasResolver(new LengthResolver("$length"));
-            compiler.AddAliasResolver(new MethodResolver("$px", typeof(StyleBindingCompiler).GetMethod(nameof(PixelLength), new[] {typeof(float)})));
         }
 
+        public void SetCompiler(ExpressionCompiler compiler) {
+            this.compiler = compiler;
+        }
+        
         public StyleBinding Compile(Type rootType, Type elementType, AttributeDefinition attributeDefinition) {
             return Compile(rootType, elementType, attributeDefinition.key, attributeDefinition.value);
         }
@@ -194,14 +164,8 @@ namespace UIForia.Compilers {
 
         private Expression<T> Compile<T>(string value, params IAliasSource[] sources) {
 
-            compiler.AddNamespace("UIForia.Rendering");
-            compiler.AddNamespace("UIForia");
-
             Expression<T> expression = compiler.Compile<T>(rootType, elementType, value);
             
-            compiler.RemoveNamespace("UIForia.Rendering");
-            compiler.RemoveNamespace("UIForia");
-
             return expression;
         }
 

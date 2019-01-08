@@ -301,26 +301,27 @@ public class LayoutSystemTests {
         Assert.AreEqual(new Rect(0, 600, 200, 50), nestedChild2.layoutResult.ScreenRect);
     }
 
-    [Test]
-    public void DoesNotAddLayoutBoxForNonLaidOutElements() {
-        string template = @"
-        <UITemplate>
-            <Style path='LayoutSystemTests+LayoutTestThing+Style'/>
-            <Contents style.layoutType='LayoutType.Flex'>
-                <Group x-id='child0' style.preferredWidth='100f' style.preferredHeight='100f'/>
-                <Repeat x-id='repeat' list='{list}'>
-                    <Group x-id='repeat-child-1' style.preferredWidth='300f' style.preferredHeight='50f'/>
-                </Repeat>
-                <Group x-id='child2' style.preferredWidth='100f' style.preferredHeight='100f'/>
-            </Contents>
-        </UITemplate>
-        ";
-        MockApplication app = new MockApplication(typeof(LayoutTestThing), template);
-        LayoutTestThing root = (LayoutTestThing) app.RootElement;
-        MockLayoutSystem layoutSystem = (MockLayoutSystem) app.LayoutSystem;
-        LayoutBox box = layoutSystem.GetBoxForElement(root.FindById("repeat"));
-        Assert.IsNull(box);
-    }
+   // todo -- this test is invalid right now but might come back later
+//    [Test]
+//    public void DoesNotAddLayoutBoxForNonLaidOutElements() {
+//        string template = @"
+//        <UITemplate>
+//            <Style path='LayoutSystemTests+LayoutTestThing+Style'/>
+//            <Contents style.layoutType='LayoutType.Flex'>
+//                <Group x-id='child0' style.preferredWidth='100f' style.preferredHeight='100f'/>
+//                <Repeat x-id='repeat' list='{list}'>
+//                    <Group x-id='repeat-child-1' style.preferredWidth='300f' style.preferredHeight='50f'/>
+//                </Repeat>
+//                <Group x-id='child2' style.preferredWidth='100f' style.preferredHeight='100f'/>
+//            </Contents>
+//        </UITemplate>
+//        ";
+//        MockApplication app = new MockApplication(typeof(LayoutTestThing), template);
+//        LayoutTestThing root = (LayoutTestThing) app.RootElement;
+//        MockLayoutSystem layoutSystem = (MockLayoutSystem) app.LayoutSystem;
+//        LayoutBox box = layoutSystem.GetBoxForElement(root.FindById("repeat"));
+//        Assert.IsNull(box);
+//    }
 
     [Test]
     public void AssignsProperClipRects_WithoutLayers() {

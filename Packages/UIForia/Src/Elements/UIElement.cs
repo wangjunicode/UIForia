@@ -1,4 +1,4 @@
-﻿using System;
+﻿﻿using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using JetBrains.Annotations;
@@ -155,7 +155,6 @@ public class UIElement : IHierarchical {
         child.parent = this;
         child.templateParent = this;
         child.templateContext.rootObject = templateContext.rootObject;
-        Array.Resize(ref children, children.Length + 1); // todo -- pool
         children[children.Length - 1] = child;
         view.Application.RegisterElement(child);
         return child;
@@ -171,7 +170,6 @@ public class UIElement : IHierarchical {
         child.parent = this;
         child.templateParent = this;
         child.templateContext.rootObject = templateContext.rootObject;
-        Array.Resize(ref children, children.Length + 1); // todo -- pool
         children[children.Length - 1] = child;
         view.Application.RegisterElement(child);
         return child as T;

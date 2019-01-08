@@ -248,7 +248,7 @@ namespace UIForia.Layout.LayoutTypes {
             }
 
             Track currentTrack = new Track();
-            currentTrack.crossSize = Mathf.Max(maxWidth, adjustedWidth);
+            currentTrack.crossSize = measureOnly ? maxWidth : Mathf.Max(maxWidth, adjustedWidth);
             currentTrack.startItemIndex = 0;
             currentTrack.endItemIndex = children.Count;
 
@@ -360,7 +360,7 @@ namespace UIForia.Layout.LayoutTypes {
                 maxHeight = Mathf.Max(maxHeight, itemList[i].crossSize);
             }
 
-            currentTrack.crossSize = Mathf.Max(maxHeight, adjustedHeight);
+            currentTrack.crossSize = measureOnly ? maxHeight : Mathf.Max(maxHeight, adjustedHeight);
 
             for (int i = 0; i < tracks.Count; i++) {
                 Track track = trackList[i];

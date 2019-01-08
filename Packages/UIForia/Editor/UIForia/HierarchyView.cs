@@ -175,7 +175,7 @@ public class HierarchyView : TreeView {
         r.x += v.x + 5f;
         r.width -= v.x + 5f;
         LayoutBox box = view.Application.LayoutSystem.GetBoxForElement(item.element);
-        s_Content.text = item.element.style.BaseStyleNames + " (id: " + item.element.id + ")";
+        s_Content.text = item.element.style.BaseStyleNames + "(children: " + box.children.Count + ", id: " + item.element.id + ")";
             
         textStyle.textColor = AdjustColor(Color.yellow, item.element);
 

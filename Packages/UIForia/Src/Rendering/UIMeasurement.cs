@@ -61,6 +61,10 @@ namespace UIForia {
             }
         }
 
+        public static UIMeasurement ParentSize(float percentage) {
+            return new UIMeasurement(percentage, UIMeasurementUnit.ParentSize);
+        }
+        
         public static bool operator ==(UIMeasurement self, UIMeasurement other) {
             if (float.IsNaN(self.value) && float.IsNaN(other.value)) {
                 return self.unit == other.unit;

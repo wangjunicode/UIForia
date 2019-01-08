@@ -72,16 +72,42 @@
         </e>
         <e p="Klang" t="Include">
           <e p="Seed" t="Include">
+            <e p="DataTypes" t="Include">
+              <e p="CharacterData.cs" t="Include" />
+              <e p="ColonyData.cs" t="Include" />
+            </e>
             <e p="Routes.cs" t="Include" />
             <e p="UIForia" t="Include">
+              <e p="BuildMenu" t="Include">
+                <e p="BuildMenu.cs" t="Include" />
+                <e p="BuildMenu.xml" t="Include" />
+              </e>
+              <e p="CharacterList" t="Include">
+                <e p="CharacterList.cs" t="Include" />
+                <e p="CharacterList.xml" t="Include" />
+                <e p="CharacterListItem.cs" t="Include" />
+                <e p="CharacterListItem.xml" t="Include" />
+              </e>
               <e p="ClippedPanel.cs" t="Include" />
+              <e p="ColonyInfoPanel" t="Include">
+                <e p="ColonlyInfoPanel.xml" t="Include" />
+                <e p="ColonyInfoPanel.cs" t="Include" />
+              </e>
               <e p="KlangButton" t="Include">
                 <e p="KlangButton.cs" t="Include" />
                 <e p="KlangButton.xml" t="Include" />
                 <e p="KlangLinkButton.xml" t="Include" />
               </e>
+              <e p="KlangDropdown" t="Include">
+                <e p="KlangDropdown.cs" t="Include" />
+                <e p="KlangDropdown.xml" t="Include" />
+              </e>
               <e p="KlangTextInput" t="Include">
                 <e p="KlangTextInput.cs" t="Include" />
+              </e>
+              <e p="KlangToolTip" t="Include">
+                <e p="KlangToolTip.cs" t="Include" />
+                <e p="KlangToolTip.xml" t="Include" />
               </e>
               <e p="KlangWindow" t="Include">
                 <e p="KlangWindow.cs" t="Include" />
@@ -113,6 +139,10 @@
                 <e p="URLNavBar.xml" t="Include" />
               </e>
               <e p="Windows" t="Include">
+                <e p="ColonyInfoWindow" t="Include">
+                  <e p="ColonyInfoWindow.cs" t="Include" />
+                  <e p="ColonyInfoWindow.xml" t="Include" />
+                </e>
                 <e p="SeedDebugWindow" t="Include">
                   <e p="SeedDebugWindow.cs" t="Include" />
                   <e p="SeedDebugWindow.xml" t="Include" />
@@ -398,6 +428,11 @@
               <e p="AstNodes" t="Include">
                 <e p="ASTNode.cs" t="Include" />
                 <e p="FieldNotDefinedException.cs" t="Include" />
+                <e p="LiteralNode.cs" t="Include" />
+                <e p="OperatorType.cs" t="Include" />
+              </e>
+              <e p="ASTNodes2" t="Include">
+                <e p="ASTNode.cs" t="Include" />
                 <e p="IdentifierNode.cs" t="Include" />
                 <e p="LiteralNode.cs" t="Include" />
                 <e p="OperatorNode.cs" t="Include" />
@@ -568,7 +603,6 @@
               <e p="WordInfo.cs" t="Include" />
             </e>
             <e p="todo.txt" t="Include" />
-            <e p="TreePlayground.cs" t="Include" />
             <e p="UIForia.cs" t="Include" />
             <e p="UIForia.Src.asmdef" t="Include" />
             <e p="UIViewBehavior.cs" t="Include" />

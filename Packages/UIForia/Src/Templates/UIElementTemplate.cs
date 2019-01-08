@@ -1,6 +1,5 @@
 using System;
 using System.Collections.Generic;
-using UIForia.Input;
 using UIForia.Util;
 using UnityEngine;
 
@@ -14,7 +13,7 @@ namespace UIForia {
         private readonly string typeName;
         private ParsedTemplate templateToExpand;
         private TemplateType templateType;
-        private LightList<UISlotContentTemplate> slotContentTemplates;
+        private List<UISlotContentTemplate> slotContentTemplates;
         
         public UIElementTemplate(string typeName, List<UITemplate> childTemplates, List<AttributeDefinition> attributes = null)
             : base(childTemplates, attributes) {
@@ -24,7 +23,6 @@ namespace UIForia {
         public UIElementTemplate(Type rootType, List<UITemplate> childTemplates, List<AttributeDefinition> attributes = null)
             : base(childTemplates, attributes) {
             this.rootType = rootType;
-            
         }
 
         public Type RootType => rootType;
@@ -35,7 +33,7 @@ namespace UIForia {
             isCompiled = true;
 
             if (rootType == null) {
-                rootType = TypeProcessor.GetType(typeName, template.imports).rawType;
+                rootType = TypeProcessor.GetType(typeName, template.Imports).rawType;
             }
 
             if (!(typeof(UIElement).IsAssignableFrom(elementType))) {
@@ -76,7 +74,7 @@ namespace UIForia {
             for (int i = 0; i < childTemplates.Count; i++) {
                 if (childTemplates[i] is UISlotContentTemplate slotContent) {
                     childTemplates.RemoveAt(i--);
-                    slotContentTemplates = slotContentTemplates ?? new LightList<UISlotContentTemplate>(2);
+                    slotContentTemplates = slotContentTemplates ?? new List<UISlotContentTemplate>(2);
                     slotContentTemplates.Add(slotContent);
                 }
             }
@@ -125,13 +123,14 @@ namespace UIForia {
             return a;
         }
 
-        public UIElement CreateUnscoped(LightList<UISlotContentTemplate> inputSlotContent = null) {
-            UIElement element = (UIElement) Activator.CreateInstance(rootType);
+        public UIElement CreateUnscoped(Type overrideRootType = null, List<UISlotContentTemplate> inputSlotContent = null) {
+            Type actualRootType = overrideRootType ?? rootType;
+            UIElement element = (UIElement) Activator.CreateInstance(actualRootType);
             element.flags |= UIElementFlags.TemplateRoot;
             element.OriginTemplate = this;
             templateToExpand.Compile();
 
-            List<UITemplate> actualChildren = templateToExpand.childTemplates;
+            List<UITemplate> actualChildren = childTemplates;
 
             TemplateScope scope = new TemplateScope(element);
             if (inputSlotContent != null) {

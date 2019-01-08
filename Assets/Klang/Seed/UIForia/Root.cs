@@ -10,9 +10,8 @@ namespace UI {
         }
 
         public void StartGame() {
-            SeedDebugWindow window1 = CreateChild<SeedDebugWindow>();
-            SeedDebugWindow window2 = CreateChild<SeedDebugWindow>();
-            SeedDebugWindow window3 = CreateChild<SeedDebugWindow>();
+//            SeedDebugWindow window1 = CreateChild<SeedDebugWindow>();
+            
         }
 
     }

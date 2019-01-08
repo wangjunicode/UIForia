@@ -3,6 +3,6 @@ using UIForia;
 namespace UI {
 
     [Template("Klang/Seed/UIForia/Windows/SeedDebugWindow/SeedDebugWindow.xml")]
-    public class SeedDebugWindow : UIElement { }
+    public class SeedDebugWindow : KlangWindow { }
 
 }

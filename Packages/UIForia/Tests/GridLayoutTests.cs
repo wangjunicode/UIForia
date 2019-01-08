@@ -36,28 +36,21 @@ public class GridLayoutTests {
 
     [Template(TemplateType.String, @"
         <UITemplate>
-            <Contents>
-                <Repeat list='{gridItems}' style.layoutType='LayoutType.Grid'>
-                    <Group style.preferredWidth='100f' style.preferredHeight='100f'/>
-                </Repeat>
+            <Contents style.layoutType='LayoutType.Grid'>
+                <Group x-id='child0' style.preferredWidth='100f' style.preferredHeight='100f'/>
+                <Group x-id='child1' style.preferredWidth='100f' style.preferredHeight='100f'/>
+                <Group x-id='child2' style.preferredWidth='100f' style.preferredHeight='100f'/>
+                <Group x-id='child3' style.preferredWidth='100f' style.preferredHeight='100f'/>
+                <Group x-id='child4' style.preferredWidth='100f' style.preferredHeight='100f'/>
+                <Group x-id='child5' style.preferredWidth='100f' style.preferredHeight='100f'/>
             </Contents>
         </UITemplate>
     ")]
-    public class GridLayoutRepeat : UIElement {
-
-        public List<int> gridItems = new List<int>();
+    public class GridLayout6Children : UIElement {
 
         public UIElement GetTestChild(int i) {
             return FindByType<UIGroupElement>()[i];
         }
-
-        public void SetChildCount(int childCount) {
-            gridItems.Clear();
-            for (int i = 0; i < childCount; i++) {
-                gridItems.Add(i);
-            }
-        }
-
     }
 
     [Test]
@@ -370,9 +363,8 @@ public class GridLayoutTests {
 
     [Test]
     public void MixImplicitAndExplicit() {
-        MockApplication mockView = new MockApplication(typeof(GridLayoutRepeat));
-        GridLayoutRepeat root = (GridLayoutRepeat) mockView.RootElement;
-        root.SetChildCount(6);
+        MockApplication mockView = new MockApplication(typeof(GridLayout6Children));
+        GridLayout6Children root = (GridLayout6Children) mockView.RootElement;
         mockView.Update();
 
         root.GetTestChild(0).style.SetGridItemPlacement(0, 2, 0, 1, StyleState.Normal);
@@ -402,9 +394,8 @@ public class GridLayoutTests {
 
     [Test]
     public void DefiningAGrid_WithGaps() {
-        MockApplication mockView = new MockApplication(typeof(GridLayoutRepeat));
-        GridLayoutRepeat root = (GridLayoutRepeat) mockView.RootElement;
-        root.SetChildCount(6);
+        MockApplication mockView = new MockApplication(typeof(GridLayout6Children));
+        GridLayout6Children root = (GridLayout6Children) mockView.RootElement;
 
         root.style.SetGridLayoutColTemplate(new[] {
             new GridTrackSize(100f),
@@ -428,9 +419,8 @@ public class GridLayoutTests {
 
     [Test]
     public void ColSize_MaxContent() {
-        MockApplication mockView = new MockApplication(typeof(GridLayoutRepeat));
-        GridLayoutRepeat root = (GridLayoutRepeat) mockView.RootElement;
-        root.SetChildCount(6);
+        MockApplication mockView = new MockApplication(typeof(GridLayout6Children));
+        GridLayout6Children root = (GridLayout6Children) mockView.RootElement;
         mockView.Update();
 
         root.GetTestChild(0).style.SetPreferredWidth(400f, StyleState.Normal);
@@ -456,9 +446,8 @@ public class GridLayoutTests {
 
     [Test]
     public void ColSize_MinContent() {
-        MockApplication mockView = new MockApplication(typeof(GridLayoutRepeat));
-        GridLayoutRepeat root = (GridLayoutRepeat) mockView.RootElement;
-        root.SetChildCount(6);
+        MockApplication mockView = new MockApplication(typeof(GridLayout6Children));
+        GridLayout6Children root = (GridLayout6Children) mockView.RootElement;
         mockView.Update();
 
         root.GetTestChild(0).style.SetPreferredWidth(400f, StyleState.Normal);
@@ -485,9 +474,8 @@ public class GridLayoutTests {
 
     [Test]
     public void RowSize_MaxContent() {
-        MockApplication mockView = new MockApplication(typeof(GridLayoutRepeat));
-        GridLayoutRepeat root = (GridLayoutRepeat) mockView.RootElement;
-        root.SetChildCount(4);
+        MockApplication mockView = new MockApplication(typeof(GridLayout6Children));
+        GridLayout6Children root = (GridLayout6Children) mockView.RootElement;
         mockView.Update();
 
         root.GetTestChild(0).style.SetPreferredHeight(400f, StyleState.Normal);
@@ -516,9 +504,8 @@ public class GridLayoutTests {
 
     [Test]
     public void RowSize_MinContent() {
-        MockApplication mockView = new MockApplication(typeof(GridLayoutRepeat));
-        GridLayoutRepeat root = (GridLayoutRepeat) mockView.RootElement;
-        root.SetChildCount(4);
+        MockApplication mockView = new MockApplication(typeof(GridLayout6Children));
+        GridLayout6Children root = (GridLayout6Children) mockView.RootElement;
         mockView.Update();
 
         root.GetTestChild(0).style.SetPreferredHeight(400f, StyleState.Normal);

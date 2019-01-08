@@ -11,6 +11,13 @@
         <Group x-id="header" style="window-header">
 
             <Slot style="window-title" name="KlangWindow.Header"/>
+            
+            <Slot style="window-actions" name="KlangWindow.Actions">
+                <Image onMouseClick="Pin()" style="window-action-icon" src="'Sprites/ui_window_titlebar_icon_pin'"/>
+                <Image onMouseClick="Minimize()" style="window-action-icon" src="'Sprites/ui_window_titlebar_icon_minimize'"/>
+                <Image onMouseClick="Maximize()" style="window-action-icon" src="'Sprites/ui_window_titlebar_icon_maximize'"/>
+                <Image onMouseClick="Close()" style="window-action-icon" src="'Sprites/ui_window_titlebar_icon_close'"/>
+            </Slot>
 
         </Group>
 

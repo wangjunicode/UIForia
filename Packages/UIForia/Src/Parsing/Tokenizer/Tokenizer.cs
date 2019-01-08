@@ -17,15 +17,14 @@ namespace UIForia {
             return ptr;
         }
 
-        public static int TryReadCharacters(int ptr, string input, string match, TokenType tokenType,
-            List<DslToken> output) {
+        public static int TryReadCharacters(int ptr, string input, string match, TokenType tokenType, List<DslToken> output) {
             if (ptr + match.Length > input.Length) return ptr;
             for (int i = 0; i < match.Length; i++) {
                 if (input[ptr + i] != match[i]) {
                     return ptr;
                 }
             }
-
+            
             output.Add(new DslToken(tokenType, match));
             return TryConsumeWhiteSpace(ptr + match.Length, input);
         }
@@ -70,8 +69,42 @@ namespace UIForia {
             while (ptr < input.Length && (char.IsLetterOrDigit(input[ptr]) || input[ptr] == '_' || input[ptr] == '$')) {
                 ptr++;
             }
-
-            output.Add(new DslToken(TokenType.Identifier, input.Substring(start, ptr - start)));
+//            ptr = TryReadCharacters(ptr, input, "true", TokenType.Boolean, output, true);
+//            ptr = TryReadCharacters(ptr, input, "false", TokenType.Boolean, output, true);
+//            ptr = TryReadCharacters(ptr, input, "as", TokenType.As, output, true);
+//            ptr = TryReadCharacters(ptr, input, "is", TokenType.Is, output, true);
+//            ptr = TryReadCharacters(ptr, input, "new", TokenType.New, output, true);
+//            ptr = TryReadCharacters(ptr, input, "typeof", TokenType.TypeOf, output, true);
+//            ptr = TryReadCharacters(ptr, input, "default", TokenType.Default, output, true);
+//            ptr = TryReadCharacters(ptr, input, "null", TokenType.Null, output, true);
+            string identifier = input.Substring(start, ptr - start);
+            if (identifier == "null") {
+                output.Add(new DslToken(TokenType.Null, "null"));
+            }
+            else if (identifier == "true") {
+                output.Add(new DslToken(TokenType.Boolean, "true"));
+            }
+            else if (identifier == "false") {
+                output.Add(new DslToken(TokenType.Boolean, "false"));
+            }
+            else if (identifier == "as") {
+                output.Add(new DslToken(TokenType.As, "as"));
+            }
+            else if (identifier == "is") {
+                output.Add(new DslToken(TokenType.Is, "is"));
+            }
+            else if (identifier == "new") {
+                output.Add(new DslToken(TokenType.New, "new"));
+            }
+            else if (identifier == "typeof") {
+                output.Add(new DslToken(TokenType.TypeOf, "typeof"));
+            }
+            else if (identifier == "default") {
+                output.Add(new DslToken(TokenType.Default, "default"));
+            }
+            else {
+                output.Add(new DslToken(TokenType.Identifier, identifier));
+            }
 
             return TryConsumeWhiteSpace(ptr, input);
         }
@@ -117,6 +150,7 @@ namespace UIForia {
             while (ptr < input.Length) {
                 int start = ptr;
 
+                ptr = TryReadCharacters(ptr, input, "@", TokenType.At, output);
                 ptr = TryReadCharacters(ptr, input, "&&", TokenType.And, output);
                 ptr = TryReadCharacters(ptr, input, "||", TokenType.Or, output);
                 ptr = TryReadCharacters(ptr, input, "==", TokenType.Equals, output);
@@ -143,15 +177,7 @@ namespace UIForia {
                 ptr = TryReadCharacters(ptr, input, "]", TokenType.ArrayAccessClose, output);
                 ptr = TryReadCharacters(ptr, input, "{", TokenType.ExpressionOpen, output);
                 ptr = TryReadCharacters(ptr, input, "}", TokenType.ExpressionClose, output);
-                ptr = TryReadCharacters(ptr, input, "true", TokenType.Boolean, output);
-                ptr = TryReadCharacters(ptr, input, "false", TokenType.Boolean, output);
-                ptr = TryReadCharacters(ptr, input, "@", TokenType.At, output);
-                ptr = TryReadCharacters(ptr, input, "as", TokenType.As, output);
-                ptr = TryReadCharacters(ptr, input, "is", TokenType.Is, output);
-                ptr = TryReadCharacters(ptr, input, "new", TokenType.New, output);
-                ptr = TryReadCharacters(ptr, input, "typeof", TokenType.TypeOf, output);
-                ptr = TryReadCharacters(ptr, input, "default", TokenType.Default, output);
-                ptr = TryReadCharacters(ptr, input, "null", TokenType.Null, output);
+
 
                 ptr = TryReadDigit(ptr, input, output);
                 ptr = TryReadString(ptr, input, output);

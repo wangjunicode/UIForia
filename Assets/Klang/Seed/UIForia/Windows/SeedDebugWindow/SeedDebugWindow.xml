@@ -5,17 +5,14 @@
 
     <Style path="Klang/Seed/UIForia/Windows/Window.style"/>
 
-    <Contents style="window-container">
+    <Contents x-inherited="true" style="window-container">
         
-        <KlangWindow>
             <SlotContent name="KlangWindow.Header">
 
                 Window Header {id}
 
             </SlotContent>
-
-        </KlangWindow>
-
+        
     </Contents>
 
 </UITemplate>

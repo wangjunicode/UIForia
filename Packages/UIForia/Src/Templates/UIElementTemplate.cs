@@ -55,7 +55,6 @@ namespace UIForia {
             }
 
             templateToExpand.Compile();
-          
             
             UITemplate expandedRoot = templateToExpand.rootElementTemplate;
 

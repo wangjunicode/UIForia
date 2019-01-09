@@ -1,0 +1,81 @@
+<?xml version="1.0" encoding="utf-8"?>
+<UITemplate>
+
+    <Style path="Klang/Seed/UIForia/CharacterSchedule/CharacterSchedule.style"/>
+
+    <Contents style="character-schedule">
+
+        <Text>01</Text>
+        <Panel style="schedule-block"/>
+
+        <Text>02</Text>
+        <Panel style="schedule-block"/>
+
+        <Text>03</Text>
+        <Panel style="schedule-block"/>
+
+        <Text>04</Text>
+        <Panel style="schedule-block"/>
+
+        <Text>05</Text>
+        <Panel style="schedule-block"/>
+
+        <Text>06</Text>
+        <Panel style="schedule-block"/>
+
+        <Text>07</Text>
+        <Panel style="schedule-block"/>
+
+        <Text>08</Text>
+        <Panel style="schedule-block"/>
+
+        <Text>09</Text>
+        <Panel style="schedule-block"/>
+
+        <Text>10</Text>
+        <Panel style="schedule-block"/>
+
+        <Text>11</Text>
+        <Panel style="schedule-block"/>
+
+        <Text>12</Text>
+        <Panel style="schedule-block"/>
+
+        <Text>13</Text>
+        <Panel style="schedule-block"/>
+
+        <Text>14</Text>
+        <Panel style="schedule-block"/>
+
+        <Text>15</Text>
+        <Panel style="schedule-block"/>
+
+        <Text>16</Text>
+        <Panel style="schedule-block"/>
+
+        <Text>17</Text>
+        <Panel style="schedule-block"/>
+
+        <Text>18</Text>
+        <Panel style="schedule-block"/>
+
+        <Text>19</Text>
+        <Panel style="schedule-block"/>
+
+        <Text>20</Text>
+        <Panel style="schedule-block"/>
+
+        <Text>21</Text>
+        <Panel style="schedule-block"/>
+
+        <Text>22</Text>
+        <Panel style="schedule-block"/>
+
+        <Text>23</Text>
+        <Panel style="schedule-block"/>
+        
+        <Group x-id="schedule-time-container" style="schedule-time-container"/>
+        
+    </Contents>
+
+</UITemplate>

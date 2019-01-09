@@ -119,6 +119,9 @@ namespace UIForia {
             IEnumerable<XElement> usingElements = doc.Root.GetChildren("Using");
             XElement contentElement = doc.Root.GetChild("Contents");
 
+            // todo -- we can't use any bindings on the <Content/> tag because then the binding system
+            // todo    would need to hold 2 different contexts depending on where the binding came from
+            // todo    (ie the parsed template or the element root itself)
             List<string> usings = ListPool<string>.Get();
 
             foreach (XElement xElement in importElements) {

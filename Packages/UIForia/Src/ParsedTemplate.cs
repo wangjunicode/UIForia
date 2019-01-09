@@ -91,6 +91,7 @@ namespace UIForia {
             compiler.AddAliasResolver(new RouteParameterResolver("$routeParams"));
             compiler.AddAliasResolver(new ContentSizeResolver());
             compiler.AddAliasResolver(new UrlResolver("$url"));
+            compiler.AddAliasResolver(new ColorResolver("$rgb"));
             compiler.AddAliasResolver(new SizeResolver("$size"));
             compiler.AddAliasResolver(new LengthResolver("$fixedLength"));
             compiler.AddAliasResolver(new MethodResolver("$px", typeof(StyleBindingCompiler).GetMethod(nameof(StyleBindingCompiler.PixelLength), new[] {typeof(float)})));

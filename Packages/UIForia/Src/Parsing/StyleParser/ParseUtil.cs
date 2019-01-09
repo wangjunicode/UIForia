@@ -525,7 +525,7 @@ namespace UIForia.Parsing.StyleParser {
                 ptr++;
             }
 
-            if (ptr < input.Length && input[ptr] == 'f') {
+            if (ptr < input.Length && input[ptr] == 'f' && (ptr + 1 < input.Length && char.IsWhiteSpace(input[ptr + 1]))) {
                 ptr++;
             }
 

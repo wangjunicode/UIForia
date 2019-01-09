@@ -529,7 +529,6 @@ namespace UIForia.Layout.LayoutTypes {
             return cachedHeight;
         }
 
-
         public float GetPreferredWidth() {
             AnchorTarget anchorTarget;
             UIMeasurement widthMeasurement = style.PreferredWidth;
@@ -780,7 +779,7 @@ namespace UIForia.Layout.LayoutTypes {
                     }
 
                     return Mathf.Max(0, PaddingBorderVertical + (contentHeight * height.value));
-
+                
                 case UIMeasurementUnit.ParentSize:
                     if (parent.style.PreferredHeight.IsContentBased) {
                         return 0f;

@@ -1,3 +1,5 @@
+using System.Collections.Generic;
+
 namespace Klang.Seed.DataTypes {
 
     public class CharacterData {
@@ -9,6 +11,8 @@ namespace Klang.Seed.DataTypes {
         public float mood;
         public bool isInDirectControl;
         public string statusIconUrl;
+
+        public List<CharacterSkill> skills;
 
     }
 

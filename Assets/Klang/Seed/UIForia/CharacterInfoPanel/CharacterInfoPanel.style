@@ -1,0 +1,73 @@
+style container {
+    FlexLayoutDirection = Column;
+    LayoutBehavior = Ignored;
+    AnchorBottom = 100%;
+    TransformBehaviorY = AnchorMaxOffset;
+}
+
+style character-info-panel-root {
+    PreferredWidth = 500px;
+}
+
+style header-section {
+    TextFontAsset = EuroStileLTPro-BoldEx2 SDF;
+}
+
+style body-section {
+    FlexLayoutDirection = Column;
+    PreferredWidth = 1pca;
+    TextFontAsset = EuroStileLTPro-BoldEx2 SDF;
+}
+
+style body-section-left {
+    PaddingTop = 8px;
+    PreferredWidth = 0.65pca;
+}
+
+style body-section-right {
+    PreferredWidth = 0.35pca;
+}
+
+style labeled-progress-bar-large {
+    FlexLayoutDirection = Column;
+    FlexLayoutCrossAxisAlignment = Center;
+    FlexLayoutMainAxisAlignment = SpaceBetween;
+    PreferredWidth = 1pca;
+    PaddingBottom = 4px;
+}
+
+style labeled-progress-bar-small {
+      FlexLayoutDirection = Column;
+      FlexLayoutCrossAxisAlignment = Center;
+      FlexLayoutMainAxisAlignment = SpaceBetween;
+      PreferredWidth = 1pca;
+}
+
+style progress-bars-small {
+    PaddingLeft = 24px;
+    PreferredWidth = 1pca;
+    PreferredHeight = 1;
+    FlexItemGrow = 1;
+}
+
+style character-panel-menu-root {
+    BorderRadius = 50%;
+    BackgroundColor = Black;
+    FlexLayoutDirection = Column;
+    PreferredWidth = 1pca;
+    Padding = 6px, 12px;
+    FlexLayoutCrossAxisAlignment = Center;
+    TextColor = white;
+}
+
+style character-panel-icon {
+    PreferredSize = 24px;
+    MarginRight = 12px;
+}
+
+style skill-panel {
+    BackgroundColor = #000000AA;
+    PreferredWidth = 340px;
+    BorderRadius = 8px;
+    Padding = 12px;
+}

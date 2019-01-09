@@ -1,0 +1,130 @@
+<?xml version="1.0" encoding="utf-8"?>
+<UITemplate>
+
+    <Style path="Klang/Seed/UIForia/CharacterInfoPanel/CharacterInfoPanel.style"/>
+    <Using namespace="UnityEngine"/>
+
+    <Contents style="container">
+
+        <Group style="character-info-panel-root">
+
+            <Group style="header-section">
+                <Text>
+                    Matt
+                </Text>
+                <Text>
+                    Weichselbaum
+                </Text>
+                <Text>
+                    Sleeping in a tent
+                </Text>
+            </Group>
+            <Group style="body-section">
+
+                <Group style="body-section-left">
+
+                    <Group style="labeled-progress-bar-large">
+                        <Text>Health</Text>
+                        <KlangProgressBar style.preferredWidth="UIMeasurement.ParentSize(0.7f)" fillColor="Color.red" size="16f"/>
+                    </Group>
+
+                    <Group style="labeled-progress-bar-large">
+                        <Text>Mood</Text>
+                        <KlangProgressBar style.preferredWidth="UIMeasurement.ParentSize(0.7f)" fillColor="Color.red" size="16f"/>
+                    </Group>
+
+                    <Group style="progress-bars-small">
+
+                        <Group style="labeled-progress-bar-small">
+                            <Text>Food</Text>
+                            <KlangProgressBar style.preferredWidth="UIMeasurement.ParentSize(0.7f)" fillColor="Color.red" size="12f"/>
+                        </Group>
+
+                        <Group style="labeled-progress-bar-small">
+                            <Text>Sleep</Text>
+                            <KlangProgressBar style.preferredWidth="UIMeasurement.ParentSize(0.7f)" fillColor="Color.red" size="12f"/>
+                        </Group>
+
+                        <Group style="labeled-progress-bar-small">
+                            <Text>Social</Text>
+                            <KlangProgressBar style.preferredWidth="UIMeasurement.ParentSize(0.7f)" fillColor="Color.red" size="12f"/>
+                        </Group>
+
+                        <Group style="labeled-progress-bar-small">
+                            <Text>Fun</Text>
+                            <KlangProgressBar style.preferredWidth="UIMeasurement.ParentSize(0.7f)" fillColor="Color.red" size="12f"/>
+                        </Group>
+
+                        <Group style="labeled-progress-bar-small">
+                            <Text>Comfort</Text>
+                            <KlangProgressBar style.preferredWidth="UIMeasurement.ParentSize(0.7f)" fillColor="Color.red" size="12f"/>
+                        </Group>
+
+                        <Group style="labeled-progress-bar-small">
+                            <Text>Beauty</Text>
+                            <KlangProgressBar style.preferredWidth="UIMeasurement.ParentSize(0.7f)" fillColor="Color.red" size="12f"/>
+                        </Group>
+                    </Group>
+
+                </Group>
+
+                <Group style="body-section-right">
+
+                    <!--<CharacterInfoPanelButton text="" icon="" selectedTint="" selectedRoute=""/>-->
+
+                    <Group x-id="skills-button" style="character-panel-menu-root" onMouseClick="ShowMenuPanel('skills')">
+                        <Image style="character-panel-icon" src="'SpriteSettingOverwrite/ui_icon_character_skills'"/>
+                        <Text>Skills</Text>
+                    </Group>
+                    <Group style="character-panel-menu-root">
+                        <Image style="character-panel-icon" src="'SpriteSettingOverwrite/ui_icon_character_gear'"/>
+                        <Text>Gear</Text>
+                    </Group>
+                    <Group style="character-panel-menu-root">
+                        <Image style="character-panel-icon" src="'SpriteSettingOverwrite/ui_icon_character_mind'"/>
+                        <Text>Mood</Text>
+                    </Group>
+                    <Group style="character-panel-menu-root" onMouseClick="ShowMenuPanel('schedule')">
+                        <Image style="character-panel-icon" src="'SpriteSettingOverwrite/ui_icon_character_schedule'"/>
+                        <Text>Schedule</Text>
+                    </Group>
+                    <Group style="character-panel-menu-root">
+                        <Image style="character-panel-icon" src="'SpriteSettingOverwrite/ui_icon_character_body'"/>
+                        <Text>Health</Text>
+                    </Group>
+                    <Group style="character-panel-menu-root">
+                        <Image style="character-panel-icon" src="'SpriteSettingOverwrite/ui_icon_character_social'"/>
+                        <Text>Social</Text>
+                    </Group>
+                </Group>
+
+            </Group>
+        </Group>
+
+        <Router>
+
+            <Route style="skill-panel-container" path="'/skills'">
+                <Repeat x-id="skill-panel" style="skill-panel" list="characterData.skills">
+                    <SkillbarDisplay label="$item.name" progress="$item.progress" level="$item.level"/>
+                </Repeat>
+            </Route>
+
+            <Route style="skill-panel-container" path="'/schedule'">
+                <CharacterSchedule characterData="characterData"/>
+            </Route>
+            <!--<Route style="skill-panel">-->
+
+            <!--&lt;!&ndash;<SkillbarDisplay label="'Construction'" progress="0.3f" level="3"/>&ndash;&gt;-->
+            <!--&lt;!&ndash;<SkillbarDisplay label="'Consume'" progress="0.3f" level="3"/>&ndash;&gt;-->
+            <!--&lt;!&ndash;<SkillbarDisplay label="'Cooking'" progress="0.3f" level="3"/>&ndash;&gt;-->
+            <!--&lt;!&ndash;<SkillbarDisplay label="'Crafting'" progress="0.3f" level="3"/>&ndash;&gt;-->
+            <!--&lt;!&ndash;<SkillbarDisplay label="'Geology'" progress="0.3f" level="3"/>&ndash;&gt;-->
+            <!--&lt;!&ndash;<SkillbarDisplay label="'Medical'" progress="0.3f" level="3"/>&ndash;&gt;-->
+            <!--&lt;!&ndash;<SkillbarDisplay label="'Physical Labor'" progress="0.3f" level="3"/>&ndash;&gt;-->
+
+            <!--</Route>-->
+        </Router>
+
+    </Contents>
+
+</UITemplate>

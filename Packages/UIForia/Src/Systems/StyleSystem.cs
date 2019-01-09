@@ -117,7 +117,7 @@ namespace UIForia.Systems {
         public void SetStyleProperty(UIElement element, StyleProperty property) {
             AddToChangeSet(element, property);
 
-            if (!StyleUtil.IsInherited(property.propertyId)) {
+            if (!StyleUtil.IsInherited(property.propertyId) || element.children == null) {
                 return;
             }
 

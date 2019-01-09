@@ -27,7 +27,6 @@
 
         <!--<URLNavBar/>-->
 
-        <BuildMenu style="build-menu"/>
 
         <!--<Group style="app-body">-->
 
@@ -51,7 +50,7 @@
 
                     <!--<ColonyInfoPanel/>-->
                     <!--<CharacterList/>-->
-                    <!---->
+                    <CharacterInfoPanel/>
                     <!--<BuildMenu style="build-menu"/>-->
                     <!---->
                 <!--</Route>-->

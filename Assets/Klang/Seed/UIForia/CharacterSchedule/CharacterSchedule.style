@@ -1,0 +1,15 @@
+style character-schedule {
+    LayoutType = Grid;
+    GridLayoutColTemplate = 20px, 200px;
+    TransformBehaviorY = LayoutOffset;
+    TransformPositionY = -200px;
+    BackgroundColor = #000000AA;
+    BorderRadius = 8px;
+    Padding = 12px;
+}
+
+style schedule-block {
+    PreferredSize = 200px, 20px;
+    Margin = 10px, 0px;
+    BackgroundColor = grey;
+}

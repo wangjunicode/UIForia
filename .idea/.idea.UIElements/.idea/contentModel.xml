@@ -74,6 +74,7 @@
           <e p="Seed" t="Include">
             <e p="DataTypes" t="Include">
               <e p="CharacterData.cs" t="Include" />
+              <e p="CharacterSkill.cs" t="Include" />
               <e p="ColonyData.cs" t="Include" />
             </e>
             <e p="Routes.cs" t="Include" />
@@ -84,11 +85,20 @@
                 <e p="BuildMenuItemDisplay.cs" t="Include" />
                 <e p="BuildMenuItemDisplay.xml" t="Include" />
               </e>
+              <e p="CharacterInfoPanel" t="Include">
+                <e p="CharacterInfoPanel.cs" t="Include" />
+                <e p="CharacterInfoPanel.xml" t="Include" />
+              </e>
               <e p="CharacterList" t="Include">
                 <e p="CharacterList.cs" t="Include" />
                 <e p="CharacterList.xml" t="Include" />
                 <e p="CharacterListItem.cs" t="Include" />
                 <e p="CharacterListItem.xml" t="Include" />
+              </e>
+              <e p="CharacterSchedule" t="Include">
+                <e p="CharacterSchedule.cs" t="Include" />
+                <e p="CharacterSchedule.style" t="Include" />
+                <e p="CharacterSchedule.xml" t="Include" />
               </e>
               <e p="ClippedPanel.cs" t="Include" />
               <e p="ColonyInfoPanel" t="Include">
@@ -103,6 +113,10 @@
               <e p="KlangDropdown" t="Include">
                 <e p="KlangDropdown.cs" t="Include" />
                 <e p="KlangDropdown.xml" t="Include" />
+              </e>
+              <e p="KlangProgressBar" t="Include">
+                <e p="KlangProgressBar.cs" t="Include" />
+                <e p="KlangProgressBar.xml" t="Include" />
               </e>
               <e p="KlangTextInput" t="Include">
                 <e p="KlangTextInput.cs" t="Include" />
@@ -136,6 +150,10 @@
               </e>
               <e p="Root.cs" t="Include" />
               <e p="Root.xml" t="Include" />
+              <e p="SkillbarDisplay" t="Include">
+                <e p="SkillbarDisplay.cs" t="Include" />
+                <e p="SkillbarDisplay.xml" t="Include" />
+              </e>
               <e p="URLNavBar" t="Include">
                 <e p="URLNavBar.cs" t="Include" />
                 <e p="URLNavBar.xml" t="Include" />
@@ -274,16 +292,19 @@
               </e>
               <e p="ExpressionCompiler.cs" t="Include" />
               <e p="ExpressionResolvers" t="Include">
+                <e p="ColorResolver.cs" t="Include" />
                 <e p="ContentSizeResolver.cs" t="Include" />
                 <e p="ElementResolver.cs" t="Include" />
                 <e p="ExpressionResolver.cs" t="Include" />
                 <e p="KeyboardEventResolver.cs" t="Include" />
+                <e p="LengthResolver.cs" t="Include" />
                 <e p="MouseEventResolver.cs" t="Include" />
                 <e p="ParentElementResolver.cs" t="Include" />
                 <e p="RepeatIndexAliasResolver.cs" t="Include" />
                 <e p="RepeatItemAliasResolver.cs" t="Include" />
                 <e p="RepeatLengthAliasResolver.cs" t="Include" />
                 <e p="RouteResolver.cs" t="Include" />
+                <e p="SizeResolver.cs" t="Include" />
                 <e p="UrlResolver.cs" t="Include" />
               </e>
               <e p="ImplicitCastExpression.cs" t="Include" />

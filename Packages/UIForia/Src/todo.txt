@@ -5,6 +5,22 @@
 - Support <Slot> elements
 - Filter Lists
 - Support arbitrary creation of child nodes?
+- Smart attributes (tooltip, route, etc)
+- formal props (required, optional, pattern matching)
+- invoke on property changed handlers after OnCreate to initialize them
+- template attrs (for tooltips, etc)
+- animation system should play animations for any float, int, or color values, not just style properties
+- grid needs to respect padding, margin, and alignments
+- grid needs to respect min-max()
+- grid might respect fit-content, fill-content
+- investigate anchoring more deeply
+- make sure transform offsets work
+
+<Template id="content">
+    
+</Template>
+
+<thing x-tooltip="{template: 'content', delay: 1f, direction: ToolTipDirection.Top, text: 'text'}/>
 
  Optimizations
 - Reduce memory usage

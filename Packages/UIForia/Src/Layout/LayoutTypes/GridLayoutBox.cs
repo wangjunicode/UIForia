@@ -728,7 +728,7 @@ namespace UIForia.Layout.LayoutTypes {
                 }
             }
 
-            throw new UIForia.InvalidArgumentException();
+            throw new InvalidArgumentException();
         }
 
         private void OccupyGridArea(GridPlacement placement) {

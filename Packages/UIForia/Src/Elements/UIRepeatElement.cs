@@ -3,10 +3,6 @@ using System.Collections.Generic;
 
 namespace UIForia {
 
-    public interface IRequireBindingSetup {
-
-    }
-
     public abstract class UIRepeatElement : UIElement {
         
         internal bool listBecamePopulated;
@@ -20,7 +16,6 @@ namespace UIForia {
         internal string lengthAlias;
         internal UITemplate template;
         internal TemplateScope scope;
-        internal int currentIndex;
         
         public event Action onListPopulated;
         public event Action onListEmptied;
@@ -42,37 +37,20 @@ namespace UIForia {
             onListPopulated = null;
         }
 
-        public abstract void Next();
-        public abstract void Reset();
-
     }
 
-    public class UIRepeatElement<T> : UIRepeatElement, IRequireBindingSetup {
+    public class UIRepeatElement<T> : UIRepeatElement {
 
-        internal T currentItem;
         internal IList<T> list;
         
         public UIRepeatElement(UITemplate template, TemplateScope scope) {
             this.template = template;
             this.scope = scope;
-            this.currentIndex = -1;
-           // flags &= ~(UIElementFlags.RequiresLayout | UIElementFlags.RequiresRendering);
         }
-        
-        public override void Next() {
-            currentItem = list[++currentIndex];
-        }
-
-        public override void Reset() {
-            currentItem = default;
-            currentIndex = -1;
-        }
-
+      
         public override string GetDisplayName() {
             return "Repeat";
         }
-
-
 
     }
 

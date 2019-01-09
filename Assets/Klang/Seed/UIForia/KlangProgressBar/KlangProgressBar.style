@@ -1,0 +1,13 @@
+style progress-bar-background {
+    PreferredSize = 1pca, 10px;
+    BackgroundColor = black;
+    BorderRadius = 50%;
+    MinWidth = 10px;
+    FlexItemShrink = 1;
+}
+
+style progress-bar-foreground {
+  BackgroundColor = #00D175;
+  PreferredHeight = 100%;
+  BorderRadius = 50%;
+}

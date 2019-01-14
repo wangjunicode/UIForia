@@ -3,79 +3,50 @@
 
     <Style path="Klang/Seed/UIForia/CharacterSchedule/CharacterSchedule.style"/>
 
-    <Contents style="character-schedule">
-
-        <Text>01</Text>
-        <Panel style="schedule-block"/>
-
-        <Text>02</Text>
-        <Panel style="schedule-block"/>
-
-        <Text>03</Text>
-        <Panel style="schedule-block"/>
-
-        <Text>04</Text>
-        <Panel style="schedule-block"/>
-
-        <Text>05</Text>
-        <Panel style="schedule-block"/>
-
-        <Text>06</Text>
-        <Panel style="schedule-block"/>
-
-        <Text>07</Text>
-        <Panel style="schedule-block"/>
-
-        <Text>08</Text>
-        <Panel style="schedule-block"/>
-
-        <Text>09</Text>
-        <Panel style="schedule-block"/>
-
-        <Text>10</Text>
-        <Panel style="schedule-block"/>
-
-        <Text>11</Text>
-        <Panel style="schedule-block"/>
-
-        <Text>12</Text>
-        <Panel style="schedule-block"/>
-
-        <Text>13</Text>
-        <Panel style="schedule-block"/>
-
-        <Text>14</Text>
-        <Panel style="schedule-block"/>
-
-        <Text>15</Text>
-        <Panel style="schedule-block"/>
-
-        <Text>16</Text>
-        <Panel style="schedule-block"/>
-
-        <Text>17</Text>
-        <Panel style="schedule-block"/>
-
-        <Text>18</Text>
-        <Panel style="schedule-block"/>
-
-        <Text>19</Text>
-        <Panel style="schedule-block"/>
-
-        <Text>20</Text>
-        <Panel style="schedule-block"/>
-
-        <Text>21</Text>
-        <Panel style="schedule-block"/>
-
-        <Text>22</Text>
-        <Panel style="schedule-block"/>
-
-        <Text>23</Text>
-        <Panel style="schedule-block"/>
+    <Contents style="schedule-container">
         
-        <Group x-id="schedule-time-container" style="schedule-time-container"/>
+        <Group x-id="slot-container" onMouseClick="CreateDestroySchedule($event)" style="slot-container rounded-grey-bg">
+            
+            <ScheduleSlot index="0"/>
+            <ScheduleSlot index="1"/>
+            <ScheduleSlot index="2"/>
+            <ScheduleSlot index="3"/>
+            <ScheduleSlot index="4"/>
+            <ScheduleSlot index="5"/>
+            <ScheduleSlot index="6"/>
+            <ScheduleSlot index="7"/>
+            <ScheduleSlot index="8"/>
+            <ScheduleSlot index="9"/>
+            <ScheduleSlot index="10"/>
+            <ScheduleSlot index="11"/>
+            <ScheduleSlot index="12"/>
+            <ScheduleSlot index="13"/>
+            <ScheduleSlot index="14"/>
+            <ScheduleSlot index="15"/>
+            <ScheduleSlot index="16"/>
+            <ScheduleSlot index="17"/>
+            <ScheduleSlot index="18"/>
+            <ScheduleSlot index="19"/>
+            <ScheduleSlot index="20"/>
+            <ScheduleSlot index="21"/>
+            <ScheduleSlot index="22"/>
+            <ScheduleSlot index="23"/>
+
+            <Repeat style="schedule-block-list" list="scheduleBlocks">
+                <Group style="schedule-block"/>
+            </Repeat>
+            
+        </Group>
         
+        <Group style="work-preference-container rounded-grey-bg">
+            <KlangCheckBox isChecked="true" label="'Building'"/>
+            <KlangCheckBox label="'Farming'"/>
+            <KlangCheckBox label="'Producing'"/>
+            <KlangCheckBox label="'Hauling'"/>
+            <KlangCheckBox label="'Logging'"/>
+            <KlangCheckBox label="'Mining'"/>
+        </Group>
+
     </Contents>
 
 </UITemplate>

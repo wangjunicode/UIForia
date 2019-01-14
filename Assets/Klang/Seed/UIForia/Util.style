@@ -20,6 +20,10 @@ style fill-parent {
     PreferredSize = 1pca, 1pca;
 }
 
+style content-size {
+    PreferredSize = 1cnt;
+}
+
 style vertical-padded48 {
     PaddingTop = 48px;
     PaddingBottom = 48px;

@@ -1,8 +1,7 @@
 style container {
     FlexLayoutDirection = Column;
-    LayoutBehavior = Ignored;
-    AnchorBottom = 100%;
-    TransformBehaviorY = AnchorMaxOffset;
+    FlexLayoutCrossAxisAlignment = End;
+    PreferredSize = 1pca;
 }
 
 style character-info-panel-root {

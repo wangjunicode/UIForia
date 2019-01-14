@@ -23,8 +23,8 @@ namespace UIForia {
         }
 
         public override void OnReady() {
-            style.SetPreferredWidth(UIMeasurement.Parent100, StyleState.Normal);
-            style.SetPreferredHeight(UIMeasurement.Parent100, StyleState.Normal);
+//            style.SetPreferredWidth(UIMeasurement.Parent100, StyleState.Normal);
+//            style.SetPreferredHeight(UIMeasurement.Parent100, StyleState.Normal);
             OnRouteChanged(new Route(view.Application.Router.CurrentUrl));
         }
 

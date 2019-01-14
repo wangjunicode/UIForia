@@ -167,7 +167,7 @@ namespace UIForia.Editor {
                     }
 
                     string source = selectedElement.style.GetPropertySource(propertyId);
-                    StyleProperty property = style.GetPropertyValue(propertyId);
+                    StyleProperty property = selectedElement.style.GetComputedStyleProperty(propertyId);
                     if (property.IsUnset) {
                         property = DefaultStyleValues_Generated.GetPropertyValue(propertyId);
                     }
@@ -765,7 +765,8 @@ namespace UIForia.Editor {
 
                 case StylePropertyId.TextFontStyle:
                     // todo -- this needs to be an EnumFlags popup
-                    return DrawEnum<Text.FontStyle>(property, isEditable);
+                    return DrawEnumWithValue<Text.FontStyle>(property, isEditable);
+//                    return DrawEnum<Text.FontStyle>(property, isEditable);
 
                 case StylePropertyId.TextAlignment:
                     return DrawEnum<Text.TextAlignment>(property, isEditable);
@@ -832,6 +833,20 @@ namespace UIForia.Editor {
             return retn;
         }
 
+        private static StyleProperty DrawEnumWithValue<T>(StyleProperty property, bool isEditable) {
+            s_Content.text = StyleUtil.GetPropertyName(property);
+            GUI.enabled = isEditable;
+            ValueTuple<int[], GUIContent[]> tuple = GetEnumValues<T>();
+
+            int[] values = tuple.Item1;
+            GUIContent[] displayOptions = tuple.Item2;
+            int index = Array.IndexOf(values, property.valuePart0);
+            int output = EditorGUILayout.Popup(s_Content, index, displayOptions);
+            // unclear if output is a value or an index, I suspect index
+            GUI.enabled = true;
+            return isEditable ? new StyleProperty(property.propertyId, values[output]) : property;
+        }
+        
         private static StyleProperty DrawEnum<T>(StyleProperty property, bool isEditable) {
             s_Content.text = StyleUtil.GetPropertyName(property);
             GUI.enabled = isEditable;

@@ -384,6 +384,9 @@ namespace UIForia.Parsing.StyleParser {
                 case "textfontsize":
                     context.targetStyle.TextFontSize = ParseUtil.ParseInt(context.variables, propertyValue);
                     break;
+                case "textalignment":
+                    context.targetStyle.TextAlignment = ParseUtil.ParseTextAlignment(context.variables, propertyValue);
+                    break;
                 default:
                     throw new NotImplementedException();
             }

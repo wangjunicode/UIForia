@@ -575,7 +575,7 @@ namespace UIForia {
         public Material GetMaterial() {
             Material fontMaterial = style.TextFontAsset.material;
 
-            if (fontAsset != style.TextFontAsset) {
+          //  if (fontAsset != style.TextFontAsset) {
                 fontAsset = style.TextFontAsset;
                 material.mainTexture = fontMaterial.mainTexture;
                 material.SetFloat(ShaderUtilities.ID_GradientScale, fontMaterial.GetFloat(ShaderUtilities.ID_GradientScale));
@@ -585,7 +585,7 @@ namespace UIForia {
                 material.SetFloat(ShaderUtilities.ID_ScaleRatio_B, fontMaterial.GetFloat(ShaderUtilities.ID_ScaleRatio_B));
                 material.SetFloat(ShaderUtilities.ID_ScaleRatio_C, fontMaterial.GetFloat(ShaderUtilities.ID_ScaleRatio_A));
                 material.SetVector(s_TextureSizeKey, new Vector4(material.mainTexture.width, material.mainTexture.height));
-            }
+           // }
 
             float fontScale = (style.TextFontSize / fontAsset.fontInfo.PointSize) * fontAsset.fontInfo.Scale;
             ;

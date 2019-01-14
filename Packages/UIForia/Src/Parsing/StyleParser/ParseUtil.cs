@@ -7,6 +7,7 @@ using UIForia.Layout.LayoutTypes;
 using UIForia.Rendering;
 using UnityEngine;
 using FontStyle = UIForia.Text.FontStyle;
+using TextAlignment = UIForia.Text.TextAlignment;
 
 namespace UIForia.Parsing.StyleParser {
 
@@ -678,6 +679,8 @@ namespace UIForia.Parsing.StyleParser {
                     return LayoutType.Radial;
                 case "grid":
                     return LayoutType.Grid;
+                case "fixed":
+                    return LayoutType.Fixed;
                 default:
                     throw new ParseException($"Unknown value for {nameof(LayoutType)}: {propertyValue}");
             }
@@ -1010,6 +1013,20 @@ namespace UIForia.Parsing.StyleParser {
                     return Visibility.Visible;
                 default:
                     throw new ParseException($"Unknown value for {nameof(Visibility)}: {propertyValue}");
+            }
+        }
+
+        public static TextAlignment ParseTextAlignment(List<StyleVariable> contextVariables, string propertyValue) {
+            switch (propertyValue.ToLower()) {
+                case "left":
+                    return TextAlignment.Left;
+                case "right":
+                    return TextAlignment.Right;
+                case "center":
+                case "middle":
+                    return TextAlignment.Center;
+                default:
+                    throw new ParseException($"Unknown value for {nameof(TextAlignment)}: {propertyValue}");
             }
         }
 

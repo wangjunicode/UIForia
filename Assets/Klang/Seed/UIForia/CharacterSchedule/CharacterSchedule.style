@@ -13,3 +13,51 @@ style schedule-block {
     Margin = 10px, 0px;
     BackgroundColor = grey;
 }
+
+style slot-container {
+    PreferredSize = 200px, 1cnt;
+    MarginRight = 8px;
+    Padding = 4px, 0px;
+}
+
+style slot-label {
+    PreferredWidth = 24px;
+    TextAlignment = Right;
+    PreferredHeight = 20px;
+}
+
+style schedule-container {
+    FlexLayoutDirection = Column;
+    FlexLayoutCrossAxisAlignment = End;
+    MarginBottom = 4px;
+}
+
+style schedule-slot-container {
+    FlexLayoutDirection = Column;
+    PreferredWidth = 1pca;
+}
+
+style slot-background {
+    PreferredSize = 0px, 20px;
+    FlexItemGrow = 1;
+    Margin = 2px, 4px, 1px, 2px;
+    BackgroundColor = red;
+}
+
+style work-preference-container {
+    PreferredSize = 200px, 1cnt;
+}
+
+style rounded-grey-bg {
+    BackgroundColor = rgba(75, 75, 75, 175);
+}
+
+style schedule-block {
+    LayoutType = Fixed;
+    BackgroundColor = white;
+    PreferredSize = 1pca, 24px;
+}
+
+style schedule-block-list {
+    LayoutBehavior = ignored;
+}

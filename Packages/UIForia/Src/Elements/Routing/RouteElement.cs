@@ -19,8 +19,6 @@ namespace UIForia {
         public virtual string FullPath => path;
 
         public override void OnCreate() {
-            style.SetPreferredWidth(UIMeasurement.Parent100, StyleState.Normal);
-            style.SetPreferredHeight(UIMeasurement.Parent100, StyleState.Normal);
             
             UIElement ptr = parent;
             while (ptr != null) {

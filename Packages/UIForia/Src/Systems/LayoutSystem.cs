@@ -308,7 +308,7 @@ namespace UIForia.Systems {
 
         private static Vector2 ResolveLocalPosition(LayoutBox box) {
             Vector2 localPosition = Vector2.zero;
-
+ 
             LayoutBehavior layoutBehavior = box.style.LayoutBehavior;
             TransformBehavior transformBehaviorX = box.style.TransformBehaviorX;
             TransformBehavior transformBehaviorY = box.style.TransformBehaviorY;
@@ -331,7 +331,7 @@ namespace UIForia.Systems {
                     // todo turn this into AnchorMaxMinusContentOffset;
                     // or make transform aware of content size 
                     else if (transformBehaviorY == TransformBehavior.AnchorMaxOffset) {
-                        localPosition.y = box.AnchorBottom + box.TransformY - box.allocatedHeight; // todo remove the - here and move to AnchorMaxMinusContentOffset
+                        localPosition.y = box.AnchorBottom + box.TransformY;// - box.allocatedHeight; // todo remove the - here and move to AnchorMaxMinusContentOffset
                     }
                     else {
                         localPosition.y = box.TransformY;

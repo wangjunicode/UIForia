@@ -645,7 +645,7 @@ namespace UIForia.Parsing.StyleParser {
                 new StylePropertyMapper("TextFontAsset", StylePropertyMappers.TextMapper),
                 new StylePropertyMapper("TextFontSize", StylePropertyMappers.TextMapper),
                 new StylePropertyMapper("TextFontStyle", StylePropertyMappers.TextMapper),
-                new StylePropertyMapper("TextAnchor", StylePropertyMappers.TextMapper),
+                new StylePropertyMapper("TextAlignment", StylePropertyMappers.TextMapper),
                 new StylePropertyMapper("TextWhitespaceMode", StylePropertyMappers.TextMapper),
                 new StylePropertyMapper("TextWrapMode", StylePropertyMappers.TextMapper),
                 new StylePropertyMapper("TextHorizontalOverflow", StylePropertyMappers.TextMapper),

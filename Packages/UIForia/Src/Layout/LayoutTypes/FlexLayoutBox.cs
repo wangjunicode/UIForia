@@ -18,7 +18,6 @@ namespace UIForia.Layout.LayoutTypes {
 
         public struct Item {
 
-            public int elementId;
             public float mainAxisStart;
             public float crossAxisStart;
             public float mainSize;

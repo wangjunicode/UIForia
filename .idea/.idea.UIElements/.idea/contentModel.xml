@@ -2,6 +2,7 @@
 <project version="4">
   <component name="ContentModelStore">
     <e p="C:\Seed\UIForia\UIElements" t="IncludeRecursive">
+      <e p="Assembly-CSharp-Editor.csproj" t="IncludeRecursive" />
       <e p="Assembly-CSharp.csproj" t="IncludeRecursive" />
       <e p="Assets" t="Include">
         <e p="Compiler" t="Include">
@@ -97,7 +98,6 @@
               </e>
               <e p="CharacterSchedule" t="Include">
                 <e p="CharacterSchedule.cs" t="Include" />
-                <e p="CharacterSchedule.style" t="Include" />
                 <e p="CharacterSchedule.xml" t="Include" />
               </e>
               <e p="ClippedPanel.cs" t="Include" />
@@ -169,6 +169,374 @@
                 </e>
               </e>
             </e>
+          </e>
+        </e>
+        <e p="LineWorks" t="Include">
+          <e p="Editor" t="Include">
+            <e p="LW_ElementEditor.cs" t="Include" />
+            <e p="LW_ShaderEditor.cs" t="Include" />
+          </e>
+          <e p="Examples" t="Include">
+            <e p="Scripts" t="Include">
+              <e p="Ball2DSpawner.cs" t="Include" />
+              <e p="BallLauncher.cs" t="Include" />
+              <e p="ControlPointHandler.cs" t="Include" />
+              <e p="DrawUI.cs" t="Include" />
+              <e p="ImpactRings.cs" t="Include" />
+              <e p="LevelLoader.cs" t="Include" />
+              <e p="OffsetTexture.cs" t="Include" />
+              <e p="ParallaxScroller.cs" t="Include" />
+              <e p="PingPongPosition.cs" t="Include" />
+              <e p="PingPongScale.cs" t="Include" />
+              <e p="ResizeRect.cs" t="Include" />
+              <e p="ResizeWidth.cs" t="Include" />
+              <e p="Simplify.cs" t="Include" />
+              <e p="SphereOfLines.cs" t="Include" />
+              <e p="Spin.cs" t="Include" />
+              <e p="TentacleController.cs" t="Include" />
+              <e p="Zoom.cs" t="Include" />
+            </e>
+          </e>
+          <e p="Plugins" t="Include">
+            <e p="Components" t="Include">
+              <e p="LW_Canvas.cs" t="Include" />
+            </e>
+            <e p="ScriptableObjects" t="Include">
+              <e p="LW_Appearance.cs" t="Include" />
+              <e p="LW_Circle.cs" t="Include" />
+              <e p="LW_Collider.cs" t="Include" />
+              <e p="LW_Element.cs" t="Include" />
+              <e p="LW_Ellipse.cs" t="Include" />
+              <e p="LW_Fill.cs" t="Include" />
+              <e p="LW_Graphic.cs" t="Include" />
+              <e p="LW_Group.cs" t="Include" />
+              <e p="LW_Line.cs" t="Include" />
+              <e p="LW_Marker.cs" t="Include" />
+              <e p="LW_Path2D.cs" t="Include" />
+              <e p="LW_Path3D.cs" t="Include" />
+              <e p="LW_Point2D.cs" t="Include" />
+              <e p="LW_Point2DShape.cs" t="Include" />
+              <e p="LW_Point3D.cs" t="Include" />
+              <e p="LW_Point3DShape.cs" t="Include" />
+              <e p="LW_PointsShape.cs" t="Include" />
+              <e p="LW_Polygon.cs" t="Include" />
+              <e p="LW_Polyline2D.cs" t="Include" />
+              <e p="LW_Polyline3D.cs" t="Include" />
+              <e p="LW_Rectangle.cs" t="Include" />
+              <e p="LW_Shape.cs" t="Include" />
+              <e p="LW_Star.cs" t="Include" />
+              <e p="LW_Stroke.cs" t="Include" />
+              <e p="LW_Style.cs" t="Include" />
+              <e p="LW_Styles.cs" t="Include" />
+              <e p="LW_Vector2Shape.cs" t="Include" />
+              <e p="LW_Vector3Shape.cs" t="Include" />
+              <e p="PointType.cs" t="Include" />
+            </e>
+            <e p="Support" t="Include">
+              <e p="LW_Buffer.cs" t="Include" />
+              <e p="LW_Pool.cs" t="Include" />
+              <e p="LW_Simplifier.cs" t="Include" />
+              <e p="LW_SVGParser.cs" t="Include" />
+              <e p="LW_Utilities.cs" t="Include" />
+              <e p="Third Party Libraries" t="Include">
+                <e p="CssParser" t="Include">
+                  <e p="CssParser.cs" t="Include" />
+                  <e p="License.txt" t="Include" />
+                  <e p="TextParser.cs" t="Include" />
+                </e>
+                <e p="LibTessDotNet" t="Include">
+                  <e p="Dict.cs" t="Include" />
+                  <e p="Geom.cs" t="Include" />
+                  <e p="License.txt" t="Include" />
+                  <e p="Mesh.cs" t="Include" />
+                  <e p="MeshUtils.cs" t="Include" />
+                  <e p="PriorityHeap.cs" t="Include" />
+                  <e p="PriorityQueue.cs" t="Include" />
+                  <e p="Sweep.cs" t="Include" />
+                  <e p="Tess.cs" t="Include" />
+                </e>
+              </e>
+            </e>
+          </e>
+          <e p="readme.txt" t="Include" />
+          <e p="Shaders" t="Include">
+            <e p="Resources" t="Include">
+              <e p="LineWorks.cginc" t="Include" />
+              <e p="LW_Shader.shader" t="Include" />
+            </e>
+          </e>
+        </e>
+        <e p="SVG Importer" t="Include">
+          <e p="Editor" t="Include">
+            <e p="AssetPostprocessor" t="Include">
+              <e p="SVGPostprocessor.cs" t="Include" />
+            </e>
+            <e p="Core" t="Include">
+              <e p="SVGAssetEditor.cs" t="Include" />
+              <e p="SVGAtlasEditor.cs" t="Include" />
+              <e p="SVGBlurModifierEditor.cs" t="Include" />
+              <e p="SVGColliderEditor.cs" t="Include" />
+              <e p="SVGFrameAnimatorEditor.cs" t="Include" />
+              <e p="SVGImageEditor.cs" t="Include" />
+              <e p="SVGImporterEditor.cs" t="Include" />
+              <e p="SVGModifierEditor.cs" t="Include" />
+              <e p="SVGRendererEditor.cs" t="Include" />
+              <e p="SVGUVModifierEditor.cs" t="Include" />
+            </e>
+            <e p="Debug" t="Include">
+              <e p="SVGDebugLayersEditor.cs" t="Include" />
+              <e p="SVGDebugMeshEditor.cs" t="Include" />
+            </e>
+            <e p="PropertyDrawers" t="Include">
+              <e p="SVGBoundsPropertyDrawer.cs" t="Include" />
+            </e>
+            <e p="Shader" t="Include">
+              <e p="StandardSVGShaderGUI.cs" t="Include" />
+            </e>
+            <e p="Utils" t="Include">
+              <e p="Coroutines" t="Include">
+                <e p="EditorCoroutine.cs" t="Include" />
+              </e>
+              <e p="MenuOptions.cs" t="Include" />
+              <e p="SVGEditorHandles.cs" t="Include" />
+              <e p="SVGGizmos.cs" t="Include" />
+              <e p="SVGGUI.cs" t="Include" />
+              <e p="SVGHandles.cs" t="Include" />
+              <e p="SVGImporterLaunchEditor.cs" t="Include" />
+              <e p="SVGImporterSettingsEditor.cs" t="Include" />
+            </e>
+            <e p="Windows" t="Include">
+              <e p="ModalWindow.cs" t="Include" />
+              <e p="SVGAboutWindow.cs" t="Include" />
+              <e p="SVGEditorUtility.cs" t="Include" />
+              <e p="SVGEditorWindow.cs" t="Include" />
+              <e p="SVGReportBugWindow.cs" t="Include" />
+              <e p="SVGUtilityWindow.cs" t="Include" />
+            </e>
+          </e>
+          <e p="Example Projects" t="Include">
+            <e p="Curves Demo" t="Include">
+              <e p="Scripts" t="Include">
+                <e p="Animation" t="Include">
+                  <e p="AnimationActions.cs" t="Include" />
+                </e>
+                <e p="Audio" t="Include">
+                  <e p="AudioCameraZoom.cs" t="Include" />
+                  <e p="AudioColor.cs" t="Include" />
+                  <e p="AudioEvent.cs" t="Include" />
+                  <e p="AudioMove.cs" t="Include" />
+                  <e p="AudioRotate.cs" t="Include" />
+                  <e p="AudioScale.cs" t="Include" />
+                  <e p="AudioSpectrum.cs" t="Include" />
+                </e>
+                <e p="Camera" t="Include">
+                  <e p="CameraSorting.cs" t="Include" />
+                </e>
+                <e p="Layout" t="Include">
+                  <e p="Instanced.cs" t="Include" />
+                  <e p="Instancer.cs" t="Include" />
+                  <e p="InstancerGrid.cs" t="Include" />
+                  <e p="InstancerSpiral.cs" t="Include" />
+                </e>
+                <e p="Utils" t="Include">
+                  <e p="OpenUrl.cs" t="Include" />
+                </e>
+              </e>
+            </e>
+            <e p="Hologram Demo" t="Include">
+              <e p="Scripts" t="Include">
+                <e p="HologramController.cs" t="Include" />
+              </e>
+            </e>
+            <e p="Realtime Import Demo" t="Include">
+              <e p="Scripts" t="Include">
+                <e p="RealtimeImportDemo.cs" t="Include" />
+              </e>
+            </e>
+          </e>
+          <e p="Plugins" t="Include">
+            <e p="Clipper" t="Include">
+              <e p="clipper.cs" t="Include" />
+              <e p="SVGClipPath.cs" t="Include" />
+            </e>
+            <e p="Core" t="Include">
+              <e p="Animation" t="Include">
+                <e p="SVGFrameAnimator.cs" t="Include" />
+                <e p="SVGLegacyAnimator.cs" t="Include" />
+              </e>
+              <e p="Data" t="Include">
+                <e p="QuadTree.cs" t="Include" />
+                <e p="SVGDepthTree.cs" t="Include" />
+                <e p="SVGImporterSettings.cs" t="Include" />
+                <e p="SVGLineData.cs" t="Include" />
+              </e>
+              <e p="Fills" t="Include">
+                <e p="CCGradient.cs" t="Include" />
+                <e p="SVGFill.cs" t="Include" />
+              </e>
+              <e p="Implementation" t="Include">
+                <e p="CSS" t="Include">
+                  <e p="CssParser.cs" t="Include" />
+                </e>
+                <e p="RenderingEngine" t="Include">
+                  <e p="SVGConicalGradientBrush.cs" t="Include" />
+                  <e p="SVGGraphics.cs" t="Include" />
+                  <e p="SVGLinearGradientBrush.cs" t="Include" />
+                  <e p="SVGRadialGradientBrush.cs" t="Include" />
+                </e>
+                <e p="SVG" t="Include">
+                  <e p="DOM" t="Include">
+                    <e p="BasicShapes" t="Include">
+                      <e p="SVGCircleElement.cs" t="Include" />
+                      <e p="SVGEllipseElement.cs" t="Include" />
+                      <e p="SVGLineElement.cs" t="Include" />
+                      <e p="SVGPolygonElement.cs" t="Include" />
+                      <e p="SVGPolylineElement.cs" t="Include" />
+                      <e p="SVGRectElement.cs" t="Include" />
+                    </e>
+                    <e p="BasicTypes" t="Include">
+                      <e p="SVGColor.cs" t="Include" />
+                      <e p="SVGLength.cs" t="Include" />
+                      <e p="SVGPaintable.cs" t="Include" />
+                      <e p="SVGParentable.cs" t="Include" />
+                      <e p="SVGTransformable.cs" t="Include" />
+                    </e>
+                    <e p="Coordinate_Transform_Units" t="Include">
+                      <e p="SVGMatrix.cs" t="Include" />
+                      <e p="SVGTransform.cs" t="Include" />
+                      <e p="SVGTransformList.cs" t="Include" />
+                    </e>
+                    <e p="DocumentStructure" t="Include">
+                      <e p="SVGDocument.cs" t="Include" />
+                      <e p="SVGElement.cs" t="Include" />
+                    </e>
+                    <e p="GradientsNPatterns" t="Include">
+                      <e p="SVGConicalGradientElement.cs" t="Include" />
+                      <e p="SVGGradientElement.cs" t="Include" />
+                      <e p="SVGLinearGradientElement.cs" t="Include" />
+                      <e p="SVGRadialGradientElement.cs" t="Include" />
+                      <e p="SVGStopElement.cs" t="Include" />
+                    </e>
+                    <e p="Others" t="Include">
+                      <e p="SVGClipPathElement.cs" t="Include" />
+                    </e>
+                    <e p="Paths" t="Include">
+                      <e p="Interfaces" t="Include">
+                        <e p="ISVGDrawable.cs" t="Include" />
+                        <e p="ISVGElement.cs" t="Include" />
+                      </e>
+                      <e p="SVGPathElement.cs" t="Include" />
+                      <e p="SVGPathSeg.cs" t="Include" />
+                      <e p="SVGPathSegArcAbs.cs" t="Include" />
+                      <e p="SVGPathSegArcRel.cs" t="Include" />
+                      <e p="SVGPathSegClosePath.cs" t="Include" />
+                      <e p="SVGPathSegCurvetoCubic.cs" t="Include" />
+                      <e p="SVGPathSegCurvetoCubicAbs.cs" t="Include" />
+                      <e p="SVGPathSegCurvetoCubicRel.cs" t="Include" />
+                      <e p="SVGPathSegCurvetoCubicSmoothAbs.cs" t="Include" />
+                      <e p="SVGPathSegCurvetoCubicSmoothRel.cs" t="Include" />
+                      <e p="SVGPathSegCurvetoQuadratic.cs" t="Include" />
+                      <e p="SVGPathSegCurvetoQuadraticAbs.cs" t="Include" />
+                      <e p="SVGPathSegCurvetoQuadraticRel.cs" t="Include" />
+                      <e p="SVGPathSegCurvetoQuadraticSmoothAbs.cs" t="Include" />
+                      <e p="SVGPathSegCurvetoQuadraticSmoothRel.cs" t="Include" />
+                      <e p="SVGPathSegLinetoAbs.cs" t="Include" />
+                      <e p="SVGPathSegLinetoHorizontalAbs.cs" t="Include" />
+                      <e p="SVGPathSegLinetoHorizontalRel.cs" t="Include" />
+                      <e p="SVGPathSegLinetoRel.cs" t="Include" />
+                      <e p="SVGPathSegLinetoVerticalAbs.cs" t="Include" />
+                      <e p="SVGPathSegLinetoVerticalRel.cs" t="Include" />
+                      <e p="SVGPathSegList.cs" t="Include" />
+                      <e p="SVGPathSegMovetoAbs.cs" t="Include" />
+                      <e p="SVGPathSegMovetoRel.cs" t="Include" />
+                    </e>
+                    <e p="Utilities" t="Include">
+                      <e p="DOMException.cs" t="Include" />
+                      <e p="LiteStack.cs" t="Include" />
+                      <e p="SVGColorExtractor.cs" t="Include" />
+                      <e p="SVGException.cs" t="Include" />
+                      <e p="SVGLengthConvertor.cs" t="Include" />
+                      <e p="SVGStringExtractor.cs" t="Include" />
+                      <e p="SVGViewport.cs" t="Include" />
+                    </e>
+                  </e>
+                </e>
+                <e p="XML Parser" t="Include">
+                  <e p="AttributeList.cs" t="Include" />
+                  <e p="SmallXmlParser.cs" t="Include" />
+                  <e p="SVGParser.cs" t="Include" />
+                </e>
+              </e>
+              <e p="Interfaces" t="Include">
+                <e p="ISVGModify.cs" t="Include" />
+                <e p="ISVGReference.cs" t="Include" />
+                <e p="ISVGRenderer.cs" t="Include" />
+                <e p="ISVGShape.cs" t="Include" />
+              </e>
+              <e p="Math" t="Include">
+                <e p="SVGBezier.cs" t="Include" />
+                <e p="SVGBounds.cs" t="Include" />
+                <e p="SVGGeom.cs" t="Include" />
+                <e p="SVGMath.cs" t="Include" />
+              </e>
+              <e p="Mesh" t="Include">
+                <e p="SVGCombineMesh.cs" t="Include" />
+                <e p="SVGGeomUtils.cs" t="Include" />
+                <e p="SVGLineUtils.cs" t="Include" />
+                <e p="SVGMesh.cs" t="Include" />
+                <e p="SVGMeshCutter.cs" t="Include" />
+                <e p="SVGMeshUtils.cs" t="Include" />
+                <e p="SVGSimplePath.cs" t="Include" />
+              </e>
+              <e p="Modifiers" t="Include">
+                <e p="SVGBlurModifier.cs" t="Include" />
+                <e p="SVGColorModifier.cs" t="Include" />
+                <e p="SVGModifier.cs" t="Include" />
+                <e p="SVGSphereModifier.cs" t="Include" />
+                <e p="SVGTwirlModifier.cs" t="Include" />
+                <e p="SVGUVModifier.cs" t="Include" />
+              </e>
+              <e p="StrokeRendererLegacy.cs" t="Include" />
+              <e p="SVGAsset.cs" t="Include" />
+              <e p="SVGAssetImport.cs" t="Include" />
+              <e p="SVGAtlas.cs" t="Include" />
+              <e p="SVGCollider2D.cs" t="Include" />
+              <e p="SVGDocumentAsset.cs" t="Include" />
+              <e p="SVGImage.cs" t="Include" />
+              <e p="SVGPath.cs" t="Include" />
+              <e p="SVGRenderer.cs" t="Include" />
+              <e p="SVGRenderTexture.cs" t="Include" />
+              <e p="SVGSorter.cs" t="Include" />
+              <e p="SVGStrokeRenderer.cs" t="Include" />
+            </e>
+            <e p="Debug" t="Include">
+              <e p="DebugSVGLayers.cs" t="Include" />
+              <e p="SVGDebug.cs" t="Include" />
+              <e p="SVGDebugMesh.cs" t="Include" />
+              <e p="SVGDebugPoints.cs" t="Include" />
+            </e>
+            <e p="LibTessDotNet" t="Include">
+              <e p="Dict.cs" t="Include" />
+              <e p="Geom.cs" t="Include" />
+              <e p="Mesh.cs" t="Include" />
+              <e p="MeshUtils.cs" t="Include" />
+              <e p="PriorityHeap.cs" t="Include" />
+              <e p="PriorityQueue.cs" t="Include" />
+              <e p="Sweep.cs" t="Include" />
+              <e p="Tess.cs" t="Include" />
+            </e>
+            <e p="Utils" t="Include">
+              <e p="FileSizeFormatProvider.cs" t="Include" />
+              <e p="SVGArrayUtils.cs" t="Include" />
+              <e p="SVGShader.cs" t="Include" />
+              <e p="SVGTransform2D.cs" t="Include" />
+              <e p="SVGUtils.cs" t="Include" />
+            </e>
+          </e>
+        </e>
+        <e p="SVG Importer Tests" t="Include">
+          <e p="Tests" t="Include">
+            <e p="BindPoseExample.cs" t="Include" />
           </e>
         </e>
         <e p="TextMesh Pro" t="Include">
@@ -451,11 +819,6 @@
               <e p="AstNodes" t="Include">
                 <e p="ASTNode.cs" t="Include" />
                 <e p="FieldNotDefinedException.cs" t="Include" />
-                <e p="LiteralNode.cs" t="Include" />
-                <e p="OperatorType.cs" t="Include" />
-              </e>
-              <e p="ASTNodes2" t="Include">
-                <e p="ASTNode.cs" t="Include" />
                 <e p="IdentifierNode.cs" t="Include" />
                 <e p="LiteralNode.cs" t="Include" />
                 <e p="OperatorNode.cs" t="Include" />

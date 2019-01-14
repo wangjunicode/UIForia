@@ -2,7 +2,6 @@
 // Todo 
 - Support style skinning
 - Support handlers for list events (add, remove, move)
-- Support <Slot> elements
 - Filter Lists
 - Support arbitrary creation of child nodes?
 - Smart attributes (tooltip, route, etc)
@@ -15,6 +14,9 @@
 - grid might respect fit-content, fill-content
 - investigate anchoring more deeply
 - make sure transform offsets work
+- expose a better way to destroy elements
+- render system v3
+- text needs a full re-do
 
 <Template id="content">
     
@@ -36,13 +38,10 @@ Critical
     Opacity
     
 Nice to have
-    LayoutDefault to Flow
-    Implement Flow
     fill modes
     shapes
     masks?
     make false mouse cursor for debug
-    handle nested repeat being null bug
     finish animations
     animations in style sheet
     attributes + eventing

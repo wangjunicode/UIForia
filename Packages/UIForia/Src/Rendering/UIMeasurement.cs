@@ -52,7 +52,7 @@ namespace UIForia {
 
         public override bool Equals(object obj) {
             if (ReferenceEquals(null, obj)) return false;
-            return obj is UIMeasurement && Equals((UIMeasurement) obj);
+            return obj is UIMeasurement a && Equals(a);
         }
 
         public override int GetHashCode() {

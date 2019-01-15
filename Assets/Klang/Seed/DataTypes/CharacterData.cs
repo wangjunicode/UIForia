@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using UIForia.Util;
 
 namespace Klang.Seed.DataTypes {
 
@@ -12,7 +13,7 @@ namespace Klang.Seed.DataTypes {
         public bool isInDirectControl;
         public string statusIconUrl;
 
-        public List<CharacterSkill> skills;
+        public RepeatableList<CharacterSkill> skills;
 
     }
 

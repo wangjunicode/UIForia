@@ -8,13 +8,13 @@ public enum UIElementFlags {
     ImplicitElement = 1 << 1,
     
 //    RequiresLayout = 1 << 2,
-    RequiresRendering = 1 << 3,
+   // RequiresRendering = 1 << 3,
     
     Enabled = 1 << 4,
     AncestorEnabled = 1 << 5,
     
-    Shown = 1 << 6,
-    AncestorShown = 1 << 7,
+  //  Shown = 1 << 6,
+  //  AncestorShown = 1 << 7,
     
     Destroyed = 1 << 8,
     AncestorDestroyed = 1 << 9,
@@ -34,7 +34,7 @@ public enum UIElementFlags {
     Created = 1 << 18,
     VirtualElement = 1 << 19,
     TemplateRoot = 1 << 20,
-    SelfAndAncestorShown = Shown | AncestorShown,
+   // SelfAndAncestorShown = Shown | AncestorShown,
     SelfAndAncestorEnabled = Enabled | AncestorEnabled,
 
 

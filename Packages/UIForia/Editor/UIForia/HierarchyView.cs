@@ -79,9 +79,10 @@ public class HierarchyView : TreeView {
             ElementTreeItem current = stack.Pop();
             UIElement element = current.element;
 
-            UIElement[] ownChildren = element.children;
+            List<UIElement> ownChildren = element.GetChildren();
 
-            if (ownChildren == null) {
+            if (ownChildren.Count == 0) {
+                ListPool<UIElement>.Release(ref ownChildren);
                 continue;
             }
 
@@ -103,7 +104,7 @@ public class HierarchyView : TreeView {
 //                }
 //            }
 
-            for (int i = 0; i < ownChildren.Length; i++) {
+            for (int i = 0; i < ownChildren.Count; i++) {
                 ElementTreeItem childItem = new ElementTreeItem(ownChildren[i]);
                 childItem.displayName = ownChildren[i].ToString();
                 current.AddChild(childItem);

@@ -454,7 +454,7 @@ public abstract class InputSystem : IInputSystem, IInputProvider {
             return;
         }
 
-        for (int i = 0; i < element.children.Length; i++) {
+        for (int i = 0; i < element.children.Count; i++) {
             OnElementCreated(element.children[i]);
         }
     }

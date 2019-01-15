@@ -1111,7 +1111,7 @@ namespace UIForia.Compilers {
             Expression retn = null;
 
             if (node.IsAlias) {
-                for (int i = 0; i < aliasResolvers.Length; i++) {
+                for (int i = 0; i < aliasResolvers.Count; i++) {
                     if (aliasResolvers[i].aliasName == fieldName) {
                         // root type, target type, element type
                         CompilerContext context = new CompilerContext(this, rootType, targetType, currentType, node);

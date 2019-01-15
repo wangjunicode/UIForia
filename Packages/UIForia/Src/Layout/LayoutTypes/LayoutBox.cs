@@ -415,7 +415,7 @@ namespace UIForia.Layout.LayoutTypes {
             if (element.parent == null) return 0;
 
             int idx = 0;
-            for (int i = 0; i < element.parent.children.Length; i++) {
+            for (int i = 0; i < element.parent.children.Count; i++) {
                 UIElement sibling = element.parent.children[i];
                 if (sibling == element) {
                     break;
@@ -557,8 +557,7 @@ namespace UIForia.Layout.LayoutTypes {
                         return 0f;
                     }
 
-                    return Mathf.Max(0, parent.allocatedWidth - parent.PaddingBorderHorizontal) *
-                           widthMeasurement.value;
+                    return Mathf.Max(0, parent.allocatedWidth - parent.PaddingBorderHorizontal) * widthMeasurement.value;
 
                 case UIMeasurementUnit.Em:
                     return Math.Max(0, style.EmSize * widthMeasurement.value) * view.ScaleFactor;

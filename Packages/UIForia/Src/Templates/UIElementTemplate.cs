@@ -135,21 +135,21 @@ namespace UIForia {
             if (inputSlotContent != null) {
                 scope.slotContents = inputSlotContent;
             }
-            
-            element.children = ArrayPool<UIElement>.GetExactSize(actualChildren.Count);
+
+            element.children = LightListPool<UIElement>.Get();
 
             element.templateParent = null;
             element.templateContext = new ExpressionContext(element, element);
 
-            for (int i = 0; i < element.children.Length; i++) {
-                element.children[i] = actualChildren[i].CreateScoped(scope);
+            for (int i = 0; i < actualChildren.Count; i++) {
+                element.children.Add(actualChildren[i].CreateScoped(scope));
                 element.children[i].parent = element;
                 element.children[i].templateParent = element;
             }
 
             UIChildrenElement childrenElement = element.TranscludedChildren;
             if (childrenElement != null) {
-                childrenElement.children = ArrayPool<UIElement>.Empty;
+                childrenElement.children = LightListPool<UIElement>.Get();
             }
 
             return element;
@@ -166,9 +166,9 @@ namespace UIForia {
 
             TemplateScope scope = new TemplateScope(element);
 
-            int childCount = templateToExpand.childTemplates.Count;
+            //int childCount = templateToExpand.childTemplates.Count;
 
-            element.children = ArrayPool<UIElement>.GetExactSize(childCount);
+            element.children =  LightListPool<UIElement>.Get();
             element.templateContext = new ExpressionContext(inputScope.rootElement, element);
             scope.slotContents = slotContentTemplates;
             
@@ -177,9 +177,9 @@ namespace UIForia {
             UIChildrenElement childrenElement = element.TranscludedChildren;
 
             if (childrenElement != null) {
-                childrenElement.children = new UIElement[childTemplates.Count];
-                for (int i = 0; i < childrenElement.children.Length; i++) {
-                    childrenElement.children[i] = childTemplates[i].CreateScoped(inputScope);
+                childrenElement.children = LightListPool<UIElement>.Get();
+                for (int i = 0; i < childTemplates.Count; i++) {
+                    childrenElement.children.Add(childTemplates[i].CreateScoped(inputScope));
                     childrenElement.children[i].parent = childrenElement;
                     childrenElement.children[i].templateParent = element;
                 }

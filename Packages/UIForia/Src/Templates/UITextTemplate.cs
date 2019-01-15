@@ -66,7 +66,7 @@ namespace UIForia {
 
         public override UIElement CreateScoped(TemplateScope inputScope) {
             UIElement retn = new UITextElement();
-            retn.children = ArrayPool<UIElement>.Empty;
+            retn.children = LightListPool<UIElement>.Get();
             retn.OriginTemplate = this;
             retn.templateContext = new ExpressionContext(inputScope.rootElement, retn);
             return retn;

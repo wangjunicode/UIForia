@@ -3,6 +3,7 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Reflection;
 using UIForia.Compilers;
+using UIForia.Util;
 
 namespace UIForia {
 
@@ -71,6 +72,7 @@ namespace UIForia {
 
             genericArgType = listExpression.YieldedType;
 
+            
             lengthAlias = "$length";
             indexAlias = "$index";
             itemAlias = "$item";

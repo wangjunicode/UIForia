@@ -64,7 +64,7 @@ namespace UIForia.Routing {
 
             historyIndex--;
             Route route = m_HistoryStack[historyIndex];
-            for (int i = 0; i < m_Handlers.Length; i++) {
+            for (int i = 0; i < m_Handlers.Count; i++) {
                 m_Handlers[i].OnRouteChanged(route);
             }
 
@@ -80,7 +80,7 @@ namespace UIForia.Routing {
                 return false;
             }
 
-            for (int i = 0; i < m_Handlers.Length; i++) {
+            for (int i = 0; i < m_Handlers.Count; i++) {
                 m_Handlers[i].OnRouteChanged(route);
             }
 
@@ -92,7 +92,7 @@ namespace UIForia.Routing {
         }
 
         private bool IsTransitionBlocked(Route route) {
-            for (int i = 0; i < m_Guards.Length; i++) {
+            for (int i = 0; i < m_Guards.Count; i++) {
                 if (!m_Guards[i].CanTransition(current, route)) {
                     return true;
                 }

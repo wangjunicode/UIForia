@@ -17,9 +17,9 @@ namespace UIForia.Util {
 
         public T[] List => list;
         public int Count => size;
+        
         public bool IsReadOnly => false;
 
-        public int Length => size;
         public int Capacity => list.Length;
 
         public void Add(T item) {
@@ -93,13 +93,16 @@ namespace UIForia.Util {
         }
 
         public void Insert(int index, T item) {
-            Add(item);
-            index = Mathf.Clamp(index, 0, size);
+            if (size + 1 >= list.Length) {
+                ArrayPool<T>.Resize(ref list, (size + 1) * 2);
+            }
+            size++;
+            index = Mathf.Clamp(index, 0, size - 1);
             for (int i = index; i < size; i++) {
                 list[i + 1] = list[i];
             }
 
-            list[index] = list[size - 1];
+            list[index] = item;
         }
 
         public void InsertRange(int index, IEnumerable<T> collection) {
@@ -144,7 +147,7 @@ namespace UIForia.Util {
             size--;
             return retn;
         }
-        
+
         public void RemoveAt(int index) {
             if ((uint) index >= (uint) size) return;
             if (index == size - 1) {
@@ -154,6 +157,7 @@ namespace UIForia.Util {
                 for (int j = index; j < size - 1; j++) {
                     list[j] = list[j + 1];
                 }
+
                 list[--size] = default(T);
             }
         }

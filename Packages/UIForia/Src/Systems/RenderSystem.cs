@@ -67,7 +67,7 @@ namespace UIForia.Systems {
             for (int i = 0; i < m_ToInitialize.Count; i++) {
                 UIElement element = list[i];
 
-                if (element.isDisabled || (element.flags & UIElementFlags.RequiresRendering) == 0) {
+                if (element.isDisabled) {
                     continue;
                 }
                 
@@ -223,7 +223,7 @@ namespace UIForia.Systems {
                 m_ToInitialize.Add(current);
 
                 if (current.children != null) {
-                    for (int i = 0; i < current.children.Length; i++) {
+                    for (int i = 0; i < current.children.Count; i++) {
                         stack.Push(current.children[i]);
                     }
                 }
@@ -253,7 +253,7 @@ namespace UIForia.Systems {
                 }
 
                 if (current.children != null) {
-                    for (int i = 0; i < current.children.Length; i++) {
+                    for (int i = 0; i < current.children.Count; i++) {
                         stack.Push(current.children[i]);
                     }
                 }
@@ -277,7 +277,7 @@ namespace UIForia.Systems {
                 return;
             }
 
-            for (int i = 0; i < element.children.Length; i++) {
+            for (int i = 0; i < element.children.Count; i++) {
                 OnElementCreated(element.children[i]);
             }
         }

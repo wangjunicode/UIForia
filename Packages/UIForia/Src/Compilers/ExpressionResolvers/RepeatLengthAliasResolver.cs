@@ -25,7 +25,7 @@ namespace UIForia.Compilers {
                 while (ptr != null) {
                     if (ptr is UIRepeatElement repeatElement) {
                         if (repeatElement.lengthAlias == lengthAlias) {
-                            return repeatElement.children.Length;
+                            return repeatElement.children.Count;
                         }
                     }
 

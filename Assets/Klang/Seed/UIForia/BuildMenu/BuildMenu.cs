@@ -42,18 +42,18 @@ namespace UI {
         public void Toggle(int index) {
             UIRepeatElement repeatElement = FindFirstByType<UIRepeatElement>();
 
-            for (int i = 0; i < repeatElement.children.Length; i++) {
-                UIElement child = repeatElement.children[i];
-                if (i == index) {
-                    child.style.PlayAnimation(OffsetAnimation(-30f));
-                    for (int j = 0; j < child.children.Length; j++) {
-                        child.children[j].style.PlayAnimation(FadeIn(Color.blue, 0.3f + (j * 0.2f)));
-                    }
-                }
-                else {
-                    child.style.PlayAnimation(OffsetAnimation(30f));
-                }
-            }
+//            for (int i = 0; i < repeatElement.children.Length; i++) {
+//                UIElement child = repeatElement.children[i];
+//                if (i == index) {
+//                    child.style.PlayAnimation(OffsetAnimation(-30f));
+//                    for (int j = 0; j < child.children.Length; j++) {
+//                        child.children[j].style.PlayAnimation(FadeIn(Color.blue, 0.3f + (j * 0.2f)));
+//                    }
+//                }
+//                else {
+//                    child.style.PlayAnimation(OffsetAnimation(30f));
+//                }
+//            }
         }
 
         private static StyleAnimation FadeIn(Color c, float delay) {

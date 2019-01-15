@@ -78,7 +78,7 @@ namespace UIForia.Routing {
                 RouteMatch route = string.IsNullOrEmpty(path) ? parentRoute.CurrentMatch : CurrentMatch;
                 Update(route); // todo -- not sure about this
                 RouteElement[] routes = m_ChildRoutes.List;
-                for (int i = 0; i < m_ChildRoutes.Length; i++) {
+                for (int i = 0; i < m_ChildRoutes.Count; i++) {
                     RouteMatch childMatch;
                     if (routes[i].TryMatch(route, out childMatch)) {
                         if (activeChild == routes[i]) {
@@ -111,7 +111,7 @@ namespace UIForia.Routing {
         public override void Enter(RouteMatch route) {
             base.Enter(route);
             RouteElement[] routes = m_ChildRoutes.List;
-            for (int i = 0; i < m_ChildRoutes.Length; i++) {
+            for (int i = 0; i < m_ChildRoutes.Count; i++) {
                 RouteMatch childMatch;
                 if (routes[i].TryMatch(route, out childMatch)) {
                     activeChild = routes[i];

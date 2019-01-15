@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using UIForia.Util;
 
 namespace Klang.Seed.DataTypes {
 
@@ -7,7 +8,7 @@ namespace Klang.Seed.DataTypes {
         public string name;
         public string leader;
         public string description;
-        public List<string> players;
+        public RepeatableList<string> players;
         public string startedDate;
         public int seeds;
 

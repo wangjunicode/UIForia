@@ -75,7 +75,8 @@ namespace UIForia.Editor {
                 UIView = targetView;
                 needsReload = true;
                 treeView.view = targetView;
-                targetView.Application.onElementCreated += OnElementCreated;
+                targetView.Application.onElementCreated += OnElementCreatedOrDestroyed;
+                targetView.Application.onElementDestroyed += OnElementCreatedOrDestroyed;
                 targetView.Application.onRefresh += OnRefresh;
                 targetView.Application.RenderSystem.DrawDebugOverlay += HandleDrawCallback;
             }
@@ -86,7 +87,8 @@ namespace UIForia.Editor {
                 }
 
                 if (targetView != null) {
-                    targetView.Application.onElementCreated -= OnElementCreated;
+                    targetView.Application.onElementCreated -= OnElementCreatedOrDestroyed;
+                    targetView.Application.onElementDestroyed -= OnElementCreatedOrDestroyed;
                     targetView.Application.onRefresh -= OnRefresh;
                     targetView.Application.RenderSystem.DrawDebugOverlay -= HandleDrawCallback;
                 }
@@ -119,10 +121,10 @@ namespace UIForia.Editor {
             camera.farClipPlane = 10000f;
         }
 
-        private void OnElementCreated(UIElement element) {
+        private void OnElementCreatedOrDestroyed(UIElement element) {
             needsReload = true;
         }
-
+       
         public void OnGUI() {
             EditorGUILayout.BeginVertical();
 

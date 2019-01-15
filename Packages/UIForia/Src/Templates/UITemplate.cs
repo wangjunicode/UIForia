@@ -101,14 +101,14 @@ namespace UIForia {
                 if (templates[i] is UISlotTemplate slotTemplate) {
                     UISlotContentTemplate contentTemplate = inputScope.FindSlotContent(slotTemplate.SlotName);
                     if (contentTemplate != null) {
-                        element.children[i] = slotTemplate.CreateWithContent(inputScope, contentTemplate.childTemplates);
+                        element.children.Add(slotTemplate.CreateWithContent(inputScope, contentTemplate.childTemplates));
                     }
                     else {
-                        element.children[i] = slotTemplate.CreateWithDefault(inputScope);
+                        element.children.Add(slotTemplate.CreateWithDefault(inputScope));
                     }
                 }
                 else {
-                    element.children[i] = templates[i].CreateScoped(inputScope);
+                    element.children.Add(templates[i].CreateScoped(inputScope));
                 }
 
                 element.children[i].parent = element;

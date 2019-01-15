@@ -54,7 +54,7 @@ namespace UIForia.Systems {
             element.style.Initialize();
 
             if (element.children != null) {
-                for (int i = 0; i < element.children.Length; i++) {
+                for (int i = 0; i < element.children.Count; i++) {
                     OnElementCreated(element.children[i]);
                 }
             }
@@ -140,7 +140,7 @@ namespace UIForia.Systems {
                 property = parentProperty;
             }
             
-            for (int i = 0; i < element.children.Length; i++) {
+            for (int i = 0; i < element.children.Count; i++) {
                 s_ElementStack.Push(element.children[i]);
             }
 
@@ -157,7 +157,7 @@ namespace UIForia.Systems {
                     continue;
                 }
 
-                for (int i = 0; i < descendent.children.Length; i++) {
+                for (int i = 0; i < descendent.children.Count; i++) {
                     s_ElementStack.Push(descendent.children[i]);
                 }
             }

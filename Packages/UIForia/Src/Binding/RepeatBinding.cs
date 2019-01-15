@@ -9,9 +9,9 @@ public class RepeatBindingNode : BindingNode {
 
 }
 
-public class RepeatBindingNode<T, U> : RepeatBindingNode where T : class, IList<U>, new() {
+public class RepeatBindingNode<T, U> : RepeatBindingNode where T : RepeatableList<U>, new() {
 
-    private UIRepeatElement<U> repeat;
+    private readonly UIRepeatElement<U> repeat;
     private readonly Expression<T> listExpression;
     private T previousReference;
 
@@ -20,9 +20,35 @@ public class RepeatBindingNode<T, U> : RepeatBindingNode where T : class, IList<
         this.listExpression = listExpression;
     }
 
+    private void OnItemInserted(U item, int index) {
+        UIElement newItem = template.CreateScoped(repeat.scope);
+        newItem.parent = element;
+        newItem.templateParent = element;
+        // root object isn't being assigned. make it assigned 
+        newItem.templateContext.rootObject = element.templateContext.rootObject;
+        element.children.Insert(index, newItem);
+        element.view.Application.RegisterElement(newItem);
+    }
+
+    private void OnItemRemoved(U item, int index) {
+        Application.DestroyElement(element.children[index]);
+    }
+
+    private void OnItemMoved(U item, int index, int newIndex) {
+        throw new NotImplementedException();
+    }
+
+    private void OnClear() {
+        element.view.Application.DestroyChildren(element);
+    }
+
     public void Validate() {
         T list = listExpression.Evaluate(context);
         repeat.list = list;
+
+        // if we get a new list entirely -> nuke the world & rebuild
+        // if get get null -> nuke the world
+        // if we get the same list -> process changes
 
         if (list == null || list.Count == 0) {
             if (previousReference == null) {
@@ -30,71 +56,41 @@ public class RepeatBindingNode<T, U> : RepeatBindingNode where T : class, IList<
             }
 
             repeat.listBecameEmpty = previousReference.Count > 0;
-
-            previousReference.Clear();
             previousReference = null;
-
             element.view.Application.DestroyChildren(element);
             return;
         }
 
-        if (previousReference == null) {
-            previousReference = new T();
-            element.children = ArrayPool<UIElement>.GetExactSize(list.Count);
-
-            for (int i = 0; i < list.Count; i++) {
-                previousReference.Add(list[i]);
-                UIElement newItem = template.CreateScoped(repeat.scope);
-                newItem.parent = element;
-                newItem.templateParent = element;
-                // root object isn't being assigned. make it assigned 
-                newItem.templateContext.rootObject = element.templateContext.rootObject;
-                element.children[i] = newItem;
-                element.view.Application.RegisterElement(newItem);
-            }
-
-            repeat.listBecamePopulated = true;
+        if (list == previousReference) {
+            return;
         }
-        else if (list.Count > previousReference.Count) {
-            repeat.listBecamePopulated = previousReference.Count == 0;
-
-            UIElement[] oldChildren = element.children;
-
-            UIElement[] ownChildren = ArrayPool<UIElement>.GetExactSize(list.Count);
-
-            element.children = ownChildren;
-
-            for (int i = 0; i < oldChildren.Length; i++) {
-                ownChildren[i] = oldChildren[i];
-            }
-
-            int previousCount = previousReference.Count;
-            int diff = list.Count - previousCount;
-
-            for (int i = 0; i < diff; i++) {
-                previousReference.Add(list[previousCount + i]);
-                UIElement newItem = template.CreateScoped(repeat.scope);
-                newItem.parent = element;
-                newItem.templateParent = element;
-                newItem.templateContext.rootObject = element.templateContext.rootObject;
-
-                ownChildren[previousCount + i] = newItem;
-                element.view.Application.RegisterElement(newItem);
-            }
-
-            ArrayPool<UIElement>.Release(ref oldChildren);
-        }
-        else if (previousReference.Count > list.Count) {
-            // todo -- this is potentially way faster w/ a DestroyChildren(start, end) method
-
-            int diff = previousReference.Count - list.Count;
-            for (int i = 0; i < diff; i++) {
-                int index = previousReference.Count - 1;
-                previousReference.RemoveAt(index);
-                Application.DestroyElement(element.children[index]);
-            }
+        
+        if (previousReference != null) {
+            previousReference.onItemInserted -= OnItemInserted;
+            previousReference.onItemMoved -= OnItemMoved;
+            previousReference.onItemRemoved -= OnItemRemoved;
+            previousReference.onClear -= OnClear;
+            element.view.Application.DestroyChildren(element);
         }
 
+        previousReference = list;
+
+        list.onItemInserted += OnItemInserted;
+        list.onItemMoved += OnItemMoved;
+        list.onItemRemoved += OnItemRemoved;
+        list.onClear += OnClear;
+
+        for (int i = 0; i < list.Count; i++) {
+            UIElement newItem = template.CreateScoped(repeat.scope);
+            newItem.parent = element;
+            newItem.templateParent = element;
+            // root object isn't being assigned. make it assigned 
+            newItem.templateContext.rootObject = element.templateContext.rootObject;
+            element.children.Insert(i, newItem);
+            element.view.Application.RegisterElement(newItem);
+        }
+
+        repeat.listBecamePopulated = list.Count > 0;
     }
 
     public override void OnUpdate() {
@@ -105,11 +101,10 @@ public class RepeatBindingNode<T, U> : RepeatBindingNode where T : class, IList<
         }
 
         if (bindings == null) return;
-        
+
         for (int i = 0; i < bindings.Length; i++) {
             bindings[i].Execute(element, context);
         }
-
     }
 
 }

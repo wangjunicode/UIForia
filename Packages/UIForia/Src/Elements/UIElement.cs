@@ -1,4 +1,4 @@
-﻿﻿using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using JetBrains.Annotations;
@@ -40,7 +40,7 @@ public class UIElement : IHierarchical {
     public readonly int id;
     public readonly UIStyleSet style;
     public UIElement templateParent; // remove or move to cold data
-    public UIElement[] children; // make readonly somehow, should never be modified by user
+    internal LightList<UIElement> children; // make readonly somehow, should never be modified by user
 
     public ExpressionContext templateContext;
 
@@ -57,9 +57,7 @@ public class UIElement : IHierarchical {
     protected UIElement() {
         this.id = UIForia.Application.NextElementId;
         this.style = new UIStyleSet(this);
-        this.flags = UIElementFlags.Enabled
-                     | UIElementFlags.Shown
-                     | UIElementFlags.RequiresRendering;
+        this.flags = UIElementFlags.Enabled;
     }
 
     public UIView view {
@@ -109,9 +107,9 @@ public class UIElement : IHierarchical {
 
     public IInputProvider Input { get; internal set; } // remove?
 
-    public int ChildCount => children?.Length ?? 0;
+    public int ChildCount => children?.Count ?? 0;
 
-    public bool isShown => (flags & UIElementFlags.SelfAndAncestorShown) == UIElementFlags.SelfAndAncestorShown;
+//    public bool isShown => (flags & UIElementFlags.SelfAndAncestorShown) == UIElementFlags.SelfAndAncestorShown;
 
     public bool isSelfEnabled => (flags & UIElementFlags.Enabled) != 0;
 
@@ -155,7 +153,7 @@ public class UIElement : IHierarchical {
         child.parent = this;
         child.templateParent = this;
         child.templateContext.rootObject = templateContext.rootObject;
-        children[children.Length - 1] = child;
+        children.Add(child);
         view.Application.RegisterElement(child);
         return child;
     }
@@ -170,7 +168,7 @@ public class UIElement : IHierarchical {
         child.parent = this;
         child.templateParent = this;
         child.templateContext.rootObject = templateContext.rootObject;
-        children[children.Length - 1] = child;
+        children.Add(child);
         view.Application.RegisterElement(child);
         return child as T;
     }
@@ -185,7 +183,7 @@ public class UIElement : IHierarchical {
     }
 
     public UIElement GetChild(int index) {
-        if (children == null || (uint) index >= (uint) children.Length) {
+        if (children == null || (uint) index >= (uint) children.Count) {
             return null;
         }
 
@@ -202,7 +200,7 @@ public class UIElement : IHierarchical {
             return null;
         }
 
-        for (int i = 0; i < children.Length; i++) {
+        for (int i = 0; i < children.Count; i++) {
             if (children[i].GetAttribute("id") == id) {
                 return children[i] as T;
             }
@@ -231,7 +229,7 @@ public class UIElement : IHierarchical {
             return null;
         }
 
-        for (int i = 0; i < children.Length; i++) {
+        for (int i = 0; i < children.Count; i++) {
             if (children[i] is T) {
                 return (T) children[i];
             }
@@ -259,7 +257,7 @@ public class UIElement : IHierarchical {
             return retn;
         }
 
-        for (int i = 0; i < children.Length; i++) {
+        for (int i = 0; i < children.Count; i++) {
             if (children[i] is T) {
                 retn.Add((T) children[i]);
             }
@@ -398,6 +396,23 @@ public class UIElement : IHierarchical {
             return a.parent.siblingIndex < b.parent.siblingIndex ? 1 : -1;
         }
 
+    }
+
+    public List<UIElement> GetChildren(List<UIElement> retn = null) {
+        if (retn != null) {
+            retn.Clear();
+        }
+
+        else {
+            retn = ListPool<UIElement>.Get();
+        }
+
+        UIElement[] childArray = children.List;
+        for (int i = 0; i < children.Count; i++) {
+            retn.Add(childArray[i]);
+        }
+
+        return retn;
     }
 
 }

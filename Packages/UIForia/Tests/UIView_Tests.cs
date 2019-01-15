@@ -438,10 +438,10 @@ public class UIView_Tests {
         
         ViewTestThing root = (ViewTestThing) testView.RootElement;
         UIElement parent = root.FindById("L1-3").parent;
-        int childCount = parent.children.Length;
+        int childCount = parent.children.Count;
         Application.DestroyElement(root.FindById("L1-3"));
         Assert.IsNull(root.FindById("L1-3"));
-        Assert.AreEqual(childCount - 1, parent.children.Length);
+        Assert.AreEqual(childCount - 1, parent.children.Count);
     }
 
     private struct TypeAssert {
@@ -471,11 +471,11 @@ public class UIView_Tests {
 
     private static void AssertHierarchy(UIElement element, TypeAssert assertRoot, int depth = 0) {
         Assert.AreEqual(element.GetType(), assertRoot.parentType);
-        if (element.children.Length != assertRoot.childTypes.Length) {
+        if (element.children.Count != assertRoot.childTypes.Length) {
             Assert.Fail("Child Count did not match at depth: " + depth);
         }
 
-        for (int i = 0; i < element.children.Length; i++) {
+        for (int i = 0; i < element.children.Count; i++) {
             if (element.children[i].GetType() != assertRoot.childTypes[i].parentType) {
                 Assert.Fail($"Types did not match for child number {i} at depth {depth}. {element.children[i].GetType()} is not {assertRoot.childTypes[i].parentType}");
             }
@@ -513,11 +513,11 @@ public class UIView_Tests {
                 break;
         }
 
-        if (element.children.Length != assertRoot.childTypes.Length) {
+        if (element.children.Count != assertRoot.childTypes.Length) {
             Assert.Fail("Child Count did not match at depth: " + depth);
         }
 
-        for (int i = 0; i < element.children.Length; i++) {
+        for (int i = 0; i < element.children.Count; i++) {
             if (element.children[i].GetType() != assertRoot.childTypes[i].parentType) {
                 Assert.Fail("Types did not match for child number " + i + " at depth " + depth);
             }

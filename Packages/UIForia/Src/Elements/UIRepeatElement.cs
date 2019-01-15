@@ -1,5 +1,7 @@
 using System;
 using System.Collections.Generic;
+using UIForia.Util;
+using UnityEngine;
 
 namespace UIForia {
 
@@ -20,6 +22,10 @@ namespace UIForia {
         public event Action onListPopulated;
         public event Action onListEmptied;
 
+        public UIRepeatElement() {
+            children = children ?? new LightList<UIElement>();
+        }
+
         public override void OnUpdate() {
             if (listBecamePopulated) {
                 listBecamePopulated = false;
@@ -31,7 +37,7 @@ namespace UIForia {
                 onListEmptied?.Invoke();
             }
         }
-
+        
         public override void OnDestroy() {
             onListEmptied = null;
             onListPopulated = null;
@@ -41,7 +47,7 @@ namespace UIForia {
 
     public class UIRepeatElement<T> : UIRepeatElement {
 
-        internal IList<T> list;
+        internal RepeatableList<T> list;
         
         public UIRepeatElement(UITemplate template, TemplateScope scope) {
             this.template = template;

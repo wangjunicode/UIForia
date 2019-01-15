@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using UIForia.Util;
 
 namespace UIForia {
 
@@ -25,10 +26,10 @@ namespace UIForia {
 
         public UIElement CreateWithDefault(TemplateScope inputScope) {
             UISlotElement element = new UISlotElement(slotNameAttr.value);
-            element.children = new UIElement[childTemplates.Count];
+            element.children =  LightListPool<UIElement>.Get();
             element.templateContext = new ExpressionContext(inputScope.rootElement, element);
             for (int i = 0; i < childTemplates.Count; i++) {
-                element.children[i] = childTemplates[i].CreateScoped(inputScope);
+                element.children.Add(childTemplates[i].CreateScoped(inputScope));
                 element.children[i].parent = element;
                 element.children[i].templateParent = element;
             }
@@ -40,11 +41,11 @@ namespace UIForia {
         public UIElement CreateWithContent(TemplateScope inputScope, List<UITemplate> content) {
             UISlotElement element = new UISlotElement(slotNameAttr.value);
 
-            element.children = new UIElement[content.Count];
+            element.children = new LightList<UIElement>(content.Count);
             element.templateContext = new ExpressionContext(inputScope.rootElement, element);
 
             for (int i = 0; i < content.Count; i++) {
-                element.children[i] = content[i].CreateScoped(inputScope);
+                element.children.Add(content[i].CreateScoped(inputScope));
                 element.children[i].parent = element;
                 element.children[i].templateParent = element;
             }

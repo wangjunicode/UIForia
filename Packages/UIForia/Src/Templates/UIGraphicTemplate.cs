@@ -13,7 +13,7 @@ namespace UIForia {
         
         public override UIElement CreateScoped(TemplateScope inputScope) {
             UIGraphicElement graphic = new UIGraphicElement();
-            graphic.children = ArrayPool<UIElement>.Empty;
+            graphic.children =  LightListPool<UIElement>.Get();
             graphic.OriginTemplate = this;
             return graphic;
         }

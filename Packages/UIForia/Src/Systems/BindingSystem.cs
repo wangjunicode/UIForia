@@ -66,7 +66,7 @@ namespace UIForia.Systems {
                 }
 
                 if (current.children != null) {
-                    for (int i = 0; i < current.children.Length; i++) {
+                    for (int i = 0; i < current.children.Count; i++) {
                         Step(current.children[i], nodes);
                     }
                 }
@@ -112,7 +112,7 @@ namespace UIForia.Systems {
                 }
 
                 if (element.children != null) {
-                    for (int i = 0; i < element.children.Length; i++) {
+                    for (int i = 0; i < element.children.Count; i++) {
                        OnElementCreated(element.children[i]);
                     }
                 }

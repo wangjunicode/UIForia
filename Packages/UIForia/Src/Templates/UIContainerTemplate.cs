@@ -47,7 +47,7 @@ namespace UIForia {
 
             Assert.IsNotNull(element);
 
-            element.children = new UIElement[childTemplates.Count];
+            element.children = LightListPool<UIElement>.Get();
             element.templateContext = new ExpressionContext(inputScope.rootElement, element);
             element.OriginTemplate = this;
 
@@ -95,7 +95,7 @@ namespace UIForia {
             Assert.IsNotNull(element);
 
             element.templateContext = new ExpressionContext(inputScope.rootElement, element);
-            element.children = ArrayPool<UIElement>.Empty;
+            element.children = LightListPool<UIElement>.Get();
             element.OriginTemplate = this;
 
             return element;

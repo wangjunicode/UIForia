@@ -165,7 +165,7 @@ namespace UIForia.Systems {
                     continue;
                 }
 
-                for (int i = 0; i < current.children.Length; i++) {
+                for (int i = 0; i < current.children.Count; i++) {
                     element = current.children[i];
 
                     LayoutBox box = m_LayoutBoxMap.GetOrDefault(element.id);
@@ -575,8 +575,8 @@ namespace UIForia.Systems {
 
                 box.InvalidatePreferredSizeCache();
                 boxes.Clear();
-                boxes.EnsureCapacity(current.children.Length);
-                for (int i = 0; i < current.children.Length; i++) {
+                boxes.EnsureCapacity(current.children.Count);
+                for (int i = 0; i < current.children.Count; i++) {
                     UIElement childElement = current.children[i];
                     elements.Push(childElement);
                     if (childElement.isDisabled || childElement.style.LayoutBehavior == LayoutBehavior.Ignored) {
@@ -674,7 +674,7 @@ namespace UIForia.Systems {
                     continue;
                 }
 
-                for (int i = 0; i < parentElement.children.Length; i++) {
+                for (int i = 0; i < parentElement.children.Count; i++) {
                     UIElement child = parentElement.children[i];
                     LayoutBox childBox = CreateLayoutBox(child);
                     childBox.SetParent(parentBox);

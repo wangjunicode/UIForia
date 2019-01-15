@@ -76,7 +76,7 @@ namespace UIForia {
         public IInputSystem InputSystem => m_InputSystem;
         public Camera Camera { get; private set; }
         public Router Router => m_Router;
-        
+
         public void SetCamera(Camera camera) {
             Camera = camera;
             RenderSystem.SetCamera(camera);
@@ -110,8 +110,8 @@ namespace UIForia {
                 }
 
                 // todo -- doesn't handle disabled index
-                element.siblingIndex = Array.IndexOf(element.parent.children, element);
-                
+                element.siblingIndex = element.parent.children.IndexOf(element);
+
                 element.depth = element.parent.depth + 1;
             }
 
@@ -151,7 +151,7 @@ namespace UIForia {
             }
 
             m_ElementTree.TraversePreOrder((el) => el.OnDestroy());
-            
+
             m_ElementTree.Clear();
             for (int i = 0; i < m_DepthMap.Count; i++) {
                 m_DepthMap[i].Clear();
@@ -193,12 +193,12 @@ namespace UIForia {
             if (routeHandler != null) {
                 m_Router.AddRouteHandler(routeHandler);
             }
-            
+
             m_ElementTree.AddItem(element);
 
-            UIElement[] children = element.children;
+            LightList<UIElement> children = element.children;
 
-            if (children == null || children.Length == 0) {
+            if (children == null || children.Count == 0) {
                 return;
             }
 
@@ -220,7 +220,7 @@ namespace UIForia {
                 list[i].depthIndex = i;
             }
 
-            for (int i = 0; i < children.Length; i++) {
+            for (int i = 0; i < children.Count; i++) {
                 children[i].siblingIndex = i;
                 InitHierarchy(children[i]);
             }
@@ -228,16 +228,16 @@ namespace UIForia {
 
         private static void InvokeOnCreate(UIElement element) {
             if (element.children != null) {
-                for (int i = 0; i < element.children.Length; i++) {
+                for (int i = 0; i < element.children.Count; i++) {
                     InvokeOnCreate(element.children[i]);
                 }
             }
 
             element.flags |= UIElementFlags.Created;
             element.OnCreate();
-            
+
             Binding[] enabledBindings = element.OriginTemplate?.triggeredBindings;
-                
+
             if (enabledBindings != null) {
                 for (int i = 0; i < enabledBindings.Length; i++) {
                     if (enabledBindings[i].bindingType != BindingType.Constant) {
@@ -245,12 +245,11 @@ namespace UIForia {
                     }
                 }
             }
-            
         }
 
         private static void InvokeOnReady(UIElement element) {
             if (element.children != null) {
-                for (int i = 0; i < element.children.Length; i++) {
+                for (int i = 0; i < element.children.Count; i++) {
                     InvokeOnReady(element.children[i]);
                 }
             }
@@ -274,7 +273,7 @@ namespace UIForia {
             element.flags |= UIElementFlags.Destroyed;
             element.flags &= ~(UIElementFlags.Enabled);
 
-            if (element.children != null && element.children.Length != 0) {
+            if (element.children != null && element.children.Count != 0) {
                 m_ElementTree.TraversePostOrder(element, (node) => {
                     node.flags |= UIElementFlags.Destroyed;
                     node.flags &= ~(UIElementFlags.Enabled);
@@ -293,34 +292,24 @@ namespace UIForia {
 
             RemoveUpdateDepthIndices(element);
 
-            UIElement[] newChildList = ArrayPool<UIElement>.GetExactSize(element.parent.children.Length - 1);
-            UIElement[] oldChildList = element.parent.children;
-            UIElement[] oldTemplateChildList = null;
+            
             if (element.parent != null) {
-                newChildList = new UIElement[element.parent.children.Length - 1];
-                oldChildList = element.parent.children;
-
-                int idx = 0;
-                for (int i = 0; i < oldChildList.Length; i++) {
-                    if (oldChildList[i] != element) {
-                        newChildList[idx] = oldChildList[i];
-                        newChildList[idx].siblingIndex = idx;
-                        idx++;
-                    }
+                element.parent.children.Remove(element);
+                for (int i = 0; i < element.parent.children.Count; i++) {
+                    element.parent.children[i].siblingIndex = i;
                 }
-
-                element.parent.children = newChildList;
             }
 
             m_ElementTree.TraversePreOrder(element, (node) => {
-                ArrayPool<UIElement>.Release(ref node.children);
+                LightListPool<UIElement>.Release(ref node.children);
                 // todo -- if child is poolable, pool it here
             }, true);
 
-            ArrayPool<UIElement>.Release(ref oldChildList);
-            ArrayPool<UIElement>.Release(ref oldTemplateChildList);
 
             // todo -- if element is poolable, pool it here
+            
+            onElementDestroyed?.Invoke(element);
+
         }
 
         internal void DestroyChildren(UIElement element) {
@@ -330,41 +319,40 @@ namespace UIForia {
                 return;
             }
 
-            if (element.children == null || element.children.Length == 0) {
+            if (element.children == null || element.children.Count == 0) {
                 return;
             }
 
-            for (int i = 0; i < element.children.Length; i++) {
+            for (int i = 0; i < element.children.Count; i++) {
                 UIElement child = element.children[i];
                 child.flags |= UIElementFlags.Destroyed;
                 child.flags &= ~(UIElementFlags.Enabled);
 
-                m_ElementTree.TraversePostOrder(element, (node) => {
+                m_ElementTree.TraversePostOrder(child, (node) => {
                     node.flags |= UIElementFlags.Destroyed;
                     node.flags &= ~(UIElementFlags.Enabled);
                 }, true);
-
-                m_ElementTree.TraversePostOrder(element, element, (node, e) => {
-                    if (node != e) {
-                        node.OnDestroy();
-                    }
-                }, true);
+                
+                m_ElementTree.TraversePostOrder(child, (node) => node.OnDestroy(), true);
             }
 
+            // todo I think this is wrong, should be done just for each child?
             RemoveUpdateDepthIndicesStep(element);
 
-            for (int i = 0; i < element.children.Length; i++) {
+            for (int i = 0; i < element.children.Count; i++) {
                 for (int j = 0; j < m_Systems.Count; j++) {
                     m_Systems[j].OnElementDestroyed(element.children[i]);
                 }
             }
 
-            for (int i = 0; i < element.children.Length; i++) {
-                m_ElementTree.TraversePostOrder(element.children[i], (node) => { ArrayPool<UIElement>.Release(ref node.children); }, true);
+            for (int i = 0; i < element.children.Count; i++) {
+                m_ElementTree.TraversePostOrder(element.children[i], (node) => {
+                    LightListPool<UIElement>.Release(ref node.children);
+                }, true);
                 m_ElementTree.RemoveHierarchy(element.children[i]);
             }
 
-            element.children = ArrayPool<UIElement>.Empty;
+            element.children.Clear();
         }
 
         protected void RemoveUpdateDepthIndices(UIElement element) {
@@ -378,19 +366,19 @@ namespace UIForia {
         }
 
         protected void RemoveUpdateDepthIndicesStep(UIElement element) {
-            if (element.children == null || element.children.Length == 0) {
+            if (element.children == null || element.children.Count == 0) {
                 return;
             }
 
             List<UIElement> list = m_DepthMap[element.depth + 1];
             int idx = element.children[0].depthIndex;
-            list.RemoveRange(idx, element.children.Length);
+            list.RemoveRange(idx, element.children.Count);
 
             for (int i = idx; i < list.Count; i++) {
                 list[i].depthIndex = i;
             }
 
-            for (int i = idx; i < element.children.Length; i++) {
+            for (int i = idx; i < element.children.Count; i++) {
                 RemoveUpdateDepthIndicesStep(element.children[i]);
             }
         }
@@ -422,7 +410,7 @@ namespace UIForia {
 
         private static void RunEnableBinding(UIElement element) {
             Binding[] enabledBindings = element.OriginTemplate?.triggeredBindings;
-                
+
             if (enabledBindings != null) {
                 for (int i = 0; i < enabledBindings.Length; i++) {
                     if (enabledBindings[i].bindingType == BindingType.OnEnable) {
@@ -431,7 +419,7 @@ namespace UIForia {
                 }
             }
         }
-        
+
         public void DoEnableElement(UIElement element) {
             // no-op for already enabled elements
             if (element.isSelfEnabled) return;
@@ -443,7 +431,7 @@ namespace UIForia {
 
             element.OnEnable();
             RunEnableBinding(element);
-           
+
             // if element is now enabled we need to walk it's children
             // and set enabled ancestor flags until we find a self-disabled child
             m_ElementTree.ConditionalTraversePreOrder(element, (child) => {
@@ -452,7 +440,7 @@ namespace UIForia {
 
                 child.OnEnable(); // todo -- maybe enqueue and flush calls after so we don't have buffer problems
                 RunEnableBinding(child);
-              
+
                 return true;
             });
 

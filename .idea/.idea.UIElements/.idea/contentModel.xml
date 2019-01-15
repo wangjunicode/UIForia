@@ -650,6 +650,7 @@
               <e p="QueuePool.cs" t="Include" />
               <e p="ReadOnlyVector2.cs" t="Include" />
               <e p="ReflectionUtil.cs" t="Include" />
+              <e p="RepeatableList.cs" t="Include" />
               <e p="SkipTree.cs" t="Include" />
               <e p="StackPool.cs" t="Include" />
               <e p="TextUtil.cs" t="Include" />

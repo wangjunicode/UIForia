@@ -33,7 +33,7 @@ public struct ElementColdData {
         InitializeAttributes();
         ElementAttribute attribute = new ElementAttribute(name, value);
         attributes = attributes ?? LightListPool<ElementAttribute>.Get();
-        for (int i = 0; i < attributes.Length; i++) {
+        for (int i = 0; i < attributes.Count; i++) {
             if (attributes[i].name == name) {
                 if (string.IsNullOrEmpty(value)) {
                     attributes.RemoveAt(i);
@@ -69,7 +69,7 @@ public struct ElementColdData {
     public ElementAttribute GetAttribute(string name) {
         InitializeAttributes();
         if (attributes != null) {
-            for (int i = 0; i < attributes.Length; i++) {
+            for (int i = 0; i < attributes.Count; i++) {
                 if (attributes[i].name == name) {
                     return attributes[i];
                 }
@@ -86,7 +86,7 @@ public struct ElementColdData {
         }
 
         if (attributes != null) {
-            for (int i = 0; i < attributes.Length; i++) {
+            for (int i = 0; i < attributes.Count; i++) {
                 retn.Add(attributes[i]);
             }
         }

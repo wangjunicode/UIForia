@@ -1,6 +1,7 @@
 using System.Collections.Generic;
 using Klang.Seed.DataTypes;
 using UIForia;
+using UIForia.Util;
 using UnityEngine;
 
 namespace UI {
@@ -12,7 +13,7 @@ namespace UI {
 
         public override void OnCreate() {
             characterData = new CharacterData();
-            characterData.skills = new List<CharacterSkill>();
+            characterData.skills = new RepeatableList<CharacterSkill>();
             characterData.skills.Add(new CharacterSkill("Agriculture", Random.Range(0f, 1f), Random.Range(0, 5)));
             characterData.skills.Add(new CharacterSkill("Construction", Random.Range(0f, 1f), Random.Range(0, 5)));
             characterData.skills.Add(new CharacterSkill("Consume", Random.Range(0f, 1f), Random.Range(0, 5)));

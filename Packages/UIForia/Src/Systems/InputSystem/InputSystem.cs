@@ -804,10 +804,10 @@ public abstract class InputSystem : IInputSystem, IInputProvider {
         RunMouseEvents(m_ExitedElements, InputEventType.MouseExit);
         RunMouseEvents(m_EnteredElements, InputEventType.MouseEnter);
 
-        if (m_MouseState.isLeftMouseDownThisFrame) {
+        if (m_MouseState.isLeftMouseDownThisFrame || m_MouseState.isRightMouseDownThisFrame) {
             RunMouseEvents(m_ElementsThisFrame, InputEventType.MouseDown);
         }
-        else if (m_MouseState.isLeftMouseUpThisFrame) {
+        else if (m_MouseState.isLeftMouseUpThisFrame || m_MouseState.isRightMouseUpThisFrame) {
             RunMouseEvents(m_ElementsThisFrame, InputEventType.MouseUp);
             if (m_MouseState.isSingleClick) {
                 RunMouseEvents(m_ElementsThisFrame, InputEventType.MouseClick);

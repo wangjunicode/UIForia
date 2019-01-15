@@ -31,8 +31,8 @@ namespace UIForia.Systems {
             retn.mouseDownPosition = m_MouseState.mouseDownPosition;
             float now = Time.unscaledTime;
 
-            if (retn.isLeftMouseDown) {
-                if (retn.isLeftMouseDownThisFrame) {
+            if (retn.isLeftMouseDown || retn.isRightMouseDown) {
+                if (retn.isLeftMouseDownThisFrame || retn.isRightMouseDownThisFrame) {
                     retn.mouseDownPosition = ConvertMousePosition(UnityEngine.Input.mousePosition);
                     if (now - m_LastMouseDownTimestamp <= k_DoubleClickDelay && Vector2.Distance(m_LastMouseDownPosition, retn.mouseDownPosition) <= 3f) {
                         if (!m_IsDoubleClick) {
@@ -50,7 +50,8 @@ namespace UIForia.Systems {
                 retn.mouseDownPosition = new Vector2();
             }
 
-            retn.isSingleClick = retn.isLeftMouseUpThisFrame && (now - m_LastMouseDownTimestamp < k_SingleClickDelay);
+            // todo formalize clicking with different buttons
+            retn.isSingleClick = (retn.isRightMouseUpThisFrame || retn.isLeftMouseUpThisFrame) && (now - m_LastMouseDownTimestamp < k_SingleClickDelay);
 
             retn.mousePosition = ConvertMousePosition(UnityEngine.Input.mousePosition);
             retn.scrollDelta = UnityEngine.Input.mouseScrollDelta;

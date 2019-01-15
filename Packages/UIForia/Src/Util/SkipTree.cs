@@ -325,9 +325,9 @@ namespace UIForia {
             SkipTreeNode node;
             IHierarchical element = item.Element;
             Stack<SkipTreeNode> stack = StackPool<SkipTreeNode>.Get();
+            SkipTreeNode parent = FindParent(item) ?? root;
 
             if (!nodeMap.TryGetValue(element.UniqueId, out node)) {
-                SkipTreeNode parent = FindParent(item) ?? root;
                 SkipTreeNode trail = null;
                 SkipTreeNode ptr = parent.firstChild;
                 while (ptr != null) {
@@ -351,10 +351,14 @@ namespace UIForia {
             else {
                 SkipTreeNode nodeNext = node.nextSibling;
                 SkipTreeNode nodePrev = FindPreviousSibling(node);
+                
                 if (nodePrev != null) {
                     nodePrev.nextSibling = nodeNext;
                 }
-
+                else if (parent.firstChild == node) {
+                    parent.firstChild = nodeNext;
+                }
+                
                 stack.Push(node);
             }
 

@@ -1,6 +1,7 @@
 using System.Collections.Generic;
 using Klang.Seed.DataTypes;
 using UIForia;
+using UIForia.Extensions;
 using UIForia.Input;
 using UIForia.Layout;
 using UIForia.Rendering;
@@ -11,10 +12,12 @@ namespace UI {
 
     public class CharacterScheduleBlock {
 
+        public int position;
         public int start;
         public int duration;
 
-        public CharacterScheduleBlock(int start, int duration) {
+        public CharacterScheduleBlock(int position, int start, int duration) {
+            this.position = position;
             this.start = start;
             this.duration = duration;
         }
@@ -29,15 +32,33 @@ namespace UI {
         private UIElement slotContainer;
 
         public void CreateDestroySchedule(MouseInputEvent evt) {
+
+            bool leftUpThisFrame = evt.IsMouseLeftUpThisFrame;
+            bool rightUpThisFrame = evt.IsMouseRightUpThisFrame;
+
+            if (!(leftUpThisFrame || rightUpThisFrame)) {
+                return;
+            }
+            
             slotContainer = slotContainer ?? FindById("slot-container");
             UIElement[] slotChildren = slotContainer.children;
 
             for (int i = 0; i < slotChildren.Length; i++) {
                 LayoutResult result = slotChildren[i].layoutResult;
-                if (result.ScreenRect.Contains(evt.MousePosition)) {
-                    int start = (int) (result.ActualHeight) * i;
-                    scheduleBlocks.Add(new CharacterScheduleBlock(start, 1));
+                if (!result.ScreenRect.Contains(evt.MousePosition)) continue;
+                
+                if (leftUpThisFrame) {
+                    int start = (int) result.ActualHeight * i;
+                    scheduleBlocks.Add(new CharacterScheduleBlock(i, start, 1));
                 }
+                else {
+                    int foundIndex = scheduleBlocks.FindIndex(i, (element, index) => element.position == index);
+                    if (foundIndex > -1) {
+                        scheduleBlocks.RemoveAt(foundIndex);
+                    }
+                }
+
+                return;
             }
         }
 

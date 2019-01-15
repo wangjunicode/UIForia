@@ -33,7 +33,7 @@
             <ScheduleSlot index="23"/>
 
             <Repeat style="schedule-block-list" list="scheduleBlocks">
-                <Group style="schedule-block"/>
+                <Group style="schedule-block" style.transformPositionY="$item.start" />
             </Repeat>
             
         </Group>

@@ -43,12 +43,15 @@ namespace UIForia.Input {
 
         public bool IsMouseLeftDown => source.mouseState.isLeftMouseDown;
         public bool IsMouseLeftDownThisFrame => source.mouseState.isLeftMouseDownThisFrame;
+        public bool IsMouseLeftUpThisFrame => source.mouseState.isLeftMouseUpThisFrame;
 
         public bool IsMouseRightDown => source.mouseState.isRightMouseDown;
         public bool IsMouseRightDownThisFrame => source.mouseState.isRightMouseDownThisFrame;
-
+        public bool IsMouseRightUpThisFrame => source.mouseState.isRightMouseUpThisFrame;
+        
         public bool IsMouseMiddleDown => source.mouseState.isMiddleMouseDown;
         public bool IsMouseMiddleDownThisFrame => source.mouseState.isMiddleMouseDownThisFrame;
+        public bool IsMouseMiddleUpThisFrame => source.mouseState.isMiddleMouseUpThisFrame;
 
         public bool IsDoubleClick => source.mouseState.isDoubleClick;
         public bool IsTripleClick => source.mouseState.isTripleClick;

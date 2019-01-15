@@ -33,6 +33,16 @@ namespace UIForia.Extensions {
 
             return default(T);
         }
+        
+        public static int FindIndex<T, U>(this List<T> list, U target, Func<T, U, bool> predicate) {
+            for (int i = 0; i < list.Count; i++) {
+                if (predicate(list[i], target)) {
+                    return i;
+                }
+            }
+
+            return -1;
+        }
 
         public static T Find<T>(this List<T> list, T target) where T : class {
             for (int i = 0; i < list.Count; i++) {

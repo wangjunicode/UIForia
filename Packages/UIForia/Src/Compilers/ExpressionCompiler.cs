@@ -243,7 +243,7 @@ namespace UIForia.Compilers {
             }
 
         }
-        
+
         private LightList<AccessInfo> GetAccessInfoList(Type rootType, MemberAccessExpressionNode node, bool injectHead = true) {
             LightList<AccessInfo> accessInfoList = LightListPool<AccessInfo>.Get();
 
@@ -297,7 +297,8 @@ namespace UIForia.Compilers {
                         if (ReflectionUtil.IsAction(lastType)) {
                             throw new NotImplementedException();
                         }
-                        else { // func
+                        else {
+                            // func
                             Type outputType = null;
                             List<Expression> arguments = VisitFuncArguments(lastType, invokeNode.parameters, out outputType);
                             accessInfo.type = AccessInfoType.FuncInvoke;
@@ -339,7 +340,6 @@ namespace UIForia.Compilers {
                 new GenericArguments(retn.YieldedType, headType),
                 new ConstructorArguments(retn, headType.IsEnum)
             );
-
         }
 
         public Expression CompileRestOfChain(Expression root, CompilerContext context) {
@@ -545,7 +545,6 @@ namespace UIForia.Compilers {
                     throw new ArgumentOutOfRangeException();
             }
         }
-
 
         private AccessExpressionPart MakeAccessPart(int u, List<ASTNode> parts, Type outputType, LightList<Type> inputTypes) {
             AccessExpressionPart retn = null;
@@ -1107,7 +1106,6 @@ namespace UIForia.Compilers {
             return (Expression) ReflectionUtil.CreateGenericInstanceFromOpenType(openType, commonBase, ReflectionUtil.ObjectArray3);
         }
 
-
         private Expression VisitSimpleRootAccess(IdentifierNode node) {
             string fieldName = node.name;
             Expression retn = null;
@@ -1223,7 +1221,7 @@ namespace UIForia.Compilers {
         private static Expression HandleCasting(Expression input, Type requiredType) {
             Type yieldedType = input.YieldedType;
 
-            if (yieldedType == requiredType) {
+            if (requiredType == null || yieldedType == requiredType || requiredType.IsAssignableFrom(yieldedType)) {
                 return input;
             }
 

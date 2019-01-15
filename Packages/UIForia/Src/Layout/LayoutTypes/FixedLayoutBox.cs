@@ -1,9 +1,12 @@
 using UIForia.Rendering;
+using UIForia.Systems;
 using UnityEngine;
 
 namespace UIForia.Layout.LayoutTypes {
 
     public class FixedLayoutBox : LayoutBox {
+        private OffsetRect padding;
+        private OffsetRect border;
 
         public FixedLayoutBox(UIElement element): base(element) { }
 
@@ -58,6 +61,26 @@ namespace UIForia.Layout.LayoutTypes {
                 maxX = Mathf.Max(maxX, x + width);
                 minY = Mathf.Min(minY, y);
                 maxY = Mathf.Max(maxY, y + heights.clampedSize);
+            }
+
+            padding = new OffsetRect(PaddingTop, PaddingRight, PaddingBottom, PaddingLeft);
+            border = new OffsetRect(BorderTop, BorderRight, BorderBottom, BorderLeft);
+
+            Size size = default;
+         
+                
+            if (allocatedWidth > size.width) {
+                actualWidth = allocatedWidth;
+            }
+            else {
+                actualWidth = size.width + padding.Horizontal + border.Horizontal;
+            }
+
+            if (allocatedHeight > size.height) {
+                actualHeight = allocatedHeight;
+            }
+            else {
+                actualHeight = size.height + padding.Vertical + border.Vertical;
             }
         }
 

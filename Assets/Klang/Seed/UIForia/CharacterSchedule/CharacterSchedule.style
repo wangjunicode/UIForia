@@ -8,12 +8,6 @@ style character-schedule {
     Padding = 12px;
 }
 
-style schedule-block {
-    PreferredSize = 200px, 20px;
-    Margin = 10px, 0px;
-    BackgroundColor = grey;
-}
-
 style slot-container {
     PreferredSize = 200px, 1cnt;
     MarginRight = 8px;
@@ -53,11 +47,13 @@ style rounded-grey-bg {
 }
 
 style schedule-block {
-    LayoutType = Fixed;
-    BackgroundColor = white;
-    PreferredSize = 1pca, 24px;
+    PreferredSize = 200px, 20px;
+    Margin = 2px, 4px, 1px, 2px;
+    BackgroundColor = grey;
 }
 
 style schedule-block-list {
     LayoutBehavior = ignored;
+    LayoutType = Fixed;
+    PaddingTop = 4px;
 }

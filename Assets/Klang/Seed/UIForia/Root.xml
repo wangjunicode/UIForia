@@ -51,6 +51,7 @@
                     <!--<ColonyInfoPanel/>-->
                     <!--<CharacterList/>-->
                     <CharacterInfoPanel/>
+        
                     <!--<BuildMenu style="build-menu"/>-->
                     <!---->
                 <!--</Route>-->

@@ -1,0 +1,47 @@
+style grid-container {
+    LayoutType = Grid;
+    GridLayoutDirection = Column;
+    PreferredSize = 400px;
+    BackgroundColor = green;    
+    GridLayoutColTemplate = 100px, 100px, 100px;
+    GridLayoutRowAutoSize = 100px;
+}
+
+style grid-cell {
+    BackgroundColor = yellow;
+    PreferredSize = 50px;
+    Border = 1px;
+    BorderColor = black;
+    FlexLayoutCrossAxisAlignment = Center;
+    FlexLayoutMainAxisAlignment = Center;
+    GridItemColSelfAlignment = Center;
+    GridItemRowSelfAlignment = Stretch;
+}
+
+style grid-row1 {
+    GridItemRowStart = 0;    
+}
+
+style grid-row2 {
+    GridItemRowStart = 1;
+}
+
+style grid-cspan-2 {
+    GridItemColSpan = 2;
+}
+
+style grid-rstart-2 {
+    GridItemRowStart = 1;
+    GridItemColStart = 1;
+    GridItemColSpan = 3;
+}
+
+style f {
+    PreferredWidth = 30px;
+}
+
+style b {
+    MarginLeft = 100px;
+    MarginBottom = 10px;
+    GridItemColSelfAlignment = Center;
+}

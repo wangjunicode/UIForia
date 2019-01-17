@@ -325,6 +325,19 @@ public class GridLayoutTests {
     }
 
     [Test]
+    public void ImplicitColumnUnplaced_Fixed3x1() {
+        MockApplication mockView = new MockApplication(typeof(GridLayoutThing3x1));
+        GridLayoutThing3x1 root = (GridLayoutThing3x1) mockView.RootElement;
+
+        root.style.SetGridLayoutDirection(LayoutDirection.Column, StyleState.Normal);
+        mockView.Update();
+
+        Assert.AreEqual(new Rect(0, 0, 100, 100), root.child0.layoutResult.ScreenRect);
+        Assert.AreEqual(new Rect(100, 0, 100, 100), root.child1.layoutResult.ScreenRect);
+        Assert.AreEqual(new Rect(200, 0, 100, 100), root.child2.layoutResult.ScreenRect);
+    }
+
+    [Test]
     public void PartialImplicitPlaced() {
         MockApplication mockView = new MockApplication(typeof(GridLayoutThing3x1));
         GridLayoutThing3x1 root = (GridLayoutThing3x1) mockView.RootElement;
@@ -532,4 +545,30 @@ public class GridLayoutTests {
         Assert.AreEqual(new Rect(100, 400, 100, 100), root.GetTestChild(3).layoutResult.LocalRect);
     }
 
+    [Test]
+    public void RowStartLocked_ColumnFlow() {
+        MockApplication mockView = new MockApplication(typeof(GridLayout6Children));
+        GridLayout6Children root = (GridLayout6Children) mockView.RootElement;
+        mockView.Update();
+        
+        root.style.SetGridLayoutDirection(LayoutDirection.Column, StyleState.Normal);
+
+        root.GetChild(0).style.SetGridItemRowStart(0, StyleState.Normal);
+        root.GetChild(1).style.SetGridItemRowStart(0, StyleState.Normal);
+        root.GetChild(2).style.SetGridItemRowStart(0, StyleState.Normal);
+        
+        root.GetChild(3).style.SetGridItemRowStart(1, StyleState.Normal);
+        root.GetChild(4).style.SetGridItemRowStart(1, StyleState.Normal);
+        root.GetChild(5).style.SetGridItemRowStart(1, StyleState.Normal);
+        
+        mockView.Update();
+        
+        Assert.AreEqual(new Rect(0, 0, 100, 100), root.GetChild(0).layoutResult.LocalRect);
+        Assert.AreEqual(new Rect(100, 0, 100, 100), root.GetChild(1).layoutResult.LocalRect);
+        Assert.AreEqual(new Rect(200, 0, 100, 100), root.GetChild(2).layoutResult.LocalRect);
+        
+        Assert.AreEqual(new Rect(0, 100, 100, 100), root.GetChild(3).layoutResult.LocalRect);
+        Assert.AreEqual(new Rect(100, 100, 100, 100), root.GetChild(4).layoutResult.LocalRect);
+        Assert.AreEqual(new Rect(200, 100, 100, 100), root.GetChild(5).layoutResult.LocalRect);
+    }
 }

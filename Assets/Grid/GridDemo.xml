@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="utf-8"?>
+<UITemplate>
+    <Style path="Grid/GridDemo.style" />
+    <Contents style="grid-container">
+
+        <!--<Group style="grid-cell " x-id='child0'>A</Group>-->
+        <!--<Group style="grid-cell " x-id='child1'>B</Group>-->
+        <!--<Group style="grid-cell " x-id='child2'>C</Group>-->
+        
+        <Group style="grid-cell grid-row1">A</Group>
+        <Group style="grid-cell grid-row1 b" >B</Group>
+        <Group style="grid-cell grid-row1" >C</Group>
+        <Group style="grid-cell grid-row2">D</Group>
+        <Group style="grid-cell grid-row2 ">E</Group>
+        <Group style="grid-cell grid-row2 f">F</Group>
+        
+    </Contents>
+</UITemplate>

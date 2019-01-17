@@ -133,10 +133,10 @@ namespace UIForia.Parsing.StyleParser {
                 case "griditemrowspan":
                     context.targetStyle.GridItemRowSpan = ParseUtil.ParseInt(context.variables, propertyValue);
                     break;
-                case "griditemcolselfalign":
+                case "griditemcolselfalignment":
                     context.targetStyle.GridItemColSelfAlignment = ParseUtil.ParseCrossAxisAlignment(context.variables, propertyValue);
                     break;
-                case "griditemrowselfalign":
+                case "griditemrowselfalignment":
                     context.targetStyle.GridItemRowSelfAlignment = ParseUtil.ParseCrossAxisAlignment(context.variables, propertyValue);
                     break;
                 default:
@@ -167,10 +167,10 @@ namespace UIForia.Parsing.StyleParser {
                 case "gridlayoutcolgap":
                     context.targetStyle.GridLayoutColGap = ParseUtil.ParseFloat(context.variables, propertyValue);
                     break;
-                case "gridlayoutrowgap":
-                    context.targetStyle.GridLayoutColGap = ParseUtil.ParseFloat(context.variables, propertyValue);
+                case "gridlayoutrowgap": // todo -- support fixed length
+                    context.targetStyle.GridLayoutRowGap = ParseUtil.ParseFloat(context.variables, propertyValue);
                     break;
-                case "gridlayoutcolalignment":
+                case "gridlayoutcolalignment": // todo -- support fixed length
                     context.targetStyle.GridLayoutColAlignment = ParseUtil.ParseCrossAxisAlignment(context.variables, propertyValue);
                     break;
                 case "gridlayoutrowalignment":

@@ -17,6 +17,7 @@
 - expose a better way to destroy elements
 - render system v3
 - text needs a full re-do
+- visual tooling for grid layout
 
 <Template id="content">
     

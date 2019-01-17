@@ -1,5 +1,8 @@
-namespace UIForia.Layout.LayoutTypes {
+using System.Diagnostics;
 
+namespace UIForia.Layout.LayoutTypes {
+    
+    [DebuggerDisplay("(minValue = {nameof(minValue)}, minUnit = {nameof(minUnit)}, maxValue = {nameof(maxValue)}, maxUnit = {nameof(maxUnit)})")]
     public struct GridTrackSize {
 
         public bool Equals(GridTrackSize other) {

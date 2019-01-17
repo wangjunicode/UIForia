@@ -2,7 +2,7 @@ using System.Diagnostics;
 
 namespace UIForia.Layout {
 
-    [DebuggerDisplay("(id = {id} ({colItem.trackStart}, {colItem.trackSpan}), ({rowItem.trackStart}, {rowItem.trackSpan})")]
+    [DebuggerDisplay("(id = {id} (colItem={colItem.trackStart}, {colItem.trackSpan}), (rowItem={rowItem.trackStart}, {rowItem.trackSpan})")]
     public struct GridPlacement {
 
         public readonly int id;

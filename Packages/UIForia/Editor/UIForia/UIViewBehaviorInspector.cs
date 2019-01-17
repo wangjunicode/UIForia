@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using UnityEditor;
+using UnityEditor.SceneManagement;
 
 namespace UIForia.Editor {
 
@@ -30,9 +31,14 @@ namespace UIForia.Editor {
         }
         
         public override void OnInspectorGUI() {
+            serializedObject.Update();
             UIViewBehavior behavior = (UIViewBehavior) target;
-            if (behavior.type == null && behavior.typeName != null) {
-                behavior.type = Type.GetType(behavior.typeName);
+            string typeName = serializedObject.FindProperty("typeName").stringValue;
+            if (behavior.type != null && typeName != behavior.type.AssemblyQualifiedName) {
+                behavior.type = Type.GetType(typeName);
+            }
+            else if (behavior.type == null) {
+                behavior.type = Type.GetType(typeName);
             }
             EditorGUILayout.BeginHorizontal();
             EditorGUILayout.PrefixLabel("Root Template");
@@ -43,9 +49,11 @@ namespace UIForia.Editor {
             if (index != newIndex) {
                 behavior.type = types[newIndex];
                 behavior.typeName = behavior.type.AssemblyQualifiedName;
+                EditorSceneManager.MarkSceneDirty(behavior.gameObject.scene);
             }
 
             EditorGUILayout.ObjectField(serializedObject.FindProperty("camera"));
+            serializedObject.FindProperty("typeName").stringValue = behavior.typeName;
             serializedObject.ApplyModifiedProperties();
         }
 

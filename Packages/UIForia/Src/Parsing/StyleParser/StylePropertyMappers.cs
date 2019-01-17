@@ -118,7 +118,7 @@ namespace UIForia.Parsing.StyleParser {
                     throw new ParseException("Unknown grid padding or border property: " + propertyName);
             }
         }
-
+  
         public static void GridItemMapper(StyleParserContext context, string propertyName, string propertyValue) {
             switch (propertyName.ToLower()) {
                 case "griditemcolstart":
@@ -133,10 +133,10 @@ namespace UIForia.Parsing.StyleParser {
                 case "griditemrowspan":
                     context.targetStyle.GridItemRowSpan = ParseUtil.ParseInt(context.variables, propertyValue);
                     break;
-                case "griditemcolselfalignment":
+                case "griditemcolselfalign":
                     context.targetStyle.GridItemColSelfAlignment = ParseUtil.ParseCrossAxisAlignment(context.variables, propertyValue);
                     break;
-                case "griditemrowselfalignment":
+                case "griditemrowselfalign":
                     context.targetStyle.GridItemRowSelfAlignment = ParseUtil.ParseCrossAxisAlignment(context.variables, propertyValue);
                     break;
                 default:
@@ -167,10 +167,10 @@ namespace UIForia.Parsing.StyleParser {
                 case "gridlayoutcolgap":
                     context.targetStyle.GridLayoutColGap = ParseUtil.ParseFloat(context.variables, propertyValue);
                     break;
-                case "gridlayoutrowgap": // todo -- support fixed length
-                    context.targetStyle.GridLayoutRowGap = ParseUtil.ParseFloat(context.variables, propertyValue);
+                case "gridlayoutrowgap":
+                    context.targetStyle.GridLayoutColGap = ParseUtil.ParseFloat(context.variables, propertyValue);
                     break;
-                case "gridlayoutcolalignment": // todo -- support fixed length
+                case "gridlayoutcolalignment":
                     context.targetStyle.GridLayoutColAlignment = ParseUtil.ParseCrossAxisAlignment(context.variables, propertyValue);
                     break;
                 case "gridlayoutrowalignment":

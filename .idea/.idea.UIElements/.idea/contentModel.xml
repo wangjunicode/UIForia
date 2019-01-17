@@ -70,6 +70,10 @@
             <e p="WindowFrame.xml" t="Include" />
           </e>
         </e>
+        <e p="Grid" t="Include">
+          <e p="GridDemo.cs" t="Include" />
+          <e p="GridDemo.xml" t="Include" />
+        </e>
         <e p="Klang" t="Include">
           <e p="Seed" t="Include">
             <e p="DataTypes" t="Include">

@@ -93,7 +93,7 @@ namespace UIForia {
             Type[] genericTypes = genericArgType.GetGenericArguments();
 
             listType = genericArgType;
-            if (!(listType.IsAssignableFrom(typeof(IRepeatableList)))) {
+            if (!(typeof(IRepeatableList).IsAssignableFrom(listType))) {
                 throw new CompileException("<Repeat> element list argument must of type RepeatableList");
             }
 

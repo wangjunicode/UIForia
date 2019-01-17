@@ -5,7 +5,9 @@ using System.Reflection;
 using UIForia.Extensions;
 using UIForia.Rendering;
 using UIForia.Util;
+using UnityEditor.Experimental.UIElements.GraphView;
 using UnityEngine;
+using UnityScript.Steps;
 using MapAction = System.Action<UIForia.Parsing.StyleParser.StyleParserContext, string, string>;
 
 namespace UIForia.Parsing.StyleParser {
@@ -231,6 +233,7 @@ namespace UIForia.Parsing.StyleParser {
 
             while (ptr < input.Length) {
                 int start = ptr;
+                ParseUtil.ConsumeComment(input, ref ptr);
                 ptr = ReadStyleDefinition(ptr, input, output);
                 ptr = ReadImplicitStyleDefinition(ptr, input, output);
                 ptr = ReadVariableDefinition(ptr, input, output);
@@ -323,6 +326,9 @@ namespace UIForia.Parsing.StyleParser {
             context.imports = imports;
 
             while (ptr < input.Length) {
+
+                ParseUtil.ConsumeComment(input, ref ptr);
+
                 int start = ptr;
                 char current = input[ptr];
 
@@ -387,7 +393,7 @@ namespace UIForia.Parsing.StyleParser {
                             context.targetStyle = styleGroup.inactive;
                             break;
                         default:
-                            throw new ParseException("Unknown style state: " + stateName);
+                            throw new ParseException("Style ‘" + styleGroup.name + "’\n" + "Unknown style state: " + stateName);
                     }
                 }
                 else if (current == '}') {
@@ -404,7 +410,7 @@ namespace UIForia.Parsing.StyleParser {
                     string value = ParseUtil.ReadToStatementEnd(input, ref ptr);
 
                     if (value == null) {
-                        throw new ParseException("Unexpected end of input");
+                        throw new ParseException("Style ‘" + styleGroup.name + "’\n" + "Unexpected end of input");
                     }
 
                     MapAction action;
@@ -413,12 +419,12 @@ namespace UIForia.Parsing.StyleParser {
                         action(context, id, value);
                     }
                     else {
-                        Debug.Log("Encountered unknown style property name: " + id);
+                        Debug.Log("Style ‘" + styleGroup.name + "’\n" + "Encountered unknown style property name: " + id);
                         return styleGroup;
                     }
                 }
                 else {
-                    throw new ParseException("bad");
+                    throw new ParseException("Style ‘" + styleGroup.name + "’\n" + ParseUtil.ProduceErrorMessage(input, ptr));
                 }
 
                 ptr = ParseUtil.ConsumeWhiteSpace(ptr, input);
@@ -426,6 +432,7 @@ namespace UIForia.Parsing.StyleParser {
                     throw new ParseException("Style Tokenizer failed on string: " + input);
                 }
             }
+
 
             return styleGroup;
         }

@@ -4,7 +4,7 @@ style grid-container {
     PreferredSize = 400px;
     BackgroundColor = green;    
     GridLayoutRowTemplate = 100px, 100px, 100px, 100px;
-    GridLayoutColAutoSize = 100px; @christian removing this line makes the size weird, try to figure out why!
+    //GridLayoutColAutoSize = 100px;
     GridLayoutDensity = sparse;
 }
 

@@ -44,6 +44,50 @@ namespace UIForia.Parsing.StyleParser {
             return null;
         }
 
+        public static void ConsumeComment(string input, ref int ptr) {
+
+            if (!(input[ptr] == '/' && input[ptr + 1] == '/')) {
+                return;
+            }
+        
+            while (ptr < input.Length) {
+                char current = input[ptr];
+                if (current == '\n') {
+                    ptr++;
+                    ptr = ConsumeWhiteSpace(ptr, input);
+                    return;
+                }
+
+                ptr++;
+            }
+        }
+
+        public static string ProduceErrorMessage(string input, int ptr) {
+            int errorLineStart = 0;
+            int line = 0;
+            int errorIndex = ptr;
+            
+            while (errorIndex >= 0) {
+                if (input[errorIndex] == '\n') {
+                    errorLineStart = errorIndex + 1;
+                    break;
+                }
+
+                errorIndex--;
+            }
+
+            for (int i = 0; i < ptr; i++) {
+                if (input[i] == '\n') {
+                    line++;
+                }
+            }
+
+            int column = ptr - errorLineStart;
+
+            return "Didn’t expect character ’" + input[ptr] + "‘ in line " + line + " at column " + column + "\n"
+                   + input.Substring(0, column + 1) + "\n";
+        }
+
         public static int ReadInt(string input, ref int ptr) {
             int start = ptr;
 

@@ -1,10 +1,10 @@
 style grid-container {
     LayoutType = Grid;
-    GridLayoutDirection = Horizontal;
+    GridLayoutDirection = Vertical;
     PreferredSize = 400px;
     BackgroundColor = green;    
-    GridLayoutRowTemplate = 100px, 100px;
-    GridLayoutColTemplate = 100px, 100px;
+    GridLayoutRowTemplate = 100px, 100px, 100px, 100px;
+    GridLayoutColAutoSize = 100px; @christian removing this line makes the size weird, try to figure out why!
     GridLayoutDensity = sparse;
 }
 
@@ -18,7 +18,6 @@ style grid-cell {
 }
 
 style a {
-
 }
 
 style b {
@@ -30,7 +29,7 @@ style c {
 }
 
 style d {
-    GridItemColSpan = 3;
+    GridItemColSpan = 2;
 }
 
 style e {

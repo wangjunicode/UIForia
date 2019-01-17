@@ -33,7 +33,7 @@ public class GridLayoutTests {
         }
 
     }
-    
+
     [Template(TemplateType.String, @"
         <UITemplate>
             <Contents style.layoutType='LayoutType.Grid'>
@@ -43,9 +43,8 @@ public class GridLayoutTests {
             </Contents>
         </UITemplate>
     ")]
-    public class GridLayoutVanilla3x1 : UIElement {
-    }
-    
+    public class GridLayoutVanilla3x1 : UIElement { }
+
     [Template(TemplateType.String, @"
         <UITemplate>
             <Contents style.layoutType='LayoutType.Grid'>
@@ -56,8 +55,7 @@ public class GridLayoutTests {
             </Contents>
         </UITemplate>
     ")]
-    public class GridLayout3x1Plus1x3 : UIElement {
-    }
+    public class GridLayout3x1Plus1x3 : UIElement { }
 
     [Template(TemplateType.String, @"
         <UITemplate>
@@ -73,15 +71,14 @@ public class GridLayoutTests {
     ")]
     public class GridLayout6Children : UIElement {
 
-        public UIElement GetTestChild(int i) {
+        public UIElement GetChild(int i) {
             return FindByType<UIGroupElement>()[i];
         }
+
     }
 
     [Test]
     public void ExplicitPlaced_Fixed3x1() {
-       
-        
         MockApplication mockView = new MockApplication(typeof(GridLayoutThing3x1));
         GridLayoutThing3x1 root = (GridLayoutThing3x1) mockView.RootElement;
         root.child0.style.SetGridItemPlacement(0, 1, 0, 1, StyleState.Normal);
@@ -121,11 +118,11 @@ public class GridLayoutTests {
         root.child2.style.SetGridItemPlacement(2, 1, 0, 1, StyleState.Normal);
 
 
-        var rowTemplate = new List<GridTrackSize>(new[] {
+        GridTrackSize[] rowTemplate = new[] {
             new GridTrackSize(100f)
-        });
+        };
 
-        var colTemplate = new[] {
+        GridTrackSize[] colTemplate = new[] {
             new GridTrackSize(100f),
             new GridTrackSize(100f),
             new GridTrackSize(100f)
@@ -135,7 +132,7 @@ public class GridLayoutTests {
         root.style.SetGridLayoutRowTemplate(rowTemplate, StyleState.Normal);
         mockView.Update();
 
-        Assert.AreEqual(new Rect(0, 0, 100, 100), root.child0.layoutResult.ScreenRect);
+        Assert.AreEqual(new Rect(0, 0, 300, 100), root.child0.layoutResult.ScreenRect);
         Assert.AreEqual(new Vector2(100, 0), root.child1.layoutResult.localPosition);
         Assert.AreEqual(new Vector2(200, 0), root.child2.layoutResult.localPosition);
     }
@@ -279,13 +276,15 @@ public class GridLayoutTests {
         root.child1.style.SetGridItemPlacement(1, 1, 0, 1, StyleState.Normal);
         root.child2.style.SetGridItemPlacement(2, 1, 0, 1, StyleState.Normal);
 
+        root.style.SetGridLayoutColAlignment(GridAxisAlignment.Start, StyleState.Normal);
+
         var rowTemplate = new List<GridTrackSize>(new[] {
             new GridTrackSize(100f)
         });
 
         var colTemplate = new[] {
             new GridTrackSize(100f),
-            GridTrackSize.MinContent, // affects positioning of items, not item width
+            GridTrackSize.MinContent,
             new GridTrackSize(100f)
         };
 
@@ -407,11 +406,11 @@ public class GridLayoutTests {
         GridLayout6Children root = (GridLayout6Children) mockView.RootElement;
         mockView.Update();
 
-        root.GetTestChild(0).style.SetGridItemPlacement(0, 2, 0, 1, StyleState.Normal);
-        root.GetTestChild(1).style.SetGridItemPlacement(2, 2, 0, 2, StyleState.Normal);
-        root.GetTestChild(2).style.SetGridItemPlacement(0, 1, 1, 1, StyleState.Normal);
-        root.GetTestChild(3).style.SetGridItemPlacement(1, 1, 1, 1, StyleState.Normal);
-        root.GetTestChild(4).style.SetGridItemPlacement(3, 1, 0, 2, StyleState.Normal);
+        root.GetChild(0).style.SetGridItemPlacement(0, 2, 0, 1, StyleState.Normal);
+        root.GetChild(1).style.SetGridItemPlacement(2, 2, 0, 2, StyleState.Normal);
+        root.GetChild(2).style.SetGridItemPlacement(0, 1, 1, 1, StyleState.Normal);
+        root.GetChild(3).style.SetGridItemPlacement(1, 1, 1, 1, StyleState.Normal);
+        root.GetChild(4).style.SetGridItemPlacement(3, 1, 0, 2, StyleState.Normal);
 
         root.style.SetGridLayoutColTemplate(new[] {
             new GridTrackSize(100f),
@@ -424,11 +423,11 @@ public class GridLayoutTests {
 
         mockView.Update();
 
-        Assert.AreEqual(new Vector2(0, 0), root.GetTestChild(0).layoutResult.localPosition);
-        Assert.AreEqual(new Vector2(200, 0), root.GetTestChild(1).layoutResult.localPosition);
-        Assert.AreEqual(new Vector2(0, 100), root.GetTestChild(2).layoutResult.localPosition);
-        Assert.AreEqual(new Vector2(100, 100), root.GetTestChild(3).layoutResult.localPosition);
-        Assert.AreEqual(new Vector2(300, 0), root.GetTestChild(4).layoutResult.localPosition);
+        Assert.AreEqual(new Vector2(0, 0), root.GetChild(0).layoutResult.localPosition);
+        Assert.AreEqual(new Vector2(200, 0), root.GetChild(1).layoutResult.localPosition);
+        Assert.AreEqual(new Vector2(0, 100), root.GetChild(2).layoutResult.localPosition);
+        Assert.AreEqual(new Vector2(100, 100), root.GetChild(3).layoutResult.localPosition);
+        Assert.AreEqual(new Vector2(300, 0), root.GetChild(4).layoutResult.localPosition);
     }
 
 
@@ -448,12 +447,12 @@ public class GridLayoutTests {
 
         mockView.Update();
 
-        Assert.AreEqual(new Vector2(0, 0), root.GetTestChild(0).layoutResult.localPosition);
-        Assert.AreEqual(new Vector2(110, 0), root.GetTestChild(1).layoutResult.localPosition);
-        Assert.AreEqual(new Vector2(220, 0), root.GetTestChild(2).layoutResult.localPosition);
-        Assert.AreEqual(new Vector2(0, 110), root.GetTestChild(3).layoutResult.localPosition);
-        Assert.AreEqual(new Vector2(110, 110), root.GetTestChild(4).layoutResult.localPosition);
-        Assert.AreEqual(new Vector2(220, 110), root.GetTestChild(5).layoutResult.localPosition);
+        Assert.AreEqual(new Vector2(0, 0), root.GetChild(0).layoutResult.localPosition);
+        Assert.AreEqual(new Vector2(110, 0), root.GetChild(1).layoutResult.localPosition);
+        Assert.AreEqual(new Vector2(220, 0), root.GetChild(2).layoutResult.localPosition);
+        Assert.AreEqual(new Vector2(0, 110), root.GetChild(3).layoutResult.localPosition);
+        Assert.AreEqual(new Vector2(110, 110), root.GetChild(4).layoutResult.localPosition);
+        Assert.AreEqual(new Vector2(220, 110), root.GetChild(5).layoutResult.localPosition);
     }
 
 
@@ -463,8 +462,8 @@ public class GridLayoutTests {
         GridLayout6Children root = (GridLayout6Children) mockView.RootElement;
         mockView.Update();
 
-        root.GetTestChild(0).style.SetPreferredWidth(400f, StyleState.Normal);
-        root.GetTestChild(3).style.SetPreferredWidth(600f, StyleState.Normal);
+        root.GetChild(0).style.SetPreferredWidth(400f, StyleState.Normal);
+        root.GetChild(3).style.SetPreferredWidth(600f, StyleState.Normal);
 
         root.style.SetGridLayoutColTemplate(new[] {
             GridTrackSize.MaxContent,
@@ -473,15 +472,15 @@ public class GridLayoutTests {
         }, StyleState.Normal);
 
         root.style.SetGridLayoutRowAutoSize(new GridTrackSize(100f), StyleState.Normal);
-
+        root.style.SetGridLayoutColAlignment(GridAxisAlignment.Start, StyleState.Normal);
         mockView.Update();
 
-        Assert.AreEqual(new Rect(0, 0, 400, 100), root.GetTestChild(0).layoutResult.LocalRect);
-        Assert.AreEqual(new Rect(600, 0, 100, 100), root.GetTestChild(1).layoutResult.LocalRect);
-        Assert.AreEqual(new Rect(700, 0, 100, 100), root.GetTestChild(2).layoutResult.LocalRect);
-        Assert.AreEqual(new Rect(0, 100, 600, 100), root.GetTestChild(3).layoutResult.LocalRect);
-        Assert.AreEqual(new Rect(600, 100, 100, 100), root.GetTestChild(4).layoutResult.LocalRect);
-        Assert.AreEqual(new Rect(700, 100, 100, 100), root.GetTestChild(5).layoutResult.LocalRect);
+        Assert.AreEqual(new Rect(0, 0, 400, 100), root.GetChild(0).layoutResult.LocalRect);
+        Assert.AreEqual(new Rect(600, 0, 100, 100), root.GetChild(1).layoutResult.LocalRect);
+        Assert.AreEqual(new Rect(700, 0, 100, 100), root.GetChild(2).layoutResult.LocalRect);
+        Assert.AreEqual(new Rect(0, 100, 600, 100), root.GetChild(3).layoutResult.LocalRect);
+        Assert.AreEqual(new Rect(600, 100, 100, 100), root.GetChild(4).layoutResult.LocalRect);
+        Assert.AreEqual(new Rect(700, 100, 100, 100), root.GetChild(5).layoutResult.LocalRect);
     }
 
     [Test]
@@ -490,8 +489,8 @@ public class GridLayoutTests {
         GridLayout6Children root = (GridLayout6Children) mockView.RootElement;
         mockView.Update();
 
-        root.GetTestChild(0).style.SetPreferredWidth(400f, StyleState.Normal);
-        root.GetTestChild(3).style.SetPreferredWidth(600f, StyleState.Normal);
+        root.GetChild(0).style.SetPreferredWidth(400f, StyleState.Normal);
+        root.GetChild(3).style.SetPreferredWidth(600f, StyleState.Normal);
 
         root.style.SetGridLayoutColTemplate(new[] {
             GridTrackSize.MinContent,
@@ -500,15 +499,16 @@ public class GridLayoutTests {
         }, StyleState.Normal);
 
         root.style.SetGridLayoutRowAutoSize(new GridTrackSize(100f), StyleState.Normal);
+        root.style.SetGridLayoutColAlignment(GridAxisAlignment.Start, StyleState.Normal);
 
         mockView.Update();
 
-        Assert.AreEqual(new Rect(0, 0, 400, 100), root.GetTestChild(0).layoutResult.LocalRect);
-        Assert.AreEqual(new Rect(400, 0, 100, 100), root.GetTestChild(1).layoutResult.LocalRect);
-        Assert.AreEqual(new Rect(500, 0, 100, 100), root.GetTestChild(2).layoutResult.LocalRect);
-        Assert.AreEqual(new Rect(0, 100, 600, 100), root.GetTestChild(3).layoutResult.LocalRect);
-        Assert.AreEqual(new Rect(400, 100, 100, 100), root.GetTestChild(4).layoutResult.LocalRect);
-        Assert.AreEqual(new Rect(500, 100, 100, 100), root.GetTestChild(5).layoutResult.LocalRect);
+        Assert.AreEqual(new Rect(0, 0, 400, 100), root.GetChild(0).layoutResult.LocalRect);
+        Assert.AreEqual(new Rect(400, 0, 100, 100), root.GetChild(1).layoutResult.LocalRect);
+        Assert.AreEqual(new Rect(500, 0, 100, 100), root.GetChild(2).layoutResult.LocalRect);
+        Assert.AreEqual(new Rect(0, 100, 600, 100), root.GetChild(3).layoutResult.LocalRect);
+        Assert.AreEqual(new Rect(400, 100, 100, 100), root.GetChild(4).layoutResult.LocalRect);
+        Assert.AreEqual(new Rect(500, 100, 100, 100), root.GetChild(5).layoutResult.LocalRect);
     }
 
 
@@ -518,8 +518,8 @@ public class GridLayoutTests {
         GridLayout6Children root = (GridLayout6Children) mockView.RootElement;
         mockView.Update();
 
-        root.GetTestChild(0).style.SetPreferredHeight(400f, StyleState.Normal);
-        root.GetTestChild(1).style.SetPreferredHeight(600f, StyleState.Normal);
+        root.GetChild(0).style.SetPreferredHeight(400f, StyleState.Normal);
+        root.GetChild(1).style.SetPreferredHeight(600f, StyleState.Normal);
 
         root.style.SetGridLayoutRowTemplate(new[] {
             GridTrackSize.MaxContent,
@@ -533,13 +533,14 @@ public class GridLayoutTests {
         }, StyleState.Normal);
 
         root.style.SetGridLayoutColAutoSize(new GridTrackSize(100f), StyleState.Normal);
+        root.style.SetGridLayoutRowAlignment(GridAxisAlignment.Start, StyleState.Normal);
 
         mockView.Update();
 
-        Assert.AreEqual(new Rect(0, 0, 100, 400), root.GetTestChild(0).layoutResult.LocalRect);
-        Assert.AreEqual(new Rect(100, 0, 100, 600), root.GetTestChild(1).layoutResult.LocalRect);
-        Assert.AreEqual(new Rect(0, 600, 100, 100), root.GetTestChild(2).layoutResult.LocalRect);
-        Assert.AreEqual(new Rect(100, 600, 100, 100), root.GetTestChild(3).layoutResult.LocalRect);
+        Assert.AreEqual(new Rect(0, 0, 100, 400), root.GetChild(0).layoutResult.LocalRect);
+        Assert.AreEqual(new Rect(100, 0, 100, 600), root.GetChild(1).layoutResult.LocalRect);
+        Assert.AreEqual(new Rect(0, 600, 100, 100), root.GetChild(2).layoutResult.LocalRect);
+        Assert.AreEqual(new Rect(100, 600, 100, 100), root.GetChild(3).layoutResult.LocalRect);
     }
 
     [Test]
@@ -548,8 +549,8 @@ public class GridLayoutTests {
         GridLayout6Children root = (GridLayout6Children) mockView.RootElement;
         mockView.Update();
 
-        root.GetTestChild(0).style.SetPreferredHeight(400f, StyleState.Normal);
-        root.GetTestChild(1).style.SetPreferredHeight(600f, StyleState.Normal);
+        root.GetChild(0).style.SetPreferredHeight(400f, StyleState.Normal);
+        root.GetChild(1).style.SetPreferredHeight(600f, StyleState.Normal);
 
         root.style.SetGridLayoutRowTemplate(new[] {
             GridTrackSize.MinContent,
@@ -563,13 +564,14 @@ public class GridLayoutTests {
         }, StyleState.Normal);
 
         root.style.SetGridLayoutColAutoSize(new GridTrackSize(100f), StyleState.Normal);
+        root.style.SetGridLayoutRowAlignment(GridAxisAlignment.Start, StyleState.Normal);
 
         mockView.Update();
 
-        Assert.AreEqual(new Rect(0, 0, 100, 400), root.GetTestChild(0).layoutResult.LocalRect);
-        Assert.AreEqual(new Rect(100, 0, 100, 600), root.GetTestChild(1).layoutResult.LocalRect);
-        Assert.AreEqual(new Rect(0, 400, 100, 100), root.GetTestChild(2).layoutResult.LocalRect);
-        Assert.AreEqual(new Rect(100, 400, 100, 100), root.GetTestChild(3).layoutResult.LocalRect);
+        Assert.AreEqual(new Rect(0, 0, 100, 400), root.GetChild(0).layoutResult.LocalRect);
+        Assert.AreEqual(new Rect(100, 0, 100, 600), root.GetChild(1).layoutResult.LocalRect);
+        Assert.AreEqual(new Rect(0, 400, 100, 100), root.GetChild(2).layoutResult.LocalRect);
+        Assert.AreEqual(new Rect(100, 400, 100, 100), root.GetChild(3).layoutResult.LocalRect);
     }
 
     [Test]
@@ -577,23 +579,23 @@ public class GridLayoutTests {
         MockApplication mockView = new MockApplication(typeof(GridLayout6Children));
         GridLayout6Children root = (GridLayout6Children) mockView.RootElement;
         mockView.Update();
-        
+
         root.style.SetGridLayoutDirection(LayoutDirection.Column, StyleState.Normal);
 
         root.GetChild(0).style.SetGridItemRowStart(0, StyleState.Normal);
         root.GetChild(1).style.SetGridItemRowStart(0, StyleState.Normal);
         root.GetChild(2).style.SetGridItemRowStart(0, StyleState.Normal);
-        
+
         root.GetChild(3).style.SetGridItemRowStart(1, StyleState.Normal);
         root.GetChild(4).style.SetGridItemRowStart(1, StyleState.Normal);
         root.GetChild(5).style.SetGridItemRowStart(1, StyleState.Normal);
-        
+
         mockView.Update();
-        
+
         Assert.AreEqual(new Rect(0, 0, 100, 100), root.GetChild(0).layoutResult.LocalRect);
         Assert.AreEqual(new Rect(100, 0, 100, 100), root.GetChild(1).layoutResult.LocalRect);
         Assert.AreEqual(new Rect(200, 0, 100, 100), root.GetChild(2).layoutResult.LocalRect);
-        
+
         Assert.AreEqual(new Rect(0, 100, 100, 100), root.GetChild(3).layoutResult.LocalRect);
         Assert.AreEqual(new Rect(100, 100, 100, 100), root.GetChild(4).layoutResult.LocalRect);
         Assert.AreEqual(new Rect(200, 100, 100, 100), root.GetChild(5).layoutResult.LocalRect);
@@ -604,14 +606,17 @@ public class GridLayoutTests {
         MockApplication mockView = new MockApplication(typeof(GridLayout3x1Plus1x3));
         GridLayout3x1Plus1x3 root = (GridLayout3x1Plus1x3) mockView.RootElement;
         mockView.Update();
-        
-        root.style.SetGridLayoutDirection(LayoutDirection.Column, StyleState.Normal);
-        
+
+        root.style.SetGridLayoutDirection(LayoutDirection.Horizontal, StyleState.Normal);
+
         root.style.SetGridLayoutColTemplate(new[] {
             new GridTrackSize(100f),
             new GridTrackSize(100f),
             new GridTrackSize(100f)
         }, StyleState.Normal);
+
+        root.style.SetGridLayoutColAlignment(GridAxisAlignment.Start, StyleState.Normal);
+        root.style.SetGridLayoutRowAlignment(GridAxisAlignment.Start, StyleState.Normal);
 
         root.style.SetPreferredWidth(400, StyleState.Normal);
         root.GetChild(0).style.SetMarginLeft(30, StyleState.Normal);
@@ -620,7 +625,7 @@ public class GridLayoutTests {
         root.GetChild(3).style.SetGridItemColSelfAlignment(GridAxisAlignment.Grow, StyleState.Normal);
 
         mockView.Update();
-        
+
         Assert.AreEqual(new Rect(30, 0, 100, 100), root.GetChild(0).layoutResult.LocalRect);
         Assert.AreEqual(new Rect(100, 30, 100, 100), root.GetChild(1).layoutResult.LocalRect);
         Assert.AreEqual(new Rect(200, 0, 100, 100), root.GetChild(2).layoutResult.LocalRect);
@@ -632,9 +637,9 @@ public class GridLayoutTests {
         MockApplication mockView = new MockApplication(typeof(GridLayoutVanilla3x1));
         GridLayoutVanilla3x1 root = (GridLayoutVanilla3x1) mockView.RootElement;
         mockView.Update();
-        
+
         root.style.SetGridLayoutDirection(LayoutDirection.Column, StyleState.Normal);
-        
+
         root.style.SetGridLayoutColTemplate(new[] {
             new GridTrackSize(100f),
             new GridTrackSize(100f),
@@ -648,18 +653,132 @@ public class GridLayoutTests {
         foreach (var child in root.GetChildren()) {
             child.style.SetPreferredWidth(100f, StyleState.Normal);
             child.style.SetGridItemColSelfAlignment(GridAxisAlignment.Center, StyleState.Normal);
-            child.style.SetGridItemRowSelfAlignment(GridAxisAlignment.Grow, StyleState.Normal);            
+            child.style.SetGridItemRowSelfAlignment(GridAxisAlignment.Grow, StyleState.Normal);
         }
-        
+
         // Left and right margin is ignored when the element is centered
         root.GetChild(0).style.SetMarginLeft(30, StyleState.Normal);
         root.GetChild(1).style.SetMarginTop(30, StyleState.Normal);
         root.GetChild(2).style.SetMarginBottom(30, StyleState.Normal);
-        
+
         mockView.Update();
-        
+
         Assert.AreEqual(new Rect(0, 0, 100, 400), root.GetChild(0).layoutResult.LocalRect);
         Assert.AreEqual(new Rect(100, 30, 100, 370), root.GetChild(1).layoutResult.LocalRect);
         Assert.AreEqual(new Rect(200, 0, 100, 370), root.GetChild(2).layoutResult.LocalRect);
     }
+
+
+    [Test]
+    public void ComplexLayoutHorizontalSparse() {
+        MockApplication mockView = new MockApplication(typeof(GridLayout6Children));
+        GridLayout6Children root = (GridLayout6Children) mockView.RootElement;
+        mockView.Update();
+
+        root.style.SetGridLayoutColTemplate(new[] {
+            new GridTrackSize(100f),
+            new GridTrackSize(100f),
+            new GridTrackSize(100f),
+            new GridTrackSize(100f)
+        }, StyleState.Normal);
+        
+        root.GetChild(1).style.SetGridItemRowSpan(2, StyleState.Normal);
+        root.GetChild(3).style.SetGridItemColSpan(2, StyleState.Normal);
+        root.style.SetGridLayoutDensity(GridLayoutDensity.Sparse, StyleState.Normal);
+        mockView.Update();
+
+        Assert.AreEqual(new Rect(0, 0, 100, 100), root.GetChild(0).layoutResult.LocalRect);
+        Assert.AreEqual(new Rect(100, 0, 100, 200), root.GetChild(1).layoutResult.LocalRect);
+        Assert.AreEqual(new Rect(200, 0, 100, 100), root.GetChild(2).layoutResult.LocalRect);
+        Assert.AreEqual(new Rect(200, 100, 200, 100), root.GetChild(3).layoutResult.LocalRect);
+        Assert.AreEqual(new Rect(0, 200, 100, 100), root.GetChild(4).layoutResult.LocalRect);
+        Assert.AreEqual(new Rect(100, 200, 100, 100), root.GetChild(5).layoutResult.LocalRect);
+        
+    }
+    
+    [Test]
+    public void ComplexLayoutHorizontalDense() {
+        MockApplication mockView = new MockApplication(typeof(GridLayout6Children));
+        GridLayout6Children root = (GridLayout6Children) mockView.RootElement;
+        mockView.Update();
+
+        root.style.SetGridLayoutColTemplate(new[] {
+            new GridTrackSize(100f),
+            new GridTrackSize(100f),
+            new GridTrackSize(100f),
+            new GridTrackSize(100f)
+        }, StyleState.Normal);
+        
+        root.GetChild(1).style.SetGridItemRowSpan(2, StyleState.Normal);
+        root.GetChild(3).style.SetGridItemColSpan(2, StyleState.Normal);
+        root.style.SetGridLayoutDensity(GridLayoutDensity.Dense, StyleState.Normal);
+        mockView.Update();
+
+        Assert.AreEqual(new Rect(0, 0, 100, 100), root.GetChild(0).layoutResult.LocalRect);
+        Assert.AreEqual(new Rect(100, 0, 100, 200), root.GetChild(1).layoutResult.LocalRect);
+        Assert.AreEqual(new Rect(200, 0, 100, 100), root.GetChild(2).layoutResult.LocalRect);
+        Assert.AreEqual(new Rect(200, 100, 200, 100), root.GetChild(3).layoutResult.LocalRect);
+        Assert.AreEqual(new Rect(300, 0, 100, 100), root.GetChild(4).layoutResult.LocalRect);
+        Assert.AreEqual(new Rect(0, 100, 100, 100), root.GetChild(5).layoutResult.LocalRect);
+        
+    }
+    
+    [Test]
+    public void ComplexLayoutVerticalSparse() {
+        MockApplication mockView = new MockApplication(typeof(GridLayout6Children));
+        GridLayout6Children root = (GridLayout6Children) mockView.RootElement;
+        mockView.Update();
+
+        root.style.SetGridLayoutRowTemplate(new[] {
+            new GridTrackSize(100f),
+            new GridTrackSize(100f),
+            new GridTrackSize(100f),
+            new GridTrackSize(100f)
+        }, StyleState.Normal);
+        
+        root.GetChild(1).style.SetGridItemRowSpan(2, StyleState.Normal);
+        root.GetChild(3).style.SetGridItemColSpan(2, StyleState.Normal);
+        root.style.SetGridLayoutDirection(LayoutDirection.Vertical, StyleState.Normal);
+        root.style.SetGridLayoutDensity(GridLayoutDensity.Sparse, StyleState.Normal);
+        root.style.SetGridLayoutColAutoSize(100f, StyleState.Normal);
+        mockView.Update();
+
+        Assert.AreEqual(new Rect(0, 0, 100, 100), root.GetChild(0).layoutResult.LocalRect);
+        Assert.AreEqual(new Rect(0, 100, 100, 200), root.GetChild(1).layoutResult.LocalRect);
+        Assert.AreEqual(new Rect(0, 300, 100, 100), root.GetChild(2).layoutResult.LocalRect);
+        Assert.AreEqual(new Rect(100, 0, 200, 100), root.GetChild(3).layoutResult.LocalRect);
+        Assert.AreEqual(new Rect(100, 100, 100, 100), root.GetChild(4).layoutResult.LocalRect);
+        Assert.AreEqual(new Rect(100, 200, 100, 100), root.GetChild(5).layoutResult.LocalRect);
+        
+    }
+    
+    [Test] // same as sparse
+    public void ComplexLayoutVerticalDense() {
+        MockApplication mockView = new MockApplication(typeof(GridLayout6Children));
+        GridLayout6Children root = (GridLayout6Children) mockView.RootElement;
+        mockView.Update();
+
+        root.style.SetGridLayoutRowTemplate(new[] {
+            new GridTrackSize(100f),
+            new GridTrackSize(100f),
+            new GridTrackSize(100f),
+            new GridTrackSize(100f)
+        }, StyleState.Normal);
+        
+        root.GetChild(1).style.SetGridItemRowSpan(2, StyleState.Normal);
+        root.GetChild(3).style.SetGridItemColSpan(2, StyleState.Normal);
+        root.style.SetGridLayoutDirection(LayoutDirection.Vertical, StyleState.Normal);
+        root.style.SetGridLayoutDensity(GridLayoutDensity.Dense, StyleState.Normal);
+        root.style.SetGridLayoutColAutoSize(100f, StyleState.Normal);
+        mockView.Update();
+
+        Assert.AreEqual(new Rect(0, 0, 100, 100), root.GetChild(0).layoutResult.LocalRect);
+        Assert.AreEqual(new Rect(0, 100, 100, 200), root.GetChild(1).layoutResult.LocalRect);
+        Assert.AreEqual(new Rect(0, 300, 100, 100), root.GetChild(2).layoutResult.LocalRect);
+        Assert.AreEqual(new Rect(100, 0, 200, 100), root.GetChild(3).layoutResult.LocalRect);
+        Assert.AreEqual(new Rect(100, 100, 100, 100), root.GetChild(4).layoutResult.LocalRect);
+        Assert.AreEqual(new Rect(100, 200, 100, 100), root.GetChild(5).layoutResult.LocalRect);
+        
+    }
+
 }

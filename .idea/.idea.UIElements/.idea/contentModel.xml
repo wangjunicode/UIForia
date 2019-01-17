@@ -425,6 +425,7 @@
             <e p="Layout" t="Include">
               <e p="CrossAxisAlignment.cs" t="Include" />
               <e p="Extents.cs" t="Include" />
+              <e p="GridAxisAlignment.cs" t="Include" />
               <e p="GridItem.cs" t="Include" />
               <e p="GridLayout.cs" t="Include" />
               <e p="GridLayoutDensity.cs" t="Include" />

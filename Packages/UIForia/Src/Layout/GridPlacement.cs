@@ -17,9 +17,6 @@ namespace UIForia.Layout {
             this.rowItem = rowItem;
         }
 
-        public bool IsAxisLocked => false;
-        public bool IsAutoPlaced => false;
-
     }
 
 }

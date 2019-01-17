@@ -11,12 +11,14 @@ namespace UIForia.Layout.LayoutTypes {
     public class GridLayoutBox : LayoutBox {
 
         private struct GridItemSizes {
+
             public float minSize;
             public float maxSize;
             public float outputSize;
             public float marginStart;
             public float marginEnd;
             public float TotalMargin => marginStart + marginEnd;
+
         }
 
         private readonly LightList<GridTrack> m_RowTracks;
@@ -746,18 +748,11 @@ namespace UIForia.Layout.LayoutTypes {
             }
         }
 
-        private void PlaceRemainingItems(List<GridPlacement> placements) {
-            GridTrackSize autoSize = style.GridLayoutColAutoSize;
-            bool autoFlowRow = style.GridLayoutDirection == LayoutDirection.Row;
-            bool dense = style.GridLayoutDensity == GridLayoutDensity.Dense;
-
+        private void PreAllocateMaxTrackSizes(List<GridPlacement> placements) {
+            int maxColStartAndSpan = 0;
+            int maxRowStartAndSpan = 0;
             GridTrackSize autoColSize = style.GridLayoutColAutoSize;
             GridTrackSize autoRowSize = style.GridLayoutRowAutoSize;
-
-            int cursorX = 0;
-            int cursorY = 0;
-            int sparseStartX = 0;
-            int sparseStartY = 0;
 
             for (int i = 0; i < placements.Count; i++) {
                 GridPlacement placement = placements[i];
@@ -767,10 +762,57 @@ namespace UIForia.Layout.LayoutTypes {
                 int rowSpan = rowItem.trackSpan;
                 int colStart = colItem.trackStart;
                 int colSpan = colItem.trackSpan;
+
+
+                if (!IntUtil.IsDefined(colStart)) {
+                    colStart = 0;
+                }
+
+                if (!IntUtil.IsDefined(rowStart)) {
+                    rowStart = 0;
+                }
+
+                maxColStartAndSpan = maxColStartAndSpan > colStart + colSpan ? maxColStartAndSpan : colStart + colSpan;
+                maxRowStartAndSpan = maxRowStartAndSpan > rowStart + rowSpan ? maxRowStartAndSpan : rowStart + rowSpan;
+            }
+
+            CreateTracks(m_ColTracks, maxColStartAndSpan, autoColSize);
+            CreateTracks(m_RowTracks, maxRowStartAndSpan, autoRowSize);
+        }
+
+        private void PlaceRemainingItems(List<GridPlacement> placements) {
+            bool flowHorizontal = style.GridLayoutDirection == LayoutDirection.Horizontal;
+            bool dense = style.GridLayoutDensity == GridLayoutDensity.Dense;
+
+            GridTrackSize autoColSize = style.GridLayoutColAutoSize;
+            GridTrackSize autoRowSize = style.GridLayoutRowAutoSize;
+
+            int sparseStartX = 0;
+            int sparseStartY = 0;
+
+            // uncomment to pre-create overflow rows / cols
+            // PreAllocateMaxTrackSizes(placements);
+
+            for (int i = 0; i < placements.Count; i++) {
+                GridPlacement placement = placements[i];
+                GridItem colItem = placement.colItem;
+                GridItem rowItem = placement.rowItem;
+                int rowStart = rowItem.trackStart;
+                int rowSpan = rowItem.trackSpan;
+                int colStart = colItem.trackStart;
+                int colSpan = colItem.trackSpan;
+
+                // @christian: should we pre-process the row and col spans and if one is larger than our total col or row count, create extra
+                // rows and columns up front? or keep current behavior where we create them on the fly? See above 
+
                 CreateTracks(m_ColTracks, colSpan, autoColSize);
                 CreateTracks(m_RowTracks, rowSpan, autoRowSize);
+
                 int colCount = m_ColTracks.Count;
                 int rowCount = m_RowTracks.Count;
+
+                int cursorX = 0;
+                int cursorY = 0;
 
                 if (rowItem.IsAxisLocked) {
                     cursorX = dense ? 0 : m_RowTracks[rowStart].autoPlacementCursor;
@@ -779,7 +821,7 @@ namespace UIForia.Layout.LayoutTypes {
                         cursorX++;
                     }
 
-                    CreateTracks(m_ColTracks, cursorX + colSpan, autoSize);
+                    CreateTracks(m_ColTracks, cursorX + colSpan, autoColSize);
 
                     m_RowTracks.List[rowStart].autoPlacementCursor = cursorX;
 
@@ -792,14 +834,13 @@ namespace UIForia.Layout.LayoutTypes {
                         cursorY++;
                     }
 
-                    CreateTracks(m_RowTracks, cursorY + rowSpan, autoSize);
+                    CreateTracks(m_RowTracks, cursorY + rowSpan, autoRowSize);
 
                     m_ColTracks.List[colStart].autoPlacementCursor = cursorY;
 
                     rowItem.trackStart = cursorY;
                 }
-                else if (autoFlowRow) {
-
+                else if (flowHorizontal) {
                     if (dense) {
                         cursorX = 0;
                         cursorY = 0;
@@ -833,7 +874,6 @@ namespace UIForia.Layout.LayoutTypes {
                     m_RowTracks.List[cursorY].autoPlacementCursor = cursorX;
                 }
                 else {
-
                     if (dense) {
                         cursorX = 0;
                         cursorY = 0;
@@ -842,9 +882,8 @@ namespace UIForia.Layout.LayoutTypes {
                         cursorX = sparseStartX;
                         cursorY = sparseStartY;
                     }
-                    
+
                     while (true) {
-                        CreateTracks(m_RowTracks, rowSpan, autoRowSize);
                         if (cursorY + rowSpan > rowCount) {
                             cursorX++;
                             CreateTracks(m_ColTracks, cursorX + colSpan, autoColSize);

@@ -30,24 +30,21 @@ namespace UIForia {
             : base(childTemplates, attributes) { }
 
         protected override Type elementType {
-            get {
-                return typeof(UIRepeatElement);
-            }
+            get { return typeof(UIRepeatElement); }
         }
 
         public override UIElement CreateScoped(TemplateScope inputScope) {
-            
             // todo -- support multiple children?
-            
+
             ReflectionUtil.ObjectArray2[0] = childTemplates[0];
             ReflectionUtil.ObjectArray2[1] = inputScope;
-            
-            UIRepeatElement element = (UIRepeatElement)ReflectionUtil.CreateGenericInstanceFromOpenType(
+
+            UIRepeatElement element = (UIRepeatElement) ReflectionUtil.CreateGenericInstanceFromOpenType(
                 typeof(UIRepeatElement<>),
                 itemType,
                 ReflectionUtil.ObjectArray2
             );
-            
+
             element.listExpression = listExpression;
             element.itemType = itemType;
             element.listType = listType;
@@ -72,7 +69,7 @@ namespace UIForia {
 
             genericArgType = listExpression.YieldedType;
 
-            
+
             lengthAlias = "$length";
             indexAlias = "$index";
             itemAlias = "$item";
@@ -96,6 +93,10 @@ namespace UIForia {
             Type[] genericTypes = genericArgType.GetGenericArguments();
 
             listType = genericArgType;
+            if (!(listType.IsAssignableFrom(typeof(IRepeatableList)))) {
+                throw new CompileException("<Repeat> element list argument must of type RepeatableList");
+            }
+
             itemType = genericTypes[0];
 
             itemResolver = new RepeatItemAliasResolver(itemAlias, itemType);
@@ -107,7 +108,6 @@ namespace UIForia {
             template.compiler.AddAliasResolver(lengthResolver);
 
             base.Compile(template);
-         
         }
 
         public override void PostCompile(ParsedTemplate template) {

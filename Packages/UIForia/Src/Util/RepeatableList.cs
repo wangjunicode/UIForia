@@ -6,7 +6,18 @@ using UIForia.Extensions;
 
 namespace UIForia.Util {
 
-    public class RepeatableList<T> : IList<T> {
+    public interface IRepeatableList {}
+
+    public interface IRepeatableList<T> : IList<T>, IRepeatableList {
+
+        event Action<T, int> onItemInserted;
+        event Action<T, int> onItemRemoved;
+        event Action<T, int, int> onItemMoved;
+        event Action onClear;
+
+    }
+    
+    public class RepeatableList<T> : IList<T>, IRepeatableList {
         
         public event Action<T, int> onItemInserted;
         public event Action<T, int> onItemRemoved;

@@ -833,13 +833,11 @@ namespace UIForia.Parsing.StyleParser {
 
             switch (propertyValue.ToLower()) {
                 case "row":
-                case "vertical":
-                case "layoutdirection.row":
+                case "horizontal":
                     return LayoutDirection.Row;
                 case "col":
                 case "column":
-                case "horizontal":
-                case "layoutdirection.column":
+                case "vertical":
                     return LayoutDirection.Column;
                 default:
                     throw new ParseException("Unknown value for " + nameof(LayoutDirection) + ": " + propertyValue);
@@ -1030,6 +1028,32 @@ namespace UIForia.Parsing.StyleParser {
             }
         }
 
+        public static GridAxisAlignment ParseGridAxisAlignment(List<StyleVariable> variables, string propertyValue) {
+            GridAxisAlignment alignment;
+            if (TryResolveVariable(variables, propertyValue, out alignment)) {
+                return alignment;
+            }
+
+            switch (propertyValue.ToLower()) {
+                case "unset":
+                    return GridAxisAlignment.Unset;
+                case "start":
+                    return GridAxisAlignment.Start;
+                case "end":
+                    return GridAxisAlignment.End;
+                case "center":
+                    return GridAxisAlignment.Center;
+                case "grow":
+                    return GridAxisAlignment.Grow;
+                case "fit":
+                    return GridAxisAlignment.Fit;
+                case "shrink":
+                    return GridAxisAlignment.Shrink;
+
+                default:
+                    throw new ParseException("Unknown value for " + nameof(GridAxisAlignment) + ": " + propertyValue);
+            }
+        }
     }
 
 }

@@ -234,16 +234,16 @@ namespace UIForia.Rendering {
             set { m_StyleSet.SetProperty(new StyleProperty(StylePropertyId.GridItemRowSpan, value), state); }
         }
         
-        public UIForia.Layout.CrossAxisAlignment GridItemColSelfAlignment {
+        public UIForia.Layout.GridAxisAlignment GridItemColSelfAlignment {
             [System.Diagnostics.DebuggerStepThrough]
-            get { return m_StyleSet.GetPropertyValueInState(StylePropertyId.GridItemColSelfAlignment, state).AsCrossAxisAlignment; }
+            get { return m_StyleSet.GetPropertyValueInState(StylePropertyId.GridItemColSelfAlignment, state).AsGridAxisAlignment; }
             [System.Diagnostics.DebuggerStepThrough]
             set { m_StyleSet.SetProperty(new StyleProperty(StylePropertyId.GridItemColSelfAlignment, (int)value), state); }
         }
         
-        public UIForia.Layout.CrossAxisAlignment GridItemRowSelfAlignment {
+        public UIForia.Layout.GridAxisAlignment GridItemRowSelfAlignment {
             [System.Diagnostics.DebuggerStepThrough]
-            get { return m_StyleSet.GetPropertyValueInState(StylePropertyId.GridItemRowSelfAlignment, state).AsCrossAxisAlignment; }
+            get { return m_StyleSet.GetPropertyValueInState(StylePropertyId.GridItemRowSelfAlignment, state).AsGridAxisAlignment; }
             [System.Diagnostics.DebuggerStepThrough]
             set { m_StyleSet.SetProperty(new StyleProperty(StylePropertyId.GridItemRowSelfAlignment, (int)value), state); }
         }
@@ -304,16 +304,16 @@ namespace UIForia.Rendering {
             set { m_StyleSet.SetProperty(new StyleProperty(StylePropertyId.GridLayoutRowGap, value), state); }
         }
         
-        public UIForia.Layout.CrossAxisAlignment GridLayoutColAlignment {
+        public UIForia.Layout.GridAxisAlignment GridLayoutColAlignment {
             [System.Diagnostics.DebuggerStepThrough]
-            get { return m_StyleSet.GetPropertyValueInState(StylePropertyId.GridLayoutColAlignment, state).AsCrossAxisAlignment; }
+            get { return m_StyleSet.GetPropertyValueInState(StylePropertyId.GridLayoutColAlignment, state).AsGridAxisAlignment; }
             [System.Diagnostics.DebuggerStepThrough]
             set { m_StyleSet.SetProperty(new StyleProperty(StylePropertyId.GridLayoutColAlignment, (int)value), state); }
         }
         
-        public UIForia.Layout.CrossAxisAlignment GridLayoutRowAlignment {
+        public UIForia.Layout.GridAxisAlignment GridLayoutRowAlignment {
             [System.Diagnostics.DebuggerStepThrough]
-            get { return m_StyleSet.GetPropertyValueInState(StylePropertyId.GridLayoutRowAlignment, state).AsCrossAxisAlignment; }
+            get { return m_StyleSet.GetPropertyValueInState(StylePropertyId.GridLayoutRowAlignment, state).AsGridAxisAlignment; }
             [System.Diagnostics.DebuggerStepThrough]
             set { m_StyleSet.SetProperty(new StyleProperty(StylePropertyId.GridLayoutRowAlignment, (int)value), state); }
         }
@@ -1404,16 +1404,16 @@ namespace UIForia.Rendering {
             set { SetProperty(new StyleProperty(StylePropertyId.GridItemRowSpan, value)); }
         }
             
-        public UIForia.Layout.CrossAxisAlignment GridItemColSelfAlignment {
+        public UIForia.Layout.GridAxisAlignment GridItemColSelfAlignment {
             [System.Diagnostics.DebuggerStepThrough]
-            get { return (UIForia.Layout.CrossAxisAlignment)FindEnumProperty(StylePropertyId.GridItemColSelfAlignment); }
+            get { return (UIForia.Layout.GridAxisAlignment)FindEnumProperty(StylePropertyId.GridItemColSelfAlignment); }
             [System.Diagnostics.DebuggerStepThrough]
             set { SetProperty(new StyleProperty(StylePropertyId.GridItemColSelfAlignment, (int)value)); }
         }
             
-        public UIForia.Layout.CrossAxisAlignment GridItemRowSelfAlignment {
+        public UIForia.Layout.GridAxisAlignment GridItemRowSelfAlignment {
             [System.Diagnostics.DebuggerStepThrough]
-            get { return (UIForia.Layout.CrossAxisAlignment)FindEnumProperty(StylePropertyId.GridItemRowSelfAlignment); }
+            get { return (UIForia.Layout.GridAxisAlignment)FindEnumProperty(StylePropertyId.GridItemRowSelfAlignment); }
             [System.Diagnostics.DebuggerStepThrough]
             set { SetProperty(new StyleProperty(StylePropertyId.GridItemRowSelfAlignment, (int)value)); }
         }
@@ -1474,16 +1474,16 @@ namespace UIForia.Rendering {
             set { SetProperty(new StyleProperty(StylePropertyId.GridLayoutRowGap, value)); }
         }
             
-        public UIForia.Layout.CrossAxisAlignment GridLayoutColAlignment {
+        public UIForia.Layout.GridAxisAlignment GridLayoutColAlignment {
             [System.Diagnostics.DebuggerStepThrough]
-            get { return (UIForia.Layout.CrossAxisAlignment)FindEnumProperty(StylePropertyId.GridLayoutColAlignment); }
+            get { return (UIForia.Layout.GridAxisAlignment)FindEnumProperty(StylePropertyId.GridLayoutColAlignment); }
             [System.Diagnostics.DebuggerStepThrough]
             set { SetProperty(new StyleProperty(StylePropertyId.GridLayoutColAlignment, (int)value)); }
         }
             
-        public UIForia.Layout.CrossAxisAlignment GridLayoutRowAlignment {
+        public UIForia.Layout.GridAxisAlignment GridLayoutRowAlignment {
             [System.Diagnostics.DebuggerStepThrough]
-            get { return (UIForia.Layout.CrossAxisAlignment)FindEnumProperty(StylePropertyId.GridLayoutRowAlignment); }
+            get { return (UIForia.Layout.GridAxisAlignment)FindEnumProperty(StylePropertyId.GridLayoutRowAlignment); }
             [System.Diagnostics.DebuggerStepThrough]
             set { SetProperty(new StyleProperty(StylePropertyId.GridLayoutRowAlignment, (int)value)); }
         }
@@ -2486,20 +2486,20 @@ namespace UIForia.Rendering {
                 }
             }
 
-            public UIForia.Layout.CrossAxisAlignment GridItemColSelfAlignment { 
+            public UIForia.Layout.GridAxisAlignment GridItemColSelfAlignment { 
                 [System.Diagnostics.DebuggerStepThrough]
                 get { 
                     StyleProperty property;
-                    if (m_PropertyMap.TryGetValue((int) StylePropertyId.GridItemColSelfAlignment, out property)) return property.AsCrossAxisAlignment;
+                    if (m_PropertyMap.TryGetValue((int) StylePropertyId.GridItemColSelfAlignment, out property)) return property.AsGridAxisAlignment;
                     return DefaultStyleValues_Generated.GridItemColSelfAlignment;
                 }
             }
 
-            public UIForia.Layout.CrossAxisAlignment GridItemRowSelfAlignment { 
+            public UIForia.Layout.GridAxisAlignment GridItemRowSelfAlignment { 
                 [System.Diagnostics.DebuggerStepThrough]
                 get { 
                     StyleProperty property;
-                    if (m_PropertyMap.TryGetValue((int) StylePropertyId.GridItemRowSelfAlignment, out property)) return property.AsCrossAxisAlignment;
+                    if (m_PropertyMap.TryGetValue((int) StylePropertyId.GridItemRowSelfAlignment, out property)) return property.AsGridAxisAlignment;
                     return DefaultStyleValues_Generated.GridItemRowSelfAlignment;
                 }
             }
@@ -2576,20 +2576,20 @@ namespace UIForia.Rendering {
                 }
             }
 
-            public UIForia.Layout.CrossAxisAlignment GridLayoutColAlignment { 
+            public UIForia.Layout.GridAxisAlignment GridLayoutColAlignment { 
                 [System.Diagnostics.DebuggerStepThrough]
                 get { 
                     StyleProperty property;
-                    if (m_PropertyMap.TryGetValue((int) StylePropertyId.GridLayoutColAlignment, out property)) return property.AsCrossAxisAlignment;
+                    if (m_PropertyMap.TryGetValue((int) StylePropertyId.GridLayoutColAlignment, out property)) return property.AsGridAxisAlignment;
                     return DefaultStyleValues_Generated.GridLayoutColAlignment;
                 }
             }
 
-            public UIForia.Layout.CrossAxisAlignment GridLayoutRowAlignment { 
+            public UIForia.Layout.GridAxisAlignment GridLayoutRowAlignment { 
                 [System.Diagnostics.DebuggerStepThrough]
                 get { 
                     StyleProperty property;
-                    if (m_PropertyMap.TryGetValue((int) StylePropertyId.GridLayoutRowAlignment, out property)) return property.AsCrossAxisAlignment;
+                    if (m_PropertyMap.TryGetValue((int) StylePropertyId.GridLayoutRowAlignment, out property)) return property.AsGridAxisAlignment;
                     return DefaultStyleValues_Generated.GridLayoutRowAlignment;
                 }
             }
@@ -3756,20 +3756,20 @@ namespace UIForia.Rendering {
             return GetPropertyValueInState(StylePropertyId.GridItemRowSpan, state).AsInt;
         }
         
-        public void SetGridItemColSelfAlignment(UIForia.Layout.CrossAxisAlignment value, StyleState state) {
+        public void SetGridItemColSelfAlignment(UIForia.Layout.GridAxisAlignment value, StyleState state) {
             SetProperty(new StyleProperty(StylePropertyId.GridItemColSelfAlignment, (int)value), state);
         }
 
-        public UIForia.Layout.CrossAxisAlignment GetGridItemColSelfAlignment(StyleState state) {
-            return GetPropertyValueInState(StylePropertyId.GridItemColSelfAlignment, state).AsCrossAxisAlignment;
+        public UIForia.Layout.GridAxisAlignment GetGridItemColSelfAlignment(StyleState state) {
+            return GetPropertyValueInState(StylePropertyId.GridItemColSelfAlignment, state).AsGridAxisAlignment;
         }
         
-        public void SetGridItemRowSelfAlignment(UIForia.Layout.CrossAxisAlignment value, StyleState state) {
+        public void SetGridItemRowSelfAlignment(UIForia.Layout.GridAxisAlignment value, StyleState state) {
             SetProperty(new StyleProperty(StylePropertyId.GridItemRowSelfAlignment, (int)value), state);
         }
 
-        public UIForia.Layout.CrossAxisAlignment GetGridItemRowSelfAlignment(StyleState state) {
-            return GetPropertyValueInState(StylePropertyId.GridItemRowSelfAlignment, state).AsCrossAxisAlignment;
+        public UIForia.Layout.GridAxisAlignment GetGridItemRowSelfAlignment(StyleState state) {
+            return GetPropertyValueInState(StylePropertyId.GridItemRowSelfAlignment, state).AsGridAxisAlignment;
         }
         
         public void SetGridLayoutDirection(UIForia.Rendering.LayoutDirection value, StyleState state) {
@@ -3836,20 +3836,20 @@ namespace UIForia.Rendering {
             return GetPropertyValueInState(StylePropertyId.GridLayoutRowGap, state).AsFloat;
         }
         
-        public void SetGridLayoutColAlignment(UIForia.Layout.CrossAxisAlignment value, StyleState state) {
+        public void SetGridLayoutColAlignment(UIForia.Layout.GridAxisAlignment value, StyleState state) {
             SetProperty(new StyleProperty(StylePropertyId.GridLayoutColAlignment, (int)value), state);
         }
 
-        public UIForia.Layout.CrossAxisAlignment GetGridLayoutColAlignment(StyleState state) {
-            return GetPropertyValueInState(StylePropertyId.GridLayoutColAlignment, state).AsCrossAxisAlignment;
+        public UIForia.Layout.GridAxisAlignment GetGridLayoutColAlignment(StyleState state) {
+            return GetPropertyValueInState(StylePropertyId.GridLayoutColAlignment, state).AsGridAxisAlignment;
         }
         
-        public void SetGridLayoutRowAlignment(UIForia.Layout.CrossAxisAlignment value, StyleState state) {
+        public void SetGridLayoutRowAlignment(UIForia.Layout.GridAxisAlignment value, StyleState state) {
             SetProperty(new StyleProperty(StylePropertyId.GridLayoutRowAlignment, (int)value), state);
         }
 
-        public UIForia.Layout.CrossAxisAlignment GetGridLayoutRowAlignment(StyleState state) {
-            return GetPropertyValueInState(StylePropertyId.GridLayoutRowAlignment, state).AsCrossAxisAlignment;
+        public UIForia.Layout.GridAxisAlignment GetGridLayoutRowAlignment(StyleState state) {
+            return GetPropertyValueInState(StylePropertyId.GridLayoutRowAlignment, state).AsGridAxisAlignment;
         }
         
         public void SetMinWidth(UIForia.UIMeasurement value, StyleState state) {

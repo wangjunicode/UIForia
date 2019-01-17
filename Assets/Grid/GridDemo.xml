@@ -3,16 +3,24 @@
     <Style path="Grid/GridDemo.style" />
     <Contents style="grid-container">
 
-        <!--<Group style="grid-cell " x-id='child0'>A</Group>-->
-        <!--<Group style="grid-cell " x-id='child1'>B</Group>-->
-        <!--<Group style="grid-cell " x-id='child2'>C</Group>-->
+        <Group style="grid-cell a">A</Group>
+        <Group style="grid-cell b">B</Group>
+        <Group style="grid-cell c">C</Group>
+        <Group style="grid-cell d">D</Group>
+        <Group style="grid-cell e">E</Group>
+        <Group style="grid-cell f">F</Group>
+        <Group style="grid-cell g">G</Group>
+    
         
-        <Group style="grid-cell grid-row1">A</Group>
-        <Group style="grid-cell grid-row1 b" >B</Group>
-        <Group style="grid-cell grid-row1" >C</Group>
-        <Group style="grid-cell grid-row2">D</Group>
-        <Group style="grid-cell grid-row2 ">E</Group>
-        <Group style="grid-cell grid-row2 f">F</Group>
+        
+        
+        
+        <!--<Group style="grid-cell grid-col1">A</Group>-->
+        <!--<Group style="grid-cell grid-col1" style.preferredHeight="50f">B</Group>-->
+        <!--<Group style="grid-cell grid-col1" >C</Group>-->
+        <!--<Group style="grid-cell">D</Group>-->
+        <!--<Group style="grid-cell grid-row2 ">E</Group>-->
+        <!--<Group style="grid-cell grid-row2 f">F</Group>-->
         
     </Contents>
 </UITemplate>

@@ -48,8 +48,8 @@ namespace UIForia.Rendering {
 		public const int GridItemColSpan = 1;
 		public const int GridItemRowStart = 2147483647;
 		public const int GridItemRowSpan = 1;
-		public const CrossAxisAlignment GridItemColSelfAlignment = UIForia.Layout.CrossAxisAlignment.Unset;
-		public const CrossAxisAlignment GridItemRowSelfAlignment = UIForia.Layout.CrossAxisAlignment.Unset;
+		public const GridAxisAlignment GridItemColSelfAlignment = UIForia.Layout.GridAxisAlignment.Unset;
+		public const GridAxisAlignment GridItemRowSelfAlignment = UIForia.Layout.GridAxisAlignment.Unset;
 		public const LayoutDirection GridLayoutDirection = UIForia.Rendering.LayoutDirection.Row;
 		public const GridLayoutDensity GridLayoutDensity = UIForia.Layout.GridLayoutDensity.Sparse;
 		public static readonly IReadOnlyList<UIForia.Layout.LayoutTypes.GridTrackSize> GridLayoutColTemplate = ListPool<GridTrackSize>.Empty;
@@ -58,8 +58,8 @@ namespace UIForia.Rendering {
 		public static readonly GridTrackSize GridLayoutRowAutoSize = new GridTrackSize(1, GridTemplateUnit.MaxContent);
 		public const float GridLayoutColGap = 0;
 		public const float GridLayoutRowGap = 0;
-		public const CrossAxisAlignment GridLayoutColAlignment = UIForia.Layout.CrossAxisAlignment.Start;
-		public const CrossAxisAlignment GridLayoutRowAlignment = UIForia.Layout.CrossAxisAlignment.Start;
+		public const GridAxisAlignment GridLayoutColAlignment = UIForia.Layout.GridAxisAlignment.Fit;
+		public const GridAxisAlignment GridLayoutRowAlignment = UIForia.Layout.GridAxisAlignment.Fit;
 		public static readonly UIMeasurement MinWidth = new UIMeasurement(0, UIMeasurementUnit.Pixel);
 		public static readonly UIMeasurement MaxWidth = new UIMeasurement(3.402823E+38, UIMeasurementUnit.Pixel);
 		public static readonly UIMeasurement PreferredWidth = new UIMeasurement(1, UIMeasurementUnit.Content);
@@ -229,9 +229,9 @@ namespace UIForia.Rendering {
 				case StylePropertyId.GridItemRowSpan:
 					 return new StyleProperty(StylePropertyId.GridItemRowSpan, 1);
 				case StylePropertyId.GridItemColSelfAlignment:
-					 return new StyleProperty(StylePropertyId.GridItemColSelfAlignment, (int)UIForia.Layout.CrossAxisAlignment.Unset);
+					 return new StyleProperty(StylePropertyId.GridItemColSelfAlignment, (int)UIForia.Layout.GridAxisAlignment.Unset);
 				case StylePropertyId.GridItemRowSelfAlignment:
-					 return new StyleProperty(StylePropertyId.GridItemRowSelfAlignment, (int)UIForia.Layout.CrossAxisAlignment.Unset);
+					 return new StyleProperty(StylePropertyId.GridItemRowSelfAlignment, (int)UIForia.Layout.GridAxisAlignment.Unset);
 				case StylePropertyId.GridLayoutDirection:
 					 return new StyleProperty(StylePropertyId.GridLayoutDirection, (int)UIForia.Rendering.LayoutDirection.Row);
 				case StylePropertyId.GridLayoutDensity:
@@ -249,9 +249,9 @@ namespace UIForia.Rendering {
 				case StylePropertyId.GridLayoutRowGap:
 					 return new StyleProperty(StylePropertyId.GridLayoutRowGap, 0);
 				case StylePropertyId.GridLayoutColAlignment:
-					 return new StyleProperty(StylePropertyId.GridLayoutColAlignment, (int)UIForia.Layout.CrossAxisAlignment.Start);
+					 return new StyleProperty(StylePropertyId.GridLayoutColAlignment, (int)UIForia.Layout.GridAxisAlignment.Fit);
 				case StylePropertyId.GridLayoutRowAlignment:
-					 return new StyleProperty(StylePropertyId.GridLayoutRowAlignment, (int)UIForia.Layout.CrossAxisAlignment.Start);
+					 return new StyleProperty(StylePropertyId.GridLayoutRowAlignment, (int)UIForia.Layout.GridAxisAlignment.Fit);
 				case StylePropertyId.MinWidth:
 					 return new StyleProperty(StylePropertyId.MinWidth, new UIMeasurement(0, UIMeasurementUnit.Pixel));
 				case StylePropertyId.MaxWidth:

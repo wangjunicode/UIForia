@@ -133,11 +133,11 @@ namespace UIForia.Parsing.StyleParser {
                 case "griditemrowspan":
                     context.targetStyle.GridItemRowSpan = ParseUtil.ParseInt(context.variables, propertyValue);
                     break;
-                case "griditemcolselfalign":
-                    context.targetStyle.GridItemColSelfAlignment = ParseUtil.ParseCrossAxisAlignment(context.variables, propertyValue);
+                case "griditemcolselfalignment":
+                    context.targetStyle.GridItemColSelfAlignment = ParseUtil.ParseGridAxisAlignment(context.variables, propertyValue);
                     break;
-                case "griditemrowselfalign":
-                    context.targetStyle.GridItemRowSelfAlignment = ParseUtil.ParseCrossAxisAlignment(context.variables, propertyValue);
+                case "griditemrowselfalignment":
+                    context.targetStyle.GridItemRowSelfAlignment = ParseUtil.ParseGridAxisAlignment(context.variables, propertyValue);
                     break;
                 default:
                     throw new ParseException("Unknown grid item property: " + propertyName);
@@ -164,17 +164,17 @@ namespace UIForia.Parsing.StyleParser {
                 case "gridlayoutrowautosize":
                     context.targetStyle.GridLayoutRowAutoSize = ParseUtil.ParseGridTrackSize(context.variables, propertyValue);
                     break;
-                case "gridlayoutcolgap":
+                case "gridlayoutcolgap": // todo -- support fixed length
                     context.targetStyle.GridLayoutColGap = ParseUtil.ParseFloat(context.variables, propertyValue);
                     break;
-                case "gridlayoutrowgap":
-                    context.targetStyle.GridLayoutColGap = ParseUtil.ParseFloat(context.variables, propertyValue);
+                case "gridlayoutrowgap": // todo -- support fixed length
+                    context.targetStyle.GridLayoutRowGap = ParseUtil.ParseFloat(context.variables, propertyValue);
                     break;
                 case "gridlayoutcolalignment":
-                    context.targetStyle.GridLayoutColAlignment = ParseUtil.ParseCrossAxisAlignment(context.variables, propertyValue);
+                    context.targetStyle.GridLayoutColAlignment = ParseUtil.ParseGridAxisAlignment(context.variables, propertyValue);
                     break;
                 case "gridlayoutrowalignment":
-                    context.targetStyle.GridLayoutRowAlignment = ParseUtil.ParseCrossAxisAlignment(context.variables, propertyValue);
+                    context.targetStyle.GridLayoutRowAlignment = ParseUtil.ParseGridAxisAlignment(context.variables, propertyValue);
                     break;
                 default:
                     throw new ParseException("Unknown grid layout property: " + propertyName);

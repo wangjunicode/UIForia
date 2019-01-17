@@ -106,6 +106,7 @@ namespace UIForia.Rendering {
 
         public int AsInt => valuePart0;
         public float AsFloat => floatValue;
+        public GridAxisAlignment AsGridAxisAlignment => (GridAxisAlignment) valuePart0;
         public CrossAxisAlignment AsCrossAxisAlignment => (CrossAxisAlignment) valuePart0;
         public MainAxisAlignment AsMainAxisAlignment => (MainAxisAlignment) valuePart0;
         public Overflow AsOverflow => (Overflow) valuePart0;

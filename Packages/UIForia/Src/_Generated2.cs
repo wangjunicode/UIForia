@@ -521,6 +521,43 @@ namespace UIForia.StyleBindings {
 
     }
         
+    public class StyleBinding_GridAxisAlignment : StyleBinding {
+
+        public readonly Expression<UIForia.Layout.GridAxisAlignment> expression;
+        public readonly StylePropertyId propertyId;
+        
+        public StyleBinding_GridAxisAlignment(string propertyName, StylePropertyId propertyId, StyleState state, Expression<UIForia.Layout.GridAxisAlignment> expression)
+            : base(propertyName, state) {
+            this.propertyId = propertyId;
+            this.expression = expression;
+        }
+
+        public override void Execute(UIElement element, ExpressionContext context) {
+            if (!element.style.IsInState(state)) return;
+
+            var oldValue = element.style.m_PropertyMap[(int)propertyId].AsGridAxisAlignment;
+            var value = expression.Evaluate(context);
+            if (value != oldValue) {
+                element.style.SetProperty(new StyleProperty(propertyId, (int)value), state);
+            }
+        }
+
+        public override bool IsConstant() {
+            return expression.IsConstant();
+        }
+
+        public override void Apply(UIStyle style, ExpressionContext context) {
+            var value = expression.Evaluate(context);
+            style.SetProperty(new StyleProperty(propertyId, (int)value));
+        }
+
+        public override void Apply(UIStyleSet styleSet, ExpressionContext context) {
+            var value = expression.Evaluate(context);
+            styleSet.SetProperty(new StyleProperty(propertyId, (int)value), state);
+        }
+
+    }
+        
     public class StyleBinding_GridLayoutDensity : StyleBinding {
 
         public readonly Expression<UIForia.Layout.GridLayoutDensity> expression;
@@ -1166,6 +1203,7 @@ namespace UIForia.Compilers {
         private static readonly EnumAliasSource<UIForia.Rendering.LayoutDirection> s_EnumSource_LayoutDirection = new EnumAliasSource<UIForia.Rendering.LayoutDirection>();
         private static readonly EnumAliasSource<UIForia.Rendering.LayoutWrap> s_EnumSource_LayoutWrap = new EnumAliasSource<UIForia.Rendering.LayoutWrap>();
         private static readonly EnumAliasSource<UIForia.Layout.MainAxisAlignment> s_EnumSource_MainAxisAlignment = new EnumAliasSource<UIForia.Layout.MainAxisAlignment>();
+        private static readonly EnumAliasSource<UIForia.Layout.GridAxisAlignment> s_EnumSource_GridAxisAlignment = new EnumAliasSource<UIForia.Layout.GridAxisAlignment>();
         private static readonly EnumAliasSource<UIForia.Layout.GridLayoutDensity> s_EnumSource_GridLayoutDensity = new EnumAliasSource<UIForia.Layout.GridLayoutDensity>();
         private static readonly EnumAliasSource<UIForia.Text.FontStyle> s_EnumSource_FontStyle = new EnumAliasSource<UIForia.Text.FontStyle>();
         private static readonly EnumAliasSource<UIForia.Text.TextAlignment> s_EnumSource_TextAlignment = new EnumAliasSource<UIForia.Text.TextAlignment>();
@@ -1250,9 +1288,9 @@ case "overflowx":
                 case "griditemrowspan":
                     return new UIForia.StyleBindings.StyleBinding_int("GridItemRowSpan", UIForia.Rendering.StylePropertyId.GridItemRowSpan, targetState.state, Compile<int>(value, null));                
                 case "griditemcolselfalignment":
-                    return new UIForia.StyleBindings.StyleBinding_CrossAxisAlignment("GridItemColSelfAlignment", UIForia.Rendering.StylePropertyId.GridItemColSelfAlignment, targetState.state, Compile<UIForia.Layout.CrossAxisAlignment>(value, s_EnumSource_CrossAxisAlignment));                
+                    return new UIForia.StyleBindings.StyleBinding_GridAxisAlignment("GridItemColSelfAlignment", UIForia.Rendering.StylePropertyId.GridItemColSelfAlignment, targetState.state, Compile<UIForia.Layout.GridAxisAlignment>(value, s_EnumSource_GridAxisAlignment));                
                 case "griditemrowselfalignment":
-                    return new UIForia.StyleBindings.StyleBinding_CrossAxisAlignment("GridItemRowSelfAlignment", UIForia.Rendering.StylePropertyId.GridItemRowSelfAlignment, targetState.state, Compile<UIForia.Layout.CrossAxisAlignment>(value, s_EnumSource_CrossAxisAlignment));                
+                    return new UIForia.StyleBindings.StyleBinding_GridAxisAlignment("GridItemRowSelfAlignment", UIForia.Rendering.StylePropertyId.GridItemRowSelfAlignment, targetState.state, Compile<UIForia.Layout.GridAxisAlignment>(value, s_EnumSource_GridAxisAlignment));                
                 case "gridlayoutdirection":
                     return new UIForia.StyleBindings.StyleBinding_LayoutDirection("GridLayoutDirection", UIForia.Rendering.StylePropertyId.GridLayoutDirection, targetState.state, Compile<UIForia.Rendering.LayoutDirection>(value, s_EnumSource_LayoutDirection));                
                 case "gridlayoutdensity":
@@ -1270,9 +1308,9 @@ case "overflowx":
                 case "gridlayoutrowgap":
                     return new UIForia.StyleBindings.StyleBinding_float("GridLayoutRowGap", UIForia.Rendering.StylePropertyId.GridLayoutRowGap, targetState.state, Compile<float>(value, null));                
                 case "gridlayoutcolalignment":
-                    return new UIForia.StyleBindings.StyleBinding_CrossAxisAlignment("GridLayoutColAlignment", UIForia.Rendering.StylePropertyId.GridLayoutColAlignment, targetState.state, Compile<UIForia.Layout.CrossAxisAlignment>(value, s_EnumSource_CrossAxisAlignment));                
+                    return new UIForia.StyleBindings.StyleBinding_GridAxisAlignment("GridLayoutColAlignment", UIForia.Rendering.StylePropertyId.GridLayoutColAlignment, targetState.state, Compile<UIForia.Layout.GridAxisAlignment>(value, s_EnumSource_GridAxisAlignment));                
                 case "gridlayoutrowalignment":
-                    return new UIForia.StyleBindings.StyleBinding_CrossAxisAlignment("GridLayoutRowAlignment", UIForia.Rendering.StylePropertyId.GridLayoutRowAlignment, targetState.state, Compile<UIForia.Layout.CrossAxisAlignment>(value, s_EnumSource_CrossAxisAlignment));                
+                    return new UIForia.StyleBindings.StyleBinding_GridAxisAlignment("GridLayoutRowAlignment", UIForia.Rendering.StylePropertyId.GridLayoutRowAlignment, targetState.state, Compile<UIForia.Layout.GridAxisAlignment>(value, s_EnumSource_GridAxisAlignment));                
                 case "minwidth":
                     return new UIForia.StyleBindings.StyleBinding_UIMeasurement("MinWidth", UIForia.Rendering.StylePropertyId.MinWidth, targetState.state, Compile<UIForia.UIMeasurement>(value, measurementSources));                
                 case "maxwidth":

@@ -3,7 +3,7 @@ using UnityEngine;
 
 namespace UIForia {
 
-    public class UIViewBehavior : MonoBehaviour {
+        public class UIViewBehavior : MonoBehaviour {
 
         public UIView view;
         public Type type;

@@ -67,8 +67,8 @@ namespace UIForia.Editor {
             new PropertyGenerator<int>(StylePropertyId.GridItemColSpan, 1),
             new PropertyGenerator<int>(StylePropertyId.GridItemRowStart, IntUtil.UnsetValue),
             new PropertyGenerator<int>(StylePropertyId.GridItemRowSpan, 1),
-            new PropertyGenerator<CrossAxisAlignment>(StylePropertyId.GridItemColSelfAlignment, CrossAxisAlignment.Unset),
-            new PropertyGenerator<CrossAxisAlignment>(StylePropertyId.GridItemRowSelfAlignment, CrossAxisAlignment.Unset),
+            new PropertyGenerator<GridAxisAlignment>(StylePropertyId.GridItemColSelfAlignment, GridAxisAlignment.Unset),
+            new PropertyGenerator<GridAxisAlignment>(StylePropertyId.GridItemRowSelfAlignment, GridAxisAlignment.Unset),
 
             // Grid Layout
             new PropertyGenerator<LayoutDirection>(StylePropertyId.GridLayoutDirection, LayoutDirection.Row),
@@ -79,8 +79,8 @@ namespace UIForia.Editor {
             new PropertyGenerator<GridTrackSize>(StylePropertyId.GridLayoutRowAutoSize, GridTrackSize.MaxContent),
             new AnimatedPropertyGenerator<float>(StylePropertyId.GridLayoutColGap, 0),
             new AnimatedPropertyGenerator<float>(StylePropertyId.GridLayoutRowGap, 0),
-            new PropertyGenerator<CrossAxisAlignment>(StylePropertyId.GridLayoutColAlignment, CrossAxisAlignment.Start),
-            new PropertyGenerator<CrossAxisAlignment>(StylePropertyId.GridLayoutRowAlignment, CrossAxisAlignment.Start),
+            new PropertyGenerator<GridAxisAlignment>(StylePropertyId.GridLayoutColAlignment, GridAxisAlignment.Fit),
+            new PropertyGenerator<GridAxisAlignment>(StylePropertyId.GridLayoutRowAlignment, GridAxisAlignment.Fit),
 
             // Size
             new AnimatedPropertyGenerator<UIMeasurement>(StylePropertyId.MinWidth, new UIMeasurement(0)),

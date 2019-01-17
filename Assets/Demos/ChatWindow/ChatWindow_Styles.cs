@@ -81,8 +81,6 @@ public class ChatWindow_Styles {
                 GridTrackSize.Flex,
                 new GridTrackSize(100f)
             },
-            GridLayoutRowAlignment = CrossAxisAlignment.Center,
-            GridLayoutColAlignment = CrossAxisAlignment.Stretch,
             GridLayoutColAutoSize = 100f,
         };
     }
@@ -111,7 +109,7 @@ public class ChatWindow_Styles {
     public static UIStyle GridItemAlt() {
         return new UIStyle() {
 //            GridItemColSelfAlignment =CrossAxisAlignment.Center,
-            GridItemRowSelfAlignment = CrossAxisAlignment.Center,
+            GridItemRowSelfAlignment = GridAxisAlignment.Center,
             BackgroundColor = Color.blue,
             PreferredWidth = 100f,
             PreferredHeight = 100f,
@@ -124,7 +122,7 @@ public class ChatWindow_Styles {
     public static UIStyle GridItemAlt2() {
         return new UIStyle() {
 //            GridItemColSelfAlignment =CrossAxisAlignment.Center,
-            GridItemRowSelfAlignment = CrossAxisAlignment.Center,
+            GridItemRowSelfAlignment = GridAxisAlignment.Center,
             BackgroundColor = Color.green,
             PreferredWidth = 100f,
             PreferredHeight = 100f,

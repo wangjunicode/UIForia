@@ -33,6 +33,31 @@ public class GridLayoutTests {
         }
 
     }
+    
+    [Template(TemplateType.String, @"
+        <UITemplate>
+            <Contents style.layoutType='LayoutType.Grid'>
+                <Group>A</Group>
+                <Group>B</Group>
+                <Group>C</Group>
+            </Contents>
+        </UITemplate>
+    ")]
+    public class GridLayoutVanilla3x1 : UIElement {
+    }
+    
+    [Template(TemplateType.String, @"
+        <UITemplate>
+            <Contents style.layoutType='LayoutType.Grid'>
+                <Group style.preferredWidth='100f' style.preferredHeight='100f'>A</Group>
+                <Group style.preferredWidth='100f' style.preferredHeight='100f'>B</Group>
+                <Group style.preferredWidth='100f' style.preferredHeight='100f'>C</Group>
+                <Group style.preferredWidth='100f' style.preferredHeight='100f' style.gridItemColSpan='3' style.gridItemRowStart='1'>D-F</Group>
+            </Contents>
+        </UITemplate>
+    ")]
+    public class GridLayout3x1Plus1x3 : UIElement {
+    }
 
     [Template(TemplateType.String, @"
         <UITemplate>
@@ -55,6 +80,8 @@ public class GridLayoutTests {
 
     [Test]
     public void ExplicitPlaced_Fixed3x1() {
+       
+        
         MockApplication mockView = new MockApplication(typeof(GridLayoutThing3x1));
         GridLayoutThing3x1 root = (GridLayoutThing3x1) mockView.RootElement;
         root.child0.style.SetGridItemPlacement(0, 1, 0, 1, StyleState.Normal);
@@ -124,7 +151,7 @@ public class GridLayoutTests {
         root.child1.style.SetGridItemPlacement(1, 1, 0, 1, StyleState.Normal);
         root.child2.style.SetGridItemPlacement(2, 1, 0, 1, StyleState.Normal);
 
-        root.style.SetGridLayoutColAlignment(CrossAxisAlignment.Center, StyleState.Normal);
+        root.style.SetGridLayoutColAlignment(GridAxisAlignment.Center, StyleState.Normal);
 
         var rowTemplate = new List<GridTrackSize>(new[] {
             new GridTrackSize(100f)
@@ -157,7 +184,7 @@ public class GridLayoutTests {
         root.child1.style.SetGridItemPlacement(1, 1, 0, 1, StyleState.Normal);
         root.child2.style.SetGridItemPlacement(2, 1, 0, 1, StyleState.Normal);
 
-        root.style.SetGridLayoutColAlignment(CrossAxisAlignment.End, StyleState.Normal);
+        root.style.SetGridLayoutColAlignment(GridAxisAlignment.End, StyleState.Normal);
 
         var rowTemplate = new List<GridTrackSize>(new[] {
             new GridTrackSize(100f)
@@ -190,7 +217,7 @@ public class GridLayoutTests {
         root.child1.style.SetGridItemPlacement(1, 1, 0, 1, StyleState.Normal);
         root.child2.style.SetGridItemPlacement(2, 1, 0, 1, StyleState.Normal);
 
-        root.style.SetGridLayoutColAlignment(CrossAxisAlignment.Stretch, StyleState.Normal);
+        root.style.SetGridLayoutColAlignment(GridAxisAlignment.Grow, StyleState.Normal);
 
         var rowTemplate = new List<GridTrackSize>(new[] {
             new GridTrackSize(100f)
@@ -296,7 +323,7 @@ public class GridLayoutTests {
         };
 
         root.style.SetPreferredWidth(400, StyleState.Normal);
-        root.style.SetGridLayoutColAlignment(CrossAxisAlignment.Stretch, StyleState.Normal);
+        root.style.SetGridLayoutColAlignment(GridAxisAlignment.Grow, StyleState.Normal);
         root.style.SetGridLayoutColTemplate(colTemplate, StyleState.Normal);
         root.style.SetGridLayoutRowTemplate(rowTemplate, StyleState.Normal);
         mockView.Update();
@@ -570,5 +597,69 @@ public class GridLayoutTests {
         Assert.AreEqual(new Rect(0, 100, 100, 100), root.GetChild(3).layoutResult.LocalRect);
         Assert.AreEqual(new Rect(100, 100, 100, 100), root.GetChild(4).layoutResult.LocalRect);
         Assert.AreEqual(new Rect(200, 100, 100, 100), root.GetChild(5).layoutResult.LocalRect);
+    }
+
+    [Test]
+    public void ColumnMargin_ShouldOffsetFromCell() {
+        MockApplication mockView = new MockApplication(typeof(GridLayout3x1Plus1x3));
+        GridLayout3x1Plus1x3 root = (GridLayout3x1Plus1x3) mockView.RootElement;
+        mockView.Update();
+        
+        root.style.SetGridLayoutDirection(LayoutDirection.Column, StyleState.Normal);
+        
+        root.style.SetGridLayoutColTemplate(new[] {
+            new GridTrackSize(100f),
+            new GridTrackSize(100f),
+            new GridTrackSize(100f)
+        }, StyleState.Normal);
+
+        root.style.SetPreferredWidth(400, StyleState.Normal);
+        root.GetChild(0).style.SetMarginLeft(30, StyleState.Normal);
+        root.GetChild(1).style.SetMarginTop(30, StyleState.Normal);
+        root.GetChild(2).style.SetMarginBottom(30, StyleState.Normal);
+        root.GetChild(3).style.SetGridItemColSelfAlignment(GridAxisAlignment.Grow, StyleState.Normal);
+
+        mockView.Update();
+        
+        Assert.AreEqual(new Rect(30, 0, 100, 100), root.GetChild(0).layoutResult.LocalRect);
+        Assert.AreEqual(new Rect(100, 30, 100, 100), root.GetChild(1).layoutResult.LocalRect);
+        Assert.AreEqual(new Rect(200, 0, 100, 100), root.GetChild(2).layoutResult.LocalRect);
+        Assert.AreEqual(new Rect(0, 130, 300, 100), root.GetChild(3).layoutResult.LocalRect);
+    }
+
+    [Test]
+    public void ColumnMargin_WithStretch_ShouldReduceCellSize() {
+        MockApplication mockView = new MockApplication(typeof(GridLayoutVanilla3x1));
+        GridLayoutVanilla3x1 root = (GridLayoutVanilla3x1) mockView.RootElement;
+        mockView.Update();
+        
+        root.style.SetGridLayoutDirection(LayoutDirection.Column, StyleState.Normal);
+        
+        root.style.SetGridLayoutColTemplate(new[] {
+            new GridTrackSize(100f),
+            new GridTrackSize(100f),
+            new GridTrackSize(100f)
+        }, StyleState.Normal);
+
+        root.style.SetPreferredWidth(400, StyleState.Normal);
+        root.style.SetPreferredHeight(400, StyleState.Normal);
+        root.style.SetGridLayoutRowAutoSize(400, StyleState.Normal);
+
+        foreach (var child in root.GetChildren()) {
+            child.style.SetPreferredWidth(100f, StyleState.Normal);
+            child.style.SetGridItemColSelfAlignment(GridAxisAlignment.Center, StyleState.Normal);
+            child.style.SetGridItemRowSelfAlignment(GridAxisAlignment.Grow, StyleState.Normal);            
+        }
+        
+        // Left and right margin is ignored when the element is centered
+        root.GetChild(0).style.SetMarginLeft(30, StyleState.Normal);
+        root.GetChild(1).style.SetMarginTop(30, StyleState.Normal);
+        root.GetChild(2).style.SetMarginBottom(30, StyleState.Normal);
+        
+        mockView.Update();
+        
+        Assert.AreEqual(new Rect(0, 0, 100, 400), root.GetChild(0).layoutResult.LocalRect);
+        Assert.AreEqual(new Rect(100, 30, 100, 370), root.GetChild(1).layoutResult.LocalRect);
+        Assert.AreEqual(new Rect(200, 0, 100, 370), root.GetChild(2).layoutResult.LocalRect);
     }
 }

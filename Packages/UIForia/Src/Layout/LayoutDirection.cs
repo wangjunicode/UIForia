@@ -4,8 +4,9 @@ namespace UIForia.Rendering {
 
         Unset = 0,
         Row = 1,
-        Column = 2
-
+        Horizontal = 1,
+        Column = 2,
+        Vertical = 2
     }
 
 }

@@ -78,7 +78,7 @@ public class ChatWindow_Styles {
                 new GridTrackSize(100f),
             },
             GridLayoutColTemplate = new[] {
-                GridTrackSize.Flex,
+                GridTrackSize.FractionalRemaining,
                 new GridTrackSize(100f)
             },
             GridLayoutColAutoSize = 100f,

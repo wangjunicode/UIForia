@@ -2,9 +2,10 @@ style grid-container {
     LayoutType = Grid;
     GridLayoutDirection = Vertical;
     PreferredSize = 400px;
-    BackgroundColor = green;    
-    GridLayoutRowTemplate = 100px, 100px, 100px, 100px;
-    //GridLayoutColAutoSize = 100px;
+    BackgroundColor = green;
+    GridLayoutRowTemplate = 100px, 100px;
+    GridLayoutColTemplate = 100px, 100px, 100px;
+    //GridLayoutColAutoSize = 1fr;
     GridLayoutDensity = sparse;
 }
 
@@ -21,7 +22,7 @@ style a {
 }
 
 style b {
-    GridItemRowSpan = 2;
+    GridItemRowSpan = 1;
 }
 
 style c {
@@ -29,7 +30,7 @@ style c {
 }
 
 style d {
-    GridItemColSpan = 2;
+    GridItemRowSpan = 2;
 }
 
 style e {

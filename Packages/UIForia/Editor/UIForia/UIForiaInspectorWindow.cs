@@ -898,6 +898,7 @@ namespace UIForia.Editor {
 
         private static StyleProperty DrawGridTrackSize(StyleProperty property, bool isEditable) {
             GUI.enabled = isEditable;
+            s_Content.text = StyleUtil.GetPropertyName(property);
             GUILayout.BeginHorizontal();
             float value = EditorGUILayout.FloatField(s_Content, property.AsGridTrackSize.minValue);
             GridTemplateUnit unit = (GridTemplateUnit) EditorGUILayout.EnumPopup(property.AsGridTrackSize.minUnit);

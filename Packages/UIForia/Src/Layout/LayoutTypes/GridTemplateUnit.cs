@@ -13,7 +13,7 @@ namespace UIForia.Layout.LayoutTypes {
         ViewportWidth = 1 << 4,
         ViewportHeight = 1 << 5,
 
-        Flex = 1 << 6,
+        FractionalRemaining = 1 << 6,
         MinContent = 1 << 7,
         MaxContent = 1 << 8,
 

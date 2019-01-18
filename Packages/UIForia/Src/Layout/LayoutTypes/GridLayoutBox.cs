@@ -140,7 +140,7 @@ namespace UIForia.Layout.LayoutTypes {
                             break;
                         }
                     }
-                    else if (spanned.size.minUnit != GridTemplateUnit.Flex) {
+                    else if (spanned.size.minUnit != GridTemplateUnit.FractionalRemaining) {
                         pieces++;
                     }
                 }
@@ -180,7 +180,7 @@ namespace UIForia.Layout.LayoutTypes {
                             break;
                         }
                     }
-                    else if (spanned.size.minUnit != GridTemplateUnit.Flex) {
+                    else if (spanned.size.minUnit != GridTemplateUnit.FractionalRemaining) {
                         pieces++;
                     }
                 }
@@ -215,13 +215,14 @@ namespace UIForia.Layout.LayoutTypes {
 
                 for (int j = colItem.trackStart; j < colItem.trackStart + colItem.trackSpan; j++) {
                     GridTrack spanned = m_ColTracks[j];
+                    
                     if ((spanned.size.minUnit & GridTemplateUnit.Fixed) != 0) {
                         baseWidth -= spanned.outputSize;
                         if (baseWidth <= 0) {
                             break;
                         }
                     }
-                    else if (spanned.size.minUnit != GridTemplateUnit.Flex) {
+                    else if (spanned.size.minUnit != GridTemplateUnit.FractionalRemaining) {
                         pieces++;
                     }
                 }
@@ -257,7 +258,7 @@ namespace UIForia.Layout.LayoutTypes {
                             break;
                         }
                     }
-                    else if (spanned.size.minUnit != GridTemplateUnit.Flex) {
+                    else if (spanned.size.minUnit != GridTemplateUnit.FractionalRemaining) {
                         pieces++;
                     }
                 }
@@ -283,7 +284,7 @@ namespace UIForia.Layout.LayoutTypes {
                     remaining -= track.outputSize;
                     m_ColTracks[i] = track;
                 }
-                else if (track.size.minUnit == GridTemplateUnit.Flex) {
+                else if (track.size.minUnit == GridTemplateUnit.FractionalRemaining) {
                     flexes.Add(ValueTuple.Create(i, track));
                     flexPieces += (int) track.size.minValue; // move flex to max only?
                 }
@@ -339,7 +340,7 @@ namespace UIForia.Layout.LayoutTypes {
                     remaining -= track.outputSize;
                     m_RowTracks[i] = track;
                 }
-                else if (track.size.minUnit == GridTemplateUnit.Flex) {
+                else if (track.size.minUnit == GridTemplateUnit.FractionalRemaining) {
                     flexes.Add(ValueTuple.Create(i, track));
                     flexPieces += (int) track.size.minValue; // move flex to max only?
                 }
@@ -389,7 +390,7 @@ namespace UIForia.Layout.LayoutTypes {
                     alignment = colAlignment;
                 }
 
-                if (alignment == GridAxisAlignment.Grow) {
+                if (alignment == GridAxisAlignment.Grow || alignment == GridAxisAlignment.Fit) {
                     float spannedTracksWidth = colGap * (colItem.trackSpan - 1);
 
                     for (int j = colItem.trackStart; j < colItem.trackStart + colItem.trackSpan; j++) {
@@ -615,7 +616,7 @@ namespace UIForia.Layout.LayoutTypes {
                 case GridTemplateUnit.ContainerContentArea:
                     return (parent.allocatedWidth - parent.PaddingHorizontal - parent.BorderHorizontal) * value;
 
-                case GridTemplateUnit.Flex:
+                case GridTemplateUnit.FractionalRemaining:
                 case GridTemplateUnit.MinContent:
                 case GridTemplateUnit.MaxContent:
                     return 0f;
@@ -648,7 +649,7 @@ namespace UIForia.Layout.LayoutTypes {
                 case GridTemplateUnit.ContainerContentArea:
                     return (parent.allocatedHeight - parent.PaddingVertical - parent.BorderVertical) * value;
 
-                case GridTemplateUnit.Flex:
+                case GridTemplateUnit.FractionalRemaining:
                 case GridTemplateUnit.MinContent:
                 case GridTemplateUnit.MaxContent:
                     return 0f;
@@ -729,9 +730,6 @@ namespace UIForia.Layout.LayoutTypes {
             }
 
             PlaceBothAxesLocked(bothAxesLocked);
-//            PlaceSingleLockedRowItems(singleAxisLockedRow);
-//            PlaceSingleLockedColItems(singleAxisLockedCol);
-//            PlaceUnlockedItems(noAxisLocked);
             PlaceRemainingItems(remainingItems);
             m_IsPlacementDirty = false;
 
@@ -791,7 +789,7 @@ namespace UIForia.Layout.LayoutTypes {
             int sparseStartY = 0;
 
             // uncomment to pre-create overflow rows / cols
-            // PreAllocateMaxTrackSizes(placements);
+            PreAllocateMaxTrackSizes(placements);
 
             for (int i = 0; i < placements.Count; i++) {
                 GridPlacement placement = placements[i];
@@ -801,13 +799,7 @@ namespace UIForia.Layout.LayoutTypes {
                 int rowSpan = rowItem.trackSpan;
                 int colStart = colItem.trackStart;
                 int colSpan = colItem.trackSpan;
-
-                // @christian: should we pre-process the row and col spans and if one is larger than our total col or row count, create extra
-                // rows and columns up front? or keep current behavior where we create them on the fly? See above 
-
-                CreateTracks(m_ColTracks, colSpan, autoColSize);
-                CreateTracks(m_RowTracks, rowSpan, autoRowSize);
-
+                
                 int colCount = m_ColTracks.Count;
                 int rowCount = m_RowTracks.Count;
 
@@ -1009,140 +1001,6 @@ namespace UIForia.Layout.LayoutTypes {
                 for (int j = rowStart; j < rowStart + rowSpan; j++) {
                     m_RowTracks[j].spanningItems.Add(placement.index);
                     m_Occupied.Add(BitUtil.SetHighLowBits(i, j));
-                }
-            }
-        }
-
-        /**
-         * For items that are locked to the row. We try to find columns.
-         */
-        private void PlaceSingleLockedRowItems(List<GridPlacement> placements) {
-            // if sparse, track colPtr and always use a higher one, else dense will 'pack' the column
-//            GridLayoutDensity density = style.GridLayoutDensity;
-            GridTrackSize autoSize = style.GridLayoutColAutoSize;
-
-            for (int i = 0; i < placements.Count; i++) {
-                GridPlacement placement = placements[i];
-                GridItem colItem = placement.colItem;
-                GridItem rowItem = placement.rowItem;
-                int rowStart = rowItem.trackStart;
-                int rowSpan = rowItem.trackSpan;
-                int colSpan = colItem.trackSpan;
-
-                int cursorX = 0;
-
-                while (!IsGridAreaAvailable(cursorX, colSpan, rowStart, rowSpan)) {
-                    cursorX++;
-                }
-
-                CreateTracks(m_ColTracks, cursorX + colSpan, autoSize);
-                colItem.trackStart = cursorX;
-                m_Placements[placement.index] = new GridPlacement(placement.id, placement.index, colItem, rowItem);
-                OccupyGridArea(m_Placements[placement.index]);
-            }
-        }
-
-        private void PlaceSingleLockedColItems(List<GridPlacement> placements) {
-            // if sparse, track colPtr and always use a higher one, else dense will 'pack' the column
-//            GridLayoutDensity density = style.GridLayoutDensity;
-            GridTrackSize autoSize = style.GridLayoutColAutoSize;
-
-            for (int i = 0; i < placements.Count; i++) {
-                GridPlacement placement = placements[i];
-                GridItem colItem = placement.colItem;
-                GridItem rowItem = placement.rowItem;
-                int rowSpan = rowItem.trackSpan;
-                int colStart = colItem.trackStart;
-                int colSpan = colItem.trackSpan;
-
-                int cursorY = 0;
-
-                while (!IsGridAreaAvailable(colStart, colSpan, cursorY, rowSpan)) {
-                    cursorY++;
-                }
-
-                CreateTracks(m_RowTracks, cursorY + rowSpan, autoSize);
-                rowItem.trackStart = cursorY;
-                m_Placements[placement.index] = new GridPlacement(placement.id, placement.index, colItem, rowItem);
-                OccupyGridArea(m_Placements[placement.index]);
-            }
-        }
-
-        private void PlaceUnlockedItems(List<GridPlacement> placements) {
-            int cursorX = 0;
-            int cursorY = 0;
-
-            bool autoFlowRow = style.GridLayoutDirection == LayoutDirection.Row;
-            bool dense = style.GridLayoutDensity == GridLayoutDensity.Dense;
-
-            GridTrackSize autoColSize = style.GridLayoutColAutoSize;
-            GridTrackSize autoRowSize = style.GridLayoutRowAutoSize;
-
-            if (autoFlowRow) {
-                int colCount = m_ColTracks.Count;
-
-                for (int i = 0; i < placements.Count; i++) {
-                    GridPlacement placement = placements[i];
-                    GridItem colItem = placement.colItem;
-                    GridItem rowItem = placement.rowItem;
-
-                    int colSpan = colItem.trackSpan;
-                    int rowSpan = rowItem.trackSpan;
-
-                    if (dense) {
-                        cursorX = 0;
-                    }
-
-                    while (!IsGridAreaAvailable(cursorX, colSpan, cursorY, rowSpan)) {
-                        cursorX++;
-                        if (cursorX + colSpan > colCount) {
-                            cursorX = 0;
-                            cursorY++;
-                        }
-                    }
-
-                    colItem.trackStart = cursorX;
-                    rowItem.trackStart = cursorY;
-
-                    m_Placements[placement.index] = new GridPlacement(placement.id, placement.index, colItem, rowItem);
-
-                    CreateTracks(m_ColTracks, cursorX + colSpan, autoColSize);
-                    CreateTracks(m_RowTracks, cursorY + rowSpan, autoRowSize);
-
-                    OccupyGridArea(m_Placements[placement.index]);
-                }
-            }
-            else {
-                int rowCount = m_RowTracks.Count;
-
-                for (int i = 0; i < placements.Count; i++) {
-                    GridPlacement placement = placements[i];
-                    GridItem colItem = placement.colItem;
-                    GridItem rowItem = placement.rowItem;
-                    int colSpan = colItem.trackSpan;
-                    int rowSpan = rowItem.trackSpan;
-
-                    if (dense) {
-                        cursorY = 0;
-                    }
-
-                    while (!IsGridAreaAvailable(cursorX, colSpan, cursorY, rowSpan)) {
-                        cursorY++;
-                        if (cursorY + rowSpan > rowCount) {
-                            cursorY = 0;
-                            cursorX++;
-                        }
-                    }
-
-                    colItem.trackStart = cursorX;
-                    rowItem.trackStart = cursorY;
-
-                    m_Placements[placement.index] = new GridPlacement(placement.id, placement.index, colItem, rowItem);
-
-                    CreateTracks(m_ColTracks, cursorX + colSpan, autoColSize);
-                    CreateTracks(m_RowTracks, cursorY + rowSpan, autoRowSize);
-
-                    OccupyGridArea(m_Placements[placement.index]);
                 }
             }
         }

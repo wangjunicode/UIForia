@@ -317,7 +317,7 @@ public class GridLayoutTests {
 
         var colTemplate = new[] {
             new GridTrackSize(100f),
-            GridTrackSize.Flex,
+            GridTrackSize.FractionalRemaining,
             new GridTrackSize(100f)
         };
 

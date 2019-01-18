@@ -40,7 +40,7 @@ namespace UIForia.Rendering {
 		public const int FlexItemGrow = 0;
 		public const int FlexItemShrink = 0;
 		public const CrossAxisAlignment FlexItemSelfAlignment = UIForia.Layout.CrossAxisAlignment.Unset;
-		public const LayoutDirection FlexLayoutDirection = UIForia.Rendering.LayoutDirection.Row;
+		public const LayoutDirection FlexLayoutDirection = UIForia.Rendering.LayoutDirection.Horizontal;
 		public const LayoutWrap FlexLayoutWrap = UIForia.Rendering.LayoutWrap.None;
 		public const MainAxisAlignment FlexLayoutMainAxisAlignment = UIForia.Layout.MainAxisAlignment.Start;
 		public const CrossAxisAlignment FlexLayoutCrossAxisAlignment = UIForia.Layout.CrossAxisAlignment.Start;
@@ -50,12 +50,12 @@ namespace UIForia.Rendering {
 		public const int GridItemRowSpan = 1;
 		public const GridAxisAlignment GridItemColSelfAlignment = UIForia.Layout.GridAxisAlignment.Unset;
 		public const GridAxisAlignment GridItemRowSelfAlignment = UIForia.Layout.GridAxisAlignment.Unset;
-		public const LayoutDirection GridLayoutDirection = UIForia.Rendering.LayoutDirection.Row;
+		public const LayoutDirection GridLayoutDirection = UIForia.Rendering.LayoutDirection.Horizontal;
 		public const GridLayoutDensity GridLayoutDensity = UIForia.Layout.GridLayoutDensity.Sparse;
 		public static readonly IReadOnlyList<UIForia.Layout.LayoutTypes.GridTrackSize> GridLayoutColTemplate = ListPool<GridTrackSize>.Empty;
 		public static readonly IReadOnlyList<UIForia.Layout.LayoutTypes.GridTrackSize> GridLayoutRowTemplate = ListPool<GridTrackSize>.Empty;
-		public static readonly GridTrackSize GridLayoutColAutoSize = new GridTrackSize(1, GridTemplateUnit.MaxContent);
-		public static readonly GridTrackSize GridLayoutRowAutoSize = new GridTrackSize(1, GridTemplateUnit.MaxContent);
+		public static readonly GridTrackSize GridLayoutColAutoSize = new GridTrackSize(1, GridTemplateUnit.FractionalRemaining);
+		public static readonly GridTrackSize GridLayoutRowAutoSize = new GridTrackSize(1, GridTemplateUnit.FractionalRemaining);
 		public const float GridLayoutColGap = 0;
 		public const float GridLayoutRowGap = 0;
 		public const GridAxisAlignment GridLayoutColAlignment = UIForia.Layout.GridAxisAlignment.Fit;
@@ -213,7 +213,7 @@ namespace UIForia.Rendering {
 				case StylePropertyId.FlexItemSelfAlignment:
 					 return new StyleProperty(StylePropertyId.FlexItemSelfAlignment, (int)UIForia.Layout.CrossAxisAlignment.Unset);
 				case StylePropertyId.FlexLayoutDirection:
-					 return new StyleProperty(StylePropertyId.FlexLayoutDirection, (int)UIForia.Rendering.LayoutDirection.Row);
+					 return new StyleProperty(StylePropertyId.FlexLayoutDirection, (int)UIForia.Rendering.LayoutDirection.Horizontal);
 				case StylePropertyId.FlexLayoutWrap:
 					 return new StyleProperty(StylePropertyId.FlexLayoutWrap, (int)UIForia.Rendering.LayoutWrap.None);
 				case StylePropertyId.FlexLayoutMainAxisAlignment:
@@ -233,7 +233,7 @@ namespace UIForia.Rendering {
 				case StylePropertyId.GridItemRowSelfAlignment:
 					 return new StyleProperty(StylePropertyId.GridItemRowSelfAlignment, (int)UIForia.Layout.GridAxisAlignment.Unset);
 				case StylePropertyId.GridLayoutDirection:
-					 return new StyleProperty(StylePropertyId.GridLayoutDirection, (int)UIForia.Rendering.LayoutDirection.Row);
+					 return new StyleProperty(StylePropertyId.GridLayoutDirection, (int)UIForia.Rendering.LayoutDirection.Horizontal);
 				case StylePropertyId.GridLayoutDensity:
 					 return new StyleProperty(StylePropertyId.GridLayoutDensity, (int)UIForia.Layout.GridLayoutDensity.Sparse);
 				case StylePropertyId.GridLayoutColTemplate:
@@ -241,9 +241,9 @@ namespace UIForia.Rendering {
 				case StylePropertyId.GridLayoutRowTemplate:
 					 return new StyleProperty(StylePropertyId.GridLayoutRowTemplate, 0, 0, ListPool<GridTrackSize>.Empty);
 				case StylePropertyId.GridLayoutColAutoSize:
-					 return new StyleProperty(StylePropertyId.GridLayoutColAutoSize, new GridTrackSize(1, GridTemplateUnit.MaxContent));
+					 return new StyleProperty(StylePropertyId.GridLayoutColAutoSize, new GridTrackSize(1, GridTemplateUnit.FractionalRemaining));
 				case StylePropertyId.GridLayoutRowAutoSize:
-					 return new StyleProperty(StylePropertyId.GridLayoutRowAutoSize, new GridTrackSize(1, GridTemplateUnit.MaxContent));
+					 return new StyleProperty(StylePropertyId.GridLayoutRowAutoSize, new GridTrackSize(1, GridTemplateUnit.FractionalRemaining));
 				case StylePropertyId.GridLayoutColGap:
 					 return new StyleProperty(StylePropertyId.GridLayoutColGap, 0);
 				case StylePropertyId.GridLayoutRowGap:

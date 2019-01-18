@@ -1299,10 +1299,10 @@ case "overflowx":
                     return new UIForia.StyleBindings.StyleBinding_GridTrackTemplate("GridLayoutColTemplate", UIForia.Rendering.StylePropertyId.GridLayoutColTemplate, targetState.state, Compile<System.Collections.Generic.IReadOnlyList<UIForia.Layout.LayoutTypes.GridTrackSize>>(value, null));                
                 case "gridlayoutrowtemplate":
                     return new UIForia.StyleBindings.StyleBinding_GridTrackTemplate("GridLayoutRowTemplate", UIForia.Rendering.StylePropertyId.GridLayoutRowTemplate, targetState.state, Compile<System.Collections.Generic.IReadOnlyList<UIForia.Layout.LayoutTypes.GridTrackSize>>(value, null));                
-                case "gridlayoutcolautosize":
-                    return new UIForia.StyleBindings.StyleBinding_GridTrackSize("GridLayoutColAutoSize", UIForia.Rendering.StylePropertyId.GridLayoutColAutoSize, targetState.state, Compile<UIForia.Layout.LayoutTypes.GridTrackSize>(value, null));                
-                case "gridlayoutrowautosize":
-                    return new UIForia.StyleBindings.StyleBinding_GridTrackSize("GridLayoutRowAutoSize", UIForia.Rendering.StylePropertyId.GridLayoutRowAutoSize, targetState.state, Compile<UIForia.Layout.LayoutTypes.GridTrackSize>(value, null));                
+                case "gridlayoutmainaxisautosize":
+                    return new UIForia.StyleBindings.StyleBinding_GridTrackSize("GridLayoutMainAxisAutoSize", UIForia.Rendering.StylePropertyId.GridLayoutMainAxisAutoSize, targetState.state, Compile<UIForia.Layout.LayoutTypes.GridTrackSize>(value, null));                
+                case "gridlayoutcrossaxisautosize":
+                    return new UIForia.StyleBindings.StyleBinding_GridTrackSize("GridLayoutCrossAxisAutoSize", UIForia.Rendering.StylePropertyId.GridLayoutCrossAxisAutoSize, targetState.state, Compile<UIForia.Layout.LayoutTypes.GridTrackSize>(value, null));                
                 case "gridlayoutcolgap":
                     return new UIForia.StyleBindings.StyleBinding_float("GridLayoutColGap", UIForia.Rendering.StylePropertyId.GridLayoutColGap, targetState.state, Compile<float>(value, null));                
                 case "gridlayoutrowgap":

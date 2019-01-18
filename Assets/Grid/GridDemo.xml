@@ -9,12 +9,16 @@
         <Group style="grid-cell d">D</Group>
         <Group style="grid-cell e">E</Group>
         <Group style="grid-cell f">F</Group>
-        <!--<Group style="grid-cell g">G</Group>-->
-    
-        
-        
-        
-        
+        <Group style="grid-cell g">G</Group>
+
+        <!--<Group style="grid-cell" style.preferredWidth='100f' style.preferredHeight='100f'>A</Group>-->
+        <!--<Group style="grid-cell" style.preferredWidth='100f' style.preferredHeight='100f'>B</Group>-->
+        <!--<Group style="grid-cell" style.preferredWidth='100f' style.preferredHeight='100f'>C</Group>-->
+        <!--<Group style="grid-cell d" style.preferredWidth='100f' style.preferredHeight='100f' style.gridItemColSpan='3' style.gridItemRowStart='1'>D-F</Group>-->
+
+
+
+
         <!--<Group style="grid-cell grid-col1">A</Group>-->
         <!--<Group style="grid-cell grid-col1" style.preferredHeight="50f">B</Group>-->
         <!--<Group style="grid-cell grid-col1" >C</Group>-->

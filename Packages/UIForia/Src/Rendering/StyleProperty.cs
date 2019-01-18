@@ -285,11 +285,11 @@ namespace UIForia.Rendering {
         }
 
         public static StyleProperty GridLayoutColAutoSize(GridTrackSize autoColSize) {
-            return new StyleProperty(StylePropertyId.GridLayoutColAutoSize, autoColSize.minValue, (int) autoColSize.minUnit);
+            return new StyleProperty(StylePropertyId.GridLayoutMainAxisAutoSize, autoColSize.minValue, (int) autoColSize.minUnit);
         }
 
         public static StyleProperty GridLayoutRowAutoSize(GridTrackSize autoRowSize) {
-            return new StyleProperty(StylePropertyId.GridLayoutRowAutoSize, autoRowSize.minValue, (int) autoRowSize.minUnit);
+            return new StyleProperty(StylePropertyId.GridLayoutCrossAxisAutoSize, autoRowSize.minValue, (int) autoRowSize.minUnit);
         }
 
         public static StyleProperty GridLayoutColGap(float colGap) {

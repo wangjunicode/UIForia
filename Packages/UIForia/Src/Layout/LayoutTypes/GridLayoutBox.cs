@@ -385,7 +385,7 @@ namespace UIForia.Layout.LayoutTypes {
                 LayoutBox child = children[i];
                 GridItem colItem = placement.colItem;
 
-                GridAxisAlignment alignment = default; // child.style.GridItemColSelfAlignment;
+                GridAxisAlignment alignment = child.style.GridItemColSelfAlignment;
                 if (alignment == GridAxisAlignment.Unset) {
                     alignment = colAlignment;
                 }
@@ -672,11 +672,18 @@ namespace UIForia.Layout.LayoutTypes {
                 return;
             }
 
-            GridTrackSize autoColSize = style.GridLayoutColAutoSize;
-            GridTrackSize autoRowSize = style.GridLayoutRowAutoSize;
             LayoutDirection direction = style.GridLayoutDirection;
-
-            bool autoFlowRow = direction == LayoutDirection.Row;
+            GridTrackSize autoColSize;
+            GridTrackSize autoRowSize;
+                
+            if (direction == LayoutDirection.Horizontal) {
+                autoColSize = style.GridLayoutMainAxisAutoSize;
+                autoRowSize = style.GridLayoutCrossAxisAutoSize;
+            }
+            else {
+                autoColSize = style.GridLayoutCrossAxisAutoSize;
+                autoRowSize = style.GridLayoutMainAxisAutoSize;
+            }
 
             List<GridPlacement> bothAxesLocked = ListPool<GridPlacement>.Get();
             List<GridPlacement> singleAxisLockedRow = ListPool<GridPlacement>.Get();
@@ -749,9 +756,20 @@ namespace UIForia.Layout.LayoutTypes {
         private void PreAllocateMaxTrackSizes(List<GridPlacement> placements) {
             int maxColStartAndSpan = 0;
             int maxRowStartAndSpan = 0;
-            GridTrackSize autoColSize = style.GridLayoutColAutoSize;
-            GridTrackSize autoRowSize = style.GridLayoutRowAutoSize;
 
+            LayoutDirection direction = style.GridLayoutDirection;
+            GridTrackSize autoColSize;
+            GridTrackSize autoRowSize;
+                
+            if (direction == LayoutDirection.Horizontal) {
+                autoColSize = style.GridLayoutMainAxisAutoSize;
+                autoRowSize = style.GridLayoutCrossAxisAutoSize;
+            }
+            else {
+                autoColSize = style.GridLayoutCrossAxisAutoSize;
+                autoRowSize = style.GridLayoutMainAxisAutoSize;
+            }
+            
             for (int i = 0; i < placements.Count; i++) {
                 GridPlacement placement = placements[i];
                 GridItem colItem = placement.colItem;
@@ -782,8 +800,18 @@ namespace UIForia.Layout.LayoutTypes {
             bool flowHorizontal = style.GridLayoutDirection == LayoutDirection.Horizontal;
             bool dense = style.GridLayoutDensity == GridLayoutDensity.Dense;
 
-            GridTrackSize autoColSize = style.GridLayoutColAutoSize;
-            GridTrackSize autoRowSize = style.GridLayoutRowAutoSize;
+            LayoutDirection direction = style.GridLayoutDirection;
+            GridTrackSize autoColSize;
+            GridTrackSize autoRowSize;
+                
+            if (direction == LayoutDirection.Horizontal) {
+                autoColSize = style.GridLayoutMainAxisAutoSize;
+                autoRowSize = style.GridLayoutCrossAxisAutoSize;
+            }
+            else {
+                autoColSize = style.GridLayoutCrossAxisAutoSize;
+                autoRowSize = style.GridLayoutMainAxisAutoSize;
+            }
 
             int sparseStartX = 0;
             int sparseStartY = 0;
@@ -940,8 +968,8 @@ namespace UIForia.Layout.LayoutTypes {
                     break;
                 case StylePropertyId.GridLayoutRowGap:
                 case StylePropertyId.GridLayoutColGap:
-                case StylePropertyId.GridLayoutColAutoSize:
-                case StylePropertyId.GridLayoutRowAutoSize:
+                case StylePropertyId.GridLayoutMainAxisAutoSize:
+                case StylePropertyId.GridLayoutCrossAxisAutoSize:
                     markedForLayout = true;
                     break;
             }

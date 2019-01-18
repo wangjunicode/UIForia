@@ -158,11 +158,11 @@ namespace UIForia.Parsing.StyleParser {
                 case "gridlayoutrowtemplate":
                     context.targetStyle.GridLayoutRowTemplate = ParseUtil.ParseGridTemplate(context.variables, propertyValue);
                     break;
-                case "gridlayoutcolautosize":
-                    context.targetStyle.GridLayoutColAutoSize = ParseUtil.ParseGridTrackSize(context.variables, propertyValue);
+                case "gridlayoutmainaxisautosize":
+                    context.targetStyle.GridLayoutMainAxisAutoSize = ParseUtil.ParseGridTrackSize(context.variables, propertyValue);
                     break;
-                case "gridlayoutrowautosize":
-                    context.targetStyle.GridLayoutRowAutoSize = ParseUtil.ParseGridTrackSize(context.variables, propertyValue);
+                case "gridlayoutcrossaxisautosize":
+                    context.targetStyle.GridLayoutCrossAxisAutoSize = ParseUtil.ParseGridTrackSize(context.variables, propertyValue);
                     break;
                 case "gridlayoutcolgap": // todo -- support fixed length
                     context.targetStyle.GridLayoutColGap = ParseUtil.ParseFloat(context.variables, propertyValue);

@@ -327,7 +327,9 @@ namespace UIForia.Parsing.StyleParser {
 
             while (ptr < input.Length) {
 
-                ParseUtil.ConsumeComment(input, ref ptr);
+                if (ParseUtil.ConsumeComment(input, ref ptr)) {
+                    continue;
+                }
 
                 int start = ptr;
                 char current = input[ptr];

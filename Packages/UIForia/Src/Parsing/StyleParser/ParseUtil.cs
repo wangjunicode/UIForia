@@ -44,10 +44,14 @@ namespace UIForia.Parsing.StyleParser {
             return null;
         }
 
-        public static void ConsumeComment(string input, ref int ptr) {
+        public static bool ConsumeComment(string input, ref int ptr) {
 
+            if (ptr + 1 >= input.Length) {
+                return false;
+            }
+            
             if (!(input[ptr] == '/' && input[ptr + 1] == '/')) {
-                return;
+                return false;
             }
         
             while (ptr < input.Length) {
@@ -55,11 +59,13 @@ namespace UIForia.Parsing.StyleParser {
                 if (current == '\n') {
                     ptr++;
                     ptr = ConsumeWhiteSpace(ptr, input);
-                    return;
+                    return true;
                 }
 
                 ptr++;
             }
+
+            return true;
         }
 
         public static string ProduceErrorMessage(string input, int ptr) {
@@ -949,7 +955,7 @@ namespace UIForia.Parsing.StyleParser {
             }
 
             if (TryReadCharacters(input, "fr", ref ptr)) {
-                return GridTemplateUnit.Flex;
+                return GridTemplateUnit.FractionalRemaining;
             }
 
             if (TryReadCharacters(input, "mn", ref ptr)) {

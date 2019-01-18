@@ -1,13 +1,14 @@
 style grid-container {
     LayoutType = Grid;
     GridLayoutDirection = Horizontal;
-    PreferredWidth = 400px;
+    PreferredWidth = 1cnt;
     BackgroundColor = green;
-    GridLayoutRowTemplate = 100px, 100px, 100px, 100px;
-    //GridLayoutColTemplate = 100px, 100px;
-   GridLayoutDensity = dense;
-  // GridLayoutMainAxisAutoSize = 1fr
-  // GridLayoutCrossAxisAutoSize = 1mx;
+    GridLayoutColTemplate = 1mx, 100px, 100px;
+     //GridLayoutColTemplate = 100px, 100px;
+    GridLayoutDensity = dense;
+    GridLayoutRowAlignment = Grow;
+    GridLayoutColAlignment = Start;
+//    GridLayoutCrossAxisAutoSize = 1mx;
 }
 
 style grid-cell {
@@ -17,14 +18,14 @@ style grid-cell {
     BorderColor = black;
     FlexLayoutCrossAxisAlignment = Center;
     FlexLayoutMainAxisAlignment = Center;
-    
 }
 
 style a {
+    PreferredWidth = 400px;
 }
 
 style b {
-    GridItemRowSpan = 2;
+    //GridItemRowSpan = 2;
 }
 
 style c {
@@ -32,7 +33,8 @@ style c {
 }
 
 style d {
-    GridItemColSpan = 2;
+    PreferredWidth = 600px; 
+    //GridItemColSpan = 2;
 }
 
 style e {

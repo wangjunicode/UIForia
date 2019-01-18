@@ -471,13 +471,14 @@ public class GridLayoutTests {
             new GridTrackSize(100f)
         }, StyleState.Normal);
 
-        root.style.SetGridLayoutMainAxisAutoSize(new GridTrackSize(100f), StyleState.Normal);
-        root.style.SetGridLayoutColAlignment(GridAxisAlignment.Start, StyleState.Normal);
+        root.style.SetGridLayoutCrossAxisAutoSize(new GridTrackSize(100f), StyleState.Normal);
+        
         mockView.Update();
 
-        Assert.AreEqual(new Rect(0, 0, 400, 100), root.GetChild(0).layoutResult.LocalRect);
+        Assert.AreEqual(new Rect(0, 0, 600, 100), root.GetChild(0).layoutResult.LocalRect); // because default is grow
         Assert.AreEqual(new Rect(600, 0, 100, 100), root.GetChild(1).layoutResult.LocalRect);
         Assert.AreEqual(new Rect(700, 0, 100, 100), root.GetChild(2).layoutResult.LocalRect);
+        
         Assert.AreEqual(new Rect(0, 100, 600, 100), root.GetChild(3).layoutResult.LocalRect);
         Assert.AreEqual(new Rect(600, 100, 100, 100), root.GetChild(4).layoutResult.LocalRect);
         Assert.AreEqual(new Rect(700, 100, 100, 100), root.GetChild(5).layoutResult.LocalRect);

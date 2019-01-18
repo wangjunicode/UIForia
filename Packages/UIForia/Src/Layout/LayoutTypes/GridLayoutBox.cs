@@ -66,8 +66,8 @@ namespace UIForia.Layout.LayoutTypes {
             }
 
             ResolveColumnTrackWidths(0);
-
-            return m_ColTracks[m_ColTracks.Count - 1].End;
+            
+            return Mathf.Max(ApplyColumnCrossAxisAlignment(true), m_ColTracks[m_ColTracks.Count - 1].End);
         }
 
         protected override float ComputeContentHeight(float width) {
@@ -75,6 +75,9 @@ namespace UIForia.Layout.LayoutTypes {
                 return 0f;
             }
 
+            // todo -- this section could be optimized out in the case where we ran ComputeContentWidth, otherwise we need to run it to setup widths
+
+            // start section to be optimized
             Place();
 
             for (int i = 0; i < children.Count; i++) {
@@ -91,6 +94,7 @@ namespace UIForia.Layout.LayoutTypes {
 
             ResolveColumnTrackWidths(width);
             StretchWidthsIfNeeded();
+            // end section to be optimized
 
             for (int i = 0; i < children.Count; i++) {
                 LayoutBox layoutBox = children[i];
@@ -104,15 +108,8 @@ namespace UIForia.Layout.LayoutTypes {
                 };
             }
 
-            ResolveRowTrackHeights(0);
-
-            float totalHeights = 0f;
-
-            for (int i = 0; i < m_RowTracks.Count; i++) {
-                totalHeights += m_RowTracks[i].outputSize;
-            }
-
-            return totalHeights + (style.GridLayoutRowGap * (m_RowTracks.Count - 1));
+            ResolveRowTrackHeights(0); // resolve with 0 since we have no size yet
+            return Mathf.Max(m_RowTracks[m_RowTracks.Count - 1].End, ApplyRowCrossAxisAlignment(false));
         }
 
         private float ResolveContentMinWidth(GridTrack track, SizeType sizeType) {
@@ -134,13 +131,13 @@ namespace UIForia.Layout.LayoutTypes {
 
                 for (int j = colItem.trackStart; j < colItem.trackStart + colItem.trackSpan; j++) {
                     GridTrack spanned = m_ColTracks[j];
-                    if ((spanned.size.minUnit & GridTemplateUnit.Fixed) != 0) {
+                    if ((unit & GridTemplateUnit.Fixed) != 0) {
                         baseWidth -= spanned.outputSize;
                         if (baseWidth <= 0) {
                             break;
                         }
                     }
-                    else if (spanned.size.minUnit != GridTemplateUnit.FractionalRemaining) {
+                    else if (unit != GridTemplateUnit.FractionalRemaining) {
                         pieces++;
                     }
                 }
@@ -215,7 +212,7 @@ namespace UIForia.Layout.LayoutTypes {
 
                 for (int j = colItem.trackStart; j < colItem.trackStart + colItem.trackSpan; j++) {
                     GridTrack spanned = m_ColTracks[j];
-                    
+
                     if ((spanned.size.minUnit & GridTemplateUnit.Fixed) != 0) {
                         baseWidth -= spanned.outputSize;
                         if (baseWidth <= 0) {
@@ -307,7 +304,6 @@ namespace UIForia.Layout.LayoutTypes {
                 m_ColTracks[intrinsics[i].Item1] = track;
             }
 
-
             float colGap = style.GridLayoutColGap;
             remaining -= colGap * (m_ColTracks.Count - 1);
 
@@ -365,9 +361,10 @@ namespace UIForia.Layout.LayoutTypes {
 
             if ((int) remaining > 0 && flexes.Count > 0) {
                 float pieceSize = remaining / flexPieces;
+                bool isContentBased = style.PreferredHeight.IsContentBased;
                 for (int i = 0; i < flexes.Count; i++) {
                     GridTrack track = flexes[i].Item2;
-                    track.outputSize = track.size.minValue * pieceSize;
+                    track.outputSize = isContentBased ? 0 : track.size.minValue * pieceSize;
                     m_RowTracks[flexes[i].Item1] = track;
                 }
             }
@@ -408,8 +405,10 @@ namespace UIForia.Layout.LayoutTypes {
             }
         }
 
-        private void ApplyColumnCrossAxisAlignment() {
+        private float ApplyColumnCrossAxisAlignment(bool applySize) {
             GridAxisAlignment colAlignment = style.GridLayoutColAlignment;
+
+            float maxXPlusWidth = 0;
 
             for (int i = 0; i < m_Placements.Count; i++) {
                 GridPlacement placement = m_Placements[i];
@@ -464,12 +463,20 @@ namespace UIForia.Layout.LayoutTypes {
                         break;
                 }
 
-                child.SetAllocatedXAndWidth(finalX, finalWidth);
+                if (applySize) {
+                    child.SetAllocatedXAndWidth(finalX, finalWidth);
+                }
+
+                maxXPlusWidth = maxXPlusWidth < finalX + finalWidth ? finalX + finalWidth : maxXPlusWidth;
             }
+
+            return maxXPlusWidth;
         }
 
-        private void ApplyRowCrossAxisAlignment() {
+        private float ApplyRowCrossAxisAlignment(bool applySizes) {
             GridAxisAlignment rowAlignment = style.GridLayoutRowAlignment;
+
+            float maxYPlusHeight = 0;
 
             for (int i = 0; i < m_Placements.Count; i++) {
                 GridPlacement placement = m_Placements[i];
@@ -527,8 +534,16 @@ namespace UIForia.Layout.LayoutTypes {
                         break;
                 }
 
-                child.SetAllocatedYAndHeight(finalY, finalHeight);
+                if (applySizes) {
+                    child.SetAllocatedYAndHeight(finalY, finalHeight);
+                }
+
+                if (finalY + finalHeight > maxYPlusHeight) {
+                    maxYPlusHeight = finalY + finalHeight;
+                }
             }
+
+            return maxYPlusHeight;
         }
 
         private void PositionColumnTracks() {
@@ -557,6 +572,7 @@ namespace UIForia.Layout.LayoutTypes {
 
             Place();
 
+            // todo -- might be able to avoid a lot of work here if children didn't change between last time we updated this stuff and now
             for (int i = 0; i < children.Count; i++) {
                 LayoutBox layoutBox = children[i];
                 LayoutBoxSize layoutBoxSize = layoutBox.GetWidths();
@@ -571,7 +587,7 @@ namespace UIForia.Layout.LayoutTypes {
 
             ResolveColumnTrackWidths(allocatedWidth - PaddingHorizontal - BorderHorizontal);
             PositionColumnTracks();
-            ApplyColumnCrossAxisAlignment();
+            float maxWidth = ApplyColumnCrossAxisAlignment(true);
 
             for (int i = 0; i < children.Count; i++) {
                 LayoutBox layoutBox = children[i];
@@ -587,10 +603,11 @@ namespace UIForia.Layout.LayoutTypes {
 
             ResolveRowTrackHeights(allocatedHeight);
             PositionRowTracks();
-            ApplyRowCrossAxisAlignment();
 
-            actualWidth = m_ColTracks[m_ColTracks.Count - 1].End;
-            actualHeight = m_RowTracks[m_RowTracks.Count - 1].End;
+            float maxHeight = ApplyRowCrossAxisAlignment(true);
+            actualWidth = Mathf.Max(maxWidth, m_ColTracks[m_ColTracks.Count - 1].End);
+            actualHeight = Mathf.Max(maxHeight, m_RowTracks[m_RowTracks.Count - 1].End);
+            
         }
 
         private float ResolveFixedWidthMeasurement(GridTrackSize size, SizeType sizeType) {
@@ -675,7 +692,7 @@ namespace UIForia.Layout.LayoutTypes {
             LayoutDirection direction = style.GridLayoutDirection;
             GridTrackSize autoColSize;
             GridTrackSize autoRowSize;
-                
+
             if (direction == LayoutDirection.Horizontal) {
                 autoColSize = style.GridLayoutMainAxisAutoSize;
                 autoRowSize = style.GridLayoutCrossAxisAutoSize;
@@ -760,7 +777,7 @@ namespace UIForia.Layout.LayoutTypes {
             LayoutDirection direction = style.GridLayoutDirection;
             GridTrackSize autoColSize;
             GridTrackSize autoRowSize;
-                
+
             if (direction == LayoutDirection.Horizontal) {
                 autoColSize = style.GridLayoutMainAxisAutoSize;
                 autoRowSize = style.GridLayoutCrossAxisAutoSize;
@@ -769,7 +786,7 @@ namespace UIForia.Layout.LayoutTypes {
                 autoColSize = style.GridLayoutCrossAxisAutoSize;
                 autoRowSize = style.GridLayoutMainAxisAutoSize;
             }
-            
+
             for (int i = 0; i < placements.Count; i++) {
                 GridPlacement placement = placements[i];
                 GridItem colItem = placement.colItem;
@@ -803,7 +820,7 @@ namespace UIForia.Layout.LayoutTypes {
             LayoutDirection direction = style.GridLayoutDirection;
             GridTrackSize autoColSize;
             GridTrackSize autoRowSize;
-                
+
             if (direction == LayoutDirection.Horizontal) {
                 autoColSize = style.GridLayoutMainAxisAutoSize;
                 autoRowSize = style.GridLayoutCrossAxisAutoSize;
@@ -827,7 +844,7 @@ namespace UIForia.Layout.LayoutTypes {
                 int rowSpan = rowItem.trackSpan;
                 int colStart = colItem.trackStart;
                 int colSpan = colItem.trackSpan;
-                
+
                 int colCount = m_ColTracks.Count;
                 int rowCount = m_RowTracks.Count;
 

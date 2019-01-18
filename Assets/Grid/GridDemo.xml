@@ -3,13 +3,12 @@
     <Style path="Grid/GridDemo.style" />
     <Contents style="grid-container">
 
-        <Group style="grid-cell a">A</Group>
+        <Group style="grid-cell logo" />
         <Group style="grid-cell b">B</Group>
         <Group style="grid-cell c">C</Group>
         <Group style="grid-cell d">D</Group>
         <Group style="grid-cell e">E</Group>
         <Group style="grid-cell f">F</Group>
-        <!--<Group style="grid-cell g">G</Group>-->
 
         <!--<Group style="grid-cell" style.preferredWidth='100f' style.preferredHeight='100f'>A</Group>-->
         <!--<Group style="grid-cell" style.preferredWidth='100f' style.preferredHeight='100f'>B</Group>-->

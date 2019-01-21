@@ -93,15 +93,15 @@ namespace UIForia.Rendering {
 		public static readonly UIFixedLength AnchorBottom = new UIFixedLength(1, UIFixedUnit.Percent);
 		public static readonly UIFixedLength AnchorLeft = new UIFixedLength(0, UIFixedUnit.Percent);
 		public const AnchorTarget AnchorTarget = UIForia.Rendering.AnchorTarget.Parent;
-		public static readonly UIMeasurement TransformPositionX = new UIMeasurement(0, UIMeasurementUnit.Pixel);
-		public static readonly UIMeasurement TransformPositionY = new UIMeasurement(0, UIMeasurementUnit.Pixel);
+		public static readonly TransformOffset TransformPositionX = new TransformOffset(0, TransformUnit.Pixel);
+		public static readonly TransformOffset TransformPositionY = new TransformOffset(0, TransformUnit.Pixel);
 		public static readonly UIFixedLength TransformPivotX = new UIFixedLength(0, UIFixedUnit.Pixel);
 		public static readonly UIFixedLength TransformPivotY = new UIFixedLength(0, UIFixedUnit.Pixel);
 		public const float TransformScaleX = 1;
 		public const float TransformScaleY = 1;
 		public const float TransformRotation = 0;
-		public const TransformBehavior TransformBehaviorX = UIForia.Rendering.TransformBehavior.Default;
-		public const TransformBehavior TransformBehaviorY = UIForia.Rendering.TransformBehavior.Default;
+		public const TransformBehavior TransformBehaviorX = UIForia.Rendering.TransformBehavior.LayoutOffset;
+		public const TransformBehavior TransformBehaviorY = UIForia.Rendering.TransformBehavior.LayoutOffset;
 		public const LayoutType LayoutType = UIForia.Rendering.LayoutType.Flex;
 		public const LayoutBehavior LayoutBehavior = UIForia.Layout.LayoutBehavior.Normal;
 		public const int ZIndex = 0;
@@ -319,9 +319,9 @@ namespace UIForia.Rendering {
 				case StylePropertyId.AnchorTarget:
 					 return new StyleProperty(StylePropertyId.AnchorTarget, (int)UIForia.Rendering.AnchorTarget.Parent);
 				case StylePropertyId.TransformPositionX:
-					 return new StyleProperty(StylePropertyId.TransformPositionX, new UIMeasurement(0, UIMeasurementUnit.Pixel));
+					 return new StyleProperty(StylePropertyId.TransformPositionX, new TransformOffset(0, TransformUnit.Pixel));
 				case StylePropertyId.TransformPositionY:
-					 return new StyleProperty(StylePropertyId.TransformPositionY, new UIMeasurement(0, UIMeasurementUnit.Pixel));
+					 return new StyleProperty(StylePropertyId.TransformPositionY, new TransformOffset(0, TransformUnit.Pixel));
 				case StylePropertyId.TransformPivotX:
 					 return new StyleProperty(StylePropertyId.TransformPivotX, new UIFixedLength(0, UIFixedUnit.Pixel));
 				case StylePropertyId.TransformPivotY:
@@ -333,9 +333,9 @@ namespace UIForia.Rendering {
 				case StylePropertyId.TransformRotation:
 					 return new StyleProperty(StylePropertyId.TransformRotation, 0);
 				case StylePropertyId.TransformBehaviorX:
-					 return new StyleProperty(StylePropertyId.TransformBehaviorX, (int)UIForia.Rendering.TransformBehavior.Default);
+					 return new StyleProperty(StylePropertyId.TransformBehaviorX, (int)UIForia.Rendering.TransformBehavior.LayoutOffset);
 				case StylePropertyId.TransformBehaviorY:
-					 return new StyleProperty(StylePropertyId.TransformBehaviorY, (int)UIForia.Rendering.TransformBehavior.Default);
+					 return new StyleProperty(StylePropertyId.TransformBehaviorY, (int)UIForia.Rendering.TransformBehavior.LayoutOffset);
 				case StylePropertyId.LayoutType:
 					 return new StyleProperty(StylePropertyId.LayoutType, (int)UIForia.Rendering.LayoutType.Flex);
 				case StylePropertyId.LayoutBehavior:

@@ -111,7 +111,7 @@ namespace UIForia.Rendering {
             );
         }
 
-        public void SetTransformPosition(MeasurementPair position, StyleState state) {
+        public void SetTransformPosition(TransformOffsetPair position, StyleState state) {
             SetTransformPositionX(position.x, state);
             SetTransformPositionY(position.y, state);
         }

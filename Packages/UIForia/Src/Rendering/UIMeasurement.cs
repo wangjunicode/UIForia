@@ -12,16 +12,19 @@ namespace UIForia {
         public readonly float value;
         public readonly UIMeasurementUnit unit;
 
+        [DebuggerStepThrough]
         public UIMeasurement(float value, UIMeasurementUnit unit = UIMeasurementUnit.Pixel) {
             this.value = value;
             this.unit = unit;
         }
 
+        [DebuggerStepThrough]
         public UIMeasurement(int value, UIMeasurementUnit unit = UIMeasurementUnit.Pixel) {
             this.value = value;
             this.unit = unit;
         }
 
+        [DebuggerStepThrough]
         public UIMeasurement(double value, UIMeasurementUnit unit = UIMeasurementUnit.Pixel) {
             this.value = (float) value;
             this.unit = unit;

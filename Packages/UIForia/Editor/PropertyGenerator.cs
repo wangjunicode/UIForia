@@ -184,7 +184,7 @@ namespace UIForia.Editor {
             
             if (defaultValue is TransformOffset) {
                 TransformOffset measurement = (TransformOffset) defaultValue;
-                return $"new {nameof(TransformOffset)}({measurement.value.ToString(CultureInfo.InvariantCulture)}, {nameof(TransformOffset)}.{Enum.GetName(typeof(TransformUnit), measurement.unit)})";
+                return $"new {nameof(TransformOffset)}({measurement.value.ToString(CultureInfo.InvariantCulture)}, {nameof(TransformUnit)}.{Enum.GetName(typeof(TransformUnit), measurement.unit)})";
             }
 
             if (defaultValue is UIFixedLength) {

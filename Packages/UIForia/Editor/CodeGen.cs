@@ -136,8 +136,8 @@ namespace UIForia.Editor {
             new AnimatedPropertyGenerator<float>(StylePropertyId.TransformScaleX, 1),
             new AnimatedPropertyGenerator<float>(StylePropertyId.TransformScaleY, 1),
             new AnimatedPropertyGenerator<float>(StylePropertyId.TransformRotation, 0),
-            new PropertyGenerator<TransformBehavior>(StylePropertyId.TransformBehaviorX, TransformBehavior.Default),
-            new PropertyGenerator<TransformBehavior>(StylePropertyId.TransformBehaviorY, TransformBehavior.Default),
+            new PropertyGenerator<TransformBehavior>(StylePropertyId.TransformBehaviorX, TransformBehavior.LayoutOffset),
+            new PropertyGenerator<TransformBehavior>(StylePropertyId.TransformBehaviorY, TransformBehavior.LayoutOffset),
 
             // Layout
             new PropertyGenerator<LayoutType>(StylePropertyId.LayoutType, LayoutType.Flex),
@@ -634,6 +634,9 @@ namespace UIForia.Rendering {
             }
             else if (typeof(UIMeasurement) == propertyGenerator.type) {
                 return $"FindUIMeasurementProperty(StylePropertyId.{propertyGenerator.propertyIdName});";
+            }
+            else if (typeof(TransformOffset) == propertyGenerator.type) {
+                return $"Find{nameof(TransformOffset)}Property(StylePropertyId.{propertyGenerator.propertyIdName});";
             }
             else if (typeof(GridTrackSize) == propertyGenerator.type) {
                 return $"FindGridTrackSizeProperty(StylePropertyId.{propertyGenerator.propertyIdName});";

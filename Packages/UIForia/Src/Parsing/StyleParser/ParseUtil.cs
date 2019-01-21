@@ -45,15 +45,14 @@ namespace UIForia.Parsing.StyleParser {
         }
 
         public static bool ConsumeComment(string input, ref int ptr) {
-
             if (ptr + 1 >= input.Length) {
                 return false;
             }
-            
+
             if (!(input[ptr] == '/' && input[ptr + 1] == '/')) {
                 return false;
             }
-        
+
             while (ptr < input.Length) {
                 char current = input[ptr];
                 if (current == '\n') {
@@ -72,7 +71,7 @@ namespace UIForia.Parsing.StyleParser {
             int errorLineStart = 0;
             int line = 0;
             int errorIndex = ptr;
-            
+
             while (errorIndex >= 0) {
                 if (input[errorIndex] == '\n') {
                     errorLineStart = errorIndex + 1;
@@ -301,7 +300,7 @@ namespace UIForia.Parsing.StyleParser {
                 string[] split = propertyValue.Split(',');
                 return new FixedLengthVector(
                     ParseFixedLength(variables, split[0]),
-                    ParseFixedLength(variables, split[0])
+                    ParseFixedLength(variables, split[1])
                 );
             }
 
@@ -331,6 +330,149 @@ namespace UIForia.Parsing.StyleParser {
                 new UIFixedLength(value, unit),
                 new UIFixedLength(value, unit)
             );
+        }
+
+        public static TransformOffsetPair ParseTransformPair(List<StyleVariable> variables, string propertyValue) {
+            TransformOffsetPair retn;
+            if (propertyValue.IndexOf(',') != -1) {
+                string[] split = propertyValue.Split(',');
+                return new TransformOffsetPair(
+                    ParseTransform(variables, split[0]),
+                    ParseTransform(variables, split[1])
+                );
+            }
+
+            if (TryResolveVariable(variables, propertyValue, out retn)) {
+                return retn;
+            }
+
+            int ptr = 0;
+            float value = ParseFloat(propertyValue, ref ptr);
+            ptr = ConsumeWhiteSpace(ptr, propertyValue);
+
+            if (ptr == propertyValue.Length) {
+                return new TransformOffsetPair(new TransformOffset(value), new TransformOffset(value));
+            }
+
+            TransformUnit unit = ParseTransformUnit(propertyValue, ref ptr);
+            if (unit == TransformUnit.Unset) {
+                throw new ParseException("Unknown transform unit: " + propertyValue);
+            }
+
+            return new TransformOffsetPair(
+                new TransformOffset(value, unit),
+                new TransformOffset(value, unit)
+            );
+        }
+
+        public static TransformOffset ParseTransform(List<StyleVariable> variables, string propertyValue) {
+            TransformOffset transformOffset;
+            if (TryResolveVariable(variables, propertyValue, out transformOffset)) {
+                return transformOffset;
+            }
+
+            int ptr = 0;
+            float value = ParseFloat(propertyValue, ref ptr);
+            ptr = ConsumeWhiteSpace(ptr, propertyValue);
+            if (ptr == propertyValue.Length) {
+                return new TransformOffset(value, TransformUnit.Pixel);
+            }
+
+            TransformUnit unit = ParseTransformUnit(propertyValue, ref ptr);
+            if (unit == TransformUnit.Unset) {
+                throw new ParseException("Unknown transform unit: " + propertyValue);
+            }
+
+            if (propertyValue.IndexOf('%') != -1) {
+                value = value * 0.01f;
+            }
+
+            return new TransformOffset(value, unit);
+        }
+
+        public static TransformUnit ParseTransformUnit(string input, ref int ptr) {
+            ptr = ConsumeWhiteSpace(ptr, input);
+            if (TryReadCharacters(input, "px", ref ptr)) {
+                return TransformUnit.Pixel;
+            }
+
+            if (TryReadCharacters(input, "actWidth", ref ptr)) {
+                return TransformUnit.ActualWidth;
+            }
+
+            if (TryReadCharacters(input, "actHeight", ref ptr)) {
+                return TransformUnit.ActualHeight;
+            }
+
+            if (TryReadCharacters(input, "allocWidth", ref ptr)) {
+                return TransformUnit.AllocatedWidth;
+            }
+
+            if (TryReadCharacters(input, "allocHeight", ref ptr)) {
+                return TransformUnit.AllocatedHeight;
+            }
+
+            if (TryReadCharacters(input, "cntWidth", ref ptr)) {
+                return TransformUnit.ContentWidth;
+            }
+
+            if (TryReadCharacters(input, "cntHeight", ref ptr)) {
+                return TransformUnit.ContentHeight;
+            }
+
+            if (TryReadCharacters(input, "cntAreaWidth", ref ptr)) {
+                return TransformUnit.ContentAreaWidth;
+            }
+
+            if (TryReadCharacters(input, "cntAreaHeight", ref ptr)) {
+                return TransformUnit.ContentAreaHeight;
+            }
+
+            if (TryReadCharacters(input, "vw", ref ptr)) {
+                return TransformUnit.ViewportWidth;
+            }
+
+            if (TryReadCharacters(input, "vh", ref ptr)) {
+                return TransformUnit.ViewportHeight;
+            }
+
+            if (TryReadCharacters(input, "aw", ref ptr)) {
+                return TransformUnit.AnchorWidth;
+            }
+
+            if (TryReadCharacters(input, "ah", ref ptr)) {
+                return TransformUnit.AnchorHeight;
+            }
+
+            if (TryReadCharacters(input, "pw", ref ptr)) {
+                return TransformUnit.ParentWidth;
+            }
+
+            if (TryReadCharacters(input, "ph", ref ptr)) {
+                return TransformUnit.ParentHeight;
+            }
+
+            if (TryReadCharacters(input, "pcaw", ref ptr)) {
+                return TransformUnit.ParentContentAreaWidth;
+            }
+
+            if (TryReadCharacters(input, "pcah", ref ptr)) {
+                return TransformUnit.ParentContentAreaHeight;
+            }
+
+            if (TryReadCharacters(input, "em", ref ptr)) {
+                return TransformUnit.Em;
+            }
+
+            if (TryReadCharacters(input, "sw", ref ptr)) {
+                return TransformUnit.ScreenWidth;
+            }
+
+            if (TryReadCharacters(input, "sh", ref ptr)) {
+                return TransformUnit.ScreenHeight;
+            }
+
+            return TransformUnit.Unset;
         }
 
         public static MeasurementPair ParseMeasurementPair(List<StyleVariable> variables, string propertyValue) {
@@ -699,9 +841,6 @@ namespace UIForia.Parsing.StyleParser {
             }
 
             switch (propertyValue.ToLower()) {
-                case "none":
-                case "default":
-                    return TransformBehavior.Default;
                 case "layoutoffset":
                     return TransformBehavior.LayoutOffset;
                 case "anchorminoffset":
@@ -1104,6 +1243,7 @@ namespace UIForia.Parsing.StyleParser {
                     throw new ParseException("Unknown value for " + nameof(GridAxisAlignment) + ": " + propertyValue);
             }
         }
+
     }
 
 }

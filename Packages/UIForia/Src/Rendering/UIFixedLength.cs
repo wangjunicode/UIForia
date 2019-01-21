@@ -9,6 +9,7 @@ namespace UIForia {
         public readonly float value;
         public readonly UIFixedUnit unit;
 
+        [DebuggerStepThrough]
         public UIFixedLength(float value, UIFixedUnit unit = UIFixedUnit.Pixel) {
             this.value = value;
             this.unit = unit;

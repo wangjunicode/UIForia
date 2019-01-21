@@ -5,6 +5,7 @@ using UIForia.Elements;
 using UIForia.Rendering;
 using UIForia.Util;
 using UnityEngine;
+using Debug = System.Diagnostics.Debug;
 
 namespace UIForia.Layout.LayoutTypes {
 
@@ -28,8 +29,8 @@ namespace UIForia.Layout.LayoutTypes {
         public VirtualScrollbar horizontalScrollbar;
         public VirtualScrollbar verticalScrollbar;
 
-        public UIView view;
-        
+        protected UIView view;
+
 #if DEBUG
         public int layoutCalls;
         public int contentSizeCacheHits;
@@ -39,6 +40,9 @@ namespace UIForia.Layout.LayoutTypes {
         public bool markedForLayout;
         protected float cachedPreferredWidth;
 
+        // todo -- stop looking up style properties, cache everything locally so we dont' have to look into the Style object
+        // Padding, Margin, Border, Anchors, AnchorTarget, TransformPosition, TransformPivot, Pref/Min/Max Width + Height
+        
         private static readonly Dictionary<int, WidthCache> s_HeightForWidthCache = new Dictionary<int, WidthCache>();
 
         /*
@@ -52,13 +56,14 @@ namespace UIForia.Layout.LayoutTypes {
             this.style = element?.style;
             this.children = ListPool<LayoutBox>.Get();
             this.cachedPreferredWidth = -1;
+            Debug.Assert(element != null, nameof(this.element) + " != null");
             this.view = element.view;
         }
 
         public abstract void RunLayout();
 
-        public float TransformX => ResolveMinOrMaxWidth(style.TransformPositionX);
-        public float TransformY => ResolveMinOrMaxHeight(style.TransformPositionY, actualWidth);
+        public float TransformX => ResolveTransform(style.TransformPositionX);
+        public float TransformY => ResolveTransform(style.TransformPositionY);
 
         public float PaddingHorizontal => ResolveFixedWidth(style.PaddingLeft) + ResolveFixedWidth(style.PaddingRight);
         public float BorderHorizontal => ResolveFixedWidth(style.BorderLeft) + ResolveFixedWidth(style.BorderRight);
@@ -84,10 +89,10 @@ namespace UIForia.Layout.LayoutTypes {
         public float ContentOffsetLeft => ResolveFixedWidth(style.PaddingLeft) + ResolveFixedWidth(style.BorderLeft);
         public float ContentOffsetTop => ResolveFixedWidth(style.PaddingTop) + ResolveFixedWidth(style.BorderTop);
 
-        public float AnchorLeft => ResolveHorizontalAnchor(style.AnchorLeft);
-        public float AnchorRight => ResolveHorizontalAnchor(style.AnchorRight);
-        public float AnchorTop => ResolveVerticalAnchor(style.AnchorTop);
-        public float AnchorBottom => ResolveVerticalAnchor(style.AnchorBottom);
+        public float AnchorLeft => ResolveAnchorLeft();
+        public float AnchorRight => ResolveAnchorRight();
+        public float AnchorTop => ResolveAnchorTop();
+        public float AnchorBottom => ResolveAnchorBottom();
 
         public float PaddingBorderHorizontal =>
             ResolveFixedWidth(style.PaddingLeft) +
@@ -115,14 +120,6 @@ namespace UIForia.Layout.LayoutTypes {
             ResolveFixedWidth(style.TransformPivotX),
             ResolveFixedHeight(style.TransformPivotY)
         );
-
-        public float GetVerticalMargin(float width) {
-            return ResolveMarginVertical(width, style.MarginTop) + ResolveMarginVertical(width, style.MarginBottom);
-        }
-
-        public float GetMarginHorizontal() {
-            return ResolveMarginHorizontal(style.MarginLeft) + ResolveMarginHorizontal(style.MarginRight);
-        }
 
         public float GetMarginTop(float width) {
             return ResolveMarginVertical(width, style.MarginTop);
@@ -182,7 +179,7 @@ namespace UIForia.Layout.LayoutTypes {
             }
         }
 
-        protected virtual void OnChildRemoved(LayoutBox child) {
+        protected void OnChildRemoved(LayoutBox child) {
             if (!children.Remove(child)) {
                 return;
             }
@@ -377,6 +374,7 @@ namespace UIForia.Layout.LayoutTypes {
                 case StylePropertyId.AnchorRight:
                 case StylePropertyId.AnchorBottom:
                 case StylePropertyId.AnchorLeft:
+                case StylePropertyId.AnchorTarget:
                     InvalidatePreferredSizeCache();
                     break;
             }
@@ -400,6 +398,7 @@ namespace UIForia.Layout.LayoutTypes {
                 case StylePropertyId.AnchorRight:
                 case StylePropertyId.AnchorBottom:
                 case StylePropertyId.AnchorLeft:
+                case StylePropertyId.AnchorTarget:
                     RequestContentSizeChangeLayout();
                     InvalidatePreferredSizeCache();
                     break;
@@ -425,7 +424,7 @@ namespace UIForia.Layout.LayoutTypes {
                     idx++;
                 }
             }
-          
+
             return idx;
         }
 
@@ -569,7 +568,7 @@ namespace UIForia.Layout.LayoutTypes {
                         return 0f;
                     }
 
-                    return ResolveAnchorWidth(widthMeasurement);
+                    return ResolveAnchorWidth(widthMeasurement.value);
 
                 case UIMeasurementUnit.AnchorHeight:
                     anchorTarget = style.AnchorTarget;
@@ -578,186 +577,187 @@ namespace UIForia.Layout.LayoutTypes {
                         return 0f;
                     }
 
-                    return ResolveAnchorHeight(widthMeasurement);
+                    return ResolveAnchorHeight(widthMeasurement.value);
 
                 default:
                     throw new ArgumentOutOfRangeException();
             }
         }
 
-        protected float ResolveAnchorWidth(UIMeasurement widthMeasurement) {
-            float left;
-            float right;
-            switch (style.AnchorTarget) {
-                case AnchorTarget.Parent:
-                    left = ResolveAnchor(parent.allocatedWidth, style.AnchorLeft);
-                    right = ResolveAnchor(parent.allocatedWidth, style.AnchorRight);
-                    return Mathf.Max(0, (right - left) * widthMeasurement.value);
-
-                case AnchorTarget.ParentContentArea:
-                    float contentArea = parent.allocatedWidth - parent.PaddingHorizontal - parent.BorderHorizontal;
-                    left = ResolveAnchor(contentArea, style.AnchorLeft);
-                    right = ResolveAnchor(contentArea, style.AnchorRight);
-                    return Mathf.Max(0, (right - left) * widthMeasurement.value);
-
-                case AnchorTarget.Screen:
-                    left = ResolveAnchor(Screen.width, style.AnchorLeft);
-                    right = Screen.width - ResolveAnchor(Screen.width, style.AnchorRight);
-                    return Mathf.Max(0, (right - left) * widthMeasurement.value);
-
-                case AnchorTarget.Viewport:
-                    left = ResolveAnchor(view.Viewport.width, style.AnchorLeft);
-                    right = ResolveAnchor(view.Viewport.width, style.AnchorRight);
-                    return Mathf.Max(0, (right - left) * widthMeasurement.value);
-
-                default:
-                    throw new ArgumentOutOfRangeException();
-            }
+        protected float ResolveAnchorWidth(float widthMeasurement) {
+            return Mathf.Max(ResolveAnchorRight() - ResolveAnchorLeft(), 0) * widthMeasurement;
         }
 
-        protected float ResolveAnchorHeight(UIMeasurement heightMeasurement) {
-            float top;
-            float bottom;
-
-            switch (style.AnchorTarget) {
-                case AnchorTarget.Parent:
-                    top = ResolveAnchor(parent.allocatedHeight, style.AnchorTop);
-                    bottom = parent.allocatedHeight - ResolveAnchor(parent.allocatedHeight, style.AnchorBottom);
-                    return Mathf.Max(0, (bottom - top) * heightMeasurement.value);
-
-                case AnchorTarget.ParentContentArea:
-                    float contentArea = parent.allocatedHeight - parent.PaddingVertical - parent.BorderVertical;
-                    top = ResolveAnchor(contentArea, style.AnchorTop);
-                    bottom = contentArea - ResolveAnchor(contentArea, style.AnchorBottom);
-                    return Mathf.Max(0, (bottom - top) * heightMeasurement.value);
-
-                case AnchorTarget.Screen:
-                    top = ResolveAnchor(Screen.height, style.AnchorTop);
-                    bottom = Screen.height - ResolveAnchor(Screen.height, style.AnchorBottom);
-                    return Mathf.Max(0, (bottom - top) * heightMeasurement.value);
-
-                case AnchorTarget.Viewport:
-                    top = ResolveAnchor(view.Viewport.height, style.AnchorTop);
-                    bottom = view.Viewport.height -
-                             ResolveAnchor(view.Viewport.height, style.AnchorBottom);
-                    return Mathf.Max(0, (bottom - top) * heightMeasurement.value);
-
-                default:
-                    throw new ArgumentOutOfRangeException();
-            }
+        protected float ResolveAnchorHeight(float heightMeasurement) {
+            return Mathf.Max(ResolveAnchorBottom() - ResolveAnchorTop(), 0) * heightMeasurement;
         }
 
-        protected float ResolveAnchor(float baseWidth, UIFixedLength anchor) {
+        protected float ResolveAnchorValue(float width, UIFixedLength anchor) {
             switch (anchor.unit) {
+                case UIFixedUnit.Unset:
+                    return 0;
+
                 case UIFixedUnit.Pixel:
-                    return anchor.value * view.ScaleFactor;
+                    return anchor.value;
 
                 case UIFixedUnit.Percent:
-                    return baseWidth * anchor.value;
-
-                case UIFixedUnit.ViewportHeight:
-                    return view.Viewport.height * anchor.value;
-
-                case UIFixedUnit.ViewportWidth:
-                    return view.Viewport.width * anchor.value;
+                    return width * anchor.value;
 
                 case UIFixedUnit.Em:
                     return style.EmSize * anchor.value * view.ScaleFactor;
 
-                default:
-                    throw new InvalidArgumentException();
-            }
-        }
-
-        protected float ResolveHorizontalAnchor(UIFixedLength anchor) {
-            switch (anchor.unit) {
-                case UIFixedUnit.Pixel:
-                    return anchor.value * view.ScaleFactor;
-
-                case UIFixedUnit.Percent:
-                    switch (style.AnchorTarget) {
-                        // note -- not intended to be called by anything but the layout system
-                        // which happens only for ignored layout behaviors after their parent is
-                        // fully sized and laid out, meaning we don't need to return 0 for content
-                        // sized parents
-                        case AnchorTarget.Parent:
-                            return parent.allocatedWidth * anchor.value;
-
-                        case AnchorTarget.ParentContentArea:
-                            float paddingLeft = parent.PaddingLeft;
-                            float borderLeft = parent.BorderLeft;
-                            float start = paddingLeft + borderLeft;
-                            float end = parent.allocatedWidth - parent.PaddingBorderHorizontal;
-                            float range = end - start;
-                            return start + (range * anchor.value);
-
-                        case AnchorTarget.Screen:
-                            return -parent.element.layoutResult.ScreenPosition.x + (Screen.width * anchor.value);
-
-                        case AnchorTarget.Viewport:
-                            return view.Viewport.width * anchor.value;
-
-                        default:
-                            throw new InvalidArgumentException();
-                    }
-
-                case UIFixedUnit.ViewportHeight:
-                    return view.Viewport.height * anchor.value;
+                case UIFixedUnit.LineHeight:
+                    return 0;
 
                 case UIFixedUnit.ViewportWidth:
                     return view.Viewport.width * anchor.value;
 
-                case UIFixedUnit.Em:
-                    return style.EmSize * anchor.value;
-
-                default:
-                    throw new InvalidArgumentException();
-            }
-        }
-
-        protected float ResolveVerticalAnchor(UIFixedLength anchor) {
-            switch (anchor.unit) {
-                case UIFixedUnit.Pixel:
-                    return anchor.value * view.ScaleFactor;
-
-                case UIFixedUnit.Percent:
-                    switch (style.AnchorTarget) {
-                        // note -- not intended to be called by anything but the layout system
-                        // which happens only for ignored layout behaviors after their parent is
-                        // fully sized and laid out, meaning we don't need to return 0 for content
-                        // sized parents
-                        case AnchorTarget.Parent:
-                            return parent.allocatedHeight * anchor.value;
-
-                        case AnchorTarget.ParentContentArea:
-                            float paddingTop = parent.PaddingTop;
-                            float borderTop = parent.BorderTop;
-                            float start = paddingTop + borderTop;
-                            float end = parent.allocatedHeight - parent.PaddingBorderVertical;
-                            float range = end - start;
-                            return start + (range * anchor.value);
-
-                        case AnchorTarget.Screen:
-                            return -parent.element.layoutResult.ScreenPosition.y + (Screen.width * anchor.value);
-
-                        case AnchorTarget.Viewport:
-                            return view.Viewport.height * anchor.value;
-
-                        default:
-                            throw new InvalidArgumentException();
-                    }
-
                 case UIFixedUnit.ViewportHeight:
                     return view.Viewport.height * anchor.value;
 
-                case UIFixedUnit.ViewportWidth:
-                    return view.Viewport.width * anchor.value;
+                default:
+                    throw new ArgumentOutOfRangeException();
+            }
+        }
 
-                case UIFixedUnit.Em:
-                    return style.EmSize * anchor.value * view.ScaleFactor;
+        protected float ResolveAnchorRight() {
+            UIFixedLength anchor = style.AnchorRight;
+            switch (style.AnchorTarget) {
+                case AnchorTarget.Unset:
+                case AnchorTarget.Parent:
+                    if (parent == null) {
+                        return view.Viewport.xMax - ResolveAnchorValue(view.Viewport.width, anchor);
+                    }
+
+                    // needs to be allocated width not actualWidth because we might not know the actual width yet
+                    return parent.element.layoutResult.ScreenPosition.x + parent.allocatedWidth - ResolveAnchorValue(view.Viewport.width, anchor);
+
+                case AnchorTarget.ParentContentArea:
+                    if (parent == null) {
+                        return view.Viewport.x + ResolveAnchorValue(view.Viewport.width, anchor);
+                    }
+
+                    Rect parentContentRect = parent.ContentRect;
+                    return parentContentRect.x +
+                           parentContentRect.width - ResolveAnchorValue(parentContentRect.width, anchor);
+
+                case AnchorTarget.Viewport:
+                    return view.Viewport.x +
+                           view.Viewport.width - ResolveAnchorValue(view.Viewport.width, anchor);
+
+                case AnchorTarget.Screen:
+                    if (parent == null) {
+                        return -view.Viewport.x + ResolveAnchorValue(Screen.width, anchor);
+                    }
+
+                    return -parent.element.layoutResult.ScreenPosition.x +
+                           Screen.width - ResolveAnchorValue(Screen.width, anchor);
 
                 default:
-                    throw new InvalidArgumentException();
+                    throw new ArgumentOutOfRangeException();
+            }
+        }
+
+        protected float ResolveAnchorLeft() {
+            UIFixedLength anchor = style.AnchorLeft;
+            switch (style.AnchorTarget) {
+                case AnchorTarget.Unset:
+                case AnchorTarget.Parent:
+                    if (parent == null) {
+                        return view.Viewport.xMax + ResolveAnchorValue(view.Viewport.width, anchor);
+                    }
+
+                    return parent.element.layoutResult.ScreenPosition.x + ResolveAnchorValue(parent.actualWidth, anchor);
+
+                case AnchorTarget.ParentContentArea:
+                    if (parent == null) {
+                        return view.Viewport.xMax + ResolveAnchorValue(view.Viewport.width, anchor);
+                    }
+
+                    Rect parentContentRect = parent.ContentRect;
+                    return parentContentRect.xMax + ResolveAnchorValue(parentContentRect.width, anchor);
+
+                case AnchorTarget.Viewport:
+                    return view.Viewport.xMax + ResolveAnchorValue(view.Viewport.width, anchor);
+
+                case AnchorTarget.Screen:
+                    if (parent == null) {
+                        return -(view.Viewport.xMax) + ResolveAnchorValue(Screen.width, anchor);
+                    }
+
+                    return -parent.element.layoutResult.ScreenPosition.x + Screen.width + ResolveAnchorValue(Screen.width, anchor.value);
+
+                default:
+                    throw new ArgumentOutOfRangeException();
+            }
+        }
+
+        protected float ResolveAnchorTop() {
+            UIFixedLength anchor = style.AnchorTop;
+            switch (style.AnchorTarget) {
+                case AnchorTarget.Unset:
+                case AnchorTarget.Parent:
+                    if (parent == null) {
+                        return view.Viewport.y + ResolveAnchorValue(view.Viewport.height, anchor);
+                    }
+
+                    return ResolveAnchorValue(parent.actualWidth, anchor);
+
+                case AnchorTarget.ParentContentArea:
+                    if (parent == null) {
+                        return view.Viewport.y + ResolveAnchorValue(view.Viewport.height, anchor);
+                    }
+
+                    Rect parentContentRect = parent.ContentRect;
+                    return parentContentRect.y + ResolveAnchorValue(parentContentRect.height, anchor);
+
+                case AnchorTarget.Viewport:
+                    return view.Viewport.y + ResolveAnchorValue(view.Viewport.height, anchor);
+
+                case AnchorTarget.Screen:
+                    if (parent == null) {
+                        return -view.Viewport.y + ResolveAnchorValue(Screen.height, anchor);
+                    }
+
+                    // todo -- need screen position here but might not have it correctly if parent moved this frame. maybe flag for later adjustment in layout?
+                    return -parent.element.layoutResult.ScreenPosition.y + ResolveAnchorValue(Screen.height, anchor.value);
+
+                default:
+                    throw new ArgumentOutOfRangeException();
+            }
+        }
+
+        protected float ResolveAnchorBottom() {
+            UIFixedLength anchor = style.AnchorBottom;
+            switch (style.AnchorTarget) {
+                case AnchorTarget.Unset:
+                case AnchorTarget.Parent:
+                    if (parent == null) {
+                        return view.Viewport.yMax + ResolveAnchorValue(view.Viewport.height, anchor) - actualHeight;
+                    }
+
+                    return parent.element.layoutResult.ScreenPosition.y + parent.actualHeight - ResolveAnchorValue(parent.actualHeight, anchor) - actualHeight;
+
+                case AnchorTarget.ParentContentArea:
+                    if (parent == null) {
+                        return view.Viewport.yMax + ResolveAnchorValue(view.Viewport.height, anchor) - actualHeight;
+                    }
+
+                    Rect parentContentRect = parent.ContentRect;
+                    return parentContentRect.yMax + ResolveAnchorValue(parentContentRect.height, anchor) - actualHeight;
+
+                case AnchorTarget.Viewport:
+                    return view.Viewport.yMax + ResolveAnchorValue(view.Viewport.height, anchor) - actualHeight;
+
+                case AnchorTarget.Screen:
+                    if (parent == null) {
+                        return -(view.Viewport.yMax) + ResolveAnchorValue(Screen.height, anchor) - actualHeight;
+                    }
+
+                    return -parent.element.layoutResult.ScreenPosition.y + Screen.height + ResolveAnchorValue(Screen.height, anchor.value) - actualHeight;
+
+                default:
+                    throw new ArgumentOutOfRangeException();
             }
         }
 
@@ -778,7 +778,7 @@ namespace UIForia.Layout.LayoutTypes {
                     }
 
                     return Mathf.Max(0, PaddingBorderVertical + (contentHeight * height.value));
-                
+
                 case UIMeasurementUnit.ParentSize:
                     if (parent.style.PreferredHeight.IsContentBased) {
                         return 0f;
@@ -811,7 +811,7 @@ namespace UIForia.Layout.LayoutTypes {
                         return 0f;
                     }
 
-                    return ResolveAnchorWidth(height);
+                    return ResolveAnchorWidth(height.value);
 
                 case UIMeasurementUnit.AnchorHeight:
                     anchorTarget = style.AnchorTarget;
@@ -820,7 +820,7 @@ namespace UIForia.Layout.LayoutTypes {
                         return 0f;
                     }
 
-                    return ResolveAnchorHeight(height);
+                    return ResolveAnchorHeight(height.value);
                 default:
                     throw new ArgumentOutOfRangeException();
             }
@@ -870,6 +870,7 @@ namespace UIForia.Layout.LayoutTypes {
                     }
 
                     return ResolveAnchorWidth(margin.value);
+
                 case UIMeasurementUnit.AnchorHeight:
                     anchorTarget = style.AnchorTarget;
                     if (parent.style.PreferredWidth.IsContentBased && anchorTarget == AnchorTarget.Parent ||
@@ -885,78 +886,95 @@ namespace UIForia.Layout.LayoutTypes {
             }
         }
 
-        [DebuggerStepThrough]
-        public float GetMinHeight(float contentHeight) {
-            return ResolveMinOrMaxHeight(style.MinHeight, contentHeight);
-        }
+        // Note: Only call this AFTER layout has run
+        public float ResolveTransform(TransformOffset transformOffset) {
+            switch (transformOffset.unit) {
+                case TransformUnit.Unset:
+                    return 0;
 
-        [DebuggerStepThrough]
-        public float GetMaxHeight(float contentHeight) {
-            return ResolveMinOrMaxHeight(style.MaxHeight, contentHeight);
-        }
-        
-        protected float ResolveTransformX(UIMeasurement transformX) {
-                 AnchorTarget anchorTarget;
-            switch (transformX.unit) {
-                case UIMeasurementUnit.Pixel:
-                    return Mathf.Max(0, transformX.value);
+                case TransformUnit.Pixel:
+                    return transformOffset.value;
+                case TransformUnit.Em:
+                    return style.EmSize * transformOffset.value * view.ScaleFactor;
 
-                case UIMeasurementUnit.Content:
-                    return Mathf.Max(0, PaddingBorderHorizontal + (GetContentWidth() * transformX.value));
+                case TransformUnit.ActualWidth:
+                    return transformOffset.value * actualWidth;
 
-                case UIMeasurementUnit.ParentSize:
-                    if (parent.style.PreferredWidth.IsContentBased) {
-                        return 0f;
-                    }
+                case TransformUnit.ActualHeight:
+                    return transformOffset.value * actualHeight;
 
-                    return Mathf.Max(0, parent.allocatedWidth * transformX.value);
+                case TransformUnit.AllocatedWidth:
+                    return transformOffset.value * allocatedWidth;
 
-                case UIMeasurementUnit.ViewportWidth:
-                    return Mathf.Max(0, view.Viewport.width * transformX.value);
+                case TransformUnit.AllocatedHeight:
+                    return transformOffset.value * allocatedHeight;
 
-                case UIMeasurementUnit.ViewportHeight:
-                    return Mathf.Max(0, view.Viewport.height * transformX.value);
+                case TransformUnit.ContentWidth:
+                    return GetContentWidth() * transformOffset.value;
 
-                case UIMeasurementUnit.ParentContentArea:
-                    if (parent.style.PreferredWidth.IsContentBased) {
-                        return 0f;
-                    }
+                case TransformUnit.ContentHeight:
+                    // should this be allocatedWidth instead?
+                    return GetContentHeight(actualWidth) * transformOffset.value;
 
-                    return Mathf.Max(0,
-                        parent.allocatedWidth * transformX.value - (parent.style == null
-                            ? 0
-                            : parent.PaddingHorizontal - parent.BorderHorizontal));
+                case TransformUnit.ContentAreaWidth:
+                    float width = allocatedWidth - PaddingLeft + BorderLeft - PaddingRight - BorderRight;
+                    return Mathf.Max(0, width) * transformOffset.value;
 
-                case UIMeasurementUnit.Em:
-                    return Math.Max(0, style.EmSize * transformX.value);
+                case TransformUnit.ContentAreaHeight:
+                    float height = allocatedHeight - PaddingTop + PaddingBottom - PaddingBottom - BorderBottom;
+                    return Mathf.Max(0, height) * transformOffset.value;
 
-                case UIMeasurementUnit.AnchorWidth:
-                    anchorTarget = style.AnchorTarget;
+                case TransformUnit.ViewportWidth:
+                    return view.Viewport.width * transformOffset.value;
+
+                case TransformUnit.ViewportHeight:
+                    return view.Viewport.height * transformOffset.value;
+
+                case TransformUnit.AnchorWidth: {
+                    AnchorTarget anchorTarget = style.AnchorTarget;
                     if (parent.style.PreferredWidth.IsContentBased && anchorTarget == AnchorTarget.Parent ||
                         anchorTarget == AnchorTarget.ParentContentArea) {
                         return 0f;
                     }
 
-                    return ResolveAnchorWidth(transformX);
-
-                case UIMeasurementUnit.AnchorHeight:
-                    anchorTarget = style.AnchorTarget;
-                    if (parent.style.PreferredWidth.IsContentBased && anchorTarget == AnchorTarget.Parent ||
+                    return ResolveAnchorWidth(transformOffset.value);
+                }
+                case TransformUnit.AnchorHeight: {
+                    AnchorTarget anchorTarget = style.AnchorTarget;
+                    if (parent.style.PreferredHeight.IsContentBased && anchorTarget == AnchorTarget.Parent ||
                         anchorTarget == AnchorTarget.ParentContentArea) {
                         return 0f;
                     }
 
-                    return ResolveAnchorHeight(transformX);
+                    return ResolveAnchorHeight(transformOffset.value);
+                }
+                case TransformUnit.ParentWidth:
+                    if (parent == null) return 0;
+                    return parent.actualWidth * transformOffset.value;
 
-                case UIMeasurementUnit.MaxContentSelf:
-                    
-                    return 0; 
-                
+                case TransformUnit.ParentHeight:
+                    if (parent == null) return 0;
+                    return parent.actualHeight * transformOffset.value;
+
+                case TransformUnit.ParentContentAreaWidth:
+                    if (parent == null) return 0;
+                    return parent.ContentRect.width * transformOffset.value;
+
+                case TransformUnit.ParentContentAreaHeight:
+                    if (parent == null) return 0;
+                    return parent.ContentRect.height * transformOffset.value;
+
+                case TransformUnit.ScreenWidth:
+                    return Screen.width * transformOffset.value;
+
+                case TransformUnit.ScreenHeight:
+                    return Screen.height * transformOffset.value;
+
                 default:
                     throw new ArgumentOutOfRangeException();
             }
         }
-        
+
         [DebuggerStepThrough]
         protected float ResolveMinOrMaxWidth(UIMeasurement widthMeasurement) {
             AnchorTarget anchorTarget;
@@ -1000,7 +1018,7 @@ namespace UIForia.Layout.LayoutTypes {
                         return 0f;
                     }
 
-                    return ResolveAnchorWidth(widthMeasurement);
+                    return ResolveAnchorWidth(widthMeasurement.value);
 
                 case UIMeasurementUnit.AnchorHeight:
                     anchorTarget = style.AnchorTarget;
@@ -1009,7 +1027,7 @@ namespace UIForia.Layout.LayoutTypes {
                         return 0f;
                     }
 
-                    return ResolveAnchorHeight(widthMeasurement);
+                    return ResolveAnchorHeight(widthMeasurement.value);
 
                 default:
                     throw new ArgumentOutOfRangeException();
@@ -1059,7 +1077,7 @@ namespace UIForia.Layout.LayoutTypes {
                         return 0f;
                     }
 
-                    return ResolveAnchorWidth(heightMeasurement);
+                    return ResolveAnchorWidth(heightMeasurement.value);
 
                 case UIMeasurementUnit.AnchorHeight:
                     anchorTarget = style.AnchorTarget;
@@ -1068,7 +1086,7 @@ namespace UIForia.Layout.LayoutTypes {
                         return 0f;
                     }
 
-                    return ResolveAnchorHeight(heightMeasurement);
+                    return ResolveAnchorHeight(heightMeasurement.value);
                 default:
                     throw new ArgumentOutOfRangeException();
             }
@@ -1127,10 +1145,10 @@ namespace UIForia.Layout.LayoutTypes {
         }
 
         public void SetChildren(LightList<LayoutBox> boxes) {
-           children.Clear();
-           for (int i = 0; i < boxes.Count; i++) {
-               OnChildAdded(boxes[i]);
-           }
+            children.Clear();
+            for (int i = 0; i < boxes.Count; i++) {
+                OnChildAdded(boxes[i]);
+            }
         }
 
     }

@@ -12,9 +12,12 @@
     
     <Contents>
         <Group style="parent">
-            <Group style="child">
-                Text
+            <Group style="child0">
+                Child 0
             </Group>
+            <!--<Group style="child1">-->
+                <!--Child 1-->
+            <!--</Group>-->
         </Group>
         
         <!--<TemplateRef id="templateToRender" data="{}"/>-->

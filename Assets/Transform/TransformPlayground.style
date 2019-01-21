@@ -1,11 +1,22 @@
 style parent {
     PreferredSize = 300px;
     BackgroundColor = red;
+    FlexLayoutDirection = Vertical; 
 }
 
-style child {
+style child0 {
+    PreferredSize = 1aw, 100px;
+    BackgroundColor = blue;
+    TransformBehaviorX = AnchorMaxOffset;
+    TransformBehaviorY = AnchorMaxOffset;
+    AnchorRight = 0px;
+    AnchorLeft = 0px;
+    AnchorBottom = -100px;
+    TransformPositionX = 0px;
+}
+
+style child1 {
     PreferredSize = 100px;
     BackgroundColor = blue;
-    TransformBehaviorX = LayoutOffset;
-    TransformPositionX = 1cnt;
+    AnchorRight = 200px;
 }

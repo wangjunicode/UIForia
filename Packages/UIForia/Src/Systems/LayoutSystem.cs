@@ -1,4 +1,4 @@
-﻿﻿using System;
+﻿using System;
 using System.Collections.Generic;
 using UIForia.Extensions;
 using UIForia.Elements;
@@ -213,7 +213,7 @@ namespace UIForia.Systems {
                     scrollOffset.y = (parentBox.actualHeight - parentBox.allocatedHeight) * parentBox.element.scrollOffset.y;
 
                     layoutResult.LocalPosition = ResolveLocalPosition(box) - scrollOffset;
-                    layoutResult.ContentRect = box.ContentRect; // = new Vector2(box.ContentOffsetLeft, box.ContentOffsetTop);
+                    layoutResult.ContentRect = box.ContentRect;
                     layoutResult.ActualSize = new Size(box.actualWidth, box.actualHeight);
                     layoutResult.AllocatedSize = new Size(box.allocatedWidth, box.allocatedHeight);
                     layoutResult.ScreenPosition = box.parent.element.layoutResult.screenPosition + layoutResult.localPosition;
@@ -308,50 +308,75 @@ namespace UIForia.Systems {
 
         private static Vector2 ResolveLocalPosition(LayoutBox box) {
             Vector2 localPosition = Vector2.zero;
- 
+
             LayoutBehavior layoutBehavior = box.style.LayoutBehavior;
             TransformBehavior transformBehaviorX = box.style.TransformBehaviorX;
             TransformBehavior transformBehaviorY = box.style.TransformBehaviorY;
 
             switch (layoutBehavior) {
                 case LayoutBehavior.Ignored:
-                    if (transformBehaviorX == TransformBehavior.AnchorMinOffset) {
-                        localPosition.x = box.AnchorLeft + box.TransformX;
-                    }
-                    else if (transformBehaviorX == TransformBehavior.AnchorMaxOffset) {
-                        localPosition.x = box.AnchorRight + box.TransformX;
-                    }
-                    else {
-                        localPosition.x = box.TransformX;
+
+                    switch (transformBehaviorX) {
+                        case TransformBehavior.AnchorMinOffset:
+                            localPosition.x = box.AnchorLeft + box.TransformX;
+                            break;
+                        case TransformBehavior.AnchorMaxOffset:
+                            localPosition.x = box.AnchorRight + box.TransformX - box.actualWidth;
+                            break;
+                        case TransformBehavior.LayoutOffset:
+                            localPosition.x = box.TransformX;
+                            break;
+                        default:
+                            localPosition.x = box.TransformX;
+                            break;
                     }
 
-                    if (transformBehaviorY == TransformBehavior.AnchorMinOffset) {
-                        localPosition.y = box.AnchorTop + box.TransformY;
-                    }
-                    // todo turn this into AnchorMaxMinusContentOffset;
-                    // or make transform aware of content size 
-                    else if (transformBehaviorY == TransformBehavior.AnchorMaxOffset) {
-                        localPosition.y = box.AnchorBottom + box.TransformY;// - box.allocatedHeight; // todo remove the - here and move to AnchorMaxMinusContentOffset
-                    }
-                    else {
-                        localPosition.y = box.TransformY;
+                    switch (transformBehaviorY) {
+                        case TransformBehavior.AnchorMinOffset:
+                            localPosition.y = box.AnchorTop + box.TransformY;
+                            break;
+                        case TransformBehavior.AnchorMaxOffset:
+                            localPosition.y = box.AnchorBottom + box.TransformY - box.actualHeight;
+                            break;
+                        case TransformBehavior.LayoutOffset:
+                            localPosition.y = box.TransformY;
+                            break;
+                        default:
+                            localPosition.y = box.localY;
+                            break;
                     }
 
                     break;
 
                 case LayoutBehavior.Normal:
-                    if (transformBehaviorX == TransformBehavior.LayoutOffset) {
-                        localPosition.x = box.localX + box.TransformX;
-                    }
-                    else {
-                        localPosition.x = box.localX;
+                    switch (transformBehaviorX) {
+                        case TransformBehavior.AnchorMinOffset:
+                            localPosition.x = box.AnchorLeft + box.TransformX;
+                            break;
+                        case TransformBehavior.AnchorMaxOffset:
+                            localPosition.x = box.AnchorRight + box.TransformX - box.actualWidth;
+                            break;
+                        case TransformBehavior.LayoutOffset:
+                            localPosition.x = box.localX + box.TransformX;
+                            break;
+                        default:
+                            localPosition.x = box.localX;
+                            break;
                     }
 
-                    if (transformBehaviorY == TransformBehavior.LayoutOffset) {
-                        localPosition.y = box.localY + box.TransformY;
-                    }
-                    else {
-                        localPosition.y = box.localY;
+                    switch (transformBehaviorY) {
+                        case TransformBehavior.AnchorMinOffset:
+                            localPosition.y = box.AnchorTop + box.TransformY;
+                            break;
+                        case TransformBehavior.AnchorMaxOffset:
+                            localPosition.y = box.AnchorBottom + box.TransformY - box.actualHeight;
+                            break;
+                        case TransformBehavior.LayoutOffset:
+                            localPosition.y = box.localY + box.TransformY;
+                            break;
+                        default:
+                            localPosition.y = box.localY;
+                            break;
                     }
 
                     break;

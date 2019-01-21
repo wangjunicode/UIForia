@@ -2,7 +2,9 @@ namespace UIForia {
 
     public enum TransformUnit {
 
+        Unset = 0,
         Pixel,
+        Em,
         ActualWidth,
         ActualHeight,
         AllocatedWidth,
@@ -20,7 +22,7 @@ namespace UIForia {
         ParentContentAreaWidth,
         ParentContentAreaHeight,
         ScreenWidth,
-        ScreenHeight
+        ScreenHeight,
 
     }
 

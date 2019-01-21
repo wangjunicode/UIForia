@@ -74,6 +74,15 @@ namespace UIForia.Rendering {
         }
 
         [DebuggerStepThrough]
+        public StyleProperty(StylePropertyId propertyId, TransformOffset offset) {
+            this.propertyId = propertyId;
+            this.valuePart0 = 0;
+            this.floatValue = offset.value;
+            this.valuePart1 = (int) offset.unit;
+            this.objectField = null;
+        }
+        
+        [DebuggerStepThrough]
         public StyleProperty(StylePropertyId propertyId, GridTrackSize trackSize) {
             this.valuePart0 = 0;
             this.propertyId = propertyId;
@@ -123,6 +132,7 @@ namespace UIForia.Rendering {
         public GridTrackSize AsGridTrackSize => new GridTrackSize(floatValue, (GridTemplateUnit) valuePart1);
         public UIMeasurement AsUIMeasurement => new UIMeasurement(floatValue, (UIMeasurementUnit) valuePart1);
         public UIFixedLength AsUIFixedLength => new UIFixedLength(floatValue, (UIFixedUnit) valuePart1);
+        public TransformOffset AsTransformOffset => new TransformOffset(floatValue, (TransformUnit) valuePart1);
 
         public IReadOnlyList<GridTrackSize> AsGridTrackTemplate => (IReadOnlyList<GridTrackSize>) objectField;
 

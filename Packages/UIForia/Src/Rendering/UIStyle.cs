@@ -99,6 +99,19 @@ namespace UIForia.Rendering {
 
             return UIMeasurement.Unset;
         }
+        
+        private TransformOffset FindTransformOffsetProperty(StylePropertyId propertyId) {
+            for (int i = 0; i < m_StyleProperties.Count; i++) {
+                if (m_StyleProperties[i].propertyId == propertyId) {
+                    return new TransformOffset(
+                        m_StyleProperties[i].floatValue,
+                        (TransformUnit) m_StyleProperties[i].valuePart1
+                    );
+                }
+            }
+
+            return TransformOffset.Unset;
+        }
 
         private UIFixedLength FindUIFixedLengthProperty(StylePropertyId propertyId) {
             for (int i = 0; i < m_StyleProperties.Count; i++) {

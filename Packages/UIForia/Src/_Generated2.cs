@@ -928,6 +928,43 @@ namespace UIForia.StyleBindings {
 
     }
         
+    public class StyleBinding_TransformOffset : StyleBinding {
+
+        public readonly Expression<UIForia.TransformOffset> expression;
+        public readonly StylePropertyId propertyId;
+        
+        public StyleBinding_TransformOffset(string propertyName, StylePropertyId propertyId, StyleState state, Expression<UIForia.TransformOffset> expression)
+            : base(propertyName, state) {
+            this.propertyId = propertyId;
+            this.expression = expression;
+        }
+
+        public override void Execute(UIElement element, ExpressionContext context) {
+            if (!element.style.IsInState(state)) return;
+
+            var oldValue = element.style.m_PropertyMap[(int)propertyId].AsTransformOffset;
+            var value = expression.Evaluate(context);
+            if (value != oldValue) {
+                element.style.SetProperty(new StyleProperty(propertyId, value), state);
+            }
+        }
+
+        public override bool IsConstant() {
+            return expression.IsConstant();
+        }
+
+        public override void Apply(UIStyle style, ExpressionContext context) {
+            var value = expression.Evaluate(context);
+            style.SetProperty(new StyleProperty(propertyId, value));
+        }
+
+        public override void Apply(UIStyleSet styleSet, ExpressionContext context) {
+            var value = expression.Evaluate(context);
+            styleSet.SetProperty(new StyleProperty(propertyId, value), state);
+        }
+
+    }
+        
     public class StyleBinding_TransformBehavior : StyleBinding {
 
         public readonly Expression<UIForia.Rendering.TransformBehavior> expression;
@@ -1378,9 +1415,9 @@ case "overflowx":
                 case "anchortarget":
                     return new UIForia.StyleBindings.StyleBinding_AnchorTarget("AnchorTarget", UIForia.Rendering.StylePropertyId.AnchorTarget, targetState.state, Compile<UIForia.Rendering.AnchorTarget>(value, s_EnumSource_AnchorTarget));                
                 case "transformpositionx":
-                    return new UIForia.StyleBindings.StyleBinding_UIMeasurement("TransformPositionX", UIForia.Rendering.StylePropertyId.TransformPositionX, targetState.state, Compile<UIForia.UIMeasurement>(value, measurementSources));                
+                    return new UIForia.StyleBindings.StyleBinding_TransformOffset("TransformPositionX", UIForia.Rendering.StylePropertyId.TransformPositionX, targetState.state, Compile<UIForia.TransformOffset>(value, null));                
                 case "transformpositiony":
-                    return new UIForia.StyleBindings.StyleBinding_UIMeasurement("TransformPositionY", UIForia.Rendering.StylePropertyId.TransformPositionY, targetState.state, Compile<UIForia.UIMeasurement>(value, measurementSources));                
+                    return new UIForia.StyleBindings.StyleBinding_TransformOffset("TransformPositionY", UIForia.Rendering.StylePropertyId.TransformPositionY, targetState.state, Compile<UIForia.TransformOffset>(value, null));                
                 case "transformpivotx":
                     return new UIForia.StyleBindings.StyleBinding_UIFixedLength("TransformPivotX", UIForia.Rendering.StylePropertyId.TransformPivotX, targetState.state, Compile<UIForia.UIFixedLength>(value, fixedSources));                
                 case "transformpivoty":

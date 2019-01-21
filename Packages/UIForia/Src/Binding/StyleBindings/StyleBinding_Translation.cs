@@ -4,9 +4,9 @@ namespace UIForia.StyleBindings {
 
     public class StyleBinding_Translation : StyleBinding {
 
-        public readonly Expression<FixedLengthVector> expression;
+        public readonly Expression<MeasurementPair> expression;
 
-        public StyleBinding_Translation(string propertyName, StyleState state, Expression<FixedLengthVector> expression)
+        public StyleBinding_Translation(string propertyName, StyleState state, Expression<MeasurementPair> expression)
             : base(propertyName, state) {
             this.expression = expression;
         }
@@ -14,11 +14,11 @@ namespace UIForia.StyleBindings {
         public override void Execute(UIElement element, ExpressionContext context) {
             if (!element.style.IsInState(state)) return;
             
-            FixedLengthVector oldValue = new FixedLengthVector(
+            MeasurementPair oldValue = new MeasurementPair(
                 element.style.TransformPositionX,
                 element.style.TransformPositionY
             );
-            FixedLengthVector value = expression.Evaluate(context);
+            MeasurementPair value = expression.Evaluate(context);
             if (value != oldValue) {
                 element.style.SetTransformPositionX(value.x, state);
                 element.style.SetTransformPositionY(value.y, state);
@@ -30,13 +30,13 @@ namespace UIForia.StyleBindings {
         }
 
         public override void Apply(UIStyle style, ExpressionContext context) {
-            FixedLengthVector value = expression.Evaluate(context);
+            MeasurementPair value = expression.Evaluate(context);
             style.SetProperty(new StyleProperty(StylePropertyId.TransformPositionX, value.x));
             style.SetProperty(new StyleProperty(StylePropertyId.TransformPositionY, value.y));
         }
 
         public override void Apply(UIStyleSet styleSet, ExpressionContext context) {
-            FixedLengthVector value = expression.Evaluate(context);
+            MeasurementPair value = expression.Evaluate(context);
             styleSet.SetProperty(new StyleProperty(StylePropertyId.TransformPositionX, value.x), state);
             styleSet.SetProperty(new StyleProperty(StylePropertyId.TransformPositionY, value.y), state);
         }

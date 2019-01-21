@@ -93,8 +93,8 @@ namespace UIForia.Rendering {
 		public static readonly UIFixedLength AnchorBottom = new UIFixedLength(1, UIFixedUnit.Percent);
 		public static readonly UIFixedLength AnchorLeft = new UIFixedLength(0, UIFixedUnit.Percent);
 		public const AnchorTarget AnchorTarget = UIForia.Rendering.AnchorTarget.Parent;
-		public static readonly UIFixedLength TransformPositionX = new UIFixedLength(0, UIFixedUnit.Pixel);
-		public static readonly UIFixedLength TransformPositionY = new UIFixedLength(0, UIFixedUnit.Pixel);
+		public static readonly UIMeasurement TransformPositionX = new UIMeasurement(0, UIMeasurementUnit.Pixel);
+		public static readonly UIMeasurement TransformPositionY = new UIMeasurement(0, UIMeasurementUnit.Pixel);
 		public static readonly UIFixedLength TransformPivotX = new UIFixedLength(0, UIFixedUnit.Pixel);
 		public static readonly UIFixedLength TransformPivotY = new UIFixedLength(0, UIFixedUnit.Pixel);
 		public const float TransformScaleX = 1;
@@ -319,9 +319,9 @@ namespace UIForia.Rendering {
 				case StylePropertyId.AnchorTarget:
 					 return new StyleProperty(StylePropertyId.AnchorTarget, (int)UIForia.Rendering.AnchorTarget.Parent);
 				case StylePropertyId.TransformPositionX:
-					 return new StyleProperty(StylePropertyId.TransformPositionX, new UIFixedLength(0, UIFixedUnit.Pixel));
+					 return new StyleProperty(StylePropertyId.TransformPositionX, new UIMeasurement(0, UIMeasurementUnit.Pixel));
 				case StylePropertyId.TransformPositionY:
-					 return new StyleProperty(StylePropertyId.TransformPositionY, new UIFixedLength(0, UIFixedUnit.Pixel));
+					 return new StyleProperty(StylePropertyId.TransformPositionY, new UIMeasurement(0, UIMeasurementUnit.Pixel));
 				case StylePropertyId.TransformPivotX:
 					 return new StyleProperty(StylePropertyId.TransformPivotX, new UIFixedLength(0, UIFixedUnit.Pixel));
 				case StylePropertyId.TransformPivotY:

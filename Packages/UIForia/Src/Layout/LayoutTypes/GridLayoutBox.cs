@@ -6,8 +6,6 @@ using UnityEngine;
 
 namespace UIForia.Layout.LayoutTypes {
 
-    // todo -- support padding and margin
-
     public class GridLayoutBox : LayoutBox {
 
         private struct GridItemSizes {

@@ -57,8 +57,8 @@ namespace UIForia.Layout.LayoutTypes {
 
         public abstract void RunLayout();
 
-        public float TransformX => ResolveFixedWidth(style.TransformPositionX);
-        public float TransformY => ResolveFixedHeight(style.TransformPositionY);
+        public float TransformX => ResolveMinOrMaxWidth(style.TransformPositionX);
+        public float TransformY => ResolveMinOrMaxHeight(style.TransformPositionY, actualWidth);
 
         public float PaddingHorizontal => ResolveFixedWidth(style.PaddingLeft) + ResolveFixedWidth(style.PaddingRight);
         public float BorderHorizontal => ResolveFixedWidth(style.BorderLeft) + ResolveFixedWidth(style.BorderRight);
@@ -894,7 +894,69 @@ namespace UIForia.Layout.LayoutTypes {
         public float GetMaxHeight(float contentHeight) {
             return ResolveMinOrMaxHeight(style.MaxHeight, contentHeight);
         }
+        
+        protected float ResolveTransformX(UIMeasurement transformX) {
+                 AnchorTarget anchorTarget;
+            switch (transformX.unit) {
+                case UIMeasurementUnit.Pixel:
+                    return Mathf.Max(0, transformX.value);
 
+                case UIMeasurementUnit.Content:
+                    return Mathf.Max(0, PaddingBorderHorizontal + (GetContentWidth() * transformX.value));
+
+                case UIMeasurementUnit.ParentSize:
+                    if (parent.style.PreferredWidth.IsContentBased) {
+                        return 0f;
+                    }
+
+                    return Mathf.Max(0, parent.allocatedWidth * transformX.value);
+
+                case UIMeasurementUnit.ViewportWidth:
+                    return Mathf.Max(0, view.Viewport.width * transformX.value);
+
+                case UIMeasurementUnit.ViewportHeight:
+                    return Mathf.Max(0, view.Viewport.height * transformX.value);
+
+                case UIMeasurementUnit.ParentContentArea:
+                    if (parent.style.PreferredWidth.IsContentBased) {
+                        return 0f;
+                    }
+
+                    return Mathf.Max(0,
+                        parent.allocatedWidth * transformX.value - (parent.style == null
+                            ? 0
+                            : parent.PaddingHorizontal - parent.BorderHorizontal));
+
+                case UIMeasurementUnit.Em:
+                    return Math.Max(0, style.EmSize * transformX.value);
+
+                case UIMeasurementUnit.AnchorWidth:
+                    anchorTarget = style.AnchorTarget;
+                    if (parent.style.PreferredWidth.IsContentBased && anchorTarget == AnchorTarget.Parent ||
+                        anchorTarget == AnchorTarget.ParentContentArea) {
+                        return 0f;
+                    }
+
+                    return ResolveAnchorWidth(transformX);
+
+                case UIMeasurementUnit.AnchorHeight:
+                    anchorTarget = style.AnchorTarget;
+                    if (parent.style.PreferredWidth.IsContentBased && anchorTarget == AnchorTarget.Parent ||
+                        anchorTarget == AnchorTarget.ParentContentArea) {
+                        return 0f;
+                    }
+
+                    return ResolveAnchorHeight(transformX);
+
+                case UIMeasurementUnit.MaxContentSelf:
+                    
+                    return 0; 
+                
+                default:
+                    throw new ArgumentOutOfRangeException();
+            }
+        }
+        
         [DebuggerStepThrough]
         protected float ResolveMinOrMaxWidth(UIMeasurement widthMeasurement) {
             AnchorTarget anchorTarget;

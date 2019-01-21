@@ -205,6 +205,10 @@
             <e p="EmojiOne Attribution.txt" t="Include" />
           </e>
         </e>
+        <e p="Transform" t="Include">
+          <e p="TransformPlayground.cs" t="Include" />
+          <e p="TransformPlayground.xml" t="Include" />
+        </e>
       </e>
       <e p="Library" t="ExcludeRecursive" />
       <e p="obj" t="ExcludeRecursive" />
@@ -522,6 +526,8 @@
               <e p="TextOverflow.cs" t="Include" />
               <e p="TextStyle.cs" t="Include" />
               <e p="TransformBehavior.cs" t="Include" />
+              <e p="TransformOffset.cs" t="Include" />
+              <e p="TransformUnit.cs" t="Include" />
               <e p="UIFixedLength.cs" t="Include" />
               <e p="UIFixedUnit.cs" t="Include" />
               <e p="UIGameObjectView.cs" t="Include" />

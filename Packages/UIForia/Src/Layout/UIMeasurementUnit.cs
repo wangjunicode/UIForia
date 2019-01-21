@@ -16,6 +16,8 @@ namespace UIForia.Rendering {
         AnchorWidth = 1 << 7,
         AnchorHeight = 1 << 8,
         LineHeight = 1 << 9,
+        MaxContentSelf = 1 << 10,
+        MinContentSelf = 1 << 11
 
     }
 

@@ -1,0 +1,11 @@
+style parent {
+    PreferredSize = 300px;
+    BackgroundColor = red;
+}
+
+style child {
+    PreferredSize = 100px;
+    BackgroundColor = blue;
+    TransformBehaviorX = LayoutOffset;
+    TransformPositionX = 1cnt;
+}

@@ -15,6 +15,7 @@ namespace UIForia.Compilers {
 
         internal static readonly MethodAliasSource sizeAliasSource;
         internal static readonly MethodAliasSource vec2FixedLengthSource;
+        internal static readonly MethodAliasSource measurementVectorSource;
 
         internal static readonly MethodAliasSource parentMeasurementSource;
         internal static readonly MethodAliasSource contentMeasurementSource;
@@ -127,13 +128,13 @@ namespace UIForia.Compilers {
                 return retn;
             }
 
-            switch (targetState.property.ToLower()) {
-                case "translation":
-                    return new StyleBinding_Translation("Translation", targetState.state, Compile<FixedLengthVector>(value, vec2FixedLengthSource));
-
-                case "preferredsize":
-                    return new StyleBinding_PreferredSize("PreferredSize", targetState.state, Compile<MeasurementPair>(value, sizeAliasSource));
-            }
+//            switch (targetState.property.ToLower()) {
+//                case "translation":
+//                    return new StyleBinding_Translation("Translation", targetState.state, Compile<MeasurementPair>(value, vec2FixedLengthSource));
+//
+//                case "preferredsize":
+//                    return new StyleBinding_PreferredSize("PreferredSize", targetState.state, Compile<MeasurementPair>(value, sizeAliasSource));
+//            }
 
             return null;
         }

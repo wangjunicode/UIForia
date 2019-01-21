@@ -246,15 +246,15 @@ namespace UIForia.Parsing.StyleParser {
         public static void TransformMapper(StyleParserContext context, string propertyName, string propertyValue) {
             switch (propertyName.ToLower()) {
                 case "transformposition":
-                    FixedLengthVector length = ParseUtil.ParseFixedLengthPair(context.variables, propertyValue);
+                    MeasurementPair length = ParseUtil.ParseMeasurementPair(context.variables, propertyValue);
                     context.targetStyle.TransformPositionX = length.x;
                     context.targetStyle.TransformPositionY = length.y;
                     break;
                 case "transformpositionx":
-                    context.targetStyle.TransformPositionX = ParseUtil.ParseFixedLength(context.variables, propertyValue);
+                    context.targetStyle.TransformPositionX = ParseUtil.ParseMeasurement(context.variables, propertyValue);
                     break;
                 case "transformpositiony":
-                    context.targetStyle.TransformPositionY = ParseUtil.ParseFixedLength(context.variables, propertyValue);
+                    context.targetStyle.TransformPositionY = ParseUtil.ParseMeasurement(context.variables, propertyValue);
                     break;
                 case "transformscale":
                     float scale = ParseUtil.ParseFloat(context.variables, propertyValue);

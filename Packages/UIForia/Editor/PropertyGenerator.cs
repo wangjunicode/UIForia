@@ -41,6 +41,7 @@ namespace UIForia.Editor {
                     || typeof(float) == type
                     || typeof(UIMeasurement) == type
                     || typeof(UIFixedLength) == type
+                    || typeof(TransformOffset) == type
                     || typeof(GridTrackSize) == type
                     || typeof(Color) == type
                 ) {
@@ -71,6 +72,7 @@ namespace UIForia.Editor {
 
                 if (typeof(UIMeasurement) == type
                     || typeof(UIFixedLength) == type
+                    || typeof(TransformOffset) == type
                     || typeof(GridTrackSize) == type
                     || typeof(Color) == type
                 ) {
@@ -98,6 +100,7 @@ namespace UIForia.Editor {
                 if (typeof(UIMeasurement) == type
                     || typeof(UIFixedLength) == type
                     || typeof(GridTrackSize) == type
+                    || typeof(TransformOffset) == type
                     || typeof(Color) == type
                 ) {
                     return $"new StyleProperty(StylePropertyId.{propertyIdName}, value)";
@@ -126,6 +129,10 @@ namespace UIForia.Editor {
                 return $"!FloatUtil.IsDefined({nameof(StyleProperty.floatValue)}) || {nameof(StyleProperty.valuePart1)} == 0";
             }
 
+            if (type == typeof(TransformOffset)) {
+                return $"!FloatUtil.IsDefined({nameof(StyleProperty.floatValue)}) || {nameof(StyleProperty.valuePart1)} == 0";
+            }
+            
             if (type == typeof(UIFixedLength)) {
                 return $"!FloatUtil.IsDefined({nameof(StyleProperty.floatValue)}) || {nameof(StyleProperty.valuePart1)} == 0";
             }
@@ -173,6 +180,11 @@ namespace UIForia.Editor {
             if (defaultValue is UIMeasurement) {
                 UIMeasurement measurement = (UIMeasurement) defaultValue;
                 return $"new {nameof(UIMeasurement)}({measurement.value.ToString(CultureInfo.InvariantCulture)}, {nameof(UIMeasurementUnit)}.{Enum.GetName(typeof(UIMeasurementUnit), measurement.unit)})";
+            }
+            
+            if (defaultValue is TransformOffset) {
+                TransformOffset measurement = (TransformOffset) defaultValue;
+                return $"new {nameof(TransformOffset)}({measurement.value.ToString(CultureInfo.InvariantCulture)}, {nameof(TransformOffset)}.{Enum.GetName(typeof(TransformUnit), measurement.unit)})";
             }
 
             if (defaultValue is UIFixedLength) {
@@ -283,6 +295,7 @@ namespace UIForia.Editor {
             if (typeof(UIMeasurement) == type
                 || typeof(UIFixedLength) == type
                 || typeof(GridTrackSize) == type
+                || typeof(TransformOffset) == type
                 || typeof(Color) == type
             ) {
                 return $"new StyleProperty({paramName}, {valueName})";

@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="utf-8"?>
+<UITemplate>
+    <Style path="Transform/TransformPlayground.style"/>
+    
+    <!--<Template id="me" item="typeof(Thing)">-->
+        <!--<Button label="$item.buttonText"/>-->
+    <!--</Template>-->
+
+    <!--<Template id="me2">-->
+        <!--stuff-->
+    <!--</Template>-->
+    
+    <Contents>
+        <Group style="parent">
+            <Group style="child">
+                Text
+            </Group>
+        </Group>
+        
+        <!--<TemplateRef id="templateToRender" data="{}"/>-->
+        
+    </Contents>
+</UITemplate>

@@ -1,46 +1,100 @@
 style grid-container {
     LayoutType = Grid;
     GridLayoutDirection = Horizontal;
-    PreferredWidth = 1cnt;
-    BackgroundColor = green;
-    GridLayoutColTemplate = 1mx, 100px, 100px;
-     //GridLayoutColTemplate = 100px, 100px;
+    PreferredSize = 1040px, 800px;
+    BackgroundColor = white;
+    GridLayoutRowTemplate = 480px, 50px, 1mx, 1mx, 1mx;
+    GridLayoutColTemplate = 1mx, 1mx, 1mx, 1mx, 1mx, 1mx;
+    
     GridLayoutDensity = dense;
-    GridLayoutRowAlignment = Grow;
-    GridLayoutColAlignment = Start;
-//    GridLayoutCrossAxisAutoSize = 1mx;
+    //GridLayoutMainAxisAutoSize = 1mx;
+    //GridLayoutMainAxisAutoSize = 400px;
 }
 
 style grid-cell {
-    BackgroundColor = yellow;
     PreferredSize = 100px;
-    Border = 1px;
     BorderColor = black;
     FlexLayoutCrossAxisAlignment = Center;
     FlexLayoutMainAxisAlignment = Center;
+    //GridItemColSelfAlignment = Center;
+    //GridItemRowSelfAlignment = Grow;
+    BorderBottom = 1px;
 }
 
-style a {
-    PreferredWidth = 400px;
+style background {
+    BackgroundColor = white;
+    BackgroundImage = Images/backgroundimg;
+    GridItemColSpan = 6;
+    PreferredSize = 1040px, 520px;
+    ZIndex = 0;
+}
+
+style thead {
+    PreferredSize = 50px;
+    [hover] {
+        
+    }
+}
+
+style concept-hover {
+    LayoutBehavior = Ignored;
+    LayoutType = Flex;
+    BackgroundColor = rgb(16, 8, 6);
+    PreferredWidth = 150px;
+    PreferredHeight = 80px;
+    Padding = 10px;
+    // TODO make px units work for this property
+    TextFontSize = 18;
+    TextColor = white;
+    Overflow = hidden;
+}
+
+style logo {
+    BorderBottom = 1px;
+    //GridItemRowStart = 0;
+    PreferredSize = 1040px, 480px;
+    GridItemColSpan = 6;
+    GridItemColSelfAlignment = Shrink;
+    BackgroundColor = white;
+    BackgroundImage = Images\klang_logo_fill_black;
+}
+
+style seedlogo {
+    PreferredSize = 232px, 70px;
+    GridItemColSpan = 2;
+    GridItemColSelfAlignment = Shrink;
+    Margin = 0px, 30px, 0px, 30px;
+    TransformPositionY = 80px;
+    TransformBehaviorY = LayoutOffset;
+    BackgroundColor = white;
+    BackgroundImage = Images\seedlogo;
+    GridItemColSelfAlignment = Center;    
+    Border = 0;
+    ZIndex = 1;
 }
 
 style b {
-    //GridItemRowSpan = 2;
+    //GridItemRowStart = 0;
+    GridItemColSelfAlignment = Shrink;
 }
 
 style c {
-  
+    //GridItemRowStart = 0;
+    PreferredWidth = 100px;
+    GridItemColSelfAlignment = Shrink;
 }
 
 style d {
-    PreferredWidth = 600px; 
-    //GridItemColSpan = 2;
+ //   GridItemRowStart = 1;
+    PreferredWidth = 100px;
 }
 
 style e {
+  //  GridItemRowStart = 1;
 }
 
 style f {
+    //GridItemRowStart = 1;
 
 }
 

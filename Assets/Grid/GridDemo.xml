@@ -3,28 +3,21 @@
     <Style path="Grid/GridDemo.style" />
     <Contents style="grid-container">
 
-        <Group style="grid-cell a">A</Group>
-        <Group style="grid-cell b">B</Group>
-        <Group style="grid-cell c">C</Group>
-        <Group style="grid-cell d">D</Group>
-        <Group style="grid-cell e">E</Group>
-        <Group style="grid-cell f">F</Group>
-        <!--<Group style="grid-cell g">G</Group>-->
-
-        <!--<Group style="grid-cell" style.preferredWidth='100f' style.preferredHeight='100f'>A</Group>-->
-        <!--<Group style="grid-cell" style.preferredWidth='100f' style.preferredHeight='100f'>B</Group>-->
-        <!--<Group style="grid-cell" style.preferredWidth='100f' style.preferredHeight='100f'>C</Group>-->
-        <!--<Group style="grid-cell d" style.preferredWidth='100f' style.preferredHeight='100f' style.gridItemColSpan='3' style.gridItemRowStart='1'>D-F</Group>-->
-
-
-
-
-        <!--<Group style="grid-cell grid-col1">A</Group>-->
-        <!--<Group style="grid-cell grid-col1" style.preferredHeight="50f">B</Group>-->
-        <!--<Group style="grid-cell grid-col1" >C</Group>-->
-        <!--<Group style="grid-cell">D</Group>-->
-        <!--<Group style="grid-cell grid-row2 ">E</Group>-->
-        <!--<Group style="grid-cell grid-row2 f">F</Group>-->
+        <Group style="grid-cell logo" />
+        <Group style="grid-cell thead">Home</Group>
+        <Group style="grid-cell thead" onMouseEnter="OnHover()" >
+            Concept
+            <Group x-id="concept-menu" if="hover" style="concept-hover" onMouseEnter="OnHover()" >
+                <Group>Features</Group>
+                <Group>Theory</Group>
+                <Group>Context</Group>
+            </Group>
+        </Group>
+        <Group style="grid-cell thead seedlogo" onMouseEnter="OnHoverEnd()" />
+        <Group style="grid-cell thead">Dev Blog</Group>
+        <Group style="grid-cell thead">Community</Group>
         
+        <Group style="background" />
+
     </Contents>
 </UITemplate>

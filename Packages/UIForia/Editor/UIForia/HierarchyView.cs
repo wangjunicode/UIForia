@@ -1,13 +1,10 @@
 ﻿using System;
-using UIForia.Util;
-using UnityEditor.IMGUI.Controls;
 using System.Collections.Generic;
 using UIForia;
-using UIForia.Editor;
 using UIForia.Layout.LayoutTypes;
-using UIForia.Rendering;
 using UIForia.Systems;
-using UnityEditor;
+using UIForia.Util;
+using UnityEditor.IMGUI.Controls;
 using UnityEngine;
 using Application = UIForia.Application;
 
@@ -265,6 +262,10 @@ public class HierarchyView : TreeView {
     }
 
     protected override void SelectionChanged(IList<int> selectedIds) {
+        if (selectedIds.Count == 0) {
+            onSelectionChanged?.Invoke(null);
+            return;
+        }
         int id = selectedIds[0];
         UIElement element = Application.Game.GetElement(id);
         onSelectionChanged?.Invoke(element);

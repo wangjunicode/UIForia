@@ -11,8 +11,6 @@ namespace UIForia {
 
     public class TemplateParser {
 
-        private string templateName = string.Empty;
-
         private static readonly Dictionary<Type, ParsedTemplate> parsedTemplates = new Dictionary<Type, ParsedTemplate>();
 
         private static readonly string[] RepeatAttributes = {"if", "style", "x-id", "list", "as", "filter", "onItemAdded", "onItemRemoved"};
@@ -38,12 +36,12 @@ namespace UIForia {
 
         public static ParsedTemplate ParseTemplateFromString<T>(string input) where T : UIElement {
             XDocument doc = XDocument.Parse(input);
-            return new TemplateParser().ParseTemplate(null, typeof(T), doc);
+            return ParseTemplate(null, typeof(T), doc);
         }
 
         public static ParsedTemplate ParseTemplateFromString(Type rootType, string input) {
             XDocument doc = XDocument.Parse(input);
-            return new TemplateParser().ParseTemplate(rootType.AssemblyQualifiedName, rootType, doc);
+            return ParseTemplate(rootType.AssemblyQualifiedName, rootType, doc);
         }
 
         private static ParsedTemplate ParseTemplateFromType(Type type) {
@@ -54,10 +52,16 @@ namespace UIForia {
             ParsedTemplate parsedTemplate;
 
             try {
-                parsedTemplate = new TemplateParser().ParseTemplate(processedType.GetTemplatePath(), processedType.rawType, doc);
+                parsedTemplate = ParseTemplate(processedType.GetTemplatePath(), processedType.rawType, doc);
             }
             catch (InvalidTemplateException ex) {
-                throw new InvalidTemplateException(template, ex.Message);
+                if (ex.templatePath == null) {
+                    ex.templatePath = processedType.GetTemplatePath();
+                }
+                throw;
+            }
+            catch (ParseException pe) {
+                throw new InvalidTemplateException(processedType.GetTemplatePath(), pe);
             }
 
             return parsedTemplate;
@@ -108,7 +112,7 @@ namespace UIForia {
             return new StyleDefinition(alias, importPathAttr.Value.Trim());
         }
 
-        private ParsedTemplate ParseTemplate(string templatePath, Type type, XDocument doc) {
+        private static ParsedTemplate ParseTemplate(string templatePath, Type type, XDocument doc) {
             doc.MergeTextNodes();
 
             List<ImportDeclaration> imports = new List<ImportDeclaration>();
@@ -129,11 +133,11 @@ namespace UIForia {
                 XAttribute aliasAttr = xElement.GetAttribute("as");
 
                 if (valueAttr == null || string.IsNullOrEmpty(valueAttr.Value)) {
-                    throw new InvalidTemplateException(templateName, "Import node without a 'value' attribute");
+                    throw new InvalidTemplateException(templatePath, "Import node without a 'value' attribute");
                 }
 
                 if (aliasAttr == null || string.IsNullOrEmpty(aliasAttr.Value)) {
-                    throw new InvalidTemplateException(templateName, "Import node without an 'as' attribute");
+                    throw new InvalidTemplateException(templatePath, "Import node without an 'as' attribute");
                 }
 
                 string alias = aliasAttr.Value;

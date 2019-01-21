@@ -92,7 +92,7 @@ namespace UIForia.Parsing {
         }
 
         private void Abort(string message = "unable to parse template") {
-            throw new InvalidTemplateException(remaining, message);
+            throw new InvalidTemplateException(null, message, remaining);
         }
 
     }

@@ -138,13 +138,11 @@ namespace UIForia {
 
             element.children = LightListPool<UIElement>.Get();
 
-            element.templateParent = null;
             element.templateContext = new ExpressionContext(element, element);
 
             for (int i = 0; i < actualChildren.Count; i++) {
                 element.children.Add(actualChildren[i].CreateScoped(scope));
                 element.children[i].parent = element;
-                element.children[i].templateParent = element;
             }
 
             UIChildrenElement childrenElement = element.TranscludedChildren;
@@ -181,7 +179,6 @@ namespace UIForia {
                 for (int i = 0; i < childTemplates.Count; i++) {
                     childrenElement.children.Add(childTemplates[i].CreateScoped(inputScope));
                     childrenElement.children[i].parent = childrenElement;
-                    childrenElement.children[i].templateParent = element;
                 }
             }
 

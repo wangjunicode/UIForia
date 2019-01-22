@@ -958,6 +958,10 @@ namespace UIForia.Layout.LayoutTypes {
         }
 
         protected override void OnChildAdded(LayoutBox child) {
+            if (child.element.isDisabled) {
+                return;
+            }
+            
             if ((child.style.LayoutBehavior & LayoutBehavior.Ignored) == 0) {
                 children.Add(child);
                 int colStart = child.style.GridItemColStart;

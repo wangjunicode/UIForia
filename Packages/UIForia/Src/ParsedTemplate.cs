@@ -71,9 +71,8 @@ namespace UIForia {
             if (baseTemplate == null) {
                 return rootElementTemplate.CreateUnscoped();
             }
-            else {
-                return baseTemplate.rootElementTemplate.CreateUnscoped(RootType, inheritedContent);
-            }
+
+            return baseTemplate.rootElementTemplate.CreateUnscoped(RootType, inheritedContent);
         }
         
         public void Compile() {

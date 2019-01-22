@@ -31,7 +31,6 @@ namespace UIForia {
             for (int i = 0; i < childTemplates.Count; i++) {
                 element.children.Add(childTemplates[i].CreateScoped(inputScope));
                 element.children[i].parent = element;
-                element.children[i].templateParent = element;
             }
 
             element.OriginTemplate = this;
@@ -47,7 +46,6 @@ namespace UIForia {
             for (int i = 0; i < content.Count; i++) {
                 element.children.Add(content[i].CreateScoped(inputScope));
                 element.children[i].parent = element;
-                element.children[i].templateParent = element;
             }
 
             element.OriginTemplate = this;

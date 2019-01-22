@@ -23,7 +23,6 @@ public class RepeatBindingNode<T, U> : RepeatBindingNode where T : RepeatableLis
     private void OnItemInserted(U item, int index) {
         UIElement newItem = template.CreateScoped(repeat.scope);
         newItem.parent = element;
-        newItem.templateParent = element;
         // root object isn't being assigned. make it assigned 
         newItem.templateContext.rootObject = element.templateContext.rootObject;
         element.children.Insert(index, newItem);
@@ -42,7 +41,7 @@ public class RepeatBindingNode<T, U> : RepeatBindingNode where T : RepeatableLis
         element.view.Application.DestroyChildren(element);
     }
 
-    public void Validate() {
+    public void CreateOrDestroyChildren() {
         T list = listExpression.Evaluate(context);
         repeat.list = list;
 
@@ -83,7 +82,6 @@ public class RepeatBindingNode<T, U> : RepeatBindingNode where T : RepeatableLis
         for (int i = 0; i < list.Count; i++) {
             UIElement newItem = template.CreateScoped(repeat.scope);
             newItem.parent = element;
-            newItem.templateParent = element;
             // root object isn't being assigned. make it assigned 
             newItem.templateContext.rootObject = element.templateContext.rootObject;
             element.children.Insert(i, newItem);
@@ -94,7 +92,7 @@ public class RepeatBindingNode<T, U> : RepeatBindingNode where T : RepeatableLis
     }
 
     public override void OnUpdate() {
-        Validate();
+        CreateOrDestroyChildren();
 
         if (!element.isEnabled || element.children == null || previousReference == null) {
             return;

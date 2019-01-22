@@ -112,7 +112,6 @@ namespace UIForia {
                 }
 
                 element.children[i].parent = element;
-                element.children[i].templateParent = element;
             }
 
         }

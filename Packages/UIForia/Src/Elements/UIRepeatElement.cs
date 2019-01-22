@@ -45,6 +45,10 @@ namespace UIForia {
 
     }
 
+    /// <summary>
+    /// See RepeatBindingNode
+    /// </summary>
+    /// <typeparam name="T"></typeparam>
     public class UIRepeatElement<T> : UIRepeatElement {
 
         internal RepeatableList<T> list;

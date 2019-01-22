@@ -516,7 +516,7 @@ namespace UIForia.Systems {
 
             box.OnStylePropertyChanged(property);
 
-            if (box.parent != null && (box.style.LayoutBehavior & LayoutBehavior.Ignored) == 0) {
+            if (box.parent != null && (box.style.LayoutBehavior & LayoutBehavior.Ignored) == 0 && box.element.isEnabled) {
                 box.parent.OnChildStylePropertyChanged(box, property);
             }
         }

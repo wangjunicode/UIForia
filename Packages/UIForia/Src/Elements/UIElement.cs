@@ -39,7 +39,6 @@ public class UIElement : IHierarchical {
 
     public readonly int id;
     public readonly UIStyleSet style;
-    public UIElement templateParent; // remove or move to cold data
     internal LightList<UIElement> children; // make readonly somehow, should never be modified by user
 
     public ExpressionContext templateContext;
@@ -151,7 +150,6 @@ public class UIElement : IHierarchical {
 
         UIElement child = template.Create();
         child.parent = this;
-        child.templateParent = this;
         child.templateContext.rootObject = templateContext.rootObject;
         children.Add(child);
         view.Application.RegisterElement(child);
@@ -166,7 +164,6 @@ public class UIElement : IHierarchical {
 
         UIElement child = template.Create();
         child.parent = this;
-        child.templateParent = this;
         child.templateContext.rootObject = templateContext.rootObject;
         children.Add(child);
         view.Application.RegisterElement(child);
@@ -405,6 +402,10 @@ public class UIElement : IHierarchical {
 
         else {
             retn = ListPool<UIElement>.Get();
+        }
+
+        if (children == null) {
+            return retn;
         }
 
         UIElement[] childArray = children.List;

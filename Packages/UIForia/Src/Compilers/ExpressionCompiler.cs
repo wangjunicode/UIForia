@@ -360,7 +360,7 @@ namespace UIForia.Compilers {
                 new ConstructorArguments(bridge)
             );
 
-            return HandleCasting(expr, targetType);
+            return GetImplicitCast(expr, targetType);
         }
 
         private Expression VisitAliasAccessExpression(MemberAccessExpressionNode node) {
@@ -1224,6 +1224,8 @@ namespace UIForia.Compilers {
             if (requiredType == null || yieldedType == requiredType || requiredType.IsAssignableFrom(yieldedType)) {
                 return input;
             }
+
+            MethodInfo info = ReflectionUtil.GetImplicitConversion(requiredType, input.YieldedType);
 
             for (int i = 0; i < builtInCastHandlers.Count; i++) {
                 if (builtInCastHandlers[i].CanHandle(requiredType, yieldedType)) {

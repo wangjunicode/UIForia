@@ -8,12 +8,12 @@
         }
 
         style tooltip-container {
-        BorderRadius = 10px;
-        Padding = 12px;
-        LayoutBehavior = Ignored;
-        BackgroundColor = red;
-        TransformBehaviorX = AnchorMinOffset;
-        RenderLayer = Modal;
+            BorderRadius = 10px;
+            Padding = 12px;
+            LayoutBehavior = Ignored;
+            BackgroundColor = red;
+            TransformBehaviorX = AnchorMinOffset;
+            RenderLayer = Modal;
         }
         
         style tooltip-text {

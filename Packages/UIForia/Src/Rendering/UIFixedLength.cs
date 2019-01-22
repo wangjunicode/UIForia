@@ -50,10 +50,6 @@ namespace UIForia {
             return FloatUtil.IsDefined(value);
         }
         
-        public static UIFixedLength Decode(int value0, int value1) {
-            return new UIFixedLength(FloatUtil.DecodeToFloat(value0), (UIFixedUnit) value1);
-        }
-
         public static implicit operator UIFixedLength(int value) {
             return new UIFixedLength(value, UIFixedUnit.Pixel);
         }
@@ -70,27 +66,6 @@ namespace UIForia {
             return new UIFixedLength(value, UIFixedUnit.Percent);
         }
 
-        public static float Resolve(UIFixedLength length, float refValue, float emSize, float viewportWidth, float viewportHeight) {
-            switch (length.unit) {
-                case UIFixedUnit.Pixel:
-                    return length.value;
-
-                case UIFixedUnit.Percent:
-                    return refValue * length.value;
-
-                case UIFixedUnit.ViewportHeight:
-                    return viewportHeight * length.value;
-
-                case UIFixedUnit.ViewportWidth:
-                    return viewportWidth * length.value;
-
-                case UIFixedUnit.Em:
-                    return emSize * length.value;
-
-                default:
-                    return 0;
-            }
-        }
     }
 
 }

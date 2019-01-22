@@ -1,8 +1,7 @@
 style character-schedule {
     LayoutType = Grid;
     GridLayoutColTemplate = 20px, 200px;
-    TransformBehaviorY = LayoutOffset;
-    TransformPositionY = -200px;
+    TransformPositionY = 0px;
     BackgroundColor = #000000AA;
     BorderRadius = 8px;
     Padding = 12px;
@@ -12,6 +11,8 @@ style slot-container {
     PreferredSize = 200px, 1cnt;
     MarginRight = 8px;
     Padding = 4px, 0px;
+    GridItemRowStart = 0;
+    GridItemColStart = 0;
 }
 
 style slot-label {
@@ -35,7 +36,7 @@ style slot-background {
     PreferredSize = 0px, 20px;
     FlexItemGrow = 1;
     Margin = 2px, 4px, 1px, 2px;
-    BackgroundColor = red;
+    BackgroundColor = rgba(30, 30, 30, 60);
 }
 
 style work-preference-container {
@@ -47,13 +48,40 @@ style rounded-grey-bg {
 }
 
 style schedule-block {
-    PreferredSize = 200px, 20px;
+    PreferredSize = 176px, 24px;
     Margin = 2px, 4px, 1px, 2px;
-    BackgroundColor = grey;
+    BackgroundColor = black;
+    LayoutBehavior = Ignored;
+    //RenderLayer = Modal;
+    FlexLayoutDirection = Column;
+    TextColor = white;
+    FlexLayoutMainAxisAlignment = SpaceAround;
+    FlexLayoutCrossAxisAlignment = Center;
+    BorderTop = 1px;
+    BorderBottom = 1px;
+    BorderColor = rgba(200, 200, 200, 200);
+}
+
+style hope-this-works {
+    LayoutType = Grid;
+    GridLayoutRowTemplate = 1mx;
+}
+
+style schedule-button {
+    //RenderLayer = Modal;
+    Border = 2px;
+    BorderRadius = 5px;
+    BorderColor = white;
+    Padding = 3px 5px;
+    Margin = 1px;
+    TextFontSize = 12;
+    
 }
 
 style schedule-block-list {
-    LayoutBehavior = ignored;
-    LayoutType = Fixed;
     PaddingTop = 4px;
+    MarginLeft = 24px;
+    GridItemRowStart = 0;
+    GridItemColStart = 0;
+    RenderLayer = Modal;
 }

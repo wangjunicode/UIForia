@@ -733,28 +733,28 @@ namespace UIForia.Layout.LayoutTypes {
                 case AnchorTarget.Unset:
                 case AnchorTarget.Parent:
                     if (parent == null) {
-                        return view.Viewport.yMax + ResolveAnchorValue(view.Viewport.height, anchor) - actualHeight;
+                        return view.Viewport.yMax + ResolveAnchorValue(view.Viewport.height, anchor);
                     }
 
-                    return parent.element.layoutResult.ScreenPosition.y + parent.actualHeight - ResolveAnchorValue(parent.actualHeight, anchor) - actualHeight;
+                    return parent.element.layoutResult.ScreenPosition.y + parent.actualHeight - ResolveAnchorValue(parent.actualHeight, anchor);
 
                 case AnchorTarget.ParentContentArea:
                     if (parent == null) {
-                        return view.Viewport.yMax + ResolveAnchorValue(view.Viewport.height, anchor) - actualHeight;
+                        return view.Viewport.yMax + ResolveAnchorValue(view.Viewport.height, anchor);
                     }
 
                     Rect parentContentRect = parent.ContentRect;
-                    return parentContentRect.yMax + ResolveAnchorValue(parentContentRect.height, anchor) - actualHeight;
+                    return parentContentRect.yMax + ResolveAnchorValue(parentContentRect.height, anchor);
 
                 case AnchorTarget.Viewport:
-                    return view.Viewport.yMax + ResolveAnchorValue(view.Viewport.height, anchor) - actualHeight;
+                    return view.Viewport.yMax + ResolveAnchorValue(view.Viewport.height, anchor);
 
                 case AnchorTarget.Screen:
                     if (parent == null) {
-                        return -(view.Viewport.yMax) + ResolveAnchorValue(Screen.height, anchor) - actualHeight;
+                        return -(view.Viewport.yMax) + ResolveAnchorValue(Screen.height, anchor);
                     }
 
-                    return -parent.element.layoutResult.ScreenPosition.y + Screen.height + ResolveAnchorValue(Screen.height, anchor.value) - actualHeight;
+                    return -parent.element.layoutResult.ScreenPosition.y + Screen.height + ResolveAnchorValue(Screen.height, anchor.value);
 
                 default:
                     throw new ArgumentOutOfRangeException();

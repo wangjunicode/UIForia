@@ -11,13 +11,13 @@
         BackgroundColor = #EEEEEEFF;
         }
 
-        style app-body {
-        FlexLayoutMainAxisAlignment = Center;
-        FlexLayoutCrossAxisAlignment = Center;
-        FlexItemSelfAlignment = Center;
-        FlexItemGrow = 1;
-        PreferredSize = 1pca, 0;
-        }
+        <!--style app-body {-->
+        <!--FlexLayoutMainAxisAlignment = Center;-->
+        <!--FlexLayoutCrossAxisAlignment = Center;-->
+        <!--FlexItemSelfAlignment = Center;-->
+        <!--FlexItemGrow = 1;-->
+        <!--PreferredSize = 1pca, 0;-->
+        <!--}-->
 
         
         
@@ -49,7 +49,7 @@
                 <!--<Route path="'/game'" onRouteEnter="StartGame()">-->
 
                     <!--<ColonyInfoPanel/>-->
-                    <!--<CharacterList/>-->
+                    <CharacterList/>
                     <CharacterInfoPanel/>
         
                     <!--<BuildMenu style="build-menu"/>-->

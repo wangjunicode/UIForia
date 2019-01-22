@@ -1,4 +1,5 @@
 using System;
+using TMPro.EditorUtilities;
 using UIForia;
 using UIForia.Rendering;
 
@@ -50,14 +51,14 @@ namespace UI {
                     throw new NotImplementedException();
                     break;
                 case ToolTipDirection.Right: {
-                    toolTipRoot.style.SetTransformBehaviorX(TransformBehavior.AnchorMaxOffset, StyleState.Normal);
-                    toolTipRoot.style.SetAnchorLeft(UIFixedLength.Percent(100), StyleState.Normal);
+                   // toolTipRoot.style.SetTransformBehaviorX(TransformBehavior.AnchorMaxOffset, StyleState.Normal);
+                    toolTipRoot.style.SetTransformPositionX(new TransformOffset(-1, TransformUnit.ActualWidth), StyleState.Normal );
                     break;
                 }
                 case ToolTipDirection.Left: {
                     float width = toolTipRoot.layoutResult.actualSize.width;
-                    toolTipRoot.style.SetAnchorLeft(-width, StyleState.Normal);
                     toolTipRoot.style.SetTransformBehaviorX(TransformBehavior.AnchorMinOffset, StyleState.Normal);
+                    toolTipRoot.style.SetTransformPositionX(new TransformOffset(1, TransformUnit.ActualWidth), StyleState.Normal );
                     break;
                 }
                 default:

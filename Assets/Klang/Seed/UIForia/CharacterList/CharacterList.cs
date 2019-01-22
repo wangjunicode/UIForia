@@ -3,6 +3,7 @@ using Klang.Seed.DataTypes;
 using UIForia;
 using UIForia.Input;
 using UIForia.Rendering;
+using UIForia.Util;
 using UnityEngine;
 
 namespace UI {
@@ -10,7 +11,7 @@ namespace UI {
     [Template("Klang/Seed/UIForia/CharacterList/CharacterList.xml")]
     public class CharacterList : UIElement {
 
-        public List<CharacterData> characters;
+        public RepeatableList<CharacterData> characters;
 
         public const string DirectControlIcon_On = "SpriteSettingOverwrite/ui_direct_control_on";
         public const string DirectControlIcon_Off = "SpriteSettingOverwrite/ui_direct_control_off";
@@ -18,7 +19,7 @@ namespace UI {
         private UIElement selectedCharacter;
         
         public override void OnCreate() {
-            characters = new List<CharacterData>();
+            characters = new RepeatableList<CharacterData>();
             characters.Add(new CharacterData() {
                 name = "Matt",
                 status = "Sleeping on the ground",

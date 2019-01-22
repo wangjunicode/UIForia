@@ -2,6 +2,7 @@ using System;
 using System.CodeDom;
 using System.Collections;
 using System.Collections.Generic;
+using System.ComponentModel;
 using UIForia.Extensions;
 
 namespace UIForia.Util {
@@ -86,6 +87,10 @@ namespace UIForia.Util {
             }
             onItemRemoved?.Invoke(backingStore[index], index);
             backingStore.RemoveAt(index);
+        }
+
+        public T Find(Predicate<T> fn) {
+            return ((List<T>) backingStore).Find(fn);
         }
 
         public T this[int index] {

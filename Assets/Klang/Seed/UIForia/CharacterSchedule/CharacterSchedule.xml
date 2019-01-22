@@ -5,40 +5,58 @@
 
     <Contents style="schedule-container">
         
-        <Group x-id="slot-container" onMouseClick="CreateDestroySchedule($event)" style="slot-container rounded-grey-bg">
+        <Group style="hope-this-works">
             
-            <ScheduleSlot index="0"/>
-            <ScheduleSlot index="1"/>
-            <ScheduleSlot index="2"/>
-            <ScheduleSlot index="3"/>
-            <ScheduleSlot index="4"/>
-            <ScheduleSlot index="5"/>
-            <ScheduleSlot index="6"/>
-            <ScheduleSlot index="7"/>
-            <ScheduleSlot index="8"/>
-            <ScheduleSlot index="9"/>
-            <ScheduleSlot index="10"/>
-            <ScheduleSlot index="11"/>
-            <ScheduleSlot index="12"/>
-            <ScheduleSlot index="13"/>
-            <ScheduleSlot index="14"/>
-            <ScheduleSlot index="15"/>
-            <ScheduleSlot index="16"/>
-            <ScheduleSlot index="17"/>
-            <ScheduleSlot index="18"/>
-            <ScheduleSlot index="19"/>
-            <ScheduleSlot index="20"/>
-            <ScheduleSlot index="21"/>
-            <ScheduleSlot index="22"/>
-            <ScheduleSlot index="23"/>
+            <Group x-id="slot-container" onMouseClick="CreateDestroySchedule($event)" style="slot-container rounded-grey-bg">
+
+                <ScheduleSlot index="0"/>
+                <ScheduleSlot index="1"/>
+                <ScheduleSlot index="2"/>
+                <ScheduleSlot index="3"/>
+                <ScheduleSlot index="4"/>
+                <ScheduleSlot index="5"/>
+                <ScheduleSlot index="6"/>
+                <ScheduleSlot index="7"/>
+                <ScheduleSlot index="8"/>
+                <ScheduleSlot index="9"/>
+                <ScheduleSlot index="10"/>
+                <ScheduleSlot index="11"/>
+                <ScheduleSlot index="12"/>
+                <ScheduleSlot index="13"/>
+                <ScheduleSlot index="14"/>
+                <ScheduleSlot index="15"/>
+                <ScheduleSlot index="16"/>
+                <ScheduleSlot index="17"/>
+                <ScheduleSlot index="18"/>
+                <ScheduleSlot index="19"/>
+                <ScheduleSlot index="20"/>
+                <ScheduleSlot index="21"/>
+                <ScheduleSlot index="22"/>
+                <ScheduleSlot index="23"/>
+               
+            </Group>
 
             <Repeat style="schedule-block-list" list="scheduleBlocks">
-                <Group style="schedule-block" style.transformPositionY="$item.start">
-                    {$index}
+                <Group onDragCreate="StartScheduleDrag($event, $element, $item)" 
+                       style="schedule-block"
+                       style.transformPositionY="CalculateTransformY($item)"
+                       style.preferredHeight="CalculateHeight($item)"
+                >
+                    
+                    <Group style="schedule-button">
+                        Work
+                    </Group>
+                    
+                    <Group style="schedule-button">
+                        Sleep
+                    </Group>
+                    <!--{$index}-->
                 </Group>
             </Repeat>
-            
+
         </Group>
+    
+        
         
         <Group style="work-preference-container rounded-grey-bg">
             <KlangCheckBox isChecked="true" label="'Building'"/>

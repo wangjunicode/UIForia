@@ -49,7 +49,7 @@ namespace UIForia {
             return !(self == other);
         }
 
-        public static implicit operator TransformOffset(int value) {
+        public static implicit operator TransformOffset(int value) {            
             return new TransformOffset(value, TransformUnit.Pixel);
         }
 
@@ -61,9 +61,6 @@ namespace UIForia {
             return new TransformOffset((float) value, TransformUnit.Pixel);
         }
 
-        public static TransformOffset Decode(int value, int unit) {
-            return new TransformOffset(FloatUtil.DecodeToFloat(value), (TransformUnit) unit);
-        }
     }
 
     public struct TransformOffsetPair {

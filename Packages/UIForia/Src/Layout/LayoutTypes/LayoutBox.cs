@@ -49,7 +49,6 @@ namespace UIForia.Layout.LayoutTypes {
          * Todo -- When layout happens can probably be optimized a bit
          * Figure out if parent needs to re-layout instead of assuming it does when child properties change
          * Don't always re-calculate preferred width
-         * 
          */
         protected LayoutBox(UIElement element) {
             this.element = element;
@@ -85,9 +84,6 @@ namespace UIForia.Layout.LayoutTypes {
 
         public bool IsInitialized { get; set; }
         public bool IsIgnored => (style.LayoutBehavior & LayoutBehavior.Ignored) != 0;
-
-        public float ContentOffsetLeft => ResolveFixedWidth(style.PaddingLeft) + ResolveFixedWidth(style.BorderLeft);
-        public float ContentOffsetTop => ResolveFixedWidth(style.PaddingTop) + ResolveFixedWidth(style.BorderTop);
 
         public float AnchorLeft => ResolveAnchorLeft();
         public float AnchorRight => ResolveAnchorRight();
@@ -733,28 +729,28 @@ namespace UIForia.Layout.LayoutTypes {
                 case AnchorTarget.Unset:
                 case AnchorTarget.Parent:
                     if (parent == null) {
-                        return view.Viewport.yMax + ResolveAnchorValue(view.Viewport.height, anchor);
+                        return view.Viewport.yMax + ResolveAnchorValue(view.Viewport.height, anchor) - actualHeight;
                     }
 
-                    return parent.element.layoutResult.ScreenPosition.y + parent.actualHeight - ResolveAnchorValue(parent.actualHeight, anchor);
+                    return parent.element.layoutResult.ScreenPosition.y + parent.actualHeight - ResolveAnchorValue(parent.actualHeight, anchor) - actualHeight;
 
                 case AnchorTarget.ParentContentArea:
                     if (parent == null) {
-                        return view.Viewport.yMax + ResolveAnchorValue(view.Viewport.height, anchor);
+                        return view.Viewport.yMax + ResolveAnchorValue(view.Viewport.height, anchor) - actualHeight;
                     }
 
                     Rect parentContentRect = parent.ContentRect;
-                    return parentContentRect.yMax + ResolveAnchorValue(parentContentRect.height, anchor);
+                    return parentContentRect.yMax + ResolveAnchorValue(parentContentRect.height, anchor) - actualHeight;
 
                 case AnchorTarget.Viewport:
-                    return view.Viewport.yMax + ResolveAnchorValue(view.Viewport.height, anchor);
+                    return view.Viewport.yMax + ResolveAnchorValue(view.Viewport.height, anchor) - actualHeight;
 
                 case AnchorTarget.Screen:
                     if (parent == null) {
-                        return -(view.Viewport.yMax) + ResolveAnchorValue(Screen.height, anchor);
+                        return -(view.Viewport.yMax) + ResolveAnchorValue(Screen.height, anchor) - actualHeight;
                     }
 
-                    return -parent.element.layoutResult.ScreenPosition.y + Screen.height + ResolveAnchorValue(Screen.height, anchor.value);
+                    return -parent.element.layoutResult.ScreenPosition.y + Screen.height + ResolveAnchorValue(Screen.height, anchor.value) - actualHeight;
 
                 default:
                     throw new ArgumentOutOfRangeException();

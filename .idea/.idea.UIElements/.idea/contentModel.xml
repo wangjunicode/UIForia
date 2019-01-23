@@ -569,6 +569,9 @@
               <e p="UIForiaDebutText.shader" t="Include" />
               <e p="UIForiaFragBody.cginc" t="Include" />
               <e p="UIForiaFragDefines.cginc" t="Include" />
+              <e p="UIForiaLine.shader" t="Include" />
+              <e p="UIForiaStencil.shader" t="Include" />
+              <e p="UIForiaStencilPaint.shader" t="Include" />
               <e p="UIForiaTextShader.shader" t="Include" />
               <e p="UIForiaVertDefines.cginc" t="Include" />
               <e p="UIStandardInstanced.shader" t="Include" />
@@ -591,6 +594,17 @@
               </e>
             </e>
             <e p="StyleDefinition.cs" t="Include" />
+            <e p="SVGX" t="Include">
+              <e p="PathCommand.cs" t="Include" />
+              <e p="SVGXBezier.cs" t="Include" />
+              <e p="SVGXElement.cs" t="Include" />
+              <e p="SVGXGroup.cs" t="Include" />
+              <e p="SVGXPathCommandType.cs" t="Include" />
+              <e p="SVGXRoot.cs" t="Include" />
+              <e p="SVGXStyle.cs" t="Include" />
+              <e p="SVGXTransform.cs" t="Include" />
+              <e p="SVGXWand.cs" t="Include" />
+            </e>
             <e p="Systems" t="Include">
               <e p="BindingSystem.cs" t="Include" />
               <e p="DefaultInputSystem.cs" t="Include" />

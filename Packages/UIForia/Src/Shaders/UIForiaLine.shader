@@ -1,4 +1,4 @@
-﻿Shader "Unlit/UIForiaLine"
+﻿Shader "UIForia/UIForiaLine"
 {
     Properties
     {
@@ -90,7 +90,7 @@
 //                }
 //                
 //                return fixed4(d, d, d, 1);
-                    return red;
+                    return i.color;
                 
             }
             

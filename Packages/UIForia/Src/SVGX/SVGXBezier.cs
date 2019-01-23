@@ -5,8 +5,8 @@ namespace SVGX {
 
     public static class SVGXArc {
 
-         public static List<Vector2> Arc(Vector2 p1, float rx, float ry, float angle, bool largeArcFlag, bool sweepFlag, Vector2 p2) {
-            
+        // todo remove list alloc
+        public static List<Vector2> Arc(Vector2 p1, float rx, float ry, float angle, bool largeArcFlag, bool sweepFlag, Vector2 p2, int vpm = 1) {
             List<Vector2> output = new List<Vector2>();
 
             float _radian = (angle * Mathf.PI / 180.0f);
@@ -16,16 +16,17 @@ namespace SVGX {
             float temp2 = (p1.y - p2.y) / 2.0f;
             float tx = (_CosRadian * temp1) + (_SinRadian * temp2);
             float ty = (-_SinRadian * temp1) + (_CosRadian * temp2);
-            
+
             double trx2 = rx * rx;
             double try2 = ry * ry;
             double tx2 = tx * tx;
             double ty2 = ty * ty;
-                    
+
             double radiiCheck = tx2 / trx2 + ty2 / try2;
-            if(radiiCheck > 1) {
-                rx = Mathf.Sqrt((float)radiiCheck) * rx;
-                ry = Mathf.Sqrt((float)radiiCheck) * ry;
+            if (radiiCheck > 1) {
+                float sqrt = Mathf.Sqrt((float) radiiCheck);
+                rx = sqrt * rx;
+                ry = sqrt * ry;
                 trx2 = rx * rx;
                 try2 = ry * ry;
             }
@@ -33,14 +34,14 @@ namespace SVGX {
             double tm1 = (trx2 * try2 - trx2 * ty2 - try2 * tx2) / (trx2 * ty2 + try2 * tx2);
             tm1 = (tm1 < 0) ? 0 : tm1;
 
-            float tm2 = (largeArcFlag == sweepFlag) ? -Mathf.Sqrt((float)tm1) : Mathf.Sqrt((float)tm1);
+            float tm2 = (largeArcFlag == sweepFlag) ? -Mathf.Sqrt((float) tm1) : Mathf.Sqrt((float) tm1);
 
             float tcx = tm2 * ((rx * ty) / ry);
             float tcy = tm2 * (-(ry * tx) / rx);
 
             float cx = _CosRadian * tcx - _SinRadian * tcy + ((p1.x + p2.x) / 2.0f);
             float cy = _SinRadian * tcx + _CosRadian * tcy + ((p1.y + p2.y) / 2.0f);
-            
+
             float ux = (tx - tcx) / rx;
             float uy = (ty - tcy) / ry;
             float vx = (-tx - tcx) / rx;
@@ -51,43 +52,44 @@ namespace SVGX {
             float _angle = (uy < 0) ? -Mathf.Acos(p / n) : Mathf.Acos(p / n);
             _angle = _angle * 180.0f / Mathf.PI;
             _angle %= 360f;
-            
+
             n = Mathf.Sqrt((ux * ux + uy * uy) * (vx * vx + vy * vy));
             p = ux * vx + uy * vy;
-            var t = p / n;
-            if((Mathf.Abs(t) >= 0.99999f) && (Mathf.Abs(t) < 1.000009f)) {
-                if(t > 0)
-                    t = 1f;
-                else
-                    t = -1f;
+            float t = p / n;
+            if ((Mathf.Abs(t) >= 0.99999f) && (Mathf.Abs(t) < 1.000009f)) {
+                t = t > 0 ? 1f : -1f;
             }
-            var _delta = (ux * vy - uy * vx < 0) ? -Mathf.Acos(t) : Mathf.Acos(t);
-            
+
+            float _delta = (ux * vy - uy * vx < 0) ? -Mathf.Acos(t) : Mathf.Acos(t);
+
             _delta = _delta * 180.0f / Mathf.PI;
-            
-            if(!sweepFlag && _delta > 0) {
+
+            if (!sweepFlag && _delta > 0) {
                 _delta -= 360f;
-            } else if(sweepFlag && _delta < 0)
+            }
+            else if (sweepFlag && _delta < 0)
                 _delta += 360f;
-            
+
             _delta %= 360f;
 
-            int number = Mathf.RoundToInt( Mathf.Clamp((100f / 1000f) * Mathf.Abs(_delta) / 360f, 2, 100));
+            int number = Mathf.RoundToInt(Mathf.Clamp((100f / vpm) * Mathf.Abs(_delta) / 360f, 2, 100));
             float deltaT = _delta / number;
-            
-            Vector2 _point = new Vector2(0, 0);
-            for(int i = 0; i <= number; i++) {
-                var t_angle = (deltaT * i + _angle) * Mathf.PI / 180.0f;
-                _point.x = _CosRadian * rx * Mathf.Cos(t_angle) - _SinRadian * ry * Mathf.Sin(t_angle) + cx;
-                _point.y = _SinRadian * rx * Mathf.Cos(t_angle) + _CosRadian * ry * Mathf.Sin(t_angle) + cy;
-                output.Add(_point);
+
+            for (int i = 0; i <= number; i++) {
+                float t_angle = (deltaT * i + _angle) * Mathf.PI / 180.0f;
+                float cos = Mathf.Cos(t_angle);
+                float sin = Mathf.Sin(t_angle);
+                output.Add(new Vector2(
+                    _CosRadian * rx * cos - _SinRadian * ry * sin + cx,
+                    _SinRadian * rx * cos + _CosRadian * ry * sin + cy
+                ));
             }
-            
+
             return output;
         }
 
     }
-    
+
     public static class SVGXBezier {
 
         private const int MaxAdaptiveBezierIteration = 200;
@@ -95,11 +97,10 @@ namespace SVGX {
         public static List<Vector2> QuadraticCurve(Vector2 p1, Vector2 p2, Vector2 p3) {
             Vector2 ctrl2 = p1 + (2f / 3f) * (p2 - p1);
             Vector2 ctrl3 = p3 + (2f / 3f) * (p2 - p3);
-            
+
             return new List<Vector2>(AdaptiveCubicCurve(1, p1, ctrl2, ctrl3, p3));
         }
 
-        
         // todo -- dont return a new list
         public static List<Vector2> Tessellate(Vector2 start, Vector2 ctrl0, Vector2 ctrl1, Vector2 end) {
             return AdaptiveCubicCurve(1f, start, ctrl0, ctrl1, end);
@@ -130,7 +131,6 @@ namespace SVGX {
             points.Add(end);
             return points;
         }
-
 
         private static void RecursiveBezier(List<Vector2> points, int currentIteration, float distanceTolerance, float x1, float y1, float x2, float y2, float x3, float y3, float x4, float y4) {
             while (true) {

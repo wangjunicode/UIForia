@@ -3,6 +3,37 @@ using UnityEngine;
 
 namespace SVGX {
 
+    public class SVGXClipElement {
+
+        public SVGXClipElement parentClipElement;
+        public List<SVGXRenderElement> shapes;
+
+    }
+    
+    public struct SVGXRenderElement {
+
+        public Mesh strokeMesh;
+        public Mesh fillMesh;
+        
+        public List<Vector2> stroke;
+        public List<Vector2> fill;
+        public SVGXClipElement clip;
+        public SVGXRenderElementType type;
+        
+    }
+
+    public enum SVGXRenderElementType {
+
+        Path,
+        Rect,
+        Circle,
+        Polygon,
+        Polyline,
+        Ellipse,
+        Line
+
+    }
+    
     public class SVGXRoot : MonoBehaviour {
 
         public Material paint;
@@ -32,7 +63,6 @@ namespace SVGX {
 //                triangles.Add(i + 1);
 //            }
 
-
 //            mesh.SetVertices(vertices);
 //            mesh.SetTriangles(triangles, 0);
 
@@ -44,10 +74,10 @@ namespace SVGX {
 //            segments.Add(new Vector2(400f, -200f));
 
 //            lineMesh = FillLineMesh(segments);
-            SVGXPathElement path = new SVGXPathElement(new [] {
+            SVGXPathElement path = new SVGXPathElement(new[] {
                 PathCommand.MoveTo(100, -250),
-                PathCommand.QuadraticCurveTo(250, -100, 400, -250),
-            });
+                PathCommand.ArcTo(100, 50, 0, false, false, 250, 50),
+            }); 
 
             List<Vector2> segs = path.Flatten()[0];
 //            segs.Insert(0, segs[0]);
@@ -65,7 +95,7 @@ namespace SVGX {
 //
 //            mesh.SetVertices(vertices);
 //            mesh.SetTriangles(triangles, 0);
-            
+
             lineMesh = FillLineMesh(segs);
         }
 
@@ -76,7 +106,7 @@ namespace SVGX {
             List<Vector4> uvNormal = new List<Vector4>();
             List<Vector4> flags = new List<Vector4>();
             List<Color32> colors = new List<Color32>();
-            
+
             Mesh retn = new Mesh();
 
             // vertex format:
@@ -88,9 +118,9 @@ namespace SVGX {
             Vector2 dir = (segments[1] - segments[0]).normalized;
             Vector2 prev = segments[0] - dir;
             Vector2 curr = segments[0];
-            Vector2 next = segments[1]; 
+            Vector2 next = segments[1];
             Vector2 far = segments.Count == 2 ? segments[1] + (segments[1] - segments[0]).normalized : segments[2];
-            
+
             vertices.Add(curr);
             vertices.Add(next);
             vertices.Add(curr);
@@ -119,33 +149,33 @@ namespace SVGX {
             triangles.Add(3);
 
             int triIdx = 4;
-            
+
             for (int i = 1; i < segments.Count - 2; i++) {
                 prev = segments[i - 1];
                 curr = segments[i];
                 next = segments[i + 1];
                 far = segments[i + 2];
-                
+
                 vertices.Add(curr);
                 vertices.Add(next);
                 vertices.Add(curr);
                 vertices.Add(next);
-                
+
                 prevNext.Add(new Vector4(prev.x, prev.y, next.x, next.y));
                 prevNext.Add(new Vector4(curr.x, curr.y, far.x, far.y));
                 prevNext.Add(new Vector4(prev.x, prev.y, next.x, next.y));
                 prevNext.Add(new Vector4(curr.x, curr.y, far.x, far.y));
-                
+
                 flags.Add(new Vector4(1, -1, 0, 0));
                 flags.Add(new Vector4(1, 1, 0, 0));
                 flags.Add(new Vector4(-1, -1, 0, 0));
                 flags.Add(new Vector4(-1, 1, 0, 0));
-                
+
                 colors.Add(Color.yellow);
                 colors.Add(Color.yellow);
                 colors.Add(Color.yellow);
                 colors.Add(Color.yellow);
-                
+
                 triangles.Add(triIdx + 0);
                 triangles.Add(triIdx + 1);
                 triangles.Add(triIdx + 2);
@@ -161,34 +191,33 @@ namespace SVGX {
                 curr = segments[currIdx];
                 next = segments[currIdx + 1];
                 far = next + (next - curr);
-                
+
                 vertices.Add(curr);
                 vertices.Add(next);
                 vertices.Add(curr);
                 vertices.Add(next);
-                
+
                 prevNext.Add(new Vector4(prev.x, prev.y, next.x, next.y));
                 prevNext.Add(new Vector4(curr.x, curr.y, far.x, far.y));
                 prevNext.Add(new Vector4(prev.x, prev.y, next.x, next.y));
                 prevNext.Add(new Vector4(curr.x, curr.y, far.x, far.y));
-                
+
                 flags.Add(new Vector4(1, -1, 0, 0));
                 flags.Add(new Vector4(1, 1, 0, 0));
                 flags.Add(new Vector4(-1, -1, 0, 0));
                 flags.Add(new Vector4(-1, 1, 0, 0));
-                
+
                 triangles.Add(triIdx + 0);
                 triangles.Add(triIdx + 1);
                 triangles.Add(triIdx + 2);
                 triangles.Add(triIdx + 2);
                 triangles.Add(triIdx + 1);
                 triangles.Add(triIdx + 3);
-                
-                colors.Add(Color.green);
-                colors.Add(Color.green);
-                colors.Add(Color.green);
-                colors.Add(Color.green);
 
+                colors.Add(Color.green);
+                colors.Add(Color.green);
+                colors.Add(Color.green);
+                colors.Add(Color.green);
             }
 
             retn.SetVertices(vertices);
@@ -213,4 +242,60 @@ namespace SVGX {
 
     }
 
+    public class SVGXRenderSystem {
+
+        private Camera camera;
+
+        public Material lineMaterial;
+        public Material stencilMaterial;
+        public Material fillMaterial;
+        
+        public SVGXRenderSystem(Camera camera) {
+            this.camera = camera;
+        }
+        
+        public void AddRootElement(SVGXElement element) {
+            
+        }
+
+        public void SortByClipGroup() {
+            // for each element
+                // if has clip group
+                    // clipGroups.Add(clipGroup)
+                    // clip group => list of shapes (maybe more clip groups) 
+                    
+               // <G clip-path="url(#clip-id)">
+                    // for each element 
+                        // if has clip group
+                        //    clip groups. push(group)
+                        //
+                    // clip stack.pop()
+        }
+        
+        public void Update() {
+            
+            // layout + compute z + transform
+            
+            // cull
+            
+            // sort into clip groups
+            
+            // traverse from root in document order
+            
+            // if has clip push clip
+            
+            // pattern -> render a shape x by y times w/ stencil buffer
+            
+            // if has fill
+                // stencil
+                // fill
+                
+            // if has stroke -> render stroke
+            // else -> render fill AA
+            
+            // if has clip pop clip
+            
+        }
+
+    }
 }

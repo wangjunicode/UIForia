@@ -38,7 +38,6 @@ namespace SVGX {
             for (int i = 0; i < commands.Length; i++) {
                 PathCommand cmd = commands[i];
 
-
                 switch (cmd.commandType) {
                     case SVGXPathCommandType.MoveToRelative:
                     case SVGXPathCommandType.MoveToAbsolute:
@@ -82,10 +81,14 @@ namespace SVGX {
                     }
 
                     case SVGXPathCommandType.ArcToAbsolute:
-                    case SVGXPathCommandType.ArcToRelative:
-
+                    case SVGXPathCommandType.ArcToRelative: {
+                        Vector2 start = new Vector2(lastX, lastY);
+                        Vector2 end = new Vector2(cmd.ArcEndX, cmd.ArcEndY);
+                        currentList.AddRange(SVGXArc.Arc(start, cmd.ArcRX, cmd.ArcRY, cmd.ArcRotation, cmd.IsLargeArc, cmd.IsSweepArc, end));
+                        lastX = end.x;
+                        lastY = end.y;
                         break;
-
+                    }
                     case SVGXPathCommandType.Close:
                         if (currentList.Count > 0) {
                             retn.Add(currentList);

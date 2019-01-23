@@ -2,19 +2,23 @@
 <project version="4">
   <component name="ChangeListManager">
     <list default="true" id="04aad282-50b7-45cb-8142-9d354d8d8754" name="Default Changelist" comment="">
-      <change afterPath="$PROJECT_DIR$/Packages/UIForia/Src/SVGX/PathCommand.cs" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/Packages/UIForia/Src/SVGX/SVGXBezier.cs" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/Packages/UIForia/Src/SVGX/SVGXElement.cs" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/Packages/UIForia/Src/SVGX/SVGXGroup.cs" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/Packages/UIForia/Src/SVGX/SVGXPathCommandType.cs" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/Packages/UIForia/Src/SVGX/SVGXRoot.cs" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/Packages/UIForia/Src/SVGX/SVGXStyle.cs" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/Packages/UIForia/Src/SVGX/SVGXTransform.cs" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/Packages/UIForia/Src/SVGX/SVGXWand.cs" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/Packages/UIForia/Src/SVGX/ClipRule.cs" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/Packages/UIForia/Src/SVGX/LineCap.cs" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/Packages/UIForia/Src/SVGX/LineJoin.cs" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/Packages/UIForia/Src/SVGX/SVGXMatrix.cs" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/.idea.UIElements/.idea/contentModel.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/.idea.UIElements/.idea/contentModel.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/.idea.UIElements/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/.idea.UIElements/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Packages/UIForia/Editor/UIForia/UIForiaHierarchyWindow.cs" beforeDir="false" afterPath="$PROJECT_DIR$/Packages/UIForia/Editor/UIForia/UIForiaHierarchyWindow.cs" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Packages/UIForia/Src/Layout/LayoutTypes/LayoutBox.cs" beforeDir="false" afterPath="$PROJECT_DIR$/Packages/UIForia/Src/Layout/LayoutTypes/LayoutBox.cs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/Klang/Seed/UIForia/LoginFlow/CharacterCreator.meta" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/Scenes/SampleScene.unity" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/Scenes/SampleScene.unity" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Packages/UIForia/Resources/UIForia/Materials/UIForiaLine.mat" beforeDir="false" afterPath="$PROJECT_DIR$/Packages/UIForia/Resources/UIForia/Materials/UIForiaLine.mat" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Packages/UIForia/Resources/UIForia/Materials/UIForiaStencil.mat" beforeDir="false" afterPath="$PROJECT_DIR$/Packages/UIForia/Resources/UIForia/Materials/UIForiaStencil.mat" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Packages/UIForia/Resources/UIForia/Materials/UIForiaStencilPaint.mat" beforeDir="false" afterPath="$PROJECT_DIR$/Packages/UIForia/Resources/UIForia/Materials/UIForiaStencilPaint.mat" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Packages/UIForia/Src/SVGX/PathCommand.cs" beforeDir="false" afterPath="$PROJECT_DIR$/Packages/UIForia/Src/SVGX/PathCommand.cs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Packages/UIForia/Src/SVGX/SVGXBezier.cs" beforeDir="false" afterPath="$PROJECT_DIR$/Packages/UIForia/Src/SVGX/SVGXBezier.cs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Packages/UIForia/Src/SVGX/SVGXRoot.cs" beforeDir="false" afterPath="$PROJECT_DIR$/Packages/UIForia/Src/SVGX/SVGXRoot.cs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Packages/UIForia/Src/SVGX/SVGXStyle.cs" beforeDir="false" afterPath="$PROJECT_DIR$/Packages/UIForia/Src/SVGX/SVGXStyle.cs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Packages/UIForia/Src/SVGX/SVGXWand.cs" beforeDir="false" afterPath="$PROJECT_DIR$/Packages/UIForia/Src/SVGX/SVGXWand.cs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Packages/UIForia/Src/Shaders/UIForiaLine.shader" beforeDir="false" afterPath="$PROJECT_DIR$/Packages/UIForia/Src/Shaders/UIForiaLine.shader" afterDir="false" />
     </list>
     <option name="EXCLUDED_CONVERTED_TO_IGNORED" value="true" />
     <option name="SHOW_DIALOG" value="false" />
@@ -23,117 +27,165 @@
     <option name="LAST_RESOLUTION" value="IGNORE" />
   </component>
   <component name="FileEditorManager">
-    <leaf>
-      <file pinned="false" current-in-tab="true">
-        <entry file="file://$PROJECT_DIR$/Packages/UIForia/Src/SVGX/SVGXWand.cs">
-          <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="1047">
-              <caret line="103" column="39" selection-start-line="103" selection-start-column="39" selection-end-line="103" selection-end-column="39" />
-              <folding>
-                <marker date="1548265041436" expanded="true" signature="6:85" ph="..." />
-                <marker date="1548265041436" expanded="true" signature="102:4502" ph="{...}" />
-                <marker date="1548265041436" expanded="true" signature="131:260" ph="{...}" />
-                <marker date="1548265041436" expanded="true" signature="168:253" ph="{...}" />
-                <marker date="1548265041436" expanded="true" signature="368:4499" ph="{...}" />
-                <marker date="1548265041436" expanded="true" signature="628:677" ph="{...}" />
-                <marker date="1548265041436" expanded="true" signature="687:845" ph="/* todo track conditions for when this needs to be re-called ... */" />
-                <marker date="1548265041436" expanded="true" signature="891:4492" ph="{...}" />
-                <marker date="1548265041436" expanded="true" signature="1132:4361" ph="{...}" />
-                <marker date="1548265041436" expanded="true" signature="1224:4347" ph="{...}" />
-                <marker date="1548265041436" expanded="true" signature="3489:3630" ph="{...}" />
-                <marker date="1548265041436" expanded="true" signature="4402:4456" ph="{...}" />
-              </folding>
-            </state>
-          </provider>
-        </entry>
-      </file>
-      <file pinned="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/Packages/UIForia/Src/SVGX/SVGXPathCommandType.cs">
-          <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="224">
-              <caret line="14" column="29" selection-start-line="14" selection-start-column="8" selection-end-line="14" selection-end-column="29" />
-              <folding>
-                <marker date="1548263821819" expanded="true" signature="15:546" ph="{...}" />
-                <marker date="1548263821819" expanded="true" signature="56:543" ph="{...}" />
-              </folding>
-            </state>
-          </provider>
-        </entry>
-      </file>
-      <file pinned="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/Packages/UIForia/Src/SVGX/SVGXBezier.cs">
-          <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="528">
-              <caret line="116" column="57" lean-forward="true" selection-start-line="116" selection-start-column="57" selection-end-line="116" selection-end-column="57" />
-              <folding>
-                <marker date="1548264760373" expanded="true" signature="6:52" ph="..." />
-                <marker date="1548264760373" expanded="true" signature="69:6824" ph="{...}" />
-                <marker date="1548264760373" expanded="true" signature="104:3430" ph="{...}" />
-                <marker date="1548264760373" expanded="true" signature="240:3423" ph="{...}" />
-                <marker date="1548264760373" expanded="true" signature="964:1157" ph="{...}" />
-                <marker date="1548264760373" expanded="true" signature="2299:2418" ph="{...}" />
-                <marker date="1548264760373" expanded="true" signature="2618:2665" ph="{...}" />
-                <marker date="1548264760373" expanded="true" signature="3031:3373" ph="{...}" />
-                <marker date="1548264760373" expanded="true" signature="3471:6821" ph="{...}" />
-                <marker date="1548264760373" expanded="true" signature="3622:3841" ph="{...}" />
-                <marker date="1548264760373" expanded="true" signature="3999:4079" ph="{...}" />
-                <marker date="1548264760373" expanded="true" signature="4223:4900" ph="{...}" />
-                <marker date="1548264760373" expanded="true" signature="4299:4358" ph="{...}" />
-                <marker date="1548264760373" expanded="true" signature="4403:4461" ph="{...}" />
-                <marker date="1548264760373" expanded="true" signature="5096:6814" ph="{...}" />
-                <marker date="1548264760373" expanded="true" signature="5123:6804" ph="{...}" />
-                <marker date="1548264760373" expanded="true" signature="5220:5313" ph="/* Calculate all the mid-points of the line segments ... */" />
-                <marker date="1548264760373" expanded="true" signature="5907:6012" ph="/* Try to approximate the full cubic curve by a single straight line ... */" />
-                <marker date="1548264760373" expanded="true" signature="6318:6424" ph="{...}" />
-                <marker date="1548264760373" expanded="true" signature="6442:6506" ph="/* Continue subdivision ... */" />
-              </folding>
-            </state>
-          </provider>
-        </entry>
-      </file>
-      <file pinned="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/Packages/UIForia/Src/SVGX/SVGXRoot.cs">
-          <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="2480">
-              <caret line="203" column="39" lean-forward="true" selection-start-line="203" selection-start-column="39" selection-end-line="203" selection-end-column="39" />
-              <folding>
-                <marker date="1548264736498" expanded="true" signature="6:52" ph="..." />
-                <marker date="1548264736498" expanded="true" signature="69:7932" ph="{...}" />
-                <marker date="1548264736498" expanded="true" signature="114:7929" ph="{...}" />
-                <marker date="1548264736498" expanded="true" signature="336:2281" ph="{...}" />
-                <marker date="1548264736498" expanded="true" signature="479:1043" ph="/* vertices.Add(new Vector3(100, -10f)); ... */" />
-                <marker date="1548264736498" expanded="true" signature="1046:1134" ph="/* mesh.SetVertices(vertices); ... */" />
-                <marker date="1548264736498" expanded="true" signature="1195:1460" ph="/* segments.Add(new Vector2(200f, -200f)); ... */" />
-                <marker date="1548264736498" expanded="true" signature="1523:1653" ph="{...}" />
-                <marker date="1548264736498" expanded="true" signature="1709:2215" ph="/* segs.Insert(0, segs[0]); ... */" />
-                <marker date="1548264736498" expanded="true" signature="2347:7352" ph="{...}" />
-                <marker date="1548264736498" expanded="true" signature="2747:2930" ph="/* vertex format: ... */" />
-                <marker date="1548264736498" expanded="true" signature="4281:5643" ph="{...}" />
-                <marker date="1548264736498" expanded="true" signature="5681:7084" ph="{...}" />
-                <marker date="1548264736498" expanded="true" signature="7383:7922" ph="{...}" />
-                <marker date="1548264736498" expanded="true" signature="7721:7912" ph="/* Graphics.DrawMesh(mesh, matrix, stencil, 0, camera, 0, null, false, false, false); ... */" />
-              </folding>
-            </state>
-          </provider>
-        </entry>
-      </file>
-      <file pinned="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/Packages/UIForia/Src/Shaders/UIForiaLine.shader">
-          <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="535">
-              <caret line="61" column="35" selection-start-line="61" selection-start-column="35" selection-end-line="61" selection-end-column="35" />
-              <folding>
-                <marker date="1548264777317" expanded="true" signature="27:3158" ph="{...}" />
-                <marker date="1548264777317" expanded="true" signature="48:101" ph="{...}" />
-                <marker date="1548264777317" expanded="true" signature="120:3156" ph="{...}" />
-                <marker date="1548264777317" expanded="true" signature="224:3150" ph="{...}" />
-                <marker date="1548264777317" expanded="true" signature="247:3135" ph="{...}" />
-              </folding>
-            </state>
-          </provider>
-        </entry>
-      </file>
-    </leaf>
+    <splitter split-orientation="vertical" split-proportion="0.67268443">
+      <split-first>
+        <leaf SIDE_TABS_SIZE_LIMIT_KEY="300">
+          <file pinned="false" current-in-tab="false">
+            <entry file="file://$PROJECT_DIR$/Packages/UIForia/Src/SVGX/SVGXWand.cs">
+              <provider selected="true" editor-type-id="text-editor">
+                <state relative-caret-position="1056">
+                  <caret line="99" column="70" lean-forward="true" selection-start-line="99" selection-start-column="70" selection-end-line="99" selection-end-column="70" />
+                  <folding>
+                    <marker date="1548273717049" expanded="false" signature="6:85" ph="..." />
+                    <marker date="1548273717049" expanded="true" signature="102:4887" ph="{...}" />
+                    <marker date="1548273717049" expanded="true" signature="131:260" ph="{...}" />
+                    <marker date="1548273717049" expanded="true" signature="168:253" ph="{...}" />
+                    <marker date="1548273717049" expanded="true" signature="368:4884" ph="{...}" />
+                    <marker date="1548273717049" expanded="true" signature="628:677" ph="{...}" />
+                    <marker date="1548273717049" expanded="true" signature="687:845" ph="/* todo track conditions for when this needs to be re-called ... */" />
+                    <marker date="1548273717049" expanded="true" signature="891:4877" ph="{...}" />
+                    <marker date="1548273717049" expanded="true" signature="1132:4746" ph="{...}" />
+                    <marker date="1548273717049" expanded="true" signature="1223:4732" ph="{...}" />
+                    <marker date="1548273717049" expanded="true" signature="3874:4015" ph="{...}" />
+                    <marker date="1548273717049" expanded="true" signature="4787:4841" ph="{...}" />
+                  </folding>
+                </state>
+              </provider>
+            </entry>
+          </file>
+          <file pinned="false" current-in-tab="false">
+            <entry file="file://$USER_HOME$/UIForiaDrawing/Assets/SVG Importer/Plugins/Core/Mesh/SVGGeomUtils.cs">
+              <provider selected="true" editor-type-id="text-editor">
+                <state relative-caret-position="400">
+                  <caret line="51" lean-forward="true" selection-start-line="51" selection-end-line="51" />
+                </state>
+              </provider>
+            </entry>
+          </file>
+          <file pinned="false" current-in-tab="false">
+            <entry file="file://$PROJECT_DIR$/Packages/UIForia/Src/SVGX/SVGXPathCommandType.cs">
+              <provider selected="true" editor-type-id="text-editor">
+                <state relative-caret-position="224">
+                  <caret line="14" column="29" selection-start-line="14" selection-start-column="8" selection-end-line="14" selection-end-column="29" />
+                  <folding>
+                    <marker date="1548272608573" expanded="true" signature="15:546" ph="{...}" />
+                    <marker date="1548272608573" expanded="true" signature="56:543" ph="{...}" />
+                  </folding>
+                </state>
+              </provider>
+            </entry>
+          </file>
+          <file pinned="false" current-in-tab="false">
+            <entry file="file://$PROJECT_DIR$/Packages/UIForia/Src/SVGX/SVGXBezier.cs">
+              <provider selected="true" editor-type-id="text-editor">
+                <state relative-caret-position="80">
+                  <caret line="6" lean-forward="true" selection-start-line="6" selection-end-line="6" />
+                  <folding>
+                    <marker date="1548273449057" expanded="false" signature="6:52" ph="..." />
+                    <marker date="1548273449057" expanded="true" signature="69:6680" ph="{...}" />
+                    <marker date="1548273449057" expanded="true" signature="104:3312" ph="{...}" />
+                    <marker date="1548273449057" expanded="true" signature="286:3305" ph="{...}" />
+                    <marker date="1548273449057" expanded="true" signature="966:1170" ph="{...}" />
+                    <marker date="1548273449057" expanded="true" signature="2293:2346" ph="{...}" />
+                    <marker date="1548273449057" expanded="true" signature="2526:2573" ph="{...}" />
+                    <marker date="1548273449057" expanded="true" signature="2878:3267" ph="{...}" />
+                    <marker date="1548273449057" expanded="true" signature="3349:6677" ph="{...}" />
+                    <marker date="1548273449057" expanded="true" signature="3500:3707" ph="{...}" />
+                    <marker date="1548273449057" expanded="true" signature="3856:3936" ph="{...}" />
+                    <marker date="1548273449057" expanded="true" signature="4080:4757" ph="{...}" />
+                    <marker date="1548273449057" expanded="true" signature="4156:4215" ph="{...}" />
+                    <marker date="1548273449057" expanded="true" signature="4260:4318" ph="{...}" />
+                    <marker date="1548273449057" expanded="true" signature="4952:6670" ph="{...}" />
+                    <marker date="1548273449057" expanded="true" signature="4979:6660" ph="{...}" />
+                    <marker date="1548273449057" expanded="true" signature="5076:5169" ph="/* Calculate all the mid-points of the line segments ... */" />
+                    <marker date="1548273449057" expanded="true" signature="5763:5868" ph="/* Try to approximate the full cubic curve by a single straight line ... */" />
+                    <marker date="1548273449057" expanded="true" signature="6174:6280" ph="{...}" />
+                    <marker date="1548273449057" expanded="true" signature="6298:6362" ph="/* Continue subdivision ... */" />
+                  </folding>
+                </state>
+              </provider>
+            </entry>
+          </file>
+          <file pinned="false" current-in-tab="true">
+            <entry file="file://$PROJECT_DIR$/Packages/UIForia/Src/SVGX/SVGXRoot.cs">
+              <provider selected="true" editor-type-id="text-editor">
+                <state relative-caret-position="378">
+                  <caret line="276" column="45" lean-forward="true" selection-start-line="276" selection-start-column="45" selection-end-line="276" selection-end-column="45" />
+                  <folding>
+                    <marker date="1548279054545" expanded="false" signature="6:52" ph="..." />
+                    <marker date="1548279054545" expanded="true" signature="69:9863" ph="{...}" />
+                    <marker date="1548279054545" expanded="true" signature="105:211" ph="{...}" />
+                    <marker date="1548279054545" expanded="true" signature="253:493" ph="{...}" />
+                    <marker date="1548279054545" expanded="true" signature="533:651" ph="{...}" />
+                    <marker date="1548279054545" expanded="true" signature="699:8305" ph="{...}" />
+                    <marker date="1548279054545" expanded="true" signature="921:2855" ph="{...}" />
+                    <marker date="1548279054545" expanded="true" signature="1064:1718" ph="/* vertices.Add(new Vector3(100, -10f)); ... */" />
+                    <marker date="1548279054545" expanded="true" signature="1779:2044" ph="/* segments.Add(new Vector2(200f, -200f)); ... */" />
+                    <marker date="1548279054545" expanded="true" signature="2106:2238" ph="{...}" />
+                    <marker date="1548279054545" expanded="true" signature="2295:2801" ph="/* segs.Insert(0, segs[0]); ... */" />
+                    <marker date="1548279054545" expanded="true" signature="2921:7728" ph="{...}" />
+                    <marker date="1548279054545" expanded="true" signature="3309:3492" ph="/* vertex format: ... */" />
+                    <marker date="1548279054545" expanded="true" signature="4818:6100" ph="{...}" />
+                    <marker date="1548279054545" expanded="true" signature="6138:7460" ph="{...}" />
+                    <marker date="1548279054545" expanded="true" signature="7759:8298" ph="{...}" />
+                    <marker date="1548279054545" expanded="true" signature="8097:8288" ph="/* Graphics.DrawMesh(mesh, matrix, stencil, 0, camera, 0, null, false, false, false); ... */" />
+                    <marker date="1548279054545" expanded="true" signature="8341:9861" ph="{...}" />
+                    <marker date="1548279054545" expanded="true" signature="8549:8594" ph="{...}" />
+                    <marker date="1548279054545" expanded="true" signature="8660:8684" ph="{...}" />
+                    <marker date="1548279054545" expanded="true" signature="8724:9208" ph="{...}" />
+                    <marker date="1548279054545" expanded="true" signature="8738:9198" ph="/* for each element ... */" />
+                    <marker date="1548279054545" expanded="true" signature="9247:9854" ph="{...}" />
+                    <marker date="1548279054545" expanded="true" signature="9274:9831" ph="/* layout + compute z + transform ... */" />
+                  </folding>
+                </state>
+              </provider>
+            </entry>
+          </file>
+          <file pinned="false" current-in-tab="false">
+            <entry file="file://$USER_HOME$/UIForiaDrawing/Assets/SVG Importer/Plugins/Core/Implementation/SVG/DOM/BasicTypes/SVGPaintable.cs">
+              <provider selected="true" editor-type-id="text-editor">
+                <state relative-caret-position="4704">
+                  <caret line="296" column="23" selection-start-line="296" selection-start-column="23" selection-end-line="296" selection-end-column="23" />
+                </state>
+              </provider>
+            </entry>
+          </file>
+          <file pinned="false" current-in-tab="false">
+            <entry file="file://$PROJECT_DIR$/Packages/UIForia/Src/Shaders/UIForiaLine.shader">
+              <provider selected="true" editor-type-id="text-editor">
+                <state relative-caret-position="871">
+                  <caret line="55" column="54" selection-start-line="55" selection-start-column="54" selection-end-line="55" selection-end-column="54" />
+                  <folding>
+                    <marker date="1548277049757" expanded="true" signature="29:3164" ph="{...}" />
+                    <marker date="1548277049757" expanded="true" signature="50:103" ph="{...}" />
+                    <marker date="1548277049757" expanded="true" signature="122:3162" ph="{...}" />
+                    <marker date="1548277049757" expanded="true" signature="226:3156" ph="{...}" />
+                    <marker date="1548277049757" expanded="true" signature="249:3141" ph="{...}" />
+                  </folding>
+                </state>
+              </provider>
+            </entry>
+          </file>
+        </leaf>
+      </split-first>
+      <split-second>
+        <leaf>
+          <file pinned="false" current-in-tab="true">
+            <entry file="file://$PROJECT_DIR$/Packages/UIForia/Src/SVGX/SVGXStyle.cs">
+              <provider selected="true" editor-type-id="text-editor">
+                <state>
+                  <folding>
+                    <marker date="1548278622392" expanded="true" signature="35:492" ph="{...}" />
+                    <marker date="1548278622392" expanded="true" signature="114:489" ph="{...}" />
+                    <marker date="1548278622392" expanded="true" signature="494:507" ph="/* ... */" />
+                  </folding>
+                </state>
+              </provider>
+            </entry>
+          </file>
+        </leaf>
+      </split-second>
+    </splitter>
   </component>
   <component name="FileTemplateManagerImpl">
     <option name="RECENT_TEMPLATES">
@@ -144,8 +196,6 @@
   </component>
   <component name="FindInProjectRecents">
     <findStrings>
-      <find>GetChildren</find>
-      <find>m_Placements</find>
       <find>Place(</find>
       <find>GridItem</find>
       <find>ColSize</find>
@@ -174,6 +224,8 @@
       <find>Arc</find>
       <find>vpm</find>
       <find>QuadraticCu</find>
+      <find>(float)</find>
+      <find>GetSegment</find>
     </findStrings>
     <replaceStrings>
       <replace>element.view.Viewport</replace>
@@ -207,374 +259,368 @@
     <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$" />
   </component>
   <component name="HighlightingSettingsPerFile">
-    <setting file="file://$PROJECT_DIR$/Packages/UIForia/Tests/ExpressionParserTests2.cs" root0="FORCE_HIGHLIGHTING" />
-    <setting file="file://$PROJECT_DIR$/Packages/UIForia/Src/Rendering/UIStyleSet/UIStyleSetStateProxy.cs" root0="FORCE_HIGHLIGHTING" />
-    <setting file="file://$PROJECT_DIR$/Packages/UIForia/Src/Templates/UIImageTemplate.cs" root0="FORCE_HIGHLIGHTING" />
-    <setting file="file://$PROJECT_DIR$/Assets/Klang/Seed/UIForia/KlangTextInput/KlangTextInput.cs" root0="FORCE_HIGHLIGHTING" />
-    <setting file="file://$PROJECT_DIR$/Packages/UIForia/Src/Templates/UISwitchCaseTemplate.cs" root0="FORCE_HIGHLIGHTING" />
-    <setting file="file://$PROJECT_DIR$/Packages/UIForia/Src/Compilers/AccessExpression_Static.cs" root0="FORCE_HIGHLIGHTING" />
-    <setting file="file://$PROJECT_DIR$/Packages/UIForia/Src/Compilers/AccessExpression.cs" root0="FORCE_HIGHLIGHTING" />
-    <setting file="file://$PROJECT_DIR$/Packages/UIForia/Src/Templates/UITemplate.cs" root0="FORCE_HIGHLIGHTING" />
-    <setting file="file://$PROJECT_DIR$/Packages/UIForia/Src/Compilers/AccessExpressionPart.cs" root0="FORCE_HIGHLIGHTING" />
-    <setting file="file://$PROJECT_DIR$/Assets/Klang/Seed/UIForia/LoginFlow/JoinColonyScreen/JoinColonyScreen.cs" root0="FORCE_HIGHLIGHTING" />
-    <setting file="file://$PROJECT_DIR$/Packages/UIForia/Src/Templates/UIRepeatTemplate.cs" root0="FORCE_HIGHLIGHTING" />
-    <setting file="file://$PROJECT_DIR$/Packages/UIForia/Src/Util/LightListPool.cs" root0="FORCE_HIGHLIGHTING" />
-    <setting file="file://$PROJECT_DIR$/Packages/UIForia/Src/Templates/UIContainerTemplate.cs" root0="FORCE_HIGHLIGHTING" />
-    <setting file="file://$PROJECT_DIR$/Packages/UIForia/Src/Extensions/ListExtensions.cs" root0="FORCE_HIGHLIGHTING" />
-    <setting file="file://$PROJECT_DIR$/Packages/UIForia/Src/Compilers/ExpressionCompiler.cs" root0="FORCE_HIGHLIGHTING" />
-    <setting file="file://$PROJECT_DIR$/Packages/UIForia/Src/Extensions/ColorExtensions.cs" root0="FORCE_HIGHLIGHTING" />
-    <setting file="file://$PROJECT_DIR$/Packages/UIForia/Src/Extensions/DictionaryExtensions.cs" root0="FORCE_HIGHLIGHTING" />
-    <setting file="file://$PROJECT_DIR$/Packages/UIForia/Src/Extensions/RectExtensions.cs" root0="FORCE_HIGHLIGHTING" />
-    <setting file="file://$PROJECT_DIR$/Packages/UIForia/Src/Expressions/AccessExpression_Property.cs" root0="FORCE_HIGHLIGHTING" />
-    <setting file="file://$PROJECT_DIR$/Packages/UIForia/Src/Expressions/ResolveExpression_Alias.cs" root0="FORCE_HIGHLIGHTING" />
-    <setting file="file://$PROJECT_DIR$/Packages/UIForia/Src/Expressions/OperatorExpression_Comparison.cs" root0="FORCE_HIGHLIGHTING" />
-    <setting file="file://$PROJECT_DIR$/Packages/UIForia/Src/Templates/UISlotContentTemplate.cs" root0="FORCE_HIGHLIGHTING" />
-    <setting file="file://$PROJECT_DIR$/Packages/UIForia/Src/Expressions/LiteralExpression_Enum.cs" root0="FORCE_HIGHLIGHTING" />
-    <setting file="file://$PROJECT_DIR$/Packages/UIForia/Src/Expressions/LiteralExpression_Double.cs" root0="FORCE_HIGHLIGHTING" />
-    <setting file="file://$PROJECT_DIR$/Packages/UIForia/Src/Expressions/Expression.cs" root0="FORCE_HIGHLIGHTING" />
-    <setting file="file://$PROJECT_DIR$/Packages/UIForia/Src/Expressions/OperatorExpression_Equality.cs" root0="FORCE_HIGHLIGHTING" />
-    <setting file="file://$PROJECT_DIR$/Packages/UIForia/Src/Expressions/ParenExpression.cs" root0="FORCE_HIGHLIGHTING" />
-    <setting file="file://$PROJECT_DIR$/Packages/UIForia/Src/Rendering/FixedLengthRect.cs" root0="FORCE_HIGHLIGHTING" />
-    <setting file="file://$PROJECT_DIR$/Packages/UIForia/Src/Expressions/OperatorExpression_Arithmetic.cs" root0="FORCE_HIGHLIGHTING" />
     <setting file="file://$PROJECT_DIR$/Packages/UIForia/Editor/UIForia/UIViewBehaviorInspector.cs" root0="FORCE_HIGHLIGHTING" />
-    <setting file="file://$PROJECT_DIR$/Packages/UIForia/Src/Expressions/LiteralExpression_String.cs" root0="FORCE_HIGHLIGHTING" />
-    <setting file="file://$PROJECT_DIR$/Packages/UIForia/Src/Expressions/LiteralExpression_Float.cs" root0="FORCE_HIGHLIGHTING" />
-    <setting file="file://$PROJECT_DIR$/Packages/UIForia/Src/Expressions/ExpressionContext.cs" root0="FORCE_HIGHLIGHTING" />
-    <setting file="file://$PROJECT_DIR$/Packages/UIForia/Src/Expressions/UnaryExpression_Minus.cs" root0="FORCE_HIGHLIGHTING" />
-    <setting file="file://$PROJECT_DIR$/Packages/UIForia/Src/Compilers/AliasAccessBridge.cs" root0="FORCE_HIGHLIGHTING" />
-    <setting file="file://$PROJECT_DIR$/Packages/UIForia/Src/Expressions/MethodCallExpression_Static.cs" root0="FORCE_HIGHLIGHTING" />
-    <setting file="file://$PROJECT_DIR$/Packages/UIForia/Src/Expressions/LiteralExpression_Int.cs" root0="FORCE_HIGHLIGHTING" />
-    <setting file="file://$PROJECT_DIR$/Packages/UIForia/Src/Expressions/Expression_Cast.cs" root0="FORCE_HIGHLIGHTING" />
-    <setting file="file://$PROJECT_DIR$/Packages/UIForia/Src/Compilers/AccessExpressionPart_Index.cs" root0="FORCE_HIGHLIGHTING" />
-    <setting file="file://$PROJECT_DIR$/Packages/UIForia/Src/Compilers/AccessExpressionPart_Method.cs" root0="FORCE_HIGHLIGHTING" />
-    <setting file="file://$PROJECT_DIR$/Packages/UIForia/Src/Compilers/AccessExpressionPart_FieldProperty.cs" root0="FORCE_HIGHLIGHTING" />
-    <setting file="file://$PROJECT_DIR$/Packages/UIForia/Src/Expressions/OperatorExpression_Ternary.cs" root0="FORCE_HIGHLIGHTING" />
-    <setting file="file://$PROJECT_DIR$/Packages/UIForia/Src/Compilers/AccessExpressionPart_FieldProperty_Property.cs" root0="FORCE_HIGHLIGHTING" />
-    <setting file="file://$PROJECT_DIR$/Assets/Klang/Seed/UIForia/BuildMenu/BuildMenuItemDisplay.cs" root0="FORCE_HIGHLIGHTING" />
-    <setting file="file://$PROJECT_DIR$/Packages/UIForia/Src/Compilers/AccessExpressionPart_FieldProperty_Field.cs" root0="FORCE_HIGHLIGHTING" />
-    <setting file="file://$PROJECT_DIR$/Packages/UIForia/Src/Expressions/OperatorExpression_StringConcat.cs" root0="FORCE_HIGHLIGHTING" />
-    <setting file="file://$PROJECT_DIR$/Packages/UIForia/Src/Expressions/AccessExpression_RootField.cs" root0="FORCE_HIGHLIGHTING" />
-    <setting file="file://$PROJECT_DIR$/Packages/UIForia/Src/Parsing/AstNodes/IdentifierNode.cs" root0="FORCE_HIGHLIGHTING" />
-    <setting file="file://$PROJECT_DIR$/Packages/UIForia/Src/Parsing/AstNodes/OperatorNode.cs" root0="FORCE_HIGHLIGHTING" />
-    <setting file="file://$PROJECT_DIR$/Packages/UIForia/Src/Parsing/ExpressionParser.cs" root0="FORCE_HIGHLIGHTING" />
-    <setting file="file://$PROJECT_DIR$/Packages/UIForia/Src/Expressions/LiteralExpression_Boolean.cs" root0="FORCE_HIGHLIGHTING" />
-    <setting file="file://$PROJECT_DIR$/Packages/UIForia/Src/Expressions/OperatorExpression_Boolean.cs" root0="FORCE_HIGHLIGHTING" />
-    <setting file="file://$PROJECT_DIR$/Packages/UIForia/Src/Expressions/MethodCallExpression_Instance.cs" root0="FORCE_HIGHLIGHTING" />
-    <setting file="file://$PROJECT_DIR$/Packages/UIForia/Src/Parsing/AstNodes/LiteralNode.cs" root0="FORCE_HIGHLIGHTING" />
-    <setting file="file://$PROJECT_DIR$/Packages/UIForia/Src/Expressions/UnaryExpression_Boolean.cs" root0="FORCE_HIGHLIGHTING" />
-    <setting file="file://$PROJECT_DIR$/Packages/UIForia/Src/Expressions/UnaryExpression_Plus.cs" root0="FORCE_HIGHLIGHTING" />
-    <setting file="file://$PROJECT_DIR$/Packages/UIForia/Src/Expressions/ConstantExpression.cs" root0="FORCE_HIGHLIGHTING" />
-    <setting file="file://$PROJECT_DIR$/Packages/UIForia/Src/Elements/Routing/ChildRouterElement.cs" root0="FORCE_HIGHLIGHTING" />
-    <setting file="file://$PROJECT_DIR$/Packages/UIForia/Src/Parsing/AstNodes/ASTNode.cs" root0="FORCE_HIGHLIGHTING" />
-    <setting file="file://$PROJECT_DIR$/Packages/UIForia/Src/Elements/Routing/RouteElement.cs" root0="FORCE_HIGHLIGHTING" />
-    <setting file="file://$PROJECT_DIR$/Packages/UIForia/Src/Parsing/TypeProcessor.cs" root0="FORCE_HIGHLIGHTING" />
-    <setting file="file://$APPLICATION_CONFIG_DIR$/resharper-host/DecompilerCache/decompiler/D616BE05-755D-41A0-8981-0B5C14E4DD50/96/d7ebdbd4/Rect.cs" root0="SKIP_HIGHLIGHTING" />
-    <setting file="file://$PROJECT_DIR$/Packages/UIForia/Src/DataSource.cs" root0="FORCE_HIGHLIGHTING" />
-    <setting file="file://$PROJECT_DIR$/Packages/UIForia/Src/Elements/Routing/RouterElement.cs" root0="FORCE_HIGHLIGHTING" />
-    <setting file="file://$PROJECT_DIR$/Packages/UIForia/Src/Parsing/TemplateParser.cs" root0="FORCE_HIGHLIGHTING" />
-    <setting file="file://$PROJECT_DIR$/Packages/UIForia/Src/Parsing/ProcessedType.cs" root0="FORCE_HIGHLIGHTING" />
-    <setting file="file://$PROJECT_DIR$/Packages/UIForia/Src/Parsing/TextTemplateParser.cs" root0="FORCE_HIGHLIGHTING" />
-    <setting file="file://$PROJECT_DIR$/Assets/Klang/Seed/UIForia/KlangWindow/KlangWindow.cs" root0="FORCE_HIGHLIGHTING" />
-    <setting file="file://$PROJECT_DIR$/Packages/UIForia/Src/Parsing/ContextDefinition.cs" root0="FORCE_HIGHLIGHTING" />
-    <setting file="file://$PROJECT_DIR$/Packages/UIForia/Src/Parsing/AttributeDefinition.cs" root0="FORCE_HIGHLIGHTING" />
-    <setting file="file://$PROJECT_DIR$/Packages/UIForia/Src/Compilers/ExpressionResolvers/ParentElementResolver.cs" root0="FORCE_HIGHLIGHTING" />
-    <setting file="file://$PROJECT_DIR$/Packages/UIForia/Src/Compilers/ExpressionResolvers/ElementResolver.cs" root0="FORCE_HIGHLIGHTING" />
-    <setting file="file://$PROJECT_DIR$/Packages/UIForia/Src/Compilers/ExpressionResolvers/RouteResolver.cs" root0="FORCE_HIGHLIGHTING" />
-    <setting file="file://$PROJECT_DIR$/Packages/UIForia/Tests/TypeProcessorTests.cs" root0="FORCE_HIGHLIGHTING" />
-    <setting file="file://$PROJECT_DIR$/Packages/UIForia/Src/_Generated2.cs" root0="FORCE_HIGHLIGHTING" />
-    <setting file="file://$PROJECT_DIR$/Packages/UIForia/Src/Parsing/AstNodes/FieldNotDefinedException.cs" root0="FORCE_HIGHLIGHTING" />
-    <setting file="file://$PROJECT_DIR$/Packages/UIForia/Src/Elements/RouteMatch.cs" root0="FORCE_HIGHLIGHTING" />
-    <setting file="file://$USER_HOME$/AppData/Local/Unity/cache/packages/packages.unity.com/com.unity.textmeshpro@1.3.0/Scripts/Runtime/TMPro_UGUI_Private.cs" root0="SKIP_HIGHLIGHTING" />
-    <setting file="file://$PROJECT_DIR$/Assets/Klang/Seed/Routes.cs" root0="FORCE_HIGHLIGHTING" />
-    <setting file="file://$PROJECT_DIR$/Packages/UIForia/Src/Application.cs" root0="FORCE_HIGHLIGHTING" />
-    <setting file="file://$PROJECT_DIR$/Packages/UIForia/Src/Parsing/Tokenizer/TokenStream.cs" root0="FORCE_HIGHLIGHTING" />
-    <setting file="file://$PROJECT_DIR$/Packages/UIForia/Src/Parsing/Tokenizer/DslToken.cs" root0="FORCE_HIGHLIGHTING" />
-    <setting file="file://$PROJECT_DIR$/Packages/UIForia/Src/Parsing/Tokenizer/TokenType.cs" root0="FORCE_HIGHLIGHTING" />
-    <setting file="file://$PROJECT_DIR$/Packages/UIForia/Src/Extensions/TypeExtensions.cs" root0="FORCE_HIGHLIGHTING" />
-    <setting file="file://$PROJECT_DIR$/Packages/UIForia/Src/Parsing/Tokenizer/Tokenizer.cs" root0="FORCE_HIGHLIGHTING" />
-    <setting file="file://$PROJECT_DIR$/Packages/UIForia/Src/Parsing/StyleParser/StyleParser.cs" root0="FORCE_HIGHLIGHTING" />
-    <setting file="file://$PROJECT_DIR$/Packages/UIForia/Src/Parsing/StyleParser/ParsedStyleSheet.cs" root0="FORCE_HIGHLIGHTING" />
-    <setting file="file://$PROJECT_DIR$/Assets/Klang/Seed/DataTypes/CharacterSkill.cs" root0="FORCE_HIGHLIGHTING" />
-    <setting file="file://$PROJECT_DIR$/Packages/UIForia/Src/Parsing/StyleParser/StylePropertyMappers.cs" root0="FORCE_HIGHLIGHTING" />
-    <setting file="file://$PROJECT_DIR$/Packages/UIForia/Src/Parsing/StyleParser/ParseUtil.cs" root0="FORCE_HIGHLIGHTING" />
-    <setting file="file://$PROJECT_DIR$/Packages/UIForia/Tests/RouterTests.cs" root0="FORCE_HIGHLIGHTING" />
-    <setting file="file://$PROJECT_DIR$/Packages/UIForia/Src/Shaders/UIForia.cginc" root0="FORCE_HIGHLIGHTING" />
-    <setting file="file://$PROJECT_DIR$/Packages/UIForia/Src/Elements/UISlotElement.cs" root0="FORCE_HIGHLIGHTING" />
-    <setting file="file://$PROJECT_DIR$/Packages/UIForia/Src/Shaders/UIForiaTextShader.shader" root0="FORCE_HIGHLIGHTING" />
-    <setting file="file://$PROJECT_DIR$/Packages/UIForia/Src/Shaders/Debug.shader" root0="FORCE_HIGHLIGHTING" />
-    <setting file="file://$PROJECT_DIR$/Packages/UIForia/Src/Compilers/ExpressionResolvers/UrlResolver.cs" root0="FORCE_HIGHLIGHTING" />
-    <setting file="file://$PROJECT_DIR$/Packages/UIForia/Tests/TemplateTests.cs" root0="FORCE_HIGHLIGHTING" />
-    <setting file="file://$PROJECT_DIR$/Packages/UIForia/Src/Shaders/UIForiaDebutText.shader" root0="FORCE_HIGHLIGHTING" />
-    <setting file="file://$PROJECT_DIR$/Packages/UIForia/Tests/StyleTests.cs" root0="FORCE_HIGHLIGHTING" />
-    <setting file="file://$PROJECT_DIR$/Packages/UIForia/Src/Exceptions/CompileExceptions.cs" root0="FORCE_HIGHLIGHTING" />
-    <setting file="file://$PROJECT_DIR$/Assets/Klang/Seed/UIForia/BuildMenu/BuildMenu.cs" root0="FORCE_HIGHLIGHTING" />
-    <setting file="file://$PROJECT_DIR$/Packages/UIForia/Tests/FlexLayoutColTests.cs" root0="FORCE_HIGHLIGHTING" />
-    <setting file="file://$PROJECT_DIR$/Packages/UIForia/Src/Shaders/UIStandardShader.shader" root0="FORCE_HIGHLIGHTING" />
-    <setting file="file://$PROJECT_DIR$/Packages/UIForia/Tests/InputCompilerBindingTests.cs" root0="FORCE_HIGHLIGHTING" />
-    <setting file="file://$PROJECT_DIR$/Packages/UIForia/Src/Systems/IStyleSystem.cs" root0="FORCE_HIGHLIGHTING" />
-    <setting file="file://$PROJECT_DIR$/Packages/UIForia/Tests/TypeCheckTests.cs" root0="FORCE_HIGHLIGHTING" />
-    <setting file="file://$PROJECT_DIR$/Packages/UIForia/Src/Systems/LayoutSystem.cs" root0="FORCE_HIGHLIGHTING" />
-    <setting file="file://$PROJECT_DIR$/Assets/Klang/Seed/DataTypes/CharacterData.cs" root0="FORCE_HIGHLIGHTING" />
-    <setting file="file://$PROJECT_DIR$/Packages/UIForia/Src/Routing/Router.cs" root0="FORCE_HIGHLIGHTING" />
-    <setting file="file://$PROJECT_DIR$/Packages/UIForia/Tests/FlexLayoutRowTests.cs" root0="FORCE_HIGHLIGHTING" />
-    <setting file="file://$PROJECT_DIR$/Packages/UIForia/Src/Routing/RouteParameter.cs" root0="FORCE_HIGHLIGHTING" />
-    <setting file="file://$PROJECT_DIR$/../../SVGTest/Assets/SVG Importer/Plugins/Core/Implementation/RenderingEngine/SVGGraphics.cs" root0="SKIP_HIGHLIGHTING" />
-    <setting file="file://$PROJECT_DIR$/Packages/UIForia/Src/Systems/StyleSystem.cs" root0="FORCE_HIGHLIGHTING" />
-    <setting file="file://$PROJECT_DIR$/Assets/Klang/Seed/UIForia/CharacterList/CharacterListItem.cs" root0="FORCE_HIGHLIGHTING" />
-    <setting file="file://$PROJECT_DIR$/Packages/UIForia/Tests/LayoutSystemTests.cs" root0="FORCE_HIGHLIGHTING" />
-    <setting file="file://$PROJECT_DIR$/Packages/UIForia/Tests/StyleBindingTests.cs" root0="FORCE_HIGHLIGHTING" />
-    <setting file="file://$PROJECT_DIR$/Packages/UIForia/Src/Systems/RenderSystem.cs" root0="FORCE_HIGHLIGHTING" />
-    <setting file="file://$PROJECT_DIR$/Assets/Grid/GridDemo.cs" root0="FORCE_HIGHLIGHTING" />
-    <setting file="file://$PROJECT_DIR$/Packages/UIForia/Tests/ElementTests.cs" root0="FORCE_HIGHLIGHTING" />
-    <setting file="file://$PROJECT_DIR$/Packages/UIForia/Src/Systems/ISystem.cs" root0="FORCE_HIGHLIGHTING" />
-    <setting file="file://$PROJECT_DIR$/Packages/UIForia/Tests/ExpressionParserTests.cs" root0="FORCE_HIGHLIGHTING" />
-    <setting file="file://$PROJECT_DIR$/Packages/UIForia/Src/Systems/BindingSystem.cs" root0="FORCE_HIGHLIGHTING" />
-    <setting file="file://$PROJECT_DIR$/Packages/UIForia/Tests/ExpressionCompilerTests.cs" root0="FORCE_HIGHLIGHTING" />
-    <setting file="file://$PROJECT_DIR$/Assets/Klang/Seed/UIForia/KlangDropdown/KlangDropdown.cs" root0="FORCE_HIGHLIGHTING" />
-    <setting file="file://$PROJECT_DIR$/Packages/UIForia/Src/Systems/DefaultInputSystem.cs" root0="FORCE_HIGHLIGHTING" />
-    <setting file="file://$PROJECT_DIR$/Packages/UIForia/Src/Systems/IInputSystem.cs" root0="FORCE_HIGHLIGHTING" />
-    <setting file="file://$PROJECT_DIR$/Packages/UIForia/Tests/BindingCompilerTests.cs" root0="FORCE_HIGHLIGHTING" />
-    <setting file="file://$PROJECT_DIR$/Packages/UIForia/Tests/BindingTests.cs" root0="FORCE_HIGHLIGHTING" />
-    <setting file="file://$PROJECT_DIR$/Packages/UIForia/Tests/GridLayoutTests.cs" root0="FORCE_HIGHLIGHTING" />
-    <setting file="file://$PROJECT_DIR$/Packages/UIForia/Src/Systems/ILayoutSystem.cs" root0="FORCE_HIGHLIGHTING" />
-    <setting file="file://$PROJECT_DIR$/Assets/Klang/Seed/DataTypes/ColonyData.cs" root0="FORCE_HIGHLIGHTING" />
-    <setting file="file://$PROJECT_DIR$/Packages/UIForia/Tests/TemplateParsingTests.cs" root0="FORCE_HIGHLIGHTING" />
-    <setting file="file://$PROJECT_DIR$/Packages/UIForia/Src/Systems/InputSystem/InputSystem.cs" root0="FORCE_HIGHLIGHTING" />
-    <setting file="file://$PROJECT_DIR$/Packages/UIForia/Tests/ElementQueryTests.cs" root0="FORCE_HIGHLIGHTING" />
-    <setting file="file://$PROJECT_DIR$/Packages/UIForia/Tests/InputSystem_MouseTests.cs" root0="FORCE_HIGHLIGHTING" />
-    <setting file="file://$PROJECT_DIR$/Packages/UIForia/Src/Systems/InputSystem/MouseState.cs" root0="FORCE_HIGHLIGHTING" />
-    <setting file="file://$PROJECT_DIR$/Packages/UIForia/Tests/TokenizingTests.cs" root0="FORCE_HIGHLIGHTING" />
-    <setting file="file://$PROJECT_DIR$/Packages/UIForia/Tests/UIView_Tests.cs" root0="FORCE_HIGHLIGHTING" />
-    <setting file="file://$PROJECT_DIR$/Assets/Klang/Seed/UIForia/CharacterList/CharacterList.cs" root0="FORCE_HIGHLIGHTING" />
-    <setting file="mock:///Dummy.cs" root0="FORCE_HIGHLIGHTING" />
-    <setting file="file://$PROJECT_DIR$/Packages/UIForia/Tests/TestUtils.cs" root0="FORCE_HIGHLIGHTING" />
-    <setting file="file://$PROJECT_DIR$/Packages/UIForia/Src/Elements/UIInputFieldElement.cs" root0="FORCE_HIGHLIGHTING" />
-    <setting file="mock:///Dummy.cs" root0="FORCE_HIGHLIGHTING" />
-    <setting file="file://$PROJECT_DIR$/Packages/UIForia/Tests/InputSystem_DragTests.cs" root0="FORCE_HIGHLIGHTING" />
-    <setting file="file://$PROJECT_DIR$/Packages/UIForia/Src/Compilers/AccessExpressionPart_Func.cs" root0="FORCE_HIGHLIGHTING" />
-    <setting file="file://$PROJECT_DIR$/Assets/Klang/Seed/UIForia/URLNavBar/URLNavBar.cs" root0="FORCE_HIGHLIGHTING" />
-    <setting file="file://$PROJECT_DIR$/Packages/UIForia/Src/Elements/ScrollbarDragEvent.cs" root0="FORCE_HIGHLIGHTING" />
-    <setting file="file://$PROJECT_DIR$/Packages/UIForia/Editor/PropertyGenerator.cs" root0="FORCE_HIGHLIGHTING" />
-    <setting file="file://$PROJECT_DIR$/Packages/UIForia/Editor/AnimatedPropertyGenerator.cs" root0="FORCE_HIGHLIGHTING" />
-    <setting file="file://$PROJECT_DIR$/Packages/UIForia/Src/Elements/UIElement.cs" root0="FORCE_HIGHLIGHTING" />
-    <setting file="file://$PROJECT_DIR$/Packages/UIForia/Src/ResourceManager.cs" root0="FORCE_HIGHLIGHTING" />
-    <setting file="file://$PROJECT_DIR$/Packages/UIForia/Src/Attributes.cs" root0="FORCE_HIGHLIGHTING" />
-    <setting file="file://$PROJECT_DIR$/Assets/Klang/Seed/UIForia/Windows/ColonyInfoWindow/ColonyInfoWindow.cs" root0="FORCE_HIGHLIGHTING" />
-    <setting file="file://$PROJECT_DIR$/Packages/UIForia/Src/Elements/UISwitchCaseElement.cs" root0="FORCE_HIGHLIGHTING" />
-    <setting file="file://$PROJECT_DIR$/Packages/UIForia/Src/Elements/UIImageElement.cs" root0="FORCE_HIGHLIGHTING" />
-    <setting file="file://$PROJECT_DIR$/Packages/UIForia/Src/Elements/UISwitchDefaultElement.cs" root0="FORCE_HIGHLIGHTING" />
-    <setting file="file://$PROJECT_DIR$/Packages/UIForia/Src/Elements/UIContainerElement.cs" root0="FORCE_HIGHLIGHTING" />
-    <setting file="file://$PROJECT_DIR$/Packages/UIForia/Src/OffsetRect.cs" root0="FORCE_HIGHLIGHTING" />
-    <setting file="file://$PROJECT_DIR$/Packages/UIForia/Src/StyleDefinition.cs" root0="FORCE_HIGHLIGHTING" />
     <setting file="file://$PROJECT_DIR$/Packages/UIForia/Src/Elements/UIGraphicElement.cs" root0="FORCE_HIGHLIGHTING" />
+    <setting file="file://$PROJECT_DIR$/Packages/UIForia/Editor/UIForia/WindowMenuItems.cs" root0="FORCE_HIGHLIGHTING" />
     <setting file="file://$PROJECT_DIR$/Packages/UIForia/Src/Elements/UITextElement.cs" root0="FORCE_HIGHLIGHTING" />
-    <setting file="file://$PROJECT_DIR$/Packages/UIForia/Src/SVGX/SVGXBezier.cs" root0="FORCE_HIGHLIGHTING" />
-    <setting file="file://$PROJECT_DIR$/Packages/UIForia/Src/SVGX/PathCommand.cs" root0="FORCE_HIGHLIGHTING" />
-    <setting file="file://$PROJECT_DIR$/Packages/UIForia/Src/SVGX/SVGXPathCommandType.cs" root0="FORCE_HIGHLIGHTING" />
-    <setting file="file://$PROJECT_DIR$/Packages/UIForia/Src/Elements/UIRepeatElement.cs" root0="FORCE_HIGHLIGHTING" />
-    <setting file="file://$PROJECT_DIR$/Packages/UIForia/Src/Compilers/Terminal.cs" root0="FORCE_HIGHLIGHTING" />
-    <setting file="file://$PROJECT_DIR$/Assets/Klang/Seed/UIForia/ColonyInfoPanel/ColonyInfoPanel.cs" root0="FORCE_HIGHLIGHTING" />
+    <setting file="file://$PROJECT_DIR$/Packages/UIForia/Editor/UIForia/HierarchyView.cs" root0="FORCE_HIGHLIGHTING" />
     <setting file="file://$PROJECT_DIR$/Packages/UIForia/Src/Elements/UISwitchElement.cs" root0="FORCE_HIGHLIGHTING" />
     <setting file="file://$PROJECT_DIR$/Packages/UIForia/Src/Elements/UIElementFlags.cs" root0="FORCE_HIGHLIGHTING" />
-    <setting file="file://$PROJECT_DIR$/Packages/UIForia/Src/Shaders/UIForiaLine.shader" root0="FORCE_HIGHLIGHTING" />
-    <setting file="file://$PROJECT_DIR$/Packages/UIForia/Src/Elements/VirtualScrollBar.cs" root0="FORCE_HIGHLIGHTING" />
-    <setting file="file://$PROJECT_DIR$/Packages/UIForia/Src/SVGX/SVGXWand.cs" root0="FORCE_HIGHLIGHTING" />
-    <setting file="file://$PROJECT_DIR$/Packages/UIForia/Src/SVGX/SVGXElement.cs" root0="FORCE_HIGHLIGHTING" />
-    <setting file="file://$PROJECT_DIR$/Packages/UIForia/Src/ParsedTemplate.cs" root0="FORCE_HIGHLIGHTING" />
-    <setting file="file://$PROJECT_DIR$/Packages/UIForia/Src/SVGX/SVGXGroup.cs" root0="FORCE_HIGHLIGHTING" />
-    <setting file="file://$PROJECT_DIR$/Packages/UIForia/Src/UIForia.cs" root0="FORCE_HIGHLIGHTING" />
-    <setting file="file://$PROJECT_DIR$/Packages/UIForia/Src/SVGX/SVGXStyle.cs" root0="FORCE_HIGHLIGHTING" />
-    <setting file="file://$PROJECT_DIR$/Packages/UIForia/Src/SVGX/SVGXTransform.cs" root0="FORCE_HIGHLIGHTING" />
-    <setting file="file://$PROJECT_DIR$/Packages/UIForia/Src/Shapes2D/Scripts/Shape.cs" root0="FORCE_HIGHLIGHTING" />
-    <setting file="file://$PROJECT_DIR$/Packages/UIForia/Editor/CodeGen.cs" root0="FORCE_HIGHLIGHTING" />
-    <setting file="file://$PROJECT_DIR$/../../SVGTest/Assets/SVG Importer/Plugins/Core/SVGRenderer.cs" root0="SKIP_HIGHLIGHTING" />
-    <setting file="file://$PROJECT_DIR$/Packages/UIForia/Editor/UIForia/UIForiaHierarchyWindow.cs" root0="FORCE_HIGHLIGHTING" />
-    <setting file="file://$PROJECT_DIR$/Packages/UIForia/Editor/UIForia/WindowMenuItems.cs" root0="FORCE_HIGHLIGHTING" />
-    <setting file="file://$PROJECT_DIR$/Assets/Klang/Seed/UIForia/ClippedPanel.cs" root0="FORCE_HIGHLIGHTING" />
-    <setting file="file://$PROJECT_DIR$/Packages/UIForia/Src/IntMap.cs" root0="FORCE_HIGHLIGHTING" />
-    <setting file="file://$PROJECT_DIR$/Assets/Demos/SeedWindowFrame.cs" root0="FORCE_HIGHLIGHTING" />
-    <setting file="file://$PROJECT_DIR$/Packages/UIForia/Editor/UIForia/HierarchyView.cs" root0="FORCE_HIGHLIGHTING" />
-    <setting file="file://$PROJECT_DIR$/Assets/Demos/ChatGroupIcon.cs" root0="FORCE_HIGHLIGHTING" />
     <setting file="file://$PROJECT_DIR$/Packages/UIForia/Editor/UIForia/UIForiaInspectorWindow.cs" root0="FORCE_HIGHLIGHTING" />
-    <setting file="file://$PROJECT_DIR$/Assets/Klang/Seed/UIForia/KlangCheckBox/KlangCheckBox.cs" root0="FORCE_HIGHLIGHTING" />
-    <setting file="file://$PROJECT_DIR$/Packages/UIForia/Src/Text/LineInfo.cs" root0="FORCE_HIGHLIGHTING" />
-    <setting file="file://$PROJECT_DIR$/Assets/Klang/Seed/UIForia/KlangToolTip/KlangToolTip.cs" root0="FORCE_HIGHLIGHTING" />
-    <setting file="file://$PROJECT_DIR$/Packages/UIForia/Src/Util/ArrayUtil.cs" root0="FORCE_HIGHLIGHTING" />
-    <setting file="file://$PROJECT_DIR$/Packages/UIForia/Src/Templates/UISlotTemplate.cs" root0="FORCE_HIGHLIGHTING" />
-    <setting file="file://$PROJECT_DIR$/Packages/UIForia/Src/Util/FixedLengthVector.cs" root0="FORCE_HIGHLIGHTING" />
-    <setting file="file://$PROJECT_DIR$/Packages/UIForia/Src/Animation/KeyFrameAnimation.cs" root0="FORCE_HIGHLIGHTING" />
-    <setting file="file://$PROJECT_DIR$/Packages/UIForia/Src/Layout/LayoutTypes/FlowLayoutBox.cs" root0="FORCE_HIGHLIGHTING" />
-    <setting file="file://$PROJECT_DIR$/Packages/UIForia/Src/Animation/StyleAnimation.cs" root0="FORCE_HIGHLIGHTING" />
-    <setting file="file://$PROJECT_DIR$/Packages/UIForia/Src/Elements/ElementColdData.cs" root0="FORCE_HIGHLIGHTING" />
-    <setting file="file://$PROJECT_DIR$/Assets/Compiler/Compiler.cs" root0="FORCE_HIGHLIGHTING" />
-    <setting file="file://$PROJECT_DIR$/Packages/UIForia/Src/UIViewBehavior.cs" root0="FORCE_HIGHLIGHTING" />
-    <setting file="file://$PROJECT_DIR$/Packages/UIForia/Src/Animation/AnimationGroup.cs" root0="FORCE_HIGHLIGHTING" />
-    <setting file="file://$PROJECT_DIR$/Packages/UIForia/Src/Elements/UIRouterLinkElement.cs" root0="FORCE_HIGHLIGHTING" />
-    <setting file="file://$PROJECT_DIR$/Packages/UIForia/Src/Util/MeasurementPair.cs" root0="FORCE_HIGHLIGHTING" />
-    <setting file="file://$PROJECT_DIR$/Packages/UIForia/Src/Animation/PropertyAnimation.cs" root0="FORCE_HIGHLIGHTING" />
-    <setting file="file://$PROJECT_DIR$/Packages/UIForia/Src/Compilers/ExpressionResolvers/SizeResolver.cs" root0="FORCE_HIGHLIGHTING" />
-    <setting file="file://$PROJECT_DIR$/Assets/Demos/ResourceListDisplay.cs" root0="FORCE_HIGHLIGHTING" />
-    <setting file="file://$PROJECT_DIR$/Packages/UIForia/Src/Compilers/ExpressionResolvers/LengthResolver.cs" root0="FORCE_HIGHLIGHTING" />
-    <setting file="file://$PROJECT_DIR$/Packages/UIForia/Src/Util/ListPool.cs" root0="FORCE_HIGHLIGHTING" />
-    <setting file="file://$PROJECT_DIR$/Packages/UIForia/Src/Compilers/ExpressionResolvers/ColorResolver.cs" root0="FORCE_HIGHLIGHTING" />
-    <setting file="file://$PROJECT_DIR$/Packages/UIForia/Src/Animation/StyleAnimator.cs" root0="FORCE_HIGHLIGHTING" />
-    <setting file="file://$PROJECT_DIR$/Packages/UIForia/Src/Extensions/Vector2Extensions.cs" root0="FORCE_HIGHLIGHTING" />
-    <setting file="file://$PROJECT_DIR$/Packages/UIForia/Src/Util/LightList.cs" root0="FORCE_HIGHLIGHTING" />
-    <setting file="file://$PROJECT_DIR$/Packages/UIForia/Src/Util/MeshUtil.cs" root0="FORCE_HIGHLIGHTING" />
-    <setting file="file://$PROJECT_DIR$/Packages/UIForia/Src/Compilers/PropertyBindingCompiler.cs" root0="FORCE_HIGHLIGHTING" />
-    <setting file="file://$PROJECT_DIR$/../../SVGTest/Assets/SVG Importer/Plugins/Core/Mesh/SVGMesh.cs" root0="FORCE_HIGHLIGHTING" />
-    <setting file="file://$PROJECT_DIR$/Packages/UIForia/Src/Util/SkipTree.cs" root0="FORCE_HIGHLIGHTING" />
-    <setting file="file://$PROJECT_DIR$/Packages/UIForia/Src/Util/FontStyle.cs" root0="FORCE_HIGHLIGHTING" />
-    <setting file="file://$PROJECT_DIR$/Packages/UIForia/Src/Compilers/StyleBindingCompiler.cs" root0="FORCE_HIGHLIGHTING" />
-    <setting file="file://$PROJECT_DIR$/Packages/UIForia/Src/Util/MathUtil.cs" root0="FORCE_HIGHLIGHTING" />
-    <setting file="file://$PROJECT_DIR$/Packages/UIForia/Src/Util/ArrayPool.cs" root0="FORCE_HIGHLIGHTING" />
-    <setting file="file://$PROJECT_DIR$/../../SVGTest/Assets/SVG Importer/Plugins/Core/Mesh/SVGGeomUtils.cs" root0="SKIP_HIGHLIGHTING" />
-    <setting file="file://$PROJECT_DIR$/Packages/UIForia/Src/Compilers/InputBindingCompiler.cs" root0="FORCE_HIGHLIGHTING" />
-    <setting file="file://$PROJECT_DIR$/Packages/UIForia/Src/Util/ObjectPool.cs" root0="FORCE_HIGHLIGHTING" />
-    <setting file="file://$PROJECT_DIR$/../../SVGTest/Assets/SVG Importer/Plugins/Core/Math/SVGBezier.cs" root0="SKIP_HIGHLIGHTING" />
-    <setting file="file://$APPLICATION_CONFIG_DIR$/resharper-host/DecompilerCache/decompiler/42073FCF-9EFD-4A92-A6F0-A4CC94099FE3/46/c8cea04b/List`1.cs" root0="SKIP_HIGHLIGHTING" />
-    <setting file="file://$PROJECT_DIR$/Packages/UIForia/Src/Util/RepeatableList.cs" root0="FORCE_HIGHLIGHTING" />
-    <setting file="file://$PROJECT_DIR$/Assets/Demos/ChatWindow/ChatWindow_Styles.cs" root0="FORCE_HIGHLIGHTING" />
-    <setting file="file://$PROJECT_DIR$/../../SVGTest/Assets/SVG Importer/Plugins/Core/Math/SVGMath.cs" root0="SKIP_HIGHLIGHTING" />
-    <setting file="file://$PROJECT_DIR$/Assets/Klang/Seed/UIForia/CharacterSchedule/ScheduleSlot.cs" root0="FORCE_HIGHLIGHTING" />
-    <setting file="file://$PROJECT_DIR$/Packages/UIForia/Src/Compilers/AliasSources/EnumAliasSources.cs" root0="FORCE_HIGHLIGHTING" />
-    <setting file="file://$PROJECT_DIR$/../../SVGTest/Assets/SVG Importer/Plugins/Core/Math/SVGGeom.cs" root0="SKIP_HIGHLIGHTING" />
-    <setting file="file://$PROJECT_DIR$/Packages/UIForia/Src/Util/ReflectionUtil.cs" root0="FORCE_HIGHLIGHTING" />
-    <setting file="file://$PROJECT_DIR$/Assets/Demos/ChatWindow/ChatWindow.cs" root0="FORCE_HIGHLIGHTING" />
-    <setting file="file://$PROJECT_DIR$/Packages/UIForia/Src/Util/StackPool.cs" root0="FORCE_HIGHLIGHTING" />
-    <setting file="file://$PROJECT_DIR$/Packages/UIForia/Src/Util/FloatUtil.cs" root0="FORCE_HIGHLIGHTING" />
-    <setting file="file://$PROJECT_DIR$/../../SVGTest/Assets/SVG Importer/Plugins/Core/Implementation/XML Parser/SVGParser.cs" root0="FORCE_HIGHLIGHTING" />
-    <setting file="file://$PROJECT_DIR$/Packages/UIForia/Src/Binding/StyleBindings/StyleBinding_Translation.cs" root0="FORCE_HIGHLIGHTING" />
-    <setting file="file://$PROJECT_DIR$/Assets/Klang/Seed/UIForia/SkillbarDisplay/SkillbarDisplay.cs" root0="FORCE_HIGHLIGHTING" />
-    <setting file="file://$PROJECT_DIR$/Packages/UIForia/Src/Input/MouseEvent.cs" root0="FORCE_HIGHLIGHTING" />
-    <setting file="file://$PROJECT_DIR$/../../SVGTest/Assets/SVG Importer/Plugins/Core/Implementation/SVG/DOM/Paths/SVGPathSeg.cs" root0="FORCE_HIGHLIGHTING" />
     <setting file="file://$PROJECT_DIR$/Packages/UIForia/Src/Rendering/TransformOffset.cs" root0="FORCE_HIGHLIGHTING" />
-    <setting file="file://$PROJECT_DIR$/Packages/UIForia/Src/Input/InputEvent.cs" root0="FORCE_HIGHLIGHTING" />
-    <setting file="file://$PROJECT_DIR$/Packages/UIForia/Src/Rendering/TransformUnit.cs" root0="FORCE_HIGHLIGHTING" />
-    <setting file="file://$PROJECT_DIR$/Packages/UIForia/Src/Compilers/ExpressionResolvers/ExpressionResolver.cs" root0="FORCE_HIGHLIGHTING" />
+    <setting file="file://$PROJECT_DIR$/Packages/UIForia/Src/Elements/VirtualScrollBar.cs" root0="FORCE_HIGHLIGHTING" />
+    <setting file="file://$PROJECT_DIR$/Packages/UIForia/Src/_Generated3.cs" root0="FORCE_HIGHLIGHTING" />
+    <setting file="file://$PROJECT_DIR$/Packages/UIForia/Src/Elements/Routing/RouterElement.cs" root0="FORCE_HIGHLIGHTING" />
+    <setting file="file://$PROJECT_DIR$/Packages/UIForia/Src/Rendering/UIStyle.cs" root0="FORCE_HIGHLIGHTING" />
+    <setting file="file://$PROJECT_DIR$/Packages/UIForia/Src/Rendering/UIStyleSet/UIStyleSet.cs" root0="FORCE_HIGHLIGHTING" />
+    <setting file="file://$PROJECT_DIR$/Packages/UIForia/Src/Elements/Routing/RouteElement.cs" root0="FORCE_HIGHLIGHTING" />
+    <setting file="file://$USER_HOME$/UIForiaDrawing/Assets/SVG Importer/Plugins/Core/Implementation/SVG/DOM/Paths/SVGPathElement.cs" root0="SKIP_HIGHLIGHTING" />
+    <setting file="file://$PROJECT_DIR$/Packages/UIForia/Src/Elements/Routing/ChildRouterElement.cs" root0="FORCE_HIGHLIGHTING" />
+    <setting file="file://$USER_HOME$/UIForiaDrawing/Assets/SVG Importer/Plugins/Core/Mesh/SVGGeomUtils.cs" root0="SKIP_HIGHLIGHTING" />
+    <setting file="file://$PROJECT_DIR$/Packages/UIForia/Src/Shapes2D/Scripts/Shape.cs" root0="FORCE_HIGHLIGHTING" />
+    <setting file="file://$PROJECT_DIR$/Assets/Klang/Seed/UIForia/ClippedPanel.cs" root0="FORCE_HIGHLIGHTING" />
+    <setting file="file://$PROJECT_DIR$/Assets/Klang/Seed/UIForia/Root.cs" root0="FORCE_HIGHLIGHTING" />
+    <setting file="file://$PROJECT_DIR$/Packages/UIForia/Src/Animation/KeyFrameAnimation.cs" root0="FORCE_HIGHLIGHTING" />
+    <setting file="file://$PROJECT_DIR$/Packages/UIForia/Src/Animation/StyleAnimation.cs" root0="FORCE_HIGHLIGHTING" />
+    <setting file="file://$PROJECT_DIR$/Packages/UIForia/Src/Animation/AnimationGroup.cs" root0="FORCE_HIGHLIGHTING" />
+    <setting file="file://$PROJECT_DIR$/Packages/UIForia/Src/Animation/PropertyAnimation.cs" root0="FORCE_HIGHLIGHTING" />
+    <setting file="file://$PROJECT_DIR$/Packages/UIForia/Src/Animation/StyleAnimator.cs" root0="FORCE_HIGHLIGHTING" />
+    <setting file="file://$PROJECT_DIR$/Assets/Klang/Seed/UIForia/Windows/SeedDebugWindow/SeedDebugWindow.cs" root0="FORCE_HIGHLIGHTING" />
+    <setting file="file://$PROJECT_DIR$/Packages/UIForia/Src/Compilers/AccessExpressionPart_Func.cs" root0="FORCE_HIGHLIGHTING" />
+    <setting file="file://$USER_HOME$/AppData/Local/Unity/cache/packages/packages.unity.com/com.unity.textmeshpro@1.3.0/Scripts/Runtime/TMPro_UGUI_Private.cs" root0="SKIP_HIGHLIGHTING" />
+    <setting file="file://$PROJECT_DIR$/Assets/Klang/Seed/UIForia/Windows/ColonyInfoWindow/ColonyInfoWindow.cs" root0="FORCE_HIGHLIGHTING" />
+    <setting file="file://$PROJECT_DIR$/Packages/UIForia/Src/Compilers/OperatorOverloadExpression.cs" root0="FORCE_HIGHLIGHTING" />
+    <setting file="file://$PROJECT_DIR$/Assets/Klang/Seed/UIForia/BuildMenu/BuildMenu.cs" root0="FORCE_HIGHLIGHTING" />
+    <setting file="file://$PROJECT_DIR$/Packages/UIForia/Src/Compilers/Terminal.cs" root0="FORCE_HIGHLIGHTING" />
+    <setting file="file://$PROJECT_DIR$/Packages/UIForia/Src/Compilers/ImplicitCastExpression.cs" root0="FORCE_HIGHLIGHTING" />
+    <setting file="file://$PROJECT_DIR$/Assets/Klang/Seed/UIForia/BuildMenu/BuildMenuItemDisplay.cs" root0="FORCE_HIGHLIGHTING" />
+    <setting file="file://$PROJECT_DIR$/Packages/UIForia/Src/Compilers/AccessExpressionPart_Index.cs" root0="FORCE_HIGHLIGHTING" />
+    <setting file="file://$PROJECT_DIR$/Packages/UIForia/Src/Compilers/InputBindingCompiler.cs" root0="FORCE_HIGHLIGHTING" />
+    <setting file="file://$PROJECT_DIR$/Packages/UIForia/Src/Compilers/ExpressionCompiler.cs" root0="FORCE_HIGHLIGHTING" />
+    <setting file="file://$PROJECT_DIR$/Packages/UIForia/Src/Compilers/AliasAccessBridge.cs" root0="FORCE_HIGHLIGHTING" />
+    <setting file="file://$PROJECT_DIR$/Packages/UIForia/Src/Compilers/PropertyBindingCompiler.cs" root0="FORCE_HIGHLIGHTING" />
+    <setting file="file://$PROJECT_DIR$/Packages/UIForia/Src/Compilers/AccessExpressionPart.cs" root0="FORCE_HIGHLIGHTING" />
+    <setting file="file://$PROJECT_DIR$/Packages/UIForia/Src/Compilers/AccessExpression.cs" root0="FORCE_HIGHLIGHTING" />
+    <setting file="file://$PROJECT_DIR$/Packages/UIForia/Src/Compilers/AccessExpression_Static.cs" root0="FORCE_HIGHLIGHTING" />
+    <setting file="file://$PROJECT_DIR$/Assets/Klang/Seed/UIForia/LoginFlow/LoginScreen/LoginScreen.cs" root0="FORCE_HIGHLIGHTING" />
+    <setting file="file://$PROJECT_DIR$/Packages/UIForia/Src/ResourceManager.cs" root0="FORCE_HIGHLIGHTING" />
+    <setting file="file://$PROJECT_DIR$/Packages/UIForia/Src/Compilers/AccessExpressionPart_Method.cs" root0="FORCE_HIGHLIGHTING" />
+    <setting file="file://$PROJECT_DIR$/Assets/Klang/Seed/UIForia/LoginFlow/JoinColonyScreen/JoinColonyScreen.cs" root0="FORCE_HIGHLIGHTING" />
+    <setting file="file://$PROJECT_DIR$/Packages/UIForia/Src/Compilers/AccessExpressionPart_FieldProperty_Field.cs" root0="FORCE_HIGHLIGHTING" />
+    <setting file="file://$PROJECT_DIR$/Packages/UIForia/Src/Attributes.cs" root0="FORCE_HIGHLIGHTING" />
+    <setting file="file://$PROJECT_DIR$/Packages/UIForia/Src/Compilers/AccessExpressionPart_FieldProperty_Property.cs" root0="FORCE_HIGHLIGHTING" />
+    <setting file="file://$PROJECT_DIR$/Packages/UIForia/Src/Compilers/AccessExpressionPart_FieldProperty.cs" root0="FORCE_HIGHLIGHTING" />
+    <setting file="file://$PROJECT_DIR$/Packages/UIForia/Src/_Generated2.cs" root0="FORCE_HIGHLIGHTING" />
+    <setting file="file://$PROJECT_DIR$/Assets/Klang/Seed/UIForia/LoginFlow/CreateAccountScreen/CreateAccountScreen.cs" root0="FORCE_HIGHLIGHTING" />
+    <setting file="file://$PROJECT_DIR$/Packages/UIForia/Src/OffsetRect.cs" root0="FORCE_HIGHLIGHTING" />
+    <setting file="file://$PROJECT_DIR$/Packages/UIForia/Src/StyleDefinition.cs" root0="FORCE_HIGHLIGHTING" />
+    <setting file="file://$PROJECT_DIR$/Assets/Klang/Seed/UIForia/URLNavBar/URLNavBar.cs" root0="FORCE_HIGHLIGHTING" />
+    <setting file="file://$PROJECT_DIR$/Assets/Klang/Seed/UIForia/KlangButton/KlangButton.cs" root0="FORCE_HIGHLIGHTING" />
+    <setting file="file://$PROJECT_DIR$/Packages/UIForia/Src/Compilers/AliasSources/EnumAliasSources.cs" root0="FORCE_HIGHLIGHTING" />
+    <setting file="file://$PROJECT_DIR$/Packages/UIForia/Src/DataSource.cs" root0="FORCE_HIGHLIGHTING" />
+    <setting file="file://$PROJECT_DIR$/Assets/Klang/Seed/UIForia/KlangWindow/WindowResizeEvent.cs" root0="FORCE_HIGHLIGHTING" />
+    <setting file="file://$PROJECT_DIR$/Assets/Klang/Seed/UIForia/KlangWindow/WindowSide.cs" root0="FORCE_HIGHLIGHTING" />
+    <setting file="file://$PROJECT_DIR$/Assets/Klang/Seed/UIForia/KlangWindow/WindowDragEvent.cs" root0="FORCE_HIGHLIGHTING" />
+    <setting file="file://$PROJECT_DIR$/Assets/Klang/Seed/UIForia/KlangWindow/KlangWindow.cs" root0="FORCE_HIGHLIGHTING" />
+    <setting file="file://$PROJECT_DIR$/Assets/Demos/ChatGroupIcon.cs" root0="FORCE_HIGHLIGHTING" />
+    <setting file="file://$PROJECT_DIR$/Packages/UIForia/Src/Util/MeasurementPair.cs" root0="FORCE_HIGHLIGHTING" />
+    <setting file="file://$PROJECT_DIR$/Packages/UIForia/Src/ParsedTemplate.cs" root0="FORCE_HIGHLIGHTING" />
     <setting file="file://$PROJECT_DIR$/Packages/UIForia/Src/Compilers/CastHandlers/CastHandler_FloatToInt.cs" root0="FORCE_HIGHLIGHTING" />
-    <setting file="file://$PROJECT_DIR$/Packages/UIForia/Src/Input/DragHandlerGroup.cs" root0="FORCE_HIGHLIGHTING" />
-    <setting file="file://$PROJECT_DIR$/Packages/UIForia/Src/Input/InputEventType.cs" root0="FORCE_HIGHLIGHTING" />
-    <setting file="file://$PROJECT_DIR$/Packages/UIForia/Src/Layout/LayoutTypes/FlexLayoutBox.cs" root0="FORCE_HIGHLIGHTING" />
-    <setting file="file://$PROJECT_DIR$/Packages/UIForia/Src/Input/MouseHandlerGroup.cs" root0="FORCE_HIGHLIGHTING" />
+    <setting file="file://$PROJECT_DIR$/Packages/UIForia/Src/UIForia.cs" root0="FORCE_HIGHLIGHTING" />
+    <setting file="file://$PROJECT_DIR$/Assets/Klang/Seed/UIForia/KlangToolTip/KlangToolTip.cs" root0="FORCE_HIGHLIGHTING" />
+    <setting file="file://$PROJECT_DIR$/Packages/UIForia/Src/Application.cs" root0="FORCE_HIGHLIGHTING" />
+    <setting file="file://$PROJECT_DIR$/Assets/Klang/Seed/UIForia/CharacterList/CharacterList.cs" root0="FORCE_HIGHLIGHTING" />
     <setting file="file://$PROJECT_DIR$/Packages/UIForia/Src/Compilers/CastHandlers/CastHandler_Vector4ToColor.cs" root0="FORCE_HIGHLIGHTING" />
-    <setting file="file://$PROJECT_DIR$/Packages/UIForia/Src/Compilers/ExpressionResolvers/RepeatLengthAliasResolver.cs" root0="FORCE_HIGHLIGHTING" />
-    <setting file="file://$PROJECT_DIR$/Packages/UIForia/Src/Compilers/ExpressionResolvers/RepeatItemAliasResolver.cs" root0="FORCE_HIGHLIGHTING" />
+    <setting file="file://$PROJECT_DIR$/Assets/Klang/Seed/UIForia/CharacterList/CharacterListItem.cs" root0="FORCE_HIGHLIGHTING" />
+    <setting file="file://$PROJECT_DIR$/Packages/UIForia/Src/Compilers/ExpressionResolvers/ElementResolver.cs" root0="FORCE_HIGHLIGHTING" />
+    <setting file="file://$PROJECT_DIR$/Packages/UIForia/Src/UIViewBehavior.cs" root0="FORCE_HIGHLIGHTING" />
     <setting file="file://$PROJECT_DIR$/Packages/UIForia/Src/Compilers/ExpressionResolvers/RepeatIndexAliasResolver.cs" root0="FORCE_HIGHLIGHTING" />
-    <setting file="file://$PROJECT_DIR$/Packages/UIForia/Tests/ExpressionCompilerTests2.cs" root0="FORCE_HIGHLIGHTING" />
-    <setting file="file://$PROJECT_DIR$/Packages/UIForia/Src/Input/DragCreatorGroup.cs" root0="FORCE_HIGHLIGHTING" />
-    <setting file="file://$PROJECT_DIR$/../../SVGTest/Assets/SVG Importer/Plugins/Core/Implementation/SVG/DOM/Paths/SVGPathSegClosePath.cs" root0="FORCE_HIGHLIGHTING" />
-    <setting file="file://$PROJECT_DIR$/Packages/UIForia/Src/Input/KeyboardInputEvent.cs" root0="FORCE_HIGHLIGHTING" />
-    <setting file="file://$PROJECT_DIR$/Packages/UIForia/Src/Input/KeyboardEventHandler.cs" root0="FORCE_HIGHLIGHTING" />
+    <setting file="file://$PROJECT_DIR$/Packages/UIForia/Src/Compilers/ExpressionResolvers/UrlResolver.cs" root0="FORCE_HIGHLIGHTING" />
+    <setting file="file://$PROJECT_DIR$/Assets/Klang/Seed/UIForia/KlangCheckBox/KlangCheckBox.cs" root0="FORCE_HIGHLIGHTING" />
+    <setting file="file://$PROJECT_DIR$/Packages/UIForia/Src/Compilers/ExpressionResolvers/SizeResolver.cs" root0="FORCE_HIGHLIGHTING" />
+    <setting file="file://$PROJECT_DIR$/Packages/UIForia/Src/Compilers/ExpressionResolvers/ContentSizeResolver.cs" root0="FORCE_HIGHLIGHTING" />
+    <setting file="file://$PROJECT_DIR$/Packages/UIForia/Src/Compilers/ExpressionResolvers/RepeatLengthAliasResolver.cs" root0="FORCE_HIGHLIGHTING" />
+    <setting file="file://$PROJECT_DIR$/Assets/Klang/Seed/UIForia/KlangDropdown/KlangDropdown.cs" root0="FORCE_HIGHLIGHTING" />
+    <setting file="file://$PROJECT_DIR$/Assets/Klang/Seed/UIForia/KlangTextInput/KlangTextInput.cs" root0="FORCE_HIGHLIGHTING" />
+    <setting file="file://$PROJECT_DIR$/Packages/UIForia/Src/Parsing/StyleParser/StylePropertyMappers.cs" root0="FORCE_HIGHLIGHTING" />
+    <setting file="file://$PROJECT_DIR$/Packages/UIForia/Src/Compilers/ExpressionResolvers/LengthResolver.cs" root0="FORCE_HIGHLIGHTING" />
+    <setting file="file://$PROJECT_DIR$/Packages/UIForia/Src/Compilers/ExpressionResolvers/RouteResolver.cs" root0="FORCE_HIGHLIGHTING" />
+    <setting file="file://$PROJECT_DIR$/Assets/Klang/Seed/UIForia/ColonyInfoPanel/ColonyInfoPanel.cs" root0="FORCE_HIGHLIGHTING" />
+    <setting file="file://$PROJECT_DIR$/Packages/UIForia/Src/Compilers/ExpressionResolvers/ExpressionResolver.cs" root0="FORCE_HIGHLIGHTING" />
+    <setting file="file://$PROJECT_DIR$/Packages/UIForia/Src/Compilers/ExpressionResolvers/ParentElementResolver.cs" root0="FORCE_HIGHLIGHTING" />
+    <setting file="file://$PROJECT_DIR$/Packages/UIForia/Src/Compilers/ExpressionResolvers/KeyboardEventResolver.cs" root0="FORCE_HIGHLIGHTING" />
+    <setting file="file://$PROJECT_DIR$/Packages/UIForia/Src/Compilers/ExpressionResolvers/RepeatItemAliasResolver.cs" root0="FORCE_HIGHLIGHTING" />
+    <setting file="file://$PROJECT_DIR$/Packages/UIForia/Src/Compilers/ExpressionResolvers/MouseEventResolver.cs" root0="FORCE_HIGHLIGHTING" />
+    <setting file="file://$PROJECT_DIR$/Packages/UIForia/Src/Binding/StyleBindings/StyleBinding_Translation.cs" root0="FORCE_HIGHLIGHTING" />
+    <setting file="file://$PROJECT_DIR$/Packages/UIForia/Editor/AnimatedPropertyGenerator.cs" root0="FORCE_HIGHLIGHTING" />
+    <setting file="file://$PROJECT_DIR$/Packages/UIForia/Src/Text/LineInfo.cs" root0="FORCE_HIGHLIGHTING" />
+    <setting file="file://$PROJECT_DIR$/Packages/UIForia/Src/Compilers/ExpressionResolvers/ColorResolver.cs" root0="FORCE_HIGHLIGHTING" />
+    <setting file="file://$PROJECT_DIR$/Packages/UIForia/Editor/CodeGen.cs" root0="FORCE_HIGHLIGHTING" />
+    <setting file="file://$PROJECT_DIR$/Assets/Klang/Seed/UIForia/SkillbarDisplay/SkillbarDisplay.cs" root0="FORCE_HIGHLIGHTING" />
+    <setting file="file://$PROJECT_DIR$/Packages/UIForia/Src/Util/ArrayUtil.cs" root0="FORCE_HIGHLIGHTING" />
+    <setting file="file://$PROJECT_DIR$/Packages/UIForia/Src/Rendering/TransformBehavior.cs" root0="FORCE_HIGHLIGHTING" />
     <setting file="file://$PROJECT_DIR$/Packages/UIForia/Src/Rendering/DefaultStyleValues_Generated.cs" root0="FORCE_HIGHLIGHTING" />
-    <setting file="file://$PROJECT_DIR$/Packages/UIForia/Src/Input/DragEventCreator.cs" root0="FORCE_HIGHLIGHTING" />
-    <setting file="file://$PROJECT_DIR$/Assets/Transform/TransformPlayground.cs" root0="FORCE_HIGHLIGHTING" />
-    <setting file="file://$PROJECT_DIR$/../../SVGTest/Assets/SVG Importer/Plugins/Core/Implementation/SVG/DOM/Paths/SVGPathSegArcAbs.cs" root0="SKIP_HIGHLIGHTING" />
-    <setting file="file://$PROJECT_DIR$/Packages/UIForia/Src/Input/MouseEventHandler.cs" root0="FORCE_HIGHLIGHTING" />
+    <setting file="file://$PROJECT_DIR$/Packages/UIForia/Src/Util/ListPool.cs" root0="FORCE_HIGHLIGHTING" />
+    <setting file="file://$PROJECT_DIR$/Packages/UIForia/Src/Util/LightList.cs" root0="FORCE_HIGHLIGHTING" />
+    <setting file="file://$PROJECT_DIR$/Assets/Klang/Seed/UIForia/KlangProgressBar/KlangProgressBar.cs" root0="FORCE_HIGHLIGHTING" />
+    <setting file="file://$PROJECT_DIR$/Packages/UIForia/Src/Util/LightListPool.cs" root0="FORCE_HIGHLIGHTING" />
+    <setting file="file://$USER_HOME$/UIForiaDrawing/Assets/SVG Importer/Plugins/Core/Math/SVGMath.cs" root0="SKIP_HIGHLIGHTING" />
     <setting file="file://$PROJECT_DIR$/Packages/UIForia/Src/Rendering/AnchorTarget.cs" root0="FORCE_HIGHLIGHTING" />
-    <setting file="file://$PROJECT_DIR$/Packages/UIForia/Src/Input/DragEventHandler.cs" root0="FORCE_HIGHLIGHTING" />
+    <setting file="file://$PROJECT_DIR$/Packages/UIForia/Src/Util/SkipTree.cs" root0="FORCE_HIGHLIGHTING" />
+    <setting file="file://$PROJECT_DIR$/Packages/UIForia/Src/Util/ArrayPool.cs" root0="FORCE_HIGHLIGHTING" />
     <setting file="file://$PROJECT_DIR$/Packages/UIForia/Src/Rendering/RenderData.cs" root0="FORCE_HIGHLIGHTING" />
     <setting file="file://$PROJECT_DIR$/Packages/UIForia/Src/Rendering/UIView.cs" root0="FORCE_HIGHLIGHTING" />
-    <setting file="file://$PROJECT_DIR$/Packages/UIForia/Src/Layout/GridPlacement.cs" root0="FORCE_HIGHLIGHTING" />
+    <setting file="file://$PROJECT_DIR$/Assets/Klang/Seed/UIForia/CharacterSchedule/ScheduleSlot.cs" root0="FORCE_HIGHLIGHTING" />
+    <setting file="file://$PROJECT_DIR$/Packages/UIForia/Src/Rendering/Visibility.cs" root0="FORCE_HIGHLIGHTING" />
     <setting file="file://$PROJECT_DIR$/Assets/Klang/Seed/UIForia/CharacterSchedule/CharacterSchedule.cs" root0="FORCE_HIGHLIGHTING" />
-    <setting file="file://$PROJECT_DIR$/Assets/Klang/Seed/UIForia/LoginFlow/LoginScreen/LoginScreen.cs" root0="FORCE_HIGHLIGHTING" />
-    <setting file="file://$PROJECT_DIR$/Packages/UIForia/Src/Rendering/TransformBehavior.cs" root0="FORCE_HIGHLIGHTING" />
     <setting file="file://$PROJECT_DIR$/Packages/UIForia/Src/Rendering/ContentBoxRect.cs" root0="FORCE_HIGHLIGHTING" />
-    <setting file="file://$PROJECT_DIR$/Packages/UIForia/Src/Layout/GridLayout.cs" root0="FORCE_HIGHLIGHTING" />
-    <setting file="file://$PROJECT_DIR$/Packages/UIForia/Src/Layout/LayoutResult.cs" root0="FORCE_HIGHLIGHTING" />
-    <setting file="file://$PROJECT_DIR$/Packages/UIForia/Src/Util/PolygonUtil.cs" root0="FORCE_HIGHLIGHTING" />
-    <setting file="file://$PROJECT_DIR$/Assets/Klang/Seed/UIForia/Windows/SeedDebugWindow/SeedDebugWindow.cs" root0="FORCE_HIGHLIGHTING" />
-    <setting file="file://$PROJECT_DIR$/Packages/UIForia/Src/SVGX/SVGXRoot.cs" root0="FORCE_HIGHLIGHTING" />
-    <setting file="file://$PROJECT_DIR$/../../SVGTest/Assets/SVG Importer/Plugins/Core/Implementation/SVG/DOM/DocumentStructure/SVGElement.cs" root0="FORCE_HIGHLIGHTING" />
+    <setting file="file://$PROJECT_DIR$/Assets/Klang/Seed/UIForia/CharacterInfoPanel/CharacterInfoPanel.cs" root0="FORCE_HIGHLIGHTING" />
+    <setting file="file://$PROJECT_DIR$/Packages/UIForia/Src/Util/StackPool.cs" root0="FORCE_HIGHLIGHTING" />
+    <setting file="file://$PROJECT_DIR$/Packages/UIForia/Src/Util/FloatUtil.cs" root0="FORCE_HIGHLIGHTING" />
+    <setting file="file://$PROJECT_DIR$/Packages/UIForia/Src/Util/FixedLengthVector.cs" root0="FORCE_HIGHLIGHTING" />
+    <setting file="file://$USER_HOME$/UIForiaDrawing/Assets/SVG Importer/Plugins/Core/Fills/CCGradient.cs" root0="SKIP_HIGHLIGHTING" />
+    <setting file="file://$PROJECT_DIR$/Packages/UIForia/Src/Rendering/FixedLengthRect.cs" root0="FORCE_HIGHLIGHTING" />
+    <setting file="file://$PROJECT_DIR$/Packages/UIForia/Src/Compilers/StyleBindingCompiler.cs" root0="FORCE_HIGHLIGHTING" />
+    <setting file="file://$PROJECT_DIR$/Packages/UIForia/Src/Rendering/TransformUnit.cs" root0="FORCE_HIGHLIGHTING" />
+    <setting file="file://$APPLICATION_CONFIG_DIR$/resharper-host/DecompilerCache/decompiler/D616BE05-755D-41A0-8981-0B5C14E4DD50/e8/d18fcd5c/Mathf.cs" root0="SKIP_HIGHLIGHTING" />
+    <setting file="file://$PROJECT_DIR$/Assets/Klang/Seed/DataTypes/CharacterSkill.cs" root0="FORCE_HIGHLIGHTING" />
+    <setting file="file://$PROJECT_DIR$/Packages/UIForia/Src/Util/RepeatableList.cs" root0="FORCE_HIGHLIGHTING" />
     <setting file="file://$PROJECT_DIR$/Packages/UIForia/Src/Rendering/Overflow.cs" root0="FORCE_HIGHLIGHTING" />
-    <setting file="file://$PROJECT_DIR$/Packages/UIForia/Src/Layout/LayoutType.cs" root0="FORCE_HIGHLIGHTING" />
-    <setting file="file://$PROJECT_DIR$/Packages/UIForia/Src/Layout/Size.cs" root0="FORCE_HIGHLIGHTING" />
-    <setting file="file://$PROJECT_DIR$/Packages/UIForia/Src/Layout/CrossAxisAlignment.cs" root0="FORCE_HIGHLIGHTING" />
-    <setting file="file://$PROJECT_DIR$/Packages/UIForia/Src/Layout/GridTrack.cs" root0="FORCE_HIGHLIGHTING" />
-    <setting file="file://$PROJECT_DIR$/Packages/UIForia/Src/Parsing/AstNodes/OperatorType.cs" root0="FORCE_HIGHLIGHTING" />
-    <setting file="file://$PROJECT_DIR$/Packages/UIForia/Src/Layout/UIMeasurementUnit.cs" root0="FORCE_HIGHLIGHTING" />
-    <setting file="file://$PROJECT_DIR$/Packages/UIForia/Src/Layout/LayoutDirection.cs" root0="FORCE_HIGHLIGHTING" />
-    <setting file="file://$PROJECT_DIR$/Packages/UIForia/Src/Layout/UIDimensions.cs" root0="FORCE_HIGHLIGHTING" />
-    <setting file="file://$PROJECT_DIR$/Packages/UIForia/Src/_Generated1.cs" root0="FORCE_HIGHLIGHTING" />
-    <setting file="file://$PROJECT_DIR$/Packages/UIForia/Src/Layout/LayoutBehavior.cs" root0="FORCE_HIGHLIGHTING" />
-    <setting file="file://$PROJECT_DIR$/Packages/UIForia/Src/Rendering/UIStyle.cs" root0="FORCE_HIGHLIGHTING" />
-    <setting file="file://$PROJECT_DIR$/Packages/UIForia/Src/Shaders/UIForiaStencilPaint.shader" root0="FORCE_HIGHLIGHTING" />
-    <setting file="file://$PROJECT_DIR$/Packages/UIForia/Src/_Generated3.cs" root0="FORCE_HIGHLIGHTING" />
-    <setting file="file://$PROJECT_DIR$/Packages/UIForia/Src/Shaders/UIForiaStencil.shader" root0="FORCE_HIGHLIGHTING" />
+    <setting file="file://$PROJECT_DIR$/Assets/Klang/Seed/DataTypes/ColonyData.cs" root0="FORCE_HIGHLIGHTING" />
+    <setting file="file://$PROJECT_DIR$/Assets/Klang/Seed/DataTypes/CharacterData.cs" root0="FORCE_HIGHLIGHTING" />
+    <setting file="file://$PROJECT_DIR$/Packages/UIForia/Src/Util/MeshUtil.cs" root0="FORCE_HIGHLIGHTING" />
+    <setting file="file://$PROJECT_DIR$/Packages/UIForia/Src/Util/FontStyle.cs" root0="FORCE_HIGHLIGHTING" />
+    <setting file="file://$PROJECT_DIR$/Packages/UIForia/Src/Util/PolygonUtil.cs" root0="FORCE_HIGHLIGHTING" />
+    <setting file="file://$PROJECT_DIR$/Packages/UIForia/Src/Util/ObjectPool.cs" root0="FORCE_HIGHLIGHTING" />
+    <setting file="file://$PROJECT_DIR$/Assets/Compiler/Compiler.cs" root0="FORCE_HIGHLIGHTING" />
+    <setting file="file://$PROJECT_DIR$/Packages/UIForia/Src/Util/ReflectionUtil.cs" root0="FORCE_HIGHLIGHTING" />
+    <setting file="file://$PROJECT_DIR$/Packages/UIForia/Src/SVGX/SVGXMatrix.cs" root0="FORCE_HIGHLIGHTING" />
     <setting file="file://$PROJECT_DIR$/Packages/UIForia/Src/Rendering/StylePropertyId.cs" root0="FORCE_HIGHLIGHTING" />
-    <setting file="file://$PROJECT_DIR$/Packages/UIForia/Src/Layout/LayoutTypes/GridLayoutBox.cs" root0="FORCE_HIGHLIGHTING" />
-    <setting file="file://$PROJECT_DIR$/Packages/UIForia/Src/Layout/LayoutTypes/RadialLayoutBox.cs" root0="FORCE_HIGHLIGHTING" />
     <setting file="file://$PROJECT_DIR$/Packages/UIForia/Src/Rendering/UIFixedUnit.cs" root0="FORCE_HIGHLIGHTING" />
     <setting file="file://$PROJECT_DIR$/Packages/UIForia/Src/Rendering/StyleColor.cs" root0="FORCE_HIGHLIGHTING" />
-    <setting file="file://$PROJECT_DIR$/Assets/Klang/Seed/UIForia/Root.cs" root0="FORCE_HIGHLIGHTING" />
-    <setting file="file://$PROJECT_DIR$/Packages/UIForia/Src/Layout/LayoutTypes/GridTrackSize.cs" root0="FORCE_HIGHLIGHTING" />
-    <setting file="file://$PROJECT_DIR$/Packages/UIForia/Src/Layout/LayoutTypes/LayoutBox.cs" root0="FORCE_HIGHLIGHTING" />
-    <setting file="file://$PROJECT_DIR$/Packages/UIForia/Src/Rendering/StyleProperty.cs" root0="FORCE_HIGHLIGHTING" />
-    <setting file="file://$PROJECT_DIR$/Packages/UIForia/Src/Layout/LayoutTypes/ImageLayoutBox.cs" root0="FORCE_HIGHLIGHTING" />
-    <setting file="file://$PROJECT_DIR$/Packages/UIForia/Src/Compilers/ExpressionResolvers/KeyboardEventResolver.cs" root0="FORCE_HIGHLIGHTING" />
-    <setting file="file://$PROJECT_DIR$/Packages/UIForia/Src/Rendering/UIFixedLength.cs" root0="FORCE_HIGHLIGHTING" />
-    <setting file="file://$PROJECT_DIR$/Packages/UIForia/Src/Compilers/ExpressionResolvers/MouseEventResolver.cs" root0="FORCE_HIGHLIGHTING" />
-    <setting file="file://$PROJECT_DIR$/Packages/UIForia/Src/Layout/LayoutTypes/TextLayoutBox.cs" root0="FORCE_HIGHLIGHTING" />
-    <setting file="file://$PROJECT_DIR$/Packages/UIForia/Src/Rendering/UIMeasurement.cs" root0="FORCE_HIGHLIGHTING" />
-    <setting file="file://$PROJECT_DIR$/Packages/UIForia/Src/Layout/LayoutTypes/FixedLayoutBox.cs" root0="FORCE_HIGHLIGHTING" />
-    <setting file="file://$PROJECT_DIR$/Packages/UIForia/Src/Compilers/ExpressionResolvers/ContentSizeResolver.cs" root0="FORCE_HIGHLIGHTING" />
-    <setting file="file://$PROJECT_DIR$/Packages/UIForia/Src/Rendering/Visibility.cs" root0="FORCE_HIGHLIGHTING" />
-    <setting file="file://$PROJECT_DIR$/Assets/Klang/Seed/UIForia/KlangProgressBar/KlangProgressBar.cs" root0="FORCE_HIGHLIGHTING" />
-    <setting file="file://$PROJECT_DIR$/Packages/UIForia/Src/Binding/BindingNode.cs" root0="FORCE_HIGHLIGHTING" />
-    <setting file="file://$PROJECT_DIR$/Packages/UIForia/Src/Binding/Binding.cs" root0="FORCE_HIGHLIGHTING" />
-    <setting file="file://$PROJECT_DIR$/Assets/Klang/Seed/UIForia/KlangWindow/WindowResizeEvent.cs" root0="FORCE_HIGHLIGHTING" />
-    <setting file="file://$PROJECT_DIR$/Packages/UIForia/Src/Binding/FieldSetterBinding.cs" root0="FORCE_HIGHLIGHTING" />
-    <setting file="file://$PROJECT_DIR$/Packages/UIForia/Src/Binding/RepeatBinding.cs" root0="FORCE_HIGHLIGHTING" />
-    <setting file="file://$PROJECT_DIR$/Assets/Klang/Seed/UIForia/KlangWindow/WindowSide.cs" root0="FORCE_HIGHLIGHTING" />
-    <setting file="file://$PROJECT_DIR$/Assets/Klang/Seed/UIForia/KlangButton/KlangButton.cs" root0="FORCE_HIGHLIGHTING" />
-    <setting file="file://$PROJECT_DIR$/Packages/UIForia/Src/Binding/TextBinding_Multiple.cs" root0="FORCE_HIGHLIGHTING" />
-    <setting file="file://$PROJECT_DIR$/Assets/Klang/Seed/UIForia/KlangWindow/WindowDragEvent.cs" root0="FORCE_HIGHLIGHTING" />
-    <setting file="file://$PROJECT_DIR$/Packages/UIForia/Src/Expressions/MethodExpressionFactory.cs" root0="FORCE_HIGHLIGHTING" />
+    <setting file="file://$PROJECT_DIR$/Assets/Klang/Seed/Routes.cs" root0="FORCE_HIGHLIGHTING" />
+    <setting file="file://$PROJECT_DIR$/Packages/UIForia/Src/Input/MouseEvent.cs" root0="FORCE_HIGHLIGHTING" />
+    <setting file="file://$PROJECT_DIR$/Packages/UIForia/Src/Input/InputEvent.cs" root0="FORCE_HIGHLIGHTING" />
+    <setting file="file://$PROJECT_DIR$/Packages/UIForia/Src/IntMap.cs" root0="FORCE_HIGHLIGHTING" />
+    <setting file="file://$PROJECT_DIR$/Packages/UIForia/Src/Input/DragHandlerGroup.cs" root0="FORCE_HIGHLIGHTING" />
+    <setting file="file://$PROJECT_DIR$/Packages/UIForia/Src/Input/InputEventType.cs" root0="FORCE_HIGHLIGHTING" />
+    <setting file="file://$PROJECT_DIR$/Packages/UIForia/Src/Input/MouseHandlerGroup.cs" root0="FORCE_HIGHLIGHTING" />
     <setting file="file://$PROJECT_DIR$/Packages/UIForia/Src/Rendering/UIStyleSet/UIStyleSet.Layout.cs" root0="FORCE_HIGHLIGHTING" />
     <setting file="file://$PROJECT_DIR$/Packages/UIForia/Src/Rendering/UIStyleSet/StyleUtil.cs" root0="FORCE_HIGHLIGHTING" />
     <setting file="file://$PROJECT_DIR$/Packages/UIForia/Src/Rendering/UIStyleSet/UIStyleSet.Paint.cs" root0="FORCE_HIGHLIGHTING" />
-    <setting file="file://$PROJECT_DIR$/Packages/UIForia/Src/Binding/SwitchCaseBinding.cs" root0="FORCE_HIGHLIGHTING" />
     <setting file="file://$PROJECT_DIR$/Packages/UIForia/Src/Rendering/UIStyleSet/UIStyleSet.FlexLayout.cs" root0="FORCE_HIGHLIGHTING" />
-    <setting file="file://$PROJECT_DIR$/Packages/UIForia/Src/Binding/CallbackBinding.cs" root0="FORCE_HIGHLIGHTING" />
-    <setting file="file://$PROJECT_DIR$/Packages/UIForia/Src/Binding/SwitchBindingInt.cs" root0="FORCE_HIGHLIGHTING" />
+    <setting file="file://$PROJECT_DIR$/Packages/UIForia/Src/Input/DragCreatorGroup.cs" root0="FORCE_HIGHLIGHTING" />
     <setting file="file://$PROJECT_DIR$/Packages/UIForia/Src/Rendering/UIStyleSet/UIStyleSet.Size.cs" root0="FORCE_HIGHLIGHTING" />
-    <setting file="file://$PROJECT_DIR$/Packages/UIForia/Src/Rendering/UIStyleSet/UIStyleSet.GridItem.cs" root0="FORCE_HIGHLIGHTING" />
-    <setting file="file://$PROJECT_DIR$/Packages/UIForia/Src/Rendering/UIStyleSet/UIStyleSet.Transform.cs" root0="FORCE_HIGHLIGHTING" />
-    <setting file="file://$PROJECT_DIR$/Packages/UIForia/Src/Binding/TextBinding_Single.cs" root0="FORCE_HIGHLIGHTING" />
-    <setting file="file://$PROJECT_DIR$/Assets/Klang/Seed/UIForia/CharacterInfoPanel/CharacterInfoPanel.cs" root0="FORCE_HIGHLIGHTING" />
     <setting file="file://$PROJECT_DIR$/Packages/UIForia/Src/Rendering/UIStyleSet/UIStyleSet.StyleEntry.cs" root0="FORCE_HIGHLIGHTING" />
-    <setting file="file://$PROJECT_DIR$/Packages/UIForia/Src/Binding/EnabledBinding.cs" root0="FORCE_HIGHLIGHTING" />
-    <setting file="file://$APPLICATION_CONFIG_DIR$/resharper-host/DecompilerCache/decompiler/D616BE05-755D-41A0-8981-0B5C14E4DD50/e8/d18fcd5c/Mathf.cs" root0="SKIP_HIGHLIGHTING" />
-    <setting file="file://$PROJECT_DIR$/Packages/UIForia/Src/Binding/TemplateBinding.cs" root0="FORCE_HIGHLIGHTING" />
+    <setting file="file://$PROJECT_DIR$/Packages/UIForia/Src/Rendering/UIStyleSet/UIStyleSet.GridItem.cs" root0="FORCE_HIGHLIGHTING" />
+    <setting file="file://$PROJECT_DIR$/Assets/Transform/TransformPlayground.cs" root0="FORCE_HIGHLIGHTING" />
+    <setting file="file://$PROJECT_DIR$/Packages/UIForia/Src/Rendering/UIStyleSet/UIStyleSet.Transform.cs" root0="FORCE_HIGHLIGHTING" />
+    <setting file="file://$PROJECT_DIR$/Packages/UIForia/Src/Input/KeyboardInputEvent.cs" root0="FORCE_HIGHLIGHTING" />
+    <setting file="file://$PROJECT_DIR$/Packages/UIForia/Src/Input/KeyboardEventHandler.cs" root0="FORCE_HIGHLIGHTING" />
+    <setting file="file://$PROJECT_DIR$/Packages/UIForia/Src/Input/DragEventCreator.cs" root0="FORCE_HIGHLIGHTING" />
     <setting file="file://$PROJECT_DIR$/Packages/UIForia/Src/Rendering/UIStyleSet/StyleState.cs" root0="FORCE_HIGHLIGHTING" />
     <setting file="file://$PROJECT_DIR$/Packages/UIForia/Src/Rendering/UIStyleSet/UIStyleSet.ContentBox.cs" root0="FORCE_HIGHLIGHTING" />
-    <setting file="file://$PROJECT_DIR$/Packages/UIForia/Src/Compilers/ImplicitCastExpression.cs" root0="FORCE_HIGHLIGHTING" />
-    <setting file="file://$PROJECT_DIR$/Packages/UIForia/Src/Rendering/UIStyleSet/UIStyleSet.cs" root0="FORCE_HIGHLIGHTING" />
-    <setting file="file://$PROJECT_DIR$/Packages/UIForia/Src/Compilers/OperatorOverloadExpression.cs" root0="FORCE_HIGHLIGHTING" />
-    <setting file="file://$PROJECT_DIR$/Packages/UIForia/Src/Binding/DisabledBinding.cs" root0="FORCE_HIGHLIGHTING" />
+    <setting file="file://$PROJECT_DIR$/Packages/UIForia/Src/Input/MouseEventHandler.cs" root0="FORCE_HIGHLIGHTING" />
+    <setting file="file://$PROJECT_DIR$/Packages/UIForia/Src/Input/DragEventHandler.cs" root0="FORCE_HIGHLIGHTING" />
     <setting file="file://$PROJECT_DIR$/Packages/UIForia/Src/Rendering/UIStyleSet/UIStyleSet.BorderRadius.cs" root0="FORCE_HIGHLIGHTING" />
-    <setting file="file://$PROJECT_DIR$/Packages/UIForia/Src/Binding/InputBindings/InputBinding.cs" root0="FORCE_HIGHLIGHTING" />
+    <setting file="file://$PROJECT_DIR$/Packages/UIForia/Src/Rendering/UIStyleSet/UIStyleSetStateProxy.cs" root0="FORCE_HIGHLIGHTING" />
     <setting file="file://$PROJECT_DIR$/Packages/UIForia/Src/Rendering/UIStyleSet/UIStyleSet.GridLayout.cs" root0="FORCE_HIGHLIGHTING" />
+    <setting file="file://$PROJECT_DIR$/Packages/UIForia/Src/Layout/GridPlacement.cs" root0="FORCE_HIGHLIGHTING" />
     <setting file="file://$PROJECT_DIR$/Packages/UIForia/Src/Rendering/UIStyleSet/UIStyleSet.Text.cs" root0="FORCE_HIGHLIGHTING" />
     <setting file="file://$PROJECT_DIR$/Packages/UIForia/Src/Rendering/UIStyleSet/UIStyleSet.FlexItem.cs" root0="FORCE_HIGHLIGHTING" />
-    <setting file="file://$PROJECT_DIR$/Packages/UIForia/Src/Binding/StyleBindings/StyleBinding.cs" root0="FORCE_HIGHLIGHTING" />
     <setting file="file://$PROJECT_DIR$/Packages/UIForia/Src/Rendering/ElementRendering/StandardTextRenderer.cs" root0="FORCE_HIGHLIGHTING" />
+    <setting file="file://$PROJECT_DIR$/Packages/UIForia/Src/Layout/GridLayout.cs" root0="FORCE_HIGHLIGHTING" />
     <setting file="file://$PROJECT_DIR$/Packages/UIForia/Src/Rendering/ElementRendering/ScrollbarRenderer.cs" root0="FORCE_HIGHLIGHTING" />
     <setting file="file://$PROJECT_DIR$/Packages/UIForia/Src/Rendering/ElementRendering/StandardInstancedRenderer.cs" root0="FORCE_HIGHLIGHTING" />
-    <setting file="file://$PROJECT_DIR$/Packages/UIForia/Src/Rendering/ElementRendering/StandardRenderer.cs" root0="FORCE_HIGHLIGHTING" />
-    <setting file="file://$PROJECT_DIR$/Assets/Klang/Seed/UIForia/LoginFlow/CreateAccountScreen/CreateAccountScreen.cs" root0="FORCE_HIGHLIGHTING" />
+    <setting file="file://$USER_HOME$/UIForiaDrawing/Assets/SVG Importer/Plugins/Core/Implementation/SVG/DOM/Paths/SVGPathSegArcAbs.cs" root0="SKIP_HIGHLIGHTING" />
+    <setting file="file://$PROJECT_DIR$/Assets/Demos/ChatWindow/ChatWindow.cs" root0="FORCE_HIGHLIGHTING" />
+    <setting file="file://$PROJECT_DIR$/Packages/UIForia/Src/Layout/LayoutType.cs" root0="FORCE_HIGHLIGHTING" />
     <setting file="file://$PROJECT_DIR$/Packages/UIForia/Src/Templates/UITextTemplate.cs" root0="FORCE_HIGHLIGHTING" />
+    <setting file="file://$PROJECT_DIR$/Packages/UIForia/Src/Layout/Size.cs" root0="FORCE_HIGHLIGHTING" />
     <setting file="file://$PROJECT_DIR$/Packages/UIForia/Src/Templates/UIElementTemplate.cs" root0="FORCE_HIGHLIGHTING" />
     <setting file="file://$PROJECT_DIR$/Packages/UIForia/Src/Templates/UIGraphicTemplate.cs" root0="FORCE_HIGHLIGHTING" />
+    <setting file="file://$PROJECT_DIR$/Assets/Demos/ChatWindow/ChatWindow_Styles.cs" root0="FORCE_HIGHLIGHTING" />
     <setting file="file://$PROJECT_DIR$/Packages/UIForia/Src/Templates/UIChildrenTemplate.cs" root0="FORCE_HIGHLIGHTING" />
+    <setting file="file://$PROJECT_DIR$/Packages/UIForia/Src/SVGX/ClipRule.cs" root0="FORCE_HIGHLIGHTING" />
     <setting file="file://$PROJECT_DIR$/Packages/UIForia/Src/Templates/TemplateScope.cs" root0="FORCE_HIGHLIGHTING" />
     <setting file="file://$PROJECT_DIR$/Packages/UIForia/Src/Templates/UISwitchTemplate.cs" root0="FORCE_HIGHLIGHTING" />
+    <setting file="file://$PROJECT_DIR$/Packages/UIForia/Editor/UIForia/UIForiaHierarchyWindow.cs" root0="FORCE_HIGHLIGHTING" />
+    <setting file="file://$PROJECT_DIR$/Packages/UIForia/Src/Layout/CrossAxisAlignment.cs" root0="FORCE_HIGHLIGHTING" />
+    <setting file="file://$PROJECT_DIR$/Packages/UIForia/Src/Layout/GridTrack.cs" root0="FORCE_HIGHLIGHTING" />
+    <setting file="file://$PROJECT_DIR$/Packages/UIForia/Src/Rendering/ElementRendering/StandardRenderer.cs" root0="FORCE_HIGHLIGHTING" />
+    <setting file="file://$PROJECT_DIR$/Packages/UIForia/Src/SVGX/LineCap.cs" root0="FORCE_HIGHLIGHTING" />
+    <setting file="file://$PROJECT_DIR$/Packages/UIForia/Src/Layout/UIMeasurementUnit.cs" root0="FORCE_HIGHLIGHTING" />
+    <setting file="file://$PROJECT_DIR$/Packages/UIForia/Src/Templates/UIImageTemplate.cs" root0="FORCE_HIGHLIGHTING" />
+    <setting file="file://$PROJECT_DIR$/Packages/UIForia/Src/Layout/LayoutDirection.cs" root0="FORCE_HIGHLIGHTING" />
+    <setting file="file://$PROJECT_DIR$/Packages/UIForia/Src/Layout/UIDimensions.cs" root0="FORCE_HIGHLIGHTING" />
+    <setting file="file://$PROJECT_DIR$/Packages/UIForia/Src/Templates/UISwitchCaseTemplate.cs" root0="FORCE_HIGHLIGHTING" />
+    <setting file="file://$PROJECT_DIR$/Packages/UIForia/Src/Layout/LayoutBehavior.cs" root0="FORCE_HIGHLIGHTING" />
+    <setting file="file://$PROJECT_DIR$/Packages/UIForia/Src/Layout/LayoutTypes/FlexLayoutBox.cs" root0="FORCE_HIGHLIGHTING" />
+    <setting file="file://$PROJECT_DIR$/Packages/UIForia/Src/SVGX/LineJoin.cs" root0="FORCE_HIGHLIGHTING" />
+    <setting file="file://$PROJECT_DIR$/Packages/UIForia/Src/Templates/UISlotContentTemplate.cs" root0="FORCE_HIGHLIGHTING" />
+    <setting file="file://$PROJECT_DIR$/Packages/UIForia/Src/Templates/UISlotTemplate.cs" root0="FORCE_HIGHLIGHTING" />
+    <setting file="file://$PROJECT_DIR$/Packages/UIForia/Src/Layout/LayoutTypes/GridLayoutBox.cs" root0="FORCE_HIGHLIGHTING" />
+    <setting file="file://$PROJECT_DIR$/Packages/UIForia/Src/Layout/LayoutTypes/RadialLayoutBox.cs" root0="FORCE_HIGHLIGHTING" />
+    <setting file="file://$PROJECT_DIR$/Packages/UIForia/Src/Templates/UITemplate.cs" root0="FORCE_HIGHLIGHTING" />
+    <setting file="file://$PROJECT_DIR$/Packages/UIForia/Src/Templates/UIRepeatTemplate.cs" root0="FORCE_HIGHLIGHTING" />
+    <setting file="file://$PROJECT_DIR$/Packages/UIForia/Src/Layout/LayoutTypes/GridTrackSize.cs" root0="FORCE_HIGHLIGHTING" />
+    <setting file="file://$PROJECT_DIR$/Packages/UIForia/Src/Templates/UIContainerTemplate.cs" root0="FORCE_HIGHLIGHTING" />
+    <setting file="file://$PROJECT_DIR$/Assets/Demos/ResourceListDisplay.cs" root0="FORCE_HIGHLIGHTING" />
+    <setting file="file://$PROJECT_DIR$/Packages/UIForia/Src/Layout/LayoutTypes/ImageLayoutBox.cs" root0="FORCE_HIGHLIGHTING" />
+    <setting file="file://$PROJECT_DIR$/Packages/UIForia/Src/Exceptions/CompileExceptions.cs" root0="FORCE_HIGHLIGHTING" />
+    <setting file="file://$PROJECT_DIR$/Packages/UIForia/Src/Layout/LayoutTypes/TextLayoutBox.cs" root0="FORCE_HIGHLIGHTING" />
+    <setting file="file://$PROJECT_DIR$/Packages/UIForia/Src/Extensions/ListExtensions.cs" root0="FORCE_HIGHLIGHTING" />
+    <setting file="file://$PROJECT_DIR$/Packages/UIForia/Src/Layout/LayoutTypes/FlowLayoutBox.cs" root0="FORCE_HIGHLIGHTING" />
+    <setting file="file://$PROJECT_DIR$/Packages/UIForia/Src/Layout/LayoutTypes/FixedLayoutBox.cs" root0="FORCE_HIGHLIGHTING" />
+    <setting file="file://$PROJECT_DIR$/Packages/UIForia/Src/Extensions/Vector2Extensions.cs" root0="FORCE_HIGHLIGHTING" />
+    <setting file="file://$USER_HOME$/UIForiaDrawing/Assets/SVG Importer/Plugins/Core/Implementation/SVG/DOM/BasicTypes/SVGColor.cs" root0="SKIP_HIGHLIGHTING" />
+    <setting file="file://$PROJECT_DIR$/Packages/UIForia/Src/Extensions/ColorExtensions.cs" root0="FORCE_HIGHLIGHTING" />
+    <setting file="file://$USER_HOME$/UIForiaDrawing/Assets/SVG Importer/Plugins/Core/Implementation/SVG/DOM/BasicTypes/SVGPaintable.cs" root0="SKIP_HIGHLIGHTING" />
+    <setting file="file://$PROJECT_DIR$/Packages/UIForia/Src/Extensions/RectExtensions.cs" root0="FORCE_HIGHLIGHTING" />
+    <setting file="file://$PROJECT_DIR$/Packages/UIForia/Src/Binding/BindingNode.cs" root0="FORCE_HIGHLIGHTING" />
+    <setting file="file://$PROJECT_DIR$/Packages/UIForia/Src/Binding/Binding.cs" root0="FORCE_HIGHLIGHTING" />
+    <setting file="file://$PROJECT_DIR$/Packages/UIForia/Src/Extensions/DictionaryExtensions.cs" root0="FORCE_HIGHLIGHTING" />
+    <setting file="file://$PROJECT_DIR$/Packages/UIForia/Src/Binding/FieldSetterBinding.cs" root0="FORCE_HIGHLIGHTING" />
+    <setting file="file://$PROJECT_DIR$/Packages/UIForia/Src/Extensions/TypeExtensions.cs" root0="FORCE_HIGHLIGHTING" />
+    <setting file="file://$PROJECT_DIR$/Packages/UIForia/Src/Binding/RepeatBinding.cs" root0="FORCE_HIGHLIGHTING" />
+    <setting file="file://$PROJECT_DIR$/Packages/UIForia/Src/Expressions/AccessExpression_Property.cs" root0="FORCE_HIGHLIGHTING" />
+    <setting file="file://$PROJECT_DIR$/Packages/UIForia/Src/Expressions/ResolveExpression_Alias.cs" root0="FORCE_HIGHLIGHTING" />
+    <setting file="file://$PROJECT_DIR$/Packages/UIForia/Src/Binding/TextBinding_Multiple.cs" root0="FORCE_HIGHLIGHTING" />
+    <setting file="file://$PROJECT_DIR$/Packages/UIForia/Src/Expressions/OperatorExpression_Comparison.cs" root0="FORCE_HIGHLIGHTING" />
+    <setting file="file://$PROJECT_DIR$/Packages/UIForia/Src/Expressions/LiteralExpression_Enum.cs" root0="FORCE_HIGHLIGHTING" />
+    <setting file="file://$PROJECT_DIR$/Assets/Demos/SeedWindowFrame.cs" root0="FORCE_HIGHLIGHTING" />
+    <setting file="file://$PROJECT_DIR$/Packages/UIForia/Src/Binding/SwitchCaseBinding.cs" root0="FORCE_HIGHLIGHTING" />
+    <setting file="file://$PROJECT_DIR$/Packages/UIForia/Src/Expressions/LiteralExpression_Double.cs" root0="FORCE_HIGHLIGHTING" />
+    <setting file="file://$PROJECT_DIR$/Packages/UIForia/Src/Binding/CallbackBinding.cs" root0="FORCE_HIGHLIGHTING" />
+    <setting file="file://$PROJECT_DIR$/Packages/UIForia/Src/Expressions/Expression.cs" root0="FORCE_HIGHLIGHTING" />
+    <setting file="file://$PROJECT_DIR$/Packages/UIForia/Src/Binding/SwitchBindingInt.cs" root0="FORCE_HIGHLIGHTING" />
+    <setting file="file://$PROJECT_DIR$/Packages/UIForia/Src/Expressions/OperatorExpression_Equality.cs" root0="FORCE_HIGHLIGHTING" />
+    <setting file="file://$PROJECT_DIR$/Assets/Grid/GridDemo.cs" root0="FORCE_HIGHLIGHTING" />
+    <setting file="file://$PROJECT_DIR$/Packages/UIForia/Src/Expressions/ParenExpression.cs" root0="FORCE_HIGHLIGHTING" />
+    <setting file="file://$PROJECT_DIR$/Packages/UIForia/Src/Expressions/OperatorExpression_Arithmetic.cs" root0="FORCE_HIGHLIGHTING" />
+    <setting file="file://$PROJECT_DIR$/Packages/UIForia/Src/Binding/TextBinding_Single.cs" root0="FORCE_HIGHLIGHTING" />
+    <setting file="file://$PROJECT_DIR$/Packages/UIForia/Src/Binding/EnabledBinding.cs" root0="FORCE_HIGHLIGHTING" />
+    <setting file="file://$PROJECT_DIR$/Packages/UIForia/Src/Expressions/LiteralExpression_String.cs" root0="FORCE_HIGHLIGHTING" />
+    <setting file="file://$PROJECT_DIR$/Packages/UIForia/Src/Expressions/LiteralExpression_Float.cs" root0="FORCE_HIGHLIGHTING" />
+    <setting file="file://$PROJECT_DIR$/Packages/UIForia/Src/Binding/TemplateBinding.cs" root0="FORCE_HIGHLIGHTING" />
+    <setting file="file://$PROJECT_DIR$/Packages/UIForia/Src/Expressions/ExpressionContext.cs" root0="FORCE_HIGHLIGHTING" />
+    <setting file="file://$PROJECT_DIR$/Packages/UIForia/Src/Expressions/UnaryExpression_Minus.cs" root0="FORCE_HIGHLIGHTING" />
+    <setting file="file://$PROJECT_DIR$/Packages/UIForia/Src/Binding/DisabledBinding.cs" root0="FORCE_HIGHLIGHTING" />
+    <setting file="file://$PROJECT_DIR$/Packages/UIForia/Src/Expressions/MethodCallExpression_Static.cs" root0="FORCE_HIGHLIGHTING" />
+    <setting file="file://$PROJECT_DIR$/Packages/UIForia/Src/Expressions/MethodExpressionFactory.cs" root0="FORCE_HIGHLIGHTING" />
+    <setting file="file://$PROJECT_DIR$/Packages/UIForia/Src/Binding/InputBindings/InputBinding.cs" root0="FORCE_HIGHLIGHTING" />
+    <setting file="file://$PROJECT_DIR$/Packages/UIForia/Src/Binding/StyleBindings/StyleBinding.cs" root0="FORCE_HIGHLIGHTING" />
+    <setting file="file://$PROJECT_DIR$/Packages/UIForia/Src/Expressions/LiteralExpression_Int.cs" root0="FORCE_HIGHLIGHTING" />
+    <setting file="file://$PROJECT_DIR$/Packages/UIForia/Src/Expressions/Expression_Cast.cs" root0="FORCE_HIGHLIGHTING" />
+    <setting file="file://$PROJECT_DIR$/Packages/UIForia/Src/Parsing/TypeProcessor.cs" root0="FORCE_HIGHLIGHTING" />
+    <setting file="file://$USER_HOME$/UIForiaDrawing/Assets/SVG Importer/Plugins/Core/Implementation/SVG/DOM/Coordinate_Transform_Units/SVGMatrix.cs" root0="SKIP_HIGHLIGHTING" />
+    <setting file="file://$PROJECT_DIR$/Packages/UIForia/Src/Expressions/OperatorExpression_Ternary.cs" root0="FORCE_HIGHLIGHTING" />
+    <setting file="file://$PROJECT_DIR$/Packages/UIForia/Src/Expressions/OperatorExpression_StringConcat.cs" root0="FORCE_HIGHLIGHTING" />
+    <setting file="file://$PROJECT_DIR$/Packages/UIForia/Src/Parsing/TemplateParser.cs" root0="FORCE_HIGHLIGHTING" />
+    <setting file="file://$PROJECT_DIR$/Packages/UIForia/Src/Parsing/ProcessedType.cs" root0="FORCE_HIGHLIGHTING" />
+    <setting file="file://$PROJECT_DIR$/Packages/UIForia/Src/Expressions/AccessExpression_RootField.cs" root0="FORCE_HIGHLIGHTING" />
+    <setting file="file://$PROJECT_DIR$/Packages/UIForia/Src/Parsing/TextTemplateParser.cs" root0="FORCE_HIGHLIGHTING" />
+    <setting file="file://$PROJECT_DIR$/Packages/UIForia/Src/Expressions/LiteralExpression_Boolean.cs" root0="FORCE_HIGHLIGHTING" />
+    <setting file="file://$PROJECT_DIR$/Packages/UIForia/Src/Parsing/ContextDefinition.cs" root0="FORCE_HIGHLIGHTING" />
+    <setting file="file://$PROJECT_DIR$/Packages/UIForia/Src/Expressions/OperatorExpression_Boolean.cs" root0="FORCE_HIGHLIGHTING" />
+    <setting file="file://$PROJECT_DIR$/Packages/UIForia/Src/Parsing/AttributeDefinition.cs" root0="FORCE_HIGHLIGHTING" />
+    <setting file="file://$PROJECT_DIR$/Packages/UIForia/Src/Expressions/MethodCallExpression_Instance.cs" root0="FORCE_HIGHLIGHTING" />
+    <setting file="file://$PROJECT_DIR$/Packages/UIForia/Src/Parsing/ExpressionParser.cs" root0="FORCE_HIGHLIGHTING" />
+    <setting file="file://$PROJECT_DIR$/Packages/UIForia/Src/Shaders/UIForiaStencilPaint.shader" root0="FORCE_HIGHLIGHTING" />
+    <setting file="file://$PROJECT_DIR$/Packages/UIForia/Src/Expressions/UnaryExpression_Boolean.cs" root0="FORCE_HIGHLIGHTING" />
+    <setting file="file://$PROJECT_DIR$/Packages/UIForia/Src/Shaders/UIForiaStencil.shader" root0="FORCE_HIGHLIGHTING" />
+    <setting file="file://$PROJECT_DIR$/Packages/UIForia/Src/Expressions/UnaryExpression_Plus.cs" root0="FORCE_HIGHLIGHTING" />
+    <setting file="file://$PROJECT_DIR$/Packages/UIForia/Src/Util/MathUtil.cs" root0="FORCE_HIGHLIGHTING" />
+    <setting file="file://$PROJECT_DIR$/Packages/UIForia/Src/Expressions/ConstantExpression.cs" root0="FORCE_HIGHLIGHTING" />
+    <setting file="file://$PROJECT_DIR$/Packages/UIForia/Src/Parsing/AstNodes/ASTNode.cs" root0="FORCE_HIGHLIGHTING" />
+    <setting file="file://$PROJECT_DIR$/Packages/UIForia/Tests/TypeProcessorTests.cs" root0="FORCE_HIGHLIGHTING" />
+    <setting file="file://$PROJECT_DIR$/Packages/UIForia/Src/Parsing/AstNodes/OperatorType.cs" root0="FORCE_HIGHLIGHTING" />
+    <setting file="file://$PROJECT_DIR$/Packages/UIForia/Src/Parsing/AstNodes/OperatorNode.cs" root0="FORCE_HIGHLIGHTING" />
+    <setting file="file://$PROJECT_DIR$/Packages/UIForia/Tests/TemplateTests.cs" root0="FORCE_HIGHLIGHTING" />
+    <setting file="file://$PROJECT_DIR$/Packages/UIForia/Src/Parsing/AstNodes/IdentifierNode.cs" root0="FORCE_HIGHLIGHTING" />
+    <setting file="file://$PROJECT_DIR$/Packages/UIForia/Src/Parsing/AstNodes/FieldNotDefinedException.cs" root0="FORCE_HIGHLIGHTING" />
+    <setting file="file://$PROJECT_DIR$/Packages/UIForia/Src/Parsing/AstNodes/LiteralNode.cs" root0="FORCE_HIGHLIGHTING" />
+    <setting file="file://$PROJECT_DIR$/Packages/UIForia/Src/SVGX/SVGXStyle.cs" root0="FORCE_HIGHLIGHTING" />
+    <setting file="file://$PROJECT_DIR$/Packages/UIForia/Tests/ExpressionParserTests2.cs" root0="FORCE_HIGHLIGHTING" />
+    <setting file="file://$PROJECT_DIR$/Packages/UIForia/Src/SVGX/SVGXElement.cs" root0="FORCE_HIGHLIGHTING" />
+    <setting file="file://$PROJECT_DIR$/Packages/UIForia/Tests/StyleTests.cs" root0="FORCE_HIGHLIGHTING" />
+    <setting file="file://$PROJECT_DIR$/Packages/UIForia/Src/SVGX/SVGXTransform.cs" root0="FORCE_HIGHLIGHTING" />
+    <setting file="file://$PROJECT_DIR$/Packages/UIForia/Src/Parsing/Tokenizer/TokenStream.cs" root0="FORCE_HIGHLIGHTING" />
+    <setting file="file://$PROJECT_DIR$/Packages/UIForia/Src/SVGX/SVGXGroup.cs" root0="FORCE_HIGHLIGHTING" />
+    <setting file="file://$PROJECT_DIR$/Packages/UIForia/Src/SVGX/PathCommand.cs" root0="FORCE_HIGHLIGHTING" />
+    <setting file="file://$PROJECT_DIR$/Packages/UIForia/Src/Parsing/Tokenizer/DslToken.cs" root0="FORCE_HIGHLIGHTING" />
+    <setting file="file://$PROJECT_DIR$/Packages/UIForia/Tests/FlexLayoutColTests.cs" root0="FORCE_HIGHLIGHTING" />
+    <setting file="file://$PROJECT_DIR$/Packages/UIForia/Src/Shaders/UIForiaLine.shader" root0="FORCE_HIGHLIGHTING" />
+    <setting file="file://$PROJECT_DIR$/Packages/UIForia/Src/Parsing/Tokenizer/TokenType.cs" root0="FORCE_HIGHLIGHTING" />
+    <setting file="file://$PROJECT_DIR$/Packages/UIForia/Src/SVGX/SVGXBezier.cs" root0="FORCE_HIGHLIGHTING" />
+    <setting file="file://$PROJECT_DIR$/Packages/UIForia/Src/Parsing/Tokenizer/Tokenizer.cs" root0="FORCE_HIGHLIGHTING" />
+    <setting file="file://$PROJECT_DIR$/Packages/UIForia/Tests/InputCompilerBindingTests.cs" root0="FORCE_HIGHLIGHTING" />
+    <setting file="file://$PROJECT_DIR$/Packages/UIForia/Src/SVGX/SVGXRoot.cs" root0="FORCE_HIGHLIGHTING" />
+    <setting file="file://$PROJECT_DIR$/Packages/UIForia/Src/SVGX/SVGXPathCommandType.cs" root0="FORCE_HIGHLIGHTING" />
+    <setting file="file://$PROJECT_DIR$/Packages/UIForia/Src/Parsing/StyleParser/StyleParser.cs" root0="FORCE_HIGHLIGHTING" />
+    <setting file="file://$PROJECT_DIR$/Packages/UIForia/Src/SVGX/SVGXWand.cs" root0="FORCE_HIGHLIGHTING" />
+    <setting file="file://$PROJECT_DIR$/Packages/UIForia/Tests/ExpressionCompilerTests2.cs" root0="FORCE_HIGHLIGHTING" />
+    <setting file="file://$PROJECT_DIR$/Packages/UIForia/Src/Parsing/StyleParser/ParsedStyleSheet.cs" root0="FORCE_HIGHLIGHTING" />
+    <setting file="file://$PROJECT_DIR$/Packages/UIForia/Tests/TypeCheckTests.cs" root0="FORCE_HIGHLIGHTING" />
+    <setting file="file://$PROJECT_DIR$/Packages/UIForia/Tests/FlexLayoutRowTests.cs" root0="FORCE_HIGHLIGHTING" />
+    <setting file="file://$PROJECT_DIR$/Packages/UIForia/Tests/LayoutSystemTests.cs" root0="FORCE_HIGHLIGHTING" />
+    <setting file="file://$PROJECT_DIR$/Packages/UIForia/Tests/StyleBindingTests.cs" root0="FORCE_HIGHLIGHTING" />
+    <setting file="file://$PROJECT_DIR$/Packages/UIForia/Src/Routing/RouteParameter.cs" root0="FORCE_HIGHLIGHTING" />
+    <setting file="file://$PROJECT_DIR$/Packages/UIForia/Src/Routing/Router.cs" root0="FORCE_HIGHLIGHTING" />
+    <setting file="file://$PROJECT_DIR$/Packages/UIForia/Tests/ElementTests.cs" root0="FORCE_HIGHLIGHTING" />
+    <setting file="file://$PROJECT_DIR$/Packages/UIForia/Src/Shaders/UIForia.cginc" root0="FORCE_HIGHLIGHTING" />
+    <setting file="file://$PROJECT_DIR$/Packages/UIForia/Src/Shaders/UIForiaTextShader.shader" root0="FORCE_HIGHLIGHTING" />
+    <setting file="file://$PROJECT_DIR$/Packages/UIForia/Tests/ExpressionParserTests.cs" root0="FORCE_HIGHLIGHTING" />
+    <setting file="file://$PROJECT_DIR$/Packages/UIForia/Tests/ExpressionCompilerTests.cs" root0="FORCE_HIGHLIGHTING" />
+    <setting file="file://$PROJECT_DIR$/Packages/UIForia/Tests/BindingCompilerTests.cs" root0="FORCE_HIGHLIGHTING" />
+    <setting file="file://$PROJECT_DIR$/Packages/UIForia/Tests/RouterTests.cs" root0="FORCE_HIGHLIGHTING" />
+    <setting file="file://$PROJECT_DIR$/Packages/UIForia/Src/Shaders/UIStandardShader.shader" root0="FORCE_HIGHLIGHTING" />
+    <setting file="file://$PROJECT_DIR$/Packages/UIForia/Tests/BindingTests.cs" root0="FORCE_HIGHLIGHTING" />
+    <setting file="file://$PROJECT_DIR$/Packages/UIForia/Tests/GridLayoutTests.cs" root0="FORCE_HIGHLIGHTING" />
+    <setting file="file://$PROJECT_DIR$/Packages/UIForia/Src/Shaders/Debug.shader" root0="FORCE_HIGHLIGHTING" />
+    <setting file="file://$PROJECT_DIR$/Packages/UIForia/Src/Shaders/UIForiaDebutText.shader" root0="FORCE_HIGHLIGHTING" />
+    <setting file="file://$PROJECT_DIR$/Packages/UIForia/Tests/TemplateParsingTests.cs" root0="FORCE_HIGHLIGHTING" />
+    <setting file="file://$PROJECT_DIR$/Packages/UIForia/Tests/ElementQueryTests.cs" root0="FORCE_HIGHLIGHTING" />
+    <setting file="file://$PROJECT_DIR$/Packages/UIForia/Tests/InputSystem_MouseTests.cs" root0="FORCE_HIGHLIGHTING" />
+    <setting file="file://$PROJECT_DIR$/Packages/UIForia/Src/Systems/IStyleSystem.cs" root0="FORCE_HIGHLIGHTING" />
+    <setting file="file://$PROJECT_DIR$/Packages/UIForia/Tests/TokenizingTests.cs" root0="FORCE_HIGHLIGHTING" />
+    <setting file="file://$PROJECT_DIR$/Packages/UIForia/Tests/UIView_Tests.cs" root0="FORCE_HIGHLIGHTING" />
+    <setting file="file://$PROJECT_DIR$/Packages/UIForia/Src/Systems/StyleSystem.cs" root0="FORCE_HIGHLIGHTING" />
+    <setting file="file://$PROJECT_DIR$/Packages/UIForia/Src/Systems/RenderSystem.cs" root0="FORCE_HIGHLIGHTING" />
+    <setting file="file://$PROJECT_DIR$/Packages/UIForia/Tests/TestUtils.cs" root0="FORCE_HIGHLIGHTING" />
+    <setting file="file://$PROJECT_DIR$/Packages/UIForia/Src/Systems/ISystem.cs" root0="FORCE_HIGHLIGHTING" />
+    <setting file="file://$PROJECT_DIR$/Packages/UIForia/Src/Systems/BindingSystem.cs" root0="FORCE_HIGHLIGHTING" />
+    <setting file="file://$PROJECT_DIR$/Packages/UIForia/Tests/InputSystem_DragTests.cs" root0="FORCE_HIGHLIGHTING" />
+    <setting file="file://$PROJECT_DIR$/Packages/UIForia/Src/Systems/DefaultInputSystem.cs" root0="FORCE_HIGHLIGHTING" />
+    <setting file="file://$PROJECT_DIR$/Packages/UIForia/Src/Systems/IInputSystem.cs" root0="FORCE_HIGHLIGHTING" />
+    <setting file="file://$PROJECT_DIR$/Packages/UIForia/Src/Systems/ILayoutSystem.cs" root0="FORCE_HIGHLIGHTING" />
+    <setting file="file://$PROJECT_DIR$/Packages/UIForia/Src/Systems/InputSystem/InputSystem.cs" root0="FORCE_HIGHLIGHTING" />
+    <setting file="file://$PROJECT_DIR$/Packages/UIForia/Src/Systems/InputSystem/MouseState.cs" root0="FORCE_HIGHLIGHTING" />
+    <setting file="file://$PROJECT_DIR$/Packages/UIForia/Src/Elements/UISlotElement.cs" root0="FORCE_HIGHLIGHTING" />
+    <setting file="file://$PROJECT_DIR$/Packages/UIForia/Src/Parsing/StyleParser/ParseUtil.cs" root0="FORCE_HIGHLIGHTING" />
+    <setting file="file://$PROJECT_DIR$/Packages/UIForia/Src/Elements/ScrollbarDragEvent.cs" root0="FORCE_HIGHLIGHTING" />
+    <setting file="file://$PROJECT_DIR$/Packages/UIForia/Editor/PropertyGenerator.cs" root0="FORCE_HIGHLIGHTING" />
+    <setting file="file://$PROJECT_DIR$/Packages/UIForia/Src/Elements/UIElement.cs" root0="FORCE_HIGHLIGHTING" />
+    <setting file="file://$PROJECT_DIR$/Packages/UIForia/Src/Rendering/UIMeasurement.cs" root0="FORCE_HIGHLIGHTING" />
+    <setting file="file://$PROJECT_DIR$/Packages/UIForia/Src/Elements/UISwitchCaseElement.cs" root0="FORCE_HIGHLIGHTING" />
+    <setting file="file://$PROJECT_DIR$/Packages/UIForia/Src/Rendering/UIFixedLength.cs" root0="FORCE_HIGHLIGHTING" />
+    <setting file="file://$PROJECT_DIR$/Packages/UIForia/Src/Elements/UISwitchDefaultElement.cs" root0="FORCE_HIGHLIGHTING" />
+    <setting file="file://$PROJECT_DIR$/Packages/UIForia/Src/Elements/UIContainerElement.cs" root0="FORCE_HIGHLIGHTING" />
+    <setting file="file://$PROJECT_DIR$/Packages/UIForia/Src/Layout/LayoutResult.cs" root0="FORCE_HIGHLIGHTING" />
+    <setting file="file://$PROJECT_DIR$/Packages/UIForia/Src/_Generated1.cs" root0="FORCE_HIGHLIGHTING" />
+    <setting file="file://$PROJECT_DIR$/Packages/UIForia/Src/Layout/LayoutTypes/LayoutBox.cs" root0="FORCE_HIGHLIGHTING" />
+    <setting file="file://$PROJECT_DIR$/Packages/UIForia/Src/Systems/LayoutSystem.cs" root0="FORCE_HIGHLIGHTING" />
+    <setting file="file://$PROJECT_DIR$/Packages/UIForia/Src/Rendering/StyleProperty.cs" root0="FORCE_HIGHLIGHTING" />
+    <setting file="file://$PROJECT_DIR$/Packages/UIForia/Src/Elements/UIRepeatElement.cs" root0="FORCE_HIGHLIGHTING" />
+    <setting file="file://$PROJECT_DIR$/Packages/UIForia/Src/Elements/ElementColdData.cs" root0="FORCE_HIGHLIGHTING" />
+    <setting file="file://$PROJECT_DIR$/Packages/UIForia/Src/Elements/UIInputFieldElement.cs" root0="FORCE_HIGHLIGHTING" />
+    <setting file="file://$PROJECT_DIR$/Packages/UIForia/Src/Elements/UIRouterLinkElement.cs" root0="FORCE_HIGHLIGHTING" />
+    <setting file="file://$PROJECT_DIR$/Packages/UIForia/Src/Elements/UIImageElement.cs" root0="FORCE_HIGHLIGHTING" />
+    <setting file="file://$PROJECT_DIR$/Packages/UIForia/Src/Elements/RouteMatch.cs" root0="FORCE_HIGHLIGHTING" />
   </component>
   <component name="IdeDocumentHistory">
     <option name="CHANGED_PATHS">
       <list>
-        <option value="$PROJECT_DIR$/Assets/Klang/Seed/DataTypes/ColonyData.cs" />
-        <option value="$PROJECT_DIR$/Packages/UIForia/Src/Extensions/ListExtensions.cs" />
         <option value="$PROJECT_DIR$/Assets/Klang/Seed/UIForia/CharacterSchedule/CharacterSchedule.cs" />
         <option value="$PROJECT_DIR$/Packages/UIForia/Src/Util/LightList.cs" />
         <option value="$PROJECT_DIR$/Packages/UIForia/Src/Elements/UIElement.cs" />
@@ -613,17 +659,19 @@
         <option value="$PROJECT_DIR$/Packages/UIForia/Editor/UIForia/UIForiaHierarchyWindow.cs" />
         <option value="$PROJECT_DIR$/Packages/UIForia/Src/Shaders/UIForiaStencil.shader" />
         <option value="$PROJECT_DIR$/Packages/UIForia/Src/Shaders/UIForiaStencilPaint.shader" />
-        <option value="$PROJECT_DIR$/Packages/UIForia/Src/SVGX/SVGXStyle.cs" />
         <option value="$PROJECT_DIR$/Packages/UIForia/Src/SVGX/SVGXElement.cs" />
         <option value="$PROJECT_DIR$/Packages/UIForia/Src/SVGX/SVGXGroup.cs" />
         <option value="$PROJECT_DIR$/Packages/UIForia/Src/SVGX/SVGXTransform.cs" />
         <option value="$PROJECT_DIR$/Packages/UIForia/Src/SVGX/SVGXPathCommandType.cs" />
-        <option value="$PROJECT_DIR$/Packages/UIForia/Src/SVGX/PathCommand.cs" />
-        <option value="$PROJECT_DIR$/../../SVGTest/Assets/SVG Importer/Plugins/Core/Mesh/SVGGeomUtils.cs" />
-        <option value="$PROJECT_DIR$/Packages/UIForia/Src/SVGX/SVGXRoot.cs" />
+        <option value="$USER_HOME$/SVGTest/Assets/SVG Importer/Plugins/Core/Mesh/SVGGeomUtils.cs" />
         <option value="$PROJECT_DIR$/Packages/UIForia/Src/SVGX/SVGXBezier.cs" />
-        <option value="$PROJECT_DIR$/Packages/UIForia/Src/Shaders/UIForiaLine.shader" />
+        <option value="$USER_HOME$/UIForiaDrawing/Assets/SVG Importer/Plugins/Core/Implementation/SVG/DOM/Paths/SVGPathElement.cs" />
+        <option value="$PROJECT_DIR$/Packages/UIForia/Src/SVGX/PathCommand.cs" />
         <option value="$PROJECT_DIR$/Packages/UIForia/Src/SVGX/SVGXWand.cs" />
+        <option value="$PROJECT_DIR$/Packages/UIForia/Src/SVGX/SVGXMatrix.cs" />
+        <option value="$PROJECT_DIR$/Packages/UIForia/Src/Shaders/UIForiaLine.shader" />
+        <option value="$PROJECT_DIR$/Packages/UIForia/Src/SVGX/SVGXStyle.cs" />
+        <option value="$PROJECT_DIR$/Packages/UIForia/Src/SVGX/SVGXRoot.cs" />
       </list>
     </option>
   </component>
@@ -632,11 +680,10 @@
       <facet id="riderModule/invalid/Default Android Facet" />
     </ignored-facets>
   </component>
-  <component name="ProjectFrameBounds" extendedState="6">
-    <option name="x" value="4258" />
-    <option name="y" value="-20" />
-    <option name="width" value="3864" />
-    <option name="height" value="2112" />
+  <component name="ProjectFrameBounds">
+    <option name="x" value="-7" />
+    <option name="width" value="1734" />
+    <option name="height" value="1407" />
   </component>
   <component name="ProjectLevelVcsManager">
     <ConfirmationsSetting value="2" id="Add" />
@@ -646,7 +693,6 @@
       <foldersAlwaysOnTop value="true" />
     </navigator>
     <panes>
-      <pane id="FileSystemExplorer" />
       <pane id="SolutionExplorer">
         <subPane>
           <expand>
@@ -670,7 +716,6 @@
         </subPane>
         <option name="show-all-files" value="false" />
       </pane>
-      <pane id="AssemblyExplorer" />
       <pane id="UnityExplorer">
         <subPane>
           <expand>
@@ -689,11 +734,20 @@
               <item name="UIForia" type="a82a7030:PackageNode" />
               <item name="Src" type="1045f7f1:UnityExplorerNode" />
             </path>
+            <path>
+              <item name="Project" type="e068e287:UnityExplorerRootNode" />
+              <item name="Packages" type="4e2708dd:PackagesRoot" />
+              <item name="UIForia" type="a82a7030:PackageNode" />
+              <item name="Src" type="1045f7f1:UnityExplorerNode" />
+              <item name="SVGX" type="1045f7f1:UnityExplorerNode" />
+            </path>
           </expand>
           <select />
         </subPane>
         <option name="show-hidden-items" value="false" />
       </pane>
+      <pane id="FileSystemExplorer" />
+      <pane id="AssemblyExplorer" />
     </panes>
   </component>
   <component name="PropertiesComponent">
@@ -836,11 +890,12 @@
       <workItem from="1547572632811" duration="201000" />
       <workItem from="1547573099800" duration="7201000" />
       <workItem from="1548059560100" duration="48116000" />
+      <workItem from="1548272691551" duration="6684000" />
     </task>
     <servers />
   </component>
   <component name="TimeTrackingManager">
-    <option name="totallyTimeSpent" value="849895000" />
+    <option name="totallyTimeSpent" value="856579000" />
   </component>
   <component name="TodoView">
     <todo-panel id="selected-file">
@@ -852,10 +907,10 @@
     </todo-panel>
   </component>
   <component name="ToolWindowManager">
-    <frame x="3833" y="-7" width="2575" height="1415" extended-state="6" />
+    <frame x="-7" y="0" width="1734" height="1407" extended-state="0" />
     <editor active="true" />
     <layout>
-      <window_info content_ui="combo" id="Project" order="0" sideWeight="0.4988372" visible="true" weight="0.12842943" />
+      <window_info active="true" content_ui="combo" id="Project" order="0" sideWeight="0.4988372" visible="true" weight="0.260454" />
       <window_info id="Structure" order="1" sideWeight="0.50116277" side_tool="true" weight="0.12246521" />
       <window_info id="Favorites" order="2" side_tool="true" />
       <window_info id="Image Layers" order="3" />
@@ -885,7 +940,7 @@
       <window_info anchor="right" id="Commander" internal_type="SLIDING" order="0" type="SLIDING" weight="0.4" />
       <window_info anchor="right" id="Ant Build" order="1" weight="0.25" />
       <window_info anchor="right" content_ui="combo" id="Hierarchy" order="2" weight="0.25" />
-      <window_info active="true" anchor="right" id="Errors In Solution" order="3" visible="true" weight="0.18409543" />
+      <window_info anchor="right" id="Errors In Solution" order="3" weight="0.18404004" />
       <window_info anchor="right" id="Database" order="4" />
       <window_info anchor="right" id="Capture Analysis" order="5" />
       <window_info anchor="right" id="Device File Explorer" order="6" side_tool="true" />
@@ -1012,500 +1067,6 @@
     </expressions>
   </component>
   <component name="editorHistoryManager">
-    <entry file="file://$PROJECT_DIR$/Assets/Transform/TransformPlayground.cs">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="48">
-          <caret line="3" column="35" lean-forward="true" selection-start-line="3" selection-start-column="35" selection-end-line="3" selection-end-column="35" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/Packages/UIForia/Src/IntMap.cs">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="-192">
-          <folding>
-            <marker date="1542390278877" expanded="true" signature="6:93" ph="..." />
-            <marker date="1542390278877" expanded="true" signature="113:11679" ph="{...}" />
-            <marker date="1542390278877" expanded="true" signature="143:8875" ph="{...}" />
-            <marker date="1542390278877" expanded="true" signature="412:747" ph="{...}" />
-            <marker date="1542390278877" expanded="true" signature="662:710" ph="{...}" />
-            <marker date="1542390278877" expanded="true" signature="869:918" ph="{...}" />
-            <marker date="1542390278877" expanded="true" signature="1004:1220" ph="{...}" />
-            <marker date="1542390278877" expanded="true" signature="1066:1152" ph="{...}" />
-            <marker date="1542390278877" expanded="true" signature="1288:2153" ph="{...}" />
-            <marker date="1542390278877" expanded="true" signature="1490:2116" ph="{...}" />
-            <marker date="1542390278877" expanded="true" signature="1570:2102" ph="{...}" />
-            <marker date="1542390278877" expanded="true" signature="1606:1688" ph="{...}" />
-            <marker date="1542390278877" expanded="true" signature="1688:1799" ph="{...}" />
-            <marker date="1542390278877" expanded="true" signature="2186:2512" ph="{...}" />
-            <marker date="1542390278877" expanded="true" signature="2238:2421" ph="{...}" />
-            <marker date="1542390278877" expanded="true" signature="2308:2372" ph="{...}" />
-            <marker date="1542390278877" expanded="true" signature="2612:2773" ph="{...}" />
-            <marker date="1542390278877" expanded="true" signature="2674:2730" ph="{...}" />
-            <marker date="1542390278877" expanded="true" signature="2833:3132" ph="{...}" />
-            <marker date="1542390278877" expanded="true" signature="2862:3122" ph="{...}" />
-            <marker date="1542390278877" expanded="true" signature="2915:2971" ph="{...}" />
-            <marker date="1542390278877" expanded="true" signature="3205:3256" ph="{...}" />
-            <marker date="1542390278877" expanded="true" signature="3288:4111" ph="{...}" />
-            <marker date="1542390278877" expanded="true" signature="3460:3511" ph="{...}" />
-            <marker date="1542390278877" expanded="true" signature="3686:3933" ph="{...}" />
-            <marker date="1542390278877" expanded="true" signature="3732:3919" ph="{...}" />
-            <marker date="1542390278877" expanded="true" signature="4182:4489" ph="{...}" />
-            <marker date="1542390278877" expanded="true" signature="4313:4456" ph="{...}" />
-            <marker date="1542390278877" expanded="true" signature="4393:4442" ph="{...}" />
-            <marker date="1542390278877" expanded="true" signature="4577:5729" ph="{...}" />
-            <marker date="1542390278877" expanded="true" signature="4755:5075" ph="{...}" />
-            <marker date="1542390278877" expanded="true" signature="4835:5061" ph="{...}" />
-            <marker date="1542390278877" expanded="true" signature="4866:4969" ph="{...}" />
-            <marker date="1542390278877" expanded="true" signature="5130:5256" ph="{...}" />
-            <marker date="1542390278877" expanded="true" signature="5256:5490" ph="{...}" />
-            <marker date="1542390278877" expanded="true" signature="5315:5420" ph="{...}" />
-            <marker date="1542390278877" expanded="true" signature="5850:6620" ph="{...}" />
-            <marker date="1542390278877" expanded="true" signature="5883:5973" ph="{...}" />
-            <marker date="1542390278877" expanded="true" signature="6003:6045" ph="{...}" />
-            <marker date="1542390278877" expanded="true" signature="6106:6203" ph="{...}" />
-            <marker date="1542390278877" expanded="true" signature="6228:6340" ph="/* count not Count -&gt; we don't know if there are holes in the array ... */" />
-            <marker date="1542390278877" expanded="true" signature="6385:6563" ph="{...}" />
-            <marker date="1542390278877" expanded="true" signature="6433:6549" ph="{...}" />
-            <marker date="1542390278877" expanded="true" signature="6727:7417" ph="{...}" />
-            <marker date="1542390278877" expanded="true" signature="6760:6831" ph="{...}" />
-            <marker date="1542390278877" expanded="true" signature="6861:6903" ph="{...}" />
-            <marker date="1542390278877" expanded="true" signature="6964:7042" ph="{...}" />
-            <marker date="1542390278877" expanded="true" signature="7067:7179" ph="/* count not Count -&gt; we don't know if there are holes in the array ... */" />
-            <marker date="1542390278877" expanded="true" signature="7224:7360" ph="{...}" />
-            <marker date="1542390278877" expanded="true" signature="7272:7346" ph="{...}" />
-            <marker date="1542390278877" expanded="true" signature="7503:8148" ph="{...}" />
-            <marker date="1542390278877" expanded="true" signature="7536:7628" ph="{...}" />
-            <marker date="1542390278877" expanded="true" signature="7669:7711" ph="{...}" />
-            <marker date="1542390278877" expanded="true" signature="7772:7869" ph="{...}" />
-            <marker date="1542390278877" expanded="true" signature="7926:8104" ph="{...}" />
-            <marker date="1542390278877" expanded="true" signature="7974:8090" ph="{...}" />
-            <marker date="1542390278877" expanded="true" signature="8179:8310" ph="{...}" />
-            <marker date="1542390278877" expanded="true" signature="8363:8569" ph="{...}" />
-            <marker date="1542390278877" expanded="true" signature="8409:8559" ph="{...}" />
-            <marker date="1542390278877" expanded="true" signature="8457:8545" ph="{...}" />
-            <marker date="1542390278877" expanded="true" signature="8650:8868" ph="{...}" />
-            <marker date="1542390278877" expanded="true" signature="8696:8858" ph="{...}" />
-            <marker date="1542390278877" expanded="true" signature="8744:8844" ph="{...}" />
-            <marker date="1542390278877" expanded="true" signature="8915:11676" ph="{...}" />
-            <marker date="1542390278877" expanded="true" signature="9030:9267" ph="{...}" />
-            <marker date="1542390278877" expanded="true" signature="9159:9218" ph="{...}" />
-            <marker date="1542390278877" expanded="true" signature="9313:9821" ph="{...}" />
-            <marker date="1542390278877" expanded="true" signature="9381:9529" ph="{...}" />
-            <marker date="1542390278877" expanded="true" signature="9462:9515" ph="{...}" />
-            <marker date="1542390278877" expanded="true" signature="9612:9787" ph="{...}" />
-            <marker date="1542390278877" expanded="true" signature="9684:9741" ph="{...}" />
-            <marker date="1542390278877" expanded="true" signature="9874:10263" ph="{...}" />
-            <marker date="1542390278877" expanded="true" signature="9914:10218" ph="{...}" />
-            <marker date="1542390278877" expanded="true" signature="10042:10175" ph="{...}" />
-            <marker date="1542390278877" expanded="true" signature="10096:10157" ph="{...}" />
-            <marker date="1542390278877" expanded="true" signature="10326:11668" ph="{...}" />
-          </folding>
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/Packages/UIForia/Src/Util/MeasurementPair.cs">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="608">
-          <caret line="38" column="5" selection-start-line="17" selection-start-column="3" selection-end-line="38" selection-end-column="5" />
-          <folding>
-            <marker date="1548070835988" expanded="true" signature="46:986" ph="{...}" />
-            <marker date="1548070835988" expanded="true" signature="168:215" ph="{...}" />
-            <marker date="1548070835988" expanded="true" signature="249:303" ph="{...}" />
-            <marker date="1548070835988" expanded="true" signature="385:447" ph="{...}" />
-            <marker date="1548070835988" expanded="true" signature="529:569" ph="{...}" />
-            <marker date="1548070835988" expanded="true" signature="617:679" ph="{...}" />
-            <marker date="1548070835988" expanded="true" signature="725:840" ph="{...}" />
-            <marker date="1548070835988" expanded="true" signature="880:979" ph="{...}" />
-            <marker date="1548070835988" expanded="true" signature="900:973" ph="{...}" />
-          </folding>
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/Assets/Demos/ChatGroupIcon.cs">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="592">
-          <caret line="37" column="42" selection-start-line="37" selection-start-column="42" selection-end-line="37" selection-end-column="42" />
-          <folding>
-            <marker date="1548071006601" expanded="true" signature="6:170" ph="..." />
-            <marker date="1548071006601" expanded="true" signature="187:2056" ph="{...}" />
-            <marker date="1548071006601" expanded="true" signature="275:2053" ph="{...}" />
-            <marker date="1548071006601" expanded="true" signature="343:2046" ph="{...}" />
-            <marker date="1548071006601" expanded="true" signature="431:588" ph="{...}" />
-            <marker date="1548071006601" expanded="true" signature="470:573" ph="{...}" />
-            <marker date="1548071006601" expanded="true" signature="686:843" ph="{...}" />
-            <marker date="1548071006601" expanded="true" signature="725:828" ph="{...}" />
-            <marker date="1548071006601" expanded="true" signature="956:1717" ph="{...}" />
-            <marker date="1548071006601" expanded="true" signature="995:1702" ph="{...}" />
-            <marker date="1548071006601" expanded="true" signature="1821:2035" ph="{...}" />
-            <marker date="1548071006601" expanded="true" signature="1860:2020" ph="{...}" />
-          </folding>
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/Packages/UIForia/Src/Rendering/UIStyleSet/UIStyleSet.cs">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="402">
-          <caret line="113" column="55" selection-start-line="113" selection-start-column="55" selection-end-line="113" selection-end-column="55" />
-          <folding>
-            <marker date="1548071207739" expanded="true" signature="6:160" ph="..." />
-            <marker date="1548071207739" expanded="true" signature="190:30011" ph="{...}" />
-            <marker date="1548071207739" expanded="true" signature="295:30008" ph="{...}" />
-            <marker date="1548071207739" expanded="true" signature="306:412" ph="/* handful of these could be replaced with a single IntMap, ... */" />
-            <marker date="1548071207739" expanded="true" signature="1051:1384" ph="{...}" />
-            <marker date="1548071207739" expanded="true" signature="2096:2303" ph="{...}" />
-            <marker date="1548071207739" expanded="true" signature="2367:2625" ph="{...}" />
-            <marker date="1548071207739" expanded="true" signature="2698:2897" ph="{...}" />
-            <marker date="1548071207739" expanded="true" signature="2958:3177" ph="{...}" />
-            <marker date="1548071207739" expanded="true" signature="3249:3450" ph="{...}" />
-            <marker date="1548071207739" expanded="true" signature="3510:3728" ph="{...}" />
-            <marker date="1548071207739" expanded="true" signature="3802:4005" ph="{...}" />
-            <marker date="1548071207739" expanded="true" signature="4067:4290" ph="{...}" />
-            <marker date="1548071207739" expanded="true" signature="4381:4500" ph="{...}" />
-            <marker date="1548071207739" expanded="true" signature="4586:4885" ph="{...}" />
-            <marker date="1548071207739" expanded="true" signature="4964:5083" ph="{...}" />
-            <marker date="1548071207739" expanded="true" signature="5172:5287" ph="{...}" />
-            <marker date="1548071207739" expanded="true" signature="5339:5558" ph="{...}" />
-            <marker date="1548071207739" expanded="true" signature="5465:5522" ph="{...}" />
-            <marker date="1548071207739" expanded="true" signature="5595:6754" ph="{...}" />
-            <marker date="1548071207739" expanded="true" signature="5734:6447" ph="{...}" />
-            <marker date="1548071207739" expanded="true" signature="5892:5941" ph="{...}" />
-            <marker date="1548071207739" expanded="true" signature="6117:6433" ph="{...}" />
-            <marker date="1548071207739" expanded="true" signature="6193:6415" ph="{...}" />
-            <marker date="1548071207739" expanded="true" signature="6502:6620" ph="{...}" />
-            <marker date="1548071207739" expanded="true" signature="6805:9561" ph="{...}" />
-            <marker date="1548071207739" expanded="true" signature="6882:6921" ph="{...}" />
-            <marker date="1548071207739" expanded="true" signature="7055:7094" ph="{...}" />
-            <marker date="1548071207739" expanded="true" signature="7233:7930" ph="{...}" />
-            <marker date="1548071207739" expanded="true" signature="7467:7916" ph="{...}" />
-            <marker date="1548071207739" expanded="true" signature="7629:7898" ph="{...}" />
-            <marker date="1548071207739" expanded="true" signature="7709:7876" ph="{...}" />
-            <marker date="1548071207739" expanded="true" signature="7944:8061" ph="/* LightList&lt;StyleProperty&gt; changeSet = styleSystem.GetChangeSet(element.id); ... */" />
-            <marker date="1548071207739" expanded="true" signature="8115:9390" ph="{...}" />
-            <marker date="1548071207739" expanded="true" signature="8174:8374" ph="/* for each property we are updating ... */" />
-            <marker date="1548071207739" expanded="true" signature="8457:8731" ph="{...}" />
-            <marker date="1548071207739" expanded="true" signature="8963:9138" ph="{...}" />
-            <marker date="1548071207739" expanded="true" signature="9303:9376" ph="{...}" />
-            <marker date="1548071207739" expanded="true" signature="9612:11511" ph="{...}" />
-            <marker date="1548071207739" expanded="true" signature="9689:9728" ph="{...}" />
-            <marker date="1548071207739" expanded="true" signature="9864:9903" ph="{...}" />
-            <marker date="1548071207739" expanded="true" signature="10042:10565" ph="{...}" />
-            <marker date="1548071207739" expanded="true" signature="10099:10148" ph="{...}" />
-            <marker date="1548071207739" expanded="true" signature="10302:10551" ph="{...}" />
-            <marker date="1548071207739" expanded="true" signature="10378:10533" ph="{...}" />
-            <marker date="1548071207739" expanded="true" signature="10620:11340" ph="{...}" />
-            <marker date="1548071207739" expanded="true" signature="10678:10770" ph="/* get old value ... */" />
-            <marker date="1548071207739" expanded="true" signature="10936:11175" ph="{...}" />
-            <marker date="1548071207739" expanded="true" signature="10984:11157" ph="{...}" />
-            <marker date="1548071207739" expanded="true" signature="11175:11326" ph="{...}" />
-            <marker date="1548071207739" expanded="true" signature="11577:12178" ph="{...}" />
-            <marker date="1548071207739" expanded="true" signature="11649:11694" ph="{...}" />
-            <marker date="1548071207739" expanded="true" signature="11868:12059" ph="{...}" />
-            <marker date="1548071207739" expanded="true" signature="11911:12014" ph="{...}" />
-            <marker date="1548071207739" expanded="true" signature="12059:12168" ph="{...}" />
-            <marker date="1548071207739" expanded="true" signature="12244:12341" ph="{...}" />
-            <marker date="1548071207739" expanded="true" signature="12391:12450" ph="{...}" />
-            <marker date="1548071207739" expanded="true" signature="12513:12607" ph="{...}" />
-            <marker date="1548071207739" expanded="true" signature="13044:13388" ph="{...}" />
-            <marker date="1548071207739" expanded="true" signature="13166:13350" ph="{...}" />
-            <marker date="1548071207739" expanded="true" signature="13281:13336" ph="{...}" />
-            <marker date="1548071207739" expanded="true" signature="14250:14325" ph="{...}" />
-            <marker date="1548071207739" expanded="true" signature="14441:15007" ph="{...}" />
-            <marker date="1548071207739" expanded="true" signature="14476:14997" ph="{...}" />
-            <marker date="1548071207739" expanded="true" signature="15121:15688" ph="{...}" />
-            <marker date="1548071207739" expanded="true" signature="15156:15678" ph="{...}" />
-            <marker date="1548071207739" expanded="true" signature="15744:16403" ph="{...}" />
-            <marker date="1548071207739" expanded="true" signature="15791:15830" ph="{...}" />
-            <marker date="1548071207739" expanded="true" signature="16467:16935" ph="{...}" />
-            <marker date="1548071207739" expanded="true" signature="17008:18372" ph="{...}" />
-            <marker date="1548071207739" expanded="true" signature="17187:17301" ph="{...}" />
-            <marker date="1548071207739" expanded="true" signature="17470:18294" ph="{...}" />
-            <marker date="1548071207739" expanded="true" signature="17651:17904" ph="{...}" />
-            <marker date="1548071207739" expanded="true" signature="17713:17886" ph="{...}" />
-            <marker date="1548071207739" expanded="true" signature="17904:18280" ph="{...}" />
-            <marker date="1548071207739" expanded="true" signature="17996:18119" ph="{...}" />
-            <marker date="1548071207739" expanded="true" signature="18449:19810" ph="{...}" />
-            <marker date="1548071207739" expanded="true" signature="18625:18739" ph="{...}" />
-            <marker date="1548071207739" expanded="true" signature="18908:19732" ph="{...}" />
-            <marker date="1548071207739" expanded="true" signature="19089:19342" ph="{...}" />
-            <marker date="1548071207739" expanded="true" signature="19151:19324" ph="{...}" />
-            <marker date="1548071207739" expanded="true" signature="19342:19718" ph="{...}" />
-            <marker date="1548071207739" expanded="true" signature="19434:19557" ph="{...}" />
-            <marker date="1548071207739" expanded="true" signature="19911:20281" ph="{...}" />
-            <marker date="1548071207739" expanded="true" signature="19971:20204" ph="{...}" />
-            <marker date="1548071207739" expanded="true" signature="20093:20190" ph="{...}" />
-            <marker date="1548071207739" expanded="true" signature="20427:22219" ph="{...}" />
-            <marker date="1548071207739" expanded="true" signature="20570:20879" ph="{...}" />
-            <marker date="1548071207739" expanded="true" signature="20660:20865" ph="{...}" />
-            <marker date="1548071207739" expanded="true" signature="20910:20949" ph="{...}" />
-            <marker date="1548071207739" expanded="true" signature="21097:21171" ph="{...}" />
-            <marker date="1548071207739" expanded="true" signature="21208:21247" ph="{...}" />
-            <marker date="1548071207739" expanded="true" signature="21464:21535" ph="{...}" />
-            <marker date="1548071207739" expanded="true" signature="21590:22209" ph="{...}" />
-            <marker date="1548071207739" expanded="true" signature="21797:22036" ph="{...}" />
-            <marker date="1548071207739" expanded="true" signature="21845:22018" ph="{...}" />
-            <marker date="1548071207739" expanded="true" signature="22036:22195" ph="{...}" />
-            <marker date="1548071207739" expanded="true" signature="22255:22342" ph="{...}" />
-            <marker date="1548071207739" expanded="true" signature="22418:22586" ph="{...}" />
-            <marker date="1548071207739" expanded="true" signature="22773:23269" ph="{...}" />
-            <marker date="1548071207739" expanded="true" signature="22833:23140" ph="{...}" />
-            <marker date="1548071207739" expanded="true" signature="22894:22943" ph="{...}" />
-            <marker date="1548071207739" expanded="true" signature="23070:23126" ph="{...}" />
-            <marker date="1548071207739" expanded="true" signature="23478:23885" ph="{...}" />
-            <marker date="1548071207739" expanded="true" signature="23538:23801" ph="{...}" />
-            <marker date="1548071207739" expanded="true" signature="23599:23648" ph="{...}" />
-            <marker date="1548071207739" expanded="true" signature="23735:23787" ph="{...}" />
-            <marker date="1548071207739" expanded="true" signature="23954:26602" ph="{...}" />
-            <marker date="1548071207739" expanded="true" signature="23995:24111" ph="{...}" />
-            <marker date="1548071207739" expanded="true" signature="24140:26592" ph="{...}" />
-            <marker date="1548071207739" expanded="true" signature="24236:24541" ph="{...}" />
-            <marker date="1548071207739" expanded="true" signature="24685:24986" ph="{...}" />
-            <marker date="1548071207739" expanded="true" signature="25131:25436" ph="{...}" />
-            <marker date="1548071207739" expanded="true" signature="25586:25927" ph="{...}" />
-            <marker date="1548071207739" expanded="true" signature="26077:26414" ph="{...}" />
-            <marker date="1548071207739" expanded="true" signature="26672:28719" ph="{...}" />
-            <marker date="1548071207739" expanded="true" signature="26714:26763" ph="{...}" />
-            <marker date="1548071207739" expanded="true" signature="26823:28678" ph="{...}" />
-            <marker date="1548071207739" expanded="true" signature="26891:26940" ph="{...}" />
-            <marker date="1548071207739" expanded="true" signature="27014:28664" ph="{...}" />
-            <marker date="1548071207739" expanded="true" signature="27085:27871" ph="{...}" />
-            <marker date="1548071207739" expanded="true" signature="27143:27849" ph="{...}" />
-            <marker date="1548071207739" expanded="true" signature="27998:28646" ph="{...}" />
-            <marker date="1548071207739" expanded="true" signature="28113:28201" ph="{...}" />
-            <marker date="1548071207739" expanded="true" signature="28253:28340" ph="{...}" />
-            <marker date="1548071207739" expanded="true" signature="28393:28481" ph="{...}" />
-            <marker date="1548071207739" expanded="true" signature="28534:28624" ph="{...}" />
-            <marker date="1548071207739" expanded="true" signature="28768:28813" ph="{...}" />
-            <marker date="1548071207739" expanded="true" signature="28889:29743" ph="{...}" />
-            <marker date="1548071207739" expanded="true" signature="28997:29081" ph="{...}" />
-            <marker date="1548071207739" expanded="true" signature="29339:29570" ph="{...}" />
-            <marker date="1548071207739" expanded="true" signature="29387:29556" ph="{...}" />
-            <marker date="1548071207739" expanded="true" signature="29570:29733" ph="{...}" />
-            <marker date="1548071207739" expanded="true" signature="29809:30001" ph="{...}" />
-            <marker date="1548071207739" expanded="true" signature="29870:29991" ph="{...}" />
-          </folding>
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/Packages/UIForia/Src/Rendering/UIStyle.cs">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="410">
-          <caret line="89" column="24" selection-start-line="89" selection-start-column="24" selection-end-line="89" selection-end-column="24" />
-          <folding>
-            <marker date="1548071207728" expanded="true" signature="6:146" ph="..." />
-            <marker date="1548071207728" expanded="true" signature="176:7076" ph="{...}" />
-            <marker date="1548071207728" expanded="true" signature="250:7073" ph="{...}" />
-            <marker date="1548071207728" expanded="true" signature="308:851" ph="{...}" />
-            <marker date="1548071207728" expanded="true" signature="1112:1186" ph="{...}" />
-            <marker date="1548071207728" expanded="true" signature="1227:1304" ph="{...}" />
-            <marker date="1548071207728" expanded="true" signature="1425:1884" ph="{...}" />
-            <marker date="1548071207728" expanded="true" signature="1443:1874" ph="{...}" />
-            <marker date="1548071207728" expanded="true" signature="1925:2242" ph="{...}" />
-            <marker date="1548071207728" expanded="true" signature="2045:2232" ph="{...}" />
-            <marker date="1548071207728" expanded="true" signature="2308:2504" ph="{...}" />
-            <marker date="1548071207728" expanded="true" signature="2372:2467" ph="{...}" />
-            <marker date="1548071207728" expanded="true" signature="2590:3008" ph="{...}" />
-            <marker date="1548071207728" expanded="true" signature="2654:2957" ph="{...}" />
-            <marker date="1548071207728" expanded="true" signature="2723:2943" ph="{...}" />
-            <marker date="1548071207728" expanded="true" signature="3094:3513" ph="{...}" />
-            <marker date="1548071207728" expanded="true" signature="3158:3462" ph="{...}" />
-            <marker date="1548071207728" expanded="true" signature="3227:3448" ph="{...}" />
-            <marker date="1548071207728" expanded="true" signature="3611:4030" ph="{...}" />
-            <marker date="1548071207728" expanded="true" signature="3675:3977" ph="{...}" />
-            <marker date="1548071207728" expanded="true" signature="3744:3963" ph="{...}" />
-            <marker date="1548071207728" expanded="true" signature="4116:4529" ph="{...}" />
-            <marker date="1548071207728" expanded="true" signature="4180:4478" ph="{...}" />
-            <marker date="1548071207728" expanded="true" signature="4249:4464" ph="{...}" />
-            <marker date="1548071207728" expanded="true" signature="4599:4751" ph="{...}" />
-            <marker date="1548071207728" expanded="true" signature="4817:4971" ph="{...}" />
-            <marker date="1548071207728" expanded="true" signature="5038:5174" ph="{...}" />
-            <marker date="1548071207728" expanded="true" signature="5244:5423" ph="{...}" />
-            <marker date="1548071207728" expanded="true" signature="5491:6247" ph="{...}" />
-            <marker date="1548071207728" expanded="true" signature="5589:5896" ph="{...}" />
-            <marker date="1548071207728" expanded="true" signature="5657:5858" ph="{...}" />
-            <marker date="1548071207728" expanded="true" signature="5730:5840" ph="{...}" />
-            <marker date="1548071207728" expanded="true" signature="6008:6191" ph="{...}" />
-            <marker date="1548071207728" expanded="true" signature="6077:6177" ph="{...}" />
-            <marker date="1548071207728" expanded="true" signature="6326:6630" ph="{...}" />
-            <marker date="1548071207728" expanded="true" signature="6390:6541" ph="{...}" />
-            <marker date="1548071207728" expanded="true" signature="6459:6527" ph="{...}" />
-            <marker date="1548071207728" expanded="true" signature="6730:7066" ph="{...}" />
-            <marker date="1548071207728" expanded="true" signature="6794:6982" ph="{...}" />
-            <marker date="1548071207728" expanded="true" signature="6863:6968" ph="{...}" />
-          </folding>
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/Packages/UIForia/Src/_Generated3.cs">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="434">
-          <caret line="322" column="56" selection-start-line="322" selection-start-column="56" selection-end-line="322" selection-end-column="56" />
-          <folding>
-            <marker date="1548074561535" expanded="true" signature="6:269" ph="..." />
-            <marker date="1548074561535" expanded="true" signature="350:33551" ph="{...}" />
-            <marker date="1548074561535" expanded="true" signature="406:33549" ph="{...}" />
-            <marker date="1548074561535" expanded="true" signature="24461:33544" ph="{...}" />
-            <marker date="1548074561535" expanded="true" signature="24461:33546" ph="{...}" />
-          </folding>
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/Packages/UIForia/Src/Rendering/TransformOffset.cs">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="144">
-          <caret line="9" column="23" selection-start-line="9" selection-start-column="23" selection-end-line="9" selection-end-column="23" />
-          <folding>
-            <marker date="1548170921252" expanded="true" signature="6:79" ph="..." />
-            <marker date="1548170921252" expanded="true" signature="99:3127" ph="{...}" />
-            <marker date="1548170921252" expanded="true" signature="136:1989" ph="{...}" />
-            <marker date="1548170921252" expanded="true" signature="289:362" ph="{...}" />
-            <marker date="1548170921252" expanded="true" signature="535:593" ph="{...}" />
-            <marker date="1548170921252" expanded="true" signature="653:732" ph="{...}" />
-            <marker date="1548170921252" expanded="true" signature="782:909" ph="{...}" />
-            <marker date="1548170921252" expanded="true" signature="953:1067" ph="{...}" />
-            <marker date="1548170921252" expanded="true" signature="977:1057" ph="{...}" />
-            <marker date="1548170921252" expanded="true" signature="1161:1379" ph="{...}" />
-            <marker date="1548170921252" expanded="true" signature="1232:1295" ph="{...}" />
-            <marker date="1548170921252" expanded="true" signature="1465:1513" ph="{...}" />
-            <marker date="1548170921252" expanded="true" signature="1582:1583" ph="{...}" />
-            <marker date="1548170921252" expanded="true" signature="1732:1811" ph="{...}" />
-            <marker date="1548170921252" expanded="true" signature="1883:1970" ph="{...}" />
-            <marker date="1548170921252" expanded="true" signature="2038:2143" ph="{...}" />
-            <marker date="1548170921252" expanded="true" signature="2029:3124" ph="{...}" />
-            <marker date="1548170921252" expanded="true" signature="2174:2233" ph="{...}" />
-            <marker date="1548170921252" expanded="true" signature="2275:2337" ph="{...}" />
-            <marker date="1548170921252" expanded="true" signature="2439:2509" ph="{...}" />
-            <marker date="1548170921252" expanded="true" signature="2603:2651" ph="{...}" />
-            <marker date="1548170921252" expanded="true" signature="2707:2777" ph="{...}" />
-            <marker date="1548170921252" expanded="true" signature="2827:2958" ph="{...}" />
-            <marker date="1548170921252" expanded="true" signature="3002:3117" ph="{...}" />
-            <marker date="1548170921252" expanded="true" signature="3026:3107" ph="{...}" />
-          </folding>
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/Packages/UIForia/Src/Parsing/StyleParser/StylePropertyMappers.cs">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="482">
-          <caret line="253" column="82" selection-start-line="253" selection-start-column="82" selection-end-line="253" selection-end-column="82" />
-          <folding>
-            <marker date="1548073492550" expanded="true" signature="6:111" ph="..." />
-            <marker date="1548073492550" expanded="true" signature="151:42938" ph="{...}" />
-            <marker date="1548073492550" expanded="true" signature="255:42935" ph="{...}" />
-            <marker date="1548073492550" expanded="true" signature="370:2299" ph="{...}" />
-            <marker date="1548073492550" expanded="true" signature="416:2289" ph="{...}" />
-            <marker date="1548073492550" expanded="true" signature="2474:3798" ph="{...}" />
-            <marker date="1548073492550" expanded="true" signature="2520:3788" ph="{...}" />
-            <marker date="1548073492550" expanded="true" signature="3918:6395" ph="{...}" />
-            <marker date="1548073492550" expanded="true" signature="3964:6385" ph="{...}" />
-            <marker date="1548073492550" expanded="true" signature="6512:7843" ph="{...}" />
-            <marker date="1548073492550" expanded="true" signature="6558:7833" ph="{...}" />
-            <marker date="1548073492550" expanded="true" signature="7960:10205" ph="{...}" />
-            <marker date="1548073492550" expanded="true" signature="8006:10195" ph="{...}" />
-            <marker date="1548073492550" expanded="true" signature="10320:11240" ph="{...}" />
-            <marker date="1548073492550" expanded="true" signature="10366:11230" ph="{...}" />
-            <marker date="1548073492550" expanded="true" signature="11357:12366" ph="{...}" />
-            <marker date="1548073492550" expanded="true" signature="11403:12356" ph="{...}" />
-            <marker date="1548073492550" expanded="true" signature="12485:13816" ph="{...}" />
-            <marker date="1548073492550" expanded="true" signature="12531:13806" ph="{...}" />
-            <marker date="1548073492550" expanded="true" signature="13932:16827" ph="{...}" />
-            <marker date="1548073492550" expanded="true" signature="13978:16817" ph="{...}" />
-            <marker date="1548073492550" expanded="true" signature="16938:19055" ph="{...}" />
-            <marker date="1548073492550" expanded="true" signature="17018:19045" ph="{...}" />
-            <marker date="1548073492550" expanded="true" signature="19168:21020" ph="{...}" />
-            <marker date="1548073492550" expanded="true" signature="19214:21010" ph="{...}" />
-            <marker date="1548073492550" expanded="true" signature="21131:22168" ph="{...}" />
-            <marker date="1548073492550" expanded="true" signature="21177:22158" ph="{...}" />
-            <marker date="1548073492550" expanded="true" signature="22281:42928" ph="{...}" />
-            <marker date="1548073492550" expanded="true" signature="22327:42918" ph="{...}" />
-            <marker date="1548073492550" expanded="true" signature="22734:22986" ph="/* case &quot;scrollbarattachment&quot;: ... */" />
-          </folding>
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/Packages/UIForia/Src/Binding/StyleBindings/StyleBinding_Translation.cs">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="-16">
-          <caret line="16" column="44" selection-start-line="16" selection-start-column="44" selection-end-line="16" selection-end-column="44" />
-          <folding>
-            <marker date="1548070941287" expanded="true" signature="0:3732" ph="/* using UIForia.Rendering; ... */" />
-          </folding>
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/Packages/UIForia/Editor/AnimatedPropertyGenerator.cs">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="112">
-          <caret line="7" column="15" selection-start-line="7" selection-start-column="15" selection-end-line="7" selection-end-column="15" />
-          <folding>
-            <marker date="1542361190674" expanded="true" signature="6:38" ph="..." />
-            <marker date="1542361190674" expanded="true" signature="65:781" ph="{...}" />
-            <marker date="1542361190674" expanded="true" signature="142:435" ph="{...}" />
-            <marker date="1542361190674" expanded="true" signature="509:778" ph="{...}" />
-          </folding>
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/Packages/UIForia/Editor/CodeGen.cs">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="681">
-          <caret line="128" column="27" selection-start-line="128" selection-start-column="27" selection-end-line="128" selection-end-column="27" />
-          <folding>
-            <marker date="1548074487841" expanded="true" signature="6:252" ph="..." />
-            <marker date="1548074487841" expanded="true" signature="279:34317" ph="{...}" />
-            <marker date="1548074487841" expanded="true" signature="314:363" ph="{...}" />
-            <marker date="1548074487841" expanded="true" signature="397:34314" ph="{...}" />
-            <marker date="1548074487841" expanded="true" signature="465:16604" ph="{...}" />
-            <marker date="1548074487841" expanded="true" signature="1922:2103" ph="/* new AnimatedPropertyGenerator&lt;float&gt;(StylePropertyId.BackgroundGridSize, 0), ... */" />
-            <marker date="1548074487841" expanded="true" signature="16710:22510" ph="{...}" />
-            <marker date="1548074487841" expanded="true" signature="19043:19122" ph="{...}" />
-            <marker date="1548074487841" expanded="true" signature="19288:19509" ph="{...}" />
-            <marker date="1548074487841" expanded="true" signature="19674:19757" ph="{...}" />
-            <marker date="1548074487841" expanded="true" signature="19922:20000" ph="{...}" />
-            <marker date="1548074487841" expanded="true" signature="20309:20544" ph="{...}" />
-            <marker date="1548074487841" expanded="true" signature="20391:20530" ph="{...}" />
-            <marker date="1548074487841" expanded="true" signature="20709:20928" ph="{...}" />
-            <marker date="1548074487841" expanded="true" signature="20775:20914" ph="{...}" />
-            <marker date="1548074487841" expanded="true" signature="21092:21164" ph="{...}" />
-            <marker date="1548074487841" expanded="true" signature="22297:22374" ph="{...}" />
-            <marker date="1548074487841" expanded="true" signature="24055:24897" ph="{...}" />
-            <marker date="1548074487841" expanded="true" signature="24206:24861" ph="{...}" />
-            <marker date="1548074487841" expanded="true" signature="24375:24810" ph="{...}" />
-            <marker date="1548074487841" expanded="true" signature="24954:25637" ph="{...}" />
-            <marker date="1548074487841" expanded="true" signature="25101:25601" ph="{...}" />
-            <marker date="1548074487841" expanded="true" signature="25207:25587" ph="{...}" />
-            <marker date="1548074487841" expanded="true" signature="25270:25569" ph="{...}" />
-            <marker date="1548074487841" expanded="true" signature="25708:26438" ph="{...}" />
-            <marker date="1548074487841" expanded="true" signature="25796:26402" ph="{...}" />
-            <marker date="1548074487841" expanded="true" signature="26489:27002" ph="{...}" />
-            <marker date="1548074487841" expanded="true" signature="26606:26807" ph="{...}" />
-            <marker date="1548074487841" expanded="true" signature="27094:27531" ph="{...}" />
-            <marker date="1548074487841" expanded="true" signature="27626:27688" ph="{...}" />
-            <marker date="1548074487841" expanded="true" signature="27781:28531" ph="{...}" />
-            <marker date="1548074487841" expanded="true" signature="28628:30179" ph="{...}" />
-            <marker date="1548074487841" expanded="true" signature="28748:29353" ph="{...}" />
-            <marker date="1548074487841" expanded="true" signature="29353:29819" ph="{...}" />
-            <marker date="1548074487841" expanded="true" signature="30229:30848" ph="{...}" />
-            <marker date="1548074487841" expanded="true" signature="30453:30650" ph="{...}" />
-            <marker date="1548074487841" expanded="true" signature="30941:31481" ph="{...}" />
-            <marker date="1548074487841" expanded="true" signature="31563:32068" ph="{...}" />
-            <marker date="1548074487841" expanded="true" signature="31696:31863" ph="{...}" />
-            <marker date="1548074487841" expanded="true" signature="31863:32058" ph="{...}" />
-            <marker date="1548074487841" expanded="true" signature="32158:34307" ph="{...}" />
-            <marker date="1548074487841" expanded="true" signature="32207:32358" ph="{...}" />
-            <marker date="1548074487841" expanded="true" signature="32419:32530" ph="{...}" />
-            <marker date="1548074487841" expanded="true" signature="32593:32706" ph="{...}" />
-            <marker date="1548074487841" expanded="true" signature="32769:32882" ph="{...}" />
-            <marker date="1548074487841" expanded="true" signature="32953:33074" ph="{...}" />
-            <marker date="1548074487841" expanded="true" signature="33145:33266" ph="{...}" />
-            <marker date="1548074487841" expanded="true" signature="33339:33472" ph="{...}" />
-            <marker date="1548074487841" expanded="true" signature="33543:33664" ph="{...}" />
-            <marker date="1548074487841" expanded="true" signature="33735:33849" ph="{...}" />
-            <marker date="1548074487841" expanded="true" signature="33916:34035" ph="{...}" />
-            <marker date="1548074487841" expanded="true" signature="34121:34243" ph="{...}" />
-          </folding>
-        </state>
-      </provider>
-    </entry>
     <entry file="file://$PROJECT_DIR$/Packages/UIForia/Src/Rendering/TransformBehavior.cs">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="176">
@@ -3427,16 +2988,6 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/Packages/UIForia/Src/SVGX/SVGXStyle.cs">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="48">
-          <caret line="3" lean-forward="true" selection-start-line="3" selection-end-line="3" />
-          <folding>
-            <marker date="1548253938889" expanded="true" signature="15:52" ph="{...}" />
-          </folding>
-        </state>
-      </provider>
-    </entry>
     <entry file="file://$PROJECT_DIR$/Packages/UIForia/Src/SVGX/SVGXElement.cs">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="240">
@@ -3461,13 +3012,7 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/../../SVGTest/Assets/SVG Importer/Plugins/Core/Math/SVGBezier.cs">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="432">
-          <caret line="277" column="37" selection-start-line="277" selection-start-column="37" selection-end-line="277" selection-end-column="37" />
-        </state>
-      </provider>
-    </entry>
+    <entry file="file://$USER_HOME$/SVGTest/Assets/SVG Importer/Plugins/Core/Math/SVGBezier.cs" />
     <entry file="file://$PROJECT_DIR$/Packages/UIForia/Src/SVGX/SVGXGroup.cs">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="48">
@@ -3480,124 +3025,43 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/../../SVGTest/Assets/SVG Importer/Plugins/Core/Math/SVGMath.cs">
+    <entry file="file://$USER_HOME$/SVGTest/Assets/SVG Importer/Plugins/Core/Math/SVGMath.cs" />
+    <entry file="file://$USER_HOME$/SVGTest/Assets/SVG Importer/Plugins/Core/Implementation/RenderingEngine/SVGGraphics.cs" />
+    <entry file="file://$USER_HOME$/SVGTest/Assets/SVG Importer/Plugins/Core/Math/SVGGeom.cs" />
+    <entry file="file://$USER_HOME$/SVGTest/Assets/SVG Importer/Plugins/Core/Mesh/SVGGeomUtils.cs" />
+    <entry file="file://$USER_HOME$/SVGTest/Assets/SVG Importer/Plugins/Core/Implementation/SVG/DOM/Paths/SVGPathSegArcAbs.cs" />
+    <entry file="file://$USER_HOME$/UIForiaDrawing/Assets/SVG Importer/Plugins/Core/Mesh/SVGGeomUtils.cs">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="32">
-          <caret line="37" column="34" lean-forward="true" selection-start-line="37" selection-start-column="34" selection-end-line="37" selection-end-column="34" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/../../SVGTest/Assets/SVG Importer/Plugins/Core/Implementation/RenderingEngine/SVGGraphics.cs">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="432">
-          <caret line="276" column="42" selection-start-line="276" selection-start-column="39" selection-end-line="276" selection-end-column="42" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/../../SVGTest/Assets/SVG Importer/Plugins/Core/Math/SVGGeom.cs">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="288">
-          <caret line="18" lean-forward="true" selection-start-line="18" selection-end-line="18" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/../../SVGTest/Assets/SVG Importer/Plugins/Core/Mesh/SVGGeomUtils.cs">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="352">
-          <caret line="316" lean-forward="true" selection-start-line="310" selection-start-column="7" selection-end-line="316" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/../../SVGTest/Assets/SVG Importer/Plugins/Core/Implementation/SVG/DOM/Paths/SVGPathSegArcAbs.cs">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="576">
-          <caret line="36" lean-forward="true" selection-start-line="36" selection-end-line="36" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/Packages/UIForia/Src/SVGX/PathCommand.cs">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="848">
-          <caret line="53" column="40" lean-forward="true" selection-start-line="53" selection-start-column="40" selection-end-line="53" selection-end-column="40" />
-          <folding>
-            <marker date="1548264288087" expanded="true" signature="15:2405" ph="{...}" />
-            <marker date="1548264288087" expanded="true" signature="48:2402" ph="{...}" />
-            <marker date="1548264288087" expanded="true" signature="505:753" ph="{...}" />
-            <marker date="1548264288087" expanded="true" signature="814:915" ph="{...}" />
-            <marker date="1548264288087" expanded="true" signature="976:1077" ph="{...}" />
-            <marker date="1548264288087" expanded="true" signature="1194:1315" ph="{...}" />
-            <marker date="1548264288087" expanded="true" signature="1439:1577" ph="{...}" />
-            <marker date="1548264288087" expanded="true" signature="1639:1750" ph="{...}" />
-            <marker date="1548264288087" expanded="true" signature="1810:1919" ph="{...}" />
-            <marker date="1548264288087" expanded="true" signature="2045:2167" ph="{...}" />
-            <marker date="1548264288087" expanded="true" signature="2274:2395" ph="{...}" />
-          </folding>
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/Packages/UIForia/Src/Shaders/UIForiaLine.shader">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="535">
-          <caret line="61" column="35" selection-start-line="61" selection-start-column="35" selection-end-line="61" selection-end-column="35" />
-          <folding>
-            <marker date="1548264777317" expanded="true" signature="27:3158" ph="{...}" />
-            <marker date="1548264777317" expanded="true" signature="48:101" ph="{...}" />
-            <marker date="1548264777317" expanded="true" signature="120:3156" ph="{...}" />
-            <marker date="1548264777317" expanded="true" signature="224:3150" ph="{...}" />
-            <marker date="1548264777317" expanded="true" signature="247:3135" ph="{...}" />
-          </folding>
+        <state relative-caret-position="400">
+          <caret line="51" lean-forward="true" selection-start-line="51" selection-end-line="51" />
         </state>
       </provider>
     </entry>
     <entry file="file://$PROJECT_DIR$/Packages/UIForia/Src/SVGX/SVGXBezier.cs">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="528">
-          <caret line="116" column="57" lean-forward="true" selection-start-line="116" selection-start-column="57" selection-end-line="116" selection-end-column="57" />
+        <state relative-caret-position="80">
+          <caret line="6" lean-forward="true" selection-start-line="6" selection-end-line="6" />
           <folding>
-            <marker date="1548264760373" expanded="true" signature="6:52" ph="..." />
-            <marker date="1548264760373" expanded="true" signature="69:6824" ph="{...}" />
-            <marker date="1548264760373" expanded="true" signature="104:3430" ph="{...}" />
-            <marker date="1548264760373" expanded="true" signature="240:3423" ph="{...}" />
-            <marker date="1548264760373" expanded="true" signature="964:1157" ph="{...}" />
-            <marker date="1548264760373" expanded="true" signature="2299:2418" ph="{...}" />
-            <marker date="1548264760373" expanded="true" signature="2618:2665" ph="{...}" />
-            <marker date="1548264760373" expanded="true" signature="3031:3373" ph="{...}" />
-            <marker date="1548264760373" expanded="true" signature="3471:6821" ph="{...}" />
-            <marker date="1548264760373" expanded="true" signature="3622:3841" ph="{...}" />
-            <marker date="1548264760373" expanded="true" signature="3999:4079" ph="{...}" />
-            <marker date="1548264760373" expanded="true" signature="4223:4900" ph="{...}" />
-            <marker date="1548264760373" expanded="true" signature="4299:4358" ph="{...}" />
-            <marker date="1548264760373" expanded="true" signature="4403:4461" ph="{...}" />
-            <marker date="1548264760373" expanded="true" signature="5096:6814" ph="{...}" />
-            <marker date="1548264760373" expanded="true" signature="5123:6804" ph="{...}" />
-            <marker date="1548264760373" expanded="true" signature="5220:5313" ph="/* Calculate all the mid-points of the line segments ... */" />
-            <marker date="1548264760373" expanded="true" signature="5907:6012" ph="/* Try to approximate the full cubic curve by a single straight line ... */" />
-            <marker date="1548264760373" expanded="true" signature="6318:6424" ph="{...}" />
-            <marker date="1548264760373" expanded="true" signature="6442:6506" ph="/* Continue subdivision ... */" />
-          </folding>
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/Packages/UIForia/Src/SVGX/SVGXRoot.cs">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="2480">
-          <caret line="203" column="39" lean-forward="true" selection-start-line="203" selection-start-column="39" selection-end-line="203" selection-end-column="39" />
-          <folding>
-            <marker date="1548264736498" expanded="true" signature="6:52" ph="..." />
-            <marker date="1548264736498" expanded="true" signature="69:7932" ph="{...}" />
-            <marker date="1548264736498" expanded="true" signature="114:7929" ph="{...}" />
-            <marker date="1548264736498" expanded="true" signature="336:2281" ph="{...}" />
-            <marker date="1548264736498" expanded="true" signature="479:1043" ph="/* vertices.Add(new Vector3(100, -10f)); ... */" />
-            <marker date="1548264736498" expanded="true" signature="1046:1134" ph="/* mesh.SetVertices(vertices); ... */" />
-            <marker date="1548264736498" expanded="true" signature="1195:1460" ph="/* segments.Add(new Vector2(200f, -200f)); ... */" />
-            <marker date="1548264736498" expanded="true" signature="1523:1653" ph="{...}" />
-            <marker date="1548264736498" expanded="true" signature="1709:2215" ph="/* segs.Insert(0, segs[0]); ... */" />
-            <marker date="1548264736498" expanded="true" signature="2347:7352" ph="{...}" />
-            <marker date="1548264736498" expanded="true" signature="2747:2930" ph="/* vertex format: ... */" />
-            <marker date="1548264736498" expanded="true" signature="4281:5643" ph="{...}" />
-            <marker date="1548264736498" expanded="true" signature="5681:7084" ph="{...}" />
-            <marker date="1548264736498" expanded="true" signature="7383:7922" ph="{...}" />
-            <marker date="1548264736498" expanded="true" signature="7721:7912" ph="/* Graphics.DrawMesh(mesh, matrix, stencil, 0, camera, 0, null, false, false, false); ... */" />
+            <marker date="1548273449057" expanded="false" signature="6:52" ph="..." />
+            <marker date="1548273449057" expanded="true" signature="69:6680" ph="{...}" />
+            <marker date="1548273449057" expanded="true" signature="104:3312" ph="{...}" />
+            <marker date="1548273449057" expanded="true" signature="286:3305" ph="{...}" />
+            <marker date="1548273449057" expanded="true" signature="966:1170" ph="{...}" />
+            <marker date="1548273449057" expanded="true" signature="2293:2346" ph="{...}" />
+            <marker date="1548273449057" expanded="true" signature="2526:2573" ph="{...}" />
+            <marker date="1548273449057" expanded="true" signature="2878:3267" ph="{...}" />
+            <marker date="1548273449057" expanded="true" signature="3349:6677" ph="{...}" />
+            <marker date="1548273449057" expanded="true" signature="3500:3707" ph="{...}" />
+            <marker date="1548273449057" expanded="true" signature="3856:3936" ph="{...}" />
+            <marker date="1548273449057" expanded="true" signature="4080:4757" ph="{...}" />
+            <marker date="1548273449057" expanded="true" signature="4156:4215" ph="{...}" />
+            <marker date="1548273449057" expanded="true" signature="4260:4318" ph="{...}" />
+            <marker date="1548273449057" expanded="true" signature="4952:6670" ph="{...}" />
+            <marker date="1548273449057" expanded="true" signature="4979:6660" ph="{...}" />
+            <marker date="1548273449057" expanded="true" signature="5076:5169" ph="/* Calculate all the mid-points of the line segments ... */" />
+            <marker date="1548273449057" expanded="true" signature="5763:5868" ph="/* Try to approximate the full cubic curve by a single straight line ... */" />
+            <marker date="1548273449057" expanded="true" signature="6174:6280" ph="{...}" />
+            <marker date="1548273449057" expanded="true" signature="6298:6362" ph="/* Continue subdivision ... */" />
           </folding>
         </state>
       </provider>
@@ -3607,29 +3071,216 @@
         <state relative-caret-position="224">
           <caret line="14" column="29" selection-start-line="14" selection-start-column="8" selection-end-line="14" selection-end-column="29" />
           <folding>
-            <marker date="1548263821819" expanded="true" signature="15:546" ph="{...}" />
-            <marker date="1548263821819" expanded="true" signature="56:543" ph="{...}" />
+            <marker date="1548272608573" expanded="true" signature="15:546" ph="{...}" />
+            <marker date="1548272608573" expanded="true" signature="56:543" ph="{...}" />
           </folding>
         </state>
       </provider>
     </entry>
     <entry file="file://$PROJECT_DIR$/Packages/UIForia/Src/SVGX/SVGXWand.cs">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="1047">
-          <caret line="103" column="39" selection-start-line="103" selection-start-column="39" selection-end-line="103" selection-end-column="39" />
+        <state relative-caret-position="1056">
+          <caret line="99" column="70" lean-forward="true" selection-start-line="99" selection-start-column="70" selection-end-line="99" selection-end-column="70" />
           <folding>
-            <marker date="1548265041436" expanded="true" signature="6:85" ph="..." />
-            <marker date="1548265041436" expanded="true" signature="102:4502" ph="{...}" />
-            <marker date="1548265041436" expanded="true" signature="131:260" ph="{...}" />
-            <marker date="1548265041436" expanded="true" signature="168:253" ph="{...}" />
-            <marker date="1548265041436" expanded="true" signature="368:4499" ph="{...}" />
-            <marker date="1548265041436" expanded="true" signature="628:677" ph="{...}" />
-            <marker date="1548265041436" expanded="true" signature="687:845" ph="/* todo track conditions for when this needs to be re-called ... */" />
-            <marker date="1548265041436" expanded="true" signature="891:4492" ph="{...}" />
-            <marker date="1548265041436" expanded="true" signature="1132:4361" ph="{...}" />
-            <marker date="1548265041436" expanded="true" signature="1224:4347" ph="{...}" />
-            <marker date="1548265041436" expanded="true" signature="3489:3630" ph="{...}" />
-            <marker date="1548265041436" expanded="true" signature="4402:4456" ph="{...}" />
+            <marker date="1548273717049" expanded="false" signature="6:85" ph="..." />
+            <marker date="1548273717049" expanded="true" signature="102:4887" ph="{...}" />
+            <marker date="1548273717049" expanded="true" signature="131:260" ph="{...}" />
+            <marker date="1548273717049" expanded="true" signature="168:253" ph="{...}" />
+            <marker date="1548273717049" expanded="true" signature="368:4884" ph="{...}" />
+            <marker date="1548273717049" expanded="true" signature="628:677" ph="{...}" />
+            <marker date="1548273717049" expanded="true" signature="687:845" ph="/* todo track conditions for when this needs to be re-called ... */" />
+            <marker date="1548273717049" expanded="true" signature="891:4877" ph="{...}" />
+            <marker date="1548273717049" expanded="true" signature="1132:4746" ph="{...}" />
+            <marker date="1548273717049" expanded="true" signature="1223:4732" ph="{...}" />
+            <marker date="1548273717049" expanded="true" signature="3874:4015" ph="{...}" />
+            <marker date="1548273717049" expanded="true" signature="4787:4841" ph="{...}" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/Packages/UIForia/Src/SVGX/SVGXMatrix.cs">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="48">
+          <caret line="3" lean-forward="true" selection-start-line="3" selection-end-line="3" />
+          <folding>
+            <marker date="1548274914448" expanded="true" signature="35:6358" ph="{...}" />
+            <marker date="1548274914448" expanded="true" signature="67:6355" ph="{...}" />
+            <marker date="1548274914448" expanded="true" signature="361:528" ph="{...}" />
+            <marker date="1548274914448" expanded="true" signature="802:986" ph="{...}" />
+            <marker date="1548274914448" expanded="true" signature="820:976" ph="{...}" />
+            <marker date="1548274914448" expanded="true" signature="1015:1194" ph="{...}" />
+            <marker date="1548274914448" expanded="true" signature="1033:1184" ph="{...}" />
+            <marker date="1548274914448" expanded="true" signature="1296:1397" ph="{...}" />
+            <marker date="1548274914448" expanded="true" signature="1459:1979" ph="{...}" />
+            <marker date="1548274914448" expanded="true" signature="2060:2482" ph="{...}" />
+            <marker date="1548274914448" expanded="true" signature="2520:2902" ph="{...}" />
+            <marker date="1548274914448" expanded="true" signature="2594:2638" ph="{...}" />
+            <marker date="1548274914448" expanded="true" signature="2955:3081" ph="{...}" />
+            <marker date="1548274914448" expanded="true" signature="3155:3285" ph="{...}" />
+            <marker date="1548274914448" expanded="true" signature="3340:3474" ph="{...}" />
+            <marker date="1548274914448" expanded="true" signature="3522:3775" ph="{...}" />
+            <marker date="1548274914448" expanded="true" signature="3831:3937" ph="{...}" />
+            <marker date="1548274914448" expanded="true" signature="3993:4135" ph="{...}" />
+            <marker date="1548274914448" expanded="true" signature="4182:4333" ph="{...}" />
+            <marker date="1548274914448" expanded="true" signature="4380:4531" ph="{...}" />
+            <marker date="1548274914448" expanded="true" signature="4581:4692" ph="{...}" />
+            <marker date="1548274914448" expanded="true" signature="4742:4857" ph="{...}" />
+            <marker date="1548274914448" expanded="true" signature="5018:5670" ph="{...}" />
+            <marker date="1548274914448" expanded="true" signature="5711:5988" ph="{...}" />
+            <marker date="1548274914448" expanded="true" signature="6032:6348" ph="{...}" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$USER_HOME$/UIForiaDrawing/Assets/SVG Importer/Plugins/Core/Fills/CCGradient.cs">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="-2496">
+          <caret line="37" column="31" lean-forward="true" selection-start-line="37" selection-start-column="31" selection-end-line="37" selection-end-column="31" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$USER_HOME$/UIForiaDrawing/Assets/SVG Importer/Plugins/Core/Implementation/SVG/DOM/BasicTypes/SVGColor.cs">
+      <provider selected="true" editor-type-id="text-editor" />
+    </entry>
+    <entry file="file://$PROJECT_DIR$/Packages/UIForia/Src/SVGX/ClipRule.cs">
+      <provider selected="true" editor-type-id="text-editor">
+        <state>
+          <folding>
+            <marker date="1548276185588" expanded="true" signature="15:88" ph="{...}" />
+            <marker date="1548276185588" expanded="true" signature="43:85" ph="{...}" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/Packages/UIForia/Src/SVGX/LineCap.cs">
+      <provider selected="true" editor-type-id="text-editor">
+        <state>
+          <folding>
+            <marker date="1548276192581" expanded="true" signature="15:98" ph="{...}" />
+            <marker date="1548276192581" expanded="true" signature="42:95" ph="{...}" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/Packages/UIForia/Src/SVGX/LineJoin.cs">
+      <provider selected="true" editor-type-id="text-editor">
+        <state>
+          <folding>
+            <marker date="1548276197680" expanded="true" signature="15:132" ph="{...}" />
+            <marker date="1548276197680" expanded="true" signature="43:129" ph="{...}" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$USER_HOME$/UIForiaDrawing/Assets/SVG Importer/Plugins/Core/Implementation/SVG/DOM/BasicTypes/SVGPaintable.cs">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="4704">
+          <caret line="296" column="23" selection-start-line="296" selection-start-column="23" selection-end-line="296" selection-end-column="23" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$USER_HOME$/UIForiaDrawing/Assets/SVG Importer/Plugins/Core/Implementation/SVG/DOM/Coordinate_Transform_Units/SVGMatrix.cs">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="439">
+          <caret line="177" column="17" lean-forward="true" selection-start-line="177" selection-start-column="17" selection-end-line="177" selection-end-column="17" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$USER_HOME$/UIForiaDrawing/Assets/SVG Importer/Plugins/Core/Implementation/SVG/DOM/Paths/SVGPathElement.cs">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="410">
+          <caret line="320" column="57" selection-start-line="320" selection-start-column="47" selection-end-line="320" selection-end-column="57" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$USER_HOME$/UIForiaDrawing/Assets/SVG Importer/Plugins/Core/Implementation/SVG/DOM/Paths/SVGPathSegArcAbs.cs">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="608">
+          <caret line="38" lean-forward="true" selection-start-line="38" selection-end-line="38" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$USER_HOME$/UIForiaDrawing/Assets/SVG Importer/Plugins/Core/Math/SVGMath.cs">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="-12640">
+          <caret line="59" column="21" lean-forward="true" selection-start-line="59" selection-start-column="21" selection-end-line="59" selection-end-column="21" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/Packages/UIForia/Src/SVGX/PathCommand.cs">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="512">
+          <caret line="32" column="26" selection-start-line="32" selection-start-column="26" selection-end-line="32" selection-end-column="26" />
+          <folding>
+            <marker date="1548273717040" expanded="true" signature="41:2709" ph="{...}" />
+            <marker date="1548273717040" expanded="true" signature="74:2706" ph="{...}" />
+            <marker date="1548273717040" expanded="true" signature="470:687" ph="{...}" />
+            <marker date="1548273717040" expanded="true" signature="1079:1180" ph="{...}" />
+            <marker date="1548273717040" expanded="true" signature="1241:1342" ph="{...}" />
+            <marker date="1548273717040" expanded="true" signature="1459:1580" ph="{...}" />
+            <marker date="1548273717040" expanded="true" signature="1704:1897" ph="{...}" />
+            <marker date="1548273717040" expanded="true" signature="1959:2070" ph="{...}" />
+            <marker date="1548273717040" expanded="true" signature="2130:2239" ph="{...}" />
+            <marker date="1548273717040" expanded="true" signature="2357:2479" ph="{...}" />
+            <marker date="1548273717040" expanded="true" signature="2578:2699" ph="{...}" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/Packages/UIForia/Src/Shaders/UIForiaLine.shader">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="871">
+          <caret line="55" column="54" selection-start-line="55" selection-start-column="54" selection-end-line="55" selection-end-column="54" />
+          <folding>
+            <marker date="1548277049757" expanded="true" signature="29:3164" ph="{...}" />
+            <marker date="1548277049757" expanded="true" signature="50:103" ph="{...}" />
+            <marker date="1548277049757" expanded="true" signature="122:3162" ph="{...}" />
+            <marker date="1548277049757" expanded="true" signature="226:3156" ph="{...}" />
+            <marker date="1548277049757" expanded="true" signature="249:3141" ph="{...}" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/Packages/UIForia/Src/SVGX/SVGXStyle.cs">
+      <provider selected="true" editor-type-id="text-editor">
+        <state>
+          <folding>
+            <marker date="1548278622392" expanded="true" signature="35:492" ph="{...}" />
+            <marker date="1548278622392" expanded="true" signature="114:489" ph="{...}" />
+            <marker date="1548278622392" expanded="true" signature="494:507" ph="/* ... */" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/Packages/UIForia/Src/SVGX/SVGXRoot.cs">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="378">
+          <caret line="276" column="45" lean-forward="true" selection-start-line="276" selection-start-column="45" selection-end-line="276" selection-end-column="45" />
+          <folding>
+            <marker date="1548279054545" expanded="false" signature="6:52" ph="..." />
+            <marker date="1548279054545" expanded="true" signature="69:9863" ph="{...}" />
+            <marker date="1548279054545" expanded="true" signature="105:211" ph="{...}" />
+            <marker date="1548279054545" expanded="true" signature="253:493" ph="{...}" />
+            <marker date="1548279054545" expanded="true" signature="533:651" ph="{...}" />
+            <marker date="1548279054545" expanded="true" signature="699:8305" ph="{...}" />
+            <marker date="1548279054545" expanded="true" signature="921:2855" ph="{...}" />
+            <marker date="1548279054545" expanded="true" signature="1064:1718" ph="/* vertices.Add(new Vector3(100, -10f)); ... */" />
+            <marker date="1548279054545" expanded="true" signature="1779:2044" ph="/* segments.Add(new Vector2(200f, -200f)); ... */" />
+            <marker date="1548279054545" expanded="true" signature="2106:2238" ph="{...}" />
+            <marker date="1548279054545" expanded="true" signature="2295:2801" ph="/* segs.Insert(0, segs[0]); ... */" />
+            <marker date="1548279054545" expanded="true" signature="2921:7728" ph="{...}" />
+            <marker date="1548279054545" expanded="true" signature="3309:3492" ph="/* vertex format: ... */" />
+            <marker date="1548279054545" expanded="true" signature="4818:6100" ph="{...}" />
+            <marker date="1548279054545" expanded="true" signature="6138:7460" ph="{...}" />
+            <marker date="1548279054545" expanded="true" signature="7759:8298" ph="{...}" />
+            <marker date="1548279054545" expanded="true" signature="8097:8288" ph="/* Graphics.DrawMesh(mesh, matrix, stencil, 0, camera, 0, null, false, false, false); ... */" />
+            <marker date="1548279054545" expanded="true" signature="8341:9861" ph="{...}" />
+            <marker date="1548279054545" expanded="true" signature="8549:8594" ph="{...}" />
+            <marker date="1548279054545" expanded="true" signature="8660:8684" ph="{...}" />
+            <marker date="1548279054545" expanded="true" signature="8724:9208" ph="{...}" />
+            <marker date="1548279054545" expanded="true" signature="8738:9198" ph="/* for each element ... */" />
+            <marker date="1548279054545" expanded="true" signature="9247:9854" ph="{...}" />
+            <marker date="1548279054545" expanded="true" signature="9274:9831" ph="/* layout + compute z + transform ... */" />
           </folding>
         </state>
       </provider>

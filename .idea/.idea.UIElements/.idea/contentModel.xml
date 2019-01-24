@@ -608,6 +608,7 @@
               <e p="SVGXGroup.cs" t="Include" />
               <e p="SVGXMatrix.cs" t="Include" />
               <e p="SVGXPathCommandType.cs" t="Include" />
+              <e p="SVGXRenderElementType.cs" t="Include" />
               <e p="SVGXRoot.cs" t="Include" />
               <e p="SVGXStyle.cs" t="Include" />
               <e p="SVGXTransform.cs" t="Include" />

@@ -1,14 +1,25 @@
 using System;
 using System.Collections.Generic;
+using System.Net.Sockets;
 using NUnit.Framework;
 using UIForia;
 using UIForia.Input;
 using Tests.Mocks;
+using UIForia.Compilers;
+using UIForia.Layout.LayoutTypes;
+using UIForia.Parsing.StyleParser;
 using UnityEngine;
 using static Tests.TestUtils;
+using Application = UIForia.Application;
 
 [TestFixture]
 public class InputSystem_DragTests {
+
+    [SetUp]
+    public void SetUp() {
+        // see #DragCreate_MustReturnDragEvent for a commend why this is here
+        TemplateParser.Reset();
+    }
 
     public class TestDragEvent : DragEvent {
 
@@ -101,19 +112,50 @@ public class InputSystem_DragTests {
         var exception = Assert.Throws<Exception>(() => {
             new MockApplication(typeof(FailDragTestThing));
         });
+        /*
+         * Unfortunately some broken state is left if the application crashes because of an exception.
+         * The next thing that renders will be rendered incorrectly but clears some of that mysterious broken state
+         * so that the next rendering will be correct again... So until we find out how and what to reset after this
+         * test we just start another non-broken TestThing so the next test isn't affected.
+         */
+        new MockApplication(typeof(DragTestThing));
         Assert.AreEqual($"Methods annotated with {nameof(OnDragCreateAttribute)} must return an instance of {nameof(DragEvent)}", exception.Message);
     }
 
     [Template(TemplateType.String, @"
-    
         <UITemplate>
-            <Contents style.layoutType='LayoutType.Fixed'>
-                <Group onDragEnter='{HandleDragEnterChild(0)}' onDragExit='{HandleDragExitChild(0)}' style.translation='$fixedLength(0,   0)' style.preferredSize='$size(100, 100)'/>
-                <Group onDragEnter='{HandleDragEnterChild(1)}' onDragExit='{HandleDragExitChild(1)}' style.translation='$fixedLength(100, 0)' style.preferredSize='$size(100, 100)'/>
-                <Group onDragEnter='{HandleDragEnterChild(2)}' onDragExit='{HandleDragExitChild(2)}' style.translation='$fixedLength(200, 0)' style.preferredSize='$size(100, 100)'/>
+            <Style>
+                style grid-container {
+                    LayoutType = Flex;
+                    FlexLayoutDirection = Column;
+                    PreferredSize = 300px, 100px;
+                }
+    
+                style grid-cell {
+                    PreferredSize = 100px;
+                    TransformPositionY = 0px;
+                    AnchorTop = 0px;
+                }
+    
+                style c1 {
+                    TransformPositionX = 0px;
+                    AnchorLeft = 0px;
+                }
+                style c2 {
+                    TransformPositionX = 0;
+                    AnchorLeft = 100px;
+                }
+                style c3 {
+                    TransformPositionX = 0;
+                    AnchorLeft = 200px;
+                }
+            </Style>
+            <Contents style='grid-container'>
+                <Group onDragEnter='{HandleDragEnterChild($element, 0)}' onDragExit='{HandleDragExitChild($element, 0)}' style='grid-cell c1'/>
+                <Group onDragEnter='{HandleDragEnterChild($element, 1)}' onDragExit='{HandleDragExitChild($element, 1)}' style='grid-cell c2'/>
+                <Group onDragEnter='{HandleDragEnterChild($element, 2)}' onDragExit='{HandleDragExitChild($element, 2)}' style='grid-cell c3'/>
             </Contents>
         </UITemplate>
-
     ")]
     public class DragHandlerTestThing : UIElement {
 
@@ -121,14 +163,20 @@ public class InputSystem_DragTests {
         public bool ignoreEnter;
         public bool ignoreExit;
         
-        public void HandleDragEnterChild(int index) {
+        public void HandleDragEnterChild(UIElement el, int index) {
             if (ignoreEnter) return;
             dragList.Add("enter:child" + index);
+            Debug.Log("enter:child" + index);
+            Debug.Log("Size is " + dragList.Count);
+            Debug.Log(el.layoutResult.ScreenRect.ToString());
         }
 
-        public void HandleDragExitChild(int index) {
+        public void HandleDragExitChild(UIElement el, int index) {
             if (ignoreExit) return;
             dragList.Add("exit:child" + index);
+            Debug.Log("exit:child" + index);
+            Debug.Log("Size is " + dragList.Count);
+            Debug.Log(el.layoutResult.ScreenRect.ToString());
         }
 
         [OnDragCreate]
@@ -143,6 +191,9 @@ public class InputSystem_DragTests {
         MockApplication testView = new MockApplication(typeof(DragHandlerTestThing));
         testView.SetViewportRect(new Rect(0, 0, 1000, 1000));
         DragHandlerTestThing root = (DragHandlerTestThing) testView.RootElement;
+        testView.Update();
+
+        Assert.AreEqual(0, root.dragList.Count);
         root.ignoreExit = true;
         testView.InputSystem.MouseDown(new Vector2(10, 10));
         testView.Update();
@@ -155,6 +206,7 @@ public class InputSystem_DragTests {
         testView.InputSystem.MouseDragMove(new Vector2(130, 30));
         testView.Update();
         
+        Assert.AreEqual(2, root.dragList.Count);
         Assert.AreEqual(new[] {"enter:child0", "enter:child1"}, root.dragList.ToArray());
 
     }
@@ -164,6 +216,9 @@ public class InputSystem_DragTests {
         MockApplication testView = new MockApplication(typeof(DragHandlerTestThing));
         testView.SetViewportRect(new Rect(0, 0, 1000, 1000));
         DragHandlerTestThing root = (DragHandlerTestThing) testView.RootElement;
+        testView.Update();
+
+        Assert.AreEqual(0, root.dragList.Count);
         root.ignoreExit = true;
         testView.InputSystem.MouseDown(new Vector2(10, 10));
         testView.Update();
@@ -174,6 +229,7 @@ public class InputSystem_DragTests {
         testView.InputSystem.MouseDragMove(new Vector2(30, 30));
         testView.Update();
         
+        Assert.AreEqual(1, root.dragList.Count);
         Assert.AreEqual(new[] {"enter:child0"}, root.dragList.ToArray());
 
     }
@@ -183,6 +239,9 @@ public class InputSystem_DragTests {
         MockApplication testView = new MockApplication(typeof(DragHandlerTestThing));
         testView.SetViewportRect(new Rect(0, 0, 1000, 1000));
         DragHandlerTestThing root = (DragHandlerTestThing) testView.RootElement;
+        testView.Update();
+
+        Assert.AreEqual(0, root.dragList.Count);
         root.ignoreExit = true;
         testView.InputSystem.MouseDown(new Vector2(10, 10));
         testView.Update();
@@ -193,6 +252,7 @@ public class InputSystem_DragTests {
         testView.InputSystem.MouseDragMove(new Vector2(30, 30));
         testView.Update();
         
+        Assert.AreEqual(1, root.dragList.Count);
         Assert.AreEqual(new[] {"enter:child0"}, root.dragList.ToArray());
     }
 
@@ -201,6 +261,9 @@ public class InputSystem_DragTests {
         MockApplication testView = new MockApplication(typeof(DragHandlerTestThing));
         testView.SetViewportRect(new Rect(0, 0, 1000, 1000));
         DragHandlerTestThing root = (DragHandlerTestThing) testView.RootElement;
+        testView.Update();
+
+        Assert.AreEqual(0, root.dragList.Count);
         root.ignoreExit = true;
 
         testView.InputSystem.MouseDown(new Vector2(10, 10));
@@ -212,6 +275,7 @@ public class InputSystem_DragTests {
         testView.InputSystem.MouseDragMove(new Vector2(130, 30));
         testView.Update();
         
+        Assert.AreEqual(2, root.dragList.Count);
         Assert.AreEqual(new[] {"enter:child0", "enter:child1"}, root.dragList.ToArray());
     }
 
@@ -220,6 +284,8 @@ public class InputSystem_DragTests {
         MockApplication testView = new MockApplication(typeof(DragHandlerTestThing));
         testView.SetViewportRect(new Rect(0, 0, 1000, 1000));
         DragHandlerTestThing root = (DragHandlerTestThing) testView.RootElement;
+        
+        Assert.AreEqual(0, root.dragList.Count);
         root.ignoreExit = true;
 
         testView.InputSystem.MouseDown(new Vector2(10, 10));
@@ -234,6 +300,7 @@ public class InputSystem_DragTests {
         testView.InputSystem.MouseDragMove(new Vector2(30, 30));
         testView.Update();
         
+        Assert.AreEqual(3, root.dragList.Count);
         Assert.AreEqual(new[] {"enter:child0", "enter:child1", "enter:child0"}, root.dragList.ToArray());
     }
     
@@ -249,11 +316,13 @@ public class InputSystem_DragTests {
         testView.InputSystem.MouseDragMove(new Vector2(30, 30));
         testView.Update();
         
+        Assert.AreEqual(1, root.dragList.Count);
         Assert.AreEqual(new[] {"enter:child0"}, root.dragList.ToArray());
         
         testView.InputSystem.MouseDragMove(new Vector2(130, 30));
         testView.Update();
         
+        Assert.AreEqual(3, root.dragList.Count);
         Assert.AreEqual(new[] {"enter:child0", "exit:child0", "enter:child1"}, root.dragList.ToArray());
     }
 
@@ -269,11 +338,13 @@ public class InputSystem_DragTests {
         testView.InputSystem.MouseDragMove(new Vector2(30, 30));
         testView.Update();
         
+        Assert.AreEqual(1, root.dragList.Count);
         Assert.AreEqual(new[] {"enter:child0"}, root.dragList.ToArray());
         
         testView.InputSystem.MouseDragMove(new Vector2(40, 30));
         testView.Update();
         
+        Assert.AreEqual(1, root.dragList.Count);
         Assert.AreEqual(new[] {"enter:child0"}, root.dragList.ToArray());
     }
 
@@ -295,16 +366,28 @@ public class InputSystem_DragTests {
         testView.InputSystem.MouseDragMove(new Vector2(30, 30));
         testView.Update();
         
+        Assert.AreEqual(5, root.dragList.Count);
         Assert.AreEqual(new[] {"enter:child0", "exit:child0", "enter:child1", "exit:child1", "enter:child0"}, root.dragList.ToArray());
     }
 
     [Template(TemplateType.String, @"
     
         <UITemplate>
-            <Contents style.layoutType='LayoutType.Fixed'>
-                <Group onDragMove='{HandleDragMoveChild(0)}' onDragHover='{HandleDragHoverChild(0)}' style.translation='$fixedLength(0,   0)' style.preferredSize='$size(100, 100)'/>
-                <Group onDragMove='{HandleDragMoveChild(1)}' onDragHover='{HandleDragHoverChild(1)}' style.translation='$fixedLength(100, 0)' style.preferredSize='$size(100, 100)'/>
-                <Group onDragMove='{HandleDragMoveChild(2)}' onDragHover='{HandleDragHoverChild(2)}' style.translation='$fixedLength(200, 0)' style.preferredSize='$size(100, 100)'/>
+            <Style>
+                style container {
+                    LayoutType = Flex;
+                    FlexLayoutDirection = Column;
+                    PreferredSize = 300px, 100px;
+                }
+        
+                style cell {
+                    PreferredSize = 100px;
+                }
+            </Style>
+            <Contents style='container'>
+                <Group onDragMove='{HandleDragMoveChild(0)}' onDragHover='{HandleDragHoverChild(0)}' style='cell c0'/>
+                <Group onDragMove='{HandleDragMoveChild(1)}' onDragHover='{HandleDragHoverChild(1)}' style='cell c1'/>
+                <Group onDragMove='{HandleDragMoveChild(2)}' onDragHover='{HandleDragHoverChild(2)}' style='cell c2'/>
             </Contents>
         </UITemplate>
 

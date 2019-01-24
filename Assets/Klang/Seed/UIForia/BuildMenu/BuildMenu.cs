@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using UIForia;
 using UIForia.Animation;
 using UIForia.Rendering;
+using UIForia.Util;
 using UnityEngine;
 
 namespace UI {
@@ -10,7 +11,7 @@ namespace UI {
     public class BuildMenuItem {
 
         public string name;
-        public List<BuildMenuItem> childItems;
+        public RepeatableList<BuildMenuItem> childItems;
         public Action action;
 
     }
@@ -19,12 +20,12 @@ namespace UI {
     [Template("Klang/Seed/UIForia/BuildMenu/BuildMenu.xml")]
     public class BuildMenu : UIElement {
 
-        public List<BuildMenuItem> buildMenuItems;
+        public RepeatableList<BuildMenuItem> buildMenuItems;
 
         private static BuildMenuItem CreateBuildItem(string name, params BuildMenuItem[] childItems) {
             BuildMenuItem item = new BuildMenuItem();
             item.name = name;
-            item.childItems = new List<BuildMenuItem>(childItems);
+            item.childItems = new RepeatableList<BuildMenuItem>(childItems);
             item.action = null;
             return item;
         }
@@ -77,7 +78,7 @@ namespace UI {
         }
 
         public override void OnCreate() {
-            buildMenuItems = new List<BuildMenuItem>();
+            buildMenuItems = new RepeatableList<BuildMenuItem>();
 
             buildMenuItems.Add(CreateBuildItem("Farming",
                 CreateBuildItem("Corn", PlaceCotton),

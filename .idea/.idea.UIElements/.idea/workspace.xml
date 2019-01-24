@@ -3,6 +3,7 @@
   <component name="ChangeListManager">
     <list default="true" id="04aad282-50b7-45cb-8142-9d354d8d8754" name="Default Changelist" comment="">
       <change afterPath="$PROJECT_DIR$/Packages/UIForia/Src/SVGX/SVGXGeometryGenerator.cs" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/Packages/UIForia/Src/SVGX/SVGXRenderElementType.cs" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/.idea.UIElements/.idea/contentModel.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/.idea.UIElements/.idea/contentModel.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/.idea.UIElements/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/.idea.UIElements/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/Assets/Grid/GridDemo.style" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/Grid/GridDemo.style" afterDir="false" />
@@ -26,18 +27,29 @@
           <file pinned="false" current-in-tab="true">
             <entry file="file://$PROJECT_DIR$/Packages/UIForia/Src/SVGX/SVGXRoot.cs">
               <provider selected="true" editor-type-id="text-editor">
-                <state relative-caret-position="583">
-                  <caret line="52" column="8" selection-start-line="52" selection-start-column="8" selection-end-line="52" selection-end-column="8" />
+                <state relative-caret-position="695">
+                  <caret line="45" column="23" selection-start-line="45" selection-start-column="23" selection-end-line="45" selection-end-column="23" />
                   <folding>
-                    <marker date="1548344964909" expanded="true" signature="6:164" ph="..." />
-                    <marker date="1548344964909" expanded="true" signature="181:2926" ph="{...}" />
-                    <marker date="1548344964909" expanded="true" signature="217:323" ph="{...}" />
-                    <marker date="1548344964909" expanded="true" signature="361:630" ph="{...}" />
-                    <marker date="1548344964909" expanded="true" signature="672:790" ph="{...}" />
-                    <marker date="1548344964909" expanded="true" signature="834:2920" ph="{...}" />
-                    <marker date="1548344964909" expanded="true" signature="1198:1502" ph="{...}" />
-                    <marker date="1548344964909" expanded="true" signature="1533:2913" ph="{...}" />
-                    <marker date="1548344964909" expanded="true" signature="2359:2578" ph="/* if not self intersection &amp;&amp; no holes -&gt; all good ... */" />
+                    <marker date="1548344967849" expanded="true" signature="6:164" ph="..." />
+                    <marker date="1548344967849" expanded="true" signature="181:2766" ph="{...}" />
+                    <marker date="1548344967849" expanded="true" signature="217:323" ph="{...}" />
+                    <marker date="1548344967849" expanded="true" signature="361:630" ph="{...}" />
+                    <marker date="1548344967849" expanded="true" signature="674:2760" ph="{...}" />
+                    <marker date="1548344967849" expanded="true" signature="1038:1342" ph="{...}" />
+                    <marker date="1548344967849" expanded="true" signature="1373:2753" ph="{...}" />
+                    <marker date="1548344967849" expanded="true" signature="2199:2418" ph="/* if not self intersection &amp;&amp; no holes -&gt; all good ... */" />
+                  </folding>
+                </state>
+              </provider>
+            </entry>
+          </file>
+          <file pinned="false" current-in-tab="false">
+            <entry file="file://$PROJECT_DIR$/Packages/UIForia/Src/SVGX/SVGXRenderElementType.cs">
+              <provider selected="true" editor-type-id="text-editor">
+                <state>
+                  <folding>
+                    <marker date="1548344967836" expanded="true" signature="15:177" ph="{...}" />
+                    <marker date="1548344967836" expanded="true" signature="56:174" ph="{...}" />
                   </folding>
                 </state>
               </provider>
@@ -171,15 +183,6 @@
                     <marker date="1548324542126" expanded="true" signature="35:647" ph="{...}" />
                     <marker date="1548324542126" expanded="true" signature="114:644" ph="{...}" />
                   </folding>
-                </state>
-              </provider>
-            </entry>
-          </file>
-          <file pinned="false" current-in-tab="false">
-            <entry file="file://$PROJECT_DIR$/Packages/UIForia/Src/Shaders/UIForia.cginc">
-              <provider selected="true" editor-type-id="text-editor">
-                <state relative-caret-position="256">
-                  <caret line="16" column="21" selection-start-line="14" selection-start-column="3" selection-end-line="16" selection-end-column="21" />
                 </state>
               </provider>
             </entry>
@@ -436,6 +439,7 @@
     <setting file="file://$PROJECT_DIR$/Packages/UIForia/Tests/TypeProcessorTests.cs" root0="FORCE_HIGHLIGHTING" />
     <setting file="file://$PROJECT_DIR$/Packages/UIForia/Src/_Generated2.cs" root0="FORCE_HIGHLIGHTING" />
     <setting file="file://$PROJECT_DIR$/Packages/UIForia/Src/Parsing/AstNodes/FieldNotDefinedException.cs" root0="FORCE_HIGHLIGHTING" />
+    <setting file="file://$PROJECT_DIR$/Packages/UIForia/Src/SVGX/SVGXRenderElementType.cs" root0="FORCE_HIGHLIGHTING" />
     <setting file="file://$PROJECT_DIR$/Packages/UIForia/Src/SVGX/SVGXGeometryGenerator.cs" root0="FORCE_HIGHLIGHTING" />
     <setting file="file://$PROJECT_DIR$/Packages/UIForia/Src/Elements/RouteMatch.cs" root0="FORCE_HIGHLIGHTING" />
     <setting file="file://$PROJECT_DIR$/Packages/UIForia/Src/Layout/GridAxisAlignment.cs" root0="FORCE_HIGHLIGHTING" />
@@ -1017,12 +1021,12 @@
       <workItem from="1547573099800" duration="7201000" />
       <workItem from="1548059560100" duration="48116000" />
       <workItem from="1548272691551" duration="6684000" />
-      <workItem from="1548322935878" duration="20919000" />
+      <workItem from="1548322935878" duration="21590000" />
     </task>
     <servers />
   </component>
   <component name="TimeTrackingManager">
-    <option name="totallyTimeSpent" value="879109000" />
+    <option name="totallyTimeSpent" value="879780000" />
   </component>
   <component name="TodoView">
     <todo-panel id="selected-file">
@@ -1037,7 +1041,7 @@
     <frame x="3833" y="-7" width="2575" height="1415" extended-state="6" />
     <editor active="true" />
     <layout>
-      <window_info active="true" content_ui="combo" id="Project" order="0" sideWeight="0.4988372" visible="true" weight="0.14791253" />
+      <window_info content_ui="combo" id="Project" order="0" sideWeight="0.4988372" visible="true" weight="0.14791253" />
       <window_info id="Structure" order="1" sideWeight="0.50116277" side_tool="true" weight="0.12246521" />
       <window_info id="Favorites" order="2" side_tool="true" />
       <window_info id="Image Layers" order="3" />
@@ -1067,7 +1071,7 @@
       <window_info anchor="right" id="Commander" internal_type="SLIDING" order="0" type="SLIDING" weight="0.4" />
       <window_info anchor="right" id="Ant Build" order="1" weight="0.25" />
       <window_info anchor="right" content_ui="combo" id="Hierarchy" order="2" weight="0.25" />
-      <window_info anchor="right" id="Errors In Solution" order="3" weight="0.18404004" />
+      <window_info active="true" anchor="right" id="Errors In Solution" order="3" visible="true" weight="0.18369782" />
       <window_info anchor="right" id="Database" order="4" />
       <window_info anchor="right" id="Capture Analysis" order="5" />
       <window_info anchor="right" id="Device File Explorer" order="6" side_tool="true" />
@@ -1230,18 +1234,6 @@
     </expressions>
   </component>
   <component name="editorHistoryManager">
-    <entry file="file://$PROJECT_DIR$/Packages/UIForia/Src/Util/MathUtil.cs">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="176">
-          <caret line="11" column="1" lean-forward="true" selection-start-line="11" selection-start-column="1" selection-end-line="11" selection-end-column="1" />
-          <folding>
-            <marker date="1542016474602" expanded="true" signature="23:252" ph="{...}" />
-            <marker date="1542016474602" expanded="true" signature="59:249" ph="{...}" />
-            <marker date="1542016474602" expanded="true" signature="139:242" ph="{...}" />
-          </folding>
-        </state>
-      </provider>
-    </entry>
     <entry file="file://$PROJECT_DIR$/Packages/UIForia/Src/SVGX/SVGXElement.cs">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="240">
@@ -1679,20 +1671,29 @@
         </state>
       </provider>
     </entry>
+    <entry file="file://$PROJECT_DIR$/Packages/UIForia/Src/SVGX/SVGXRenderElementType.cs">
+      <provider selected="true" editor-type-id="text-editor">
+        <state>
+          <folding>
+            <marker date="1548344967836" expanded="true" signature="15:177" ph="{...}" />
+            <marker date="1548344967836" expanded="true" signature="56:174" ph="{...}" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
     <entry file="file://$PROJECT_DIR$/Packages/UIForia/Src/SVGX/SVGXRoot.cs">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="583">
-          <caret line="52" column="8" selection-start-line="52" selection-start-column="8" selection-end-line="52" selection-end-column="8" />
+        <state relative-caret-position="695">
+          <caret line="45" column="23" selection-start-line="45" selection-start-column="23" selection-end-line="45" selection-end-column="23" />
           <folding>
-            <marker date="1548344964909" expanded="true" signature="6:164" ph="..." />
-            <marker date="1548344964909" expanded="true" signature="181:2926" ph="{...}" />
-            <marker date="1548344964909" expanded="true" signature="217:323" ph="{...}" />
-            <marker date="1548344964909" expanded="true" signature="361:630" ph="{...}" />
-            <marker date="1548344964909" expanded="true" signature="672:790" ph="{...}" />
-            <marker date="1548344964909" expanded="true" signature="834:2920" ph="{...}" />
-            <marker date="1548344964909" expanded="true" signature="1198:1502" ph="{...}" />
-            <marker date="1548344964909" expanded="true" signature="1533:2913" ph="{...}" />
-            <marker date="1548344964909" expanded="true" signature="2359:2578" ph="/* if not self intersection &amp;&amp; no holes -&gt; all good ... */" />
+            <marker date="1548344967849" expanded="true" signature="6:164" ph="..." />
+            <marker date="1548344967849" expanded="true" signature="181:2766" ph="{...}" />
+            <marker date="1548344967849" expanded="true" signature="217:323" ph="{...}" />
+            <marker date="1548344967849" expanded="true" signature="361:630" ph="{...}" />
+            <marker date="1548344967849" expanded="true" signature="674:2760" ph="{...}" />
+            <marker date="1548344967849" expanded="true" signature="1038:1342" ph="{...}" />
+            <marker date="1548344967849" expanded="true" signature="1373:2753" ph="{...}" />
+            <marker date="1548344967849" expanded="true" signature="2199:2418" ph="/* if not self intersection &amp;&amp; no holes -&gt; all good ... */" />
           </folding>
         </state>
       </provider>

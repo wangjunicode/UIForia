@@ -26,8 +26,7 @@ namespace UIForia {
         }
 
         public override string Message =>
-            "Path: " 
-            + templatePath + "\n"
+            (templatePath ?? "Path: " + templatePath + "\n")
             + (template != null ? "Template: \n" + template + "\n" : string.Empty)
             + base.Message;
     }

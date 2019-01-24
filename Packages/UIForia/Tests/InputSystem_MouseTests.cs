@@ -11,10 +11,21 @@ public class InputSystemTests {
     [Template(TemplateType.String, @"
     
         <UITemplate>
-            <Contents style.layoutType='LayoutType.Fixed'>
-                <Group onMouseDown='{HandleClickedChild(0)}' style.translation='$fixedLength(0)'      style.preferredSize='$size(100, 20)'/>
-                <Group onMouseDown='{HandleClickedChild(1)}' style.translation='$fixedLength(100, 0)' style.preferredSize='$size(100, 20)'/>
-                <Group onMouseDown='{HandleClickedChild(2)}' style.translation='$fixedLength(200, 0)' style.preferredSize='$size(100, 20)'/>
+            <Style>
+                style container {
+                    LayoutType = Flex;
+                    FlexLayoutDirection = Column;
+                    PreferredSize = 300px, 100px;
+                }
+        
+                style cell {
+                    PreferredSize = 100px;
+                }
+            </Style>
+            <Contents style='container'>
+                <Group onMouseDown='{HandleClickedChild(0)}' style.translation='$fixedLength(0)'      style='cell' />
+                <Group onMouseDown='{HandleClickedChild(1)}' style.translation='$fixedLength(100, 0)' style='cell' />
+                <Group onMouseDown='{HandleClickedChild(2)}' style.translation='$fixedLength(200, 0)' style='cell' />
             </Contents>
         </UITemplate>
 
@@ -38,29 +49,37 @@ public class InputSystemTests {
     [Template(TemplateType.String, @"
     
         <UITemplate>
-            <Contents style.layoutType='LayoutType.Fixed'>
+            <Style>
+                style grid-container {
+                    LayoutType = Flex;
+                    FlexLayoutDirection = Column;
+                    PreferredSize = 300px, 100px;
+                }
+        
+                style cell {
+                    PreferredSize = 100px;
+                }
+            </Style>
+            <Contents style='grid-container'>
                 <Group onMouseUp='{HandleMouseUpChild($event, 0)}'
                        onMouseDown='{HandleMouseDownChild($event, 0)}' 
                        onMouseEnter='{HandleMouseEnterChild($event, 0)}'
                        onMouseExit='{HandleMouseExitChild($event, 0)}'
                        onMouseMove='{HandleMouseMoveChild($event, 0)}'
                        onMouseHover='{HandleMouseHoverChild($event, 0)}'
-                       style.translation='$fixedLength(0)' 
-                       style.preferredSize='$size(100, 20)'
+                       style='cell' 
                 />
                 <Group onMouseDown.capture='{HandleMouseDownChild($event, 1)}'
                        onMouseUp.capture='{HandleMouseUpChild($event, 1)}'
                        onMouseEnter.capture='{HandleMouseEnterChild($event, 1)}'
                        onMouseMove='{HandleMouseMoveChild($event, 1)}'
-                       style.translation='$fixedLength(100, 0)' 
-                       style.preferredSize='$size(100, 20)'
+                       style='cell' 
                 />
                 <Group onMouseDown='{HandleMouseDownChild($event, 2)}' 
                        onMouseUp='{HandleMouseUpChild($event, 2)}'
                        onMouseEnter='{HandleMouseEnterChild($event, 2)}'
                        onMouseExit='{HandleMouseExitChild($event, 2)}'
-                       style.translation='$fixedLength(200, 0)'
-                       style.preferredSize='$size(100, 20)'
+                       style='cell' 
                 />
             </Contents>
         </UITemplate>

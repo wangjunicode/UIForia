@@ -5,7 +5,7 @@ style grid-container {
     BackgroundColor = white;
     GridLayoutRowTemplate = 480px, 50px, 1mx, 1mx, 1mx;
     GridLayoutColTemplate = 1mx, 1mx, 1mx, 1mx, 1mx, 1mx;
-    
+        
     GridLayoutDensity = dense;
     //GridLayoutMainAxisAutoSize = 1mx;
     //GridLayoutMainAxisAutoSize = 400px;

@@ -1,4 +1,4 @@
-﻿Shader "UIForia/UIForiaStencilPaint"
+﻿Shader "UIForia/UIForiaStencilEven"
 {
     Properties
     {
@@ -7,14 +7,26 @@
     {
         Tags { "RenderType"="Transparent " }
         LOD 100
-
+        ColorMask 0
+        
+        /*
+        Why this works:
+            
+            1st pass (UIForiaClip) renders a clip value of 0 or 1 into stencil buffer
+            2nd pass (UIForiaStencil) renders a fill value of 1 into the stencil buffer at bit 2
+            3rd pass (This one) looks for all pixels with both the clip bit and the fill bit set (ie 3) and only renders there
+        */
         Stencil {
-            Ref 3
-            Comp Equal
+        
+            Ref 4
+            Comp Always
+            Pass Invert
+            WriteMask 6
+            
         }
         
         Cull Off
-        
+
         Pass
         {
             CGPROGRAM
@@ -27,27 +39,24 @@
             {
                 float4 vertex : POSITION;
                 float2 uv : TEXCOORD0;
-                fixed4 color : COLOR;
             };
 
             struct v2f
             {
-                float4 vertex : SV_POSITION;
                 float2 uv : TEXCOORD0;
-                fixed4 color : COLOR;
+                float4 vertex : SV_POSITION;
             };
 
             v2f vert (appdata v)
             {
                 v2f o;
                 o.vertex = UnityObjectToClipPos(v.vertex);
-                o.color = v.color;
                 return o;
             }
 
             fixed4 frag (v2f i) : SV_Target
             {
-                return i.color;
+                return fixed4(1, 1, 1, 1);
             }
             ENDCG
         }

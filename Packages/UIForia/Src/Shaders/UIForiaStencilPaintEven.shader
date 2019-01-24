@@ -1,4 +1,4 @@
-﻿Shader "UIForia/UIForiaStencilPaint"
+﻿Shader "UIForia/UIForiaStencilPaintEven"
 {
     Properties
     {
@@ -9,7 +9,8 @@
         LOD 100
 
         Stencil {
-            Ref 3
+            Ref 5
+            ReadMask 5
             Comp Equal
         }
         

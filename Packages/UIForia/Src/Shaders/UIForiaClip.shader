@@ -1,19 +1,24 @@
-﻿Shader "UIForia/UIForiaStencilPaint"
+﻿Shader "UIForia/UIForiaClip"
 {
     Properties
     {
     }
     SubShader
     {
-        Tags { "RenderType"="Transparent " }
+        Tags { "RenderType"="Transparent" }
         LOD 100
-
+        
         Stencil {
-            Ref 3
-            Comp Equal
+        
+            Ref 0
+            Comp Always
+            Pass Invert
+            WriteMask 1
+            
         }
         
         Cull Off
+        ColorMask 0
         
         Pass
         {
@@ -26,28 +31,23 @@
             struct appdata
             {
                 float4 vertex : POSITION;
-                float2 uv : TEXCOORD0;
-                fixed4 color : COLOR;
             };
 
             struct v2f
             {
                 float4 vertex : SV_POSITION;
-                float2 uv : TEXCOORD0;
-                fixed4 color : COLOR;
             };
 
             v2f vert (appdata v)
             {
                 v2f o;
                 o.vertex = UnityObjectToClipPos(v.vertex);
-                o.color = v.color;
                 return o;
             }
 
             fixed4 frag (v2f i) : SV_Target
             {
-                return i.color;
+                return fixed4(1, 0, 0, 1);
             }
             ENDCG
         }

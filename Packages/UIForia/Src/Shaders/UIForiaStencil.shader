@@ -5,18 +5,28 @@
     }
     SubShader
     {
-        Tags { "RenderType"="Opaque" }
+        Tags { "RenderType"="Transparent " }
         LOD 100
-        Cull Off
         ColorMask 0
         
+        /*
+        Why this works:
+            
+            1st pass (UIForiaClip) renders a clip value of 0 or 1 into stencil buffer
+            2nd pass (UIForiaStencil) renders a fill value of 1 into the stencil buffer at bit 2
+            3rd pass (This one) looks for all pixels with both the clip bit and the fill bit set (ie 3) and only renders there
+        */
         Stencil {
-            Ref 0
+        
+            Ref 3
             Comp Always
             Pass Invert
-            WriteMask 1
+            WriteMask 2
+            
         }
-//        
+        
+        Cull Off
+
         Pass
         {
             CGPROGRAM

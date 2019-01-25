@@ -62,7 +62,7 @@ namespace UIForia.Systems {
             m_RenderDataList.EnsureAdditionalCapacity(m_ToInitialize.Count);
             m_WillRenderList.EnsureAdditionalCapacity(m_ToInitialize.Count);
 
-            UIElement[] list = m_ToInitialize.List;
+            UIElement[] list = m_ToInitialize.Array;
 
             for (int i = 0; i < m_ToInitialize.Count; i++) {
                 UIElement element = list[i];
@@ -98,7 +98,7 @@ namespace UIForia.Systems {
             m_WillRenderList.Clear();
             m_WillRenderList.EnsureCapacity(m_RenderDataList.Count);
 
-            RenderData[] renderList = m_RenderDataList.List;
+            RenderData[] renderList = m_RenderDataList.Array;
 
             // todo -- can be easily jobified
             for (int i = 0; i < m_RenderDataList.Count; i++) {
@@ -178,7 +178,7 @@ namespace UIForia.Systems {
             });
 
             int start = 0;
-            RenderData[] willRender = m_WillRenderList.List;
+            RenderData[] willRender = m_WillRenderList.Array;
             ElementRenderer renderer = willRender[0].Renderer;
             for (int i = 1; i < m_WillRenderList.Count; i++) {
                 RenderData data = willRender[i];
@@ -299,7 +299,7 @@ namespace UIForia.Systems {
 
             int layerStart = 0;
             int currentLayer = renderList[0].element.layoutResult.layer;
-            RenderData[] list = renderList.List;
+            RenderData[] list = renderList.Array;
             for (int i = 1; i < renderList.Count; i++) {
                 RenderData renderData = list[i];
                 int layer = renderData.element.layoutResult.layer;

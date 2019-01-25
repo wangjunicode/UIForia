@@ -187,7 +187,7 @@ namespace UIForia.Layout.LayoutTypes {
         private float PositionCrossAxis(float offsetTop, float offsetBottom, float targetSize) {
             float maxHeight = 0;
             targetSize -= (offsetTop + offsetBottom);
-            FlexItem[] itemArray = items.List;
+            FlexItem[] itemArray = items.Array;
             for (int i = 0; i < items.Count; i++) {
                 FlexItem item = itemArray[i];
                 switch (itemArray[i].crossAxisAlignment) {
@@ -268,7 +268,7 @@ namespace UIForia.Layout.LayoutTypes {
                 }
             }
 
-            FlexItem[] itemArray = items.List;
+            FlexItem[] itemArray = items.Array;
             for (int i = 0; i < itemCount; i++) {
                 itemArray[i].mainAxisStart = mainAxisOffset + offset;
                 offset += itemArray[i].mainSize + spacerSize;

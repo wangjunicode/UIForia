@@ -408,7 +408,7 @@ public class UIElement : IHierarchical {
             return retn;
         }
 
-        UIElement[] childArray = children.List;
+        UIElement[] childArray = children.Array;
         for (int i = 0; i < children.Count; i++) {
             retn.Add(childArray[i]);
         }

@@ -55,7 +55,7 @@ namespace UIForia.Layout.LayoutTypes {
         public override void OnChildEnabled(LayoutBox enabledChild) {
             children.Add(enabledChild); // todo -- insert in sort order
             items.Add(new Item());
-            Item[] itemList = items.List;
+            Item[] itemList = items.Array;
             for (int i = 0; i < children.Count; i++) {
                 LayoutBox child = children[i];
                 CrossAxisAlignment childCrossAlignment = children[i].style.FlexItemSelfAlignment;
@@ -73,7 +73,7 @@ namespace UIForia.Layout.LayoutTypes {
 
         public override void OnChildDisabled(LayoutBox disabledChild) {
             children.Remove(disabledChild);
-            Item[] itemList = items.List;
+            Item[] itemList = items.Array;
             for (int i = 0; i < children.Count; i++) {
                 LayoutBox child = children[i];
                 CrossAxisAlignment childCrossAlignment = children[i].style.FlexItemSelfAlignment;
@@ -98,7 +98,7 @@ namespace UIForia.Layout.LayoutTypes {
                     crossAxisAlignment = style.FlexLayoutCrossAxisAlignment;
                     mainAxisAlignment = style.FlexLayoutMainAxisAlignment;
                     for (int i = 0; i < children.Count; i++) {
-                        Item[] itemList = items.List;
+                        Item[] itemList = items.Array;
                         CrossAxisAlignment childCrossAlignment = children[i].style.FlexItemSelfAlignment;
                         if (childCrossAlignment == CrossAxisAlignment.Unset) {
                             childCrossAlignment = crossAxisAlignment;
@@ -120,7 +120,7 @@ namespace UIForia.Layout.LayoutTypes {
                 case StylePropertyId.FlexItemSelfAlignment:
                     for (int i = 0; i < children.Count; i++) {
                         if (children[i] == child) {
-                            Item[] itemList = items.List;
+                            Item[] itemList = items.Array;
                             CrossAxisAlignment childCrossAlignment = child.style.FlexItemSelfAlignment;
                             if (childCrossAlignment == CrossAxisAlignment.Unset) {
                                 childCrossAlignment = crossAxisAlignment;
@@ -233,7 +233,7 @@ namespace UIForia.Layout.LayoutTypes {
             float maxWidth = 0f;
             tracks.Clear();
 
-            Item[] itemList = items.List;
+            Item[] itemList = items.Array;
             for (int i = 0; i < children.Count; i++) {
                 LayoutBox child = children[i];
                 LayoutBoxSize widthSize = child.GetWidths();
@@ -291,10 +291,10 @@ namespace UIForia.Layout.LayoutTypes {
                 track.remainingSpace = adjustedHeight - track.mainSize;
 
                 if (track.remainingSpace > 0) {
-                    track = GrowTrack(track, items.List);
+                    track = GrowTrack(track, items.Array);
                 }
                 else if (track.remainingSpace < 0) {
-                    track = ShrinkTrack(track, items.List);
+                    track = ShrinkTrack(track, items.Array);
                 }
 
                 AlignMainAxis(track, paddingBorderTop);
@@ -316,7 +316,7 @@ namespace UIForia.Layout.LayoutTypes {
             float adjustedHeight = allocatedHeight - paddingBorderTop - paddingBorderBottom;
 
             tracks.Clear();
-            Item[] itemList = items.List;
+            Item[] itemList = items.Array;
 
             Track currentTrack = new Track();
             currentTrack.startItemIndex = 0;
@@ -334,7 +334,7 @@ namespace UIForia.Layout.LayoutTypes {
 
             tracks.Add(currentTrack);
 
-            Track[] trackList = tracks.List;
+            Track[] trackList = tracks.Array;
 
             for (int i = 0; i < tracks.Count; i++) {
                 Track track = trackList[i];
@@ -371,7 +371,7 @@ namespace UIForia.Layout.LayoutTypes {
         }
 
         private void AlignMainAxis(Track track, float mainAxisOffset) {
-            Item[] itemList = items.List;
+            Item[] itemList = items.Array;
             int itemCount = track.endItemIndex - track.startItemIndex;
             float spacerSize = 0;
             float offset = 0;
@@ -429,7 +429,7 @@ namespace UIForia.Layout.LayoutTypes {
 
         private void PositionCrossAxisColumn(float axisOffset, float padding, Track track) {
             axisOffset += padding;
-            Item[] itemList = items.List;
+            Item[] itemList = items.Array;
             for (int i = track.startItemIndex; i < track.endItemIndex; i++) {
                 switch (items[i].crossAxisAlignment) {
                     case CrossAxisAlignment.Center:
@@ -460,7 +460,7 @@ namespace UIForia.Layout.LayoutTypes {
 
         private void PositionCrossAxisRow(float axisOffset, float padding, Track track) {
             axisOffset += padding;
-            Item[] itemList = items.List;
+            Item[] itemList = items.Array;
             for (int i = track.startItemIndex; i < track.endItemIndex; i++) {
                 switch (items[i].crossAxisAlignment) {
                     case CrossAxisAlignment.Center:

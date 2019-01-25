@@ -20,8 +20,21 @@ namespace SVGX {
         
         public Vector2 uv;
         public int textureMode;
-        public float dropShadow; 
+        public float dropShadow;
+
+        public SVGXStrokeStyle strokeStyle;
 
     }
 
+    public struct SVGXStrokeStyle {
+
+        public Color color;
+        public float alpha;
+        public float width;
+        public float[] dashArray;
+        public LineCap lineCap;
+        public LineJoin lineJoin;
+
+    }
+    
 }

@@ -167,16 +167,16 @@ namespace UIForia.Rendering {
             }
             
             m_Block.Clear();
-            m_Block.SetVectorArray(s_PrimaryColorKey, m_PrimaryColors.List);
-            m_Block.SetVectorArray(s_SecondaryColorKey, m_SecondaryColors.List);
-            m_Block.SetVectorArray(s_FillOffsetAndScaleKey, m_FillOffsetAndScales.List);
-            m_Block.SetVectorArray(s_SizeRotationGradientStartKey, m_SizeRotations.List);
-            m_Block.SetVectorArray(s_ClipRectKey, m_ClipRects.List);
+            m_Block.SetVectorArray(s_PrimaryColorKey, m_PrimaryColors.Array);
+            m_Block.SetVectorArray(s_SecondaryColorKey, m_SecondaryColors.Array);
+            m_Block.SetVectorArray(s_FillOffsetAndScaleKey, m_FillOffsetAndScales.Array);
+            m_Block.SetVectorArray(s_SizeRotationGradientStartKey, m_SizeRotations.Array);
+            m_Block.SetVectorArray(s_ClipRectKey, m_ClipRects.Array);
             
             if ((batchKey & MaterialBatchKey.Border) != 0) {
-                m_Block.SetVectorArray(s_BorderRadiusKey, m_BorderRadii.List);
-                m_Block.SetVectorArray(s_BorderSizeKey, m_BorderSizes.List);
-                m_Block.SetVectorArray(s_BorderColorKey, m_BorderColors.List);
+                m_Block.SetVectorArray(s_BorderRadiusKey, m_BorderRadii.Array);
+                m_Block.SetVectorArray(s_BorderSizeKey, m_BorderSizes.Array);
+                m_Block.SetVectorArray(s_BorderColorKey, m_BorderColors.Array);
             }
 
             if ((batchKey & MaterialBatchKey.Shape_Ellipse) != 0) {
@@ -192,14 +192,14 @@ namespace UIForia.Rendering {
             }
 
             if ((batchKey & MaterialBatchKey.__FillType_Gradient) != 0) {
-                m_Block.SetVectorArray(s_GradientAxisAndStartKey, m_GradientAxisAndStart.List);
+                m_Block.SetVectorArray(s_GradientAxisAndStartKey, m_GradientAxisAndStart.Array);
             }
             
             if ((batchKey & MaterialBatchKey.__FillType_GridOrLine) != 0) {
-                m_Block.SetVectorArray(s_GridAndLineSizeKey, m_GridAndLineSizes.List);
+                m_Block.SetVectorArray(s_GridAndLineSizeKey, m_GridAndLineSizes.Array);
             }
 
-            Graphics.DrawMeshInstanced(s_Mesh, 0, material, m_Matrices.List, end - start, m_Block, ShadowCastingMode.Off, false, 0, camera, LightProbeUsage.Off);
+            Graphics.DrawMeshInstanced(s_Mesh, 0, material, m_Matrices.Array, end - start, m_Block, ShadowCastingMode.Off, false, 0, camera, LightProbeUsage.Off);
 
         }
 
@@ -355,7 +355,7 @@ namespace UIForia.Rendering {
             SortBatches(drawList, start, end);
             if (m_BatchEntries.Count > 0) {
                 MaterialBatchKey currentKey = m_BatchEntries[0].batchKey;
-                BatchEntry[] entries = m_BatchEntries.List;
+                BatchEntry[] entries = m_BatchEntries.Array;
                 int batchStart = 0;
                 for (int i = 0; i < m_BatchEntries.Count; i++) {
                     if (entries[i].batchKey != currentKey) {
@@ -368,7 +368,7 @@ namespace UIForia.Rendering {
                 RenderBatch(currentKey, entries, batchStart, m_BatchEntries.Count, origin, camera);
             }
 
-            DefaultNonInstanced.Render(m_SpecialRenderList.List, 0, m_SpecialRenderList.Count, origin, camera);
+            DefaultNonInstanced.Render(m_SpecialRenderList.Array, 0, m_SpecialRenderList.Count, origin, camera);
 
             m_SpecialRenderList.Clear();
             m_BatchEntries.Clear();

@@ -5,6 +5,7 @@ namespace SVGX {
 
     public static class SVGXGeometryGenerator {
 
+        
         public static Mesh FillLineMesh(List<Vector2> segments) {
             List<Vector3> vertices = new List<Vector3>();
             List<int> triangles = new List<int>();

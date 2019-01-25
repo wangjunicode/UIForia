@@ -77,7 +77,7 @@ namespace UIForia.Systems {
             m_ChangeSets.ForEach(this, (id, changeSet, self) => {
                 UIElement element = changeSet.element;
                 int changeCount = changeSet.changes.Count;
-                StyleProperty[] properties = changeSet.changes.List;
+                StyleProperty[] properties = changeSet.changes.Array;
                 for (int i = 0; i < changeCount; i++) {
                     // todo -- change this to be 1 invoke w/ property list instead of n invokes
                     self.onStylePropertyChanged.Invoke(element, properties[i]);

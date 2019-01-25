@@ -8,26 +8,26 @@ namespace UIForia.Util {
     public class LightList<T> : IReadOnlyList<T>, IList<T> {
 
         private int size;
-        private T[] list;
+        private T[] array;
 
         public LightList(int size = 8) {
-            this.list = ArrayPool<T>.GetMinSize(size);
+            this.array = ArrayPool<T>.GetMinSize(size);
             this.size = 0;
         }
 
-        public T[] List => list;
+        public T[] Array => array;
         public int Count => size;
         
         public bool IsReadOnly => false;
 
-        public int Capacity => list.Length;
+        public int Capacity => array.Length;
 
         public void Add(T item) {
-            if (size + 1 > list.Length) {
-                ArrayPool<T>.Resize(ref list, (size + 1) * 2);
+            if (size + 1 > array.Length) {
+                ArrayPool<T>.Resize(ref array, (size + 1) * 2);
             }
 
-            list[size] = item;
+            array[size] = item;
             size++;
         }
 
@@ -42,11 +42,11 @@ namespace UIForia.Util {
         }
 
         public void AddUnchecked(T item) {
-            list[size++] = item;
+            array[size++] = item;
         }
 
         public void Clear() {
-            Array.Clear(list, 0, list.Length);
+            System.Array.Clear(array, 0, array.Length);
             size = 0;
         }
 
@@ -56,7 +56,7 @@ namespace UIForia.Util {
 
         public bool Contains(T item) {
             for (int i = 0; i < size; i++) {
-                if (list[i].Equals(item)) return true;
+                if (array[i].Equals(item)) return true;
             }
 
             return false;
@@ -64,18 +64,18 @@ namespace UIForia.Util {
 
         public void CopyTo(T[] array, int arrayIndex) {
             for (int i = 0; i < size; i++) {
-                array[arrayIndex + i] = list[i];
+                array[arrayIndex + i] = this.array[i];
             }
         }
 
         public bool Remove(T item) {
             for (int i = 0; i < size; i++) {
-                if (list[i].Equals(item)) {
+                if (array[i].Equals(item)) {
                     for (int j = i; j < size - 1; j++) {
-                        list[j] = list[j + 1];
+                        array[j] = array[j + 1];
                     }
 
-                    list[size - 1] = default(T);
+                    array[size - 1] = default(T);
                     size--;
                     return true;
                 }
@@ -86,23 +86,23 @@ namespace UIForia.Util {
 
         public int IndexOf(T item) {
             for (int i = 0; i < size; i++) {
-                if (list[i].Equals(item)) return i;
+                if (array[i].Equals(item)) return i;
             }
 
             return -1;
         }
 
         public void Insert(int index, T item) {
-            if (size + 1 >= list.Length) {
-                ArrayPool<T>.Resize(ref list, (size + 1) * 2);
+            if (size + 1 >= array.Length) {
+                ArrayPool<T>.Resize(ref array, (size + 1) * 2);
             }
             size++;
             index = Mathf.Clamp(index, 0, size - 1);
             for (int i = index; i < size; i++) {
-                list[i + 1] = list[i];
+                array[i + 1] = array[i];
             }
 
-            list[index] = item;
+            array[index] = item;
         }
 
         public void InsertRange(int index, IEnumerable<T> collection) {
@@ -119,15 +119,15 @@ namespace UIForia.Util {
                 if (count > 0) {
                     this.EnsureCapacity(size + count);
                     if (index < size)
-                        Array.Copy(list, index, list, index + count, size - index);
+                        System.Array.Copy(array, index, array, index + count, size - index);
                     if (Equals(this, objs)) {
-                        Array.Copy(list, 0, list, index, index);
-                        Array.Copy(list, index + count, list, index * 2, size - index);
+                        System.Array.Copy(array, 0, array, index, index);
+                        System.Array.Copy(array, index + count, array, index * 2, size - index);
                     }
                     else {
                         T[] array = ArrayPool<T>.GetExactSize(count);
                         objs.CopyTo(array, 0);
-                        array.CopyTo(list, index);
+                        array.CopyTo(this.array, index);
                         ArrayPool<T>.Release(ref array);
                     }
 
@@ -142,8 +142,8 @@ namespace UIForia.Util {
         }
 
         public T RemoveLast() {
-            T retn = list[size - 1];
-            list[size - 1] = default;
+            T retn = array[size - 1];
+            array[size - 1] = default;
             size--;
             return retn;
         }
@@ -151,20 +151,20 @@ namespace UIForia.Util {
         public void RemoveAt(int index) {
             if ((uint) index >= (uint) size) return;
             if (index == size - 1) {
-                list[--size] = default;
+                array[--size] = default;
             }
             else {
                 for (int j = index; j < size - 1; j++) {
-                    list[j] = list[j + 1];
+                    array[j] = array[j + 1];
                 }
 
-                list[--size] = default(T);
+                array[--size] = default(T);
             }
         }
 
         public int FindIndex(Predicate<T> fn) {
             for (int i = 0; i < size; i++) {
-                if (fn(list[i])) {
+                if (fn(array[i])) {
                     return i;
                 }
             }
@@ -174,7 +174,7 @@ namespace UIForia.Util {
 
         public int FindIndex<U>(U closureArg, Func<T, U, bool> fn) {
             for (int i = 0; i < size; i++) {
-                if (fn(list[i], closureArg)) {
+                if (fn(array[i], closureArg)) {
                     return i;
                 }
             }
@@ -184,8 +184,8 @@ namespace UIForia.Util {
 
         public T Find(Predicate<T> fn) {
             for (int i = 0; i < size; i++) {
-                if (fn(list[i])) {
-                    return list[i];
+                if (fn(array[i])) {
+                    return array[i];
                 }
             }
 
@@ -194,8 +194,8 @@ namespace UIForia.Util {
 
         public T Find<U>(U closureArg, Func<T, U, bool> fn) {
             for (int i = 0; i < size; i++) {
-                if (fn(list[i], closureArg)) {
-                    return list[i];
+                if (fn(array[i], closureArg)) {
+                    return array[i];
                 }
             }
 
@@ -203,48 +203,48 @@ namespace UIForia.Util {
         }
 
         public T this[int index] {
-            get { return list[index]; }
-            set { list[index] = value; }
+            get { return array[index]; }
+            set { array[index] = value; }
         }
 
         public void EnsureCapacity(int capacity) {
-            if (list.Length < capacity) {
-                ArrayPool<T>.Resize(ref list, capacity * 2);
+            if (array.Length < capacity) {
+                ArrayPool<T>.Resize(ref array, capacity * 2);
             }
         }
 
         public void EnsureAdditionalCapacity(int capacity) {
-            if (list.Length < size + capacity) {
-                ArrayPool<T>.Resize(ref list, (size + capacity) * 2);
+            if (array.Length < size + capacity) {
+                ArrayPool<T>.Resize(ref array, (size + capacity) * 2);
             }
         }
 
         public void Sort(int start, int end, IComparer<T> comparison) {
-            Array.Sort(list, start, end, comparison);
+            System.Array.Sort(array, start, end, comparison);
         }
 
         public void Sort(int start, int end, Comparison<T> comparison) {
             s_Compare.comparison = comparison;
-            Array.Sort(list, start, end, s_Compare);
+            System.Array.Sort(array, start, end, s_Compare);
             s_Compare.comparison = null;
         }
 
         public void Sort(Comparison<T> comparison) {
             s_Compare.comparison = comparison;
-            Array.Sort(list, 0, size, s_Compare);
+            System.Array.Sort(array, 0, size, s_Compare);
             s_Compare.comparison = null;
         }
 
         public void Sort(IComparer<T> comparison) {
-            Array.Sort(list, 0, size, comparison);
+            System.Array.Sort(array, 0, size, comparison);
         }
 
         public int BinarySearch(T value, IComparer<T> comparer) {
-            return InternalBinarySearch(list, 0, size, value, comparer);
+            return InternalBinarySearch(array, 0, size, value, comparer);
         }
 
         public int BinarySearch(T value) {
-            return InternalBinarySearch(list, 0, size, value, Comparer<T>.Default);
+            return InternalBinarySearch(array, 0, size, value, Comparer<T>.Default);
         }
 
         private static int InternalBinarySearch(T[] array, int index, int length, T value, IComparer<T> comparer) {
@@ -314,7 +314,7 @@ namespace UIForia.Util {
                     return false;
                 }
 
-                current = list.list[index];
+                current = list.array[index];
                 ++index;
                 return true;
             }

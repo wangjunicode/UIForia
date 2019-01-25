@@ -599,9 +599,11 @@
             <e p="StyleDefinition.cs" t="Include" />
             <e p="SVGX" t="Include">
               <e p="ClipRule.cs" t="Include" />
+              <e p="ImmediateRenderContext.cs" t="Include" />
               <e p="LineCap.cs" t="Include" />
               <e p="LineJoin.cs" t="Include" />
               <e p="PathCommand.cs" t="Include" />
+              <e p="StrokeVertexData.cs" t="Include" />
               <e p="SVGXBezier.cs" t="Include" />
               <e p="SVGXElement.cs" t="Include" />
               <e p="SVGXGeometryGenerator.cs" t="Include" />

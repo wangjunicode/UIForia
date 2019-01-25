@@ -674,7 +674,7 @@ namespace UIForia.Layout.LayoutTypes {
         }
 
         private static void ClearGridTracks(LightList<GridTrack> tracks) {
-            GridTrack[] array = tracks.List;
+            GridTrack[] array = tracks.Array;
             for (int i = 0; i < tracks.Count; i++) {
                 ListPool<int>.Release(ref array[i].spanningItems);
             }
@@ -858,7 +858,7 @@ namespace UIForia.Layout.LayoutTypes {
 
                     CreateTracks(m_ColTracks, cursorX + colSpan, autoColSize);
 
-                    m_RowTracks.List[rowStart].autoPlacementCursor = cursorX;
+                    m_RowTracks.Array[rowStart].autoPlacementCursor = cursorX;
 
                     colItem.trackStart = cursorX;
                 }
@@ -871,7 +871,7 @@ namespace UIForia.Layout.LayoutTypes {
 
                     CreateTracks(m_RowTracks, cursorY + rowSpan, autoRowSize);
 
-                    m_ColTracks.List[colStart].autoPlacementCursor = cursorY;
+                    m_ColTracks.Array[colStart].autoPlacementCursor = cursorY;
 
                     rowItem.trackStart = cursorY;
                 }
@@ -905,8 +905,8 @@ namespace UIForia.Layout.LayoutTypes {
                     colItem.trackStart = cursorX;
                     rowItem.trackStart = cursorY;
                     CreateTracks(m_ColTracks, cursorX + colSpan, autoColSize);
-                    m_ColTracks.List[cursorX].autoPlacementCursor = cursorY;
-                    m_RowTracks.List[cursorY].autoPlacementCursor = cursorX;
+                    m_ColTracks.Array[cursorX].autoPlacementCursor = cursorY;
+                    m_RowTracks.Array[cursorY].autoPlacementCursor = cursorX;
                 }
                 else {
                     if (dense) {
@@ -937,8 +937,8 @@ namespace UIForia.Layout.LayoutTypes {
                     sparseStartY = cursorY + rowSpan;
                     colItem.trackStart = cursorX;
                     rowItem.trackStart = cursorY;
-                    m_ColTracks.List[cursorX].autoPlacementCursor = cursorY;
-                    m_RowTracks.List[cursorY].autoPlacementCursor = cursorX;
+                    m_ColTracks.Array[cursorX].autoPlacementCursor = cursorY;
+                    m_RowTracks.Array[cursorY].autoPlacementCursor = cursorX;
                     CreateTracks(m_ColTracks, cursorX + colSpan, autoColSize);
                     CreateTracks(m_RowTracks, cursorY + rowSpan, autoRowSize);
                 }

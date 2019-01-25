@@ -98,8 +98,6 @@ public class RepeatBindingNode<T, U> : RepeatBindingNode where T : RepeatableLis
             return;
         }
 
-        if (bindings == null) return;
-
         for (int i = 0; i < bindings.Length; i++) {
             bindings[i].Execute(element, context);
         }

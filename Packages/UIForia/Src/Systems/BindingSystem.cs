@@ -51,6 +51,7 @@ namespace UIForia.Systems {
                     ReflectionUtil.ObjectArray2
                 );
 
+                node.bindings = template.perFrameBindings;
                 node.element = repeat;
                 node.template = repeat.template;
                 node.context = repeat.templateContext;

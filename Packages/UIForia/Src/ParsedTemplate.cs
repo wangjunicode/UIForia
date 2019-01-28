@@ -122,7 +122,7 @@ namespace UIForia {
 
         public UIStyleGroup ResolveStyleGroup(string styleName) {
             if (styleGroups == null) {
-                return null;
+                return default;
             }
             StyleDefinition def;
             // if no dot in path then the style name is the alias

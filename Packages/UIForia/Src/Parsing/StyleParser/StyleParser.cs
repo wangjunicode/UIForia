@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Reflection;
+using JetBrains.Annotations;
 using UIForia.Extensions;
 using UIForia.Rendering;
 using UIForia.Util;
@@ -54,6 +55,18 @@ namespace UIForia.Parsing.StyleParser {
             s_CurrentlyParsingList.Clear();
         }
 
+        /// <summary>
+        /// Gets a copy of a style group from any style file. Loads and parses the styles if necessary. Does not support getting
+        /// styles from ui templates.
+        /// </summary>
+        /// <param name="uniqueStyleId">the relative path to the style file</param>
+        /// <param name="styleName">the style group's name you're looking for</param>
+        /// <returns>a style group or null if none is found</returns>
+        [PublicAPI]
+        public static UIStyleGroup GetParsedStyle(string uniqueStyleId, string styleName) {
+            return GetParsedStyle(uniqueStyleId, null, styleName);
+        }
+
         public static UIStyleGroup GetParsedStyle(string uniqueStyleId, string body, string styleName) {
             uniqueStyleId = uniqueStyleId.Trim();
             styleName = styleName.Trim();
@@ -84,7 +97,7 @@ namespace UIForia.Parsing.StyleParser {
                 s_CompiledStyles[uniqueStyleId] = sheet;
             }
 
-            return sheet?.GetStyleGroup(styleName);
+            return sheet?.GetStyleGroup(styleName) ?? default;
         }
 
         private static ParsedStyleSheet TryParseStyleFromClassPath(string path) {

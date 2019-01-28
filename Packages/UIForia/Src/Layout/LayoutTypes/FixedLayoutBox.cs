@@ -1,5 +1,6 @@
 using UIForia.Rendering;
 using UIForia.Systems;
+using UIForia.Util;
 using UnityEngine;
 
 namespace UIForia.Layout.LayoutTypes {
@@ -84,12 +85,16 @@ namespace UIForia.Layout.LayoutTypes {
             }
         }
 
-        public override void OnStylePropertyChanged(StyleProperty property) {
-            switch (property.propertyId) {
-                case StylePropertyId.TransformPositionX:
-                case StylePropertyId.TransformPositionY:
-                    RequestContentSizeChangeLayout();
-                    break;
+        public override void OnStylePropertyChanged(LightList<StyleProperty> properties) {
+            for (int i = 0; i < properties.Count; i++) {
+                StyleProperty property = properties[i];
+
+                switch (property.propertyId) {
+                    case StylePropertyId.TransformPositionX:
+                    case StylePropertyId.TransformPositionY:
+                        RequestContentSizeChangeLayout();
+                        return;
+                }
             }
         }
 

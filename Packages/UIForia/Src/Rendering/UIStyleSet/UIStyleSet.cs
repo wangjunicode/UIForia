@@ -625,9 +625,8 @@ namespace UIForia.Rendering {
         }
 
         private UIStyle GetOrCreateInstanceStyle(StyleState state) {
-            if (instanceStyle == null) {
-                instanceStyle = new UIStyleGroup();
-                instanceStyle.name = "Instance";
+            if (instanceStyle == default) {
+                instanceStyle = new UIStyleGroup {name = "Instance"};
             }
 
             switch (state) {

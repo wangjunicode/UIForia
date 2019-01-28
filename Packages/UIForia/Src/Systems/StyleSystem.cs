@@ -13,7 +13,7 @@ namespace UIForia.Systems {
         protected readonly StyleAnimator animator;
 
         public event Action<UIElement, string> onTextContentChanged;
-        public event Action<UIElement, StyleProperty> onStylePropertyChanged;
+        public event Action<UIElement, LightList<StyleProperty>> onStylePropertyChanged;
 
         private static readonly Stack<UIElement> s_ElementStack = new Stack<UIElement>();
 
@@ -75,13 +75,7 @@ namespace UIForia.Systems {
             }
 
             m_ChangeSets.ForEach(this, (id, changeSet, self) => {
-                UIElement element = changeSet.element;
-                int changeCount = changeSet.changes.Count;
-                StyleProperty[] properties = changeSet.changes.Array;
-                for (int i = 0; i < changeCount; i++) {
-                    // todo -- change this to be 1 invoke w/ property list instead of n invokes
-                    self.onStylePropertyChanged.Invoke(element, properties[i]);
-                }
+                self.onStylePropertyChanged.Invoke(changeSet.element, changeSet.changes);
 
                 LightListPool<StyleProperty>.Release(ref changeSet.changes);
                 changeSet.element = null;

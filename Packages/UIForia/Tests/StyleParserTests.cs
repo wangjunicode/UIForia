@@ -3,6 +3,7 @@ using NUnit.Framework;
 using UIForia.Rendering;
 using UIForia;
 using UIForia.Parsing.StyleParser;
+using UnityEditorInternal;
 using UnityEngine;
 
 [TestFixture]
@@ -192,5 +193,15 @@ public class StyleParserTests {
         Assert.AreEqual(new UIFixedLength(0.2f, UIFixedUnit.Percent), rect.right);
         Assert.AreEqual(new UIFixedLength(12, UIFixedUnit.Em), rect.bottom);
         Assert.AreEqual(new UIFixedLength(7, UIFixedUnit.ViewportHeight), rect.left);
+    }
+
+    [Test]
+    public void LoadStyleGroupFromSheet() {
+        var styleGroup = StyleParser.GetParsedStyle("Tests/Styles/test.style", "custom-style");
+        
+        Assert.NotNull(styleGroup, "Could not find style :(");
+        Assert.AreEqual("custom-style", styleGroup.name);
+        Assert.NotNull(styleGroup.normal.MarginTop, "Margin expected");
+        Assert.AreEqual(10f, styleGroup.normal.MarginTop.value);
     }
 }

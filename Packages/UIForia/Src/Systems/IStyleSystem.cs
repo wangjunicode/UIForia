@@ -1,6 +1,7 @@
 ﻿using System;
 using UIForia.Animation;
 using UIForia.Rendering;
+using UIForia.Util;
 using UnityEngine;
 
 namespace UIForia.Systems {
@@ -8,7 +9,7 @@ namespace UIForia.Systems {
     public interface IStyleSystem : ISystem {
 
         event Action<UIElement, string> onTextContentChanged;
-        event Action<UIElement, StyleProperty> onStylePropertyChanged;
+        event Action<UIElement, LightList<StyleProperty>> onStylePropertyChanged;
 
         void SetStyleProperty(UIElement element, StyleProperty propertyValue);
 

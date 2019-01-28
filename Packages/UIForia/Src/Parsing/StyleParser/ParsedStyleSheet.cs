@@ -17,14 +17,14 @@ namespace UIForia.Parsing.StyleParser {
         public List<string> dependencies;
         
         public UIStyleGroup GetStyleGroup(string uniqueStyleId) {
-            if (styles == null) return null;
+            if (styles == null) return default;
             for (int i = 0; i < styles.Length; i++) {
                 if (styles[i].name == uniqueStyleId) {
                     return styles[i];
                 }
             }
 
-            return null;
+            return default;
         }
 
     }

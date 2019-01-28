@@ -243,7 +243,7 @@ Camera:
   m_TargetDisplay: 0
   m_TargetEye: 3
   m_HDR: 1
-  m_AllowMSAA: 1
+  m_AllowMSAA: 0
   m_AllowDynamicResolution: 0
   m_ForceIntoRT: 0
   m_OcclusionCulling: 0
@@ -363,8 +363,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 35f2b5d632fd4d64b9acedec5215cda2, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  typeName: UnityEngine.GridDemo, Assembly-CSharp, Version=0.0.0.0, Culture=neutral,
-    PublicKeyToken=null
+  typeName: UI.Root, Assembly-CSharp, Version=0.0.0.0, Culture=neutral, PublicKeyToken=null
   camera: {fileID: 534669904}
 --- !u!114 &1506585480
 MonoBehaviour:
@@ -458,12 +457,11 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   paint: {fileID: 2100000, guid: 8e838649fb5b1c24c9632a1c399f6f2a, type: 2}
-  paintEven: {fileID: 2100000, guid: dc26552bfd564e747a2d9d6bb5654881, type: 2}
   stencil: {fileID: 2100000, guid: 1e8b2a2341a5e6048963693c2767e790, type: 2}
-  stencilEven: {fileID: 2100000, guid: 240e21b72410fda44b3a33ecc446057a, type: 2}
-  lineMaterial: {fileID: 2100000, guid: b3112747779d55040a25c1e39cfe8bc4, type: 2}
   camera: {fileID: 534669904}
   clip: {fileID: 2100000, guid: 6953c70803c286549b51fd41864ab675, type: 2}
+  stencilClear: {fileID: 0}
+  strokeMaterial: {fileID: 2100000, guid: b3112747779d55040a25c1e39cfe8bc4, type: 2}
 --- !u!222 &1506585485
 CanvasRenderer:
   m_ObjectHideFlags: 0

@@ -1,4 +1,4 @@
-using System.Linq;
+using System.Collections.Generic;
 using UIForia.Util;
 using UnityEngine;
 
@@ -14,11 +14,11 @@ namespace SVGX {
         public int triangleIndex;
         
         public StrokeVertexData() {
-            this.position = new LightList<Vector3>(1024);
-            this.prevNext = new LightList<Vector4>(1024);
-            this.flags = new LightList<Vector4>(1024);
-            this.colors = new LightList<Color>(1024);
-            this.triangles = new LightList<int>(1024 * 3);
+            this.position = new LightList<Vector3>(32);
+            this.prevNext = new LightList<Vector4>(32);
+            this.flags = new LightList<Vector4>(32);
+            this.colors = new LightList<Color>(32);
+            this.triangles = new LightList<int>(32 * 3);
         }
 
         public void Clear() {
@@ -40,11 +40,12 @@ namespace SVGX {
 
         public void FillMesh(Mesh mesh) {
             // todo -- the list requirement sucks :/
-            mesh.vertices = position.Array;
-            mesh.colors = colors.Array;
-            mesh.SetUVs(1, prevNext.Array.ToList());
-            mesh.SetUVs(2, flags.Array.ToList());
-            mesh.triangles = triangles.Array;
+            mesh.SetVertices(position.ToList());
+            mesh.SetColors(colors.ToList());
+            mesh.SetUVs(0, new List<Vector2>());
+            mesh.SetUVs(1, prevNext.ToList());
+            mesh.SetUVs(2, flags.ToList());
+            mesh.SetTriangles(triangles.ToList(), 0);
         }
 
     }

@@ -74,7 +74,7 @@ namespace SVGX {
                         Vector2 ctrl0 = transform.TransformPoint(cmd.c0x, cmd.c0y);
                         Vector2 ctrl1 = transform.TransformPoint(cmd.c1x, cmd.c1y);
                         Vector2 end = transform.TransformPoint(cmd.px, cmd.py);
-                        currentList.AddRange(SVGXBezier.Tessellate(start, ctrl0, ctrl1, end));
+                        //currentList.AddRange(SVGXBezier.Tessellate(start, ctrl0, ctrl1, end));
                         lastX = cmd.px;
                         lastY = cmd.py;
                         break;
@@ -84,7 +84,7 @@ namespace SVGX {
                     case SVGXPathCommandType.ArcToRelative: {
                         Vector2 start = new Vector2(lastX, lastY);
                         Vector2 end = new Vector2(cmd.ArcEndX, cmd.ArcEndY);
-                        currentList.AddRange(SVGXArc.Arc(start, cmd.ArcRX, cmd.ArcRY, cmd.ArcRotation, cmd.IsLargeArc, cmd.IsSweepArc, end));
+                     //   currentList.AddRange(SVGXArc.Arc(start, cmd.ArcRX, cmd.ArcRY, cmd.ArcRotation, cmd.IsLargeArc, cmd.IsSweepArc, end));
                         lastX = end.x;
                         lastY = end.y;
                         break;
@@ -102,7 +102,7 @@ namespace SVGX {
                         Vector2 start = new Vector2(lastX, lastY);
                         Vector2 ctrl = new Vector2(cmd.c0x, cmd.c0y);
                         Vector2 end = new Vector2(cmd.px, cmd.py);
-                        currentList.AddRange(SVGXBezier.QuadraticCurve(start, ctrl, end));
+                       //  currentList.AddRange(SVGXBezier.QuadraticCurve(start, ctrl, end));
                         lastX = cmd.px;
                         lastY = cmd.py;
                         break;

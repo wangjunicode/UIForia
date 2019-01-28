@@ -599,19 +599,23 @@
             <e p="StyleDefinition.cs" t="Include" />
             <e p="SVGX" t="Include">
               <e p="ClipRule.cs" t="Include" />
+              <e p="DrawCallType.cs" t="Include" />
               <e p="ImmediateRenderContext.cs" t="Include" />
               <e p="LineCap.cs" t="Include" />
               <e p="LineJoin.cs" t="Include" />
               <e p="PathCommand.cs" t="Include" />
               <e p="StrokeVertexData.cs" t="Include" />
               <e p="SVGXBezier.cs" t="Include" />
+              <e p="SVGXDrawCall.cs" t="Include" />
               <e p="SVGXElement.cs" t="Include" />
               <e p="SVGXGeometryGenerator.cs" t="Include" />
               <e p="SVGXGroup.cs" t="Include" />
               <e p="SVGXMatrix.cs" t="Include" />
               <e p="SVGXPathCommandType.cs" t="Include" />
               <e p="SVGXRenderElementType.cs" t="Include" />
+              <e p="SVGXRenderSystem.cs" t="Include" />
               <e p="SVGXRoot.cs" t="Include" />
+              <e p="SVGXShapeType.cs" t="Include" />
               <e p="SVGXStyle.cs" t="Include" />
               <e p="SVGXTransform.cs" t="Include" />
               <e p="SVGXWand.cs" t="Include" />

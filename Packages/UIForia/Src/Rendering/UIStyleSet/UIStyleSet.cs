@@ -14,7 +14,7 @@ namespace UIForia.Rendering {
         // handful of these could be replaced with a single IntMap, 
         // instance styles, instance states, 
         private string styleNames;
-        private UIStyle queryStyle;
+        // private UIStyle queryStyle;
         private StyleState currentState;
         private UIStyleGroup instanceStyle;
         private UIStyleGroup implicitStyle;

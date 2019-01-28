@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using UIForia.Util;
 using UnityEngine;
 
 namespace SVGX {
@@ -6,8 +7,80 @@ namespace SVGX {
     public static class SVGXArc {
 
         // todo remove list alloc
-        public static List<Vector2> Arc(Vector2 p1, float rx, float ry, float angle, bool largeArcFlag, bool sweepFlag, Vector2 p2, int vpm = 1) {
-            List<Vector2> output = new List<Vector2>();
+
+    }
+
+    public static class SVGXBezier {
+
+        private const int MaxAdaptiveBezierIteration = 200;
+
+        public static int QuadraticCurve(LightList<Vector2> output, Vector2 start, Vector2 ctrl, Vector2 end) {
+            Vector2 ctrl2 = start + (2f / 3f) * (ctrl - start);
+            Vector2 ctrl3 = end + (2f / 3f) * (ctrl - end);
+            return CubicCurve(output, start, ctrl2, ctrl3, end);
+        }
+
+        public static int CubicCurve(LightList<Vector2> output, Vector2 start, Vector2 ctrl0, Vector2 ctrl1, Vector2 end) {
+            if (start == ctrl0 && ctrl0 == ctrl1 && ctrl1 == end) {
+                return 0;
+            }
+
+            const float distanceTolerance = 1f;
+
+            int originalPointCount = output.Count;
+            output.EnsureAdditionalCapacity(40);
+
+            if (output.Count == 0 || output[output.Count - 1] != start) {
+                output.Add(start);
+            }
+
+            RecursiveBezier(output, 0, distanceTolerance * distanceTolerance, start.x, start.y, ctrl0.x, ctrl0.y, ctrl1.x, ctrl1.y, end.x, end.y);
+
+            output.Add(end);
+            
+            return output.Count - originalPointCount;
+        }
+
+        private static void RecursiveBezier(LightList<Vector2> points, int currentIteration, float distanceTolerance, float x1, float y1, float x2, float y2, float x3, float y3, float x4, float y4) {
+            while (true) {
+                if (currentIteration++ >= MaxAdaptiveBezierIteration) return;
+
+                float x12 = (x1 + x2) * 0.5f;
+                float y12 = (y1 + y2) * 0.5f;
+                float x23 = (x2 + x3) * 0.5f;
+                float y23 = (y2 + y3) * 0.5f;
+                float x34 = (x3 + x4) * 0.5f;
+                float y34 = (y3 + y4) * 0.5f;
+                float x123 = (x12 + x23) * 0.5f;
+                float y123 = (y12 + y23) * 0.5f;
+                float x234 = (x23 + x34) * 0.5f;
+                float y234 = (y23 + y34) * 0.5f;
+                float x1234 = (x123 + x234) * 0.5f;
+                float y1234 = (y123 + y234) * 0.5f;
+
+                float dx = x4 - x1;
+                float dy = y4 - y1;
+
+                float d2 = Mathf.Abs(((x2 - x4) * dy - (y2 - y4) * dx));
+                float d3 = Mathf.Abs(((x3 - x4) * dy - (y3 - y4) * dx));
+
+                if ((d2 + d3) * (d2 + d3) < distanceTolerance * (dx * dx + dy * dy)) {
+                    points.Add(new Vector2(x1234, y1234));
+                    return;
+                }
+
+                RecursiveBezier(points, currentIteration, distanceTolerance, x1, y1, x12, y12, x123, y123, x1234, y1234);
+                x1 = x1234;
+                y1 = y1234;
+                x2 = x234;
+                y2 = y234;
+                x3 = x34;
+                y3 = y34;
+            }
+        }
+
+        public static int Arc(LightList<Vector2> output, Vector2 p1, float rx, float ry, float angle, bool largeArcFlag, bool sweepFlag, Vector2 p2, int vpm = 1) {
+            int originalSize = output.Count;
 
             float _radian = (angle * Mathf.PI / 180.0f);
             float _CosRadian = Mathf.Cos(_radian);
@@ -75,105 +148,20 @@ namespace SVGX {
             int number = Mathf.RoundToInt(Mathf.Clamp((100f / vpm) * Mathf.Abs(_delta) / 360f, 2, 100));
             float deltaT = _delta / number;
 
+            output.EnsureAdditionalCapacity(number + 1);
+
             for (int i = 0; i <= number; i++) {
                 float t_angle = (deltaT * i + _angle) * Mathf.PI / 180.0f;
                 float cos = Mathf.Cos(t_angle);
                 float sin = Mathf.Sin(t_angle);
+                // todo -- change this to index or AddUnchecked & verify 
                 output.Add(new Vector2(
                     _CosRadian * rx * cos - _SinRadian * ry * sin + cx,
                     _SinRadian * rx * cos + _CosRadian * ry * sin + cy
                 ));
             }
 
-            return output;
-        }
-
-    }
-
-    public static class SVGXBezier {
-
-        private const int MaxAdaptiveBezierIteration = 200;
-
-        public static List<Vector2> QuadraticCurve(Vector2 p1, Vector2 p2, Vector2 p3) {
-            Vector2 ctrl2 = p1 + (2f / 3f) * (p2 - p1);
-            Vector2 ctrl3 = p3 + (2f / 3f) * (p2 - p3);
-
-            return new List<Vector2>(AdaptiveCubicCurve(1, p1, ctrl2, ctrl3, p3));
-        }
-
-        // todo -- dont return a new list
-        public static List<Vector2> Tessellate(Vector2 start, Vector2 ctrl0, Vector2 ctrl1, Vector2 end) {
-            return AdaptiveCubicCurve(1f, start, ctrl0, ctrl1, end);
-        }
-
-        public static List<Vector2> AdaptiveCubicCurve(float distanceTolerance, Vector2 start, Vector2 handle0, Vector2 handle1, Vector2 end) {
-            if (start == handle0 && handle0 == handle1 && handle1 == end) {
-                return new List<Vector2>();
-            }
-
-            if (distanceTolerance < 0.01f) {
-                distanceTolerance = 0.01f;
-            }
-
-            List<Vector2> points = new List<Vector2>(40);
-            points.Add(start);
-
-            RecursiveBezier(
-                points,
-                0,
-                distanceTolerance * distanceTolerance,
-                start.x, start.y,
-                handle0.x, handle0.y,
-                handle1.x, handle1.y,
-                end.x, end.y
-            );
-
-            points.Add(end);
-            return points;
-        }
-
-        private static void RecursiveBezier(List<Vector2> points, int currentIteration, float distanceTolerance, float x1, float y1, float x2, float y2, float x3, float y3, float x4, float y4) {
-            while (true) {
-                if (currentIteration++ >= MaxAdaptiveBezierIteration) return;
-
-                // Calculate all the mid-points of the line segments
-                //----------------------
-                float x12 = (x1 + x2) * 0.5f;
-                float y12 = (y1 + y2) * 0.5f;
-                float x23 = (x2 + x3) * 0.5f;
-                float y23 = (y2 + y3) * 0.5f;
-                float x34 = (x3 + x4) * 0.5f;
-                float y34 = (y3 + y4) * 0.5f;
-                float x123 = (x12 + x23) * 0.5f;
-                float y123 = (y12 + y23) * 0.5f;
-                float x234 = (x23 + x34) * 0.5f;
-                float y234 = (y23 + y34) * 0.5f;
-                float x1234 = (x123 + x234) * 0.5f;
-                float y1234 = (y123 + y234) * 0.5f;
-
-                // Try to approximate the full cubic curve by a single straight line
-                //------------------
-                float dx = x4 - x1;
-                float dy = y4 - y1;
-
-                float d2 = Mathf.Abs(((x2 - x4) * dy - (y2 - y4) * dx));
-                float d3 = Mathf.Abs(((x3 - x4) * dy - (y3 - y4) * dx));
-
-                if ((d2 + d3) * (d2 + d3) < distanceTolerance * (dx * dx + dy * dy)) {
-                    points.Add(new Vector2(x1234, y1234));
-                    return;
-                }
-
-                // Continue subdivision
-                //----------------------
-                RecursiveBezier(points, currentIteration, distanceTolerance, x1, y1, x12, y12, x123, y123, x1234, y1234);
-                x1 = x1234;
-                y1 = y1234;
-                x2 = x234;
-                y2 = y234;
-                x3 = x34;
-                y3 = y34;
-            }
+            return output.Count - originalSize;
         }
 
     }

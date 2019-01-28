@@ -9,7 +9,8 @@ namespace SVGX {
 
         public SVGXShapeType type;
         public RangeInt pointRange;
-
+        public Bounds bounds;
+        
         public bool isHole;
         public bool isClosed;
 
@@ -18,6 +19,7 @@ namespace SVGX {
             this.pointRange = pointRange;
             this.isClosed = false;
             this.isHole = false;
+            this.bounds = new Bounds();
         }
 
     }
@@ -209,33 +211,32 @@ namespace SVGX {
             }
         }
 
-        public void EndPath() { }
-
         public void Rect(float x, float y, float width, float height) {
             SVGXShape currentShape = shapes[shapes.Count - 1];
             SVGXShapeType lastType = currentShape.type;
-            currentShape = new SVGXShape(SVGXShapeType.Rect, new RangeInt(points.Count, 5));
-            currentShape.isClosed = true;
-
-            if (lastType != SVGXShapeType.Unset) {
-                shapes.Add(currentShape);
-            }
-            else {
-                shapes[shapes.Count - 1] = currentShape;
-            }
 
             Vector2 x0y0 = currentMatrix.Transform(new Vector2(x, y));
             Vector2 x1y0 = currentMatrix.Transform(new Vector2(x + width, y));
             Vector2 x1y1 = currentMatrix.Transform(new Vector2(x + width, y + height));
             Vector2 x0y1 = currentMatrix.Transform(new Vector2(x, y + height));
 
-            points.EnsureAdditionalCapacity(5);
+            currentShape = new SVGXShape(SVGXShapeType.Rect, new RangeInt(points.Count, 4));
+            
+            points.EnsureAdditionalCapacity(4);
             points.AddUnchecked(x0y0);
             points.AddUnchecked(x1y0);
             points.AddUnchecked(x1y1);
             points.AddUnchecked(x0y1);
-            points.AddUnchecked(x0y0);
 
+            currentShape.isClosed = true;
+            
+            if (lastType != SVGXShapeType.Unset) {
+                shapes.Add(currentShape);
+            }
+            else {
+                shapes[shapes.Count - 1] = currentShape;
+            }
+            
             currentShapeRange.length++;
         }
 
@@ -254,12 +255,21 @@ namespace SVGX {
         }
 
         public void BeginPath() {
-            currentShapeRange = new RangeInt(shapes.Count, 0);
+            SVGXShape currentShape = shapes[shapes.Count - 1];
+            if (currentShape.type != SVGXShapeType.Unset) {
+                shapes.Add(new SVGXShape(SVGXShapeType.Unset, default));
+                currentShapeRange = new RangeInt(shapes.Count - 1, 0);
+            }
+        }
+
+        public void Fill() {
+            SVGXDrawCall drawCall = new SVGXDrawCall(DrawCallType.StandardFill, currentStyle, currentShapeRange);
+            drawCalls.Add(drawCall);
         }
 
         public void Stroke() {
-            SVGXDrawCall call = new SVGXDrawCall(DrawCallType.StandardStroke, currentStyle, currentShapeRange);
-            drawCalls.Add(call);
+            SVGXDrawCall drawCall = new SVGXDrawCall(DrawCallType.StandardStroke, currentStyle, currentShapeRange);
+            drawCalls.Add(drawCall);
         }
 
     }

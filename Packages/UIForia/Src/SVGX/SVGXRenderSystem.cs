@@ -1,11 +1,13 @@
+using System;
 using UIForia.Util;
 using UnityEngine;
 
 namespace SVGX {
 
     public class SVGXRenderSystem {
-
-        private Mesh mesh;
+        
+        private ObjectPool<Mesh> m_MeshPool = new ObjectPool<Mesh>();
+        
         private readonly Material strokeMaterial;
 
         public SVGXRenderSystem(Material strokeMaterial) {
@@ -27,8 +29,142 @@ namespace SVGX {
             }
         }
 
+        private void DrawFill(ImmediateRenderContext ctx, Camera camera, SVGXDrawCall drawCall) {
+            Mesh mesh = m_MeshPool.Get();
+            mesh.MarkDynamic();
+            mesh.Clear();
+            int start = drawCall.shapeRange.start;
+            int end = drawCall.shapeRange.end;
+            LightList<SVGXShape> withHoles = LightListPool<SVGXShape>.Get();
+            FillVertexData fillVertexData = new FillVertexData();
+
+            if (drawCall.shapeRange.length == 1) {
+                
+            }
+            
+            for (int i = start; i < end; i++) {
+                if (ctx.shapes[i].isHole) {
+                    withHoles.Add(ctx.shapes[i]);
+                }
+                else {
+                    CreateFillVertices(fillVertexData, ctx.points, drawCall.style, ctx.shapes[i]);
+                }
+            }
+            
+            // if path contains only lines and # of lines < 25 -> see if any two lines intersect use stencil if they do
+            // if path contains curves -> stencil automatically
+            
+            // for each item to be stenciled
+            // if that item intersects any other thing to be stencilled
+            // put it in its own call
+            
+            // best way to do this is probably globally, between all fill calls
+            
+            // while list has more items
+                // take first item
+                // for every other item still in the list
+                // if item does not overlap / intersect bounds of any item in current batch
+                //     add that item to the batch
+                
+            LightList<LightList<SVGXShape>> batches = new LightList<LightList<SVGXShape>>();
+            LightList<SVGXShape> currentBatch = new LightList<SVGXShape>();
+            
+            while (withHoles.Count > 1) {
+
+                int cnt = withHoles.Count;
+                for (int i = 1; i < withHoles.Count; i++) {
+                    SVGXShape currentShape = withHoles[i];
+                    Bounds currentBounds = currentShape.bounds;
+
+                    bool shouldAdd = true;
+                    for (int j = 0; j < currentBatch.Count; j++) {
+                        if (currentBounds.Intersects(currentBatch[i].bounds)) {
+                            shouldAdd = false;
+                            break;
+                        }
+                    }
+
+                    if (shouldAdd) {
+                        currentBatch.Add(currentShape);
+                        withHoles.RemoveAt(i--);
+                    }
+                    
+                }
+
+                if (currentBatch.Count > 0 && cnt == withHoles.Count) {
+                    batches.Add(currentBatch);
+                }
+                
+            }
+            
+            LightListPool<SVGXShape>.Release(ref withHoles);
+            
+        }
+
+        private void CreateFillVertices(FillVertexData vertexData, LightList<Vector2> points, SVGXStyle style, SVGXShape shape) {
+            
+            int triIdx = vertexData.triangleIndex;
+            int vertexCnt = vertexData.position.Count;
+            int colorCnt = vertexData.colors.Count;
+            int texCoordCnt = vertexData.texCoords.Count;
+            int triangleCnt = vertexData.triangles.Count;
+
+            Vector3[] vertices = vertexData.position.Array;
+            Vector2[] texCoords = vertexData.texCoords.Array;
+            Color[] colors = vertexData.colors.Array;
+            int[] triangles = vertexData.triangles.Array;
+
+            int start = shape.pointRange.start;
+            Color color = style.fillColor;
+            
+            switch (shape.type) {
+                case SVGXShapeType.Unset:
+                    break;
+                case SVGXShapeType.Ellipse:
+                case SVGXShapeType.Circle:
+                case SVGXShapeType.Rect:
+                    
+                    vertices[vertexCnt++] = points[start++];
+                    vertices[vertexCnt++] = points[start++];
+                    vertices[vertexCnt++] = points[start++];
+                    vertices[vertexCnt++] = points[start];
+                    
+                    triangles[triangleCnt++] = triIdx + 0;
+                    triangles[triangleCnt++] = triIdx + 1;
+                    triangles[triangleCnt++] = triIdx + 2;
+                    triangles[triangleCnt++] = triIdx + 2;
+                    triangles[triangleCnt++] = triIdx + 3;
+                    triangles[triangleCnt++] = triIdx + 0;
+                    
+                    texCoords[texCoordCnt++] = new Vector2(0, 1);
+                    texCoords[texCoordCnt++] = new Vector2(1, 1);
+                    texCoords[texCoordCnt++] = new Vector2(1, 0);
+                    texCoords[texCoordCnt++] = new Vector2(0, 0);
+
+                    colors[colorCnt++] = color;
+                    colors[colorCnt++] = color;
+                    colors[colorCnt++] = color;
+                    colors[colorCnt++] = color;
+                    
+                    vertexData.position.Count = vertexCnt;
+                    vertexData.triangles.Count = triangleCnt;
+                    vertexData.colors.Count = colorCnt;
+                    vertexData.texCoords.Count = texCoordCnt;
+                    
+                    vertexData.triangleIndex = triIdx + 4;
+                    
+                    break;
+                
+                case SVGXShapeType.Path:
+                    
+                    break;
+                default:
+                    throw new ArgumentOutOfRangeException();
+            }
+        }
+
         private void DrawStroke(ImmediateRenderContext ctx, Camera camera, SVGXDrawCall drawCall) {
-            mesh = mesh ? mesh : new Mesh();
+            Mesh mesh = m_MeshPool.Get();
             mesh.MarkDynamic();
             mesh.Clear();
             int start = drawCall.shapeRange.start;
@@ -208,7 +344,7 @@ namespace SVGX {
                     curr = points[currIdx];
                     next = points[0];
                     far = points[1];
-                        
+
                     vertices[vertexCnt++] = curr;
                     vertices[vertexCnt++] = next;
                     vertices[vertexCnt++] = curr;
@@ -249,9 +385,7 @@ namespace SVGX {
             
             vertexData.triangleIndex = triIdx;
         }
-
        
     }
-    
 
 }

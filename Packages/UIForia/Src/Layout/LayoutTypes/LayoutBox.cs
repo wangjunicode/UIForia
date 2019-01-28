@@ -354,51 +354,12 @@ namespace UIForia.Layout.LayoutTypes {
         }
 
 
-        public virtual void OnStylePropertyChanged(StyleProperty property) {
-            switch (property.propertyId) {
-                case StylePropertyId.MinWidth:
-                case StylePropertyId.MaxWidth:
-                case StylePropertyId.PreferredWidth:
-                    InvalidatePreferredSizeCache();
-                    break;
-                case StylePropertyId.MinHeight:
-                case StylePropertyId.MaxHeight:
-                case StylePropertyId.PreferredHeight:
-                    InvalidatePreferredSizeCache();
-                    break;
-                case StylePropertyId.AnchorTop:
-                case StylePropertyId.AnchorRight:
-                case StylePropertyId.AnchorBottom:
-                case StylePropertyId.AnchorLeft:
-                case StylePropertyId.AnchorTarget:
-                    InvalidatePreferredSizeCache();
-                    break;
-            }
+        public virtual void OnStylePropertyChanged(LightList<StyleProperty> property) {
+            
         }
 
-        public virtual void OnChildStylePropertyChanged(LayoutBox child, StyleProperty property) {
-            switch (property.propertyId) {
-                case StylePropertyId.MinWidth:
-                case StylePropertyId.MaxWidth:
-                case StylePropertyId.PreferredWidth:
-                    RequestContentSizeChangeLayout();
-                    InvalidatePreferredSizeCache();
-                    break;
-                case StylePropertyId.MinHeight:
-                case StylePropertyId.MaxHeight:
-                case StylePropertyId.PreferredHeight:
-                    RequestContentSizeChangeLayout();
-                    InvalidatePreferredSizeCache();
-                    break;
-                case StylePropertyId.AnchorTop:
-                case StylePropertyId.AnchorRight:
-                case StylePropertyId.AnchorBottom:
-                case StylePropertyId.AnchorLeft:
-                case StylePropertyId.AnchorTarget:
-                    RequestContentSizeChangeLayout();
-                    InvalidatePreferredSizeCache();
-                    break;
-            }
+        public virtual void OnChildStylePropertyChanged(LayoutBox child, LightList<StyleProperty> property) {
+
         }
 
         protected static int FindLayoutSiblingIndex(UIElement element) {

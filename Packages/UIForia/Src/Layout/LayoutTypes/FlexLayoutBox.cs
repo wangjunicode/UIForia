@@ -89,50 +89,54 @@ namespace UIForia.Layout.LayoutTypes {
             RequestContentSizeChangeLayout();
         }
 
-        public override void OnStylePropertyChanged(StyleProperty property) {
-            base.OnStylePropertyChanged(property);
-            switch (property.propertyId) {
-                case StylePropertyId.FlexLayoutDirection:
-                case StylePropertyId.FlexLayoutCrossAxisAlignment:
-                case StylePropertyId.FlexLayoutMainAxisAlignment:
-                    crossAxisAlignment = style.FlexLayoutCrossAxisAlignment;
-                    mainAxisAlignment = style.FlexLayoutMainAxisAlignment;
-                    for (int i = 0; i < children.Count; i++) {
-                        Item[] itemList = items.Array;
-                        CrossAxisAlignment childCrossAlignment = children[i].style.FlexItemSelfAlignment;
-                        if (childCrossAlignment == CrossAxisAlignment.Unset) {
-                            childCrossAlignment = crossAxisAlignment;
-                        }
-
-                        itemList[i].crossAxisAlignment = childCrossAlignment;
-                    }
-
-                    break;
-            }
-        }
-
-        public override void OnChildStylePropertyChanged(LayoutBox child, StyleProperty property) {
-            base.OnChildStylePropertyChanged(child, property);
-            switch (property.propertyId) {
-//                case StylePropertyId.FlexItemOrder:
-                case StylePropertyId.FlexItemGrow:
-                case StylePropertyId.FlexItemShrink:
-                case StylePropertyId.FlexItemSelfAlignment:
-                    for (int i = 0; i < children.Count; i++) {
-                        if (children[i] == child) {
+        public override void OnStylePropertyChanged(LightList<StyleProperty> properties) {
+            for (var index = 0; index < properties.Count; index++) {
+                StyleProperty property = properties[index];
+                switch (property.propertyId) {
+                    case StylePropertyId.FlexLayoutDirection:
+                    case StylePropertyId.FlexLayoutCrossAxisAlignment:
+                    case StylePropertyId.FlexLayoutMainAxisAlignment:
+                        crossAxisAlignment = style.FlexLayoutCrossAxisAlignment;
+                        mainAxisAlignment = style.FlexLayoutMainAxisAlignment;
+                        for (int i = 0; i < children.Count; i++) {
                             Item[] itemList = items.Array;
-                            CrossAxisAlignment childCrossAlignment = child.style.FlexItemSelfAlignment;
+                            CrossAxisAlignment childCrossAlignment = children[i].style.FlexItemSelfAlignment;
                             if (childCrossAlignment == CrossAxisAlignment.Unset) {
                                 childCrossAlignment = crossAxisAlignment;
                             }
-
+    
                             itemList[i].crossAxisAlignment = childCrossAlignment;
-                            itemList[i].growFactor = child.style.FlexItemGrow;
-                            itemList[i].shrinkFactor = child.style.FlexItemShrink;
                         }
-                    }
+    
+                        break;
+                }
+            }
+        }
 
-                    break;
+        public override void OnChildStylePropertyChanged(LayoutBox child, LightList<StyleProperty> properties) {
+            for (var index = 0; index < properties.Count; index++) {
+                StyleProperty property = properties[index];
+                switch (property.propertyId) {
+                    // case StylePropertyId.FlexItemOrder:
+                    case StylePropertyId.FlexItemGrow:
+                    case StylePropertyId.FlexItemShrink:
+                    case StylePropertyId.FlexItemSelfAlignment:
+                        for (int i = 0; i < children.Count; i++) {
+                            if (children[i] == child) {
+                                Item[] itemList = items.Array;
+                                CrossAxisAlignment childCrossAlignment = child.style.FlexItemSelfAlignment;
+                                if (childCrossAlignment == CrossAxisAlignment.Unset) {
+                                    childCrossAlignment = crossAxisAlignment;
+                                }
+
+                                itemList[i].crossAxisAlignment = childCrossAlignment;
+                                itemList[i].growFactor = child.style.FlexItemGrow;
+                                itemList[i].shrinkFactor = child.style.FlexItemShrink;
+                            }
+                        }
+
+                        break;
+                }
             }
         }
 

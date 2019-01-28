@@ -976,21 +976,24 @@ namespace UIForia.Layout.LayoutTypes {
             }
         }
 
-        public override void OnStylePropertyChanged(StyleProperty property) {
-            switch (property.propertyId) {
-                case StylePropertyId.GridLayoutDensity:
-                case StylePropertyId.GridLayoutColTemplate:
-                case StylePropertyId.GridLayoutRowTemplate:
-                case StylePropertyId.GridLayoutDirection:
-                    m_IsPlacementDirty = true;
-                    markedForLayout = true;
-                    break;
-                case StylePropertyId.GridLayoutRowGap:
-                case StylePropertyId.GridLayoutColGap:
-                case StylePropertyId.GridLayoutMainAxisAutoSize:
-                case StylePropertyId.GridLayoutCrossAxisAutoSize:
-                    markedForLayout = true;
-                    break;
+        public override void OnStylePropertyChanged(LightList<StyleProperty> properties) {
+            for (int i = 0; i < properties.Count; i++) {
+                StyleProperty property = properties[i];
+                switch (property.propertyId) {
+                    case StylePropertyId.GridLayoutDensity:
+                    case StylePropertyId.GridLayoutColTemplate:
+                    case StylePropertyId.GridLayoutRowTemplate:
+                    case StylePropertyId.GridLayoutDirection:
+                        m_IsPlacementDirty = true;
+                        markedForLayout = true;
+                        break;
+                    case StylePropertyId.GridLayoutRowGap:
+                    case StylePropertyId.GridLayoutColGap:
+                    case StylePropertyId.GridLayoutMainAxisAutoSize:
+                    case StylePropertyId.GridLayoutCrossAxisAutoSize:
+                        markedForLayout = true;
+                        break;
+                }
             }
         }
 
@@ -1006,24 +1009,27 @@ namespace UIForia.Layout.LayoutTypes {
             }
         }
 
-        public override void OnChildStylePropertyChanged(LayoutBox child, StyleProperty property) {
-            int idx = GetPlacementIndexForId(child.element.id);
-            switch (property.propertyId) {
-                case StylePropertyId.LayoutBehavior:
-                    markedForLayout = true;
-                    m_IsPlacementDirty = true;
-                    break;
-                case StylePropertyId.GridItemColSpan:
-                case StylePropertyId.GridItemRowSpan:
-                case StylePropertyId.GridItemColStart:
-                case StylePropertyId.GridItemRowStart:
-                    m_IsPlacementDirty = true;
-                    markedForLayout = true;
-                    break;
-                case StylePropertyId.GridItemColSelfAlignment:
-                case StylePropertyId.GridItemRowSelfAlignment:
-                    markedForLayout = true;
-                    break;
+        public override void OnChildStylePropertyChanged(LayoutBox child, LightList<StyleProperty> properties) {
+            // int idx = GetPlacementIndexForId(child.element.id); // what was this intended for?
+            for (int i = 0; i < properties.Count; i++) {
+                StyleProperty property = properties[i];
+                switch (property.propertyId) {
+                    case StylePropertyId.LayoutBehavior:
+                        // markedForLayout = true; already set by the layout system but could be set here explicitly again for clarity maybe?
+                        m_IsPlacementDirty = true;
+                        break;
+                    case StylePropertyId.GridItemColSpan:
+                    case StylePropertyId.GridItemRowSpan:
+                    case StylePropertyId.GridItemColStart:
+                    case StylePropertyId.GridItemRowStart:
+                        m_IsPlacementDirty = true;
+                        markedForLayout = true;
+                        break;
+                    case StylePropertyId.GridItemColSelfAlignment:
+                    case StylePropertyId.GridItemRowSelfAlignment:
+                        markedForLayout = true;
+                        break;
+                }
             }
         }
 

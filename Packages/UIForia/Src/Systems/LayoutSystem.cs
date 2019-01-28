@@ -6,6 +6,7 @@ using UIForia.Layout;
 using UIForia.Layout.LayoutTypes;
 using UIForia.Rendering;
 using UIForia.Util;
+using UnityEditor;
 using UnityEngine;
 
 namespace UIForia.Systems {
@@ -498,26 +499,61 @@ namespace UIForia.Systems {
 //            m_Views.Remove(view);
         }
 
-        private void HandleStylePropertyChanged(UIElement element, StyleProperty property) {
+        private void HandleStylePropertyChanged(UIElement element, LightList<StyleProperty> properties) {
             // todo early-out if we haven't had a layout pass for the element yet
             LayoutBox box = m_LayoutBoxMap.GetOrDefault(element.id);
             if (box == null) {
                 return;
             }
 
-            switch (property.propertyId) {
-                case StylePropertyId.LayoutBehavior:
-                    box.markedForLayout = true;
-                    break;
-                case StylePropertyId.LayoutType:
-                    HandleLayoutChanged(element);
-                    break;
+            bool notifyParent = box.parent != null && (box.style.LayoutBehavior & LayoutBehavior.Ignored) == 0 && box.element.isEnabled;
+            bool invalidatePreferredSizeCache = false;            
+            for (int i = 0; i < properties.Count; i++) {
+                StyleProperty property = properties[i];
+                
+                switch (property.propertyId) {
+                    case StylePropertyId.LayoutBehavior:
+                        box.markedForLayout = true;
+                        break;
+                    case StylePropertyId.LayoutType:
+                        HandleLayoutChanged(element);
+                        break;
+                }
+
+                if (!invalidatePreferredSizeCache) {
+                    switch (property.propertyId) {
+                        case StylePropertyId.MinWidth:
+                        case StylePropertyId.MaxWidth:
+                        case StylePropertyId.PreferredWidth:
+                            invalidatePreferredSizeCache = true;
+                            break;
+                        case StylePropertyId.MinHeight:
+                        case StylePropertyId.MaxHeight:
+                        case StylePropertyId.PreferredHeight:
+                            invalidatePreferredSizeCache = true;
+                            break;
+                        case StylePropertyId.AnchorTop:
+                        case StylePropertyId.AnchorRight:
+                        case StylePropertyId.AnchorBottom:
+                        case StylePropertyId.AnchorLeft:
+                        case StylePropertyId.AnchorTarget:
+                            invalidatePreferredSizeCache = true;
+                            break;
+                    }
+                }
             }
 
-            box.OnStylePropertyChanged(property);
+            if (invalidatePreferredSizeCache) {
+                if (notifyParent) {
+                    box.RequestContentSizeChangeLayout();
+                }
+                box.InvalidatePreferredSizeCache();
+            }
 
-            if (box.parent != null && (box.style.LayoutBehavior & LayoutBehavior.Ignored) == 0 && box.element.isEnabled) {
-                box.parent.OnChildStylePropertyChanged(box, property);
+            box.OnStylePropertyChanged(properties);
+
+            if (notifyParent) {
+                box.parent.OnChildStylePropertyChanged(box, properties);
             }
         }
 

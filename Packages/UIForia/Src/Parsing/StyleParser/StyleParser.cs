@@ -97,7 +97,7 @@ namespace UIForia.Parsing.StyleParser {
                 s_CompiledStyles[uniqueStyleId] = sheet;
             }
 
-            return sheet?.GetStyleGroup(styleName) ?? default;
+            return sheet == null ? default : sheet.GetStyleGroup(styleName);
         }
 
         private static ParsedStyleSheet TryParseStyleFromClassPath(string path) {
@@ -503,7 +503,7 @@ namespace UIForia.Parsing.StyleParser {
 
             StyleComponent retn = new StyleComponent(
                 StyleComponentType.Style,
-                ParseUtil.ReadIdentifierOrThrow(input, ref ptr),
+                ParseUtil.ReadStyleIdentifierOrThrow(input, ref ptr),
                 ReadInheritanceList(input, ref ptr),
                 ParseUtil.ReadBlockOrThrow(input, ref ptr, '{', '}')
             );

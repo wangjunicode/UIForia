@@ -8,7 +8,7 @@
     {
         Tags { "RenderType"="Opaque" }
         LOD 100
-        Cull Off
+        Cull Off // todo set this to Back
         
         Pass
         {
@@ -27,7 +27,7 @@
             
             struct appdata {
                 float4 vertex : POSITION;
-                float3 uvNormal : TEXCOORD0;
+                float2 uv : TEXCOORD0;
                 float4 prevNext : TEXCOORD1;
                 float4 flags : TEXCOORD2;
                 fixed4 color : COLOR;
@@ -43,24 +43,40 @@
                 
                 float strokeWidth = 5;
                 
-                float2 toCurrent = normalize(curr - prev);
-                float2 toNext = normalize(next - curr);
-                float2 tangent = normalize(toNext + toCurrent);
-                float2 miter = float2(-tangent.y, tangent.x);
-                float2 normal = float2(-toCurrent.y, toCurrent.x) * extrude;
-                
-                float miterLength = strokeWidth / dot(miter, normal);
-                
-                float3 vertWithOffset = float3(v.vertex.x, v.vertex.y, 0);
-                vertWithOffset.x += miter.x * miterLength;
-                vertWithOffset.y += miter.y * miterLength;
-                
-                o.color = v.color;
-                o.vertex = UnityObjectToClipPos(vertWithOffset);
-//                o.pixelCoord.xy = curr;
-//                o.pixelCoord.zw = vertWithOffset.xy;
-//                o.pixelFlags.w = distance(v.vertex.xy, vertWithOffset.xy);
-//                o.pixelFlags.z = extrude;
+                if(v.flags.z == 5) {
+                    float2 fromCurrent = normalize(next - curr);
+                    float2 normal = float2(-fromCurrent.y, fromCurrent.x) * strokeWidth * extrude;
+                    float3 vertWithOffset = float3(v.vertex.x, v.vertex.y, 0);
+                    vertWithOffset.x += normal.x;
+                    vertWithOffset.y += normal.y;
+                    o.color = v.color;
+                    o.vertex = UnityObjectToClipPos(vertWithOffset);
+                }
+                else if(v.flags.z == 6) {
+                    float2 toCurrent = normalize(curr - prev);
+                    float2 normal = float2(-toCurrent.y, toCurrent.x) * strokeWidth * extrude;
+                    float3 vertWithOffset = float3(v.vertex.x, v.vertex.y, 0);
+                    vertWithOffset.x += normal.x;
+                    vertWithOffset.y += normal.y;
+                    o.color = v.color;
+                    o.vertex = UnityObjectToClipPos(vertWithOffset);
+                }
+                else {
+                    float2 toCurrent = normalize(curr - prev);
+                    float2 toNext = normalize(next - curr);
+                    float2 tangent = normalize(toNext + toCurrent);
+                    float2 miter = float2(-tangent.y, tangent.x);
+                    float2 normal = float2(-toCurrent.y, toCurrent.x) * extrude;
+                    
+                    float miterLength = strokeWidth / dot(miter, normal);
+                    
+                    float3 vertWithOffset = float3(v.vertex.x, v.vertex.y, 0);
+                    vertWithOffset.x += miter.x * miterLength;
+                    vertWithOffset.y += miter.y * miterLength;
+                    o.color = v.color;
+                    o.vertex = UnityObjectToClipPos(vertWithOffset); 
+                }
+
                 return o;
             }
             
@@ -68,30 +84,8 @@
                 return val * 0.5 + 0.5;
             }
 
-            #define red fixed4(1, 0, 0, 1)
-            #define green fixed4(0, 1, 0, 1)
-
             fixed4 frag (v2f i) : SV_Target {
-//                float l = length(i.pixelCoord.xy);
-//                float d = l / 15;
-//                float dist = distance(i.pixelCoord.xy, i.pixelCoord.zw);
-//                if(i.pixelFlags.w > 5) return green;
-//                
-//                fixed e = MapMinusOneOneToZeroOne( i.pixelCoord.z);
-//                fixed lr = MapMinusOneOneToZeroOne(i.pixelCoord.w);
-//                
-//                if(e < 0.5) {
-//                    return fixed4(1, 1, 1, 1);
-//                }
-//                
-//                else {
-//                //    if(i.pixelCoord.w > 0.5) return green;
-//                    return red;
-//                }
-//                
-//                return fixed4(d, d, d, 1);
-                    return i.color;
-                
+                return i.color;
             }
             
             ENDCG

@@ -16,8 +16,11 @@ namespace UIForia.Util {
         }
 
         public T[] Array => array;
-        public int Count => size;
-        
+        public int Count {
+            get => size;
+            set => size = value;
+        }
+
         public bool IsReadOnly => false;
 
         public int Capacity => array.Length;
@@ -60,6 +63,15 @@ namespace UIForia.Util {
             }
 
             return false;
+        }
+
+        public List<T> ToList() {
+            List<T> list = new List<T>();
+            for (int i = 0; i < Count; i++) {
+                list.Add(array[i]);
+            }
+
+            return list;
         }
 
         public void CopyTo(T[] array, int arrayIndex) {

@@ -526,26 +526,26 @@ namespace UIForia.Editor {
 
             for (int i = 0; i < baseStyles.Count; i++) {
                 UIStyleGroup group = baseStyles[i];
-                s_Content.text = group.name;
+                s_Content.text = $"{group.name} ({group.styleType.ToString()})";
 
                 if (group.normal != null) {
-                    DrawStyle(group.name + " [Normal]", group.normal);
+                    DrawStyle(s_Content.text + " [Normal]", group.normal);
                 }
 
                 if (group.hover != null) {
-                    DrawStyle(group.name + " [Hover]", group.hover);
+                    DrawStyle(s_Content.text + " [Hover]", group.hover);
                 }
 
                 if (group.focused != null) {
-                    DrawStyle(group.name + " [Focus]", group.focused);
+                    DrawStyle(s_Content.text + " [Focus]", group.focused);
                 }
 
                 if (group.active != null) {
-                    DrawStyle(group.name + " [Active]", group.active);
+                    DrawStyle(s_Content.text + " [Active]", group.active);
                 }
 
                 if (group.inactive != null) {
-                    DrawStyle(group.name + " [Inactive]", group.inactive);
+                    DrawStyle(s_Content.text + " [Inactive]", group.inactive);
                 }
             }
 

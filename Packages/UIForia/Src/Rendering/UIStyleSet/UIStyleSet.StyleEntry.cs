@@ -20,44 +20,28 @@ namespace UIForia.Rendering {
 
             private static int GetSortPriority(StyleType type, StyleState state, int styleNumber) {
                 int retn = 0;
+                
+                // instance        0000 0000 1111 1111 
+                
+                // shared + index  0000 0000 0000 0010
+                
+                // implicit styles 0000 0000 0000 0001
+                
+                // base            0000 0000 0000 0000 
 
-                if ((type & StyleType.Default) != 0) {
-                    return -10000;
-                }
-
+                int baseBits = 0;
+            
                 if ((type & StyleType.Instance) != 0) {
-                    retn = 10000;
+                    baseBits = ushort.MaxValue;
                 }
                 else if ((type & StyleType.Implicit) != 0) {
-                    retn = 100000;
+                    baseBits = 1;
                 }
                 else if((type & StyleType.Shared) != 0) {
-                    retn = styleNumber;
+                    baseBits = 2 + styleNumber;
                 }
-
-                int bonus = 0;
-                if (state != StyleState.Normal) {
-                    bonus += 500;
-
-                    if ((state & StyleState.Focused) != 0) {
-                        bonus += 60;
-                    }
-                    
-                    else if ((state & StyleState.Hover) != 0) {
-                        bonus += 50;
-                    }
-
-                    else if ((state & StyleState.Active) != 0) {
-                        bonus += 40;
-                    }
-
-                    else if ((state & StyleState.Inactive) != 0) {
-                        bonus += 30;
-                    }
-                   
-                }
-
-                return retn + bonus;
+                
+                return BitUtil.SetHighLowBits((int) state, baseBits);
             }
 
         }

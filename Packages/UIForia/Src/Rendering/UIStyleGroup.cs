@@ -3,6 +3,7 @@ namespace UIForia.Rendering {
     public struct UIStyleGroup {
 
         public string name { get; internal set; }
+        public StyleType styleType { get; internal set; }
         public UIStyle hover { get; internal set; }
         public UIStyle normal { get; internal set; }
         public UIStyle active { get; internal set; }
@@ -15,6 +16,7 @@ namespace UIForia.Rendering {
                    && Equals(x.normal, y.normal) 
                    && Equals(x.active, y.active) 
                    && Equals(x.inactive, y.inactive) 
+                   && x.styleType == y.styleType 
                    && Equals(x.focused, y.focused);
         }
 

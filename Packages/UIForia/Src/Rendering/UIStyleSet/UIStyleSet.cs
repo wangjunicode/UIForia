@@ -427,64 +427,16 @@ namespace UIForia.Rendering {
             // todo -- subscribe to changes?
             styleGroups.Add(group);
             styleNames = GetBaseStyleNames(this);
-            if (group.normal != null) AddBaseStyle(group.normal, StyleState.Normal);
-            if (group.active != null) AddBaseStyle(group.active, StyleState.Active);
-            if (group.inactive != null) AddBaseStyle(group.inactive, StyleState.Inactive);
-            if (group.focused != null) AddBaseStyle(group.focused, StyleState.Focused);
-            if (group.hover != null) AddBaseStyle(group.hover, StyleState.Hover);
+            if (group.normal != null) AddBaseStyle(group.normal, StyleState.Normal, group.styleType);
+            if (group.active != null) AddBaseStyle(group.active, StyleState.Active, group.styleType);
+            if (group.inactive != null) AddBaseStyle(group.inactive, StyleState.Inactive, group.styleType);
+            if (group.focused != null) AddBaseStyle(group.focused, StyleState.Focused, group.styleType);
+            if (group.hover != null) AddBaseStyle(group.hover, StyleState.Hover, group.styleType);
         }
 
-        public void AddImplicitStyleGroup(UIStyleGroup group) {
-            
-            if (group.normal != null) AddBaseStyle(group.normal, StyleState.Normal);
-            if (group.active != null) AddBaseStyle(group.active, StyleState.Active);
-            if (group.inactive != null) AddBaseStyle(group.inactive, StyleState.Inactive);
-            if (group.focused != null) AddBaseStyle(group.focused, StyleState.Focused);
-            if (group.hover != null) AddBaseStyle(group.hover, StyleState.Hover);
-            
-        }
-
-        private void AddImplicitStyle(UIStyle style, StyleState state) {
-
+        private void AddBaseStyle(UIStyle style, StyleState state, StyleType styleType) {
             containedStates |= state;
-            StyleEntry newEntry = new StyleEntry(style, StyleType.Implicit, state, styleGroups.Count);
-            if (!IsInState(state)) {
-                appliedStyles.Add(newEntry);
-                SortStyles();
-                return;
-            }
-
-            // todo -- use change list
-            IReadOnlyList<StyleProperty> properties = style.Properties;
-
-            for (int i = 0; i < properties.Count; i++) {
-                StyleProperty property = properties[i];
-
-                StyleEntry entry;
-
-                if (TryGetActiveStyleForProperty(properties[i].propertyId, out entry)) {
-                    if (entry.priority < newEntry.priority) {
-                        m_PropertyMap[(int) property.propertyId] = property;
-                        styleSystem.SetStyleProperty(element, property);
-                    }
-                }
-                else {
-                    if (StyleUtil.IsInherited(property.propertyId)) {
-                        m_PropertyMap.Remove(BitUtil.SetHighLowBits(1, (int) property.propertyId));
-                    }
-
-                    m_PropertyMap[(int) property.propertyId] = property;
-                    styleSystem.SetStyleProperty(element, property);
-                }
-            }
-
-            appliedStyles.Add(newEntry);
-            SortStyles();
-        }
-        
-        private void AddBaseStyle(UIStyle style, StyleState state) {
-            containedStates |= state;
-            StyleEntry newEntry = new StyleEntry(style, StyleType.Shared, state, styleGroups.Count);
+            StyleEntry newEntry = new StyleEntry(style, styleType, state, styleGroups.Count);
             if (!IsInState(state)) {
                 appliedStyles.Add(newEntry);
                 SortStyles();
@@ -584,7 +536,7 @@ namespace UIForia.Rendering {
         }
 
         private void SortStyles() {
-            appliedStyles.Sort((a, b) => a.priority > b.priority ? -1 : 1);
+            appliedStyles.Sort((a, b) => a.priority < b.priority ? 1 : -1);
         }
 
         public StyleProperty GetPropertyValue(StylePropertyId propertyId) {
@@ -628,6 +580,8 @@ namespace UIForia.Rendering {
             if (instanceStyle == default) {
                 instanceStyle = new UIStyleGroup {name = "Instance"};
             }
+
+            instanceStyle.styleType = StyleType.Instance;
 
             switch (state) {
                 case StyleState.Normal:

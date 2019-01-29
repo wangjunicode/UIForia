@@ -227,6 +227,7 @@ namespace UIForia {
 
         private static UITemplate ParseContainerElement(Type type, XElement element) {
             UIContainerTemplate template = new UIContainerTemplate(
+                element.Name.LocalName,
                 type,
                 ParseNodes(element.Nodes()),
                 ParseAttributes(element.Attributes())

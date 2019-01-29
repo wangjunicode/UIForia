@@ -213,8 +213,5 @@ public class StyleParserTests {
         Assert.AreEqual("<Div>", styleGroup.name);
         Assert.NotNull(styleGroup.normal.MarginTop, "Margin expected");
         Assert.AreEqual(20f, styleGroup.normal.MarginTop.value);
-
-        StyleType def = default;
-        Assert.AreEqual(StyleType.Default, def);
     }
 }

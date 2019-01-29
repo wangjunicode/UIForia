@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using UIForia.Compilers;
 using UIForia.Parsing.StyleParser;
 using UIForia.Rendering;
+using UIForia.Util;
 
 namespace UIForia {
 
@@ -19,9 +20,11 @@ namespace UIForia {
 
         private bool isCompiled;
 
+        private LightList<UIStyleGroup> mergedElementStyles;
+        
         private readonly List<string> usings;
         private readonly List<UISlotContentTemplate> inheritedContent;
-        private readonly List<StyleDefinition> styleGroups;
+        private readonly List<StyleDefinition> styleDefinitions;
         public readonly UIElementTemplate rootElementTemplate;
         public readonly ExpressionCompiler compiler; // todo -- static?
         public ParsedTemplate baseTemplate;
@@ -30,30 +33,22 @@ namespace UIForia {
             s_ParsedTemplates = new IntMap<ParsedTemplate>();
         }
         
-        public ParsedTemplate(Type type, List<UITemplate> contents, List<AttributeDefinition> attributes, List<string> usings, List<StyleDefinition> styleGroups, List<ImportDeclaration> imports) {
-            this.RootType = type;
-            this.templateId = ++s_TemplateIdGenerator;
+        public ParsedTemplate(Type type, List<UITemplate> contents, List<AttributeDefinition> attributes, List<string> usings, List<StyleDefinition> styleDefinitions, List<ImportDeclaration> imports) : this(null, type, usings, null, styleDefinitions, imports) {
             this.rootElementTemplate = new UIElementTemplate(type, contents, attributes);
-            this.usings = usings;
-            this.styleGroups = styleGroups;
-            this.Imports = imports;
-            this.compiler = new ExpressionCompiler();
-            s_ParsedTemplates[templateId] = this;
-            ValidateStyleGroups();
         }
 
-        public ParsedTemplate(ParsedTemplate baseTemplate, Type type,  List<string> usings, List<UISlotContentTemplate> contentTemplates, List<StyleDefinition> styleGroups, List<ImportDeclaration> imports) {
+        public ParsedTemplate(ParsedTemplate baseTemplate, Type type,  List<string> usings, List<UISlotContentTemplate> contentTemplates, List<StyleDefinition> styleDefinitions, List<ImportDeclaration> imports) {
             this.templateId = ++s_TemplateIdGenerator;
             this.baseTemplate = baseTemplate;
             this.RootType = type;
             this.rootElementTemplate = null;
             this.usings = usings;
             this.inheritedContent = contentTemplates;
-            this.styleGroups = styleGroups;
+            this.styleDefinitions = styleDefinitions;
             this.Imports = imports;
             this.compiler = new ExpressionCompiler();
             s_ParsedTemplates[templateId] = this;
-            ValidateStyleGroups();
+            ValidateStyleDefinitions();
         }
 
         public static void Reset() {
@@ -121,7 +116,7 @@ namespace UIForia {
         }
 
         public UIStyleGroup ResolveStyleGroup(string styleName) {
-            if (styleGroups == null) {
+            if (styleDefinitions == null) {
                 return default;
             }
             StyleDefinition def;
@@ -140,15 +135,15 @@ namespace UIForia {
             return StyleParser.GetParsedStyle(def.importPath, null, path[1]);
         }
 
-        private void ValidateStyleGroups() {
-            if (styleGroups == null) return;
-            for (int i = 0; i < styleGroups.Count; i++) {
-                StyleDefinition current = styleGroups[i];
-                for (int j = 0; j < styleGroups.Count; j++) {
+        private void ValidateStyleDefinitions() {
+            if (styleDefinitions == null) return;
+            for (int i = 0; i < styleDefinitions.Count; i++) {
+                StyleDefinition current = styleDefinitions[i];
+                for (int j = 0; j < styleDefinitions.Count; j++) {
                     if (j == i) {
                         continue;
                     }
-                    if (styleGroups[j].alias == current.alias) {
+                    if (styleDefinitions[j].alias == current.alias) {
                         if (current.alias == StyleDefinition.k_EmptyAliasName) {
                             throw new Exception("You cannot provide multiple style tags with a default alias");
                         }
@@ -159,9 +154,9 @@ namespace UIForia {
         }
 
         private StyleDefinition GetStyleDefinitionFromAlias(string alias) {
-            for (int i = 0; i < styleGroups.Count; i++) {
-                if (styleGroups[i].alias == alias) {
-                    return styleGroups[i];
+            for (int i = 0; i < styleDefinitions.Count; i++) {
+                if (styleDefinitions[i].alias == alias) {
+                    return styleDefinitions[i];
                 }
             }
 
@@ -176,6 +171,31 @@ namespace UIForia {
             return new ParsedTemplate(this, inheritedType, usings, contents, styleDefinitions, importDeclarations);
         }
 
+        internal UIStyleGroup ResolveElementStyle(string tagName) {
+            if (styleDefinitions == null) {
+                return default;
+            }
+
+            UIStyleGroup mergedGroup = new UIStyleGroup() {
+                name = tagName, 
+                styleType = StyleType.Implicit
+            };
+
+            // if no dot in path then the style name is the alias
+            for (int i = 0; i < styleDefinitions.Count; i++) {
+                StyleDefinition def = styleDefinitions[i];
+                UIStyleGroup styleGroup = StyleParser.GetParsedStyle(def.importPath, def.body, tagName);
+                if (styleGroup.name == tagName) {
+                    mergedGroup.normal = UIStyle.Merge(mergedGroup.normal, styleGroup.normal);
+                    mergedGroup.hover = UIStyle.Merge(mergedGroup.hover, styleGroup.hover);
+                    mergedGroup.active = UIStyle.Merge(mergedGroup.active, styleGroup.active);
+                    mergedGroup.inactive = UIStyle.Merge(mergedGroup.inactive, styleGroup.inactive);
+                    mergedGroup.focused = UIStyle.Merge(mergedGroup.focused, styleGroup.focused);
+                }
+            }
+
+            return mergedGroup;
+        }
     }
 
 }

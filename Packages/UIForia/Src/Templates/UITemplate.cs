@@ -20,6 +20,8 @@ namespace UIForia {
         public readonly List<UITemplate> childTemplates;
         public readonly List<AttributeDefinition> attributes;
 
+        public string elementName;
+
         public Binding[] perFrameBindings;
         public Binding[] triggeredBindings;
 
@@ -234,27 +236,36 @@ namespace UIForia {
         }
 
         protected void ResolveBaseStyles(ParsedTemplate template) {
-            AttributeDefinition styleAttr = GetAttribute("style");
-            if (styleAttr == null) {
-                return;
-            }
-
-            List<UIStyleGroup> list = ListPool<UIStyleGroup>.Get();
             
-            // todo -- handle + and - instead of space
-            if (styleAttr.value.IndexOf(' ') != -1) {
-                string[] names = styleAttr.value.Split(' ');
-                foreach (string part in names) {
-                    UIStyleGroup style = template.ResolveStyleGroup(part.Trim());
-                    if (style != null) {
-                        list.Add(style);
-                    }
+            List<UIStyleGroup> list = ListPool<UIStyleGroup>.Get();
+
+            if (elementName != null) {
+                UIStyleGroup styleGroup = template.ResolveElementStyle("<" + elementName + ">");
+                if (styleGroup != default) {
+                    styleGroup.styleType = StyleType.Implicit;
+                    list.Add(styleGroup);
                 }
             }
-            else {
-                UIStyleGroup style = template.ResolveStyleGroup(styleAttr.value);
-                if (style != null) {
-                    list.Add(style);
+            
+            AttributeDefinition styleAttr = GetAttribute("style");
+            if (styleAttr != null) {
+                // todo -- handle + and - instead of space
+                if (styleAttr.value.IndexOf(' ') != -1) {
+                    string[] names = styleAttr.value.Split(' ');
+                    foreach (string part in names) {
+                        UIStyleGroup style = template.ResolveStyleGroup(part.Trim());
+                        if (style != default) {
+                            style.styleType = StyleType.Shared;
+                            list.Add(style);
+                        }
+                    }
+                }
+                else {
+                    UIStyleGroup style = template.ResolveStyleGroup(styleAttr.value);
+                    if (style != default) {
+                        style.styleType = StyleType.Shared;
+                        list.Add(style);
+                    }
                 }
             }
 

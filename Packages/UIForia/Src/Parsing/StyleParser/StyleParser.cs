@@ -314,11 +314,6 @@ namespace UIForia.Parsing.StyleParser {
             return retn;
         }
 
-        private static string ParseEventName(string input, ref int ptr) {
-//            string eventName = ReadUntilEnd
-            return null;
-        }
-
         private static UIStyleGroup ParseStyle(StyleComponent styleComponent, List<StyleVariable> variables, List<ImportDefinition> imports) {
             int ptr = 0;
             string input = styleComponent.body;
@@ -346,43 +341,6 @@ namespace UIForia.Parsing.StyleParser {
 
                 int start = ptr;
                 char current = input[ptr];
-
-//                if (current == ':' && ptr + 1 < input.Length && input[ptr + 1] == ':') {
-//                    ptr++;
-//                    string sectionName = ParseUtil.ReadIdentifier(input, ref ptr);
-//                    switch (sectionName.ToLower()) {
-//                        case "scrollbar-track":
-//                            break;
-//                        case "scrollbar-track-vertical":
-//                            break;
-//                        case "scrollbar-track-horizontal":
-//                            break;
-//                        case "scrollbar-handle":
-//                            break;
-//                        case "scrollbar-handle-vertical":
-//                            break;
-//                        case "scrollbar-handle-horizontal":
-//                            break;
-//                        case "scrollbar-increment":
-//                            break;
-//                        case "scrollbar-increment-vertical":
-//                            break;
-//                        case "scrollbar-increment-horizontal":
-//                            break;
-//                        case "scrollbar-decrement":
-//                            break;
-//                        case "scrollbar-decrement-vertical":
-//                            break;
-//                        case "scrollbar-decrement-horizontal":
-//                            break;
-//                        case "scrollbar-buttons":
-//                            break;
-//                        case "scrollbar-buttons-vertical:
-//                            break;
-//                        case "scrollbar-buttons-horizontal":
-//                            break;
-//                    }
-//                }
 
                 if (current == '[') {
                     string stateName = ParseUtil.ReadBlock(input, ref ptr, '[', ']');

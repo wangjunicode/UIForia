@@ -5,10 +5,14 @@ namespace UIForia.Rendering {
     [Flags]
     public enum StyleType {
 
-        Default = 1 << 0,
-        Shared = 1 << 1,
-        Instance = 1 << 2,
-        Implicit = 1 << 3
+        /// Styles applied to the element type, overrides the built-in default styles
+        Implicit = 1 << 1,
+
+        /// Regular style applied to one or more elements, overrides implicit styles
+        Shared = 1 << 2,
+
+        /// Set only on one element, like inline styles, overrides all other styles
+        Instance = 1 << 3
 
     }
 
@@ -17,9 +21,9 @@ namespace UIForia.Rendering {
 
         // todo -- reorganize by priority since this is a sort key
         Normal = 1 << 0,
-        Hover = 1 << 1,
-        Active = 1 << 2,
-        Inactive = 1 << 3,
+        Active = 1 << 1,
+        Inactive = 1 << 2,
+        Hover = 1 << 3,
         Focused = 1 << 4,
 
     }

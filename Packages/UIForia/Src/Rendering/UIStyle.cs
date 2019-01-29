@@ -41,7 +41,7 @@ namespace UIForia.Rendering {
             m_StyleProperties = ListPool<StyleProperty>.Get();
         }
 
-        public UIStyle(UIStyle toCopy) {
+        public UIStyle(UIStyle toCopy) : this() {
             m_StyleProperties.AddRange(toCopy.m_StyleProperties);
         }
 
@@ -190,6 +190,24 @@ namespace UIForia.Rendering {
             property = default(StyleProperty);
             return false;
         }
+
+        public static UIStyle Merge(UIStyle destination, UIStyle source) {
+            if (source == null || source.m_StyleProperties.Count == 0) {
+                return destination;
+            }
+
+            if (destination == null) {
+                return new UIStyle(source);
+            }
+
+            for (int pIndex = 0; pIndex < source.m_StyleProperties.Count; pIndex++) {
+                StyleProperty prop = source.m_StyleProperties[pIndex];
+                destination.SetProperty(prop);
+            }
+
+            return destination;
+        }
+
 
     }
 

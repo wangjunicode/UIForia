@@ -204,4 +204,14 @@ public class StyleParserTests {
         Assert.NotNull(styleGroup.normal.MarginTop, "Margin expected");
         Assert.AreEqual(10f, styleGroup.normal.MarginTop.value);
     }
+
+    [Test]
+    public void LoadDefaultStyleGroupFromSheet() {
+        var styleGroup = StyleParser.GetParsedStyle("Tests/Styles/test.style", "<Div>");
+        
+        Assert.NotNull(styleGroup, "Could not find style :(");
+        Assert.AreEqual("<Div>", styleGroup.name);
+        Assert.NotNull(styleGroup.normal.MarginTop, "Margin expected");
+        Assert.AreEqual(20f, styleGroup.normal.MarginTop.value);
+    }
 }

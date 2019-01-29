@@ -217,6 +217,7 @@ public class StyleTests {
             UIStyleGroup group = new UIStyleGroup();
             group.name = "Name";
             group.normal = baseStyle;
+            group.styleType = StyleType.Shared;
             root.style.AddStyleGroup(group);
             Assert.AreEqual(15, ComputedValue<int>(root, propName));
 

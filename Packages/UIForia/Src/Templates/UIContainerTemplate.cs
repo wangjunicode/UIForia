@@ -10,6 +10,12 @@ namespace UIForia {
 
         private readonly string typeName;
 
+        public UIContainerTemplate(string elementName, Type rootType, List<UITemplate> childTemplates, List<AttributeDefinition> attributes = null)
+            : base(childTemplates, attributes) {
+            elementType = rootType;
+            this.elementName = elementName;
+        }
+        
         public UIContainerTemplate(Type rootType, List<UITemplate> childTemplates, List<AttributeDefinition> attributes = null)
             : base(childTemplates, attributes) {
             elementType = rootType;

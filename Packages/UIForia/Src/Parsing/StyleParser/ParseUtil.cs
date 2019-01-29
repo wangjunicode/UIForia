@@ -115,11 +115,20 @@ namespace UIForia.Parsing.StyleParser {
 
             return retn.Trim();
         }
+        
+        public static string ReadStyleIdentifierOrThrow(string input, ref int ptr) {
+            string retn = ReadStyleIdentifier(input, ref ptr);
+            if (retn == null) {
+                throw new ParseException("Expected a valid style identifier while parsing style: " + input.Substring(ptr));
+            }
+
+            return retn.Trim();
+        }
 
         public static string ReadBlockOrThrow(string input, ref int ptr, char open, char close) {
             string retn = ReadBlock(input, ref ptr, open, close);
             if (retn == null) {
-                throw new ParseException("Expected a '{' '}' delimited block while parsing style: " + input.Substring(ptr));
+                throw new ParseException("Expected a '" + open + "' '" + close + "' delimited block while parsing style: " + input.Substring(ptr));
             }
 
             return retn;
@@ -153,6 +162,31 @@ namespace UIForia.Parsing.StyleParser {
 
             ptr = start;
             return null;
+        }
+
+        public static string ReadStyleIdentifier(string input, ref int ptr) {
+            bool hasStartTag = input[ptr] == '<';
+            int startIndex = ptr;
+
+            if (hasStartTag) {
+                ptr++;
+            }
+
+            // if there is a tag start then 
+            string identifier = ReadIdentifier(input, ref ptr);
+            
+            if (hasStartTag) {
+                if (input[ptr] != '>') {
+                    // The expression is only valid if tag start and end were both present.
+                    return null;
+                }
+                ptr++;
+                string tagIdentifier = input.Substring(startIndex, ptr - startIndex);
+                ptr = ConsumeWhiteSpace(ptr, input);
+                return tagIdentifier;
+            }
+
+            return identifier;
         }
 
         public static string ReadIdentifier(string input, ref int ptr) {

@@ -13,11 +13,13 @@ namespace UIForia {
         public UITextTemplate(Type textElementType, string rawText, List<AttributeDefinition> attributes = null) : base(null, attributes) {
             this.textElementType = textElementType;
             this.RawText = rawText;
+            this.elementName = "Text";
         }
 
         public UITextTemplate(string rawText, List<AttributeDefinition> attributes = null) : base(null, attributes) {
             this.textElementType = null;
             this.RawText = rawText;
+            this.elementName = "Text";
         }
 
         public string RawText { get; }

@@ -10,12 +10,15 @@ namespace SVGX {
         public readonly LightList<Color> colors;
         public readonly LightList<int> triangles;
         public readonly LightList<Vector2> texCoords;
-
+        public readonly Mesh mesh;
+        
         public FillVertexData() {
             position = new LightList<Vector3>(32);
             colors = new LightList<Color>(32);
             texCoords = new LightList<Vector2>(32);
             triangles = new LightList<int>(32 * 3);
+            mesh = new Mesh();
+            mesh.MarkDynamic();
         }
 
         public void Clear() {
@@ -25,6 +28,15 @@ namespace SVGX {
             triangles.Clear();
             triangleIndex = 0;
         }
+
+        public Mesh FillMesh() {
+            mesh.SetVertices(position.ToList());
+            mesh.SetColors(colors.ToList());
+            mesh.SetUVs(0, texCoords.ToList());
+            mesh.SetTriangles(triangles.ToList(), 0);
+            return mesh;
+        }
+
     }
 
 

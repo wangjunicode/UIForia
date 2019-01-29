@@ -34,6 +34,7 @@ namespace SVGX {
         public float[] dashArray;
         public LineCap lineCap;
         public LineJoin lineJoin;
+        public float miterLimit;
 
     }
     

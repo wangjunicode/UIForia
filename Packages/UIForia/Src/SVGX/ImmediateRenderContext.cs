@@ -9,8 +9,8 @@ namespace SVGX {
 
         public SVGXShapeType type;
         public RangeInt pointRange;
-        public Bounds bounds;
-        
+        public SVGXBounds bounds;
+
         public bool isHole;
         public bool isClosed;
 
@@ -19,25 +19,31 @@ namespace SVGX {
             this.pointRange = pointRange;
             this.isClosed = false;
             this.isHole = false;
-            this.bounds = new Bounds();
+            this.bounds = new SVGXBounds();
         }
 
     }
 
-    internal struct SVGXPoint {
+    public struct SVGXBounds {
 
-        public float x;
-        public float y;
-        public SVGXPointFlag flags;
+        public Vector2 min;
+        public Vector2 max;
 
-    }
-
-    internal enum SVGXPointFlag {
-
-        Corner = 0x1,
-        Left = 0x02,
-        Bevel = 0x04,
-        InnerBevel = 0x08
+        public bool Intersects(SVGXBounds bounds) {
+            float r1x1 = min.x;
+            float r1x2 = max.x;
+            float r2x1 = bounds.min.x;
+            float r2x2 = bounds.max.x;
+            float r1y1 = min.y;
+            float r1y2 = max.y;
+            float r2y1 = bounds.min.y;
+            float r2y2 = bounds.max.y;
+            bool noOverlap = r1x1 > r2x2 ||
+                             r2x1 > r1x2 ||
+                             r1y1 > r2y2 ||
+                             r2y1 > r1y2;
+            return !noOverlap;
+        }
 
     }
 
@@ -70,6 +76,10 @@ namespace SVGX {
             drawCalls = new LightList<SVGXDrawCall>();
             shapes = new LightList<SVGXShape>();
             shapes.Add(new SVGXShape(SVGXShapeType.Unset, default));
+        }
+
+        public void SetStrokeColor(Color color) {
+            this.currentStyle.strokeStyle.color = color;
         }
 
         public void MoveTo(float x, float y) {
@@ -221,7 +231,7 @@ namespace SVGX {
             Vector2 x0y1 = currentMatrix.Transform(new Vector2(x, y + height));
 
             currentShape = new SVGXShape(SVGXShapeType.Rect, new RangeInt(points.Count, 4));
-            
+
             points.EnsureAdditionalCapacity(4);
             points.AddUnchecked(x0y0);
             points.AddUnchecked(x1y0);
@@ -229,14 +239,14 @@ namespace SVGX {
             points.AddUnchecked(x0y1);
 
             currentShape.isClosed = true;
-            
+
             if (lastType != SVGXShapeType.Unset) {
                 shapes.Add(currentShape);
             }
             else {
                 shapes[shapes.Count - 1] = currentShape;
             }
-            
+
             currentShapeRange.length++;
         }
 

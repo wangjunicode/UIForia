@@ -57,6 +57,7 @@ namespace UIForia.Util {
             size = 0;
         }
 
+        // todo -- remove boxing
         public bool Contains(T item) {
             for (int i = 0; i < size; i++) {
                 if (array[i].Equals(item)) return true;
@@ -65,8 +66,8 @@ namespace UIForia.Util {
             return false;
         }
 
-        public List<T> ToList() {
-            List<T> list = new List<T>();
+        public List<T> ToList(List<T> list = null) {
+            list = list ?? new List<T>();
             for (int i = 0; i < Count; i++) {
                 list.Add(array[i]);
             }
@@ -80,6 +81,7 @@ namespace UIForia.Util {
             }
         }
 
+        // todo -- remove boxing
         public bool Remove(T item) {
             for (int i = 0; i < size; i++) {
                 if (array[i].Equals(item)) {
@@ -96,6 +98,7 @@ namespace UIForia.Util {
             return false;
         }
 
+        // todo -- remove boxing
         public int IndexOf(T item) {
             for (int i = 0; i < size; i++) {
                 if (array[i].Equals(item)) return i;
@@ -137,10 +140,10 @@ namespace UIForia.Util {
                         System.Array.Copy(array, index + count, array, index * 2, size - index);
                     }
                     else {
-                        T[] array = ArrayPool<T>.GetExactSize(count);
-                        objs.CopyTo(array, 0);
-                        array.CopyTo(this.array, index);
-                        ArrayPool<T>.Release(ref array);
+                        T[] a = ArrayPool<T>.GetExactSize(count);
+                        objs.CopyTo(a, 0);
+                        a.CopyTo(array, index);
+                        ArrayPool<T>.Release(ref a);
                     }
 
                     size += count;

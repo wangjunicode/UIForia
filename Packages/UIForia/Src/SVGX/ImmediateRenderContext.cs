@@ -221,6 +221,12 @@ namespace SVGX {
             }
         }
 
+        public void PushClip() {
+        //     clips.Add(new SVGXClipGroup(currentShapeRange))
+            BeginPath();
+            
+        }
+
         public void Rect(float x, float y, float width, float height) {
             SVGXShape currentShape = shapes[shapes.Count - 1];
             SVGXShapeType lastType = currentShape.type;

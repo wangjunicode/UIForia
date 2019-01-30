@@ -19,7 +19,6 @@ namespace UIForia.Rendering {
             }
 
             private static int GetSortPriority(StyleType type, StyleState state, int styleNumber) {
-                int retn = 0;
                 
                 // instance        0000 0000 1111 1111 
                 
@@ -31,6 +30,9 @@ namespace UIForia.Rendering {
 
                 int baseBits = 0;
             
+                // type = Selector
+                
+                
                 if ((type & StyleType.Instance) != 0) {
                     baseBits = ushort.MaxValue;
                 }

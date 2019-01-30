@@ -13,10 +13,6 @@ namespace UIForia.Compilers {
 
         private ExpressionCompiler compiler;
 
-        internal static readonly MethodAliasSource sizeAliasSource;
-        internal static readonly MethodAliasSource vec2FixedLengthSource;
-        internal static readonly MethodAliasSource measurementVectorSource;
-
         internal static readonly MethodAliasSource parentMeasurementSource;
         internal static readonly MethodAliasSource contentMeasurementSource;
         internal static readonly MethodAliasSource viewportWidthMeasurementSource;
@@ -26,7 +22,6 @@ namespace UIForia.Compilers {
         internal static readonly MethodAliasSource textureUrlSource;
         internal static readonly MethodAliasSource fontUrlSource;
 
-        // todo 
         internal static readonly ValueAliasSource<int> siblingIndexSource;
         internal static readonly ValueAliasSource<int> activeSiblingIndexSource;
         internal static readonly ValueAliasSource<int> childCountSource;
@@ -54,51 +49,6 @@ namespace UIForia.Compilers {
         private Type rootType;
         private Type elementType;
 
-        static StyleBindingCompiler() {
-            Type type = typeof(StyleBindingCompiler);
-
-            textureUrlSource = new MethodAliasSource("url", type.GetMethod(nameof(TextureUrl)));
-            fontUrlSource = new MethodAliasSource("url", type.GetMethod(nameof(FontUrl)));
-
-            vec2FixedLengthSource = new MethodAliasSource("vec2", type.GetMethod(nameof(Vec2FixedLength)));
-          
-            pixelMeasurementSource = new MethodAliasSource("pixels", type.GetMethod(nameof(PixelMeasurement), new[] {typeof(float)}));
-            parentMeasurementSource = new MethodAliasSource("parent", type.GetMethod(nameof(ParentMeasurement), new[] {typeof(float)}));
-            viewportWidthMeasurementSource = new MethodAliasSource("viewWidth", type.GetMethod(nameof(ViewportWidthMeasurement), new[] {typeof(float)}));
-            viewportHeightMeasurementSource = new MethodAliasSource("viewHeight", type.GetMethod(nameof(ViewportHeightMeasurement), new[] {typeof(float)}));
-            contentMeasurementSource = new MethodAliasSource("content", type.GetMethod(nameof(ContentMeasurement), new[] {typeof(float)}));
-
-            MethodAliasSource percentageLengthSource = new MethodAliasSource("percent", type.GetMethod(nameof(PercentageLength), new[] {typeof(float)}));
-            MethodAliasSource emLengthSource = new MethodAliasSource("em", type.GetMethod(nameof(EmLength), new[] {typeof(float)}));
-            MethodAliasSource viewportWidthLengthSource = new MethodAliasSource("vw", type.GetMethod(nameof(ViewportWidthLength)));
-            MethodAliasSource viewportHeightLengthSource = new MethodAliasSource("vh", type.GetMethod(nameof(ViewportHeightLength)));
-            MethodAliasSource pixelLengthSource = new MethodAliasSource("px", type.GetMethod(nameof(PixelLength)));
-
-            measurementSources = new IAliasSource[] {
-                pixelMeasurementSource,
-                parentMeasurementSource,
-                viewportWidthMeasurementSource,
-                viewportHeightMeasurementSource,
-                contentMeasurementSource,
-            };
-
-            fixedSources = new IAliasSource[] {
-                pixelLengthSource,
-                percentageLengthSource,
-                emLengthSource,
-                viewportWidthLengthSource,
-                viewportHeightLengthSource
-            };
-
-            colorSources = new IAliasSource[] {
-                new ColorAliasSource(),
-                new MethodAliasSource("rgb", type.GetMethod("Rgb", ReflectionUtil.PublicStatic)),
-                new MethodAliasSource("rgba", type.GetMethod("Rgba", ReflectionUtil.PublicStatic))
-            };
-
-            sizeAliasSource = new MethodAliasSource("size", type.GetMethod(nameof(Vec2Measurement)));
-        }
-
         public StyleBindingCompiler() {
             this.compiler = new ExpressionCompiler();
         }
@@ -112,31 +62,20 @@ namespace UIForia.Compilers {
         }
 
         public StyleBinding Compile(Type rootType, Type elementType, string key, string value) {
+            
+            if (key == "style") {
+                    
+            }
+            
             if (!key.StartsWith("style.")) return null;
             this.rootType = rootType;
             this.elementType = elementType;
 
-            // todo -- drop this restriction if possible
-            if (value[0] != '{') {
-                value = '{' + value + '}';
-            }
-
             Target targetState = GetTargetState(key);
 
             StyleBinding retn = DoCompile(key, value, targetState);
-            if (retn != null) {
-                return retn;
-            }
-
-//            switch (targetState.property.ToLower()) {
-//                case "translation":
-//                    return new StyleBinding_Translation("Translation", targetState.state, Compile<MeasurementPair>(value, vec2FixedLengthSource));
-//
-//                case "preferredsize":
-//                    return new StyleBinding_PreferredSize("PreferredSize", targetState.state, Compile<MeasurementPair>(value, sizeAliasSource));
-//            }
-
-            return null;
+            return retn;
+            
         }
 
         private static Target GetTargetState(string key) {

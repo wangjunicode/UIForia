@@ -17,7 +17,7 @@
         <Group style="grid-cell thead">Dev Blog</Group>
         <Group style="grid-cell thead">Community</Group>
         
-        <Group style="background" />
+        <Group style="[backgroundStyleName, 'more']" />
 
     </Contents>
 </UITemplate>

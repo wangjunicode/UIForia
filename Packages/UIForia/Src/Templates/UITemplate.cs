@@ -16,7 +16,7 @@ namespace UIForia {
         public const string k_SpecialAttrPrefix = "x-";
 
         public bool isCompiled;
-        
+
         public readonly List<UITemplate> childTemplates;
         public readonly List<AttributeDefinition> attributes;
 
@@ -69,7 +69,7 @@ namespace UIForia {
             }
 
             if (triggeredCount > 0) {
-                triggeredBindings= new Binding[triggeredCount];
+                triggeredBindings = new Binding[triggeredCount];
             }
 
             if (perFrameCount > 0) {
@@ -78,7 +78,7 @@ namespace UIForia {
 
             perFrameCount = 0;
             triggeredCount = 0;
-            
+
             for (int i = 0; i < s_BindingList.Count; i++) {
                 if (s_BindingList[i].IsTriggered) {
                     triggeredBindings[triggeredCount++] = s_BindingList[i];
@@ -93,9 +93,8 @@ namespace UIForia {
                     }
                 }
             }
-            
-            s_BindingList.Clear();
 
+            s_BindingList.Clear();
         }
 
         protected static void CreateChildren(UIElement element, IList<UITemplate> templates, TemplateScope inputScope) {
@@ -115,16 +114,16 @@ namespace UIForia {
 
                 element.children[i].parent = element;
             }
-
         }
-        
+
         public virtual void Compile(ParsedTemplate template) {
-            if(isCompiled) return;
+            if (isCompiled) return;
             isCompiled = true;
             if (!(typeof(UIElement).IsAssignableFrom(elementType))) {
                 Debug.Log($"{elementType} must be a subclass of {typeof(UIElement)} in order to be used in templates");
                 return;
             }
+
             ResolveBaseStyles(template);
             CompileStyleBindings(template);
             CompileInputBindings(template, false);
@@ -137,7 +136,7 @@ namespace UIForia {
             if (attributes == null || attributes.Count == 0) return;
 
             styleCompiler.SetCompiler(template.compiler);
-            
+
             for (int i = 0; i < attributes.Count; i++) {
                 AttributeDefinition attr = attributes[i];
                 StyleBinding binding = styleCompiler.Compile(template.RootType, elementType, attr);
@@ -226,6 +225,7 @@ namespace UIForia {
                         if (binding.IsConstant()) {
                             binding.bindingType = BindingType.Constant;
                         }
+
                         s_BindingList.Add(binding);
                     }
                 }
@@ -236,7 +236,6 @@ namespace UIForia {
         }
 
         protected void ResolveBaseStyles(ParsedTemplate template) {
-            
             List<UIStyleGroup> list = ListPool<UIStyleGroup>.Get();
 
             if (elementName != null) {
@@ -246,10 +245,27 @@ namespace UIForia {
                     list.Add(styleGroup);
                 }
             }
-            
+
             AttributeDefinition styleAttr = GetAttribute("style");
             if (styleAttr != null) {
-                // todo -- handle + and - instead of space
+                if (styleAttr.value[0] == '[') {
+                    Expression<string[]> styleExpressions = template.compiler.Compile<string[]>(template.RootType, styleAttr.value);
+
+                    if (styleExpressions is ArrayLiteralExpression<string> arrayExpr) {
+                        DynamicStyleBinding styleBinding = new DynamicStyleBinding(template, arrayExpr);
+                        if (styleBinding.IsConstant()) {
+                            styleBinding.bindingType = BindingType.Constant;
+                        }
+                        else {
+                            styleBinding.bindingType = BindingType.Normal;
+                        }
+
+                        s_BindingList.Add(styleBinding);
+                    }
+
+                    return;
+                }
+
                 if (styleAttr.value.IndexOf(' ') != -1) {
                     string[] names = styleAttr.value.Split(' ');
                     foreach (string part in names) {
@@ -272,11 +288,11 @@ namespace UIForia {
             if (list.Count > 0) {
                 baseStyles = list.ToArray();
             }
-            
+
             ListPool<UIStyleGroup>.Release(ref list);
         }
 
-        public virtual void PostCompile(ParsedTemplate template) {}
+        public virtual void PostCompile(ParsedTemplate template) { }
 
     }
 

@@ -27,6 +27,23 @@ namespace UIForia.Parsing.StyleParser {
             return default;
         }
 
+        public bool GetStyleGroup(string uniqueStyleId, out UIStyleGroup group) {
+            if (styles == null) {
+                group = default;
+                return false;
+            }
+            for (int i = 0; i < styles.Length; i++) {
+                if (styles[i].name == uniqueStyleId) {
+                    group = styles[i];
+                    return true;
+                }
+            }
+
+            group = default;
+            return false;
+        }
+
+        
     }
 
 }

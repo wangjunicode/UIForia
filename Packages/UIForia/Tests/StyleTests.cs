@@ -14,16 +14,22 @@ public class StyleTests {
 
     [Template(TemplateType.String, @"
         <UITemplate>
+            <Style>style MyMargin { MarginTop = 100px; }</Style>
             <Contents>
                 <Group x-id='group1'>
                     <Group x-id='group2'/>
                 </Group>                  
                 <Group x-id='group3'/>                  
-                <Group x-id='group4'/>                  
+                <Group x-id='group4'/>
+                <Group x-id='dynamic' style='[marginStyle]' />                  
             </Contents>
         </UITemplate>
     ")]
-    public class StyleSetTestThing : UIElement { }
+    public class StyleSetTestThing : UIElement {
+
+        public string marginStyle = "MyMargin";
+
+    }
 
     public T ComputedValue<T>(UIElement obj, string propertyName) {
         return (T) typeof(UIStyleSet).GetProperty(propertyName).GetValue(obj.style);
@@ -440,7 +446,7 @@ public class StyleTests {
         Assert.AreEqual(8, root.FindById("group1").style.TextFontSize);
         Assert.AreEqual(8, root.FindById("group2").style.TextFontSize);
     }
-    
+
     [Test]
     public void Inherit_TextColor() {
         MockApplication app = new MockApplication(typeof(StyleSetTestThing));
@@ -480,4 +486,14 @@ public class StyleTests {
         Assert.AreEqual(font0, root.FindById("group1").style.TextFontAsset);
         Assert.AreEqual(font0, root.FindById("group2").style.TextFontAsset);
     }
+
+    [Test]
+    public void ApplyDynamicStyleBinding() {
+        MockApplication app = new MockApplication(typeof(StyleSetTestThing));
+        StyleSetTestThing root = (StyleSetTestThing) app.RootElement;
+        app.Update();
+        Assert.AreEqual(100, root.FindById("dynamic").style.MarginTop.value);
+        
+    }
+
 }

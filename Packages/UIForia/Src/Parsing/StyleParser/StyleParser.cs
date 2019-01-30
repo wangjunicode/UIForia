@@ -67,6 +67,44 @@ namespace UIForia.Parsing.StyleParser {
             return GetParsedStyle(uniqueStyleId, null, styleName);
         }
 
+        public static  bool TryGetParsedStyle(string uniqueStyleId, string body, string styleName, out UIStyleGroup group) {
+            uniqueStyleId = uniqueStyleId.Trim();
+            styleName = styleName.Trim();
+            ParsedStyleSheet sheet = s_CompiledStyles.GetOrDefault(uniqueStyleId);
+            if (sheet != null) {
+                return sheet.GetStyleGroup(styleName, out group);
+            }
+
+            if (!string.IsNullOrEmpty(body) && !string.IsNullOrWhiteSpace(body)) {
+                sheet = ParseFromString(body);
+                sheet.id = uniqueStyleId;
+
+                s_CompiledStyles[uniqueStyleId] = sheet;
+                return sheet.GetStyleGroup(styleName, out group);
+            }
+
+            if (File.Exists(UnityEngine.Application.dataPath + "/" + uniqueStyleId)) {
+                string contents = File.ReadAllText(UnityEngine.Application.dataPath + "/" + uniqueStyleId);
+                sheet = ParseFromString(contents);
+                sheet.id = uniqueStyleId;
+                s_CompiledStyles[uniqueStyleId] = sheet;
+                return sheet.GetStyleGroup(styleName, out group);
+            }
+
+            sheet = TryParseStyleFromClassPath(Path.GetFileNameWithoutExtension(uniqueStyleId));
+
+            if (sheet != null) {
+                s_CompiledStyles[uniqueStyleId] = sheet;
+            }
+
+            if (sheet == null) {
+                group = default;
+                return false;
+            }
+
+            return sheet.GetStyleGroup(styleName, out group);
+        }
+
         public static UIStyleGroup GetParsedStyle(string uniqueStyleId, string body, string styleName) {
             uniqueStyleId = uniqueStyleId.Trim();
             styleName = styleName.Trim();
@@ -341,7 +379,8 @@ namespace UIForia.Parsing.StyleParser {
 
                 int start = ptr;
                 char current = input[ptr];
-
+                
+                // parse name of attr or state or element property
                 if (current == '[') {
                     string stateName = ParseUtil.ReadBlock(input, ref ptr, '[', ']');
                     ParseUtil.ConsumeString("{", input, ref ptr);

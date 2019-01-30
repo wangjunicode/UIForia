@@ -5,6 +5,13 @@ using UnityEngine;
 
 namespace SVGX {
 
+    public struct SVGXClipGroup {
+
+        public RangeInt shapeRange;
+        public int parent;  
+
+    }
+    
     public class SVGXRenderSystem {
 
         private readonly Material strokeMaterial;
@@ -162,6 +169,10 @@ namespace SVGX {
             int start = shape.pointRange.start;
             Color color = style.fillColor;
 
+            // Matrix 3x3 fillTransform -> matrix defining rotation / offset / scale for fill 
+            // would need a way to index into a constant buffer probably, or pass even more vertex data
+            // float rotation, vec2 scale, vec2, position -> pack into 2 floats?
+             
             switch (shape.type) {
                 case SVGXShapeType.Unset:
                     break;
@@ -225,7 +236,7 @@ namespace SVGX {
             Graphics.DrawMesh(strokeVertexData.FillMesh(), mat, strokeMaterial, 0, camera, 0, null, false, false, false);
             strokesToRecycle.Add(strokeVertexData);
         }
-
+  
         /// <summary>
         /// Creates vertex data for a solid stroked line
         /// </summary>

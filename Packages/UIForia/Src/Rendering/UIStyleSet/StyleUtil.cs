@@ -1,4 +1,5 @@
 using System;
+using Boo.Lang;
 using UIForia;
 
 namespace UIForia.Rendering {
@@ -6,10 +7,13 @@ namespace UIForia.Rendering {
     public static partial class StyleUtil {
 
         public static readonly StylePropertyId[] StylePropertyIdList;
+        public static readonly List<StylePropertyId> InheritedProperties;
+        
         private static readonly IntMap<string> s_NameMap;
         
         static StyleUtil() {
             s_NameMap = new IntMap<string>();
+            InheritedProperties = new List<StylePropertyId>();
             StylePropertyId[] values = (StylePropertyId[]) Enum.GetValues(typeof(StylePropertyId));
             StylePropertyId[] ignored = {
                 StylePropertyId.__TextPropertyStart__,
@@ -24,6 +28,9 @@ namespace UIForia.Rendering {
 
                 StylePropertyIdList[idx++] = values[i];
                 s_NameMap.Add((int)values[i], values[i].ToString());
+                if (IsInherited(values[i])) {
+                    InheritedProperties.Add(values[i]);
+                }
             }
         }
 

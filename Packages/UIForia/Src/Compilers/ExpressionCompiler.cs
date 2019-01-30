@@ -1,4 +1,5 @@
 using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Globalization;
 using System.Reflection;
@@ -175,8 +176,10 @@ namespace UIForia.Compilers {
 
                 case ASTNodeType.New:
                 case ASTNodeType.DirectCast:
-                case ASTNodeType.ListInitializer:
                     throw new NotImplementedException();
+
+                case ASTNodeType.ListInitializer:
+                    return VisitListExpression((ListInitializerNode) node);
 
                 case ASTNodeType.AccessExpression:
                     return VisitAccessExpression((MemberAccessExpressionNode) node);
@@ -189,59 +192,59 @@ namespace UIForia.Compilers {
             }
         }
 
-        public struct AccessInfo {
+        private Expression VisitListExpression(ListInitializerNode node) {
+            // todo if we have a target type, try to cast all nodes to that type's element type
+            // otherwise use a base type
+            Type targetElementType = null;
 
-            public FieldInfo fieldInfo;
-            public PropertyInfo propertyInfo;
-            public MethodInfo methodInfo;
-            public List<Expression> arguments;
-            public Type outputType;
-            public AccessInfoType type;
-            public Type inputType;
-
-            public static void CreateMethodCall(ref AccessInfo accessInfo, MethodInfo info, List<Expression> arguments) {
-                accessInfo.type = AccessInfoType.MethodInvoke;
-                accessInfo.arguments = arguments;
-                accessInfo.methodInfo = info;
-                accessInfo.outputType = info.ReturnType == typeof(void) ? typeof(Terminal) : info.ReturnType;
-                accessInfo.inputType = info.DeclaringType;
-            }
-
-            public static bool CreateField(ref AccessInfo accessInfo, Type lastType, DotAccessNode dotAccessNode) {
-                FieldInfo fieldInfo = ReflectionUtil.GetInstanceOrStaticFieldInfo(lastType, dotAccessNode.propertyName);
-                if (fieldInfo == null) {
-                    return false;
+            if (targetType != null && typeof(IList).IsAssignableFrom(targetType)) {
+                if (targetType.IsArray) {
+                    targetElementType = targetType.GetElementType();
                 }
-
-                accessInfo.inputType = lastType;
-                accessInfo.fieldInfo = fieldInfo;
-                accessInfo.outputType = fieldInfo.FieldType;
-                accessInfo.type = AccessInfoType.Field;
-                return true;
-            }
-
-            public static bool CreateProperty(ref AccessInfo accessInfo, Type lastType, DotAccessNode dotAccessNode) {
-                PropertyInfo propertyInfo = ReflectionUtil.GetInstanceOrStaticPropertyInfo(lastType, dotAccessNode.propertyName);
-                if (propertyInfo == null) {
-                    return false;
+                else {
+                    targetElementType = targetType.GetGenericArguments()[0];
                 }
-
-                accessInfo.inputType = lastType;
-                accessInfo.propertyInfo = propertyInfo;
-                accessInfo.outputType = propertyInfo.PropertyType;
-                accessInfo.type = AccessInfoType.Property;
-                return true;
             }
 
-            public static bool CreateIndexer(ref AccessInfo accessInfo, Type lastType, Expression indexExpression) {
-                accessInfo.inputType = lastType;
-                accessInfo.outputType = GetListElementType(lastType);
-                accessInfo.arguments = new List<Expression>();
-                accessInfo.arguments.Add(indexExpression);
-                accessInfo.type = AccessInfoType.Index;
-                return true;
+            LightList<Expression> exprList = LightListPool<Expression>.Get();
+            LightList<Type> typeList = LightListPool<Type>.Get();
+
+            for (int i = 0; i < node.list.Count; i++) {
+                Expression expr = Visit(targetElementType, node.list[i]);
+                exprList.Add(expr);
+                typeList.Add(expr.YieldedType);
             }
 
+            Type commonBase = ReflectionUtil.GetCommonBaseClass(typeList);
+
+
+            if (commonBase == null || commonBase == typeof(ValueType) || commonBase == typeof(object)) {
+                throw new Exception("Types in list literal don't match, common base type was: " + commonBase);
+            }
+
+            Type expressionType = ReflectionUtil.CreateGenericType(typeof(Expression<>), commonBase);
+
+            IList retnValue = null;
+            Expression retnExpr = null;
+            
+            if (targetType == null || targetType.IsArray) {
+                retnValue = Array.CreateInstance(expressionType, node.list.Count);
+                for (int i = 0; i < retnValue.Count; i++) {
+                    retnValue[i] = exprList[i];
+                }
+                retnExpr = (Expression) ReflectionUtil.CreateGenericInstanceFromOpenType(
+                    typeof(ArrayLiteralExpression<>),
+                    new GenericArguments(targetElementType),
+                    new ConstructorArguments(retnValue)
+                );
+            }
+
+            LightListPool<Expression>.Release(ref exprList);
+            LightListPool<Type>.Release(ref typeList);
+
+            return retnExpr;
+      
+            
         }
 
         private LightList<AccessInfo> GetAccessInfoList(Type rootType, MemberAccessExpressionNode node, bool injectHead = true) {
@@ -1246,6 +1249,61 @@ namespace UIForia.Compilers {
             for (int i = 0; i < usings.Count; i++) {
                 namespaces.Remove(usings[i]);
             }
+        }
+
+        public struct AccessInfo {
+
+            public FieldInfo fieldInfo;
+            public PropertyInfo propertyInfo;
+            public MethodInfo methodInfo;
+            public List<Expression> arguments;
+            public Type outputType;
+            public AccessInfoType type;
+            public Type inputType;
+
+            public static void CreateMethodCall(ref AccessInfo accessInfo, MethodInfo info, List<Expression> arguments) {
+                accessInfo.type = AccessInfoType.MethodInvoke;
+                accessInfo.arguments = arguments;
+                accessInfo.methodInfo = info;
+                accessInfo.outputType = info.ReturnType == typeof(void) ? typeof(Terminal) : info.ReturnType;
+                accessInfo.inputType = info.DeclaringType;
+            }
+
+            public static bool CreateField(ref AccessInfo accessInfo, Type lastType, DotAccessNode dotAccessNode) {
+                FieldInfo fieldInfo = ReflectionUtil.GetInstanceOrStaticFieldInfo(lastType, dotAccessNode.propertyName);
+                if (fieldInfo == null) {
+                    return false;
+                }
+
+                accessInfo.inputType = lastType;
+                accessInfo.fieldInfo = fieldInfo;
+                accessInfo.outputType = fieldInfo.FieldType;
+                accessInfo.type = AccessInfoType.Field;
+                return true;
+            }
+
+            public static bool CreateProperty(ref AccessInfo accessInfo, Type lastType, DotAccessNode dotAccessNode) {
+                PropertyInfo propertyInfo = ReflectionUtil.GetInstanceOrStaticPropertyInfo(lastType, dotAccessNode.propertyName);
+                if (propertyInfo == null) {
+                    return false;
+                }
+
+                accessInfo.inputType = lastType;
+                accessInfo.propertyInfo = propertyInfo;
+                accessInfo.outputType = propertyInfo.PropertyType;
+                accessInfo.type = AccessInfoType.Property;
+                return true;
+            }
+
+            public static bool CreateIndexer(ref AccessInfo accessInfo, Type lastType, Expression indexExpression) {
+                accessInfo.inputType = lastType;
+                accessInfo.outputType = GetListElementType(lastType);
+                accessInfo.arguments = new List<Expression>();
+                accessInfo.arguments.Add(indexExpression);
+                accessInfo.type = AccessInfoType.Index;
+                return true;
+            }
+
         }
 
     }

@@ -145,14 +145,14 @@ public static class ReflectionUtil {
         return GetPropertyInfoOrThrow(type, propertyName).PropertyType;
     }
 
-    public static Type GetCommonBaseClass(params Type[] types) {
-        if (types.Length == 0) {
+    public static Type GetCommonBaseClass(IList<Type> types) {
+        if (types.Count == 0) {
             return null;
         }
 
         Type ret = types[0];
 
-        for (int i = 1; i < types.Length; ++i) {
+        for (int i = 1; i < types.Count; ++i) {
             if (types[i].IsAssignableFrom(ret))
                 ret = types[i];
             else {
@@ -163,6 +163,21 @@ public static class ReflectionUtil {
         }
 
         return ret;
+    }
+    
+    public static Type GetCommonBaseClass(Type type0, Type type1) {
+        Type oldT0 = TypeArray2[0];
+        Type oldT1 = TypeArray2[1];
+        
+        TypeArray2[0] = type0;
+        TypeArray2[1] = type1;
+        
+        Type retn = GetCommonBaseClass(TypeArray2);
+
+        TypeArray2[0] = oldT0;
+        TypeArray2[1] = oldT1;
+        
+        return retn;
     }
 
     public static bool IsNumericType(Type o) {

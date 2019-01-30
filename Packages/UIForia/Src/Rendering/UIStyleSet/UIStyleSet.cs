@@ -5,6 +5,7 @@ using UIForia.Animation;
 using UIForia.Systems;
 using UIForia.Util;
 using UnityEngine;
+using Debug = UnityEngine.Debug;
 
 namespace UIForia.Rendering {
 
@@ -14,6 +15,7 @@ namespace UIForia.Rendering {
         // handful of these could be replaced with a single IntMap, 
         // instance styles, instance states, 
         private string styleNames;
+
         // private UIStyle queryStyle;
         private StyleState currentState;
         private UIStyleGroup instanceStyle;
@@ -341,7 +343,7 @@ namespace UIForia.Rendering {
 
         private static string GetBaseStyleNames(UIStyleSet styleSet) {
             string output = string.Empty;
-            
+
             for (int i = 0; i < styleSet.styleGroups.Count; i++) {
                 output += styleSet.styleGroups[i].name;
                 if (i != styleSet.styleGroups.Count - 1) {
@@ -416,6 +418,60 @@ namespace UIForia.Rendering {
 
                 default:
                     return 0;
+            }
+        }
+
+        public void SetStyleGroups(IList<UIStyleGroup> groups) {
+            styleGroups.Clear();
+            containedStates = 0;
+            appliedStyles.Clear();
+            m_PropertyMap.Clear();
+
+            LightList<int> properties = LightListPool<int>.Get();
+
+            for (int i = 0; i < StyleUtil.InheritedProperties.Count; i++) {
+                SetInheritedStyle(element.parent.style.GetComputedStyleProperty(StyleUtil.InheritedProperties[i]));
+            }
+
+            for (int i = 0; i < groups.Count; i++) {
+                UIStyleGroup group = groups[i];
+                if (group.normal != null) AddStyleState(properties, group.normal, StyleState.Normal, group.styleType);
+                if (group.active != null) AddStyleState(properties, group.active, StyleState.Active, group.styleType);
+                if (group.inactive != null) AddStyleState(properties, group.inactive, StyleState.Inactive, group.styleType);
+                if (group.focused != null) AddStyleState(properties, group.focused, StyleState.Focused, group.styleType);
+                if (group.hover != null) AddStyleState(properties, group.hover, StyleState.Hover, group.styleType);
+            }
+
+            SortStyles();
+
+            // todo -- implement a style reset handler, currently no handler for when we return to default
+            
+            for (int i = 0; i < properties.Count; i++) {
+                StyleProperty property = GetPropertyValueInState((StylePropertyId) properties[i], currentState);
+                m_PropertyMap[(int) property.propertyId] = property;
+                styleSystem.SetStyleProperty(element, property);
+            }
+
+            LightListPool<int>.Release(ref properties);
+            styleNames = GetBaseStyleNames(this);
+        }
+
+        private void AddStyleState(LightList<int> propertyIds, UIStyle style, StyleState state, StyleType styleType) {
+            StyleEntry newEntry = new StyleEntry(style, styleType, state, styleGroups.Count);
+            appliedStyles.Add(newEntry);
+
+            if (!IsInState(state)) {
+                return;
+            }
+
+            IReadOnlyList<StyleProperty> properties = style.Properties;
+
+            for (int i = 0; i < properties.Count; i++) {
+                StyleProperty property = properties[i];
+
+                if (!propertyIds.Contains((int) property.propertyId)) {
+                    propertyIds.Add((int) property.propertyId);
+                }
             }
         }
 

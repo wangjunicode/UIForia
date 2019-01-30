@@ -3,8 +3,6 @@ using System.Collections.Generic;
 
 namespace UIForia {
 
-    // todo support ternary, Math, some other globals
-
     public static class Tokenizer {
 
         public static int ConsumeWhiteSpace(int start, string input) {
@@ -177,7 +175,6 @@ namespace UIForia {
                 ptr = TryReadCharacters(ptr, input, "]", TokenType.ArrayAccessClose, output);
                 ptr = TryReadCharacters(ptr, input, "{", TokenType.ExpressionOpen, output);
                 ptr = TryReadCharacters(ptr, input, "}", TokenType.ExpressionClose, output);
-
 
                 ptr = TryReadDigit(ptr, input, output);
                 ptr = TryReadString(ptr, input, output);

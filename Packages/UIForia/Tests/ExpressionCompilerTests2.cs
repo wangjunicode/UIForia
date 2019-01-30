@@ -21,12 +21,13 @@ public class ExpressionCompilerTests2 {
         public string Stuff() {
             return value.ToString();
         }
-        
+
         public override string ToString() {
             return value.ToString();
         }
 
     }
+
     private class TestType0 {
 
         public const string ConstantFieldValue = "some constant value";
@@ -40,7 +41,7 @@ public class ExpressionCompilerTests2 {
         public float[] floats;
 
         public string StringValueProp => value;
-        
+
         public string GetValue() {
             return value;
         }
@@ -1007,7 +1008,7 @@ public class ExpressionCompilerTests2 {
         CompileException ex = Assert.Throws<CompileException>(() => { new ExpressionCompiler().Compile<string>(typeof(TestType0), "GetValue('1', '2', '3', '4', '5')"); });
         Assert.AreEqual(CompileExceptions.TooManyArgumentsException("GetValue", 5).Message, ex.Message);
     }
-    
+
     [Test]
     public void Compile_AccessExpression_MethodChained() {
         TestType0 target = new TestType0();
@@ -1017,7 +1018,7 @@ public class ExpressionCompilerTests2 {
         Assert.IsInstanceOf<AccessExpression<string, TestType0>>(expression);
         Assert.AreEqual("funky", expression.Evaluate(ctx));
     }
-    
+
     [Test]
     public void Compile_AccessExpression_MethodOnField() {
         TestType0 target = new TestType0();
@@ -1039,7 +1040,7 @@ public class ExpressionCompilerTests2 {
         Assert.IsInstanceOf<AccessExpression<string, TestType0>>(expression);
         Assert.AreEqual("matt", expression.Evaluate(ctx));
     }
-    
+
     [Test]
     public void Compile_AccessExpression_MethodOnIndex() {
         TestType0 target = new TestType0();
@@ -1063,5 +1064,14 @@ public class ExpressionCompilerTests2 {
         Assert.AreEqual(TestType0.ConstantFieldValue, expression.Evaluate(ctx));
     }
 
-    
+    [Test]
+    public void Compile_ListLiteral() {
+        TestType0 target = new TestType0();
+        ExpressionContext ctx = new ExpressionContext(target);
+        ExpressionCompiler compiler = new ExpressionCompiler();
+        Expression<string[]> expression = compiler.Compile<string[]>(typeof(TestType0), "['a', 'b', 'c']");
+        Assert.IsInstanceOf<ArrayLiteralExpression<string>>(expression);
+        Assert.AreEqual(new[] {"a", "b", "c"}, expression.Evaluate(ctx));
+    }
+
 }

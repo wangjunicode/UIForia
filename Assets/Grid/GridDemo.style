@@ -11,6 +11,11 @@ style grid-container {
     //GridLayoutMainAxisAutoSize = 400px;
 }
 
+style more {
+    BorderColor = red;
+    BorderRadius = 50%;
+}
+
 style grid-cell {
     PreferredSize = 100px;
     BorderColor = black;

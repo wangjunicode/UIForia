@@ -2,19 +2,17 @@ using UIForia.Rendering;
 using UIForia.Util;
 
 namespace UIForia {
-
+    
     public class DynamicStyleBinding : Binding {
 
-        private ParsedTemplate template;
-        private LightList<string> styleNames;
+        private readonly string[] styleNames;
+        private readonly ParsedTemplate template;
         public readonly ArrayLiteralExpression<string> bindingList;
 
-        // todo if style count is 1 don't use the array just use a string
         public DynamicStyleBinding(ParsedTemplate template, ArrayLiteralExpression<string> bindingList) : base("style") {
             this.template = template;
             this.bindingList = bindingList.Clone();
-            this.styleNames = LightListPool<string>.Get();
-            this.styleNames.EnsureCapacity(bindingList.list.Length);
+            this.styleNames = new string[bindingList.list.Length];
         }
 
         public override void Execute(UIElement element, ExpressionContext context) {
@@ -46,6 +44,7 @@ namespace UIForia {
                 }
                 
                 element.style.SetStyleGroups(groups);
+                LightListPool<UIStyleGroup>.Release(ref groups);
             }
         }
 

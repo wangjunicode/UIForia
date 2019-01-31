@@ -135,7 +135,7 @@ namespace SVGX {
             return new Vector3(m0 * point.x + m2 * point.y + m4, m1 * point.x + m3 * point.y + m5, 0f);
         }
 
-        // todo this is silly for most cases since its * 1 or * 0 or + 0
+        // todo this is silly for most cases since its * 1 or * 0 or + 0, compiler probably collapses it
         public static SVGXMatrix TRS(Vector2 position, float rotation, Vector2 scale) {
             const float a = 1;
             const float b = 0;

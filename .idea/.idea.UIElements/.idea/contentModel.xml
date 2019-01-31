@@ -567,6 +567,8 @@
             </e>
             <e p="Shaders" t="Include">
               <e p="Debug.shader" t="Include" />
+              <e p="SimpleFillOpaque.shader" t="Include" />
+              <e p="SimpleStrokeOpaque.shader" t="Include" />
               <e p="UIForia.cginc" t="Include" />
               <e p="UIForiaClip.shader" t="Include" />
               <e p="UIForiaDebutText.shader" t="Include" />
@@ -574,10 +576,10 @@
               <e p="UIForiaFragBody.cginc" t="Include" />
               <e p="UIForiaFragDefines.cginc" t="Include" />
               <e p="UIForiaLine.shader" t="Include" />
-              <e p="UIForiaStencil.shader" t="Include" />
               <e p="UIForiaStencilEven.shader" t="Include" />
-              <e p="UIForiaStencilPaint.shader" t="Include" />
-              <e p="UIForiaStencilPaintEven.shader" t="Include" />
+              <e p="UIForiaStencilFillClear.shader" t="Include" />
+              <e p="UIForiaStencilFillCutout.shader" t="Include" />
+              <e p="uiforiastencilfillpaint.shader" t="Include" />
               <e p="UIForiaTextShader.shader" t="Include" />
               <e p="UIForiaVertDefines.cginc" t="Include" />
               <e p="UIStandardInstanced.shader" t="Include" />
@@ -604,21 +606,27 @@
               <e p="ClipRule.cs" t="Include" />
               <e p="DrawCallType.cs" t="Include" />
               <e p="FillVertexData.cs" t="Include" />
+              <e p="GFX.cs" t="Include" />
               <e p="ImmediateRenderContext.cs" t="Include" />
               <e p="LineCap.cs" t="Include" />
               <e p="LineJoin.cs" t="Include" />
               <e p="PathCommand.cs" t="Include" />
               <e p="StrokeVertexData.cs" t="Include" />
               <e p="SVGXBezier.cs" t="Include" />
+              <e p="SVGXBounds.cs" t="Include" />
+              <e p="SVGXClipGroup.cs" t="Include" />
               <e p="SVGXDrawCall.cs" t="Include" />
+              <e p="SVGXDrawWave.cs" t="Include" />
               <e p="SVGXElement.cs" t="Include" />
               <e p="SVGXGeometryGenerator.cs" t="Include" />
+              <e p="SVGXGeometryUtil.cs" t="Include" />
               <e p="SVGXGroup.cs" t="Include" />
               <e p="SVGXMatrix.cs" t="Include" />
               <e p="SVGXPathCommandType.cs" t="Include" />
               <e p="SVGXRenderElementType.cs" t="Include" />
               <e p="SVGXRenderSystem.cs" t="Include" />
               <e p="SVGXRoot.cs" t="Include" />
+              <e p="SVGXShape.cs" t="Include" />
               <e p="SVGXShapeType.cs" t="Include" />
               <e p="SVGXStyle.cs" t="Include" />
               <e p="SVGXTransform.cs" t="Include" />

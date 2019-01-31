@@ -1,47 +1,35 @@
-using System.Collections.Generic;
 using UnityEngine;
 
 namespace SVGX {
-
-    public class SVGXClipElement {
-
-        public SVGXClipElement parentClipElement;
-        public List<SVGXRenderElement> shapes;
-
-    }
-
-    public struct SVGXRenderElement {
-
-        public List<Vector2> strokeAA;
-        public List<Vector2> stroke;
-        public List<Vector2> fill;
-        public SVGXClipElement clip;
-        public SVGXRenderElementType type;
-        public SVGXStyle style;
-        public SVGXMatrix transform;
-
-    }
-
+    
     public class SVGXRoot : MonoBehaviour {
 
-        public Material paint;
-        public Material stencil;
         public new Camera camera;
         private Mesh mesh;
         private Mesh lineMesh;
 
-        private SVGXRenderSystem renderSystem;
+        private GFX gfx;
+        
+        [Header("Fill Materials")]
+        public Material simpleFillOpaque;
+        public Material stencilFillCutoutOpaque;
+        public Material stencilFillPaintOpaque;
+        public Material stencilFillClearOpaque;
 
-        public Material clip;
-        public Material stencilClear;
-        public Material strokeMaterial;
-        public Material fillMaterial;
-
+        [Header("Stroke Materials")] 
+        public Material simpleStrokeOpaque;
+        
         private ImmediateRenderContext ctx;
 
         public void Start() {
-            renderSystem = new SVGXRenderSystem(strokeMaterial, fillMaterial, null, null, null);
             ctx = new ImmediateRenderContext();
+            gfx = new GFX(camera) {
+                simpleFillOpaqueMaterial = simpleFillOpaque,
+                stencilFillOpaqueCutoutMaterial = stencilFillCutoutOpaque,
+                stencilFillOpaquePaintMaterial = stencilFillPaintOpaque,
+                stencilFillOpaqueClearMaterial = stencilFillClearOpaque,
+                simpleStrokeOpaqueMaterial = simpleStrokeOpaque
+            };
         }
 
         public void Update() {
@@ -49,11 +37,29 @@ namespace SVGX {
             camera.orthographicSize = Screen.height * 0.5f;
 
             ctx.Clear();
-            ctx.Rect(100, 100, 100, 100);
-            ctx.Fill();
             
-            renderSystem.Render(camera, ctx);
+//            ctx.SetFillColor(Color.red);
+//            ctx.Rect(100, 100, 100, 100);
+//            ctx.Fill();
+//            
+//            ctx.BeginPath();
+//            ctx.SetFillColor(Color.white);
+//            ctx.Rect(100, 300, 100, 100);
+//            ctx.Ellipse(100, 100, 50, 100);
+//            ctx.Fill();
+//  
+//            ctx.BeginPath();
+//            ctx.SetFillColor(Color.blue);
+//            ctx.Rect(300, 100, 100, 100);
+//            ctx.Fill();
+//            ctx.Stroke();
 
+            ctx.LineTo(100, 0);
+//            ctx.LineTo(100, 0);
+            ctx.Stroke();
+            
+            gfx.Render(ctx);
+            
         }
 
     }

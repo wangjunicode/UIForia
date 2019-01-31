@@ -1,17 +1,9 @@
 using System;
-using System.Collections.Generic;
 using UIForia.Util;
 using UnityEngine;
 
 namespace SVGX {
 
-    public struct SVGXClipGroup {
-
-        public RangeInt shapeRange;
-        public int parent;  
-
-    }
-    
     public class SVGXRenderSystem {
 
         private readonly Material strokeMaterial;
@@ -20,7 +12,7 @@ namespace SVGX {
         private readonly Material clipClearMaterial;
         private readonly Material stencilFillMaterial;
         private readonly Material stencilCutoutMaterial;
-        
+
         private readonly ObjectPool<StrokeVertexData> strokePool;
         private readonly ObjectPool<FillVertexData> fillPool;
         private readonly LightList<StrokeVertexData> strokesToRecycle;
@@ -74,29 +66,29 @@ namespace SVGX {
         }
 
         private void DrawFill(ImmediateRenderContext ctx, Camera camera, SVGXDrawCall drawCall) {
-            FillVertexData fillVertexData = fillPool.Get();
-
-            int start = drawCall.shapeRange.start;
-            int end = drawCall.shapeRange.end;
-            LightList<SVGXShape> withHoles = LightListPool<SVGXShape>.Get();
-            Vector3 origin = camera.transform.position + new Vector3(0, 0, 2);
-            
-            if (drawCall.shapeRange.length == 1) {
-                CreateFillVertices(fillVertexData, ctx.points, drawCall.style, ctx.shapes[drawCall.shapeRange.start]);
-                if (ctx.shapes[drawCall.shapeRange.start].type != SVGXShapeType.Path) {
-                    Matrix4x4 matrix = Matrix4x4.TRS(origin, Quaternion.identity, Vector3.one);
-                    Graphics.DrawMesh(fillVertexData.FillMesh(), matrix, fillMaterial, 0, camera, 0, null, false, false, false);
-                }
-                else {
-                    Mesh fillMesh = fillVertexData.FillMesh();
-                    Matrix4x4 matrix = Matrix4x4.TRS(origin, Quaternion.identity, Vector3.one);
-                    Graphics.DrawMesh(fillMesh, matrix, stencilCutoutMaterial, 0, camera, 0, null, false, false, false);
-                    Graphics.DrawMesh(fillMesh, matrix, stencilFillMaterial, 0, camera, 0, null, false, false, false);
-//                    Graphics.DrawMesh(fillMesh, matrix, stencilResetMaterial, 0, camera, 0, null, false, false, false);
-                }
-            }
-
-            fillsToRecycle.Add(fillVertexData);
+//            FillVertexData fillVertexData = fillPool.Get();
+//
+//            int start = drawCall.shapeRange.start;
+//            int end = drawCall.shapeRange.end;
+//            LightList<SVGXShape> withHoles = LightListPool<SVGXShape>.Get();
+//            Vector3 origin = camera.transform.position + new Vector3(0, 0, 2);
+//            
+//            if (drawCall.shapeRange.length == 1) {
+//                CreateFillVertices(fillVertexData, ctx.points, drawCall.style, ctx.shapes[drawCall.shapeRange.start]);
+//                if (ctx.shapes[drawCall.shapeRange.start].type != SVGXShapeType.Path) {
+//                    Matrix4x4 matrix = Matrix4x4.TRS(origin, Quaternion.identity, Vector3.one);
+//                    Graphics.DrawMesh(fillVertexData.FillMesh(), matrix, fillMaterial, 0, camera, 0, null, false, false, false);
+//                }
+//                else {
+//                    Mesh fillMesh = fillVertexData.FillMesh();
+//                    Matrix4x4 matrix = Matrix4x4.TRS(origin, Quaternion.identity, Vector3.one);
+//                    Graphics.DrawMesh(fillMesh, matrix, stencilCutoutMaterial, 0, camera, 0, null, false, false, false);
+//                    Graphics.DrawMesh(fillMesh, matrix, stencilFillMaterial, 0, camera, 0, null, false, false, false);
+////                    Graphics.DrawMesh(fillMesh, matrix, stencilResetMaterial, 0, camera, 0, null, false, false, false);
+//                }
+//            }
+//
+//            fillsToRecycle.Add(fillVertexData);
 
 //            for (int i = start; i < end; i++) {
 //                if (ctx.shapes[i].isHole) {
@@ -154,15 +146,49 @@ namespace SVGX {
 //            LightListPool<SVGXShape>.Release(ref withHoles);
         }
 
-        private static void CreateFillVertices(FillVertexData vertexData, LightList<Vector2> points, SVGXStyle style, SVGXShape shape) {
+        internal static void CreateShapeStrokeVertices(StrokeVertexData vertexData, LightList<Vector2> points, SVGXMatrix matrix, SVGXStyle style, SVGXShape shape) {
+            switch (shape.type) {
+                case SVGXShapeType.Rect:
+                    //     CreateRectStrokeVertices();
+                    break;
+            }
+        }
+
+        internal static void CreateRectStrokeVertices(StrokeVertexData vertexData, LightList<Vector2> points, SVGXMatrix matrix, SVGXStyle style, SVGXShape shape) {
             int triIdx = vertexData.triangleIndex;
             int vertexCnt = vertexData.position.Count;
+            int flagCnt = vertexData.flags.Count;
+            int prevNextCnt = vertexData.prevNext.Count;
             int colorCnt = vertexData.colors.Count;
             int texCoordCnt = vertexData.texCoords.Count;
             int triangleCnt = vertexData.triangles.Count;
 
             Vector3[] vertices = vertexData.position.Array;
+            Vector4[] prevNext = vertexData.prevNext.Array;
+            Vector4[] flags = vertexData.flags.Array;
             Vector2[] texCoords = vertexData.texCoords.Array;
+            Color[] colors = vertexData.colors.Array;
+            int[] triangles = vertexData.triangles.Array;
+
+            switch (style.lineJoin) {
+                case LineJoin.Bevel:
+
+
+                    break;
+            }
+        }
+
+        internal static void CreateFillVertices(FillVertexData vertexData, LightList<Vector2> points, SVGXMatrix matrix, SVGXStyle style, SVGXShape shape) {
+            int triIdx = vertexData.triangleIndex;
+            int vertexCnt = vertexData.position.Count;
+            int colorCnt = vertexData.colors.Count;
+            int texCoordCnt = vertexData.texCoords.Count;
+            int flagsCnt = vertexData.flags.Count;
+            int triangleCnt = vertexData.triangles.Count;
+
+            Vector3[] vertices = vertexData.position.Array;
+            Vector2[] texCoords = vertexData.texCoords.Array;
+            Vector4[] flags = vertexData.flags.Array;
             Color[] colors = vertexData.colors.Array;
             int[] triangles = vertexData.triangles.Array;
 
@@ -172,7 +198,10 @@ namespace SVGX {
             // Matrix 3x3 fillTransform -> matrix defining rotation / offset / scale for fill 
             // would need a way to index into a constant buffer probably, or pass even more vertex data
             // float rotation, vec2 scale, vec2, position -> pack into 2 floats?
-             
+
+            // probably want to pre-process the points and apply the matrix transform to them in a job
+            // that way we can do each point only once even if they get re-used
+
             switch (shape.type) {
                 case SVGXShapeType.Unset:
                     break;
@@ -180,10 +209,10 @@ namespace SVGX {
                 case SVGXShapeType.Circle:
                 case SVGXShapeType.Rect:
 
-                    vertices[vertexCnt++] = points[start++];
-                    vertices[vertexCnt++] = points[start++];
-                    vertices[vertexCnt++] = points[start++];
-                    vertices[vertexCnt++] = points[start];
+                    vertices[vertexCnt++] = matrix.Transform(points[start++]);
+                    vertices[vertexCnt++] = matrix.Transform(points[start++]);
+                    vertices[vertexCnt++] = matrix.Transform(points[start++]);
+                    vertices[vertexCnt++] = matrix.Transform(points[start]);
 
                     triangles[triangleCnt++] = triIdx + 0;
                     triangles[triangleCnt++] = triIdx + 1;
@@ -197,6 +226,11 @@ namespace SVGX {
                     texCoords[texCoordCnt++] = new Vector2(1, 0);
                     texCoords[texCoordCnt++] = new Vector2(0, 0);
 
+                    flags[flagsCnt++] = new Vector4((int) shape.type, 0, 0, 0);
+                    flags[flagsCnt++] = new Vector4((int) shape.type, 0, 0, 0);
+                    flags[flagsCnt++] = new Vector4((int) shape.type, 0, 0, 0);
+                    flags[flagsCnt++] = new Vector4((int) shape.type, 0, 0, 0);
+
                     colors[colorCnt++] = color;
                     colors[colorCnt++] = color;
                     colors[colorCnt++] = color;
@@ -206,49 +240,46 @@ namespace SVGX {
                     vertexData.triangles.Count = triangleCnt;
                     vertexData.colors.Count = colorCnt;
                     vertexData.texCoords.Count = texCoordCnt;
+                    vertexData.flags.Count = flagsCnt;
 
                     vertexData.triangleIndex = triIdx + 4;
 
                     break;
 
                 case SVGXShapeType.Path:
-
                     break;
+
                 default:
                     throw new ArgumentOutOfRangeException();
             }
         }
 
         private void DrawStroke(ImmediateRenderContext ctx, Camera camera, SVGXDrawCall drawCall) {
-            int start = drawCall.shapeRange.start;
-            int end = drawCall.shapeRange.end;
-            StrokeVertexData strokeVertexData = strokePool.Get();
-
-            // todo -- write to z-index
-            for (int i = start; i < end; i++) {
-                CreateSolidStrokeVertices(strokeVertexData, drawCall.style.strokeStyle, ctx.points, ctx.shapes[i].isClosed, ctx.shapes[i].pointRange);
-            }
-
-            Vector3 origin = camera.transform.position + new Vector3(0, 0, 2);
-            Matrix4x4 mat = Matrix4x4.TRS(origin, Quaternion.identity, Vector3.one);
-            // todo -- this should only issue a draw when the shader would change 
-            ; // todo -- needs to handle breaking into multiple meshes if count > ushort.max
-            Graphics.DrawMesh(strokeVertexData.FillMesh(), mat, strokeMaterial, 0, camera, 0, null, false, false, false);
-            strokesToRecycle.Add(strokeVertexData);
+//            int start = drawCall.shapeRange.start;
+//            int end = drawCall.shapeRange.end;
+//            StrokeVertexData strokeVertexData = strokePool.Get();
+//
+//            // todo -- write to z-index
+//            for (int i = start; i < end; i++) {
+//                CreateSolidStrokeVertices(strokeVertexData, drawCall.style.strokeStyle, ctx.points, ctx.shapes[i].isClosed, ctx.shapes[i].pointRange);
+//            }
+//
+//            Vector3 origin = camera.transform.position + new Vector3(0, 0, 2);
+//            Matrix4x4 mat = Matrix4x4.TRS(origin, Quaternion.identity, Vector3.one);
+//            // todo -- this should only issue a draw when the shader would change 
+//            ; // todo -- needs to handle breaking into multiple meshes if count > ushort.max
+//            Graphics.DrawMesh(strokeVertexData.FillMesh(), mat, strokeMaterial, 0, camera, 0, null, false, false, false);
+//            strokesToRecycle.Add(strokeVertexData);
         }
-  
-        /// <summary>
-        /// Creates vertex data for a solid stroked line
-        /// </summary>
-        /// <param name="vertexData"></param>
-        /// <param name="style"></param>
-        /// <param name="points"></param>
-        /// <param name="range"></param>
-        private static void CreateSolidStrokeVertices(StrokeVertexData vertexData, SVGXStrokeStyle style, LightList<Vector2> points, bool isClosed, RangeInt range) {
+
+        internal static void CreateSolidStrokeVertices(StrokeVertexData vertexData, LightList<Vector2> points, SVGXMatrix matrix, SVGXStyle style, SVGXShape shape) {
             Color32 color = Color.red; //style.color;
-            float strokeWidth = style.width;
+            float strokeWidth = 5f; //style.width;
             float miterLimit = style.miterLimit;
-            
+
+            RangeInt range = shape.pointRange;
+            bool isClosed = shape.isClosed;
+
             // todo -- interesting optimization for later: when stroking rects / ellipses / circles, see if it is faster to generate less geometry but use a discard to clip out the middle
 
             // needs to be a while loop?
@@ -262,7 +293,7 @@ namespace SVGX {
 
             const int top = 1;
             const int btm = -1;
-            
+
             Vector2 dir = (points[range.start + 1] - points[range.start]).normalized;
             Vector2 prev = isClosed ? points[range.end - 1] : points[range.start] - dir;
             Vector2 curr = points[range.start];
@@ -303,7 +334,7 @@ namespace SVGX {
             // color, opacity, texcoords, texture id
             // join type, cap type, miter limit, 
             // stroke width,
-            
+
             // todo -- encode segment length, probably done in shader (or maybe just do the sqrt in the shader)
             // todo -- encode cap type / join type
             // todo -- if miter or round join / cap embed new geometry to handle that
@@ -322,12 +353,12 @@ namespace SVGX {
             texCoords[texCoordCnt++] = new Vector2(1, 1);
             texCoords[texCoordCnt++] = new Vector2(1, 0);
             texCoords[texCoordCnt++] = new Vector2(0, 0);
-            
+
             colors[colorCnt++] = color;
             colors[colorCnt++] = color;
             colors[colorCnt++] = color;
             colors[colorCnt++] = color;
-            
+
             triangles[triangleCnt++] = triIdx + 0;
             triangles[triangleCnt++] = triIdx + 1;
             triangles[triangleCnt++] = triIdx + 2;
@@ -362,7 +393,7 @@ namespace SVGX {
                 texCoords[texCoordCnt++] = new Vector2(1, 1);
                 texCoords[texCoordCnt++] = new Vector2(1, 0);
                 texCoords[texCoordCnt++] = new Vector2(0, 0);
-                
+
                 colors[colorCnt++] = color;
                 colors[colorCnt++] = color;
                 colors[colorCnt++] = color;
@@ -404,7 +435,7 @@ namespace SVGX {
                 texCoords[texCoordCnt++] = new Vector2(1, 1);
                 texCoords[texCoordCnt++] = new Vector2(1, 0);
                 texCoords[texCoordCnt++] = new Vector2(0, 0);
-                
+
                 colors[colorCnt++] = color;
                 colors[colorCnt++] = color;
                 colors[colorCnt++] = color;
@@ -445,7 +476,7 @@ namespace SVGX {
                     texCoords[texCoordCnt++] = new Vector2(1, 1);
                     texCoords[texCoordCnt++] = new Vector2(1, 0);
                     texCoords[texCoordCnt++] = new Vector2(0, 0);
-                    
+
                     colors[colorCnt++] = color;
                     colors[colorCnt++] = color;
                     colors[colorCnt++] = color;

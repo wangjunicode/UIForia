@@ -1,4 +1,4 @@
-﻿Shader "UIForia/UIForiaStencilPaint"
+﻿Shader "UIForia/StencilFillPaint"
 {
     Properties
     {
@@ -9,7 +9,7 @@
         LOD 100
 
         Stencil {
-            Ref 3
+            Ref 1 // 3 with clipping
             Comp Equal
         }
         

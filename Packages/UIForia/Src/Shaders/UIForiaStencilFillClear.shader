@@ -1,21 +1,24 @@
-﻿Shader "UIForia/UIForiaStencilPaintEven"
+﻿Shader "UIForia/StencilFillClear"
 {
     Properties
     {
     }
     SubShader
     {
-        Tags { "RenderType"="Transparent " }
+        Tags { "RenderType"="Transparent" }
         LOD 100
-
+        ColorMask 0
+        
         Stencil {
-            Ref 5
-            ReadMask 5
-            Comp Equal
+        
+            Ref 0
+            Comp Always
+            Pass Replace
+            // todo -- use mask so we don't clear clip
         }
         
         Cull Off
-        
+
         Pass
         {
             CGPROGRAM
@@ -28,27 +31,24 @@
             {
                 float4 vertex : POSITION;
                 float2 uv : TEXCOORD0;
-                fixed4 color : COLOR;
             };
 
             struct v2f
             {
-                float4 vertex : SV_POSITION;
                 float2 uv : TEXCOORD0;
-                fixed4 color : COLOR;
+                float4 vertex : SV_POSITION;
             };
 
             v2f vert (appdata v)
             {
                 v2f o;
                 o.vertex = UnityObjectToClipPos(v.vertex);
-                o.color = v.color;
                 return o;
             }
 
             fixed4 frag (v2f i) : SV_Target
             {
-                return i.color;
+                return fixed4(1, 1, 1, 1);
             }
             ENDCG
         }

@@ -1,14 +1,13 @@
-﻿Shader "UIForia/UIForiaStencil"
+﻿Shader "UIForia/StencilFillCutout"
 {
     Properties
     {
     }
     SubShader
     {
-        Tags { "RenderType"="Transparent " }
+        Tags { "RenderType"="Transparent" }
         LOD 100
         ColorMask 0
-        
         /*
         Why this works:
             
@@ -18,10 +17,10 @@
         */
         Stencil {
         
-            Ref 3
+            Ref 1 // use 3 for clip
             Comp Always
             Pass Invert
-            WriteMask 2
+            WriteMask 1 // 2 for clip
             
         }
         

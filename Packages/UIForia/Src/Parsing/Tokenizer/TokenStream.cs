@@ -10,9 +10,9 @@ namespace UIForia {
         private int ptr;
 
         private Stack<int> stack;
-        private List<DslToken> tokens;
+        private List<ExpressionToken> tokens;
 
-        public TokenStream(List<DslToken> tokens) {
+        public TokenStream(List<ExpressionToken> tokens) {
             ptr = 0;
             this.tokens = tokens;
             stack = StackPool<int>.Get();
@@ -20,21 +20,21 @@ namespace UIForia {
 
         public int CurrentIndex => ptr;
 
-        public DslToken Current {
-            [DebuggerStepThrough] get { return (ptr >= tokens.Count || tokens.Count == 0) ? DslToken.Invalid : tokens[ptr]; }
+        public ExpressionToken Current {
+            [DebuggerStepThrough] get { return (ptr >= tokens.Count || tokens.Count == 0) ? ExpressionToken.Invalid : tokens[ptr]; }
         }
 
-        public DslToken Next {
-            [DebuggerStepThrough] get { return (ptr + 1 >= tokens.Count) ? DslToken.Invalid : tokens[ptr + 1]; }
+        public ExpressionToken Next {
+            [DebuggerStepThrough] get { return (ptr + 1 >= tokens.Count) ? ExpressionToken.Invalid : tokens[ptr + 1]; }
         }
 
-        public DslToken Previous {
+        public ExpressionToken Previous {
 //            [DebuggerStepThrough]
-            get { return (ptr - 1 < 0 || tokens.Count == 0) ? DslToken.Invalid : tokens[ptr - 1]; }
+            get { return (ptr - 1 < 0 || tokens.Count == 0) ? ExpressionToken.Invalid : tokens[ptr - 1]; }
         }
 
-        public DslToken Last {
-            [DebuggerStepThrough] get { return (tokens.Count == 0) ? DslToken.Invalid : tokens[tokens.Count - 1]; }
+        public ExpressionToken Last {
+            [DebuggerStepThrough] get { return (tokens.Count == 0) ? ExpressionToken.Invalid : tokens[tokens.Count - 1]; }
         }
 
         public bool HasMoreTokens {
@@ -71,22 +71,22 @@ namespace UIForia {
                 retn += tokens[i].value;
             }
 
-            return retn + $" (idx: {ptr}, {Current.value} -> {Current.tokenType})";
+            return retn + $" (idx: {ptr}, {Current.value} -> {Current.expressionTokenType})";
         }
 
         [DebuggerStepThrough]
-        public int FindNextIndex(TokenType targetTokenType) {
+        public int FindNextIndex(ExpressionTokenType targetExpressionTokenType) {
             int i = 0;
             int counter = 0;
             while (HasTokenAt(i)) {
-                TokenType token = Peek(i);
-                if (token == TokenType.ParenOpen) {
+                ExpressionTokenType expressionToken = Peek(i);
+                if (expressionToken == ExpressionTokenType.ParenOpen) {
                     counter++;
                 }
-                else if (token == TokenType.ParenClose) {
+                else if (expressionToken == ExpressionTokenType.ParenClose) {
                     counter--;
                 }
-                else if (token == targetTokenType && counter == 0) {
+                else if (expressionToken == targetExpressionTokenType && counter == 0) {
                     return i;
                 }
 
@@ -97,18 +97,18 @@ namespace UIForia {
         }
         
         [DebuggerStepThrough]
-        public int FindNextIndexAtSameLevel(TokenType targetTokenType) {
+        public int FindNextIndexAtSameLevel(ExpressionTokenType targetExpressionTokenType) {
             int i = 0;
             int level = 0;
             while (HasTokenAt(i)) {
-                TokenType token = Peek(i);
-                if (token == TokenType.ParenOpen || token == TokenType.ArrayAccessOpen || token == TokenType.LessThan) {
+                ExpressionTokenType expressionToken = Peek(i);
+                if (expressionToken == ExpressionTokenType.ParenOpen || expressionToken == ExpressionTokenType.ArrayAccessOpen || expressionToken == ExpressionTokenType.LessThan) {
                     level++;
                 }
-                else if (token == TokenType.ParenClose || token == TokenType.ArrayAccessClose || token == TokenType.GreaterThan) {
+                else if (expressionToken == ExpressionTokenType.ParenClose || expressionToken == ExpressionTokenType.ArrayAccessClose || expressionToken == ExpressionTokenType.GreaterThan) {
                     level--;
                 }
-                else if (token == targetTokenType && level == 0) {
+                else if (expressionToken == targetExpressionTokenType && level == 0) {
                     return i;
                 }
 
@@ -119,7 +119,7 @@ namespace UIForia {
         }
 
         [DebuggerStepThrough]
-        public int FindMatchingIndex(TokenType braceOpen, TokenType braceClose) {
+        public int FindMatchingIndex(ExpressionTokenType braceOpen, ExpressionTokenType braceClose) {
             if (Current != braceOpen) {
                 return -1;
             }
@@ -152,13 +152,13 @@ namespace UIForia {
 
         [DebuggerStepThrough]
         public TokenStream AdvanceAndReturnSubStream(int advance) {
-            List<DslToken> subStreamTokens = tokens.GetRange(ptr, advance);
+            List<ExpressionToken> subStreamTokens = tokens.GetRange(ptr, advance);
             Advance(advance);
             return new TokenStream(subStreamTokens);
         }
 
         [DebuggerStepThrough]
-        public TokenType Peek(int i) {
+        public ExpressionTokenType Peek(int i) {
             return tokens[ptr + i];
         }
 
@@ -169,7 +169,7 @@ namespace UIForia {
 
         public void Release() {
             StackPool<int>.Release(stack);
-            ListPool<DslToken>.Release(ref tokens);
+            ListPool<ExpressionToken>.Release(ref tokens);
             stack = null;
             tokens = null;
         }

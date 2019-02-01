@@ -7,7 +7,7 @@ using UIForia.Input;
 using Tests.Mocks;
 using UIForia.Compilers;
 using UIForia.Layout.LayoutTypes;
-using UIForia.Parsing.StyleParser;
+using UIForia.Parsing.Style;
 using UnityEngine;
 using static Tests.TestUtils;
 using Application = UIForia.Application;

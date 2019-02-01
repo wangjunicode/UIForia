@@ -358,13 +358,12 @@ MonoBehaviour:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1506585478}
-  m_Enabled: 1
+  m_Enabled: 0
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 35f2b5d632fd4d64b9acedec5215cda2, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  typeName: UnityEngine.GridDemo, Assembly-CSharp, Version=0.0.0.0, Culture=neutral,
-    PublicKeyToken=null
+  typeName: UI.Root, Assembly-CSharp, Version=0.0.0.0, Culture=neutral, PublicKeyToken=null
   camera: {fileID: 534669904}
 --- !u!114 &1506585480
 MonoBehaviour:
@@ -452,18 +451,17 @@ MonoBehaviour:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1506585478}
-  m_Enabled: 0
+  m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 8320c0a28cb8f0e4892c007125564e25, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  paint: {fileID: 2100000, guid: 8e838649fb5b1c24c9632a1c399f6f2a, type: 2}
-  stencil: {fileID: 2100000, guid: 1e8b2a2341a5e6048963693c2767e790, type: 2}
   camera: {fileID: 534669904}
-  clip: {fileID: 2100000, guid: 6953c70803c286549b51fd41864ab675, type: 2}
-  stencilClear: {fileID: 0}
-  strokeMaterial: {fileID: 2100000, guid: b3112747779d55040a25c1e39cfe8bc4, type: 2}
-  fillMaterial: {fileID: 2100000, guid: 1bfb90e5f001323488453a2f7e6aed47, type: 2}
+  simpleFillOpaque: {fileID: 0}
+  stencilFillCutoutOpaque: {fileID: 0}
+  stencilFillPaintOpaque: {fileID: 0}
+  stencilFillClearOpaque: {fileID: 0}
+  simpleStrokeOpaque: {fileID: 0}
 --- !u!222 &1506585485
 CanvasRenderer:
   m_ObjectHideFlags: 0

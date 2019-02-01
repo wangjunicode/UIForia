@@ -1,7 +1,7 @@
 using System;
 using System.Collections.Generic;
 using UIForia.Compilers;
-using UIForia.Parsing.StyleParser;
+using UIForia.Parsing.Style;
 using UIForia.Rendering;
 using UIForia.Util;
 

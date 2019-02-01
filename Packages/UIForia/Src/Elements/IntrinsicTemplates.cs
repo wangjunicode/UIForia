@@ -1,5 +1,5 @@
 ﻿using UIForia.Elements;
-using UIForia.Parsing.StyleParser;
+using UIForia.Parsing.Style;
 using UIForia.Rendering;
 
 namespace UIForia {

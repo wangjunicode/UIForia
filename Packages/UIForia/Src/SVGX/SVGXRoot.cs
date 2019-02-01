@@ -1,3 +1,4 @@
+using UIForia.Extensions;
 using UnityEngine;
 
 namespace SVGX {
@@ -21,6 +22,9 @@ namespace SVGX {
         
         private ImmediateRenderContext ctx;
 
+        [Range(0, 360f)] public float rotation;
+        public float dot;
+        
         public void Start() {
             ctx = new ImmediateRenderContext();
             gfx = new GFX(camera) {
@@ -54,9 +58,18 @@ namespace SVGX {
 //            ctx.Fill();
 //            ctx.Stroke();
 
-            ctx.LineTo(100, 0);
-//            ctx.LineTo(100, 0);
+            ctx.LineTo(100, 100);
+            Vector2 v = new Vector2(200, 0);
+            v = v.Rotate(new Vector2(0, 0), rotation);
+            ctx.LineTo(v.x, v.y);
             ctx.Stroke();
+            Vector2 toCurrent = new Vector2(100, 100) - new Vector2(0, 0);
+            Vector2 toNext = v - new Vector2(100, 100);
+
+            toCurrent = toCurrent.normalized;
+            toNext = toNext.normalized;
+            
+            dot = Vector2.Dot(toCurrent, new Vector2(-toNext.y, toNext.x));
             
             gfx.Render(ctx);
             

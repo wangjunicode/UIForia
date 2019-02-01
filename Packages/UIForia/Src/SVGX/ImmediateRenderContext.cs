@@ -4,11 +4,13 @@ using UnityEngine;
 
 namespace SVGX {
 
+    // todo this saves 2 list allocations + operations
     public struct SVGXDrawState {
 
         public SVGXMatrix matrix;
         public SVGXStyle style;
         public Vector2 lastPoint;
+        // clip state lives here too
 
     }
 

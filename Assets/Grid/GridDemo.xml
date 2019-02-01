@@ -15,7 +15,7 @@
         </Group>
         <Group style="grid-cell thead seedlogo" onMouseEnter="OnHoverEnd()" />
         <Group style="grid-cell thead">Dev Blog</Group>
-        <Group style="grid-cell thead">Community</Group>
+        <Group style="[styleProp]">Community</Group>
         
         <Group style="[backgroundStyleName, 'more']" />
 

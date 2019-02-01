@@ -7,7 +7,7 @@ Material:
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_Name: UIForiaStencil
+  m_Name: UIForiaStencilCutout
   m_Shader: {fileID: 4800000, guid: c3d8aa261ca28e04a9eaf1a90601c422, type: 3}
   m_ShaderKeywords: 
   m_LightmapFlags: 4

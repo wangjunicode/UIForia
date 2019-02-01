@@ -2,7 +2,7 @@ using System.Collections.Generic;
 using NUnit.Framework;
 using UIForia.Rendering;
 using UIForia;
-using UIForia.Parsing.StyleParser;
+using UIForia.Parsing.Style;
 using UnityEditorInternal;
 using UnityEngine;
 

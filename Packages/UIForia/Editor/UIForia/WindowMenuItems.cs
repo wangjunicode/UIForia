@@ -1,4 +1,4 @@
-using UIForia.Parsing.StyleParser;
+using UIForia.Parsing.Style;
 using UnityEditor;
 
 namespace UIForia.Editor {

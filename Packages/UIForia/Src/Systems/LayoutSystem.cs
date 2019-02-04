@@ -322,7 +322,7 @@ namespace UIForia.Systems {
                             localPosition.x = box.AnchorLeft + box.TransformX;
                             break;
                         case TransformBehavior.AnchorMaxOffset:
-                            localPosition.x = box.AnchorRight + box.TransformX - box.actualWidth;
+                            localPosition.x = box.AnchorRight + box.TransformX;
                             break;
                         case TransformBehavior.LayoutOffset:
                             localPosition.x = box.TransformX;
@@ -337,7 +337,7 @@ namespace UIForia.Systems {
                             localPosition.y = box.AnchorTop + box.TransformY;
                             break;
                         case TransformBehavior.AnchorMaxOffset:
-                            localPosition.y = box.AnchorBottom + box.TransformY - box.actualHeight;
+                            localPosition.y = box.AnchorBottom + box.TransformY;
                             break;
                         case TransformBehavior.LayoutOffset:
                             localPosition.y = box.TransformY;
@@ -355,7 +355,7 @@ namespace UIForia.Systems {
                             localPosition.x = box.AnchorLeft + box.TransformX;
                             break;
                         case TransformBehavior.AnchorMaxOffset:
-                            localPosition.x = box.AnchorRight + box.TransformX - box.actualWidth;
+                            localPosition.x = box.AnchorRight + box.TransformX;
                             break;
                         case TransformBehavior.LayoutOffset:
                             localPosition.x = box.localX + box.TransformX;
@@ -370,7 +370,7 @@ namespace UIForia.Systems {
                             localPosition.y = box.AnchorTop + box.TransformY;
                             break;
                         case TransformBehavior.AnchorMaxOffset:
-                            localPosition.y = box.AnchorBottom + box.TransformY - box.actualHeight;
+                            localPosition.y = box.AnchorBottom + box.TransformY;
                             break;
                         case TransformBehavior.LayoutOffset:
                             localPosition.y = box.localY + box.TransformY;

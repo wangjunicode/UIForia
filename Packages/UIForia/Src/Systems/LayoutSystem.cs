@@ -6,7 +6,6 @@ using UIForia.Layout;
 using UIForia.Layout.LayoutTypes;
 using UIForia.Rendering;
 using UIForia.Util;
-using UnityEditor;
 using UnityEngine;
 
 namespace UIForia.Systems {
@@ -38,6 +37,8 @@ namespace UIForia.Systems {
         private Size m_ScreenSize;
         private readonly List<UIElement> m_Elements;
         private readonly LightList<ViewRect> m_Views;
+
+        private static readonly IComparer<UIElement> comparer = new UIElement.RenderLayerComparerAscending();
 
         public LayoutSystem(IStyleSystem styleSystem) {
             this.m_StyleSystem = styleSystem;
@@ -126,17 +127,6 @@ namespace UIForia.Systems {
 #endif
             }
 
-            int depth = 0;
-            int computedLayer = ResolveRenderLayer(element) - element.style.RenderLayerOffset;
-            int zIndex = element.style.ZIndex;
-
-            if (depth > computedLayer) {
-                zIndex -= 2000;
-            }
-            else if (depth < computedLayer) {
-                zIndex += -2000;
-            }
-
             // actual size should probably be the root containing all children, ignored or not
 
             layoutResult.ActualSize = new Size(root.actualWidth, root.actualHeight);
@@ -148,8 +138,6 @@ namespace UIForia.Systems {
             layoutResult.LocalPosition = ResolveLocalPosition(root);
             layoutResult.ScreenPosition = layoutResult.localPosition;
             layoutResult.Rotation = root.style.TransformRotation;
-            layoutResult.Layer = computedLayer;
-            layoutResult.ZIndex = zIndex;
             layoutResult.clipRect = new Rect(0, 0, viewportRect.width, viewportRect.height);
             element.layoutResult = layoutResult;
 
@@ -194,17 +182,6 @@ namespace UIForia.Systems {
 #endif
                     }
 
-                    depth = element.depth;
-                    computedLayer = ResolveRenderLayer(element) - element.style.RenderLayerOffset;
-                    zIndex = element.style.ZIndex;
-
-                    if (depth > computedLayer) {
-                        zIndex -= 2000;
-                    }
-                    else if (depth < computedLayer) {
-                        zIndex += -2000;
-                    }
-
                     layoutResult = element.layoutResult;
                     Rect oldScreenRect = layoutResult.ScreenRect;
 
@@ -221,22 +198,11 @@ namespace UIForia.Systems {
                     layoutResult.Scale = new Vector2(box.style.TransformScaleX, box.style.TransformScaleY);
                     layoutResult.Rotation = parentBox.style.TransformRotation + box.style.TransformRotation;
                     layoutResult.Pivot = box.Pivot;
-                    layoutResult.Layer = computedLayer;
-                    layoutResult.ZIndex = zIndex;
 
                     // should be able to sort by view
                     Rect clipRect = new Rect(0, 0, viewportRect.width, viewportRect.height);
                     UIElement ptr = element.parent;
                     // find ancestor where layer is higher, might not be our parent
-
-                    // while parent is higher layer and requires layout
-                    while (ptr != null) {
-                        if (ptr.layoutResult.layer < computedLayer) {
-                            break;
-                        }
-
-                        ptr = ptr.parent;
-                    }
 
                     if (ptr != null) {
                         bool handlesHorizontal = ptr.style.OverflowX != Overflow.None;
@@ -280,6 +246,16 @@ namespace UIForia.Systems {
 
                     stack.Push(element);
                 }
+            }
+
+            // TODO optimize this to only sort if styles changed
+            m_Elements.Sort(comparer);
+            m_Elements.Reverse();
+            for (var i = 0; i < m_Elements.Count; i++) {
+                UIElement e = m_Elements[i];
+                LayoutResult lr = e.layoutResult; 
+                lr.zIndex = (i + 1) * 1000;
+                e.layoutResult = lr;
             }
 
             UpdateScrollbarLayouts();
@@ -451,12 +427,11 @@ namespace UIForia.Systems {
             for (int i = 0; i < m_VirtualElements.Count; i++) {
                 VirtualScrollbar scrollbar = (VirtualScrollbar) m_VirtualElements[i];
                 scrollbar.RunLayout();
-//
+
                 LayoutResult scrollbarResult = scrollbar.layoutResult;
                 LayoutResult targetResult = scrollbar.targetElement.layoutResult;
-//
+
                 Rect trackRect = scrollbar.trackRect;
-                scrollbarResult.layer = targetResult.layer + 1;
                 scrollbarResult.zIndex = 999999;
                 scrollbarResult.localPosition = new Vector2(trackRect.x, trackRect.y);
                 scrollbarResult.screenPosition = targetResult.screenPosition + scrollbarResult.localPosition;

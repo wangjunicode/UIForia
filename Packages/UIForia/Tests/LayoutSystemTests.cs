@@ -396,50 +396,6 @@ public class LayoutSystemTests {
         Assert.AreEqual(new Rect(0, 0, 100, 200), root.FindById("nested-child0").layoutResult.clipRect);
     }
 
-    [Test]
-    public void AssignsProperLayer() {
-        string template = @"
-        <UITemplate>
-            <Style path='LayoutSystemTests+LayoutTestThing+Style'/>
-            <Contents style.preferredWidth='100f' style.preferredHeight='200f'>
-                <Group x-id='child0' style.preferredWidth='100f' style.preferredHeight='100f'/>
-                <Group x-id='child1' style.preferredWidth='100f' style.preferredHeight='100f'/>
-            </Contents>
-        </UITemplate>
-        ";
-        MockApplication app = new MockApplication(typeof(LayoutTestThing), template);
-        LayoutTestThing root = (LayoutTestThing) app.RootElement;
-        app.SetViewportRect(new Rect(0, 0, 400, 400));
-        app.Update();
-        Assert.AreEqual(1, root.FindById("child0").layoutResult.layer);
-        root.FindById("child0").style.SetRenderLayer(RenderLayer.Parent, StyleState.Normal);
-        app.Update();
-        Assert.AreEqual(0, root.FindById("child0").layoutResult.layer);
-    }
-    
-    [Test]
-    public void AssignsProperLayer_WithOffset() {
-        string template = @"
-        <UITemplate>
-            <Style path='LayoutSystemTests+LayoutTestThing+Style'/>
-            <Contents style.preferredWidth='100f' style.preferredHeight='200f'>
-                <Group x-id='child0' style.preferredWidth='100f' style.preferredHeight='100f'/>
-                <Group x-id='child1' style.preferredWidth='100f' style.preferredHeight='100f'/>
-            </Contents>
-        </UITemplate>
-        ";
-        MockApplication app = new MockApplication(typeof(LayoutTestThing), template);
-        LayoutTestThing root = (LayoutTestThing) app.RootElement;
-        app.SetViewportRect(new Rect(0, 0, 400, 400));
-        app.Update();
-        Assert.AreEqual(1, root.FindById("child0").layoutResult.layer);
-        root.FindById("child0").style.SetRenderLayerOffset(5, StyleState.Normal);
-        app.Update();
-        Assert.AreEqual(-4, root.FindById("child0").layoutResult.layer);
-        root.FindById("child0").style.SetRenderLayer(RenderLayer.Parent, StyleState.Normal);
-        app.Update();
-        Assert.AreEqual(-5, root.FindById("child0").layoutResult.layer);
-    }
     
     [Test]
     public void AssignsProperZIndex() {
@@ -466,22 +422,22 @@ public class LayoutSystemTests {
         UIElement child2 = root.FindById("child2");
         UIElement child3 = root.FindById("child3");
         
-        Assert.AreEqual(0, child0.layoutResult.zIndex);
-        Assert.AreEqual(0, child1.layoutResult.zIndex);
-        Assert.AreEqual(0, child2.layoutResult.zIndex);
-        Assert.AreEqual(0, child3.layoutResult.zIndex);
+        Assert.AreEqual(4000, child0.layoutResult.zIndex);
+        Assert.AreEqual(3000, child1.layoutResult.zIndex);
+        Assert.AreEqual(2000, child2.layoutResult.zIndex);
+        Assert.AreEqual(1000, child3.layoutResult.zIndex);
         
         child0.style.SetZIndex(1, StyleState.Normal);
-        child1.style.SetZIndex(2, StyleState.Normal);
-        child2.style.SetZIndex(3, StyleState.Normal);
+        child2.style.SetZIndex(2, StyleState.Normal);
+        child1.style.SetZIndex(3, StyleState.Normal);
         child3.style.SetZIndex(4, StyleState.Normal);
         
         app.Update();
         
-        Assert.AreEqual(1, child0.layoutResult.zIndex);
-        Assert.AreEqual(2, child1.layoutResult.zIndex);
-        Assert.AreEqual(3, child2.layoutResult.zIndex);
-        Assert.AreEqual(4, child3.layoutResult.zIndex);
+        Assert.AreEqual(4000, child0.layoutResult.zIndex);
+        Assert.AreEqual(3000, child2.layoutResult.zIndex);
+        Assert.AreEqual(2000, child1.layoutResult.zIndex);
+        Assert.AreEqual(1000, child3.layoutResult.zIndex);
     }
 
 }

@@ -1,0 +1,58 @@
+style container {
+    LayoutType = Flex;
+    FlexLayoutDirection = Column;
+    PreferredSize = 300px, 100px;
+}
+
+style <Group> {
+    Border = 5px;
+    BorderColor = black;
+    PreferredSize = 100px;
+    Margin = 20px;
+    TextColor = white;
+} 
+
+style c1 {
+    BackgroundColor = rgba(100, 0, 0, 255);
+}
+style c11 {
+    BackgroundColor = rgba(200, 0, 0, 255);
+}
+style c12 {
+    BackgroundColor = rgba(140, 0, 0, 255);
+}
+style c13 {
+    BackgroundColor = rgba(100, 243, 0, 255);
+}
+style c2 {
+    BackgroundColor = rgba(100, 0, 231, 255);
+}
+style c21 {
+    BackgroundColor = rgba(123, 123, 0, 255);
+}
+style c22 {
+    BackgroundColor = rgba(54, 0, 45, 255);
+}
+style c23 {
+    PreferredSize = 200px;
+    BackgroundColor = rgba(100, 34, 3, 255);
+    ZIndex = -10000;
+}
+style c3 {
+    PreferredSize = 200px;
+    BackgroundColor = rgba(24, 0, 66, 255);
+    zIndex = -10000;
+}
+style c31 {
+    BackgroundColor = rgba(9, 123, 45, 255);
+}
+style c32 {
+    BackgroundColor = rgba(211, 0, 0, 255);
+}
+style c33 {
+    BackgroundColor = rgba(211, 56, 54, 255);
+}
+style c331 {
+    PreferredSize = 200px;
+    BackgroundColor = rgba(86, 0, 0, 255);
+}

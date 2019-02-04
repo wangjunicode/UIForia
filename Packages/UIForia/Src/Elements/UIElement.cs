@@ -7,6 +7,7 @@ using UIForia;
 using UIForia.Routing;
 using UIForia.Systems;
 using UIForia.Util;
+using UnityEditor.WindowsStandalone;
 using UnityEngine;
 
 [Flags]
@@ -53,7 +54,7 @@ public class UIElement : IHierarchical {
 
     internal static IntMap<ElementColdData> s_ColdDataMap = new IntMap<ElementColdData>();
 
-    protected UIElement() {
+    protected internal UIElement() {
         this.id = UIForia.Application.NextElementId;
         this.style = new UIStyleSet(this);
         this.flags = UIElementFlags.Enabled;
@@ -392,7 +393,74 @@ public class UIElement : IHierarchical {
 
             return a.parent.siblingIndex < b.parent.siblingIndex ? 1 : -1;
         }
+    }
+       
+    public class RenderLayerComparerAscending : IComparer<UIElement> {
 
+        private static RenderLayer GetRenderLayer(UIElement e) {
+            if (e == null) return RenderLayer.Default;
+            if (e.style.IsDefined(StylePropertyId.RenderLayer)) {
+                return e.style.RenderLayer;
+            }
+
+            return GetRenderLayer(e.parent);
+        }
+
+        private static int GetZIndex(UIElement e) {
+            if (e == null) return 0;
+            if (e.style.IsDefined(StylePropertyId.ZIndex)) {
+                return e.style.ZIndex;
+            }
+
+            return GetZIndex(e.parent);
+        }
+
+        public int Compare(UIElement a, UIElement b) {
+            
+            if (a == null) {
+                if (b == null) return 0;
+                return -1;
+            }
+
+            if (b == null) {
+                return 1;
+            }
+
+            RenderLayer renderLayerA = GetRenderLayer(a);
+            RenderLayer renderLayerB = GetRenderLayer(b);
+            
+            if (renderLayerA > renderLayerB) {
+                return 1;
+            }
+
+            if (renderLayerB > renderLayerA) {
+                return -1;
+            }
+
+            int zIndexA = GetZIndex(a);
+            int zIndexB = GetZIndex(b);
+            
+            if (zIndexA > zIndexB) {
+                return 1;
+            }
+
+            if (zIndexB > zIndexA) {
+                return -1;
+            }
+
+            if (a.depth != b.depth) {
+                return a.depth > b.depth ? 1 : -1;
+            }
+
+            if (a.parent == b.parent) {
+                return a.siblingIndex > b.siblingIndex ? 1 : -1;
+            }
+
+            if (a.parent == null) return 1;
+            if (b.parent == null) return -1;
+
+            return a.parent.siblingIndex > b.parent.siblingIndex ? 1 : -1;
+        }
     }
 
     public List<UIElement> GetChildren(List<UIElement> retn = null) {

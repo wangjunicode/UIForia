@@ -35,6 +35,8 @@
            struct v2f {
                 float4 vertex : SV_POSITION;
                 fixed4 color : COLOR;
+                float4 fragData1 : TEXCOORD1;
+                float4 fragData2 : TEXCOORD2;
            };
 
             // idx 0 == top left
@@ -45,8 +47,37 @@
             // idx 5 == join point top right
             // idx 6 == join point bottom center
             
-            v2f vert (appdata v)
-           {
+            float cross2(float2 a, float2 b ){
+                return a.x * b.y - a.y * b.x;
+            }
+            
+            float2 LineIntersection(float2 p0, float2 p1, float2 p2, float2 p3) {
+                float s1_x = p1.x - p0.x;
+                float s1_y = p1.y - p0.y;
+                float s2_x = p3.x - p2.x;
+                float s2_y = p3.y - p2.y;
+                
+                float s = (-s1_y * (p0.x - p2.x) + s1_x * (p0.y - p2.y)) / (-s2_x * s1_y + s1_x * s2_y);
+                float t = ( s2_x * (p0.y - p2.y) - s2_y * (p0.x - p2.x)) / (-s2_x * s1_y + s1_x * s2_y);
+            
+                return float2(p0.x + (t * s1_x), p0.y + (t* s1_y));
+                
+            }            
+    
+            float DistToLine(float2 p, float2 line_begin, float2 line_end) {
+	            float2 c1 = line_end - line_begin;
+	            float2 c2 = p - line_begin;
+	
+	            float area = cross2(c2, c1);
+	
+	            return area / length(c1);
+            };
+            
+            float2 Reflect(float2 inDirection, float2 inNormal) {
+                return -2 * dot(inNormal, inDirection) * inNormal + inDirection;
+            }
+
+            v2f vert (appdata v) {
                 v2f o;
                 float strokeWidth = 25;
                 
@@ -130,19 +161,40 @@
                      
                     }
               //  #endif
-                
+             
                 if(flag == cap) {
                     vertWithOffset = v.vertex + normal * strokeWidth;   
                 }
                 
+                o.fragData1 = float4(segmentLength, idx, bottomSide, miter.y);
+                o.fragData2 = float4(v.vertex.xy, vertWithOffset.xy);
+//                o.fragData2 = float4(prev, curr);
                 o.color = v.color;
                 o.vertex = UnityObjectToClipPos(float3(vertWithOffset.xy, v.vertex.z)); 
                 return o;
                 
            }
 
-           fixed4 frag (v2f i) : SV_Target
-           {
+           // returns between 0 and 1
+//           float DistToLine(float2 pt1, float2 pt2, float2 testPt) {
+//              float2 lineDir = pt2 - pt1;
+//              float2 perpDir = float2(lineDir.y, -lineDir.x);
+//              float2 dirToPt1 = pt1 - testPt;
+//              return abs(dot(normalize(perpDir), dirToPt1));
+//           }
+
+           fixed4 frag (v2f i) : SV_Target {
+               int idx = (int)i.fragData1.y;
+              //  return fixed4(1, 0, 0, 1);
+//                    Round Join                        
+//                    if(distance(i.fragData2.xy, i.fragData2.zw) > 25) {
+//                        //discard;
+//                    }    
+//                    else {
+//                        return fixed4(1, 1, 1, 1);
+//                    }           
+            //   }
+               
                return i.color;
            }
            ENDCG

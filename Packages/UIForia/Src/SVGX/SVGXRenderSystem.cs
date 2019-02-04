@@ -1,5 +1,6 @@
 using System;
 using UIForia.Util;
+using Unity.Jobs;
 using UnityEngine;
 
 namespace SVGX {
@@ -272,6 +273,49 @@ namespace SVGX {
 //            strokesToRecycle.Add(strokeVertexData);
         }
 
+        internal static void CreateStrokeVertices(StrokeVertexData vertexData, LightList<Vector2> points, SVGXMatrix matrix, SVGXStyle style, SVGXShape shape) {
+            RangeInt range = shape.pointRange;
+            bool isClosed = shape.isClosed;
+
+            // todo -- interesting optimization for later: when stroking rects / ellipses / circles, see if it is faster to generate less geometry but use a discard to clip out the middle
+
+            while (range.length > 1 && points[range.start] == points[range.end - 1]) {
+                range.length--;
+            }
+
+            if (range.length < 2) {
+                return;
+            }
+
+            Vector2 dir = (points[range.start + 1] - points[range.start]).normalized;
+            Vector2 prev = isClosed ? points[range.end - 1] : points[range.start] - dir;
+            Vector2 curr = points[range.start];
+            Vector2 next = points[range.start + 1];
+            Vector2 far = points.Count == 2
+                ? points[range.start + 1] + (points[range.start + 1] - points[range.start]).normalized
+                : points[range.start + 2];
+            
+            vertexData.EnsureCapacity(points.Count * 4);
+
+            int triIdx = vertexData.triangleIndex;
+            int vertexCnt = vertexData.position.Count;
+            int flagCnt = vertexData.flags.Count;
+            int prevNextCnt = vertexData.prevNext.Count;
+            int colorCnt = vertexData.colors.Count;
+            int texCoordCnt = vertexData.texCoords.Count;
+            int triangleCnt = vertexData.triangles.Count;
+
+            Vector3[] vertices = vertexData.position.Array;
+            Vector4[] prevNext = vertexData.prevNext.Array;
+            Vector4[] flags = vertexData.flags.Array;
+            Vector2[] texCoords = vertexData.texCoords.Array;
+            Color[] colors = vertexData.colors.Array;
+            int[] triangles = vertexData.triangles.Array;
+
+            
+            
+        }
+
         internal static void CreateSolidStrokeVertices(StrokeVertexData vertexData, LightList<Vector2> points, SVGXMatrix matrix, SVGXStyle style, SVGXShape shape) {
             Color32 color = Color.red; //style.color;
             float strokeWidth = 5f; //style.width;
@@ -282,7 +326,6 @@ namespace SVGX {
 
             // todo -- interesting optimization for later: when stroking rects / ellipses / circles, see if it is faster to generate less geometry but use a discard to clip out the middle
 
-            // needs to be a while loop?
             while (range.length > 1 && points[range.start] == points[range.end - 1]) {
                 range.length--;
             }
@@ -477,7 +520,7 @@ namespace SVGX {
                 triangles[triangleCnt++] = triIdx + 2;
 
                 triIdx += 3;
-                // END TEMP ROUND JOIN GEOMETRY
+//                // END TEMP ROUND JOIN GEOMETRY
 
                 // end TEMP join segment
                 

@@ -68,6 +68,7 @@ namespace UIForia.Util {
 
         public List<T> ToList(List<T> list = null) {
             list = list ?? new List<T>();
+            // can't use AddRange because our array is oversized
             for (int i = 0; i < Count; i++) {
                 list.Add(array[i]);
             }

@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using UIForia.Util;
 using UnityEngine;
@@ -39,9 +40,23 @@ namespace SVGX {
         internal Material simpleStrokeOpaqueMaterial;
         internal Material simpleStrokeTransparentMaterial;
 
+        private Dictionary<SVGXGradient, int> gradientMap = new Dictionary<SVGXGradient, int>();
+        private Texture2D gradientAtlas;
+        private Color32[] gradientAtlasContents;
+        private static readonly int s_GlobalGradientAtlas = Shader.PropertyToID("_globalGradientAtlas");
+        private Stack<int> freeGradientRows;
+        
+        private const int GradientPrecision = 128;
+
         public GFX(Camera camera) {
             this.camera = camera;
             wavePool = new ObjectPool<SVGXDrawWave>(null, (wave) => wave.Clear());
+            gradientAtlas = new Texture2D(GradientPrecision, 32);
+            gradientAtlasContents = new Color32[GradientPrecision * gradientAtlas.height];
+            freeGradientRows = new Stack<int>(gradientAtlas.height);
+            for (int i = 0; i < gradientAtlas.height; i++) {
+                freeGradientRows.Push(i);
+            }
         }
 
         public void DrawMesh(Mesh mesh, Matrix4x4 transform, Material material) {
@@ -79,14 +94,14 @@ namespace SVGX {
             Matrix4x4 cameraMatrix = Matrix4x4.TRS(camera.transform.position + new Vector3(0, 0, 2), Quaternion.identity, Vector3.one);
             
             if (stencil) {
-//                Material cutout = stencilStrokelOpaqueCutoutMaterial;
-//                Material paint = stencilStrokelOpaquePaintMaterial;
-//                Material clear = stencilStrokelOpaqueClearMaterial;
+//                Material cutout = stencilStrokeOpaqueCutoutMaterial;
+//                Material paint = stencilStrokeOpaquePaintMaterial;
+//                Material clear = stencilStrokeOpaqueClearMaterial;
 //
 //                if (transparent) {
-//                    cutout = stencilStrokelTransparentCutoutMaterial;
-//                    paint = stencilStrokelTransparentPaintMaterial;
-//                    clear = stencilStrokelTransparentClearMaterial;
+//                    cutout = stencilStrokeTransparentCutoutMaterial;
+//                    paint = stencilStrokeTransparentPaintMaterial;
+//                    clear = stencilStrokeTransparentClearMaterial;
 //                }
 //
 //                DrawMesh(mesh, cameraMatrix, cutout);
@@ -95,7 +110,7 @@ namespace SVGX {
             }
             else {
                 if (transparent) {
-                //    DrawMesh(mesh, cameraMatrix, simpleStrokelTransparentMaterial);
+                //    DrawMesh(mesh, cameraMatrix, simpleStrokeTransparentMaterial);
                 }
                 else {
                     DrawMesh(mesh, cameraMatrix, simpleStrokeOpaqueMaterial);
@@ -104,6 +119,7 @@ namespace SVGX {
         }
         
         private void Fill(SVGXDrawWave wave, List<SVGXRenderShape> shapes, bool transparent, bool stencil) {
+            // todo -- pool this shit
             FillVertexData fillVertexData = new FillVertexData();
 
             for (int i = 0; i < shapes.Count; i++) {
@@ -161,14 +177,56 @@ namespace SVGX {
         private void DrawSimpleOpaqueStroke(SVGXDrawWave wave) {
             Stroke(wave, wave.opaqueStrokes, false, false);
         }
+
+        private void WriteGradient(SVGXGradient gradient, int row) {
+            int baseIdx = gradientAtlas.width * row;
+            for (int i = 0; i < GradientPrecision; i++) {
+                gradientAtlasContents[gradientAtlas.width * row + i] = gradient.Evaluate(i /(float) GradientPrecision);
+//                gradientAtlasContents[(gradientAtlas.width * (row + 1)) + i] = gradient.Evaluate(i /(float) GradientPrecision);
+//                gradientAtlasContents[(gradientAtlas.width * (row + 2)) + i] = gradient.Evaluate(i /(float) GradientPrecision);
+//                gradientAtlasContents[(gradientAtlas.width * (row + 3)) + i] = gradient.Evaluate(i /(float) GradientPrecision);
+//                gradientAtlasContents[(gradientAtlas.width * (row + 4)) + i] = gradient.Evaluate(i /(float) GradientPrecision);
+            }
+            
+        }
+
+        private void ExpandGradientTexture() {
+            Texture2D newAtlas = new Texture2D(GradientPrecision, gradientAtlas.height * 2);
+            UnityEngine.Object.Destroy(gradientAtlas);
+            gradientAtlas = newAtlas;
+            Array.Resize(ref gradientAtlasContents, GradientPrecision * newAtlas.height);
+        }
         
         public void Render(ImmediateRenderContext ctx) {
             this.ctx = ctx;
             SVGXDrawWave wave = CreateWaves(ctx);
+            gradientMap.Clear();
             
+            // for now assume all uses of a gradient get their own entry in gradient map
+            // this means we are ok with duplicated values for now. 
+            
+            for (int i = 0; i < ctx.gradients.Count; i++) {
+                
+                if (!gradientMap.ContainsKey(ctx.gradients[i])) {
+                    if (gradientMap.Count == gradientAtlas.height) {
+                        ExpandGradientTexture();
+                    }
+
+                    WriteGradient(ctx.gradients[i], gradientMap.Count);
+                    gradientMap.Add(ctx.gradients[i], gradientMap.Count);
+                }
+
+            }
+
+            if (ctx.gradients.Count > 0) {
+                gradientAtlas.SetPixels32(gradientAtlasContents);
+                gradientAtlas.Apply(false);
+                Shader.SetGlobalTexture(s_GlobalGradientAtlas, gradientAtlas);
+            }
+
             DrawSimpleOpaqueFill(wave);
-            DrawSimpleOpaqueStroke(wave);
-//            DrawStencilOpaqueFill(wave);
+            // DrawStencilOpaqueFill(wave);            
+            // DrawSimpleOpaqueStroke(wave);
             
             wavePool.Release(wave);
             

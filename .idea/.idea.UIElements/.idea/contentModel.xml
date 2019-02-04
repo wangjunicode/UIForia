@@ -1,7 +1,10 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project version="4">
   <component name="ContentModelStore">
-    <e p="C:\Seed\UIForia\UIElements" t="IncludeRecursive">
+    <e p="C:\Users\matth\.Rider2018.3\config\extensions" t="IncludeRecursive" />
+    <e p="C:\Users\matth\.Rider2018.3\system\extResources" t="IncludeRecursive" />
+    <e p="C:\Users\matth\.Rider2018.3\system\resharper-host\local\Transient\ReSharperHost\v183\SolutionCaches\_UIElements.-1987582547.00" t="ExcludeRecursive" />
+    <e p="C:\Users\matth\RiderProjects\UIElements" t="IncludeRecursive">
       <e p="Assembly-CSharp.csproj" t="IncludeRecursive" />
       <e p="Assets" t="Include">
         <e p="Compiler" t="Include">
@@ -217,6 +220,7 @@
           <e p="Editor" t="Include">
             <e p="AnimatedPropertyGenerator.cs" t="Include" />
             <e p="CodeGen.cs" t="Include" />
+            <e p="GradientTest.cs" t="Include" />
             <e p="PropertyGenerator.cs" t="Include" />
             <e p="UIForia" t="Include">
               <e p="GUIRect.cs" t="Include" />
@@ -477,21 +481,35 @@
               <e p="ExpressionParser.cs" t="Include" />
               <e p="InvalidTemplateException.cs" t="Include" />
               <e p="ProcessedType.cs" t="Include" />
-              <e p="StyleParser" t="Include">
+              <e p="Style" t="Include">
+                <e p="AstNodes" t="Include">
+                  <e p="StyleASTNode.cs" t="Include" />
+                  <e p="StyleASTNodeType.cs" t="Include" />
+                  <e p="StyleFieldNotDefinedException.cs" t="Include" />
+                  <e p="StyleIdentifierNode.cs" t="Include" />
+                  <e p="StyleLiteralNode.cs" t="Include" />
+                  <e p="StyleOperatorNode.cs" t="Include" />
+                  <e p="StyleOperatorType.cs" t="Include" />
+                </e>
                 <e p="ParsedStyleSheet.cs" t="Include" />
                 <e p="ParseUtil.cs" t="Include" />
-                <e p="StyleDslToken.cs" t="Include" />
+                <e p="StyleFileParser.cs" t="Include" />
                 <e p="StyleParser.cs" t="Include" />
                 <e p="StylePropertyMappers.cs" t="Include" />
-                <e p="StyleTokenType.cs" t="Include" />
+                <e p="Tokenizer" t="Include">
+                  <e p="StyleToken.cs" t="Include" />
+                  <e p="StyleTokenizer.cs" t="Include" />
+                  <e p="StyleTokenStream.cs" t="Include" />
+                  <e p="StyleTokenType.cs" t="Include" />
+                </e>
               </e>
               <e p="TemplateParser.cs" t="Include" />
               <e p="TextTemplateParser.cs" t="Include" />
               <e p="Tokenizer" t="Include">
-                <e p="DslToken.cs" t="Include" />
-                <e p="Tokenizer.cs" t="Include" />
+                <e p="ExpressionToken.cs" t="Include" />
+                <e p="ExpressionTokenizer.cs" t="Include" />
+                <e p="ExpressionTokenType.cs" t="Include" />
                 <e p="TokenStream.cs" t="Include" />
-                <e p="TokenType.cs" t="Include" />
               </e>
               <e p="TypeProcessor.cs" t="Include" />
               <e p="XMLExtensions.cs" t="Include" />
@@ -567,6 +585,7 @@
             </e>
             <e p="Shaders" t="Include">
               <e p="Debug.shader" t="Include" />
+              <e p="Lines2.shader" t="Include" />
               <e p="SimpleFillOpaque.shader" t="Include" />
               <e p="SimpleStrokeOpaque.shader" t="Include" />
               <e p="UIForia.cginc" t="Include" />
@@ -734,8 +753,10 @@
             <e p="RouterTests.cs" t="Include" />
             <e p="SkipTreeTests.cs" t="Include" />
             <e p="StyleBindingTests.cs" t="Include" />
+            <e p="StyleParserTest.cs" t="Include" />
             <e p="StyleParserTests.cs" t="Include" />
             <e p="StyleTests.cs" t="Include" />
+            <e p="StyleTokenizerTests.cs" t="Include" />
             <e p="TemplateParsingTests.cs" t="Include" />
             <e p="Templates" t="Include">
               <e p="Parsing" t="Include">
@@ -782,8 +803,5 @@
       <e p="UIForia.Src.csproj" t="IncludeRecursive" />
       <e p="UIForia.Test.csproj" t="IncludeRecursive" />
     </e>
-    <e p="C:\Users\Matt\.Rider2018.3\config\extensions" t="IncludeRecursive" />
-    <e p="C:\Users\Matt\.Rider2018.3\system\extResources" t="IncludeRecursive" />
-    <e p="C:\Users\Matt\.Rider2018.3\system\resharper-host\local\Transient\ReSharperHost\v183\SolutionCaches\_UIElements.120647963.00" t="ExcludeRecursive" />
   </component>
 </project>

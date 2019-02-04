@@ -1,5 +1,6 @@
 using System.Collections.Generic;
 using UIForia.Rendering;
+using UIForia.Util;
 using UnityEngine;
 
 namespace SVGX {
@@ -42,11 +43,11 @@ namespace SVGX {
 
     public struct ColorStop {
 
-        public readonly float percent;
+        public readonly float time;
         public readonly Color32 color;
 
-        public ColorStop(float percent, Color32 color) {
-            this.percent = percent;
+        public ColorStop(float time, Color32 color) {
+            this.time = time;
             this.color = color;
         }
 
@@ -63,21 +64,61 @@ namespace SVGX {
     public class SVGXGradient {
 
         public string hash;
-        public int stopCount;         //max 10 stops? inline array?
-        public ColorStop[] stops;
+        public LightList<ColorStop> stops;
         public SVGXGradientType type;
 
-        public string GetHashString() {
-            if (type == SVGXGradientType.Linear) {
+        public SVGXGradient(SVGXGradientType type, IList<ColorStop> colorStops) {
+            this.type = type;
+            this.stops = new LightList<ColorStop>(colorStops.Count);
+            for (int i = 0; i < colorStops.Count; i++) {
+                stops.Add(colorStops[i]);
+            }
+
+            hash = GetHashString(this);
+        }
+
+        private static string GetHashString(SVGXGradient gradient) {
+            int stopCount = gradient.stops.Count;
+            ColorStop[] stops = gradient.stops.Array;
+            if (gradient.type == SVGXGradientType.Linear) {
                 // todo remove allocation, maybe use a char[]
                 string hashStr = "L" + stopCount;
                 for (int i = 0; i < stopCount; i++) {
                     hashStr += new StyleColor(stops[i].color).rgba.ToString("X");
                 }
+
                 return hashStr;
             }
 
             return null;
+        }
+
+        public Color32 Evaluate(float time) {
+            time = Mathf.Clamp01(time);
+            int stopCount = stops.Count;
+            
+            if (stopCount == 0) {
+                return new Color32(0, 0, 0, 255);
+            }
+
+            if (stopCount == 1) {
+                return stops[0].color;
+            }
+
+            Color32 output = stops[0].color;
+
+            for (int i = 1; i < stopCount; i++) {
+                output = Color32.Lerp(output, stops[i].color, SmoothStep(stops[i - 1].time, stops[i].time, time));
+            }
+
+            return output;
+        }
+
+        private static float SmoothStep(float a, float b, float x) {
+            float t = (x - a) / (b - a);
+            t = t > 1f ? 1 : t;
+            t = t < 0f ? 0 : t;
+            return t * t * (3.0f - (2.0f * t));
         }
 
     }

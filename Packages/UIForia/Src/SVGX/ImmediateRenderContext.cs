@@ -23,6 +23,7 @@ namespace SVGX {
         internal readonly LightList<SVGXShape> shapes;
         internal readonly LightList<SVGXClipGroup> clipGroups;
         internal readonly Stack<SVGXClipGroup> clipStack;
+        internal readonly LightList<SVGXGradient> gradients;
         
         private Vector2 lastPoint;
         private SVGXMatrix currentMatrix;
@@ -37,7 +38,14 @@ namespace SVGX {
             drawCalls = new LightList<SVGXDrawCall>();
             shapes = new LightList<SVGXShape>();
             clipGroups = new LightList<SVGXClipGroup>();
+            gradients = new LightList<SVGXGradient>();
             shapes.Add(new SVGXShape(SVGXShapeType.Unset, default));
+        }
+
+        public void SetFill(Color color) { }
+
+        public void SetFill(SVGXGradient gradient) {
+            gradients.Add(gradient);
         }
 
         public void SetStrokeColor(Color color) {
@@ -166,6 +174,7 @@ namespace SVGX {
             lastPoint = Vector2.zero;
             shapes.Add(new SVGXShape(SVGXShapeType.Unset, default));
             currentShapeRange = new RangeInt();
+            gradients.Clear();
         }
 
         public void Save() {
@@ -226,8 +235,8 @@ namespace SVGX {
             
             Vector2 x0y0 = new Vector2(x, y);
             Vector2 x1y0 = new Vector2(x + width, y);
-            Vector2 x1y1 = new Vector2(x + width, y + height);
-            Vector2 x0y1 = new Vector2(x, y + height);
+            Vector2 x1y1 = new Vector2(x + width, y - height);
+            Vector2 x0y1 = new Vector2(x, y - height);
 
             currentShape = new SVGXShape(shapeType, new RangeInt(points.Count, 4));
 

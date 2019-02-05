@@ -16,7 +16,6 @@ namespace UIForia.Systems {
         public Size allocatedSize;
         public Rect contentRect;
 
-        public int layer;
         public int zIndex;
         public Rect clipRect;
         public float rotation;
@@ -130,19 +129,6 @@ namespace UIForia.Systems {
                 }
                 else {
                     flags &= ~LayoutResultFlags.RotationChanged;
-                }
-            }
-        }
-
-        public int Layer {
-            get { return layer; }
-            internal set {
-                if (layer != value) {
-                    layer = value;
-                    flags |= LayoutResultFlags.LayerChanged;
-                }
-                else {
-                    flags &= ~LayoutResultFlags.LayerChanged;
                 }
             }
         }

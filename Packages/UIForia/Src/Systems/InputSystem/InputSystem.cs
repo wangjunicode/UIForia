@@ -19,6 +19,8 @@ public abstract class InputSystem : IInputSystem, IInputProvider {
     private List<UIElement> m_ElementsThisFrame;
     private List<UIElement> m_ElementsLastFrame;
 
+    private CursorStyle currentCursor;
+
     protected UIElement m_FocusedElement;
     protected DragEvent m_CurrentDragEvent;
     protected MouseInputEvent m_CurrentMouseEvent;
@@ -43,7 +45,7 @@ public abstract class InputSystem : IInputSystem, IInputProvider {
     private readonly EventPropagator m_EventPropagator;
     private readonly List<ValueTuple<MouseEventHandler, UIElement, ExpressionContext>> m_MouseEventCaptureList;
     private readonly List<ValueTuple<DragEventHandler, UIElement, ExpressionContext>> m_DragEventCaptureList;
-    protected static readonly UIElement.DepthComparerAscending s_DepthComparer = new UIElement.DepthComparerAscending();
+    protected static readonly UIElement.RenderLayerComparerAscending s_DepthComparer = new UIElement.RenderLayerComparerAscending();
     private static readonly Event s_Event = new Event();
 
     public KeyboardModifiers KeyboardModifiers => modifiersThisFrame;
@@ -200,6 +202,28 @@ public abstract class InputSystem : IInputSystem, IInputProvider {
 
         m_EnteredElements.Sort(s_DepthComparer);
         m_ElementsThisFrame.Sort(s_DepthComparer);
+
+        CursorStyle newCursor = null;
+        if (m_ElementsThisFrame.Count > 0) {
+
+            for (int i = m_ElementsThisFrame.Count - 1; i >= 0; i--) {
+                UIElement element = m_ElementsThisFrame[i];
+              
+                if (element.style.IsDefined(StylePropertyId.Cursor)) {
+                    newCursor = element.style.Cursor;
+                    if (newCursor != currentCursor) {
+                        Cursor.SetCursor(newCursor.texture, newCursor.hotSpot, CursorMode.Auto);
+                    }
+                    break;
+                }
+            }
+        }
+
+        if (currentCursor != null && newCursor == null) {
+            Cursor.SetCursor(null, new Vector2(0, 0), CursorMode.Auto);
+        }
+
+        currentCursor = newCursor;
 
         if (m_MouseState.isLeftMouseDownThisFrame) {
             m_MouseDownElements.AddRange(m_ElementsThisFrame);
@@ -815,10 +839,6 @@ public abstract class InputSystem : IInputSystem, IInputProvider {
         }
 
         RunMouseEvents(m_ElementsThisFrame, m_MouseState.DidMove ? InputEventType.MouseMove : InputEventType.MouseHover);
-        //for each element
-        // if element defines cursor
-        // take cursor
-        // RequestCursorLock(element);
     }
 
 }

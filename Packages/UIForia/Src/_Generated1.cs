@@ -136,9 +136,9 @@ namespace UIForia.Rendering {
             set { m_StyleSet.SetProperty(new StyleProperty(StylePropertyId.Opacity, value), state); }
         }
         
-        public UnityEngine.Texture2D Cursor {
+        public UIForia.Rendering.CursorStyle Cursor {
             [System.Diagnostics.DebuggerStepThrough]
-            get { return m_StyleSet.GetPropertyValueInState(StylePropertyId.Cursor, state).AsTexture2D; }
+            get { return m_StyleSet.GetPropertyValueInState(StylePropertyId.Cursor, state).AsCursorStyle; }
             [System.Diagnostics.DebuggerStepThrough]
             set { m_StyleSet.SetProperty(new StyleProperty(StylePropertyId.Cursor, 0, 0, value), state); }
         }
@@ -1306,9 +1306,9 @@ namespace UIForia.Rendering {
             set { SetProperty(new StyleProperty(StylePropertyId.Opacity, value)); }
         }
             
-        public UnityEngine.Texture2D Cursor {
+        public UIForia.Rendering.CursorStyle Cursor {
             [System.Diagnostics.DebuggerStepThrough]
-            get { return GetProperty(StylePropertyId.Cursor).AsTexture2D; }
+            get { return GetProperty(StylePropertyId.Cursor).AsCursorStyle; }
             [System.Diagnostics.DebuggerStepThrough]
             set { SetProperty(new StyleProperty(StylePropertyId.Cursor, 0, 0, value)); }
         }
@@ -2359,12 +2359,11 @@ namespace UIForia.Rendering {
                 }
             }
 
-            public UnityEngine.Texture2D Cursor { 
+            public UIForia.Rendering.CursorStyle Cursor { 
                 [System.Diagnostics.DebuggerStepThrough]
                 get { 
                     StyleProperty property;
-                    if (m_PropertyMap.TryGetValue((int) StylePropertyId.Cursor, out property)) return property.AsTexture2D;
-                    if (m_PropertyMap.TryGetValue(BitUtil.SetHighLowBits(1, (int) StylePropertyId.Cursor), out property)) return property.AsTexture2D;
+                    if (m_PropertyMap.TryGetValue((int) StylePropertyId.Cursor, out property)) return property.AsCursorStyle;
                     return DefaultStyleValues_Generated.Cursor;
                 }
             }
@@ -3644,12 +3643,12 @@ namespace UIForia.Rendering {
             return GetPropertyValueInState(StylePropertyId.Opacity, state).AsFloat;
         }
         
-        public void SetCursor(UnityEngine.Texture2D value, StyleState state) {
+        public void SetCursor(UIForia.Rendering.CursorStyle value, StyleState state) {
             SetProperty(new StyleProperty(StylePropertyId.Cursor, 0, 0, value), state);
         }
 
-        public UnityEngine.Texture2D GetCursor(StyleState state) {
-            return GetPropertyValueInState(StylePropertyId.Cursor, state).AsTexture2D;
+        public UIForia.Rendering.CursorStyle GetCursor(StyleState state) {
+            return GetPropertyValueInState(StylePropertyId.Cursor, state).AsCursorStyle;
         }
         
         public void SetVisibility(UIForia.Rendering.Visibility value, StyleState state) {
@@ -5008,7 +5007,6 @@ namespace UIForia.Rendering {
         public static bool IsInherited(StylePropertyId propertyId) {
             switch (propertyId) {
 
-                    case StylePropertyId.Cursor: return true;
                     case StylePropertyId.TextColor: return true;
                     case StylePropertyId.TextFontAsset: return true;
                     case StylePropertyId.TextFontSize: return true;

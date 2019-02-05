@@ -287,33 +287,12 @@ namespace UIForia.Systems {
                 return;
             }
 
-            renderList.Sort((a, b) => {
-                int layerA = a.element.layoutResult.layer;
-                int layerB = b.element.layoutResult.layer;
-                if (layerA == layerB) {
-                    return 0;
-                }
-
-                return (layerA < layerB) ? 1 : -1;
-            });
-
-            int layerStart = 0;
-            int currentLayer = renderList[0].element.layoutResult.layer;
             RenderData[] list = renderList.Array;
-            for (int i = 1; i < renderList.Count; i++) {
-                RenderData renderData = list[i];
-                int layer = renderData.element.layoutResult.layer;
-                if (layer != currentLayer) {
-                    renderList.Sort(layerStart, i - layerStart, s_ZIndexComparer);
-                    currentLayer = layer;
-                    layerStart = i;
-                }
-            }
 
-            int z = 10;
             for (int i = 0; i < renderList.Count; i++) {
-                Vector2 screenPosition = list[i].element.layoutResult.screenPosition;
-                list[i].renderPosition = new Vector3(screenPosition.x, -screenPosition.y, z++);
+                RenderData renderData = list[i];
+                Vector2 screenPosition = renderData.element.layoutResult.screenPosition;
+                renderData.renderPosition = new Vector3(screenPosition.x, -screenPosition.y, renderData.element.layoutResult.zIndex);
             }
         }
 

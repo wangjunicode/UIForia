@@ -6,7 +6,6 @@ using UIForia.Layout;
 using UIForia.Layout.LayoutTypes;
 using UIForia.Rendering;
 using UIForia.Util;
-using UnityEditor;
 using UnityEngine;
 
 namespace UIForia.Systems {
@@ -38,6 +37,8 @@ namespace UIForia.Systems {
         private Size m_ScreenSize;
         private readonly List<UIElement> m_Elements;
         private readonly LightList<ViewRect> m_Views;
+
+        private static readonly IComparer<UIElement> comparer = new UIElement.RenderLayerComparerAscending();
 
         public LayoutSystem(IStyleSystem styleSystem) {
             this.m_StyleSystem = styleSystem;
@@ -126,17 +127,6 @@ namespace UIForia.Systems {
 #endif
             }
 
-            int depth = 0;
-            int computedLayer = ResolveRenderLayer(element) - element.style.RenderLayerOffset;
-            int zIndex = element.style.ZIndex;
-
-            if (depth > computedLayer) {
-                zIndex -= 2000;
-            }
-            else if (depth < computedLayer) {
-                zIndex += -2000;
-            }
-
             // actual size should probably be the root containing all children, ignored or not
 
             layoutResult.ActualSize = new Size(root.actualWidth, root.actualHeight);
@@ -148,8 +138,6 @@ namespace UIForia.Systems {
             layoutResult.LocalPosition = ResolveLocalPosition(root);
             layoutResult.ScreenPosition = layoutResult.localPosition;
             layoutResult.Rotation = root.style.TransformRotation;
-            layoutResult.Layer = computedLayer;
-            layoutResult.ZIndex = zIndex;
             layoutResult.clipRect = new Rect(0, 0, viewportRect.width, viewportRect.height);
             element.layoutResult = layoutResult;
 
@@ -194,18 +182,6 @@ namespace UIForia.Systems {
 #endif
                     }
 
-                    depth = element.depth;
-                    computedLayer = ResolveRenderLayer(element) - element.style.RenderLayerOffset;
-                    zIndex = element.style.ZIndex;
-
-                    // RenderLayer, ZIndex, OverflowX, OverflowY
-                    if (depth > computedLayer) {
-                        zIndex -= 2000;
-                    }
-                    else if (depth < computedLayer) {
-                        zIndex += -2000;
-                    }
-
                     layoutResult = element.layoutResult;
                     Rect oldScreenRect = layoutResult.ScreenRect;
 
@@ -222,22 +198,11 @@ namespace UIForia.Systems {
                     layoutResult.Scale = new Vector2(box.style.TransformScaleX, box.style.TransformScaleY);
                     layoutResult.Rotation = parentBox.style.TransformRotation + box.style.TransformRotation;
                     layoutResult.Pivot = box.Pivot;
-                    layoutResult.Layer = computedLayer;
-                    layoutResult.ZIndex = zIndex;
 
                     // should be able to sort by view
                     Rect clipRect = new Rect(0, 0, viewportRect.width, viewportRect.height);
                     UIElement ptr = element.parent;
                     // find ancestor where layer is higher, might not be our parent
-
-                    // while parent is higher layer and requires layout
-                    while (ptr != null) {
-                        if (ptr.layoutResult.layer < computedLayer) {
-                            break;
-                        }
-
-                        ptr = ptr.parent;
-                    }
 
                     if (ptr != null) {
                         bool handlesHorizontal = ptr.style.OverflowX != Overflow.None;
@@ -283,6 +248,16 @@ namespace UIForia.Systems {
                 }
             }
 
+            // TODO optimize this to only sort if styles changed
+            m_Elements.Sort(comparer);
+            m_Elements.Reverse();
+            for (var i = 0; i < m_Elements.Count; i++) {
+                UIElement e = m_Elements[i];
+                LayoutResult lr = e.layoutResult; 
+                lr.zIndex = (i + 1) * 1000;
+                e.layoutResult = lr;
+            }
+
             UpdateScrollbarLayouts();
             StackPool<UIElement>.Release(stack);
         }
@@ -323,7 +298,7 @@ namespace UIForia.Systems {
                             localPosition.x = box.AnchorLeft + box.TransformX;
                             break;
                         case TransformBehavior.AnchorMaxOffset:
-                            localPosition.x = box.AnchorRight + box.TransformX - box.actualWidth;
+                            localPosition.x = box.AnchorRight + box.TransformX;
                             break;
                         case TransformBehavior.LayoutOffset:
                             localPosition.x = box.TransformX;
@@ -338,7 +313,7 @@ namespace UIForia.Systems {
                             localPosition.y = box.AnchorTop + box.TransformY;
                             break;
                         case TransformBehavior.AnchorMaxOffset:
-                            localPosition.y = box.AnchorBottom + box.TransformY - box.actualHeight;
+                            localPosition.y = box.AnchorBottom + box.TransformY;
                             break;
                         case TransformBehavior.LayoutOffset:
                             localPosition.y = box.TransformY;
@@ -356,7 +331,7 @@ namespace UIForia.Systems {
                             localPosition.x = box.AnchorLeft + box.TransformX;
                             break;
                         case TransformBehavior.AnchorMaxOffset:
-                            localPosition.x = box.AnchorRight + box.TransformX - box.actualWidth;
+                            localPosition.x = box.AnchorRight + box.TransformX;
                             break;
                         case TransformBehavior.LayoutOffset:
                             localPosition.x = box.localX + box.TransformX;
@@ -371,7 +346,7 @@ namespace UIForia.Systems {
                             localPosition.y = box.AnchorTop + box.TransformY;
                             break;
                         case TransformBehavior.AnchorMaxOffset:
-                            localPosition.y = box.AnchorBottom + box.TransformY - box.actualHeight;
+                            localPosition.y = box.AnchorBottom + box.TransformY;
                             break;
                         case TransformBehavior.LayoutOffset:
                             localPosition.y = box.localY + box.TransformY;
@@ -457,7 +432,6 @@ namespace UIForia.Systems {
                 LayoutResult targetResult = scrollbar.targetElement.layoutResult;
 
                 Rect trackRect = scrollbar.trackRect;
-                scrollbarResult.layer = targetResult.layer + 1;
                 scrollbarResult.zIndex = 999999;
                 scrollbarResult.localPosition = new Vector2(trackRect.x, trackRect.y);
                 scrollbarResult.screenPosition = targetResult.screenPosition + scrollbarResult.localPosition;
@@ -467,6 +441,27 @@ namespace UIForia.Systems {
 
                 scrollbar.layoutResult = scrollbarResult;
             }
+        }
+
+        private void LayoutSticky() {
+            // only sticky within the parent
+            // Layer = 1
+            // ZIndex = 1
+            // PreferredWidth = new UIMeasurement(1f, UIUnit.AnchorWidth | UIUnit.AnchorHeight);
+            // AnchorTop = UIFixedLength
+            // AnchorRight
+            // AnchorBottom
+            // AnchorLeft
+            // AnchorTarget = Viewport | Screen | Parent | Template?  
+            // TransformPositionXBehavior = Ignore | LayoutOffset | Normal | Anchor Offset
+            // TranslateX = new UIFixedLength(-1f, Percent);
+            // TransformPositionXAnchor
+
+            // TransformPositionXBehavior =  LayoutOffset | Default | Fixed | Sticky;
+
+            // LayoutBehavior = Normal | Anchor | Fixed | Sticky
+            // TransformAnchorLeft = new UIAnchor(value, Left | Right);
+            // TransformAnchorY = Top | Bottom
         }
 
         public void OnDestroy() { }
@@ -487,10 +482,10 @@ namespace UIForia.Systems {
             }
 
             bool notifyParent = box.parent != null && (box.style.LayoutBehavior & LayoutBehavior.Ignored) == 0 && box.element.isEnabled;
-            bool invalidatePreferredSizeCache = false;
+            bool invalidatePreferredSizeCache = false;            
             for (int i = 0; i < properties.Count; i++) {
                 StyleProperty property = properties[i];
-
+                
                 switch (property.propertyId) {
                     case StylePropertyId.LayoutBehavior:
                         box.markedForLayout = true;
@@ -527,7 +522,6 @@ namespace UIForia.Systems {
                 if (notifyParent) {
                     box.RequestContentSizeChangeLayout();
                 }
-
                 box.InvalidatePreferredSizeCache();
             }
 
@@ -649,21 +643,7 @@ namespace UIForia.Systems {
             }
         }
 
-        public void OnElementDestroyed(UIElement element) {
-            m_Elements.Remove(element);
-
-            if (m_LayoutBoxMap.TryGetValue(element.id, out LayoutBox box)) {
-                m_LayoutBoxMap.Remove(element.id);
-                m_PendingInitialization.Remove(box);
-                // todo -- recycle box
-            }
-
-            if (element.children != null) {
-                for (int i = 0; i < element.children.Count; i++) {
-                    OnElementDestroyed(element.children[i]);
-                }
-            }
-        }
+        public void OnElementDestroyed(UIElement element) { }
 
         // todo pool boxes
         private LayoutBox CreateLayoutBox(UIElement element) {

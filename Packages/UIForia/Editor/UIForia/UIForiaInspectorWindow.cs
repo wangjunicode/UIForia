@@ -452,7 +452,7 @@ namespace UIForia.Editor {
             DrawLabel("Content Rect",
                 $"X: {contentRect.x}, Y: {contentRect.y}, W: {contentRect.width}, H: {contentRect.height}");
 
-            DrawLabel("Render Layer", layoutResult.layer.ToString());
+            DrawLabel("Render Layer", selectedElement.style.RenderLayer.ToString());
             DrawLabel("Z Index", layoutResult.zIndex.ToString());
 
             GUILayout.Space(16);

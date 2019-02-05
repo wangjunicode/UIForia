@@ -1,14 +1,26 @@
+using System;
 using System.Collections.Generic;
+using TMPro;
+using UIForia.Text;
 using UIForia.Util;
 using UnityEngine;
+using FontStyle = UIForia.Text.FontStyle;
+using TextAlignment = UIForia.Text.TextAlignment;
 
 namespace SVGX {
+
+    public class AttributePostProcessor {
+
+        public void ProcessAttribute(UIElement element, string attr, string value) { }
+
+    }
 
     // todo this saves 2 list allocations + operations
     public struct SVGXDrawState {
 
         public SVGXMatrix matrix;
         public SVGXStyle style;
+
         public Vector2 lastPoint;
         // clip state lives here too
 
@@ -24,11 +36,14 @@ namespace SVGX {
         internal readonly LightList<SVGXClipGroup> clipGroups;
         internal readonly Stack<SVGXClipGroup> clipStack;
         internal readonly LightList<SVGXGradient> gradients;
-        
+        internal readonly LightList<Texture2D> textures;
+
         private Vector2 lastPoint;
         private SVGXMatrix currentMatrix;
         private SVGXStyle currentStyle;
         private RangeInt currentShapeRange;
+        private SVGXGradient currentGradient;
+        private Texture2D currentTexture;
 
         public ImmediateRenderContext() {
             points = new LightList<Vector2>(128);
@@ -40,14 +55,46 @@ namespace SVGX {
             clipGroups = new LightList<SVGXClipGroup>();
             gradients = new LightList<SVGXGradient>();
             shapes.Add(new SVGXShape(SVGXShapeType.Unset, default));
+            textures = new LightList<Texture2D>();
         }
 
-        public void SetFill(Color color) { }
+        public void SetFill(Color color) {
+            currentStyle.fillMode = FillMode.Color;
+            currentStyle.fillColor = color;
+        }
 
         public void SetFill(SVGXGradient gradient) {
-            gradients.Add(gradient);
+            currentStyle.fillMode = FillMode.Gradient;
+            currentGradient = gradient;
         }
 
+        public void SetFill(Texture2D texture, Color tintColor) {
+            currentStyle.fillMode = FillMode.TextureColor;
+            currentStyle.fillTintColor = tintColor;
+            currentTexture = texture;
+        }
+        
+        public void SetFill(Texture2D texture, SVGXGradient gradient) {
+            currentStyle.fillMode = FillMode.TextureGradient;
+            currentStyle.gradientId = gradient.id;
+            currentTexture = texture;
+            currentGradient = gradient;
+        }
+        
+        public void SetFill(Texture2D texture) {
+            currentStyle.fillMode = FillMode.Texture;
+            currentStyle.fillTintColor = Color.white;
+            currentStyle.textureId = texture.GetInstanceID();
+            currentTexture = texture;
+        }
+
+        public void SetFill(Texture2D texture, SVGXGradient gradient, float mix) {
+            currentStyle.fillMode = FillMode.Texture;
+            currentStyle.fillTintColor = Color.white;
+            currentStyle.textureId = texture.GetInstanceID();
+            currentTexture = texture;
+        }
+        
         public void SetStrokeColor(Color color) {
             this.currentStyle.strokeStyle.color = color;
         }
@@ -61,6 +108,14 @@ namespace SVGX {
                 currentShapeRange.length++;
             }
         }
+
+        public void Text(float x, float y, string text) { }
+
+        public struct Path2D { }
+
+        public void SetTextStyle(SVGXTextStyle style) { }
+
+        public void Text(float x, float y, TextInfo text) { }
 
         public void LineTo(float x, float y) {
             SVGXShape currentShape = shapes[shapes.Count - 1];
@@ -175,6 +230,7 @@ namespace SVGX {
             shapes.Add(new SVGXShape(SVGXShapeType.Unset, default));
             currentShapeRange = new RangeInt();
             gradients.Clear();
+            textures.Clear();
         }
 
         public void Save() {
@@ -201,13 +257,12 @@ namespace SVGX {
         }
 
         public void PushClip() {
-
             int parentId = -1;
             if (clipStack.Count > 0) {
                 parentId = clipStack.Peek().id;
             }
 
-            SVGXClipGroup clipGroup = default;//new SVGXClipGroup(clipGroups.Count, parentId, currentShapeRange);
+            SVGXClipGroup clipGroup = default; //new SVGXClipGroup(clipGroups.Count, parentId, currentShapeRange);
             clipGroups.Add(clipGroup);
         }
 
@@ -221,18 +276,39 @@ namespace SVGX {
             SimpleShape(SVGXShapeType.Rect, x, y, width, height);
         }
 
-        public void Ellipse(float cx, float cy, float rx, float ry) {
-            SimpleShape(SVGXShapeType.Ellipse, cx - rx, cy - ry, rx * 2f, ry * 2f);
+        public void Ellipse(float x, float y, float dx, float dy) {
+            SimpleShape(SVGXShapeType.Ellipse, x, y, dx, dy);
         }
 
         public void Circle(float x, float y, float radius) {
             SimpleShape(SVGXShapeType.Circle, x, y, radius * 2f, radius * 2f);
         }
 
+        public void FillRect(float x, float y, float width, float height) {
+            BeginPath();
+            Rect(x, y, width, height);
+            Fill();
+            BeginPath();
+        }
+        
+        public void FillCircle(float x, float y, float radius) {
+            BeginPath();
+            Circle(x, y, radius);
+            Fill();
+            BeginPath();
+        }
+        
+        public void FillEllipse(float x, float y, float dx, float dy) {
+            BeginPath();
+            Ellipse(x, y, dx, dy);
+            Fill();
+            BeginPath();
+        }
+
         private void SimpleShape(SVGXShapeType shapeType, float x, float y, float width, float height) {
             SVGXShape currentShape = shapes[shapes.Count - 1];
             SVGXShapeType lastType = currentShape.type;
-            
+
             Vector2 x0y0 = new Vector2(x, y);
             Vector2 x1y0 = new Vector2(x + width, y);
             Vector2 x1y1 = new Vector2(x + width, y - height);
@@ -257,7 +333,7 @@ namespace SVGX {
 
             currentShapeRange.length++;
         }
-        
+
         public void BeginPath() {
             SVGXShape currentShape = shapes[shapes.Count - 1];
             if (currentShape.type != SVGXShapeType.Unset) {
@@ -267,17 +343,26 @@ namespace SVGX {
         }
 
         public void Fill() {
-            SVGXDrawCall drawCall = new SVGXDrawCall(DrawCallType.StandardFill, currentStyle, currentMatrix, currentShapeRange);
-            drawCalls.Add(drawCall);
+            
+            if ((currentStyle.fillMode & FillMode.Texture) != 0) {
+                if (!textures.Contains(currentTexture)) {
+                    textures.Add(currentTexture);
+                }
+                currentStyle.textureId = currentTexture.GetInstanceID();
+            }
+
+            if ((currentStyle.fillMode & FillMode.Gradient) != 0) {
+                if (!gradients.Contains(currentGradient)) {
+                    gradients.Add(currentGradient);
+                }
+                currentStyle.gradientId = currentGradient.id;
+            }
+            
+            drawCalls.Add(new SVGXDrawCall(DrawCallType.StandardFill, currentStyle, currentMatrix, currentShapeRange));
         }
 
         public void Stroke() {
-            SVGXDrawCall drawCall = new SVGXDrawCall(DrawCallType.StandardStroke, currentStyle, currentMatrix, currentShapeRange);
-            drawCalls.Add(drawCall);
-        }
-
-        public void SetFillColor(Color color) {
-            currentStyle.fillColor = color;
+            drawCalls.Add(new SVGXDrawCall(DrawCallType.StandardStroke, currentStyle, currentMatrix, currentShapeRange));
         }
 
     }

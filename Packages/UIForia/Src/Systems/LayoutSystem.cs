@@ -198,6 +198,7 @@ namespace UIForia.Systems {
                     computedLayer = ResolveRenderLayer(element) - element.style.RenderLayerOffset;
                     zIndex = element.style.ZIndex;
 
+                    // RenderLayer, ZIndex, OverflowX, OverflowY
                     if (depth > computedLayer) {
                         zIndex -= 2000;
                     }
@@ -451,10 +452,10 @@ namespace UIForia.Systems {
             for (int i = 0; i < m_VirtualElements.Count; i++) {
                 VirtualScrollbar scrollbar = (VirtualScrollbar) m_VirtualElements[i];
                 scrollbar.RunLayout();
-//
+
                 LayoutResult scrollbarResult = scrollbar.layoutResult;
                 LayoutResult targetResult = scrollbar.targetElement.layoutResult;
-//
+
                 Rect trackRect = scrollbar.trackRect;
                 scrollbarResult.layer = targetResult.layer + 1;
                 scrollbarResult.zIndex = 999999;
@@ -466,27 +467,6 @@ namespace UIForia.Systems {
 
                 scrollbar.layoutResult = scrollbarResult;
             }
-        }
-
-        private void LayoutSticky() {
-            // only sticky within the parent
-            // Layer = 1
-            // ZIndex = 1
-            // PreferredWidth = new UIMeasurement(1f, UIUnit.AnchorWidth | UIUnit.AnchorHeight);
-            // AnchorTop = UIFixedLength
-            // AnchorRight
-            // AnchorBottom
-            // AnchorLeft
-            // AnchorTarget = Viewport | Screen | Parent | Template?  
-            // TransformPositionXBehavior = Ignore | LayoutOffset | Normal | Anchor Offset
-            // TranslateX = new UIFixedLength(-1f, Percent);
-            // TransformPositionXAnchor
-
-            // TransformPositionXBehavior =  LayoutOffset | Default | Fixed | Sticky;
-
-            // LayoutBehavior = Normal | Anchor | Fixed | Sticky
-            // TransformAnchorLeft = new UIAnchor(value, Left | Right);
-            // TransformAnchorY = Top | Bottom
         }
 
         public void OnDestroy() { }
@@ -507,10 +487,10 @@ namespace UIForia.Systems {
             }
 
             bool notifyParent = box.parent != null && (box.style.LayoutBehavior & LayoutBehavior.Ignored) == 0 && box.element.isEnabled;
-            bool invalidatePreferredSizeCache = false;            
+            bool invalidatePreferredSizeCache = false;
             for (int i = 0; i < properties.Count; i++) {
                 StyleProperty property = properties[i];
-                
+
                 switch (property.propertyId) {
                     case StylePropertyId.LayoutBehavior:
                         box.markedForLayout = true;
@@ -547,6 +527,7 @@ namespace UIForia.Systems {
                 if (notifyParent) {
                     box.RequestContentSizeChangeLayout();
                 }
+
                 box.InvalidatePreferredSizeCache();
             }
 
@@ -668,7 +649,21 @@ namespace UIForia.Systems {
             }
         }
 
-        public void OnElementDestroyed(UIElement element) { }
+        public void OnElementDestroyed(UIElement element) {
+            m_Elements.Remove(element);
+
+            if (m_LayoutBoxMap.TryGetValue(element.id, out LayoutBox box)) {
+                m_LayoutBoxMap.Remove(element.id);
+                m_PendingInitialization.Remove(box);
+                // todo -- recycle box
+            }
+
+            if (element.children != null) {
+                for (int i = 0; i < element.children.Count; i++) {
+                    OnElementDestroyed(element.children[i]);
+                }
+            }
+        }
 
         // todo pool boxes
         private LayoutBox CreateLayoutBox(UIElement element) {

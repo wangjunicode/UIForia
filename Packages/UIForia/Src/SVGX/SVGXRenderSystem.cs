@@ -210,6 +210,12 @@ namespace SVGX {
                 case SVGXShapeType.Circle:
                 case SVGXShapeType.Rect:
 
+                    int fillMode = (int) style.fillMode;
+//                    int gradientId = 
+                    if (style.fillMode == FillMode.Gradient) {
+                            
+                    }
+                    
                     vertices[vertexCnt++] = matrix.Transform(points[start++]);
                     vertices[vertexCnt++] = matrix.Transform(points[start++]);
                     vertices[vertexCnt++] = matrix.Transform(points[start++]);

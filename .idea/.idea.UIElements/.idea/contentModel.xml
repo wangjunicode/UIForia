@@ -1,10 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project version="4">
   <component name="ContentModelStore">
-    <e p="C:\Users\matth\.Rider2018.3\config\extensions" t="IncludeRecursive" />
-    <e p="C:\Users\matth\.Rider2018.3\system\extResources" t="IncludeRecursive" />
-    <e p="C:\Users\matth\.Rider2018.3\system\resharper-host\local\Transient\ReSharperHost\v183\SolutionCaches\_UIElements.-1987582547.00" t="ExcludeRecursive" />
-    <e p="C:\Users\matth\RiderProjects\UIElements" t="IncludeRecursive">
+    <e p="C:\Seed\UIForia\UIElements" t="IncludeRecursive">
       <e p="Assembly-CSharp.csproj" t="IncludeRecursive" />
       <e p="Assets" t="Include">
         <e p="Compiler" t="Include">
@@ -220,7 +217,6 @@
           <e p="Editor" t="Include">
             <e p="AnimatedPropertyGenerator.cs" t="Include" />
             <e p="CodeGen.cs" t="Include" />
-            <e p="GradientTest.cs" t="Include" />
             <e p="PropertyGenerator.cs" t="Include" />
             <e p="UIForia" t="Include">
               <e p="GUIRect.cs" t="Include" />
@@ -594,6 +590,7 @@
               <e p="UIForiaFill.shader" t="Include" />
               <e p="UIForiaFragBody.cginc" t="Include" />
               <e p="UIForiaFragDefines.cginc" t="Include" />
+              <e p="UIForiaInc.cginc" t="Include" />
               <e p="UIForiaLine.shader" t="Include" />
               <e p="UIForiaStencilEven.shader" t="Include" />
               <e p="UIForiaStencilFillClear.shader" t="Include" />
@@ -623,6 +620,7 @@
             <e p="StyleDefinition.cs" t="Include" />
             <e p="SVGX" t="Include">
               <e p="ClipRule.cs" t="Include" />
+              <e p="ColorStop.cs" t="Include" />
               <e p="DrawCallType.cs" t="Include" />
               <e p="FillVertexData.cs" t="Include" />
               <e p="GFX.cs" t="Include" />
@@ -639,6 +637,8 @@
               <e p="SVGXElement.cs" t="Include" />
               <e p="SVGXGeometryGenerator.cs" t="Include" />
               <e p="SVGXGeometryUtil.cs" t="Include" />
+              <e p="SVGXGradient.cs" t="Include" />
+              <e p="SVGXGradientType.cs" t="Include" />
               <e p="SVGXGroup.cs" t="Include" />
               <e p="SVGXMatrix.cs" t="Include" />
               <e p="SVGXPathCommandType.cs" t="Include" />
@@ -655,7 +655,6 @@
               <e p="BindingSystem.cs" t="Include" />
               <e p="DefaultInputSystem.cs" t="Include" />
               <e p="GORenderSystem.cs" t="Include" />
-              <e p="Gradient.cs" t="Include" />
               <e p="IInputSystem.cs" t="Include" />
               <e p="ILayoutSystem.cs" t="Include" />
               <e p="InputSystem" t="Include">
@@ -803,5 +802,8 @@
       <e p="UIForia.Src.csproj" t="IncludeRecursive" />
       <e p="UIForia.Test.csproj" t="IncludeRecursive" />
     </e>
+    <e p="C:\Users\Matt\.Rider2018.3\config\extensions" t="IncludeRecursive" />
+    <e p="C:\Users\Matt\.Rider2018.3\system\extResources" t="IncludeRecursive" />
+    <e p="C:\Users\Matt\.Rider2018.3\system\resharper-host\local\Transient\ReSharperHost\v183\SolutionCaches\_UIElements.120647963.00" t="ExcludeRecursive" />
   </component>
 </project>

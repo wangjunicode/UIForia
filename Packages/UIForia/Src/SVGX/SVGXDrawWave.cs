@@ -1,32 +1,33 @@
 using System.Collections.Generic;
+using UIForia.Util;
 
 namespace SVGX {
 
     internal class SVGXDrawWave {
 
-        public List<SVGXRenderShape> transparentFills;
-        public List<SVGXRenderShape> transparentStrokes;
+        public LightList<SVGXRenderShape> transparentFills;
+        public LightList<SVGXRenderShape> transparentStrokes;
         
-        public List<SVGXRenderShape> opaqueFills;
-        public List<SVGXRenderShape> opaqueStrokes;
+        public LightList<SVGXRenderShape> opaqueFills;
+        public LightList<SVGXRenderShape> opaqueStrokes;
                 
-        public List<SVGXStyle> styles;
-        public List<SVGXMatrix> matrices;
+        public LightList<SVGXStyle> styles;
+        public LightList<SVGXMatrix> matrices;
         
         private bool opaqueNeedsStencilFill;
         private bool transparentNeedsStencilFill;
         
         public SVGXDrawWave() {
-            transparentFills = new List<SVGXRenderShape>(32);
-            transparentStrokes = new List<SVGXRenderShape>(32);
-            opaqueFills = new List<SVGXRenderShape>(32);
-            opaqueStrokes = new List<SVGXRenderShape>(32);
-            matrices = new List<SVGXMatrix>();
-            styles = new List<SVGXStyle>();
+            transparentFills = new LightList<SVGXRenderShape>(32);
+            transparentStrokes = new LightList<SVGXRenderShape>(32);
+            opaqueFills = new LightList<SVGXRenderShape>(32);
+            opaqueStrokes = new LightList<SVGXRenderShape>(32);
+            matrices = new LightList<SVGXMatrix>();
+            styles = new LightList<SVGXStyle>();
         }
 
         public void AddDrawCall(ImmediateRenderContext ctx, SVGXDrawCall drawCall) {
-            List<SVGXRenderShape> shapes = null;
+            LightList<SVGXRenderShape> shapes = null;
             switch (drawCall.type) {
                 case DrawCallType.StandardStroke: {
                     shapes = opaqueStrokes;

@@ -1,6 +1,5 @@
 using System;
 using System.Diagnostics.CodeAnalysis;
-using UIForia;
 using UIForia.Rendering;
 using UnityEngine;
 
@@ -20,9 +19,10 @@ namespace UIForia.Parsing.Style {
                 case "opacity":
                     throw new NotImplementedException();
                 case "cursor":
-                    throw new NotImplementedException();
+                    context.targetStyle.Cursor = ParseUtil.ParseCursorStyle(propertyValue);
+                    break;
                 case "backgroundimage":
-                    context.targetStyle.BackgroundImage = UIForia.ResourceManager.GetTexture(propertyValue);
+                    context.targetStyle.BackgroundImage = ResourceManager.GetTexture(propertyValue);
                     break;
                 case "overflow":
                     Overflow overflow = ParseUtil.ParseOverflow(context.variables, propertyValue);

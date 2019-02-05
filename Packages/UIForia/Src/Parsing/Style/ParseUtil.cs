@@ -1278,6 +1278,22 @@ namespace UIForia.Parsing.Style {
             }
         }
 
+        public static CursorStyle ParseCursorStyle(string propertyValue) {
+            int ptr = 0;
+            string texturePath = ReadToWhitespace(propertyValue, ref ptr);
+            int hotSpotX = 0;
+            
+            Texture2D texture = ResourceManager.GetTexture(texturePath);
+            if (ptr < propertyValue.Length) {
+                hotSpotX = ReadInt(propertyValue, ref ptr);
+            }
+            int hotSpotY = hotSpotX;
+            if (ptr < propertyValue.Length) {
+                hotSpotY = ReadInt(propertyValue, ref ptr);
+            }
+
+            return new CursorStyle(texturePath, texture, new Vector2(hotSpotX, hotSpotY));
+        }
     }
 
 }

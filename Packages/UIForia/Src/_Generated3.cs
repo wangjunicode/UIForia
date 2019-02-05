@@ -34,7 +34,7 @@ namespace UIForia.Rendering {
 		public const float BackgroundFillScaleX = 1;
 		public const float BackgroundFillScaleY = 1;
 		public const float Opacity = 1;
-		public static readonly Texture2D Cursor = null;
+		public static readonly CursorStyle Cursor = null;
 		public const Visibility Visibility = UIForia.Rendering.Visibility.Visible;
 		public const int FlexItemOrder = 0;
 		public const int FlexItemGrow = 0;

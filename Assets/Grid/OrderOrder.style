@@ -36,12 +36,18 @@ style c22 {
 style c23 {
     PreferredSize = 200px;
     BackgroundColor = rgba(100, 34, 3, 255);
-    ZIndex = -10000;
+    ZIndex = 20;
+    [hover] {
+        BackgroundColor = yellow;
+        Cursor = Cursor15 15;
+    }
 }
+
+
 style c3 {
     PreferredSize = 200px;
     BackgroundColor = rgba(24, 0, 66, 255);
-    zIndex = -10000;
+    zIndex = 10;
 }
 style c31 {
     BackgroundColor = rgba(9, 123, 45, 255);

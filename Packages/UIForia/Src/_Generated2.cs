@@ -299,6 +299,43 @@ namespace UIForia.StyleBindings {
 
     }
         
+    public class StyleBinding_CursorStyle : StyleBinding {
+
+        public readonly Expression<UIForia.Rendering.CursorStyle> expression;
+        public readonly StylePropertyId propertyId;
+        
+        public StyleBinding_CursorStyle(string propertyName, StylePropertyId propertyId, StyleState state, Expression<UIForia.Rendering.CursorStyle> expression)
+            : base(propertyName, state) {
+            this.propertyId = propertyId;
+            this.expression = expression;
+        }
+
+        public override void Execute(UIElement element, ExpressionContext context) {
+            if (!element.style.IsInState(state)) return;
+
+            var oldValue = element.style.m_PropertyMap[(int)propertyId].AsCursorStyle;
+            var value = expression.Evaluate(context);
+            if (value != oldValue) {
+                element.style.SetProperty(new StyleProperty(propertyId, 0, 0, value), state);
+            }
+        }
+
+        public override bool IsConstant() {
+            return expression.IsConstant();
+        }
+
+        public override void Apply(UIStyle style, ExpressionContext context) {
+            var value = expression.Evaluate(context);
+            style.SetProperty(new StyleProperty(propertyId, 0, 0, value));
+        }
+
+        public override void Apply(UIStyleSet styleSet, ExpressionContext context) {
+            var value = expression.Evaluate(context);
+            styleSet.SetProperty(new StyleProperty(propertyId, 0, 0, value), state);
+        }
+
+    }
+        
     public class StyleBinding_Visibility : StyleBinding {
 
         public readonly Expression<UIForia.Rendering.Visibility> expression;
@@ -1297,7 +1334,7 @@ case "overflowx":
                 case "opacity":
                     return new UIForia.StyleBindings.StyleBinding_float("Opacity", UIForia.Rendering.StylePropertyId.Opacity, targetState.state, Compile<float>(value, null));                
                 case "cursor":
-                    return new UIForia.StyleBindings.StyleBinding_Texture2D("Cursor", UIForia.Rendering.StylePropertyId.Cursor, targetState.state, Compile<UnityEngine.Texture2D>(value, textureUrlSource));                
+                    return new UIForia.StyleBindings.StyleBinding_CursorStyle("Cursor", UIForia.Rendering.StylePropertyId.Cursor, targetState.state, Compile<UIForia.Rendering.CursorStyle>(value, null));                
                 case "visibility":
                     return new UIForia.StyleBindings.StyleBinding_Visibility("Visibility", UIForia.Rendering.StylePropertyId.Visibility, targetState.state, Compile<UIForia.Rendering.Visibility>(value, s_EnumSource_Visibility));                
                 case "flexitemorder":

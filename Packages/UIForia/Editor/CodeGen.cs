@@ -47,7 +47,7 @@ namespace UIForia.Editor {
             new AnimatedPropertyGenerator<float>(StylePropertyId.BackgroundFillScaleX, 1),
             new AnimatedPropertyGenerator<float>(StylePropertyId.BackgroundFillScaleY, 1),
             new AnimatedPropertyGenerator<float>(StylePropertyId.Opacity, 1),
-            new PropertyGenerator<Texture2D>(StylePropertyId.Cursor, null, InheritanceType.Inherited),
+            new PropertyGenerator<CursorStyle>(StylePropertyId.Cursor, null),
             new PropertyGenerator<Visibility>(StylePropertyId.Visibility, Visibility.Visible),
 
             // Flex Item
@@ -649,6 +649,9 @@ namespace UIForia.Rendering {
             }
             else if (typeof(IReadOnlyList<GridTrackSize>) == propertyGenerator.type) {
                 return $"GetProperty(StylePropertyId.{propertyGenerator.propertyIdName}).AsGridTemplate;";
+            }
+            if (typeof(CursorStyle) == propertyGenerator.type) {
+                return $"GetProperty(StylePropertyId.{propertyGenerator.propertyIdName}).AsCursorStyle;";
             }
 
             throw new ArgumentOutOfRangeException();

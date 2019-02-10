@@ -37,7 +37,7 @@ namespace SVGX {
             this.prevNextList = new List<Vector4>(32);
             this.flagsList = new List<Vector4>(32);
             this.colorsList = new List<Color>(32);
-            this.texCoordList = new List<Vector2>();
+            this.texCoordList = new List<Vector2>(32);
             this.trianglesList = new List<int>(32 * 3);
             mesh = new Mesh();
             mesh.MarkDynamic();
@@ -46,6 +46,7 @@ namespace SVGX {
         public void Clear() {
             // does not clear the mesh on purpose so this object can be pooled and re-used next frame
             position.Clear();
+            texCoords.Clear();
             prevNext.Clear();
             flags.Clear();
             colors.Clear();
@@ -68,8 +69,8 @@ namespace SVGX {
             mesh.SetVertices(position.ToList(positionList));
             mesh.SetColors(colors.ToList(colorsList));
             mesh.SetUVs(0, texCoords.ToList(texCoordList));
-            mesh.SetUVs(1, prevNext.ToList(prevNextList));
-            mesh.SetUVs(2, flags.ToList(flagsList));
+            mesh.SetUVs(1, flags.ToList(flagsList));
+            mesh.SetUVs(2, prevNext.ToList(prevNextList));
             mesh.SetTriangles(triangles.ToList(trianglesList), 0);
             
             positionList.Clear();

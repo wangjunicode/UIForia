@@ -27,8 +27,8 @@
            struct appdata {
                 float4 vertex : POSITION;
                 float2 uv : TEXCOORD0;
-                float4 prevNext : TEXCOORD1;
-                float4 flags : TEXCOORD2;
+                float4 prevNext : TEXCOORD2;
+                float4 flags : TEXCOORD1;
                 fixed4 color : COLOR;
            };
 
@@ -170,6 +170,7 @@
                 o.fragData2 = float4(v.vertex.xy, vertWithOffset.xy);
 //                o.fragData2 = float4(prev, curr);
                 o.color = v.color;
+                if(dir < 0) o.color = fixed4(0, 0, 0, 1);
                 o.vertex = UnityObjectToClipPos(float3(vertWithOffset.xy, v.vertex.z)); 
                 return o;
                 

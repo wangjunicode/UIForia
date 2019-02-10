@@ -474,58 +474,58 @@ namespace SVGX {
                 far = isClosed ? points[range.start] : next + (next - curr);
 
                 // start TEMP BEVEL / ROUND GEOMETRY
-                vertices[vertexCnt++] = curr;
-                vertices[vertexCnt++] = curr;
-                vertices[vertexCnt++] = curr;
-
-                flags[flagCnt++] = new Vector4(top, 4, join, strokeWidth);
-                flags[flagCnt++] = new Vector4(top, 5, join, strokeWidth);
-                flags[flagCnt++] = new Vector4(btm, 6, join, strokeWidth);
-                
-                prevNext[prevNextCnt++] = new Vector4(prev.x, prev.y, next.x, next.y);
-                prevNext[prevNextCnt++] = new Vector4(prev.x, prev.y, next.x, next.y);
-                prevNext[prevNextCnt++] = new Vector4(prev.x, prev.y, next.x, next.y);
-
-                texCoords[texCoordCnt++] = new Vector2(0, 1);
-                texCoords[texCoordCnt++] = new Vector2(1, 1);
-                texCoords[texCoordCnt++] = new Vector2(1, 0);
-
-                colors[colorCnt++] = Color.yellow;
-                colors[colorCnt++] = Color.yellow;
-                colors[colorCnt++] = Color.yellow;
-
-                triangles[triangleCnt++] = triIdx + 0;
-                triangles[triangleCnt++] = triIdx + 1;
-                triangles[triangleCnt++] = triIdx + 2;
-
-                triIdx += 3;
-                
-                // START TEMP ROUND JOIN GEOMETRY
-                vertices[vertexCnt++] = curr;
-                vertices[vertexCnt++] = curr;
-                vertices[vertexCnt++] = curr;
-
-                flags[flagCnt++] = new Vector4(top, 7, join, strokeWidth);
-                flags[flagCnt++] = new Vector4(top, 8, join, strokeWidth);
-                flags[flagCnt++] = new Vector4(btm, 9, join, strokeWidth);
-                
-                prevNext[prevNextCnt++] = new Vector4(prev.x, prev.y, next.x, next.y);
-                prevNext[prevNextCnt++] = new Vector4(prev.x, prev.y, next.x, next.y);
-                prevNext[prevNextCnt++] = new Vector4(prev.x, prev.y, next.x, next.y);
-
-                texCoords[texCoordCnt++] = new Vector2(0, 1);
-                texCoords[texCoordCnt++] = new Vector2(1, 1);
-                texCoords[texCoordCnt++] = new Vector2(1, 0);
-
-                colors[colorCnt++] = Color.magenta;
-                colors[colorCnt++] = Color.magenta;
-                colors[colorCnt++] = Color.magenta;
-
-                triangles[triangleCnt++] = triIdx + 0;
-                triangles[triangleCnt++] = triIdx + 1;
-                triangles[triangleCnt++] = triIdx + 2;
-
-                triIdx += 3;
+//                vertices[vertexCnt++] = curr;
+//                vertices[vertexCnt++] = curr;
+//                vertices[vertexCnt++] = curr;
+//
+//                flags[flagCnt++] = new Vector4(top, 4, join, strokeWidth);
+//                flags[flagCnt++] = new Vector4(top, 5, join, strokeWidth);
+//                flags[flagCnt++] = new Vector4(btm, 6, join, strokeWidth);
+//                
+//                prevNext[prevNextCnt++] = new Vector4(prev.x, prev.y, next.x, next.y);
+//                prevNext[prevNextCnt++] = new Vector4(prev.x, prev.y, next.x, next.y);
+//                prevNext[prevNextCnt++] = new Vector4(prev.x, prev.y, next.x, next.y);
+//
+//                texCoords[texCoordCnt++] = new Vector2(0, 1);
+//                texCoords[texCoordCnt++] = new Vector2(1, 1);
+//                texCoords[texCoordCnt++] = new Vector2(1, 0);
+//
+//                colors[colorCnt++] = Color.yellow;
+//                colors[colorCnt++] = Color.yellow;
+//                colors[colorCnt++] = Color.yellow;
+//
+//                triangles[triangleCnt++] = triIdx + 0;
+//                triangles[triangleCnt++] = triIdx + 1;
+//                triangles[triangleCnt++] = triIdx + 2;
+//
+//                triIdx += 3;
+//                
+//                // START TEMP ROUND JOIN GEOMETRY
+//                vertices[vertexCnt++] = curr;
+//                vertices[vertexCnt++] = curr;
+//                vertices[vertexCnt++] = curr;
+//
+//                flags[flagCnt++] = new Vector4(top, 7, join, strokeWidth);
+//                flags[flagCnt++] = new Vector4(top, 8, join, strokeWidth);
+//                flags[flagCnt++] = new Vector4(btm, 9, join, strokeWidth);
+//                
+//                prevNext[prevNextCnt++] = new Vector4(prev.x, prev.y, next.x, next.y);
+//                prevNext[prevNextCnt++] = new Vector4(prev.x, prev.y, next.x, next.y);
+//                prevNext[prevNextCnt++] = new Vector4(prev.x, prev.y, next.x, next.y);
+//
+//                texCoords[texCoordCnt++] = new Vector2(0, 1);
+//                texCoords[texCoordCnt++] = new Vector2(1, 1);
+//                texCoords[texCoordCnt++] = new Vector2(1, 0);
+//
+//                colors[colorCnt++] = Color.magenta;
+//                colors[colorCnt++] = Color.magenta;
+//                colors[colorCnt++] = Color.magenta;
+//
+//                triangles[triangleCnt++] = triIdx + 0;
+//                triangles[triangleCnt++] = triIdx + 1;
+//                triangles[triangleCnt++] = triIdx + 2;
+//
+//                triIdx += 3;
 //                // END TEMP ROUND JOIN GEOMETRY
 
                 // end TEMP join segment

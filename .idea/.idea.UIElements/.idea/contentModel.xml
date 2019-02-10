@@ -1,7 +1,10 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project version="4">
   <component name="ContentModelStore">
-    <e p="C:\Seed\UIForia\UIElements" t="IncludeRecursive">
+    <e p="C:\Users\matth\.Rider2018.3\config\extensions" t="IncludeRecursive" />
+    <e p="C:\Users\matth\.Rider2018.3\system\extResources" t="IncludeRecursive" />
+    <e p="C:\Users\matth\.Rider2018.3\system\resharper-host\local\Transient\ReSharperHost\v183\SolutionCaches\_UIElements.-1987582547.00" t="ExcludeRecursive" />
+    <e p="C:\Users\matth\RiderProjects\UIElements" t="IncludeRecursive">
       <e p="Assembly-CSharp.csproj" t="IncludeRecursive" />
       <e p="Assets" t="Include">
         <e p="Compiler" t="Include">
@@ -71,8 +74,12 @@
           </e>
         </e>
         <e p="Grid" t="Include">
+          <e p="Cursors.cs" t="Include" />
+          <e p="Cursors.xml" t="Include" />
           <e p="GridDemo.cs" t="Include" />
           <e p="GridDemo.xml" t="Include" />
+          <e p="OrderOrder.cs" t="Include" />
+          <e p="OrderOrder.xml" t="Include" />
         </e>
         <e p="Klang" t="Include">
           <e p="Seed" t="Include">
@@ -518,6 +525,7 @@
               <e p="BorderRadius.cs" t="Include" />
               <e p="BorderStyle.cs" t="Include" />
               <e p="ContentBoxRect.cs" t="Include" />
+              <e p="CursorStyle.cs" t="Include" />
               <e p="DefaultStyleValues_Generated.cs" t="Include" />
               <e p="Easing.cs" t="Include" />
               <e p="ElementRendering" t="Include">
@@ -581,9 +589,11 @@
             </e>
             <e p="Shaders" t="Include">
               <e p="Debug.shader" t="Include" />
-              <e p="Lines2.shader" t="Include" />
+              <e p="JoinedPolyline.shader" t="Include" />
               <e p="SimpleFillOpaque.shader" t="Include" />
+              <e p="simplelinesegments.shader" t="Include" />
               <e p="SimpleStrokeOpaque.shader" t="Include" />
+              <e p="Text.shader" t="Include" />
               <e p="UIForia.cginc" t="Include" />
               <e p="UIForiaClip.shader" t="Include" />
               <e p="UIForiaDebutText.shader" t="Include" />
@@ -749,6 +759,7 @@
               <e p="MockLayoutSystem.cs" t="Include" />
             </e>
             <e p="ReflectionUtilTests.cs" t="Include" />
+            <e p="RenderLayerComparerAscendingTest.cs" t="Include" />
             <e p="RouterTests.cs" t="Include" />
             <e p="SkipTreeTests.cs" t="Include" />
             <e p="StyleBindingTests.cs" t="Include" />
@@ -802,8 +813,5 @@
       <e p="UIForia.Src.csproj" t="IncludeRecursive" />
       <e p="UIForia.Test.csproj" t="IncludeRecursive" />
     </e>
-    <e p="C:\Users\Matt\.Rider2018.3\config\extensions" t="IncludeRecursive" />
-    <e p="C:\Users\Matt\.Rider2018.3\system\extResources" t="IncludeRecursive" />
-    <e p="C:\Users\Matt\.Rider2018.3\system\resharper-host\local\Transient\ReSharperHost\v183\SolutionCaches\_UIElements.120647963.00" t="ExcludeRecursive" />
   </component>
 </project>

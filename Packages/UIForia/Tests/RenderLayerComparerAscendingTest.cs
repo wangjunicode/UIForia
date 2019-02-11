@@ -68,21 +68,20 @@ public class RenderLayerComparerAscendingTest {
         List<UIElement> ordered = root.FindByType<UIElement>();
         ordered.Sort(new UIElement.RenderLayerComparerAscending());
         
-        Assert.AreEqual("c11", ordered[12].GetAttribute("id"));
-        Assert.AreEqual("c13", ordered[11].GetAttribute("id"));
-        Assert.AreEqual("c12", ordered[10].GetAttribute("id"));
-        Assert.AreEqual("c1", ordered[9].GetAttribute("id"));
-        Assert.AreEqual("c331", ordered[8].GetAttribute("id"));
-        Assert.AreEqual("c33", ordered[7].GetAttribute("id"));
+        Assert.AreEqual("c11", ordered[0].GetAttribute("id"));
+        Assert.AreEqual("c13", ordered[1].GetAttribute("id"));
+        Assert.AreEqual("c12", ordered[2].GetAttribute("id"));
+        Assert.AreEqual("c1", ordered[3].GetAttribute("id"));
+        Assert.AreEqual("c331", ordered[4].GetAttribute("id"));
+        Assert.AreEqual("c33", ordered[5].GetAttribute("id"));
         Assert.AreEqual("c23", ordered[6].GetAttribute("id"));
-        Assert.AreEqual("c32", ordered[5].GetAttribute("id"));
-        Assert.AreEqual("c31", ordered[4].GetAttribute("id"));
-        Assert.AreEqual("c3", ordered[3].GetAttribute("id"));
-        Assert.AreEqual("c22", ordered[2].GetAttribute("id"));
-        Assert.AreEqual("c21", ordered[1].GetAttribute("id"));
-        Assert.AreEqual("c2", ordered[0].GetAttribute("id"));
+        Assert.AreEqual("c32", ordered[7].GetAttribute("id"));
+        Assert.AreEqual("c31", ordered[8].GetAttribute("id"));
+        Assert.AreEqual("c3", ordered[9].GetAttribute("id"));
+        Assert.AreEqual("c22", ordered[10].GetAttribute("id"));
+        Assert.AreEqual("c21", ordered[11].GetAttribute("id"));
+        Assert.AreEqual("c2", ordered[12].GetAttribute("id"));
         
-        Debug.Log((float.MaxValue / 1024).ToString("######"));
     }
 
 }

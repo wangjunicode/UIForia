@@ -8,7 +8,7 @@ using UnityEngine;
 public class TemplateParsingTests {
 
     [Template("Tests/Templates/Parsing/Test1.xml")]
-    public class Test1 : UIElement { }
+    private class Test1 : UIElement { }
 
     [Template(TemplateType.String, @"
     <UITemplate>
@@ -21,7 +21,7 @@ public class TemplateParsingTests {
         </Contents>
     </UITemplate>
     ")]
-    public class TestThing2 : UIElement { }
+    private class TestThing2 : UIElement { }
 
     [Template(TemplateType.String, @"
     <UITemplate>
@@ -30,7 +30,7 @@ public class TemplateParsingTests {
         </Contents>
     </UITemplate>
     ")]
-    public class TestThing3 : UIElement { }
+    private class TestThing3 : UIElement { }
     
     [Template(TemplateType.String, @"
     <UITemplate>
@@ -41,7 +41,7 @@ public class TemplateParsingTests {
         </Contents>
     </UITemplate>
     ")]
-    public class ThingWithSlot : UIElement { }
+    private class ThingWithSlot : UIElement { }
 
     [Test]
     public void Children_ParsesCorrectly() {

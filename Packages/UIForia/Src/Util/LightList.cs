@@ -121,6 +121,10 @@ namespace UIForia.Util {
             array[index] = item;
         }
 
+        public void Reverse() {
+            System.Array.Reverse(array, 0, size);
+        }
+        
         public void InsertRange(int index, IEnumerable<T> collection) {
             if (collection == null) {
                 return;

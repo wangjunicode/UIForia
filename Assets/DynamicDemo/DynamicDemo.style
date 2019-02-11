@@ -1,0 +1,9 @@
+style container {
+    FlexLayoutDirection = Column;
+    BackgroundColor = red;
+    PaddingLeft = 20px;
+}
+
+style button {
+    Margin = 20px;
+}

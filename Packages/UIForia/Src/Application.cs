@@ -97,6 +97,27 @@ namespace UIForia {
             return view;
         }
 
+        internal UIElement CreateChildElement(UIElement parent, Type type) {
+            if (type == null) {
+                return null;
+            }
+
+            ParsedTemplate template = TemplateParser.GetParsedTemplate(type);
+
+            if (template == null) {
+                return null;
+            }
+
+            UIElement retn = template.Create();
+            
+            retn.templateContext.rootObject = parent;
+            retn.parent = parent;
+            parent.children.Add(retn);
+            RegisterElement(retn);
+            
+            return retn;
+        }
+
         internal void RegisterElement(UIElement element) {
             if (element.parent == null) {
                 Debug.Assert(element.view.RootElement == element, nameof(element.view.RootElement) + " must be null if providing a null parent");
@@ -292,7 +313,7 @@ namespace UIForia {
 
             RemoveUpdateDepthIndices(element);
 
-            
+
             if (element.parent != null) {
                 element.parent.children.Remove(element);
                 for (int i = 0; i < element.parent.children.Count; i++) {
@@ -307,9 +328,8 @@ namespace UIForia {
 
 
             // todo -- if element is poolable, pool it here
-            
-            onElementDestroyed?.Invoke(element);
 
+            onElementDestroyed?.Invoke(element);
         }
 
         internal void DestroyChildren(UIElement element) {
@@ -332,7 +352,7 @@ namespace UIForia {
                     node.flags |= UIElementFlags.Destroyed;
                     node.flags &= ~(UIElementFlags.Enabled);
                 }, true);
-                
+
                 m_ElementTree.TraversePostOrder(child, (node) => node.OnDestroy(), true);
             }
 
@@ -346,9 +366,7 @@ namespace UIForia {
             }
 
             for (int i = 0; i < element.children.Count; i++) {
-                m_ElementTree.TraversePostOrder(element.children[i], (node) => {
-                    LightListPool<UIElement>.Release(ref node.children);
-                }, true);
+                m_ElementTree.TraversePostOrder(element.children[i], (node) => { LightListPool<UIElement>.Release(ref node.children); }, true);
                 m_ElementTree.RemoveHierarchy(element.children[i]);
             }
 

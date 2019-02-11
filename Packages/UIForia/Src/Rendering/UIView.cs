@@ -29,7 +29,6 @@ public class UIView {
         Refresh();
     }
 
-
     public void EnableElement(UIElement element) {
         Application.DoEnableElement(element);
     }

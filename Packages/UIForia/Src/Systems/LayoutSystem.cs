@@ -27,15 +27,13 @@ namespace UIForia.Systems {
         public event Action<VirtualScrollbar> onCreateVirtualScrollbar;
         public event Action<VirtualScrollbar> onDestroyVirtualScrollbar;
 
-        // todo -- use arrays instead
         protected readonly IStyleSystem m_StyleSystem;
-        protected readonly IntMap<UIElement[]> m_QueryGrid;
         protected readonly IntMap<LayoutBox> m_LayoutBoxMap;
-        protected readonly List<VirtualElement> m_VirtualElements;
-        protected readonly List<LayoutBox> m_PendingInitialization;
+        protected readonly LightList<VirtualElement> m_VirtualElements;
+        protected readonly LightList<LayoutBox> m_PendingInitialization;
 
         private Size m_ScreenSize;
-        private readonly List<UIElement> m_Elements;
+        private readonly LightList<UIElement> m_Elements;
         private readonly LightList<ViewRect> m_Views;
 
         private static readonly IComparer<UIElement> comparer = new UIElement.RenderLayerComparerAscending();
@@ -43,10 +41,9 @@ namespace UIForia.Systems {
         public LayoutSystem(IStyleSystem styleSystem) {
             this.m_StyleSystem = styleSystem;
             this.m_LayoutBoxMap = new IntMap<LayoutBox>();
-            this.m_Elements = new List<UIElement>();
-            this.m_PendingInitialization = new List<LayoutBox>();
-            this.m_VirtualElements = new List<VirtualElement>();
-            this.m_QueryGrid = new IntMap<UIElement[]>();
+            this.m_Elements = new LightList<UIElement>();
+            this.m_PendingInitialization = new LightList<LayoutBox>();
+            this.m_VirtualElements = new LightList<VirtualElement>();
             this.m_Views = new LightList<ViewRect>();
             m_StyleSystem.onTextContentChanged += HandleTextContentChanged;
             m_StyleSystem.onStylePropertyChanged += HandleStylePropertyChanged;
@@ -57,7 +54,6 @@ namespace UIForia.Systems {
             m_Elements.Clear();
             m_PendingInitialization.Clear();
             m_VirtualElements.Clear();
-            m_QueryGrid.Clear();
             m_Views.Clear();
         }
 
@@ -250,7 +246,7 @@ namespace UIForia.Systems {
 
             // TODO optimize this to only sort if styles changed
             m_Elements.Sort(comparer);
-            m_Elements.Reverse();
+            
             for (var i = 0; i < m_Elements.Count; i++) {
                 UIElement e = m_Elements[i];
                 LayoutResult lr = e.layoutResult; 
@@ -263,6 +259,7 @@ namespace UIForia.Systems {
         }
 
         private void UpdateQueryGrid(UIElement element, Rect oldRect) {
+            // todo this should replace the brute force search for querying
             int x = (int) oldRect.x;
             int y = (int) oldRect.y;
             int w = (int) oldRect.width;
@@ -643,7 +640,29 @@ namespace UIForia.Systems {
             }
         }
 
-        public void OnElementDestroyed(UIElement element) { }
+        public void OnElementDestroyed(UIElement element) {
+            LayoutBox child = m_LayoutBoxMap.GetOrDefault(element.id);
+
+            // todo destroy scroll bars
+            
+            if (child?.parent != null) {
+                child.parent.OnChildDisabled(child);
+                child.parent.RequestContentSizeChangeLayout();
+            }
+
+            m_Elements.Remove(element);
+            m_PendingInitialization.Remove(child);
+            m_LayoutBoxMap.Remove(element.id);
+            
+            // todo -- maybe recycle the layout box
+
+            if (element.children != null) {
+                for (int i = 0; i < element.children.Count; i++) {
+                    OnElementDestroyed(element.children[i]);
+                }
+            }
+            
+        }
 
         // todo pool boxes
         private LayoutBox CreateLayoutBox(UIElement element) {

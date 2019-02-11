@@ -1,16 +1,11 @@
 using System;
 using System.Collections.Generic;
-using System.Net.Sockets;
 using NUnit.Framework;
+using Tests.Mocks;
 using UIForia;
 using UIForia.Input;
-using Tests.Mocks;
-using UIForia.Compilers;
-using UIForia.Layout.LayoutTypes;
-using UIForia.Parsing.Style;
 using UnityEngine;
 using static Tests.TestUtils;
-using Application = UIForia.Application;
 
 [TestFixture]
 public class InputSystem_DragTests {
@@ -166,17 +161,11 @@ public class InputSystem_DragTests {
         public void HandleDragEnterChild(UIElement el, int index) {
             if (ignoreEnter) return;
             dragList.Add("enter:child" + index);
-            Debug.Log("enter:child" + index);
-            Debug.Log("Size is " + dragList.Count);
-            Debug.Log(el.layoutResult.ScreenRect.ToString());
         }
 
         public void HandleDragExitChild(UIElement el, int index) {
             if (ignoreExit) return;
             dragList.Add("exit:child" + index);
-            Debug.Log("exit:child" + index);
-            Debug.Log("Size is " + dragList.Count);
-            Debug.Log(el.layoutResult.ScreenRect.ToString());
         }
 
         [OnDragCreate]

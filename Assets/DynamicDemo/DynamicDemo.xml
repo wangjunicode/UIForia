@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="utf-8"?>
+<UITemplate>
+    
+    <Style path="DynamicDemo/DynamicDemo.style"/>
+    
+    <Contents style="container">
+        
+        <Div style="button" onMouseClick="SelectDynamic(0)">
+            Dynamic 1
+        </Div>
+        
+        <Div style="button" onMouseClick="SelectDynamic(1)">
+            Dynamic 2
+        </Div>
+        
+        <Dynamic data="currentDynamicItem"/>
+        
+    </Contents>
+</UITemplate>

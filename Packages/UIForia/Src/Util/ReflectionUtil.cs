@@ -99,8 +99,8 @@ public static class ReflectionUtil {
         return type.GetField(fieldName, StaticFlags | InstanceBindFlags);
     }
 
-    public static PropertyInfo GetPropertyInfo(Type type, string propertyType) {
-        return type.GetProperty(propertyType, InstanceBindFlags);
+    public static PropertyInfo GetPropertyInfo(Type type, string propertyName) {
+        return type.GetProperty(propertyName, InstanceBindFlags);
     }
 
     public static PropertyInfo GetStaticPropertyInfo(Type type, string fieldName) {

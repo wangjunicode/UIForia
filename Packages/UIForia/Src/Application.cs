@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using SVGX;
+using UIForia.AttributeProcessors;
 using UIForia.Rendering;
 using UIForia.Routing;
 using UIForia.Systems;
@@ -10,14 +11,6 @@ using Debug = System.Diagnostics.Debug;
 
 namespace UIForia {
 
-    public abstract class AttributeProcessor {
-
-        public void Process(UIElement element, UITemplate originTemplate, ElementAttribute currentAttribute, List<ElementAttribute> attributes) {
-            
-        }
-
-    }
-    
     public abstract class Application {
 
         private static int ElementIdGenerator;
@@ -52,11 +45,13 @@ namespace UIForia {
         protected static readonly DepthIndexComparer s_DepthIndexComparer = new DepthIndexComparer();
 
         public static readonly Application Game = new GameApplication();
-        public static readonly List<AttributeProcessor> s_AttributeProcessors;
+        public static readonly List<IAttributeProcessor> s_AttributeProcessors;
         
         static Application() {
             ArrayPool<UIElement>.SetMaxPoolSize(64);
-            s_AttributeProcessors = new List<AttributeProcessor>();
+            s_AttributeProcessors = new List<IAttributeProcessor>();
+            s_AttributeProcessors.Add(new RouteAttrProcessor());
+            s_AttributeProcessors.Add(new InputAttrProcessor());
         }
 
         protected Application() {

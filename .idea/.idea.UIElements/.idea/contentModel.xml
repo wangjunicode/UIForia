@@ -1,7 +1,10 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project version="4">
   <component name="ContentModelStore">
-    <e p="C:\Seed\UIForia\UIElements" t="IncludeRecursive">
+    <e p="C:\Users\matth\.Rider2018.3\config\extensions" t="IncludeRecursive" />
+    <e p="C:\Users\matth\.Rider2018.3\system\extResources" t="IncludeRecursive" />
+    <e p="C:\Users\matth\.Rider2018.3\system\resharper-host\local\Transient\ReSharperHost\v183\SolutionCaches\_UIElements.-1987582547.00" t="ExcludeRecursive" />
+    <e p="C:\Users\matth\RiderProjects\UIElements" t="IncludeRecursive">
       <e p="Assembly-CSharp.csproj" t="IncludeRecursive" />
       <e p="Assets" t="Include">
         <e p="Compiler" t="Include">
@@ -255,6 +258,7 @@
             <e p="Application.cs" t="Include" />
             <e p="AssemblyInfo.cs" t="Include" />
             <e p="AttributeProcessors" t="Include">
+              <e p="InputAttrProcessor.cs" t="Include" />
               <e p="RouteAttrProcessor.cs" t="Include" />
             </e>
             <e p="Attributes.cs" t="Include" />
@@ -824,8 +828,5 @@
       <e p="UIForia.Src.csproj" t="IncludeRecursive" />
       <e p="UIForia.Test.csproj" t="IncludeRecursive" />
     </e>
-    <e p="C:\Users\Matt\.Rider2018.3\config\extensions" t="IncludeRecursive" />
-    <e p="C:\Users\Matt\.Rider2018.3\system\extResources" t="IncludeRecursive" />
-    <e p="C:\Users\Matt\.Rider2018.3\system\resharper-host\local\Transient\ReSharperHost\v183\SolutionCaches\_UIElements.120647963.00" t="ExcludeRecursive" />
   </component>
 </project>

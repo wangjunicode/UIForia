@@ -86,10 +86,10 @@
                 
                 color = lerp(textureColor, gradientColor, 1);
                 
-                bool colorMode = fmod(flags, 2) == 1);
-                bool colorMode = fmod(flags, 4) >= 2);
-                bool colorMode = fmod(flags, 8) >= 4);
-                bool colorMode = fmod(flags, 16) >= 8);
+//                bool colorMode = fmod(flags, 2) == 1);
+//                bool colorMode = fmod(flags, 4) >= 2);
+//                bool colorMode = fmod(flags, 8) >= 4);
+//                bool colorMode = fmod(flags, 16) >= 8);
                 
                 if(ShapeType > ShapeType_Path) {
                     float dist = length(i.uv - 0.5);

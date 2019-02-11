@@ -6,6 +6,12 @@
     <Style path="Klang/Seed/UIForia/Util.style" alias="util"/>
     <Style path="Klang/Seed/UIForia/KlangButton/KlangButton.style" alias="klang-button"/>
 
+    <Block id="block0" baseType="typeof($root)">
+        
+        {$value}
+        
+    </Block>
+    
     <Contents style="container">
 
         <Image style="seed-logo" src="'Images/seed_pioneers_hgm_logo'"/>
@@ -17,7 +23,7 @@
             <Input style="login-input" password.bindTo="onValueChanged"/>
         </Group>
 
-        <Group style="util.vertical-center">
+        <Group style="util.vertical-center" x-tooltip="blockId">
             
             <KlangButton style="klang-button.black" label="'Login'" onMouseDown="Login()"/>
             

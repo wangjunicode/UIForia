@@ -15,5 +15,9 @@
         
         <Dynamic data="currentDynamicItem"/>
         
+        <Text style.textFontSize="24">
+            Text here
+        </Text>
+        
     </Contents>
 </UITemplate>

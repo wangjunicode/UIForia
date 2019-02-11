@@ -43,31 +43,34 @@ namespace SVGX {
             camera.orthographicSize = Screen.height * 0.5f;
 
             ctx.Clear();
-
-
-            Vector2 v = new Vector2(200, 0);
-            v = v.Rotate(new Vector2(100, 100), rotation);
-
-            ctx.MoveTo(20, 20);
-            ctx.LineTo(100, 20);
-            ctx.LineTo(v.x, v.y);
-            ctx.Stroke();
-
-
+            ctx.Text(0, 0, "This should work");
             gfx.Render(ctx);
             
-            Vector2 start = new Vector2(20, 20);
-            Vector2 mid = new Vector2(100, 20);
-            Vector2 toV = (v - mid).normalized;
-            
-            gfx.DrawDebugLine(mid, v + toV * 100, Color.red, 2f);
-            gfx.DrawDebugLine(new Vector2(-120, 20), new Vector2(400, 20), Color.blue, 2f);
-
-//            Vector2 toCurrent = new Vector2(100, 20) - v;
-//            Vector2 
-//            toCurrent = toCurrent.normalized;
-//            toNext = toNext.normalized;
-            dot = Vector2.Dot(toV, (mid - start).normalized);
+//
+//
+//            Vector2 v = new Vector2(200, 0);
+//            v = v.Rotate(new Vector2(100, 100), rotation);
+//
+//            ctx.MoveTo(20, 20);
+//            ctx.LineTo(100, 20);
+//            ctx.LineTo(v.x, v.y);
+//            ctx.Stroke();
+//
+//
+//            gfx.Render(ctx);
+//            
+//            Vector2 start = new Vector2(20, 20);
+//            Vector2 mid = new Vector2(100, 20);
+//            Vector2 toV = (v - mid).normalized;
+//            
+//            gfx.DrawDebugLine(mid, v + toV * 100, Color.red, 2f);
+//            gfx.DrawDebugLine(new Vector2(-120, 20), new Vector2(400, 20), Color.blue, 2f);
+//
+////            Vector2 toCurrent = new Vector2(100, 20) - v;
+////            Vector2 
+////            toCurrent = toCurrent.normalized;
+////            toNext = toNext.normalized;
+//            dot = Vector2.Dot(toV, (mid - start).normalized);
         }
 
     }

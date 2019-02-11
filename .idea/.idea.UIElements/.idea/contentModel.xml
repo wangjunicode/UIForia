@@ -254,6 +254,9 @@
             </e>
             <e p="Application.cs" t="Include" />
             <e p="AssemblyInfo.cs" t="Include" />
+            <e p="AttributeProcessors" t="Include">
+              <e p="RouteAttrProcessor.cs" t="Include" />
+            </e>
             <e p="Attributes.cs" t="Include" />
             <e p="Binding" t="Include">
               <e p="Binding.cs" t="Include" />
@@ -594,6 +597,7 @@
             <e p="Shaders" t="Include">
               <e p="Debug.shader" t="Include" />
               <e p="JoinedPolyline.shader" t="Include" />
+              <e p="SDFText.shader" t="Include" />
               <e p="SimpleFillOpaque.shader" t="Include" />
               <e p="SimpleLineSegments.shader" t="Include" />
               <e p="SimpleStrokeOpaque.shader" t="Include" />
@@ -641,6 +645,7 @@
               <e p="ImmediateRenderContext.cs" t="Include" />
               <e p="LineCap.cs" t="Include" />
               <e p="LineJoin.cs" t="Include" />
+              <e p="MaterialPool.cs" t="Include" />
               <e p="PathCommand.cs" t="Include" />
               <e p="StrokeVertexData.cs" t="Include" />
               <e p="SVGXBezier.cs" t="Include" />
@@ -657,6 +662,7 @@
               <e p="SVGXMatrix.cs" t="Include" />
               <e p="SVGXPathCommandType.cs" t="Include" />
               <e p="SVGXRenderElementType.cs" t="Include" />
+              <e p="SVGXRenderShape.cs" t="Include" />
               <e p="SVGXRenderSystem.cs" t="Include" />
               <e p="SVGXRoot.cs" t="Include" />
               <e p="SVGXShape.cs" t="Include" />

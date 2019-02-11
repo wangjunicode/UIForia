@@ -22,11 +22,11 @@
         
         
     </Style>
+    
 
     <Contents style="container">
 
         <!--<URLNavBar/>-->
-
 
         <!--<Group style="app-body">-->
 
@@ -47,7 +47,7 @@
                 <!--&lt;!&ndash;</Route>&ndash;&gt;-->
 
                 <!--<Route path="'/game'" onRouteEnter="StartGame()">-->
-
+        
                     <!--<ColonyInfoPanel/>-->
                     <CharacterList/>
                     <CharacterInfoPanel/>

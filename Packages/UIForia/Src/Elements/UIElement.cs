@@ -471,4 +471,12 @@ public class UIElement : IHierarchical {
         return retn;
     }
 
+    internal void InternalDestroy() {
+        ElementColdData coldData = s_ColdDataMap.GetOrDefault(id);
+        coldData.Destroy();
+        s_ColdDataMap.Remove(id);
+        LightListPool<UIElement>.Release(ref children);
+        parent = null;
+    }
+
 }

@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using SVGX;
 using UIForia.Rendering;
 using UIForia.Routing;
 using UIForia.Systems;
@@ -9,6 +10,14 @@ using Debug = System.Diagnostics.Debug;
 
 namespace UIForia {
 
+    public abstract class AttributeProcessor {
+
+        public void Process(UIElement element, UITemplate originTemplate, ElementAttribute currentAttribute, List<ElementAttribute> attributes) {
+            
+        }
+
+    }
+    
     public abstract class Application {
 
         private static int ElementIdGenerator;
@@ -40,20 +49,19 @@ namespace UIForia {
 
         protected readonly List<UIView> m_Views;
 
-        protected readonly List<List<UIElement>> m_DepthMap;
         protected static readonly DepthIndexComparer s_DepthIndexComparer = new DepthIndexComparer();
 
         public static readonly Application Game = new GameApplication();
-
-
+        public static readonly List<AttributeProcessor> s_AttributeProcessors;
+        
         static Application() {
             ArrayPool<UIElement>.SetMaxPoolSize(64);
+            s_AttributeProcessors = new List<AttributeProcessor>();
         }
 
         protected Application() {
             this.m_Systems = new List<ISystem>();
             this.m_ElementTree = new SkipTree<UIElement>();
-            this.m_DepthMap = new List<List<UIElement>>();
             this.m_Views = new List<UIView>();
             this.m_Router = new Router();
 
@@ -134,32 +142,16 @@ namespace UIForia {
                 element.siblingIndex = element.parent.children.IndexOf(element);
 
                 element.depth = element.parent.depth + 1;
-            }
-
-            List<UIElement> list;
-            if (m_DepthMap.Count <= element.depth) {
-                list = ListPool<UIElement>.Get();
-                m_DepthMap.Add(list);
-            }
-            else {
-                list = m_DepthMap[element.depth];
-            }
+            }           
 
             InitHierarchy(element);
-
-            int index = ~list.BinarySearch(0, list.Count, element, s_DepthIndexComparer);
-
-            list.Insert(index, element);
-
-            for (int i = index; i < list.Count; i++) {
-                list[i].depthIndex = i;
-            }
 
             for (int i = 0; i < m_Systems.Count; i++) {
                 m_Systems[i].OnElementCreated(element);
             }
 
             InvokeOnCreate(element);
+            InvokeAttributeProcessors(element);
             InvokeOnReady(element);
             onElementCreated?.Invoke(element);
         }
@@ -174,13 +166,6 @@ namespace UIForia {
             m_ElementTree.TraversePreOrder((el) => el.OnDestroy());
 
             m_ElementTree.Clear();
-            for (int i = 0; i < m_DepthMap.Count; i++) {
-                m_DepthMap[i].Clear();
-                List<UIElement> map = m_DepthMap[i];
-                ListPool<UIElement>.Release(ref map);
-            }
-
-            m_DepthMap.Clear();
 
             for (int i = 0; i < m_Views.Count; i++) {
                 m_Views[i].Refresh();
@@ -223,31 +208,30 @@ namespace UIForia {
                 return;
             }
 
-            List<UIElement> list;
-
-            if (m_DepthMap.Count <= element.depth + 1) {
-                list = ListPool<UIElement>.Get();
-                m_DepthMap.Add(list);
-            }
-            else {
-                list = m_DepthMap[element.depth + 1];
-            }
-
-            int idx = ~list.BinarySearch(0, list.Count, element.children[0], s_DepthIndexComparer);
-
-            list.InsertRange(idx, children);
-
-            for (int i = idx; i < list.Count; i++) {
-                list[i].depthIndex = i;
-            }
-
             for (int i = 0; i < children.Count; i++) {
                 children[i].siblingIndex = i;
                 InitHierarchy(children[i]);
             }
         }
 
+        private static void InvokeAttributeProcessors(UIElement element) {
+            List<ElementAttribute> attributes = element.GetAttributes();
+            for (int i = 0; i < attributes.Count; i++) {
+                for (int j = 0; j < s_AttributeProcessors.Count; j++) {
+                    s_AttributeProcessors[i].Process(element, element.OriginTemplate, attributes[i], attributes);
+                }    
+            }
+
+            if (element.children == null) return;
+            
+            for (int i = 0; i < element.children.Count; i++) {
+                InvokeAttributeProcessors(element.children[i]);    
+            }
+            
+        }
+        
         private static void InvokeOnCreate(UIElement element) {
+            
             if (element.children != null) {
                 for (int i = 0; i < element.children.Count; i++) {
                     InvokeOnCreate(element.children[i]);
@@ -266,6 +250,7 @@ namespace UIForia {
                     }
                 }
             }
+            
         }
 
         private static void InvokeOnReady(UIElement element) {
@@ -311,9 +296,6 @@ namespace UIForia {
                 m_Systems[i].OnElementDestroyed(element);
             }
 
-            RemoveUpdateDepthIndices(element);
-
-
             if (element.parent != null) {
                 element.parent.children.Remove(element);
                 for (int i = 0; i < element.parent.children.Count; i++) {
@@ -326,10 +308,9 @@ namespace UIForia {
                 // todo -- if child is poolable, pool it here
             }, true);
 
-
             // todo -- if element is poolable, pool it here
-
             onElementDestroyed?.Invoke(element);
+            element.InternalDestroy();
         }
 
         internal void DestroyChildren(UIElement element) {
@@ -356,8 +337,6 @@ namespace UIForia {
                 m_ElementTree.TraversePostOrder(child, (node) => node.OnDestroy(), true);
             }
 
-            // todo I think this is wrong, should be done just for each child?
-            RemoveUpdateDepthIndicesStep(element);
 
             for (int i = 0; i < element.children.Count; i++) {
                 for (int j = 0; j < m_Systems.Count; j++) {
@@ -373,33 +352,33 @@ namespace UIForia {
             element.children.Clear();
         }
 
-        protected void RemoveUpdateDepthIndices(UIElement element) {
-            List<UIElement> list = m_DepthMap[element.depth];
-            list.RemoveAt(element.depthIndex);
-            for (int i = element.depthIndex; i < list.Count; i++) {
-                list[i].depthIndex = i;
-            }
-
-            RemoveUpdateDepthIndicesStep(element);
-        }
-
-        protected void RemoveUpdateDepthIndicesStep(UIElement element) {
-            if (element.children == null || element.children.Count == 0) {
-                return;
-            }
-
-            List<UIElement> list = m_DepthMap[element.depth + 1];
-            int idx = element.children[0].depthIndex;
-            list.RemoveRange(idx, element.children.Count);
-
-            for (int i = idx; i < list.Count; i++) {
-                list[i].depthIndex = i;
-            }
-
-            for (int i = idx; i < element.children.Count; i++) {
-                RemoveUpdateDepthIndicesStep(element.children[i]);
-            }
-        }
+//        protected void RemoveUpdateDepthIndices(UIElement element) {
+//            List<UIElement> list = m_DepthMap[element.depth];
+//            list.RemoveAt(element.depthIndex);
+//            for (int i = element.depthIndex; i < list.Count; i++) {
+//                list[i].depthIndex = i;
+//            }
+//
+//            RemoveUpdateDepthIndicesStep(element);
+//        }
+//
+//        protected void RemoveUpdateDepthIndicesStep(UIElement element) {
+//            if (element.children == null || element.children.Count == 0) {
+//                return;
+//            }
+//
+//            List<UIElement> list = m_DepthMap[element.depth + 1];
+//            int idx = element.children[0].depthIndex;
+//            list.RemoveRange(idx, element.children.Count);
+//
+//            for (int i = idx; i < list.Count; i++) {
+//                list[i].depthIndex = i;
+//            }
+//
+//            for (int i = idx; i < element.children.Count; i++) {
+//                RemoveUpdateDepthIndicesStep(element.children[i]);
+//            }
+//        }
 
         public void Update() {
             m_BindingSystem.OnUpdate();

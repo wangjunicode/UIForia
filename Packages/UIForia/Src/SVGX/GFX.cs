@@ -8,59 +8,6 @@ using UnityEngine.Rendering;
 
 namespace SVGX {
 
-    internal struct SVGXRenderShape {
-
-        public readonly int matrixId;
-        public readonly int styleId;
-        public readonly SVGXShape shape;
-
-        public SVGXRenderShape(SVGXShape shape, int styleId, int matrixId) {
-            this.shape = shape;
-            this.styleId = styleId;
-            this.matrixId = matrixId;
-        }
-
-    }
-
-    internal class MaterialPool {
-
-        private readonly Material material;
-        private readonly Stack<Material> pool;
-
-        private readonly LightList<Material> releaseQueue;
-
-        public MaterialPool(Material material) {
-            this.material = material;
-            this.pool = new Stack<Material>();
-            this.releaseQueue = new LightList<Material>();
-        }
-
-        public Material Get() {
-            if (pool.Count > 0) {
-                return pool.Pop();
-            }
-
-            return new Material(material);
-        }
-
-        public void Release(Material material) {
-            pool.Push(material);
-        }
-
-        public void FlushReleaseQueue() {
-            for (int i = 0; i < releaseQueue.Count; i++) {
-                pool.Push(releaseQueue[i]);
-            }
-
-            releaseQueue.Clear();
-        }
-
-        public void QueueForRelease(Material mat) {
-            releaseQueue.Add(mat);
-        }
-
-    }
-
     public class GFX {
 
         public Camera camera;
@@ -89,6 +36,7 @@ namespace SVGX {
         internal Material simpleStrokeTransparentMaterial;
 
         internal Material debugLineMaterial;
+        internal Material sdfTextMaterial;
         
         private Texture2D gradientAtlas;
         private Color32[] gradientAtlasContents;
@@ -122,6 +70,8 @@ namespace SVGX {
         public GFX(Camera camera) {
             this.camera = camera;
             debugLineMaterial = new Material(Shader.Find("UIForia/SimpleLineSegments"));
+            sdfTextMaterial = new Material(Shader.Find("UIForia/SDFText"));
+            
             gradientAtlas = new Texture2D(GradientPrecision, 32);
             gradientAtlas.wrapMode = TextureWrapMode.Clamp;
             gradientAtlasContents = new Color32[GradientPrecision * gradientAtlas.height];

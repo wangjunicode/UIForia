@@ -178,6 +178,8 @@ namespace UIForia {
                 foreach (AttributeDefinition s in realAttributes) {
                     templateAttributes.Add(new ElementAttribute(s.key.Substring(k_SpecialAttrPrefix.Length), s.value));
                 }
+
+                
             }
         }
 

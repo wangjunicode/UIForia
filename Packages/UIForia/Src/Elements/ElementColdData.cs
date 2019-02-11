@@ -12,9 +12,6 @@ public struct ElementColdData {
     public event Action<ElementAttribute> onAttributeRemoved;
 
     public UITemplate templateRef;
-    public ElementRenderer renderer;
-    public UIElement templateParent;
-    public ExpressionContext templateContext;
     public LightList<ElementAttribute> attributes;
     public UIChildrenElement transcludedChildren;
     public UIView view;
@@ -94,4 +91,13 @@ public struct ElementColdData {
         return retn;
     }
 
+    public void Destroy() {
+        LightListPool<ElementAttribute>.Release(ref attributes);
+        onAttributeAdded = null;
+        onAttributeRemoved = null;
+        onAttributeChanged = null;
+        transcludedChildren = null;
+        templateRef = null;
+        view = null;
+    }
 }

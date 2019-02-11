@@ -28,8 +28,6 @@ namespace UIForia.Systems {
         private Camera m_Camera;
         private readonly List<VirtualScrollbar> m_Scrollbars;
 
-        private static readonly RenderZIndexComparerAscending s_ZIndexComparer = new RenderZIndexComparerAscending();
-
         public event Action<LightList<RenderData>, LightList<RenderData>, Vector3, Camera> DrawDebugOverlay;
 
         public RenderSystem(Camera camera, ILayoutSystem layoutSystem) {
@@ -294,33 +292,7 @@ namespace UIForia.Systems {
                 Vector2 screenPosition = renderData.element.layoutResult.screenPosition;
                 renderData.renderPosition = new Vector3(screenPosition.x, -screenPosition.y, renderData.element.layoutResult.zIndex);
             }
-        }
-
-        //sort each group by z-index, use depth index to resolve ties, use origin layer if still tied
-        private class RenderZIndexComparerAscending : IComparer<RenderData> {
-
-            // at this point we can assume layers are the same 
-            public int Compare(RenderData a, RenderData b) {
-                // ReSharper disable once PossibleNullReferenceException
-                UIElement first = a.element;
-                // ReSharper disable once PossibleNullReferenceException
-                UIElement second = b.element;
-                // if z-indexes with bonus are equal
-                if (first.layoutResult.zIndex == second.layoutResult.zIndex) {
-                    // if original depths are the same, resolve using depth index
-                    if (first.depth == second.depth) {
-                        return first.depthIndex > second.depthIndex ? -1 : 1;
-                    }
-
-                    // otherwise resolve using raw depth
-                    return first.depth > second.depth ? -1 : 1;
-                }
-                else {
-                    return first.layoutResult.zIndex > second.layoutResult.zIndex ? -1 : 1;
-                }
-            }
-
-        }
+        }       
 
     }
 

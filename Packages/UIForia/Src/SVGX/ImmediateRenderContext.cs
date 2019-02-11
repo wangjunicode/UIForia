@@ -1,19 +1,9 @@
-using System;
 using System.Collections.Generic;
-using TMPro;
 using UIForia.Text;
 using UIForia.Util;
 using UnityEngine;
-using FontStyle = UIForia.Text.FontStyle;
-using TextAlignment = UIForia.Text.TextAlignment;
 
 namespace SVGX {
-
-    public class AttributePostProcessor {
-
-        public void ProcessAttribute(UIElement element, string attr, string value) { }
-
-    }
 
     // todo this saves 2 list allocations + operations
     public struct SVGXDrawState {
@@ -109,11 +99,9 @@ namespace SVGX {
             }
         }
 
-        public void Text(float x, float y, string text) { }
-
-        public struct Path2D { }
-
-        public void SetTextStyle(SVGXTextStyle style) { }
+        public void Text(float x, float y, string text) {
+                                                                   
+        }
 
         public void Text(float x, float y, TextInfo text) { }
 

@@ -391,48 +391,6 @@ public class UIView_Tests {
     }
 
     [Test]
-    public void SetDepthIndex() {
-        MockApplication testView = new MockApplication(typeof(ViewTestThing), template);
-        ViewTestThing root = (ViewTestThing) testView.RootElement;
-        for (int i = 0; i < 5; i++) {
-            Assert.AreEqual(root.FindById("L1-" + i).depthIndex, i);
-        }
-
-        for (int i = 0; i < 15; i++) {
-            Assert.AreEqual(root.FindById("L2-" + i).depthIndex, i);
-        }
-
-        for (int i = 0; i < 13; i++) {
-            Assert.AreEqual(root.FindById("L3-" + i).depthIndex, i);
-        }
-    }
-
-    [Test]
-    public void UpdateDepthIndexOnDestroy() {
-        MockApplication testView = new MockApplication(typeof(ViewTestThing), template);
-        
-        ViewTestThing root = (ViewTestThing) testView.RootElement;
-        Application.DestroyElement(root.FindById("L1-3"));
-
-        Assert.AreEqual(0, root.FindById("L1-0").depthIndex);
-        Assert.AreEqual(1, root.FindById("L1-1").depthIndex);
-        Assert.AreEqual(2, root.FindById("L1-2").depthIndex);
-        Assert.AreEqual(3, root.FindById("L1-4").depthIndex);
-
-//        for (int i = 0; i < 5; i++) {
-//            Assert.AreEqual(root.FindById("L1-" + i).depthIndex, i);
-//        }
-//        
-//        for (int i = 0; i < 15; i++) {
-//            Assert.AreEqual(root.FindById("L2-" + i).depthIndex, i);
-//        }
-//        
-//        for (int i = 0; i < 13; i++) {
-//            Assert.AreEqual(root.FindById("L3-" + i).depthIndex, i);
-//        }
-    }
-
-    [Test]
     public void RemoveFromChildrenOnDestroy() {
         MockApplication testView = new MockApplication(typeof(ViewTestThing), template);
         

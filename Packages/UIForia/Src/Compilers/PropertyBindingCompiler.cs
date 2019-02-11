@@ -1,4 +1,4 @@
-﻿ using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Reflection;
 using UIForia.Extensions;
@@ -24,7 +24,7 @@ namespace UIForia.Compilers {
 
         private Type rootType;
         private Type elementType;
-        
+
         public static readonly string[] EvtArgNames = {
             "$eventArg0",
             "$eventArg1",
@@ -164,6 +164,7 @@ namespace UIForia.Compilers {
                         if (binding == null) {
                             return null;
                         }
+
                         binding.bindingType = BindingType.Constant;
                         return binding;
                     }
@@ -217,7 +218,6 @@ namespace UIForia.Compilers {
         }
 
         private Binding CompilePropertyAttribute(PropertyInfo propertyInfo, Type elementType, string attrKey, string attrValue) {
-
             Expression expression = compiler.Compile(rootType, elementType, attrValue, propertyInfo.PropertyType);
 
             ReflectionUtil.LinqAccessor accessor = ReflectionUtil.GetLinqPropertyAccessors(elementType, propertyInfo.PropertyType, attrKey);
@@ -246,7 +246,6 @@ namespace UIForia.Compilers {
         }
 
         private Binding CompileFieldAttribute(FieldInfo fieldInfo, string attrKey, string attrValue) {
-
             Expression expression = compiler.Compile(rootType, elementType, attrValue, fieldInfo.FieldType);
 
             ReflectionUtil.LinqAccessor accessor = ReflectionUtil.GetLinqFieldAccessors(elementType, fieldInfo.FieldType, attrKey);
@@ -297,7 +296,7 @@ namespace UIForia.Compilers {
             return list;
         }
 
-        private Dictionary<string, LightList<object>> GetActionMap(Type elementType) {
+        private static Dictionary<string, LightList<object>> GetActionMap(Type elementType) {
             Dictionary<string, LightList<object>> actionMap;
             if (!m_TypeMap.TryGetValue(elementType, out actionMap)) {
                 MethodInfo[] methods = elementType.GetMethods(ReflectionUtil.InstanceBindFlags);
@@ -309,6 +308,7 @@ namespace UIForia.Compilers {
                     if (customAttributes.Length == 0) continue;
 
                     ParameterInfo[] parameterInfos = info.GetParameters();
+
                     if (!info.IsStatic && parameterInfos.Length == 1 && parameterInfos[0].ParameterType == typeof(string)) {
                         if (actionMap == null) {
                             actionMap = m_TypeMap.GetOrDefault(elementType);
@@ -325,6 +325,8 @@ namespace UIForia.Compilers {
                             GetHandlerList(actionMap, attr.propertyName).Add(ReflectionUtil.GetDelegate(a, info));
                         }
                     }
+
+                    UnityEngine.Debug.LogWarning($"Trying to compile 'OnPropertyChanged' attribute on method {info.Name} but the method did not have the required signature of 1 parameter of type string");
                 }
 
                 // use null as a marker in the dictionary regardless of whether or not we have actions registered

@@ -499,6 +499,7 @@
               <e p="ProcessedType.cs" t="Include" />
               <e p="Style" t="Include">
                 <e p="AstNodes" t="Include">
+                  <e p="GroupOperatorType.cs" t="Include" />
                   <e p="StyleASTNode.cs" t="Include" />
                   <e p="StyleASTNodeType.cs" t="Include" />
                   <e p="StyleFieldNotDefinedException.cs" t="Include" />
@@ -509,8 +510,11 @@
                 </e>
                 <e p="ParsedStyleSheet.cs" t="Include" />
                 <e p="ParseUtil.cs" t="Include" />
-                <e p="StyleFileParser.cs" t="Include" />
+                <e p="StyleAttributeExpression.cs" t="Include" />
+                <e p="StyleAttributeExpressionOperation.cs" t="Include" />
+                <e p="StyleCompiler.cs" t="Include" />
                 <e p="StyleParser.cs" t="Include" />
+                <e p="StyleParser2.cs" t="Include" />
                 <e p="StylePropertyMappers.cs" t="Include" />
                 <e p="Tokenizer" t="Include">
                   <e p="StyleToken.cs" t="Include" />
@@ -570,6 +574,7 @@
               <e p="UIMeasurement.cs" t="Include" />
               <e p="UIStyle.cs" t="Include" />
               <e p="UIStyleGroup.cs" t="Include" />
+              <e p="UIStyleRule.cs" t="Include" />
               <e p="UIStyleSet" t="Include">
                 <e p="ScrollbarButtonPlacement.cs" t="Include" />
                 <e p="StyleState.cs" t="Include" />
@@ -768,6 +773,7 @@
             <e p="RouterTests2.cs" t="Include" />
             <e p="SkipTreeTests.cs" t="Include" />
             <e p="StyleBindingTests.cs" t="Include" />
+            <e p="StyleParser2Tests.cs" t="Include" />
             <e p="StyleParserTest.cs" t="Include" />
             <e p="StyleParserTests.cs" t="Include" />
             <e p="StyleTests.cs" t="Include" />

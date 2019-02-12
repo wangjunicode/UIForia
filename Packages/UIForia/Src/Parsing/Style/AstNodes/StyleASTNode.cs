@@ -84,7 +84,7 @@ namespace UIForia.Style.Parsing {
             return propertyNode;
         }
 
-        internal static GroupSpecifierNode GroupSpecifierNode(UIForia.Rendering.GroupOperatorType groupOperatorType) {
+        internal static GroupSpecifierNode GroupSpecifierNode(GroupOperatorType groupOperatorType) {
             GroupSpecifierNode groupNode = s_GroupSpecifierNodePool.Get();
             groupNode.groupOperatorType = groupOperatorType;
             return groupNode;

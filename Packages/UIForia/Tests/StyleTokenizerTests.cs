@@ -17,7 +17,7 @@ public class StyleTokenizerTests {
             StyleTokenType.Colon,
             StyleTokenType.VariableType,
             StyleTokenType.Equal,
-            StyleTokenType.Identifier,
+            StyleTokenType.Rgba,
             StyleTokenType.ParenOpen,
             StyleTokenType.Number,
             StyleTokenType.Comma,
@@ -119,6 +119,27 @@ public class StyleTokenizerTests {
             StyleTokenType.BracesOpen,
             StyleTokenType.At,
             StyleTokenType.Use,
+            StyleTokenType.Identifier,
+            StyleTokenType.EndStatement,
+            StyleTokenType.BracesClose,
+        }, tokens);
+    }
+
+    [Test]
+    public void StyleWithProperty() {
+        List<StyleToken> tokens = StyleTokenizer.Tokenize(@"
+              style mystyle {
+                  MarginTop = 10px;
+              }
+        ");
+        
+        AssertTokenTypes(new List<StyleTokenType>() {
+            StyleTokenType.Style,
+            StyleTokenType.Identifier,
+            StyleTokenType.BracesOpen,
+            StyleTokenType.Identifier,
+            StyleTokenType.Equal,
+            StyleTokenType.Number,
             StyleTokenType.Identifier,
             StyleTokenType.EndStatement,
             StyleTokenType.BracesClose,

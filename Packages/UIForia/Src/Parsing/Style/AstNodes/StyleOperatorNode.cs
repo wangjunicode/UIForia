@@ -2,54 +2,58 @@ using System;
 
 namespace UIForia.Style.Parsing {
 
-    public class OperatorNode : ASTNode {
+    public class StyleOperatorNode : StyleASTNode {
 
-        public ASTNode left;
-        public ASTNode right;
-        public OperatorType operatorType;
+        public StyleASTNode left;
+        public StyleASTNode right;
+        public StyleOperatorType operatorType;
 
         public int priority {
             get {
                 switch (operatorType) {
-                    case OperatorType.Plus:
+                    case StyleOperatorType.Plus:
                         return 1;
                     
-                    case OperatorType.Minus:
+                    case StyleOperatorType.Minus:
                         return 1;
                     
-                    case OperatorType.Mod:
+                    case StyleOperatorType.Mod:
                         return 1;
                     
-                    case OperatorType.Times:
+                    case StyleOperatorType.Times:
                         return 2;
                     
-                    case OperatorType.Divide:
+                    case StyleOperatorType.Divide:
                         return 2;
                     
-                    case OperatorType.TernaryCondition:
+                    case StyleOperatorType.TernaryCondition:
                         return -2;
                     
-                    case OperatorType.TernarySelection:
+                    case StyleOperatorType.TernarySelection:
                         return -1;
                     
-                    case OperatorType.Equals:
+                    case StyleOperatorType.Equals:
                         return -1;
                     
-                    case OperatorType.NotEquals:
+                    case StyleOperatorType.NotEquals:
                         return -1;
                     
-                    case OperatorType.GreaterThan:
+                    case StyleOperatorType.GreaterThan:
                         return -1;
                     
-                    case OperatorType.GreaterThanEqualTo:
+                    case StyleOperatorType.GreaterThanEqualTo:
                         return -1;
                     
-                    case OperatorType.LessThan:
+                    case StyleOperatorType.LessThan:
                         return -1;
                     
-                    case OperatorType.LessThanEqualTo:
+                    case StyleOperatorType.LessThanEqualTo:
                         return -1;
-                    
+                    case StyleOperatorType.And:
+                        return -1;
+                    case StyleOperatorType.Not:
+                        return -1;
+                   
                     default:
                         throw new ArgumentOutOfRangeException();
                 }

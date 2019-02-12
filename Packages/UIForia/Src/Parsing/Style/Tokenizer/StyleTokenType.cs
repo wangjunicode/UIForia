@@ -39,6 +39,10 @@ namespace UIForia.Style.Parsing {
         // identifiers
         Identifier,
         VariableType,
+        
+        Rgba,
+        Rgb,
+        Url,
 
         // constants
         String,

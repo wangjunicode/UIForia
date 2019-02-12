@@ -213,7 +213,7 @@ namespace UIForia {
             List<ElementAttribute> attributes = element.GetAttributes();
             for (int i = 0; i < attributes.Count; i++) {
                 for (int j = 0; j < s_AttributeProcessors.Count; j++) {
-                    s_AttributeProcessors[i].Process(element, element.OriginTemplate, attributes[i], attributes);
+                    s_AttributeProcessors[j].Process(element, element.OriginTemplate, attributes[i], attributes);
                 }    
             }
 

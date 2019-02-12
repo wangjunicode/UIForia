@@ -195,6 +195,23 @@ namespace UIForia {
             return new ParsedTemplate(this, inheritedType, usings, contents, styleDefinitions, importDeclarations);
         }
 
+        internal UIStyleGroup ResolveElementStyle(UIElement element) {
+            // style search engine
+            string tagName = element.GetDisplayName();
+            List<ElementAttribute> attributes = element.GetAttributes();
+            int siblingIndex = element.siblingIndex;
+
+            // ComputeStyleGroup(tagName, attributes, siblingIndex);
+
+
+            for (int i = 0; i < styleDefinitions.Count; i++) {
+                StyleDefinition def = styleDefinitions[i];
+                UIStyleGroup styleGroup = StyleParser.GetParsedStyle(def.importPath, def.body, tagName);
+            }
+            
+            throw new NotImplementedException("come back here and fix this!");    
+        }
+        
         internal UIStyleGroup ResolveElementStyle(string tagName) {
             if (styleDefinitions == null) {
                 return default;

@@ -9,6 +9,7 @@ namespace UIForia.Rendering {
         public UIStyle active { get; internal set; }
         public UIStyle inactive { get; internal set; }
         public UIStyle focused { get; internal set; }
+        public UIStyleRule rule { get; internal set; }
 
         public static bool operator ==(UIStyleGroup x, UIStyleGroup y) {
             return string.Equals(x.name, y.name) 
@@ -17,7 +18,8 @@ namespace UIForia.Rendering {
                    && Equals(x.active, y.active) 
                    && Equals(x.inactive, y.inactive) 
                    && x.styleType == y.styleType 
-                   && Equals(x.focused, y.focused);
+                   && Equals(x.focused, y.focused)
+                   && x.rule == y.rule;
         }
 
         public static bool operator !=(UIStyleGroup x, UIStyleGroup y) {

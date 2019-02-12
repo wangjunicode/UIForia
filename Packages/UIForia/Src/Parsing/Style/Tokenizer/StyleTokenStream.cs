@@ -5,14 +5,14 @@ using UnityEngine;
 
 namespace UIForia.Style.Parsing {
 
-    public struct TokenStream {
+    public struct StyleTokenStream {
 
         private int ptr;
 
         private Stack<int> stack;
         private List<StyleToken> tokens;
 
-        public TokenStream(List<StyleToken> tokens) {
+        public StyleTokenStream(List<StyleToken> tokens) {
             ptr = 0;
             this.tokens = tokens;
             stack = StackPool<int>.Get();
@@ -29,7 +29,6 @@ namespace UIForia.Style.Parsing {
         }
 
         public StyleToken Previous {
-//            [DebuggerStepThrough]
             get { return (ptr - 1 < 0 || tokens.Count == 0) ? StyleToken.Invalid : tokens[ptr - 1]; }
         }
 
@@ -151,10 +150,10 @@ namespace UIForia.Style.Parsing {
         }
 
         [DebuggerStepThrough]
-        public TokenStream AdvanceAndReturnSubStream(int advance) {
+        public StyleTokenStream AdvanceAndReturnSubStream(int advance) {
             List<StyleToken> subStreamTokens = tokens.GetRange(ptr, advance);
             Advance(advance);
-            return new TokenStream(subStreamTokens);
+            return new StyleTokenStream(subStreamTokens);
         }
 
         [DebuggerStepThrough]

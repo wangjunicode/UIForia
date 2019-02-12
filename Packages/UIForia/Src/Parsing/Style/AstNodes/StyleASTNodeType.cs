@@ -1,6 +1,6 @@
 namespace UIForia.Style.Parsing {
 
-    public enum ASTNodeType {
+    public enum StyleASTNodeType {
 
         None,
         NullLiteral,
@@ -17,11 +17,15 @@ namespace UIForia.Style.Parsing {
         IndexExpression,
         UnaryNot,
         UnaryMinus,
-        DirectCast,
-        ListInitializer,
-        New,
-        Paren
-
+        Paren,
+        Unit,
+        Rgba,
+        Rgb,
+        Url,
+        Property,
+        AttributeGroup,
+        StateGroup,
+        ExpressionGroup
     }
 
 }

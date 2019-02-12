@@ -1,4 +1,3 @@
-using System;
 using System.Collections.Generic;
 using UIForia.Rendering;
 using UnityEngine;
@@ -15,7 +14,7 @@ namespace UIForia.Style.Parsing {
             "string",
             "bool",
         };
-        
+
         public static int TryReadCharacters(int ptr, string input, string match, StyleTokenType styleTokenType, List<StyleToken> output) {
             if (ptr + match.Length > input.Length) return ptr;
             for (int i = 0; i < match.Length; i++) {
@@ -23,7 +22,7 @@ namespace UIForia.Style.Parsing {
                     return ptr;
                 }
             }
-            
+
             output.Add(new StyleToken(styleTokenType, match));
             return TryConsumeWhiteSpace(ptr + match.Length, input);
         }
@@ -39,7 +38,6 @@ namespace UIForia.Style.Parsing {
         }
 
         public static int TryConsumeComment(int ptr, string input) {
-                        
             if (ptr + 1 >= input.Length) {
                 return ptr;
             }
@@ -104,23 +102,27 @@ namespace UIForia.Style.Parsing {
         }
 
         private static StyleToken TransformIdentifierToTokenType(string identifier) {
-            switch (identifier) {
-                case "use": return new StyleToken(StyleTokenType.Use, identifier);
-                case "and": return new StyleToken(StyleTokenType.And, identifier);
-                case "not": return new StyleToken(StyleTokenType.Not, identifier);
-                case "style": return new StyleToken(StyleTokenType.Style, identifier);
-                case "animation": return new StyleToken(StyleTokenType.Animation, identifier);
-                case "texture": return new StyleToken(StyleTokenType.Texture, identifier);
-                case "audio": return new StyleToken(StyleTokenType.Audio, identifier);
-                case "cursor": return new StyleToken(StyleTokenType.Cursor, identifier);
-                case "export": return new StyleToken(StyleTokenType.Export, identifier);
-                case "const": return new StyleToken(StyleTokenType.Const, identifier);
-                case "import": return new StyleToken(StyleTokenType.Import, identifier);
-                case "attr": return new StyleToken(StyleTokenType.AttributeSpecifier, identifier);
-                case "true": return new StyleToken(StyleTokenType.Boolean, identifier);
-                case "false": return new StyleToken(StyleTokenType.Boolean, identifier);
-                case "from": return new StyleToken(StyleTokenType.From, identifier);
-                case "as": return new StyleToken(StyleTokenType.As, identifier);
+            string identifierLowerCase = identifier.ToLower();
+            switch (identifierLowerCase) {
+                case "use": return new StyleToken(StyleTokenType.Use, identifierLowerCase);
+                case "and": return new StyleToken(StyleTokenType.And, identifierLowerCase);
+                case "not": return new StyleToken(StyleTokenType.Not, identifierLowerCase);
+                case "style": return new StyleToken(StyleTokenType.Style, identifierLowerCase);
+                case "animation": return new StyleToken(StyleTokenType.Animation, identifierLowerCase);
+                case "texture": return new StyleToken(StyleTokenType.Texture, identifierLowerCase);
+                case "audio": return new StyleToken(StyleTokenType.Audio, identifierLowerCase);
+                case "cursor": return new StyleToken(StyleTokenType.Cursor, identifierLowerCase);
+                case "export": return new StyleToken(StyleTokenType.Export, identifierLowerCase);
+                case "const": return new StyleToken(StyleTokenType.Const, identifierLowerCase);
+                case "import": return new StyleToken(StyleTokenType.Import, identifierLowerCase);
+                case "attr": return new StyleToken(StyleTokenType.AttributeSpecifier, identifierLowerCase);
+                case "true": return new StyleToken(StyleTokenType.Boolean, identifierLowerCase);
+                case "false": return new StyleToken(StyleTokenType.Boolean, identifierLowerCase);
+                case "from": return new StyleToken(StyleTokenType.From, identifierLowerCase);
+                case "as": return new StyleToken(StyleTokenType.As, identifierLowerCase);
+                case "rgba": return new StyleToken(StyleTokenType.Rgba, identifierLowerCase);
+                case "rgb": return new StyleToken(StyleTokenType.Rgb, identifierLowerCase);
+                case "url": return new StyleToken(StyleTokenType.Url, identifierLowerCase);
                 default: {
                     for (int index = 0; index < s_AcceptedTypes.Length; index++) {
                         if (identifier == s_AcceptedTypes[index]) {
@@ -133,12 +135,6 @@ namespace UIForia.Style.Parsing {
             }
         }
 
-        // todo handle {} inside of strings
-        // read until end or unescaped {
-        // if unescaped { found, find matching index
-        // add token for string 0 to index({)
-        // add + token
-        // run parse loop on contents of {}
         private static int TryReadString(int ptr, string input, List<StyleToken> output) {
             int start = ptr;
             if (ptr >= input.Length) return input.Length;
@@ -165,7 +161,7 @@ namespace UIForia.Style.Parsing {
 
             return TryConsumeWhiteSpace(ptr, input);
         }
-        
+
         private static int TryReadValue(int ptr, string input, List<StyleToken> output) {
             int originalPosition = ptr;
             if (ptr >= input.Length) return input.Length;
@@ -178,31 +174,32 @@ namespace UIForia.Style.Parsing {
                 if (input[ptr] == '/' && ptr + 1 < input.Length && input[ptr + 1] == '/') {
                     break;
                 }
+
                 ptr++;
             }
 
             if (ptr >= input.Length) {
                 return originalPosition;
             }
-                
+
             output.Add(new StyleToken(StyleTokenType.Value, input.Substring(start, ptr - start)));
 
             return TryConsumeWhiteSpace(ptr, input);
         }
-        
+
         private static int TryReadAttribute(int ptr, string input, List<StyleToken> output) {
             if (ptr >= input.Length) return input.Length;
 
             int start = ptr;
             ptr = TryReadCharacters(ptr, input, "attr", StyleTokenType.AttributeSpecifier, output);
-           
+
             if (start == ptr) {
                 return ptr;
             }
-            
+
             ptr = TryReadCharacters(ptr, input, ":", StyleTokenType.Colon, output);
             ptr = TryReadIdentifier(ptr, input, output);
-            
+
             if (input[ptr] != '=') return ptr;
             ptr++;
 
@@ -257,8 +254,8 @@ namespace UIForia.Style.Parsing {
 
                 if (ptr == start && ptr < input.Length) {
                     throw new ParseException($"Tokenizer failed on string: {input}." +
-                                        $" Processed {input.Substring(0, ptr)} as ({PrintTokenList(output)})" +
-                                        $" but then got stuck on {input.Substring(ptr)}");
+                                             $" Processed {input.Substring(0, ptr)} as ({PrintTokenList(output)})" +
+                                             $" but then got stuck on {input.Substring(ptr)}");
                 }
             }
 
@@ -273,6 +270,7 @@ namespace UIForia.Style.Parsing {
                     retn += ", \n";
                 }
             }
+
             return retn;
         }
 

@@ -721,9 +721,9 @@ namespace UIForia.Compilers {
             Expression left = Visit(node.left);
             Type leftType = left.YieldedType;
             Expression right = Visit(node.right);
-            ;
+
             Type rightType = right.YieldedType;
-            ;
+
 
             targetType = oldTarget;
 

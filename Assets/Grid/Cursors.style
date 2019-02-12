@@ -18,4 +18,5 @@ style blue {
         BackgroundColor = yellow;
         Cursor = Cursor1 15;
     }
+    [attr:attrName]
 }

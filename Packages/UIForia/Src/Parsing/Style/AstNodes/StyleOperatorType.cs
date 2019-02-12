@@ -3,7 +3,7 @@ using System;
 namespace UIForia.Style.Parsing {
     
     [Flags]
-    public enum OperatorType {
+    public enum StyleOperatorType {
         Plus = 1 << 0,
         Minus = 1 << 1,
         Mod = 1 << 2,
@@ -17,13 +17,16 @@ namespace UIForia.Style.Parsing {
         GreaterThanEqualTo = 1 << 10,
         LessThan = 1 << 11,
         LessThanEqualTo = 1 << 12,
-        And = 1 << 13,
-        Or = 1 << 14,
-        Not = 1 << 15,
+        BooleanAnd = 1 << 13,
+        BooleanOr = 1 << 14,
+        BooleanNot = 1 << 15,
         As = 1 << 16,
         Is = 1 << 17,
+        And = 1 << 18,
+        Not = 1 << 19,
         
-        Boolean = And | Or | Not,
+        GroupOperator = And | Not,
+        Boolean = BooleanAnd | BooleanOr | BooleanNot,
         Arithmetic = Plus | Minus | Times | Divide | Mod,
         Comparator = Equals | NotEquals | GreaterThan | GreaterThanEqualTo | LessThan | LessThanEqualTo,
 

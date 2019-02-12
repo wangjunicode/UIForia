@@ -1,103 +1,119 @@
 ﻿using System;
 using System.Collections.Generic;
-using UIForia;
-using UIForia.Systems;
 using UIForia.Util;
-using UnityEngine;
 
-public struct ElementColdData {
+namespace UIForia {
 
-    public event Action<ElementAttribute> onAttributeAdded;
-    public event Action<ElementAttribute> onAttributeChanged;
-    public event Action<ElementAttribute> onAttributeRemoved;
+    internal struct ElementColdData {
 
-    public UITemplate templateRef;
-    public LightList<ElementAttribute> attributes;
-    public UIChildrenElement transcludedChildren;
-    public UIView view;
-    public IRouterElement nearestRouter;
-    
-    private void InitializeAttributes() {
-        if (attributes == null && templateRef?.attributes != null) {
-            attributes = LightListPool<ElementAttribute>.Get();
-            for (int i = 0; i < templateRef.attributes.Count; i++) {
-                attributes.AddUnchecked(new ElementAttribute(templateRef.attributes[i].key, templateRef.attributes[i].value));
-            }
-        }
-    }
+        public event Action<ElementAttribute> onAttributeAdded;
+        public event Action<ElementAttribute> onAttributeChanged;
+        public event Action<ElementAttribute> onAttributeRemoved;
 
-    public void SetAttribute(string name, string value) {
-        InitializeAttributes();
-        ElementAttribute attribute = new ElementAttribute(name, value);
-        attributes = attributes ?? LightListPool<ElementAttribute>.Get();
-        for (int i = 0; i < attributes.Count; i++) {
-            if (attributes[i].name == name) {
-                if (string.IsNullOrEmpty(value)) {
-                    attributes.RemoveAt(i);
-                    onAttributeRemoved?.Invoke(attribute);
+        public UIView view;
+        public UITemplate templateRef;
+        public LightList<ElementAttribute> attributes;
+        public UIChildrenElement transcludedChildren;
+        public IRouterElement nearestRouter;
+
+        public void InitializeAttributes() {
+            if (attributes == null && templateRef?.templateAttributes != null) {
+                attributes = LightListPool<ElementAttribute>.Get();
+                for (int i = 0; i < templateRef.templateAttributes.Count; i++) {
+                    attributes.AddUnchecked(templateRef.templateAttributes[i]);
                 }
-                else {
-                    attributes[i] = attribute;
-                    onAttributeChanged?.Invoke(attributes[i]);
-                }
-
-                return;
             }
         }
 
-        attributes.Add(attribute);
-        onAttributeAdded?.Invoke(attribute);
-    }
-
-    public void RemoveAttribute(string name) {
-        InitializeAttributes();
-        if (attributes == null) {
-            return;
-        }
-        for (int i = 0; i < attributes.Count; i++) {
-            if (attributes[i].name == name) {
-                onAttributeRemoved?.Invoke(attributes[i]);
-                attributes.RemoveAt(i);
-                return;
-            }   
-        }
-    }
-
-    public ElementAttribute GetAttribute(string name) {
-        InitializeAttributes();
-        if (attributes != null) {
+        public void SetAttribute(string name, string value) {
+            ElementAttribute attribute = new ElementAttribute(name, value);
+            attributes = attributes ?? LightListPool<ElementAttribute>.Get();
             for (int i = 0; i < attributes.Count; i++) {
                 if (attributes[i].name == name) {
-                    return attributes[i];
+                    if (string.IsNullOrEmpty(value)) {
+                        attributes.RemoveAt(i);
+                        onAttributeRemoved?.Invoke(attribute);
+                    }
+                    else {
+                        attributes[i] = attribute;
+                        onAttributeChanged?.Invoke(attributes[i]);
+                    }
+
+                    return;
+                }
+            }
+
+            attributes.Add(attribute);
+            onAttributeAdded?.Invoke(attribute);
+        }
+
+        public void RemoveAttribute(string name) {
+            if (attributes == null) {
+                return;
+            }
+
+            for (int i = 0; i < attributes.Count; i++) {
+                if (attributes[i].name == name) {
+                    onAttributeRemoved?.Invoke(attributes[i]);
+                    attributes.RemoveAt(i);
+                    return;
                 }
             }
         }
 
-        return new ElementAttribute(name, null);
-    }
-
-    public List<ElementAttribute> GetAttributes(List<ElementAttribute> retn) {
-        InitializeAttributes();
-        if (retn == null) {
-            retn = ListPool<ElementAttribute>.Get();
-        }
-
-        if (attributes != null) {
-            for (int i = 0; i < attributes.Count; i++) {
-                retn.Add(attributes[i]);
+        public bool TryGetAttribute(string name, out ElementAttribute attr) {
+            if (attributes == null) {
+                attr = default;
+                return false;
             }
+
+            for (int i = 0; i < attributes.Count; i++) {
+                if (attributes[i].name == name) {
+                    attr = attributes[i];
+                    return true;
+                }
+            }
+
+            attr = default;
+            return false;
         }
 
-        return retn;
+        public ElementAttribute GetAttribute(string name) {
+            if (attributes != null) {
+                for (int i = 0; i < attributes.Count; i++) {
+                    if (attributes[i].name == name) {
+                        return attributes[i];
+                    }
+                }
+            }
+
+            return new ElementAttribute(name, null);
+        }
+
+        public List<ElementAttribute> GetAttributes(List<ElementAttribute> retn) {
+            if (retn == null) {
+                retn = ListPool<ElementAttribute>.Get();
+            }
+
+            if (attributes != null) {
+                for (int i = 0; i < attributes.Count; i++) {
+                    retn.Add(attributes[i]);
+                }
+            }
+
+            return retn;
+        }
+
+        public void Destroy() {
+            LightListPool<ElementAttribute>.Release(ref attributes);
+            onAttributeAdded = null;
+            onAttributeRemoved = null;
+            onAttributeChanged = null;
+            transcludedChildren = null;
+            templateRef = null;
+            view = null;
+        }
+
     }
 
-    public void Destroy() {
-        LightListPool<ElementAttribute>.Release(ref attributes);
-        onAttributeAdded = null;
-        onAttributeRemoved = null;
-        onAttributeChanged = null;
-        transcludedChildren = null;
-        templateRef = null;
-        view = null;
-    }
 }

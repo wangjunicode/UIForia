@@ -1,0 +1,10 @@
+style splash-screen {
+    PreferredSize = 100%;
+    BackgroundColor = black;
+    FlexLayoutMainAxisAlignment = Center;
+    FlexLayoutCrossAxisAlignment = Center;
+}
+
+style logo {
+    
+}

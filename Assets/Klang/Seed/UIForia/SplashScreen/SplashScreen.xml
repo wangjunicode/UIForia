@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8"?>
+<UITemplate>
+
+    <Style path="Klang/Seed/UIForia/SplashScreen/SplashScreen.style"/>
+
+    <Contents style="splash-screen">
+
+        <Image x-id="logo" src="'Sprites/seed_logo_no_text'"/>
+
+    </Contents>
+
+</UITemplate>

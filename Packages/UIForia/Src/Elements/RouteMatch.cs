@@ -115,14 +115,6 @@ namespace UIForia {
             return toMatch;
         }
 
-        private static int SkipToNextSection(int ptr, string path) {
-            while (ptr < path.Length && path[ptr] != '/') {
-                ptr++;
-            }
-
-            return ptr;
-        }
-
         private static string ReadRouteSectionContents(ref int ptr, string path) {
             int startIndex = ptr;
             while (ptr < path.Length) {

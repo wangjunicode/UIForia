@@ -18,7 +18,8 @@ namespace UIForia {
         public bool isCompiled;
 
         public readonly List<UITemplate> childTemplates;
-        public readonly List<AttributeDefinition> attributes;
+        public readonly List<AttributeDefinition> attributes; // all attributes
+        public List<ElementAttribute> templateAttributes; // actual attributes
 
         public string elementName;
 
@@ -32,12 +33,10 @@ namespace UIForia {
         public MouseEventHandler[] mouseEventHandlers;
         public KeyboardEventHandler[] keyboardEventHandlers;
 
-        public List<ElementAttribute> templateAttributes;
-
         protected static readonly LightList<Binding> s_BindingList = new LightList<Binding>();
-        protected static readonly StyleBindingCompiler styleCompiler = new StyleBindingCompiler();
-        protected static readonly InputBindingCompiler inputCompiler = new InputBindingCompiler();
-        protected static readonly PropertyBindingCompiler propCompiler = new PropertyBindingCompiler();
+        protected static readonly StyleBindingCompiler s_StyleCompiler = new StyleBindingCompiler();
+        protected static readonly InputBindingCompiler s_InputCompiler = new InputBindingCompiler();
+        protected static readonly PropertyBindingCompiler s_PropCompiler = new PropertyBindingCompiler();
 
         protected UITemplate(List<UITemplate> childTemplates, List<AttributeDefinition> attributes = null) {
             this.childTemplates = childTemplates;
@@ -135,11 +134,11 @@ namespace UIForia {
         protected void CompileStyleBindings(ParsedTemplate template) {
             if (attributes == null || attributes.Count == 0) return;
 
-            styleCompiler.SetCompiler(template.compiler);
+            s_StyleCompiler.SetCompiler(template.compiler);
 
             for (int i = 0; i < attributes.Count; i++) {
                 AttributeDefinition attr = attributes[i];
-                StyleBinding binding = styleCompiler.Compile(template.RootType, elementType, attr);
+                StyleBinding binding = s_StyleCompiler.Compile(template.RootType, elementType, attr);
 
                 if (binding == null) {
                     continue;
@@ -177,20 +176,18 @@ namespace UIForia {
                 templateAttributes = new List<ElementAttribute>();
                 foreach (AttributeDefinition s in realAttributes) {
                     templateAttributes.Add(new ElementAttribute(s.key.Substring(k_SpecialAttrPrefix.Length), s.value));
-                }
-
-                
+                }                
             }
         }
 
         protected void CompileInputBindings(ParsedTemplate template, bool attributesOnly) {
             // todo can't pool the lists since they get cached... make this better
             Type rootType = template.RootType;
-            inputCompiler.SetCompiler(template.compiler);
-            List<MouseEventHandler> mouseHandlers = inputCompiler.CompileMouseEventHandlers(rootType, elementType, attributes, attributesOnly);
-            List<KeyboardEventHandler> keyboardHandlers = inputCompiler.CompileKeyboardEventHandlers(rootType, elementType, attributes, attributesOnly);
-            List<DragEventCreator> dragCreators = inputCompiler.CompileDragEventCreators(rootType, elementType, attributes, attributesOnly);
-            List<DragEventHandler> dragHandlers = inputCompiler.CompileDragEventHandlers(rootType, elementType, attributes, attributesOnly);
+            s_InputCompiler.SetCompiler(template.compiler);
+            List<MouseEventHandler> mouseHandlers = s_InputCompiler.CompileMouseEventHandlers(rootType, elementType, attributes, attributesOnly);
+            List<KeyboardEventHandler> keyboardHandlers = s_InputCompiler.CompileKeyboardEventHandlers(rootType, elementType, attributes, attributesOnly);
+            List<DragEventCreator> dragCreators = s_InputCompiler.CompileDragEventCreators(rootType, elementType, attributes, attributesOnly);
+            List<DragEventHandler> dragHandlers = s_InputCompiler.CompileDragEventHandlers(rootType, elementType, attributes, attributesOnly);
 
             if (mouseHandlers != null) {
                 mouseEventHandlers = mouseHandlers.ToArray();
@@ -213,7 +210,7 @@ namespace UIForia {
             if (attributes == null || attributes.Count == 0) return;
 
             try {
-                propCompiler.SetCompiler(template.compiler);
+                s_PropCompiler.SetCompiler(template.compiler);
                 for (int i = 0; i < attributes.Count; i++) {
                     if (attributes[i].isCompiled) continue;
 
@@ -222,7 +219,7 @@ namespace UIForia {
                     }
 
                     attributes[i].isCompiled = true;
-                    Binding binding = propCompiler.CompileAttribute(template.rootElementTemplate.RootType, elementType, attributes[i]);
+                    Binding binding = s_PropCompiler.CompileAttribute(template.rootElementTemplate.RootType, elementType, attributes[i]);
                     if (binding != null) {
                         if (binding.IsConstant()) {
                             binding.bindingType = BindingType.Constant;

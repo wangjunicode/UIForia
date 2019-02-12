@@ -6,7 +6,7 @@ using UIForia.Compilers.AliasSource;
 using UIForia.Util;
 using UnityEngine;
 using Debug = System.Diagnostics.Debug;
-using ElementCallback = System.Action<UIElement, string>;
+using ElementCallback = System.Action<UIForia.UIElement, string>;
 
 namespace UIForia.Compilers {
 

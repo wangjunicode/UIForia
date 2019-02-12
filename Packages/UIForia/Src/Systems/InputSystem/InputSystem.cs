@@ -472,8 +472,6 @@ public abstract class InputSystem : IInputSystem, IInputProvider {
             m_DragCreatorMap[element.id] = new DragCreatorGroup(element.templateContext, dragEventCreators);
         }
 
-        element.Input = this;
-
         if (element.children == null) {
             return;
         }

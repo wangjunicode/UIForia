@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
 using System.Reflection;
@@ -11,7 +12,7 @@ namespace UIForia {
 
         public readonly Type rawType;
         private readonly TemplateAttribute templateAttr;
-
+        
         public ProcessedType(Type rawType) {
             this.rawType = rawType;
             templateAttr = rawType.GetCustomAttribute<TemplateAttribute>();
@@ -23,11 +24,28 @@ namespace UIForia {
             }
 
             if (templateAttr.templateType == TemplateType.File) {
-                // todo should probably be cached
-                return File.ReadAllText(UnityEngine.Application.dataPath + "/" + templateAttr.template);
+                return TryReadFile(UnityEngine.Application.dataPath + "/" + templateAttr.template);
             }
 
             return templateAttr.template;
+        }
+
+        private static string TryReadFile(string path) {
+            if (!path.EndsWith(".xml")) {
+                path += ".xml";
+            }
+            
+            // todo should probably be cached, but be careful about reloading
+
+            try {
+                return File.ReadAllText(path);
+            }
+            catch (FileNotFoundException e) {
+                throw e;
+            }
+            catch (Exception e) {
+                return null;
+            }
         }
 
         public bool HasTemplatePath() {

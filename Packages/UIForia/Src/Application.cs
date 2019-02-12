@@ -1,13 +1,11 @@
 using System;
 using System.Collections.Generic;
-using SVGX;
 using UIForia.AttributeProcessors;
 using UIForia.Rendering;
 using UIForia.Routing;
 using UIForia.Systems;
 using UIForia.Util;
 using UnityEngine;
-using Debug = System.Diagnostics.Debug;
 
 namespace UIForia {
 
@@ -23,6 +21,7 @@ namespace UIForia {
         protected IInputSystem m_InputSystem;
 
         protected readonly SkipTree<UIElement> m_ElementTree;
+        protected readonly SkipTree<UIElement> m_UpdateTree;
         protected Router m_Router;
 
         protected readonly List<ISystem> m_Systems;
@@ -42,13 +41,13 @@ namespace UIForia {
 
         protected readonly List<UIView> m_Views;
 
-        protected static readonly DepthIndexComparer s_DepthIndexComparer = new DepthIndexComparer();
-
         public static readonly Application Game = new GameApplication();
         public static readonly List<IAttributeProcessor> s_AttributeProcessors;
-        
+        private static readonly Dictionary<Type, bool> s_RequiresUpdateMap;
+
         static Application() {
             ArrayPool<UIElement>.SetMaxPoolSize(64);
+            s_RequiresUpdateMap = new Dictionary<Type, bool>();
             s_AttributeProcessors = new List<IAttributeProcessor>();
             s_AttributeProcessors.Add(new RouteAttrProcessor());
             s_AttributeProcessors.Add(new InputAttrProcessor());
@@ -59,7 +58,8 @@ namespace UIForia {
             this.m_ElementTree = new SkipTree<UIElement>();
             this.m_Views = new List<UIView>();
             this.m_Router = new Router();
-
+            this.m_UpdateTree = new SkipTree<UIElement>();
+            
             m_StyleSystem = new StyleSystem();
             m_BindingSystem = new BindingSystem();
             m_LayoutSystem = new LayoutSystem(m_StyleSystem);
@@ -112,12 +112,12 @@ namespace UIForia {
             }
 
             UIElement retn = template.Create();
-            
+
             retn.templateContext.rootObject = parent;
             retn.parent = parent;
             parent.children.Add(retn);
             RegisterElement(retn);
-            
+
             return retn;
         }
 
@@ -137,7 +137,7 @@ namespace UIForia {
                 element.siblingIndex = element.parent.children.IndexOf(element);
 
                 element.depth = element.parent.depth + 1;
-            }           
+            }
 
             InitHierarchy(element);
 
@@ -149,6 +149,17 @@ namespace UIForia {
             InvokeAttributeProcessors(element);
             InvokeOnReady(element);
             onElementCreated?.Invoke(element);
+
+            Type elementType = element.GetType();
+            if (!s_RequiresUpdateMap.TryGetValue(elementType, out bool requiresUpdate)) { 
+                requiresUpdate = ReflectionUtil.IsOverride(elementType.GetMethod(nameof(UIElement.OnUpdate)));
+                s_RequiresUpdateMap[elementType] = requiresUpdate;
+            }
+
+            if (requiresUpdate) {
+                m_UpdateTree.AddItem(element);
+            }
+            
         }
 
         public void Refresh() {
@@ -213,20 +224,18 @@ namespace UIForia {
             List<ElementAttribute> attributes = element.GetAttributes();
             for (int i = 0; i < attributes.Count; i++) {
                 for (int j = 0; j < s_AttributeProcessors.Count; j++) {
-                    s_AttributeProcessors[i].Process(element, element.OriginTemplate, attributes[i], attributes);
-                }    
+                    s_AttributeProcessors[j].Process(element, element.OriginTemplate, attributes[i], attributes);
+                }
             }
 
             if (element.children == null) return;
-            
+
             for (int i = 0; i < element.children.Count; i++) {
-                InvokeAttributeProcessors(element.children[i]);    
+                InvokeAttributeProcessors(element.children[i]);
             }
-            
         }
-        
+
         private static void InvokeOnCreate(UIElement element) {
-            
             if (element.children != null) {
                 for (int i = 0; i < element.children.Count; i++) {
                     InvokeOnCreate(element.children[i]);
@@ -245,7 +254,6 @@ namespace UIForia {
                     }
                 }
             }
-            
         }
 
         private static void InvokeOnReady(UIElement element) {
@@ -298,14 +306,15 @@ namespace UIForia {
                 }
             }
 
-            m_ElementTree.TraversePreOrder(element, (node) => {
-                LightListPool<UIElement>.Release(ref node.children);
-                // todo -- if child is poolable, pool it here
-            }, true);
-
-            // todo -- if element is poolable, pool it here
             onElementDestroyed?.Invoke(element);
-            element.InternalDestroy();
+         
+            // todo -- if element is poolable, pool it here
+            m_ElementTree.TraversePreOrder(element, (el) => {
+                el.InternalDestroy();
+            }, true);
+            
+            m_UpdateTree.RemoveHierarchy(element);
+
         }
 
         internal void DestroyChildren(UIElement element) {
@@ -347,34 +356,6 @@ namespace UIForia {
             element.children.Clear();
         }
 
-//        protected void RemoveUpdateDepthIndices(UIElement element) {
-//            List<UIElement> list = m_DepthMap[element.depth];
-//            list.RemoveAt(element.depthIndex);
-//            for (int i = element.depthIndex; i < list.Count; i++) {
-//                list[i].depthIndex = i;
-//            }
-//
-//            RemoveUpdateDepthIndicesStep(element);
-//        }
-//
-//        protected void RemoveUpdateDepthIndicesStep(UIElement element) {
-//            if (element.children == null || element.children.Count == 0) {
-//                return;
-//            }
-//
-//            List<UIElement> list = m_DepthMap[element.depth + 1];
-//            int idx = element.children[0].depthIndex;
-//            list.RemoveRange(idx, element.children.Count);
-//
-//            for (int i = idx; i < list.Count; i++) {
-//                list[i].depthIndex = i;
-//            }
-//
-//            for (int i = idx; i < element.children.Count; i++) {
-//                RemoveUpdateDepthIndicesStep(element.children[i]);
-//            }
-//        }
-
         public void Update() {
             m_BindingSystem.OnUpdate();
             m_StyleSystem.OnUpdate();
@@ -382,7 +363,7 @@ namespace UIForia {
             m_InputSystem.OnUpdate();
             m_RenderSystem.OnUpdate();
 
-            m_ElementTree.ConditionalTraversePreOrder((element) => {
+            m_UpdateTree.ConditionalTraversePreOrder((element) => {
                 if (element == null) return true;
                 if (element.isDisabled) return false;
                 element.OnUpdate();
@@ -475,26 +456,6 @@ namespace UIForia {
 
         public UIElement GetElement(int elementId) {
             return m_ElementTree.GetItem(elementId);
-        }
-
-        protected class DepthIndexComparer : IComparer<UIElement> {
-
-            public int Compare(UIElement x, UIElement y) {
-                if (x.parent == y.parent) {
-                    return x.siblingIndex > y.siblingIndex ? 1 : -1;
-                }
-
-                UIElement p0 = x.parent;
-                UIElement p1 = y.parent;
-
-                while (p0.parent != p1.parent) {
-                    p0 = p0.parent;
-                    p1 = p1.parent;
-                }
-
-                return p0.siblingIndex > p1.siblingIndex ? 1 : -1;
-            }
-
         }
 
     }

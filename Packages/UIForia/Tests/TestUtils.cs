@@ -1,5 +1,6 @@
 using System;
 using NUnit.Framework;
+using UIForia;
 using UIForia.Compilers;
 using UIForia.Compilers.AliasSource;
 

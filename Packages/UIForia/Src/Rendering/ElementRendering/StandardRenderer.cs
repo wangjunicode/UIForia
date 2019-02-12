@@ -81,7 +81,7 @@ namespace UIForia.Systems {
                     Quaternion.AngleAxis(0, Vector3.forward),
                     new Vector3(1, 1, 1)
                 );
-
+ 
                 Graphics.DrawMesh(data.mesh, matrix, data.material, 0, camera, 0, null, false, false, false);
             }
         }

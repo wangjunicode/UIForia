@@ -34,6 +34,8 @@ namespace SVGX {
 
         // todo -- remove list allocation
         public Mesh FillMesh() {
+            // do we really need to clear? 
+            mesh.Clear(true);
             mesh.SetVertices(position.ToList());
             mesh.SetColors(colors.ToList());
             mesh.SetUVs(0, texCoords.ToList());

@@ -4,11 +4,16 @@ namespace SVGX {
 
     public struct SVGXClipGroup {
 
-        public int id;
+//        public int id;
         public int parent;  
         public RangeInt shapeRange;
-        public SVGXBounds bounds;
+//        public SVGXBounds bounds;
 
+        public SVGXClipGroup(int parentId, RangeInt shapeRange) {
+            this.parent = parentId;
+            this.shapeRange = shapeRange;
+        }
+        
         public SVGXBounds GetBounds(ImmediateRenderContext ctx) {
 //
 //            SVGXBounds bounds = ctx.GetBounds(shapeRange);

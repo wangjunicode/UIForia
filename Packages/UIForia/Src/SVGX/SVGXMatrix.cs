@@ -132,7 +132,7 @@ namespace SVGX {
         }
 
         public Vector3 Transform(Vector3 point) {
-            return new Vector3(m0 * point.x + m2 * point.y + m4, m1 * point.x + m3 * point.y + m5, 0f);
+            return new Vector3(m0 * point.x + m2 * point.y + m4, m1 * point.x + m3 * point.y + m5, point.z);
         }
 
         // todo this is silly for most cases since its * 1 or * 0 or + 0, compiler probably collapses it

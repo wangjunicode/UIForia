@@ -18,17 +18,17 @@ namespace SVGX {
 
     public class ImmediateRenderContext {
 
-        internal readonly LightList<Vector2> points;
+        internal readonly LightList<Vector3> points;
         internal readonly LightList<SVGXStyle> styles;
         internal readonly LightList<SVGXMatrix> transforms;
         internal readonly LightList<SVGXDrawCall> drawCalls;
         internal readonly LightList<SVGXShape> shapes;
         internal readonly LightList<SVGXClipGroup> clipGroups;
-        internal readonly Stack<SVGXClipGroup> clipStack;
+        internal readonly Stack<int> clipStack;
         internal readonly LightList<SVGXGradient> gradients;
         internal readonly LightList<Texture2D> textures;
 
-        private Vector2 lastPoint;
+        private Vector3 lastPoint;
         private SVGXMatrix currentMatrix;
         private SVGXStyle currentStyle;
         private RangeInt currentShapeRange;
@@ -36,7 +36,7 @@ namespace SVGX {
         private Texture2D currentTexture;
 
         public ImmediateRenderContext() {
-            points = new LightList<Vector2>(128);
+            points = new LightList<Vector3>(128);
             styles = new LightList<SVGXStyle>();
             transforms = new LightList<SVGXMatrix>();
             currentMatrix = SVGXMatrix.identity;
@@ -46,6 +46,7 @@ namespace SVGX {
             gradients = new LightList<SVGXGradient>();
             shapes.Add(new SVGXShape(SVGXShapeType.Unset, default));
             textures = new LightList<Texture2D>();
+            clipStack = new Stack<int>();
         }
 
         public void SetFill(Color color) {
@@ -219,6 +220,8 @@ namespace SVGX {
             currentShapeRange = new RangeInt();
             gradients.Clear();
             textures.Clear();
+            clipStack.Clear();
+            clipGroups.Clear();
         }
 
         public void Save() {
@@ -245,13 +248,11 @@ namespace SVGX {
         }
 
         public void PushClip() {
-            int parentId = -1;
-            if (clipStack.Count > 0) {
-                parentId = clipStack.Peek().id;
-            }
-
-            SVGXClipGroup clipGroup = default; //new SVGXClipGroup(clipGroups.Count, parentId, currentShapeRange);
+            int parentId = clipStack.Count > 0 ? clipStack.Peek() : -1;
+            SVGXClipGroup clipGroup = new SVGXClipGroup(parentId, currentShapeRange);
+            clipStack.Push(clipGroups.Count);
             clipGroups.Add(clipGroup);
+            BeginPath();
         }
 
         public void PopClip() {
@@ -260,54 +261,55 @@ namespace SVGX {
             }
         }
 
-        public void Rect(float x, float y, float width, float height) {
-            SimpleShape(SVGXShapeType.Rect, x, y, width, height);
+        public void Rect(float x, float y, float width, float height, float z = 0) {
+            SimpleShape(SVGXShapeType.Rect, x, y, width, height, z);
         }
 
-        public void Ellipse(float x, float y, float dx, float dy) {
-            SimpleShape(SVGXShapeType.Ellipse, x, y, dx, dy);
+        public void Ellipse(float x, float y, float dx, float dy, float z = 0) {
+            SimpleShape(SVGXShapeType.Ellipse, x, y, dx, dy, z);
         }
 
-        public void Circle(float x, float y, float radius) {
-            SimpleShape(SVGXShapeType.Circle, x, y, radius * 2f, radius * 2f);
+        public void Circle(float x, float y, float radius, float z = 0) {
+            SimpleShape(SVGXShapeType.Circle, x, y, radius * 2f, radius * 2f, z);
         }
 
-        public void FillRect(float x, float y, float width, float height) {
+        public void FillRect(float x, float y, float width, float height, float z = 0) {
             BeginPath();
-            Rect(x, y, width, height);
+            Rect(x, y, width, height, z);
             Fill();
             BeginPath();
         }
         
-        public void FillRect(Rect rect) {
+        public void FillRect(Rect rect, float z = 0) {
             BeginPath();
-            Rect(rect.x, rect.y, rect.width, rect.height);
+            Rect(rect.x, rect.y, rect.width, rect.height, z);
             Fill();
             BeginPath();
         }
         
-        public void FillCircle(float x, float y, float radius) {
+        public void FillCircle(float x, float y, float radius, float z = 0) {
             BeginPath();
-            Circle(x, y, radius);
+            Circle(x, y, radius, z);
             Fill();
             BeginPath();
         }
         
-        public void FillEllipse(float x, float y, float dx, float dy) {
+        public void FillEllipse(float x, float y, float dx, float dy, float z = 0) {
             BeginPath();
-            Ellipse(x, y, dx, dy);
+            Ellipse(x, y, dx, dy, z);
             Fill();
             BeginPath();
         }
 
-        private void SimpleShape(SVGXShapeType shapeType, float x, float y, float width, float height) {
+        private void SimpleShape(SVGXShapeType shapeType, float x, float y, float width, float height, float z) {
             SVGXShape currentShape = shapes[shapes.Count - 1];
             SVGXShapeType lastType = currentShape.type;
 
-            Vector2 x0y0 = new Vector2(x, y);
-            Vector2 x1y0 = new Vector2(x + width, y);
-            Vector2 x1y1 = new Vector2(x + width, y - height);
-            Vector2 x0y1 = new Vector2(x, y - height);
+            y = -y;
+            Vector3 x0y0 = new Vector3(x, y, z);
+            Vector3 x1y0 = new Vector3(x + width, y, z);
+            Vector3 x1y1 = new Vector3(x + width, y - height, z);
+            Vector3 x0y1 = new Vector3(x, y - height, z);
 
             currentShape = new SVGXShape(shapeType, new RangeInt(points.Count, 4));
 
@@ -352,12 +354,14 @@ namespace SVGX {
                 }
                 currentStyle.gradientId = currentGradient.id;
             }
-            
-            drawCalls.Add(new SVGXDrawCall(DrawCallType.StandardFill, currentStyle, currentMatrix, currentShapeRange));
+
+            int clipId = clipStack.Count > 0 ? clipStack.Peek() : -1;
+            drawCalls.Add(new SVGXDrawCall(DrawCallType.StandardFill, clipId, currentStyle, currentMatrix, currentShapeRange));
         }
 
         public void Stroke() {
-            drawCalls.Add(new SVGXDrawCall(DrawCallType.StandardStroke, currentStyle, currentMatrix, currentShapeRange));
+            int clipId = clipStack.Count > 0 ? clipStack.Peek() : -1;
+            drawCalls.Add(new SVGXDrawCall(DrawCallType.StandardStroke, clipId, currentStyle, currentMatrix, currentShapeRange));
         }
 
     }

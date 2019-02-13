@@ -1,5 +1,6 @@
 using System.Collections.Generic;
 using UIForia.Util;
+using UnityEngine;
 
 namespace SVGX {
 
@@ -13,10 +14,12 @@ namespace SVGX {
                 
         public LightList<SVGXStyle> styles;
         public LightList<SVGXMatrix> matrices;
-        
+        public readonly LightList<SVGXShape> clipShapes;
+
         private bool opaqueNeedsStencilFill;
         private bool transparentNeedsStencilFill;
-        
+        public Mesh clipMesh;
+
         public SVGXDrawWave() {
             transparentFills = new LightList<SVGXRenderShape>(32);
             transparentStrokes = new LightList<SVGXRenderShape>(32);
@@ -24,6 +27,7 @@ namespace SVGX {
             opaqueStrokes = new LightList<SVGXRenderShape>(32);
             matrices = new LightList<SVGXMatrix>();
             styles = new LightList<SVGXStyle>();
+            clipShapes = new LightList<SVGXShape>();
         }
 
         public void AddDrawCall(ImmediateRenderContext ctx, SVGXDrawCall drawCall) {
@@ -67,6 +71,13 @@ namespace SVGX {
             opaqueStrokes.Clear();
             opaqueNeedsStencilFill = false;
             transparentNeedsStencilFill = false;
+            clipMesh = null;
+            clipShapes.Clear();
+        }
+
+        
+        public void AddClipShapes(SVGXShape[] shapes, SVGXClipGroup clipGroup) {
+           
         }
 
     }

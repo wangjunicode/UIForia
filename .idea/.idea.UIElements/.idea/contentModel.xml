@@ -225,6 +225,7 @@
           <e p="TransformPlayground.cs" t="Include" />
           <e p="TransformPlayground.xml" t="Include" />
         </e>
+        <e p="UIForiaFXAA.cs" t="Include" />
       </e>
       <e p="Library" t="ExcludeRecursive" />
       <e p="obj" t="ExcludeRecursive" />
@@ -606,11 +607,15 @@
             </e>
             <e p="Shaders" t="Include">
               <e p="Debug.shader" t="Include" />
+              <e p="Fxaa3.shader" t="Include" />
+              <e p="Fxaa3_9.cginc" t="Include" />
               <e p="JoinedPolyline.shader" t="Include" />
               <e p="SDFText.shader" t="Include" />
               <e p="SimpleFillOpaque.shader" t="Include" />
               <e p="SimpleLineSegments.shader" t="Include" />
               <e p="SimpleStrokeOpaque.shader" t="Include" />
+              <e p="StencilClipClear.shader" t="Include" />
+              <e p="stencilclipset.shader" t="Include" />
               <e p="Text.shader" t="Include" />
               <e p="UIForia.cginc" t="Include" />
               <e p="UIForiaClip.shader" t="Include" />

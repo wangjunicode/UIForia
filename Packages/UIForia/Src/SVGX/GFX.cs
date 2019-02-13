@@ -37,7 +37,8 @@ namespace SVGX {
 
         internal Material debugLineMaterial;
         internal Material sdfTextMaterial;
-        
+        private int drawCallCnt = 0;
+
         private Texture2D gradientAtlas;
         private Color32[] gradientAtlasContents;
         private static readonly int s_GlobalGradientAtlas = Shader.PropertyToID("_globalGradientAtlas");
@@ -55,8 +56,16 @@ namespace SVGX {
 
         private readonly LightList<TexturedShapeGroup> texturedShapeGroups;
         private readonly IntMap<Texture2D> textureMap;
-        
+
         private readonly LightList<StrokeVertexData> strokesToRelease = new LightList<StrokeVertexData>();
+        private readonly LightList<FillVertexData> fillsToRelease = new LightList<FillVertexData>();
+
+        private readonly MaterialPool stencilClipSetPool;
+        private readonly MaterialPool stencilClipClearPool;
+        private readonly MaterialPool stencilClipFillPool;
+        private readonly MaterialPool simpleFillOpaquePool;
+        
+        private static readonly int s_StencilRefKey = Shader.PropertyToID("_StencilRef");
 
         static GFX() {
             s_GradientRowMap = new Dictionary<SVGXGradient, int>();
@@ -67,11 +76,21 @@ namespace SVGX {
             s_SimpleFillPool = new MaterialPool(new Material(Shader.Find("UIForia/SimpleFillOpaque")));
         }
 
+        
         public GFX(Camera camera) {
             this.camera = camera;
+
             debugLineMaterial = new Material(Shader.Find("UIForia/SimpleLineSegments"));
             sdfTextMaterial = new Material(Shader.Find("UIForia/SDFText"));
-            simpleFillOpaqueMaterial = new Material(Shader.Find("UIForia/SimpleFillOpaque"));
+
+            stencilClipFillPool = new MaterialPool(Shader.Find("UIForia/SimpleFillOpaque")); // todo -- different shader
+            stencilClipSetPool = new MaterialPool(Shader.Find("UIForia/StencilClipSet"));
+            stencilClipClearPool = new MaterialPool(Shader.Find("UIForia/StencilClipClear"));
+            Material simpleFill = new Material(Shader.Find("UIForia/SimpleFillOpaque"));
+            
+            simpleFill.SetFloat(s_StencilRefKey, 0);
+            
+            simpleFillOpaquePool = new MaterialPool(simpleFill);
             
             gradientAtlas = new Texture2D(GradientPrecision, 32);
             gradientAtlas.wrapMode = TextureWrapMode.Clamp;
@@ -88,7 +107,11 @@ namespace SVGX {
             }
         }
 
-        public void DrawDebugLine(Vector2 start, Vector2 end, Color color, float thickness = 1f) {
+        public void SetCamera(Camera camera) {
+            this.camera = camera;
+        }
+        
+        public void DrawDebugLine(Vector3 start, Vector3 end, Color color, float thickness = 1f) {
             StrokeVertexData strokeVertexData = s_StrokeVertexDataPool.Get();
 
             SVGXMatrix matrix = SVGXMatrix.identity;
@@ -96,47 +119,102 @@ namespace SVGX {
             style.strokeColor = color;
             style.strokeWidth = thickness;
             SVGXShape shape = new SVGXShape(SVGXShapeType.Path, new RangeInt(0, 2));
-            
-            LightList<Vector2> points = LightListPool<Vector2>.Get();
-            
+
+            LightList<Vector3> points = LightListPool<Vector3>.Get();
+
             points.Add(start);
             points.Add(end);
-            
+
             CreateStrokeVertices(strokeVertexData, points, matrix, style, shape);
 
             Mesh mesh = strokeVertexData.FillMesh();
-            
+
             Matrix4x4 cameraMatrix = Matrix4x4.TRS(camera.transform.position + new Vector3(0, 0, 2), Quaternion.identity, Vector3.one);
 
             DrawMesh(mesh, cameraMatrix, debugLineMaterial);
 
-            LightListPool<Vector2>.Release(ref points);
+            LightListPool<Vector3>.Release(ref points);
             strokesToRelease.Add(strokeVertexData);
         }
 
         public void DrawMesh(Mesh mesh, Matrix4x4 transform, Material material) {
+            material.renderQueue = drawCallCnt++;
             Graphics.DrawMesh(mesh, transform, material, 0, camera, 0, null, ShadowCastingMode.Off, false, null, LightProbeUsage.Off);
         }
 
-        internal SVGXDrawWave CreateWaves(ImmediateRenderContext ctx) {
+        internal LightList<SVGXDrawWave> CreateWaves(ImmediateRenderContext ctx) {
             // get clip groups ignoring hierarchy
             // each clip group becomes a wave
             // waves get merged if they have non overlapping bounds
             // different draw calls can contain the same shapes, probably can't totally re-use geometry because of changes to transform
             // or require 2nd pass before rendering that does the transform 
 
+
+            // 1 wave per compound clip group
+            // if clip groups do not overlap we can combine two waves            
+            // for each draw call
+            // get clip id
+            // if clip id == 0 -> no clipping
+            // while clip id == last clip id
+            // add draw call to current wave
+            // if clip id is different
+            // create new wave
+            // wave.clipId = clipId;
+
+            int lastClipId = ctx.drawCalls[0].clipGroupId;
+            LightList<SVGXDrawWave> waves = LightListPool<SVGXDrawWave>.Get();
+
             SVGXDrawWave wave = s_WavePool.Get();
 
+            if (lastClipId != -1) {
+                int clipId = lastClipId;
+
+                while (clipId != -1) {
+                    SVGXClipGroup clipGroup = ctx.clipGroups[clipId];
+                    int start = clipGroup.shapeRange.start;
+                    int end = clipGroup.shapeRange.end;
+
+                    for (int j = start; j < end; j++) {
+                        wave.clipShapes.Add(ctx.shapes[j]);
+                    }
+
+                    clipId = ctx.clipGroups[clipId].parent;
+                }
+            }
+
             for (int i = 0; i < ctx.drawCalls.Count; i++) {
+                int clipId = ctx.drawCalls[i].clipGroupId;
+
+                if (clipId != lastClipId) {
+                    waves.Add(wave);
+                    wave = s_WavePool.Get();
+                    lastClipId = clipId;
+
+                    while (clipId != -1) {
+                        SVGXClipGroup clipGroup = ctx.clipGroups[clipId];
+                        int start = clipGroup.shapeRange.start;
+                        int end = clipGroup.shapeRange.end;
+
+                        for (int j = start; j < end; j++) {
+                            wave.clipShapes.Add(ctx.shapes[j]);
+                        }
+
+                        clipId = ctx.clipGroups[clipId].parent;
+                    }
+                }
+
                 wave.AddDrawCall(ctx, ctx.drawCalls[i]);
             }
 
-            return wave;
+            waves.Add(wave);
+
+            return waves;
         }
 
         private void Stroke(SVGXDrawWave wave, LightList<SVGXRenderShape> shapes, bool transparent, bool stencil) {
-            StrokeVertexData strokeVertexData = s_StrokeVertexDataPool.Get();
+            if (shapes.Count == 0) return;
 
+            StrokeVertexData strokeVertexData = s_StrokeVertexDataPool.Get();
             for (int i = 0; i < shapes.Count; i++) {
                 SVGXRenderShape shape = shapes[i];
                 SVGXStyle style = wave.styles[shape.styleId];
@@ -217,9 +295,91 @@ namespace SVGX {
             }
         }
 
-        private void Fill(SVGXDrawWave wave, LightList<SVGXRenderShape> shapes, bool transparent, bool stencil, int textureId = -1) {
-            // todo preserve z order
+        private void CreateClipFillVertices(SVGXDrawWave wave, Vector3[] points) {
+            FillVertexData vertexData = s_FillVertexDataPool.Get();
 
+            int triIdx = vertexData.triangleIndex;
+            int vertexCnt = vertexData.position.Count;
+            int colorCnt = vertexData.colors.Count;
+            int texCoordCnt = vertexData.texCoords.Count;
+            int flagsCnt = vertexData.flags.Count;
+            int triangleCnt = vertexData.triangles.Count;
+
+            Vector3[] vertices = vertexData.position.Array;
+            Vector2[] texCoords = vertexData.texCoords.Array;
+            Vector4[] flags = vertexData.flags.Array;
+            int[] triangles = vertexData.triangles.Array;
+
+            SVGXShape[] shapes = wave.clipShapes.Array;
+
+            for (int i = 0; i < wave.clipShapes.Count; i++) {
+                SVGXShape shape = shapes[i];
+                SVGXMatrix matrix = wave.matrices[0]; // todo -- make this work [shape.matrixId];
+                int start = shape.pointRange.start;
+
+                switch (shape.type) {
+                    case SVGXShapeType.Unset:
+                        break;
+                    case SVGXShapeType.Ellipse:
+                    case SVGXShapeType.Circle:
+                    case SVGXShapeType.Rect:
+
+                        vertices[vertexCnt++] = matrix.Transform(points[start++]);
+                        vertices[vertexCnt++] = matrix.Transform(points[start++]);
+                        vertices[vertexCnt++] = matrix.Transform(points[start++]);
+                        vertices[vertexCnt++] = matrix.Transform(points[start]);
+
+                        triangles[triangleCnt++] = triIdx + 0;
+                        triangles[triangleCnt++] = triIdx + 1;
+                        triangles[triangleCnt++] = triIdx + 2;
+                        triangles[triangleCnt++] = triIdx + 2;
+                        triangles[triangleCnt++] = triIdx + 3;
+                        triangles[triangleCnt++] = triIdx + 0;
+
+                        texCoords[texCoordCnt++] = new Vector2(0, 1);
+                        texCoords[texCoordCnt++] = new Vector2(1, 1);
+                        texCoords[texCoordCnt++] = new Vector2(1, 0);
+                        texCoords[texCoordCnt++] = new Vector2(0, 0);
+
+                        flags[flagsCnt++] = new Vector4((int) shape.type, 0, 0, 0);
+                        flags[flagsCnt++] = new Vector4((int) shape.type, 0, 0, 0);
+                        flags[flagsCnt++] = new Vector4((int) shape.type, 0, 0, 0);
+                        flags[flagsCnt++] = new Vector4((int) shape.type, 0, 0, 0);
+
+                        vertexData.position.Count = vertexCnt;
+                        vertexData.triangles.Count = triangleCnt;
+                        vertexData.colors.Count = colorCnt;
+                        vertexData.texCoords.Count = texCoordCnt;
+                        vertexData.flags.Count = flagsCnt;
+
+                        vertexData.triangleIndex = triIdx + 4;
+
+                        break;
+
+                    case SVGXShapeType.Path:
+                        break;
+
+                    default:
+                        throw new ArgumentOutOfRangeException();
+                }
+            }
+
+            wave.clipMesh = vertexData.FillMesh();
+        }
+
+        private Matrix4x4 OriginMatrix {
+            get {
+                Vector3 origin = camera.transform.position;
+                origin.x -= 0.5f * Screen.width;
+                origin.y += 0.5f * Screen.height;
+                origin.z += 2;
+                origin.x -= 1f;
+
+                return Matrix4x4.TRS(origin, Quaternion.identity, Vector3.one);
+            }
+        }
+
+        private void Fill(SVGXDrawWave wave, LightList<SVGXRenderShape> shapes, bool stencil, int textureId = -1) {
             FillVertexData fillVertexData = s_FillVertexDataPool.Get();
 
             for (int i = 0; i < shapes.Count; i++) {
@@ -230,63 +390,51 @@ namespace SVGX {
             }
 
             Mesh mesh = fillVertexData.FillMesh();
-            Vector3 origin = camera.transform.position;
-            origin.x -= 0.5f * Screen.width;
-            origin.y += 0.5f * Screen.height;
-            origin.z += 2;
-            Matrix4x4 cameraMatrix = Matrix4x4.TRS(origin, Quaternion.identity, Vector3.one);
+
+            Matrix4x4 cameraMatrix = OriginMatrix;
 
             if (stencil) {
-                Material cutout = stencilFillOpaqueCutoutMaterial;
-                Material paint = stencilFillOpaquePaintMaterial;
-                Material clear = stencilFillOpaqueClearMaterial;
+                   DrawMesh(mesh, cameraMatrix, stencilClipFillPool.GetAndQueueForRelease());
 
-                if (transparent) {
-                    cutout = stencilFillTransparentCutoutMaterial;
-                    paint = stencilFillTransparentPaintMaterial;
-                    clear = stencilFillTransparentClearMaterial;
-                }
-
-                DrawMesh(mesh, cameraMatrix, cutout);
-                DrawMesh(mesh, cameraMatrix, paint);
-                DrawMesh(mesh, cameraMatrix, clear);
+//                Material cutout = stencilFillOpaqueCutoutMaterial;
+//                Material paint = stencilFillOpaquePaintMaterial;
+//                Material clear = stencilFillOpaqueClearMaterial;
+//
+//                if (transparent) {
+//                    cutout = stencilFillTransparentCutoutMaterial;
+//                    paint = stencilFillTransparentPaintMaterial;
+//                    clear = stencilFillTransparentClearMaterial;
+//                }
+//
+//                DrawMesh(mesh, cameraMatrix, cutout);
+//                DrawMesh(mesh, cameraMatrix, paint);
+//                DrawMesh(mesh, cameraMatrix, clear);
             }
             else {
                 if (textureId != -1) {
-                    Material material = s_SimpleFillPool.Get();
-                    material.mainTexture = textureMap.GetOrDefault(textureId);
-                    DrawMesh(mesh, cameraMatrix, material);
-                    s_SimpleFillPool.QueueForRelease(material);
+//                    Material material = s_SimpleFillPool.Get();
+//                    material.mainTexture = textureMap.GetOrDefault(textureId);
+//                    DrawMesh(mesh, cameraMatrix, material);
+//                    s_SimpleFillPool.QueueForRelease(material);
                 }
                 else {
-                    DrawMesh(mesh, cameraMatrix, simpleFillOpaqueMaterial);
+                    DrawMesh(mesh, cameraMatrix, simpleFillOpaquePool.GetAndQueueForRelease());
                 }
             }
 
-            s_FillVertexDataPool.Release(fillVertexData);
-        }
-
-        internal void StencilFill(SVGXDrawWave wave, LightList<SVGXRenderShape> shapes, bool transparent) {
-            Fill(wave, shapes, transparent, true);
-        }
-
-        internal void SimpleFill(SVGXDrawWave wave, LightList<SVGXRenderShape> shapes, bool transparent) {
-            Fill(wave, shapes, transparent, false);
+            fillsToRelease.Add(fillVertexData);
         }
 
         private void DrawSimpleOpaqueFill(SVGXDrawWave wave) {
+            bool isStencil = wave.clipShapes.Count > 0;
             GroupByTexture(wave, wave.opaqueFills, texturedShapeGroups);
             TexturedShapeGroup[] array = texturedShapeGroups.Array;
             for (int i = 0; i < texturedShapeGroups.Count; i++) {
-                Fill(wave, array[i].shapes, false, false, array[i].textureId);
+                Fill(wave, array[i].shapes, isStencil, array[i].textureId);
                 LightListPool<SVGXRenderShape>.Release(ref array[i].shapes);
             }
 
             texturedShapeGroups.Clear();
-        }
-
-        private void DrawStencilOpaqueFill(SVGXDrawWave wave) {
-            Fill(wave, wave.opaqueFills, false, true);
         }
 
         private void DrawSimpleOpaqueStroke(SVGXDrawWave wave) {
@@ -310,13 +458,27 @@ namespace SVGX {
 
         public void Render(ImmediateRenderContext ctx) {
             this.ctx = ctx;
+            drawCallCnt = 0;
+            
+            simpleFillOpaquePool.FlushReleaseQueue();
+            stencilClipSetPool.FlushReleaseQueue();
+            stencilClipClearPool.FlushReleaseQueue();
+            stencilClipFillPool.FlushReleaseQueue();
+            
             textureMap.Clear();
             s_GradientMap.Clear();
             s_GradientRowMap.Clear();
             for (int i = 0; i < strokesToRelease.Count; i++) {
                 s_StrokeVertexDataPool.Release(strokesToRelease[i]);
             }
+
+            for (int i = 0; i < fillsToRelease.Count; i++) {
+                s_FillVertexDataPool.Release(fillsToRelease[i]);
+            }
+
             strokesToRelease.Clear();
+            fillsToRelease.Clear();
+
             s_SimpleFillPool.FlushReleaseQueue();
 
             // for now assume all uses of a gradient get their own entry in gradient map
@@ -346,24 +508,53 @@ namespace SVGX {
                 Shader.SetGlobalFloat(s_GlobalGradientAtlasSize, gradientAtlas.height);
             }
 
-            SVGXDrawWave wave = CreateWaves(ctx);
+            LightList<SVGXDrawWave> waves = CreateWaves(ctx);
 
-            DrawSimpleOpaqueFill(wave);
-            // DrawStencilOpaqueFill(wave);            
+            SVGXDrawWave[] waveArray = waves.Array;
+            for (int i = 0; i < waves.Count; i++) {
+                SVGXDrawWave wave = waveArray[i];
 
-            DrawSimpleOpaqueStroke(wave);
-            s_WavePool.Release(wave);
+                DrawClip(wave);
+
+                DrawSimpleOpaqueFill(wave);
+                // DrawStencilOpaqueFill(wave);            
+
+                DrawSimpleOpaqueStroke(wave);
+
+                ClearClip(wave);
+
+                s_WavePool.Release(wave);
+            }
+
+            LightListPool<SVGXDrawWave>.Release(ref waves);
         }
 
-        private static float Pack(Vector2 input, int precision) {
-            Vector2 output = input;
+        private void DrawClip(SVGXDrawWave wave) {
+            if (wave.clipShapes.Count == 0) {
+                return;
+            }
+
+            CreateClipFillVertices(wave, ctx.points.Array);
+            DrawMesh(wave.clipMesh, OriginMatrix, stencilClipSetPool.GetAndQueueForRelease());
+        }
+
+        private void ClearClip(SVGXDrawWave wave) {
+            if (wave.clipShapes.Count == 0) {
+                return;
+            }
+
+            DrawMesh(wave.clipMesh, OriginMatrix, stencilClipClearPool.GetAndQueueForRelease());
+        }
+
+        private static float Pack(Vector3 input, int precision) {
+            Vector3 output = input;
             output.x = Mathf.Floor(output.x * (precision - 1));
             output.y = Mathf.Floor(output.y * (precision - 1));
 
             return (output.x * precision) + output.y;
         }
 
-        internal void CreateStrokeVertices(StrokeVertexData vertexData, LightList<Vector2> points, SVGXMatrix matrix, SVGXStyle style, SVGXShape shape) {
+        internal void CreateStrokeVertices(StrokeVertexData vertexData, LightList<Vector3> points, SVGXMatrix matrix, SVGXStyle style, SVGXShape shape) {
             int triIdx = vertexData.triangleIndex;
             int vertexCnt = vertexData.position.Count;
             int colorCnt = vertexData.colors.Count;
@@ -384,8 +575,8 @@ namespace SVGX {
             float thickness = Mathf.Max(0.5f, style.strokeWidth);
 
             for (int i = range.start; i < range.end - 1; i++) {
-                Vector2 pnt0 = matrix.Transform(points[i]);
-                Vector2 pnt1 = matrix.Transform(points[i + 1]);
+                Vector3 pnt0 = matrix.Transform(points[i]);
+                Vector3 pnt1 = matrix.Transform(points[i + 1]);
 
                 vertices[vertexCnt++] = pnt0;
                 vertices[vertexCnt++] = pnt0;
@@ -432,7 +623,7 @@ namespace SVGX {
             vertexData.triangleIndex = triIdx;
         }
 
-        internal void CreateStrokeVerticesWithJoin(StrokeVertexData vertexData, LightList<Vector2> points, SVGXMatrix matrix, SVGXStyle style, SVGXShape shape) {
+        internal void CreateStrokeVerticesWithJoin(StrokeVertexData vertexData, LightList<Vector3> points, SVGXMatrix matrix, SVGXStyle style, SVGXShape shape) {
             int triIdx = vertexData.triangleIndex;
             int vertexCnt = vertexData.position.Count;
             int colorCnt = vertexData.colors.Count;
@@ -456,11 +647,11 @@ namespace SVGX {
 
             bool isClosed = false;
 
-            Vector2 dir = (points[range.start + 1] - points[range.start]).normalized;
-            Vector2 prev = isClosed ? points[range.end - 1] : points[range.start] - dir;
-            Vector2 curr = points[range.start];
-            Vector2 next = points[range.start + 1];
-            Vector2 far = points.Count == 2
+            Vector3 dir = (points[range.start + 1] - points[range.start]).normalized;
+            Vector3 prev = isClosed ? points[range.end - 1] : points[range.start] - dir;
+            Vector3 curr = points[range.start];
+            Vector3 next = points[range.start + 1];
+            Vector3 far = points.Count == 2
                 ? points[range.start + 1] + (points[range.start + 1] - points[range.start]).normalized
                 : points[range.start + 2];
 
@@ -628,7 +819,7 @@ namespace SVGX {
             vertexData.triangleIndex = triIdx;
         }
 
-        internal void CreateFillVertices(FillVertexData vertexData, LightList<Vector2> points, SVGXMatrix matrix, SVGXStyle style, SVGXShape shape) {
+        internal void CreateFillVertices(FillVertexData vertexData, LightList<Vector3> points, SVGXMatrix matrix, SVGXStyle style, SVGXShape shape) {
             int triIdx = vertexData.triangleIndex;
             int vertexCnt = vertexData.position.Count;
             int colorCnt = vertexData.colors.Count;
@@ -668,7 +859,7 @@ namespace SVGX {
 
                     int gradientId = 0;
                     int gradientDirection = 0;
-                    float fillColorModes = Pack(new Vector2(fillMode, colorMode), 4096);
+                    float fillColorModes = Pack(new Vector3(fillMode, colorMode), 4096);
                     if (style.gradientId > 0) {
                         SVGXGradient gradient = s_GradientMap.GetOrDefault(style.gradientId);
                         gradientId = s_GradientRowMap.GetOrDefault(gradient);

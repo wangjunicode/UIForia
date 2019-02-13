@@ -1,10 +1,12 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Diagnostics;
 using UnityEngine;
 
 namespace UIForia.Util {
 
+    [DebuggerDisplay("Count = {" + nameof(size) + "}")]
     public class LightList<T> : IReadOnlyList<T>, IList<T> {
 
         private int size;
@@ -223,8 +225,8 @@ namespace UIForia.Util {
         }
 
         public T this[int index] {
-            get { return array[index]; }
-            set { array[index] = value; }
+            [DebuggerStepThrough]get  { return array[index]; }
+            [DebuggerStepThrough]set { array[index] = value; }
         }
 
         public void EnsureCapacity(int capacity) {

@@ -1,6 +1,3 @@
-using System.Collections.Generic;
-using UIForia.Extensions;
-using UIForia.Util;
 using UnityEngine;
 
 namespace SVGX {
@@ -29,13 +26,7 @@ namespace SVGX {
         
         public void Start() {
             ctx = new ImmediateRenderContext();
-            gfx = new GFX(camera) {
-//                simpleFillOpaqueMaterial = simpleFillOpaque,
-//                stencilFillOpaqueCutoutMaterial = stencilFillCutoutOpaque,
-//                stencilFillOpaquePaintMaterial = stencilFillPaintOpaque,
-//                stencilFillOpaqueClearMaterial = stencilFillClearOpaque,
-//                simpleStrokeOpaqueMaterial = simpleStrokeOpaque
-            };
+            gfx = new GFX(camera);
         }
 
         public void Update() {
@@ -43,8 +34,28 @@ namespace SVGX {
             camera.orthographicSize = Screen.height * 0.5f;
 
             ctx.Clear();
+            
+//            ctx.SetFill(Color.blue);
+//            ctx.Circle(0, 0, 100, 100);
+//            ctx.Fill();
+
+            ctx.BeginPath();
+            
+            ctx.Circle(0, 0, 50);
+            
+            ctx.PushClip();
+            
             ctx.SetFill(Color.red);
             ctx.FillRect(new Rect(0, 0, 100, 100));
+            
+            ctx.SetFill(Color.green);
+            ctx.FillRect(new Rect(50, 50, 100, 100));
+            
+            ctx.PopClip();
+            
+            ctx.SetFill(Color.blue);
+            ctx.FillRect(new Rect(75, 75, 200, 200));
+            
             gfx.Render(ctx);
             
 //

@@ -2,16 +2,25 @@
 {
     Properties
     {
+        _StencilComp ("Stencil Comparison", Float) = 8
+        _StencilRef ("Stencil ID", Float) = 1
+        _StencilOp ("Stencil Operation", Float) = 0
+        _StencilWriteMask ("Stencil Write Mask", Float) = 255
+        _StencilReadMask ("Stencil Read Mask", Float) = 255
     }
     SubShader
     {
-        Tags { "RenderType"="Transparent" }
+        Tags { "RenderType"="Opaque" "DisableBatching"="True" }
+
         LOD 100
         Cull Off
         Blend SrcAlpha OneMinusSrcAlpha
         ColorMask RGBA
-        
-        // todo -- handle clip stencil
+                   
+        Stencil {
+            Ref [_StencilRef]
+            Comp Equal
+        }
         
         Pass
         {
@@ -25,7 +34,7 @@
             uniform sampler2D _MainTex;
             uniform sampler2D _globalGradientAtlas;
             uniform float _globalGradientAtlasSize;
-            
+         
             struct appdata {
                 float4 vertex : POSITION;
                 float2 uv : TEXCOORD0;
@@ -73,7 +82,7 @@
                 #define ColorMode_Gradient 1
                 
 //                if(FillMode != 0) return fixed4(0, 1, 0, 1);
-                if(ColorMode > 0) return fixed4(1, 1, 0, 1);
+//                if(ColorMode > 0) return fixed4(1, 1, 0, 1);
                 
                 float t = lerp(i.uv.x, i.uv.y, GradientDirection);
                     
@@ -84,7 +93,7 @@
                 textureColor = lerp(textureColor, color, 1);
                 gradientColor = lerp(gradientColor, color, 0);
                 
-                color = lerp(textureColor, gradientColor, 1);
+                color = i.color;//lerp(textureColor, gradientColor, 1);
                 
 //                bool colorMode = fmod(flags, 2) == 1);
 //                bool colorMode = fmod(flags, 4) >= 2);

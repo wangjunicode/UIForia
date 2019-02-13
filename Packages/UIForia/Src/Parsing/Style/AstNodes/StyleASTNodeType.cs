@@ -25,7 +25,10 @@ namespace UIForia.Style.Parsing {
         Property,
         AttributeGroup,
         StateGroup,
-        ExpressionGroup
+        ExpressionGroup,
+        Color,
+        StyleGroup,
+        Measurement,
     }
 
 }

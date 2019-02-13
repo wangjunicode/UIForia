@@ -346,6 +346,13 @@
               <e p="InputBindingCompiler.cs" t="Include" />
               <e p="OperatorOverloadExpression.cs" t="Include" />
               <e p="PropertyBindingCompiler.cs" t="Include" />
+              <e p="Style" t="Include">
+                <e p="StyleCompileContext.cs" t="Include" />
+                <e p="StyleConstants.cs" t="Include" />
+                <e p="StylePropertyMappers.cs" t="Include" />
+                <e p="StyleSheet.cs" t="Include" />
+                <e p="StyleSheetCompiler.cs" t="Include" />
+              </e>
               <e p="StyleBindingCompiler.cs" t="Include" />
               <e p="Terminal.cs" t="Include" />
             </e>
@@ -506,6 +513,7 @@
                   <e p="StyleASTNode.cs" t="Include" />
                   <e p="StyleASTNodeType.cs" t="Include" />
                   <e p="StyleFieldNotDefinedException.cs" t="Include" />
+                  <e p="StyleGroupContainer.cs" t="Include" />
                   <e p="StyleIdentifierNode.cs" t="Include" />
                   <e p="StyleLiteralNode.cs" t="Include" />
                   <e p="StyleOperatorNode.cs" t="Include" />

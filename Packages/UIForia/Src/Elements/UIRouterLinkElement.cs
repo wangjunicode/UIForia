@@ -33,13 +33,7 @@ namespace UIForia {
     public class UIRouterLinkBackElement : UIContainerElement {
 
         public override void OnUpdate() {
-            bool canGoBack = view.Application.Router.CanGoBack;
-            if (canGoBack) {
-                style.ExitState(StyleState.Inactive);
-            }
-            else {
-                style.EnterState(StyleState.Inactive);
-            }
+
         }
         
         [OnMouseClick]

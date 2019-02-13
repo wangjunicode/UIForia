@@ -83,10 +83,6 @@ namespace UIForia.Compilers {
                 return new Target(key.Substring("style.hover.".Length), StyleState.Hover);
             }
 
-            if (key.StartsWith("style.disabled.")) {
-                return new Target(key.Substring("style.disabled.".Length), StyleState.Inactive);
-            }
-
             if (key.StartsWith("style.focused.")) {
                 return new Target(key.Substring("style.focused.".Length), StyleState.Focused);
             }

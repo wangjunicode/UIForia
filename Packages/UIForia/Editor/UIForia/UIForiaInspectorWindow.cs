@@ -140,7 +140,6 @@ namespace UIForia.Editor {
 
             GUILayout.BeginHorizontal();
             DrawStyleStateButton("Active", StyleState.Active);
-            DrawStyleStateButton("Inactive", StyleState.Inactive);
             GUILayout.EndHorizontal();
 
             EditorGUILayout.BeginHorizontal();
@@ -510,7 +509,6 @@ namespace UIForia.Editor {
 
             GUILayout.BeginHorizontal();
             DrawStyleStateButton("Active", StyleState.Active);
-            DrawStyleStateButton("Inactive", StyleState.Inactive);
             GUILayout.EndHorizontal();
 
             GUILayout.Space(10f);
@@ -542,10 +540,6 @@ namespace UIForia.Editor {
 
                 if (group.active != null) {
                     DrawStyle(s_Content.text + " [Active]", group.active);
-                }
-
-                if (group.inactive != null) {
-                    DrawStyle(s_Content.text + " [Inactive]", group.inactive);
                 }
             }
 

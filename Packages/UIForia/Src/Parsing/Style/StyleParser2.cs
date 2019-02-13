@@ -2,7 +2,6 @@ using System;
 using System.Collections.Generic;
 using UIForia.Style.Parsing;
 using UIForia.Util;
-using UnityEditorInternal;
 
 namespace UIForia.Parsing.Style {
     public struct StyleParser2 {
@@ -98,6 +97,8 @@ namespace UIForia.Parsing.Style {
                 case StyleTokenType.Cursor:
                     tokenStream.Advance();
                     break;
+                default:
+                    throw new ParseException($"Did not expect token {tokenStream.Current.value} of type {tokenStream.Current.styleTokenType} here");
             }
         }
 
@@ -147,7 +148,7 @@ namespace UIForia.Parsing.Style {
             // nodes.Add(StyleASTNode.ExportNode());
         }
 
-        private void ParsePropertyStateOrAttributeGroup(StyleASTNode styleRootNode) {
+        private void ParsePropertyStateOrAttributeGroup(StyleGroupContainer styleRootNode) {
 
             while (tokenStream.HasMoreTokens && tokenStream.Current.styleTokenType != StyleTokenType.BracesClose) {
                 switch (tokenStream.Current.styleTokenType) {
@@ -188,11 +189,11 @@ namespace UIForia.Parsing.Style {
             }
         }
 
-        private void ParseStateOrAttributeGroup(StyleASTNode styleRootNode) {
+        private void ParseStateOrAttributeGroup(StyleGroupContainer styleRootNode) {
             switch (tokenStream.Current.styleTokenType) {
                 // this is the state group
                 case StyleTokenType.Identifier:
-                    StyleContainer stateGroupRootNode = StyleASTNode.StateGroupRootNode(tokenStream.Current.value);
+                    StyleStateContainer stateGroupRootNode = StyleASTNode.StateGroupRootNode(tokenStream.Current.value);
                     
                     tokenStream.Advance();
                     AssertTokenTypeAndAdvance(StyleTokenType.BracketClose);
@@ -232,120 +233,130 @@ namespace UIForia.Parsing.Style {
             }
         }
 
-        private void ParseProperties(StyleASTNode styleRootNode) {
+        private void ParseProperties(StyleGroupContainer styleRootNode) {
             while (tokenStream.HasMoreTokens && tokenStream.Current.styleTokenType != StyleTokenType.BracesClose) {
                 ParseProperty(styleRootNode);
             }
         }
 
-        private void ParseProperty(StyleASTNode styleRootNode) {
+        private void ParseProperty(StyleGroupContainer styleRootNode) {
             string propertyName = tokenStream.Current.value;
             tokenStream.Advance();
             AssertTokenType(StyleTokenType.Equal);
             tokenStream.Advance();
 
-            LightList<StyleASTNode> propertyValueParts = LightListPool<StyleASTNode>.Get();
-            while (tokenStream.HasMoreTokens && tokenStream.Current.styleTokenType != StyleTokenType.EndStatement) {
-                switch (tokenStream.Current.styleTokenType) {
-                    case StyleTokenType.Number:
-                        propertyValueParts.Add(StyleASTNode.NumericLiteralNode(tokenStream.Current.value));
-                        if (tokenStream.Next != StyleTokenType.EndStatement) {
-                            tokenStream.Advance();
-                            AssertTokenType(StyleTokenType.Identifier);
-                            propertyValueParts.Add(StyleASTNode.UnitNode(tokenStream.Current.value));
-                        }
+            StyleASTNode propertyValue = null;
 
-                        break;
-                    case StyleTokenType.String:
-                        propertyValueParts.Add(StyleASTNode.StringLiteralNode(tokenStream.Current.value));
-                        break;
-                    case StyleTokenType.Identifier:
-                        propertyValueParts.Add(StyleASTNode.IdentifierNode(tokenStream.Current.value));
-                        break;
-                    case StyleTokenType.Rgba: {
-                        tokenStream.Advance();
-                        AssertTokenType(StyleTokenType.ParenOpen);
-
-                        tokenStream.Advance();
-                        StyleASTNode red = ParseLiteralOrReference(StyleTokenType.Number);
-
-                        tokenStream.Advance();
-                        AssertTokenType(StyleTokenType.Comma);
-
-                        tokenStream.Advance();
-                        StyleASTNode green = ParseLiteralOrReference(StyleTokenType.Number);
-
-                        tokenStream.Advance();
-                        AssertTokenType(StyleTokenType.Comma);
-
-                        tokenStream.Advance();
-                        StyleASTNode blue = ParseLiteralOrReference(StyleTokenType.Number);
-
-                        tokenStream.Advance();
-                        AssertTokenType(StyleTokenType.Comma);
-
-                        tokenStream.Advance();
-                        AssertTokenType(StyleTokenType.Number);
-                        StyleASTNode alpha = ParseLiteralOrReference(StyleTokenType.Number);
-
-                        tokenStream.Advance();
-                        AssertTokenType(StyleTokenType.ParenClose);
-
-                        propertyValueParts.Add(StyleASTNode.RgbaNode(red, green, blue, alpha));
-                    }
-                        break;
-                    case StyleTokenType.Rgb: {
-                        tokenStream.Advance();
-                        AssertTokenType(StyleTokenType.ParenOpen);
-
-                        tokenStream.Advance();
-                        StyleASTNode red = ParseLiteralOrReference(StyleTokenType.Number);
-
-                        tokenStream.Advance();
-                        AssertTokenType(StyleTokenType.Comma);
-
-                        tokenStream.Advance();
-                        StyleASTNode green = ParseLiteralOrReference(StyleTokenType.Number);
-
-                        tokenStream.Advance();
-                        AssertTokenType(StyleTokenType.Comma);
-
-                        tokenStream.Advance();
-                        StyleASTNode blue = ParseLiteralOrReference(StyleTokenType.Number);
-
-                        tokenStream.Advance();
-                        AssertTokenType(StyleTokenType.ParenClose);
-                        propertyValueParts.Add(StyleASTNode.RgbNode(red, green, blue));
-                    }
-                        break;
-                    case StyleTokenType.Url:
-                        tokenStream.Advance();
-                        AssertTokenType(StyleTokenType.ParenOpen);
-
-                        tokenStream.Advance();
-                        StyleASTNode url = ParseLiteralOrReference(StyleTokenType.Identifier);
-
-                        tokenStream.Advance();
-                        AssertTokenType(StyleTokenType.ParenClose);
-                        propertyValueParts.Add(StyleASTNode.UrlNode(url));
-
-                        break;
-                    case StyleTokenType.At:
+            switch (tokenStream.Current.styleTokenType) {
+                case StyleTokenType.Number:
+                    StyleASTNode value = StyleASTNode.NumericLiteralNode(tokenStream.Current.value);
+                    StyleASTNode unit = null;
+                    if (tokenStream.Next != StyleTokenType.EndStatement) {
                         tokenStream.Advance();
                         AssertTokenType(StyleTokenType.Identifier);
-                        propertyValueParts.Add(StyleASTNode.ReferenceNode(tokenStream.Current.value));
-                        break;
-                    case StyleTokenType.Dot:
-                        tokenStream.Advance();
-                        AssertTokenType(StyleTokenType.Identifier);
-                        propertyValueParts.Add(StyleASTNode.DotAccessNode(tokenStream.Current.value));
-                        break;
+                        unit = StyleASTNode.UnitNode(tokenStream.Current.value);
+                    }
+                    propertyValue = StyleASTNode.MeasurementNode(value, unit);
+
+                    break;
+                case StyleTokenType.String:
+                    propertyValue = StyleASTNode.StringLiteralNode(tokenStream.Current.value);
+                    break;
+                case StyleTokenType.Identifier:
+                    propertyValue = StyleASTNode.IdentifierNode(tokenStream.Current.value);
+                    break;
+                case StyleTokenType.Rgba: {
+                    tokenStream.Advance();
+                    AssertTokenType(StyleTokenType.ParenOpen);
+
+                    tokenStream.Advance();
+                    StyleASTNode red = ParseLiteralOrReference(StyleTokenType.Number);
+
+                    tokenStream.Advance();
+                    AssertTokenType(StyleTokenType.Comma);
+
+                    tokenStream.Advance();
+                    StyleASTNode green = ParseLiteralOrReference(StyleTokenType.Number);
+
+                    tokenStream.Advance();
+                    AssertTokenType(StyleTokenType.Comma);
+
+                    tokenStream.Advance();
+                    StyleASTNode blue = ParseLiteralOrReference(StyleTokenType.Number);
+
+                    tokenStream.Advance();
+                    AssertTokenType(StyleTokenType.Comma);
+
+                    tokenStream.Advance();
+                    AssertTokenType(StyleTokenType.Number);
+                    StyleASTNode alpha = ParseLiteralOrReference(StyleTokenType.Number);
+
+                    tokenStream.Advance();
+                    AssertTokenType(StyleTokenType.ParenClose);
+
+                    propertyValue = StyleASTNode.RgbaNode(red, green, blue, alpha);
                 }
+                    break;
+                case StyleTokenType.Rgb: {
+                    tokenStream.Advance();
+                    AssertTokenType(StyleTokenType.ParenOpen);
 
-                tokenStream.Advance();
+                    tokenStream.Advance();
+                    StyleASTNode red = ParseLiteralOrReference(StyleTokenType.Number);
+
+                    tokenStream.Advance();
+                    AssertTokenType(StyleTokenType.Comma);
+
+                    tokenStream.Advance();
+                    StyleASTNode green = ParseLiteralOrReference(StyleTokenType.Number);
+
+                    tokenStream.Advance();
+                    AssertTokenType(StyleTokenType.Comma);
+
+                    tokenStream.Advance();
+                    StyleASTNode blue = ParseLiteralOrReference(StyleTokenType.Number);
+
+                    tokenStream.Advance();
+                    AssertTokenType(StyleTokenType.ParenClose);
+                    propertyValue = StyleASTNode.RgbNode(red, green, blue);
+                }
+                    break;
+                case StyleTokenType.HashColor:
+                    string hashColor = tokenStream.Current.value;
+                    propertyValue = StyleASTNode.ColorNode(hashColor);
+                    tokenStream.Advance();
+                    break;
+                case StyleTokenType.Url:
+                    tokenStream.Advance();
+                    AssertTokenType(StyleTokenType.ParenOpen);
+
+                    tokenStream.Advance();
+                    StyleASTNode url = ParseLiteralOrReference(StyleTokenType.Identifier);
+
+                    tokenStream.Advance();
+                    AssertTokenType(StyleTokenType.ParenClose);
+                    propertyValue = StyleASTNode.UrlNode(url);
+
+                    break;
+                case StyleTokenType.At:
+
+                    tokenStream.Advance();
+                    AssertTokenType(StyleTokenType.Identifier);
+                    ReferenceNode referenceNode = StyleASTNode.ReferenceNode(tokenStream.Current.value);
+                    propertyValue = referenceNode;
+                    tokenStream.Advance();
+                    
+                    while (tokenStream.HasMoreTokens && AdvanceIfTokenType(StyleTokenType.Dot)) {
+                        AssertTokenType(StyleTokenType.Identifier);
+                        referenceNode.AddChildNode(StyleASTNode.DotAccessNode(tokenStream.Current.value));                           
+                    }
+
+                    break;
             }
 
-            PropertyNode propertyNode = StyleASTNode.PropertyNode(propertyName, propertyValueParts);
+            tokenStream.Advance();
+          
+            PropertyNode propertyNode = StyleASTNode.PropertyNode(propertyName, propertyValue);
             styleRootNode.AddChildNode(propertyNode);
             AssertTokenTypeAndAdvance(StyleTokenType.EndStatement);
         }
@@ -394,7 +405,7 @@ namespace UIForia.Parsing.Style {
             return false;
         }
 
-        private void ParseAttributeOrExpressionGroup(StyleASTNode styleRootNode) {
+        private void ParseAttributeOrExpressionGroup(StyleGroupContainer styleRootNode) {
             AssertTokenType(StyleTokenType.BracketOpen);
 
             switch (tokenStream.Current.styleTokenType) {
@@ -414,7 +425,7 @@ namespace UIForia.Parsing.Style {
             AssertTokenType(StyleTokenType.BracketClose);
         }
 
-        private void ParseAttributeGroup(StyleASTNode styleRootNode) {
+        private void ParseAttributeGroup(StyleGroupContainer styleRootNode) {
             AssertTokenType(StyleTokenType.Identifier);
 
             string identifier = tokenStream.Current.value;

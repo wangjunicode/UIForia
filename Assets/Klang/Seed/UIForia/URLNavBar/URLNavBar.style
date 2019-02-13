@@ -11,7 +11,5 @@ style url-nav-bar {
 }
 
 style back-button {
-    [Inactive] {
-        BackgroundColor = green;
-    }
+
 }

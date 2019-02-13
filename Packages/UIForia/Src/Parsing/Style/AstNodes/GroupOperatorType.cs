@@ -1,11 +1,7 @@
 namespace UIForia.Style.Parsing {
-
     public enum GroupOperatorType {
-
-        None,
-        Not,
+        None, 
+        Not, 
         And,
-
     }
-
 }

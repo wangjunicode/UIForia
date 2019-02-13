@@ -386,10 +386,6 @@ namespace UIForia.Parsing.Style {
                         case "normal":
                             context.targetStyle = styleGroup.normal;
                             break;
-                        case "inactive":
-                            styleGroup.inactive = styleGroup.inactive ?? new UIStyle();
-                            context.targetStyle = styleGroup.inactive;
-                            break;
                         case "focused":
                             styleGroup.focused = styleGroup.focused ?? new UIStyle();
                             context.targetStyle = styleGroup.focused;
@@ -399,8 +395,8 @@ namespace UIForia.Parsing.Style {
                             context.targetStyle = styleGroup.hover;
                             break;
                         case "active":
-                            styleGroup.inactive = styleGroup.inactive ?? new UIStyle();
-                            context.targetStyle = styleGroup.inactive;
+                            styleGroup.active = styleGroup.active ?? new UIStyle();
+                            context.targetStyle = styleGroup.active;
                             break;
                         default:
                             throw new ParseException("Style ‘" + styleGroup.name + "’\n" + "Unknown style state: " + stateName);

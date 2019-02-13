@@ -59,6 +59,20 @@ namespace UIForia.Style.Parsing {
             return ptr;
         }
 
+        public static int TryReadHashColor(int ptr, string input, List<StyleToken> output) {
+            if (ptr >= input.Length) return input.Length;
+            if (input[ptr] != '#') return ptr;
+
+            int start = ptr;
+            while (ptr < input.Length && input[ptr] != ';' && !char.IsWhiteSpace(input[ptr])) {
+                ptr++;
+            }
+
+            output.Add(new StyleToken(StyleTokenType.HashColor, input.Substring(start, ptr - start)));
+
+            return TryConsumeWhiteSpace(ptr, input);
+        }
+
         public static int TryReadDigit(int ptr, string input, List<StyleToken> output) {
             bool foundDot = false;
             int startIndex = ptr;
@@ -243,6 +257,7 @@ namespace UIForia.Style.Parsing {
                 ptr = TryReadCharacters(ptr, input, "{", StyleTokenType.BracesOpen, output);
                 ptr = TryReadCharacters(ptr, input, "}", StyleTokenType.BracesClose, output);
 
+                ptr = TryReadHashColor(ptr, input, output);
                 ptr = TryReadDigit(ptr, input, output);
                 ptr = TryReadString(ptr, input, output);
                 ptr = TryReadIdentifier(ptr, input, output);

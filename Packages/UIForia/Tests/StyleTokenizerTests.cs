@@ -32,6 +32,16 @@ public class StyleTokenizerTests {
     }
 
     [Test]
+    public void TokenizeHashColor() {
+        List<StyleToken> tokens = StyleTokenizer.Tokenize(@"BackgrundColor = #1A2B3C4D");
+        AssertTokenTypes(new List<StyleTokenType>() {
+                StyleTokenType.Identifier,
+                StyleTokenType.Equal,
+                StyleTokenType.HashColor,
+        }, tokens);
+    }
+
+    [Test]
     public void TokenizeImport() {
         List<StyleToken> tokens = StyleTokenizer.Tokenize(@"import vars as Constants from ""file"";");
         

@@ -19,7 +19,7 @@ namespace UIForia.Style.Parsing {
         protected static readonly ObjectPool<UnaryExpressionNode> s_UnaryNodePool = new ObjectPool<UnaryExpressionNode>();
         protected static readonly ObjectPool<ImportNode> s_ImportNodePool = new ObjectPool<ImportNode>();
         protected static readonly ObjectPool<PropertyNode> s_PropertyNodePool = new ObjectPool<PropertyNode>();
-        protected static readonly ObjectPool<StyleContainer> s_StyleContainerNodePool = new ObjectPool<StyleContainer>();
+        protected static readonly ObjectPool<StyleStateContainer> s_StyleContainerNodePool = new ObjectPool<StyleStateContainer>();
         protected static readonly ObjectPool<StyleRootNode> s_StyleRootNodePool = new ObjectPool<StyleRootNode>();
         protected static readonly ObjectPool<AttributeGroupContainer> s_AttributeGroupContainerNodePool = new ObjectPool<AttributeGroupContainer>();
         protected static readonly ObjectPool<GroupSpecifierNode> s_GroupSpecifierNodePool = new ObjectPool<GroupSpecifierNode>();
@@ -29,6 +29,8 @@ namespace UIForia.Style.Parsing {
         protected static readonly ObjectPool<RgbNode> s_RgbNodePool = new ObjectPool<RgbNode>();
         protected static readonly ObjectPool<UrlNode> s_UrlNodePool = new ObjectPool<UrlNode>();
         protected static readonly ObjectPool<ExportNode> s_ExportNodePool = new ObjectPool<ExportNode>();
+        protected static readonly ObjectPool<ColorNode> s_ColorNodePool = new ObjectPool<ColorNode>();
+        protected static readonly ObjectPool<MeasurementNode> s_MeasurementNodePool = new ObjectPool<MeasurementNode>();
 
         public StyleASTNodeType type;
 
@@ -40,10 +42,6 @@ namespace UIForia.Style.Parsing {
 
                 return false;
             }
-        }
-        
-        public virtual void AddChildNode(StyleASTNode child) {
-            throw new NotImplementedException();
         }
 
         public abstract void Release();
@@ -63,25 +61,32 @@ namespace UIForia.Style.Parsing {
             return rootNode;
         }
 
-        internal static StyleContainer StateGroupRootNode(string identifier) {
-            StyleContainer rootNode = s_StyleContainerNodePool.Get();
+        internal static StyleStateContainer StateGroupRootNode(string identifier) {
+            StyleStateContainer rootNode = s_StyleContainerNodePool.Get();
             rootNode.type = StyleASTNodeType.StateGroup;
             rootNode.identifier = identifier;
             return rootNode;
         }
 
-        internal static StyleContainer ExpressionGroupRootNode(string identifier) {
-            StyleContainer rootNode = s_StyleContainerNodePool.Get();
+        internal static StyleStateContainer ExpressionGroupRootNode(string identifier) {
+            StyleStateContainer rootNode = s_StyleContainerNodePool.Get();
             rootNode.type = StyleASTNodeType.ExpressionGroup;
             rootNode.identifier = identifier;
             return rootNode;
         }
 
-        internal static PropertyNode PropertyNode(string propertyName, LightList<StyleASTNode> propertyValueParts) {
+        internal static PropertyNode PropertyNode(string propertyName, StyleASTNode propertyValue) {
             PropertyNode propertyNode = s_PropertyNodePool.Get();
             propertyNode.propertyName = propertyName;
-            propertyNode.propertyValueParts = propertyValueParts;
+            propertyNode.propertyValue = propertyValue;
             return propertyNode;
+        }
+
+        internal static MeasurementNode MeasurementNode(StyleASTNode value, StyleASTNode unit) {
+            MeasurementNode measurementNode = s_MeasurementNodePool.Get();
+            measurementNode.value = value;
+            measurementNode.unit = unit;
+            return measurementNode;
         }
 
         internal static GroupSpecifierNode GroupSpecifierNode(GroupOperatorType groupOperatorType) {
@@ -94,7 +99,6 @@ namespace UIForia.Style.Parsing {
             ImportNode importNode = s_ImportNodePool.Get();
             return importNode;
         }
-        
 
         internal static ReferenceNode ReferenceNode(string value) {
             ReferenceNode referenceNode = s_ReferenceNodePool.Get();
@@ -114,6 +118,13 @@ namespace UIForia.Style.Parsing {
             retn.type = StyleASTNodeType.BooleanLiteral;
             retn.rawValue = value;
             return retn;
+        }
+
+        public static ColorNode ColorNode(string colorHash) {
+            ColorNode colorNode = s_ColorNodePool.Get();
+            ColorUtility.TryParseHtmlString(colorHash, out Color color);
+            colorNode.color = color;
+            return colorNode;
         }
 
         public static RgbaNode RgbaNode(StyleASTNode red, StyleASTNode green, StyleASTNode blue, StyleASTNode alpha) {
@@ -277,78 +288,33 @@ namespace UIForia.Style.Parsing {
     /// <summary>
     /// Container for all the things inside a style node: 'style xy { children... }'
     /// </summary>
-    public class StyleRootNode : StyleASTNode {
-        public string identifier;
+    public class StyleRootNode : StyleGroupContainer {
+        
         public string tagName;
-        public LightList<StyleASTNode> children { get; private set; }
-
+        
         public StyleRootNode() {
-            this.children = LightListPool<StyleASTNode>.Get();
-        }
-
-        public override void AddChildNode(StyleASTNode child) {
-            children.Add(child);
+            type = StyleASTNodeType.StyleGroup;
         }
 
         public override void Release() {
-            for (int index = 0; index < children.Count; index++) {
-                StyleASTNode child = children[index];
-                child.Release();
-            }
-
-            children.Clear();
-            children = null;
+            base.Release();
             s_StyleRootNodePool.Release(this);
         }
     }
 
-    public class AttributeGroupContainer : StyleASTNode {
+    public class AttributeGroupContainer : StyleGroupContainer {
         
-        public string identifier;
         public string value;
-        
-        public LightList<StyleASTNode> children { get; private set; }
-
-        public AttributeGroupContainer() {
-            this.children = LightListPool<StyleASTNode>.Get();
-        }
-
-        public override void AddChildNode(StyleASTNode child) {
-            children.Add(child);
-        }
-
+       
         public override void Release() {
-            for (int index = 0; index < children.Count; index++) {
-                StyleASTNode child = children[index];
-                child.Release();
-            }
-
-            children.Clear();
-            children = null;
+            base.Release();
             s_AttributeGroupContainerNodePool.Release(this);
         }
     }
     
-    public class StyleContainer : StyleASTNode {
-        public string identifier;
-        public LightList<StyleASTNode> children { get; private set; }
-
-        public StyleContainer() {
-            this.children = LightListPool<StyleASTNode>.Get();
-        }
-
-        public override void AddChildNode(StyleASTNode child) {
-            children.Add(child);
-        }
-
+    public class StyleStateContainer : StyleGroupContainer {
         public override void Release() {
-            for (int index = 0; index < children.Count; index++) {
-                StyleASTNode child = children[index];
-                child.Release();
-            }
-
-            children.Clear();
-            children = null;
+            base.Release();
             s_StyleContainerNodePool.Release(this);
         }
     }
@@ -391,23 +357,23 @@ namespace UIForia.Style.Parsing {
     public class PropertyNode : StyleASTNode {
 
         public string propertyName;
-        public LightList<StyleASTNode> propertyValueParts;
+        public StyleASTNode propertyValue;
 
         public PropertyNode() {
             type = StyleASTNodeType.Property;
         }
 
         public override void Release() {
-            propertyValueParts.Clear();
-            propertyValueParts = null;
+            s_PropertyNodePool.Release(this);
         }
     }
 
-    public class ReferenceNode : StyleASTNode {
+    public class ReferenceNode : StyleGroupContainer {
 
         public string referenceName;
 
         public override void Release() {
+            base.Release();
             s_ReferenceNodePool.Release(this);
         }
 
@@ -557,6 +523,19 @@ namespace UIForia.Style.Parsing {
         }
     }
 
+    public class ColorNode : StyleASTNode {
+
+        public Color color;
+
+        public ColorNode() {
+            type = StyleASTNodeType.Color;
+        }
+        
+        public override void Release() {
+            s_ColorNodePool.Release(this);
+        }
+    }
+
     public class UrlNode : StyleASTNode {
 
         public StyleASTNode url;
@@ -567,6 +546,17 @@ namespace UIForia.Style.Parsing {
 
         public override void Release() {
             s_UrlNodePool.Release(this);
+        }
+    }
+
+    public class MeasurementNode : StyleASTNode {
+
+        public StyleASTNode value;
+
+        public StyleASTNode unit;
+
+        public override void Release() {
+            s_MeasurementNodePool.Release(this);
         }
     }
 

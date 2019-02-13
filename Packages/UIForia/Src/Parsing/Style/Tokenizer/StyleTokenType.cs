@@ -40,6 +40,7 @@ namespace UIForia.Style.Parsing {
         Identifier,
         VariableType,
         
+        HashColor,
         Rgba,
         Rgb,
         Url,

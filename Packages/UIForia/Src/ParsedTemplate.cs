@@ -60,7 +60,6 @@ namespace UIForia {
         public Type RootType { get; }
         public List<ImportDeclaration> Imports { get; }
 
-
         public UIElement Create() {
             Compile();
             if (baseTemplate == null) {
@@ -208,10 +207,10 @@ namespace UIForia {
                 StyleDefinition def = styleDefinitions[i];
                 UIStyleGroup styleGroup = StyleParser.GetParsedStyle(def.importPath, def.body, tagName);
             }
-            
-            throw new NotImplementedException("come back here and fix this!");    
+
+            throw new NotImplementedException("come back here and fix this!");
         }
-        
+
         internal UIStyleGroup ResolveElementStyle(string tagName) {
             if (styleDefinitions == null) {
                 return default;
@@ -240,7 +239,6 @@ namespace UIForia {
                     mergedGroup.normal = UIStyle.Merge(mergedGroup.normal, styleGroup.normal);
                     mergedGroup.hover = UIStyle.Merge(mergedGroup.hover, styleGroup.hover);
                     mergedGroup.active = UIStyle.Merge(mergedGroup.active, styleGroup.active);
-                    mergedGroup.inactive = UIStyle.Merge(mergedGroup.inactive, styleGroup.inactive);
                     mergedGroup.focused = UIStyle.Merge(mergedGroup.focused, styleGroup.focused);
                 }
             }

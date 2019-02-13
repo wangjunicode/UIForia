@@ -47,7 +47,6 @@ namespace UIForia.Rendering {
         public UIStyleSetStateProxy Hover => new UIStyleSetStateProxy(this, StyleState.Hover);
         public UIStyleSetStateProxy Focus => new UIStyleSetStateProxy(this, StyleState.Focused);
         public UIStyleSetStateProxy Active => new UIStyleSetStateProxy(this, StyleState.Active);
-        public UIStyleSetStateProxy InActive => new UIStyleSetStateProxy(this, StyleState.Inactive);
 
         public void SetGridItemPlacement(int colStart, int colSpan, int rowStart, int rowSpan, StyleState state) {
             SetGridItemColStart(colStart, state);
@@ -437,7 +436,6 @@ namespace UIForia.Rendering {
                 UIStyleGroup group = groups[i];
                 if (group.normal != null) AddStyleState(properties, group.normal, StyleState.Normal, group.styleType);
                 if (group.active != null) AddStyleState(properties, group.active, StyleState.Active, group.styleType);
-                if (group.inactive != null) AddStyleState(properties, group.inactive, StyleState.Inactive, group.styleType);
                 if (group.focused != null) AddStyleState(properties, group.focused, StyleState.Focused, group.styleType);
                 if (group.hover != null) AddStyleState(properties, group.hover, StyleState.Hover, group.styleType);
             }
@@ -485,7 +483,6 @@ namespace UIForia.Rendering {
             styleNames = GetBaseStyleNames(this);
             if (group.normal != null) AddBaseStyle(group.normal, StyleState.Normal, group.styleType);
             if (group.active != null) AddBaseStyle(group.active, StyleState.Active, group.styleType);
-            if (group.inactive != null) AddBaseStyle(group.inactive, StyleState.Inactive, group.styleType);
             if (group.focused != null) AddBaseStyle(group.focused, StyleState.Focused, group.styleType);
             if (group.hover != null) AddBaseStyle(group.hover, StyleState.Hover, group.styleType);
         }
@@ -670,17 +667,6 @@ namespace UIForia.Rendering {
 
                     return instanceStyle.active;
 
-                case StyleState.Inactive:
-                    if (instanceStyle.inactive == null) {
-                        instanceStyle.inactive = new UIStyle();
-                        appliedStyles.Add(new StyleEntry(instanceStyle.inactive, StyleType.Instance,
-                            StyleState.Inactive));
-                        SortStyles();
-                        containedStates |= StyleState.Inactive;
-                    }
-
-                    return instanceStyle.inactive;
-
                 case StyleState.Focused:
                     if (instanceStyle.focused == null) {
                         instanceStyle.focused = new UIStyle();
@@ -719,9 +705,6 @@ namespace UIForia.Rendering {
                             case StyleState.Active:
                                 return "Instance [Active]";
 
-                            case StyleState.Inactive:
-                                return "Instance [Inactive]";
-
                             case StyleState.Focused:
                                 return "Instance [Focused]";
 
@@ -747,8 +730,8 @@ namespace UIForia.Rendering {
                             return group.name + " [Active]";
                         }
 
-                        if (style == group.active) {
-                            return group.name + " [Inactive]";
+                        if (style == group.focused) {
+                            return group.name + " [Focused]";
                         }
                     }
                 }

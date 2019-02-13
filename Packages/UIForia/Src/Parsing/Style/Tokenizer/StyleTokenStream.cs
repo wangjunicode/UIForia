@@ -3,7 +3,7 @@ using System.Diagnostics;
 using UIForia.Util;
 using UnityEngine;
 
-namespace UIForia.Style.Parsing {
+namespace UIForia.Parsing.Style.Tokenizer {
 
     public struct StyleTokenStream {
 

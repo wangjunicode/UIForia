@@ -1,6 +1,6 @@
-namespace UIForia.Style.Parsing {
+namespace UIForia.Parsing.Style.AstNodes {
 
-    public class IdentifierNode : StyleASTNode {
+    public class StyleIdentifierNode : StyleASTNode {
 
         public string name;
         
@@ -10,7 +10,7 @@ namespace UIForia.Style.Parsing {
             s_IdentifierPool.Release(this);
         }
 
-        protected bool Equals(IdentifierNode other) {
+        protected bool Equals(StyleIdentifierNode other) {
             return string.Equals(name, other.name);
         }
 
@@ -18,11 +18,15 @@ namespace UIForia.Style.Parsing {
             if (ReferenceEquals(null, obj)) return false;
             if (ReferenceEquals(this, obj)) return true;
             if (obj.GetType() != this.GetType()) return false;
-            return Equals((IdentifierNode) obj);
+            return Equals((StyleIdentifierNode) obj);
         }
 
         public override int GetHashCode() {
             return (name != null ? name.GetHashCode() : 0);
+        }
+
+        public override string ToString() {
+            return $"StyleIdentifierNode[{name}]";
         }
     }
 

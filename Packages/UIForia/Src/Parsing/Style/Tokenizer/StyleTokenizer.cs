@@ -2,7 +2,7 @@ using System.Collections.Generic;
 using UIForia.Rendering;
 using UnityEngine;
 
-namespace UIForia.Style.Parsing {
+namespace UIForia.Parsing.Style.Tokenizer {
 
     public static class StyleTokenizer {
 

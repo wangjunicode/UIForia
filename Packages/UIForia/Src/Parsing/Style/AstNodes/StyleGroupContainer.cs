@@ -1,6 +1,6 @@
 using UIForia.Util;
 
-namespace UIForia.Style.Parsing {
+namespace UIForia.Parsing.Style.AstNodes {
 
     public abstract class StyleGroupContainer : StyleASTNode {
 

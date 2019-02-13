@@ -1,9 +1,7 @@
 
-using System;
 using System.Collections.Generic;
-using UIForia.Parsing.Style;
+using UIForia.Parsing.Style.AstNodes;
 using UIForia.Rendering;
-using UIForia.Style.Parsing;
 using UIForia.Util;
 using UnityEngine;
 
@@ -113,7 +111,7 @@ namespace UIForia.Compilers.Style {
             }
             
             if (node.type == StyleASTNodeType.NumericLiteral) {
-                return int.Parse(((LiteralNode) node).rawValue);
+                return int.Parse(((StyleLiteralNode) node).rawValue);
             }
 
             throw new ParseException($"Expected a numeric value but all I got was this lousy {node}");

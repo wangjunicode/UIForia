@@ -1,6 +1,6 @@
 using System.Diagnostics;
 
-namespace UIForia.Style.Parsing {
+namespace UIForia.Parsing.Style.Tokenizer {
 
     [DebuggerDisplay("{styleTokenType} -> {value}")]
     public struct StyleToken {

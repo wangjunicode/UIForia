@@ -3,11 +3,12 @@ using UIForia.Util;
 namespace UIForia.Style.Parsing {
 
     public abstract class StyleGroupContainer : StyleASTNode {
+
         public string identifier;
-        public LightList<StyleASTNode> children { get; private set; }
+        public readonly LightList<StyleASTNode> children;
 
         public StyleGroupContainer() {
-            this.children = LightListPool<StyleASTNode>.Get();
+            this.children = new LightList<StyleASTNode>(2);
         }
 
         public void AddChildNode(StyleASTNode child) {
@@ -16,12 +17,12 @@ namespace UIForia.Style.Parsing {
 
         public override void Release() {
             for (int index = 0; index < children.Count; index++) {
-                StyleASTNode child = children[index];
-                child.Release();
+                children[index].Release();
             }
 
             children.Clear();
-            children = null;
         }
+
     }
+
 }

@@ -4,6 +4,7 @@ using UIForia.Style.Parsing;
 using UIForia.Util;
 
 namespace UIForia.Parsing.Style {
+
     public struct StyleParser2 {
 
         private StyleTokenStream tokenStream;
@@ -149,35 +150,34 @@ namespace UIForia.Parsing.Style {
         }
 
         private void ParsePropertyStateOrAttributeGroup(StyleGroupContainer styleRootNode) {
-
             while (tokenStream.HasMoreTokens && tokenStream.Current.styleTokenType != StyleTokenType.BracesClose) {
                 switch (tokenStream.Current.styleTokenType) {
                     case StyleTokenType.Not: {
                         groupOperatorStack.Push(StyleASTNode.OperatorNode(StyleOperatorType.Not));
                         tokenStream.Advance();
-    
+
                         ParseAttributeOrExpressionGroup(styleRootNode);
                         break;
                     }
-    
+
                     case StyleTokenType.And:
                         tokenStream.Advance();
                         AssertTokenType(StyleTokenType.BracketOpen);
                         tokenStream.Advance();
-    
+
                         groupOperatorStack.Push(StyleASTNode.OperatorNode(StyleOperatorType.And));
                         tokenStream.Advance();
-    
+
                         ParseAttributeOrExpressionGroup(styleRootNode);
                         AssertTokenType(StyleTokenType.BracketClose);
                         break;
-    
+
                     case StyleTokenType.BracketOpen:
                         tokenStream.Advance();
                         ParseStateOrAttributeGroup(styleRootNode);
-    
+
                         break;
-    
+
                     case StyleTokenType.Identifier:
                         ParseProperty(styleRootNode);
                         break;
@@ -194,17 +194,17 @@ namespace UIForia.Parsing.Style {
                 // this is the state group
                 case StyleTokenType.Identifier:
                     StyleStateContainer stateGroupRootNode = StyleASTNode.StateGroupRootNode(tokenStream.Current.value);
-                    
+
                     tokenStream.Advance();
                     AssertTokenTypeAndAdvance(StyleTokenType.BracketClose);
                     AssertTokenTypeAndAdvance(StyleTokenType.BracesOpen);
 
                     ParseProperties(stateGroupRootNode);
-                    
+
                     AssertTokenTypeAndAdvance(StyleTokenType.BracesClose);
-                    
+
                     styleRootNode.AddChildNode(stateGroupRootNode);
-                    
+
                     break;
                 case StyleTokenType.AttributeSpecifier:
                     tokenStream.Advance();
@@ -256,6 +256,7 @@ namespace UIForia.Parsing.Style {
                         AssertTokenType(StyleTokenType.Identifier);
                         unit = StyleASTNode.UnitNode(tokenStream.Current.value);
                     }
+
                     propertyValue = StyleASTNode.MeasurementNode(value, unit);
 
                     break;
@@ -345,17 +346,17 @@ namespace UIForia.Parsing.Style {
                     ReferenceNode referenceNode = StyleASTNode.ReferenceNode(tokenStream.Current.value);
                     propertyValue = referenceNode;
                     tokenStream.Advance();
-                    
+
                     while (tokenStream.HasMoreTokens && AdvanceIfTokenType(StyleTokenType.Dot)) {
                         AssertTokenType(StyleTokenType.Identifier);
-                        referenceNode.AddChildNode(StyleASTNode.DotAccessNode(tokenStream.Current.value));                           
+                        referenceNode.AddChildNode(StyleASTNode.DotAccessNode(tokenStream.Current.value));
                     }
 
                     break;
             }
 
             tokenStream.Advance();
-          
+
             PropertyNode propertyNode = StyleASTNode.PropertyNode(propertyName, propertyValue);
             styleRootNode.AddChildNode(propertyNode);
             AssertTokenTypeAndAdvance(StyleTokenType.EndStatement);
@@ -393,6 +394,7 @@ namespace UIForia.Parsing.Style {
             if (tokenStream.Current.styleTokenType != styleTokenType) {
                 throw new ParseException($"Parsing stylesheet failed. Expected token '{styleTokenType}' but got '{tokenStream.Current.styleTokenType}'");
             }
+
             tokenStream.Advance();
         }
 
@@ -430,18 +432,18 @@ namespace UIForia.Parsing.Style {
 
             string identifier = tokenStream.Current.value;
             string value = null;
-            
+
             tokenStream.Advance();
             if (tokenStream.Current.styleTokenType == StyleTokenType.Equal) {
                 tokenStream.Advance();
                 value = tokenStream.Current.value;
             }
-            
+
             AttributeGroupContainer attributeGroupRootNode = StyleASTNode.AttributeGroupRootNode(identifier, value);
-            
+
             tokenStream.Advance();
             AssertTokenType(StyleTokenType.BracketClose);
-        
+
             tokenStream.Advance();
             AssertTokenType(StyleTokenType.BracesOpen);
 
@@ -546,6 +548,7 @@ namespace UIForia.Parsing.Style {
                     throw new Exception("Unknown op type");
             }
         }
+
     }
 
 }

@@ -236,14 +236,14 @@ public class HierarchyView : TreeView {
             rect.width -= size.x;
         }
         
-        if (element is RouterElement) {
-            s_Content.text = "url: " + element.view.Application.Router.CurrentUrl;
-            s_ElementNameStyle.normal.textColor = AdjustColor(new Color32(255, 113, 0, 255), element);
-            GUI.Label(rect, s_Content, s_ElementNameStyle);
-            Vector2 size = s_ElementNameStyle.CalcSize(s_Content);
-            rect.x += size.x;
-            rect.width -= size.x;
-        }
+//        if (element is RouterElement) {
+//            s_Content.text = "url: " + element.view.Application.Router.CurrentUrl;
+//            s_ElementNameStyle.normal.textColor = AdjustColor(new Color32(255, 113, 0, 255), element);
+//            GUI.Label(rect, s_Content, s_ElementNameStyle);
+//            Vector2 size = s_ElementNameStyle.CalcSize(s_Content);
+//            rect.x += size.x;
+//            rect.width -= size.x;
+//        }
 
         if (renderData != null && renderData.CullResult != CullResult.NotCulled) {
             s_Content.text = GetCullText(renderData.CullResult);

@@ -27,22 +27,22 @@ namespace UI {
         public void ShowMenuPanel(string menuName) {
             switch (menuName) {
                 case "skills":
-                    view.Application.Router.GoTo("/skills");
+                    Application.RoutingSystem.FindRouterInHierarchy(this).GoTo("/skills");
                     break;
                 case "gear":
-                    view.Application.Router.GoTo("/gear");
+                    Application.RoutingSystem.FindRouterInHierarchy(this).GoTo("/gear");
                     break;
                 case "mood":
-                    view.Application.Router.GoTo("/mood");
+                    Application.RoutingSystem.FindRouterInHierarchy(this).GoTo("/mood");
                     break;
                 case "schedule":
-                    view.Application.Router.GoTo("/schedule");
+                    Application.RoutingSystem.FindRouterInHierarchy(this).GoTo("/schedule");
                     break;
                 case "health":
-                    view.Application.Router.GoTo("/health");
+                    Application.RoutingSystem.FindRouterInHierarchy(this).GoTo("/health");
                     break;
                 case "social":
-                    view.Application.Router.GoTo("/social");
+                    Application.RoutingSystem.FindRouterInHierarchy(this).GoTo("/social");
                     break;
                 
             }

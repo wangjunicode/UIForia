@@ -1,11 +1,10 @@
-using JetBrains.Annotations;
+using System;
 using UIForia;
-using UIForia.Elements;
 
 namespace UI {
 
-    public class OptionalPropAttribute : System.Attribute {}
-    public class RequiredPropAttribute : System.Attribute {}
+    public class OptionalPropAttribute : Attribute {}
+    public class RequiredPropAttribute : Attribute {}
 
     [Template("Klang/Seed/UIForia/KlangButton/KlangButton.xml")]
     public class KlangButton : UIElement {
@@ -41,7 +40,7 @@ namespace UI {
             if (path == null) {
                 return;
             }
-            view.Application.Router.GoTo(path);
+            throw new NotSupportedException();
         }
 
     }

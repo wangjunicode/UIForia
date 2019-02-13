@@ -279,6 +279,13 @@ namespace SVGX {
             BeginPath();
         }
         
+        public void FillRect(Rect rect) {
+            BeginPath();
+            Rect(rect.x, rect.y, rect.width, rect.height);
+            Fill();
+            BeginPath();
+        }
+        
         public void FillCircle(float x, float y, float radius) {
             BeginPath();
             Circle(x, y, radius);

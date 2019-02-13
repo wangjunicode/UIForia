@@ -606,6 +606,9 @@ namespace UIForia.Systems {
                 UIElement current = elements.Pop();
 
                 LayoutBox box = m_LayoutBoxMap.GetOrDefault(current.id);
+                
+                if(box == null) continue; 
+                
                 box.markedForLayout = true;
 
                 if (current.children == null) {

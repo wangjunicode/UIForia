@@ -71,6 +71,7 @@ namespace SVGX {
             this.camera = camera;
             debugLineMaterial = new Material(Shader.Find("UIForia/SimpleLineSegments"));
             sdfTextMaterial = new Material(Shader.Find("UIForia/SDFText"));
+            simpleFillOpaqueMaterial = new Material(Shader.Find("UIForia/SimpleFillOpaque"));
             
             gradientAtlas = new Texture2D(GradientPrecision, 32);
             gradientAtlas.wrapMode = TextureWrapMode.Clamp;
@@ -190,6 +191,20 @@ namespace SVGX {
                     if (idx == -1) {
                         TexturedShapeGroup group = new TexturedShapeGroup() {
                             textureId = textureId,
+                            shapes = LightListPool<SVGXRenderShape>.Get()
+                        };
+                        group.shapes.Add(shapes[i]);
+                        retn.Add(group);
+                    }
+                    else {
+                        retn[idx].shapes.Add(shapes[i]);
+                    }
+                }
+                else {
+                    int idx = retn.FindIndex(-1, ((group, texId) => group.textureId == texId));
+                    if (idx == -1) {
+                        TexturedShapeGroup group = new TexturedShapeGroup() {
+                            textureId = -1,
                             shapes = LightListPool<SVGXRenderShape>.Get()
                         };
                         group.shapes.Add(shapes[i]);

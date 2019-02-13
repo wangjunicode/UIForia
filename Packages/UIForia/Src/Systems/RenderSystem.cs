@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using SVGX;
 using UIForia.Extensions;
 using UIForia.Elements;
 using UIForia.Rendering;
@@ -24,6 +25,8 @@ namespace UIForia.Systems {
         private readonly LightList<UIElement> m_ToInitialize;
         private readonly LightList<RenderData> m_WillRenderList;
         private readonly LightList<RenderData> m_RenderDataList;
+        private readonly ImmediateRenderContext m_RenderContext;
+        private GFX gfx;
 
         private Camera m_Camera;
         private readonly List<VirtualScrollbar> m_Scrollbars;
@@ -38,10 +41,12 @@ namespace UIForia.Systems {
             this.m_Scrollbars = new List<VirtualScrollbar>();
             layoutSystem.onCreateVirtualScrollbar += HandleScrollbarCreated;
             layoutSystem.onDestroyVirtualScrollbar += HandleScrollbarDestroyed;
+            gfx = new GFX(camera);
         }
 
         public void SetCamera(Camera camera) {
             m_Camera = camera;
+            gfx = new GFX(camera);
         }
 
         private void HandleScrollbarCreated(VirtualScrollbar scrollbar) {
@@ -52,7 +57,9 @@ namespace UIForia.Systems {
             m_Scrollbars.Add(scrollbar);
         }
 
-        private void HandleScrollbarDestroyed(VirtualScrollbar scrollbar) { }
+        private void HandleScrollbarDestroyed(VirtualScrollbar scrollbar) {
+            throw new NotImplementedException();
+        }
 
         private void InitializeRenderables() {
             if (m_ToInitialize.Count == 0) return;
@@ -68,7 +75,7 @@ namespace UIForia.Systems {
                 if (element.isDisabled) {
                     continue;
                 }
-                
+
                 m_RenderDataList.AddUnchecked(new RenderData(element));
             }
 
@@ -77,6 +84,49 @@ namespace UIForia.Systems {
 
         public RenderData GetRenderData(UIElement element) {
             return m_RenderDataList.Find(element, (d, el) => d.element == el);
+        }
+
+        public void OnUpdateImmediateMode() {
+            if (m_Camera == null) {
+                return;
+            }
+
+            m_RenderContext.Clear();
+
+            // will render list should be already depth sorted
+
+            // will have to handle clipping
+            
+            
+            for (int i = 0; i < m_WillRenderList.Count; i++) {
+                RenderData renderData = m_WillRenderList[i];
+                UIStyleSet style = renderData.element.style;
+
+                if (renderData.element is UITextElement) { }
+                else if (renderData.element is UIImageElement) { }
+                else {
+                    if (style.HasBorderRadius) { }
+
+                    if (style.BackgroundColor.IsDefined()) { }
+
+                    LayoutResult layoutResult = renderData.element.layoutResult;
+                    Rect screenRect = layoutResult.ScreenRect;
+
+                    Texture2D backgroundImage = style.BackgroundImage;
+                    Color backgroundColor = style.BackgroundColor;
+
+                    if (style.BackgroundImage != null) {
+                        m_RenderContext.SetFill(backgroundImage);
+                    }
+                    else {
+                        m_RenderContext.SetFill(backgroundColor);
+                    }
+                    
+                    m_RenderContext.FillRect(screenRect);
+                }
+            }
+            
+            gfx.Render(m_RenderContext);
         }
 
         public void OnUpdate() {
@@ -98,17 +148,28 @@ namespace UIForia.Systems {
 
             RenderData[] renderList = m_RenderDataList.Array;
 
+
+            // sort by cull groups
+            // for each each cull group
+
+            // ctx.BeginCull()
+
+            // ctx.Issue Draw Calls
+
+            // ctx.EndCull()
+
+
             // todo -- can be easily jobified
             for (int i = 0; i < m_RenderDataList.Count; i++) {
                 RenderData data = renderList[i];
-                
+
                 if (data.element.style.Visibility == Visibility.Hidden) {
                     data.CullResult = CullResult.VisibilityHidden;
-                    continue; 
+                    continue;
                 }
-                
+
                 // todo -- if no background image & no background color or opacity is 0: cull
-                
+
                 LayoutResult layoutResult = data.element.layoutResult;
                 Rect screenRect = layoutResult.ScreenRect;
 
@@ -208,7 +269,7 @@ namespace UIForia.Systems {
             m_ToInitialize.Clear();
         }
 
-        public void OnElementEnabled(UIElement element) {            
+        public void OnElementEnabled(UIElement element) {
             Stack<UIElement> stack = StackPool<UIElement>.Get();
             stack.Push(element);
             while (stack.Count > 0) {
@@ -217,7 +278,7 @@ namespace UIForia.Systems {
                 if (current.isDisabled) {
                     continue;
                 }
-                
+
                 m_ToInitialize.Add(current);
 
                 if (current.children != null) {
@@ -231,7 +292,6 @@ namespace UIForia.Systems {
         }
 
         public void OnElementDisabled(UIElement element) {
-           
             Stack<UIElement> stack = StackPool<UIElement>.Get();
             stack.Push(element);
             while (stack.Count > 0) {
@@ -265,11 +325,10 @@ namespace UIForia.Systems {
         }
 
         public void OnElementCreated(UIElement element) {
-
             if (element.isDisabled) {
                 return;
             }
-            
+
             m_ToInitialize.Add(element);
             if (element.children == null) {
                 return;
@@ -292,7 +351,7 @@ namespace UIForia.Systems {
                 Vector2 screenPosition = renderData.element.layoutResult.screenPosition;
                 renderData.renderPosition = new Vector3(screenPosition.x, -screenPosition.y, renderData.element.layoutResult.zIndex);
             }
-        }       
+        }
 
     }
 

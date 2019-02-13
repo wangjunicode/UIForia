@@ -22,8 +22,7 @@ namespace UIForia {
                 }
             }
             
-            view.Application.Router.GoTo(path);
-            
+            throw new NotImplementedException();
             ListPool<ElementAttribute>.Release(ref attrs);
         }
         
@@ -38,7 +37,7 @@ namespace UIForia {
         
         [OnMouseClick]
         public void GoBack() {
-            view.Application.Router.GoBack();
+            throw new NotImplementedException();
         }
         
     }

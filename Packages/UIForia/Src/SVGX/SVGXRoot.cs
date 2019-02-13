@@ -30,11 +30,11 @@ namespace SVGX {
         public void Start() {
             ctx = new ImmediateRenderContext();
             gfx = new GFX(camera) {
-                simpleFillOpaqueMaterial = simpleFillOpaque,
-                stencilFillOpaqueCutoutMaterial = stencilFillCutoutOpaque,
-                stencilFillOpaquePaintMaterial = stencilFillPaintOpaque,
-                stencilFillOpaqueClearMaterial = stencilFillClearOpaque,
-                simpleStrokeOpaqueMaterial = simpleStrokeOpaque
+//                simpleFillOpaqueMaterial = simpleFillOpaque,
+//                stencilFillOpaqueCutoutMaterial = stencilFillCutoutOpaque,
+//                stencilFillOpaquePaintMaterial = stencilFillPaintOpaque,
+//                stencilFillOpaqueClearMaterial = stencilFillClearOpaque,
+//                simpleStrokeOpaqueMaterial = simpleStrokeOpaque
             };
         }
 
@@ -43,7 +43,8 @@ namespace SVGX {
             camera.orthographicSize = Screen.height * 0.5f;
 
             ctx.Clear();
-            ctx.Text(0, 0, "This should work");
+            ctx.SetFill(Color.red);
+            ctx.FillRect(new Rect(0, 0, 100, 100));
             gfx.Render(ctx);
             
 //

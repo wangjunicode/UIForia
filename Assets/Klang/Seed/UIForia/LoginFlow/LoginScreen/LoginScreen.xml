@@ -5,12 +5,6 @@
 
     <Style path="Klang/Seed/UIForia/Util.style" alias="util"/>
     <Style path="Klang/Seed/UIForia/KlangButton/KlangButton.style" alias="klang-button"/>
-
-    <Block id="block0" baseType="typeof($root)">
-        
-        {$value}
-        
-    </Block>
     
     <Contents style="container">
 

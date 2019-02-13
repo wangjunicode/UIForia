@@ -23,7 +23,6 @@ namespace UIForia {
 
         protected readonly SkipTree<UIElement> m_ElementTree;
         protected readonly SkipTree<UIElement> m_UpdateTree;
-        protected Router m_Router;
 
         protected readonly List<ISystem> m_Systems;
 
@@ -57,7 +56,6 @@ namespace UIForia {
             this.m_Systems = new List<ISystem>();
             this.m_ElementTree = new SkipTree<UIElement>();
             this.m_Views = new List<UIView>();
-            this.m_Router = new Router();
             this.m_UpdateTree = new SkipTree<UIElement>();
 
             m_StyleSystem = new StyleSystem();
@@ -83,7 +81,6 @@ namespace UIForia {
         public RoutingSystem RoutingSystem => m_RoutingSystem;
 
         public Camera Camera { get; private set; }
-        public Router Router => m_Router;
 
         public void SetCamera(Camera camera) {
             Camera = camera;
@@ -158,7 +155,6 @@ namespace UIForia {
 
         public void Refresh() {
             onWillRefresh?.Invoke();
-            m_Router = new Router();
             foreach (ISystem system in m_Systems) {
                 system.OnReset();
             }
@@ -197,13 +193,7 @@ namespace UIForia {
 
                 element.view = element.parent.view;
                 element.depth = element.parent.depth + 1;
-            }
-
-            // todo -- maybe move this
-            IRouteHandler routeHandler = element as IRouteHandler;
-            if (routeHandler != null) {
-                m_Router.AddRouteHandler(routeHandler);
-            }
+            }          
 
             m_ElementTree.AddItem(element);
             Type elementType = element.GetType();

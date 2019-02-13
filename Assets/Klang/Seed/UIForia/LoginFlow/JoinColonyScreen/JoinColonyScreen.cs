@@ -2,7 +2,7 @@ using System.Collections.Generic;
 using UIForia;
 using UnityEngine;
 
-namespace UI.LoginFlow {
+namespace UI {
 
     public struct JoinColonyInfo {
 

@@ -162,6 +162,8 @@
                   <e p="JoinColonyScreen.cs" t="Include" />
                   <e p="JoinColonyScreen.xml" t="Include" />
                 </e>
+                <e p="LoginFlow.cs" t="Include" />
+                <e p="LoginFlow.xml" t="Include" />
                 <e p="LoginScreen" t="Include">
                   <e p="LoginScreen.cs" t="Include" />
                   <e p="LoginScreen.xml" t="Include" />
@@ -259,8 +261,9 @@
             <e p="Application.cs" t="Include" />
             <e p="AssemblyInfo.cs" t="Include" />
             <e p="AttributeProcessors" t="Include">
+              <e p="IAttributeProcessor.cs" t="Include" />
               <e p="InputAttrProcessor.cs" t="Include" />
-              <e p="RouteAttrProcessor.cs" t="Include" />
+              <e p="RoutingSystem.cs" t="Include" />
             </e>
             <e p="Attributes.cs" t="Include" />
             <e p="Binding" t="Include">

@@ -479,13 +479,19 @@ namespace UIForia.Systems {
             }
 
             bool notifyParent = box.parent != null && (box.style.LayoutBehavior & LayoutBehavior.Ignored) == 0 && box.element.isEnabled;
-            bool invalidatePreferredSizeCache = false;            
+            bool invalidatePreferredSizeCache = false;
+            
             for (int i = 0; i < properties.Count; i++) {
                 StyleProperty property = properties[i];
                 
                 switch (property.propertyId) {
                     case StylePropertyId.LayoutBehavior:
-                        box.markedForLayout = true;
+                        if (property.AsLayoutBehavior == LayoutBehavior.Ignored) {
+                            box.parent?.OnChildDisabled(box);
+                        }
+                        else {
+                            box.parent?.OnChildEnabled(box);
+                        }
                         break;
                     case StylePropertyId.LayoutType:
                         HandleLayoutChanged(element);
@@ -514,7 +520,7 @@ namespace UIForia.Systems {
                     }
                 }
             }
-
+            
             if (invalidatePreferredSizeCache) {
                 if (notifyParent) {
                     box.RequestContentSizeChangeLayout();

@@ -103,7 +103,6 @@ namespace UIForia.Animation {
             UIElement element = styleSet.element;
             switch (m_TargetValue.propertyId) {
                 case StylePropertyId.TransformPivotX:
-                case StylePropertyId.TransformPositionX:
                 case StylePropertyId.PaddingLeft:
                 case StylePropertyId.PaddingRight:
                 case StylePropertyId.BorderLeft:
@@ -111,6 +110,9 @@ namespace UIForia.Animation {
                 case StylePropertyId.MarginLeft:
                 case StylePropertyId.MarginRight:
                     return new AnimationState(ResolveFixedWidth(element, viewport, startProperty.AsUIFixedLength));
+                
+                case StylePropertyId.TransformPositionX:
+                    return new AnimationState(ResolveTransformOffset(element, viewport, startProperty.AsTransformOffset));
 
                 case StylePropertyId.TransformPivotY:
                 case StylePropertyId.TransformPositionY:
@@ -232,7 +234,6 @@ namespace UIForia.Animation {
 
             switch (propertyId) {
                 case StylePropertyId.TransformPivotX:
-                case StylePropertyId.TransformPositionX:
                 case StylePropertyId.PaddingLeft:
                 case StylePropertyId.PaddingRight:
                 case StylePropertyId.BorderLeft:
@@ -242,6 +243,12 @@ namespace UIForia.Animation {
                     v = Mathf.Lerp(status.floatValue, ResolveFixedWidth(element, viewport, m_TargetValue.AsUIFixedLength), adjustedT);
                     element.style.SetAnimatedProperty(new StyleProperty(propertyId, new UIFixedLength(v)));
                     break;
+                
+                case StylePropertyId.TransformPositionX:
+                    v = Mathf.Lerp(status.floatValue, ResolveTransformOffset(element, viewport, m_TargetValue.AsTransformOffset), adjustedT);
+                    element.style.SetAnimatedProperty(new StyleProperty(propertyId, new TransformOffset(v)));
+                    break;
+                
                 case StylePropertyId.TransformPivotY:
                 case StylePropertyId.TransformPositionY:
                 case StylePropertyId.PaddingTop:
@@ -294,57 +301,7 @@ namespace UIForia.Animation {
                 case StylePropertyId.BorderColor:
                 case StylePropertyId.BackgroundColor:
                 case StylePropertyId.TextColor:
-//                    if (m_TargetValue.IsGradient) {
-//                        Rendering.Gradient targetGradient = m_TargetValue.AsGradient;
-//                        if ((int) status.floatValue == (int) ColorType.Gradient) {
-//                            Rendering.Gradient startGradient = (Rendering.Gradient) status.startValueAsObject;
-//                            Rendering.Gradient finalGradient = new Rendering.Gradient();
-//
-//                            finalGradient.start = Mathf.Lerp(startGradient.start, targetGradient.start, adjustedT);
-//                            finalGradient.rotation = Mathf.Lerp(startGradient.rotation, targetGradient.rotation, adjustedT);
-//                            finalGradient.color0 = Color.Lerp(startGradient.color0, targetGradient.color0, adjustedT);
-//                            finalGradient.color1 = Color.Lerp(startGradient.color1, targetGradient.color1, adjustedT);
-//                            finalGradient.offset = Vector2.Lerp(startGradient.offset, targetGradient.offset, adjustedT);
-//                            finalGradient.axis = targetGradient.axis;
-//                            finalGradient.type = targetGradient.type;
-//                            element.style.SetAnimatedProperty(new StyleProperty(propertyId, finalGradient));
-//                        }
-//                        else {
-//                            Color color = new StyleColor((int) status.floatValue);
-//
-//                            Rendering.Gradient finalGradient = new Rendering.Gradient();
-//
-//                            finalGradient.start = Mathf.Lerp(0, targetGradient.start, adjustedT);
-//                            finalGradient.rotation = Mathf.Lerp(0, targetGradient.rotation, adjustedT);
-//                            finalGradient.color0 = Color.Lerp(color, targetGradient.color0, adjustedT);
-//                            finalGradient.color1 = Color.Lerp(color, targetGradient.color1, adjustedT);
-//                            finalGradient.offset = Vector2.Lerp(Vector2.zero, targetGradient.offset, adjustedT);
-//                            finalGradient.axis = targetGradient.axis;
-//                            finalGradient.type = targetGradient.type;
-//
-//                            element.style.SetAnimatedProperty(new StyleProperty(propertyId, finalGradient));
-//                        }
-//                    }
-//                    else {
-//                        if ((int) status.floatValue == (int) ColorType.Gradient) {
-//                            Rendering.Gradient startGradient = (Rendering.Gradient) status.startValueAsObject;
-//                            Rendering.Gradient finalGradient = new Rendering.Gradient();
-//                            Color targetColor = m_TargetValue.AsColor;
-//                            finalGradient.start = Mathf.Lerp(startGradient.start, 0, adjustedT);
-//                            finalGradient.rotation = Mathf.Lerp(startGradient.rotation, 0, adjustedT);
-//                            finalGradient.color0 = Color.Lerp(startGradient.color0, targetColor, adjustedT);
-//                            finalGradient.color1 = Color.Lerp(startGradient.color1, targetColor, adjustedT);
-//                            finalGradient.offset = Vector2.Lerp(startGradient.offset, Vector2.zero, adjustedT);
-//                            finalGradient.axis = startGradient.axis;
-//                            finalGradient.type = startGradient.type;
-//                            element.style.SetAnimatedProperty(new StyleProperty(propertyId, finalGradient));
-//                        }
-//                        else {
-//                            Color c = Color.Lerp(new StyleColor((int) status.floatValue), m_TargetValue.AsColor, adjustedT);
-//                            element.style.SetAnimatedProperty(new StyleProperty(propertyId, c));
-//                        }
-//                    }
-
+                    
                     break;
 
                 default:

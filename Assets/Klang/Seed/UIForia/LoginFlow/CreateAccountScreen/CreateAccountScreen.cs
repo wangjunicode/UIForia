@@ -4,7 +4,7 @@ using UIForia.Rendering;
 using UIForia.Routing;
 using UnityEngine;
 
-namespace UI.LoginFlow {
+namespace UI {
 
     [Template("Klang/Seed/UIForia/LoginFlow/CreateAccountScreen/CreateAccountScreen.xml")]
     public class CreateAccountScreen : UIElement {

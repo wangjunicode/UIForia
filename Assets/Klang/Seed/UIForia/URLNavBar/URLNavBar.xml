@@ -5,15 +5,15 @@
     
     <Contents style="url-nav-bar">
     
-        <RouterLinkBack style="back-button">
-            <Image style="icon" src="'arrow_left'"/>
-        </RouterLinkBack>
+        <!--<RouterLinkBack style="back-button">-->
+            <!--<Image style="icon" src="'arrow_left'"/>-->
+        <!--</RouterLinkBack>-->
+        <!---->
+        <!--<RouterLink>-->
+            <!--<Image style="icon" src="'arrow_right'"/>-->
+        <!--</RouterLink>-->
         
-        <RouterLink>
-            <Image style="icon" src="'arrow_right'"/>
-        </RouterLink>
-        
-        <Text>URL: {$route.url}</Text>
+        <Text>URL: {router.CurrentUrl}</Text>
             
     </Contents>
     

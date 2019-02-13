@@ -207,11 +207,11 @@ namespace UIForia.Rendering {
             return new StyleProperty(propertyId, IntUtil.UnsetValue, IntUtil.UnsetValue, FloatUtil.UnsetValue, null);
         }
 
-        public static StyleProperty TransformPositionX(UIFixedLength length) {
+        public static StyleProperty TransformPositionX(TransformOffset length) {
             return new StyleProperty(StylePropertyId.TransformPositionX, length);
         }
 
-        public static StyleProperty TransformPositionY(UIFixedLength length) {
+        public static StyleProperty TransformPositionY(TransformOffset length) {
             return new StyleProperty(StylePropertyId.TransformPositionY, length);
         }
 

@@ -44,6 +44,7 @@ namespace UIForia.Routing2 {
     public class Route {
 
         public string path;
+        public UIElement element;
         public event Action onRouteEnter;
         public event Action onRouteExit;
         public event Action onRouteUpdate;
@@ -51,15 +52,18 @@ namespace UIForia.Routing2 {
         // path       = /game/view/creator/1/eyebrows
         // match Path = /game/view/character
 
-        public Route(string path) {
+        public Route(string path, UIElement element) {
             this.path = path;
+            this.element = element;
         }
 
         public void Enter() {
+            element.SetEnabled(true);
             onRouteEnter?.Invoke();
         }
 
         public void Exit() {
+            element.SetEnabled(false);
             onRouteExit?.Invoke();
         }
 
@@ -112,8 +116,7 @@ namespace UIForia.Routing2 {
 
         public int hostId;
         public readonly string name;
-
-        private static readonly LightList<Router> s_Routers = new LightList<Router>();
+        private bool isInitialized;
 
         private readonly LightList<Route> m_RouteHandlers;
         private readonly LightList<RouteTransition> m_Transitions;
@@ -122,9 +125,14 @@ namespace UIForia.Routing2 {
         private Route activeRoute;
         private Route targetRoute;
 
-        public Router(int hostId, string name) {
+        private string targetUrl;
+        private string defaultRoute;
+
+        internal Router(int hostId, string name, string defaultRoute = null) {
             this.hostId = hostId;
             this.name = name;
+            this.defaultRoute = defaultRoute;
+
             m_RouteHandlers = new LightList<Route>();
             m_Transitions = new LightList<RouteTransition>();
             m_ActiveTransitions = new LightList<RouteTransition>();
@@ -135,9 +143,10 @@ namespace UIForia.Routing2 {
 
         public Route ActiveRoute => activeRoute;
         public Route TargetRoute => targetRoute;
+        public string CurrentUrl { get; private set; }
 
-        public void AddRoute(string path) {
-            this.m_RouteHandlers.Add(new Route(path));
+        public void AddRoute(UIElement element, string path) {
+            this.m_RouteHandlers.Add(new Route(path, element));
         }
 
         public void AddRoute(Route route) {
@@ -148,47 +157,40 @@ namespace UIForia.Routing2 {
             m_Transitions.Add(new RouteTransition(fromPath, toPath, action));
         }
 
-        public static Router Find(string routerName) {
-            for (int i = 0; i < s_Routers.Count; i++) {
-                if (s_Routers[i].name == routerName) {
-                    return s_Routers[i];
-                }
-            }
+        public void Initialize() {
+            if (isInitialized) return;
+            isInitialized = true;
 
-            return null;
-        }
+            if (defaultRoute != null) {
+                CurrentUrl = defaultRoute;
+                targetUrl = defaultRoute;
 
-        public static Router Find(IHierarchical element, string routerName) {
-            // todo find router by element hierarchy
-            IHierarchical ptr = element;
-            while (ptr != null) {
-                for (int i = 0; i < s_Routers.Count; i++) {
-                    if (s_Routers[i].hostId == ptr.UniqueId) {
-                        return s_Routers[i];
+                for (int i = 0; i < m_RouteHandlers.Count; i++) {
+                    RouteMatch match = Route.Match(m_RouteHandlers[i].path, defaultRoute, 0);
+                    if (match.IsMatch) {
+                        targetRoute = m_RouteHandlers[i];
+
+                        if (m_ActiveTransitions.Count == 0) {
+                            EnterRoute();
+                        }
+
+                        return;
                     }
                 }
-
-                ptr = ptr.Parent;
             }
-
-            for (int i = 0; i < s_Routers.Count; i++) {
-                if (s_Routers[i].name == routerName) {
-                    return s_Routers[i];
-                }
-            }
-
-            return null;
         }
 
+        private float tickElapsed;
+        
         public void Tick() {
-            float delta = Time.deltaTime;
+            Initialize();
 
             if (m_ActiveTransitions.Count == 0) {
                 return;
             }
 
             for (int i = 0; i < m_ActiveTransitions.Count; i++) {
-                RouteTransitionState state = m_ActiveTransitions[i].fn(delta);
+                RouteTransitionState state = m_ActiveTransitions[i].fn(tickElapsed);
 
                 if (state == RouteTransitionState.Cancelled) {
                     // reset transition state
@@ -197,17 +199,19 @@ namespace UIForia.Routing2 {
                 }
 
                 if (state == RouteTransitionState.Completed) {
-                    m_Transitions.RemoveAt(i--);
+                    m_ActiveTransitions.RemoveAt(i--);
                 }
             }
 
             if (m_ActiveTransitions.Count == 0) {
                 EnterRoute();
             }
+
+            tickElapsed += Time.deltaTime;
         }
 
-
         public void GoTo(string path) {
+            targetUrl = path;
             for (int i = 0; i < m_RouteHandlers.Count; i++) {
                 RouteMatch match = Route.Match(m_RouteHandlers[i].path, path, 0);
                 if (match.IsMatch) {
@@ -237,6 +241,9 @@ namespace UIForia.Routing2 {
             else {
                 activeRoute.Update();
             }
+
+            tickElapsed = 0;
+            CurrentUrl = targetUrl;
         }
 
         private void GatherTransitions(string path) {
@@ -247,19 +254,14 @@ namespace UIForia.Routing2 {
             }
         }
 
-        private static bool IsTransitionApplicable(RouteTransition transition, string path) {
-            return Route.Match(transition.fromPath, path, 0).IsMatch;
+        private bool IsTransitionApplicable(RouteTransition transition, string path) {
+            bool first = Route.Match(transition.fromPath, CurrentUrl, 0).IsMatch;
+            bool second = Route.Match(transition.toPath, path, 0).IsMatch;
+            return first && second;
         }
 
         private bool IsTransitionAllowed(string path, string targetPath) {
             return true;
-        }
-
-        public static Router Create(UIElement element, string currentAttrValue) {
-            // todo eventually we want to segment routers by application, ie 1 set for editor, 1 set for game
-            Router router = new Router(element.id, currentAttrValue);
-            s_Routers.Add(router);
-            return router;
         }
 
         public static void ResolveRouterName(string value, out string routerName, out string path) {
@@ -269,7 +271,7 @@ namespace UIForia.Routing2 {
                 path = value.Substring(idx + 2);
             }
             else {
-                routerName = "__default__";
+                routerName = null;
                 path = value;
             }
         }

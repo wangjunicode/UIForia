@@ -7,70 +7,37 @@
     <Style>
 
         style container {
-        PreferredSize = 100vw, 100vh;
-        BackgroundColor = #EEEEEEFF;
+            PreferredSize = 100vw, 100vh;
+            BackgroundColor = #EEEEEEFF;
         }
 
         style app-body {
-        FlexLayoutMainAxisAlignment = Center;
-        FlexLayoutCrossAxisAlignment = Center;
-        FlexItemSelfAlignment = Center;
-        FlexItemGrow = 1;
-        PreferredSize = 1pca, 0;
+            FlexLayoutMainAxisAlignment = Center;
+            FlexLayoutCrossAxisAlignment = Center;
+            FlexItemSelfAlignment = Center;
+            FlexItemGrow = 1;
+            PreferredSize = 1pca, 0;
+            FlexLayoutDirection = Column;
         }
 
     </Style>
 
     <Using namespace="UI"/>
 
-    <Contents style="container">
+    <Contents style="container" x-router="game" x-defaultRoute="/splash">
 
-        <URLNavBar/>
+        <URLNavBar targetRouterName="'game'"/>
 
-        <Group style="app-body" x-router="game" x-default-route="/splash">
+        <Group style="app-body" >
 
             <SeedSplashScreen x-route="/splash"/>
 
-            <!--<LoginFlow x-route="/login_flow"/>-->
-            <!---->
-            <!--<Game x-route="/game"/>-->
-            <!---->
-            <!--<ErrorScreen x-route="*"/>-->
+            <LoginFlow x-route="/login_flow"/>
+            
+            <!--<Game x-nestedRouter="'game'" x-route="'/game'"/>-->
 
         </Group>
-
-        <!--<Group style="app-body">-->
-
-        <!--&lt;!&ndash;<KlangWindow/>&ndash;&gt;-->
-        <!--<Router>-->
-
-        <!--&lt;!&ndash;<Route style="util.vertical-center" path="'/login'">&ndash;&gt;-->
-        <!--&lt;!&ndash;<CreateAccountScreen/>&ndash;&gt;-->
-
-        <!--&lt;!&ndash;&lt;!&ndash;<LoginScreen x-routePath="'/login'" x-onRouteEnter=""/>&ndash;&gt;&ndash;&gt;-->
-
-        <!--&lt;!&ndash;</Route>&ndash;&gt;-->
-
-        <!--&lt;!&ndash;<Route path="'/create_account'">&ndash;&gt;-->
-
-        <!--&lt;!&ndash;<CreateAccountScreen/>&ndash;&gt;-->
-
-        <!--&lt;!&ndash;</Route>&ndash;&gt;-->
-
-        <!--<Route path="'/game'" onRouteEnter="StartGame()">-->
-
-        <!--<ColonyInfoPanel/>-->
-        <!--<CharacterList/>-->
-        <!--<CharacterInfoPanel/>-->
-
-        <!--<BuildMenu style="build-menu"/>-->
-        <!---->
-        <!--</Route>-->
-
-        <!--</Router>-->
-
-        <!--</Group>-->
-
+       
     </Contents>
 
 </UITemplate>

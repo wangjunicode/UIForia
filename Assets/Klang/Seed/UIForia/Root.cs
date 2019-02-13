@@ -1,8 +1,8 @@
-using System;
-using System.Collections.Generic;
 using UIForia;
-using UIForia.Routing;
-using UIForia.Util;
+using UIForia.Animation;
+using UIForia.Layout;
+using UIForia.Rendering;
+using UIForia.Routing2;
 using UnityEngine;
 
 namespace UI {
@@ -13,26 +13,41 @@ namespace UI {
         public const string BasePath = "Klang/Seed/UIForia/";
 
         public override void OnCreate() {
-            Application.Router.GoTo("/game");
+            
+            Router gameRouter = Application.RoutingSystem.FindRouter("game");
+            
+            gameRouter.AddTransition("/splash", "/login_flow", (elapsed) => {
+
+                if (elapsed == 0) {
+                    UIElement currentRouteRoot = FindFirstByType<SeedSplashScreen>();
+                    UIElement targetRouteRoot = FindFirstByType<LoginFlow>();
+                    
+                    targetRouteRoot.SetEnabled(true);
+                    currentRouteRoot.style.SetLayoutBehavior(LayoutBehavior.Ignored, StyleState.Normal);
+                    currentRouteRoot.style.PlayAnimation(FadeOut());
+//                    targetRouteRoot.style.PlayAnimation(FadeIn());
+                }
+                
+                if (elapsed < 1f) {
+                    return RouteTransitionState.Pending;
+                }
+
+                return RouteTransitionState.Completed;
+            });
+            
         }
 
-        public void StartGame() {
-//            SeedDebugWindow window1 = CreateChild<SeedDebugWindow>();
+        private static StyleAnimation FadeOut() {
+            AnimationOptions options = new AnimationOptions();
+            options.duration = 1f;
+            options.timingFunction = EasingFunction.CubicEaseOut;
+            return new PropertyAnimation(StyleProperty.TransformPositionX(new TransformOffset(-1f, TransformUnit.ActualWidth)), options);
         }
-
-        public void RouteTransitions() {
-//            
-//            Router.Find("game").Transition("/game/userview/:id", "*", (float elapsed) => RouteTransitionState.Completed);
-//
-//            Router.Find("game").Transition("/splash", "*", (float elapsed) => {
-//                if (elapsed > 500f) {
-//                    return RouteTransitionState.Completed;
-//                }
-//
-//                return RouteTransitionState.Pending;
-//            });
+        
+        private static StyleAnimation FadeIn() {
+            AnimationOptions options = new AnimationOptions();
+            return new PropertyAnimation(StyleProperty.Opacity(1f), options);
         }
-
     }
 
 }

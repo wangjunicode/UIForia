@@ -1,7 +1,7 @@
 using UIForia;
 using UnityEngine;
 
-namespace UI.LoginFlow {
+namespace UI {
 
     [Template("Klang/Seed/UIForia/LoginFlow/LoginScreen/LoginScreen.xml")]
     public class LoginScreen : UIElement {

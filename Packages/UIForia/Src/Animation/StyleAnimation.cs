@@ -26,6 +26,85 @@ namespace UIForia.Animation {
 
         public virtual void OnResume(UIStyleSet styleSet) { }
 
+        protected float ResolveTransformOffset(UIElement element, Rect viewport, TransformOffset transformOffset) {
+            switch (transformOffset.unit) {
+                
+                case TransformUnit.Unset:
+                    return 0;
+                
+                case TransformUnit.Pixel:
+                    return transformOffset.value;
+                
+                case TransformUnit.ActualWidth:
+                    return element.layoutResult.actualSize.width * transformOffset.value;
+                
+                case TransformUnit.ActualHeight:
+                    return element.layoutResult.actualSize.height * transformOffset.value;
+                
+                case TransformUnit.AllocatedWidth:
+                    return element.layoutResult.allocatedSize.width * transformOffset.value;
+
+                case TransformUnit.AllocatedHeight:
+                    return element.layoutResult.allocatedSize.height * transformOffset.value;
+                
+                case TransformUnit.ContentWidth:
+                    return element.layoutResult.contentRect.width * transformOffset.value;
+                
+                case TransformUnit.ContentHeight:
+                    return element.layoutResult.contentRect.height * transformOffset.value;
+
+                case TransformUnit.ViewportWidth:
+                    return viewport.width * transformOffset.value;
+                
+                case TransformUnit.ViewportHeight:
+                    return viewport.height * transformOffset.value;
+
+                case TransformUnit.Em:
+                case TransformUnit.ContentAreaWidth:
+                case TransformUnit.ContentAreaHeight:
+                case TransformUnit.AnchorWidth:
+                case TransformUnit.AnchorHeight:
+                    throw new NotImplementedException();
+                
+                case TransformUnit.ParentWidth:
+                    if (element.parent == null) {
+                        return viewport.width * transformOffset.value;
+                    }
+
+                    return element.parent.layoutResult.actualSize.width * transformOffset.value;
+                
+                case TransformUnit.ParentHeight:
+                    if (element.parent == null) {
+                        return viewport.height * transformOffset.value;
+                    }
+
+                    return element.parent.layoutResult.actualSize.height * transformOffset.value;
+                
+                case TransformUnit.ParentContentAreaWidth:
+                    if (element.parent == null) {
+                        return viewport.width * transformOffset.value;
+                    }
+
+                    return element.parent.layoutResult.contentRect.width * transformOffset.value;
+                
+                case TransformUnit.ParentContentAreaHeight:
+                    if (element.parent == null) {
+                        return viewport.height * transformOffset.value;
+                    }
+
+                    return element.parent.layoutResult.contentRect.height * transformOffset.value;
+                
+                case TransformUnit.ScreenWidth:
+                    return Screen.width * transformOffset.value;
+                
+                case TransformUnit.ScreenHeight:
+                    return Screen.height * transformOffset.value;
+                
+                default:
+                    throw new ArgumentOutOfRangeException();
+            }
+        }
+
         protected static float ResolveFixedWidth(UIElement element, Rect viewport, UIFixedLength width) {
             switch (width.unit) {
                 case UIFixedUnit.Pixel:

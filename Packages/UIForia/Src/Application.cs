@@ -19,6 +19,7 @@ namespace UIForia {
         protected ILayoutSystem m_LayoutSystem;
         protected IRenderSystem m_RenderSystem;
         protected IInputSystem m_InputSystem;
+        protected RoutingSystem m_RoutingSystem;
 
         protected readonly SkipTree<UIElement> m_ElementTree;
         protected readonly SkipTree<UIElement> m_UpdateTree;
@@ -36,6 +37,7 @@ namespace UIForia {
         public event Action onUpdate;
         public event Action onReady;
         public event Action onDestroy;
+        public event Action onNextRefresh;
         public event Action<UIView> onViewAdded;
         public event Action<UIView> onViewRemoved;
 
@@ -49,8 +51,6 @@ namespace UIForia {
             ArrayPool<UIElement>.SetMaxPoolSize(64);
             s_RequiresUpdateMap = new Dictionary<Type, bool>();
             s_AttributeProcessors = new List<IAttributeProcessor>();
-            s_AttributeProcessors.Add(new RouteAttrProcessor());
-            s_AttributeProcessors.Add(new InputAttrProcessor());
         }
 
         protected Application() {
@@ -59,14 +59,17 @@ namespace UIForia {
             this.m_Views = new List<UIView>();
             this.m_Router = new Router();
             this.m_UpdateTree = new SkipTree<UIElement>();
-            
+
             m_StyleSystem = new StyleSystem();
             m_BindingSystem = new BindingSystem();
             m_LayoutSystem = new LayoutSystem(m_StyleSystem);
             m_InputSystem = new DefaultInputSystem(m_LayoutSystem, m_StyleSystem);
             m_RenderSystem = new RenderSystem(null, m_LayoutSystem);
+            m_RoutingSystem = new RoutingSystem();
+
             m_Systems.Add(m_StyleSystem);
             m_Systems.Add(m_BindingSystem);
+            m_Systems.Add(m_RoutingSystem);
             m_Systems.Add(m_InputSystem);
             m_Systems.Add(m_LayoutSystem);
             m_Systems.Add(m_RenderSystem);
@@ -77,6 +80,8 @@ namespace UIForia {
         public IRenderSystem RenderSystem => m_RenderSystem;
         public ILayoutSystem LayoutSystem => m_LayoutSystem;
         public IInputSystem InputSystem => m_InputSystem;
+        public RoutingSystem RoutingSystem => m_RoutingSystem;
+
         public Camera Camera { get; private set; }
         public Router Router => m_Router;
 
@@ -145,21 +150,10 @@ namespace UIForia {
                 m_Systems[i].OnElementCreated(element);
             }
 
-            InvokeOnCreate(element);
             InvokeAttributeProcessors(element);
+            InvokeOnCreate(element);
             InvokeOnReady(element);
             onElementCreated?.Invoke(element);
-
-            Type elementType = element.GetType();
-            if (!s_RequiresUpdateMap.TryGetValue(elementType, out bool requiresUpdate)) { 
-                requiresUpdate = ReflectionUtil.IsOverride(elementType.GetMethod(nameof(UIElement.OnUpdate)));
-                s_RequiresUpdateMap[elementType] = requiresUpdate;
-            }
-
-            if (requiresUpdate) {
-                m_UpdateTree.AddItem(element);
-            }
-            
         }
 
         public void Refresh() {
@@ -168,6 +162,9 @@ namespace UIForia {
             foreach (ISystem system in m_Systems) {
                 system.OnReset();
             }
+
+            onReady = null;
+            onUpdate = null;
 
             m_ElementTree.TraversePreOrder((el) => el.OnDestroy());
 
@@ -183,6 +180,8 @@ namespace UIForia {
             }
 
             onRefresh?.Invoke();
+            onNextRefresh?.Invoke();
+            onNextRefresh = null;
         }
 
         protected void InitHierarchy(UIElement element) {
@@ -207,6 +206,15 @@ namespace UIForia {
             }
 
             m_ElementTree.AddItem(element);
+            Type elementType = element.GetType();
+            if (!s_RequiresUpdateMap.TryGetValue(elementType, out bool requiresUpdate)) {
+                requiresUpdate = ReflectionUtil.IsOverride(elementType.GetMethod(nameof(UIElement.OnUpdate)));
+                s_RequiresUpdateMap[elementType] = requiresUpdate;
+            }
+
+            if (requiresUpdate) {
+                m_UpdateTree.AddItem(element);
+            }
 
             LightList<UIElement> children = element.children;
 
@@ -222,10 +230,11 @@ namespace UIForia {
 
         private static void InvokeAttributeProcessors(UIElement element) {
             List<ElementAttribute> attributes = element.GetAttributes();
-            for (int i = 0; i < attributes.Count; i++) {
-                for (int j = 0; j < s_AttributeProcessors.Count; j++) {
-                    s_AttributeProcessors[j].Process(element, element.OriginTemplate, attributes[i], attributes);
-                }
+
+            // todo -- the origin template can figure out which processors to invoke at compile time, saves potentially a lot of cycles
+
+            for (int i = 0; i < s_AttributeProcessors.Count; i++) {
+                s_AttributeProcessors[i].Process(element, element.OriginTemplate, attributes);
             }
 
             if (element.children == null) return;
@@ -307,14 +316,11 @@ namespace UIForia {
             }
 
             onElementDestroyed?.Invoke(element);
-         
-            // todo -- if element is poolable, pool it here
-            m_ElementTree.TraversePreOrder(element, (el) => {
-                el.InternalDestroy();
-            }, true);
-            
-            m_UpdateTree.RemoveHierarchy(element);
 
+            // todo -- if element is poolable, pool it here
+            m_ElementTree.TraversePreOrder(element, (el) => { el.InternalDestroy(); }, true);
+
+            m_UpdateTree.RemoveHierarchy(element);
         }
 
         internal void DestroyChildren(UIElement element) {
@@ -363,6 +369,8 @@ namespace UIForia {
             m_InputSystem.OnUpdate();
             m_RenderSystem.OnUpdate();
 
+            m_RoutingSystem.OnUpdate();
+
             m_UpdateTree.ConditionalTraversePreOrder((element) => {
                 if (element == null) return true;
                 if (element.isDisabled) return false;
@@ -402,20 +410,22 @@ namespace UIForia {
             // if element is not enabled (ie has a disabled ancestor), no-op 
             if (!element.isEnabled) return;
 
-            element.OnEnable();
-            RunEnableBinding(element);
+            if ((element.flags & UIElementFlags.Initialized) != 0) {
+                element.OnEnable();
+                RunEnableBinding(element);
 
-            // if element is now enabled we need to walk it's children
-            // and set enabled ancestor flags until we find a self-disabled child
-            m_ElementTree.ConditionalTraversePreOrder(element, (child) => {
-                child.flags |= UIElementFlags.AncestorEnabled;
-                if (child.isSelfDisabled) return false;
+                // if element is now enabled we need to walk it's children
+                // and set enabled ancestor flags until we find a self-disabled child
+                m_ElementTree.ConditionalTraversePreOrder(element, (child) => {
+                    child.flags |= UIElementFlags.AncestorEnabled;
+                    if (child.isSelfDisabled) return false;
 
-                child.OnEnable(); // todo -- maybe enqueue and flush calls after so we don't have buffer problems
-                RunEnableBinding(child);
+                    child.OnEnable(); // todo -- maybe enqueue and flush calls after so we don't have buffer problems
+                    RunEnableBinding(child);
 
-                return true;
-            });
+                    return true;
+                });
+            }
 
             foreach (ISystem system in m_Systems) {
                 system.OnElementEnabled(element);
@@ -435,23 +445,30 @@ namespace UIForia {
                 return;
             }
 
-            element.OnDisable();
+            if ((element.flags & UIElementFlags.Initialized) != 0) {
+                element.OnDisable();
+            }
 
             m_ElementTree.ConditionalTraversePreOrder(element, (child) => {
                 child.flags &= ~(UIElementFlags.AncestorEnabled);
                 if (child.isSelfDisabled) return false;
 
-                child.OnDisable(); // todo -- enqueue for later
+                if ((child.flags & UIElementFlags.Initialized) != 0) {
+                    child.OnDisable(); // todo -- enqueue for later
+                }
 
                 return true;
             });
+
 
             foreach (ISystem system in m_Systems) {
                 system.OnElementDisabled(element);
             }
 
-            element.view.InvokeElementDisabled(element);
-            onElementDisabled?.Invoke(element);
+            if ((element.flags & UIElementFlags.Initialized) != 0) {
+                element.view.InvokeElementDisabled(element);
+                onElementDisabled?.Invoke(element);
+            }
         }
 
         public UIElement GetElement(int elementId) {

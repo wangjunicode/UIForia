@@ -1,6 +1,7 @@
 using UIForia;
 using UIForia.Animation;
 using UIForia.Rendering;
+using UIForia.Routing2;
 using UnityEngine;
 
 namespace UI {
@@ -16,9 +17,10 @@ namespace UI {
 
         public override void OnUpdate() {
             elapsed += Time.deltaTime;
-            if (elapsed >= 1000f) {
-             //   view.Application.GetRouter("game").SetRoute("/LoginFlow");
+            if (elapsed >= 1f) {
+                Application.RoutingSystem.FindRouter("game").GoTo("/login_flow");
             }
+
         }
         
         private static StyleAnimation AnimateLogo() {

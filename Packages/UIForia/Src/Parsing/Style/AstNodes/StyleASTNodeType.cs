@@ -27,7 +27,8 @@ namespace UIForia.Style.Parsing {
         StateGroup,
         ExpressionGroup,
         Color,
-        StyleGroup
+        StyleGroup,
+        Measurement,
     }
 
 }

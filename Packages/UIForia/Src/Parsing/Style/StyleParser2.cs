@@ -97,6 +97,8 @@ namespace UIForia.Parsing.Style {
                 case StyleTokenType.Cursor:
                     tokenStream.Advance();
                     break;
+                default:
+                    throw new ParseException($"Did not expect token {tokenStream.Current.value} of type {tokenStream.Current.styleTokenType} here");
             }
         }
 

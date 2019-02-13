@@ -555,6 +555,10 @@ namespace UIForia.Style.Parsing {
 
         public StyleASTNode unit;
 
+        public MeasurementNode() {
+            type = StyleASTNodeType.Measurement;
+        }
+
         public override void Release() {
             s_MeasurementNodePool.Release(this);
         }

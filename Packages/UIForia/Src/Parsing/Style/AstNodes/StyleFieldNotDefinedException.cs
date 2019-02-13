@@ -1,6 +1,6 @@
 using System;
 
-namespace UIForia.Style.Parsing {
+namespace UIForia.Parsing.Style.AstNodes {
 
     public class FieldNotDefinedException : Exception {
 

@@ -4,13 +4,13 @@ using System.Text;
 using UIForia.Util;
 using UnityEngine;
 
-namespace UIForia.Style.Parsing {
+namespace UIForia.Parsing.Style.AstNodes {
 
     public abstract class StyleASTNode {
 
-        protected static readonly ObjectPool<LiteralNode> s_LiteralPool = new ObjectPool<LiteralNode>();
+        protected static readonly ObjectPool<StyleLiteralNode> s_LiteralPool = new ObjectPool<StyleLiteralNode>();
         protected static readonly ObjectPool<StyleOperatorNode> s_OperatorPool = new ObjectPool<StyleOperatorNode>();
-        protected static readonly ObjectPool<IdentifierNode> s_IdentifierPool = new ObjectPool<IdentifierNode>();
+        protected static readonly ObjectPool<StyleIdentifierNode> s_IdentifierPool = new ObjectPool<StyleIdentifierNode>();
         protected static readonly ObjectPool<ParenNode> s_ParenPool = new ObjectPool<ParenNode>();
         protected static readonly ObjectPool<DotAccessNode> s_DotAccessPool = new ObjectPool<DotAccessNode>();
         protected static readonly ObjectPool<MemberAccessExpressionNode> s_MemberAccessExpressionPool = new ObjectPool<MemberAccessExpressionNode>();
@@ -29,6 +29,7 @@ namespace UIForia.Style.Parsing {
         protected static readonly ObjectPool<RgbNode> s_RgbNodePool = new ObjectPool<RgbNode>();
         protected static readonly ObjectPool<UrlNode> s_UrlNodePool = new ObjectPool<UrlNode>();
         protected static readonly ObjectPool<ExportNode> s_ExportNodePool = new ObjectPool<ExportNode>();
+        protected static readonly ObjectPool<ConstNode> s_ConstNodePool = new ObjectPool<ConstNode>();
         protected static readonly ObjectPool<ColorNode> s_ColorNodePool = new ObjectPool<ColorNode>();
         protected static readonly ObjectPool<MeasurementNode> s_MeasurementNodePool = new ObjectPool<MeasurementNode>();
 
@@ -100,21 +101,30 @@ namespace UIForia.Style.Parsing {
             return importNode;
         }
 
+        internal static ExportNode ExportNode(string name, string type, StyleASTNode value) {
+            ExportNode exportNode = s_ExportNodePool.Get();
+            exportNode.constNode = s_ConstNodePool.Get();
+            exportNode.constNode.constName = name;
+            exportNode.constNode.constType = type;
+            exportNode.constNode.value = value;
+            return exportNode;
+        }
+
         internal static ReferenceNode ReferenceNode(string value) {
             ReferenceNode referenceNode = s_ReferenceNodePool.Get();
             referenceNode.referenceName = value;
             return referenceNode;
         }
 
-        public static LiteralNode StringLiteralNode(string value) {
-            LiteralNode retn = s_LiteralPool.Get();
+        public static StyleLiteralNode StringLiteralNode(string value) {
+            StyleLiteralNode retn = s_LiteralPool.Get();
             retn.type = StyleASTNodeType.StringLiteral;
             retn.rawValue = value;
             return retn;
         }
 
-        public static LiteralNode BooleanLiteralNode(string value) {
-            LiteralNode retn = s_LiteralPool.Get();
+        public static StyleLiteralNode BooleanLiteralNode(string value) {
+            StyleLiteralNode retn = s_LiteralPool.Get();
             retn.type = StyleASTNodeType.BooleanLiteral;
             retn.rawValue = value;
             return retn;
@@ -156,8 +166,8 @@ namespace UIForia.Style.Parsing {
             return retn;
         }
 
-        public static LiteralNode NumericLiteralNode(string value) {
-            LiteralNode retn = s_LiteralPool.Get();
+        public static StyleLiteralNode NumericLiteralNode(string value) {
+            StyleLiteralNode retn = s_LiteralPool.Get();
             retn.type = StyleASTNodeType.NumericLiteral;
             retn.rawValue = value;
             return retn;
@@ -170,8 +180,8 @@ namespace UIForia.Style.Parsing {
             return operatorNode;
         }
 
-        public static IdentifierNode IdentifierNode(string name) {
-            IdentifierNode idNode = s_IdentifierPool.Get();
+        public static StyleIdentifierNode IdentifierNode(string name) {
+            StyleIdentifierNode idNode = s_IdentifierPool.Get();
             idNode.name = name;
             idNode.type = StyleASTNodeType.Identifier;
             return idNode;
@@ -325,8 +335,14 @@ namespace UIForia.Style.Parsing {
 
         public string constType;
 
+        public StyleASTNode value;
+        
+        public ConstNode() {
+            type = StyleASTNodeType.Const;
+        }
+
         public override void Release() {
-            throw new NotImplementedException();
+            s_ConstNodePool.Release(this);
         }
     } 
 
@@ -334,8 +350,12 @@ namespace UIForia.Style.Parsing {
 
         public ConstNode constNode;
 
+        public ExportNode() {
+            type = StyleASTNodeType.Export;
+        }
+
         public override void Release() {
-            throw new NotImplementedException();
+            s_ExportNodePool.Release(this);
         }
     }
 
@@ -371,6 +391,10 @@ namespace UIForia.Style.Parsing {
     public class ReferenceNode : StyleGroupContainer {
 
         public string referenceName;
+
+        public ReferenceNode() {
+            type = StyleASTNodeType.Reference;
+        }
 
         public override void Release() {
             base.Release();

@@ -1,6 +1,6 @@
 using NUnit.Framework;
 using UIForia.Parsing.Style;
-using UIForia.Style.Parsing;
+using UIForia.Parsing.Style.AstNodes;
 
 [TestFixture]
 public class StyleParser2Tests {
@@ -82,7 +82,7 @@ public class StyleParser2Tests {
     public void ParseUrl() {
         var nodes = StyleParser2.Parse(@"
             style withBg {
-                Background = url(path);
+                Background = url(path/to/image);
             }
         ");
         
@@ -98,7 +98,7 @@ public class StyleParser2Tests {
 
         var urlNode = (UrlNode) property.propertyValue;
         Assert.AreEqual(StyleASTNodeType.Url, urlNode.type);
-        Assert.AreEqual(StyleASTNode.IdentifierNode("path"), urlNode.url);
+        Assert.AreEqual(StyleASTNode.IdentifierNode("path/to/image"), urlNode.url);
     }
 
     [Test]
@@ -123,7 +123,7 @@ public class StyleParser2Tests {
     public void ParseStyleState() {
         var nodes = StyleParser2.Parse(@"
             style hasBackgroundOnHover {
-                [hover] { Background = url(@pathRef); }
+                [hover] { Background = url(@pathRef.member); }
             }
         ");
 
@@ -136,7 +136,13 @@ public class StyleParser2Tests {
 
         var urlNode = (UrlNode) property.propertyValue;
         Assert.AreEqual(StyleASTNodeType.Url, urlNode.type);
-        Assert.AreEqual(StyleASTNode.ReferenceNode("pathRef"), urlNode.url);
+        Assert.AreEqual(StyleASTNodeType.Reference, urlNode.url.type);
+        var refNode = (ReferenceNode) urlNode.url;
+        Assert.AreEqual("pathRef", refNode.referenceName);
+        Assert.AreEqual(1, refNode.children.Count);
+        Assert.AreEqual(StyleASTNodeType.DotAccess, refNode.children[0].type);
+        var dotAccess = (DotAccessNode) refNode.children[0];
+        Assert.AreEqual("member", dotAccess.propertyName);
     }
 
     [Test]
@@ -259,12 +265,16 @@ public class StyleParser2Tests {
     [Test]
     public void ParseExportKeyword() {
         var nodes = StyleParser2.Parse(@"
-            export const col1 : Color = rgba(100, 100, 100, 100);
+            export const color0 : Color = rgba(1, 0, 0, 1);
         ");
         
         // there should be two style nodes
         Assert.AreEqual(1, nodes.Count);
-        var styleChildren = ((StyleRootNode) nodes[0]).children;
-        Assert.AreEqual(3, styleChildren.Count);
+        Assert.AreEqual(StyleASTNodeType.Export, nodes[0].type);
+
+        ExportNode exportNode = (ExportNode) nodes[0];
+        Assert.AreEqual("color0", exportNode.constNode.constName);
+        Assert.AreEqual("Color", exportNode.constNode.constType);
+        Assert.AreEqual(StyleASTNodeType.Rgba, exportNode.constNode.value.type);
     }
 }

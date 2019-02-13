@@ -1,4 +1,4 @@
-namespace UIForia.Style.Parsing {
+namespace UIForia.Parsing.Style.AstNodes {
 
     public enum StyleASTNodeType {
 
@@ -29,6 +29,10 @@ namespace UIForia.Style.Parsing {
         Color,
         StyleGroup,
         Measurement,
+        Export,
+        Import,
+        Const,
+        Reference,
     }
 
 }

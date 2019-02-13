@@ -1,6 +1,6 @@
-namespace UIForia.Style.Parsing {
+namespace UIForia.Parsing.Style.AstNodes {
 
-    public class LiteralNode : StyleASTNode {
+    public class StyleLiteralNode : StyleASTNode {
 
         public string rawValue;
 
@@ -10,7 +10,7 @@ namespace UIForia.Style.Parsing {
             s_LiteralPool.Release(this);
         }
 
-        protected bool Equals(LiteralNode other) {
+        protected bool Equals(StyleLiteralNode other) {
             return string.Equals(rawValue, other.rawValue);
         }
 
@@ -18,7 +18,7 @@ namespace UIForia.Style.Parsing {
             if (ReferenceEquals(null, obj)) return false;
             if (ReferenceEquals(this, obj)) return true;
             if (obj.GetType() != this.GetType()) return false;
-            return Equals((LiteralNode) obj);
+            return Equals((StyleLiteralNode) obj);
         }
 
         public override int GetHashCode() {

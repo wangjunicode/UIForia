@@ -34,15 +34,18 @@ Shader "UIForia/JoinedPolyline" {
 
            v2f vert (appdata input) {
                v2f o;
-               
+
                float2 prev = input.prevNext.xy;
                float2 next = input.prevNext.zw;
                float2 curr = input.vertex.xy;
                
-               float strokeWidth = 15; //input.flags.w;
+               float strokeWidth = input.flags.w;
+               
+               float aa = strokeWidth < 2 ? 1 : antialias;
+               
                int idx = input.flags.y;
                
-               float w = (strokeWidth * 0.5) + antialias;
+               float w = (strokeWidth * 0.5) + aa;
                float dir = input.flags.x;
                
                float2 v0 = normalize(curr - prev);
@@ -55,16 +58,11 @@ Shader "UIForia/JoinedPolyline" {
                         
                float miterLength = w / dot(miter, n1);
                float2 pos = curr + (miter * miterLength * dir);
-               
                o.color = input.color;
                o.uv = float4(w, w * dir, 0, 0);
-               o.flags = float4(strokeWidth, w * dir, 0, 0);
+               
+               o.flags = float4(strokeWidth, w * dir, aa, 0);
                o.vertex = UnityObjectToClipPos(float3(pos.xy, input.vertex.z));
-//               if(dir < 0) {
-//               }
-//               else {
-//               o.vertex = UnityObjectToClipPos(float3(input.vertex.xy + strokeWidth, input.vertex.z));
-//               }
                
                return o;
            }
@@ -72,7 +70,8 @@ Shader "UIForia/JoinedPolyline" {
            fixed4 frag (v2f i) : SV_Target {
                
                float thickness = i.flags.x;
-               float w = (thickness * 0.5) - antialias; // todo -- scale AA by strokeWidth somehow
+               float aa = i.flags.z;
+               float w = (thickness * 0.5) - aa; // todo -- scale AA by strokeWidth somehow
 
                float d = abs(i.uv.y) - w;
                
@@ -83,8 +82,8 @@ Shader "UIForia/JoinedPolyline" {
                d /= antialias;
                float threshold = 1;
                float afwidth = length(float2(ddx(d), ddy(d)));
-               float aa = smoothstep(threshold - afwidth, threshold + afwidth, d);
-               return fixed4(i.color.rgb, i.color.a * (1 - aa));
+               float alpha = smoothstep(threshold - afwidth, threshold + afwidth, d);
+               return fixed4(i.color.rgb, i.color.a * (1 - alpha));
                
            }
            ENDCG

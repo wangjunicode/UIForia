@@ -52,6 +52,7 @@ namespace SVGX {
 
 
             ctx.SetStrokeColor(Color.red);
+            ctx.SetStrokeWidth(10f);
             
 //            ctx.MoveTo(10, 100);
 //            ctx.LineTo(Screen.width - 500f, 500);
@@ -59,11 +60,11 @@ namespace SVGX {
             
 //            ctx.BeginPath();
 //            
-//            ctx.SetFill(texture);
+            ctx.SetFill(texture);
             
-            ctx.RoundedRect(new Rect(50, 50, 100, 100), 20, 20, 20, 20);
+            ctx.RoundedRect(new Rect(50, 50, 1024, 512), 20, 20, 20, 20);
             
-//            ctx.Fill();
+            ctx.Fill();
             ctx.Stroke();
 
             gfx.Render(ctx);

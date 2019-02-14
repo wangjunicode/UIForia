@@ -432,6 +432,10 @@ namespace SVGX {
             drawCalls.Add(new SVGXDrawCall(DrawCallType.StandardStroke, clipId, currentStyle, currentMatrix, currentShapeRange));
         }
 
+        public void SetStrokeWidth(float width) {
+            currentStyle.strokeWidth = width;
+        }
+
     }
 
 }

@@ -16,16 +16,16 @@ namespace UIForia.Parsing.Style {
 
         private Stack<StyleASTNode> expressionStack;
         private Stack<StyleOperatorNode> operatorStack;
-        private Stack<StyleASTNode> groupExpressionStack;
-        private Stack<StyleOperatorNode> groupOperatorStack;
+        private Stack<AttributeGroupContainer> groupExpressionStack;
+        private Stack<StyleOperatorType> groupOperatorStack;
 
         private StyleParser2(StyleTokenStream stream) {
             tokenStream = stream;
             nodes = LightListPool<StyleASTNode>.Get();
             operatorStack = StackPool<StyleOperatorNode>.Get();
             expressionStack = StackPool<StyleASTNode>.Get();
-            groupExpressionStack = StackPool<StyleASTNode>.Get();
-            groupOperatorStack = StackPool<StyleOperatorNode>.Get();
+            groupExpressionStack = StackPool<AttributeGroupContainer>.Get();
+            groupOperatorStack = StackPool<StyleOperatorType>.Get();
         }
 
         private static StyleTokenStream FromString(string input) {
@@ -64,8 +64,6 @@ namespace UIForia.Parsing.Style {
                 case StyleTokenType.Style:
                     tokenStream.Advance();
                     ParseStyle();
-                    AssertTokenType(StyleTokenType.BracesClose);
-                    tokenStream.Advance();
                     break;
 
                 case StyleTokenType.Audio:
@@ -98,7 +96,7 @@ namespace UIForia.Parsing.Style {
                     tokenStream.Advance();
                     break;
                 default:
-                    throw new ParseException($"Did not expect token {tokenStream.Current.value} of type {tokenStream.Current.styleTokenType} here");
+                    throw new ParseException(tokenStream.Current, $"Did not expect token {tokenStream.Current.value} of type {tokenStream.Current.styleTokenType} here at line");
             }
         }
 
@@ -116,14 +114,15 @@ namespace UIForia.Parsing.Style {
                     AssertTokenType(StyleTokenType.Identifier);
                     tagName = tokenStream.Current.value;
                     tokenStream.Advance();
-                    AssertTokenType(StyleTokenType.GreaterThan);
+                    AssertTokenTypeAndAdvance(StyleTokenType.GreaterThan);
                     break;
                 // styleId { ... }
                 case StyleTokenType.Identifier:
                     identifier = tokenStream.Current.value;
+                    tokenStream.Advance();
                     break;
                 default:
-                    throw new ParseException($"Expected style definition or tag name but found {tokenStream.Current.styleTokenType}");
+                    throw new ParseException(tokenStream.Current, $"Expected style definition or tag name but found {tokenStream.Current.styleTokenType}");
             }
 
             StyleRootNode styleRootNode = StyleASTNode.StyleRootNode(identifier, tagName);
@@ -132,20 +131,15 @@ namespace UIForia.Parsing.Style {
             // we just read an element name or style name
             // now move forward and expect an open curly brace
 
-            tokenStream.Advance();
-            AssertTokenType(StyleTokenType.BracesOpen);
-            tokenStream.Advance();
-
             // next there should be one of those:
             // - property
             // - state
             // - attribute with or without boolean modifier
             // - expression with constants
-            ParsePropertyStateOrAttributeGroup(styleRootNode);
+            ParseStyleGroupBody(styleRootNode);
         }
 
         private void ParseExportNode() {
-
             tokenStream.Advance();
             // export statement must be followed by const keyword
             AssertTokenTypeAndAdvance(StyleTokenType.Const);
@@ -156,48 +150,64 @@ namespace UIForia.Parsing.Style {
             string variableType = AssertTokenTypeAndAdvance(StyleTokenType.VariableType);
 
             AssertTokenTypeAndAdvance(StyleTokenType.Equal);
-            
+
             // now let's find out which value we're assigning
             nodes.Add(StyleASTNode.ExportNode(variableName, variableType, ParsePropertyValue()));
         }
 
-        private void ParsePropertyStateOrAttributeGroup(StyleGroupContainer styleRootNode) {
+        private void ParseStyleGroupBody(StyleGroupContainer styleRootNode) {
+            AssertTokenTypeAndAdvance(StyleTokenType.BracesOpen);
 
-            while (tokenStream.HasMoreTokens && tokenStream.Current.styleTokenType != StyleTokenType.BracesClose) {
+            while (tokenStream.HasMoreTokens && !AdvanceIfTokenType(StyleTokenType.BracesClose)) {
                 switch (tokenStream.Current.styleTokenType) {
                     case StyleTokenType.Not: {
-                        groupOperatorStack.Push(StyleASTNode.OperatorNode(StyleOperatorType.Not));
+                        groupOperatorStack.Push(StyleOperatorType.Not);
                         tokenStream.Advance();
-    
-                        ParseAttributeOrExpressionGroup(styleRootNode);
+                        ParseAttributeOrExpressionGroup();
                         break;
                     }
-    
+
                     case StyleTokenType.And:
                         tokenStream.Advance();
-                        AssertTokenType(StyleTokenType.BracketOpen);
-                        tokenStream.Advance();
-    
-                        groupOperatorStack.Push(StyleASTNode.OperatorNode(StyleOperatorType.And));
-                        tokenStream.Advance();
-    
-                        ParseAttributeOrExpressionGroup(styleRootNode);
-                        AssertTokenType(StyleTokenType.BracketClose);
+                        if (AdvanceIfTokenType(StyleTokenType.Not)) {
+                            groupOperatorStack.Push(StyleOperatorType.Not);
+                        }
+
+                        ParseAttributeOrExpressionGroup();
                         break;
-    
+
                     case StyleTokenType.BracketOpen:
                         tokenStream.Advance();
                         ParseStateOrAttributeGroup(styleRootNode);
-    
+
                         break;
-    
+
                     case StyleTokenType.Identifier:
                         ParseProperty(styleRootNode);
                         break;
+
+                    case StyleTokenType.BracesOpen: {
+                        // At this point only unconsumed attribute/expression group bodies are allowed
+
+                        if (groupExpressionStack.Count > 1) {
+                            throw new ParseException(tokenStream.Current, "There was a problem, I somehow made an error parsing a combined style group...");
+                        }
+
+                        if (groupExpressionStack.Count == 1) {
+                            AttributeGroupContainer attributeGroupContainer = groupExpressionStack.Pop();
+                            ParseStyleGroupBody(attributeGroupContainer);
+                            styleRootNode.AddChildNode(attributeGroupContainer);
+                        }
+                        else {
+                            throw new ParseException(tokenStream.Current, "Expected an attribute style group body. Braces are in a weird position!");
+                        }
+
+                        break;
+                    }
                     default:
-                        throw new ParseException("Expected either a boolean group operator (not / and), the start" +
-                                                 " of a group (an open bracket) or a regular property identifier but found " +
-                                                 tokenStream.Current.styleTokenType + " with value " + tokenStream.Current.value);
+                        throw new ParseException(tokenStream.Current, "Expected either a boolean group operator (not / and), the start" +
+                                                                      " of a group (an open bracket) or a regular property identifier but found " +
+                                                                      tokenStream.Current.styleTokenType + " with value " + tokenStream.Current.value);
                 }
             }
         }
@@ -207,39 +217,25 @@ namespace UIForia.Parsing.Style {
                 // this is the state group
                 case StyleTokenType.Identifier:
                     StyleStateContainer stateGroupRootNode = StyleASTNode.StateGroupRootNode(tokenStream.Current.value);
-                    
+
                     tokenStream.Advance();
                     AssertTokenTypeAndAdvance(StyleTokenType.BracketClose);
                     AssertTokenTypeAndAdvance(StyleTokenType.BracesOpen);
 
                     ParseProperties(stateGroupRootNode);
-                    
+
                     AssertTokenTypeAndAdvance(StyleTokenType.BracesClose);
-                    
+
                     styleRootNode.AddChildNode(stateGroupRootNode);
-                    
+
                     break;
                 case StyleTokenType.AttributeSpecifier:
-                    tokenStream.Advance();
-                    AssertTokenTypeAndAdvance(StyleTokenType.Colon);
-                    string attributeIdentifier = AssertTokenTypeAndAdvance(StyleTokenType.Identifier);
-                    string attributeValue = null;
-                    if (AdvanceIfTokenType(StyleTokenType.Equal)) {
-                        attributeValue = tokenStream.Current.value;
-                        tokenStream.Advance();
-                    }
-
-                    AttributeGroupContainer attributeGroupContainer = StyleASTNode.AttributeGroupRootNode(attributeIdentifier, attributeValue);
-                    styleRootNode.AddChildNode(attributeGroupContainer);
-                    AssertTokenTypeAndAdvance(StyleTokenType.BracketClose);
-                    AssertTokenTypeAndAdvance(StyleTokenType.BracesOpen);
-                    ParsePropertyStateOrAttributeGroup(attributeGroupContainer);
-                    AssertTokenTypeAndAdvance(StyleTokenType.BracesClose);
+                    ParseAttributeGroup();
                     break;
                 default:
-                    throw new ParseException("Expected either a group state identifier (hover etc.)" +
-                                             " or an attribute identifier (attr:...) but found " +
-                                             tokenStream.Current.styleTokenType);
+                    throw new ParseException(tokenStream.Current, "Expected either a group state identifier (hover etc.)" +
+                                                                  " or an attribute identifier (attr:...) but found " +
+                                                                  tokenStream.Current.styleTokenType);
             }
         }
 
@@ -267,6 +263,7 @@ namespace UIForia.Parsing.Style {
                     if (tokenStream.Current.styleTokenType != StyleTokenType.EndStatement) {
                         unit = StyleASTNode.UnitNode(AssertTokenTypeAndAdvance(StyleTokenType.Identifier));
                     }
+
                     propertyValue = StyleASTNode.MeasurementNode(value, unit);
 
                     break;
@@ -329,7 +326,7 @@ namespace UIForia.Parsing.Style {
         private StyleASTNode ParseRgba() {
             AssertTokenTypeAndAdvance(StyleTokenType.Rgba);
             AssertTokenTypeAndAdvance(StyleTokenType.ParenOpen);
-            
+
             StyleASTNode red = ParseLiteralOrReference(StyleTokenType.Number);
             AssertTokenTypeAndAdvance(StyleTokenType.Comma);
 
@@ -348,11 +345,11 @@ namespace UIForia.Parsing.Style {
         private StyleASTNode ParseRgb() {
             AssertTokenTypeAndAdvance(StyleTokenType.Rgb);
             AssertTokenTypeAndAdvance(StyleTokenType.ParenOpen);
-            
+
             StyleASTNode red = ParseLiteralOrReference(StyleTokenType.Number);
             AssertTokenTypeAndAdvance(StyleTokenType.Comma);
 
-            StyleASTNode green = ParseLiteralOrReference(StyleTokenType.Number);            
+            StyleASTNode green = ParseLiteralOrReference(StyleTokenType.Number);
             AssertTokenTypeAndAdvance(StyleTokenType.Comma);
 
             StyleASTNode blue = ParseLiteralOrReference(StyleTokenType.Number);
@@ -378,19 +375,20 @@ namespace UIForia.Parsing.Style {
                     return StyleASTNode.IdentifierNode(value);
             }
 
-            throw new ParseException($"Please add support for this type: {literalType}!");
+            throw new ParseException(tokenStream.Current, $"Please add support for this type: {literalType}!");
         }
 
         private void AssertTokenType(StyleTokenType styleTokenType) {
             if (tokenStream.Current.styleTokenType != styleTokenType) {
-                throw new ParseException($"Parsing stylesheet failed. Expected token '{styleTokenType}' but got '{tokenStream.Current.styleTokenType}'");
+                throw new ParseException(tokenStream.Current, $"Parsing stylesheet failed. Expected token '{styleTokenType}' but got '{tokenStream.Current.styleTokenType}'");
             }
         }
 
         private string AssertTokenTypeAndAdvance(StyleTokenType styleTokenType) {
             if (tokenStream.Current.styleTokenType != styleTokenType) {
-                throw new ParseException($"Parsing stylesheet failed. Expected token '{styleTokenType}' but got '{tokenStream.Current.styleTokenType}'");
+                throw new ParseException(tokenStream.Current, $"Parsing stylesheet failed. Expected token '{styleTokenType}' but got '{tokenStream.Current.styleTokenType}'");
             }
+
             tokenStream.Advance();
             return tokenStream.Previous.value;
         }
@@ -404,64 +402,49 @@ namespace UIForia.Parsing.Style {
             return false;
         }
 
-        private void ParseAttributeOrExpressionGroup(StyleGroupContainer styleRootNode) {
-            AssertTokenType(StyleTokenType.BracketOpen);
+        private void ParseAttributeOrExpressionGroup() {
+            AssertTokenTypeAndAdvance(StyleTokenType.BracketOpen);
 
             switch (tokenStream.Current.styleTokenType) {
                 case StyleTokenType.AttributeSpecifier:
-                    tokenStream.Advance();
-                    ParseAttributeGroup(styleRootNode);
-                    break;
-                case StyleTokenType.Identifier:
-                    // todo implement state group parsing
+                    ParseAttributeGroup();
                     break;
                 case StyleTokenType.Dollar:
                     ParseStyleExpression();
                     // todo add style expression
                     break;
             }
-
-            AssertTokenType(StyleTokenType.BracketClose);
         }
 
-        private void ParseAttributeGroup(StyleGroupContainer styleRootNode) {
-            AssertTokenType(StyleTokenType.Identifier);
+        private void ParseAttributeGroup() {
+            AssertTokenTypeAndAdvance(StyleTokenType.AttributeSpecifier);
+            AssertTokenTypeAndAdvance(StyleTokenType.Colon);
+            string attributeIdentifier = AssertTokenTypeAndAdvance(StyleTokenType.Identifier);
+            string attributeValue = null;
 
-            string identifier = tokenStream.Current.value;
-            string value = null;
-            
-            tokenStream.Advance();
-            if (tokenStream.Current.styleTokenType == StyleTokenType.Equal) {
+            if (AdvanceIfTokenType(StyleTokenType.Equal)) {
+                attributeValue = tokenStream.Current.value;
                 tokenStream.Advance();
-                value = tokenStream.Current.value;
-            }
-            
-            AttributeGroupContainer attributeGroupRootNode = StyleASTNode.AttributeGroupRootNode(identifier, value);
-            
-            tokenStream.Advance();
-            AssertTokenType(StyleTokenType.BracketClose);
-        
-            tokenStream.Advance();
-            AssertTokenType(StyleTokenType.BracesOpen);
-
-            while (tokenStream.HasMoreTokens && tokenStream.Current.styleTokenType != StyleTokenType.BracesClose) {
-                tokenStream.Advance();
-                ParsePropertyStateOrAttributeGroup(attributeGroupRootNode);
             }
 
-            tokenStream.Advance();
-            AssertTokenType(StyleTokenType.BracesClose);
+            bool invert = groupOperatorStack.Count > 0 && groupOperatorStack.Pop() == StyleOperatorType.Not;
 
-            styleRootNode.AddChildNode(attributeGroupRootNode);
+            AttributeGroupContainer andAttribute = groupExpressionStack.Count > 0 ? groupExpressionStack.Pop() : null;
+            AttributeGroupContainer attributeGroupContainer =
+                StyleASTNode.AttributeGroupRootNode(attributeIdentifier, attributeValue, invert, andAttribute);
+            groupExpressionStack.Push(attributeGroupContainer);
+
+            AssertTokenTypeAndAdvance(StyleTokenType.BracketClose);
         }
 
-        private StyleASTNode ParseStyleExpression() {
+        private void ParseStyleExpression() {
             switch (tokenStream.Current.styleTokenType) {
                 case StyleTokenType.Plus:
-                    return StyleASTNode.OperatorNode(StyleOperatorType.Plus);
+                    StyleASTNode.OperatorNode(StyleOperatorType.Plus);
+                    break;
             }
 
-            return null;
+            AssertTokenTypeAndAdvance(StyleTokenType.BracketClose);
         }
 
         private bool ParseOperatorExpression(out StyleOperatorNode operatorNode) {

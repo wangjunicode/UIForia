@@ -4,7 +4,7 @@ using UnityEngine;
 
 namespace UIForia.Parsing.Style.Tokenizer {
 
-    public static class StyleTokenizer {
+    internal static class StyleTokenizer {
 
         private static readonly string[] s_AcceptedTypes = {
             nameof(LayoutDirection),
@@ -15,262 +15,255 @@ namespace UIForia.Parsing.Style.Tokenizer {
             "bool",
         };
 
-        public static int TryReadCharacters(int ptr, string input, string match, StyleTokenType styleTokenType, List<StyleToken> output) {
-            if (ptr + match.Length > input.Length) return ptr;
+        private static void TryReadCharacters(TokenizerContext context, string match, StyleTokenType styleTokenType, List<StyleToken> output) {
+            
+            if (context.ptr + match.Length > context.input.Length) return;
             for (int i = 0; i < match.Length; i++) {
-                if (input[ptr + i] != match[i]) {
-                    return ptr;
+                if (context.input[context.ptr + i] != match[i]) {
+                    return;
                 }
             }
 
-            output.Add(new StyleToken(styleTokenType, match));
-            return TryConsumeWhiteSpace(ptr + match.Length, input);
+            output.Add(new StyleToken(styleTokenType, match, context.line, context.column));
+            TryConsumeWhiteSpace(context.Advance(match.Length));
         }
 
-        public static int TryConsumeWhiteSpace(int start, string input) {
-            int ptr = start;
-            if (ptr >= input.Length) return input.Length;
-            while (ptr < input.Length && char.IsWhiteSpace(input[ptr])) {
-                ptr++;
+        private static void TryConsumeWhiteSpace(TokenizerContext context) {
+            if (context.IsConsumed()) {
+                return;
             }
 
-            return ptr;
+            while (context.HasMore() && char.IsWhiteSpace(context.input[context.ptr])) {
+                context.Advance();
+            }
         }
 
-        public static int TryConsumeComment(int ptr, string input) {
-            if (ptr + 1 >= input.Length) {
-                return ptr;
+        private static void TryConsumeComment(TokenizerContext context) {
+            if (context.ptr + 1 >= context.input.Length) {
+                return;
             }
 
-            if (!(input[ptr] == '/' && input[ptr + 1] == '/')) {
-                return ptr;
+            if (!(context.input[context.ptr] == '/' && context.input[context.ptr + 1] == '/')) {
+                return;
             }
 
-            while (ptr < input.Length) {
-                char current = input[ptr];
+            while (context.HasMore()) {
+                char current = context.input[context.ptr];
                 if (current == '\n') {
-                    ptr++;
-                    return TryConsumeWhiteSpace(ptr, input);
+                    TryConsumeWhiteSpace(context);
+                    return;
                 }
 
-                ptr++;
+                context.Advance();
             }
-
-            return ptr;
         }
 
-        public static int TryReadHashColor(int ptr, string input, List<StyleToken> output) {
-            if (ptr >= input.Length) return input.Length;
-            if (input[ptr] != '#') return ptr;
+        private static void TryReadHashColor(TokenizerContext context, List<StyleToken> output) {
+            if (context.IsConsumed()) return;
+            if (context.input[context.ptr] != '#') return;
 
-            int start = ptr;
-            while (ptr < input.Length && input[ptr] != ';' && !char.IsWhiteSpace(input[ptr])) {
-                ptr++;
+            int start = context.ptr;
+            while (context.HasMore() && context.input[context.ptr] != ';' && !char.IsWhiteSpace(context.input[context.ptr])) {
+                context.Advance();
             }
 
-            output.Add(new StyleToken(StyleTokenType.HashColor, input.Substring(start, ptr - start)));
+            string colorHash = context.input.Substring(start, context.ptr - start);
+            output.Add(new StyleToken(StyleTokenType.HashColor, colorHash, context.line, context.column));
 
-            return TryConsumeWhiteSpace(ptr, input);
+            TryConsumeWhiteSpace(context);
         }
 
-        public static int TryReadDigit(int ptr, string input, List<StyleToken> output) {
+        private static void TryReadDigit(TokenizerContext context, List<StyleToken> output) {
+            if (context.IsConsumed()) return;
             bool foundDot = false;
-            int startIndex = ptr;
-            if (ptr >= input.Length) return input.Length;
+            int startIndex = context.ptr;
 
-            if (!char.IsDigit(input[ptr])) return ptr;
+            if (!char.IsDigit(context.input[context.ptr])) return;
 
             // 1
             // 1.4
             // 1.4f
 
-            while (ptr < input.Length && (char.IsDigit(input[ptr]) || (!foundDot && input[ptr] == '.'))) {
-                if (input[ptr] == '.') {
+            while (context.HasMore() && (char.IsDigit(context.input[context.ptr]) || (!foundDot && context.input[context.ptr] == '.'))) {
+                if (context.input[context.ptr] == '.') {
                     foundDot = true;
                 }
 
-                ptr++;
+                context.Advance();
             }
 
-            if (ptr < input.Length && input[ptr] == 'f') {
-                ptr++;
+            if (context.HasMore() && context.input[context.ptr] == 'f') {
+                context.Advance();
             }
 
-            output.Add(new StyleToken(StyleTokenType.Number, input.Substring(startIndex, ptr - startIndex)));
-            return TryConsumeWhiteSpace(ptr, input);
+            string digit = context.input.Substring(startIndex, context.ptr - startIndex);
+            output.Add(new StyleToken(StyleTokenType.Number, digit, context.line, context.line));
+            TryConsumeWhiteSpace(context);
         }
 
-        private static int TryReadIdentifier(int ptr, string input, List<StyleToken> output) {
-            int start = ptr;
-            if (ptr >= input.Length) return input.Length;
-            char first = input[ptr];
-            if (!char.IsLetter(first) && first != '_' && first != '$') return ptr;
+        private static void TryReadIdentifier(TokenizerContext context, List<StyleToken> output) {
+            if (context.IsConsumed()) return;
+            int start = context.ptr;
+            char first = context.input[context.ptr];
+            if (!char.IsLetter(first) && first != '_' && first != '$') return;
 
-            while (ptr < input.Length && (char.IsLetterOrDigit(input[ptr]) || input[ptr] == '_' || input[ptr] == '$')) {
-                ptr++;
+            while (context.HasMore() 
+                   && (char.IsLetterOrDigit(context.input[context.ptr]) 
+                       || context.input[context.ptr] == '_' 
+                       || context.input[context.ptr] == '$')) {
+                context.Advance();
             }
 
-            string identifier = input.Substring(start, ptr - start);
-            output.Add(TransformIdentifierToTokenType(identifier));
-            return TryConsumeWhiteSpace(ptr, input);
+            string identifier = context.input.Substring(start, context.ptr - start);
+            output.Add(TransformIdentifierToTokenType(context, identifier));
+            TryConsumeWhiteSpace(context);
         }
 
-        private static StyleToken TransformIdentifierToTokenType(string identifier) {
+        private static StyleToken TransformIdentifierToTokenType(TokenizerContext context, string identifier) {
             string identifierLowerCase = identifier.ToLower();
             switch (identifierLowerCase) {
-                case "use": return new StyleToken(StyleTokenType.Use, identifierLowerCase);
-                case "and": return new StyleToken(StyleTokenType.And, identifierLowerCase);
-                case "not": return new StyleToken(StyleTokenType.Not, identifierLowerCase);
-                case "style": return new StyleToken(StyleTokenType.Style, identifierLowerCase);
-                case "animation": return new StyleToken(StyleTokenType.Animation, identifierLowerCase);
-                case "texture": return new StyleToken(StyleTokenType.Texture, identifierLowerCase);
-                case "audio": return new StyleToken(StyleTokenType.Audio, identifierLowerCase);
-                case "cursor": return new StyleToken(StyleTokenType.Cursor, identifierLowerCase);
-                case "export": return new StyleToken(StyleTokenType.Export, identifierLowerCase);
-                case "const": return new StyleToken(StyleTokenType.Const, identifierLowerCase);
-                case "import": return new StyleToken(StyleTokenType.Import, identifierLowerCase);
-                case "attr": return new StyleToken(StyleTokenType.AttributeSpecifier, identifierLowerCase);
-                case "true": return new StyleToken(StyleTokenType.Boolean, identifierLowerCase);
-                case "false": return new StyleToken(StyleTokenType.Boolean, identifierLowerCase);
-                case "from": return new StyleToken(StyleTokenType.From, identifierLowerCase);
-                case "as": return new StyleToken(StyleTokenType.As, identifierLowerCase);
-                case "rgba": return new StyleToken(StyleTokenType.Rgba, identifierLowerCase);
-                case "rgb": return new StyleToken(StyleTokenType.Rgb, identifierLowerCase);
-                case "url": return new StyleToken(StyleTokenType.Url, identifierLowerCase);
+                case "use": return new StyleToken(StyleTokenType.Use, identifierLowerCase, context.line, context.column);
+                case "and": return new StyleToken(StyleTokenType.And, identifierLowerCase, context.line, context.column);
+                case "not": return new StyleToken(StyleTokenType.Not, identifierLowerCase, context.line, context.column);
+                case "style": return new StyleToken(StyleTokenType.Style, identifierLowerCase, context.line, context.column);
+                case "animation": return new StyleToken(StyleTokenType.Animation, identifierLowerCase, context.line, context.column);
+                case "texture": return new StyleToken(StyleTokenType.Texture, identifierLowerCase, context.line, context.column);
+                case "audio": return new StyleToken(StyleTokenType.Audio, identifierLowerCase, context.line, context.column);
+                case "cursor": return new StyleToken(StyleTokenType.Cursor, identifierLowerCase, context.line, context.column);
+                case "export": return new StyleToken(StyleTokenType.Export, identifierLowerCase, context.line, context.column);
+                case "const": return new StyleToken(StyleTokenType.Const, identifierLowerCase, context.line, context.column);
+                case "import": return new StyleToken(StyleTokenType.Import, identifierLowerCase, context.line, context.column);
+                case "attr": return new StyleToken(StyleTokenType.AttributeSpecifier, identifierLowerCase, context.line, context.column);
+                case "true": return new StyleToken(StyleTokenType.Boolean, identifierLowerCase, context.line, context.column);
+                case "false": return new StyleToken(StyleTokenType.Boolean, identifierLowerCase, context.line, context.column);
+                case "from": return new StyleToken(StyleTokenType.From, identifierLowerCase, context.line, context.column);
+                case "as": return new StyleToken(StyleTokenType.As, identifierLowerCase, context.line, context.column);
+                case "rgba": return new StyleToken(StyleTokenType.Rgba, identifierLowerCase, context.line, context.column);
+                case "rgb": return new StyleToken(StyleTokenType.Rgb, identifierLowerCase, context.line, context.column);
+                case "url": return new StyleToken(StyleTokenType.Url, identifierLowerCase, context.line, context.column);
                 default: {
                     for (int index = 0; index < s_AcceptedTypes.Length; index++) {
                         if (identifier == s_AcceptedTypes[index]) {
-                            return new StyleToken(StyleTokenType.VariableType, identifier);
+                            return new StyleToken(StyleTokenType.VariableType, identifier, context.line, context.column);
                         }
                     }
 
-                    return new StyleToken(StyleTokenType.Identifier, identifier);
+                    return new StyleToken(StyleTokenType.Identifier, identifier, context.line, context.column);
                 }
             }
         }
 
-        private static int TryReadString(int ptr, string input, List<StyleToken> output) {
-            int start = ptr;
-            if (ptr >= input.Length) return input.Length;
-            if (input[ptr] != '"') return ptr;
+        private static void TryReadString(TokenizerContext context, List<StyleToken> output) {
+            if (context.IsConsumed()) return;
+            if (context.input[context.ptr] != '"') return;
+            int start = context.ptr;
 
-            ptr++;
+            context.Save();
+            context.Advance();
 
-            while (ptr < input.Length && input[ptr] != '"') {
-                ptr++;
+            while (context.HasMore() && context.input[context.ptr] != '"') {
+                context.Advance();
             }
 
-            if (ptr >= input.Length) {
-                return start;
+            if (context.IsConsumed()) {
+                context.Restore();
+                return;
             }
 
-            if (input[ptr] != '"') {
-                return start;
+            if (context.input[context.ptr] != '"') {
+                context.Restore();
+                return;
             }
 
-            ptr++;
+            context.Advance();
 
             // strip the quotes
-            output.Add(new StyleToken(StyleTokenType.String, input.Substring(start + 1, ptr - start - 2)));
+            string substring = context.input.Substring(start + 1, context.ptr - start - 2);
+            output.Add(new StyleToken(StyleTokenType.String, substring, context.line, context.column));
 
-            return TryConsumeWhiteSpace(ptr, input);
+            TryConsumeWhiteSpace(context);
         }
 
-        private static int TryReadValue(int ptr, string input, List<StyleToken> output) {
-            int originalPosition = ptr;
-            if (ptr >= input.Length) return input.Length;
-            if (input[ptr] != '=') return ptr;
+        private static void TryReadValue(TokenizerContext context, List<StyleToken> output) {
+            if (context.IsConsumed()) return;
+            if (context.input[context.ptr] != '=') return;
+            context.Save();
 
-            ptr++;
-            int start = TryConsumeWhiteSpace(ptr, input);
+            context.Advance();
+            TryConsumeWhiteSpace(context);
+            int start = context.ptr;
 
-            while (ptr < input.Length && input[ptr] != ';' && input[ptr] != '\n') {
-                if (input[ptr] == '/' && ptr + 1 < input.Length && input[ptr + 1] == '/') {
+            while (context.HasMore() && context.input[context.ptr] != ';' && context.input[context.ptr] != '\n') {
+                if (context.input[context.ptr] == '/' && context.ptr + 1 < context.input.Length && context.input[context.ptr + 1] == '/') {
                     break;
                 }
 
-                ptr++;
+                context.Advance();
             }
 
-            if (ptr >= input.Length) {
-                return originalPosition;
+            if (context.IsConsumed()) {
+                context.Restore();
+                return;
             }
 
-            output.Add(new StyleToken(StyleTokenType.Value, input.Substring(start, ptr - start)));
-
-            return TryConsumeWhiteSpace(ptr, input);
-        }
-
-        private static int TryReadAttribute(int ptr, string input, List<StyleToken> output) {
-            if (ptr >= input.Length) return input.Length;
-
-            int start = ptr;
-            ptr = TryReadCharacters(ptr, input, "attr", StyleTokenType.AttributeSpecifier, output);
-
-            if (start == ptr) {
-                return ptr;
-            }
-
-            ptr = TryReadCharacters(ptr, input, ":", StyleTokenType.Colon, output);
-            ptr = TryReadIdentifier(ptr, input, output);
-
-            if (input[ptr] != '=') return ptr;
-            ptr++;
-
-            return TryReadString(ptr, input, output);
+            string value = context.input.Substring(start, context.ptr - start);
+            output.Add(new StyleToken(StyleTokenType.Value, value, context.line, context.column));
+            TryConsumeWhiteSpace(context);
         }
 
         // todo take optional file / line number for error message
         public static List<StyleToken> Tokenize(string input, List<StyleToken> retn = null) {
             List<StyleToken> output = retn ?? new List<StyleToken>();
 
-            int ptr = TryConsumeWhiteSpace(0, input);
-            while (ptr < input.Length) {
-                int start = ptr;
+            TokenizerContext context = new TokenizerContext(input);
+            TryConsumeWhiteSpace(context);
+            while (context.ptr < input.Length) {
+                int start = context.ptr;
 
-                ptr = TryConsumeComment(ptr, input);
+                TryConsumeComment(context);
 
-                ptr = TryReadCharacters(ptr, input, "@", StyleTokenType.At, output);
-                ptr = TryReadCharacters(ptr, input, ":", StyleTokenType.Colon, output);
-                ptr = TryReadCharacters(ptr, input, "==", StyleTokenType.Equals, output);
-                ptr = TryReadCharacters(ptr, input, "!=", StyleTokenType.NotEquals, output);
-                ptr = TryReadCharacters(ptr, input, "!", StyleTokenType.BooleanNot, output);
-                ptr = TryReadCharacters(ptr, input, "=", StyleTokenType.Equal, output);
-                ptr = TryReadCharacters(ptr, input, ">", StyleTokenType.GreaterThan, output);
-                ptr = TryReadCharacters(ptr, input, "<", StyleTokenType.LessThan, output);
-                ptr = TryReadCharacters(ptr, input, "&&", StyleTokenType.BooleanAnd, output);
-                ptr = TryReadCharacters(ptr, input, "||", StyleTokenType.BooleanOr, output);
-                ptr = TryReadCharacters(ptr, input, "$", StyleTokenType.Dollar, output);
-                ptr = TryReadCharacters(ptr, input, "+", StyleTokenType.Plus, output);
-                ptr = TryReadCharacters(ptr, input, "-", StyleTokenType.Minus, output);
-                ptr = TryReadCharacters(ptr, input, "/", StyleTokenType.Divide, output);
-                ptr = TryReadCharacters(ptr, input, "*", StyleTokenType.Times, output);
-                ptr = TryReadCharacters(ptr, input, "%", StyleTokenType.Mod, output);
-                ptr = TryReadCharacters(ptr, input, "?", StyleTokenType.QuestionMark, output);
+                TryReadCharacters(context, "@", StyleTokenType.At, output);
+                TryReadCharacters(context, ":", StyleTokenType.Colon, output);
+                TryReadCharacters(context, "==", StyleTokenType.Equals, output);
+                TryReadCharacters(context, "!=", StyleTokenType.NotEquals, output);
+                TryReadCharacters(context, "!", StyleTokenType.BooleanNot, output);
+                TryReadCharacters(context, "=", StyleTokenType.Equal, output);
+                TryReadCharacters(context, ">", StyleTokenType.GreaterThan, output);
+                TryReadCharacters(context, "<", StyleTokenType.LessThan, output);
+                TryReadCharacters(context, "&&", StyleTokenType.BooleanAnd, output);
+                TryReadCharacters(context, "||", StyleTokenType.BooleanOr, output);
+                TryReadCharacters(context, "$", StyleTokenType.Dollar, output);
+                TryReadCharacters(context, "+", StyleTokenType.Plus, output);
+                TryReadCharacters(context, "-", StyleTokenType.Minus, output);
+                TryReadCharacters(context, "/", StyleTokenType.Divide, output);
+                TryReadCharacters(context, "*", StyleTokenType.Times, output);
+                TryReadCharacters(context, "%", StyleTokenType.Mod, output);
+                TryReadCharacters(context, "?", StyleTokenType.QuestionMark, output);
 
-                ptr = TryReadCharacters(ptr, input, ".", StyleTokenType.Dot, output);
-                ptr = TryReadCharacters(ptr, input, ",", StyleTokenType.Comma, output);
-                ptr = TryReadCharacters(ptr, input, "(", StyleTokenType.ParenOpen, output);
-                ptr = TryReadCharacters(ptr, input, ")", StyleTokenType.ParenClose, output);
-                ptr = TryReadCharacters(ptr, input, "[", StyleTokenType.BracketOpen, output);
-                ptr = TryReadCharacters(ptr, input, "]", StyleTokenType.BracketClose, output);
-                ptr = TryReadCharacters(ptr, input, "{", StyleTokenType.BracesOpen, output);
-                ptr = TryReadCharacters(ptr, input, "}", StyleTokenType.BracesClose, output);
+                TryReadCharacters(context, ".", StyleTokenType.Dot, output);
+                TryReadCharacters(context, ",", StyleTokenType.Comma, output);
+                TryReadCharacters(context, "(", StyleTokenType.ParenOpen, output);
+                TryReadCharacters(context, ")", StyleTokenType.ParenClose, output);
+                TryReadCharacters(context, "[", StyleTokenType.BracketOpen, output);
+                TryReadCharacters(context, "]", StyleTokenType.BracketClose, output);
+                TryReadCharacters(context, "{", StyleTokenType.BracesOpen, output);
+                TryReadCharacters(context, "}", StyleTokenType.BracesClose, output);
 
-                ptr = TryReadHashColor(ptr, input, output);
-                ptr = TryReadDigit(ptr, input, output);
-                ptr = TryReadString(ptr, input, output);
-                ptr = TryReadIdentifier(ptr, input, output);
-                ptr = TryConsumeWhiteSpace(ptr, input);
+                TryReadHashColor(context, output);
+                TryReadDigit(context, output);
+                TryReadString(context, output);
+                TryReadIdentifier(context, output);
+                TryConsumeWhiteSpace(context);
 
-                ptr = TryReadCharacters(ptr, input, ";\n", StyleTokenType.EndStatement, output);
-                ptr = TryReadCharacters(ptr, input, ";", StyleTokenType.EndStatement, output);
-                ptr = TryReadCharacters(ptr, input, "\n", StyleTokenType.EndStatement, output);
+                TryReadCharacters(context, ";\n", StyleTokenType.EndStatement, output);
+                TryReadCharacters(context, ";", StyleTokenType.EndStatement, output);
+                TryReadCharacters(context, "\n", StyleTokenType.EndStatement, output);
 
-                if (ptr == start && ptr < input.Length) {
+                if (context.ptr == start && context.ptr < input.Length) {
                     throw new ParseException($"Tokenizer failed on string: {input}." +
-                                             $" Processed {input.Substring(0, ptr)} as ({PrintTokenList(output)})" +
-                                             $" but then got stuck on {input.Substring(ptr)}");
+                                             $" in line {context.line}, column {context.column}" +
+                                             $" Processed {input.Substring(0, context.ptr)} as ({PrintTokenList(output)})" +
+                                             $" but then got stuck on {input.Substring(context.ptr)}");
                 }
             }
 
@@ -289,6 +282,68 @@ namespace UIForia.Parsing.Style.Tokenizer {
             return retn;
         }
 
+        private class TokenizerContext {
+            public int line;
+            public int column;
+            public int ptr;
+            public readonly string input;
+
+            private int savedLine;
+            private int savedColumn;
+            private int savedPtr;
+
+            public TokenizerContext(string input) {
+                this.line = 1;
+                this.column = 1;
+                this.ptr = 0;
+                this.input = input;
+            }
+
+            public TokenizerContext Save() {
+                savedLine = line;
+                savedColumn = column;
+                savedPtr = ptr;
+                return this;
+            }
+
+            public TokenizerContext Restore() {
+                line = savedLine;
+                column = savedColumn;
+                ptr = savedPtr;
+                return this;
+            }
+
+            public TokenizerContext Advance() {
+                if (IsConsumed()) return this;
+                if (input[ptr] == '\n') {
+                    line++;
+                    column = 1;
+                }
+                else {
+                    column++;
+                }
+
+                ptr++;
+
+                return this;
+            }
+
+            public TokenizerContext Advance(int characters) {
+                while (HasMore() && characters > 0) {
+                    Advance();
+                    characters--;
+                }
+                return this;
+            }
+
+            public bool IsConsumed() {
+                return ptr >= input.Length;
+            }
+            
+            public bool HasMore() {
+                return ptr < input.Length;
+            }
+        }
     }
 
 }

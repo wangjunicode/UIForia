@@ -67,7 +67,7 @@ namespace UIForia.Parsing.Style.Tokenizer {
         public override string ToString() {
             string retn = string.Empty;
             for (int i = 0; i < tokens.Count; i++) {
-                retn += tokens[i].value;
+                retn += i + ": " + tokens[i].value + ", ";
             }
 
             return retn + $" (idx: {ptr}, {Current.value} -> {Current.styleTokenType})";

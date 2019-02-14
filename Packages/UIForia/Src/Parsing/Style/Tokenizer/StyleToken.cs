@@ -7,15 +7,18 @@ namespace UIForia.Parsing.Style.Tokenizer {
 
         public readonly StyleTokenType styleTokenType;
         public readonly string value;
+        public readonly int line;
+        public readonly int column;
 
-        public StyleToken(StyleTokenType styleTokenType) {
-            this.styleTokenType = styleTokenType;
-            value = string.Empty;
-        }
-
-        public StyleToken(StyleTokenType styleTokenType, string value) {
+        public StyleToken(StyleTokenType styleTokenType, string value, int line, int column) {
             this.styleTokenType = styleTokenType;
             this.value = value;
+            this.line = line;
+            this.column = column;
+        }
+
+        public StyleToken(StyleTokenType styleTokenType, int line, int column) : 
+            this(styleTokenType, string.Empty, line, column) {
         }
 
         [DebuggerStepThrough]
@@ -68,7 +71,7 @@ namespace UIForia.Parsing.Style.Tokenizer {
             styleTokenType == StyleTokenType.ParenOpen ||
             IsArithmeticOperator ||
             IsComparator;
-        public static StyleToken Invalid => new StyleToken(StyleTokenType.Invalid, string.Empty);
+        public static StyleToken Invalid => new StyleToken(StyleTokenType.Invalid, string.Empty, 0, 0);
 
         public override string ToString() {
             return $"{styleTokenType} -> {value}";

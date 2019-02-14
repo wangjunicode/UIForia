@@ -277,4 +277,30 @@ public class StyleParser2Tests {
         Assert.AreEqual("Color", exportNode.constNode.constType);
         Assert.AreEqual(StyleASTNodeType.Rgba, exportNode.constNode.value.type);
     }
+    
+    [Test]
+    public void ParseMultipleAttributes() {
+        var nodes = StyleParser2.Parse(@"
+            style hasBackgroundOnHover {
+                not [attr:attrName1] and not [attr:attrName2] and [attr:attrName3]{ }
+            }
+        ");
+
+        Assert.AreEqual(1, nodes.Count);
+        StyleRootNode styleRootNode = (StyleRootNode) nodes[0];
+        Assert.AreEqual(1, styleRootNode.children.Count);
+        
+        var attributeGroupContainer3 = (((AttributeGroupContainer) styleRootNode.children[0]));
+        Assert.AreEqual("attrName3", attributeGroupContainer3.identifier);
+        Assert.AreEqual(false, attributeGroupContainer3.invert);
+        
+        var attributeGroupContainer2 = attributeGroupContainer3.next;
+        Assert.AreEqual("attrName2", attributeGroupContainer2.identifier);
+        Assert.AreEqual(true, attributeGroupContainer2.invert);
+        
+        var attributeGroupContainer1 = attributeGroupContainer2.next;
+        Assert.AreEqual("attrName1", attributeGroupContainer1.identifier);
+        Assert.AreEqual(true, attributeGroupContainer1.invert);
+        Assert.IsNull(attributeGroupContainer1.next);
+    }
 }

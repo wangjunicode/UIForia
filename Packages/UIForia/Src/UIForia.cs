@@ -1,26 +1,33 @@
 using System;
-using System.Collections.Generic;
+using UIForia.Parsing.Style.Tokenizer;
 
 namespace UIForia {
 
-    public class InvalidArgumentException : System.Exception {
+    public class InvalidArgumentException : Exception {
 
-        public InvalidArgumentException(string message = null) : base(message) { }
-
-    }
-
-    public class ParseException : System.Exception {
-
-        public ParseException(string message = null) : base(message) { }
+        public InvalidArgumentException(string message = null) : base(message) {
+        }
 
     }
 
-    public class CompileException : System.Exception {
+    public class ParseException : Exception {
 
-        public CompileException(string message = null) : base(message) { }
+        public ParseException(StyleToken token, string message = null) : base($"Parse error at line {token.line} column {token.column}: {message}") {
+        }
+
+        public ParseException(string message = null) : base(message) {
+        }
 
     }
-    
-    public class GameApplication : Application { }
+
+    public class CompileException : Exception {
+
+        public CompileException(string message = null) : base(message) {
+        }
+
+    }
+
+    public class GameApplication : Application {
+    }
 
 }

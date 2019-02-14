@@ -22,7 +22,7 @@ namespace UIForia.Parsing.Style.AstNodes {
         protected static readonly ObjectPool<StyleStateContainer> s_StyleContainerNodePool = new ObjectPool<StyleStateContainer>();
         protected static readonly ObjectPool<StyleRootNode> s_StyleRootNodePool = new ObjectPool<StyleRootNode>();
         protected static readonly ObjectPool<AttributeGroupContainer> s_AttributeGroupContainerNodePool = new ObjectPool<AttributeGroupContainer>();
-        protected static readonly ObjectPool<GroupSpecifierNode> s_GroupSpecifierNodePool = new ObjectPool<GroupSpecifierNode>();
+        protected static readonly ObjectPool<ExpressionGroupContainer> s_ExpressionGroupContainerNodePool = new ObjectPool<ExpressionGroupContainer>();
         protected static readonly ObjectPool<UnitNode> s_UnitNodePool = new ObjectPool<UnitNode>();
         protected static readonly ObjectPool<ReferenceNode> s_ReferenceNodePool = new ObjectPool<ReferenceNode>();
         protected static readonly ObjectPool<RgbaNode> s_RgbaNodePool = new ObjectPool<RgbaNode>();
@@ -54,11 +54,13 @@ namespace UIForia.Parsing.Style.AstNodes {
             return rootNode;
         }
 
-        internal static AttributeGroupContainer AttributeGroupRootNode(string identifier, string value) {
+        internal static AttributeGroupContainer AttributeGroupRootNode(string identifier, string value, bool invert, AttributeGroupContainer next) {
             AttributeGroupContainer rootNode = s_AttributeGroupContainerNodePool.Get();
             rootNode.type = StyleASTNodeType.AttributeGroup;
             rootNode.identifier = identifier;
             rootNode.value = value;
+            rootNode.invert = invert;
+            rootNode.next = next;
             return rootNode;
         }
 
@@ -69,8 +71,8 @@ namespace UIForia.Parsing.Style.AstNodes {
             return rootNode;
         }
 
-        internal static StyleStateContainer ExpressionGroupRootNode(string identifier) {
-            StyleStateContainer rootNode = s_StyleContainerNodePool.Get();
+        internal static ExpressionGroupContainer ExpressionGroupRootNode(string identifier, bool invert, AttributeGroupContainer next) {
+            ExpressionGroupContainer rootNode = s_ExpressionGroupContainerNodePool.Get();
             rootNode.type = StyleASTNodeType.ExpressionGroup;
             rootNode.identifier = identifier;
             return rootNode;
@@ -89,13 +91,7 @@ namespace UIForia.Parsing.Style.AstNodes {
             measurementNode.unit = unit;
             return measurementNode;
         }
-
-        internal static GroupSpecifierNode GroupSpecifierNode(GroupOperatorType groupOperatorType) {
-            GroupSpecifierNode groupNode = s_GroupSpecifierNodePool.Get();
-            groupNode.groupOperatorType = groupOperatorType;
-            return groupNode;
-        }
-
+        
         internal static ImportNode ImportNode() {
             ImportNode importNode = s_ImportNodePool.Get();
             return importNode;
@@ -312,13 +308,27 @@ namespace UIForia.Parsing.Style.AstNodes {
         }
     }
 
-    public class AttributeGroupContainer : StyleGroupContainer {
-        
+    public abstract class ChainableGroupContainer : StyleGroupContainer {
         public string value;
-       
+        public bool invert;
+        public ChainableGroupContainer next;
+    }
+
+    public class AttributeGroupContainer : ChainableGroupContainer {
+
         public override void Release() {
             base.Release();
             s_AttributeGroupContainerNodePool.Release(this);
+        }
+    }
+
+    public class ExpressionGroupContainer : ChainableGroupContainer {
+
+        // TODO add expression node
+        
+        public override void Release() {
+            base.Release();
+            s_ExpressionGroupContainerNodePool.Release(this);
         }
     }
     
@@ -356,21 +366,6 @@ namespace UIForia.Parsing.Style.AstNodes {
 
         public override void Release() {
             s_ExportNodePool.Release(this);
-        }
-    }
-
-    public class GroupSpecifierNode : StyleASTNode {
-
-        public GroupOperatorType groupOperatorType;
-
-        public string attributeName;
-
-        public string attributeValue;
-
-        public string state;
-
-        public override void Release() {
-            throw new NotImplementedException();
         }
     }
 

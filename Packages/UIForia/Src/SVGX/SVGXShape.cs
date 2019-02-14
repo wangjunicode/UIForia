@@ -8,16 +8,18 @@ namespace SVGX {
         public RangeInt pointRange;
         public SVGXBounds bounds;
 
-        public bool isHole;
         public bool isClosed;
-
-        public SVGXShape(SVGXShapeType type, RangeInt pointRange) {
+        public Vector3 origin;
+        
+        public SVGXShape(SVGXShapeType type, RangeInt pointRange, Vector3 origin = default) {
             this.type = type;
             this.pointRange = pointRange;
             this.isClosed = false;
-            this.isHole = false;
             this.bounds = new SVGXBounds();
+            this.origin = origin;
         }
+
+        public Vector4 Dimensions => new Vector4(origin.x, origin.y, bounds.Width, bounds.Height);
 
     }
 

@@ -5,9 +5,6 @@ using UnityEngine;
 namespace SVGX {
 
     internal class SVGXDrawWave {
-
-        public LightList<SVGXRenderShape> transparentFills;
-        public LightList<SVGXRenderShape> transparentStrokes;
         
         public LightList<SVGXRenderShape> opaqueFills;
         public LightList<SVGXRenderShape> opaqueStrokes;
@@ -16,13 +13,9 @@ namespace SVGX {
         public LightList<SVGXMatrix> matrices;
         public readonly LightList<SVGXShape> clipShapes;
 
-        private bool opaqueNeedsStencilFill;
-        private bool transparentNeedsStencilFill;
         public Mesh clipMesh;
 
         public SVGXDrawWave() {
-            transparentFills = new LightList<SVGXRenderShape>(32);
-            transparentStrokes = new LightList<SVGXRenderShape>(32);
             opaqueFills = new LightList<SVGXRenderShape>(32);
             opaqueStrokes = new LightList<SVGXRenderShape>(32);
             matrices = new LightList<SVGXMatrix>();
@@ -35,13 +28,11 @@ namespace SVGX {
             switch (drawCall.type) {
                 case DrawCallType.StandardStroke: {
                     shapes = opaqueStrokes;
-//                    shapes = drawCall.IsTransparentStroke ? transparentStrokes : opaqueStrokes;
                     break;
                 }
 
                 case DrawCallType.StandardFill: {
-                    shapes = drawCall.IsTransparentFill ? transparentFills : opaqueFills;
-//                    opaqueNeedsStencilFill = opaqueNeedsStencilFill ? opaqueNeedsStencilFill : drawCall.requiresStencilFill;
+                    shapes = opaqueFills;
                     break;
                 }
             }
@@ -57,7 +48,9 @@ namespace SVGX {
             int matrixId = matrices.Count - 1;
             
             for (int i = drawCall.shapeRange.start; i < drawCall.shapeRange.end; i++) {
-                shapes.Add(new SVGXRenderShape(ctx.shapes[i], styleId, matrixId));
+                if (ctx.shapes[i].type != SVGXShapeType.Unset) {
+                    shapes.Add(new SVGXRenderShape(ctx.shapes[i], styleId, matrixId));
+                }
             }
             
         }
@@ -65,19 +58,10 @@ namespace SVGX {
         public void Clear() {
             styles.Clear();
             matrices.Clear();
-            transparentFills.Clear();
             opaqueFills.Clear();
-            transparentStrokes.Clear();
             opaqueStrokes.Clear();
-            opaqueNeedsStencilFill = false;
-            transparentNeedsStencilFill = false;
-            clipMesh = null;
             clipShapes.Clear();
-        }
-
-        
-        public void AddClipShapes(SVGXShape[] shapes, SVGXClipGroup clipGroup) {
-           
+            clipMesh = null;
         }
 
     }

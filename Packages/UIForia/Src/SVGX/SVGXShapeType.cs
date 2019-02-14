@@ -4,9 +4,10 @@ namespace SVGX {
 
         Unset = 0,
         Rect = 1,
-        Path = 2,
-        Circle = 3,
-        Ellipse = 4
+        RoundedRect = 2,
+        Path = 3,
+        Circle = 4,
+        Ellipse = 5
 
     }
 

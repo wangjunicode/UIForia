@@ -54,7 +54,7 @@ namespace SVGX {
             triangleIndex = 0;
         }
 
-        public void EnsureCapacity(int vertexCount) {
+        public void EnsureAdditionalCapacity(int vertexCount) {
             position.EnsureAdditionalCapacity(vertexCount);
             prevNext.EnsureAdditionalCapacity(vertexCount);
             flags.EnsureAdditionalCapacity(vertexCount);
@@ -65,12 +65,23 @@ namespace SVGX {
 
         public Mesh FillMesh() {
             mesh.Clear();
+
+            int posCount = position.Count;
+            for (int i = 0; i < posCount; i++) {
+                Vector3 p = position[i];
+                positionList.Add(new Vector3(p.x, -p.y, p.z));
+            }
             
-            mesh.SetVertices(position.ToList(positionList));
+            for (int i = 0; i < prevNext.Count; i++) {
+                Vector4 p = prevNext[i];
+                prevNextList.Add(new Vector4(p.x, -p.y, p.z, -p.w));
+            }
+            
+            mesh.SetVertices(positionList);
             mesh.SetColors(colors.ToList(colorsList));
             mesh.SetUVs(0, texCoords.ToList(texCoordList));
             mesh.SetUVs(1, flags.ToList(flagsList));
-            mesh.SetUVs(2, prevNext.ToList(prevNextList));
+            mesh.SetUVs(2, prevNextList);
             mesh.SetTriangles(triangles.ToList(trianglesList), 0);
             
             positionList.Clear();

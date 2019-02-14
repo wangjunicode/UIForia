@@ -495,19 +495,31 @@
             <e p="OffsetRect.cs" t="Include" />
             <e p="ParsedTemplate.cs" t="Include" />
             <e p="Parsing" t="Include">
-              <e p="AstNodes" t="Include">
-                <e p="ASTNode.cs" t="Include" />
-                <e p="FieldNotDefinedException.cs" t="Include" />
-                <e p="IdentifierNode.cs" t="Include" />
-                <e p="LiteralNode.cs" t="Include" />
-                <e p="OperatorNode.cs" t="Include" />
-                <e p="OperatorType.cs" t="Include" />
+              <e p="Expression" t="Include">
+                <e p="AstNodes" t="Include">
+                  <e p="ASTNode.cs" t="Include" />
+                  <e p="FieldNotDefinedException.cs" t="Include" />
+                  <e p="IdentifierNode.cs" t="Include" />
+                  <e p="LiteralNode.cs" t="Include" />
+                  <e p="OperatorNode.cs" t="Include" />
+                  <e p="OperatorType.cs" t="Include" />
+                </e>
+                <e p="AttributeDefinition.cs" t="Include" />
+                <e p="ContextDefinition.cs" t="Include" />
+                <e p="ExpressionParser.cs" t="Include" />
+                <e p="InvalidTemplateException.cs" t="Include" />
+                <e p="ProcessedType.cs" t="Include" />
+                <e p="TemplateParser.cs" t="Include" />
+                <e p="TextTemplateParser.cs" t="Include" />
+                <e p="Tokenizer" t="Include">
+                  <e p="ExpressionToken.cs" t="Include" />
+                  <e p="ExpressionTokenizer.cs" t="Include" />
+                  <e p="ExpressionTokenType.cs" t="Include" />
+                  <e p="TokenStream.cs" t="Include" />
+                </e>
+                <e p="TypeProcessor.cs" t="Include" />
+                <e p="XMLExtensions.cs" t="Include" />
               </e>
-              <e p="AttributeDefinition.cs" t="Include" />
-              <e p="ContextDefinition.cs" t="Include" />
-              <e p="ExpressionParser.cs" t="Include" />
-              <e p="InvalidTemplateException.cs" t="Include" />
-              <e p="ProcessedType.cs" t="Include" />
               <e p="Style" t="Include">
                 <e p="AstNodes" t="Include">
                   <e p="GroupOperatorType.cs" t="Include" />
@@ -524,7 +536,6 @@
                 <e p="ParseUtil.cs" t="Include" />
                 <e p="StyleAttributeExpression.cs" t="Include" />
                 <e p="StyleAttributeExpressionOperation.cs" t="Include" />
-                <e p="StyleCompiler.cs" t="Include" />
                 <e p="StyleParser.cs" t="Include" />
                 <e p="StyleParser2.cs" t="Include" />
                 <e p="StylePropertyMappers.cs" t="Include" />
@@ -535,16 +546,6 @@
                   <e p="StyleTokenType.cs" t="Include" />
                 </e>
               </e>
-              <e p="TemplateParser.cs" t="Include" />
-              <e p="TextTemplateParser.cs" t="Include" />
-              <e p="Tokenizer" t="Include">
-                <e p="ExpressionToken.cs" t="Include" />
-                <e p="ExpressionTokenizer.cs" t="Include" />
-                <e p="ExpressionTokenType.cs" t="Include" />
-                <e p="TokenStream.cs" t="Include" />
-              </e>
-              <e p="TypeProcessor.cs" t="Include" />
-              <e p="XMLExtensions.cs" t="Include" />
             </e>
             <e p="Rendering" t="Include">
               <e p="AnchorTarget.cs" t="Include" />
@@ -625,7 +626,6 @@
               <e p="UIForiaFragDefines.cginc" t="Include" />
               <e p="UIForiaInc.cginc" t="Include" />
               <e p="UIForiaLine.shader" t="Include" />
-              <e p="UIForiaStencilEven.shader" t="Include" />
               <e p="UIForiaStencilFillClear.shader" t="Include" />
               <e p="UIForiaStencilFillCutout.shader" t="Include" />
               <e p="uiforiastencilfillpaint.shader" t="Include" />
@@ -655,6 +655,7 @@
               <e p="ClipRule.cs" t="Include" />
               <e p="ColorStop.cs" t="Include" />
               <e p="DrawCallType.cs" t="Include" />
+              <e p="FillMode.cs" t="Include" />
               <e p="FillVertexData.cs" t="Include" />
               <e p="GFX.cs" t="Include" />
               <e p="ImmediateRenderContext.cs" t="Include" />

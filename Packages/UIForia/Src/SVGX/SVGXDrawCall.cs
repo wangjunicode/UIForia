@@ -19,7 +19,7 @@ namespace SVGX {
         }
 
         public bool IsTransparentFill => false;//style.fillColor.a < 1;
-        public bool IsTransparentStroke => style.strokeStyle.color.a < 1;
+//        public bool IsTransparentStroke => style.strokeStyle.color.a < 1;
 
     }
 

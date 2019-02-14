@@ -1,23 +1,9 @@
-using System;
 using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
 
 namespace SVGX {
 
-    [Flags]
-    public enum FillMode {
-
-        Color = 0,
-        Texture = 1 << 0,
-        Gradient = 1 << 1,
-        Pattern = 1 << 4,
-        
-        TextureGradient = Texture | Gradient,
-        TextureColor = Texture | Color
-
-    }
-    
     // https://www.w3.org/TR/SVG11/styling.html
     public struct SVGXStyle {
 
@@ -38,19 +24,6 @@ namespace SVGX {
         public float dropShadow;
         public int gradientId;
         public int textureId;
-        public SVGXStrokeStyle strokeStyle;
-
-    }
-
-    public struct SVGXStrokeStyle {
-
-        public Color color;
-        public float alpha;
-        public float width;
-        public float[] dashArray;
-        public LineCap lineCap;
-        public LineJoin lineJoin;
-        public float miterLimit;
 
     }
 

@@ -64,14 +64,14 @@ namespace SVGX {
             currentStyle.fillTintColor = tintColor;
             currentTexture = texture;
         }
-        
+
         public void SetFill(Texture2D texture, SVGXGradient gradient) {
             currentStyle.fillMode = FillMode.TextureGradient;
             currentStyle.gradientId = gradient.id;
             currentTexture = texture;
             currentGradient = gradient;
         }
-        
+
         public void SetFill(Texture2D texture) {
             currentStyle.fillMode = FillMode.Texture;
             currentStyle.fillTintColor = Color.white;
@@ -85,14 +85,14 @@ namespace SVGX {
             currentStyle.textureId = texture.GetInstanceID();
             currentTexture = texture;
         }
-        
+
         public void SetStrokeColor(Color color) {
-            this.currentStyle.strokeStyle.color = color;
+            this.currentStyle.strokeColor = color;
         }
 
         public void MoveTo(float x, float y) {
             // todo -- if last was move to, set point and return
-            lastPoint = currentMatrix.Transform(new Vector2(x, y));
+            lastPoint = new Vector2(x, y);
             SVGXShape currentShape = shapes[shapes.Count - 1];
             if (currentShape.type != SVGXShapeType.Unset) {
                 shapes.Add(new SVGXShape(SVGXShapeType.Unset, default));
@@ -100,16 +100,14 @@ namespace SVGX {
             }
         }
 
-        public void Text(float x, float y, string text) {
-                                                                   
-        }
+        public void Text(float x, float y, string text) { }
 
         public void Text(float x, float y, TextInfo text) { }
 
         public void LineTo(float x, float y) {
             SVGXShape currentShape = shapes[shapes.Count - 1];
 
-            Vector2 point = currentMatrix.Transform(new Vector2(x, y));
+            Vector2 point = new Vector2(x, y);
 
             switch (currentShape.type) {
                 case SVGXShapeType.Path:
@@ -143,7 +141,7 @@ namespace SVGX {
         }
 
         public void ArcTo(float rx, float ry, float angle, bool isLargeArc, bool isSweepArc, float endX, float endY) {
-            Vector2 end = currentMatrix.Transform(new Vector2(endX, endY));
+            Vector2 end = new Vector2(endX, endY);
 
             int pointStart = points.Count;
             int pointCount = SVGXBezier.Arc(points, lastPoint, rx, ry, angle, isLargeArc, isSweepArc, end);
@@ -166,9 +164,6 @@ namespace SVGX {
         }
 
         public void CubicCurveTo(Vector2 ctrl0, Vector2 ctrl1, Vector2 end) {
-            ctrl0 = currentMatrix.Transform(ctrl0);
-            ctrl1 = currentMatrix.Transform(ctrl1);
-            end = currentMatrix.Transform(end);
 
             int pointStart = points.Count;
             int pointCount = SVGXBezier.CubicCurve(points, lastPoint, ctrl0, ctrl1, end);
@@ -177,9 +172,6 @@ namespace SVGX {
         }
 
         public void QuadraticCurveTo(Vector2 ctrl, Vector2 end) {
-            ctrl = currentMatrix.Transform(ctrl);
-            end = currentMatrix.Transform(end);
-
             int pointStart = points.Count;
             int pointCount = SVGXBezier.QuadraticCurve(points, lastPoint, ctrl, end);
             UpdateShape(pointStart, pointCount);
@@ -187,6 +179,82 @@ namespace SVGX {
             lastPoint = end;
         }
 
+        public void RoundedRect(Rect rect, float rtl, float rtr, float rbl, float rbr) {
+
+            float halfW = rect.width * 0.5f;
+            float halfH = rect.height * 0.5f;
+            float rxBL = rbl < halfW ? rbl : halfW;
+            float ryBL = rbl < halfH ? rbl : halfH;
+            float rxBR = rbr < halfW ? rbr : halfW;
+            float ryBR = rbr < halfH ? rbr : halfH;
+            float rxTL = rtl < halfW ? rtl : halfW;
+            float ryTL = rtl < halfH ? rtl : halfH;
+            float rxTR = rtr < halfW ? rtr : halfW;
+            float ryTR = rtr < halfH ? rtr : halfH;
+
+            float x = rect.x;
+            float y = rect.y;
+            float w = rect.width;
+            float h = rect.height;
+            
+            SVGXShape currentShape = shapes[shapes.Count - 1];
+            SVGXShapeType lastType = currentShape.type;
+
+            int pointRangeStart = points.Count;
+            const float OneMinusKappa90 = 0.4477152f;
+
+            BeginPath();
+                        
+            MoveTo(x, y + ryTL);
+            LineTo(x, y + h - ryBL);
+
+            CubicCurveTo(
+                new Vector2(x, y + h - ryBL * OneMinusKappa90),
+                new Vector2(x + rxBL * OneMinusKappa90, y + h),
+                new Vector2(x + rxBL, y + h)
+            );
+
+            LineTo(x + w - rxBR, y + h);
+            
+            CubicCurveTo(
+                new Vector2(x + w - rxBR * OneMinusKappa90, y + h),
+                new Vector2(x + w, y + h - ryBR * OneMinusKappa90),
+                new Vector2(x + w, y + h - ryBR)
+            );
+
+            LineTo(x + w, y + ryTR);
+            
+            CubicCurveTo(
+                new Vector2(x + w, y + ryTR * OneMinusKappa90),
+                new Vector2(x + w - rxTR * OneMinusKappa90, y),
+                new Vector2(x + w - rxTR, y)
+            );
+
+            LineTo(x + rxTL, y);
+
+            CubicCurveTo(
+                new Vector2(x + rxTL * OneMinusKappa90, y),
+                new Vector2(x, y + ryTL * OneMinusKappa90),
+                new Vector2(x, y + ryTL)
+            );
+
+            RangeInt pointRange = new RangeInt(pointRangeStart, points.Count - pointRangeStart);
+            currentShape = new SVGXShape(SVGXShapeType.RoundedRect, pointRange, new Vector3(x, y));
+            currentShape.bounds = new SVGXBounds(rect.min, rect.max);
+//            currentShape.isClosed = true; // todo -- isClosed yields the wrong behavior
+            
+            if (lastType != SVGXShapeType.Unset) {
+                shapes.Add(currentShape);
+            }
+            else {
+                shapes[shapes.Count - 1] = currentShape;
+            }
+
+            currentShapeRange.length++;
+        }
+
+        // todo -- diamond / other sdf shapes
+        
         private void UpdateShape(int pointStart, int pointCount) {
             SVGXShape currentShape = shapes[shapes.Count - 1];
             switch (currentShape.type) {
@@ -279,21 +347,21 @@ namespace SVGX {
             Fill();
             BeginPath();
         }
-        
+
         public void FillRect(Rect rect, float z = 0) {
             BeginPath();
             Rect(rect.x, rect.y, rect.width, rect.height, z);
             Fill();
             BeginPath();
         }
-        
+
         public void FillCircle(float x, float y, float radius, float z = 0) {
             BeginPath();
             Circle(x, y, radius, z);
             Fill();
             BeginPath();
         }
-        
+
         public void FillEllipse(float x, float y, float dx, float dy, float z = 0) {
             BeginPath();
             Ellipse(x, y, dx, dy, z);
@@ -305,11 +373,10 @@ namespace SVGX {
             SVGXShape currentShape = shapes[shapes.Count - 1];
             SVGXShapeType lastType = currentShape.type;
 
-            y = -y;
             Vector3 x0y0 = new Vector3(x, y, z);
             Vector3 x1y0 = new Vector3(x + width, y, z);
-            Vector3 x1y1 = new Vector3(x + width, y - height, z);
-            Vector3 x0y1 = new Vector3(x, y - height, z);
+            Vector3 x1y1 = new Vector3(x + width, y + height, z);
+            Vector3 x0y1 = new Vector3(x, y + height, z);
 
             currentShape = new SVGXShape(shapeType, new RangeInt(points.Count, 4));
 
@@ -340,11 +407,11 @@ namespace SVGX {
         }
 
         public void Fill() {
-            
             if ((currentStyle.fillMode & FillMode.Texture) != 0) {
                 if (!textures.Contains(currentTexture)) {
                     textures.Add(currentTexture);
                 }
+
                 currentStyle.textureId = currentTexture.GetInstanceID();
             }
 
@@ -352,6 +419,7 @@ namespace SVGX {
                 if (!gradients.Contains(currentGradient)) {
                     gradients.Add(currentGradient);
                 }
+
                 currentStyle.gradientId = currentGradient.id;
             }
 

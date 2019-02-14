@@ -10,54 +10,64 @@ namespace SVGX {
 
         private GFX gfx;
 
-        [Header("Fill Materials")] public Material simpleFillOpaque;
-        public Material stencilFillCutoutOpaque;
-        public Material stencilFillPaintOpaque;
-        public Material stencilFillClearOpaque;
-
-        [Header("Stroke Materials")] public Material simpleStrokeOpaque;
-
         private ImmediateRenderContext ctx;
 
         [Range(0, 360f)] public float rotation;
         public float dot;
 
-        public Texture2D texture;
-        
         public void Start() {
             ctx = new ImmediateRenderContext();
             gfx = new GFX(camera);
         }
 
+        public Texture2D texture;
+        
         public void Update() {
             camera.orthographic = true;
             camera.orthographicSize = Screen.height * 0.5f;
 
             ctx.Clear();
-            
+
 //            ctx.SetFill(Color.blue);
 //            ctx.Circle(0, 0, 100, 100);
 //            ctx.Fill();
 
-            ctx.BeginPath();
+//            ctx.BeginPath();
+//            
+//            ctx.Circle(0, 0, 50);
+//            
+//            ctx.PushClip();
+//            
+//            ctx.SetFill(Color.red);
+//            ctx.FillRect(new Rect(0, 0, 100, 100));
+//            
+//            ctx.SetFill(Color.green);
+//            ctx.FillRect(new Rect(50, 50, 100, 100));
+//            
+//            ctx.PopClip();
+//            
+//            ctx.SetFill(Color.blue);
+//            ctx.FillRect(new Rect(75, 75, 200, 200));
+
+
+
+            ctx.SetStrokeColor(Color.red);
             
-            ctx.Circle(0, 0, 50);
+//            ctx.MoveTo(10, 100);
+//            ctx.LineTo(Screen.width - 500f, 500);
+//            ctx.Stroke();
             
-            ctx.PushClip();
+//            ctx.BeginPath();
+//            
+//            ctx.SetFill(texture);
             
-            ctx.SetFill(Color.red);
-            ctx.FillRect(new Rect(0, 0, 100, 100));
+            ctx.RoundedRect(new Rect(50, 50, 100, 100), 20, 20, 20, 20);
             
-            ctx.SetFill(Color.green);
-            ctx.FillRect(new Rect(50, 50, 100, 100));
-            
-            ctx.PopClip();
-            
-            ctx.SetFill(Color.blue);
-            ctx.FillRect(new Rect(75, 75, 200, 200));
-            
+//            ctx.Fill();
+            ctx.Stroke();
+
             gfx.Render(ctx);
-            
+
 //
 //
 //            Vector2 v = new Vector2(200, 0);

@@ -4,9 +4,17 @@ namespace SVGX {
 
     public struct SVGXBounds {
 
-        public Vector2 min;
-        public Vector2 max;
+        public readonly Vector2 min;
+        public readonly Vector2 max;
+        
+        public SVGXBounds(Vector2 min, Vector2 max) {
+            this.min = min;
+            this.max = max;
+        }
 
+        public float Width => max.x - min.x;
+        public float Height => max.y - min.y;
+        
         public bool Intersects(SVGXBounds bounds) {
             float r1x1 = min.x;
             float r1x2 = max.x;

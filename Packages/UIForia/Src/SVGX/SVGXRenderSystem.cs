@@ -188,7 +188,7 @@ namespace SVGX {
             int triangleCnt = vertexData.triangles.Count;
 
             Vector3[] vertices = vertexData.position.Array;
-            Vector2[] texCoords = vertexData.texCoords.Array;
+            Vector4[] texCoords = vertexData.texCoords.Array;
             Vector4[] flags = vertexData.flags.Array;
             Color[] colors = vertexData.colors.Array;
             int[] triangles = vertexData.triangles.Array;
@@ -301,7 +301,7 @@ namespace SVGX {
                 ? points[range.start + 1] + (points[range.start + 1] - points[range.start]).normalized
                 : points[range.start + 2];
             
-            vertexData.EnsureCapacity(points.Count * 4);
+            vertexData.EnsureAdditionalCapacity(points.Count * 4);
 
             int triIdx = vertexData.triangleIndex;
             int vertexCnt = vertexData.position.Count;
@@ -358,7 +358,7 @@ namespace SVGX {
 
             // todo -- if path is closed be sure to join end to start
 
-            vertexData.EnsureCapacity(points.Count * 4);
+            vertexData.EnsureAdditionalCapacity(points.Count * 4);
 
             int triIdx = vertexData.triangleIndex;
             int vertexCnt = vertexData.position.Count;

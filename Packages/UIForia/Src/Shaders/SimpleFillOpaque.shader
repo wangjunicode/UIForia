@@ -10,7 +10,7 @@
     }
     SubShader
     {
-        Tags { "RenderType"="Opaque" "DisableBatching"="True" }
+        Tags { "RenderType"="Transparent" "DisableBatching"="True" }
 
         LOD 100
         Cull Off
@@ -37,9 +37,10 @@
          
             struct appdata {
                 float4 vertex : POSITION;
-                float2 uv : TEXCOORD0;
+                float4 uv : TEXCOORD0; // xy = origin, zw = size
                 fixed4 color : COLOR;
-                float4 flags : TEXCOORD1;
+                float4 flags : TEXCOORD1; // x = shape type, y = fill mode, z = gradientId, w = gradientDirection
+                float4 fillSettings : TEXCOORD2;
             };
 
             struct v2f {
@@ -47,58 +48,53 @@
                 float4 vertex : SV_POSITION;
                 fixed4 color : COLOR;
                 float4 flags : TEXCOORD1;
+                float4 colorFlags : TEXCOORD2;
             };
-
+            
             // 0.5 is to target center of texel, otherwise we get bad neighbor blending
-            float GetPixelInRowUV(int targetY, float textureHeight) {
+            inline float GetPixelInRowUV(int targetY, float textureHeight) {
                 return (targetY + 0.5) / textureHeight;
             }
             
             v2f vert (appdata v) {
+            
                 v2f o;
                 o.vertex = UnityObjectToClipPos(v.vertex);
-                o.uv = v.uv;
+                o.uv = float2((v.vertex.x - v.uv.x) / (v.uv.z + 1), (v.vertex.y + v.uv.y) / (v.uv.w + 1));
                 o.color = v.color;
                 o.flags = v.flags;
+                
+                uint fillFlags = (uint)v.flags.y;
+                
+                uint texFlag = (fillFlags & FillMode_Texture) != 0;
+                uint gradientFlag = (fillFlags & FillMode_Gradient) != 0;
+                uint tintFlag = (fillFlags & FillMode_Tint) != 0;
+                
+                o.colorFlags = float4(texFlag, gradientFlag, tintFlag, 0);
                 return o;
-            }
-            
-            float2 Unpack(float input, int precision) {
-                return float2(floor(input / precision), input % precision) / precision - 1;
-            }
+            }        
 
             fixed4 frag (v2f i) : SV_Target {
-                float2 unpackedFillColorMode = Unpack(i.flags.y, 4096);
+                
+                // todo -- use feature flags and make renderer determine if they can be used 
                 
                 #define ShapeType i.flags.x
                 #define GradientId i.flags.z
                 #define GradientDirection i.flags.w
                 
-                #define FillMode (unpackedFillColorMode.x)
-                #define ColorMode ((int)unpackedFillColorMode.y)
-                
-                //((int)unpackedFillColorMode.y)
-                                                
                 #define ColorMode_Gradient 1
                 
-//                if(FillMode != 0) return fixed4(0, 1, 0, 1);
-//                if(ColorMode > 0) return fixed4(1, 1, 0, 1);
-                
                 float t = lerp(i.uv.x, i.uv.y, GradientDirection);
-                    
-                fixed4 color = fixed4(1, 1, 1, 1);
+                float y = GetPixelInRowUV(GradientId, _globalGradientAtlasSize);
+                
+                fixed4 color = i.color;
                 fixed4 textureColor = tex2D(_MainTex, i.uv);
-                fixed4 gradientColor = tex2Dlod(_globalGradientAtlas, float4(t, GetPixelInRowUV(GradientId, _globalGradientAtlasSize), 0, 0));
+                fixed4 gradientColor = tex2Dlod(_globalGradientAtlas, float4(t, y, 0, 0));
                 
-                textureColor = lerp(textureColor, color, 1);
-                gradientColor = lerp(gradientColor, color, 0);
+                textureColor = lerp(color, textureColor, i.colorFlags.x);
+                gradientColor = lerp(color, gradientColor, i.colorFlags.y);
                 
-                color = i.color;//lerp(textureColor, gradientColor, 1);
-                
-//                bool colorMode = fmod(flags, 2) == 1);
-//                bool colorMode = fmod(flags, 4) >= 2);
-//                bool colorMode = fmod(flags, 8) >= 4);
-//                bool colorMode = fmod(flags, 16) >= 8);
+                color = lerp(textureColor, gradientColor, 0);
                 
                 if(ShapeType > ShapeType_Path) {
                     float dist = length(i.uv - 0.5);

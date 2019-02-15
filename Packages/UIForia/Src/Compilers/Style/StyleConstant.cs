@@ -1,14 +1,17 @@
 using System;
+using UIForia.Parsing.Style.AstNodes;
 
 namespace UIForia.Compilers.Style {
     
-    public struct StyleConstants {
+    public struct StyleConstant {
 
         public string name;
 
         public Type type;
 
-        public object value;
+        public StyleASTNode value;
+
+        public ReferenceNode referenceNode;
 
         public bool exported;
     }

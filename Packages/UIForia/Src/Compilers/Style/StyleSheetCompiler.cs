@@ -1,53 +1,44 @@
-
+using System;
 using System.Collections.Generic;
 using UIForia.Parsing.Style.AstNodes;
+using UIForia.Parsing.Style.Tokenizer;
 using UIForia.Rendering;
 using UIForia.Util;
-using UnityEngine;
 
 namespace UIForia.Compilers.Style {
 
     public class StyleSheetCompiler {
-        
-        private LightList<StyleConstants> constants;
-        private LightList<UIStyleGroup> importedGroups;
 
-        public StyleSheetCompiler() {
-            constants = LightListPool<StyleConstants>.Get();
-            importedGroups = LightListPool<UIStyleGroup>.Get();
+        private StyleSheetImporter styleSheetImporter;
+
+        private List<string> currentlyResolvingConstants = new List<string>();
+
+        private StyleCompileContext context;
+
+        public StyleSheetCompiler(StyleSheetImporter styleSheetImporter) {
+            this.styleSheetImporter = styleSheetImporter;
         }
 
-        public StyleSheet Compile(List<StyleASTNode> rootNodes) {
+        public StyleSheet Compile(LightList<StyleASTNode> rootNodes) {
+            context = new StyleSheetConstantImporter(styleSheetImporter).CreateContext(rootNodes);
 
-            StyleSheet styleSheet = new StyleSheet();
-            
+            StyleSheet styleSheet = new StyleSheet(context.constants, LightListPool<UIStyleGroup>.Get());
+
+
             for (int index = 0; index < rootNodes.Count; index++) {
-                
                 switch (rootNodes[index]) {
                     case StyleRootNode styleRoot:
-
-                        UIStyleGroup styleGroup = new UIStyleGroup();
-                        
-                        
-                        
-                        styleSheet.styleGroups.Add(styleGroup);
-                        
-                        break;
-                    case ExportNode exportNode:
-                        break;
-                    case ImportNode importNode:
-                        break;
-                    case ConstNode constNode:
-                        constants.Add(new StyleConstants());
+                        styleSheet.styleGroups.AddRange(CompileStyleGroup(styleRoot));
                         break;
                 }
             }
 
-            return null;
+            context.Release();
+
+            return styleSheet;
         }
 
         private LightList<UIStyleGroup> CompileStyleGroup(StyleRootNode styleRoot) {
-
             UIStyleGroup defaultGroup = new UIStyleGroup();
             defaultGroup.name = styleRoot.identifier ?? styleRoot.tagName;
             LightList<UIStyleGroup> result = LightListPool<UIStyleGroup>.Get();
@@ -56,65 +47,24 @@ namespace UIForia.Compilers.Style {
                     case PropertyNode propertyNode:
                         // add to normal ui style set
 
-                        // StylePropertyMappers.MapProperty(defaultGroup.normal, propertyNode.propertyName, propertyNode.propertyValue);
-                        
+                        StylePropertyMappers.MapProperty(defaultGroup.normal, propertyNode.propertyName, propertyNode.children);
+
                         break;
                     case AttributeGroupContainer attribute:
                         foreach (var uiStyleGroup in result) {
                             // is attribute name already in here?
-                            
                         }
+
                         break;
                     case StyleStateContainer styleContainer:
                         break;
-                    
+
                     default:
                         throw new ParseException($"You cannot have a {node} at this level.");
                 }
             }
 
             return result;
-        }
-        
-        
-        private Color CompileRgbaNode(RgbaNode rgbaNode) {
-            byte red = (byte) CompileToNumber(rgbaNode.red);
-            byte green = (byte) CompileToNumber(rgbaNode.green);
-            byte blue = (byte) CompileToNumber(rgbaNode.blue);
-            byte alpha = (byte) CompileToNumber(rgbaNode.alpha);
-
-            return new Color32(red, green, blue, alpha);
-        }
-
-        private Color CompileRgbNode(RgbNode rgbaNode) {
-            byte red = (byte) CompileToNumber(rgbaNode.red);
-            byte green = (byte) CompileToNumber(rgbaNode.green);
-            byte blue = (byte) CompileToNumber(rgbaNode.blue);
-
-            return new Color32(red, green, blue, 255);
-        }
-
-        private StyleASTNode ResolveReference(ReferenceNode reference) {
-            foreach (var constant in constants) {
-                if (constant.name == reference.referenceName) {
-                    // todo this should resolve a ref and figure out type and all that jazz
-                }
-            }
-            
-            throw new ParseException($"Could not resolve reference {reference}");
-        }
-
-        private int CompileToNumber(StyleASTNode node) {
-
-            if (node is ReferenceNode) {
-                node = ResolveReference((ReferenceNode) node);
-            }
-            
-            if (node.type == StyleASTNodeType.NumericLiteral) {
-                return int.Parse(((StyleLiteralNode) node).rawValue);
-            }
-
-            throw new ParseException($"Expected a numeric value but all I got was this lousy {node}");
         }
 
     }

@@ -1,0 +1,10 @@
+export const col0 : Color = red;
+import "sizes.style" as sizes;
+
+const x = sizes.x;
+
+const m1 : int = sizes.medium;
+
+style xyz {
+  MarginTop = @m1.px;
+}

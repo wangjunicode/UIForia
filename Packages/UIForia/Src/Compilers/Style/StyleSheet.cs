@@ -1,13 +1,17 @@
-using System.Collections.Generic;
 using UIForia.Rendering;
+using UIForia.Util;
 
 namespace UIForia.Compilers.Style {
     
     public class StyleSheet {
 
-        public List<StyleConstants> exportedConstants;
+        public LightList<StyleConstant> constants;
 
-        public List<UIStyleGroup> styleGroups;
+        public LightList<UIStyleGroup> styleGroups;
 
+        public StyleSheet(LightList<StyleConstant> constants, LightList<UIStyleGroup> styleGroups) {
+            this.constants = constants;
+            this.styleGroups = styleGroups;
+        }
     }
 }

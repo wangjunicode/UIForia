@@ -1,6 +1,9 @@
 using System;
 using System.Collections.Generic;
 using System.Text;
+using System.Threading;
+using UIForia.Layout.LayoutTypes;
+using UIForia.Parsing.Style.Tokenizer;
 using UIForia.Util;
 using UnityEngine;
 
@@ -35,6 +38,15 @@ namespace UIForia.Parsing.Style.AstNodes {
 
         public StyleASTNodeType type;
 
+        public int line;
+        public int column;
+
+        public StyleASTNode WithLocation(StyleToken token) {
+            this.line = token.line;
+            this.column = token.column;
+            return this;
+        }
+
         public bool IsCompound {
             get {
                 if (type == StyleASTNodeType.Operator) {
@@ -64,10 +76,11 @@ namespace UIForia.Parsing.Style.AstNodes {
             return rootNode;
         }
 
-        internal static StyleStateContainer StateGroupRootNode(string identifier) {
+        internal static StyleStateContainer StateGroupRootNode(StyleToken token) {
             StyleStateContainer rootNode = s_StyleContainerNodePool.Get();
             rootNode.type = StyleASTNodeType.StateGroup;
-            rootNode.identifier = identifier;
+            rootNode.identifier = token.value;
+            rootNode.WithLocation(token);
             return rootNode;
         }
 
@@ -78,10 +91,9 @@ namespace UIForia.Parsing.Style.AstNodes {
             return rootNode;
         }
 
-        internal static PropertyNode PropertyNode(string propertyName, StyleASTNode propertyValue) {
+        internal static PropertyNode PropertyNode(string propertyName) {
             PropertyNode propertyNode = s_PropertyNodePool.Get();
             propertyNode.propertyName = propertyName;
-            propertyNode.propertyValue = propertyValue;
             return propertyNode;
         }
 
@@ -92,18 +104,25 @@ namespace UIForia.Parsing.Style.AstNodes {
             return measurementNode;
         }
         
-        internal static ImportNode ImportNode() {
+        internal static ImportNode ImportNode(string alias, string source) {
             ImportNode importNode = s_ImportNodePool.Get();
+            importNode.alias = alias;
+            importNode.source = source;
             return importNode;
         }
 
-        internal static ExportNode ExportNode(string name, string type, StyleASTNode value) {
+        internal static ExportNode ExportNode(ConstNode constNode) {
             ExportNode exportNode = s_ExportNodePool.Get();
-            exportNode.constNode = s_ConstNodePool.Get();
-            exportNode.constNode.constName = name;
-            exportNode.constNode.constType = type;
-            exportNode.constNode.value = value;
+            exportNode.constNode = constNode;
             return exportNode;
+        }
+
+        internal static ConstNode ConstNode(string name, string type, StyleASTNode value) {
+            ConstNode constNode = s_ConstNodePool.Get();
+            constNode.constName = name;
+            constNode.constType = type;
+            constNode.value = value;
+            return constNode;
         }
 
         internal static ReferenceNode ReferenceNode(string value) {
@@ -283,7 +302,6 @@ namespace UIForia.Parsing.Style.AstNodes {
     public class ImportNode : StyleASTNode {
 
         public string alias;
-        public string importedProperty;
         public string source;
 
         public override void Release() {
@@ -369,16 +387,16 @@ namespace UIForia.Parsing.Style.AstNodes {
         }
     }
 
-    public class PropertyNode : StyleASTNode {
+    public class PropertyNode : StyleGroupContainer {
 
         public string propertyName;
-        public StyleASTNode propertyValue;
 
         public PropertyNode() {
             type = StyleASTNodeType.Property;
         }
 
         public override void Release() {
+            base.Release();
             s_PropertyNodePool.Release(this);
         }
     }

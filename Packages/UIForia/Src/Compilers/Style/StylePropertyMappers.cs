@@ -8,20 +8,21 @@ using UnityEngine;
 namespace UIForia.Compilers.Style {
     public struct StylePropertyMappers {
 
-        private static readonly Dictionary<string, Action<UIStyle, LightList<StyleASTNode>>> mappers = new Dictionary<string, Action<UIStyle, LightList<StyleASTNode>>> {
-            { "backgroundcolor", (targetStyle, valueParts) => targetStyle.BackgroundColor = MapColor(valueParts) },
-            { "bordercolor", (targetStyle, valueParts) => targetStyle.BorderColor = MapColor(valueParts) },
-            { "opacity", (targetStyle, valueParts) => targetStyle.Opacity = MapNumber(valueParts) },
-            { "cursor", (targetStyle, valueParts) => {
 
-                    // TODO implement this
+        private static readonly Dictionary<string, Action<UIStyle, LightList<StyleASTNode>>> mappers 
+            = new Dictionary<string, Action<UIStyle, LightList<StyleASTNode>>> {
+            { "backgroundcolor", (targetStyle, propertyValues) => targetStyle.BackgroundColor = MapColor(propertyValues) },
+            { "bordercolor", (targetStyle, propertyValues) => targetStyle.BorderColor = MapColor(propertyValues) },
+            { "opacity", (targetStyle, propertyValues) => targetStyle.Opacity = MapNumber(propertyValues) },
+            { "cursor", (targetStyle, propertyValues) => {
+
+                    // first value must be the reference
                     
                     CursorStyle cursor = null; // new CursorStyle(texturePath, texture, new Vector2(hotSpotX, hotSpotY));
                     targetStyle.Cursor = cursor;
                 }
             },
-//            { "backgroundimage", (targetStyle, valueParts) => targetStyle.BackgroundImage = 
-//                ResourceManager.GetTexture(valueParts[0]) },
+            { "backgroundimage", (targetStyle, propertyValues) => targetStyle.BackgroundImage = MapTexture(propertyValues) },
 //            { "bordercolor", (targetStyle, valueParts) => targetStyle.BorderColor = MapColor(valueParts) },
 //            { "bordercolor", (targetStyle, valueParts) => targetStyle.BorderColor = MapColor(valueParts) },
 //            { "bordercolor", (targetStyle, valueParts) => targetStyle.BorderColor = MapColor(valueParts) },
@@ -58,25 +59,49 @@ namespace UIForia.Compilers.Style {
 //            { "bordercolor", (targetStyle, valueParts) => targetStyle.BorderColor = MapColor(valueParts) },
         };
 
-        private static float MapNumber(LightList<StyleASTNode> valueParts) {
+        private static Texture2D MapTexture(LightList<StyleASTNode> propertyValues) {
+            AssertSingleValue(propertyValues);
+            switch (propertyValues[0]) {
+                case UrlNode urlNode:
+                    return ResourceManager.GetTexture(TransformUrlNode(urlNode));
+                default:
+                    throw new CompileException(propertyValues[0], "Expected url(path/to/texture).");
+            }
+        }
+
+        private static string TransformUrlNode(UrlNode urlNode) {
+
+            StyleASTNode url = urlNode.url;
+
+            if (url.type == StyleASTNodeType.Identifier) {
+                return ((StyleIdentifierNode) url).name;
+            }
+
+            if (url.type == StyleASTNodeType.StringLiteral) {
+                return ((StyleLiteralNode) url).rawValue;
+            }
+
+            throw new CompileException(url, "Invalid url value.");
+        }
+
+        private static float MapNumber(LightList<StyleASTNode> propertyValues) {
             throw new NotImplementedException();
         }
 
-        private static Color MapColor(LightList<StyleASTNode> colorValueParts) {
-            if (colorValueParts.Count == 0) {
-                return Color.clear;
-            }
+        private static Color MapColor(LightList<StyleASTNode> propertyValues) {
+            AssertSingleValue(propertyValues);
 
-            if (colorValueParts.Count == 1) {
-                switch (colorValueParts[0]) {
-                    case RgbaNode rgbaNode: return MapRbgaNodeToColor(rgbaNode);
-                    case RgbNode rgbNode: return MapRgbNodeToColor(rgbNode);
-                    default: throw new ParseException($"Unsupported color value: {colorValueParts[0]}");
-                }
+            switch (propertyValues[0]) {
+                case StyleIdentifierNode identifierNode:
+                    Color color; 
+                    ColorUtility.TryParseHtmlString(identifierNode.name, out color);
+                    return color;
+                case ColorNode colorNode: return colorNode.color;
+                case RgbaNode rgbaNode: return MapRbgaNodeToColor(rgbaNode);
+                case RgbNode rgbNode: return MapRgbNodeToColor(rgbNode);
+                default: 
+                    throw new CompileException(propertyValues[0], $"Unsupported color value.");
             }
-
-            // this must be a color in # notation
-            throw new ParseException("TODO implement #color mapper");
         }
 
         private static Color MapRbgaNodeToColor(RgbaNode rgbaNode) {
@@ -96,31 +121,17 @@ namespace UIForia.Compilers.Style {
             return new Color32(red, green, blue, 255);
         }
 
-        private static StyleASTNode ResolveReference(ReferenceNode reference) {
-//            foreach (var constant in constants) {
-//                if (constant.name == reference.referenceName) {
-//                    // todo this should resolve a ref and figure out type and all that jazz
-//                }
-//            }
-            
-            throw new ParseException($"Could not resolve reference {reference}");
-        }
-
         private static int CompileToNumber(StyleASTNode node) {
-
-            if (node is ReferenceNode) {
-                node = ResolveReference((ReferenceNode) node);
-            }
             
             if (node.type == StyleASTNodeType.NumericLiteral) {
                 return int.Parse(((StyleLiteralNode) node).rawValue);
             }
 
-            throw new ParseException($"Expected a numeric value but all I got was this lousy {node}");
+            throw new CompileException(node, $"Expected a numeric value but all I got was this lousy {node}");
         }
 
-        public static void MapProperty(UIStyle targetStyle, string propertyName, LightList<StyleASTNode> propertyValueParts) {
-            mappers[propertyName].Invoke(targetStyle, propertyValueParts);
+        public static void MapProperty(UIStyle targetStyle, string propertyName, LightList<StyleASTNode> propertyValues) {
+            mappers[propertyName].Invoke(targetStyle, propertyValues);
         }
 
 //            
@@ -782,5 +793,11 @@ namespace UIForia.Compilers.Style {
 //            }
 //        }
 
+
+        private static void AssertSingleValue(LightList<StyleASTNode> propertyValues) {
+            if (propertyValues.Count > 1) {
+                throw new CompileException(propertyValues[1], "Found too many values.");
+            }
+        }
     }
 }

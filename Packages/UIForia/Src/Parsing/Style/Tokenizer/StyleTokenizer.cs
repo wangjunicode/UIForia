@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using UIForia.Rendering;
 using UnityEngine;
@@ -5,15 +6,19 @@ using UnityEngine;
 namespace UIForia.Parsing.Style.Tokenizer {
 
     internal static class StyleTokenizer {
-
-        private static readonly string[] s_AcceptedTypes = {
-            nameof(LayoutDirection),
-            nameof(Color),
-            "int",
-            "float",
-            "string",
-            "bool",
+        
+        private static readonly Dictionary<string, Type> s_AllowedTypes = new Dictionary<string, Type>() {
+            { nameof(LayoutDirection), typeof(LayoutDirection)},
+            { nameof(Color), typeof(Color)},
+            { "int", typeof(int)},
+            { "float", typeof(float)},
+            { "string", typeof(string)},
+            { "bool", typeof(bool)},
         };
+
+        public static bool TryResolveVariableType(string typeName, out Type type) {
+            return s_AllowedTypes.TryGetValue(typeName, out type);
+        }
 
         private static void TryReadCharacters(TokenizerContext context, string match, StyleTokenType styleTokenType, List<StyleToken> output) {
             
@@ -142,13 +147,9 @@ namespace UIForia.Parsing.Style.Tokenizer {
                 case "rgb": return new StyleToken(StyleTokenType.Rgb, identifierLowerCase, context.line, context.column);
                 case "url": return new StyleToken(StyleTokenType.Url, identifierLowerCase, context.line, context.column);
                 default: {
-                    for (int index = 0; index < s_AcceptedTypes.Length; index++) {
-                        if (identifier == s_AcceptedTypes[index]) {
-                            return new StyleToken(StyleTokenType.VariableType, identifier, context.line, context.column);
-                        }
-                    }
-
-                    return new StyleToken(StyleTokenType.Identifier, identifier, context.line, context.column);
+                    return s_AllowedTypes.ContainsKey(identifier)
+                        ? new StyleToken(StyleTokenType.VariableType, identifier, context.line, context.column)
+                        : new StyleToken(StyleTokenType.Identifier, identifier, context.line, context.column);
                 }
             }
         }

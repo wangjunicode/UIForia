@@ -21,79 +21,45 @@ namespace SVGX {
         }
 
         public Texture2D texture;
-        
+
+        public Color tintColor;
+        [Range(0, 1)] public float strokeOpacity;
+        [Range(0, 1)] public float fillOpacity;
+
         public void Update() {
             camera.orthographic = true;
             camera.orthographicSize = Screen.height * 0.5f;
 
             ctx.Clear();
 
-//            ctx.SetFill(Color.blue);
-//            ctx.Circle(0, 0, 100, 100);
-//            ctx.Fill();
+            ctx.MoveTo(-Screen.width * 0.5f, 0);
+            ctx.LineTo(Screen.width, 0);
+            ctx.SetStrokeColor(Color.blue);
+            ctx.SetStrokeWidth(2f);
+            ctx.SetStrokeOpacity(strokeOpacity);
 
-//            ctx.BeginPath();
-//            
-//            ctx.Circle(0, 0, 50);
-//            
-//            ctx.PushClip();
-//            
-//            ctx.SetFill(Color.red);
-//            ctx.FillRect(new Rect(0, 0, 100, 100));
-//            
-//            ctx.SetFill(Color.green);
-//            ctx.FillRect(new Rect(50, 50, 100, 100));
-//            
-//            ctx.PopClip();
-//            
-//            ctx.SetFill(Color.blue);
-//            ctx.FillRect(new Rect(75, 75, 200, 200));
-
-
-
+            ctx.Stroke();
+            
+            ctx.BeginPath();
+            
+//            SVGXMatrix mat = SVGXMatrix.identity;
+//            mat = mat.Translate(new Vector2(Screen.width * 0.5f, Screen.height * 0.5f));
+//            mat = mat.SkewX(45f);
+//
+//            ctx.SetTransform(mat);
+            
             ctx.SetStrokeColor(Color.red);
             ctx.SetStrokeWidth(10f);
+            ctx.SetStrokeOpacity(strokeOpacity);
+            ctx.SetFillOpacity(fillOpacity);
             
-//            ctx.MoveTo(10, 100);
-//            ctx.LineTo(Screen.width - 500f, 500);
-//            ctx.Stroke();
-            
-//            ctx.BeginPath();
-//            
-            ctx.SetFill(texture);
-            
-            ctx.RoundedRect(new Rect(50, 50, 1024, 512), 20, 20, 20, 20);
-            
+            ctx.RoundedRect(new Rect(-150, -50, 300, 100), 20, 20, 20, 20);
+                        
             ctx.Fill();
-            ctx.Stroke();
+//            ctx.Stroke();
+
 
             gfx.Render(ctx);
-
-//
-//
-//            Vector2 v = new Vector2(200, 0);
-//            v = v.Rotate(new Vector2(100, 100), rotation);
-//
-//            ctx.MoveTo(20, 20);
-//            ctx.LineTo(100, 20);
-//            ctx.LineTo(v.x, v.y);
-//            ctx.Stroke();
-//
-//
-//            gfx.Render(ctx);
-//            
-//            Vector2 start = new Vector2(20, 20);
-//            Vector2 mid = new Vector2(100, 20);
-//            Vector2 toV = (v - mid).normalized;
-//            
-//            gfx.DrawDebugLine(mid, v + toV * 100, Color.red, 2f);
-//            gfx.DrawDebugLine(new Vector2(-120, 20), new Vector2(400, 20), Color.blue, 2f);
-//
-////            Vector2 toCurrent = new Vector2(100, 20) - v;
-////            Vector2 
-////            toCurrent = toCurrent.normalized;
-////            toNext = toNext.normalized;
-//            dot = Vector2.Dot(toV, (mid - start).normalized);
         }
 
     }

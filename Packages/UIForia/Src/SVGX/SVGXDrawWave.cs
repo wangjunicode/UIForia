@@ -1,4 +1,4 @@
-using System.Collections.Generic;
+using UIForia.Rendering;
 using UIForia.Util;
 using UnityEngine;
 
@@ -23,7 +23,7 @@ namespace SVGX {
             clipShapes = new LightList<SVGXShape>();
         }
 
-        public void AddDrawCall(ImmediateRenderContext ctx, SVGXDrawCall drawCall) {
+        public void AddDrawCall(ImmediateRenderContext ctx, int drawCallIdx, SVGXDrawCall drawCall) {
             LightList<SVGXRenderShape> shapes = null;
             switch (drawCall.type) {
                 case DrawCallType.StandardStroke: {
@@ -49,7 +49,7 @@ namespace SVGX {
             
             for (int i = drawCall.shapeRange.start; i < drawCall.shapeRange.end; i++) {
                 if (ctx.shapes[i].type != SVGXShapeType.Unset) {
-                    shapes.Add(new SVGXRenderShape(ctx.shapes[i], styleId, matrixId));
+                    shapes.Add(new SVGXRenderShape(ctx.shapes[i], BitUtil.SetHighLowBits(ctx.drawCalls.Count - drawCallIdx, ctx.shapes.Count - i), styleId, matrixId));
                 }
             }
             

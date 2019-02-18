@@ -9,3 +9,7 @@
 #define ShapeType_Path 3
 #define ShapeType_Circle 4
 #define ShapeType_Ellipse 5
+
+#define Red fixed4(1, 0, 0, 1)
+#define Green fixed4(0, 1, 0, 1)
+#define Blue fixed4(0, 0, 1, 1)

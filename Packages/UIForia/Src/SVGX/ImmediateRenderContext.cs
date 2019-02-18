@@ -18,7 +18,7 @@ namespace SVGX {
 
     public class ImmediateRenderContext {
 
-        internal readonly LightList<Vector3> points;
+        internal readonly LightList<Vector2> points;
         internal readonly LightList<SVGXStyle> styles;
         internal readonly LightList<SVGXMatrix> transforms;
         internal readonly LightList<SVGXDrawCall> drawCalls;
@@ -28,7 +28,7 @@ namespace SVGX {
         internal readonly LightList<SVGXGradient> gradients;
         internal readonly LightList<Texture2D> textures;
 
-        private Vector3 lastPoint;
+        private Vector2 lastPoint;
         private SVGXMatrix currentMatrix;
         private SVGXStyle currentStyle;
         private RangeInt currentShapeRange;
@@ -36,7 +36,7 @@ namespace SVGX {
         private Texture2D currentTexture;
 
         public ImmediateRenderContext() {
-            points = new LightList<Vector3>(128);
+            points = new LightList<Vector2>(128);
             styles = new LightList<SVGXStyle>();
             transforms = new LightList<SVGXMatrix>();
             currentMatrix = SVGXMatrix.identity;
@@ -47,6 +47,7 @@ namespace SVGX {
             shapes.Add(new SVGXShape(SVGXShapeType.Unset, default));
             textures = new LightList<Texture2D>();
             clipStack = new Stack<int>();
+            currentStyle = SVGXStyle.Default();
         }
 
         public void SetFill(Color color) {
@@ -60,7 +61,7 @@ namespace SVGX {
         }
 
         public void SetFill(Texture2D texture, Color tintColor) {
-            currentStyle.fillMode = FillMode.TextureColor;
+            currentStyle.fillMode = FillMode.TextureTint;
             currentStyle.fillTintColor = tintColor;
             currentTexture = texture;
         }
@@ -164,7 +165,6 @@ namespace SVGX {
         }
 
         public void CubicCurveTo(Vector2 ctrl0, Vector2 ctrl1, Vector2 end) {
-
             int pointStart = points.Count;
             int pointCount = SVGXBezier.CubicCurve(points, lastPoint, ctrl0, ctrl1, end);
             UpdateShape(pointStart, pointCount);
@@ -180,7 +180,6 @@ namespace SVGX {
         }
 
         public void RoundedRect(Rect rect, float rtl, float rtr, float rbl, float rbr) {
-
             float halfW = rect.width * 0.5f;
             float halfH = rect.height * 0.5f;
             float rxBL = rbl < halfW ? rbl : halfW;
@@ -196,53 +195,64 @@ namespace SVGX {
             float y = rect.y;
             float w = rect.width;
             float h = rect.height;
-            
-            SVGXShape currentShape = shapes[shapes.Count - 1];
-            SVGXShapeType lastType = currentShape.type;
+
+            SVGXShapeType lastType = shapes[shapes.Count - 1].type;
+            SVGXShape currentShape = new SVGXShape();
 
             int pointRangeStart = points.Count;
             const float OneMinusKappa90 = 0.4477152f;
 
-            BeginPath();
-                        
-            MoveTo(x, y + ryTL);
-            LineTo(x, y + h - ryBL);
+            points.Add(new Vector2(x, y + ryTL)); // move to
+            Vector2 last = new Vector2(x, y + h - ryBL);
 
-            CubicCurveTo(
+            points.Add(last); // line to
+
+            SVGXBezier.CubicCurve(
+                points,
+                last,
                 new Vector2(x, y + h - ryBL * OneMinusKappa90),
                 new Vector2(x + rxBL * OneMinusKappa90, y + h),
                 new Vector2(x + rxBL, y + h)
             );
 
-            LineTo(x + w - rxBR, y + h);
-            
-            CubicCurveTo(
+            last = new Vector2(x + w - rxBR, y + h); // line to
+            points.Add(last);
+
+            SVGXBezier.CubicCurve(
+                points,
+                last,
                 new Vector2(x + w - rxBR * OneMinusKappa90, y + h),
                 new Vector2(x + w, y + h - ryBR * OneMinusKappa90),
                 new Vector2(x + w, y + h - ryBR)
             );
 
-            LineTo(x + w, y + ryTR);
-            
-            CubicCurveTo(
+            last = new Vector2(x + w, y + ryTR); // line to
+            points.Add(last);
+
+            SVGXBezier.CubicCurve(
+                points,
+                last,
                 new Vector2(x + w, y + ryTR * OneMinusKappa90),
                 new Vector2(x + w - rxTR * OneMinusKappa90, y),
                 new Vector2(x + w - rxTR, y)
             );
 
-            LineTo(x + rxTL, y);
+            last = new Vector2(x + rxTL, y); // line to
+            points.Add(last);
 
-            CubicCurveTo(
+            SVGXBezier.CubicCurve(
+                points,
+                last,
                 new Vector2(x + rxTL * OneMinusKappa90, y),
                 new Vector2(x, y + ryTL * OneMinusKappa90),
                 new Vector2(x, y + ryTL)
             );
 
             RangeInt pointRange = new RangeInt(pointRangeStart, points.Count - pointRangeStart);
-            currentShape = new SVGXShape(SVGXShapeType.RoundedRect, pointRange, new Vector3(x, y));
+            currentShape = new SVGXShape(SVGXShapeType.RoundedRect, pointRange, new Vector2(x, y));
             currentShape.bounds = new SVGXBounds(rect.min, rect.max);
 //            currentShape.isClosed = true; // todo -- isClosed yields the wrong behavior
-            
+
             if (lastType != SVGXShapeType.Unset) {
                 shapes.Add(currentShape);
             }
@@ -250,11 +260,12 @@ namespace SVGX {
                 shapes[shapes.Count - 1] = currentShape;
             }
 
+            lastPoint = points[points.Count - 1];
             currentShapeRange.length++;
         }
 
         // todo -- diamond / other sdf shapes
-        
+
         private void UpdateShape(int pointStart, int pointCount) {
             SVGXShape currentShape = shapes[shapes.Count - 1];
             switch (currentShape.type) {
@@ -281,7 +292,7 @@ namespace SVGX {
             transforms.Clear();
             drawCalls.Clear();
             shapes.Clear();
-            currentStyle = new SVGXStyle();
+            currentStyle = SVGXStyle.Default();
             currentMatrix = SVGXMatrix.identity;
             lastPoint = Vector2.zero;
             shapes.Add(new SVGXShape(SVGXShapeType.Unset, default));
@@ -329,56 +340,62 @@ namespace SVGX {
             }
         }
 
-        public void Rect(float x, float y, float width, float height, float z = 0) {
-            SimpleShape(SVGXShapeType.Rect, x, y, width, height, z);
+        public void Rect(float x, float y, float width, float height) {
+            SimpleShape(SVGXShapeType.Rect, x, y, width, height);
         }
 
-        public void Ellipse(float x, float y, float dx, float dy, float z = 0) {
-            SimpleShape(SVGXShapeType.Ellipse, x, y, dx, dy, z);
+        public void Ellipse(float x, float y, float dx, float dy) {
+            SimpleShape(SVGXShapeType.Ellipse, x, y, dx, dy);
         }
 
-        public void Circle(float x, float y, float radius, float z = 0) {
-            SimpleShape(SVGXShapeType.Circle, x, y, radius * 2f, radius * 2f, z);
+        public void Circle(float x, float y, float radius) {
+            SimpleShape(SVGXShapeType.Circle, x, y, radius * 2f, radius * 2f);
         }
 
-        public void FillRect(float x, float y, float width, float height, float z = 0) {
+        public void CircleFromCenter(float cx, float cy, float radius) {
+            SimpleShape(SVGXShapeType.Circle, cx - radius, cy - radius, radius * 2f, radius * 2f);
+        }
+
+        public void FillRect(float x, float y, float width, float height) {
             BeginPath();
-            Rect(x, y, width, height, z);
+            Rect(x, y, width, height);
             Fill();
             BeginPath();
         }
 
-        public void FillRect(Rect rect, float z = 0) {
+        public void FillRect(Rect rect) {
             BeginPath();
-            Rect(rect.x, rect.y, rect.width, rect.height, z);
+            Rect(rect.x, rect.y, rect.width, rect.height);
             Fill();
             BeginPath();
         }
 
-        public void FillCircle(float x, float y, float radius, float z = 0) {
+        public void FillCircle(float x, float y, float radius) {
             BeginPath();
-            Circle(x, y, radius, z);
+            Circle(x, y, radius);
             Fill();
             BeginPath();
         }
 
-        public void FillEllipse(float x, float y, float dx, float dy, float z = 0) {
+        public void FillEllipse(float x, float y, float dx, float dy) {
             BeginPath();
-            Ellipse(x, y, dx, dy, z);
+            Ellipse(x, y, dx, dy);
             Fill();
             BeginPath();
         }
 
-        private void SimpleShape(SVGXShapeType shapeType, float x, float y, float width, float height, float z) {
+        private void SimpleShape(SVGXShapeType shapeType, float x, float y, float width, float height) {
             SVGXShape currentShape = shapes[shapes.Count - 1];
             SVGXShapeType lastType = currentShape.type;
 
-            Vector3 x0y0 = new Vector3(x, y, z);
-            Vector3 x1y0 = new Vector3(x + width, y, z);
-            Vector3 x1y1 = new Vector3(x + width, y + height, z);
-            Vector3 x0y1 = new Vector3(x, y + height, z);
+            Vector2 x0y0 = new Vector2(x, y);
+            Vector2 x1y0 = new Vector2(x + width, y);
+            Vector2 x1y1 = new Vector2(x + width, y + height);
+            Vector2 x0y1 = new Vector2(x, y + height);
 
             currentShape = new SVGXShape(shapeType, new RangeInt(points.Count, 4));
+            currentShape.bounds = new SVGXBounds(x0y0, x1y1);
+            currentShape.origin = x0y0;
 
             points.EnsureAdditionalCapacity(4);
             points.AddUnchecked(x0y0);
@@ -432,8 +449,24 @@ namespace SVGX {
             drawCalls.Add(new SVGXDrawCall(DrawCallType.StandardStroke, clipId, currentStyle, currentMatrix, currentShapeRange));
         }
 
+        public void SetStrokeOpacity(float opacity) {
+            currentStyle.strokeOpacity = opacity;
+        }
+
         public void SetStrokeWidth(float width) {
             currentStyle.strokeWidth = width;
+        }
+
+        public void SetTransform(SVGXMatrix trs) {
+            currentMatrix = trs;
+        }
+
+        public void SaveState() { }
+
+        public void RestoreState() { }
+
+        public void SetFillOpacity(float fillOpacity) {
+            currentStyle.fillOpacity = fillOpacity;
         }
 
     }

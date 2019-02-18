@@ -8,11 +8,10 @@ namespace SVGX {
         Color = 0,
         Texture = 1 << 0,
         Gradient = 1 << 1,
-        Pattern = 1 << 4,
-        GradientAsTint = 1 << 5,
-        
+        Tint = 1 << 2,
+        Pattern = 1 << 3,
         TextureGradient = Texture | Gradient,
-        TextureColor = Texture | Color
+        TextureTint = Texture | Tint
 
     }
 

@@ -225,7 +225,6 @@
           <e p="TransformPlayground.cs" t="Include" />
           <e p="TransformPlayground.xml" t="Include" />
         </e>
-        <e p="UIForiaFXAA.cs" t="Include" />
       </e>
       <e p="Library" t="ExcludeRecursive" />
       <e p="obj" t="ExcludeRecursive" />
@@ -349,10 +348,12 @@
               <e p="PropertyBindingCompiler.cs" t="Include" />
               <e p="Style" t="Include">
                 <e p="StyleCompileContext.cs" t="Include" />
-                <e p="StyleConstants.cs" t="Include" />
+                <e p="StyleConstant.cs" t="Include" />
                 <e p="StylePropertyMappers.cs" t="Include" />
                 <e p="StyleSheet.cs" t="Include" />
                 <e p="StyleSheetCompiler.cs" t="Include" />
+                <e p="StyleSheetConstantImporter.cs" t="Include" />
+                <e p="StyleSheetImporter.cs" t="Include" />
               </e>
               <e p="StyleBindingCompiler.cs" t="Include" />
               <e p="Terminal.cs" t="Include" />
@@ -522,7 +523,6 @@
               </e>
               <e p="Style" t="Include">
                 <e p="AstNodes" t="Include">
-                  <e p="GroupOperatorType.cs" t="Include" />
                   <e p="StyleASTNode.cs" t="Include" />
                   <e p="StyleASTNodeType.cs" t="Include" />
                   <e p="StyleFieldNotDefinedException.cs" t="Include" />
@@ -662,30 +662,21 @@
               <e p="LineCap.cs" t="Include" />
               <e p="LineJoin.cs" t="Include" />
               <e p="MaterialPool.cs" t="Include" />
-              <e p="PathCommand.cs" t="Include" />
               <e p="StrokeVertexData.cs" t="Include" />
               <e p="SVGXBezier.cs" t="Include" />
               <e p="SVGXBounds.cs" t="Include" />
               <e p="SVGXClipGroup.cs" t="Include" />
               <e p="SVGXDrawCall.cs" t="Include" />
               <e p="SVGXDrawWave.cs" t="Include" />
-              <e p="SVGXElement.cs" t="Include" />
-              <e p="SVGXGeometryGenerator.cs" t="Include" />
               <e p="SVGXGeometryUtil.cs" t="Include" />
               <e p="SVGXGradient.cs" t="Include" />
               <e p="SVGXGradientType.cs" t="Include" />
-              <e p="SVGXGroup.cs" t="Include" />
               <e p="SVGXMatrix.cs" t="Include" />
-              <e p="SVGXPathCommandType.cs" t="Include" />
-              <e p="SVGXRenderElementType.cs" t="Include" />
               <e p="SVGXRenderShape.cs" t="Include" />
-              <e p="SVGXRenderSystem.cs" t="Include" />
               <e p="SVGXRoot.cs" t="Include" />
               <e p="SVGXShape.cs" t="Include" />
               <e p="SVGXShapeType.cs" t="Include" />
               <e p="SVGXStyle.cs" t="Include" />
-              <e p="SVGXTransform.cs" t="Include" />
-              <e p="SVGXWand.cs" t="Include" />
             </e>
             <e p="Systems" t="Include">
               <e p="BindingSystem.cs" t="Include" />
@@ -733,6 +724,7 @@
             <e p="todo.txt" t="Include" />
             <e p="UIForia.cs" t="Include" />
             <e p="UIForia.Src.asmdef" t="Include" />
+            <e p="UIForiaFXAA.cs" t="Include" />
             <e p="UIViewBehavior.cs" t="Include" />
             <e p="Util" t="Include">
               <e p="ArrayPool.cs" t="Include" />
@@ -764,6 +756,12 @@
           <e p="Tests" t="Include">
             <e p="BindingCompilerTests.cs" t="Include" />
             <e p="BindingTests.cs" t="Include" />
+            <e p="Compilers" t="Include">
+              <e p="Style" t="Include">
+                <e p="StyleSheetCompilerTests.cs" t="Include" />
+                <e p="StyleSheetConstantImporterTests.cs" t="Include" />
+              </e>
+            </e>
             <e p="DynamicElementTests.cs" t="Include" />
             <e p="ElementQueryTests.cs" t="Include" />
             <e p="ElementTests.cs" t="Include" />
@@ -784,17 +782,22 @@
               <e p="MockInputSystem.cs" t="Include" />
               <e p="MockLayoutSystem.cs" t="Include" />
             </e>
+            <e p="Parsing" t="Include">
+              <e p="Style" t="Include">
+                <e p="StyleParser2Tests.cs" t="Include" />
+                <e p="Tokenizer" t="Include">
+                  <e p="StyleTokenizerTests.cs" t="Include" />
+                </e>
+              </e>
+            </e>
             <e p="ReflectionUtilTests.cs" t="Include" />
             <e p="RenderLayerComparerAscendingTest.cs" t="Include" />
             <e p="RouterTests.cs" t="Include" />
             <e p="RouterTests2.cs" t="Include" />
             <e p="SkipTreeTests.cs" t="Include" />
             <e p="StyleBindingTests.cs" t="Include" />
-            <e p="StyleParser2Tests.cs" t="Include" />
-            <e p="StyleParserTest.cs" t="Include" />
             <e p="StyleParserTests.cs" t="Include" />
             <e p="StyleTests.cs" t="Include" />
-            <e p="StyleTokenizerTests.cs" t="Include" />
             <e p="TemplateParsingTests.cs" t="Include" />
             <e p="Templates" t="Include">
               <e p="Parsing" t="Include">

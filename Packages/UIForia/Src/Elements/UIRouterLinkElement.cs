@@ -22,8 +22,8 @@ namespace UIForia {
                 }
             }
             
-            throw new NotImplementedException();
             ListPool<ElementAttribute>.Release(ref attrs);
+            throw new NotImplementedException();
         }
         
     }

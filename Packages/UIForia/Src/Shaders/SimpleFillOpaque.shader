@@ -12,11 +12,10 @@
     {
         Tags { "RenderType"="Transparent" "DisableBatching"="True" }
 
-        LOD 100
         Cull Off
         Blend SrcAlpha OneMinusSrcAlpha
         ColorMask RGBA
-                   
+
         Stencil {
             Ref [_StencilRef]
             Comp Equal
@@ -60,7 +59,15 @@
             
                 v2f o;
                 o.vertex = UnityObjectToClipPos(v.vertex);
-                o.uv = float2((v.vertex.x - v.uv.x) / (v.uv.z + 1), (v.vertex.y + v.uv.y) / (v.uv.w + 1));
+                
+                // todo -- support scaling and repeating uvs
+                if(v.flags.x == ShapeType_Circle) {
+                    o.uv = v.uv.xy;
+                }
+                else {
+                    o.uv = float2((v.vertex.x - v.uv.x) / (v.uv.z + 1), (v.vertex.y + v.uv.y) / (v.uv.w + 1));
+                }
+                
                 o.color = v.color;
                 o.flags = v.flags;
                 
@@ -70,7 +77,7 @@
                 uint gradientFlag = (fillFlags & FillMode_Gradient) != 0;
                 uint tintFlag = (fillFlags & FillMode_Tint) != 0;
                 
-                o.colorFlags = float4(texFlag, gradientFlag, tintFlag, 0);
+                o.colorFlags = float4(texFlag, gradientFlag, tintFlag, texFlag + gradientFlag + tintFlag);
                 return o;
             }        
 
@@ -81,31 +88,36 @@
                 #define ShapeType i.flags.x
                 #define GradientId i.flags.z
                 #define GradientDirection i.flags.w
-                
-                #define ColorMode_Gradient 1
-                
+                                
                 float t = lerp(i.uv.x, i.uv.y, GradientDirection);
                 float y = GetPixelInRowUV(GradientId, _globalGradientAtlasSize);
-                
+
                 fixed4 color = i.color;
                 fixed4 textureColor = tex2D(_MainTex, i.uv);
                 fixed4 gradientColor = tex2Dlod(_globalGradientAtlas, float4(t, y, 0, 0));
-                
+                fixed4 tintColor = lerp(fixed4(1, 1, 1, 1), color, i.colorFlags.x);
+                                
                 textureColor = lerp(color, textureColor, i.colorFlags.x);
+                textureColor = lerp(textureColor, textureColor * tintColor, tintColor.a);
                 gradientColor = lerp(color, gradientColor, i.colorFlags.y);
                 
+                // todo -- support mixing gradient with texture
                 color = lerp(textureColor, gradientColor, 0);
                 
+                color = lerp(color, i.color, 0);
+                                
                 if(ShapeType > ShapeType_Path) {
                     float dist = length(i.uv - 0.5);
                     float pwidth = length(float2(ddx(dist), ddy(dist)));
                     float alpha = smoothstep(0.5, 0.5 - pwidth * 1.5, dist);                
-                    
-                    if(alpha - 0.01 <= 0) discard;
-                    
+                                        
                     color = fixed4(color.rgb, color.a * alpha);
                 }
-               
+                             
+                if(color.a - 0.001 <= 0) {
+                    discard;
+                }
+                   
                 return color;
             }
 

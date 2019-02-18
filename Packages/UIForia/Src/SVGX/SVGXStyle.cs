@@ -1,18 +1,10 @@
-using TMPro;
 using UnityEngine;
-using UnityEngine.UI;
 
 namespace SVGX {
 
     // https://www.w3.org/TR/SVG11/styling.html
     public struct SVGXStyle {
 
-        public LineJoin lineJoin;
-        public LineCap lineCap;
-
-        public float dashOffset;
-        public float[] dashArray;
-        public float miterLimit;
         public float strokeWidth;
         public float strokeOpacity;
         public float fillOpacity;
@@ -20,23 +12,35 @@ namespace SVGX {
         public Color fillColor; 
         public Color fillTintColor; 
         public FillMode fillMode;
-        public Vector2 uv;
-        public float dropShadow;
         public int gradientId;
         public int textureId;
 
+        public static SVGXStyle Default() {
+            SVGXStyle retn = new SVGXStyle();
+            retn.strokeOpacity = 1;
+            retn.fillMode = FillMode.Color;
+            retn.strokeColor = Color.black;
+            retn.fillOpacity = 1;
+            retn.fillColor = Color.white;
+            retn.fillTintColor = Color.white;
+            retn.gradientId = -1;
+            retn.textureId = -1;
+            return retn;
+        }
+
+        public static SVGXStyle Clone(SVGXStyle style) {
+            SVGXStyle retn = new SVGXStyle();
+            retn.strokeColor = style.strokeColor;
+            retn.strokeOpacity = style.strokeOpacity;
+            retn.fillColor = style.fillColor;
+            retn.fillMode = style.fillMode;
+            retn.fillOpacity = style.fillOpacity;
+            retn.fillTintColor = style.fillTintColor;
+            retn.gradientId = style.gradientId;
+            retn.textureId = style.textureId;
+            return retn;
+        }
     }
 
-    public struct SVGXTextStyle {
-
-        public TMP_FontAsset font;
-        public int fontSize;
-        public TextAlignment alignment;
-        public Color color;
-        public FontStyle fontStyle;
-        public float outline;
-        public Color outlineColor;
-
-    }
     
 }

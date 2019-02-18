@@ -7,13 +7,13 @@ namespace SVGX {
 
         private const int MaxAdaptiveBezierIteration = 200;
 
-        public static int QuadraticCurve(LightList<Vector3> output, Vector3 start, Vector3 ctrl, Vector3 end) {
-            Vector3 ctrl2 = start + (2f / 3f) * (ctrl - start);
-            Vector3 ctrl3 = end + (2f / 3f) * (ctrl - end);
+        public static int QuadraticCurve(LightList<Vector2> output, Vector2 start, Vector2 ctrl, Vector2 end) {
+            Vector2 ctrl2 = start + (2f / 3f) * (ctrl - start);
+            Vector2 ctrl3 = end + (2f / 3f) * (ctrl - end);
             return CubicCurve(output, start, ctrl2, ctrl3, end);
         }
 
-        public static int CubicCurve(LightList<Vector3> output, Vector3 start, Vector3 ctrl0, Vector3 ctrl1, Vector3 end) {
+        public static int CubicCurve(LightList<Vector2> output, Vector2 start, Vector2 ctrl0, Vector2 ctrl1, Vector2 end) {
             if (start == ctrl0 && ctrl0 == ctrl1 && ctrl1 == end) {
                 return 0;
             }
@@ -34,7 +34,7 @@ namespace SVGX {
             return output.Count - originalPointCount;
         }
 
-        private static void RecursiveBezier(LightList<Vector3> points, int currentIteration, float distanceTolerance, float x1, float y1, float x2, float y2, float x3, float y3, float x4, float y4) {
+        private static void RecursiveBezier(LightList<Vector2> points, int currentIteration, float distanceTolerance, float x1, float y1, float x2, float y2, float x3, float y3, float x4, float y4) {
             while (true) {
                 if (currentIteration++ >= MaxAdaptiveBezierIteration) return;
 
@@ -58,7 +58,7 @@ namespace SVGX {
                 float d3 = Mathf.Abs(((x3 - x4) * dy - (y3 - y4) * dx));
 
                 if ((d2 + d3) * (d2 + d3) < distanceTolerance * (dx * dx + dy * dy)) {
-                    points.Add(new Vector3(x1234, y1234));
+                    points.Add(new Vector2(x1234, y1234));
                     return;
                 }
 
@@ -72,7 +72,7 @@ namespace SVGX {
             }
         }
 
-        public static int Arc(LightList<Vector3> output, Vector3 p1, float rx, float ry, float angle, bool largeArcFlag, bool sweepFlag, Vector3 p2, int vpm = 1) {
+        public static int Arc(LightList<Vector2> output, Vector2 p1, float rx, float ry, float angle, bool largeArcFlag, bool sweepFlag, Vector2 p2, int vpm = 1) {
             int originalSize = output.Count;
 
             float _radian = (angle * Mathf.PI / 180.0f);
@@ -148,7 +148,7 @@ namespace SVGX {
                 float cos = Mathf.Cos(t_angle);
                 float sin = Mathf.Sin(t_angle);
                 // todo -- change this to index or AddUnchecked & verify 
-                output.Add(new Vector3(
+                output.Add(new Vector2(
                     _CosRadian * rx * cos - _SinRadian * ry * sin + cx,
                     _SinRadian * rx * cos + _CosRadian * ry * sin + cy
                 ));

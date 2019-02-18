@@ -8,58 +8,113 @@ using UnityEngine;
 namespace UIForia.Compilers.Style {
     public struct StylePropertyMappers {
 
+        private static readonly Dictionary<string, Action<UIStyle, PropertyNode, StyleCompileContext>> mappers
+            = new Dictionary<string, Action<UIStyle, PropertyNode, StyleCompileContext>> {
+                {"backgroundcolor", (targetStyle, property, context) => targetStyle.BackgroundColor = MapColor(property, context)},
+                {"bordercolor", (targetStyle, property, context) => targetStyle.BorderColor = MapColor(property, context)},
+                {"opacity", (targetStyle, property, context) => targetStyle.Opacity = CompileToNumber(property)}, {
+                    "cursor", (targetStyle, property, context) => {
+                        // first value must be the reference
 
-        private static readonly Dictionary<string, Action<UIStyle, LightList<StyleASTNode>>> mappers 
-            = new Dictionary<string, Action<UIStyle, LightList<StyleASTNode>>> {
-            { "backgroundcolor", (targetStyle, propertyValues) => targetStyle.BackgroundColor = MapColor(propertyValues) },
-            { "bordercolor", (targetStyle, propertyValues) => targetStyle.BorderColor = MapColor(propertyValues) },
-            { "opacity", (targetStyle, propertyValues) => targetStyle.Opacity = MapNumber(propertyValues) },
-            { "cursor", (targetStyle, propertyValues) => {
+                        CursorStyle cursor = null; // new CursorStyle(texturePath, texture, new Vector2(hotSpotX, hotSpotY));
+                        targetStyle.Cursor = cursor;
+                    }
+                },
+                {"backgroundimage", (targetStyle, property, context) => targetStyle.BackgroundImage = MapTexture(property)},
+                {"overflow", (targetStyle, property, context) => MapOverflows(targetStyle, property, context)},
+                {"overflowx", (targetStyle, property, context) => targetStyle.OverflowX = MapOverflow(property, context)},
+                {"overflowy", (targetStyle, property, context) => targetStyle.OverflowY = MapOverflow(property, context)},
+                { "margin", (targetStyle, valueParts, context) => MapMargins(targetStyle, valueParts, context) },
+//                { "margintop", (targetStyle, valueParts, context) => targetStyle.MarginTop = MapMargin(valueParts, context) },
+//                { "marginright", (targetStyle, valueParts, context) => targetStyle.MarginRight = MapMargin(valueParts, context) },
+//                { "marginbottom", (targetStyle, valueParts, context) => targetStyle.MarginBottom = MapMargin(valueParts, context) },
+//                { "marginleft", (targetStyle, valueParts, context) => targetStyle.MarginLeft = MapMargin(valueParts, context) },
+//            { "bordercolor", (targetStyle, valueParts) => targetStyle.BorderColor = MapColor(valueParts) },
+//            { "bordercolor", (targetStyle, valueParts) => targetStyle.BorderColor = MapColor(valueParts) },
+//            { "bordercolor", (targetStyle, valueParts) => targetStyle.BorderColor = MapColor(valueParts) },
+//            { "bordercolor", (targetStyle, valueParts) => targetStyle.BorderColor = MapColor(valueParts) },
+//            { "bordercolor", (targetStyle, valueParts) => targetStyle.BorderColor = MapColor(valueParts) },
+//            { "bordercolor", (targetStyle, valueParts) => targetStyle.BorderColor = MapColor(valueParts) },
+//            { "bordercolor", (targetStyle, valueParts) => targetStyle.BorderColor = MapColor(valueParts) },
+//            { "bordercolor", (targetStyle, valueParts) => targetStyle.BorderColor = MapColor(valueParts) },
+//            { "bordercolor", (targetStyle, valueParts) => targetStyle.BorderColor = MapColor(valueParts) },
+//            { "bordercolor", (targetStyle, valueParts) => targetStyle.BorderColor = MapColor(valueParts) },
+//            { "bordercolor", (targetStyle, valueParts) => targetStyle.BorderColor = MapColor(valueParts) },
+//            { "bordercolor", (targetStyle, valueParts) => targetStyle.BorderColor = MapColor(valueParts) },
+//            { "bordercolor", (targetStyle, valueParts) => targetStyle.BorderColor = MapColor(valueParts) },
+//            { "bordercolor", (targetStyle, valueParts) => targetStyle.BorderColor = MapColor(valueParts) },
+//            { "bordercolor", (targetStyle, valueParts) => targetStyle.BorderColor = MapColor(valueParts) },
+//            { "bordercolor", (targetStyle, valueParts) => targetStyle.BorderColor = MapColor(valueParts) },
+//            { "bordercolor", (targetStyle, valueParts) => targetStyle.BorderColor = MapColor(valueParts) },
+//            { "bordercolor", (targetStyle, valueParts) => targetStyle.BorderColor = MapColor(valueParts) },
+//            { "bordercolor", (targetStyle, valueParts) => targetStyle.BorderColor = MapColor(valueParts) },
+//            { "bordercolor", (targetStyle, valueParts) => targetStyle.BorderColor = MapColor(valueParts) },
+//            { "bordercolor", (targetStyle, valueParts) => targetStyle.BorderColor = MapColor(valueParts) },
+//            { "bordercolor", (targetStyle, valueParts) => targetStyle.BorderColor = MapColor(valueParts) },
+//            { "bordercolor", (targetStyle, valueParts) => targetStyle.BorderColor = MapColor(valueParts) },
+//            { "bordercolor", (targetStyle, valueParts) => targetStyle.BorderColor = MapColor(valueParts) },
+//            { "bordercolor", (targetStyle, valueParts) => targetStyle.BorderColor = MapColor(valueParts) },
+//            { "bordercolor", (targetStyle, valueParts) => targetStyle.BorderColor = MapColor(valueParts) },
+//            { "bordercolor", (targetStyle, valueParts) => targetStyle.BorderColor = MapColor(valueParts) },
+//            { "bordercolor", (targetStyle, valueParts) => targetStyle.BorderColor = MapColor(valueParts) },
+            };
 
-                    // first value must be the reference
-                    
-                    CursorStyle cursor = null; // new CursorStyle(texturePath, texture, new Vector2(hotSpotX, hotSpotY));
-                    targetStyle.Cursor = cursor;
+        
+        private static void MapMargins(UIStyle targetStyle, PropertyNode property, StyleCompileContext context) {
+        
+            // We support all css notations here and accept, 1, 2, 3 and 4 values
+            
+            // - 1 value sets all 4 margins
+            // - 2 values: first value sets top and bottom, second value sets left and right
+            // - 3 values: first values sets top, 2nd sets left and right, 3rd sets bottom
+            // - 4 values set all 4 margins from top to left, clockwise
+            
+            StyleASTNode value1 = context.GetValueForReference(property.children[0]);
+            
+            // targetStyle.MarginTop = 
+            
+        }
+
+        private static void MapOverflows(UIStyle targetStyle, PropertyNode property, StyleCompileContext context) {
+
+            StyleASTNode value1 = context.GetValueForReference(property.children[0]);
+
+            Overflow overflowX = MapOverflow(property, context);
+            Overflow overflowY = overflowX;
+
+            if (property.children.Count == 2) {
+                StyleASTNode value2 = context.GetValueForReference(property.children[0]);
+
+                if (value2 is StyleLiteralNode literalNode2) {
+                    overflowY = ParseOverflowFromLiteralNode(literalNode2);
                 }
-            },
-            { "backgroundimage", (targetStyle, propertyValues) => targetStyle.BackgroundImage = MapTexture(propertyValues) },
-//            { "bordercolor", (targetStyle, valueParts) => targetStyle.BorderColor = MapColor(valueParts) },
-//            { "bordercolor", (targetStyle, valueParts) => targetStyle.BorderColor = MapColor(valueParts) },
-//            { "bordercolor", (targetStyle, valueParts) => targetStyle.BorderColor = MapColor(valueParts) },
-//            { "bordercolor", (targetStyle, valueParts) => targetStyle.BorderColor = MapColor(valueParts) },
-//            { "bordercolor", (targetStyle, valueParts) => targetStyle.BorderColor = MapColor(valueParts) },
-//            { "bordercolor", (targetStyle, valueParts) => targetStyle.BorderColor = MapColor(valueParts) },
-//            { "bordercolor", (targetStyle, valueParts) => targetStyle.BorderColor = MapColor(valueParts) },
-//            { "bordercolor", (targetStyle, valueParts) => targetStyle.BorderColor = MapColor(valueParts) },
-//            { "bordercolor", (targetStyle, valueParts) => targetStyle.BorderColor = MapColor(valueParts) },
-//            { "bordercolor", (targetStyle, valueParts) => targetStyle.BorderColor = MapColor(valueParts) },
-//            { "bordercolor", (targetStyle, valueParts) => targetStyle.BorderColor = MapColor(valueParts) },
-//            { "bordercolor", (targetStyle, valueParts) => targetStyle.BorderColor = MapColor(valueParts) },
-//            { "bordercolor", (targetStyle, valueParts) => targetStyle.BorderColor = MapColor(valueParts) },
-//            { "bordercolor", (targetStyle, valueParts) => targetStyle.BorderColor = MapColor(valueParts) },
-//            { "bordercolor", (targetStyle, valueParts) => targetStyle.BorderColor = MapColor(valueParts) },
-//            { "bordercolor", (targetStyle, valueParts) => targetStyle.BorderColor = MapColor(valueParts) },
-//            { "bordercolor", (targetStyle, valueParts) => targetStyle.BorderColor = MapColor(valueParts) },
-//            { "bordercolor", (targetStyle, valueParts) => targetStyle.BorderColor = MapColor(valueParts) },
-//            { "bordercolor", (targetStyle, valueParts) => targetStyle.BorderColor = MapColor(valueParts) },
-//            { "bordercolor", (targetStyle, valueParts) => targetStyle.BorderColor = MapColor(valueParts) },
-//            { "bordercolor", (targetStyle, valueParts) => targetStyle.BorderColor = MapColor(valueParts) },
-//            { "bordercolor", (targetStyle, valueParts) => targetStyle.BorderColor = MapColor(valueParts) },
-//            { "bordercolor", (targetStyle, valueParts) => targetStyle.BorderColor = MapColor(valueParts) },
-//            { "bordercolor", (targetStyle, valueParts) => targetStyle.BorderColor = MapColor(valueParts) },
-//            { "bordercolor", (targetStyle, valueParts) => targetStyle.BorderColor = MapColor(valueParts) },
-//            { "bordercolor", (targetStyle, valueParts) => targetStyle.BorderColor = MapColor(valueParts) },
-//            { "bordercolor", (targetStyle, valueParts) => targetStyle.BorderColor = MapColor(valueParts) },
-//            { "bordercolor", (targetStyle, valueParts) => targetStyle.BorderColor = MapColor(valueParts) },
-//            { "bordercolor", (targetStyle, valueParts) => targetStyle.BorderColor = MapColor(valueParts) },
-//            { "bordercolor", (targetStyle, valueParts) => targetStyle.BorderColor = MapColor(valueParts) },
-//            { "bordercolor", (targetStyle, valueParts) => targetStyle.BorderColor = MapColor(valueParts) },
-//            { "bordercolor", (targetStyle, valueParts) => targetStyle.BorderColor = MapColor(valueParts) },
-//            { "bordercolor", (targetStyle, valueParts) => targetStyle.BorderColor = MapColor(valueParts) },
-//            { "bordercolor", (targetStyle, valueParts) => targetStyle.BorderColor = MapColor(valueParts) },
-        };
+                else throw new CompileException(value1, "Couldn't parse second overflow value.");
+            }
 
-        private static Texture2D MapTexture(LightList<StyleASTNode> propertyValues) {
+            // should we check for more than 2 values and log a warning?
+
+            targetStyle.OverflowX = overflowX;
+            targetStyle.OverflowY = overflowY;
+        }
+
+        private static Overflow MapOverflow(PropertyNode property, StyleCompileContext context) {
+            StyleASTNode value = context.GetValueForReference(property.children[0]);
+            if (value is StyleLiteralNode literalNode) {
+                return ParseOverflowFromLiteralNode(literalNode);
+            }
+            throw new CompileException(value, "Couldn't parse overflow value.");
+        }
+
+        private static Overflow ParseOverflowFromLiteralNode(StyleLiteralNode node) {
+            if (!Enum.TryParse(node.rawValue, true, out Overflow overflow)) {
+                throw new CompileException(node, "Unknown value overflow. Possible values: [None, Scroll, ScrollAndHide, Hidden]");
+            }
+
+            return overflow;
+        }
+
+        private static Texture2D MapTexture(PropertyNode property) {
+            LightList<StyleASTNode> propertyValues = property.children;
             AssertSingleValue(propertyValues);
             switch (propertyValues[0]) {
                 case UrlNode urlNode:
@@ -70,7 +125,6 @@ namespace UIForia.Compilers.Style {
         }
 
         private static string TransformUrlNode(UrlNode urlNode) {
-
             StyleASTNode url = urlNode.url;
 
             if (url.type == StyleASTNodeType.Identifier) {
@@ -84,23 +138,20 @@ namespace UIForia.Compilers.Style {
             throw new CompileException(url, "Invalid url value.");
         }
 
-        private static float MapNumber(LightList<StyleASTNode> propertyValues) {
-            throw new NotImplementedException();
-        }
+        private static Color MapColor(PropertyNode property, StyleCompileContext context) {
+            AssertSingleValue(property.children);
 
-        private static Color MapColor(LightList<StyleASTNode> propertyValues) {
-            AssertSingleValue(propertyValues);
-
-            switch (propertyValues[0]) {
+            var styleAstNode = context.GetValueForReference(property.children[0]);
+            switch (styleAstNode) {
                 case StyleIdentifierNode identifierNode:
-                    Color color; 
+                    Color color;
                     ColorUtility.TryParseHtmlString(identifierNode.name, out color);
                     return color;
                 case ColorNode colorNode: return colorNode.color;
                 case RgbaNode rgbaNode: return MapRbgaNodeToColor(rgbaNode);
                 case RgbNode rgbNode: return MapRgbNodeToColor(rgbNode);
-                default: 
-                    throw new CompileException(propertyValues[0], $"Unsupported color value.");
+                default:
+                    throw new CompileException(styleAstNode, $"Unsupported color value.");
             }
         }
 
@@ -121,37 +172,32 @@ namespace UIForia.Compilers.Style {
             return new Color32(red, green, blue, 255);
         }
 
-        private static int CompileToNumber(StyleASTNode node) {
-            
+        private static float CompileToNumber(StyleASTNode node) {
             if (node.type == StyleASTNodeType.NumericLiteral) {
-                return int.Parse(((StyleLiteralNode) node).rawValue);
+                bool isNumeric = float.TryParse(((StyleLiteralNode) node).rawValue, out float n);
+                if (isNumeric) {
+                    return n;
+                }
             }
 
             throw new CompileException(node, $"Expected a numeric value but all I got was this lousy {node}");
         }
 
-        public static void MapProperty(UIStyle targetStyle, string propertyName, LightList<StyleASTNode> propertyValues) {
-            mappers[propertyName].Invoke(targetStyle, propertyValues);
+        public static void MapProperty(UIStyle targetStyle, PropertyNode node, StyleCompileContext context) {
+            string propertyName = node.identifier;
+            LightList<StyleASTNode> propertyValues = node.children;
+
+            if (propertyValues.Count == 0) {
+                throw new CompileException(node, "Property does not have a value.");
+            }
+
+            string propertyKey = propertyName.ToLower();
+
+            mappers.TryGetValue(propertyKey, out Action<UIStyle, PropertyNode, StyleCompileContext> action);
+            action?.Invoke(targetStyle, node, context);
+            if (action == null) Debug.LogWarning($"{propertyKey} is an unknown style property.");
         }
 
-//            
-//            
-//            switch (propertyName) {
-//               
-//                case "backgroundimage":
-//                    targetStyle.BackgroundImage = ResourceManager.GetTexture(propertyValue);
-//                    break;
-//                case "overflow":
-//                    Overflow overflow = ParseUtil.ParseOverflow(propertyValue);
-//                    targetStyle.OverflowX = overflow;
-//                    targetStyle.OverflowY = overflow;
-//                    break;
-//                case "overflowx":
-//                    targetStyle.OverflowX = ParseUtil.ParseOverflow(propertyValue);
-//                    break;
-//                case "overflowy":
-//                    targetStyle.OverflowY = ParseUtil.ParseOverflow(propertyValue);
-//                    break;
 //                case "visibility":
 //                    targetStyle.Visibility = ParseUtil.ParseVisibility(propertyValue);
 //                    break;
@@ -792,7 +838,6 @@ namespace UIForia.Compilers.Style {
 //                    break;
 //            }
 //        }
-
 
         private static void AssertSingleValue(LightList<StyleASTNode> propertyValues) {
             if (propertyValues.Count > 1) {

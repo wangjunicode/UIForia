@@ -13,7 +13,7 @@ namespace UIForia {
     public class ParseException : Exception {
 
         public ParseException(StyleToken token, string message = null) : 
-            base($"Parse error at line {token.line}, column {token.column}, token type '{token.styleTokenType}' -> {token.value}: {message}") {
+            base($"Parse error at line {token.line}, column {token.column}, token type '{token.styleTokenType}' -> {token.value}\n{message}") {
         }
         
         public ParseException(string message = null) : base(message) {
@@ -26,7 +26,7 @@ namespace UIForia {
         }
 
         public CompileException(StyleASTNode node, string message = null) : 
-            base($"Compile error for style token at line {node.line}, column {node.column}, node type '{node.type}': {message}") {
+            base($"Compile error for style token at line {node.line}, column {node.column}, node type '{node.type}'\n{message}") {
         }
     }
 

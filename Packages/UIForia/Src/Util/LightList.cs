@@ -194,6 +194,17 @@ namespace UIForia.Util {
             return -1;
         }
 
+        public bool Contains<U>(U closureArg, Func<T, U, bool> fn) {
+            for (int i = 0; i < size; i++) {
+                if (fn(array[i], closureArg)) {
+                    return true;
+                }
+            }
+
+            return false;
+        }
+            
+
         public int FindIndex<U>(U closureArg, Func<T, U, bool> fn) {
             for (int i = 0; i < size; i++) {
                 if (fn(array[i], closureArg)) {

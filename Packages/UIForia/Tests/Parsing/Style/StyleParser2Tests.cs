@@ -1,6 +1,7 @@
 using NUnit.Framework;
 using UIForia.Parsing.Style;
 using UIForia.Parsing.Style.AstNodes;
+using UIForia.Parsing.Style.Tokenizer;
 using UnityEngine;
 
 [TestFixture]
@@ -24,7 +25,7 @@ public class StyleParser2Tests {
         Assert.AreEqual(StyleASTNodeType.Property, propertyNode.type);
         
         var typedPropertyNode = (((PropertyNode) propertyNode));
-        Assert.AreEqual("MarginTop", typedPropertyNode.propertyName);
+        Assert.AreEqual("MarginTop", typedPropertyNode.identifier);
         Assert.AreEqual(StyleASTNodeType.Measurement, typedPropertyNode.children[0].type);
     }
 
@@ -43,15 +44,15 @@ public class StyleParser2Tests {
         Assert.AreEqual(1, rootNode.children.Count);
 
         var property = (((PropertyNode) rootNode.children[0]));
-        Assert.AreEqual("BackgroundColor", property.propertyName);
+        Assert.AreEqual("BackgroundColor", property.identifier);
         Assert.AreEqual(StyleASTNodeType.Rgba, property.children[0].type);
 
         var rgbaNode = (RgbaNode) property.children[0];
         Assert.AreEqual(StyleASTNodeType.Rgba, rgbaNode.type);
-        Assert.AreEqual(StyleASTNode.NumericLiteralNode("10"), rgbaNode.red);
-        Assert.AreEqual(StyleASTNode.NumericLiteralNode("20"), rgbaNode.green);
-        Assert.AreEqual(StyleASTNode.NumericLiteralNode("30"), rgbaNode.blue);
-        Assert.AreEqual(StyleASTNode.NumericLiteralNode("40"), rgbaNode.alpha);
+        Assert.AreEqual(StyleASTNodeFactory.NumericLiteralNode("10"), rgbaNode.red);
+        Assert.AreEqual(StyleASTNodeFactory.NumericLiteralNode("20"), rgbaNode.green);
+        Assert.AreEqual(StyleASTNodeFactory.NumericLiteralNode("30"), rgbaNode.blue);
+        Assert.AreEqual(StyleASTNodeFactory.NumericLiteralNode("40"), rgbaNode.alpha);
     }
 
     [Test]
@@ -69,14 +70,14 @@ public class StyleParser2Tests {
         Assert.AreEqual(1, rootNode.children.Count);
 
         var property = (((PropertyNode) rootNode.children[0]));
-        Assert.AreEqual("BackgroundColor", property.propertyName);
+        Assert.AreEqual("BackgroundColor", property.identifier);
         Assert.AreEqual(StyleASTNodeType.Rgb, property.children[0].type);
 
         var rgbNode = (RgbNode) property.children[0];
         Assert.AreEqual(StyleASTNodeType.Rgb, rgbNode.type);
-        Assert.AreEqual(StyleASTNode.NumericLiteralNode("10"), rgbNode.red);
-        Assert.AreEqual(StyleASTNode.NumericLiteralNode("20"), rgbNode.green);
-        Assert.AreEqual(StyleASTNode.NumericLiteralNode("30"), rgbNode.blue);
+        Assert.AreEqual(StyleASTNodeFactory.NumericLiteralNode("10"), rgbNode.red);
+        Assert.AreEqual(StyleASTNodeFactory.NumericLiteralNode("20"), rgbNode.green);
+        Assert.AreEqual(StyleASTNodeFactory.NumericLiteralNode("30"), rgbNode.blue);
     }
 
     [Test]
@@ -94,12 +95,12 @@ public class StyleParser2Tests {
         Assert.AreEqual(1, rootNode.children.Count);
 
         var property = (((PropertyNode) rootNode.children[0]));
-        Assert.AreEqual("Background", property.propertyName);
+        Assert.AreEqual("Background", property.identifier);
         Assert.AreEqual(StyleASTNodeType.Url, property.children[0].type);
 
         var urlNode = (UrlNode) property.children[0];
         Assert.AreEqual(StyleASTNodeType.Url, urlNode.type);
-        Assert.AreEqual(StyleASTNode.IdentifierNode("path/to/image"), urlNode.url);
+        Assert.AreEqual(StyleASTNodeFactory.IdentifierNode("path/to/image"), urlNode.url);
     }
 
     [Test]
@@ -112,12 +113,12 @@ public class StyleParser2Tests {
 
         Assert.AreEqual(1, nodes.Count);
         var property = (((PropertyNode) ((StyleRootNode) nodes[0]).children[0]));
-        Assert.AreEqual("Background", property.propertyName);
+        Assert.AreEqual("Background", property.identifier);
         Assert.AreEqual(StyleASTNodeType.Url, property.children[0].type);
 
         var urlNode = (UrlNode) property.children[0];
         Assert.AreEqual(StyleASTNodeType.Url, urlNode.type);
-        Assert.AreEqual(StyleASTNode.ReferenceNode("pathRef"), urlNode.url);
+        Assert.AreEqual(StyleASTNodeFactory.ReferenceNode("pathRef"), urlNode.url);
     }
 
     [Test]
@@ -133,7 +134,7 @@ public class StyleParser2Tests {
         Assert.AreEqual("hover", stateGroupContainer.identifier);
         
         var property = (PropertyNode) stateGroupContainer.children[0];
-        Assert.AreEqual("Background", property.propertyName);
+        Assert.AreEqual("Background", property.identifier);
 
         var urlNode = (UrlNode) property.children[0];
         Assert.AreEqual(StyleASTNodeType.Url, urlNode.type);
@@ -159,11 +160,11 @@ public class StyleParser2Tests {
         Assert.AreEqual("attrName", attributeGroupContainer.identifier);
         
         var property = (PropertyNode) attributeGroupContainer.children[0];
-        Assert.AreEqual("Background", property.propertyName);
+        Assert.AreEqual("Background", property.identifier);
         Assert.AreEqual(StyleASTNodeType.Url, property.children[0].type);
 
         var urlNode = (UrlNode) property.children[0];
-        Assert.AreEqual(StyleASTNode.ReferenceNode("pathRef"), urlNode.url);
+        Assert.AreEqual(StyleASTNodeFactory.ReferenceNode("pathRef"), urlNode.url);
     }
     
     [Test]
@@ -225,7 +226,7 @@ public class StyleParser2Tests {
         
         // first node is the property color = green
         var property1 = (PropertyNode) styleChildren[0];
-        Assert.AreEqual("TextColor", property1.propertyName);
+        Assert.AreEqual("TextColor", property1.identifier);
         Assert.AreEqual(StyleASTNodeType.Identifier, property1.children[0].type);
 
         // next the attribute group that in turn has 3 children
@@ -234,7 +235,11 @@ public class StyleParser2Tests {
         
         // and the trailing margin property is the third of the style's properties 
         var property2 = (PropertyNode) styleChildren[2];
-        Assert.AreEqual("MarginTop", property2.propertyName);
+        Assert.AreEqual("MarginTop", property2.identifier);
+        Assert.AreEqual(1, property2.children.Count);
+        Assert.AreEqual(StyleASTNodeType.Measurement, property2.children[0].type);        
+        Assert.AreEqual("px", ((MeasurementNode)property2.children[0]).unit.value);        
+        Assert.AreEqual("10", ((StyleLiteralNode)((MeasurementNode)property2.children[0]).value).rawValue);        
 
         // now assert the existence of the three attribute group children
         Assert.AreEqual(3, attributeGroupContainer.children.Count);
@@ -243,14 +248,14 @@ public class StyleParser2Tests {
         var attrProperty2 = (PropertyNode) attributeGroupContainer.children[2];
 
         // assert values for attr property 1
-        Assert.AreEqual("Background", attrProperty1.propertyName);
+        Assert.AreEqual("Background", attrProperty1.identifier);
 
         var urlNode = (UrlNode) attrProperty1.children[0];
         Assert.AreEqual(StyleASTNodeType.Url, urlNode.type);
-        Assert.AreEqual(StyleASTNode.ReferenceNode("pathRef"), urlNode.url);
+        Assert.AreEqual(StyleASTNodeFactory.ReferenceNode("pathRef"), urlNode.url);
         
         // assert values for attr property 2
-        Assert.AreEqual("TextColor", attrProperty2.propertyName);
+        Assert.AreEqual("TextColor", attrProperty2.identifier);
         Assert.AreEqual(StyleASTNodeType.Identifier, attrProperty2.children[0].type);
         
         // assert the state group
@@ -258,7 +263,7 @@ public class StyleParser2Tests {
         // just asserting that multiple properties in a state group can be a thing
         Assert.AreEqual(2, stateGroup.children.Count);
         var stateGroupChild = (PropertyNode) stateGroup.children[0];
-        Assert.AreEqual("TextColor", stateGroupChild.propertyName);
+        Assert.AreEqual("TextColor", stateGroupChild.identifier);
         Assert.AreEqual(StyleASTNodeType.Identifier, stateGroupChild.children[0].type);
     }
 
@@ -266,7 +271,7 @@ public class StyleParser2Tests {
     [Test]
     public void ParseExportKeyword() {
         var nodes = StyleParser2.Parse(@"
-            export const color0 : Color = rgba(1, 0, 0, 1);
+            export const color0 = rgba(1, 0, 0, 1);
         ");
         
         // there should be two style nodes
@@ -275,7 +280,6 @@ public class StyleParser2Tests {
 
         ExportNode exportNode = (ExportNode) nodes[0];
         Assert.AreEqual("color0", exportNode.constNode.constName);
-        Assert.AreEqual("Color", exportNode.constNode.constType);
         Assert.AreEqual(StyleASTNodeType.Rgba, exportNode.constNode.value.type);
     }
     
@@ -303,5 +307,17 @@ public class StyleParser2Tests {
         Assert.AreEqual("attrName1", attributeGroupContainer1.identifier);
         Assert.AreEqual(true, attributeGroupContainer1.invert);
         Assert.IsNull(attributeGroupContainer1.next);
+    }
+
+    [Test]
+    public void ImportFromFile() {
+        var nodes = StyleParser2.Parse(@"
+            import ""mypath/to/myfile"" as myconsts;
+        ");
+        
+        Assert.AreEqual(1, nodes.Count);
+        ImportNode importNode = (ImportNode) nodes[0];
+        Assert.AreEqual("myconsts", importNode.alias);
+        Assert.AreEqual("mypath/to/myfile", importNode.source);
     }
 }

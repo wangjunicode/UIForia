@@ -1,5 +1,19 @@
+using UIForia.Util;
+
 namespace UIForia.Parsing.Style.AstNodes {
 
+    internal static partial class StyleASTNodeFactory {
+        
+        internal static readonly ObjectPool<StyleIdentifierNode> s_IdentifierPool = new ObjectPool<StyleIdentifierNode>();
+        
+        internal static StyleIdentifierNode IdentifierNode(string name) {
+            StyleIdentifierNode idNode = s_IdentifierPool.Get();
+            idNode.name = name;
+            idNode.type = StyleASTNodeType.Identifier;
+            return idNode;
+        }
+    }
+    
     public class StyleIdentifierNode : StyleASTNode {
 
         public string name;
@@ -7,7 +21,7 @@ namespace UIForia.Parsing.Style.AstNodes {
         public bool IsAlias => name[0] == '$';
 
         public override void Release() {
-            s_IdentifierPool.Release(this);
+            StyleASTNodeFactory.s_IdentifierPool.Release(this);
         }
 
         protected bool Equals(StyleIdentifierNode other) {

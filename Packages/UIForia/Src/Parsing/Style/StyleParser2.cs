@@ -127,7 +127,7 @@ namespace UIForia.Parsing.Style {
                     throw new ParseException(initialStyleToken, $"Expected style definition or tag name but found {initialStyleToken.styleTokenType}");
             }
 
-            StyleRootNode styleRootNode = StyleASTNode.StyleRootNode(identifier, tagName);
+            StyleRootNode styleRootNode = StyleASTNodeFactory.StyleRootNode(identifier, tagName);
             styleRootNode.WithLocation(initialStyleToken);
             nodes.Add(styleRootNode);
 
@@ -148,7 +148,7 @@ namespace UIForia.Parsing.Style {
             // export statement must be followed by const keyword
 
             // now let's find out which value we're assigning
-            nodes.Add(StyleASTNode.ExportNode(ParseConstNode()).WithLocation(exportToken));
+            nodes.Add(StyleASTNodeFactory.ExportNode(ParseConstNode()).WithLocation(exportToken));
             AdvanceIfTokenType(StyleTokenType.EndStatement);
         }
 
@@ -157,25 +157,23 @@ namespace UIForia.Parsing.Style {
             AssertTokenTypeAndAdvance(StyleTokenType.Const);
             // const name
             string variableName = AssertTokenTypeAndAdvance(StyleTokenType.Identifier);
-            // type declaration (add supported types in the StyleTokenizer)
-            AssertTokenTypeAndAdvance(StyleTokenType.Colon);
-            string variableType = AssertTokenTypeAndAdvance(StyleTokenType.VariableType);
-
             AssertTokenTypeAndAdvance(StyleTokenType.Equal);
 
-            ConstNode constNode = StyleASTNode.ConstNode(variableName, variableType, ParsePropertyValue());
+            ConstNode constNode = StyleASTNodeFactory.ConstNode(variableName, ParsePropertyValue());
             constNode.WithLocation(constToken);
             return constNode;
         }
 
         private void ParseImportNode() {
             StyleToken importToken = tokenStream.Current;
+            AssertTokenTypeAndAdvance(StyleTokenType.Import);
             string source = AssertTokenTypeAndAdvance(StyleTokenType.String);
             AssertTokenTypeAndAdvance(StyleTokenType.As);
 
-            string alias = AssertTokenTypeAndAdvance(StyleTokenType.String);
+            string alias = AssertTokenTypeAndAdvance(StyleTokenType.Identifier);
+            AssertTokenTypeAndAdvance(StyleTokenType.EndStatement);
 
-            nodes.Add(StyleASTNode.ImportNode(alias, source).WithLocation(importToken));
+            nodes.Add(StyleASTNodeFactory.ImportNode(alias, source).WithLocation(importToken));
         }
 
         private void ParseStyleGroupBody(StyleGroupContainer styleRootNode) {
@@ -239,7 +237,7 @@ namespace UIForia.Parsing.Style {
             switch (tokenStream.Current.styleTokenType) {
                 // this is the state group
                 case StyleTokenType.Identifier:
-                    StyleStateContainer stateGroupRootNode = StyleASTNode.StateGroupRootNode(tokenStream.Current);
+                    StyleStateContainer stateGroupRootNode = StyleASTNodeFactory.StateGroupRootNode(tokenStream.Current);
 
                     tokenStream.Advance();
                     AssertTokenTypeAndAdvance(StyleTokenType.BracketClose);
@@ -272,7 +270,7 @@ namespace UIForia.Parsing.Style {
             string propertyName = AssertTokenTypeAndAdvance(StyleTokenType.Identifier);
             AssertTokenTypeAndAdvance(StyleTokenType.Equal);
 
-            PropertyNode propertyNode = StyleASTNode.PropertyNode(propertyName);
+            PropertyNode propertyNode = StyleASTNodeFactory.PropertyNode(propertyName);
             propertyNode.WithLocation(propertyNodeToken);
 
             while (tokenStream.HasMoreTokens && !AdvanceIfTokenType(StyleTokenType.EndStatement)) {
@@ -290,22 +288,22 @@ namespace UIForia.Parsing.Style {
 
             switch (tokenStream.Current.styleTokenType) {
                 case StyleTokenType.Number:
-                    StyleASTNode value = StyleASTNode.NumericLiteralNode(tokenStream.Current.value).WithLocation(propertyToken);
-                    StyleASTNode unit = null;
+                    StyleASTNode value = StyleASTNodeFactory.NumericLiteralNode(tokenStream.Current.value).WithLocation(propertyToken);
+                    UnitNode unit = null;
                     tokenStream.Advance();
                     if (tokenStream.Current.styleTokenType != StyleTokenType.EndStatement) {
-                        unit = StyleASTNode.UnitNode(AssertTokenTypeAndAdvance(StyleTokenType.Identifier)).WithLocation(tokenStream.Previous);
+                        unit = ParseUnit().WithLocation(tokenStream.Previous) as UnitNode;
                     }
 
-                    propertyValue = StyleASTNode.MeasurementNode(value, unit);
+                    propertyValue = StyleASTNodeFactory.MeasurementNode(value, unit);
 
                     break;
                 case StyleTokenType.String:
-                    propertyValue = StyleASTNode.StringLiteralNode(tokenStream.Current.value);
+                    propertyValue = StyleASTNodeFactory.StringLiteralNode(tokenStream.Current.value);
                     tokenStream.Advance();
                     break;
                 case StyleTokenType.Identifier:
-                    propertyValue = StyleASTNode.IdentifierNode(tokenStream.Current.value);
+                    propertyValue = StyleASTNodeFactory.IdentifierNode(tokenStream.Current.value);
                     tokenStream.Advance();
                     break;
                 case StyleTokenType.Rgba:
@@ -315,7 +313,7 @@ namespace UIForia.Parsing.Style {
                     propertyValue = ParseRgb();
                     break;
                 case StyleTokenType.HashColor:
-                    propertyValue = StyleASTNode.ColorNode(tokenStream.Current.value);
+                    propertyValue = StyleASTNodeFactory.ColorNode(tokenStream.Current.value);
                     tokenStream.Advance();
                     break;
                 case StyleTokenType.Url:
@@ -330,7 +328,7 @@ namespace UIForia.Parsing.Style {
                         tokenStream.Advance();
                     }
 
-                    propertyValue = StyleASTNode.UrlNode(url);
+                    propertyValue = StyleASTNodeFactory.UrlNode(url);
                     break;
                 case StyleTokenType.At:
                     propertyValue = ParseVariableReference();
@@ -342,13 +340,29 @@ namespace UIForia.Parsing.Style {
             return propertyValue.WithLocation(propertyToken);
         }
 
+        private UnitNode ParseUnit() {
+            StyleToken styleToken = tokenStream.Current;
+            string value = styleToken.value;
+
+            tokenStream.Advance();
+
+            switch (styleToken.styleTokenType) {
+                case StyleTokenType.Identifier:
+                    return StyleASTNodeFactory.UnitNode(value);
+                case StyleTokenType.Mod:
+                    return StyleASTNodeFactory.UnitNode(value);
+                default:
+                    throw new ParseException(styleToken, "Expected a token that looks like a unit but this didn't.");
+            }
+        }
+
         private StyleASTNode ParseVariableReference() {
             AdvanceIfTokenType(StyleTokenType.At);
-            ReferenceNode referenceNode = StyleASTNode.ReferenceNode(AssertTokenTypeAndAdvance(StyleTokenType.Identifier));
+            ReferenceNode referenceNode = StyleASTNodeFactory.ReferenceNode(AssertTokenTypeAndAdvance(StyleTokenType.Identifier));
 
             while (tokenStream.HasMoreTokens && AdvanceIfTokenType(StyleTokenType.Dot)) {
                 referenceNode.AddChildNode(
-                    StyleASTNode.DotAccessNode(
+                    StyleASTNodeFactory.DotAccessNode(
                         AssertTokenTypeAndAdvance(StyleTokenType.Identifier)
                     ).WithLocation(tokenStream.Previous)
                 );
@@ -373,7 +387,7 @@ namespace UIForia.Parsing.Style {
             StyleASTNode alpha = ParseLiteralOrReference(StyleTokenType.Number);
             AssertTokenTypeAndAdvance(StyleTokenType.ParenClose);
 
-            return StyleASTNode.RgbaNode(red, green, blue, alpha);
+            return StyleASTNodeFactory.RgbaNode(red, green, blue, alpha);
         }
 
         private StyleASTNode ParseRgb() {
@@ -389,7 +403,7 @@ namespace UIForia.Parsing.Style {
             StyleASTNode blue = ParseLiteralOrReference(StyleTokenType.Number);
             AssertTokenTypeAndAdvance(StyleTokenType.ParenClose);
 
-            return StyleASTNode.RgbNode(red, green, blue);
+            return StyleASTNodeFactory.RgbNode(red, green, blue);
         }
 
         private StyleASTNode ParseLiteralOrReference(StyleTokenType literalType) {
@@ -401,13 +415,13 @@ namespace UIForia.Parsing.Style {
             string value = AssertTokenTypeAndAdvance(literalType);
             switch (literalType) {
                 case StyleTokenType.String:
-                    return StyleASTNode.StringLiteralNode(value).WithLocation(currentToken);
+                    return StyleASTNodeFactory.StringLiteralNode(value).WithLocation(currentToken);
                 case StyleTokenType.Number:
-                    return StyleASTNode.NumericLiteralNode(value).WithLocation(currentToken);
+                    return StyleASTNodeFactory.NumericLiteralNode(value).WithLocation(currentToken);
                 case StyleTokenType.Boolean:
-                    return StyleASTNode.BooleanLiteralNode(value).WithLocation(currentToken);
+                    return StyleASTNodeFactory.BooleanLiteralNode(value).WithLocation(currentToken);
                 case StyleTokenType.Identifier:
-                    return StyleASTNode.IdentifierNode(value).WithLocation(currentToken);
+                    return StyleASTNodeFactory.IdentifierNode(value).WithLocation(currentToken);
             }
 
             throw new ParseException(currentToken, $"Please add support for this type: {literalType}!");
@@ -467,7 +481,7 @@ namespace UIForia.Parsing.Style {
 
             AttributeGroupContainer andAttribute = groupExpressionStack.Count > 0 ? groupExpressionStack.Pop() : null;
             AttributeGroupContainer attributeGroupContainer =
-                StyleASTNode.AttributeGroupRootNode(attributeIdentifier, attributeValue, invert, andAttribute);
+                StyleASTNodeFactory.AttributeGroupRootNode(attributeIdentifier, attributeValue, invert, andAttribute);
             attributeGroupContainer.WithLocation(attributeToken);
 
             groupExpressionStack.Push(attributeGroupContainer);
@@ -478,7 +492,7 @@ namespace UIForia.Parsing.Style {
         private void ParseStyleExpression() {
             switch (tokenStream.Current.styleTokenType) {
                 case StyleTokenType.Plus:
-                    StyleASTNode.OperatorNode(StyleOperatorType.Plus);
+                    StyleASTNodeFactory.OperatorNode(StyleOperatorType.Plus);
                     break;
             }
 
@@ -498,67 +512,67 @@ namespace UIForia.Parsing.Style {
 
             switch (tokenStream.Previous.styleTokenType) {
                 case StyleTokenType.Plus:
-                    operatorNode = StyleASTNode.OperatorNode(StyleOperatorType.Plus);
+                    operatorNode = StyleASTNodeFactory.OperatorNode(StyleOperatorType.Plus);
                     return true;
 
                 case StyleTokenType.Minus:
-                    operatorNode = StyleASTNode.OperatorNode(StyleOperatorType.Minus);
+                    operatorNode = StyleASTNodeFactory.OperatorNode(StyleOperatorType.Minus);
                     return true;
 
                 case StyleTokenType.Times:
-                    operatorNode = StyleASTNode.OperatorNode(StyleOperatorType.Times);
+                    operatorNode = StyleASTNodeFactory.OperatorNode(StyleOperatorType.Times);
                     return true;
 
                 case StyleTokenType.Divide:
-                    operatorNode = StyleASTNode.OperatorNode(StyleOperatorType.Divide);
+                    operatorNode = StyleASTNodeFactory.OperatorNode(StyleOperatorType.Divide);
                     return true;
 
                 case StyleTokenType.Mod:
-                    operatorNode = StyleASTNode.OperatorNode(StyleOperatorType.Mod);
+                    operatorNode = StyleASTNodeFactory.OperatorNode(StyleOperatorType.Mod);
                     return true;
 
                 case StyleTokenType.BooleanAnd:
-                    operatorNode = StyleASTNode.OperatorNode(StyleOperatorType.BooleanAnd);
+                    operatorNode = StyleASTNodeFactory.OperatorNode(StyleOperatorType.BooleanAnd);
                     return true;
 
                 case StyleTokenType.BooleanOr:
-                    operatorNode = StyleASTNode.OperatorNode(StyleOperatorType.BooleanOr);
+                    operatorNode = StyleASTNodeFactory.OperatorNode(StyleOperatorType.BooleanOr);
                     return true;
 
                 case StyleTokenType.Equals:
-                    operatorNode = StyleASTNode.OperatorNode(StyleOperatorType.Equals);
+                    operatorNode = StyleASTNodeFactory.OperatorNode(StyleOperatorType.Equals);
                     return true;
 
                 case StyleTokenType.NotEquals:
-                    operatorNode = StyleASTNode.OperatorNode(StyleOperatorType.NotEquals);
+                    operatorNode = StyleASTNodeFactory.OperatorNode(StyleOperatorType.NotEquals);
                     return true;
 
                 case StyleTokenType.GreaterThan:
-                    operatorNode = StyleASTNode.OperatorNode(StyleOperatorType.GreaterThan);
+                    operatorNode = StyleASTNodeFactory.OperatorNode(StyleOperatorType.GreaterThan);
                     return true;
 
                 case StyleTokenType.GreaterThanEqualTo:
-                    operatorNode = StyleASTNode.OperatorNode(StyleOperatorType.GreaterThanEqualTo);
+                    operatorNode = StyleASTNodeFactory.OperatorNode(StyleOperatorType.GreaterThanEqualTo);
                     return true;
 
                 case StyleTokenType.LessThan:
-                    operatorNode = StyleASTNode.OperatorNode(StyleOperatorType.LessThan);
+                    operatorNode = StyleASTNodeFactory.OperatorNode(StyleOperatorType.LessThan);
                     return true;
 
                 case StyleTokenType.LessThanEqualTo:
-                    operatorNode = StyleASTNode.OperatorNode(StyleOperatorType.LessThanEqualTo);
+                    operatorNode = StyleASTNodeFactory.OperatorNode(StyleOperatorType.LessThanEqualTo);
                     return true;
 
                 case StyleTokenType.QuestionMark:
-                    operatorNode = StyleASTNode.OperatorNode(StyleOperatorType.TernaryCondition);
+                    operatorNode = StyleASTNodeFactory.OperatorNode(StyleOperatorType.TernaryCondition);
                     return true;
 
                 case StyleTokenType.Colon:
-                    operatorNode = StyleASTNode.OperatorNode(StyleOperatorType.TernarySelection);
+                    operatorNode = StyleASTNodeFactory.OperatorNode(StyleOperatorType.TernarySelection);
                     return true;
 
                 case StyleTokenType.As: {
-                    operatorNode = StyleASTNode.OperatorNode(StyleOperatorType.As);
+                    operatorNode = StyleASTNodeFactory.OperatorNode(StyleOperatorType.As);
                     return true;
                 }
 

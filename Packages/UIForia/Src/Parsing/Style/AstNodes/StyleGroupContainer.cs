@@ -22,6 +22,10 @@ namespace UIForia.Parsing.Style.AstNodes {
 
             children.Clear();
         }
+        
+        public override string ToString() {
+            return $"{identifier} = {children}";
+        }
 
     }
 

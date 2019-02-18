@@ -6,14 +6,12 @@ using UIForia.Parsing.Style.Tokenizer;
 public class StyleTokenizerTests {
     [Test]
     public void TokenizeExport() {
-        List<StyleToken> tokens = StyleTokenizer.Tokenize("export const color0 : Color = rgba(1, 0, 0, 1);");
+        List<StyleToken> tokens = StyleTokenizer.Tokenize("export const color0 = rgba(1, 0, 0, 1);");
         
         AssertTokenTypes(new List<StyleTokenType>() {
             StyleTokenType.Export,
             StyleTokenType.Const,
             StyleTokenType.Identifier,
-            StyleTokenType.Colon,
-            StyleTokenType.VariableType,
             StyleTokenType.Equal,
             StyleTokenType.Rgba,
             StyleTokenType.ParenOpen,
@@ -41,15 +39,13 @@ public class StyleTokenizerTests {
 
     [Test]
     public void TokenizeImport() {
-        List<StyleToken> tokens = StyleTokenizer.Tokenize(@"import vars as Constants from ""file"";");
+        List<StyleToken> tokens = StyleTokenizer.Tokenize(@"import ""file"" as vars;");
         
         AssertTokenTypes(new List<StyleTokenType>() {
             StyleTokenType.Import,
-            StyleTokenType.Identifier,
+            StyleTokenType.String,
             StyleTokenType.As,
             StyleTokenType.Identifier,
-            StyleTokenType.From,
-            StyleTokenType.String,
             StyleTokenType.EndStatement,
         }, tokens);
     }

@@ -1,4 +1,32 @@
+using UIForia.Util;
+
 namespace UIForia.Parsing.Style.AstNodes {
+
+    internal static partial class StyleASTNodeFactory {
+
+        internal static readonly ObjectPool<StyleLiteralNode> s_LiteralPool = new ObjectPool<StyleLiteralNode>();
+
+        internal static StyleLiteralNode StringLiteralNode(string value) {
+            StyleLiteralNode retn = s_LiteralPool.Get();
+            retn.type = StyleASTNodeType.StringLiteral;
+            retn.rawValue = value;
+            return retn;
+        }
+
+        internal static StyleLiteralNode BooleanLiteralNode(string value) {
+            StyleLiteralNode retn = s_LiteralPool.Get();
+            retn.type = StyleASTNodeType.BooleanLiteral;
+            retn.rawValue = value;
+            return retn;
+        }
+
+        internal static StyleLiteralNode NumericLiteralNode(string value) {
+            StyleLiteralNode retn = s_LiteralPool.Get();
+            retn.type = StyleASTNodeType.NumericLiteral;
+            retn.rawValue = value;
+            return retn;
+        }
+    }
 
     public class StyleLiteralNode : StyleASTNode {
 
@@ -7,7 +35,7 @@ namespace UIForia.Parsing.Style.AstNodes {
         public override void Release() {
             rawValue = null;
             type = StyleASTNodeType.Invalid;
-            s_LiteralPool.Release(this);
+            StyleASTNodeFactory.s_LiteralPool.Release(this);
         }
 
         protected bool Equals(StyleLiteralNode other) {
@@ -23,6 +51,10 @@ namespace UIForia.Parsing.Style.AstNodes {
 
         public override int GetHashCode() {
             return (rawValue != null ? rawValue.GetHashCode() : 0);
+        }
+
+        public override string ToString() {
+            return rawValue;
         }
     }
 

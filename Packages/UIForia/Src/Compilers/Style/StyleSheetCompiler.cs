@@ -1,7 +1,4 @@
-using System;
-using System.Collections.Generic;
 using UIForia.Parsing.Style.AstNodes;
-using UIForia.Parsing.Style.Tokenizer;
 using UIForia.Rendering;
 using UIForia.Util;
 
@@ -11,9 +8,11 @@ namespace UIForia.Compilers.Style {
 
         private StyleSheetImporter styleSheetImporter;
 
-        private List<string> currentlyResolvingConstants = new List<string>();
-
         private StyleCompileContext context;
+
+        public static StyleSheetCompiler New() {
+            return new StyleSheetCompiler(new StyleSheetImporter());
+        }
 
         public StyleSheetCompiler(StyleSheetImporter styleSheetImporter) {
             this.styleSheetImporter = styleSheetImporter;
@@ -22,8 +21,8 @@ namespace UIForia.Compilers.Style {
         public StyleSheet Compile(LightList<StyleASTNode> rootNodes) {
             context = new StyleSheetConstantImporter(styleSheetImporter).CreateContext(rootNodes);
 
+            // todo add imported style groups
             StyleSheet styleSheet = new StyleSheet(context.constants, LightListPool<UIStyleGroup>.Get());
-
 
             for (int index = 0; index < rootNodes.Count; index++) {
                 switch (rootNodes[index]) {
@@ -46,9 +45,10 @@ namespace UIForia.Compilers.Style {
                 switch (node) {
                     case PropertyNode propertyNode:
                         // add to normal ui style set
+                        defaultGroup.normal = new UIStyle();
+                        StylePropertyMappers.MapProperty(defaultGroup.normal, propertyNode, context);
 
-                        StylePropertyMappers.MapProperty(defaultGroup.normal, propertyNode.propertyName, propertyNode.children);
-
+                        
                         break;
                     case AttributeGroupContainer attribute:
                         foreach (var uiStyleGroup in result) {
@@ -63,6 +63,8 @@ namespace UIForia.Compilers.Style {
                         throw new ParseException($"You cannot have a {node} at this level.");
                 }
             }
+            
+            result.Add(defaultGroup);
 
             return result;
         }

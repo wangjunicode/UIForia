@@ -15,7 +15,7 @@
         Cull Off
         Blend SrcAlpha OneMinusSrcAlpha
         ColorMask RGBA
-
+        
         Stencil {
             Ref [_StencilRef]
             Comp Equal
@@ -49,11 +49,6 @@
                 float4 flags : TEXCOORD1;
                 float4 colorFlags : TEXCOORD2;
             };
-            
-            // 0.5 is to target center of texel, otherwise we get bad neighbor blending
-            inline float GetPixelInRowUV(int targetY, float textureHeight) {
-                return (targetY + 0.5) / textureHeight;
-            }
             
             v2f vert (appdata v) {
             

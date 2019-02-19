@@ -22,9 +22,12 @@ namespace SVGX {
 
         public Texture2D texture;
 
+        public float strokeWidth = 5;
         public Color tintColor;
         [Range(0, 1)] public float strokeOpacity;
         [Range(0, 1)] public float fillOpacity;
+
+        public ColorStop[] gradientStops;
 
         public void Update() {
             camera.orthographic = true;
@@ -32,32 +35,30 @@ namespace SVGX {
 
             ctx.Clear();
 
-            ctx.MoveTo(-Screen.width * 0.5f, 0);
-            ctx.LineTo(Screen.width, 0);
-            ctx.SetStrokeColor(Color.blue);
-            ctx.SetStrokeWidth(2f);
-            ctx.SetStrokeOpacity(strokeOpacity);
+//            SVGXGradient gradient = new SVGXLinearGradient(GradientDirection.Vertical, gradientStops);
 
-            ctx.Stroke();
-            
+//            ctx.Circle(0, 0, 100);
+//            ctx.PushClip();
+
+//            ctx.SetFill(texture);
+//            ctx.FillRect(new Rect(-50, -50, 300, 300));
+
             ctx.BeginPath();
-            
-//            SVGXMatrix mat = SVGXMatrix.identity;
-//            mat = mat.Translate(new Vector2(Screen.width * 0.5f, Screen.height * 0.5f));
-//            mat = mat.SkewX(45f);
-//
-//            ctx.SetTransform(mat);
-            
-            ctx.SetStrokeColor(Color.red);
-            ctx.SetStrokeWidth(10f);
+            ctx.SetStrokeColor(tintColor);
+            ctx.SetStrokeWidth(strokeWidth);
             ctx.SetStrokeOpacity(strokeOpacity);
-            ctx.SetFillOpacity(fillOpacity);
-            
-            ctx.RoundedRect(new Rect(-150, -50, 300, 100), 20, 20, 20, 20);
-                        
-            ctx.Fill();
-//            ctx.Stroke();
+//            ctx.Circle(0, 0, 300);
+            ctx.LineTo(400, 400);
+            ctx.LineTo(400, 0);
+//            ctx.Rect(0, 0, 300, 300);
+            ctx.Stroke();
 
+//            ctx.SetFill(new Color(1, 0, 0, 0.5f));
+//
+//            ctx.FillRect(0, 0, 100, 100);
+//
+//            ctx.SetFill(new Color(1, 1, 0, 0.5f));
+//            ctx.FillRect(25, 25, 100, 100);
 
             gfx.Render(ctx);
         }

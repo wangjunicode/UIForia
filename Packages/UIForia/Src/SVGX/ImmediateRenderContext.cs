@@ -80,13 +80,6 @@ namespace SVGX {
             currentTexture = texture;
         }
 
-        public void SetFill(Texture2D texture, SVGXGradient gradient, float mix) {
-            currentStyle.fillMode = FillMode.Texture;
-            currentStyle.fillTintColor = Color.white;
-            currentStyle.textureId = texture.GetInstanceID();
-            currentTexture = texture;
-        }
-
         public void SetStrokeColor(Color color) {
             this.currentStyle.strokeColor = color;
         }
@@ -249,9 +242,7 @@ namespace SVGX {
             );
 
             RangeInt pointRange = new RangeInt(pointRangeStart, points.Count - pointRangeStart);
-            currentShape = new SVGXShape(SVGXShapeType.RoundedRect, pointRange, new Vector2(x, y));
-            currentShape.bounds = new SVGXBounds(rect.min, rect.max);
-//            currentShape.isClosed = true; // todo -- isClosed yields the wrong behavior
+            currentShape = new SVGXShape(SVGXShapeType.RoundedRect, pointRange, new SVGXBounds(rect.min, rect.max), true);
 
             if (lastType != SVGXShapeType.Unset) {
                 shapes.Add(currentShape);
@@ -389,19 +380,12 @@ namespace SVGX {
             SVGXShapeType lastType = currentShape.type;
 
             Vector2 x0y0 = new Vector2(x, y);
-            Vector2 x1y0 = new Vector2(x + width, y);
             Vector2 x1y1 = new Vector2(x + width, y + height);
-            Vector2 x0y1 = new Vector2(x, y + height);
 
-            currentShape = new SVGXShape(shapeType, new RangeInt(points.Count, 4));
-            currentShape.bounds = new SVGXBounds(x0y0, x1y1);
-            currentShape.origin = x0y0;
+            currentShape = new SVGXShape(shapeType, new RangeInt(points.Count, 2), new SVGXBounds(x0y0, x1y1));
 
-            points.EnsureAdditionalCapacity(4);
-            points.AddUnchecked(x0y0);
-            points.AddUnchecked(x1y0);
-            points.AddUnchecked(x1y1);
-            points.AddUnchecked(x0y1);
+            points.Add(x0y0);
+            points.Add(x1y1);
 
             currentShape.isClosed = true;
 

@@ -1,11 +1,13 @@
+using System;
 using UnityEngine;
 
 namespace SVGX {
 
+    [Serializable]
     public struct ColorStop {
 
-        public readonly float time;
-        public readonly Color32 color;
+        public float time;
+        public Color32 color;
 
         public ColorStop(float time, Color32 color) {
             this.time = time;

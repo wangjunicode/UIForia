@@ -473,7 +473,23 @@ MonoBehaviour:
   rotation: 0
   dot: 0
   texture: {fileID: 2800000, guid: 99d6c5e6d36afca42bb3ceae665890c4, type: 3}
+  strokeWidth: 64.98
   tintColor: {r: 0.2924528, g: 0.017933436, b: 0.22865911, a: 0.35686275}
+  strokeOpacity: 1
+  fillOpacity: 0
+  gradientStops:
+  - time: 0
+    color:
+      serializedVersion: 2
+      rgba: 4292347130
+  - time: 0.5
+    color:
+      serializedVersion: 2
+      rgba: 4278250752
+  - time: 1
+    color:
+      serializedVersion: 2
+      rgba: 4278190335
 --- !u!222 &1506585485
 CanvasRenderer:
   m_ObjectHideFlags: 0

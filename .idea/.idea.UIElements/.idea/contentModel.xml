@@ -607,6 +607,7 @@
               <e p="Router.cs" t="Include" />
             </e>
             <e p="Shaders" t="Include">
+              <e p="BatchedTransparent.shader" t="Include" />
               <e p="Debug.shader" t="Include" />
               <e p="Fxaa3.shader" t="Include" />
               <e p="Fxaa3_9.cginc" t="Include" />
@@ -652,8 +653,10 @@
             </e>
             <e p="StyleDefinition.cs" t="Include" />
             <e p="SVGX" t="Include">
+              <e p="BatchedVertexData.cs" t="Include" />
               <e p="ClipRule.cs" t="Include" />
               <e p="ColorStop.cs" t="Include" />
+              <e p="DeferredReleasePool.cs" t="Include" />
               <e p="DrawCallType.cs" t="Include" />
               <e p="FillMode.cs" t="Include" />
               <e p="FillVertexData.cs" t="Include" />

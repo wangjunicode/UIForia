@@ -56,7 +56,7 @@
                 #define ShapeType i.flags.x
                 
                 if(ShapeType > ShapeType_Path) {
-                    float dist = length(i.uv - 0.5);
+                    float dist = length(i.uv.xy - 0.5);
                     float pwidth = length(float2(ddx(dist), ddy(dist)));
                     float alpha = smoothstep(0.5, 0.5 - pwidth * 1.5, dist);                
                     

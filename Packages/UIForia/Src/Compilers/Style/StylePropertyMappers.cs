@@ -22,13 +22,13 @@ namespace UIForia.Compilers.Style {
                 },
                 {"backgroundimage", (targetStyle, property, context) => targetStyle.BackgroundImage = MapTexture(property)},
                 {"overflow", (targetStyle, property, context) => MapOverflows(targetStyle, property, context)},
-                {"overflowx", (targetStyle, property, context) => targetStyle.OverflowX = MapOverflow(property, context)},
-                {"overflowy", (targetStyle, property, context) => targetStyle.OverflowY = MapOverflow(property, context)},
-                { "margin", (targetStyle, valueParts, context) => MapMargins(targetStyle, valueParts, context) },
-//                { "margintop", (targetStyle, valueParts, context) => targetStyle.MarginTop = MapMargin(valueParts, context) },
-//                { "marginright", (targetStyle, valueParts, context) => targetStyle.MarginRight = MapMargin(valueParts, context) },
-//                { "marginbottom", (targetStyle, valueParts, context) => targetStyle.MarginBottom = MapMargin(valueParts, context) },
-//                { "marginleft", (targetStyle, valueParts, context) => targetStyle.MarginLeft = MapMargin(valueParts, context) },
+                {"overflowx", (targetStyle, property, context) => targetStyle.OverflowX = MapOverflow(property.children[0], context)},
+                {"overflowy", (targetStyle, property, context) => targetStyle.OverflowY = MapOverflow(property.children[0], context)},
+                {"margin", (targetStyle, valueParts, context) => MapMargins(targetStyle, valueParts, context)},
+                {"margintop", (targetStyle, property, context) => targetStyle.MarginTop = MapMeasurement(property.children[0], context)},
+                {"marginright", (targetStyle, property, context) => targetStyle.MarginRight = MapMeasurement(property.children[0], context)},
+                {"marginbottom", (targetStyle, property, context) => targetStyle.MarginBottom = MapMeasurement(property.children[0], context)},
+                {"marginleft", (targetStyle, property, context) => targetStyle.MarginLeft = MapMeasurement(property.children[0], context)},
 //            { "bordercolor", (targetStyle, valueParts) => targetStyle.BorderColor = MapColor(valueParts) },
 //            { "bordercolor", (targetStyle, valueParts) => targetStyle.BorderColor = MapColor(valueParts) },
 //            { "bordercolor", (targetStyle, valueParts) => targetStyle.BorderColor = MapColor(valueParts) },
@@ -59,36 +59,96 @@ namespace UIForia.Compilers.Style {
 //            { "bordercolor", (targetStyle, valueParts) => targetStyle.BorderColor = MapColor(valueParts) },
             };
 
-        
         private static void MapMargins(UIStyle targetStyle, PropertyNode property, StyleCompileContext context) {
-        
             // We support all css notations here and accept, 1, 2, 3 and 4 values
-            
+
             // - 1 value sets all 4 margins
             // - 2 values: first value sets top and bottom, second value sets left and right
             // - 3 values: first values sets top, 2nd sets left and right, 3rd sets bottom
             // - 4 values set all 4 margins from top to left, clockwise
-            
-            StyleASTNode value1 = context.GetValueForReference(property.children[0]);
-            
-            // targetStyle.MarginTop = 
-            
+
+            UIMeasurement value1 = MapMeasurement(property.children[0], context);
+
+            if (property.children.Count == 1) {
+                targetStyle.MarginTop = value1;
+                targetStyle.MarginRight = value1;
+                targetStyle.MarginBottom = value1;
+                targetStyle.MarginLeft = value1;
+            }
+            else if (property.children.Count == 2) {
+                UIMeasurement value2 = MapMeasurement(property.children[1], context);
+                targetStyle.MarginTop = value1;
+                targetStyle.MarginRight = value2;
+                targetStyle.MarginBottom = value1;
+                targetStyle.MarginLeft = value2;
+            }
+            else if (property.children.Count == 3) {
+                UIMeasurement value2 = MapMeasurement(property.children[1], context);
+                UIMeasurement value3 = MapMeasurement(property.children[2], context);
+                targetStyle.MarginTop = value1;
+                targetStyle.MarginRight = value2;
+                targetStyle.MarginBottom = value3;
+                targetStyle.MarginLeft = value2;
+            }
+            else if (property.children.Count > 3) {
+                UIMeasurement value2 = MapMeasurement(property.children[1], context);
+                UIMeasurement value3 = MapMeasurement(property.children[2], context);
+                UIMeasurement value4 = MapMeasurement(property.children[4], context);
+                targetStyle.MarginTop = value1;
+                targetStyle.MarginRight = value2;
+                targetStyle.MarginBottom = value3;
+                targetStyle.MarginLeft = value4;
+            }
+        }
+
+        private static UIMeasurement MapMeasurement(StyleASTNode value, StyleCompileContext context) {
+            value = context.GetValueForReference(value);
+            switch (value) {
+                case MeasurementNode measurementNode:
+                    if (float.TryParse(measurementNode.value.rawValue, out float measurementValue)) {
+                        return new UIMeasurement(measurementValue, MapUnit(measurementNode.unit));
+                    }
+
+                    break;
+
+                case StyleLiteralNode literalNode:
+                    if (float.TryParse(literalNode.rawValue, out float literalValue)) {
+                        return new UIMeasurement(literalValue);
+                    }
+
+                    break;
+            }
+
+            throw new CompileException(value, "Cannot parse value, expected a numeric literal or measurement.");
+        }
+
+        private static UIMeasurementUnit MapUnit(UnitNode unitNode) {
+            if (unitNode == null) return UIMeasurementUnit.Pixel;
+
+            switch (unitNode.value) {
+                case "px":
+                    return UIMeasurementUnit.Pixel;
+                case "pca":
+                    return UIMeasurementUnit.ParentContentArea;
+                case "pcz":
+                    return UIMeasurementUnit.ParentSize;
+                case "em":
+                    return UIMeasurementUnit.Em;
+                case "cnt":
+                    return UIMeasurementUnit.Content;
+                case "lh":
+                    return UIMeasurementUnit.LineHeight;
+            }
+
+            return UIMeasurementUnit.Pixel;
         }
 
         private static void MapOverflows(UIStyle targetStyle, PropertyNode property, StyleCompileContext context) {
-
-            StyleASTNode value1 = context.GetValueForReference(property.children[0]);
-
-            Overflow overflowX = MapOverflow(property, context);
+            Overflow overflowX = MapOverflow(property.children[0], context);
             Overflow overflowY = overflowX;
 
             if (property.children.Count == 2) {
-                StyleASTNode value2 = context.GetValueForReference(property.children[0]);
-
-                if (value2 is StyleLiteralNode literalNode2) {
-                    overflowY = ParseOverflowFromLiteralNode(literalNode2);
-                }
-                else throw new CompileException(value1, "Couldn't parse second overflow value.");
+                overflowY = MapOverflow(property.children[1], context);
             }
 
             // should we check for more than 2 values and log a warning?
@@ -97,11 +157,12 @@ namespace UIForia.Compilers.Style {
             targetStyle.OverflowY = overflowY;
         }
 
-        private static Overflow MapOverflow(PropertyNode property, StyleCompileContext context) {
-            StyleASTNode value = context.GetValueForReference(property.children[0]);
+        private static Overflow MapOverflow(StyleASTNode valueNode, StyleCompileContext context) {
+            StyleASTNode value = context.GetValueForReference(valueNode);
             if (value is StyleLiteralNode literalNode) {
                 return ParseOverflowFromLiteralNode(literalNode);
             }
+
             throw new CompileException(value, "Couldn't parse overflow value.");
         }
 
@@ -201,32 +262,6 @@ namespace UIForia.Compilers.Style {
 //                case "visibility":
 //                    targetStyle.Visibility = ParseUtil.ParseVisibility(propertyValue);
 //                    break;
-//                case "margin":
-//                    ContentBoxRect rect = ParseUtil.ParseMeasurementRect(propertyValue);
-//                    targetStyle.MarginTop = rect.top;
-//                    targetStyle.MarginRight = rect.right;
-//                    targetStyle.MarginBottom = rect.bottom;
-//                    targetStyle.MarginLeft = rect.left;
-//                    break;
-//                case "margintop":
-//                    targetStyle.MarginTop = ParseUtil.ParseMeasurement(propertyValue);
-//                    break;
-//                case "marginright":
-//                    targetStyle.MarginRight = ParseUtil.ParseMeasurement(propertyValue);
-//                    break;
-//                case "marginbottom":
-//                    targetStyle.MarginBottom = ParseUtil.ParseMeasurement(propertyValue);
-//                    break;
-//                case "marginleft":
-//                    targetStyle.MarginLeft = ParseUtil.ParseMeasurement(propertyValue);
-//                    break;
-//                default:
-//                    throw new ParseException("Unknown margin property: " + propertyName);
-//            }
-//        }
-//
-//        public static void PaddingBorderMapper(StyleParserContext context, string propertyName, string propertyValue) {
-//            switch (propertyName.ToLower()) {
 //                case "padding":
 //                    FixedLengthRect rect = ParseUtil.ParseFixedLengthRect(propertyValue);
 //                    targetStyle.PaddingTop = rect.top;
@@ -265,13 +300,6 @@ namespace UIForia.Compilers.Style {
 //                case "borderleft":
 //                    targetStyle.BorderLeft = ParseUtil.ParseFixedLength(propertyValue);
 //                    break;
-//                default:
-//                    throw new ParseException("Unknown grid padding or border property: " + propertyName);
-//            }
-//        }
-//  
-//        public static void GridItemMapper(StyleParserContext context, string propertyName, string propertyValue) {
-//            switch (propertyName.ToLower()) {
 //                case "griditemcolstart":
 //                    targetStyle.GridItemColStart = ParseUtil.ParseInt(propertyValue);
 //                    break;
@@ -290,13 +318,6 @@ namespace UIForia.Compilers.Style {
 //                case "griditemrowselfalignment":
 //                    targetStyle.GridItemRowSelfAlignment = ParseUtil.ParseGridAxisAlignment(propertyValue);
 //                    break;
-//                default:
-//                    throw new ParseException("Unknown grid item property: " + propertyName);
-//            }
-//        }
-//
-//        public static void GridLayoutMapper(StyleParserContext context, string propertyName, string propertyValue) {
-//            switch (propertyName.ToLower()) {
 //                case "gridlayoutdirection":
 //                    targetStyle.GridLayoutDirection = ParseUtil.ParseLayoutDirection(propertyValue);
 //                    break;
@@ -327,13 +348,6 @@ namespace UIForia.Compilers.Style {
 //                case "gridlayoutrowalignment":
 //                    targetStyle.GridLayoutRowAlignment = ParseUtil.ParseGridAxisAlignment(propertyValue);
 //                    break;
-//                default:
-//                    throw new ParseException("Unknown grid layout property: " + propertyName);
-//            }
-//        }
-//
-//        public static void FlexItemMapper(StyleParserContext context, string propertyName, string propertyValue) {
-//            switch (propertyName.ToLower()) {
 //                case "flexitemselfalignment":
 //                    targetStyle.FlexItemSelfAlignment = ParseUtil.ParseCrossAxisAlignment(propertyValue);
 //                    break;
@@ -346,13 +360,6 @@ namespace UIForia.Compilers.Style {
 //                case "flexitemshrink":
 //                    targetStyle.FlexItemShrink = ParseUtil.ParseInt(propertyValue);
 //                    break;
-//                default:
-//                    throw new ParseException("Unknown flex item property: " + propertyName);
-//            }
-//        }
-//
-//        public static void FlexLayoutMapper(StyleParserContext context, string propertyName, string propertyValue) {
-//            switch (propertyName.ToLower()) {
 //                case "flexlayoutwrap":
 //                    targetStyle.FlexLayoutWrap = ParseUtil.ParseLayoutWrap(propertyValue);
 //                    break;
@@ -365,13 +372,6 @@ namespace UIForia.Compilers.Style {
 //                case "flexlayoutcrossaxisalignment":
 //                    targetStyle.FlexLayoutCrossAxisAlignment = ParseUtil.ParseCrossAxisAlignment(propertyValue);
 //                    break;
-//                default:
-//                    throw new ParseException("Unknown flex item property: " + propertyName);
-//            }
-//        }
-//
-//        public static void BorderRadiusMapper(StyleParserContext context, string propertyName, string propertyValue) {
-//            switch (propertyName.ToLower()) {
 //                case "borderradius":
 //                    FixedLengthRect rect = ParseUtil.ParseFixedLengthRect(propertyValue);
 //                    BorderRadius radius = new BorderRadius(rect.top, rect.right, rect.bottom, rect.left);
@@ -389,13 +389,6 @@ namespace UIForia.Compilers.Style {
 //                case "borderradiusbottomleft":
 //                    targetStyle.BorderRadiusBottomLeft = ParseUtil.ParseFixedLength(propertyValue);
 //                    break;
-//                default:
-//                    throw new ParseException("Unknown border radius property: " + propertyName);
-//            }
-//        }
-//
-//        public static void TransformMapper(StyleParserContext context, string propertyName, string propertyValue) {
-//            switch (propertyName.ToLower()) {
 //                case "transformposition":
 //                    TransformOffsetPair length = ParseUtil.ParseTransformPair(propertyValue);
 //                    targetStyle.TransformPositionX = length.x;

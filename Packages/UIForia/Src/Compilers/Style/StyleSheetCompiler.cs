@@ -1,3 +1,5 @@
+using System;
+using System.Security.AccessControl;
 using UIForia.Parsing.Style.AstNodes;
 using UIForia.Rendering;
 using UIForia.Util;
@@ -39,35 +41,88 @@ namespace UIForia.Compilers.Style {
 
         private LightList<UIStyleGroup> CompileStyleGroup(StyleRootNode styleRoot) {
             UIStyleGroup defaultGroup = new UIStyleGroup();
+            defaultGroup.normal = new UIStyle();
             defaultGroup.name = styleRoot.identifier ?? styleRoot.tagName;
+
+            return CompileStyleContainer(styleRoot, defaultGroup);
+        }
+
+        private LightList<UIStyleGroup> CompileStyleContainer(StyleGroupContainer root, UIStyleGroup defaultGroup) {
             LightList<UIStyleGroup> result = LightListPool<UIStyleGroup>.Get();
-            foreach (var node in styleRoot.children) {
+            result.Add(defaultGroup);
+
+            for (int index = 0; index < root.children.Count; index++) {
+                StyleASTNode node = root.children[index];
                 switch (node) {
                     case PropertyNode propertyNode:
                         // add to normal ui style set
-                        defaultGroup.normal = new UIStyle();
                         StylePropertyMappers.MapProperty(defaultGroup.normal, propertyNode, context);
-
-                        
                         break;
                     case AttributeGroupContainer attribute:
-                        foreach (var uiStyleGroup in result) {
-                            // is attribute name already in here?
+                        if (root is AttributeGroupContainer) {
+                            throw new CompileException(attribute, "You cannot nest attribute group definitions.");
                         }
+                        UIStyleGroup attributeGroup = new UIStyleGroup();            
+                        attributeGroup.normal = new UIStyle();
+                        attributeGroup.name = attribute.GetGroupName();
+                        attributeGroup.rule = MapAttributeContainerToRule(attribute);
+                        result.AddRange(CompileStyleContainer(attribute, attributeGroup));
 
                         break;
                     case StyleStateContainer styleContainer:
-                        break;
+                        if (styleContainer.identifier == "hover") {
+                            defaultGroup.hover = GetUIStyleOrDefault(defaultGroup.hover);
+                            MapProperties(defaultGroup.hover, styleContainer.children);
+                        }
+                        else if (styleContainer.identifier == "focus") {
+                            defaultGroup.focused = GetUIStyleOrDefault(defaultGroup.focused);
+                            MapProperties(defaultGroup.hover, styleContainer.children);
+                        }
+                        else if (styleContainer.identifier == "active") {
+                            defaultGroup.focused = GetUIStyleOrDefault(defaultGroup.active);
+                            MapProperties(defaultGroup.active, styleContainer.children);
+                        }
+                        else throw new CompileException(styleContainer, $"Unknown style state. Please use [hover], [focus] or [active] instead.");
 
+                        break;
                     default:
-                        throw new ParseException($"You cannot have a {node} at this level.");
+                        throw new CompileException(node, $"You cannot have a {node} at this level.");
                 }
             }
-            
-            result.Add(defaultGroup);
 
             return result;
         }
 
+        private UIStyle GetUIStyleOrDefault(UIStyle style) {
+            if (style == null) return new UIStyle();
+            return style;
+        }
+
+        private void MapProperties(UIStyle targetStyle, LightList<StyleASTNode> styleContainerChildren) {
+            for (int i = 0; i < styleContainerChildren.Count; i++) {
+                StyleASTNode node = styleContainerChildren[i];
+                switch (node) {
+                    case PropertyNode propertyNode:
+                        // add to normal ui style set
+                        StylePropertyMappers.MapProperty(targetStyle, propertyNode, context);
+                        break;
+                    default:
+                        throw new CompileException(node, $"You cannot have a {node} at this level.");
+                }
+            }
+        }
+
+        private UIStyleRule MapAttributeContainerToRule(ChainableGroupContainer groupContainer) {
+            if (groupContainer == null) return null;
+
+            if (groupContainer is AttributeGroupContainer attribute) {
+                return new UIStyleRule(attribute.invert, attribute.identifier, attribute.value, MapAttributeContainerToRule(attribute.next));
+            }
+
+            if (groupContainer is ExpressionGroupContainer expression) {
+            }
+
+            throw new NotImplementedException("Sorry this feature experiences a slight delay.");
+        }
     }
 }

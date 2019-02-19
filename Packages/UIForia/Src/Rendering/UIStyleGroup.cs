@@ -1,6 +1,6 @@
 namespace UIForia.Rendering {
 
-    public struct UIStyleGroup {
+    public class UIStyleGroup {
 
         public string name { get; internal set; }
         public StyleType styleType { get; internal set; }

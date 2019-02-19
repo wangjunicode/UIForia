@@ -288,7 +288,7 @@ namespace UIForia.Parsing.Style {
 
             switch (tokenStream.Current.styleTokenType) {
                 case StyleTokenType.Number:
-                    StyleASTNode value = StyleASTNodeFactory.NumericLiteralNode(tokenStream.Current.value).WithLocation(propertyToken);
+                    StyleLiteralNode value = StyleASTNodeFactory.NumericLiteralNode(tokenStream.Current.value).WithLocation(propertyToken) as StyleLiteralNode;
                     UnitNode unit = null;
                     tokenStream.Advance();
                     if (tokenStream.Current.styleTokenType != StyleTokenType.EndStatement) {

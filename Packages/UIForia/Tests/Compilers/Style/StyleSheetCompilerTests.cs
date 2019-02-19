@@ -1,6 +1,4 @@
-using System.Xml.Schema;
 using NUnit.Framework;
-using UIForia;
 using UIForia.Compilers.Style;
 using UIForia.Parsing.Style;
 using UIForia.Parsing.Style.AstNodes;

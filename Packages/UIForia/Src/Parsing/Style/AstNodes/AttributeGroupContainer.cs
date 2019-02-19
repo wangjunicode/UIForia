@@ -3,7 +3,7 @@ using UIForia.Util;
 namespace UIForia.Parsing.Style.AstNodes {
 
     internal static partial class StyleASTNodeFactory {
-        
+
         internal static readonly ObjectPool<AttributeGroupContainer> s_AttributeGroupContainerNodePool = new ObjectPool<AttributeGroupContainer>();
 
         internal static AttributeGroupContainer AttributeGroupRootNode(string identifier, string value, bool invert, AttributeGroupContainer next) {

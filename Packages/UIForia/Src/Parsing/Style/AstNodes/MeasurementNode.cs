@@ -6,7 +6,7 @@ namespace UIForia.Parsing.Style.AstNodes {
 
         internal static readonly ObjectPool<MeasurementNode> s_MeasurementNodePool = new ObjectPool<MeasurementNode>();
 
-        internal static MeasurementNode MeasurementNode(StyleASTNode value, UnitNode unit) {
+        internal static MeasurementNode MeasurementNode(StyleLiteralNode value, UnitNode unit) {
             MeasurementNode measurementNode = s_MeasurementNodePool.Get();
             measurementNode.value = value;
             measurementNode.unit = unit;
@@ -16,7 +16,7 @@ namespace UIForia.Parsing.Style.AstNodes {
 
     public class MeasurementNode : StyleASTNode {
 
-        public StyleASTNode value;
+        public StyleLiteralNode value;
 
         public UnitNode unit;
 

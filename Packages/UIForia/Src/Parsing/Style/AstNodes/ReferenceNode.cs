@@ -40,5 +40,9 @@ namespace UIForia.Parsing.Style.AstNodes {
         public override int GetHashCode() {
             return (referenceName != null ? referenceName.GetHashCode() : 0);
         }
+
+        public override string ToString() {
+            return $"@{referenceName}";
+        }
     }
 }

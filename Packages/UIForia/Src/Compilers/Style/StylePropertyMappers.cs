@@ -1,5 +1,8 @@
 using System;
 using System.Collections.Generic;
+using System.Collections.ObjectModel;
+using UIForia.Layout;
+using UIForia.Layout.LayoutTypes;
 using UIForia.Parsing.Style.AstNodes;
 using UIForia.Rendering;
 using UIForia.Util;
@@ -12,7 +15,7 @@ namespace UIForia.Compilers.Style {
             = new Dictionary<string, Action<UIStyle, PropertyNode, StyleCompileContext>> {
                 {"backgroundcolor", (targetStyle, property, context) => targetStyle.BackgroundColor = MapColor(property, context)},
                 {"bordercolor", (targetStyle, property, context) => targetStyle.BorderColor = MapColor(property, context)},
-                {"opacity", (targetStyle, property, context) => targetStyle.Opacity = CompileToNumber(property)}, {
+                {"opacity", (targetStyle, property, context) => targetStyle.Opacity = MapNumber(property.children[0], context)}, {
                     "cursor", (targetStyle, property, context) => {
                         // first value must be the reference
 
@@ -29,35 +32,173 @@ namespace UIForia.Compilers.Style {
                 {"marginright", (targetStyle, property, context) => targetStyle.MarginRight = MapMeasurement(property.children[0], context)},
                 {"marginbottom", (targetStyle, property, context) => targetStyle.MarginBottom = MapMeasurement(property.children[0], context)},
                 {"marginleft", (targetStyle, property, context) => targetStyle.MarginLeft = MapMeasurement(property.children[0], context)},
-//            { "bordercolor", (targetStyle, valueParts) => targetStyle.BorderColor = MapColor(valueParts) },
-//            { "bordercolor", (targetStyle, valueParts) => targetStyle.BorderColor = MapColor(valueParts) },
-//            { "bordercolor", (targetStyle, valueParts) => targetStyle.BorderColor = MapColor(valueParts) },
-//            { "bordercolor", (targetStyle, valueParts) => targetStyle.BorderColor = MapColor(valueParts) },
-//            { "bordercolor", (targetStyle, valueParts) => targetStyle.BorderColor = MapColor(valueParts) },
-//            { "bordercolor", (targetStyle, valueParts) => targetStyle.BorderColor = MapColor(valueParts) },
-//            { "bordercolor", (targetStyle, valueParts) => targetStyle.BorderColor = MapColor(valueParts) },
-//            { "bordercolor", (targetStyle, valueParts) => targetStyle.BorderColor = MapColor(valueParts) },
-//            { "bordercolor", (targetStyle, valueParts) => targetStyle.BorderColor = MapColor(valueParts) },
-//            { "bordercolor", (targetStyle, valueParts) => targetStyle.BorderColor = MapColor(valueParts) },
-//            { "bordercolor", (targetStyle, valueParts) => targetStyle.BorderColor = MapColor(valueParts) },
-//            { "bordercolor", (targetStyle, valueParts) => targetStyle.BorderColor = MapColor(valueParts) },
-//            { "bordercolor", (targetStyle, valueParts) => targetStyle.BorderColor = MapColor(valueParts) },
-//            { "bordercolor", (targetStyle, valueParts) => targetStyle.BorderColor = MapColor(valueParts) },
-//            { "bordercolor", (targetStyle, valueParts) => targetStyle.BorderColor = MapColor(valueParts) },
-//            { "bordercolor", (targetStyle, valueParts) => targetStyle.BorderColor = MapColor(valueParts) },
-//            { "bordercolor", (targetStyle, valueParts) => targetStyle.BorderColor = MapColor(valueParts) },
-//            { "bordercolor", (targetStyle, valueParts) => targetStyle.BorderColor = MapColor(valueParts) },
-//            { "bordercolor", (targetStyle, valueParts) => targetStyle.BorderColor = MapColor(valueParts) },
-//            { "bordercolor", (targetStyle, valueParts) => targetStyle.BorderColor = MapColor(valueParts) },
-//            { "bordercolor", (targetStyle, valueParts) => targetStyle.BorderColor = MapColor(valueParts) },
-//            { "bordercolor", (targetStyle, valueParts) => targetStyle.BorderColor = MapColor(valueParts) },
-//            { "bordercolor", (targetStyle, valueParts) => targetStyle.BorderColor = MapColor(valueParts) },
-//            { "bordercolor", (targetStyle, valueParts) => targetStyle.BorderColor = MapColor(valueParts) },
-//            { "bordercolor", (targetStyle, valueParts) => targetStyle.BorderColor = MapColor(valueParts) },
-//            { "bordercolor", (targetStyle, valueParts) => targetStyle.BorderColor = MapColor(valueParts) },
-//            { "bordercolor", (targetStyle, valueParts) => targetStyle.BorderColor = MapColor(valueParts) },
-//            { "bordercolor", (targetStyle, valueParts) => targetStyle.BorderColor = MapColor(valueParts) },
+                {"padding", (targetStyle, valueParts, context) => MapPaddings(targetStyle, valueParts, context)},
+                {"paddingtop", (targetStyle, property, context) => targetStyle.PaddingTop = MapFixedLength(property.children[0], context)},
+                {"paddingright", (targetStyle, property, context) => targetStyle.PaddingRight = MapFixedLength(property.children[0], context)},
+                {"paddingbottom", (targetStyle, property, context) => targetStyle.PaddingBottom = MapFixedLength(property.children[0], context)},
+                {"paddingleft", (targetStyle, property, context) => targetStyle.PaddingLeft = MapFixedLength(property.children[0], context)},
+                {"visibility", (targetStyle, property, context) => targetStyle.Visibility = MapVisibility(property, context)},
+                {"border", (targetStyle, property, context) => MapBorders(targetStyle, property, context)},
+                {"bordertop", (targetStyle, property, context) => targetStyle.BorderTop = MapFixedLength(property, context)},
+                {"borderright", (targetStyle, property, context) => targetStyle.BorderRight = MapFixedLength(property, context)},
+                {"borderbottom", (targetStyle, property, context) => targetStyle.BorderBottom = MapFixedLength(property, context)},
+                {"borderleft", (targetStyle, property, context) => targetStyle.BorderLeft = MapFixedLength(property, context)},
+                {"griditemcolstart", (targetStyle, property, context) => targetStyle.GridItemColStart = (int) MapNumber(property.children[0], context)},
+                {"griditemcolspan", (targetStyle, property, context) => targetStyle.GridItemColSpan = (int) MapNumber(property.children[0], context)},
+                {"griditemrowstart", (targetStyle, property, context) => targetStyle.GridItemRowStart = (int) MapNumber(property.children[0], context)},
+                {"griditemrowspan", (targetStyle, property, context) => targetStyle.GridItemRowSpan = (int) MapNumber(property.children[0], context)},
+                {"griditemcolselfalignment", (targetStyle, property, context) => targetStyle.GridItemColSelfAlignment = MapEnum<GridAxisAlignment>(property.children[0], context)},
+                {"griditemrowselfalignment", (targetStyle, property, context) => targetStyle.GridItemRowSelfAlignment = MapEnum<GridAxisAlignment>(property.children[0], context)},
+                {"gridlayoutcolalignment", (targetStyle, property, context) => targetStyle.GridLayoutColAlignment = MapEnum<GridAxisAlignment>(property.children[0], context)},
+                {"gridlayoutrowalignment", (targetStyle, property, context) => targetStyle.GridLayoutRowAlignment = MapEnum<GridAxisAlignment>(property.children[0], context)},
+                {"gridlayoutdensity", (targetStyle, property, context) => targetStyle.GridLayoutDensity = MapEnum<GridLayoutDensity>(property.children[0], context)},
+                {"gridlayoutcoltemplate", (targetStyle, property, context) => targetStyle.GridLayoutColTemplate = MapGridLayoutTemplate(property, context)},
+                {"gridlayoutrowtemplate", (targetStyle, property, context) => targetStyle.GridLayoutRowTemplate = MapGridLayoutTemplate(property, context)},
+                {"gridlayoutdirection", (targetStyle, property, context) => targetStyle.GridLayoutDirection = MapEnum<LayoutDirection>(property.children[0], context)},
+                {"gridlayoutmainaxisautosize", (targetStyle, property, context) => targetStyle.GridLayoutMainAxisAutoSize = MapGridTrackSize(property.children[0], context)},
+                {"gridlayoutcrossaxisautosize", (targetStyle, property, context) => targetStyle.GridLayoutCrossAxisAutoSize = MapGridTrackSize(property.children[0], context)},
+                {"gridlayoutcolgap", (targetStyle, property, context) => targetStyle.GridLayoutColGap = MapNumber(property.children[0], context)},
+                {"gridlayoutrowgap", (targetStyle, property, context) => targetStyle.GridLayoutRowGap = MapNumber(property.children[0], context)},
+                {"flexitemselfalignment", (targetStyle, property, context) => targetStyle.FlexItemSelfAlignment = MapEnum<CrossAxisAlignment>(property.children[0], context)},
+                {"flexitemorder", (targetStyle, property, context) => targetStyle.FlexItemOrder = (int) MapNumber(property.children[0], context)},
+                {"flexitemgrow", (targetStyle, property, context) => targetStyle.FlexItemGrow = (int) MapNumber(property.children[0], context)},
+                {"flexitemshrink", (targetStyle, property, context) => targetStyle.FlexItemShrink = (int) MapNumber(property.children[0], context)},
+                {"flexlayoutwrap", (targetStyle, property, context) => targetStyle.FlexLayoutWrap = MapEnum<LayoutWrap>(property.children[0], context)},
+                {"flexlayoutdirection", (targetStyle, property, context) => targetStyle.FlexLayoutDirection = MapEnum<LayoutDirection>(property.children[0], context)},
+                {"flexlayoutmainaxisalignment", (targetStyle, property, context) => targetStyle.FlexLayoutMainAxisAlignment = MapEnum<MainAxisAlignment>(property.children[0], context)},
+                {"flexlayoutcrossaxisalignment", (targetStyle, property, context) => targetStyle.FlexLayoutCrossAxisAlignment = MapEnum<CrossAxisAlignment>(property.children[0], context)},
+                {"borderradius", (targetStyle, property, context) => MapBorderRadius(targetStyle, property, context)},                
+                {"borderradiustopleft", (targetStyle, property, context) => targetStyle.BorderRadiusTopLeft = MapFixedLength(property.children[0], context)},
+                {"borderradiustopright", (targetStyle, property, context) => targetStyle.BorderRadiusTopRight = MapFixedLength(property.children[0], context)},
+                {"borderradiusbottomright", (targetStyle, property, context) => targetStyle.BorderRadiusBottomRight = MapFixedLength(property.children[0], context)},
+                {"borderradiusbottomleft", (targetStyle, property, context) => targetStyle.BorderRadiusBottomLeft = MapFixedLength(property.children[0], context)},
             };
+
+        private static IReadOnlyList<GridTrackSize> MapGridLayoutTemplate(PropertyNode propertyNode, StyleCompileContext context) {
+            LightList<GridTrackSize> gridTrackSizes = LightListPool<GridTrackSize>.Get();
+            foreach (StyleASTNode trackSize in propertyNode.children) {
+                gridTrackSizes.Add(MapGridTrackSize(trackSize, context));
+            }
+
+            return gridTrackSizes;
+        }
+
+        private static GridTrackSize MapGridTrackSize(StyleASTNode trackSize, StyleCompileContext context) {
+            StyleASTNode dereferencedValue = context.GetValueForReference(trackSize);
+            switch (dereferencedValue) {
+                case StyleLiteralNode literalNode:
+                    if (literalNode.type == StyleASTNodeType.StringLiteral && literalNode.rawValue.ToLower() == "auto") {
+                        // todo revisit this default value and replace this with something else like 1mx? 
+                        return GridTrackSize.Unset;
+                    }
+                    else if (literalNode.type == StyleASTNodeType.NumericLiteral && float.TryParse(literalNode.rawValue, out float number)) {
+                        return new GridTrackSize(number);
+                    }
+
+                    throw new CompileException(literalNode, $"Could not create a grid track size out of the value {literalNode}.");
+
+                case MeasurementNode measurementNode:
+                    GridTemplateUnit unit = MapGridTemplateUnit(measurementNode.unit);
+                    float value = MapNumber(measurementNode.value, context);
+                    return new GridTrackSize(value, unit);
+
+                default:
+                    throw new CompileException(trackSize, $"Had a hard time parsing that track size: {trackSize}.");
+            }
+        }
+
+        private static void MapBorders(UIStyle targetStyle, PropertyNode property, StyleCompileContext context) {
+            UIFixedLength value1 = MapFixedLength(property.children[0], context);
+
+            if (property.children.Count == 1) {
+                targetStyle.BorderTop = value1;
+                targetStyle.BorderRight = value1;
+                targetStyle.BorderBottom = value1;
+                targetStyle.BorderLeft = value1;
+            }
+            else if (property.children.Count == 2) {
+                UIFixedLength value2 = MapFixedLength(property.children[1], context);
+                targetStyle.BorderTop = value1;
+                targetStyle.BorderRight = value2;
+                targetStyle.BorderBottom = value1;
+                targetStyle.BorderLeft = value2;
+            }
+            else if (property.children.Count == 3) {
+                UIFixedLength value2 = MapFixedLength(property.children[1], context);
+                UIFixedLength value3 = MapFixedLength(property.children[2], context);
+                targetStyle.BorderTop = value1;
+                targetStyle.BorderRight = value2;
+                targetStyle.BorderBottom = value3;
+                targetStyle.BorderLeft = value2;
+            }
+            else if (property.children.Count > 3) {
+                UIFixedLength value2 = MapFixedLength(property.children[1], context);
+                UIFixedLength value3 = MapFixedLength(property.children[2], context);
+                UIFixedLength value4 = MapFixedLength(property.children[3], context);
+                targetStyle.BorderTop = value1;
+                targetStyle.BorderRight = value2;
+                targetStyle.BorderBottom = value3;
+                targetStyle.BorderLeft = value4;
+            }
+        }
+
+        private static void MapBorderRadius(UIStyle targetStyle, PropertyNode property, StyleCompileContext context) {
+            UIFixedLength value1 = MapFixedLength(property.children[0], context);
+
+            if (property.children.Count == 1) {
+                targetStyle.BorderRadiusTopLeft = value1;
+                targetStyle.BorderRadiusTopRight = value1;
+                targetStyle.BorderRadiusBottomRight = value1;
+                targetStyle.BorderRadiusBottomLeft = value1;
+            }
+            else if (property.children.Count == 2) {
+                UIFixedLength value2 = MapFixedLength(property.children[1], context);
+                targetStyle.BorderRadiusTopLeft = value1;
+                targetStyle.BorderRadiusTopRight = value2;
+                targetStyle.BorderRadiusBottomRight = value1;
+                targetStyle.BorderRadiusBottomLeft = value2;
+            }
+            else if (property.children.Count == 3) {
+                UIFixedLength value2 = MapFixedLength(property.children[1], context);
+                UIFixedLength value3 = MapFixedLength(property.children[2], context);
+                targetStyle.BorderRadiusTopLeft = value1;
+                targetStyle.BorderRadiusTopRight = value2;
+                targetStyle.BorderRadiusBottomRight = value3;
+                targetStyle.BorderRadiusBottomLeft = value2;
+            }
+            else if (property.children.Count > 3) {
+                UIFixedLength value2 = MapFixedLength(property.children[1], context);
+                UIFixedLength value3 = MapFixedLength(property.children[2], context);
+                UIFixedLength value4 = MapFixedLength(property.children[3], context);
+                targetStyle.BorderRadiusTopLeft = value1;
+                targetStyle.BorderRadiusTopRight = value2;
+                targetStyle.BorderRadiusBottomRight = value3;
+                targetStyle.BorderRadiusBottomLeft = value4;
+            }
+        }
+
+        private static Visibility MapVisibility(PropertyNode property, StyleCompileContext context) {
+            StyleASTNode visibilityValueNode = context.GetValueForReference(property.children[0]);
+            string visibilityValue = "";
+            switch (visibilityValueNode) {
+                case StyleIdentifierNode identifierNode:
+                    visibilityValue = identifierNode.name;
+                    break;
+                case StyleLiteralNode literalNode:
+                    visibilityValue = literalNode.rawValue;
+                    break;
+            }
+
+            if (Enum.TryParse(visibilityValue, true, out Visibility visibility)) {
+                return visibility;
+            }
+
+            throw new CompileException(property.children[0], $"Unexpected value for visibility. Please choose one of {EnumValues(typeof(Visibility))}.");
+        }
+
+        private static string EnumValues(Type type) {
+            return $"[{string.Join(", ", Enum.GetNames(type))}]";
+        }
 
         private static void MapMargins(UIStyle targetStyle, PropertyNode property, StyleCompileContext context) {
             // We support all css notations here and accept, 1, 2, 3 and 4 values
@@ -93,11 +234,46 @@ namespace UIForia.Compilers.Style {
             else if (property.children.Count > 3) {
                 UIMeasurement value2 = MapMeasurement(property.children[1], context);
                 UIMeasurement value3 = MapMeasurement(property.children[2], context);
-                UIMeasurement value4 = MapMeasurement(property.children[4], context);
+                UIMeasurement value4 = MapMeasurement(property.children[3], context);
                 targetStyle.MarginTop = value1;
                 targetStyle.MarginRight = value2;
                 targetStyle.MarginBottom = value3;
                 targetStyle.MarginLeft = value4;
+            }
+        }
+
+        private static void MapPaddings(UIStyle targetStyle, PropertyNode property, StyleCompileContext context) {
+            UIFixedLength value1 = MapFixedLength(property.children[0], context);
+
+            if (property.children.Count == 1) {
+                targetStyle.PaddingTop = value1;
+                targetStyle.PaddingRight = value1;
+                targetStyle.PaddingBottom = value1;
+                targetStyle.PaddingLeft = value1;
+            }
+            else if (property.children.Count == 2) {
+                UIFixedLength value2 = MapFixedLength(property.children[1], context);
+                targetStyle.PaddingTop = value1;
+                targetStyle.PaddingRight = value2;
+                targetStyle.PaddingBottom = value1;
+                targetStyle.PaddingLeft = value2;
+            }
+            else if (property.children.Count == 3) {
+                UIFixedLength value2 = MapFixedLength(property.children[1], context);
+                UIFixedLength value3 = MapFixedLength(property.children[2], context);
+                targetStyle.PaddingTop = value1;
+                targetStyle.PaddingRight = value2;
+                targetStyle.PaddingBottom = value3;
+                targetStyle.PaddingLeft = value2;
+            }
+            else if (property.children.Count > 3) {
+                UIFixedLength value2 = MapFixedLength(property.children[1], context);
+                UIFixedLength value3 = MapFixedLength(property.children[2], context);
+                UIFixedLength value4 = MapFixedLength(property.children[3], context);
+                targetStyle.PaddingTop = value1;
+                targetStyle.PaddingRight = value2;
+                targetStyle.PaddingBottom = value3;
+                targetStyle.PaddingLeft = value4;
             }
         }
 
@@ -122,6 +298,27 @@ namespace UIForia.Compilers.Style {
             throw new CompileException(value, "Cannot parse value, expected a numeric literal or measurement.");
         }
 
+        private static UIFixedLength MapFixedLength(StyleASTNode value, StyleCompileContext context) {
+            value = context.GetValueForReference(value);
+            switch (value) {
+                case MeasurementNode measurementNode:
+                    if (float.TryParse(measurementNode.value.rawValue, out float measurementValue)) {
+                        return new UIFixedLength(measurementValue, MapFixedUnit(measurementNode.unit));
+                    }
+
+                    break;
+
+                case StyleLiteralNode literalNode:
+                    if (float.TryParse(literalNode.rawValue, out float literalValue)) {
+                        return new UIFixedLength(literalValue);
+                    }
+
+                    break;
+            }
+
+            throw new CompileException(value, "Cannot parse value, expected a numeric literal or measurement.");
+        }
+
         private static UIMeasurementUnit MapUnit(UnitNode unitNode) {
             if (unitNode == null) return UIMeasurementUnit.Pixel;
 
@@ -138,9 +335,74 @@ namespace UIForia.Compilers.Style {
                     return UIMeasurementUnit.Content;
                 case "lh":
                     return UIMeasurementUnit.LineHeight;
+                case "aw":
+                    return UIMeasurementUnit.AnchorWidth;
+                case "ah":
+                    return UIMeasurementUnit.AnchorHeight;
+                case "vw":
+                    return UIMeasurementUnit.ViewportWidth;
+                case "vh":
+                    return UIMeasurementUnit.ViewportHeight;
             }
 
+            Debug.LogWarning($"You used a {unitNode.value} in line {unitNode.line} column {unitNode.column} but this unit isn't supported. " +
+                             "Try px, pca, pcz, em, cnt, aw, ah, vw, vh or lh instead (see UIMeasurementUnit). Will fall back to px.");
+
             return UIMeasurementUnit.Pixel;
+        }
+
+        private static UIFixedUnit MapFixedUnit(UnitNode unitNode) {
+            if (unitNode == null) return UIFixedUnit.Pixel;
+
+            switch (unitNode.value) {
+                case "px":
+                    return UIFixedUnit.Pixel;
+                case "%":
+                    return UIFixedUnit.Percent;
+                case "vh":
+                    return UIFixedUnit.ViewportHeight;
+                case "vw":
+                    return UIFixedUnit.ViewportWidth;
+                case "em":
+                    return UIFixedUnit.Em;
+                case "lh":
+                    return UIFixedUnit.LineHeight;
+            }
+
+            Debug.LogWarning($"You used a {unitNode.value} in line {unitNode.line} column {unitNode.column} but this unit isn't supported. " +
+                             "Try px, %, em, vw, vh or lh instead (see UIFixedUnit). Will fall back to px.");
+
+            return UIFixedUnit.Pixel;
+        }
+
+        private static GridTemplateUnit MapGridTemplateUnit(UnitNode unitNode) {
+            if (unitNode == null) return GridTemplateUnit.Pixel;
+
+            switch (unitNode.value) {
+                case "px":
+                    return GridTemplateUnit.Pixel;
+                case "mx":
+                    return GridTemplateUnit.MaxContent;
+                case "min":
+                    return GridTemplateUnit.MinContent;
+                case "fr":
+                    return GridTemplateUnit.FractionalRemaining;
+                case "vw":
+                    return GridTemplateUnit.ViewportWidth;
+                case "vh":
+                    return GridTemplateUnit.ViewportHeight;
+                case "em":
+                    return GridTemplateUnit.Em;
+                case "cca":
+                    return GridTemplateUnit.ContainerContentArea;
+                case "cnt":
+                    return GridTemplateUnit.Container;
+            }
+
+            Debug.LogWarning($"You used a {unitNode.value} in line {unitNode.line} column {unitNode.column} but this unit isn't supported. " +
+                             "Try px, mx, min, em, vw, vh, cca, fr or cnt instead (see GridTemplateUnit). Will fall back to px.");
+
+            return GridTemplateUnit.Pixel;
         }
 
         private static void MapOverflows(UIStyle targetStyle, PropertyNode property, StyleCompileContext context) {
@@ -168,7 +430,7 @@ namespace UIForia.Compilers.Style {
 
         private static Overflow ParseOverflowFromLiteralNode(StyleLiteralNode node) {
             if (!Enum.TryParse(node.rawValue, true, out Overflow overflow)) {
-                throw new CompileException(node, "Unknown value overflow. Possible values: [None, Scroll, ScrollAndHide, Hidden]");
+                throw new CompileException(node, $"Unknown value overflow. Possible values: {EnumValues(typeof(Overflow))}");
             }
 
             return overflow;
@@ -209,35 +471,41 @@ namespace UIForia.Compilers.Style {
                     ColorUtility.TryParseHtmlString(identifierNode.name, out color);
                     return color;
                 case ColorNode colorNode: return colorNode.color;
-                case RgbaNode rgbaNode: return MapRbgaNodeToColor(rgbaNode);
-                case RgbNode rgbNode: return MapRgbNodeToColor(rgbNode);
+                case RgbaNode rgbaNode: return MapRbgaNodeToColor(rgbaNode, context);
+                case RgbNode rgbNode: return MapRgbNodeToColor(rgbNode, context);
                 default:
                     throw new CompileException(styleAstNode, $"Unsupported color value.");
             }
         }
 
-        private static Color MapRbgaNodeToColor(RgbaNode rgbaNode) {
-            byte red = (byte) CompileToNumber(rgbaNode.red);
-            byte green = (byte) CompileToNumber(rgbaNode.green);
-            byte blue = (byte) CompileToNumber(rgbaNode.blue);
-            byte alpha = (byte) CompileToNumber(rgbaNode.alpha);
+        private static Color MapRbgaNodeToColor(RgbaNode rgbaNode, StyleCompileContext context) {
+            byte red = (byte) MapNumber(rgbaNode.red, context);
+            byte green = (byte) MapNumber(rgbaNode.green, context);
+            byte blue = (byte) MapNumber(rgbaNode.blue, context);
+            byte alpha = (byte) MapNumber(rgbaNode.alpha, context);
 
             return new Color32(red, green, blue, alpha);
         }
 
-        private static Color MapRgbNodeToColor(RgbNode rgbaNode) {
-            byte red = (byte) CompileToNumber(rgbaNode.red);
-            byte green = (byte) CompileToNumber(rgbaNode.green);
-            byte blue = (byte) CompileToNumber(rgbaNode.blue);
+        private static Color MapRgbNodeToColor(RgbNode rgbaNode, StyleCompileContext context) {
+            byte red = (byte) MapNumber(rgbaNode.red, context);
+            byte green = (byte) MapNumber(rgbaNode.green, context);
+            byte blue = (byte) MapNumber(rgbaNode.blue, context);
 
             return new Color32(red, green, blue, 255);
         }
 
-        private static float CompileToNumber(StyleASTNode node) {
+        private static float MapNumber(StyleASTNode node, StyleCompileContext context) {
+            node = context.GetValueForReference(node);
+            if (node is StyleIdentifierNode identifierNode) {
+                if (float.TryParse(identifierNode.name, out float number)) {
+                    return number;
+                }
+            }
+
             if (node.type == StyleASTNodeType.NumericLiteral) {
-                bool isNumeric = float.TryParse(((StyleLiteralNode) node).rawValue, out float n);
-                if (isNumeric) {
-                    return n;
+                if (float.TryParse(((StyleLiteralNode) node).rawValue, out float number)) {
+                    return number;
                 }
             }
 
@@ -259,136 +527,20 @@ namespace UIForia.Compilers.Style {
             if (action == null) Debug.LogWarning($"{propertyKey} is an unknown style property.");
         }
 
-//                case "visibility":
-//                    targetStyle.Visibility = ParseUtil.ParseVisibility(propertyValue);
-//                    break;
-//                case "padding":
-//                    FixedLengthRect rect = ParseUtil.ParseFixedLengthRect(propertyValue);
-//                    targetStyle.PaddingTop = rect.top;
-//                    targetStyle.PaddingRight = rect.right;
-//                    targetStyle.PaddingBottom = rect.bottom;
-//                    targetStyle.PaddingLeft = rect.left;
-//                    break;
-//                case "paddingtop":
-//                    targetStyle.PaddingTop = ParseUtil.ParseFixedLength(propertyValue);
-//                    break;
-//                case "paddingright":
-//                    targetStyle.PaddingRight = ParseUtil.ParseFixedLength(propertyValue);
-//                    break;
-//                case "paddingbottom":
-//                    targetStyle.PaddingBottom = ParseUtil.ParseFixedLength(propertyValue);
-//                    break;
-//                case "paddingleft":
-//                    targetStyle.PaddingLeft = ParseUtil.ParseFixedLength(propertyValue);
-//                    break;
-//                case "border":
-//                    rect = ParseUtil.ParseFixedLengthRect(propertyValue);
-//                    targetStyle.BorderTop = rect.top;
-//                    targetStyle.BorderRight = rect.right;
-//                    targetStyle.BorderBottom = rect.bottom;
-//                    targetStyle.BorderLeft = rect.left;
-//                    break;
-//                case "bordertop":
-//                    targetStyle.BorderTop = ParseUtil.ParseFixedLength(propertyValue);
-//                    break;
-//                case "borderright":
-//                    targetStyle.BorderRight = ParseUtil.ParseFixedLength(propertyValue);
-//                    break;
-//                case "borderbottom":
-//                    targetStyle.BorderBottom = ParseUtil.ParseFixedLength(propertyValue);
-//                    break;
-//                case "borderleft":
-//                    targetStyle.BorderLeft = ParseUtil.ParseFixedLength(propertyValue);
-//                    break;
-//                case "griditemcolstart":
-//                    targetStyle.GridItemColStart = ParseUtil.ParseInt(propertyValue);
-//                    break;
-//                case "griditemcolspan":
-//                    targetStyle.GridItemColSpan = ParseUtil.ParseInt(propertyValue);
-//                    break;
-//                case "griditemrowstart":
-//                    targetStyle.GridItemRowStart = ParseUtil.ParseInt(propertyValue);
-//                    break;
-//                case "griditemrowspan":
-//                    targetStyle.GridItemRowSpan = ParseUtil.ParseInt(propertyValue);
-//                    break;
-//                case "griditemcolselfalignment":
-//                    targetStyle.GridItemColSelfAlignment = ParseUtil.ParseGridAxisAlignment(propertyValue);
-//                    break;
-//                case "griditemrowselfalignment":
-//                    targetStyle.GridItemRowSelfAlignment = ParseUtil.ParseGridAxisAlignment(propertyValue);
-//                    break;
-//                case "gridlayoutdirection":
-//                    targetStyle.GridLayoutDirection = ParseUtil.ParseLayoutDirection(propertyValue);
-//                    break;
-//                case "gridlayoutdensity":
-//                    targetStyle.GridLayoutDensity = ParseUtil.ParseDensity(propertyValue);
-//                    break;
-//                case "gridlayoutcoltemplate":
-//                    targetStyle.GridLayoutColTemplate = ParseUtil.ParseGridTemplate(propertyValue);
-//                    break;
-//                case "gridlayoutrowtemplate":
-//                    targetStyle.GridLayoutRowTemplate = ParseUtil.ParseGridTemplate(propertyValue);
-//                    break;
-//                case "gridlayoutmainaxisautosize":
-//                    targetStyle.GridLayoutMainAxisAutoSize = ParseUtil.ParseGridTrackSize(propertyValue);
-//                    break;
-//                case "gridlayoutcrossaxisautosize":
-//                    targetStyle.GridLayoutCrossAxisAutoSize = ParseUtil.ParseGridTrackSize(propertyValue);
-//                    break;
-//                case "gridlayoutcolgap": // todo -- support fixed length
-//                    targetStyle.GridLayoutColGap = ParseUtil.ParseFloat(propertyValue);
-//                    break;
-//                case "gridlayoutrowgap": // todo -- support fixed length
-//                    targetStyle.GridLayoutRowGap = ParseUtil.ParseFloat(propertyValue);
-//                    break;
-//                case "gridlayoutcolalignment":
-//                    targetStyle.GridLayoutColAlignment = ParseUtil.ParseGridAxisAlignment(propertyValue);
-//                    break;
-//                case "gridlayoutrowalignment":
-//                    targetStyle.GridLayoutRowAlignment = ParseUtil.ParseGridAxisAlignment(propertyValue);
-//                    break;
-//                case "flexitemselfalignment":
-//                    targetStyle.FlexItemSelfAlignment = ParseUtil.ParseCrossAxisAlignment(propertyValue);
-//                    break;
-//                case "flexitemorder":
-//                    targetStyle.FlexItemOrder = ParseUtil.ParseInt(propertyValue);
-//                    break;
-//                case "flexitemgrow":
-//                    targetStyle.FlexItemGrow = ParseUtil.ParseInt(propertyValue);
-//                    break;
-//                case "flexitemshrink":
-//                    targetStyle.FlexItemShrink = ParseUtil.ParseInt(propertyValue);
-//                    break;
-//                case "flexlayoutwrap":
-//                    targetStyle.FlexLayoutWrap = ParseUtil.ParseLayoutWrap(propertyValue);
-//                    break;
-//                case "flexlayoutdirection":
-//                    targetStyle.FlexLayoutDirection = ParseUtil.ParseLayoutDirection(propertyValue);
-//                    break;
-//                case "flexlayoutmainaxisalignment":
-//                    targetStyle.FlexLayoutMainAxisAlignment = ParseUtil.ParseMainAxisAlignment(propertyValue);
-//                    break;
-//                case "flexlayoutcrossaxisalignment":
-//                    targetStyle.FlexLayoutCrossAxisAlignment = ParseUtil.ParseCrossAxisAlignment(propertyValue);
-//                    break;
-//                case "borderradius":
-//                    FixedLengthRect rect = ParseUtil.ParseFixedLengthRect(propertyValue);
-//                    BorderRadius radius = new BorderRadius(rect.top, rect.right, rect.bottom, rect.left);
-//                    targetStyle.BorderRadius = radius;
-//                    break;
-//                case "borderradiustopleft":
-//                    targetStyle.BorderRadiusTopLeft = ParseUtil.ParseFixedLength(propertyValue);
-//                    break;
-//                case "borderradiustopright":
-//                    targetStyle.BorderRadiusTopRight = ParseUtil.ParseFixedLength(propertyValue);
-//                    break;
-//                case "borderradiusbottomright":
-//                    targetStyle.BorderRadiusBottomRight = ParseUtil.ParseFixedLength(propertyValue);
-//                    break;
-//                case "borderradiusbottomleft":
-//                    targetStyle.BorderRadiusBottomLeft = ParseUtil.ParseFixedLength(propertyValue);
-//                    break;
+        private static T MapEnum<T>(StyleASTNode node, StyleCompileContext context) where T : struct {
+            node = context.GetValueForReference(node);
+
+            if (node is StyleIdentifierNode identifierNode) {
+                if (Enum.TryParse(identifierNode.name, true, out T thing)) {
+                    return thing;
+                }
+            }
+
+            throw new CompileException(node, $"Expected a proper {typeof(T).Name} value, which must be one of " +
+                                             $"{EnumValues(typeof(T))} and your " +
+                                             $"value {node} does not match any of them.");
+        }
+
 //                case "transformposition":
 //                    TransformOffsetPair length = ParseUtil.ParseTransformPair(propertyValue);
 //                    targetStyle.TransformPositionX = length.x;

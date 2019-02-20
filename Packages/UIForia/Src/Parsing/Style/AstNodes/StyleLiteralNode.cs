@@ -54,7 +54,7 @@ namespace UIForia.Parsing.Style.AstNodes {
         }
 
         public override string ToString() {
-            return rawValue;
+            return type == StyleASTNodeType.StringLiteral ? $@"""{rawValue}""" : rawValue;
         }
     }
 

@@ -91,6 +91,7 @@ namespace UIForia.Parsing.Style {
 
                 case StyleTokenType.Const:
                     nodes.Add(ParseConstNode());
+                    AdvanceIfTokenType(StyleTokenType.EndStatement);
                     break;
 
                 case StyleTokenType.Cursor:
@@ -289,13 +290,14 @@ namespace UIForia.Parsing.Style {
             switch (tokenStream.Current.styleTokenType) {
                 case StyleTokenType.Number:
                     StyleLiteralNode value = StyleASTNodeFactory.NumericLiteralNode(tokenStream.Current.value).WithLocation(propertyToken) as StyleLiteralNode;
-                    UnitNode unit = null;
                     tokenStream.Advance();
                     if (tokenStream.Current.styleTokenType != StyleTokenType.EndStatement) {
-                        unit = ParseUnit().WithLocation(tokenStream.Previous) as UnitNode;
+                        UnitNode unit = ParseUnit().WithLocation(tokenStream.Previous) as UnitNode;
+                        propertyValue = StyleASTNodeFactory.MeasurementNode(value, unit);
                     }
-
-                    propertyValue = StyleASTNodeFactory.MeasurementNode(value, unit);
+                    else {
+                        propertyValue = value;
+                    }
 
                     break;
                 case StyleTokenType.String:

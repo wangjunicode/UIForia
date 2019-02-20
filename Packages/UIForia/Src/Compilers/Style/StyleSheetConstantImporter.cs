@@ -126,7 +126,8 @@ namespace UIForia.Compilers.Style {
                 return resolvedConstant;
             }
 
-            throw new CompileException(reference, "Could not resolve reference.");
+            throw new CompileException(reference, $"Could not resolve reference {reference}. "
+             + "Known references are " + context.PrintConstants());
         }
 
         private void TransformConstNode(StyleCompileContext context, ConstNode constNode, bool exported) {

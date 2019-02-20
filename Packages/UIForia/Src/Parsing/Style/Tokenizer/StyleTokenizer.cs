@@ -6,22 +6,8 @@ using UnityEngine;
 namespace UIForia.Parsing.Style.Tokenizer {
 
     internal static class StyleTokenizer {
-        
-        private static readonly Dictionary<string, Type> s_AllowedTypes = new Dictionary<string, Type>() {
-            { nameof(LayoutDirection), typeof(LayoutDirection)},
-            { nameof(Color), typeof(Color)},
-            { "int", typeof(int)},
-            { "float", typeof(float)},
-            { "string", typeof(string)},
-            { "bool", typeof(bool)},
-        };
-
-        public static bool TryResolveVariableType(string typeName, out Type type) {
-            return s_AllowedTypes.TryGetValue(typeName, out type);
-        }
 
         private static void TryReadCharacters(TokenizerContext context, string match, StyleTokenType styleTokenType, List<StyleToken> output) {
-            
             if (context.ptr + match.Length > context.input.Length) return;
             for (int i = 0; i < match.Length; i++) {
                 if (context.input[context.ptr + i] != match[i]) {
@@ -89,6 +75,7 @@ namespace UIForia.Parsing.Style.Tokenizer {
             // 1.4
             // 1.4f
 
+            context.Save();
             while (context.HasMore() && (char.IsDigit(context.input[context.ptr]) || (!foundDot && context.input[context.ptr] == '.'))) {
                 if (context.input[context.ptr] == '.') {
                     foundDot = true;
@@ -97,12 +84,16 @@ namespace UIForia.Parsing.Style.Tokenizer {
                 context.Advance();
             }
 
-            if (context.HasMore() && context.input[context.ptr] == 'f') {
+            // a trailing f should be considered part of a float, except the f is followed by more characters like in a unit '2fr'
+            if (context.HasMore() && context.input[context.ptr] == 'f' && context.HasMuchMore(1) && !char.IsLetter(context.input[context.ptr + 1])) {
                 context.Advance();
             }
 
-            string digit = context.input.Substring(startIndex, context.ptr - startIndex);
-            output.Add(new StyleToken(StyleTokenType.Number, digit, context.line, context.line));
+            int length = context.ptr - startIndex;
+            string digit = context.input.Substring(startIndex, length);
+            context.Restore();
+            output.Add(new StyleToken(StyleTokenType.Number, digit, context.line, context.column));
+            context.Advance(length);
             TryConsumeWhiteSpace(context);
         }
 
@@ -112,15 +103,19 @@ namespace UIForia.Parsing.Style.Tokenizer {
             char first = context.input[context.ptr];
             if (!char.IsLetter(first) && first != '_' && first != '$') return;
 
-            while (context.HasMore() 
-                   && (char.IsLetterOrDigit(context.input[context.ptr]) 
-                       || context.input[context.ptr] == '_' 
+            context.Save();
+            while (context.HasMore()
+                   && (char.IsLetterOrDigit(context.input[context.ptr])
+                       || context.input[context.ptr] == '_'
                        || context.input[context.ptr] == '$')) {
                 context.Advance();
             }
 
-            string identifier = context.input.Substring(start, context.ptr - start);
+            int length = context.ptr - start;
+            string identifier = context.input.Substring(start, length);
+            context.Restore();
             output.Add(TransformIdentifierToTokenType(context, identifier));
+            context.Advance(length);
             TryConsumeWhiteSpace(context);
         }
 
@@ -147,9 +142,7 @@ namespace UIForia.Parsing.Style.Tokenizer {
                 case "rgb": return new StyleToken(StyleTokenType.Rgb, identifierLowerCase, context.line, context.column);
                 case "url": return new StyleToken(StyleTokenType.Url, identifierLowerCase, context.line, context.column);
                 default: {
-                    return s_AllowedTypes.ContainsKey(identifier)
-                        ? new StyleToken(StyleTokenType.VariableType, identifier, context.line, context.column)
-                        : new StyleToken(StyleTokenType.Identifier, identifier, context.line, context.column);
+                    return new StyleToken(StyleTokenType.Identifier, identifier, context.line, context.column);
                 }
             }
         }
@@ -179,8 +172,13 @@ namespace UIForia.Parsing.Style.Tokenizer {
             context.Advance();
 
             // strip the quotes
-            string substring = context.input.Substring(start + 1, context.ptr - start - 2);
+            // "abc" 
+            // 01234
+            int length = context.ptr - start;
+            string substring = context.input.Substring(start + 1, length - 2);
+            context.Restore();
             output.Add(new StyleToken(StyleTokenType.String, substring, context.line, context.column));
+            context.Advance(length);
 
             TryConsumeWhiteSpace(context);
         }
@@ -334,15 +332,20 @@ namespace UIForia.Parsing.Style.Tokenizer {
                     Advance();
                     characters--;
                 }
+
                 return this;
             }
 
             public bool IsConsumed() {
                 return ptr >= input.Length;
             }
-            
+
             public bool HasMore() {
                 return ptr < input.Length;
+            }
+
+            public bool HasMuchMore(int howMuchMore) {
+                return ptr + howMuchMore < input.Length;
             }
         }
     }

@@ -1,3 +1,4 @@
+using System.Diagnostics;
 using UIForia.Util;
 
 namespace UIForia.Parsing.Style.AstNodes {
@@ -14,6 +15,7 @@ namespace UIForia.Parsing.Style.AstNodes {
         }
     }
     
+    [DebuggerDisplay("StyleIdentifierNode[{name}]")]
     public class StyleIdentifierNode : StyleASTNode {
 
         public string name;
@@ -40,7 +42,7 @@ namespace UIForia.Parsing.Style.AstNodes {
         }
 
         public override string ToString() {
-            return $"StyleIdentifierNode[{name}]";
+            return name;
         }
     }
 

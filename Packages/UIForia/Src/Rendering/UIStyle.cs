@@ -133,7 +133,7 @@ namespace UIForia.Rendering {
 
         private int FindIntProperty(StylePropertyId propertyId) {
             StyleProperty property = GetProperty(propertyId);
-            return property.IsUnset ?  property.valuePart0 : IntUtil.UnsetValue;
+            return property.IsUnset ? IntUtil.UnsetValue : property.valuePart0;
         }
 
         private int FindEnumProperty(StylePropertyId propertyId) {

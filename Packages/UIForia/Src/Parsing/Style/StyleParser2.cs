@@ -204,6 +204,11 @@ namespace UIForia.Parsing.Style {
 
                         break;
 
+                    case StyleTokenType.Cursor:
+                        // special case here: we are out of words and need to use the
+                        // cursor token for the property AND the top level definition ¯\_(ツ)_/¯
+                        ParseProperty(styleRootNode);
+                        break;
                     case StyleTokenType.Identifier:
                         ParseProperty(styleRootNode);
                         break;
@@ -268,7 +273,14 @@ namespace UIForia.Parsing.Style {
 
         private void ParseProperty(StyleGroupContainer styleRootNode) {
             StyleToken propertyNodeToken = tokenStream.Current;
-            string propertyName = AssertTokenTypeAndAdvance(StyleTokenType.Identifier);
+            string propertyName;
+            if (AdvanceIfTokenType(StyleTokenType.Cursor)) {
+                propertyName = propertyNodeToken.value;
+            }
+            else {
+                propertyName = AssertTokenTypeAndAdvance(StyleTokenType.Identifier);
+            }
+
             AssertTokenTypeAndAdvance(StyleTokenType.Equal);
 
             PropertyNode propertyNode = StyleASTNodeFactory.PropertyNode(propertyName);
@@ -291,7 +303,8 @@ namespace UIForia.Parsing.Style {
                 case StyleTokenType.Number:
                     StyleLiteralNode value = StyleASTNodeFactory.NumericLiteralNode(tokenStream.Current.value).WithLocation(propertyToken) as StyleLiteralNode;
                     tokenStream.Advance();
-                    if (tokenStream.Current.styleTokenType != StyleTokenType.EndStatement) {
+                    if (tokenStream.Current.styleTokenType != StyleTokenType.EndStatement 
+                        && tokenStream.Current.styleTokenType != StyleTokenType.Number) {
                         UnitNode unit = ParseUnit().WithLocation(tokenStream.Previous) as UnitNode;
                         propertyValue = StyleASTNodeFactory.MeasurementNode(value, unit);
                     }

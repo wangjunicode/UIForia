@@ -24,7 +24,14 @@ namespace UIForia.Parsing.Style.AstNodes {
         }
         
         public override string ToString() {
-            return $"{identifier} = {children}";
+
+            string childrenToString = children.Count > 0 ? children[0].ToString() : string.Empty;
+            for (int index = 1; index < children.Count; index++) {
+                var child = children[index];
+                childrenToString += ", " + child;
+            }
+
+            return $"{identifier} = {childrenToString}";
         }
 
     }

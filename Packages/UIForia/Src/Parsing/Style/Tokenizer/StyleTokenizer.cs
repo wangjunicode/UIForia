@@ -1,7 +1,4 @@
-using System;
 using System.Collections.Generic;
-using UIForia.Rendering;
-using UnityEngine;
 
 namespace UIForia.Parsing.Style.Tokenizer {
 
@@ -84,16 +81,20 @@ namespace UIForia.Parsing.Style.Tokenizer {
                 context.Advance();
             }
 
+            int length = context.ptr - startIndex;
+            string digit = context.input.Substring(startIndex, length);
+
+            context.Restore();
+            output.Add(new StyleToken(StyleTokenType.Number, digit, context.line, context.column));
+            context.Advance(length);
+
             // a trailing f should be considered part of a float, except the f is followed by more characters like in a unit '2fr'
+            // we don't want it to appear in the value, though. If it's ever used to differentiate something we should add a 
+            // more specific type like StyleTokenType.Float? Also what about 'm' and 'd' postfixes?
             if (context.HasMore() && context.input[context.ptr] == 'f' && context.HasMuchMore(1) && !char.IsLetter(context.input[context.ptr + 1])) {
                 context.Advance();
             }
 
-            int length = context.ptr - startIndex;
-            string digit = context.input.Substring(startIndex, length);
-            context.Restore();
-            output.Add(new StyleToken(StyleTokenType.Number, digit, context.line, context.column));
-            context.Advance(length);
             TryConsumeWhiteSpace(context);
         }
 

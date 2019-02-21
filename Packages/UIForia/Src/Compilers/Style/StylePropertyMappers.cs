@@ -1,12 +1,13 @@
 using System;
 using System.Collections.Generic;
-using System.Collections.ObjectModel;
+using TMPro;
 using UIForia.Layout;
 using UIForia.Layout.LayoutTypes;
 using UIForia.Parsing.Style.AstNodes;
 using UIForia.Rendering;
 using UIForia.Util;
 using UnityEngine;
+using FontStyle = UIForia.Text.FontStyle;
 
 namespace UIForia.Compilers.Style {
     public struct StylePropertyMappers {
@@ -14,35 +15,40 @@ namespace UIForia.Compilers.Style {
         private static readonly Dictionary<string, Action<UIStyle, PropertyNode, StyleCompileContext>> mappers
             = new Dictionary<string, Action<UIStyle, PropertyNode, StyleCompileContext>> {
                 {"backgroundcolor", (targetStyle, property, context) => targetStyle.BackgroundColor = MapColor(property, context)},
-                {"bordercolor", (targetStyle, property, context) => targetStyle.BorderColor = MapColor(property, context)},
-                {"opacity", (targetStyle, property, context) => targetStyle.Opacity = MapNumber(property.children[0], context)}, {
-                    "cursor", (targetStyle, property, context) => {
-                        // first value must be the reference
-
-                        CursorStyle cursor = null; // new CursorStyle(texturePath, texture, new Vector2(hotSpotX, hotSpotY));
-                        targetStyle.Cursor = cursor;
-                    }
-                },
-                {"backgroundimage", (targetStyle, property, context) => targetStyle.BackgroundImage = MapTexture(property)},
+                {"visibility", (targetStyle, property, context) => targetStyle.Visibility = MapEnum<Visibility>(property.children[0], context)},
+                {"opacity", (targetStyle, property, context) => targetStyle.Opacity = MapNumber(property.children[0], context)},
+                {"cursor", (targetStyle, property, context) => targetStyle.Cursor = MapCursor(property, context)},
+                {"backgroundimage", (targetStyle, property, context) => targetStyle.BackgroundImage = MapTexture(property.children[0], context)},
                 {"overflow", (targetStyle, property, context) => MapOverflows(targetStyle, property, context)},
-                {"overflowx", (targetStyle, property, context) => targetStyle.OverflowX = MapOverflow(property.children[0], context)},
-                {"overflowy", (targetStyle, property, context) => targetStyle.OverflowY = MapOverflow(property.children[0], context)},
+                {"overflowx", (targetStyle, property, context) => targetStyle.OverflowX = MapEnum<Overflow>(property.children[0], context)},
+                {"overflowy", (targetStyle, property, context) => targetStyle.OverflowY = MapEnum<Overflow>(property.children[0], context)},
+
                 {"margin", (targetStyle, valueParts, context) => MapMargins(targetStyle, valueParts, context)},
                 {"margintop", (targetStyle, property, context) => targetStyle.MarginTop = MapMeasurement(property.children[0], context)},
                 {"marginright", (targetStyle, property, context) => targetStyle.MarginRight = MapMeasurement(property.children[0], context)},
                 {"marginbottom", (targetStyle, property, context) => targetStyle.MarginBottom = MapMeasurement(property.children[0], context)},
                 {"marginleft", (targetStyle, property, context) => targetStyle.MarginLeft = MapMeasurement(property.children[0], context)},
+
                 {"padding", (targetStyle, valueParts, context) => MapPaddings(targetStyle, valueParts, context)},
                 {"paddingtop", (targetStyle, property, context) => targetStyle.PaddingTop = MapFixedLength(property.children[0], context)},
                 {"paddingright", (targetStyle, property, context) => targetStyle.PaddingRight = MapFixedLength(property.children[0], context)},
                 {"paddingbottom", (targetStyle, property, context) => targetStyle.PaddingBottom = MapFixedLength(property.children[0], context)},
                 {"paddingleft", (targetStyle, property, context) => targetStyle.PaddingLeft = MapFixedLength(property.children[0], context)},
-                {"visibility", (targetStyle, property, context) => targetStyle.Visibility = MapVisibility(property, context)},
+
+                {"bordercolor", (targetStyle, property, context) => targetStyle.BorderColor = MapColor(property, context)},
+
                 {"border", (targetStyle, property, context) => MapBorders(targetStyle, property, context)},
                 {"bordertop", (targetStyle, property, context) => targetStyle.BorderTop = MapFixedLength(property, context)},
                 {"borderright", (targetStyle, property, context) => targetStyle.BorderRight = MapFixedLength(property, context)},
                 {"borderbottom", (targetStyle, property, context) => targetStyle.BorderBottom = MapFixedLength(property, context)},
                 {"borderleft", (targetStyle, property, context) => targetStyle.BorderLeft = MapFixedLength(property, context)},
+
+                {"borderradius", (targetStyle, property, context) => MapBorderRadius(targetStyle, property, context)},
+                {"borderradiustopleft", (targetStyle, property, context) => targetStyle.BorderRadiusTopLeft = MapFixedLength(property.children[0], context)},
+                {"borderradiustopright", (targetStyle, property, context) => targetStyle.BorderRadiusTopRight = MapFixedLength(property.children[0], context)},
+                {"borderradiusbottomright", (targetStyle, property, context) => targetStyle.BorderRadiusBottomRight = MapFixedLength(property.children[0], context)},
+                {"borderradiusbottomleft", (targetStyle, property, context) => targetStyle.BorderRadiusBottomLeft = MapFixedLength(property.children[0], context)},
+
                 {"griditemcolstart", (targetStyle, property, context) => targetStyle.GridItemColStart = (int) MapNumber(property.children[0], context)},
                 {"griditemcolspan", (targetStyle, property, context) => targetStyle.GridItemColSpan = (int) MapNumber(property.children[0], context)},
                 {"griditemrowstart", (targetStyle, property, context) => targetStyle.GridItemRowStart = (int) MapNumber(property.children[0], context)},
@@ -59,6 +65,7 @@ namespace UIForia.Compilers.Style {
                 {"gridlayoutcrossaxisautosize", (targetStyle, property, context) => targetStyle.GridLayoutCrossAxisAutoSize = MapGridTrackSize(property.children[0], context)},
                 {"gridlayoutcolgap", (targetStyle, property, context) => targetStyle.GridLayoutColGap = MapNumber(property.children[0], context)},
                 {"gridlayoutrowgap", (targetStyle, property, context) => targetStyle.GridLayoutRowGap = MapNumber(property.children[0], context)},
+
                 {"flexitemselfalignment", (targetStyle, property, context) => targetStyle.FlexItemSelfAlignment = MapEnum<CrossAxisAlignment>(property.children[0], context)},
                 {"flexitemorder", (targetStyle, property, context) => targetStyle.FlexItemOrder = (int) MapNumber(property.children[0], context)},
                 {"flexitemgrow", (targetStyle, property, context) => targetStyle.FlexItemGrow = (int) MapNumber(property.children[0], context)},
@@ -67,12 +74,195 @@ namespace UIForia.Compilers.Style {
                 {"flexlayoutdirection", (targetStyle, property, context) => targetStyle.FlexLayoutDirection = MapEnum<LayoutDirection>(property.children[0], context)},
                 {"flexlayoutmainaxisalignment", (targetStyle, property, context) => targetStyle.FlexLayoutMainAxisAlignment = MapEnum<MainAxisAlignment>(property.children[0], context)},
                 {"flexlayoutcrossaxisalignment", (targetStyle, property, context) => targetStyle.FlexLayoutCrossAxisAlignment = MapEnum<CrossAxisAlignment>(property.children[0], context)},
-                {"borderradius", (targetStyle, property, context) => MapBorderRadius(targetStyle, property, context)},                
-                {"borderradiustopleft", (targetStyle, property, context) => targetStyle.BorderRadiusTopLeft = MapFixedLength(property.children[0], context)},
-                {"borderradiustopright", (targetStyle, property, context) => targetStyle.BorderRadiusTopRight = MapFixedLength(property.children[0], context)},
-                {"borderradiusbottomright", (targetStyle, property, context) => targetStyle.BorderRadiusBottomRight = MapFixedLength(property.children[0], context)},
-                {"borderradiusbottomleft", (targetStyle, property, context) => targetStyle.BorderRadiusBottomLeft = MapFixedLength(property.children[0], context)},
+
+                {"transformposition", (targetStyle, property, context) => MapTransformPosition(targetStyle, property, context)},
+                {"transformpositionx", (targetStyle, property, context) => targetStyle.TransformPositionX = MapTransformOffset(property.children[0], context)},
+                {"transformpositiony", (targetStyle, property, context) => targetStyle.TransformPositionY = MapTransformOffset(property.children[0], context)},
+                {"transformscale", (targetStyle, property, context) => MapTransformScale(targetStyle, property, context)},
+                {"transformscalex", (targetStyle, property, context) => targetStyle.TransformScaleX = MapNumber(property.children[0], context)},
+                {"transformscaley", (targetStyle, property, context) => targetStyle.TransformScaleY = MapNumber(property.children[0], context)},
+                {"transformpivot", (targetStyle, property, context) => MapTransformPivot(targetStyle, property, context)},
+                {"transformpivotx", (targetStyle, property, context) => targetStyle.TransformPivotX = MapFixedLength(property.children[0], context)},
+                {"transformpivoty", (targetStyle, property, context) => targetStyle.TransformPivotY = MapFixedLength(property.children[0], context)},
+                {"transformrotation", (targetStyle, property, context) => targetStyle.TransformRotation = MapNumber(property.children[0], context)},
+                {"transformbehavior", (targetStyle, property, context) => MapTransformBehavior(targetStyle, property, context)},
+                {"transformbehaviorx", (targetStyle, property, context) => targetStyle.TransformBehaviorX = MapEnum<TransformBehavior>(property.children[0], context)},
+                {"transformbehaviory", (targetStyle, property, context) => targetStyle.TransformBehaviorY = MapEnum<TransformBehavior>(property.children[0], context)},
+
+                {"minwidth", (targetStyle, property, context) => targetStyle.MinWidth = MapMeasurement(property.children[0], context)},
+                {"minheight", (targetStyle, property, context) => targetStyle.MinHeight = MapMeasurement(property.children[0], context)},
+                {"preferredwidth", (targetStyle, property, context) => targetStyle.PreferredWidth = MapMeasurement(property.children[0], context)},
+                {"preferredheight", (targetStyle, property, context) => targetStyle.PreferredHeight = MapMeasurement(property.children[0], context)},
+                {"maxwidth", (targetStyle, property, context) => targetStyle.MaxWidth = MapMeasurement(property.children[0], context)},
+                {"maxheight", (targetStyle, property, context) => targetStyle.MaxHeight = MapMeasurement(property.children[0], context)},
+                {"preferredsize", (targetStyle, property, context) => MapPreferredSize(targetStyle, property, context)},
+                {"minsize", (targetStyle, property, context) => MapMinSize(targetStyle, property, context)},
+                {"maxsize", (targetStyle, property, context) => MapMaxSize(targetStyle, property, context)},
+
+                {"layouttype", (targetStyle, property, context) => targetStyle.LayoutType = MapEnum<LayoutType>(property.children[0], context)},
+                {"layoutbehavior", (targetStyle, property, context) => targetStyle.LayoutBehavior = MapEnum<LayoutBehavior>(property.children[0], context)},
+                {"anchortarget", (targetStyle, property, context) => targetStyle.AnchorTarget = MapEnum<AnchorTarget>(property.children[0], context)},
+                {"anchortop", (targetStyle, property, context) => targetStyle.AnchorTop = MapFixedLength(property.children[0], context)},
+                {"anchorright", (targetStyle, property, context) => targetStyle.AnchorRight = MapFixedLength(property.children[0], context)},
+                {"anchorbottom", (targetStyle, property, context) => targetStyle.AnchorBottom = MapFixedLength(property.children[0], context)},
+                {"anchorleft", (targetStyle, property, context) => targetStyle.AnchorLeft = MapFixedLength(property.children[0], context)},
+                {"zindex", (targetStyle, property, context) => targetStyle.ZIndex = (int) MapNumber(property.children[0], context)},
+                {"renderlayer", (targetStyle, property, context) => targetStyle.RenderLayer = MapEnum<RenderLayer>(property.children[0], context)},
+                {"renderlayeroffset", (targetStyle, property, context) => targetStyle.RenderLayerOffset = (int) MapNumber(property.children[0], context)},
+
+                {"textcolor", (targetStyle, property, context) => targetStyle.TextColor = MapColor(property, context)},
+                {"textfontasset", (targetStyle, property, context) => targetStyle.TextFontAsset = MapFont(property.children[0], context)},
+                {"textfontstyle", (targetStyle, property, context) => targetStyle.TextFontStyle = MapTextFontStyle(property, context)},
+                {"textfontsize", (targetStyle, property, context) => targetStyle.TextFontSize = (int) MapNumber(property.children[0], context)},
+                {"textalignment", (targetStyle, property, context) => targetStyle.TextAlignment = MapEnum<UIForia.Text.TextAlignment>(property.children[0], context)},
+                
             };
+
+        private static FontStyle MapTextFontStyle(PropertyNode property, StyleCompileContext context) {
+            Text.FontStyle style = Text.FontStyle.Normal;
+
+            foreach (StyleASTNode value in property.children) {
+                StyleASTNode resolvedValue = context.GetValueForReference(value);
+                switch (resolvedValue) {
+                    case StyleIdentifierNode identifierNode:
+
+                        string propertyValue = identifierNode.name.ToLower();
+
+                        if (propertyValue.Contains("bold")) {
+                            style |= Text.FontStyle.Bold;
+                        }
+
+                        if (propertyValue.Contains("italic")) {
+                            style |= Text.FontStyle.Italic;
+                        }
+
+                        if (propertyValue.Contains("highlight")) {
+                            style |= Text.FontStyle.Highlight;
+                        }
+
+                        if (propertyValue.Contains("smallcaps")) {
+                            style |= Text.FontStyle.SmallCaps;
+                        }
+
+                        if (propertyValue.Contains("superscript")) {
+                            style |= Text.FontStyle.Superscript;
+                        }
+
+                        if (propertyValue.Contains("subscript")) {
+                            style |= Text.FontStyle.Subscript;
+                        }
+
+                        if (propertyValue.Contains("underline")) {
+                            style |= Text.FontStyle.Underline;
+                        }
+
+                        if (propertyValue.Contains("strikethrough")) {
+                            style |= Text.FontStyle.StrikeThrough;
+                        }
+
+                        break;
+                }
+            }
+
+            if ((style & Text.FontStyle.Superscript) != 0 && (style & Text.FontStyle.Subscript) != 0) {
+                throw new CompileException(property, "Font style cannot be both superscript and subscript");
+            }
+
+            return style;
+        }
+
+        private static void MapMaxSize(UIStyle targetStyle, PropertyNode property, StyleCompileContext context) {
+            UIMeasurement x = MapMeasurement(property.children[0], context);
+            UIMeasurement y = x;
+            if (property.children.Count > 1) {
+                y = MapMeasurement(property.children[1], context);
+            }
+
+            targetStyle.MaxWidth = x;
+            targetStyle.MaxHeight = y;
+        }
+
+        private static void MapMinSize(UIStyle targetStyle, PropertyNode property, StyleCompileContext context) {
+            UIMeasurement x = MapMeasurement(property.children[0], context);
+            UIMeasurement y = x;
+            if (property.children.Count > 1) {
+                y = MapMeasurement(property.children[1], context);
+            }
+
+            targetStyle.MinWidth = x;
+            targetStyle.MinHeight = y;
+        }
+
+        private static void MapPreferredSize(UIStyle targetStyle, PropertyNode property, StyleCompileContext context) {
+            UIMeasurement x = MapMeasurement(property.children[0], context);
+            UIMeasurement y = x;
+            if (property.children.Count > 1) {
+                y = MapMeasurement(property.children[1], context);
+            }
+
+            targetStyle.PreferredWidth = x;
+            targetStyle.PreferredHeight = y;
+        }
+
+        private static CursorStyle MapCursor(PropertyNode property, StyleCompileContext context) {
+            float hotSpotX = 0;
+            float hotSpotY = 0;
+            if (property.children.Count > 1) {
+                hotSpotX = MapNumber(property.children[1], context);
+                if (property.children.Count > 2) {
+                    hotSpotY = MapNumber(property.children[2], context);
+                }
+                else {
+                    hotSpotY = hotSpotX;
+                }
+            }
+
+            return new CursorStyle(null, MapTexture(property.children[0], context), new Vector2(hotSpotX, hotSpotY));
+        }
+
+        private static void MapTransformBehavior(UIStyle targetStyle, PropertyNode property, StyleCompileContext context) {
+            TransformBehavior x = MapEnum<TransformBehavior>(property.children[0], context);
+            TransformBehavior y = x;
+            if (property.children.Count > 1) {
+                y = MapEnum<TransformBehavior>(property.children[1], context);
+            }
+
+            targetStyle.TransformBehaviorX = x;
+            targetStyle.TransformBehaviorY = y;
+        }
+
+        private static void MapTransformScale(UIStyle targetStyle, PropertyNode property, StyleCompileContext context) {
+            float x = MapNumber(property.children[0], context);
+            float y = x;
+            if (property.children.Count > 1) {
+                y = MapNumber(property.children[1], context);
+            }
+
+            targetStyle.TransformScaleX = x;
+            targetStyle.TransformScaleY = y;
+        }
+
+        private static void MapTransformPivot(UIStyle targetStyle, PropertyNode property, StyleCompileContext context) {
+            UIFixedLength x = MapFixedLength(property.children[0], context);
+            UIFixedLength y = x;
+            if (property.children.Count > 1) {
+                y = MapFixedLength(property.children[1], context);
+            }
+
+            targetStyle.TransformPivotX = x;
+            targetStyle.TransformPivotY = y;
+        }
+
+        private static void MapTransformPosition(UIStyle targetStyle, PropertyNode property, StyleCompileContext context) {
+            TransformOffset x = MapTransformOffset(property.children[0], context);
+            TransformOffset y = x;
+            if (property.children.Count > 1) {
+                y = MapTransformOffset(property.children[1], context);
+            }
+
+            targetStyle.TransformPositionX = x;
+            targetStyle.TransformPositionY = y;
+        }
 
         private static IReadOnlyList<GridTrackSize> MapGridLayoutTemplate(PropertyNode propertyNode, StyleCompileContext context) {
             LightList<GridTrackSize> gridTrackSizes = LightListPool<GridTrackSize>.Get();
@@ -177,25 +367,6 @@ namespace UIForia.Compilers.Style {
             }
         }
 
-        private static Visibility MapVisibility(PropertyNode property, StyleCompileContext context) {
-            StyleASTNode visibilityValueNode = context.GetValueForReference(property.children[0]);
-            string visibilityValue = "";
-            switch (visibilityValueNode) {
-                case StyleIdentifierNode identifierNode:
-                    visibilityValue = identifierNode.name;
-                    break;
-                case StyleLiteralNode literalNode:
-                    visibilityValue = literalNode.rawValue;
-                    break;
-            }
-
-            if (Enum.TryParse(visibilityValue, true, out Visibility visibility)) {
-                return visibility;
-            }
-
-            throw new CompileException(property.children[0], $"Unexpected value for visibility. Please choose one of {EnumValues(typeof(Visibility))}.");
-        }
-
         private static string EnumValues(Type type) {
             return $"[{string.Join(", ", Enum.GetNames(type))}]";
         }
@@ -295,7 +466,7 @@ namespace UIForia.Compilers.Style {
                     break;
             }
 
-            throw new CompileException(value, "Cannot parse value, expected a numeric literal or measurement.");
+            throw new CompileException(value, $"Cannot parse value, expected a numeric literal or measurement {value}.");
         }
 
         private static UIFixedLength MapFixedLength(StyleASTNode value, StyleCompileContext context) {
@@ -316,7 +487,7 @@ namespace UIForia.Compilers.Style {
                     break;
             }
 
-            throw new CompileException(value, "Cannot parse value, expected a numeric literal or measurement.");
+            throw new CompileException(value, $"Cannot parse value, expected a numeric literal or measurement {value}.");
         }
 
         private static UIMeasurementUnit MapUnit(UnitNode unitNode) {
@@ -383,7 +554,7 @@ namespace UIForia.Compilers.Style {
                     return GridTemplateUnit.Pixel;
                 case "mx":
                     return GridTemplateUnit.MaxContent;
-                case "min":
+                case "mn":
                     return GridTemplateUnit.MinContent;
                 case "fr":
                     return GridTemplateUnit.FractionalRemaining;
@@ -400,17 +571,90 @@ namespace UIForia.Compilers.Style {
             }
 
             Debug.LogWarning($"You used a {unitNode.value} in line {unitNode.line} column {unitNode.column} but this unit isn't supported. " +
-                             "Try px, mx, min, em, vw, vh, cca, fr or cnt instead (see GridTemplateUnit). Will fall back to px.");
+                             "Try px, mx, mn, em, vw, vh, cca, fr or cnt instead (see GridTemplateUnit). Will fall back to px.");
 
             return GridTemplateUnit.Pixel;
         }
 
+        private static TransformOffset MapTransformOffset(StyleASTNode value, StyleCompileContext context) {
+            value = context.GetValueForReference(value);
+            switch (value) {
+                case MeasurementNode measurementNode:
+                    if (float.TryParse(measurementNode.value.rawValue, out float measurementValue)) {
+                        return new TransformOffset(measurementValue, MapTransformUnit(measurementNode.unit));
+                    }
+
+                    break;
+
+                case StyleLiteralNode literalNode:
+                    if (float.TryParse(literalNode.rawValue, out float literalValue)) {
+                        return new TransformOffset(literalValue);
+                    }
+
+                    break;
+            }
+
+            throw new CompileException(value, $"Cannot parse value, expected a numeric literal or measurement {value}.");
+        }
+
+        private static TransformUnit MapTransformUnit(UnitNode unitNode) {
+            if (unitNode == null) return TransformUnit.Pixel;
+
+            switch (unitNode.value) {
+                case "px":
+                    return TransformUnit.Pixel;
+                case "w":
+                    return TransformUnit.ActualWidth;
+                case "h":
+                    return TransformUnit.ActualHeight;
+                case "alw":
+                    return TransformUnit.AllocatedWidth;
+                case "alh":
+                    return TransformUnit.AllocatedHeight;
+                case "cw":
+                    return TransformUnit.ContentWidth;
+                case "ch":
+                    return TransformUnit.ContentHeight;
+                case "em":
+                    return TransformUnit.Em;
+                case "caw":
+                    return TransformUnit.ContentAreaWidth;
+                case "cah":
+                    return TransformUnit.ContentAreaHeight;
+                case "aw":
+                    return TransformUnit.AnchorWidth;
+                case "ah":
+                    return TransformUnit.AnchorHeight;
+                case "vw":
+                    return TransformUnit.ViewportWidth;
+                case "vh":
+                    return TransformUnit.ViewportHeight;
+                case "pw":
+                    return TransformUnit.ParentWidth;
+                case "ph":
+                    return TransformUnit.ParentHeight;
+                case "pcaw":
+                    return TransformUnit.ParentContentAreaWidth;
+                case "pcah":
+                    return TransformUnit.ParentContentAreaHeight;
+                case "sw":
+                    return TransformUnit.ScreenWidth;
+                case "sh":
+                    return TransformUnit.ScreenHeight;
+            }
+
+            Debug.LogWarning($"You used a {unitNode.value} in line {unitNode.line} column {unitNode.column} but this unit isn't supported. " +
+                             "Try px, w, h, alw, alh, cw, ch, em, caw, cah, aw, ah, vw, vh, pw, ph, pcaw, pcah, sw, or sh instead (see TransformUnit). Will fall back to px.");
+
+            return TransformUnit.Pixel;
+        }
+
         private static void MapOverflows(UIStyle targetStyle, PropertyNode property, StyleCompileContext context) {
-            Overflow overflowX = MapOverflow(property.children[0], context);
+            Overflow overflowX = MapEnum<Overflow>(property.children[0], context);
             Overflow overflowY = overflowX;
 
             if (property.children.Count == 2) {
-                overflowY = MapOverflow(property.children[1], context);
+                overflowY = MapEnum<Overflow>(property.children[1], context);
             }
 
             // should we check for more than 2 values and log a warning?
@@ -419,36 +663,43 @@ namespace UIForia.Compilers.Style {
             targetStyle.OverflowY = overflowY;
         }
 
-        private static Overflow MapOverflow(StyleASTNode valueNode, StyleCompileContext context) {
-            StyleASTNode value = context.GetValueForReference(valueNode);
-            if (value is StyleLiteralNode literalNode) {
-                return ParseOverflowFromLiteralNode(literalNode);
-            }
-
-            throw new CompileException(value, "Couldn't parse overflow value.");
-        }
-
-        private static Overflow ParseOverflowFromLiteralNode(StyleLiteralNode node) {
-            if (!Enum.TryParse(node.rawValue, true, out Overflow overflow)) {
-                throw new CompileException(node, $"Unknown value overflow. Possible values: {EnumValues(typeof(Overflow))}");
-            }
-
-            return overflow;
-        }
-
-        private static Texture2D MapTexture(PropertyNode property) {
-            LightList<StyleASTNode> propertyValues = property.children;
-            AssertSingleValue(propertyValues);
-            switch (propertyValues[0]) {
+        private static Texture2D MapTexture(StyleASTNode node, StyleCompileContext context) {
+            node = context.GetValueForReference(node);
+            switch (node) {
                 case UrlNode urlNode:
-                    return ResourceManager.GetTexture(TransformUrlNode(urlNode));
-                default:
-                    throw new CompileException(propertyValues[0], "Expected url(path/to/texture).");
+                    return ResourceManager.GetTexture(TransformUrlNode(urlNode, context));
+                case StyleLiteralNode literalNode:
+                    string value = literalNode.rawValue;
+                    if (value == "unset" || value == "default" || value == "null") {
+                        return null;
+                    }
+
+                    break;
             }
+
+            throw new CompileException(node, $"Expected url(path/to/texture) but found {node}.");
         }
 
-        private static string TransformUrlNode(UrlNode urlNode) {
-            StyleASTNode url = urlNode.url;
+        private static TMP_FontAsset MapFont(StyleASTNode node, StyleCompileContext context) {
+            node = context.GetValueForReference(node);
+            switch (node) {
+                case UrlNode urlNode:
+                    return Resources.Load<TMP_FontAsset>(TransformUrlNode(urlNode, context));
+                    // return ResourceManager.GetFont(TransformUrlNode(urlNode, context));
+                case StyleLiteralNode literalNode:
+                    string value = literalNode.rawValue;
+                    if (value == "unset" || value == "default" || value == "null") {
+                        return null;
+                    }
+
+                    break;
+            }
+
+            throw new CompileException(node, $"Expected url(path/to/font) but found {node}.");
+        }
+
+        private static string TransformUrlNode(UrlNode urlNode, StyleCompileContext context) {
+            StyleASTNode url = context.GetValueForReference(urlNode.url);
 
             if (url.type == StyleASTNodeType.Identifier) {
                 return ((StyleIdentifierNode) url).name;
@@ -540,449 +791,6 @@ namespace UIForia.Compilers.Style {
                                              $"{EnumValues(typeof(T))} and your " +
                                              $"value {node} does not match any of them.");
         }
-
-//                case "transformposition":
-//                    TransformOffsetPair length = ParseUtil.ParseTransformPair(propertyValue);
-//                    targetStyle.TransformPositionX = length.x;
-//                    targetStyle.TransformPositionY = length.y;
-//                    break;
-//                case "transformpositionx":
-//                    targetStyle.TransformPositionX = ParseUtil.ParseTransform(propertyValue);
-//                    break;
-//                case "transformpositiony":
-//                    targetStyle.TransformPositionY = ParseUtil.ParseTransform(propertyValue);
-//                    break;
-//                case "transformscale":
-//                    float scale = ParseUtil.ParseFloat(propertyValue);
-//                    targetStyle.TransformScaleX = scale;
-//                    targetStyle.TransformScaleY = scale;
-//                    break;
-//                case "transformscalex":
-//                    targetStyle.TransformScaleX = ParseUtil.ParseFloat(propertyValue);
-//                    break;
-//                case "transformscaley":
-//                    targetStyle.TransformScaleY = ParseUtil.ParseFloat(propertyValue);
-//                    break;
-//                case "transformpivotx":
-//                    targetStyle.TransformPivotX = ParseUtil.ParseFixedLength(propertyValue);
-//                    break;
-//                case "transformpivoty":
-//                    targetStyle.TransformPivotY = ParseUtil.ParseFixedLength(propertyValue);
-//                    break;
-//                case "transformrotation":
-//                    // todo -- handle deg / rad / and maybe %
-//                    targetStyle.TransformRotation = ParseUtil.ParseFloat(propertyValue);
-//                    break;
-//                case "transformbehavior":
-//                    TransformBehavior behavior = ParseUtil.ParseTransformBehavior(propertyValue);
-//                    targetStyle.TransformBehaviorX = behavior;
-//                    targetStyle.TransformBehaviorY = behavior;
-//                    break;
-//
-//                case "transformbehaviorx":
-//                    targetStyle.TransformBehaviorX = ParseUtil.ParseTransformBehavior(propertyValue);
-//                    break;
-//                case "transformbehaviory":
-//                    targetStyle.TransformBehaviorY = ParseUtil.ParseTransformBehavior(propertyValue);
-//                    break;
-//                default:
-//                    throw new ParseException("Unknown border radius property: " + propertyName);
-//            }
-//        }
-//
-//        public static void SizeMapper(StyleParserContext context, string propertyName, string propertyValue) {
-//            MeasurementPair pair;
-//            switch (propertyName.ToLower()) {
-//                case "minwidth":
-//                    targetStyle.MinWidth = ParseUtil.ParseMeasurement(propertyValue);
-//                    break;
-//                case "minheight":
-//                    targetStyle.MinHeight = ParseUtil.ParseMeasurement(propertyValue);
-//                    break;
-//                case "preferredwidth":
-//                    targetStyle.PreferredWidth = ParseUtil.ParseMeasurement(propertyValue);
-//                    break;
-//                case "preferredheight":
-//                    targetStyle.PreferredHeight = ParseUtil.ParseMeasurement(propertyValue);
-//                    break;
-//                case "maxwidth":
-//                    targetStyle.MaxWidth = ParseUtil.ParseMeasurement(propertyValue);
-//                    break;
-//                case "maxheight":
-//                    targetStyle.MaxHeight = ParseUtil.ParseMeasurement(propertyValue);
-//                    break;
-//                case "preferredsize":
-//                    pair = ParseUtil.ParseMeasurementPair(propertyValue);
-//                    targetStyle.PreferredWidth = pair.x;
-//                    targetStyle.PreferredHeight = pair.y;
-//                    break;
-//                case "minsize":
-//                    pair = ParseUtil.ParseMeasurementPair(propertyValue);
-//                    targetStyle.MinWidth = pair.x;
-//                    targetStyle.MinHeight = pair.y;
-//                    break;
-//                case "maxsize":
-//                    pair = ParseUtil.ParseMeasurementPair(propertyValue);
-//                    targetStyle.MaxWidth = pair.x;
-//                    targetStyle.MaxHeight = pair.y;
-//                    break;
-//                default:
-//                    throw new ParseException("Unknown size property: " + propertyName);
-//            }
-//        }
-//
-//        public static void LayoutMapper(StyleParserContext context, string propertyName, string propertyValue) {
-//            switch (propertyName.ToLower()) {
-//                case "layouttype":
-//                    targetStyle.LayoutType = ParseUtil.ParseLayoutType(propertyValue);
-//                    break;
-//                case "layoutbehavior":
-//                    targetStyle.LayoutBehavior = ParseUtil.ParseLayoutBehavior(propertyValue);
-//                    break;
-//                case "anchortarget":
-//                    targetStyle.AnchorTarget = ParseUtil.ParseAnchorTarget(propertyValue);
-//                    break;
-//                case "anchortop":
-//                    targetStyle.AnchorTop = ParseUtil.ParseFixedLength(propertyValue);
-//                    break;
-//                case "anchorright":
-//                    targetStyle.AnchorRight = ParseUtil.ParseFixedLength(propertyValue);
-//                    break;
-//                case "anchorbottom":
-//                    targetStyle.AnchorBottom = ParseUtil.ParseFixedLength(propertyValue);
-//                    break;
-//                case "anchorleft":
-//                    targetStyle.AnchorLeft = ParseUtil.ParseFixedLength(propertyValue);
-//                    break;
-//                case "zindex":
-//                    targetStyle.ZIndex = ParseUtil.ParseInt(propertyValue);
-//                    break;
-//                case "renderlayer":
-//                    targetStyle.RenderLayer = ParseUtil.ParseRenderLayer(propertyValue);
-//                    break;
-//                case "renderlayeroffset":
-//                    targetStyle.RenderLayerOffset = ParseUtil.ParseInt(propertyValue);
-//                    break;
-//            }
-//        }
-//
-//        public static void TextMapper(StyleParserContext context, string propertyName, string propertyValue) {
-//            switch (propertyName.ToLower()) {
-//                case "textcolor":
-//                    targetStyle.TextColor = ParseUtil.ParseColor(propertyValue);
-//                    break;
-//                case "textfontasset":
-//                    targetStyle.TextFontAsset = ParseUtil.ParseFont(propertyValue);
-//                    break;
-//                case "textfontstyle":
-//                    targetStyle.TextFontStyle = ParseUtil.ParseFontStyle(propertyValue);
-//                    break;
-//                case "textfontsize":
-//                    targetStyle.TextFontSize = ParseUtil.ParseInt(propertyValue);
-//                    break;
-//                case "textalignment":
-//                    targetStyle.TextAlignment = ParseUtil.ParseTextAlignment(propertyValue);
-//                    break;
-//                default:
-//                    throw new NotImplementedException();
-//            }
-//        }
-//
-//        public static void ScrollMapper(StyleParserContext context, string propertyName, string propertyValue) {
-//            switch (propertyName.ToLower()) {
-//                // General
-//                case "scrollbarbuttonplacement":
-//                    targetStyle.ScrollbarVerticalButtonPlacement = ParseUtil.ParseScrollbarButtonPlacement(propertyValue);
-//                    targetStyle.ScrollbarHorizontalButtonPlacement = ParseUtil.ParseScrollbarButtonPlacement(propertyValue);
-//                    break;
-////                case "scrollbarattachment":
-//////                    targetStyle.ScrollbarVerticalAttachment = ParseUtil.ParseScrollbarVerticalAttachment(propertyValue);
-////                    break;
-//
-//                // Track
-//                case "scrollbartracksize":
-//                    float size = ParseUtil.ParseFloat(propertyValue);
-//                    targetStyle.ScrollbarVerticalTrackSize = size;
-//                    targetStyle.ScrollbarHorizontalTrackSize = size;
-//                    break;
-//                case "scrollbartrackcolor":
-//                    Color trackColor = ParseUtil.ParseColor(propertyValue);
-//                    targetStyle.ScrollbarVerticalTrackColor = trackColor;
-//                    targetStyle.ScrollbarHorizontalTrackColor = trackColor;
-//                    break;
-//                case "scrollbartrackborderradius":
-//                    targetStyle.ScrollbarVerticalTrackBorderRadius = ParseUtil.ParseFloat(propertyValue);
-//                    targetStyle.ScrollbarHorizontalTrackBorderRadius = ParseUtil.ParseFloat(propertyValue);
-//                    break;
-//                case "scrollbartrackbordersize":
-//                    targetStyle.ScrollbarVerticalTrackBorderSize = ParseUtil.ParseFloat(propertyValue);
-//                    targetStyle.ScrollbarHorizontalTrackBorderSize = ParseUtil.ParseFloat(propertyValue);
-//                    break;
-//                case "scrollbartrackbordercolor":
-//                    targetStyle.ScrollbarVerticalTrackBorderColor = ParseUtil.ParseColor(propertyValue);
-//                    targetStyle.ScrollbarHorizontalTrackBorderColor = ParseUtil.ParseColor(propertyValue);
-//                    break;
-//                case "scrollbartrackimage":
-//                    targetStyle.ScrollbarVerticalTrackImage = ParseUtil.ParseTexture(propertyValue);
-//                    targetStyle.ScrollbarHorizontalTrackImage = ParseUtil.ParseTexture(propertyValue);
-//                    break;
-//
-//                // Handle
-//                case "scrollbarhandlesize":
-//                    targetStyle.ScrollbarVerticalHandleSize = ParseUtil.ParseFloat(propertyValue);
-//                    targetStyle.ScrollbarHorizontalHandleSize = ParseUtil.ParseFloat(propertyValue);
-//                    break;
-//                case "scrollbarhandlecolor":
-//                    targetStyle.ScrollbarVerticalHandleColor = ParseUtil.ParseColor(propertyValue);
-//                    targetStyle.ScrollbarHorizontalHandleColor = ParseUtil.ParseColor(propertyValue);
-//                    break;
-//                case "scrollbarhandleborderradius":
-//                    targetStyle.ScrollbarVerticalHandleBorderRadius = ParseUtil.ParseFloat(propertyValue);
-//                    targetStyle.ScrollbarHorizontalHandleBorderRadius = ParseUtil.ParseFloat(propertyValue);
-//                    break;
-//                case "scrollbarhandlebordersize":
-//                    targetStyle.ScrollbarVerticalHandleBorderSize = ParseUtil.ParseFloat(propertyValue);
-//                    targetStyle.ScrollbarHorizontalHandleBorderSize = ParseUtil.ParseFloat(propertyValue);
-//                    break;
-//                case "scrollbarhandlebordercolor":
-//                    targetStyle.ScrollbarVerticalHandleBorderColor = ParseUtil.ParseColor(propertyValue);
-//                    targetStyle.ScrollbarHorizontalHandleBorderColor = ParseUtil.ParseColor(propertyValue);
-//                    break;
-//                case "scrollbarhandleimage":
-//                    targetStyle.ScrollbarVerticalTrackImage = ParseUtil.ParseTexture(propertyValue);
-//                    targetStyle.ScrollbarHorizontalTrackImage = ParseUtil.ParseTexture(propertyValue);
-//                    break;
-//
-//                // Increment
-//                case "scrollbarincrementsize":
-//                    targetStyle.ScrollbarVerticalIncrementSize = ParseUtil.ParseFloat(propertyValue);
-//                    targetStyle.ScrollbarHorizontalIncrementSize = ParseUtil.ParseFloat(propertyValue);
-//                    break;
-//                case "scrollbarincrementcolor":
-//                    targetStyle.ScrollbarVerticalIncrementColor = ParseUtil.ParseColor(propertyValue);
-//                    targetStyle.ScrollbarHorizontalIncrementColor = ParseUtil.ParseColor(propertyValue);
-//                    break;
-//                case "scrollbarincrementborderradius":
-//                    targetStyle.ScrollbarVerticalIncrementBorderRadius = ParseUtil.ParseFloat(propertyValue);
-//                    targetStyle.ScrollbarHorizontalIncrementBorderRadius = ParseUtil.ParseFloat(propertyValue);
-//                    break;
-//                case "scrollbarincrementbordersize":
-//                    targetStyle.ScrollbarVerticalIncrementBorderSize = ParseUtil.ParseFloat(propertyValue);
-//                    targetStyle.ScrollbarHorizontalIncrementBorderSize = ParseUtil.ParseFloat(propertyValue);
-//                    break;
-//                case "scrollbarincrementbordercolor":
-//                    targetStyle.ScrollbarVerticalIncrementBorderColor = ParseUtil.ParseColor(propertyValue);
-//                    targetStyle.ScrollbarHorizontalIncrementBorderColor = ParseUtil.ParseColor(propertyValue);
-//                    break;
-//                case "scrollbarincrementimage":
-//                    targetStyle.ScrollbarVerticalIncrementImage = ParseUtil.ParseTexture(propertyValue);
-//                    targetStyle.ScrollbarHorizontalIncrementImage = ParseUtil.ParseTexture(propertyValue);
-//                    break;
-//
-//                // Decrement
-//                case "scrollbardecrementsize":
-//                    targetStyle.ScrollbarVerticalDecrementSize = ParseUtil.ParseFloat(propertyValue);
-//                    targetStyle.ScrollbarHorizontalDecrementSize = ParseUtil.ParseFloat(propertyValue);
-//                    break;
-//                case "scrollbardecrementcolor":
-//                    targetStyle.ScrollbarVerticalDecrementColor = ParseUtil.ParseColor(propertyValue);
-//                    targetStyle.ScrollbarHorizontalDecrementColor = ParseUtil.ParseColor(propertyValue);
-//                    break;
-//                case "scrollbardecrementborderradius":
-//                    targetStyle.ScrollbarVerticalDecrementBorderRadius = ParseUtil.ParseFloat(propertyValue);
-//                    targetStyle.ScrollbarHorizontalDecrementBorderRadius = ParseUtil.ParseFloat(propertyValue);
-//                    break;
-//                case "scrollbardecrementbordersize":
-//                    targetStyle.ScrollbarVerticalDecrementBorderSize = ParseUtil.ParseFloat(propertyValue);
-//                    targetStyle.ScrollbarHorizontalDecrementBorderSize = ParseUtil.ParseFloat(propertyValue);
-//                    break;
-//                case "scrollbardecrementbordercolor":
-//                    targetStyle.ScrollbarVerticalDecrementBorderColor = ParseUtil.ParseColor(propertyValue);
-//                    targetStyle.ScrollbarHorizontalDecrementBorderColor = ParseUtil.ParseColor(propertyValue);
-//                    break;
-//                case "scrollbardecrementimage":
-//                    targetStyle.ScrollbarVerticalDecrementImage = ParseUtil.ParseTexture(propertyValue);
-//                    targetStyle.ScrollbarHorizontalDecrementImage = ParseUtil.ParseTexture(propertyValue);
-//                    break;
-//
-//                // General
-//                case "scrollbarverticalbuttonplacement":
-//                    targetStyle.ScrollbarVerticalButtonPlacement = ParseUtil.ParseScrollbarButtonPlacement(propertyValue);
-//                    break;
-//                case "scrollbarverticalattachment":
-//                    targetStyle.ScrollbarVerticalAttachment = ParseUtil.ParseScrollbarVerticalAttachment(propertyValue);
-//                    break;
-//
-//                // Track
-//                case "scrollbarverticaltracksize":
-//                    targetStyle.ScrollbarVerticalTrackSize = ParseUtil.ParseFloat(propertyValue);
-//                    break;
-//                case "scrollbarverticaltrackcolor":
-//                    targetStyle.ScrollbarVerticalTrackColor = ParseUtil.ParseColor(propertyValue);
-//                    break;
-//                case "scrollbarverticaltrackborderradius":
-//                    targetStyle.ScrollbarVerticalTrackBorderRadius = ParseUtil.ParseFloat(propertyValue);
-//                    break;
-//                case "scrollbarverticaltrackbordersize":
-//                    targetStyle.ScrollbarVerticalTrackBorderSize = ParseUtil.ParseFloat(propertyValue);
-//                    break;
-//                case "scrollbarverticaltrackbordercolor":
-//                    targetStyle.ScrollbarVerticalTrackBorderColor = ParseUtil.ParseColor(propertyValue);
-//                    break;
-//                case "scrollbarverticaltrackimage":
-//                    targetStyle.ScrollbarVerticalTrackImage = ParseUtil.ParseTexture(propertyValue);
-//                    break;
-//
-//                // Handle
-//                case "scrollbarverticalhandlesize":
-//                    targetStyle.ScrollbarVerticalHandleSize = ParseUtil.ParseFloat(propertyValue);
-//                    break;
-//                case "scrollbarverticalhandlecolor":
-//                    targetStyle.ScrollbarVerticalHandleColor = ParseUtil.ParseColor(propertyValue);
-//                    break;
-//                case "scrollbarverticalhandleborderradius":
-//                    targetStyle.ScrollbarVerticalHandleBorderRadius = ParseUtil.ParseFloat(propertyValue);
-//                    break;
-//                case "scrollbarverticalhandlebordersize":
-//                    targetStyle.ScrollbarVerticalHandleBorderSize = ParseUtil.ParseFloat(propertyValue);
-//                    break;
-//                case "scrollbarverticalhandlebordercolor":
-//                    targetStyle.ScrollbarVerticalHandleBorderColor = ParseUtil.ParseColor(propertyValue);
-//                    break;
-//                case "scrollbarverticalhandleimage":
-//                    targetStyle.ScrollbarVerticalHandleImage = ParseUtil.ParseTexture(propertyValue);
-//                    break;
-//
-//                // Increment
-//                case "scrollbarverticalincrementsize":
-//                    targetStyle.ScrollbarVerticalIncrementSize = ParseUtil.ParseFloat(propertyValue);
-//                    break;
-//                case "scrollbarverticalincrementcolor":
-//                    targetStyle.ScrollbarVerticalIncrementColor = ParseUtil.ParseColor(propertyValue);
-//                    break;
-//                case "scrollbarverticalincrementborderradius":
-//                    targetStyle.ScrollbarVerticalIncrementBorderRadius = ParseUtil.ParseFloat(propertyValue);
-//                    break;
-//                case "scrollbarverticalincrementbordersize":
-//                    targetStyle.ScrollbarVerticalIncrementBorderSize = ParseUtil.ParseFloat(propertyValue);
-//                    break;
-//                case "scrollbarverticalincrementbordercolor":
-//                    targetStyle.ScrollbarVerticalIncrementBorderColor = ParseUtil.ParseColor(propertyValue);
-//                    break;
-//                case "scrollbarverticalincrementimage":
-//                    targetStyle.ScrollbarVerticalIncrementImage = ParseUtil.ParseTexture(propertyValue);
-//                    break;
-//
-//                // Decrement
-//                case "scrollbarverticaldecrementsize":
-//                    targetStyle.ScrollbarVerticalDecrementSize = ParseUtil.ParseFloat(propertyValue);
-//                    break;
-//                case "scrollbarverticaldecrementcolor":
-//                    targetStyle.ScrollbarVerticalDecrementColor = ParseUtil.ParseColor(propertyValue);
-//                    break;
-//                case "scrollbarverticaldecrementborderradius":
-//                    targetStyle.ScrollbarVerticalDecrementBorderRadius = ParseUtil.ParseFloat(propertyValue);
-//                    break;
-//                case "scrollbarverticaldecrementbordersize":
-//                    targetStyle.ScrollbarVerticalDecrementBorderSize = ParseUtil.ParseFloat(propertyValue);
-//                    break;
-//                case "scrollbarverticaldecrementbordercolor":
-//                    targetStyle.ScrollbarVerticalDecrementBorderColor = ParseUtil.ParseColor(propertyValue);
-//                    break;
-//                case "scrollbarverticaldecrementimage":
-//                    targetStyle.ScrollbarVerticalDecrementImage = ParseUtil.ParseTexture(propertyValue);
-//                    break;
-//
-//
-//                // General
-//                case "scrollbarhorizontalbuttonplacement":
-//                    targetStyle.ScrollbarHorizontalButtonPlacement = ParseUtil.ParseScrollbarButtonPlacement(propertyValue);
-//                    break;
-//                case "scrollbarhorizontalattachment":
-//                    targetStyle.ScrollbarHorizontalAttachment = ParseUtil.ParseScrollbarHorizontalAttachment(propertyValue);
-//                    break;
-//
-//                // Track
-//                case "scrollbarhorizontaltracksize":
-//                    targetStyle.ScrollbarHorizontalTrackSize = ParseUtil.ParseFloat(propertyValue);
-//                    break;
-//                case "scrollbarhorizontaltrackcolor":
-//                    targetStyle.ScrollbarHorizontalTrackColor = ParseUtil.ParseColor(propertyValue);
-//                    break;
-//                case "scrollbarhorizontaltrackborderradius":
-//                    targetStyle.ScrollbarHorizontalTrackBorderRadius = ParseUtil.ParseFloat(propertyValue);
-//                    break;
-//                case "scrollbarhorizontaltrackbordersize":
-//                    targetStyle.ScrollbarHorizontalTrackBorderSize = ParseUtil.ParseFloat(propertyValue);
-//                    break;
-//                case "scrollbarhorizontaltrackbordercolor":
-//                    targetStyle.ScrollbarHorizontalTrackBorderColor = ParseUtil.ParseColor(propertyValue);
-//                    break;
-//                case "scrollbarhorizontaltrackimage":
-//                    targetStyle.ScrollbarHorizontalTrackImage = ParseUtil.ParseTexture(propertyValue);
-//                    break;
-//
-//                // Handle
-//                case "scrollbarhorizontalhandlesize":
-//                    targetStyle.ScrollbarHorizontalHandleSize = ParseUtil.ParseFloat(propertyValue);
-//                    break;
-//                case "scrollbarhorizontalhandlecolor":
-//                    targetStyle.ScrollbarHorizontalHandleColor = ParseUtil.ParseColor(propertyValue);
-//                    break;
-//                case "scrollbarhorizontalhandleborderradius":
-//                    targetStyle.ScrollbarHorizontalHandleBorderRadius = ParseUtil.ParseFloat(propertyValue);
-//                    break;
-//                case "scrollbarhorizontalhandlebordersize":
-//                    targetStyle.ScrollbarHorizontalHandleBorderSize = ParseUtil.ParseFloat(propertyValue);
-//                    break;
-//                case "scrollbarhorizontalhandlebordercolor":
-//                    targetStyle.ScrollbarHorizontalHandleBorderColor = ParseUtil.ParseColor(propertyValue);
-//                    break;
-//                case "scrollbarhorizontalhandleimage":
-//                    targetStyle.ScrollbarHorizontalHandleImage = ParseUtil.ParseTexture(propertyValue);
-//                    break;
-//
-//                // Increment
-//                case "scrollbarhorizontalincrementsize":
-//                    targetStyle.ScrollbarHorizontalIncrementSize = ParseUtil.ParseFloat(propertyValue);
-//                    break;
-//                case "scrollbarhorizontalincrementcolor":
-//                    targetStyle.ScrollbarHorizontalIncrementColor = ParseUtil.ParseColor(propertyValue);
-//                    break;
-//                case "scrollbarhorizontalincrementborderradius":
-//                    targetStyle.ScrollbarHorizontalIncrementBorderRadius = ParseUtil.ParseFloat(propertyValue);
-//                    break;
-//                case "scrollbarhorizontalincrementbordersize":
-//                    targetStyle.ScrollbarHorizontalIncrementBorderSize = ParseUtil.ParseFloat(propertyValue);
-//                    break;
-//                case "scrollbarhorizontalincrementbordercolor":
-//                    targetStyle.ScrollbarHorizontalIncrementBorderColor = ParseUtil.ParseColor(propertyValue);
-//                    break;
-//                case "scrollbarhorizontalincrementimage":
-//                    targetStyle.ScrollbarHorizontalIncrementImage = ParseUtil.ParseTexture(propertyValue);
-//                    break;
-//
-//                // Decrement
-//                case "scrollbarhorizontaldecrementsize":
-//                    targetStyle.ScrollbarHorizontalDecrementSize = ParseUtil.ParseFloat(propertyValue);
-//                    break;
-//                case "scrollbarhorizontaldecrementcolor":
-//                    targetStyle.ScrollbarHorizontalDecrementColor = ParseUtil.ParseColor(propertyValue);
-//                    break;
-//                case "scrollbarhorizontaldecrementborderradius":
-//                    targetStyle.ScrollbarHorizontalDecrementBorderRadius = ParseUtil.ParseFloat(propertyValue);
-//                    break;
-//                case "scrollbarhorizontaldecrementbordersize":
-//                    targetStyle.ScrollbarHorizontalDecrementBorderSize = ParseUtil.ParseFloat(propertyValue);
-//                    break;
-//                case "scrollbarhorizontaldecrementbordercolor":
-//                    targetStyle.ScrollbarHorizontalDecrementBorderColor = ParseUtil.ParseColor(propertyValue);
-//                    break;
-//                case "scrollbarhorizontaldecrementimage":
-//                    targetStyle.ScrollbarHorizontalDecrementImage = ParseUtil.ParseTexture(propertyValue);
-//                    break;
-//            }
-//        }
 
         private static void AssertSingleValue(LightList<StyleASTNode> propertyValues) {
             if (propertyValues.Count > 1) {

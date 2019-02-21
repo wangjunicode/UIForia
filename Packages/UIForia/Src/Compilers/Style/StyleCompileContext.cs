@@ -21,6 +21,13 @@ namespace UIForia.Compilers.Style {
             constantsWithReferences.Clear();
         }
 
+        /// <summary>
+        /// Returns a referenced StyleASTNode if the passed in node is a ReferenceNode.
+        /// Only called once all references have been resolved in the constants list.
+        /// </summary>
+        /// <param name="node">A node that can be a ReferenceNode or something else.</param>
+        /// <returns>The referenced node or the node itself if it's a regular one.</returns>
+        /// <exception cref="CompileException">thrown in case a reference cannot be resolved.</exception>
         public StyleASTNode GetValueForReference(StyleASTNode node) {
             if (node is ReferenceNode referenceNode) {
                 foreach (var c in constants) {
@@ -29,7 +36,7 @@ namespace UIForia.Compilers.Style {
                     }
                 }
 
-                throw new CompileException(referenceNode, $"Couldn't resolve reference {referenceNode}");
+                throw new CompileException(referenceNode, $"Couldn't resolve reference {referenceNode}. Known references are: {PrintConstants()}");
             }
 
             return node;
@@ -38,9 +45,9 @@ namespace UIForia.Compilers.Style {
         internal string PrintConstants() {
             if (constants.Count == 0) return string.Empty;
 
-            string result = constants[0].name;
+            string result = "\n\t" + constants[0].name;
             for (int index = 1; index < constants.Count; index++) {
-                result += ", " + constants[index].name;
+                result += "\n\t" + constants[index].name;
             }
 
             return result;

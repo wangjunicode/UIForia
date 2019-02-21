@@ -48,7 +48,7 @@ namespace UIForia.Rendering {
             if (!nextApplies) return false;
             
             if (expression != null) {
-                return invert ^ expression?.Execute() == 0;
+                return invert ^ expression.Execute() == 0;
             }
 
             if (attributeValue == null) {

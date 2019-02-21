@@ -61,6 +61,9 @@ namespace UIForia {
             return new TransformOffset((float) value, TransformUnit.Pixel);
         }
 
+        public override string ToString() {
+            return $"{value} {unit}";
+        }
     }
 
     public struct TransformOffsetPair {

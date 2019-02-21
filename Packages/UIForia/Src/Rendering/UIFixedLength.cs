@@ -66,6 +66,9 @@ namespace UIForia {
             return new UIFixedLength(value, UIFixedUnit.Percent);
         }
 
+        public override string ToString() {
+            return $"{value} {unit}";
+        }
     }
 
 }

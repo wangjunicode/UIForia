@@ -12,10 +12,6 @@ namespace UIForia.Compilers.Style {
 
         private StyleCompileContext context;
 
-        public static StyleSheetCompiler New() {
-            return new StyleSheetCompiler(new StyleSheetImporter());
-        }
-
         public StyleSheetCompiler(StyleSheetImporter styleSheetImporter) {
             this.styleSheetImporter = styleSheetImporter;
         }

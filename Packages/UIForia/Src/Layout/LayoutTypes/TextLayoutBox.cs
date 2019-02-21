@@ -13,7 +13,7 @@ namespace UIForia.Layout.LayoutTypes {
 
         protected override float ComputeContentWidth() {
             TextInfo textInfo = ((UITextElement) element).textInfo;
-            List<LineInfo> lineInfos = RunLayout(textInfo, float.MaxValue);
+            List<LineInfo> lineInfos = TextUtil.Layout(textInfo, float.MaxValue);
 
             ((UITextElement) element).textInfo = textInfo;
 
@@ -37,7 +37,7 @@ namespace UIForia.Layout.LayoutTypes {
                 return lh;
             }
             
-            List<LineInfo> lineInfos = RunLayout(textInfo, width);
+            List<LineInfo> lineInfos = TextUtil.Layout(textInfo, width - PaddingHorizontal - BorderHorizontal);
             LineInfo lastLine = lineInfos[lineInfos.Count - 1];
             ListPool<LineInfo>.Release(ref lineInfos);
             return lastLine.position.y + lh;
@@ -45,7 +45,7 @@ namespace UIForia.Layout.LayoutTypes {
 
         public override void RunLayout() {
             TextInfo textInfo = ((UITextElement) element).textInfo;
-            List<LineInfo> lineInfos = RunLayout(textInfo, allocatedWidth);
+            List<LineInfo> lineInfos = TextUtil.Layout(textInfo, allocatedWidth - PaddingHorizontal - BorderHorizontal);
             textInfo.lineInfos = ArrayPool<LineInfo>.CopyFromList(lineInfos);
             textInfo.lineCount = lineInfos.Count;
             ((UITextElement) element).textInfo = textInfo;

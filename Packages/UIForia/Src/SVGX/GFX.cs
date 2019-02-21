@@ -1,8 +1,10 @@
 using System;
 using System.Collections.Generic;
+using TMPro;
 using UIForia;
 using UIForia.Extensions;
 using UIForia.Rendering;
+using UIForia.Text;
 using UIForia.Util;
 using UnityEngine;
 using UnityEngine.Rendering;
@@ -43,11 +45,14 @@ namespace SVGX {
         private readonly MaterialPool simpleStrokePool;
         private readonly MaterialPool batchedTransparentPool;
         private readonly DeferredReleasePool<BatchedVertexData> vertexDataPool;
-        
+
         private readonly LightList<Vector2> scratchPointList;
-        
+
         private static readonly int s_StencilRefKey = Shader.PropertyToID("_StencilRef");
         private static readonly int s_MainTexKey = Shader.PropertyToID("_MainTex");
+        private static readonly int s_GlobalFontTextureKey = Shader.PropertyToID("_globalFontTexture");
+        private static readonly int s_GlobalFontData1Key = Shader.PropertyToID("_globalFontData1");
+        private static readonly int s_GlobalFontData2Key = Shader.PropertyToID("_globalFontData2");
 
         static GFX() {
             s_GradientRowMap = new Dictionary<SVGXGradient, int>();
@@ -64,7 +69,7 @@ namespace SVGX {
             scratchPointList = new LightList<Vector2>(64);
             debugLineMaterial = new Material(Shader.Find("UIForia/SimpleLineSegments"));
             vertexDataPool = new DeferredReleasePool<BatchedVertexData>();
-            
+
             stencilClipSetPool = new MaterialPool(Shader.Find("UIForia/StencilClipSet"));
             stencilClipClearPool = new MaterialPool(Shader.Find("UIForia/StencilClipClear"));
             simpleStrokePool = new MaterialPool(Shader.Find("UIForia/JoinedPolyline"));
@@ -300,7 +305,7 @@ namespace SVGX {
             public LightList<SVGXRenderShape> shapes;
 
         }
-       
+
         private void CreateClipFillVertices(SVGXDrawWave wave, Vector2[] points) {
             FillVertexData vertexData = s_FillVertexDataPool.Get();
 
@@ -388,7 +393,6 @@ namespace SVGX {
             }
         }
 
-        
 
         private void WriteGradient(SVGXGradient gradient, int row) {
             int baseIdx = gradientAtlas.width * row;
@@ -484,16 +488,26 @@ namespace SVGX {
 
                     if (call.type == DrawCallType.StandardStroke) {
                         for (int k = call.shapeRange.start; k < call.shapeRange.end; k++) {
-                            transparents.Add(new SVGXRenderShape(ctx.shapes[k], 0, j, j, DrawCallType.StandardStroke));
+                            TextInfo textInfo = null;
+                            if (ctx.shapes[k].type == SVGXShapeType.Text) {
+                                textInfo = ctx.textInfos[ctx.shapes[k].textInfoId];
+                            }
+
+                            transparents.Add(new SVGXRenderShape(ctx.shapes[k], 0, j, j, DrawCallType.StandardStroke, textInfo));
                         }
                     }
                     else if (call.type == DrawCallType.StandardFill) {
                         for (int k = call.shapeRange.start; k < call.shapeRange.end; k++) {
+                            TextInfo textInfo = null;
+                            if (ctx.shapes[k].type == SVGXShapeType.Text) {
+                                textInfo = ctx.textInfos[ctx.shapes[k].textInfoId];
+                            }
+
                             if (isFillTransparent || ctx.shapes[k].RequiresTransparentRendering) {
-                                transparents.Add(new SVGXRenderShape(ctx.shapes[k], 0, j, j, DrawCallType.StandardFill));
+                                transparents.Add(new SVGXRenderShape(ctx.shapes[k], 0, j, j, DrawCallType.StandardFill, textInfo));
                             }
                             else {
-                                opaques.Add(new SVGXRenderShape(ctx.shapes[k], 0, j, j, DrawCallType.StandardFill));
+                                opaques.Add(new SVGXRenderShape(ctx.shapes[k], 0, j, j, DrawCallType.StandardFill, textInfo));
                             }
                         }
                     }
@@ -549,7 +563,7 @@ namespace SVGX {
 
             public readonly int rowId;
             public readonly SVGXGradient gradient;
-            
+
             public GradientData(int rowId, SVGXGradient gradient) {
                 this.rowId = rowId;
                 this.gradient = gradient;
@@ -561,18 +575,60 @@ namespace SVGX {
             GroupByTexture(styles, renderShapes, texturedShapeGroups);
             TexturedShapeGroup[] array = texturedShapeGroups.Array;
 
+            Material material = null;
+            
+            int lastFontId = -1;
+
             for (int i = 0; i < texturedShapeGroups.Count; i++) {
                 LightList<SVGXRenderShape> shapes = array[i].shapes;
                 BatchedVertexData batchedVertexData = vertexDataPool.GetAndQueueForRelease();
 
                 for (int j = 0; j < shapes.Count; j++) {
-                    SVGXGradient gradient = s_GradientMap.GetOrDefault(styles[shapes[i].styleId].gradientId);
-                    int gradientId = s_GradientRowMap.GetOrDefault(gradient);
-                    GradientData gradientData = new GradientData(gradientId, gradient);
-                    batchedVertexData.CreateFillVertices(points, shapes[i], gradientData, styles[shapes[i].styleId], matrices[shapes[i].matrixId]);
+                    SVGXGradient gradient = s_GradientMap.GetOrDefault(styles[shapes[j].styleId].gradientId);
+                    GradientData gradientData = default;
+
+                    if (gradient != null) {
+                        int gradientId = s_GradientRowMap.GetOrDefault(gradient);
+                        gradientData = new GradientData(gradientId, gradient);
+                    }
+
+                    if (shapes[j].shape.type == SVGXShapeType.Text) {
+                        TextInfo textInfo = shapes[j].textInfo;
+                        int currentFontId = textInfo.spanInfos[0].font.GetInstanceID();
+
+                        if (lastFontId != currentFontId) {
+
+                            if (lastFontId != -1 && j != 0) {
+                                material = batchedTransparentPool.GetAndQueueForRelease();
+                                material.SetTexture(s_MainTexKey, textureMap.GetOrDefault(array[i].textureId));
+                                DrawMesh(batchedVertexData.FillMesh(), OriginMatrix, material);
+                                batchedVertexData = vertexDataPool.GetAndQueueForRelease();
+                            }
+
+                            Material fontMaterial = textInfo.spanInfos[0].font.material;
+
+                            Shader.SetGlobalTexture(s_GlobalFontTextureKey, textInfo.spanInfos[0].font.atlas);
+
+                            Shader.SetGlobalVector(s_GlobalFontData1Key, new Vector4(
+                                fontMaterial.GetFloat(ShaderUtilities.ID_WeightNormal),
+                                fontMaterial.GetFloat(ShaderUtilities.ID_WeightBold),
+                                textInfo.spanInfos[0].font.atlas.width,
+                                textInfo.spanInfos[0].font.atlas.height)
+                            );
+
+                            Shader.SetGlobalVector(s_GlobalFontData2Key, new Vector4(
+                                fontMaterial.GetFloat(ShaderUtilities.ID_GradientScale),
+                                fontMaterial.GetFloat(ShaderUtilities.ID_ScaleRatio_A),
+                                fontMaterial.GetFloat(ShaderUtilities.ID_ScaleRatio_B),
+                                fontMaterial.GetFloat(ShaderUtilities.ID_ScaleRatio_C))
+                            );
+                        }
+                    }
+
+                    batchedVertexData.CreateFillVertices(points, shapes[j], gradientData, styles[shapes[j].styleId], matrices[shapes[j].matrixId]);
                 }
 
-                Material material = batchedTransparentPool.GetAndQueueForRelease();
+                material = batchedTransparentPool.GetAndQueueForRelease();
                 material.SetTexture(s_MainTexKey, textureMap.GetOrDefault(array[i].textureId));
                 DrawMesh(batchedVertexData.FillMesh(), OriginMatrix, material);
 
@@ -586,13 +642,14 @@ namespace SVGX {
             BatchedVertexData batchedVertexData = vertexDataPool.GetAndQueueForRelease();
 
             int count = renderShapes.Count;
+            if (count == 0) return;
             SVGXRenderShape[] renderShapeArray = renderShapes.Array;
             int lastTextureId = styles[renderShapeArray[0].styleId].textureId;
             Matrix4x4 originMatrix = OriginMatrix;
 
             GradientData gradientData = default;
             int gradientLookupId = styles[renderShapeArray[0].styleId].gradientId;
-            
+
             if (gradientLookupId != -1) {
                 SVGXGradient gradient = s_GradientMap.GetOrDefault(gradientLookupId);
                 int gradientId = s_GradientRowMap.GetOrDefault(gradient);
@@ -606,17 +663,45 @@ namespace SVGX {
                 batchedVertexData.CreateStrokeVertices(points, renderShapeArray[0], gradientData, styles[renderShapeArray[0].styleId], matrices[renderShapeArray[0].matrixId]);
             }
 
+
+            int fontId = -1;
+
             Material material = null;
             for (int i = 1; i < count; i++) {
                 SVGXRenderShape renderShape = renderShapeArray[i];
                 int currentTextureId = styles[renderShape.styleId].textureId;
 
-                if (currentTextureId != lastTextureId) {
+                if (renderShape.shape.type == SVGXShapeType.Text) {
+                    TextInfo textInfo = renderShape.textInfo;
+                    int currentFontId = textInfo.spanInfos[0].font.GetInstanceID();
+
+                    if (fontId != currentFontId) {
+                        Material fontMaterial = textInfo.spanInfos[0].font.material;
+
+                        Shader.SetGlobalTexture(s_GlobalFontTextureKey, textInfo.spanInfos[0].font.atlas);
+
+                        Shader.SetGlobalVector(s_GlobalFontData1Key, new Vector4(
+                            fontMaterial.GetFloat(ShaderUtilities.ID_WeightNormal),
+                            fontMaterial.GetFloat(ShaderUtilities.ID_WeightBold),
+                            textInfo.spanInfos[0].font.atlas.width,
+                            textInfo.spanInfos[0].font.atlas.height)
+                        );
+
+                        Shader.SetGlobalVector(s_GlobalFontData2Key, new Vector4(
+                            fontMaterial.GetFloat(ShaderUtilities.ID_GradientScale),
+                            fontMaterial.GetFloat(ShaderUtilities.ID_ScaleRatio_A),
+                            fontMaterial.GetFloat(ShaderUtilities.ID_ScaleRatio_B),
+                            fontMaterial.GetFloat(ShaderUtilities.ID_ScaleRatio_C))
+                        );
+
+                        if (fontId != -1) { }
+
+                        fontId = currentFontId;
+                    }
+
                     material = batchedTransparentPool.GetAndQueueForRelease();
-                    material.SetTexture(s_MainTexKey, textureMap.GetOrDefault(currentTextureId));
-                    DrawMesh(batchedVertexData.FillMesh(), originMatrix, material);
-                    batchedVertexData = vertexDataPool.GetAndQueueForRelease();
                 }
+
 
                 if (gradientLookupId != -1) {
                     SVGXGradient gradient = s_GradientMap.GetOrDefault(gradientLookupId);
@@ -626,14 +711,13 @@ namespace SVGX {
                 else {
                     gradientData = default;
                 }
-                
+
                 if (renderShape.drawCallType == DrawCallType.StandardFill) {
                     batchedVertexData.CreateFillVertices(points, renderShape, gradientData, styles[renderShape.styleId], matrices[renderShape.matrixId]);
                 }
                 else if (renderShape.drawCallType == DrawCallType.StandardStroke) {
                     batchedVertexData.CreateStrokeVertices(points, renderShape, gradientData, styles[renderShape.styleId], matrices[renderShape.matrixId]);
                 }
-                
             }
 
             material = batchedTransparentPool.GetAndQueueForRelease();

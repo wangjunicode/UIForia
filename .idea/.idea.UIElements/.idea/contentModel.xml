@@ -680,6 +680,7 @@
               <e p="SVGXShape.cs" t="Include" />
               <e p="SVGXShapeType.cs" t="Include" />
               <e p="SVGXStyle.cs" t="Include" />
+              <e p="SVGXTextStyle.cs" t="Include" />
             </e>
             <e p="Systems" t="Include">
               <e p="BindingSystem.cs" t="Include" />

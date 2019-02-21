@@ -1,6 +1,8 @@
 using System;
 using System.Collections.Generic;
+using TMPro;
 using UIForia.Rendering;
+using UIForia.Text;
 using UIForia.Util;
 using UnityEngine;
 
@@ -34,6 +36,11 @@ namespace SVGX {
             const int join = 0;
             const int renderData = 0;
 
+            int flags0 = BitUtil.SetBytes(1, 0, join, 0);
+            int flags1 = BitUtil.SetBytes(1, 1, join, 0);
+            int flags2 = BitUtil.SetBytes(0, 2, join, 0);
+            int flags3 = BitUtil.SetBytes(0, 3, join, 0);
+
             for (int i = 1; i < count; i++) {
                 Vector2 prev = points[i - 1];
                 Vector2 curr = points[i];
@@ -50,10 +57,10 @@ namespace SVGX {
                 uv0List.Add(new Vector4(1, 0));
                 uv0List.Add(new Vector4(0, 0));
 
-                uv1List.Add(new Vector4(renderData, BitUtil.SetBytes(1, 0, join, 0), 0, strokeWidth));
-                uv1List.Add(new Vector4(renderData, BitUtil.SetBytes(1, 1, join, 0), 0, strokeWidth));
-                uv1List.Add(new Vector4(renderData, BitUtil.SetBytes(0, 2, join, 0), 0, strokeWidth));
-                uv1List.Add(new Vector4(renderData, BitUtil.SetBytes(0, 3, join, 0), 0, strokeWidth));
+                uv1List.Add(new Vector4(renderData, flags0, 0, strokeWidth));
+                uv1List.Add(new Vector4(renderData, flags1, 0, strokeWidth));
+                uv1List.Add(new Vector4(renderData, flags2, 0, strokeWidth));
+                uv1List.Add(new Vector4(renderData, flags3, 0, strokeWidth));
 
                 uv2List.Add(new Vector4(prev.x, -prev.y, next.x, -next.y));
                 uv2List.Add(new Vector4(curr.x, -curr.y, far.x, -far.y));
@@ -76,6 +83,10 @@ namespace SVGX {
             }
         }
 
+//        private RangeInt GenerateFillGeometry(LightList<Vector2> output, SVGXShapeType shapeType, SVGXMatrix matrix, Vector2[] points, RangeInt pointRange) {
+//                
+//        }
+//        
         private RangeInt GenerateStrokeGeometry(LightList<Vector2> output, SVGXShapeType shapeType, SVGXMatrix matrix, Vector2[] points, RangeInt pointRange, bool isClosed) {
             RangeInt retn = new RangeInt(output.Count, 0);
 
@@ -102,14 +113,13 @@ namespace SVGX {
                     break;
 
                 case SVGXShapeType.Path: {
-
                     if (isClosed) {
                         output.Add(Vector2.zero);
                     }
                     else {
                         output.Add(Vector2.zero);
                     }
-                    
+
                     for (int i = pointRange.start; i < pointRange.end; i++) {
                         output.Add(matrix.Transform(points[i]));
                     }
@@ -124,6 +134,7 @@ namespace SVGX {
                         output.Add(output[output.Count - 1] + output[output.Count - 1] - output[output.Count - 2]);
                         output.Add(output[output.Count - 1] + output[output.Count - 1] - output[output.Count - 2]);
                     }
+
                     break;
                 }
                 case SVGXShapeType.Ellipse:
@@ -187,11 +198,10 @@ namespace SVGX {
         private const int DrawType_Stroke = 0;
         private const int VertexType_Near = 1;
         private const int VertexType_Far = 0;
-        
+
         internal void CreateStrokeVertices(Vector2[] points, SVGXRenderShape renderShape, GFX.GradientData gradientData, SVGXStyle style, SVGXMatrix matrix) {
-            
             // todo -- use point cache to store geometry for multiple shape lookups, index by shape id, use returned ranged from GenerateStrokeGeometry
-            
+
             LightList<Vector2> pointCache = LightListPool<Vector2>.Get();
 
             RangeInt range = GenerateStrokeGeometry(pointCache, renderShape.shape.type, matrix, points, renderShape.shape.pointRange, renderShape.shape.isClosed);
@@ -202,7 +212,7 @@ namespace SVGX {
 
             bool isClosed = renderShape.shape.isClosed;
             const int cap = 1;
-            
+
             if (isClosed) {
                 GenerateSegmentBodies(pointCache.Array, pointCache.Count - 2, color, strokeWidth, renderShape.zIndex);
             }
@@ -290,19 +300,85 @@ namespace SVGX {
             switch (renderShape.shape.type) {
                 case SVGXShapeType.Unset:
                     break;
+                case SVGXShapeType.Text: {
+                    Vector2 p0 = matrix.Transform(transformedArray[start]);
+                    
+                    List<LineInfo> lineInfos = TextUtil.Layout(renderShape.textInfo, float.MaxValue);
+                    renderShape.textInfo.lineInfos = ArrayPool<LineInfo>.CopyFromList(lineInfos);
+                    renderShape.textInfo.lineCount = lineInfos.Count;
+                    TextUtil.ApplyLineAndWordOffsets(renderShape.textInfo);
+                    ListPool<LineInfo>.Release(ref lineInfos);
+                    
+                    CharInfo[] charInfos = renderShape.textInfo.charInfos;
+                    int charCount = renderShape.textInfo.charCount;
+
+                    Color32 outlineColor = Color.red;
+                    float outlineWidth = 4f;
+                    float outlineSoftness = 0f;
+
+                    Color32 underlayColor = Color.white;
+                    float underlayOffsetX = 0;
+                    float underlayOffsetY = 0;
+                    float underlayDilate = 0;
+
+                    Color32 glowColor = Color.green;
+                    
+                    Vector4 outline = new Vector4(new StyleColor(outlineColor).rgba, outlineWidth, outlineSoftness, 0);
+                    
+                    for (int i = 0; i < charCount; i++) {
+                        if(charInfos[i].character == ' ') continue;
+                        Vector2 topLeft = charInfos[i].topLeft;
+                        Vector2 bottomRight = charInfos[i].bottomRight;
+                        
+                        positionList.Add(new Vector3(p0.x + topLeft.x, -p0.y + -bottomRight.y, z)); // Bottom Left
+                        positionList.Add(new Vector3(p0.x + topLeft.x, -p0.y + -topLeft.y, z)); // Top Left
+                        positionList.Add(new Vector3(p0.x + bottomRight.x, -p0.y + -topLeft.y, z)); // Top Right
+                        positionList.Add(new Vector3(p0.x + bottomRight.x, -p0.y + -bottomRight.y, z)); // Bottom Right
+                        
+                        uv0List.Add(new Vector4(charInfos[i].uv0.x, charInfos[i].uv0.y, charInfos[i].uv2.x, 0));
+                        uv0List.Add(new Vector4(charInfos[i].uv0.x, charInfos[i].uv1.y, charInfos[i].uv2.x, 0));
+                        uv0List.Add(new Vector4(charInfos[i].uv1.x, charInfos[i].uv1.y, charInfos[i].uv2.x, 0));
+                        uv0List.Add(new Vector4(charInfos[i].uv1.x, charInfos[i].uv0.y, charInfos[i].uv2.x, 0));
+                        
+                        uv1List.Add(new Vector4(renderData, 0, 0, 0));
+                        uv1List.Add(new Vector4(renderData, 0, 0, 0));
+                        uv1List.Add(new Vector4(renderData, 0, 0, 0));
+                        uv1List.Add(new Vector4(renderData, 0, 0, 0));
+
+                        uv2List.Add(outline);
+                        uv2List.Add(outline);
+                        uv2List.Add(outline);
+                        uv2List.Add(outline);
+                        
+                        colorsList.Add(style.fillColor);
+                        colorsList.Add(style.fillColor);
+                        colorsList.Add(style.fillColor);
+                        colorsList.Add(style.fillColor);
+                        
+                        trianglesList.Add(triangleIndex + 0);
+                        trianglesList.Add(triangleIndex + 1);
+                        trianglesList.Add(triangleIndex + 2);
+                        trianglesList.Add(triangleIndex + 2);
+                        trianglesList.Add(triangleIndex + 3);
+                        trianglesList.Add(triangleIndex + 0);
+
+                        triangleIndex += 4;
+                    }
+                    
+                    break;
+                }
                 case SVGXShapeType.Ellipse:
                 case SVGXShapeType.Circle:
-                case SVGXShapeType.Rect:
+                // todo -- consider generating full geometry and not using discard in the shader when using opaque
+                case SVGXShapeType.Rect: {
 
-                    Vector2 p0 = transformedArray[0];
-                    Vector2 p1 = transformedArray[1];
-                    Vector2 p2 = transformedArray[2];
-                    Vector2 p3 = transformedArray[3];
+                    Vector2 p0 = matrix.Transform(points[start + 0]);
+                    Vector2 p1 = matrix.Transform(points[start + 1]);
 
                     positionList.Add(new Vector3(p0.x, -p0.y, z));
+                    positionList.Add(new Vector3(p1.x, -p0.y, z));
                     positionList.Add(new Vector3(p1.x, -p1.y, z));
-                    positionList.Add(new Vector3(p2.x, -p2.y, z));
-                    positionList.Add(new Vector3(p3.x, -p3.y, z));
+                    positionList.Add(new Vector3(p0.x, -p1.y, z));
 
                     trianglesList.Add(triIdx + 0);
                     trianglesList.Add(triIdx + 1);
@@ -339,15 +415,15 @@ namespace SVGX {
                     triangleIndex = triIdx + 4;
 
                     break;
-
-                case SVGXShapeType.Path:
+                }
+                case SVGXShapeType.Path: {
 
                     // assume closed for now
                     // assume convex for now
 
                     throw new NotImplementedException();
-
-                case SVGXShapeType.RoundedRect: // or other convex shape without holes
+                }
+                case SVGXShapeType.RoundedRect: { // or other convex shape without holes
 
                     for (int i = start; i < end; i++) {
                         positionList.Add(new Vector3(transformedArray[i].x, transformedArray[i].y, z));
@@ -367,7 +443,7 @@ namespace SVGX {
                     triangleIndex = triIdx + renderShape.shape.pointRange.length; // todo this might be off by 1
 
                     break;
-
+                }
                 default:
                     throw new ArgumentOutOfRangeException();
             }

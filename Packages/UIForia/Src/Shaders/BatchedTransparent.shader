@@ -22,7 +22,8 @@ Shader "UIForia/BatchedTransparent" {
            #pragma vertex vert
            #pragma fragment frag
            #pragma enable_d3d11_debug_symbols
-
+           #pragma debug
+           
            #include "UnityCG.cginc"
            #include "UIForiaInc.cginc"
            
@@ -30,7 +31,12 @@ Shader "UIForia/BatchedTransparent" {
            
            uniform sampler2D _MainTex;
            uniform sampler2D _globalGradientAtlas;
+           uniform sampler2D _globalFontTexture;
+           
            uniform float _globalGradientAtlasSize;
+           
+           uniform float4 _globalFontData1; // WeightNormal, WeightBold, TextureSizeX, TextureSizeY
+           uniform float4 _globalFontData2; // GradientScale, ScaleRatioA, ScaleRatioB, ScaleRatioC
                     
            struct appdata {
                 float4 vertex : POSITION;
@@ -74,6 +80,8 @@ Shader "UIForia/BatchedTransparent" {
                 return o;
            }
            
+           
+           
            v2f LineVertex(appdata input) {
                v2f o;
                
@@ -110,7 +118,6 @@ Shader "UIForia/BatchedTransparent" {
                
                o.flags = float4(strokeWidth, w * dir, aa, curr.x == next.x || curr.y == next.y);
 
-                
                if(isCap) {
                     if(isNear) {
                         pos = curr + w * v1 + dir * w * n1;
@@ -154,7 +161,7 @@ Shader "UIForia/BatchedTransparent" {
                 #define ShapeType i.flags.x
                 #define GradientId i.flags.z
                 #define GradientDirection i.flags.w
-                                
+                                                
                 float t = lerp(i.uv.x, 1 - i.uv.y, GradientDirection);
                 float y = GetPixelInRowUV(GradientId, _globalGradientAtlasSize);
 
@@ -186,21 +193,133 @@ Shader "UIForia/BatchedTransparent" {
                 return color;
            }
            
+           fixed4 GetColor(half d, fixed4 faceColor, fixed4 outlineColor, half outline, half softness) {
+                half faceAlpha = 1 - saturate((d - outline * 0.5 + softness * 0.5) / (1.0 + softness));
+                half outlineAlpha = saturate((d + outline * 0.5)) * sqrt(min(1.0, outline));
+            
+                faceColor.rgb *= faceColor.a;
+                outlineColor.rgb *= outlineColor.a;
+            
+                faceColor = lerp(faceColor, outlineColor, outlineAlpha);
+            
+                faceColor *= faceAlpha;
+            
+                return faceColor;
+           }
+           
+           #define gWeightNormal _globalFontData1.x
+           #define gWeightBold _globalFontData1.y
+           #define gFontTextureWidth _globalFontData1.z
+           #define gFontTextureHeight _globalFontData1.w
+           #define gGradientScale _globalFontData2.x
+           #define gScaleRatioA _globalFontData2.y
+           #define gScaleRatioB _globalFontData2.z
+           #define gScaleRatioC _globalFontData2.w
+           #define _ScaleX 1
+           #define _ScaleY 1
+           #define _FaceDilate 0
+           #define _OutlineWidth 0
+           #define _OutlineSoftness 0
+           #define _GlowOuter 0
+           #define _GlowOffset 0
+           #define _UnderlayColor 0
+           #define _UnderlaySoftness 0
+           #define _UnderlayDilate 0
+           #define _UnderlayOffsetX 0
+           #define _UnderlayOffsetY 0
+               
+           v2f TextVertex(appdata input) {
+           
+               float4 vPosition = UnityObjectToClipPos(input.vertex);
+               float2 pixelSize = vPosition.w;
+               
+               pixelSize /= float2(_ScaleX, _ScaleY) * abs(mul((float2x2)UNITY_MATRIX_P, _ScreenParams.xy));
+               float scale = rsqrt(dot(pixelSize, pixelSize));
+			   scale *= abs(input.uv.z) * gGradientScale * 1.5; 
+			   
+			   int bold = 0;
+			   
+			   float weight = lerp(gWeightNormal, gWeightBold, 0) / 4.0;
+			   weight = (weight + _FaceDilate) * gScaleRatioA * 0.5;
+			   
+			   float bias =(.5 - weight) + (.5 / scale);
+			   float alphaClip = (1.0 - _OutlineWidth * gScaleRatioA - _OutlineSoftness * gScaleRatioA);
+
+			   alphaClip = min(alphaClip, 1.0 - _GlowOffset * gScaleRatioB - _GlowOuter * gScaleRatioB);
+			   alphaClip = alphaClip / 2.0 - ( .5 / scale) - weight;
+			   
+			   float4 underlayColor = _UnderlayColor;
+			   underlayColor.rgb *= underlayColor.a;
+
+			   float bScale = scale;
+			   bScale /= 1 + ((_UnderlaySoftness * gScaleRatioC) * bScale);
+			   float bBias = (0.5 - weight) * bScale - 0.5 - ((_UnderlayDilate *  gScaleRatioC) * 0.5 * bScale);
+
+			   float x = -(_UnderlayOffsetX *  gScaleRatioC) * gGradientScale / gFontTextureWidth;
+			   float y = -(_UnderlayOffsetY *  gScaleRatioC) * gGradientScale / gFontTextureHeight;
+			   float2 bOffset = float2(x, y);
+			   //float4 clampedRect = clamp(_ClipRect, -2e10, 2e10);
+			   //float2 maskUV = (vert.xy - clampedRect.xy) / (clampedRect.zw - clampedRect.xy);
+
+			   // Support for texture tiling and offset
+			  // float2 textureUV = UnpackUV(input.texcoord1.x);
+			  // float2 faceUV = TRANSFORM_TEX(textureUV, _FaceTex);
+			  // float2 outlineUV = TRANSFORM_TEX(textureUV, _OutlineTex);
+//			  fixed4 outlineColor = input.util.x;
+			   v2f o;
+			   o.vertex = vPosition;
+               o.color = input.color;
+               o.uv = input.uv;
+               o.flags = float4(alphaClip, scale, bias, weight);
+               o.colorFlags = float4(0, 0, 0, 0);   			   
+			   return o;
+           }
+           
+           fixed4 TextFragment(v2f input) {
+           
+               float c = tex2Dlod(_globalFontTexture, float4(input.uv.xy, 0, 0)).a;
+               
+               float scale = input.flags.y;
+			   float bias = input.flags.z;
+			   float weight	= input.flags.w;
+               float sd = (bias - c) * scale;
+
+               float outline = (0.025 * gScaleRatioA) * scale;
+               float softness = (0 * gScaleRatioA) * scale;
+               
+               half4 faceColor = input.color;
+               fixed4 outlineColor = fixed4(0, 0, 0, 1); //input.colorFlags.x;
+               
+               faceColor.rgb *= input.color.rgb;
+			   faceColor = GetColor(sd, faceColor, outlineColor, outline, softness);
+			   
+			   return faceColor * input.color.a;
+           }
+           
            v2f vert (appdata input) {
+               return TextVertex(input);
                uint renderData = (uint)input.flags.x;
                int isFill = (renderData & 0xffff) == 1;
                uint shapeType = (renderData >> 16) & (1 << 16) - 1;
                if(isFill) {
                    return FillVertex(input, shapeType);
                }
+               else 
                return LineVertex(input);
            }
 
            fixed4 frag (v2f i) : SV_Target {
+               return TextFragment(i);
+
                if(i.flags.x == 1) {
                    return FillFragment(i);
                }
-               return LineFragment(i);
+               else if(i.flags.x == 2) {
+                   return TextFragment(i);
+               }
+               else {
+                   return LineFragment(i);
+               }
            }
            
            ENDCG

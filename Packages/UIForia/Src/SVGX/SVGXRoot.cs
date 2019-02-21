@@ -1,3 +1,5 @@
+using TMPro;
+using UIForia.Util;
 using UnityEngine;
 
 namespace SVGX {
@@ -43,15 +45,30 @@ namespace SVGX {
 //            ctx.SetFill(texture);
 //            ctx.FillRect(new Rect(-50, -50, 300, 300));
 
-            ctx.BeginPath();
-            ctx.SetStrokeColor(tintColor);
-            ctx.SetStrokeWidth(strokeWidth);
-            ctx.SetStrokeOpacity(strokeOpacity);
-//            ctx.Circle(0, 0, 300);
-            ctx.LineTo(400, 400);
-            ctx.LineTo(400, 0);
+//            ctx.BeginPath();
+//            ctx.SetStrokeColor(tintColor);
+//            ctx.SetStrokeWidth(strokeWidth);
+//            ctx.SetStrokeOpacity(strokeOpacity);
+////            ctx.Circle(0, 0, 300);
+//            ctx.LineTo(400, 400);
+//            ctx.LineTo(400, 0);
+//            ctx.Stroke();
+//
+//            ctx.BeginPath();
 //            ctx.Rect(0, 0, 300, 300);
-            ctx.Stroke();
+//            ctx.SetFill(Color.yellow);
+//            ctx.Fill();
+
+            SVGXTextStyle textStyle = new SVGXTextStyle() {
+                fontSize = 72,
+                color = Color.yellow
+            };
+            
+            ctx.SetFill(Color.yellow);
+            ctx.Text(0, 0, TextUtil.CreateTextInfo(new TextUtil.TextSpan(TMP_FontAsset.defaultFontAsset, textStyle, "Hello World")));
+            ctx.Text(100, 200, TextUtil.CreateTextInfo(new TextUtil.TextSpan(TMP_FontAsset.defaultFontAsset, textStyle, "Goodbye Boston")));
+//            ctx.Stroke();
+            ctx.Fill();
 
 //            ctx.SetFill(new Color(1, 0, 0, 0.5f));
 //

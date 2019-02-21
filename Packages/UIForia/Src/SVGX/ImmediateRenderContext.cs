@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using TMPro;
 using UIForia.Text;
 using UIForia.Util;
 using UnityEngine;
@@ -27,6 +28,7 @@ namespace SVGX {
         internal readonly Stack<int> clipStack;
         internal readonly LightList<SVGXGradient> gradients;
         internal readonly LightList<Texture2D> textures;
+        internal readonly LightList<TextInfo> textInfos;
 
         private Vector2 lastPoint;
         private SVGXMatrix currentMatrix;
@@ -47,6 +49,7 @@ namespace SVGX {
             shapes.Add(new SVGXShape(SVGXShapeType.Unset, default));
             textures = new LightList<Texture2D>();
             clipStack = new Stack<int>();
+            textInfos = new LightList<TextInfo>();
             currentStyle = SVGXStyle.Default();
         }
 
@@ -85,7 +88,6 @@ namespace SVGX {
         }
 
         public void MoveTo(float x, float y) {
-            // todo -- if last was move to, set point and return
             lastPoint = new Vector2(x, y);
             SVGXShape currentShape = shapes[shapes.Count - 1];
             if (currentShape.type != SVGXShapeType.Unset) {
@@ -93,10 +95,25 @@ namespace SVGX {
                 currentShapeRange.length++;
             }
         }
+        
+        public void Text(float x, float y, TextInfo text) {
+            SVGXShape currentShape = shapes[shapes.Count - 1];
 
-        public void Text(float x, float y, string text) { }
+            // todo -- bounds will depend on text layout, should we just do it here?
+            SVGXShape textShape = new SVGXShape(SVGXShapeType.Text, new RangeInt(points.Count, 1), new SVGXBounds(), false, textInfos.Count);
+            textInfos.Add(text);
 
-        public void Text(float x, float y, TextInfo text) { }
+            if (currentShape.type == SVGXShapeType.Unset) {
+                shapes[shapes.Count - 1] = textShape;
+            }
+            else {
+                shapes.Add(textShape);
+            }
+            
+            currentShapeRange.length++;
+            lastPoint = new Vector2(x, y);;
+            points.Add(lastPoint);
+        }
 
         public void LineTo(float x, float y) {
             SVGXShape currentShape = shapes[shapes.Count - 1];
@@ -292,6 +309,7 @@ namespace SVGX {
             textures.Clear();
             clipStack.Clear();
             clipGroups.Clear();
+            textInfos.Clear();
         }
 
         public void Save() {

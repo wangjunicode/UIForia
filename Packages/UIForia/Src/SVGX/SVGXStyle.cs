@@ -1,3 +1,4 @@
+using TMPro;
 using UnityEngine;
 
 namespace SVGX {
@@ -14,7 +15,7 @@ namespace SVGX {
         public FillMode fillMode;
         public int gradientId;
         public int textureId;
-
+        
         public bool IsFillTransparent {
             get { return fillOpacity < 1f || fillColor.a < 1f || textureId != -1; } // todo add check for gradient alpha
         }

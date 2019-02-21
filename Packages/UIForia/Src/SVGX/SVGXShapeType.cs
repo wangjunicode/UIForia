@@ -7,7 +7,8 @@ namespace SVGX {
         RoundedRect = 2,
         Path = 3,
         Circle = 4,
-        Ellipse = 5
+        Ellipse = 5,
+        Text = 6,
 
     }
 

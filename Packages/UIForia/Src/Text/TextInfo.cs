@@ -1,6 +1,6 @@
 namespace UIForia.Text {
 
-    public struct TextInfo {
+    public class TextInfo {
 
         public int lineCount;
         public int wordCount;

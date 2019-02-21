@@ -8,6 +8,7 @@ using UIForia.Parsing.Style.AstNodes;
 using UIForia.Rendering;
 using UIForia.Util;
 using UnityEngine;
+using FontStyle = UIForia.Text.FontStyle;
 
 [TestFixture]
 public class StyleSheetCompilerTests {
@@ -791,12 +792,16 @@ style anchoring {
     [Test]
     public void CompileText() {
         
+        // note: because of possible spaces in paths we have to support string values for urls
         var nodes = StyleParser2.Parse(@"
 export const red = red;
 
 style teXt { 
     TextColor = @red;
-    // TextFontAsset = url(EurostileLTPro);
+    TextFontAsset = url(""Gotham-Medium SDF"");
+    TextFontStyle = bold italic superscript underline highlight smallcaps;
+    TextFontSize = 14;
+    TextAlignment = Center;
 }
 
         ".Trim());
@@ -804,7 +809,16 @@ style teXt {
         StyleSheet styleSheet = NewStyleSheetCompiler().Compile(nodes);
         var styleGroup = styleSheet.styleGroups;
         Assert.AreEqual(Color.red, styleGroup[0].normal.TextColor);
-        // todo make loading fonts work
-        // Assert.AreEqual("EurostileLTPro", styleGroup[0].normal.TextFontAsset.name);
+        Assert.AreEqual("Gotham-Medium SDF", styleGroup[0].normal.TextFontAsset.name);
+        Assert.AreEqual(FontStyle.Normal
+                        | FontStyle.Bold
+                        | FontStyle.Italic
+                        | FontStyle.Highlight
+                        | FontStyle.Superscript
+                        | FontStyle.Underline
+                        | FontStyle.Highlight
+                        | FontStyle.SmallCaps, styleGroup[0].normal.TextFontStyle);
+        Assert.AreEqual(UIForia.Text.TextAlignment.Center, styleGroup[0].normal.TextAlignment);
+        Assert.AreEqual(14, styleGroup[0].normal.TextFontSize);
     }
 }

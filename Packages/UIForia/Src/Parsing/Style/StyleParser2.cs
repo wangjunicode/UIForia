@@ -335,7 +335,14 @@ namespace UIForia.Parsing.Style {
                     tokenStream.Advance();
                     AssertTokenTypeAndAdvance(StyleTokenType.ParenOpen);
 
-                    StyleASTNode url = ParseLiteralOrReference(StyleTokenType.Identifier);
+                    StyleASTNode url;
+                    if (tokenStream.Current.styleTokenType == StyleTokenType.String) {
+                        url = ParseLiteralOrReference(StyleTokenType.String);
+                    }
+                    else {
+                        url = ParseLiteralOrReference(StyleTokenType.Identifier);    
+                    }
+
                     while (tokenStream.HasMoreTokens && !AdvanceIfTokenType(StyleTokenType.ParenClose)) {
                         StyleIdentifierNode urlIdentifier = (StyleIdentifierNode) url;
                         // advancing tokens no matter the type. We want to concatenate all identifiers and slashes of a path again.

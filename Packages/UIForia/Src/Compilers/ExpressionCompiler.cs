@@ -980,7 +980,7 @@ namespace UIForia.Compilers {
             }
 
             if (targetType == typeof(float)) {
-                if (float.TryParse(node.rawValue.Replace("f", ""), out float f)) {
+                if (float.TryParse(node.rawValue.Replace("f", ""), NumberStyles.Float, CultureInfo.InvariantCulture, out float f)) {
                     return new ConstantExpression<float>(f);
                 }
 

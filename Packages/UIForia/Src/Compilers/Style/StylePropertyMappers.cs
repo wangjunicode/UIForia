@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Globalization;
 using TMPro;
 using UIForia.Layout;
 using UIForia.Layout.LayoutTypes;
@@ -281,7 +282,7 @@ namespace UIForia.Compilers.Style {
                         // todo revisit this default value and replace this with something else like 1mx? 
                         return GridTrackSize.Unset;
                     }
-                    else if (literalNode.type == StyleASTNodeType.NumericLiteral && float.TryParse(literalNode.rawValue, out float number)) {
+                    else if (literalNode.type == StyleASTNodeType.NumericLiteral && TryParseFloat(literalNode.rawValue, out float number)) {
                         return new GridTrackSize(number);
                     }
 
@@ -452,14 +453,14 @@ namespace UIForia.Compilers.Style {
             value = context.GetValueForReference(value);
             switch (value) {
                 case MeasurementNode measurementNode:
-                    if (float.TryParse(measurementNode.value.rawValue, out float measurementValue)) {
+                    if (TryParseFloat(measurementNode.value.rawValue, out float measurementValue)) {
                         return new UIMeasurement(measurementValue, MapUnit(measurementNode.unit));
                     }
 
                     break;
 
                 case StyleLiteralNode literalNode:
-                    if (float.TryParse(literalNode.rawValue, out float literalValue)) {
+                    if (TryParseFloat(literalNode.rawValue, out float literalValue)) {
                         return new UIMeasurement(literalValue);
                     }
 
@@ -473,14 +474,14 @@ namespace UIForia.Compilers.Style {
             value = context.GetValueForReference(value);
             switch (value) {
                 case MeasurementNode measurementNode:
-                    if (float.TryParse(measurementNode.value.rawValue, out float measurementValue)) {
+                    if (TryParseFloat(measurementNode.value.rawValue, out float measurementValue)) {
                         return new UIFixedLength(measurementValue, MapFixedUnit(measurementNode.unit));
                     }
 
                     break;
 
                 case StyleLiteralNode literalNode:
-                    if (float.TryParse(literalNode.rawValue, out float literalValue)) {
+                    if (TryParseFloat(literalNode.rawValue, out float literalValue)) {
                         return new UIFixedLength(literalValue);
                     }
 
@@ -580,14 +581,14 @@ namespace UIForia.Compilers.Style {
             value = context.GetValueForReference(value);
             switch (value) {
                 case MeasurementNode measurementNode:
-                    if (float.TryParse(measurementNode.value.rawValue, out float measurementValue)) {
+                    if (TryParseFloat(measurementNode.value.rawValue, out float measurementValue)) {
                         return new TransformOffset(measurementValue, MapTransformUnit(measurementNode.unit));
                     }
 
                     break;
 
                 case StyleLiteralNode literalNode:
-                    if (float.TryParse(literalNode.rawValue, out float literalValue)) {
+                    if (TryParseFloat(literalNode.rawValue, out float literalValue)) {
                         return new TransformOffset(literalValue);
                     }
 
@@ -749,13 +750,13 @@ namespace UIForia.Compilers.Style {
         private static float MapNumber(StyleASTNode node, StyleCompileContext context) {
             node = context.GetValueForReference(node);
             if (node is StyleIdentifierNode identifierNode) {
-                if (float.TryParse(identifierNode.name, out float number)) {
+                if (TryParseFloat(identifierNode.name, out float number)) {
                     return number;
                 }
             }
 
             if (node.type == StyleASTNodeType.NumericLiteral) {
-                if (float.TryParse(((StyleLiteralNode) node).rawValue, out float number)) {
+                if (TryParseFloat(((StyleLiteralNode) node).rawValue, out float number)) {
                     return number;
                 }
             }
@@ -790,6 +791,10 @@ namespace UIForia.Compilers.Style {
             throw new CompileException(node, $"Expected a proper {typeof(T).Name} value, which must be one of " +
                                              $"{EnumValues(typeof(T))} and your " +
                                              $"value {node} does not match any of them.");
+        }
+
+        private static bool TryParseFloat(string input, out float result) {
+           return float.TryParse(input, NumberStyles.Float, CultureInfo.InvariantCulture, out result);
         }
 
         private static void AssertSingleValue(LightList<StyleASTNode> propertyValues) {

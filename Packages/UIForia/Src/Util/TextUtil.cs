@@ -322,6 +322,7 @@ namespace UIForia.Util {
             textInfo.spanInfos[0].wordCount = textInfo.wordCount;
             textInfo.spanInfos[0].font = textSpan.fontAsset;
             textInfo.spanInfos[0].charCount = textInfo.charCount;
+            textInfo.spanInfos[0].textStyle = textSpan.textStyle;
             textInfo.spanInfos[0].fontSize = textSpan.textStyle.fontSize;
             textInfo.spanInfos[0].fontStyle = textSpan.textStyle.fontStyle;
             textInfo.spanInfos[0].alignment = textSpan.textStyle.alignment;

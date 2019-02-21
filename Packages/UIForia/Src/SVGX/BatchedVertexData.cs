@@ -253,6 +253,10 @@ namespace SVGX {
             return mesh;
         }
 
+        public static float EncodeColor(Color color) {
+            return Vector4.Dot(color, new Vector4(1f, 1 / 255f, 1 / 65025.0f, 1 / 16581375.0f));
+        }
+        
         internal void CreateFillVertices(Vector2[] points, SVGXRenderShape renderShape, GFX.GradientData gradientData, SVGXStyle style, SVGXMatrix matrix) {
             int start = renderShape.shape.pointRange.start;
             int end = renderShape.shape.pointRange.end;
@@ -302,28 +306,38 @@ namespace SVGX {
                     break;
                 case SVGXShapeType.Text: {
                     Vector2 p0 = matrix.Transform(transformedArray[start]);
-                    
-                    List<LineInfo> lineInfos = TextUtil.Layout(renderShape.textInfo, float.MaxValue);
-                    renderShape.textInfo.lineInfos = ArrayPool<LineInfo>.CopyFromList(lineInfos);
-                    renderShape.textInfo.lineCount = lineInfos.Count;
-                    TextUtil.ApplyLineAndWordOffsets(renderShape.textInfo);
+
+                    TextInfo textInfo = renderShape.textInfo;
+                    List<LineInfo> lineInfos = TextUtil.Layout(textInfo, float.MaxValue);
+                    textInfo.lineInfos = ArrayPool<LineInfo>.CopyFromList(lineInfos);
+                    textInfo.lineCount = lineInfos.Count;
+                    TextUtil.ApplyLineAndWordOffsets(textInfo);
                     ListPool<LineInfo>.Release(ref lineInfos);
                     
-                    CharInfo[] charInfos = renderShape.textInfo.charInfos;
-                    int charCount = renderShape.textInfo.charCount;
+                    CharInfo[] charInfos = textInfo.charInfos;
+                    int charCount = textInfo.charCount;
 
-                    Color32 outlineColor = Color.red;
-                    float outlineWidth = 4f;
-                    float outlineSoftness = 0f;
-
+                    SVGXTextStyle textStyle = textInfo.spanInfos[0].textStyle;
+                    Color32 outlineColor = textStyle.outlineColor;
+                    float outlineWidth = textStyle.outlineWidth;
+                    float outlineSoftness = textStyle.outlineSoftness;
+                    float oc = EncodeColor(Color.red); //textStyle.outlineColor);
+                    
                     Color32 underlayColor = Color.white;
                     float underlayOffsetX = 0;
                     float underlayOffsetY = 0;
                     float underlayDilate = 0;
 
                     Color32 glowColor = Color.green;
+                    float glowOuter = textStyle.glowOuter;
+                    float glowOffset = textStyle.glowOffset;
                     
-                    Vector4 outline = new Vector4(new StyleColor(outlineColor).rgba, outlineWidth, outlineSoftness, 0);
+                    Vector4 glowAndRenderData = new Vector4(renderData, new StyleColor(glowColor).rgba, glowOuter, glowOffset);
+
+                    int isStroke = 0;
+
+                        
+                    Vector4 outline = new Vector4(oc, outlineWidth, outlineSoftness, 0);
                     
                     for (int i = 0; i < charCount; i++) {
                         if(charInfos[i].character == ' ') continue;
@@ -335,15 +349,15 @@ namespace SVGX {
                         positionList.Add(new Vector3(p0.x + bottomRight.x, -p0.y + -topLeft.y, z)); // Top Right
                         positionList.Add(new Vector3(p0.x + bottomRight.x, -p0.y + -bottomRight.y, z)); // Bottom Right
                         
-                        uv0List.Add(new Vector4(charInfos[i].uv0.x, charInfos[i].uv0.y, charInfos[i].uv2.x, 0));
-                        uv0List.Add(new Vector4(charInfos[i].uv0.x, charInfos[i].uv1.y, charInfos[i].uv2.x, 0));
-                        uv0List.Add(new Vector4(charInfos[i].uv1.x, charInfos[i].uv1.y, charInfos[i].uv2.x, 0));
-                        uv0List.Add(new Vector4(charInfos[i].uv1.x, charInfos[i].uv0.y, charInfos[i].uv2.x, 0));
+                        uv0List.Add(new Vector4(charInfos[i].uv0.x, charInfos[i].uv0.y, charInfos[i].uv2.x, isStroke));
+                        uv0List.Add(new Vector4(charInfos[i].uv0.x, charInfos[i].uv1.y, charInfos[i].uv2.x, isStroke));
+                        uv0List.Add(new Vector4(charInfos[i].uv1.x, charInfos[i].uv1.y, charInfos[i].uv2.x, isStroke));
+                        uv0List.Add(new Vector4(charInfos[i].uv1.x, charInfos[i].uv0.y, charInfos[i].uv2.x, isStroke));
                         
-                        uv1List.Add(new Vector4(renderData, 0, 0, 0));
-                        uv1List.Add(new Vector4(renderData, 0, 0, 0));
-                        uv1List.Add(new Vector4(renderData, 0, 0, 0));
-                        uv1List.Add(new Vector4(renderData, 0, 0, 0));
+                        uv1List.Add(glowAndRenderData);
+                        uv1List.Add(glowAndRenderData);
+                        uv1List.Add(glowAndRenderData);
+                        uv1List.Add(glowAndRenderData);
 
                         uv2List.Add(outline);
                         uv2List.Add(outline);

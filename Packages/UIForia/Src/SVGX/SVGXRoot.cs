@@ -30,7 +30,9 @@ namespace SVGX {
         [Range(0, 1)] public float fillOpacity;
 
         public ColorStop[] gradientStops;
-
+        public float outlineWidth = 0.25f;
+        public Color textOutline;
+        
         public void Update() {
             camera.orthographic = true;
             camera.orthographicSize = Screen.height * 0.5f;
@@ -61,7 +63,9 @@ namespace SVGX {
 
             SVGXTextStyle textStyle = new SVGXTextStyle() {
                 fontSize = 72,
-                color = Color.yellow
+                color = Color.yellow,
+                outlineColor =  textOutline,
+                outlineWidth = outlineWidth
             };
             
             ctx.SetFill(Color.yellow);

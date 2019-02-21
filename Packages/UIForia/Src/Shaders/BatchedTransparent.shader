@@ -42,7 +42,7 @@ Shader "UIForia/BatchedTransparent" {
                 float4 vertex : POSITION;
                 float4 uv : TEXCOORD0;
                 float4 flags : TEXCOORD1;
-                float4 util : TEXCOORD2;
+                float4 uv2 : TEXCOORD2;
                 fixed4 color : COLOR;
            };
 
@@ -52,6 +52,7 @@ Shader "UIForia/BatchedTransparent" {
                 float4 flags : TEXCOORD0;
                 float4 uv : TEXCOORD1;
                 float4 colorFlags : TEXCOORD2;
+                fixed4 secondaryColor : COLOR1;
            };
 
            v2f FillVertex(appdata v, uint shapeType) {
@@ -75,19 +76,17 @@ Shader "UIForia/BatchedTransparent" {
                 uint gradientFlag = (fillFlags & FillMode_Gradient) != 0;
                 uint tintFlag = (fillFlags & FillMode_Tint) != 0;
                 uint gradientTintFlag = (fillFlags & FillMode_GradientTint) != 0;
-                
+                o.secondaryColor = fixed4(0, 0, 0, 0);
                 o.colorFlags = float4(texFlag, gradientFlag, tintFlag, gradientTintFlag);
                 return o;
            }
-           
-           
            
            v2f LineVertex(appdata input) {
                v2f o;
                
                uint flags = input.flags.y;
                
-               #define prevNext input.util
+               #define prevNext input.uv2
                
                float2 prev = prevNext.xy;
                float2 next = prevNext.zw;
@@ -133,7 +132,7 @@ Shader "UIForia/BatchedTransparent" {
                // todo -- support flags for pushing stroke to inside or outside of shape
                // for pushing stroke outwards: pos.xy - (n1 * strokeWidth * 0.5)
                // for pushing stroke inwards: pos.xy + (n1 * strokeWidth * 0.5)
-               
+               o.secondaryColor = fixed4(0, 0, 0, 0);
                o.vertex = UnityObjectToClipPos(float3(pos, input.vertex.z));
                return o;
            }
@@ -218,8 +217,8 @@ Shader "UIForia/BatchedTransparent" {
            #define _ScaleX 1
            #define _ScaleY 1
            #define _FaceDilate 0
-           #define _OutlineWidth 0
-           #define _OutlineSoftness 0
+           #define _OutlineWidth input.uv2.y
+           #define _OutlineSoftness input.uv2.z
            #define _GlowOuter 0
            #define _GlowOffset 0
            #define _UnderlayColor 0
@@ -228,6 +227,16 @@ Shader "UIForia/BatchedTransparent" {
            #define _UnderlayOffsetX 0
            #define _UnderlayOffsetY 0
                
+                    
+           inline float4 ColorFromFloat( float v ) {
+                float4 kEncodeMul = float4(1.0, 255.0, 65025.0, 160581375.0);
+                float kEncodeBit = 1.0/255.0;
+                float4 enc = kEncodeMul * v;
+                enc = frac (enc);
+                enc -= enc.yzww * kEncodeBit;
+                return enc;
+           }
+           
            v2f TextVertex(appdata input) {
            
                float4 vPosition = UnityObjectToClipPos(input.vertex);
@@ -258,23 +267,21 @@ Shader "UIForia/BatchedTransparent" {
 			   float x = -(_UnderlayOffsetX *  gScaleRatioC) * gGradientScale / gFontTextureWidth;
 			   float y = -(_UnderlayOffsetY *  gScaleRatioC) * gGradientScale / gFontTextureHeight;
 			   float2 bOffset = float2(x, y);
-			   //float4 clampedRect = clamp(_ClipRect, -2e10, 2e10);
-			   //float2 maskUV = (vert.xy - clampedRect.xy) / (clampedRect.zw - clampedRect.xy);
 
-			   // Support for texture tiling and offset
-			  // float2 textureUV = UnpackUV(input.texcoord1.x);
-			  // float2 faceUV = TRANSFORM_TEX(textureUV, _FaceTex);
-			  // float2 outlineUV = TRANSFORM_TEX(textureUV, _OutlineTex);
-//			  fixed4 outlineColor = input.util.x;
+               fixed4 c = ColorFromFloat(input.uv2.x) / 255;
+               
 			   v2f o;
 			   o.vertex = vPosition;
                o.color = input.color;
                o.uv = input.uv;
                o.flags = float4(alphaClip, scale, bias, weight);
-               o.colorFlags = float4(0, 0, 0, 0);   			   
+               o.colorFlags = float4(_OutlineWidth, _OutlineSoftness, input.uv2.x, 0);
+               o.secondaryColor = c;// fixed4(1, 0, 0, 1);
+               
 			   return o;
            }
-           
+      
+
            fixed4 TextFragment(v2f input) {
            
                float c = tex2Dlod(_globalFontTexture, float4(input.uv.xy, 0, 0)).a;
@@ -284,11 +291,12 @@ Shader "UIForia/BatchedTransparent" {
 			   float weight	= input.flags.w;
                float sd = (bias - c) * scale;
 
-               float outline = (0.025 * gScaleRatioA) * scale;
-               float softness = (0 * gScaleRatioA) * scale;
+               float outline = (input.colorFlags.x * gScaleRatioA) * scale;
+               float softness = (input.colorFlags.y * gScaleRatioA) * scale;
                
                half4 faceColor = input.color;
-               fixed4 outlineColor = fixed4(0, 0, 0, 1); //input.colorFlags.x;
+               fixed4 outlineColor = input.secondaryColor; //input.colorFlags.z;//ColorFromFloat(input.colorFlags.z);
+               //input.secondaryColor; //fixed4(0, 0, 0, 1); //input.colorFlags.x;
                
                faceColor.rgb *= input.color.rgb;
 			   faceColor = GetColor(sd, faceColor, outlineColor, outline, softness);

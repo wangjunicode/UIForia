@@ -11,6 +11,14 @@
 #define ShapeType_Circle 4
 #define ShapeType_Ellipse 5
 
+#define StrokePlacement_Center 0
+#define StrokePlacement_Inside 1
+#define StrokePlacement_Center 2
+
+#define RenderType_Fill 0
+#define RenderType_Text 1
+#define RenderType_Stroke 2
+
 #define Red fixed4(1, 0, 0, 1)
 #define Green fixed4(0, 1, 0, 1)
 #define Blue fixed4(0, 0, 1, 1)

@@ -85,11 +85,12 @@ namespace UIForia {
 //            bool collapseSpaces = true; //style.computedStyle.TextCollapseWhiteSpace;
 //            bool preserveNewlines = false; //style.computedStyle.TextPreserveNewLines;
 
-            if (textInfo.spanInfos != null) ArrayPool<SpanInfo>.Release(ref textInfo.spanInfos);
-            if (textInfo.wordInfos != null) ArrayPool<WordInfo>.Release(ref textInfo.wordInfos);
-            if (textInfo.lineInfos != null) ArrayPool<LineInfo>.Release(ref textInfo.lineInfos);
-            if (textInfo.charInfos != null) ArrayPool<CharInfo>.Release(ref textInfo.charInfos);
-
+            if (textInfo != null) {
+                if (textInfo.spanInfos != null) ArrayPool<SpanInfo>.Release(ref textInfo.spanInfos);
+                if (textInfo.wordInfos != null) ArrayPool<WordInfo>.Release(ref textInfo.wordInfos);
+                if (textInfo.lineInfos != null) ArrayPool<LineInfo>.Release(ref textInfo.lineInfos);
+                if (textInfo.charInfos != null) ArrayPool<CharInfo>.Release(ref textInfo.charInfos);
+            }
 //            textInfo = TextUtil.ProcessText(text, collapseSpaces, preserveNewlines, style.TextTransform);
 //            textInfo.spanCount = 1;
 //            textInfo.spanInfos = ArrayPool<SpanInfo>.GetMinSize(1);

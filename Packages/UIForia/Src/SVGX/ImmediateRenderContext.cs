@@ -471,6 +471,10 @@ namespace SVGX {
             currentStyle.fillOpacity = fillOpacity;
         }
 
+        public void SetStrokePlacement(StrokePlacement strokePlacement) {
+            currentStyle.strokePlacement = strokePlacement;
+        }
+
     }
 
 }

@@ -1,4 +1,3 @@
-using TMPro;
 using UnityEngine;
 
 namespace SVGX {
@@ -15,7 +14,8 @@ namespace SVGX {
         public FillMode fillMode;
         public int gradientId;
         public int textureId;
-        
+        public StrokePlacement strokePlacement;
+
         public bool IsFillTransparent {
             get { return fillOpacity < 1f || fillColor.a < 1f || textureId != -1; } // todo add check for gradient alpha
         }
@@ -30,6 +30,7 @@ namespace SVGX {
             retn.fillTintColor = Color.white;
             retn.gradientId = -1;
             retn.textureId = -1;
+            retn.strokePlacement = StrokePlacement.Center;
             return retn;
         }
 
@@ -43,6 +44,7 @@ namespace SVGX {
             retn.fillTintColor = style.fillTintColor;
             retn.gradientId = style.gradientId;
             retn.textureId = style.textureId;
+            retn.strokePlacement = style.strokePlacement;
             return retn;
         }
     }

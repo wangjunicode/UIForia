@@ -23,7 +23,7 @@ Shader "UIForia/BatchedTransparent" {
            #pragma fragment frag
            #pragma enable_d3d11_debug_symbols
            #pragma debug
-           
+           #pragma target 4.0
            #include "UnityCG.cginc"
            #include "UIForiaInc.cginc"
            
@@ -115,31 +115,28 @@ Shader "UIForia/BatchedTransparent" {
                o.color = input.color;
                o.uv = float4(w, w * dir, 0, 0);
                
-               o.flags = float4(strokeWidth, w * dir, aa, curr.x == next.x || curr.y == next.y);
+               o.flags = float4(RenderType_Stroke, w * dir, aa, strokeWidth);
 
                if(isCap) {
                     if(isNear) {
-                        pos = curr + w * v1 + dir * w * n1;
+                        pos = curr + w * n1 * dir; // * v1 + dir * w * n1;
                     }
                     else {
-                        pos = curr - w * v0 + dir * w * n0;
+                        pos = curr + w * n0 * dir; //v0 + dir * w * n0;
                     }
                }
                else {
                    pos = curr + (miter * miterLength * dir);
                }
-               
-               // todo -- support flags for pushing stroke to inside or outside of shape
-               // for pushing stroke outwards: pos.xy - (n1 * strokeWidth * 0.5)
-               // for pushing stroke inwards: pos.xy + (n1 * strokeWidth * 0.5)
+ 
                o.secondaryColor = fixed4(0, 0, 0, 0);
                o.vertex = UnityObjectToClipPos(float3(pos, input.vertex.z));
                return o;
            }
            
            fixed4 LineFragment(v2f i) {
-               return i.color;
-               float thickness = i.flags.x;
+//                return fixed4(1, 0, 0, 1);//i.color;
+               float thickness = i.flags.w;
                float aa = i.flags.z;
                float w = (thickness * 0.5) - aa;
 
@@ -165,7 +162,7 @@ Shader "UIForia/BatchedTransparent" {
                 float y = GetPixelInRowUV(GradientId, _globalGradientAtlasSize);
 
                 fixed4 color = i.color;
-                fixed4 textureColor = tex2D(_MainTex, i.uv);
+                fixed4 textureColor = tex2Dlod(_MainTex, float4(i.uv.xy, 0, 0));
                 fixed4 gradientColor = tex2Dlod(_globalGradientAtlas, float4(t, y, 0, 0));
                 fixed4 tintColor = lerp(White, color, i.colorFlags.z);                
                 
@@ -228,58 +225,63 @@ Shader "UIForia/BatchedTransparent" {
            #define _UnderlayOffsetY 0
                
                     
-           inline float4 ColorFromFloat( float v ) {
-                float4 kEncodeMul = float4(1.0, 255.0, 65025.0, 160581375.0);
-                float kEncodeBit = 1.0/255.0;
-                float4 enc = kEncodeMul * v;
-                enc = frac (enc);
-                enc -= enc.yzww * kEncodeBit;
-                return enc;
-           }
-           
-           v2f TextVertex(appdata input) {
+          inline float4 EncodeToFloat4(float v) {
+              v = clamp(v, 0, 0.99999); // this conversion works only with [0, 1)
+              float4 kEncodeMul = float4(1.0, 255.0, 65025.0, 16581375.0);
+              float kEncodeBit = 1.0 / 255.0;
+              float4 enc = kEncodeMul * v;
+              enc = frac(enc);
+              enc -= enc.yzww * kEncodeBit;
+              return enc;
+          }
+          
+          v2f TextVertex(appdata input) {
            
                float4 vPosition = UnityObjectToClipPos(input.vertex);
                float2 pixelSize = vPosition.w;
                
                pixelSize /= float2(_ScaleX, _ScaleY) * abs(mul((float2x2)UNITY_MATRIX_P, _ScreenParams.xy));
                float scale = rsqrt(dot(pixelSize, pixelSize));
-			   scale *= abs(input.uv.z) * gGradientScale * 1.5; 
-			   
-			   int bold = 0;
-			   
-			   float weight = lerp(gWeightNormal, gWeightBold, 0) / 4.0;
-			   weight = (weight + _FaceDilate) * gScaleRatioA * 0.5;
-			   
-			   float bias =(.5 - weight) + (.5 / scale);
-			   float alphaClip = (1.0 - _OutlineWidth * gScaleRatioA - _OutlineSoftness * gScaleRatioA);
-
-			   alphaClip = min(alphaClip, 1.0 - _GlowOffset * gScaleRatioB - _GlowOuter * gScaleRatioB);
-			   alphaClip = alphaClip / 2.0 - ( .5 / scale) - weight;
-			   
-			   float4 underlayColor = _UnderlayColor;
-			   underlayColor.rgb *= underlayColor.a;
-
-			   float bScale = scale;
-			   bScale /= 1 + ((_UnderlaySoftness * gScaleRatioC) * bScale);
-			   float bBias = (0.5 - weight) * bScale - 0.5 - ((_UnderlayDilate *  gScaleRatioC) * 0.5 * bScale);
-
-			   float x = -(_UnderlayOffsetX *  gScaleRatioC) * gGradientScale / gFontTextureWidth;
-			   float y = -(_UnderlayOffsetY *  gScaleRatioC) * gGradientScale / gFontTextureHeight;
-			   float2 bOffset = float2(x, y);
-
-               fixed4 c = ColorFromFloat(input.uv2.x) / 255;
+               scale *= abs(input.uv.z) * gGradientScale * 1.5; 
                
-			   v2f o;
-			   o.vertex = vPosition;
+               int bold = 0;
+               
+               float weight = lerp(gWeightNormal, gWeightBold, 0) / 4.0;
+               weight = (weight + _FaceDilate) * gScaleRatioA * 0.5;
+               
+               float bias =(.5 - weight) + (.5 / scale);
+               float alphaClip = (1.0 - _OutlineWidth * gScaleRatioA - _OutlineSoftness * gScaleRatioA);
+               
+               alphaClip = min(alphaClip, 1.0 - _GlowOffset * gScaleRatioB - _GlowOuter * gScaleRatioB);
+               alphaClip = alphaClip / 2.0 - ( .5 / scale) - weight;
+               
+               float4 underlayColor = _UnderlayColor;
+               underlayColor.rgb *= underlayColor.a;
+               
+               float bScale = scale;
+               bScale /= 1 + ((_UnderlaySoftness * gScaleRatioC) * bScale);
+               float bBias = (0.5 - weight) * bScale - 0.5 - ((_UnderlayDilate *  gScaleRatioC) * 0.5 * bScale);
+               
+               float x = -(_UnderlayOffsetX *  gScaleRatioC) * gGradientScale / gFontTextureWidth;
+               float y = -(_UnderlayOffsetY *  gScaleRatioC) * gGradientScale / gFontTextureHeight;
+               float2 bOffset = float2(x, y);
+               
+               uint data = uint(input.uv2.x);
+               
+               // todo this works but ignores alpha. better to pack with 3 bits and alpha separate. can combine multiple alphas into one
+               float4 c = EncodeToFloat4(input.uv2.x);
+               c.a = 1;
+               
+               v2f o;
+               o.vertex = vPosition;
                o.color = input.color;
                o.uv = input.uv;
                o.flags = float4(alphaClip, scale, bias, weight);
                o.colorFlags = float4(_OutlineWidth, _OutlineSoftness, input.uv2.x, 0);
                o.secondaryColor = c;// fixed4(1, 0, 0, 1);
                
-			   return o;
-           }
+               return o;
+          }
       
 
            fixed4 TextFragment(v2f input) {
@@ -305,24 +307,27 @@ Shader "UIForia/BatchedTransparent" {
            }
            
            v2f vert (appdata input) {
-               return TextVertex(input);
                uint renderData = (uint)input.flags.x;
-               int isFill = (renderData & 0xffff) == 1;
+               int renderType = (renderData & 0xffff);
                uint shapeType = (renderData >> 16) & (1 << 16) - 1;
-               if(isFill) {
+               
+               if(renderType == RenderType_Fill) {
                    return FillVertex(input, shapeType);
                }
-               else 
-               return LineVertex(input);
+               else if(renderType == RenderType_Text) {
+                   return TextVertex(input);
+               }
+               else {
+                   return LineVertex(input);
+               }
            }
 
            fixed4 frag (v2f i) : SV_Target {
-               return TextFragment(i);
 
-               if(i.flags.x == 1) {
+               if(i.flags.x == RenderType_Fill) {
                    return FillFragment(i);
                }
-               else if(i.flags.x == 2) {
+               else if(i.flags.x == RenderType_Text) {
                    return TextFragment(i);
                }
                else {

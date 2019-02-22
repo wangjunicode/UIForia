@@ -384,10 +384,10 @@ namespace SVGX {
         private Matrix4x4 OriginMatrix {
             get {
                 Vector3 origin = camera.transform.position;
-                origin.x -= 0.5f * Screen.width;
-                //  origin.y += 0.5f * Screen.height;
+                // origin.x -= 0.5f * Screen.width;
+                // origin.y += 0.5f * Screen.height;
                 origin.z += 2;
-                origin.x -= 1f;
+                //origin.x -= 1f;
 
                 return Matrix4x4.TRS(origin, Quaternion.identity, Vector3.one);
             }

@@ -62,7 +62,7 @@ namespace UIForia {
             m_BindingSystem = new BindingSystem();
             m_LayoutSystem = new LayoutSystem(m_StyleSystem);
             m_InputSystem = new DefaultInputSystem(m_LayoutSystem, m_StyleSystem);
-            m_RenderSystem = new RenderSystem(null, m_LayoutSystem);
+            m_RenderSystem = new SVGXRenderSystem(null, m_LayoutSystem);
             m_RoutingSystem = new RoutingSystem();
 
             m_Systems.Add(m_StyleSystem);

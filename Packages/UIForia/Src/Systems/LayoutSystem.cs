@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 using UIForia.Extensions;
 using UIForia.Elements;
 using UIForia.Layout;
@@ -35,6 +36,7 @@ namespace UIForia.Systems {
         private Size m_ScreenSize;
         private readonly LightList<UIElement> m_Elements;
         private readonly LightList<ViewRect> m_Views;
+        private readonly LightList<UIElement> m_VisibleElements;
 
         private static readonly IComparer<UIElement> comparer = new UIElement.RenderLayerComparerAscending();
 
@@ -45,6 +47,7 @@ namespace UIForia.Systems {
             this.m_PendingInitialization = new LightList<LayoutBox>();
             this.m_VirtualElements = new LightList<VirtualElement>();
             this.m_Views = new LightList<ViewRect>();
+            this.m_VisibleElements = new LightList<UIElement>();
             m_StyleSystem.onTextContentChanged += HandleTextContentChanged;
             m_StyleSystem.onStylePropertyChanged += HandleStylePropertyChanged;
         }
@@ -74,6 +77,9 @@ namespace UIForia.Systems {
 
         public void OnUpdate() {
             InitializeLayoutBoxes();
+
+            // todo -- should this be a list per-view?
+            m_VisibleElements.Clear();
 
             bool forceLayout = false;
             Size screen = new Size(Screen.width, Screen.height);
@@ -135,6 +141,12 @@ namespace UIForia.Systems {
             layoutResult.ScreenPosition = layoutResult.localPosition;
             layoutResult.Rotation = root.style.TransformRotation;
             layoutResult.clipRect = new Rect(0, 0, viewportRect.width, viewportRect.height);
+            layoutResult.border = new OffsetRect(
+                root.BorderTop,
+                root.BorderRight,
+                root.BorderBottom,
+                root.BorderLeft
+            );
             element.layoutResult = layoutResult;
 
             CreateOrDestroyScrollbars(root);
@@ -194,11 +206,18 @@ namespace UIForia.Systems {
                     layoutResult.Scale = new Vector2(box.style.TransformScaleX, box.style.TransformScaleY);
                     layoutResult.Rotation = parentBox.style.TransformRotation + box.style.TransformRotation;
                     layoutResult.Pivot = box.Pivot;
-
+                    layoutResult.border = new OffsetRect(
+                        box.BorderTop,
+                        box.BorderRight,
+                        box.BorderBottom,
+                        box.BorderLeft
+                    );
                     // should be able to sort by view
                     Rect clipRect = new Rect(0, 0, viewportRect.width, viewportRect.height);
                     UIElement ptr = element.parent;
                     // find ancestor where layer is higher, might not be our parent
+
+                    // todo -- handle non rect clip shapes: ie circle / ellipse
 
                     if (ptr != null) {
                         bool handlesHorizontal = ptr.style.OverflowX != Overflow.None;
@@ -231,14 +250,53 @@ namespace UIForia.Systems {
                     }
 
                     layoutResult.clipRect = clipRect;
-                    element.layoutResult = layoutResult;
 
-                    // if layout result size or position changed -> update the query grid
-                    if (layoutResult.PositionChanged || layoutResult.SizeChanged) {
-                        UpdateQueryGrid(element, oldScreenRect);
+                    Rect intersectedClipRect = layoutResult.clipRect.Intersect(layoutResult.ScreenRect);
+                    CullResult cullResult = CullResult.NotCulled;
+
+                    float clipWAdjustment = 0;
+                    float clipHAdjustment = 0;
+
+                    if (intersectedClipRect.width <= 0 || intersectedClipRect.height <= 0) {
+                        cullResult = CullResult.ClipRectIsZero;
+                    }
+                    else if (layoutResult.actualSize.width * layoutResult.actualSize.height <= 0) {
+                        cullResult = CullResult.ActualSizeZero;
+                    }
+                    else if (layoutResult.allocatedSize.height < layoutResult.actualSize.height) {
+                        clipHAdjustment = 1 - (layoutResult.allocatedSize.height / layoutResult.actualSize.height);
+                        if (clipHAdjustment >= 1) {
+                            cullResult = CullResult.ClipRectIsZero;
+                        }
+                    }
+                    else if (layoutResult.allocatedSize.width < layoutResult.actualSize.width) {
+                        clipWAdjustment = 1 - (layoutResult.allocatedSize.width / layoutResult.actualSize.width);
+                        if (clipWAdjustment >= 1) {
+                            cullResult = CullResult.ClipRectIsZero;
+                        }
                     }
 
+                    Rect screenRect = layoutResult.ScreenRect;
+                    float clipX = Mathf.Clamp01(MathUtil.PercentOfRange(clipRect.x, screenRect.xMin, screenRect.xMax));
+                    float clipY = Mathf.Clamp01(MathUtil.PercentOfRange(clipRect.y, screenRect.yMin, screenRect.yMax));
+                    float clipW = Mathf.Clamp01(MathUtil.PercentOfRange(clipRect.xMax, screenRect.xMin, screenRect.xMax)) - clipWAdjustment;
+                    float clipH = Mathf.Clamp01(MathUtil.PercentOfRange(clipRect.yMax, screenRect.yMin, screenRect.yMax)) - clipHAdjustment;
+
+                    if (clipH <= 0 || clipW <= 0) {
+                        cullResult = CullResult.ClipRectIsZero;
+                    }
+
+                    layoutResult.cullState = cullResult;
+                    layoutResult.clipVector = new Vector4(clipX, clipY, clipW, clipH);
+
+                    // todo actually use this
+                    // if layout result size or position changed -> update the query grid
+                    // if (layoutResult.PositionChanged || layoutResult.SizeChanged) {
+                    //     UpdateQueryGrid(element, oldScreenRect);
+                    // }
+
                     CreateOrDestroyScrollbars(box);
+                    element.layoutResult = layoutResult;
 
                     stack.Push(element);
                 }
@@ -246,13 +304,22 @@ namespace UIForia.Systems {
 
             // TODO optimize this to only sort if styles changed
             m_Elements.Sort(comparer);
-            
-            for (var i = 0; i < m_Elements.Count; i++) {
-                UIElement e = m_Elements[i];
-                LayoutResult lr = e.layoutResult; 
-                lr.zIndex = (i + 1) * 1000;
+
+            m_VisibleElements.EnsureCapacity(m_Elements.Count);
+
+            int visibleIdx = 0;
+            UIElement[] elements = m_Elements.Array;
+            for (int i = 0; i < m_Elements.Count; i++) {
+                UIElement e = elements[i];
+                LayoutResult lr = e.layoutResult;
+                lr.zIndex = (i + 1) * 1000; // todo -- verify that this is actually needed
                 e.layoutResult = lr;
+                if (lr.cullState == CullResult.NotCulled) {
+                    m_VisibleElements[visibleIdx++] = e;
+                }
             }
+
+            m_VisibleElements.Count = visibleIdx;
 
             UpdateScrollbarLayouts();
             StackPool<UIElement>.Release(stack);
@@ -480,10 +547,10 @@ namespace UIForia.Systems {
 
             bool notifyParent = box.parent != null && (box.style.LayoutBehavior & LayoutBehavior.Ignored) == 0 && box.element.isEnabled;
             bool invalidatePreferredSizeCache = false;
-            
+
             for (int i = 0; i < properties.Count; i++) {
                 StyleProperty property = properties[i];
-                
+
                 switch (property.propertyId) {
                     case StylePropertyId.LayoutBehavior:
                         if (property.AsLayoutBehavior == LayoutBehavior.Ignored) {
@@ -492,6 +559,7 @@ namespace UIForia.Systems {
                         else {
                             box.parent?.OnChildEnabled(box);
                         }
+
                         break;
                     case StylePropertyId.LayoutType:
                         HandleLayoutChanged(element);
@@ -520,11 +588,12 @@ namespace UIForia.Systems {
                     }
                 }
             }
-            
+
             if (invalidatePreferredSizeCache) {
                 if (notifyParent) {
                     box.RequestContentSizeChangeLayout();
                 }
+
                 box.InvalidatePreferredSizeCache();
             }
 
@@ -606,9 +675,9 @@ namespace UIForia.Systems {
                 UIElement current = elements.Pop();
 
                 LayoutBox box = m_LayoutBoxMap.GetOrDefault(current.id);
-                
-                if(box == null) continue; 
-                
+
+                if (box == null) continue;
+
                 box.markedForLayout = true;
 
                 if (current.children == null) {
@@ -653,7 +722,7 @@ namespace UIForia.Systems {
             LayoutBox child = m_LayoutBoxMap.GetOrDefault(element.id);
 
             // todo destroy scroll bars
-            
+
             if (child?.parent != null) {
                 child.parent.OnChildDisabled(child);
                 child.parent.RequestContentSizeChangeLayout();
@@ -662,7 +731,7 @@ namespace UIForia.Systems {
             m_Elements.Remove(element);
             m_PendingInitialization.Remove(child);
             m_LayoutBoxMap.Remove(element.id);
-            
+
             // todo -- maybe recycle the layout box
 
             if (element.children != null) {
@@ -670,7 +739,6 @@ namespace UIForia.Systems {
                     OnElementDestroyed(element.children[i]);
                 }
             }
-            
         }
 
         // todo pool boxes
@@ -828,6 +896,10 @@ namespace UIForia.Systems {
 
         public LayoutBox GetBoxForElement(UIElement itemElement) {
             return m_LayoutBoxMap.GetOrDefault(itemElement.id);
+        }
+
+        public LightList<UIElement> GetVisibleElements() {
+            return m_VisibleElements;
         }
 
         private static int ResolveRenderLayer(UIElement element) {

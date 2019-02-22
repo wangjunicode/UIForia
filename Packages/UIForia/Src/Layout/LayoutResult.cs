@@ -3,6 +3,8 @@ using UnityEngine;
 
 namespace UIForia.Systems {
 
+    // todo make this a class or crunch significantly
+    
     public struct LayoutResult {
 
         private LayoutResultFlags flags;
@@ -19,7 +21,13 @@ namespace UIForia.Systems {
         public int zIndex;
         public Rect clipRect;
         public float rotation;
-
+        public CullResult cullState;
+        public Vector4 clipVector;
+        
+        public OffsetRect border;
+        public OffsetRect padding;
+        public OffsetRect margin;
+        
         public Rect ScreenRect => new Rect(screenPosition, new Vector2(allocatedSize.width, allocatedSize.height));
         public Rect ScreenOverflowRect => new Rect(screenPosition, new Vector2(actualSize.width, actualSize.height));
 

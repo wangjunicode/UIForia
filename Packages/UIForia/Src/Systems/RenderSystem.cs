@@ -26,7 +26,6 @@ namespace UIForia.Systems {
         private readonly LightList<RenderData> m_WillRenderList;
         private readonly LightList<RenderData> m_RenderDataList;
         private readonly ImmediateRenderContext m_RenderContext;
-        private GFX gfx;
 
         private Camera m_Camera;
         private readonly List<VirtualScrollbar> m_Scrollbars;
@@ -41,12 +40,10 @@ namespace UIForia.Systems {
             this.m_Scrollbars = new List<VirtualScrollbar>();
             layoutSystem.onCreateVirtualScrollbar += HandleScrollbarCreated;
             layoutSystem.onDestroyVirtualScrollbar += HandleScrollbarDestroyed;
-            gfx = new GFX(camera);
         }
 
         public void SetCamera(Camera camera) {
             m_Camera = camera;
-            gfx = new GFX(camera);
         }
 
         private void HandleScrollbarCreated(VirtualScrollbar scrollbar) {
@@ -84,49 +81,6 @@ namespace UIForia.Systems {
 
         public RenderData GetRenderData(UIElement element) {
             return m_RenderDataList.Find(element, (d, el) => d.element == el);
-        }
-
-        public void OnUpdateImmediateMode() {
-            if (m_Camera == null) {
-                return;
-            }
-
-            m_RenderContext.Clear();
-
-            // will render list should be already depth sorted
-
-            // will have to handle clipping
-            
-            
-            for (int i = 0; i < m_WillRenderList.Count; i++) {
-                RenderData renderData = m_WillRenderList[i];
-                UIStyleSet style = renderData.element.style;
-
-                if (renderData.element is UITextElement) { }
-                else if (renderData.element is UIImageElement) { }
-                else {
-                    if (style.HasBorderRadius) { }
-
-                    if (style.BackgroundColor.IsDefined()) { }
-
-                    LayoutResult layoutResult = renderData.element.layoutResult;
-                    Rect screenRect = layoutResult.ScreenRect;
-
-                    Texture2D backgroundImage = style.BackgroundImage;
-                    Color backgroundColor = style.BackgroundColor;
-
-                    if (style.BackgroundImage != null) {
-                        m_RenderContext.SetFill(backgroundImage);
-                    }
-                    else {
-                        m_RenderContext.SetFill(backgroundColor);
-                    }
-                    
-                    m_RenderContext.FillRect(screenRect);
-                }
-            }
-            
-            gfx.Render(m_RenderContext);
         }
 
         public void OnUpdate() {

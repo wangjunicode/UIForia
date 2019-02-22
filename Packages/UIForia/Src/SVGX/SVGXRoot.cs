@@ -61,18 +61,28 @@ namespace SVGX {
 //            ctx.SetFill(Color.yellow);
 //            ctx.Fill();
 
-            SVGXTextStyle textStyle = new SVGXTextStyle() {
-                fontSize = 72,
-                color = Color.yellow,
-                outlineColor =  textOutline,
-                outlineWidth = outlineWidth
-            };
+     
             
-            ctx.SetFill(Color.yellow);
-            ctx.Text(0, 0, TextUtil.CreateTextInfo(new TextUtil.TextSpan(TMP_FontAsset.defaultFontAsset, textStyle, "Hello World")));
-            ctx.Text(100, 200, TextUtil.CreateTextInfo(new TextUtil.TextSpan(TMP_FontAsset.defaultFontAsset, textStyle, "Goodbye Boston")));
-//            ctx.Stroke();
-            ctx.Fill();
+            ctx.MoveTo(200f * 0.5f, 0);
+            ctx.LineTo(200f * 0.5f, 10f);
+            ctx.SetStrokeWidth(200f);
+            ctx.SetStrokeColor(Color.red);
+            ctx.SetStrokePlacement(StrokePlacement.Outside);
+            ctx.SetStrokeOpacity(1f);
+            ctx.Stroke();
+            
+//            SVGXTextStyle textStyle = new SVGXTextStyle() {
+//                fontSize = 72,
+//                color = Color.yellow,
+//                outlineColor =  textOutline,
+//                outlineWidth = outlineWidth
+//            };
+//            
+//            ctx.SetFill(Color.yellow);
+//            ctx.Text(0, 0, TextUtil.CreateTextInfo(new TextUtil.TextSpan(TMP_FontAsset.defaultFontAsset, textStyle, "Hello World")));
+//            ctx.Text(100, 200, TextUtil.CreateTextInfo(new TextUtil.TextSpan(TMP_FontAsset.defaultFontAsset, textStyle, "Goodbye Boston")));
+////            ctx.Stroke();
+//            ctx.Fill();
 
 //            ctx.SetFill(new Color(1, 0, 0, 0.5f));
 //

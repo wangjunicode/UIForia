@@ -1,7 +1,7 @@
-using System;
 using System.Collections.Generic;
 using System.IO;
 using UIForia.Parsing.Style;
+using UIForia.Rendering;
 
 namespace UIForia.Compilers.Style {
     public class StyleSheetImporter {
@@ -22,7 +22,7 @@ namespace UIForia.Compilers.Style {
             return styleSheet;
         }
 
-        public StyleSheet importStyleSheetFromFile(string fileName) {
+        public StyleSheet ImportStyleSheetFromFile(string fileName) {
             if (s_CurrentlyImportingStylesheets.Contains(fileName)) {
                 throw new CompileException($"Cannot import style sheet '{fileName}' because it references itself.");
             }
@@ -42,6 +42,10 @@ namespace UIForia.Compilers.Style {
             }
 
             throw new ParseException($"Cannot find style file {fileName}");
+        }
+
+        public static UIStyleGroup GetStyleGroupsByTagName(string defImportPath, string defBody, string tagName) {
+            throw new System.NotImplementedException();
         }
     }
 }

@@ -481,6 +481,9 @@ public abstract class InputSystem : IInputSystem, IInputProvider {
         }
     }
 
+    public void OnAttributeSet(UIElement element, string attributeName, string attributeValue) {
+            
+    }
 
     public bool IsKeyDown(KeyCode keyCode) {
         return (GetKeyState(keyCode) & KeyState.Down) != 0;

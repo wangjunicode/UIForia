@@ -1,4 +1,5 @@
 using System.Diagnostics;
+using System.Runtime.InteropServices;
 
 namespace UIForia.Rendering {
 
@@ -23,6 +24,57 @@ namespace UIForia.Rendering {
             return (((1 << bitCount) - 1) & (number >> (offset - 1)));
         }
 
+        [StructLayout(LayoutKind.Explicit)]
+        private struct BitSetter {
+
+            [FieldOffset(0)] public int intVal;
+            [FieldOffset(0)] public byte byte0;
+            [FieldOffset(1)] public byte byte1;
+            [FieldOffset(2)] public byte byte2;
+            [FieldOffset(3)] public byte byte3;
+
+            public BitSetter(int value) {
+                byte0 = 0;
+                byte1 = 0;
+                byte2 = 0;
+                byte3 = 0;
+                intVal = value;
+            }
+
+        }
+
+        public static int SetByte0(int value, int i) {
+            BitSetter b = new BitSetter(value);
+            b.byte0 = (byte) i;
+            return b.intVal;
+        }
+
+        public static int SetByte1(int value, int i) {
+            BitSetter b = new BitSetter(value);
+            b.byte1 = (byte) i;
+            return b.intVal;
+        }
+
+        public static int SetByte2(int value, int i) {
+            BitSetter b = new BitSetter(value);
+            b.byte2 = (byte) i;
+            return b.intVal;
+        }
+
+        public static int SetByte3(int value, int i) {
+            BitSetter b = new BitSetter(value);
+            b.byte3 = (byte) i;
+            return b.intVal;
+        }
+
+        public static int SetBytes(int byte0, int byte1, int byte2, int byte3) {
+            BitSetter b = new BitSetter(0);
+            b.byte0 = (byte) byte0;
+            b.byte1 = (byte) byte1;
+            b.byte2 = (byte) byte2;
+            b.byte3 = (byte) byte3;
+            return b.intVal;
+        }
     }
 
 }

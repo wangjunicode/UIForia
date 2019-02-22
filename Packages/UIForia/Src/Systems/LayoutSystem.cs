@@ -670,6 +670,9 @@ namespace UIForia.Systems {
                     OnElementDestroyed(element.children[i]);
                 }
             }
+        }
+
+        public void OnAttributeSet(UIElement element, string attributeName, string attributeValue) {
             
         }
 

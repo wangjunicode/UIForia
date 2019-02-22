@@ -1,13 +1,11 @@
-﻿﻿using System;
-using UIForia.Rendering;
-using UIForia.Util;
+﻿using UIForia.Rendering;
 
 namespace UIForia.Systems {
 
     public class BindingSystem : ISystem {
 
         private readonly SkipTree<BindingNode> m_BindingTree;
-        
+
         public BindingSystem() {
             this.m_BindingTree = new SkipTree<BindingNode>();
         }
@@ -17,19 +15,19 @@ namespace UIForia.Systems {
         }
 
         public void OnUpdate() {
-            m_BindingTree.TraversePreOrder((node) => {
-                node.OnUpdate();
-            });
+            m_BindingTree.TraversePreOrder((node) => { node.OnUpdate(); });
         }
 
-        public void OnDestroy() {}
+        public void OnDestroy() {
+        }
 
-        public void OnViewAdded(UIView view) { }
+        public void OnViewAdded(UIView view) {
+        }
 
-        public void OnViewRemoved(UIView view) { }
+        public void OnViewRemoved(UIView view) {
+        }
 
         public void OnElementCreated(UIElement element) {
-
             UITemplate template = element.OriginTemplate;
 
             for (int i = 0; i < template.triggeredBindings.Length; i++) {
@@ -58,7 +56,6 @@ namespace UIForia.Systems {
                 m_BindingTree.AddItem(node);
             }
             else {
-                
                 if (template.perFrameBindings.Length > 0) {
                     BindingNode node = new BindingNode();
                     node.bindings = template.perFrameBindings;
@@ -69,20 +66,24 @@ namespace UIForia.Systems {
 
                 if (element.children != null) {
                     for (int i = 0; i < element.children.Count; i++) {
-                       OnElementCreated(element.children[i]);
+                        OnElementCreated(element.children[i]);
                     }
                 }
             }
-
         }
 
         public void OnElementDestroyed(UIElement element) {
             m_BindingTree.RemoveHierarchy(element);
         }
 
-        public void OnElementEnabled(UIElement element) { }
+        public void OnElementEnabled(UIElement element) {
+        }
 
-        public void OnElementDisabled(UIElement element) { }
+        public void OnElementDisabled(UIElement element) {
+        }
+
+        public void OnAttributeSet(UIElement element, string attributeName, string attributeValue) {
+        }
 
     }
 

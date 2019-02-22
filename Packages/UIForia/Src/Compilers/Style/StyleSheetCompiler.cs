@@ -1,5 +1,4 @@
 using System;
-using System.Security.AccessControl;
 using UIForia.Parsing.Style.AstNodes;
 using UIForia.Rendering;
 using UIForia.Util;
@@ -39,6 +38,7 @@ namespace UIForia.Compilers.Style {
             UIStyleGroup defaultGroup = new UIStyleGroup();
             defaultGroup.normal = new UIStyle();
             defaultGroup.name = styleRoot.identifier ?? styleRoot.tagName;
+            defaultGroup.styleType = styleRoot.tagName != null ? StyleType.Implicit : StyleType.Shared;
 
             return CompileStyleContainer(styleRoot, defaultGroup);
         }
@@ -60,7 +60,7 @@ namespace UIForia.Compilers.Style {
                         }
                         UIStyleGroup attributeGroup = new UIStyleGroup();            
                         attributeGroup.normal = new UIStyle();
-                        attributeGroup.name = attribute.GetGroupName();
+                        attributeGroup.name = root.identifier;
                         attributeGroup.rule = MapAttributeContainerToRule(attribute);
                         result.AddRange(CompileStyleContainer(attribute, attributeGroup));
 
@@ -89,7 +89,7 @@ namespace UIForia.Compilers.Style {
             return result;
         }
 
-        private UIStyle GetUIStyleOrDefault(UIStyle style) {
+        private static UIStyle GetUIStyleOrDefault(UIStyle style) {
             if (style == null) return new UIStyle();
             return style;
         }

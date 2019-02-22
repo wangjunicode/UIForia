@@ -27,7 +27,7 @@ namespace UIForia.Compilers.Style {
             for (int index = 0; index < rootNodes.Count; index++) {
                 switch (rootNodes[index]) {
                     case ImportNode importNode:
-                        StyleSheet importedStyle = styleSheetImporter.importStyleSheetFromFile(importNode.source);
+                        StyleSheet importedStyle = styleSheetImporter.ImportStyleSheetFromFile(importNode.source);
 
                         LightList<StyleConstant> importedStyleConstants = LightListPool<StyleConstant>.Get();
                         context.importedStyleConstants.Add(importNode.alias, importedStyleConstants);

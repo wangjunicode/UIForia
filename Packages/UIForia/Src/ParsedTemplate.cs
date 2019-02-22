@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using UIForia.Compilers;
+using UIForia.Compilers.Style;
 using UIForia.Parsing.Style;
 using UIForia.Rendering;
 using UIForia.Util;
@@ -234,7 +235,7 @@ namespace UIForia {
             // if no dot in path then the style name is the alias
             for (int i = 0; i < styleDefinitions.Count; i++) {
                 StyleDefinition def = styleDefinitions[i];
-                UIStyleGroup styleGroup = StyleParser.GetParsedStyle(def.importPath, def.body, tagName);
+                UIStyleGroup styleGroup = StyleSheetImporter.GetStyleGroupsByTagName(def.importPath, def.body, tagName);
                 if (styleGroup.name == tagName) {
                     mergedGroup.normal = UIStyle.Merge(mergedGroup.normal, styleGroup.normal);
                     mergedGroup.hover = UIStyle.Merge(mergedGroup.hover, styleGroup.hover);

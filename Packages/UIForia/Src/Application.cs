@@ -465,6 +465,11 @@ namespace UIForia {
             return m_ElementTree.GetItem(elementId);
         }
 
+        public void OnAttributeSet(UIElement element, string attributeName, string attributeValue) {
+            for (int i = 0; i < m_Systems.Count; i++) {
+                m_Systems[i].OnAttributeSet(element, attributeName, attributeValue);
+            }
+        }
     }
 
 }

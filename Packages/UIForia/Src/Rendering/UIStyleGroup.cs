@@ -26,6 +26,17 @@ namespace UIForia.Rendering {
         public static bool operator !=(UIStyleGroup x, UIStyleGroup y) {
             return !(x == y);
         }
-    }
 
+        public int CountRules() {
+            if (rule == null) return 0;
+            UIStyleRule r = rule;
+            int count = 1;
+            while (r.next != null) {
+                count++;
+                r = r.next;
+            }
+
+            return count;
+        }
+    }
 }

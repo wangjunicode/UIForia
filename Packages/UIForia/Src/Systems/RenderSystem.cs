@@ -339,6 +339,10 @@ namespace UIForia.Systems {
             }
         }
 
+        public void OnAttributeSet(UIElement element, string attributeName, string attributeValue) {
+            
+        }
+
         private static void ComputePositions(LightList<RenderData> renderList) {
             if (renderList.Count == 0) {
                 return;

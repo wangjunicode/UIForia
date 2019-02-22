@@ -108,6 +108,7 @@ namespace UIForia.Parsing.Style.Tokenizer {
             while (context.HasMore()
                    && (char.IsLetterOrDigit(context.input[context.ptr])
                        || context.input[context.ptr] == '_'
+                       || context.input[context.ptr] == '-'
                        || context.input[context.ptr] == '$')) {
                 context.Advance();
             }

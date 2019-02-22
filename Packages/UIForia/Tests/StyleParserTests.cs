@@ -2,6 +2,7 @@ using System.Collections.Generic;
 using NUnit.Framework;
 using UIForia.Rendering;
 using UIForia;
+using UIForia.Compilers.Style;
 using UIForia.Parsing.Style;
 using UnityEditorInternal;
 using UnityEngine;
@@ -207,11 +208,11 @@ public class StyleParserTests {
 
     [Test]
     public void LoadDefaultStyleGroupFromSheet() {
-        var styleGroup = StyleParser.GetParsedStyle("Tests/Styles/test.style", "<Div>");
+        var styleSheet = new StyleSheetImporter().ImportStyleSheetFromFile("Tests/Styles/test.style");
         
-        Assert.NotNull(styleGroup, "Could not find style :(");
-        Assert.AreEqual("<Div>", styleGroup.name);
-        Assert.NotNull(styleGroup.normal.MarginTop, "Margin expected");
-        Assert.AreEqual(20f, styleGroup.normal.MarginTop.value);
+        Assert.NotNull(styleSheet.styleGroups, "Could not find style :(");
+        Assert.AreEqual("<Div>", styleSheet.styleGroups[1].name);
+        Assert.NotNull(styleSheet.styleGroups[1].normal.MarginTop, "Margin expected");
+        Assert.AreEqual(20f, styleSheet.styleGroups[1].normal.MarginTop.value);
     }
 }

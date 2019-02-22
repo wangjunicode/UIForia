@@ -37,6 +37,7 @@ namespace UIForia {
 
         public void OnElementDestroyed(UIElement element) {}
 
+        public void OnAttributeSet(UIElement element, string attributeName, string attributeValue) {}
         
         public void OnElementCreated(UIElement element) {
 

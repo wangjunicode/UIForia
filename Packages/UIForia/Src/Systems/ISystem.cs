@@ -1,6 +1,4 @@
-﻿using UIForia;
-
-namespace UIForia.Rendering {
+﻿namespace UIForia.Rendering {
 
     public interface ISystem {
 
@@ -13,6 +11,8 @@ namespace UIForia.Rendering {
         void OnElementEnabled(UIElement element);
         void OnElementDisabled(UIElement element);
         void OnElementDestroyed(UIElement element);
+
+        void OnAttributeSet(UIElement element, string attributeName, string attributeValue);
 
         void OnElementCreated(UIElement element);
 

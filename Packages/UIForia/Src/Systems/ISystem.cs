@@ -12,7 +12,7 @@
         void OnElementDisabled(UIElement element);
         void OnElementDestroyed(UIElement element);
 
-        void OnAttributeSet(UIElement element, string attributeName, string attributeValue);
+        void OnAttributeSet(UIElement element, string attributeName, string previousValue);
 
         void OnElementCreated(UIElement element);
 

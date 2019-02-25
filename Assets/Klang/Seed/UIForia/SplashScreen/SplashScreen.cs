@@ -18,7 +18,7 @@ namespace UI {
         public override void OnUpdate() {
             elapsed += Time.deltaTime;
             if (elapsed >= 1f) {
-                Application.RoutingSystem.FindRouter("game").GoTo("/login_flow");
+               // Application.RoutingSystem.FindRouter("game").GoTo("/login_flow");
             }
 
         }

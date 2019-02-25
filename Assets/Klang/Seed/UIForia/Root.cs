@@ -3,7 +3,6 @@ using UIForia.Animation;
 using UIForia.Layout;
 using UIForia.Rendering;
 using UIForia.Routing2;
-using UnityEngine;
 
 namespace UI {
 
@@ -37,6 +36,21 @@ namespace UI {
             
         }
 
+        [OnMouseDown]
+        public void OnClick() {
+            UIElement element = FindFirstByType<SeedSplashScreen>();
+            string variant = element.GetAttribute("variant");
+            if (variant == null || variant == "0") {
+                element.SetAttribute("variant", "1");
+            }
+            else if (variant == "1") {
+                element.SetAttribute("variant", "2");
+            }
+            else {
+                element.SetAttribute("variant", "0");
+            }
+        }
+        
         private static StyleAnimation FadeOut() {
             AnimationOptions options = new AnimationOptions();
             options.duration = 1f;

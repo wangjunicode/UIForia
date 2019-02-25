@@ -39,17 +39,17 @@ namespace UIForia.Compilers.Style {
             UIStyleGroup defaultGroup = new UIStyleGroup();
             defaultGroup.normal = new UIStyle();
             defaultGroup.name = styleRoot.identifier ?? styleRoot.tagName;
-            defaultGroup.styleType = styleRoot.tagName != null ? StyleType.Implicit : StyleType.Shared;
+            StyleType styleType = styleRoot.tagName != null ? StyleType.Implicit : StyleType.Shared;
             
             LightList<UIStyleGroup> styleGroups = new LightList<UIStyleGroup>(4);
             styleGroups.Add(defaultGroup);
 
-            CompileStyleGroups(styleRoot, styleGroups, defaultGroup);
+            CompileStyleGroups(styleRoot, styleType, styleGroups, defaultGroup);
 
-            return new UIStyleGroupContainer(defaultGroup.name, defaultGroup.styleType, styleGroups);
+            return new UIStyleGroupContainer(defaultGroup.name, styleType, styleGroups);
         }
 
-        private void CompileStyleGroups(StyleGroupContainer root, LightList<UIStyleGroup> groups, UIStyleGroup targetGroup) {
+        private void CompileStyleGroups(StyleGroupContainer root, StyleType styleType, LightList<UIStyleGroup> groups, UIStyleGroup targetGroup) {
             for (int index = 0; index < root.children.Count; index++) {
                 StyleASTNode node = root.children[index];
                 switch (node) {
@@ -65,35 +65,31 @@ namespace UIForia.Compilers.Style {
                         attributeGroup.normal = new UIStyle();
                         attributeGroup.name = root.identifier;
                         attributeGroup.rule = MapAttributeContainerToRule(attribute);
+                        attributeGroup.styleType = styleType;
                         groups.Add(attributeGroup);
-                        CompileStyleGroups(attribute, groups, attributeGroup);
+                        CompileStyleGroups(attribute, styleType, groups, attributeGroup);
 
                         break;
                     case StyleStateContainer styleContainer:
                         if (styleContainer.identifier == "hover") {
-                            targetGroup.hover = GetUIStyleOrDefault(targetGroup.hover);
+                            targetGroup.hover = targetGroup.hover ?? new UIStyle();
                             MapProperties(targetGroup.hover, styleContainer.children);
                         }
                         else if (styleContainer.identifier == "focus") {
-                            targetGroup.focused = GetUIStyleOrDefault(targetGroup.focused);
+                            targetGroup.focused = targetGroup.focused ?? new UIStyle();
                             MapProperties(targetGroup.hover, styleContainer.children);
                         }
                         else if (styleContainer.identifier == "active") {
-                            targetGroup.focused = GetUIStyleOrDefault(targetGroup.active);
+                            targetGroup.active = targetGroup.active ?? new UIStyle();
                             MapProperties(targetGroup.active, styleContainer.children);
                         }
-                        else throw new CompileException(styleContainer, $"Unknown style state. Please use [hover], [focus] or [active] instead.");
+                        else throw new CompileException(styleContainer, $"Unknown style state '{styleContainer.identifier}'. Please use [hover], [focus] or [active] instead.");
 
                         break;
                     default:
                         throw new CompileException(node, $"You cannot have a {node} at this level.");
                 }
             }
-        }
-
-        private static UIStyle GetUIStyleOrDefault(UIStyle style) {
-            if (style == null) return new UIStyle();
-            return style;
         }
 
         private void MapProperties(UIStyle targetStyle, LightList<StyleASTNode> styleContainerChildren) {

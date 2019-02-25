@@ -3,8 +3,10 @@ using System.Collections.Generic;
 using System.IO;
 using UIForia.Parsing.Style;
 using UIForia.Rendering;
+using UnityEngine;
 
 namespace UIForia.Compilers.Style {
+
     public class StyleSheetImporter {
 
         private readonly List<string> m_CurrentlyImportingStylesheets;
@@ -22,9 +24,15 @@ namespace UIForia.Compilers.Style {
                 return sheet;
             }
 
-            StyleSheet styleSheet = new StyleSheetCompiler(this).Compile(StyleParser2.Parse(literalTemplate));
-            m_CachedStyleSheets.Add(id, styleSheet);
-            return styleSheet;
+            try {
+                StyleSheet styleSheet = new StyleSheetCompiler(this).Compile(StyleParser2.Parse(literalTemplate));
+                m_CachedStyleSheets.Add(id, styleSheet);
+                return styleSheet;
+            }
+            catch (ParseException ex) {
+                Debug.Log("Error compiling file: " + id);
+                throw ex;
+            }
         }
 
         public StyleSheet ImportStyleSheetFromFile(string fileName) {
@@ -65,5 +73,11 @@ namespace UIForia.Compilers.Style {
             return ImportStyleSheetFromFile(idOrPath).GetStyleGroupByStyleName(styleName);
         }
 
+        public void Reset() {
+            m_CachedStyleSheets.Clear();
+            m_CurrentlyImportingStylesheets.Clear();
+        }
+
     }
+
 }

@@ -1,8 +1,17 @@
 style splash-screen {
-    PreferredSize = 100%;
+
+    PreferredSize = 1pca;
     BackgroundColor = black;
     FlexLayoutMainAxisAlignment = Center;
     FlexLayoutCrossAxisAlignment = Center;
+    
+    [attr:variant="1"] {
+        BackgroundColor = red;
+    }
+    
+    [attr:variant="2"] not [attr:block] {
+        BackgroundColor = blue;
+    }
 }
 
 style logo {

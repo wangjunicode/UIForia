@@ -15,7 +15,6 @@ namespace UIForia {
     public class ParsedTemplate {
 
         private static int s_TemplateIdGenerator;
-        private static readonly IntMap<ParsedTemplate> s_ParsedTemplates; // todo -- is this used?
 
         public readonly int templateId;
 
@@ -31,9 +30,7 @@ namespace UIForia {
         public ParsedTemplate baseTemplate;
         public Application app;
         
-        static ParsedTemplate() {
-            s_ParsedTemplates = new IntMap<ParsedTemplate>();
-        }
+
 
         public ParsedTemplate(Application app, Type type, List<UITemplate> contents, List<AttributeDefinition> attributes, List<string> usings, List<StyleDefinition> styleDefinitions, List<ImportDeclaration> imports) : this(null, type, usings, null, styleDefinitions, imports) {
             this.app = app;
@@ -50,12 +47,7 @@ namespace UIForia {
             this.styleDefinitions = styleDefinitions;
             this.Imports = imports;
             this.compiler = new ExpressionCompiler();
-            s_ParsedTemplates[templateId] = this;
             ValidateStyleDefinitions();
-        }
-
-        public static void Reset() {
-            s_ParsedTemplates.Clear();
         }
 
         public List<UITemplate> childTemplates => rootElementTemplate.childTemplates;

@@ -7,6 +7,7 @@ using UnityEngine;
 
 namespace UIForia.Rendering {
 
+    // can this be a struct?
     [DebuggerDisplay("{nameof(Id)}")]
     public partial class UIStyle {
 
@@ -32,13 +33,12 @@ namespace UIForia.Rendering {
 
         private static int NextStyleId;
 
-        // todo -- make this a LightList<StyleProperty> and keep sorted, 
-        private readonly List<StyleProperty> m_StyleProperties;
+        internal readonly LightList<StyleProperty> m_StyleProperties;
 
         public int Id { get; set; } = NextStyleId++;
 
-        public UIStyle() {
-            m_StyleProperties = ListPool<StyleProperty>.Get();
+        public UIStyle(int capacity = 8) {
+            m_StyleProperties = new LightList<StyleProperty>(capacity);
         }
 
         public UIStyle(UIStyle toCopy) : this() {

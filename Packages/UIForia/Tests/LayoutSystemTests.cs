@@ -12,7 +12,11 @@ public class LayoutSystemTests {
 
     [Template(TemplateType.String, @"
         <UITemplate>
-            <Style path='LayoutSystemTests+LayoutTestThing+Style'/>
+            <Style>
+                style child1 {
+                    MinWidth = 300px;
+                }
+            </Style>
             <Contents style.layoutType='LayoutType.Flex'>
                 <Group x-id='child0' style='child1' style.preferredWidth='100f' style.preferredHeight='100f'/>
                 <Group x-id='child1' style.preferredWidth='100f' style.preferredHeight='100f'/>
@@ -31,17 +35,6 @@ public class LayoutSystemTests {
             child0 = FindById<UIGroupElement>("child0");
             child1 = FindById<UIGroupElement>("child1");
             child2 = FindById<UIGroupElement>("child2");
-        }
-
-        public class Style {
-
-            [ExportStyle("child1")]
-            public static UIStyle Style1() {
-                return new UIStyle() {
-                    MinWidth = 300f
-                };
-            }
-
         }
 
     }
@@ -93,7 +86,11 @@ public class LayoutSystemTests {
     public void ContentSized() {
         string template = @"
         <UITemplate>
-            <Style path='LayoutSystemTests+LayoutTestThing+Style'/>
+            <Style>
+                style child1 {
+                    MinWidth = 300px;
+                }
+            </Style>
             <Contents style.layoutType='LayoutType.Flex'>
                 <Group x-id='child0' style.preferredWidth='100f' style.preferredHeight='100f'/>
                 <Group x-id='child1' style.preferredWidth='$content(100)' style.preferredHeight='$content(100)'>
@@ -113,7 +110,11 @@ public class LayoutSystemTests {
     public void MaxSizeChanges() {
         string template = @"
         <UITemplate>
-            <Style path='LayoutSystemTests+LayoutTestThing+Style'/>
+            <Style>
+                style child1 {
+                    MinWidth = 300px;
+                }
+            </Style>
             <Contents style.layoutType='LayoutType.Flex'>
                 <Group x-id='child0' style.preferredWidth='100f' style.preferredHeight='100f'/>
                 <Group x-id='child1' style.preferredWidth='$content(100)' style.preferredHeight='$content(100)'>
@@ -136,7 +137,11 @@ public class LayoutSystemTests {
     public void WidthSizeConstraintChangesToContent() {
         string template = @"
         <UITemplate>
-            <Style path='LayoutSystemTests+LayoutTestThing+Style'/>
+            <Style>
+                style child1 {
+                    MinWidth = 300px;
+                }
+            </Style>
             <Contents style.layoutType='LayoutType.Flex'>
                 <Group x-id='child0' style.preferredWidth='100f' style.preferredHeight='100f'/>
                 <Group x-id='child1' style.preferredWidth='400f' style.preferredHeight='$content(100)'>
@@ -162,7 +167,11 @@ public class LayoutSystemTests {
     public void HeightSizeConstraintChangesToMaxContent() {
         string template = @"
         <UITemplate>
-            <Style path='LayoutSystemTests+LayoutTestThing+Style'/>
+            <Style>
+                style child1 {
+                    MinWidth = 300px;
+                }
+            </Style>
             <Contents style.layoutType='LayoutType.Flex'>
                 <Group x-id='child0' style.preferredWidth='100f' style.preferredHeight='100f'/>
                 <Group x-id='child1' style.preferredWidth='400f' style.preferredHeight='300f'>
@@ -188,7 +197,11 @@ public class LayoutSystemTests {
     public void HeightSizeConstraintChangesToMinContent() {
         string template = @"
         <UITemplate>
-            <Style path='LayoutSystemTests+LayoutTestThing+Style'/>
+            <Style>
+                style child1 {
+                    MinWidth = 300px;
+                }
+            </Style>
             <Contents style.layoutType='LayoutType.Flex'>
                 <Group x-id='child0' style.preferredWidth='100f' style.preferredHeight='100f'/>
                 <Group x-id='child1' style.preferredWidth='400f' style.preferredHeight='300f'>
@@ -214,7 +227,11 @@ public class LayoutSystemTests {
     public void ChildEnabled() {
         string template = @"
         <UITemplate>
-            <Style path='LayoutSystemTests+LayoutTestThing+Style'/>
+            <Style>
+                style child1 {
+                    MinWidth = 300px;
+                }
+            </Style>
             <Contents style.layoutType='LayoutType.Flex'>
                 <Group x-id='child0' style.preferredWidth='100f' style.preferredHeight='100f'/>
                 <Group x-id='child1' style.preferredWidth='$content(100)' style.preferredHeight='$content(100)'>
@@ -241,7 +258,11 @@ public class LayoutSystemTests {
     public void ChildDisabled() {
         string template = @"
         <UITemplate>
-            <Style path='LayoutSystemTests+LayoutTestThing+Style'/>
+            <Style>
+                style child1 {
+                    MinWidth = 300px;
+                }
+            </Style>
             <Contents style.layoutType='LayoutType.Flex'>
                 <Group x-id='child0' style.preferredWidth='100f' style.preferredHeight='100f'/>
                 <Group x-id='child1' style.preferredWidth='$content(100)' style.preferredHeight='$content(100)'>
@@ -270,7 +291,11 @@ public class LayoutSystemTests {
     public void ScreenPositionsGetUpdated() {
         string template = @"
         <UITemplate>
-            <Style path='LayoutSystemTests+LayoutTestThing+Style'/>
+            <Style>
+                style child1 {
+                    MinWidth = 300px;
+                }
+            </Style>
             <Contents style.layoutType='LayoutType.Flex'>
                 <Group x-id='child0' style.preferredWidth='100f' style.preferredHeight='100f'/>
                 <Group x-id='child1' style='marker' style.preferredWidth='$content(100)' style.preferredHeight='$content(100)'>
@@ -301,28 +326,6 @@ public class LayoutSystemTests {
         Assert.AreEqual(new Rect(0, 600, 200, 50), nestedChild2.layoutResult.ScreenRect);
     }
 
-   // todo -- this test is invalid right now but might come back later
-//    [Test]
-//    public void DoesNotAddLayoutBoxForNonLaidOutElements() {
-//        string template = @"
-//        <UITemplate>
-//            <Style path='LayoutSystemTests+LayoutTestThing+Style'/>
-//            <Contents style.layoutType='LayoutType.Flex'>
-//                <Group x-id='child0' style.preferredWidth='100f' style.preferredHeight='100f'/>
-//                <Repeat x-id='repeat' list='{list}'>
-//                    <Group x-id='repeat-child-1' style.preferredWidth='300f' style.preferredHeight='50f'/>
-//                </Repeat>
-//                <Group x-id='child2' style.preferredWidth='100f' style.preferredHeight='100f'/>
-//            </Contents>
-//        </UITemplate>
-//        ";
-//        MockApplication app = new MockApplication(typeof(LayoutTestThing), template);
-//        LayoutTestThing root = (LayoutTestThing) app.RootElement;
-//        MockLayoutSystem layoutSystem = (MockLayoutSystem) app.LayoutSystem;
-//        LayoutBox box = layoutSystem.GetBoxForElement(root.FindById("repeat"));
-//        Assert.IsNull(box);
-//    }
-
     [Test]
     public void AssignsProperClipRects_WithoutLayers() {
         string template = @"
@@ -352,7 +355,11 @@ public class LayoutSystemTests {
     public void AssignsProperClipRects_NestedWithoutLayers() {
         string template = @"
         <UITemplate>
-            <Style path='LayoutSystemTests+LayoutTestThing+Style'/>
+            <Style>
+                style child1 {
+                    MinWidth = 300px;
+                }
+            </Style>
             <Contents style.preferredWidth='100f' style.preferredHeight='200f'>
                 <Group x-id='child0' style.preferredWidth='100f' style.preferredHeight='100f'>
                     <Group x-id='nested-child0' style.preferredWidth='100f' style.preferredHeight='100f'/>
@@ -374,7 +381,11 @@ public class LayoutSystemTests {
     public void AssignsProperClipRects_NestedOverflowWithoutLayers() {
         string template = @"
         <UITemplate>
-            <Style path='LayoutSystemTests+LayoutTestThing+Style'/>
+            <Style>
+                style child1 {
+                    MinWidth = 300px;
+                }
+            </Style>
             <Contents style.preferredWidth='100f' style.preferredHeight='200f'>
                 <Group x-id='child0' style.preferredWidth='50f' style.preferredHeight='100f'>
                     <Group x-id='nested-child0' style.preferredWidth='100f' style.preferredHeight='100f'/>
@@ -401,7 +412,11 @@ public class LayoutSystemTests {
     public void AssignsProperZIndex() {
         string template = @"
         <UITemplate>
-            <Style path='LayoutSystemTests+LayoutTestThing+Style'/>
+            <Style>
+                style child1 {
+                    MinWidth = 300px;
+                }
+            </Style>
             <Contents style.preferredWidth='100f' style.preferredHeight='200f'>
                 <Group x-id='child0' style.preferredWidth='100f' style.preferredHeight='100f'/>
                 <Group x-id='child1' style.preferredWidth='100f' style.preferredHeight='100f'/>

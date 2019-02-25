@@ -12,10 +12,7 @@ public class FlexLayoutRowTests {
     
     [Template(TemplateType.String, @"
         <UITemplate>
-            <Style path='ests+LayoutTestThing+Style'/>
-            <Contents style.layoutType='LayoutType.Flex'>
-              
-            </Contents>
+            <Contents style.layoutType='LayoutType.Flex'/>
         </UITemplate>
     ")]
     public class FlexRowLayoutThing : UIElement {
@@ -30,37 +27,7 @@ public class FlexLayoutRowTests {
             child2 = FindById<UIGroupElement>("child2");
         }
 
-        public class Style {
-
-            [ExportStyle("w100h100")]
-            public static UIStyle W100H100() {
-                return new UIStyle() {
-                    PreferredWidth = 100f,
-                    PreferredHeight = 100f
-                };
-            }
-            
-            [ExportStyle("w90h90m10")]
-            public static UIStyle W90H90M10() {
-                return new UIStyle() {
-                    MarginTop =  5f,
-                    MarginBottom =  5f,
-                    PreferredWidth = 90f,
-                    PreferredHeight = 90f
-                };
-            }
-            
-            [ExportStyle("w90h90mc10")]
-            public static UIStyle W90H90MC10() {
-                return new UIStyle() {
-                    MarginLeft =  5f,
-                    MarginRight =  5f,
-                    PreferredWidth = 90f,
-                    PreferredHeight = 90f
-                };
-            }
-
-        }
+        
 
     }
     
@@ -69,7 +36,7 @@ public class FlexLayoutRowTests {
     
         string template = @"
         <UITemplate>
-            <Style path='FlexLayoutRowTests+FlexRowLayoutThing+Style'/>
+            <Style path='Tests/Styles/FlexLayoutRowTests.style'/>
             <Contents style.layoutType='LayoutType.Flex' style.preferredWidth='500f'>
                 <Group x-id='child0' style='w100h100'/>
                 <Group x-id='child1' style='w100h100'/>
@@ -94,7 +61,7 @@ public class FlexLayoutRowTests {
     
         string template = @"
         <UITemplate>
-            <Style path='FlexLayoutRowTests+FlexRowLayoutThing+Style'/>
+            <Style path='Tests/Styles/FlexLayoutRowTests.style'/>
             <Contents style.layoutType='LayoutType.Flex' style.preferredWidth='500f'>
                 <Group x-id='child0' style='w100h100'/>
                 <Group x-id='child1' style='w100h100'/>
@@ -119,7 +86,7 @@ public class FlexLayoutRowTests {
     
         string template = @"
         <UITemplate>
-            <Style path='FlexLayoutRowTests+FlexRowLayoutThing+Style'/>
+            <Style path='Tests/Styles/FlexLayoutRowTests.style'/>
             <Contents style.layoutType='LayoutType.Flex' style.preferredWidth='500f'>
                 <Group x-id='child0' style='w100h100'/>
                 <Group x-id='child1' style='w100h100'/>
@@ -144,7 +111,7 @@ public class FlexLayoutRowTests {
     
         string template = @"
         <UITemplate>
-            <Style path='FlexLayoutRowTests+FlexRowLayoutThing+Style'/>
+            <Style path='Tests/Styles/FlexLayoutRowTests.style'/>
             <Contents style.layoutType='LayoutType.Flex' style.preferredWidth='500f'>
                 <Group x-id='child0' style='w100h100'/>
                 <Group x-id='child1' style='w100h100'/>
@@ -168,7 +135,7 @@ public class FlexLayoutRowTests {
     public void AppliesMainAxisEnd() {
         string template = @"
         <UITemplate>
-            <Style path='FlexLayoutRowTests+FlexRowLayoutThing+Style'/>
+            <Style path='Tests/Styles/FlexLayoutRowTests.style'/>
             <Contents style.layoutType='LayoutType.Flex' style.preferredWidth='500f' style.preferredHeight='500f'>
                 <Group x-id='child0' style='w100h100'/>
                 <Group x-id='child1' style='w100h100'/>
@@ -191,7 +158,7 @@ public class FlexLayoutRowTests {
     public void AppliesMainAxisStart() {
         string template = @"
         <UITemplate>
-            <Style path='FlexLayoutRowTests+FlexRowLayoutThing+Style'/>
+            <Style path='Tests/Styles/FlexLayoutRowTests.style'/>
             <Contents style.layoutType='LayoutType.Flex' style.preferredWidth='500f' style.preferredHeight='500f'>
                 <Group x-id='child0' style='w100h100'/>
                 <Group x-id='child1' style='w100h100'/>
@@ -214,7 +181,7 @@ public class FlexLayoutRowTests {
     public void AppliesMainAxisSpaceBetween() {
         string template = @"
         <UITemplate>
-            <Style path='FlexLayoutRowTests+FlexRowLayoutThing+Style'/>
+            <Style path='Tests/Styles/FlexLayoutRowTests.style'/>
             <Contents style.layoutType='LayoutType.Flex' style.preferredWidth='500f' style.preferredHeight='500f'>
                 <Group x-id='child0' style='w100h100'/>
                 <Group x-id='child1' style='w100h100'/>
@@ -237,7 +204,7 @@ public class FlexLayoutRowTests {
     public void AppliesMainAxisSpaceAround() {
         string template = @"
         <UITemplate>
-            <Style path='FlexLayoutRowTests+FlexRowLayoutThing+Style'/>
+            <Style path='Tests/Styles/FlexLayoutRowTests.style'/>
             <Contents style.layoutType='LayoutType.Flex' style.preferredWidth='600f' style.preferredHeight='600f'>
                 <Group x-id='child0' style='w100h100'/>
                 <Group x-id='child1' style='w100h100'/>
@@ -259,8 +226,7 @@ public class FlexLayoutRowTests {
 //    [Test]
 //    public void HandlesCustomOrdering() {
 //        string template = @"
-//        <UITemplate>
-//            <Style path='FlexLayoutRowTests+FlexRowLayoutThing+Style'/>
+//        <//                        <Style path='Tests/Styles/FlexLayoutRowTests.style'/>
 //            <Contents style.layoutType='LayoutType.Flex' style.preferredWidth='500f'>
 //                <Group x-id='child0' style='w100h100'/>
 //                <Group x-id='child1' style='w100h100' />
@@ -284,7 +250,7 @@ public class FlexLayoutRowTests {
     public void HandleCrossAxisOverride() {
         string template = @"
         <UITemplate>
-            <Style path='FlexLayoutRowTests+FlexRowLayoutThing+Style'/>
+            <Style path='Tests/Styles/FlexLayoutRowTests.style'/>
             <Contents style.layoutType='LayoutType.Flex' style.preferredWidth='500f'>
                 <Group x-id='child0' style='w100h100'/>
                 <Group x-id='child1' style='w100h100' />
@@ -308,7 +274,7 @@ public class FlexLayoutRowTests {
     public void GrowsBasedOnGrowthFactor() {
         string template = @"
         <UITemplate>
-            <Style path='FlexLayoutRowTests+FlexRowLayoutThing+Style'/>
+            <Style path='Tests/Styles/FlexLayoutRowTests.style'/>
             <Contents style.layoutType='LayoutType.Flex' style.preferredWidth='600f' style.preferredHeight='500f'>
                 <Group x-id='child0' style='w100h100'/>
                 <Group x-id='child1' style='w100h100' style.flexItemGrow='1' />
@@ -330,7 +296,7 @@ public class FlexLayoutRowTests {
     public void ShrinksBasedOnShrinkFactor() {
         string template = @"
         <UITemplate>
-            <Style path='FlexLayoutRowTests+FlexRowLayoutThing+Style'/>
+            <Style path='Tests/Styles/FlexLayoutRowTests.style'/>
             <Contents style.layoutType='LayoutType.Flex' style.preferredWidth='600f' style.preferredHeight='250f'>
                 <Group x-id='child0' style='w100h100'/>
                 <Group x-id='child1' style='w100h100' style.flexItemShrink='1' />
@@ -351,8 +317,7 @@ public class FlexLayoutRowTests {
 //    [Test]
 //    public void WrapsOnExactSizeMatch() {
 //        string template = @"
-//        <UITemplate>
-//            <Style path='FlexLayoutRowTests+FlexRowLayoutThing+Style'/>
+//        <//                        <Style path='Tests/Styles/FlexLayoutRowTests.style'/>
 //            <Contents style.layoutType='LayoutType.Flex' style.preferredWidth='600f' style.preferredHeight='500f'>
 //                <Group x-id='child0' style.preferredWidth='100f' style.preferredHeight='500f'/>
 //                <Group x-id='child1' style='w100h100'/>
@@ -373,8 +338,7 @@ public class FlexLayoutRowTests {
 //    [Test]
 //    public void WrapsOnSizeOverflow() {
 //        string template = @"
-//        <UITemplate>
-//            <Style path='FlexLayoutRowTests+FlexRowLayoutThing+Style'/>
+//        <//                        <Style path='Tests/Styles/FlexLayoutRowTests.style'/>
 //            <Contents style.layoutType='LayoutType.Flex' style.preferredWidth='600f' style.preferredHeight='500f'>
 //                <Group x-id='child0' style.preferredWidth='100f' style.preferredHeight='450f'/>
 //                <Group x-id='child1' style='w100h100'/>
@@ -396,8 +360,7 @@ public class FlexLayoutRowTests {
 //    [Test]
 //    public void WrapsOnSizeExceeded() {
 //        string template = @"
-//        <UITemplate>
-//            <Style path='FlexLayoutRowTests+FlexRowLayoutThing+Style'/>
+//        <//                        <Style path='Tests/Styles/FlexLayoutRowTests.style'/>
 //            <Contents style.layoutType='LayoutType.Flex' style.preferredWidth='600f' style.preferredHeight='500f'>
 //                <Group x-id='child0' style.preferredWidth='100f' style.preferredHeight='550f'/>
 //                <Group x-id='child1' style='w100h100'/>
@@ -418,8 +381,7 @@ public class FlexLayoutRowTests {
 //    [Test]
 //    public void GrowWrappedTracks() {
 //        string template = @"
-//        <UITemplate>
-//            <Style path='FlexLayoutRowTests+FlexRowLayoutThing+Style'/>
+//        <//                        <Style path='Tests/Styles/FlexLayoutRowTests.style'/>
 //            <Contents style.layoutType='LayoutType.Flex' style.preferredWidth='600f' style.preferredHeight='500f'>
 //                <Group x-id='child0' style.preferredWidth='100f' style.preferredHeight='450f' style.flexItemGrow='1'/>
 //                <Group x-id='child1' style='w100h100' style.flexItemGrow='1'/>
@@ -440,8 +402,7 @@ public class FlexLayoutRowTests {
 //    [Test]
 //    public void ShrinkWrappedTracks() {
 //        string template = @"
-//        <UITemplate>
-//            <Style path='FlexLayoutRowTests+FlexRowLayoutThing+Style'/>
+//        <//                        <Style path='Tests/Styles/FlexLayoutRowTests.style'/>
 //            <Contents style.layoutType='LayoutType.Flex' style.preferredWidth='600f' style.preferredHeight='400f'>
 //                <Group x-id='child0' style.preferredWidth='100f' style.preferredHeight='450f' style.flexItemShrink='1'/>
 //                <Group x-id='child1' style.preferredWidth='100f' style.preferredHeight='300f' style.flexItemShrink='1'/>
@@ -463,7 +424,7 @@ public class FlexLayoutRowTests {
     public void RespectsPaddingValues() {
         string template = @"
         <UITemplate>
-            <Style path='FlexLayoutRowTests+FlexRowLayoutThing+Style'/>
+            <Style path='Tests/Styles/FlexLayoutRowTests.style'/>
             <Contents style.layoutType='LayoutType.Flex' style.flexLayoutDirection='LayoutDirection.Row' style.preferredWidth='500f' style.preferredHeight='$content(100)' style.paddingTop='5f' style.paddingBottom='5f'>
                 <Group x-id='child0' style='w100h100'/>
                 <Group x-id='child1' style='w100h100'/>
@@ -485,7 +446,7 @@ public class FlexLayoutRowTests {
     public void RespectsMainAxisMarginValues() {
         string template = @"
         <UITemplate>
-            <Style path='FlexLayoutRowTests+FlexRowLayoutThing+Style'/>
+            <Style path='Tests/Styles/FlexLayoutRowTests.style'/>
             <Contents style.layoutType='LayoutType.Flex'
                       style.flexLayoutDirection='LayoutDirection.Row' 
                       style.preferredWidth='500f'
@@ -510,7 +471,7 @@ public class FlexLayoutRowTests {
     public void RespectsCrossAxisMarginValues() {
         string template = @"
         <UITemplate>
-            <Style path='FlexLayoutRowTests+FlexRowLayoutThing+Style'/>
+            <Style path='Tests/Styles/FlexLayoutRowTests.style'/>
             <Contents style.layoutType='LayoutType.Flex'
                       style.flexLayoutDirection='LayoutDirection.Row' 
                       style.preferredWidth='500f'
@@ -535,7 +496,7 @@ public class FlexLayoutRowTests {
     public void RespectsCrossAxisMarginValues_Center() {
         string template = @"
         <UITemplate>
-            <Style path='FlexLayoutRowTests+FlexRowLayoutThing+Style'/>
+            <Style path='Tests/Styles/FlexLayoutRowTests.style'/>
             <Contents style.layoutType='LayoutType.Flex'
                       style.flexLayoutDirection='LayoutDirection.Row' 
                       style.preferredWidth='600f'
@@ -561,7 +522,7 @@ public class FlexLayoutRowTests {
     public void RespectsCrossAxisMarginValues_End() {
         string template = @"
         <UITemplate>
-            <Style path='FlexLayoutRowTests+FlexRowLayoutThing+Style'/>
+            <Style path='Tests/Styles/FlexLayoutRowTests.style'/>
             <Contents style.layoutType='LayoutType.Flex'
                       style.flexLayoutDirection='LayoutDirection.Row' 
                       style.preferredWidth='600f'
@@ -587,7 +548,7 @@ public class FlexLayoutRowTests {
     public void RespectsCrossAxisMarginValues_Stretch() {
         string template = @"
         <UITemplate>
-            <Style path='FlexLayoutRowTests+FlexRowLayoutThing+Style'/>
+            <Style path='Tests/Styles/FlexLayoutRowTests.style'/>
             <Contents style.layoutType='LayoutType.Flex'
                       style.flexLayoutDirection='LayoutDirection.Row' 
                       style.preferredWidth='600f'
@@ -612,8 +573,7 @@ public class FlexLayoutRowTests {
 //    [Test]
 //    public void WrapWithMultipleColumnSizes() {
 //        string template = @"
-//        <UITemplate>
-//            <Style path='FlexLayoutRowTests+FlexRowLayoutThing+Style'/>
+//        <//                        <Style path='Tests/Styles/FlexLayoutRowTests.style'/>
 //            <Contents style.layoutType='LayoutType.Flex' style.preferredWidth='600f' style.preferredHeight='400f'>
 //                <Group x-id='child0' style.preferredWidth='100f' style.preferredHeight='450f'/>
 //                <Group x-id='child1' style.preferredWidth='200f' style.preferredHeight='200f'/>
@@ -634,8 +594,7 @@ public class FlexLayoutRowTests {
 //    [Test]
 //    public void Wrap_AlignTracks() {
 //        string template = @"
-//        <UITemplate>
-//            <Style path='FlexLayoutRowTests+FlexRowLayoutThing+Style'/>
+//        <//                        <Style path='Tests/Styles/FlexLayoutRowTests.style'/>
 //            <Contents style.layoutType='LayoutType.Flex' style.preferredWidth='400f' style.preferredHeight='400f'>
 //                <Group x-id='child0' style.preferredWidth='100f' style.preferredHeight='450f'/>
 //                <Group x-id='child1' style.preferredWidth='200f' style.preferredHeight='200f'/>
@@ -658,7 +617,7 @@ public class FlexLayoutRowTests {
     public void SetsActualWidthAndHeight() {
         string template = @"
         <UITemplate>
-            <Style path='FlexLayoutRowTests+FlexRowLayoutThing+Style'/>
+            <Style path='Tests/Styles/FlexLayoutRowTests.style'/>
             <Contents style.layoutType='LayoutType.Flex' style.flexLayoutDirection='LayoutDirection.Row' style.preferredWidth='$content(100)' style.preferredHeight='$content(100)'>
                 <Group x-id='child0' style='w100h100' style.paddingLeft='5f' style.paddingRight='5f'/>
                 <Group x-id='child1' style='w100h100' style.paddingLeft='5f' style.paddingRight='5f'/>

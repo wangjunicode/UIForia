@@ -6,6 +6,7 @@ using UIForia.Rendering;
 using UIForia.Systems;
 using Tests.Mocks;
 using TMPro;
+using UIForia.Compilers.Style;
 using UnityEditor.VersionControl;
 using UnityEngine;
 
@@ -198,11 +199,12 @@ public class StyleTests {
             UIStyleGroup group = new UIStyleGroup();
             group.name = "Name";
             group.normal = baseStyle;
-            root.style.AddStyleGroup(group);
+            UIStyleGroupContainer container = new UIStyleGroupContainer("Name", StyleType.Shared, new[] {group});
+            root.style.AddStyleGroupContainer(container);
 
             Assert.AreEqual(5, ComputedValue<int>(root, propName));
 
-            root.style.RemoveBaseStyle(baseStyle);
+            root.style.RemoveStyleGroupContainer(container);
 
             Assert.AreEqual(DefaultValue<int>(defaultName), ComputedValue<int>(root, propName));
         };
@@ -224,10 +226,13 @@ public class StyleTests {
             group.name = "Name";
             group.normal = baseStyle;
             group.styleType = StyleType.Shared;
-            root.style.AddStyleGroup(group);
+
+            UIStyleGroupContainer container = new UIStyleGroupContainer("Name", StyleType.Shared, new[] {group});
+            root.style.AddStyleGroupContainer(container);
+
             Assert.AreEqual(15, ComputedValue<int>(root, propName));
 
-            root.style.RemoveBaseStyle(baseStyle);
+            root.style.RemoveStyleGroupContainer(container);
 
             Assert.AreEqual(15, ComputedValue<int>(root, propName));
         };
@@ -247,7 +252,9 @@ public class StyleTests {
             UIStyleGroup group = new UIStyleGroup();
             group.name = "Name";
             group.normal = baseStyle;
-            root.style.AddStyleGroup(group);
+            UIStyleGroupContainer container = new UIStyleGroupContainer("Name", StyleType.Shared, new[] {group});
+            root.style.AddStyleGroupContainer(container);
+            
             Assert.AreEqual(5, ComputedValue<int>(root, propName));
 
             root.style.EnterState(StyleState.Hover);
@@ -365,10 +372,11 @@ public class StyleTests {
             UIStyleGroup group = new UIStyleGroup();
             group.name = "Name";
             group.normal = baseStyle;
-            root.style.AddStyleGroup(group);
+            UIStyleGroupContainer container = new UIStyleGroupContainer("Name", StyleType.Shared, new[] {group});
+            root.style.AddStyleGroupContainer(container);
             Assert.AreEqual(new UIMeasurement(5000), ComputedValue<UIMeasurement>(root, propName));
 
-            root.style.RemoveBaseStyle(baseStyle);
+            root.style.RemoveStyleGroupContainer(container);
 
             Assert.AreEqual(DefaultValue<UIMeasurement>(defaultName), ComputedValue<UIMeasurement>(root, propName));
         };
@@ -389,10 +397,11 @@ public class StyleTests {
             UIStyleGroup group = new UIStyleGroup();
             group.name = "Name";
             group.normal = baseStyle;
-            root.style.AddStyleGroup(group);
+            UIStyleGroupContainer container = new UIStyleGroupContainer("Name", StyleType.Shared, new[] {group});
+            root.style.AddStyleGroupContainer(container);
             Assert.AreEqual(new UIMeasurement(1500), ComputedValue<UIMeasurement>(root, propName));
 
-            root.style.RemoveBaseStyle(baseStyle);
+            root.style.RemoveStyleGroupContainer(container);
 
             Assert.AreEqual(new UIMeasurement(1500), ComputedValue<UIMeasurement>(root, propName));
         };
@@ -412,7 +421,8 @@ public class StyleTests {
             UIStyleGroup group = new UIStyleGroup();
             group.name = "Name";
             group.normal = baseStyle;
-            root.style.AddStyleGroup(group);
+            UIStyleGroupContainer container = new UIStyleGroupContainer("Name", StyleType.Shared, new[] {group});
+            root.style.AddStyleGroupContainer(container);
             Assert.AreEqual(new UIMeasurement(500), ComputedValue<UIMeasurement>(root, propName));
 
             root.style.EnterState(StyleState.Hover);
@@ -493,7 +503,6 @@ public class StyleTests {
         StyleSetTestThing root = (StyleSetTestThing) app.RootElement;
         app.Update();
         Assert.AreEqual(100, root.FindById("dynamic").style.MarginTop.value);
-        
     }
 
 }

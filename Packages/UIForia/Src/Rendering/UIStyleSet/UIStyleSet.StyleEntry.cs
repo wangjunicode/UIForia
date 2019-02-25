@@ -1,4 +1,3 @@
-
 namespace UIForia.Rendering {
 
     public partial class UIStyleSet {
@@ -9,18 +8,19 @@ namespace UIForia.Rendering {
             public readonly StyleState state;
             public readonly StyleType type;
             public readonly int priority;
+            public readonly UIStyleGroup sourceGroup;
 
             //style number is used to prioritize shared styles, higher numbers are less important
-            public StyleEntry(UIStyle style, StyleType type, StyleState state, int styleNumber, int attributeCount) {
+            public StyleEntry(UIStyleGroup sourceGroup, UIStyle style, StyleType type, StyleState state, int styleNumber, int attributeCount) {
+                this.sourceGroup = sourceGroup;
                 this.style = style;
                 this.type = type;
                 this.state = state;
-                this.priority = GetSortPriority(type, state, styleNumber, attributeCount);
+                this.priority = BitUtil.SetBytes(styleNumber, attributeCount, (int) type, (int) state);
             }
 
-            private static int GetSortPriority(StyleType type, StyleState state, int styleNumber, int attributeCount) {
-                return BitUtil.SetBytes(styleNumber, attributeCount, (int) type, (int) state);
-            }
         }
+
     }
+
 }

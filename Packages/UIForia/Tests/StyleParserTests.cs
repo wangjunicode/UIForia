@@ -1,10 +1,8 @@
 using System.Collections.Generic;
 using NUnit.Framework;
-using UIForia.Rendering;
 using UIForia;
-using UIForia.Compilers.Style;
 using UIForia.Parsing.Style;
-using UnityEditorInternal;
+using UIForia.Rendering;
 using UnityEngine;
 
 [TestFixture]

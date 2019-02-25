@@ -11,7 +11,7 @@ style login-input {
 }
 
 style container {
-    TextFontAsset = Fonts/EurostileLTPro SDF;
+    TextFontAsset = url("Fonts/EurostileLTPro SDF");
     TextFontSize = 48;
     FlexLayoutMainAxisAlignment = Center;
     FlexLayoutCrossAxisAlignment = Center;

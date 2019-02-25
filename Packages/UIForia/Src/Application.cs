@@ -173,7 +173,11 @@ namespace UIForia {
             m_ElementTree.TraversePreOrder((el) => el.OnDestroy());
 
             m_ElementTree.Clear();
-
+            
+            templateParser.Reset();
+            styleImporter.Reset();
+            ResourceManager.Reset(); // todo use 1 instance per application
+            
             for (int i = 0; i < m_Views.Count; i++) {
                 m_Views[i].Refresh();
                 RegisterElement(m_Views[i].RootElement);
@@ -473,9 +477,9 @@ namespace UIForia {
             return m_ElementTree.GetItem(elementId);
         }
 
-        public void OnAttributeSet(UIElement element, string attributeName, string attributeValue) {
+        public void OnAttributeSet(UIElement element, string attributeName, string previousValue) {
             for (int i = 0; i < m_Systems.Count; i++) {
-                m_Systems[i].OnAttributeSet(element, attributeName, attributeValue);
+                m_Systems[i].OnAttributeSet(element, attributeName, previousValue);
             }
         }
     }

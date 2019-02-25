@@ -1,6 +1,7 @@
 using UIForia.Parsing.Style;
 
 namespace UIForia.Rendering {
+
     public class UIStyleRule {
 
         /// <summary>
@@ -27,7 +28,7 @@ namespace UIForia.Rendering {
             this.expression = expression;
             this.next = next;
         }
-        
+
         public UIStyleRule(bool invert, string attributeName, string attributeValue, UIStyleRule next = null) {
             this.invert = invert;
             this.attributeName = attributeName;
@@ -36,7 +37,6 @@ namespace UIForia.Rendering {
         }
 
         public bool IsApplicableTo(UIElement element) {
-
             if (next != null) {
                 return IsApplicableToNext(element, next.IsApplicableTo(element));
             }
@@ -46,7 +46,7 @@ namespace UIForia.Rendering {
 
         private bool IsApplicableToNext(UIElement element, bool nextApplies) {
             if (!nextApplies) return false;
-            
+
             if (expression != null) {
                 return invert ^ expression.Execute() == 0;
             }
@@ -58,14 +58,14 @@ namespace UIForia.Rendering {
             return invert ^ element.GetAttribute(attributeName) == attributeValue;
         }
 
-        public static bool operator ==(UIStyleRule x, UIStyleRule y) {
-            return x.invert == y.invert
-                   && string.Equals(x.attributeName, y.attributeName)
-                   && string.Equals(x.attributeValue, y.attributeValue);
+        public bool WillBeApplicableTo(UIElement element) {
+            if (next != null) {
+                return IsApplicableToNext(element, next.IsApplicableTo(element));
+            }
+
+            return IsApplicableToNext(element, true);
         }
 
-        public static bool operator !=(UIStyleRule x, UIStyleRule y) {
-            return !(x == y);
-        }
     }
+
 }

@@ -5,6 +5,7 @@ using UIForia.Parsing.Style.Tokenizer;
 using UIForia.Util;
 
 namespace UIForia.Parsing.Style {
+
     public struct StyleParser2 {
 
         private StyleTokenStream tokenStream;
@@ -303,7 +304,7 @@ namespace UIForia.Parsing.Style {
                 case StyleTokenType.Number:
                     StyleLiteralNode value = StyleASTNodeFactory.NumericLiteralNode(tokenStream.Current.value).WithLocation(propertyToken) as StyleLiteralNode;
                     tokenStream.Advance();
-                    if (tokenStream.Current.styleTokenType != StyleTokenType.EndStatement 
+                    if (tokenStream.Current.styleTokenType != StyleTokenType.EndStatement
                         && tokenStream.Current.styleTokenType != StyleTokenType.Number) {
                         UnitNode unit = ParseUnit().WithLocation(tokenStream.Previous) as UnitNode;
                         propertyValue = StyleASTNodeFactory.MeasurementNode(value, unit);
@@ -340,7 +341,7 @@ namespace UIForia.Parsing.Style {
                         url = ParseLiteralOrReference(StyleTokenType.String);
                     }
                     else {
-                        url = ParseLiteralOrReference(StyleTokenType.Identifier);    
+                        url = ParseLiteralOrReference(StyleTokenType.Identifier);
                     }
 
                     while (tokenStream.HasMoreTokens && !AdvanceIfTokenType(StyleTokenType.ParenClose)) {
@@ -602,6 +603,7 @@ namespace UIForia.Parsing.Style {
                     throw new Exception("Unknown op type");
             }
         }
+
     }
 
 }

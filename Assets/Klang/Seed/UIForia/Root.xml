@@ -26,13 +26,13 @@
 
     <Contents style="container" x-router="game" x-defaultRoute="/splash">
 
-        <URLNavBar targetRouterName="'game'"/>
+        <!--<URLNavBar targetRouterName="'game'"/>-->
 
         <Group style="app-body" >
 
-            <SeedSplashScreen x-route="/splash"/>
+            <SeedSplashScreen x-route="/splash" x-variant="1"/>
 
-            <LoginFlow x-route="/login_flow"/>
+            <!--<LoginFlow x-route="/login_flow"/>-->
             
             <!--<Game x-nestedRouter="'game'" x-route="'/game'"/>-->
 

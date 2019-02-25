@@ -354,6 +354,7 @@
                 <e p="StyleSheetCompiler.cs" t="Include" />
                 <e p="StyleSheetConstantImporter.cs" t="Include" />
                 <e p="StyleSheetImporter.cs" t="Include" />
+                <e p="UIStyleGroupContainer.cs" t="Include" />
               </e>
               <e p="StyleBindingCompiler.cs" t="Include" />
               <e p="Terminal.cs" t="Include" />
@@ -523,6 +524,22 @@
               </e>
               <e p="Style" t="Include">
                 <e p="AstNodes" t="Include">
+                  <e p="AttributeGroupContainer.cs" t="Include" />
+                  <e p="ChainableGroupContainer.cs" t="Include" />
+                  <e p="ColorNode.cs" t="Include" />
+                  <e p="ConstNode.cs" t="Include" />
+                  <e p="DotAccessNode.cs" t="Include" />
+                  <e p="ExportNode.cs" t="Include" />
+                  <e p="ExpressionGroupContainer.cs" t="Include" />
+                  <e p="ImportNode.cs" t="Include" />
+                  <e p="InvokeNode.cs" t="Include" />
+                  <e p="MeasurementNode.cs" t="Include" />
+                  <e p="MemberAccessExpressionNode.cs" t="Include" />
+                  <e p="ParenNode.cs" t="Include" />
+                  <e p="PropertyNode.cs" t="Include" />
+                  <e p="ReferenceNode.cs" t="Include" />
+                  <e p="RgbaNode.cs" t="Include" />
+                  <e p="RgbNode.cs" t="Include" />
                   <e p="StyleASTNode.cs" t="Include" />
                   <e p="StyleASTNodeType.cs" t="Include" />
                   <e p="StyleFieldNotDefinedException.cs" t="Include" />
@@ -531,6 +548,12 @@
                   <e p="StyleLiteralNode.cs" t="Include" />
                   <e p="StyleOperatorNode.cs" t="Include" />
                   <e p="StyleOperatorType.cs" t="Include" />
+                  <e p="StyleRootNode.cs" t="Include" />
+                  <e p="StyleStateContainer.cs" t="Include" />
+                  <e p="TypePath.cs" t="Include" />
+                  <e p="UnaryExpressionNode.cs" t="Include" />
+                  <e p="UnitNode.cs" t="Include" />
+                  <e p="UrlNode.cs" t="Include" />
                 </e>
                 <e p="ParsedStyleSheet.cs" t="Include" />
                 <e p="ParseUtil.cs" t="Include" />
@@ -793,7 +816,6 @@
             <e p="ReflectionUtilTests.cs" t="Include" />
             <e p="RenderLayerComparerAscendingTest.cs" t="Include" />
             <e p="RouterTests.cs" t="Include" />
-            <e p="RouterTests2.cs" t="Include" />
             <e p="SkipTreeTests.cs" t="Include" />
             <e p="StyleBindingTests.cs" t="Include" />
             <e p="StyleParserTests.cs" t="Include" />

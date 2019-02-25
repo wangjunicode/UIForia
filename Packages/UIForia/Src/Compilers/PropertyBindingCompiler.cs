@@ -326,7 +326,7 @@ namespace UIForia.Compilers {
                         }
                     }
 
-                    UnityEngine.Debug.LogWarning($"Trying to compile 'OnPropertyChanged' attribute on method {info.Name} but the method did not have the required signature of 1 parameter of type string");
+                    UnityEngine.Debug.LogWarning($"Trying to compile 'OnPropertyChanged' attribute on method {info.Name} of type {info.DeclaringType} but the method did not have the required signature of 1 parameter of type string");
                 }
 
                 // use null as a marker in the dictionary regardless of whether or not we have actions registered

@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using JetBrains.Annotations;
 using UIForia.Compilers;
+using UIForia.Compilers.Style;
 using UIForia.Input;
 using UIForia.Rendering;
 using UIForia.StyleBindings;
@@ -26,7 +27,7 @@ namespace UIForia {
         public Binding[] perFrameBindings;
         public Binding[] triggeredBindings;
 
-        public UIStyleGroup[] baseStyles;
+        public UIStyleGroupContainer[] baseStyles;
 
         public DragEventCreator[] dragEventCreators;
         public DragEventHandler[] dragEventHandlers;
@@ -37,13 +38,16 @@ namespace UIForia {
         protected static readonly StyleBindingCompiler s_StyleCompiler = new StyleBindingCompiler();
         protected static readonly InputBindingCompiler s_InputCompiler = new InputBindingCompiler();
         protected static readonly PropertyBindingCompiler s_PropCompiler = new PropertyBindingCompiler();
-
-        protected UITemplate(List<UITemplate> childTemplates, List<AttributeDefinition> attributes = null) {
+        
+        public readonly Application app;
+        
+        protected UITemplate(Application app, List<UITemplate> childTemplates, List<AttributeDefinition> attributes = null) {
+            this.app = app;
             this.childTemplates = childTemplates;
             this.attributes = attributes;
             this.perFrameBindings = Binding.EmptyArray;
             this.triggeredBindings = Binding.EmptyArray;
-            this.baseStyles = ArrayPool<UIStyleGroup>.Empty;
+            this.baseStyles = ArrayPool<UIStyleGroupContainer>.Empty;
             this.dragEventCreators = ArrayPool<DragEventCreator>.Empty;
             this.dragEventHandlers = ArrayPool<DragEventHandler>.Empty;
             this.mouseEventHandlers = ArrayPool<MouseEventHandler>.Empty;
@@ -235,10 +239,10 @@ namespace UIForia {
         }
 
         protected void ResolveBaseStyles(ParsedTemplate template) {
-            List<UIStyleGroup> list = ListPool<UIStyleGroup>.Get();
+            List<UIStyleGroupContainer> list = ListPool<UIStyleGroupContainer>.Get();
 
             if (elementName != null) {
-                UIStyleGroup styleGroup = template.ResolveElementStyle("<" + elementName + ">");
+                UIStyleGroupContainer styleGroup = template.ResolveElementStyle(elementName);
                 if (styleGroup != default) {
                     styleGroup.styleType = StyleType.Implicit;
                     list.Add(styleGroup);
@@ -265,20 +269,19 @@ namespace UIForia {
                     return;
                 }
 
+                // a list of styles has been defined
                 if (styleAttr.value.IndexOf(' ') != -1) {
                     string[] names = styleAttr.value.Split(' ');
                     foreach (string part in names) {
-                        UIStyleGroup style = template.ResolveStyleGroup(part.Trim());
-                        if (style != default) {
-                            style.styleType = StyleType.Shared;
+                        UIStyleGroupContainer style = template.ResolveStyleGroup(part.Trim());
+                        if (style != null) {
                             list.Add(style);
                         }
                     }
                 }
                 else {
-                    UIStyleGroup style = template.ResolveStyleGroup(styleAttr.value);
-                    if (style != default) {
-                        style.styleType = StyleType.Shared;
+                    UIStyleGroupContainer style = template.ResolveStyleGroup(styleAttr.value);
+                    if (style != null) {
                         list.Add(style);
                     }
                 }
@@ -288,7 +291,7 @@ namespace UIForia {
                 baseStyles = list.ToArray();
             }
 
-            ListPool<UIStyleGroup>.Release(ref list);
+            ListPool<UIStyleGroupContainer>.Release(ref list);
         }
 
         public virtual void PostCompile(ParsedTemplate template) { }

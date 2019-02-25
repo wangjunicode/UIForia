@@ -26,8 +26,8 @@ namespace UIForia {
         private RepeatIndexAliasResolver indexResolver;
         private RepeatLengthAliasResolver lengthResolver;
 
-        public UIRepeatTemplate(List<UITemplate> childTemplates, List<AttributeDefinition> attributes = null)
-            : base(childTemplates, attributes) { }
+        public UIRepeatTemplate(Application app, List<UITemplate> childTemplates, List<AttributeDefinition> attributes = null)
+            : base(app, childTemplates, attributes) { }
 
         protected override Type elementType {
             get { return typeof(UIRepeatElement); }

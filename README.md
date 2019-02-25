@@ -19,8 +19,9 @@ Keyword           | Description
 // place single line comments everywhere
 
 // export theme constants e.g.
-export const color0 : Color = rgba(1, 0, 0, 1); // semicolon is optional 
-export const baseDirection : LayoutDirection = LayoutDirection.Vertical;
+const redVal = 200;
+export const color0 = rgba(@redVal, 0, 0, 1); // semicolon is optional 
+export const baseDirection = Vertical;
 
 // reference UIForia enums 
 const anotherDirection : LayoutDirection = LayoutDirection.Horizontal;

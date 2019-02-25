@@ -8,8 +8,8 @@ namespace UIForia {
         public int switchId;
         public int index;
 
-        public UISwitchCaseTemplate(List<UITemplate> childTemplates, List<AttributeDefinition> attributes = null)
-            : base(childTemplates, attributes) { }
+        public UISwitchCaseTemplate(Application app, List<UITemplate> childTemplates, List<AttributeDefinition> attributes = null)
+            : base(app, childTemplates, attributes) { }
 
         protected override Type elementType => typeof(UISwitchCaseElement);
 

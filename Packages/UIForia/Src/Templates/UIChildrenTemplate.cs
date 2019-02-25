@@ -5,8 +5,8 @@ namespace UIForia {
 
     public class UIChildrenTemplate : UITemplate {
 
-        public UIChildrenTemplate(List<UITemplate> childTemplates = null, List<AttributeDefinition> attributes = null) 
-            : base(childTemplates, attributes) { }
+        public UIChildrenTemplate(Application app, List<UITemplate> childTemplates = null, List<AttributeDefinition> attributes = null) 
+            : base(app, childTemplates, attributes) { }
 
         protected override Type elementType => typeof(UIChildrenElement);
 

@@ -19,7 +19,7 @@ namespace UIForia.Editor {
         [MenuItem("UIForia/Refresh UI Templates %g")]
         public static void Refresh() {
             StyleParser.Reset();
-            TemplateParser.Reset();
+            //TemplateParser.Reset();
             ResourceManager.Reset();
             ParsedTemplate.Reset(); // todo -- roll all parsers into one place
             

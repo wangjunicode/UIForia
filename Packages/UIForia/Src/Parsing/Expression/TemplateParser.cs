@@ -11,7 +11,7 @@ namespace UIForia {
 
     public class TemplateParser {
 
-        private static readonly Dictionary<Type, ParsedTemplate> parsedTemplates = new Dictionary<Type, ParsedTemplate>();
+        private readonly Dictionary<Type, ParsedTemplate> parsedTemplates = new Dictionary<Type, ParsedTemplate>();
 
         private static readonly string[] RepeatAttributes = {"if", "style", "x-id", "list", "as", "filter", "onItemAdded", "onItemRemoved"};
         private static readonly string[] CaseAttributes = {"when"};
@@ -20,11 +20,17 @@ namespace UIForia {
         private static readonly string[] ChildrenAttributes = {"style"};
         private static readonly string[] TextAttributes = { };
 
-        public static void Reset() {
+        public readonly Application app;
+        
+        public TemplateParser(Application app) {
+            this.app = app;
+        }
+        
+        public void Reset() {
             parsedTemplates.Clear();
         }
 
-        public static ParsedTemplate GetParsedTemplate(Type elementType, bool forceReload = false) {
+        public ParsedTemplate GetParsedTemplate(Type elementType, bool forceReload = false) {
             if (!forceReload && parsedTemplates.ContainsKey(elementType)) {
                 return parsedTemplates[elementType];
             }
@@ -34,17 +40,17 @@ namespace UIForia {
             return parsedTemplate;
         }
 
-        public static ParsedTemplate ParseTemplateFromString<T>(string input) where T : UIElement {
+        public ParsedTemplate ParseTemplateFromString<T>(string input) where T : UIElement {
             XDocument doc = XDocument.Parse(input);
             return ParseTemplate(null, typeof(T), doc);
         }
 
-        public static ParsedTemplate ParseTemplateFromString(Type rootType, string input) {
+        public ParsedTemplate ParseTemplateFromString(Type rootType, string input) {
             XDocument doc = XDocument.Parse(input);
             return ParseTemplate(rootType.AssemblyQualifiedName, rootType, doc);
         }
 
-        private static ParsedTemplate ParseTemplateFromType(Type type) {
+        private ParsedTemplate ParseTemplateFromType(Type type) {
             ProcessedType processedType = TypeProcessor.GetType(type);
 
             string template = processedType.GetTemplate();
@@ -58,6 +64,7 @@ namespace UIForia {
                 if (ex.templatePath == null) {
                     ex.templatePath = processedType.GetTemplatePath();
                 }
+
                 throw;
             }
             catch (ParseException pe) {
@@ -67,7 +74,7 @@ namespace UIForia {
             return parsedTemplate;
         }
 
-        private static StyleDefinition ParseStyleSheet(string templateId, XElement styleElement) {
+        private StyleDefinition ParseStyleSheet(string templateId, XElement styleElement) {
             XAttribute aliasAttr = styleElement.GetAttribute("alias");
             XAttribute importPathAttr = styleElement.GetAttribute("path");
 
@@ -112,7 +119,7 @@ namespace UIForia {
             return new StyleDefinition(alias, importPathAttr.Value.Trim());
         }
 
-        private static ParsedTemplate ParseTemplate(string templatePath, Type type, XDocument doc) {
+        private ParsedTemplate ParseTemplate(string templatePath, Type type, XDocument doc) {
             doc.MergeTextNodes();
 
             List<ImportDeclaration> imports = new List<ImportDeclaration>();
@@ -173,11 +180,10 @@ namespace UIForia {
                 return baseTemplate.CreateInherited(type, usings, contentTemplates, styleTemplates, imports);
             }
 
-//            UIElementTemplate rootTemplate = new UIElementTemplate(type, children, attributes);
-            return new ParsedTemplate(type, children, attributes, usings, styleTemplates, imports);
+            return new ParsedTemplate(app, type, children, attributes, usings, styleTemplates, imports);
         }
 
-        private static string ParseUsing(XElement element) {
+        private string ParseUsing(XElement element) {
             var namespaceAttr = element.GetAttribute("namespace");
             if (namespaceAttr == null) {
                 throw new ParseException("<Using/> tags require a 'namespace' attribute");
@@ -191,11 +197,12 @@ namespace UIForia {
             return value;
         }
 
-        private static UITemplate ParseCaseElement(XElement element) {
+        private UITemplate ParseCaseElement(XElement element) {
             EnsureAttribute(element, "when");
             EnsureOnlyAttributes(element, CaseAttributes);
 
             UISwitchCaseTemplate template = new UISwitchCaseTemplate(
+                app,
                 ParseNodes(element.Nodes()),
                 ParseAttributes(element.Attributes())
             );
@@ -203,21 +210,23 @@ namespace UIForia {
             return template;
         }
 
-        private static UITemplate ParseDefaultElement(XElement element) {
+        private UITemplate ParseDefaultElement(XElement element) {
             EnsureOnlyAttributes(element, DefaultAttributes);
 
             UISwitchDefaultTemplate template = new UISwitchDefaultTemplate(
+                app,
                 ParseNodes(element.Nodes()),
                 ParseAttributes(element.Attributes())
             );
             return template;
         }
 
-        private static UITemplate ParseRepeatElement(XElement element) {
+        private UITemplate ParseRepeatElement(XElement element) {
             EnsureAttribute(element, "list");
 //            EnsureOnlyAttributes(element, RepeatAttributes);
 
             UIRepeatTemplate template = new UIRepeatTemplate(
+                app,
                 ParseNodes(element.Nodes()),
                 ParseAttributes(element.Attributes())
             );
@@ -225,8 +234,9 @@ namespace UIForia {
             return template;
         }
 
-        private static UITemplate ParseContainerElement(Type type, XElement element) {
+        private UITemplate ParseContainerElement(Type type, XElement element) {
             UIContainerTemplate template = new UIContainerTemplate(
+                app,
                 element.Name.LocalName,
                 type,
                 ParseNodes(element.Nodes()),
@@ -235,40 +245,43 @@ namespace UIForia {
             return template;
         }
 
-        private static UITemplate ParseSlotElement(XElement element) {
+        private UITemplate ParseSlotElement(XElement element) {
             EnsureAttribute(element, "name");
             EnsureNotInsideTagName(element, "Repeat");
             EnsureNotInsideTagName(element, "Slot");
 
             return new UISlotTemplate(
+                app,
                 ParseNodes(element.Nodes()),
                 ParseAttributes(element.Attributes())
             );
         }
 
-        private static UITemplate ParseSlotContentElement(XElement element) {
+        private UITemplate ParseSlotContentElement(XElement element) {
             EnsureAttribute(element, "name");
             EnsureNotInsideTagName(element, "Repeat");
             EnsureNotInsideTagName(element, "Slot");
 
             return new UISlotContentTemplate(
+                app,
                 ParseNodes(element.Nodes()),
                 ParseAttributes(element.Attributes())
             );
         }
 
-        private static UITemplate ParseChildrenElement(XElement element) {
+        private UITemplate ParseChildrenElement(XElement element) {
             EnsureEmpty(element);
             EnsureNotInsideTagName(element, "Repeat");
-            return new UIChildrenTemplate(null, ParseAttributes(element.Attributes()));
+            return new UIChildrenTemplate(app, null, ParseAttributes(element.Attributes()));
         }
 
-        private static UITemplate ParseSwitchElement(XElement element) {
+        private UITemplate ParseSwitchElement(XElement element) {
             EnsureAttribute(element, "value");
             EnsureOnlyAttributes(element, SwitchAttributes);
 
             // can only contain <Case> and <Default>
             UISwitchTemplate template = new UISwitchTemplate(
+                app,
                 ParseNodes(element.Nodes()),
                 ParseAttributes(element.Attributes())
             );
@@ -296,15 +309,16 @@ namespace UIForia {
             return template;
         }
 
-        private static UITextTemplate ParseTextNode(XText node) {
+        private UITextTemplate ParseTextNode(XText node) {
             // todo split nodes based on inline {expressions}
             return new UITextTemplate(null, "'" + node.Value.Trim() + "'");
         }
 
-        private static UITemplate ParseTemplateElement(XElement element) {
+        private UITemplate ParseTemplateElement(XElement element) {
             ProcessedType elementType = TypeProcessor.GetTemplateType(element.Name.LocalName);
             if (typeof(UIContainerElement).IsAssignableFrom(elementType.rawType)) {
                 return new UIContainerTemplate(
+                    app,
                     elementType.rawType,
                     ParseNodes(element.Nodes()),
                     ParseAttributes(element.Attributes())
@@ -320,6 +334,7 @@ namespace UIForia {
 //            }
 
             UITemplate template = new UIElementTemplate(
+                app,
                 element.Name.LocalName,
                 ParseNodes(element.Nodes()),
                 ParseAttributes(element.Attributes())
@@ -328,7 +343,7 @@ namespace UIForia {
             return template;
         }
 
-        private static UITemplate ParseTextElement(Type type, XElement element) {
+        private UITemplate ParseTextElement(Type type, XElement element) {
             string rawText = string.Empty;
             foreach (XNode node in element.Nodes()) {
                 switch (node.NodeType) {
@@ -346,30 +361,32 @@ namespace UIForia {
                 throw new InvalidTemplateException("Unable to handle node type: " + node.NodeType);
             }
 
-            return new UITextTemplate(type, rawText, ParseAttributes(element.Attributes()));
+            return new UITextTemplate(app, type, rawText, ParseAttributes(element.Attributes()));
         }
 
-        private static UITemplate ParseGraphicElement(XElement element) {
+        private UITemplate ParseGraphicElement(XElement element) {
             UITemplate template = new UIGraphicTemplate(
+                app,
                 ParseNodes(element.Nodes()),
                 ParseAttributes(element.Attributes())
             );
             return template;
         }
 
-        private static UITemplate ParseImageElement(XElement element) {
-            return new UIImageTemplate(null, ParseAttributes(element.Attributes()));
+        private UITemplate ParseImageElement(XElement element) {
+            return new UIImageTemplate(app, null, ParseAttributes(element.Attributes()));
         }
 
-        private static UITemplate ParseInputElement(XElement element) {
+        private UITemplate ParseInputElement(XElement element) {
             return new UIElementTemplate(
+                app,
                 typeof(UIInputFieldElement),
                 ParseNodes(element.Nodes()),
                 ParseAttributes(element.Attributes())
             );
         }
 
-        private static UITemplate ParseElement(XElement element) {
+        private UITemplate ParseElement(XElement element) {
             if (element.Name == "Children") {
                 return ParseChildrenElement(element);
             }
@@ -457,7 +474,7 @@ namespace UIForia {
             new IntrinsicElementType("Heading6", typeof(UIHeading6Element), false),
         };
 
-        private static List<UITemplate> ParseNodes(IEnumerable<XNode> nodes) {
+        private List<UITemplate> ParseNodes(IEnumerable<XNode> nodes) {
             List<UITemplate> retn = new List<UITemplate>();
             foreach (XNode node in nodes) {
                 switch (node.NodeType) {
@@ -479,29 +496,29 @@ namespace UIForia {
             return retn;
         }
 
-        private static List<AttributeDefinition> ParseAttributes(IEnumerable<XAttribute> attributes) {
+        private List<AttributeDefinition> ParseAttributes(IEnumerable<XAttribute> attributes) {
             return attributes.Select(attr => new AttributeDefinition(attr.Name.LocalName, attr.Value.Trim())).ToList();
         }
 
-        private static InvalidTemplateException Abort(string message) {
+        private InvalidTemplateException Abort(string message) {
             return new InvalidTemplateException(message);
         }
 
-        private static void EnsureAttribute(XElement element, string attrName) {
+        private void EnsureAttribute(XElement element, string attrName) {
             if (element.GetAttribute(attrName) == null) {
                 throw new InvalidTemplateException(
                     $"<{element.Name.LocalName}> is missing required attribute '{attrName}'");
             }
         }
 
-        private static void EnsureMissingAttribute(XElement element, string attrName) {
+        private void EnsureMissingAttribute(XElement element, string attrName) {
             if (element.GetAttribute(attrName) != null) {
                 throw new InvalidTemplateException(
                     $"<{element.Name.LocalName}> is not allowed to have attribute '{attrName}'");
             }
         }
 
-        private static void EnsureOnlyAttributes(XElement element, string[] attrs) {
+        private void EnsureOnlyAttributes(XElement element, string[] attrs) {
             foreach (XAttribute attr in element.Attributes()) {
                 if (!attrs.Contains(attr.Name.LocalName)) {
                     throw Abort($"<{element.Name.LocalName}> cannot have attribute: '{attr.Name.LocalName}");
@@ -509,14 +526,14 @@ namespace UIForia {
             }
         }
 
-        private static void EnsureEmpty(XElement element) {
+        private void EnsureEmpty(XElement element) {
             if (!element.IsEmpty) {
                 throw new InvalidTemplateException(
                     $"<{element.Name.LocalName}> tags cannot have children");
             }
         }
 
-        private static void EnsureNotInsideTagName(XElement element, string tagName) {
+        private void EnsureNotInsideTagName(XElement element, string tagName) {
             XElement ptr = element;
 
             while (ptr.Parent != null) {

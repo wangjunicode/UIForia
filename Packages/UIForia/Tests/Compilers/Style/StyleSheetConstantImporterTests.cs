@@ -13,7 +13,7 @@ public class StyleSheetConstantImporterTests {
         nodes.Add(StyleASTNodeFactory.ExportNode(StyleASTNodeFactory.ConstNode("thing0", StyleASTNodeFactory.StringLiteralNode("someVal"))));
         nodes.Add(StyleASTNodeFactory.ExportNode(StyleASTNodeFactory.ConstNode("number", StyleASTNodeFactory.NumericLiteralNode("1"))));
 
-        var context = new StyleSheetConstantImporter(new StyleSheetImporter()).CreateContext(nodes);
+        var context = new StyleSheetConstantImporter(new StyleSheetImporter(null)).CreateContext(nodes);
 
         Assert.AreEqual(3, context.constants.Count);
         Assert.AreEqual("col0", context.constants[0].name);
@@ -34,7 +34,7 @@ public class StyleSheetConstantImporterTests {
         var stringValue = StyleASTNodeFactory.StringLiteralNode("you win!");
         nodes.Add(StyleASTNodeFactory.ExportNode(StyleASTNodeFactory.ConstNode("z", stringValue)));
 
-        var context = new StyleSheetConstantImporter(new StyleSheetImporter()).CreateContext(nodes);
+        var context = new StyleSheetConstantImporter(new StyleSheetImporter(null)).CreateContext(nodes);
 
         Assert.AreEqual(3, context.constants.Count);
         

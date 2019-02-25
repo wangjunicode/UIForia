@@ -15,13 +15,13 @@ namespace UIForia {
         private TemplateType templateType;
         private List<UISlotContentTemplate> slotContentTemplates;
         
-        public UIElementTemplate(string typeName, List<UITemplate> childTemplates, List<AttributeDefinition> attributes = null)
-            : base(childTemplates, attributes) {
+        public UIElementTemplate(Application app, string typeName, List<UITemplate> childTemplates, List<AttributeDefinition> attributes = null)
+            : base(app, childTemplates, attributes) {
             this.typeName = typeName;
         }
 
-        public UIElementTemplate(Type rootType, List<UITemplate> childTemplates, List<AttributeDefinition> attributes = null)
-            : base(childTemplates, attributes) {
+        public UIElementTemplate(Application app, Type rootType, List<UITemplate> childTemplates, List<AttributeDefinition> attributes = null)
+            : base(app, childTemplates, attributes) {
             this.rootType = rootType;
         }
 
@@ -41,7 +41,7 @@ namespace UIForia {
                 return;
             }
 
-            templateToExpand = TemplateParser.GetParsedTemplate(rootType);
+            templateToExpand = app.templateParser.GetParsedTemplate(rootType);
                         
             ResolveBaseStyles(template);
             CompileStyleBindings(template);

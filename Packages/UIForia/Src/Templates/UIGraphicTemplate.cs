@@ -7,7 +7,8 @@ namespace UIForia {
 
     public class UIGraphicTemplate : UITemplate {
 
-        public UIGraphicTemplate(List<UITemplate> childTemplates, List<AttributeDefinition> attributes = null) : base(childTemplates, attributes) { }
+        public UIGraphicTemplate(Application app, List<UITemplate> childTemplates, List<AttributeDefinition> attributes = null) 
+            : base(app, childTemplates, attributes) { }
 
         protected override Type elementType => typeof(UIGraphicElement);
         

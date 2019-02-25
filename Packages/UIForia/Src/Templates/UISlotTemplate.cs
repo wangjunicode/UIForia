@@ -8,8 +8,8 @@ namespace UIForia {
 
         public AttributeDefinition slotNameAttr;
 
-        public UISlotTemplate(List<UITemplate> childTemplates, List<AttributeDefinition> attributes = null)
-            : base(childTemplates, attributes) { }
+        public UISlotTemplate(Application app, List<UITemplate> childTemplates, List<AttributeDefinition> attributes = null)
+            : base(app, childTemplates, attributes) { }
 
         protected override Type elementType => typeof(UISlotElement);
         public string SlotName => slotNameAttr.value;

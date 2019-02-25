@@ -30,7 +30,8 @@ namespace UIForia.Compilers.Style {
         /// <exception cref="CompileException">thrown in case a reference cannot be resolved.</exception>
         public StyleASTNode GetValueForReference(StyleASTNode node) {
             if (node is ReferenceNode referenceNode) {
-                foreach (var c in constants) {
+                for (int index = 0; index < constants.Count; index++) {
+                    StyleConstant c = constants[index];
                     if (c.name == referenceNode.referenceName) {
                         return c.value;
                     }

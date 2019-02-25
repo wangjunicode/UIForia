@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using UIForia.AttributeProcessors;
+using UIForia.Compilers.Style;
 using UIForia.Rendering;
 using UIForia.Routing;
 using UIForia.Systems;
@@ -20,6 +21,8 @@ namespace UIForia {
         protected IRenderSystem m_RenderSystem;
         protected IInputSystem m_InputSystem;
         protected RoutingSystem m_RoutingSystem;
+
+        public readonly StyleSheetImporter styleImporter;
 
         protected readonly SkipTree<UIElement> m_ElementTree;
         protected readonly SkipTree<UIElement> m_UpdateTree;
@@ -46,6 +49,8 @@ namespace UIForia {
         public static readonly List<IAttributeProcessor> s_AttributeProcessors;
         private static readonly Dictionary<Type, bool> s_RequiresUpdateMap;
 
+        public readonly TemplateParser templateParser;
+        
         static Application() {
             ArrayPool<UIElement>.SetMaxPoolSize(64);
             s_RequiresUpdateMap = new Dictionary<Type, bool>();
@@ -64,6 +69,9 @@ namespace UIForia {
             m_InputSystem = new DefaultInputSystem(m_LayoutSystem, m_StyleSystem);
             m_RenderSystem = new RenderSystem(null, m_LayoutSystem);
             m_RoutingSystem = new RoutingSystem();
+           
+            styleImporter = new StyleSheetImporter(this);
+            templateParser = new TemplateParser(this);
 
             m_Systems.Add(m_StyleSystem);
             m_Systems.Add(m_BindingSystem);
@@ -107,7 +115,7 @@ namespace UIForia {
                 return null;
             }
 
-            ParsedTemplate template = TemplateParser.GetParsedTemplate(type);
+            ParsedTemplate template = templateParser.GetParsedTemplate(type);
 
             if (template == null) {
                 return null;

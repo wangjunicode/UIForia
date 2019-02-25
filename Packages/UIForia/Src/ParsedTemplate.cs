@@ -21,7 +21,7 @@ namespace UIForia {
 
         private bool isCompiled;
 
-        private LightList<UIStyleGroup> mergedElementStyles;
+        private LightList<UIStyleGroupContainer> styleContainers;
 
         private readonly List<string> usings;
         private readonly List<UISlotContentTemplate> inheritedContent;
@@ -29,13 +29,15 @@ namespace UIForia {
         public readonly UIElementTemplate rootElementTemplate;
         public readonly ExpressionCompiler compiler; // todo -- static?
         public ParsedTemplate baseTemplate;
-
+        public Application app;
+        
         static ParsedTemplate() {
             s_ParsedTemplates = new IntMap<ParsedTemplate>();
         }
 
-        public ParsedTemplate(Type type, List<UITemplate> contents, List<AttributeDefinition> attributes, List<string> usings, List<StyleDefinition> styleDefinitions, List<ImportDeclaration> imports) : this(null, type, usings, null, styleDefinitions, imports) {
-            this.rootElementTemplate = new UIElementTemplate(type, contents, attributes);
+        public ParsedTemplate(Application app, Type type, List<UITemplate> contents, List<AttributeDefinition> attributes, List<string> usings, List<StyleDefinition> styleDefinitions, List<ImportDeclaration> imports) : this(null, type, usings, null, styleDefinitions, imports) {
+            this.app = app;
+            this.rootElementTemplate = new UIElementTemplate(app, type, contents, attributes);
         }
 
         public ParsedTemplate(ParsedTemplate baseTemplate, Type type, List<string> usings, List<UISlotContentTemplate> contentTemplates, List<StyleDefinition> styleDefinitions, List<ImportDeclaration> imports) {
@@ -114,9 +116,9 @@ namespace UIForia {
             template.PostCompile(this);
         }
 
-        public bool TryResolveStyleGroup(string styleName, out UIStyleGroup group) {
+        public bool TryResolveStyleGroup(string styleName, out UIStyleGroupContainer container) {
             if (styleDefinitions == null) {
-                group = default;
+                container = null;
                 return false;
             }
 
@@ -124,7 +126,8 @@ namespace UIForia {
             // if no dot in path then the style name is the alias
             if (styleName.IndexOf('.') == -1) {
                 def = GetStyleDefinitionFromAlias(StyleDefinition.k_EmptyAliasName);
-                return StyleParser.TryGetParsedStyle(def.importPath, def.body, styleName, out group);
+                container = app.styleImporter.GetStyleGroupByStyleName(def.importPath, def.body, styleName);
+                return container != null;
             }
 
             string[] path = styleName.Split('.');
@@ -133,19 +136,20 @@ namespace UIForia {
             }
 
             def = GetStyleDefinitionFromAlias(path[0]);
-            return StyleParser.TryGetParsedStyle(def.importPath, null, path[1], out group);
+            container = app.styleImporter.GetStyleGroupByStyleName(def.importPath, def.body, styleName);
+            return container != null;
         }
 
-        public UIStyleGroup ResolveStyleGroup(string styleName) {
+        public UIStyleGroupContainer ResolveStyleGroup(string styleName) {
             if (styleDefinitions == null) {
-                return default;
+                return null;
             }
 
             StyleDefinition def;
             // if no dot in path then the style name is the alias
             if (styleName.IndexOf('.') == -1) {
                 def = GetStyleDefinitionFromAlias(StyleDefinition.k_EmptyAliasName);
-                return StyleParser.GetParsedStyle(def.importPath, def.body, styleName);
+                return app.styleImporter.GetStyleGroupByStyleName(def.importPath, def.body, styleName);
             }
 
             string[] path = styleName.Split('.');
@@ -154,7 +158,7 @@ namespace UIForia {
             }
 
             def = GetStyleDefinitionFromAlias(path[0]);
-            return StyleParser.GetParsedStyle(def.importPath, null, path[1]);
+            return app.styleImporter.GetStyleGroupByStyleName(def.importPath, def.body, path[1]);
         }
 
         private void ValidateStyleDefinitions() {
@@ -212,41 +216,36 @@ namespace UIForia {
             throw new NotImplementedException("come back here and fix this!");
         }
 
-        internal UIStyleGroup ResolveElementStyle(string tagName) {
+        internal UIStyleGroupContainer ResolveElementStyle(string tagName) {
             if (styleDefinitions == null) {
                 return default;
             }
 
-            if (mergedElementStyles == null) {
-                mergedElementStyles = new LightList<UIStyleGroup>();
+            if (styleContainers == null) {
+                styleContainers = new LightList<UIStyleGroupContainer>();
             }
 
-            for (int i = 0; i < mergedElementStyles.Count; i++) {
-                if (mergedElementStyles[i].name == tagName) {
-                    return mergedElementStyles[i];
+            for (int i = 0; i < styleContainers.Count; i++) {
+                if (styleContainers[i].styleType == StyleType.Implicit && styleContainers[i].name == tagName) {
+                    return styleContainers[i];
                 }
             }
 
-            UIStyleGroup mergedGroup = new UIStyleGroup() {
-                name = tagName,
-                styleType = StyleType.Implicit
-            };
+            LightList<UIStyleGroup> groups = new LightList<UIStyleGroup>();
 
             // if no dot in path then the style name is the alias
             for (int i = 0; i < styleDefinitions.Count; i++) {
                 StyleDefinition def = styleDefinitions[i];
-                UIStyleGroup styleGroup = StyleSheetImporter.GetStyleGroupsByTagName(def.importPath, def.body, tagName);
-                if (styleGroup.name == tagName) {
-                    mergedGroup.normal = UIStyle.Merge(mergedGroup.normal, styleGroup.normal);
-                    mergedGroup.hover = UIStyle.Merge(mergedGroup.hover, styleGroup.hover);
-                    mergedGroup.active = UIStyle.Merge(mergedGroup.active, styleGroup.active);
-                    mergedGroup.focused = UIStyle.Merge(mergedGroup.focused, styleGroup.focused);
+                UIStyleGroupContainer container = app.styleImporter.GetStyleGroupsByTagName(def.importPath, def.body, tagName);
+                if (container != null && container.styleType == StyleType.Implicit) {
+                    groups.AddRange(container.groups);
                 }
             }
 
-            mergedElementStyles.Add(mergedGroup);
+            UIStyleGroupContainer containerResult = new UIStyleGroupContainer(tagName, StyleType.Implicit, groups);
+            styleContainers.Add(containerResult);
 
-            return mergedGroup;
+            return containerResult;
         }
 
     }

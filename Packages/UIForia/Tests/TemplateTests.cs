@@ -17,12 +17,12 @@ public class TemplateTests {
 
     [SetUp]
     public void Setup() {
-        dummyTemplate = new ParsedTemplate(typeof(TestTarget), null, null, null, null, null);
+        dummyTemplate = new ParsedTemplate(null, typeof(TestTarget), null, null, null, null, null);
     }
 
     [Test]
     public void TextElement_CompileSimpleConstantBinding() {
-        UITextTemplate template = new UITextTemplate("'hello'");
+        UITextTemplate template = new UITextTemplate(null, "'hello'");
         template.Compile(dummyTemplate);
         template.CreateScoped(new TemplateScope());
         Assert.IsNotEmpty(template.triggeredBindings);
@@ -32,7 +32,7 @@ public class TemplateTests {
 
     [Test]
     public void TextElement_CompileMultipartConstantBinding() {
-        UITextTemplate template = new UITextTemplate("'hello {'there'}'");
+        UITextTemplate template = new UITextTemplate(null, "'hello {'there'}'");
         template.Compile(dummyTemplate);
         UIElement element = template.CreateScoped(new TemplateScope());
         Assert.IsNotEmpty(template.triggeredBindings);
@@ -48,7 +48,7 @@ public class TemplateTests {
         ExpressionContext ctx = new ExpressionContext(target);
 
         target.stringValue = "world";
-        UITextTemplate template = new UITextTemplate("'hello {stringValue}!'");
+        UITextTemplate template = new UITextTemplate(null,"'hello {stringValue}!'");
         template.Compile(dummyTemplate);
         UIElement element = template.CreateScoped(new TemplateScope());
 //        MetaData data = template.GetCreationData(new UITextElement(), ctx);
@@ -64,7 +64,7 @@ public class TemplateTests {
         TestTarget target = new TestTarget();
         ExpressionContext ctx = new ExpressionContext(target);
         target.stringValue = "world";
-        UITextTemplate template = new UITextTemplate("'hello {stringValue}!'");
+        UITextTemplate template = new UITextTemplate(null, "'hello {stringValue}!'");
         template.Compile(dummyTemplate);
         UIElement el = template.CreateScoped(new TemplateScope());
         int callCount = 0;
@@ -79,7 +79,7 @@ public class TemplateTests {
         ExpressionContext ctx = new ExpressionContext(target);
 
         target.stringValue = "world";
-        UITextTemplate template = new UITextTemplate("'hello {stringValue}!'");
+        UITextTemplate template = new UITextTemplate(null, "'hello {stringValue}!'");
         template.Compile(dummyTemplate);
         UIElement el = template.CreateScoped(new TemplateScope());
         int callCount = 0;

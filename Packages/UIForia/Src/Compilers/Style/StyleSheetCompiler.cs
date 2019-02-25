@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using UIForia.Parsing.Style.AstNodes;
 using UIForia.Rendering;
 using UIForia.Util;
@@ -19,12 +20,12 @@ namespace UIForia.Compilers.Style {
             context = new StyleSheetConstantImporter(styleSheetImporter).CreateContext(rootNodes);
 
             // todo add imported style groups
-            StyleSheet styleSheet = new StyleSheet(context.constants, LightListPool<UIStyleGroup>.Get());
+            StyleSheet styleSheet = new StyleSheet(context.constants, LightListPool<UIStyleGroupContainer>.Get());
 
             for (int index = 0; index < rootNodes.Count; index++) {
                 switch (rootNodes[index]) {
                     case StyleRootNode styleRoot:
-                        styleSheet.styleGroups.AddRange(CompileStyleGroup(styleRoot));
+                        styleSheet.styleGroupContainers.Add(CompileStyleGroup(styleRoot));
                         break;
                 }
             }
@@ -34,25 +35,27 @@ namespace UIForia.Compilers.Style {
             return styleSheet;
         }
 
-        private LightList<UIStyleGroup> CompileStyleGroup(StyleRootNode styleRoot) {
+        private UIStyleGroupContainer CompileStyleGroup(StyleRootNode styleRoot) {
             UIStyleGroup defaultGroup = new UIStyleGroup();
             defaultGroup.normal = new UIStyle();
             defaultGroup.name = styleRoot.identifier ?? styleRoot.tagName;
             defaultGroup.styleType = styleRoot.tagName != null ? StyleType.Implicit : StyleType.Shared;
+            
+            LightList<UIStyleGroup> styleGroups = new LightList<UIStyleGroup>(4);
+            styleGroups.Add(defaultGroup);
 
-            return CompileStyleContainer(styleRoot, defaultGroup);
+            CompileStyleGroups(styleRoot, styleGroups, defaultGroup);
+
+            return new UIStyleGroupContainer(defaultGroup.name, defaultGroup.styleType, styleGroups);
         }
 
-        private LightList<UIStyleGroup> CompileStyleContainer(StyleGroupContainer root, UIStyleGroup defaultGroup) {
-            LightList<UIStyleGroup> result = LightListPool<UIStyleGroup>.Get();
-            result.Add(defaultGroup);
-
+        private void CompileStyleGroups(StyleGroupContainer root, LightList<UIStyleGroup> groups, UIStyleGroup targetGroup) {
             for (int index = 0; index < root.children.Count; index++) {
                 StyleASTNode node = root.children[index];
                 switch (node) {
                     case PropertyNode propertyNode:
                         // add to normal ui style set
-                        StylePropertyMappers.MapProperty(defaultGroup.normal, propertyNode, context);
+                        StylePropertyMappers.MapProperty(targetGroup.normal, propertyNode, context);
                         break;
                     case AttributeGroupContainer attribute:
                         if (root is AttributeGroupContainer) {
@@ -62,21 +65,22 @@ namespace UIForia.Compilers.Style {
                         attributeGroup.normal = new UIStyle();
                         attributeGroup.name = root.identifier;
                         attributeGroup.rule = MapAttributeContainerToRule(attribute);
-                        result.AddRange(CompileStyleContainer(attribute, attributeGroup));
+                        groups.Add(attributeGroup);
+                        CompileStyleGroups(attribute, groups, attributeGroup);
 
                         break;
                     case StyleStateContainer styleContainer:
                         if (styleContainer.identifier == "hover") {
-                            defaultGroup.hover = GetUIStyleOrDefault(defaultGroup.hover);
-                            MapProperties(defaultGroup.hover, styleContainer.children);
+                            targetGroup.hover = GetUIStyleOrDefault(targetGroup.hover);
+                            MapProperties(targetGroup.hover, styleContainer.children);
                         }
                         else if (styleContainer.identifier == "focus") {
-                            defaultGroup.focused = GetUIStyleOrDefault(defaultGroup.focused);
-                            MapProperties(defaultGroup.hover, styleContainer.children);
+                            targetGroup.focused = GetUIStyleOrDefault(targetGroup.focused);
+                            MapProperties(targetGroup.hover, styleContainer.children);
                         }
                         else if (styleContainer.identifier == "active") {
-                            defaultGroup.focused = GetUIStyleOrDefault(defaultGroup.active);
-                            MapProperties(defaultGroup.active, styleContainer.children);
+                            targetGroup.focused = GetUIStyleOrDefault(targetGroup.active);
+                            MapProperties(targetGroup.active, styleContainer.children);
                         }
                         else throw new CompileException(styleContainer, $"Unknown style state. Please use [hover], [focus] or [active] instead.");
 
@@ -85,8 +89,6 @@ namespace UIForia.Compilers.Style {
                         throw new CompileException(node, $"You cannot have a {node} at this level.");
                 }
             }
-
-            return result;
         }
 
         private static UIStyle GetUIStyleOrDefault(UIStyle style) {

@@ -10,14 +10,14 @@ namespace UIForia {
 
         private readonly string typeName;
 
-        public UIContainerTemplate(string elementName, Type rootType, List<UITemplate> childTemplates, List<AttributeDefinition> attributes = null)
-            : base(childTemplates, attributes) {
+        public UIContainerTemplate(Application app, string elementName, Type rootType, List<UITemplate> childTemplates, List<AttributeDefinition> attributes = null)
+            : base(app, childTemplates, attributes) {
             elementType = rootType;
             this.elementName = elementName;
         }
         
-        public UIContainerTemplate(Type rootType, List<UITemplate> childTemplates, List<AttributeDefinition> attributes = null)
-            : base(childTemplates, attributes) {
+        public UIContainerTemplate(Application app, Type rootType, List<UITemplate> childTemplates, List<AttributeDefinition> attributes = null)
+            : base(app, childTemplates, attributes) {
             elementType = rootType;
         }
 
@@ -66,8 +66,8 @@ namespace UIForia {
 
     public class UITextElementTemplate : UITemplate {
 
-        public UITextElementTemplate(Type elementType, List<UITemplate> childTemplates, List<AttributeDefinition> attributes = null)
-            : base(childTemplates, attributes) {
+        public UITextElementTemplate(Application app, Type elementType, List<UITemplate> childTemplates, List<AttributeDefinition> attributes = null)
+            : base(app, childTemplates, attributes) {
             this.elementType = elementType;
         }
 

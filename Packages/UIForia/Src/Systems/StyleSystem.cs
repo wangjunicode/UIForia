@@ -1,7 +1,8 @@
 ﻿﻿using System;
 using System.Collections.Generic;
 using UIForia.Animation;
-using UIForia.Rendering;
+ using UIForia.Compilers.Style;
+ using UIForia.Rendering;
 using UIForia.StyleBindings;
 using UIForia.Util;
 using UnityEngine;
@@ -41,7 +42,7 @@ namespace UIForia.Systems {
                 ((UITextElement) element).onTextChanged += HandleTextChanged;
             }
 
-            UIStyleGroup[] baseStyles = element.OriginTemplate.baseStyles;
+            UIStyleGroupContainer[] baseStyles = element.OriginTemplate.baseStyles;
 
             element.style.styleSystem = this;
 

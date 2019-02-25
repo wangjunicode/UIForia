@@ -45,7 +45,7 @@ public class TemplateParsingTests {
 
     [Test]
     public void Children_ParsesCorrectly() {
-        ParsedTemplate parsedTemplate = TemplateParser.ParseTemplateFromString<Test1>(@"
+        ParsedTemplate parsedTemplate = new TemplateParser(null).ParseTemplateFromString<Test1>(@"
             <UITemplate>
                 <Contents>
                     <Children/>
@@ -58,7 +58,7 @@ public class TemplateParsingTests {
     [Test]
     public void Children_CannotAppearInsideRepeat() {
         var x = Assert.Throws<InvalidTemplateException>(() => {
-            TemplateParser.ParseTemplateFromString<Test1>(@"
+            new TemplateParser(null).ParseTemplateFromString<Test1>(@"
                 <UITemplate>
                     <Contents>
                         <Repeat list='{null}'>
@@ -74,7 +74,7 @@ public class TemplateParsingTests {
     [Test]
     public void Children_MustBeEmpty() {
         var x = Assert.Throws<InvalidTemplateException>(() => {
-            TemplateParser.ParseTemplateFromString<Test1>(@"
+            new TemplateParser(null).ParseTemplateFromString<Test1>(@"
                 <UITemplate>
                     <Contents>
                             <Children>text</Children>
@@ -88,7 +88,7 @@ public class TemplateParsingTests {
     [Test]
     public void Switch_CanOnlyContainCaseAndDefault() {
         var x = Assert.Throws<InvalidTemplateException>(() => {
-            TemplateParser.ParseTemplateFromString<Test1>(@"
+            new TemplateParser(null).ParseTemplateFromString<Test1>(@"
                 <UITemplate>
                     <Contents>
                         <Switch value='1'>
@@ -104,7 +104,7 @@ public class TemplateParsingTests {
     [Test]
     public void Switch_CanOnlyContainOneDefault() {
         var x = Assert.Throws<InvalidTemplateException>(() => {
-            TemplateParser.ParseTemplateFromString<Test1>(@"
+            new TemplateParser(null).ParseTemplateFromString<Test1>(@"
                 <UITemplate>
                     <Contents>
                         <Switch value='1'>
@@ -121,7 +121,7 @@ public class TemplateParsingTests {
     [Test]
     public void Switch_CanContainOnlyCases() {
         Assert.DoesNotThrow(() => {
-            TemplateParser.ParseTemplateFromString<Test1>(@"
+            new TemplateParser(null).ParseTemplateFromString<Test1>(@"
                 <UITemplate>
                     <Contents>
                         <Switch value='1'>
@@ -137,7 +137,7 @@ public class TemplateParsingTests {
     [Test]
     public void Switch_CanContainOnlyDefault() {
         Assert.DoesNotThrow(() => {
-            TemplateParser.ParseTemplateFromString<Test1>(@"
+            new TemplateParser(null).ParseTemplateFromString<Test1>(@"
                 <UITemplate>
                     <Contents>
                         <Switch value='1'>
@@ -152,7 +152,7 @@ public class TemplateParsingTests {
     [Test]
     public void Switch_CannotBeEmpty() {
         var x = Assert.Throws<InvalidTemplateException>(() => {
-            TemplateParser.ParseTemplateFromString<Test1>(@"
+            new TemplateParser(null).ParseTemplateFromString<Test1>(@"
                 <UITemplate>
                     <Contents>
                         <Switch value='1'>
@@ -168,7 +168,7 @@ public class TemplateParsingTests {
     [Test]
     public void Case_MustHaveWhenAttribute() {
         var x = Assert.Throws<InvalidTemplateException>(() => {
-            TemplateParser.ParseTemplateFromString<Test1>(@"
+            new TemplateParser(null).ParseTemplateFromString<Test1>(@"
                 <UITemplate>
                     <Contents>
                         <Switch value='1'>
@@ -199,7 +199,7 @@ public class TemplateParsingTests {
     [Test]
     public void Text_Parses() {
         Assert.DoesNotThrow(() => {
-            TemplateParser.ParseTemplateFromString<Test1>(@"
+            new TemplateParser(null).ParseTemplateFromString<Test1>(@"
                 <UITemplate>
                     <Contents>
                             <Group>text</Group>
@@ -211,7 +211,7 @@ public class TemplateParsingTests {
 
     [Test]
     public void Text_AssignsRawString() {
-        ParsedTemplate parsedTemplate = TemplateParser.ParseTemplateFromString<Test1>(@"
+        ParsedTemplate parsedTemplate = new TemplateParser(null).ParseTemplateFromString<Test1>(@"
                 <UITemplate>
                     <Contents>
                             <Group>text {value} is here</Group>
@@ -226,7 +226,7 @@ public class TemplateParsingTests {
     [Test]
     public void Repeat_CanNest() {
         Assert.DoesNotThrow(() => {
-            TemplateParser.ParseTemplateFromString<Test1>(@"
+            new TemplateParser(null).ParseTemplateFromString<Test1>(@"
                 <UITemplate>
                     <Contents>
                        <Repeat list='{something}'>
@@ -242,7 +242,7 @@ public class TemplateParsingTests {
 
     [Test]
     public void Slot_CanParse() {
-        ParsedTemplate parsedTemplate = TemplateParser.ParseTemplateFromString<Test1>(@"
+        ParsedTemplate parsedTemplate = new TemplateParser(null).ParseTemplateFromString<Test1>(@"
                 <UITemplate>
                     <Contents>
                         <Group>
@@ -256,7 +256,7 @@ public class TemplateParsingTests {
 
     [Test]
     public void SlotContent_CanParse() {
-        ParsedTemplate parsedTemplate = TemplateParser.ParseTemplateFromString<Test1>(@"
+        ParsedTemplate parsedTemplate = new TemplateParser(null).ParseTemplateFromString<Test1>(@"
                 <UITemplate>
                     <Contents>
                         <Thing>

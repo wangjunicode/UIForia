@@ -17,6 +17,11 @@ namespace UIForia.Util {
             this.size = 0;
         }
 
+        public LightList(T[] items) {
+            this.array = items;
+            this.size = items.Length;
+        }
+
         public T[] Array => array;
         public int Count {
             get => size;

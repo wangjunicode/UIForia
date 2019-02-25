@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using System.IO;
 using UIForia.Parsing.Style;
@@ -6,46 +7,63 @@ using UIForia.Rendering;
 namespace UIForia.Compilers.Style {
     public class StyleSheetImporter {
 
-        private static readonly List<string> s_CurrentlyImportingStylesheets = new List<string>();
-        
-        private static readonly Dictionary<string, StyleSheet> s_CachedStyleSheets = new Dictionary<string, StyleSheet>();
+        private readonly List<string> m_CurrentlyImportingStylesheets;
+        private readonly Dictionary<string, StyleSheet> m_CachedStyleSheets;
+        public readonly Application app;
 
-        private StyleSheetCompiler compiler;
-
-        public StyleSheetImporter() {
-            this.compiler = new StyleSheetCompiler(this);
+        public StyleSheetImporter(Application app) {
+            this.app = app;
+            m_CurrentlyImportingStylesheets = new List<string>();
+            m_CachedStyleSheets = new Dictionary<string, StyleSheet>();
         }
 
-        public StyleSheet importStyleSheet(string id, string literalTemplate) {
-            StyleSheet styleSheet = compiler.Compile(StyleParser2.Parse(literalTemplate));
-            s_CachedStyleSheets.Add(id, styleSheet);
+        public StyleSheet ImportStyleSheet(string id, string literalTemplate) {
+            if (m_CachedStyleSheets.TryGetValue(id, out StyleSheet sheet)) {
+                return sheet;
+            }
+
+            StyleSheet styleSheet = new StyleSheetCompiler(this).Compile(StyleParser2.Parse(literalTemplate));
+            m_CachedStyleSheets.Add(id, styleSheet);
             return styleSheet;
         }
 
         public StyleSheet ImportStyleSheetFromFile(string fileName) {
-            if (s_CurrentlyImportingStylesheets.Contains(fileName)) {
+            if (m_CurrentlyImportingStylesheets.Contains(fileName)) {
                 throw new CompileException($"Cannot import style sheet '{fileName}' because it references itself.");
             }
-            
+
             // pass 1: load file F(1), read imports
-            
+
             // pass 1a: import file F(n) no further imports? => collect consts + exports, compile file
-            
+
             // pass 2: recursively add imported consts and compile whole file for each F(n-1) until F(1) is hit again
 
             if (File.Exists(UnityEngine.Application.dataPath + "/" + fileName)) {
                 string contents = File.ReadAllText(UnityEngine.Application.dataPath + "/" + fileName);
-                s_CurrentlyImportingStylesheets.Add(fileName);
-                StyleSheet result = importStyleSheet(fileName, contents);
-                s_CurrentlyImportingStylesheets.Remove(fileName);
+                m_CurrentlyImportingStylesheets.Add(fileName);
+                StyleSheet result = ImportStyleSheet(fileName, contents);
+                m_CurrentlyImportingStylesheets.Remove(fileName);
                 return result;
             }
 
             throw new ParseException($"Cannot find style file {fileName}");
         }
 
-        public static UIStyleGroup GetStyleGroupsByTagName(string defImportPath, string defBody, string tagName) {
-            throw new System.NotImplementedException();
+        public UIStyleGroupContainer GetStyleGroupsByTagName(string idOrPath, string literalTemplate, string tagName) {
+            if (literalTemplate != null) {
+                return ImportStyleSheet(idOrPath, literalTemplate).GetStyleGroupsByTagName(tagName);
+            }
+
+            return ImportStyleSheetFromFile(idOrPath).GetStyleGroupsByTagName(tagName);
         }
+
+        public UIStyleGroupContainer GetStyleGroupByStyleName(string idOrPath, string literalTemplate, string styleName) {
+            if (literalTemplate != null) {
+                return ImportStyleSheet(idOrPath, literalTemplate).GetStyleGroupByStyleName(styleName);
+            }
+
+            return ImportStyleSheetFromFile(idOrPath).GetStyleGroupByStyleName(styleName);
+        }
+
     }
 }

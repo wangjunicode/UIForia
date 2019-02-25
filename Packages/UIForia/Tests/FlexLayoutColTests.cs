@@ -10,9 +10,8 @@ public class FlexLayoutColTests {
 
     [Template(TemplateType.String, @"
         <UITemplate>
-            <Style path='LayoutTestThing+Style'/>
             <Contents style.layoutType='LayoutType.Flex'>
-              
+                
             </Contents>
         </UITemplate>
     ")]
@@ -27,46 +26,13 @@ public class FlexLayoutColTests {
             child1 = FindById<UIGroupElement>("child1");
             child2 = FindById<UIGroupElement>("child2");
         }
-
-        public class Style {
-
-            [ExportStyle("w100h100")]
-            public static UIStyle W100H100() {
-                return new UIStyle() {
-                    PreferredWidth = 100f,
-                    PreferredHeight = 100f
-                };
-            }
-
-            [ExportStyle("w90h90m10")]
-            public static UIStyle W90H90M10() {
-                return new UIStyle() {
-                    MarginLeft = 5f,
-                    MarginRight = 5f,
-                    PreferredWidth = 90f,
-                    PreferredHeight = 90f
-                };
-            }
-
-            [ExportStyle("w90h90mc10")]
-            public static UIStyle W90H90MC10() {
-                return new UIStyle() {
-                    MarginTop = 5f,
-                    MarginBottom = 5f,
-                    PreferredWidth = 90f,
-                    PreferredHeight = 90f
-                };
-            }
-
-        }
-
     }
 
     [Test]
     public void AppliesCrossAxisStart() {
         string template = @"
         <UITemplate>
-            <Style path='FlexLayoutColTests+FlexColLayoutThing+Style'/>
+            <Style path='Tests/Styles/FlexLayoutColTests.style' />
             <Contents style.layoutType='LayoutType.Flex' style.flexLayoutDirection='LayoutDirection.Column' style.preferredWidth='500f'>
                 <Group x-id='child0' style='w100h100'/>
                 <Group x-id='child1' style='w100h100'/>

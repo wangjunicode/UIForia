@@ -120,7 +120,7 @@ namespace UIForia {
                 throw new Exception("Can't create child from non UIElement type");
             }
 
-            ParsedTemplate template = TemplateParser.GetParsedTemplate(type);
+            ParsedTemplate template = Application.templateParser.GetParsedTemplate(type);
             if (template == null) {
                 throw new Exception("failed creating child");
             }
@@ -134,7 +134,7 @@ namespace UIForia {
         }
 
         public T CreateChild<T>() where T : UIElement {
-            ParsedTemplate template = TemplateParser.GetParsedTemplate(typeof(T));
+            ParsedTemplate template = Application.templateParser.GetParsedTemplate(typeof(T));
             if (template == null) {
                 throw new Exception("failed creating child");
             }

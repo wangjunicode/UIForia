@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using Shapes2D;
 using TMPro;
+using UIForia.Compilers.Style;
 using UIForia.Layout;
 using UIForia.Layout.LayoutTypes;
 using UIForia.Rendering;
@@ -497,7 +498,7 @@ namespace UIForia.Editor {
         private void DrawStyles() {
             UIStyleSet styleSet = selectedElement.style;
 
-            List<UIStyleGroup> baseStyles = styleSet.GetBaseStyles();
+            List<UIStyleGroupContainer> baseStyles = styleSet.GetBaseStyles();
 
             float labelWidth = EditorGUIUtility.labelWidth;
             EditorGUIUtility.labelWidth = 100;
@@ -516,34 +517,34 @@ namespace UIForia.Editor {
             EditorGUIUtility.labelWidth = labelWidth;
 
             EditorGUILayout.BeginVertical();
-
-            UIStyleGroup instanceStyle = styleSet.GetInstanceStyle();
-            if (instanceStyle != null) {
-                baseStyles.Insert(0, instanceStyle);
-            }
-
-            for (int i = 0; i < baseStyles.Count; i++) {
-                UIStyleGroup group = baseStyles[i];
-                s_Content.text = $"{group.name} ({group.styleType.ToString()})";
-
-                if (group.normal != null) {
-                    DrawStyle(s_Content.text + " [Normal]", group.normal);
-                }
-
-                if (group.hover != null) {
-                    DrawStyle(s_Content.text + " [Hover]", group.hover);
-                }
-
-                if (group.focused != null) {
-                    DrawStyle(s_Content.text + " [Focus]", group.focused);
-                }
-
-                if (group.active != null) {
-                    DrawStyle(s_Content.text + " [Active]", group.active);
-                }
-            }
-
-            ListPool<UIStyleGroup>.Release(ref baseStyles);
+//
+//            UIStyleGroup instanceStyle = styleSet.GetInstanceStyle();
+//            if (instanceStyle != null) {
+//                baseStyles.Insert(0, instanceStyle);
+//            }
+//
+//            for (int i = 0; i < baseStyles.Count; i++) {
+//                UIStyleGroupContainer group = baseStyles[i];
+//                s_Content.text = $"{group.name} ({group.styleType.ToString()})";
+//
+//                if (group.normal != null) {
+//                    DrawStyle(s_Content.text + " [Normal]", group.normal);
+//                }
+//
+//                if (group.hover != null) {
+//                    DrawStyle(s_Content.text + " [Hover]", group.hover);
+//                }
+//
+//                if (group.focused != null) {
+//                    DrawStyle(s_Content.text + " [Focus]", group.focused);
+//                }
+//
+//                if (group.active != null) {
+//                    DrawStyle(s_Content.text + " [Active]", group.active);
+//                }
+//            }
+//
+//            ListPool<UIStyleGroup>.Release(ref baseStyles);
             GUILayout.EndVertical();
         }
 

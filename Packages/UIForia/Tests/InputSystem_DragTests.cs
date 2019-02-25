@@ -10,12 +10,6 @@ using static Tests.TestUtils;
 [TestFixture]
 public class InputSystem_DragTests {
 
-    [SetUp]
-    public void SetUp() {
-        // see #DragCreate_MustReturnDragEvent for a commend why this is here
-        TemplateParser.Reset();
-    }
-
     public class TestDragEvent : DragEvent {
 
         public string sourceName;

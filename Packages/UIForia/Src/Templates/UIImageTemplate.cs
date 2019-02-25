@@ -5,8 +5,8 @@ namespace UIForia {
 
     public class UIImageTemplate : UITemplate {
 
-        public UIImageTemplate(List<UITemplate> childTemplates, List<AttributeDefinition> attributes = null)
-            : base(childTemplates, attributes) { }
+        public UIImageTemplate(Application app, List<UITemplate> childTemplates, List<AttributeDefinition> attributes = null)
+            : base(app, childTemplates, attributes) { }
 
         protected override Type elementType => typeof(UIImageElement);
 

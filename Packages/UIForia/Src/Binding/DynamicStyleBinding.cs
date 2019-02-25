@@ -1,3 +1,4 @@
+using UIForia.Compilers.Style;
 using UIForia.Rendering;
 using UIForia.Util;
 
@@ -27,16 +28,16 @@ namespace UIForia {
             }
 
             if (shouldSet) {
-                LightList<UIStyleGroup> groups = LightListPool<UIStyleGroup>.Get();
-                string tagName = "<" + element.GetDisplayName() + ">"; // todo get rid of concat allocation
-                UIStyleGroup tagGroup = template.ResolveElementStyle(tagName);
-                if (tagGroup != default) {
-                    groups.Add(tagGroup);    
+                LightList<UIStyleGroupContainer> groups = LightListPool<UIStyleGroupContainer>.Get();
+                string tagName = element.GetDisplayName();
+                UIStyleGroupContainer groupContainer = template.ResolveElementStyle(tagName);
+                if (groupContainer != null) {
+                    groups.Add(groupContainer);    
                 }
 
                 for (int i = 0; i < styles.Length; i++) {
                     if (!string.IsNullOrEmpty(styles[i])) {
-                        if (template.TryResolveStyleGroup(styles[i], out UIStyleGroup group)) {
+                        if (template.TryResolveStyleGroup(styles[i], out UIStyleGroupContainer group)) {
                             group.styleType = StyleType.Shared;
                             groups.Add(group);
                         }
@@ -44,7 +45,7 @@ namespace UIForia {
                 }
                 
                 element.style.SetStyleGroups(groups);
-                LightListPool<UIStyleGroup>.Release(ref groups);
+                LightListPool<UIStyleGroupContainer>.Release(ref groups);
             }
         }
 

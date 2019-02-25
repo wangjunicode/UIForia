@@ -5,8 +5,8 @@ namespace UIForia {
 
     public class UISwitchDefaultTemplate : UITemplate {
 
-        public UISwitchDefaultTemplate(List<UITemplate> childTemplates, List<AttributeDefinition> attributes = null)
-            : base(childTemplates, attributes) { }
+        public UISwitchDefaultTemplate(Application app, List<UITemplate> childTemplates, List<AttributeDefinition> attributes = null)
+            : base(app, childTemplates, attributes) { }
 
         protected override Type elementType => typeof(UISwitchDefaultElement);
 

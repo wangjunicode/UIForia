@@ -32,44 +32,84 @@ namespace SVGX {
         public ColorStop[] gradientStops;
         public float outlineWidth = 0.25f;
         public Color textOutline;
+        public float radiusTL;
+        public float radiusTR;
+        public float radiusBL;
+        public float radiusBR;
+        public float radiusTL2;
+        public float radiusTR2;
+        public float radiusBL2;
+        public float radiusBR2;
+        public float skewX = 0;
+        public Color fillColor = Color.yellow;
+
+        public Vector2 thing1;
+        public Vector2 thing2;
+        public bool stroke = true;
+        public bool fill = true;
+
+        public StrokePlacement strokePlacement;
+
+        public static Vector2 Thing1;
+        public static Vector2 Thing2;
+
+        public Color shadowColor = Color.black;
+        public Color shadowTint = Color.clear;
+        public float shadowIntensity = 0.4f;
+        [Range(0, 1)] public float shadowSoftnessX = 0.16f;
+        [Range(0, 1)] public float shadowSoftnessY = 0.16f;
+        public Vector2 shadowOffset;
+        public Rect shadowRect = new Rect(400, 340, 200, 200);
         
         public void Update() {
+            Thing1 = thing1;
+            Thing2 = thing2;
             camera.orthographic = true;
             camera.orthographicSize = Screen.height * 0.5f;
 
             ctx.Clear();
 
-//            SVGXGradient gradient = new SVGXLinearGradient(GradientDirection.Vertical, gradientStops);
+            ctx.SetStrokeColor(tintColor);
+            ctx.SetStrokeWidth(strokeWidth);
+            ctx.SetStrokePlacement(strokePlacement);
+            SVGXMatrix matrix = SVGXMatrix.TRS(new Vector2(100, 100), rotation, Vector2.one); //identity);
+//            matrix = matrix.SkewX(skewX);
+//            ctx.SetTransform(matrix);
 
-//            ctx.Circle(0, 0, 100);
-//            ctx.PushClip();
+      
+           ctx.BeginPath();
+           ctx.Rect(shadowRect.x, shadowRect.y, shadowRect.width, shadowRect.height);
+           ctx.SetShadowColor(shadowColor);
+           ctx.SetShadowOffsetX(shadowOffset.x);
+           ctx.SetShadowOffsetY(shadowOffset.y);
+           ctx.SetShadowSoftnessX(shadowSoftnessX);
+           ctx.SetShadowSoftnessY(shadowSoftnessY);
+           ctx.SetShadowIntensity(shadowIntensity);
+           ctx.SetShadowTint(shadowTint);
+           
+           ctx.Shadow();
 
-//            ctx.SetFill(texture);
-//            ctx.FillRect(new Rect(-50, -50, 300, 300));
+           ctx.BeginPath();
+           ctx.SetFill(fillColor);
 
-//            ctx.BeginPath();
-//            ctx.SetStrokeColor(tintColor);
-//            ctx.SetStrokeWidth(strokeWidth);
-//            ctx.SetStrokeOpacity(strokeOpacity);
-////            ctx.Circle(0, 0, 300);
-//            ctx.LineTo(400, 400);
-//            ctx.LineTo(400, 0);
-//            ctx.Stroke();
-//
-//            ctx.BeginPath();
-//            ctx.Rect(0, 0, 300, 300);
-//            ctx.SetFill(Color.yellow);
-//            ctx.Fill();
+           // ctx.Ellipse(100, 100, 400, 200);
+           // ctx.Circle(825, 250, 100);
+           ctx.Rect(400, 340, 200, 200);
+           // ctx.RoundedRect(new Rect(50, 550, 300, 200), radiusTL, radiusTR, radiusBL, radiusBR);
 
-     
-            
-            ctx.MoveTo(200f * 0.5f, 0);
-            ctx.LineTo(200f * 0.5f, 10f);
-            ctx.SetStrokeWidth(200f);
-            ctx.SetStrokeColor(Color.red);
-            ctx.SetStrokePlacement(StrokePlacement.Outside);
-            ctx.SetStrokeOpacity(1f);
-            ctx.Stroke();
+            if (fill) {
+                ctx.Fill();
+            }
+
+            if (stroke) {
+//                ctx.Stroke();
+//                ctx.SetStrokePlacement(StrokePlacement.Center);
+//                ctx.SetStrokeColor(Color.cyan);
+//                ctx.SetStrokeWidth(strokeWidth * 0.5f);
+                ctx.Stroke();
+            }
+
+ 
             
 //            SVGXTextStyle textStyle = new SVGXTextStyle() {
 //                fontSize = 72,

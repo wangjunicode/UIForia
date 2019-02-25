@@ -8,6 +8,7 @@ namespace SVGX {
         public RangeInt pointRange;
         public SVGXBounds bounds;
 
+        // can combine type, closed, and textInfoId into 1 int
         public bool isClosed;
         public int textInfoId;
         
@@ -15,7 +16,7 @@ namespace SVGX {
             this.type = type;
             this.pointRange = pointRange;
             this.isClosed = isClosed;
-            this.bounds = bounds;
+            this.bounds = bounds; // untransformed 
             this.textInfoId = textInfoId;
         }
 
@@ -25,4 +26,5 @@ namespace SVGX {
 
     }
 
+   
 }

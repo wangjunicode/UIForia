@@ -10,7 +10,7 @@ namespace SVGX {
         private readonly LightList<T> releaseQueue;
 
         private readonly Action<T> releaseHandler;
-        
+
         public DeferredReleasePool(Action<T> releaseHandler = null) {
             this.releaseHandler = releaseHandler;
             pool = new Queue<T>();
@@ -25,14 +25,9 @@ namespace SVGX {
 
             releaseQueue.Clear();
         }
-        
-        public T GetAndQueueForRelease() {
-            T retn = null;
-            if (pool.Count > 0) {
-                retn = pool.Dequeue();
-            }
 
-            retn = new T();
+        public T GetAndQueueForRelease() {
+            T retn = pool.Count > 0 ? pool.Dequeue() : new T();
             releaseQueue.Add(retn);
             return retn;
         }

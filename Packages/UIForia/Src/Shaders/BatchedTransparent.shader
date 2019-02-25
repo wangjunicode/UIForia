@@ -6,10 +6,10 @@ Shader "UIForia/BatchedTransparent" {
     
     SubShader {
 
-        Tags { "RenderType"="Transparent" "DisableBatching"="True" }
+        Tags { "RenderType"="Opaque" "DisableBatching"="True" }
         Cull Back 
         Blend SrcAlpha OneMinusSrcAlpha
-        ZWrite Off
+        ZWrite On
         ColorMask RGBA
         
 //        Stencil {
@@ -23,7 +23,7 @@ Shader "UIForia/BatchedTransparent" {
            #pragma fragment frag
            #pragma enable_d3d11_debug_symbols
            #pragma debug
-           #pragma target 4.0
+           #pragma target 3.0
            #include "UnityCG.cginc"
            #include "UIForiaInc.cginc"
            
@@ -38,11 +38,15 @@ Shader "UIForia/BatchedTransparent" {
            uniform float4 _globalFontData1; // WeightNormal, WeightBold, TextureSizeX, TextureSizeY
            uniform float4 _globalFontData2; // GradientScale, ScaleRatioA, ScaleRatioB, ScaleRatioC
                     
+           // todo -- with some bit packing we can remove uv3 and uv4 from the app data input
+                               
            struct appdata {
                 float4 vertex : POSITION;
                 float4 uv : TEXCOORD0;
-                float4 flags : TEXCOORD1;
+                float4 uv1 : TEXCOORD1;
                 float4 uv2 : TEXCOORD2;
+                float4 uv3 : TEXCOORD3;
+                float4 uv4 : TEXCOORD4;
                 fixed4 color : COLOR;
            };
 
@@ -51,291 +55,181 @@ Shader "UIForia/BatchedTransparent" {
                 fixed4 color : COLOR;
                 float4 flags : TEXCOORD0;
                 float4 uv : TEXCOORD1;
-                float4 colorFlags : TEXCOORD2;
-                fixed4 secondaryColor : COLOR1;
+                float4 fragData1 : TEXCOORD2;
+                float4 fragData2 : TEXCOORD3;
+                float4 fragData3 : TEXCOORD4;
+                fixed4 secondaryColor : COLOR1; // todo -- remove
            };
 
-           v2f FillVertex(appdata v, uint shapeType) {
-                v2f o;
-                o.vertex = UnityObjectToClipPos(v.vertex);
+           #include "BatchedTransparentText.cginc"
+           #include "BatchedTransparentLine.cginc"
+
+           // todo -- use multi-compile flags to only compile the SDF functions a given draw actually needs
+           fixed4 SDFShape(v2f i, int shapeType, int strokeShape) {
+               float2 drawSurfaceSize = i.uv.zw;
+               float strokeWidth = lerp(0, i.flags.z, strokeShape);
+               
+               float left = step(i.uv.x, 0.5); // 1 if left
+               float bottom = step(i.uv.y, 0.5); // 1 if bottom
+               float top = 1 - bottom;
+               float right = 1 - left;
+               
+               float4 radii = i.fragData2;
+               
+               int radiusIndex = 0;
+               radiusIndex += and(top, right) * 1;
+               radiusIndex += and(bottom, left) * 2;
+               radiusIndex += and(bottom, 1 - left) * 3;
+               
+               float2 pixelCoord = float2(i.uv.x, 1 - i.uv.y) * drawSurfaceSize;
+               
+               float radius = clamp(radii[radiusIndex], 0, min(drawSurfaceSize.x * 0.5, drawSurfaceSize.y * 0.5));
+               
+               float halfStrokeWidth = strokeWidth * 0.5;
+               float2 halfShapeSize = (drawSurfaceSize * 0.5) - halfStrokeWidth;
+               float2 center = i.uv.xy - 0.5;
+               
+               float fDist = 0;
+               
+               if (shapeType == ShapeType_Rect || shapeType == ShapeType_RoundedRect) {
+                   fDist = RectSDF(center * drawSurfaceSize, halfShapeSize, radius - halfStrokeWidth);
+               }
+               else if(shapeType == ShapeType_Circle) {
+                   fDist = length(center * drawSurfaceSize) - halfShapeSize;
+               }
+               else if(shapeType == ShapeType_Ellipse) {
+                   fDist = EllipseSDF(center * drawSurfaceSize, halfShapeSize);
+               }
+               
+               // todo -- support squircles
+               fixed4 fromColor = i.color;
+               fixed4 toColor = Clear;
+               
+               if(halfStrokeWidth > 0) {
+                   if(fDist <= 0) {
+                       toColor = Clear;
+                   }
+                   fDist = abs(fDist) - halfStrokeWidth;
+               }
+               else {
+                   toColor = Clear;
+               }
+               
+               float fBlendAmount = smoothstep(-1, 1, fDist);
+               return lerp(fromColor, toColor, fBlendAmount);
+
+           }
+           
+           v2f FillVertex(appdata v, uint shapeType, uint renderType) {
                 
-                // todo -- support scaling and repeating uvs
-                //if(v.flags.x == ShapeType_Circle) {
-                    o.uv = float4(v.uv.xy, 0, 0);
-                //}
-//                else {
-//                    o.uv = float4((v.vertex.x - v.uv.x) / (v.uv.z + 1), (v.vertex.y + v.uv.y) / (v.uv.w + 1), 0, 0);
-//                }
-                
-                o.color = v.color;
-                o.flags = float4(shapeType, v.flags.yzw);
-                
-                uint fillFlags = (uint)v.flags.y;
+                uint fillFlags = (uint)v.uv1.y;
                 
                 uint texFlag = (fillFlags & FillMode_Texture) != 0;
                 uint gradientFlag = (fillFlags & FillMode_Gradient) != 0;
                 uint tintFlag = (fillFlags & FillMode_Tint) != 0;
                 uint gradientTintFlag = (fillFlags & FillMode_GradientTint) != 0;
+                
+                v2f o;
+
+                o.vertex = UnityObjectToClipPos(v.vertex);
+                o.uv = v.uv;
+                o.color = v.color;
+                o.flags = float4(renderType, shapeType, v.uv1.yz);
                 o.secondaryColor = fixed4(0, 0, 0, 0);
-                o.colorFlags = float4(texFlag, gradientFlag, tintFlag, gradientTintFlag);
+                o.fragData1 = float4(texFlag, gradientFlag, tintFlag, gradientTintFlag);
+                o.fragData2 = v.uv2;
+                o.fragData3 = v.uv3;
+                
                 return o;
            }
-           
-           v2f LineVertex(appdata input) {
-               v2f o;
-               
-               uint flags = input.flags.y;
-               
-               #define prevNext input.uv2
-               
-               float2 prev = prevNext.xy;
-               float2 next = prevNext.zw;
-               float2 curr = input.vertex.xy;
-               
-               float strokeWidth = input.flags.w;
-               
-               float aa = strokeWidth < 2 ? 1 : antialias;
-               
-               int dir = GetByte0(flags) * 2 - 1; // remap [0, 1] to [-1, 1]
-               uint isNear = GetByte1(flags);
-               uint isCap = GetByte2(flags);
-               
-               float w = (strokeWidth * 0.5) + aa;
-               
-               float2 v0 = normalize(curr - prev);
-               float2 v1 = normalize(next - curr);
-               
-               float2 n0 = float2(-v0.y, v0.x);
-               float2 n1 = float2(-v1.y, v1.x);
-               
-               float2 miter = normalize(n0 + n1);
-                        
-               float miterLength = w / dot(miter, n1);
-               float2 pos = float2(0, 0);
-               o.color = input.color;
-               o.uv = float4(w, w * dir, 0, 0);
-               
-               o.flags = float4(RenderType_Stroke, w * dir, aa, strokeWidth);
 
-               if(isCap) {
-                    if(isNear) {
-                        pos = curr + w * n1 * dir; // * v1 + dir * w * n1;
-                    }
-                    else {
-                        pos = curr + w * n0 * dir; //v0 + dir * w * n0;
-                    }
+           fixed4 FillFragment(v2f i, int strokeShape) {
+
+               #define ShapeType i.flags.y
+               #define GradientId i.flags.z
+               #define GradientDirection i.flags.w
+               
+               fixed4 color = SDFShape(i, ShapeType, strokeShape);
+               // todo -- get this working again
+               
+//               float t = lerp(i.uv.x, 1 - i.uv.y, GradientDirection);
+//               float y = GetPixelInRowUV(GradientId, _globalGradientAtlasSize);
+//               fixed4 textureColor = tex2Dlod(_MainTex, float4(i.uv.xy, 0, 0));
+//               fixed4 gradientColor = tex2Dlod(_globalGradientAtlas, float4(t, y, 0, 0));
+//               fixed4 tintColor = lerp(White, color, i.fragData1.z);                
+//               
+//               textureColor = lerp(color, textureColor, i.fragData1.x);
+//               gradientColor = lerp(White, gradientColor, i.fragData1.y);
+//               tintColor = lerp(tintColor, gradientColor, i.fragData1.w);
+//               
+//               fixed4 tintedTextureColor = lerp(textureColor, textureColor * tintColor, tintColor.a);
+//           
+//               color = lerp(tintedTextureColor, gradientColor, 0);
+        
+               if(color.a - 0.001 <= 0) {
+                   discard;
                }
-               else {
-                   pos = curr + (miter * miterLength * dir);
-               }
- 
-               o.secondaryColor = fixed4(0, 0, 0, 0);
-               o.vertex = UnityObjectToClipPos(float3(pos, input.vertex.z));
-               return o;
-           }
-           
-           fixed4 LineFragment(v2f i) {
-//                return fixed4(1, 0, 0, 1);//i.color;
-               float thickness = i.flags.w;
-               float aa = i.flags.z;
-               float w = (thickness * 0.5) - aa;
-
-               float d = abs(i.uv.y) - w;
-               
-               if(d <= 0) {
-                   return i.color;
-               }
-
-               d /= aa;
-               float threshold = 1;
-               float afwidth = length(float2(ddx(d), ddy(d)));
-               float alpha = smoothstep(threshold - afwidth, threshold + afwidth, d);
-               return fixed4(i.color.rgb, i.color.a * (1 - alpha));
-           }
-           
-           fixed4 FillFragment(v2f i) {
-                #define ShapeType i.flags.x
-                #define GradientId i.flags.z
-                #define GradientDirection i.flags.w
-                                                
-                float t = lerp(i.uv.x, 1 - i.uv.y, GradientDirection);
-                float y = GetPixelInRowUV(GradientId, _globalGradientAtlasSize);
-
-                fixed4 color = i.color;
-                fixed4 textureColor = tex2Dlod(_MainTex, float4(i.uv.xy, 0, 0));
-                fixed4 gradientColor = tex2Dlod(_globalGradientAtlas, float4(t, y, 0, 0));
-                fixed4 tintColor = lerp(White, color, i.colorFlags.z);                
-                
-                textureColor = lerp(color, textureColor, i.colorFlags.x);
-                gradientColor = lerp(White, gradientColor, i.colorFlags.y);
-                tintColor = lerp(tintColor, gradientColor, i.colorFlags.w);
-                
-                fixed4 tintedTextureColor = lerp(textureColor, textureColor * tintColor, tintColor.a);
-            
-                color = lerp(tintedTextureColor, gradientColor, 0);
-                
-                if(ShapeType > ShapeType_Path) {
-                    float dist = length(i.uv.xy - 0.5);
-                    float pwidth = length(float2(ddx(dist), ddy(dist)));
-                    float alpha = smoothstep(0.5, 0.5 - pwidth * 1.5, dist);                
-                                        
-                    color = fixed4(color.rgb, color.a * alpha);
-                }
-                             
-                if(color.a - 0.001 <= 0) {
-                    discard;
-                }
-                   
-                return color;
-           }
-           
-           fixed4 GetColor(half d, fixed4 faceColor, fixed4 outlineColor, half outline, half softness) {
-                half faceAlpha = 1 - saturate((d - outline * 0.5 + softness * 0.5) / (1.0 + softness));
-                half outlineAlpha = saturate((d + outline * 0.5)) * sqrt(min(1.0, outline));
-            
-                faceColor.rgb *= faceColor.a;
-                outlineColor.rgb *= outlineColor.a;
-            
-                faceColor = lerp(faceColor, outlineColor, outlineAlpha);
-            
-                faceColor *= faceAlpha;
-            
-                return faceColor;
-           }
-           
-           #define gWeightNormal _globalFontData1.x
-           #define gWeightBold _globalFontData1.y
-           #define gFontTextureWidth _globalFontData1.z
-           #define gFontTextureHeight _globalFontData1.w
-           #define gGradientScale _globalFontData2.x
-           #define gScaleRatioA _globalFontData2.y
-           #define gScaleRatioB _globalFontData2.z
-           #define gScaleRatioC _globalFontData2.w
-           #define _ScaleX 1
-           #define _ScaleY 1
-           #define _FaceDilate 0
-           #define _OutlineWidth input.uv2.y
-           #define _OutlineSoftness input.uv2.z
-           #define _GlowOuter 0
-           #define _GlowOffset 0
-           #define _UnderlayColor 0
-           #define _UnderlaySoftness 0
-           #define _UnderlayDilate 0
-           #define _UnderlayOffsetX 0
-           #define _UnderlayOffsetY 0
-               
-                    
-          inline float4 EncodeToFloat4(float v) {
-              v = clamp(v, 0, 0.99999); // this conversion works only with [0, 1)
-              float4 kEncodeMul = float4(1.0, 255.0, 65025.0, 16581375.0);
-              float kEncodeBit = 1.0 / 255.0;
-              float4 enc = kEncodeMul * v;
-              enc = frac(enc);
-              enc -= enc.yzww * kEncodeBit;
-              return enc;
+                  
+               return color;
           }
           
-          v2f TextVertex(appdata input) {
-           
-               float4 vPosition = UnityObjectToClipPos(input.vertex);
-               float2 pixelSize = vPosition.w;
+          fixed4 ShadowFragment(v2f i) {
+
+               float shadowSoftnessX = i.fragData2.x;
+               float shadowSoftnessY = i.fragData2.y;
+               float shadowAlpha = i.fragData2.z;
+               fixed4 shadowTint = fixed4(i.fragData3.r, i.fragData3.g, i.fragData3.b, 0);
+               float2 shadowPosition =  float2(0.1, 0.1);
+               float2 shadowSize = float2(0.8, 0.8);
                
-               pixelSize /= float2(_ScaleX, _ScaleY) * abs(mul((float2x2)UNITY_MATRIX_P, _ScreenParams.xy));
-               float scale = rsqrt(dot(pixelSize, pixelSize));
-               scale *= abs(input.uv.z) * gGradientScale * 1.5; 
+               float shadowRect = shadowAlpha * SmoothRect(i.uv.xy, shadowPosition, shadowSize, shadowSoftnessX, shadowSoftnessY);
                
-               int bold = 0;
+               float a = shadowRect;
+               fixed4 shadowColor = i.color;
+               fixed4 color = lerp(shadowTint, fixed4(shadowColor.rgb, shadowColor.a * a), a);
+               return color;
                
-               float weight = lerp(gWeightNormal, gWeightBold, 0) / 4.0;
-               weight = (weight + _FaceDilate) * gScaleRatioA * 0.5;
-               
-               float bias =(.5 - weight) + (.5 / scale);
-               float alphaClip = (1.0 - _OutlineWidth * gScaleRatioA - _OutlineSoftness * gScaleRatioA);
-               
-               alphaClip = min(alphaClip, 1.0 - _GlowOffset * gScaleRatioB - _GlowOuter * gScaleRatioB);
-               alphaClip = alphaClip / 2.0 - ( .5 / scale) - weight;
-               
-               float4 underlayColor = _UnderlayColor;
-               underlayColor.rgb *= underlayColor.a;
-               
-               float bScale = scale;
-               bScale /= 1 + ((_UnderlaySoftness * gScaleRatioC) * bScale);
-               float bBias = (0.5 - weight) * bScale - 0.5 - ((_UnderlayDilate *  gScaleRatioC) * 0.5 * bScale);
-               
-               float x = -(_UnderlayOffsetX *  gScaleRatioC) * gGradientScale / gFontTextureWidth;
-               float y = -(_UnderlayOffsetY *  gScaleRatioC) * gGradientScale / gFontTextureHeight;
-               float2 bOffset = float2(x, y);
-               
-               uint data = uint(input.uv2.x);
-               
-               // todo this works but ignores alpha. better to pack with 3 bits and alpha separate. can combine multiple alphas into one
-               float4 c = EncodeToFloat4(input.uv2.x);
-               c.a = 1;
-               
-               v2f o;
-               o.vertex = vPosition;
-               o.color = input.color;
-               o.uv = input.uv;
-               o.flags = float4(alphaClip, scale, bias, weight);
-               o.colorFlags = float4(_OutlineWidth, _OutlineSoftness, input.uv2.x, 0);
-               o.secondaryColor = c;// fixed4(1, 0, 0, 1);
-               
-               return o;
           }
-      
-
-           fixed4 TextFragment(v2f input) {
            
-               float c = tex2Dlod(_globalFontTexture, float4(input.uv.xy, 0, 0)).a;
-               
-               float scale = input.flags.y;
-			   float bias = input.flags.z;
-			   float weight	= input.flags.w;
-               float sd = (bias - c) * scale;
-
-               float outline = (input.colorFlags.x * gScaleRatioA) * scale;
-               float softness = (input.colorFlags.y * gScaleRatioA) * scale;
-               
-               half4 faceColor = input.color;
-               fixed4 outlineColor = input.secondaryColor; //input.colorFlags.z;//ColorFromFloat(input.colorFlags.z);
-               //input.secondaryColor; //fixed4(0, 0, 0, 1); //input.colorFlags.x;
-               
-               faceColor.rgb *= input.color.rgb;
-			   faceColor = GetColor(sd, faceColor, outlineColor, outline, softness);
-			   
-			   return faceColor * input.color.a;
-           }
-           
-           v2f vert (appdata input) {
-               uint renderData = (uint)input.flags.x;
+          v2f vert (appdata input) {
+               int renderData = (int)input.uv1.x;
                int renderType = (renderData & 0xffff);
                uint shapeType = (renderData >> 16) & (1 << 16) - 1;
                
-               if(renderType == RenderType_Fill) {
-                   return FillVertex(input, shapeType);
+               if(renderType == RenderType_Fill || RenderType_Shadow) {
+                   return FillVertex(input, shapeType, renderType);
                }
                else if(renderType == RenderType_Text) {
                    return TextVertex(input);
+               }
+               else if(renderType == RenderType_StrokeShape) {
+                   return FillVertex(input, shapeType, renderType);
                }
                else {
                    return LineVertex(input);
                }
            }
 
-           fixed4 frag (v2f i) : SV_Target {
-
+            fixed4 frag (v2f i) : SV_Target {
+               
                if(i.flags.x == RenderType_Fill) {
-                   return FillFragment(i);
+                   return FillFragment(i, 0);
                }
                else if(i.flags.x == RenderType_Text) {
                    return TextFragment(i);
+               }
+               else if(i.flags.x == RenderType_StrokeShape) {
+                   return FillFragment(i, 1);
+               }
+               else if(i.flags.x == RenderType_Shadow) {
+                   return ShadowFragment(i);
                }
                else {
                    return LineFragment(i);
                }
            }
            
-           ENDCG
+            ENDCG
         }
     }
 }

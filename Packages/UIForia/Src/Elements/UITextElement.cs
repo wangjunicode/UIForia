@@ -270,8 +270,8 @@ namespace UIForia {
 
             for (int spanIdx = 0; spanIdx < textInfo.spanCount; spanIdx++) {
                 SpanInfo spanInfo = textInfo.spanInfos[spanIdx];
-                TMP_FontAsset fontAsset = spanInfo.font;
-                Material fontAssetMaterial = fontAsset.material;
+                TMP_FontAsset fontAsset = spanInfo.font ? spanInfo.font : TMP_FontAsset.defaultFontAsset;
+                Material fontAssetMaterial = TextMeshPro.defaultGraphicMaterial; // fontAsset.material;
 
                 bool isUsingAltTypeface = false;
                 float boldAdvanceMultiplier = 1;

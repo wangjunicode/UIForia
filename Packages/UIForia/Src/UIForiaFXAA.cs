@@ -2,7 +2,6 @@ using System;
 using UnityEngine;
 
 [RequireComponent(typeof(Camera))]
-[AddComponentMenu("UIForia/FXAA")]
 public class UIForiaFXAA : MonoBehaviour {
 
     private Material mat;

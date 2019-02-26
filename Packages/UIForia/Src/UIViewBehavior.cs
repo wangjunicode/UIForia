@@ -14,10 +14,8 @@ namespace UIForia {
             type = Type.GetType(typeName);
             
             if (type == null) return;
-        
-            RectTransform rectTransform = transform.GetComponent<RectTransform>();
-            rectTransform.pivot = new Vector2(0, 1);
-            view = Application.Game.AddView(rectTransform.rect, type);
+
+            view = Application.Game.AddView(new Rect(0, 0, Screen.width, Screen.height), type);
             Application.Game.SetCamera(camera);
         }
 

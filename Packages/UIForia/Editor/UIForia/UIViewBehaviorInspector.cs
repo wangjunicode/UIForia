@@ -42,11 +42,16 @@ namespace UIForia.Editor {
             }
             EditorGUILayout.BeginHorizontal();
             EditorGUILayout.PrefixLabel("Root Template");
+
+            if (types == null || types.Length == 0) {
+                EditorGUILayout.EndHorizontal();
+                return;
+            }
+            
             if (behavior.type == null) {
                 behavior.type = types[0];
             }
 
-            if (types == null) return;
             int index = Array.IndexOf(types, behavior.type);
             int newIndex = EditorGUILayout.Popup(index, names);
             EditorGUILayout.EndHorizontal();

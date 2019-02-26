@@ -32,7 +32,7 @@ namespace UIForia.Compilers.Style {
                         LightList<StyleConstant> importedStyleConstants = LightListPool<StyleConstant>.Get();
                         context.importedStyleConstants.Add(importNode.alias, importedStyleConstants);
 
-                        for (int constantIndex = 0; constantIndex < importedStyle.constants.Count; constantIndex++) {
+                        for (int constantIndex = 0; constantIndex < importedStyle.constants.Length; constantIndex++) {
                             StyleConstant importedStyleConstant = importedStyle.constants[constantIndex];
                             if (importedStyleConstant.exported) {
                                 importedStyleConstants.Add(importedStyleConstant);
@@ -69,7 +69,8 @@ namespace UIForia.Compilers.Style {
 
         private StyleConstant Resolve(StyleCompileContext context, StyleConstant constant) {
             // shortcut return for constants that have been resolved already
-            foreach (StyleConstant c in context.constants) {
+            for (int index = 0; index < context.constants.Count; index++) {
+                StyleConstant c = context.constants[index];
                 if (c.name == constant.name) {
                     return c;
                 }

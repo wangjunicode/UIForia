@@ -52,4 +52,15 @@ public class StyleSheetConstantImporterTests {
         
         Assert.AreEqual(0, context.constantsWithReferences.Count, "There should be no unresolved const left.");
     }
+
+    [Test]
+    public void ImportAndUseConsts() {
+        LightList<StyleASTNode> nodes = new LightList<StyleASTNode>();
+        nodes.Add(StyleASTNodeFactory.ImportNode("importedThing", "Tests/Styles/ImportFromMe.style"));
+
+        var context = new StyleSheetConstantImporter(new StyleSheetImporter(null)).CreateContext(nodes);
+        Assert.AreEqual(1, context.importedStyleConstants.Count);
+        Assert.AreEqual(1, context.importedStyleConstants["importedThing"].Count);
+        Assert.AreEqual("colorRed", context.importedStyleConstants["importedThing"][0].name);
+    }
 }

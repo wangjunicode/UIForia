@@ -46,10 +46,8 @@ namespace UI {
             switch (direction) {
                 case ToolTipDirection.Top:
                     throw new NotImplementedException();
-                    break;
                 case ToolTipDirection.Bottom:
                     throw new NotImplementedException();
-                    break;
                 case ToolTipDirection.Right: {
                    // toolTipRoot.style.SetTransformBehaviorX(TransformBehavior.AnchorMaxOffset, StyleState.Normal);
                     toolTipRoot.style.SetTransformPositionX(new TransformOffset(-1, TransformUnit.ActualWidth), StyleState.Normal );

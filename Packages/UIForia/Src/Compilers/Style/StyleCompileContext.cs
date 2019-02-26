@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using UIForia.Parsing.Style.AstNodes;
 using UIForia.Rendering;
@@ -6,6 +7,7 @@ using UIForia.Util;
 namespace UIForia.Compilers.Style {
 
     public class StyleCompileContext {
+        private static readonly Func<StyleConstant, string, bool> s_FindStyleConstant = (element, name) => element.name == name;
 
         public Dictionary<string, ConstNode> constNodes = new Dictionary<string, ConstNode>();
         public Dictionary<string, LightList<StyleConstant>> importedStyleConstants = new Dictionary<string, LightList<StyleConstant>>();
@@ -36,6 +38,25 @@ namespace UIForia.Compilers.Style {
                         return c.value;
                     }
                 }
+                
+                if (referenceNode.children.Count > 0) {
+                    if (importedStyleConstants.ContainsKey(referenceNode.referenceName)) {
+                        DotAccessNode importedConstant = (DotAccessNode) referenceNode.children[0];
+
+                        StyleConstant importedStyleConstant = importedStyleConstants[referenceNode.referenceName]
+                            .Find(importedConstant.propertyName, s_FindStyleConstant);
+
+                        if (importedStyleConstant.name == null) {
+                            throw new CompileException(importedConstant, "Could not find referenced property in imported scope.");
+                        }
+
+                        return importedStyleConstant.value;
+                    }
+
+                    throw new CompileException(referenceNode,
+                        "Constants cannot reference members of other constants.");
+                }
+                
 
                 throw new CompileException(referenceNode, $"Couldn't resolve reference {referenceNode}. Known references are: {PrintConstants()}");
             }

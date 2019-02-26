@@ -1,5 +1,5 @@
 using System;
-using System.Collections.Generic;
+using System.Linq;
 using UIForia.Parsing.Style.AstNodes;
 using UIForia.Rendering;
 using UIForia.Util;
@@ -20,12 +20,24 @@ namespace UIForia.Compilers.Style {
             context = new StyleSheetConstantImporter(styleSheetImporter).CreateContext(rootNodes);
 
             // todo add imported style groups
-            StyleSheet styleSheet = new StyleSheet(context.constants, LightListPool<UIStyleGroupContainer>.Get());
 
+            int containerCount = 0;
+            for (int index = 0; index < rootNodes.Count; index++) {
+                switch (rootNodes[index]) {
+                    case StyleRootNode _:
+                        containerCount++;
+                        break;
+                }
+            }
+
+            StyleSheet styleSheet = new StyleSheet(context.constants.ToArray(), new UIStyleGroupContainer[containerCount]);
+
+            int containerIndex = 0;
             for (int index = 0; index < rootNodes.Count; index++) {
                 switch (rootNodes[index]) {
                     case StyleRootNode styleRoot:
-                        styleSheet.styleGroupContainers.Add(CompileStyleGroup(styleRoot));
+                        styleSheet.styleGroupContainers[containerIndex] = CompileStyleGroup(styleRoot);
+                        containerIndex++;
                         break;
                 }
             }
@@ -40,7 +52,7 @@ namespace UIForia.Compilers.Style {
             defaultGroup.normal = new UIStyle();
             defaultGroup.name = styleRoot.identifier ?? styleRoot.tagName;
             StyleType styleType = styleRoot.tagName != null ? StyleType.Implicit : StyleType.Shared;
-            
+
             LightList<UIStyleGroup> styleGroups = new LightList<UIStyleGroup>(4);
             styleGroups.Add(defaultGroup);
 
@@ -61,7 +73,8 @@ namespace UIForia.Compilers.Style {
                         if (root is AttributeGroupContainer) {
                             throw new CompileException(attribute, "You cannot nest attribute group definitions.");
                         }
-                        UIStyleGroup attributeGroup = new UIStyleGroup();            
+
+                        UIStyleGroup attributeGroup = new UIStyleGroup();
                         attributeGroup.normal = new UIStyle();
                         attributeGroup.name = root.identifier;
                         attributeGroup.rule = MapAttributeContainerToRule(attribute);

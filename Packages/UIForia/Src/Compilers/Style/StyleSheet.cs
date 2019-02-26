@@ -5,18 +5,18 @@ namespace UIForia.Compilers.Style {
     
     public class StyleSheet {
 
-        internal LightList<UIStyleGroupContainer> styleGroupContainers; 
+        internal UIStyleGroupContainer[] styleGroupContainers; 
 
-        internal LightList<StyleConstant> constants;
+        internal StyleConstant[] constants;
 
-        internal StyleSheet(LightList<StyleConstant> constants, LightList<UIStyleGroupContainer> styleGroupContainers) {
+        internal StyleSheet(StyleConstant[] constants, UIStyleGroupContainer[] styleGroupContainers) {
             this.constants = constants;
             this.styleGroupContainers = styleGroupContainers;
         }
 
         public UIStyleGroupContainer GetStyleGroupsByTagName(string tagName) {
 
-            for (int i = 0; i < styleGroupContainers.Count; i++) {
+            for (int i = 0; i < styleGroupContainers.Length; i++) {
                 UIStyleGroupContainer container = styleGroupContainers[i];
                 if (container.styleType == StyleType.Implicit && container.name == tagName) {
                     return container;
@@ -27,7 +27,7 @@ namespace UIForia.Compilers.Style {
         }
 
         public UIStyleGroupContainer GetStyleGroupByStyleName(string styleName) {
-            for (int i = 0; i < styleGroupContainers.Count; i++) {
+            for (int i = 0; i < styleGroupContainers.Length; i++) {
                 UIStyleGroupContainer container = styleGroupContainers[i];
                 if (container.styleType == StyleType.Shared && container.name == styleName) {
                     return container;

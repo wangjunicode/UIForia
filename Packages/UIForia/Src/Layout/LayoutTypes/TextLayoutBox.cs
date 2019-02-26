@@ -1,5 +1,6 @@
 using System.Collections.Generic;
 using TMPro;
+using UIForia.Rendering;
 using UIForia.Text;
 using UIForia.Util;
 using UnityEngine;
@@ -211,6 +212,16 @@ namespace UIForia.Layout.LayoutTypes {
                     }
 
                     break;
+            }
+        }
+
+        public override void OnStylePropertyChanged(LightList<StyleProperty> property) {
+            base.OnStylePropertyChanged(property);
+            for (int i = 0; i < property.Count; i++) {
+                if (property[i].propertyId == StylePropertyId.TextFontSize) {
+                    RequestContentSizeChangeLayout();
+                    break;
+                }
             }
         }
 

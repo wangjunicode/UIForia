@@ -2812,7 +2812,7 @@ namespace UIForia.Rendering {
             }
 
             public int TextFontSize { 
-                [System.Diagnostics.DebuggerStepThrough]
+//                [System.Diagnostics.DebuggerStepThrough]
                 get { 
                     StyleProperty property;
                     if (propertyMap.TryGetValue((int) StylePropertyId.TextFontSize, out property)) return property.AsInt;

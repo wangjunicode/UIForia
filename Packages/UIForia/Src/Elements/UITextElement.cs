@@ -588,7 +588,6 @@ namespace UIForia {
            // }
 
             float fontScale = (style.TextFontSize / fontAsset.fontInfo.PointSize) * fontAsset.fontInfo.Scale;
-            ;
             material.SetFloat(s_FontScaleKey, fontScale);
             // todo -- text styles & keywords, try to use the same materials where possible
 //            material.SetVector("_OutlineColor", style.TextOutlineColor);

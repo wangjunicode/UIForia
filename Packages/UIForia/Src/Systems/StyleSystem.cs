@@ -46,7 +46,6 @@ namespace UIForia.Systems {
 
             element.style.styleSystem = this;
 
-            // todo -- push to style buffer & apply later on first run
             element.style.SetStyleGroups(baseStyles);
 
             if (element.children != null) {
@@ -92,7 +91,7 @@ namespace UIForia.Systems {
 
         public void OnElementDestroyed(UIElement element) { }
 
-        public void OnAttributeSet(UIElement element, string attributeName, string currentvalue, string attributeValue) {
+        public void OnAttributeSet(UIElement element, string attributeName, string currentValue, string attributeValue) {
             element.style.UpdateApplicableAttributeRules(attributeName, attributeValue);
         }
 
@@ -110,7 +109,7 @@ namespace UIForia.Systems {
         public void SetStyleProperty(UIElement element, StyleProperty property) {
             AddToChangeSet(element, property);
 
-            if (!StyleUtil.IsInherited(property.propertyId) || element.children == null) {
+            if (!StyleUtil.IsInherited(property.propertyId) || element.children == null || element.children.Count == 0) {
                 return;
             }
 

@@ -672,7 +672,7 @@ namespace UIForia.Systems {
             }
         }
 
-        public void OnAttributeSet(UIElement element, string attributeName, string currentvalue, string attributeValue) {
+        public void OnAttributeSet(UIElement element, string attributeName, string currentValue, string attributeValue) {
             
         }
 

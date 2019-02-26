@@ -1,23 +1,29 @@
 <?xml version="1.0" encoding="utf-8"?>
 <UITemplate>
-    <Style path="Grid/GridDemo.style" />
+    <Style path="Grid/GridDemo.style"/>
     <Contents style="grid-container">
 
-        <Group style="grid-cell logo" />
-        <Group style="grid-cell thead">Home</Group>
-        <Group style="grid-cell thead" onMouseEnter="OnHover()" >
-            Concept
-            <Group x-id="concept-menu" if="hover" style="concept-hover" onMouseEnter="OnHover()" >
-                <Group>Features</Group>
-                <Group>Theory</Group>
-                <Group>Context</Group>
-            </Group>
+        <Group x-id="concept-menu" style="concept-hover" onMouseEnter="OnHover()">
+            <Group>Features</Group>
+            <Group>Theory</Group>
+            <Group>Context</Group>
         </Group>
-        <Group style="grid-cell thead seedlogo" onMouseEnter="OnHoverEnd()" />
-        <Group style="grid-cell thead">Dev Blog</Group>
-        <Group style="grid-cell thead">Community</Group>
-        
-        <Group style="[backgroundStyleName, 'more']" />
+
+        <Group style="grid-cell logo"/>
+        <!--<Group style="grid-cell thead">Home</Group>-->
+        <!--<Group style="grid-cell thead" onMouseEnter="OnHover()">-->
+            <!--Concept-->
+            <!--<Group x-id="concept-menu" if="hover" style="concept-hover" onMouseEnter="OnHover()">-->
+                <!--<Group>Features</Group>-->
+                <!--<Group>Theory</Group>-->
+                <!--<Group>Context</Group>-->
+            <!--</Group>-->
+        <!--</Group>-->
+        <!--<Group style="grid-cell thead seedlogo" onMouseEnter="OnHoverEnd()"/>-->
+        <!--<Group style="grid-cell thead">Dev Blog</Group>-->
+        <!--<Group style="grid-cell thead">Community</Group>-->
+
+        <!--<Group style="[backgroundStyleName, 'more']"/>-->
 
     </Contents>
 </UITemplate>

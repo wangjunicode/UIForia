@@ -2192,7 +2192,7 @@ namespace UIForia.Rendering {
                 [System.Diagnostics.DebuggerStepThrough]
                 get { 
                     StyleProperty property;
-                    if (m_PropertyMap.TryGetValue((int) StylePropertyId.OverflowX, out property)) return property.AsOverflow;
+                    if (propertyMap.TryGetValue((int) StylePropertyId.OverflowX, out property)) return property.AsOverflow;
                     return DefaultStyleValues_Generated.OverflowX;
                 }
             }
@@ -2201,7 +2201,7 @@ namespace UIForia.Rendering {
                 [System.Diagnostics.DebuggerStepThrough]
                 get { 
                     StyleProperty property;
-                    if (m_PropertyMap.TryGetValue((int) StylePropertyId.OverflowY, out property)) return property.AsOverflow;
+                    if (propertyMap.TryGetValue((int) StylePropertyId.OverflowY, out property)) return property.AsOverflow;
                     return DefaultStyleValues_Generated.OverflowY;
                 }
             }
@@ -2210,7 +2210,7 @@ namespace UIForia.Rendering {
                 [System.Diagnostics.DebuggerStepThrough]
                 get { 
                     StyleProperty property;
-                    if (m_PropertyMap.TryGetValue((int) StylePropertyId.BorderColor, out property)) return property.AsColor;
+                    if (propertyMap.TryGetValue((int) StylePropertyId.BorderColor, out property)) return property.AsColor;
                     return DefaultStyleValues_Generated.BorderColor;
                 }
             }
@@ -2219,7 +2219,7 @@ namespace UIForia.Rendering {
                 [System.Diagnostics.DebuggerStepThrough]
                 get { 
                     StyleProperty property;
-                    if (m_PropertyMap.TryGetValue((int) StylePropertyId.BackgroundColor, out property)) return property.AsColor;
+                    if (propertyMap.TryGetValue((int) StylePropertyId.BackgroundColor, out property)) return property.AsColor;
                     return DefaultStyleValues_Generated.BackgroundColor;
                 }
             }
@@ -2228,7 +2228,7 @@ namespace UIForia.Rendering {
                 [System.Diagnostics.DebuggerStepThrough]
                 get { 
                     StyleProperty property;
-                    if (m_PropertyMap.TryGetValue((int) StylePropertyId.BackgroundColorSecondary, out property)) return property.AsColor;
+                    if (propertyMap.TryGetValue((int) StylePropertyId.BackgroundColorSecondary, out property)) return property.AsColor;
                     return DefaultStyleValues_Generated.BackgroundColorSecondary;
                 }
             }
@@ -2237,7 +2237,7 @@ namespace UIForia.Rendering {
                 [System.Diagnostics.DebuggerStepThrough]
                 get { 
                     StyleProperty property;
-                    if (m_PropertyMap.TryGetValue((int) StylePropertyId.BackgroundImage, out property)) return property.AsTexture2D;
+                    if (propertyMap.TryGetValue((int) StylePropertyId.BackgroundImage, out property)) return property.AsTexture2D;
                     return DefaultStyleValues_Generated.BackgroundImage;
                 }
             }
@@ -2246,7 +2246,7 @@ namespace UIForia.Rendering {
                 [System.Diagnostics.DebuggerStepThrough]
                 get { 
                     StyleProperty property;
-                    if (m_PropertyMap.TryGetValue((int) StylePropertyId.BackgroundImage1, out property)) return property.AsTexture2D;
+                    if (propertyMap.TryGetValue((int) StylePropertyId.BackgroundImage1, out property)) return property.AsTexture2D;
                     return DefaultStyleValues_Generated.BackgroundImage1;
                 }
             }
@@ -2255,7 +2255,7 @@ namespace UIForia.Rendering {
                 [System.Diagnostics.DebuggerStepThrough]
                 get { 
                     StyleProperty property;
-                    if (m_PropertyMap.TryGetValue((int) StylePropertyId.BackgroundImage2, out property)) return property.AsTexture2D;
+                    if (propertyMap.TryGetValue((int) StylePropertyId.BackgroundImage2, out property)) return property.AsTexture2D;
                     return DefaultStyleValues_Generated.BackgroundImage2;
                 }
             }
@@ -2264,7 +2264,7 @@ namespace UIForia.Rendering {
                 [System.Diagnostics.DebuggerStepThrough]
                 get { 
                     StyleProperty property;
-                    if (m_PropertyMap.TryGetValue((int) StylePropertyId.BackgroundGradientType, out property)) return property.AsGradientType;
+                    if (propertyMap.TryGetValue((int) StylePropertyId.BackgroundGradientType, out property)) return property.AsGradientType;
                     return DefaultStyleValues_Generated.BackgroundGradientType;
                 }
             }
@@ -2273,7 +2273,7 @@ namespace UIForia.Rendering {
                 [System.Diagnostics.DebuggerStepThrough]
                 get { 
                     StyleProperty property;
-                    if (m_PropertyMap.TryGetValue((int) StylePropertyId.BackgroundGradientAxis, out property)) return property.AsGradientAxis;
+                    if (propertyMap.TryGetValue((int) StylePropertyId.BackgroundGradientAxis, out property)) return property.AsGradientAxis;
                     return DefaultStyleValues_Generated.BackgroundGradientAxis;
                 }
             }
@@ -2282,7 +2282,7 @@ namespace UIForia.Rendering {
                 [System.Diagnostics.DebuggerStepThrough]
                 get { 
                     StyleProperty property;
-                    if (m_PropertyMap.TryGetValue((int) StylePropertyId.BackgroundGradientStart, out property)) return property.AsFloat;
+                    if (propertyMap.TryGetValue((int) StylePropertyId.BackgroundGradientStart, out property)) return property.AsFloat;
                     return DefaultStyleValues_Generated.BackgroundGradientStart;
                 }
             }
@@ -2291,7 +2291,7 @@ namespace UIForia.Rendering {
                 [System.Diagnostics.DebuggerStepThrough]
                 get { 
                     StyleProperty property;
-                    if (m_PropertyMap.TryGetValue((int) StylePropertyId.BackgroundFillRotation, out property)) return property.AsFloat;
+                    if (propertyMap.TryGetValue((int) StylePropertyId.BackgroundFillRotation, out property)) return property.AsFloat;
                     return DefaultStyleValues_Generated.BackgroundFillRotation;
                 }
             }
@@ -2300,7 +2300,7 @@ namespace UIForia.Rendering {
                 [System.Diagnostics.DebuggerStepThrough]
                 get { 
                     StyleProperty property;
-                    if (m_PropertyMap.TryGetValue((int) StylePropertyId.BackgroundFillType, out property)) return property.AsBackgroundFillType;
+                    if (propertyMap.TryGetValue((int) StylePropertyId.BackgroundFillType, out property)) return property.AsBackgroundFillType;
                     return DefaultStyleValues_Generated.BackgroundFillType;
                 }
             }
@@ -2309,7 +2309,7 @@ namespace UIForia.Rendering {
                 [System.Diagnostics.DebuggerStepThrough]
                 get { 
                     StyleProperty property;
-                    if (m_PropertyMap.TryGetValue((int) StylePropertyId.BackgroundShapeType, out property)) return property.AsBackgroundShapeType;
+                    if (propertyMap.TryGetValue((int) StylePropertyId.BackgroundShapeType, out property)) return property.AsBackgroundShapeType;
                     return DefaultStyleValues_Generated.BackgroundShapeType;
                 }
             }
@@ -2318,7 +2318,7 @@ namespace UIForia.Rendering {
                 [System.Diagnostics.DebuggerStepThrough]
                 get { 
                     StyleProperty property;
-                    if (m_PropertyMap.TryGetValue((int) StylePropertyId.BackgroundFillOffsetX, out property)) return property.AsFloat;
+                    if (propertyMap.TryGetValue((int) StylePropertyId.BackgroundFillOffsetX, out property)) return property.AsFloat;
                     return DefaultStyleValues_Generated.BackgroundFillOffsetX;
                 }
             }
@@ -2327,7 +2327,7 @@ namespace UIForia.Rendering {
                 [System.Diagnostics.DebuggerStepThrough]
                 get { 
                     StyleProperty property;
-                    if (m_PropertyMap.TryGetValue((int) StylePropertyId.BackgroundFillOffsetY, out property)) return property.AsFloat;
+                    if (propertyMap.TryGetValue((int) StylePropertyId.BackgroundFillOffsetY, out property)) return property.AsFloat;
                     return DefaultStyleValues_Generated.BackgroundFillOffsetY;
                 }
             }
@@ -2336,7 +2336,7 @@ namespace UIForia.Rendering {
                 [System.Diagnostics.DebuggerStepThrough]
                 get { 
                     StyleProperty property;
-                    if (m_PropertyMap.TryGetValue((int) StylePropertyId.BackgroundFillScaleX, out property)) return property.AsFloat;
+                    if (propertyMap.TryGetValue((int) StylePropertyId.BackgroundFillScaleX, out property)) return property.AsFloat;
                     return DefaultStyleValues_Generated.BackgroundFillScaleX;
                 }
             }
@@ -2345,7 +2345,7 @@ namespace UIForia.Rendering {
                 [System.Diagnostics.DebuggerStepThrough]
                 get { 
                     StyleProperty property;
-                    if (m_PropertyMap.TryGetValue((int) StylePropertyId.BackgroundFillScaleY, out property)) return property.AsFloat;
+                    if (propertyMap.TryGetValue((int) StylePropertyId.BackgroundFillScaleY, out property)) return property.AsFloat;
                     return DefaultStyleValues_Generated.BackgroundFillScaleY;
                 }
             }
@@ -2354,7 +2354,7 @@ namespace UIForia.Rendering {
                 [System.Diagnostics.DebuggerStepThrough]
                 get { 
                     StyleProperty property;
-                    if (m_PropertyMap.TryGetValue((int) StylePropertyId.Opacity, out property)) return property.AsFloat;
+                    if (propertyMap.TryGetValue((int) StylePropertyId.Opacity, out property)) return property.AsFloat;
                     return DefaultStyleValues_Generated.Opacity;
                 }
             }
@@ -2363,7 +2363,7 @@ namespace UIForia.Rendering {
                 [System.Diagnostics.DebuggerStepThrough]
                 get { 
                     StyleProperty property;
-                    if (m_PropertyMap.TryGetValue((int) StylePropertyId.Cursor, out property)) return property.AsCursorStyle;
+                    if (propertyMap.TryGetValue((int) StylePropertyId.Cursor, out property)) return property.AsCursorStyle;
                     return DefaultStyleValues_Generated.Cursor;
                 }
             }
@@ -2372,7 +2372,7 @@ namespace UIForia.Rendering {
                 [System.Diagnostics.DebuggerStepThrough]
                 get { 
                     StyleProperty property;
-                    if (m_PropertyMap.TryGetValue((int) StylePropertyId.Visibility, out property)) return property.AsVisibility;
+                    if (propertyMap.TryGetValue((int) StylePropertyId.Visibility, out property)) return property.AsVisibility;
                     return DefaultStyleValues_Generated.Visibility;
                 }
             }
@@ -2381,7 +2381,7 @@ namespace UIForia.Rendering {
                 [System.Diagnostics.DebuggerStepThrough]
                 get { 
                     StyleProperty property;
-                    if (m_PropertyMap.TryGetValue((int) StylePropertyId.FlexItemOrder, out property)) return property.AsInt;
+                    if (propertyMap.TryGetValue((int) StylePropertyId.FlexItemOrder, out property)) return property.AsInt;
                     return DefaultStyleValues_Generated.FlexItemOrder;
                 }
             }
@@ -2390,7 +2390,7 @@ namespace UIForia.Rendering {
                 [System.Diagnostics.DebuggerStepThrough]
                 get { 
                     StyleProperty property;
-                    if (m_PropertyMap.TryGetValue((int) StylePropertyId.FlexItemGrow, out property)) return property.AsInt;
+                    if (propertyMap.TryGetValue((int) StylePropertyId.FlexItemGrow, out property)) return property.AsInt;
                     return DefaultStyleValues_Generated.FlexItemGrow;
                 }
             }
@@ -2399,7 +2399,7 @@ namespace UIForia.Rendering {
                 [System.Diagnostics.DebuggerStepThrough]
                 get { 
                     StyleProperty property;
-                    if (m_PropertyMap.TryGetValue((int) StylePropertyId.FlexItemShrink, out property)) return property.AsInt;
+                    if (propertyMap.TryGetValue((int) StylePropertyId.FlexItemShrink, out property)) return property.AsInt;
                     return DefaultStyleValues_Generated.FlexItemShrink;
                 }
             }
@@ -2408,7 +2408,7 @@ namespace UIForia.Rendering {
                 [System.Diagnostics.DebuggerStepThrough]
                 get { 
                     StyleProperty property;
-                    if (m_PropertyMap.TryGetValue((int) StylePropertyId.FlexItemSelfAlignment, out property)) return property.AsCrossAxisAlignment;
+                    if (propertyMap.TryGetValue((int) StylePropertyId.FlexItemSelfAlignment, out property)) return property.AsCrossAxisAlignment;
                     return DefaultStyleValues_Generated.FlexItemSelfAlignment;
                 }
             }
@@ -2417,7 +2417,7 @@ namespace UIForia.Rendering {
                 [System.Diagnostics.DebuggerStepThrough]
                 get { 
                     StyleProperty property;
-                    if (m_PropertyMap.TryGetValue((int) StylePropertyId.FlexLayoutDirection, out property)) return property.AsLayoutDirection;
+                    if (propertyMap.TryGetValue((int) StylePropertyId.FlexLayoutDirection, out property)) return property.AsLayoutDirection;
                     return DefaultStyleValues_Generated.FlexLayoutDirection;
                 }
             }
@@ -2426,7 +2426,7 @@ namespace UIForia.Rendering {
                 [System.Diagnostics.DebuggerStepThrough]
                 get { 
                     StyleProperty property;
-                    if (m_PropertyMap.TryGetValue((int) StylePropertyId.FlexLayoutWrap, out property)) return property.AsLayoutWrap;
+                    if (propertyMap.TryGetValue((int) StylePropertyId.FlexLayoutWrap, out property)) return property.AsLayoutWrap;
                     return DefaultStyleValues_Generated.FlexLayoutWrap;
                 }
             }
@@ -2435,7 +2435,7 @@ namespace UIForia.Rendering {
                 [System.Diagnostics.DebuggerStepThrough]
                 get { 
                     StyleProperty property;
-                    if (m_PropertyMap.TryGetValue((int) StylePropertyId.FlexLayoutMainAxisAlignment, out property)) return property.AsMainAxisAlignment;
+                    if (propertyMap.TryGetValue((int) StylePropertyId.FlexLayoutMainAxisAlignment, out property)) return property.AsMainAxisAlignment;
                     return DefaultStyleValues_Generated.FlexLayoutMainAxisAlignment;
                 }
             }
@@ -2444,7 +2444,7 @@ namespace UIForia.Rendering {
                 [System.Diagnostics.DebuggerStepThrough]
                 get { 
                     StyleProperty property;
-                    if (m_PropertyMap.TryGetValue((int) StylePropertyId.FlexLayoutCrossAxisAlignment, out property)) return property.AsCrossAxisAlignment;
+                    if (propertyMap.TryGetValue((int) StylePropertyId.FlexLayoutCrossAxisAlignment, out property)) return property.AsCrossAxisAlignment;
                     return DefaultStyleValues_Generated.FlexLayoutCrossAxisAlignment;
                 }
             }
@@ -2453,7 +2453,7 @@ namespace UIForia.Rendering {
                 [System.Diagnostics.DebuggerStepThrough]
                 get { 
                     StyleProperty property;
-                    if (m_PropertyMap.TryGetValue((int) StylePropertyId.GridItemColStart, out property)) return property.AsInt;
+                    if (propertyMap.TryGetValue((int) StylePropertyId.GridItemColStart, out property)) return property.AsInt;
                     return DefaultStyleValues_Generated.GridItemColStart;
                 }
             }
@@ -2462,7 +2462,7 @@ namespace UIForia.Rendering {
                 [System.Diagnostics.DebuggerStepThrough]
                 get { 
                     StyleProperty property;
-                    if (m_PropertyMap.TryGetValue((int) StylePropertyId.GridItemColSpan, out property)) return property.AsInt;
+                    if (propertyMap.TryGetValue((int) StylePropertyId.GridItemColSpan, out property)) return property.AsInt;
                     return DefaultStyleValues_Generated.GridItemColSpan;
                 }
             }
@@ -2471,7 +2471,7 @@ namespace UIForia.Rendering {
                 [System.Diagnostics.DebuggerStepThrough]
                 get { 
                     StyleProperty property;
-                    if (m_PropertyMap.TryGetValue((int) StylePropertyId.GridItemRowStart, out property)) return property.AsInt;
+                    if (propertyMap.TryGetValue((int) StylePropertyId.GridItemRowStart, out property)) return property.AsInt;
                     return DefaultStyleValues_Generated.GridItemRowStart;
                 }
             }
@@ -2480,7 +2480,7 @@ namespace UIForia.Rendering {
                 [System.Diagnostics.DebuggerStepThrough]
                 get { 
                     StyleProperty property;
-                    if (m_PropertyMap.TryGetValue((int) StylePropertyId.GridItemRowSpan, out property)) return property.AsInt;
+                    if (propertyMap.TryGetValue((int) StylePropertyId.GridItemRowSpan, out property)) return property.AsInt;
                     return DefaultStyleValues_Generated.GridItemRowSpan;
                 }
             }
@@ -2489,7 +2489,7 @@ namespace UIForia.Rendering {
                 [System.Diagnostics.DebuggerStepThrough]
                 get { 
                     StyleProperty property;
-                    if (m_PropertyMap.TryGetValue((int) StylePropertyId.GridItemColSelfAlignment, out property)) return property.AsGridAxisAlignment;
+                    if (propertyMap.TryGetValue((int) StylePropertyId.GridItemColSelfAlignment, out property)) return property.AsGridAxisAlignment;
                     return DefaultStyleValues_Generated.GridItemColSelfAlignment;
                 }
             }
@@ -2498,7 +2498,7 @@ namespace UIForia.Rendering {
                 [System.Diagnostics.DebuggerStepThrough]
                 get { 
                     StyleProperty property;
-                    if (m_PropertyMap.TryGetValue((int) StylePropertyId.GridItemRowSelfAlignment, out property)) return property.AsGridAxisAlignment;
+                    if (propertyMap.TryGetValue((int) StylePropertyId.GridItemRowSelfAlignment, out property)) return property.AsGridAxisAlignment;
                     return DefaultStyleValues_Generated.GridItemRowSelfAlignment;
                 }
             }
@@ -2507,7 +2507,7 @@ namespace UIForia.Rendering {
                 [System.Diagnostics.DebuggerStepThrough]
                 get { 
                     StyleProperty property;
-                    if (m_PropertyMap.TryGetValue((int) StylePropertyId.GridLayoutDirection, out property)) return property.AsLayoutDirection;
+                    if (propertyMap.TryGetValue((int) StylePropertyId.GridLayoutDirection, out property)) return property.AsLayoutDirection;
                     return DefaultStyleValues_Generated.GridLayoutDirection;
                 }
             }
@@ -2516,7 +2516,7 @@ namespace UIForia.Rendering {
                 [System.Diagnostics.DebuggerStepThrough]
                 get { 
                     StyleProperty property;
-                    if (m_PropertyMap.TryGetValue((int) StylePropertyId.GridLayoutDensity, out property)) return property.AsGridLayoutDensity;
+                    if (propertyMap.TryGetValue((int) StylePropertyId.GridLayoutDensity, out property)) return property.AsGridLayoutDensity;
                     return DefaultStyleValues_Generated.GridLayoutDensity;
                 }
             }
@@ -2525,7 +2525,7 @@ namespace UIForia.Rendering {
                 [System.Diagnostics.DebuggerStepThrough]
                 get { 
                     StyleProperty property;
-                    if (m_PropertyMap.TryGetValue((int) StylePropertyId.GridLayoutColTemplate, out property)) return property.AsGridTemplate;
+                    if (propertyMap.TryGetValue((int) StylePropertyId.GridLayoutColTemplate, out property)) return property.AsGridTemplate;
                     return DefaultStyleValues_Generated.GridLayoutColTemplate;
                 }
             }
@@ -2534,7 +2534,7 @@ namespace UIForia.Rendering {
                 [System.Diagnostics.DebuggerStepThrough]
                 get { 
                     StyleProperty property;
-                    if (m_PropertyMap.TryGetValue((int) StylePropertyId.GridLayoutRowTemplate, out property)) return property.AsGridTemplate;
+                    if (propertyMap.TryGetValue((int) StylePropertyId.GridLayoutRowTemplate, out property)) return property.AsGridTemplate;
                     return DefaultStyleValues_Generated.GridLayoutRowTemplate;
                 }
             }
@@ -2543,7 +2543,7 @@ namespace UIForia.Rendering {
                 [System.Diagnostics.DebuggerStepThrough]
                 get { 
                     StyleProperty property;
-                    if (m_PropertyMap.TryGetValue((int) StylePropertyId.GridLayoutMainAxisAutoSize, out property)) return property.AsGridTrackSize;
+                    if (propertyMap.TryGetValue((int) StylePropertyId.GridLayoutMainAxisAutoSize, out property)) return property.AsGridTrackSize;
                     return DefaultStyleValues_Generated.GridLayoutMainAxisAutoSize;
                 }
             }
@@ -2552,7 +2552,7 @@ namespace UIForia.Rendering {
                 [System.Diagnostics.DebuggerStepThrough]
                 get { 
                     StyleProperty property;
-                    if (m_PropertyMap.TryGetValue((int) StylePropertyId.GridLayoutCrossAxisAutoSize, out property)) return property.AsGridTrackSize;
+                    if (propertyMap.TryGetValue((int) StylePropertyId.GridLayoutCrossAxisAutoSize, out property)) return property.AsGridTrackSize;
                     return DefaultStyleValues_Generated.GridLayoutCrossAxisAutoSize;
                 }
             }
@@ -2561,7 +2561,7 @@ namespace UIForia.Rendering {
                 [System.Diagnostics.DebuggerStepThrough]
                 get { 
                     StyleProperty property;
-                    if (m_PropertyMap.TryGetValue((int) StylePropertyId.GridLayoutColGap, out property)) return property.AsFloat;
+                    if (propertyMap.TryGetValue((int) StylePropertyId.GridLayoutColGap, out property)) return property.AsFloat;
                     return DefaultStyleValues_Generated.GridLayoutColGap;
                 }
             }
@@ -2570,7 +2570,7 @@ namespace UIForia.Rendering {
                 [System.Diagnostics.DebuggerStepThrough]
                 get { 
                     StyleProperty property;
-                    if (m_PropertyMap.TryGetValue((int) StylePropertyId.GridLayoutRowGap, out property)) return property.AsFloat;
+                    if (propertyMap.TryGetValue((int) StylePropertyId.GridLayoutRowGap, out property)) return property.AsFloat;
                     return DefaultStyleValues_Generated.GridLayoutRowGap;
                 }
             }
@@ -2579,7 +2579,7 @@ namespace UIForia.Rendering {
                 [System.Diagnostics.DebuggerStepThrough]
                 get { 
                     StyleProperty property;
-                    if (m_PropertyMap.TryGetValue((int) StylePropertyId.GridLayoutColAlignment, out property)) return property.AsGridAxisAlignment;
+                    if (propertyMap.TryGetValue((int) StylePropertyId.GridLayoutColAlignment, out property)) return property.AsGridAxisAlignment;
                     return DefaultStyleValues_Generated.GridLayoutColAlignment;
                 }
             }
@@ -2588,7 +2588,7 @@ namespace UIForia.Rendering {
                 [System.Diagnostics.DebuggerStepThrough]
                 get { 
                     StyleProperty property;
-                    if (m_PropertyMap.TryGetValue((int) StylePropertyId.GridLayoutRowAlignment, out property)) return property.AsGridAxisAlignment;
+                    if (propertyMap.TryGetValue((int) StylePropertyId.GridLayoutRowAlignment, out property)) return property.AsGridAxisAlignment;
                     return DefaultStyleValues_Generated.GridLayoutRowAlignment;
                 }
             }
@@ -2597,7 +2597,7 @@ namespace UIForia.Rendering {
                 [System.Diagnostics.DebuggerStepThrough]
                 get { 
                     StyleProperty property;
-                    if (m_PropertyMap.TryGetValue((int) StylePropertyId.MinWidth, out property)) return property.AsUIMeasurement;
+                    if (propertyMap.TryGetValue((int) StylePropertyId.MinWidth, out property)) return property.AsUIMeasurement;
                     return DefaultStyleValues_Generated.MinWidth;
                 }
             }
@@ -2606,7 +2606,7 @@ namespace UIForia.Rendering {
                 [System.Diagnostics.DebuggerStepThrough]
                 get { 
                     StyleProperty property;
-                    if (m_PropertyMap.TryGetValue((int) StylePropertyId.MaxWidth, out property)) return property.AsUIMeasurement;
+                    if (propertyMap.TryGetValue((int) StylePropertyId.MaxWidth, out property)) return property.AsUIMeasurement;
                     return DefaultStyleValues_Generated.MaxWidth;
                 }
             }
@@ -2615,7 +2615,7 @@ namespace UIForia.Rendering {
                 [System.Diagnostics.DebuggerStepThrough]
                 get { 
                     StyleProperty property;
-                    if (m_PropertyMap.TryGetValue((int) StylePropertyId.PreferredWidth, out property)) return property.AsUIMeasurement;
+                    if (propertyMap.TryGetValue((int) StylePropertyId.PreferredWidth, out property)) return property.AsUIMeasurement;
                     return DefaultStyleValues_Generated.PreferredWidth;
                 }
             }
@@ -2624,7 +2624,7 @@ namespace UIForia.Rendering {
                 [System.Diagnostics.DebuggerStepThrough]
                 get { 
                     StyleProperty property;
-                    if (m_PropertyMap.TryGetValue((int) StylePropertyId.MinHeight, out property)) return property.AsUIMeasurement;
+                    if (propertyMap.TryGetValue((int) StylePropertyId.MinHeight, out property)) return property.AsUIMeasurement;
                     return DefaultStyleValues_Generated.MinHeight;
                 }
             }
@@ -2633,7 +2633,7 @@ namespace UIForia.Rendering {
                 [System.Diagnostics.DebuggerStepThrough]
                 get { 
                     StyleProperty property;
-                    if (m_PropertyMap.TryGetValue((int) StylePropertyId.MaxHeight, out property)) return property.AsUIMeasurement;
+                    if (propertyMap.TryGetValue((int) StylePropertyId.MaxHeight, out property)) return property.AsUIMeasurement;
                     return DefaultStyleValues_Generated.MaxHeight;
                 }
             }
@@ -2642,7 +2642,7 @@ namespace UIForia.Rendering {
                 [System.Diagnostics.DebuggerStepThrough]
                 get { 
                     StyleProperty property;
-                    if (m_PropertyMap.TryGetValue((int) StylePropertyId.PreferredHeight, out property)) return property.AsUIMeasurement;
+                    if (propertyMap.TryGetValue((int) StylePropertyId.PreferredHeight, out property)) return property.AsUIMeasurement;
                     return DefaultStyleValues_Generated.PreferredHeight;
                 }
             }
@@ -2651,7 +2651,7 @@ namespace UIForia.Rendering {
                 [System.Diagnostics.DebuggerStepThrough]
                 get { 
                     StyleProperty property;
-                    if (m_PropertyMap.TryGetValue((int) StylePropertyId.MarginTop, out property)) return property.AsUIMeasurement;
+                    if (propertyMap.TryGetValue((int) StylePropertyId.MarginTop, out property)) return property.AsUIMeasurement;
                     return DefaultStyleValues_Generated.MarginTop;
                 }
             }
@@ -2660,7 +2660,7 @@ namespace UIForia.Rendering {
                 [System.Diagnostics.DebuggerStepThrough]
                 get { 
                     StyleProperty property;
-                    if (m_PropertyMap.TryGetValue((int) StylePropertyId.MarginRight, out property)) return property.AsUIMeasurement;
+                    if (propertyMap.TryGetValue((int) StylePropertyId.MarginRight, out property)) return property.AsUIMeasurement;
                     return DefaultStyleValues_Generated.MarginRight;
                 }
             }
@@ -2669,7 +2669,7 @@ namespace UIForia.Rendering {
                 [System.Diagnostics.DebuggerStepThrough]
                 get { 
                     StyleProperty property;
-                    if (m_PropertyMap.TryGetValue((int) StylePropertyId.MarginBottom, out property)) return property.AsUIMeasurement;
+                    if (propertyMap.TryGetValue((int) StylePropertyId.MarginBottom, out property)) return property.AsUIMeasurement;
                     return DefaultStyleValues_Generated.MarginBottom;
                 }
             }
@@ -2678,7 +2678,7 @@ namespace UIForia.Rendering {
                 [System.Diagnostics.DebuggerStepThrough]
                 get { 
                     StyleProperty property;
-                    if (m_PropertyMap.TryGetValue((int) StylePropertyId.MarginLeft, out property)) return property.AsUIMeasurement;
+                    if (propertyMap.TryGetValue((int) StylePropertyId.MarginLeft, out property)) return property.AsUIMeasurement;
                     return DefaultStyleValues_Generated.MarginLeft;
                 }
             }
@@ -2687,7 +2687,7 @@ namespace UIForia.Rendering {
                 [System.Diagnostics.DebuggerStepThrough]
                 get { 
                     StyleProperty property;
-                    if (m_PropertyMap.TryGetValue((int) StylePropertyId.BorderTop, out property)) return property.AsUIFixedLength;
+                    if (propertyMap.TryGetValue((int) StylePropertyId.BorderTop, out property)) return property.AsUIFixedLength;
                     return DefaultStyleValues_Generated.BorderTop;
                 }
             }
@@ -2696,7 +2696,7 @@ namespace UIForia.Rendering {
                 [System.Diagnostics.DebuggerStepThrough]
                 get { 
                     StyleProperty property;
-                    if (m_PropertyMap.TryGetValue((int) StylePropertyId.BorderRight, out property)) return property.AsUIFixedLength;
+                    if (propertyMap.TryGetValue((int) StylePropertyId.BorderRight, out property)) return property.AsUIFixedLength;
                     return DefaultStyleValues_Generated.BorderRight;
                 }
             }
@@ -2705,7 +2705,7 @@ namespace UIForia.Rendering {
                 [System.Diagnostics.DebuggerStepThrough]
                 get { 
                     StyleProperty property;
-                    if (m_PropertyMap.TryGetValue((int) StylePropertyId.BorderBottom, out property)) return property.AsUIFixedLength;
+                    if (propertyMap.TryGetValue((int) StylePropertyId.BorderBottom, out property)) return property.AsUIFixedLength;
                     return DefaultStyleValues_Generated.BorderBottom;
                 }
             }
@@ -2714,7 +2714,7 @@ namespace UIForia.Rendering {
                 [System.Diagnostics.DebuggerStepThrough]
                 get { 
                     StyleProperty property;
-                    if (m_PropertyMap.TryGetValue((int) StylePropertyId.BorderLeft, out property)) return property.AsUIFixedLength;
+                    if (propertyMap.TryGetValue((int) StylePropertyId.BorderLeft, out property)) return property.AsUIFixedLength;
                     return DefaultStyleValues_Generated.BorderLeft;
                 }
             }
@@ -2723,7 +2723,7 @@ namespace UIForia.Rendering {
                 [System.Diagnostics.DebuggerStepThrough]
                 get { 
                     StyleProperty property;
-                    if (m_PropertyMap.TryGetValue((int) StylePropertyId.BorderRadiusTopLeft, out property)) return property.AsUIFixedLength;
+                    if (propertyMap.TryGetValue((int) StylePropertyId.BorderRadiusTopLeft, out property)) return property.AsUIFixedLength;
                     return DefaultStyleValues_Generated.BorderRadiusTopLeft;
                 }
             }
@@ -2732,7 +2732,7 @@ namespace UIForia.Rendering {
                 [System.Diagnostics.DebuggerStepThrough]
                 get { 
                     StyleProperty property;
-                    if (m_PropertyMap.TryGetValue((int) StylePropertyId.BorderRadiusTopRight, out property)) return property.AsUIFixedLength;
+                    if (propertyMap.TryGetValue((int) StylePropertyId.BorderRadiusTopRight, out property)) return property.AsUIFixedLength;
                     return DefaultStyleValues_Generated.BorderRadiusTopRight;
                 }
             }
@@ -2741,7 +2741,7 @@ namespace UIForia.Rendering {
                 [System.Diagnostics.DebuggerStepThrough]
                 get { 
                     StyleProperty property;
-                    if (m_PropertyMap.TryGetValue((int) StylePropertyId.BorderRadiusBottomRight, out property)) return property.AsUIFixedLength;
+                    if (propertyMap.TryGetValue((int) StylePropertyId.BorderRadiusBottomRight, out property)) return property.AsUIFixedLength;
                     return DefaultStyleValues_Generated.BorderRadiusBottomRight;
                 }
             }
@@ -2750,7 +2750,7 @@ namespace UIForia.Rendering {
                 [System.Diagnostics.DebuggerStepThrough]
                 get { 
                     StyleProperty property;
-                    if (m_PropertyMap.TryGetValue((int) StylePropertyId.BorderRadiusBottomLeft, out property)) return property.AsUIFixedLength;
+                    if (propertyMap.TryGetValue((int) StylePropertyId.BorderRadiusBottomLeft, out property)) return property.AsUIFixedLength;
                     return DefaultStyleValues_Generated.BorderRadiusBottomLeft;
                 }
             }
@@ -2759,7 +2759,7 @@ namespace UIForia.Rendering {
                 [System.Diagnostics.DebuggerStepThrough]
                 get { 
                     StyleProperty property;
-                    if (m_PropertyMap.TryGetValue((int) StylePropertyId.PaddingTop, out property)) return property.AsUIFixedLength;
+                    if (propertyMap.TryGetValue((int) StylePropertyId.PaddingTop, out property)) return property.AsUIFixedLength;
                     return DefaultStyleValues_Generated.PaddingTop;
                 }
             }
@@ -2768,7 +2768,7 @@ namespace UIForia.Rendering {
                 [System.Diagnostics.DebuggerStepThrough]
                 get { 
                     StyleProperty property;
-                    if (m_PropertyMap.TryGetValue((int) StylePropertyId.PaddingRight, out property)) return property.AsUIFixedLength;
+                    if (propertyMap.TryGetValue((int) StylePropertyId.PaddingRight, out property)) return property.AsUIFixedLength;
                     return DefaultStyleValues_Generated.PaddingRight;
                 }
             }
@@ -2777,7 +2777,7 @@ namespace UIForia.Rendering {
                 [System.Diagnostics.DebuggerStepThrough]
                 get { 
                     StyleProperty property;
-                    if (m_PropertyMap.TryGetValue((int) StylePropertyId.PaddingBottom, out property)) return property.AsUIFixedLength;
+                    if (propertyMap.TryGetValue((int) StylePropertyId.PaddingBottom, out property)) return property.AsUIFixedLength;
                     return DefaultStyleValues_Generated.PaddingBottom;
                 }
             }
@@ -2786,7 +2786,7 @@ namespace UIForia.Rendering {
                 [System.Diagnostics.DebuggerStepThrough]
                 get { 
                     StyleProperty property;
-                    if (m_PropertyMap.TryGetValue((int) StylePropertyId.PaddingLeft, out property)) return property.AsUIFixedLength;
+                    if (propertyMap.TryGetValue((int) StylePropertyId.PaddingLeft, out property)) return property.AsUIFixedLength;
                     return DefaultStyleValues_Generated.PaddingLeft;
                 }
             }
@@ -2795,8 +2795,8 @@ namespace UIForia.Rendering {
                 [System.Diagnostics.DebuggerStepThrough]
                 get { 
                     StyleProperty property;
-                    if (m_PropertyMap.TryGetValue((int) StylePropertyId.TextColor, out property)) return property.AsColor;
-                    if (m_PropertyMap.TryGetValue(BitUtil.SetHighLowBits(1, (int) StylePropertyId.TextColor), out property)) return property.AsColor;
+                    if (propertyMap.TryGetValue((int) StylePropertyId.TextColor, out property)) return property.AsColor;
+                    if (propertyMap.TryGetValue(BitUtil.SetHighLowBits(1, (int) StylePropertyId.TextColor), out property)) return property.AsColor;
                     return DefaultStyleValues_Generated.TextColor;
                 }
             }
@@ -2805,8 +2805,8 @@ namespace UIForia.Rendering {
                 [System.Diagnostics.DebuggerStepThrough]
                 get { 
                     StyleProperty property;
-                    if (m_PropertyMap.TryGetValue((int) StylePropertyId.TextFontAsset, out property)) return property.AsFont;
-                    if (m_PropertyMap.TryGetValue(BitUtil.SetHighLowBits(1, (int) StylePropertyId.TextFontAsset), out property)) return property.AsFont;
+                    if (propertyMap.TryGetValue((int) StylePropertyId.TextFontAsset, out property)) return property.AsFont;
+                    if (propertyMap.TryGetValue(BitUtil.SetHighLowBits(1, (int) StylePropertyId.TextFontAsset), out property)) return property.AsFont;
                     return DefaultStyleValues_Generated.TextFontAsset;
                 }
             }
@@ -2815,8 +2815,8 @@ namespace UIForia.Rendering {
                 [System.Diagnostics.DebuggerStepThrough]
                 get { 
                     StyleProperty property;
-                    if (m_PropertyMap.TryGetValue((int) StylePropertyId.TextFontSize, out property)) return property.AsInt;
-                    if (m_PropertyMap.TryGetValue(BitUtil.SetHighLowBits(1, (int) StylePropertyId.TextFontSize), out property)) return property.AsInt;
+                    if (propertyMap.TryGetValue((int) StylePropertyId.TextFontSize, out property)) return property.AsInt;
+                    if (propertyMap.TryGetValue(BitUtil.SetHighLowBits(1, (int) StylePropertyId.TextFontSize), out property)) return property.AsInt;
                     return DefaultStyleValues_Generated.TextFontSize;
                 }
             }
@@ -2825,8 +2825,8 @@ namespace UIForia.Rendering {
                 [System.Diagnostics.DebuggerStepThrough]
                 get { 
                     StyleProperty property;
-                    if (m_PropertyMap.TryGetValue((int) StylePropertyId.TextFontStyle, out property)) return property.AsFontStyle;
-                    if (m_PropertyMap.TryGetValue(BitUtil.SetHighLowBits(1, (int) StylePropertyId.TextFontStyle), out property)) return property.AsFontStyle;
+                    if (propertyMap.TryGetValue((int) StylePropertyId.TextFontStyle, out property)) return property.AsFontStyle;
+                    if (propertyMap.TryGetValue(BitUtil.SetHighLowBits(1, (int) StylePropertyId.TextFontStyle), out property)) return property.AsFontStyle;
                     return DefaultStyleValues_Generated.TextFontStyle;
                 }
             }
@@ -2835,8 +2835,8 @@ namespace UIForia.Rendering {
                 [System.Diagnostics.DebuggerStepThrough]
                 get { 
                     StyleProperty property;
-                    if (m_PropertyMap.TryGetValue((int) StylePropertyId.TextAlignment, out property)) return property.AsTextAlignment;
-                    if (m_PropertyMap.TryGetValue(BitUtil.SetHighLowBits(1, (int) StylePropertyId.TextAlignment), out property)) return property.AsTextAlignment;
+                    if (propertyMap.TryGetValue((int) StylePropertyId.TextAlignment, out property)) return property.AsTextAlignment;
+                    if (propertyMap.TryGetValue(BitUtil.SetHighLowBits(1, (int) StylePropertyId.TextAlignment), out property)) return property.AsTextAlignment;
                     return DefaultStyleValues_Generated.TextAlignment;
                 }
             }
@@ -2845,8 +2845,8 @@ namespace UIForia.Rendering {
                 [System.Diagnostics.DebuggerStepThrough]
                 get { 
                     StyleProperty property;
-                    if (m_PropertyMap.TryGetValue((int) StylePropertyId.TextTransform, out property)) return property.AsTextTransform;
-                    if (m_PropertyMap.TryGetValue(BitUtil.SetHighLowBits(1, (int) StylePropertyId.TextTransform), out property)) return property.AsTextTransform;
+                    if (propertyMap.TryGetValue((int) StylePropertyId.TextTransform, out property)) return property.AsTextTransform;
+                    if (propertyMap.TryGetValue(BitUtil.SetHighLowBits(1, (int) StylePropertyId.TextTransform), out property)) return property.AsTextTransform;
                     return DefaultStyleValues_Generated.TextTransform;
                 }
             }
@@ -2855,7 +2855,7 @@ namespace UIForia.Rendering {
                 [System.Diagnostics.DebuggerStepThrough]
                 get { 
                     StyleProperty property;
-                    if (m_PropertyMap.TryGetValue((int) StylePropertyId.AnchorTop, out property)) return property.AsUIFixedLength;
+                    if (propertyMap.TryGetValue((int) StylePropertyId.AnchorTop, out property)) return property.AsUIFixedLength;
                     return DefaultStyleValues_Generated.AnchorTop;
                 }
             }
@@ -2864,7 +2864,7 @@ namespace UIForia.Rendering {
                 [System.Diagnostics.DebuggerStepThrough]
                 get { 
                     StyleProperty property;
-                    if (m_PropertyMap.TryGetValue((int) StylePropertyId.AnchorRight, out property)) return property.AsUIFixedLength;
+                    if (propertyMap.TryGetValue((int) StylePropertyId.AnchorRight, out property)) return property.AsUIFixedLength;
                     return DefaultStyleValues_Generated.AnchorRight;
                 }
             }
@@ -2873,7 +2873,7 @@ namespace UIForia.Rendering {
                 [System.Diagnostics.DebuggerStepThrough]
                 get { 
                     StyleProperty property;
-                    if (m_PropertyMap.TryGetValue((int) StylePropertyId.AnchorBottom, out property)) return property.AsUIFixedLength;
+                    if (propertyMap.TryGetValue((int) StylePropertyId.AnchorBottom, out property)) return property.AsUIFixedLength;
                     return DefaultStyleValues_Generated.AnchorBottom;
                 }
             }
@@ -2882,7 +2882,7 @@ namespace UIForia.Rendering {
                 [System.Diagnostics.DebuggerStepThrough]
                 get { 
                     StyleProperty property;
-                    if (m_PropertyMap.TryGetValue((int) StylePropertyId.AnchorLeft, out property)) return property.AsUIFixedLength;
+                    if (propertyMap.TryGetValue((int) StylePropertyId.AnchorLeft, out property)) return property.AsUIFixedLength;
                     return DefaultStyleValues_Generated.AnchorLeft;
                 }
             }
@@ -2891,7 +2891,7 @@ namespace UIForia.Rendering {
                 [System.Diagnostics.DebuggerStepThrough]
                 get { 
                     StyleProperty property;
-                    if (m_PropertyMap.TryGetValue((int) StylePropertyId.AnchorTarget, out property)) return property.AsAnchorTarget;
+                    if (propertyMap.TryGetValue((int) StylePropertyId.AnchorTarget, out property)) return property.AsAnchorTarget;
                     return DefaultStyleValues_Generated.AnchorTarget;
                 }
             }
@@ -2900,7 +2900,7 @@ namespace UIForia.Rendering {
                 [System.Diagnostics.DebuggerStepThrough]
                 get { 
                     StyleProperty property;
-                    if (m_PropertyMap.TryGetValue((int) StylePropertyId.TransformPositionX, out property)) return property.AsTransformOffset;
+                    if (propertyMap.TryGetValue((int) StylePropertyId.TransformPositionX, out property)) return property.AsTransformOffset;
                     return DefaultStyleValues_Generated.TransformPositionX;
                 }
             }
@@ -2909,7 +2909,7 @@ namespace UIForia.Rendering {
                 [System.Diagnostics.DebuggerStepThrough]
                 get { 
                     StyleProperty property;
-                    if (m_PropertyMap.TryGetValue((int) StylePropertyId.TransformPositionY, out property)) return property.AsTransformOffset;
+                    if (propertyMap.TryGetValue((int) StylePropertyId.TransformPositionY, out property)) return property.AsTransformOffset;
                     return DefaultStyleValues_Generated.TransformPositionY;
                 }
             }
@@ -2918,7 +2918,7 @@ namespace UIForia.Rendering {
                 [System.Diagnostics.DebuggerStepThrough]
                 get { 
                     StyleProperty property;
-                    if (m_PropertyMap.TryGetValue((int) StylePropertyId.TransformPivotX, out property)) return property.AsUIFixedLength;
+                    if (propertyMap.TryGetValue((int) StylePropertyId.TransformPivotX, out property)) return property.AsUIFixedLength;
                     return DefaultStyleValues_Generated.TransformPivotX;
                 }
             }
@@ -2927,7 +2927,7 @@ namespace UIForia.Rendering {
                 [System.Diagnostics.DebuggerStepThrough]
                 get { 
                     StyleProperty property;
-                    if (m_PropertyMap.TryGetValue((int) StylePropertyId.TransformPivotY, out property)) return property.AsUIFixedLength;
+                    if (propertyMap.TryGetValue((int) StylePropertyId.TransformPivotY, out property)) return property.AsUIFixedLength;
                     return DefaultStyleValues_Generated.TransformPivotY;
                 }
             }
@@ -2936,7 +2936,7 @@ namespace UIForia.Rendering {
                 [System.Diagnostics.DebuggerStepThrough]
                 get { 
                     StyleProperty property;
-                    if (m_PropertyMap.TryGetValue((int) StylePropertyId.TransformScaleX, out property)) return property.AsFloat;
+                    if (propertyMap.TryGetValue((int) StylePropertyId.TransformScaleX, out property)) return property.AsFloat;
                     return DefaultStyleValues_Generated.TransformScaleX;
                 }
             }
@@ -2945,7 +2945,7 @@ namespace UIForia.Rendering {
                 [System.Diagnostics.DebuggerStepThrough]
                 get { 
                     StyleProperty property;
-                    if (m_PropertyMap.TryGetValue((int) StylePropertyId.TransformScaleY, out property)) return property.AsFloat;
+                    if (propertyMap.TryGetValue((int) StylePropertyId.TransformScaleY, out property)) return property.AsFloat;
                     return DefaultStyleValues_Generated.TransformScaleY;
                 }
             }
@@ -2954,7 +2954,7 @@ namespace UIForia.Rendering {
                 [System.Diagnostics.DebuggerStepThrough]
                 get { 
                     StyleProperty property;
-                    if (m_PropertyMap.TryGetValue((int) StylePropertyId.TransformRotation, out property)) return property.AsFloat;
+                    if (propertyMap.TryGetValue((int) StylePropertyId.TransformRotation, out property)) return property.AsFloat;
                     return DefaultStyleValues_Generated.TransformRotation;
                 }
             }
@@ -2963,7 +2963,7 @@ namespace UIForia.Rendering {
                 [System.Diagnostics.DebuggerStepThrough]
                 get { 
                     StyleProperty property;
-                    if (m_PropertyMap.TryGetValue((int) StylePropertyId.TransformBehaviorX, out property)) return property.AsTransformBehavior;
+                    if (propertyMap.TryGetValue((int) StylePropertyId.TransformBehaviorX, out property)) return property.AsTransformBehavior;
                     return DefaultStyleValues_Generated.TransformBehaviorX;
                 }
             }
@@ -2972,7 +2972,7 @@ namespace UIForia.Rendering {
                 [System.Diagnostics.DebuggerStepThrough]
                 get { 
                     StyleProperty property;
-                    if (m_PropertyMap.TryGetValue((int) StylePropertyId.TransformBehaviorY, out property)) return property.AsTransformBehavior;
+                    if (propertyMap.TryGetValue((int) StylePropertyId.TransformBehaviorY, out property)) return property.AsTransformBehavior;
                     return DefaultStyleValues_Generated.TransformBehaviorY;
                 }
             }
@@ -2981,7 +2981,7 @@ namespace UIForia.Rendering {
                 [System.Diagnostics.DebuggerStepThrough]
                 get { 
                     StyleProperty property;
-                    if (m_PropertyMap.TryGetValue((int) StylePropertyId.LayoutType, out property)) return property.AsLayoutType;
+                    if (propertyMap.TryGetValue((int) StylePropertyId.LayoutType, out property)) return property.AsLayoutType;
                     return DefaultStyleValues_Generated.LayoutType;
                 }
             }
@@ -2990,7 +2990,7 @@ namespace UIForia.Rendering {
                 [System.Diagnostics.DebuggerStepThrough]
                 get { 
                     StyleProperty property;
-                    if (m_PropertyMap.TryGetValue((int) StylePropertyId.LayoutBehavior, out property)) return property.AsLayoutBehavior;
+                    if (propertyMap.TryGetValue((int) StylePropertyId.LayoutBehavior, out property)) return property.AsLayoutBehavior;
                     return DefaultStyleValues_Generated.LayoutBehavior;
                 }
             }
@@ -2999,7 +2999,7 @@ namespace UIForia.Rendering {
                 [System.Diagnostics.DebuggerStepThrough]
                 get { 
                     StyleProperty property;
-                    if (m_PropertyMap.TryGetValue((int) StylePropertyId.ZIndex, out property)) return property.AsInt;
+                    if (propertyMap.TryGetValue((int) StylePropertyId.ZIndex, out property)) return property.AsInt;
                     return DefaultStyleValues_Generated.ZIndex;
                 }
             }
@@ -3008,7 +3008,7 @@ namespace UIForia.Rendering {
                 [System.Diagnostics.DebuggerStepThrough]
                 get { 
                     StyleProperty property;
-                    if (m_PropertyMap.TryGetValue((int) StylePropertyId.RenderLayerOffset, out property)) return property.AsInt;
+                    if (propertyMap.TryGetValue((int) StylePropertyId.RenderLayerOffset, out property)) return property.AsInt;
                     return DefaultStyleValues_Generated.RenderLayerOffset;
                 }
             }
@@ -3017,7 +3017,7 @@ namespace UIForia.Rendering {
                 [System.Diagnostics.DebuggerStepThrough]
                 get { 
                     StyleProperty property;
-                    if (m_PropertyMap.TryGetValue((int) StylePropertyId.RenderLayer, out property)) return property.AsRenderLayer;
+                    if (propertyMap.TryGetValue((int) StylePropertyId.RenderLayer, out property)) return property.AsRenderLayer;
                     return DefaultStyleValues_Generated.RenderLayer;
                 }
             }
@@ -3026,7 +3026,7 @@ namespace UIForia.Rendering {
                 [System.Diagnostics.DebuggerStepThrough]
                 get { 
                     StyleProperty property;
-                    if (m_PropertyMap.TryGetValue((int) StylePropertyId.ScrollbarVerticalAttachment, out property)) return property.AsVerticalScrollbarAttachment;
+                    if (propertyMap.TryGetValue((int) StylePropertyId.ScrollbarVerticalAttachment, out property)) return property.AsVerticalScrollbarAttachment;
                     return DefaultStyleValues_Generated.ScrollbarVerticalAttachment;
                 }
             }
@@ -3035,7 +3035,7 @@ namespace UIForia.Rendering {
                 [System.Diagnostics.DebuggerStepThrough]
                 get { 
                     StyleProperty property;
-                    if (m_PropertyMap.TryGetValue((int) StylePropertyId.ScrollbarVerticalButtonPlacement, out property)) return property.AsScrollbarButtonPlacement;
+                    if (propertyMap.TryGetValue((int) StylePropertyId.ScrollbarVerticalButtonPlacement, out property)) return property.AsScrollbarButtonPlacement;
                     return DefaultStyleValues_Generated.ScrollbarVerticalButtonPlacement;
                 }
             }
@@ -3044,7 +3044,7 @@ namespace UIForia.Rendering {
                 [System.Diagnostics.DebuggerStepThrough]
                 get { 
                     StyleProperty property;
-                    if (m_PropertyMap.TryGetValue((int) StylePropertyId.ScrollbarVerticalTrackSize, out property)) return property.AsFloat;
+                    if (propertyMap.TryGetValue((int) StylePropertyId.ScrollbarVerticalTrackSize, out property)) return property.AsFloat;
                     return DefaultStyleValues_Generated.ScrollbarVerticalTrackSize;
                 }
             }
@@ -3053,7 +3053,7 @@ namespace UIForia.Rendering {
                 [System.Diagnostics.DebuggerStepThrough]
                 get { 
                     StyleProperty property;
-                    if (m_PropertyMap.TryGetValue((int) StylePropertyId.ScrollbarVerticalTrackBorderRadius, out property)) return property.AsFloat;
+                    if (propertyMap.TryGetValue((int) StylePropertyId.ScrollbarVerticalTrackBorderRadius, out property)) return property.AsFloat;
                     return DefaultStyleValues_Generated.ScrollbarVerticalTrackBorderRadius;
                 }
             }
@@ -3062,7 +3062,7 @@ namespace UIForia.Rendering {
                 [System.Diagnostics.DebuggerStepThrough]
                 get { 
                     StyleProperty property;
-                    if (m_PropertyMap.TryGetValue((int) StylePropertyId.ScrollbarVerticalTrackBorderSize, out property)) return property.AsFloat;
+                    if (propertyMap.TryGetValue((int) StylePropertyId.ScrollbarVerticalTrackBorderSize, out property)) return property.AsFloat;
                     return DefaultStyleValues_Generated.ScrollbarVerticalTrackBorderSize;
                 }
             }
@@ -3071,7 +3071,7 @@ namespace UIForia.Rendering {
                 [System.Diagnostics.DebuggerStepThrough]
                 get { 
                     StyleProperty property;
-                    if (m_PropertyMap.TryGetValue((int) StylePropertyId.ScrollbarVerticalTrackBorderColor, out property)) return property.AsColor;
+                    if (propertyMap.TryGetValue((int) StylePropertyId.ScrollbarVerticalTrackBorderColor, out property)) return property.AsColor;
                     return DefaultStyleValues_Generated.ScrollbarVerticalTrackBorderColor;
                 }
             }
@@ -3080,7 +3080,7 @@ namespace UIForia.Rendering {
                 [System.Diagnostics.DebuggerStepThrough]
                 get { 
                     StyleProperty property;
-                    if (m_PropertyMap.TryGetValue((int) StylePropertyId.ScrollbarVerticalTrackImage, out property)) return property.AsTexture2D;
+                    if (propertyMap.TryGetValue((int) StylePropertyId.ScrollbarVerticalTrackImage, out property)) return property.AsTexture2D;
                     return DefaultStyleValues_Generated.ScrollbarVerticalTrackImage;
                 }
             }
@@ -3089,7 +3089,7 @@ namespace UIForia.Rendering {
                 [System.Diagnostics.DebuggerStepThrough]
                 get { 
                     StyleProperty property;
-                    if (m_PropertyMap.TryGetValue((int) StylePropertyId.ScrollbarVerticalTrackColor, out property)) return property.AsColor;
+                    if (propertyMap.TryGetValue((int) StylePropertyId.ScrollbarVerticalTrackColor, out property)) return property.AsColor;
                     return DefaultStyleValues_Generated.ScrollbarVerticalTrackColor;
                 }
             }
@@ -3098,7 +3098,7 @@ namespace UIForia.Rendering {
                 [System.Diagnostics.DebuggerStepThrough]
                 get { 
                     StyleProperty property;
-                    if (m_PropertyMap.TryGetValue((int) StylePropertyId.ScrollbarVerticalHandleSize, out property)) return property.AsFloat;
+                    if (propertyMap.TryGetValue((int) StylePropertyId.ScrollbarVerticalHandleSize, out property)) return property.AsFloat;
                     return DefaultStyleValues_Generated.ScrollbarVerticalHandleSize;
                 }
             }
@@ -3107,7 +3107,7 @@ namespace UIForia.Rendering {
                 [System.Diagnostics.DebuggerStepThrough]
                 get { 
                     StyleProperty property;
-                    if (m_PropertyMap.TryGetValue((int) StylePropertyId.ScrollbarVerticalHandleBorderRadius, out property)) return property.AsFloat;
+                    if (propertyMap.TryGetValue((int) StylePropertyId.ScrollbarVerticalHandleBorderRadius, out property)) return property.AsFloat;
                     return DefaultStyleValues_Generated.ScrollbarVerticalHandleBorderRadius;
                 }
             }
@@ -3116,7 +3116,7 @@ namespace UIForia.Rendering {
                 [System.Diagnostics.DebuggerStepThrough]
                 get { 
                     StyleProperty property;
-                    if (m_PropertyMap.TryGetValue((int) StylePropertyId.ScrollbarVerticalHandleBorderSize, out property)) return property.AsFloat;
+                    if (propertyMap.TryGetValue((int) StylePropertyId.ScrollbarVerticalHandleBorderSize, out property)) return property.AsFloat;
                     return DefaultStyleValues_Generated.ScrollbarVerticalHandleBorderSize;
                 }
             }
@@ -3125,7 +3125,7 @@ namespace UIForia.Rendering {
                 [System.Diagnostics.DebuggerStepThrough]
                 get { 
                     StyleProperty property;
-                    if (m_PropertyMap.TryGetValue((int) StylePropertyId.ScrollbarVerticalHandleBorderColor, out property)) return property.AsColor;
+                    if (propertyMap.TryGetValue((int) StylePropertyId.ScrollbarVerticalHandleBorderColor, out property)) return property.AsColor;
                     return DefaultStyleValues_Generated.ScrollbarVerticalHandleBorderColor;
                 }
             }
@@ -3134,7 +3134,7 @@ namespace UIForia.Rendering {
                 [System.Diagnostics.DebuggerStepThrough]
                 get { 
                     StyleProperty property;
-                    if (m_PropertyMap.TryGetValue((int) StylePropertyId.ScrollbarVerticalHandleImage, out property)) return property.AsTexture2D;
+                    if (propertyMap.TryGetValue((int) StylePropertyId.ScrollbarVerticalHandleImage, out property)) return property.AsTexture2D;
                     return DefaultStyleValues_Generated.ScrollbarVerticalHandleImage;
                 }
             }
@@ -3143,7 +3143,7 @@ namespace UIForia.Rendering {
                 [System.Diagnostics.DebuggerStepThrough]
                 get { 
                     StyleProperty property;
-                    if (m_PropertyMap.TryGetValue((int) StylePropertyId.ScrollbarVerticalHandleColor, out property)) return property.AsColor;
+                    if (propertyMap.TryGetValue((int) StylePropertyId.ScrollbarVerticalHandleColor, out property)) return property.AsColor;
                     return DefaultStyleValues_Generated.ScrollbarVerticalHandleColor;
                 }
             }
@@ -3152,7 +3152,7 @@ namespace UIForia.Rendering {
                 [System.Diagnostics.DebuggerStepThrough]
                 get { 
                     StyleProperty property;
-                    if (m_PropertyMap.TryGetValue((int) StylePropertyId.ScrollbarVerticalIncrementSize, out property)) return property.AsFloat;
+                    if (propertyMap.TryGetValue((int) StylePropertyId.ScrollbarVerticalIncrementSize, out property)) return property.AsFloat;
                     return DefaultStyleValues_Generated.ScrollbarVerticalIncrementSize;
                 }
             }
@@ -3161,7 +3161,7 @@ namespace UIForia.Rendering {
                 [System.Diagnostics.DebuggerStepThrough]
                 get { 
                     StyleProperty property;
-                    if (m_PropertyMap.TryGetValue((int) StylePropertyId.ScrollbarVerticalIncrementBorderRadius, out property)) return property.AsFloat;
+                    if (propertyMap.TryGetValue((int) StylePropertyId.ScrollbarVerticalIncrementBorderRadius, out property)) return property.AsFloat;
                     return DefaultStyleValues_Generated.ScrollbarVerticalIncrementBorderRadius;
                 }
             }
@@ -3170,7 +3170,7 @@ namespace UIForia.Rendering {
                 [System.Diagnostics.DebuggerStepThrough]
                 get { 
                     StyleProperty property;
-                    if (m_PropertyMap.TryGetValue((int) StylePropertyId.ScrollbarVerticalIncrementBorderSize, out property)) return property.AsFloat;
+                    if (propertyMap.TryGetValue((int) StylePropertyId.ScrollbarVerticalIncrementBorderSize, out property)) return property.AsFloat;
                     return DefaultStyleValues_Generated.ScrollbarVerticalIncrementBorderSize;
                 }
             }
@@ -3179,7 +3179,7 @@ namespace UIForia.Rendering {
                 [System.Diagnostics.DebuggerStepThrough]
                 get { 
                     StyleProperty property;
-                    if (m_PropertyMap.TryGetValue((int) StylePropertyId.ScrollbarVerticalIncrementBorderColor, out property)) return property.AsColor;
+                    if (propertyMap.TryGetValue((int) StylePropertyId.ScrollbarVerticalIncrementBorderColor, out property)) return property.AsColor;
                     return DefaultStyleValues_Generated.ScrollbarVerticalIncrementBorderColor;
                 }
             }
@@ -3188,7 +3188,7 @@ namespace UIForia.Rendering {
                 [System.Diagnostics.DebuggerStepThrough]
                 get { 
                     StyleProperty property;
-                    if (m_PropertyMap.TryGetValue((int) StylePropertyId.ScrollbarVerticalIncrementImage, out property)) return property.AsTexture2D;
+                    if (propertyMap.TryGetValue((int) StylePropertyId.ScrollbarVerticalIncrementImage, out property)) return property.AsTexture2D;
                     return DefaultStyleValues_Generated.ScrollbarVerticalIncrementImage;
                 }
             }
@@ -3197,7 +3197,7 @@ namespace UIForia.Rendering {
                 [System.Diagnostics.DebuggerStepThrough]
                 get { 
                     StyleProperty property;
-                    if (m_PropertyMap.TryGetValue((int) StylePropertyId.ScrollbarVerticalIncrementColor, out property)) return property.AsColor;
+                    if (propertyMap.TryGetValue((int) StylePropertyId.ScrollbarVerticalIncrementColor, out property)) return property.AsColor;
                     return DefaultStyleValues_Generated.ScrollbarVerticalIncrementColor;
                 }
             }
@@ -3206,7 +3206,7 @@ namespace UIForia.Rendering {
                 [System.Diagnostics.DebuggerStepThrough]
                 get { 
                     StyleProperty property;
-                    if (m_PropertyMap.TryGetValue((int) StylePropertyId.ScrollbarVerticalDecrementSize, out property)) return property.AsFloat;
+                    if (propertyMap.TryGetValue((int) StylePropertyId.ScrollbarVerticalDecrementSize, out property)) return property.AsFloat;
                     return DefaultStyleValues_Generated.ScrollbarVerticalDecrementSize;
                 }
             }
@@ -3215,7 +3215,7 @@ namespace UIForia.Rendering {
                 [System.Diagnostics.DebuggerStepThrough]
                 get { 
                     StyleProperty property;
-                    if (m_PropertyMap.TryGetValue((int) StylePropertyId.ScrollbarVerticalDecrementBorderRadius, out property)) return property.AsFloat;
+                    if (propertyMap.TryGetValue((int) StylePropertyId.ScrollbarVerticalDecrementBorderRadius, out property)) return property.AsFloat;
                     return DefaultStyleValues_Generated.ScrollbarVerticalDecrementBorderRadius;
                 }
             }
@@ -3224,7 +3224,7 @@ namespace UIForia.Rendering {
                 [System.Diagnostics.DebuggerStepThrough]
                 get { 
                     StyleProperty property;
-                    if (m_PropertyMap.TryGetValue((int) StylePropertyId.ScrollbarVerticalDecrementBorderSize, out property)) return property.AsFloat;
+                    if (propertyMap.TryGetValue((int) StylePropertyId.ScrollbarVerticalDecrementBorderSize, out property)) return property.AsFloat;
                     return DefaultStyleValues_Generated.ScrollbarVerticalDecrementBorderSize;
                 }
             }
@@ -3233,7 +3233,7 @@ namespace UIForia.Rendering {
                 [System.Diagnostics.DebuggerStepThrough]
                 get { 
                     StyleProperty property;
-                    if (m_PropertyMap.TryGetValue((int) StylePropertyId.ScrollbarVerticalDecrementBorderColor, out property)) return property.AsColor;
+                    if (propertyMap.TryGetValue((int) StylePropertyId.ScrollbarVerticalDecrementBorderColor, out property)) return property.AsColor;
                     return DefaultStyleValues_Generated.ScrollbarVerticalDecrementBorderColor;
                 }
             }
@@ -3242,7 +3242,7 @@ namespace UIForia.Rendering {
                 [System.Diagnostics.DebuggerStepThrough]
                 get { 
                     StyleProperty property;
-                    if (m_PropertyMap.TryGetValue((int) StylePropertyId.ScrollbarVerticalDecrementImage, out property)) return property.AsTexture2D;
+                    if (propertyMap.TryGetValue((int) StylePropertyId.ScrollbarVerticalDecrementImage, out property)) return property.AsTexture2D;
                     return DefaultStyleValues_Generated.ScrollbarVerticalDecrementImage;
                 }
             }
@@ -3251,7 +3251,7 @@ namespace UIForia.Rendering {
                 [System.Diagnostics.DebuggerStepThrough]
                 get { 
                     StyleProperty property;
-                    if (m_PropertyMap.TryGetValue((int) StylePropertyId.ScrollbarVerticalDecrementColor, out property)) return property.AsColor;
+                    if (propertyMap.TryGetValue((int) StylePropertyId.ScrollbarVerticalDecrementColor, out property)) return property.AsColor;
                     return DefaultStyleValues_Generated.ScrollbarVerticalDecrementColor;
                 }
             }
@@ -3260,7 +3260,7 @@ namespace UIForia.Rendering {
                 [System.Diagnostics.DebuggerStepThrough]
                 get { 
                     StyleProperty property;
-                    if (m_PropertyMap.TryGetValue((int) StylePropertyId.ScrollbarHorizontalAttachment, out property)) return property.AsHorizontalScrollbarAttachment;
+                    if (propertyMap.TryGetValue((int) StylePropertyId.ScrollbarHorizontalAttachment, out property)) return property.AsHorizontalScrollbarAttachment;
                     return DefaultStyleValues_Generated.ScrollbarHorizontalAttachment;
                 }
             }
@@ -3269,7 +3269,7 @@ namespace UIForia.Rendering {
                 [System.Diagnostics.DebuggerStepThrough]
                 get { 
                     StyleProperty property;
-                    if (m_PropertyMap.TryGetValue((int) StylePropertyId.ScrollbarHorizontalButtonPlacement, out property)) return property.AsScrollbarButtonPlacement;
+                    if (propertyMap.TryGetValue((int) StylePropertyId.ScrollbarHorizontalButtonPlacement, out property)) return property.AsScrollbarButtonPlacement;
                     return DefaultStyleValues_Generated.ScrollbarHorizontalButtonPlacement;
                 }
             }
@@ -3278,7 +3278,7 @@ namespace UIForia.Rendering {
                 [System.Diagnostics.DebuggerStepThrough]
                 get { 
                     StyleProperty property;
-                    if (m_PropertyMap.TryGetValue((int) StylePropertyId.ScrollbarHorizontalTrackSize, out property)) return property.AsFloat;
+                    if (propertyMap.TryGetValue((int) StylePropertyId.ScrollbarHorizontalTrackSize, out property)) return property.AsFloat;
                     return DefaultStyleValues_Generated.ScrollbarHorizontalTrackSize;
                 }
             }
@@ -3287,7 +3287,7 @@ namespace UIForia.Rendering {
                 [System.Diagnostics.DebuggerStepThrough]
                 get { 
                     StyleProperty property;
-                    if (m_PropertyMap.TryGetValue((int) StylePropertyId.ScrollbarHorizontalTrackBorderRadius, out property)) return property.AsFloat;
+                    if (propertyMap.TryGetValue((int) StylePropertyId.ScrollbarHorizontalTrackBorderRadius, out property)) return property.AsFloat;
                     return DefaultStyleValues_Generated.ScrollbarHorizontalTrackBorderRadius;
                 }
             }
@@ -3296,7 +3296,7 @@ namespace UIForia.Rendering {
                 [System.Diagnostics.DebuggerStepThrough]
                 get { 
                     StyleProperty property;
-                    if (m_PropertyMap.TryGetValue((int) StylePropertyId.ScrollbarHorizontalTrackBorderSize, out property)) return property.AsFloat;
+                    if (propertyMap.TryGetValue((int) StylePropertyId.ScrollbarHorizontalTrackBorderSize, out property)) return property.AsFloat;
                     return DefaultStyleValues_Generated.ScrollbarHorizontalTrackBorderSize;
                 }
             }
@@ -3305,7 +3305,7 @@ namespace UIForia.Rendering {
                 [System.Diagnostics.DebuggerStepThrough]
                 get { 
                     StyleProperty property;
-                    if (m_PropertyMap.TryGetValue((int) StylePropertyId.ScrollbarHorizontalTrackBorderColor, out property)) return property.AsColor;
+                    if (propertyMap.TryGetValue((int) StylePropertyId.ScrollbarHorizontalTrackBorderColor, out property)) return property.AsColor;
                     return DefaultStyleValues_Generated.ScrollbarHorizontalTrackBorderColor;
                 }
             }
@@ -3314,7 +3314,7 @@ namespace UIForia.Rendering {
                 [System.Diagnostics.DebuggerStepThrough]
                 get { 
                     StyleProperty property;
-                    if (m_PropertyMap.TryGetValue((int) StylePropertyId.ScrollbarHorizontalTrackImage, out property)) return property.AsTexture2D;
+                    if (propertyMap.TryGetValue((int) StylePropertyId.ScrollbarHorizontalTrackImage, out property)) return property.AsTexture2D;
                     return DefaultStyleValues_Generated.ScrollbarHorizontalTrackImage;
                 }
             }
@@ -3323,7 +3323,7 @@ namespace UIForia.Rendering {
                 [System.Diagnostics.DebuggerStepThrough]
                 get { 
                     StyleProperty property;
-                    if (m_PropertyMap.TryGetValue((int) StylePropertyId.ScrollbarHorizontalTrackColor, out property)) return property.AsColor;
+                    if (propertyMap.TryGetValue((int) StylePropertyId.ScrollbarHorizontalTrackColor, out property)) return property.AsColor;
                     return DefaultStyleValues_Generated.ScrollbarHorizontalTrackColor;
                 }
             }
@@ -3332,7 +3332,7 @@ namespace UIForia.Rendering {
                 [System.Diagnostics.DebuggerStepThrough]
                 get { 
                     StyleProperty property;
-                    if (m_PropertyMap.TryGetValue((int) StylePropertyId.ScrollbarHorizontalHandleSize, out property)) return property.AsFloat;
+                    if (propertyMap.TryGetValue((int) StylePropertyId.ScrollbarHorizontalHandleSize, out property)) return property.AsFloat;
                     return DefaultStyleValues_Generated.ScrollbarHorizontalHandleSize;
                 }
             }
@@ -3341,7 +3341,7 @@ namespace UIForia.Rendering {
                 [System.Diagnostics.DebuggerStepThrough]
                 get { 
                     StyleProperty property;
-                    if (m_PropertyMap.TryGetValue((int) StylePropertyId.ScrollbarHorizontalHandleBorderRadius, out property)) return property.AsFloat;
+                    if (propertyMap.TryGetValue((int) StylePropertyId.ScrollbarHorizontalHandleBorderRadius, out property)) return property.AsFloat;
                     return DefaultStyleValues_Generated.ScrollbarHorizontalHandleBorderRadius;
                 }
             }
@@ -3350,7 +3350,7 @@ namespace UIForia.Rendering {
                 [System.Diagnostics.DebuggerStepThrough]
                 get { 
                     StyleProperty property;
-                    if (m_PropertyMap.TryGetValue((int) StylePropertyId.ScrollbarHorizontalHandleBorderSize, out property)) return property.AsFloat;
+                    if (propertyMap.TryGetValue((int) StylePropertyId.ScrollbarHorizontalHandleBorderSize, out property)) return property.AsFloat;
                     return DefaultStyleValues_Generated.ScrollbarHorizontalHandleBorderSize;
                 }
             }
@@ -3359,7 +3359,7 @@ namespace UIForia.Rendering {
                 [System.Diagnostics.DebuggerStepThrough]
                 get { 
                     StyleProperty property;
-                    if (m_PropertyMap.TryGetValue((int) StylePropertyId.ScrollbarHorizontalHandleBorderColor, out property)) return property.AsColor;
+                    if (propertyMap.TryGetValue((int) StylePropertyId.ScrollbarHorizontalHandleBorderColor, out property)) return property.AsColor;
                     return DefaultStyleValues_Generated.ScrollbarHorizontalHandleBorderColor;
                 }
             }
@@ -3368,7 +3368,7 @@ namespace UIForia.Rendering {
                 [System.Diagnostics.DebuggerStepThrough]
                 get { 
                     StyleProperty property;
-                    if (m_PropertyMap.TryGetValue((int) StylePropertyId.ScrollbarHorizontalHandleImage, out property)) return property.AsTexture2D;
+                    if (propertyMap.TryGetValue((int) StylePropertyId.ScrollbarHorizontalHandleImage, out property)) return property.AsTexture2D;
                     return DefaultStyleValues_Generated.ScrollbarHorizontalHandleImage;
                 }
             }
@@ -3377,7 +3377,7 @@ namespace UIForia.Rendering {
                 [System.Diagnostics.DebuggerStepThrough]
                 get { 
                     StyleProperty property;
-                    if (m_PropertyMap.TryGetValue((int) StylePropertyId.ScrollbarHorizontalHandleColor, out property)) return property.AsColor;
+                    if (propertyMap.TryGetValue((int) StylePropertyId.ScrollbarHorizontalHandleColor, out property)) return property.AsColor;
                     return DefaultStyleValues_Generated.ScrollbarHorizontalHandleColor;
                 }
             }
@@ -3386,7 +3386,7 @@ namespace UIForia.Rendering {
                 [System.Diagnostics.DebuggerStepThrough]
                 get { 
                     StyleProperty property;
-                    if (m_PropertyMap.TryGetValue((int) StylePropertyId.ScrollbarHorizontalIncrementSize, out property)) return property.AsFloat;
+                    if (propertyMap.TryGetValue((int) StylePropertyId.ScrollbarHorizontalIncrementSize, out property)) return property.AsFloat;
                     return DefaultStyleValues_Generated.ScrollbarHorizontalIncrementSize;
                 }
             }
@@ -3395,7 +3395,7 @@ namespace UIForia.Rendering {
                 [System.Diagnostics.DebuggerStepThrough]
                 get { 
                     StyleProperty property;
-                    if (m_PropertyMap.TryGetValue((int) StylePropertyId.ScrollbarHorizontalIncrementBorderRadius, out property)) return property.AsFloat;
+                    if (propertyMap.TryGetValue((int) StylePropertyId.ScrollbarHorizontalIncrementBorderRadius, out property)) return property.AsFloat;
                     return DefaultStyleValues_Generated.ScrollbarHorizontalIncrementBorderRadius;
                 }
             }
@@ -3404,7 +3404,7 @@ namespace UIForia.Rendering {
                 [System.Diagnostics.DebuggerStepThrough]
                 get { 
                     StyleProperty property;
-                    if (m_PropertyMap.TryGetValue((int) StylePropertyId.ScrollbarHorizontalIncrementBorderSize, out property)) return property.AsFloat;
+                    if (propertyMap.TryGetValue((int) StylePropertyId.ScrollbarHorizontalIncrementBorderSize, out property)) return property.AsFloat;
                     return DefaultStyleValues_Generated.ScrollbarHorizontalIncrementBorderSize;
                 }
             }
@@ -3413,7 +3413,7 @@ namespace UIForia.Rendering {
                 [System.Diagnostics.DebuggerStepThrough]
                 get { 
                     StyleProperty property;
-                    if (m_PropertyMap.TryGetValue((int) StylePropertyId.ScrollbarHorizontalIncrementBorderColor, out property)) return property.AsColor;
+                    if (propertyMap.TryGetValue((int) StylePropertyId.ScrollbarHorizontalIncrementBorderColor, out property)) return property.AsColor;
                     return DefaultStyleValues_Generated.ScrollbarHorizontalIncrementBorderColor;
                 }
             }
@@ -3422,7 +3422,7 @@ namespace UIForia.Rendering {
                 [System.Diagnostics.DebuggerStepThrough]
                 get { 
                     StyleProperty property;
-                    if (m_PropertyMap.TryGetValue((int) StylePropertyId.ScrollbarHorizontalIncrementImage, out property)) return property.AsTexture2D;
+                    if (propertyMap.TryGetValue((int) StylePropertyId.ScrollbarHorizontalIncrementImage, out property)) return property.AsTexture2D;
                     return DefaultStyleValues_Generated.ScrollbarHorizontalIncrementImage;
                 }
             }
@@ -3431,7 +3431,7 @@ namespace UIForia.Rendering {
                 [System.Diagnostics.DebuggerStepThrough]
                 get { 
                     StyleProperty property;
-                    if (m_PropertyMap.TryGetValue((int) StylePropertyId.ScrollbarHorizontalIncrementColor, out property)) return property.AsColor;
+                    if (propertyMap.TryGetValue((int) StylePropertyId.ScrollbarHorizontalIncrementColor, out property)) return property.AsColor;
                     return DefaultStyleValues_Generated.ScrollbarHorizontalIncrementColor;
                 }
             }
@@ -3440,7 +3440,7 @@ namespace UIForia.Rendering {
                 [System.Diagnostics.DebuggerStepThrough]
                 get { 
                     StyleProperty property;
-                    if (m_PropertyMap.TryGetValue((int) StylePropertyId.ScrollbarHorizontalDecrementSize, out property)) return property.AsFloat;
+                    if (propertyMap.TryGetValue((int) StylePropertyId.ScrollbarHorizontalDecrementSize, out property)) return property.AsFloat;
                     return DefaultStyleValues_Generated.ScrollbarHorizontalDecrementSize;
                 }
             }
@@ -3449,7 +3449,7 @@ namespace UIForia.Rendering {
                 [System.Diagnostics.DebuggerStepThrough]
                 get { 
                     StyleProperty property;
-                    if (m_PropertyMap.TryGetValue((int) StylePropertyId.ScrollbarHorizontalDecrementBorderRadius, out property)) return property.AsFloat;
+                    if (propertyMap.TryGetValue((int) StylePropertyId.ScrollbarHorizontalDecrementBorderRadius, out property)) return property.AsFloat;
                     return DefaultStyleValues_Generated.ScrollbarHorizontalDecrementBorderRadius;
                 }
             }
@@ -3458,7 +3458,7 @@ namespace UIForia.Rendering {
                 [System.Diagnostics.DebuggerStepThrough]
                 get { 
                     StyleProperty property;
-                    if (m_PropertyMap.TryGetValue((int) StylePropertyId.ScrollbarHorizontalDecrementBorderSize, out property)) return property.AsFloat;
+                    if (propertyMap.TryGetValue((int) StylePropertyId.ScrollbarHorizontalDecrementBorderSize, out property)) return property.AsFloat;
                     return DefaultStyleValues_Generated.ScrollbarHorizontalDecrementBorderSize;
                 }
             }
@@ -3467,7 +3467,7 @@ namespace UIForia.Rendering {
                 [System.Diagnostics.DebuggerStepThrough]
                 get { 
                     StyleProperty property;
-                    if (m_PropertyMap.TryGetValue((int) StylePropertyId.ScrollbarHorizontalDecrementBorderColor, out property)) return property.AsColor;
+                    if (propertyMap.TryGetValue((int) StylePropertyId.ScrollbarHorizontalDecrementBorderColor, out property)) return property.AsColor;
                     return DefaultStyleValues_Generated.ScrollbarHorizontalDecrementBorderColor;
                 }
             }
@@ -3476,7 +3476,7 @@ namespace UIForia.Rendering {
                 [System.Diagnostics.DebuggerStepThrough]
                 get { 
                     StyleProperty property;
-                    if (m_PropertyMap.TryGetValue((int) StylePropertyId.ScrollbarHorizontalDecrementImage, out property)) return property.AsTexture2D;
+                    if (propertyMap.TryGetValue((int) StylePropertyId.ScrollbarHorizontalDecrementImage, out property)) return property.AsTexture2D;
                     return DefaultStyleValues_Generated.ScrollbarHorizontalDecrementImage;
                 }
             }
@@ -3485,7 +3485,7 @@ namespace UIForia.Rendering {
                 [System.Diagnostics.DebuggerStepThrough]
                 get { 
                     StyleProperty property;
-                    if (m_PropertyMap.TryGetValue((int) StylePropertyId.ScrollbarHorizontalDecrementColor, out property)) return property.AsColor;
+                    if (propertyMap.TryGetValue((int) StylePropertyId.ScrollbarHorizontalDecrementColor, out property)) return property.AsColor;
                     return DefaultStyleValues_Generated.ScrollbarHorizontalDecrementColor;
                 }
             }

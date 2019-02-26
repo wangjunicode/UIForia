@@ -17,7 +17,7 @@ namespace UIForia.StyleBindings {
         public override void Execute(UIElement element, ExpressionContext context) {
             if (!element.style.IsInState(state)) return;
 
-            var oldValue = element.style.m_PropertyMap[(int)propertyId].AsOverflow;
+            var oldValue = element.style.propertyMap[(int)propertyId].AsOverflow;
             var value = expression.Evaluate(context);
             if (value != oldValue) {
                 element.style.SetProperty(new StyleProperty(propertyId, (int)value), state);
@@ -54,7 +54,7 @@ namespace UIForia.StyleBindings {
         public override void Execute(UIElement element, ExpressionContext context) {
             if (!element.style.IsInState(state)) return;
 
-            var oldValue = element.style.m_PropertyMap[(int)propertyId].AsColor;
+            var oldValue = element.style.propertyMap[(int)propertyId].AsColor;
             var value = expression.Evaluate(context);
             if (value != oldValue) {
                 element.style.SetProperty(new StyleProperty(propertyId, value), state);
@@ -91,7 +91,7 @@ namespace UIForia.StyleBindings {
         public override void Execute(UIElement element, ExpressionContext context) {
             if (!element.style.IsInState(state)) return;
 
-            var oldValue = element.style.m_PropertyMap[(int)propertyId].AsTexture2D;
+            var oldValue = element.style.propertyMap[(int)propertyId].AsTexture2D;
             var value = expression.Evaluate(context);
             if (value != oldValue) {
                 element.style.SetProperty(new StyleProperty(propertyId, 0, 0, value), state);
@@ -128,7 +128,7 @@ namespace UIForia.StyleBindings {
         public override void Execute(UIElement element, ExpressionContext context) {
             if (!element.style.IsInState(state)) return;
 
-            var oldValue = element.style.m_PropertyMap[(int)propertyId].AsGradientType;
+            var oldValue = element.style.propertyMap[(int)propertyId].AsGradientType;
             var value = expression.Evaluate(context);
             if (value != oldValue) {
                 element.style.SetProperty(new StyleProperty(propertyId, (int)value), state);
@@ -165,7 +165,7 @@ namespace UIForia.StyleBindings {
         public override void Execute(UIElement element, ExpressionContext context) {
             if (!element.style.IsInState(state)) return;
 
-            var oldValue = element.style.m_PropertyMap[(int)propertyId].AsGradientAxis;
+            var oldValue = element.style.propertyMap[(int)propertyId].AsGradientAxis;
             var value = expression.Evaluate(context);
             if (value != oldValue) {
                 element.style.SetProperty(new StyleProperty(propertyId, (int)value), state);
@@ -202,7 +202,7 @@ namespace UIForia.StyleBindings {
         public override void Execute(UIElement element, ExpressionContext context) {
             if (!element.style.IsInState(state)) return;
 
-            var oldValue = element.style.m_PropertyMap[(int)propertyId].AsFloat;
+            var oldValue = element.style.propertyMap[(int)propertyId].AsFloat;
             var value = expression.Evaluate(context);
             if (value != oldValue) {
                 element.style.SetProperty(new StyleProperty(propertyId, value), state);
@@ -239,7 +239,7 @@ namespace UIForia.StyleBindings {
         public override void Execute(UIElement element, ExpressionContext context) {
             if (!element.style.IsInState(state)) return;
 
-            var oldValue = element.style.m_PropertyMap[(int)propertyId].AsBackgroundFillType;
+            var oldValue = element.style.propertyMap[(int)propertyId].AsBackgroundFillType;
             var value = expression.Evaluate(context);
             if (value != oldValue) {
                 element.style.SetProperty(new StyleProperty(propertyId, (int)value), state);
@@ -276,7 +276,7 @@ namespace UIForia.StyleBindings {
         public override void Execute(UIElement element, ExpressionContext context) {
             if (!element.style.IsInState(state)) return;
 
-            var oldValue = element.style.m_PropertyMap[(int)propertyId].AsBackgroundShapeType;
+            var oldValue = element.style.propertyMap[(int)propertyId].AsBackgroundShapeType;
             var value = expression.Evaluate(context);
             if (value != oldValue) {
                 element.style.SetProperty(new StyleProperty(propertyId, (int)value), state);
@@ -313,7 +313,7 @@ namespace UIForia.StyleBindings {
         public override void Execute(UIElement element, ExpressionContext context) {
             if (!element.style.IsInState(state)) return;
 
-            var oldValue = element.style.m_PropertyMap[(int)propertyId].AsCursorStyle;
+            var oldValue = element.style.propertyMap[(int)propertyId].AsCursorStyle;
             var value = expression.Evaluate(context);
             if (value != oldValue) {
                 element.style.SetProperty(new StyleProperty(propertyId, 0, 0, value), state);
@@ -350,7 +350,7 @@ namespace UIForia.StyleBindings {
         public override void Execute(UIElement element, ExpressionContext context) {
             if (!element.style.IsInState(state)) return;
 
-            var oldValue = element.style.m_PropertyMap[(int)propertyId].AsVisibility;
+            var oldValue = element.style.propertyMap[(int)propertyId].AsVisibility;
             var value = expression.Evaluate(context);
             if (value != oldValue) {
                 element.style.SetProperty(new StyleProperty(propertyId, (int)value), state);
@@ -387,7 +387,7 @@ namespace UIForia.StyleBindings {
         public override void Execute(UIElement element, ExpressionContext context) {
             if (!element.style.IsInState(state)) return;
 
-            var oldValue = element.style.m_PropertyMap[(int)propertyId].AsInt;
+            var oldValue = element.style.propertyMap[(int)propertyId].AsInt;
             var value = expression.Evaluate(context);
             if (value != oldValue) {
                 element.style.SetProperty(new StyleProperty(propertyId, value), state);
@@ -424,7 +424,7 @@ namespace UIForia.StyleBindings {
         public override void Execute(UIElement element, ExpressionContext context) {
             if (!element.style.IsInState(state)) return;
 
-            var oldValue = element.style.m_PropertyMap[(int)propertyId].AsCrossAxisAlignment;
+            var oldValue = element.style.propertyMap[(int)propertyId].AsCrossAxisAlignment;
             var value = expression.Evaluate(context);
             if (value != oldValue) {
                 element.style.SetProperty(new StyleProperty(propertyId, (int)value), state);
@@ -461,7 +461,7 @@ namespace UIForia.StyleBindings {
         public override void Execute(UIElement element, ExpressionContext context) {
             if (!element.style.IsInState(state)) return;
 
-            var oldValue = element.style.m_PropertyMap[(int)propertyId].AsLayoutDirection;
+            var oldValue = element.style.propertyMap[(int)propertyId].AsLayoutDirection;
             var value = expression.Evaluate(context);
             if (value != oldValue) {
                 element.style.SetProperty(new StyleProperty(propertyId, (int)value), state);
@@ -498,7 +498,7 @@ namespace UIForia.StyleBindings {
         public override void Execute(UIElement element, ExpressionContext context) {
             if (!element.style.IsInState(state)) return;
 
-            var oldValue = element.style.m_PropertyMap[(int)propertyId].AsLayoutWrap;
+            var oldValue = element.style.propertyMap[(int)propertyId].AsLayoutWrap;
             var value = expression.Evaluate(context);
             if (value != oldValue) {
                 element.style.SetProperty(new StyleProperty(propertyId, (int)value), state);
@@ -535,7 +535,7 @@ namespace UIForia.StyleBindings {
         public override void Execute(UIElement element, ExpressionContext context) {
             if (!element.style.IsInState(state)) return;
 
-            var oldValue = element.style.m_PropertyMap[(int)propertyId].AsMainAxisAlignment;
+            var oldValue = element.style.propertyMap[(int)propertyId].AsMainAxisAlignment;
             var value = expression.Evaluate(context);
             if (value != oldValue) {
                 element.style.SetProperty(new StyleProperty(propertyId, (int)value), state);
@@ -572,7 +572,7 @@ namespace UIForia.StyleBindings {
         public override void Execute(UIElement element, ExpressionContext context) {
             if (!element.style.IsInState(state)) return;
 
-            var oldValue = element.style.m_PropertyMap[(int)propertyId].AsGridAxisAlignment;
+            var oldValue = element.style.propertyMap[(int)propertyId].AsGridAxisAlignment;
             var value = expression.Evaluate(context);
             if (value != oldValue) {
                 element.style.SetProperty(new StyleProperty(propertyId, (int)value), state);
@@ -609,7 +609,7 @@ namespace UIForia.StyleBindings {
         public override void Execute(UIElement element, ExpressionContext context) {
             if (!element.style.IsInState(state)) return;
 
-            var oldValue = element.style.m_PropertyMap[(int)propertyId].AsGridLayoutDensity;
+            var oldValue = element.style.propertyMap[(int)propertyId].AsGridLayoutDensity;
             var value = expression.Evaluate(context);
             if (value != oldValue) {
                 element.style.SetProperty(new StyleProperty(propertyId, (int)value), state);
@@ -646,7 +646,7 @@ namespace UIForia.StyleBindings {
         public override void Execute(UIElement element, ExpressionContext context) {
             if (!element.style.IsInState(state)) return;
 
-            var oldValue = element.style.m_PropertyMap[(int)propertyId].AsGridTemplate;
+            var oldValue = element.style.propertyMap[(int)propertyId].AsGridTemplate;
             var value = expression.Evaluate(context);
             if (value != oldValue) {
                 element.style.SetProperty(new StyleProperty(propertyId, 0, 0, value), state);
@@ -683,7 +683,7 @@ namespace UIForia.StyleBindings {
         public override void Execute(UIElement element, ExpressionContext context) {
             if (!element.style.IsInState(state)) return;
 
-            var oldValue = element.style.m_PropertyMap[(int)propertyId].AsGridTrackSize;
+            var oldValue = element.style.propertyMap[(int)propertyId].AsGridTrackSize;
             var value = expression.Evaluate(context);
             if (value != oldValue) {
                 element.style.SetProperty(new StyleProperty(propertyId, value), state);
@@ -720,7 +720,7 @@ namespace UIForia.StyleBindings {
         public override void Execute(UIElement element, ExpressionContext context) {
             if (!element.style.IsInState(state)) return;
 
-            var oldValue = element.style.m_PropertyMap[(int)propertyId].AsUIMeasurement;
+            var oldValue = element.style.propertyMap[(int)propertyId].AsUIMeasurement;
             var value = expression.Evaluate(context);
             if (value != oldValue) {
                 element.style.SetProperty(new StyleProperty(propertyId, value), state);
@@ -757,7 +757,7 @@ namespace UIForia.StyleBindings {
         public override void Execute(UIElement element, ExpressionContext context) {
             if (!element.style.IsInState(state)) return;
 
-            var oldValue = element.style.m_PropertyMap[(int)propertyId].AsUIFixedLength;
+            var oldValue = element.style.propertyMap[(int)propertyId].AsUIFixedLength;
             var value = expression.Evaluate(context);
             if (value != oldValue) {
                 element.style.SetProperty(new StyleProperty(propertyId, value), state);
@@ -794,7 +794,7 @@ namespace UIForia.StyleBindings {
         public override void Execute(UIElement element, ExpressionContext context) {
             if (!element.style.IsInState(state)) return;
 
-            var oldValue = element.style.m_PropertyMap[(int)propertyId].AsFont;
+            var oldValue = element.style.propertyMap[(int)propertyId].AsFont;
             var value = expression.Evaluate(context);
             if (value != oldValue) {
                 element.style.SetProperty(new StyleProperty(propertyId, 0, 0, value), state);
@@ -831,7 +831,7 @@ namespace UIForia.StyleBindings {
         public override void Execute(UIElement element, ExpressionContext context) {
             if (!element.style.IsInState(state)) return;
 
-            var oldValue = element.style.m_PropertyMap[(int)propertyId].AsFontStyle;
+            var oldValue = element.style.propertyMap[(int)propertyId].AsFontStyle;
             var value = expression.Evaluate(context);
             if (value != oldValue) {
                 element.style.SetProperty(new StyleProperty(propertyId, (int)value), state);
@@ -868,7 +868,7 @@ namespace UIForia.StyleBindings {
         public override void Execute(UIElement element, ExpressionContext context) {
             if (!element.style.IsInState(state)) return;
 
-            var oldValue = element.style.m_PropertyMap[(int)propertyId].AsTextAlignment;
+            var oldValue = element.style.propertyMap[(int)propertyId].AsTextAlignment;
             var value = expression.Evaluate(context);
             if (value != oldValue) {
                 element.style.SetProperty(new StyleProperty(propertyId, (int)value), state);
@@ -905,7 +905,7 @@ namespace UIForia.StyleBindings {
         public override void Execute(UIElement element, ExpressionContext context) {
             if (!element.style.IsInState(state)) return;
 
-            var oldValue = element.style.m_PropertyMap[(int)propertyId].AsTextTransform;
+            var oldValue = element.style.propertyMap[(int)propertyId].AsTextTransform;
             var value = expression.Evaluate(context);
             if (value != oldValue) {
                 element.style.SetProperty(new StyleProperty(propertyId, (int)value), state);
@@ -942,7 +942,7 @@ namespace UIForia.StyleBindings {
         public override void Execute(UIElement element, ExpressionContext context) {
             if (!element.style.IsInState(state)) return;
 
-            var oldValue = element.style.m_PropertyMap[(int)propertyId].AsAnchorTarget;
+            var oldValue = element.style.propertyMap[(int)propertyId].AsAnchorTarget;
             var value = expression.Evaluate(context);
             if (value != oldValue) {
                 element.style.SetProperty(new StyleProperty(propertyId, (int)value), state);
@@ -979,7 +979,7 @@ namespace UIForia.StyleBindings {
         public override void Execute(UIElement element, ExpressionContext context) {
             if (!element.style.IsInState(state)) return;
 
-            var oldValue = element.style.m_PropertyMap[(int)propertyId].AsTransformOffset;
+            var oldValue = element.style.propertyMap[(int)propertyId].AsTransformOffset;
             var value = expression.Evaluate(context);
             if (value != oldValue) {
                 element.style.SetProperty(new StyleProperty(propertyId, value), state);
@@ -1016,7 +1016,7 @@ namespace UIForia.StyleBindings {
         public override void Execute(UIElement element, ExpressionContext context) {
             if (!element.style.IsInState(state)) return;
 
-            var oldValue = element.style.m_PropertyMap[(int)propertyId].AsTransformBehavior;
+            var oldValue = element.style.propertyMap[(int)propertyId].AsTransformBehavior;
             var value = expression.Evaluate(context);
             if (value != oldValue) {
                 element.style.SetProperty(new StyleProperty(propertyId, (int)value), state);
@@ -1053,7 +1053,7 @@ namespace UIForia.StyleBindings {
         public override void Execute(UIElement element, ExpressionContext context) {
             if (!element.style.IsInState(state)) return;
 
-            var oldValue = element.style.m_PropertyMap[(int)propertyId].AsLayoutType;
+            var oldValue = element.style.propertyMap[(int)propertyId].AsLayoutType;
             var value = expression.Evaluate(context);
             if (value != oldValue) {
                 element.style.SetProperty(new StyleProperty(propertyId, (int)value), state);
@@ -1090,7 +1090,7 @@ namespace UIForia.StyleBindings {
         public override void Execute(UIElement element, ExpressionContext context) {
             if (!element.style.IsInState(state)) return;
 
-            var oldValue = element.style.m_PropertyMap[(int)propertyId].AsLayoutBehavior;
+            var oldValue = element.style.propertyMap[(int)propertyId].AsLayoutBehavior;
             var value = expression.Evaluate(context);
             if (value != oldValue) {
                 element.style.SetProperty(new StyleProperty(propertyId, (int)value), state);
@@ -1127,7 +1127,7 @@ namespace UIForia.StyleBindings {
         public override void Execute(UIElement element, ExpressionContext context) {
             if (!element.style.IsInState(state)) return;
 
-            var oldValue = element.style.m_PropertyMap[(int)propertyId].AsRenderLayer;
+            var oldValue = element.style.propertyMap[(int)propertyId].AsRenderLayer;
             var value = expression.Evaluate(context);
             if (value != oldValue) {
                 element.style.SetProperty(new StyleProperty(propertyId, (int)value), state);
@@ -1164,7 +1164,7 @@ namespace UIForia.StyleBindings {
         public override void Execute(UIElement element, ExpressionContext context) {
             if (!element.style.IsInState(state)) return;
 
-            var oldValue = element.style.m_PropertyMap[(int)propertyId].AsVerticalScrollbarAttachment;
+            var oldValue = element.style.propertyMap[(int)propertyId].AsVerticalScrollbarAttachment;
             var value = expression.Evaluate(context);
             if (value != oldValue) {
                 element.style.SetProperty(new StyleProperty(propertyId, (int)value), state);
@@ -1201,7 +1201,7 @@ namespace UIForia.StyleBindings {
         public override void Execute(UIElement element, ExpressionContext context) {
             if (!element.style.IsInState(state)) return;
 
-            var oldValue = element.style.m_PropertyMap[(int)propertyId].AsScrollbarButtonPlacement;
+            var oldValue = element.style.propertyMap[(int)propertyId].AsScrollbarButtonPlacement;
             var value = expression.Evaluate(context);
             if (value != oldValue) {
                 element.style.SetProperty(new StyleProperty(propertyId, (int)value), state);
@@ -1238,7 +1238,7 @@ namespace UIForia.StyleBindings {
         public override void Execute(UIElement element, ExpressionContext context) {
             if (!element.style.IsInState(state)) return;
 
-            var oldValue = element.style.m_PropertyMap[(int)propertyId].AsHorizontalScrollbarAttachment;
+            var oldValue = element.style.propertyMap[(int)propertyId].AsHorizontalScrollbarAttachment;
             var value = expression.Evaluate(context);
             if (value != oldValue) {
                 element.style.SetProperty(new StyleProperty(propertyId, (int)value), state);

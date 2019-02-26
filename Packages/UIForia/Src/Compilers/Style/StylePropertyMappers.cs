@@ -39,10 +39,10 @@ namespace UIForia.Compilers.Style {
                 {"bordercolor", (targetStyle, property, context) => targetStyle.BorderColor = MapColor(property, context)},
 
                 {"border", (targetStyle, property, context) => MapBorders(targetStyle, property, context)},
-                {"bordertop", (targetStyle, property, context) => targetStyle.BorderTop = MapFixedLength(property, context)},
-                {"borderright", (targetStyle, property, context) => targetStyle.BorderRight = MapFixedLength(property, context)},
-                {"borderbottom", (targetStyle, property, context) => targetStyle.BorderBottom = MapFixedLength(property, context)},
-                {"borderleft", (targetStyle, property, context) => targetStyle.BorderLeft = MapFixedLength(property, context)},
+                {"bordertop", (targetStyle, property, context) => targetStyle.BorderTop = MapFixedLength(property.children[0], context)},
+                {"borderright", (targetStyle, property, context) => targetStyle.BorderRight = MapFixedLength(property.children[0], context)},
+                {"borderbottom", (targetStyle, property, context) => targetStyle.BorderBottom = MapFixedLength(property.children[0], context)},
+                {"borderleft", (targetStyle, property, context) => targetStyle.BorderLeft = MapFixedLength(property.children[0], context)},
 
                 {"borderradius", (targetStyle, property, context) => MapBorderRadius(targetStyle, property, context)},
                 {"borderradiustopleft", (targetStyle, property, context) => targetStyle.BorderRadiusTopLeft = MapFixedLength(property.children[0], context)},

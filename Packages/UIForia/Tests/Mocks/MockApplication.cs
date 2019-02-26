@@ -53,7 +53,7 @@ namespace Tests.Mocks {
 
         public void OnElementCreated(UIElement element) { }
 
-        public void OnAttributeSet(UIElement element, string attributeName, string attributeValue) {}
+        public void OnAttributeSet(UIElement element, string attributeName, string currentvalue, string attributeValue) {}
         
         public event Action<LightList<RenderData>, LightList<RenderData>, Vector3, Camera> DrawDebugOverlay;
 

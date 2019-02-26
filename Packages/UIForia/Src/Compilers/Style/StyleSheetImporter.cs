@@ -30,8 +30,8 @@ namespace UIForia.Compilers.Style {
                 return styleSheet;
             }
             catch (ParseException ex) {
-                Debug.Log("Error compiling file: " + id);
-                throw ex;
+                ex.SetFileName(id); 
+                throw;
             }
         }
 

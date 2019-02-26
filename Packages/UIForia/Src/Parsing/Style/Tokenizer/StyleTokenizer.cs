@@ -1,4 +1,6 @@
+using System;
 using System.Collections.Generic;
+using UnityEngine;
 
 namespace UIForia.Parsing.Style.Tokenizer {
 
@@ -39,6 +41,7 @@ namespace UIForia.Parsing.Style.Tokenizer {
                 char current = context.input[context.ptr];
                 if (current == '\n') {
                     TryConsumeWhiteSpace(context);
+                    TryConsumeComment(context);
                     return;
                 }
 
@@ -261,10 +264,12 @@ namespace UIForia.Parsing.Style.Tokenizer {
                 TryReadCharacters(context, "\n", StyleTokenType.EndStatement, output);
 
                 if (context.ptr == start && context.ptr < input.Length) {
-                    throw new ParseException($"Tokenizer failed on string: {input}." +
-                                             $" in line {context.line}, column {context.column}" +
-                                             $" Processed {input.Substring(0, context.ptr)} as ({PrintTokenList(output)})" +
-                                             $" but then got stuck on {input.Substring(context.ptr)}");
+                    int nextNewLine = input.IndexOf("\n", context.ptr + 1, input.Length - context.ptr - 1, StringComparison.Ordinal);
+                    nextNewLine = Mathf.Clamp(nextNewLine, context.ptr + 1, input.Length - 1);
+                    string errorLine = input.Substring(context.ptr, nextNewLine - context.ptr);
+                    throw new ParseException($"Tokenizer failed at line {context.line}, column {context.column}.\n" +
+                                             $" Processed {input.Substring(0, context.ptr)}\n" +
+                                             $" ...but then got stuck on {errorLine}.\n");
                 }
             }
 

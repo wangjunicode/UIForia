@@ -477,9 +477,9 @@ namespace UIForia {
             return m_ElementTree.GetItem(elementId);
         }
 
-        public void OnAttributeSet(UIElement element, string attributeName, string previousValue) {
+        public void OnAttributeSet(UIElement element, string attributeName, string currentValue, string previousValue) {
             for (int i = 0; i < m_Systems.Count; i++) {
-                m_Systems[i].OnAttributeSet(element, attributeName, previousValue);
+                m_Systems[i].OnAttributeSet(element, attributeName, currentValue, previousValue);
             }
         }
     }

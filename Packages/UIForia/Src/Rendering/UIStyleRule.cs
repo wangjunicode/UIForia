@@ -57,15 +57,6 @@ namespace UIForia.Rendering {
 
             return invert ^ element.GetAttribute(attributeName) == attributeValue;
         }
-
-        public bool WillBeApplicableTo(UIElement element) {
-            if (next != null) {
-                return IsApplicableToNext(element, next.IsApplicableTo(element));
-            }
-
-            return IsApplicableToNext(element, true);
-        }
-
     }
 
 }

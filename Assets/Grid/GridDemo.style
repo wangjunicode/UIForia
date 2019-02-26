@@ -28,7 +28,7 @@ style grid-cell {
 
 style background {
     BackgroundColor = white;
-    BackgroundImage = Images/backgroundimg;
+    BackgroundImage = url("Images/backgroundimg");
     GridItemColSpan = 6;
     PreferredSize = 1040px, 520px;
     ZIndex = 0;
@@ -44,13 +44,13 @@ style thead {
 style concept-hover {
     LayoutBehavior = Ignored;
     LayoutType = Flex;
-    BackgroundColor = rgb(16, 8, 6);
+    BackgroundColor = rgba(166, 8, 6, 255);
     PreferredWidth = 150px;
     PreferredHeight = 80px;
     Padding = 10px;
     // TODO make px units work for this property
     TextFontSize = 18;
-    TextColor = white;
+    TextColor = rgb(255, 255, 255);
     Overflow = hidden;
 }
 
@@ -61,18 +61,18 @@ style logo {
     GridItemColSpan = 6;
     GridItemColSelfAlignment = Shrink;
     BackgroundColor = white;
-    BackgroundImage = Images\klang_logo_fill_black;
+    BackgroundImage = url("Images/klang_logo_fill_black");
 }
 
 style seedlogo {
-    PreferredSize = 232px, 70px;
+    PreferredSize = 232px 70px;
     GridItemColSpan = 2;
     GridItemColSelfAlignment = Shrink;
-    Margin = 0px, 30px, 0px, 30px;
+    Margin = 0 30px;
     TransformPositionY = 80px;
     TransformBehaviorY = LayoutOffset;
     BackgroundColor = white;
-    BackgroundImage = Images\seedlogo;
+    BackgroundImage = url("Images/seedlogo");
     GridItemColSelfAlignment = Center;    
     Border = 0;
     ZIndex = 1;

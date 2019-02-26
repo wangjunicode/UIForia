@@ -132,16 +132,16 @@ namespace UIForia.Rendering {
         }
 
         private void AddStyleGroups(LightList<StylePropertyId> toUpdate, UIStyleGroupContainer container) {
-            styleGroupContainers.AddUnchecked(container);
+            styleGroupContainers.Add(container);
+
+            if (container.hasAttributeStyles) {
+                hasAttributeStyles = true;
+            }
 
             for (int j = 0; j < container.groups.Count; j++) {
                 UIStyleGroup group = container.groups[j];
 
-                if (group.HasAttributeRule) {
-                    hasAttributeStyles = true;
-                }
-
-                if (group.rule == null || group.rule != null & group.rule.IsApplicableTo(element)) {
+                if (group.rule == null || group.rule != null && group.rule.IsApplicableTo(element)) {
                     int ruleCount = group.CountRules();
                     CreateStyleEntry(toUpdate, group, group.normal, container.styleType, StyleState.Normal, ruleCount);
                     CreateStyleEntry(toUpdate, group, group.hover, container.styleType, StyleState.Hover, ruleCount);
@@ -533,7 +533,7 @@ namespace UIForia.Rendering {
                                 throw new ArgumentOutOfRangeException();
                         }
                     }
-                    else if (availableStyles[i].type == StyleType.Shared) {
+                    if (availableStyles[i].type == StyleType.Shared) {
                         UIStyleGroupContainer container = FindContainerForGroup(availableStyles[i].sourceGroup);
                         string containerName = container?.name ?? "Unknown";
                         switch (availableStyles[i].state) {
@@ -549,21 +549,20 @@ namespace UIForia.Rendering {
                                 throw new ArgumentOutOfRangeException();
                         }
                     }
-                    else {
-                        switch (availableStyles[i].state) {
-                            case StyleState.Normal:
-                                return $"<{element.GetDisplayName()}> [Normal]";
-                            case StyleState.Active:
-                                return $"<{element.GetDisplayName()}> [Active]";
-                            case StyleState.Hover:
-                                return $"<{element.GetDisplayName()}> [Hover]";
-                            case StyleState.Focused:
-                                return $"<{element.GetDisplayName()}> [Focused]";
-                            default:
-                                throw new ArgumentOutOfRangeException();
-                        }
+
+                    switch (availableStyles[i].state) {
+                        case StyleState.Normal:
+                            return $"<{element.GetDisplayName()}> [Normal]";
+                        case StyleState.Active:
+                            return $"<{element.GetDisplayName()}> [Active]";
+                        case StyleState.Hover:
+                            return $"<{element.GetDisplayName()}> [Hover]";
+                        case StyleState.Focused:
+                            return $"<{element.GetDisplayName()}> [Focused]";
+                        default:
+                            throw new ArgumentOutOfRangeException();
                     }
-                   
+
                 }
             }
 

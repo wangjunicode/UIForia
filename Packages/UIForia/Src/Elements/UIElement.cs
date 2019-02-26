@@ -276,7 +276,7 @@ namespace UIForia {
             ElementColdData coldData = s_ColdDataMap.GetOrDefault(id);
             string oldValue = coldData.GetAttribute(name).value;
             coldData.SetAttribute(name, value);
-            Application.OnAttributeSet(this, name, oldValue);
+            Application.OnAttributeSet(this, name, value, oldValue);
             s_ColdDataMap[id] = coldData;
         }
 

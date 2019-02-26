@@ -92,7 +92,7 @@ namespace UIForia.Systems {
 
         public void OnElementDestroyed(UIElement element) { }
 
-        public void OnAttributeSet(UIElement element, string attributeName, string attributeValue) {
+        public void OnAttributeSet(UIElement element, string attributeName, string currentvalue, string attributeValue) {
             element.style.UpdateApplicableAttributeRules(attributeName, attributeValue);
         }
 

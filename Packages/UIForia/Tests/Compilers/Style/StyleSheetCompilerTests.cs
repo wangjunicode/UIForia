@@ -562,6 +562,68 @@ style myStyle {
     }
 
     [Test]
+    public void CompileBorder() {
+        var nodes = StyleParser2.Parse(@"
+export const brtl = 1px;
+export const brtr = 2%;
+export const brbr = 3vw;
+export const brbl = 4em;
+
+style border1 {
+    Border = @brtl @brtr @brbr @brbl;
+}
+
+style border2 {
+    Border = @brtl 20px @brbr;
+}
+
+style border3 {
+    Border = @brtl @brtr;
+}
+
+style border4 {
+    Border = 5px;
+}
+style border5 {
+    BorderTop = 1px;
+    BorderRight = 20vh;
+    BorderBottom = 2em;
+    BorderLeft = 4px;
+}
+        ".Trim());
+
+        StyleSheet styleSheet = NewStyleSheetCompiler().Compile(nodes);
+
+        var styleGroup = styleSheet.styleGroupContainers;
+        Assert.AreEqual(5, styleGroup.Count);
+
+        Assert.AreEqual(new UIFixedLength(1), styleGroup[0].groups[0].normal.BorderTop);
+        Assert.AreEqual(new UIFixedLength(2, UIFixedUnit.Percent), styleGroup[0].groups[0].normal.BorderRight);
+        Assert.AreEqual(new UIFixedLength(3, UIFixedUnit.ViewportWidth), styleGroup[0].groups[0].normal.BorderBottom);
+        Assert.AreEqual(new UIFixedLength(4, UIFixedUnit.Em), styleGroup[0].groups[0].normal.BorderLeft);
+
+        Assert.AreEqual(new UIFixedLength(1), styleGroup[1].groups[0].normal.BorderTop);
+        Assert.AreEqual(new UIFixedLength(20), styleGroup[1].groups[0].normal.BorderRight);
+        Assert.AreEqual(new UIFixedLength(3, UIFixedUnit.ViewportWidth), styleGroup[1].groups[0].normal.BorderBottom);
+        Assert.AreEqual(new UIFixedLength(20), styleGroup[1].groups[0].normal.BorderLeft);
+
+        Assert.AreEqual(new UIFixedLength(1), styleGroup[2].groups[0].normal.BorderTop);
+        Assert.AreEqual(new UIFixedLength(2, UIFixedUnit.Percent), styleGroup[2].groups[0].normal.BorderRight);
+        Assert.AreEqual(new UIFixedLength(1), styleGroup[2].groups[0].normal.BorderBottom);
+        Assert.AreEqual(new UIFixedLength(2, UIFixedUnit.Percent), styleGroup[2].groups[0].normal.BorderLeft);
+
+        Assert.AreEqual(new UIFixedLength(5), styleGroup[3].groups[0].normal.BorderTop);
+        Assert.AreEqual(new UIFixedLength(5), styleGroup[3].groups[0].normal.BorderRight);
+        Assert.AreEqual(new UIFixedLength(5), styleGroup[3].groups[0].normal.BorderBottom);
+        Assert.AreEqual(new UIFixedLength(5), styleGroup[3].groups[0].normal.BorderLeft);
+
+        Assert.AreEqual(new UIFixedLength(1), styleGroup[4].groups[0].normal.BorderTop);
+        Assert.AreEqual(new UIFixedLength(20, UIFixedUnit.ViewportHeight), styleGroup[4].groups[0].normal.BorderRight);
+        Assert.AreEqual(new UIFixedLength(2, UIFixedUnit.Em), styleGroup[4].groups[0].normal.BorderBottom);
+        Assert.AreEqual(new UIFixedLength(4), styleGroup[4].groups[0].normal.BorderLeft);
+    }
+
+    [Test]
     public void CompilBorderRadius() {
         var nodes = StyleParser2.Parse(@"
 export const brtl = 1px;

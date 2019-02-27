@@ -376,7 +376,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 35f2b5d632fd4d64b9acedec5215cda2, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  typeName: UI.Root, Assembly-CSharp, Version=0.0.0.0, Culture=neutral, PublicKeyToken=null
+  typeName: SVGXDemo.SVGXDemoRoot, Assembly-CSharp, Version=0.0.0.0, Culture=neutral,
+    PublicKeyToken=null
   camera: {fileID: 534669904}
 --- !u!114 &1506585480
 MonoBehaviour:
@@ -473,9 +474,40 @@ MonoBehaviour:
   rotation: 0
   dot: 0
   texture: {fileID: 2800000, guid: 99d6c5e6d36afca42bb3ceae665890c4, type: 3}
+  strokeWidth: 5
   tintColor: {r: 0.2924528, g: 0.017933436, b: 0.22865911, a: 0.35686275}
   strokeOpacity: 0
   fillOpacity: 0
+  gradientStops: []
+  outlineWidth: 0.25
+  textOutline: {r: 0, g: 0, b: 0, a: 0}
+  radiusTL: 0
+  radiusTR: 0
+  radiusBL: 0
+  radiusBR: 0
+  radiusTL2: 0
+  radiusTR2: 0
+  radiusBL2: 0
+  radiusBR2: 0
+  skewX: 0
+  fillColor: {r: 1, g: 0.92156863, b: 0.015686275, a: 1}
+  thing1: {x: 0, y: 0}
+  thing2: {x: 0, y: 0}
+  stroke: 1
+  fill: 1
+  strokePlacement: 0
+  shadowColor: {r: 0, g: 0, b: 0, a: 1}
+  shadowTint: {r: 0, g: 0, b: 0, a: 0}
+  shadowIntensity: 0.4
+  shadowSoftnessX: 0.16
+  shadowSoftnessY: 0.16
+  shadowOffset: {x: 0, y: 0}
+  shadowRect:
+    serializedVersion: 2
+    x: 400
+    y: 340
+    width: 200
+    height: 200
 --- !u!222 &1506585485
 CanvasRenderer:
   m_ObjectHideFlags: 0

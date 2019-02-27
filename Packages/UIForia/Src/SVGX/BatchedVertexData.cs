@@ -1,6 +1,5 @@
 using System;
 using System.Collections.Generic;
-using UIForia;
 using UIForia.Rendering;
 using UIForia.Text;
 using UIForia.Util;
@@ -83,7 +82,7 @@ namespace SVGX {
         private void GenerateSegmentBodies(Vector2[] points, int count, Color color, float strokeWidth, float z) {
             const int join = 0;
 
-            int renderData = BitUtil.SetHighLowBits(DrawType_Stroke, RenderTypeStroke);
+            int renderData = BitUtil.SetHighLowBits((int)SVGXShapeType.Path, RenderTypeStroke);
 
             uint flags0 = BitUtil.SetBytes(1, VertexType_Near, join, 0);
             uint flags1 = BitUtil.SetBytes(1, VertexType_Far, join, 0);
@@ -151,6 +150,10 @@ namespace SVGX {
             color.a *= style.strokeOpacity;
 
             switch (renderShape.shape.type) {
+                
+                case SVGXShapeType.Path:
+                    break;
+                
                 case SVGXShapeType.Unset:
                     return;
 
@@ -242,8 +245,8 @@ namespace SVGX {
                     return;
                 }
 
-                case SVGXShapeType.Path:
-                    break;
+
+                
                 case SVGXShapeType.Rect:
                 case SVGXShapeType.Circle:
                 case SVGXShapeType.Ellipse: {
@@ -398,11 +401,6 @@ namespace SVGX {
                     renderData = BitUtil.SetHighLowBits((int) renderShape.shape.type, RenderTypeText);
 
                     TextInfo textInfo = renderShape.textInfo;
-                    List<LineInfo> lineInfos = TextUtil.Layout(textInfo, float.MaxValue);
-                    textInfo.lineInfos = ArrayPool<LineInfo>.CopyFromList(lineInfos);
-                    textInfo.lineCount = lineInfos.Count;
-                    TextUtil.ApplyLineAndWordOffsets(textInfo);
-                    ListPool<LineInfo>.Release(ref lineInfos);
 
                     CharInfo[] charInfos = textInfo.charInfos;
                     int charCount = textInfo.charCount;
@@ -434,8 +432,8 @@ namespace SVGX {
 
                     for (int i = 0; i < charCount; i++) {
                         if (charInfos[i].character == ' ') continue;
-                        Vector2 topLeft = charInfos[i].topLeft;
-                        Vector2 bottomRight = charInfos[i].bottomRight;
+                        Vector2 topLeft = charInfos[i].layoutTopLeft;
+                        Vector2 bottomRight = charInfos[i].layoutBottomRight;
 
                         positionList.Add(new Vector3(p0.x + topLeft.x, -p0.y + -bottomRight.y, z)); // Bottom Left
                         positionList.Add(new Vector3(p0.x + topLeft.x, -p0.y + -topLeft.y, z)); // Top Left

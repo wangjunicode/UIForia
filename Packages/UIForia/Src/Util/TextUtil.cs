@@ -321,17 +321,13 @@ namespace UIForia.Util {
             textInfo.spanInfos = ArrayPool<SpanInfo>.GetMinSize(1);
             textInfo.spanInfos[0].wordCount = textInfo.wordCount;
             textInfo.spanInfos[0].font = textSpan.fontAsset;
-            textInfo.spanInfos[0].charCount = textInfo.charCount;
             textInfo.spanInfos[0].textStyle = textSpan.textStyle;
-            textInfo.spanInfos[0].fontSize = textSpan.textStyle.fontSize;
-            textInfo.spanInfos[0].fontStyle = textSpan.textStyle.fontStyle;
-            textInfo.spanInfos[0].alignment = textSpan.textStyle.alignment;
             ComputeCharacterAndWordSizes(textInfo);
             return textInfo;
         }
 
         private static TMP_FontAsset GetFontAssetForWeight(SpanInfo spanInfo, int fontWeight) {
-            bool isItalic = (spanInfo.fontStyle & FontStyle.Italic) != 0;
+            bool isItalic = (spanInfo.textStyle.fontStyle & FontStyle.Italic) != 0;
 
             int weightIndex = fontWeight / 100;
             TMP_FontWeights weights = spanInfo.font.fontWeights[weightIndex];
@@ -360,8 +356,8 @@ namespace UIForia.Util {
                         float y1 = charInfos[i].bottomRight.y + lineOffset;
                         charInfos[i].wordIndex = w;
                         charInfos[i].lineIndex = lineIdx;
-                        charInfos[i].topLeft = new Vector2(x0, y0);
-                        charInfos[i].bottomRight = new Vector2(x1, y1);
+                        charInfos[i].layoutTopLeft = new Vector2(x0, y0);
+                        charInfos[i].layoutBottomRight = new Vector2(x1, y1);
                     }
 
                     wordInfos[w] = currentWord;
@@ -374,7 +370,7 @@ namespace UIForia.Util {
             SpanInfo spanInfo = textInfo.spanInfos[0];
             
             TMP_FontAsset asset = spanInfo.font;
-            float scale = (spanInfo.fontSize / asset.fontInfo.PointSize) * asset.fontInfo.Scale;
+            float scale = (spanInfo.textStyle.fontSize / asset.fontInfo.PointSize) * asset.fontInfo.Scale;
             float lh = (asset.fontInfo.Ascender + asset.fontInfo.Descender) * scale;
 
             float lineOffset = 0; 
@@ -485,14 +481,14 @@ namespace UIForia.Util {
                 bool isUsingAltTypeface = false;
                 float boldAdvanceMultiplier = 1;
 
-                if ((spanInfo.fontStyle & FontStyle.Bold) != 0) {
+                if ((spanInfo.textStyle.fontStyle & FontStyle.Bold) != 0) {
                     fontAsset = GetFontAssetForWeight(spanInfo, 700);
                     isUsingAltTypeface = true;
                     boldAdvanceMultiplier = 1 + fontAsset.boldSpacing * 0.01f;
                 }
 
-                float smallCapsMultiplier = (spanInfo.fontStyle & FontStyle.SmallCaps) == 0 ? 1.0f : 0.8f;
-                float fontScale = spanInfo.fontSize * smallCapsMultiplier / fontAsset.fontInfo.PointSize * fontAsset.fontInfo.Scale;
+                float smallCapsMultiplier = (spanInfo.textStyle.fontStyle & FontStyle.SmallCaps) == 0 ? 1.0f : 0.8f;
+                float fontScale = spanInfo.textStyle.fontSize * smallCapsMultiplier / fontAsset.fontInfo.PointSize * fontAsset.fontInfo.Scale;
 
                 //float yAdvance = fontAsset.fontInfo.Baseline * fontScale * fontAsset.fontInfo.Scale;
                 //float monoAdvance = 0;
@@ -503,7 +499,7 @@ namespace UIForia.Util {
                 float padding = ShaderUtilities.GetPadding(fontAsset.material, enableExtraPadding: false, isBold: false);
                 float stylePadding = 0;
 
-                if (!isUsingAltTypeface && (spanInfo.fontStyle & FontStyle.Bold) == FontStyle.Bold) {
+                if (!isUsingAltTypeface && (spanInfo.textStyle.fontStyle & FontStyle.Bold) == FontStyle.Bold) {
                     if (fontAssetMaterial.HasProperty(ShaderUtilities.ID_GradientScale)) {
                         float gradientScale = fontAssetMaterial.GetFloat(ShaderUtilities.ID_GradientScale);
                         stylePadding = fontAsset.boldStyle / 4.0f * gradientScale * fontAssetMaterial.GetFloat(ShaderUtilities.ID_ScaleRatio_A);
@@ -565,7 +561,7 @@ namespace UIForia.Util {
                         float topShear = 0;
                         float bottomShear = 0;
 
-                        if (!isUsingAltTypeface && ((spanInfo.fontStyle & FontStyle.Italic) != 0)) {
+                        if (!isUsingAltTypeface && ((spanInfo.textStyle.fontStyle & FontStyle.Italic) != 0)) {
                             float shearValue = fontAsset.italicStyle * 0.01f;
                             topShear = glyph.yOffset * shearValue;
                             bottomShear = (glyph.yOffset - glyph.height) * shearValue;
@@ -628,7 +624,7 @@ namespace UIForia.Util {
                             ? elementDescender
                             : currentWord.descender;
 
-                        if ((spanInfo.fontStyle & (FontStyle.Superscript | FontStyle.Subscript)) != 0) {
+                        if ((spanInfo.textStyle.fontStyle & (FontStyle.Superscript | FontStyle.Subscript)) != 0) {
                             float baseAscender = elementAscender / fontAsset.fontInfo.SubSize;
                             float baseDescender = elementDescender / fontAsset.fontInfo.SubSize;
 

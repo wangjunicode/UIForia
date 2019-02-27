@@ -1,8 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
-using UIForia.Extensions;
 using UIForia.Elements;
+using UIForia.Extensions;
 using UIForia.Layout;
 using UIForia.Layout.LayoutTypes;
 using UIForia.Rendering;
@@ -741,6 +740,10 @@ namespace UIForia.Systems {
             }
         }
 
+        public void OnAttributeSet(UIElement element, string attributeName, string currentValue, string previousValue) {
+            
+        }
+
         // todo pool boxes
         private LayoutBox CreateLayoutBox(UIElement element) {
             if ((element is UITextElement)) {
@@ -900,33 +903,6 @@ namespace UIForia.Systems {
 
         public LightList<UIElement> GetVisibleElements() {
             return m_VisibleElements;
-        }
-
-        private static int ResolveRenderLayer(UIElement element) {
-            RenderLayer layer = element.style.RenderLayer;
-            switch (layer) {
-                case RenderLayer.Unset:
-                case RenderLayer.Default:
-                    return element.depth;
-
-                case RenderLayer.Parent:
-                    return element.depth - 1;
-
-                case RenderLayer.Template:
-                    throw new NotImplementedException(); // need to save template root element somehow
-
-                case RenderLayer.Modal:
-                    return 100000;
-
-                case RenderLayer.View:
-                    return 500000;
-
-                case RenderLayer.Screen:
-                    return 1000000;
-
-                default:
-                    throw new ArgumentOutOfRangeException();
-            }
         }
 
         private static Extents GetLocalExtents(List<LayoutBox> children) {

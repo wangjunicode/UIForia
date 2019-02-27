@@ -85,9 +85,9 @@ v2f TextVertex(appdata input) {
     o.vertex = vPosition;
     o.color = input.color;
     o.uv = input.uv;
-    o.flags = float4(alphaClip, scale, bias, weight);
+    o.flags = float4(RenderType_Text, 0, 0, 0);
     o.fragData1 = float4(_OutlineWidth, _OutlineSoftness, input.uv2.x, 0);
-    o.fragData2 = float4(0, 0, 0, 0); 
+    o.fragData2 =  float4(alphaClip, scale, bias, weight);
     o.fragData3 = float4(0, 0, 0, 0); 
     o.secondaryColor = c;
     
@@ -98,9 +98,12 @@ fixed4 TextFragment(v2f input) {
 
    float c = tex2Dlod(_globalFontTexture, float4(input.uv.xy, 0, 0)).a;
    
-   float scale = input.flags.y;
-   float bias = input.flags.z;
-   float weight	= input.flags.w;
+   #define outlineWidth input.fragData1.x
+   #define outlineSoftness input.fragData1.y
+   
+   float scale = input.fragData2.y;
+   float bias = input.fragData2.z;
+   float weight	= input.fragData2.w;
    float sd = (bias - c) * scale;
 
    float outline = (input.fragData1.x * gScaleRatioA) * scale;

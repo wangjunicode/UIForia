@@ -69,6 +69,9 @@ Shader "UIForia/BatchedTransparent" {
                float2 drawSurfaceSize = i.uv.zw;
                float strokeWidth = lerp(0, i.flags.z, strokeShape);
                
+               fixed4 fromColor = i.color;
+               fixed4 toColor = Clear;
+               
                float left = step(i.uv.x, 0.5); // 1 if left
                float bottom = step(i.uv.y, 0.5); // 1 if bottom
                float top = 1 - bottom;
@@ -90,9 +93,10 @@ Shader "UIForia/BatchedTransparent" {
                float2 center = i.uv.xy - 0.5;
                
                float fDist = 0;
-               
+               float4 widths = float4(20, 8, 8, 20);
                if (shapeType == ShapeType_Rect || shapeType == ShapeType_RoundedRect) {
                    fDist = RectSDF(center * drawSurfaceSize, halfShapeSize, radius - halfStrokeWidth);
+                   
                }
                else if(shapeType == ShapeType_Circle) {
                    fDist = length(center * drawSurfaceSize) - halfShapeSize;
@@ -102,8 +106,6 @@ Shader "UIForia/BatchedTransparent" {
                }
                
                // todo -- support squircles
-               fixed4 fromColor = i.color;
-               fixed4 toColor = Clear;
                
                if(halfStrokeWidth > 0) {
                    if(fDist <= 0) {
@@ -150,22 +152,29 @@ Shader "UIForia/BatchedTransparent" {
                #define GradientDirection i.flags.w
                
                fixed4 color = SDFShape(i, ShapeType, strokeShape);
-               // todo -- get this working again
                
-//               float t = lerp(i.uv.x, 1 - i.uv.y, GradientDirection);
-//               float y = GetPixelInRowUV(GradientId, _globalGradientAtlasSize);
-//               fixed4 textureColor = tex2Dlod(_MainTex, float4(i.uv.xy, 0, 0));
-//               fixed4 gradientColor = tex2Dlod(_globalGradientAtlas, float4(t, y, 0, 0));
-//               fixed4 tintColor = lerp(White, color, i.fragData1.z);                
-//               
-//               textureColor = lerp(color, textureColor, i.fragData1.x);
-//               gradientColor = lerp(White, gradientColor, i.fragData1.y);
-//               tintColor = lerp(tintColor, gradientColor, i.fragData1.w);
-//               
-//               fixed4 tintedTextureColor = lerp(textureColor, textureColor * tintColor, tintColor.a);
-//           
-//               color = lerp(tintedTextureColor, gradientColor, 0);
+               // todo -- get this working again for filled strokes
+               
+               // todo -- see if we can drop the discard statement
+               if(color.a - 0.001 <= 0) {
+                   discard;
+               }
+               
+               float t = lerp(i.uv.x, 1 - i.uv.y, GradientDirection);
+               float y = GetPixelInRowUV(GradientId, _globalGradientAtlasSize);
+               fixed4 textureColor = tex2Dlod(_MainTex, float4(i.uv.xy, 0, 0));
+               fixed4 gradientColor = tex2Dlod(_globalGradientAtlas, float4(t, y, 0, 0));
+               fixed4 tintColor = lerp(White, color, i.fragData1.z);                
+               
+               textureColor = lerp(color, textureColor, i.fragData1.x);
+               gradientColor = lerp(White, gradientColor, i.fragData1.y);
+               tintColor = lerp(tintColor, gradientColor, i.fragData1.w);
+               
+               fixed4 tintedTextureColor = lerp(textureColor, textureColor * tintColor, tintColor.a);
+           
+               color = lerp(tintedTextureColor, gradientColor, 0);
         
+               // todo -- see if we can drop the discard statement
                if(color.a - 0.001 <= 0) {
                    discard;
                }
@@ -195,8 +204,8 @@ Shader "UIForia/BatchedTransparent" {
                int renderData = (int)input.uv1.x;
                int renderType = (renderData & 0xffff);
                uint shapeType = (renderData >> 16) & (1 << 16) - 1;
-               
-               if(renderType == RenderType_Fill || RenderType_Shadow) {
+
+               if(renderType == RenderType_Fill || renderType == RenderType_Shadow) {
                    return FillVertex(input, shapeType, renderType);
                }
                else if(renderType == RenderType_Text) {
@@ -211,7 +220,7 @@ Shader "UIForia/BatchedTransparent" {
            }
 
             fixed4 frag (v2f i) : SV_Target {
-               
+
                if(i.flags.x == RenderType_Fill) {
                    return FillFragment(i, 0);
                }

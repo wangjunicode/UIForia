@@ -1,6 +1,9 @@
 style container {
     PreferredSize = 600px;
     BackgroundColor = yellow;
+    PaddingLeft = 10px;
+    TextColor = red;
+    TextFontSize = 24;
 }
 
 style group1 {
@@ -8,15 +11,23 @@ style group1 {
     BackgroundColor = green;
     Border = 20px;
     BorderColor = red;
+    MarginBottom = 10px;
+    BackgroundImage = url("Images/backgroundimg"); 
+
 }
 
 style group2 {
-    PreferredSize = 200px;
+    PreferredSize = 400px;
     BackgroundColor = blue;
-    BorderTop = 30px;
-    BorderRight = 20px;
-    BorderLeft = 20px;
-    BorderBottom = 20px;
-    BorderColor = rgba(255, 255, 255, 100);
+    BackgroundImage = url("Images/backgroundimg"); 
+    BorderRadius = 0.35%;
+    Border = 12px;
+    BorderColor = green;
+//    BackgroundImage = url("Images/backgroundimg"); 
+//    BorderTop = 20px;
+//    BorderRight = 8px;
+//    BorderLeft = 8px;
+//    BorderBottom = 8px;
+//    BorderColor = rgba(0, 255, 0, 255);
 
 }

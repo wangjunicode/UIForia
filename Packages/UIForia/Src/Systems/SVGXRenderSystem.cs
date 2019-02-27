@@ -95,34 +95,18 @@ namespace UIForia.Systems {
             m_Camera.orthographicSize = Screen.height * 0.5f;
             visibleElements.Reverse(); // todo -- dont' do this, also don't get a reference directly to the layout system's visible elements
 
-            ctx.SetStrokeColor(Color.red);
-            ctx.SetStrokeWidth(2);
-            
-            ctx.MoveTo(-300, 0);
-            ctx.LineTo(300, 0);
-            ctx.Stroke();
-            
-            ctx.BeginPath();
-            ctx.MoveTo(-300, 200);
-            ctx.LineTo(300, 200);
-            ctx.Stroke();
-            
-            ctx.BeginPath();
-            ctx.MoveTo(0, -200);
-            ctx.LineTo(0, 400);
-            ctx.Stroke();
-            
-            ctx.BeginPath();
-            ctx.MoveTo(200, -200);
-            ctx.LineTo(200, 400);
-            ctx.Stroke();
-            
-            
             UIElement[] elementArray = visibleElements.Array;
             for (int i = 0; i < visibleElements.Count; i++) {
+                
                 UIElement current = elementArray[i];
+                
+                if (current.style.Visibility == Visibility.Hidden) {
+                    continue;
+                }
+                
                 LayoutResult layoutResult = current.layoutResult;
 
+                
 
                 // todo -- if no paint properties are set, don't draw (ie no bg, no colors, no border, etc)
 
@@ -133,7 +117,8 @@ namespace UIForia.Systems {
                 ctx.SetTransform(matrix);
 
                 if (current is UITextElement textElement) {
-                    ctx.Text(layoutResult.screenPosition.x, layoutResult.screenPosition.y, textElement.textInfo);
+                    ctx.BeginPath();
+                    ctx.Text(0, 0, textElement.textInfo);
                     ctx.SetFill(textElement.style.TextColor);
                     ctx.Fill();
                 }
@@ -145,93 +130,82 @@ namespace UIForia.Systems {
                 else {
                     ctx.BeginPath();
 
-                    OffsetRect borderRect = layoutResult.border; //new OffsetRect(10, 10, 10, 10);
-
-                    ctx.Rect(borderRect.left, borderRect.top, layoutResult.actualSize.width - borderRect.Horizontal, layoutResult.actualSize.height - borderRect.Vertical);
+                    OffsetRect borderRect = layoutResult.border;
 
                     Vector4 border = current.style.ResolvedBorder;
+                    Vector4 resolveBorderRadius = current.style.ResolvedBorderRadius;
+                    float width = layoutResult.actualSize.width;
+                    float height = layoutResult.actualSize.height;
+                    bool hasUniformBorder = border.x == border.y && border.z == border.x && border.w == border.x;
                     bool hasBorder = border.x > 0 || border.y > 0 || border.z > 0 || border.w > 0;
-                    if (!hasBorder) {
-//                        DrawNormalFill(current);
-                    }
-                    else {
-                        bool hasUniformBorder = border.x == border.y && border.z == border.x && border.w == border.x;
 
-                        if (hasUniformBorder) {
-//                            DrawNormalFill(current);
-                            ctx.SetStrokePlacement(StrokePlacement.Outside);
-                            ctx.SetStrokeWidth(border.x);
-                            ctx.SetStrokeColor(current.style.BorderColor);
-                            ctx.Stroke();
+                    if (resolveBorderRadius == Vector4.zero) {
+                        
+                        ctx.Rect(borderRect.left, borderRect.top, layoutResult.actualSize.width - borderRect.Horizontal, layoutResult.actualSize.height - borderRect.Vertical);
+                        
+                        if (!hasBorder) {
+                            DrawNormalFill(current);
                         }
                         else {
-                            
-                            DrawNormalFill(current);
-                            
-                            ctx.SetStrokeOpacity(1f);
-                            ctx.SetStrokePlacement(StrokePlacement.Outside);
+
+                            if (hasUniformBorder) {
+                                DrawNormalFill(current);
+                                ctx.SetStrokePlacement(StrokePlacement.Outside);
+                                ctx.SetStrokeWidth(border.x);
+                                ctx.SetStrokeColor(current.style.BorderColor);
+                                ctx.Stroke();
+                            }
+                            else {
+                                DrawNormalFill(current);
+
+//                                ctx.SetUVBounds();
+                                ctx.SetStrokeOpacity(1f);
+                                ctx.SetStrokePlacement(StrokePlacement.Inside);
+                                ctx.SetStrokeColor(current.style.BorderColor);
+                                ctx.SetFill(current.style.BorderColor);
+
+                                // todo this isn't really working correctly,
+                                // compute single stroke path on cpu. current implementation has weird blending overlap artifacts with transparent border color
+
+                                if (borderRect.top > 0) {
+                                    ctx.BeginPath();
+                                    ctx.Rect(borderRect.left, 0, width - borderRect.Horizontal, borderRect.top - 1);
+                                    ctx.Fill();
+                                }
+
+                                if (borderRect.right > 0) {
+                                    ctx.BeginPath();
+                                    ctx.Rect(width - borderRect.right, 0, borderRect.right, height);
+                                    ctx.Fill();
+                                }
+
+                                if (borderRect.left > 0) {
+                                    ctx.BeginPath();
+                                    ctx.Rect(0, 0, borderRect.left, height);
+                                    ctx.Fill();
+                                }
+
+                                if (borderRect.bottom > 0) {
+                                    ctx.BeginPath();
+                                    ctx.Rect(borderRect.left, height - borderRect.bottom, width - borderRect.Horizontal, borderRect.bottom);
+                                    ctx.Fill();
+                                }
+                            }
+                        }
+                    }
+                    // todo -- might need to special case non uniform border with border radius
+                    else {
+                        ctx.BeginPath();
+                        ctx.RoundedRect(new Rect(borderRect.left, borderRect.top, width - borderRect.Horizontal, height - borderRect.Vertical), resolveBorderRadius.x, resolveBorderRadius.y, resolveBorderRadius.z, resolveBorderRadius.w);
+                        DrawNormalFill(current);
+                        if (hasBorder) {
+                            ctx.SetStrokeWidth(borderRect.top);
                             ctx.SetStrokeColor(current.style.BorderColor);
-                            
-                            float width = layoutResult.actualSize.width;
-                            float height = layoutResult.actualSize.height;
-
-                            if (borderRect.top > 0) {
-                                ctx.BeginPath();
-                                float topWidth = width - borderRect.Horizontal;
-                                float leftWidth = borderRect.left;
-                                ctx.MoveTo(leftWidth + (topWidth * 0.5f), 0);
-                                ctx.LineTo(leftWidth + (topWidth * 0.5f), borderRect.top);
-                                ctx.SetStrokeWidth(topWidth);
-                                ctx.Stroke();
-                            }
-
-                            if (borderRect.right > 0) {
-                                ctx.BeginPath();
-                                float rightWidth = borderRect.right;
-                                ctx.MoveTo(width - (rightWidth * 0.5f), 0);
-                                ctx.LineTo(width - (rightWidth * 0.5f), height);
-                                ctx.SetStrokeWidth(rightWidth);
-                                ctx.Stroke();
-                            }
-                            
-                            if (borderRect.left > 0) {
-                                ctx.BeginPath();
-                                float leftWidth = borderRect.left;
-                                ctx.MoveTo(leftWidth * 0.5f, 0);
-                                ctx.LineTo(leftWidth * 0.5f, height);
-                                ctx.SetStrokeWidth(leftWidth);
-                                ctx.Stroke();
-                            }
-
-                            if (borderRect.bottom > 0) {
-                                ctx.BeginPath();
-                                float bottomWidth = width - borderRect.Horizontal;
-                                float leftWidth = borderRect.left;
-                                ctx.MoveTo(leftWidth + (bottomWidth * 0.5f), height - borderRect.bottom);
-                                ctx.LineTo(leftWidth + (bottomWidth * 0.5f), height);
-                                ctx.SetStrokeWidth(bottomWidth);
-                                ctx.Stroke();
-                            }
-                            
+                            ctx.Stroke();
                         }
                     }
                 }
             }
-
-
-//                    switch (current.borderType) {
-//                        case BorderType.None:
-//                          
-//                            break;
-//                        case BorderType.UniformNormal:
-//                            break;
-//                        case BorderType.VaryingNormal:
-//                            break;
-//                        case BorderType.UniformRounded:
-//                            break;
-//                        case BorderType.VaryingRounded:
-//                            break;
-//                    }
 
 
             // if requires stencil clip -> do stencil clip true if overflow is not hidden and shape is not rect. not sure how to handle z order here
@@ -266,6 +240,8 @@ namespace UIForia.Systems {
         public void OnElementDisabled(UIElement element) { }
 
         public void OnElementDestroyed(UIElement element) { }
+
+        public void OnAttributeSet(UIElement element, string attributeName, string currentValue, string previousValue) { }
 
         public void OnElementCreated(UIElement element) { }
 

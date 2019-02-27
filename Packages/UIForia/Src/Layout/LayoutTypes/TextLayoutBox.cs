@@ -71,7 +71,8 @@ namespace UIForia.Layout.LayoutTypes {
                            BorderBottom;
 
             ApplyTextAlignment(allocatedWidth, textInfo, style.TextAlignment);
-            
+            TextUtil.ApplyLineAndWordOffsets(textInfo);
+
             ListPool<LineInfo>.Release(ref lineInfos);
         }
 

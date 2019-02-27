@@ -56,6 +56,11 @@ namespace SVGX {
             return sum >= 0;
         }
 
+        internal static void GenerateStrokePathGeometry(LightList<Vector2> output, LightList<float> strokeWidths, SVGXMatrix matrix, Vector2[] points, RangeInt pointRange, bool isClosed) {
+            //https://github.com/memononen/nanovg/blob/master/src/nanovg.c#L1650
+            //https://github.com/memononen/nanovg/blob/master/src/nanovg.c#L1720
+        }
+
         internal static RangeInt GenerateStrokeGeometry(LightList<Vector2> output, StrokePlacement strokePlacement, float strokeWidth, SVGXShapeType shapeType, SVGXMatrix matrix, Vector2[] points, RangeInt pointRange, bool isClosed) {
             RangeInt retn = new RangeInt(output.Count, 0);
 
@@ -109,7 +114,6 @@ namespace SVGX {
                     if (pointRange.length == 2) {
                         Vector2 p0 = matrix.Transform(points[pointRange.start + 0]);
                         Vector2 p1 = matrix.Transform(points[pointRange.start + 1]);
-
                         output.Add(p0 - (p1 - p0));
                         output.Add(p0);
                         output.Add(p1);

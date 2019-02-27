@@ -6,7 +6,6 @@ using UIForia.Systems;
 using UIForia.Text;
 using UIForia.Util;
 using UnityEngine;
-using FontStyle = UIForia.Text.FontStyle;
 
 namespace UIForia {
 
@@ -82,8 +81,6 @@ namespace UIForia {
         }
 
         private void UpdateTextInfo() {
-//            bool collapseSpaces = true; //style.computedStyle.TextCollapseWhiteSpace;
-//            bool preserveNewlines = false; //style.computedStyle.TextPreserveNewLines;
 
             if (textInfo != null) {
                 if (textInfo.spanInfos != null) ArrayPool<SpanInfo>.Release(ref textInfo.spanInfos);
@@ -91,19 +88,17 @@ namespace UIForia {
                 if (textInfo.lineInfos != null) ArrayPool<LineInfo>.Release(ref textInfo.lineInfos);
                 if (textInfo.charInfos != null) ArrayPool<CharInfo>.Release(ref textInfo.charInfos);
             }
-//            textInfo = TextUtil.ProcessText(text, collapseSpaces, preserveNewlines, style.TextTransform);
-//            textInfo.spanCount = 1;
-//            textInfo.spanInfos = ArrayPool<SpanInfo>.GetMinSize(1);
-//            textInfo.spanInfos[0].wordCount = textInfo.wordCount;
-//            textInfo.spanInfos[0].font = style.TextFontAsset;
-//            textInfo.spanInfos[0].charCount = textInfo.charCount;
-//            textInfo.spanInfos[0].fontSize = style.TextFontSize;
-//            textInfo.spanInfos[0].fontStyle = style.TextFontStyle;
-//            textInfo.spanInfos[0].alignment = style.TextAlignment;
 
-            textInfo = TextUtil.CreateTextInfo(new TextUtil.TextSpan(style.TextFontAsset, new SVGXTextStyle(), text));
+            SVGXTextStyle textStyle = new SVGXTextStyle() {
+                fontSize = style.TextFontSize,
+                color = style.TextColor,
+                fontStyle = style.TextFontStyle,
+                alignment = style.TextAlignment,
+                whitespaceMode = WhitespaceMode.Wrap,
+                // todo -- glow styles etc
+            };
+            textInfo = TextUtil.CreateTextInfo(new TextUtil.TextSpan(style.TextFontAsset, textStyle, text));
             
-//            ComputeCharacterAndWordSizes(textInfo);
         }
 
         public SelectionRange AppendText(char character) {

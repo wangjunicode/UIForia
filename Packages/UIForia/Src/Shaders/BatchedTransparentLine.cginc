@@ -12,7 +12,7 @@ v2f LineVertex(appdata input) {
    
    float strokeWidth = input.uv1.w;
    
-   float aa = strokeWidth < 2 ? 1 : antialias;
+   float aa = 0; //strokeWidth < 2 ? 1 : antialias;
    
    int dir = GetByte0(flags) * 2 - 1; // remap [0, 1] to [-1, 1]
    uint isNear = GetByte1(flags);
@@ -47,7 +47,6 @@ v2f LineVertex(appdata input) {
        pos = curr + (miter * miterLength * dir);
    }
 
-   pos -= miter * ((strokeWidth * 0.5f) + (2 * aa));
    o.secondaryColor = fixed4(0, 0, 0, 0);
    o.vertex = UnityObjectToClipPos(float3(pos, input.vertex.z));
    return o;

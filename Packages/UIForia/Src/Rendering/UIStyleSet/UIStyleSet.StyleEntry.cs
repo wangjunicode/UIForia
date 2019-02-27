@@ -16,7 +16,7 @@ namespace UIForia.Rendering {
                 this.style = style;
                 this.type = type;
                 this.state = state;
-                this.priority = BitUtil.SetBytes(styleNumber, attributeCount, (int) type, (int) state);
+                this.priority = (int)BitUtil.SetBytes(styleNumber, attributeCount, (int) type, (int) state);
             }
 
         }

@@ -17,6 +17,13 @@ namespace SVGX {
 
     }
 
+    public enum StrokeMode {
+
+        Uniform,
+        Varying
+
+    }
+
     public class ImmediateRenderContext {
 
         internal readonly LightList<Vector2> points;
@@ -36,6 +43,7 @@ namespace SVGX {
         private RangeInt currentShapeRange;
         private SVGXGradient currentGradient;
         private Texture2D currentTexture;
+        private StrokeMode strokeMode;
 
         public ImmediateRenderContext() {
             points = new LightList<Vector2>(128);
@@ -51,6 +59,7 @@ namespace SVGX {
             clipStack = new Stack<int>();
             textInfos = new LightList<TextInfo>();
             currentStyle = SVGXStyle.Default();
+            strokeMode = StrokeMode.Uniform;
         }
 
         public void SetFill(Color color) {
@@ -112,7 +121,7 @@ namespace SVGX {
 
             currentShapeRange.length++;
             lastPoint = new Vector2(x, y);
-            ;
+            
             points.Add(lastPoint);
         }
 
@@ -252,6 +261,7 @@ namespace SVGX {
             clipStack.Clear();
             clipGroups.Clear();
             textInfos.Clear();
+            strokeMode = StrokeMode.Uniform;
         }
 
         public void Save() {
@@ -359,7 +369,7 @@ namespace SVGX {
             currentShapeRange.length++;
         }
 
-        public void BeginPath() {
+        public void BeginPath(StrokeMode strokeMode = StrokeMode.Uniform) {
             SVGXShape currentShape = shapes[shapes.Count - 1];
             if (currentShape.type != SVGXShapeType.Unset) {
                 shapes.Add(new SVGXShape(SVGXShapeType.Unset, default));
@@ -403,6 +413,7 @@ namespace SVGX {
         }
 
         public void SetStrokeWidth(float width) {
+            // todo -- support varying stroke parameters per path call
             currentStyle.strokeWidth = width;
         }
 

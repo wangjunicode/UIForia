@@ -539,37 +539,25 @@ namespace SVGX {
             if (count == 0) return;
             
             SVGXRenderShape[] renderShapeArray = renderShapes.Array;
-            int lastTextureId = styles[renderShapeArray[0].styleId].textureId;
             Matrix4x4 originMatrix = OriginMatrix;
-
-            GradientData gradientData = default;
-            int gradientLookupId = styles[renderShapeArray[0].styleId].gradientId;
-
-            if (gradientLookupId != -1) {
-                SVGXGradient gradient = s_GradientMap.GetOrDefault(gradientLookupId);
-                int gradientId = s_GradientRowMap.GetOrDefault(gradient);
-                gradientData = new GradientData(gradientId, gradient);
-            }
-
-            switch (renderShapeArray[0].drawCallType) {
-                case DrawCallType.StandardFill:
-                    batchedVertexData.CreateFillVertices(points, renderShapeArray[0], gradientData, styles[renderShapeArray[0].styleId], matrices[renderShapeArray[0].matrixId]);
-                    break;
-                case DrawCallType.StandardStroke:
-                    batchedVertexData.CreateStrokeVertices(points, renderShapeArray[0], gradientData, styles[renderShapeArray[0].styleId], matrices[renderShapeArray[0].matrixId]);
-                    break;
-                case DrawCallType.Shadow:
-                    batchedVertexData.CreateShadowVertices(points, renderShapeArray[0], gradientData, styles[renderShapeArray[0].styleId], matrices[renderShapeArray[0].matrixId]);
-                    break;
-            }
 
             int fontId = -1;
 
-            Material material = null;
-            for (int i = 1; i < count; i++) {
+            int lastTextureId = styles[renderShapeArray[0].styleId].textureId;
+            Material material = batchedTransparentPool.GetAndQueueForRelease();
+            material.SetTexture(s_MainTexKey, textureMap.GetOrDefault(lastTextureId));
+            
+            for (int i = 0; i < count; i++) {
                 SVGXRenderShape renderShape = renderShapeArray[i];
                 int currentTextureId = styles[renderShape.styleId].textureId;
 
+                if (currentTextureId != lastTextureId) {
+                    DrawMesh(batchedVertexData.FillMesh(), originMatrix, material);
+                    material = batchedTransparentPool.GetAndQueueForRelease();
+                    material.SetTexture(s_MainTexKey, textureMap.GetOrDefault(lastTextureId));
+                    lastTextureId = currentTextureId;
+                }
+                
                 if (renderShape.shape.type == SVGXShapeType.Text) {
                     TextInfo textInfo = renderShape.textInfo;
                     int currentFontId = textInfo.spanInfos[0].font.GetInstanceID();
@@ -593,12 +581,13 @@ namespace SVGX {
                             fontMaterial.GetFloat(ShaderUtilities.ID_ScaleRatio_C))
                         );
 
-                        if (fontId != -1) { }
-
                         fontId = currentFontId;
                     }
                 }
 
+                int gradientLookupId = styles[renderShape.styleId].gradientId;
+
+                GradientData gradientData = default;
                 if (gradientLookupId != -1) {
                     SVGXGradient gradient = s_GradientMap.GetOrDefault(gradientLookupId);
                     int gradientId = s_GradientRowMap.GetOrDefault(gradient);

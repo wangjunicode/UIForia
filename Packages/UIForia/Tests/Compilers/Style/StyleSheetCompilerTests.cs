@@ -244,10 +244,10 @@ style myStyle {
         var containers = styleSheet.styleGroupContainers;
         Assert.AreEqual(1, containers.Length);
 
-        Assert.AreEqual(10, containers[0].groups[0].normal.PaddingTop.value);
-        Assert.AreEqual(10, containers[0].groups[0].normal.PaddingRight.value);
+        Assert.AreEqual(10 * 0.01f, containers[0].groups[0].normal.PaddingTop.value);
+        Assert.AreEqual(10 * 0.01f, containers[0].groups[0].normal.PaddingRight.value);
         Assert.AreEqual(20, containers[0].groups[0].normal.PaddingBottom.value);
-        Assert.AreEqual(10, containers[0].groups[0].normal.PaddingLeft.value);
+        Assert.AreEqual(10 * 0.01f, containers[0].groups[0].normal.PaddingLeft.value);
         Assert.AreEqual(UIFixedUnit.Percent, containers[0].groups[0].normal.PaddingTop.unit);
         Assert.AreEqual(UIFixedUnit.Percent, containers[0].groups[0].normal.PaddingRight.unit);
         Assert.AreEqual(UIFixedUnit.Pixel, containers[0].groups[0].normal.PaddingBottom.unit);
@@ -275,10 +275,10 @@ style myStyle {
         var containers = styleSheet.styleGroupContainers;
         Assert.AreEqual(1, containers.Length);
 
-        Assert.AreEqual(10, containers[0].groups[0].normal.BorderTop.value);
-        Assert.AreEqual(10, containers[0].groups[0].normal.BorderRight.value);
+        Assert.AreEqual(10 * 0.01f, containers[0].groups[0].normal.BorderTop.value);
+        Assert.AreEqual(10 * 0.01f, containers[0].groups[0].normal.BorderRight.value);
         Assert.AreEqual(20, containers[0].groups[0].normal.BorderBottom.value);
-        Assert.AreEqual(10, containers[0].groups[0].normal.BorderLeft.value);
+        Assert.AreEqual(10 * 0.01f, containers[0].groups[0].normal.BorderLeft.value);
         Assert.AreEqual(UIFixedUnit.Percent, containers[0].groups[0].normal.BorderTop.unit);
         Assert.AreEqual(UIFixedUnit.Percent, containers[0].groups[0].normal.BorderRight.unit);
         Assert.AreEqual(UIFixedUnit.Pixel, containers[0].groups[0].normal.BorderBottom.unit);
@@ -903,28 +903,4 @@ style xyz {
         var styleGroup = styleSheet.styleGroupContainers;
         Assert.AreEqual(Color.red, styleGroup[0].groups[0].normal.BackgroundColor);
     }
-    
-
-    [Test]
-    public void ParseASeeminglyBrokenStyle() {
-
-        try {
-            StyleParser2.Parse(@"
-style s { 
-    PreferredSize = 400px;
-    BackgroundColor = blue;
-    BackgroundImage = url(""Images/backgroundimg"")
-    BorderRadius = 0.35%;
-    Border = 12px;
-    BorderColor = green;
-}
-            ".Trim());
-            Assert.Fail("This should not have parsed!");
-        }
-        catch (ParseException e) {
-            Console.Write(e);
-            throw;
-        }
-    }
-    
 }

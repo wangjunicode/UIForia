@@ -31,7 +31,7 @@ namespace UIForia {
         public static UIFixedLength Unset => new UIFixedLength(FloatUtil.UnsetValue);
 
         public bool Equals(UIFixedLength other) {
-            return Mathf.Approximately(value, other.value) && unit == other.unit;
+            return ((float.IsNaN(value) && float.IsNaN(other.value)) || Mathf.Approximately(value, other.value)) && unit == other.unit;
         }
 
         public override bool Equals(object obj) {

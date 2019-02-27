@@ -255,7 +255,7 @@ SubShader {
 
 			float3 bump = UnpackNormal(tex2D(_BumpMap, input.textures.xy + float2(_FaceUVSpeedX, _FaceUVSpeedY) * _Time.y)).xyz;
 			bump *= lerp(_BumpFace, _BumpOutline, saturate(sd + outline * 0.5));
-			n = normalize(n- bump);
+			n = normalize(n - bump);
 
 			float3 light = normalize(float3(sin(_LightAngle), cos(_LightAngle), -1.0));
 

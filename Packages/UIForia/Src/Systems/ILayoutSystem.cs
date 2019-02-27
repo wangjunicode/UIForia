@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using UIForia.Elements;
 using UIForia.Layout.LayoutTypes;
 using UIForia.Rendering;
+using UIForia.Util;
 using UnityEngine;
 
 namespace UIForia.Systems {
@@ -19,6 +20,8 @@ namespace UIForia.Systems {
         OffsetRect GetBorderRect(UIElement element);
 
         LayoutBox GetBoxForElement(UIElement itemElement);
+
+        LightList<UIElement> GetVisibleElements();
 
     }
 

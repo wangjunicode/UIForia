@@ -13,12 +13,10 @@ namespace SVGX {
             return CubicCurve(output, start, ctrl2, ctrl3, end);
         }
 
-        public static int CubicCurve(LightList<Vector2> output, Vector2 start, Vector2 ctrl0, Vector2 ctrl1, Vector2 end) {
+        public static int CubicCurve(LightList<Vector2> output, Vector2 start, Vector2 ctrl0, Vector2 ctrl1, Vector2 end, float distanceTolerance = 1f) {
             if (start == ctrl0 && ctrl0 == ctrl1 && ctrl1 == end) {
                 return 0;
             }
-
-            const float distanceTolerance = 1f;
 
             int originalPointCount = output.Count;
             output.EnsureAdditionalCapacity(40);
@@ -34,6 +32,8 @@ namespace SVGX {
             return output.Count - originalPointCount;
         }
 
+        // todo -- remove recursion, maybe jobify
+        
         private static void RecursiveBezier(LightList<Vector2> points, int currentIteration, float distanceTolerance, float x1, float y1, float x2, float y2, float x3, float y3, float x4, float y4) {
             while (true) {
                 if (currentIteration++ >= MaxAdaptiveBezierIteration) return;

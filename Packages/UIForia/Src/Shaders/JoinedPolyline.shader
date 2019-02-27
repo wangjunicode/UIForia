@@ -3,10 +3,8 @@ Shader "UIForia/JoinedPolyline" {
     SubShader {
 
         Tags { "RenderType"="Transparent" "DisableBatching"="True" }
-        Cull Off // todo set this to Back
+        Cull Back 
         Blend SrcAlpha OneMinusSrcAlpha
-        ZClip Off
-        ZWrite Off
         
         Pass {
            CGPROGRAM
@@ -62,7 +60,7 @@ Shader "UIForia/JoinedPolyline" {
                o.color = input.color;
                o.uv = float4(w, w * dir, 0, 0);
                
-               o.flags = float4(strokeWidth, w * dir, aa, 0);
+               o.flags = float4(strokeWidth, w * dir, aa, curr.x == next.x || curr.y == next.y);
                
                // todo -- support flags for pushing stroke to inside or outside of shape
                // for pushing stroke outwards: pos.xy - (n1 * strokeWidth * 0.5)
@@ -84,8 +82,8 @@ Shader "UIForia/JoinedPolyline" {
                if(d <= 0) {
                    return i.color;
                }
-               
-               d /= antialias;
+
+               d /= aa;
                float threshold = 1;
                float afwidth = length(float2(ddx(d), ddy(d)));
                float alpha = smoothstep(threshold - afwidth, threshold + afwidth, d);

@@ -111,7 +111,7 @@ namespace UIForia.Rendering {
                 return;
             }
 
-            containedStates = 0;
+            containedStates = 0;  
             hasAttributeStyles = false;
             styleGroupContainers.Clear();
             ClearPropertyMap();

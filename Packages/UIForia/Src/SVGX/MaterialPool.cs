@@ -17,19 +17,14 @@ namespace SVGX {
             this.releaseQueue = new LightList<Material>();
         }
 
-        public MaterialPool(Shader shader) : this(new Material(shader)) {}
+        public MaterialPool(Shader shader) : this(new Material(shader)) { }
 
         public Material GetAndQueueForRelease() {
-            Material retn = null;
-            if (pool.Count > 0) {
-                retn = pool.Pop();
-            }
-            
-            retn = new Material(material);
+            Material retn = pool.Count > 0 ? pool.Pop() : new Material(material);
             releaseQueue.Add(retn);
             return retn;
         }
-        
+
         public Material Get() {
             if (pool.Count > 0) {
                 return pool.Pop();

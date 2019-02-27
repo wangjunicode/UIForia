@@ -1,0 +1,22 @@
+style container {
+    PreferredSize = 600px;
+    BackgroundColor = yellow;
+}
+
+style group1 {
+    PreferredSize = 200px;
+    BackgroundColor = green;
+    Border = 20px;
+    BorderColor = red;
+}
+
+style group2 {
+    PreferredSize = 200px;
+    BackgroundColor = blue;
+    BorderTop = 30px;
+    BorderRight = 20px;
+    BorderLeft = 20px;
+    BorderBottom = 20px;
+    BorderColor = rgba(255, 255, 255, 100);
+
+}

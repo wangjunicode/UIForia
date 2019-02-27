@@ -1,11 +1,13 @@
+using SVGX;
 using UIForia.Util;
 using TMPro;
 using UIForia.Rendering;
+using UnityEngine;
 
 namespace UIForia.Text {
 
     public struct SpanInfo {
-
+        // todo -- clean up these fields
         public int startChar;
         public int charCount;
         public TMP_FontAsset font;
@@ -21,6 +23,8 @@ namespace UIForia.Text {
         public int startWord;
         public int wordCount;
         public TextAlignment alignment;
+
+        public SVGXTextStyle textStyle;
 
     }
 

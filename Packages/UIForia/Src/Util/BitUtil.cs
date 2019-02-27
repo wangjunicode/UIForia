@@ -27,13 +27,13 @@ namespace UIForia.Rendering {
         [StructLayout(LayoutKind.Explicit)]
         private struct BitSetter {
 
-            [FieldOffset(0)] public int intVal;
+            [FieldOffset(0)] public uint intVal;
             [FieldOffset(0)] public byte byte0;
             [FieldOffset(1)] public byte byte1;
             [FieldOffset(2)] public byte byte2;
             [FieldOffset(3)] public byte byte3;
 
-            public BitSetter(int value) {
+            public BitSetter(uint value) {
                 byte0 = 0;
                 byte1 = 0;
                 byte2 = 0;
@@ -43,38 +43,40 @@ namespace UIForia.Rendering {
 
         }
 
-        public static int SetByte0(int value, int i) {
+        public static uint SetByte0(uint value, int i) {
             BitSetter b = new BitSetter(value);
             b.byte0 = (byte) i;
             return b.intVal;
         }
 
-        public static int SetByte1(int value, int i) {
+        public static uint SetByte1(uint value, int i) {
             BitSetter b = new BitSetter(value);
             b.byte1 = (byte) i;
             return b.intVal;
         }
 
-        public static int SetByte2(int value, int i) {
+        public static uint SetByte2(uint value, int i) {
             BitSetter b = new BitSetter(value);
             b.byte2 = (byte) i;
             return b.intVal;
         }
 
-        public static int SetByte3(int value, int i) {
+        public static uint SetByte3(uint value, int i) {
             BitSetter b = new BitSetter(value);
             b.byte3 = (byte) i;
             return b.intVal;
         }
 
-        public static int SetBytes(int byte0, int byte1, int byte2, int byte3) {
+        public static uint SetBytes(int byte0, int byte1, int byte2, int byte3) {
             BitSetter b = new BitSetter(0);
-            b.byte0 = (byte) byte0;
-            b.byte1 = (byte) byte1;
-            b.byte2 = (byte) byte2;
-            b.byte3 = (byte) byte3;
+            b.byte0 = (byte)byte0;
+            b.byte1 = (byte)byte1;
+            b.byte2 = (byte)byte2;
+            b.byte3 = (byte)byte3;
             return b.intVal;
         }
+    
+
     }
 
 }

@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using TMPro;
 using UIForia.Text;
 using UIForia.Util;
 using UnityEngine;
@@ -27,6 +28,7 @@ namespace SVGX {
         internal readonly Stack<int> clipStack;
         internal readonly LightList<SVGXGradient> gradients;
         internal readonly LightList<Texture2D> textures;
+        internal readonly LightList<TextInfo> textInfos;
 
         private Vector2 lastPoint;
         private SVGXMatrix currentMatrix;
@@ -47,6 +49,7 @@ namespace SVGX {
             shapes.Add(new SVGXShape(SVGXShapeType.Unset, default));
             textures = new LightList<Texture2D>();
             clipStack = new Stack<int>();
+            textInfos = new LightList<TextInfo>();
             currentStyle = SVGXStyle.Default();
         }
 
@@ -80,19 +83,11 @@ namespace SVGX {
             currentTexture = texture;
         }
 
-        public void SetFill(Texture2D texture, SVGXGradient gradient, float mix) {
-            currentStyle.fillMode = FillMode.Texture;
-            currentStyle.fillTintColor = Color.white;
-            currentStyle.textureId = texture.GetInstanceID();
-            currentTexture = texture;
-        }
-
         public void SetStrokeColor(Color color) {
             this.currentStyle.strokeColor = color;
         }
 
         public void MoveTo(float x, float y) {
-            // todo -- if last was move to, set point and return
             lastPoint = new Vector2(x, y);
             SVGXShape currentShape = shapes[shapes.Count - 1];
             if (currentShape.type != SVGXShapeType.Unset) {
@@ -101,9 +96,25 @@ namespace SVGX {
             }
         }
 
-        public void Text(float x, float y, string text) { }
+        public void Text(float x, float y, TextInfo text) {
+            SVGXShape currentShape = shapes[shapes.Count - 1];
 
-        public void Text(float x, float y, TextInfo text) { }
+            // todo -- bounds will depend on text layout, should we just do it here?
+            SVGXShape textShape = new SVGXShape(SVGXShapeType.Text, new RangeInt(points.Count, 1), new SVGXBounds(), false, textInfos.Count);
+            textInfos.Add(text);
+
+            if (currentShape.type == SVGXShapeType.Unset) {
+                shapes[shapes.Count - 1] = textShape;
+            }
+            else {
+                shapes.Add(textShape);
+            }
+
+            currentShapeRange.length++;
+            lastPoint = new Vector2(x, y);
+            ;
+            points.Add(lastPoint);
+        }
 
         public void LineTo(float x, float y) {
             SVGXShape currentShape = shapes[shapes.Count - 1];
@@ -180,78 +191,17 @@ namespace SVGX {
         }
 
         public void RoundedRect(Rect rect, float rtl, float rtr, float rbl, float rbr) {
-            float halfW = rect.width * 0.5f;
-            float halfH = rect.height * 0.5f;
-            float rxBL = rbl < halfW ? rbl : halfW;
-            float ryBL = rbl < halfH ? rbl : halfH;
-            float rxBR = rbr < halfW ? rbr : halfW;
-            float ryBR = rbr < halfH ? rbr : halfH;
-            float rxTL = rtl < halfW ? rtl : halfW;
-            float ryTL = rtl < halfH ? rtl : halfH;
-            float rxTR = rtr < halfW ? rtr : halfW;
-            float ryTR = rtr < halfH ? rtr : halfH;
-
-            float x = rect.x;
-            float y = rect.y;
-            float w = rect.width;
-            float h = rect.height;
-
             SVGXShapeType lastType = shapes[shapes.Count - 1].type;
-            SVGXShape currentShape = new SVGXShape();
 
             int pointRangeStart = points.Count;
-            const float OneMinusKappa90 = 0.4477152f;
 
-            points.Add(new Vector2(x, y + ryTL)); // move to
-            Vector2 last = new Vector2(x, y + h - ryBL);
-
-            points.Add(last); // line to
-
-            SVGXBezier.CubicCurve(
-                points,
-                last,
-                new Vector2(x, y + h - ryBL * OneMinusKappa90),
-                new Vector2(x + rxBL * OneMinusKappa90, y + h),
-                new Vector2(x + rxBL, y + h)
-            );
-
-            last = new Vector2(x + w - rxBR, y + h); // line to
-            points.Add(last);
-
-            SVGXBezier.CubicCurve(
-                points,
-                last,
-                new Vector2(x + w - rxBR * OneMinusKappa90, y + h),
-                new Vector2(x + w, y + h - ryBR * OneMinusKappa90),
-                new Vector2(x + w, y + h - ryBR)
-            );
-
-            last = new Vector2(x + w, y + ryTR); // line to
-            points.Add(last);
-
-            SVGXBezier.CubicCurve(
-                points,
-                last,
-                new Vector2(x + w, y + ryTR * OneMinusKappa90),
-                new Vector2(x + w - rxTR * OneMinusKappa90, y),
-                new Vector2(x + w - rxTR, y)
-            );
-
-            last = new Vector2(x + rxTL, y); // line to
-            points.Add(last);
-
-            SVGXBezier.CubicCurve(
-                points,
-                last,
-                new Vector2(x + rxTL * OneMinusKappa90, y),
-                new Vector2(x, y + ryTL * OneMinusKappa90),
-                new Vector2(x, y + ryTL)
-            );
+            points.Add(rect.min);
+            points.Add(new Vector2(rect.width, rect.height));
+            points.Add(new Vector2(rtl, rtr));
+            points.Add(new Vector2(rbl, rbr));
 
             RangeInt pointRange = new RangeInt(pointRangeStart, points.Count - pointRangeStart);
-            currentShape = new SVGXShape(SVGXShapeType.RoundedRect, pointRange, new Vector2(x, y));
-            currentShape.bounds = new SVGXBounds(rect.min, rect.max);
-//            currentShape.isClosed = true; // todo -- isClosed yields the wrong behavior
+            SVGXShape currentShape = new SVGXShape(SVGXShapeType.RoundedRect, pointRange, new SVGXBounds(rect.min, rect.max), true);
 
             if (lastType != SVGXShapeType.Unset) {
                 shapes.Add(currentShape);
@@ -301,6 +251,7 @@ namespace SVGX {
             textures.Clear();
             clipStack.Clear();
             clipGroups.Clear();
+            textInfos.Clear();
         }
 
         public void Save() {
@@ -389,19 +340,12 @@ namespace SVGX {
             SVGXShapeType lastType = currentShape.type;
 
             Vector2 x0y0 = new Vector2(x, y);
-            Vector2 x1y0 = new Vector2(x + width, y);
-            Vector2 x1y1 = new Vector2(x + width, y + height);
-            Vector2 x0y1 = new Vector2(x, y + height);
+            Vector2 x1y1 = new Vector2(width, height);
 
-            currentShape = new SVGXShape(shapeType, new RangeInt(points.Count, 4));
-            currentShape.bounds = new SVGXBounds(x0y0, x1y1);
-            currentShape.origin = x0y0;
+            currentShape = new SVGXShape(shapeType, new RangeInt(points.Count, 2), new SVGXBounds(x0y0, x0y0 + x1y1));
 
-            points.EnsureAdditionalCapacity(4);
-            points.AddUnchecked(x0y0);
-            points.AddUnchecked(x1y0);
-            points.AddUnchecked(x1y1);
-            points.AddUnchecked(x0y1);
+            points.Add(x0y0);
+            points.Add(x1y1);
 
             currentShape.isClosed = true;
 
@@ -444,6 +388,11 @@ namespace SVGX {
             drawCalls.Add(new SVGXDrawCall(DrawCallType.StandardFill, clipId, currentStyle, currentMatrix, currentShapeRange));
         }
 
+        public void Shadow() {
+            int clipId = clipStack.Count > 0 ? clipStack.Peek() : -1;
+            drawCalls.Add(new SVGXDrawCall(DrawCallType.Shadow, clipId, currentStyle, currentMatrix, currentShapeRange));
+        }
+
         public void Stroke() {
             int clipId = clipStack.Count > 0 ? clipStack.Peek() : -1;
             drawCalls.Add(new SVGXDrawCall(DrawCallType.StandardStroke, clipId, currentStyle, currentMatrix, currentShapeRange));
@@ -467,6 +416,43 @@ namespace SVGX {
 
         public void SetFillOpacity(float fillOpacity) {
             currentStyle.fillOpacity = fillOpacity;
+        }
+
+        public void SetStrokePlacement(StrokePlacement strokePlacement) {
+            currentStyle.strokePlacement = strokePlacement;
+        }
+
+        public void SetShadowColor(Color shadowColor) {
+            currentStyle.shadowColor = shadowColor;
+        }
+
+        public void SetShadowOffsetX(float shadowOffsetX) {
+            currentStyle.shadowOffsetX = shadowOffsetX;
+        }
+
+        public void SetShadowOffsetY(float shadowOffsetY) {
+            currentStyle.shadowOffsetY = shadowOffsetY;
+        }
+
+        public void SetShadowSoftness(float shadowSoftness) {
+            currentStyle.shadowSoftnessX = Mathf.Clamp01(shadowSoftness);
+            currentStyle.shadowSoftnessY = Mathf.Clamp01(shadowSoftness);
+        }
+
+        public void SetShadowSoftnessX(float shadowSoftnessX) {
+            currentStyle.shadowSoftnessX = Mathf.Clamp01(shadowSoftnessX);
+        }
+
+        public void SetShadowSoftnessY(float shadowSoftnessY) {
+            currentStyle.shadowSoftnessY = Mathf.Clamp01(shadowSoftnessY);
+        }
+
+        public void SetShadowIntensity(float shadowIntensity) {
+            currentStyle.shadowIntensity = shadowIntensity;
+        }
+
+        public void SetShadowTint(Color shadowTint) {
+            currentStyle.shadowTint = shadowTint;
         }
 
     }

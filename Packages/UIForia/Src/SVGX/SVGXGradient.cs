@@ -29,7 +29,6 @@ namespace SVGX {
 
         public readonly int id;
         public LightList<ColorStop> stops;
-        
         private static int s_IdGenerator;
 
         protected SVGXGradient(IList<ColorStop> colorStops) {

@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="utf-8"?>
+<UITemplate>
+    <Style path="SVGXDemo/SVGXDemo.style"/>
+    
+    <Contents style="container">
+        
+        <!--<Group style="group1"/>    -->
+        
+        <Group style="group2"/>
+        
+    </Contents>
+    
+</UITemplate>

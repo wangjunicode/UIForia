@@ -12,11 +12,11 @@ v2f LineVertex(appdata input) {
    
    float strokeWidth = input.uv1.w;
    
-   float aa = 0; //strokeWidth < 2 ? 1 : antialias;
+   float aa = strokeWidth < 2 ? 1 : antialias;
    
-   int dir = GetByte0(flags) * 2 - 1; // remap [0, 1] to [-1, 1]
-   uint isNear = GetByte1(flags);
-   uint isCap = GetByte2(flags);
+   int dir = input.uv3.x;
+   uint isNear = input.uv3.y;
+   uint isCap = input.uv3.z;
    
    float w = (strokeWidth * 0.5) + aa;
    
@@ -37,14 +37,14 @@ v2f LineVertex(appdata input) {
 
    if(isCap) {
         if(isNear) {
-            pos = curr + w * n1 * dir; // * v1 + dir * w * n1;
+            pos = curr - w * v1 + dir * w * n1;
         }
         else {
-            pos = curr + w * n0 * dir; //v0 + dir * w * n0;
+            pos = curr + w * v0 + dir * w * n0;
         }
    }
    else {
-       pos = curr + (miter * miterLength * dir);
+        pos = curr + (miter * miterLength * dir);
    }
 
    o.secondaryColor = fixed4(0, 0, 0, 0);
@@ -58,7 +58,7 @@ fixed4 LineFragment(v2f i) {
    float w = (thickness * 0.5) - aa;
 
    float d = abs(i.uv.y) - w;
-   
+
    if(d <= 0) {
        return i.color;
    }

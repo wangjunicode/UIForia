@@ -105,20 +105,20 @@ namespace SVGX {
                 uv0List.Add(new Vector4(1, 0));
                 uv0List.Add(new Vector4(0, 0));
 
-                uv1List.Add(new Vector4(renderData, flags0, 0, strokeWidth));
-                uv1List.Add(new Vector4(renderData, flags1, 0, strokeWidth));
-                uv1List.Add(new Vector4(renderData, flags2, 0, strokeWidth));
-                uv1List.Add(new Vector4(renderData, flags3, 0, strokeWidth));
+                uv1List.Add(new Vector4(renderData, flags0, 1, strokeWidth));
+                uv1List.Add(new Vector4(renderData, flags1, 1, strokeWidth));
+                uv1List.Add(new Vector4(renderData, flags2, -1, strokeWidth));
+                uv1List.Add(new Vector4(renderData, flags3, -1, strokeWidth));
 
                 uv2List.Add(new Vector4(prev.x, -prev.y, next.x, -next.y));
                 uv2List.Add(new Vector4(curr.x, -curr.y, far.x, -far.y));
                 uv2List.Add(new Vector4(prev.x, -prev.y, next.x, -next.y));
                 uv2List.Add(new Vector4(curr.x, -curr.y, far.x, -far.y));
 
-                uv3List.Add(new Vector4());
-                uv3List.Add(new Vector4());
-                uv3List.Add(new Vector4());
-                uv3List.Add(new Vector4());
+                uv3List.Add(new Vector4(1, 1, 0, 0));
+                uv3List.Add(new Vector4(1, 0, 0, 0));
+                uv3List.Add(new Vector4(-1, 1, 0, 0));
+                uv3List.Add(new Vector4(-1, 0, 0, 0));
 
                 uv4List.Add(new Vector4());
                 uv4List.Add(new Vector4());
@@ -166,6 +166,15 @@ namespace SVGX {
                     Vector2 borderRadiusZW = points[start + 3];
                     strokeWidth += 0.1f; // not sure why but stroke isn't right here if 
 
+                    int gradientId = gradientData.rowId;
+                    int gradientDirection = 0;
+
+                    uint fillColorModes = (uint) style.fillMode;
+
+                    if (gradientData.gradient is SVGXLinearGradient linearGradient) {
+                        gradientDirection = (int) linearGradient.direction;
+                    }
+                    
                     // if we use negatives then we can bend the outline without bending the box
 
                     if (style.strokePlacement == StrokePlacement.Outside) {
@@ -216,20 +225,20 @@ namespace SVGX {
                     uv0List.Add(new Vector4(1, 0, wh.x, wh.y));
                     uv0List.Add(new Vector4(0, 0, wh.x, wh.y));
 
-                    uv1List.Add(new Vector4(renderData, strokeWidth, 0, 0));
-                    uv1List.Add(new Vector4(renderData, strokeWidth, 0, 0));
-                    uv1List.Add(new Vector4(renderData, strokeWidth, 0, 0));
-                    uv1List.Add(new Vector4(renderData, strokeWidth, 0, 0));
-
+                    uv1List.Add(new Vector4(renderData, fillColorModes, gradientId, gradientDirection));
+                    uv1List.Add(new Vector4(renderData, fillColorModes, gradientId, gradientDirection));
+                    uv1List.Add(new Vector4(renderData, fillColorModes, gradientId, gradientDirection));
+                    uv1List.Add(new Vector4(renderData, fillColorModes, gradientId, gradientDirection));
+                    
                     uv2List.Add(new Vector4(borderRadiusXY.x, borderRadiusXY.y, borderRadiusZW.x, borderRadiusZW.y));
                     uv2List.Add(new Vector4(borderRadiusXY.x, borderRadiusXY.y, borderRadiusZW.x, borderRadiusZW.y));
                     uv2List.Add(new Vector4(borderRadiusXY.x, borderRadiusXY.y, borderRadiusZW.x, borderRadiusZW.y));
                     uv2List.Add(new Vector4(borderRadiusXY.x, borderRadiusXY.y, borderRadiusZW.x, borderRadiusZW.y));
 
-                    uv3List.Add(new Vector4());
-                    uv3List.Add(new Vector4());
-                    uv3List.Add(new Vector4());
-                    uv3List.Add(new Vector4());
+                    uv3List.Add(new Vector4(strokeWidth, 0, 0, 0));
+                    uv3List.Add(new Vector4(strokeWidth, 0, 0, 0));
+                    uv3List.Add(new Vector4(strokeWidth, 0, 0, 0));
+                    uv3List.Add(new Vector4(strokeWidth, 0, 0, 0));
 
                     uv4List.Add(new Vector4());
                     uv4List.Add(new Vector4());
@@ -250,6 +259,16 @@ namespace SVGX {
                 case SVGXShapeType.Rect:
                 case SVGXShapeType.Circle:
                 case SVGXShapeType.Ellipse: {
+                    
+                    int gradientId = gradientData.rowId;
+                    int gradientDirection = 0;
+
+                    uint fillColorModes = (uint) style.fillMode;
+
+                    if (gradientData.gradient is SVGXLinearGradient linearGradient) {
+                        gradientDirection = (int) linearGradient.direction;
+                    }
+                    
                     // todo for strokes cutout the shape of the center, ie build a mesh that produces less discard ops
                     int renderData = BitUtil.SetHighLowBits((int) renderShape.shape.type, RenderTypeStrokeShape);
 
@@ -299,21 +318,21 @@ namespace SVGX {
                     uv0List.Add(new Vector4(1, 1, wh.x, wh.y));
                     uv0List.Add(new Vector4(1, 0, wh.x, wh.y));
                     uv0List.Add(new Vector4(0, 0, wh.x, wh.y));
+                    
+                    uv1List.Add(new Vector4(renderData, fillColorModes, gradientId, gradientDirection));
+                    uv1List.Add(new Vector4(renderData, fillColorModes, gradientId, gradientDirection));
+                    uv1List.Add(new Vector4(renderData, fillColorModes, gradientId, gradientDirection));
+                    uv1List.Add(new Vector4(renderData, fillColorModes, gradientId, gradientDirection));
 
-                    uv1List.Add(new Vector4(renderData, strokeWidth, 0, 0));
-                    uv1List.Add(new Vector4(renderData, strokeWidth, 0, 0));
-                    uv1List.Add(new Vector4(renderData, strokeWidth, 0, 0));
-                    uv1List.Add(new Vector4(renderData, strokeWidth, 0, 0));
-
                     uv2List.Add(new Vector4(borderRadiusXY.x, borderRadiusXY.y, borderRadiusZW.x, borderRadiusZW.y));
                     uv2List.Add(new Vector4(borderRadiusXY.x, borderRadiusXY.y, borderRadiusZW.x, borderRadiusZW.y));
                     uv2List.Add(new Vector4(borderRadiusXY.x, borderRadiusXY.y, borderRadiusZW.x, borderRadiusZW.y));
                     uv2List.Add(new Vector4(borderRadiusXY.x, borderRadiusXY.y, borderRadiusZW.x, borderRadiusZW.y));
 
-                    uv3List.Add(new Vector4());
-                    uv3List.Add(new Vector4());
-                    uv3List.Add(new Vector4());
-                    uv3List.Add(new Vector4());
+                    uv3List.Add(new Vector4(strokeWidth, 0, 0, 0));
+                    uv3List.Add(new Vector4(strokeWidth, 0, 0, 0));
+                    uv3List.Add(new Vector4(strokeWidth, 0, 0, 0));
+                    uv3List.Add(new Vector4(strokeWidth, 0, 0, 0));
 
                     uv4List.Add(new Vector4());
                     uv4List.Add(new Vector4());
@@ -352,12 +371,12 @@ namespace SVGX {
                 uv1List[rangeStart + 3] = new Vector4(renderData, BitUtil.SetBytes(0, VertexType_Far, cap, 0), 0, strokeWidth);
             }
             else {
-                int rangeStart = uv1List.Count;
+                int rangeStart = uv3List.Count;
                 GenerateSegmentBodies(pointCache.Array, pointCache.Count - 2, color, strokeWidth, renderShape.zIndex);
-                uv1List[rangeStart + 0] = new Vector4(DrawType_Stroke, BitUtil.SetBytes(1, VertexType_Near, cap, 0), 0, strokeWidth);
-                uv1List[rangeStart + 2] = new Vector4(DrawType_Stroke, BitUtil.SetBytes(0, VertexType_Near, cap, 0), 0, strokeWidth);
-                uv1List[uv1List.Count - 3] = new Vector4(DrawType_Stroke, BitUtil.SetBytes(1, VertexType_Far, cap, 0), 0, strokeWidth);
-                uv1List[uv1List.Count - 1] = new Vector4(DrawType_Stroke, BitUtil.SetBytes(0, VertexType_Far, cap, 0), 0, strokeWidth);
+                uv3List[rangeStart + 0] = new Vector4(1, VertexType_Near, cap, 0);
+                uv3List[rangeStart + 2] = new Vector4(-1, VertexType_Near, cap, 0);
+                uv3List[uv3List.Count - 3] = new Vector4(uv3List[uv3List.Count - 3].x, uv3List[uv3List.Count - 3].y, cap, 0);
+                uv3List[uv3List.Count - 1] = new Vector4(uv3List[uv3List.Count - 1].x, uv3List[uv3List.Count - 1].y, cap, 0);
             }
 
             LightListPool<Vector2>.Release(ref pointCache);
@@ -430,6 +449,8 @@ namespace SVGX {
 
                     Vector4 outline = new Vector4(oc, outlineWidth, outlineSoftness, 0);
 
+                    Color textColor = textStyle.color;
+                    
                     for (int i = 0; i < charCount; i++) {
                         if (charInfos[i].character == ' ') continue;
                         Vector2 topLeft = charInfos[i].layoutTopLeft;
@@ -465,10 +486,10 @@ namespace SVGX {
                         uv4List.Add(new Vector4());
                         uv4List.Add(new Vector4());
 
-                        colorsList.Add(style.fillColor);
-                        colorsList.Add(style.fillColor);
-                        colorsList.Add(style.fillColor);
-                        colorsList.Add(style.fillColor);
+                        colorsList.Add(textColor);
+                        colorsList.Add(textColor);
+                        colorsList.Add(textColor);
+                        colorsList.Add(textColor);
 
                         trianglesList.Add(triangleIndex + 0);
                         trianglesList.Add(triangleIndex + 1);

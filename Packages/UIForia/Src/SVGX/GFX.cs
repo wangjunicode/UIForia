@@ -457,18 +457,6 @@ namespace SVGX {
             }
         }
 
-        public struct GradientData {
-
-            public readonly int rowId;
-            public readonly SVGXGradient gradient;
-
-            public GradientData(int rowId, SVGXGradient gradient) {
-                this.rowId = rowId;
-                this.gradient = gradient;
-            }
-
-        }
-
         private void DrawBatchedOpaques(Vector2[] points, LightList<SVGXRenderShape> renderShapes, LightList<SVGXStyle> styles, LightList<SVGXMatrix> matrices) {
             GroupByTexture(styles, renderShapes, texturedShapeGroups);
             TexturedShapeGroup[] array = texturedShapeGroups.Array;
@@ -544,38 +532,43 @@ namespace SVGX {
             SVGXRenderShape[] renderShapeArray = renderShapes.Array;
             Matrix4x4 originMatrix = OriginMatrix;
 
-            int lastFontId = -1;
             int lastTextureId = styles[renderShapeArray[0].styleId].textureId;
             Material material = batchedTransparentPool.GetAndQueueForRelease();
             Material fontMaterial = null;
-
 
             for (int i = 0; i < count; i++) {
                 SVGXRenderShape renderShape = renderShapeArray[i];
                 TextInfo textInfo = renderShape.textInfo;
                 int currentTextureId = styles[renderShape.styleId].textureId;
-                int currentFontId = renderShape.shape.type == SVGXShapeType.Text ? textInfo.spanInfos[0].font.GetInstanceID() : lastFontId;
-                // if texture changed or font changed, we need to draw what we currently have buffered
-                // if we have nothing buffered, don't draw yet
 
-                if (currentTextureId != lastTextureId) {
-                    material.SetTexture(s_MainTexKey, textureMap.GetOrDefault(lastTextureId));
-                    DrawMesh(batchedVertexData.FillMesh(), originMatrix, material);
-                    batchedVertexData = vertexDataPool.GetAndQueueForRelease();
-                    material = batchedTransparentPool.GetAndQueueForRelease();
-                    lastTextureId = currentTextureId;
+                bool fontChanged = false;
+
+                bool textureChanged = currentTextureId != -1 && lastTextureId != 1 && currentTextureId != lastTextureId;
+
+                if (renderShape.shape.type == SVGXShapeType.Text) {
+                    // if we have a current font and stuff to render with it, draw it
+                    // set current font to this text element's font
+                    fontChanged = fontMaterial != textInfo.spanInfos[0].font.material;
                 }
-//              // todo -- fonts are broken, might have to do with the SetGlobalTexture stuff
-//                if (lastFontId != currentFontId) {
-//                    
-//                    material = batchedTransparentPool.GetAndQueueForRelease();
-//                    material.SetTexture(s_MainTexKey, textureMap.GetOrDefault(lastTextureId));
-//                    DrawMesh(batchedVertexData.FillMesh(), originMatrix, material);
-//                    
-//                    fontMaterial = textInfo.spanInfos[0].font.material;
-//                    UpdateFontAtlas(fontMaterial);
-//                }
-                
+
+                if (fontChanged || textureChanged) {
+                    bool mustDraw = fontChanged && fontMaterial != null;
+
+                    if (mustDraw) {
+                        UpdateFontAtlas(material, fontMaterial);
+                        material.SetTexture(s_MainTexKey, textureMap.GetOrDefault(lastTextureId));
+                        DrawMesh(batchedVertexData.FillMesh(), originMatrix, material);
+                        batchedVertexData = vertexDataPool.GetAndQueueForRelease();
+                        material = batchedTransparentPool.GetAndQueueForRelease();
+                    }
+
+                    lastTextureId = currentTextureId;
+
+                    if (fontChanged) {
+                        fontMaterial = textInfo.spanInfos[0].font.material;
+                    }
+                }
+
                 int gradientLookupId = styles[renderShape.styleId].gradientId;
 
                 GradientData gradientData = default;
@@ -602,22 +595,25 @@ namespace SVGX {
                 }
             }
 
-            material = batchedTransparentPool.GetAndQueueForRelease();
             material.SetTexture(s_MainTexKey, textureMap.GetOrDefault(lastTextureId));
+            UpdateFontAtlas(material, fontMaterial);
             DrawMesh(batchedVertexData.FillMesh(), originMatrix, material);
         }
 
-        private static void UpdateFontAtlas(Material fontMaterial) {
-            Shader.SetGlobalTexture(s_GlobalFontTextureKey, fontMaterial.mainTexture);
+        private static void UpdateFontAtlas(Material renderMaterial, Material fontMaterial) {
+            if (fontMaterial == null) return;
+            renderMaterial.SetTexture(s_GlobalFontTextureKey, fontMaterial.mainTexture);
 
-            Shader.SetGlobalVector(s_GlobalFontData1Key, new Vector4(
+            // if we group fonts by channel (4 fonts per texture) then these need to be vectors 
+            // where each channel is the value for the corresponding texture
+            renderMaterial.SetVector(s_GlobalFontData1Key, new Vector4(
                 fontMaterial.GetFloat(ShaderUtilities.ID_WeightNormal),
                 fontMaterial.GetFloat(ShaderUtilities.ID_WeightBold),
                 fontMaterial.mainTexture.width,
                 fontMaterial.mainTexture.height)
             );
 
-            Shader.SetGlobalVector(s_GlobalFontData2Key, new Vector4(
+            renderMaterial.SetVector(s_GlobalFontData2Key, new Vector4(
                 fontMaterial.GetFloat(ShaderUtilities.ID_GradientScale),
                 fontMaterial.GetFloat(ShaderUtilities.ID_ScaleRatio_A),
                 fontMaterial.GetFloat(ShaderUtilities.ID_ScaleRatio_B),
@@ -640,6 +636,18 @@ namespace SVGX {
             }
 
             DrawMesh(wave.clipMesh, OriginMatrix, stencilClipClearPool.GetAndQueueForRelease());
+        }
+
+        public struct GradientData {
+
+            public readonly int rowId;
+            public readonly SVGXGradient gradient;
+
+            public GradientData(int rowId, SVGXGradient gradient) {
+                this.rowId = rowId;
+                this.gradient = gradient;
+            }
+
         }
 
     }

@@ -21,8 +21,6 @@ Shader "UIForia/BatchedTransparent" {
            CGPROGRAM
            #pragma vertex vert
            #pragma fragment frag
-           #pragma enable_d3d11_debug_symbols
-           #pragma debug
            #pragma target 3.0
            #include "UnityCG.cginc"
            #include "UIForiaInc.cginc"
@@ -67,7 +65,7 @@ Shader "UIForia/BatchedTransparent" {
            // todo -- use multi-compile flags to only compile the SDF functions a given draw actually needs
            fixed4 SDFShape(v2f i, int shapeType, int strokeShape) {
                float2 drawSurfaceSize = i.uv.zw;
-               float strokeWidth = lerp(0, i.flags.z, strokeShape);
+               float strokeWidth = lerp(0, i.fragData3.x, strokeShape);
                
                fixed4 fromColor = i.color;
                fixed4 toColor = Clear;
@@ -152,8 +150,6 @@ Shader "UIForia/BatchedTransparent" {
                #define GradientDirection i.flags.w
                
                fixed4 color = SDFShape(i, ShapeType, strokeShape);
-               
-               // todo -- get this working again for filled strokes
                
                // todo -- see if we can drop the discard statement
                if(color.a - 0.001 <= 0) {

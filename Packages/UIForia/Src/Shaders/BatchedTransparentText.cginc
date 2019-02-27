@@ -10,8 +10,6 @@
 #define _ScaleX 1
 #define _ScaleY 1
 #define _FaceDilate 0
-#define _OutlineWidth 0
-#define _OutlineSoftness 0
 #define _GlowOuter 0
 #define _GlowOffset 0
 #define _UnderlayColor 0
@@ -46,6 +44,9 @@ inline float4 EncodeToFloat4(float v) {
           
 v2f TextVertex(appdata input) {
            
+    float outlineWidth = input.uv2.y;
+    float outlineSoftness = input.uv2.z;
+    
     float4 vPosition = UnityObjectToClipPos(input.vertex);
     float2 pixelSize = vPosition.w;
     
@@ -59,7 +60,7 @@ v2f TextVertex(appdata input) {
     weight = (weight + _FaceDilate) * gScaleRatioA * 0.5;
     
     float bias =(.5 - weight) + (.5 / scale);
-    float alphaClip = (1.0 - _OutlineWidth * gScaleRatioA - _OutlineSoftness * gScaleRatioA);
+    float alphaClip = (1.0 - outlineWidth * gScaleRatioA - outlineSoftness * gScaleRatioA);
     
     alphaClip = min(alphaClip, 1.0 - _GlowOffset * gScaleRatioB - _GlowOuter * gScaleRatioB);
     alphaClip = alphaClip / 2.0 - ( .5 / scale) - weight;
@@ -86,7 +87,7 @@ v2f TextVertex(appdata input) {
     o.color = input.color;
     o.uv = input.uv;
     o.flags = float4(RenderType_Text, 0, 0, 0);
-    o.fragData1 = float4(_OutlineWidth, _OutlineSoftness, input.uv2.x, 0);
+    o.fragData1 = float4(outlineWidth, outlineSoftness, input.uv2.x, 0);
     o.fragData2 =  float4(alphaClip, scale, bias, weight);
     o.fragData3 = float4(0, 0, 0, 0); 
     o.secondaryColor = c;

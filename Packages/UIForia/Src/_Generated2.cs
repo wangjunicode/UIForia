@@ -262,43 +262,6 @@ namespace UIForia.StyleBindings {
 
     }
         
-    public class StyleBinding_BackgroundShapeType : StyleBinding {
-
-        public readonly Expression<UIForia.Rendering.BackgroundShapeType> expression;
-        public readonly StylePropertyId propertyId;
-        
-        public StyleBinding_BackgroundShapeType(string propertyName, StylePropertyId propertyId, StyleState state, Expression<UIForia.Rendering.BackgroundShapeType> expression)
-            : base(propertyName, state) {
-            this.propertyId = propertyId;
-            this.expression = expression;
-        }
-
-        public override void Execute(UIElement element, ExpressionContext context) {
-            if (!element.style.IsInState(state)) return;
-
-            var oldValue = element.style.propertyMap[(int)propertyId].AsBackgroundShapeType;
-            var value = expression.Evaluate(context);
-            if (value != oldValue) {
-                element.style.SetProperty(new StyleProperty(propertyId, (int)value), state);
-            }
-        }
-
-        public override bool IsConstant() {
-            return expression.IsConstant();
-        }
-
-        public override void Apply(UIStyle style, ExpressionContext context) {
-            var value = expression.Evaluate(context);
-            style.SetProperty(new StyleProperty(propertyId, (int)value));
-        }
-
-        public override void Apply(UIStyleSet styleSet, ExpressionContext context) {
-            var value = expression.Evaluate(context);
-            styleSet.SetProperty(new StyleProperty(propertyId, (int)value), state);
-        }
-
-    }
-        
     public class StyleBinding_CursorStyle : StyleBinding {
 
         public readonly Expression<UIForia.Rendering.CursorStyle> expression;
@@ -928,6 +891,43 @@ namespace UIForia.StyleBindings {
 
     }
         
+    public class StyleBinding_ShadowType : StyleBinding {
+
+        public readonly Expression<UIForia.Rendering.ShadowType> expression;
+        public readonly StylePropertyId propertyId;
+        
+        public StyleBinding_ShadowType(string propertyName, StylePropertyId propertyId, StyleState state, Expression<UIForia.Rendering.ShadowType> expression)
+            : base(propertyName, state) {
+            this.propertyId = propertyId;
+            this.expression = expression;
+        }
+
+        public override void Execute(UIElement element, ExpressionContext context) {
+            if (!element.style.IsInState(state)) return;
+
+            var oldValue = element.style.propertyMap[(int)propertyId].AsShadowType;
+            var value = expression.Evaluate(context);
+            if (value != oldValue) {
+                element.style.SetProperty(new StyleProperty(propertyId, (int)value), state);
+            }
+        }
+
+        public override bool IsConstant() {
+            return expression.IsConstant();
+        }
+
+        public override void Apply(UIStyle style, ExpressionContext context) {
+            var value = expression.Evaluate(context);
+            style.SetProperty(new StyleProperty(propertyId, (int)value));
+        }
+
+        public override void Apply(UIStyleSet styleSet, ExpressionContext context) {
+            var value = expression.Evaluate(context);
+            styleSet.SetProperty(new StyleProperty(propertyId, (int)value), state);
+        }
+
+    }
+        
     public class StyleBinding_AnchorTarget : StyleBinding {
 
         public readonly Expression<UIForia.Rendering.AnchorTarget> expression;
@@ -1150,12 +1150,12 @@ namespace UIForia.StyleBindings {
 
     }
         
-    public class StyleBinding_VerticalScrollbarAttachment : StyleBinding {
+    public class StyleBinding_string : StyleBinding {
 
-        public readonly Expression<UIForia.Rendering.VerticalScrollbarAttachment> expression;
+        public readonly Expression<string> expression;
         public readonly StylePropertyId propertyId;
         
-        public StyleBinding_VerticalScrollbarAttachment(string propertyName, StylePropertyId propertyId, StyleState state, Expression<UIForia.Rendering.VerticalScrollbarAttachment> expression)
+        public StyleBinding_string(string propertyName, StylePropertyId propertyId, StyleState state, Expression<string> expression)
             : base(propertyName, state) {
             this.propertyId = propertyId;
             this.expression = expression;
@@ -1164,10 +1164,10 @@ namespace UIForia.StyleBindings {
         public override void Execute(UIElement element, ExpressionContext context) {
             if (!element.style.IsInState(state)) return;
 
-            var oldValue = element.style.propertyMap[(int)propertyId].AsVerticalScrollbarAttachment;
+            var oldValue = element.style.propertyMap[(int)propertyId].AsString;
             var value = expression.Evaluate(context);
             if (value != oldValue) {
-                element.style.SetProperty(new StyleProperty(propertyId, (int)value), state);
+                element.style.SetProperty(new StyleProperty(propertyId, 0, 0, value), state);
             }
         }
 
@@ -1177,86 +1177,12 @@ namespace UIForia.StyleBindings {
 
         public override void Apply(UIStyle style, ExpressionContext context) {
             var value = expression.Evaluate(context);
-            style.SetProperty(new StyleProperty(propertyId, (int)value));
+            style.SetProperty(new StyleProperty(propertyId, 0, 0, value));
         }
 
         public override void Apply(UIStyleSet styleSet, ExpressionContext context) {
             var value = expression.Evaluate(context);
-            styleSet.SetProperty(new StyleProperty(propertyId, (int)value), state);
-        }
-
-    }
-        
-    public class StyleBinding_ScrollbarButtonPlacement : StyleBinding {
-
-        public readonly Expression<UIForia.Rendering.ScrollbarButtonPlacement> expression;
-        public readonly StylePropertyId propertyId;
-        
-        public StyleBinding_ScrollbarButtonPlacement(string propertyName, StylePropertyId propertyId, StyleState state, Expression<UIForia.Rendering.ScrollbarButtonPlacement> expression)
-            : base(propertyName, state) {
-            this.propertyId = propertyId;
-            this.expression = expression;
-        }
-
-        public override void Execute(UIElement element, ExpressionContext context) {
-            if (!element.style.IsInState(state)) return;
-
-            var oldValue = element.style.propertyMap[(int)propertyId].AsScrollbarButtonPlacement;
-            var value = expression.Evaluate(context);
-            if (value != oldValue) {
-                element.style.SetProperty(new StyleProperty(propertyId, (int)value), state);
-            }
-        }
-
-        public override bool IsConstant() {
-            return expression.IsConstant();
-        }
-
-        public override void Apply(UIStyle style, ExpressionContext context) {
-            var value = expression.Evaluate(context);
-            style.SetProperty(new StyleProperty(propertyId, (int)value));
-        }
-
-        public override void Apply(UIStyleSet styleSet, ExpressionContext context) {
-            var value = expression.Evaluate(context);
-            styleSet.SetProperty(new StyleProperty(propertyId, (int)value), state);
-        }
-
-    }
-        
-    public class StyleBinding_HorizontalScrollbarAttachment : StyleBinding {
-
-        public readonly Expression<UIForia.Rendering.HorizontalScrollbarAttachment> expression;
-        public readonly StylePropertyId propertyId;
-        
-        public StyleBinding_HorizontalScrollbarAttachment(string propertyName, StylePropertyId propertyId, StyleState state, Expression<UIForia.Rendering.HorizontalScrollbarAttachment> expression)
-            : base(propertyName, state) {
-            this.propertyId = propertyId;
-            this.expression = expression;
-        }
-
-        public override void Execute(UIElement element, ExpressionContext context) {
-            if (!element.style.IsInState(state)) return;
-
-            var oldValue = element.style.propertyMap[(int)propertyId].AsHorizontalScrollbarAttachment;
-            var value = expression.Evaluate(context);
-            if (value != oldValue) {
-                element.style.SetProperty(new StyleProperty(propertyId, (int)value), state);
-            }
-        }
-
-        public override bool IsConstant() {
-            return expression.IsConstant();
-        }
-
-        public override void Apply(UIStyle style, ExpressionContext context) {
-            var value = expression.Evaluate(context);
-            style.SetProperty(new StyleProperty(propertyId, (int)value));
-        }
-
-        public override void Apply(UIStyleSet styleSet, ExpressionContext context) {
-            var value = expression.Evaluate(context);
-            styleSet.SetProperty(new StyleProperty(propertyId, (int)value), state);
+            styleSet.SetProperty(new StyleProperty(propertyId, 0, 0, value), state);
         }
 
     }
@@ -1271,7 +1197,6 @@ namespace UIForia.Compilers {
         private static readonly EnumAliasSource<Shapes2D.GradientType> s_EnumSource_GradientType = new EnumAliasSource<Shapes2D.GradientType>();
         private static readonly EnumAliasSource<Shapes2D.GradientAxis> s_EnumSource_GradientAxis = new EnumAliasSource<Shapes2D.GradientAxis>();
         private static readonly EnumAliasSource<UIForia.Rendering.BackgroundFillType> s_EnumSource_BackgroundFillType = new EnumAliasSource<UIForia.Rendering.BackgroundFillType>();
-        private static readonly EnumAliasSource<UIForia.Rendering.BackgroundShapeType> s_EnumSource_BackgroundShapeType = new EnumAliasSource<UIForia.Rendering.BackgroundShapeType>();
         private static readonly EnumAliasSource<UIForia.Rendering.Visibility> s_EnumSource_Visibility = new EnumAliasSource<UIForia.Rendering.Visibility>();
         private static readonly EnumAliasSource<UIForia.Layout.CrossAxisAlignment> s_EnumSource_CrossAxisAlignment = new EnumAliasSource<UIForia.Layout.CrossAxisAlignment>();
         private static readonly EnumAliasSource<UIForia.Rendering.LayoutDirection> s_EnumSource_LayoutDirection = new EnumAliasSource<UIForia.Rendering.LayoutDirection>();
@@ -1282,14 +1207,12 @@ namespace UIForia.Compilers {
         private static readonly EnumAliasSource<UIForia.Text.FontStyle> s_EnumSource_FontStyle = new EnumAliasSource<UIForia.Text.FontStyle>();
         private static readonly EnumAliasSource<UIForia.Text.TextAlignment> s_EnumSource_TextAlignment = new EnumAliasSource<UIForia.Text.TextAlignment>();
         private static readonly EnumAliasSource<UIForia.Text.TextTransform> s_EnumSource_TextTransform = new EnumAliasSource<UIForia.Text.TextTransform>();
+        private static readonly EnumAliasSource<UIForia.Rendering.ShadowType> s_EnumSource_ShadowType = new EnumAliasSource<UIForia.Rendering.ShadowType>();
         private static readonly EnumAliasSource<UIForia.Rendering.AnchorTarget> s_EnumSource_AnchorTarget = new EnumAliasSource<UIForia.Rendering.AnchorTarget>();
         private static readonly EnumAliasSource<UIForia.Rendering.TransformBehavior> s_EnumSource_TransformBehavior = new EnumAliasSource<UIForia.Rendering.TransformBehavior>();
         private static readonly EnumAliasSource<UIForia.Rendering.LayoutType> s_EnumSource_LayoutType = new EnumAliasSource<UIForia.Rendering.LayoutType>();
         private static readonly EnumAliasSource<UIForia.Layout.LayoutBehavior> s_EnumSource_LayoutBehavior = new EnumAliasSource<UIForia.Layout.LayoutBehavior>();
         private static readonly EnumAliasSource<UIForia.Rendering.RenderLayer> s_EnumSource_RenderLayer = new EnumAliasSource<UIForia.Rendering.RenderLayer>();
-        private static readonly EnumAliasSource<UIForia.Rendering.VerticalScrollbarAttachment> s_EnumSource_VerticalScrollbarAttachment = new EnumAliasSource<UIForia.Rendering.VerticalScrollbarAttachment>();
-        private static readonly EnumAliasSource<UIForia.Rendering.ScrollbarButtonPlacement> s_EnumSource_ScrollbarButtonPlacement = new EnumAliasSource<UIForia.Rendering.ScrollbarButtonPlacement>();
-        private static readonly EnumAliasSource<UIForia.Rendering.HorizontalScrollbarAttachment> s_EnumSource_HorizontalScrollbarAttachment = new EnumAliasSource<UIForia.Rendering.HorizontalScrollbarAttachment>();
 
 
         private StyleBindings.StyleBinding DoCompile(string key, string value, Target targetState) {
@@ -1303,34 +1226,16 @@ case "overflowx":
                     return new UIForia.StyleBindings.StyleBinding_Color("BorderColor", UIForia.Rendering.StylePropertyId.BorderColor, targetState.state, Compile<UnityEngine.Color>(value, colorSources));                
                 case "backgroundcolor":
                     return new UIForia.StyleBindings.StyleBinding_Color("BackgroundColor", UIForia.Rendering.StylePropertyId.BackgroundColor, targetState.state, Compile<UnityEngine.Color>(value, colorSources));                
-                case "backgroundcolorsecondary":
-                    return new UIForia.StyleBindings.StyleBinding_Color("BackgroundColorSecondary", UIForia.Rendering.StylePropertyId.BackgroundColorSecondary, targetState.state, Compile<UnityEngine.Color>(value, colorSources));                
                 case "backgroundimage":
                     return new UIForia.StyleBindings.StyleBinding_Texture2D("BackgroundImage", UIForia.Rendering.StylePropertyId.BackgroundImage, targetState.state, Compile<UnityEngine.Texture2D>(value, textureUrlSource));                
-                case "backgroundimage1":
-                    return new UIForia.StyleBindings.StyleBinding_Texture2D("BackgroundImage1", UIForia.Rendering.StylePropertyId.BackgroundImage1, targetState.state, Compile<UnityEngine.Texture2D>(value, textureUrlSource));                
-                case "backgroundimage2":
-                    return new UIForia.StyleBindings.StyleBinding_Texture2D("BackgroundImage2", UIForia.Rendering.StylePropertyId.BackgroundImage2, targetState.state, Compile<UnityEngine.Texture2D>(value, textureUrlSource));                
                 case "backgroundgradienttype":
                     return new UIForia.StyleBindings.StyleBinding_GradientType("BackgroundGradientType", UIForia.Rendering.StylePropertyId.BackgroundGradientType, targetState.state, Compile<Shapes2D.GradientType>(value, s_EnumSource_GradientType));                
                 case "backgroundgradientaxis":
                     return new UIForia.StyleBindings.StyleBinding_GradientAxis("BackgroundGradientAxis", UIForia.Rendering.StylePropertyId.BackgroundGradientAxis, targetState.state, Compile<Shapes2D.GradientAxis>(value, s_EnumSource_GradientAxis));                
                 case "backgroundgradientstart":
                     return new UIForia.StyleBindings.StyleBinding_float("BackgroundGradientStart", UIForia.Rendering.StylePropertyId.BackgroundGradientStart, targetState.state, Compile<float>(value, null));                
-                case "backgroundfillrotation":
-                    return new UIForia.StyleBindings.StyleBinding_float("BackgroundFillRotation", UIForia.Rendering.StylePropertyId.BackgroundFillRotation, targetState.state, Compile<float>(value, null));                
-                case "backgroundfilltype":
-                    return new UIForia.StyleBindings.StyleBinding_BackgroundFillType("BackgroundFillType", UIForia.Rendering.StylePropertyId.BackgroundFillType, targetState.state, Compile<UIForia.Rendering.BackgroundFillType>(value, s_EnumSource_BackgroundFillType));                
-                case "backgroundshapetype":
-                    return new UIForia.StyleBindings.StyleBinding_BackgroundShapeType("BackgroundShapeType", UIForia.Rendering.StylePropertyId.BackgroundShapeType, targetState.state, Compile<UIForia.Rendering.BackgroundShapeType>(value, s_EnumSource_BackgroundShapeType));                
-                case "backgroundfilloffsetx":
-                    return new UIForia.StyleBindings.StyleBinding_float("BackgroundFillOffsetX", UIForia.Rendering.StylePropertyId.BackgroundFillOffsetX, targetState.state, Compile<float>(value, null));                
-                case "backgroundfilloffsety":
-                    return new UIForia.StyleBindings.StyleBinding_float("BackgroundFillOffsetY", UIForia.Rendering.StylePropertyId.BackgroundFillOffsetY, targetState.state, Compile<float>(value, null));                
-                case "backgroundfillscalex":
-                    return new UIForia.StyleBindings.StyleBinding_float("BackgroundFillScaleX", UIForia.Rendering.StylePropertyId.BackgroundFillScaleX, targetState.state, Compile<float>(value, null));                
-                case "backgroundfillscaley":
-                    return new UIForia.StyleBindings.StyleBinding_float("BackgroundFillScaleY", UIForia.Rendering.StylePropertyId.BackgroundFillScaleY, targetState.state, Compile<float>(value, null));                
+                case "painter":
+                    return new UIForia.StyleBindings.StyleBinding_BackgroundFillType("Painter", UIForia.Rendering.StylePropertyId.Painter, targetState.state, Compile<UIForia.Rendering.BackgroundFillType>(value, s_EnumSource_BackgroundFillType));                
                 case "opacity":
                     return new UIForia.StyleBindings.StyleBinding_float("Opacity", UIForia.Rendering.StylePropertyId.Opacity, targetState.state, Compile<float>(value, null));                
                 case "cursor":
@@ -1441,6 +1346,32 @@ case "overflowx":
                     return new UIForia.StyleBindings.StyleBinding_TextAlignment("TextAlignment", UIForia.Rendering.StylePropertyId.TextAlignment, targetState.state, Compile<UIForia.Text.TextAlignment>(value, s_EnumSource_TextAlignment));                
                 case "texttransform":
                     return new UIForia.StyleBindings.StyleBinding_TextTransform("TextTransform", UIForia.Rendering.StylePropertyId.TextTransform, targetState.state, Compile<UIForia.Text.TextTransform>(value, s_EnumSource_TextTransform));                
+                case "textoutlinewidth":
+                    return new UIForia.StyleBindings.StyleBinding_float("TextOutlineWidth", UIForia.Rendering.StylePropertyId.TextOutlineWidth, targetState.state, Compile<float>(value, null));                
+                case "textoutlinecolor":
+                    return new UIForia.StyleBindings.StyleBinding_Color("TextOutlineColor", UIForia.Rendering.StylePropertyId.TextOutlineColor, targetState.state, Compile<UnityEngine.Color>(value, colorSources));                
+                case "textglowcolor":
+                    return new UIForia.StyleBindings.StyleBinding_Color("TextGlowColor", UIForia.Rendering.StylePropertyId.TextGlowColor, targetState.state, Compile<UnityEngine.Color>(value, colorSources));                
+                case "textglowoffset":
+                    return new UIForia.StyleBindings.StyleBinding_float("TextGlowOffset", UIForia.Rendering.StylePropertyId.TextGlowOffset, targetState.state, Compile<float>(value, null));                
+                case "textglowinner":
+                    return new UIForia.StyleBindings.StyleBinding_float("TextGlowInner", UIForia.Rendering.StylePropertyId.TextGlowInner, targetState.state, Compile<float>(value, null));                
+                case "textglowouter":
+                    return new UIForia.StyleBindings.StyleBinding_float("TextGlowOuter", UIForia.Rendering.StylePropertyId.TextGlowOuter, targetState.state, Compile<float>(value, null));                
+                case "textglowpower":
+                    return new UIForia.StyleBindings.StyleBinding_float("TextGlowPower", UIForia.Rendering.StylePropertyId.TextGlowPower, targetState.state, Compile<float>(value, null));                
+                case "textshadowcolor":
+                    return new UIForia.StyleBindings.StyleBinding_Color("TextShadowColor", UIForia.Rendering.StylePropertyId.TextShadowColor, targetState.state, Compile<UnityEngine.Color>(value, colorSources));                
+                case "textshadowoffsetx":
+                    return new UIForia.StyleBindings.StyleBinding_float("TextShadowOffsetX", UIForia.Rendering.StylePropertyId.TextShadowOffsetX, targetState.state, Compile<float>(value, null));                
+                case "textshadowoffsety":
+                    return new UIForia.StyleBindings.StyleBinding_float("TextShadowOffsetY", UIForia.Rendering.StylePropertyId.TextShadowOffsetY, targetState.state, Compile<float>(value, null));                
+                case "textshadowintensity":
+                    return new UIForia.StyleBindings.StyleBinding_float("TextShadowIntensity", UIForia.Rendering.StylePropertyId.TextShadowIntensity, targetState.state, Compile<float>(value, null));                
+                case "textshadowsoftness":
+                    return new UIForia.StyleBindings.StyleBinding_float("TextShadowSoftness", UIForia.Rendering.StylePropertyId.TextShadowSoftness, targetState.state, Compile<float>(value, null));                
+                case "textshadowtype":
+                    return new UIForia.StyleBindings.StyleBinding_ShadowType("TextShadowType", UIForia.Rendering.StylePropertyId.TextShadowType, targetState.state, Compile<UIForia.Rendering.ShadowType>(value, s_EnumSource_ShadowType));                
                 case "anchortop":
                     return new UIForia.StyleBindings.StyleBinding_UIFixedLength("AnchorTop", UIForia.Rendering.StylePropertyId.AnchorTop, targetState.state, Compile<UIForia.UIFixedLength>(value, fixedSources));                
                 case "anchorright":
@@ -1479,110 +1410,24 @@ case "overflowx":
                     return new UIForia.StyleBindings.StyleBinding_int("RenderLayerOffset", UIForia.Rendering.StylePropertyId.RenderLayerOffset, targetState.state, Compile<int>(value, null));                
                 case "renderlayer":
                     return new UIForia.StyleBindings.StyleBinding_RenderLayer("RenderLayer", UIForia.Rendering.StylePropertyId.RenderLayer, targetState.state, Compile<UIForia.Rendering.RenderLayer>(value, s_EnumSource_RenderLayer));                
-                case "scrollbarverticalattachment":
-                    return new UIForia.StyleBindings.StyleBinding_VerticalScrollbarAttachment("ScrollbarVerticalAttachment", UIForia.Rendering.StylePropertyId.ScrollbarVerticalAttachment, targetState.state, Compile<UIForia.Rendering.VerticalScrollbarAttachment>(value, s_EnumSource_VerticalScrollbarAttachment));                
-                case "scrollbarverticalbuttonplacement":
-                    return new UIForia.StyleBindings.StyleBinding_ScrollbarButtonPlacement("ScrollbarVerticalButtonPlacement", UIForia.Rendering.StylePropertyId.ScrollbarVerticalButtonPlacement, targetState.state, Compile<UIForia.Rendering.ScrollbarButtonPlacement>(value, s_EnumSource_ScrollbarButtonPlacement));                
-                case "scrollbarverticaltracksize":
-                    return new UIForia.StyleBindings.StyleBinding_float("ScrollbarVerticalTrackSize", UIForia.Rendering.StylePropertyId.ScrollbarVerticalTrackSize, targetState.state, Compile<float>(value, null));                
-                case "scrollbarverticaltrackborderradius":
-                    return new UIForia.StyleBindings.StyleBinding_float("ScrollbarVerticalTrackBorderRadius", UIForia.Rendering.StylePropertyId.ScrollbarVerticalTrackBorderRadius, targetState.state, Compile<float>(value, null));                
-                case "scrollbarverticaltrackbordersize":
-                    return new UIForia.StyleBindings.StyleBinding_float("ScrollbarVerticalTrackBorderSize", UIForia.Rendering.StylePropertyId.ScrollbarVerticalTrackBorderSize, targetState.state, Compile<float>(value, null));                
-                case "scrollbarverticaltrackbordercolor":
-                    return new UIForia.StyleBindings.StyleBinding_Color("ScrollbarVerticalTrackBorderColor", UIForia.Rendering.StylePropertyId.ScrollbarVerticalTrackBorderColor, targetState.state, Compile<UnityEngine.Color>(value, colorSources));                
-                case "scrollbarverticaltrackimage":
-                    return new UIForia.StyleBindings.StyleBinding_Texture2D("ScrollbarVerticalTrackImage", UIForia.Rendering.StylePropertyId.ScrollbarVerticalTrackImage, targetState.state, Compile<UnityEngine.Texture2D>(value, textureUrlSource));                
-                case "scrollbarverticaltrackcolor":
-                    return new UIForia.StyleBindings.StyleBinding_Color("ScrollbarVerticalTrackColor", UIForia.Rendering.StylePropertyId.ScrollbarVerticalTrackColor, targetState.state, Compile<UnityEngine.Color>(value, colorSources));                
-                case "scrollbarverticalhandlesize":
-                    return new UIForia.StyleBindings.StyleBinding_float("ScrollbarVerticalHandleSize", UIForia.Rendering.StylePropertyId.ScrollbarVerticalHandleSize, targetState.state, Compile<float>(value, null));                
-                case "scrollbarverticalhandleborderradius":
-                    return new UIForia.StyleBindings.StyleBinding_float("ScrollbarVerticalHandleBorderRadius", UIForia.Rendering.StylePropertyId.ScrollbarVerticalHandleBorderRadius, targetState.state, Compile<float>(value, null));                
-                case "scrollbarverticalhandlebordersize":
-                    return new UIForia.StyleBindings.StyleBinding_float("ScrollbarVerticalHandleBorderSize", UIForia.Rendering.StylePropertyId.ScrollbarVerticalHandleBorderSize, targetState.state, Compile<float>(value, null));                
-                case "scrollbarverticalhandlebordercolor":
-                    return new UIForia.StyleBindings.StyleBinding_Color("ScrollbarVerticalHandleBorderColor", UIForia.Rendering.StylePropertyId.ScrollbarVerticalHandleBorderColor, targetState.state, Compile<UnityEngine.Color>(value, colorSources));                
-                case "scrollbarverticalhandleimage":
-                    return new UIForia.StyleBindings.StyleBinding_Texture2D("ScrollbarVerticalHandleImage", UIForia.Rendering.StylePropertyId.ScrollbarVerticalHandleImage, targetState.state, Compile<UnityEngine.Texture2D>(value, textureUrlSource));                
-                case "scrollbarverticalhandlecolor":
-                    return new UIForia.StyleBindings.StyleBinding_Color("ScrollbarVerticalHandleColor", UIForia.Rendering.StylePropertyId.ScrollbarVerticalHandleColor, targetState.state, Compile<UnityEngine.Color>(value, colorSources));                
-                case "scrollbarverticalincrementsize":
-                    return new UIForia.StyleBindings.StyleBinding_float("ScrollbarVerticalIncrementSize", UIForia.Rendering.StylePropertyId.ScrollbarVerticalIncrementSize, targetState.state, Compile<float>(value, null));                
-                case "scrollbarverticalincrementborderradius":
-                    return new UIForia.StyleBindings.StyleBinding_float("ScrollbarVerticalIncrementBorderRadius", UIForia.Rendering.StylePropertyId.ScrollbarVerticalIncrementBorderRadius, targetState.state, Compile<float>(value, null));                
-                case "scrollbarverticalincrementbordersize":
-                    return new UIForia.StyleBindings.StyleBinding_float("ScrollbarVerticalIncrementBorderSize", UIForia.Rendering.StylePropertyId.ScrollbarVerticalIncrementBorderSize, targetState.state, Compile<float>(value, null));                
-                case "scrollbarverticalincrementbordercolor":
-                    return new UIForia.StyleBindings.StyleBinding_Color("ScrollbarVerticalIncrementBorderColor", UIForia.Rendering.StylePropertyId.ScrollbarVerticalIncrementBorderColor, targetState.state, Compile<UnityEngine.Color>(value, colorSources));                
-                case "scrollbarverticalincrementimage":
-                    return new UIForia.StyleBindings.StyleBinding_Texture2D("ScrollbarVerticalIncrementImage", UIForia.Rendering.StylePropertyId.ScrollbarVerticalIncrementImage, targetState.state, Compile<UnityEngine.Texture2D>(value, textureUrlSource));                
-                case "scrollbarverticalincrementcolor":
-                    return new UIForia.StyleBindings.StyleBinding_Color("ScrollbarVerticalIncrementColor", UIForia.Rendering.StylePropertyId.ScrollbarVerticalIncrementColor, targetState.state, Compile<UnityEngine.Color>(value, colorSources));                
-                case "scrollbarverticaldecrementsize":
-                    return new UIForia.StyleBindings.StyleBinding_float("ScrollbarVerticalDecrementSize", UIForia.Rendering.StylePropertyId.ScrollbarVerticalDecrementSize, targetState.state, Compile<float>(value, null));                
-                case "scrollbarverticaldecrementborderradius":
-                    return new UIForia.StyleBindings.StyleBinding_float("ScrollbarVerticalDecrementBorderRadius", UIForia.Rendering.StylePropertyId.ScrollbarVerticalDecrementBorderRadius, targetState.state, Compile<float>(value, null));                
-                case "scrollbarverticaldecrementbordersize":
-                    return new UIForia.StyleBindings.StyleBinding_float("ScrollbarVerticalDecrementBorderSize", UIForia.Rendering.StylePropertyId.ScrollbarVerticalDecrementBorderSize, targetState.state, Compile<float>(value, null));                
-                case "scrollbarverticaldecrementbordercolor":
-                    return new UIForia.StyleBindings.StyleBinding_Color("ScrollbarVerticalDecrementBorderColor", UIForia.Rendering.StylePropertyId.ScrollbarVerticalDecrementBorderColor, targetState.state, Compile<UnityEngine.Color>(value, colorSources));                
-                case "scrollbarverticaldecrementimage":
-                    return new UIForia.StyleBindings.StyleBinding_Texture2D("ScrollbarVerticalDecrementImage", UIForia.Rendering.StylePropertyId.ScrollbarVerticalDecrementImage, targetState.state, Compile<UnityEngine.Texture2D>(value, textureUrlSource));                
-                case "scrollbarverticaldecrementcolor":
-                    return new UIForia.StyleBindings.StyleBinding_Color("ScrollbarVerticalDecrementColor", UIForia.Rendering.StylePropertyId.ScrollbarVerticalDecrementColor, targetState.state, Compile<UnityEngine.Color>(value, colorSources));                
-                case "scrollbarhorizontalattachment":
-                    return new UIForia.StyleBindings.StyleBinding_HorizontalScrollbarAttachment("ScrollbarHorizontalAttachment", UIForia.Rendering.StylePropertyId.ScrollbarHorizontalAttachment, targetState.state, Compile<UIForia.Rendering.HorizontalScrollbarAttachment>(value, s_EnumSource_HorizontalScrollbarAttachment));                
-                case "scrollbarhorizontalbuttonplacement":
-                    return new UIForia.StyleBindings.StyleBinding_ScrollbarButtonPlacement("ScrollbarHorizontalButtonPlacement", UIForia.Rendering.StylePropertyId.ScrollbarHorizontalButtonPlacement, targetState.state, Compile<UIForia.Rendering.ScrollbarButtonPlacement>(value, s_EnumSource_ScrollbarButtonPlacement));                
-                case "scrollbarhorizontaltracksize":
-                    return new UIForia.StyleBindings.StyleBinding_float("ScrollbarHorizontalTrackSize", UIForia.Rendering.StylePropertyId.ScrollbarHorizontalTrackSize, targetState.state, Compile<float>(value, null));                
-                case "scrollbarhorizontaltrackborderradius":
-                    return new UIForia.StyleBindings.StyleBinding_float("ScrollbarHorizontalTrackBorderRadius", UIForia.Rendering.StylePropertyId.ScrollbarHorizontalTrackBorderRadius, targetState.state, Compile<float>(value, null));                
-                case "scrollbarhorizontaltrackbordersize":
-                    return new UIForia.StyleBindings.StyleBinding_float("ScrollbarHorizontalTrackBorderSize", UIForia.Rendering.StylePropertyId.ScrollbarHorizontalTrackBorderSize, targetState.state, Compile<float>(value, null));                
-                case "scrollbarhorizontaltrackbordercolor":
-                    return new UIForia.StyleBindings.StyleBinding_Color("ScrollbarHorizontalTrackBorderColor", UIForia.Rendering.StylePropertyId.ScrollbarHorizontalTrackBorderColor, targetState.state, Compile<UnityEngine.Color>(value, colorSources));                
-                case "scrollbarhorizontaltrackimage":
-                    return new UIForia.StyleBindings.StyleBinding_Texture2D("ScrollbarHorizontalTrackImage", UIForia.Rendering.StylePropertyId.ScrollbarHorizontalTrackImage, targetState.state, Compile<UnityEngine.Texture2D>(value, textureUrlSource));                
-                case "scrollbarhorizontaltrackcolor":
-                    return new UIForia.StyleBindings.StyleBinding_Color("ScrollbarHorizontalTrackColor", UIForia.Rendering.StylePropertyId.ScrollbarHorizontalTrackColor, targetState.state, Compile<UnityEngine.Color>(value, colorSources));                
-                case "scrollbarhorizontalhandlesize":
-                    return new UIForia.StyleBindings.StyleBinding_float("ScrollbarHorizontalHandleSize", UIForia.Rendering.StylePropertyId.ScrollbarHorizontalHandleSize, targetState.state, Compile<float>(value, null));                
-                case "scrollbarhorizontalhandleborderradius":
-                    return new UIForia.StyleBindings.StyleBinding_float("ScrollbarHorizontalHandleBorderRadius", UIForia.Rendering.StylePropertyId.ScrollbarHorizontalHandleBorderRadius, targetState.state, Compile<float>(value, null));                
-                case "scrollbarhorizontalhandlebordersize":
-                    return new UIForia.StyleBindings.StyleBinding_float("ScrollbarHorizontalHandleBorderSize", UIForia.Rendering.StylePropertyId.ScrollbarHorizontalHandleBorderSize, targetState.state, Compile<float>(value, null));                
-                case "scrollbarhorizontalhandlebordercolor":
-                    return new UIForia.StyleBindings.StyleBinding_Color("ScrollbarHorizontalHandleBorderColor", UIForia.Rendering.StylePropertyId.ScrollbarHorizontalHandleBorderColor, targetState.state, Compile<UnityEngine.Color>(value, colorSources));                
-                case "scrollbarhorizontalhandleimage":
-                    return new UIForia.StyleBindings.StyleBinding_Texture2D("ScrollbarHorizontalHandleImage", UIForia.Rendering.StylePropertyId.ScrollbarHorizontalHandleImage, targetState.state, Compile<UnityEngine.Texture2D>(value, textureUrlSource));                
-                case "scrollbarhorizontalhandlecolor":
-                    return new UIForia.StyleBindings.StyleBinding_Color("ScrollbarHorizontalHandleColor", UIForia.Rendering.StylePropertyId.ScrollbarHorizontalHandleColor, targetState.state, Compile<UnityEngine.Color>(value, colorSources));                
-                case "scrollbarhorizontalincrementsize":
-                    return new UIForia.StyleBindings.StyleBinding_float("ScrollbarHorizontalIncrementSize", UIForia.Rendering.StylePropertyId.ScrollbarHorizontalIncrementSize, targetState.state, Compile<float>(value, null));                
-                case "scrollbarhorizontalincrementborderradius":
-                    return new UIForia.StyleBindings.StyleBinding_float("ScrollbarHorizontalIncrementBorderRadius", UIForia.Rendering.StylePropertyId.ScrollbarHorizontalIncrementBorderRadius, targetState.state, Compile<float>(value, null));                
-                case "scrollbarhorizontalincrementbordersize":
-                    return new UIForia.StyleBindings.StyleBinding_float("ScrollbarHorizontalIncrementBorderSize", UIForia.Rendering.StylePropertyId.ScrollbarHorizontalIncrementBorderSize, targetState.state, Compile<float>(value, null));                
-                case "scrollbarhorizontalincrementbordercolor":
-                    return new UIForia.StyleBindings.StyleBinding_Color("ScrollbarHorizontalIncrementBorderColor", UIForia.Rendering.StylePropertyId.ScrollbarHorizontalIncrementBorderColor, targetState.state, Compile<UnityEngine.Color>(value, colorSources));                
-                case "scrollbarhorizontalincrementimage":
-                    return new UIForia.StyleBindings.StyleBinding_Texture2D("ScrollbarHorizontalIncrementImage", UIForia.Rendering.StylePropertyId.ScrollbarHorizontalIncrementImage, targetState.state, Compile<UnityEngine.Texture2D>(value, textureUrlSource));                
-                case "scrollbarhorizontalincrementcolor":
-                    return new UIForia.StyleBindings.StyleBinding_Color("ScrollbarHorizontalIncrementColor", UIForia.Rendering.StylePropertyId.ScrollbarHorizontalIncrementColor, targetState.state, Compile<UnityEngine.Color>(value, colorSources));                
-                case "scrollbarhorizontaldecrementsize":
-                    return new UIForia.StyleBindings.StyleBinding_float("ScrollbarHorizontalDecrementSize", UIForia.Rendering.StylePropertyId.ScrollbarHorizontalDecrementSize, targetState.state, Compile<float>(value, null));                
-                case "scrollbarhorizontaldecrementborderradius":
-                    return new UIForia.StyleBindings.StyleBinding_float("ScrollbarHorizontalDecrementBorderRadius", UIForia.Rendering.StylePropertyId.ScrollbarHorizontalDecrementBorderRadius, targetState.state, Compile<float>(value, null));                
-                case "scrollbarhorizontaldecrementbordersize":
-                    return new UIForia.StyleBindings.StyleBinding_float("ScrollbarHorizontalDecrementBorderSize", UIForia.Rendering.StylePropertyId.ScrollbarHorizontalDecrementBorderSize, targetState.state, Compile<float>(value, null));                
-                case "scrollbarhorizontaldecrementbordercolor":
-                    return new UIForia.StyleBindings.StyleBinding_Color("ScrollbarHorizontalDecrementBorderColor", UIForia.Rendering.StylePropertyId.ScrollbarHorizontalDecrementBorderColor, targetState.state, Compile<UnityEngine.Color>(value, colorSources));                
-                case "scrollbarhorizontaldecrementimage":
-                    return new UIForia.StyleBindings.StyleBinding_Texture2D("ScrollbarHorizontalDecrementImage", UIForia.Rendering.StylePropertyId.ScrollbarHorizontalDecrementImage, targetState.state, Compile<UnityEngine.Texture2D>(value, textureUrlSource));                
-                case "scrollbarhorizontaldecrementcolor":
-                    return new UIForia.StyleBindings.StyleBinding_Color("ScrollbarHorizontalDecrementColor", UIForia.Rendering.StylePropertyId.ScrollbarHorizontalDecrementColor, targetState.state, Compile<UnityEngine.Color>(value, colorSources));                
+                case "shadowtype":
+                    return new UIForia.StyleBindings.StyleBinding_ShadowType("ShadowType", UIForia.Rendering.StylePropertyId.ShadowType, targetState.state, Compile<UIForia.Rendering.ShadowType>(value, s_EnumSource_ShadowType));                
+                case "shadowoffsetx":
+                    return new UIForia.StyleBindings.StyleBinding_float("ShadowOffsetX", UIForia.Rendering.StylePropertyId.ShadowOffsetX, targetState.state, Compile<float>(value, null));                
+                case "shadowoffsety":
+                    return new UIForia.StyleBindings.StyleBinding_float("ShadowOffsetY", UIForia.Rendering.StylePropertyId.ShadowOffsetY, targetState.state, Compile<float>(value, null));                
+                case "shadowsoftnessx":
+                    return new UIForia.StyleBindings.StyleBinding_float("ShadowSoftnessX", UIForia.Rendering.StylePropertyId.ShadowSoftnessX, targetState.state, Compile<float>(value, null));                
+                case "shadowsoftnessy":
+                    return new UIForia.StyleBindings.StyleBinding_float("ShadowSoftnessY", UIForia.Rendering.StylePropertyId.ShadowSoftnessY, targetState.state, Compile<float>(value, null));                
+                case "shadowintensity":
+                    return new UIForia.StyleBindings.StyleBinding_float("ShadowIntensity", UIForia.Rendering.StylePropertyId.ShadowIntensity, targetState.state, Compile<float>(value, null));                
+                case "scrollbar":
+                    return new UIForia.StyleBindings.StyleBinding_string("Scrollbar", UIForia.Rendering.StylePropertyId.Scrollbar, targetState.state, Compile<string>(value, null));                
+                case "scrollbarsize":
+                    return new UIForia.StyleBindings.StyleBinding_UIMeasurement("ScrollbarSize", UIForia.Rendering.StylePropertyId.ScrollbarSize, targetState.state, Compile<UIForia.UIMeasurement>(value, measurementSources));                
+                case "scrollbarcolor":
+                    return new UIForia.StyleBindings.StyleBinding_Color("ScrollbarColor", UIForia.Rendering.StylePropertyId.ScrollbarColor, targetState.state, Compile<UnityEngine.Color>(value, colorSources));                
                 
 
             }

@@ -1,6 +1,7 @@
 using System.Diagnostics;
 using JetBrains.Annotations;
 using UIForia.Rendering;
+using UnityEngine;
 
 namespace UIForia {
 
@@ -20,7 +21,7 @@ namespace UIForia {
                 return self.unit == other.unit;
             }
 
-            return self.value == other.value && self.unit == other.unit;
+            return Mathf.Approximately(self.value, other.value) && self.unit == other.unit;
         }
 
         public static bool operator !=(UIFixedLength self, UIFixedLength other) {
@@ -30,7 +31,7 @@ namespace UIForia {
         public static UIFixedLength Unset => new UIFixedLength(FloatUtil.UnsetValue);
 
         public bool Equals(UIFixedLength other) {
-            return value.Equals(other.value) && unit == other.unit;
+            return Mathf.Approximately(value, other.value) && unit == other.unit;
         }
 
         public override bool Equals(object obj) {

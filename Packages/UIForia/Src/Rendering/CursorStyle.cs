@@ -1,6 +1,7 @@
 using UnityEngine;
 
 namespace UIForia.Rendering {
+
     public class CursorStyle {
 
         public readonly string name;
@@ -32,5 +33,7 @@ namespace UIForia.Rendering {
                 return hashCode;
             }
         }
+
     }
+
 }

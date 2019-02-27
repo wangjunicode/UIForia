@@ -20,7 +20,7 @@ style group2 {
     PreferredSize = 400px;
     BackgroundColor = blue;
     BackgroundImage = url("Images/backgroundimg"); 
-    BorderRadius = 0.35%;
+    BorderRadius = 35%;
     Border = 12px;
     BorderColor = green;
 //    BackgroundImage = url("Images/backgroundimg"); 

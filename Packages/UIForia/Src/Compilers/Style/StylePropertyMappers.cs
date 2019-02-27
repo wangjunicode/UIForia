@@ -475,7 +475,11 @@ namespace UIForia.Compilers.Style {
             switch (value) {
                 case MeasurementNode measurementNode:
                     if (TryParseFloat(measurementNode.value.rawValue, out float measurementValue)) {
-                        return new UIFixedLength(measurementValue, MapFixedUnit(measurementNode.unit));
+                        UIFixedUnit unit = MapFixedUnit(measurementNode.unit);
+                        if (unit == UIFixedUnit.Percent) {
+                            measurementValue *= 0.01f;
+                        }
+                        return new UIFixedLength(measurementValue, unit);
                     }
 
                     break;

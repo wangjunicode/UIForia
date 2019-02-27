@@ -127,11 +127,10 @@ namespace UIForia.Rendering {
                 }
 
                 Size size = element.layoutResult.actualSize;
-                m_SizeRotations[instanceId] = new Vector4(size.width, size.height, style.BackgroundFillRotation, 0);
+                m_SizeRotations[instanceId] = new Vector4(size.width, size.height, 0, 0);
                 m_ClipRects[instanceId] = data.clipVector;
                 m_Matrices[instanceId] = Matrix4x4.TRS(origin + data.renderPosition, Quaternion.identity, Vector3.one);
                 m_PrimaryColors[instanceId] = style.BackgroundColor;
-                m_SecondaryColors[instanceId] = style.BackgroundColorSecondary;
                 m_FillOffsetAndScales[instanceId] = new Vector4(0, 0, 1, 1);
                 
                 switch (fillType) {
@@ -168,7 +167,6 @@ namespace UIForia.Rendering {
             
             m_Block.Clear();
             m_Block.SetVectorArray(s_PrimaryColorKey, m_PrimaryColors.Array);
-            m_Block.SetVectorArray(s_SecondaryColorKey, m_SecondaryColors.Array);
             m_Block.SetVectorArray(s_FillOffsetAndScaleKey, m_FillOffsetAndScales.Array);
             m_Block.SetVectorArray(s_SizeRotationGradientStartKey, m_SizeRotations.Array);
             m_Block.SetVectorArray(s_ClipRectKey, m_ClipRects.Array);

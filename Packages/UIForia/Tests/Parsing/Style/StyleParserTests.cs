@@ -1,4 +1,6 @@
+using System;
 using NUnit.Framework;
+using UIForia;
 using UIForia.Parsing.Style;
 using UIForia.Parsing.Style.AstNodes;
 using UIForia.Parsing.Style.Tokenizer;
@@ -320,4 +322,19 @@ public class StyleParser2Tests {
         Assert.AreEqual("myconsts", importNode.alias);
         Assert.AreEqual("mypath/to/myfile", importNode.source);
     }
+
+    [Test]
+    public void ParseBrokenStyle() {
+        try {
+            StyleParser2.Parse(@"
+style s { BrokenUrl = url() }
+            ".Trim());
+            Assert.Fail("This should not have parsed!");
+        }
+        catch (ParseException e) {
+            Assert.AreEqual(1, e.token.line);
+            Assert.AreEqual(27, e.token.column);
+        }
+    }
+    
 }

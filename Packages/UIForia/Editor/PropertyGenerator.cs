@@ -155,6 +155,8 @@ namespace UIForia.Editor {
 
             if (type == typeof(float)) return "float";
             if (type == typeof(int)) return "int";
+            if (type == typeof(string)) return "string";
+
             return type.Name;
         }
 
@@ -165,6 +167,8 @@ namespace UIForia.Editor {
 
             if (type == typeof(float)) return "float";
             if (type == typeof(int)) return "int";
+            if (type == typeof(string)) return "string";
+
             return type.FullName;
         }
 
@@ -203,6 +207,14 @@ namespace UIForia.Editor {
                 return $"new Color({c.r.ToString(CultureInfo.InvariantCulture)}f, {c.g.ToString(CultureInfo.InvariantCulture)}f, {c.b.ToString(CultureInfo.InvariantCulture)}f, {c.a.ToString(CultureInfo.InvariantCulture)}f)";
             }
 
+            if (defaultValue is float) {
+                return defaultValue.ToString() + "f";
+            }
+
+            if (defaultValue is string) {
+                return '"' + defaultValue.ToString() + '"';
+            }
+            
             if (defaultValue == null) return "null";
 
             return defaultValue.ToString();
@@ -236,6 +248,7 @@ namespace UIForia.Editor {
 
             if (type == typeof(float)) return "float";
             if (type == typeof(int)) return "int";
+            if (type == typeof(string)) return "string";
             return type.Name;
         }
 

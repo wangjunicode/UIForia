@@ -102,53 +102,19 @@ namespace UIForia.Systems {
                 material.DisableKeyword(k_UseBorder);
             }
 
-            switch (style.BackgroundFillType) {
-                case BackgroundFillType.Unset:
-                case BackgroundFillType.None:
-                case BackgroundFillType.Normal:
-                    if (style.BackgroundImage != null) {
-                        material.EnableKeyword(k_FillType_Texture);
-                        material.DisableKeyword(k_FillType_Color);
-                        material.mainTexture = style.BackgroundImage;
-                    }
-                    else {
-                        material.EnableKeyword(k_FillType_Color);
-                    }
-
-                    break;
-                case BackgroundFillType.Gradient:
-
-                    switch (style.BackgroundGradientType) {
-                        case GradientType.Linear:
-                            material.EnableKeyword(k_FillType_LinearGradient);
-                            break;
-                        case GradientType.Radial:
-                            material.EnableKeyword(k_FillType_RadialGradient);
-                            break;
-                        case GradientType.Cylindrical:
-                            material.EnableKeyword(k_FillType_CylindricalGradient);
-                            break;
-                        default:
-                            throw new ArgumentOutOfRangeException();
-                    }
-
-                    break;
-                case BackgroundFillType.Grid:
-                    material.EnableKeyword(k_FillType_Grid);
-                    break;
-                case BackgroundFillType.Checker:
-                    material.EnableKeyword(k_FillType_Checker);
-                    break;
-                case BackgroundFillType.Stripes:
-                    material.EnableKeyword(k_FillType_Stripes);
-                    break;
-                default:
-                    throw new ArgumentOutOfRangeException();
+            if (style.BackgroundImage != null) {
+                material.EnableKeyword(k_FillType_Texture);
+                material.DisableKeyword(k_FillType_Color);
+                material.mainTexture = style.BackgroundImage;
             }
+            else {
+                material.EnableKeyword(k_FillType_Color);
+            }
+            
 
             // todo -- see if [PerRendererData] can stop us from needing unique materials
-            Vector2 fillScale = new Vector2(style.BackgroundFillScaleX, style.BackgroundFillScaleY);
-            Vector2 fillOffset = new Vector2(style.BackgroundFillOffsetX, style.BackgroundFillOffsetY);
+            Vector2 fillScale = new Vector2(1, 1);
+            Vector2 fillOffset = new Vector2(0, 0);
             Vector2 pivot = data.element.layoutResult.Pivot;
             Rect contentRect = data.element.layoutResult.ContentRect;
             material.SetVector(s_ContentRectKey,

@@ -611,14 +611,13 @@ namespace UIForia.Editor {
                     return DrawEnum<Overflow>(property, isEditable);
 
                 case StylePropertyId.BackgroundColor:
-                case StylePropertyId.BackgroundColorSecondary:
                 case StylePropertyId.BorderColor:
                     return DrawColor(property, isEditable);
 
                 case StylePropertyId.Visibility:
                     return DrawEnum<Visibility>(property, isEditable);
 
-                case StylePropertyId.BackgroundFillType:
+                case StylePropertyId.Painter:
                     return DrawEnum<FillType>(property, isEditable);
 
                 case StylePropertyId.BackgroundGradientType:
@@ -630,13 +629,13 @@ namespace UIForia.Editor {
                 case StylePropertyId.BackgroundGradientStart:
 //                case StylePropertyId.BackgroundGridSize:
 //                case StylePropertyId.BackgroundLineSize:
-                case StylePropertyId.BackgroundFillOffsetX:
-                case StylePropertyId.BackgroundFillOffsetY:
-                case StylePropertyId.BackgroundFillScaleX:
-                case StylePropertyId.BackgroundFillScaleY:
+                case StylePropertyId.BackgroundImageOffsetX:
+                case StylePropertyId.BackgroundImageOffsetY:
+                case StylePropertyId.BackgroundImageScaleX:
+                case StylePropertyId.BackgroundImageScaleY:
                     return DrawFloat(property, isEditable);
 
-                case StylePropertyId.BackgroundFillRotation:
+                case StylePropertyId.BackgroundImageRotation:
 //                case StylePropertyId.BackgroundImageTileX:
 //                case StylePropertyId.BackgroundImageTileY:
 //                case StylePropertyId.BackgroundImageOffsetX:
@@ -644,13 +643,8 @@ namespace UIForia.Editor {
                     return DrawFloat(property, isEditable);
 
                 case StylePropertyId.BackgroundImage:
-                case StylePropertyId.BackgroundImage1:
-                case StylePropertyId.BackgroundImage2:
                 case StylePropertyId.Cursor:
                     return DrawTextureAsset(property, isEditable);
-
-                case StylePropertyId.BackgroundShapeType:
-                    return DrawEnum<BackgroundShapeType>(property, isEditable);
 
                 case StylePropertyId.Opacity:
                     return DrawFloat(property, isEditable);

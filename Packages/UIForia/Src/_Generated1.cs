@@ -31,32 +31,11 @@ namespace UIForia.Rendering {
             set { m_StyleSet.SetProperty(new StyleProperty(StylePropertyId.BackgroundColor, value), state); }
         }
         
-        public UnityEngine.Color BackgroundColorSecondary {
-            [System.Diagnostics.DebuggerStepThrough]
-            get { return m_StyleSet.GetPropertyValueInState(StylePropertyId.BackgroundColorSecondary, state).AsColor; }
-            [System.Diagnostics.DebuggerStepThrough]
-            set { m_StyleSet.SetProperty(new StyleProperty(StylePropertyId.BackgroundColorSecondary, value), state); }
-        }
-        
         public UnityEngine.Texture2D BackgroundImage {
             [System.Diagnostics.DebuggerStepThrough]
             get { return m_StyleSet.GetPropertyValueInState(StylePropertyId.BackgroundImage, state).AsTexture2D; }
             [System.Diagnostics.DebuggerStepThrough]
             set { m_StyleSet.SetProperty(new StyleProperty(StylePropertyId.BackgroundImage, 0, 0, value), state); }
-        }
-        
-        public UnityEngine.Texture2D BackgroundImage1 {
-            [System.Diagnostics.DebuggerStepThrough]
-            get { return m_StyleSet.GetPropertyValueInState(StylePropertyId.BackgroundImage1, state).AsTexture2D; }
-            [System.Diagnostics.DebuggerStepThrough]
-            set { m_StyleSet.SetProperty(new StyleProperty(StylePropertyId.BackgroundImage1, 0, 0, value), state); }
-        }
-        
-        public UnityEngine.Texture2D BackgroundImage2 {
-            [System.Diagnostics.DebuggerStepThrough]
-            get { return m_StyleSet.GetPropertyValueInState(StylePropertyId.BackgroundImage2, state).AsTexture2D; }
-            [System.Diagnostics.DebuggerStepThrough]
-            set { m_StyleSet.SetProperty(new StyleProperty(StylePropertyId.BackgroundImage2, 0, 0, value), state); }
         }
         
         public Shapes2D.GradientType BackgroundGradientType {
@@ -80,53 +59,11 @@ namespace UIForia.Rendering {
             set { m_StyleSet.SetProperty(new StyleProperty(StylePropertyId.BackgroundGradientStart, value), state); }
         }
         
-        public float BackgroundFillRotation {
+        public UIForia.Rendering.BackgroundFillType Painter {
             [System.Diagnostics.DebuggerStepThrough]
-            get { return m_StyleSet.GetPropertyValueInState(StylePropertyId.BackgroundFillRotation, state).AsFloat; }
+            get { return m_StyleSet.GetPropertyValueInState(StylePropertyId.Painter, state).AsBackgroundFillType; }
             [System.Diagnostics.DebuggerStepThrough]
-            set { m_StyleSet.SetProperty(new StyleProperty(StylePropertyId.BackgroundFillRotation, value), state); }
-        }
-        
-        public UIForia.Rendering.BackgroundFillType BackgroundFillType {
-            [System.Diagnostics.DebuggerStepThrough]
-            get { return m_StyleSet.GetPropertyValueInState(StylePropertyId.BackgroundFillType, state).AsBackgroundFillType; }
-            [System.Diagnostics.DebuggerStepThrough]
-            set { m_StyleSet.SetProperty(new StyleProperty(StylePropertyId.BackgroundFillType, (int)value), state); }
-        }
-        
-        public UIForia.Rendering.BackgroundShapeType BackgroundShapeType {
-            [System.Diagnostics.DebuggerStepThrough]
-            get { return m_StyleSet.GetPropertyValueInState(StylePropertyId.BackgroundShapeType, state).AsBackgroundShapeType; }
-            [System.Diagnostics.DebuggerStepThrough]
-            set { m_StyleSet.SetProperty(new StyleProperty(StylePropertyId.BackgroundShapeType, (int)value), state); }
-        }
-        
-        public float BackgroundFillOffsetX {
-            [System.Diagnostics.DebuggerStepThrough]
-            get { return m_StyleSet.GetPropertyValueInState(StylePropertyId.BackgroundFillOffsetX, state).AsFloat; }
-            [System.Diagnostics.DebuggerStepThrough]
-            set { m_StyleSet.SetProperty(new StyleProperty(StylePropertyId.BackgroundFillOffsetX, value), state); }
-        }
-        
-        public float BackgroundFillOffsetY {
-            [System.Diagnostics.DebuggerStepThrough]
-            get { return m_StyleSet.GetPropertyValueInState(StylePropertyId.BackgroundFillOffsetY, state).AsFloat; }
-            [System.Diagnostics.DebuggerStepThrough]
-            set { m_StyleSet.SetProperty(new StyleProperty(StylePropertyId.BackgroundFillOffsetY, value), state); }
-        }
-        
-        public float BackgroundFillScaleX {
-            [System.Diagnostics.DebuggerStepThrough]
-            get { return m_StyleSet.GetPropertyValueInState(StylePropertyId.BackgroundFillScaleX, state).AsFloat; }
-            [System.Diagnostics.DebuggerStepThrough]
-            set { m_StyleSet.SetProperty(new StyleProperty(StylePropertyId.BackgroundFillScaleX, value), state); }
-        }
-        
-        public float BackgroundFillScaleY {
-            [System.Diagnostics.DebuggerStepThrough]
-            get { return m_StyleSet.GetPropertyValueInState(StylePropertyId.BackgroundFillScaleY, state).AsFloat; }
-            [System.Diagnostics.DebuggerStepThrough]
-            set { m_StyleSet.SetProperty(new StyleProperty(StylePropertyId.BackgroundFillScaleY, value), state); }
+            set { m_StyleSet.SetProperty(new StyleProperty(StylePropertyId.Painter, (int)value), state); }
         }
         
         public float Opacity {
@@ -514,6 +451,97 @@ namespace UIForia.Rendering {
             set { m_StyleSet.SetProperty(new StyleProperty(StylePropertyId.TextTransform, (int)value), state); }
         }
         
+        public float TextOutlineWidth {
+            [System.Diagnostics.DebuggerStepThrough]
+            get { return m_StyleSet.GetPropertyValueInState(StylePropertyId.TextOutlineWidth, state).AsFloat; }
+            [System.Diagnostics.DebuggerStepThrough]
+            set { m_StyleSet.SetProperty(new StyleProperty(StylePropertyId.TextOutlineWidth, value), state); }
+        }
+        
+        public UnityEngine.Color TextOutlineColor {
+            [System.Diagnostics.DebuggerStepThrough]
+            get { return m_StyleSet.GetPropertyValueInState(StylePropertyId.TextOutlineColor, state).AsColor; }
+            [System.Diagnostics.DebuggerStepThrough]
+            set { m_StyleSet.SetProperty(new StyleProperty(StylePropertyId.TextOutlineColor, value), state); }
+        }
+        
+        public UnityEngine.Color TextGlowColor {
+            [System.Diagnostics.DebuggerStepThrough]
+            get { return m_StyleSet.GetPropertyValueInState(StylePropertyId.TextGlowColor, state).AsColor; }
+            [System.Diagnostics.DebuggerStepThrough]
+            set { m_StyleSet.SetProperty(new StyleProperty(StylePropertyId.TextGlowColor, value), state); }
+        }
+        
+        public float TextGlowOffset {
+            [System.Diagnostics.DebuggerStepThrough]
+            get { return m_StyleSet.GetPropertyValueInState(StylePropertyId.TextGlowOffset, state).AsFloat; }
+            [System.Diagnostics.DebuggerStepThrough]
+            set { m_StyleSet.SetProperty(new StyleProperty(StylePropertyId.TextGlowOffset, value), state); }
+        }
+        
+        public float TextGlowInner {
+            [System.Diagnostics.DebuggerStepThrough]
+            get { return m_StyleSet.GetPropertyValueInState(StylePropertyId.TextGlowInner, state).AsFloat; }
+            [System.Diagnostics.DebuggerStepThrough]
+            set { m_StyleSet.SetProperty(new StyleProperty(StylePropertyId.TextGlowInner, value), state); }
+        }
+        
+        public float TextGlowOuter {
+            [System.Diagnostics.DebuggerStepThrough]
+            get { return m_StyleSet.GetPropertyValueInState(StylePropertyId.TextGlowOuter, state).AsFloat; }
+            [System.Diagnostics.DebuggerStepThrough]
+            set { m_StyleSet.SetProperty(new StyleProperty(StylePropertyId.TextGlowOuter, value), state); }
+        }
+        
+        public float TextGlowPower {
+            [System.Diagnostics.DebuggerStepThrough]
+            get { return m_StyleSet.GetPropertyValueInState(StylePropertyId.TextGlowPower, state).AsFloat; }
+            [System.Diagnostics.DebuggerStepThrough]
+            set { m_StyleSet.SetProperty(new StyleProperty(StylePropertyId.TextGlowPower, value), state); }
+        }
+        
+        public UnityEngine.Color TextShadowColor {
+            [System.Diagnostics.DebuggerStepThrough]
+            get { return m_StyleSet.GetPropertyValueInState(StylePropertyId.TextShadowColor, state).AsColor; }
+            [System.Diagnostics.DebuggerStepThrough]
+            set { m_StyleSet.SetProperty(new StyleProperty(StylePropertyId.TextShadowColor, value), state); }
+        }
+        
+        public float TextShadowOffsetX {
+            [System.Diagnostics.DebuggerStepThrough]
+            get { return m_StyleSet.GetPropertyValueInState(StylePropertyId.TextShadowOffsetX, state).AsFloat; }
+            [System.Diagnostics.DebuggerStepThrough]
+            set { m_StyleSet.SetProperty(new StyleProperty(StylePropertyId.TextShadowOffsetX, value), state); }
+        }
+        
+        public float TextShadowOffsetY {
+            [System.Diagnostics.DebuggerStepThrough]
+            get { return m_StyleSet.GetPropertyValueInState(StylePropertyId.TextShadowOffsetY, state).AsFloat; }
+            [System.Diagnostics.DebuggerStepThrough]
+            set { m_StyleSet.SetProperty(new StyleProperty(StylePropertyId.TextShadowOffsetY, value), state); }
+        }
+        
+        public float TextShadowIntensity {
+            [System.Diagnostics.DebuggerStepThrough]
+            get { return m_StyleSet.GetPropertyValueInState(StylePropertyId.TextShadowIntensity, state).AsFloat; }
+            [System.Diagnostics.DebuggerStepThrough]
+            set { m_StyleSet.SetProperty(new StyleProperty(StylePropertyId.TextShadowIntensity, value), state); }
+        }
+        
+        public float TextShadowSoftness {
+            [System.Diagnostics.DebuggerStepThrough]
+            get { return m_StyleSet.GetPropertyValueInState(StylePropertyId.TextShadowSoftness, state).AsFloat; }
+            [System.Diagnostics.DebuggerStepThrough]
+            set { m_StyleSet.SetProperty(new StyleProperty(StylePropertyId.TextShadowSoftness, value), state); }
+        }
+        
+        public UIForia.Rendering.ShadowType TextShadowType {
+            [System.Diagnostics.DebuggerStepThrough]
+            get { return m_StyleSet.GetPropertyValueInState(StylePropertyId.TextShadowType, state).AsShadowType; }
+            [System.Diagnostics.DebuggerStepThrough]
+            set { m_StyleSet.SetProperty(new StyleProperty(StylePropertyId.TextShadowType, (int)value), state); }
+        }
+        
         public UIForia.UIFixedLength AnchorTop {
             [System.Diagnostics.DebuggerStepThrough]
             get { return m_StyleSet.GetPropertyValueInState(StylePropertyId.AnchorTop, state).AsUIFixedLength; }
@@ -647,368 +675,67 @@ namespace UIForia.Rendering {
             set { m_StyleSet.SetProperty(new StyleProperty(StylePropertyId.RenderLayer, (int)value), state); }
         }
         
-        public UIForia.Rendering.VerticalScrollbarAttachment ScrollbarVerticalAttachment {
+        public UIForia.Rendering.ShadowType ShadowType {
             [System.Diagnostics.DebuggerStepThrough]
-            get { return m_StyleSet.GetPropertyValueInState(StylePropertyId.ScrollbarVerticalAttachment, state).AsVerticalScrollbarAttachment; }
+            get { return m_StyleSet.GetPropertyValueInState(StylePropertyId.ShadowType, state).AsShadowType; }
             [System.Diagnostics.DebuggerStepThrough]
-            set { m_StyleSet.SetProperty(new StyleProperty(StylePropertyId.ScrollbarVerticalAttachment, (int)value), state); }
+            set { m_StyleSet.SetProperty(new StyleProperty(StylePropertyId.ShadowType, (int)value), state); }
         }
         
-        public UIForia.Rendering.ScrollbarButtonPlacement ScrollbarVerticalButtonPlacement {
+        public float ShadowOffsetX {
             [System.Diagnostics.DebuggerStepThrough]
-            get { return m_StyleSet.GetPropertyValueInState(StylePropertyId.ScrollbarVerticalButtonPlacement, state).AsScrollbarButtonPlacement; }
+            get { return m_StyleSet.GetPropertyValueInState(StylePropertyId.ShadowOffsetX, state).AsFloat; }
             [System.Diagnostics.DebuggerStepThrough]
-            set { m_StyleSet.SetProperty(new StyleProperty(StylePropertyId.ScrollbarVerticalButtonPlacement, (int)value), state); }
+            set { m_StyleSet.SetProperty(new StyleProperty(StylePropertyId.ShadowOffsetX, value), state); }
         }
         
-        public float ScrollbarVerticalTrackSize {
+        public float ShadowOffsetY {
             [System.Diagnostics.DebuggerStepThrough]
-            get { return m_StyleSet.GetPropertyValueInState(StylePropertyId.ScrollbarVerticalTrackSize, state).AsFloat; }
+            get { return m_StyleSet.GetPropertyValueInState(StylePropertyId.ShadowOffsetY, state).AsFloat; }
             [System.Diagnostics.DebuggerStepThrough]
-            set { m_StyleSet.SetProperty(new StyleProperty(StylePropertyId.ScrollbarVerticalTrackSize, value), state); }
+            set { m_StyleSet.SetProperty(new StyleProperty(StylePropertyId.ShadowOffsetY, value), state); }
         }
         
-        public float ScrollbarVerticalTrackBorderRadius {
+        public float ShadowSoftnessX {
             [System.Diagnostics.DebuggerStepThrough]
-            get { return m_StyleSet.GetPropertyValueInState(StylePropertyId.ScrollbarVerticalTrackBorderRadius, state).AsFloat; }
+            get { return m_StyleSet.GetPropertyValueInState(StylePropertyId.ShadowSoftnessX, state).AsFloat; }
             [System.Diagnostics.DebuggerStepThrough]
-            set { m_StyleSet.SetProperty(new StyleProperty(StylePropertyId.ScrollbarVerticalTrackBorderRadius, value), state); }
+            set { m_StyleSet.SetProperty(new StyleProperty(StylePropertyId.ShadowSoftnessX, value), state); }
         }
         
-        public float ScrollbarVerticalTrackBorderSize {
+        public float ShadowSoftnessY {
             [System.Diagnostics.DebuggerStepThrough]
-            get { return m_StyleSet.GetPropertyValueInState(StylePropertyId.ScrollbarVerticalTrackBorderSize, state).AsFloat; }
+            get { return m_StyleSet.GetPropertyValueInState(StylePropertyId.ShadowSoftnessY, state).AsFloat; }
             [System.Diagnostics.DebuggerStepThrough]
-            set { m_StyleSet.SetProperty(new StyleProperty(StylePropertyId.ScrollbarVerticalTrackBorderSize, value), state); }
+            set { m_StyleSet.SetProperty(new StyleProperty(StylePropertyId.ShadowSoftnessY, value), state); }
         }
         
-        public UnityEngine.Color ScrollbarVerticalTrackBorderColor {
+        public float ShadowIntensity {
             [System.Diagnostics.DebuggerStepThrough]
-            get { return m_StyleSet.GetPropertyValueInState(StylePropertyId.ScrollbarVerticalTrackBorderColor, state).AsColor; }
+            get { return m_StyleSet.GetPropertyValueInState(StylePropertyId.ShadowIntensity, state).AsFloat; }
             [System.Diagnostics.DebuggerStepThrough]
-            set { m_StyleSet.SetProperty(new StyleProperty(StylePropertyId.ScrollbarVerticalTrackBorderColor, value), state); }
+            set { m_StyleSet.SetProperty(new StyleProperty(StylePropertyId.ShadowIntensity, value), state); }
         }
         
-        public UnityEngine.Texture2D ScrollbarVerticalTrackImage {
+        public string Scrollbar {
             [System.Diagnostics.DebuggerStepThrough]
-            get { return m_StyleSet.GetPropertyValueInState(StylePropertyId.ScrollbarVerticalTrackImage, state).AsTexture2D; }
+            get { return m_StyleSet.GetPropertyValueInState(StylePropertyId.Scrollbar, state).AsString; }
             [System.Diagnostics.DebuggerStepThrough]
-            set { m_StyleSet.SetProperty(new StyleProperty(StylePropertyId.ScrollbarVerticalTrackImage, 0, 0, value), state); }
+            set { m_StyleSet.SetProperty(new StyleProperty(StylePropertyId.Scrollbar, 0, 0, value), state); }
         }
         
-        public UnityEngine.Color ScrollbarVerticalTrackColor {
+        public UIForia.UIMeasurement ScrollbarSize {
             [System.Diagnostics.DebuggerStepThrough]
-            get { return m_StyleSet.GetPropertyValueInState(StylePropertyId.ScrollbarVerticalTrackColor, state).AsColor; }
+            get { return m_StyleSet.GetPropertyValueInState(StylePropertyId.ScrollbarSize, state).AsUIMeasurement; }
             [System.Diagnostics.DebuggerStepThrough]
-            set { m_StyleSet.SetProperty(new StyleProperty(StylePropertyId.ScrollbarVerticalTrackColor, value), state); }
+            set { m_StyleSet.SetProperty(new StyleProperty(StylePropertyId.ScrollbarSize, value), state); }
         }
         
-        public float ScrollbarVerticalHandleSize {
+        public UnityEngine.Color ScrollbarColor {
             [System.Diagnostics.DebuggerStepThrough]
-            get { return m_StyleSet.GetPropertyValueInState(StylePropertyId.ScrollbarVerticalHandleSize, state).AsFloat; }
+            get { return m_StyleSet.GetPropertyValueInState(StylePropertyId.ScrollbarColor, state).AsColor; }
             [System.Diagnostics.DebuggerStepThrough]
-            set { m_StyleSet.SetProperty(new StyleProperty(StylePropertyId.ScrollbarVerticalHandleSize, value), state); }
-        }
-        
-        public float ScrollbarVerticalHandleBorderRadius {
-            [System.Diagnostics.DebuggerStepThrough]
-            get { return m_StyleSet.GetPropertyValueInState(StylePropertyId.ScrollbarVerticalHandleBorderRadius, state).AsFloat; }
-            [System.Diagnostics.DebuggerStepThrough]
-            set { m_StyleSet.SetProperty(new StyleProperty(StylePropertyId.ScrollbarVerticalHandleBorderRadius, value), state); }
-        }
-        
-        public float ScrollbarVerticalHandleBorderSize {
-            [System.Diagnostics.DebuggerStepThrough]
-            get { return m_StyleSet.GetPropertyValueInState(StylePropertyId.ScrollbarVerticalHandleBorderSize, state).AsFloat; }
-            [System.Diagnostics.DebuggerStepThrough]
-            set { m_StyleSet.SetProperty(new StyleProperty(StylePropertyId.ScrollbarVerticalHandleBorderSize, value), state); }
-        }
-        
-        public UnityEngine.Color ScrollbarVerticalHandleBorderColor {
-            [System.Diagnostics.DebuggerStepThrough]
-            get { return m_StyleSet.GetPropertyValueInState(StylePropertyId.ScrollbarVerticalHandleBorderColor, state).AsColor; }
-            [System.Diagnostics.DebuggerStepThrough]
-            set { m_StyleSet.SetProperty(new StyleProperty(StylePropertyId.ScrollbarVerticalHandleBorderColor, value), state); }
-        }
-        
-        public UnityEngine.Texture2D ScrollbarVerticalHandleImage {
-            [System.Diagnostics.DebuggerStepThrough]
-            get { return m_StyleSet.GetPropertyValueInState(StylePropertyId.ScrollbarVerticalHandleImage, state).AsTexture2D; }
-            [System.Diagnostics.DebuggerStepThrough]
-            set { m_StyleSet.SetProperty(new StyleProperty(StylePropertyId.ScrollbarVerticalHandleImage, 0, 0, value), state); }
-        }
-        
-        public UnityEngine.Color ScrollbarVerticalHandleColor {
-            [System.Diagnostics.DebuggerStepThrough]
-            get { return m_StyleSet.GetPropertyValueInState(StylePropertyId.ScrollbarVerticalHandleColor, state).AsColor; }
-            [System.Diagnostics.DebuggerStepThrough]
-            set { m_StyleSet.SetProperty(new StyleProperty(StylePropertyId.ScrollbarVerticalHandleColor, value), state); }
-        }
-        
-        public float ScrollbarVerticalIncrementSize {
-            [System.Diagnostics.DebuggerStepThrough]
-            get { return m_StyleSet.GetPropertyValueInState(StylePropertyId.ScrollbarVerticalIncrementSize, state).AsFloat; }
-            [System.Diagnostics.DebuggerStepThrough]
-            set { m_StyleSet.SetProperty(new StyleProperty(StylePropertyId.ScrollbarVerticalIncrementSize, value), state); }
-        }
-        
-        public float ScrollbarVerticalIncrementBorderRadius {
-            [System.Diagnostics.DebuggerStepThrough]
-            get { return m_StyleSet.GetPropertyValueInState(StylePropertyId.ScrollbarVerticalIncrementBorderRadius, state).AsFloat; }
-            [System.Diagnostics.DebuggerStepThrough]
-            set { m_StyleSet.SetProperty(new StyleProperty(StylePropertyId.ScrollbarVerticalIncrementBorderRadius, value), state); }
-        }
-        
-        public float ScrollbarVerticalIncrementBorderSize {
-            [System.Diagnostics.DebuggerStepThrough]
-            get { return m_StyleSet.GetPropertyValueInState(StylePropertyId.ScrollbarVerticalIncrementBorderSize, state).AsFloat; }
-            [System.Diagnostics.DebuggerStepThrough]
-            set { m_StyleSet.SetProperty(new StyleProperty(StylePropertyId.ScrollbarVerticalIncrementBorderSize, value), state); }
-        }
-        
-        public UnityEngine.Color ScrollbarVerticalIncrementBorderColor {
-            [System.Diagnostics.DebuggerStepThrough]
-            get { return m_StyleSet.GetPropertyValueInState(StylePropertyId.ScrollbarVerticalIncrementBorderColor, state).AsColor; }
-            [System.Diagnostics.DebuggerStepThrough]
-            set { m_StyleSet.SetProperty(new StyleProperty(StylePropertyId.ScrollbarVerticalIncrementBorderColor, value), state); }
-        }
-        
-        public UnityEngine.Texture2D ScrollbarVerticalIncrementImage {
-            [System.Diagnostics.DebuggerStepThrough]
-            get { return m_StyleSet.GetPropertyValueInState(StylePropertyId.ScrollbarVerticalIncrementImage, state).AsTexture2D; }
-            [System.Diagnostics.DebuggerStepThrough]
-            set { m_StyleSet.SetProperty(new StyleProperty(StylePropertyId.ScrollbarVerticalIncrementImage, 0, 0, value), state); }
-        }
-        
-        public UnityEngine.Color ScrollbarVerticalIncrementColor {
-            [System.Diagnostics.DebuggerStepThrough]
-            get { return m_StyleSet.GetPropertyValueInState(StylePropertyId.ScrollbarVerticalIncrementColor, state).AsColor; }
-            [System.Diagnostics.DebuggerStepThrough]
-            set { m_StyleSet.SetProperty(new StyleProperty(StylePropertyId.ScrollbarVerticalIncrementColor, value), state); }
-        }
-        
-        public float ScrollbarVerticalDecrementSize {
-            [System.Diagnostics.DebuggerStepThrough]
-            get { return m_StyleSet.GetPropertyValueInState(StylePropertyId.ScrollbarVerticalDecrementSize, state).AsFloat; }
-            [System.Diagnostics.DebuggerStepThrough]
-            set { m_StyleSet.SetProperty(new StyleProperty(StylePropertyId.ScrollbarVerticalDecrementSize, value), state); }
-        }
-        
-        public float ScrollbarVerticalDecrementBorderRadius {
-            [System.Diagnostics.DebuggerStepThrough]
-            get { return m_StyleSet.GetPropertyValueInState(StylePropertyId.ScrollbarVerticalDecrementBorderRadius, state).AsFloat; }
-            [System.Diagnostics.DebuggerStepThrough]
-            set { m_StyleSet.SetProperty(new StyleProperty(StylePropertyId.ScrollbarVerticalDecrementBorderRadius, value), state); }
-        }
-        
-        public float ScrollbarVerticalDecrementBorderSize {
-            [System.Diagnostics.DebuggerStepThrough]
-            get { return m_StyleSet.GetPropertyValueInState(StylePropertyId.ScrollbarVerticalDecrementBorderSize, state).AsFloat; }
-            [System.Diagnostics.DebuggerStepThrough]
-            set { m_StyleSet.SetProperty(new StyleProperty(StylePropertyId.ScrollbarVerticalDecrementBorderSize, value), state); }
-        }
-        
-        public UnityEngine.Color ScrollbarVerticalDecrementBorderColor {
-            [System.Diagnostics.DebuggerStepThrough]
-            get { return m_StyleSet.GetPropertyValueInState(StylePropertyId.ScrollbarVerticalDecrementBorderColor, state).AsColor; }
-            [System.Diagnostics.DebuggerStepThrough]
-            set { m_StyleSet.SetProperty(new StyleProperty(StylePropertyId.ScrollbarVerticalDecrementBorderColor, value), state); }
-        }
-        
-        public UnityEngine.Texture2D ScrollbarVerticalDecrementImage {
-            [System.Diagnostics.DebuggerStepThrough]
-            get { return m_StyleSet.GetPropertyValueInState(StylePropertyId.ScrollbarVerticalDecrementImage, state).AsTexture2D; }
-            [System.Diagnostics.DebuggerStepThrough]
-            set { m_StyleSet.SetProperty(new StyleProperty(StylePropertyId.ScrollbarVerticalDecrementImage, 0, 0, value), state); }
-        }
-        
-        public UnityEngine.Color ScrollbarVerticalDecrementColor {
-            [System.Diagnostics.DebuggerStepThrough]
-            get { return m_StyleSet.GetPropertyValueInState(StylePropertyId.ScrollbarVerticalDecrementColor, state).AsColor; }
-            [System.Diagnostics.DebuggerStepThrough]
-            set { m_StyleSet.SetProperty(new StyleProperty(StylePropertyId.ScrollbarVerticalDecrementColor, value), state); }
-        }
-        
-        public UIForia.Rendering.HorizontalScrollbarAttachment ScrollbarHorizontalAttachment {
-            [System.Diagnostics.DebuggerStepThrough]
-            get { return m_StyleSet.GetPropertyValueInState(StylePropertyId.ScrollbarHorizontalAttachment, state).AsHorizontalScrollbarAttachment; }
-            [System.Diagnostics.DebuggerStepThrough]
-            set { m_StyleSet.SetProperty(new StyleProperty(StylePropertyId.ScrollbarHorizontalAttachment, (int)value), state); }
-        }
-        
-        public UIForia.Rendering.ScrollbarButtonPlacement ScrollbarHorizontalButtonPlacement {
-            [System.Diagnostics.DebuggerStepThrough]
-            get { return m_StyleSet.GetPropertyValueInState(StylePropertyId.ScrollbarHorizontalButtonPlacement, state).AsScrollbarButtonPlacement; }
-            [System.Diagnostics.DebuggerStepThrough]
-            set { m_StyleSet.SetProperty(new StyleProperty(StylePropertyId.ScrollbarHorizontalButtonPlacement, (int)value), state); }
-        }
-        
-        public float ScrollbarHorizontalTrackSize {
-            [System.Diagnostics.DebuggerStepThrough]
-            get { return m_StyleSet.GetPropertyValueInState(StylePropertyId.ScrollbarHorizontalTrackSize, state).AsFloat; }
-            [System.Diagnostics.DebuggerStepThrough]
-            set { m_StyleSet.SetProperty(new StyleProperty(StylePropertyId.ScrollbarHorizontalTrackSize, value), state); }
-        }
-        
-        public float ScrollbarHorizontalTrackBorderRadius {
-            [System.Diagnostics.DebuggerStepThrough]
-            get { return m_StyleSet.GetPropertyValueInState(StylePropertyId.ScrollbarHorizontalTrackBorderRadius, state).AsFloat; }
-            [System.Diagnostics.DebuggerStepThrough]
-            set { m_StyleSet.SetProperty(new StyleProperty(StylePropertyId.ScrollbarHorizontalTrackBorderRadius, value), state); }
-        }
-        
-        public float ScrollbarHorizontalTrackBorderSize {
-            [System.Diagnostics.DebuggerStepThrough]
-            get { return m_StyleSet.GetPropertyValueInState(StylePropertyId.ScrollbarHorizontalTrackBorderSize, state).AsFloat; }
-            [System.Diagnostics.DebuggerStepThrough]
-            set { m_StyleSet.SetProperty(new StyleProperty(StylePropertyId.ScrollbarHorizontalTrackBorderSize, value), state); }
-        }
-        
-        public UnityEngine.Color ScrollbarHorizontalTrackBorderColor {
-            [System.Diagnostics.DebuggerStepThrough]
-            get { return m_StyleSet.GetPropertyValueInState(StylePropertyId.ScrollbarHorizontalTrackBorderColor, state).AsColor; }
-            [System.Diagnostics.DebuggerStepThrough]
-            set { m_StyleSet.SetProperty(new StyleProperty(StylePropertyId.ScrollbarHorizontalTrackBorderColor, value), state); }
-        }
-        
-        public UnityEngine.Texture2D ScrollbarHorizontalTrackImage {
-            [System.Diagnostics.DebuggerStepThrough]
-            get { return m_StyleSet.GetPropertyValueInState(StylePropertyId.ScrollbarHorizontalTrackImage, state).AsTexture2D; }
-            [System.Diagnostics.DebuggerStepThrough]
-            set { m_StyleSet.SetProperty(new StyleProperty(StylePropertyId.ScrollbarHorizontalTrackImage, 0, 0, value), state); }
-        }
-        
-        public UnityEngine.Color ScrollbarHorizontalTrackColor {
-            [System.Diagnostics.DebuggerStepThrough]
-            get { return m_StyleSet.GetPropertyValueInState(StylePropertyId.ScrollbarHorizontalTrackColor, state).AsColor; }
-            [System.Diagnostics.DebuggerStepThrough]
-            set { m_StyleSet.SetProperty(new StyleProperty(StylePropertyId.ScrollbarHorizontalTrackColor, value), state); }
-        }
-        
-        public float ScrollbarHorizontalHandleSize {
-            [System.Diagnostics.DebuggerStepThrough]
-            get { return m_StyleSet.GetPropertyValueInState(StylePropertyId.ScrollbarHorizontalHandleSize, state).AsFloat; }
-            [System.Diagnostics.DebuggerStepThrough]
-            set { m_StyleSet.SetProperty(new StyleProperty(StylePropertyId.ScrollbarHorizontalHandleSize, value), state); }
-        }
-        
-        public float ScrollbarHorizontalHandleBorderRadius {
-            [System.Diagnostics.DebuggerStepThrough]
-            get { return m_StyleSet.GetPropertyValueInState(StylePropertyId.ScrollbarHorizontalHandleBorderRadius, state).AsFloat; }
-            [System.Diagnostics.DebuggerStepThrough]
-            set { m_StyleSet.SetProperty(new StyleProperty(StylePropertyId.ScrollbarHorizontalHandleBorderRadius, value), state); }
-        }
-        
-        public float ScrollbarHorizontalHandleBorderSize {
-            [System.Diagnostics.DebuggerStepThrough]
-            get { return m_StyleSet.GetPropertyValueInState(StylePropertyId.ScrollbarHorizontalHandleBorderSize, state).AsFloat; }
-            [System.Diagnostics.DebuggerStepThrough]
-            set { m_StyleSet.SetProperty(new StyleProperty(StylePropertyId.ScrollbarHorizontalHandleBorderSize, value), state); }
-        }
-        
-        public UnityEngine.Color ScrollbarHorizontalHandleBorderColor {
-            [System.Diagnostics.DebuggerStepThrough]
-            get { return m_StyleSet.GetPropertyValueInState(StylePropertyId.ScrollbarHorizontalHandleBorderColor, state).AsColor; }
-            [System.Diagnostics.DebuggerStepThrough]
-            set { m_StyleSet.SetProperty(new StyleProperty(StylePropertyId.ScrollbarHorizontalHandleBorderColor, value), state); }
-        }
-        
-        public UnityEngine.Texture2D ScrollbarHorizontalHandleImage {
-            [System.Diagnostics.DebuggerStepThrough]
-            get { return m_StyleSet.GetPropertyValueInState(StylePropertyId.ScrollbarHorizontalHandleImage, state).AsTexture2D; }
-            [System.Diagnostics.DebuggerStepThrough]
-            set { m_StyleSet.SetProperty(new StyleProperty(StylePropertyId.ScrollbarHorizontalHandleImage, 0, 0, value), state); }
-        }
-        
-        public UnityEngine.Color ScrollbarHorizontalHandleColor {
-            [System.Diagnostics.DebuggerStepThrough]
-            get { return m_StyleSet.GetPropertyValueInState(StylePropertyId.ScrollbarHorizontalHandleColor, state).AsColor; }
-            [System.Diagnostics.DebuggerStepThrough]
-            set { m_StyleSet.SetProperty(new StyleProperty(StylePropertyId.ScrollbarHorizontalHandleColor, value), state); }
-        }
-        
-        public float ScrollbarHorizontalIncrementSize {
-            [System.Diagnostics.DebuggerStepThrough]
-            get { return m_StyleSet.GetPropertyValueInState(StylePropertyId.ScrollbarHorizontalIncrementSize, state).AsFloat; }
-            [System.Diagnostics.DebuggerStepThrough]
-            set { m_StyleSet.SetProperty(new StyleProperty(StylePropertyId.ScrollbarHorizontalIncrementSize, value), state); }
-        }
-        
-        public float ScrollbarHorizontalIncrementBorderRadius {
-            [System.Diagnostics.DebuggerStepThrough]
-            get { return m_StyleSet.GetPropertyValueInState(StylePropertyId.ScrollbarHorizontalIncrementBorderRadius, state).AsFloat; }
-            [System.Diagnostics.DebuggerStepThrough]
-            set { m_StyleSet.SetProperty(new StyleProperty(StylePropertyId.ScrollbarHorizontalIncrementBorderRadius, value), state); }
-        }
-        
-        public float ScrollbarHorizontalIncrementBorderSize {
-            [System.Diagnostics.DebuggerStepThrough]
-            get { return m_StyleSet.GetPropertyValueInState(StylePropertyId.ScrollbarHorizontalIncrementBorderSize, state).AsFloat; }
-            [System.Diagnostics.DebuggerStepThrough]
-            set { m_StyleSet.SetProperty(new StyleProperty(StylePropertyId.ScrollbarHorizontalIncrementBorderSize, value), state); }
-        }
-        
-        public UnityEngine.Color ScrollbarHorizontalIncrementBorderColor {
-            [System.Diagnostics.DebuggerStepThrough]
-            get { return m_StyleSet.GetPropertyValueInState(StylePropertyId.ScrollbarHorizontalIncrementBorderColor, state).AsColor; }
-            [System.Diagnostics.DebuggerStepThrough]
-            set { m_StyleSet.SetProperty(new StyleProperty(StylePropertyId.ScrollbarHorizontalIncrementBorderColor, value), state); }
-        }
-        
-        public UnityEngine.Texture2D ScrollbarHorizontalIncrementImage {
-            [System.Diagnostics.DebuggerStepThrough]
-            get { return m_StyleSet.GetPropertyValueInState(StylePropertyId.ScrollbarHorizontalIncrementImage, state).AsTexture2D; }
-            [System.Diagnostics.DebuggerStepThrough]
-            set { m_StyleSet.SetProperty(new StyleProperty(StylePropertyId.ScrollbarHorizontalIncrementImage, 0, 0, value), state); }
-        }
-        
-        public UnityEngine.Color ScrollbarHorizontalIncrementColor {
-            [System.Diagnostics.DebuggerStepThrough]
-            get { return m_StyleSet.GetPropertyValueInState(StylePropertyId.ScrollbarHorizontalIncrementColor, state).AsColor; }
-            [System.Diagnostics.DebuggerStepThrough]
-            set { m_StyleSet.SetProperty(new StyleProperty(StylePropertyId.ScrollbarHorizontalIncrementColor, value), state); }
-        }
-        
-        public float ScrollbarHorizontalDecrementSize {
-            [System.Diagnostics.DebuggerStepThrough]
-            get { return m_StyleSet.GetPropertyValueInState(StylePropertyId.ScrollbarHorizontalDecrementSize, state).AsFloat; }
-            [System.Diagnostics.DebuggerStepThrough]
-            set { m_StyleSet.SetProperty(new StyleProperty(StylePropertyId.ScrollbarHorizontalDecrementSize, value), state); }
-        }
-        
-        public float ScrollbarHorizontalDecrementBorderRadius {
-            [System.Diagnostics.DebuggerStepThrough]
-            get { return m_StyleSet.GetPropertyValueInState(StylePropertyId.ScrollbarHorizontalDecrementBorderRadius, state).AsFloat; }
-            [System.Diagnostics.DebuggerStepThrough]
-            set { m_StyleSet.SetProperty(new StyleProperty(StylePropertyId.ScrollbarHorizontalDecrementBorderRadius, value), state); }
-        }
-        
-        public float ScrollbarHorizontalDecrementBorderSize {
-            [System.Diagnostics.DebuggerStepThrough]
-            get { return m_StyleSet.GetPropertyValueInState(StylePropertyId.ScrollbarHorizontalDecrementBorderSize, state).AsFloat; }
-            [System.Diagnostics.DebuggerStepThrough]
-            set { m_StyleSet.SetProperty(new StyleProperty(StylePropertyId.ScrollbarHorizontalDecrementBorderSize, value), state); }
-        }
-        
-        public UnityEngine.Color ScrollbarHorizontalDecrementBorderColor {
-            [System.Diagnostics.DebuggerStepThrough]
-            get { return m_StyleSet.GetPropertyValueInState(StylePropertyId.ScrollbarHorizontalDecrementBorderColor, state).AsColor; }
-            [System.Diagnostics.DebuggerStepThrough]
-            set { m_StyleSet.SetProperty(new StyleProperty(StylePropertyId.ScrollbarHorizontalDecrementBorderColor, value), state); }
-        }
-        
-        public UnityEngine.Texture2D ScrollbarHorizontalDecrementImage {
-            [System.Diagnostics.DebuggerStepThrough]
-            get { return m_StyleSet.GetPropertyValueInState(StylePropertyId.ScrollbarHorizontalDecrementImage, state).AsTexture2D; }
-            [System.Diagnostics.DebuggerStepThrough]
-            set { m_StyleSet.SetProperty(new StyleProperty(StylePropertyId.ScrollbarHorizontalDecrementImage, 0, 0, value), state); }
-        }
-        
-        public UnityEngine.Color ScrollbarHorizontalDecrementColor {
-            [System.Diagnostics.DebuggerStepThrough]
-            get { return m_StyleSet.GetPropertyValueInState(StylePropertyId.ScrollbarHorizontalDecrementColor, state).AsColor; }
-            [System.Diagnostics.DebuggerStepThrough]
-            set { m_StyleSet.SetProperty(new StyleProperty(StylePropertyId.ScrollbarHorizontalDecrementColor, value), state); }
+            set { m_StyleSet.SetProperty(new StyleProperty(StylePropertyId.ScrollbarColor, value), state); }
         }
         
     }
@@ -1022,20 +749,11 @@ namespace UIForia.Rendering {
                     case StylePropertyId.OverflowY: return valuePart0 == 0 || IntUtil.UnsetValue == valuePart0;
                     case StylePropertyId.BorderColor: return valuePart1 == 0;
                     case StylePropertyId.BackgroundColor: return valuePart1 == 0;
-                    case StylePropertyId.BackgroundColorSecondary: return valuePart1 == 0;
                     case StylePropertyId.BackgroundImage: return objectField == null;
-                    case StylePropertyId.BackgroundImage1: return objectField == null;
-                    case StylePropertyId.BackgroundImage2: return objectField == null;
                     case StylePropertyId.BackgroundGradientType: return valuePart0 == 0 || IntUtil.UnsetValue == valuePart0;
                     case StylePropertyId.BackgroundGradientAxis: return valuePart0 == 0 || IntUtil.UnsetValue == valuePart0;
                     case StylePropertyId.BackgroundGradientStart: return !FloatUtil.IsDefined(floatValue);
-                    case StylePropertyId.BackgroundFillRotation: return !FloatUtil.IsDefined(floatValue);
-                    case StylePropertyId.BackgroundFillType: return valuePart0 == 0 || IntUtil.UnsetValue == valuePart0;
-                    case StylePropertyId.BackgroundShapeType: return valuePart0 == 0 || IntUtil.UnsetValue == valuePart0;
-                    case StylePropertyId.BackgroundFillOffsetX: return !FloatUtil.IsDefined(floatValue);
-                    case StylePropertyId.BackgroundFillOffsetY: return !FloatUtil.IsDefined(floatValue);
-                    case StylePropertyId.BackgroundFillScaleX: return !FloatUtil.IsDefined(floatValue);
-                    case StylePropertyId.BackgroundFillScaleY: return !FloatUtil.IsDefined(floatValue);
+                    case StylePropertyId.Painter: return valuePart0 == 0 || IntUtil.UnsetValue == valuePart0;
                     case StylePropertyId.Opacity: return !FloatUtil.IsDefined(floatValue);
                     case StylePropertyId.Cursor: return objectField == null;
                     case StylePropertyId.Visibility: return valuePart0 == 0 || IntUtil.UnsetValue == valuePart0;
@@ -1091,6 +809,19 @@ namespace UIForia.Rendering {
                     case StylePropertyId.TextFontStyle: return valuePart0 == 0 || IntUtil.UnsetValue == valuePart0;
                     case StylePropertyId.TextAlignment: return valuePart0 == 0 || IntUtil.UnsetValue == valuePart0;
                     case StylePropertyId.TextTransform: return valuePart0 == 0 || IntUtil.UnsetValue == valuePart0;
+                    case StylePropertyId.TextOutlineWidth: return !FloatUtil.IsDefined(floatValue);
+                    case StylePropertyId.TextOutlineColor: return valuePart1 == 0;
+                    case StylePropertyId.TextGlowColor: return valuePart1 == 0;
+                    case StylePropertyId.TextGlowOffset: return !FloatUtil.IsDefined(floatValue);
+                    case StylePropertyId.TextGlowInner: return !FloatUtil.IsDefined(floatValue);
+                    case StylePropertyId.TextGlowOuter: return !FloatUtil.IsDefined(floatValue);
+                    case StylePropertyId.TextGlowPower: return !FloatUtil.IsDefined(floatValue);
+                    case StylePropertyId.TextShadowColor: return valuePart1 == 0;
+                    case StylePropertyId.TextShadowOffsetX: return !FloatUtil.IsDefined(floatValue);
+                    case StylePropertyId.TextShadowOffsetY: return !FloatUtil.IsDefined(floatValue);
+                    case StylePropertyId.TextShadowIntensity: return !FloatUtil.IsDefined(floatValue);
+                    case StylePropertyId.TextShadowSoftness: return !FloatUtil.IsDefined(floatValue);
+                    case StylePropertyId.TextShadowType: return valuePart0 == 0 || IntUtil.UnsetValue == valuePart0;
                     case StylePropertyId.AnchorTop: return !FloatUtil.IsDefined(floatValue) || valuePart1 == 0;
                     case StylePropertyId.AnchorRight: return !FloatUtil.IsDefined(floatValue) || valuePart1 == 0;
                     case StylePropertyId.AnchorBottom: return !FloatUtil.IsDefined(floatValue) || valuePart1 == 0;
@@ -1110,58 +841,15 @@ namespace UIForia.Rendering {
                     case StylePropertyId.ZIndex: return !IntUtil.IsDefined(valuePart0);
                     case StylePropertyId.RenderLayerOffset: return !IntUtil.IsDefined(valuePart0);
                     case StylePropertyId.RenderLayer: return valuePart0 == 0 || IntUtil.UnsetValue == valuePart0;
-                    case StylePropertyId.ScrollbarVerticalAttachment: return valuePart0 == 0 || IntUtil.UnsetValue == valuePart0;
-                    case StylePropertyId.ScrollbarVerticalButtonPlacement: return valuePart0 == 0 || IntUtil.UnsetValue == valuePart0;
-                    case StylePropertyId.ScrollbarVerticalTrackSize: return !FloatUtil.IsDefined(floatValue);
-                    case StylePropertyId.ScrollbarVerticalTrackBorderRadius: return !FloatUtil.IsDefined(floatValue);
-                    case StylePropertyId.ScrollbarVerticalTrackBorderSize: return !FloatUtil.IsDefined(floatValue);
-                    case StylePropertyId.ScrollbarVerticalTrackBorderColor: return valuePart1 == 0;
-                    case StylePropertyId.ScrollbarVerticalTrackImage: return objectField == null;
-                    case StylePropertyId.ScrollbarVerticalTrackColor: return valuePart1 == 0;
-                    case StylePropertyId.ScrollbarVerticalHandleSize: return !FloatUtil.IsDefined(floatValue);
-                    case StylePropertyId.ScrollbarVerticalHandleBorderRadius: return !FloatUtil.IsDefined(floatValue);
-                    case StylePropertyId.ScrollbarVerticalHandleBorderSize: return !FloatUtil.IsDefined(floatValue);
-                    case StylePropertyId.ScrollbarVerticalHandleBorderColor: return valuePart1 == 0;
-                    case StylePropertyId.ScrollbarVerticalHandleImage: return objectField == null;
-                    case StylePropertyId.ScrollbarVerticalHandleColor: return valuePart1 == 0;
-                    case StylePropertyId.ScrollbarVerticalIncrementSize: return !FloatUtil.IsDefined(floatValue);
-                    case StylePropertyId.ScrollbarVerticalIncrementBorderRadius: return !FloatUtil.IsDefined(floatValue);
-                    case StylePropertyId.ScrollbarVerticalIncrementBorderSize: return !FloatUtil.IsDefined(floatValue);
-                    case StylePropertyId.ScrollbarVerticalIncrementBorderColor: return valuePart1 == 0;
-                    case StylePropertyId.ScrollbarVerticalIncrementImage: return objectField == null;
-                    case StylePropertyId.ScrollbarVerticalIncrementColor: return valuePart1 == 0;
-                    case StylePropertyId.ScrollbarVerticalDecrementSize: return !FloatUtil.IsDefined(floatValue);
-                    case StylePropertyId.ScrollbarVerticalDecrementBorderRadius: return !FloatUtil.IsDefined(floatValue);
-                    case StylePropertyId.ScrollbarVerticalDecrementBorderSize: return !FloatUtil.IsDefined(floatValue);
-                    case StylePropertyId.ScrollbarVerticalDecrementBorderColor: return valuePart1 == 0;
-                    case StylePropertyId.ScrollbarVerticalDecrementImage: return objectField == null;
-                    case StylePropertyId.ScrollbarVerticalDecrementColor: return valuePart1 == 0;
-                    case StylePropertyId.ScrollbarHorizontalAttachment: return valuePart0 == 0 || IntUtil.UnsetValue == valuePart0;
-                    case StylePropertyId.ScrollbarHorizontalButtonPlacement: return valuePart0 == 0 || IntUtil.UnsetValue == valuePart0;
-                    case StylePropertyId.ScrollbarHorizontalTrackSize: return !FloatUtil.IsDefined(floatValue);
-                    case StylePropertyId.ScrollbarHorizontalTrackBorderRadius: return !FloatUtil.IsDefined(floatValue);
-                    case StylePropertyId.ScrollbarHorizontalTrackBorderSize: return !FloatUtil.IsDefined(floatValue);
-                    case StylePropertyId.ScrollbarHorizontalTrackBorderColor: return valuePart1 == 0;
-                    case StylePropertyId.ScrollbarHorizontalTrackImage: return objectField == null;
-                    case StylePropertyId.ScrollbarHorizontalTrackColor: return valuePart1 == 0;
-                    case StylePropertyId.ScrollbarHorizontalHandleSize: return !FloatUtil.IsDefined(floatValue);
-                    case StylePropertyId.ScrollbarHorizontalHandleBorderRadius: return !FloatUtil.IsDefined(floatValue);
-                    case StylePropertyId.ScrollbarHorizontalHandleBorderSize: return !FloatUtil.IsDefined(floatValue);
-                    case StylePropertyId.ScrollbarHorizontalHandleBorderColor: return valuePart1 == 0;
-                    case StylePropertyId.ScrollbarHorizontalHandleImage: return objectField == null;
-                    case StylePropertyId.ScrollbarHorizontalHandleColor: return valuePart1 == 0;
-                    case StylePropertyId.ScrollbarHorizontalIncrementSize: return !FloatUtil.IsDefined(floatValue);
-                    case StylePropertyId.ScrollbarHorizontalIncrementBorderRadius: return !FloatUtil.IsDefined(floatValue);
-                    case StylePropertyId.ScrollbarHorizontalIncrementBorderSize: return !FloatUtil.IsDefined(floatValue);
-                    case StylePropertyId.ScrollbarHorizontalIncrementBorderColor: return valuePart1 == 0;
-                    case StylePropertyId.ScrollbarHorizontalIncrementImage: return objectField == null;
-                    case StylePropertyId.ScrollbarHorizontalIncrementColor: return valuePart1 == 0;
-                    case StylePropertyId.ScrollbarHorizontalDecrementSize: return !FloatUtil.IsDefined(floatValue);
-                    case StylePropertyId.ScrollbarHorizontalDecrementBorderRadius: return !FloatUtil.IsDefined(floatValue);
-                    case StylePropertyId.ScrollbarHorizontalDecrementBorderSize: return !FloatUtil.IsDefined(floatValue);
-                    case StylePropertyId.ScrollbarHorizontalDecrementBorderColor: return valuePart1 == 0;
-                    case StylePropertyId.ScrollbarHorizontalDecrementImage: return objectField == null;
-                    case StylePropertyId.ScrollbarHorizontalDecrementColor: return valuePart1 == 0;
+                    case StylePropertyId.ShadowType: return valuePart0 == 0 || IntUtil.UnsetValue == valuePart0;
+                    case StylePropertyId.ShadowOffsetX: return !FloatUtil.IsDefined(floatValue);
+                    case StylePropertyId.ShadowOffsetY: return !FloatUtil.IsDefined(floatValue);
+                    case StylePropertyId.ShadowSoftnessX: return !FloatUtil.IsDefined(floatValue);
+                    case StylePropertyId.ShadowSoftnessY: return !FloatUtil.IsDefined(floatValue);
+                    case StylePropertyId.ShadowIntensity: return !FloatUtil.IsDefined(floatValue);
+                    case StylePropertyId.Scrollbar: return objectField == null;
+                    case StylePropertyId.ScrollbarSize: return !FloatUtil.IsDefined(floatValue) || valuePart1 == 0;
+                    case StylePropertyId.ScrollbarColor: return valuePart1 == 0;
 
                 }
                 return true;
@@ -1201,32 +889,11 @@ namespace UIForia.Rendering {
             set { SetProperty(new StyleProperty(StylePropertyId.BackgroundColor, value)); }
         }
             
-        public UnityEngine.Color BackgroundColorSecondary {
-            [System.Diagnostics.DebuggerStepThrough]
-            get { return FindColorProperty(StylePropertyId.BackgroundColorSecondary); }
-            [System.Diagnostics.DebuggerStepThrough]
-            set { SetProperty(new StyleProperty(StylePropertyId.BackgroundColorSecondary, value)); }
-        }
-            
         public UnityEngine.Texture2D BackgroundImage {
             [System.Diagnostics.DebuggerStepThrough]
             get { return GetProperty(StylePropertyId.BackgroundImage).AsTexture2D; }
             [System.Diagnostics.DebuggerStepThrough]
             set { SetProperty(new StyleProperty(StylePropertyId.BackgroundImage, 0, 0, value)); }
-        }
-            
-        public UnityEngine.Texture2D BackgroundImage1 {
-            [System.Diagnostics.DebuggerStepThrough]
-            get { return GetProperty(StylePropertyId.BackgroundImage1).AsTexture2D; }
-            [System.Diagnostics.DebuggerStepThrough]
-            set { SetProperty(new StyleProperty(StylePropertyId.BackgroundImage1, 0, 0, value)); }
-        }
-            
-        public UnityEngine.Texture2D BackgroundImage2 {
-            [System.Diagnostics.DebuggerStepThrough]
-            get { return GetProperty(StylePropertyId.BackgroundImage2).AsTexture2D; }
-            [System.Diagnostics.DebuggerStepThrough]
-            set { SetProperty(new StyleProperty(StylePropertyId.BackgroundImage2, 0, 0, value)); }
         }
             
         public Shapes2D.GradientType BackgroundGradientType {
@@ -1250,53 +917,11 @@ namespace UIForia.Rendering {
             set { SetProperty(new StyleProperty(StylePropertyId.BackgroundGradientStart, value)); }
         }
             
-        public float BackgroundFillRotation {
+        public UIForia.Rendering.BackgroundFillType Painter {
             [System.Diagnostics.DebuggerStepThrough]
-            get { return FindFloatProperty(StylePropertyId.BackgroundFillRotation); }
+            get { return (UIForia.Rendering.BackgroundFillType)FindEnumProperty(StylePropertyId.Painter); }
             [System.Diagnostics.DebuggerStepThrough]
-            set { SetProperty(new StyleProperty(StylePropertyId.BackgroundFillRotation, value)); }
-        }
-            
-        public UIForia.Rendering.BackgroundFillType BackgroundFillType {
-            [System.Diagnostics.DebuggerStepThrough]
-            get { return (UIForia.Rendering.BackgroundFillType)FindEnumProperty(StylePropertyId.BackgroundFillType); }
-            [System.Diagnostics.DebuggerStepThrough]
-            set { SetProperty(new StyleProperty(StylePropertyId.BackgroundFillType, (int)value)); }
-        }
-            
-        public UIForia.Rendering.BackgroundShapeType BackgroundShapeType {
-            [System.Diagnostics.DebuggerStepThrough]
-            get { return (UIForia.Rendering.BackgroundShapeType)FindEnumProperty(StylePropertyId.BackgroundShapeType); }
-            [System.Diagnostics.DebuggerStepThrough]
-            set { SetProperty(new StyleProperty(StylePropertyId.BackgroundShapeType, (int)value)); }
-        }
-            
-        public float BackgroundFillOffsetX {
-            [System.Diagnostics.DebuggerStepThrough]
-            get { return FindFloatProperty(StylePropertyId.BackgroundFillOffsetX); }
-            [System.Diagnostics.DebuggerStepThrough]
-            set { SetProperty(new StyleProperty(StylePropertyId.BackgroundFillOffsetX, value)); }
-        }
-            
-        public float BackgroundFillOffsetY {
-            [System.Diagnostics.DebuggerStepThrough]
-            get { return FindFloatProperty(StylePropertyId.BackgroundFillOffsetY); }
-            [System.Diagnostics.DebuggerStepThrough]
-            set { SetProperty(new StyleProperty(StylePropertyId.BackgroundFillOffsetY, value)); }
-        }
-            
-        public float BackgroundFillScaleX {
-            [System.Diagnostics.DebuggerStepThrough]
-            get { return FindFloatProperty(StylePropertyId.BackgroundFillScaleX); }
-            [System.Diagnostics.DebuggerStepThrough]
-            set { SetProperty(new StyleProperty(StylePropertyId.BackgroundFillScaleX, value)); }
-        }
-            
-        public float BackgroundFillScaleY {
-            [System.Diagnostics.DebuggerStepThrough]
-            get { return FindFloatProperty(StylePropertyId.BackgroundFillScaleY); }
-            [System.Diagnostics.DebuggerStepThrough]
-            set { SetProperty(new StyleProperty(StylePropertyId.BackgroundFillScaleY, value)); }
+            set { SetProperty(new StyleProperty(StylePropertyId.Painter, (int)value)); }
         }
             
         public float Opacity {
@@ -1684,6 +1309,97 @@ namespace UIForia.Rendering {
             set { SetProperty(new StyleProperty(StylePropertyId.TextTransform, (int)value)); }
         }
             
+        public float TextOutlineWidth {
+            [System.Diagnostics.DebuggerStepThrough]
+            get { return FindFloatProperty(StylePropertyId.TextOutlineWidth); }
+            [System.Diagnostics.DebuggerStepThrough]
+            set { SetProperty(new StyleProperty(StylePropertyId.TextOutlineWidth, value)); }
+        }
+            
+        public UnityEngine.Color TextOutlineColor {
+            [System.Diagnostics.DebuggerStepThrough]
+            get { return FindColorProperty(StylePropertyId.TextOutlineColor); }
+            [System.Diagnostics.DebuggerStepThrough]
+            set { SetProperty(new StyleProperty(StylePropertyId.TextOutlineColor, value)); }
+        }
+            
+        public UnityEngine.Color TextGlowColor {
+            [System.Diagnostics.DebuggerStepThrough]
+            get { return FindColorProperty(StylePropertyId.TextGlowColor); }
+            [System.Diagnostics.DebuggerStepThrough]
+            set { SetProperty(new StyleProperty(StylePropertyId.TextGlowColor, value)); }
+        }
+            
+        public float TextGlowOffset {
+            [System.Diagnostics.DebuggerStepThrough]
+            get { return FindFloatProperty(StylePropertyId.TextGlowOffset); }
+            [System.Diagnostics.DebuggerStepThrough]
+            set { SetProperty(new StyleProperty(StylePropertyId.TextGlowOffset, value)); }
+        }
+            
+        public float TextGlowInner {
+            [System.Diagnostics.DebuggerStepThrough]
+            get { return FindFloatProperty(StylePropertyId.TextGlowInner); }
+            [System.Diagnostics.DebuggerStepThrough]
+            set { SetProperty(new StyleProperty(StylePropertyId.TextGlowInner, value)); }
+        }
+            
+        public float TextGlowOuter {
+            [System.Diagnostics.DebuggerStepThrough]
+            get { return FindFloatProperty(StylePropertyId.TextGlowOuter); }
+            [System.Diagnostics.DebuggerStepThrough]
+            set { SetProperty(new StyleProperty(StylePropertyId.TextGlowOuter, value)); }
+        }
+            
+        public float TextGlowPower {
+            [System.Diagnostics.DebuggerStepThrough]
+            get { return FindFloatProperty(StylePropertyId.TextGlowPower); }
+            [System.Diagnostics.DebuggerStepThrough]
+            set { SetProperty(new StyleProperty(StylePropertyId.TextGlowPower, value)); }
+        }
+            
+        public UnityEngine.Color TextShadowColor {
+            [System.Diagnostics.DebuggerStepThrough]
+            get { return FindColorProperty(StylePropertyId.TextShadowColor); }
+            [System.Diagnostics.DebuggerStepThrough]
+            set { SetProperty(new StyleProperty(StylePropertyId.TextShadowColor, value)); }
+        }
+            
+        public float TextShadowOffsetX {
+            [System.Diagnostics.DebuggerStepThrough]
+            get { return FindFloatProperty(StylePropertyId.TextShadowOffsetX); }
+            [System.Diagnostics.DebuggerStepThrough]
+            set { SetProperty(new StyleProperty(StylePropertyId.TextShadowOffsetX, value)); }
+        }
+            
+        public float TextShadowOffsetY {
+            [System.Diagnostics.DebuggerStepThrough]
+            get { return FindFloatProperty(StylePropertyId.TextShadowOffsetY); }
+            [System.Diagnostics.DebuggerStepThrough]
+            set { SetProperty(new StyleProperty(StylePropertyId.TextShadowOffsetY, value)); }
+        }
+            
+        public float TextShadowIntensity {
+            [System.Diagnostics.DebuggerStepThrough]
+            get { return FindFloatProperty(StylePropertyId.TextShadowIntensity); }
+            [System.Diagnostics.DebuggerStepThrough]
+            set { SetProperty(new StyleProperty(StylePropertyId.TextShadowIntensity, value)); }
+        }
+            
+        public float TextShadowSoftness {
+            [System.Diagnostics.DebuggerStepThrough]
+            get { return FindFloatProperty(StylePropertyId.TextShadowSoftness); }
+            [System.Diagnostics.DebuggerStepThrough]
+            set { SetProperty(new StyleProperty(StylePropertyId.TextShadowSoftness, value)); }
+        }
+            
+        public UIForia.Rendering.ShadowType TextShadowType {
+            [System.Diagnostics.DebuggerStepThrough]
+            get { return (UIForia.Rendering.ShadowType)FindEnumProperty(StylePropertyId.TextShadowType); }
+            [System.Diagnostics.DebuggerStepThrough]
+            set { SetProperty(new StyleProperty(StylePropertyId.TextShadowType, (int)value)); }
+        }
+            
         public UIForia.UIFixedLength AnchorTop {
             [System.Diagnostics.DebuggerStepThrough]
             get { return FindUIFixedLengthProperty(StylePropertyId.AnchorTop); }
@@ -1817,368 +1533,67 @@ namespace UIForia.Rendering {
             set { SetProperty(new StyleProperty(StylePropertyId.RenderLayer, (int)value)); }
         }
             
-        public UIForia.Rendering.VerticalScrollbarAttachment ScrollbarVerticalAttachment {
+        public UIForia.Rendering.ShadowType ShadowType {
             [System.Diagnostics.DebuggerStepThrough]
-            get { return (UIForia.Rendering.VerticalScrollbarAttachment)FindEnumProperty(StylePropertyId.ScrollbarVerticalAttachment); }
+            get { return (UIForia.Rendering.ShadowType)FindEnumProperty(StylePropertyId.ShadowType); }
             [System.Diagnostics.DebuggerStepThrough]
-            set { SetProperty(new StyleProperty(StylePropertyId.ScrollbarVerticalAttachment, (int)value)); }
+            set { SetProperty(new StyleProperty(StylePropertyId.ShadowType, (int)value)); }
         }
             
-        public UIForia.Rendering.ScrollbarButtonPlacement ScrollbarVerticalButtonPlacement {
+        public float ShadowOffsetX {
             [System.Diagnostics.DebuggerStepThrough]
-            get { return (UIForia.Rendering.ScrollbarButtonPlacement)FindEnumProperty(StylePropertyId.ScrollbarVerticalButtonPlacement); }
+            get { return FindFloatProperty(StylePropertyId.ShadowOffsetX); }
             [System.Diagnostics.DebuggerStepThrough]
-            set { SetProperty(new StyleProperty(StylePropertyId.ScrollbarVerticalButtonPlacement, (int)value)); }
+            set { SetProperty(new StyleProperty(StylePropertyId.ShadowOffsetX, value)); }
         }
             
-        public float ScrollbarVerticalTrackSize {
+        public float ShadowOffsetY {
             [System.Diagnostics.DebuggerStepThrough]
-            get { return FindFloatProperty(StylePropertyId.ScrollbarVerticalTrackSize); }
+            get { return FindFloatProperty(StylePropertyId.ShadowOffsetY); }
             [System.Diagnostics.DebuggerStepThrough]
-            set { SetProperty(new StyleProperty(StylePropertyId.ScrollbarVerticalTrackSize, value)); }
+            set { SetProperty(new StyleProperty(StylePropertyId.ShadowOffsetY, value)); }
         }
             
-        public float ScrollbarVerticalTrackBorderRadius {
+        public float ShadowSoftnessX {
             [System.Diagnostics.DebuggerStepThrough]
-            get { return FindFloatProperty(StylePropertyId.ScrollbarVerticalTrackBorderRadius); }
+            get { return FindFloatProperty(StylePropertyId.ShadowSoftnessX); }
             [System.Diagnostics.DebuggerStepThrough]
-            set { SetProperty(new StyleProperty(StylePropertyId.ScrollbarVerticalTrackBorderRadius, value)); }
+            set { SetProperty(new StyleProperty(StylePropertyId.ShadowSoftnessX, value)); }
         }
             
-        public float ScrollbarVerticalTrackBorderSize {
+        public float ShadowSoftnessY {
             [System.Diagnostics.DebuggerStepThrough]
-            get { return FindFloatProperty(StylePropertyId.ScrollbarVerticalTrackBorderSize); }
+            get { return FindFloatProperty(StylePropertyId.ShadowSoftnessY); }
             [System.Diagnostics.DebuggerStepThrough]
-            set { SetProperty(new StyleProperty(StylePropertyId.ScrollbarVerticalTrackBorderSize, value)); }
+            set { SetProperty(new StyleProperty(StylePropertyId.ShadowSoftnessY, value)); }
         }
             
-        public UnityEngine.Color ScrollbarVerticalTrackBorderColor {
+        public float ShadowIntensity {
             [System.Diagnostics.DebuggerStepThrough]
-            get { return FindColorProperty(StylePropertyId.ScrollbarVerticalTrackBorderColor); }
+            get { return FindFloatProperty(StylePropertyId.ShadowIntensity); }
             [System.Diagnostics.DebuggerStepThrough]
-            set { SetProperty(new StyleProperty(StylePropertyId.ScrollbarVerticalTrackBorderColor, value)); }
+            set { SetProperty(new StyleProperty(StylePropertyId.ShadowIntensity, value)); }
         }
             
-        public UnityEngine.Texture2D ScrollbarVerticalTrackImage {
+        public string Scrollbar {
             [System.Diagnostics.DebuggerStepThrough]
-            get { return GetProperty(StylePropertyId.ScrollbarVerticalTrackImage).AsTexture2D; }
+            get { return GetProperty(StylePropertyId.Scrollbar).AsString; }
             [System.Diagnostics.DebuggerStepThrough]
-            set { SetProperty(new StyleProperty(StylePropertyId.ScrollbarVerticalTrackImage, 0, 0, value)); }
+            set { SetProperty(new StyleProperty(StylePropertyId.Scrollbar, 0, 0, value)); }
         }
             
-        public UnityEngine.Color ScrollbarVerticalTrackColor {
+        public UIForia.UIMeasurement ScrollbarSize {
             [System.Diagnostics.DebuggerStepThrough]
-            get { return FindColorProperty(StylePropertyId.ScrollbarVerticalTrackColor); }
+            get { return FindUIMeasurementProperty(StylePropertyId.ScrollbarSize); }
             [System.Diagnostics.DebuggerStepThrough]
-            set { SetProperty(new StyleProperty(StylePropertyId.ScrollbarVerticalTrackColor, value)); }
+            set { SetProperty(new StyleProperty(StylePropertyId.ScrollbarSize, value)); }
         }
             
-        public float ScrollbarVerticalHandleSize {
+        public UnityEngine.Color ScrollbarColor {
             [System.Diagnostics.DebuggerStepThrough]
-            get { return FindFloatProperty(StylePropertyId.ScrollbarVerticalHandleSize); }
+            get { return FindColorProperty(StylePropertyId.ScrollbarColor); }
             [System.Diagnostics.DebuggerStepThrough]
-            set { SetProperty(new StyleProperty(StylePropertyId.ScrollbarVerticalHandleSize, value)); }
-        }
-            
-        public float ScrollbarVerticalHandleBorderRadius {
-            [System.Diagnostics.DebuggerStepThrough]
-            get { return FindFloatProperty(StylePropertyId.ScrollbarVerticalHandleBorderRadius); }
-            [System.Diagnostics.DebuggerStepThrough]
-            set { SetProperty(new StyleProperty(StylePropertyId.ScrollbarVerticalHandleBorderRadius, value)); }
-        }
-            
-        public float ScrollbarVerticalHandleBorderSize {
-            [System.Diagnostics.DebuggerStepThrough]
-            get { return FindFloatProperty(StylePropertyId.ScrollbarVerticalHandleBorderSize); }
-            [System.Diagnostics.DebuggerStepThrough]
-            set { SetProperty(new StyleProperty(StylePropertyId.ScrollbarVerticalHandleBorderSize, value)); }
-        }
-            
-        public UnityEngine.Color ScrollbarVerticalHandleBorderColor {
-            [System.Diagnostics.DebuggerStepThrough]
-            get { return FindColorProperty(StylePropertyId.ScrollbarVerticalHandleBorderColor); }
-            [System.Diagnostics.DebuggerStepThrough]
-            set { SetProperty(new StyleProperty(StylePropertyId.ScrollbarVerticalHandleBorderColor, value)); }
-        }
-            
-        public UnityEngine.Texture2D ScrollbarVerticalHandleImage {
-            [System.Diagnostics.DebuggerStepThrough]
-            get { return GetProperty(StylePropertyId.ScrollbarVerticalHandleImage).AsTexture2D; }
-            [System.Diagnostics.DebuggerStepThrough]
-            set { SetProperty(new StyleProperty(StylePropertyId.ScrollbarVerticalHandleImage, 0, 0, value)); }
-        }
-            
-        public UnityEngine.Color ScrollbarVerticalHandleColor {
-            [System.Diagnostics.DebuggerStepThrough]
-            get { return FindColorProperty(StylePropertyId.ScrollbarVerticalHandleColor); }
-            [System.Diagnostics.DebuggerStepThrough]
-            set { SetProperty(new StyleProperty(StylePropertyId.ScrollbarVerticalHandleColor, value)); }
-        }
-            
-        public float ScrollbarVerticalIncrementSize {
-            [System.Diagnostics.DebuggerStepThrough]
-            get { return FindFloatProperty(StylePropertyId.ScrollbarVerticalIncrementSize); }
-            [System.Diagnostics.DebuggerStepThrough]
-            set { SetProperty(new StyleProperty(StylePropertyId.ScrollbarVerticalIncrementSize, value)); }
-        }
-            
-        public float ScrollbarVerticalIncrementBorderRadius {
-            [System.Diagnostics.DebuggerStepThrough]
-            get { return FindFloatProperty(StylePropertyId.ScrollbarVerticalIncrementBorderRadius); }
-            [System.Diagnostics.DebuggerStepThrough]
-            set { SetProperty(new StyleProperty(StylePropertyId.ScrollbarVerticalIncrementBorderRadius, value)); }
-        }
-            
-        public float ScrollbarVerticalIncrementBorderSize {
-            [System.Diagnostics.DebuggerStepThrough]
-            get { return FindFloatProperty(StylePropertyId.ScrollbarVerticalIncrementBorderSize); }
-            [System.Diagnostics.DebuggerStepThrough]
-            set { SetProperty(new StyleProperty(StylePropertyId.ScrollbarVerticalIncrementBorderSize, value)); }
-        }
-            
-        public UnityEngine.Color ScrollbarVerticalIncrementBorderColor {
-            [System.Diagnostics.DebuggerStepThrough]
-            get { return FindColorProperty(StylePropertyId.ScrollbarVerticalIncrementBorderColor); }
-            [System.Diagnostics.DebuggerStepThrough]
-            set { SetProperty(new StyleProperty(StylePropertyId.ScrollbarVerticalIncrementBorderColor, value)); }
-        }
-            
-        public UnityEngine.Texture2D ScrollbarVerticalIncrementImage {
-            [System.Diagnostics.DebuggerStepThrough]
-            get { return GetProperty(StylePropertyId.ScrollbarVerticalIncrementImage).AsTexture2D; }
-            [System.Diagnostics.DebuggerStepThrough]
-            set { SetProperty(new StyleProperty(StylePropertyId.ScrollbarVerticalIncrementImage, 0, 0, value)); }
-        }
-            
-        public UnityEngine.Color ScrollbarVerticalIncrementColor {
-            [System.Diagnostics.DebuggerStepThrough]
-            get { return FindColorProperty(StylePropertyId.ScrollbarVerticalIncrementColor); }
-            [System.Diagnostics.DebuggerStepThrough]
-            set { SetProperty(new StyleProperty(StylePropertyId.ScrollbarVerticalIncrementColor, value)); }
-        }
-            
-        public float ScrollbarVerticalDecrementSize {
-            [System.Diagnostics.DebuggerStepThrough]
-            get { return FindFloatProperty(StylePropertyId.ScrollbarVerticalDecrementSize); }
-            [System.Diagnostics.DebuggerStepThrough]
-            set { SetProperty(new StyleProperty(StylePropertyId.ScrollbarVerticalDecrementSize, value)); }
-        }
-            
-        public float ScrollbarVerticalDecrementBorderRadius {
-            [System.Diagnostics.DebuggerStepThrough]
-            get { return FindFloatProperty(StylePropertyId.ScrollbarVerticalDecrementBorderRadius); }
-            [System.Diagnostics.DebuggerStepThrough]
-            set { SetProperty(new StyleProperty(StylePropertyId.ScrollbarVerticalDecrementBorderRadius, value)); }
-        }
-            
-        public float ScrollbarVerticalDecrementBorderSize {
-            [System.Diagnostics.DebuggerStepThrough]
-            get { return FindFloatProperty(StylePropertyId.ScrollbarVerticalDecrementBorderSize); }
-            [System.Diagnostics.DebuggerStepThrough]
-            set { SetProperty(new StyleProperty(StylePropertyId.ScrollbarVerticalDecrementBorderSize, value)); }
-        }
-            
-        public UnityEngine.Color ScrollbarVerticalDecrementBorderColor {
-            [System.Diagnostics.DebuggerStepThrough]
-            get { return FindColorProperty(StylePropertyId.ScrollbarVerticalDecrementBorderColor); }
-            [System.Diagnostics.DebuggerStepThrough]
-            set { SetProperty(new StyleProperty(StylePropertyId.ScrollbarVerticalDecrementBorderColor, value)); }
-        }
-            
-        public UnityEngine.Texture2D ScrollbarVerticalDecrementImage {
-            [System.Diagnostics.DebuggerStepThrough]
-            get { return GetProperty(StylePropertyId.ScrollbarVerticalDecrementImage).AsTexture2D; }
-            [System.Diagnostics.DebuggerStepThrough]
-            set { SetProperty(new StyleProperty(StylePropertyId.ScrollbarVerticalDecrementImage, 0, 0, value)); }
-        }
-            
-        public UnityEngine.Color ScrollbarVerticalDecrementColor {
-            [System.Diagnostics.DebuggerStepThrough]
-            get { return FindColorProperty(StylePropertyId.ScrollbarVerticalDecrementColor); }
-            [System.Diagnostics.DebuggerStepThrough]
-            set { SetProperty(new StyleProperty(StylePropertyId.ScrollbarVerticalDecrementColor, value)); }
-        }
-            
-        public UIForia.Rendering.HorizontalScrollbarAttachment ScrollbarHorizontalAttachment {
-            [System.Diagnostics.DebuggerStepThrough]
-            get { return (UIForia.Rendering.HorizontalScrollbarAttachment)FindEnumProperty(StylePropertyId.ScrollbarHorizontalAttachment); }
-            [System.Diagnostics.DebuggerStepThrough]
-            set { SetProperty(new StyleProperty(StylePropertyId.ScrollbarHorizontalAttachment, (int)value)); }
-        }
-            
-        public UIForia.Rendering.ScrollbarButtonPlacement ScrollbarHorizontalButtonPlacement {
-            [System.Diagnostics.DebuggerStepThrough]
-            get { return (UIForia.Rendering.ScrollbarButtonPlacement)FindEnumProperty(StylePropertyId.ScrollbarHorizontalButtonPlacement); }
-            [System.Diagnostics.DebuggerStepThrough]
-            set { SetProperty(new StyleProperty(StylePropertyId.ScrollbarHorizontalButtonPlacement, (int)value)); }
-        }
-            
-        public float ScrollbarHorizontalTrackSize {
-            [System.Diagnostics.DebuggerStepThrough]
-            get { return FindFloatProperty(StylePropertyId.ScrollbarHorizontalTrackSize); }
-            [System.Diagnostics.DebuggerStepThrough]
-            set { SetProperty(new StyleProperty(StylePropertyId.ScrollbarHorizontalTrackSize, value)); }
-        }
-            
-        public float ScrollbarHorizontalTrackBorderRadius {
-            [System.Diagnostics.DebuggerStepThrough]
-            get { return FindFloatProperty(StylePropertyId.ScrollbarHorizontalTrackBorderRadius); }
-            [System.Diagnostics.DebuggerStepThrough]
-            set { SetProperty(new StyleProperty(StylePropertyId.ScrollbarHorizontalTrackBorderRadius, value)); }
-        }
-            
-        public float ScrollbarHorizontalTrackBorderSize {
-            [System.Diagnostics.DebuggerStepThrough]
-            get { return FindFloatProperty(StylePropertyId.ScrollbarHorizontalTrackBorderSize); }
-            [System.Diagnostics.DebuggerStepThrough]
-            set { SetProperty(new StyleProperty(StylePropertyId.ScrollbarHorizontalTrackBorderSize, value)); }
-        }
-            
-        public UnityEngine.Color ScrollbarHorizontalTrackBorderColor {
-            [System.Diagnostics.DebuggerStepThrough]
-            get { return FindColorProperty(StylePropertyId.ScrollbarHorizontalTrackBorderColor); }
-            [System.Diagnostics.DebuggerStepThrough]
-            set { SetProperty(new StyleProperty(StylePropertyId.ScrollbarHorizontalTrackBorderColor, value)); }
-        }
-            
-        public UnityEngine.Texture2D ScrollbarHorizontalTrackImage {
-            [System.Diagnostics.DebuggerStepThrough]
-            get { return GetProperty(StylePropertyId.ScrollbarHorizontalTrackImage).AsTexture2D; }
-            [System.Diagnostics.DebuggerStepThrough]
-            set { SetProperty(new StyleProperty(StylePropertyId.ScrollbarHorizontalTrackImage, 0, 0, value)); }
-        }
-            
-        public UnityEngine.Color ScrollbarHorizontalTrackColor {
-            [System.Diagnostics.DebuggerStepThrough]
-            get { return FindColorProperty(StylePropertyId.ScrollbarHorizontalTrackColor); }
-            [System.Diagnostics.DebuggerStepThrough]
-            set { SetProperty(new StyleProperty(StylePropertyId.ScrollbarHorizontalTrackColor, value)); }
-        }
-            
-        public float ScrollbarHorizontalHandleSize {
-            [System.Diagnostics.DebuggerStepThrough]
-            get { return FindFloatProperty(StylePropertyId.ScrollbarHorizontalHandleSize); }
-            [System.Diagnostics.DebuggerStepThrough]
-            set { SetProperty(new StyleProperty(StylePropertyId.ScrollbarHorizontalHandleSize, value)); }
-        }
-            
-        public float ScrollbarHorizontalHandleBorderRadius {
-            [System.Diagnostics.DebuggerStepThrough]
-            get { return FindFloatProperty(StylePropertyId.ScrollbarHorizontalHandleBorderRadius); }
-            [System.Diagnostics.DebuggerStepThrough]
-            set { SetProperty(new StyleProperty(StylePropertyId.ScrollbarHorizontalHandleBorderRadius, value)); }
-        }
-            
-        public float ScrollbarHorizontalHandleBorderSize {
-            [System.Diagnostics.DebuggerStepThrough]
-            get { return FindFloatProperty(StylePropertyId.ScrollbarHorizontalHandleBorderSize); }
-            [System.Diagnostics.DebuggerStepThrough]
-            set { SetProperty(new StyleProperty(StylePropertyId.ScrollbarHorizontalHandleBorderSize, value)); }
-        }
-            
-        public UnityEngine.Color ScrollbarHorizontalHandleBorderColor {
-            [System.Diagnostics.DebuggerStepThrough]
-            get { return FindColorProperty(StylePropertyId.ScrollbarHorizontalHandleBorderColor); }
-            [System.Diagnostics.DebuggerStepThrough]
-            set { SetProperty(new StyleProperty(StylePropertyId.ScrollbarHorizontalHandleBorderColor, value)); }
-        }
-            
-        public UnityEngine.Texture2D ScrollbarHorizontalHandleImage {
-            [System.Diagnostics.DebuggerStepThrough]
-            get { return GetProperty(StylePropertyId.ScrollbarHorizontalHandleImage).AsTexture2D; }
-            [System.Diagnostics.DebuggerStepThrough]
-            set { SetProperty(new StyleProperty(StylePropertyId.ScrollbarHorizontalHandleImage, 0, 0, value)); }
-        }
-            
-        public UnityEngine.Color ScrollbarHorizontalHandleColor {
-            [System.Diagnostics.DebuggerStepThrough]
-            get { return FindColorProperty(StylePropertyId.ScrollbarHorizontalHandleColor); }
-            [System.Diagnostics.DebuggerStepThrough]
-            set { SetProperty(new StyleProperty(StylePropertyId.ScrollbarHorizontalHandleColor, value)); }
-        }
-            
-        public float ScrollbarHorizontalIncrementSize {
-            [System.Diagnostics.DebuggerStepThrough]
-            get { return FindFloatProperty(StylePropertyId.ScrollbarHorizontalIncrementSize); }
-            [System.Diagnostics.DebuggerStepThrough]
-            set { SetProperty(new StyleProperty(StylePropertyId.ScrollbarHorizontalIncrementSize, value)); }
-        }
-            
-        public float ScrollbarHorizontalIncrementBorderRadius {
-            [System.Diagnostics.DebuggerStepThrough]
-            get { return FindFloatProperty(StylePropertyId.ScrollbarHorizontalIncrementBorderRadius); }
-            [System.Diagnostics.DebuggerStepThrough]
-            set { SetProperty(new StyleProperty(StylePropertyId.ScrollbarHorizontalIncrementBorderRadius, value)); }
-        }
-            
-        public float ScrollbarHorizontalIncrementBorderSize {
-            [System.Diagnostics.DebuggerStepThrough]
-            get { return FindFloatProperty(StylePropertyId.ScrollbarHorizontalIncrementBorderSize); }
-            [System.Diagnostics.DebuggerStepThrough]
-            set { SetProperty(new StyleProperty(StylePropertyId.ScrollbarHorizontalIncrementBorderSize, value)); }
-        }
-            
-        public UnityEngine.Color ScrollbarHorizontalIncrementBorderColor {
-            [System.Diagnostics.DebuggerStepThrough]
-            get { return FindColorProperty(StylePropertyId.ScrollbarHorizontalIncrementBorderColor); }
-            [System.Diagnostics.DebuggerStepThrough]
-            set { SetProperty(new StyleProperty(StylePropertyId.ScrollbarHorizontalIncrementBorderColor, value)); }
-        }
-            
-        public UnityEngine.Texture2D ScrollbarHorizontalIncrementImage {
-            [System.Diagnostics.DebuggerStepThrough]
-            get { return GetProperty(StylePropertyId.ScrollbarHorizontalIncrementImage).AsTexture2D; }
-            [System.Diagnostics.DebuggerStepThrough]
-            set { SetProperty(new StyleProperty(StylePropertyId.ScrollbarHorizontalIncrementImage, 0, 0, value)); }
-        }
-            
-        public UnityEngine.Color ScrollbarHorizontalIncrementColor {
-            [System.Diagnostics.DebuggerStepThrough]
-            get { return FindColorProperty(StylePropertyId.ScrollbarHorizontalIncrementColor); }
-            [System.Diagnostics.DebuggerStepThrough]
-            set { SetProperty(new StyleProperty(StylePropertyId.ScrollbarHorizontalIncrementColor, value)); }
-        }
-            
-        public float ScrollbarHorizontalDecrementSize {
-            [System.Diagnostics.DebuggerStepThrough]
-            get { return FindFloatProperty(StylePropertyId.ScrollbarHorizontalDecrementSize); }
-            [System.Diagnostics.DebuggerStepThrough]
-            set { SetProperty(new StyleProperty(StylePropertyId.ScrollbarHorizontalDecrementSize, value)); }
-        }
-            
-        public float ScrollbarHorizontalDecrementBorderRadius {
-            [System.Diagnostics.DebuggerStepThrough]
-            get { return FindFloatProperty(StylePropertyId.ScrollbarHorizontalDecrementBorderRadius); }
-            [System.Diagnostics.DebuggerStepThrough]
-            set { SetProperty(new StyleProperty(StylePropertyId.ScrollbarHorizontalDecrementBorderRadius, value)); }
-        }
-            
-        public float ScrollbarHorizontalDecrementBorderSize {
-            [System.Diagnostics.DebuggerStepThrough]
-            get { return FindFloatProperty(StylePropertyId.ScrollbarHorizontalDecrementBorderSize); }
-            [System.Diagnostics.DebuggerStepThrough]
-            set { SetProperty(new StyleProperty(StylePropertyId.ScrollbarHorizontalDecrementBorderSize, value)); }
-        }
-            
-        public UnityEngine.Color ScrollbarHorizontalDecrementBorderColor {
-            [System.Diagnostics.DebuggerStepThrough]
-            get { return FindColorProperty(StylePropertyId.ScrollbarHorizontalDecrementBorderColor); }
-            [System.Diagnostics.DebuggerStepThrough]
-            set { SetProperty(new StyleProperty(StylePropertyId.ScrollbarHorizontalDecrementBorderColor, value)); }
-        }
-            
-        public UnityEngine.Texture2D ScrollbarHorizontalDecrementImage {
-            [System.Diagnostics.DebuggerStepThrough]
-            get { return GetProperty(StylePropertyId.ScrollbarHorizontalDecrementImage).AsTexture2D; }
-            [System.Diagnostics.DebuggerStepThrough]
-            set { SetProperty(new StyleProperty(StylePropertyId.ScrollbarHorizontalDecrementImage, 0, 0, value)); }
-        }
-            
-        public UnityEngine.Color ScrollbarHorizontalDecrementColor {
-            [System.Diagnostics.DebuggerStepThrough]
-            get { return FindColorProperty(StylePropertyId.ScrollbarHorizontalDecrementColor); }
-            [System.Diagnostics.DebuggerStepThrough]
-            set { SetProperty(new StyleProperty(StylePropertyId.ScrollbarHorizontalDecrementColor, value)); }
+            set { SetProperty(new StyleProperty(StylePropertyId.ScrollbarColor, value)); }
         }
             
         
@@ -2224,39 +1639,12 @@ namespace UIForia.Rendering {
                 }
             }
 
-            public UnityEngine.Color BackgroundColorSecondary { 
-                [System.Diagnostics.DebuggerStepThrough]
-                get { 
-                    StyleProperty property;
-                    if (propertyMap.TryGetValue((int) StylePropertyId.BackgroundColorSecondary, out property)) return property.AsColor;
-                    return DefaultStyleValues_Generated.BackgroundColorSecondary;
-                }
-            }
-
             public UnityEngine.Texture2D BackgroundImage { 
                 [System.Diagnostics.DebuggerStepThrough]
                 get { 
                     StyleProperty property;
                     if (propertyMap.TryGetValue((int) StylePropertyId.BackgroundImage, out property)) return property.AsTexture2D;
                     return DefaultStyleValues_Generated.BackgroundImage;
-                }
-            }
-
-            public UnityEngine.Texture2D BackgroundImage1 { 
-                [System.Diagnostics.DebuggerStepThrough]
-                get { 
-                    StyleProperty property;
-                    if (propertyMap.TryGetValue((int) StylePropertyId.BackgroundImage1, out property)) return property.AsTexture2D;
-                    return DefaultStyleValues_Generated.BackgroundImage1;
-                }
-            }
-
-            public UnityEngine.Texture2D BackgroundImage2 { 
-                [System.Diagnostics.DebuggerStepThrough]
-                get { 
-                    StyleProperty property;
-                    if (propertyMap.TryGetValue((int) StylePropertyId.BackgroundImage2, out property)) return property.AsTexture2D;
-                    return DefaultStyleValues_Generated.BackgroundImage2;
                 }
             }
 
@@ -2287,66 +1675,12 @@ namespace UIForia.Rendering {
                 }
             }
 
-            public float BackgroundFillRotation { 
+            public UIForia.Rendering.BackgroundFillType Painter { 
                 [System.Diagnostics.DebuggerStepThrough]
                 get { 
                     StyleProperty property;
-                    if (propertyMap.TryGetValue((int) StylePropertyId.BackgroundFillRotation, out property)) return property.AsFloat;
-                    return DefaultStyleValues_Generated.BackgroundFillRotation;
-                }
-            }
-
-            public UIForia.Rendering.BackgroundFillType BackgroundFillType { 
-                [System.Diagnostics.DebuggerStepThrough]
-                get { 
-                    StyleProperty property;
-                    if (propertyMap.TryGetValue((int) StylePropertyId.BackgroundFillType, out property)) return property.AsBackgroundFillType;
-                    return DefaultStyleValues_Generated.BackgroundFillType;
-                }
-            }
-
-            public UIForia.Rendering.BackgroundShapeType BackgroundShapeType { 
-                [System.Diagnostics.DebuggerStepThrough]
-                get { 
-                    StyleProperty property;
-                    if (propertyMap.TryGetValue((int) StylePropertyId.BackgroundShapeType, out property)) return property.AsBackgroundShapeType;
-                    return DefaultStyleValues_Generated.BackgroundShapeType;
-                }
-            }
-
-            public float BackgroundFillOffsetX { 
-                [System.Diagnostics.DebuggerStepThrough]
-                get { 
-                    StyleProperty property;
-                    if (propertyMap.TryGetValue((int) StylePropertyId.BackgroundFillOffsetX, out property)) return property.AsFloat;
-                    return DefaultStyleValues_Generated.BackgroundFillOffsetX;
-                }
-            }
-
-            public float BackgroundFillOffsetY { 
-                [System.Diagnostics.DebuggerStepThrough]
-                get { 
-                    StyleProperty property;
-                    if (propertyMap.TryGetValue((int) StylePropertyId.BackgroundFillOffsetY, out property)) return property.AsFloat;
-                    return DefaultStyleValues_Generated.BackgroundFillOffsetY;
-                }
-            }
-
-            public float BackgroundFillScaleX { 
-                [System.Diagnostics.DebuggerStepThrough]
-                get { 
-                    StyleProperty property;
-                    if (propertyMap.TryGetValue((int) StylePropertyId.BackgroundFillScaleX, out property)) return property.AsFloat;
-                    return DefaultStyleValues_Generated.BackgroundFillScaleX;
-                }
-            }
-
-            public float BackgroundFillScaleY { 
-                [System.Diagnostics.DebuggerStepThrough]
-                get { 
-                    StyleProperty property;
-                    if (propertyMap.TryGetValue((int) StylePropertyId.BackgroundFillScaleY, out property)) return property.AsFloat;
-                    return DefaultStyleValues_Generated.BackgroundFillScaleY;
+                    if (propertyMap.TryGetValue((int) StylePropertyId.Painter, out property)) return property.AsBackgroundFillType;
+                    return DefaultStyleValues_Generated.Painter;
                 }
             }
 
@@ -2812,7 +2146,7 @@ namespace UIForia.Rendering {
             }
 
             public int TextFontSize { 
-//                [System.Diagnostics.DebuggerStepThrough]
+                [System.Diagnostics.DebuggerStepThrough]
                 get { 
                     StyleProperty property;
                     if (propertyMap.TryGetValue((int) StylePropertyId.TextFontSize, out property)) return property.AsInt;
@@ -2848,6 +2182,136 @@ namespace UIForia.Rendering {
                     if (propertyMap.TryGetValue((int) StylePropertyId.TextTransform, out property)) return property.AsTextTransform;
                     if (propertyMap.TryGetValue(BitUtil.SetHighLowBits(1, (int) StylePropertyId.TextTransform), out property)) return property.AsTextTransform;
                     return DefaultStyleValues_Generated.TextTransform;
+                }
+            }
+
+            public float TextOutlineWidth { 
+                [System.Diagnostics.DebuggerStepThrough]
+                get { 
+                    StyleProperty property;
+                    if (propertyMap.TryGetValue((int) StylePropertyId.TextOutlineWidth, out property)) return property.AsFloat;
+                    if (propertyMap.TryGetValue(BitUtil.SetHighLowBits(1, (int) StylePropertyId.TextOutlineWidth), out property)) return property.AsFloat;
+                    return DefaultStyleValues_Generated.TextOutlineWidth;
+                }
+            }
+
+            public UnityEngine.Color TextOutlineColor { 
+                [System.Diagnostics.DebuggerStepThrough]
+                get { 
+                    StyleProperty property;
+                    if (propertyMap.TryGetValue((int) StylePropertyId.TextOutlineColor, out property)) return property.AsColor;
+                    if (propertyMap.TryGetValue(BitUtil.SetHighLowBits(1, (int) StylePropertyId.TextOutlineColor), out property)) return property.AsColor;
+                    return DefaultStyleValues_Generated.TextOutlineColor;
+                }
+            }
+
+            public UnityEngine.Color TextGlowColor { 
+                [System.Diagnostics.DebuggerStepThrough]
+                get { 
+                    StyleProperty property;
+                    if (propertyMap.TryGetValue((int) StylePropertyId.TextGlowColor, out property)) return property.AsColor;
+                    if (propertyMap.TryGetValue(BitUtil.SetHighLowBits(1, (int) StylePropertyId.TextGlowColor), out property)) return property.AsColor;
+                    return DefaultStyleValues_Generated.TextGlowColor;
+                }
+            }
+
+            public float TextGlowOffset { 
+                [System.Diagnostics.DebuggerStepThrough]
+                get { 
+                    StyleProperty property;
+                    if (propertyMap.TryGetValue((int) StylePropertyId.TextGlowOffset, out property)) return property.AsFloat;
+                    if (propertyMap.TryGetValue(BitUtil.SetHighLowBits(1, (int) StylePropertyId.TextGlowOffset), out property)) return property.AsFloat;
+                    return DefaultStyleValues_Generated.TextGlowOffset;
+                }
+            }
+
+            public float TextGlowInner { 
+                [System.Diagnostics.DebuggerStepThrough]
+                get { 
+                    StyleProperty property;
+                    if (propertyMap.TryGetValue((int) StylePropertyId.TextGlowInner, out property)) return property.AsFloat;
+                    if (propertyMap.TryGetValue(BitUtil.SetHighLowBits(1, (int) StylePropertyId.TextGlowInner), out property)) return property.AsFloat;
+                    return DefaultStyleValues_Generated.TextGlowInner;
+                }
+            }
+
+            public float TextGlowOuter { 
+                [System.Diagnostics.DebuggerStepThrough]
+                get { 
+                    StyleProperty property;
+                    if (propertyMap.TryGetValue((int) StylePropertyId.TextGlowOuter, out property)) return property.AsFloat;
+                    if (propertyMap.TryGetValue(BitUtil.SetHighLowBits(1, (int) StylePropertyId.TextGlowOuter), out property)) return property.AsFloat;
+                    return DefaultStyleValues_Generated.TextGlowOuter;
+                }
+            }
+
+            public float TextGlowPower { 
+                [System.Diagnostics.DebuggerStepThrough]
+                get { 
+                    StyleProperty property;
+                    if (propertyMap.TryGetValue((int) StylePropertyId.TextGlowPower, out property)) return property.AsFloat;
+                    if (propertyMap.TryGetValue(BitUtil.SetHighLowBits(1, (int) StylePropertyId.TextGlowPower), out property)) return property.AsFloat;
+                    return DefaultStyleValues_Generated.TextGlowPower;
+                }
+            }
+
+            public UnityEngine.Color TextShadowColor { 
+                [System.Diagnostics.DebuggerStepThrough]
+                get { 
+                    StyleProperty property;
+                    if (propertyMap.TryGetValue((int) StylePropertyId.TextShadowColor, out property)) return property.AsColor;
+                    if (propertyMap.TryGetValue(BitUtil.SetHighLowBits(1, (int) StylePropertyId.TextShadowColor), out property)) return property.AsColor;
+                    return DefaultStyleValues_Generated.TextShadowColor;
+                }
+            }
+
+            public float TextShadowOffsetX { 
+                [System.Diagnostics.DebuggerStepThrough]
+                get { 
+                    StyleProperty property;
+                    if (propertyMap.TryGetValue((int) StylePropertyId.TextShadowOffsetX, out property)) return property.AsFloat;
+                    if (propertyMap.TryGetValue(BitUtil.SetHighLowBits(1, (int) StylePropertyId.TextShadowOffsetX), out property)) return property.AsFloat;
+                    return DefaultStyleValues_Generated.TextShadowOffsetX;
+                }
+            }
+
+            public float TextShadowOffsetY { 
+                [System.Diagnostics.DebuggerStepThrough]
+                get { 
+                    StyleProperty property;
+                    if (propertyMap.TryGetValue((int) StylePropertyId.TextShadowOffsetY, out property)) return property.AsFloat;
+                    if (propertyMap.TryGetValue(BitUtil.SetHighLowBits(1, (int) StylePropertyId.TextShadowOffsetY), out property)) return property.AsFloat;
+                    return DefaultStyleValues_Generated.TextShadowOffsetY;
+                }
+            }
+
+            public float TextShadowIntensity { 
+                [System.Diagnostics.DebuggerStepThrough]
+                get { 
+                    StyleProperty property;
+                    if (propertyMap.TryGetValue((int) StylePropertyId.TextShadowIntensity, out property)) return property.AsFloat;
+                    if (propertyMap.TryGetValue(BitUtil.SetHighLowBits(1, (int) StylePropertyId.TextShadowIntensity), out property)) return property.AsFloat;
+                    return DefaultStyleValues_Generated.TextShadowIntensity;
+                }
+            }
+
+            public float TextShadowSoftness { 
+                [System.Diagnostics.DebuggerStepThrough]
+                get { 
+                    StyleProperty property;
+                    if (propertyMap.TryGetValue((int) StylePropertyId.TextShadowSoftness, out property)) return property.AsFloat;
+                    if (propertyMap.TryGetValue(BitUtil.SetHighLowBits(1, (int) StylePropertyId.TextShadowSoftness), out property)) return property.AsFloat;
+                    return DefaultStyleValues_Generated.TextShadowSoftness;
+                }
+            }
+
+            public UIForia.Rendering.ShadowType TextShadowType { 
+                [System.Diagnostics.DebuggerStepThrough]
+                get { 
+                    StyleProperty property;
+                    if (propertyMap.TryGetValue((int) StylePropertyId.TextShadowType, out property)) return property.AsShadowType;
+                    if (propertyMap.TryGetValue(BitUtil.SetHighLowBits(1, (int) StylePropertyId.TextShadowType), out property)) return property.AsShadowType;
+                    return DefaultStyleValues_Generated.TextShadowType;
                 }
             }
 
@@ -3022,471 +2486,84 @@ namespace UIForia.Rendering {
                 }
             }
 
-            public UIForia.Rendering.VerticalScrollbarAttachment ScrollbarVerticalAttachment { 
+            public UIForia.Rendering.ShadowType ShadowType { 
                 [System.Diagnostics.DebuggerStepThrough]
                 get { 
                     StyleProperty property;
-                    if (propertyMap.TryGetValue((int) StylePropertyId.ScrollbarVerticalAttachment, out property)) return property.AsVerticalScrollbarAttachment;
-                    return DefaultStyleValues_Generated.ScrollbarVerticalAttachment;
+                    if (propertyMap.TryGetValue((int) StylePropertyId.ShadowType, out property)) return property.AsShadowType;
+                    return DefaultStyleValues_Generated.ShadowType;
                 }
             }
 
-            public UIForia.Rendering.ScrollbarButtonPlacement ScrollbarVerticalButtonPlacement { 
+            public float ShadowOffsetX { 
                 [System.Diagnostics.DebuggerStepThrough]
                 get { 
                     StyleProperty property;
-                    if (propertyMap.TryGetValue((int) StylePropertyId.ScrollbarVerticalButtonPlacement, out property)) return property.AsScrollbarButtonPlacement;
-                    return DefaultStyleValues_Generated.ScrollbarVerticalButtonPlacement;
+                    if (propertyMap.TryGetValue((int) StylePropertyId.ShadowOffsetX, out property)) return property.AsFloat;
+                    return DefaultStyleValues_Generated.ShadowOffsetX;
                 }
             }
 
-            public float ScrollbarVerticalTrackSize { 
+            public float ShadowOffsetY { 
                 [System.Diagnostics.DebuggerStepThrough]
                 get { 
                     StyleProperty property;
-                    if (propertyMap.TryGetValue((int) StylePropertyId.ScrollbarVerticalTrackSize, out property)) return property.AsFloat;
-                    return DefaultStyleValues_Generated.ScrollbarVerticalTrackSize;
+                    if (propertyMap.TryGetValue((int) StylePropertyId.ShadowOffsetY, out property)) return property.AsFloat;
+                    return DefaultStyleValues_Generated.ShadowOffsetY;
                 }
             }
 
-            public float ScrollbarVerticalTrackBorderRadius { 
+            public float ShadowSoftnessX { 
                 [System.Diagnostics.DebuggerStepThrough]
                 get { 
                     StyleProperty property;
-                    if (propertyMap.TryGetValue((int) StylePropertyId.ScrollbarVerticalTrackBorderRadius, out property)) return property.AsFloat;
-                    return DefaultStyleValues_Generated.ScrollbarVerticalTrackBorderRadius;
+                    if (propertyMap.TryGetValue((int) StylePropertyId.ShadowSoftnessX, out property)) return property.AsFloat;
+                    return DefaultStyleValues_Generated.ShadowSoftnessX;
                 }
             }
 
-            public float ScrollbarVerticalTrackBorderSize { 
+            public float ShadowSoftnessY { 
                 [System.Diagnostics.DebuggerStepThrough]
                 get { 
                     StyleProperty property;
-                    if (propertyMap.TryGetValue((int) StylePropertyId.ScrollbarVerticalTrackBorderSize, out property)) return property.AsFloat;
-                    return DefaultStyleValues_Generated.ScrollbarVerticalTrackBorderSize;
+                    if (propertyMap.TryGetValue((int) StylePropertyId.ShadowSoftnessY, out property)) return property.AsFloat;
+                    return DefaultStyleValues_Generated.ShadowSoftnessY;
                 }
             }
 
-            public UnityEngine.Color ScrollbarVerticalTrackBorderColor { 
+            public float ShadowIntensity { 
                 [System.Diagnostics.DebuggerStepThrough]
                 get { 
                     StyleProperty property;
-                    if (propertyMap.TryGetValue((int) StylePropertyId.ScrollbarVerticalTrackBorderColor, out property)) return property.AsColor;
-                    return DefaultStyleValues_Generated.ScrollbarVerticalTrackBorderColor;
+                    if (propertyMap.TryGetValue((int) StylePropertyId.ShadowIntensity, out property)) return property.AsFloat;
+                    return DefaultStyleValues_Generated.ShadowIntensity;
                 }
             }
 
-            public UnityEngine.Texture2D ScrollbarVerticalTrackImage { 
+            public string Scrollbar { 
                 [System.Diagnostics.DebuggerStepThrough]
                 get { 
                     StyleProperty property;
-                    if (propertyMap.TryGetValue((int) StylePropertyId.ScrollbarVerticalTrackImage, out property)) return property.AsTexture2D;
-                    return DefaultStyleValues_Generated.ScrollbarVerticalTrackImage;
+                    if (propertyMap.TryGetValue((int) StylePropertyId.Scrollbar, out property)) return property.AsString;
+                    return DefaultStyleValues_Generated.Scrollbar;
                 }
             }
 
-            public UnityEngine.Color ScrollbarVerticalTrackColor { 
+            public UIForia.UIMeasurement ScrollbarSize { 
                 [System.Diagnostics.DebuggerStepThrough]
                 get { 
                     StyleProperty property;
-                    if (propertyMap.TryGetValue((int) StylePropertyId.ScrollbarVerticalTrackColor, out property)) return property.AsColor;
-                    return DefaultStyleValues_Generated.ScrollbarVerticalTrackColor;
+                    if (propertyMap.TryGetValue((int) StylePropertyId.ScrollbarSize, out property)) return property.AsUIMeasurement;
+                    return DefaultStyleValues_Generated.ScrollbarSize;
                 }
             }
 
-            public float ScrollbarVerticalHandleSize { 
+            public UnityEngine.Color ScrollbarColor { 
                 [System.Diagnostics.DebuggerStepThrough]
                 get { 
                     StyleProperty property;
-                    if (propertyMap.TryGetValue((int) StylePropertyId.ScrollbarVerticalHandleSize, out property)) return property.AsFloat;
-                    return DefaultStyleValues_Generated.ScrollbarVerticalHandleSize;
-                }
-            }
-
-            public float ScrollbarVerticalHandleBorderRadius { 
-                [System.Diagnostics.DebuggerStepThrough]
-                get { 
-                    StyleProperty property;
-                    if (propertyMap.TryGetValue((int) StylePropertyId.ScrollbarVerticalHandleBorderRadius, out property)) return property.AsFloat;
-                    return DefaultStyleValues_Generated.ScrollbarVerticalHandleBorderRadius;
-                }
-            }
-
-            public float ScrollbarVerticalHandleBorderSize { 
-                [System.Diagnostics.DebuggerStepThrough]
-                get { 
-                    StyleProperty property;
-                    if (propertyMap.TryGetValue((int) StylePropertyId.ScrollbarVerticalHandleBorderSize, out property)) return property.AsFloat;
-                    return DefaultStyleValues_Generated.ScrollbarVerticalHandleBorderSize;
-                }
-            }
-
-            public UnityEngine.Color ScrollbarVerticalHandleBorderColor { 
-                [System.Diagnostics.DebuggerStepThrough]
-                get { 
-                    StyleProperty property;
-                    if (propertyMap.TryGetValue((int) StylePropertyId.ScrollbarVerticalHandleBorderColor, out property)) return property.AsColor;
-                    return DefaultStyleValues_Generated.ScrollbarVerticalHandleBorderColor;
-                }
-            }
-
-            public UnityEngine.Texture2D ScrollbarVerticalHandleImage { 
-                [System.Diagnostics.DebuggerStepThrough]
-                get { 
-                    StyleProperty property;
-                    if (propertyMap.TryGetValue((int) StylePropertyId.ScrollbarVerticalHandleImage, out property)) return property.AsTexture2D;
-                    return DefaultStyleValues_Generated.ScrollbarVerticalHandleImage;
-                }
-            }
-
-            public UnityEngine.Color ScrollbarVerticalHandleColor { 
-                [System.Diagnostics.DebuggerStepThrough]
-                get { 
-                    StyleProperty property;
-                    if (propertyMap.TryGetValue((int) StylePropertyId.ScrollbarVerticalHandleColor, out property)) return property.AsColor;
-                    return DefaultStyleValues_Generated.ScrollbarVerticalHandleColor;
-                }
-            }
-
-            public float ScrollbarVerticalIncrementSize { 
-                [System.Diagnostics.DebuggerStepThrough]
-                get { 
-                    StyleProperty property;
-                    if (propertyMap.TryGetValue((int) StylePropertyId.ScrollbarVerticalIncrementSize, out property)) return property.AsFloat;
-                    return DefaultStyleValues_Generated.ScrollbarVerticalIncrementSize;
-                }
-            }
-
-            public float ScrollbarVerticalIncrementBorderRadius { 
-                [System.Diagnostics.DebuggerStepThrough]
-                get { 
-                    StyleProperty property;
-                    if (propertyMap.TryGetValue((int) StylePropertyId.ScrollbarVerticalIncrementBorderRadius, out property)) return property.AsFloat;
-                    return DefaultStyleValues_Generated.ScrollbarVerticalIncrementBorderRadius;
-                }
-            }
-
-            public float ScrollbarVerticalIncrementBorderSize { 
-                [System.Diagnostics.DebuggerStepThrough]
-                get { 
-                    StyleProperty property;
-                    if (propertyMap.TryGetValue((int) StylePropertyId.ScrollbarVerticalIncrementBorderSize, out property)) return property.AsFloat;
-                    return DefaultStyleValues_Generated.ScrollbarVerticalIncrementBorderSize;
-                }
-            }
-
-            public UnityEngine.Color ScrollbarVerticalIncrementBorderColor { 
-                [System.Diagnostics.DebuggerStepThrough]
-                get { 
-                    StyleProperty property;
-                    if (propertyMap.TryGetValue((int) StylePropertyId.ScrollbarVerticalIncrementBorderColor, out property)) return property.AsColor;
-                    return DefaultStyleValues_Generated.ScrollbarVerticalIncrementBorderColor;
-                }
-            }
-
-            public UnityEngine.Texture2D ScrollbarVerticalIncrementImage { 
-                [System.Diagnostics.DebuggerStepThrough]
-                get { 
-                    StyleProperty property;
-                    if (propertyMap.TryGetValue((int) StylePropertyId.ScrollbarVerticalIncrementImage, out property)) return property.AsTexture2D;
-                    return DefaultStyleValues_Generated.ScrollbarVerticalIncrementImage;
-                }
-            }
-
-            public UnityEngine.Color ScrollbarVerticalIncrementColor { 
-                [System.Diagnostics.DebuggerStepThrough]
-                get { 
-                    StyleProperty property;
-                    if (propertyMap.TryGetValue((int) StylePropertyId.ScrollbarVerticalIncrementColor, out property)) return property.AsColor;
-                    return DefaultStyleValues_Generated.ScrollbarVerticalIncrementColor;
-                }
-            }
-
-            public float ScrollbarVerticalDecrementSize { 
-                [System.Diagnostics.DebuggerStepThrough]
-                get { 
-                    StyleProperty property;
-                    if (propertyMap.TryGetValue((int) StylePropertyId.ScrollbarVerticalDecrementSize, out property)) return property.AsFloat;
-                    return DefaultStyleValues_Generated.ScrollbarVerticalDecrementSize;
-                }
-            }
-
-            public float ScrollbarVerticalDecrementBorderRadius { 
-                [System.Diagnostics.DebuggerStepThrough]
-                get { 
-                    StyleProperty property;
-                    if (propertyMap.TryGetValue((int) StylePropertyId.ScrollbarVerticalDecrementBorderRadius, out property)) return property.AsFloat;
-                    return DefaultStyleValues_Generated.ScrollbarVerticalDecrementBorderRadius;
-                }
-            }
-
-            public float ScrollbarVerticalDecrementBorderSize { 
-                [System.Diagnostics.DebuggerStepThrough]
-                get { 
-                    StyleProperty property;
-                    if (propertyMap.TryGetValue((int) StylePropertyId.ScrollbarVerticalDecrementBorderSize, out property)) return property.AsFloat;
-                    return DefaultStyleValues_Generated.ScrollbarVerticalDecrementBorderSize;
-                }
-            }
-
-            public UnityEngine.Color ScrollbarVerticalDecrementBorderColor { 
-                [System.Diagnostics.DebuggerStepThrough]
-                get { 
-                    StyleProperty property;
-                    if (propertyMap.TryGetValue((int) StylePropertyId.ScrollbarVerticalDecrementBorderColor, out property)) return property.AsColor;
-                    return DefaultStyleValues_Generated.ScrollbarVerticalDecrementBorderColor;
-                }
-            }
-
-            public UnityEngine.Texture2D ScrollbarVerticalDecrementImage { 
-                [System.Diagnostics.DebuggerStepThrough]
-                get { 
-                    StyleProperty property;
-                    if (propertyMap.TryGetValue((int) StylePropertyId.ScrollbarVerticalDecrementImage, out property)) return property.AsTexture2D;
-                    return DefaultStyleValues_Generated.ScrollbarVerticalDecrementImage;
-                }
-            }
-
-            public UnityEngine.Color ScrollbarVerticalDecrementColor { 
-                [System.Diagnostics.DebuggerStepThrough]
-                get { 
-                    StyleProperty property;
-                    if (propertyMap.TryGetValue((int) StylePropertyId.ScrollbarVerticalDecrementColor, out property)) return property.AsColor;
-                    return DefaultStyleValues_Generated.ScrollbarVerticalDecrementColor;
-                }
-            }
-
-            public UIForia.Rendering.HorizontalScrollbarAttachment ScrollbarHorizontalAttachment { 
-                [System.Diagnostics.DebuggerStepThrough]
-                get { 
-                    StyleProperty property;
-                    if (propertyMap.TryGetValue((int) StylePropertyId.ScrollbarHorizontalAttachment, out property)) return property.AsHorizontalScrollbarAttachment;
-                    return DefaultStyleValues_Generated.ScrollbarHorizontalAttachment;
-                }
-            }
-
-            public UIForia.Rendering.ScrollbarButtonPlacement ScrollbarHorizontalButtonPlacement { 
-                [System.Diagnostics.DebuggerStepThrough]
-                get { 
-                    StyleProperty property;
-                    if (propertyMap.TryGetValue((int) StylePropertyId.ScrollbarHorizontalButtonPlacement, out property)) return property.AsScrollbarButtonPlacement;
-                    return DefaultStyleValues_Generated.ScrollbarHorizontalButtonPlacement;
-                }
-            }
-
-            public float ScrollbarHorizontalTrackSize { 
-                [System.Diagnostics.DebuggerStepThrough]
-                get { 
-                    StyleProperty property;
-                    if (propertyMap.TryGetValue((int) StylePropertyId.ScrollbarHorizontalTrackSize, out property)) return property.AsFloat;
-                    return DefaultStyleValues_Generated.ScrollbarHorizontalTrackSize;
-                }
-            }
-
-            public float ScrollbarHorizontalTrackBorderRadius { 
-                [System.Diagnostics.DebuggerStepThrough]
-                get { 
-                    StyleProperty property;
-                    if (propertyMap.TryGetValue((int) StylePropertyId.ScrollbarHorizontalTrackBorderRadius, out property)) return property.AsFloat;
-                    return DefaultStyleValues_Generated.ScrollbarHorizontalTrackBorderRadius;
-                }
-            }
-
-            public float ScrollbarHorizontalTrackBorderSize { 
-                [System.Diagnostics.DebuggerStepThrough]
-                get { 
-                    StyleProperty property;
-                    if (propertyMap.TryGetValue((int) StylePropertyId.ScrollbarHorizontalTrackBorderSize, out property)) return property.AsFloat;
-                    return DefaultStyleValues_Generated.ScrollbarHorizontalTrackBorderSize;
-                }
-            }
-
-            public UnityEngine.Color ScrollbarHorizontalTrackBorderColor { 
-                [System.Diagnostics.DebuggerStepThrough]
-                get { 
-                    StyleProperty property;
-                    if (propertyMap.TryGetValue((int) StylePropertyId.ScrollbarHorizontalTrackBorderColor, out property)) return property.AsColor;
-                    return DefaultStyleValues_Generated.ScrollbarHorizontalTrackBorderColor;
-                }
-            }
-
-            public UnityEngine.Texture2D ScrollbarHorizontalTrackImage { 
-                [System.Diagnostics.DebuggerStepThrough]
-                get { 
-                    StyleProperty property;
-                    if (propertyMap.TryGetValue((int) StylePropertyId.ScrollbarHorizontalTrackImage, out property)) return property.AsTexture2D;
-                    return DefaultStyleValues_Generated.ScrollbarHorizontalTrackImage;
-                }
-            }
-
-            public UnityEngine.Color ScrollbarHorizontalTrackColor { 
-                [System.Diagnostics.DebuggerStepThrough]
-                get { 
-                    StyleProperty property;
-                    if (propertyMap.TryGetValue((int) StylePropertyId.ScrollbarHorizontalTrackColor, out property)) return property.AsColor;
-                    return DefaultStyleValues_Generated.ScrollbarHorizontalTrackColor;
-                }
-            }
-
-            public float ScrollbarHorizontalHandleSize { 
-                [System.Diagnostics.DebuggerStepThrough]
-                get { 
-                    StyleProperty property;
-                    if (propertyMap.TryGetValue((int) StylePropertyId.ScrollbarHorizontalHandleSize, out property)) return property.AsFloat;
-                    return DefaultStyleValues_Generated.ScrollbarHorizontalHandleSize;
-                }
-            }
-
-            public float ScrollbarHorizontalHandleBorderRadius { 
-                [System.Diagnostics.DebuggerStepThrough]
-                get { 
-                    StyleProperty property;
-                    if (propertyMap.TryGetValue((int) StylePropertyId.ScrollbarHorizontalHandleBorderRadius, out property)) return property.AsFloat;
-                    return DefaultStyleValues_Generated.ScrollbarHorizontalHandleBorderRadius;
-                }
-            }
-
-            public float ScrollbarHorizontalHandleBorderSize { 
-                [System.Diagnostics.DebuggerStepThrough]
-                get { 
-                    StyleProperty property;
-                    if (propertyMap.TryGetValue((int) StylePropertyId.ScrollbarHorizontalHandleBorderSize, out property)) return property.AsFloat;
-                    return DefaultStyleValues_Generated.ScrollbarHorizontalHandleBorderSize;
-                }
-            }
-
-            public UnityEngine.Color ScrollbarHorizontalHandleBorderColor { 
-                [System.Diagnostics.DebuggerStepThrough]
-                get { 
-                    StyleProperty property;
-                    if (propertyMap.TryGetValue((int) StylePropertyId.ScrollbarHorizontalHandleBorderColor, out property)) return property.AsColor;
-                    return DefaultStyleValues_Generated.ScrollbarHorizontalHandleBorderColor;
-                }
-            }
-
-            public UnityEngine.Texture2D ScrollbarHorizontalHandleImage { 
-                [System.Diagnostics.DebuggerStepThrough]
-                get { 
-                    StyleProperty property;
-                    if (propertyMap.TryGetValue((int) StylePropertyId.ScrollbarHorizontalHandleImage, out property)) return property.AsTexture2D;
-                    return DefaultStyleValues_Generated.ScrollbarHorizontalHandleImage;
-                }
-            }
-
-            public UnityEngine.Color ScrollbarHorizontalHandleColor { 
-                [System.Diagnostics.DebuggerStepThrough]
-                get { 
-                    StyleProperty property;
-                    if (propertyMap.TryGetValue((int) StylePropertyId.ScrollbarHorizontalHandleColor, out property)) return property.AsColor;
-                    return DefaultStyleValues_Generated.ScrollbarHorizontalHandleColor;
-                }
-            }
-
-            public float ScrollbarHorizontalIncrementSize { 
-                [System.Diagnostics.DebuggerStepThrough]
-                get { 
-                    StyleProperty property;
-                    if (propertyMap.TryGetValue((int) StylePropertyId.ScrollbarHorizontalIncrementSize, out property)) return property.AsFloat;
-                    return DefaultStyleValues_Generated.ScrollbarHorizontalIncrementSize;
-                }
-            }
-
-            public float ScrollbarHorizontalIncrementBorderRadius { 
-                [System.Diagnostics.DebuggerStepThrough]
-                get { 
-                    StyleProperty property;
-                    if (propertyMap.TryGetValue((int) StylePropertyId.ScrollbarHorizontalIncrementBorderRadius, out property)) return property.AsFloat;
-                    return DefaultStyleValues_Generated.ScrollbarHorizontalIncrementBorderRadius;
-                }
-            }
-
-            public float ScrollbarHorizontalIncrementBorderSize { 
-                [System.Diagnostics.DebuggerStepThrough]
-                get { 
-                    StyleProperty property;
-                    if (propertyMap.TryGetValue((int) StylePropertyId.ScrollbarHorizontalIncrementBorderSize, out property)) return property.AsFloat;
-                    return DefaultStyleValues_Generated.ScrollbarHorizontalIncrementBorderSize;
-                }
-            }
-
-            public UnityEngine.Color ScrollbarHorizontalIncrementBorderColor { 
-                [System.Diagnostics.DebuggerStepThrough]
-                get { 
-                    StyleProperty property;
-                    if (propertyMap.TryGetValue((int) StylePropertyId.ScrollbarHorizontalIncrementBorderColor, out property)) return property.AsColor;
-                    return DefaultStyleValues_Generated.ScrollbarHorizontalIncrementBorderColor;
-                }
-            }
-
-            public UnityEngine.Texture2D ScrollbarHorizontalIncrementImage { 
-                [System.Diagnostics.DebuggerStepThrough]
-                get { 
-                    StyleProperty property;
-                    if (propertyMap.TryGetValue((int) StylePropertyId.ScrollbarHorizontalIncrementImage, out property)) return property.AsTexture2D;
-                    return DefaultStyleValues_Generated.ScrollbarHorizontalIncrementImage;
-                }
-            }
-
-            public UnityEngine.Color ScrollbarHorizontalIncrementColor { 
-                [System.Diagnostics.DebuggerStepThrough]
-                get { 
-                    StyleProperty property;
-                    if (propertyMap.TryGetValue((int) StylePropertyId.ScrollbarHorizontalIncrementColor, out property)) return property.AsColor;
-                    return DefaultStyleValues_Generated.ScrollbarHorizontalIncrementColor;
-                }
-            }
-
-            public float ScrollbarHorizontalDecrementSize { 
-                [System.Diagnostics.DebuggerStepThrough]
-                get { 
-                    StyleProperty property;
-                    if (propertyMap.TryGetValue((int) StylePropertyId.ScrollbarHorizontalDecrementSize, out property)) return property.AsFloat;
-                    return DefaultStyleValues_Generated.ScrollbarHorizontalDecrementSize;
-                }
-            }
-
-            public float ScrollbarHorizontalDecrementBorderRadius { 
-                [System.Diagnostics.DebuggerStepThrough]
-                get { 
-                    StyleProperty property;
-                    if (propertyMap.TryGetValue((int) StylePropertyId.ScrollbarHorizontalDecrementBorderRadius, out property)) return property.AsFloat;
-                    return DefaultStyleValues_Generated.ScrollbarHorizontalDecrementBorderRadius;
-                }
-            }
-
-            public float ScrollbarHorizontalDecrementBorderSize { 
-                [System.Diagnostics.DebuggerStepThrough]
-                get { 
-                    StyleProperty property;
-                    if (propertyMap.TryGetValue((int) StylePropertyId.ScrollbarHorizontalDecrementBorderSize, out property)) return property.AsFloat;
-                    return DefaultStyleValues_Generated.ScrollbarHorizontalDecrementBorderSize;
-                }
-            }
-
-            public UnityEngine.Color ScrollbarHorizontalDecrementBorderColor { 
-                [System.Diagnostics.DebuggerStepThrough]
-                get { 
-                    StyleProperty property;
-                    if (propertyMap.TryGetValue((int) StylePropertyId.ScrollbarHorizontalDecrementBorderColor, out property)) return property.AsColor;
-                    return DefaultStyleValues_Generated.ScrollbarHorizontalDecrementBorderColor;
-                }
-            }
-
-            public UnityEngine.Texture2D ScrollbarHorizontalDecrementImage { 
-                [System.Diagnostics.DebuggerStepThrough]
-                get { 
-                    StyleProperty property;
-                    if (propertyMap.TryGetValue((int) StylePropertyId.ScrollbarHorizontalDecrementImage, out property)) return property.AsTexture2D;
-                    return DefaultStyleValues_Generated.ScrollbarHorizontalDecrementImage;
-                }
-            }
-
-            public UnityEngine.Color ScrollbarHorizontalDecrementColor { 
-                [System.Diagnostics.DebuggerStepThrough]
-                get { 
-                    StyleProperty property;
-                    if (propertyMap.TryGetValue((int) StylePropertyId.ScrollbarHorizontalDecrementColor, out property)) return property.AsColor;
-                    return DefaultStyleValues_Generated.ScrollbarHorizontalDecrementColor;
+                    if (propertyMap.TryGetValue((int) StylePropertyId.ScrollbarColor, out property)) return property.AsColor;
+                    return DefaultStyleValues_Generated.ScrollbarColor;
                 }
             }
 
@@ -3523,36 +2600,12 @@ namespace UIForia.Rendering {
             return GetPropertyValueInState(StylePropertyId.BackgroundColor, state).AsColor;
         }
         
-        public void SetBackgroundColorSecondary(UnityEngine.Color value, StyleState state) {
-            SetProperty(new StyleProperty(StylePropertyId.BackgroundColorSecondary, value), state);
-        }
-
-        public UnityEngine.Color GetBackgroundColorSecondary(StyleState state) {
-            return GetPropertyValueInState(StylePropertyId.BackgroundColorSecondary, state).AsColor;
-        }
-        
         public void SetBackgroundImage(UnityEngine.Texture2D value, StyleState state) {
             SetProperty(new StyleProperty(StylePropertyId.BackgroundImage, 0, 0, value), state);
         }
 
         public UnityEngine.Texture2D GetBackgroundImage(StyleState state) {
             return GetPropertyValueInState(StylePropertyId.BackgroundImage, state).AsTexture2D;
-        }
-        
-        public void SetBackgroundImage1(UnityEngine.Texture2D value, StyleState state) {
-            SetProperty(new StyleProperty(StylePropertyId.BackgroundImage1, 0, 0, value), state);
-        }
-
-        public UnityEngine.Texture2D GetBackgroundImage1(StyleState state) {
-            return GetPropertyValueInState(StylePropertyId.BackgroundImage1, state).AsTexture2D;
-        }
-        
-        public void SetBackgroundImage2(UnityEngine.Texture2D value, StyleState state) {
-            SetProperty(new StyleProperty(StylePropertyId.BackgroundImage2, 0, 0, value), state);
-        }
-
-        public UnityEngine.Texture2D GetBackgroundImage2(StyleState state) {
-            return GetPropertyValueInState(StylePropertyId.BackgroundImage2, state).AsTexture2D;
         }
         
         public void SetBackgroundGradientType(Shapes2D.GradientType value, StyleState state) {
@@ -3579,60 +2632,12 @@ namespace UIForia.Rendering {
             return GetPropertyValueInState(StylePropertyId.BackgroundGradientStart, state).AsFloat;
         }
         
-        public void SetBackgroundFillRotation(float value, StyleState state) {
-            SetProperty(new StyleProperty(StylePropertyId.BackgroundFillRotation, value), state);
+        public void SetPainter(UIForia.Rendering.BackgroundFillType value, StyleState state) {
+            SetProperty(new StyleProperty(StylePropertyId.Painter, (int)value), state);
         }
 
-        public float GetBackgroundFillRotation(StyleState state) {
-            return GetPropertyValueInState(StylePropertyId.BackgroundFillRotation, state).AsFloat;
-        }
-        
-        public void SetBackgroundFillType(UIForia.Rendering.BackgroundFillType value, StyleState state) {
-            SetProperty(new StyleProperty(StylePropertyId.BackgroundFillType, (int)value), state);
-        }
-
-        public UIForia.Rendering.BackgroundFillType GetBackgroundFillType(StyleState state) {
-            return GetPropertyValueInState(StylePropertyId.BackgroundFillType, state).AsBackgroundFillType;
-        }
-        
-        public void SetBackgroundShapeType(UIForia.Rendering.BackgroundShapeType value, StyleState state) {
-            SetProperty(new StyleProperty(StylePropertyId.BackgroundShapeType, (int)value), state);
-        }
-
-        public UIForia.Rendering.BackgroundShapeType GetBackgroundShapeType(StyleState state) {
-            return GetPropertyValueInState(StylePropertyId.BackgroundShapeType, state).AsBackgroundShapeType;
-        }
-        
-        public void SetBackgroundFillOffsetX(float value, StyleState state) {
-            SetProperty(new StyleProperty(StylePropertyId.BackgroundFillOffsetX, value), state);
-        }
-
-        public float GetBackgroundFillOffsetX(StyleState state) {
-            return GetPropertyValueInState(StylePropertyId.BackgroundFillOffsetX, state).AsFloat;
-        }
-        
-        public void SetBackgroundFillOffsetY(float value, StyleState state) {
-            SetProperty(new StyleProperty(StylePropertyId.BackgroundFillOffsetY, value), state);
-        }
-
-        public float GetBackgroundFillOffsetY(StyleState state) {
-            return GetPropertyValueInState(StylePropertyId.BackgroundFillOffsetY, state).AsFloat;
-        }
-        
-        public void SetBackgroundFillScaleX(float value, StyleState state) {
-            SetProperty(new StyleProperty(StylePropertyId.BackgroundFillScaleX, value), state);
-        }
-
-        public float GetBackgroundFillScaleX(StyleState state) {
-            return GetPropertyValueInState(StylePropertyId.BackgroundFillScaleX, state).AsFloat;
-        }
-        
-        public void SetBackgroundFillScaleY(float value, StyleState state) {
-            SetProperty(new StyleProperty(StylePropertyId.BackgroundFillScaleY, value), state);
-        }
-
-        public float GetBackgroundFillScaleY(StyleState state) {
-            return GetPropertyValueInState(StylePropertyId.BackgroundFillScaleY, state).AsFloat;
+        public UIForia.Rendering.BackgroundFillType GetPainter(StyleState state) {
+            return GetPropertyValueInState(StylePropertyId.Painter, state).AsBackgroundFillType;
         }
         
         public void SetOpacity(float value, StyleState state) {
@@ -4075,6 +3080,110 @@ namespace UIForia.Rendering {
             return GetPropertyValueInState(StylePropertyId.TextTransform, state).AsTextTransform;
         }
         
+        public void SetTextOutlineWidth(float value, StyleState state) {
+            SetProperty(new StyleProperty(StylePropertyId.TextOutlineWidth, value), state);
+        }
+
+        public float GetTextOutlineWidth(StyleState state) {
+            return GetPropertyValueInState(StylePropertyId.TextOutlineWidth, state).AsFloat;
+        }
+        
+        public void SetTextOutlineColor(UnityEngine.Color value, StyleState state) {
+            SetProperty(new StyleProperty(StylePropertyId.TextOutlineColor, value), state);
+        }
+
+        public UnityEngine.Color GetTextOutlineColor(StyleState state) {
+            return GetPropertyValueInState(StylePropertyId.TextOutlineColor, state).AsColor;
+        }
+        
+        public void SetTextGlowColor(UnityEngine.Color value, StyleState state) {
+            SetProperty(new StyleProperty(StylePropertyId.TextGlowColor, value), state);
+        }
+
+        public UnityEngine.Color GetTextGlowColor(StyleState state) {
+            return GetPropertyValueInState(StylePropertyId.TextGlowColor, state).AsColor;
+        }
+        
+        public void SetTextGlowOffset(float value, StyleState state) {
+            SetProperty(new StyleProperty(StylePropertyId.TextGlowOffset, value), state);
+        }
+
+        public float GetTextGlowOffset(StyleState state) {
+            return GetPropertyValueInState(StylePropertyId.TextGlowOffset, state).AsFloat;
+        }
+        
+        public void SetTextGlowInner(float value, StyleState state) {
+            SetProperty(new StyleProperty(StylePropertyId.TextGlowInner, value), state);
+        }
+
+        public float GetTextGlowInner(StyleState state) {
+            return GetPropertyValueInState(StylePropertyId.TextGlowInner, state).AsFloat;
+        }
+        
+        public void SetTextGlowOuter(float value, StyleState state) {
+            SetProperty(new StyleProperty(StylePropertyId.TextGlowOuter, value), state);
+        }
+
+        public float GetTextGlowOuter(StyleState state) {
+            return GetPropertyValueInState(StylePropertyId.TextGlowOuter, state).AsFloat;
+        }
+        
+        public void SetTextGlowPower(float value, StyleState state) {
+            SetProperty(new StyleProperty(StylePropertyId.TextGlowPower, value), state);
+        }
+
+        public float GetTextGlowPower(StyleState state) {
+            return GetPropertyValueInState(StylePropertyId.TextGlowPower, state).AsFloat;
+        }
+        
+        public void SetTextShadowColor(UnityEngine.Color value, StyleState state) {
+            SetProperty(new StyleProperty(StylePropertyId.TextShadowColor, value), state);
+        }
+
+        public UnityEngine.Color GetTextShadowColor(StyleState state) {
+            return GetPropertyValueInState(StylePropertyId.TextShadowColor, state).AsColor;
+        }
+        
+        public void SetTextShadowOffsetX(float value, StyleState state) {
+            SetProperty(new StyleProperty(StylePropertyId.TextShadowOffsetX, value), state);
+        }
+
+        public float GetTextShadowOffsetX(StyleState state) {
+            return GetPropertyValueInState(StylePropertyId.TextShadowOffsetX, state).AsFloat;
+        }
+        
+        public void SetTextShadowOffsetY(float value, StyleState state) {
+            SetProperty(new StyleProperty(StylePropertyId.TextShadowOffsetY, value), state);
+        }
+
+        public float GetTextShadowOffsetY(StyleState state) {
+            return GetPropertyValueInState(StylePropertyId.TextShadowOffsetY, state).AsFloat;
+        }
+        
+        public void SetTextShadowIntensity(float value, StyleState state) {
+            SetProperty(new StyleProperty(StylePropertyId.TextShadowIntensity, value), state);
+        }
+
+        public float GetTextShadowIntensity(StyleState state) {
+            return GetPropertyValueInState(StylePropertyId.TextShadowIntensity, state).AsFloat;
+        }
+        
+        public void SetTextShadowSoftness(float value, StyleState state) {
+            SetProperty(new StyleProperty(StylePropertyId.TextShadowSoftness, value), state);
+        }
+
+        public float GetTextShadowSoftness(StyleState state) {
+            return GetPropertyValueInState(StylePropertyId.TextShadowSoftness, state).AsFloat;
+        }
+        
+        public void SetTextShadowType(UIForia.Rendering.ShadowType value, StyleState state) {
+            SetProperty(new StyleProperty(StylePropertyId.TextShadowType, (int)value), state);
+        }
+
+        public UIForia.Rendering.ShadowType GetTextShadowType(StyleState state) {
+            return GetPropertyValueInState(StylePropertyId.TextShadowType, state).AsShadowType;
+        }
+        
         public void SetAnchorTop(UIForia.UIFixedLength value, StyleState state) {
             SetProperty(new StyleProperty(StylePropertyId.AnchorTop, value), state);
         }
@@ -4227,420 +3336,76 @@ namespace UIForia.Rendering {
             return GetPropertyValueInState(StylePropertyId.RenderLayer, state).AsRenderLayer;
         }
         
-        public void SetScrollbarVerticalAttachment(UIForia.Rendering.VerticalScrollbarAttachment value, StyleState state) {
-            SetProperty(new StyleProperty(StylePropertyId.ScrollbarVerticalAttachment, (int)value), state);
+        public void SetShadowType(UIForia.Rendering.ShadowType value, StyleState state) {
+            SetProperty(new StyleProperty(StylePropertyId.ShadowType, (int)value), state);
         }
 
-        public UIForia.Rendering.VerticalScrollbarAttachment GetScrollbarVerticalAttachment(StyleState state) {
-            return GetPropertyValueInState(StylePropertyId.ScrollbarVerticalAttachment, state).AsVerticalScrollbarAttachment;
+        public UIForia.Rendering.ShadowType GetShadowType(StyleState state) {
+            return GetPropertyValueInState(StylePropertyId.ShadowType, state).AsShadowType;
         }
         
-        public void SetScrollbarVerticalButtonPlacement(UIForia.Rendering.ScrollbarButtonPlacement value, StyleState state) {
-            SetProperty(new StyleProperty(StylePropertyId.ScrollbarVerticalButtonPlacement, (int)value), state);
+        public void SetShadowOffsetX(float value, StyleState state) {
+            SetProperty(new StyleProperty(StylePropertyId.ShadowOffsetX, value), state);
         }
 
-        public UIForia.Rendering.ScrollbarButtonPlacement GetScrollbarVerticalButtonPlacement(StyleState state) {
-            return GetPropertyValueInState(StylePropertyId.ScrollbarVerticalButtonPlacement, state).AsScrollbarButtonPlacement;
+        public float GetShadowOffsetX(StyleState state) {
+            return GetPropertyValueInState(StylePropertyId.ShadowOffsetX, state).AsFloat;
         }
         
-        public void SetScrollbarVerticalTrackSize(float value, StyleState state) {
-            SetProperty(new StyleProperty(StylePropertyId.ScrollbarVerticalTrackSize, value), state);
+        public void SetShadowOffsetY(float value, StyleState state) {
+            SetProperty(new StyleProperty(StylePropertyId.ShadowOffsetY, value), state);
         }
 
-        public float GetScrollbarVerticalTrackSize(StyleState state) {
-            return GetPropertyValueInState(StylePropertyId.ScrollbarVerticalTrackSize, state).AsFloat;
+        public float GetShadowOffsetY(StyleState state) {
+            return GetPropertyValueInState(StylePropertyId.ShadowOffsetY, state).AsFloat;
         }
         
-        public void SetScrollbarVerticalTrackBorderRadius(float value, StyleState state) {
-            SetProperty(new StyleProperty(StylePropertyId.ScrollbarVerticalTrackBorderRadius, value), state);
+        public void SetShadowSoftnessX(float value, StyleState state) {
+            SetProperty(new StyleProperty(StylePropertyId.ShadowSoftnessX, value), state);
         }
 
-        public float GetScrollbarVerticalTrackBorderRadius(StyleState state) {
-            return GetPropertyValueInState(StylePropertyId.ScrollbarVerticalTrackBorderRadius, state).AsFloat;
+        public float GetShadowSoftnessX(StyleState state) {
+            return GetPropertyValueInState(StylePropertyId.ShadowSoftnessX, state).AsFloat;
         }
         
-        public void SetScrollbarVerticalTrackBorderSize(float value, StyleState state) {
-            SetProperty(new StyleProperty(StylePropertyId.ScrollbarVerticalTrackBorderSize, value), state);
+        public void SetShadowSoftnessY(float value, StyleState state) {
+            SetProperty(new StyleProperty(StylePropertyId.ShadowSoftnessY, value), state);
         }
 
-        public float GetScrollbarVerticalTrackBorderSize(StyleState state) {
-            return GetPropertyValueInState(StylePropertyId.ScrollbarVerticalTrackBorderSize, state).AsFloat;
+        public float GetShadowSoftnessY(StyleState state) {
+            return GetPropertyValueInState(StylePropertyId.ShadowSoftnessY, state).AsFloat;
         }
         
-        public void SetScrollbarVerticalTrackBorderColor(UnityEngine.Color value, StyleState state) {
-            SetProperty(new StyleProperty(StylePropertyId.ScrollbarVerticalTrackBorderColor, value), state);
+        public void SetShadowIntensity(float value, StyleState state) {
+            SetProperty(new StyleProperty(StylePropertyId.ShadowIntensity, value), state);
         }
 
-        public UnityEngine.Color GetScrollbarVerticalTrackBorderColor(StyleState state) {
-            return GetPropertyValueInState(StylePropertyId.ScrollbarVerticalTrackBorderColor, state).AsColor;
+        public float GetShadowIntensity(StyleState state) {
+            return GetPropertyValueInState(StylePropertyId.ShadowIntensity, state).AsFloat;
         }
         
-        public void SetScrollbarVerticalTrackImage(UnityEngine.Texture2D value, StyleState state) {
-            SetProperty(new StyleProperty(StylePropertyId.ScrollbarVerticalTrackImage, 0, 0, value), state);
+        public void SetScrollbar(string value, StyleState state) {
+            SetProperty(new StyleProperty(StylePropertyId.Scrollbar, 0, 0, value), state);
         }
 
-        public UnityEngine.Texture2D GetScrollbarVerticalTrackImage(StyleState state) {
-            return GetPropertyValueInState(StylePropertyId.ScrollbarVerticalTrackImage, state).AsTexture2D;
+        public string GetScrollbar(StyleState state) {
+            return GetPropertyValueInState(StylePropertyId.Scrollbar, state).AsString;
         }
         
-        public void SetScrollbarVerticalTrackColor(UnityEngine.Color value, StyleState state) {
-            SetProperty(new StyleProperty(StylePropertyId.ScrollbarVerticalTrackColor, value), state);
+        public void SetScrollbarSize(UIForia.UIMeasurement value, StyleState state) {
+            SetProperty(new StyleProperty(StylePropertyId.ScrollbarSize, value), state);
         }
 
-        public UnityEngine.Color GetScrollbarVerticalTrackColor(StyleState state) {
-            return GetPropertyValueInState(StylePropertyId.ScrollbarVerticalTrackColor, state).AsColor;
+        public UIForia.UIMeasurement GetScrollbarSize(StyleState state) {
+            return GetPropertyValueInState(StylePropertyId.ScrollbarSize, state).AsUIMeasurement;
         }
         
-        public void SetScrollbarVerticalHandleSize(float value, StyleState state) {
-            SetProperty(new StyleProperty(StylePropertyId.ScrollbarVerticalHandleSize, value), state);
+        public void SetScrollbarColor(UnityEngine.Color value, StyleState state) {
+            SetProperty(new StyleProperty(StylePropertyId.ScrollbarColor, value), state);
         }
 
-        public float GetScrollbarVerticalHandleSize(StyleState state) {
-            return GetPropertyValueInState(StylePropertyId.ScrollbarVerticalHandleSize, state).AsFloat;
-        }
-        
-        public void SetScrollbarVerticalHandleBorderRadius(float value, StyleState state) {
-            SetProperty(new StyleProperty(StylePropertyId.ScrollbarVerticalHandleBorderRadius, value), state);
-        }
-
-        public float GetScrollbarVerticalHandleBorderRadius(StyleState state) {
-            return GetPropertyValueInState(StylePropertyId.ScrollbarVerticalHandleBorderRadius, state).AsFloat;
-        }
-        
-        public void SetScrollbarVerticalHandleBorderSize(float value, StyleState state) {
-            SetProperty(new StyleProperty(StylePropertyId.ScrollbarVerticalHandleBorderSize, value), state);
-        }
-
-        public float GetScrollbarVerticalHandleBorderSize(StyleState state) {
-            return GetPropertyValueInState(StylePropertyId.ScrollbarVerticalHandleBorderSize, state).AsFloat;
-        }
-        
-        public void SetScrollbarVerticalHandleBorderColor(UnityEngine.Color value, StyleState state) {
-            SetProperty(new StyleProperty(StylePropertyId.ScrollbarVerticalHandleBorderColor, value), state);
-        }
-
-        public UnityEngine.Color GetScrollbarVerticalHandleBorderColor(StyleState state) {
-            return GetPropertyValueInState(StylePropertyId.ScrollbarVerticalHandleBorderColor, state).AsColor;
-        }
-        
-        public void SetScrollbarVerticalHandleImage(UnityEngine.Texture2D value, StyleState state) {
-            SetProperty(new StyleProperty(StylePropertyId.ScrollbarVerticalHandleImage, 0, 0, value), state);
-        }
-
-        public UnityEngine.Texture2D GetScrollbarVerticalHandleImage(StyleState state) {
-            return GetPropertyValueInState(StylePropertyId.ScrollbarVerticalHandleImage, state).AsTexture2D;
-        }
-        
-        public void SetScrollbarVerticalHandleColor(UnityEngine.Color value, StyleState state) {
-            SetProperty(new StyleProperty(StylePropertyId.ScrollbarVerticalHandleColor, value), state);
-        }
-
-        public UnityEngine.Color GetScrollbarVerticalHandleColor(StyleState state) {
-            return GetPropertyValueInState(StylePropertyId.ScrollbarVerticalHandleColor, state).AsColor;
-        }
-        
-        public void SetScrollbarVerticalIncrementSize(float value, StyleState state) {
-            SetProperty(new StyleProperty(StylePropertyId.ScrollbarVerticalIncrementSize, value), state);
-        }
-
-        public float GetScrollbarVerticalIncrementSize(StyleState state) {
-            return GetPropertyValueInState(StylePropertyId.ScrollbarVerticalIncrementSize, state).AsFloat;
-        }
-        
-        public void SetScrollbarVerticalIncrementBorderRadius(float value, StyleState state) {
-            SetProperty(new StyleProperty(StylePropertyId.ScrollbarVerticalIncrementBorderRadius, value), state);
-        }
-
-        public float GetScrollbarVerticalIncrementBorderRadius(StyleState state) {
-            return GetPropertyValueInState(StylePropertyId.ScrollbarVerticalIncrementBorderRadius, state).AsFloat;
-        }
-        
-        public void SetScrollbarVerticalIncrementBorderSize(float value, StyleState state) {
-            SetProperty(new StyleProperty(StylePropertyId.ScrollbarVerticalIncrementBorderSize, value), state);
-        }
-
-        public float GetScrollbarVerticalIncrementBorderSize(StyleState state) {
-            return GetPropertyValueInState(StylePropertyId.ScrollbarVerticalIncrementBorderSize, state).AsFloat;
-        }
-        
-        public void SetScrollbarVerticalIncrementBorderColor(UnityEngine.Color value, StyleState state) {
-            SetProperty(new StyleProperty(StylePropertyId.ScrollbarVerticalIncrementBorderColor, value), state);
-        }
-
-        public UnityEngine.Color GetScrollbarVerticalIncrementBorderColor(StyleState state) {
-            return GetPropertyValueInState(StylePropertyId.ScrollbarVerticalIncrementBorderColor, state).AsColor;
-        }
-        
-        public void SetScrollbarVerticalIncrementImage(UnityEngine.Texture2D value, StyleState state) {
-            SetProperty(new StyleProperty(StylePropertyId.ScrollbarVerticalIncrementImage, 0, 0, value), state);
-        }
-
-        public UnityEngine.Texture2D GetScrollbarVerticalIncrementImage(StyleState state) {
-            return GetPropertyValueInState(StylePropertyId.ScrollbarVerticalIncrementImage, state).AsTexture2D;
-        }
-        
-        public void SetScrollbarVerticalIncrementColor(UnityEngine.Color value, StyleState state) {
-            SetProperty(new StyleProperty(StylePropertyId.ScrollbarVerticalIncrementColor, value), state);
-        }
-
-        public UnityEngine.Color GetScrollbarVerticalIncrementColor(StyleState state) {
-            return GetPropertyValueInState(StylePropertyId.ScrollbarVerticalIncrementColor, state).AsColor;
-        }
-        
-        public void SetScrollbarVerticalDecrementSize(float value, StyleState state) {
-            SetProperty(new StyleProperty(StylePropertyId.ScrollbarVerticalDecrementSize, value), state);
-        }
-
-        public float GetScrollbarVerticalDecrementSize(StyleState state) {
-            return GetPropertyValueInState(StylePropertyId.ScrollbarVerticalDecrementSize, state).AsFloat;
-        }
-        
-        public void SetScrollbarVerticalDecrementBorderRadius(float value, StyleState state) {
-            SetProperty(new StyleProperty(StylePropertyId.ScrollbarVerticalDecrementBorderRadius, value), state);
-        }
-
-        public float GetScrollbarVerticalDecrementBorderRadius(StyleState state) {
-            return GetPropertyValueInState(StylePropertyId.ScrollbarVerticalDecrementBorderRadius, state).AsFloat;
-        }
-        
-        public void SetScrollbarVerticalDecrementBorderSize(float value, StyleState state) {
-            SetProperty(new StyleProperty(StylePropertyId.ScrollbarVerticalDecrementBorderSize, value), state);
-        }
-
-        public float GetScrollbarVerticalDecrementBorderSize(StyleState state) {
-            return GetPropertyValueInState(StylePropertyId.ScrollbarVerticalDecrementBorderSize, state).AsFloat;
-        }
-        
-        public void SetScrollbarVerticalDecrementBorderColor(UnityEngine.Color value, StyleState state) {
-            SetProperty(new StyleProperty(StylePropertyId.ScrollbarVerticalDecrementBorderColor, value), state);
-        }
-
-        public UnityEngine.Color GetScrollbarVerticalDecrementBorderColor(StyleState state) {
-            return GetPropertyValueInState(StylePropertyId.ScrollbarVerticalDecrementBorderColor, state).AsColor;
-        }
-        
-        public void SetScrollbarVerticalDecrementImage(UnityEngine.Texture2D value, StyleState state) {
-            SetProperty(new StyleProperty(StylePropertyId.ScrollbarVerticalDecrementImage, 0, 0, value), state);
-        }
-
-        public UnityEngine.Texture2D GetScrollbarVerticalDecrementImage(StyleState state) {
-            return GetPropertyValueInState(StylePropertyId.ScrollbarVerticalDecrementImage, state).AsTexture2D;
-        }
-        
-        public void SetScrollbarVerticalDecrementColor(UnityEngine.Color value, StyleState state) {
-            SetProperty(new StyleProperty(StylePropertyId.ScrollbarVerticalDecrementColor, value), state);
-        }
-
-        public UnityEngine.Color GetScrollbarVerticalDecrementColor(StyleState state) {
-            return GetPropertyValueInState(StylePropertyId.ScrollbarVerticalDecrementColor, state).AsColor;
-        }
-        
-        public void SetScrollbarHorizontalAttachment(UIForia.Rendering.HorizontalScrollbarAttachment value, StyleState state) {
-            SetProperty(new StyleProperty(StylePropertyId.ScrollbarHorizontalAttachment, (int)value), state);
-        }
-
-        public UIForia.Rendering.HorizontalScrollbarAttachment GetScrollbarHorizontalAttachment(StyleState state) {
-            return GetPropertyValueInState(StylePropertyId.ScrollbarHorizontalAttachment, state).AsHorizontalScrollbarAttachment;
-        }
-        
-        public void SetScrollbarHorizontalButtonPlacement(UIForia.Rendering.ScrollbarButtonPlacement value, StyleState state) {
-            SetProperty(new StyleProperty(StylePropertyId.ScrollbarHorizontalButtonPlacement, (int)value), state);
-        }
-
-        public UIForia.Rendering.ScrollbarButtonPlacement GetScrollbarHorizontalButtonPlacement(StyleState state) {
-            return GetPropertyValueInState(StylePropertyId.ScrollbarHorizontalButtonPlacement, state).AsScrollbarButtonPlacement;
-        }
-        
-        public void SetScrollbarHorizontalTrackSize(float value, StyleState state) {
-            SetProperty(new StyleProperty(StylePropertyId.ScrollbarHorizontalTrackSize, value), state);
-        }
-
-        public float GetScrollbarHorizontalTrackSize(StyleState state) {
-            return GetPropertyValueInState(StylePropertyId.ScrollbarHorizontalTrackSize, state).AsFloat;
-        }
-        
-        public void SetScrollbarHorizontalTrackBorderRadius(float value, StyleState state) {
-            SetProperty(new StyleProperty(StylePropertyId.ScrollbarHorizontalTrackBorderRadius, value), state);
-        }
-
-        public float GetScrollbarHorizontalTrackBorderRadius(StyleState state) {
-            return GetPropertyValueInState(StylePropertyId.ScrollbarHorizontalTrackBorderRadius, state).AsFloat;
-        }
-        
-        public void SetScrollbarHorizontalTrackBorderSize(float value, StyleState state) {
-            SetProperty(new StyleProperty(StylePropertyId.ScrollbarHorizontalTrackBorderSize, value), state);
-        }
-
-        public float GetScrollbarHorizontalTrackBorderSize(StyleState state) {
-            return GetPropertyValueInState(StylePropertyId.ScrollbarHorizontalTrackBorderSize, state).AsFloat;
-        }
-        
-        public void SetScrollbarHorizontalTrackBorderColor(UnityEngine.Color value, StyleState state) {
-            SetProperty(new StyleProperty(StylePropertyId.ScrollbarHorizontalTrackBorderColor, value), state);
-        }
-
-        public UnityEngine.Color GetScrollbarHorizontalTrackBorderColor(StyleState state) {
-            return GetPropertyValueInState(StylePropertyId.ScrollbarHorizontalTrackBorderColor, state).AsColor;
-        }
-        
-        public void SetScrollbarHorizontalTrackImage(UnityEngine.Texture2D value, StyleState state) {
-            SetProperty(new StyleProperty(StylePropertyId.ScrollbarHorizontalTrackImage, 0, 0, value), state);
-        }
-
-        public UnityEngine.Texture2D GetScrollbarHorizontalTrackImage(StyleState state) {
-            return GetPropertyValueInState(StylePropertyId.ScrollbarHorizontalTrackImage, state).AsTexture2D;
-        }
-        
-        public void SetScrollbarHorizontalTrackColor(UnityEngine.Color value, StyleState state) {
-            SetProperty(new StyleProperty(StylePropertyId.ScrollbarHorizontalTrackColor, value), state);
-        }
-
-        public UnityEngine.Color GetScrollbarHorizontalTrackColor(StyleState state) {
-            return GetPropertyValueInState(StylePropertyId.ScrollbarHorizontalTrackColor, state).AsColor;
-        }
-        
-        public void SetScrollbarHorizontalHandleSize(float value, StyleState state) {
-            SetProperty(new StyleProperty(StylePropertyId.ScrollbarHorizontalHandleSize, value), state);
-        }
-
-        public float GetScrollbarHorizontalHandleSize(StyleState state) {
-            return GetPropertyValueInState(StylePropertyId.ScrollbarHorizontalHandleSize, state).AsFloat;
-        }
-        
-        public void SetScrollbarHorizontalHandleBorderRadius(float value, StyleState state) {
-            SetProperty(new StyleProperty(StylePropertyId.ScrollbarHorizontalHandleBorderRadius, value), state);
-        }
-
-        public float GetScrollbarHorizontalHandleBorderRadius(StyleState state) {
-            return GetPropertyValueInState(StylePropertyId.ScrollbarHorizontalHandleBorderRadius, state).AsFloat;
-        }
-        
-        public void SetScrollbarHorizontalHandleBorderSize(float value, StyleState state) {
-            SetProperty(new StyleProperty(StylePropertyId.ScrollbarHorizontalHandleBorderSize, value), state);
-        }
-
-        public float GetScrollbarHorizontalHandleBorderSize(StyleState state) {
-            return GetPropertyValueInState(StylePropertyId.ScrollbarHorizontalHandleBorderSize, state).AsFloat;
-        }
-        
-        public void SetScrollbarHorizontalHandleBorderColor(UnityEngine.Color value, StyleState state) {
-            SetProperty(new StyleProperty(StylePropertyId.ScrollbarHorizontalHandleBorderColor, value), state);
-        }
-
-        public UnityEngine.Color GetScrollbarHorizontalHandleBorderColor(StyleState state) {
-            return GetPropertyValueInState(StylePropertyId.ScrollbarHorizontalHandleBorderColor, state).AsColor;
-        }
-        
-        public void SetScrollbarHorizontalHandleImage(UnityEngine.Texture2D value, StyleState state) {
-            SetProperty(new StyleProperty(StylePropertyId.ScrollbarHorizontalHandleImage, 0, 0, value), state);
-        }
-
-        public UnityEngine.Texture2D GetScrollbarHorizontalHandleImage(StyleState state) {
-            return GetPropertyValueInState(StylePropertyId.ScrollbarHorizontalHandleImage, state).AsTexture2D;
-        }
-        
-        public void SetScrollbarHorizontalHandleColor(UnityEngine.Color value, StyleState state) {
-            SetProperty(new StyleProperty(StylePropertyId.ScrollbarHorizontalHandleColor, value), state);
-        }
-
-        public UnityEngine.Color GetScrollbarHorizontalHandleColor(StyleState state) {
-            return GetPropertyValueInState(StylePropertyId.ScrollbarHorizontalHandleColor, state).AsColor;
-        }
-        
-        public void SetScrollbarHorizontalIncrementSize(float value, StyleState state) {
-            SetProperty(new StyleProperty(StylePropertyId.ScrollbarHorizontalIncrementSize, value), state);
-        }
-
-        public float GetScrollbarHorizontalIncrementSize(StyleState state) {
-            return GetPropertyValueInState(StylePropertyId.ScrollbarHorizontalIncrementSize, state).AsFloat;
-        }
-        
-        public void SetScrollbarHorizontalIncrementBorderRadius(float value, StyleState state) {
-            SetProperty(new StyleProperty(StylePropertyId.ScrollbarHorizontalIncrementBorderRadius, value), state);
-        }
-
-        public float GetScrollbarHorizontalIncrementBorderRadius(StyleState state) {
-            return GetPropertyValueInState(StylePropertyId.ScrollbarHorizontalIncrementBorderRadius, state).AsFloat;
-        }
-        
-        public void SetScrollbarHorizontalIncrementBorderSize(float value, StyleState state) {
-            SetProperty(new StyleProperty(StylePropertyId.ScrollbarHorizontalIncrementBorderSize, value), state);
-        }
-
-        public float GetScrollbarHorizontalIncrementBorderSize(StyleState state) {
-            return GetPropertyValueInState(StylePropertyId.ScrollbarHorizontalIncrementBorderSize, state).AsFloat;
-        }
-        
-        public void SetScrollbarHorizontalIncrementBorderColor(UnityEngine.Color value, StyleState state) {
-            SetProperty(new StyleProperty(StylePropertyId.ScrollbarHorizontalIncrementBorderColor, value), state);
-        }
-
-        public UnityEngine.Color GetScrollbarHorizontalIncrementBorderColor(StyleState state) {
-            return GetPropertyValueInState(StylePropertyId.ScrollbarHorizontalIncrementBorderColor, state).AsColor;
-        }
-        
-        public void SetScrollbarHorizontalIncrementImage(UnityEngine.Texture2D value, StyleState state) {
-            SetProperty(new StyleProperty(StylePropertyId.ScrollbarHorizontalIncrementImage, 0, 0, value), state);
-        }
-
-        public UnityEngine.Texture2D GetScrollbarHorizontalIncrementImage(StyleState state) {
-            return GetPropertyValueInState(StylePropertyId.ScrollbarHorizontalIncrementImage, state).AsTexture2D;
-        }
-        
-        public void SetScrollbarHorizontalIncrementColor(UnityEngine.Color value, StyleState state) {
-            SetProperty(new StyleProperty(StylePropertyId.ScrollbarHorizontalIncrementColor, value), state);
-        }
-
-        public UnityEngine.Color GetScrollbarHorizontalIncrementColor(StyleState state) {
-            return GetPropertyValueInState(StylePropertyId.ScrollbarHorizontalIncrementColor, state).AsColor;
-        }
-        
-        public void SetScrollbarHorizontalDecrementSize(float value, StyleState state) {
-            SetProperty(new StyleProperty(StylePropertyId.ScrollbarHorizontalDecrementSize, value), state);
-        }
-
-        public float GetScrollbarHorizontalDecrementSize(StyleState state) {
-            return GetPropertyValueInState(StylePropertyId.ScrollbarHorizontalDecrementSize, state).AsFloat;
-        }
-        
-        public void SetScrollbarHorizontalDecrementBorderRadius(float value, StyleState state) {
-            SetProperty(new StyleProperty(StylePropertyId.ScrollbarHorizontalDecrementBorderRadius, value), state);
-        }
-
-        public float GetScrollbarHorizontalDecrementBorderRadius(StyleState state) {
-            return GetPropertyValueInState(StylePropertyId.ScrollbarHorizontalDecrementBorderRadius, state).AsFloat;
-        }
-        
-        public void SetScrollbarHorizontalDecrementBorderSize(float value, StyleState state) {
-            SetProperty(new StyleProperty(StylePropertyId.ScrollbarHorizontalDecrementBorderSize, value), state);
-        }
-
-        public float GetScrollbarHorizontalDecrementBorderSize(StyleState state) {
-            return GetPropertyValueInState(StylePropertyId.ScrollbarHorizontalDecrementBorderSize, state).AsFloat;
-        }
-        
-        public void SetScrollbarHorizontalDecrementBorderColor(UnityEngine.Color value, StyleState state) {
-            SetProperty(new StyleProperty(StylePropertyId.ScrollbarHorizontalDecrementBorderColor, value), state);
-        }
-
-        public UnityEngine.Color GetScrollbarHorizontalDecrementBorderColor(StyleState state) {
-            return GetPropertyValueInState(StylePropertyId.ScrollbarHorizontalDecrementBorderColor, state).AsColor;
-        }
-        
-        public void SetScrollbarHorizontalDecrementImage(UnityEngine.Texture2D value, StyleState state) {
-            SetProperty(new StyleProperty(StylePropertyId.ScrollbarHorizontalDecrementImage, 0, 0, value), state);
-        }
-
-        public UnityEngine.Texture2D GetScrollbarHorizontalDecrementImage(StyleState state) {
-            return GetPropertyValueInState(StylePropertyId.ScrollbarHorizontalDecrementImage, state).AsTexture2D;
-        }
-        
-        public void SetScrollbarHorizontalDecrementColor(UnityEngine.Color value, StyleState state) {
-            SetProperty(new StyleProperty(StylePropertyId.ScrollbarHorizontalDecrementColor, value), state);
-        }
-
-        public UnityEngine.Color GetScrollbarHorizontalDecrementColor(StyleState state) {
-            return GetPropertyValueInState(StylePropertyId.ScrollbarHorizontalDecrementColor, state).AsColor;
+        public UnityEngine.Color GetScrollbarColor(StyleState state) {
+            return GetPropertyValueInState(StylePropertyId.ScrollbarColor, state).AsColor;
         }
         
 
@@ -4654,34 +3419,16 @@ namespace UIForia.Rendering {
 					 return new StyleProperty(StylePropertyId.BorderColor, BorderColor);
 				case StylePropertyId.BackgroundColor:
 					 return new StyleProperty(StylePropertyId.BackgroundColor, BackgroundColor);
-				case StylePropertyId.BackgroundColorSecondary:
-					 return new StyleProperty(StylePropertyId.BackgroundColorSecondary, BackgroundColorSecondary);
 				case StylePropertyId.BackgroundImage:
 					 return new StyleProperty(StylePropertyId.BackgroundImage, 0, 0, BackgroundImage);
-				case StylePropertyId.BackgroundImage1:
-					 return new StyleProperty(StylePropertyId.BackgroundImage1, 0, 0, BackgroundImage1);
-				case StylePropertyId.BackgroundImage2:
-					 return new StyleProperty(StylePropertyId.BackgroundImage2, 0, 0, BackgroundImage2);
 				case StylePropertyId.BackgroundGradientType:
 					 return new StyleProperty(StylePropertyId.BackgroundGradientType, (int)BackgroundGradientType);
 				case StylePropertyId.BackgroundGradientAxis:
 					 return new StyleProperty(StylePropertyId.BackgroundGradientAxis, (int)BackgroundGradientAxis);
 				case StylePropertyId.BackgroundGradientStart:
 					 return new StyleProperty(StylePropertyId.BackgroundGradientStart, BackgroundGradientStart);
-				case StylePropertyId.BackgroundFillRotation:
-					 return new StyleProperty(StylePropertyId.BackgroundFillRotation, BackgroundFillRotation);
-				case StylePropertyId.BackgroundFillType:
-					 return new StyleProperty(StylePropertyId.BackgroundFillType, (int)BackgroundFillType);
-				case StylePropertyId.BackgroundShapeType:
-					 return new StyleProperty(StylePropertyId.BackgroundShapeType, (int)BackgroundShapeType);
-				case StylePropertyId.BackgroundFillOffsetX:
-					 return new StyleProperty(StylePropertyId.BackgroundFillOffsetX, BackgroundFillOffsetX);
-				case StylePropertyId.BackgroundFillOffsetY:
-					 return new StyleProperty(StylePropertyId.BackgroundFillOffsetY, BackgroundFillOffsetY);
-				case StylePropertyId.BackgroundFillScaleX:
-					 return new StyleProperty(StylePropertyId.BackgroundFillScaleX, BackgroundFillScaleX);
-				case StylePropertyId.BackgroundFillScaleY:
-					 return new StyleProperty(StylePropertyId.BackgroundFillScaleY, BackgroundFillScaleY);
+				case StylePropertyId.Painter:
+					 return new StyleProperty(StylePropertyId.Painter, (int)Painter);
 				case StylePropertyId.Opacity:
 					 return new StyleProperty(StylePropertyId.Opacity, Opacity);
 				case StylePropertyId.Cursor:
@@ -4792,6 +3539,32 @@ namespace UIForia.Rendering {
 					 return new StyleProperty(StylePropertyId.TextAlignment, (int)TextAlignment);
 				case StylePropertyId.TextTransform:
 					 return new StyleProperty(StylePropertyId.TextTransform, (int)TextTransform);
+				case StylePropertyId.TextOutlineWidth:
+					 return new StyleProperty(StylePropertyId.TextOutlineWidth, TextOutlineWidth);
+				case StylePropertyId.TextOutlineColor:
+					 return new StyleProperty(StylePropertyId.TextOutlineColor, TextOutlineColor);
+				case StylePropertyId.TextGlowColor:
+					 return new StyleProperty(StylePropertyId.TextGlowColor, TextGlowColor);
+				case StylePropertyId.TextGlowOffset:
+					 return new StyleProperty(StylePropertyId.TextGlowOffset, TextGlowOffset);
+				case StylePropertyId.TextGlowInner:
+					 return new StyleProperty(StylePropertyId.TextGlowInner, TextGlowInner);
+				case StylePropertyId.TextGlowOuter:
+					 return new StyleProperty(StylePropertyId.TextGlowOuter, TextGlowOuter);
+				case StylePropertyId.TextGlowPower:
+					 return new StyleProperty(StylePropertyId.TextGlowPower, TextGlowPower);
+				case StylePropertyId.TextShadowColor:
+					 return new StyleProperty(StylePropertyId.TextShadowColor, TextShadowColor);
+				case StylePropertyId.TextShadowOffsetX:
+					 return new StyleProperty(StylePropertyId.TextShadowOffsetX, TextShadowOffsetX);
+				case StylePropertyId.TextShadowOffsetY:
+					 return new StyleProperty(StylePropertyId.TextShadowOffsetY, TextShadowOffsetY);
+				case StylePropertyId.TextShadowIntensity:
+					 return new StyleProperty(StylePropertyId.TextShadowIntensity, TextShadowIntensity);
+				case StylePropertyId.TextShadowSoftness:
+					 return new StyleProperty(StylePropertyId.TextShadowSoftness, TextShadowSoftness);
+				case StylePropertyId.TextShadowType:
+					 return new StyleProperty(StylePropertyId.TextShadowType, (int)TextShadowType);
 				case StylePropertyId.AnchorTop:
 					 return new StyleProperty(StylePropertyId.AnchorTop, AnchorTop);
 				case StylePropertyId.AnchorRight:
@@ -4830,110 +3603,24 @@ namespace UIForia.Rendering {
 					 return new StyleProperty(StylePropertyId.RenderLayerOffset, RenderLayerOffset);
 				case StylePropertyId.RenderLayer:
 					 return new StyleProperty(StylePropertyId.RenderLayer, (int)RenderLayer);
-				case StylePropertyId.ScrollbarVerticalAttachment:
-					 return new StyleProperty(StylePropertyId.ScrollbarVerticalAttachment, (int)ScrollbarVerticalAttachment);
-				case StylePropertyId.ScrollbarVerticalButtonPlacement:
-					 return new StyleProperty(StylePropertyId.ScrollbarVerticalButtonPlacement, (int)ScrollbarVerticalButtonPlacement);
-				case StylePropertyId.ScrollbarVerticalTrackSize:
-					 return new StyleProperty(StylePropertyId.ScrollbarVerticalTrackSize, ScrollbarVerticalTrackSize);
-				case StylePropertyId.ScrollbarVerticalTrackBorderRadius:
-					 return new StyleProperty(StylePropertyId.ScrollbarVerticalTrackBorderRadius, ScrollbarVerticalTrackBorderRadius);
-				case StylePropertyId.ScrollbarVerticalTrackBorderSize:
-					 return new StyleProperty(StylePropertyId.ScrollbarVerticalTrackBorderSize, ScrollbarVerticalTrackBorderSize);
-				case StylePropertyId.ScrollbarVerticalTrackBorderColor:
-					 return new StyleProperty(StylePropertyId.ScrollbarVerticalTrackBorderColor, ScrollbarVerticalTrackBorderColor);
-				case StylePropertyId.ScrollbarVerticalTrackImage:
-					 return new StyleProperty(StylePropertyId.ScrollbarVerticalTrackImage, 0, 0, ScrollbarVerticalTrackImage);
-				case StylePropertyId.ScrollbarVerticalTrackColor:
-					 return new StyleProperty(StylePropertyId.ScrollbarVerticalTrackColor, ScrollbarVerticalTrackColor);
-				case StylePropertyId.ScrollbarVerticalHandleSize:
-					 return new StyleProperty(StylePropertyId.ScrollbarVerticalHandleSize, ScrollbarVerticalHandleSize);
-				case StylePropertyId.ScrollbarVerticalHandleBorderRadius:
-					 return new StyleProperty(StylePropertyId.ScrollbarVerticalHandleBorderRadius, ScrollbarVerticalHandleBorderRadius);
-				case StylePropertyId.ScrollbarVerticalHandleBorderSize:
-					 return new StyleProperty(StylePropertyId.ScrollbarVerticalHandleBorderSize, ScrollbarVerticalHandleBorderSize);
-				case StylePropertyId.ScrollbarVerticalHandleBorderColor:
-					 return new StyleProperty(StylePropertyId.ScrollbarVerticalHandleBorderColor, ScrollbarVerticalHandleBorderColor);
-				case StylePropertyId.ScrollbarVerticalHandleImage:
-					 return new StyleProperty(StylePropertyId.ScrollbarVerticalHandleImage, 0, 0, ScrollbarVerticalHandleImage);
-				case StylePropertyId.ScrollbarVerticalHandleColor:
-					 return new StyleProperty(StylePropertyId.ScrollbarVerticalHandleColor, ScrollbarVerticalHandleColor);
-				case StylePropertyId.ScrollbarVerticalIncrementSize:
-					 return new StyleProperty(StylePropertyId.ScrollbarVerticalIncrementSize, ScrollbarVerticalIncrementSize);
-				case StylePropertyId.ScrollbarVerticalIncrementBorderRadius:
-					 return new StyleProperty(StylePropertyId.ScrollbarVerticalIncrementBorderRadius, ScrollbarVerticalIncrementBorderRadius);
-				case StylePropertyId.ScrollbarVerticalIncrementBorderSize:
-					 return new StyleProperty(StylePropertyId.ScrollbarVerticalIncrementBorderSize, ScrollbarVerticalIncrementBorderSize);
-				case StylePropertyId.ScrollbarVerticalIncrementBorderColor:
-					 return new StyleProperty(StylePropertyId.ScrollbarVerticalIncrementBorderColor, ScrollbarVerticalIncrementBorderColor);
-				case StylePropertyId.ScrollbarVerticalIncrementImage:
-					 return new StyleProperty(StylePropertyId.ScrollbarVerticalIncrementImage, 0, 0, ScrollbarVerticalIncrementImage);
-				case StylePropertyId.ScrollbarVerticalIncrementColor:
-					 return new StyleProperty(StylePropertyId.ScrollbarVerticalIncrementColor, ScrollbarVerticalIncrementColor);
-				case StylePropertyId.ScrollbarVerticalDecrementSize:
-					 return new StyleProperty(StylePropertyId.ScrollbarVerticalDecrementSize, ScrollbarVerticalDecrementSize);
-				case StylePropertyId.ScrollbarVerticalDecrementBorderRadius:
-					 return new StyleProperty(StylePropertyId.ScrollbarVerticalDecrementBorderRadius, ScrollbarVerticalDecrementBorderRadius);
-				case StylePropertyId.ScrollbarVerticalDecrementBorderSize:
-					 return new StyleProperty(StylePropertyId.ScrollbarVerticalDecrementBorderSize, ScrollbarVerticalDecrementBorderSize);
-				case StylePropertyId.ScrollbarVerticalDecrementBorderColor:
-					 return new StyleProperty(StylePropertyId.ScrollbarVerticalDecrementBorderColor, ScrollbarVerticalDecrementBorderColor);
-				case StylePropertyId.ScrollbarVerticalDecrementImage:
-					 return new StyleProperty(StylePropertyId.ScrollbarVerticalDecrementImage, 0, 0, ScrollbarVerticalDecrementImage);
-				case StylePropertyId.ScrollbarVerticalDecrementColor:
-					 return new StyleProperty(StylePropertyId.ScrollbarVerticalDecrementColor, ScrollbarVerticalDecrementColor);
-				case StylePropertyId.ScrollbarHorizontalAttachment:
-					 return new StyleProperty(StylePropertyId.ScrollbarHorizontalAttachment, (int)ScrollbarHorizontalAttachment);
-				case StylePropertyId.ScrollbarHorizontalButtonPlacement:
-					 return new StyleProperty(StylePropertyId.ScrollbarHorizontalButtonPlacement, (int)ScrollbarHorizontalButtonPlacement);
-				case StylePropertyId.ScrollbarHorizontalTrackSize:
-					 return new StyleProperty(StylePropertyId.ScrollbarHorizontalTrackSize, ScrollbarHorizontalTrackSize);
-				case StylePropertyId.ScrollbarHorizontalTrackBorderRadius:
-					 return new StyleProperty(StylePropertyId.ScrollbarHorizontalTrackBorderRadius, ScrollbarHorizontalTrackBorderRadius);
-				case StylePropertyId.ScrollbarHorizontalTrackBorderSize:
-					 return new StyleProperty(StylePropertyId.ScrollbarHorizontalTrackBorderSize, ScrollbarHorizontalTrackBorderSize);
-				case StylePropertyId.ScrollbarHorizontalTrackBorderColor:
-					 return new StyleProperty(StylePropertyId.ScrollbarHorizontalTrackBorderColor, ScrollbarHorizontalTrackBorderColor);
-				case StylePropertyId.ScrollbarHorizontalTrackImage:
-					 return new StyleProperty(StylePropertyId.ScrollbarHorizontalTrackImage, 0, 0, ScrollbarHorizontalTrackImage);
-				case StylePropertyId.ScrollbarHorizontalTrackColor:
-					 return new StyleProperty(StylePropertyId.ScrollbarHorizontalTrackColor, ScrollbarHorizontalTrackColor);
-				case StylePropertyId.ScrollbarHorizontalHandleSize:
-					 return new StyleProperty(StylePropertyId.ScrollbarHorizontalHandleSize, ScrollbarHorizontalHandleSize);
-				case StylePropertyId.ScrollbarHorizontalHandleBorderRadius:
-					 return new StyleProperty(StylePropertyId.ScrollbarHorizontalHandleBorderRadius, ScrollbarHorizontalHandleBorderRadius);
-				case StylePropertyId.ScrollbarHorizontalHandleBorderSize:
-					 return new StyleProperty(StylePropertyId.ScrollbarHorizontalHandleBorderSize, ScrollbarHorizontalHandleBorderSize);
-				case StylePropertyId.ScrollbarHorizontalHandleBorderColor:
-					 return new StyleProperty(StylePropertyId.ScrollbarHorizontalHandleBorderColor, ScrollbarHorizontalHandleBorderColor);
-				case StylePropertyId.ScrollbarHorizontalHandleImage:
-					 return new StyleProperty(StylePropertyId.ScrollbarHorizontalHandleImage, 0, 0, ScrollbarHorizontalHandleImage);
-				case StylePropertyId.ScrollbarHorizontalHandleColor:
-					 return new StyleProperty(StylePropertyId.ScrollbarHorizontalHandleColor, ScrollbarHorizontalHandleColor);
-				case StylePropertyId.ScrollbarHorizontalIncrementSize:
-					 return new StyleProperty(StylePropertyId.ScrollbarHorizontalIncrementSize, ScrollbarHorizontalIncrementSize);
-				case StylePropertyId.ScrollbarHorizontalIncrementBorderRadius:
-					 return new StyleProperty(StylePropertyId.ScrollbarHorizontalIncrementBorderRadius, ScrollbarHorizontalIncrementBorderRadius);
-				case StylePropertyId.ScrollbarHorizontalIncrementBorderSize:
-					 return new StyleProperty(StylePropertyId.ScrollbarHorizontalIncrementBorderSize, ScrollbarHorizontalIncrementBorderSize);
-				case StylePropertyId.ScrollbarHorizontalIncrementBorderColor:
-					 return new StyleProperty(StylePropertyId.ScrollbarHorizontalIncrementBorderColor, ScrollbarHorizontalIncrementBorderColor);
-				case StylePropertyId.ScrollbarHorizontalIncrementImage:
-					 return new StyleProperty(StylePropertyId.ScrollbarHorizontalIncrementImage, 0, 0, ScrollbarHorizontalIncrementImage);
-				case StylePropertyId.ScrollbarHorizontalIncrementColor:
-					 return new StyleProperty(StylePropertyId.ScrollbarHorizontalIncrementColor, ScrollbarHorizontalIncrementColor);
-				case StylePropertyId.ScrollbarHorizontalDecrementSize:
-					 return new StyleProperty(StylePropertyId.ScrollbarHorizontalDecrementSize, ScrollbarHorizontalDecrementSize);
-				case StylePropertyId.ScrollbarHorizontalDecrementBorderRadius:
-					 return new StyleProperty(StylePropertyId.ScrollbarHorizontalDecrementBorderRadius, ScrollbarHorizontalDecrementBorderRadius);
-				case StylePropertyId.ScrollbarHorizontalDecrementBorderSize:
-					 return new StyleProperty(StylePropertyId.ScrollbarHorizontalDecrementBorderSize, ScrollbarHorizontalDecrementBorderSize);
-				case StylePropertyId.ScrollbarHorizontalDecrementBorderColor:
-					 return new StyleProperty(StylePropertyId.ScrollbarHorizontalDecrementBorderColor, ScrollbarHorizontalDecrementBorderColor);
-				case StylePropertyId.ScrollbarHorizontalDecrementImage:
-					 return new StyleProperty(StylePropertyId.ScrollbarHorizontalDecrementImage, 0, 0, ScrollbarHorizontalDecrementImage);
-				case StylePropertyId.ScrollbarHorizontalDecrementColor:
-					 return new StyleProperty(StylePropertyId.ScrollbarHorizontalDecrementColor, ScrollbarHorizontalDecrementColor);
+				case StylePropertyId.ShadowType:
+					 return new StyleProperty(StylePropertyId.ShadowType, (int)ShadowType);
+				case StylePropertyId.ShadowOffsetX:
+					 return new StyleProperty(StylePropertyId.ShadowOffsetX, ShadowOffsetX);
+				case StylePropertyId.ShadowOffsetY:
+					 return new StyleProperty(StylePropertyId.ShadowOffsetY, ShadowOffsetY);
+				case StylePropertyId.ShadowSoftnessX:
+					 return new StyleProperty(StylePropertyId.ShadowSoftnessX, ShadowSoftnessX);
+				case StylePropertyId.ShadowSoftnessY:
+					 return new StyleProperty(StylePropertyId.ShadowSoftnessY, ShadowSoftnessY);
+				case StylePropertyId.ShadowIntensity:
+					 return new StyleProperty(StylePropertyId.ShadowIntensity, ShadowIntensity);
+				case StylePropertyId.Scrollbar:
+					 return new StyleProperty(StylePropertyId.Scrollbar, 0, 0, Scrollbar);
+				case StylePropertyId.ScrollbarSize:
+					 return new StyleProperty(StylePropertyId.ScrollbarSize, ScrollbarSize);
+				case StylePropertyId.ScrollbarColor:
+					 return new StyleProperty(StylePropertyId.ScrollbarColor, ScrollbarColor);
 				default: throw new System.ArgumentOutOfRangeException(nameof(propertyId), propertyId, null);
 				}  
         }
@@ -4947,13 +3634,7 @@ namespace UIForia.Rendering {
     
                     case StylePropertyId.BorderColor: return true;
                     case StylePropertyId.BackgroundColor: return true;
-                    case StylePropertyId.BackgroundColorSecondary: return true;
                     case StylePropertyId.BackgroundGradientStart: return true;
-                    case StylePropertyId.BackgroundFillRotation: return true;
-                    case StylePropertyId.BackgroundFillOffsetX: return true;
-                    case StylePropertyId.BackgroundFillOffsetY: return true;
-                    case StylePropertyId.BackgroundFillScaleX: return true;
-                    case StylePropertyId.BackgroundFillScaleY: return true;
                     case StylePropertyId.Opacity: return true;
                     case StylePropertyId.FlexItemOrder: return true;
                     case StylePropertyId.FlexItemGrow: return true;
@@ -4984,6 +3665,18 @@ namespace UIForia.Rendering {
                     case StylePropertyId.PaddingLeft: return true;
                     case StylePropertyId.TextColor: return true;
                     case StylePropertyId.TextFontSize: return true;
+                    case StylePropertyId.TextOutlineWidth: return true;
+                    case StylePropertyId.TextOutlineColor: return true;
+                    case StylePropertyId.TextGlowColor: return true;
+                    case StylePropertyId.TextGlowOffset: return true;
+                    case StylePropertyId.TextGlowInner: return true;
+                    case StylePropertyId.TextGlowOuter: return true;
+                    case StylePropertyId.TextGlowPower: return true;
+                    case StylePropertyId.TextShadowColor: return true;
+                    case StylePropertyId.TextShadowOffsetX: return true;
+                    case StylePropertyId.TextShadowOffsetY: return true;
+                    case StylePropertyId.TextShadowIntensity: return true;
+                    case StylePropertyId.TextShadowSoftness: return true;
                     case StylePropertyId.AnchorTop: return true;
                     case StylePropertyId.AnchorRight: return true;
                     case StylePropertyId.AnchorBottom: return true;
@@ -4998,6 +3691,12 @@ namespace UIForia.Rendering {
                     case StylePropertyId.ZIndex: return true;
                     case StylePropertyId.RenderLayerOffset: return true;
                     case StylePropertyId.RenderLayer: return true;
+                    case StylePropertyId.ShadowOffsetX: return true;
+                    case StylePropertyId.ShadowOffsetY: return true;
+                    case StylePropertyId.ShadowSoftnessX: return true;
+                    case StylePropertyId.ShadowSoftnessY: return true;
+                    case StylePropertyId.ShadowIntensity: return true;
+                    case StylePropertyId.ScrollbarColor: return true;
 
                 }
     
@@ -5013,6 +3712,19 @@ namespace UIForia.Rendering {
                     case StylePropertyId.TextFontStyle: return true;
                     case StylePropertyId.TextAlignment: return true;
                     case StylePropertyId.TextTransform: return true;
+                    case StylePropertyId.TextOutlineWidth: return true;
+                    case StylePropertyId.TextOutlineColor: return true;
+                    case StylePropertyId.TextGlowColor: return true;
+                    case StylePropertyId.TextGlowOffset: return true;
+                    case StylePropertyId.TextGlowInner: return true;
+                    case StylePropertyId.TextGlowOuter: return true;
+                    case StylePropertyId.TextGlowPower: return true;
+                    case StylePropertyId.TextShadowColor: return true;
+                    case StylePropertyId.TextShadowOffsetX: return true;
+                    case StylePropertyId.TextShadowOffsetY: return true;
+                    case StylePropertyId.TextShadowIntensity: return true;
+                    case StylePropertyId.TextShadowSoftness: return true;
+                    case StylePropertyId.TextShadowType: return true;
 
             }
 

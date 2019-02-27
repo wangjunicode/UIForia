@@ -1,3 +1,4 @@
+using System;
 using NUnit.Framework;
 using UIForia;
 using UIForia.Compilers.Style;
@@ -598,7 +599,7 @@ style border5 {
         Assert.AreEqual(5, styleGroup.Length);
 
         Assert.AreEqual(new UIFixedLength(1), styleGroup[0].groups[0].normal.BorderTop);
-        Assert.AreEqual(new UIFixedLength(2, UIFixedUnit.Percent), styleGroup[0].groups[0].normal.BorderRight);
+        Assert.AreEqual(new UIFixedLength(0.02f, UIFixedUnit.Percent), styleGroup[0].groups[0].normal.BorderRight);
         Assert.AreEqual(new UIFixedLength(3, UIFixedUnit.ViewportWidth), styleGroup[0].groups[0].normal.BorderBottom);
         Assert.AreEqual(new UIFixedLength(4, UIFixedUnit.Em), styleGroup[0].groups[0].normal.BorderLeft);
 
@@ -608,9 +609,9 @@ style border5 {
         Assert.AreEqual(new UIFixedLength(20), styleGroup[1].groups[0].normal.BorderLeft);
 
         Assert.AreEqual(new UIFixedLength(1), styleGroup[2].groups[0].normal.BorderTop);
-        Assert.AreEqual(new UIFixedLength(2, UIFixedUnit.Percent), styleGroup[2].groups[0].normal.BorderRight);
+        Assert.AreEqual(new UIFixedLength(0.02f, UIFixedUnit.Percent), styleGroup[2].groups[0].normal.BorderRight);
         Assert.AreEqual(new UIFixedLength(1), styleGroup[2].groups[0].normal.BorderBottom);
-        Assert.AreEqual(new UIFixedLength(2, UIFixedUnit.Percent), styleGroup[2].groups[0].normal.BorderLeft);
+        Assert.AreEqual(new UIFixedLength(0.02f, UIFixedUnit.Percent), styleGroup[2].groups[0].normal.BorderLeft);
 
         Assert.AreEqual(new UIFixedLength(5), styleGroup[3].groups[0].normal.BorderTop);
         Assert.AreEqual(new UIFixedLength(5), styleGroup[3].groups[0].normal.BorderRight);
@@ -660,7 +661,7 @@ style border5 {
         Assert.AreEqual(5, styleGroup.Length);
 
         Assert.AreEqual(new UIFixedLength(1), styleGroup[0].groups[0].normal.BorderRadiusTopLeft);
-        Assert.AreEqual(new UIFixedLength(2, UIFixedUnit.Percent), styleGroup[0].groups[0].normal.BorderRadiusTopRight);
+        Assert.AreEqual(new UIFixedLength(0.02f, UIFixedUnit.Percent), styleGroup[0].groups[0].normal.BorderRadiusTopRight);
         Assert.AreEqual(new UIFixedLength(3, UIFixedUnit.ViewportWidth), styleGroup[0].groups[0].normal.BorderRadiusBottomRight);
         Assert.AreEqual(new UIFixedLength(4, UIFixedUnit.Em), styleGroup[0].groups[0].normal.BorderRadiusBottomLeft);
 
@@ -670,9 +671,9 @@ style border5 {
         Assert.AreEqual(new UIFixedLength(20), styleGroup[1].groups[0].normal.BorderRadiusBottomLeft);
 
         Assert.AreEqual(new UIFixedLength(1), styleGroup[2].groups[0].normal.BorderRadiusTopLeft);
-        Assert.AreEqual(new UIFixedLength(2, UIFixedUnit.Percent), styleGroup[2].groups[0].normal.BorderRadiusTopRight);
+        Assert.AreEqual(new UIFixedLength(0.02f, UIFixedUnit.Percent), styleGroup[2].groups[0].normal.BorderRadiusTopRight);
         Assert.AreEqual(new UIFixedLength(1), styleGroup[2].groups[0].normal.BorderRadiusBottomRight);
-        Assert.AreEqual(new UIFixedLength(2, UIFixedUnit.Percent), styleGroup[2].groups[0].normal.BorderRadiusBottomLeft);
+        Assert.AreEqual(new UIFixedLength(0.02f, UIFixedUnit.Percent), styleGroup[2].groups[0].normal.BorderRadiusBottomLeft);
 
         Assert.AreEqual(new UIFixedLength(5), styleGroup[3].groups[0].normal.BorderRadiusTopLeft);
         Assert.AreEqual(new UIFixedLength(5), styleGroup[3].groups[0].normal.BorderRadiusTopRight);
@@ -755,10 +756,10 @@ style transBeh4 { TransformBehaviorY = AnchorMaxOffset; }
         Assert.AreEqual(0, styleGroup[2].groups[0].normal.TransformScaleX);
         Assert.AreEqual(4, styleGroup[2].groups[0].normal.TransformScaleY);
 
-        Assert.AreEqual(new UIFixedLength(10, UIFixedUnit.Percent), styleGroup[3].groups[0].normal.TransformPivotX);
+        Assert.AreEqual(new UIFixedLength(0.1f, UIFixedUnit.Percent), styleGroup[3].groups[0].normal.TransformPivotX);
         Assert.AreEqual(new UIFixedLength(10), styleGroup[3].groups[0].normal.TransformPivotY);
 
-        Assert.AreEqual(new UIFixedLength(10, UIFixedUnit.Percent), styleGroup[4].groups[0].normal.TransformPivotX);
+        Assert.AreEqual(new UIFixedLength(0.1f, UIFixedUnit.Percent), styleGroup[4].groups[0].normal.TransformPivotX);
         Assert.AreEqual(UIFixedLength.Unset, styleGroup[4].groups[0].normal.TransformPivotY);
 
         Assert.AreEqual(UIFixedLength.Unset, styleGroup[5].groups[0].normal.TransformPivotX);
@@ -845,7 +846,7 @@ style anchoring {
         Assert.AreEqual(LayoutBehavior.Ignored, styleGroup[0].groups[0].normal.LayoutBehavior);
         Assert.AreEqual(AnchorTarget.Viewport, styleGroup[0].groups[0].normal.AnchorTarget);
         Assert.AreEqual(new UIFixedLength(10), styleGroup[0].groups[0].normal.AnchorTop);
-        Assert.AreEqual(new UIFixedLength(20, UIFixedUnit.Percent), styleGroup[0].groups[0].normal.AnchorRight);
+        Assert.AreEqual(new UIFixedLength(0.2f, UIFixedUnit.Percent), styleGroup[0].groups[0].normal.AnchorRight);
         Assert.AreEqual(new UIFixedLength(400), styleGroup[0].groups[0].normal.AnchorBottom);
         Assert.AreEqual(new UIFixedLength(90, UIFixedUnit.ViewportHeight), styleGroup[0].groups[0].normal.AnchorLeft);
         Assert.AreEqual(3, styleGroup[0].groups[0].normal.ZIndex);
@@ -903,5 +904,27 @@ style xyz {
         Assert.AreEqual(Color.red, styleGroup[0].groups[0].normal.BackgroundColor);
     }
     
+
+    [Test]
+    public void ParseASeeminglyBrokenStyle() {
+
+        try {
+            StyleParser2.Parse(@"
+style s { 
+    PreferredSize = 400px;
+    BackgroundColor = blue;
+    BackgroundImage = url(""Images/backgroundimg"")
+    BorderRadius = 0.35%;
+    Border = 12px;
+    BorderColor = green;
+}
+            ".Trim());
+            Assert.Fail("This should not have parsed!");
+        }
+        catch (ParseException e) {
+            Console.Write(e);
+            throw;
+        }
+    }
     
 }

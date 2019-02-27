@@ -19,21 +19,12 @@ namespace UIForia.Rendering {
 		public const Overflow OverflowY = UIForia.Rendering.Overflow.None;
 		public static readonly Color BorderColor = new Color(-1f, -1f, -1f, -1f);
 		public static readonly Color BackgroundColor = new Color(-1f, -1f, -1f, -1f);
-		public static readonly Color BackgroundColorSecondary = new Color(-1f, -1f, -1f, -1f);
 		public static readonly Texture2D BackgroundImage = null;
-		public static readonly Texture2D BackgroundImage1 = null;
-		public static readonly Texture2D BackgroundImage2 = null;
 		public const GradientType BackgroundGradientType = Shapes2D.GradientType.Linear;
 		public const GradientAxis BackgroundGradientAxis = Shapes2D.GradientAxis.Horizontal;
-		public const float BackgroundGradientStart = 0;
-		public const float BackgroundFillRotation = 0;
-		public const BackgroundFillType BackgroundFillType = UIForia.Rendering.BackgroundFillType.Normal;
-		public const BackgroundShapeType BackgroundShapeType = UIForia.Rendering.BackgroundShapeType.Rectangle;
-		public const float BackgroundFillOffsetX = 0;
-		public const float BackgroundFillOffsetY = 0;
-		public const float BackgroundFillScaleX = 1;
-		public const float BackgroundFillScaleY = 1;
-		public const float Opacity = 1;
+		public const float BackgroundGradientStart = 0f;
+		public const BackgroundFillType Painter = UIForia.Rendering.BackgroundFillType.Normal;
+		public const float Opacity = 1f;
 		public static readonly CursorStyle Cursor = null;
 		public const Visibility Visibility = UIForia.Rendering.Visibility.Visible;
 		public const int FlexItemOrder = 0;
@@ -56,8 +47,8 @@ namespace UIForia.Rendering {
 		public static readonly IReadOnlyList<UIForia.Layout.LayoutTypes.GridTrackSize> GridLayoutRowTemplate = ListPool<GridTrackSize>.Empty;
 		public static readonly GridTrackSize GridLayoutMainAxisAutoSize = new GridTrackSize(1, GridTemplateUnit.MaxContent);
 		public static readonly GridTrackSize GridLayoutCrossAxisAutoSize = new GridTrackSize(1, GridTemplateUnit.FractionalRemaining);
-		public const float GridLayoutColGap = 0;
-		public const float GridLayoutRowGap = 0;
+		public const float GridLayoutColGap = 0f;
+		public const float GridLayoutRowGap = 0f;
 		public const GridAxisAlignment GridLayoutColAlignment = UIForia.Layout.GridAxisAlignment.Grow;
 		public const GridAxisAlignment GridLayoutRowAlignment = UIForia.Layout.GridAxisAlignment.Grow;
 		public static readonly UIMeasurement MinWidth = new UIMeasurement(0, UIMeasurementUnit.Pixel);
@@ -88,6 +79,19 @@ namespace UIForia.Rendering {
 		public const FontStyle TextFontStyle = UIForia.Text.FontStyle.Normal;
 		public const TextAlignment TextAlignment = UIForia.Text.TextAlignment.Left;
 		public const TextTransform TextTransform = UIForia.Text.TextTransform.None;
+		public const float TextOutlineWidth = 0f;
+		public static readonly Color TextOutlineColor = new Color(0f, 0f, 0f, 1f);
+		public static readonly Color TextGlowColor = new Color(-1f, -1f, -1f, -1f);
+		public const float TextGlowOffset = 0f;
+		public const float TextGlowInner = 0f;
+		public const float TextGlowOuter = 0f;
+		public const float TextGlowPower = 0f;
+		public static readonly Color TextShadowColor = new Color(-1f, -1f, -1f, -1f);
+		public const float TextShadowOffsetX = 0f;
+		public const float TextShadowOffsetY = 0f;
+		public const float TextShadowIntensity = 0.5f;
+		public const float TextShadowSoftness = 0.5f;
+		public const ShadowType TextShadowType = UIForia.Rendering.ShadowType.Unset;
 		public static readonly UIFixedLength AnchorTop = new UIFixedLength(0, UIFixedUnit.Percent);
 		public static readonly UIFixedLength AnchorRight = new UIFixedLength(1, UIFixedUnit.Percent);
 		public static readonly UIFixedLength AnchorBottom = new UIFixedLength(1, UIFixedUnit.Percent);
@@ -97,9 +101,9 @@ namespace UIForia.Rendering {
 		public static readonly TransformOffset TransformPositionY = new TransformOffset(0, TransformUnit.Pixel);
 		public static readonly UIFixedLength TransformPivotX = new UIFixedLength(0, UIFixedUnit.Pixel);
 		public static readonly UIFixedLength TransformPivotY = new UIFixedLength(0, UIFixedUnit.Pixel);
-		public const float TransformScaleX = 1;
-		public const float TransformScaleY = 1;
-		public const float TransformRotation = 0;
+		public const float TransformScaleX = 1f;
+		public const float TransformScaleY = 1f;
+		public const float TransformRotation = 0f;
 		public const TransformBehavior TransformBehaviorX = UIForia.Rendering.TransformBehavior.LayoutOffset;
 		public const TransformBehavior TransformBehaviorY = UIForia.Rendering.TransformBehavior.LayoutOffset;
 		public const LayoutType LayoutType = UIForia.Rendering.LayoutType.Flex;
@@ -107,58 +111,15 @@ namespace UIForia.Rendering {
 		public const int ZIndex = 0;
 		public const int RenderLayerOffset = 0;
 		public const RenderLayer RenderLayer = UIForia.Rendering.RenderLayer.Default;
-		public const VerticalScrollbarAttachment ScrollbarVerticalAttachment = UIForia.Rendering.VerticalScrollbarAttachment.Right;
-		public const ScrollbarButtonPlacement ScrollbarVerticalButtonPlacement = UIForia.Rendering.ScrollbarButtonPlacement.Hidden;
-		public const float ScrollbarVerticalTrackSize = 10;
-		public const float ScrollbarVerticalTrackBorderRadius = 0;
-		public const float ScrollbarVerticalTrackBorderSize = 0;
-		public static readonly Color ScrollbarVerticalTrackBorderColor = new Color(-1f, -1f, -1f, -1f);
-		public static readonly Texture2D ScrollbarVerticalTrackImage = null;
-		public static readonly Color ScrollbarVerticalTrackColor = new Color(0.5f, 0.5f, 0.5f, 1f);
-		public const float ScrollbarVerticalHandleSize = 10;
-		public const float ScrollbarVerticalHandleBorderRadius = 0;
-		public const float ScrollbarVerticalHandleBorderSize = 0;
-		public static readonly Color ScrollbarVerticalHandleBorderColor = new Color(-1f, -1f, -1f, -1f);
-		public static readonly Texture2D ScrollbarVerticalHandleImage = null;
-		public static readonly Color ScrollbarVerticalHandleColor = new Color(0.5f, 0.5f, 0.5f, 1f);
-		public const float ScrollbarVerticalIncrementSize = 10;
-		public const float ScrollbarVerticalIncrementBorderRadius = 0;
-		public const float ScrollbarVerticalIncrementBorderSize = 0;
-		public static readonly Color ScrollbarVerticalIncrementBorderColor = new Color(-1f, -1f, -1f, -1f);
-		public static readonly Texture2D ScrollbarVerticalIncrementImage = null;
-		public static readonly Color ScrollbarVerticalIncrementColor = new Color(0.5f, 0.5f, 0.5f, 1f);
-		public const float ScrollbarVerticalDecrementSize = 10;
-		public const float ScrollbarVerticalDecrementBorderRadius = 0;
-		public const float ScrollbarVerticalDecrementBorderSize = 0;
-		public static readonly Color ScrollbarVerticalDecrementBorderColor = new Color(-1f, -1f, -1f, -1f);
-		public static readonly Texture2D ScrollbarVerticalDecrementImage = null;
-		public static readonly Color ScrollbarVerticalDecrementColor = new Color(0.5f, 0.5f, 0.5f, 1f);
-		public const HorizontalScrollbarAttachment ScrollbarHorizontalAttachment = UIForia.Rendering.HorizontalScrollbarAttachment.Bottom;
-		public const ScrollbarButtonPlacement ScrollbarHorizontalButtonPlacement = UIForia.Rendering.ScrollbarButtonPlacement.Hidden;
-		public const float ScrollbarHorizontalTrackSize = 10;
-		public const float ScrollbarHorizontalTrackBorderRadius = 0;
-		public const float ScrollbarHorizontalTrackBorderSize = 0;
-		public static readonly Color ScrollbarHorizontalTrackBorderColor = new Color(-1f, -1f, -1f, -1f);
-		public static readonly Texture2D ScrollbarHorizontalTrackImage = null;
-		public static readonly Color ScrollbarHorizontalTrackColor = new Color(0.5f, 0.5f, 0.5f, 1f);
-		public const float ScrollbarHorizontalHandleSize = 10;
-		public const float ScrollbarHorizontalHandleBorderRadius = 0;
-		public const float ScrollbarHorizontalHandleBorderSize = 0;
-		public static readonly Color ScrollbarHorizontalHandleBorderColor = new Color(-1f, -1f, -1f, -1f);
-		public static readonly Texture2D ScrollbarHorizontalHandleImage = null;
-		public static readonly Color ScrollbarHorizontalHandleColor = new Color(0.5f, 0.5f, 0.5f, 1f);
-		public const float ScrollbarHorizontalIncrementSize = 10;
-		public const float ScrollbarHorizontalIncrementBorderRadius = 0;
-		public const float ScrollbarHorizontalIncrementBorderSize = 0;
-		public static readonly Color ScrollbarHorizontalIncrementBorderColor = new Color(-1f, -1f, -1f, -1f);
-		public static readonly Texture2D ScrollbarHorizontalIncrementImage = null;
-		public static readonly Color ScrollbarHorizontalIncrementColor = new Color(0.5f, 0.5f, 0.5f, 1f);
-		public const float ScrollbarHorizontalDecrementSize = 10;
-		public const float ScrollbarHorizontalDecrementBorderRadius = 0;
-		public const float ScrollbarHorizontalDecrementBorderSize = 0;
-		public static readonly Color ScrollbarHorizontalDecrementBorderColor = new Color(-1f, -1f, -1f, -1f);
-		public static readonly Texture2D ScrollbarHorizontalDecrementImage = null;
-		public static readonly Color ScrollbarHorizontalDecrementColor = new Color(0.5f, 0.5f, 0.5f, 1f);
+		public const ShadowType ShadowType = UIForia.Rendering.ShadowType.Unset;
+		public const float ShadowOffsetX = 0f;
+		public const float ShadowOffsetY = 0f;
+		public const float ShadowSoftnessX = 0.1f;
+		public const float ShadowSoftnessY = 0.1f;
+		public const float ShadowIntensity = 0.7f;
+		public static readonly string Scrollbar = "";
+		public static readonly UIMeasurement ScrollbarSize = new UIMeasurement(15, UIMeasurementUnit.Pixel);
+		public static readonly Color ScrollbarColor = new Color(0f, 0f, 0f, 1f);
 		public static StyleProperty GetPropertyValue(StylePropertyId propertyId) {
 
 			switch(propertyId) {
@@ -170,36 +131,18 @@ namespace UIForia.Rendering {
 					 return new StyleProperty(StylePropertyId.BorderColor, new Color(-1f, -1f, -1f, -1f));
 				case StylePropertyId.BackgroundColor:
 					 return new StyleProperty(StylePropertyId.BackgroundColor, new Color(-1f, -1f, -1f, -1f));
-				case StylePropertyId.BackgroundColorSecondary:
-					 return new StyleProperty(StylePropertyId.BackgroundColorSecondary, new Color(-1f, -1f, -1f, -1f));
 				case StylePropertyId.BackgroundImage:
 					 return new StyleProperty(StylePropertyId.BackgroundImage, 0, 0, null);
-				case StylePropertyId.BackgroundImage1:
-					 return new StyleProperty(StylePropertyId.BackgroundImage1, 0, 0, null);
-				case StylePropertyId.BackgroundImage2:
-					 return new StyleProperty(StylePropertyId.BackgroundImage2, 0, 0, null);
 				case StylePropertyId.BackgroundGradientType:
 					 return new StyleProperty(StylePropertyId.BackgroundGradientType, (int)Shapes2D.GradientType.Linear);
 				case StylePropertyId.BackgroundGradientAxis:
 					 return new StyleProperty(StylePropertyId.BackgroundGradientAxis, (int)Shapes2D.GradientAxis.Horizontal);
 				case StylePropertyId.BackgroundGradientStart:
-					 return new StyleProperty(StylePropertyId.BackgroundGradientStart, 0);
-				case StylePropertyId.BackgroundFillRotation:
-					 return new StyleProperty(StylePropertyId.BackgroundFillRotation, 0);
-				case StylePropertyId.BackgroundFillType:
-					 return new StyleProperty(StylePropertyId.BackgroundFillType, (int)UIForia.Rendering.BackgroundFillType.Normal);
-				case StylePropertyId.BackgroundShapeType:
-					 return new StyleProperty(StylePropertyId.BackgroundShapeType, (int)UIForia.Rendering.BackgroundShapeType.Rectangle);
-				case StylePropertyId.BackgroundFillOffsetX:
-					 return new StyleProperty(StylePropertyId.BackgroundFillOffsetX, 0);
-				case StylePropertyId.BackgroundFillOffsetY:
-					 return new StyleProperty(StylePropertyId.BackgroundFillOffsetY, 0);
-				case StylePropertyId.BackgroundFillScaleX:
-					 return new StyleProperty(StylePropertyId.BackgroundFillScaleX, 1);
-				case StylePropertyId.BackgroundFillScaleY:
-					 return new StyleProperty(StylePropertyId.BackgroundFillScaleY, 1);
+					 return new StyleProperty(StylePropertyId.BackgroundGradientStart, 0f);
+				case StylePropertyId.Painter:
+					 return new StyleProperty(StylePropertyId.Painter, (int)UIForia.Rendering.BackgroundFillType.Normal);
 				case StylePropertyId.Opacity:
-					 return new StyleProperty(StylePropertyId.Opacity, 1);
+					 return new StyleProperty(StylePropertyId.Opacity, 1f);
 				case StylePropertyId.Cursor:
 					 return new StyleProperty(StylePropertyId.Cursor, 0, 0, null);
 				case StylePropertyId.Visibility:
@@ -245,9 +188,9 @@ namespace UIForia.Rendering {
 				case StylePropertyId.GridLayoutCrossAxisAutoSize:
 					 return new StyleProperty(StylePropertyId.GridLayoutCrossAxisAutoSize, new GridTrackSize(1, GridTemplateUnit.FractionalRemaining));
 				case StylePropertyId.GridLayoutColGap:
-					 return new StyleProperty(StylePropertyId.GridLayoutColGap, 0);
+					 return new StyleProperty(StylePropertyId.GridLayoutColGap, 0f);
 				case StylePropertyId.GridLayoutRowGap:
-					 return new StyleProperty(StylePropertyId.GridLayoutRowGap, 0);
+					 return new StyleProperty(StylePropertyId.GridLayoutRowGap, 0f);
 				case StylePropertyId.GridLayoutColAlignment:
 					 return new StyleProperty(StylePropertyId.GridLayoutColAlignment, (int)UIForia.Layout.GridAxisAlignment.Grow);
 				case StylePropertyId.GridLayoutRowAlignment:
@@ -308,6 +251,32 @@ namespace UIForia.Rendering {
 					 return new StyleProperty(StylePropertyId.TextAlignment, (int)UIForia.Text.TextAlignment.Left);
 				case StylePropertyId.TextTransform:
 					 return new StyleProperty(StylePropertyId.TextTransform, (int)UIForia.Text.TextTransform.None);
+				case StylePropertyId.TextOutlineWidth:
+					 return new StyleProperty(StylePropertyId.TextOutlineWidth, 0f);
+				case StylePropertyId.TextOutlineColor:
+					 return new StyleProperty(StylePropertyId.TextOutlineColor, new Color(0f, 0f, 0f, 1f));
+				case StylePropertyId.TextGlowColor:
+					 return new StyleProperty(StylePropertyId.TextGlowColor, new Color(-1f, -1f, -1f, -1f));
+				case StylePropertyId.TextGlowOffset:
+					 return new StyleProperty(StylePropertyId.TextGlowOffset, 0f);
+				case StylePropertyId.TextGlowInner:
+					 return new StyleProperty(StylePropertyId.TextGlowInner, 0f);
+				case StylePropertyId.TextGlowOuter:
+					 return new StyleProperty(StylePropertyId.TextGlowOuter, 0f);
+				case StylePropertyId.TextGlowPower:
+					 return new StyleProperty(StylePropertyId.TextGlowPower, 0f);
+				case StylePropertyId.TextShadowColor:
+					 return new StyleProperty(StylePropertyId.TextShadowColor, new Color(-1f, -1f, -1f, -1f));
+				case StylePropertyId.TextShadowOffsetX:
+					 return new StyleProperty(StylePropertyId.TextShadowOffsetX, 0f);
+				case StylePropertyId.TextShadowOffsetY:
+					 return new StyleProperty(StylePropertyId.TextShadowOffsetY, 0f);
+				case StylePropertyId.TextShadowIntensity:
+					 return new StyleProperty(StylePropertyId.TextShadowIntensity, 0.5f);
+				case StylePropertyId.TextShadowSoftness:
+					 return new StyleProperty(StylePropertyId.TextShadowSoftness, 0.5f);
+				case StylePropertyId.TextShadowType:
+					 return new StyleProperty(StylePropertyId.TextShadowType, (int)UIForia.Rendering.ShadowType.Unset);
 				case StylePropertyId.AnchorTop:
 					 return new StyleProperty(StylePropertyId.AnchorTop, new UIFixedLength(0, UIFixedUnit.Percent));
 				case StylePropertyId.AnchorRight:
@@ -327,11 +296,11 @@ namespace UIForia.Rendering {
 				case StylePropertyId.TransformPivotY:
 					 return new StyleProperty(StylePropertyId.TransformPivotY, new UIFixedLength(0, UIFixedUnit.Pixel));
 				case StylePropertyId.TransformScaleX:
-					 return new StyleProperty(StylePropertyId.TransformScaleX, 1);
+					 return new StyleProperty(StylePropertyId.TransformScaleX, 1f);
 				case StylePropertyId.TransformScaleY:
-					 return new StyleProperty(StylePropertyId.TransformScaleY, 1);
+					 return new StyleProperty(StylePropertyId.TransformScaleY, 1f);
 				case StylePropertyId.TransformRotation:
-					 return new StyleProperty(StylePropertyId.TransformRotation, 0);
+					 return new StyleProperty(StylePropertyId.TransformRotation, 0f);
 				case StylePropertyId.TransformBehaviorX:
 					 return new StyleProperty(StylePropertyId.TransformBehaviorX, (int)UIForia.Rendering.TransformBehavior.LayoutOffset);
 				case StylePropertyId.TransformBehaviorY:
@@ -346,110 +315,24 @@ namespace UIForia.Rendering {
 					 return new StyleProperty(StylePropertyId.RenderLayerOffset, 0);
 				case StylePropertyId.RenderLayer:
 					 return new StyleProperty(StylePropertyId.RenderLayer, (int)UIForia.Rendering.RenderLayer.Default);
-				case StylePropertyId.ScrollbarVerticalAttachment:
-					 return new StyleProperty(StylePropertyId.ScrollbarVerticalAttachment, (int)UIForia.Rendering.VerticalScrollbarAttachment.Right);
-				case StylePropertyId.ScrollbarVerticalButtonPlacement:
-					 return new StyleProperty(StylePropertyId.ScrollbarVerticalButtonPlacement, (int)UIForia.Rendering.ScrollbarButtonPlacement.Hidden);
-				case StylePropertyId.ScrollbarVerticalTrackSize:
-					 return new StyleProperty(StylePropertyId.ScrollbarVerticalTrackSize, 10);
-				case StylePropertyId.ScrollbarVerticalTrackBorderRadius:
-					 return new StyleProperty(StylePropertyId.ScrollbarVerticalTrackBorderRadius, 0);
-				case StylePropertyId.ScrollbarVerticalTrackBorderSize:
-					 return new StyleProperty(StylePropertyId.ScrollbarVerticalTrackBorderSize, 0);
-				case StylePropertyId.ScrollbarVerticalTrackBorderColor:
-					 return new StyleProperty(StylePropertyId.ScrollbarVerticalTrackBorderColor, new Color(-1f, -1f, -1f, -1f));
-				case StylePropertyId.ScrollbarVerticalTrackImage:
-					 return new StyleProperty(StylePropertyId.ScrollbarVerticalTrackImage, 0, 0, null);
-				case StylePropertyId.ScrollbarVerticalTrackColor:
-					 return new StyleProperty(StylePropertyId.ScrollbarVerticalTrackColor, new Color(0.5f, 0.5f, 0.5f, 1f));
-				case StylePropertyId.ScrollbarVerticalHandleSize:
-					 return new StyleProperty(StylePropertyId.ScrollbarVerticalHandleSize, 10);
-				case StylePropertyId.ScrollbarVerticalHandleBorderRadius:
-					 return new StyleProperty(StylePropertyId.ScrollbarVerticalHandleBorderRadius, 0);
-				case StylePropertyId.ScrollbarVerticalHandleBorderSize:
-					 return new StyleProperty(StylePropertyId.ScrollbarVerticalHandleBorderSize, 0);
-				case StylePropertyId.ScrollbarVerticalHandleBorderColor:
-					 return new StyleProperty(StylePropertyId.ScrollbarVerticalHandleBorderColor, new Color(-1f, -1f, -1f, -1f));
-				case StylePropertyId.ScrollbarVerticalHandleImage:
-					 return new StyleProperty(StylePropertyId.ScrollbarVerticalHandleImage, 0, 0, null);
-				case StylePropertyId.ScrollbarVerticalHandleColor:
-					 return new StyleProperty(StylePropertyId.ScrollbarVerticalHandleColor, new Color(0.5f, 0.5f, 0.5f, 1f));
-				case StylePropertyId.ScrollbarVerticalIncrementSize:
-					 return new StyleProperty(StylePropertyId.ScrollbarVerticalIncrementSize, 10);
-				case StylePropertyId.ScrollbarVerticalIncrementBorderRadius:
-					 return new StyleProperty(StylePropertyId.ScrollbarVerticalIncrementBorderRadius, 0);
-				case StylePropertyId.ScrollbarVerticalIncrementBorderSize:
-					 return new StyleProperty(StylePropertyId.ScrollbarVerticalIncrementBorderSize, 0);
-				case StylePropertyId.ScrollbarVerticalIncrementBorderColor:
-					 return new StyleProperty(StylePropertyId.ScrollbarVerticalIncrementBorderColor, new Color(-1f, -1f, -1f, -1f));
-				case StylePropertyId.ScrollbarVerticalIncrementImage:
-					 return new StyleProperty(StylePropertyId.ScrollbarVerticalIncrementImage, 0, 0, null);
-				case StylePropertyId.ScrollbarVerticalIncrementColor:
-					 return new StyleProperty(StylePropertyId.ScrollbarVerticalIncrementColor, new Color(0.5f, 0.5f, 0.5f, 1f));
-				case StylePropertyId.ScrollbarVerticalDecrementSize:
-					 return new StyleProperty(StylePropertyId.ScrollbarVerticalDecrementSize, 10);
-				case StylePropertyId.ScrollbarVerticalDecrementBorderRadius:
-					 return new StyleProperty(StylePropertyId.ScrollbarVerticalDecrementBorderRadius, 0);
-				case StylePropertyId.ScrollbarVerticalDecrementBorderSize:
-					 return new StyleProperty(StylePropertyId.ScrollbarVerticalDecrementBorderSize, 0);
-				case StylePropertyId.ScrollbarVerticalDecrementBorderColor:
-					 return new StyleProperty(StylePropertyId.ScrollbarVerticalDecrementBorderColor, new Color(-1f, -1f, -1f, -1f));
-				case StylePropertyId.ScrollbarVerticalDecrementImage:
-					 return new StyleProperty(StylePropertyId.ScrollbarVerticalDecrementImage, 0, 0, null);
-				case StylePropertyId.ScrollbarVerticalDecrementColor:
-					 return new StyleProperty(StylePropertyId.ScrollbarVerticalDecrementColor, new Color(0.5f, 0.5f, 0.5f, 1f));
-				case StylePropertyId.ScrollbarHorizontalAttachment:
-					 return new StyleProperty(StylePropertyId.ScrollbarHorizontalAttachment, (int)UIForia.Rendering.HorizontalScrollbarAttachment.Bottom);
-				case StylePropertyId.ScrollbarHorizontalButtonPlacement:
-					 return new StyleProperty(StylePropertyId.ScrollbarHorizontalButtonPlacement, (int)UIForia.Rendering.ScrollbarButtonPlacement.Hidden);
-				case StylePropertyId.ScrollbarHorizontalTrackSize:
-					 return new StyleProperty(StylePropertyId.ScrollbarHorizontalTrackSize, 10);
-				case StylePropertyId.ScrollbarHorizontalTrackBorderRadius:
-					 return new StyleProperty(StylePropertyId.ScrollbarHorizontalTrackBorderRadius, 0);
-				case StylePropertyId.ScrollbarHorizontalTrackBorderSize:
-					 return new StyleProperty(StylePropertyId.ScrollbarHorizontalTrackBorderSize, 0);
-				case StylePropertyId.ScrollbarHorizontalTrackBorderColor:
-					 return new StyleProperty(StylePropertyId.ScrollbarHorizontalTrackBorderColor, new Color(-1f, -1f, -1f, -1f));
-				case StylePropertyId.ScrollbarHorizontalTrackImage:
-					 return new StyleProperty(StylePropertyId.ScrollbarHorizontalTrackImage, 0, 0, null);
-				case StylePropertyId.ScrollbarHorizontalTrackColor:
-					 return new StyleProperty(StylePropertyId.ScrollbarHorizontalTrackColor, new Color(0.5f, 0.5f, 0.5f, 1f));
-				case StylePropertyId.ScrollbarHorizontalHandleSize:
-					 return new StyleProperty(StylePropertyId.ScrollbarHorizontalHandleSize, 10);
-				case StylePropertyId.ScrollbarHorizontalHandleBorderRadius:
-					 return new StyleProperty(StylePropertyId.ScrollbarHorizontalHandleBorderRadius, 0);
-				case StylePropertyId.ScrollbarHorizontalHandleBorderSize:
-					 return new StyleProperty(StylePropertyId.ScrollbarHorizontalHandleBorderSize, 0);
-				case StylePropertyId.ScrollbarHorizontalHandleBorderColor:
-					 return new StyleProperty(StylePropertyId.ScrollbarHorizontalHandleBorderColor, new Color(-1f, -1f, -1f, -1f));
-				case StylePropertyId.ScrollbarHorizontalHandleImage:
-					 return new StyleProperty(StylePropertyId.ScrollbarHorizontalHandleImage, 0, 0, null);
-				case StylePropertyId.ScrollbarHorizontalHandleColor:
-					 return new StyleProperty(StylePropertyId.ScrollbarHorizontalHandleColor, new Color(0.5f, 0.5f, 0.5f, 1f));
-				case StylePropertyId.ScrollbarHorizontalIncrementSize:
-					 return new StyleProperty(StylePropertyId.ScrollbarHorizontalIncrementSize, 10);
-				case StylePropertyId.ScrollbarHorizontalIncrementBorderRadius:
-					 return new StyleProperty(StylePropertyId.ScrollbarHorizontalIncrementBorderRadius, 0);
-				case StylePropertyId.ScrollbarHorizontalIncrementBorderSize:
-					 return new StyleProperty(StylePropertyId.ScrollbarHorizontalIncrementBorderSize, 0);
-				case StylePropertyId.ScrollbarHorizontalIncrementBorderColor:
-					 return new StyleProperty(StylePropertyId.ScrollbarHorizontalIncrementBorderColor, new Color(-1f, -1f, -1f, -1f));
-				case StylePropertyId.ScrollbarHorizontalIncrementImage:
-					 return new StyleProperty(StylePropertyId.ScrollbarHorizontalIncrementImage, 0, 0, null);
-				case StylePropertyId.ScrollbarHorizontalIncrementColor:
-					 return new StyleProperty(StylePropertyId.ScrollbarHorizontalIncrementColor, new Color(0.5f, 0.5f, 0.5f, 1f));
-				case StylePropertyId.ScrollbarHorizontalDecrementSize:
-					 return new StyleProperty(StylePropertyId.ScrollbarHorizontalDecrementSize, 10);
-				case StylePropertyId.ScrollbarHorizontalDecrementBorderRadius:
-					 return new StyleProperty(StylePropertyId.ScrollbarHorizontalDecrementBorderRadius, 0);
-				case StylePropertyId.ScrollbarHorizontalDecrementBorderSize:
-					 return new StyleProperty(StylePropertyId.ScrollbarHorizontalDecrementBorderSize, 0);
-				case StylePropertyId.ScrollbarHorizontalDecrementBorderColor:
-					 return new StyleProperty(StylePropertyId.ScrollbarHorizontalDecrementBorderColor, new Color(-1f, -1f, -1f, -1f));
-				case StylePropertyId.ScrollbarHorizontalDecrementImage:
-					 return new StyleProperty(StylePropertyId.ScrollbarHorizontalDecrementImage, 0, 0, null);
-				case StylePropertyId.ScrollbarHorizontalDecrementColor:
-					 return new StyleProperty(StylePropertyId.ScrollbarHorizontalDecrementColor, new Color(0.5f, 0.5f, 0.5f, 1f));
+				case StylePropertyId.ShadowType:
+					 return new StyleProperty(StylePropertyId.ShadowType, (int)UIForia.Rendering.ShadowType.Unset);
+				case StylePropertyId.ShadowOffsetX:
+					 return new StyleProperty(StylePropertyId.ShadowOffsetX, 0f);
+				case StylePropertyId.ShadowOffsetY:
+					 return new StyleProperty(StylePropertyId.ShadowOffsetY, 0f);
+				case StylePropertyId.ShadowSoftnessX:
+					 return new StyleProperty(StylePropertyId.ShadowSoftnessX, 0.1f);
+				case StylePropertyId.ShadowSoftnessY:
+					 return new StyleProperty(StylePropertyId.ShadowSoftnessY, 0.1f);
+				case StylePropertyId.ShadowIntensity:
+					 return new StyleProperty(StylePropertyId.ShadowIntensity, 0.7f);
+				case StylePropertyId.Scrollbar:
+					 return new StyleProperty(StylePropertyId.Scrollbar, 0, 0, "");
+				case StylePropertyId.ScrollbarSize:
+					 return new StyleProperty(StylePropertyId.ScrollbarSize, new UIMeasurement(15, UIMeasurementUnit.Pixel));
+				case StylePropertyId.ScrollbarColor:
+					 return new StyleProperty(StylePropertyId.ScrollbarColor, new Color(0f, 0f, 0f, 1f));
 				default: throw new System.ArgumentOutOfRangeException(nameof(propertyId), propertyId, null);
 				}
 } 

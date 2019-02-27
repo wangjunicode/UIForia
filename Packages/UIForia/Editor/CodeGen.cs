@@ -30,22 +30,12 @@ namespace UIForia.Editor {
             // Background
             new AnimatedPropertyGenerator<Color>(StylePropertyId.BorderColor, ColorUtil.UnsetValue),
             new AnimatedPropertyGenerator<Color>(StylePropertyId.BackgroundColor, ColorUtil.UnsetValue),
-            new AnimatedPropertyGenerator<Color>(StylePropertyId.BackgroundColorSecondary, ColorUtil.UnsetValue),
             new PropertyGenerator<Texture2D>(StylePropertyId.BackgroundImage, null),
-            new PropertyGenerator<Texture2D>(StylePropertyId.BackgroundImage1, null),
-            new PropertyGenerator<Texture2D>(StylePropertyId.BackgroundImage2, null),
             new PropertyGenerator<GradientType>(StylePropertyId.BackgroundGradientType, GradientType.Linear),
             new PropertyGenerator<GradientAxis>(StylePropertyId.BackgroundGradientAxis, GradientAxis.Horizontal),
             new AnimatedPropertyGenerator<float>(StylePropertyId.BackgroundGradientStart, 0),
-            new AnimatedPropertyGenerator<float>(StylePropertyId.BackgroundFillRotation, 0),
-            new PropertyGenerator<BackgroundFillType>(StylePropertyId.BackgroundFillType, BackgroundFillType.Normal),
-            new PropertyGenerator<BackgroundShapeType>(StylePropertyId.BackgroundShapeType, BackgroundShapeType.Rectangle),
-//            new AnimatedPropertyGenerator<float>(StylePropertyId.BackgroundGridSize, 0),
-//            new AnimatedPropertyGenerator<float>(StylePropertyId.BackgroundLineSize, 0),
-            new AnimatedPropertyGenerator<float>(StylePropertyId.BackgroundFillOffsetX, 0),
-            new AnimatedPropertyGenerator<float>(StylePropertyId.BackgroundFillOffsetY, 0),
-            new AnimatedPropertyGenerator<float>(StylePropertyId.BackgroundFillScaleX, 1),
-            new AnimatedPropertyGenerator<float>(StylePropertyId.BackgroundFillScaleY, 1),
+            new PropertyGenerator<BackgroundFillType>(StylePropertyId.Painter, BackgroundFillType.Normal),
+
             new AnimatedPropertyGenerator<float>(StylePropertyId.Opacity, 1),
             new PropertyGenerator<CursorStyle>(StylePropertyId.Cursor, null),
             new PropertyGenerator<Visibility>(StylePropertyId.Visibility, Visibility.Visible),
@@ -120,6 +110,19 @@ namespace UIForia.Editor {
             new PropertyGenerator<Text.FontStyle>(StylePropertyId.TextFontStyle, Text.FontStyle.Normal, InheritanceType.Inherited),
             new PropertyGenerator<Text.TextAlignment>(StylePropertyId.TextAlignment, Text.TextAlignment.Left, InheritanceType.Inherited),
             new PropertyGenerator<TextTransform>(StylePropertyId.TextTransform, TextTransform.None, InheritanceType.Inherited),
+            new AnimatedPropertyGenerator<float>(StylePropertyId.TextOutlineWidth, 0, InheritanceType.Inherited),
+            new AnimatedPropertyGenerator<Color>(StylePropertyId.TextOutlineColor, Color.black, InheritanceType.Inherited),
+            new AnimatedPropertyGenerator<Color>(StylePropertyId.TextGlowColor, ColorUtil.UnsetValue, InheritanceType.Inherited),
+            new AnimatedPropertyGenerator<float>(StylePropertyId.TextGlowOffset, 0, InheritanceType.Inherited),
+            new AnimatedPropertyGenerator<float>(StylePropertyId.TextGlowInner, 0, InheritanceType.Inherited),
+            new AnimatedPropertyGenerator<float>(StylePropertyId.TextGlowOuter, 0, InheritanceType.Inherited),
+            new AnimatedPropertyGenerator<float>(StylePropertyId.TextGlowPower, 0, InheritanceType.Inherited),
+            new AnimatedPropertyGenerator<Color>(StylePropertyId.TextShadowColor, ColorUtil.UnsetValue, InheritanceType.Inherited),
+            new AnimatedPropertyGenerator<float>(StylePropertyId.TextShadowOffsetX, 0, InheritanceType.Inherited),
+            new AnimatedPropertyGenerator<float>(StylePropertyId.TextShadowOffsetY, 0, InheritanceType.Inherited),
+            new AnimatedPropertyGenerator<float>(StylePropertyId.TextShadowIntensity, 0.5f, InheritanceType.Inherited),
+            new AnimatedPropertyGenerator<float>(StylePropertyId.TextShadowSoftness, 0.5f, InheritanceType.Inherited),
+            new PropertyGenerator<ShadowType>(StylePropertyId.TextShadowType, ShadowType.Unset, InheritanceType.Inherited),
 
             // Anchors
             new AnimatedPropertyGenerator<UIFixedLength>(StylePropertyId.AnchorTop, new UIFixedLength(0f, UIFixedUnit.Percent)),
@@ -146,69 +149,18 @@ namespace UIForia.Editor {
             new AnimatedPropertyGenerator<int>(StylePropertyId.RenderLayerOffset, 0),
             new AnimatedPropertyGenerator<RenderLayer>(StylePropertyId.RenderLayer, RenderLayer.Default),
 
-            // Scrollbar Vertical
-            new PropertyGenerator<VerticalScrollbarAttachment>(StylePropertyId.ScrollbarVerticalAttachment, VerticalScrollbarAttachment.Right),
-            new PropertyGenerator<ScrollbarButtonPlacement>(StylePropertyId.ScrollbarVerticalButtonPlacement, ScrollbarButtonPlacement.Hidden),
-
-            new PropertyGenerator<float>(StylePropertyId.ScrollbarVerticalTrackSize, 10f),
-            new PropertyGenerator<float>(StylePropertyId.ScrollbarVerticalTrackBorderRadius, 0),
-            new PropertyGenerator<float>(StylePropertyId.ScrollbarVerticalTrackBorderSize, 0),
-            new PropertyGenerator<Color>(StylePropertyId.ScrollbarVerticalTrackBorderColor, ColorUtil.UnsetValue),
-            new PropertyGenerator<Texture2D>(StylePropertyId.ScrollbarVerticalTrackImage, null),
-            new PropertyGenerator<Color>(StylePropertyId.ScrollbarVerticalTrackColor, Color.gray),
-
-            new PropertyGenerator<float>(StylePropertyId.ScrollbarVerticalHandleSize, 10f),
-            new PropertyGenerator<float>(StylePropertyId.ScrollbarVerticalHandleBorderRadius, 0),
-            new PropertyGenerator<float>(StylePropertyId.ScrollbarVerticalHandleBorderSize, 0),
-            new PropertyGenerator<Color>(StylePropertyId.ScrollbarVerticalHandleBorderColor, ColorUtil.UnsetValue),
-            new PropertyGenerator<Texture2D>(StylePropertyId.ScrollbarVerticalHandleImage, null),
-            new PropertyGenerator<Color>(StylePropertyId.ScrollbarVerticalHandleColor, Color.gray),
-
-            new PropertyGenerator<float>(StylePropertyId.ScrollbarVerticalIncrementSize, 10f),
-            new PropertyGenerator<float>(StylePropertyId.ScrollbarVerticalIncrementBorderRadius, 0),
-            new PropertyGenerator<float>(StylePropertyId.ScrollbarVerticalIncrementBorderSize, 0),
-            new PropertyGenerator<Color>(StylePropertyId.ScrollbarVerticalIncrementBorderColor, ColorUtil.UnsetValue),
-            new PropertyGenerator<Texture2D>(StylePropertyId.ScrollbarVerticalIncrementImage, null),
-            new PropertyGenerator<Color>(StylePropertyId.ScrollbarVerticalIncrementColor, Color.gray),
-
-            new PropertyGenerator<float>(StylePropertyId.ScrollbarVerticalDecrementSize, 10f),
-            new PropertyGenerator<float>(StylePropertyId.ScrollbarVerticalDecrementBorderRadius, 0),
-            new PropertyGenerator<float>(StylePropertyId.ScrollbarVerticalDecrementBorderSize, 0),
-            new PropertyGenerator<Color>(StylePropertyId.ScrollbarVerticalDecrementBorderColor, ColorUtil.UnsetValue),
-            new PropertyGenerator<Texture2D>(StylePropertyId.ScrollbarVerticalDecrementImage, null),
-            new PropertyGenerator<Color>(StylePropertyId.ScrollbarVerticalDecrementColor, Color.gray),
-
-            // Scrollbar Horizontal
-            new PropertyGenerator<HorizontalScrollbarAttachment>(StylePropertyId.ScrollbarHorizontalAttachment, HorizontalScrollbarAttachment.Bottom),
-            new PropertyGenerator<ScrollbarButtonPlacement>(StylePropertyId.ScrollbarHorizontalButtonPlacement, ScrollbarButtonPlacement.Hidden),
-
-            new PropertyGenerator<float>(StylePropertyId.ScrollbarHorizontalTrackSize, 10f),
-            new PropertyGenerator<float>(StylePropertyId.ScrollbarHorizontalTrackBorderRadius, 0),
-            new PropertyGenerator<float>(StylePropertyId.ScrollbarHorizontalTrackBorderSize, 0),
-            new PropertyGenerator<Color>(StylePropertyId.ScrollbarHorizontalTrackBorderColor, ColorUtil.UnsetValue),
-            new PropertyGenerator<Texture2D>(StylePropertyId.ScrollbarHorizontalTrackImage, null),
-            new PropertyGenerator<Color>(StylePropertyId.ScrollbarHorizontalTrackColor, Color.gray),
-
-            new PropertyGenerator<float>(StylePropertyId.ScrollbarHorizontalHandleSize, 10f),
-            new PropertyGenerator<float>(StylePropertyId.ScrollbarHorizontalHandleBorderRadius, 0),
-            new PropertyGenerator<float>(StylePropertyId.ScrollbarHorizontalHandleBorderSize, 0),
-            new PropertyGenerator<Color>(StylePropertyId.ScrollbarHorizontalHandleBorderColor, ColorUtil.UnsetValue),
-            new PropertyGenerator<Texture2D>(StylePropertyId.ScrollbarHorizontalHandleImage, null),
-            new PropertyGenerator<Color>(StylePropertyId.ScrollbarHorizontalHandleColor, Color.gray),
-
-            new PropertyGenerator<float>(StylePropertyId.ScrollbarHorizontalIncrementSize, 10f),
-            new PropertyGenerator<float>(StylePropertyId.ScrollbarHorizontalIncrementBorderRadius, 0),
-            new PropertyGenerator<float>(StylePropertyId.ScrollbarHorizontalIncrementBorderSize, 0),
-            new PropertyGenerator<Color>(StylePropertyId.ScrollbarHorizontalIncrementBorderColor, ColorUtil.UnsetValue),
-            new PropertyGenerator<Texture2D>(StylePropertyId.ScrollbarHorizontalIncrementImage, null),
-            new PropertyGenerator<Color>(StylePropertyId.ScrollbarHorizontalIncrementColor, Color.gray),
-
-            new PropertyGenerator<float>(StylePropertyId.ScrollbarHorizontalDecrementSize, 10f),
-            new PropertyGenerator<float>(StylePropertyId.ScrollbarHorizontalDecrementBorderRadius, 0),
-            new PropertyGenerator<float>(StylePropertyId.ScrollbarHorizontalDecrementBorderSize, 0),
-            new PropertyGenerator<Color>(StylePropertyId.ScrollbarHorizontalDecrementBorderColor, ColorUtil.UnsetValue),
-            new PropertyGenerator<Texture2D>(StylePropertyId.ScrollbarHorizontalDecrementImage, null),
-            new PropertyGenerator<Color>(StylePropertyId.ScrollbarHorizontalDecrementColor, Color.gray),
+            // Shadow
+            new PropertyGenerator<ShadowType>(StylePropertyId.ShadowType, ShadowType.Unset), 
+            new AnimatedPropertyGenerator<float>(StylePropertyId.ShadowOffsetX, 0),
+            new AnimatedPropertyGenerator<float>(StylePropertyId.ShadowOffsetY, 0),
+            new AnimatedPropertyGenerator<float>(StylePropertyId.ShadowSoftnessX, 0.1f),
+            new AnimatedPropertyGenerator<float>(StylePropertyId.ShadowSoftnessY, 0.1f),
+            new AnimatedPropertyGenerator<float>(StylePropertyId.ShadowIntensity, 0.7f),
+            
+            new PropertyGenerator<string>(StylePropertyId.Scrollbar, string.Empty),
+            new PropertyGenerator<UIMeasurement>(StylePropertyId.ScrollbarSize, new UIMeasurement(15f)),
+            new AnimatedPropertyGenerator<Color>(StylePropertyId.ScrollbarColor, Color.black)
+            
         };
 
         [MenuItem("UIForia/Regenerate Style Stuff")]
@@ -418,7 +370,7 @@ namespace UIForia.Rendering {
         public override void Execute(UIElement element, ExpressionContext context) {
             if (!element.style.IsInState(state)) return;
 
-            var oldValue = element.style.m_PropertyMap[(int)propertyId].As__CAST_TYPE__;
+            var oldValue = element.style.propertyMap[(int)propertyId].As__CAST_TYPE__;
             var value = expression.Evaluate(context);
             if (value != oldValue) {
                 element.style.SetProperty(__STYLE_PROPERTY_CONSTRUCTOR__, state);
@@ -552,8 +504,8 @@ namespace UIForia.Rendering {
                 [System.Diagnostics.DebuggerStepThrough]
                 get { 
                     StyleProperty property;
-                    if (m_PropertyMap.TryGetValue((int) StylePropertyId.__NAME__, out property)) return property.As__CAST_TYPE__;
-                    if (m_PropertyMap.TryGetValue(BitUtil.SetHighLowBits(1, (int) StylePropertyId.__NAME__), out property)) return property.As__CAST_TYPE__;
+                    if (propertyMap.TryGetValue((int) StylePropertyId.__NAME__, out property)) return property.As__CAST_TYPE__;
+                    if (propertyMap.TryGetValue(BitUtil.SetHighLowBits(1, (int) StylePropertyId.__NAME__), out property)) return property.As__CAST_TYPE__;
                     return DefaultStyleValues_Generated.__NAME__;
                 }
             }";
@@ -565,7 +517,7 @@ namespace UIForia.Rendering {
                 [System.Diagnostics.DebuggerStepThrough]
                 get { 
                     StyleProperty property;
-                    if (m_PropertyMap.TryGetValue((int) StylePropertyId.__NAME__, out property)) return property.As__CAST_TYPE__;
+                    if (propertyMap.TryGetValue((int) StylePropertyId.__NAME__, out property)) return property.As__CAST_TYPE__;
                     return DefaultStyleValues_Generated.__NAME__;
                 }
             }";
@@ -650,9 +602,13 @@ namespace UIForia.Rendering {
             else if (typeof(IReadOnlyList<GridTrackSize>) == propertyGenerator.type) {
                 return $"GetProperty(StylePropertyId.{propertyGenerator.propertyIdName}).AsGridTemplate;";
             }
-            if (typeof(CursorStyle) == propertyGenerator.type) {
+            else if (typeof(CursorStyle) == propertyGenerator.type) {
                 return $"GetProperty(StylePropertyId.{propertyGenerator.propertyIdName}).AsCursorStyle;";
             }
+            else if (typeof(string) == propertyGenerator.type) {
+                return $"GetProperty(StylePropertyId.{propertyGenerator.propertyIdName}).AsString;";
+            }
+            
 
             throw new ArgumentOutOfRangeException();
         }

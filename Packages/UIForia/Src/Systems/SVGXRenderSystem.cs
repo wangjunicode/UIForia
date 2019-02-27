@@ -122,7 +122,7 @@ namespace UIForia.Systems {
                     ctx.SetFill(textElement.style.TextColor);
                     ctx.Fill();
                 }
-//                else if (current.customShape != null) {
+//                else if (current.customPainter != null) {
 //                    ctx.BeginPath();
 //                    current.customShape(ctx, current.element);
 //                    // restore?

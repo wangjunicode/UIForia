@@ -16,7 +16,7 @@ style blue {
     BackgroundColor = blue;
     [hover] {
         BackgroundColor = yellow;
-        Cursor = url(Cursor1) 15;
+        Cursor = url("testimg/Cursor1") 15;
     }
     [attr:attrName]
 }

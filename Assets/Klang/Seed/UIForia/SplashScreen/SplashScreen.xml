@@ -5,7 +5,7 @@
 
     <Contents style="splash-screen">
 
-        <!--<Image x-id="logo" src="'Sprites/seed_logo_no_text'"/>-->
+        <Image x-id="logo" style="img" src="'Sprites/seed_logo_no_text'"/>
 
     </Contents>
 

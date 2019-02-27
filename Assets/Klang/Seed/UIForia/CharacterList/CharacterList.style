@@ -18,7 +18,7 @@ style character-entry-selected {
 style name-text {
     TextColor = White;
     TextFontSize = 20;
-    TextFontAsset = Gotham-Bold SDF;
+    TextFontAsset = url("Gotham-Bold SDF");
 }
 
 style text {
@@ -55,13 +55,13 @@ style status-bar-background {
 
 style status-bar-health {
   BackgroundColor = #00D175;
-  PreferredHeight = 100%;
+  PreferredHeight = 1pca;
   BorderRadius = 50%;
 }
 
 style status-bar-mood {
   BackgroundColor = #9873E6;
-  PreferredHeight = 100%;
+  PreferredHeight = 1pca;
   BorderRadius = 50%;
 }
 

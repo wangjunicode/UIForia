@@ -21,6 +21,8 @@
                     </Panel>
                 </Group>
 
+                <Text>{$item.status}</Text>
+
                 <Group style="character-status">
 
                     <Text style="name-text">{$item.name}</Text>
@@ -36,10 +38,10 @@
 
                 </Group>
 
-                <KlangToolTip direction="ToolTipDirection.Right" style="status-icon" text="'Such content, much wow'">
-                    <Image src="$item.statusIconUrl"/>
-                </KlangToolTip>
-                
+                <!--<KlangToolTip direction="ToolTipDirection.Right" style="status-icon" text="'Such content, much wow'">-->
+                    <!--<Image src="$item.statusIconUrl"/>-->
+                <!--</KlangToolTip>-->
+                <!---->
             </Group>
         </Repeat>
 

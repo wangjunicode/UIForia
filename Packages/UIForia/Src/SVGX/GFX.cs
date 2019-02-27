@@ -113,6 +113,8 @@ namespace SVGX {
             // if clip id is different
             // create new wave
 
+            if (ctx.drawCalls.Count == 0) return null;
+
             int lastClipId = ctx.drawCalls[0].clipGroupId;
             LightList<SVGXDrawWave> waves = LightListPool<SVGXDrawWave>.Get();
 
@@ -328,6 +330,8 @@ namespace SVGX {
 
             LightList<SVGXDrawWave> waves = CreateWaves(ctx);
 
+            if (waves == null) return;
+
             LightList<SVGXStyle> styles = LightListPool<SVGXStyle>.Get();
             LightList<SVGXMatrix> matrices = LightListPool<SVGXMatrix>.Get();
 
@@ -379,7 +383,6 @@ namespace SVGX {
                                 else {
                                     //opaques.Add(new SVGXRenderShape(ctx.shapes[k], z, j, j, DrawCallType.StandardFill, textInfo));
                                     transparents.Add(new SVGXRenderShape(ctx.shapes[k], z, j, j, DrawCallType.StandardFill, textInfo));
-
                                 }
                             }
 
@@ -537,54 +540,42 @@ namespace SVGX {
 
             int count = renderShapes.Count;
             if (count == 0) return;
-            
+
             SVGXRenderShape[] renderShapeArray = renderShapes.Array;
             Matrix4x4 originMatrix = OriginMatrix;
 
-            int fontId = -1;
-
+            int lastFontId = -1;
             int lastTextureId = styles[renderShapeArray[0].styleId].textureId;
             Material material = batchedTransparentPool.GetAndQueueForRelease();
-            material.SetTexture(s_MainTexKey, textureMap.GetOrDefault(lastTextureId));
-            
+            Material fontMaterial = null;
+
+
             for (int i = 0; i < count; i++) {
                 SVGXRenderShape renderShape = renderShapeArray[i];
+                TextInfo textInfo = renderShape.textInfo;
                 int currentTextureId = styles[renderShape.styleId].textureId;
+                int currentFontId = renderShape.shape.type == SVGXShapeType.Text ? textInfo.spanInfos[0].font.GetInstanceID() : lastFontId;
+                // if texture changed or font changed, we need to draw what we currently have buffered
+                // if we have nothing buffered, don't draw yet
 
                 if (currentTextureId != lastTextureId) {
-                    DrawMesh(batchedVertexData.FillMesh(), originMatrix, material);
-                    material = batchedTransparentPool.GetAndQueueForRelease();
                     material.SetTexture(s_MainTexKey, textureMap.GetOrDefault(lastTextureId));
+                    DrawMesh(batchedVertexData.FillMesh(), originMatrix, material);
+                    batchedVertexData = vertexDataPool.GetAndQueueForRelease();
+                    material = batchedTransparentPool.GetAndQueueForRelease();
                     lastTextureId = currentTextureId;
                 }
+//              // todo -- fonts are broken, might have to do with the SetGlobalTexture stuff
+//                if (lastFontId != currentFontId) {
+//                    
+//                    material = batchedTransparentPool.GetAndQueueForRelease();
+//                    material.SetTexture(s_MainTexKey, textureMap.GetOrDefault(lastTextureId));
+//                    DrawMesh(batchedVertexData.FillMesh(), originMatrix, material);
+//                    
+//                    fontMaterial = textInfo.spanInfos[0].font.material;
+//                    UpdateFontAtlas(fontMaterial);
+//                }
                 
-                if (renderShape.shape.type == SVGXShapeType.Text) {
-                    TextInfo textInfo = renderShape.textInfo;
-                    int currentFontId = textInfo.spanInfos[0].font.GetInstanceID();
-
-                    if (fontId != currentFontId) {
-                        Material fontMaterial = textInfo.spanInfos[0].font.material;
-
-                        Shader.SetGlobalTexture(s_GlobalFontTextureKey, textInfo.spanInfos[0].font.atlas);
-
-                        Shader.SetGlobalVector(s_GlobalFontData1Key, new Vector4(
-                            fontMaterial.GetFloat(ShaderUtilities.ID_WeightNormal),
-                            fontMaterial.GetFloat(ShaderUtilities.ID_WeightBold),
-                            textInfo.spanInfos[0].font.atlas.width,
-                            textInfo.spanInfos[0].font.atlas.height)
-                        );
-
-                        Shader.SetGlobalVector(s_GlobalFontData2Key, new Vector4(
-                            fontMaterial.GetFloat(ShaderUtilities.ID_GradientScale),
-                            fontMaterial.GetFloat(ShaderUtilities.ID_ScaleRatio_A),
-                            fontMaterial.GetFloat(ShaderUtilities.ID_ScaleRatio_B),
-                            fontMaterial.GetFloat(ShaderUtilities.ID_ScaleRatio_C))
-                        );
-
-                        fontId = currentFontId;
-                    }
-                }
-
                 int gradientLookupId = styles[renderShape.styleId].gradientId;
 
                 GradientData gradientData = default;
@@ -614,6 +605,24 @@ namespace SVGX {
             material = batchedTransparentPool.GetAndQueueForRelease();
             material.SetTexture(s_MainTexKey, textureMap.GetOrDefault(lastTextureId));
             DrawMesh(batchedVertexData.FillMesh(), originMatrix, material);
+        }
+
+        private static void UpdateFontAtlas(Material fontMaterial) {
+            Shader.SetGlobalTexture(s_GlobalFontTextureKey, fontMaterial.mainTexture);
+
+            Shader.SetGlobalVector(s_GlobalFontData1Key, new Vector4(
+                fontMaterial.GetFloat(ShaderUtilities.ID_WeightNormal),
+                fontMaterial.GetFloat(ShaderUtilities.ID_WeightBold),
+                fontMaterial.mainTexture.width,
+                fontMaterial.mainTexture.height)
+            );
+
+            Shader.SetGlobalVector(s_GlobalFontData2Key, new Vector4(
+                fontMaterial.GetFloat(ShaderUtilities.ID_GradientScale),
+                fontMaterial.GetFloat(ShaderUtilities.ID_ScaleRatio_A),
+                fontMaterial.GetFloat(ShaderUtilities.ID_ScaleRatio_B),
+                fontMaterial.GetFloat(ShaderUtilities.ID_ScaleRatio_C))
+            );
         }
 
         private void DrawClip(SVGXDrawWave wave) {

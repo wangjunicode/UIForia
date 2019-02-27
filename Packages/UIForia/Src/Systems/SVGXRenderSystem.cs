@@ -97,28 +97,29 @@ namespace UIForia.Systems {
 
             UIElement[] elementArray = visibleElements.Array;
             for (int i = 0; i < visibleElements.Count; i++) {
-                
                 UIElement current = elementArray[i];
-                
+
                 if (current.style.Visibility == Visibility.Hidden) {
                     continue;
                 }
-                
+
                 LayoutResult layoutResult = current.layoutResult;
 
-                
 
                 // todo -- if no paint properties are set, don't draw (ie no bg, no colors, no border, etc)
 
                 // todo -- opacity will need to be inherited
 
-                SVGXMatrix matrix = SVGXMatrix.TRS(layoutResult.screenPosition, 0, Vector2.one);
+                Vector2 pivot = Vector2.zero;//new Vector2(0.5f, 0.5f); //layoutResult.pivot);layoutResult.pivot; // [0, 1]
+
+                Vector2 offset = new Vector2(layoutResult.actualSize.width * pivot.x, layoutResult.actualSize.height * pivot.y);
+                SVGXMatrix matrix = SVGXMatrix.TRS(layoutResult.screenPosition + offset, layoutResult.rotation, Vector2.one);
 
                 ctx.SetTransform(matrix);
 
                 if (current is UITextElement textElement) {
                     ctx.BeginPath();
-                    ctx.Text(0, 0, textElement.textInfo);
+                    ctx.Text(-offset.x, -offset.y, textElement.textInfo);
                     ctx.SetFill(textElement.style.TextColor);
                     ctx.Fill();
                 }
@@ -140,14 +141,13 @@ namespace UIForia.Systems {
                     bool hasBorder = border.x > 0 || border.y > 0 || border.z > 0 || border.w > 0;
 
                     if (resolveBorderRadius == Vector4.zero) {
-                        
-                        ctx.Rect(borderRect.left, borderRect.top, layoutResult.actualSize.width - borderRect.Horizontal, layoutResult.actualSize.height - borderRect.Vertical);
-                        
+                        //ctx.Rect(-offset.x, -offset.y, layoutResult.actualSize.width - borderRect.Horizontal, layoutResult.actualSize.height - borderRect.Vertical);
+                        ctx.Rect(borderRect.left - offset.x, borderRect.top - offset.y, layoutResult.actualSize.width - borderRect.Horizontal, layoutResult.actualSize.height - borderRect.Vertical);
+
                         if (!hasBorder) {
                             DrawNormalFill(current);
                         }
                         else {
-
                             if (hasUniformBorder) {
                                 DrawNormalFill(current);
                                 ctx.SetStrokePlacement(StrokePlacement.Outside);
@@ -196,7 +196,7 @@ namespace UIForia.Systems {
                     // todo -- might need to special case non uniform border with border radius
                     else {
                         ctx.BeginPath();
-                        ctx.RoundedRect(new Rect(borderRect.left, borderRect.top, width - borderRect.Horizontal, height - borderRect.Vertical), resolveBorderRadius.x, resolveBorderRadius.y, resolveBorderRadius.z, resolveBorderRadius.w);
+                        ctx.RoundedRect(new Rect(borderRect.left - offset.x, borderRect.top - offset.y, width - borderRect.Horizontal, height - borderRect.Vertical), resolveBorderRadius.x, resolveBorderRadius.y, resolveBorderRadius.z, resolveBorderRadius.w);
                         DrawNormalFill(current);
                         if (hasBorder) {
                             ctx.SetStrokeWidth(borderRect.top);

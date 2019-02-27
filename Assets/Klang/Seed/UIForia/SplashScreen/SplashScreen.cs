@@ -12,7 +12,7 @@ namespace UI {
         private float elapsed;
         
         public override void OnReady() {
-            FindById("logo").style.PlayAnimation(AnimateLogo());    
+             FindById("logo").style.PlayAnimation(AnimateLogo());    
         }
 
         public override void OnUpdate() {
@@ -26,6 +26,7 @@ namespace UI {
         private static StyleAnimation AnimateLogo() {
             AnimationOptions options = new AnimationOptions();
             options.duration = 1f;
+            options.timingFunction = EasingFunction.CubicEaseIn;
             
             return new PropertyAnimation(StyleProperty.TransformRotation(360f), options);    
         }

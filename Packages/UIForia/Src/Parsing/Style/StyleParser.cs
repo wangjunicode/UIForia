@@ -1,817 +1,607 @@
 using System;
 using System.Collections.Generic;
-using System.IO;
-using System.Reflection;
-using JetBrains.Annotations;
-using UIForia.Extensions;
-using UIForia.Rendering;
+using UIForia.Parsing.Style.AstNodes;
+using UIForia.Parsing.Style.Tokenizer;
 using UIForia.Util;
-using UnityEngine;
-using MapAction = System.Action<UIForia.Parsing.Style.StyleParserContext, string, string>;
 
 namespace UIForia.Parsing.Style {
 
-    public struct StyleParserContext {
+    public struct StyleParser2 {
 
-        public UIStyle targetStyle;
-        public List<StyleVariable> variables;
-        public List<ImportDefinition> imports;
+        private StyleTokenStream tokenStream;
 
-    }
+        /// <summary>
+        /// Contains all top level nodes that are in the style file. 
+        /// </summary>
+        private LightList<StyleASTNode> nodes;
 
-    public struct StyleVariable {
+        private Stack<StyleASTNode> expressionStack;
+        private Stack<StyleOperatorNode> operatorStack;
+        private Stack<AttributeGroupContainer> groupExpressionStack;
+        private Stack<StyleOperatorType> groupOperatorStack;
 
-        public Type type;
-        public string name;
-        public object value;
-
-        public T GetValue<T>() {
-            if (type != typeof(T)) { }
-
-            return (T) value;
+        private StyleParser2(StyleTokenStream stream) {
+            tokenStream = stream;
+            nodes = LightListPool<StyleASTNode>.Get();
+            operatorStack = StackPool<StyleOperatorNode>.Get();
+            expressionStack = StackPool<StyleASTNode>.Get();
+            groupExpressionStack = StackPool<AttributeGroupContainer>.Get();
+            groupOperatorStack = StackPool<StyleOperatorType>.Get();
         }
 
-    }
+        private static StyleTokenStream FromString(string input) {
+            return new StyleTokenStream(StyleTokenizer.Tokenize(input, ListPool<StyleToken>.Get()));
+        }
 
-    public struct ImportDefinition {
+        public static LightList<StyleASTNode> Parse(string input) {
+            return new StyleParser2(FromString(input)).Parse();
+        }
 
-        public string path;
-        public string name;
-        public ParsedStyleSheet sheet;
+        private void Release() {
+            tokenStream.Release();
+            StackPool<StyleOperatorNode>.Release(operatorStack);
+            StackPool<StyleASTNode>.Release(expressionStack);
+        }
 
-    }
+        private LightList<StyleASTNode> Parse() {
+            if (!tokenStream.HasMoreTokens) {
+                return nodes;
+            }
 
-    public static class StyleParser {
+            ParseLoop();
+            Release();
 
-        private static readonly Dictionary<string, ParsedStyleSheet> s_CompiledStyles;
-        private static readonly Dictionary<string, MapAction> s_StylePropertyMappers;
-        private static readonly List<string> s_CurrentlyParsingList;
+            return nodes;
+        }
 
+        private void ParseLoop() {
+            while (tokenStream.HasMoreTokens) {
+                ParseNextRoot();
+            }
+        }
 
-        public static void Reset() {
-            s_CompiledStyles.Clear();
-            s_CurrentlyParsingList.Clear();
+        private void ParseNextRoot() {
+            switch (tokenStream.Current.styleTokenType) {
+                case StyleTokenType.Style:
+                    tokenStream.Advance();
+                    ParseStyle();
+                    break;
+
+                case StyleTokenType.Audio:
+                    tokenStream.Advance();
+                    // ParseAudio
+                    AssertTokenTypeAndAdvance(StyleTokenType.BracesOpen);
+                    AssertTokenTypeAndAdvance(StyleTokenType.BracesClose);
+                    break;
+
+                case StyleTokenType.Animation:
+                    tokenStream.Advance();
+                    // ParseAnimation
+                    AssertTokenTypeAndAdvance(StyleTokenType.BracesOpen);
+                    AssertTokenTypeAndAdvance(StyleTokenType.BracesClose);
+                    tokenStream.Advance();
+                    break;
+
+                case StyleTokenType.Import:
+                    ParseImportNode();
+                    break;
+
+                case StyleTokenType.Export:
+                    ParseExportNode();
+                    break;
+
+                case StyleTokenType.Const:
+                    nodes.Add(ParseConstNode());
+                    AdvanceIfTokenType(StyleTokenType.EndStatement);
+                    break;
+
+                case StyleTokenType.Cursor:
+                    tokenStream.Advance();
+                    break;
+                default:
+                    throw new ParseException(tokenStream.Current, $"Did not expect token {tokenStream.Current.value} of type {tokenStream.Current.styleTokenType} here at line");
+            }
         }
 
         /// <summary>
-        /// Gets a copy of a style group from any style file. Loads and parses the styles if necessary. Does not support getting
-        /// styles from ui templates.
+        /// Takes on all the things after a 'style' keyword on the root level of a style file.
         /// </summary>
-        /// <param name="uniqueStyleId">the relative path to the style file</param>
-        /// <param name="styleName">the style group's name you're looking for</param>
-        /// <returns>a style group or null if none is found</returns>
-        [PublicAPI]
-        public static UIStyleGroup GetParsedStyle(string uniqueStyleId, string styleName) {
-            return GetParsedStyle(uniqueStyleId, null, styleName);
+        /// <exception cref="ParseException"></exception>
+        private void ParseStyle() {
+            string identifier = null;
+            string tagName = null;
+            StyleToken initialStyleToken = tokenStream.Current;
+            switch (initialStyleToken.styleTokenType) {
+                // <TagName> { ... }
+                case StyleTokenType.LessThan:
+                    tokenStream.Advance();
+                    AssertTokenType(StyleTokenType.Identifier);
+                    tagName = tokenStream.Current.value;
+                    tokenStream.Advance();
+                    AssertTokenTypeAndAdvance(StyleTokenType.GreaterThan);
+                    break;
+                // styleId { ... }
+                case StyleTokenType.Identifier:
+                    identifier = tokenStream.Current.value;
+                    tokenStream.Advance();
+                    break;
+                default:
+                    throw new ParseException(initialStyleToken, $"Expected style definition or tag name but found {initialStyleToken.styleTokenType}");
+            }
+
+            StyleRootNode styleRootNode = StyleASTNodeFactory.StyleRootNode(identifier, tagName);
+            styleRootNode.WithLocation(initialStyleToken);
+            nodes.Add(styleRootNode);
+
+            // we just read an element name or style name
+            // now move forward and expect an open curly brace
+
+            // next there should be one of those:
+            // - property
+            // - state
+            // - attribute with or without boolean modifier
+            // - expression with constants
+            ParseStyleGroupBody(styleRootNode);
         }
 
-        public static  bool TryGetParsedStyle(string uniqueStyleId, string body, string styleName, out UIStyleGroup group) {
-            uniqueStyleId = uniqueStyleId.Trim();
-            styleName = styleName.Trim();
-            ParsedStyleSheet sheet = s_CompiledStyles.GetOrDefault(uniqueStyleId);
-            if (sheet != null) {
-                return sheet.GetStyleGroup(styleName, out group);
+        private void ParseExportNode() {
+            StyleToken exportToken = tokenStream.Current;
+            tokenStream.Advance();
+            // export statement must be followed by const keyword
+
+            // now let's find out which value we're assigning
+            nodes.Add(StyleASTNodeFactory.ExportNode(ParseConstNode()).WithLocation(exportToken));
+            AdvanceIfTokenType(StyleTokenType.EndStatement);
+        }
+
+        private ConstNode ParseConstNode() {
+            StyleToken constToken = tokenStream.Current;
+            AssertTokenTypeAndAdvance(StyleTokenType.Const);
+            // const name
+            string variableName = AssertTokenTypeAndAdvance(StyleTokenType.Identifier);
+            AssertTokenTypeAndAdvance(StyleTokenType.Equal);
+
+            ConstNode constNode = StyleASTNodeFactory.ConstNode(variableName, ParsePropertyValue());
+            constNode.WithLocation(constToken);
+            return constNode;
+        }
+
+        private void ParseImportNode() {
+            StyleToken importToken = tokenStream.Current;
+            AssertTokenTypeAndAdvance(StyleTokenType.Import);
+            string source = AssertTokenTypeAndAdvance(StyleTokenType.String);
+            AssertTokenTypeAndAdvance(StyleTokenType.As);
+
+            string alias = AssertTokenTypeAndAdvance(StyleTokenType.Identifier);
+            AssertTokenTypeAndAdvance(StyleTokenType.EndStatement);
+
+            nodes.Add(StyleASTNodeFactory.ImportNode(alias, source).WithLocation(importToken));
+        }
+
+        private void ParseStyleGroupBody(StyleGroupContainer styleRootNode) {
+            AssertTokenTypeAndAdvance(StyleTokenType.BracesOpen);
+
+            while (tokenStream.HasMoreTokens && !AdvanceIfTokenType(StyleTokenType.BracesClose)) {
+                switch (tokenStream.Current.styleTokenType) {
+                    case StyleTokenType.Not: {
+                        groupOperatorStack.Push(StyleOperatorType.Not);
+                        tokenStream.Advance();
+                        ParseAttributeOrExpressionGroup();
+                        break;
+                    }
+
+                    case StyleTokenType.And:
+                        tokenStream.Advance();
+                        if (AdvanceIfTokenType(StyleTokenType.Not)) {
+                            groupOperatorStack.Push(StyleOperatorType.Not);
+                        }
+
+                        ParseAttributeOrExpressionGroup();
+                        break;
+
+                    case StyleTokenType.BracketOpen:
+                        tokenStream.Advance();
+                        ParseStateOrAttributeGroup(styleRootNode);
+
+                        break;
+
+                    case StyleTokenType.Cursor:
+                        // special case here: we are out of words and need to use the
+                        // cursor token for the property AND the top level definition ¯\_(ツ)_/¯
+                        ParseProperty(styleRootNode);
+                        break;
+                    case StyleTokenType.Identifier:
+                        ParseProperty(styleRootNode);
+                        break;
+
+                    case StyleTokenType.BracesOpen: {
+                        // At this point only unconsumed attribute/expression group bodies are allowed
+
+                        if (groupExpressionStack.Count > 1) {
+                            throw new ParseException(tokenStream.Current, "There was a problem, I somehow made an error parsing a combined style group...");
+                        }
+
+                        if (groupExpressionStack.Count == 1) {
+                            AttributeGroupContainer attributeGroupContainer = groupExpressionStack.Pop();
+                            ParseStyleGroupBody(attributeGroupContainer);
+                            styleRootNode.AddChildNode(attributeGroupContainer);
+                        }
+                        else {
+                            throw new ParseException(tokenStream.Current, "Expected an attribute style group body. Braces are in a weird position!");
+                        }
+
+                        break;
+                    }
+                    default:
+                        throw new ParseException(tokenStream.Current, "Expected either a boolean group operator (not / and), the start" +
+                                                                      " of a group (an open bracket) or a regular property identifier but found " +
+                                                                      tokenStream.Current.styleTokenType + " with value " + tokenStream.Current.value);
+                }
+            }
+        }
+
+        private void ParseStateOrAttributeGroup(StyleGroupContainer styleRootNode) {
+            switch (tokenStream.Current.styleTokenType) {
+                // this is the state group
+                case StyleTokenType.Identifier:
+                    StyleStateContainer stateGroupRootNode = StyleASTNodeFactory.StateGroupRootNode(tokenStream.Current);
+
+                    tokenStream.Advance();
+                    AssertTokenTypeAndAdvance(StyleTokenType.BracketClose);
+                    AssertTokenTypeAndAdvance(StyleTokenType.BracesOpen);
+
+                    ParseProperties(stateGroupRootNode);
+
+                    AssertTokenTypeAndAdvance(StyleTokenType.BracesClose);
+
+                    styleRootNode.AddChildNode(stateGroupRootNode);
+
+                    break;
+                case StyleTokenType.AttributeSpecifier:
+                    ParseAttributeGroup();
+                    break;
+                default:
+                    throw new ParseException(tokenStream.Current, "Expected either a group state identifier (hover etc.)" +
+                                                                  " or an attribute identifier (attr:...)");
+            }
+        }
+
+        private void ParseProperties(StyleGroupContainer styleRootNode) {
+            while (tokenStream.HasMoreTokens && tokenStream.Current.styleTokenType != StyleTokenType.BracesClose) {
+                ParseProperty(styleRootNode);
+            }
+        }
+
+        private void ParseProperty(StyleGroupContainer styleRootNode) {
+            StyleToken propertyNodeToken = tokenStream.Current;
+            string propertyName;
+            if (AdvanceIfTokenType(StyleTokenType.Cursor)) {
+                propertyName = propertyNodeToken.value;
+            }
+            else {
+                propertyName = AssertTokenTypeAndAdvance(StyleTokenType.Identifier);
             }
 
-            if (!string.IsNullOrEmpty(body) && !string.IsNullOrWhiteSpace(body)) {
-                sheet = ParseFromString(body);
-                sheet.id = uniqueStyleId;
+            AssertTokenTypeAndAdvance(StyleTokenType.Equal);
 
-                s_CompiledStyles[uniqueStyleId] = sheet;
-                return sheet.GetStyleGroup(styleName, out group);
+            PropertyNode propertyNode = StyleASTNodeFactory.PropertyNode(propertyName);
+            propertyNode.WithLocation(propertyNodeToken);
+
+            while (tokenStream.HasMoreTokens && !AdvanceIfTokenType(StyleTokenType.EndStatement)) {
+                propertyNode.AddChildNode(ParsePropertyValue());
+                // we just ignore the comma for now
+                AdvanceIfTokenType(StyleTokenType.Comma);
             }
 
-            if (File.Exists(UnityEngine.Application.dataPath + "/" + uniqueStyleId)) {
-                string contents = File.ReadAllText(UnityEngine.Application.dataPath + "/" + uniqueStyleId);
-                sheet = ParseFromString(contents);
-                sheet.id = uniqueStyleId;
-                s_CompiledStyles[uniqueStyleId] = sheet;
-                return sheet.GetStyleGroup(styleName, out group);
+            styleRootNode.AddChildNode(propertyNode);
+        }
+
+        private StyleASTNode ParsePropertyValue() {
+            StyleToken propertyToken = tokenStream.Current;
+            StyleASTNode propertyValue;
+
+            switch (tokenStream.Current.styleTokenType) {
+                case StyleTokenType.Number:
+                    StyleLiteralNode value = StyleASTNodeFactory.NumericLiteralNode(tokenStream.Current.value).WithLocation(propertyToken) as StyleLiteralNode;
+                    tokenStream.Advance();
+                    if (tokenStream.Current.styleTokenType != StyleTokenType.EndStatement
+                        && tokenStream.Current.styleTokenType != StyleTokenType.Number) {
+                        UnitNode unit = ParseUnit().WithLocation(tokenStream.Previous) as UnitNode;
+                        propertyValue = StyleASTNodeFactory.MeasurementNode(value, unit);
+                    }
+                    else {
+                        propertyValue = value;
+                    }
+
+                    break;
+                case StyleTokenType.String:
+                    propertyValue = StyleASTNodeFactory.StringLiteralNode(tokenStream.Current.value);
+                    tokenStream.Advance();
+                    break;
+                case StyleTokenType.Identifier:
+                    propertyValue = StyleASTNodeFactory.IdentifierNode(tokenStream.Current.value);
+                    tokenStream.Advance();
+                    break;
+                case StyleTokenType.Rgba:
+                    propertyValue = ParseRgba();
+                    break;
+                case StyleTokenType.Rgb:
+                    propertyValue = ParseRgb();
+                    break;
+                case StyleTokenType.HashColor:
+                    propertyValue = StyleASTNodeFactory.ColorNode(tokenStream.Current.value);
+                    tokenStream.Advance();
+                    break;
+                case StyleTokenType.Url:
+                    tokenStream.Advance();
+                    AssertTokenTypeAndAdvance(StyleTokenType.ParenOpen);
+
+                    StyleASTNode url;
+                    if (tokenStream.Current.styleTokenType == StyleTokenType.String) {
+                        url = ParseLiteralOrReference(StyleTokenType.String);
+                    }
+                    else {
+                        url = ParseLiteralOrReference(StyleTokenType.Identifier);
+                    }
+
+                    while (tokenStream.HasMoreTokens && !AdvanceIfTokenType(StyleTokenType.ParenClose)) {
+                        StyleIdentifierNode urlIdentifier = (StyleIdentifierNode) url;
+                        // advancing tokens no matter the type. We want to concatenate all identifiers and slashes of a path again.
+                        urlIdentifier.name += tokenStream.Current.value;
+                        tokenStream.Advance();
+                    }
+
+                    propertyValue = StyleASTNodeFactory.UrlNode(url);
+                    break;
+                case StyleTokenType.At:
+                    propertyValue = ParseVariableReference();
+                    break;
+                default:
+                    throw new ParseException(propertyToken, "Expected a property value but found no valid token.");
             }
 
-            sheet = TryParseStyleFromClassPath(Path.GetFileNameWithoutExtension(uniqueStyleId));
+            return propertyValue.WithLocation(propertyToken);
+        }
 
-            if (sheet != null) {
-                s_CompiledStyles[uniqueStyleId] = sheet;
+        private UnitNode ParseUnit() {
+            StyleToken styleToken = tokenStream.Current;
+            string value = styleToken.value;
+
+            tokenStream.Advance();
+
+            switch (styleToken.styleTokenType) {
+                case StyleTokenType.Identifier:
+                    return StyleASTNodeFactory.UnitNode(value);
+                case StyleTokenType.Mod:
+                    return StyleASTNodeFactory.UnitNode(value);
+                default:
+                    throw new ParseException(styleToken, "Expected a token that looks like a unit but this didn't.");
+            }
+        }
+
+        private StyleASTNode ParseVariableReference() {
+            AdvanceIfTokenType(StyleTokenType.At);
+            ReferenceNode referenceNode = StyleASTNodeFactory.ReferenceNode(AssertTokenTypeAndAdvance(StyleTokenType.Identifier));
+
+            while (tokenStream.HasMoreTokens && AdvanceIfTokenType(StyleTokenType.Dot)) {
+                referenceNode.AddChildNode(
+                    StyleASTNodeFactory.DotAccessNode(
+                        AssertTokenTypeAndAdvance(StyleTokenType.Identifier)
+                    ).WithLocation(tokenStream.Previous)
+                );
             }
 
-            if (sheet == null) {
-                group = default;
+            return referenceNode;
+        }
+
+        private StyleASTNode ParseRgba() {
+            AssertTokenTypeAndAdvance(StyleTokenType.Rgba);
+            AssertTokenTypeAndAdvance(StyleTokenType.ParenOpen);
+
+            StyleASTNode red = ParseLiteralOrReference(StyleTokenType.Number);
+            AssertTokenTypeAndAdvance(StyleTokenType.Comma);
+
+            StyleASTNode green = ParseLiteralOrReference(StyleTokenType.Number);
+            AssertTokenTypeAndAdvance(StyleTokenType.Comma);
+
+            StyleASTNode blue = ParseLiteralOrReference(StyleTokenType.Number);
+            AssertTokenTypeAndAdvance(StyleTokenType.Comma);
+
+            StyleASTNode alpha = ParseLiteralOrReference(StyleTokenType.Number);
+            AssertTokenTypeAndAdvance(StyleTokenType.ParenClose);
+
+            return StyleASTNodeFactory.RgbaNode(red, green, blue, alpha);
+        }
+
+        private StyleASTNode ParseRgb() {
+            AssertTokenTypeAndAdvance(StyleTokenType.Rgb);
+            AssertTokenTypeAndAdvance(StyleTokenType.ParenOpen);
+
+            StyleASTNode red = ParseLiteralOrReference(StyleTokenType.Number);
+            AssertTokenTypeAndAdvance(StyleTokenType.Comma);
+
+            StyleASTNode green = ParseLiteralOrReference(StyleTokenType.Number);
+            AssertTokenTypeAndAdvance(StyleTokenType.Comma);
+
+            StyleASTNode blue = ParseLiteralOrReference(StyleTokenType.Number);
+            AssertTokenTypeAndAdvance(StyleTokenType.ParenClose);
+
+            return StyleASTNodeFactory.RgbNode(red, green, blue);
+        }
+
+        private StyleASTNode ParseLiteralOrReference(StyleTokenType literalType) {
+            StyleToken currentToken = tokenStream.Current;
+            if (AdvanceIfTokenType(StyleTokenType.At)) {
+                return ParseVariableReference().WithLocation(currentToken);
+            }
+
+            string value = AssertTokenTypeAndAdvance(literalType);
+            switch (literalType) {
+                case StyleTokenType.String:
+                    return StyleASTNodeFactory.StringLiteralNode(value).WithLocation(currentToken);
+                case StyleTokenType.Number:
+                    return StyleASTNodeFactory.NumericLiteralNode(value).WithLocation(currentToken);
+                case StyleTokenType.Boolean:
+                    return StyleASTNodeFactory.BooleanLiteralNode(value).WithLocation(currentToken);
+                case StyleTokenType.Identifier:
+                    return StyleASTNodeFactory.IdentifierNode(value).WithLocation(currentToken);
+            }
+
+            throw new ParseException(currentToken, $"Please add support for this type: {literalType}!");
+        }
+
+        private void AssertTokenType(StyleTokenType styleTokenType) {
+            if (tokenStream.Current.styleTokenType != styleTokenType) {
+                throw new ParseException(tokenStream.Current, $"Parsing stylesheet failed. Expected token '{styleTokenType}' but got '{tokenStream.Current.styleTokenType}'");
+            }
+        }
+
+        private string AssertTokenTypeAndAdvance(StyleTokenType styleTokenType) {
+            if (tokenStream.Current.styleTokenType != styleTokenType) {
+                throw new ParseException(tokenStream.Current, $"Parsing stylesheet failed. Expected token '{styleTokenType}' but got '{tokenStream.Current.styleTokenType}'");
+            }
+
+            tokenStream.Advance();
+            return tokenStream.Previous.value;
+        }
+
+        private bool AdvanceIfTokenType(StyleTokenType styleTokenType) {
+            if (tokenStream.Current.styleTokenType == styleTokenType) {
+                tokenStream.Advance();
+                return true;
+            }
+
+            return false;
+        }
+
+        private void ParseAttributeOrExpressionGroup() {
+            AssertTokenTypeAndAdvance(StyleTokenType.BracketOpen);
+
+            switch (tokenStream.Current.styleTokenType) {
+                case StyleTokenType.AttributeSpecifier:
+                    ParseAttributeGroup();
+                    break;
+                case StyleTokenType.Dollar:
+                    ParseStyleExpression();
+                    // todo add style expression
+                    break;
+            }
+        }
+
+        private void ParseAttributeGroup() {
+            AssertTokenTypeAndAdvance(StyleTokenType.AttributeSpecifier);
+            AssertTokenTypeAndAdvance(StyleTokenType.Colon);
+            StyleToken attributeToken = tokenStream.Current;
+            string attributeIdentifier = AssertTokenTypeAndAdvance(StyleTokenType.Identifier);
+            string attributeValue = null;
+
+            if (AdvanceIfTokenType(StyleTokenType.Equal)) {
+                attributeValue = tokenStream.Current.value;
+                tokenStream.Advance();
+            }
+
+            bool invert = groupOperatorStack.Count > 0 && groupOperatorStack.Pop() == StyleOperatorType.Not;
+
+            AttributeGroupContainer andAttribute = groupExpressionStack.Count > 0 ? groupExpressionStack.Pop() : null;
+            AttributeGroupContainer attributeGroupContainer =
+                StyleASTNodeFactory.AttributeGroupRootNode(attributeIdentifier, attributeValue, invert, andAttribute);
+            attributeGroupContainer.WithLocation(attributeToken);
+
+            groupExpressionStack.Push(attributeGroupContainer);
+
+            AssertTokenTypeAndAdvance(StyleTokenType.BracketClose);
+        }
+
+        private void ParseStyleExpression() {
+            switch (tokenStream.Current.styleTokenType) {
+                case StyleTokenType.Plus:
+                    StyleASTNodeFactory.OperatorNode(StyleOperatorType.Plus);
+                    break;
+            }
+
+            AssertTokenTypeAndAdvance(StyleTokenType.BracketClose);
+        }
+
+        private bool ParseOperatorExpression(out StyleOperatorNode operatorNode) {
+            tokenStream.Save();
+
+            if (!tokenStream.Current.IsOperator) {
+                tokenStream.Restore();
+                operatorNode = default;
                 return false;
             }
 
-            return sheet.GetStyleGroup(styleName, out group);
-        }
+            tokenStream.Advance();
 
-        public static UIStyleGroup GetParsedStyle(string uniqueStyleId, string body, string styleName) {
-            uniqueStyleId = uniqueStyleId.Trim();
-            styleName = styleName.Trim();
-            ParsedStyleSheet sheet = s_CompiledStyles.GetOrDefault(uniqueStyleId);
-            if (sheet != null) {
-                return sheet.GetStyleGroup(styleName);
-            }
+            switch (tokenStream.Previous.styleTokenType) {
+                case StyleTokenType.Plus:
+                    operatorNode = StyleASTNodeFactory.OperatorNode(StyleOperatorType.Plus);
+                    return true;
 
-            if (!string.IsNullOrEmpty(body) && !string.IsNullOrWhiteSpace(body)) {
-                sheet = ParseFromString(body);
-                sheet.id = uniqueStyleId;
+                case StyleTokenType.Minus:
+                    operatorNode = StyleASTNodeFactory.OperatorNode(StyleOperatorType.Minus);
+                    return true;
 
-                s_CompiledStyles[uniqueStyleId] = sheet;
-                return sheet.GetStyleGroup(styleName);
-            }
+                case StyleTokenType.Times:
+                    operatorNode = StyleASTNodeFactory.OperatorNode(StyleOperatorType.Times);
+                    return true;
 
-            if (File.Exists(UnityEngine.Application.dataPath + "/" + uniqueStyleId)) {
-                string contents = File.ReadAllText(UnityEngine.Application.dataPath + "/" + uniqueStyleId);
-                sheet = ParseFromString(contents);
-                sheet.id = uniqueStyleId;
-                s_CompiledStyles[uniqueStyleId] = sheet;
-                return sheet.GetStyleGroup(styleName);
-            }
+                case StyleTokenType.Divide:
+                    operatorNode = StyleASTNodeFactory.OperatorNode(StyleOperatorType.Divide);
+                    return true;
 
-            sheet = TryParseStyleFromClassPath(Path.GetFileNameWithoutExtension(uniqueStyleId));
+                case StyleTokenType.Mod:
+                    operatorNode = StyleASTNodeFactory.OperatorNode(StyleOperatorType.Mod);
+                    return true;
 
-            if (sheet != null) {
-                s_CompiledStyles[uniqueStyleId] = sheet;
-            }
+                case StyleTokenType.BooleanAnd:
+                    operatorNode = StyleASTNodeFactory.OperatorNode(StyleOperatorType.BooleanAnd);
+                    return true;
 
-            return sheet == null ? default : sheet.GetStyleGroup(styleName);
-        }
+                case StyleTokenType.BooleanOr:
+                    operatorNode = StyleASTNodeFactory.OperatorNode(StyleOperatorType.BooleanOr);
+                    return true;
 
-        private static ParsedStyleSheet TryParseStyleFromClassPath(string path) {
-            Type styleType = TypeProcessor.GetRuntimeType(Path.GetFileNameWithoutExtension(path));
+                case StyleTokenType.Equals:
+                    operatorNode = StyleASTNodeFactory.OperatorNode(StyleOperatorType.Equals);
+                    return true;
 
-            if (styleType == null) return null;
-            ParsedStyleSheet sheet = new ParsedStyleSheet();
-            List<UIStyleGroup> groups = new List<UIStyleGroup>();
+                case StyleTokenType.NotEquals:
+                    operatorNode = StyleASTNodeFactory.OperatorNode(StyleOperatorType.NotEquals);
+                    return true;
 
-            MethodInfo[] methods = styleType.GetMethods(BindingFlags.Public | BindingFlags.Instance | BindingFlags.NonPublic | BindingFlags.Static);
-            for (int i = 0; i < methods.Length; i++) {
-                MethodInfo methodInfo = methods[i];
+                case StyleTokenType.GreaterThan:
+                    operatorNode = StyleASTNodeFactory.OperatorNode(StyleOperatorType.GreaterThan);
+                    return true;
 
-                ExportStyleAttribute attr = (ExportStyleAttribute) methodInfo.GetCustomAttribute(typeof(ExportStyleAttribute));
+                case StyleTokenType.GreaterThanEqualTo:
+                    operatorNode = StyleASTNodeFactory.OperatorNode(StyleOperatorType.GreaterThanEqualTo);
+                    return true;
 
-                if (attr == null) continue;
+                case StyleTokenType.LessThan:
+                    operatorNode = StyleASTNodeFactory.OperatorNode(StyleOperatorType.LessThan);
+                    return true;
 
-                if (!methodInfo.IsStatic) {
-                    throw new Exception($"Methods annotated with {nameof(ExportStyleAttribute)} must be static");
+                case StyleTokenType.LessThanEqualTo:
+                    operatorNode = StyleASTNodeFactory.OperatorNode(StyleOperatorType.LessThanEqualTo);
+                    return true;
+
+                case StyleTokenType.QuestionMark:
+                    operatorNode = StyleASTNodeFactory.OperatorNode(StyleOperatorType.TernaryCondition);
+                    return true;
+
+                case StyleTokenType.Colon:
+                    operatorNode = StyleASTNodeFactory.OperatorNode(StyleOperatorType.TernarySelection);
+                    return true;
+
+                case StyleTokenType.As: {
+                    operatorNode = StyleASTNodeFactory.OperatorNode(StyleOperatorType.As);
+                    return true;
                 }
 
-                if (methods[i].GetParameters().Length != 0) {
-                    throw new Exception($"Methods annotated with {nameof(ExportStyleAttribute)} must not accept parameters");
-                }
-
-                if (methodInfo.ReturnType == typeof(UIStyle)) {
-                    UIStyleGroup group = new UIStyleGroup();
-                    group.name = attr.name;
-                    group.normal = (UIStyle) methodInfo.Invoke(null, null);
-                    groups.Add(group);
-                }
-                else if (methodInfo.ReturnType == typeof(UIStyleGroup)) {
-                    UIStyleGroup group = (UIStyleGroup) methodInfo.Invoke(null, null);
-                    group.name = attr.name;
-                    groups.Add(group);
-                }
-                else {
-                    throw new Exception($"Methods annotated with {nameof(ExportStyleAttribute)} must return {nameof(UIStyle)} or {nameof(UIStyleGroup)}");
-                }
-            }
-
-            sheet.styles = groups.ToArray();
-            return sheet;
-        }
-
-        // var name colon equals value
-        private static StyleVariable ResolveVariable(List<StyleVariable> variables, List<ImportDefinition> imports, StyleComponent component) {
-            string body = component.body;
-            int ptr = 0;
-            ParseUtil.ConsumeString(":", body, ref ptr);
-            string typeName = ParseUtil.ReadToWhitespace(body, ref ptr);
-            ParseUtil.ConsumeString("=", body, ref ptr);
-            string value = ParseUtil.ReadToStatementEnd(body, ref ptr);
-            StyleVariable retn = new StyleVariable();
-            retn.name = "@" + component.name;
-
-            switch (typeName.ToLower()) {
-                case "color":
-                    retn.type = typeof(Color);
-                    retn.value = ParseUtil.ParseColor(variables, value);
-                    break;
-                case "int":
-                    retn.type = typeof(int);
-                    retn.value = ParseUtil.ParseInt(variables, value);
-                    break;
-                case "float":
-                    retn.type = typeof(float);
-                    retn.value = ParseUtil.ParseFloat(variables, value);
-                    break;
-                case "fixed-length":
-                    retn.type = typeof(UIFixedLength);
-                    retn.value = ParseUtil.ParseFixedLength(variables, value);
-                    break;
-                case "measurement":
-                    retn.type = typeof(UIMeasurement);
-                    retn.value = ParseUtil.ParseMeasurement(variables, value);
-                    break;
-                case "layout-type":
-                    retn.type = typeof(LayoutType);
-                    retn.value = ParseUtil.ParseLayoutType(variables, value);
-                    break;
-                case "layout-direction":
-                    retn.type = typeof(LayoutDirection);
-                    retn.value = ParseUtil.ParseLayoutDirection(variables, value);
-                    break;
                 default:
-                    throw new NotImplementedException();
+                    throw new Exception("Unknown op type");
             }
-
-            // if local reference make sure it was defined already
-            return retn;
-        }
-
-        private static ImportDefinition ResolveImport(List<StyleVariable> variables, StyleComponent component) {
-            string body = component.body;
-            int ptr = 0;
-            string alias = ParseUtil.ReadToWhitespace(body, ref ptr);
-            ParseUtil.ConsumeString("=", body, ref ptr);
-            string path = ParseUtil.ReadToStatementEnd(body, ref ptr);
-            ImportDefinition import = new ImportDefinition();
-            ParsedStyleSheet sheet;
-            if (!s_CompiledStyles.TryGetValue(path, out sheet)) {
-                string filePath = UnityEngine.Application.dataPath + "/" + path;
-                if (!File.Exists(filePath)) {
-                    throw new ParseException("File at " + path + " does not exist or is a not a .style file");
-                }
-
-                if (s_CurrentlyParsingList.Contains(filePath)) {
-                    throw new ParseException("Cycle in imports");
-                }
-
-                s_CurrentlyParsingList.Add(filePath);
-
-                string content = File.ReadAllText(filePath);
-
-                sheet = ParseFromString(content);
-                s_CurrentlyParsingList.Remove(filePath);
-                s_CompiledStyles[path] = sheet;
-                for (int i = 0; i < sheet.variables.Count; i++) {
-                    StyleVariable v = new StyleVariable();
-                    v.name = "@" + alias + "." + sheet.variables[i].name;
-                    v.value = sheet.variables[i].value;
-                    v.type = sheet.variables[i].type;
-                    variables.Add(v);
-                }
-            }
-
-            import.name = alias;
-            import.path = path;
-            import.sheet = sheet;
-            return import;
-        }
-
-        public static ParsedStyleSheet ParseFromString(string input) {
-            if (input == null) {
-                return null;
-            }
-
-            ParsedStyleSheet retn = new ParsedStyleSheet();
-            List<StyleComponent> output = new List<StyleComponent>();
-            int ptr = 0;
-
-            if (input.Length == 0) {
-                return retn;
-            }
-
-            while (ptr < input.Length) {
-                int start = ptr;
-                ParseUtil.ConsumeComment(input, ref ptr);
-                ptr = ReadStyleDefinition(ptr, input, output);
-                ptr = ReadImplicitStyleDefinition(ptr, input, output);
-                ptr = ReadVariableDefinition(ptr, input, output);
-                ptr = ReadImportDefinition(ptr, input, output);
-                ptr = ReadCursorDefinition(ptr, input, output);
-                ptr = ParseUtil.ConsumeWhiteSpace(ptr, input);
-                if (ptr == start && ptr < input.Length) {
-                    throw new ParseException("Style Tokenizer failed on string: " + input);
-                }
-            }
-
-            List<UIStyleGroup> styleList = ListPool<UIStyleGroup>.Get();
-            List<StyleVariable> localVariables = ListPool<StyleVariable>.Get();
-            List<StyleVariable> variables = ListPool<StyleVariable>.Get();
-            List<ImportDefinition> imports = ListPool<ImportDefinition>.Get();
-
-            for (int i = 0; i < output.Count; i++) {
-                StyleComponent current = output[i];
-                if (current.type == StyleComponentType.Import) {
-                    imports.Add(ResolveImport(variables, current));
-                }
-            }
-
-            for (int i = 0; i < output.Count; i++) {
-                StyleComponent current = output[i];
-                if (current.type == StyleComponentType.Variable) {
-                    variables.Add(ResolveVariable(variables, imports, current));
-                    localVariables.Add(variables[variables.Count - 1]);
-                }
-            }
-
-            for (int i = 0; i < output.Count; i++) {
-                StyleComponent current = output[i];
-                switch (current.type) {
-                    case StyleComponentType.Style:
-                        styleList.Add(ParseStyle(current, variables, imports));
-                        break;
-                    case StyleComponentType.ImplicitStyle:
-                        throw new NotImplementedException();
-                    
-                    case StyleComponentType.Animation:
-                        break;
-                    case StyleComponentType.Cursor:
-                        break;
-                    case StyleComponentType.Texture:
-                        break;
-                    case StyleComponentType.Font:
-                        break;
-                    case StyleComponentType.Query:
-                        break;
-                    case StyleComponentType.Variable:
-                    case StyleComponentType.Import:
-                        break;
-                    default:
-                        throw new ArgumentOutOfRangeException();
-                }
-            }
-
-            retn.styles = styleList.ToArray();
-            retn.variables = localVariables;
-            
-            ListPool<UIStyleGroup>.Release(ref styleList);
-            ListPool<ImportDefinition>.Release(ref imports);
-            ListPool<StyleVariable>.Release(ref variables);
-            return retn;
-        }
-
-        private static UIStyleGroup ParseStyle(StyleComponent styleComponent, List<StyleVariable> variables, List<ImportDefinition> imports) {
-            int ptr = 0;
-            string input = styleComponent.body;
-
-            UIStyle currentStyle = new UIStyle();
-            UIStyleGroup styleGroup = new UIStyleGroup();
-            styleGroup.name = styleComponent.name;
-            styleGroup.normal = currentStyle;
-
-            ptr = ParseUtil.ConsumeWhiteSpace(ptr, input);
-
-            Stack<UIStyle> styleStack = StackPool<UIStyle>.Get();
-
-            styleStack.Push(currentStyle);
-            StyleParserContext context = new StyleParserContext();
-            context.targetStyle = currentStyle;
-            context.variables = variables;
-            context.imports = imports;
-
-            while (ptr < input.Length) {
-
-                if (ParseUtil.ConsumeComment(input, ref ptr)) {
-                    continue;
-                }
-
-                int start = ptr;
-                char current = input[ptr];
-                
-                // parse name of attr or state or element property
-                if (current == '[') {
-                    string stateName = ParseUtil.ReadBlock(input, ref ptr, '[', ']');
-                    ParseUtil.ConsumeString("{", input, ref ptr);
-                    switch (stateName.ToLower()) {
-                        case "normal":
-                            context.targetStyle = styleGroup.normal;
-                            break;
-                        case "focused":
-                            styleGroup.focused = styleGroup.focused ?? new UIStyle();
-                            context.targetStyle = styleGroup.focused;
-                            break;
-                        case "hover":
-                            styleGroup.hover = styleGroup.hover ?? new UIStyle();
-                            context.targetStyle = styleGroup.hover;
-                            break;
-                        case "active":
-                            styleGroup.active = styleGroup.active ?? new UIStyle();
-                            context.targetStyle = styleGroup.active;
-                            break;
-                        default:
-                            throw new ParseException("Style ‘" + styleGroup.name + "’\n" + "Unknown style state: " + stateName);
-                    }
-                }
-                else if (current == '}') {
-                    context.targetStyle = styleGroup.normal;
-                    ptr++;
-                }
-//                else if (current == ':') {
-//                    string eventName = ParseEventName(input, ref ptr);
-//                    string stateBody = ReadBlock(input, ref ptr, '{', '}');
-//                }
-                else if (char.IsLetter(current)) {
-                    string id = ParseUtil.ReadIdentifier(input, ref ptr);
-                    ParseUtil.ConsumeString("=", input, ref ptr);
-                    string value = ParseUtil.ReadToStatementEnd(input, ref ptr);
-
-                    if (value == null) {
-                        throw new ParseException("Style ‘" + styleGroup.name + "’\n" + "Unexpected end of input");
-                    }
-
-                    MapAction action;
-                    // I think this should be replaced with a huge switch statement
-                    if (s_StylePropertyMappers.TryGetValue(id.ToLower(), out action)) {
-                        action(context, id, value);
-                    }
-                    else {
-                        Debug.Log("Style ‘" + styleGroup.name + "’\n" + "Encountered unknown style property name: " + id);
-                        return styleGroup;
-                    }
-                }
-                else {
-                    throw new ParseException("Style ‘" + styleGroup.name + "’\n" + ParseUtil.ProduceErrorMessage(input, ptr));
-                }
-
-                ptr = ParseUtil.ConsumeWhiteSpace(ptr, input);
-                if (ptr == start && ptr < input.Length) {
-                    throw new ParseException("Style Tokenizer failed on string: " + input);
-                }
-            }
-
-
-            return styleGroup;
-        }
-
-        private static int ReadVariableDefinition(int ptr, string input, List<StyleComponent> output) {
-            int start = ptr;
-
-            ptr = ParseUtil.ConsumeWhiteSpace(ptr, input);
-            if (!ParseUtil.TryReadCharacters(input, "var ", ref ptr)) {
-                return start;
-            }
-
-            StyleComponent retn = new StyleComponent(
-                StyleComponentType.Variable,
-                ParseUtil.ReadIdentifierOrThrow(input, ref ptr),
-                null,
-                ParseUtil.ReadToStatementEnd(input, ref ptr)
-            );
-
-            output.Add(retn);
-            return ptr;
-        }
-
-        private static int ReadImportDefinition(int ptr, string input, List<StyleComponent> output) {
-            int start = ptr;
-
-            ptr = ParseUtil.ConsumeWhiteSpace(ptr, input);
-            if (!ParseUtil.TryReadCharacters(input, "import ", ref ptr)) {
-                return start;
-            }
-
-            StyleComponent retn = new StyleComponent(
-                StyleComponentType.Import,
-                ParseUtil.ReadIdentifierOrThrow(input, ref ptr),
-                null,
-                ParseUtil.ReadToStatementEnd(input, ref ptr)
-            );
-
-            output.Add(retn);
-            return ptr;
-        }
-
-        // style space string (space*) (colon? identifier+) (space*) open-brace (space*) .* (space*) close-brace
-        private static int ReadStyleDefinition(int ptr, string input, List<StyleComponent> output) {
-            int start = ptr;
-
-            ptr = ParseUtil.ConsumeWhiteSpace(ptr, input);
-
-            // if we get past here we can assume what we are parsing is actually a style definition
-            if (!ParseUtil.TryReadCharacters(input, "style ", ref ptr)) {
-                return start;
-            }
-
-            StyleComponent retn = new StyleComponent(
-                StyleComponentType.Style,
-                ParseUtil.ReadStyleIdentifierOrThrow(input, ref ptr),
-                ReadInheritanceList(input, ref ptr),
-                ParseUtil.ReadBlockOrThrow(input, ref ptr, '{', '}')
-            );
-
-            output.Add(retn);
-
-            return ptr;
-        }
-        
-        // style space string (space*) (colon? identifier+) (space*) open-brace (space*) .* (space*) close-brace
-        private static int ReadImplicitStyleDefinition(int ptr, string input, List<StyleComponent> output) {
-            int start = ptr;
-
-            ptr = ParseUtil.ConsumeWhiteSpace(ptr, input);
-
-            // if we get past here we can assume what we are parsing is actually a style definition
-            if (!ParseUtil.TryReadCharacters(input, "implicit style ", ref ptr)) {
-                return start;
-            }
-
-            StyleComponent retn = new StyleComponent(
-                StyleComponentType.ImplicitStyle,
-                ParseUtil.ReadIdentifierOrThrow(input, ref ptr),
-                ReadInheritanceList(input, ref ptr),
-                ParseUtil.ReadBlockOrThrow(input, ref ptr, '{', '}')
-            );
-
-            output.Add(retn);
-
-            return ptr;
-        }
-
-        private static int ReadCursorDefinition(int ptr, string input, List<StyleComponent> output) {
-            int start = ptr;
-            ptr = ParseUtil.ConsumeWhiteSpace(ptr, input);
-            if (!ParseUtil.TryReadCharacters(input, "cursor ", ref ptr)) {
-                return start;
-            }
-
-            StyleComponent retn = new StyleComponent(
-                StyleComponentType.Cursor,
-                ParseUtil.ReadIdentifierOrThrow(input, ref ptr),
-                null,
-                ParseUtil.ReadBlockOrThrow(input, ref ptr, '{', '}')
-            );
-
-            output.Add(retn);
-
-            return ptr;
-        }
-
-        private static string[] ReadInheritanceList(string input, ref int ptr) {
-            return null;
-        }
-
-        static StyleParser() {
-            s_CurrentlyParsingList = new List<string>();
-            s_StylePropertyMappers = new Dictionary<string, MapAction>();
-            // todo -- get rid of this, or at least don't allocate so many actions. 
-            
-            StylePropertyMapper[] styleIdentifiers = {
-                new StylePropertyMapper("Overflow", StylePropertyMappers.DisplayMapper),
-                new StylePropertyMapper("OverflowX", StylePropertyMappers.DisplayMapper),
-                new StylePropertyMapper("OverflowY", StylePropertyMappers.DisplayMapper),
-
-                new StylePropertyMapper("BackgroundColor", StylePropertyMappers.DisplayMapper),
-                new StylePropertyMapper("BorderColor", StylePropertyMappers.DisplayMapper),
-                new StylePropertyMapper("BackgroundImage", StylePropertyMappers.DisplayMapper),
-                new StylePropertyMapper("Opacity", StylePropertyMappers.DisplayMapper),
-                new StylePropertyMapper("Cursor", StylePropertyMappers.DisplayMapper),
-                new StylePropertyMapper("Visibility", StylePropertyMappers.DisplayMapper), 
-
-                new StylePropertyMapper("GridItemColStart", StylePropertyMappers.GridItemMapper),
-                new StylePropertyMapper("GridItemColSpan", StylePropertyMappers.GridItemMapper),
-                new StylePropertyMapper("GridItemRowStart", StylePropertyMappers.GridItemMapper),
-                new StylePropertyMapper("GridItemRowSpan", StylePropertyMappers.GridItemMapper),
-                new StylePropertyMapper("GridItemColSelfAlignment", StylePropertyMappers.GridItemMapper),
-                new StylePropertyMapper("GridItemRowSelfAlignment", StylePropertyMappers.GridItemMapper),
-
-                new StylePropertyMapper("GridLayoutDirection", StylePropertyMappers.GridLayoutMapper),
-                new StylePropertyMapper("GridLayoutDensity", StylePropertyMappers.GridLayoutMapper),
-                new StylePropertyMapper("GridLayoutColTemplate", StylePropertyMappers.GridLayoutMapper),
-                new StylePropertyMapper("GridLayoutRowTemplate", StylePropertyMappers.GridLayoutMapper),
-                new StylePropertyMapper("GridLayoutMainAxisAutoSize", StylePropertyMappers.GridLayoutMapper),
-                new StylePropertyMapper("GridLayoutCrossAxisAutoSize", StylePropertyMappers.GridLayoutMapper),
-                new StylePropertyMapper("GridLayoutColGap", StylePropertyMappers.GridLayoutMapper),
-                new StylePropertyMapper("GridLayoutRowGap", StylePropertyMappers.GridLayoutMapper),
-                new StylePropertyMapper("GridLayoutColAlignment", StylePropertyMappers.GridLayoutMapper),
-                new StylePropertyMapper("GridLayoutRowAlignment", StylePropertyMappers.GridLayoutMapper),
-
-                new StylePropertyMapper("FlexLayoutWrap", StylePropertyMappers.FlexLayoutMapper),
-                new StylePropertyMapper("FlexLayoutDirection", StylePropertyMappers.FlexLayoutMapper),
-                new StylePropertyMapper("FlexLayoutMainAxisAlignment", StylePropertyMappers.FlexLayoutMapper),
-                new StylePropertyMapper("FlexLayoutCrossAxisAlignment", StylePropertyMappers.FlexLayoutMapper),
-
-                new StylePropertyMapper("FlexItemSelfAlignment", StylePropertyMappers.FlexItemMapper),
-                new StylePropertyMapper("FlexItemOrder", StylePropertyMappers.FlexItemMapper),
-                new StylePropertyMapper("FlexItemGrow", StylePropertyMappers.FlexItemMapper),
-                new StylePropertyMapper("FlexItemShrink", StylePropertyMappers.FlexItemMapper),
-
-                new StylePropertyMapper("Margin", StylePropertyMappers.MarginMapper),
-                new StylePropertyMapper("MarginTop", StylePropertyMappers.MarginMapper),
-                new StylePropertyMapper("MarginRight", StylePropertyMappers.MarginMapper),
-                new StylePropertyMapper("MarginBottom", StylePropertyMappers.MarginMapper),
-                new StylePropertyMapper("MarginLeft", StylePropertyMappers.MarginMapper),
-
-                new StylePropertyMapper("Border", StylePropertyMappers.PaddingBorderMapper),
-                new StylePropertyMapper("BorderTop", StylePropertyMappers.PaddingBorderMapper),
-                new StylePropertyMapper("BorderRight", StylePropertyMappers.PaddingBorderMapper),
-                new StylePropertyMapper("BorderBottom", StylePropertyMappers.PaddingBorderMapper),
-                new StylePropertyMapper("BorderLeft", StylePropertyMappers.PaddingBorderMapper),
-
-                new StylePropertyMapper("Padding", StylePropertyMappers.PaddingBorderMapper),
-                new StylePropertyMapper("PaddingTop", StylePropertyMappers.PaddingBorderMapper),
-                new StylePropertyMapper("PaddingRight", StylePropertyMappers.PaddingBorderMapper),
-                new StylePropertyMapper("PaddingBottom", StylePropertyMappers.PaddingBorderMapper),
-                new StylePropertyMapper("PaddingLeft", StylePropertyMappers.PaddingBorderMapper),
-
-                new StylePropertyMapper("BorderRadius", StylePropertyMappers.BorderRadiusMapper),
-                new StylePropertyMapper("BorderRadiusTopLeft", StylePropertyMappers.BorderRadiusMapper),
-                new StylePropertyMapper("BorderRadiusTopRight", StylePropertyMappers.BorderRadiusMapper),
-                new StylePropertyMapper("BorderRadiusBottomLeft", StylePropertyMappers.BorderRadiusMapper),
-                new StylePropertyMapper("BorderRadiusBottomRight", StylePropertyMappers.BorderRadiusMapper),
-
-                new StylePropertyMapper("TransformPosition", StylePropertyMappers.TransformMapper),
-                new StylePropertyMapper("TransformPositionX", StylePropertyMappers.TransformMapper),
-                new StylePropertyMapper("TransformPositionY", StylePropertyMappers.TransformMapper),
-                new StylePropertyMapper("TransformScale", StylePropertyMappers.TransformMapper),
-                new StylePropertyMapper("TransformScaleX", StylePropertyMappers.TransformMapper),
-                new StylePropertyMapper("TransformScaleY", StylePropertyMappers.TransformMapper),
-                new StylePropertyMapper("TransformPivot", StylePropertyMappers.TransformMapper),
-                new StylePropertyMapper("TransformPivotX", StylePropertyMappers.TransformMapper),
-                new StylePropertyMapper("TransformPivotY", StylePropertyMappers.TransformMapper),
-                new StylePropertyMapper("TransformRotation", StylePropertyMappers.TransformMapper),
-                new StylePropertyMapper("TransformBehavior", StylePropertyMappers.TransformMapper),
-                new StylePropertyMapper("TransformBehaviorX", StylePropertyMappers.TransformMapper),
-                new StylePropertyMapper("TransformBehaviorY", StylePropertyMappers.TransformMapper),
-
-                new StylePropertyMapper("MinWidth", StylePropertyMappers.SizeMapper),
-                new StylePropertyMapper("MaxWidth", StylePropertyMappers.SizeMapper),
-                new StylePropertyMapper("PreferredWidth", StylePropertyMappers.SizeMapper),
-                new StylePropertyMapper("MinHeight", StylePropertyMappers.SizeMapper),
-                new StylePropertyMapper("MaxHeight", StylePropertyMappers.SizeMapper),
-                new StylePropertyMapper("PreferredHeight", StylePropertyMappers.SizeMapper),
-                new StylePropertyMapper("PreferredSize", StylePropertyMappers.SizeMapper),
-                new StylePropertyMapper("MinSize", StylePropertyMappers.SizeMapper),
-                new StylePropertyMapper("MaxSize", StylePropertyMappers.SizeMapper),
-
-                new StylePropertyMapper("LayoutType", StylePropertyMappers.LayoutMapper),
-                new StylePropertyMapper("LayoutBehavior", StylePropertyMappers.LayoutMapper),
-                new StylePropertyMapper("AnchorTop", StylePropertyMappers.LayoutMapper),
-                new StylePropertyMapper("AnchorRight", StylePropertyMappers.LayoutMapper),
-                new StylePropertyMapper("AnchorBottom", StylePropertyMappers.LayoutMapper),
-                new StylePropertyMapper("AnchorLeft", StylePropertyMappers.LayoutMapper),
-                new StylePropertyMapper("AnchorTarget", StylePropertyMappers.LayoutMapper),
-                new StylePropertyMapper("ZIndex", StylePropertyMappers.LayoutMapper),
-                new StylePropertyMapper("RenderLayer", StylePropertyMappers.LayoutMapper),
-                new StylePropertyMapper("RenderLayerOffset", StylePropertyMappers.LayoutMapper),
-
-                new StylePropertyMapper("TextColor", StylePropertyMappers.TextMapper),
-                new StylePropertyMapper("TextFontAsset", StylePropertyMappers.TextMapper),
-                new StylePropertyMapper("TextFontSize", StylePropertyMappers.TextMapper),
-                new StylePropertyMapper("TextFontStyle", StylePropertyMappers.TextMapper),
-                new StylePropertyMapper("TextAlignment", StylePropertyMappers.TextMapper),
-                new StylePropertyMapper("TextWhitespaceMode", StylePropertyMappers.TextMapper),
-                new StylePropertyMapper("TextWrapMode", StylePropertyMappers.TextMapper),
-                new StylePropertyMapper("TextHorizontalOverflow", StylePropertyMappers.TextMapper),
-                new StylePropertyMapper("TextVerticalOverflow", StylePropertyMappers.TextMapper),
-                new StylePropertyMapper("TextIndentFirstLine", StylePropertyMappers.TextMapper),
-                new StylePropertyMapper("TextIndentNewLine", StylePropertyMappers.TextMapper),
-                new StylePropertyMapper("TextLayoutStyle", StylePropertyMappers.TextMapper),
-                new StylePropertyMapper("TextAutoSize", StylePropertyMappers.TextMapper),
-                new StylePropertyMapper("TextTransform", StylePropertyMappers.TextMapper),
-
-                new StylePropertyMapper("BackgroundFillType", null),
-                new StylePropertyMapper("BackgroundShapeType", null),
-                new StylePropertyMapper("BackgroundSecondaryColor", null),
-                new StylePropertyMapper("BackgroundGradientStart", null),
-                new StylePropertyMapper("BackgroundGradientAxis", null),
-                new StylePropertyMapper("BackgroundGradientType", null),
-                new StylePropertyMapper("BackgroundFillRotation", null),
-                new StylePropertyMapper("BackgroundFillOffset", null),
-                new StylePropertyMapper("BackgroundGridSize", null),
-                new StylePropertyMapper("BackgroundLineSize", null),
-
-                new StylePropertyMapper("ScrollbarVerticalTrackSize", StylePropertyMappers.ScrollMapper),
-                new StylePropertyMapper("ScrollbarVerticalTrackColor", StylePropertyMappers.ScrollMapper),
-                new StylePropertyMapper("ScrollbarVerticalTrackBorderRadius", StylePropertyMappers.ScrollMapper),
-                new StylePropertyMapper("ScrollbarVerticalTrackBorderSize", StylePropertyMappers.ScrollMapper),
-                new StylePropertyMapper("ScrollbarVerticalTrackBorderColor", StylePropertyMappers.ScrollMapper),
-                new StylePropertyMapper("ScrollbarVerticalTrackImage", StylePropertyMappers.ScrollMapper),
-
-                new StylePropertyMapper("ScrollbarVerticalHandleSize", StylePropertyMappers.ScrollMapper),
-                new StylePropertyMapper("ScrollbarVerticalHandleColor", StylePropertyMappers.ScrollMapper),
-                new StylePropertyMapper("ScrollbarVerticalHandleBorderRadius", StylePropertyMappers.ScrollMapper),
-                new StylePropertyMapper("ScrollbarVerticalHandleBorderSize", StylePropertyMappers.ScrollMapper),
-                new StylePropertyMapper("ScrollbarVerticalHandleBorderColor", StylePropertyMappers.ScrollMapper),
-                new StylePropertyMapper("ScrollbarVerticalHandleImage", StylePropertyMappers.ScrollMapper),
-
-                new StylePropertyMapper("ScrollbarVerticalIncrementSize", StylePropertyMappers.ScrollMapper),
-                new StylePropertyMapper("ScrollbarVerticalIncrementColor", StylePropertyMappers.ScrollMapper),
-                new StylePropertyMapper("ScrollbarVerticalIncrementBorderRadius", StylePropertyMappers.ScrollMapper),
-                new StylePropertyMapper("ScrollbarVerticalIncrementBorderSize", StylePropertyMappers.ScrollMapper),
-                new StylePropertyMapper("ScrollbarVerticalIncrementBorderColor", StylePropertyMappers.ScrollMapper),
-                new StylePropertyMapper("ScrollbarVerticalIncrementImage", StylePropertyMappers.ScrollMapper),
-
-                new StylePropertyMapper("ScrollbarVerticalDecrementSize", StylePropertyMappers.ScrollMapper),
-                new StylePropertyMapper("ScrollbarVerticalDecrementColor", StylePropertyMappers.ScrollMapper),
-                new StylePropertyMapper("ScrollbarVerticalDecrementBorderRadius", StylePropertyMappers.ScrollMapper),
-                new StylePropertyMapper("ScrollbarVerticalDecrementBorderSize", StylePropertyMappers.ScrollMapper),
-                new StylePropertyMapper("ScrollbarVerticalDecrementBorderColor", StylePropertyMappers.ScrollMapper),
-                new StylePropertyMapper("ScrollbarVerticalDecrementImage", StylePropertyMappers.ScrollMapper),
-
-                new StylePropertyMapper("ScrollbarHorizontalTrackSize", StylePropertyMappers.ScrollMapper),
-                new StylePropertyMapper("ScrollbarHorizontalTrackColor", StylePropertyMappers.ScrollMapper),
-                new StylePropertyMapper("ScrollbarHorizontalTrackBorderRadius", StylePropertyMappers.ScrollMapper),
-                new StylePropertyMapper("ScrollbarHorizontalTrackBorderSize", StylePropertyMappers.ScrollMapper),
-                new StylePropertyMapper("ScrollbarHorizontalTrackBorderColor", StylePropertyMappers.ScrollMapper),
-                new StylePropertyMapper("ScrollbarHorizontalTrackImage", StylePropertyMappers.ScrollMapper),
-
-                new StylePropertyMapper("ScrollbarHorizontalHandleSize", StylePropertyMappers.ScrollMapper),
-                new StylePropertyMapper("ScrollbarHorizontalHandleColor", StylePropertyMappers.ScrollMapper),
-                new StylePropertyMapper("ScrollbarHorizontalHandleBorderRadius", StylePropertyMappers.ScrollMapper),
-                new StylePropertyMapper("ScrollbarHorizontalHandleBorderSize", StylePropertyMappers.ScrollMapper),
-                new StylePropertyMapper("ScrollbarHorizontalHandleBorderColor", StylePropertyMappers.ScrollMapper),
-                new StylePropertyMapper("ScrollbarHorizontalHandleImage", StylePropertyMappers.ScrollMapper),
-
-                new StylePropertyMapper("ScrollbarHorizontalIncrementSize", StylePropertyMappers.ScrollMapper),
-                new StylePropertyMapper("ScrollbarHorizontalIncrementColor", StylePropertyMappers.ScrollMapper),
-                new StylePropertyMapper("ScrollbarHorizontalIncrementBorderRadius", StylePropertyMappers.ScrollMapper),
-                new StylePropertyMapper("ScrollbarHorizontalIncrementBorderSize", StylePropertyMappers.ScrollMapper),
-                new StylePropertyMapper("ScrollbarHorizontalIncrementBorderColor", StylePropertyMappers.ScrollMapper),
-                new StylePropertyMapper("ScrollbarHorizontalIncrementImage", StylePropertyMappers.ScrollMapper),
-
-                new StylePropertyMapper("ScrollbarHorizontalDecrementSize", StylePropertyMappers.ScrollMapper),
-                new StylePropertyMapper("ScrollbarHorizontalDecrementColor", StylePropertyMappers.ScrollMapper),
-                new StylePropertyMapper("ScrollbarHorizontalDecrementBorderRadius", StylePropertyMappers.ScrollMapper),
-                new StylePropertyMapper("ScrollbarHorizontalDecrementBorderSize", StylePropertyMappers.ScrollMapper),
-                new StylePropertyMapper("ScrollbarHorizontalDecrementBorderColor", StylePropertyMappers.ScrollMapper),
-                new StylePropertyMapper("ScrollbarHorizontalDecrementImage", StylePropertyMappers.ScrollMapper),
-
-                new StylePropertyMapper("ScrollbarTrackSize", StylePropertyMappers.ScrollMapper),
-                new StylePropertyMapper("ScrollbarTrackColor", StylePropertyMappers.ScrollMapper),
-                new StylePropertyMapper("ScrollbarTrackBorderRadius", StylePropertyMappers.ScrollMapper),
-                new StylePropertyMapper("ScrollbarTrackBorderSize", StylePropertyMappers.ScrollMapper),
-                new StylePropertyMapper("ScrollbarTrackBorderColor", StylePropertyMappers.ScrollMapper),
-                new StylePropertyMapper("ScrollbarTrackImage", StylePropertyMappers.ScrollMapper),
-
-                new StylePropertyMapper("ScrollbarHandleSize", StylePropertyMappers.ScrollMapper),
-                new StylePropertyMapper("ScrollbarHandleColor", StylePropertyMappers.ScrollMapper),
-                new StylePropertyMapper("ScrollbarHandleBorderRadius", StylePropertyMappers.ScrollMapper),
-                new StylePropertyMapper("ScrollbarHandleBorderSize", StylePropertyMappers.ScrollMapper),
-                new StylePropertyMapper("ScrollbarHandleBorderColor", StylePropertyMappers.ScrollMapper),
-                new StylePropertyMapper("ScrollbarHandleImage", StylePropertyMappers.ScrollMapper),
-
-                new StylePropertyMapper("ScrollbarIncrementSize", StylePropertyMappers.ScrollMapper),
-                new StylePropertyMapper("ScrollbarIncrementColor", StylePropertyMappers.ScrollMapper),
-                new StylePropertyMapper("ScrollbarIncrementBorderRadius", StylePropertyMappers.ScrollMapper),
-                new StylePropertyMapper("ScrollbarIncrementBorderSize", StylePropertyMappers.ScrollMapper),
-                new StylePropertyMapper("ScrollbarIncrementBorderColor", StylePropertyMappers.ScrollMapper),
-                new StylePropertyMapper("ScrollbarIncrementImage", StylePropertyMappers.ScrollMapper),
-
-                new StylePropertyMapper("ScrollbarDecrementSize", StylePropertyMappers.ScrollMapper),
-                new StylePropertyMapper("ScrollbarDecrementColor", StylePropertyMappers.ScrollMapper),
-                new StylePropertyMapper("ScrollbarDecrementBorderRadius", StylePropertyMappers.ScrollMapper),
-                new StylePropertyMapper("ScrollbarDecrementBorderSize", StylePropertyMappers.ScrollMapper),
-                new StylePropertyMapper("ScrollbarDecrementBorderColor", StylePropertyMappers.ScrollMapper),
-                new StylePropertyMapper("ScrollbarDecrementImage", StylePropertyMappers.ScrollMapper),
-            };
-
-
-            s_CompiledStyles = new Dictionary<string, ParsedStyleSheet>();
-            for (int i = 0; i < styleIdentifiers.Length; i++) {
-                s_StylePropertyMappers[styleIdentifiers[i].propertyName.ToLower()] = styleIdentifiers[i].mapFn;
-            }
-        }
-
-        private struct StylePropertyMapper {
-
-            public readonly string propertyName;
-            public readonly MapAction mapFn;
-
-            public StylePropertyMapper(string propertyName, MapAction mapFn) {
-                this.propertyName = propertyName;
-                this.mapFn = mapFn;
-            }
-
-        }
-
-        public struct StyleComponent {
-
-            public readonly string name;
-            public readonly string body;
-            public readonly StyleComponentType type;
-            public readonly string[] inheritance;
-
-            public StyleComponent(StyleComponentType type, string name, string[] inheritance, string body) {
-                this.type = type;
-                this.name = name;
-                this.body = body;
-                this.inheritance = inheritance;
-            }
-
-        }
-
-        public enum StyleComponentType {
-
-            Style,
-            Animation,
-            Cursor,
-            Texture,
-            Font,
-            Query,
-            Variable,
-            Import,
-            ImplicitStyle
-
         }
 
     }

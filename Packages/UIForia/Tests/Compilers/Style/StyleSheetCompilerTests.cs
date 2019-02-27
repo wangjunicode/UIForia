@@ -1,3 +1,4 @@
+using System;
 using NUnit.Framework;
 using UIForia;
 using UIForia.Compilers.Style;
@@ -903,5 +904,27 @@ style xyz {
         Assert.AreEqual(Color.red, styleGroup[0].groups[0].normal.BackgroundColor);
     }
     
+
+    [Test]
+    public void ParseASeeminglyBrokenStyle() {
+
+        try {
+            StyleParser2.Parse(@"
+style s { 
+    PreferredSize = 400px;
+    BackgroundColor = blue;
+    BackgroundImage = url(""Images/backgroundimg"")
+    BorderRadius = 0.35%;
+    Border = 12px;
+    BorderColor = green;
+}
+            ".Trim());
+            Assert.Fail("This should not have parsed!");
+        }
+        catch (ParseException e) {
+            Console.Write(e);
+            throw;
+        }
+    }
     
 }

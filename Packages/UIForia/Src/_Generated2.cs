@@ -77,6 +77,43 @@ namespace UIForia.StyleBindings {
 
     }
         
+    public class StyleBinding_UIFixedLength : StyleBinding {
+
+        public readonly Expression<UIForia.UIFixedLength> expression;
+        public readonly StylePropertyId propertyId;
+        
+        public StyleBinding_UIFixedLength(string propertyName, StylePropertyId propertyId, StyleState state, Expression<UIForia.UIFixedLength> expression)
+            : base(propertyName, state) {
+            this.propertyId = propertyId;
+            this.expression = expression;
+        }
+
+        public override void Execute(UIElement element, ExpressionContext context) {
+            if (!element.style.IsInState(state)) return;
+
+            var oldValue = element.style.propertyMap[(int)propertyId].AsUIFixedLength;
+            var value = expression.Evaluate(context);
+            if (value != oldValue) {
+                element.style.SetProperty(new StyleProperty(propertyId, value), state);
+            }
+        }
+
+        public override bool IsConstant() {
+            return expression.IsConstant();
+        }
+
+        public override void Apply(UIStyle style, ExpressionContext context) {
+            var value = expression.Evaluate(context);
+            style.SetProperty(new StyleProperty(propertyId, value));
+        }
+
+        public override void Apply(UIStyleSet styleSet, ExpressionContext context) {
+            var value = expression.Evaluate(context);
+            styleSet.SetProperty(new StyleProperty(propertyId, value), state);
+        }
+
+    }
+        
     public class StyleBinding_Texture2D : StyleBinding {
 
         public readonly Expression<UnityEngine.Texture2D> expression;
@@ -114,12 +151,12 @@ namespace UIForia.StyleBindings {
 
     }
         
-    public class StyleBinding_GradientType : StyleBinding {
+    public class StyleBinding_string : StyleBinding {
 
-        public readonly Expression<Shapes2D.GradientType> expression;
+        public readonly Expression<string> expression;
         public readonly StylePropertyId propertyId;
         
-        public StyleBinding_GradientType(string propertyName, StylePropertyId propertyId, StyleState state, Expression<Shapes2D.GradientType> expression)
+        public StyleBinding_string(string propertyName, StylePropertyId propertyId, StyleState state, Expression<string> expression)
             : base(propertyName, state) {
             this.propertyId = propertyId;
             this.expression = expression;
@@ -128,10 +165,10 @@ namespace UIForia.StyleBindings {
         public override void Execute(UIElement element, ExpressionContext context) {
             if (!element.style.IsInState(state)) return;
 
-            var oldValue = element.style.propertyMap[(int)propertyId].AsGradientType;
+            var oldValue = element.style.propertyMap[(int)propertyId].AsString;
             var value = expression.Evaluate(context);
             if (value != oldValue) {
-                element.style.SetProperty(new StyleProperty(propertyId, (int)value), state);
+                element.style.SetProperty(new StyleProperty(propertyId, 0, 0, value), state);
             }
         }
 
@@ -141,49 +178,12 @@ namespace UIForia.StyleBindings {
 
         public override void Apply(UIStyle style, ExpressionContext context) {
             var value = expression.Evaluate(context);
-            style.SetProperty(new StyleProperty(propertyId, (int)value));
+            style.SetProperty(new StyleProperty(propertyId, 0, 0, value));
         }
 
         public override void Apply(UIStyleSet styleSet, ExpressionContext context) {
             var value = expression.Evaluate(context);
-            styleSet.SetProperty(new StyleProperty(propertyId, (int)value), state);
-        }
-
-    }
-        
-    public class StyleBinding_GradientAxis : StyleBinding {
-
-        public readonly Expression<Shapes2D.GradientAxis> expression;
-        public readonly StylePropertyId propertyId;
-        
-        public StyleBinding_GradientAxis(string propertyName, StylePropertyId propertyId, StyleState state, Expression<Shapes2D.GradientAxis> expression)
-            : base(propertyName, state) {
-            this.propertyId = propertyId;
-            this.expression = expression;
-        }
-
-        public override void Execute(UIElement element, ExpressionContext context) {
-            if (!element.style.IsInState(state)) return;
-
-            var oldValue = element.style.propertyMap[(int)propertyId].AsGradientAxis;
-            var value = expression.Evaluate(context);
-            if (value != oldValue) {
-                element.style.SetProperty(new StyleProperty(propertyId, (int)value), state);
-            }
-        }
-
-        public override bool IsConstant() {
-            return expression.IsConstant();
-        }
-
-        public override void Apply(UIStyle style, ExpressionContext context) {
-            var value = expression.Evaluate(context);
-            style.SetProperty(new StyleProperty(propertyId, (int)value));
-        }
-
-        public override void Apply(UIStyleSet styleSet, ExpressionContext context) {
-            var value = expression.Evaluate(context);
-            styleSet.SetProperty(new StyleProperty(propertyId, (int)value), state);
+            styleSet.SetProperty(new StyleProperty(propertyId, 0, 0, value), state);
         }
 
     }
@@ -221,43 +221,6 @@ namespace UIForia.StyleBindings {
         public override void Apply(UIStyleSet styleSet, ExpressionContext context) {
             var value = expression.Evaluate(context);
             styleSet.SetProperty(new StyleProperty(propertyId, value), state);
-        }
-
-    }
-        
-    public class StyleBinding_BackgroundFillType : StyleBinding {
-
-        public readonly Expression<UIForia.Rendering.BackgroundFillType> expression;
-        public readonly StylePropertyId propertyId;
-        
-        public StyleBinding_BackgroundFillType(string propertyName, StylePropertyId propertyId, StyleState state, Expression<UIForia.Rendering.BackgroundFillType> expression)
-            : base(propertyName, state) {
-            this.propertyId = propertyId;
-            this.expression = expression;
-        }
-
-        public override void Execute(UIElement element, ExpressionContext context) {
-            if (!element.style.IsInState(state)) return;
-
-            var oldValue = element.style.propertyMap[(int)propertyId].AsBackgroundFillType;
-            var value = expression.Evaluate(context);
-            if (value != oldValue) {
-                element.style.SetProperty(new StyleProperty(propertyId, (int)value), state);
-            }
-        }
-
-        public override bool IsConstant() {
-            return expression.IsConstant();
-        }
-
-        public override void Apply(UIStyle style, ExpressionContext context) {
-            var value = expression.Evaluate(context);
-            style.SetProperty(new StyleProperty(propertyId, (int)value));
-        }
-
-        public override void Apply(UIStyleSet styleSet, ExpressionContext context) {
-            var value = expression.Evaluate(context);
-            styleSet.SetProperty(new StyleProperty(propertyId, (int)value), state);
         }
 
     }
@@ -706,43 +669,6 @@ namespace UIForia.StyleBindings {
 
     }
         
-    public class StyleBinding_UIFixedLength : StyleBinding {
-
-        public readonly Expression<UIForia.UIFixedLength> expression;
-        public readonly StylePropertyId propertyId;
-        
-        public StyleBinding_UIFixedLength(string propertyName, StylePropertyId propertyId, StyleState state, Expression<UIForia.UIFixedLength> expression)
-            : base(propertyName, state) {
-            this.propertyId = propertyId;
-            this.expression = expression;
-        }
-
-        public override void Execute(UIElement element, ExpressionContext context) {
-            if (!element.style.IsInState(state)) return;
-
-            var oldValue = element.style.propertyMap[(int)propertyId].AsUIFixedLength;
-            var value = expression.Evaluate(context);
-            if (value != oldValue) {
-                element.style.SetProperty(new StyleProperty(propertyId, value), state);
-            }
-        }
-
-        public override bool IsConstant() {
-            return expression.IsConstant();
-        }
-
-        public override void Apply(UIStyle style, ExpressionContext context) {
-            var value = expression.Evaluate(context);
-            style.SetProperty(new StyleProperty(propertyId, value));
-        }
-
-        public override void Apply(UIStyleSet styleSet, ExpressionContext context) {
-            var value = expression.Evaluate(context);
-            styleSet.SetProperty(new StyleProperty(propertyId, value), state);
-        }
-
-    }
-        
     public class StyleBinding_TMP_FontAsset : StyleBinding {
 
         public readonly Expression<TMPro.TMP_FontAsset> expression;
@@ -854,12 +780,12 @@ namespace UIForia.StyleBindings {
 
     }
         
-    public class StyleBinding_TextTransform : StyleBinding {
+    public class StyleBinding_ShadowType : StyleBinding {
 
-        public readonly Expression<UIForia.Text.TextTransform> expression;
+        public readonly Expression<UIForia.Rendering.ShadowType> expression;
         public readonly StylePropertyId propertyId;
         
-        public StyleBinding_TextTransform(string propertyName, StylePropertyId propertyId, StyleState state, Expression<UIForia.Text.TextTransform> expression)
+        public StyleBinding_ShadowType(string propertyName, StylePropertyId propertyId, StyleState state, Expression<UIForia.Rendering.ShadowType> expression)
             : base(propertyName, state) {
             this.propertyId = propertyId;
             this.expression = expression;
@@ -868,7 +794,7 @@ namespace UIForia.StyleBindings {
         public override void Execute(UIElement element, ExpressionContext context) {
             if (!element.style.IsInState(state)) return;
 
-            var oldValue = element.style.propertyMap[(int)propertyId].AsTextTransform;
+            var oldValue = element.style.propertyMap[(int)propertyId].AsShadowType;
             var value = expression.Evaluate(context);
             if (value != oldValue) {
                 element.style.SetProperty(new StyleProperty(propertyId, (int)value), state);
@@ -891,12 +817,12 @@ namespace UIForia.StyleBindings {
 
     }
         
-    public class StyleBinding_ShadowType : StyleBinding {
+    public class StyleBinding_TextTransform : StyleBinding {
 
-        public readonly Expression<UIForia.Rendering.ShadowType> expression;
+        public readonly Expression<UIForia.Text.TextTransform> expression;
         public readonly StylePropertyId propertyId;
         
-        public StyleBinding_ShadowType(string propertyName, StylePropertyId propertyId, StyleState state, Expression<UIForia.Rendering.ShadowType> expression)
+        public StyleBinding_TextTransform(string propertyName, StylePropertyId propertyId, StyleState state, Expression<UIForia.Text.TextTransform> expression)
             : base(propertyName, state) {
             this.propertyId = propertyId;
             this.expression = expression;
@@ -905,7 +831,7 @@ namespace UIForia.StyleBindings {
         public override void Execute(UIElement element, ExpressionContext context) {
             if (!element.style.IsInState(state)) return;
 
-            var oldValue = element.style.propertyMap[(int)propertyId].AsShadowType;
+            var oldValue = element.style.propertyMap[(int)propertyId].AsTextTransform;
             var value = expression.Evaluate(context);
             if (value != oldValue) {
                 element.style.SetProperty(new StyleProperty(propertyId, (int)value), state);
@@ -1149,43 +1075,6 @@ namespace UIForia.StyleBindings {
         }
 
     }
-        
-    public class StyleBinding_string : StyleBinding {
-
-        public readonly Expression<string> expression;
-        public readonly StylePropertyId propertyId;
-        
-        public StyleBinding_string(string propertyName, StylePropertyId propertyId, StyleState state, Expression<string> expression)
-            : base(propertyName, state) {
-            this.propertyId = propertyId;
-            this.expression = expression;
-        }
-
-        public override void Execute(UIElement element, ExpressionContext context) {
-            if (!element.style.IsInState(state)) return;
-
-            var oldValue = element.style.propertyMap[(int)propertyId].AsString;
-            var value = expression.Evaluate(context);
-            if (value != oldValue) {
-                element.style.SetProperty(new StyleProperty(propertyId, 0, 0, value), state);
-            }
-        }
-
-        public override bool IsConstant() {
-            return expression.IsConstant();
-        }
-
-        public override void Apply(UIStyle style, ExpressionContext context) {
-            var value = expression.Evaluate(context);
-            style.SetProperty(new StyleProperty(propertyId, 0, 0, value));
-        }
-
-        public override void Apply(UIStyleSet styleSet, ExpressionContext context) {
-            var value = expression.Evaluate(context);
-            styleSet.SetProperty(new StyleProperty(propertyId, 0, 0, value), state);
-        }
-
-    }
 
 }
 
@@ -1194,9 +1083,6 @@ namespace UIForia.Compilers {
     public partial class StyleBindingCompiler {
 
         private static readonly EnumAliasSource<UIForia.Rendering.Overflow> s_EnumSource_Overflow = new EnumAliasSource<UIForia.Rendering.Overflow>();
-        private static readonly EnumAliasSource<Shapes2D.GradientType> s_EnumSource_GradientType = new EnumAliasSource<Shapes2D.GradientType>();
-        private static readonly EnumAliasSource<Shapes2D.GradientAxis> s_EnumSource_GradientAxis = new EnumAliasSource<Shapes2D.GradientAxis>();
-        private static readonly EnumAliasSource<UIForia.Rendering.BackgroundFillType> s_EnumSource_BackgroundFillType = new EnumAliasSource<UIForia.Rendering.BackgroundFillType>();
         private static readonly EnumAliasSource<UIForia.Rendering.Visibility> s_EnumSource_Visibility = new EnumAliasSource<UIForia.Rendering.Visibility>();
         private static readonly EnumAliasSource<UIForia.Layout.CrossAxisAlignment> s_EnumSource_CrossAxisAlignment = new EnumAliasSource<UIForia.Layout.CrossAxisAlignment>();
         private static readonly EnumAliasSource<UIForia.Rendering.LayoutDirection> s_EnumSource_LayoutDirection = new EnumAliasSource<UIForia.Rendering.LayoutDirection>();
@@ -1206,8 +1092,8 @@ namespace UIForia.Compilers {
         private static readonly EnumAliasSource<UIForia.Layout.GridLayoutDensity> s_EnumSource_GridLayoutDensity = new EnumAliasSource<UIForia.Layout.GridLayoutDensity>();
         private static readonly EnumAliasSource<UIForia.Text.FontStyle> s_EnumSource_FontStyle = new EnumAliasSource<UIForia.Text.FontStyle>();
         private static readonly EnumAliasSource<UIForia.Text.TextAlignment> s_EnumSource_TextAlignment = new EnumAliasSource<UIForia.Text.TextAlignment>();
-        private static readonly EnumAliasSource<UIForia.Text.TextTransform> s_EnumSource_TextTransform = new EnumAliasSource<UIForia.Text.TextTransform>();
         private static readonly EnumAliasSource<UIForia.Rendering.ShadowType> s_EnumSource_ShadowType = new EnumAliasSource<UIForia.Rendering.ShadowType>();
+        private static readonly EnumAliasSource<UIForia.Text.TextTransform> s_EnumSource_TextTransform = new EnumAliasSource<UIForia.Text.TextTransform>();
         private static readonly EnumAliasSource<UIForia.Rendering.AnchorTarget> s_EnumSource_AnchorTarget = new EnumAliasSource<UIForia.Rendering.AnchorTarget>();
         private static readonly EnumAliasSource<UIForia.Rendering.TransformBehavior> s_EnumSource_TransformBehavior = new EnumAliasSource<UIForia.Rendering.TransformBehavior>();
         private static readonly EnumAliasSource<UIForia.Rendering.LayoutType> s_EnumSource_LayoutType = new EnumAliasSource<UIForia.Rendering.LayoutType>();
@@ -1222,20 +1108,26 @@ case "overflowx":
                     return new UIForia.StyleBindings.StyleBinding_Overflow("OverflowX", UIForia.Rendering.StylePropertyId.OverflowX, targetState.state, Compile<UIForia.Rendering.Overflow>(value, s_EnumSource_Overflow));                
                 case "overflowy":
                     return new UIForia.StyleBindings.StyleBinding_Overflow("OverflowY", UIForia.Rendering.StylePropertyId.OverflowY, targetState.state, Compile<UIForia.Rendering.Overflow>(value, s_EnumSource_Overflow));                
-                case "bordercolor":
-                    return new UIForia.StyleBindings.StyleBinding_Color("BorderColor", UIForia.Rendering.StylePropertyId.BorderColor, targetState.state, Compile<UnityEngine.Color>(value, colorSources));                
                 case "backgroundcolor":
                     return new UIForia.StyleBindings.StyleBinding_Color("BackgroundColor", UIForia.Rendering.StylePropertyId.BackgroundColor, targetState.state, Compile<UnityEngine.Color>(value, colorSources));                
+                case "backgroundimageoffsetx":
+                    return new UIForia.StyleBindings.StyleBinding_UIFixedLength("BackgroundImageOffsetX", UIForia.Rendering.StylePropertyId.BackgroundImageOffsetX, targetState.state, Compile<UIForia.UIFixedLength>(value, fixedSources));                
+                case "backgroundimageoffsety":
+                    return new UIForia.StyleBindings.StyleBinding_UIFixedLength("BackgroundImageOffsetY", UIForia.Rendering.StylePropertyId.BackgroundImageOffsetY, targetState.state, Compile<UIForia.UIFixedLength>(value, fixedSources));                
+                case "backgroundimagescalex":
+                    return new UIForia.StyleBindings.StyleBinding_UIFixedLength("BackgroundImageScaleX", UIForia.Rendering.StylePropertyId.BackgroundImageScaleX, targetState.state, Compile<UIForia.UIFixedLength>(value, fixedSources));                
+                case "backgroundimagescaley":
+                    return new UIForia.StyleBindings.StyleBinding_UIFixedLength("BackgroundImageScaleY", UIForia.Rendering.StylePropertyId.BackgroundImageScaleY, targetState.state, Compile<UIForia.UIFixedLength>(value, fixedSources));                
+                case "backgroundimagetilex":
+                    return new UIForia.StyleBindings.StyleBinding_UIFixedLength("BackgroundImageTileX", UIForia.Rendering.StylePropertyId.BackgroundImageTileX, targetState.state, Compile<UIForia.UIFixedLength>(value, fixedSources));                
+                case "backgroundimagetiley":
+                    return new UIForia.StyleBindings.StyleBinding_UIFixedLength("BackgroundImageTileY", UIForia.Rendering.StylePropertyId.BackgroundImageTileY, targetState.state, Compile<UIForia.UIFixedLength>(value, fixedSources));                
+                case "backgroundimagerotation":
+                    return new UIForia.StyleBindings.StyleBinding_UIFixedLength("BackgroundImageRotation", UIForia.Rendering.StylePropertyId.BackgroundImageRotation, targetState.state, Compile<UIForia.UIFixedLength>(value, fixedSources));                
                 case "backgroundimage":
                     return new UIForia.StyleBindings.StyleBinding_Texture2D("BackgroundImage", UIForia.Rendering.StylePropertyId.BackgroundImage, targetState.state, Compile<UnityEngine.Texture2D>(value, textureUrlSource));                
-                case "backgroundgradienttype":
-                    return new UIForia.StyleBindings.StyleBinding_GradientType("BackgroundGradientType", UIForia.Rendering.StylePropertyId.BackgroundGradientType, targetState.state, Compile<Shapes2D.GradientType>(value, s_EnumSource_GradientType));                
-                case "backgroundgradientaxis":
-                    return new UIForia.StyleBindings.StyleBinding_GradientAxis("BackgroundGradientAxis", UIForia.Rendering.StylePropertyId.BackgroundGradientAxis, targetState.state, Compile<Shapes2D.GradientAxis>(value, s_EnumSource_GradientAxis));                
-                case "backgroundgradientstart":
-                    return new UIForia.StyleBindings.StyleBinding_float("BackgroundGradientStart", UIForia.Rendering.StylePropertyId.BackgroundGradientStart, targetState.state, Compile<float>(value, null));                
                 case "painter":
-                    return new UIForia.StyleBindings.StyleBinding_BackgroundFillType("Painter", UIForia.Rendering.StylePropertyId.Painter, targetState.state, Compile<UIForia.Rendering.BackgroundFillType>(value, s_EnumSource_BackgroundFillType));                
+                    return new UIForia.StyleBindings.StyleBinding_string("Painter", UIForia.Rendering.StylePropertyId.Painter, targetState.state, Compile<string>(value, null));                
                 case "opacity":
                     return new UIForia.StyleBindings.StyleBinding_float("Opacity", UIForia.Rendering.StylePropertyId.Opacity, targetState.state, Compile<float>(value, null));                
                 case "cursor":
@@ -1310,6 +1202,8 @@ case "overflowx":
                     return new UIForia.StyleBindings.StyleBinding_UIMeasurement("MarginBottom", UIForia.Rendering.StylePropertyId.MarginBottom, targetState.state, Compile<UIForia.UIMeasurement>(value, measurementSources));                
                 case "marginleft":
                     return new UIForia.StyleBindings.StyleBinding_UIMeasurement("MarginLeft", UIForia.Rendering.StylePropertyId.MarginLeft, targetState.state, Compile<UIForia.UIMeasurement>(value, measurementSources));                
+                case "bordercolor":
+                    return new UIForia.StyleBindings.StyleBinding_Color("BorderColor", UIForia.Rendering.StylePropertyId.BorderColor, targetState.state, Compile<UnityEngine.Color>(value, colorSources));                
                 case "bordertop":
                     return new UIForia.StyleBindings.StyleBinding_UIFixedLength("BorderTop", UIForia.Rendering.StylePropertyId.BorderTop, targetState.state, Compile<UIForia.UIFixedLength>(value, fixedSources));                
                 case "borderright":
@@ -1344,8 +1238,6 @@ case "overflowx":
                     return new UIForia.StyleBindings.StyleBinding_FontStyle("TextFontStyle", UIForia.Rendering.StylePropertyId.TextFontStyle, targetState.state, Compile<UIForia.Text.FontStyle>(value, s_EnumSource_FontStyle));                
                 case "textalignment":
                     return new UIForia.StyleBindings.StyleBinding_TextAlignment("TextAlignment", UIForia.Rendering.StylePropertyId.TextAlignment, targetState.state, Compile<UIForia.Text.TextAlignment>(value, s_EnumSource_TextAlignment));                
-                case "texttransform":
-                    return new UIForia.StyleBindings.StyleBinding_TextTransform("TextTransform", UIForia.Rendering.StylePropertyId.TextTransform, targetState.state, Compile<UIForia.Text.TextTransform>(value, s_EnumSource_TextTransform));                
                 case "textoutlinewidth":
                     return new UIForia.StyleBindings.StyleBinding_float("TextOutlineWidth", UIForia.Rendering.StylePropertyId.TextOutlineWidth, targetState.state, Compile<float>(value, null));                
                 case "textoutlinecolor":
@@ -1372,6 +1264,8 @@ case "overflowx":
                     return new UIForia.StyleBindings.StyleBinding_float("TextShadowSoftness", UIForia.Rendering.StylePropertyId.TextShadowSoftness, targetState.state, Compile<float>(value, null));                
                 case "textshadowtype":
                     return new UIForia.StyleBindings.StyleBinding_ShadowType("TextShadowType", UIForia.Rendering.StylePropertyId.TextShadowType, targetState.state, Compile<UIForia.Rendering.ShadowType>(value, s_EnumSource_ShadowType));                
+                case "texttransform":
+                    return new UIForia.StyleBindings.StyleBinding_TextTransform("TextTransform", UIForia.Rendering.StylePropertyId.TextTransform, targetState.state, Compile<UIForia.Text.TextTransform>(value, s_EnumSource_TextTransform));                
                 case "anchortop":
                     return new UIForia.StyleBindings.StyleBinding_UIFixedLength("AnchorTop", UIForia.Rendering.StylePropertyId.AnchorTop, targetState.state, Compile<UIForia.UIFixedLength>(value, fixedSources));                
                 case "anchorright":
@@ -1410,6 +1304,12 @@ case "overflowx":
                     return new UIForia.StyleBindings.StyleBinding_int("RenderLayerOffset", UIForia.Rendering.StylePropertyId.RenderLayerOffset, targetState.state, Compile<int>(value, null));                
                 case "renderlayer":
                     return new UIForia.StyleBindings.StyleBinding_RenderLayer("RenderLayer", UIForia.Rendering.StylePropertyId.RenderLayer, targetState.state, Compile<UIForia.Rendering.RenderLayer>(value, s_EnumSource_RenderLayer));                
+                case "scrollbar":
+                    return new UIForia.StyleBindings.StyleBinding_string("Scrollbar", UIForia.Rendering.StylePropertyId.Scrollbar, targetState.state, Compile<string>(value, null));                
+                case "scrollbarsize":
+                    return new UIForia.StyleBindings.StyleBinding_UIMeasurement("ScrollbarSize", UIForia.Rendering.StylePropertyId.ScrollbarSize, targetState.state, Compile<UIForia.UIMeasurement>(value, measurementSources));                
+                case "scrollbarcolor":
+                    return new UIForia.StyleBindings.StyleBinding_Color("ScrollbarColor", UIForia.Rendering.StylePropertyId.ScrollbarColor, targetState.state, Compile<UnityEngine.Color>(value, colorSources));                
                 case "shadowtype":
                     return new UIForia.StyleBindings.StyleBinding_ShadowType("ShadowType", UIForia.Rendering.StylePropertyId.ShadowType, targetState.state, Compile<UIForia.Rendering.ShadowType>(value, s_EnumSource_ShadowType));                
                 case "shadowoffsetx":
@@ -1422,12 +1322,6 @@ case "overflowx":
                     return new UIForia.StyleBindings.StyleBinding_float("ShadowSoftnessY", UIForia.Rendering.StylePropertyId.ShadowSoftnessY, targetState.state, Compile<float>(value, null));                
                 case "shadowintensity":
                     return new UIForia.StyleBindings.StyleBinding_float("ShadowIntensity", UIForia.Rendering.StylePropertyId.ShadowIntensity, targetState.state, Compile<float>(value, null));                
-                case "scrollbar":
-                    return new UIForia.StyleBindings.StyleBinding_string("Scrollbar", UIForia.Rendering.StylePropertyId.Scrollbar, targetState.state, Compile<string>(value, null));                
-                case "scrollbarsize":
-                    return new UIForia.StyleBindings.StyleBinding_UIMeasurement("ScrollbarSize", UIForia.Rendering.StylePropertyId.ScrollbarSize, targetState.state, Compile<UIForia.UIMeasurement>(value, measurementSources));                
-                case "scrollbarcolor":
-                    return new UIForia.StyleBindings.StyleBinding_Color("ScrollbarColor", UIForia.Rendering.StylePropertyId.ScrollbarColor, targetState.state, Compile<UnityEngine.Color>(value, colorSources));                
                 
 
             }

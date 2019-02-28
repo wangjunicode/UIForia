@@ -17,13 +17,16 @@ namespace UIForia.Rendering {
 
 		public const Overflow OverflowX = UIForia.Rendering.Overflow.None;
 		public const Overflow OverflowY = UIForia.Rendering.Overflow.None;
-		public static readonly Color BorderColor = new Color(-1f, -1f, -1f, -1f);
 		public static readonly Color BackgroundColor = new Color(-1f, -1f, -1f, -1f);
+		public static readonly UIFixedLength BackgroundImageOffsetX = new UIFixedLength(0, UIFixedUnit.Pixel);
+		public static readonly UIFixedLength BackgroundImageOffsetY = new UIFixedLength(0, UIFixedUnit.Pixel);
+		public static readonly UIFixedLength BackgroundImageScaleX = new UIFixedLength(0, UIFixedUnit.Pixel);
+		public static readonly UIFixedLength BackgroundImageScaleY = new UIFixedLength(0, UIFixedUnit.Pixel);
+		public static readonly UIFixedLength BackgroundImageTileX = new UIFixedLength(0, UIFixedUnit.Pixel);
+		public static readonly UIFixedLength BackgroundImageTileY = new UIFixedLength(0, UIFixedUnit.Pixel);
+		public static readonly UIFixedLength BackgroundImageRotation = new UIFixedLength(0, UIFixedUnit.Pixel);
 		public static readonly Texture2D BackgroundImage = null;
-		public const GradientType BackgroundGradientType = Shapes2D.GradientType.Linear;
-		public const GradientAxis BackgroundGradientAxis = Shapes2D.GradientAxis.Horizontal;
-		public const float BackgroundGradientStart = 0f;
-		public const BackgroundFillType Painter = UIForia.Rendering.BackgroundFillType.Normal;
+		public static readonly string Painter = "";
 		public const float Opacity = 1f;
 		public static readonly CursorStyle Cursor = null;
 		public const Visibility Visibility = UIForia.Rendering.Visibility.Visible;
@@ -61,6 +64,7 @@ namespace UIForia.Rendering {
 		public static readonly UIMeasurement MarginRight = new UIMeasurement(0, UIMeasurementUnit.Pixel);
 		public static readonly UIMeasurement MarginBottom = new UIMeasurement(0, UIMeasurementUnit.Pixel);
 		public static readonly UIMeasurement MarginLeft = new UIMeasurement(0, UIMeasurementUnit.Pixel);
+		public static readonly Color BorderColor = new Color(-1f, -1f, -1f, -1f);
 		public static readonly UIFixedLength BorderTop = new UIFixedLength(0, UIFixedUnit.Pixel);
 		public static readonly UIFixedLength BorderRight = new UIFixedLength(0, UIFixedUnit.Pixel);
 		public static readonly UIFixedLength BorderBottom = new UIFixedLength(0, UIFixedUnit.Pixel);
@@ -78,7 +82,6 @@ namespace UIForia.Rendering {
 		public const int TextFontSize = 18;
 		public const FontStyle TextFontStyle = UIForia.Text.FontStyle.Normal;
 		public const TextAlignment TextAlignment = UIForia.Text.TextAlignment.Left;
-		public const TextTransform TextTransform = UIForia.Text.TextTransform.None;
 		public const float TextOutlineWidth = 0f;
 		public static readonly Color TextOutlineColor = new Color(0f, 0f, 0f, 1f);
 		public static readonly Color TextGlowColor = new Color(-1f, -1f, -1f, -1f);
@@ -92,6 +95,7 @@ namespace UIForia.Rendering {
 		public const float TextShadowIntensity = 0.5f;
 		public const float TextShadowSoftness = 0.5f;
 		public const ShadowType TextShadowType = UIForia.Rendering.ShadowType.Unset;
+		public const TextTransform TextTransform = UIForia.Text.TextTransform.None;
 		public static readonly UIFixedLength AnchorTop = new UIFixedLength(0, UIFixedUnit.Percent);
 		public static readonly UIFixedLength AnchorRight = new UIFixedLength(1, UIFixedUnit.Percent);
 		public static readonly UIFixedLength AnchorBottom = new UIFixedLength(1, UIFixedUnit.Percent);
@@ -111,15 +115,15 @@ namespace UIForia.Rendering {
 		public const int ZIndex = 0;
 		public const int RenderLayerOffset = 0;
 		public const RenderLayer RenderLayer = UIForia.Rendering.RenderLayer.Default;
+		public static readonly string Scrollbar = "";
+		public static readonly UIMeasurement ScrollbarSize = new UIMeasurement(15, UIMeasurementUnit.Pixel);
+		public static readonly Color ScrollbarColor = new Color(0f, 0f, 0f, 1f);
 		public const ShadowType ShadowType = UIForia.Rendering.ShadowType.Unset;
 		public const float ShadowOffsetX = 0f;
 		public const float ShadowOffsetY = 0f;
 		public const float ShadowSoftnessX = 0.1f;
 		public const float ShadowSoftnessY = 0.1f;
 		public const float ShadowIntensity = 0.7f;
-		public static readonly string Scrollbar = "";
-		public static readonly UIMeasurement ScrollbarSize = new UIMeasurement(15, UIMeasurementUnit.Pixel);
-		public static readonly Color ScrollbarColor = new Color(0f, 0f, 0f, 1f);
 		public static StyleProperty GetPropertyValue(StylePropertyId propertyId) {
 
 			switch(propertyId) {
@@ -127,20 +131,26 @@ namespace UIForia.Rendering {
 					 return new StyleProperty(StylePropertyId.OverflowX, (int)UIForia.Rendering.Overflow.None);
 				case StylePropertyId.OverflowY:
 					 return new StyleProperty(StylePropertyId.OverflowY, (int)UIForia.Rendering.Overflow.None);
-				case StylePropertyId.BorderColor:
-					 return new StyleProperty(StylePropertyId.BorderColor, new Color(-1f, -1f, -1f, -1f));
 				case StylePropertyId.BackgroundColor:
 					 return new StyleProperty(StylePropertyId.BackgroundColor, new Color(-1f, -1f, -1f, -1f));
+				case StylePropertyId.BackgroundImageOffsetX:
+					 return new StyleProperty(StylePropertyId.BackgroundImageOffsetX, new UIFixedLength(0, UIFixedUnit.Pixel));
+				case StylePropertyId.BackgroundImageOffsetY:
+					 return new StyleProperty(StylePropertyId.BackgroundImageOffsetY, new UIFixedLength(0, UIFixedUnit.Pixel));
+				case StylePropertyId.BackgroundImageScaleX:
+					 return new StyleProperty(StylePropertyId.BackgroundImageScaleX, new UIFixedLength(0, UIFixedUnit.Pixel));
+				case StylePropertyId.BackgroundImageScaleY:
+					 return new StyleProperty(StylePropertyId.BackgroundImageScaleY, new UIFixedLength(0, UIFixedUnit.Pixel));
+				case StylePropertyId.BackgroundImageTileX:
+					 return new StyleProperty(StylePropertyId.BackgroundImageTileX, new UIFixedLength(0, UIFixedUnit.Pixel));
+				case StylePropertyId.BackgroundImageTileY:
+					 return new StyleProperty(StylePropertyId.BackgroundImageTileY, new UIFixedLength(0, UIFixedUnit.Pixel));
+				case StylePropertyId.BackgroundImageRotation:
+					 return new StyleProperty(StylePropertyId.BackgroundImageRotation, new UIFixedLength(0, UIFixedUnit.Pixel));
 				case StylePropertyId.BackgroundImage:
 					 return new StyleProperty(StylePropertyId.BackgroundImage, 0, 0, null);
-				case StylePropertyId.BackgroundGradientType:
-					 return new StyleProperty(StylePropertyId.BackgroundGradientType, (int)Shapes2D.GradientType.Linear);
-				case StylePropertyId.BackgroundGradientAxis:
-					 return new StyleProperty(StylePropertyId.BackgroundGradientAxis, (int)Shapes2D.GradientAxis.Horizontal);
-				case StylePropertyId.BackgroundGradientStart:
-					 return new StyleProperty(StylePropertyId.BackgroundGradientStart, 0f);
 				case StylePropertyId.Painter:
-					 return new StyleProperty(StylePropertyId.Painter, (int)UIForia.Rendering.BackgroundFillType.Normal);
+					 return new StyleProperty(StylePropertyId.Painter, 0, 0, "");
 				case StylePropertyId.Opacity:
 					 return new StyleProperty(StylePropertyId.Opacity, 1f);
 				case StylePropertyId.Cursor:
@@ -215,6 +225,8 @@ namespace UIForia.Rendering {
 					 return new StyleProperty(StylePropertyId.MarginBottom, new UIMeasurement(0, UIMeasurementUnit.Pixel));
 				case StylePropertyId.MarginLeft:
 					 return new StyleProperty(StylePropertyId.MarginLeft, new UIMeasurement(0, UIMeasurementUnit.Pixel));
+				case StylePropertyId.BorderColor:
+					 return new StyleProperty(StylePropertyId.BorderColor, new Color(-1f, -1f, -1f, -1f));
 				case StylePropertyId.BorderTop:
 					 return new StyleProperty(StylePropertyId.BorderTop, new UIFixedLength(0, UIFixedUnit.Pixel));
 				case StylePropertyId.BorderRight:
@@ -249,8 +261,6 @@ namespace UIForia.Rendering {
 					 return new StyleProperty(StylePropertyId.TextFontStyle, (int)UIForia.Text.FontStyle.Normal);
 				case StylePropertyId.TextAlignment:
 					 return new StyleProperty(StylePropertyId.TextAlignment, (int)UIForia.Text.TextAlignment.Left);
-				case StylePropertyId.TextTransform:
-					 return new StyleProperty(StylePropertyId.TextTransform, (int)UIForia.Text.TextTransform.None);
 				case StylePropertyId.TextOutlineWidth:
 					 return new StyleProperty(StylePropertyId.TextOutlineWidth, 0f);
 				case StylePropertyId.TextOutlineColor:
@@ -277,6 +287,8 @@ namespace UIForia.Rendering {
 					 return new StyleProperty(StylePropertyId.TextShadowSoftness, 0.5f);
 				case StylePropertyId.TextShadowType:
 					 return new StyleProperty(StylePropertyId.TextShadowType, (int)UIForia.Rendering.ShadowType.Unset);
+				case StylePropertyId.TextTransform:
+					 return new StyleProperty(StylePropertyId.TextTransform, (int)UIForia.Text.TextTransform.None);
 				case StylePropertyId.AnchorTop:
 					 return new StyleProperty(StylePropertyId.AnchorTop, new UIFixedLength(0, UIFixedUnit.Percent));
 				case StylePropertyId.AnchorRight:
@@ -315,6 +327,12 @@ namespace UIForia.Rendering {
 					 return new StyleProperty(StylePropertyId.RenderLayerOffset, 0);
 				case StylePropertyId.RenderLayer:
 					 return new StyleProperty(StylePropertyId.RenderLayer, (int)UIForia.Rendering.RenderLayer.Default);
+				case StylePropertyId.Scrollbar:
+					 return new StyleProperty(StylePropertyId.Scrollbar, 0, 0, "");
+				case StylePropertyId.ScrollbarSize:
+					 return new StyleProperty(StylePropertyId.ScrollbarSize, new UIMeasurement(15, UIMeasurementUnit.Pixel));
+				case StylePropertyId.ScrollbarColor:
+					 return new StyleProperty(StylePropertyId.ScrollbarColor, new Color(0f, 0f, 0f, 1f));
 				case StylePropertyId.ShadowType:
 					 return new StyleProperty(StylePropertyId.ShadowType, (int)UIForia.Rendering.ShadowType.Unset);
 				case StylePropertyId.ShadowOffsetX:
@@ -327,12 +345,6 @@ namespace UIForia.Rendering {
 					 return new StyleProperty(StylePropertyId.ShadowSoftnessY, 0.1f);
 				case StylePropertyId.ShadowIntensity:
 					 return new StyleProperty(StylePropertyId.ShadowIntensity, 0.7f);
-				case StylePropertyId.Scrollbar:
-					 return new StyleProperty(StylePropertyId.Scrollbar, 0, 0, "");
-				case StylePropertyId.ScrollbarSize:
-					 return new StyleProperty(StylePropertyId.ScrollbarSize, new UIMeasurement(15, UIMeasurementUnit.Pixel));
-				case StylePropertyId.ScrollbarColor:
-					 return new StyleProperty(StylePropertyId.ScrollbarColor, new Color(0f, 0f, 0f, 1f));
 				default: throw new System.ArgumentOutOfRangeException(nameof(propertyId), propertyId, null);
 				}
 } 

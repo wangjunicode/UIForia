@@ -620,13 +620,6 @@ namespace UIForia.Editor {
                 case StylePropertyId.Painter:
                     return DrawEnum<FillType>(property, isEditable);
 
-                case StylePropertyId.BackgroundGradientType:
-                    return DrawEnum<GradientType>(property, isEditable);
-
-                case StylePropertyId.BackgroundGradientAxis:
-                    return DrawEnum<GradientAxis>(property, isEditable);
-
-                case StylePropertyId.BackgroundGradientStart:
 //                case StylePropertyId.BackgroundGridSize:
 //                case StylePropertyId.BackgroundLineSize:
                 case StylePropertyId.BackgroundImageOffsetX:

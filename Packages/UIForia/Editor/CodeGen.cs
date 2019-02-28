@@ -22,19 +22,22 @@ namespace UIForia.Editor {
 
     public static class CodeGen {
 
-        private static readonly PropertyGenerator[] properties = {
+        internal static readonly PropertyGenerator[] properties = {
             // Overflow
             new PropertyGenerator<Overflow>(StylePropertyId.OverflowX, Overflow.None),
             new PropertyGenerator<Overflow>(StylePropertyId.OverflowY, Overflow.None),
 
             // Background
-            new AnimatedPropertyGenerator<Color>(StylePropertyId.BorderColor, ColorUtil.UnsetValue),
             new AnimatedPropertyGenerator<Color>(StylePropertyId.BackgroundColor, ColorUtil.UnsetValue),
+            new AnimatedPropertyGenerator<UIFixedLength>(StylePropertyId.BackgroundImageOffsetX, new UIFixedLength(0)),
+            new AnimatedPropertyGenerator<UIFixedLength>(StylePropertyId.BackgroundImageOffsetY, new UIFixedLength(0)),
+            new AnimatedPropertyGenerator<UIFixedLength>(StylePropertyId.BackgroundImageScaleX, new UIFixedLength(0)),
+            new AnimatedPropertyGenerator<UIFixedLength>(StylePropertyId.BackgroundImageScaleY, new UIFixedLength(0)),
+            new AnimatedPropertyGenerator<UIFixedLength>(StylePropertyId.BackgroundImageTileX, new UIFixedLength(0)),
+            new AnimatedPropertyGenerator<UIFixedLength>(StylePropertyId.BackgroundImageTileY, new UIFixedLength(0)),
+            new AnimatedPropertyGenerator<UIFixedLength>(StylePropertyId.BackgroundImageRotation, new UIFixedLength(0)),
             new PropertyGenerator<Texture2D>(StylePropertyId.BackgroundImage, null),
-            new PropertyGenerator<GradientType>(StylePropertyId.BackgroundGradientType, GradientType.Linear),
-            new PropertyGenerator<GradientAxis>(StylePropertyId.BackgroundGradientAxis, GradientAxis.Horizontal),
-            new AnimatedPropertyGenerator<float>(StylePropertyId.BackgroundGradientStart, 0),
-            new PropertyGenerator<BackgroundFillType>(StylePropertyId.Painter, BackgroundFillType.Normal),
+            new PropertyGenerator<string>(StylePropertyId.Painter, string.Empty),
 
             new AnimatedPropertyGenerator<float>(StylePropertyId.Opacity, 1),
             new PropertyGenerator<CursorStyle>(StylePropertyId.Cursor, null),
@@ -87,6 +90,8 @@ namespace UIForia.Editor {
             new AnimatedPropertyGenerator<UIMeasurement>(StylePropertyId.MarginLeft, new UIMeasurement(0)),
 
             // Border
+            new AnimatedPropertyGenerator<Color>(StylePropertyId.BorderColor, ColorUtil.UnsetValue),
+
             new AnimatedPropertyGenerator<UIFixedLength>(StylePropertyId.BorderTop, new UIFixedLength(0)),
             new AnimatedPropertyGenerator<UIFixedLength>(StylePropertyId.BorderRight, new UIFixedLength(0)),
             new AnimatedPropertyGenerator<UIFixedLength>(StylePropertyId.BorderBottom, new UIFixedLength(0)),
@@ -109,7 +114,6 @@ namespace UIForia.Editor {
             new AnimatedPropertyGenerator<int>(StylePropertyId.TextFontSize, 18, InheritanceType.Inherited),
             new PropertyGenerator<Text.FontStyle>(StylePropertyId.TextFontStyle, Text.FontStyle.Normal, InheritanceType.Inherited),
             new PropertyGenerator<Text.TextAlignment>(StylePropertyId.TextAlignment, Text.TextAlignment.Left, InheritanceType.Inherited),
-            new PropertyGenerator<TextTransform>(StylePropertyId.TextTransform, TextTransform.None, InheritanceType.Inherited),
             new AnimatedPropertyGenerator<float>(StylePropertyId.TextOutlineWidth, 0, InheritanceType.Inherited),
             new AnimatedPropertyGenerator<Color>(StylePropertyId.TextOutlineColor, Color.black, InheritanceType.Inherited),
             new AnimatedPropertyGenerator<Color>(StylePropertyId.TextGlowColor, ColorUtil.UnsetValue, InheritanceType.Inherited),
@@ -123,6 +127,7 @@ namespace UIForia.Editor {
             new AnimatedPropertyGenerator<float>(StylePropertyId.TextShadowIntensity, 0.5f, InheritanceType.Inherited),
             new AnimatedPropertyGenerator<float>(StylePropertyId.TextShadowSoftness, 0.5f, InheritanceType.Inherited),
             new PropertyGenerator<ShadowType>(StylePropertyId.TextShadowType, ShadowType.Unset, InheritanceType.Inherited),
+            new PropertyGenerator<TextTransform>(StylePropertyId.TextTransform, TextTransform.None, InheritanceType.Inherited),
 
             // Anchors
             new AnimatedPropertyGenerator<UIFixedLength>(StylePropertyId.AnchorTop, new UIFixedLength(0f, UIFixedUnit.Percent)),
@@ -148,6 +153,11 @@ namespace UIForia.Editor {
             new AnimatedPropertyGenerator<int>(StylePropertyId.ZIndex, 0),
             new AnimatedPropertyGenerator<int>(StylePropertyId.RenderLayerOffset, 0),
             new AnimatedPropertyGenerator<RenderLayer>(StylePropertyId.RenderLayer, RenderLayer.Default),
+            
+            // Scrollbar
+            new PropertyGenerator<string>(StylePropertyId.Scrollbar, string.Empty),
+            new PropertyGenerator<UIMeasurement>(StylePropertyId.ScrollbarSize, new UIMeasurement(15f)),
+            new AnimatedPropertyGenerator<Color>(StylePropertyId.ScrollbarColor, Color.black),
 
             // Shadow
             new PropertyGenerator<ShadowType>(StylePropertyId.ShadowType, ShadowType.Unset), 
@@ -156,10 +166,6 @@ namespace UIForia.Editor {
             new AnimatedPropertyGenerator<float>(StylePropertyId.ShadowSoftnessX, 0.1f),
             new AnimatedPropertyGenerator<float>(StylePropertyId.ShadowSoftnessY, 0.1f),
             new AnimatedPropertyGenerator<float>(StylePropertyId.ShadowIntensity, 0.7f),
-            
-            new PropertyGenerator<string>(StylePropertyId.Scrollbar, string.Empty),
-            new PropertyGenerator<UIMeasurement>(StylePropertyId.ScrollbarSize, new UIMeasurement(15f)),
-            new AnimatedPropertyGenerator<Color>(StylePropertyId.ScrollbarColor, Color.black)
             
         };
 

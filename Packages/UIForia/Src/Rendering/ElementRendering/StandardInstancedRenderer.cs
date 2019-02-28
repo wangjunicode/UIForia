@@ -151,7 +151,7 @@ namespace UIForia.Rendering {
                     case MaterialBatchKey.FillType_GradientLinear:
                     case MaterialBatchKey.FillType_GradientRadial:
                     case MaterialBatchKey.FillType_GradientCylindrical:
-                        m_GradientAxisAndStart[instanceId] = new Vector4((int)style.BackgroundGradientAxis, style.BackgroundGradientStart);
+                        m_GradientAxisAndStart[instanceId] = new Vector4(0, 0);
                         break;
                 }
 

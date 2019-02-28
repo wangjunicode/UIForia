@@ -6,6 +6,7 @@ using UIForia.Layout;
 using UIForia.Layout.LayoutTypes;
 using UIForia.Parsing.Style.AstNodes;
 using UIForia.Rendering;
+using UIForia.Text;
 using UIForia.Util;
 using UnityEngine;
 using FontStyle = UIForia.Text.FontStyle;
@@ -15,14 +16,25 @@ namespace UIForia.Compilers.Style {
 
         private static readonly Dictionary<string, Action<UIStyle, PropertyNode, StyleCompileContext>> mappers
             = new Dictionary<string, Action<UIStyle, PropertyNode, StyleCompileContext>> {
-                {"backgroundcolor", (targetStyle, property, context) => targetStyle.BackgroundColor = MapColor(property, context)},
-                {"visibility", (targetStyle, property, context) => targetStyle.Visibility = MapEnum<Visibility>(property.children[0], context)},
-                {"opacity", (targetStyle, property, context) => targetStyle.Opacity = MapNumber(property.children[0], context)},
-                {"cursor", (targetStyle, property, context) => targetStyle.Cursor = MapCursor(property, context)},
-                {"backgroundimage", (targetStyle, property, context) => targetStyle.BackgroundImage = MapTexture(property.children[0], context)},
+                // Overflow
                 {"overflow", (targetStyle, property, context) => MapOverflows(targetStyle, property, context)},
                 {"overflowx", (targetStyle, property, context) => targetStyle.OverflowX = MapEnum<Overflow>(property.children[0], context)},
                 {"overflowy", (targetStyle, property, context) => targetStyle.OverflowY = MapEnum<Overflow>(property.children[0], context)},
+
+                // Background
+                {"backgroundcolor", (targetStyle, property, context) => targetStyle.BackgroundColor = MapColor(property, context)},
+                {"backgroundimageoffsetx", (targetStyle, property, context) => targetStyle.BackgroundImageOffsetX = MapFixedLength(property.children[0], context)},
+                {"backgroundimageoffsety", (targetStyle, property, context) => targetStyle.BackgroundImageOffsetY = MapFixedLength(property.children[0], context)},
+                {"backgroundimagescalex", (targetStyle, property, context) => targetStyle.BackgroundImageScaleX = MapFixedLength(property.children[0], context)},
+                {"backgroundimagescaley", (targetStyle, property, context) => targetStyle.BackgroundImageScaleY = MapFixedLength(property.children[0], context)},
+                {"backgroundimagetilex", (targetStyle, property, context) => targetStyle.BackgroundImageTileX = MapFixedLength(property.children[0], context)},
+                {"backgroundimagetiley", (targetStyle, property, context) => targetStyle.BackgroundImageTileY = MapFixedLength(property.children[0], context)},
+                {"backgroundimagerotation", (targetStyle, property, context) => targetStyle.BackgroundImageRotation = MapFixedLength(property.children[0], context)},
+                {"backgroundimage", (targetStyle, property, context) => targetStyle.BackgroundImage = MapTexture(property.children[0], context)},
+                
+                {"visibility", (targetStyle, property, context) => targetStyle.Visibility = MapEnum<Visibility>(property.children[0], context)},
+                {"opacity", (targetStyle, property, context) => targetStyle.Opacity = MapNumber(property.children[0], context)},
+                {"cursor", (targetStyle, property, context) => targetStyle.Cursor = MapCursor(property, context)},
 
                 {"margin", (targetStyle, valueParts, context) => MapMargins(targetStyle, valueParts, context)},
                 {"margintop", (targetStyle, property, context) => targetStyle.MarginTop = MapMeasurement(property.children[0], context)},
@@ -111,12 +123,41 @@ namespace UIForia.Compilers.Style {
                 {"renderlayer", (targetStyle, property, context) => targetStyle.RenderLayer = MapEnum<RenderLayer>(property.children[0], context)},
                 {"renderlayeroffset", (targetStyle, property, context) => targetStyle.RenderLayerOffset = (int) MapNumber(property.children[0], context)},
 
+                // Text
                 {"textcolor", (targetStyle, property, context) => targetStyle.TextColor = MapColor(property, context)},
                 {"textfontasset", (targetStyle, property, context) => targetStyle.TextFontAsset = MapFont(property.children[0], context)},
                 {"textfontstyle", (targetStyle, property, context) => targetStyle.TextFontStyle = MapTextFontStyle(property, context)},
                 {"textfontsize", (targetStyle, property, context) => targetStyle.TextFontSize = (int) MapNumber(property.children[0], context)},
                 {"textalignment", (targetStyle, property, context) => targetStyle.TextAlignment = MapEnum<UIForia.Text.TextAlignment>(property.children[0], context)},
+                {"textoutlinewidth", (targetStyle, property, context) => targetStyle.TextOutlineWidth = MapNumber(property.children[0], context)},
+                {"textoutlinecolor", (targetStyle, property, context) => targetStyle.TextOutlineColor = MapColor(property, context)},
+                {"textglowcolor", (targetStyle, property, context) => targetStyle.TextGlowColor = MapColor(property, context)},
+                {"textglowoffset", (targetStyle, property, context) => targetStyle.TextGlowOffset = MapNumber(property.children[0], context)},
+                {"textglowinner", (targetStyle, property, context) => targetStyle.TextGlowInner = MapNumber(property.children[0], context)},
+                {"textglowouter", (targetStyle, property, context) => targetStyle.TextGlowOuter = MapNumber(property.children[0], context)},
+                {"textglowpower", (targetStyle, property, context) => targetStyle.TextGlowPower = MapNumber(property.children[0], context)},
+                {"textshadowcolor", (targetStyle, property, context) => targetStyle.TextShadowColor = MapColor(property, context)},
+                {"textshadowoffsetx", (targetStyle, property, context) => targetStyle.TextShadowOffsetX = MapNumber(property.children[0], context)},
+                {"textshadowoffsety", (targetStyle, property, context) => targetStyle.TextShadowOffsetY = MapNumber(property.children[0], context)},
+                {"textshadowintensity", (targetStyle, property, context) => targetStyle.TextShadowIntensity = MapNumber(property.children[0], context)},
+                {"textshadowsoftness", (targetStyle, property, context) => targetStyle.TextShadowSoftness = MapNumber(property.children[0], context)},
+                {"textshadowtype", (targetStyle, property, context) => targetStyle.TextShadowType = MapEnum<ShadowType>(property.children[0], context)},
+                {"texttransform", (targetStyle, property, context) => targetStyle.TextTransform = MapEnum<TextTransform>(property.children[0], context)},
+
+                {"painter", (targetStyle, property, context) => targetStyle.Painter = MapString(property.children[0], context)},
+
+                // Scrollbar
+                {"scrollbar", (targetStyle, property, context) => targetStyle.Scrollbar = MapString(property.children[0], context)},
+                {"scrollbarsize", (targetStyle, property, context) => targetStyle.ScrollbarSize = MapMeasurement(property.children[0], context)},
+                {"scrollbarcolor", (targetStyle, property, context) => targetStyle.ScrollbarColor = MapColor(property, context)},
                 
+                // shadows for things
+                {"shadowtype", (targetStyle, property, context) => targetStyle.ShadowType = MapEnum<ShadowType>(property.children[0], context)},
+                {"shadowoffsetx", (targetStyle, property, context) => targetStyle.ShadowOffsetX = MapNumber(property.children[0], context)},
+                {"shadowoffsety", (targetStyle, property, context) => targetStyle.ShadowOffsetY = MapNumber(property.children[0], context)},
+                {"shadowsoftnessx", (targetStyle, property, context) => targetStyle.ShadowSoftnessX = MapNumber(property.children[0], context)},
+                {"shadowsoftnessy", (targetStyle, property, context) => targetStyle.ShadowSoftnessY = MapNumber(property.children[0], context)},
+                {"shadowintensity", (targetStyle, property, context) => targetStyle.ShadowIntensity = MapNumber(property.children[0], context)},
             };
 
         private static FontStyle MapTextFontStyle(PropertyNode property, StyleCompileContext context) {
@@ -162,6 +203,8 @@ namespace UIForia.Compilers.Style {
                         }
 
                         break;
+                    default: throw new CompileException(value, $"Invalid TextFontStyle {value}. " +
+                           "Make sure you use one of those: bold, italic, highlight, smallcaps, superscript, subscript, underline or strikethrough.");
                 }
             }
 
@@ -766,6 +809,20 @@ namespace UIForia.Compilers.Style {
             }
 
             throw new CompileException(node, $"Expected a numeric value but all I got was this lousy {node}");
+        }
+
+        private static string MapString(StyleASTNode node, StyleCompileContext context) {
+            node = context.GetValueForReference(node);
+
+            if (node is StyleIdentifierNode identifierNode) {
+                return identifierNode.name;
+            }
+
+            if (node is StyleLiteralNode literalNode && literalNode.type == StyleASTNodeType.StringLiteral) {
+                return literalNode.rawValue;
+            }
+
+            throw new CompileException(node, $"Expected a string value but all I got was this lousy {node}");
         }
 
         public static void MapProperty(UIStyle targetStyle, PropertyNode node, StyleCompileContext context) {

@@ -2,6 +2,7 @@
     "name": "UIForia.Test",
     "references": [
         "UIForia.Src",
+        "UIForia.Editor",
         "Unity.TextMeshPro"
     ],
     "optionalUnityReferences": [

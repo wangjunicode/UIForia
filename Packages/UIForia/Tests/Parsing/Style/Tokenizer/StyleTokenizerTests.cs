@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using System.Diagnostics.Contracts;
 using NUnit.Framework;
 using UIForia.Parsing.Style.Tokenizer;
 
@@ -148,6 +149,29 @@ public class StyleTokenizerTests {
             StyleTokenType.EndStatement,
             StyleTokenType.BracesClose,
         }, tokens);
+    }
+
+    [Test]
+    public void TokenizeNegativeNumbers() {
+        List<StyleToken> tokens = StyleTokenizer.Tokenize(@"
+              style negativenancy {
+                  MarginTop = -10px;
+              }
+        ");
+        
+        AssertTokenTypes(new List<StyleTokenType>() {
+            StyleTokenType.Style,
+            StyleTokenType.Identifier,
+            StyleTokenType.BracesOpen,
+            StyleTokenType.Identifier,
+            StyleTokenType.Equal,
+            StyleTokenType.Number,
+            StyleTokenType.Identifier,
+            StyleTokenType.EndStatement,
+            StyleTokenType.BracesClose,
+        }, tokens);
+        
+        Assert.AreEqual("-10", tokens[5].value);
     }
 
     private static void AssertTokenTypes(List<StyleTokenType> expected, List<StyleToken> actual) {

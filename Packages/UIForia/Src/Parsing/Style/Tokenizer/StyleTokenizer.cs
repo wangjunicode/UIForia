@@ -69,13 +69,20 @@ namespace UIForia.Parsing.Style.Tokenizer {
             bool foundDot = false;
             int startIndex = context.ptr;
 
-            if (!char.IsDigit(context.input[context.ptr])) return;
+            context.Save();
+            if (context.input[context.ptr] == '-') {
+                context.Advance();
+            }
+
+            if (!char.IsDigit(context.input[context.ptr])) {
+                context.Restore();
+                return;
+            }
 
             // 1
             // 1.4
             // 1.4f
 
-            context.Save();
             while (context.HasMore() && (char.IsDigit(context.input[context.ptr]) || (!foundDot && context.input[context.ptr] == '.'))) {
                 if (context.input[context.ptr] == '.') {
                     foundDot = true;
@@ -238,6 +245,8 @@ namespace UIForia.Parsing.Style.Tokenizer {
                 TryReadCharacters(context, "||", StyleTokenType.BooleanOr, output);
                 TryReadCharacters(context, "$", StyleTokenType.Dollar, output);
                 TryReadCharacters(context, "+", StyleTokenType.Plus, output);
+                // If the next character is a minus sign then we want to try to parse a single number token
+                TryReadDigit(context, output);
                 TryReadCharacters(context, "-", StyleTokenType.Minus, output);
                 TryReadCharacters(context, "/", StyleTokenType.Divide, output);
                 TryReadCharacters(context, "*", StyleTokenType.Times, output);

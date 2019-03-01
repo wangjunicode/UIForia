@@ -1,7 +1,10 @@
 ﻿using System.Diagnostics;
+using UIForia.Elements;
+using UIForia.Rendering.ElementRendering;
+using UIForia.Systems;
 using UnityEngine;
 
-namespace UIForia.Systems {
+namespace UIForia.Rendering {
     
     [DebuggerDisplay("{" + nameof(element) + ".ToString()}")]
     public class RenderData {

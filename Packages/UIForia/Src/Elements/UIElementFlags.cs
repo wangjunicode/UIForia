@@ -37,6 +37,6 @@ public enum UIElementFlags {
    // SelfAndAncestorShown = Shown | AncestorShown,
     SelfAndAncestorEnabled = Enabled | AncestorEnabled,
 
-
+    BuiltIn = 1 << 21,
 
 }

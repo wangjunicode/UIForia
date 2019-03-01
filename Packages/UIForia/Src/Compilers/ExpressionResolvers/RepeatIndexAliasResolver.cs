@@ -1,6 +1,8 @@
 using System;
+using UIForia.Elements;
+using UIForia.Expressions;
 
-namespace UIForia.Compilers {
+namespace UIForia.Compilers.ExpressionResolvers {
 
     public class RepeatIndexAliasResolver : ExpressionAliasResolver {
 

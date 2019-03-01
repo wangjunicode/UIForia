@@ -1,9 +1,10 @@
 using UIForia.Util;
 using System;
 using JetBrains.Annotations;
+using UIForia.Attributes;
 using UIForia.Rendering;
 
-namespace UIForia.Routing {
+namespace UIForia.Elements.Routing {
 
     [TemplateTagName("ChildRouter")]
     public class ChildRouterElement : RouteElement, IRouterElement {

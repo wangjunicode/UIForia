@@ -1,7 +1,7 @@
 using System;
 using NUnit.Framework;
 using Tests.Mocks;
-using UIForia;
+using UIForia.Attributes;
 using UIForia.Elements;
 
 [TestFixture]

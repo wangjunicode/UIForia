@@ -9,6 +9,7 @@ using UIForia.Rendering;
 using UIForia.Util;
 using UnityEngine;
 using FontStyle = UIForia.Text.FontStyle;
+using TextAlignment = UIForia.Text.TextAlignment;
 
 [TestFixture]
 public class StyleSheetCompilerTests {
@@ -882,7 +883,7 @@ style teXt {
                         | FontStyle.Underline
                         | FontStyle.Highlight
                         | FontStyle.SmallCaps, styleGroup[0].groups[0].normal.TextFontStyle);
-        Assert.AreEqual(UIForia.Text.TextAlignment.Center, styleGroup[0].groups[0].normal.TextAlignment);
+        Assert.AreEqual(TextAlignment.Center, styleGroup[0].groups[0].normal.TextAlignment);
         Assert.AreEqual(14, styleGroup[0].groups[0].normal.TextFontSize);
     }
     

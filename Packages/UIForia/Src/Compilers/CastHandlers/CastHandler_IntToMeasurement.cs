@@ -1,4 +1,6 @@
 using System;
+using UIForia.Expressions;
+using UIForia.Rendering;
 
 namespace UIForia.Compilers.CastHandlers {
 

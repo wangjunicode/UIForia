@@ -1,9 +1,12 @@
 using System;
 using System.Collections.Generic;
-using UIForia.Parsing;
+using UIForia.Bindings;
+using UIForia.Elements;
+using UIForia.Expressions;
+using UIForia.Parsing.Expression;
 using UIForia.Util;
 
-namespace UIForia {
+namespace UIForia.Templates {
 
     public class UITextTemplate : UITemplate {
 

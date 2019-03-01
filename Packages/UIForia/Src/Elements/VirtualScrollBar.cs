@@ -1,7 +1,7 @@
-using System;
-using UIForia.Input;
+using UIForia.Layout;
 using UIForia.Rendering;
-using UIForia.Systems;
+using UIForia.Rendering.ElementRendering;
+using UIForia.UIInput;
 using UIForia.Util;
 using UnityEngine;
 
@@ -51,6 +51,7 @@ namespace UIForia.Elements {
             if (target.isEnabled) {
                 flags |= UIElementFlags.AncestorEnabled;
             }
+            flags |= UIElementFlags.BuiltIn;
 
             scrollState = ScrollState.Normal;
             trackMaterial = StandardRenderer.CreateMaterial();

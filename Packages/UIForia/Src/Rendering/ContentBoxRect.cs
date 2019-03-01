@@ -1,7 +1,6 @@
 ﻿using System.Diagnostics;
 using UIForia.Rendering;
-using UIForia;
-using UnityEngine;
+using UIForia.Util;
 
 [DebuggerDisplay("{top}, {right}, {bottom}, {left}")]
 public struct ContentBoxRect {

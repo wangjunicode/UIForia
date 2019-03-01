@@ -1,11 +1,10 @@
 using System;
-using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
 using System.Reflection;
-using UnityEngine;
+using UIForia.Attributes;
 
-namespace UIForia {
+namespace UIForia.Parsing.Expression {
 
     [DebuggerDisplay("{rawType.Name}")]
     public struct ProcessedType {

@@ -1,7 +1,8 @@
 using System;
-using UIForia.Parsing;
+using UIForia.Elements;
+using UIForia.Expressions;
 
-namespace UIForia.Compilers {
+namespace UIForia.Compilers.ExpressionResolvers {
 
     public class ParentElementResolver : ExpressionAliasResolver {
 

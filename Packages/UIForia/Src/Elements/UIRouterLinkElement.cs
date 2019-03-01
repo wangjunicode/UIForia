@@ -1,17 +1,19 @@
 using System;
 using System.Collections.Generic;
-using UIForia.Elements;
-using UIForia.Rendering;
+using UIForia.Attributes;
 using UIForia.Util;
-using UnityEngine;
 
-namespace UIForia {
+namespace UIForia.Elements {
 
     [TemplateTagName("RouterLink")]
     public class UIRouterLinkElement : UIContainerElement {
 
         public string path;
-        
+
+        public UIRouterLinkElement() {
+            flags |= UIElementFlags.BuiltIn;
+        }
+
         [OnMouseClick]
         public void GoToPath() {
             List<ElementAttribute> attrs = GetAttributes();
@@ -21,25 +23,24 @@ namespace UIForia {
                     //  Expression<string> exp = new ExpressionCompiler(null).Compile<string>(attrs[i].value);
                 }
             }
-            
+
             ListPool<ElementAttribute>.Release(ref attrs);
             throw new NotImplementedException();
         }
-        
+
     }
-    
+
     [TemplateTagName("RouterLinkBack")]
     public class UIRouterLinkBackElement : UIContainerElement {
 
         public override void OnUpdate() {
-
         }
-        
+
         [OnMouseClick]
         public void GoBack() {
             throw new NotImplementedException();
         }
-        
+
     }
 
 }

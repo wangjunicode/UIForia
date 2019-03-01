@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
+using UIForia.Layout;
 using UIForia.Layout.LayoutTypes;
 using UIForia.Util;
 using UnityEngine;

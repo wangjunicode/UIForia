@@ -1,10 +1,9 @@
 using System.Collections.Generic;
 using NUnit.Framework;
-using UIForia;
-using UIForia.Layout.LayoutTypes;
-using UIForia.Rendering;
-using UIForia.Systems;
 using Tests.Mocks;
+using UIForia.Attributes;
+using UIForia.Elements;
+using UIForia.Rendering;
 using UnityEngine;
 
 [TestFixture]

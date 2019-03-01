@@ -1,7 +1,13 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Reflection;
-using UIForia.Input;
+using UIForia.Attributes;
+using UIForia.Compilers.ExpressionResolvers;
+using UIForia.Expressions;
+using UIForia.Parsing.Expression;
+using UIForia.UIInput;
+using UIForia.Util;
 
 namespace UIForia.Compilers {
 
@@ -279,7 +285,7 @@ namespace UIForia.Compilers {
                             break;
                         }
                         case 1: {
-                            System.Diagnostics.Debug.Assert(parameters[0].ParameterType == typeof(MouseInputEvent));
+                            Debug.Assert(parameters[0].ParameterType == typeof(MouseInputEvent));
                             handlerType = ReflectionUtil.CreateGenericType(typeof(MouseEventHandler_WithEvent<>), targetType);
                             break;
                         }
@@ -338,7 +344,7 @@ namespace UIForia.Compilers {
                             break;
                         }
                         case 1: {
-                            System.Diagnostics.Debug.Assert(parameters[0].ParameterType == typeof(MouseInputEvent));
+                            Debug.Assert(parameters[0].ParameterType == typeof(MouseInputEvent));
                             handlerType = ReflectionUtil.CreateGenericType(typeof(DragEventHandler_WithEvent<>), targetType);
                             break;
                         }
@@ -560,7 +566,7 @@ namespace UIForia.Compilers {
                             break;
                         }
                         case 1: {
-                            System.Diagnostics.Debug.Assert(parameters[0].ParameterType == typeof(MouseInputEvent));
+                            Debug.Assert(parameters[0].ParameterType == typeof(MouseInputEvent));
                             handlerType = ReflectionUtil.CreateGenericType(typeof(DragEventCreator_WithEvent<>), targetType);
                             break;
                         }

@@ -1,7 +1,7 @@
 using System;
 using System.Reflection;
 using NUnit.Framework;
-using UIForia;
+using UIForia.Util;
 
 [TestFixture]
 public class ReflectionUtilTests {

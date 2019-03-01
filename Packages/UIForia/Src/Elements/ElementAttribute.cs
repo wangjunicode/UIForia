@@ -1,11 +1,14 @@
-public struct ElementAttribute {
+namespace UIForia.Elements {
 
-    public readonly string name;
-    public readonly string value;
+    public struct ElementAttribute {
 
-    public ElementAttribute(string name, string value) {
-        this.name = name;
-        this.value = value;
+        public readonly string name;
+        public readonly string value;
+
+        public ElementAttribute(string name, string value) {
+            this.name = name;
+            this.value = value;
+        }
+
     }
-
 }

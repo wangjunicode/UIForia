@@ -1,6 +1,6 @@
 using System;
 
-namespace UIForia.Rendering {
+namespace UIForia.Layout {
 
     [Flags]
     public enum UIMeasurementUnit {

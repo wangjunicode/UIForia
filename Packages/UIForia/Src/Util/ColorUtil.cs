@@ -2,7 +2,7 @@ using System.Diagnostics;
 using UIForia.Extensions;
 using UnityEngine;
 
-namespace UIForia.Rendering {
+namespace UIForia.Util {
 
     public static class ColorUtil {
 

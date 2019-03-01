@@ -1,7 +1,5 @@
 using System;
-using JetBrains.Annotations;
 using UIForia.Rendering;
-using UIForia.Systems;
 using UnityEngine;
 
 namespace UIForia.Elements {
@@ -14,6 +12,7 @@ namespace UIForia.Elements {
 
         public UIGraphicElement() {
             flags |= UIElementFlags.Primitive;
+            flags |= UIElementFlags.BuiltIn;
             mesh = new Mesh();
             IsGeometryDirty = true;
         }

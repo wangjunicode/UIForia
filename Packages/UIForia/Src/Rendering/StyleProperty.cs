@@ -5,6 +5,7 @@ using TMPro;
 using UIForia.Layout;
 using UIForia.Layout.LayoutTypes;
 using UIForia.Text;
+using UIForia.Util;
 using UnityEngine;
 using FontStyle = UIForia.Text.FontStyle;
 using TextAlignment = UIForia.Text.TextAlignment;

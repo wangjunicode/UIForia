@@ -1,12 +1,17 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Reflection;
+using UIForia.Attributes;
+using UIForia.Bindings;
 using UIForia.Extensions;
 using UIForia.Compilers.AliasSource;
+using UIForia.Exceptions;
+using UIForia.Expressions;
+using UIForia.Parsing.Expression;
 using UIForia.Util;
 using UnityEngine;
 using Debug = System.Diagnostics.Debug;
-using ElementCallback = System.Action<UIForia.UIElement, string>;
+using ElementCallback = System.Action<UIForia.Elements.UIElement, string>;
 
 namespace UIForia.Compilers {
 

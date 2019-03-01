@@ -1,7 +1,6 @@
 using System;
-using UIForia;
+using UIForia.Elements;
 using UIForia.Rendering;
-using UIForia.Systems;
 using UIForia.Util;
 using UnityEngine;
 using Application = UIForia.Application;

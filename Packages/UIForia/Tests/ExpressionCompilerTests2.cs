@@ -3,8 +3,9 @@ using System.Collections.Generic;
 using NUnit.Framework;
 using UIForia;
 using UIForia.Compilers;
+using UIForia.Compilers.ExpressionResolvers;
 using UIForia.Exceptions;
-using UIForia.Parsing;
+using UIForia.Expressions;
 using UnityEngine;
 
 [TestFixture]

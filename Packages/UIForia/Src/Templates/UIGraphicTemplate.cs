@@ -1,9 +1,10 @@
 using System;
 using System.Collections.Generic;
 using UIForia.Elements;
+using UIForia.Parsing.Expression;
 using UIForia.Util;
 
-namespace UIForia {
+namespace UIForia.Templates {
 
     public class UIGraphicTemplate : UITemplate {
 

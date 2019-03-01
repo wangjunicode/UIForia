@@ -1,8 +1,9 @@
 ﻿using System;
 using System.Reflection;
 using JetBrains.Annotations;
+using UIForia.Util;
 
-namespace UIForia {
+namespace UIForia.Expressions {
 
     public class MethodCallExpression_InstanceVoid<T> : Expression<Terminal> {
 

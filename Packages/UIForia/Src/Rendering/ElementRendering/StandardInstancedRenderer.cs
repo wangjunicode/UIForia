@@ -1,10 +1,12 @@
 using System;
+using UIForia.Elements;
+using UIForia.Layout;
 using UIForia.Systems;
 using UIForia.Util;
 using UnityEngine;
 using UnityEngine.Rendering;
 
-namespace UIForia.Rendering {
+namespace UIForia.Rendering.ElementRendering {
 
     public class StandardInstancedRenderer : ElementRenderer {
 

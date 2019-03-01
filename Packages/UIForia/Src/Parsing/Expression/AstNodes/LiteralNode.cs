@@ -1,4 +1,4 @@
-namespace UIForia.Parsing {
+namespace UIForia.Parsing.Expression.AstNodes {
 
     public class LiteralNode : ASTNode {
 

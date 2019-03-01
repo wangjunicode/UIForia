@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Reflection;
 using UIForia.Compilers.AliasSource;
 
-namespace UIForia {
+namespace UIForia.Parsing.Expression {
 
 //    public class ContextDefinition {
 //

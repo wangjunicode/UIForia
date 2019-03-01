@@ -1,7 +1,9 @@
 ﻿using System;
+using UIForia.Systems;
+using UIForia.Util;
 using UnityEngine;
 
-namespace UIForia.Systems {
+namespace UIForia.Layout {
 
     // todo make this a class or crunch significantly
     

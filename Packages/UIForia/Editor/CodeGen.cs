@@ -1,7 +1,6 @@
 using System;
 using System.Collections.Generic;
 using System.IO;
-using Shapes2D;
 using TMPro;
 using UIForia.Layout;
 using UIForia.Layout.LayoutTypes;
@@ -176,6 +175,8 @@ namespace UIForia.Editor {
             string generatedPath3 = Path.GetFullPath(Path.Combine(UnityEngine.Application.dataPath, "../Packages/UIForia/Src/_Generated3.cs"));
 
             string template = @"
+using UIForia.Util;
+
 namespace UIForia.Rendering {
     
     public partial struct UIStyleSetStateProxy {
@@ -238,9 +239,11 @@ __REPLACE_StyleUtil__IsInherited
 }";
 
             const string StyleBindingTemplate = @"using UIForia.Compilers.AliasSource;
-using UIForia.Rendering;    
+using UIForia.Expressions;
+using UIForia.Elements;
+using UIForia.Rendering;
 
-namespace UIForia.StyleBindings {
+namespace UIForia.Bindings.StyleBindings {
     __REPLACE_StyleBindingClasses
 }
 
@@ -250,7 +253,7 @@ namespace UIForia.Compilers {
 
 __REPLACE_StyleBindingCompiler_EnumSources
 
-        private StyleBindings.StyleBinding DoCompile(string key, string value, Target targetState) {
+        private UIForia.Bindings.StyleBindings.StyleBinding DoCompile(string key, string value, Target targetState) {
             switch(targetState.property.ToLower()) {
 
 __REPLACE_StyleBindingCompiler_DoCompile
@@ -335,6 +338,7 @@ __REPLACE_StyleBindingCompiler_DoCompile
 using UIForia.Layout;
 using UIForia.Layout.LayoutTypes;
 using TMPro;
+using UIForia.Bindings.StyleBindings;
 using System.Collections.Generic;
 using UnityEngine;
 using UIForia.Util;
@@ -447,7 +451,7 @@ namespace UIForia.Rendering {
                 string bindingName = generator.GetPrintableTypeName();
                 string type = generator.GetFullTypeName();
                 retn += $@"case ""{generator.propertyIdName.ToLower()}"":
-                    return new UIForia.StyleBindings.StyleBinding_{bindingName}(""{generator.propertyIdName}"", {name}, targetState.state, Compile<{type}>(value, {generator.GetAliasSources()}));                
+                    return new UIForia.Bindings.StyleBindings.StyleBinding_{bindingName}(""{generator.propertyIdName}"", {name}, targetState.state, Compile<{type}>(value, {generator.GetAliasSources()}));                
                 ";
             }
 

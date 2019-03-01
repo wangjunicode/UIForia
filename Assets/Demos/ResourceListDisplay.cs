@@ -1,11 +1,11 @@
 using System.Collections.Generic;
-using System.Diagnostics;
 using UIForia;
 using UIForia.Animation;
-using UIForia.Input;
+using UIForia.Attributes;
+using UIForia.Elements;
 using UIForia.Rendering;
+using UIForia.UIInput;
 using UnityEngine;
-using Debug = UnityEngine.Debug;
 
 namespace Demos {
 
@@ -53,7 +53,7 @@ namespace Demos {
                 return;
             }
          
-            UnityEngine.Debug.Log("enter");
+            Debug.Log("enter");
         }
 
         private float offset = 0;
@@ -132,7 +132,7 @@ namespace Demos {
             if (evt.origin == this) {
                 return;
             }
-            UnityEngine.Debug.Log("exit");
+            Debug.Log("exit");
         }
 
     }

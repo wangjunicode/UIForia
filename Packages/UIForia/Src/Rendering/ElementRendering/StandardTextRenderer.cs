@@ -1,4 +1,4 @@
-using System;
+using UIForia.Elements;
 using UIForia.Systems;
 using UnityEngine;
 
@@ -27,9 +27,6 @@ namespace UIForia.Rendering.ElementRendering {
                 
                 Graphics.DrawMesh(mesh, origin + data.renderPosition, rotation, material, 0, camera, 0, m_PropertyBlock, false, false, false);
             }
-            
         }
-
     }
-
 }

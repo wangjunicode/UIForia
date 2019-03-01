@@ -1,6 +1,6 @@
 using System;
 
-namespace UIForia {
+namespace UIForia.Expressions {
 
     public static class UnaryExpression_MinusFactory {
 

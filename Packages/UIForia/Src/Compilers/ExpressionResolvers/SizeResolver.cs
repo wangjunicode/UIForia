@@ -1,9 +1,13 @@
 using System.Collections.Generic;
 using System.Reflection;
 using JetBrains.Annotations;
-using UIForia.Parsing;
+using UIForia.Exceptions;
+using UIForia.Expressions;
+using UIForia.Parsing.Expression.AstNodes;
+using UIForia.Rendering;
+using UIForia.Util;
 
-namespace UIForia.Compilers {
+namespace UIForia.Compilers.ExpressionResolvers {
 
     public class SizeResolver : ExpressionAliasResolver {
 
@@ -30,7 +34,8 @@ namespace UIForia.Compilers {
 
                 return new MethodCallExpression_Static<UIMeasurement, MeasurementPair>(s_SizeInfo1, new[] {expr0});
             }
-            else if (parameters.Count == 2) {
+
+            if (parameters.Count == 2) {
                 Expression expr0 = context.Visit(typeof(UIMeasurement), parameters[0]);
                 Expression expr1 = context.Visit(typeof(UIMeasurement), parameters[1]);
                 if (expr0 == null || expr1 == null) {

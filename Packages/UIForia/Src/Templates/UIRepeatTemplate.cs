@@ -1,11 +1,13 @@
 using System;
-using System.Collections;
 using System.Collections.Generic;
-using System.Reflection;
-using UIForia.Compilers;
+using UIForia.Compilers.ExpressionResolvers;
+using UIForia.Elements;
+using UIForia.Exceptions;
+using UIForia.Expressions;
+using UIForia.Parsing.Expression;
 using UIForia.Util;
 
-namespace UIForia {
+namespace UIForia.Templates {
 
     public class UIRepeatTemplate : UITemplate {
 

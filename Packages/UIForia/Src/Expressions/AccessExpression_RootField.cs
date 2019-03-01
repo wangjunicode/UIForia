@@ -1,7 +1,8 @@
 using System;
 using System.Reflection;
+using UIForia.Util;
 
-namespace UIForia {
+namespace UIForia.Expressions {
 
     public class AccessExpression_RootField<T> : Expression<T> {
 

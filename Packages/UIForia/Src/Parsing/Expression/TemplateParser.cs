@@ -1,13 +1,14 @@
 using System;
-using System.Xml;
 using System.Collections.Generic;
 using System.Linq;
+using System.Xml;
 using System.Xml.Linq;
-using UIForia.Style;
 using UIForia.Elements;
+using UIForia.Exceptions;
+using UIForia.Templates;
 using UIForia.Util;
 
-namespace UIForia {
+namespace UIForia.Parsing.Expression {
 
     public class TemplateParser {
 
@@ -105,7 +106,7 @@ namespace UIForia {
             // if we have a body, expect import path to be null
             if (!string.IsNullOrEmpty(rawText) && !string.IsNullOrWhiteSpace(rawText)) {
                 if (importPathAttr != null && !string.IsNullOrEmpty(importPathAttr.Value)) {
-                    throw new UIForia.ParseException("Expected 'path' to be null when a body is provided to a style tag");
+                    throw new ParseException("Expected 'path' to be null when a body is provided to a style tag");
                 }
 
                 return new StyleDefinition(alias, templateId, rawText);
@@ -113,7 +114,7 @@ namespace UIForia {
 
             // if we have no body then expect path to be set
             if (importPathAttr == null || string.IsNullOrEmpty(importPathAttr.Value)) {
-                throw new UIForia.ParseException("Expected 'path' to be provided when a body is not provided in a style tag");
+                throw new ParseException("Expected 'path' to be provided when a body is not provided in a style tag");
             }
 
             return new StyleDefinition(alias, importPathAttr.Value.Trim());

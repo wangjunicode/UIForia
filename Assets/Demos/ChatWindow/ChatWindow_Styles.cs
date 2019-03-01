@@ -1,5 +1,6 @@
 using UIForia;
 using UIForia.Animation;
+using UIForia.Attributes;
 using UIForia.Layout;
 using UIForia.Layout.LayoutTypes;
 using UIForia.Rendering;

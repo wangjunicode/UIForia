@@ -1,9 +1,9 @@
 using NUnit.Framework;
-using UIForia.Rendering;
-using UIForia;
-using UIForia.Layout;
 using Tests.Mocks;
-using UnityEditor.VersionControl;
+using UIForia.Attributes;
+using UIForia.Elements;
+using UIForia.Layout;
+using UIForia.Rendering;
 using UnityEngine;
 
 [TestFixture]

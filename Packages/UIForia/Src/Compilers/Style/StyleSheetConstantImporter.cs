@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using UIForia.Exceptions;
 using UIForia.Parsing.Style.AstNodes;
 using UIForia.Util;
 

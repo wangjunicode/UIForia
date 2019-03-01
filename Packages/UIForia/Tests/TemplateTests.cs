@@ -1,5 +1,9 @@
 using NUnit.Framework;
-using UIForia;
+using UIForia.Attributes;
+using UIForia.Bindings;
+using UIForia.Elements;
+using UIForia.Expressions;
+using UIForia.Templates;
 using static Tests.TestUtils;
 
 [TestFixture]

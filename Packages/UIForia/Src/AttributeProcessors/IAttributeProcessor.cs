@@ -1,4 +1,6 @@
 using System.Collections.Generic;
+using UIForia.Elements;
+using UIForia.Templates;
 
 namespace UIForia.AttributeProcessors {
 

@@ -1,8 +1,7 @@
 using System;
 using System.Collections.Generic;
 using NUnit.Framework;
-using UIForia;
-using UIForia.Parsing;
+using UIForia.Parsing.Expression;
 using UnityEngine;
 
 [TestFixture]

@@ -2,10 +2,8 @@
 using System.Collections.Generic;
 using System.Diagnostics;
 using JetBrains.Annotations;
-using UIForia.Rendering;
-using UIForia.Util;
 
-namespace UIForia {
+namespace UIForia.Util {
 
     public interface IHierarchical {
 

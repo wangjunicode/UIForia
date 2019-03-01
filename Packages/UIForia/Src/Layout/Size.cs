@@ -1,7 +1,7 @@
-﻿using UIForia.Rendering;
+﻿using UIForia.Util;
 using UnityEngine;
 
-namespace UIForia.Systems {
+namespace UIForia.Layout {
 
     public struct Size {
 

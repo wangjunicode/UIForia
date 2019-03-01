@@ -1,4 +1,3 @@
-using System;
 using UIForia.Compilers.AliasSource;
 
 namespace UIForia.Compilers.AliasSources {

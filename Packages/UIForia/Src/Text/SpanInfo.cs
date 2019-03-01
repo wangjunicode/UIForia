@@ -1,8 +1,5 @@
 using SVGX;
-using UIForia.Util;
 using TMPro;
-using UIForia.Rendering;
-using UnityEngine;
 
 namespace UIForia.Text {
 

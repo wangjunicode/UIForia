@@ -1,6 +1,6 @@
 using System;
 
-namespace UIForia {
+namespace UIForia.Elements.Routing {
 
     public class GuardedRoute : RouteElement {
 

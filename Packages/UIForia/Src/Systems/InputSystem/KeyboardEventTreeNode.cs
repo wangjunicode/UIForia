@@ -1,7 +1,8 @@
-using System.Collections.Generic;
-using UIForia.Input;
+using UIForia.Elements;
+using UIForia.UIInput;
+using UIForia.Util;
 
-namespace UIForia.Systems {
+namespace UIForia.Stystems.InputSystem {
 
     public class KeyboardEventTreeNode : IHierarchical {
 
@@ -18,5 +19,4 @@ namespace UIForia.Systems {
         public IHierarchical Parent => element.parent;
 
     }
-
 }

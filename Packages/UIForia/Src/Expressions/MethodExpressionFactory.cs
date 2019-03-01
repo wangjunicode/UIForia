@@ -1,11 +1,10 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Reflection;
-using UIForia.Compilers;
 using UIForia.Exceptions;
 using UIForia.Util;
 
-namespace UIForia {
+namespace UIForia.Expressions {
 
     public static class MethodExpressionFactory {
 

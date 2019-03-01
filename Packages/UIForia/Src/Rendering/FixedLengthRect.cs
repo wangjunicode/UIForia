@@ -1,6 +1,6 @@
 ﻿using System.Diagnostics;
 using UIForia;
-using UIForia.Rendering;
+using UIForia.Util;
 
 [DebuggerDisplay("{top}, {right}, {bottom}, {left}")]
 public struct FixedLengthRect {

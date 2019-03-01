@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using Shapes2D;
 using TMPro;
 using UIForia.Compilers.Style;
+using UIForia.Elements;
 using UIForia.Layout;
 using UIForia.Layout.LayoutTypes;
 using UIForia.Rendering;

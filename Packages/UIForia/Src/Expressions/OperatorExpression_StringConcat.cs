@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace UIForia {
+namespace UIForia.Expressions {
 
     
     public class OperatorExpression_StringConcat<U, V> : Expression<string> {

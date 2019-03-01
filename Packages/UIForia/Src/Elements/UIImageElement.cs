@@ -1,9 +1,9 @@
+using UIForia.Attributes;
 using UIForia.Rendering;
-using UIForia.Systems;
 using UIForia.Util;
 using UnityEngine;
 
-namespace UIForia {
+namespace UIForia.Elements {
 
     public class UIImageElement : UIElement, IMeshProvider {
 

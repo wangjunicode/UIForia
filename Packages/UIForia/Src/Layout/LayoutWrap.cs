@@ -1,4 +1,4 @@
-namespace UIForia.Rendering {
+namespace UIForia.Layout {
 
     public enum LayoutWrap {
 

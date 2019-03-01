@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace UIForia {
+namespace UIForia.Expressions {
 
     public class ResolveExpression_Alias<T> : Expression<T> {
 

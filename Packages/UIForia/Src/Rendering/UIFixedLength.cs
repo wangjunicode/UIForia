@@ -1,6 +1,6 @@
 using System.Diagnostics;
 using JetBrains.Annotations;
-using UIForia.Rendering;
+using UIForia.Util;
 using UnityEngine;
 
 namespace UIForia {

@@ -1,7 +1,7 @@
 using System.Collections.Generic;
-using UIForia.Util;
+using UIForia.Elements;
 
-namespace UIForia {
+namespace UIForia.Templates {
 
     public struct TemplateScope {
 

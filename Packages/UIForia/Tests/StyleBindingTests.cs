@@ -1,8 +1,10 @@
 using NUnit.Framework;
-using UIForia.Rendering;
-using UIForia;
 using Tests.Mocks;
 using TMPro;
+using UIForia;
+using UIForia.Attributes;
+using UIForia.Elements;
+using UIForia.Rendering;
 using UnityEngine;
 
 [TestFixture]
@@ -23,7 +25,7 @@ public class StyleBindingTests {
 
     [SetUp]
     public void Setup() {
-        UIForia.ResourceManager.Reset();
+        ResourceManager.Reset();
     }
     
     [Test]

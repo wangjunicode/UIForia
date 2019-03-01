@@ -1,8 +1,8 @@
 using System.Collections.Generic;
-using System.Linq;
 using NUnit.Framework;
-using UIForia;
 using Tests.Mocks;
+using UIForia.Attributes;
+using UIForia.Elements;
 using UIForia.Util;
 
 [TestFixture]

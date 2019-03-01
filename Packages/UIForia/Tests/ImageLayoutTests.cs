@@ -1,8 +1,4 @@
 using NUnit.Framework;
-using UIForia.Rendering;
-using UIForia;
-using Tests.Mocks;
-using UnityEngine;
 
 [TestFixture]
 public class ImageLayoutTests {

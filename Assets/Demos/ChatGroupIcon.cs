@@ -1,9 +1,9 @@
-using UIForia.Rendering;
 using UIForia;
+using UIForia.Attributes;
+using UIForia.Elements;
 using UIForia.Layout;
-using UIForia.Util;
+using UIForia.Rendering;
 using UnityEngine;
-using UIForia.Text;
 using TextAlignment = UIForia.Text.TextAlignment;
 
 namespace Demo {

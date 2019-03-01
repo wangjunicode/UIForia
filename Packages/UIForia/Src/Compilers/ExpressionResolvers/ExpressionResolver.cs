@@ -1,9 +1,11 @@
 using System.Collections.Generic;
 using System.Reflection;
-using UIForia.Parsing;
+using UIForia.Exceptions;
+using UIForia.Expressions;
+using UIForia.Parsing.Expression.AstNodes;
 using UIForia.Util;
 
-namespace UIForia.Compilers {
+namespace UIForia.Compilers.ExpressionResolvers {
 
     public abstract class ExpressionAliasResolver {
 

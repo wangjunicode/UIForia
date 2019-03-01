@@ -6,6 +6,7 @@ namespace UIForia.Elements {
         
         protected VirtualElement() {
             flags |= UIElementFlags.VirtualElement;
+            flags |= UIElementFlags.BuiltIn;
         }
 
 

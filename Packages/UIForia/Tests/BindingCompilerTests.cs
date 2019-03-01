@@ -1,9 +1,12 @@
 ﻿using System;
 using NUnit.Framework;
-using UIForia;
-using UIForia.Compilers;
 using Tests.Mocks;
+using UIForia.Attributes;
+using UIForia.Bindings;
+using UIForia.Compilers;
 using UIForia.Elements;
+using UIForia.Expressions;
+using UIForia.Parsing.Expression;
 using static Tests.TestUtils;
 
 [TestFixture]

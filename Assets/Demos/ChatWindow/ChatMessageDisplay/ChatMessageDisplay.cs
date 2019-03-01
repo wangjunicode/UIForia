@@ -1,5 +1,5 @@
-using UIForia;
-using UnityEngine;
+using UIForia.Attributes;
+using UIForia.Elements;
 
 namespace Demo {
 

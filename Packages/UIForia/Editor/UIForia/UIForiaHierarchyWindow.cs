@@ -1,5 +1,7 @@
 using System;
 using System.Reflection;
+using UIForia.Elements;
+using UIForia.Rendering;
 using UIForia.Systems;
 using UIForia.Util;
 using UnityEditor;

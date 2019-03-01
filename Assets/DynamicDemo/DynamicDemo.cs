@@ -1,5 +1,6 @@
 using System;
 using UIForia;
+using UIForia.Attributes;
 using UIForia.Elements;
 
 public class DynamicDataTest<T> : IDynamicData where T : UIElement {

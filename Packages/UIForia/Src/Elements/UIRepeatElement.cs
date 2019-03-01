@@ -1,9 +1,9 @@
 using System;
-using System.Collections.Generic;
+using UIForia.Expressions;
+using UIForia.Templates;
 using UIForia.Util;
-using UnityEngine;
 
-namespace UIForia {
+namespace UIForia.Elements {
 
     public abstract class UIRepeatElement : UIElement {
         

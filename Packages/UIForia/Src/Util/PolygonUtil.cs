@@ -1,6 +1,6 @@
 using UnityEngine;
 
-namespace UIForia.Src.Util {
+namespace UIForia.Util {
 
     public static class PolygonUtil {
 

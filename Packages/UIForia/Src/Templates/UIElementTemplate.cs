@@ -1,9 +1,14 @@
 using System;
 using System.Collections.Generic;
+using UIForia.Attributes;
+using UIForia.Bindings;
+using UIForia.Elements;
+using UIForia.Expressions;
+using UIForia.Parsing.Expression;
 using UIForia.Util;
 using UnityEngine;
 
-namespace UIForia {
+namespace UIForia.Templates {
 
     // wraps a ParsedTemplate, this is what is created by parent templates
     // properties need to be merged from the parsed template <Content/> tag (root)

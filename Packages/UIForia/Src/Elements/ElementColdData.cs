@@ -1,8 +1,10 @@
 ﻿using System;
 using System.Collections.Generic;
+using UIForia.Elements.Routing;
+using UIForia.Templates;
 using UIForia.Util;
 
-namespace UIForia {
+namespace UIForia.Elements {
 
     internal struct ElementColdData {
 

@@ -2,10 +2,12 @@ using System.Collections.Generic;
 using System.Reflection;
 using JetBrains.Annotations;
 using TMPro;
-using UIForia.Parsing;
+using UIForia.Expressions;
+using UIForia.Parsing.Expression.AstNodes;
+using UIForia.Util;
 using UnityEngine;
 
-namespace UIForia.Compilers {
+namespace UIForia.Compilers.ExpressionResolvers {
 
     public class UrlResolver : ExpressionAliasResolver {
 

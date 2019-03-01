@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using UIForia.Animation;
 using UIForia.Compilers.Style;
+using UIForia.Elements;
 using UIForia.Systems;
 using UIForia.Util;
 using UnityEngine;

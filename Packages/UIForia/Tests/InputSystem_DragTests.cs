@@ -2,8 +2,9 @@ using System;
 using System.Collections.Generic;
 using NUnit.Framework;
 using Tests.Mocks;
-using UIForia;
-using UIForia.Input;
+using UIForia.Attributes;
+using UIForia.Elements;
+using UIForia.UIInput;
 using UnityEngine;
 using static Tests.TestUtils;
 

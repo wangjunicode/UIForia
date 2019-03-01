@@ -1,4 +1,4 @@
-namespace UIForia {
+namespace UIForia.Elements.Routing {
 
     public interface IRouterElement {
 

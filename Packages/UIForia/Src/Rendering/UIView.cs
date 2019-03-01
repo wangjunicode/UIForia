@@ -1,5 +1,5 @@
 using System;
-using UIForia;
+using UIForia.Elements;
 using UnityEngine;
 using Application = UIForia.Application;
 

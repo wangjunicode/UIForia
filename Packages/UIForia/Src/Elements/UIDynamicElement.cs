@@ -1,5 +1,5 @@
 using System;
-using UnityEngine;
+using UIForia.Attributes;
 
 namespace UIForia.Elements {
 
@@ -20,7 +20,11 @@ namespace UIForia.Elements {
 
         public IDynamicData data;
         private IDynamicData previousData;
-        
+
+        public UIDynamicElement() {
+            flags |= UIElementFlags.BuiltIn;
+        }
+
         [OnPropertyChanged(nameof(data))]
         private void OnDataChanged(string propertyName) {
             if (previousData != null && data != null) {

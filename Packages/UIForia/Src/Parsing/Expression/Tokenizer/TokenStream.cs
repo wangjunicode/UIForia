@@ -3,7 +3,7 @@ using System.Diagnostics;
 using UIForia.Util;
 using UnityEngine;
 
-namespace UIForia {
+namespace UIForia.Parsing.Expression.Tokenizer {
 
     public struct TokenStream {
 

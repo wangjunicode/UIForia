@@ -4,9 +4,13 @@ using System.Collections.Generic;
 using System.Globalization;
 using System.Reflection;
 using UIForia.Compilers.CastHandlers;
+using UIForia.Compilers.ExpressionResolvers;
 using UIForia.Exceptions;
+using UIForia.Expressions;
 using UIForia.Extensions;
 using UIForia.Parsing;
+using UIForia.Parsing.Expression;
+using UIForia.Parsing.Expression.AstNodes;
 using UIForia.Util;
 
 namespace UIForia.Compilers {

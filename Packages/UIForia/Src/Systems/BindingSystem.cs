@@ -1,4 +1,7 @@
-﻿using UIForia.Rendering;
+﻿using UIForia.Bindings;
+using UIForia.Elements;
+using UIForia.Templates;
+using UIForia.Util;
 
 namespace UIForia.Systems {
 

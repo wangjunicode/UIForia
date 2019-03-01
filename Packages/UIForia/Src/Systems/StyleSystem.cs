@@ -1,9 +1,9 @@
-﻿﻿using System;
+﻿using System;
 using System.Collections.Generic;
 using UIForia.Animation;
- using UIForia.Compilers.Style;
- using UIForia.Rendering;
-using UIForia.StyleBindings;
+using UIForia.Compilers.Style;
+using UIForia.Elements;
+using UIForia.Rendering;
 using UIForia.Util;
 using UnityEngine;
 
@@ -53,13 +53,12 @@ namespace UIForia.Systems {
                     OnElementCreated(element.children[i]);
                 }
             }
-            
+
             // todo need to trickle inherited properties into newly created elements (repeat children, etc)
-        //    for (int i = 0; i < StyleUtil.InheritedProperties.Count; i++) {
-                // if ! element.style.Defines(properties[i])
-                    // 
-          //  }
-            
+            //    for (int i = 0; i < StyleUtil.InheritedProperties.Count; i++) {
+            // if ! element.style.Defines(properties[i])
+            // 
+            //  }
         }
 
         public void OnUpdate() {
@@ -79,17 +78,23 @@ namespace UIForia.Systems {
             m_ChangeSets.Clear();
         }
 
-        public void OnDestroy() { }
+        public void OnDestroy() {
+        }
 
-        public void OnViewAdded(UIView view) { }
+        public void OnViewAdded(UIView view) {
+        }
 
-        public void OnViewRemoved(UIView view) { }
+        public void OnViewRemoved(UIView view) {
+        }
 
-        public void OnElementEnabled(UIElement element) { }
+        public void OnElementEnabled(UIElement element) {
+        }
 
-        public void OnElementDisabled(UIElement element) { }
+        public void OnElementDisabled(UIElement element) {
+        }
 
-        public void OnElementDestroyed(UIElement element) { }
+        public void OnElementDestroyed(UIElement element) {
+        }
 
         public void OnAttributeSet(UIElement element, string attributeName, string currentValue, string attributeValue) {
             element.style.UpdateApplicableAttributeRules(attributeName, attributeValue);
@@ -116,12 +121,13 @@ namespace UIForia.Systems {
             if (property.IsUnset) {
                 UIElement ptr = element.parent;
                 StyleProperty parentProperty = StyleProperty.Unset(property.propertyId);
-                
+
                 while (ptr != null) {
                     parentProperty = ptr.style.GetPropertyValue(property.propertyId);
                     if (parentProperty.IsDefined) {
                         break;
                     }
+
                     ptr = ptr.parent;
                 }
 
@@ -131,7 +137,7 @@ namespace UIForia.Systems {
 
                 property = parentProperty;
             }
-            
+
             for (int i = 0; i < element.children.Count; i++) {
                 s_ElementStack.Push(element.children[i]);
             }

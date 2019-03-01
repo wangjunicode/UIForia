@@ -1,3 +1,5 @@
+using UIForia.Expressions;
+
 namespace UIForia.Compilers {
 
     public class AccessExpressionPart_Method<TReturn, TInput, TNext> : AccessExpressionPart<TReturn, TInput> {

@@ -1,7 +1,7 @@
 ﻿using System;
-using UIForia.Parsing;
+using UIForia.Parsing.Expression.AstNodes;
 
-namespace UIForia {
+namespace UIForia.Expressions {
 
     public class OperatorExpression_Boolean : Expression<bool> {
 

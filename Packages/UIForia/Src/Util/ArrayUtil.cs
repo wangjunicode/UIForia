@@ -1,6 +1,6 @@
 ﻿using System.Collections.Generic;
 
-namespace UIForia.Rendering {
+namespace UIForia.Util {
 
     public static class ArrayUtil {
 

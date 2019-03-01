@@ -1,5 +1,4 @@
-﻿using UIForia.Input;
-using UIForia.Rendering;
+﻿using UIForia.UIInput;
 
 namespace UIForia.Systems {
 

@@ -1,7 +1,9 @@
 using UIForia.Compilers.AliasSource;
-using UIForia.Rendering;    
+using UIForia.Expressions;
+using UIForia.Elements;
+using UIForia.Rendering;
 
-namespace UIForia.StyleBindings {
+namespace UIForia.Bindings.StyleBindings {
             
     public class StyleBinding_Overflow : StyleBinding {
 
@@ -375,10 +377,10 @@ namespace UIForia.StyleBindings {
         
     public class StyleBinding_LayoutDirection : StyleBinding {
 
-        public readonly Expression<UIForia.Rendering.LayoutDirection> expression;
+        public readonly Expression<UIForia.Layout.LayoutDirection> expression;
         public readonly StylePropertyId propertyId;
         
-        public StyleBinding_LayoutDirection(string propertyName, StylePropertyId propertyId, StyleState state, Expression<UIForia.Rendering.LayoutDirection> expression)
+        public StyleBinding_LayoutDirection(string propertyName, StylePropertyId propertyId, StyleState state, Expression<UIForia.Layout.LayoutDirection> expression)
             : base(propertyName, state) {
             this.propertyId = propertyId;
             this.expression = expression;
@@ -412,10 +414,10 @@ namespace UIForia.StyleBindings {
         
     public class StyleBinding_LayoutWrap : StyleBinding {
 
-        public readonly Expression<UIForia.Rendering.LayoutWrap> expression;
+        public readonly Expression<UIForia.Layout.LayoutWrap> expression;
         public readonly StylePropertyId propertyId;
         
-        public StyleBinding_LayoutWrap(string propertyName, StylePropertyId propertyId, StyleState state, Expression<UIForia.Rendering.LayoutWrap> expression)
+        public StyleBinding_LayoutWrap(string propertyName, StylePropertyId propertyId, StyleState state, Expression<UIForia.Layout.LayoutWrap> expression)
             : base(propertyName, state) {
             this.propertyId = propertyId;
             this.expression = expression;
@@ -634,10 +636,10 @@ namespace UIForia.StyleBindings {
         
     public class StyleBinding_UIMeasurement : StyleBinding {
 
-        public readonly Expression<UIForia.UIMeasurement> expression;
+        public readonly Expression<UIForia.Rendering.UIMeasurement> expression;
         public readonly StylePropertyId propertyId;
         
-        public StyleBinding_UIMeasurement(string propertyName, StylePropertyId propertyId, StyleState state, Expression<UIForia.UIMeasurement> expression)
+        public StyleBinding_UIMeasurement(string propertyName, StylePropertyId propertyId, StyleState state, Expression<UIForia.Rendering.UIMeasurement> expression)
             : base(propertyName, state) {
             this.propertyId = propertyId;
             this.expression = expression;
@@ -967,10 +969,10 @@ namespace UIForia.StyleBindings {
         
     public class StyleBinding_LayoutType : StyleBinding {
 
-        public readonly Expression<UIForia.Rendering.LayoutType> expression;
+        public readonly Expression<UIForia.Layout.LayoutType> expression;
         public readonly StylePropertyId propertyId;
         
-        public StyleBinding_LayoutType(string propertyName, StylePropertyId propertyId, StyleState state, Expression<UIForia.Rendering.LayoutType> expression)
+        public StyleBinding_LayoutType(string propertyName, StylePropertyId propertyId, StyleState state, Expression<UIForia.Layout.LayoutType> expression)
             : base(propertyName, state) {
             this.propertyId = propertyId;
             this.expression = expression;
@@ -1085,8 +1087,8 @@ namespace UIForia.Compilers {
         private static readonly EnumAliasSource<UIForia.Rendering.Overflow> s_EnumSource_Overflow = new EnumAliasSource<UIForia.Rendering.Overflow>();
         private static readonly EnumAliasSource<UIForia.Rendering.Visibility> s_EnumSource_Visibility = new EnumAliasSource<UIForia.Rendering.Visibility>();
         private static readonly EnumAliasSource<UIForia.Layout.CrossAxisAlignment> s_EnumSource_CrossAxisAlignment = new EnumAliasSource<UIForia.Layout.CrossAxisAlignment>();
-        private static readonly EnumAliasSource<UIForia.Rendering.LayoutDirection> s_EnumSource_LayoutDirection = new EnumAliasSource<UIForia.Rendering.LayoutDirection>();
-        private static readonly EnumAliasSource<UIForia.Rendering.LayoutWrap> s_EnumSource_LayoutWrap = new EnumAliasSource<UIForia.Rendering.LayoutWrap>();
+        private static readonly EnumAliasSource<UIForia.Layout.LayoutDirection> s_EnumSource_LayoutDirection = new EnumAliasSource<UIForia.Layout.LayoutDirection>();
+        private static readonly EnumAliasSource<UIForia.Layout.LayoutWrap> s_EnumSource_LayoutWrap = new EnumAliasSource<UIForia.Layout.LayoutWrap>();
         private static readonly EnumAliasSource<UIForia.Layout.MainAxisAlignment> s_EnumSource_MainAxisAlignment = new EnumAliasSource<UIForia.Layout.MainAxisAlignment>();
         private static readonly EnumAliasSource<UIForia.Layout.GridAxisAlignment> s_EnumSource_GridAxisAlignment = new EnumAliasSource<UIForia.Layout.GridAxisAlignment>();
         private static readonly EnumAliasSource<UIForia.Layout.GridLayoutDensity> s_EnumSource_GridLayoutDensity = new EnumAliasSource<UIForia.Layout.GridLayoutDensity>();
@@ -1096,232 +1098,232 @@ namespace UIForia.Compilers {
         private static readonly EnumAliasSource<UIForia.Text.TextTransform> s_EnumSource_TextTransform = new EnumAliasSource<UIForia.Text.TextTransform>();
         private static readonly EnumAliasSource<UIForia.Rendering.AnchorTarget> s_EnumSource_AnchorTarget = new EnumAliasSource<UIForia.Rendering.AnchorTarget>();
         private static readonly EnumAliasSource<UIForia.Rendering.TransformBehavior> s_EnumSource_TransformBehavior = new EnumAliasSource<UIForia.Rendering.TransformBehavior>();
-        private static readonly EnumAliasSource<UIForia.Rendering.LayoutType> s_EnumSource_LayoutType = new EnumAliasSource<UIForia.Rendering.LayoutType>();
+        private static readonly EnumAliasSource<UIForia.Layout.LayoutType> s_EnumSource_LayoutType = new EnumAliasSource<UIForia.Layout.LayoutType>();
         private static readonly EnumAliasSource<UIForia.Layout.LayoutBehavior> s_EnumSource_LayoutBehavior = new EnumAliasSource<UIForia.Layout.LayoutBehavior>();
         private static readonly EnumAliasSource<UIForia.Rendering.RenderLayer> s_EnumSource_RenderLayer = new EnumAliasSource<UIForia.Rendering.RenderLayer>();
 
 
-        private StyleBindings.StyleBinding DoCompile(string key, string value, Target targetState) {
+        private UIForia.Bindings.StyleBindings.StyleBinding DoCompile(string key, string value, Target targetState) {
             switch(targetState.property.ToLower()) {
 
 case "overflowx":
-                    return new UIForia.StyleBindings.StyleBinding_Overflow("OverflowX", UIForia.Rendering.StylePropertyId.OverflowX, targetState.state, Compile<UIForia.Rendering.Overflow>(value, s_EnumSource_Overflow));                
+                    return new UIForia.Bindings.StyleBindings.StyleBinding_Overflow("OverflowX", UIForia.Rendering.StylePropertyId.OverflowX, targetState.state, Compile<UIForia.Rendering.Overflow>(value, s_EnumSource_Overflow));                
                 case "overflowy":
-                    return new UIForia.StyleBindings.StyleBinding_Overflow("OverflowY", UIForia.Rendering.StylePropertyId.OverflowY, targetState.state, Compile<UIForia.Rendering.Overflow>(value, s_EnumSource_Overflow));                
+                    return new UIForia.Bindings.StyleBindings.StyleBinding_Overflow("OverflowY", UIForia.Rendering.StylePropertyId.OverflowY, targetState.state, Compile<UIForia.Rendering.Overflow>(value, s_EnumSource_Overflow));                
                 case "backgroundcolor":
-                    return new UIForia.StyleBindings.StyleBinding_Color("BackgroundColor", UIForia.Rendering.StylePropertyId.BackgroundColor, targetState.state, Compile<UnityEngine.Color>(value, colorSources));                
+                    return new UIForia.Bindings.StyleBindings.StyleBinding_Color("BackgroundColor", UIForia.Rendering.StylePropertyId.BackgroundColor, targetState.state, Compile<UnityEngine.Color>(value, colorSources));                
                 case "backgroundimageoffsetx":
-                    return new UIForia.StyleBindings.StyleBinding_UIFixedLength("BackgroundImageOffsetX", UIForia.Rendering.StylePropertyId.BackgroundImageOffsetX, targetState.state, Compile<UIForia.UIFixedLength>(value, fixedSources));                
+                    return new UIForia.Bindings.StyleBindings.StyleBinding_UIFixedLength("BackgroundImageOffsetX", UIForia.Rendering.StylePropertyId.BackgroundImageOffsetX, targetState.state, Compile<UIForia.UIFixedLength>(value, fixedSources));                
                 case "backgroundimageoffsety":
-                    return new UIForia.StyleBindings.StyleBinding_UIFixedLength("BackgroundImageOffsetY", UIForia.Rendering.StylePropertyId.BackgroundImageOffsetY, targetState.state, Compile<UIForia.UIFixedLength>(value, fixedSources));                
+                    return new UIForia.Bindings.StyleBindings.StyleBinding_UIFixedLength("BackgroundImageOffsetY", UIForia.Rendering.StylePropertyId.BackgroundImageOffsetY, targetState.state, Compile<UIForia.UIFixedLength>(value, fixedSources));                
                 case "backgroundimagescalex":
-                    return new UIForia.StyleBindings.StyleBinding_UIFixedLength("BackgroundImageScaleX", UIForia.Rendering.StylePropertyId.BackgroundImageScaleX, targetState.state, Compile<UIForia.UIFixedLength>(value, fixedSources));                
+                    return new UIForia.Bindings.StyleBindings.StyleBinding_UIFixedLength("BackgroundImageScaleX", UIForia.Rendering.StylePropertyId.BackgroundImageScaleX, targetState.state, Compile<UIForia.UIFixedLength>(value, fixedSources));                
                 case "backgroundimagescaley":
-                    return new UIForia.StyleBindings.StyleBinding_UIFixedLength("BackgroundImageScaleY", UIForia.Rendering.StylePropertyId.BackgroundImageScaleY, targetState.state, Compile<UIForia.UIFixedLength>(value, fixedSources));                
+                    return new UIForia.Bindings.StyleBindings.StyleBinding_UIFixedLength("BackgroundImageScaleY", UIForia.Rendering.StylePropertyId.BackgroundImageScaleY, targetState.state, Compile<UIForia.UIFixedLength>(value, fixedSources));                
                 case "backgroundimagetilex":
-                    return new UIForia.StyleBindings.StyleBinding_UIFixedLength("BackgroundImageTileX", UIForia.Rendering.StylePropertyId.BackgroundImageTileX, targetState.state, Compile<UIForia.UIFixedLength>(value, fixedSources));                
+                    return new UIForia.Bindings.StyleBindings.StyleBinding_UIFixedLength("BackgroundImageTileX", UIForia.Rendering.StylePropertyId.BackgroundImageTileX, targetState.state, Compile<UIForia.UIFixedLength>(value, fixedSources));                
                 case "backgroundimagetiley":
-                    return new UIForia.StyleBindings.StyleBinding_UIFixedLength("BackgroundImageTileY", UIForia.Rendering.StylePropertyId.BackgroundImageTileY, targetState.state, Compile<UIForia.UIFixedLength>(value, fixedSources));                
+                    return new UIForia.Bindings.StyleBindings.StyleBinding_UIFixedLength("BackgroundImageTileY", UIForia.Rendering.StylePropertyId.BackgroundImageTileY, targetState.state, Compile<UIForia.UIFixedLength>(value, fixedSources));                
                 case "backgroundimagerotation":
-                    return new UIForia.StyleBindings.StyleBinding_UIFixedLength("BackgroundImageRotation", UIForia.Rendering.StylePropertyId.BackgroundImageRotation, targetState.state, Compile<UIForia.UIFixedLength>(value, fixedSources));                
+                    return new UIForia.Bindings.StyleBindings.StyleBinding_UIFixedLength("BackgroundImageRotation", UIForia.Rendering.StylePropertyId.BackgroundImageRotation, targetState.state, Compile<UIForia.UIFixedLength>(value, fixedSources));                
                 case "backgroundimage":
-                    return new UIForia.StyleBindings.StyleBinding_Texture2D("BackgroundImage", UIForia.Rendering.StylePropertyId.BackgroundImage, targetState.state, Compile<UnityEngine.Texture2D>(value, textureUrlSource));                
+                    return new UIForia.Bindings.StyleBindings.StyleBinding_Texture2D("BackgroundImage", UIForia.Rendering.StylePropertyId.BackgroundImage, targetState.state, Compile<UnityEngine.Texture2D>(value, textureUrlSource));                
                 case "painter":
-                    return new UIForia.StyleBindings.StyleBinding_string("Painter", UIForia.Rendering.StylePropertyId.Painter, targetState.state, Compile<string>(value, null));                
+                    return new UIForia.Bindings.StyleBindings.StyleBinding_string("Painter", UIForia.Rendering.StylePropertyId.Painter, targetState.state, Compile<string>(value, null));                
                 case "opacity":
-                    return new UIForia.StyleBindings.StyleBinding_float("Opacity", UIForia.Rendering.StylePropertyId.Opacity, targetState.state, Compile<float>(value, null));                
+                    return new UIForia.Bindings.StyleBindings.StyleBinding_float("Opacity", UIForia.Rendering.StylePropertyId.Opacity, targetState.state, Compile<float>(value, null));                
                 case "cursor":
-                    return new UIForia.StyleBindings.StyleBinding_CursorStyle("Cursor", UIForia.Rendering.StylePropertyId.Cursor, targetState.state, Compile<UIForia.Rendering.CursorStyle>(value, null));                
+                    return new UIForia.Bindings.StyleBindings.StyleBinding_CursorStyle("Cursor", UIForia.Rendering.StylePropertyId.Cursor, targetState.state, Compile<UIForia.Rendering.CursorStyle>(value, null));                
                 case "visibility":
-                    return new UIForia.StyleBindings.StyleBinding_Visibility("Visibility", UIForia.Rendering.StylePropertyId.Visibility, targetState.state, Compile<UIForia.Rendering.Visibility>(value, s_EnumSource_Visibility));                
+                    return new UIForia.Bindings.StyleBindings.StyleBinding_Visibility("Visibility", UIForia.Rendering.StylePropertyId.Visibility, targetState.state, Compile<UIForia.Rendering.Visibility>(value, s_EnumSource_Visibility));                
                 case "flexitemorder":
-                    return new UIForia.StyleBindings.StyleBinding_int("FlexItemOrder", UIForia.Rendering.StylePropertyId.FlexItemOrder, targetState.state, Compile<int>(value, null));                
+                    return new UIForia.Bindings.StyleBindings.StyleBinding_int("FlexItemOrder", UIForia.Rendering.StylePropertyId.FlexItemOrder, targetState.state, Compile<int>(value, null));                
                 case "flexitemgrow":
-                    return new UIForia.StyleBindings.StyleBinding_int("FlexItemGrow", UIForia.Rendering.StylePropertyId.FlexItemGrow, targetState.state, Compile<int>(value, null));                
+                    return new UIForia.Bindings.StyleBindings.StyleBinding_int("FlexItemGrow", UIForia.Rendering.StylePropertyId.FlexItemGrow, targetState.state, Compile<int>(value, null));                
                 case "flexitemshrink":
-                    return new UIForia.StyleBindings.StyleBinding_int("FlexItemShrink", UIForia.Rendering.StylePropertyId.FlexItemShrink, targetState.state, Compile<int>(value, null));                
+                    return new UIForia.Bindings.StyleBindings.StyleBinding_int("FlexItemShrink", UIForia.Rendering.StylePropertyId.FlexItemShrink, targetState.state, Compile<int>(value, null));                
                 case "flexitemselfalignment":
-                    return new UIForia.StyleBindings.StyleBinding_CrossAxisAlignment("FlexItemSelfAlignment", UIForia.Rendering.StylePropertyId.FlexItemSelfAlignment, targetState.state, Compile<UIForia.Layout.CrossAxisAlignment>(value, s_EnumSource_CrossAxisAlignment));                
+                    return new UIForia.Bindings.StyleBindings.StyleBinding_CrossAxisAlignment("FlexItemSelfAlignment", UIForia.Rendering.StylePropertyId.FlexItemSelfAlignment, targetState.state, Compile<UIForia.Layout.CrossAxisAlignment>(value, s_EnumSource_CrossAxisAlignment));                
                 case "flexlayoutdirection":
-                    return new UIForia.StyleBindings.StyleBinding_LayoutDirection("FlexLayoutDirection", UIForia.Rendering.StylePropertyId.FlexLayoutDirection, targetState.state, Compile<UIForia.Rendering.LayoutDirection>(value, s_EnumSource_LayoutDirection));                
+                    return new UIForia.Bindings.StyleBindings.StyleBinding_LayoutDirection("FlexLayoutDirection", UIForia.Rendering.StylePropertyId.FlexLayoutDirection, targetState.state, Compile<UIForia.Layout.LayoutDirection>(value, s_EnumSource_LayoutDirection));                
                 case "flexlayoutwrap":
-                    return new UIForia.StyleBindings.StyleBinding_LayoutWrap("FlexLayoutWrap", UIForia.Rendering.StylePropertyId.FlexLayoutWrap, targetState.state, Compile<UIForia.Rendering.LayoutWrap>(value, s_EnumSource_LayoutWrap));                
+                    return new UIForia.Bindings.StyleBindings.StyleBinding_LayoutWrap("FlexLayoutWrap", UIForia.Rendering.StylePropertyId.FlexLayoutWrap, targetState.state, Compile<UIForia.Layout.LayoutWrap>(value, s_EnumSource_LayoutWrap));                
                 case "flexlayoutmainaxisalignment":
-                    return new UIForia.StyleBindings.StyleBinding_MainAxisAlignment("FlexLayoutMainAxisAlignment", UIForia.Rendering.StylePropertyId.FlexLayoutMainAxisAlignment, targetState.state, Compile<UIForia.Layout.MainAxisAlignment>(value, s_EnumSource_MainAxisAlignment));                
+                    return new UIForia.Bindings.StyleBindings.StyleBinding_MainAxisAlignment("FlexLayoutMainAxisAlignment", UIForia.Rendering.StylePropertyId.FlexLayoutMainAxisAlignment, targetState.state, Compile<UIForia.Layout.MainAxisAlignment>(value, s_EnumSource_MainAxisAlignment));                
                 case "flexlayoutcrossaxisalignment":
-                    return new UIForia.StyleBindings.StyleBinding_CrossAxisAlignment("FlexLayoutCrossAxisAlignment", UIForia.Rendering.StylePropertyId.FlexLayoutCrossAxisAlignment, targetState.state, Compile<UIForia.Layout.CrossAxisAlignment>(value, s_EnumSource_CrossAxisAlignment));                
+                    return new UIForia.Bindings.StyleBindings.StyleBinding_CrossAxisAlignment("FlexLayoutCrossAxisAlignment", UIForia.Rendering.StylePropertyId.FlexLayoutCrossAxisAlignment, targetState.state, Compile<UIForia.Layout.CrossAxisAlignment>(value, s_EnumSource_CrossAxisAlignment));                
                 case "griditemcolstart":
-                    return new UIForia.StyleBindings.StyleBinding_int("GridItemColStart", UIForia.Rendering.StylePropertyId.GridItemColStart, targetState.state, Compile<int>(value, null));                
+                    return new UIForia.Bindings.StyleBindings.StyleBinding_int("GridItemColStart", UIForia.Rendering.StylePropertyId.GridItemColStart, targetState.state, Compile<int>(value, null));                
                 case "griditemcolspan":
-                    return new UIForia.StyleBindings.StyleBinding_int("GridItemColSpan", UIForia.Rendering.StylePropertyId.GridItemColSpan, targetState.state, Compile<int>(value, null));                
+                    return new UIForia.Bindings.StyleBindings.StyleBinding_int("GridItemColSpan", UIForia.Rendering.StylePropertyId.GridItemColSpan, targetState.state, Compile<int>(value, null));                
                 case "griditemrowstart":
-                    return new UIForia.StyleBindings.StyleBinding_int("GridItemRowStart", UIForia.Rendering.StylePropertyId.GridItemRowStart, targetState.state, Compile<int>(value, null));                
+                    return new UIForia.Bindings.StyleBindings.StyleBinding_int("GridItemRowStart", UIForia.Rendering.StylePropertyId.GridItemRowStart, targetState.state, Compile<int>(value, null));                
                 case "griditemrowspan":
-                    return new UIForia.StyleBindings.StyleBinding_int("GridItemRowSpan", UIForia.Rendering.StylePropertyId.GridItemRowSpan, targetState.state, Compile<int>(value, null));                
+                    return new UIForia.Bindings.StyleBindings.StyleBinding_int("GridItemRowSpan", UIForia.Rendering.StylePropertyId.GridItemRowSpan, targetState.state, Compile<int>(value, null));                
                 case "griditemcolselfalignment":
-                    return new UIForia.StyleBindings.StyleBinding_GridAxisAlignment("GridItemColSelfAlignment", UIForia.Rendering.StylePropertyId.GridItemColSelfAlignment, targetState.state, Compile<UIForia.Layout.GridAxisAlignment>(value, s_EnumSource_GridAxisAlignment));                
+                    return new UIForia.Bindings.StyleBindings.StyleBinding_GridAxisAlignment("GridItemColSelfAlignment", UIForia.Rendering.StylePropertyId.GridItemColSelfAlignment, targetState.state, Compile<UIForia.Layout.GridAxisAlignment>(value, s_EnumSource_GridAxisAlignment));                
                 case "griditemrowselfalignment":
-                    return new UIForia.StyleBindings.StyleBinding_GridAxisAlignment("GridItemRowSelfAlignment", UIForia.Rendering.StylePropertyId.GridItemRowSelfAlignment, targetState.state, Compile<UIForia.Layout.GridAxisAlignment>(value, s_EnumSource_GridAxisAlignment));                
+                    return new UIForia.Bindings.StyleBindings.StyleBinding_GridAxisAlignment("GridItemRowSelfAlignment", UIForia.Rendering.StylePropertyId.GridItemRowSelfAlignment, targetState.state, Compile<UIForia.Layout.GridAxisAlignment>(value, s_EnumSource_GridAxisAlignment));                
                 case "gridlayoutdirection":
-                    return new UIForia.StyleBindings.StyleBinding_LayoutDirection("GridLayoutDirection", UIForia.Rendering.StylePropertyId.GridLayoutDirection, targetState.state, Compile<UIForia.Rendering.LayoutDirection>(value, s_EnumSource_LayoutDirection));                
+                    return new UIForia.Bindings.StyleBindings.StyleBinding_LayoutDirection("GridLayoutDirection", UIForia.Rendering.StylePropertyId.GridLayoutDirection, targetState.state, Compile<UIForia.Layout.LayoutDirection>(value, s_EnumSource_LayoutDirection));                
                 case "gridlayoutdensity":
-                    return new UIForia.StyleBindings.StyleBinding_GridLayoutDensity("GridLayoutDensity", UIForia.Rendering.StylePropertyId.GridLayoutDensity, targetState.state, Compile<UIForia.Layout.GridLayoutDensity>(value, s_EnumSource_GridLayoutDensity));                
+                    return new UIForia.Bindings.StyleBindings.StyleBinding_GridLayoutDensity("GridLayoutDensity", UIForia.Rendering.StylePropertyId.GridLayoutDensity, targetState.state, Compile<UIForia.Layout.GridLayoutDensity>(value, s_EnumSource_GridLayoutDensity));                
                 case "gridlayoutcoltemplate":
-                    return new UIForia.StyleBindings.StyleBinding_GridTrackTemplate("GridLayoutColTemplate", UIForia.Rendering.StylePropertyId.GridLayoutColTemplate, targetState.state, Compile<System.Collections.Generic.IReadOnlyList<UIForia.Layout.LayoutTypes.GridTrackSize>>(value, null));                
+                    return new UIForia.Bindings.StyleBindings.StyleBinding_GridTrackTemplate("GridLayoutColTemplate", UIForia.Rendering.StylePropertyId.GridLayoutColTemplate, targetState.state, Compile<System.Collections.Generic.IReadOnlyList<UIForia.Layout.LayoutTypes.GridTrackSize>>(value, null));                
                 case "gridlayoutrowtemplate":
-                    return new UIForia.StyleBindings.StyleBinding_GridTrackTemplate("GridLayoutRowTemplate", UIForia.Rendering.StylePropertyId.GridLayoutRowTemplate, targetState.state, Compile<System.Collections.Generic.IReadOnlyList<UIForia.Layout.LayoutTypes.GridTrackSize>>(value, null));                
+                    return new UIForia.Bindings.StyleBindings.StyleBinding_GridTrackTemplate("GridLayoutRowTemplate", UIForia.Rendering.StylePropertyId.GridLayoutRowTemplate, targetState.state, Compile<System.Collections.Generic.IReadOnlyList<UIForia.Layout.LayoutTypes.GridTrackSize>>(value, null));                
                 case "gridlayoutmainaxisautosize":
-                    return new UIForia.StyleBindings.StyleBinding_GridTrackSize("GridLayoutMainAxisAutoSize", UIForia.Rendering.StylePropertyId.GridLayoutMainAxisAutoSize, targetState.state, Compile<UIForia.Layout.LayoutTypes.GridTrackSize>(value, null));                
+                    return new UIForia.Bindings.StyleBindings.StyleBinding_GridTrackSize("GridLayoutMainAxisAutoSize", UIForia.Rendering.StylePropertyId.GridLayoutMainAxisAutoSize, targetState.state, Compile<UIForia.Layout.LayoutTypes.GridTrackSize>(value, null));                
                 case "gridlayoutcrossaxisautosize":
-                    return new UIForia.StyleBindings.StyleBinding_GridTrackSize("GridLayoutCrossAxisAutoSize", UIForia.Rendering.StylePropertyId.GridLayoutCrossAxisAutoSize, targetState.state, Compile<UIForia.Layout.LayoutTypes.GridTrackSize>(value, null));                
+                    return new UIForia.Bindings.StyleBindings.StyleBinding_GridTrackSize("GridLayoutCrossAxisAutoSize", UIForia.Rendering.StylePropertyId.GridLayoutCrossAxisAutoSize, targetState.state, Compile<UIForia.Layout.LayoutTypes.GridTrackSize>(value, null));                
                 case "gridlayoutcolgap":
-                    return new UIForia.StyleBindings.StyleBinding_float("GridLayoutColGap", UIForia.Rendering.StylePropertyId.GridLayoutColGap, targetState.state, Compile<float>(value, null));                
+                    return new UIForia.Bindings.StyleBindings.StyleBinding_float("GridLayoutColGap", UIForia.Rendering.StylePropertyId.GridLayoutColGap, targetState.state, Compile<float>(value, null));                
                 case "gridlayoutrowgap":
-                    return new UIForia.StyleBindings.StyleBinding_float("GridLayoutRowGap", UIForia.Rendering.StylePropertyId.GridLayoutRowGap, targetState.state, Compile<float>(value, null));                
+                    return new UIForia.Bindings.StyleBindings.StyleBinding_float("GridLayoutRowGap", UIForia.Rendering.StylePropertyId.GridLayoutRowGap, targetState.state, Compile<float>(value, null));                
                 case "gridlayoutcolalignment":
-                    return new UIForia.StyleBindings.StyleBinding_GridAxisAlignment("GridLayoutColAlignment", UIForia.Rendering.StylePropertyId.GridLayoutColAlignment, targetState.state, Compile<UIForia.Layout.GridAxisAlignment>(value, s_EnumSource_GridAxisAlignment));                
+                    return new UIForia.Bindings.StyleBindings.StyleBinding_GridAxisAlignment("GridLayoutColAlignment", UIForia.Rendering.StylePropertyId.GridLayoutColAlignment, targetState.state, Compile<UIForia.Layout.GridAxisAlignment>(value, s_EnumSource_GridAxisAlignment));                
                 case "gridlayoutrowalignment":
-                    return new UIForia.StyleBindings.StyleBinding_GridAxisAlignment("GridLayoutRowAlignment", UIForia.Rendering.StylePropertyId.GridLayoutRowAlignment, targetState.state, Compile<UIForia.Layout.GridAxisAlignment>(value, s_EnumSource_GridAxisAlignment));                
+                    return new UIForia.Bindings.StyleBindings.StyleBinding_GridAxisAlignment("GridLayoutRowAlignment", UIForia.Rendering.StylePropertyId.GridLayoutRowAlignment, targetState.state, Compile<UIForia.Layout.GridAxisAlignment>(value, s_EnumSource_GridAxisAlignment));                
                 case "minwidth":
-                    return new UIForia.StyleBindings.StyleBinding_UIMeasurement("MinWidth", UIForia.Rendering.StylePropertyId.MinWidth, targetState.state, Compile<UIForia.UIMeasurement>(value, measurementSources));                
+                    return new UIForia.Bindings.StyleBindings.StyleBinding_UIMeasurement("MinWidth", UIForia.Rendering.StylePropertyId.MinWidth, targetState.state, Compile<UIForia.Rendering.UIMeasurement>(value, measurementSources));                
                 case "maxwidth":
-                    return new UIForia.StyleBindings.StyleBinding_UIMeasurement("MaxWidth", UIForia.Rendering.StylePropertyId.MaxWidth, targetState.state, Compile<UIForia.UIMeasurement>(value, measurementSources));                
+                    return new UIForia.Bindings.StyleBindings.StyleBinding_UIMeasurement("MaxWidth", UIForia.Rendering.StylePropertyId.MaxWidth, targetState.state, Compile<UIForia.Rendering.UIMeasurement>(value, measurementSources));                
                 case "preferredwidth":
-                    return new UIForia.StyleBindings.StyleBinding_UIMeasurement("PreferredWidth", UIForia.Rendering.StylePropertyId.PreferredWidth, targetState.state, Compile<UIForia.UIMeasurement>(value, measurementSources));                
+                    return new UIForia.Bindings.StyleBindings.StyleBinding_UIMeasurement("PreferredWidth", UIForia.Rendering.StylePropertyId.PreferredWidth, targetState.state, Compile<UIForia.Rendering.UIMeasurement>(value, measurementSources));                
                 case "minheight":
-                    return new UIForia.StyleBindings.StyleBinding_UIMeasurement("MinHeight", UIForia.Rendering.StylePropertyId.MinHeight, targetState.state, Compile<UIForia.UIMeasurement>(value, measurementSources));                
+                    return new UIForia.Bindings.StyleBindings.StyleBinding_UIMeasurement("MinHeight", UIForia.Rendering.StylePropertyId.MinHeight, targetState.state, Compile<UIForia.Rendering.UIMeasurement>(value, measurementSources));                
                 case "maxheight":
-                    return new UIForia.StyleBindings.StyleBinding_UIMeasurement("MaxHeight", UIForia.Rendering.StylePropertyId.MaxHeight, targetState.state, Compile<UIForia.UIMeasurement>(value, measurementSources));                
+                    return new UIForia.Bindings.StyleBindings.StyleBinding_UIMeasurement("MaxHeight", UIForia.Rendering.StylePropertyId.MaxHeight, targetState.state, Compile<UIForia.Rendering.UIMeasurement>(value, measurementSources));                
                 case "preferredheight":
-                    return new UIForia.StyleBindings.StyleBinding_UIMeasurement("PreferredHeight", UIForia.Rendering.StylePropertyId.PreferredHeight, targetState.state, Compile<UIForia.UIMeasurement>(value, measurementSources));                
+                    return new UIForia.Bindings.StyleBindings.StyleBinding_UIMeasurement("PreferredHeight", UIForia.Rendering.StylePropertyId.PreferredHeight, targetState.state, Compile<UIForia.Rendering.UIMeasurement>(value, measurementSources));                
                 case "margintop":
-                    return new UIForia.StyleBindings.StyleBinding_UIMeasurement("MarginTop", UIForia.Rendering.StylePropertyId.MarginTop, targetState.state, Compile<UIForia.UIMeasurement>(value, measurementSources));                
+                    return new UIForia.Bindings.StyleBindings.StyleBinding_UIMeasurement("MarginTop", UIForia.Rendering.StylePropertyId.MarginTop, targetState.state, Compile<UIForia.Rendering.UIMeasurement>(value, measurementSources));                
                 case "marginright":
-                    return new UIForia.StyleBindings.StyleBinding_UIMeasurement("MarginRight", UIForia.Rendering.StylePropertyId.MarginRight, targetState.state, Compile<UIForia.UIMeasurement>(value, measurementSources));                
+                    return new UIForia.Bindings.StyleBindings.StyleBinding_UIMeasurement("MarginRight", UIForia.Rendering.StylePropertyId.MarginRight, targetState.state, Compile<UIForia.Rendering.UIMeasurement>(value, measurementSources));                
                 case "marginbottom":
-                    return new UIForia.StyleBindings.StyleBinding_UIMeasurement("MarginBottom", UIForia.Rendering.StylePropertyId.MarginBottom, targetState.state, Compile<UIForia.UIMeasurement>(value, measurementSources));                
+                    return new UIForia.Bindings.StyleBindings.StyleBinding_UIMeasurement("MarginBottom", UIForia.Rendering.StylePropertyId.MarginBottom, targetState.state, Compile<UIForia.Rendering.UIMeasurement>(value, measurementSources));                
                 case "marginleft":
-                    return new UIForia.StyleBindings.StyleBinding_UIMeasurement("MarginLeft", UIForia.Rendering.StylePropertyId.MarginLeft, targetState.state, Compile<UIForia.UIMeasurement>(value, measurementSources));                
+                    return new UIForia.Bindings.StyleBindings.StyleBinding_UIMeasurement("MarginLeft", UIForia.Rendering.StylePropertyId.MarginLeft, targetState.state, Compile<UIForia.Rendering.UIMeasurement>(value, measurementSources));                
                 case "bordercolor":
-                    return new UIForia.StyleBindings.StyleBinding_Color("BorderColor", UIForia.Rendering.StylePropertyId.BorderColor, targetState.state, Compile<UnityEngine.Color>(value, colorSources));                
+                    return new UIForia.Bindings.StyleBindings.StyleBinding_Color("BorderColor", UIForia.Rendering.StylePropertyId.BorderColor, targetState.state, Compile<UnityEngine.Color>(value, colorSources));                
                 case "bordertop":
-                    return new UIForia.StyleBindings.StyleBinding_UIFixedLength("BorderTop", UIForia.Rendering.StylePropertyId.BorderTop, targetState.state, Compile<UIForia.UIFixedLength>(value, fixedSources));                
+                    return new UIForia.Bindings.StyleBindings.StyleBinding_UIFixedLength("BorderTop", UIForia.Rendering.StylePropertyId.BorderTop, targetState.state, Compile<UIForia.UIFixedLength>(value, fixedSources));                
                 case "borderright":
-                    return new UIForia.StyleBindings.StyleBinding_UIFixedLength("BorderRight", UIForia.Rendering.StylePropertyId.BorderRight, targetState.state, Compile<UIForia.UIFixedLength>(value, fixedSources));                
+                    return new UIForia.Bindings.StyleBindings.StyleBinding_UIFixedLength("BorderRight", UIForia.Rendering.StylePropertyId.BorderRight, targetState.state, Compile<UIForia.UIFixedLength>(value, fixedSources));                
                 case "borderbottom":
-                    return new UIForia.StyleBindings.StyleBinding_UIFixedLength("BorderBottom", UIForia.Rendering.StylePropertyId.BorderBottom, targetState.state, Compile<UIForia.UIFixedLength>(value, fixedSources));                
+                    return new UIForia.Bindings.StyleBindings.StyleBinding_UIFixedLength("BorderBottom", UIForia.Rendering.StylePropertyId.BorderBottom, targetState.state, Compile<UIForia.UIFixedLength>(value, fixedSources));                
                 case "borderleft":
-                    return new UIForia.StyleBindings.StyleBinding_UIFixedLength("BorderLeft", UIForia.Rendering.StylePropertyId.BorderLeft, targetState.state, Compile<UIForia.UIFixedLength>(value, fixedSources));                
+                    return new UIForia.Bindings.StyleBindings.StyleBinding_UIFixedLength("BorderLeft", UIForia.Rendering.StylePropertyId.BorderLeft, targetState.state, Compile<UIForia.UIFixedLength>(value, fixedSources));                
                 case "borderradiustopleft":
-                    return new UIForia.StyleBindings.StyleBinding_UIFixedLength("BorderRadiusTopLeft", UIForia.Rendering.StylePropertyId.BorderRadiusTopLeft, targetState.state, Compile<UIForia.UIFixedLength>(value, fixedSources));                
+                    return new UIForia.Bindings.StyleBindings.StyleBinding_UIFixedLength("BorderRadiusTopLeft", UIForia.Rendering.StylePropertyId.BorderRadiusTopLeft, targetState.state, Compile<UIForia.UIFixedLength>(value, fixedSources));                
                 case "borderradiustopright":
-                    return new UIForia.StyleBindings.StyleBinding_UIFixedLength("BorderRadiusTopRight", UIForia.Rendering.StylePropertyId.BorderRadiusTopRight, targetState.state, Compile<UIForia.UIFixedLength>(value, fixedSources));                
+                    return new UIForia.Bindings.StyleBindings.StyleBinding_UIFixedLength("BorderRadiusTopRight", UIForia.Rendering.StylePropertyId.BorderRadiusTopRight, targetState.state, Compile<UIForia.UIFixedLength>(value, fixedSources));                
                 case "borderradiusbottomright":
-                    return new UIForia.StyleBindings.StyleBinding_UIFixedLength("BorderRadiusBottomRight", UIForia.Rendering.StylePropertyId.BorderRadiusBottomRight, targetState.state, Compile<UIForia.UIFixedLength>(value, fixedSources));                
+                    return new UIForia.Bindings.StyleBindings.StyleBinding_UIFixedLength("BorderRadiusBottomRight", UIForia.Rendering.StylePropertyId.BorderRadiusBottomRight, targetState.state, Compile<UIForia.UIFixedLength>(value, fixedSources));                
                 case "borderradiusbottomleft":
-                    return new UIForia.StyleBindings.StyleBinding_UIFixedLength("BorderRadiusBottomLeft", UIForia.Rendering.StylePropertyId.BorderRadiusBottomLeft, targetState.state, Compile<UIForia.UIFixedLength>(value, fixedSources));                
+                    return new UIForia.Bindings.StyleBindings.StyleBinding_UIFixedLength("BorderRadiusBottomLeft", UIForia.Rendering.StylePropertyId.BorderRadiusBottomLeft, targetState.state, Compile<UIForia.UIFixedLength>(value, fixedSources));                
                 case "paddingtop":
-                    return new UIForia.StyleBindings.StyleBinding_UIFixedLength("PaddingTop", UIForia.Rendering.StylePropertyId.PaddingTop, targetState.state, Compile<UIForia.UIFixedLength>(value, fixedSources));                
+                    return new UIForia.Bindings.StyleBindings.StyleBinding_UIFixedLength("PaddingTop", UIForia.Rendering.StylePropertyId.PaddingTop, targetState.state, Compile<UIForia.UIFixedLength>(value, fixedSources));                
                 case "paddingright":
-                    return new UIForia.StyleBindings.StyleBinding_UIFixedLength("PaddingRight", UIForia.Rendering.StylePropertyId.PaddingRight, targetState.state, Compile<UIForia.UIFixedLength>(value, fixedSources));                
+                    return new UIForia.Bindings.StyleBindings.StyleBinding_UIFixedLength("PaddingRight", UIForia.Rendering.StylePropertyId.PaddingRight, targetState.state, Compile<UIForia.UIFixedLength>(value, fixedSources));                
                 case "paddingbottom":
-                    return new UIForia.StyleBindings.StyleBinding_UIFixedLength("PaddingBottom", UIForia.Rendering.StylePropertyId.PaddingBottom, targetState.state, Compile<UIForia.UIFixedLength>(value, fixedSources));                
+                    return new UIForia.Bindings.StyleBindings.StyleBinding_UIFixedLength("PaddingBottom", UIForia.Rendering.StylePropertyId.PaddingBottom, targetState.state, Compile<UIForia.UIFixedLength>(value, fixedSources));                
                 case "paddingleft":
-                    return new UIForia.StyleBindings.StyleBinding_UIFixedLength("PaddingLeft", UIForia.Rendering.StylePropertyId.PaddingLeft, targetState.state, Compile<UIForia.UIFixedLength>(value, fixedSources));                
+                    return new UIForia.Bindings.StyleBindings.StyleBinding_UIFixedLength("PaddingLeft", UIForia.Rendering.StylePropertyId.PaddingLeft, targetState.state, Compile<UIForia.UIFixedLength>(value, fixedSources));                
                 case "textcolor":
-                    return new UIForia.StyleBindings.StyleBinding_Color("TextColor", UIForia.Rendering.StylePropertyId.TextColor, targetState.state, Compile<UnityEngine.Color>(value, colorSources));                
+                    return new UIForia.Bindings.StyleBindings.StyleBinding_Color("TextColor", UIForia.Rendering.StylePropertyId.TextColor, targetState.state, Compile<UnityEngine.Color>(value, colorSources));                
                 case "textfontasset":
-                    return new UIForia.StyleBindings.StyleBinding_TMP_FontAsset("TextFontAsset", UIForia.Rendering.StylePropertyId.TextFontAsset, targetState.state, Compile<TMPro.TMP_FontAsset>(value, fontUrlSource));                
+                    return new UIForia.Bindings.StyleBindings.StyleBinding_TMP_FontAsset("TextFontAsset", UIForia.Rendering.StylePropertyId.TextFontAsset, targetState.state, Compile<TMPro.TMP_FontAsset>(value, fontUrlSource));                
                 case "textfontsize":
-                    return new UIForia.StyleBindings.StyleBinding_int("TextFontSize", UIForia.Rendering.StylePropertyId.TextFontSize, targetState.state, Compile<int>(value, null));                
+                    return new UIForia.Bindings.StyleBindings.StyleBinding_int("TextFontSize", UIForia.Rendering.StylePropertyId.TextFontSize, targetState.state, Compile<int>(value, null));                
                 case "textfontstyle":
-                    return new UIForia.StyleBindings.StyleBinding_FontStyle("TextFontStyle", UIForia.Rendering.StylePropertyId.TextFontStyle, targetState.state, Compile<UIForia.Text.FontStyle>(value, s_EnumSource_FontStyle));                
+                    return new UIForia.Bindings.StyleBindings.StyleBinding_FontStyle("TextFontStyle", UIForia.Rendering.StylePropertyId.TextFontStyle, targetState.state, Compile<UIForia.Text.FontStyle>(value, s_EnumSource_FontStyle));                
                 case "textalignment":
-                    return new UIForia.StyleBindings.StyleBinding_TextAlignment("TextAlignment", UIForia.Rendering.StylePropertyId.TextAlignment, targetState.state, Compile<UIForia.Text.TextAlignment>(value, s_EnumSource_TextAlignment));                
+                    return new UIForia.Bindings.StyleBindings.StyleBinding_TextAlignment("TextAlignment", UIForia.Rendering.StylePropertyId.TextAlignment, targetState.state, Compile<UIForia.Text.TextAlignment>(value, s_EnumSource_TextAlignment));                
                 case "textoutlinewidth":
-                    return new UIForia.StyleBindings.StyleBinding_float("TextOutlineWidth", UIForia.Rendering.StylePropertyId.TextOutlineWidth, targetState.state, Compile<float>(value, null));                
+                    return new UIForia.Bindings.StyleBindings.StyleBinding_float("TextOutlineWidth", UIForia.Rendering.StylePropertyId.TextOutlineWidth, targetState.state, Compile<float>(value, null));                
                 case "textoutlinecolor":
-                    return new UIForia.StyleBindings.StyleBinding_Color("TextOutlineColor", UIForia.Rendering.StylePropertyId.TextOutlineColor, targetState.state, Compile<UnityEngine.Color>(value, colorSources));                
+                    return new UIForia.Bindings.StyleBindings.StyleBinding_Color("TextOutlineColor", UIForia.Rendering.StylePropertyId.TextOutlineColor, targetState.state, Compile<UnityEngine.Color>(value, colorSources));                
                 case "textglowcolor":
-                    return new UIForia.StyleBindings.StyleBinding_Color("TextGlowColor", UIForia.Rendering.StylePropertyId.TextGlowColor, targetState.state, Compile<UnityEngine.Color>(value, colorSources));                
+                    return new UIForia.Bindings.StyleBindings.StyleBinding_Color("TextGlowColor", UIForia.Rendering.StylePropertyId.TextGlowColor, targetState.state, Compile<UnityEngine.Color>(value, colorSources));                
                 case "textglowoffset":
-                    return new UIForia.StyleBindings.StyleBinding_float("TextGlowOffset", UIForia.Rendering.StylePropertyId.TextGlowOffset, targetState.state, Compile<float>(value, null));                
+                    return new UIForia.Bindings.StyleBindings.StyleBinding_float("TextGlowOffset", UIForia.Rendering.StylePropertyId.TextGlowOffset, targetState.state, Compile<float>(value, null));                
                 case "textglowinner":
-                    return new UIForia.StyleBindings.StyleBinding_float("TextGlowInner", UIForia.Rendering.StylePropertyId.TextGlowInner, targetState.state, Compile<float>(value, null));                
+                    return new UIForia.Bindings.StyleBindings.StyleBinding_float("TextGlowInner", UIForia.Rendering.StylePropertyId.TextGlowInner, targetState.state, Compile<float>(value, null));                
                 case "textglowouter":
-                    return new UIForia.StyleBindings.StyleBinding_float("TextGlowOuter", UIForia.Rendering.StylePropertyId.TextGlowOuter, targetState.state, Compile<float>(value, null));                
+                    return new UIForia.Bindings.StyleBindings.StyleBinding_float("TextGlowOuter", UIForia.Rendering.StylePropertyId.TextGlowOuter, targetState.state, Compile<float>(value, null));                
                 case "textglowpower":
-                    return new UIForia.StyleBindings.StyleBinding_float("TextGlowPower", UIForia.Rendering.StylePropertyId.TextGlowPower, targetState.state, Compile<float>(value, null));                
+                    return new UIForia.Bindings.StyleBindings.StyleBinding_float("TextGlowPower", UIForia.Rendering.StylePropertyId.TextGlowPower, targetState.state, Compile<float>(value, null));                
                 case "textshadowcolor":
-                    return new UIForia.StyleBindings.StyleBinding_Color("TextShadowColor", UIForia.Rendering.StylePropertyId.TextShadowColor, targetState.state, Compile<UnityEngine.Color>(value, colorSources));                
+                    return new UIForia.Bindings.StyleBindings.StyleBinding_Color("TextShadowColor", UIForia.Rendering.StylePropertyId.TextShadowColor, targetState.state, Compile<UnityEngine.Color>(value, colorSources));                
                 case "textshadowoffsetx":
-                    return new UIForia.StyleBindings.StyleBinding_float("TextShadowOffsetX", UIForia.Rendering.StylePropertyId.TextShadowOffsetX, targetState.state, Compile<float>(value, null));                
+                    return new UIForia.Bindings.StyleBindings.StyleBinding_float("TextShadowOffsetX", UIForia.Rendering.StylePropertyId.TextShadowOffsetX, targetState.state, Compile<float>(value, null));                
                 case "textshadowoffsety":
-                    return new UIForia.StyleBindings.StyleBinding_float("TextShadowOffsetY", UIForia.Rendering.StylePropertyId.TextShadowOffsetY, targetState.state, Compile<float>(value, null));                
+                    return new UIForia.Bindings.StyleBindings.StyleBinding_float("TextShadowOffsetY", UIForia.Rendering.StylePropertyId.TextShadowOffsetY, targetState.state, Compile<float>(value, null));                
                 case "textshadowintensity":
-                    return new UIForia.StyleBindings.StyleBinding_float("TextShadowIntensity", UIForia.Rendering.StylePropertyId.TextShadowIntensity, targetState.state, Compile<float>(value, null));                
+                    return new UIForia.Bindings.StyleBindings.StyleBinding_float("TextShadowIntensity", UIForia.Rendering.StylePropertyId.TextShadowIntensity, targetState.state, Compile<float>(value, null));                
                 case "textshadowsoftness":
-                    return new UIForia.StyleBindings.StyleBinding_float("TextShadowSoftness", UIForia.Rendering.StylePropertyId.TextShadowSoftness, targetState.state, Compile<float>(value, null));                
+                    return new UIForia.Bindings.StyleBindings.StyleBinding_float("TextShadowSoftness", UIForia.Rendering.StylePropertyId.TextShadowSoftness, targetState.state, Compile<float>(value, null));                
                 case "textshadowtype":
-                    return new UIForia.StyleBindings.StyleBinding_ShadowType("TextShadowType", UIForia.Rendering.StylePropertyId.TextShadowType, targetState.state, Compile<UIForia.Rendering.ShadowType>(value, s_EnumSource_ShadowType));                
+                    return new UIForia.Bindings.StyleBindings.StyleBinding_ShadowType("TextShadowType", UIForia.Rendering.StylePropertyId.TextShadowType, targetState.state, Compile<UIForia.Rendering.ShadowType>(value, s_EnumSource_ShadowType));                
                 case "texttransform":
-                    return new UIForia.StyleBindings.StyleBinding_TextTransform("TextTransform", UIForia.Rendering.StylePropertyId.TextTransform, targetState.state, Compile<UIForia.Text.TextTransform>(value, s_EnumSource_TextTransform));                
+                    return new UIForia.Bindings.StyleBindings.StyleBinding_TextTransform("TextTransform", UIForia.Rendering.StylePropertyId.TextTransform, targetState.state, Compile<UIForia.Text.TextTransform>(value, s_EnumSource_TextTransform));                
                 case "anchortop":
-                    return new UIForia.StyleBindings.StyleBinding_UIFixedLength("AnchorTop", UIForia.Rendering.StylePropertyId.AnchorTop, targetState.state, Compile<UIForia.UIFixedLength>(value, fixedSources));                
+                    return new UIForia.Bindings.StyleBindings.StyleBinding_UIFixedLength("AnchorTop", UIForia.Rendering.StylePropertyId.AnchorTop, targetState.state, Compile<UIForia.UIFixedLength>(value, fixedSources));                
                 case "anchorright":
-                    return new UIForia.StyleBindings.StyleBinding_UIFixedLength("AnchorRight", UIForia.Rendering.StylePropertyId.AnchorRight, targetState.state, Compile<UIForia.UIFixedLength>(value, fixedSources));                
+                    return new UIForia.Bindings.StyleBindings.StyleBinding_UIFixedLength("AnchorRight", UIForia.Rendering.StylePropertyId.AnchorRight, targetState.state, Compile<UIForia.UIFixedLength>(value, fixedSources));                
                 case "anchorbottom":
-                    return new UIForia.StyleBindings.StyleBinding_UIFixedLength("AnchorBottom", UIForia.Rendering.StylePropertyId.AnchorBottom, targetState.state, Compile<UIForia.UIFixedLength>(value, fixedSources));                
+                    return new UIForia.Bindings.StyleBindings.StyleBinding_UIFixedLength("AnchorBottom", UIForia.Rendering.StylePropertyId.AnchorBottom, targetState.state, Compile<UIForia.UIFixedLength>(value, fixedSources));                
                 case "anchorleft":
-                    return new UIForia.StyleBindings.StyleBinding_UIFixedLength("AnchorLeft", UIForia.Rendering.StylePropertyId.AnchorLeft, targetState.state, Compile<UIForia.UIFixedLength>(value, fixedSources));                
+                    return new UIForia.Bindings.StyleBindings.StyleBinding_UIFixedLength("AnchorLeft", UIForia.Rendering.StylePropertyId.AnchorLeft, targetState.state, Compile<UIForia.UIFixedLength>(value, fixedSources));                
                 case "anchortarget":
-                    return new UIForia.StyleBindings.StyleBinding_AnchorTarget("AnchorTarget", UIForia.Rendering.StylePropertyId.AnchorTarget, targetState.state, Compile<UIForia.Rendering.AnchorTarget>(value, s_EnumSource_AnchorTarget));                
+                    return new UIForia.Bindings.StyleBindings.StyleBinding_AnchorTarget("AnchorTarget", UIForia.Rendering.StylePropertyId.AnchorTarget, targetState.state, Compile<UIForia.Rendering.AnchorTarget>(value, s_EnumSource_AnchorTarget));                
                 case "transformpositionx":
-                    return new UIForia.StyleBindings.StyleBinding_TransformOffset("TransformPositionX", UIForia.Rendering.StylePropertyId.TransformPositionX, targetState.state, Compile<UIForia.TransformOffset>(value, null));                
+                    return new UIForia.Bindings.StyleBindings.StyleBinding_TransformOffset("TransformPositionX", UIForia.Rendering.StylePropertyId.TransformPositionX, targetState.state, Compile<UIForia.TransformOffset>(value, null));                
                 case "transformpositiony":
-                    return new UIForia.StyleBindings.StyleBinding_TransformOffset("TransformPositionY", UIForia.Rendering.StylePropertyId.TransformPositionY, targetState.state, Compile<UIForia.TransformOffset>(value, null));                
+                    return new UIForia.Bindings.StyleBindings.StyleBinding_TransformOffset("TransformPositionY", UIForia.Rendering.StylePropertyId.TransformPositionY, targetState.state, Compile<UIForia.TransformOffset>(value, null));                
                 case "transformpivotx":
-                    return new UIForia.StyleBindings.StyleBinding_UIFixedLength("TransformPivotX", UIForia.Rendering.StylePropertyId.TransformPivotX, targetState.state, Compile<UIForia.UIFixedLength>(value, fixedSources));                
+                    return new UIForia.Bindings.StyleBindings.StyleBinding_UIFixedLength("TransformPivotX", UIForia.Rendering.StylePropertyId.TransformPivotX, targetState.state, Compile<UIForia.UIFixedLength>(value, fixedSources));                
                 case "transformpivoty":
-                    return new UIForia.StyleBindings.StyleBinding_UIFixedLength("TransformPivotY", UIForia.Rendering.StylePropertyId.TransformPivotY, targetState.state, Compile<UIForia.UIFixedLength>(value, fixedSources));                
+                    return new UIForia.Bindings.StyleBindings.StyleBinding_UIFixedLength("TransformPivotY", UIForia.Rendering.StylePropertyId.TransformPivotY, targetState.state, Compile<UIForia.UIFixedLength>(value, fixedSources));                
                 case "transformscalex":
-                    return new UIForia.StyleBindings.StyleBinding_float("TransformScaleX", UIForia.Rendering.StylePropertyId.TransformScaleX, targetState.state, Compile<float>(value, null));                
+                    return new UIForia.Bindings.StyleBindings.StyleBinding_float("TransformScaleX", UIForia.Rendering.StylePropertyId.TransformScaleX, targetState.state, Compile<float>(value, null));                
                 case "transformscaley":
-                    return new UIForia.StyleBindings.StyleBinding_float("TransformScaleY", UIForia.Rendering.StylePropertyId.TransformScaleY, targetState.state, Compile<float>(value, null));                
+                    return new UIForia.Bindings.StyleBindings.StyleBinding_float("TransformScaleY", UIForia.Rendering.StylePropertyId.TransformScaleY, targetState.state, Compile<float>(value, null));                
                 case "transformrotation":
-                    return new UIForia.StyleBindings.StyleBinding_float("TransformRotation", UIForia.Rendering.StylePropertyId.TransformRotation, targetState.state, Compile<float>(value, null));                
+                    return new UIForia.Bindings.StyleBindings.StyleBinding_float("TransformRotation", UIForia.Rendering.StylePropertyId.TransformRotation, targetState.state, Compile<float>(value, null));                
                 case "transformbehaviorx":
-                    return new UIForia.StyleBindings.StyleBinding_TransformBehavior("TransformBehaviorX", UIForia.Rendering.StylePropertyId.TransformBehaviorX, targetState.state, Compile<UIForia.Rendering.TransformBehavior>(value, s_EnumSource_TransformBehavior));                
+                    return new UIForia.Bindings.StyleBindings.StyleBinding_TransformBehavior("TransformBehaviorX", UIForia.Rendering.StylePropertyId.TransformBehaviorX, targetState.state, Compile<UIForia.Rendering.TransformBehavior>(value, s_EnumSource_TransformBehavior));                
                 case "transformbehaviory":
-                    return new UIForia.StyleBindings.StyleBinding_TransformBehavior("TransformBehaviorY", UIForia.Rendering.StylePropertyId.TransformBehaviorY, targetState.state, Compile<UIForia.Rendering.TransformBehavior>(value, s_EnumSource_TransformBehavior));                
+                    return new UIForia.Bindings.StyleBindings.StyleBinding_TransformBehavior("TransformBehaviorY", UIForia.Rendering.StylePropertyId.TransformBehaviorY, targetState.state, Compile<UIForia.Rendering.TransformBehavior>(value, s_EnumSource_TransformBehavior));                
                 case "layouttype":
-                    return new UIForia.StyleBindings.StyleBinding_LayoutType("LayoutType", UIForia.Rendering.StylePropertyId.LayoutType, targetState.state, Compile<UIForia.Rendering.LayoutType>(value, s_EnumSource_LayoutType));                
+                    return new UIForia.Bindings.StyleBindings.StyleBinding_LayoutType("LayoutType", UIForia.Rendering.StylePropertyId.LayoutType, targetState.state, Compile<UIForia.Layout.LayoutType>(value, s_EnumSource_LayoutType));                
                 case "layoutbehavior":
-                    return new UIForia.StyleBindings.StyleBinding_LayoutBehavior("LayoutBehavior", UIForia.Rendering.StylePropertyId.LayoutBehavior, targetState.state, Compile<UIForia.Layout.LayoutBehavior>(value, s_EnumSource_LayoutBehavior));                
+                    return new UIForia.Bindings.StyleBindings.StyleBinding_LayoutBehavior("LayoutBehavior", UIForia.Rendering.StylePropertyId.LayoutBehavior, targetState.state, Compile<UIForia.Layout.LayoutBehavior>(value, s_EnumSource_LayoutBehavior));                
                 case "zindex":
-                    return new UIForia.StyleBindings.StyleBinding_int("ZIndex", UIForia.Rendering.StylePropertyId.ZIndex, targetState.state, Compile<int>(value, null));                
+                    return new UIForia.Bindings.StyleBindings.StyleBinding_int("ZIndex", UIForia.Rendering.StylePropertyId.ZIndex, targetState.state, Compile<int>(value, null));                
                 case "renderlayeroffset":
-                    return new UIForia.StyleBindings.StyleBinding_int("RenderLayerOffset", UIForia.Rendering.StylePropertyId.RenderLayerOffset, targetState.state, Compile<int>(value, null));                
+                    return new UIForia.Bindings.StyleBindings.StyleBinding_int("RenderLayerOffset", UIForia.Rendering.StylePropertyId.RenderLayerOffset, targetState.state, Compile<int>(value, null));                
                 case "renderlayer":
-                    return new UIForia.StyleBindings.StyleBinding_RenderLayer("RenderLayer", UIForia.Rendering.StylePropertyId.RenderLayer, targetState.state, Compile<UIForia.Rendering.RenderLayer>(value, s_EnumSource_RenderLayer));                
+                    return new UIForia.Bindings.StyleBindings.StyleBinding_RenderLayer("RenderLayer", UIForia.Rendering.StylePropertyId.RenderLayer, targetState.state, Compile<UIForia.Rendering.RenderLayer>(value, s_EnumSource_RenderLayer));                
                 case "scrollbar":
-                    return new UIForia.StyleBindings.StyleBinding_string("Scrollbar", UIForia.Rendering.StylePropertyId.Scrollbar, targetState.state, Compile<string>(value, null));                
+                    return new UIForia.Bindings.StyleBindings.StyleBinding_string("Scrollbar", UIForia.Rendering.StylePropertyId.Scrollbar, targetState.state, Compile<string>(value, null));                
                 case "scrollbarsize":
-                    return new UIForia.StyleBindings.StyleBinding_UIMeasurement("ScrollbarSize", UIForia.Rendering.StylePropertyId.ScrollbarSize, targetState.state, Compile<UIForia.UIMeasurement>(value, measurementSources));                
+                    return new UIForia.Bindings.StyleBindings.StyleBinding_UIMeasurement("ScrollbarSize", UIForia.Rendering.StylePropertyId.ScrollbarSize, targetState.state, Compile<UIForia.Rendering.UIMeasurement>(value, measurementSources));                
                 case "scrollbarcolor":
-                    return new UIForia.StyleBindings.StyleBinding_Color("ScrollbarColor", UIForia.Rendering.StylePropertyId.ScrollbarColor, targetState.state, Compile<UnityEngine.Color>(value, colorSources));                
+                    return new UIForia.Bindings.StyleBindings.StyleBinding_Color("ScrollbarColor", UIForia.Rendering.StylePropertyId.ScrollbarColor, targetState.state, Compile<UnityEngine.Color>(value, colorSources));                
                 case "shadowtype":
-                    return new UIForia.StyleBindings.StyleBinding_ShadowType("ShadowType", UIForia.Rendering.StylePropertyId.ShadowType, targetState.state, Compile<UIForia.Rendering.ShadowType>(value, s_EnumSource_ShadowType));                
+                    return new UIForia.Bindings.StyleBindings.StyleBinding_ShadowType("ShadowType", UIForia.Rendering.StylePropertyId.ShadowType, targetState.state, Compile<UIForia.Rendering.ShadowType>(value, s_EnumSource_ShadowType));                
                 case "shadowoffsetx":
-                    return new UIForia.StyleBindings.StyleBinding_float("ShadowOffsetX", UIForia.Rendering.StylePropertyId.ShadowOffsetX, targetState.state, Compile<float>(value, null));                
+                    return new UIForia.Bindings.StyleBindings.StyleBinding_float("ShadowOffsetX", UIForia.Rendering.StylePropertyId.ShadowOffsetX, targetState.state, Compile<float>(value, null));                
                 case "shadowoffsety":
-                    return new UIForia.StyleBindings.StyleBinding_float("ShadowOffsetY", UIForia.Rendering.StylePropertyId.ShadowOffsetY, targetState.state, Compile<float>(value, null));                
+                    return new UIForia.Bindings.StyleBindings.StyleBinding_float("ShadowOffsetY", UIForia.Rendering.StylePropertyId.ShadowOffsetY, targetState.state, Compile<float>(value, null));                
                 case "shadowsoftnessx":
-                    return new UIForia.StyleBindings.StyleBinding_float("ShadowSoftnessX", UIForia.Rendering.StylePropertyId.ShadowSoftnessX, targetState.state, Compile<float>(value, null));                
+                    return new UIForia.Bindings.StyleBindings.StyleBinding_float("ShadowSoftnessX", UIForia.Rendering.StylePropertyId.ShadowSoftnessX, targetState.state, Compile<float>(value, null));                
                 case "shadowsoftnessy":
-                    return new UIForia.StyleBindings.StyleBinding_float("ShadowSoftnessY", UIForia.Rendering.StylePropertyId.ShadowSoftnessY, targetState.state, Compile<float>(value, null));                
+                    return new UIForia.Bindings.StyleBindings.StyleBinding_float("ShadowSoftnessY", UIForia.Rendering.StylePropertyId.ShadowSoftnessY, targetState.state, Compile<float>(value, null));                
                 case "shadowintensity":
-                    return new UIForia.StyleBindings.StyleBinding_float("ShadowIntensity", UIForia.Rendering.StylePropertyId.ShadowIntensity, targetState.state, Compile<float>(value, null));                
+                    return new UIForia.Bindings.StyleBindings.StyleBinding_float("ShadowIntensity", UIForia.Rendering.StylePropertyId.ShadowIntensity, targetState.state, Compile<float>(value, null));                
                 
 
             }

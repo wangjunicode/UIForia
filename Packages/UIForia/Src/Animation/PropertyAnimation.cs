@@ -1,5 +1,7 @@
 using System;
 using System.Collections.Generic;
+using UIForia.Elements;
+using UIForia.Exceptions;
 using UIForia.Rendering;
 using UIForia.Util;
 using UnityEngine;
@@ -161,7 +163,7 @@ namespace UIForia.Animation {
 //                        return new AnimationState((int) ColorType.Color, new StyleColor(startProperty.AsColor).rgba);
 //                    }
 
-                default: throw new UIForia.InvalidArgumentException(m_TargetValue.propertyId + " is not a supported animation property");
+                default: throw new InvalidArgumentException(m_TargetValue.propertyId + " is not a supported animation property");
             }
         }
 
@@ -305,7 +307,7 @@ namespace UIForia.Animation {
                     break;
 
                 default:
-                    throw new UIForia.InvalidArgumentException(propertyId + " is not a supported animation property");
+                    throw new InvalidArgumentException(propertyId + " is not a supported animation property");
             }
 
             if (t == 1f) {

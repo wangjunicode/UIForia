@@ -1,6 +1,6 @@
-using System;
 using NUnit.Framework;
-using UIForia.Parsing;
+using UIForia.Parsing.Expression;
+using UIForia.Parsing.Expression.AstNodes;
 using static Tests.TestUtils;
 
 [TestFixture]

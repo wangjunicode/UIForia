@@ -1,9 +1,12 @@
 using System.Collections.Generic;
 using System.Reflection;
-using UIForia.Parsing;
+using UIForia.Expressions;
+using UIForia.Layout;
+using UIForia.Parsing.Expression.AstNodes;
 using UIForia.Rendering;
+using UIForia.Util;
 
-namespace UIForia.Compilers {
+namespace UIForia.Compilers.ExpressionResolvers {
 
     public class ContentSizeResolver : ExpressionAliasResolver {
 

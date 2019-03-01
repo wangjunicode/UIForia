@@ -1,10 +1,14 @@
 using System;
 using System.Collections.Generic;
 using UIForia.AttributeProcessors;
+using UIForia.Bindings;
 using UIForia.Compilers.Style;
+using UIForia.Elements;
+using UIForia.Parsing.Expression;
 using UIForia.Rendering;
 using UIForia.Routing;
 using UIForia.Systems;
+using UIForia.Templates;
 using UIForia.Util;
 using UnityEngine;
 

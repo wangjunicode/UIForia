@@ -1,8 +1,10 @@
 using System.Collections.Generic;
 using NUnit.Framework;
-using UIForia;
-using UIForia.Input;
 using Tests.Mocks;
+using UIForia.Attributes;
+using UIForia.Elements;
+using UIForia.Stystems.InputSystem;
+using UIForia.UIInput;
 using UnityEngine;
 
 [TestFixture]

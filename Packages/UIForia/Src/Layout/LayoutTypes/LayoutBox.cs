@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using UIForia.Elements;
+using UIForia.Layout;
 using UIForia.Rendering;
 using UIForia.Util;
 using UnityEngine;

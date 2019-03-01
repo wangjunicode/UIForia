@@ -1,3 +1,4 @@
+using UIForia.Stystems.InputSystem;
 using UnityEngine;
 
 namespace UIForia.Systems {
@@ -17,23 +18,23 @@ namespace UIForia.Systems {
 
         protected override MouseState GetMouseState() {
             MouseState retn = new MouseState();
-            retn.isLeftMouseDown = UnityEngine.Input.GetMouseButton(0);
-            retn.isRightMouseDown = UnityEngine.Input.GetMouseButton(1);
-            retn.isMiddleMouseDown = UnityEngine.Input.GetMouseButton(2);
+            retn.isLeftMouseDown = Input.GetMouseButton(0);
+            retn.isRightMouseDown = Input.GetMouseButton(1);
+            retn.isMiddleMouseDown = Input.GetMouseButton(2);
 
-            retn.isLeftMouseDownThisFrame = UnityEngine.Input.GetMouseButtonDown(0);
-            retn.isRightMouseDownThisFrame = UnityEngine.Input.GetMouseButtonDown(1);
-            retn.isMiddleMouseDownThisFrame = UnityEngine.Input.GetMouseButtonDown(2);
+            retn.isLeftMouseDownThisFrame = Input.GetMouseButtonDown(0);
+            retn.isRightMouseDownThisFrame = Input.GetMouseButtonDown(1);
+            retn.isMiddleMouseDownThisFrame = Input.GetMouseButtonDown(2);
 
-            retn.isLeftMouseUpThisFrame = UnityEngine.Input.GetMouseButtonUp(0);
-            retn.isRightMouseUpThisFrame = UnityEngine.Input.GetMouseButtonUp(1);
-            retn.isMiddleMouseUpThisFrame = UnityEngine.Input.GetMouseButtonUp(2);
+            retn.isLeftMouseUpThisFrame = Input.GetMouseButtonUp(0);
+            retn.isRightMouseUpThisFrame = Input.GetMouseButtonUp(1);
+            retn.isMiddleMouseUpThisFrame = Input.GetMouseButtonUp(2);
             retn.mouseDownPosition = m_MouseState.mouseDownPosition;
             float now = Time.unscaledTime;
 
             if (retn.isLeftMouseDown || retn.isRightMouseDown) {
                 if (retn.isLeftMouseDownThisFrame || retn.isRightMouseDownThisFrame) {
-                    retn.mouseDownPosition = ConvertMousePosition(UnityEngine.Input.mousePosition);
+                    retn.mouseDownPosition = ConvertMousePosition(Input.mousePosition);
                     if (now - m_LastMouseDownTimestamp <= k_DoubleClickDelay && Vector2.Distance(m_LastMouseDownPosition, retn.mouseDownPosition) <= 3f) {
                         if (!m_IsDoubleClick) {
                             m_IsDoubleClick = true;
@@ -53,8 +54,8 @@ namespace UIForia.Systems {
             // todo formalize clicking with different buttons
             retn.isSingleClick = (retn.isRightMouseUpThisFrame || retn.isLeftMouseUpThisFrame) && (now - m_LastMouseDownTimestamp < k_SingleClickDelay);
 
-            retn.mousePosition = ConvertMousePosition(UnityEngine.Input.mousePosition);
-            retn.scrollDelta = UnityEngine.Input.mouseScrollDelta;
+            retn.mousePosition = ConvertMousePosition(Input.mousePosition);
+            retn.scrollDelta = Input.mouseScrollDelta;
             retn.previousMousePosition = m_MouseState.mousePosition;
 
             if (now - m_LastMouseDownTimestamp > k_DoubleClickDelay) {

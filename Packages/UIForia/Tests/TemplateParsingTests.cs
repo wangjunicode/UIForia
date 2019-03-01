@@ -1,10 +1,12 @@
-﻿﻿using UIForia;
-using NUnit.Framework;
-using Tests.Mocks;
-using UIForia.Parsing;
-using UnityEngine;
+﻿﻿using NUnit.Framework;
+ using Tests.Mocks;
+ using UIForia.Attributes;
+ using UIForia.Elements;
+ using UIForia.Parsing.Expression;
+ using UIForia.Templates;
+ using UnityEngine;
 
-[TestFixture]
+ [TestFixture]
 public class TemplateParsingTests {
 
     [Template("Tests/Templates/Parsing/Test1.xml")]

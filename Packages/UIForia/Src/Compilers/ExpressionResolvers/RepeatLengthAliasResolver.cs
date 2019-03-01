@@ -1,10 +1,13 @@
 using System;
+using UIForia.Elements;
+using UIForia.Expressions;
 
-namespace UIForia.Compilers {
+namespace UIForia.Compilers.ExpressionResolvers {
 
     public class RepeatLengthAliasResolver : ExpressionAliasResolver {
 
-        public RepeatLengthAliasResolver(string aliasName) : base(aliasName) { }
+        public RepeatLengthAliasResolver(string aliasName) : base(aliasName) {
+        }
 
         public override Expression CompileAsValueExpression(CompilerContext context) {
             return new RepeatLengthExpression(aliasName);

@@ -1,7 +1,8 @@
 using System;
 using System.Collections.Generic;
+using UIForia.Exceptions;
 
-namespace UIForia {
+namespace UIForia.Parsing.Expression.Tokenizer {
 
     public static class ExpressionTokenizer {
 

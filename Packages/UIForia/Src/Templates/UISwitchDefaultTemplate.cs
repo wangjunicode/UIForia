@@ -1,7 +1,9 @@
 using System;
 using System.Collections.Generic;
+using UIForia.Elements;
+using UIForia.Parsing.Expression;
 
-namespace UIForia {
+namespace UIForia.Templates {
 
     public class UISwitchDefaultTemplate : UITemplate {
 

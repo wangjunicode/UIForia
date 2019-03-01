@@ -2,9 +2,10 @@ using System;
 using System.Collections.Generic;
 using UIForia;
 using UIForia.Animation;
+using UIForia.Attributes;
+using UIForia.Elements;
 using UIForia.Rendering;
 using UnityEngine;
-using Debug = UnityEngine.Debug;
 
 namespace Demos {
 
@@ -210,7 +211,7 @@ namespace Demos {
 
         public SidebarThing(string imageUrl) {
             this.imageUrl = imageUrl;
-            onClick = () => { UnityEngine.Debug.Log(imageUrl); };
+            onClick = () => { Debug.Log(imageUrl); };
         }
 
     }

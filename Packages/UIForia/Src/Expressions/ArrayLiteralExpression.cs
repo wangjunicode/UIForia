@@ -1,9 +1,6 @@
 using System;
-using System.Collections;
-using System.Collections.Generic;
-using UIForia.StyleBindings;
 
-namespace UIForia {
+namespace UIForia.Expressions {
 
     public class ArrayLiteralExpression<T> : Expression<T[]> {
 

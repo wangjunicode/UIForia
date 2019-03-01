@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Text;
 using UIForia.Util;
 
-namespace UIForia.Parsing {
+namespace UIForia.Parsing.Expression.AstNodes {
 
     public abstract class ASTNode {
 

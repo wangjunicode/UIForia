@@ -1,4 +1,4 @@
-﻿namespace UIForia {
+﻿namespace UIForia.Expressions {
 
     public class ExpressionContext {
 

@@ -1,7 +1,7 @@
 using System;
-using UIForia.Elements;
+using UIForia.Attributes;
 
-namespace UIForia {
+namespace UIForia.Elements.Routing {
 
     [TemplateTagName("Route")]
     public class RouteElement : UIContainerElement {
@@ -15,6 +15,10 @@ namespace UIForia {
         public RouteMatch CurrentMatch => match;
         public bool IsRouteMatched => match.IsMatch;
         public virtual string FullPath => path;
+
+        public RouteElement() {
+            flags |= UIElementFlags.BuiltIn;
+        }
 
         public override void OnCreate() {
             

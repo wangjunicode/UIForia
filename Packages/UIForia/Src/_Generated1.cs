@@ -1,4 +1,6 @@
 
+using UIForia.Util;
+
 namespace UIForia.Rendering {
     
     public partial struct UIStyleSetStateProxy {
@@ -136,14 +138,14 @@ namespace UIForia.Rendering {
             set { m_StyleSet.SetProperty(new StyleProperty(StylePropertyId.FlexItemSelfAlignment, (int)value), state); }
         }
         
-        public UIForia.Rendering.LayoutDirection FlexLayoutDirection {
+        public UIForia.Layout.LayoutDirection FlexLayoutDirection {
             [System.Diagnostics.DebuggerStepThrough]
             get { return m_StyleSet.GetPropertyValueInState(StylePropertyId.FlexLayoutDirection, state).AsLayoutDirection; }
             [System.Diagnostics.DebuggerStepThrough]
             set { m_StyleSet.SetProperty(new StyleProperty(StylePropertyId.FlexLayoutDirection, (int)value), state); }
         }
         
-        public UIForia.Rendering.LayoutWrap FlexLayoutWrap {
+        public UIForia.Layout.LayoutWrap FlexLayoutWrap {
             [System.Diagnostics.DebuggerStepThrough]
             get { return m_StyleSet.GetPropertyValueInState(StylePropertyId.FlexLayoutWrap, state).AsLayoutWrap; }
             [System.Diagnostics.DebuggerStepThrough]
@@ -206,7 +208,7 @@ namespace UIForia.Rendering {
             set { m_StyleSet.SetProperty(new StyleProperty(StylePropertyId.GridItemRowSelfAlignment, (int)value), state); }
         }
         
-        public UIForia.Rendering.LayoutDirection GridLayoutDirection {
+        public UIForia.Layout.LayoutDirection GridLayoutDirection {
             [System.Diagnostics.DebuggerStepThrough]
             get { return m_StyleSet.GetPropertyValueInState(StylePropertyId.GridLayoutDirection, state).AsLayoutDirection; }
             [System.Diagnostics.DebuggerStepThrough]
@@ -276,70 +278,70 @@ namespace UIForia.Rendering {
             set { m_StyleSet.SetProperty(new StyleProperty(StylePropertyId.GridLayoutRowAlignment, (int)value), state); }
         }
         
-        public UIForia.UIMeasurement MinWidth {
+        public UIForia.Rendering.UIMeasurement MinWidth {
             [System.Diagnostics.DebuggerStepThrough]
             get { return m_StyleSet.GetPropertyValueInState(StylePropertyId.MinWidth, state).AsUIMeasurement; }
             [System.Diagnostics.DebuggerStepThrough]
             set { m_StyleSet.SetProperty(new StyleProperty(StylePropertyId.MinWidth, value), state); }
         }
         
-        public UIForia.UIMeasurement MaxWidth {
+        public UIForia.Rendering.UIMeasurement MaxWidth {
             [System.Diagnostics.DebuggerStepThrough]
             get { return m_StyleSet.GetPropertyValueInState(StylePropertyId.MaxWidth, state).AsUIMeasurement; }
             [System.Diagnostics.DebuggerStepThrough]
             set { m_StyleSet.SetProperty(new StyleProperty(StylePropertyId.MaxWidth, value), state); }
         }
         
-        public UIForia.UIMeasurement PreferredWidth {
+        public UIForia.Rendering.UIMeasurement PreferredWidth {
             [System.Diagnostics.DebuggerStepThrough]
             get { return m_StyleSet.GetPropertyValueInState(StylePropertyId.PreferredWidth, state).AsUIMeasurement; }
             [System.Diagnostics.DebuggerStepThrough]
             set { m_StyleSet.SetProperty(new StyleProperty(StylePropertyId.PreferredWidth, value), state); }
         }
         
-        public UIForia.UIMeasurement MinHeight {
+        public UIForia.Rendering.UIMeasurement MinHeight {
             [System.Diagnostics.DebuggerStepThrough]
             get { return m_StyleSet.GetPropertyValueInState(StylePropertyId.MinHeight, state).AsUIMeasurement; }
             [System.Diagnostics.DebuggerStepThrough]
             set { m_StyleSet.SetProperty(new StyleProperty(StylePropertyId.MinHeight, value), state); }
         }
         
-        public UIForia.UIMeasurement MaxHeight {
+        public UIForia.Rendering.UIMeasurement MaxHeight {
             [System.Diagnostics.DebuggerStepThrough]
             get { return m_StyleSet.GetPropertyValueInState(StylePropertyId.MaxHeight, state).AsUIMeasurement; }
             [System.Diagnostics.DebuggerStepThrough]
             set { m_StyleSet.SetProperty(new StyleProperty(StylePropertyId.MaxHeight, value), state); }
         }
         
-        public UIForia.UIMeasurement PreferredHeight {
+        public UIForia.Rendering.UIMeasurement PreferredHeight {
             [System.Diagnostics.DebuggerStepThrough]
             get { return m_StyleSet.GetPropertyValueInState(StylePropertyId.PreferredHeight, state).AsUIMeasurement; }
             [System.Diagnostics.DebuggerStepThrough]
             set { m_StyleSet.SetProperty(new StyleProperty(StylePropertyId.PreferredHeight, value), state); }
         }
         
-        public UIForia.UIMeasurement MarginTop {
+        public UIForia.Rendering.UIMeasurement MarginTop {
             [System.Diagnostics.DebuggerStepThrough]
             get { return m_StyleSet.GetPropertyValueInState(StylePropertyId.MarginTop, state).AsUIMeasurement; }
             [System.Diagnostics.DebuggerStepThrough]
             set { m_StyleSet.SetProperty(new StyleProperty(StylePropertyId.MarginTop, value), state); }
         }
         
-        public UIForia.UIMeasurement MarginRight {
+        public UIForia.Rendering.UIMeasurement MarginRight {
             [System.Diagnostics.DebuggerStepThrough]
             get { return m_StyleSet.GetPropertyValueInState(StylePropertyId.MarginRight, state).AsUIMeasurement; }
             [System.Diagnostics.DebuggerStepThrough]
             set { m_StyleSet.SetProperty(new StyleProperty(StylePropertyId.MarginRight, value), state); }
         }
         
-        public UIForia.UIMeasurement MarginBottom {
+        public UIForia.Rendering.UIMeasurement MarginBottom {
             [System.Diagnostics.DebuggerStepThrough]
             get { return m_StyleSet.GetPropertyValueInState(StylePropertyId.MarginBottom, state).AsUIMeasurement; }
             [System.Diagnostics.DebuggerStepThrough]
             set { m_StyleSet.SetProperty(new StyleProperty(StylePropertyId.MarginBottom, value), state); }
         }
         
-        public UIForia.UIMeasurement MarginLeft {
+        public UIForia.Rendering.UIMeasurement MarginLeft {
             [System.Diagnostics.DebuggerStepThrough]
             get { return m_StyleSet.GetPropertyValueInState(StylePropertyId.MarginLeft, state).AsUIMeasurement; }
             [System.Diagnostics.DebuggerStepThrough]
@@ -668,7 +670,7 @@ namespace UIForia.Rendering {
             set { m_StyleSet.SetProperty(new StyleProperty(StylePropertyId.TransformBehaviorY, (int)value), state); }
         }
         
-        public UIForia.Rendering.LayoutType LayoutType {
+        public UIForia.Layout.LayoutType LayoutType {
             [System.Diagnostics.DebuggerStepThrough]
             get { return m_StyleSet.GetPropertyValueInState(StylePropertyId.LayoutType, state).AsLayoutType; }
             [System.Diagnostics.DebuggerStepThrough]
@@ -710,7 +712,7 @@ namespace UIForia.Rendering {
             set { m_StyleSet.SetProperty(new StyleProperty(StylePropertyId.Scrollbar, 0, 0, value), state); }
         }
         
-        public UIForia.UIMeasurement ScrollbarSize {
+        public UIForia.Rendering.UIMeasurement ScrollbarSize {
             [System.Diagnostics.DebuggerStepThrough]
             get { return m_StyleSet.GetPropertyValueInState(StylePropertyId.ScrollbarSize, state).AsUIMeasurement; }
             [System.Diagnostics.DebuggerStepThrough]
@@ -1026,16 +1028,16 @@ namespace UIForia.Rendering {
             set { SetProperty(new StyleProperty(StylePropertyId.FlexItemSelfAlignment, (int)value)); }
         }
             
-        public UIForia.Rendering.LayoutDirection FlexLayoutDirection {
+        public UIForia.Layout.LayoutDirection FlexLayoutDirection {
             [System.Diagnostics.DebuggerStepThrough]
-            get { return (UIForia.Rendering.LayoutDirection)FindEnumProperty(StylePropertyId.FlexLayoutDirection); }
+            get { return (UIForia.Layout.LayoutDirection)FindEnumProperty(StylePropertyId.FlexLayoutDirection); }
             [System.Diagnostics.DebuggerStepThrough]
             set { SetProperty(new StyleProperty(StylePropertyId.FlexLayoutDirection, (int)value)); }
         }
             
-        public UIForia.Rendering.LayoutWrap FlexLayoutWrap {
+        public UIForia.Layout.LayoutWrap FlexLayoutWrap {
             [System.Diagnostics.DebuggerStepThrough]
-            get { return (UIForia.Rendering.LayoutWrap)FindEnumProperty(StylePropertyId.FlexLayoutWrap); }
+            get { return (UIForia.Layout.LayoutWrap)FindEnumProperty(StylePropertyId.FlexLayoutWrap); }
             [System.Diagnostics.DebuggerStepThrough]
             set { SetProperty(new StyleProperty(StylePropertyId.FlexLayoutWrap, (int)value)); }
         }
@@ -1096,9 +1098,9 @@ namespace UIForia.Rendering {
             set { SetProperty(new StyleProperty(StylePropertyId.GridItemRowSelfAlignment, (int)value)); }
         }
             
-        public UIForia.Rendering.LayoutDirection GridLayoutDirection {
+        public UIForia.Layout.LayoutDirection GridLayoutDirection {
             [System.Diagnostics.DebuggerStepThrough]
-            get { return (UIForia.Rendering.LayoutDirection)FindEnumProperty(StylePropertyId.GridLayoutDirection); }
+            get { return (UIForia.Layout.LayoutDirection)FindEnumProperty(StylePropertyId.GridLayoutDirection); }
             [System.Diagnostics.DebuggerStepThrough]
             set { SetProperty(new StyleProperty(StylePropertyId.GridLayoutDirection, (int)value)); }
         }
@@ -1166,70 +1168,70 @@ namespace UIForia.Rendering {
             set { SetProperty(new StyleProperty(StylePropertyId.GridLayoutRowAlignment, (int)value)); }
         }
             
-        public UIForia.UIMeasurement MinWidth {
+        public UIForia.Rendering.UIMeasurement MinWidth {
             [System.Diagnostics.DebuggerStepThrough]
             get { return FindUIMeasurementProperty(StylePropertyId.MinWidth); }
             [System.Diagnostics.DebuggerStepThrough]
             set { SetProperty(new StyleProperty(StylePropertyId.MinWidth, value)); }
         }
             
-        public UIForia.UIMeasurement MaxWidth {
+        public UIForia.Rendering.UIMeasurement MaxWidth {
             [System.Diagnostics.DebuggerStepThrough]
             get { return FindUIMeasurementProperty(StylePropertyId.MaxWidth); }
             [System.Diagnostics.DebuggerStepThrough]
             set { SetProperty(new StyleProperty(StylePropertyId.MaxWidth, value)); }
         }
             
-        public UIForia.UIMeasurement PreferredWidth {
+        public UIForia.Rendering.UIMeasurement PreferredWidth {
             [System.Diagnostics.DebuggerStepThrough]
             get { return FindUIMeasurementProperty(StylePropertyId.PreferredWidth); }
             [System.Diagnostics.DebuggerStepThrough]
             set { SetProperty(new StyleProperty(StylePropertyId.PreferredWidth, value)); }
         }
             
-        public UIForia.UIMeasurement MinHeight {
+        public UIForia.Rendering.UIMeasurement MinHeight {
             [System.Diagnostics.DebuggerStepThrough]
             get { return FindUIMeasurementProperty(StylePropertyId.MinHeight); }
             [System.Diagnostics.DebuggerStepThrough]
             set { SetProperty(new StyleProperty(StylePropertyId.MinHeight, value)); }
         }
             
-        public UIForia.UIMeasurement MaxHeight {
+        public UIForia.Rendering.UIMeasurement MaxHeight {
             [System.Diagnostics.DebuggerStepThrough]
             get { return FindUIMeasurementProperty(StylePropertyId.MaxHeight); }
             [System.Diagnostics.DebuggerStepThrough]
             set { SetProperty(new StyleProperty(StylePropertyId.MaxHeight, value)); }
         }
             
-        public UIForia.UIMeasurement PreferredHeight {
+        public UIForia.Rendering.UIMeasurement PreferredHeight {
             [System.Diagnostics.DebuggerStepThrough]
             get { return FindUIMeasurementProperty(StylePropertyId.PreferredHeight); }
             [System.Diagnostics.DebuggerStepThrough]
             set { SetProperty(new StyleProperty(StylePropertyId.PreferredHeight, value)); }
         }
             
-        public UIForia.UIMeasurement MarginTop {
+        public UIForia.Rendering.UIMeasurement MarginTop {
             [System.Diagnostics.DebuggerStepThrough]
             get { return FindUIMeasurementProperty(StylePropertyId.MarginTop); }
             [System.Diagnostics.DebuggerStepThrough]
             set { SetProperty(new StyleProperty(StylePropertyId.MarginTop, value)); }
         }
             
-        public UIForia.UIMeasurement MarginRight {
+        public UIForia.Rendering.UIMeasurement MarginRight {
             [System.Diagnostics.DebuggerStepThrough]
             get { return FindUIMeasurementProperty(StylePropertyId.MarginRight); }
             [System.Diagnostics.DebuggerStepThrough]
             set { SetProperty(new StyleProperty(StylePropertyId.MarginRight, value)); }
         }
             
-        public UIForia.UIMeasurement MarginBottom {
+        public UIForia.Rendering.UIMeasurement MarginBottom {
             [System.Diagnostics.DebuggerStepThrough]
             get { return FindUIMeasurementProperty(StylePropertyId.MarginBottom); }
             [System.Diagnostics.DebuggerStepThrough]
             set { SetProperty(new StyleProperty(StylePropertyId.MarginBottom, value)); }
         }
             
-        public UIForia.UIMeasurement MarginLeft {
+        public UIForia.Rendering.UIMeasurement MarginLeft {
             [System.Diagnostics.DebuggerStepThrough]
             get { return FindUIMeasurementProperty(StylePropertyId.MarginLeft); }
             [System.Diagnostics.DebuggerStepThrough]
@@ -1558,9 +1560,9 @@ namespace UIForia.Rendering {
             set { SetProperty(new StyleProperty(StylePropertyId.TransformBehaviorY, (int)value)); }
         }
             
-        public UIForia.Rendering.LayoutType LayoutType {
+        public UIForia.Layout.LayoutType LayoutType {
             [System.Diagnostics.DebuggerStepThrough]
-            get { return (UIForia.Rendering.LayoutType)FindEnumProperty(StylePropertyId.LayoutType); }
+            get { return (UIForia.Layout.LayoutType)FindEnumProperty(StylePropertyId.LayoutType); }
             [System.Diagnostics.DebuggerStepThrough]
             set { SetProperty(new StyleProperty(StylePropertyId.LayoutType, (int)value)); }
         }
@@ -1600,7 +1602,7 @@ namespace UIForia.Rendering {
             set { SetProperty(new StyleProperty(StylePropertyId.Scrollbar, 0, 0, value)); }
         }
             
-        public UIForia.UIMeasurement ScrollbarSize {
+        public UIForia.Rendering.UIMeasurement ScrollbarSize {
             [System.Diagnostics.DebuggerStepThrough]
             get { return FindUIMeasurementProperty(StylePropertyId.ScrollbarSize); }
             [System.Diagnostics.DebuggerStepThrough]
@@ -1834,7 +1836,7 @@ namespace UIForia.Rendering {
                 }
             }
 
-            public UIForia.Rendering.LayoutDirection FlexLayoutDirection { 
+            public UIForia.Layout.LayoutDirection FlexLayoutDirection { 
                 [System.Diagnostics.DebuggerStepThrough]
                 get { 
                     StyleProperty property;
@@ -1843,7 +1845,7 @@ namespace UIForia.Rendering {
                 }
             }
 
-            public UIForia.Rendering.LayoutWrap FlexLayoutWrap { 
+            public UIForia.Layout.LayoutWrap FlexLayoutWrap { 
                 [System.Diagnostics.DebuggerStepThrough]
                 get { 
                     StyleProperty property;
@@ -1924,7 +1926,7 @@ namespace UIForia.Rendering {
                 }
             }
 
-            public UIForia.Rendering.LayoutDirection GridLayoutDirection { 
+            public UIForia.Layout.LayoutDirection GridLayoutDirection { 
                 [System.Diagnostics.DebuggerStepThrough]
                 get { 
                     StyleProperty property;
@@ -2014,7 +2016,7 @@ namespace UIForia.Rendering {
                 }
             }
 
-            public UIForia.UIMeasurement MinWidth { 
+            public UIForia.Rendering.UIMeasurement MinWidth { 
                 [System.Diagnostics.DebuggerStepThrough]
                 get { 
                     StyleProperty property;
@@ -2023,7 +2025,7 @@ namespace UIForia.Rendering {
                 }
             }
 
-            public UIForia.UIMeasurement MaxWidth { 
+            public UIForia.Rendering.UIMeasurement MaxWidth { 
                 [System.Diagnostics.DebuggerStepThrough]
                 get { 
                     StyleProperty property;
@@ -2032,7 +2034,7 @@ namespace UIForia.Rendering {
                 }
             }
 
-            public UIForia.UIMeasurement PreferredWidth { 
+            public UIForia.Rendering.UIMeasurement PreferredWidth { 
                 [System.Diagnostics.DebuggerStepThrough]
                 get { 
                     StyleProperty property;
@@ -2041,7 +2043,7 @@ namespace UIForia.Rendering {
                 }
             }
 
-            public UIForia.UIMeasurement MinHeight { 
+            public UIForia.Rendering.UIMeasurement MinHeight { 
                 [System.Diagnostics.DebuggerStepThrough]
                 get { 
                     StyleProperty property;
@@ -2050,7 +2052,7 @@ namespace UIForia.Rendering {
                 }
             }
 
-            public UIForia.UIMeasurement MaxHeight { 
+            public UIForia.Rendering.UIMeasurement MaxHeight { 
                 [System.Diagnostics.DebuggerStepThrough]
                 get { 
                     StyleProperty property;
@@ -2059,7 +2061,7 @@ namespace UIForia.Rendering {
                 }
             }
 
-            public UIForia.UIMeasurement PreferredHeight { 
+            public UIForia.Rendering.UIMeasurement PreferredHeight { 
                 [System.Diagnostics.DebuggerStepThrough]
                 get { 
                     StyleProperty property;
@@ -2068,7 +2070,7 @@ namespace UIForia.Rendering {
                 }
             }
 
-            public UIForia.UIMeasurement MarginTop { 
+            public UIForia.Rendering.UIMeasurement MarginTop { 
                 [System.Diagnostics.DebuggerStepThrough]
                 get { 
                     StyleProperty property;
@@ -2077,7 +2079,7 @@ namespace UIForia.Rendering {
                 }
             }
 
-            public UIForia.UIMeasurement MarginRight { 
+            public UIForia.Rendering.UIMeasurement MarginRight { 
                 [System.Diagnostics.DebuggerStepThrough]
                 get { 
                     StyleProperty property;
@@ -2086,7 +2088,7 @@ namespace UIForia.Rendering {
                 }
             }
 
-            public UIForia.UIMeasurement MarginBottom { 
+            public UIForia.Rendering.UIMeasurement MarginBottom { 
                 [System.Diagnostics.DebuggerStepThrough]
                 get { 
                     StyleProperty property;
@@ -2095,7 +2097,7 @@ namespace UIForia.Rendering {
                 }
             }
 
-            public UIForia.UIMeasurement MarginLeft { 
+            public UIForia.Rendering.UIMeasurement MarginLeft { 
                 [System.Diagnostics.DebuggerStepThrough]
                 get { 
                     StyleProperty property;
@@ -2537,7 +2539,7 @@ namespace UIForia.Rendering {
                 }
             }
 
-            public UIForia.Rendering.LayoutType LayoutType { 
+            public UIForia.Layout.LayoutType LayoutType { 
                 [System.Diagnostics.DebuggerStepThrough]
                 get { 
                     StyleProperty property;
@@ -2591,7 +2593,7 @@ namespace UIForia.Rendering {
                 }
             }
 
-            public UIForia.UIMeasurement ScrollbarSize { 
+            public UIForia.Rendering.UIMeasurement ScrollbarSize { 
                 [System.Diagnostics.DebuggerStepThrough]
                 get { 
                     StyleProperty property;
@@ -2816,19 +2818,19 @@ namespace UIForia.Rendering {
             return GetPropertyValueInState(StylePropertyId.FlexItemSelfAlignment, state).AsCrossAxisAlignment;
         }
         
-        public void SetFlexLayoutDirection(UIForia.Rendering.LayoutDirection value, StyleState state) {
+        public void SetFlexLayoutDirection(UIForia.Layout.LayoutDirection value, StyleState state) {
             SetProperty(new StyleProperty(StylePropertyId.FlexLayoutDirection, (int)value), state);
         }
 
-        public UIForia.Rendering.LayoutDirection GetFlexLayoutDirection(StyleState state) {
+        public UIForia.Layout.LayoutDirection GetFlexLayoutDirection(StyleState state) {
             return GetPropertyValueInState(StylePropertyId.FlexLayoutDirection, state).AsLayoutDirection;
         }
         
-        public void SetFlexLayoutWrap(UIForia.Rendering.LayoutWrap value, StyleState state) {
+        public void SetFlexLayoutWrap(UIForia.Layout.LayoutWrap value, StyleState state) {
             SetProperty(new StyleProperty(StylePropertyId.FlexLayoutWrap, (int)value), state);
         }
 
-        public UIForia.Rendering.LayoutWrap GetFlexLayoutWrap(StyleState state) {
+        public UIForia.Layout.LayoutWrap GetFlexLayoutWrap(StyleState state) {
             return GetPropertyValueInState(StylePropertyId.FlexLayoutWrap, state).AsLayoutWrap;
         }
         
@@ -2896,11 +2898,11 @@ namespace UIForia.Rendering {
             return GetPropertyValueInState(StylePropertyId.GridItemRowSelfAlignment, state).AsGridAxisAlignment;
         }
         
-        public void SetGridLayoutDirection(UIForia.Rendering.LayoutDirection value, StyleState state) {
+        public void SetGridLayoutDirection(UIForia.Layout.LayoutDirection value, StyleState state) {
             SetProperty(new StyleProperty(StylePropertyId.GridLayoutDirection, (int)value), state);
         }
 
-        public UIForia.Rendering.LayoutDirection GetGridLayoutDirection(StyleState state) {
+        public UIForia.Layout.LayoutDirection GetGridLayoutDirection(StyleState state) {
             return GetPropertyValueInState(StylePropertyId.GridLayoutDirection, state).AsLayoutDirection;
         }
         
@@ -2976,83 +2978,83 @@ namespace UIForia.Rendering {
             return GetPropertyValueInState(StylePropertyId.GridLayoutRowAlignment, state).AsGridAxisAlignment;
         }
         
-        public void SetMinWidth(UIForia.UIMeasurement value, StyleState state) {
+        public void SetMinWidth(UIForia.Rendering.UIMeasurement value, StyleState state) {
             SetProperty(new StyleProperty(StylePropertyId.MinWidth, value), state);
         }
 
-        public UIForia.UIMeasurement GetMinWidth(StyleState state) {
+        public UIForia.Rendering.UIMeasurement GetMinWidth(StyleState state) {
             return GetPropertyValueInState(StylePropertyId.MinWidth, state).AsUIMeasurement;
         }
         
-        public void SetMaxWidth(UIForia.UIMeasurement value, StyleState state) {
+        public void SetMaxWidth(UIForia.Rendering.UIMeasurement value, StyleState state) {
             SetProperty(new StyleProperty(StylePropertyId.MaxWidth, value), state);
         }
 
-        public UIForia.UIMeasurement GetMaxWidth(StyleState state) {
+        public UIForia.Rendering.UIMeasurement GetMaxWidth(StyleState state) {
             return GetPropertyValueInState(StylePropertyId.MaxWidth, state).AsUIMeasurement;
         }
         
-        public void SetPreferredWidth(UIForia.UIMeasurement value, StyleState state) {
+        public void SetPreferredWidth(UIForia.Rendering.UIMeasurement value, StyleState state) {
             SetProperty(new StyleProperty(StylePropertyId.PreferredWidth, value), state);
         }
 
-        public UIForia.UIMeasurement GetPreferredWidth(StyleState state) {
+        public UIForia.Rendering.UIMeasurement GetPreferredWidth(StyleState state) {
             return GetPropertyValueInState(StylePropertyId.PreferredWidth, state).AsUIMeasurement;
         }
         
-        public void SetMinHeight(UIForia.UIMeasurement value, StyleState state) {
+        public void SetMinHeight(UIForia.Rendering.UIMeasurement value, StyleState state) {
             SetProperty(new StyleProperty(StylePropertyId.MinHeight, value), state);
         }
 
-        public UIForia.UIMeasurement GetMinHeight(StyleState state) {
+        public UIForia.Rendering.UIMeasurement GetMinHeight(StyleState state) {
             return GetPropertyValueInState(StylePropertyId.MinHeight, state).AsUIMeasurement;
         }
         
-        public void SetMaxHeight(UIForia.UIMeasurement value, StyleState state) {
+        public void SetMaxHeight(UIForia.Rendering.UIMeasurement value, StyleState state) {
             SetProperty(new StyleProperty(StylePropertyId.MaxHeight, value), state);
         }
 
-        public UIForia.UIMeasurement GetMaxHeight(StyleState state) {
+        public UIForia.Rendering.UIMeasurement GetMaxHeight(StyleState state) {
             return GetPropertyValueInState(StylePropertyId.MaxHeight, state).AsUIMeasurement;
         }
         
-        public void SetPreferredHeight(UIForia.UIMeasurement value, StyleState state) {
+        public void SetPreferredHeight(UIForia.Rendering.UIMeasurement value, StyleState state) {
             SetProperty(new StyleProperty(StylePropertyId.PreferredHeight, value), state);
         }
 
-        public UIForia.UIMeasurement GetPreferredHeight(StyleState state) {
+        public UIForia.Rendering.UIMeasurement GetPreferredHeight(StyleState state) {
             return GetPropertyValueInState(StylePropertyId.PreferredHeight, state).AsUIMeasurement;
         }
         
-        public void SetMarginTop(UIForia.UIMeasurement value, StyleState state) {
+        public void SetMarginTop(UIForia.Rendering.UIMeasurement value, StyleState state) {
             SetProperty(new StyleProperty(StylePropertyId.MarginTop, value), state);
         }
 
-        public UIForia.UIMeasurement GetMarginTop(StyleState state) {
+        public UIForia.Rendering.UIMeasurement GetMarginTop(StyleState state) {
             return GetPropertyValueInState(StylePropertyId.MarginTop, state).AsUIMeasurement;
         }
         
-        public void SetMarginRight(UIForia.UIMeasurement value, StyleState state) {
+        public void SetMarginRight(UIForia.Rendering.UIMeasurement value, StyleState state) {
             SetProperty(new StyleProperty(StylePropertyId.MarginRight, value), state);
         }
 
-        public UIForia.UIMeasurement GetMarginRight(StyleState state) {
+        public UIForia.Rendering.UIMeasurement GetMarginRight(StyleState state) {
             return GetPropertyValueInState(StylePropertyId.MarginRight, state).AsUIMeasurement;
         }
         
-        public void SetMarginBottom(UIForia.UIMeasurement value, StyleState state) {
+        public void SetMarginBottom(UIForia.Rendering.UIMeasurement value, StyleState state) {
             SetProperty(new StyleProperty(StylePropertyId.MarginBottom, value), state);
         }
 
-        public UIForia.UIMeasurement GetMarginBottom(StyleState state) {
+        public UIForia.Rendering.UIMeasurement GetMarginBottom(StyleState state) {
             return GetPropertyValueInState(StylePropertyId.MarginBottom, state).AsUIMeasurement;
         }
         
-        public void SetMarginLeft(UIForia.UIMeasurement value, StyleState state) {
+        public void SetMarginLeft(UIForia.Rendering.UIMeasurement value, StyleState state) {
             SetProperty(new StyleProperty(StylePropertyId.MarginLeft, value), state);
         }
 
-        public UIForia.UIMeasurement GetMarginLeft(StyleState state) {
+        public UIForia.Rendering.UIMeasurement GetMarginLeft(StyleState state) {
             return GetPropertyValueInState(StylePropertyId.MarginLeft, state).AsUIMeasurement;
         }
         
@@ -3424,11 +3426,11 @@ namespace UIForia.Rendering {
             return GetPropertyValueInState(StylePropertyId.TransformBehaviorY, state).AsTransformBehavior;
         }
         
-        public void SetLayoutType(UIForia.Rendering.LayoutType value, StyleState state) {
+        public void SetLayoutType(UIForia.Layout.LayoutType value, StyleState state) {
             SetProperty(new StyleProperty(StylePropertyId.LayoutType, (int)value), state);
         }
 
-        public UIForia.Rendering.LayoutType GetLayoutType(StyleState state) {
+        public UIForia.Layout.LayoutType GetLayoutType(StyleState state) {
             return GetPropertyValueInState(StylePropertyId.LayoutType, state).AsLayoutType;
         }
         
@@ -3472,11 +3474,11 @@ namespace UIForia.Rendering {
             return GetPropertyValueInState(StylePropertyId.Scrollbar, state).AsString;
         }
         
-        public void SetScrollbarSize(UIForia.UIMeasurement value, StyleState state) {
+        public void SetScrollbarSize(UIForia.Rendering.UIMeasurement value, StyleState state) {
             SetProperty(new StyleProperty(StylePropertyId.ScrollbarSize, value), state);
         }
 
-        public UIForia.UIMeasurement GetScrollbarSize(StyleState state) {
+        public UIForia.Rendering.UIMeasurement GetScrollbarSize(StyleState state) {
             return GetPropertyValueInState(StylePropertyId.ScrollbarSize, state).AsUIMeasurement;
         }
         

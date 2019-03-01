@@ -1,6 +1,6 @@
 using System.Diagnostics;
 
-namespace UIForia {
+namespace UIForia.Parsing.Expression {
 
     [DebuggerDisplay("{key}={value}")]
     public class AttributeDefinition {

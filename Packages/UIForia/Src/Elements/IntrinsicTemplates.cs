@@ -1,10 +1,10 @@
-﻿using UIForia.Elements;
-using UIForia.Parsing.Style;
-using UIForia.Rendering;
-
-namespace UIForia {
+﻿namespace UIForia.Elements {
 
     public class UIGroupElement : UIContainerElement {
+
+        public UIGroupElement() {
+            flags |= UIElementFlags.BuiltIn;
+        }
 
         public override string GetDisplayName() {
             return "Group";
@@ -14,6 +14,10 @@ namespace UIForia {
 
     public class UIPanelElement : UIContainerElement {
 
+        public UIPanelElement() {
+            flags |= UIElementFlags.BuiltIn;
+        }
+
         public override string GetDisplayName() {
             return "Panel";
         }
@@ -21,6 +25,10 @@ namespace UIForia {
     }
 
     public class UISectionElement : UIContainerElement {
+        
+        public UISectionElement() {
+            flags |= UIElementFlags.BuiltIn;
+        }
 
         public override string GetDisplayName() {
             return "Section";
@@ -30,6 +38,10 @@ namespace UIForia {
 
     public class UIDivElement : UIContainerElement {
 
+        public UIDivElement() {
+            flags |= UIElementFlags.BuiltIn;
+        }
+
         public override string GetDisplayName() {
             return "Div";
         }
@@ -38,6 +50,10 @@ namespace UIForia {
 
     public class UIHeaderElement : UIContainerElement {
 
+        public UIHeaderElement() {
+            flags |= UIElementFlags.BuiltIn;
+        }
+
         public override string GetDisplayName() {
             return "Header";
         }
@@ -45,6 +61,10 @@ namespace UIForia {
     }
 
     public class UIFooterElement : UIContainerElement {
+        
+        public UIFooterElement() {
+            flags |= UIElementFlags.BuiltIn;
+        }
 
         public override string GetDisplayName() {
             return "Footer";
@@ -54,6 +74,10 @@ namespace UIForia {
 
     public class UILabelElement : UITextElement {
 
+        public UILabelElement(string text = "") : base(text) {
+            flags |= UIElementFlags.BuiltIn;
+        }
+
         public override string GetDisplayName() {
             return "Label";
         }
@@ -61,6 +85,10 @@ namespace UIForia {
     }
 
     public class UIParagraphElement : UITextElement {
+
+        public UIParagraphElement(string text = "") : base(text) {
+            flags |= UIElementFlags.BuiltIn;
+        }
 
         public override string GetDisplayName() {
             return "Paragraph";
@@ -70,6 +98,10 @@ namespace UIForia {
 
     public class UIHeading1Element : UITextElement {
 
+        public UIHeading1Element(string text = "") : base(text) {
+            flags |= UIElementFlags.BuiltIn;
+        }
+
         public override string GetDisplayName() {
             return "Heading1";
         }
@@ -78,6 +110,10 @@ namespace UIForia {
 
     public class UIHeading2Element : UITextElement {
 
+        public UIHeading2Element(string text = "") : base(text) {
+            flags |= UIElementFlags.BuiltIn;
+        }
+
         public override string GetDisplayName() {
             return "Heading2";
         }
@@ -85,6 +121,10 @@ namespace UIForia {
     }
 
     public class UIHeading3Element : UITextElement {
+
+        public UIHeading3Element(string text = "") : base(text) {
+            flags |= UIElementFlags.BuiltIn;
+        }
 
         public override void OnReady() {
 //            style.AddImplicitStyleGroup(StyleParser.GetImplicitStyleGroup(""));
@@ -98,6 +138,10 @@ namespace UIForia {
 
     public class UIHeading4Element : UITextElement {
 
+        public UIHeading4Element(string text = "") : base(text) {
+            flags |= UIElementFlags.BuiltIn;
+        }
+
         public override string GetDisplayName() {
             return "Heading4";
         }
@@ -105,6 +149,10 @@ namespace UIForia {
     }
 
     public class UIHeading5Element : UITextElement {
+
+        public UIHeading5Element(string text = "") : base(text) {
+            flags |= UIElementFlags.BuiltIn;
+        }
 
         public override string GetDisplayName() {
             return "Heading5";
@@ -114,23 +162,13 @@ namespace UIForia {
 
     public class UIHeading6Element : UITextElement {
 
+        public UIHeading6Element(string text = "") : base(text) {
+            flags |= UIElementFlags.BuiltIn;
+        }
+
         public override string GetDisplayName() {
             return "Heading6";
         }
 
     }
-
-    public static class DefaultIntrinsicStyles {
-
-        public static readonly UIStyleGroup LabelStyle = new UIStyleGroup();
-        public static readonly UIStyleGroup ParagraphStyle = new UIStyleGroup();
-        public static readonly UIStyleGroup Heading1Style = new UIStyleGroup();
-        public static readonly UIStyleGroup Heading2Style = new UIStyleGroup();
-        public static readonly UIStyleGroup Heading3Style = new UIStyleGroup();
-        public static readonly UIStyleGroup Heading4Style = new UIStyleGroup();
-        public static readonly UIStyleGroup Heading5Style = new UIStyleGroup();
-        public static readonly UIStyleGroup Heading6Style = new UIStyleGroup();
-
-    }
-
 }

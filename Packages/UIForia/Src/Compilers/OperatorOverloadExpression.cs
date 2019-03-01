@@ -1,5 +1,7 @@
 using System;
 using System.Reflection;
+using UIForia.Expressions;
+using UIForia.Util;
 
 namespace UIForia.Compilers {
 

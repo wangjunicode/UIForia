@@ -1,4 +1,6 @@
-﻿namespace UIForia.Rendering {
+﻿using UIForia.Elements;
+
+namespace UIForia.Systems {
 
     public interface ISystem {
 

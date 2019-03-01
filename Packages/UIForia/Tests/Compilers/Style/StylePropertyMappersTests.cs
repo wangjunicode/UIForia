@@ -2,6 +2,7 @@ using System;
 using NUnit.Framework;
 using UIForia;
 using UIForia.Compilers.Style;
+using UIForia.Exceptions;
 using UIForia.Parsing.Style.AstNodes;
 using UIForia.Rendering;
 

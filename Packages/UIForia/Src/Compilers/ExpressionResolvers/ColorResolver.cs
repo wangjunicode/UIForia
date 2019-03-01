@@ -1,10 +1,13 @@
 using System.Collections.Generic;
 using System.Reflection;
 using JetBrains.Annotations;
-using UIForia.Parsing;
+using UIForia.Exceptions;
+using UIForia.Expressions;
+using UIForia.Parsing.Expression.AstNodes;
+using UIForia.Util;
 using UnityEngine;
 
-namespace UIForia.Compilers {
+namespace UIForia.Compilers.ExpressionResolvers {
 
     public class ColorResolver : ExpressionAliasResolver {
 

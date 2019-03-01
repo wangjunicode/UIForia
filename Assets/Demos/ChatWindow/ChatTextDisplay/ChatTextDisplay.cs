@@ -1,5 +1,6 @@
 using System.Collections.Generic;
-using UIForia;
+using UIForia.Attributes;
+using UIForia.Elements;
 
 namespace Demo {
 

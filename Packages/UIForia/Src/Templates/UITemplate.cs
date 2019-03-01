@@ -2,15 +2,19 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using JetBrains.Annotations;
+using UIForia.Bindings;
+using UIForia.Bindings.StyleBindings;
 using UIForia.Compilers;
 using UIForia.Compilers.Style;
-using UIForia.Input;
+using UIForia.Elements;
+using UIForia.Expressions;
+using UIForia.Parsing.Expression;
 using UIForia.Rendering;
-using UIForia.StyleBindings;
+using UIForia.UIInput;
 using UIForia.Util;
 using UnityEngine;
 
-namespace UIForia {
+namespace UIForia.Templates {
 
     public abstract class UITemplate {
 

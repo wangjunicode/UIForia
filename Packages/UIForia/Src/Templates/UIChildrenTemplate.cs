@@ -1,7 +1,10 @@
 using System;
 using System.Collections.Generic;
+using UIForia.Elements;
+using UIForia.Expressions;
+using UIForia.Parsing.Expression;
 
-namespace UIForia {
+namespace UIForia.Templates {
 
     public class UIChildrenTemplate : UITemplate {
 

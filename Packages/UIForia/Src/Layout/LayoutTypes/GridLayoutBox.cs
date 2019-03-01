@@ -1,5 +1,7 @@
 using System;
 using System.Collections.Generic;
+using UIForia.Elements;
+using UIForia.Exceptions;
 using UIForia.Rendering;
 using UIForia.Util;
 using UnityEngine;
@@ -637,7 +639,7 @@ namespace UIForia.Layout.LayoutTypes {
                     return 0f;
 
                 default:
-                    throw new UIForia.InvalidArgumentException();
+                    throw new InvalidArgumentException();
             }
         }
 
@@ -669,7 +671,7 @@ namespace UIForia.Layout.LayoutTypes {
                 case GridTemplateUnit.MaxContent:
                     return 0f;
                 default:
-                    throw new UIForia.InvalidArgumentException();
+                    throw new InvalidArgumentException();
             }
         }
 

@@ -1,7 +1,9 @@
 using System;
 using NUnit.Framework;
-using UIForia;
 using Tests.Mocks;
+using UIForia;
+using UIForia.Attributes;
+using UIForia.Elements;
 using static Tests.TestUtils;
 
 [TemplateTagName("TranscludedThing")]

@@ -1,6 +1,6 @@
 using System;
 
-namespace UIForia.Parsing {
+namespace UIForia.Parsing.Expression.AstNodes {
 
     public class OperatorNode : ASTNode {
 

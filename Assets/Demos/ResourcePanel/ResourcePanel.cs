@@ -1,4 +1,4 @@
-using UIForia;
+using UIForia.Attributes;
 
 namespace Demos.ResourcePanel {
 

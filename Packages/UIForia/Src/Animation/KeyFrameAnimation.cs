@@ -1,5 +1,7 @@
 using System;
 using System.Collections.Generic;
+using UIForia.Elements;
+using UIForia.Exceptions;
 using UIForia.Rendering;
 using UIForia.Util;
 using UnityEngine;
@@ -134,7 +136,7 @@ namespace UIForia.Animation {
                         break;
 
                     default:
-                        throw new UIForia.InvalidArgumentException(propertyId + " is not a supported animation property");
+                        throw new InvalidArgumentException(propertyId + " is not a supported animation property");
                 }
             }
             

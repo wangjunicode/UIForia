@@ -1,6 +1,6 @@
 using System.Diagnostics;
 
-namespace UIForia {
+namespace UIForia.Parsing.Expression.Tokenizer {
 
     [DebuggerDisplay("{value} -> {expressionTokenType}")]
     public struct ExpressionToken {

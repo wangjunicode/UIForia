@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Globalization;
 using System.Linq;
 using TMPro;
+using UIForia.Layout;
 using UIForia.Layout.LayoutTypes;
 using UIForia.Rendering;
 using UnityEngine;

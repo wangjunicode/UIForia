@@ -1,6 +1,7 @@
 ﻿using System;
+using UIForia.Util;
 
-namespace UIForia {
+namespace UIForia.Expressions {
 
     public static class ParenExpressionFactory {
 

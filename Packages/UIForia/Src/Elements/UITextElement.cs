@@ -1,13 +1,15 @@
 using System;
 using SVGX;
 using TMPro;
+using UIForia.Layout;
 using UIForia.Rendering;
+using UIForia.Rendering.ElementRendering;
 using UIForia.Systems;
 using UIForia.Text;
 using UIForia.Util;
 using UnityEngine;
 
-namespace UIForia {
+namespace UIForia.Elements {
 
     // <Paragraph/>
     // <Header1/>
@@ -51,6 +53,7 @@ namespace UIForia {
             Renderer = ElementRenderer.DefaultText;
             material = new Material(s_BaseTextMaterial);
             flags = flags | UIElementFlags.TextElement
+                          | UIElementFlags.BuiltIn
                           | UIElementFlags.Primitive;
             UpdateTextInfo();
         }

@@ -1,8 +1,9 @@
 using System;
-using UIForia.Input;
-using UIForia.Parsing;
+using UIForia.Elements;
+using UIForia.Expressions;
+using UIForia.UIInput;
 
-namespace UIForia.Compilers {
+namespace UIForia.Compilers.ExpressionResolvers {
 
     public class KeyboardEventResolver : ExpressionAliasResolver {
 

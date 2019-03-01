@@ -1,5 +1,6 @@
 using System;
 using System.Linq;
+using UIForia.Exceptions;
 using UIForia.Parsing.Style.AstNodes;
 using UIForia.Rendering;
 using UIForia.Util;

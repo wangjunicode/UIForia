@@ -1,16 +1,15 @@
 using System;
 using System.Collections.Generic;
-using System.Linq;
 using System.Reflection;
+using UIForia.Attributes;
+using UIForia.Elements;
+using UIForia.Exceptions;
 using UIForia.Extensions;
-using UIForia.Parsing;
 using UIForia.Util;
 using UnityEngine;
 using UnityEngine.Assertions;
-using UnityEngine.UI;
-using Assembly = System.Reflection.Assembly;
 
-namespace UIForia {
+namespace UIForia.Parsing.Expression {
 
     public static class TypeProcessor {
 

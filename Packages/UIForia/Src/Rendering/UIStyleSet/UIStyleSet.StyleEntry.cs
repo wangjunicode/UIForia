@@ -1,3 +1,5 @@
+using UIForia.Util;
+
 namespace UIForia.Rendering {
 
     public partial class UIStyleSet {

@@ -1,5 +1,6 @@
 using System.Collections.Generic;
 using System.IO;
+using UIForia.Exceptions;
 using UIForia.Parsing.Style;
 
 namespace UIForia.Compilers.Style {

@@ -74,6 +74,7 @@ namespace UIForia.Templates {
 
             compiler.AddNamespaces(usings);
             compiler.AddNamespace("UIForia.Rendering");
+            compiler.AddNamespace("UIForia.Layout");
             compiler.AddNamespace("UIForia");
 
             compiler.AddAliasResolver(new ElementResolver("element"));

@@ -8,7 +8,6 @@ using UIForia.Compilers.ExpressionResolvers;
 using UIForia.Exceptions;
 using UIForia.Expressions;
 using UIForia.Extensions;
-using UIForia.Parsing;
 using UIForia.Parsing.Expression;
 using UIForia.Parsing.Expression.AstNodes;
 using UIForia.Util;

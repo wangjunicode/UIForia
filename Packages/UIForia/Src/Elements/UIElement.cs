@@ -104,6 +104,8 @@ namespace UIForia.Elements {
 
         public bool isDestroyed => (flags & UIElementFlags.Destroyed) != 0;
 
+        public bool isBuiltIn => (flags & UIElementFlags.BuiltIn) != 0;
+        
         internal bool isPrimitive => (flags & UIElementFlags.Primitive) != 0;
 
         public virtual void OnCreate() { }

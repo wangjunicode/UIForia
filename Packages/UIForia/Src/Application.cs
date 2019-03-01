@@ -33,6 +33,7 @@ namespace UIForia {
 
         protected readonly List<ISystem> m_Systems;
 
+        public event Action<UIElement> onElementRegistered;
         public event Action<UIElement> onElementCreated;
         public event Action<UIElement> onElementDestroyed;
         public event Action<UIElement> onElementEnabled;
@@ -158,6 +159,8 @@ namespace UIForia {
             for (int i = 0; i < m_Systems.Count; i++) {
                 m_Systems[i].OnElementCreated(element);
             }
+
+            onElementRegistered?.Invoke(element);
 
             InvokeAttributeProcessors(element);
             InvokeOnCreate(element);

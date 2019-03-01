@@ -70,8 +70,13 @@ namespace UIForia.Elements {
         private bool hasFocus;
         private bool canSetCaret;
 
-        protected internal UIInputFieldElement() {
-            flags |= UIElementFlags.BuiltIn;
+        public UIInputFieldElement() : this(true) {
+            
+        }
+        
+        
+        protected internal UIInputFieldElement(bool isBuiltIn) {
+            if (isBuiltIn) flags |= UIElementFlags.BuiltIn;
         }
 
         protected static string clipboard {

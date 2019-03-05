@@ -2,6 +2,7 @@ using System;
 using UIForia.Elements;
 using UIForia.Rendering;
 using UIForia.Util;
+using UnityEditor;
 using UnityEngine;
 using Application = UIForia.Application;
 
@@ -9,7 +10,7 @@ namespace Tests.Mocks {
 
     public class MockApplication : Application {
 
-        public MockApplication(Type elementType, string template = null) {
+        public MockApplication(Type elementType, string template = null) : base(GUID.Generate().ToString()) {
             MockLayoutSystem layoutSystem = new MockLayoutSystem(m_StyleSystem);
             MockRenderSystem renderSystem = new MockRenderSystem();
             MockInputSystem inputSystem = new MockInputSystem(layoutSystem, m_StyleSystem);

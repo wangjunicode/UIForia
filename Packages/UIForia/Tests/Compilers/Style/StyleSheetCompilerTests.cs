@@ -22,7 +22,7 @@ public class StyleSheetCompilerTests {
     public void CompileEmptyStyle() {
         LightList<StyleASTNode> nodes = new LightList<StyleASTNode>();
 
-        StyleSheet styleSheet = NewStyleSheetCompiler().Compile(nodes);
+        StyleSheet styleSheet = NewStyleSheetCompiler().Compile("test", nodes);
 
         Assert.IsNotNull(styleSheet);
         Assert.AreEqual(0, styleSheet.styleGroupContainers.Length);
@@ -41,7 +41,7 @@ style image3 { BackgroundImage = url(testimg/cat); }
 
         ".Trim());
 
-        StyleSheet styleSheet = NewStyleSheetCompiler().Compile(nodes);
+        StyleSheet styleSheet = NewStyleSheetCompiler().Compile("test", nodes);
 
         var containers = styleSheet.styleGroupContainers;
         Assert.AreEqual(3, containers.Length);
@@ -64,7 +64,7 @@ style image3 { Cursor = url(testimg/Cursor1); }
 
         ".Trim());
 
-        StyleSheet styleSheet = NewStyleSheetCompiler().Compile(nodes);
+        StyleSheet styleSheet = NewStyleSheetCompiler().Compile("test", nodes);
 
         var containers = styleSheet.styleGroupContainers;
         Assert.AreEqual(3, containers.Length);
@@ -92,7 +92,7 @@ style visi3 { Visibility = Visible; }
 
         ".Trim());
 
-        StyleSheet styleSheet = NewStyleSheetCompiler().Compile(nodes);
+        StyleSheet styleSheet = NewStyleSheetCompiler().Compile("test", nodes);
 
         var containers = styleSheet.styleGroupContainers;
         Assert.AreEqual(3, containers.Length);
@@ -120,7 +120,7 @@ style overflow5 {
 
         ".Trim());
 
-        StyleSheet styleSheet = NewStyleSheetCompiler().Compile(nodes);
+        StyleSheet styleSheet = NewStyleSheetCompiler().Compile("test", nodes);
 
         var containers = styleSheet.styleGroupContainers;
         Assert.AreEqual(5, containers.Length);
@@ -156,7 +156,7 @@ style myStyle {
 
         ".Trim());
 
-        StyleSheet styleSheet = NewStyleSheetCompiler().Compile(nodes);
+        StyleSheet styleSheet = NewStyleSheetCompiler().Compile("test", nodes);
 
         var containers = styleSheet.styleGroupContainers;
         Assert.AreEqual(1, containers.Length);
@@ -182,7 +182,7 @@ style myStyle {
 
         ".Trim());
 
-        StyleSheet styleSheet = NewStyleSheetCompiler().Compile(nodes);
+        StyleSheet styleSheet = NewStyleSheetCompiler().Compile("test", nodes);
 
         var containers = styleSheet.styleGroupContainers;
         Assert.AreEqual(1, containers.Length);
@@ -209,7 +209,7 @@ style myStyle {
 
         ".Trim());
 
-        StyleSheet styleSheet = NewStyleSheetCompiler().Compile(nodes);
+        StyleSheet styleSheet = NewStyleSheetCompiler().Compile("test", nodes);
 
         var containers = styleSheet.styleGroupContainers;
         Assert.AreEqual(1, containers.Length);
@@ -239,7 +239,7 @@ style myStyle {
 
         ".Trim());
 
-        StyleSheet styleSheet = NewStyleSheetCompiler().Compile(nodes);
+        StyleSheet styleSheet = NewStyleSheetCompiler().Compile("test", nodes);
 
         var containers = styleSheet.styleGroupContainers;
         Assert.AreEqual(1, containers.Length);
@@ -270,7 +270,7 @@ style myStyle {
 
         ".Trim());
 
-        StyleSheet styleSheet = NewStyleSheetCompiler().Compile(nodes);
+        StyleSheet styleSheet = NewStyleSheetCompiler().Compile("test", nodes);
 
         var containers = styleSheet.styleGroupContainers;
         Assert.AreEqual(1, containers.Length);
@@ -302,7 +302,7 @@ style myStyle {
 
         ".Trim());
 
-        StyleSheet styleSheet = NewStyleSheetCompiler().Compile(nodes);
+        StyleSheet styleSheet = NewStyleSheetCompiler().Compile("test", nodes);
 
         var containers = styleSheet.styleGroupContainers;
         Assert.AreEqual(1, containers.Length);
@@ -330,7 +330,7 @@ style myStyle {
 
         ".Trim());
 
-        StyleSheet styleSheet = NewStyleSheetCompiler().Compile(nodes);
+        StyleSheet styleSheet = NewStyleSheetCompiler().Compile("test", nodes);
 
         var containers = styleSheet.styleGroupContainers;
         Assert.AreEqual(1, containers.Length);
@@ -356,7 +356,7 @@ style myStyle {
 
         ".Trim());
 
-        StyleSheet styleSheet = NewStyleSheetCompiler().Compile(nodes);
+        StyleSheet styleSheet = NewStyleSheetCompiler().Compile("test", nodes);
 
         var containers = styleSheet.styleGroupContainers;
         Assert.AreEqual(1, containers.Length);
@@ -380,7 +380,7 @@ style myStyle {
 
         ".Trim());
 
-        StyleSheet styleSheet = NewStyleSheetCompiler().Compile(nodes);
+        StyleSheet styleSheet = NewStyleSheetCompiler().Compile("test", nodes);
 
         var containers = styleSheet.styleGroupContainers;
         Assert.AreEqual(1, containers.Length);
@@ -401,7 +401,7 @@ style myStyle {
 
         ".Trim());
 
-        StyleSheet styleSheet = NewStyleSheetCompiler().Compile(nodes);
+        StyleSheet styleSheet = NewStyleSheetCompiler().Compile("test", nodes);
 
         var styleGroup = styleSheet.styleGroupContainers;
         Assert.AreEqual(1, styleGroup.Length);
@@ -420,7 +420,7 @@ style myStyle {
 
         ".Trim());
 
-        StyleSheet styleSheet = NewStyleSheetCompiler().Compile(nodes);
+        StyleSheet styleSheet = NewStyleSheetCompiler().Compile("test", nodes);
 
         var styleGroup = styleSheet.styleGroupContainers;
         Assert.AreEqual(1, styleGroup.Length);
@@ -439,7 +439,7 @@ style myStyle {
 
         ".Trim());
 
-        StyleSheet styleSheet = NewStyleSheetCompiler().Compile(nodes);
+        StyleSheet styleSheet = NewStyleSheetCompiler().Compile("test", nodes);
 
         var styleGroup = styleSheet.styleGroupContainers;
         Assert.AreEqual(1, styleGroup.Length);
@@ -463,7 +463,7 @@ style myStyle {
 
         ".Trim());
 
-        StyleSheet styleSheet = NewStyleSheetCompiler().Compile(nodes);
+        StyleSheet styleSheet = NewStyleSheetCompiler().Compile("test", nodes);
 
         var styleGroup = styleSheet.styleGroupContainers;
         Assert.AreEqual(1, styleGroup.Length);
@@ -486,7 +486,7 @@ style myStyle {
 }
         ".Trim());
 
-        StyleSheet styleSheet = NewStyleSheetCompiler().Compile(nodes);
+        StyleSheet styleSheet = NewStyleSheetCompiler().Compile("test", nodes);
 
         var styleGroup = styleSheet.styleGroupContainers;
         Assert.AreEqual(1, styleGroup.Length);
@@ -506,7 +506,7 @@ style myStyle {
 }
         ".Trim());
 
-        StyleSheet styleSheet = NewStyleSheetCompiler().Compile(nodes);
+        StyleSheet styleSheet = NewStyleSheetCompiler().Compile("test", nodes);
 
         var styleGroup = styleSheet.styleGroupContainers;
         Assert.AreEqual(1, styleGroup.Length);
@@ -527,7 +527,7 @@ style myStyle {
 }
         ".Trim());
 
-        StyleSheet styleSheet = NewStyleSheetCompiler().Compile(nodes);
+        StyleSheet styleSheet = NewStyleSheetCompiler().Compile("test", nodes);
 
         var styleGroup = styleSheet.styleGroupContainers;
         Assert.AreEqual(1, styleGroup.Length);
@@ -551,7 +551,7 @@ style myStyle {
 }
         ".Trim());
 
-        StyleSheet styleSheet = NewStyleSheetCompiler().Compile(nodes);
+        StyleSheet styleSheet = NewStyleSheetCompiler().Compile("test", nodes);
 
         var styleGroup = styleSheet.styleGroupContainers;
         Assert.AreEqual(1, styleGroup.Length);
@@ -593,7 +593,7 @@ style border5 {
 }
         ".Trim());
 
-        StyleSheet styleSheet = NewStyleSheetCompiler().Compile(nodes);
+        StyleSheet styleSheet = NewStyleSheetCompiler().Compile("test", nodes);
 
         var styleGroup = styleSheet.styleGroupContainers;
         Assert.AreEqual(5, styleGroup.Length);
@@ -655,7 +655,7 @@ style border5 {
 }
         ".Trim());
 
-        StyleSheet styleSheet = NewStyleSheetCompiler().Compile(nodes);
+        StyleSheet styleSheet = NewStyleSheetCompiler().Compile("test", nodes);
 
         var styleGroup = styleSheet.styleGroupContainers;
         Assert.AreEqual(5, styleGroup.Length);
@@ -699,7 +699,7 @@ style trans4 { TransformPositionY = 15ah; }
 
         ".Trim());
 
-        StyleSheet styleSheet = NewStyleSheetCompiler().Compile(nodes);
+        StyleSheet styleSheet = NewStyleSheetCompiler().Compile("test", nodes);
 
         var styleGroup = styleSheet.styleGroupContainers;
         Assert.AreEqual(4, styleGroup.Length);
@@ -744,7 +744,7 @@ style transBeh4 { TransformBehaviorY = AnchorMaxOffset; }
 
         ".Trim());
 
-        StyleSheet styleSheet = NewStyleSheetCompiler().Compile(nodes);
+        StyleSheet styleSheet = NewStyleSheetCompiler().Compile("test", nodes);
 
         var styleGroup = styleSheet.styleGroupContainers;
         Assert.AreEqual(1, styleGroup[0].groups[0].normal.TransformScaleX);
@@ -802,7 +802,7 @@ style size2 {
 
         ".Trim());
 
-        StyleSheet styleSheet = NewStyleSheetCompiler().Compile(nodes);
+        StyleSheet styleSheet = NewStyleSheetCompiler().Compile("test", nodes);
         var styleContainer = styleSheet.styleGroupContainers;
         Assert.AreEqual(new UIMeasurement(1, UIMeasurementUnit.ParentContentArea), styleContainer[0].groups[0].normal.MinWidth);
         Assert.AreEqual(new UIMeasurement(300), styleContainer[0].groups[0].normal.MinHeight);
@@ -840,7 +840,7 @@ style anchoring {
 
         ".Trim());
 
-        StyleSheet styleSheet = NewStyleSheetCompiler().Compile(nodes);
+        StyleSheet styleSheet = NewStyleSheetCompiler().Compile("test", nodes);
         var styleGroup = styleSheet.styleGroupContainers;
         Assert.AreEqual(LayoutType.Fixed, styleGroup[0].groups[0].normal.LayoutType);
         Assert.AreEqual(LayoutBehavior.Ignored, styleGroup[0].groups[0].normal.LayoutBehavior);
@@ -871,7 +871,7 @@ style teXt {
 
         ".Trim());
 
-        StyleSheet styleSheet = NewStyleSheetCompiler().Compile(nodes);
+        StyleSheet styleSheet = NewStyleSheetCompiler().Compile("test", nodes);
         var styleGroup = styleSheet.styleGroupContainers;
         Assert.AreEqual(Color.red, styleGroup[0].groups[0].normal.TextColor);
         Assert.AreEqual("Gotham-Medium SDF", styleGroup[0].groups[0].normal.TextFontAsset.name);
@@ -899,7 +899,7 @@ style xyz {
 }
         ".Trim());
 
-        StyleSheet styleSheet = NewStyleSheetCompiler().Compile(nodes);
+        StyleSheet styleSheet = NewStyleSheetCompiler().Compile("test", nodes);
         var styleGroup = styleSheet.styleGroupContainers;
         Assert.AreEqual(Color.red, styleGroup[0].groups[0].normal.BackgroundColor);
     }

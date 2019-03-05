@@ -17,8 +17,16 @@ namespace UIForia.Compilers.Style {
             this.styleSheetImporter = styleSheetImporter;
         }
 
-        public StyleSheet Compile(LightList<StyleASTNode> rootNodes) {
-            context = new StyleSheetConstantImporter(styleSheetImporter).CreateContext(rootNodes);
+        public StyleSheet Compile(string styleId, LightList<StyleASTNode> rootNodes) {
+            try {
+                context = new StyleSheetConstantImporter(styleSheetImporter).CreateContext(rootNodes);
+            }
+            catch (CompileException e) {
+                e.SetFileName(styleId);
+                throw;
+            }
+
+            context.fileName = styleId;
 
             // todo add imported style groups
 

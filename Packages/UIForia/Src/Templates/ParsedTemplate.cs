@@ -185,10 +185,10 @@ namespace UIForia.Templates {
             }
 
             if (alias == StyleDefinition.k_EmptyAliasName) {
-                throw new ParseException("Unable to find a default style group");
+                throw new ParseException($"Unable to find a default style group. Template: {RootType}");
             }
 
-            throw new ParseException("Unable to find a style with the alias: " + alias);
+            throw new ParseException($"Unable to find a style with the alias: {alias}. Template: {RootType}");
         }
 
         public ParsedTemplate CreateInherited(Type inheritedType, List<string> usings, List<UISlotContentTemplate> contents, List<StyleDefinition> styleDefinitions, List<ImportDeclaration> importDeclarations) {

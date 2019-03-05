@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using UIForia.Attributes;
+using UIForia.Routing;
 using UIForia.Util;
 
 namespace UIForia.Elements {
@@ -21,11 +22,14 @@ namespace UIForia.Elements {
                 int index = attrs[i].name.IndexOf("parameters.", StringComparison.Ordinal);
                 if (index == 0) {
                     //  Expression<string> exp = new ExpressionCompiler(null).Compile<string>(attrs[i].value);
+                    throw new NotImplementedException();
                 }
             }
+            
+            Router gameRouter = Application.RoutingSystem.FindRouter("game");
+            gameRouter.GoTo(path);
 
             ListPool<ElementAttribute>.Release(ref attrs);
-            throw new NotImplementedException();
         }
 
     }
@@ -38,7 +42,8 @@ namespace UIForia.Elements {
 
         [OnMouseClick]
         public void GoBack() {
-            throw new NotImplementedException();
+            Router gameRouter = Application.RoutingSystem.FindRouter("game");
+            gameRouter.GoBack();
         }
 
     }

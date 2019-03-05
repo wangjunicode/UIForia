@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Linq.Expressions;
 using System.Reflection;
+using UIForia.Parsing.Expression;
 
 namespace UIForia.Util {
 
@@ -906,6 +907,7 @@ namespace UIForia.Util {
         public static FieldInfo GetConstantField(Type rootType, string fieldName) {
             return rootType.GetField(fieldName, BindingFlags.Public | BindingFlags.Static | BindingFlags.FlattenHierarchy);
         }
+
     }
 
     public struct ConstructorArguments {

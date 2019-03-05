@@ -4,6 +4,7 @@ using UIForia.AttributeProcessors;
 using UIForia.Bindings;
 using UIForia.Compilers.Style;
 using UIForia.Elements;
+using UIForia.Extensions;
 using UIForia.Parsing.Expression;
 using UIForia.Rendering;
 using UIForia.Routing;
@@ -53,13 +54,16 @@ namespace UIForia {
         public static readonly Application Game = new GameApplication();
         public static readonly List<IAttributeProcessor> s_AttributeProcessors;
         private static readonly Dictionary<Type, bool> s_RequiresUpdateMap;
-
+        
+        internal static readonly Dictionary<string, ISVGXElementPainter> s_CustomPainters;
+        
         public readonly TemplateParser templateParser;
         
         static Application() {
             ArrayPool<UIElement>.SetMaxPoolSize(64);
             s_RequiresUpdateMap = new Dictionary<Type, bool>();
             s_AttributeProcessors = new List<IAttributeProcessor>();
+            s_CustomPainters = new Dictionary<string, ISVGXElementPainter>();
         }
 
         protected Application() {
@@ -489,6 +493,19 @@ namespace UIForia {
                 m_Systems[i].OnAttributeSet(element, attributeName, currentValue, previousValue);
             }
         }
+
+        public static void RegisterCustomPainter(string name, ISVGXElementPainter painter) {
+            s_CustomPainters[name] = painter;
+        }
+
+        public static bool HasCustomPainter(string name) {
+            return s_CustomPainters.ContainsKey(name);
+        }
+
+        public static ISVGXElementPainter GetCustomPainter(string name) {
+            return s_CustomPainters.GetOrDefault(name);
+        }
+        
     }
 
 }

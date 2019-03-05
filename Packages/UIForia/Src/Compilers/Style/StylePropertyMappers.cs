@@ -145,7 +145,7 @@ namespace UIForia.Compilers.Style {
                 {"textshadowtype", (targetStyle, property, context) => targetStyle.TextShadowType = MapEnum<ShadowType>(property.children[0], context)},
                 {"texttransform", (targetStyle, property, context) => targetStyle.TextTransform = MapEnum<TextTransform>(property.children[0], context)},
 
-                {"painter", (targetStyle, property, context) => targetStyle.Painter = MapString(property.children[0], context)},
+                {"painter", (targetStyle, property, context) => targetStyle.Painter = MapPainter(property, context)},
 
                 // Scrollbar
                 {"scrollbar", (targetStyle, property, context) => targetStyle.Scrollbar = MapString(property.children[0], context)},
@@ -160,6 +160,14 @@ namespace UIForia.Compilers.Style {
                 {"shadowsoftnessy", (targetStyle, property, context) => targetStyle.ShadowSoftnessY = MapNumber(property.children[0], context)},
                 {"shadowintensity", (targetStyle, property, context) => targetStyle.ShadowIntensity = MapNumber(property.children[0], context)},
             };
+
+        private static string MapPainter(PropertyNode property, StyleCompileContext context) {
+            string customPainter = MapString(property.children[0], context);
+            if (string.IsNullOrEmpty(customPainter) || !Application.HasCustomPainter(customPainter)) {
+                Debug.Log($"Could not find your custom painter {customPainter} in file {context.fileName}.");
+            }
+            return customPainter;
+        }
 
         private static FontStyle MapTextFontStyle(PropertyNode property, StyleCompileContext context) {
             Text.FontStyle style = Text.FontStyle.Normal;
@@ -204,13 +212,13 @@ namespace UIForia.Compilers.Style {
                         }
 
                         break;
-                    default: throw new CompileException(value, $"Invalid TextFontStyle {value}. " +
+                    default: throw new CompileException(context.fileName, value, $"Invalid TextFontStyle {value}. " +
                            "Make sure you use one of those: bold, italic, highlight, smallcaps, superscript, subscript, underline or strikethrough.");
                 }
             }
 
             if ((style & Text.FontStyle.Superscript) != 0 && (style & Text.FontStyle.Subscript) != 0) {
-                throw new CompileException(property, "Font style cannot be both superscript and subscript");
+                throw new CompileException(context.fileName, property, "Font style cannot be both superscript and subscript");
             }
 
             return style;
@@ -330,15 +338,15 @@ namespace UIForia.Compilers.Style {
                         return new GridTrackSize(number);
                     }
 
-                    throw new CompileException(literalNode, $"Could not create a grid track size out of the value {literalNode}.");
+                    throw new CompileException(context.fileName, literalNode, $"Could not create a grid track size out of the value {literalNode}.");
 
                 case MeasurementNode measurementNode:
-                    GridTemplateUnit unit = MapGridTemplateUnit(measurementNode.unit);
+                    GridTemplateUnit unit = MapGridTemplateUnit(measurementNode.unit, context);
                     float value = MapNumber(measurementNode.value, context);
                     return new GridTrackSize(value, unit);
 
                 default:
-                    throw new CompileException(trackSize, $"Had a hard time parsing that track size: {trackSize}.");
+                    throw new CompileException(context.fileName, trackSize, $"Had a hard time parsing that track size: {trackSize}.");
             }
         }
 
@@ -498,7 +506,7 @@ namespace UIForia.Compilers.Style {
             switch (value) {
                 case MeasurementNode measurementNode:
                     if (TryParseFloat(measurementNode.value.rawValue, out float measurementValue)) {
-                        return new UIMeasurement(measurementValue, MapUnit(measurementNode.unit));
+                        return new UIMeasurement(measurementValue, MapUnit(measurementNode.unit, context));
                     }
 
                     break;
@@ -511,7 +519,7 @@ namespace UIForia.Compilers.Style {
                     break;
             }
 
-            throw new CompileException(value, $"Cannot parse value, expected a numeric literal or measurement {value}.");
+            throw new CompileException(context.fileName, value, $"Cannot parse value, expected a numeric literal or measurement {value}.");
         }
 
         private static UIFixedLength MapFixedLength(StyleASTNode value, StyleCompileContext context) {
@@ -519,7 +527,7 @@ namespace UIForia.Compilers.Style {
             switch (value) {
                 case MeasurementNode measurementNode:
                     if (TryParseFloat(measurementNode.value.rawValue, out float measurementValue)) {
-                        UIFixedUnit unit = MapFixedUnit(measurementNode.unit);
+                        UIFixedUnit unit = MapFixedUnit(measurementNode.unit, context);
                         if (unit == UIFixedUnit.Percent) {
                             measurementValue *= 0.01f;
                         }
@@ -536,10 +544,10 @@ namespace UIForia.Compilers.Style {
                     break;
             }
 
-            throw new CompileException(value, $"Cannot parse value, expected a numeric literal or measurement {value}.");
+            throw new CompileException(context.fileName, value, $"Cannot parse value, expected a numeric literal or measurement {value}.");
         }
 
-        private static UIMeasurementUnit MapUnit(UnitNode unitNode) {
+        private static UIMeasurementUnit MapUnit(UnitNode unitNode, StyleCompileContext context) {
             if (unitNode == null) return UIMeasurementUnit.Pixel;
 
             switch (unitNode.value) {
@@ -565,13 +573,13 @@ namespace UIForia.Compilers.Style {
                     return UIMeasurementUnit.ViewportHeight;
             }
 
-            Debug.LogWarning($"You used a {unitNode.value} in line {unitNode.line} column {unitNode.column} but this unit isn't supported. " +
+            Debug.LogWarning($"You used a {unitNode.value} in line {unitNode.line} column {unitNode.column} in file {context.fileName} but this unit isn't supported. " +
                              "Try px, pca, pcz, em, cnt, aw, ah, vw, vh or lh instead (see UIMeasurementUnit). Will fall back to px.");
 
             return UIMeasurementUnit.Pixel;
         }
 
-        private static UIFixedUnit MapFixedUnit(UnitNode unitNode) {
+        private static UIFixedUnit MapFixedUnit(UnitNode unitNode, StyleCompileContext context) {
             if (unitNode == null) return UIFixedUnit.Pixel;
 
             switch (unitNode.value) {
@@ -589,13 +597,13 @@ namespace UIForia.Compilers.Style {
                     return UIFixedUnit.LineHeight;
             }
 
-            Debug.LogWarning($"You used a {unitNode.value} in line {unitNode.line} column {unitNode.column} but this unit isn't supported. " +
+            Debug.LogWarning($"You used a {unitNode.value} in line {unitNode.line} column {unitNode.column} in file {context.fileName} but this unit isn't supported. " +
                              "Try px, %, em, vw, vh or lh instead (see UIFixedUnit). Will fall back to px.");
 
             return UIFixedUnit.Pixel;
         }
 
-        private static GridTemplateUnit MapGridTemplateUnit(UnitNode unitNode) {
+        private static GridTemplateUnit MapGridTemplateUnit(UnitNode unitNode, StyleCompileContext context) {
             if (unitNode == null) return GridTemplateUnit.Pixel;
 
             switch (unitNode.value) {
@@ -619,7 +627,7 @@ namespace UIForia.Compilers.Style {
                     return GridTemplateUnit.Container;
             }
 
-            Debug.LogWarning($"You used a {unitNode.value} in line {unitNode.line} column {unitNode.column} but this unit isn't supported. " +
+            Debug.LogWarning($"You used a {unitNode.value} in line {unitNode.line} column {unitNode.column} in file {context.fileName} but this unit isn't supported. " +
                              "Try px, mx, mn, em, vw, vh, cca, fr or cnt instead (see GridTemplateUnit). Will fall back to px.");
 
             return GridTemplateUnit.Pixel;
@@ -630,7 +638,7 @@ namespace UIForia.Compilers.Style {
             switch (value) {
                 case MeasurementNode measurementNode:
                     if (TryParseFloat(measurementNode.value.rawValue, out float measurementValue)) {
-                        return new TransformOffset(measurementValue, MapTransformUnit(measurementNode.unit));
+                        return new TransformOffset(measurementValue, MapTransformUnit(measurementNode.unit, context));
                     }
 
                     break;
@@ -643,10 +651,10 @@ namespace UIForia.Compilers.Style {
                     break;
             }
 
-            throw new CompileException(value, $"Cannot parse value, expected a numeric literal or measurement {value}.");
+            throw new CompileException(context.fileName, value, $"Cannot parse value, expected a numeric literal or measurement {value}.");
         }
 
-        private static TransformUnit MapTransformUnit(UnitNode unitNode) {
+        private static TransformUnit MapTransformUnit(UnitNode unitNode, StyleCompileContext context) {
             if (unitNode == null) return TransformUnit.Pixel;
 
             switch (unitNode.value) {
@@ -692,7 +700,7 @@ namespace UIForia.Compilers.Style {
                     return TransformUnit.ScreenHeight;
             }
 
-            Debug.LogWarning($"You used a {unitNode.value} in line {unitNode.line} column {unitNode.column} but this unit isn't supported. " +
+            Debug.LogWarning($"You used a {unitNode.value} in line {unitNode.line} column {unitNode.column} in file {context.fileName} but this unit isn't supported. " +
                              "Try px, w, h, alw, alh, cw, ch, em, caw, cah, aw, ah, vw, vh, pw, ph, pcaw, pcah, sw, or sh instead (see TransformUnit). Will fall back to px.");
 
             return TransformUnit.Pixel;
@@ -726,7 +734,7 @@ namespace UIForia.Compilers.Style {
                     break;
             }
 
-            throw new CompileException(node, $"Expected url(path/to/texture) but found {node}.");
+            throw new CompileException(context.fileName, node, $"Expected url(path/to/texture) but found {node}.");
         }
 
         private static TMP_FontAsset MapFont(StyleASTNode node, StyleCompileContext context) {
@@ -744,7 +752,7 @@ namespace UIForia.Compilers.Style {
                     break;
             }
 
-            throw new CompileException(node, $"Expected url(path/to/font) but found {node}.");
+            throw new CompileException(context.fileName, node, $"Expected url(path/to/font) but found {node}.");
         }
 
         private static string TransformUrlNode(UrlNode urlNode, StyleCompileContext context) {
@@ -762,7 +770,7 @@ namespace UIForia.Compilers.Style {
         }
 
         private static Color MapColor(PropertyNode property, StyleCompileContext context) {
-            AssertSingleValue(property.children);
+            AssertSingleValue(property.children, context);
 
             var styleAstNode = context.GetValueForReference(property.children[0]);
             switch (styleAstNode) {
@@ -774,7 +782,7 @@ namespace UIForia.Compilers.Style {
                 case RgbaNode rgbaNode: return MapRbgaNodeToColor(rgbaNode, context);
                 case RgbNode rgbNode: return MapRgbNodeToColor(rgbNode, context);
                 default:
-                    throw new CompileException(styleAstNode, $"Unsupported color value.");
+                    throw new CompileException(context.fileName, styleAstNode, "Unsupported color value.");
             }
         }
 
@@ -809,7 +817,7 @@ namespace UIForia.Compilers.Style {
                 }
             }
 
-            throw new CompileException(node, $"Expected a numeric value but all I got was this lousy {node}");
+            throw new CompileException(context.fileName,node, $"Expected a numeric value but all I got was this lousy {node}");
         }
 
         private static string MapString(StyleASTNode node, StyleCompileContext context) {
@@ -823,7 +831,7 @@ namespace UIForia.Compilers.Style {
                 return literalNode.rawValue;
             }
 
-            throw new CompileException(node, $"Expected a string value but all I got was this lousy {node}");
+            throw new CompileException(context.fileName,node, $"Expected a string value but all I got was this lousy {node}");
         }
 
         public static void MapProperty(UIStyle targetStyle, PropertyNode node, StyleCompileContext context) {
@@ -838,7 +846,7 @@ namespace UIForia.Compilers.Style {
 
             mappers.TryGetValue(propertyKey, out Action<UIStyle, PropertyNode, StyleCompileContext> action);
             action?.Invoke(targetStyle, node, context);
-            if (action == null) Debug.LogWarning($"{propertyKey} is an unknown style property.");
+            if (action == null) Debug.LogWarning($"{propertyKey} at column {node.column} line {node.line} in file {context.fileName} is an unknown style property.");
         }
 
         private static T MapEnum<T>(StyleASTNode node, StyleCompileContext context) where T : struct {
@@ -850,7 +858,7 @@ namespace UIForia.Compilers.Style {
                 }
             }
 
-            throw new CompileException(node, $"Expected a proper {typeof(T).Name} value, which must be one of " +
+            throw new CompileException(context.fileName, node, $"Expected a proper {typeof(T).Name} value, which must be one of " +
                                              $"{EnumValues(typeof(T))} and your " +
                                              $"value {node} does not match any of them.");
         }
@@ -859,9 +867,9 @@ namespace UIForia.Compilers.Style {
            return float.TryParse(input, NumberStyles.Float, CultureInfo.InvariantCulture, out result);
         }
 
-        private static void AssertSingleValue(LightList<StyleASTNode> propertyValues) {
+        private static void AssertSingleValue(LightList<StyleASTNode> propertyValues, StyleCompileContext context) {
             if (propertyValues.Count > 1) {
-                throw new CompileException(propertyValues[1], "Found too many values.");
+                throw new CompileException(context.fileName, propertyValues[1], "Found too many values.");
             }
         }
     }

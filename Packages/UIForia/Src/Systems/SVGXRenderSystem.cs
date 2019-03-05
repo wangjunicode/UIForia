@@ -35,30 +35,8 @@ namespace UIForia.Systems {
             this.layoutSystem = layoutSystem;
         }
 
-
         public void OnReset() {
             this.views.Clear();
-        }
-
-        public class ElementRenderData {
-
-            public UIElement element;
-            public Color32 backgroundColor;
-            public Color32 borderColor;
-            public Texture2D backgroundImage;
-            public float opacity;
-            public SVGXMatrix matrix;
-            public CullResult cullResult;
-            public int elementType;
-
-            public Action<ImmediateRenderContext, UIElement> customShape;
-
-            public bool isTextElement;
-            public BorderType borderType;
-
-            public ElementRenderData parent;
-            public ElementRenderData nextSibling;
-
         }
 
         public void OnUpdate() {
@@ -106,16 +84,25 @@ namespace UIForia.Systems {
 
                 LayoutResult layoutResult = current.layoutResult;
 
-
                 // todo -- if no paint properties are set, don't draw (ie no bg, no colors, no border, etc)
 
                 // todo -- opacity will need to be inherited
 
-                Vector2 pivot = Vector2.zero;//new Vector2(0.5f, 0.5f); //layoutResult.pivot);layoutResult.pivot; // [0, 1]
+                Vector2 pivot = layoutResult.pivot;
 
                 Vector2 offset = new Vector2(layoutResult.actualSize.width * pivot.x, layoutResult.actualSize.height * pivot.y);
                 SVGXMatrix matrix = SVGXMatrix.TRS(layoutResult.screenPosition + offset, layoutResult.rotation, Vector2.one);
 
+                string painterName = current.style.Painter;
+                if (painterName != string.Empty) {
+                    ctx.BeginPath();
+                    ISVGXElementPainter painter = Application.GetCustomPainter(painterName);
+                    ctx.SetTransform(SVGXMatrix.identity);
+                    painter?.Paint(current, ctx, matrix);
+                    // restore?
+                    continue;
+                }
+                
                 ctx.SetTransform(matrix);
 
                 if (current is UITextElement textElement) {
@@ -124,12 +111,8 @@ namespace UIForia.Systems {
                     ctx.SetFill(textElement.style.TextColor);
                     ctx.Fill();
                 }
-//                else if (current.customPainter != null) {
-//                    ctx.BeginPath();
-//                    current.customShape(ctx, current.element);
-//                    // restore?
-//                }
                 else {
+                    
                     ctx.BeginPath();
 
                     OffsetRect borderRect = layoutResult.border;
@@ -142,7 +125,6 @@ namespace UIForia.Systems {
                     bool hasBorder = border.x > 0 || border.y > 0 || border.z > 0 || border.w > 0;
 
                     if (resolveBorderRadius == Vector4.zero) {
-                        //ctx.Rect(-offset.x, -offset.y, layoutResult.actualSize.width - borderRect.Horizontal, layoutResult.actualSize.height - borderRect.Vertical);
                         ctx.Rect(borderRect.left - offset.x, borderRect.top - offset.y, layoutResult.actualSize.width - borderRect.Horizontal, layoutResult.actualSize.height - borderRect.Vertical);
 
                         if (!hasBorder) {
@@ -153,7 +135,7 @@ namespace UIForia.Systems {
                                 DrawNormalFill(current);
                                 ctx.SetStrokePlacement(StrokePlacement.Outside);
                                 ctx.SetStrokeWidth(border.x);
-                                ctx.SetStrokeColor(current.style.BorderColor);
+                                ctx.SetStroke(current.style.BorderColor);
                                 ctx.Stroke();
                             }
                             else {
@@ -162,7 +144,7 @@ namespace UIForia.Systems {
 //                                ctx.SetUVBounds();
                                 ctx.SetStrokeOpacity(1f);
                                 ctx.SetStrokePlacement(StrokePlacement.Inside);
-                                ctx.SetStrokeColor(current.style.BorderColor);
+                                ctx.SetStroke(current.style.BorderColor);
                                 ctx.SetFill(current.style.BorderColor);
 
                                 // todo this isn't really working correctly,
@@ -201,7 +183,7 @@ namespace UIForia.Systems {
                         DrawNormalFill(current);
                         if (hasBorder) {
                             ctx.SetStrokeWidth(borderRect.top);
-                            ctx.SetStrokeColor(current.style.BorderColor);
+                            ctx.SetStroke(current.style.BorderColor);
                             ctx.Stroke();
                         }
                     }

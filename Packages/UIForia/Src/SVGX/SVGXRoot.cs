@@ -65,7 +65,7 @@ namespace SVGX {
 
             ctx.Clear();
 
-            ctx.SetStrokeColor(tintColor);
+            ctx.SetStroke(tintColor);
             ctx.SetStrokeWidth(strokeWidth);
             ctx.SetStrokePlacement(strokePlacement);
             ctx.SetStrokeOpacity(strokeOpacity);

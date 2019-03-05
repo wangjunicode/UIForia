@@ -41,8 +41,13 @@ namespace SVGX {
         private SVGXMatrix currentMatrix;
         private SVGXStyle currentStyle;
         private RangeInt currentShapeRange;
-        private SVGXGradient currentGradient;
-        private Texture2D currentTexture;
+        
+        private SVGXGradient currentFillGradient;
+        private Texture2D currentFillTexture;
+        
+        private Texture2D currentStrokeTexture;
+        private SVGXGradient currentStrokeGradient;
+        
         private StrokeMode strokeMode;
 
         public ImmediateRenderContext() {
@@ -63,37 +68,57 @@ namespace SVGX {
         }
 
         public void SetFill(Color color) {
-            currentStyle.fillMode = FillMode.Color;
+            currentStyle.fillColorMode = ColorMode.Color;
             currentStyle.fillColor = color;
         }
 
         public void SetFill(SVGXGradient gradient) {
-            currentStyle.fillMode = FillMode.Gradient;
-            currentGradient = gradient;
+            currentStyle.fillColorMode = ColorMode.Gradient;
+            currentFillGradient = gradient;
         }
 
         public void SetFill(Texture2D texture, Color tintColor) {
-            currentStyle.fillMode = FillMode.TextureTint;
+            currentStyle.fillColorMode = ColorMode.TextureTint;
             currentStyle.fillTintColor = tintColor;
-            currentTexture = texture;
+            currentFillTexture = texture;
         }
 
         public void SetFill(Texture2D texture, SVGXGradient gradient) {
-            currentStyle.fillMode = FillMode.TextureGradient;
-            currentStyle.gradientId = gradient.id;
-            currentTexture = texture;
-            currentGradient = gradient;
+            currentStyle.fillColorMode = ColorMode.TextureGradient;
+            currentStyle.fillGradientId = gradient.id;
+            currentFillTexture = texture;
+            currentFillGradient = gradient;
         }
 
         public void SetFill(Texture2D texture) {
-            currentStyle.fillMode = FillMode.Texture;
+            currentStyle.fillColorMode = ColorMode.Texture;
             currentStyle.fillTintColor = Color.white;
-            currentStyle.textureId = texture.GetInstanceID();
-            currentTexture = texture;
+            currentStyle.fillTextureId = texture.GetInstanceID();
+            currentFillTexture = texture;
         }
 
-        public void SetStrokeColor(Color color) {
-            this.currentStyle.strokeColor = color;
+        public void SetStroke(Color color) {
+            currentStyle.strokeColorMode = ColorMode.Color;
+            currentStyle.strokeColor = color;
+        }
+
+        public void SetStroke(SVGXGradient gradient) {
+            currentStyle.strokeColorMode = ColorMode.Gradient;
+            currentStrokeGradient = gradient;
+        }
+        
+        public void SetStroke(Texture2D texture, SVGXGradient gradient) {
+            currentStyle.strokeColorMode = ColorMode.TextureGradient;
+            currentStyle.strokeGradientId = gradient.id;
+            currentStrokeTexture = texture;
+            currentStrokeGradient = gradient;
+        }
+        
+        public void SetStroke(Texture2D texture) {
+            currentStyle.strokeColorMode = ColorMode.Texture;
+            currentStyle.strokeTintColor = Color.white;
+            currentStyle.strokeTextureId = texture.GetInstanceID();
+            currentStrokeTexture = texture;
         }
 
         public void MoveTo(float x, float y) {
@@ -378,20 +403,20 @@ namespace SVGX {
         }
 
         public void Fill() {
-            if ((currentStyle.fillMode & FillMode.Texture) != 0) {
-                if (!textures.Contains(currentTexture)) {
-                    textures.Add(currentTexture);
+            if ((currentStyle.fillColorMode & ColorMode.Texture) != 0) {
+                if (!textures.Contains(currentFillTexture)) {
+                    textures.Add(currentFillTexture);
                 }
 
-                currentStyle.textureId = currentTexture.GetInstanceID();
+                currentStyle.fillTextureId = currentFillTexture.GetInstanceID();
             }
 
-            if ((currentStyle.fillMode & FillMode.Gradient) != 0) {
-                if (!gradients.Contains(currentGradient)) {
-                    gradients.Add(currentGradient);
+            if ((currentStyle.fillColorMode & ColorMode.Gradient) != 0) {
+                if (!gradients.Contains(currentFillGradient)) {
+                    gradients.Add(currentFillGradient);
                 }
 
-                currentStyle.gradientId = currentGradient.id;
+                currentStyle.fillGradientId = currentFillGradient.id;
             }
 
             int clipId = clipStack.Count > 0 ? clipStack.Peek() : -1;
@@ -404,6 +429,22 @@ namespace SVGX {
         }
 
         public void Stroke() {
+            if ((currentStyle.strokeColorMode & ColorMode.Texture) != 0) {
+                if (!textures.Contains(currentStrokeTexture)) {
+                    textures.Add(currentStrokeTexture);
+                }
+
+                currentStyle.strokeTextureId = currentStrokeTexture.GetInstanceID();
+            }
+
+            if ((currentStyle.strokeColorMode & ColorMode.Gradient) != 0) {
+                if (!gradients.Contains(currentStrokeGradient)) {
+                    gradients.Add(currentStrokeGradient);
+                }
+
+                currentStyle.strokeGradientId = currentStrokeGradient.id;
+            }
+
             int clipId = clipStack.Count > 0 ? clipStack.Peek() : -1;
             drawCalls.Add(new SVGXDrawCall(DrawCallType.StandardStroke, clipId, currentStyle, currentMatrix, currentShapeRange));
         }

@@ -544,7 +544,7 @@ namespace UIForia {
         }
 
         public UIView GetView(int i) {
-            if (i < 0 || i > m_Views.Count) return null;
+            if (i < 0 || i >= m_Views.Count) return null;
             return m_Views[i];
         }
 

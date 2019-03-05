@@ -623,7 +623,7 @@ namespace UIForia.Editor {
                     return DrawEnum<Visibility>(property, isEditable);
 
                 case StylePropertyId.Painter:
-                    return DrawEnum<FillType>(property, isEditable);
+                    return DrawString(property, isEditable);
 
 //                case StylePropertyId.BackgroundGridSize:
 //                case StylePropertyId.BackgroundLineSize:
@@ -862,6 +862,14 @@ namespace UIForia.Editor {
             float value = EditorGUILayout.IntField(s_Content, property.AsInt);
             GUI.enabled = true;
             return isEditable ? new StyleProperty(property.propertyId, value) : property;
+        }
+
+        private static StyleProperty DrawString(StyleProperty property, bool isEditable) {
+            s_Content.text = StyleUtil.GetPropertyName(property);
+            GUI.enabled = isEditable;
+            string value = EditorGUILayout.TextField(s_Content, property.AsString);
+            GUI.enabled = true;
+            return isEditable ? new StyleProperty(property.propertyId, 0, 0, value) : property;
         }
 
         private static StyleProperty DrawFloat(StyleProperty property, bool isEditable) {

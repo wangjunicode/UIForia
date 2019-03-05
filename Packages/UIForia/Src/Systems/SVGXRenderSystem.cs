@@ -40,27 +40,6 @@ namespace UIForia.Systems {
             this.views.Clear();
         }
 
-        public class ElementRenderData {
-
-            public UIElement element;
-            public Color32 backgroundColor;
-            public Color32 borderColor;
-            public Texture2D backgroundImage;
-            public float opacity;
-            public SVGXMatrix matrix;
-            public CullResult cullResult;
-            public int elementType;
-
-            public Action<ImmediateRenderContext, UIElement> customShape;
-
-            public bool isTextElement;
-            public BorderType borderType;
-
-            public ElementRenderData parent;
-            public ElementRenderData nextSibling;
-
-        }
-
         public void OnUpdate() {
             ctx.Clear();
 
@@ -153,7 +132,7 @@ namespace UIForia.Systems {
                                 DrawNormalFill(current);
                                 ctx.SetStrokePlacement(StrokePlacement.Outside);
                                 ctx.SetStrokeWidth(border.x);
-                                ctx.SetStrokeColor(current.style.BorderColor);
+                                ctx.SetStroke(current.style.BorderColor);
                                 ctx.Stroke();
                             }
                             else {
@@ -162,7 +141,7 @@ namespace UIForia.Systems {
 //                                ctx.SetUVBounds();
                                 ctx.SetStrokeOpacity(1f);
                                 ctx.SetStrokePlacement(StrokePlacement.Inside);
-                                ctx.SetStrokeColor(current.style.BorderColor);
+                                ctx.SetStroke(current.style.BorderColor);
                                 ctx.SetFill(current.style.BorderColor);
 
                                 // todo this isn't really working correctly,
@@ -201,7 +180,7 @@ namespace UIForia.Systems {
                         DrawNormalFill(current);
                         if (hasBorder) {
                             ctx.SetStrokeWidth(borderRect.top);
-                            ctx.SetStrokeColor(current.style.BorderColor);
+                            ctx.SetStroke(current.style.BorderColor);
                             ctx.Stroke();
                         }
                     }

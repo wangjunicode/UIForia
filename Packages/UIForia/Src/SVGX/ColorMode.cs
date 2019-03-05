@@ -3,7 +3,7 @@ using System;
 namespace SVGX {
 
     [Flags]
-    public enum FillMode {
+    public enum ColorMode {
 
         Color = 0,
         Texture = 1 << 0,

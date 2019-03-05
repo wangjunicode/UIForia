@@ -7,7 +7,6 @@ using UIForia.Elements;
 using UIForia.Layout;
 using UIForia.Layout.LayoutTypes;
 using UIForia.Rendering;
-using UIForia.Systems;
 using UIForia.Text;
 using UIForia.Util;
 using UnityEditor;
@@ -20,7 +19,6 @@ namespace UIForia.Editor {
 
         private UIElement selectedElement;
         private Vector2 scrollPosition;
-        private UIView view;
         private bool drawDebugBox;
         private Color overlayColor;
         private Vector3 drawPos;
@@ -49,6 +47,7 @@ namespace UIForia.Editor {
         private Mesh mesh;
         private Material material;
         private int tab;
+        private Application app;
 
         public static readonly string[] s_TabNames = {
             "Element",
@@ -58,26 +57,23 @@ namespace UIForia.Editor {
         };
 
         public void Update() {
-            if (UIForiaHierarchyWindow.UIView != null) {
-                if (view == null) {
-                    view = UIForiaHierarchyWindow.UIView;
-                    view.Application.RenderSystem.DrawDebugOverlay += DrawDebugOverlay;
-                }
-            }
-            else {
-                if (view != null) {
-                    view.Application.RenderSystem.DrawDebugOverlay -= DrawDebugOverlay;
-                    view = null;
-                }
+            if (!EditorApplication.isPlaying) {
+                return;
             }
 
-            if (UIForiaHierarchyWindow.SelectedElement != selectedElement) {
-                selectedElement = UIForiaHierarchyWindow.SelectedElement != null
-                    ? UIForiaHierarchyWindow.SelectedElement
-                    : null;
+            if (app != UIForiaHierarchyWindow.s_SelectedApplication) {
+                if (app != null) {
+                    app.RenderSystem.DrawDebugOverlay -= DrawDebugOverlay;
+                }
+
+                app = UIForiaHierarchyWindow.s_SelectedApplication;
+                if (app != null) {
+                    app.RenderSystem.DrawDebugOverlay += DrawDebugOverlay;
+                }
                 m_ExpandedMap.Clear();
-                Repaint();
             }
+
+            Repaint();
         }
 
         private bool showAllComputedStyles;
@@ -257,9 +253,9 @@ namespace UIForia.Editor {
                 Vector3 renderPosition = data.renderPosition;
                 renderPosition.z = 5;
 
-                OffsetRect padding = view.Application.LayoutSystem.GetPaddingRect(selectedElement);
-                OffsetRect margin = view.Application.LayoutSystem.GetMarginRect(selectedElement);
-                OffsetRect border = view.Application.LayoutSystem.GetBorderRect(selectedElement);
+                OffsetRect padding = app.LayoutSystem.GetPaddingRect(selectedElement);
+                OffsetRect margin = app.LayoutSystem.GetMarginRect(selectedElement);
+                OffsetRect border = app.LayoutSystem.GetBorderRect(selectedElement);
 
                 float width = result.actualSize.width;
                 float height = result.actualSize.height;
@@ -306,7 +302,7 @@ namespace UIForia.Editor {
                     Quaternion.identity, material, 0, camera, 0, null, false, false, false);
 
                 // todo highlight underflow scenarios, visualize this somehow
-                
+
                 if (selectedElement is UITextElement && (showTextBaseline || showTextDescender)) {
                     baselineMesh = MeshUtil.ResizeStandardUIMesh(baselineMesh, new Size(width, height + 100));
                     UIStyleSet style = selectedElement.style;
@@ -458,7 +454,7 @@ namespace UIForia.Editor {
 
             GUILayout.Space(16);
 
-            OffsetRect margin = view.Application.LayoutSystem.GetMarginRect(selectedElement);
+            OffsetRect margin = app.LayoutSystem.GetMarginRect(selectedElement);
             DrawLabel("Margin Top", margin.top.ToString());
             DrawLabel("Margin Right", margin.right.ToString());
             DrawLabel("Margin Bottom", margin.bottom.ToString());
@@ -466,7 +462,7 @@ namespace UIForia.Editor {
 
             GUILayout.Space(16);
 
-            OffsetRect border = view.Application.LayoutSystem.GetBorderRect(selectedElement);
+            OffsetRect border = app.LayoutSystem.GetBorderRect(selectedElement);
 
             DrawLabel("Border Top", border.top.ToString());
             DrawLabel("Border Right", border.right.ToString());
@@ -475,7 +471,7 @@ namespace UIForia.Editor {
 
             GUILayout.Space(16);
 
-            OffsetRect padding = view.Application.LayoutSystem.GetPaddingRect(selectedElement);
+            OffsetRect padding = app.LayoutSystem.GetPaddingRect(selectedElement);
             DrawLabel("Padding Top", padding.top.ToString());
             DrawLabel("Padding Right", padding.right.ToString());
             DrawLabel("Padding Bottom", padding.bottom.ToString());
@@ -551,6 +547,14 @@ namespace UIForia.Editor {
 
         public void OnGUI() {
             EditorGUIUtility.wideMode = true;
+
+            if (app == null) {
+                return;
+            }
+
+            int elementId = UIForiaHierarchyWindow.s_SelectedElementId;
+
+            selectedElement = app.GetElement(elementId);
 
             if (selectedElement == null) {
                 GUILayout.Label("Select an element in the UIForia Hierarchy Window");
@@ -829,7 +833,7 @@ namespace UIForia.Editor {
             GUI.enabled = true;
             return isEditable ? new StyleProperty(property.propertyId, values[output]) : property;
         }
-        
+
         private static StyleProperty DrawEnum<T>(StyleProperty property, bool isEditable) {
             s_Content.text = StyleUtil.GetPropertyName(property);
             GUI.enabled = isEditable;

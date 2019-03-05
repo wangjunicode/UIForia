@@ -16,6 +16,7 @@ namespace UIForia {
 
     public abstract class Application {
 
+        public readonly string id;
         private static int ElementIdGenerator;
         public static int NextElementId => ElementIdGenerator++;
 
@@ -48,21 +49,34 @@ namespace UIForia {
         public event Action<UIView> onViewAdded;
         public event Action<UIView> onViewRemoved;
 
+        public static event Action<Application> onApplicationCreated;
+        public static event Action<Application> onApplicationDestroyed;
+
         protected readonly List<UIView> m_Views;
 
-        public static readonly Application Game = new GameApplication();
         public static readonly List<IAttributeProcessor> s_AttributeProcessors;
         private static readonly Dictionary<Type, bool> s_RequiresUpdateMap;
 
         public readonly TemplateParser templateParser;
-        
+
+        private static readonly LightList<Application> s_ApplicationList;
+
         static Application() {
             ArrayPool<UIElement>.SetMaxPoolSize(64);
             s_RequiresUpdateMap = new Dictionary<Type, bool>();
             s_AttributeProcessors = new List<IAttributeProcessor>();
+            s_ApplicationList = new LightList<Application>();
         }
 
-        protected Application() {
+        protected Application(string id) {
+            this.id = id;
+
+            if (s_ApplicationList.Find(id, (app, _id) => app.id == _id) != null) {
+                throw new Exception($"Applications must have a unique id. Id {id} was already taken.");
+            }
+
+            s_ApplicationList.Add(this);
+            
             this.m_Systems = new List<ISystem>();
             this.m_ElementTree = new SkipTree<UIElement>();
             this.m_Views = new List<UIView>();
@@ -74,7 +88,7 @@ namespace UIForia {
             m_InputSystem = new DefaultInputSystem(m_LayoutSystem, m_StyleSystem);
             m_RenderSystem = new SVGXRenderSystem(null, m_LayoutSystem);
             m_RoutingSystem = new RoutingSystem();
-           
+
             styleImporter = new StyleSheetImporter(this);
             templateParser = new TemplateParser(this);
 
@@ -84,6 +98,9 @@ namespace UIForia {
             m_Systems.Add(m_InputSystem);
             m_Systems.Add(m_LayoutSystem);
             m_Systems.Add(m_RenderSystem);
+            
+            onApplicationCreated?.Invoke(this);
+            
         }
 
         public IStyleSystem StyleSystem => m_StyleSystem;
@@ -180,11 +197,11 @@ namespace UIForia {
             m_ElementTree.TraversePreOrder((el) => el.OnDestroy());
 
             m_ElementTree.Clear();
-            
+
             templateParser.Reset();
             styleImporter.Reset();
             ResourceManager.Reset(); // todo use 1 instance per application
-            
+
             for (int i = 0; i < m_Views.Count; i++) {
                 m_Views[i].Refresh();
                 RegisterElement(m_Views[i].RootElement);
@@ -197,6 +214,32 @@ namespace UIForia {
             onRefresh?.Invoke();
             onNextRefresh?.Invoke();
             onNextRefresh = null;
+        }
+
+        public void Destroy() {
+            onApplicationDestroyed?.Invoke(this);
+            onDestroy?.Invoke();
+
+            foreach (ISystem system in m_Systems) {
+                system.OnDestroy();
+            }
+
+            foreach (UIView view in m_Views) {
+                view.Destroy();
+            }
+
+            m_ElementTree.Clear();
+            onRefresh = null;
+            onNextRefresh = null;
+            onReady = null;
+            onUpdate = null;
+            onDestroy = null;
+            onNextRefresh = null;
+            onElementCreated = null;
+            onElementEnabled = null;
+            onElementDisabled = null;
+            onElementDestroyed = null;
+            onElementRegistered = null;
         }
 
         protected void InitHierarchy(UIElement element) {
@@ -212,7 +255,7 @@ namespace UIForia {
 
                 element.view = element.parent.view;
                 element.depth = element.parent.depth + 1;
-            }          
+            }
 
             m_ElementTree.AddItem(element);
             Type elementType = element.GetType();
@@ -489,6 +532,22 @@ namespace UIForia {
                 m_Systems[i].OnAttributeSet(element, attributeName, currentValue, previousValue);
             }
         }
+
+        public static void RefreshAll() {
+            for (int i = 0; i < s_ApplicationList.Count; i++) {
+                s_ApplicationList[i].Refresh();
+            }
+        }
+
+        public UIView GetView(int i) {
+            if (i < 0 || i > m_Views.Count) return null;
+            return m_Views[i];
+        }
+
+        public static Application Find(string appId) {
+            return s_ApplicationList.Find(appId, (app, _id) => app.id == _id);
+        }
+
     }
 
 }

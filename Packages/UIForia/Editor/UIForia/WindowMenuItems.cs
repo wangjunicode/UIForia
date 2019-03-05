@@ -18,7 +18,7 @@ namespace UIForia.Editor {
 
         [MenuItem("UIForia/Refresh UI Templates %g")]
         public static void Refresh() {            
-            Application.Game.Refresh();
+            Application.RefreshAll();
             
         }
     }

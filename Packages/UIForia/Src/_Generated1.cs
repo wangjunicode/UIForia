@@ -1367,8 +1367,10 @@ namespace UIForia.Rendering {
         public float TextOutlineWidth {
             [System.Diagnostics.DebuggerStepThrough]
             get { return FindFloatProperty(StylePropertyId.TextOutlineWidth); }
-            [System.Diagnostics.DebuggerStepThrough]
-            set { SetProperty(new StyleProperty(StylePropertyId.TextOutlineWidth, value)); }
+//            [System.Diagnostics.DebuggerStepThrough]
+            set {
+                SetProperty(new StyleProperty(StylePropertyId.TextOutlineWidth, value));
+            }
         }
             
         public UnityEngine.Color TextOutlineColor {

@@ -44,8 +44,8 @@ inline float4 EncodeToFloat4(float v) {
           
 v2f TextVertex(appdata input) {
            
-    float outlineWidth = input.uv2.y;
-    float outlineSoftness = input.uv2.z;
+    float outlineWidth = input.uv2.x;
+    float outlineSoftness = 0;//input.uv2.y;
     
     float4 vPosition = UnityObjectToClipPos(input.vertex);
     float2 pixelSize = vPosition.w;
@@ -75,12 +75,9 @@ v2f TextVertex(appdata input) {
     float x = -(_UnderlayOffsetX *  gScaleRatioC) * gGradientScale / gFontTextureWidth;
     float y = -(_UnderlayOffsetY *  gScaleRatioC) * gGradientScale / gFontTextureHeight;
     float2 bOffset = float2(x, y);
-    
-    uint data = uint(input.uv2.x);
-    
+        
     // todo this works but ignores alpha. better to pack with 3 bits and alpha separate. can combine multiple alphas into one
-    float4 c = EncodeToFloat4(input.uv2.x);
-    c.a = 1;
+    float4 outlineColor = input.uv3;
     
     v2f o;
     o.vertex = vPosition;
@@ -90,7 +87,7 @@ v2f TextVertex(appdata input) {
     o.fragData1 = float4(outlineWidth, outlineSoftness, input.uv2.x, 0);
     o.fragData2 =  float4(alphaClip, scale, bias, weight);
     o.fragData3 = float4(0, 0, 0, 0); 
-    o.secondaryColor = c;
+    o.secondaryColor = outlineColor;
     
     return o;
 }

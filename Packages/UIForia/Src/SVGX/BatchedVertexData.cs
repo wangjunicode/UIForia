@@ -426,13 +426,9 @@ namespace SVGX {
 
                     SVGXTextStyle textStyle = textInfo.spanInfos[0].textStyle;
 
-                    // todo -- 255 or 1 does not work as color value, clamp to 0.99999 or it will drop to zero
-                    Color32 outlineColor = textStyle.outlineColor;
 
                     float outlineWidth = Mathf.Clamp01(textStyle.outlineWidth);
                     float outlineSoftness = textStyle.outlineSoftness;
-
-                    float oc = EncodeColor(outlineColor);
 
                     Color32 underlayColor = Color.white;
                     float underlayOffsetX = 0;
@@ -447,9 +443,10 @@ namespace SVGX {
 
                     int isStroke = 0;
 
-                    Vector4 outline = new Vector4(oc, outlineWidth, outlineSoftness, 0);
-
+                    Vector4 outline = new Vector4(outlineWidth, outlineSoftness, 0, 0);
+                    
                     Color textColor = textStyle.color;
+                    Color outlineColor = textStyle.outlineColor;
                     
                     for (int i = 0; i < charCount; i++) {
                         if (charInfos[i].character == ' ') continue;
@@ -476,10 +473,10 @@ namespace SVGX {
                         uv2List.Add(outline);
                         uv2List.Add(outline);
 
-                        uv3List.Add(new Vector4());
-                        uv3List.Add(new Vector4());
-                        uv3List.Add(new Vector4());
-                        uv3List.Add(new Vector4());
+                        uv3List.Add(outlineColor);
+                        uv3List.Add(outlineColor);
+                        uv3List.Add(outlineColor);
+                        uv3List.Add(outlineColor);
 
                         uv4List.Add(new Vector4());
                         uv4List.Add(new Vector4());

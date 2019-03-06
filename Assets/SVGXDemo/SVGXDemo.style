@@ -1,9 +1,10 @@
 style container {
     PreferredSize = 600px;
-    BackgroundColor = yellow;
+//    BackgroundColor = red;
     PaddingLeft = 10px;
-    TextColor = red;
-    TextFontSize = 24;
+    TextColor = white;
+    TextFontSize = 36;
+    TextOutlineWidth = 0.15;
 }
 
 style group1 {
@@ -23,6 +24,7 @@ style group2 {
     BorderRadius = 35%;
     Border = 12px;
     BorderColor = green;
+    
 //    BackgroundImage = url("Images/backgroundimg"); 
 //    BorderTop = 20px;
 //    BorderRight = 8px;

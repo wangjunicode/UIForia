@@ -98,6 +98,9 @@ namespace UIForia.Elements {
                 fontStyle = style.TextFontStyle,
                 alignment = style.TextAlignment,
                 whitespaceMode = WhitespaceMode.Wrap,
+                outlineColor = style.TextOutlineColor,
+                outlineWidth = style.TextOutlineWidth,
+                outlineSoftness = 0.01f,//style.TextOutlineSoftness
                 // todo -- glow styles etc
             };
             textInfo = TextUtil.CreateTextInfo(new TextUtil.TextSpan(style.TextFontAsset, textStyle, text));

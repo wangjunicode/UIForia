@@ -111,15 +111,15 @@ namespace UIForia.Elements {
             if (!hasFocus) return;
 
             if (selectionRange != previousSelectionRange) {
-                if (textElement.text.Length > 0) {
-                    if (selectionRange.HasSelection) {
-                        highlight.SetEnabled(true);
-                        highlight.MarkGeometryDirty();
-                    }
-                    else {
-                        highlight.SetEnabled(false);
-                    }
-                }
+//                if (textElement.text.Length > 0) {
+//                    if (selectionRange.HasSelection) {
+//                        highlight.SetEnabled(true);
+//                        highlight.MarkGeometryDirty();
+//                    }
+//                    else {
+//                        highlight.SetEnabled(false);
+//                    }
+//                }
 
                 blinkStartTime = Time.unscaledTime;
                 previousSelectionRange = selectionRange;
@@ -135,7 +135,7 @@ namespace UIForia.Elements {
             }
 
             caret.style.SetBackgroundColor(Color.black, StyleState.Normal);
-            caret.SetEnabled(blinkState);
+//            caret.SetEnabled(blinkState);
             canSetCaret = true;
         }
 

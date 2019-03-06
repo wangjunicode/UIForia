@@ -245,7 +245,7 @@ namespace UIForia.Layout.LayoutTypes {
             RequestContentSizeChangeLayout();
         }
 
-//        [DebuggerStepThrough]
+        [DebuggerStepThrough]
         protected float ResolveFixedWidth(UIFixedLength width) {
             switch (width.unit) {
                 case UIFixedUnit.Pixel:
@@ -271,7 +271,7 @@ namespace UIForia.Layout.LayoutTypes {
             }
         }
 
-//        [DebuggerStepThrough]
+        [DebuggerStepThrough]
         protected float ResolveFixedHeight(UIFixedLength height) {
             switch (height.unit) {
                 case UIFixedUnit.Pixel:

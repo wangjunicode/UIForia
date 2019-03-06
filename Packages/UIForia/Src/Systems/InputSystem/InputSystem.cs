@@ -208,7 +208,7 @@ namespace UIForia.Stystems.InputSystem {
 
             CursorStyle newCursor = null;
             if (m_ElementsThisFrame.Count > 0) {
-                for (int i = m_ElementsThisFrame.Count - 1; i >= 0; i--) {
+                for (int i = 0; i < m_ElementsThisFrame.Count; i++) {
                     UIElement element = m_ElementsThisFrame[i];
 
                     if (element.style.IsDefined(StylePropertyId.Cursor)) {

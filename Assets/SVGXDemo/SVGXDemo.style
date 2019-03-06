@@ -24,7 +24,10 @@ style group2 {
     BorderRadius = 35%;
     Border = 12px;
     BorderColor = green;
-    
+    TransformRotation = 90;
+    TransformPivotX = 0.5;
+    TransformPivotY = 0.5;
+    Painter = "Painter0";
 //    BackgroundImage = url("Images/backgroundimg"); 
 //    BorderTop = 20px;
 //    BorderRight = 8px;

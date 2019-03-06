@@ -169,7 +169,7 @@ namespace SVGX {
                     int gradientId = gradientData.rowId;
                     int gradientDirection = 0;
 
-                    uint fillColorModes = (uint) style.fillMode;
+                    uint strokeColorMode = (uint) style.strokeColorMode;
 
                     if (gradientData.gradient is SVGXLinearGradient linearGradient) {
                         gradientDirection = (int) linearGradient.direction;
@@ -225,10 +225,10 @@ namespace SVGX {
                     uv0List.Add(new Vector4(1, 0, wh.x, wh.y));
                     uv0List.Add(new Vector4(0, 0, wh.x, wh.y));
 
-                    uv1List.Add(new Vector4(renderData, fillColorModes, gradientId, gradientDirection));
-                    uv1List.Add(new Vector4(renderData, fillColorModes, gradientId, gradientDirection));
-                    uv1List.Add(new Vector4(renderData, fillColorModes, gradientId, gradientDirection));
-                    uv1List.Add(new Vector4(renderData, fillColorModes, gradientId, gradientDirection));
+                    uv1List.Add(new Vector4(renderData, strokeColorMode, gradientId, gradientDirection));
+                    uv1List.Add(new Vector4(renderData, strokeColorMode, gradientId, gradientDirection));
+                    uv1List.Add(new Vector4(renderData, strokeColorMode, gradientId, gradientDirection));
+                    uv1List.Add(new Vector4(renderData, strokeColorMode, gradientId, gradientDirection));
                     
                     uv2List.Add(new Vector4(borderRadiusXY.x, borderRadiusXY.y, borderRadiusZW.x, borderRadiusZW.y));
                     uv2List.Add(new Vector4(borderRadiusXY.x, borderRadiusXY.y, borderRadiusZW.x, borderRadiusZW.y));
@@ -263,7 +263,7 @@ namespace SVGX {
                     int gradientId = gradientData.rowId;
                     int gradientDirection = 0;
 
-                    uint fillColorModes = (uint) style.fillMode;
+                    uint strokeColorMode = (uint) style.strokeColorMode;
 
                     if (gradientData.gradient is SVGXLinearGradient linearGradient) {
                         gradientDirection = (int) linearGradient.direction;
@@ -319,10 +319,10 @@ namespace SVGX {
                     uv0List.Add(new Vector4(1, 0, wh.x, wh.y));
                     uv0List.Add(new Vector4(0, 0, wh.x, wh.y));
                     
-                    uv1List.Add(new Vector4(renderData, fillColorModes, gradientId, gradientDirection));
-                    uv1List.Add(new Vector4(renderData, fillColorModes, gradientId, gradientDirection));
-                    uv1List.Add(new Vector4(renderData, fillColorModes, gradientId, gradientDirection));
-                    uv1List.Add(new Vector4(renderData, fillColorModes, gradientId, gradientDirection));
+                    uv1List.Add(new Vector4(renderData, strokeColorMode, gradientId, gradientDirection));
+                    uv1List.Add(new Vector4(renderData, strokeColorMode, gradientId, gradientDirection));
+                    uv1List.Add(new Vector4(renderData, strokeColorMode, gradientId, gradientDirection));
+                    uv1List.Add(new Vector4(renderData, strokeColorMode, gradientId, gradientDirection));
 
                     uv2List.Add(new Vector4(borderRadiusXY.x, borderRadiusXY.y, borderRadiusZW.x, borderRadiusZW.y));
                     uv2List.Add(new Vector4(borderRadiusXY.x, borderRadiusXY.y, borderRadiusZW.x, borderRadiusZW.y));
@@ -390,17 +390,17 @@ namespace SVGX {
 
             Color color = style.fillColor;
 
-            if (style.fillMode == FillMode.Color) {
+            if (style.fillColorMode == ColorMode.Color) {
                 color = style.fillColor;
             }
-            else if ((style.fillMode & FillMode.Tint) != 0) {
+            else if ((style.fillColorMode & ColorMode.Tint) != 0) {
                 color = style.fillTintColor;
             }
 
             int gradientId = gradientData.rowId;
             int gradientDirection = 0;
 
-            uint fillColorModes = (uint) style.fillMode;
+            uint fillColorModes = (uint) style.fillColorMode;
 
             if (gradientData.gradient is SVGXLinearGradient linearGradient) {
                 gradientDirection = (int) linearGradient.direction;

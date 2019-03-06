@@ -76,7 +76,6 @@ v2f TextVertex(appdata input) {
     float y = -(_UnderlayOffsetY *  gScaleRatioC) * gGradientScale / gFontTextureHeight;
     float2 bOffset = float2(x, y);
         
-    // todo this works but ignores alpha. better to pack with 3 bits and alpha separate. can combine multiple alphas into one
     float4 outlineColor = input.uv3;
     
     v2f o;

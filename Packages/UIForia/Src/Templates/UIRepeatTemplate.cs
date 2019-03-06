@@ -96,7 +96,7 @@ namespace UIForia.Templates {
 
             listType = genericArgType;
             if (!(typeof(IRepeatableList).IsAssignableFrom(listType))) {
-                throw new CompileException("<Repeat> element list argument must of type RepeatableList");
+                throw new CompileException("<Repeat> element list argument must of type RepeatableList. Template: " + template.RootType);
             }
 
             itemType = genericTypes[0];

@@ -117,7 +117,9 @@ namespace UIForia.Routing {
         public int hostId;
         public readonly string name;
         private bool isInitialized;
+        private int historyIndex;
 
+        private readonly LightList<Route> m_HistoryStack;
         private readonly LightList<Route> m_RouteHandlers;
         private readonly LightList<RouteTransition> m_Transitions;
         private readonly LightList<RouteTransition> m_ActiveTransitions;
@@ -132,13 +134,27 @@ namespace UIForia.Routing {
             this.hostId = hostId;
             this.name = name;
             this.defaultRoute = defaultRoute;
-
+            
+            m_HistoryStack = new LightList<Route>();
             m_RouteHandlers = new LightList<Route>();
             m_Transitions = new LightList<RouteTransition>();
             m_ActiveTransitions = new LightList<RouteTransition>();
 
             activeRoute = null;
             targetRoute = null;
+        }
+        
+        public bool CanGoForwards => m_HistoryStack.Count > 1 && historyIndex != m_HistoryStack.Count - 1;
+
+        public void GoBack() {
+            if (historyIndex == 0) {
+                return;
+            }
+
+            m_HistoryStack.RemoveLast();
+            Route route = m_HistoryStack.RemoveLast();
+            historyIndex = historyIndex - 2;
+            GoTo(route.path);
         }
 
         public Route ActiveRoute => activeRoute;
@@ -242,6 +258,8 @@ namespace UIForia.Routing {
                 activeRoute.Update();
             }
 
+            historyIndex++;
+            m_HistoryStack.Add(activeRoute);
             tickElapsed = 0;
             CurrentUrl = targetUrl;
         }
@@ -281,28 +299,6 @@ namespace UIForia.Routing {
 }
 //
 //namespace UIForia.Routing {
-//
-//    public struct Route {
-//
-//        public string path;
-//
-//        public Route(string path) {
-//            this.path = path;
-//        }
-//
-//    }
-//
-//    public interface IRouteHandler {
-//
-//        void OnRouteChanged(Route route);
-//
-//    }
-//
-//    public interface IRouteGuard {
-//
-//        bool CanTransition(Route current, Route next);
-//
-//    }
 //
 //    public class Router {
 //

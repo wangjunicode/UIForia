@@ -425,8 +425,8 @@ namespace SVGX {
         private static void GroupByTexture(LightList<SVGXStyle> styles, LightList<SVGXRenderShape> shapes, LightList<TexturedShapeGroup> retn) {
             for (int i = 0; i < shapes.Count; i++) {
                 SVGXStyle style = styles[shapes[i].styleId];
-                if ((style.fillMode & FillMode.Texture) != 0) {
-                    int textureId = style.textureId;
+                if ((style.fillColorMode & ColorMode.Texture) != 0) {
+                    int textureId = style.fillTextureId;
                     int idx = retn.FindIndex(textureId, ((group, texId) => group.textureId == texId));
                     if (idx == -1) {
                         TexturedShapeGroup group = new TexturedShapeGroup() {
@@ -470,7 +470,7 @@ namespace SVGX {
                 BatchedVertexData batchedVertexData = vertexDataPool.GetAndQueueForRelease();
 
                 for (int j = 0; j < shapes.Count; j++) {
-                    SVGXGradient gradient = s_GradientMap.GetOrDefault(styles[shapes[j].styleId].gradientId);
+                    SVGXGradient gradient = s_GradientMap.GetOrDefault(styles[shapes[j].styleId].fillGradientId);
                     GradientData gradientData = default;
 
                     if (gradient != null) {
@@ -532,14 +532,16 @@ namespace SVGX {
             SVGXRenderShape[] renderShapeArray = renderShapes.Array;
             Matrix4x4 originMatrix = OriginMatrix;
 
-            int lastTextureId = styles[renderShapeArray[0].styleId].textureId;
+            int lastTextureId = styles[renderShapeArray[0].styleId].fillTextureId;
             Material material = batchedTransparentPool.GetAndQueueForRelease();
             Material fontMaterial = null;
 
+            // todo -- support stroke textures, right now we only set texture for fill
+            
             for (int i = 0; i < count; i++) {
                 SVGXRenderShape renderShape = renderShapeArray[i];
                 TextInfo textInfo = renderShape.textInfo;
-                int currentTextureId = styles[renderShape.styleId].textureId;
+                int currentTextureId = styles[renderShape.styleId].fillTextureId;
 
                 bool fontChanged = false;
 
@@ -569,7 +571,9 @@ namespace SVGX {
                     }
                 }
 
-                int gradientLookupId = styles[renderShape.styleId].gradientId;
+                int gradientLookupId = renderShape.drawCallType == DrawCallType.StandardFill
+                    ? styles[renderShape.styleId].fillGradientId
+                    : styles[renderShape.styleId].strokeGradientId;
 
                 GradientData gradientData = default;
                 if (gradientLookupId != -1) {

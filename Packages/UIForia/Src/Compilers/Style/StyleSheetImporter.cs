@@ -23,7 +23,7 @@ namespace UIForia.Compilers.Style {
             }
 
             try {
-                StyleSheet styleSheet = new StyleSheetCompiler(this).Compile(StyleParser2.Parse(literalTemplate));
+                StyleSheet styleSheet = new StyleSheetCompiler(this).Compile(id, StyleParser2.Parse(literalTemplate));
                 m_CachedStyleSheets.Add(id, styleSheet);
                 return styleSheet;
             }

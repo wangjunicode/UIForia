@@ -245,12 +245,10 @@ namespace UIForia.Templates {
         protected void ResolveBaseStyles(ParsedTemplate template) {
             List<UIStyleGroupContainer> list = ListPool<UIStyleGroupContainer>.Get();
 
-            if (elementName != null) {
-                UIStyleGroupContainer styleGroup = template.ResolveElementStyle(elementName);
-                if (styleGroup != default) {
-                    styleGroup.styleType = StyleType.Implicit;
-                    list.Add(styleGroup);
-                }
+            UIStyleGroupContainer styleGroup = template.ResolveElementStyle(elementType.Name);
+            if (styleGroup != default) {
+                styleGroup.styleType = StyleType.Implicit;
+                list.Add(styleGroup);
             }
 
             AttributeDefinition styleAttr = GetAttribute("style");

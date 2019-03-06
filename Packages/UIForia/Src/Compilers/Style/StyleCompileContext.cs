@@ -10,6 +10,7 @@ namespace UIForia.Compilers.Style {
     public class StyleCompileContext {
         private static readonly Func<StyleConstant, string, bool> s_FindStyleConstant = (element, name) => element.name == name;
 
+        public string fileName;
         public Dictionary<string, ConstNode> constNodes = new Dictionary<string, ConstNode>();
         public Dictionary<string, LightList<StyleConstant>> importedStyleConstants = new Dictionary<string, LightList<StyleConstant>>();
 

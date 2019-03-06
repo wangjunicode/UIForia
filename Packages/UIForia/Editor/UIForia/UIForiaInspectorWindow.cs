@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using Shapes2D;
+using SVGX;
 using TMPro;
 using UIForia.Compilers.Style;
 using UIForia.Elements;
@@ -236,22 +237,23 @@ namespace UIForia.Editor {
             }
         }
 
-        private void DrawDebugOverlay(LightList<RenderData> renderData, LightList<RenderData> drawList, Vector3 origin, Camera camera) {
+        private void DrawDebugOverlay(ImmediateRenderContext ctx) {
             if (!drawDebugBox) return;
             if (material == null) {
                 material = new Material(Resources.Load<Material>("UIForia/Materials/UIForiaDebug"));
             }
 
             if (selectedElement != null) {
-                RenderData data = drawList.Find((d) => d.element == selectedElement);
-                if (data == null) {
-                    return;
-                }
+                
+               // RenderData data = drawList.Find((d) => d.element == selectedElement);
+                //if (data == null) {
+                //    return;
+                //}
 
                 LayoutResult result = selectedElement.layoutResult;
 
-                Vector3 renderPosition = data.renderPosition;
-                renderPosition.z = 5;
+                //Vector3 renderPosition = data.renderPosition;
+                //renderPosition.z = 5;
 
                 OffsetRect padding = app.LayoutSystem.GetPaddingRect(selectedElement);
                 OffsetRect margin = app.LayoutSystem.GetMarginRect(selectedElement);
@@ -298,46 +300,136 @@ namespace UIForia.Editor {
                     renderSize.height - margin.Vertical - border.Vertical - padding.Vertical
                 ));
 
-                Graphics.DrawMesh(mesh, renderPosition + origin - new Vector3(margin.left, -margin.top),
-                    Quaternion.identity, material, 0, camera, 0, null, false, false, false);
+                float x = result.screenPosition.x;
+                float y = result.screenPosition.y;
+                
+                ctx.SetTransform(SVGXMatrix.identity);
+                ctx.SetFill(contentColor);
+                float contentX = (result.screenPosition.x) + border.left + padding.left;
+                float contentY = (result.screenPosition.y) + border.top + padding.top;
+                float contentWidth = result.actualSize.width - border.Horizontal - padding.Horizontal;
+                float contentHeight = result.actualSize.height - border.Vertical - padding.Vertical;
+                ctx.FillRect(contentX, contentY, contentWidth, contentHeight);
+
+                float paddingHorizontalWidth = width - padding.Horizontal - border.left;
+                float paddingVerticalHeight = height - padding.Vertical;
+                
+                ctx.SetFill(paddingColor);
+                if (padding.top > 0) {
+                    ctx.BeginPath();
+                    ctx.Rect(x + padding.left + border.left, y + border.top, paddingHorizontalWidth, padding.top - 1);
+                    ctx.Fill();
+                }
+
+                if (padding.right > 0) {
+                    ctx.BeginPath();
+                    ctx.Rect(margin.left + width - padding.right - border.right, y + border.top, padding.right, paddingVerticalHeight);
+                    ctx.Fill();
+                }
+
+                if (padding.left > 0) {
+                    ctx.BeginPath();
+                    ctx.Rect(x + border.left, y + border.top, padding.left, paddingVerticalHeight);
+                    ctx.Fill();
+                }
+
+                if (padding.bottom > 0) {
+                    ctx.BeginPath();
+                    ctx.Rect(x + border.left + padding.left, y - border.top + height - padding.bottom, paddingHorizontalWidth, padding.bottom);
+                    ctx.Fill();
+                }
+                
+                ctx.SetFill(borderColor);
+                
+                if (border.top > 0) {
+                    ctx.BeginPath();
+                    ctx.Rect(x + border.left, y, width - border.Horizontal, border.top - 1);
+                    ctx.Fill();
+                }
+
+                if (border.right > 0) {
+                    ctx.BeginPath();
+                    ctx.Rect(margin.left + width - border.right, y, border.right, height);
+                    ctx.Fill();
+                }
+
+                if (border.left > 0) {
+                    ctx.BeginPath();
+                    ctx.Rect(x, y, border.left, height);
+                    ctx.Fill();
+                }
+
+                if (border.bottom > 0) {
+                    ctx.BeginPath();
+                    ctx.Rect(margin.left + border.left, y + height - border.bottom, width - border.Horizontal, border.bottom);
+                    ctx.Fill();
+                }
+                
+                ctx.SetFill(marginColor);
+                if (margin.left > 0) {
+                    ctx.BeginPath();
+                    ctx.Rect(x - margin.left, y, margin.left, height);
+                    ctx.Fill();
+                }
+                
+                if (margin.right > 0) {
+                    ctx.BeginPath();
+                    ctx.Rect(x + width, y, margin.right, height);
+                    ctx.Fill();
+                }
+
+                if (margin.top > 0) {
+                    ctx.BeginPath();
+                    ctx.Rect(x - margin.left, y - margin.top, width + margin.Horizontal, margin.top);
+                    ctx.Fill();
+                }
+                
+                if (margin.bottom > 0) {
+                    ctx.BeginPath();
+                    ctx.Rect(x - margin.left, y + height, width + margin.Horizontal, margin.bottom);
+                    ctx.Fill();
+                }
+//                Vector3 renderPosition = new Vector3(result.screenPosition.x, result.screenPosition.y, 0);
+//                Graphics.DrawMesh(mesh, new Vector3(margin.left, -margin.top),
+//                    Quaternion.identity, material, 0, camera, 0, null, false, false, false);
 
                 // todo highlight underflow scenarios, visualize this somehow
 
-                if (selectedElement is UITextElement && (showTextBaseline || showTextDescender)) {
-                    baselineMesh = MeshUtil.ResizeStandardUIMesh(baselineMesh, new Size(width, height + 100));
-                    UIStyleSet style = selectedElement.style;
-                    TMP_FontAsset asset = style.TextFontAsset;
-                    float s = (style.TextFontSize / asset.fontInfo.PointSize) * asset.fontInfo.Scale;
-
-                    lineMaterial = lineMaterial ? lineMaterial : Resources.Load<Material>("Materials/UIForiaTextDebug");
-                    float offset = TextLayoutBox.GetLineOffset(style.TextFontAsset);
-                    if (showTextBaseline) {
-                        lineMaterial.SetFloat(s_BaseLineKey,
-                            offset + padding.top + border.top +
-                            (s * style.TextFontAsset.fontInfo.Ascender));
-                    }
-                    else {
-                        lineMaterial.SetFloat(s_BaseLineKey, -1);
-                    }
-
-                    if (showTextDescender) {
-                        lineMaterial.SetFloat(s_DescenderKey,
-                            offset + padding.top + border.top +
-                            (s * style.TextFontAsset.fontInfo.Ascender) +
-                            (s * -style.TextFontAsset.fontInfo.Descender)
-                        );
-                    }
-                    else {
-                        lineMaterial.SetFloat(s_DescenderKey, -1);
-                    }
-
-                    lineMaterial.SetColor(s_BaseLineColorKey, baseLineColor);
-                    lineMaterial.SetColor(s_DescenderColorKey, descenderColor);
-                    lineMaterial.SetVector(s_SizeKey, new Vector4(width, height + 100, 0, 0));
-
-                    Graphics.DrawMesh(baselineMesh, renderPosition + origin, Quaternion.identity, lineMaterial, 0,
-                        camera, 0, null, false, false, false);
-                }
+//                if (selectedElement is UITextElement && (showTextBaseline || showTextDescender)) {
+//                    baselineMesh = MeshUtil.ResizeStandardUIMesh(baselineMesh, new Size(width, height + 100));
+//                    UIStyleSet style = selectedElement.style;
+//                    TMP_FontAsset asset = style.TextFontAsset;
+//                    float s = (style.TextFontSize / asset.fontInfo.PointSize) * asset.fontInfo.Scale;
+//
+//                    lineMaterial = lineMaterial ? lineMaterial : Resources.Load<Material>("Materials/UIForiaTextDebug");
+//                    float offset = TextLayoutBox.GetLineOffset(style.TextFontAsset);
+//                    if (showTextBaseline) {
+//                        lineMaterial.SetFloat(s_BaseLineKey,
+//                            offset + padding.top + border.top +
+//                            (s * style.TextFontAsset.fontInfo.Ascender));
+//                    }
+//                    else {
+//                        lineMaterial.SetFloat(s_BaseLineKey, -1);
+//                    }
+//
+//                    if (showTextDescender) {
+//                        lineMaterial.SetFloat(s_DescenderKey,
+//                            offset + padding.top + border.top +
+//                            (s * style.TextFontAsset.fontInfo.Ascender) +
+//                            (s * -style.TextFontAsset.fontInfo.Descender)
+//                        );
+//                    }
+//                    else {
+//                        lineMaterial.SetFloat(s_DescenderKey, -1);
+//                    }
+//
+//                    lineMaterial.SetColor(s_BaseLineColorKey, baseLineColor);
+//                    lineMaterial.SetColor(s_DescenderColorKey, descenderColor);
+//                    lineMaterial.SetVector(s_SizeKey, new Vector4(width, height + 100, 0, 0));
+//
+//                    Graphics.DrawMesh(baselineMesh, renderPosition + origin, Quaternion.identity, lineMaterial, 0,
+//                        camera, 0, null, false, false, false);
+//                }
             }
         }
 

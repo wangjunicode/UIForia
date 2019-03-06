@@ -94,7 +94,6 @@ namespace UIForia.Editor {
                 oldApp.onElementCreated -= OnElementCreatedOrDestroyed;
                 oldApp.onElementDestroyed -= OnElementCreatedOrDestroyed;
                 oldApp.onRefresh -= OnRefresh;
-                oldApp.RenderSystem.DrawDebugOverlay -= HandleDrawCallback;
             }
 
             treeView?.Destroy();
@@ -114,7 +113,6 @@ namespace UIForia.Editor {
                 app.onElementCreated += OnElementCreatedOrDestroyed;
                 app.onElementDestroyed += OnElementCreatedOrDestroyed;
                 app.onRefresh += OnRefresh;
-                app.RenderSystem.DrawDebugOverlay += HandleDrawCallback;
             }
 
             s_SelectedApplication = app;

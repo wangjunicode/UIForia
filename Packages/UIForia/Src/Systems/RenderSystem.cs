@@ -32,7 +32,7 @@ namespace UIForia.Systems {
         private Camera m_Camera;
         private readonly List<VirtualScrollbar> m_Scrollbars;
 
-        public event Action<LightList<RenderData>, LightList<RenderData>, Vector3, Camera> DrawDebugOverlay;
+        public event Action<ImmediateRenderContext> DrawDebugOverlay;
 
         public RenderSystem(Camera camera, ILayoutSystem layoutSystem) {
             this.m_Camera = camera;
@@ -206,7 +206,7 @@ namespace UIForia.Systems {
 
             renderer.Render(willRender, start, m_WillRenderList.Count, origin, m_Camera);
 
-            DrawDebugOverlay?.Invoke(m_RenderDataList, m_WillRenderList, origin, m_Camera);
+            //DrawDebugOverlay?.Invoke(m_RenderDataList, m_WillRenderList, origin, m_Camera);
 
             m_WillRenderList.Clear();
         }

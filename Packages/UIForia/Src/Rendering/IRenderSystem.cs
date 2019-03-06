@@ -1,4 +1,5 @@
 ﻿using System;
+using SVGX;
 using UIForia.Elements;
 using UIForia.Systems;
 using UIForia.Util;
@@ -8,7 +9,7 @@ namespace UIForia.Rendering {
 
     public interface IRenderSystem : ISystem {
 
-        event Action<LightList<RenderData>, LightList<RenderData>, Vector3, Camera> DrawDebugOverlay ;
+        event Action<ImmediateRenderContext> DrawDebugOverlay ;
 
         RenderData GetRenderData(UIElement element);
 

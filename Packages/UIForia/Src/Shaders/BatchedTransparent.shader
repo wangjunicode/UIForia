@@ -8,6 +8,8 @@ Shader "UIForia/BatchedTransparent" {
 
         Tags { "RenderType"="Opaque" "DisableBatching"="True" }
         Cull Back 
+        Lighting Off
+	    Fog { Mode Off }
         Blend SrcAlpha OneMinusSrcAlpha
         ZWrite On
         ColorMask RGBA

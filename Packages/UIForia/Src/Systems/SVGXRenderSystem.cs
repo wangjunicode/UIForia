@@ -191,6 +191,8 @@ namespace UIForia.Systems {
             }
 
 
+            DrawDebugOverlay?.Invoke(ctx);
+            
             // if requires stencil clip -> do stencil clip true if overflow is not hidden and shape is not rect. not sure how to handle z order here
             // children with elevated z probably get lifted into ancestor's clipping scope. 
 
@@ -228,7 +230,7 @@ namespace UIForia.Systems {
 
         public void OnElementCreated(UIElement element) { }
 
-        public event Action<LightList<RenderData>, LightList<RenderData>, Vector3, Camera> DrawDebugOverlay;
+        public event Action<ImmediateRenderContext> DrawDebugOverlay;
 
         public RenderData GetRenderData(UIElement element) {
             return new RenderData(element);

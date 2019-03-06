@@ -1,10 +1,8 @@
 style container {
     PreferredSize = 600px;
-//    BackgroundColor = red;
-    PaddingLeft = 10px;
     TextColor = white;
     TextFontSize = 36;
-    TextOutlineWidth = 0.15;
+    TextOutlineWidth = 0;
 }
 
 style group1 {
@@ -13,6 +11,11 @@ style group1 {
     Border = 20px;
     BorderColor = red;
     MarginBottom = 10px;
+    Padding = 20px;
+    MarginLeft = 20px;
+    MarginRight = 20px;
+    MarginTop = 10px;
+    MarginBottom = 30px;
     BackgroundImage = url("Images/backgroundimg"); 
 
 }
@@ -24,15 +27,8 @@ style group2 {
     BorderRadius = 35%;
     Border = 12px;
     BorderColor = green;
-    TransformRotation = 90;
+    Padding = 20px;
+    TransformRotation = 0;
     TransformPivotX = 0.5;
     TransformPivotY = 0.5;
-    Painter = "Painter0";
-//    BackgroundImage = url("Images/backgroundimg"); 
-//    BorderTop = 20px;
-//    BorderRight = 8px;
-//    BorderLeft = 8px;
-//    BorderBottom = 8px;
-//    BorderColor = rgba(0, 255, 0, 255);
-
 }

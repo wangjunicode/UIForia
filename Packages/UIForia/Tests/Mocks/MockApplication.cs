@@ -1,4 +1,5 @@
 using System;
+using SVGX;
 using UIForia.Elements;
 using UIForia.Rendering;
 using UIForia.Util;
@@ -55,7 +56,7 @@ namespace Tests.Mocks {
 
         public void OnAttributeSet(UIElement element, string attributeName, string currentValue, string attributeValue) {}
         
-        public event Action<LightList<RenderData>, LightList<RenderData>, Vector3, Camera> DrawDebugOverlay;
+        public event Action<ImmediateRenderContext> DrawDebugOverlay;
 
         public RenderData GetRenderData(UIElement element) {
             return null;

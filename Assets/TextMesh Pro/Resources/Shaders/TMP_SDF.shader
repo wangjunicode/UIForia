@@ -153,7 +153,7 @@ SubShader {
 		// Used by Unity internally to handle Texture Tiling and Offset.
 		float4 _FaceTex_ST;
 		float4 _OutlineTex_ST;
-
+ 
 		pixel_t VertShader(vertex_t input)
 		{
 			float bold = step(input.texcoord1.y, 0);
@@ -228,69 +228,70 @@ SubShader {
 			float c = tex2D(_MainTex, input.atlas).a;
 		
 		#ifndef UNDERLAY_ON
-			clip(c - input.param.x);
+//clip(c - input.param.x);
 		#endif
 
-			float	scale	= input.param.y;
-			float	bias	= input.param.z;
-			float	weight	= input.param.w;
+			float	scale	= 8.87; //input.param.y;
+			float	bias	= 0.556331; //input.param.z;
+			float	weight	= 0; //input.param.w;
 			float	sd = (bias - c) * scale;
 
-			float outline = (_OutlineWidth * _ScaleRatioA) * scale;
-			float softness = (_OutlineSoftness * _ScaleRatioA) * scale;
+			float outline = 0; //(_OutlineWidth * _ScaleRatioA) * scale;
+			float softness = 0; //(_OutlineSoftness * _ScaleRatioA) * scale;
 
 			half4 faceColor = _FaceColor;
 			half4 outlineColor = _OutlineColor;
 
 			faceColor.rgb *= input.color.rgb;
 			
-			faceColor *= tex2D(_FaceTex, input.textures.xy + float2(_FaceUVSpeedX, _FaceUVSpeedY) * _Time.y);
-			outlineColor *= tex2D(_OutlineTex, input.textures.zw + float2(_OutlineUVSpeedX, _OutlineUVSpeedY) * _Time.y);
+			//faceColor *= tex2D(_FaceTex, input.textures.xy + float2(_FaceUVSpeedX, _FaceUVSpeedY) * _Time.y);
+			//outlineColor *= tex2D(_OutlineTex, input.textures.zw + float2(_OutlineUVSpeedX, _OutlineUVSpeedY) * _Time.y);
 
 			faceColor = GetColor(sd, faceColor, outlineColor, outline, softness);
+  		    return faceColor;// * input.color.a;
 
 		#if BEVEL_ON
-			float3 dxy = float3(0.5 / _TextureWidth, 0.5 / _TextureHeight, 0);
-			float3 n = GetSurfaceNormal(input.atlas, weight, dxy);
-
-			float3 bump = UnpackNormal(tex2D(_BumpMap, input.textures.xy + float2(_FaceUVSpeedX, _FaceUVSpeedY) * _Time.y)).xyz;
-			bump *= lerp(_BumpFace, _BumpOutline, saturate(sd + outline * 0.5));
-			n = normalize(n - bump);
-
-			float3 light = normalize(float3(sin(_LightAngle), cos(_LightAngle), -1.0));
-
-			float3 col = GetSpecular(n, light);
-			faceColor.rgb += col*faceColor.a;
-			faceColor.rgb *= 1-(dot(n, light)*_Diffuse);
-			faceColor.rgb *= lerp(_Ambient, 1, n.z*n.z);
-
-			fixed4 reflcol = texCUBE(_Cube, reflect(input.viewDir, -n));
-			faceColor.rgb += reflcol.rgb * lerp(_ReflectFaceColor.rgb, _ReflectOutlineColor.rgb, saturate(sd + outline * 0.5)) * faceColor.a;
+	//		float3 dxy = float3(0.5 / _TextureWidth, 0.5 / _TextureHeight, 0);
+	//		float3 n = GetSurfaceNormal(input.atlas, weight, dxy);
+//
+	//		float3 bump = UnpackNormal(tex2D(_BumpMap, input.textures.xy + float2(_FaceUVSpeedX, _FaceUVSpeedY) * _Time.y)).xyz;
+	//		bump *= lerp(_BumpFace, _BumpOutline, saturate(sd + outline * 0.5));
+	//		n = normalize(n - bump);
+//
+	//		float3 light = normalize(float3(sin(_LightAngle), cos(_LightAngle), -1.0));
+//
+	//		float3 col = GetSpecular(n, light);
+	//		faceColor.rgb += col*faceColor.a;
+	//		faceColor.rgb *= 1-(dot(n, light)*_Diffuse);
+	//		faceColor.rgb *= lerp(_Ambient, 1, n.z*n.z);
+//
+	//		fixed4 reflcol = texCUBE(_Cube, reflect(input.viewDir, -n));
+	//		faceColor.rgb += reflcol.rgb * lerp(_ReflectFaceColor.rgb, _ReflectOutlineColor.rgb, saturate(sd + outline * 0.5)) * faceColor.a;
 		#endif
 
 		#if UNDERLAY_ON
-			float d = tex2D(_MainTex, input.texcoord2.xy).a * input.texcoord2.z;
-			faceColor += input.underlayColor * saturate(d - input.texcoord2.w) * (1 - faceColor.a);
+	//		float d = tex2D(_MainTex, input.texcoord2.xy).a * input.texcoord2.z;
+	//		faceColor += input.underlayColor * saturate(d - input.texcoord2.w) * (1 - faceColor.a);
 		#endif
 
 		#if UNDERLAY_INNER
-			float d = tex2D(_MainTex, input.texcoord2.xy).a * input.texcoord2.z;
-			faceColor += input.underlayColor * (1 - saturate(d - input.texcoord2.w)) * saturate(1 - sd) * (1 - faceColor.a);
+	//		float d = tex2D(_MainTex, input.texcoord2.xy).a * input.texcoord2.z;
+	//		faceColor += input.underlayColor * (1 - saturate(d - input.texcoord2.w)) * saturate(1 - sd) * (1 - faceColor.a);
 		#endif
 
 		#if GLOW_ON
-			float4 glowColor = GetGlowColor(sd, scale);
-			faceColor.rgb += glowColor.rgb * glowColor.a;
+	//		float4 glowColor = GetGlowColor(sd, scale);
+	//		faceColor.rgb += glowColor.rgb * glowColor.a;
 		#endif
 
 		// Alternative implementation to UnityGet2DClipping with support for softness.
 		#if UNITY_UI_CLIP_RECT
-			half2 m = saturate((_ClipRect.zw - _ClipRect.xy - abs(input.mask.xy)) * input.mask.zw);
-			faceColor *= m.x * m.y;
+	//		half2 m = saturate((_ClipRect.zw - _ClipRect.xy - abs(input.mask.xy)) * input.mask.zw);
+	//		faceColor *= m.x * m.y;
 		#endif
 
 		#if UNITY_UI_ALPHACLIP
-			clip(faceColor.a - 0.001);
+	//		clip(faceColor.a - 0.001);
 		#endif
 
   		return faceColor * input.color.a;

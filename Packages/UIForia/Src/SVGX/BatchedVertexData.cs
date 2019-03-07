@@ -452,16 +452,25 @@ namespace SVGX {
                         if (charInfos[i].character == ' ') continue;
                         Vector2 topLeft = charInfos[i].layoutTopLeft;
                         Vector2 bottomRight = charInfos[i].layoutBottomRight;
-
+                        topLeft.x = topLeft.x - 2.5f;
+                        bottomRight.x = bottomRight.x + 2.5f;
+                        topLeft.y = topLeft.y - 2.5f;
+                        bottomRight.y = bottomRight.y + 2.5f;
+                        
                         positionList.Add(new Vector3(p0.x + topLeft.x, -p0.y + -bottomRight.y, z)); // Bottom Left
                         positionList.Add(new Vector3(p0.x + topLeft.x, -p0.y + -topLeft.y, z)); // Top Left
                         positionList.Add(new Vector3(p0.x + bottomRight.x, -p0.y + -topLeft.y, z)); // Top Right
                         positionList.Add(new Vector3(p0.x + bottomRight.x, -p0.y + -bottomRight.y, z)); // Bottom Right
 
-                        uv0List.Add(new Vector4(charInfos[i].uv0.x, charInfos[i].uv0.y, charInfos[i].uv2.x, isStroke));
-                        uv0List.Add(new Vector4(charInfos[i].uv0.x, charInfos[i].uv1.y, charInfos[i].uv2.x, isStroke));
-                        uv0List.Add(new Vector4(charInfos[i].uv1.x, charInfos[i].uv1.y, charInfos[i].uv2.x, isStroke));
-                        uv0List.Add(new Vector4(charInfos[i].uv1.x, charInfos[i].uv0.y, charInfos[i].uv2.x, isStroke));
+                        float x = charInfos[i].uv0.x - (5 / 1024f);
+                        float y = charInfos[i].uv0.y - (5 / 1024f);
+                        float x1 = charInfos[i].uv1.x + (5 / 1024f);
+                        float y1 = charInfos[i].uv1.y + (5 / 1024f);
+                        
+                        uv0List.Add(new Vector4(x, y, charInfos[i].uv2.x, isStroke));
+                        uv0List.Add(new Vector4(x, y1, charInfos[i].uv2.x, isStroke));
+                        uv0List.Add(new Vector4(x1, y1, charInfos[i].uv2.x, isStroke));
+                        uv0List.Add(new Vector4(x1, y, charInfos[i].uv2.x, isStroke));
 
                         uv1List.Add(glowAndRenderData);
                         uv1List.Add(glowAndRenderData);

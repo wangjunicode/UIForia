@@ -1,8 +1,10 @@
 style container {
     PreferredSize = 600px;
     TextColor = white;
-    TextFontSize = 36;
+    TextFontSize = 48;
     TextOutlineWidth = 0;
+    PaddingLeft = 12px;
+//    TextFontAsset = url("GothamNarrow-Book SDF");
 }
 
 style group1 {

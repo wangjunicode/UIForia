@@ -93,26 +93,39 @@ v2f TextVertex(appdata input) {
 
 fixed4 TextFragment(v2f input) {
 
-   float c = tex2Dlod(_globalFontTexture, float4(input.uv.xy, 0, 0)).a;
    
-   #define outlineWidth input.fragData1.x
-   #define outlineSoftness input.fragData1.y
-   
-   float scale = input.fragData2.y;
-   float bias = input.fragData2.z;
-   float weight	= input.fragData2.w;
-   float sd = (bias - c) * scale;
+   float c = tex2D(_globalFontTexture, float2(input.uv.xy)).a;
 
-   float outline = (input.fragData1.x * gScaleRatioA) * scale;
-   float softness = (input.fragData1.y * gScaleRatioA) * scale;
    
-   half4 faceColor = input.color;
-   fixed4 outlineColor = input.secondaryColor;
+   float smoothing = 1.0 / 16.0;
+   float outlineWidth = 0; //.25;
+   float outerEdgeCenter = 0.5 - outlineWidth;
    
-   faceColor.rgb *= input.color.rgb;
-   faceColor = GetColor(sd, faceColor, outlineColor, outline, softness);
-   
-   return faceColor * input.color.a;
+  // if(outlineWidth > 0) {
+       float alpha = smoothstep(outerEdgeCenter - smoothing, outerEdgeCenter + smoothing, c);
+       float border = smoothstep(0.5 - smoothing, 0.5 + smoothing, c);
+       return fixed4(lerp(Black.rgb, input.color.rgb, border), alpha);
+   //}  
+
+   //return fixed4(input.color.rgb, alpha);
+
+   //loat alpha = smoothstep(0.5 - smoothing, 0.5 + smoothing, c);
+   //float outlineFactor = smoothstep(0.5 - smoothing, 0.5 + smoothing, c);
+   //fixed4 color = lerp(Red, input.color, outlineFactor);
+   //float alpha = smoothstep(outlineWidth - smoothing, outlineWidth + smoothing, c); 
+   //
+   //
+   //
+   //float outline = (input.fragData1.x * gScaleRatioA) * scale;
+   //float softness = (input.fragData1.y * gScaleRatioA) * scale;
+   //
+   //half4 faceColor = input.color;
+   //fixed4 outlineColor = input.secondaryColor;
+   //
+   //faceColor.rgb *= input.color.rgb;
+   //faceColor = GetColor(sd, faceColor, outlineColor, outline, softness);
+   //
+   //return faceColor * input.color.a;
 }
 
 #undef gWeightNormal

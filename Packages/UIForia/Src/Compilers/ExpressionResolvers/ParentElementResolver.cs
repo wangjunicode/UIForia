@@ -10,9 +10,9 @@ namespace UIForia.Compilers.ExpressionResolvers {
 
         private static readonly UIParentElementExpression<UIElement> s_Expression = new UIParentElementExpression<UIElement>();
 
-//        public override Expression CompileAsValueExpression(ASTNode node, Func<Type, ASTNode, Expression> visit) {
-//            return null;
-//        }
+        public override Expression CompileAsValueExpression(CompilerContext context) {
+            return s_Expression;
+        }
 
         public class UIParentElementExpression<T> : Expression<T> where T : UIElement {
 

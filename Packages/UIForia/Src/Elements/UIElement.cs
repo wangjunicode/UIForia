@@ -264,7 +264,7 @@ namespace UIForia.Elements {
             }
 
             if (style != null && style.HasBaseStyles) {
-                return "<" + GetDisplayName() + "> " + style.BaseStyleNames;
+                return "<" + GetDisplayName() + ">";// + style.BaseStyleNames;
             }
             else {
                 return "<" + GetDisplayName() + " " + id + ">";

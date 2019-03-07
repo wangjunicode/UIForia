@@ -11,12 +11,14 @@ namespace UIForia.Util {
 
         private int size;
         private T[] array;
-
+        
+        [DebuggerStepThrough]
         public LightList(int size = 8) {
             this.array = ArrayPool<T>.GetMinSize(size);
             this.size = 0;
         }
-
+        
+        [DebuggerStepThrough]
         public LightList(T[] items) {
             this.array = items;
             this.size = items.Length;
@@ -24,7 +26,9 @@ namespace UIForia.Util {
 
         public T[] Array => array;
         public int Count {
+            [DebuggerStepThrough]
             get => size;
+            [DebuggerStepThrough]
             set => size = value;
         }
 
@@ -32,6 +36,7 @@ namespace UIForia.Util {
 
         public int Capacity => array.Length;
 
+        [DebuggerStepThrough]
         public void Add(T item) {
             if (size + 1 > array.Length) {
                 ArrayPool<T>.Resize(ref array, (size + 1) * 2);
@@ -40,6 +45,8 @@ namespace UIForia.Util {
             array[size] = item;
             size++;
         }
+
+        [DebuggerStepThrough]
 
         public void AddRange(IEnumerable<T> collection) {
             if (collection == null || Equals(collection, this)) {
@@ -55,6 +62,11 @@ namespace UIForia.Util {
             array[size++] = item;
         }
 
+        public void QuickClear() {
+            System.Array.Clear(array, 0, size);
+            size = 0;
+        }
+        
         public void Clear() {
             System.Array.Clear(array, 0, array.Length);
             size = 0;

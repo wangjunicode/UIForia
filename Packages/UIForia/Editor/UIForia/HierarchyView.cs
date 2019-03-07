@@ -29,7 +29,8 @@ public class HierarchyView : TreeView {
     private static readonly GUIStyle s_ElementTemplateRootStyle;
     private static readonly GUIContent s_Content = new GUIContent();
 
-
+    public bool showChildrenAndId = false;
+    
     static HierarchyView() {
         s_ElementNameStyle = new GUIStyle();
         GUIStyleState elementNameNormal = new GUIStyleState();
@@ -140,19 +141,37 @@ public class HierarchyView : TreeView {
         r.x += v.x + 5f;
         r.width -= v.x + 5f;
         LayoutBox box = view.Application.LayoutSystem.GetBoxForElement(item.element);
-        s_Content.text = item.element.style.BaseStyleNames + "(children: " + box.children.Count + ", id: " + item.element.id + ")";
 
+        List<string> names = ListPool<string>.Get();
+        
+        item.element.style.GetStyleNames(names);
+        string styleName = string.Empty;
+        
+        for (int i = 0; i < names.Count; i++) {
+            styleName += names[i] + " ";
+        }
+        
+        ListPool<string>.Release(ref names);
+
+        if (styleName.Length > 0) {
+            styleName = '[' + styleName.TrimEnd() + "] ";
+        }
+
+        s_Content.text = styleName; // + "(children: " + box.children.Count + ", id: " + item.element.id + ")";
+
+        if (showChildrenAndId) {
+            s_Content.text += "(children: " + box.children.Count + ", id: " + item.element.id + ")";
+        }
+        
         textStyle.textColor = AdjustColor(Color.yellow, item.element);
 
         GUI.Label(r, s_Content, s_ElementNameStyle);
-
-        RenderData renderData = default; //Application.Game.RenderSystem.GetRenderData(item.element);
 
         v = s_ElementNameStyle.CalcSize(s_Content);
         r.x += v.x + 5f;
         r.width -= v.x + 5f;
 
-        r = DrawAdditionalInfo(item.element, renderData, r);
+        r = DrawAdditionalInfo(item.element, default, r);
 
         if (!isTemplateRoot) {
             return;

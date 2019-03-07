@@ -9,7 +9,6 @@ using UIForia.Compilers.Style;
 using UIForia.Elements;
 using UIForia.Expressions;
 using UIForia.Parsing.Expression;
-using UIForia.Rendering;
 using UIForia.UIInput;
 using UIForia.Util;
 using UnityEngine;
@@ -26,13 +25,11 @@ namespace UIForia.Templates {
         public readonly List<AttributeDefinition> attributes; // all attributes
         public List<ElementAttribute> templateAttributes; // actual attributes
 
-        public string elementName;
-
         public Binding[] perFrameBindings;
         public Binding[] triggeredBindings;
 
-        public UIStyleGroupContainer[] baseStyles;
-
+        public UIStyleGroupContainer[] baseStyles; // todo convert this to a string array
+        
         public DragEventCreator[] dragEventCreators;
         public DragEventHandler[] dragEventHandlers;
         public MouseEventHandler[] mouseEventHandlers;
@@ -44,7 +41,6 @@ namespace UIForia.Templates {
         protected static readonly PropertyBindingCompiler s_PropCompiler = new PropertyBindingCompiler();
         
         public readonly Application app;
-        
         protected UITemplate(Application app, List<UITemplate> childTemplates, List<AttributeDefinition> attributes = null) {
             this.app = app;
             this.childTemplates = childTemplates;
@@ -58,6 +54,8 @@ namespace UIForia.Templates {
             this.keyboardEventHandlers = ArrayPool<KeyboardEventHandler>.Empty;
         }
 
+        public ParsedTemplate SourceTemplate { get; protected internal set; }
+        
         protected abstract Type elementType { get; }
 
         public abstract UIElement CreateScoped(TemplateScope inputScope);
@@ -242,14 +240,9 @@ namespace UIForia.Templates {
             }
         }
 
+        
         protected void ResolveBaseStyles(ParsedTemplate template) {
             List<UIStyleGroupContainer> list = ListPool<UIStyleGroupContainer>.Get();
-
-            UIStyleGroupContainer styleGroup = template.ResolveElementStyle(elementType.Name);
-            if (styleGroup != default) {
-                styleGroup.styleType = StyleType.Implicit;
-                list.Add(styleGroup);
-            }
 
             AttributeDefinition styleAttr = GetAttribute("style");
             if (styleAttr != null) {
@@ -271,18 +264,20 @@ namespace UIForia.Templates {
                     return;
                 }
 
+                
                 // a list of styles has been defined
                 if (styleAttr.value.IndexOf(' ') != -1) {
+                    // todo -- would be great to get rid of this allocation
                     string[] names = styleAttr.value.Split(' ');
                     foreach (string part in names) {
-                        UIStyleGroupContainer style = template.ResolveStyleGroup(part.Trim());
+                        UIStyleGroupContainer style = template.GetSharedStyle(part.Trim());
                         if (style != null) {
                             list.Add(style);
                         }
                     }
                 }
                 else {
-                    UIStyleGroupContainer style = template.ResolveStyleGroup(styleAttr.value);
+                    UIStyleGroupContainer style = template.GetSharedStyle(styleAttr.value);
                     if (style != null) {
                         list.Add(style);
                     }

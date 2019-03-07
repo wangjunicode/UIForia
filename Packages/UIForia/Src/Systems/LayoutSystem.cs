@@ -309,11 +309,12 @@ namespace UIForia.Systems {
                 }
             }
 
-            // TODO optimize this to only sort if styles changed
+            // TODO optimize this to only sort if styles changed, also our comparer is really slow right now
+            
             m_VisibleElements.Sort(comparer);
 
-            UIElement[] elements = m_Elements.Array;
-            for (int i = 0; i < m_Elements.Count; i++) {
+            UIElement[] elements = m_VisibleElements.Array;
+            for (int i = 0; i < m_VisibleElements.Count; i++) {
                 UIElement e = elements[i];
                 LayoutResult lr = e.layoutResult;
                 lr.zIndex = (i + 1); 

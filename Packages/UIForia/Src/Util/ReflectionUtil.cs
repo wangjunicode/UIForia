@@ -641,6 +641,9 @@ namespace UIForia.Util {
         }
 
         private static Delegate CreateFieldSetter(Type baseType, Type fieldType, string fieldName) {
+            if (baseType.GetField(fieldName).IsInitOnly) {
+                return null;
+            }
             ParameterExpression paramExpression0 = Expression.Parameter(baseType);
             ParameterExpression paramExpression1 = Expression.Parameter(fieldType, fieldName);
             MemberExpression fieldGetter = Expression.Field(paramExpression0, fieldName);

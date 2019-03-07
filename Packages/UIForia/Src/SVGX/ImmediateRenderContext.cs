@@ -126,7 +126,6 @@ namespace SVGX {
             SVGXShape currentShape = shapes[shapes.Count - 1];
             if (currentShape.type != SVGXShapeType.Unset) {
                 shapes.Add(new SVGXShape(SVGXShapeType.Unset, default));
-                currentShapeRange.length++;
             }
         }
 

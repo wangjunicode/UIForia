@@ -54,7 +54,7 @@ namespace UIForia.Parsing.Expression {
         private ParsedTemplate ParseTemplateFromType(Type type) {
             ProcessedType processedType = TypeProcessor.GetType(type);
 
-            string template = processedType.GetTemplate();
+            string template = processedType.GetTemplate(app.TemplateRootPath);
             XDocument doc = XDocument.Parse(template);
             ParsedTemplate parsedTemplate;
 
@@ -181,7 +181,7 @@ namespace UIForia.Parsing.Expression {
                 return baseTemplate.CreateInherited(type, usings, contentTemplates, styleTemplates, imports);
             }
 
-            return new ParsedTemplate(app, type, children, attributes, usings, styleTemplates, imports);
+            return new ParsedTemplate(app, type, templatePath, children, attributes, usings, styleTemplates, imports);
         }
 
         private string ParseUsing(XElement element) {

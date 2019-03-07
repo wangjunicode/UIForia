@@ -1,10 +1,12 @@
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.Linq;
 using UIForia.Animation;
 using UIForia.Compilers.Style;
 using UIForia.Elements;
 using UIForia.Systems;
+using UIForia.Templates;
 using UIForia.Util;
 using UnityEngine;
 using Debug = UnityEngine.Debug;
@@ -16,14 +18,12 @@ namespace UIForia.Rendering {
 
         public readonly UIElement element;
 
-        private string styleNames;
-
-        // private UIStyle queryStyle;
         private StyleState currentState;
         private UIStyleGroup instanceStyle;
         private StyleState containedStates;
+        private UIStyleGroupContainer implicitStyleContainer;
         private readonly LightList<StyleEntry> availableStyles;
-        private readonly LightList<UIStyleGroupContainer> styleGroupContainers;
+        private readonly LightList<UIStyleGroupContainer> styleGroupContainers; // probably only need to store the names
         internal readonly IntMap<StyleProperty> propertyMap;
         internal IStyleSystem styleSystem; // needed? can reference via element
         private bool hasAttributeStyles;
@@ -41,7 +41,6 @@ namespace UIForia.Rendering {
             this.hasAttributeStyles = false;
         }
 
-        public string BaseStyleNames => styleNames;
         public StyleState CurrentState => currentState;
 
         public UIStyleSetStateProxy Normal => new UIStyleSetStateProxy(this, StyleState.Normal);
@@ -49,7 +48,7 @@ namespace UIForia.Rendering {
         public UIStyleSetStateProxy Focus => new UIStyleSetStateProxy(this, StyleState.Focused);
         public UIStyleSetStateProxy Active => new UIStyleSetStateProxy(this, StyleState.Active);
 
-        public List<UIStyleGroupContainer> GetBaseStyles() {
+        public IList<UIStyleGroupContainer> GetBaseStyles() {
             List<UIStyleGroupContainer> retn = ListPool<UIStyleGroupContainer>.Get();
             for (int i = 0; i < styleGroupContainers.Count; i++) {
                 retn.Add(styleGroupContainers[i]);
@@ -106,47 +105,137 @@ namespace UIForia.Rendering {
             LightListPool<StyleProperty>.Release(ref inherited);
         }
 
-        internal void SetStyleGroups(IList<UIStyleGroupContainer> baseStyles) {
-
-            // todo make this smarter so we don't set styles we already have applied
-            Debug.Log($"Settings base styles for {element.id} and had previously {styleGroupContainers.Count} style containers");
-            containedStates = 0;  
+        internal void Initialize(IList<UIStyleGroupContainer> baseStyles) {
+            containedStates = 0;
             hasAttributeStyles = false;
-            styleGroupContainers.Clear();
-            ClearPropertyMap();
-            availableStyles.Clear();
+
+            ParsedTemplate template = element.OriginTemplate.SourceTemplate;
 
             LightList<StylePropertyId> toUpdate = LightListPool<StylePropertyId>.Get();
             styleGroupContainers.EnsureCapacity(baseStyles.Count);
 
             for (int i = 0; i < baseStyles.Count; i++) {
-                UIStyleGroupContainer groupContainer = baseStyles[i];
-
                 styleGroupContainers.AddUnchecked(baseStyles[i]);
-
-                for (int j = 0; j < groupContainer.groups.Count; j++) {
-                    UIStyleGroup group = groupContainer.groups[j];
-
-                    if (group.HasAttributeRule) {
-                        hasAttributeStyles = true;
-                    }
-
-                    if (group.rule == null || group.rule != null & group.rule.IsApplicableTo(element)) {
-                        int ruleCount = group.CountRules();
-                        CreateStyleEntry(toUpdate, group, group.normal, groupContainer.styleType, StyleState.Normal, ruleCount);
-                        CreateStyleEntry(toUpdate, group, group.hover, groupContainer.styleType, StyleState.Hover, ruleCount);
-                        CreateStyleEntry(toUpdate, group, group.focused, groupContainer.styleType, StyleState.Focused, ruleCount);
-                        CreateStyleEntry(toUpdate, group, group.active, groupContainer.styleType, StyleState.Active, ruleCount);
-                    }
-                }
+                CreateStyleGroups(baseStyles[i], toUpdate);
             }
 
+            UIStyleGroupContainer implicitStyle = template.GetImplicitStyle(element.GetDisplayName());
+            if (implicitStyle != null) {
+                CreateStyleGroups(implicitStyle, toUpdate);
+            }
 
             SortStyles();
 
             UpdatePropertyMap(toUpdate);
 
             LightListPool<StylePropertyId>.Release(ref toUpdate);
+        }
+
+        private void AppendSharedStyles(LightList<UIStyleGroupContainer> updatedStyles, int index) {
+            int count = updatedStyles.Count;
+            UIStyleGroupContainer[] updatedStyleArray = updatedStyles.Array;
+
+            LightList<StylePropertyId> toUpdate = LightListPool<StylePropertyId>.Get();
+            styleGroupContainers.EnsureAdditionalCapacity(updatedStyles.Count - index);
+
+            for (int i = index; i < count; i++) {
+                CreateStyleGroups(updatedStyleArray[i], toUpdate);
+                styleGroupContainers.AddUnchecked(updatedStyleArray[i]);
+            }
+
+            SortStyles();
+
+            UpdatePropertyMap(toUpdate);
+
+            LightListPool<StylePropertyId>.Release(ref toUpdate);
+        }
+
+        private void ResetSharedStyles(LightList<UIStyleGroupContainer> updatedStyles) {
+            int count = updatedStyles.Count;
+            UIStyleGroupContainer[] updatedStyleArray = updatedStyles.Array;
+
+            availableStyles.Clear();
+            styleGroupContainers.Clear();
+            ClearPropertyMap();
+
+            styleGroupContainers.EnsureCapacity(updatedStyles.Count);
+
+            containedStates = 0;
+            hasAttributeStyles = false;
+
+            LightList<StylePropertyId> toUpdate = LightListPool<StylePropertyId>.Get();
+
+            if (instanceStyle != null) {
+                CreateStyleEntry(toUpdate, instanceStyle, instanceStyle.normal, StyleType.Instance, StyleState.Normal, 0);
+                CreateStyleEntry(toUpdate, instanceStyle, instanceStyle.hover, StyleType.Instance, StyleState.Hover, 0);
+                CreateStyleEntry(toUpdate, instanceStyle, instanceStyle.focused, StyleType.Instance, StyleState.Focused, 0);
+                CreateStyleEntry(toUpdate, instanceStyle, instanceStyle.active, StyleType.Instance, StyleState.Active, 0);
+            }
+
+            if (implicitStyleContainer != null) {
+                CreateStyleGroups(implicitStyleContainer, toUpdate);
+            }
+
+            for (int i = 0; i < count; i++) {
+                CreateStyleGroups(updatedStyleArray[i], toUpdate);
+            }
+
+            SortStyles();
+
+            UpdatePropertyMap(toUpdate);
+
+            LightListPool<StylePropertyId>.Release(ref toUpdate);
+        }
+
+        internal void UpdateSharedStyles(LightList<UIStyleGroupContainer> updatedStyles) {
+            int count = styleGroupContainers.Count;
+            UIStyleGroupContainer[] currentContainers = styleGroupContainers.Array;
+            UIStyleGroupContainer[] updatedContainers = updatedStyles.Array;
+            
+            if (updatedStyles.Count > styleGroupContainers.Count) {
+                // if we have more styles in the incoming list
+                // check that all existing styles match
+                // if they do, make sure all updated styles are not present in the template
+                for (int i = 0; i < count; i++) {
+                    if (currentContainers[i] != updatedContainers[i]) {
+                        ResetSharedStyles(updatedStyles);
+                        return;
+                    }
+                }
+
+                AppendSharedStyles(updatedStyles, count);
+            }
+            else if (updatedStyles.Count < styleGroupContainers.Count) {
+                // todo -- optimize
+                ResetSharedStyles(updatedStyles);
+            }
+            else {
+                // todo -- optimize
+                for (int i = 0; i < count; i++) {
+                    if (currentContainers[i] != updatedContainers[i]) {
+                        ResetSharedStyles(updatedStyles);
+                        return;
+                    }
+                }
+            }
+        }
+
+        private void CreateStyleGroups(UIStyleGroupContainer groupContainer, LightList<StylePropertyId> toUpdate) {
+            for (int i = 0; i < groupContainer.groups.Count; i++) {
+                UIStyleGroup group = groupContainer.groups[i];
+
+                if (group.HasAttributeRule) {
+                    hasAttributeStyles = true;
+                }
+
+                if (group.rule == null || group.rule != null & group.rule.IsApplicableTo(element)) {
+                    int ruleCount = group.CountRules();
+                    CreateStyleEntry(toUpdate, group, group.normal, groupContainer.styleType, StyleState.Normal, ruleCount);
+                    CreateStyleEntry(toUpdate, group, group.hover, groupContainer.styleType, StyleState.Hover, ruleCount);
+                    CreateStyleEntry(toUpdate, group, group.focused, groupContainer.styleType, StyleState.Focused, ruleCount);
+                    CreateStyleEntry(toUpdate, group, group.active, groupContainer.styleType, StyleState.Active, ruleCount);
+                }
+            }
         }
 
         private void AddStyleGroups(LightList<StylePropertyId> toUpdate, UIStyleGroupContainer container) {
@@ -460,7 +549,6 @@ namespace UIForia.Rendering {
                     styleType = StyleType.Instance
                 };
             }
-
 
             switch (state) {
                 case StyleState.Normal:
@@ -802,67 +890,37 @@ namespace UIForia.Rendering {
         public List<string> GetStyleNames(List<string> retn = null) {
             retn = retn ?? new List<string>(styleGroupContainers.Count);
             for (int i = 0; i < styleGroupContainers.Count; i++) {
-                retn.Add(styleGroupContainers[i].name);
+                if (styleGroupContainers[i].styleType == StyleType.Shared) {
+                    retn.Add(styleGroupContainers[i].name);
+                }
             }
 
             return retn;
         }
 
-        public bool EqualsToSharedStyles(IList<string> styles) {
-
-            LightList<string> styleGroup = LightListPool<string>.Get();
-            string last = null;
+        internal bool AreStylesEquivalent(LightList<string> styles) {
             int count = styleGroupContainers.Count;
             UIStyleGroupContainer[] styleGroupContainersArray = styleGroupContainers.Array;
-            
+
+            int compareIndex = 0;
+            int compareStylesCount = styles.Count;
+            string[] comparedStyles = styles.Array;
+
             for (int i = 0; i < count; i++) {
-                if (styleGroupContainersArray[i].styleType == StyleType.Shared && last != styleGroupContainersArray[i].name) {
-                    styleGroup.Add(styleGroupContainersArray[i].name);
-                    last = styleGroupContainersArray[i].name;
+                if (compareIndex >= compareStylesCount) {
+                    return false;
+                }
+
+                if (styleGroupContainersArray[i].styleType == StyleType.Shared) {
+                    if (comparedStyles[compareIndex++] != styleGroupContainersArray[i].name) {
+                        return false;
+                    }
                 }
             }
 
-            int sharedIndex = 0;
-            bool equals = true;
-            count = styleGroup.Count;
-            for (int styleIndex = 0; styleIndex < styles.Count; styleIndex++) {
-                if (string.IsNullOrWhiteSpace(styles[styleIndex])) continue;
-                if (CheckedForStyleAlready(styles, styleIndex)) continue;
-
-                // if we're out of styles we're definitely not equal
-                if (sharedIndex >= count) {
-                    equals = false;
-                    break;
-                }
-                
-                // styleIndex and the sharedIndex should both point to a style of the same name.
-                if (styles[styleIndex] != styleGroup[sharedIndex]) {
-                    equals = false;
-                    break;
-                }
-
-                sharedIndex++;
-            }
-
-            // if there are more style containers in this style set than in the input style list the lists aren't equal either
-            if (sharedIndex < count) {
-                return false;
-            }
-
-            LightListPool<string>.Release(ref styleGroup);
-            
-            return equals;
+            return true;
         }
 
-        private static bool CheckedForStyleAlready(IList<string> styles, int styleIndex) {
-            for (int dupIndex = 0; dupIndex < styleIndex; dupIndex++) {
-                if (styles[dupIndex] == styles[styleIndex]) {
-                    return true;
-                }
-            }
-
-            return false;
-        }
     }
 
 }

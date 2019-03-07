@@ -15,7 +15,6 @@ namespace UIForia.Templates {
         public UIContainerTemplate(Application app, string elementName, Type rootType, List<UITemplate> childTemplates, List<AttributeDefinition> attributes = null)
             : base(app, childTemplates, attributes) {
             elementType = rootType;
-            this.elementName = elementName;
         }
         
         public UIContainerTemplate(Application app, Type rootType, List<UITemplate> childTemplates, List<AttributeDefinition> attributes = null)

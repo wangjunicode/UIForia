@@ -1,8 +1,6 @@
-using System.Collections.Generic;
 using UIForia.Compilers.Style;
 using UIForia.Elements;
 using UIForia.Expressions;
-using UIForia.Rendering;
 using UIForia.Templates;
 using UIForia.Util;
 
@@ -13,35 +11,55 @@ namespace UIForia.Bindings {
         private readonly ParsedTemplate template;
         public readonly ArrayLiteralExpression<string> bindingList;
 
+        //when bindings support multi-threading: add [ThreadStatic] 
+        private static readonly LightList<string> boundStyles;
+        private static readonly LightList<UIStyleGroupContainer> containers;
+
         public DynamicStyleBinding(ParsedTemplate template, ArrayLiteralExpression<string> bindingList) : base("style") {
             this.template = template;
             this.bindingList = bindingList.Clone();
         }
 
-        public override void Execute(UIElement element, ExpressionContext context) {
-            IList<string> bindingStyles = bindingList.Evaluate(context);
+        static DynamicStyleBinding() {
+            containers = new LightList<UIStyleGroupContainer>(12);
+            boundStyles = new LightList<string>(12);
+        }
 
-            if (!element.style.EqualsToSharedStyles(bindingStyles)) {
-                LightList<UIStyleGroupContainer> groups = LightListPool<UIStyleGroupContainer>.Get();
-                string tagName = element.GetDisplayName();
-                UIStyleGroupContainer groupContainer = template.ResolveElementStyle(tagName);
-                if (groupContainer != null) {
-                    groups.Add(groupContainer);
+        public override void Execute(UIElement element, ExpressionContext context) {
+            string[] bindingStyles = bindingList.Evaluate(context);
+            
+            containers.QuickClear();
+            boundStyles.QuickClear();
+            
+            containers.EnsureCapacity(bindingStyles.Length);
+            boundStyles.EnsureCapacity(bindingStyles.Length);
+            
+            string[] boundStyleArray = boundStyles.Array;
+
+            for (int i = 0; i < bindingStyles.Length; i++) {
+                string style = bindingStyles[i];
+                if (string.IsNullOrWhiteSpace(style) || style == string.Empty) {
+                    continue;
                 }
 
-                for (int i = 0; i < bindingStyles.Count; i++) {
-                    string styleName = bindingStyles[i];
-                    if (!string.IsNullOrEmpty(styleName)) {
-                        if (template.TryResolveStyleGroup(styleName, out UIStyleGroupContainer group)) {
-                            group.styleType = StyleType.Shared;
-                            groups.Add(group);
-                        }
+                bool add = true;
+                int cnt = boundStyles.Count;
+                for (int j = 0; j < cnt; j++) {
+                    if (boundStyleArray[j] == style) {
+                        add = false;
+                        break;
                     }
                 }
 
-                element.style.SetStyleGroups(groups);
-                LightListPool<UIStyleGroupContainer>.Release(ref groups);
+                if (add) {
+                    UIStyleGroupContainer c = template.GetSharedStyle(style);
+                    if (c != null) {
+                        containers.Add(c);
+                    }
+                }
             }
+
+            element.style.UpdateSharedStyles(containers);
         }
 
         public override bool IsConstant() {

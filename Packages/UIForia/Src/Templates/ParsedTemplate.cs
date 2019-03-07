@@ -7,7 +7,6 @@ using UIForia.Elements;
 using UIForia.Exceptions;
 using UIForia.Parsing.Expression;
 using UIForia.Rendering;
-using UIForia.Util;
 
 namespace UIForia.Templates {
 
@@ -17,31 +16,27 @@ namespace UIForia.Templates {
     /// </summary>
     public class ParsedTemplate {
 
-        private static int s_TemplateIdGenerator;
-
-        public readonly int templateId;
-
         private bool isCompiled;
-
-        private LightList<UIStyleGroupContainer> styleContainers;
+        
+        internal Dictionary<string, UIStyleGroupContainer> sharedStyleMap;
+        internal Dictionary<string, UIStyleGroupContainer> implicitStyleMap;
 
         private readonly List<string> usings;
         private readonly List<UISlotContentTemplate> inheritedContent;
         private readonly List<StyleDefinition> styleDefinitions;
         public readonly UIElementTemplate rootElementTemplate;
         public readonly ExpressionCompiler compiler; // todo -- static?
-        public ParsedTemplate baseTemplate;
-        public Application app;
-        
+        public readonly ParsedTemplate baseTemplate;
+        public readonly Application app;
+        public readonly string templatePath;
 
-
-        public ParsedTemplate(Application app, Type type, List<UITemplate> contents, List<AttributeDefinition> attributes, List<string> usings, List<StyleDefinition> styleDefinitions, List<ImportDeclaration> imports) : this(null, type, usings, null, styleDefinitions, imports) {
+        public ParsedTemplate(Application app, Type type, string templatePath, List<UITemplate> contents, List<AttributeDefinition> attributes, List<string> usings, List<StyleDefinition> styleDefinitions, List<ImportDeclaration> imports) : this(null, type, usings, null, styleDefinitions, imports) {
             this.app = app;
+            this.templatePath = templatePath;
             this.rootElementTemplate = new UIElementTemplate(app, type, contents, attributes);
         }
 
         public ParsedTemplate(ParsedTemplate baseTemplate, Type type, List<string> usings, List<UISlotContentTemplate> contentTemplates, List<StyleDefinition> styleDefinitions, List<ImportDeclaration> imports) {
-            this.templateId = ++s_TemplateIdGenerator;
             this.baseTemplate = baseTemplate;
             this.RootType = type;
             this.rootElementTemplate = null;
@@ -70,6 +65,9 @@ namespace UIForia.Templates {
         public void Compile() {
             if (isCompiled) return;
             isCompiled = true;
+
+            CompileStyles();
+
             // todo -- remove allocations
 
             compiler.AddNamespaces(usings);
@@ -100,7 +98,50 @@ namespace UIForia.Templates {
             CompileStep(rootElementTemplate);
         }
 
+        private void CompileStyles() {
+            if (styleDefinitions == null || styleDefinitions.Count == 0) {
+                return;
+            }
+
+            sharedStyleMap = new Dictionary<string, UIStyleGroupContainer>();
+
+            for (int i = 0; i < styleDefinitions.Count; i++) {
+                StyleSheet sheet = null;
+                if (styleDefinitions[i].body != null) {
+                    sheet = app.styleImporter.ImportStyleSheetFromString(templatePath, styleDefinitions[i].body);
+                }
+                else if (styleDefinitions[i].importPath != null) {
+                    sheet = app.styleImporter.ImportStyleSheetFromFile(styleDefinitions[i].importPath);
+                }
+
+                if (sheet != null) {
+                    string alias = styleDefinitions[i].alias;
+
+                    for (int j = 0; j < sheet.styleGroupContainers.Length; j++) {
+                        UIStyleGroupContainer container = sheet.styleGroupContainers[j];
+
+                        if (container.styleType == StyleType.Implicit) {
+                            // we only take the first implicit style. This could be improved by doing a merge of some sort
+                            implicitStyleMap = implicitStyleMap ?? new Dictionary<string, UIStyleGroupContainer>();
+                            if (!implicitStyleMap.ContainsKey(container.name)) {
+                                implicitStyleMap.Add(container.name, container);
+                            }
+                            continue;
+                        }
+                        
+                        if (alias == null) {
+                            sharedStyleMap.Add(container.name, container);
+                        }
+                        else {
+                            sharedStyleMap.Add(alias + "." + container.name, container);
+                        }
+                    }
+                }
+            }
+        }
+
         private void CompileStep(UITemplate template) {
+            template.SourceTemplate = this;
             template.Compile(this);
 
             if (template.childTemplates != null) {
@@ -110,51 +151,6 @@ namespace UIForia.Templates {
             }
 
             template.PostCompile(this);
-        }
-
-        public bool TryResolveStyleGroup(string styleName, out UIStyleGroupContainer container) {
-            if (styleDefinitions == null) {
-                container = null;
-                return false;
-            }
-
-            StyleDefinition def;
-            // if no dot in path then the style name is the alias
-            if (styleName.IndexOf('.') == -1) {
-                def = GetStyleDefinitionFromAlias(StyleDefinition.k_EmptyAliasName);
-                container = app.styleImporter.GetStyleGroupByStyleName(def.importPath, def.body, styleName);
-                return container != null;
-            }
-
-            string[] path = styleName.Split('.');
-            if (path.Length != 2) {
-                throw new Exception("Invalid style path: " + path);
-            }
-
-            def = GetStyleDefinitionFromAlias(path[0]);
-            container = app.styleImporter.GetStyleGroupByStyleName(def.importPath, def.body, styleName);
-            return container != null;
-        }
-
-        public UIStyleGroupContainer ResolveStyleGroup(string styleName) {
-            if (styleDefinitions == null) {
-                return null;
-            }
-
-            StyleDefinition def;
-            // if no dot in path then the style name is the alias
-            if (styleName.IndexOf('.') == -1) {
-                def = GetStyleDefinitionFromAlias(StyleDefinition.k_EmptyAliasName);
-                return app.styleImporter.GetStyleGroupByStyleName(def.importPath, def.body, styleName);
-            }
-
-            string[] path = styleName.Split('.');
-            if (path.Length != 2) {
-                throw new Exception("Invalid style path: " + path);
-            }
-
-            def = GetStyleDefinitionFromAlias(path[0]);
-            return app.styleImporter.GetStyleGroupByStyleName(def.importPath, def.body, path[1]);
         }
 
         private void ValidateStyleDefinitions() {
@@ -177,56 +173,22 @@ namespace UIForia.Templates {
             }
         }
 
-        private StyleDefinition GetStyleDefinitionFromAlias(string alias) {
-            for (int i = 0; i < styleDefinitions.Count; i++) {
-                if (styleDefinitions[i].alias == alias) {
-                    return styleDefinitions[i];
-                }
-            }
-
-            if (alias == StyleDefinition.k_EmptyAliasName) {
-                throw new ParseException($"Unable to find a default style group. Template: {RootType}");
-            }
-
-            throw new ParseException($"Unable to find a style with the alias: {alias}. Template: {RootType}");
-        }
-
         public ParsedTemplate CreateInherited(Type inheritedType, List<string> usings, List<UISlotContentTemplate> contents, List<StyleDefinition> styleDefinitions, List<ImportDeclaration> importDeclarations) {
             return new ParsedTemplate(this, inheritedType, usings, contents, styleDefinitions, importDeclarations);
         }
 
-        internal UIStyleGroupContainer ResolveElementStyle(string tagName) {
-            if (styleDefinitions == null) {
-                return default;
-            }
-
-            if (styleContainers == null) {
-                styleContainers = new LightList<UIStyleGroupContainer>();
-            }
-
-            for (int i = 0; i < styleContainers.Count; i++) {
-                if (styleContainers[i].styleType == StyleType.Implicit && styleContainers[i].name == tagName) {
-                    return styleContainers[i];
-                }
-            }
-
-            LightList<UIStyleGroup> groups = new LightList<UIStyleGroup>();
-
-            // if no dot in path then the style name is the alias
-            for (int i = 0; i < styleDefinitions.Count; i++) {
-                StyleDefinition def = styleDefinitions[i];
-                UIStyleGroupContainer container = app.styleImporter.GetStyleGroupsByTagName(def.importPath, def.body, tagName);
-                if (container != null && container.styleType == StyleType.Implicit) {
-                    groups.AddRange(container.groups);
-                }
-            }
-
-            UIStyleGroupContainer containerResult = new UIStyleGroupContainer(tagName, StyleType.Implicit, groups);
-            styleContainers.Add(containerResult);
-
-            return containerResult;
+        internal UIStyleGroupContainer GetImplicitStyle(string tagName) {
+            if (implicitStyleMap == null) return null;
+            implicitStyleMap.TryGetValue(tagName, out UIStyleGroupContainer retn);
+            return retn;
         }
-
+        
+        internal UIStyleGroupContainer GetSharedStyle(string styleName) {
+            if (sharedStyleMap == null) return null;
+            sharedStyleMap.TryGetValue(styleName, out UIStyleGroupContainer retn);
+            return retn;
+        }
+       
     }
 
 }

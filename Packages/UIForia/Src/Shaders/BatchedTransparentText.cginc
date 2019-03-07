@@ -97,14 +97,14 @@ fixed4 TextFragment(v2f input) {
    float c = tex2D(_globalFontTexture, float2(input.uv.xy)).a;
 
    
-   float smoothing = 1.0 / 16.0;
+   float smoothing = 1 / 16.0;
    float outlineWidth = 0; //.25;
    float outerEdgeCenter = 0.5 - outlineWidth;
    
   // if(outlineWidth > 0) {
-       float alpha = smoothstep(outerEdgeCenter - smoothing, outerEdgeCenter + smoothing, c);
-       float border = smoothstep(0.5 - smoothing, 0.5 + smoothing, c);
-       return fixed4(lerp(Black.rgb, input.color.rgb, border), alpha);
+       float alpha = smoothstep(0.5 - smoothing, 0.5 + smoothing, c);
+       //float border = smoothstep(0.5 - smoothing, 0.5 + smoothing, c);
+       return fixed4(input.color.rgb, input.color.a * alpha);
    //}  
 
    //return fixed4(input.color.rgb, alpha);

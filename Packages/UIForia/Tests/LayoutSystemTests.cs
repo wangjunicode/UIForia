@@ -426,7 +426,6 @@ public class LayoutSystemTests {
         ";
         MockApplication app = new MockApplication(typeof(LayoutTestThing), template);
         LayoutTestThing root = (LayoutTestThing) app.RootElement;
-        MockLayoutSystem layoutSystem = (MockLayoutSystem) app.LayoutSystem;
         app.SetViewportRect(new Rect(0, 0, 400, 400));
         
         app.Update();
@@ -436,10 +435,10 @@ public class LayoutSystemTests {
         UIElement child2 = root.FindById("child2");
         UIElement child3 = root.FindById("child3");
         
-        Assert.AreEqual(4000, child0.layoutResult.zIndex);
-        Assert.AreEqual(3000, child1.layoutResult.zIndex);
-        Assert.AreEqual(2000, child2.layoutResult.zIndex);
-        Assert.AreEqual(1000, child3.layoutResult.zIndex);
+        Assert.AreEqual(4, child0.layoutResult.zIndex);
+        Assert.AreEqual(3, child1.layoutResult.zIndex);
+        Assert.AreEqual(2, child2.layoutResult.zIndex);
+        Assert.AreEqual(1, child3.layoutResult.zIndex);
         
         child0.style.SetZIndex(1, StyleState.Normal);
         child2.style.SetZIndex(2, StyleState.Normal);
@@ -448,10 +447,10 @@ public class LayoutSystemTests {
         
         app.Update();
         
-        Assert.AreEqual(4000, child0.layoutResult.zIndex);
-        Assert.AreEqual(3000, child2.layoutResult.zIndex);
-        Assert.AreEqual(2000, child1.layoutResult.zIndex);
-        Assert.AreEqual(1000, child3.layoutResult.zIndex);
+        Assert.AreEqual(4, child0.layoutResult.zIndex);
+        Assert.AreEqual(3, child2.layoutResult.zIndex);
+        Assert.AreEqual(2, child1.layoutResult.zIndex);
+        Assert.AreEqual(1, child3.layoutResult.zIndex);
     }
 
 }

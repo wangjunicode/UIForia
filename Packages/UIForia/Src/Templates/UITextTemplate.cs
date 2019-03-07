@@ -17,14 +17,12 @@ namespace UIForia.Templates {
             : base(app, null, attributes) {
             this.textElementType = textElementType;
             this.RawText = rawText;
-            this.elementName = "Text";
         }
 
         public UITextTemplate(Application app, string rawText, List<AttributeDefinition> attributes = null)
             : base(app, null, attributes) {
             this.textElementType = null;
             this.RawText = rawText;
-            this.elementName = "Text";
         }
 
         public string RawText { get; }

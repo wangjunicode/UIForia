@@ -64,81 +64,104 @@ namespace SVGX {
             camera.orthographicSize = Screen.height * 0.5f;
 
             ctx.Clear();
-
-            ctx.SetStroke(tintColor);
-            ctx.SetStrokeWidth(strokeWidth);
-            ctx.SetStrokePlacement(strokePlacement);
-            ctx.SetStrokeOpacity(strokeOpacity);
-            ctx.SetFillOpacity(fillOpacity);
-
-            SVGXMatrix matrix = SVGXMatrix.TRS(new Vector2(100, 100), rotation, Vector2.one); //identity);
-            matrix = matrix.SkewX(skewX);
-            matrix = matrix.SkewY(skewY);
-            matrix = matrix.Rotate(rotation);
-
-            ctx.SetTransform(matrix);
-
+            
+            ctx.SetStrokeWidth(1f);
+            ctx.SetStroke(Color.black);
             ctx.BeginPath();
-            ctx.Rect(shadowRect.x, shadowRect.y, shadowRect.width, shadowRect.height);
-            ctx.SetShadowColor(shadowColor);
-            ctx.SetShadowOffsetX(shadowOffset.x);
-            ctx.SetShadowOffsetY(shadowOffset.y);
-            ctx.SetShadowSoftnessX(shadowSoftnessX);
-            ctx.SetShadowSoftnessY(shadowSoftnessY);
-            ctx.SetShadowIntensity(shadowIntensity);
-            ctx.SetShadowTint(shadowTint);
-
-            ctx.Shadow();
-
-            ctx.BeginPath();
-            ctx.SetFill(fillColor);
-
-            ctx.Ellipse(100, 100, 400, 200);
-            ctx.Circle(825, 250, 100);
-            ctx.Rect(400, 340, 200, 200);
-            ctx.RoundedRect(new Rect(50, 550, 300, 200), radiusTL, radiusTR, radiusBL, radiusBR);
-
-            if (fill) {
-                ctx.Fill();
+            
+            float[] rows = new float[] { 100, 200, 300, 400, 500, 600};
+            float[] cols = new float[] {100, 200, 300};
+            
+            float x = 100;
+            float y = 100;
+            
+            float width = 300;
+            float height = 300;
+            for (int i = 0; i < rows.Length; i++) {
+                ctx.MoveTo(x, rows[i]);
+                ctx.LineTo(x + width, rows[i]);
             }
 
-            if (stroke) {
-//                ctx.Stroke();
-//                ctx.SetStrokePlacement(StrokePlacement.Center);
-//                ctx.SetStrokeColor(Color.cyan);
-//                ctx.SetStrokeWidth(strokeWidth * 0.5f);
-                ctx.Stroke();
+            for (int i = 0; i < cols.Length; i++) {
+                ctx.MoveTo(cols[i], y);
+                ctx.LineTo(cols[i], y + height);
             }
-
-            ctx.BeginPath();
-            ctx.MoveTo(100, 250);
-            matrix = matrix.Translate(500, -100);
-            ctx.SetTransform(matrix);
-            ctx.CubicCurveTo(new Vector2(100, 100), new Vector2(400, 100), new Vector2(400, 250));
-            ctx.LineTo(200, 400);
-            ctx.LineTo(400, 300);
-            ctx.LineTo(100, 350);
             ctx.Stroke();
-
-            ctx.BeginPath();
-
-            SVGXTextStyle textStyle = new SVGXTextStyle() {
-                fontSize = textSize,
-                color = textColor,
-                outlineColor = textOutline,
-                outlineWidth = outlineWidth
-            };
-            
-            ctx.SetTransform(SVGXMatrix.identity);
-
-            TextInfo textInfo = TextUtil.CreateTextInfo(new TextUtil.TextSpan(TMP_FontAsset.defaultFontAsset, textStyle, "Hello Klang Gang!"));
-            List<LineInfo> lineInfos = TextUtil.Layout(textInfo, float.MaxValue);
-            textInfo.lineInfos = lineInfos.ToArray();
-            textInfo.lineCount = lineInfos.Count;
-            TextUtil.ApplyLineAndWordOffsets(textInfo);
-            
-            ctx.Text(20, 20, textInfo);
-            ctx.Fill();
+//
+//            ctx.SetStroke(tintColor);
+//            ctx.SetStrokeWidth(strokeWidth);
+//            ctx.SetStrokePlacement(strokePlacement);
+//            ctx.SetStrokeOpacity(strokeOpacity);
+//            ctx.SetFillOpacity(fillOpacity);
+//
+//            SVGXMatrix matrix = SVGXMatrix.TRS(new Vector2(100, 100), rotation, Vector2.one); //identity);
+//            matrix = matrix.SkewX(skewX);
+//            matrix = matrix.SkewY(skewY);
+//            matrix = matrix.Rotate(rotation);
+//
+//            ctx.SetTransform(matrix);
+//
+//            ctx.BeginPath();
+//            ctx.Rect(shadowRect.x, shadowRect.y, shadowRect.width, shadowRect.height);
+//            ctx.SetShadowColor(shadowColor);
+//            ctx.SetShadowOffsetX(shadowOffset.x);
+//            ctx.SetShadowOffsetY(shadowOffset.y);
+//            ctx.SetShadowSoftnessX(shadowSoftnessX);
+//            ctx.SetShadowSoftnessY(shadowSoftnessY);
+//            ctx.SetShadowIntensity(shadowIntensity);
+//            ctx.SetShadowTint(shadowTint);
+//
+//            ctx.Shadow();
+//
+//            ctx.BeginPath();
+//            ctx.SetFill(fillColor);
+//
+//            ctx.Ellipse(100, 100, 400, 200);
+//            ctx.Circle(825, 250, 100);
+//            ctx.Rect(400, 340, 200, 200);
+//            ctx.RoundedRect(new Rect(50, 550, 300, 200), radiusTL, radiusTR, radiusBL, radiusBR);
+//
+//            if (fill) {
+//                ctx.Fill();
+//            }
+//
+//            if (stroke) {
+////                ctx.Stroke();
+////                ctx.SetStrokePlacement(StrokePlacement.Center);
+////                ctx.SetStrokeColor(Color.cyan);
+////                ctx.SetStrokeWidth(strokeWidth * 0.5f);
+//                ctx.Stroke();
+//            }
+//
+//            ctx.BeginPath();
+//            ctx.MoveTo(100, 250);
+//            matrix = matrix.Translate(500, -100);
+//            ctx.SetTransform(matrix);
+//            ctx.CubicCurveTo(new Vector2(100, 100), new Vector2(400, 100), new Vector2(400, 250));
+//            ctx.LineTo(200, 400);
+//            ctx.LineTo(400, 300);
+//            ctx.LineTo(100, 350);
+//            ctx.Stroke();
+//
+//            ctx.BeginPath();
+//
+//            SVGXTextStyle textStyle = new SVGXTextStyle() {
+//                fontSize = textSize,
+//                color = textColor,
+//                outlineColor = textOutline,
+//                outlineWidth = outlineWidth
+//            };
+//            
+//            ctx.SetTransform(SVGXMatrix.identity);
+//
+//            TextInfo textInfo = TextUtil.CreateTextInfo(new TextUtil.TextSpan(TMP_FontAsset.defaultFontAsset, textStyle, "Hello Klang Gang!"));
+//            List<LineInfo> lineInfos = TextUtil.Layout(textInfo, float.MaxValue);
+//            textInfo.lineInfos = lineInfos.ToArray();
+//            textInfo.lineCount = lineInfos.Count;
+//            TextUtil.ApplyLineAndWordOffsets(textInfo);
+//            
+//            ctx.Text(20, 20, textInfo);
+//            ctx.Fill();
 
             gfx.Render(ctx);
         }

@@ -17,13 +17,13 @@ namespace UIForia.Parsing.Expression {
             templateAttr = rawType.GetCustomAttribute<TemplateAttribute>();
         }
 
-        public string GetTemplate() {
+        public string GetTemplate(string templateRoot) {
             if (templateAttr == null) {
                 throw new Exception($"Template not defined for {rawType.Name}");
             }
 
             if (templateAttr.templateType == TemplateType.File) {
-                return TryReadFile(UnityEngine.Application.dataPath + "/" + templateAttr.template);
+                return TryReadFile(templateRoot + "/" + templateAttr.template);
             }
 
             return templateAttr.template;

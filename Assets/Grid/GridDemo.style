@@ -1,19 +1,63 @@
 const cellMargin = 20px;
 
+
+style varStyle0 {
+    PreferredSize = 300px, 300px;
+    BackgroundColor = red;
+}
+
+style grid0 {
+    Padding = 20px;
+}
+
+style grid1 {
+
+}
+
+style grid2 {
+    Padding = 10px;
+     GridLayoutColTemplate = 300px 220px 200px;
+     GridLayoutRowTemplate = 300px 220px;
+}
+
 style mb50 {
     MarginBottom = 50px;
 }
 
+style cell-start {
+    GridItemColSelfAlignment = Start;
+}
+
+style cell-end {
+     GridItemColSelfAlignment = End;
+}
+
+style cell-center {
+    GridItemColSelfAlignment = Center;
+}
+
+style cell-shrink {
+    GridItemColSelfAlignment = Shrink;
+}
+
+style cell-grow {
+    GridItemColSelfAlignment = Grow;
+}
+
+style cell-fit {
+    GridItemColSelfAlignment = Fit;
+}
+
+style size100 {
+    PreferredSize = 100px;
+}
+
 style m10 {
-    Margin = 11px;
+    Margin = 10px;
 }
 
 style cell {
     BackgroundColor = rgba(200, 100, 160, 200);
-}
-
-style cell-center {
-    GridLayoutColAlignment = Center;
 }
 
 style grid-horizontal {

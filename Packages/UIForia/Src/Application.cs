@@ -72,9 +72,10 @@ namespace UIForia {
             s_CustomPainters = new Dictionary<string, ISVGXElementPainter>();
         }
 
-        protected Application(string id) {
+        protected Application(string id, string templateRootPath = null) {
             this.id = id;
-
+            this.templateRootPath = templateRootPath;
+            
             if (s_ApplicationList.Find(id, (app, _id) => app.id == _id) != null) {
                 throw new Exception($"Applications must have a unique id. Id {id} was already taken.");
             }
@@ -105,6 +106,18 @@ namespace UIForia {
             
             onApplicationCreated?.Invoke(this);
             
+        }
+
+        private string templateRootPath;
+        public string TemplateRootPath {
+            get {
+                if (templateRootPath == null) {
+                    return UnityEngine.Application.dataPath;
+                }
+
+                return templateRootPath;
+            }
+            set { templateRootPath = value; }
         }
 
         public IStyleSystem StyleSystem => m_StyleSystem;

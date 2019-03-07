@@ -1,0 +1,14 @@
+
+
+style <Div> {
+    TextFontSize = 1;
+}
+
+style <Group> {
+    TextFontSize = 2;
+}
+
+style <Other> {
+    TextFontSize = 3;
+}
+

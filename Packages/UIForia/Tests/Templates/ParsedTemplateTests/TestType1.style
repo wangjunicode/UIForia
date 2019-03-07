@@ -1,0 +1,12 @@
+style style0 {
+    BackgroundColor = #ff0000;
+}
+
+style style1 {
+    BackgroundColor = #00ff00;
+}
+
+style style2 {
+    BackgroundColor = #0000ff;
+}
+

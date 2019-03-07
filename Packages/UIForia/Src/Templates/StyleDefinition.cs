@@ -3,7 +3,7 @@ namespace UIForia.Templates {
 
     public struct StyleDefinition {
 
-        internal const string k_EmptyAliasName = "__base__";
+        internal const string k_EmptyAliasName = null;
         
         public readonly string alias;
         public readonly string importPath;

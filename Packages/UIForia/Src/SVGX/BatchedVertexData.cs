@@ -79,6 +79,44 @@ namespace SVGX {
             return Vector4.Dot(color, new Vector4(1f, 1 / 255f, 1 / 65025.0f, 1 / 16581375.0f));
         }
 
+        private void GenerateCapStart(Vector2[] points, int count, LineCap cap, float strokeWidth, float z) {
+
+            Vector2 p0 = points[0];
+            Vector2 p1 = points[1];
+            
+            Vector3 v0 = new Vector3();
+            Vector3 v1 = new Vector3();
+            Vector3 v2 = new Vector3();
+            Vector3 v3 = new Vector3();
+
+            Vector2 toP1 = (p1 - p0).normalized;
+            Vector2 toP1Perp = new Vector2(-toP1.y, toP1.x);
+            
+            switch (cap) {
+                case LineCap.Butt:
+                    v0 = toP1Perp * strokeWidth * 0.5f;
+                    v1 = -toP1Perp * strokeWidth * 0.5f;
+                    break;
+                case LineCap.Square:
+                    break;
+                case LineCap.Round:
+                    break;
+                default:
+                    throw new ArgumentOutOfRangeException(nameof(cap), cap, null);
+            }
+            
+            positionList.Add(v0);
+            positionList.Add(v1);
+            positionList.Add(v2);
+            positionList.Add(v3);
+            
+        }
+        
+        private void GenerateJoinedPath(Vector2[] points, int count, Color color, float strokeWidth, float z) {
+          //  GenerateCapStart();
+          //  GenerateCapEnd();
+        }
+        
         private void GenerateSegmentBodies(Vector2[] points, int count, Color color, float strokeWidth, float z) {
             const int join = 0;
 
@@ -452,20 +490,20 @@ namespace SVGX {
                         if (charInfos[i].character == ' ') continue;
                         Vector2 topLeft = charInfos[i].layoutTopLeft;
                         Vector2 bottomRight = charInfos[i].layoutBottomRight;
-                        topLeft.x = topLeft.x - 2.5f;
-                        bottomRight.x = bottomRight.x + 2.5f;
-                        topLeft.y = topLeft.y - 2.5f;
-                        bottomRight.y = bottomRight.y + 2.5f;
+//                        topLeft.x = topLeft.x - 2.5f;
+//                        bottomRight.x = bottomRight.x + 2.5f;
+//                        topLeft.y = topLeft.y - 2.5f;
+//                        bottomRight.y = bottomRight.y + 2.5f;
                         
                         positionList.Add(new Vector3(p0.x + topLeft.x, -p0.y + -bottomRight.y, z)); // Bottom Left
                         positionList.Add(new Vector3(p0.x + topLeft.x, -p0.y + -topLeft.y, z)); // Top Left
                         positionList.Add(new Vector3(p0.x + bottomRight.x, -p0.y + -topLeft.y, z)); // Top Right
                         positionList.Add(new Vector3(p0.x + bottomRight.x, -p0.y + -bottomRight.y, z)); // Bottom Right
 
-                        float x = charInfos[i].uv0.x - (5 / 1024f);
-                        float y = charInfos[i].uv0.y - (5 / 1024f);
-                        float x1 = charInfos[i].uv1.x + (5 / 1024f);
-                        float y1 = charInfos[i].uv1.y + (5 / 1024f);
+                        float x = charInfos[i].uv0.x;// - (5 / 1024f);
+                        float y = charInfos[i].uv0.y; // - (5 / 1024f);
+                        float x1 = charInfos[i].uv1.x; // + (5 / 1024f);
+                        float y1 = charInfos[i].uv1.y;// + (5 / 1024f);
                         
                         uv0List.Add(new Vector4(x, y, charInfos[i].uv2.x, isStroke));
                         uv0List.Add(new Vector4(x, y1, charInfos[i].uv2.x, isStroke));

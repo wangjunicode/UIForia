@@ -21,7 +21,7 @@ public class TemplateTests {
 
     [SetUp]
     public void Setup() {
-        dummyTemplate = new ParsedTemplate(null, typeof(TestTarget), null, null, null, null, null);
+        dummyTemplate = new ParsedTemplate(null, typeof(TestTarget), null, null, null, null, null, null);
     }
 
     [Test]
@@ -123,43 +123,5 @@ public class TemplateTests {
     </UITemplate>
     ")]
     public class ThingBlerg2 : UIElement { }
-
-//    [Test]
-//    public void General_AssignTemplateRef() {
-//        MockView view = new MockView(typeof(Thing));
-//        view.Initialize();
-//        ParsedTemplate template = view.RootElement.GetTemplate();
-//        Assert.IsNotNull(template);
-//        Assert.AreEqual(template, view.RootElement.FindById("child0").GetTemplate());
-//        Assert.AreEqual(template, view.RootElement.FindById("child1").GetTemplate());
-//        Assert.AreEqual(template, view.RootElement.FindById("child2").GetTemplate());
-//    }
-//
-//    [Test]
-//    public void General_ScopedTemplateRef() {
-//        MockView view = new MockView(typeof(Thing));
-//        view.Initialize();
-//        ParsedTemplate template = view.RootElement.GetTemplate();
-//        Assert.IsNotNull(template);
-//        Assert.AreEqual(template, view.RootElement.FindById("child0").GetTemplate());
-//        Assert.AreEqual(template, view.RootElement.FindById("child1").GetTemplate());
-//        Assert.AreEqual(template, view.RootElement.FindById("child2").GetTemplate());
-//        Assert.AreEqual(template, view.RootElement.FindById("child3").GetTemplate());
-//        UIElement c3 = view.RootElement.FindById("child3");
-//        UIElement c4 = c3.FindById("child4");
-//        Assert.IsNotNull(c4.GetTemplate());
-//        Assert.AreNotEqual(template, c4.GetTemplate());
-//    }
-//
-//    [Test]
-//    public void General_GetStyleFromTemplate() {
-//        ParsedTemplate.Reset();
-//        MockView view = new MockView(typeof(Thing));
-//        view.Initialize();
-//        UITemplate t = view.RootElement.FindById("child0").GetTemplateData();
-//        UITemplate t2 = view.RootElement.FindById("child2").GetTemplateData();
-//        Assert.AreEqual(t.baseStyles[0].name, "x");
-//        Assert.AreEqual(t2.baseStyles[0].name, "y");
-//    }
 
 }

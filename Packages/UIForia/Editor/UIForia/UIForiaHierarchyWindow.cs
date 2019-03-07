@@ -158,6 +158,8 @@ namespace UIForia.Editor {
                 return;
             }
 
+            treeView.showChildrenAndId = EditorGUILayout.Toggle("Show Meta Data", treeView.showChildrenAndId);
+            
             if (needsReload) {
                 needsReload = false;
                 treeView.Reload();

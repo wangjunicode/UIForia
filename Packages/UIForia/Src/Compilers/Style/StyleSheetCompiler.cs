@@ -9,7 +9,7 @@ namespace UIForia.Compilers.Style {
 
     public class StyleSheetCompiler {
 
-        private StyleSheetImporter styleSheetImporter;
+        private readonly StyleSheetImporter styleSheetImporter;
 
         private StyleCompileContext context;
 
@@ -18,6 +18,7 @@ namespace UIForia.Compilers.Style {
         }
 
         public StyleSheet Compile(string styleId, LightList<StyleASTNode> rootNodes) {
+            // todo -- remove this allocation
             try {
                 context = new StyleSheetConstantImporter(styleSheetImporter).CreateContext(rootNodes);
             }

@@ -7,24 +7,33 @@ namespace UIForia.Compilers.Style {
 
     public class StyleSheetImporter {
 
+        public readonly Application app;
         private readonly List<string> m_CurrentlyImportingStylesheets;
         private readonly Dictionary<string, StyleSheet> m_CachedStyleSheets;
-        public readonly Application app;
-
+        private readonly StyleSheetCompiler m_Compiler;
+        
         public StyleSheetImporter(Application app) {
             this.app = app;
+            m_Compiler = new StyleSheetCompiler(this);
             m_CurrentlyImportingStylesheets = new List<string>();
             m_CachedStyleSheets = new Dictionary<string, StyleSheet>();
         }
 
-        public StyleSheet ImportStyleSheet(string id, string literalTemplate) {
-            if (m_CachedStyleSheets.TryGetValue(id, out StyleSheet sheet)) {
+        public StyleSheet ImportStyleSheetFromString(string literalTemplate) {
+            return ImportStyleSheetFromString(null, literalTemplate);
+        }
+        
+        public StyleSheet ImportStyleSheetFromString(string id, string literalTemplate) {
+            if (id != null && m_CachedStyleSheets.TryGetValue(id, out StyleSheet sheet)) {
                 return sheet;
             }
 
             try {
-                StyleSheet styleSheet = new StyleSheetCompiler(this).Compile(id, StyleParser2.Parse(literalTemplate));
-                m_CachedStyleSheets.Add(id, styleSheet);
+                StyleSheet styleSheet = m_Compiler.Compile(id, StyleParser2.Parse(literalTemplate));
+                if (id != null) {
+                    m_CachedStyleSheets.Add(id, styleSheet);
+                }
+
                 return styleSheet;
             }
             catch (ParseException ex) {
@@ -44,10 +53,14 @@ namespace UIForia.Compilers.Style {
 
             // pass 2: recursively add imported consts and compile whole file for each F(n-1) until F(1) is hit again
 
-            if (File.Exists(UnityEngine.Application.dataPath + "/" + fileName)) {
-                string contents = File.ReadAllText(UnityEngine.Application.dataPath + "/" + fileName);
+            
+            // null check is for test cases without an app so that the importer can be used stand-alone
+            string path = app == null ? UnityEngine.Application.dataPath + "/" + fileName : app.TemplateRootPath + "/" + fileName;
+
+            if (File.Exists(path)) {
+                string contents = File.ReadAllText(path);
                 m_CurrentlyImportingStylesheets.Add(fileName);
-                StyleSheet result = ImportStyleSheet(fileName, contents);
+                StyleSheet result = ImportStyleSheetFromString(fileName, contents);
                 m_CurrentlyImportingStylesheets.Remove(fileName);
                 return result;
             }
@@ -57,7 +70,7 @@ namespace UIForia.Compilers.Style {
 
         public UIStyleGroupContainer GetStyleGroupsByTagName(string idOrPath, string literalTemplate, string tagName) {
             if (literalTemplate != null) {
-                return ImportStyleSheet(idOrPath, literalTemplate).GetStyleGroupsByTagName(tagName);
+                return ImportStyleSheetFromString(idOrPath, literalTemplate).GetStyleGroupsByTagName(tagName);
             }
 
             return ImportStyleSheetFromFile(idOrPath).GetStyleGroupsByTagName(tagName);
@@ -65,7 +78,7 @@ namespace UIForia.Compilers.Style {
 
         public UIStyleGroupContainer GetStyleGroupByStyleName(string idOrPath, string literalTemplate, string styleName) {
             if (literalTemplate != null) {
-                return ImportStyleSheet(idOrPath, literalTemplate).GetStyleGroupByStyleName(styleName);
+                return ImportStyleSheetFromString(idOrPath, literalTemplate).GetStyleGroupByStyleName(styleName);
             }
 
             return ImportStyleSheetFromFile(idOrPath).GetStyleGroupByStyleName(styleName);

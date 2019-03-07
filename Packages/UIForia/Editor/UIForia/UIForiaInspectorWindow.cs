@@ -389,47 +389,36 @@ namespace UIForia.Editor {
                     ctx.Rect(x - margin.left, y + height, width + margin.Horizontal, margin.bottom);
                     ctx.Fill();
                 }
-//                Vector3 renderPosition = new Vector3(result.screenPosition.x, result.screenPosition.y, 0);
-//                Graphics.DrawMesh(mesh, new Vector3(margin.left, -margin.top),
-//                    Quaternion.identity, material, 0, camera, 0, null, false, false, false);
 
-                // todo highlight underflow scenarios, visualize this somehow
+                if (selectedElement.style.LayoutType != LayoutType.Grid) {
+                    return;
+                }
 
-//                if (selectedElement is UITextElement && (showTextBaseline || showTextDescender)) {
-//                    baselineMesh = MeshUtil.ResizeStandardUIMesh(baselineMesh, new Size(width, height + 100));
-//                    UIStyleSet style = selectedElement.style;
-//                    TMP_FontAsset asset = style.TextFontAsset;
-//                    float s = (style.TextFontSize / asset.fontInfo.PointSize) * asset.fontInfo.Scale;
-//
-//                    lineMaterial = lineMaterial ? lineMaterial : Resources.Load<Material>("Materials/UIForiaTextDebug");
-//                    float offset = TextLayoutBox.GetLineOffset(style.TextFontAsset);
-//                    if (showTextBaseline) {
-//                        lineMaterial.SetFloat(s_BaseLineKey,
-//                            offset + padding.top + border.top +
-//                            (s * style.TextFontAsset.fontInfo.Ascender));
-//                    }
-//                    else {
-//                        lineMaterial.SetFloat(s_BaseLineKey, -1);
-//                    }
-//
-//                    if (showTextDescender) {
-//                        lineMaterial.SetFloat(s_DescenderKey,
-//                            offset + padding.top + border.top +
-//                            (s * style.TextFontAsset.fontInfo.Ascender) +
-//                            (s * -style.TextFontAsset.fontInfo.Descender)
-//                        );
-//                    }
-//                    else {
-//                        lineMaterial.SetFloat(s_DescenderKey, -1);
-//                    }
-//
-//                    lineMaterial.SetColor(s_BaseLineColorKey, baseLineColor);
-//                    lineMaterial.SetColor(s_DescenderColorKey, descenderColor);
-//                    lineMaterial.SetVector(s_SizeKey, new Vector4(width, height + 100, 0, 0));
-//
-//                    Graphics.DrawMesh(baselineMesh, renderPosition + origin, Quaternion.identity, lineMaterial, 0,
-//                        camera, 0, null, false, false, false);
-//                }
+                if (!(selectedElement.Application.LayoutSystem.GetBoxForElement(selectedElement) is GridLayoutBox layoutBox)) {
+                    return;
+                }
+
+                Rect contentRect = selectedElement.layoutResult.contentRect;
+                
+                ctx.SetTransform(SVGXMatrix.TRS(selectedElement.layoutResult.screenPosition + selectedElement.layoutResult.contentRect.min, 0, Vector2.one));
+                ctx.BeginPath();
+                ctx.SetStrokeWidth(1);
+                ctx.SetStroke(Color.black);
+                
+                LightList<GridTrack> rows = layoutBox.GetRowTracks();
+                LightList<GridTrack> cols = layoutBox.GetColTracks();
+                
+                for (int i = 0; i < rows.Count; i++) {
+                    ctx.MoveTo(0, rows[i].position);
+                    ctx.LineTo(contentRect.width, rows[i].position);
+                }
+
+                for (int i = 0; i < cols.Count; i++) {
+                    ctx.MoveTo(cols[i].position, 0);
+                    ctx.LineTo(cols[i].position, contentRect.height);
+                }
+                
+                ctx.Stroke();
             }
         }
 
@@ -587,7 +576,7 @@ namespace UIForia.Editor {
         private void DrawStyles() {
             UIStyleSet styleSet = selectedElement.style;
 
-            List<UIStyleGroupContainer> baseStyles = styleSet.GetBaseStyles();
+            IList<UIStyleGroupContainer> baseStyles = styleSet.GetBaseStyles();
 
             float labelWidth = EditorGUIUtility.labelWidth;
             EditorGUIUtility.labelWidth = 100;

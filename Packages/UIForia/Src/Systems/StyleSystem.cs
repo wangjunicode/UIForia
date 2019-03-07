@@ -46,7 +46,7 @@ namespace UIForia.Systems {
 
             element.style.styleSystem = this;
 
-            element.style.SetStyleGroups(baseStyles);
+            element.style.Initialize(baseStyles);
 
             if (element.children != null) {
                 for (int i = 0; i < element.children.Count; i++) {

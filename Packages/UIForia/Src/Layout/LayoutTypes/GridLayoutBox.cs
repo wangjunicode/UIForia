@@ -42,6 +42,14 @@ namespace UIForia.Layout.LayoutTypes {
             this.m_Placements = new List<GridPlacement>();
         }
 
+        internal LightList<GridTrack> GetRowTracks() {
+            return m_RowTracks;
+        }
+        
+        internal LightList<GridTrack> GetColTracks() {
+            return m_ColTracks;
+        }
+        
         public override void OnInitialize() {
             m_IsPlacementDirty = true;
         }
@@ -69,7 +77,7 @@ namespace UIForia.Layout.LayoutTypes {
             }
 
             ResolveColumnTrackWidths(0);
-            
+            PositionColumnTracks();
             return Mathf.Max(ApplyColumnCrossAxisAlignment(true), m_ColTracks[m_ColTracks.Count - 1].End);
         }
 
@@ -117,6 +125,7 @@ namespace UIForia.Layout.LayoutTypes {
             }
 
             ResolveRowTrackHeights(0); // resolve with 0 since we have no size yet
+            PositionRowTracks();
             return Mathf.Max(m_RowTracks[m_RowTracks.Count - 1].End, ApplyRowCrossAxisAlignment(false));
         }
 
@@ -421,8 +430,8 @@ namespace UIForia.Layout.LayoutTypes {
 
             for (int i = 0; i < m_Placements.Count; i++) {
                 GridPlacement placement = m_Placements[i];
-
-                LayoutBox child = children[i];
+                int idx = placement.index;
+                LayoutBox child = children[idx];
                 GridItem colItem = placement.colItem;
 
                 GridAxisAlignment alignment = child.style.GridItemColSelfAlignment;
@@ -434,38 +443,42 @@ namespace UIForia.Layout.LayoutTypes {
                 float spannedTracksWidth = m_ColTracks[colItem.trackStart + colItem.trackSpan - 1].End - x;
 
                 float finalX;
-                float finalWidth = m_Widths[i].outputSize;
+                float finalWidth = m_Widths[idx].outputSize;
 
                 switch (alignment) {
                     case GridAxisAlignment.Center:
-                        finalX = x + (spannedTracksWidth * 0.5f) - (m_Widths[i].outputSize * 0.5f);
+                        // centering ignores margin, otherwise a 'center' operation doesn't really make sense
+                        finalWidth -= m_Widths[idx].TotalMargin;
+                        finalX = x + (spannedTracksWidth * 0.5f) - (finalWidth * 0.5f);
                         break;
 
                     case GridAxisAlignment.End:
-                        finalX = x + spannedTracksWidth - m_Widths[i].outputSize - m_Widths[placement.index].marginEnd;
+                        finalX = x + spannedTracksWidth - finalWidth - m_Widths[placement.index].marginEnd;
+                        finalWidth -= m_Widths[idx].TotalMargin;
                         break;
 
                     case GridAxisAlignment.Start:
-                        finalX = x + m_Widths[placement.index].marginStart;
+                        finalX = x + m_Widths[idx].marginStart;
+                        finalWidth -= m_Widths[idx].TotalMargin;
                         break;
 
                     case GridAxisAlignment.Grow:
-                        finalX = x + m_Widths[placement.index].marginStart;
+                        finalX = x + m_Widths[idx].marginStart;
                         if (finalWidth <= spannedTracksWidth) {
-                            finalWidth = spannedTracksWidth - m_Widths[placement.index].TotalMargin;
+                            finalWidth = spannedTracksWidth - m_Widths[idx].TotalMargin;
                         }
 
                         break;
                     case GridAxisAlignment.Shrink:
-                        finalX = x + m_Widths[placement.index].marginStart;
+                        finalX = x + m_Widths[idx].marginStart;
                         if (finalWidth > spannedTracksWidth) {
-                            finalWidth = spannedTracksWidth - m_Widths[placement.index].TotalMargin;
+                            finalWidth = spannedTracksWidth - m_Widths[idx].TotalMargin;
                         }
 
                         break;
                     case GridAxisAlignment.Fit:
-                        finalX = x + m_Widths[placement.index].marginStart;
-                        finalWidth = spannedTracksWidth - m_Widths[placement.index].TotalMargin;
+                        finalX = x + m_Widths[idx].marginStart;
+                        finalWidth = spannedTracksWidth - m_Widths[idx].TotalMargin;
                         break;
                     default:
                         finalX = x;
@@ -474,9 +487,7 @@ namespace UIForia.Layout.LayoutTypes {
 
                 
                 if (applySize) {
-                    float marginStart = m_Widths[i].marginStart;
-                    float marginEnd = m_Widths[i].marginEnd;
-                    child.SetAllocatedXAndWidth(finalX + paddingBorderLeft, finalWidth - marginStart - marginEnd);
+                    child.SetAllocatedXAndWidth(finalX + paddingBorderLeft, finalWidth);
                 }
 
                 maxXPlusWidth = maxXPlusWidth < finalX + finalWidth ? finalX + finalWidth : maxXPlusWidth;

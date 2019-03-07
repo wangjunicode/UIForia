@@ -1,4 +1,5 @@
 using NUnit.Framework;
+using Tests.Mocks;
 using UIForia.Compilers.Style;
 using UIForia.Parsing.Style.AstNodes;
 using UIForia.Util;

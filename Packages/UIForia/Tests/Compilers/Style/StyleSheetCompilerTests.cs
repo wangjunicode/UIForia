@@ -903,4 +903,34 @@ style xyz {
         var styleGroup = styleSheet.styleGroupContainers;
         Assert.AreEqual(Color.red, styleGroup[0].groups[0].normal.BackgroundColor);
     }
+
+    [Test]
+    public void StyleSheetContainers() {
+        LightList<StyleASTNode> nodes = StyleParser2.Parse(@"
+          export const red = red;
+
+          style styleRoot {
+               
+              TextColor = @red;
+              TextFontAsset = url(""Gotham-Medium SDF"");
+              TextFontStyle = bold italic superscript underline highlight smallcaps;
+              TextFontSize = 14;
+              TextAlignment = Center;
+              [attr:attr0] {
+              
+                BackgroundColor = #ff0000aa;
+
+              }
+
+              [hover] {
+                TextFontSize = 18;
+              }
+          }
+
+        ".Trim());
+        StyleSheet styleSheet = NewStyleSheetCompiler().Compile("test", nodes);
+        Assert.AreEqual(1, styleSheet.styleGroupContainers.Length);     
+        Assert.AreEqual(2, styleSheet.styleGroupContainers[0].groups.Count);     
+    }
+    
 }

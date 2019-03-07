@@ -3,11 +3,12 @@ using UIForia.Rendering;
 
 namespace UIForia.Compilers.Style {
 
+    // can this become a struct?
     public class UIStyleGroupContainer {
 
         public string name;
         public StyleType styleType;
-        public IReadOnlyList<UIStyleGroup> groups;
+        public IReadOnlyList<UIStyleGroup> groups; // can this become an int[]?
 
         public readonly bool hasAttributeStyles;
         

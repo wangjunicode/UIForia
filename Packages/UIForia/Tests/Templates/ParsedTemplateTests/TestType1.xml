@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<UITemplate>
+
+    <Style path="Templates/ParsedTemplateTests/TestType0.style" alias="t0"/>
+    <Style path="Templates/ParsedTemplateTests/TestType1.style" alias="t1"/>
+
+    <Contents>
+
+    </Contents>
+
+</UITemplate>

@@ -312,7 +312,7 @@ namespace UIForia.Editor {
                 ctx.FillRect(contentX, contentY, contentWidth, contentHeight);
 
                 float paddingHorizontalWidth = width - padding.Horizontal - border.left;
-                float paddingVerticalHeight = height - padding.Vertical;
+                float paddingVerticalHeight = height - border.Vertical;
                 
                 ctx.SetFill(paddingColor);
                 if (padding.top > 0) {
@@ -733,8 +733,9 @@ namespace UIForia.Editor {
                     return DrawFloat(property, isEditable);
 
                 case StylePropertyId.BackgroundImage:
-                case StylePropertyId.Cursor:
                     return DrawTextureAsset(property, isEditable);
+                case StylePropertyId.Cursor:
+                    return DrawCursor(property, isEditable);
 
                 case StylePropertyId.Opacity:
                     return DrawFloat(property, isEditable);
@@ -891,6 +892,22 @@ namespace UIForia.Editor {
             }
 
             return StyleProperty.Unset(property.propertyId);
+        }
+
+        private static StyleProperty DrawCursor(StyleProperty property, bool isEditable) {
+            GUI.enabled = isEditable;
+            GUILayout.BeginHorizontal();
+            Texture2D texture = property.AsCursorStyle?.texture;
+
+            EditorGUILayout.BeginHorizontal();
+            EditorGUILayout.PrefixLabel(StyleUtil.GetPropertyName(property));
+            Texture2D newTexture = (Texture2D) EditorGUILayout.ObjectField(texture, typeof(Texture2D), false);
+            EditorGUILayout.EndHorizontal();
+
+            GUI.enabled = true;
+            GUILayout.EndHorizontal();
+            // todo fix return value
+            return property;
         }
 
         private static ValueTuple<int[], GUIContent[]> GetEnumValues<T>() {

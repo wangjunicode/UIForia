@@ -188,7 +188,7 @@ namespace UIForia.Layout.LayoutTypes {
 
         protected void AdoptChildren(LayoutBox box) {
             for (int i = 0; i < box.children.Count; i++) {
-                children.Add(box.children[i]);
+                OnChildAdded(box.children[i]);
             }
 
             RequestContentSizeChangeLayout();

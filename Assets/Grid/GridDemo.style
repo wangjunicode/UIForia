@@ -1,17 +1,60 @@
+const cellMargin = 20px;
+
+style mb50 {
+    MarginBottom = 50px;
+}
+
+style m10 {
+    Margin = 11px;
+}
+
+style cell {
+    BackgroundColor = rgba(200, 100, 160, 200);
+}
+
+style cell-center {
+    GridLayoutColAlignment = Center;
+}
+
+style grid-horizontal {
+    LayoutType = Grid;
+    GridLayoutDirection = Horizontal;
+    MinHeight = 50px;
+    GridLayoutCrossAxisAutoSize = 1mx;
+}
+style grid-vertical {
+    LayoutType = Grid;
+    GridLayoutDirection = Vertical;
+    GridLayoutCrossAxisAutoSize = 1mx;
+}
+
+style oddPadding {
+    Padding = 12px 29px 18px 21px;
+}
+
+style col3layout {
+    GridLayoutColTemplate = 300px 220px 200px;
+}
+
+style row3layout {
+    GridLayoutRowTemplate = 300px 220px 200px;
+}
+
+
 style grid-container {
     LayoutType = Grid;
     GridLayoutDirection = Horizontal;
-    PreferredSize = 1040px, 800px;
+    PreferredSize = 1040px 800px;
     BackgroundColor = white;
-    GridLayoutRowTemplate = 480px, 50px, 1mx, 1mx, 1mx;
-    GridLayoutColTemplate = 1mx, 1mx, 1mx, 1mx, 1mx, 1mx;
+    GridLayoutRowTemplate = 480px 50px 1mx 1mx 1mx;
+    GridLayoutColTemplate = 1mx 1mx 1mx 1mx 1mx 1mx;
         
     GridLayoutDensity = dense;
     //GridLayoutMainAxisAutoSize = 1mx;
     //GridLayoutMainAxisAutoSize = 400px;
 }
 
-style more {
+style borderRadiusTest {
     BorderColor = red;
     BorderRadius = 50%;
 }
@@ -27,10 +70,9 @@ style grid-cell {
 }
 
 style background {
-    BackgroundColor = white;
     BackgroundImage = url("Images/backgroundimg");
     GridItemColSpan = 6;
-    PreferredSize = 1040px, 520px;
+    PreferredSize = 1040px 520px;
     ZIndex = 0;
 }
 
@@ -49,7 +91,7 @@ style concept-hover {
     PreferredHeight = 80px;
     Padding = 10px;
     // TODO make px units work for this property
-    TextFontSize = 28;
+    TextFontSize = 18;
     TextColor = rgb(255, 255, 255);
     Overflow = hidden;
 }
@@ -57,7 +99,7 @@ style concept-hover {
 style logo {
     BorderBottom = 1px;
     //GridItemRowStart = 0;
-    PreferredSize = 1040px, 480px;
+    PreferredSize = 1040px 480px;
     GridItemColSpan = 6;
     GridItemColSelfAlignment = Shrink;
     BackgroundColor = white;
@@ -101,8 +143,4 @@ style e {
 style f {
     //GridItemRowStart = 1;
 
-}
-
-style g {
-  
 }

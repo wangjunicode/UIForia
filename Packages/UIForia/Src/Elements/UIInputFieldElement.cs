@@ -38,15 +38,19 @@ namespace UIForia.Elements {
             FlexLayoutMainAxisAlignment = Center;
         }
 
+        style caret {
+            PreferredSize = 1px 24px;
+        }
+
     </Style>
     
     <Contents style='container'>
         
-        <Graphic if='false' x-id=""highlight"" style=""highlight""/>
+        <Div if='false' x-id=""highlight"" style=""highlight""/>
         
         <Text style='text' x-id=""text""/>
         
-        <Graphic if='false' x-id='cursor' style='ignored'/>
+        <Div if='false' x-id='cursor' style='ignored caret'/>
         
 </Contents>
 
@@ -60,8 +64,8 @@ namespace UIForia.Elements {
         public float caretBlinkRate = 0.85f;
         public event Action<string> onValueChanged;
 
-        private UIGraphicElement caret;
-        private UIGraphicElement highlight;
+        private UIContainerElement caret;
+        private UIContainerElement highlight;
         private UITextElement textElement;
         private UITextElement.SelectionRange selectionRange = new UITextElement.SelectionRange(0, UITextElement.TextEdge.Right);
         private UITextElement.SelectionRange previousSelectionRange = new UITextElement.SelectionRange(0, UITextElement.TextEdge.Right);
@@ -73,7 +77,6 @@ namespace UIForia.Elements {
         public UIInputFieldElement() : this(true) {
             
         }
-        
         
         protected internal UIInputFieldElement(bool isBuiltIn) {
             if (isBuiltIn) flags |= UIElementFlags.BuiltIn;
@@ -95,12 +98,10 @@ namespace UIForia.Elements {
 
         public override void OnCreate() {
             text = text ?? string.Empty;
-            caret = FindById<UIGraphicElement>("cursor");
-            highlight = FindById<UIGraphicElement>("highlight");
+            caret = FindById<UIContainerElement>("cursor");
+            highlight = FindById<UIContainerElement>("highlight");
             textElement = FindById<UITextElement>("text");
 
-            caret.rebuildGeometry = UpdateCaretVertices;
-            highlight.rebuildGeometry = UpdateHighlightVertices;
             caret.SetEnabled(false);
             highlight.SetEnabled(false);
             textElement.SetText(text);
@@ -269,21 +270,10 @@ namespace UIForia.Elements {
             selectionRange = textElement.SelectToPoint(selectionRange, mouse);
         }
 
-        private void UpdateHighlightVertices(Mesh obj) {
-            if (selectionRange.HasSelection) {
-                highlight.SetMesh(textElement.GetHighlightMesh(selectionRange));
-            }
-        }
-
-        private void UpdateCaretVertices(Mesh obj) {
-            caret.SetMesh(MeshUtil.CreateStandardUIMesh(new Size(1f, textElement.GetLineHeight())));
-        }
-
         public void Focus() {
             hasFocus = true;
             blinkStartTime = Time.unscaledTime;
             caret.SetEnabled(true);
-            caret.MarkGeometryDirty();
         }
 
         public void Blur() {

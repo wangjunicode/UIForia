@@ -114,6 +114,8 @@ namespace UIForia.Systems {
             UIElement element = view.RootElement;
             LayoutResult layoutResult = element.layoutResult;
             stack.Push(element);
+            
+            m_VisibleElements.Add(element);
 
             if (root.IsIgnored) {
                 root.allocatedWidth = root.GetWidths().clampedSize;
@@ -165,6 +167,10 @@ namespace UIForia.Systems {
                     element = current.children[i];
 
                     LayoutBox box = m_LayoutBoxMap.GetOrDefault(element.id);
+                    
+                    if (!element.isEnabled) {
+                        continue;
+                    }
 
                     if (box == null) {
                         stack.Push(element);
@@ -190,7 +196,6 @@ namespace UIForia.Systems {
                     }
 
                     layoutResult = element.layoutResult;
-                    Rect oldScreenRect = layoutResult.ScreenRect;
 
                     LayoutBox parentBox = box.parent;
                     Vector2 scrollOffset = new Vector2();
@@ -298,27 +303,22 @@ namespace UIForia.Systems {
                     element.layoutResult = layoutResult;
 
                     stack.Push(element);
+                    if (cullResult == CullResult.NotCulled) {
+                        m_VisibleElements.Add(element);
+                    }
                 }
             }
 
             // TODO optimize this to only sort if styles changed
-            m_Elements.Sort(comparer);
+            m_VisibleElements.Sort(comparer);
 
-            m_VisibleElements.EnsureCapacity(m_Elements.Count);
-
-            int visibleIdx = 0;
             UIElement[] elements = m_Elements.Array;
             for (int i = 0; i < m_Elements.Count; i++) {
                 UIElement e = elements[i];
                 LayoutResult lr = e.layoutResult;
-                lr.zIndex = (i + 1) * 1000; // todo -- verify that this is actually needed
+                lr.zIndex = (i + 1); 
                 e.layoutResult = lr;
-                if (lr.cullState == CullResult.NotCulled) {
-                    m_VisibleElements[visibleIdx++] = e;
-                }
             }
-
-            m_VisibleElements.Count = visibleIdx;
 
             UpdateScrollbarLayouts();
             StackPool<UIElement>.Release(stack);
@@ -358,10 +358,10 @@ namespace UIForia.Systems {
 
                     switch (transformBehaviorX) {
                         case TransformBehavior.AnchorMinOffset:
-                            localPosition.x = box.AnchorLeft + box.TransformX;
+                            localPosition.x = box.TransformX;
                             break;
                         case TransformBehavior.AnchorMaxOffset:
-                            localPosition.x = box.AnchorRight + box.TransformX;
+                            localPosition.x = box.TransformX;
                             break;
                         case TransformBehavior.LayoutOffset:
                             localPosition.x = box.TransformX;
@@ -373,10 +373,10 @@ namespace UIForia.Systems {
 
                     switch (transformBehaviorY) {
                         case TransformBehavior.AnchorMinOffset:
-                            localPosition.y = box.AnchorTop + box.TransformY;
+                            localPosition.y = box.TransformY;
                             break;
                         case TransformBehavior.AnchorMaxOffset:
-                            localPosition.y = box.AnchorBottom + box.TransformY;
+                            localPosition.y = box.TransformY;
                             break;
                         case TransformBehavior.LayoutOffset:
                             localPosition.y = box.TransformY;
@@ -391,10 +391,10 @@ namespace UIForia.Systems {
                 case LayoutBehavior.Normal:
                     switch (transformBehaviorX) {
                         case TransformBehavior.AnchorMinOffset:
-                            localPosition.x = box.AnchorLeft + box.TransformX;
+                            localPosition.x = box.TransformX;
                             break;
                         case TransformBehavior.AnchorMaxOffset:
-                            localPosition.x = box.AnchorRight + box.TransformX;
+                            localPosition.x = box.TransformX;
                             break;
                         case TransformBehavior.LayoutOffset:
                             localPosition.x = box.localX + box.TransformX;
@@ -406,10 +406,10 @@ namespace UIForia.Systems {
 
                     switch (transformBehaviorY) {
                         case TransformBehavior.AnchorMinOffset:
-                            localPosition.y = box.AnchorTop + box.TransformY;
+                            localPosition.y = box.TransformY;
                             break;
                         case TransformBehavior.AnchorMaxOffset:
-                            localPosition.y = box.AnchorBottom + box.TransformY;
+                            localPosition.y = box.TransformY;
                             break;
                         case TransformBehavior.LayoutOffset:
                             localPosition.y = box.localY + box.TransformY;
@@ -829,9 +829,11 @@ namespace UIForia.Systems {
                 retn = ListPool<UIElement>.Get();
             }
 
-            for (int i = 0; i < m_Elements.Count; i++) {
-                LayoutResult layoutResult = m_Elements[i].layoutResult;
-                UIElement element = m_Elements[i];
+            UIElement[] elements = m_VisibleElements.Array;
+            int elementCount = m_VisibleElements.Count;
+            for (int i = 0; i < elementCount; i++) {
+                UIElement element = elements[i];
+                LayoutResult layoutResult = element.layoutResult;
 
                 // todo make this better
                 if (element.isDisabled || !layoutResult.ScreenRect.ContainOrOverlap(point)) {
@@ -857,7 +859,7 @@ namespace UIForia.Systems {
                 }
 
                 if (ptr == null) {
-                    retn.Add(m_Elements[i]);
+                    retn.Add(element);
                 }
             }
 

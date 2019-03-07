@@ -27,15 +27,15 @@ namespace UIForia.Layout.LayoutTypes {
 
         private readonly HashSet<int> m_Occupied;
 
-        private readonly List<GridItemSizes> m_Widths;
-        private readonly List<GridItemSizes> m_Heights;
+        private readonly LightList<GridItemSizes> m_Widths;
+        private readonly LightList<GridItemSizes> m_Heights;
 
         private bool m_IsPlacementDirty;
 
         public GridLayoutBox(UIElement element) : base(element) {
             this.m_IsPlacementDirty = true;
-            this.m_Widths = new List<GridItemSizes>(4);
-            this.m_Heights = new List<GridItemSizes>(4);
+            this.m_Widths = new LightList<GridItemSizes>(4);
+            this.m_Heights = new LightList<GridItemSizes>(4);
             this.m_RowTracks = new LightList<GridTrack>();
             this.m_ColTracks = new LightList<GridTrack>();
             this.m_Occupied = new HashSet<int>();
@@ -53,15 +53,18 @@ namespace UIForia.Layout.LayoutTypes {
 
             Place();
 
+
             for (int i = 0; i < children.Count; i++) {
                 LayoutBox layoutBox = children[i];
+                float marginStart = layoutBox.GetMarginLeft();
+                float marginEnd = layoutBox.GetMarginRight();
                 LayoutBoxSize layoutBoxSize = layoutBox.GetWidths();
                 m_Widths[i] = new GridItemSizes() {
                     minSize = layoutBoxSize.minSize,
                     maxSize = layoutBoxSize.maxSize,
-                    marginStart = layoutBox.GetMarginLeft(),
-                    marginEnd = layoutBox.GetMarginRight(),
-                    outputSize = layoutBoxSize.clampedSize
+                    marginStart = marginStart,
+                    marginEnd =  marginEnd,
+                    outputSize = layoutBoxSize.clampedSize + marginStart + marginEnd
                 };
             }
 
@@ -83,12 +86,14 @@ namespace UIForia.Layout.LayoutTypes {
             for (int i = 0; i < children.Count; i++) {
                 LayoutBox layoutBox = children[i];
                 LayoutBoxSize layoutBoxSize = layoutBox.GetWidths();
+                float marginStart = layoutBox.GetMarginLeft();
+                float marginEnd = layoutBox.GetMarginRight();
                 m_Widths[i] = new GridItemSizes() {
                     minSize = layoutBoxSize.minSize,
                     maxSize = layoutBoxSize.maxSize,
-                    marginStart = layoutBox.GetMarginLeft(),
-                    marginEnd = layoutBox.GetMarginRight(),
-                    outputSize = layoutBoxSize.clampedSize
+                    marginStart = marginStart,
+                    marginEnd = marginEnd,
+                    outputSize = layoutBoxSize.clampedSize + marginStart + marginEnd
                 };
             }
 
@@ -99,12 +104,15 @@ namespace UIForia.Layout.LayoutTypes {
             for (int i = 0; i < children.Count; i++) {
                 LayoutBox layoutBox = children[i];
                 LayoutBoxSize layoutBoxSize = layoutBox.GetHeights(m_Widths[i].outputSize);
+                float marginStart = layoutBox.GetMarginTop(m_Widths[i].outputSize);
+                float marginEnd = layoutBox.GetMarginBottom(m_Widths[i].outputSize);
+                
                 m_Heights[i] = new GridItemSizes() {
                     minSize = layoutBoxSize.minSize,
                     maxSize = layoutBoxSize.maxSize,
-                    marginStart = layoutBox.GetMarginTop(m_Widths[i].outputSize),
-                    marginEnd = layoutBox.GetMarginBottom(m_Widths[i].outputSize),
-                    outputSize = layoutBoxSize.clampedSize
+                    marginStart = marginStart,
+                    marginEnd = marginEnd,
+                    outputSize = layoutBoxSize.clampedSize + marginStart + marginEnd
                 };
             }
 
@@ -127,7 +135,7 @@ namespace UIForia.Layout.LayoutTypes {
                 GridItem colItem = m_Placements[childIndex].colItem;
                 int pieces = 0; // never 0 because we only call this function for intrinsic sized tracks
                 GridItemSizes gridItemSizes = m_Widths[childIndex];
-                float baseWidth = gridItemSizes.outputSize + gridItemSizes.TotalMargin;
+                float baseWidth = gridItemSizes.outputSize;
 
                 for (int j = colItem.trackStart; j < colItem.trackStart + colItem.trackSpan; j++) {
                     GridTrack spanned = m_ColTracks[j];
@@ -167,7 +175,7 @@ namespace UIForia.Layout.LayoutTypes {
                 int childIndex = track.spanningItems[i];
                 GridItem rowItem = m_Placements[childIndex].rowItem;
                 int pieces = 0; // never 0 because we only call this function for intrinsic sized tracks
-                float baseHeight = m_Heights[childIndex].outputSize + m_Heights[childIndex].TotalMargin;
+                float baseHeight = m_Heights[childIndex].outputSize;
 
                 for (int j = rowItem.trackStart; j < rowItem.trackStart + rowItem.trackSpan; j++) {
                     GridTrack spanned = m_RowTracks[j];
@@ -208,7 +216,7 @@ namespace UIForia.Layout.LayoutTypes {
                 GridItem colItem = m_Placements[childIndex].colItem;
                 int pieces = 0; // never 0 because we only call this function for intrinsic sized tracks
                 GridItemSizes gridItemSizes = m_Widths[childIndex];
-                float baseWidth = gridItemSizes.outputSize + gridItemSizes.TotalMargin;
+                float baseWidth = gridItemSizes.outputSize;
 
                 for (int j = colItem.trackStart; j < colItem.trackStart + colItem.trackSpan; j++) {
                     GridTrack spanned = m_ColTracks[j];
@@ -245,7 +253,7 @@ namespace UIForia.Layout.LayoutTypes {
                 int childIndex = track.spanningItems[i];
                 GridItem rowItem = m_Placements[childIndex].rowItem;
                 int pieces = 0; // never 0 because we only call this function for intrinsic sized tracks
-                float baseHeight = m_Heights[childIndex].outputSize + m_Heights[childIndex].TotalMargin;
+                float baseHeight = m_Heights[childIndex].outputSize;
 
                 for (int j = rowItem.trackStart; j < rowItem.trackStart + rowItem.trackSpan; j++) {
                     GridTrack spanned = m_RowTracks[j];
@@ -407,7 +415,8 @@ namespace UIForia.Layout.LayoutTypes {
 
         private float ApplyColumnCrossAxisAlignment(bool applySize) {
             GridAxisAlignment colAlignment = style.GridLayoutColAlignment;
-
+            float paddingBorderLeft = PaddingLeft + BorderLeft;
+            
             float maxXPlusWidth = 0;
 
             for (int i = 0; i < m_Placements.Count; i++) {
@@ -463,8 +472,11 @@ namespace UIForia.Layout.LayoutTypes {
                         break;
                 }
 
+                
                 if (applySize) {
-                    child.SetAllocatedXAndWidth(finalX, finalWidth);
+                    float marginStart = m_Widths[i].marginStart;
+                    float marginEnd = m_Widths[i].marginEnd;
+                    child.SetAllocatedXAndWidth(finalX + paddingBorderLeft, finalWidth - marginStart - marginEnd);
                 }
 
                 maxXPlusWidth = maxXPlusWidth < finalX + finalWidth ? finalX + finalWidth : maxXPlusWidth;
@@ -493,7 +505,9 @@ namespace UIForia.Layout.LayoutTypes {
                 float spannedTracksHeight = m_RowTracks[rowItem.trackStart + rowItem.trackSpan - 1].End - y;
 
                 float finalY;
-                float finalHeight = m_Heights[i].outputSize;
+                float marginStart = m_Heights[i].marginStart;
+                float marginEnd = m_Heights[i].marginEnd;
+                float finalHeight = m_Heights[i].outputSize - marginStart - marginEnd;
 
                 switch (alignment) {
                     case GridAxisAlignment.Center:
@@ -511,20 +525,20 @@ namespace UIForia.Layout.LayoutTypes {
                     case GridAxisAlignment.Grow:
                         finalY = y + m_Heights[placement.index].marginStart;
                         if (spannedTracksHeight > finalHeight) {
-                            finalHeight = spannedTracksHeight - m_Heights[placement.index].TotalMargin;
+                            finalHeight = spannedTracksHeight - marginEnd - marginStart;
                         }
 
                         break;
 
                     case GridAxisAlignment.Fit:
                         finalY = y + m_Heights[placement.index].marginStart;
-                        finalHeight = spannedTracksHeight - m_Heights[placement.index].TotalMargin;
+                        finalHeight = spannedTracksHeight;
                         break;
 
                     case GridAxisAlignment.Shrink:
                         finalY = y + m_Heights[placement.index].marginStart;
                         if (spannedTracksHeight < finalHeight) {
-                            finalHeight = spannedTracksHeight - m_Heights[placement.index].TotalMargin;
+                            finalHeight = spannedTracksHeight;
                         }
 
                         break;
@@ -534,12 +548,15 @@ namespace UIForia.Layout.LayoutTypes {
                         break;
                 }
 
+                float paddingBorderTop = PaddingTop + BorderTop;
+                
                 if (applySizes) {
-                    child.SetAllocatedYAndHeight(finalY, finalHeight);
+                    
+                    child.SetAllocatedYAndHeight(finalY + paddingBorderTop, finalHeight);
                 }
 
-                if (finalY + finalHeight > maxYPlusHeight) {
-                    maxYPlusHeight = finalY + finalHeight;
+                if (finalY + finalHeight + marginEnd > maxYPlusHeight) {
+                    maxYPlusHeight = finalY + finalHeight + marginEnd;
                 }
             }
 
@@ -576,12 +593,14 @@ namespace UIForia.Layout.LayoutTypes {
             for (int i = 0; i < children.Count; i++) {
                 LayoutBox layoutBox = children[i];
                 LayoutBoxSize layoutBoxSize = layoutBox.GetWidths();
+                float marginStart = layoutBox.GetMarginLeft();
+                float marginEnd = layoutBox.GetMarginRight();
                 m_Widths[i] = new GridItemSizes() {
                     minSize = layoutBoxSize.minSize,
                     maxSize = layoutBoxSize.maxSize,
-                    marginStart = layoutBox.GetMarginLeft(),
-                    marginEnd = layoutBox.GetMarginRight(),
-                    outputSize = layoutBoxSize.clampedSize
+                    marginStart = marginStart,
+                    marginEnd = marginEnd,
+                    outputSize = layoutBoxSize.clampedSize + marginStart + marginEnd
                 };
             }
 
@@ -592,12 +611,14 @@ namespace UIForia.Layout.LayoutTypes {
             for (int i = 0; i < children.Count; i++) {
                 LayoutBox layoutBox = children[i];
                 LayoutBoxSize layoutBoxSize = layoutBox.GetHeights(m_Widths[i].outputSize);
+                float marginStart = layoutBox.GetMarginTop(m_Widths[i].outputSize);
+                float marginEnd = layoutBox.GetMarginBottom(m_Widths[i].outputSize);
                 m_Heights[i] = new GridItemSizes() {
                     minSize = layoutBoxSize.minSize,
                     maxSize = layoutBoxSize.maxSize,
-                    marginStart = layoutBox.GetMarginTop(m_Widths[i].outputSize),
-                    marginEnd = layoutBox.GetMarginBottom(m_Widths[i].outputSize),
-                    outputSize = layoutBoxSize.clampedSize
+                    marginStart = marginStart,
+                    marginEnd = marginEnd,
+                    outputSize = layoutBoxSize.clampedSize + marginStart + marginEnd
                 };
             }
 
@@ -607,7 +628,19 @@ namespace UIForia.Layout.LayoutTypes {
             float maxHeight = ApplyRowCrossAxisAlignment(true);
             actualWidth = Mathf.Max(maxWidth, m_ColTracks[m_ColTracks.Count - 1].End);
             actualHeight = Mathf.Max(maxHeight, m_RowTracks[m_RowTracks.Count - 1].End);
-            
+            if (allocatedWidth > actualWidth) {
+                actualWidth = allocatedWidth;
+            }
+            else {
+                actualWidth = actualWidth + PaddingHorizontal + BorderHorizontal;
+            }
+
+            if (allocatedHeight > actualHeight) {
+                actualHeight = allocatedHeight;
+            }
+            else {
+                actualHeight = actualHeight + PaddingVertical + BorderVertical;
+            }
         }
 
         private float ResolveFixedWidthMeasurement(GridTrackSize size, SizeType sizeType) {

@@ -533,6 +533,16 @@ namespace SVGX {
             Matrix4x4 originMatrix = OriginMatrix;
 
             int lastTextureId = styles[renderShapeArray[0].styleId].fillTextureId;
+
+            for (int i = 0; i < count; i++) {
+                SVGXRenderShape renderShape = renderShapeArray[i];
+                int currentTextureId = styles[renderShape.styleId].fillTextureId;
+                if (currentTextureId != -1) {
+                    lastTextureId = currentTextureId;
+                    break;
+                }
+            }
+
             Material material = batchedTransparentPool.GetAndQueueForRelease();
             Material fontMaterial = null;
 
@@ -545,7 +555,7 @@ namespace SVGX {
 
                 bool fontChanged = false;
 
-                bool textureChanged = currentTextureId != -1 && lastTextureId != 1 && currentTextureId != lastTextureId;
+                bool textureChanged = currentTextureId != -1 && currentTextureId != lastTextureId;
 
                 if (renderShape.shape.type == SVGXShapeType.Text) {
                     // if we have a current font and stuff to render with it, draw it
@@ -554,15 +564,12 @@ namespace SVGX {
                 }
 
                 if (fontChanged || textureChanged) {
-                    bool mustDraw = fontChanged && fontMaterial != null;
 
-                    if (mustDraw) {
-                        UpdateFontAtlas(material, fontMaterial);
-                        material.SetTexture(s_MainTexKey, textureMap.GetOrDefault(lastTextureId));
-                        DrawMesh(batchedVertexData.FillMesh(), originMatrix, material);
-                        batchedVertexData = vertexDataPool.GetAndQueueForRelease();
-                        material = batchedTransparentPool.GetAndQueueForRelease();
-                    }
+                    UpdateFontAtlas(material, fontMaterial);
+                    material.SetTexture(s_MainTexKey, textureMap.GetOrDefault(lastTextureId));
+                    DrawMesh(batchedVertexData.FillMesh(), originMatrix, material);
+                    batchedVertexData = vertexDataPool.GetAndQueueForRelease();
+                    material = batchedTransparentPool.GetAndQueueForRelease();
 
                     lastTextureId = currentTextureId;
 

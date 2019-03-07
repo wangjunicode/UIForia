@@ -69,7 +69,10 @@ namespace UIForia.Systems {
             }
 
             m_ChangeSets.ForEach(this, (id, changeSet, self) => {
-                self.onStylePropertyChanged.Invoke(changeSet.element, changeSet.changes);
+                
+                if (changeSet.element.isEnabled) {
+                    self.onStylePropertyChanged.Invoke(changeSet.element, changeSet.changes);
+                }
 
                 LightListPool<StyleProperty>.Release(ref changeSet.changes);
                 changeSet.element = null;

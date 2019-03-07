@@ -1,29 +1,66 @@
 <?xml version="1.0" encoding="utf-8"?>
 <UITemplate>
     <Style path="Grid/GridDemo.style"/>
-    <Contents style="grid-container">
+    <Using namespace="UnityEngine"/>
 
-        <Group x-id="concept-menu" style="concept-hover" onMouseEnter="OnHover()">
-            <Group>Features</Group>
-            <Group>Theory</Group>
-            <Group>Context</Group>
+    <Contents>
+        <!-- Creates a grid with a fixed amount of columns. More columns will align horizontally and break vertically -->
+        <Group style="grid-horizontal col3layout">
+            <Div style="cell m10">Col1</Div>
+            <Div style="cell m10">Col2</Div>
+            <Div style="cell m10">Col3</Div>
+
+            <Div style="cell m10">Col4 Row 2</Div>
+            <Div style="cell m10">Col5 Row 2</Div>
         </Group>
+        
+        <!--&lt;!&ndash; Creates a grid with a fixed amount of columns. More columns will align horizontally and break vertically &ndash;&gt;-->
+        <!--<Group style="grid-horizontal col3layout mb50 oddPadding cell-center">-->
+            <!--<Div style="cell m10">Col1</Div>-->
+            <!--<Div style="cell m10">Col2</Div>-->
+            <!--<Div style="cell m10">Col3</Div>-->
 
-        <Group style="grid-cell logo"/>
-        <!--<Group style="grid-cell thead">Home</Group>-->
-        <!--<Group style="grid-cell thead" onMouseEnter="OnHover()">-->
-            <!--Concept-->
-            <!--<Group x-id="concept-menu" if="hover" style="concept-hover" onMouseEnter="OnHover()">-->
-                <!--<Group>Features</Group>-->
-                <!--<Group>Theory</Group>-->
-                <!--<Group>Context</Group>-->
-            <!--</Group>-->
+            <!--<Div style="cell m10">Col4 Row 2</Div>-->
+            <!--<Div style="cell m10">Col5 Row 2</Div>-->
         <!--</Group>-->
-        <!--<Group style="grid-cell thead seedlogo" onMouseEnter="OnHoverEnd()"/>-->
-        <!--<Group style="grid-cell thead">Dev Blog</Group>-->
-        <!--<Group style="grid-cell thead">Community</Group>-->
 
-        <!--<Group style="[backgroundStyleName, 'more']"/>-->
+        <!--<Group style="grid-horizontal col3layout mb50 oddPadding ">-->
+            <!--<Div style="cell m10">Col1</Div>-->
+            <!--<Div style="cell m10">Col2</Div>-->
+            <!--<Div style="cell m10">Col3</Div>-->
+
+            <!--<Div style="cell m10">Col4 Row 2</Div>-->
+            <!--<Div style="cell m10">Col5 Row 2</Div>-->
+        <!--</Group>-->
+            <!---->
+        <!--<Group style="grid-vertical row3layout mb50 oddPadding">-->
+            <!--<Div style="cell m10">Col1</Div>-->
+            <!--<Div style="cell m10">Col2</Div>-->
+            <!--<Div style="cell m10">Col3</Div>-->
+
+            <!--<Div style="cell m10">Col4 Row 2</Div>-->
+            <!--<Div style="cell m10">Col5 Row 2</Div>-->
+        <!--</Group>-->
+
+        <!--<Div style="grid-container">-->
+
+            <!--<Group style="grid-cell logo" />-->
+            <!--<Group style="grid-cell thead">Home</Group>-->
+            <!--<Group style="grid-cell thead" onMouseEnter="OnHover()" >-->
+                <!--Concept-->
+                <!--<Group x-id="concept-menu" if="hover" style="concept-hover" onMouseEnter="OnHover()" >-->
+                    <!--<Group>Features</Group>-->
+                    <!--<Group>Theory</Group>-->
+                    <!--<Group>Context</Group>-->
+                <!--</Group>-->
+            <!--</Group>-->
+            <!--<Group style="grid-cell thead seedlogo" onMouseEnter="OnHoverEnd()" />-->
+            <!--<Group style="grid-cell thead">Dev Blog</Group>-->
+            <!--<Group style="grid-cell thead">Community</Group>-->
+
+            <!--&lt;!&ndash; the red background should not be visible, instead the grid's background should! &ndash;&gt;-->
+            <!--<Group style="[backgroundStyleName, 'borderRadiusTest']"/>-->
+        <!--</Div>-->
 
     </Contents>
 </UITemplate>

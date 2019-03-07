@@ -49,9 +49,6 @@ namespace UIForia.Routing {
         public event Action onRouteExit;
         public event Action onRouteUpdate;
 
-        // path       = /game/view/creator/1/eyebrows
-        // match Path = /game/view/character
-
         public Route(string path, UIElement element) {
             this.path = path;
             this.element = element;

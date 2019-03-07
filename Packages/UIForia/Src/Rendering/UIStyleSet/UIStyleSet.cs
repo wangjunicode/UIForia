@@ -107,11 +107,9 @@ namespace UIForia.Rendering {
         }
 
         internal void SetStyleGroups(IList<UIStyleGroupContainer> baseStyles) {
-            if (styleGroupContainers.Count > 0) {
-                Debug.LogWarning("You should not initialize UIStyleSets twice!!");
-                return;
-            }
 
+            // todo make this smarter so we don't set styles we already have applied
+            Debug.Log($"Settings base styles for {element.id} and had previously {styleGroupContainers.Count} style containers");
             containedStates = 0;  
             hasAttributeStyles = false;
             styleGroupContainers.Clear();
@@ -796,6 +794,75 @@ namespace UIForia.Rendering {
             SetTransformBehaviorY(behavior, state);
         }
 
+        /// <summary>
+        ///  Keeping this for the debugger display
+        /// </summary>
+        /// <param name="retn"></param>
+        /// <returns></returns>
+        public List<string> GetStyleNames(List<string> retn = null) {
+            retn = retn ?? new List<string>(styleGroupContainers.Count);
+            for (int i = 0; i < styleGroupContainers.Count; i++) {
+                retn.Add(styleGroupContainers[i].name);
+            }
+
+            return retn;
+        }
+
+        public bool EqualsToSharedStyles(IList<string> styles) {
+
+            LightList<string> styleGroup = LightListPool<string>.Get();
+            string last = null;
+            int count = styleGroupContainers.Count;
+            UIStyleGroupContainer[] styleGroupContainersArray = styleGroupContainers.Array;
+            
+            for (int i = 0; i < count; i++) {
+                if (styleGroupContainersArray[i].styleType == StyleType.Shared && last != styleGroupContainersArray[i].name) {
+                    styleGroup.Add(styleGroupContainersArray[i].name);
+                    last = styleGroupContainersArray[i].name;
+                }
+            }
+
+            int sharedIndex = 0;
+            bool equals = true;
+            count = styleGroup.Count;
+            for (int styleIndex = 0; styleIndex < styles.Count; styleIndex++) {
+                if (string.IsNullOrWhiteSpace(styles[styleIndex])) continue;
+                if (CheckedForStyleAlready(styles, styleIndex)) continue;
+
+                // if we're out of styles we're definitely not equal
+                if (sharedIndex >= count) {
+                    equals = false;
+                    break;
+                }
+                
+                // styleIndex and the sharedIndex should both point to a style of the same name.
+                if (styles[styleIndex] != styleGroup[sharedIndex]) {
+                    equals = false;
+                    break;
+                }
+
+                sharedIndex++;
+            }
+
+            // if there are more style containers in this style set than in the input style list the lists aren't equal either
+            if (sharedIndex < count) {
+                return false;
+            }
+
+            LightListPool<string>.Release(ref styleGroup);
+            
+            return equals;
+        }
+
+        private static bool CheckedForStyleAlready(IList<string> styles, int styleIndex) {
+            for (int dupIndex = 0; dupIndex < styleIndex; dupIndex++) {
+                if (styles[dupIndex] == styles[styleIndex]) {
+                    return true;
+                }
+            }
+
+            return false;
+        }
     }
 
 }

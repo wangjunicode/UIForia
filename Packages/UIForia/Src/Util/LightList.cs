@@ -11,13 +11,13 @@ namespace UIForia.Util {
 
         private int size;
         private T[] array;
-        
+
         [DebuggerStepThrough]
         public LightList(int size = 8) {
             this.array = ArrayPool<T>.GetMinSize(size);
             this.size = 0;
         }
-        
+
         [DebuggerStepThrough]
         public LightList(T[] items) {
             this.array = items;
@@ -25,16 +25,25 @@ namespace UIForia.Util {
         }
 
         public T[] Array => array;
+
         public int Count {
-            [DebuggerStepThrough]
-            get => size;
-            [DebuggerStepThrough]
-            set => size = value;
+            [DebuggerStepThrough] get => size;
+            [DebuggerStepThrough] set => size = value;
         }
 
         public bool IsReadOnly => false;
 
         public int Capacity => array.Length;
+
+        public T First {
+            [DebuggerStepThrough] get { return array[0]; }
+            [DebuggerStepThrough] set { array[0] = value; }
+        }
+
+        public T Last {
+            [DebuggerStepThrough] get { return array[size - 1]; }
+            [DebuggerStepThrough] set { array[size - 1] = value; }
+        }
 
         [DebuggerStepThrough]
         public void Add(T item) {
@@ -47,7 +56,6 @@ namespace UIForia.Util {
         }
 
         [DebuggerStepThrough]
-
         public void AddRange(IEnumerable<T> collection) {
             if (collection == null || Equals(collection, this)) {
                 return;
@@ -66,7 +74,7 @@ namespace UIForia.Util {
             System.Array.Clear(array, 0, size);
             size = 0;
         }
-        
+
         public void Clear() {
             System.Array.Clear(array, 0, array.Length);
             size = 0;
@@ -131,6 +139,7 @@ namespace UIForia.Util {
             if (size + 1 >= array.Length) {
                 ArrayPool<T>.Resize(ref array, (size + 1) * 2);
             }
+
             size++;
             index = Mathf.Clamp(index, 0, size - 1);
             for (int i = index; i < size; i++) {
@@ -143,7 +152,7 @@ namespace UIForia.Util {
         public void Reverse() {
             System.Array.Reverse(array, 0, size);
         }
-        
+
         public void InsertRange(int index, IEnumerable<T> collection) {
             if (collection == null) {
                 return;
@@ -220,7 +229,7 @@ namespace UIForia.Util {
 
             return false;
         }
-            
+
 
         public int FindIndex<U>(U closureArg, Func<T, U, bool> fn) {
             for (int i = 0; i < size; i++) {
@@ -253,8 +262,8 @@ namespace UIForia.Util {
         }
 
         public T this[int index] {
-            [DebuggerStepThrough]get  { return array[index]; }
-            [DebuggerStepThrough]set { array[index] = value; }
+            [DebuggerStepThrough] get { return array[index]; }
+            [DebuggerStepThrough] set { array[index] = value; }
         }
 
         public void EnsureCapacity(int capacity) {

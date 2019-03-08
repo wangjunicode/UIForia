@@ -125,7 +125,15 @@ namespace SVGX {
             lastPoint = new Vector2(x, y);
             SVGXShape currentShape = shapes[shapes.Count - 1];
             if (currentShape.type != SVGXShapeType.Unset) {
-                shapes.Add(new SVGXShape(SVGXShapeType.Unset, default));
+                shapes.Add(new SVGXShape(SVGXShapeType.Unset));
+            }
+        }
+        
+        public void MoveTo(Vector2 position) {
+            lastPoint = position;
+            SVGXShape currentShape = shapes[shapes.Count - 1];
+            if (currentShape.type != SVGXShapeType.Unset) {
+                shapes.Add(new SVGXShape(SVGXShapeType.Unset));
             }
         }
 
@@ -149,6 +157,10 @@ namespace SVGX {
             points.Add(lastPoint);
         }
 
+        public void LineTo(Vector2 position) {
+            LineTo(position.x, position.y);    
+        }
+        
         public void LineTo(float x, float y) {
             SVGXShape currentShape = shapes[shapes.Count - 1];
 

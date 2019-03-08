@@ -1,5 +1,7 @@
 using System.Collections.Generic;
+using Packages.UIForia.Src.VectorGraphics;
 using TMPro;
+using UIForia.Extensions;
 using UIForia.Text;
 using UIForia.Util;
 using UnityEngine;
@@ -22,6 +24,8 @@ namespace SVGX {
         public void Start() {
             ctx = new ImmediateRenderContext();
             gfx = new GFX(camera);
+            gfx2 = new GFX2(camera);
+            ctx2 = gfx2.CreateContext();
         }
 
         public Texture2D texture;
@@ -59,110 +63,71 @@ namespace SVGX {
         public Vector2 shadowOffset;
         public Rect shadowRect = new Rect(400, 340, 200, 200);
 
+        private GFX2 gfx2;
+        private VectorContext ctx2;
+
         public void Update() {
             camera.orthographic = true;
             camera.orthographicSize = Screen.height * 0.5f;
 
             ctx.Clear();
-            
-            ctx.SetStrokeWidth(1f);
-            ctx.SetStroke(Color.black);
-            ctx.BeginPath();
-            
-            float[] rows = new float[] { 100, 200, 300, 400, 500, 600};
-            float[] cols = new float[] {100, 200, 300};
-            
-            float x = 100;
-            float y = 100;
-            
-            float width = 300;
-            float height = 300;
-            for (int i = 0; i < rows.Length; i++) {
-                ctx.MoveTo(x, rows[i]);
-                ctx.LineTo(x + width, rows[i]);
-            }
+            ctx2.Clear();
+            ctx.SetStroke(Color.red);
+            float sWidth = 1f;
+            ctx.SetStrokeWidth(sWidth);
 
-            for (int i = 0; i < cols.Length; i++) {
-                ctx.MoveTo(cols[i], y);
-                ctx.LineTo(cols[i], y + height);
-            }
+            Vector2 p0 = new Vector2(450, 450);
+            Vector2 p1 = new Vector2(600, 600);
+            p1 = p1.Rotate(p0, rotation);
+            Vector2 p2 = new Vector2(700, 700);
+
+            ctx.MoveTo(p0);
+            ctx.LineTo(p1);
+            ctx.LineTo(p2);
+
             ctx.Stroke();
-//
-//            ctx.SetStroke(tintColor);
-//            ctx.SetStrokeWidth(strokeWidth);
-//            ctx.SetStrokePlacement(strokePlacement);
-//            ctx.SetStrokeOpacity(strokeOpacity);
-//            ctx.SetFillOpacity(fillOpacity);
-//
-//            SVGXMatrix matrix = SVGXMatrix.TRS(new Vector2(100, 100), rotation, Vector2.one); //identity);
-//            matrix = matrix.SkewX(skewX);
-//            matrix = matrix.SkewY(skewY);
-//            matrix = matrix.Rotate(rotation);
-//
-//            ctx.SetTransform(matrix);
-//
-//            ctx.BeginPath();
-//            ctx.Rect(shadowRect.x, shadowRect.y, shadowRect.width, shadowRect.height);
-//            ctx.SetShadowColor(shadowColor);
-//            ctx.SetShadowOffsetX(shadowOffset.x);
-//            ctx.SetShadowOffsetY(shadowOffset.y);
-//            ctx.SetShadowSoftnessX(shadowSoftnessX);
-//            ctx.SetShadowSoftnessY(shadowSoftnessY);
-//            ctx.SetShadowIntensity(shadowIntensity);
-//            ctx.SetShadowTint(shadowTint);
-//
-//            ctx.Shadow();
-//
-//            ctx.BeginPath();
-//            ctx.SetFill(fillColor);
-//
-//            ctx.Ellipse(100, 100, 400, 200);
-//            ctx.Circle(825, 250, 100);
-//            ctx.Rect(400, 340, 200, 200);
-//            ctx.RoundedRect(new Rect(50, 550, 300, 200), radiusTL, radiusTR, radiusBL, radiusBR);
-//
-//            if (fill) {
-//                ctx.Fill();
-//            }
-//
-//            if (stroke) {
-////                ctx.Stroke();
-////                ctx.SetStrokePlacement(StrokePlacement.Center);
-////                ctx.SetStrokeColor(Color.cyan);
-////                ctx.SetStrokeWidth(strokeWidth * 0.5f);
-//                ctx.Stroke();
-//            }
-//
-//            ctx.BeginPath();
-//            ctx.MoveTo(100, 250);
-//            matrix = matrix.Translate(500, -100);
-//            ctx.SetTransform(matrix);
-//            ctx.CubicCurveTo(new Vector2(100, 100), new Vector2(400, 100), new Vector2(400, 250));
-//            ctx.LineTo(200, 400);
-//            ctx.LineTo(400, 300);
-//            ctx.LineTo(100, 350);
-//            ctx.Stroke();
-//
-//            ctx.BeginPath();
-//
-//            SVGXTextStyle textStyle = new SVGXTextStyle() {
-//                fontSize = textSize,
-//                color = textColor,
-//                outlineColor = textOutline,
-//                outlineWidth = outlineWidth
-//            };
-//            
-//            ctx.SetTransform(SVGXMatrix.identity);
-//
-//            TextInfo textInfo = TextUtil.CreateTextInfo(new TextUtil.TextSpan(TMP_FontAsset.defaultFontAsset, textStyle, "Hello Klang Gang!"));
-//            List<LineInfo> lineInfos = TextUtil.Layout(textInfo, float.MaxValue);
-//            textInfo.lineInfos = lineInfos.ToArray();
-//            textInfo.lineCount = lineInfos.Count;
-//            TextUtil.ApplyLineAndWordOffsets(textInfo);
-//            
-//            ctx.Text(20, 20, textInfo);
-//            ctx.Fill();
 
+            ctx.BeginPath();
+            Vector2 toCurr = (p1 - p0).normalized;
+            Vector2 toNext = (p2 - p1).normalized;
+            Vector2 toCurrPerp = new Vector2(-toCurr.y, toCurr.x);
+            Vector2 toNextPerp = new Vector2(-toNext.y, toNext.x);
+
+            Vector2 miter = (toCurrPerp + toNextPerp).normalized;
+
+            ctx.MoveTo(p1);
+            ctx.LineTo(p1 + (miter * 100f));
+            ctx.MoveTo(p1);
+            ctx.LineTo(p1 - (miter * 100f));
+
+            ctx.Stroke();
+//            
+//            ctx.CircleFromCenter(v0.x, v0.y, 5f);
+//            ctx.CircleFromCenter(v1.x, v1.y, 5f);
+//            ctx.CircleFromCenter(v2.x, v2.y, 5f);
+//            ctx.CircleFromCenter(v3.x, v3.y, 5f);
+//            ctx.Stroke();
+//            
+//            ctx.BeginPath();
+//            
+////            ctx.MoveTo(lineStart - (toEnd * 10f));
+//            ctx.LineTo((p0 - (toNext * 100f)  + (toNextPerp * (sWidth))));
+//            ctx.Stroke();
+//            
+//            ctx.SetStroke(Color.yellow);
+//            ctx.BeginPath();
+//            ctx.MoveTo(p0);
+//            ctx.LineTo(p0 + (toNextPerp * (-sWidth)));
+//            ctx.LineTo((p0 - (toNext * 100f)  + (toNextPerp * (-sWidth))));
+//            ctx.Stroke();
+
+            ctx2.BeginPath();
+            ctx2.MoveTo(p0);
+            ctx2.LineTo(p1);
+            ctx2.LineTo(p2);
+            ctx2.Stroke();
+
+            gfx2.Render();
             gfx.Render(ctx);
         }
 

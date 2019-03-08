@@ -31,7 +31,7 @@ namespace SVGX {
             
             return output.Count - originalPointCount;
         }
-
+        
         // todo -- remove recursion, maybe jobify
         
         private static void RecursiveBezier(LightList<Vector2> points, int currentIteration, float distanceTolerance, float x1, float y1, float x2, float y2, float x3, float y3, float x4, float y4) {

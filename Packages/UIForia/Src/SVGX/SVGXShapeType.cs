@@ -1,6 +1,6 @@
 namespace SVGX {
 
-    internal enum SVGXShapeType {
+    public enum SVGXShapeType {
 
         Unset = 0,
         Rect = 1,

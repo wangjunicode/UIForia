@@ -14,9 +14,9 @@ namespace SVGX {
     
     public enum LineCap {
 
-        Butt,
-        Square,
-        Round
+        Butt = 0,
+        Square = 1,
+        Round = 2
 
     }
 

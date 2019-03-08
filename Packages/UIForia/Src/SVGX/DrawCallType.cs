@@ -1,6 +1,6 @@
 namespace SVGX {
 
-    internal enum DrawCallType {
+    public enum DrawCallType {
 
         StandardStroke,
         StandardFill,

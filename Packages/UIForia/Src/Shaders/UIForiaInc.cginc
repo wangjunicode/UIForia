@@ -18,6 +18,10 @@
 #define StrokePlacement_Inside 1
 #define StrokePlacement_Center 2
 
+#define LineCap_Butt 0
+#define LineCap_Square 1
+#define LineCap_Round 2
+
 #define RenderType_Fill 0
 #define RenderType_Text 1
 #define RenderType_Stroke 2

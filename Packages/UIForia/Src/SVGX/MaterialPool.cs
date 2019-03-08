@@ -4,7 +4,7 @@ using UnityEngine;
 
 namespace SVGX {
 
-    internal class MaterialPool {
+    public class MaterialPool {
 
         private readonly Material material;
         private readonly Stack<Material> pool;

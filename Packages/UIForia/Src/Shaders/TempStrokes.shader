@@ -11,7 +11,7 @@ Shader "UIForia/TempStrokes" {
         Lighting Off
 	    Fog { Mode Off }
         Blend SrcAlpha OneMinusSrcAlpha
-        ZWrite Off
+        ZWrite On
         ColorMask RGBA
 
         Pass {

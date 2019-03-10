@@ -352,6 +352,10 @@ namespace SVGX {
         public void CircleFromCenter(float cx, float cy, float radius) {
             SimpleShape(SVGXShapeType.Circle, cx - radius, cy - radius, radius * 2f, radius * 2f);
         }
+        
+        public void CircleFromCenter(Vector2 position, float radius) {
+            SimpleShape(SVGXShapeType.Circle, position.x - radius, position.y - radius, radius * 2f, radius * 2f);
+        }
 
         public void FillRect(float x, float y, float width, float height) {
             BeginPath();

@@ -20,6 +20,18 @@ namespace UIForia.Extensions {
             return v;
         }
 
+        public static Vector2 Perpendicular(this Vector2 v) {
+            return new Vector2(-v.y, v.x);
+        }
+        
+        public static Vector2 Invert(this Vector2 v) {
+            return new Vector2(-v.x, -v.y);
+        }
+        
+        public static float Angle(this Vector2 v) {
+            return v.y / v.x;
+        }
+        
     }
 
 }

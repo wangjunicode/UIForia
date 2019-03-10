@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using Packages.UIForia.Src.VectorGraphics;
+using UIForia.Extensions;
 using UIForia.Rendering;
 using UIForia.Text;
 using UIForia.Util;
@@ -765,6 +766,271 @@ namespace SVGX {
             }
         }
 
+        public Vector2 MidPoint(Vector2 v0, Vector2 v1) {
+            return (v0 + v1) * 0.5f;
+        }
+
+        public float SignedArea(Vector2 p0, Vector2 p1, Vector2 p2) {
+            return (p1.x - p0.x) * (p2.y - p0.y) - (p2.x - p0.x) * (p1.y - p0.y);
+        }
+
+        public bool LineIntersection(Vector2 p0, Vector2 p1, Vector2 p2, Vector2 p3, out Vector2 intersection) {
+            float a0 = p1.y - p0.y;
+            float b0 = p0.x - p1.x;
+
+            float a1 = p3.y - p2.y;
+            float b1 = p2.x - p3.x;
+
+            float det = a0 * b1 - a1 * b0;
+            if (det > -float.Epsilon && det < float.Epsilon) {
+                intersection = Vector2.zero;
+                return false;
+            }
+            else {
+                float c0 = a0 * p0.x + b0 * p0.y;
+                float c1 = a1 * p2.x + b1 * p2.y;
+
+                float x = (b1 * c0 - b0 * c1) / det;
+                float y = (a0 * c1 - a1 * c0) / det;
+                intersection = new Vector2(x, y);
+                return true;
+            }
+        }
+
+        // todo -- implement a version that uses a pixel shader instead of geometry
+        private void GenerateRoundJoin(Vector2 center, Vector2 p0, Vector2 p1, Vector2 next) {
+            float radius = (center - p0).magnitude;
+
+            float angle0 = Mathf.Atan2((p1.y - center.y), (p1.x - center.x));
+            float angle1 = Mathf.Atan2((p0.y - center.y), (p0.x - center.x));
+            float orgAngle0 = angle0;
+
+            if (angle1 > angle0) {
+                if (angle1 - angle0 >= Mathf.PI - float.Epsilon) {
+                    angle1 = angle1 - (2f * Mathf.PI);
+                }
+            }
+            else {
+                if (angle0 - angle1 >= Mathf.PI - float.Epsilon) {
+                    angle0 = angle0 - (2f * Mathf.PI);
+                }
+            }
+
+            float angleDiff = angle1 - angle0;
+
+            if (Mathf.Abs(angleDiff) >= Mathf.PI - float.Epsilon && Mathf.Abs(angleDiff) <= Mathf.PI + float.Epsilon) {
+                Vector2 r1 = center - next;
+                if (r1.x == 0) {
+                    if (r1.y > 0) {
+                        angleDiff = -angleDiff;
+                    }
+                }
+                else if (r1.x >= -float.Epsilon) {
+                    angleDiff = -angleDiff;
+                }
+            }
+
+            // 7 is magic but is a reasonable tessellation threshold
+            int segmentCount = (int) ((Mathf.Abs(angleDiff * radius) / 7f) + 1);
+
+            float angleInc = angleDiff / segmentCount;
+
+            for (int i = 0; i < segmentCount; i++) {
+                AddVertex(center, Color.yellow, 0);
+                // todo can remove a bunch of Sin and Cos calls here by using previous results
+                AddVertex(new Vector2(
+                    center.x + radius * Mathf.Cos(orgAngle0 + angleInc * i),
+                    center.y + radius * Mathf.Sin(orgAngle0 + angleInc * i)
+                ), Color.yellow, 0);
+                AddVertex(new Vector2(
+                    center.x + radius * Mathf.Cos(orgAngle0 + angleInc * (i + 1)),
+                    center.y + radius * Mathf.Sin(orgAngle0 + angleInc * (i + 1))
+                ), Color.yellow, 0);
+                CompleteTriangle();
+            }
+        }
+
+        // next steps:
+        // get culling to work, right now Cull must be off
+        // experiment with depth buffer to stop overdraw and behave like html canvas does
+        // allow fragment shader to generate round joins
+        // implement caps 
+        // test miter join
+        // only do this for corner segments
+        // see if we can stop splitting along midpoint 
+        // push all of this to gpu only code
+        
+        public void CreateTriangles(Vector2 p0, Vector2 p1, Vector2 p2, float strokeWidth, LineJoin join, int miterLimit) {
+            Vector2 t0 = (p1 - p0).Perpendicular();
+            Vector2 t2 = (p2 - p1).Perpendicular();
+
+            if (SignedArea(p0, p1, p2) > 0) {
+                t0 = t0.Invert();
+                t2 = t2.Invert();
+            }
+
+            t0 = t0.normalized;
+            t2 = t2.normalized;
+            t0 *= strokeWidth;
+            t2 *= strokeWidth;
+
+            float anchorLength = float.MaxValue;
+            Vector2 anchor = new Vector2();
+            bool didIntersect = LineIntersection(t0 + p0, t0 + p1, t2 + p2, t2 + p1, out Vector2 pintersect);
+            if (didIntersect) {
+                anchor = pintersect - p1;
+                anchorLength = anchor.magnitude;
+                var ctx = SVGXRoot.CTX;
+                ctx.CircleFromCenter(pintersect, 5f);
+                ctx.SetStroke(Color.black);
+                ctx.Stroke();
+            }
+
+            int limit = (int) (anchorLength / strokeWidth);
+            Vector2 p0p1 = p0 - p1;
+            Vector2 p1p2 = p1 - p2;
+            float p0p1Length = p0p1.magnitude;
+            float p1p2Length = p1p2.magnitude;
+            if (anchorLength > p0p1Length || anchorLength > p1p2Length) {
+                Vector2 v4 = p2 + t2;
+                Vector2 v5 = p1 - t2;
+                Vector2 v6 = p1 + t2;
+                Vector2 v7 = p2 - t2;
+
+                AddVertex(v4, Color.red, 0);
+                AddVertex(v6, Color.red, 1);
+                AddVertex(v7, Color.red, 2);
+                AddVertex(v5, Color.red, 3);
+
+                CompleteQuad();
+
+                Vector2 v0 = p0 + t0;
+                Vector2 v1 = p0 - t0;
+                Vector2 v2 = p1 + t0;
+                Vector2 v3 = p1 - t0;
+
+                AddVertex(v0, Color.blue, 0);
+                AddVertex(v2, Color.blue, 0);
+                AddVertex(v1, Color.blue, 0);
+                AddVertex(v3, Color.blue, 0);
+
+                CompleteQuad();
+
+                if (join == LineJoin.Round) {
+                    GenerateRoundJoin(p1, p1 + t0, p1 + t2, p2);
+                }
+                else if (join == LineJoin.Bevel || (join == LineJoin.Miter && limit >= miterLimit)) {
+                    AddVertex(p1, Color.yellow, 4);
+                    AddVertex(p1 + t0, Color.yellow, 5);
+                    AddVertex(p1 + t2, Color.yellow, 6);
+                    CompleteTriangle();
+                }
+                else if (join == LineJoin.Miter && limit < miterLimit && didIntersect) {
+                    AddVertex(p1 + t0, Color.yellow, 0);
+                    AddVertex(p1, Color.yellow, 1);
+                    AddVertex(pintersect, Color.yellow, 2);
+
+                    CompleteTriangle();
+
+                    AddVertex(p1 + t2, Color.yellow, 0);
+                    AddVertex(p1, Color.yellow, 1);
+                    AddVertex(pintersect, Color.yellow, 2);
+
+                    CompleteTriangle();
+                }
+            }
+            else {
+                Vector2 v0 = p0 - t0;
+                Vector2 v1 = p1 - anchor;
+                Vector2 v2 = p0 + t0;
+                Vector2 v3 = p1 + t0;
+
+                AddVertex(v0, Color.blue, 0);
+                AddVertex(v1, Color.blue, 1);
+                AddVertex(v2, Color.blue, 2);
+                AddVertex(v3, Color.blue, 3);
+
+                CompleteQuad();
+
+                Vector2 v4 = p1 - anchor;
+                Vector4 v5 = p2 - t2;
+                Vector2 v6 = p1 + t2;
+                Vector2 v7 = p2 + t2;
+
+                AddVertex(v4, Color.red, 0);
+                AddVertex(v5, Color.red, 1);
+                AddVertex(v6, Color.red, 2);
+                AddVertex(v7, Color.red, 3);
+
+                CompleteQuad();
+
+                if (join == LineJoin.Round) {
+                    Vector2 center = p1;
+                    Vector2 _p0 = p1 + t0;
+                    Vector2 _p1 = p1 + t2;
+                    Vector2 _p2 = p1 - anchor;
+
+                    AddVertex(_p0, Color.yellow, 0);
+                    AddVertex(center, Color.yellow, 0);
+                    AddVertex(_p2, Color.yellow, 0);
+
+                    CompleteTriangle();
+
+                    AddVertex(center, Color.yellow, 0);
+                    AddVertex(_p1, Color.yellow, 0);
+                    AddVertex(_p2, Color.yellow, 0);
+
+                    CompleteTriangle();
+
+                    GenerateRoundJoin(center, _p0, _p1, _p2);
+                }
+                else {
+                    if (join == LineJoin.Bevel) {
+                        AddVertex(p1 + t0, Color.yellow, 0);
+                        AddVertex(p1 + t2, Color.yellow, 0);
+                        AddVertex(p1 - anchor, Color.yellow, 0);
+                        CompleteTriangle();
+                    }
+                    else if (join == LineJoin.Miter && limit < miterLimit) {
+                        AddVertex(p1 + t0, Color.yellow, 0);
+                        AddVertex(p1 - anchor, Color.yellow, 0);
+                        AddVertex(p1 + t2, Color.yellow, 0);
+                        CompleteTriangle();
+                        
+                        AddVertex(pintersect, Color.yellow, 0);
+                        AddVertex(p1 + t0, Color.yellow, 0);
+                        AddVertex(p1 + t2, Color.yellow, 0);
+                        CompleteTriangle();
+                    }
+                }
+            }
+        }
+
+        public void GetStrokeGeometry(LightList<Point> pointList, SVGXShape shape, float strokeWidth) {
+            float halfStrokeWidth = strokeWidth * 0.5f;
+
+            Point[] points = pointList.Array;
+
+            RangeInt range = shape.pointRange;
+            if (range.length == 2) {
+                CreateTriangles(points[0].position, MidPoint(pointList[0].position, pointList[1].position), pointList[1].position, halfStrokeWidth, LineJoin.Bevel, 10);
+                return;
+            }
+
+            LightList<Vector2> midpoints = new LightList<Vector2>(range.length);
+
+            midpoints.Add(points[0].position);
+            for (int i = range.start + 1; i < range.end - 2; i++) {
+                midpoints.Add(MidPoint(points[i].position, points[i + 1].position));
+            }
+
+            midpoints.Add(points[range.end - 1].position);
+
+            for (int i = range.start + 1; i < midpoints.Count; i++) {
+                CreateTriangles(midpoints[i - 1], points[i].position, midpoints[i], halfStrokeWidth, LineJoin.Miter, 10);
+            }
+        }
+
         private static bool IsLeft(Vector2 a, Vector2 b, Vector2 c) {
             return ((b.x - a.x) * (c.y - a.y) - (b.y - a.y) * (c.x - a.x)) > 0;
         }
@@ -835,21 +1101,21 @@ namespace SVGX {
 
                 Vector2 iv0 = new Vector2(v0.x, -v0.y);
                 Vector2 iv2 = new Vector2(v2.x, -v2.y);
-                
+
                 SVGXRoot.CTX.BeginPath();
                 Vector2 toV = (iv2 - iv0).normalized;
                 SVGXRoot.CTX.SetStroke(Color.cyan);
-                SVGXRoot.CTX.SetStrokeWidth(1f);//Color.cyan);
+                SVGXRoot.CTX.SetStrokeWidth(1f); //Color.cyan);
                 SVGXRoot.CTX.MoveTo(iv0);
                 SVGXRoot.CTX.LineTo(iv2 + (toV * 200f));
                 SVGXRoot.CTX.Stroke();
-                
+
                 if (LineLineIntersect(v1, v3, iv0, iv2)) {
                     v3 = iv2;
                 }
 
                 // todo -- if line intersects next end pair need to also relocated bevel center
-                
+
                 AddVertex(v3, Color.blue, 3);
                 AddVertex(v1, Color.white, 1);
 
@@ -1194,7 +1460,7 @@ namespace SVGX {
             Vector2 iv2 = positionList[positionList.Count - 2];
             iv0.y = -iv0.y;
             iv2.y = -iv2.y;
-            
+
             SVGXRoot.CTX.BeginPath();
             Vector2 toV = (v0 - v1).normalized;
             SVGXRoot.CTX.SetStroke(Color.cyan);
@@ -1205,16 +1471,16 @@ namespace SVGX {
 
             SVGXRoot.CTX.BeginPath();
             SVGXRoot.CTX.MoveTo(iv0);
-            
+
             toV = (iv0 - iv2).normalized;
-            
+
             SVGXRoot.CTX.LineTo(iv2 + (toV * 200f));
             SVGXRoot.CTX.Stroke();
 
             if (LineLineIntersect(v0, v1, iv0, iv2)) {
                 positionList[positionList.Count - 1] = new Vector3(v1.x, -v1.y);
             }
-            
+
             AddVertex(v0, Color.blue, 0);
             AddVertex(v1, Color.blue, 1);
 

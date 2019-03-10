@@ -88,9 +88,9 @@ namespace Packages.UIForia.Src.VectorGraphics {
                 if (shape.type == SVGXShapeType.Path) {
                     if (shape.isClosed) { }
                     else {
-                        vertexData.GenerateStartCap(drawCall.ctx.points, shape, 30f, LineCap.Square);
-                        vertexData.GenerateStrokeBody(drawCall.ctx.points, shape, 30f, LineJoin.Miter);
-                        vertexData.GenerateEndCap(drawCall.ctx.points, shape, 30f, LineCap.Square);
+                        //vertexData.GenerateStartCap(drawCall.ctx.points, shape, 30f, LineCap.Square);
+                        vertexData.GenerateStrokeBody2(drawCall.ctx.points, shape, 30f);
+                        //vertexData.GenerateEndCap(drawCall.ctx.points, shape, 30f, LineCap.Square);
                     }
                 }
             }

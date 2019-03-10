@@ -111,11 +111,6 @@ namespace SVGX {
             positionList.Add(v3);
         }
 
-        private void GenerateJoinedPath(Vector2[] points, int count, Color color, float strokeWidth, float z) {
-            //  GenerateCapStart();
-            //  GenerateCapEnd();
-        }
-
         private void GenerateSegmentBodies(Vector2[] points, int count, Color color, float strokeWidth, float z) {
             const int join = 0;
 
@@ -769,6 +764,29 @@ namespace SVGX {
             return ((b.x - a.x) * (c.y - a.y) - (b.y - a.y) * (c.x - a.x)) > 0;
         }
 
+        public static bool LineSegmentsIntersection(Vector2 p1, Vector2 p2, Vector2 p3, Vector3 p4, out Vector2 intersection) {
+            intersection = Vector2.zero;
+
+            var d = (p2.x - p1.x) * (p4.y - p3.y) - (p2.y - p1.y) * (p4.x - p3.x);
+
+            if (d == 0.0f) {
+                return false;
+            }
+
+            var u = ((p3.x - p1.x) * (p4.y - p3.y) - (p3.y - p1.y) * (p4.x - p3.x)) / d;
+            var v = ((p3.x - p1.x) * (p2.y - p1.y) - (p3.y - p1.y) * (p2.x - p1.x)) / d;
+
+            if (u < 0.0f || u > 1.0f || v < 0.0f || v > 1.0f) {
+                return false;
+            }
+
+            intersection.x = p1.x + u * (p2.x - p1.x);
+            intersection.y = p1.y + u * (p2.y - p1.y);
+
+            return true;
+        }
+
+
         public static bool LineLineIntersect(Vector2 p1, Vector2 p2, Vector2 p3, Vector2 p4) {
             bool isIntersecting = false;
 
@@ -788,19 +806,72 @@ namespace SVGX {
             return isIntersecting;
         }
 
-        public void GenerateStartCap2() { }
-
         // joins always work on vertex 1 and 3 from s0 and 0 and 2 from s1
         // this means we need to 'complete' the last segment geometry before creating
         // the join geometry and starting the next one
         // caps should handle the start / end of the first and last segments respectively
 
-        public void GenerateBevelJoin(Segment s0, Segment s1, float strokeWidth) {
+        private void GenerateStartCap2(ref Segment s0, ref Segment s1, float strokeWidth) {
+            Vector2 p0 = s0.p0;
+            Vector2 p1 = s0.p1;
+            Vector2 toP1 = s0.toNextNormalized;
+
+            Vector2 perp = new Vector2(-toP1.y, toP1.x);
+
+            float halfStrokeWidth = strokeWidth * 0.5f;
+
+            s0.geometry0 = p0 - (perp * halfStrokeWidth);
+            s0.geometry1 = p1 - (perp * halfStrokeWidth);
+            s0.geometry2 = p0 + (perp * halfStrokeWidth);
+            s0.geometry3 = p1 + (perp * halfStrokeWidth);
+
+            s1.geometry0 = s0.geometry1;
+            s1.geometry2 = s0.geometry3;
+
+            ImmediateRenderContext ctx = SVGXRoot.CTX;
+            ctx.BeginPath();
+            ctx.SetStrokeWidth(1f);
+            ctx.MoveTo(s0.geometry0);
+            ctx.LineTo(s0.geometry1);
+            ctx.LineTo(s0.geometry3);
+            ctx.LineTo(s0.geometry2);
+            ctx.LineTo(s0.geometry0);
+            ctx.Stroke();
+        }
+
+        private void GenerateEndCap2(ref Segment s0, ref Segment s1, float strokeWidth) {
+            Vector2 p0 = s0.p0;
+            Vector2 p1 = s0.p1;
+            Vector2 toP1 = s1.toNextNormalized;
+
+            Vector2 perp = new Vector2(-toP1.y, toP1.x);
+
+            float halfStrokeWidth = strokeWidth * 0.5f;
+
+            s1.geometry0 = p0 - (perp * halfStrokeWidth);
+            s1.geometry1 = p1 - (perp * halfStrokeWidth);
+            s1.geometry2 = p0 + (perp * halfStrokeWidth);
+            s1.geometry3 = p1 + (perp * halfStrokeWidth);
+
+            s0.geometry1 = s1.geometry0;
+            s0.geometry3 = s1.geometry2;
+
+            ImmediateRenderContext ctx = SVGXRoot.CTX;
+            ctx.BeginPath();
+            ctx.SetStrokeWidth(1f);
+            ctx.MoveTo(s1.geometry0);
+            ctx.LineTo(s1.geometry1);
+            ctx.LineTo(s1.geometry3);
+            ctx.LineTo(s1.geometry2);
+            ctx.LineTo(s1.geometry0);
+            ctx.Stroke();
+        }
+
+        private static void GenerateSegmentGeometry(ref Segment s0, ref Segment s1, float strokeWidth) {
             float offset = strokeWidth * 0.5f;
 
             Vector2 p0 = s0.p0;
             Vector2 p1 = s0.p1;
-            Vector2 p2 = s1.p0;
             Vector2 p3 = s1.p1;
 
             Vector2 toSegment1End = s0.toNextNormalized;
@@ -809,115 +880,202 @@ namespace SVGX {
             Vector2 segment1Perp = new Vector2(-toSegment1End.y, toSegment1End.x);
             Vector2 segment2Perp = new Vector2(-toSegment2End.y, toSegment2End.x);
 
-            Vector2 v1 = p1 - (segment1Perp * offset);
-            Vector2 v3 = p1 + (segment1Perp * offset);
-
-            Vector2 v4 = p2 - (segment2Perp * offset);
-            Vector2 v6 = p2 - (segment2Perp * offset);
-
             Vector2 miter = (segment1Perp + segment2Perp).normalized;
             float miterLength = offset / Vector2.Dot(miter, segment2Perp);
 
-            // first we finish the geometry from start segment
+            s0.isLeft = IsLeft(p0, p1, p3);
+            s0.miter = miter;
+            s0.miterLength = miterLength;
 
-            // need to compute the bevel point, first figure out if we are going left or right
+//            var ctx = SVGXRoot.CTX;
+//            ctx.SetStroke(Color.green);
+//            ctx.SetStrokeWidth(2f);
+//            ctx.BeginPath();
+//            ctx.MoveTo(p1);
+//            ctx.LineTo(p1 + (miter * 300f));
+//            ctx.Stroke();
 
-            if (IsLeft(p0, p1, p3)) {
-                v3 = p1 + (miter * miterLength);
-                v6 = v3;
-
-                Vector2 bevel0 = v1;
-                Vector2 bevel1 = v3;
-                Vector2 bevel2 = v4;
-
-                Vector2 v0 = positionList[positionList.Count - 1];
-                Vector2 v2 = positionList[positionList.Count - 2];
-
-                Vector2 iv0 = new Vector2(v0.x, -v0.y);
-                Vector2 iv2 = new Vector2(v2.x, -v2.y);
-                
-                SVGXRoot.CTX.BeginPath();
-                Vector2 toV = (iv2 - iv0).normalized;
-                SVGXRoot.CTX.SetStroke(Color.cyan);
-                SVGXRoot.CTX.SetStrokeWidth(1f);//Color.cyan);
-                SVGXRoot.CTX.MoveTo(iv0);
-                SVGXRoot.CTX.LineTo(iv2 + (toV * 200f));
-                SVGXRoot.CTX.Stroke();
-                
-                if (LineLineIntersect(v1, v3, iv0, iv2)) {
-                    v3 = iv2;
-                }
-
-                // todo -- if line intersects next end pair need to also relocated bevel center
-                
-                AddVertex(v3, Color.blue, 3);
-                AddVertex(v1, Color.white, 1);
-
-                CompleteQuad();
-
-                AddVertex(bevel0, Color.yellow, -1);
-                AddVertex(bevel1, Color.yellow, -1);
-                AddVertex(bevel2, Color.yellow, -1);
-
-                CompleteTriangle();
-
-                AddVertex(v4, Color.red, 0);
-                AddVertex(v6, Color.red, 2);
+            if (s0.isLeft) {
+                // uncomment for bevel / round join
+//                s0.geometry1 = p1 - (segment1Perp * offset);
+//                s0.geometry3 = p1 + (miter * miterLength);
+//                s1.geometry0 = p1 - (segment2Perp * offset);
+//                s1.geometry2 = s0.geometry3;
+                s0.geometry1 = p1 - (miter * miterLength);
+                s0.geometry3 = p1 + (miter * miterLength);
+                s1.geometry0 = p1 - (miter * miterLength);
+                s1.geometry2 = s0.geometry3;
             }
             else {
-                // v1 = normal offset position
-                // v3 = miter position
+                s0.geometry1 = p1 - (miter * miterLength);
+                s0.geometry3 = p1 + (segment1Perp * offset);
+                s1.geometry0 = s0.geometry1;
+                s1.geometry2 = p1 + (segment2Perp * offset);
+            }
+        }
 
-                // v4 = normal offset position
-                // v6 = v3 (miter position)
-                // todo -- figure out this case
-                v1 = p1 - (miter * miterLength);
-                v4 = v1;
+        public bool GetIntersectionPointCoordinates(Vector2 A1, Vector2 A2, Vector2 B1, Vector2 B2, out Vector2 found) {
+            float tmp = (B2.x - B1.x) * (A2.y - A1.y) - (B2.y - B1.y) * (A2.x - A1.x);
 
-                v6 = p2 + (segment2Perp * offset);
+            if (tmp == 0) {
+                // No solution!
+                found = Vector2.zero;
+                return false;
+            }
 
-                Vector2 bevel0 = v1;
-                Vector2 bevel1 = v3;
-                Vector2 bevel2 = v6;
+            float mu = ((A1.x - B1.x) * (A2.y - A1.y) - (A1.y - B1.y) * (A2.x - A1.x)) / tmp;
 
-                AddVertex(v3, Color.blue, 1);
-                AddVertex(v1, Color.white, 3);
+
+            found = new Vector2(
+                B1.x + (B2.x - B1.x) * mu,
+                B1.y + (B2.y - B1.y) * mu
+            );
+
+            return true;
+        }
+
+        public void LimitSegmentGeometry(int i, ref Segment s0, ref Segment s1) {
+            var ctx = SVGXRoot.CTX;
+
+
+            if (!s0.isLeft) {
+                if (LineLineIntersect(s0.geometry3, s1.geometry1, s0.geometry0, s0.geometry2)) {
+                    // s0.geometry1 = s0.geometry0;
+                    Debug.Log("yep");
+                }
+
+
+                AddVertex(s0.geometry0, Color.white, 0);
+                AddVertex(s0.geometry1, Color.yellow, 1);
+                AddVertex(s0.geometry2, Color.red, 2);
+                AddVertex(s0.geometry3, Color.blue, 3);
                 CompleteQuad();
+            }
+            else {
+//                if (LineSegmentsIntersection(s0.geometry1, s1.geometry3, s0.geometry0, s0.geometry2, out Vector2 intersection)) {
+//                    ctx.CircleFromCenter(intersection, 5f);
+//                    ctx.Stroke();
+//                }
 
-                AddVertex(bevel0, Color.yellow, -1);
-                AddVertex(bevel1, Color.yellow, -1);
-                AddVertex(bevel2, Color.yellow, -1);
+                Vector2 v = s1.geometry3 - (s1.geometry3 - s1.geometry2).normalized * 99999f;
 
-                CompleteTriangle();
+                if (i == 1) {
+                    ctx.BeginPath();
+                    ctx.SetStrokeWidth(3f);
+                    ctx.SetStroke(Color.cyan);
+                    ctx.MoveTo(s1.geometry3);
+                    ctx.LineTo(v);
+                    ctx.Stroke();
+                }
 
-                AddVertex(v4, Color.red, 0);
-                AddVertex(v6, Color.red, 2);
+
+                // get a weird intersection back if not wrapped in check
+                if (LineLineIntersect(s0.geometry0, s0.geometry2, v, s1.geometry3)) {
+                    if (GetIntersectionPointCoordinates(s0.geometry0, s0.geometry2, v, s1.geometry3, out Vector2 intersection)) {
+                        ctx.CircleFromCenter(intersection, 5f);
+                        ctx.Stroke();
+                    }
+
+                    // generate s1 geometry, re-assign s0 geometry
+                    // s0.geometry1 = intersect point
+                    // s0.geometry2 = intersect point + normal * strokeWidth
+                    // s1.geometry0 = intersect point
+                    // s1.geometry1 = intersect point + normal * strokeWidth
+                    // s1.geometry2 = regular output position 
+                    // s1.geometry3 = regular output position 
+                    
+                    AddVertex(s1.geometry0, Color.blue, 0);
+                    AddVertex(s1.geometry0, Color.blue, 1);
+                    AddVertex(s1.geometry0, Color.blue, 2);
+                    AddVertex(s1.geometry0, Color.blue, 3);
+                    
+                    CompleteQuad();
+                    
+                    AddVertex(s0.geometry0, Color.white, 0);
+                    AddVertex(s0.geometry1, Color.white, 1);
+                    AddVertex(s0.geometry2, Color.white, 2);
+                    AddVertex(s0.geometry3, Color.white, 3);
+
+                    CompleteQuad();
+                }
+                else {
+                    AddVertex(s0.geometry0, Color.white, 0);
+                    AddVertex(s0.geometry1, Color.yellow, 1);
+                    AddVertex(s0.geometry2, Color.red, 2);
+                    AddVertex(s0.geometry3, Color.blue, 3);
+
+                    CompleteQuad();
+                }
             }
         }
 
-        public struct Segment {
+        public void GenerateStrokeBody2(LightList<Point> points, SVGXShape shape, float strokeWidth) {
+            // s0.GetOutputPoints(s1);
+            // need to find the next point pair for the segment
+            // need to limit v1, v3 to next segment v0, v2
+            // generate join geometry in 2nd pass, so we know the final points already
 
-            public readonly Vector2 p0;
-            public readonly Vector2 p1;
-            public readonly Vector2 toNextNormalized;
+            LightList<Segment> segmentList = CreateSegments(points, shape.pointRange, strokeWidth);
+            LightList<Vector2> geometry = new LightList<Vector2>(segmentList.Count * 4); // larger w/ join
 
-            public Segment(Vector2 p0, Vector2 p1) {
-                this.p0 = p0;
-                this.p1 = p1;
-                this.toNextNormalized = (p1 - p0).normalized;
+            int segmentCount = segmentList.Count;
+            Segment[] segments = segmentList.Array;
+
+            GenerateStartCap2(ref segments[0], ref segments[1], strokeWidth);
+            GenerateEndCap2(ref segments[segmentCount - 1], ref segments[segmentCount - 2], strokeWidth);
+
+            // first pass generates line geometry
+            for (int i = 1; i < segmentCount - 1; i++) {
+                GenerateSegmentGeometry(ref segments[i], ref segments[i + 1], strokeWidth);
             }
 
+            for (int i = 1; i < segmentCount - 1; i++) {
+                LimitSegmentGeometry(i, ref segments[i], ref segments[i + 1]);
+            }
         }
 
-        public LightList<Segment> CreateSegments(LightList<Point> points, RangeInt range) {
-            LightList<Segment> segments = new LightList<Segment>(range.length);
+        public static LightList<Segment> CreateSegments(LightList<Point> points, RangeInt range, float strokeWidth) {
+            LightList<Segment> segments = new LightList<Segment>(range.length + 2);
+
+            float dist = strokeWidth * 0.5f;
+
+            Point[] pointArray = points.Array;
+
+            Vector2 startCapEnd = pointArray[range.start + 0].position;
+            Vector2 p1 = pointArray[range.start + 1].position;
+
+            Vector2 toFirst = (startCapEnd - p1).normalized;
+
+            Vector2 startCapStart = startCapEnd + (toFirst * dist); // swap stroke width for AA value if cap is Butt
+
+            segments.Add(new Segment(startCapStart, startCapEnd));
+
             for (int i = range.start; i < range.end - 1; i++) {
                 segments.Add(new Segment(
-                        points.Array[i + 0].position,
-                        points.Array[i + 1].position
+                        pointArray[i + 0].position,
+                        pointArray[i + 1].position
                     )
                 );
             }
+
+            Vector2 endCapStart = pointArray[range.end - 1].position;
+            Vector2 pEndPrev = pointArray[range.end - 2].position;
+
+            Vector2 toCapEnd = (endCapStart - pEndPrev).normalized;
+            Vector2 endCapEnd = endCapStart + (toCapEnd * dist);
+
+            segments.Add(new Segment(endCapStart, endCapEnd));
+
+            ImmediateRenderContext ctx = SVGXRoot.CTX;
+            ctx.SetStroke(Color.yellow);
+            ctx.SetStrokeWidth(5f);
+            ctx.BeginPath();
+            ctx.MoveTo(startCapStart);
+            ctx.LineTo(startCapEnd);
+
+            ctx.MoveTo(endCapStart);
+            ctx.LineTo(endCapEnd);
+            ctx.Stroke();
 
             return segments;
         }
@@ -973,298 +1131,6 @@ namespace SVGX {
             trianglesList.Add(triIdx + 2);
 
             triangleIndex = triIdx + 3;
-        }
-
-        public void GenerateStrokeBody(LightList<Point> points, SVGXShape shape, float strokeWidth, LineJoin join) {
-            int start = shape.pointRange.start;
-            int end = shape.pointRange.end;
-
-            Point[] pointArray = points.Array;
-
-            LightList<Segment> segments = CreateSegments(points, shape.pointRange);
-
-            for (int i = 0; i < segments.Count - 1; i++) {
-                GenerateBevelJoin(segments[i], segments[i + 1], strokeWidth);
-            }
-
-//            for (int i = start; i < end - 1; i++) {
-//                Vector2 p0 = pointArray[i + 0].position;
-//                Vector2 p1 = pointArray[i + 1].position;
-//
-//                continue;
-//
-//                Vector2 toNext = (p1 - p0).normalized;
-//                Vector2 toNextPerp = new Vector2(-toNext.y, toNext.x);
-//
-//                float dist = (p1 - p0).magnitude;
-//                float offset = strokeWidth * 0.5f;
-//
-//                Vector2 v0 = p0; // + (toNextPerp * (-offset));
-//                Vector2 v1 = p1; //0 + (toNext * dist);
-//                Vector2 v2 = p0; // + (toNextPerp * (offset));
-//                Vector2 v3 = p1; //0 + (toNext * dist) + (toNextPerp * (offset));
-//
-//                if (i == start) {
-//                    Vector2 curr = p1;
-//                    Vector2 next = pointArray[i + 2].position;
-//                    Vector2 __toNext = (next - curr).normalized;
-//                    Vector2 __toCurr = (p1 - p0).normalized;
-//                    Vector2 __toCurrPerp = new Vector2(-__toCurr.y, __toCurr.x);
-//                    Vector2 __toNextPerp = new Vector2(-__toNext.y, __toNext.x);
-//                    Vector2 miter = (__toCurrPerp + __toNextPerp).normalized;
-//
-//                    float miterLength = (strokeWidth * 0.5f) / Vector2.Dot(miter, toNextPerp);
-//
-//                    v0 -= (toNextPerp * offset);
-//                    v1 -= (miter * miterLength);
-//                    v2 += (toNextPerp * offset);
-//                    v3 += (miter * miterLength);
-//
-//                    // walk miter back along itself to find the proper bevel coordinate
-//                    if (miterLength > 30) {
-//                        Vector2 toV0 = (v0 - v1).normalized;
-//                        v1 += (toV0 * (miterLength - 30));
-//                    }
-//
-//                    // if miter line intersects [v0, v2] we need to limit v3
-//                }
-//                else if (i == end - 1) { }
-//                else {
-//                    Vector2 prev = pointArray[i - 1].position;
-//                    Vector2 curr = p0;
-//                    Vector2 next = p1;
-//                    Vector2 toCurr = (curr - prev).normalized;
-//                    Vector2 miter = (toCurr + toNext).normalized;
-//                    Vector2 n1 = toNextPerp;
-//                    Vector2 n0 = new Vector2(-toCurr.y, toCurr.x);
-//                    float miterLength = (strokeWidth * 0.5f) / Vector2.Dot(miter, n1);
-//                    if (IsLeft(p0, p1, pointArray[i + 2].position)) { }
-//                    else { }
-//
-//                    //v0 += (miter * miterLength);
-//                    //v1 += (miter * miterLength);
-////                    v2 += (miter * miterLength);
-////                    v3 += (miter * miterLength);
-//                }
-//
-//                positionList.Add(new Vector3(v0.x, -v0.y, 65534));
-//                positionList.Add(new Vector3(v1.x, -v1.y, 65534));
-//                positionList.Add(new Vector3(v2.x, -v2.y, 65534));
-//                positionList.Add(new Vector3(v3.x, -v3.y, 65534));
-//
-//                uv0List.Add(new Vector4(0, 1, 0, 0));
-//                uv0List.Add(new Vector4(1, 1, 0, 0));
-//                uv0List.Add(new Vector4(1, 0, 0, 0));
-//                uv0List.Add(new Vector4(0, 0, 0, 0));
-//
-//                uv1List.Add(new Vector4(0, 0, 0, 0));
-//                uv1List.Add(new Vector4(0, 0, 0, 0));
-//                uv1List.Add(new Vector4(0, 0, 0, 0));
-//                uv1List.Add(new Vector4(0, 0, 0, 0));
-//
-//                uv2List.Add(new Vector4(0, 0, 0, 0));
-//                uv2List.Add(new Vector4(0, 0, 0, 0));
-//                uv2List.Add(new Vector4(0, 0, 0, 0));
-//                uv2List.Add(new Vector4(0, 0, 0, 0));
-//
-//                uv3List.Add(new Vector4());
-//                uv3List.Add(new Vector4());
-//                uv3List.Add(new Vector4());
-//                uv3List.Add(new Vector4());
-//
-//                uv4List.Add(new Vector4());
-//                uv4List.Add(new Vector4());
-//                uv4List.Add(new Vector4());
-//                uv4List.Add(new Vector4());
-//
-//                if (i != start) {
-//                    colorsList.Add(Color.clear);
-//                    colorsList.Add(Color.clear);
-//                    colorsList.Add(Color.clear);
-//                    colorsList.Add(Color.clear);
-//                }
-//
-//                else {
-//                    colorsList.Add(Color.blue);
-//                    colorsList.Add(Color.white);
-//                    colorsList.Add(Color.red);
-//                    colorsList.Add(Color.black);
-//                }
-//
-//                int triIdx = triangleIndex;
-//
-//                trianglesList.Add(triIdx + 0);
-//                trianglesList.Add(triIdx + 1);
-//                trianglesList.Add(triIdx + 2);
-//                trianglesList.Add(triIdx + 2);
-//                trianglesList.Add(triIdx + 1);
-//                trianglesList.Add(triIdx + 3);
-//
-//                triangleIndex = triIdx + 4;
-//            }
-        }
-
-        public void GenerateStartCap(LightList<Point> points, SVGXShape shape, float strokeWidth, LineCap cap) {
-            Vector2 p0 = points.Array[shape.pointRange.start + 0].position;
-            Vector2 p1 = points.Array[shape.pointRange.start + 1].position;
-
-            Vector2 toNext = (p1 - p0).normalized;
-            Vector2 toNextPerp = new Vector2(-toNext.y, toNext.x);
-
-            float dist = strokeWidth * 0.5f;
-
-            if (cap == LineCap.Butt) {
-                dist = 2f;
-            }
-
-            Vector2 v0 = p0 + (toNextPerp * (dist));
-            Vector2 v1 = p0 + (toNextPerp * (-dist));
-            Vector2 v2 = p0 - (toNext * dist) + (toNextPerp * (-dist));
-            Vector2 v3 = p0 - (toNext * dist) + (toNextPerp * (dist));
-
-            positionList.Add(new Vector3(v0.x, -v0.y, 65534));
-            positionList.Add(new Vector3(v1.x, -v1.y, 65534));
-            positionList.Add(new Vector3(v2.x, -v2.y, 65534));
-            positionList.Add(new Vector3(v3.x, -v3.y, 65534));
-
-            uv0List.Add(new Vector4(0, 1, 0, 0));
-            uv0List.Add(new Vector4(1, 1, 0, 0));
-            uv0List.Add(new Vector4(1, 0, 0, 0));
-            uv0List.Add(new Vector4(0, 0, 0, 0));
-
-            uv1List.Add(new Vector4(1, (int) cap, 0, 0));
-            uv1List.Add(new Vector4(1, (int) cap, 0, 0));
-            uv1List.Add(new Vector4(1, (int) cap, 0, 0));
-            uv1List.Add(new Vector4(1, (int) cap, 0, 0));
-
-            uv2List.Add(new Vector4(0, 0, 0, 0));
-            uv2List.Add(new Vector4(0, 0, 0, 0));
-            uv2List.Add(new Vector4(0, 0, 0, 0));
-            uv2List.Add(new Vector4(0, 0, 0, 0));
-
-            uv3List.Add(new Vector4());
-            uv3List.Add(new Vector4());
-            uv3List.Add(new Vector4());
-            uv3List.Add(new Vector4());
-
-            uv4List.Add(new Vector4());
-            uv4List.Add(new Vector4());
-            uv4List.Add(new Vector4());
-            uv4List.Add(new Vector4());
-
-            colorsList.Add(Color.green);
-            colorsList.Add(Color.green);
-            colorsList.Add(Color.green);
-            colorsList.Add(Color.green);
-
-            int triIdx = triangleIndex;
-
-            trianglesList.Add(triIdx + 0);
-            trianglesList.Add(triIdx + 1);
-            trianglesList.Add(triIdx + 2);
-            trianglesList.Add(triIdx + 2);
-            trianglesList.Add(triIdx + 3);
-            trianglesList.Add(triIdx + 0);
-
-            triangleIndex = triIdx + 4;
-
-            AddVertex(v0, Color.red, 0);
-            AddVertex(v1, Color.red, 2);
-        }
-
-        public void GenerateEndCap(LightList<Point> points, SVGXShape shape, float strokeWidth, LineCap cap) {
-            Vector2 p0 = points.Array[shape.pointRange.end - 2].position;
-            Vector2 p1 = points.Array[shape.pointRange.end - 1].position;
-
-            Vector2 toPrev = (p0 - p1).normalized;
-            Vector2 toPrevPerp = new Vector2(-toPrev.y, toPrev.x);
-
-            float dist = strokeWidth * 0.5f;
-
-            if (cap == LineCap.Butt) {
-                dist = 2f;
-            }
-
-            Vector2 v0 = p1 + (toPrevPerp * (dist));
-            Vector2 v1 = p1 + (toPrevPerp * (-dist));
-            Vector2 v2 = p1 - (toPrev * dist) + (toPrevPerp * (-dist));
-            Vector2 v3 = p1 - (toPrev * dist) + (toPrevPerp * (dist));
-
-            Vector2 iv0 = positionList[positionList.Count - 1];
-            Vector2 iv2 = positionList[positionList.Count - 2];
-            iv0.y = -iv0.y;
-            iv2.y = -iv2.y;
-            
-            SVGXRoot.CTX.BeginPath();
-            Vector2 toV = (v0 - v1).normalized;
-            SVGXRoot.CTX.SetStroke(Color.cyan);
-            SVGXRoot.CTX.SetStrokeWidth(1f);
-            SVGXRoot.CTX.MoveTo(v0);
-            SVGXRoot.CTX.LineTo(v1 + (toV * 200f));
-            SVGXRoot.CTX.Stroke();
-
-            SVGXRoot.CTX.BeginPath();
-            SVGXRoot.CTX.MoveTo(iv0);
-            
-            toV = (iv0 - iv2).normalized;
-            
-            SVGXRoot.CTX.LineTo(iv2 + (toV * 200f));
-            SVGXRoot.CTX.Stroke();
-
-            if (LineLineIntersect(v0, v1, iv0, iv2)) {
-                positionList[positionList.Count - 1] = new Vector3(v1.x, -v1.y);
-            }
-            
-            AddVertex(v0, Color.blue, 0);
-            AddVertex(v1, Color.blue, 1);
-
-            CompleteQuad();
-
-            positionList.Add(new Vector3(v0.x, -v0.y, 65534));
-            positionList.Add(new Vector3(v1.x, -v1.y, 65534));
-            positionList.Add(new Vector3(v2.x, -v2.y, 65534));
-            positionList.Add(new Vector3(v3.x, -v3.y, 65534));
-
-            uv0List.Add(new Vector4(0, 1, 0, 0));
-            uv0List.Add(new Vector4(1, 1, 0, 0));
-            uv0List.Add(new Vector4(1, 0, 0, 0));
-            uv0List.Add(new Vector4(0, 0, 0, 0));
-
-            uv1List.Add(new Vector4(1, (int) cap, 0, 0));
-            uv1List.Add(new Vector4(1, (int) cap, 0, 0));
-            uv1List.Add(new Vector4(1, (int) cap, 0, 0));
-            uv1List.Add(new Vector4(1, (int) cap, 0, 0));
-
-            uv2List.Add(new Vector4(0, 0, 0, 0));
-            uv2List.Add(new Vector4(0, 0, 0, 0));
-            uv2List.Add(new Vector4(0, 0, 0, 0));
-            uv2List.Add(new Vector4(0, 0, 0, 0));
-
-            uv3List.Add(new Vector4());
-            uv3List.Add(new Vector4());
-            uv3List.Add(new Vector4());
-            uv3List.Add(new Vector4());
-
-            uv4List.Add(new Vector4());
-            uv4List.Add(new Vector4());
-            uv4List.Add(new Vector4());
-            uv4List.Add(new Vector4());
-
-            colorsList.Add(Color.green);
-            colorsList.Add(Color.green);
-            colorsList.Add(Color.green);
-            colorsList.Add(Color.green);
-
-            int triIdx = triangleIndex;
-
-            trianglesList.Add(triIdx + 0);
-            trianglesList.Add(triIdx + 1);
-            trianglesList.Add(triIdx + 2);
-            trianglesList.Add(triIdx + 2);
-            trianglesList.Add(triIdx + 3);
-            trianglesList.Add(triIdx + 0);
-
-            triangleIndex = triIdx + 4;
         }
 
     }

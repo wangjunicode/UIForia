@@ -63,7 +63,7 @@ Shader "UIForia/TempStrokes" {
                      float alpha = smoothstep(0.5, 0.5 - pwidth * 1.5, dist);                
                      i.color = fixed4(i.color.rgb, i.color.a * alpha);
                 }
-                return fixed4(i.color.rgb, 0.75);
+                return fixed4(i.color.rgb, 0.5);
            }
            
             ENDCG

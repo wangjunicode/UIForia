@@ -66,10 +66,13 @@ namespace SVGX {
         private GFX2 gfx2;
         private VectorContext ctx2;
 
+        public static ImmediateRenderContext CTX;
+        
         public void Update() {
             camera.orthographic = true;
             camera.orthographicSize = Screen.height * 0.5f;
 
+            CTX = ctx;
             ctx.Clear();
             ctx2.Clear();
             ctx.SetStroke(Color.red);

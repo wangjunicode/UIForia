@@ -290,7 +290,6 @@ namespace SVGX {
                     return;
                 }
 
-
                 case SVGXShapeType.Rect:
                 case SVGXShapeType.Circle:
                 case SVGXShapeType.Ellipse: {
@@ -459,7 +458,6 @@ namespace SVGX {
                     int charCount = textInfo.charCount;
 
                     SVGXTextStyle textStyle = textInfo.spanInfos[0].textStyle;
-
 
                     float outlineWidth = Mathf.Clamp01(textStyle.outlineWidth);
                     float outlineSoftness = textStyle.outlineSoftness;
@@ -771,6 +769,24 @@ namespace SVGX {
             return ((b.x - a.x) * (c.y - a.y) - (b.y - a.y) * (c.x - a.x)) > 0;
         }
 
+        public static bool LineLineIntersect(Vector2 p1, Vector2 p2, Vector2 p3, Vector2 p4) {
+            bool isIntersecting = false;
+
+            float denominator = (p4.y - p3.y) * (p2.x - p1.x) - (p4.x - p3.x) * (p2.y - p1.y);
+
+            //Make sure the denominator is > 0, if so the lines are parallel
+            if (Math.Abs(denominator) > float.Epsilon) {
+                float u_a = ((p4.x - p3.x) * (p1.y - p3.y) - (p4.y - p3.y) * (p1.x - p3.x)) / denominator;
+                float u_b = ((p2.x - p1.x) * (p1.y - p3.y) - (p2.y - p1.y) * (p1.x - p3.x)) / denominator;
+
+                //Is intersecting if u_a and u_b are between 0 and 1
+                if (u_a >= 0 && u_a <= 1 && u_b >= 0 && u_b <= 1) {
+                    isIntersecting = true;
+                }
+            }
+
+            return isIntersecting;
+        }
 
         public void GenerateStartCap2() { }
 
@@ -787,29 +803,21 @@ namespace SVGX {
             Vector2 p2 = s1.p0;
             Vector2 p3 = s1.p1;
 
-            Vector2 toSegment1End = (p1 - p0).normalized;
-            Vector2 toSegment2End = (p3 - p2).normalized;
+            Vector2 toSegment1End = s0.toNextNormalized;
+            Vector2 toSegment2End = s1.toNextNormalized;
 
             Vector2 segment1Perp = new Vector2(-toSegment1End.y, toSegment1End.x);
             Vector2 segment2Perp = new Vector2(-toSegment2End.y, toSegment2End.x);
 
-            Vector2 v0 = p0 - (segment1Perp * offset);
             Vector2 v1 = p1 - (segment1Perp * offset);
-            Vector2 v2 = p0 - (segment1Perp * offset);
             Vector2 v3 = p1 + (segment1Perp * offset);
 
             Vector2 v4 = p2 - (segment2Perp * offset);
-            Vector2 v5 = p3 + (segment2Perp * offset);
             Vector2 v6 = p2 - (segment2Perp * offset);
-            Vector2 v7 = p3 + (segment2Perp * offset);
 
-            Vector2 prev = p0;
-            Vector2 curr = p1;
-            Vector2 next = p2;
-            
             Vector2 miter = (segment1Perp + segment2Perp).normalized;
             float miterLength = offset / Vector2.Dot(miter, segment2Perp);
-            
+
             // first we finish the geometry from start segment
 
             // need to compute the bevel point, first figure out if we are going left or right
@@ -817,66 +825,86 @@ namespace SVGX {
             if (IsLeft(p0, p1, p3)) {
                 v3 = p1 + (miter * miterLength);
                 v6 = v3;
-                
+
                 Vector2 bevel0 = v1;
                 Vector2 bevel1 = v3;
                 Vector2 bevel2 = v4;
+
+                Vector2 v0 = positionList[positionList.Count - 1];
+                Vector2 v2 = positionList[positionList.Count - 2];
+
+                Vector2 iv0 = new Vector2(v0.x, -v0.y);
+                Vector2 iv2 = new Vector2(v2.x, -v2.y);
+                
+                SVGXRoot.CTX.BeginPath();
+                Vector2 toV = (iv2 - iv0).normalized;
+                SVGXRoot.CTX.SetStroke(Color.cyan);
+                SVGXRoot.CTX.SetStrokeWidth(1f);//Color.cyan);
+                SVGXRoot.CTX.MoveTo(iv0);
+                SVGXRoot.CTX.LineTo(iv2 + (toV * 200f));
+                SVGXRoot.CTX.Stroke();
+                
+                if (LineLineIntersect(v1, v3, iv0, iv2)) {
+                    v3 = iv2;
+                }
+
+                // todo -- if line intersects next end pair need to also relocated bevel center
                 
                 AddVertex(v3, Color.blue, 3);
-                AddVertex(v1, Color.blue, 1);
-                
+                AddVertex(v1, Color.white, 1);
+
                 CompleteQuad();
 
                 AddVertex(bevel0, Color.yellow, -1);
                 AddVertex(bevel1, Color.yellow, -1);
                 AddVertex(bevel2, Color.yellow, -1);
-                
+
                 CompleteTriangle();
-                
+
                 AddVertex(v4, Color.red, 0);
                 AddVertex(v6, Color.red, 2);
             }
             else {
-                
                 // v1 = normal offset position
                 // v3 = miter position
 
                 // v4 = normal offset position
                 // v6 = v3 (miter position)
                 // todo -- figure out this case
-                v3 = p1 + (miter * miterLength);
-                //v3 = v6;
-                
-                Vector2 bevel0 = v3;
-                Vector2 bevel1 = v1;
+                v1 = p1 - (miter * miterLength);
+                v4 = v1;
+
+                v6 = p2 + (segment2Perp * offset);
+
+                Vector2 bevel0 = v1;
+                Vector2 bevel1 = v3;
                 Vector2 bevel2 = v6;
-                
+
                 AddVertex(v3, Color.blue, 1);
                 AddVertex(v1, Color.white, 3);
-                
                 CompleteQuad();
 
-//                AddVertex(bevel0, Color.yellow, -1);
-//                AddVertex(bevel1, Color.yellow, -1);
-//                AddVertex(bevel2, Color.yellow, -1);
-//                
-//                CompleteTriangle();
-                
-                AddVertex(v3, Color.red, 0);
-                AddVertex(v1, Color.red, 2);
-                
-            }
+                AddVertex(bevel0, Color.yellow, -1);
+                AddVertex(bevel1, Color.yellow, -1);
+                AddVertex(bevel2, Color.yellow, -1);
 
+                CompleteTriangle();
+
+                AddVertex(v4, Color.red, 0);
+                AddVertex(v6, Color.red, 2);
+            }
         }
 
         public struct Segment {
 
-            public Vector2 p0;
-            public Vector2 p1;
+            public readonly Vector2 p0;
+            public readonly Vector2 p1;
+            public readonly Vector2 toNextNormalized;
 
             public Segment(Vector2 p0, Vector2 p1) {
                 this.p0 = p0;
                 this.p1 = p1;
+                this.toNextNormalized = (p1 - p0).normalized;
             }
 
         }
@@ -905,13 +933,14 @@ namespace SVGX {
                 case 2:
                     uv0List.Add(new Vector4(1, 0, 0, 0));
                     break;
-                case 3: 
+                case 3:
                     uv0List.Add(new Vector4(0, 0, 0, 0));
                     break;
                 default:
                     uv0List.Add(new Vector4(0, 0, 0, 0));
                     break;
             }
+
             positionList.Add(new Vector3(position.x, -position.y, 500)); // todo -- set z
             colorsList.Add(color);
             uv1List.Add(new Vector4());
@@ -921,10 +950,9 @@ namespace SVGX {
         }
 
         private void CompleteQuad() {
-
             // assume vertex 0 and 2 are added first
             // then vertex 1 and 3
-            
+
             int triIdx = triangleIndex;
 
             trianglesList.Add(triIdx + 0);
@@ -935,11 +963,9 @@ namespace SVGX {
             trianglesList.Add(triIdx + 3);
 
             triangleIndex = triIdx + 4;
-            
         }
-        
-        private void CompleteTriangle() {
 
+        private void CompleteTriangle() {
             int triIdx = triangleIndex;
 
             trianglesList.Add(triIdx + 0);
@@ -947,13 +973,11 @@ namespace SVGX {
             trianglesList.Add(triIdx + 2);
 
             triangleIndex = triIdx + 3;
-            
         }
-        
+
         public void GenerateStrokeBody(LightList<Point> points, SVGXShape shape, float strokeWidth, LineJoin join) {
             int start = shape.pointRange.start;
             int end = shape.pointRange.end;
-
 
             Point[] pointArray = points.Array;
 
@@ -1081,7 +1105,6 @@ namespace SVGX {
         }
 
         public void GenerateStartCap(LightList<Point> points, SVGXShape shape, float strokeWidth, LineCap cap) {
-
             Vector2 p0 = points.Array[shape.pointRange.start + 0].position;
             Vector2 p1 = points.Array[shape.pointRange.start + 1].position;
 
@@ -1144,14 +1167,12 @@ namespace SVGX {
             trianglesList.Add(triIdx + 0);
 
             triangleIndex = triIdx + 4;
-            
+
             AddVertex(v0, Color.red, 0);
             AddVertex(v1, Color.red, 2);
-            
         }
 
         public void GenerateEndCap(LightList<Point> points, SVGXShape shape, float strokeWidth, LineCap cap) {
-
             Vector2 p0 = points.Array[shape.pointRange.end - 2].position;
             Vector2 p1 = points.Array[shape.pointRange.end - 1].position;
 
@@ -1169,11 +1190,36 @@ namespace SVGX {
             Vector2 v2 = p1 - (toPrev * dist) + (toPrevPerp * (-dist));
             Vector2 v3 = p1 - (toPrev * dist) + (toPrevPerp * (dist));
 
-            AddVertex(v3, Color.blue, 3);
+            Vector2 iv0 = positionList[positionList.Count - 1];
+            Vector2 iv2 = positionList[positionList.Count - 2];
+            iv0.y = -iv0.y;
+            iv2.y = -iv2.y;
+            
+            SVGXRoot.CTX.BeginPath();
+            Vector2 toV = (v0 - v1).normalized;
+            SVGXRoot.CTX.SetStroke(Color.cyan);
+            SVGXRoot.CTX.SetStrokeWidth(1f);
+            SVGXRoot.CTX.MoveTo(v0);
+            SVGXRoot.CTX.LineTo(v1 + (toV * 200f));
+            SVGXRoot.CTX.Stroke();
+
+            SVGXRoot.CTX.BeginPath();
+            SVGXRoot.CTX.MoveTo(iv0);
+            
+            toV = (iv0 - iv2).normalized;
+            
+            SVGXRoot.CTX.LineTo(iv2 + (toV * 200f));
+            SVGXRoot.CTX.Stroke();
+
+            if (LineLineIntersect(v0, v1, iv0, iv2)) {
+                positionList[positionList.Count - 1] = new Vector3(v1.x, -v1.y);
+            }
+            
+            AddVertex(v0, Color.blue, 0);
             AddVertex(v1, Color.blue, 1);
-            
+
             CompleteQuad();
-            
+
             positionList.Add(new Vector3(v0.x, -v0.y, 65534));
             positionList.Add(new Vector3(v1.x, -v1.y, 65534));
             positionList.Add(new Vector3(v2.x, -v2.y, 65534));

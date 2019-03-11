@@ -504,18 +504,4 @@ public class StyleTests {
         app.Update();
         Assert.AreEqual(100, root.FindById("dynamic").style.MarginTop.value);
     }
-
-//    [Test]
-//    public void EqualsToSharedStyles() {
-//        UIStyleSet styleSet = new UIStyleSet(new UIElement());
-//        styleSet.AddStyleGroupContainer(new UIStyleGroupContainer("a", StyleType.Shared, new UIStyleGroup[0]));
-//        styleSet.AddStyleGroupContainer(new UIStyleGroupContainer("Div", StyleType.Implicit, new UIStyleGroup[0]));
-//        styleSet.AddStyleGroupContainer(new UIStyleGroupContainer("b", StyleType.Shared, new UIStyleGroup[0]));
-//        styleSet.AddStyleGroupContainer(new UIStyleGroupContainer("b", StyleType.Shared, new UIStyleGroup[0]));
-//        styleSet.AddStyleGroupContainer(new UIStyleGroupContainer("someId", StyleType.Instance, new UIStyleGroup[0]));
-//
-//        Assert.IsTrue(styleSet.AreStylesEquivalent(new[] {"a", "b"}));
-//        Assert.IsTrue(styleSet.AreStylesEquivalent(new[] {"a", " ", "b", "b"}));
-//        Assert.IsFalse(styleSet.AreStylesEquivalent(new[] {"a"}));
-//    }
 }

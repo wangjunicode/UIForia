@@ -896,29 +896,6 @@ namespace UIForia.Rendering {
             return retn;
         }
 
-        internal bool AreStylesEquivalent(LightList<string> styles) {
-            int count = styleGroupContainers.Count;
-            UIStyleGroupContainer[] styleGroupContainersArray = styleGroupContainers.Array;
-
-            int compareIndex = 0;
-            int compareStylesCount = styles.Count;
-            string[] comparedStyles = styles.Array;
-
-            for (int i = 0; i < count; i++) {
-                if (compareIndex >= compareStylesCount) {
-                    return false;
-                }
-
-                if (styleGroupContainersArray[i].styleType == StyleType.Shared) {
-                    if (comparedStyles[compareIndex++] != styleGroupContainersArray[i].name) {
-                        return false;
-                    }
-                }
-            }
-
-            return true;
-        }
-
     }
 
 }

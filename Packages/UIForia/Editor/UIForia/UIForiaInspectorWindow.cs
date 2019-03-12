@@ -323,7 +323,7 @@ namespace UIForia.Editor {
 
                 if (padding.right > 0) {
                     ctx.BeginPath();
-                    ctx.Rect(margin.left + width - padding.right - border.right, y + border.top, padding.right, paddingVerticalHeight);
+                    ctx.Rect(x + margin.left + width - padding.right - border.right, y + border.top, padding.right, paddingVerticalHeight);
                     ctx.Fill();
                 }
 
@@ -349,7 +349,7 @@ namespace UIForia.Editor {
 
                 if (border.right > 0) {
                     ctx.BeginPath();
-                    ctx.Rect(margin.left + width - border.right, y, border.right, height);
+                    ctx.Rect(x + margin.left + width - border.right, y, border.right, height);
                     ctx.Fill();
                 }
 
@@ -361,7 +361,7 @@ namespace UIForia.Editor {
 
                 if (border.bottom > 0) {
                     ctx.BeginPath();
-                    ctx.Rect(margin.left + border.left, y + height - border.bottom, width - border.Horizontal, border.bottom);
+                    ctx.Rect(x + margin.left + border.left, y + height - border.bottom, width - border.Horizontal, border.bottom);
                     ctx.Fill();
                 }
                 

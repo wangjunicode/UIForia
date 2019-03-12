@@ -20,11 +20,11 @@ Keyword           | Description
 
 // export theme constants e.g.
 const redVal = 200;
-export const color0 = rgba(@redVal, 0, 0, 1); // semicolon is optional 
+export const color0 = rgba(@redVal, 0, 0, 1);
 export const baseDirection = Vertical;
 
 // reference UIForia enums 
-const anotherDirection : LayoutDirection = LayoutDirection.Horizontal;
+const anotherDirection = Horizontal;
 
 // import exported constants from other style files
 import vars as Constants from "file.style";
@@ -63,7 +63,6 @@ style MattsStyleSheet {
        @use styleNameHere;
    }
 
-   @exportAs("name")
    [state-name-here] {
        // block of styles
        StyleName = StyleValue;
@@ -71,7 +70,7 @@ style MattsStyleSheet {
 
 }
 
-@audio xy {
+audio xy {
     
 }
 
@@ -85,4 +84,26 @@ style MattsStyleSheet {
    
 }
 
+```
+
+
+##Style by Attributes
+So you want to add a special style for your element based on its attributes?
+```<Input x-disabled="true" text="'some text'" style="button"/>```
+Be aware of UIForia's distinction between attributes and properties. To set an attribute you have to use the
+`x-` notation. To add a stylable `disabled` attribute you have to write `x-disabled` and assign your value.
+UIForia attributes always expect plain strings as values in contrast to properties, which expect expressions (hence 
+the double quoting when passing strings).
+
+After defining an attribute in your element go to your style definition and add an attribute style group like this:
+```
+style button {
+    BackgroundColor = rgba(240, 240, 240, 255);             // almost white if not disabled
+    [attr:disabled="true"] {
+        BackgroundColor = rgba(190, 190, 190, 255);         // a bit grey if the disabled attribute has the string value "true"
+        [hover] {
+            BackgroundColor = rgba(100, 100, 100, 255);     // hover the disabled attribute and it becomes very dark
+        }
+    }
+}
 ```

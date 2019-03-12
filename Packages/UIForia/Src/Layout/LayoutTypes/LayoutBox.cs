@@ -27,8 +27,8 @@ namespace UIForia.Layout.LayoutTypes {
         public LayoutBox parent;
         public List<LayoutBox> children;
 
-        public VirtualScrollbar horizontalScrollbar;
-        public VirtualScrollbar verticalScrollbar;
+        public Scrollbar horizontalScrollbar;
+        public Scrollbar verticalScrollbar;
 
         protected UIView view;
 
@@ -185,7 +185,7 @@ namespace UIForia.Layout.LayoutTypes {
                 RequestContentSizeChangeLayout();
             }
         }
-
+ 
         protected void AdoptChildren(LayoutBox box) {
             for (int i = 0; i < box.children.Count; i++) {
                 OnChildAdded(box.children[i]);
@@ -494,7 +494,7 @@ namespace UIForia.Layout.LayoutTypes {
                     return view.ScaleFactor * Mathf.Max(0, widthMeasurement.value);
 
                 case UIMeasurementUnit.Content:
-                    return Mathf.Max(0, PaddingBorderHorizontal + (GetContentWidth() * widthMeasurement.value));
+                    return Mathf.Max(0,   + (GetContentWidth() * widthMeasurement.value));
 
                 case UIMeasurementUnit.ParentSize:
                     if (parent.style.PreferredWidth.IsContentBased) {
@@ -588,7 +588,7 @@ namespace UIForia.Layout.LayoutTypes {
                     }
 
                     // needs to be allocated width not actualWidth because we might not know the actual width yet
-                    return parent.element.layoutResult.ScreenPosition.x + parent.allocatedWidth - ResolveAnchorValue(view.Viewport.width, anchor);
+                    return parent.element.layoutResult.screenPosition.x + parent.allocatedWidth - ResolveAnchorValue(view.Viewport.width, anchor);
 
                 case AnchorTarget.ParentContentArea:
                     if (parent == null) {
@@ -608,7 +608,7 @@ namespace UIForia.Layout.LayoutTypes {
                         return -view.Viewport.x + ResolveAnchorValue(Screen.width, anchor);
                     }
 
-                    return -parent.element.layoutResult.ScreenPosition.x +
+                    return -parent.element.layoutResult.screenPosition.x +
                            Screen.width - ResolveAnchorValue(Screen.width, anchor);
 
                 default:
@@ -625,7 +625,7 @@ namespace UIForia.Layout.LayoutTypes {
                         return view.Viewport.xMax + ResolveAnchorValue(view.Viewport.width, anchor);
                     }
 
-                    return parent.element.layoutResult.ScreenPosition.x + ResolveAnchorValue(parent.actualWidth, anchor);
+                    return parent.element.layoutResult.screenPosition.x + ResolveAnchorValue(parent.actualWidth, anchor);
 
                 case AnchorTarget.ParentContentArea:
                     if (parent == null) {
@@ -643,7 +643,7 @@ namespace UIForia.Layout.LayoutTypes {
                         return -(view.Viewport.xMax) + ResolveAnchorValue(Screen.width, anchor);
                     }
 
-                    return -parent.element.layoutResult.ScreenPosition.x + Screen.width + ResolveAnchorValue(Screen.width, anchor.value);
+                    return -parent.element.layoutResult.screenPosition.x + Screen.width + ResolveAnchorValue(Screen.width, anchor.value);
 
                 default:
                     throw new ArgumentOutOfRangeException();
@@ -678,7 +678,7 @@ namespace UIForia.Layout.LayoutTypes {
                     }
 
                     // todo -- need screen position here but might not have it correctly if parent moved this frame. maybe flag for later adjustment in layout?
-                    return -parent.element.layoutResult.ScreenPosition.y + ResolveAnchorValue(Screen.height, anchor.value);
+                    return -parent.element.layoutResult.screenPosition.y + ResolveAnchorValue(Screen.height, anchor.value);
 
                 default:
                     throw new ArgumentOutOfRangeException();
@@ -694,7 +694,7 @@ namespace UIForia.Layout.LayoutTypes {
                         return view.Viewport.yMax + ResolveAnchorValue(view.Viewport.height, anchor) - actualHeight;
                     }
 
-                    return parent.element.layoutResult.ScreenPosition.y + parent.actualHeight - ResolveAnchorValue(parent.actualHeight, anchor) - actualHeight;
+                    return parent.element.layoutResult.screenPosition.y + parent.actualHeight - ResolveAnchorValue(parent.actualHeight, anchor) - actualHeight;
 
                 case AnchorTarget.ParentContentArea:
                     if (parent == null) {
@@ -712,7 +712,7 @@ namespace UIForia.Layout.LayoutTypes {
                         return -(view.Viewport.yMax) + ResolveAnchorValue(Screen.height, anchor) - actualHeight;
                     }
 
-                    return -parent.element.layoutResult.ScreenPosition.y + Screen.height + ResolveAnchorValue(Screen.height, anchor.value) - actualHeight;
+                    return -parent.element.layoutResult.screenPosition.y + Screen.height + ResolveAnchorValue(Screen.height, anchor.value) - actualHeight;
 
                 default:
                     throw new ArgumentOutOfRangeException();

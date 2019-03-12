@@ -46,9 +46,12 @@ v2f LineVertex(appdata input) {
    else {
         pos = curr + (miter * miterLength * dir);
    }
-
-   o.secondaryColor = fixed4(0, 0, 0, 0);
+   
+   o.fragData1 = float4(pos.xy, 0, 0);
+   o.fragData2 = input.uv2;
+   o.fragData3 = input.uv3;
    o.vertex = UnityObjectToClipPos(float3(pos, input.vertex.z));
+   
    return o;
 }
 
@@ -56,7 +59,7 @@ fixed4 LineFragment(v2f i) {
    float thickness = i.flags.w;
    float aa = i.flags.z;
    float w = (thickness * 0.5) - aa;
-
+   
    float d = abs(i.uv.y) - w;
 
    if(d <= 0) {

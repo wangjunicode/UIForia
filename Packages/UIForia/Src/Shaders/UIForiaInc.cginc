@@ -76,6 +76,11 @@ inline float when_ge(float x, float y) {
     return 1 - max(sign(y - x), 0.0);
 }
 
+inline float InsideBox(float2 v, float2 bottomLeft, float2 topRight) {
+    float2 s = step(bottomLeft, v) - step(topRight, v);
+    return s.x * s.y;   
+}
+
 // Rounded rect distance function
 inline float udRoundRect(float2 p, float2 b, float r) {
    return length(max(abs(p) - b, 0)) - r;

@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using Packages.UIForia.Src.VectorGraphics;
 using UIForia.Extensions;
+using UIForia.Layout;
 using UIForia.Rendering;
 using UIForia.Text;
 using UIForia.Util;
@@ -117,7 +118,7 @@ namespace SVGX {
             //  GenerateCapEnd();
         }
 
-        private void GenerateSegmentBodies(Vector2[] points, int count, Color color, float strokeWidth, float z) {
+        private void GenerateSegmentBodies(Vector2[] points, Rect scissor, int count, Color color, float strokeWidth, float z) {
             const int join = 0;
 
             int renderData = BitUtil.SetHighLowBits((int) SVGXShapeType.Path, RenderTypeStroke);
@@ -127,6 +128,23 @@ namespace SVGX {
             uint flags2 = BitUtil.SetBytes(0, VertexType_Near, join, 0);
             uint flags3 = BitUtil.SetBytes(0, VertexType_Far, join, 0);
 
+            float minX = float.MaxValue;
+            float maxX = float.MinValue;
+            float minY = float.MaxValue;
+            float maxY = float.MinValue;
+            
+            for (int i = 1; i < count + 1; i++) {
+                if (points[i].x < minX) minX = points[i].x;
+                if (points[i].x > maxX) maxX = points[i].x;
+                if (points[i].y < minY) minY = points[i].y;
+                if (points[i].y > maxY) maxY = points[i].y;
+            }
+
+            float w = maxX - minX;
+            float h = maxY - minY;
+            
+            Vector4 scissorVector = new Vector4(scissor.x, -scissor.y, scissor.xMax, -scissor.yMax);
+            
             for (int i = 1; i < count; i++) {
                 Vector2 prev = points[i - 1];
                 Vector2 curr = points[i];
@@ -138,10 +156,10 @@ namespace SVGX {
                 positionList.Add(new Vector3(curr.x, -curr.y, z));
                 positionList.Add(new Vector3(next.x, -next.y, z));
 
-                uv0List.Add(new Vector4(0, 1));
-                uv0List.Add(new Vector4(1, 1));
-                uv0List.Add(new Vector4(1, 0));
-                uv0List.Add(new Vector4(0, 0));
+                uv0List.Add(new Vector4(0, 1, w, h));
+                uv0List.Add(new Vector4(1, 1, w, h));
+                uv0List.Add(new Vector4(1, 0, w, h));
+                uv0List.Add(new Vector4(0, 0, w, h));
 
                 uv1List.Add(new Vector4(renderData, flags0, 1, strokeWidth));
                 uv1List.Add(new Vector4(renderData, flags1, 1, strokeWidth));
@@ -157,11 +175,11 @@ namespace SVGX {
                 uv3List.Add(new Vector4(1, 0, 0, 0));
                 uv3List.Add(new Vector4(-1, 1, 0, 0));
                 uv3List.Add(new Vector4(-1, 0, 0, 0));
-
-                uv4List.Add(new Vector4());
-                uv4List.Add(new Vector4());
-                uv4List.Add(new Vector4());
-                uv4List.Add(new Vector4());
+                
+                uv4List.Add(scissorVector);
+                uv4List.Add(scissorVector);
+                uv4List.Add(scissorVector);
+                uv4List.Add(scissorVector);
 
                 colorsList.Add(color);
                 colorsList.Add(color);
@@ -179,13 +197,15 @@ namespace SVGX {
             }
         }
 
-        internal void CreateStrokeVertices(Vector2[] points, SVGXRenderShape renderShape, GFX.GradientData gradientData, SVGXStyle style, SVGXMatrix matrix) {
+        internal void CreateStrokeVertices(Vector2[] points, SVGXRenderShape renderShape, GFX.GradientData gradientData, Rect scissor, SVGXStyle style, SVGXMatrix matrix) {
             int start = renderShape.shape.pointRange.start;
             int triIdx = triangleIndex;
             float strokeWidth = Mathf.Clamp(style.strokeWidth, 1f, style.strokeWidth);
             float z = renderShape.zIndex;
             Color color = style.strokeColor;
             color.a *= style.strokeOpacity;
+
+            Vector4 scissorVector = new Vector4(scissor.x, -scissor.y, scissor.xMax, -scissor.yMax);
 
             switch (renderShape.shape.type) {
                 case SVGXShapeType.Path:
@@ -277,10 +297,10 @@ namespace SVGX {
                     uv3List.Add(new Vector4(strokeWidth, 0, 0, 0));
                     uv3List.Add(new Vector4(strokeWidth, 0, 0, 0));
 
-                    uv4List.Add(new Vector4());
-                    uv4List.Add(new Vector4());
-                    uv4List.Add(new Vector4());
-                    uv4List.Add(new Vector4());
+                    uv4List.Add(scissorVector);
+                    uv4List.Add(scissorVector);
+                    uv4List.Add(scissorVector);
+                    uv4List.Add(scissorVector);
 
                     colorsList.Add(color);
                     colorsList.Add(color);
@@ -368,10 +388,10 @@ namespace SVGX {
                     uv3List.Add(new Vector4(strokeWidth, 0, 0, 0));
                     uv3List.Add(new Vector4(strokeWidth, 0, 0, 0));
 
-                    uv4List.Add(new Vector4());
-                    uv4List.Add(new Vector4());
-                    uv4List.Add(new Vector4());
-                    uv4List.Add(new Vector4());
+                    uv4List.Add(scissorVector);
+                    uv4List.Add(scissorVector);
+                    uv4List.Add(scissorVector);
+                    uv4List.Add(scissorVector);
 
                     colorsList.Add(color);
                     colorsList.Add(color);
@@ -393,12 +413,12 @@ namespace SVGX {
             bool isClosed = renderShape.shape.isClosed;
             const int cap = 1;
             if (isClosed) {
-                GenerateSegmentBodies(pointCache.Array, pointCache.Count - 2, color, strokeWidth, renderShape.zIndex);
+                GenerateSegmentBodies(pointCache.Array, scissor, pointCache.Count - 2, color, strokeWidth, renderShape.zIndex);
             }
             else if (renderShape.shape.pointRange.length == 2) {
                 int renderData = BitUtil.SetHighLowBits(DrawType_Stroke, RenderTypeStroke);
                 int rangeStart = uv1List.Count;
-                GenerateSegmentBodies(pointCache.Array, pointCache.Count - 2, color, strokeWidth, renderShape.zIndex);
+                GenerateSegmentBodies(pointCache.Array, scissor, pointCache.Count - 2, color, strokeWidth, renderShape.zIndex);
                 uv1List[rangeStart + 0] = new Vector4(renderData, BitUtil.SetBytes(1, VertexType_Near, cap, 0), 0, strokeWidth);
                 uv1List[rangeStart + 1] = new Vector4(renderData, BitUtil.SetBytes(1, VertexType_Far, cap, 0), 0, strokeWidth);
                 uv1List[rangeStart + 2] = new Vector4(renderData, BitUtil.SetBytes(0, VertexType_Near, cap, 0), 0, strokeWidth);
@@ -406,7 +426,7 @@ namespace SVGX {
             }
             else {
                 int rangeStart = uv3List.Count;
-                GenerateSegmentBodies(pointCache.Array, pointCache.Count - 2, color, strokeWidth, renderShape.zIndex);
+                GenerateSegmentBodies(pointCache.Array, scissor, pointCache.Count - 2, color, strokeWidth, renderShape.zIndex);
                 uv3List[rangeStart + 0] = new Vector4(1, VertexType_Near, cap, 0);
                 uv3List[rangeStart + 2] = new Vector4(-1, VertexType_Near, cap, 0);
                 uv3List[uv3List.Count - 3] = new Vector4(uv3List[uv3List.Count - 3].x, uv3List[uv3List.Count - 3].y, cap, 0);
@@ -416,7 +436,7 @@ namespace SVGX {
             LightListPool<Vector2>.Release(ref pointCache);
         }
 
-        internal void CreateFillVertices(Vector2[] points, SVGXRenderShape renderShape, GFX.GradientData gradientData, SVGXStyle style, SVGXMatrix matrix) {
+        internal void CreateFillVertices(Vector2[] points, SVGXRenderShape renderShape, Rect scissorRect, GFX.GradientData gradientData, SVGXStyle style, SVGXMatrix matrix) {
             int start = renderShape.shape.pointRange.start;
             int end = renderShape.shape.pointRange.end;
 
@@ -445,6 +465,7 @@ namespace SVGX {
             color.a *= opacity;
 
             int renderData = BitUtil.SetHighLowBits((int) renderShape.shape.type, RenderTypeFill);
+            Vector4 scissorVector = new Vector4(scissorRect.x, -scissorRect.y, scissorRect.xMax, -scissorRect.yMax);
 
             switch (renderShape.shape.type) {
                 case SVGXShapeType.Unset:
@@ -481,8 +502,24 @@ namespace SVGX {
                     Color textColor = textStyle.color;
                     Color outlineColor = textStyle.outlineColor;
 
+                    float totalWidth = 0f;
+
+                    for (int i = 0; i < textInfo.lineCount; i++) {
+                        totalWidth = Mathf.Max(totalWidth, textInfo.lineInfos[i].width);
+                    }
+
+                    int fontSize = textInfo.spanInfos[0].textStyle.fontSize;
+                    var asset = textInfo.spanInfos[0].font;
+                    
+                    float scale = (fontSize / asset.fontInfo.PointSize) * asset.fontInfo.Scale;
+                    float lh = (asset.fontInfo.Ascender - asset.fontInfo.Descender) * scale;
+                    float totalHeight = textInfo.lineInfos[textInfo.lineCount - 1].position.y + lh;
+                    
+                    // todo -- clip smarter using layout lines
                     for (int i = 0; i < charCount; i++) {
+                        
                         if (charInfos[i].character == ' ') continue;
+                        
                         Vector2 topLeft = charInfos[i].layoutTopLeft;
                         Vector2 bottomRight = charInfos[i].layoutBottomRight;
 //                        topLeft.x = topLeft.x - 2.5f;
@@ -519,11 +556,11 @@ namespace SVGX {
                         uv3List.Add(outlineColor);
                         uv3List.Add(outlineColor);
                         uv3List.Add(outlineColor);
-
-                        uv4List.Add(new Vector4());
-                        uv4List.Add(new Vector4());
-                        uv4List.Add(new Vector4());
-                        uv4List.Add(new Vector4());
+                        
+                        uv4List.Add(scissorVector);
+                        uv4List.Add(scissorVector);
+                        uv4List.Add(scissorVector);
+                        uv4List.Add(scissorVector);
 
                         colorsList.Add(textColor);
                         colorsList.Add(textColor);
@@ -548,21 +585,65 @@ namespace SVGX {
                     Vector2 pos = points[start + 0];
                     Vector2 wh = points[start + 1];
 
-                    pos.x -= 1f;
-                    pos.y -= 1f;
-                    wh.x += 2f;
-                    wh.y += 2f;
+//                    pos.x -= 1f;
+//                    pos.y -= 1f;
+//                    wh.x += 2f;
+//                    wh.y += 2f;
                     Vector2 p0 = matrix.Transform(new Vector2(pos.x, pos.y));
                     Vector2 p1 = matrix.Transform(new Vector2(pos.x + wh.x, pos.y));
                     Vector2 p2 = matrix.Transform(new Vector2(pos.x + wh.x, pos.y + wh.y));
                     Vector2 p3 = matrix.Transform(new Vector2(pos.x, pos.y + wh.y));
 
-                    // we probably want to buffer all these sizes so our sdf doesn't cut off
+                    // todo -- probably doesn't work for rotation
+                    Rect r = new Rect(p0.x, p0.y, p1.x - p0.x, p3.y - p1.y);
 
-                    positionList.Add(new Vector3(p0.x, -p0.y, z));
-                    positionList.Add(new Vector3(p1.x, -p1.y, z));
-                    positionList.Add(new Vector3(p2.x, -p2.y, z));
-                    positionList.Add(new Vector3(p3.x, -p3.y, z));
+                    Vector2 uv0 = new Vector2(0, 1);
+                    Vector2 uv1 = new Vector2(1, 1);
+                    Vector2 uv2 = new Vector2(1, 0);
+                    Vector2 uv3 = new Vector2(0, 0);
+
+                    Vector2 v0 = new Vector2(p0.x, p0.y);
+                    Vector2 v1 = new Vector2(p1.x, p1.y);
+                    Vector2 v2 = new Vector2(p2.x, p2.y);
+                    Vector2 v3 = new Vector2(p3.x, p3.y);
+
+                    Rect overlap = r.Intersect(scissorRect);
+                    if (overlap.width <= 0 && overlap.height <= 0) {
+                        return;
+                    }
+
+                    if (p0.x < scissorRect.x) {
+                        v0.x = scissorRect.x;
+                        v3.x = scissorRect.x;
+                        uv0.x = (scissorRect.x - p0.x) / r.width;
+                        uv3.x = uv0.x;
+                    }
+
+                    if (p0.y < scissorRect.y) {
+                        v0.y = scissorRect.y;
+                        v1.y = scissorRect.y;
+                        uv0.y = 1 - ((scissorRect.y - p0.y) / r.height);
+                        uv1.y = uv0.y;
+                    }
+
+                    if (p1.x > scissorRect.xMax) {
+                        v1.x = scissorRect.xMax;
+                        v2.x = scissorRect.xMax;
+                        uv1.x = 1 - (p1.x - scissorRect.xMax) / r.width;
+                        uv2.x = uv1.x;
+                    }
+
+                    if (p3.y > scissorRect.yMax) {
+                        v2.y = scissorRect.yMax;
+                        v3.y = scissorRect.yMax;
+                        uv2.y = (p3.y - scissorRect.yMax) / r.height;
+                        uv3.y = (p3.y - scissorRect.yMax) / r.height;
+                    }
+
+                    positionList.Add(new Vector3(v0.x, -v0.y, z));
+                    positionList.Add(new Vector3(v1.x, -v1.y, z));
+                    positionList.Add(new Vector3(v2.x, -v2.y, z));
+                    positionList.Add(new Vector3(v3.x, -v3.y, z));
 
                     trianglesList.Add(triIdx + 0);
                     trianglesList.Add(triIdx + 1);
@@ -571,10 +652,10 @@ namespace SVGX {
                     trianglesList.Add(triIdx + 3);
                     trianglesList.Add(triIdx + 0);
 
-                    uv0List.Add(new Vector4(0, 1, wh.x, wh.y));
-                    uv0List.Add(new Vector4(1, 1, wh.x, wh.y));
-                    uv0List.Add(new Vector4(1, 0, wh.x, wh.y));
-                    uv0List.Add(new Vector4(0, 0, wh.x, wh.y));
+                    uv0List.Add(new Vector4(uv0.x, uv0.y, wh.x, wh.y));
+                    uv0List.Add(new Vector4(uv1.x, uv1.y, wh.x, wh.y));
+                    uv0List.Add(new Vector4(uv2.x, uv2.y, wh.x, wh.y));
+                    uv0List.Add(new Vector4(uv3.x, uv3.y, wh.x, wh.y));
 
                     uv1List.Add(new Vector4(renderData, fillColorModes, gradientId, gradientDirection));
                     uv1List.Add(new Vector4(renderData, fillColorModes, gradientId, gradientDirection));
@@ -591,10 +672,10 @@ namespace SVGX {
                     uv3List.Add(new Vector4());
                     uv3List.Add(new Vector4());
 
-                    uv4List.Add(new Vector4());
-                    uv4List.Add(new Vector4());
-                    uv4List.Add(new Vector4());
-                    uv4List.Add(new Vector4());
+                    uv4List.Add(scissorVector);
+                    uv4List.Add(scissorVector);
+                    uv4List.Add(scissorVector);
+                    uv4List.Add(scissorVector);
 
                     colorsList.Add(color);
                     colorsList.Add(color);
@@ -656,10 +737,10 @@ namespace SVGX {
                     uv3List.Add(new Vector4());
                     uv3List.Add(new Vector4());
 
-                    uv4List.Add(new Vector4());
-                    uv4List.Add(new Vector4());
-                    uv4List.Add(new Vector4());
-                    uv4List.Add(new Vector4());
+                    uv4List.Add(scissorVector);
+                    uv4List.Add(scissorVector);
+                    uv4List.Add(scissorVector);
+                    uv4List.Add(scissorVector);
 
                     colorsList.Add(color);
                     colorsList.Add(color);
@@ -859,7 +940,7 @@ namespace SVGX {
         // only do this for corner segments
         // see if we can stop splitting along midpoint 
         // push all of this to gpu only code
-        
+
         public void CreateTriangles(Vector2 p0, Vector2 p1, Vector2 p2, float strokeWidth, LineJoin join, int miterLimit) {
             Vector2 t0 = (p1 - p0).Perpendicular();
             Vector2 t2 = (p2 - p1).Perpendicular();
@@ -996,7 +1077,7 @@ namespace SVGX {
                         AddVertex(p1 - anchor, Color.yellow, 0);
                         AddVertex(p1 + t2, Color.yellow, 0);
                         CompleteTriangle();
-                        
+
                         AddVertex(pintersect, Color.yellow, 0);
                         AddVertex(p1 + t0, Color.yellow, 0);
                         AddVertex(p1 + t2, Color.yellow, 0);
@@ -1013,7 +1094,7 @@ namespace SVGX {
 
             RangeInt range = shape.pointRange;
             if (range.length == 2) {
-                CreateTriangles(points[0].position, MidPoint(pointList[0].position, pointList[1].position), pointList[1].position, halfStrokeWidth, LineJoin.Bevel, 10);
+                CreateTriangles(points[0].position, MidPoint(pointList[0].position, pointList[1].position), pointList[1].position, halfStrokeWidth, LineJoin.Round, 10);
                 return;
             }
 
@@ -1027,7 +1108,7 @@ namespace SVGX {
             midpoints.Add(points[range.end - 1].position);
 
             for (int i = range.start + 1; i < midpoints.Count; i++) {
-                CreateTriangles(midpoints[i - 1], points[i].position, midpoints[i], halfStrokeWidth, LineJoin.Miter, 10);
+                CreateTriangles(midpoints[i - 1], points[i].position, midpoints[i], halfStrokeWidth, LineJoin.Round, 10);
             }
         }
 

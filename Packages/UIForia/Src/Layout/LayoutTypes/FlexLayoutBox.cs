@@ -191,6 +191,7 @@ namespace UIForia.Layout.LayoutTypes {
             else {
                 actualHeight = size.height + padding.Vertical + border.Vertical;
             }
+            
         }
 
         protected override float ComputeContentWidth() {

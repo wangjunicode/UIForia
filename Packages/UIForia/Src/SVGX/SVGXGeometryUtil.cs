@@ -102,7 +102,7 @@ namespace SVGX {
 
                     output.Add(Vector2.zero);
 
-                    SVGXGeometryUtil.CreateShapeGeometry(output, new Vector2(-strokeWidth * 0.5f, -strokeWidth * 0.5f), shapeType, pointRange, points, matrix);
+                    CreateShapeGeometry(output, new Vector2(-strokeWidth * 0.5f, -strokeWidth * 0.5f), shapeType, pointRange, points, matrix);
 
                     output[retn.start] = output[output.Count - 1];
                     output.Add(output[retn.start + 2]);

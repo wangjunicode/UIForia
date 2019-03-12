@@ -9,17 +9,16 @@ namespace SVGX {
         public readonly SVGXStyle style;
         public readonly SVGXMatrix matrix;
         public readonly RangeInt shapeRange;
+        public readonly Rect scissorRect;
         
-        public SVGXDrawCall(DrawCallType type, int clipGroupId, SVGXStyle style, SVGXMatrix matrix, RangeInt shapeRange) {
+        public SVGXDrawCall(DrawCallType type, int clipGroupId, SVGXStyle style, Rect scissorRect, SVGXMatrix matrix, RangeInt shapeRange) {
             this.type = type;
             this.style = style;
             this.clipGroupId = clipGroupId;
             this.shapeRange = shapeRange;
             this.matrix = matrix;
+            this.scissorRect = scissorRect;
         }
-
-        public bool IsTransparentFill => false;//style.fillColor.a < 1;
-//        public bool IsTransparentStroke => style.strokeStyle.color.a < 1;
 
     }
 

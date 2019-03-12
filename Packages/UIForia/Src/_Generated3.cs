@@ -16,8 +16,8 @@ namespace UIForia.Rendering {
 
     public static class DefaultStyleValues_Generated {
 
-		public const Overflow OverflowX = UIForia.Rendering.Overflow.None;
-		public const Overflow OverflowY = UIForia.Rendering.Overflow.None;
+		public const Overflow OverflowX = UIForia.Rendering.Overflow.Visible;
+		public const Overflow OverflowY = UIForia.Rendering.Overflow.Visible;
 		public static readonly Color BackgroundColor = new Color(-1f, -1f, -1f, -1f);
 		public static readonly UIFixedLength BackgroundImageOffsetX = new UIFixedLength(0, UIFixedUnit.Pixel);
 		public static readonly UIFixedLength BackgroundImageOffsetY = new UIFixedLength(0, UIFixedUnit.Pixel);
@@ -129,9 +129,9 @@ namespace UIForia.Rendering {
 
 			switch(propertyId) {
 				case StylePropertyId.OverflowX:
-					 return new StyleProperty(StylePropertyId.OverflowX, (int)UIForia.Rendering.Overflow.None);
+					 return new StyleProperty(StylePropertyId.OverflowX, (int)UIForia.Rendering.Overflow.Visible);
 				case StylePropertyId.OverflowY:
-					 return new StyleProperty(StylePropertyId.OverflowY, (int)UIForia.Rendering.Overflow.None);
+					 return new StyleProperty(StylePropertyId.OverflowY, (int)UIForia.Rendering.Overflow.Visible);
 				case StylePropertyId.BackgroundColor:
 					 return new StyleProperty(StylePropertyId.BackgroundColor, new Color(-1f, -1f, -1f, -1f));
 				case StylePropertyId.BackgroundImageOffsetX:

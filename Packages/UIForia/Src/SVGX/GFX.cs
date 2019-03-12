@@ -334,6 +334,7 @@ namespace SVGX {
 
             LightList<SVGXStyle> styles = LightListPool<SVGXStyle>.Get();
             LightList<SVGXMatrix> matrices = LightListPool<SVGXMatrix>.Get();
+            LightList<Rect> scissors = LightListPool<Rect>.Get();
 
             SVGXDrawWave[] waveArray = waves.Array;
             for (int i = 0; i < waves.Count; i++) {
@@ -341,7 +342,6 @@ namespace SVGX {
 
                 DrawClip(wave);
 
-                LightList<SVGXRenderShape> opaques = LightListPool<SVGXRenderShape>.Get();
                 LightList<SVGXRenderShape> transparents = LightListPool<SVGXRenderShape>.Get();
 
                 // j is the wave's draw call need the over all offset as well
@@ -351,9 +351,8 @@ namespace SVGX {
                     SVGXDrawCall call = wave.drawCalls[j];
                     styles.Add(call.style);
                     matrices.Add(call.matrix);
-
-                    bool isFillTransparent = call.style.IsFillTransparent;
-
+                    scissors.Add(call.scissorRect);
+                    
                     switch (call.type) {
                         case DrawCallType.StandardStroke: {
                             for (int k = call.shapeRange.start; k < call.shapeRange.end; k++) {
@@ -363,7 +362,6 @@ namespace SVGX {
                                     textInfo = ctx.textInfos[ctx.shapes[k].textInfoId];
                                 }
 
-                                // todo -- for stroked shapes without a transparent color we can use the opaque group
                                 transparents.Add(new SVGXRenderShape(ctx.shapes[k], z, j, j, DrawCallType.StandardStroke, textInfo));
                             }
 
@@ -377,13 +375,8 @@ namespace SVGX {
                                     textInfo = ctx.textInfos[ctx.shapes[k].textInfoId];
                                 }
 
-                                if (isFillTransparent || ctx.shapes[k].RequiresTransparentRendering) {
-                                    transparents.Add(new SVGXRenderShape(ctx.shapes[k], z, j, j, DrawCallType.StandardFill, textInfo));
-                                }
-                                else {
-                                    //opaques.Add(new SVGXRenderShape(ctx.shapes[k], z, j, j, DrawCallType.StandardFill, textInfo));
-                                    transparents.Add(new SVGXRenderShape(ctx.shapes[k], z, j, j, DrawCallType.StandardFill, textInfo));
-                                }
+
+                                transparents.Add(new SVGXRenderShape(ctx.shapes[k], z, j, j, DrawCallType.StandardFill, textInfo));
                             }
 
                             break;
@@ -406,10 +399,8 @@ namespace SVGX {
 
                 transparents.Sort((a, b) => a.zIndex > b.zIndex ? -1 : 1);
 
-                DrawBatchedOpaques(ctx.points.Array, opaques, styles, matrices);
-                DrawBatchedTransparents(ctx.points.Array, transparents, styles, matrices);
+                DrawBatchedTransparents(ctx.points.Array, transparents, scissors, styles, matrices);
 
-                LightListPool<SVGXRenderShape>.Release(ref opaques);
                 LightListPool<SVGXRenderShape>.Release(ref transparents);
 
                 ClearClip(wave);
@@ -420,6 +411,7 @@ namespace SVGX {
             LightListPool<SVGXDrawWave>.Release(ref waves);
             LightListPool<SVGXStyle>.Release(ref styles);
             LightListPool<SVGXMatrix>.Release(ref matrices);
+            LightListPool<Rect>.Release(ref scissors);
         }
 
         private static void GroupByTexture(LightList<SVGXStyle> styles, LightList<SVGXRenderShape> shapes, LightList<TexturedShapeGroup> retn) {
@@ -457,7 +449,7 @@ namespace SVGX {
             }
         }
 
-        private void DrawBatchedOpaques(Vector2[] points, LightList<SVGXRenderShape> renderShapes, LightList<SVGXStyle> styles, LightList<SVGXMatrix> matrices) {
+        private void DrawBatchedOpaques(Vector2[] points, LightList<SVGXRenderShape> renderShapes, Rect scissorRect, LightList<SVGXStyle> styles, LightList<SVGXMatrix> matrices) {
             GroupByTexture(styles, renderShapes, texturedShapeGroups);
             TexturedShapeGroup[] array = texturedShapeGroups.Array;
 
@@ -510,7 +502,7 @@ namespace SVGX {
                         }
                     }
 
-                    batchedVertexData.CreateFillVertices(points, shapes[j], gradientData, styles[shapes[j].styleId], matrices[shapes[j].matrixId]);
+                    batchedVertexData.CreateFillVertices(points, shapes[j], scissorRect, gradientData, styles[shapes[j].styleId], matrices[shapes[j].matrixId]);
                 }
 
                 material = batchedTransparentPool.GetAndQueueForRelease();
@@ -523,7 +515,7 @@ namespace SVGX {
             texturedShapeGroups.Clear();
         }
 
-        private void DrawBatchedTransparents(Vector2[] points, LightList<SVGXRenderShape> renderShapes, LightList<SVGXStyle> styles, LightList<SVGXMatrix> matrices) {
+        private void DrawBatchedTransparents(Vector2[] points, LightList<SVGXRenderShape> renderShapes, LightList<Rect> scissors, LightList<SVGXStyle> styles, LightList<SVGXMatrix> matrices) {
             BatchedVertexData batchedVertexData = vertexDataPool.GetAndQueueForRelease();
 
             int count = renderShapes.Count;
@@ -547,7 +539,7 @@ namespace SVGX {
             Material fontMaterial = null;
 
             // todo -- support stroke textures, right now we only set texture for fill
-            
+
             for (int i = 0; i < count; i++) {
                 SVGXRenderShape renderShape = renderShapeArray[i];
                 TextInfo textInfo = renderShape.textInfo;
@@ -564,7 +556,6 @@ namespace SVGX {
                 }
 
                 if (fontChanged || textureChanged) {
-
                     UpdateFontAtlas(material, fontMaterial);
                     material.SetTexture(s_MainTexKey, textureMap.GetOrDefault(lastTextureId));
                     DrawMesh(batchedVertexData.FillMesh(), originMatrix, material);
@@ -595,10 +586,10 @@ namespace SVGX {
                 switch (renderShape.drawCallType) {
                     // todo pass array + index to avoid struct copy cost here for style + matrix
                     case DrawCallType.StandardFill:
-                        batchedVertexData.CreateFillVertices(points, renderShape, gradientData, styles[renderShape.styleId], matrices[renderShape.matrixId]);
+                        batchedVertexData.CreateFillVertices(points, renderShape, scissors[renderShape.styleId], gradientData, styles[renderShape.styleId], matrices[renderShape.matrixId]);
                         break;
                     case DrawCallType.StandardStroke:
-                        batchedVertexData.CreateStrokeVertices(points, renderShape, gradientData, styles[renderShape.styleId], matrices[renderShape.matrixId]);
+                        batchedVertexData.CreateStrokeVertices(points, renderShape, gradientData, scissors[renderShape.styleId], styles[renderShape.styleId], matrices[renderShape.matrixId]);
                         break;
                     case DrawCallType.Shadow:
                         batchedVertexData.CreateShadowVertices(points, renderShape, gradientData, styles[renderShape.styleId], matrices[renderShape.matrixId]);

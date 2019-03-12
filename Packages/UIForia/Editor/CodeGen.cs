@@ -23,8 +23,8 @@ namespace UIForia.Editor {
 
         internal static readonly PropertyGenerator[] properties = {
             // Overflow
-            new PropertyGenerator<Overflow>(StylePropertyId.OverflowX, Overflow.None),
-            new PropertyGenerator<Overflow>(StylePropertyId.OverflowY, Overflow.None),
+            new PropertyGenerator<Overflow>(StylePropertyId.OverflowX, Overflow.Visible),
+            new PropertyGenerator<Overflow>(StylePropertyId.OverflowY, Overflow.Visible),
 
             // Background
             new AnimatedPropertyGenerator<Color>(StylePropertyId.BackgroundColor, ColorUtil.UnsetValue),

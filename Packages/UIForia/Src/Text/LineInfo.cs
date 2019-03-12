@@ -10,6 +10,8 @@ namespace UIForia.Text {
         public float width;
         public float height;
 
+        public float MaxY => position.y + height;
+
     }
 
 

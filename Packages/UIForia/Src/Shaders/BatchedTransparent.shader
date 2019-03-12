@@ -58,7 +58,7 @@ Shader "UIForia/BatchedTransparent" {
                 float4 fragData1 : TEXCOORD2;
                 float4 fragData2 : TEXCOORD3;
                 float4 fragData3 : TEXCOORD4;
-                fixed4 secondaryColor : COLOR1; // todo -- remove
+                float4 scissorRect : TEXCOORD5;
            };
 
            #include "BatchedTransparentText.cginc"
@@ -67,17 +67,17 @@ Shader "UIForia/BatchedTransparent" {
            // todo -- use multi-compile flags to only compile the SDF functions a given draw actually needs
            fixed4 SDFShape(v2f i, int shapeType, int strokeShape) {
                float2 drawSurfaceSize = i.uv.zw;
-               float strokeWidth = lerp(0, i.fragData3.x, strokeShape);
+               float strokeWidth = lerp(0, i.fragData1.z, strokeShape);
                
                fixed4 fromColor = i.color;
-               fixed4 toColor = Clear;
+               fixed4 toColor = fixed4(i.color.rgb, 0); //Clear;
                
                float left = step(i.uv.x, 0.5); // 1 if left
                float bottom = step(i.uv.y, 0.5); // 1 if bottom
                float top = 1 - bottom;
                float right = 1 - left;
                
-               float4 radii = i.fragData2;
+               float4 radii = i.fragData3;
                
                int radiusIndex = 0;
                radiusIndex += and(top, right) * 1;
@@ -109,12 +109,12 @@ Shader "UIForia/BatchedTransparent" {
                
                if(halfStrokeWidth > 0) {
                    if(fDist <= 0) {
-                       toColor = Clear;
+                       toColor = fixed4(i.color.rgb, 0);//Clear;
                    }
                    fDist = abs(fDist) - halfStrokeWidth;
                }
                else {
-                   toColor = Clear;
+                   toColor = fixed4(i.color.rgb, 0);//Clear;
                }
                
                float fBlendAmount = smoothstep(-1, 1, fDist);
@@ -137,10 +137,9 @@ Shader "UIForia/BatchedTransparent" {
                 o.uv = v.uv;
                 o.color = v.color;
                 o.flags = float4(renderType, shapeType, v.uv1.yz);
-                o.secondaryColor = fixed4(0, 0, 0, 0);
-                o.fragData1 = float4(texFlag, gradientFlag, tintFlag, gradientTintFlag);
-                o.fragData2 = v.uv2;
-                o.fragData3 = v.uv3;
+                o.fragData1 = float4(v.vertex.xy, v.uv3.xy);
+                o.fragData2 = float4(texFlag, gradientFlag, tintFlag, gradientTintFlag);;
+                o.fragData3 = v.uv2;
                 
                 return o;
            }
@@ -162,11 +161,11 @@ Shader "UIForia/BatchedTransparent" {
                float y = GetPixelInRowUV(GradientId, _globalGradientAtlasSize);
                fixed4 textureColor = tex2Dlod(_MainTex, float4(i.uv.xy, 0, 0));
                fixed4 gradientColor = tex2Dlod(_globalGradientAtlas, float4(t, y, 0, 0));
-               fixed4 tintColor = lerp(White, color, i.fragData1.z);                
+               fixed4 tintColor = lerp(White, color, i.fragData2.z);                
                
-               textureColor = lerp(color, textureColor, i.fragData1.x);
-               gradientColor = lerp(White, gradientColor, i.fragData1.y);
-               tintColor = lerp(tintColor, gradientColor, i.fragData1.w);
+               textureColor = lerp(color, textureColor, i.fragData2.x);
+               gradientColor = lerp(White, gradientColor, i.fragData2.y);
+               tintColor = lerp(tintColor, gradientColor, i.fragData2.w);
                
                fixed4 tintedTextureColor = lerp(textureColor, textureColor * tintColor, tintColor.a);
            
@@ -202,23 +201,36 @@ Shader "UIForia/BatchedTransparent" {
                int renderData = (int)input.uv1.x;
                int renderType = (renderData & 0xffff);
                uint shapeType = (renderData >> 16) & (1 << 16) - 1;
-
+               
+               v2f o;
                if(renderType == RenderType_Fill || renderType == RenderType_Shadow) {
-                   return FillVertex(input, shapeType, renderType);
+                   o = FillVertex(input, shapeType, renderType);
                }
                else if(renderType == RenderType_Text) {
-                   return TextVertex(input);
+                   o = TextVertex(input);
                }
                else if(renderType == RenderType_StrokeShape) {
-                   return FillVertex(input, shapeType, renderType);
+                   o = FillVertex(input, shapeType, renderType);
                }
                else {
-                   return LineVertex(input);
+                   o = LineVertex(input);
                }
+               
+               o.scissorRect = input.uv4;
+               return o;
            }
 
             fixed4 frag (v2f i) : SV_Target {
-
+                
+               float2 p = i.fragData1.xy;
+               
+               float2 bottomLeft = i.scissorRect.xw;
+               float2 topRight = i.scissorRect.zy;
+               
+               if(InsideBox(p, bottomLeft, topRight) <= 0) {
+                   return Clear;
+               }
+   
                if(i.flags.x == RenderType_Fill) {
                    return FillFragment(i, 0);
                }

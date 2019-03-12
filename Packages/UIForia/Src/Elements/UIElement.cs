@@ -6,7 +6,6 @@ using UIForia.Elements.Routing;
 using UIForia.Expressions;
 using UIForia.Layout;
 using UIForia.Rendering;
-using UIForia.Rendering.ElementRendering;
 using UIForia.Routing;
 using UIForia.Templates;
 using UIForia.UIInput;
@@ -28,14 +27,14 @@ namespace UIForia.Elements {
         internal UIElementFlags flags;
         internal UIElement parent;
 
-        public LayoutResult layoutResult { get; internal set; }
-        private ElementRenderer renderer = ElementRenderer.DefaultInstanced; // cold data?
+        public readonly LayoutResult layoutResult;
 
         internal static IntMap<ElementColdData> s_ColdDataMap = new IntMap<ElementColdData>();
         
         protected internal UIElement() {
             this.id = Application.NextElementId;
             this.style = new UIStyleSet(this);
+            this.layoutResult = new LayoutResult();
             this.flags = UIElementFlags.Enabled;
         }
 
@@ -68,18 +67,6 @@ namespace UIForia.Elements {
                 coldData.templateRef = value;
                 coldData.InitializeAttributes();
                 s_ColdDataMap[id] = coldData;
-            }
-        }
-
-        public ElementRenderer Renderer {
-            get { return renderer; }
-            set {
-                if (value == null) {
-                    value = ElementRenderer.DefaultInstanced;
-                }
-                else {
-                    renderer = value;
-                }
             }
         }
 

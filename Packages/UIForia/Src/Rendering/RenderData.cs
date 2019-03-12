@@ -1,6 +1,5 @@
 ﻿using System.Diagnostics;
 using UIForia.Elements;
-using UIForia.Rendering.ElementRendering;
 using UIForia.Systems;
 using UnityEngine;
 
@@ -26,7 +25,6 @@ namespace UIForia.Rendering {
             this.isMaterialProvider = this.element is IMaterialProvider;
         }
 
-        public ElementRenderer Renderer => element.Renderer;
         public bool CullResultChanged => previousCullResult != cullResult;
        
         public CullResult CullResult {

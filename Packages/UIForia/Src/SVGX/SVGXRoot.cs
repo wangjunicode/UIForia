@@ -67,76 +67,121 @@ namespace SVGX {
         private VectorContext ctx2;
 
         public static ImmediateRenderContext CTX;
+        public bool enableScissor = true;
+
+        public Vector2 offset;
         
         public void Update() {
             camera.orthographic = true;
             camera.orthographicSize = Screen.height * 0.5f;
 
-            CTX = ctx;
             ctx.Clear();
-            ctx2.Clear();
-            ctx.SetStroke(Color.red);
-            float sWidth = 1f;
-            ctx.SetStrokeWidth(sWidth);
+            
+            if (enableScissor) {
+                ctx.EnableScissorRect(new Rect(100, 100, 300, 300));
+            }
 
-            Vector2 p0 = new Vector2(500, 100);
-//            Vector2 p0 = new Vector2(450, 450);
-            Vector2 p1 = new Vector2(100, 300);
-//            Vector2 p1 = new Vector2(600, 600);
-            p1 = p1.Rotate(p0, rotation);
-            Vector2 p2 = new Vector2(400, 500);
-//            Vector2 p2 = new Vector2(700, 700);
-            Vector2 p3 = new Vector2(500,400);
-
-            ctx.MoveTo(p0);
-            ctx.LineTo(p1);
-            ctx.LineTo(p2);
-
-//            ctx.Stroke();
-
+            
+            ctx.SetStrokeWidth(3f);
+            ctx.SetStroke(new Color32(0, 181, 217, 255));
+            ctx.RoundedRect(new Rect(offset.x + 100, offset.y + 100, 300, 100), 40, 40, 40, 40);
+            ctx.Stroke();
+            
+      
+//            ctx.SetFill(Color.red);
+//            ctx.FillRect(400, 400, 100, 100);
+//
+//            ctx.SetFill(texture);
+//            ctx.FillRect(50 + offset.x, 250 + offset.y, 400, 300);
+//            
+//            ctx.SetFill(Color.blue);
+//            ctx.FillRect(150, 150, 100, 100);
+            SVGXTextStyle style = new SVGXTextStyle();
+            style.fontSize = 24;
+            style.color = Color.black;
+            TextInfo tf = TextUtil.CreateTextInfo(new TextUtil.TextSpan(TMP_FontAsset.defaultFontAsset, style, "Hello World"));
+            List<LineInfo> lineInfos = TextUtil.Layout(tf, float.MaxValue);
+            tf.lineInfos = ArrayPool<LineInfo>.CopyFromList(lineInfos);
+            tf.lineCount = lineInfos.Count;
+            TextUtil.ApplyLineAndWordOffsets(tf);
+            
+//            ctx.Text(100 + offset.x, 100 + offset.y, tf);
+//            ctx.SetFill(Color.black);
+//            ctx.Fill();
+            
             ctx.BeginPath();
-            Vector2 toCurr = (p1 - p0).normalized;
-            Vector2 toNext = (p2 - p1).normalized;
-            Vector2 toCurrPerp = new Vector2(-toCurr.y, toCurr.x);
-            Vector2 toNextPerp = new Vector2(-toNext.y, toNext.x);
-
-            Vector2 miter = (toCurrPerp + toNextPerp).normalized;
-//
-//            ctx.MoveTo(p1);
-//            ctx.LineTo(p1 + (miter * 100f));
-//            ctx.MoveTo(p1);
-//            ctx.LineTo(p1 - (miter * 100f));
-//
-//            ctx.Stroke();
-//            
-//            ctx.CircleFromCenter(v0.x, v0.y, 5f);
-//            ctx.CircleFromCenter(v1.x, v1.y, 5f);
-//            ctx.CircleFromCenter(v2.x, v2.y, 5f);
-//            ctx.CircleFromCenter(v3.x, v3.y, 5f);
-//            ctx.Stroke();
-//            
-//            ctx.BeginPath();
-//            
-////            ctx.MoveTo(lineStart - (toEnd * 10f));
-//            ctx.LineTo((p0 - (toNext * 100f)  + (toNextPerp * (sWidth))));
-//            ctx.Stroke();
-//            
-//            ctx.SetStroke(Color.yellow);
-//            ctx.BeginPath();
-//            ctx.MoveTo(p0);
-//            ctx.LineTo(p0 + (toNextPerp * (-sWidth)));
-//            ctx.LineTo((p0 - (toNext * 100f)  + (toNextPerp * (-sWidth))));
-//            ctx.Stroke();
-
-            ctx2.BeginPath();
-            ctx2.MoveTo(p0);
-            ctx2.LineTo(p1);
-            ctx2.LineTo(p2);
-            ctx2.LineTo(p3);
-            ctx2.Stroke();
-
-            gfx2.Render();
+            ctx.MoveTo(offset.x, offset.y);
+            ctx.LineTo(500, 500);
+            ctx.SetStroke(Color.yellow);
+            ctx.SetStrokeWidth(3f);
+            ctx.Stroke();
+            
             gfx.Render(ctx);
+//            CTX = ctx;
+//            ctx.Clear();
+//            ctx2.Clear();
+//            ctx.SetStroke(Color.red);
+//            float sWidth = 1f;
+//            ctx.SetStrokeWidth(sWidth);
+//
+//            Vector2 p0 = new Vector2(500, 100);
+////            Vector2 p0 = new Vector2(450, 450);
+//            Vector2 p1 = new Vector2(100, 300);
+////            Vector2 p1 = new Vector2(600, 600);
+//            p1 = p1.Rotate(p0, rotation);
+//            Vector2 p2 = new Vector2(400, 500);
+////            Vector2 p2 = new Vector2(700, 700);
+//            Vector2 p3 = new Vector2(500,400);
+//
+//            ctx.MoveTo(p0);
+//            ctx.LineTo(p1);
+//            ctx.LineTo(p2);
+//
+////            ctx.Stroke();
+//
+//            ctx.BeginPath();
+//            Vector2 toCurr = (p1 - p0).normalized;
+//            Vector2 toNext = (p2 - p1).normalized;
+//            Vector2 toCurrPerp = new Vector2(-toCurr.y, toCurr.x);
+//            Vector2 toNextPerp = new Vector2(-toNext.y, toNext.x);
+//
+//            Vector2 miter = (toCurrPerp + toNextPerp).normalized;
+////
+////            ctx.MoveTo(p1);
+////            ctx.LineTo(p1 + (miter * 100f));
+////            ctx.MoveTo(p1);
+////            ctx.LineTo(p1 - (miter * 100f));
+////
+////            ctx.Stroke();
+////            
+////            ctx.CircleFromCenter(v0.x, v0.y, 5f);
+////            ctx.CircleFromCenter(v1.x, v1.y, 5f);
+////            ctx.CircleFromCenter(v2.x, v2.y, 5f);
+////            ctx.CircleFromCenter(v3.x, v3.y, 5f);
+////            ctx.Stroke();
+////            
+////            ctx.BeginPath();
+////            
+//////            ctx.MoveTo(lineStart - (toEnd * 10f));
+////            ctx.LineTo((p0 - (toNext * 100f)  + (toNextPerp * (sWidth))));
+////            ctx.Stroke();
+////            
+////            ctx.SetStroke(Color.yellow);
+////            ctx.BeginPath();
+////            ctx.MoveTo(p0);
+////            ctx.LineTo(p0 + (toNextPerp * (-sWidth)));
+////            ctx.LineTo((p0 - (toNext * 100f)  + (toNextPerp * (-sWidth))));
+////            ctx.Stroke();
+//
+//            ctx2.BeginPath();
+//            ctx2.MoveTo(p0);
+//            ctx2.LineTo(p1);
+//            ctx2.LineTo(p2);
+//            ctx2.LineTo(p3);
+//            ctx2.Stroke();
+//
+//            gfx2.Render();
+//            gfx.Render(ctx);
         }
 
     }

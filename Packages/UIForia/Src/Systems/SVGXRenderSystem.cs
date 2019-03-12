@@ -104,7 +104,7 @@ namespace UIForia.Systems {
                 }
                 
                 ctx.SetTransform(matrix);
-
+                                
                 if (current is UITextElement textElement) {
                     ctx.BeginPath();
                     ctx.Text(-offset.x, -offset.y, textElement.textInfo);
@@ -124,6 +124,16 @@ namespace UIForia.Systems {
                     bool hasUniformBorder = border.x == border.y && border.z == border.x && border.w == border.x;
                     bool hasBorder = border.x > 0 || border.y > 0 || border.z > 0 || border.w > 0;
 
+                    Vector2 screenPos = current.layoutResult.screenPosition;
+                    Rect scissorRect = new Rect(screenPos.x, screenPos.y, float.MaxValue, float.MaxValue);
+                    
+                    // todo -- implement background scrolling style properties
+                    
+                    if (current.style.OverflowY != Overflow.Visible) {
+                        Size allocated = current.layoutResult.allocatedSize;
+                        ctx.EnableScissorRect(new Rect(screenPos.x, screenPos.y, allocated.width, allocated.height));
+                    }
+                    
                     if (resolveBorderRadius == Vector4.zero) {
                         ctx.Rect(borderRect.left - offset.x, borderRect.top - offset.y, layoutResult.actualSize.width - borderRect.Horizontal, layoutResult.actualSize.height - borderRect.Vertical);
 
@@ -141,7 +151,6 @@ namespace UIForia.Systems {
                             else {
                                 DrawNormalFill(current);
 
-//                                ctx.SetUVBounds();
                                 ctx.SetStrokeOpacity(1f);
                                 ctx.SetStrokePlacement(StrokePlacement.Inside);
                                 ctx.SetStroke(current.style.BorderColor);
@@ -188,8 +197,21 @@ namespace UIForia.Systems {
                         }
                     }
                 }
-            }
 
+                Size scrollbarVerticalSize = current.layoutResult.scrollbarVerticalSize;
+                if (scrollbarVerticalSize.IsDefined()) {
+                    Scrollbar scrollbar = Application.GetCustomScrollbar(null);
+                    Vector2 screenPosition = current.layoutResult.screenPosition;
+                    float width = current.layoutResult.allocatedSize.width;
+                    Vector2 pos = new Vector2(screenPosition.x + width - scrollbarVerticalSize.width, screenPosition.y);
+                    matrix = SVGXMatrix.TRS(pos, 0, Vector2.one);
+                    scrollbar.Paint(current, scrollbarVerticalSize, ctx, matrix);
+                }
+
+                if (current.layoutResult.HasScrollbarHorizontal) {
+                    
+                }
+            }
 
             DrawDebugOverlay?.Invoke(ctx);
             

@@ -1,6 +1,5 @@
 using UIForia.Layout;
 using UIForia.Rendering;
-using UIForia.Rendering.ElementRendering;
 using UIForia.UIInput;
 using UIForia.Util;
 using UnityEngine;
@@ -54,10 +53,6 @@ namespace UIForia.Elements {
             flags |= UIElementFlags.BuiltIn;
 
             scrollState = ScrollState.Normal;
-            trackMaterial = StandardRenderer.CreateMaterial();
-            handleMaterial = StandardRenderer.CreateMaterial();
-            incrementButtonMaterial = StandardRenderer.CreateMaterial();
-            decrementButtonMaterial = StandardRenderer.CreateMaterial();
         }
 
 

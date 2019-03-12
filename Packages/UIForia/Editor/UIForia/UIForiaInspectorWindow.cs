@@ -694,14 +694,14 @@ namespace UIForia.Editor {
             switch (property.propertyId) {
                 case StylePropertyId.OverflowX:
                 case StylePropertyId.OverflowY:
-                    return DrawEnum<Overflow>(property, isEditable);
+                    return DrawEnumWithValue<Overflow>(property, isEditable);
 
                 case StylePropertyId.BackgroundColor:
                 case StylePropertyId.BorderColor:
                     return DrawColor(property, isEditable);
 
                 case StylePropertyId.Visibility:
-                    return DrawEnum<Visibility>(property, isEditable);
+                    return DrawEnumWithValue<Visibility>(property, isEditable);
 
                 case StylePropertyId.Painter:
                     return DrawString(property, isEditable);
@@ -737,13 +737,13 @@ namespace UIForia.Editor {
 
                 case StylePropertyId.GridItemColSelfAlignment:
                 case StylePropertyId.GridItemRowSelfAlignment:
-                    return DrawEnum<CrossAxisAlignment>(property, isEditable);
+                    return DrawEnumWithValue<CrossAxisAlignment>(property, isEditable);
 
                 case StylePropertyId.GridLayoutDirection:
-                    return DrawEnum<LayoutDirection>(property, isEditable);
+                    return DrawEnumWithValue<LayoutDirection>(property, isEditable);
 
                 case StylePropertyId.GridLayoutDensity:
-                    return DrawEnum<GridLayoutDensity>(property, isEditable);
+                    return DrawEnumWithValue<GridLayoutDensity>(property, isEditable);
 
                 case StylePropertyId.GridLayoutColTemplate:
                 case StylePropertyId.GridLayoutRowTemplate:
@@ -759,20 +759,20 @@ namespace UIForia.Editor {
 
                 case StylePropertyId.GridLayoutColAlignment:
                 case StylePropertyId.GridLayoutRowAlignment:
-                    return DrawEnum<CrossAxisAlignment>(property, isEditable);
+                    return DrawEnumWithValue<CrossAxisAlignment>(property, isEditable);
 
                 case StylePropertyId.FlexLayoutWrap:
-                    return DrawEnum<WrapMode>(property, isEditable);
+                    return DrawEnumWithValue<WrapMode>(property, isEditable);
 
                 case StylePropertyId.FlexLayoutDirection:
-                    return DrawEnum<LayoutDirection>(property, isEditable);
+                    return DrawEnumWithValue<LayoutDirection>(property, isEditable);
 
                 case StylePropertyId.FlexLayoutMainAxisAlignment:
-                    return DrawEnum<MainAxisAlignment>(property, isEditable);
+                    return DrawEnumWithValue<MainAxisAlignment>(property, isEditable);
 
                 case StylePropertyId.FlexLayoutCrossAxisAlignment:
                 case StylePropertyId.FlexItemSelfAlignment:
-                    return DrawEnum<CrossAxisAlignment>(property, isEditable);
+                    return DrawEnumWithValue<CrossAxisAlignment>(property, isEditable);
 
                 case StylePropertyId.FlexItemOrder:
                 case StylePropertyId.FlexItemGrow:
@@ -818,7 +818,7 @@ namespace UIForia.Editor {
 
                 case StylePropertyId.TransformBehaviorX:
                 case StylePropertyId.TransformBehaviorY:
-                    return DrawEnum<TransformBehavior>(property, isEditable);
+                    return DrawEnumWithValue<TransformBehavior>(property, isEditable);
 
                 case StylePropertyId.__TextPropertyStart__:
                 case StylePropertyId.__TextPropertyEnd__:
@@ -838,13 +838,13 @@ namespace UIForia.Editor {
 //                    return DrawEnum<Text.FontStyle>(property, isEditable);
 
                 case StylePropertyId.TextAlignment:
-                    return DrawEnum<Text.TextAlignment>(property, isEditable);
+                    return DrawEnumWithValue<Text.TextAlignment>(property, isEditable);
 
 //                case StylePropertyId.TextWhitespaceMode:
 //                    return DrawEnum<WhitespaceMode>(property, isEditable);
 //
                 case StylePropertyId.TextTransform:
-                    return DrawEnum<TextTransform>(property, isEditable);
+                    return DrawEnumWithValue<TextTransform>(property, isEditable);
 
                 case StylePropertyId.MinWidth:
                 case StylePropertyId.MaxWidth:
@@ -855,10 +855,10 @@ namespace UIForia.Editor {
                     return DrawMeasurement(property, isEditable);
 
                 case StylePropertyId.LayoutType:
-                    return DrawEnum<LayoutType>(property, isEditable);
+                    return DrawEnumWithValue<LayoutType>(property, isEditable);
 
                 case StylePropertyId.LayoutBehavior:
-                    return DrawEnum<LayoutBehavior>(property, isEditable);
+                    return DrawEnumWithValue<LayoutBehavior>(property, isEditable);
 
                 case StylePropertyId.AnchorTop:
                 case StylePropertyId.AnchorRight:
@@ -867,14 +867,14 @@ namespace UIForia.Editor {
                     return DrawFixedLength(property, isEditable);
 
                 case StylePropertyId.AnchorTarget:
-                    return DrawEnum<AnchorTarget>(property, isEditable);
+                    return DrawEnumWithValue<AnchorTarget>(property, isEditable);
 
                 case StylePropertyId.ZIndex:
                 case StylePropertyId.RenderLayerOffset:
                     return DrawInt(property, isEditable);
 
                 case StylePropertyId.RenderLayer:
-                    return DrawEnum<RenderLayer>(property, isEditable);
+                    return DrawEnumWithValue<RenderLayer>(property, isEditable);
 
 //                default:
                 //throw new ArgumentOutOfRangeException(property.propertyId.ToString());
@@ -930,21 +930,7 @@ namespace UIForia.Editor {
             // unclear if output is a value or an index, I suspect index
             GUI.enabled = true;
             return isEditable ? new StyleProperty(property.propertyId, values[output]) : property;
-        }
-
-        private static StyleProperty DrawEnum<T>(StyleProperty property, bool isEditable) {
-            s_Content.text = StyleUtil.GetPropertyName(property);
-            GUI.enabled = isEditable;
-            ValueTuple<int[], GUIContent[]> tuple = GetEnumValues<T>();
-
-            int[] values = tuple.Item1;
-            GUIContent[] displayOptions = tuple.Item2;
-            int index = Array.IndexOf(values, property.valuePart0);
-            int output = EditorGUILayout.IntPopup(s_Content, index, displayOptions, values);
-            // unclear if output is a value or an index, I suspect index
-            GUI.enabled = true;
-            return isEditable ? new StyleProperty(property.propertyId, output) : property;
-        }
+        }       
 
         private static StyleProperty DrawColor(StyleProperty property, bool isEditable) {
             s_Content.text = StyleUtil.GetPropertyName(property);

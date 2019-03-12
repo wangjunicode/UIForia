@@ -44,70 +44,61 @@ inline float4 EncodeToFloat4(float v) {
           
 v2f TextVertex(appdata input) {
            
-    float outlineWidth = input.uv2.x;
-    float outlineSoftness = 0;//input.uv2.y;
-    
-    float4 vPosition = UnityObjectToClipPos(input.vertex);
-    float2 pixelSize = vPosition.w;
-    
-    pixelSize /= float2(_ScaleX, _ScaleY) * abs(mul((float2x2)UNITY_MATRIX_P, _ScreenParams.xy));
-    float scale = rsqrt(dot(pixelSize, pixelSize));
-    scale *= abs(input.uv.z) * gGradientScale * 1.5; 
-    
-    int bold = 0;
-    
-    float weight = lerp(gWeightNormal, gWeightBold, 0) / 4.0;
-    weight = (weight + _FaceDilate) * gScaleRatioA * 0.5;
-    
-    float bias =(.5 - weight) + (.5 / scale);
-    float alphaClip = (1.0 - outlineWidth * gScaleRatioA - outlineSoftness * gScaleRatioA);
-    
-    alphaClip = min(alphaClip, 1.0 - _GlowOffset * gScaleRatioB - _GlowOuter * gScaleRatioB);
-    alphaClip = alphaClip / 2.0 - ( .5 / scale) - weight;
-    
-    float4 underlayColor = _UnderlayColor;
-    underlayColor.rgb *= underlayColor.a;
-    
-    float bScale = scale;
-    bScale /= 1 + ((_UnderlaySoftness * gScaleRatioC) * bScale);
-    float bBias = (0.5 - weight) * bScale - 0.5 - ((_UnderlayDilate *  gScaleRatioC) * 0.5 * bScale);
-    
-    float x = -(_UnderlayOffsetX *  gScaleRatioC) * gGradientScale / gFontTextureWidth;
-    float y = -(_UnderlayOffsetY *  gScaleRatioC) * gGradientScale / gFontTextureHeight;
-    float2 bOffset = float2(x, y);
-        
-    float4 outlineColor = input.uv3;
+   // float outlineWidth = input.uv2.x;
+   // float outlineSoftness = 0;//input.uv2.y;
+   // 
+   // float4 vPosition = UnityObjectToClipPos(input.vertex);
+   // float2 pixelSize = vPosition.w;
+   // 
+   // pixelSize /= float2(_ScaleX, _ScaleY) * abs(mul((float2x2)UNITY_MATRIX_P, _ScreenParams.xy));
+   // float scale = rsqrt(dot(pixelSize, pixelSize));
+   // scale *= abs(input.uv.z) * gGradientScale * 1.5; 
+   // 
+   // int bold = 0;
+   // 
+   // float weight = lerp(gWeightNormal, gWeightBold, 0) / 4.0;
+   // weight = (weight + _FaceDilate) * gScaleRatioA * 0.5;
+   // 
+   // float bias =(.5 - weight) + (.5 / scale);
+   // float alphaClip = (1.0 - outlineWidth * gScaleRatioA - outlineSoftness * gScaleRatioA);
+   // 
+   // alphaClip = min(alphaClip, 1.0 - _GlowOffset * gScaleRatioB - _GlowOuter * gScaleRatioB);
+   // alphaClip = alphaClip / 2.0 - ( .5 / scale) - weight;
+   // 
+   // float4 underlayColor = _UnderlayColor;
+   // underlayColor.rgb *= underlayColor.a;
+   // 
+   // float bScale = scale;
+   // bScale /= 1 + ((_UnderlaySoftness * gScaleRatioC) * bScale);
+   // float bBias = (0.5 - weight) * bScale - 0.5 - ((_UnderlayDilate *  gScaleRatioC) * 0.5 * bScale);
+   // 
+   // float x = -(_UnderlayOffsetX *  gScaleRatioC) * gGradientScale / gFontTextureWidth;
+   // float y = -(_UnderlayOffsetY *  gScaleRatioC) * gGradientScale / gFontTextureHeight;
+   // float2 bOffset = float2(x, y);
+   //     
+   // float4 outlineColor = input.uv3;
     
     v2f o;
-    o.vertex = vPosition;
+    o.vertex = UnityObjectToClipPos(input.vertex);
     o.color = input.color;
     o.uv = input.uv;
     o.flags = float4(RenderType_Text, 0, 0, 0);
-    o.fragData1 = float4(outlineWidth, outlineSoftness, input.uv2.x, 0);
-    o.fragData2 =  float4(alphaClip, scale, bias, weight);
-    o.fragData3 = float4(0, 0, 0, 0); 
-    o.secondaryColor = outlineColor;
+    o.fragData1 = float4(input.vertex.xy, input.uv2.x, 0);
+    o.fragData2 =  float4(0, 0, 0, 0); //alphaClip, scale, bias, weight);
+    o.fragData3 = float4(0, 0, 0, 0);
     
     return o;
 }
 
 fixed4 TextFragment(v2f input) {
-
    
    float c = tex2D(_globalFontTexture, float2(input.uv.xy)).a;
-
    
    float smoothing = 1 / 16.0;
-   float outlineWidth = 0; //.25;
-   float outerEdgeCenter = 0.5 - outlineWidth;
    
-  // if(outlineWidth > 0) {
-       float alpha = smoothstep(0.5 - smoothing, 0.5 + smoothing, c);
-       //float border = smoothstep(0.5 - smoothing, 0.5 + smoothing, c);
-       return fixed4(input.color.rgb, input.color.a * alpha);
-   //}  
+   float alpha = smoothstep(0.5 - smoothing, 0.5 + smoothing, c);
+   return fixed4(input.color.rgb, input.color.a * alpha);
 
-   //return fixed4(input.color.rgb, alpha);
 
    //loat alpha = smoothstep(0.5 - smoothing, 0.5 + smoothing, c);
    //float outlineFactor = smoothstep(0.5 - smoothing, 0.5 + smoothing, c);

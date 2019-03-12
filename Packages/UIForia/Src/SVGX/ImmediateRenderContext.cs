@@ -48,8 +48,8 @@ namespace SVGX {
         private Texture2D currentStrokeTexture;
         private SVGXGradient currentStrokeGradient;
         
-        private StrokeMode strokeMode;
-
+        private Rect currentScissorRect;
+        
         public ImmediateRenderContext() {
             points = new LightList<Vector2>(128);
             styles = new LightList<SVGXStyle>();
@@ -59,12 +59,12 @@ namespace SVGX {
             shapes = new LightList<SVGXShape>();
             clipGroups = new LightList<SVGXClipGroup>();
             gradients = new LightList<SVGXGradient>();
-            shapes.Add(new SVGXShape(SVGXShapeType.Unset, default));
+            shapes.Add(new SVGXShape(SVGXShapeType.Unset));
             textures = new LightList<Texture2D>();
             clipStack = new Stack<int>();
             textInfos = new LightList<TextInfo>();
             currentStyle = SVGXStyle.Default();
-            strokeMode = StrokeMode.Uniform;
+            currentScissorRect = new Rect(-float.MaxValue * 0.5f, -float.MaxValue * 0.5f, float.MaxValue, float.MaxValue);
         }
 
         public void SetFill(Color color) {
@@ -290,14 +290,14 @@ namespace SVGX {
             currentStyle = SVGXStyle.Default();
             currentMatrix = SVGXMatrix.identity;
             lastPoint = Vector2.zero;
-            shapes.Add(new SVGXShape(SVGXShapeType.Unset, default));
+            shapes.Add(SVGXShape.Unset);
             currentShapeRange = new RangeInt();
             gradients.Clear();
             textures.Clear();
             clipStack.Clear();
             clipGroups.Clear();
             textInfos.Clear();
-            strokeMode = StrokeMode.Uniform;
+            currentScissorRect = new Rect(-float.MaxValue * 0.5f, -float.MaxValue * 0.5f, float.MaxValue, float.MaxValue);
         }
 
         public void Save() {
@@ -337,6 +337,14 @@ namespace SVGX {
             }
         }
 
+        public void EnableScissorRect(Rect rect) {
+            currentScissorRect = rect;
+        }
+
+        public void DisableScissorRect() {
+            currentScissorRect = new Rect(-float.MaxValue * 0.5f, -float.MaxValue * 0.5f, float.MaxValue, float.MaxValue);
+        }
+        
         public void Rect(float x, float y, float width, float height) {
             SimpleShape(SVGXShapeType.Rect, x, y, width, height);
         }
@@ -435,12 +443,12 @@ namespace SVGX {
             }
 
             int clipId = clipStack.Count > 0 ? clipStack.Peek() : -1;
-            drawCalls.Add(new SVGXDrawCall(DrawCallType.StandardFill, clipId, currentStyle, currentMatrix, currentShapeRange));
+            drawCalls.Add(new SVGXDrawCall(DrawCallType.StandardFill, clipId, currentStyle, currentScissorRect, currentMatrix, currentShapeRange));
         }
 
         public void Shadow() {
             int clipId = clipStack.Count > 0 ? clipStack.Peek() : -1;
-            drawCalls.Add(new SVGXDrawCall(DrawCallType.Shadow, clipId, currentStyle, currentMatrix, currentShapeRange));
+            drawCalls.Add(new SVGXDrawCall(DrawCallType.Shadow, clipId, currentStyle, currentScissorRect, currentMatrix, currentShapeRange));
         }
 
         public void Stroke() {
@@ -461,7 +469,7 @@ namespace SVGX {
             }
 
             int clipId = clipStack.Count > 0 ? clipStack.Peek() : -1;
-            drawCalls.Add(new SVGXDrawCall(DrawCallType.StandardStroke, clipId, currentStyle, currentMatrix, currentShapeRange));
+            drawCalls.Add(new SVGXDrawCall(DrawCallType.StandardStroke, clipId, currentStyle, currentScissorRect, currentMatrix, currentShapeRange));
         }
 
         public void SetStrokeOpacity(float opacity) {

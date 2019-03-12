@@ -3,7 +3,6 @@ using SVGX;
 using TMPro;
 using UIForia.Layout;
 using UIForia.Rendering;
-using UIForia.Rendering.ElementRendering;
 using UIForia.Systems;
 using UIForia.Text;
 using UIForia.Util;
@@ -26,7 +25,7 @@ namespace UIForia.Elements {
     // text flow container can handle layouting text to flow around other contents
     // 
 
-    public class UITextElement : UIElement, IMeshProvider, IMaterialProvider {
+    public class UITextElement : UIElement {
 
         public string text;
         public TextInfo textInfo;
@@ -50,7 +49,6 @@ namespace UIForia.Elements {
 
         public UITextElement(string text = "") {
             this.text = text ?? string.Empty;
-            Renderer = ElementRenderer.DefaultText;
             material = new Material(s_BaseTextMaterial);
             flags = flags | UIElementFlags.TextElement
                           | UIElementFlags.BuiltIn
@@ -264,90 +262,90 @@ namespace UIForia.Elements {
       
 
        
-        public Mesh GetMesh() {
-            if (!meshRequiresUpdate && (mesh != null && !layoutResult.SizeChanged)) {
-                return mesh;
-            }
-
-            if (mesh == null) mesh = new Mesh();
-            mesh.Clear();
-            meshRequiresUpdate = false;
-
-            TextUtil.ApplyLineAndWordOffsets(textInfo);
-
-            CharInfo[] charInfos = textInfo.charInfos;
-
-            int sizeX4 = textInfo.charCount * 4;
-
-            int[] triangles = new int[textInfo.charCount * 6];
-            Vector3[] positions = new Vector3[textInfo.charCount * 4];
-            Vector2[] uvs0 = new Vector2[sizeX4];
-            Vector2[] uvs2 = new Vector2[sizeX4];
-            Vector3[] normals = new Vector3[sizeX4];
-            Vector4[] tangents = new Vector4[sizeX4];
-            Color32[] colors = new Color32[sizeX4];
-
-            Color32 color = style.TextColor;
-
-            int idx_x4 = 0;
-            int idx_x6 = 0;
-
-            Size actualSize = layoutResult.actualSize;
-
-            // todo -- convert this to the job system
-            for (int i = 0; i < textInfo.charCount; i++) {
-                if (charInfos[i].character == ' ') continue;
-
-                for (int j = 0; j < 4; j++) {
-                    normals[idx_x4 + j] = Vector3.back;
-                    tangents[idx_x4 + j] = new Vector4(-1f, 0, 0, 1f);
-                    colors[idx_x4 + j] = color;
-                }
-
-                Vector2 topLeft = charInfos[i].topLeft;
-                Vector2 bottomRight = charInfos[i].bottomRight;
-
-                positions[idx_x4 + 0] = new Vector3(topLeft.x, -bottomRight.y, 0); // Bottom Left
-                positions[idx_x4 + 1] = new Vector3(topLeft.x, -topLeft.y, 0); // Top Left
-                positions[idx_x4 + 2] = new Vector3(bottomRight.x, -topLeft.y, 0); // Top Right
-                positions[idx_x4 + 3] = new Vector3(bottomRight.x, -bottomRight.y); // Bottom Right
-
-                uvs0[idx_x4 + 0] = new Vector2(charInfos[i].uv0.x, charInfos[i].uv0.y);
-                uvs0[idx_x4 + 1] = new Vector2(charInfos[i].uv0.x, charInfos[i].uv1.y);
-                uvs0[idx_x4 + 2] = new Vector2(charInfos[i].uv1.x, charInfos[i].uv1.y);
-                uvs0[idx_x4 + 3] = new Vector2(charInfos[i].uv1.x, charInfos[i].uv0.y);
-
-                float leftClipX = topLeft.x / actualSize.width;
-                float rightClipX = bottomRight.x / actualSize.width;
-                float topClipY = topLeft.y / actualSize.height;
-                float bottomClipY = bottomRight.y / actualSize.height;
-
-                uvs2[idx_x4 + 0] = new Vector2(leftClipX, bottomClipY);
-                uvs2[idx_x4 + 1] = new Vector2(leftClipX, topClipY);
-                uvs2[idx_x4 + 2] = new Vector2(rightClipX, topClipY);
-                uvs2[idx_x4 + 3] = new Vector2(rightClipX, bottomClipY);
-
-                triangles[idx_x6 + 0] = idx_x4 + 0;
-                triangles[idx_x6 + 1] = idx_x4 + 1;
-                triangles[idx_x6 + 2] = idx_x4 + 2;
-                triangles[idx_x6 + 3] = idx_x4 + 2;
-                triangles[idx_x6 + 4] = idx_x4 + 3;
-                triangles[idx_x6 + 5] = idx_x4 + 0;
-
-                idx_x4 += 4;
-                idx_x6 += 6;
-            }
-
-            mesh.vertices = positions;
-            mesh.uv = uvs0;
-            mesh.uv2 = uvs2;
-            mesh.colors32 = colors;
-            mesh.normals = normals;
-            mesh.tangents = tangents;
-            mesh.triangles = triangles;
-
-            return mesh;
-        }
+//        public Mesh GetMesh() {
+//            if (!meshRequiresUpdate && (mesh != null && !layoutResult.SizeChanged)) {
+//                return mesh;
+//            }
+//
+//            if (mesh == null) mesh = new Mesh();
+//            mesh.Clear();
+//            meshRequiresUpdate = false;
+//
+//            TextUtil.ApplyLineAndWordOffsets(textInfo);
+//
+//            CharInfo[] charInfos = textInfo.charInfos;
+//
+//            int sizeX4 = textInfo.charCount * 4;
+//
+//            int[] triangles = new int[textInfo.charCount * 6];
+//            Vector3[] positions = new Vector3[textInfo.charCount * 4];
+//            Vector2[] uvs0 = new Vector2[sizeX4];
+//            Vector2[] uvs2 = new Vector2[sizeX4];
+//            Vector3[] normals = new Vector3[sizeX4];
+//            Vector4[] tangents = new Vector4[sizeX4];
+//            Color32[] colors = new Color32[sizeX4];
+//
+//            Color32 color = style.TextColor;
+//
+//            int idx_x4 = 0;
+//            int idx_x6 = 0;
+//
+//            Size actualSize = layoutResult.actualSize;
+//
+//            // todo -- convert this to the job system
+//            for (int i = 0; i < textInfo.charCount; i++) {
+//                if (charInfos[i].character == ' ') continue;
+//
+//                for (int j = 0; j < 4; j++) {
+//                    normals[idx_x4 + j] = Vector3.back;
+//                    tangents[idx_x4 + j] = new Vector4(-1f, 0, 0, 1f);
+//                    colors[idx_x4 + j] = color;
+//                }
+//
+//                Vector2 topLeft = charInfos[i].topLeft;
+//                Vector2 bottomRight = charInfos[i].bottomRight;
+//
+//                positions[idx_x4 + 0] = new Vector3(topLeft.x, -bottomRight.y, 0); // Bottom Left
+//                positions[idx_x4 + 1] = new Vector3(topLeft.x, -topLeft.y, 0); // Top Left
+//                positions[idx_x4 + 2] = new Vector3(bottomRight.x, -topLeft.y, 0); // Top Right
+//                positions[idx_x4 + 3] = new Vector3(bottomRight.x, -bottomRight.y); // Bottom Right
+//
+//                uvs0[idx_x4 + 0] = new Vector2(charInfos[i].uv0.x, charInfos[i].uv0.y);
+//                uvs0[idx_x4 + 1] = new Vector2(charInfos[i].uv0.x, charInfos[i].uv1.y);
+//                uvs0[idx_x4 + 2] = new Vector2(charInfos[i].uv1.x, charInfos[i].uv1.y);
+//                uvs0[idx_x4 + 3] = new Vector2(charInfos[i].uv1.x, charInfos[i].uv0.y);
+//
+//                float leftClipX = topLeft.x / actualSize.width;
+//                float rightClipX = bottomRight.x / actualSize.width;
+//                float topClipY = topLeft.y / actualSize.height;
+//                float bottomClipY = bottomRight.y / actualSize.height;
+//
+//                uvs2[idx_x4 + 0] = new Vector2(leftClipX, bottomClipY);
+//                uvs2[idx_x4 + 1] = new Vector2(leftClipX, topClipY);
+//                uvs2[idx_x4 + 2] = new Vector2(rightClipX, topClipY);
+//                uvs2[idx_x4 + 3] = new Vector2(rightClipX, bottomClipY);
+//
+//                triangles[idx_x6 + 0] = idx_x4 + 0;
+//                triangles[idx_x6 + 1] = idx_x4 + 1;
+//                triangles[idx_x6 + 2] = idx_x4 + 2;
+//                triangles[idx_x6 + 3] = idx_x4 + 2;
+//                triangles[idx_x6 + 4] = idx_x4 + 3;
+//                triangles[idx_x6 + 5] = idx_x4 + 0;
+//
+//                idx_x4 += 4;
+//                idx_x6 += 6;
+//            }
+//
+//            mesh.vertices = positions;
+//            mesh.uv = uvs0;
+//            mesh.uv2 = uvs2;
+//            mesh.colors32 = colors;
+//            mesh.normals = normals;
+//            mesh.tangents = tangents;
+//            mesh.triangles = triangles;
+//
+//            return mesh;
+//        }
 
         public Material GetMaterial() {
             Material fontMaterial = style.TextFontAsset.material;

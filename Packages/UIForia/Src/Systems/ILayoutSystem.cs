@@ -9,9 +9,6 @@ namespace UIForia.Systems {
 
     public interface ILayoutSystem : ISystem {
 
-        event Action<VirtualScrollbar> onCreateVirtualScrollbar;
-        event Action<VirtualScrollbar> onDestroyVirtualScrollbar;
-
         List<UIElement> QueryPoint(Vector2 point, List<UIElement> retn);
 
         OffsetRect GetPaddingRect(UIElement element);
@@ -20,7 +17,7 @@ namespace UIForia.Systems {
 
         LayoutBox GetBoxForElement(UIElement itemElement);
 
-        LightList<UIElement> GetVisibleElements();
+        LightList<UIElement> GetVisibleElements(LightList<UIElement> retn = null);
 
     }
 

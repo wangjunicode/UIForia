@@ -37,6 +37,7 @@ namespace UIForia {
 
         private void Update() {
             if (type == null) return;
+            application.GetView(0).Viewport = new Rect(0, 0, Screen.width, Screen.height);
             application.Update();
         }
 

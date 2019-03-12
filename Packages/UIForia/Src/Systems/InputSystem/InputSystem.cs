@@ -11,11 +11,9 @@ using UnityEngine;
 
 namespace UIForia.Stystems.InputSystem {
 
-    public abstract class InputSystem : IInputSystem, IInputProvider {
+    public abstract class InputSystem : IInputSystem {
 
         private const float k_DragThreshold = 5f;
-        private const string k_EventAlias = "$event";
-        private const string k_ElementAlias = "$element";
 
         private readonly ILayoutSystem m_LayoutSystem;
 
@@ -52,11 +50,10 @@ namespace UIForia.Stystems.InputSystem {
         private static readonly Event s_Event = new Event();
 
         public KeyboardModifiers KeyboardModifiers => modifiersThisFrame;
-        public bool debugMode;
 
         private static readonly ExpressionContext s_DummyContext = new ExpressionContext(null);
 
-        protected InputSystem(ILayoutSystem layoutSystem, IStyleSystem styleSystem) {
+        protected InputSystem(ILayoutSystem layoutSystem) {
             this.m_LayoutSystem = layoutSystem;
 
             this.m_MouseDownElements = new List<UIElement>();
@@ -77,8 +74,6 @@ namespace UIForia.Stystems.InputSystem {
             this.m_MouseEventCaptureList = new List<ValueTuple<MouseEventHandler, UIElement, ExpressionContext>>();
             this.m_DragEventCaptureList = new List<ValueTuple<DragEventHandler, UIElement, ExpressionContext>>();
             this.m_FocusedElement = null;
-
-            this.m_LayoutSystem.onCreateVirtualScrollbar += HandleCreateScrollbar;
         }
 
         public DragEvent CurrentDragEvent => m_CurrentDragEvent;
@@ -106,6 +101,7 @@ namespace UIForia.Stystems.InputSystem {
 
         protected abstract MouseState GetMouseState();
 
+        // todo -- make this work
         private void HandleCreateScrollbar(VirtualScrollbar scrollbar) {
             m_DragCreatorMap.Add(scrollbar.id, new DragCreatorGroup(s_DummyContext, new DragEventCreator[] {
                 new DragEventCreator_WithEvent<VirtualScrollbar>(KeyboardModifiers.None, EventPhase.Bubble, (instance, evt) => instance.CreateDragEvent(evt)),
@@ -154,19 +150,15 @@ namespace UIForia.Stystems.InputSystem {
         public virtual void OnUpdate() {
             m_MouseState = GetMouseState();
 
-            if (!debugMode) {
-                ProcessKeyboardEvents();
-                ProcessMouseInput();
+            ProcessKeyboardEvents();
+            ProcessMouseInput();
 
-                if (!IsDragging) {
-                    ProcessMouseEvents();
-                }
+            if (!IsDragging) {
+                ProcessMouseEvents();
+            }
 
-                ProcessDragEvents();
-            }
-            else {
-                ProcessMouseInput();
-            }
+            ProcessDragEvents();
+
 
             List<UIElement> temp = m_ElementsLastFrame;
             m_ElementsLastFrame = m_ElementsThisFrame;
@@ -213,7 +205,7 @@ namespace UIForia.Stystems.InputSystem {
 
                     if (element.style.IsDefined(StylePropertyId.Cursor)) {
                         newCursor = element.style.Cursor;
-                        if (newCursor != currentCursor) {
+                        if (!newCursor.Equals(currentCursor)) {
                             Cursor.SetCursor(newCursor.texture, newCursor.hotSpot, CursorMode.Auto);
                         }
 
@@ -294,19 +286,25 @@ namespace UIForia.Stystems.InputSystem {
             m_CurrentMouseEvent = mouseEvent;
 
             for (int i = 0; i < m_MouseDownElements.Count; i++) {
-                DragCreatorGroup dragCreatorGroup;
                 UIElement element = m_MouseDownElements[i];
 
-                if (!m_DragCreatorMap.TryGetValue(element.id, out dragCreatorGroup)) {
-                    continue;
+                if (element.layoutResult.HasScrollbarVertical || element.layoutResult.HasScrollbarHorizontal) {
+                    Scrollbar scrollbar = Application.GetCustomScrollbar(element.style.Scrollbar);
+                    m_CurrentDragEvent = scrollbar.CreateDragEvent(element, mouseEvent);
                 }
 
-                // todo -- figure out if these should respect propagation
-
-                m_CurrentDragEvent = dragCreatorGroup.TryCreateEvent(element, mouseEvent);
-
                 if (m_CurrentDragEvent == null) {
-                    continue;
+                    DragCreatorGroup dragCreatorGroup;
+                    if (!m_DragCreatorMap.TryGetValue(element.id, out dragCreatorGroup)) {
+                        continue;
+                    }
+
+                    // todo -- figure out if these should respect propagation
+
+                    m_CurrentDragEvent = dragCreatorGroup.TryCreateEvent(element, mouseEvent);
+                    if (m_CurrentDragEvent == null) {
+                        continue;
+                    }
                 }
 
                 m_CurrentDragEvent.StartTime = Time.realtimeSinceStartup;
@@ -418,20 +416,15 @@ namespace UIForia.Stystems.InputSystem {
             m_DragHandlerMap.Clear();
         }
 
-        public void OnDestroy() {
-        }
+        public void OnDestroy() { }
 
-        public void OnViewAdded(UIView view) {
-        }
+        public void OnViewAdded(UIView view) { }
 
-        public void OnViewRemoved(UIView view) {
-        }
+        public void OnViewRemoved(UIView view) { }
 
-        public void OnElementEnabled(UIElement element) {
-        }
+        public void OnElementEnabled(UIElement element) { }
 
-        public void OnElementDisabled(UIElement element) {
-        }
+        public void OnElementDisabled(UIElement element) { }
 
         public void OnElementDestroyed(UIElement element) {
             m_ElementsLastFrame.Remove(element);
@@ -488,8 +481,7 @@ namespace UIForia.Stystems.InputSystem {
             }
         }
 
-        public void OnAttributeSet(UIElement element, string attributeName, string currentValue, string attributeValue) {
-        }
+        public void OnAttributeSet(UIElement element, string attributeName, string currentValue, string attributeValue) { }
 
         public bool IsKeyDown(KeyCode keyCode) {
             return (GetKeyState(keyCode) & KeyState.Down) != 0;
@@ -779,6 +771,14 @@ namespace UIForia.Stystems.InputSystem {
                 UIElement element = elements[i];
                 MouseHandlerGroup mouseHandlerGroup;
 
+                if (element.layoutResult.HasScrollbarVertical) {
+                    Scrollbar scrollbar = Application.GetCustomScrollbar(null);
+                    scrollbar.HandleMouseInputEvent(element, mouseEvent);
+                    if (m_EventPropagator.shouldStopPropagation) {
+                        return;
+                    }
+                }
+                
                 if (!m_MouseHandlerMap.TryGetValue(element.id, out mouseHandlerGroup)) {
                     continue;
                 }
@@ -847,4 +847,5 @@ namespace UIForia.Stystems.InputSystem {
         }
 
     }
+
 }

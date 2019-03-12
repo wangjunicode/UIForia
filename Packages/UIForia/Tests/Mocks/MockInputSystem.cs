@@ -7,8 +7,8 @@ namespace Tests.Mocks {
 
     public class MockInputSystem : InputSystem {
 
-        public MockInputSystem(ILayoutSystem layoutSystem, IStyleSystem styleSystem)
-            : base(layoutSystem, styleSystem) { }
+        public MockInputSystem(ILayoutSystem layoutSystem)
+            : base(layoutSystem) { }
 
         public void SetMouseState(MouseState mouseState) {
             m_MouseState = mouseState;

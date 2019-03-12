@@ -24,38 +24,31 @@ namespace UIForia.Systems {
 
         }
 
-        public event Action<VirtualScrollbar> onCreateVirtualScrollbar;
-        public event Action<VirtualScrollbar> onDestroyVirtualScrollbar;
 
         protected readonly IStyleSystem m_StyleSystem;
         protected readonly IntMap<LayoutBox> m_LayoutBoxMap;
-        protected readonly LightList<VirtualElement> m_VirtualElements;
         protected readonly LightList<LayoutBox> m_PendingInitialization;
 
         private Size m_ScreenSize;
-        private readonly LightList<UIElement> m_Elements;
         private readonly LightList<ViewRect> m_Views;
-        private readonly LightList<UIElement> m_VisibleElements;
+        private readonly LightList<UIElement> m_VisibleElementList;
 
         private static readonly IComparer<UIElement> comparer = new UIElement.RenderLayerComparerAscending();
 
         public LayoutSystem(IStyleSystem styleSystem) {
             this.m_StyleSystem = styleSystem;
             this.m_LayoutBoxMap = new IntMap<LayoutBox>();
-            this.m_Elements = new LightList<UIElement>();
             this.m_PendingInitialization = new LightList<LayoutBox>();
-            this.m_VirtualElements = new LightList<VirtualElement>();
             this.m_Views = new LightList<ViewRect>();
-            this.m_VisibleElements = new LightList<UIElement>();
+            this.m_VisibleElementList = new LightList<UIElement>();
             m_StyleSystem.onTextContentChanged += HandleTextContentChanged;
             m_StyleSystem.onStylePropertyChanged += HandleStylePropertyChanged;
         }
 
         public void OnReset() {
             m_LayoutBoxMap.Clear();
-            m_Elements.Clear();
             m_PendingInitialization.Clear();
-            m_VirtualElements.Clear();
+            m_VisibleElementList.Clear();
             m_Views.Clear();
         }
 
@@ -78,7 +71,7 @@ namespace UIForia.Systems {
             InitializeLayoutBoxes();
 
             // todo -- should this be a list per-view?
-            m_VisibleElements.Clear();
+            m_VisibleElementList.Clear();
 
             bool forceLayout = false;
             Size screen = new Size(Screen.width, Screen.height);
@@ -114,8 +107,8 @@ namespace UIForia.Systems {
             UIElement element = view.RootElement;
             LayoutResult layoutResult = element.layoutResult;
             stack.Push(element);
-            
-            m_VisibleElements.Add(element);
+
+            m_VisibleElementList.Add(element);
 
             if (root.IsIgnored) {
                 root.allocatedWidth = root.GetWidths().clampedSize;
@@ -132,15 +125,15 @@ namespace UIForia.Systems {
 
             // actual size should probably be the root containing all children, ignored or not
 
-            layoutResult.ActualSize = new Size(root.actualWidth, root.actualHeight);
-            layoutResult.AllocatedSize = new Size(root.allocatedWidth, root.allocatedHeight);
+            layoutResult.actualSize = new Size(root.actualWidth, root.actualHeight);
+            layoutResult.allocatedSize = new Size(root.allocatedWidth, root.allocatedHeight);
 
             layoutResult.ContentRect = root.ContentRect;
 
-            layoutResult.Scale = new Vector2(root.style.TransformScaleX, root.style.TransformScaleY);
-            layoutResult.LocalPosition = ResolveLocalPosition(root);
-            layoutResult.ScreenPosition = layoutResult.localPosition;
-            layoutResult.Rotation = root.style.TransformRotation;
+            layoutResult.scale = new Vector2(root.style.TransformScaleX, root.style.TransformScaleY);
+            layoutResult.localPosition = ResolveLocalPosition(root);
+            layoutResult.screenPosition = layoutResult.localPosition;
+            layoutResult.rotation = root.style.TransformRotation;
             layoutResult.clipRect = new Rect(0, 0, viewportRect.width, viewportRect.height);
             layoutResult.border = new OffsetRect(
                 root.BorderTop,
@@ -148,7 +141,6 @@ namespace UIForia.Systems {
                 root.BorderBottom,
                 root.BorderLeft
             );
-            element.layoutResult = layoutResult;
 
             CreateOrDestroyScrollbars(root);
 
@@ -167,7 +159,7 @@ namespace UIForia.Systems {
                     element = current.children[i];
 
                     LayoutBox box = m_LayoutBoxMap.GetOrDefault(element.id);
-                    
+
                     if (!element.isEnabled) {
                         continue;
                     }
@@ -190,6 +182,7 @@ namespace UIForia.Systems {
                     if (forceLayout || box.markedForLayout) {
                         box.RunLayout();
                         box.markedForLayout = false;
+                        CreateOrDestroyScrollbars(box);
 #if DEBUG
                         box.layoutCalls++;
 #endif
@@ -202,20 +195,21 @@ namespace UIForia.Systems {
                     scrollOffset.x = (parentBox.actualWidth - parentBox.allocatedWidth) * parentBox.element.scrollOffset.x;
                     scrollOffset.y = (parentBox.actualHeight - parentBox.allocatedHeight) * parentBox.element.scrollOffset.y;
 
-                    layoutResult.LocalPosition = ResolveLocalPosition(box) - scrollOffset;
+                    layoutResult.localPosition = ResolveLocalPosition(box) - scrollOffset;
                     layoutResult.ContentRect = box.ContentRect;
-                    layoutResult.ActualSize = new Size(box.actualWidth, box.actualHeight);
-                    layoutResult.AllocatedSize = new Size(box.allocatedWidth, box.allocatedHeight);
-                    layoutResult.ScreenPosition = box.parent.element.layoutResult.screenPosition + layoutResult.localPosition;
-                    layoutResult.Scale = new Vector2(box.style.TransformScaleX, box.style.TransformScaleY);
-                    layoutResult.Rotation = parentBox.style.TransformRotation + box.style.TransformRotation;
-                    layoutResult.Pivot = box.Pivot;
-                    layoutResult.border = new OffsetRect(
+                    layoutResult.actualSize = new Size(box.actualWidth, box.actualHeight);
+                    layoutResult.allocatedSize = new Size(box.allocatedWidth, box.allocatedHeight);
+                    layoutResult.screenPosition = box.parent.element.layoutResult.screenPosition + layoutResult.localPosition;
+                    layoutResult.scale = new Vector2(box.style.TransformScaleX, box.style.TransformScaleY); // only set if changed
+                    layoutResult.rotation = parentBox.style.TransformRotation + box.style.TransformRotation; // only set if changed
+                    layoutResult.pivot = box.Pivot; // only set if changed
+                    layoutResult.border = new OffsetRect( // only set if changed
                         box.BorderTop,
                         box.BorderRight,
                         box.BorderBottom,
                         box.BorderLeft
                     );
+
                     // should be able to sort by view
                     Rect clipRect = new Rect(0, 0, viewportRect.width, viewportRect.height);
                     UIElement ptr = element.parent;
@@ -224,8 +218,8 @@ namespace UIForia.Systems {
                     // todo -- handle non rect clip shapes: ie circle / ellipse
 
                     if (ptr != null) {
-                        bool handlesHorizontal = ptr.style.OverflowX != Overflow.None;
-                        bool handlesVertical = ptr.style.OverflowY != Overflow.None;
+                        bool handlesHorizontal = ptr.style.OverflowX != Overflow.Visible;
+                        bool handlesVertical = ptr.style.OverflowY != Overflow.Visible;
                         if (handlesHorizontal && handlesVertical) {
                             Rect r = new Rect(ptr.layoutResult.screenPosition, ptr.layoutResult.allocatedSize);
                             clipRect = clipRect.Intersect(r.Intersect(ptr.layoutResult.clipRect));
@@ -299,29 +293,22 @@ namespace UIForia.Systems {
                     //     UpdateQueryGrid(element, oldScreenRect);
                     // }
 
-                    CreateOrDestroyScrollbars(box);
-                    element.layoutResult = layoutResult;
-
                     stack.Push(element);
                     if (cullResult == CullResult.NotCulled) {
-                        m_VisibleElements.Add(element);
+                        m_VisibleElementList.Add(element);
                     }
                 }
             }
 
             // TODO optimize this to only sort if styles changed, also our comparer is really slow right now
-            
-            m_VisibleElements.Sort(comparer);
 
-            UIElement[] elements = m_VisibleElements.Array;
-            for (int i = 0; i < m_VisibleElements.Count; i++) {
-                UIElement e = elements[i];
-                LayoutResult lr = e.layoutResult;
-                lr.zIndex = (i + 1); 
-                e.layoutResult = lr;
+            m_VisibleElementList.Sort(comparer);
+
+            UIElement[] elements = m_VisibleElementList.Array;
+            for (int i = 0; i < m_VisibleElementList.Count; i++) {
+                elements[i].layoutResult.zIndex = i + 1;
             }
 
-            UpdateScrollbarLayouts();
             StackPool<UIElement>.Release(stack);
         }
 
@@ -428,104 +415,67 @@ namespace UIForia.Systems {
 
         private void CreateOrDestroyScrollbars(LayoutBox box) {
             UIElement element = box.element;
-            VirtualScrollbar vertical = box.verticalScrollbar;
-            VirtualScrollbar horizontal = box.horizontalScrollbar;
 
             if (box.actualHeight <= box.allocatedHeight) {
-                if (vertical != null) {
-                    onDestroyVirtualScrollbar?.Invoke(vertical);
-                    m_Elements.Remove(vertical);
-                    m_VirtualElements.Remove(vertical);
-                    box.verticalScrollbar = null; // todo -- pool
-                }
+                LayoutResult lr = box.element.layoutResult;
+                lr.scrollbarVerticalSize = Size.Unset;
             }
             else {
                 Overflow verticalOverflow = box.style.OverflowY;
-
-                if (vertical == null && verticalOverflow == Overflow.Scroll || verticalOverflow == Overflow.ScrollAndAutoHide) {
-                    vertical = new VirtualScrollbar(element, ScrollbarOrientation.Vertical);
-                    // todo -- depth index needs to be set
-
-                    m_Elements.Add(vertical);
-
-                    m_VirtualElements.Add(vertical);
+                if (verticalOverflow == Overflow.Scroll || verticalOverflow == Overflow.ScrollAndAutoHide) {
+                    Scrollbar vertical = Application.GetCustomScrollbar(null);
 
                     Extents childExtents = GetLocalExtents(box.children);
                     float offsetY = (childExtents.min.y < 0) ? -childExtents.min.y / box.allocatedHeight : 0f;
                     element.scrollOffset = new Vector2(element.scrollOffset.x, offsetY);
 
-                    onCreateVirtualScrollbar?.Invoke(vertical);
-                    box.verticalScrollbar = vertical;
+                    Size originalAllocatedSize =  new Size(box.allocatedWidth, box.allocatedHeight);
+                    element.layoutResult.actualSize = new Size(box.actualWidth, box.actualHeight);
+                    element.layoutResult.allocatedSize = new Size(box.allocatedWidth, box.allocatedHeight);
+
+                    Size verticalScrollbarSize = vertical.RunLayout(element);
+
+                    // this is the push-content case
+                    box.allocatedWidth -= (Mathf.Clamp(verticalScrollbarSize.width, 0, box.allocatedWidth));
+                    
+                    box.RunLayout();
+                    
+                    element.layoutResult.allocatedSize = originalAllocatedSize;
+                    element.layoutResult.scrollbarVerticalSize = verticalScrollbarSize;
                 }
             }
 
-            if (box.actualWidth <= box.allocatedWidth) {
-                if (horizontal != null) {
-                    onDestroyVirtualScrollbar?.Invoke(horizontal);
-                    m_Elements.Remove(horizontal);
-                    m_VirtualElements.Remove(horizontal);
-                    box.horizontalScrollbar = null; // todo -- pool
-                }
-            }
-            else {
-                Overflow horizontalOverflow = box.style.OverflowX;
-                if (horizontal == null && horizontalOverflow == Overflow.Scroll || horizontalOverflow == Overflow.ScrollAndAutoHide) {
-                    horizontal = new VirtualScrollbar(element, ScrollbarOrientation.Horizontal);
-                    // todo -- depth index needs to be set
-
-                    m_Elements.Add(horizontal);
-
-                    m_VirtualElements.Add(horizontal);
-
-                    Extents childExtents = GetLocalExtents(box.children);
-                    float offsetX = (childExtents.min.x < 0) ? -childExtents.min.x / box.allocatedWidth : 0f;
-                    element.scrollOffset = new Vector2(element.scrollOffset.y, offsetX);
-
-                    onCreateVirtualScrollbar?.Invoke(horizontal);
-                    box.horizontalScrollbar = horizontal;
-                }
-            }
-        }
-
-        private void UpdateScrollbarLayouts() {
-            for (int i = 0; i < m_VirtualElements.Count; i++) {
-                VirtualScrollbar scrollbar = (VirtualScrollbar) m_VirtualElements[i];
-                scrollbar.RunLayout();
-
-                LayoutResult scrollbarResult = scrollbar.layoutResult;
-                LayoutResult targetResult = scrollbar.targetElement.layoutResult;
-
-                Rect trackRect = scrollbar.trackRect;
-                scrollbarResult.zIndex = 999999;
-                scrollbarResult.localPosition = new Vector2(trackRect.x, trackRect.y);
-                scrollbarResult.screenPosition = targetResult.screenPosition + scrollbarResult.localPosition;
-                scrollbarResult.clipRect = targetResult.clipRect;
-                scrollbarResult.actualSize = new Size(trackRect.width, trackRect.height);
-                scrollbarResult.allocatedSize = scrollbarResult.actualSize;
-
-                scrollbar.layoutResult = scrollbarResult;
-            }
+//            if (box.actualWidth <= box.allocatedWidth) {
+//                if (horizontal != null) {
+//                    onDestroyVirtualScrollbar?.Invoke(horizontal);
+//                    m_Elements.Remove(horizontal);
+//                    m_VirtualElements.Remove(horizontal);
+//                    box.horizontalScrollbar = null; // todo -- pool
+//                }
+//            }
+//            else {
+//                Overflow horizontalOverflow = box.style.OverflowX;
+//                if (horizontal == null && horizontalOverflow == Overflow.Scroll || horizontalOverflow == Overflow.ScrollAndAutoHide) {
+//                    horizontal = new VirtualScrollbar(element, ScrollbarOrientation.Horizontal);
+//                    // todo -- depth index needs to be set
+//
+//                    m_Elements.Add(horizontal);
+//
+//                    m_VirtualElements.Add(horizontal);
+//
+//                    Extents childExtents = GetLocalExtents(box.children);
+//                    float offsetX = (childExtents.min.x < 0) ? -childExtents.min.x / box.allocatedWidth : 0f;
+//                    element.scrollOffset = new Vector2(element.scrollOffset.y, offsetX);
+//
+//                    onCreateVirtualScrollbar?.Invoke(horizontal);
+//                    box.horizontalScrollbar = horizontal;
+//                }
+//            }
         }
 
         private void LayoutSticky() {
             // only sticky within the parent
-            // Layer = 1
-            // ZIndex = 1
-            // PreferredWidth = new UIMeasurement(1f, UIUnit.AnchorWidth | UIUnit.AnchorHeight);
-            // AnchorTop = UIFixedLength
-            // AnchorRight
-            // AnchorBottom
-            // AnchorLeft
-            // AnchorTarget = Viewport | Screen | Parent | Template?  
-            // TransformPositionXBehavior = Ignore | LayoutOffset | Normal | Anchor Offset
-            // TranslateX = new UIFixedLength(-1f, Percent);
-            // TransformPositionXAnchor
-
-            // TransformPositionXBehavior =  LayoutOffset | Default | Fixed | Sticky;
-
-            // LayoutBehavior = Normal | Anchor | Fixed | Sticky
-            // TransformAnchorLeft = new UIAnchor(value, Left | Right);
-            // TransformAnchorY = Top | Bottom
+            // TransformPositionXBehavior =  Sticky;
         }
 
         public void OnDestroy() { }
@@ -728,7 +678,6 @@ namespace UIForia.Systems {
                 child.parent.RequestContentSizeChangeLayout();
             }
 
-            m_Elements.Remove(element);
             m_PendingInitialization.Remove(child);
             m_LayoutBoxMap.Remove(element.id);
 
@@ -741,9 +690,7 @@ namespace UIForia.Systems {
             }
         }
 
-        public void OnAttributeSet(UIElement element, string attributeName, string currentValue, string previousValue) {
-            
-        }
+        public void OnAttributeSet(UIElement element, string attributeName, string currentValue, string previousValue) { }
 
         // todo pool boxes
         private LayoutBox CreateLayoutBox(UIElement element) {
@@ -787,7 +734,6 @@ namespace UIForia.Systems {
             m_LayoutBoxMap.Add(element.id, layoutBox);
             stack.Push(ValueTuple.Create(element, layoutBox));
 
-            m_Elements.Add(element);
             m_PendingInitialization.Add(layoutBox);
 
             while (stack.Count > 0) {
@@ -816,7 +762,6 @@ namespace UIForia.Systems {
                     childBox.SetParent(parentBox);
                     m_LayoutBoxMap.Add(child.id, childBox);
                     stack.Push(ValueTuple.Create(child, childBox));
-                    m_Elements.Add(child);
                     m_PendingInitialization.Add(childBox);
                 }
             }
@@ -830,8 +775,8 @@ namespace UIForia.Systems {
                 retn = ListPool<UIElement>.Get();
             }
 
-            UIElement[] elements = m_VisibleElements.Array;
-            int elementCount = m_VisibleElements.Count;
+            UIElement[] elements = m_VisibleElementList.Array;
+            int elementCount = m_VisibleElementList.Count;
             for (int i = 0; i < elementCount; i++) {
                 UIElement element = elements[i];
                 LayoutResult layoutResult = element.layoutResult;
@@ -844,13 +789,13 @@ namespace UIForia.Systems {
                 UIElement ptr = element.parent;
                 while (ptr != null) {
                     Vector2 screenPosition = ptr.layoutResult.screenPosition;
-                    if (ptr.style.OverflowX != Overflow.None) {
+                    if (ptr.style.OverflowX != Overflow.Visible) {
                         if (point.x < screenPosition.x || point.x > screenPosition.x + ptr.layoutResult.AllocatedWidth) {
                             break;
                         }
                     }
 
-                    if (ptr.style.OverflowY != Overflow.None) {
+                    if (ptr.style.OverflowY != Overflow.Visible) {
                         if (point.y < screenPosition.y || point.y > screenPosition.y + ptr.layoutResult.AllocatedHeight) {
                             break;
                         }
@@ -904,8 +849,17 @@ namespace UIForia.Systems {
             return m_LayoutBoxMap.GetOrDefault(itemElement.id);
         }
 
-        public LightList<UIElement> GetVisibleElements() {
-            return m_VisibleElements;
+        public LightList<UIElement> GetVisibleElements(LightList<UIElement> retn = null) {
+            if (retn == null) {
+                retn = new LightList<UIElement>(m_VisibleElementList.Count);
+            }
+            else {
+                retn.EnsureCapacity(m_VisibleElementList.Count);
+            }
+
+            m_VisibleElementList.CopyTo(retn.Array, 0);
+            retn.Count = m_VisibleElementList.Count;
+            return retn;
         }
 
         private static Extents GetLocalExtents(List<LayoutBox> children) {

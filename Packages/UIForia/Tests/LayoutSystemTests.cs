@@ -401,7 +401,7 @@ public class LayoutSystemTests {
         app.SetViewportRect(new Rect(0, 0, 400, 400));
         app.Update();
         Assert.AreEqual(new Rect(0, 0, 50, 200), root.FindById("nested-child0").layoutResult.clipRect);
-        root.FindById("child0").style.SetOverflowX(Overflow.None, StyleState.Normal);
+        root.FindById("child0").style.SetOverflowX(Overflow.Visible, StyleState.Normal);
         app.Update();
         Assert.AreEqual(new Rect(0, 0, 100, 200), root.FindById("nested-child0").layoutResult.clipRect);
     }

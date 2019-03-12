@@ -13,8 +13,8 @@ namespace UIForia.Systems {
         private bool m_IsDoubleClick;
         private bool m_IsTripleClick;
 
-        public DefaultInputSystem(ILayoutSystem layoutSystem, IStyleSystem styleSystem)
-            : base(layoutSystem, styleSystem) { }
+        public DefaultInputSystem(ILayoutSystem layoutSystem)
+            : base(layoutSystem) { }
 
         protected override MouseState GetMouseState() {
             MouseState retn = new MouseState();
@@ -48,12 +48,18 @@ namespace UIForia.Systems {
                 }
             }
             else {
-                retn.mouseDownPosition = new Vector2();
+                retn.isSingleClick = (retn.isRightMouseUpThisFrame || retn.isLeftMouseUpThisFrame) && (now - m_LastMouseDownTimestamp < k_SingleClickDelay);
+                if (!retn.isSingleClick) {
+                    retn.mouseDownPosition = new Vector2();
+                }
             }
 
             // todo formalize clicking with different buttons
-            retn.isSingleClick = (retn.isRightMouseUpThisFrame || retn.isLeftMouseUpThisFrame) && (now - m_LastMouseDownTimestamp < k_SingleClickDelay);
-
+//            retn.isSingleClick = (retn.isRightMouseUpThisFrame || retn.isLeftMouseUpThisFrame) && (now - m_LastMouseDownTimestamp < k_SingleClickDelay);
+//            if (retn.isSingleClick) {
+//                Debug.Log("K");
+//            }
+            
             retn.mousePosition = ConvertMousePosition(Input.mousePosition);
             retn.scrollDelta = Input.mouseScrollDelta;
             retn.previousMousePosition = m_MouseState.mousePosition;

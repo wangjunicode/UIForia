@@ -59,6 +59,7 @@ namespace UIForia {
         private static readonly Dictionary<Type, bool> s_RequiresUpdateMap;
         
         internal static readonly Dictionary<string, ISVGXElementPainter> s_CustomPainters;
+        internal static readonly Dictionary<string, Scrollbar> s_Scrollbars;
         
         public readonly TemplateParser templateParser;
 
@@ -70,6 +71,8 @@ namespace UIForia {
             s_AttributeProcessors = new List<IAttributeProcessor>();
             s_ApplicationList = new LightList<Application>();
             s_CustomPainters = new Dictionary<string, ISVGXElementPainter>();
+            s_Scrollbars = new Dictionary<string, Scrollbar>();
+            s_Scrollbars.Add("UIForia.Default", new DefaultScrollbar());
         }
 
         protected Application(string id, string templateRootPath = null) {
@@ -90,7 +93,7 @@ namespace UIForia {
             m_StyleSystem = new StyleSystem();
             m_BindingSystem = new BindingSystem();
             m_LayoutSystem = new LayoutSystem(m_StyleSystem);
-            m_InputSystem = new DefaultInputSystem(m_LayoutSystem, m_StyleSystem);
+            m_InputSystem = new DefaultInputSystem(m_LayoutSystem);
             m_RenderSystem = new SVGXRenderSystem(null, m_LayoutSystem);
             m_RoutingSystem = new RoutingSystem();
 
@@ -575,6 +578,17 @@ namespace UIForia {
 
         public static ISVGXElementPainter GetCustomPainter(string name) {
             return s_CustomPainters.GetOrDefault(name);
+        }
+
+        public static void RegisterCustomScrollbar(string name, Scrollbar scrollbar) {
+            s_Scrollbars.Add(name, scrollbar);
+        }
+
+        public static Scrollbar GetCustomScrollbar(string name) {
+            if (string.IsNullOrEmpty(name)) {
+                return s_Scrollbars["UIForia.Default"];
+            }
+            return s_Scrollbars.GetOrDefault(name);
         }
         
     }

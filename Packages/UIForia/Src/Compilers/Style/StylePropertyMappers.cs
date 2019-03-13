@@ -555,7 +555,7 @@ namespace UIForia.Compilers.Style {
                     return UIMeasurementUnit.Pixel;
                 case "pca":
                     return UIMeasurementUnit.ParentContentArea;
-                case "pcz":
+                case "psz":
                     return UIMeasurementUnit.ParentSize;
                 case "em":
                     return UIMeasurementUnit.Em;
@@ -621,14 +621,14 @@ namespace UIForia.Compilers.Style {
                     return GridTemplateUnit.ViewportHeight;
                 case "em":
                     return GridTemplateUnit.Em;
-                case "cca":
-                    return GridTemplateUnit.ContainerContentArea;
-                case "cnt":
-                    return GridTemplateUnit.Container;
+                case "pca":
+                    return GridTemplateUnit.ParentContentArea;
+                case "psz":
+                    return GridTemplateUnit.ParentSize;
             }
 
             Debug.LogWarning($"You used a {unitNode.value} in line {unitNode.line} column {unitNode.column} in file {context.fileName} but this unit isn't supported. " +
-                             "Try px, mx, mn, em, vw, vh, cca, fr or cnt instead (see GridTemplateUnit). Will fall back to px.");
+                             "Try px, mx, mn, em, vw, vh, fr, pca or psz instead (see GridTemplateUnit). Will fall back to px.");
 
             return GridTemplateUnit.Pixel;
         }
@@ -771,7 +771,6 @@ namespace UIForia.Compilers.Style {
 
         private static Color MapColor(PropertyNode property, StyleCompileContext context) {
             AssertSingleValue(property.children, context);
-
             var styleAstNode = context.GetValueForReference(property.children[0]);
             switch (styleAstNode) {
                 case StyleIdentifierNode identifierNode:

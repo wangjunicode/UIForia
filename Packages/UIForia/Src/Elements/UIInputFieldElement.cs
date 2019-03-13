@@ -7,59 +7,8 @@ using UnityEngine;
 
 namespace UIForia.Elements {
 
-    [Template(TemplateType.String, @"
-<UITemplate>
-    
-    <Style>
-        
-        style ignored {
-            LayoutBehavior = Ignored;
-            TransformBehaviorX = AnchorMinOffset;
-            TransformBehaviorY = AnchorMinOffset;
-            AnchorTarget = Parent;
-        }
-        
-        style text {
-            TextFontSize = 24;
-            MaxWidth = 1pca; 
-        }
-
-        style highlight {
-            LayoutBehavior = Ignored;
-            TransformBehaviorX = AnchorMinOffset;
-            TransformBehaviorY = AnchorMinOffset;
-            AnchorTarget = ParentContentArea;
-            BackgroundColor = #A8CEFF;
-        }
-        
-        style container {
-            FlexLayoutMainAxisAlignment = Center;
-        }
-
-        style caret {
-            PreferredSize = 1px 24px;
-        }
-
-        style placeholder {
-            TextColor = rgba(120, 120, 120, 200);
-            TextFontSize = 24;
-            TextAlignment = Center;
-            PreferredSize = 1pca;
-        }
-
-    </Style>
-    
-    <Contents style='container'>
-        
-        <Div if='false' x-id=""highlight"" style=""highlight""/>
-        <Text style='text' x-id=""text""/>
-        <Div if='false' x-id='cursor' style='ignored caret'/>
-        <Text x-id='placeholder' style='ignored placeholder'>{placeholder}</Text>
-    </Contents>
-
-</UITemplate>
-")]
-    public class UIInputFieldElement : UIElement, IFocusable, IPropertyChangedHandler {
+    [Template(TemplateType.Internal, "Elements/UIInputFieldElement.xml")]
+    public sealed class UIInputFieldElement : UIElement, IFocusable, IPropertyChangedHandler {
 
         public string text;
         public string placeholder;
@@ -70,7 +19,7 @@ namespace UIForia.Elements {
         private UIContainerElement caret;
         private UIContainerElement highlight;
         private UITextElement textElement;
-        private UITextElement placeholderElement;
+        private UISlotElement placeholderElement;
         private UITextElement.SelectionRange selectionRange = new UITextElement.SelectionRange(0, UITextElement.TextEdge.Right);
         private UITextElement.SelectionRange previousSelectionRange = new UITextElement.SelectionRange(0, UITextElement.TextEdge.Right);
 
@@ -78,12 +27,8 @@ namespace UIForia.Elements {
         private bool hasFocus;
         private bool canSetCaret;
 
-        public UIInputFieldElement() : this(true) {
-            
-        }
-        
-        protected internal UIInputFieldElement(bool isBuiltIn) {
-            if (isBuiltIn) flags |= UIElementFlags.BuiltIn;
+        public UIInputFieldElement() {
+            flags |= UIElementFlags.BuiltIn;
         }
 
         protected static string clipboard {
@@ -105,7 +50,7 @@ namespace UIForia.Elements {
             caret = FindById<UIContainerElement>("cursor");
             highlight = FindById<UIContainerElement>("highlight");
             textElement = FindById<UITextElement>("text");
-            placeholderElement = FindById<UITextElement>("placeholder");
+            placeholderElement = FindById<UISlotElement>("placeholder");
 
             caret.SetEnabled(false);
             highlight.SetEnabled(false);

@@ -494,9 +494,10 @@ namespace UIForia.Layout.LayoutTypes {
                     return view.ScaleFactor * Mathf.Max(0, widthMeasurement.value);
 
                 case UIMeasurementUnit.Content:
-                    return Mathf.Max(0,   + (GetContentWidth() * widthMeasurement.value));
+                    return Mathf.Max(0, PaddingBorderHorizontal + (GetContentWidth() * widthMeasurement.value));
 
                 case UIMeasurementUnit.ParentSize:
+                    if (parent == null) return view.Viewport.width;
                     if (parent.style.PreferredWidth.IsContentBased) {
                         return 0f;
                     }
@@ -510,6 +511,7 @@ namespace UIForia.Layout.LayoutTypes {
                     return Mathf.Max(0, view.Viewport.height * widthMeasurement.value);
 
                 case UIMeasurementUnit.ParentContentArea:
+                    if (parent == null) return view.Viewport.width;
                     if (parent.style.PreferredWidth.IsContentBased) {
                         return 0f;
                     }
@@ -521,6 +523,7 @@ namespace UIForia.Layout.LayoutTypes {
 
                 case UIMeasurementUnit.AnchorWidth:
                     anchorTarget = style.AnchorTarget;
+                    if (parent == null) return view.Viewport.width;
                     if (parent.style.PreferredWidth.IsContentBased && anchorTarget == AnchorTarget.Parent ||
                         anchorTarget == AnchorTarget.ParentContentArea) {
                         return 0f;
@@ -530,6 +533,7 @@ namespace UIForia.Layout.LayoutTypes {
 
                 case UIMeasurementUnit.AnchorHeight:
                     anchorTarget = style.AnchorTarget;
+                    if (parent == null) return view.Viewport.height;
                     if (parent.style.PreferredWidth.IsContentBased && anchorTarget == AnchorTarget.Parent ||
                         anchorTarget == AnchorTarget.ParentContentArea) {
                         return 0f;
@@ -738,6 +742,7 @@ namespace UIForia.Layout.LayoutTypes {
                     return Mathf.Max(0, PaddingBorderVertical + (contentHeight * height.value));
 
                 case UIMeasurementUnit.ParentSize:
+                    if (parent == null) return view.Viewport.height;
                     if (parent.style.PreferredHeight.IsContentBased) {
                         return 0f;
                     }
@@ -751,6 +756,7 @@ namespace UIForia.Layout.LayoutTypes {
                     return Mathf.Max(0, view.Viewport.height * height.value);
 
                 case UIMeasurementUnit.ParentContentArea:
+                    if (parent == null) return view.Viewport.height;
                     if (parent.style.PreferredHeight.IsContentBased) {
                         return 0f;
                     }
@@ -764,6 +770,7 @@ namespace UIForia.Layout.LayoutTypes {
 
                 case UIMeasurementUnit.AnchorWidth:
                     anchorTarget = style.AnchorTarget;
+                    if (parent == null) return view.Viewport.width;
                     if (parent.style.PreferredHeight.IsContentBased && anchorTarget == AnchorTarget.Parent ||
                         anchorTarget == AnchorTarget.ParentContentArea) {
                         return 0f;
@@ -773,6 +780,7 @@ namespace UIForia.Layout.LayoutTypes {
 
                 case UIMeasurementUnit.AnchorHeight:
                     anchorTarget = style.AnchorTarget;
+                    if (parent == null) return view.Viewport.height;
                     if (parent.style.PreferredHeight.IsContentBased && anchorTarget == AnchorTarget.Parent ||
                         anchorTarget == AnchorTarget.ParentContentArea) {
                         return 0f;

@@ -1,0 +1,58 @@
+<?xml version="1.0" encoding="utf-8"?>
+<UITemplate>
+
+    <Style>
+
+        style ignored {
+            LayoutBehavior = Ignored;
+            TransformBehaviorX = AnchorMinOffset;
+            TransformBehaviorY = AnchorMinOffset;
+            AnchorTarget = Parent;
+        }
+
+        style text {
+            TextFontSize = 24;
+            MaxWidth = 1pca;
+        }
+
+        style highlight {
+            LayoutBehavior = Ignored;
+            TransformBehaviorX = AnchorMinOffset;
+            TransformBehaviorY = AnchorMinOffset;
+            AnchorTarget = ParentContentArea;
+            BackgroundColor = #A8CEFF;
+        }
+
+        style container {
+            FlexLayoutMainAxisAlignment = Center;
+        }
+
+        style caret {
+            PreferredSize = 1px 24px;
+        }
+
+        style placeholder {
+            TextColor = rgba(120, 120, 120, 200);
+            TextFontSize = 24;
+            TextAlignment = Center;
+            PreferredSize = 1pca;
+        }
+        
+        style slot {
+            LayoutBehavior = Ignored;
+            PreferredSize = 1pca;
+        }
+
+    </Style>
+
+    <Contents style='container'>
+
+        <Div if='false' x-id="highlight" style="highlight"/>
+        <Text style='text' x-id="text"/>
+        <Div if='false' x-id='cursor' style='ignored caret'/>
+        <Slot x-id='placeholder' style="slot" name='Placeholder'>
+            <Text style='ignored placeholder'>{placeholder}</Text>
+        </Slot>
+    </Contents>
+
+</UITemplate>

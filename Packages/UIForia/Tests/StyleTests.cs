@@ -504,4 +504,23 @@ public class StyleTests {
         app.Update();
         Assert.AreEqual(100, root.FindById("dynamic").style.MarginTop.value);
     }
+
+
+    [Template(TemplateType.String, @"
+        <UITemplate>
+            <Style>style &lt;Heading1&gt; { TextFontSize = 100; }</Style>
+            <Contents>
+                <Heading1 x-id=""myHeading"">TestMe</Heading1>                  
+            </Contents>
+        </UITemplate>
+    ")]
+    public class HeadingStyleElement : UIElement { }
+    
+    [Test]
+    public void ApplyHeadingStyles() {
+        MockApplication app = new MockApplication(typeof(HeadingStyleElement));
+        HeadingStyleElement root = (HeadingStyleElement) app.RootElement;
+        app.Update();
+        Assert.AreEqual(100, root.FindById("myHeading").style.TextFontSize);
+    }
 }

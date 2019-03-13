@@ -18,10 +18,6 @@ namespace UIForia.Compilers.Style {
             m_CurrentlyImportingStylesheets = new List<string>();
             m_CachedStyleSheets = new Dictionary<string, StyleSheet>();
         }
-
-        public StyleSheet ImportStyleSheetFromString(string literalTemplate) {
-            return ImportStyleSheetFromString(null, literalTemplate);
-        }
         
         public StyleSheet ImportStyleSheetFromString(string id, string literalTemplate) {
             if (id != null && m_CachedStyleSheets.TryGetValue(id, out StyleSheet sheet)) {

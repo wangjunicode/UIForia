@@ -11,19 +11,20 @@ namespace UIForia.Templates {
     public class UITextTemplate : UITemplate {
 
         private static readonly TextElementParser textParser = new TextElementParser();
-        private readonly Type textElementType;
 
         public UITextTemplate(Application app, Type textElementType, string rawText, List<AttributeDefinition> attributes = null)
             : base(app, null, attributes) {
-            this.textElementType = textElementType;
+            this.elementType = textElementType;
             this.RawText = rawText;
         }
 
         public UITextTemplate(Application app, string rawText, List<AttributeDefinition> attributes = null)
             : base(app, null, attributes) {
-            this.textElementType = null;
+            this.elementType = typeof(UITextElement);
             this.RawText = rawText;
         }
+        
+        protected override Type elementType { get; }
 
         public string RawText { get; }
 
@@ -38,7 +39,7 @@ namespace UIForia.Templates {
                     continue;
                 }
 
-                Expression<string> expression = template.compiler.Compile<string>(template.RootType, textElementType, expressionParts[i]);
+                Expression<string> expression = template.compiler.Compile<string>(template.RootType, elementType, expressionParts[i]);
                 expressionList.Add(expression);
             }
 
@@ -67,14 +68,39 @@ namespace UIForia.Templates {
             base.Compile(template);
         }
 
-        protected override Type elementType => typeof(UITextElement);
-
         public override UIElement CreateScoped(TemplateScope inputScope) {
-            UIElement retn = new UITextElement();
-            retn.children = LightListPool<UIElement>.Get();
-            retn.OriginTemplate = this;
-            retn.templateContext = new ExpressionContext(inputScope.rootElement, retn);
-            return retn;
+            UITextElement element = null;
+            if (elementType == typeof(UILabelElement)) { }
+            else if (elementType == typeof(UIParagraphElement)) {
+                element = new UIParagraphElement();
+            }
+            else if (elementType == typeof(UIHeading1Element)) {
+                element = new UIHeading1Element();
+            }
+            else if (elementType == typeof(UIHeading2Element)) {
+                element = new UIHeading2Element();
+            }
+            else if (elementType == typeof(UIHeading3Element)) {
+                element = new UIHeading3Element();
+            }
+            else if (elementType == typeof(UIHeading4Element)) {
+                element = new UIHeading4Element();
+            }
+            else if (elementType == typeof(UIHeading5Element)) {
+                element = new UIHeading5Element();
+            }
+            else if (elementType == typeof(UIHeading6Element)) {
+                element = new UIHeading6Element();
+            }
+            else if (elementType == typeof(UITextElement)) {
+                element = new UITextElement();
+            }
+
+            element.templateContext = new ExpressionContext(inputScope.rootElement, element);
+            element.children = LightListPool<UIElement>.Get();
+            element.OriginTemplate = this;
+
+            return element;
         }
 
     }

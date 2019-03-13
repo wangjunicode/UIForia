@@ -7,6 +7,7 @@ using UIForia.Elements;
 using UIForia.Exceptions;
 using UIForia.Templates;
 using UIForia.Util;
+using UnityEngine;
 
 namespace UIForia.Parsing.Expression {
 
@@ -36,9 +37,15 @@ namespace UIForia.Parsing.Expression {
                 return parsedTemplates[elementType];
             }
 
-            ParsedTemplate parsedTemplate = ParseTemplateFromType(elementType);
-            parsedTemplates[elementType] = parsedTemplate;
-            return parsedTemplate;
+            try {
+                ParsedTemplate parsedTemplate = ParseTemplateFromType(elementType);
+                parsedTemplates[elementType] = parsedTemplate;
+                return parsedTemplate;
+            }
+            catch (Exception e) {
+                Debug.Log($"Cannot parse file {elementType}");
+                throw;
+            }
         }
 
         public ParsedTemplate ParseTemplateFromString<T>(string input) where T : UIElement {

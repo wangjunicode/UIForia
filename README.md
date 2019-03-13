@@ -1,6 +1,12 @@
 # UIForia User Guide
 UIForia (/juːˈfɔːriə/) is a stylable template based UI system.  
 
+## Box Model
+Unlike CSS there is only one box model in UIForia, which is the equivalent to the CSS border-box model.
+The content width of an element will be reduced by border and padding values. Defining a width of 100% and 
+additionally a border and/or padding will not result in a box bigger than 100%. An element with a fixed 
+width of 100px on the other hand will "eat up" border and padding, effectively shrinking the content box.
+
 ## Syntax
 
 Keyword           | Description
@@ -107,3 +113,7 @@ style button {
     }
 }
 ```
+
+## Sizes:
+
+

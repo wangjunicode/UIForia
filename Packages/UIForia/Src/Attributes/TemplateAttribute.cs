@@ -4,6 +4,7 @@ namespace UIForia.Attributes {
 
     public enum TemplateType {
 
+        Internal,
         String,
         File
 
@@ -19,7 +20,7 @@ namespace UIForia.Attributes {
         
         public TemplateAttribute(string template) {
             this.templateType = TemplateType.File;
-            this.template = "/" + template;
+            this.template = template;
         }
         
     }

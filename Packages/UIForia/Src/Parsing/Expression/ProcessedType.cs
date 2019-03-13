@@ -22,11 +22,15 @@ namespace UIForia.Parsing.Expression {
                 throw new Exception($"Template not defined for {rawType.Name}");
             }
 
-            if (templateAttr.templateType == TemplateType.File) {
-                return TryReadFile(templateRoot + "/" + templateAttr.template);
+            switch (templateAttr.templateType) {
+                case TemplateType.Internal:
+                    string path = Path.GetFullPath(Path.Combine(UnityEngine.Application.dataPath, "..", "Packages", "UIForia", "Src", templateAttr.template));
+                    return TryReadFile(path);
+                case TemplateType.File:
+                    return TryReadFile(Path.GetFullPath(Path.Combine(templateRoot, templateAttr.template)));
+                default:
+                    return templateAttr.template;
             }
-
-            return templateAttr.template;
         }
 
         private static string TryReadFile(string path) {

@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="utf-8"?>
+<UITemplate>
+
+    <Style path="FlexDemo/FlexDemo.style"/>
+
+    <Contents style="container vertical-center">
+
+        <Heading3 style="head">
+            C
+        </Heading3>
+
+        <Div style="blue medium mt3 m1">Join existing colony</Div>
+        <Div style="mb3">Recommended for new players</Div>
+        <Div style="blue medium mt3 m1">Join existing colony</Div>
+    </Contents>
+</UITemplate>

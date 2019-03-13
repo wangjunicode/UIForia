@@ -14,7 +14,17 @@ namespace UIForia {
         }
 
     }
+    
+    public class MyPainter : ISVGXElementPainter {
 
+        public void Paint(UIElement element, ImmediateRenderContext ctx, SVGXMatrix matrix) {
+            ctx.SetStroke(Color.magenta);
+            ctx.MoveTo(element.layoutResult.ActualWidth * 0.5f, 0);
+            ctx.VerticalLineTo(element.layoutResult.ActualHeight);
+            ctx.Stroke();
+        }
+    } 
+    
     public class UIViewBehavior : MonoBehaviour {
 
         public UIView view;
@@ -33,6 +43,7 @@ namespace UIForia {
             view = application.AddView(new Rect(0, 0, Screen.width, Screen.height), type);
             application.SetCamera(camera);
             Application.RegisterCustomPainter("Painter0", new Painter());
+            Application.RegisterCustomPainter("Painter1", new MyPainter());
         }
 
         private void Update() {

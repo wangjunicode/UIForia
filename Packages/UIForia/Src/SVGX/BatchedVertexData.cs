@@ -508,13 +508,6 @@ namespace SVGX {
                         totalWidth = Mathf.Max(totalWidth, textInfo.lineInfos[i].width);
                     }
 
-                    int fontSize = textInfo.spanInfos[0].textStyle.fontSize;
-                    var asset = textInfo.spanInfos[0].font;
-                    
-                    float scale = (fontSize / asset.fontInfo.PointSize) * asset.fontInfo.Scale;
-                    float lh = (asset.fontInfo.Ascender - asset.fontInfo.Descender) * scale;
-                    float totalHeight = textInfo.lineInfos[textInfo.lineCount - 1].position.y + lh;
-                    
                     // todo -- clip smarter using layout lines
                     for (int i = 0; i < charCount; i++) {
                         

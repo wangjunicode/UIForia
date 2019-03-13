@@ -17,6 +17,7 @@ namespace UIForia.Rendering {
         }
 
         public bool Equals(CursorStyle other) {
+            if (other == null) return false;
             return string.Equals(name, other.name) && Equals(texture, other.texture) && hotSpot.Equals(other.hotSpot);
         }
 

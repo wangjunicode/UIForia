@@ -1,5 +1,8 @@
+using System;
+
 namespace UIForia.Rendering {
 
+    [Flags]
     public enum WhitespaceMode {
 
         Unset,

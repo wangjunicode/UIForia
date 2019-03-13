@@ -7,6 +7,7 @@ using UIForia.Systems;
 using UIForia.Text;
 using UIForia.Util;
 using UnityEngine;
+using WhitespaceMode = UIForia.Text.WhitespaceMode;
 
 namespace UIForia.Elements {
 
@@ -95,7 +96,7 @@ namespace UIForia.Elements {
                 color = style.TextColor,
                 fontStyle = style.TextFontStyle,
                 alignment = style.TextAlignment,
-                whitespaceMode = WhitespaceMode.Wrap,
+                whitespaceMode = WhitespaceMode.CollapseWhitespace,
                 outlineColor = style.TextOutlineColor,
                 outlineWidth = style.TextOutlineWidth,
                 outlineSoftness = 0.01f,//style.TextOutlineSoftness

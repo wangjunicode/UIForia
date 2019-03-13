@@ -2,6 +2,7 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Diagnostics;
+using UIForia.Layout;
 using UnityEngine;
 
 namespace UIForia.Util {
@@ -166,17 +167,27 @@ namespace UIForia.Util {
                 int count = objs.Count;
                 if (count > 0) {
                     this.EnsureCapacity(size + count);
-                    if (index < size)
+                    
+                    if (index < size) {
                         System.Array.Copy(array, index, array, index + count, size - index);
+                    }
+
                     if (Equals(this, objs)) {
                         System.Array.Copy(array, 0, array, index, index);
                         System.Array.Copy(array, index + count, array, index * 2, size - index);
                     }
                     else {
-                        T[] a = ArrayPool<T>.GetExactSize(count);
-                        objs.CopyTo(a, 0);
-                        a.CopyTo(array, index);
-                        ArrayPool<T>.Release(ref a);
+                        if (objs is LightList<T> list) {
+                            System.Array.Copy(list.Array, 0, array, index, list.size);
+                        }
+                        else if (objs is T[] b) {
+                            System.Array.Copy(b, 0, array, index, b.Length);
+                        }
+                        else {
+                            T[] a = new T[count];
+                            objs.CopyTo(a, 0);
+                            a.CopyTo(array, index);
+                        }
                     }
 
                     size += count;
@@ -187,6 +198,13 @@ namespace UIForia.Util {
                     this.Insert(index++, obj);
                 }
             }
+        }
+
+        public void ShiftRight(int startIndex, int count) {
+            EnsureCapacity(size + count);
+            System.Array.Copy(array, startIndex, array, startIndex + count, count);
+            System.Array.Clear(array, startIndex, count);
+            size += count;
         }
 
         public T RemoveLast() {

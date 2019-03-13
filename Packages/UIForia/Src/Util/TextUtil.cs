@@ -25,13 +25,13 @@ namespace UIForia.Util {
 
         }
 
-        public static string ProcessWrapString(string input, bool collapseSpaceAndTab = true, bool preserveNewLine = false, TextTransform textTransform = TextTransform.None) {
+        public static string ProcessWrapString(string input, bool collapseSpaceAndTab = true, bool preserveNewLine = false) {
             char[] buffer = null;
-            int count = ProcessWrap(input, true, false, ref buffer, textTransform);
+            int count = ProcessWrap(input, collapseSpaceAndTab, preserveNewLine, ref buffer);
             return new string(buffer, 0, count);
         }
 
-        public static int ProcessWrap(string input, bool collapseSpaceAndTab, bool preserveNewLine, ref char[] buffer, TextTransform textTransform) {
+        public static int ProcessWrap(string input, bool collapseSpaceAndTab, bool preserveNewLine, ref char[] buffer) {
             bool collapsing = collapseSpaceAndTab;
 
             input = input ?? string.Empty;
@@ -70,11 +70,10 @@ namespace UIForia.Util {
                 }
             }
 
-            ApplyTextTransform(buffer, writeIndex, textTransform);
             return writeIndex;
         }
 
-        private static void ApplyTextTransform(char[] buffer, int count, TextTransform transform) {
+        public static void ApplyTextTransform(char[] buffer, int count, TextTransform transform) {
             switch (transform) {
                 case TextTransform.UpperCase:
                 case TextTransform.SmallCaps:
@@ -89,10 +88,18 @@ namespace UIForia.Util {
                     }
 
                     break;
+                case TextTransform.TitleCase:
+                    for (int i = 0; i < count - 1; i++) {
+                        if (char.IsLetter(buffer[i]) && char.IsWhiteSpace(buffer[i - 1])) {
+                            buffer[i] = char.ToUpper(buffer[i]);
+                        }
+                    }
+
+                    break;
             }
         }
 
-        public static int StringToCharArray(string sourceText, ref int[] charBuffer, WhitespaceMode whiteSpaceMode, bool parseControlCharacters = false) {
+        public static int StringToCharArray(string sourceText, ref int[] charBuffer, bool parseControlCharacters = false) {
             if (string.IsNullOrEmpty(sourceText)) {
                 charBuffer = charBuffer ?? new int[0];
                 return 0;
@@ -242,7 +249,7 @@ namespace UIForia.Util {
         // line info is processed only when doing wrapping, not here
         public static TextInfo ProcessText(string text, bool collapseWhitespace, bool preserveNewLines, TextTransform textTransform = TextTransform.None) {
             char[] buffer = null;
-            int bufferLength = ProcessWrap(text, collapseWhitespace, preserveNewLines, ref buffer, textTransform);
+            int bufferLength = ProcessWrap(text, collapseWhitespace, preserveNewLines, ref buffer);
 
             List<WordInfo> s_WordInfoList = ListPool<WordInfo>.Get();
 
@@ -325,7 +332,6 @@ namespace UIForia.Util {
             ComputeCharacterAndWordSizes(textInfo);
             return textInfo;
         }
-
         private static TMP_FontAsset GetFontAssetForWeight(SpanInfo spanInfo, int fontWeight) {
             bool isItalic = (spanInfo.textStyle.fontStyle & FontStyle.Italic) != 0;
 
@@ -333,6 +339,7 @@ namespace UIForia.Util {
             TMP_FontWeights weights = spanInfo.font.fontWeights[weightIndex];
             return isItalic ? weights.italicTypeface : weights.regularTypeface;
         }
+
 
         public static void ApplyLineAndWordOffsets(TextInfo textInfo) {
             LineInfo[] lineInfos = textInfo.lineInfos;
@@ -368,12 +375,12 @@ namespace UIForia.Util {
 
         public static List<LineInfo> Layout(TextInfo textInfo, float width) {
             SpanInfo spanInfo = textInfo.spanInfos[0];
-            
+
             TMP_FontAsset asset = spanInfo.font;
             float scale = (spanInfo.textStyle.fontSize / asset.fontInfo.PointSize) * asset.fontInfo.Scale;
             float lh = (asset.fontInfo.Ascender + asset.fontInfo.Descender) * scale;
 
-            float lineOffset = 0; 
+            float lineOffset = 0;
 
             LineInfo currentLine = new LineInfo();
             WordInfo[] wordInfos = textInfo.wordInfos;
@@ -468,7 +475,7 @@ namespace UIForia.Util {
 
             return lineInfos;
         }
-        
+
         private static void ComputeCharacterAndWordSizes(TextInfo textInfo) {
             WordInfo[] wordInfos = textInfo.wordInfos;
             CharInfo[] charInfos = textInfo.charInfos;
@@ -607,7 +614,7 @@ namespace UIForia.Util {
 
                         charInfos[i].uv0 = uv0;
                         charInfos[i].uv1 = uv1;
-                                                
+
                         charInfos[i].uv2 = new Vector2(currentElementScale, 0); // todo -- compute uv2s
                         charInfos[i].uv3 = Vector2.one;
 

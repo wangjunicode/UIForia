@@ -672,9 +672,9 @@ namespace UIForia.Layout.LayoutTypes {
                     return value * view.Viewport.width;
                 case GridTemplateUnit.ViewportHeight:
                     return value * view.Viewport.height;
-                case GridTemplateUnit.Container:
+                case GridTemplateUnit.ParentSize:
                     return parent.allocatedWidth * value;
-                case GridTemplateUnit.ContainerContentArea:
+                case GridTemplateUnit.ParentContentArea:
                     return (parent.allocatedWidth - parent.PaddingHorizontal - parent.BorderHorizontal) * value;
 
                 case GridTemplateUnit.FractionalRemaining:
@@ -705,9 +705,9 @@ namespace UIForia.Layout.LayoutTypes {
                     return value * view.Viewport.width;
                 case GridTemplateUnit.ViewportHeight:
                     return value * view.Viewport.height;
-                case GridTemplateUnit.Container:
+                case GridTemplateUnit.ParentSize:
                     return parent.allocatedHeight * value;
-                case GridTemplateUnit.ContainerContentArea:
+                case GridTemplateUnit.ParentContentArea:
                     return (parent.allocatedHeight - parent.PaddingVertical - parent.BorderVertical) * value;
 
                 case GridTemplateUnit.FractionalRemaining:

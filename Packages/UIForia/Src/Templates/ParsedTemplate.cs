@@ -16,8 +16,9 @@ namespace UIForia.Templates {
     public class ParsedTemplate {
 
         private bool isCompiled;
-        
-        internal Dictionary<string, UIStyleGroupContainer> sharedStyleMap;
+
+        // todo: write custom comparer 
+        internal Dictionary<string, AliasedUIStyleGroupContainer> sharedStyleMap;
         internal Dictionary<string, UIStyleGroupContainer> implicitStyleMap;
 
         private readonly List<string> usings;
@@ -102,7 +103,7 @@ namespace UIForia.Templates {
                 return;
             }
 
-            sharedStyleMap = new Dictionary<string, UIStyleGroupContainer>();
+            sharedStyleMap = new Dictionary<string, AliasedUIStyleGroupContainer>();
 
             for (int i = 0; i < styleDefinitions.Count; i++) {
                 StyleSheet sheet = null;
@@ -129,10 +130,22 @@ namespace UIForia.Templates {
                         }
                         
                         if (alias == null) {
-                            sharedStyleMap.Add(container.name, container);
+                            sharedStyleMap[container.name] = new AliasedUIStyleGroupContainer() {
+                                alias = null,
+                                container = container
+                            };
                         }
                         else {
-                            sharedStyleMap.Add(alias + "." + container.name, container);
+                            sharedStyleMap[alias + "." + container.name ] = new AliasedUIStyleGroupContainer() {
+                                alias = alias,
+                                container = container
+                            };
+                            if (!sharedStyleMap.ContainsKey(container.name)) {
+                                sharedStyleMap[container.name] = new AliasedUIStyleGroupContainer() {
+                                    alias = alias,
+                                    container = container
+                                };
+                            }
                         }
                     }
                 }
@@ -181,13 +194,18 @@ namespace UIForia.Templates {
             implicitStyleMap.TryGetValue(tagName, out UIStyleGroupContainer retn);
             return retn;
         }
-        
+
         internal UIStyleGroupContainer GetSharedStyle(string styleName) {
             if (sharedStyleMap == null) return null;
-            sharedStyleMap.TryGetValue(styleName, out UIStyleGroupContainer retn);
-            return retn;
+            sharedStyleMap.TryGetValue(styleName, out AliasedUIStyleGroupContainer aliasedUiStyleGroupContainer);
+            return aliasedUiStyleGroupContainer.container;
         }
-       
+
+        internal struct AliasedUIStyleGroupContainer {
+            // alias will be used by the inspector
+            public string alias;
+            public UIStyleGroupContainer container;
+        }
     }
 
 }

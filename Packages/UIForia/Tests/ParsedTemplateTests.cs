@@ -25,9 +25,9 @@ public class ParsedTemplateTests {
         ParsedTemplate template = parser.GetParsedTemplate(typeof(TestType0), true);
         template.Compile();
         Assert.AreEqual(3, template.sharedStyleMap.Count);
-        Assert.AreEqual("style0", template.sharedStyleMap.GetOrDefault("style0").name);
-        Assert.AreEqual("style1", template.sharedStyleMap.GetOrDefault("style1").name);
-        Assert.AreEqual("style2", template.sharedStyleMap.GetOrDefault("style2").name);
+        Assert.AreEqual("style0", template.sharedStyleMap.GetOrDefault("style0").container.name);
+        Assert.AreEqual("style1", template.sharedStyleMap.GetOrDefault("style1").container.name);
+        Assert.AreEqual("style2", template.sharedStyleMap.GetOrDefault("style2").container.name);
     }
 
     [Test]
@@ -37,19 +37,19 @@ public class ParsedTemplateTests {
         ParsedTemplate template = parser.GetParsedTemplate(typeof(TestType1), true);
         template.Compile();
 
-        Assert.AreEqual(6, template.sharedStyleMap.Count);
+        Assert.AreEqual(9, template.sharedStyleMap.Count);
 
-        Assert.IsNull(template.sharedStyleMap.GetOrDefault("style0"));
-        Assert.IsNull(template.sharedStyleMap.GetOrDefault("style1"));
-        Assert.IsNull(template.sharedStyleMap.GetOrDefault("style2"));
+        Assert.AreEqual(template.sharedStyleMap.GetOrDefault("t0.style0").container, template.sharedStyleMap.GetOrDefault("style0").container);
+        Assert.AreEqual(template.sharedStyleMap.GetOrDefault("t0.style1").container, template.sharedStyleMap.GetOrDefault("style1").container);
+        Assert.AreEqual(template.sharedStyleMap.GetOrDefault("t0.style2").container, template.sharedStyleMap.GetOrDefault("style2").container);
 
-        Assert.AreEqual("style0", template.sharedStyleMap.GetOrDefault("t0.style0").name);
-        Assert.AreEqual("style1", template.sharedStyleMap.GetOrDefault("t0.style1").name);
-        Assert.AreEqual("style2", template.sharedStyleMap.GetOrDefault("t0.style2").name);
+        Assert.AreEqual("style0", template.sharedStyleMap.GetOrDefault("t0.style0").container.name);
+        Assert.AreEqual("style1", template.sharedStyleMap.GetOrDefault("t0.style1").container.name);
+        Assert.AreEqual("style2", template.sharedStyleMap.GetOrDefault("t0.style2").container.name);
 
-        Assert.AreEqual("style0", template.sharedStyleMap.GetOrDefault("t1.style0").name);
-        Assert.AreEqual("style1", template.sharedStyleMap.GetOrDefault("t1.style1").name);
-        Assert.AreEqual("style2", template.sharedStyleMap.GetOrDefault("t1.style2").name);
+        Assert.AreEqual("style0", template.sharedStyleMap.GetOrDefault("t1.style0").container.name);
+        Assert.AreEqual("style1", template.sharedStyleMap.GetOrDefault("t1.style1").container.name);
+        Assert.AreEqual("style2", template.sharedStyleMap.GetOrDefault("t1.style2").container.name);
     }
 
     [Test]

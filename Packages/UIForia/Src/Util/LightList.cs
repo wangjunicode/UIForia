@@ -201,7 +201,7 @@ namespace UIForia.Util {
         }
 
         public void ShiftRight(int startIndex, int count) {
-            EnsureCapacity(size + count);
+            EnsureCapacity(startIndex + count + count);
             System.Array.Copy(array, startIndex, array, startIndex + count, count);
             System.Array.Clear(array, startIndex, count);
             size += count;

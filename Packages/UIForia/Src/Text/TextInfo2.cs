@@ -83,7 +83,6 @@ namespace UIForia.Text {
         public void AppendSpan(TextSpan span) {
             int spanIdx = spanList.Count;
             int previousCount = characterList.Count;
-
             spanList.Add(CreateSpanInfo(span));
 
             char[] buffer = null;
@@ -92,18 +91,43 @@ namespace UIForia.Text {
             TextUtil.ApplyTextTransform(buffer, bufferSize, span.style.textTransform);
 
             characterList.EnsureAdditionalCapacity(bufferSize);
+            charInfoList.EnsureAdditionalCapacity(bufferSize);
             char[] characters = characterList.Array;
 
             Array.Copy(buffer, 0, characters, characterList.Count, bufferSize);
             ArrayPool<char>.Release(ref buffer);
 
+            int wordStart = spanList.Count == 1 ? 0 : spanList[spanIdx - 1].wordEnd;
+
             characterList.Count += bufferSize;
-            ProcessText(spanIdx, previousCount, previousCount + bufferSize);
+            charInfoList.Count += bufferSize;
+
+            LightList<WordInfo> tempWordList = ProcessText(previousCount, previousCount + bufferSize);
+
             ComputeCharacterAndWordSizes(spanIdx);
+
+            spanList.Array[spanIdx].charStart = previousCount;
+            spanList.Array[spanIdx].charEnd = previousCount + bufferSize;
+            spanList.Array[spanIdx].wordStart = wordStart;
+            spanList.Array[spanIdx].wordEnd = wordStart + tempWordList.Count;
+
+            int w = wordInfoList.Count;
+            wordInfoList.AddRange(tempWordList);
+
+            for (int i = w; i < w + tempWordList.Count; i++) {
+                    
+            }
+            
+            LightListPool<WordInfo>.Release(ref tempWordList);
         }
 
         public void UpdateSpan(int spanIdx, TextSpan span) {
-            int previousCount = characterList.Count;
+            
+            if (spanIdx >= spanList.Count) {
+                AppendSpan(span);
+                return;
+            }
+            
             SpanInfo2 old = spanList.Array[spanIdx];
 
             spanList.Array[spanIdx] = CreateSpanInfo(span);
@@ -115,47 +139,59 @@ namespace UIForia.Text {
 
             if (bufferSize > old.CharCount) {
                 characterList.ShiftRight(old.charEnd, bufferSize - old.CharCount);
+                charInfoList.ShiftRight(old.charEnd, bufferSize - old.CharCount);
                 char[] characters = characterList.Array;
                 Array.Copy(buffer, 0, characters, old.charStart, bufferSize);
             }
-            else if (bufferSize < old.CharCount) {
-                
-            }
+            else if (bufferSize < old.CharCount) { }
             else {
-                Array.Copy(buffer, 0, characterList.Array, old.charStart, bufferSize); 
+                Array.Copy(buffer, 0, characterList.Array, old.charStart, bufferSize);
             }
 
-            LightList<WordInfo> tempWordInfo = ProcessText(spanIdx, previousCount, previousCount + bufferSize);
-            
-            
+            LightList<WordInfo> tempWordList = ProcessText(old.charStart, bufferSize);
+
+            int wordStart = old.wordStart;
+
+            int charDiff = bufferSize - old.CharCount;
+            int wordDiff = tempWordList.Count - old.WordCount;
             SpanInfo2[] spans = spanList.Array;
+
+            if (wordDiff > 0) {
+                wordInfoList.ShiftRight(old.wordEnd, wordDiff);
+                WordInfo[] wordInfos = wordInfoList.Array;
+                Array.Copy(tempWordList.Array, 0, wordInfos, old.wordStart, tempWordList.Count);
+                for (int i = spanIdx + 1; i < spanList.Count; i++) {
+                    spans[i].charStart += charDiff;
+                    spans[i].charEnd += charDiff;
+                    spans[i].wordStart += wordDiff;
+                    spans[i].wordEnd += wordDiff;
+                    int ws = spans[i].wordStart;
+                    int we = spans[i].wordEnd;
+                    for (int j = ws; j < we; j++) {
+                        wordInfos[j].startChar += charDiff;
+                    }
+                }
+            }
+            
             spans[spanIdx].charStart = old.charStart;
             spans[spanIdx].charEnd = old.charStart + bufferSize;
             spans[spanIdx].wordStart = wordStart;
             spans[spanIdx].wordEnd = wordStart + tempWordList.Count;
 
-//            for (int i = idx + 1; i < spanList.Count; i++) {
-//                spans[i].charStart += characterStart;
-//                spans[i].charEnd += characterStart;
-//                spans[i].wordStart += tempWordList.Count;
-//                spans[i].wordEnd += tempWordList.Count;
-//            }
-            
-//            ProcessText(spanIdx, previousCount, previousCount + bufferSize);
             ComputeCharacterAndWordSizes(spanIdx);
-            
-            LightListPool<WordInfo>.Release(ref tempWordInfo);
+
+            LightListPool<WordInfo>.Release(ref tempWordList);
         }
 
         public void RemoveSpan(int idx) { }
-        
-        private LightList<WordInfo> ProcessText(int idx, int characterStart, int characterEnd) {
+
+        private LightList<WordInfo> ProcessText(int characterStart, int characterEnd) {
             LightList<WordInfo> tempWordList = LightListPool<WordInfo>.Get();
 
             WordInfo currentWord = new WordInfo();
-
+            currentWord.startChar = characterStart;
+            
             bool inWhiteSpace = false;
-            charInfoList.EnsureAdditionalCapacity(characterEnd - characterStart);
             CharInfo[] charInfos = charInfoList.Array;
             char[] buffer = characterList.Array;
             for (int i = characterStart; i < characterEnd; i++) {
@@ -198,25 +234,14 @@ namespace UIForia.Text {
                 }
             }
 
-            charInfoList.Count += characterEnd - characterStart;
-
             if (!inWhiteSpace) {
                 currentWord.spaceStart = currentWord.charCount;
             }
 
             tempWordList.Add(currentWord);
-            int wordStart = wordInfoList.Count;
-
-            if (idx == spanList.Count - 1) {
-                wordInfoList.AddRange(tempWordList);
-            }
-            else {
-                wordInfoList.InsertRange(idx, tempWordList);
-            }
 
             return tempWordList;
-//            LightListPool<WordInfo>.Release(ref tempWordList);
-        }      
+        }
 
         public float ComputeWidth() {
             return 0;

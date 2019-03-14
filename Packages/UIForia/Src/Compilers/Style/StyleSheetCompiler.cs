@@ -100,7 +100,7 @@ namespace UIForia.Compilers.Style {
                         }
                         else if (styleContainer.identifier == "focus") {
                             targetGroup.focused = targetGroup.focused ?? new UIStyle();
-                            MapProperties(targetGroup.hover, styleContainer.children);
+                            MapProperties(targetGroup.focused, styleContainer.children);
                         }
                         else if (styleContainer.identifier == "active") {
                             targetGroup.active = targetGroup.active ?? new UIStyle();

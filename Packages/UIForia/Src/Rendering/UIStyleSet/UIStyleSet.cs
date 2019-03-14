@@ -316,7 +316,7 @@ namespace UIForia.Rendering {
                 StyleEntry entry = styleEntries[i];
 
                 // if this a state we were in that is now invalid, mark it's properties for update
-                if ((entry.state & oldState) != 0 && (entry.state & state) == 0) {
+                if ((entry.state & oldState) != 0 && (entry.state & state) != 0) {
                     AddMissingProperties(toUpdate, entry.style.m_StyleProperties);
                 }
             }

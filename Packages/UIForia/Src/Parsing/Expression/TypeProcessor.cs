@@ -51,32 +51,37 @@ namespace UIForia.Parsing.Expression {
                 if (assembly == null) {
                     continue;
                 }
-
-                if(assembly.IsDynamic) continue;
                                 
-                // if (!FilterAssembly(assembly)) continue;
+                if (!FilterAssembly(assembly)) continue;
 
                 filteredAssemblies.Add(assembly);
-                Type[] types = assembly.GetTypes();
+                try {
 
-                for (int j = 0; j < types.Length; j++) {
-                    // can be null if assembly referenced is unavailable
-                    // ReSharper disable once ConditionIsAlwaysTrueOrFalse
-                    if (types[j] == null) {
-                        continue;
+                    Type[] types = assembly.GetTypes();
+
+                    for (int j = 0; j < types.Length; j++) {
+                        // can be null if assembly referenced is unavailable
+                        // ReSharper disable once ConditionIsAlwaysTrueOrFalse
+                        if (types[j] == null) {
+                            continue;
+                        }
+
+                        loadedTypes.Add(types[j]);
+
+                        if (!s_NamespaceMap.TryGetValue(types[j].Namespace ?? "null", out LightList<Assembly> list)) {
+                            list = new LightList<Assembly>();
+                            s_NamespaceMap.Add(types[j].Namespace ?? "null", list);
+                        }
+
+                        if (!list.Contains(assembly)) {
+                            list.Add(assembly);
+                        }
+
                     }
-
-                    loadedTypes.Add(types[j]);
-
-                    if (!s_NamespaceMap.TryGetValue(types[j].Namespace ?? "null", out LightList<Assembly> list)) {
-                        list = new LightList<Assembly>();
-                        s_NamespaceMap.Add(types[j].Namespace ?? "null", list);
-                    }
-
-                    if (!list.Contains(assembly)) {
-                        list.Add(assembly);
-                    }
-                    
+                }
+                catch (ReflectionTypeLoadException e) {
+                    Debug.Log($"{assembly.FullName}");
+                    throw;
                 }
             }
 
@@ -262,15 +267,18 @@ namespace UIForia.Parsing.Expression {
         private static bool FilterAssembly(Assembly assembly) {
             string name = assembly.FullName;
 
-            if (assembly.IsDynamic
-                || name.StartsWith("System,")
-                || name.StartsWith("nunit")
-                || name.Contains("Unity")
-                || name.StartsWith("System.")
-                || name.StartsWith("Microsoft.")
-                || name.StartsWith("Mono")
-                || name.Contains("mscorlib")
-                || name.Contains("Jetbrains")) {
+            if (assembly.IsDynamic ||
+                name.StartsWith("System,") ||
+                name.StartsWith("Accessibility") ||
+                name.StartsWith("Boo") ||
+                name.StartsWith("I18N") ||
+                name.StartsWith("TextMeshPro") ||
+                name.StartsWith("nunit") ||
+                name.StartsWith("System.") ||
+                name.StartsWith("Microsoft.") ||
+                name.StartsWith("Mono") ||
+                name.Contains("mscorlib") ||
+                name.Contains("Jetbrains")) {
                 return false;
             }
 

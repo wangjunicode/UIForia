@@ -1,4 +1,3 @@
-using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using UIForia.Layout;
@@ -11,26 +10,6 @@ namespace UIForia.Rendering {
     // can this be a struct?
     [DebuggerDisplay("{nameof(Id)}")]
     public partial class UIStyle {
-
-        [Flags]
-        public enum TextPropertyIdFlag {
-
-            TextColor = 1 << 0,
-            TextFontAsset = 1 << 1,
-            TextFontSize = 1 << 2,
-            TextFontStyle = 1 << 3,
-            TextAnchor = 1 << 4,
-            TextWhitespaceMode = 1 << 5,
-            TextWrapMode = 1 << 6,
-            TextHorizontalOverflow = 1 << 7,
-            TextVerticalOverflow = 1 << 8,
-            TextIndentFirstLine = 1 << 9,
-            TextIndentNewLine = 1 << 10,
-            TextLayoutStyle = 1 << 11,
-            TextAutoSize = 1 << 12,
-            TextTransform = 1 << 13
-
-        }
 
         private static int NextStyleId;
 

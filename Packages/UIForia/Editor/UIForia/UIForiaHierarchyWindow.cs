@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using System.Reflection;
 using UIForia.Elements;
 using UIForia.Rendering;
-using UIForia.Systems;
 using UIForia.Util;
 using UnityEditor;
 using UnityEditor.IMGUI.Controls;
@@ -43,7 +42,12 @@ namespace UIForia.Editor {
         }
 
         private void OnElementSelectionChanged(UIElement element) {
-            s_SelectedElementId = element.id;
+            if (element != null) {
+                s_SelectedElementId = element.id;
+            }
+            else {
+                s_SelectedElementId = -1;
+            }
         }
 
         private void OnDisable() {

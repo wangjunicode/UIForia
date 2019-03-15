@@ -5,6 +5,7 @@ using System.Linq;
 using System.Linq.Expressions;
 using System.Reflection;
 using UIForia.Parsing.Expression;
+using UnityEngine;
 
 namespace UIForia.Util {
 
@@ -641,18 +642,34 @@ namespace UIForia.Util {
         }
 
         private static Delegate CreateFieldSetter(Type baseType, Type fieldType, string fieldName) {
-           // if (baseType.GetField(fieldName).IsInitOnly) {
-          //      return null;
-          //  }
+            FieldInfo fieldInfo = baseType.GetField(fieldName);
+            
+            if (fieldInfo == null) {
+                PropertyInfo propertyInfo = baseType.GetProperty(fieldName);
+                if (propertyInfo == null || !propertyInfo.CanWrite) {
+                    return null;
+                }
+            }
+
+            if (fieldInfo.IsInitOnly) {
+                return null;
+            }
             ParameterExpression paramExpression0 = Expression.Parameter(baseType);
             ParameterExpression paramExpression1 = Expression.Parameter(fieldType, fieldName);
             MemberExpression fieldGetter = Expression.Field(paramExpression0, fieldName);
 
-            return Expression.Lambda(
-                Expression.Assign(fieldGetter, paramExpression1),
-                paramExpression0,
-                paramExpression1
-            ).Compile();
+            try {
+
+                return Expression.Lambda(
+                    Expression.Assign(fieldGetter, paramExpression1),
+                    paramExpression0,
+                    paramExpression1
+                ).Compile();
+            }
+            catch (ArgumentException e) {
+                Debug.Log($"baseType: {baseType}, fieldType: {fieldType}, fieldName: {fieldName}");
+                throw;
+            }
         }
 
         public struct LinqAccessor {

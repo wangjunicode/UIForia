@@ -57,26 +57,33 @@ namespace UIForia.Parsing.Expression {
                 // if (!FilterAssembly(assembly)) continue;
 
                 filteredAssemblies.Add(assembly);
-                Type[] types = assembly.GetTypes();
+                try {
 
-                for (int j = 0; j < types.Length; j++) {
-                    // can be null if assembly referenced is unavailable
-                    // ReSharper disable once ConditionIsAlwaysTrueOrFalse
-                    if (types[j] == null) {
-                        continue;
+                    Type[] types = assembly.GetTypes();
+
+                    for (int j = 0; j < types.Length; j++) {
+                        // can be null if assembly referenced is unavailable
+                        // ReSharper disable once ConditionIsAlwaysTrueOrFalse
+                        if (types[j] == null) {
+                            continue;
+                        }
+
+                        loadedTypes.Add(types[j]);
+
+                        if (!s_NamespaceMap.TryGetValue(types[j].Namespace ?? "null", out LightList<Assembly> list)) {
+                            list = new LightList<Assembly>();
+                            s_NamespaceMap.Add(types[j].Namespace ?? "null", list);
+                        }
+
+                        if (!list.Contains(assembly)) {
+                            list.Add(assembly);
+                        }
+
                     }
-
-                    loadedTypes.Add(types[j]);
-
-                    if (!s_NamespaceMap.TryGetValue(types[j].Namespace ?? "null", out LightList<Assembly> list)) {
-                        list = new LightList<Assembly>();
-                        s_NamespaceMap.Add(types[j].Namespace ?? "null", list);
-                    }
-
-                    if (!list.Contains(assembly)) {
-                        list.Add(assembly);
-                    }
-                    
+                }
+                catch (ReflectionTypeLoadException e) {
+                    Debug.Log($"{assembly.FullName}");
+                    throw;
                 }
             }
 

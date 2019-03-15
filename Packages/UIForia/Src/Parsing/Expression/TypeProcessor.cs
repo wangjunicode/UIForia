@@ -51,10 +51,8 @@ namespace UIForia.Parsing.Expression {
                 if (assembly == null) {
                     continue;
                 }
-
-                if(assembly.IsDynamic) continue;
                                 
-                // if (!FilterAssembly(assembly)) continue;
+                if (!FilterAssembly(assembly)) continue;
 
                 filteredAssemblies.Add(assembly);
                 try {
@@ -269,15 +267,18 @@ namespace UIForia.Parsing.Expression {
         private static bool FilterAssembly(Assembly assembly) {
             string name = assembly.FullName;
 
-            if (assembly.IsDynamic
-                || name.StartsWith("System,")
-                || name.StartsWith("nunit")
-                || name.Contains("Unity")
-                || name.StartsWith("System.")
-                || name.StartsWith("Microsoft.")
-                || name.StartsWith("Mono")
-                || name.Contains("mscorlib")
-                || name.Contains("Jetbrains")) {
+            if (assembly.IsDynamic ||
+                name.StartsWith("System,") ||
+                name.StartsWith("Accessibility") ||
+                name.StartsWith("Boo") ||
+                name.StartsWith("I18N") ||
+                name.StartsWith("TextMeshPro") ||
+                name.StartsWith("nunit") ||
+                name.StartsWith("System.") ||
+                name.StartsWith("Microsoft.") ||
+                name.StartsWith("Mono") ||
+                name.Contains("mscorlib") ||
+                name.Contains("Jetbrains")) {
                 return false;
             }
 

@@ -152,8 +152,10 @@ namespace UIForia.Animation {
                 case StylePropertyId.AnchorLeft:
                     return new AnimationState(ResolveAnchorLeft(element, viewport, startProperty.AsUIFixedLength));
 
-                case StylePropertyId.BorderColor:
                 case StylePropertyId.BackgroundColor:
+                    return new AnimationState(0, new StyleColor(startProperty.AsColor));
+                
+                case StylePropertyId.BorderColor:
                 case StylePropertyId.TextColor:
                     // todo gradient works differently now
 //                    if (startProperty.IsGradient) {
@@ -299,9 +301,16 @@ namespace UIForia.Animation {
                     v = Mathf.Lerp(status.floatValue, ResolveAnchorLeft(element, viewport, m_TargetValue.AsUIFixedLength), adjustedT);
                     element.style.SetAnimatedProperty(StyleProperty.AnchorLeft(v));
                     break;
+                case StylePropertyId.BackgroundColor:
+
+                    // todo the start value is leider always white :-/
+                    StyleColor c = element.style.BackgroundColor;
+                    Color target = m_TargetValue.AsColor;
+                    StyleColor styleColor = StyleColor.Lerp(c, new StyleColor(target), adjustedT);
+                    element.style.SetAnimatedProperty(StyleProperty.BackgroundColor(styleColor));
+                    break;
 
                 case StylePropertyId.BorderColor:
-                case StylePropertyId.BackgroundColor:
                 case StylePropertyId.TextColor:
                     
                     break;

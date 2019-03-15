@@ -12,6 +12,7 @@ namespace UIForia.Text {
         public float height;
 
         public float MaxY => position.y + height;
+        public int LastWordIndex => wordStart + wordCount - 1;
 
         public LineInfo(int wordStart, Vector2 position, float height) {
             this.width = 0;

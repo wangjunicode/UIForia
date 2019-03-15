@@ -691,36 +691,20 @@ namespace UIForia.Text {
             }
         }
 
-        public Vector2 GetCursorPosition(SelectionRange selectionRange) {
-//            if (string.IsNullOrEmpty(text) || selectionRange.cursorIndex >= textInfo.CharCount) {
-//                return Vector2.zero;
-//            }
+        public Vector2 GetSelectionPosition2(SelectionRange2 selectionRange) {
+            int selectionEnd = selectionRange.cursorIndex + selectionRange.selectionCount;
 
-            CharInfo charInfo = charInfoList.Array[selectionRange.cursorIndex];
-            LineInfo lineInfo = lineInfoList.Array[charInfo.lineIndex];
+            if (selectionRange.IsSelectionBackward) {
+                CharInfo charInfo = charInfoList.Array[selectionEnd];
+                LineInfo lineInfo = lineInfoList.Array[charInfo.lineIndex];
+                return new Vector2(charInfo.layoutTopLeft.x, lineInfo.position.y);
+            }
+            else {
+                CharInfo charInfo = charInfoList.Array[selectionEnd];
+                LineInfo lineInfo = lineInfoList.Array[charInfo.lineIndex];
 
-            return new Vector2(selectionRange.cursorEdge == TextEdge.Right
-                    ? charInfo.layoutBottomRight.x
-                    : charInfo.layoutTopLeft.x,
-                lineInfo.position.y
-            );
-        }
-
-        public Vector2 GetSelectionPosition(SelectionRange selectionRange) {
-            CharInfo charInfo = charInfoList.Array[selectionRange.selectIndex];
-            LineInfo lineInfo = lineInfoList.Array[charInfo.lineIndex];
-
-            return new Vector2(selectionRange.selectEdge == TextEdge.Right
-                    ? charInfo.layoutBottomRight.x
-                    : charInfo.layoutTopLeft.x,
-                lineInfo.position.y
-            );
-        }
-
-        public SelectionRange GetSelectionAtPoint(Vector2 point) {
-            if (charInfoList.Count == 0) return new SelectionRange(0, TextEdge.Left);
-            int charIndex = FindNearestCharacterIndex(point);
-            return new SelectionRange(charIndex, FindCursorEdge(charIndex, point));
+                return new Vector2(charInfo.layoutTopLeft.x, lineInfo.position.y);
+            }
         }
 
         private TextEdge FindCursorEdge(int charIndex, Vector2 point) {
@@ -855,25 +839,85 @@ namespace UIForia.Text {
             return closestIndex;
         }
 
-        public SelectionRange BeginSelection(Vector2 point) {
-            int selectIdx = FindNearestCharacterIndex(point);
-            TextEdge selectEdge = FindCursorEdge(selectIdx, point);
-            return new SelectionRange(selectIdx, selectEdge, selectIdx, selectEdge);
-        }
+        public SelectionRange2 SelectToPoint2(SelectionRange2 range, Vector2 point) {
+            SelectionRange2 selectEnd = GetSelectionAtPoint2(point);
 
-        public SelectionRange SelectToPoint(SelectionRange range, Vector2 point) {
-            int charIndex = FindNearestCharacterIndex(point);
-            return new SelectionRange(
-                charIndex,
-                FindCursorEdge(charIndex, point),
-                range.selectIndex,
-                range.selectEdge
-            );
+            if (selectEnd.cursorIndex > range.cursorIndex) {
+                int selectedIdx = selectEnd.cursorIndex;
+
+                if (selectedIdx >= CharCount - 1) {
+                    Debug.Log("Char Count");
+                    if (selectEnd.cursorEdge == TextEdge.Right) {
+                        return new SelectionRange2(
+                            range.cursorIndex,
+                            range.cursorEdge,
+                            CharCount - range.cursorIndex
+                        );
+                    }
+                    else {
+                        return new SelectionRange2(
+                            range.cursorIndex,
+                            range.cursorEdge,
+                            CharCount + 1 - range.cursorIndex
+                        );
+                    }
+                }
+                
+                if (selectedIdx >= CharCount || selectEnd.cursorEdge == TextEdge.Left) {
+                    selectedIdx--;
+                }
+
+                if (selectedIdx < CharCount - 1) {
+                    selectedIdx++;
+                }
+
+                if (selectedIdx >= CharCount) {
+                    return new SelectionRange2(
+                        range.cursorIndex,
+                        range.cursorEdge,
+                        (CharCount + 1) - range.cursorIndex
+                    );
+                }
+
+               // Debug.Log(GetSelectionString(new SelectionRange2(range.cursorIndex, range.cursorEdge, selectedIdx - range.cursorIndex)));
+                return new SelectionRange2(
+                    range.cursorIndex,
+                    range.cursorEdge,
+                    selectedIdx - range.cursorIndex
+                );
+               
+            }
+            else if (selectEnd.cursorIndex < range.cursorIndex) {
+                int selectedIdx = selectEnd.cursorIndex;
+                if (selectEnd.cursorEdge == TextEdge.Right) {
+                    selectedIdx++;
+                }
+
+                Debug.Log(GetSelectionString(new SelectionRange2(range.cursorIndex, range.cursorEdge, selectedIdx - range.cursorIndex)));
+                return new SelectionRange2(
+                    range.cursorIndex,
+                    range.cursorEdge,
+                    selectedIdx - range.cursorIndex
+                );
+            }
+
+            if (range.cursorEdge == selectEnd.cursorEdge) {
+                return new SelectionRange2(range.cursorIndex, range.cursorEdge);
+            }
+
+            if (selectEnd.cursorEdge == TextEdge.Left) {
+                Debug.Log("edge case " + GetSelectionString(new SelectionRange2(range.cursorIndex, range.cursorEdge, -1)));
+                return new SelectionRange2(range.cursorIndex, range.cursorEdge, -1);
+            }
+            else {
+                Debug.Log("edge case " + GetSelectionString(new SelectionRange2(range.cursorIndex, range.cursorEdge, 1)));
+                return new SelectionRange2(range.cursorIndex, range.cursorEdge, 1);
+            }
         }
 
         // todo -- verify this for multi line
         public RangeInt GetLineRange(SelectionRange selectionRange) {
-            if(lineInfoList.Count == 0) return new RangeInt();
+            if (lineInfoList.Count == 0) return new RangeInt();
             int start = 0;
             int end = 0;
             int min = Mathf.Min(selectionRange.cursorIndex, selectionRange.selectIndex);
@@ -897,8 +941,10 @@ namespace UIForia.Text {
                     end = i;
                     break;
                 }
+
                 i++;
             }
+
             // todo fix for multi line
             return new RangeInt(start, 1);
 //            return new RangeInt(start, 1 + (end - start));
@@ -908,8 +954,99 @@ namespace UIForia.Text {
             if (i < 0 || i >= lineInfoList.Count) {
                 return default;
             }
+
             LineInfo lineInfo = lineInfoList.Array[i];
             return new Rect(lineInfo.position.x, lineInfo.position.y, lineInfo.width, lineInfo.height);
+        }
+
+        public SelectionRange2 GetSelectionAtPoint2(Vector2 point) {
+            if (charInfoList.Count == 0) return new SelectionRange2(0, TextEdge.Left);
+            int charIndex = FindNearestCharacterIndex(point);
+            return new SelectionRange2(charIndex, FindCursorEdge(charIndex, point));
+        }
+
+        private bool IsFirstOnLine(int idx) {
+            int lineIndex = charInfoList.Array[idx].lineIndex;
+            int wordIndex = lineInfoList.Array[lineIndex].wordStart;
+            int startChar = wordInfoList.Array[wordIndex].startChar;
+            return idx == startChar;
+        }
+
+        private bool IsLastOnLine(int idx) {
+            int lineIndex = charInfoList.Array[idx].lineIndex;
+            int wordIndex = lineInfoList.Array[lineIndex].LastWordIndex;
+            int endChar = wordInfoList.Array[wordIndex].LastCharacterIndex;
+            return idx == endChar;
+        }
+
+        public Vector2 GetCursorPosition2(SelectionRange2 selectionRange) {
+            CharInfo charInfo = charInfoList.Array[selectionRange.cursorIndex];
+            LineInfo lineInfo = lineInfoList.Array[charInfo.lineIndex];
+
+            if (IsFirstOnLine(selectionRange.cursorIndex)) {
+                return new Vector2(selectionRange.cursorEdge == TextEdge.Right
+                        ? charInfo.layoutBottomRight.x
+                        : charInfo.layoutTopLeft.x,
+                    lineInfo.position.y
+                );
+            }
+            else if (IsLastOnLine(selectionRange.cursorIndex)) {
+                return new Vector2(selectionRange.cursorEdge == TextEdge.Right
+                        ? charInfo.layoutBottomRight.x
+                        : charInfo.layoutTopLeft.x,
+                    lineInfo.position.y
+                );
+            }
+            else {
+                if (selectionRange.cursorEdge == TextEdge.Left) {
+                    // use average of previous right and current left
+                    CharInfo prev = charInfoList.Array[selectionRange.cursorIndex - 1];
+                    float prevX = prev.layoutBottomRight.x;
+                    float x = charInfo.layoutTopLeft.x;
+                    float half = (prevX + x) * 0.5f;
+                    return new Vector2(half, lineInfo.position.y);
+                }
+                else {
+                    // use average of previous right and current left
+                    CharInfo next = charInfoList.Array[selectionRange.cursorIndex + 1];
+                    float nextX = next.layoutTopLeft.x;
+                    float x = charInfo.layoutBottomRight.x;
+                    float half = (nextX + x) * 0.5f;
+                    return new Vector2(half, lineInfo.position.y);
+                }
+            }
+        }
+
+        public string GetSelectionString(SelectionRange2 range) {
+            string retn = "Output: ( " + range.cursorEdge + " of " + (charInfoList[range.cursorIndex].character + " / " + range.selectionCount + ") -> ");
+            if (range.IsSelectionBackward) {
+                int start = range.cursorIndex + range.selectionCount;
+                if (range.cursorEdge == TextEdge.Left) {
+                    for (int i = start; i < range.cursorIndex; i++) {
+                        retn += charInfoList.Array[i].character;
+                    }
+                }
+                else {
+                    for (int i = start; i < range.cursorIndex + 1; i++) {
+                        retn += charInfoList.Array[i].character;
+                    }
+                }
+            }
+            else if (range.IsSelectionForward) {
+                int start = range.cursorIndex + range.selectionCount;
+                if (range.cursorEdge == TextEdge.Right) {
+                    for (int i = range.cursorIndex; i < range.cursorIndex + range.selectionCount; i++) {
+                        retn += charInfoList.Array[i].character;
+                    }
+                }
+                else {
+                    for (int i = range.cursorIndex; i < range.cursorIndex + range.selectionCount; i++) {
+                        retn += charInfoList.Array[i].character;
+                    }
+                }
+            }
+
+            return retn;
         }
 
     }

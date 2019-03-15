@@ -20,7 +20,7 @@ namespace UIForia.Text {
         public int lineIndex;
 
         public int VisibleCharCount => charCount - (charCount - spaceStart);
-        public int LastCharacterIndex => startChar + charCount;
+        public int LastCharacterIndex => startChar + charCount - 1;
 
     }
 

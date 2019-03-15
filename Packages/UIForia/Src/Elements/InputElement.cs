@@ -23,14 +23,14 @@ namespace UIForia.Elements {
         public float caretBlinkRate = 0.85f;
         private float blinkStartTime;
 
-        private SelectionRange selectionRange;
+        private SelectionRange2 selectionRange;
 
         private bool hasFocus;
         private bool selectAllOnFocus;
 
         public InputElement() {
             flags |= UIElementFlags.BuiltIn;
-            selectionRange = new SelectionRange(0, TextEdge.Left);
+            selectionRange = new SelectionRange2(0, TextEdge.Left);
         }
 
         public override void OnCreate() {
@@ -71,15 +71,15 @@ namespace UIForia.Elements {
                 // selectionRange = textInfo.SelectToPoint(selectionRange, mouse);
             }
             else {
-                selectionRange = textInfo.GetSelectionAtPoint(mouse);
+                selectionRange = textInfo.GetSelectionAtPoint2(mouse);
             }
         }
 
         [OnDragCreate]
         private TextSelectDragEvent CreateDragEvent(MouseInputEvent evt) {
             TextSelectDragEvent retn = new TextSelectDragEvent(this);
-            Vector2 mouse = evt.MousePosition - layoutResult.screenPosition - layoutResult.ContentRect.position;
-            selectionRange = textInfo.BeginSelection(mouse);
+            Vector2 mouse = evt.MouseDownPosition - layoutResult.screenPosition - layoutResult.ContentRect.position;
+            selectionRange = textInfo.GetSelectionAtPoint2(mouse);
             return retn;
         }
 
@@ -95,14 +95,14 @@ namespace UIForia.Elements {
                 ctx.BeginPath();
                 ctx.SetStroke(caretColor);
                 ctx.SetStrokeWidth(1f);
-                Vector2 p = textInfo.GetCursorPosition(selectionRange);
+                Vector2 p = textInfo.GetCursorPosition2(selectionRange);
                 ctx.MoveTo(layoutResult.ContentRect.min + p + new Vector2(0, 4f)); // todo remove + 4 on y
                 ctx.VerticalLineTo(layoutResult.ContentRect.y + p.y + style.TextFontSize);
                 ctx.Stroke();
             }
 
             if (selectionRange.HasSelection) {
-                RangeInt lineRange = textInfo.GetLineRange(selectionRange);
+                RangeInt lineRange = new RangeInt(0, 1); //textInfo.GetLineRange(selectionRange));textInfo.GetLineRange(selectionRange);
                 ctx.BeginPath();
                 ctx.SetFill(new Color(0.5f, 0, 0, 0.5f));
                 Rect contentRect = layoutResult.ContentRect;
@@ -118,8 +118,8 @@ namespace UIForia.Elements {
                 }
                 else {
                     Rect rect = textInfo.GetLineRect(lineRange.start);
-                    Vector2 cursorPosition = textInfo.GetCursorPosition(selectionRange);
-                    Vector2 selectPosition = textInfo.GetSelectionPosition(selectionRange);
+                    Vector2 cursorPosition = textInfo.GetCursorPosition2(selectionRange);
+                    Vector2 selectPosition = textInfo.GetSelectionPosition2(selectionRange);
                     float minX = Mathf.Min(cursorPosition.x, selectPosition.x);
                     float maxX = Mathf.Max(cursorPosition.x, selectPosition.x);
                     minX += contentRect.x;
@@ -155,11 +155,15 @@ namespace UIForia.Elements {
 
             public override void Update() {
                 Vector2 mouse = MousePosition - inputElement.layoutResult.screenPosition - inputElement.layoutResult.ContentRect.position;
-                inputElement.selectionRange = inputElement.textInfo.SelectToPoint(inputElement.selectionRange, mouse);
+                inputElement.selectionRange = inputElement.textInfo.SelectToPoint2(inputElement.selectionRange, mouse);
             }
 
             public override void OnComplete() {
-                Debug.Log("Finished: " + inputElement.selectionRange.cursorIndex + " -> " + inputElement.selectionRange.selectIndex);
+                Vector2 mouse = MousePosition - inputElement.layoutResult.screenPosition - inputElement.layoutResult.ContentRect.position;
+                inputElement.selectionRange = inputElement.textInfo.SelectToPoint2(inputElement.selectionRange, mouse);
+
+                Debug.Log(inputElement.textInfo.GetSelectionString(inputElement.selectionRange));
+                Debug.Log("Finished: " + inputElement.selectionRange.cursorIndex + " -> count: " + inputElement.selectionRange.selectionCount);
             }
             
             

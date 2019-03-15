@@ -1,4 +1,25 @@
+using UnityEngine;
+
 namespace UIForia.Text {
+
+    public struct SelectionRange2 {
+
+        public readonly int cursorIndex;
+        public readonly TextEdge cursorEdge;
+        public readonly int selectionCount;
+        
+        public SelectionRange2(int cursorIndex, TextEdge cursorEdge, int selectionCount = 0) {
+            this.cursorIndex = cursorIndex;
+            this.cursorEdge = cursorEdge;
+            this.selectionCount = selectionCount;
+        }
+
+        public bool IsSelectionForward => selectionCount > 0;
+        public bool IsSelectionBackward => selectionCount < 0;
+        
+        public bool HasSelection => selectionCount != 0;
+
+    }
 
     public struct SelectionRange {
 
@@ -6,7 +27,7 @@ namespace UIForia.Text {
         public readonly int selectIndex;
         public readonly TextEdge cursorEdge;
         public readonly TextEdge selectEdge;
-
+        
         public SelectionRange(int cursorIndex, TextEdge cursorEdge, int selectIndex = -1, TextEdge selectEdge = TextEdge.Left) {
             this.cursorIndex = cursorIndex;
             this.cursorEdge = cursorEdge;
@@ -14,7 +35,32 @@ namespace UIForia.Text {
             this.selectEdge = selectEdge;
         }
 
-        public bool HasSelection => selectIndex != -1 && (selectIndex != cursorIndex || selectEdge != cursorEdge);
+        // cursorIndex
+        // cursor is always before
+        // if cursor index == length
+        // cursor position = last char left
+        // if cursor index is last on line, take right edge
+        
+        public bool HasSelection {
+            get {
+                if (selectIndex == -1) return false;
+
+                if (selectIndex == cursorIndex + 1) {
+                    // selected is larger, should be sure not to select if edges are not the same
+                    return selectEdge == TextEdge.Right && cursorEdge == TextEdge.Left;
+                }
+
+                if (cursorIndex == selectIndex + 1) {
+                    return selectEdge == TextEdge.Left && cursorEdge == TextEdge.Right;
+                }
+                
+                if (selectIndex == cursorIndex) {
+                    return selectEdge != cursorEdge;
+                }
+
+                return true;
+            }
+        }
 
         public override bool Equals(object obj) {
             if (ReferenceEquals(null, obj)) return false;

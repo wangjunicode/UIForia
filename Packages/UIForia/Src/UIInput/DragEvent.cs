@@ -44,6 +44,8 @@ namespace UIForia.UIInput {
 
         public virtual void Cancel() { }
 
+        public virtual void OnComplete() { }
+
     }
 
     public class CallbackDragEvent : DragEvent {

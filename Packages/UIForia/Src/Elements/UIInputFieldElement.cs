@@ -2,7 +2,9 @@ using System;
 using UIForia.Attributes;
 using UIForia.Bindings;
 using UIForia.Rendering;
+using UIForia.Text;
 using UIForia.UIInput;
+
 using UnityEngine;
 
 namespace UIForia.Elements {
@@ -20,8 +22,8 @@ namespace UIForia.Elements {
         private UIContainerElement highlight;
         private UITextElement textElement;
         private UISlotElement placeholderElement;
-        private UITextElement.SelectionRange selectionRange = new UITextElement.SelectionRange(0, UITextElement.TextEdge.Right);
-        private UITextElement.SelectionRange previousSelectionRange = new UITextElement.SelectionRange(0, UITextElement.TextEdge.Right);
+        private SelectionRange selectionRange = new SelectionRange(0, TextEdge.Right);
+        private SelectionRange previousSelectionRange = new SelectionRange(0, TextEdge.Right);
 
         private float blinkStartTime;
         private bool hasFocus;
@@ -79,7 +81,7 @@ namespace UIForia.Elements {
             float blinkPeriod = 1f / caretBlinkRate;
             bool blinkState = (Time.unscaledTime - blinkStartTime) % blinkPeriod < blinkPeriod / 2;
             if (canSetCaret) {
-                caret.style.SetTransformPositionX(layoutResult.contentRect.x + textElement.GetCursorPosition(selectionRange).x, StyleState.Normal);
+                caret.style.SetTransformPositionX(layoutResult.ContentRect.x + textElement.GetCursorPosition(selectionRange).x, StyleState.Normal);
                 caret.style.SetTransformPositionY(textElement.layoutResult.localPosition.y, StyleState.Normal);
 //            caret.style.SetTransformPositionX(layoutResult.contentRect.x + textElement.GetCursorPosition(selectionRange).x, StyleState.Normal);
 //            caret.style.SetTransformPositionY(textElement.layoutResult.localPosition.y, StyleState.Normal);
@@ -133,7 +135,7 @@ namespace UIForia.Elements {
 
             evt.StopPropagation();
 
-            Vector2 mouse = evt.MousePosition - layoutResult.screenPosition - layoutResult.contentRect.position;
+            Vector2 mouse = evt.MousePosition - layoutResult.screenPosition - layoutResult.ContentRect.position;
 
             if (evt.IsDoubleClick) {
                 selectionRange = textElement.SelectWordAtPoint(mouse);
@@ -230,13 +232,13 @@ namespace UIForia.Elements {
         public TextSelectDragEvent CreateDragEvent(MouseInputEvent evt) {
             TextSelectDragEvent retn = new TextSelectDragEvent(this);
             retn.onUpdate += HandleDragUpdate;
-            Vector2 mouse = evt.MousePosition - layoutResult.screenPosition - layoutResult.contentRect.position;
+            Vector2 mouse = evt.MousePosition - layoutResult.screenPosition - layoutResult.ContentRect.position;
             selectionRange = textElement.BeginSelection(mouse);
             return retn;
         }
 
         private void HandleDragUpdate(DragEvent obj) {
-            Vector2 mouse = obj.MousePosition - layoutResult.screenPosition - layoutResult.contentRect.position;
+            Vector2 mouse = obj.MousePosition - layoutResult.screenPosition - layoutResult.ContentRect.position;
             selectionRange = textElement.SelectToPoint(selectionRange, mouse);
         }
 

@@ -357,7 +357,7 @@ namespace SVGX {
                         case DrawCallType.StandardStroke: {
                             for (int k = call.shapeRange.start; k < call.shapeRange.end; k++) {
                                 int z = ushort.MaxValue - k;
-                                TextInfo textInfo = null;
+                                TextInfo2 textInfo = null;
                                 if (ctx.shapes[k].type == SVGXShapeType.Text) {
                                     textInfo = ctx.textInfos[ctx.shapes[k].textInfoId];
                                 }
@@ -370,7 +370,7 @@ namespace SVGX {
                         case DrawCallType.StandardFill: {
                             for (int k = call.shapeRange.start; k < call.shapeRange.end; k++) {
                                 int z = ushort.MaxValue - k;
-                                TextInfo textInfo = null;
+                                TextInfo2 textInfo = null;
                                 if (ctx.shapes[k].type == SVGXShapeType.Text) {
                                     textInfo = ctx.textInfos[ctx.shapes[k].textInfoId];
                                 }
@@ -384,7 +384,7 @@ namespace SVGX {
                         case DrawCallType.Shadow:
                             for (int k = call.shapeRange.start; k < call.shapeRange.end; k++) {
                                 int z = ushort.MaxValue - k;
-                                TextInfo textInfo = null;
+                                TextInfo2 textInfo = null;
 
                                 if (ctx.shapes[k].type == SVGXShapeType.Text) {
                                     textInfo = ctx.textInfos[ctx.shapes[k].textInfoId];
@@ -449,71 +449,71 @@ namespace SVGX {
             }
         }
 
-        private void DrawBatchedOpaques(Vector2[] points, LightList<SVGXRenderShape> renderShapes, Rect scissorRect, LightList<SVGXStyle> styles, LightList<SVGXMatrix> matrices) {
-            GroupByTexture(styles, renderShapes, texturedShapeGroups);
-            TexturedShapeGroup[] array = texturedShapeGroups.Array;
-
-            Material material = null;
-            Matrix4x4 originMatrix = OriginMatrix;
-            int lastFontId = -1;
-
-            for (int i = 0; i < texturedShapeGroups.Count; i++) {
-                LightList<SVGXRenderShape> shapes = array[i].shapes;
-                BatchedVertexData batchedVertexData = vertexDataPool.GetAndQueueForRelease();
-
-                for (int j = 0; j < shapes.Count; j++) {
-                    SVGXGradient gradient = s_GradientMap.GetOrDefault(styles[shapes[j].styleId].fillGradientId);
-                    GradientData gradientData = default;
-
-                    if (gradient != null) {
-                        int gradientId = s_GradientRowMap.GetOrDefault(gradient);
-                        gradientData = new GradientData(gradientId, gradient);
-                    }
-
-                    if (shapes[j].shape.type == SVGXShapeType.Text) {
-                        TextInfo textInfo = shapes[j].textInfo;
-                        int currentFontId = textInfo.spanInfos[0].font.GetInstanceID();
-
-                        if (lastFontId != currentFontId) {
-                            if (lastFontId != -1 && j != 0) {
-                                material = batchedTransparentPool.GetAndQueueForRelease();
-                                material.SetTexture(s_MainTexKey, textureMap.GetOrDefault(array[i].textureId));
-                                DrawMesh(batchedVertexData.FillMesh(), originMatrix, material);
-                                batchedVertexData = vertexDataPool.GetAndQueueForRelease();
-                            }
-
-                            Material fontMaterial = textInfo.spanInfos[0].font.material;
-
-                            Shader.SetGlobalTexture(s_GlobalFontTextureKey, textInfo.spanInfos[0].font.atlas);
-
-                            Shader.SetGlobalVector(s_GlobalFontData1Key, new Vector4(
-                                fontMaterial.GetFloat(ShaderUtilities.ID_WeightNormal),
-                                fontMaterial.GetFloat(ShaderUtilities.ID_WeightBold),
-                                textInfo.spanInfos[0].font.atlas.width,
-                                textInfo.spanInfos[0].font.atlas.height)
-                            );
-
-                            Shader.SetGlobalVector(s_GlobalFontData2Key, new Vector4(
-                                fontMaterial.GetFloat(ShaderUtilities.ID_GradientScale),
-                                fontMaterial.GetFloat(ShaderUtilities.ID_ScaleRatio_A),
-                                fontMaterial.GetFloat(ShaderUtilities.ID_ScaleRatio_B),
-                                fontMaterial.GetFloat(ShaderUtilities.ID_ScaleRatio_C))
-                            );
-                        }
-                    }
-
-                    batchedVertexData.CreateFillVertices(points, shapes[j], scissorRect, gradientData, styles[shapes[j].styleId], matrices[shapes[j].matrixId]);
-                }
-
-                material = batchedTransparentPool.GetAndQueueForRelease();
-                material.SetTexture(s_MainTexKey, textureMap.GetOrDefault(array[i].textureId));
-                DrawMesh(batchedVertexData.FillMesh(), originMatrix, material);
-
-                LightListPool<SVGXRenderShape>.Release(ref array[i].shapes);
-            }
-
-            texturedShapeGroups.Clear();
-        }
+//        private void DrawBatchedOpaques(Vector2[] points, LightList<SVGXRenderShape> renderShapes, Rect scissorRect, LightList<SVGXStyle> styles, LightList<SVGXMatrix> matrices) {
+//            GroupByTexture(styles, renderShapes, texturedShapeGroups);
+//            TexturedShapeGroup[] array = texturedShapeGroups.Array;
+//
+//            Material material = null;
+//            Matrix4x4 originMatrix = OriginMatrix;
+//            int lastFontId = -1;
+//
+//            for (int i = 0; i < texturedShapeGroups.Count; i++) {
+//                LightList<SVGXRenderShape> shapes = array[i].shapes;
+//                BatchedVertexData batchedVertexData = vertexDataPool.GetAndQueueForRelease();
+//
+//                for (int j = 0; j < shapes.Count; j++) {
+//                    SVGXGradient gradient = s_GradientMap.GetOrDefault(styles[shapes[j].styleId].fillGradientId);
+//                    GradientData gradientData = default;
+//
+//                    if (gradient != null) {
+//                        int gradientId = s_GradientRowMap.GetOrDefault(gradient);
+//                        gradientData = new GradientData(gradientId, gradient);
+//                    }
+//
+//                    if (shapes[j].shape.type == SVGXShapeType.Text) {
+//                        TextInfo2 textInfo = shapes[j].textInfo;
+//                        int currentFontId = textInfo.spanInfos[0].font.GetInstanceID();
+//
+//                        if (lastFontId != currentFontId) {
+//                            if (lastFontId != -1 && j != 0) {
+//                                material = batchedTransparentPool.GetAndQueueForRelease();
+//                                material.SetTexture(s_MainTexKey, textureMap.GetOrDefault(array[i].textureId));
+//                                DrawMesh(batchedVertexData.FillMesh(), originMatrix, material);
+//                                batchedVertexData = vertexDataPool.GetAndQueueForRelease();
+//                            }
+//
+//                            Material fontMaterial = textInfo.spanInfos[0].font.material;
+//
+//                            Shader.SetGlobalTexture(s_GlobalFontTextureKey, textInfo.spanInfos[0].font.atlas);
+//
+//                            Shader.SetGlobalVector(s_GlobalFontData1Key, new Vector4(
+//                                fontMaterial.GetFloat(ShaderUtilities.ID_WeightNormal),
+//                                fontMaterial.GetFloat(ShaderUtilities.ID_WeightBold),
+//                                textInfo.spanInfos[0].font.atlas.width,
+//                                textInfo.spanInfos[0].font.atlas.height)
+//                            );
+//
+//                            Shader.SetGlobalVector(s_GlobalFontData2Key, new Vector4(
+//                                fontMaterial.GetFloat(ShaderUtilities.ID_GradientScale),
+//                                fontMaterial.GetFloat(ShaderUtilities.ID_ScaleRatio_A),
+//                                fontMaterial.GetFloat(ShaderUtilities.ID_ScaleRatio_B),
+//                                fontMaterial.GetFloat(ShaderUtilities.ID_ScaleRatio_C))
+//                            );
+//                        }
+//                    }
+//
+//                    batchedVertexData.CreateFillVertices(points, shapes[j], scissorRect, gradientData, styles[shapes[j].styleId], matrices[shapes[j].matrixId]);
+//                }
+//
+//                material = batchedTransparentPool.GetAndQueueForRelease();
+//                material.SetTexture(s_MainTexKey, textureMap.GetOrDefault(array[i].textureId));
+//                DrawMesh(batchedVertexData.FillMesh(), originMatrix, material);
+//
+//                LightListPool<SVGXRenderShape>.Release(ref array[i].shapes);
+//            }
+//
+//            texturedShapeGroups.Clear();
+//        }
 
         private void DrawBatchedTransparents(Vector2[] points, LightList<SVGXRenderShape> renderShapes, LightList<Rect> scissors, LightList<SVGXStyle> styles, LightList<SVGXMatrix> matrices) {
             BatchedVertexData batchedVertexData = vertexDataPool.GetAndQueueForRelease();
@@ -542,7 +542,7 @@ namespace SVGX {
 
             for (int i = 0; i < count; i++) {
                 SVGXRenderShape renderShape = renderShapeArray[i];
-                TextInfo textInfo = renderShape.textInfo;
+                TextInfo2 textInfo = renderShape.textInfo;
                 int currentTextureId = styles[renderShape.styleId].fillTextureId;
 
                 bool fontChanged = false;
@@ -552,7 +552,7 @@ namespace SVGX {
                 if (renderShape.shape.type == SVGXShapeType.Text) {
                     // if we have a current font and stuff to render with it, draw it
                     // set current font to this text element's font
-                    fontChanged = fontMaterial != textInfo.spanInfos[0].font.material;
+                    fontChanged = fontMaterial != textInfo.spanList[0].textStyle.font.material;
                 }
 
                 if (fontChanged || textureChanged) {
@@ -565,7 +565,7 @@ namespace SVGX {
                     lastTextureId = currentTextureId;
 
                     if (fontChanged) {
-                        fontMaterial = textInfo.spanInfos[0].font.material;
+                        fontMaterial = textInfo.spanList[0].textStyle.font.material;
                     }
                 }
 

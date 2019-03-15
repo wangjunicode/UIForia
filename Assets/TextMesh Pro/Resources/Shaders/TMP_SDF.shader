@@ -223,8 +223,8 @@ SubShader {
 		}
 
 
-		fixed4 PixShader(pixel_t input) : SV_Target
-		{
+		fixed4 PixShader(pixel_t input) : SV_Target		{
+		    
 			float c = tex2D(_MainTex, input.atlas).a;
 		
 		#ifndef UNDERLAY_ON
@@ -293,7 +293,7 @@ SubShader {
 			clip(faceColor.a - 0.001);
 		#endif
 
-  		return faceColor * input.color.a;
+  		    return faceColor * input.color.a;
 		}
 
 		ENDCG

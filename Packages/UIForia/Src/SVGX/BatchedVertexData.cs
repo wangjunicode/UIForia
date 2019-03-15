@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using Packages.UIForia.Src.VectorGraphics;
+using TMPro;
 using UIForia.Extensions;
 using UIForia.Layout;
 using UIForia.Rendering;
@@ -474,20 +475,19 @@ namespace SVGX {
                     Vector2 p0 = matrix.Transform(points[start]);
                     renderData = BitUtil.SetHighLowBits((int) renderShape.shape.type, RenderTypeText);
 
-                    TextInfo textInfo = renderShape.textInfo;
+                    TextInfo2 textInfo = renderShape.textInfo;
 
-                    CharInfo[] charInfos = textInfo.charInfos;
-                    int charCount = textInfo.charCount;
+                    if (textInfo.LayoutDirty) {
+                        textInfo.Layout(Vector2.zero);
+                    }
+                    
+                    CharInfo[] charInfos = textInfo.charInfoList.Array;
+                    int charCount = textInfo.CharCount;
 
-                    SVGXTextStyle textStyle = textInfo.spanInfos[0].textStyle;
+                    SVGXTextStyle textStyle = textInfo.spanList[0].textStyle;
 
                     float outlineWidth = Mathf.Clamp01(textStyle.outlineWidth);
                     float outlineSoftness = textStyle.outlineSoftness;
-
-                    Color32 underlayColor = Color.white;
-                    float underlayOffsetX = 0;
-                    float underlayOffsetY = 0;
-                    float underlayDilate = 0;
 
                     Color32 glowColor = Color.green;
                     float glowOuter = textStyle.glowOuter;
@@ -499,14 +499,8 @@ namespace SVGX {
 
                     Vector4 outline = new Vector4(outlineWidth, outlineSoftness, 0, 0);
 
-                    Color textColor = textStyle.color;
+                    Color textColor = style.fillColor;
                     Color outlineColor = textStyle.outlineColor;
-
-                    float totalWidth = 0f;
-
-                    for (int i = 0; i < textInfo.lineCount; i++) {
-                        totalWidth = Mathf.Max(totalWidth, textInfo.lineInfos[i].width);
-                    }
 
                     // todo -- clip smarter using layout lines
                     for (int i = 0; i < charCount; i++) {

@@ -201,10 +201,20 @@ namespace UIForia.Util {
         }
 
         public void ShiftRight(int startIndex, int count) {
+            if (count <= 0) return;
+            if (startIndex < 0) startIndex = 0;
             EnsureCapacity(startIndex + count + count);
             System.Array.Copy(array, startIndex, array, startIndex + count, count);
             System.Array.Clear(array, startIndex, count);
             size += count;
+        }
+        
+        public void ShiftLeft(int startIndex, int count) {
+            if (count <= 0) return;
+            if (startIndex < 0) startIndex = 0; 
+            System.Array.Copy(array, startIndex, array, startIndex - count, size - startIndex);
+            System.Array.Clear(array, size - count, count);
+            size -= count;
         }
 
         public T RemoveLast() {

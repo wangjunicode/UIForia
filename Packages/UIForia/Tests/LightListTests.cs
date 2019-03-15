@@ -102,4 +102,46 @@ public class LightListTests {
         Assert.AreEqual(4, ints[7]);
         Assert.AreEqual(5, ints[8]);
     }
+    
+    [Test]
+    public void ShiftLeft3() {
+        LightList<int> ints = new LightList<int>();
+        ints.Add(0);
+        ints.Add(1);
+        ints.Add(2);
+        ints.Add(3);
+        ints.Add(4);
+        ints.Add(5);
+        ints.ShiftLeft(3, 3);
+        Assert.AreEqual(3, ints.Count);
+        Assert.AreEqual(3, ints[0]);
+        Assert.AreEqual(4, ints[1]);
+        Assert.AreEqual(5, ints[2]);
+        Assert.AreEqual(0, ints[3]);
+        Assert.AreEqual(0, ints[4]);
+        Assert.AreEqual(0, ints[5]);
+    }
+    
+    [Test]
+    public void ShiftLeft2() {
+        LightList<int> ints = new LightList<int>();
+        ints.Add(0);
+        ints.Add(1);
+        ints.Add(2);
+        ints.Add(3);
+        ints.Add(4);
+        ints.Add(5);
+        ints.Add(6);
+        ints.Add(7);
+        
+        ints.ShiftLeft(3, 2);
+        Assert.AreEqual(6, ints.Count);
+        
+        Assert.AreEqual(0, ints[0]);
+        Assert.AreEqual(3, ints[1]);
+        Assert.AreEqual(4, ints[2]);
+        Assert.AreEqual(5, ints[3]);
+        Assert.AreEqual(6, ints[4]);
+        Assert.AreEqual(7, ints[5]);
+    }
 }

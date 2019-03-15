@@ -1,3 +1,4 @@
+using UIForia.Layout;
 using UnityEngine;
 
 namespace UIForia.Text {
@@ -12,6 +13,31 @@ namespace UIForia.Text {
 
         public float MaxY => position.y + height;
 
+        public LineInfo(int wordStart, Vector2 position, float height) {
+            this.width = 0;
+            this.height = height;
+            this.wordCount = 0;
+            this.wordStart = wordStart;
+            this.position = position;
+        }
+        
+        public LineInfo(RangeInt wordRange, Vector2 position, float height) {
+            this.width = 0;
+            this.height = height;
+            this.wordCount = 0;
+            this.wordStart = wordRange.start;
+            this.wordCount = wordRange.length;
+            this.position = position;
+        }
+        
+        public LineInfo(RangeInt wordRange, Vector2 position, Size size) {
+            this.width = size.width;
+            this.height = size.height;
+            this.wordCount = 0;
+            this.wordStart = wordRange.start;
+            this.wordCount = wordRange.length;
+            this.position = position;
+        }
     }
 
 

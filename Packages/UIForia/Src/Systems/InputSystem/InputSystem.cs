@@ -333,6 +333,7 @@ namespace UIForia.Stystems.InputSystem {
                 m_CurrentDragEvent.Drop(true);
             }
 
+            m_CurrentDragEvent.OnComplete();
             m_CurrentDragEvent = null;
         }
 

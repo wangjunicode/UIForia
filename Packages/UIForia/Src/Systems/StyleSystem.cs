@@ -9,11 +9,28 @@ using UnityEngine;
 
 namespace UIForia.Systems {
 
+    public interface IStylePropertiesWillChangeHandler {
+
+        void OnStylePropertiesWillChange();
+
+    }
+    
+    public interface IStylePropertiesDidChangeHandler {
+
+        void OnStylePropertiesDidChange();
+
+    }
+    
+    public interface IStyleChangeHandler {
+
+        void OnStylePropertyChanged(in StyleProperty property);
+
+    }
+    
     public class StyleSystem : IStyleSystem {
 
         protected readonly StyleAnimator animator;
 
-        public event Action<UIElement, string> onTextContentChanged;
         public event Action<UIElement, LightList<StyleProperty>> onStylePropertyChanged;
 
         private static readonly Stack<UIElement> s_ElementStack = new Stack<UIElement>();
@@ -38,9 +55,6 @@ namespace UIForia.Systems {
         }
 
         public void OnElementCreated(UIElement element) {
-            if ((element.flags & UIElementFlags.TextElement) != 0) {
-                ((UITextElement) element).onTextChanged += HandleTextChanged;
-            }
 
             UIStyleGroupContainer[] baseStyles = element.OriginTemplate.baseStyles;
 
@@ -49,16 +63,11 @@ namespace UIForia.Systems {
             element.style.Initialize(baseStyles);
 
             if (element.children != null) {
-                for (int i = 0; i < element.children.Count; i++) {
+                for (int i = 0; i < element.children.Count; i++) { 
                     OnElementCreated(element.children[i]);
                 }
             }
-
             // todo need to trickle inherited properties into newly created elements (repeat children, etc)
-            //    for (int i = 0; i < StyleUtil.InheritedProperties.Count; i++) {
-            // if ! element.style.Defines(properties[i])
-            // 
-            //  }
         }
 
         public void OnUpdate() {
@@ -69,11 +78,27 @@ namespace UIForia.Systems {
             }
 
             m_ChangeSets.ForEach(this, (id, changeSet, self) => {
+
+                if (changeSet.element is IStylePropertiesWillChangeHandler willChangeHandler) {
+                    willChangeHandler.OnStylePropertiesWillChange();
+                }
                 
                 if (changeSet.element.isEnabled) {
                     self.onStylePropertyChanged.Invoke(changeSet.element, changeSet.changes);
                 }
 
+                if (changeSet.element is IStyleChangeHandler changeHandler) {
+                    StyleProperty[] properties = changeSet.changes.Array;
+                    int count = changeSet.changes.Count;
+                    for (int i = 0; i < count; i++) {
+                        changeHandler.OnStylePropertyChanged(properties[i]);
+                    }
+                }
+
+                if (changeSet.element is IStylePropertiesDidChangeHandler didChangeHandler) {
+                    didChangeHandler.OnStylePropertiesDidChange();
+                }
+                
                 LightListPool<StyleProperty>.Release(ref changeSet.changes);
                 changeSet.element = null;
             });
@@ -162,10 +187,6 @@ namespace UIForia.Systems {
                     s_ElementStack.Push(descendent.children[i]);
                 }
             }
-        }
-
-        private void HandleTextChanged(UITextElement element, string text) {
-            onTextContentChanged?.Invoke(element, text);
         }
 
         private struct ChangeSet {

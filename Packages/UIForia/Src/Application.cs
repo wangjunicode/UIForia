@@ -4,6 +4,7 @@ using UIForia.AttributeProcessors;
 using UIForia.Bindings;
 using UIForia.Compilers.Style;
 using UIForia.Elements;
+using UIForia.Elements.Painters;
 using UIForia.Extensions;
 using UIForia.Parsing.Expression;
 using UIForia.Rendering;
@@ -71,6 +72,7 @@ namespace UIForia {
             s_AttributeProcessors = new List<IAttributeProcessor>();
             s_ApplicationList = new LightList<Application>();
             s_CustomPainters = new Dictionary<string, ISVGXElementPainter>();
+            s_CustomPainters.Add("UIForia.InputElement", new InputPainter());
             s_Scrollbars = new Dictionary<string, Scrollbar>();
             s_Scrollbars.Add("UIForia.Default", new DefaultScrollbar());
         }

@@ -16,13 +16,11 @@ namespace UIForia.Layout {
 
         public Size actualSize;
         public Size allocatedSize;
-        public Rect contentRect;
 
         public int zIndex;
         public Rect clipRect;
         public float rotation;
         public CullResult cullState;
-        public Vector4 clipVector;
         
         public OffsetRect border;
         public OffsetRect padding;
@@ -43,8 +41,8 @@ namespace UIForia.Layout {
         public float ActualWidth => actualSize.width;
         public float ActualHeight => actualSize.height;
 
-        public float ContentWidth => contentRect.width;
-        public float ContentHeight => contentRect.height;
+        public float ContentWidth => ContentRect.width;
+        public float ContentHeight => ContentRect.height;
         public Rect ContentRect { get; internal set; }
         
 //        public bool SizeChanged => (flags & LayoutResultFlags.SizeChanged) != 0;

@@ -21,12 +21,6 @@ namespace SVGX {
         [Range(0, 360f)] public float rotation;
         public float dot;
 
-        public void Start() {
-            ctx = new ImmediateRenderContext();
-            gfx = new GFX(camera);
-            gfx2 = new GFX2(camera);
-            ctx2 = gfx2.CreateContext();
-        }
 
         public Texture2D texture;
 
@@ -70,118 +64,55 @@ namespace SVGX {
         public bool enableScissor = true;
 
         public Vector2 offset;
-        
+
+        [Range(1, 128)] public int fontSize;
+        private TextInfo2 textInfo;
+
+        public void Start() {
+            ctx = new ImmediateRenderContext();
+            gfx = new GFX(camera);
+            gfx2 = new GFX2(camera);
+            ctx2 = gfx2.CreateContext();
+            textInfo = new TextInfo2(new TextSpan("Hello World"));
+        }
+
         public void Update() {
             camera.orthographic = true;
             camera.orthographicSize = Screen.height * 0.5f;
 
             ctx.Clear();
-            
+
             if (enableScissor) {
                 ctx.EnableScissorRect(new Rect(100, 100, 300, 300));
             }
 
+            ctx.SetFill(Color.green);
+            ctx.RoundedRect(new Rect(100, 100, 300, 100), 200, 200, 200, 200);
+            ctx.Fill();
+            ctx.BeginPath();
+            ctx.SetFill(Color.green);
+            ctx.RoundedRect(new Rect(100, 200, 300, 100), 20, 20, 20, 20);
+            ctx.Fill();
             
-            ctx.SetStrokeWidth(3f);
-            ctx.SetStroke(new Color32(0, 181, 217, 255));
-            ctx.RoundedRect(new Rect(offset.x + 100, offset.y + 100, 300, 100), 40, 40, 40, 40);
-            ctx.Stroke();
+//            ctx.Rect(new Rect(200, 200, 200, 200));
+//            ctx.Rect(new Rect(200, 400, 200, 200));
+            ctx.Fill();
             
-      
-//            ctx.SetFill(Color.red);
-//            ctx.FillRect(400, 400, 100, 100);
+            textInfo.SetSpanStyle(0, new SVGXTextStyle() {
+                fontSize = fontSize
+            });
+
+//            textInfo.Layout();
 //
-//            ctx.SetFill(texture);
-//            ctx.FillRect(50 + offset.x, 250 + offset.y, 400, 300);
-//            
-//            ctx.SetFill(Color.blue);
-//            ctx.FillRect(150, 150, 100, 100);
-            SVGXTextStyle style = new SVGXTextStyle();
-            style.fontSize = 24;
-            style.color = Color.black;
-            TextInfo tf = TextUtil.CreateTextInfo(new TextUtil.TextSpan(TMP_FontAsset.defaultFontAsset, style, "Hello World"));
-            List<LineInfo> lineInfos = TextUtil.Layout(tf, float.MaxValue);
-            tf.lineInfos = ArrayPool<LineInfo>.CopyFromList(lineInfos);
-            tf.lineCount = lineInfos.Count;
-            TextUtil.ApplyLineAndWordOffsets(tf);
-            
-//            ctx.Text(100 + offset.x, 100 + offset.y, tf);
+//            ctx.Text(100 + offset.x, 100 + offset.y, textInfo);
 //            ctx.SetFill(Color.black);
 //            ctx.Fill();
-            
-            ctx.BeginPath();
-            ctx.MoveTo(offset.x, offset.y);
-            ctx.LineTo(500, 500);
-            ctx.SetStroke(Color.yellow);
-            ctx.SetStrokeWidth(3f);
-            ctx.Stroke();
-            
+//
+//            ctx.SetFill(new Color(0, 255, 0, 255));
+//            ctx.FillRect(100, 100, 200, 200);
+//            ctx.SetFill(new Color32(255, 0, 0, 100));
+//            ctx.FillRect(150, 150, 200, 200);
             gfx.Render(ctx);
-//            CTX = ctx;
-//            ctx.Clear();
-//            ctx2.Clear();
-//            ctx.SetStroke(Color.red);
-//            float sWidth = 1f;
-//            ctx.SetStrokeWidth(sWidth);
-//
-//            Vector2 p0 = new Vector2(500, 100);
-////            Vector2 p0 = new Vector2(450, 450);
-//            Vector2 p1 = new Vector2(100, 300);
-////            Vector2 p1 = new Vector2(600, 600);
-//            p1 = p1.Rotate(p0, rotation);
-//            Vector2 p2 = new Vector2(400, 500);
-////            Vector2 p2 = new Vector2(700, 700);
-//            Vector2 p3 = new Vector2(500,400);
-//
-//            ctx.MoveTo(p0);
-//            ctx.LineTo(p1);
-//            ctx.LineTo(p2);
-//
-////            ctx.Stroke();
-//
-//            ctx.BeginPath();
-//            Vector2 toCurr = (p1 - p0).normalized;
-//            Vector2 toNext = (p2 - p1).normalized;
-//            Vector2 toCurrPerp = new Vector2(-toCurr.y, toCurr.x);
-//            Vector2 toNextPerp = new Vector2(-toNext.y, toNext.x);
-//
-//            Vector2 miter = (toCurrPerp + toNextPerp).normalized;
-////
-////            ctx.MoveTo(p1);
-////            ctx.LineTo(p1 + (miter * 100f));
-////            ctx.MoveTo(p1);
-////            ctx.LineTo(p1 - (miter * 100f));
-////
-////            ctx.Stroke();
-////            
-////            ctx.CircleFromCenter(v0.x, v0.y, 5f);
-////            ctx.CircleFromCenter(v1.x, v1.y, 5f);
-////            ctx.CircleFromCenter(v2.x, v2.y, 5f);
-////            ctx.CircleFromCenter(v3.x, v3.y, 5f);
-////            ctx.Stroke();
-////            
-////            ctx.BeginPath();
-////            
-//////            ctx.MoveTo(lineStart - (toEnd * 10f));
-////            ctx.LineTo((p0 - (toNext * 100f)  + (toNextPerp * (sWidth))));
-////            ctx.Stroke();
-////            
-////            ctx.SetStroke(Color.yellow);
-////            ctx.BeginPath();
-////            ctx.MoveTo(p0);
-////            ctx.LineTo(p0 + (toNextPerp * (-sWidth)));
-////            ctx.LineTo((p0 - (toNext * 100f)  + (toNextPerp * (-sWidth))));
-////            ctx.Stroke();
-//
-//            ctx2.BeginPath();
-//            ctx2.MoveTo(p0);
-//            ctx2.LineTo(p1);
-//            ctx2.LineTo(p2);
-//            ctx2.LineTo(p3);
-//            ctx2.Stroke();
-//
-//            gfx2.Render();
-//            gfx.Render(ctx);
         }
 
     }

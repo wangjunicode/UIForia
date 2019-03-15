@@ -163,6 +163,11 @@ namespace UIForia.Compilers.Style {
 
         private static string MapPainter(PropertyNode property, StyleCompileContext context) {
             string customPainter = MapString(property.children[0], context);
+            
+            if (customPainter == "self" || customPainter == "none") {
+                return customPainter;
+            }
+            
             if (string.IsNullOrEmpty(customPainter) || !Application.HasCustomPainter(customPainter)) {
                 Debug.Log($"Could not find your custom painter {customPainter} in file {context.fileName}.");
             }

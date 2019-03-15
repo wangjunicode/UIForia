@@ -3,6 +3,7 @@ using UIForia.Elements;
 using UnityEngine;
 using Application = UIForia.Application;
 
+// the idea behind a view is that it is a flat plane that can be oriented in 3d space and show content
 public class UIView {
 
     public event Action<UIElement> onElementCreated;

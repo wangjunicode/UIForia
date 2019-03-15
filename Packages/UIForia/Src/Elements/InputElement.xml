@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="utf-8"?>
+<UITempalate>
+    
+    <Style>
+        
+        style input-element {
+            PreferredSize = 300px, 1cnt;
+            Border = 5px;
+            BorderColor = blue;
+            Margin = 20px;
+            TextFontSize = 48;
+        }
+        
+    </Style>
+    
+    <Contents style="input-element">
+
+        <InputElementText/>
+        <!--<Slot placeholder-visible="true" placeholder="">-->
+            <!--<Text>default placeholder</Text>-->
+        <!--</Slot>-->
+        
+    </Contents>
+    
+</UITempalate>
+

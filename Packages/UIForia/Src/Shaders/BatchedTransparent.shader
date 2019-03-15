@@ -10,6 +10,8 @@ Shader "UIForia/BatchedTransparent" {
         Cull Back 
         Lighting Off
 	    Fog { Mode Off }
+	    // todo -- read and apply this https://limnu.com/webgl-blending-youre-probably-wrong/
+	    // todo -- explore pre-multiplied alpha
         Blend SrcAlpha OneMinusSrcAlpha
         ZWrite On
         ColorMask RGBA
@@ -91,12 +93,12 @@ Shader "UIForia/BatchedTransparent" {
                float halfStrokeWidth = strokeWidth * 0.5;
                float2 halfShapeSize = (drawSurfaceSize * 0.5) - halfStrokeWidth;
                float2 center = i.uv.xy - 0.5;
-               
                float fDist = 0;
-               float4 widths = float4(20, 8, 8, 20);
-               if (shapeType == ShapeType_Rect || shapeType == ShapeType_RoundedRect) {
+               
+               // float4 widths = float4(20, 8, 8, 20); // border stuff
+               
+               if(shapeType == ShapeType_Rect || shapeType == ShapeType_RoundedRect) {
                    fDist = RectSDF(center * drawSurfaceSize, halfShapeSize, radius - halfStrokeWidth);
-                   
                }
                else if(shapeType == ShapeType_Circle) {
                    fDist = length(center * drawSurfaceSize) - halfShapeSize;
@@ -114,7 +116,17 @@ Shader "UIForia/BatchedTransparent" {
                    fDist = abs(fDist) - halfStrokeWidth;
                }
                else {
-                   toColor = fixed4(i.color.rgb, 0);//Clear;
+                   // HACK this fixes an issue with blend mode for rects which is our common case
+                   // issue still exists for other shapes. The problem is that SDF produces alpha along
+                   // the edge of shapes and if two shapes with the same color are placed against eachother
+                   // there is a line between them that has alpha and blends poorly, causing a one pixel border
+                   // that shouldn't be there
+                   if(shapeType == ShapeType_Rect) {
+                      toColor = fromColor;
+                   }
+                   else {
+                      toColor = fixed4(i.color.rgb, 0);//Clear;
+                   }
                }
                
                float fBlendAmount = smoothstep(-1, 1, fDist);
@@ -157,19 +169,27 @@ Shader "UIForia/BatchedTransparent" {
                    discard;
                }
                
+               //if(color.a > 0.7) color.a = 1;
+               
+               i.color.a *= color.a;
+               
+               return i.color;
+               
                float t = lerp(i.uv.x, 1 - i.uv.y, GradientDirection);
                float y = GetPixelInRowUV(GradientId, _globalGradientAtlasSize);
+               
                fixed4 textureColor = tex2Dlod(_MainTex, float4(i.uv.xy, 0, 0));
                fixed4 gradientColor = tex2Dlod(_globalGradientAtlas, float4(t, y, 0, 0));
-               fixed4 tintColor = lerp(White, color, i.fragData2.z);                
+               // fixed4 tintColor = lerp(fixed4(i.color.rgb, 0), i.color.rgba, i.fragData2.z);                
                
-               textureColor = lerp(color, textureColor, i.fragData2.x);
+               textureColor = lerp(color, textureColor, 0);//i.fragData2.x);
                gradientColor = lerp(White, gradientColor, i.fragData2.y);
-               tintColor = lerp(tintColor, gradientColor, i.fragData2.w);
+               // tintColor = lerp(tintColor, gradientColor, i.fragData2.w);
                
-               fixed4 tintedTextureColor = lerp(textureColor, textureColor * tintColor, tintColor.a);
+               // fixed4 tintedTextureColor = lerp(textureColor, textureColor * tintColor, tintColor.a);
            
-               color = lerp(tintedTextureColor, gradientColor, 0);
+               // todo -- fix blend artifacts by not tinting. be sure to use fixed4(input.rgb, 0) instead of clear or white
+               color = lerp(textureColor, gradientColor, 0);
         
                // todo -- see if we can drop the discard statement
                if(color.a - 0.001 <= 0) {

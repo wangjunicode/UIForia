@@ -24,10 +24,10 @@ namespace UIForia.Systems {
 
         }
 
-
         protected readonly IStyleSystem m_StyleSystem;
         protected readonly IntMap<LayoutBox> m_LayoutBoxMap;
         protected readonly LightList<LayoutBox> m_PendingInitialization;
+        protected readonly LightList<TextLayoutBox> m_TextLayoutBoxes;
 
         private Size m_ScreenSize;
         private readonly LightList<ViewRect> m_Views;
@@ -41,8 +41,8 @@ namespace UIForia.Systems {
             this.m_PendingInitialization = new LightList<LayoutBox>();
             this.m_Views = new LightList<ViewRect>();
             this.m_VisibleElementList = new LightList<UIElement>();
-            m_StyleSystem.onTextContentChanged += HandleTextContentChanged;
-            m_StyleSystem.onStylePropertyChanged += HandleStylePropertyChanged;
+            this.m_TextLayoutBoxes = new LightList<TextLayoutBox>(64);
+            this.m_StyleSystem.onStylePropertyChanged += HandleStylePropertyChanged;
         }
 
         public void OnReset() {
@@ -78,6 +78,13 @@ namespace UIForia.Systems {
             if (m_ScreenSize != screen) {
                 m_ScreenSize = screen;
                 forceLayout = true;
+            }
+
+            TextLayoutBox[] textLayouts = m_TextLayoutBoxes.Array;
+            for (int i = 0; i < m_TextLayoutBoxes.Count; i++) {
+                if (textLayouts[i].TextInfo.LayoutDirty) {
+                    textLayouts[i].RequestContentSizeChangeLayout();
+                }
             }
 
             for (int i = 0; i < m_Views.Count; i++) {
@@ -274,9 +281,10 @@ namespace UIForia.Systems {
                         }
                     }
 
+                    // todo -- can i get rid of clip vector here?
                     Rect screenRect = layoutResult.ScreenRect;
-                    float clipX = Mathf.Clamp01(MathUtil.PercentOfRange(clipRect.x, screenRect.xMin, screenRect.xMax));
-                    float clipY = Mathf.Clamp01(MathUtil.PercentOfRange(clipRect.y, screenRect.yMin, screenRect.yMax));
+//                    float clipX = Mathf.Clamp01(MathUtil.PercentOfRange(clipRect.x, screenRect.xMin, screenRect.xMax));
+//                    float clipY = Mathf.Clamp01(MathUtil.PercentOfRange(clipRect.y, screenRect.yMin, screenRect.yMax));
                     float clipW = Mathf.Clamp01(MathUtil.PercentOfRange(clipRect.xMax, screenRect.xMin, screenRect.xMax)) - clipWAdjustment;
                     float clipH = Mathf.Clamp01(MathUtil.PercentOfRange(clipRect.yMax, screenRect.yMin, screenRect.yMax)) - clipHAdjustment;
 
@@ -285,7 +293,7 @@ namespace UIForia.Systems {
                     }
 
                     layoutResult.cullState = cullResult;
-                    layoutResult.clipVector = new Vector4(clipX, clipY, clipW, clipH);
+//                    layoutResult.clipVector = new Vector4(clipX, clipY, clipW, clipH);
 
                     // todo actually use this
                     // if layout result size or position changed -> update the query grid
@@ -429,7 +437,7 @@ namespace UIForia.Systems {
                     float offsetY = (childExtents.min.y < 0) ? -childExtents.min.y / box.allocatedHeight : 0f;
                     element.scrollOffset = new Vector2(element.scrollOffset.x, offsetY);
 
-                    Size originalAllocatedSize =  new Size(box.allocatedWidth, box.allocatedHeight);
+                    Size originalAllocatedSize = new Size(box.allocatedWidth, box.allocatedHeight);
                     element.layoutResult.actualSize = new Size(box.actualWidth, box.actualHeight);
                     element.layoutResult.allocatedSize = new Size(box.allocatedWidth, box.allocatedHeight);
 
@@ -437,9 +445,9 @@ namespace UIForia.Systems {
 
                     // this is the push-content case
                     box.allocatedWidth -= (Mathf.Clamp(verticalScrollbarSize.width, 0, box.allocatedWidth));
-                    
+
                     box.RunLayout();
-                    
+
                     element.layoutResult.allocatedSize = originalAllocatedSize;
                     element.layoutResult.scrollbarVerticalSize = verticalScrollbarSize;
                 }
@@ -569,6 +577,10 @@ namespace UIForia.Systems {
                 return;
             }
 
+            if ((box.element.flags & UIElementFlags.TextElement) != 0) {
+                return;
+            }
+
             LayoutBox parent = box.parent;
             LayoutBox replace = box;
 
@@ -620,6 +632,7 @@ namespace UIForia.Systems {
             Stack<UIElement> elements = StackPool<UIElement>.Get();
             LightList<LayoutBox> boxes = LightListPool<LayoutBox>.Get();
 
+
             elements.Push(element);
             while (elements.Count != 0) {
                 UIElement current = elements.Pop();
@@ -627,6 +640,10 @@ namespace UIForia.Systems {
                 LayoutBox box = m_LayoutBoxMap.GetOrDefault(current.id);
 
                 if (box == null) continue;
+
+                if (box is TextLayoutBox textLayout) {
+                    m_TextLayoutBoxes.Add(textLayout);
+                }
 
                 box.markedForLayout = true;
 
@@ -662,6 +679,10 @@ namespace UIForia.Systems {
 
         public void OnElementDisabled(UIElement element) {
             LayoutBox child = m_LayoutBoxMap.GetOrDefault(element.id);
+            if (child is TextLayoutBox textLayout) {
+                m_TextLayoutBoxes.Remove(textLayout);
+            }
+
             if (child?.parent != null) {
                 child.parent.OnChildDisabled(child);
                 child.parent.RequestContentSizeChangeLayout();
@@ -670,6 +691,9 @@ namespace UIForia.Systems {
 
         public void OnElementDestroyed(UIElement element) {
             LayoutBox child = m_LayoutBoxMap.GetOrDefault(element.id);
+            if (child is TextLayoutBox textLayout) {
+                m_TextLayoutBoxes.Remove(textLayout);
+            }
 
             // todo destroy scroll bars
 
@@ -695,7 +719,9 @@ namespace UIForia.Systems {
         // todo pool boxes
         private LayoutBox CreateLayoutBox(UIElement element) {
             if ((element is UITextElement)) {
-                return new TextLayoutBox(element);
+                TextLayoutBox textLayout = new TextLayoutBox(element);
+                m_TextLayoutBoxes.Add(textLayout);
+                return textLayout;
             }
 
             if ((element is UIImageElement)) {

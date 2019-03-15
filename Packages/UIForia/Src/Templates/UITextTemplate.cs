@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using UIForia.Bindings;
 using UIForia.Elements;
 using UIForia.Expressions;
@@ -12,6 +13,8 @@ namespace UIForia.Templates {
 
         private static readonly TextElementParser textParser = new TextElementParser();
 
+        private string unquoted;
+        
         public UITextTemplate(Application app, Type textElementType, string rawText, List<AttributeDefinition> attributes = null)
             : base(app, null, attributes) {
             this.elementType = textElementType;
@@ -22,6 +25,8 @@ namespace UIForia.Templates {
             : base(app, null, attributes) {
             this.elementType = typeof(UITextElement);
             this.RawText = rawText;
+            this.unquoted = rawText.Substring(1, rawText.Length - 1);
+
         }
         
         protected override Type elementType { get; }
@@ -63,39 +68,44 @@ namespace UIForia.Templates {
 
             ListPool<Expression<string>>.Release(ref expressionList);
 
-            // todo -- might ask template root for the style for element and default to DefaultIntrinsicStyles if not provided
-
             base.Compile(template);
         }
 
         public override UIElement CreateScoped(TemplateScope inputScope) {
             UITextElement element = null;
-            if (elementType == typeof(UILabelElement)) { }
+            if (elementType == typeof(UILabelElement)) {
+                throw new NotImplementedException();
+            }
             else if (elementType == typeof(UIParagraphElement)) {
-                element = new UIParagraphElement();
+                element = new UIParagraphElement(RawText);
             }
             else if (elementType == typeof(UIHeading1Element)) {
-                element = new UIHeading1Element();
+                element = new UIHeading1Element(RawText);
             }
             else if (elementType == typeof(UIHeading2Element)) {
-                element = new UIHeading2Element();
+                element = new UIHeading2Element(RawText);
             }
             else if (elementType == typeof(UIHeading3Element)) {
-                element = new UIHeading3Element();
+                element = new UIHeading3Element(RawText);
             }
             else if (elementType == typeof(UIHeading4Element)) {
-                element = new UIHeading4Element();
+                element = new UIHeading4Element(RawText);
             }
             else if (elementType == typeof(UIHeading5Element)) {
-                element = new UIHeading5Element();
+                element = new UIHeading5Element(RawText);
             }
             else if (elementType == typeof(UIHeading6Element)) {
-                element = new UIHeading6Element();
+                element = new UIHeading6Element(RawText);
             }
             else if (elementType == typeof(UITextElement)) {
                 element = new UITextElement();
             }
+            else {
+                element = Activator.CreateInstance(elementType) as UITextElement;
+            }
 
+            Debug.Assert(element != null, nameof(element) + " != null");
+            
             element.templateContext = new ExpressionContext(inputScope.rootElement, element);
             element.children = LightListPool<UIElement>.Get();
             element.OriginTemplate = this;

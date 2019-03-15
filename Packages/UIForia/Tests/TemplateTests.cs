@@ -63,35 +63,35 @@ public class TemplateTests {
         Assert.AreEqual("hello world!", As<UITextElement>(element).GetText());
     }
 
-    [Test]
-    public void TextElement_EventOnChange() {
-        TestTarget target = new TestTarget();
-        ExpressionContext ctx = new ExpressionContext(target);
-        target.stringValue = "world";
-        UITextTemplate template = new UITextTemplate(null, "'hello {stringValue}!'");
-        template.Compile(dummyTemplate);
-        UIElement el = template.CreateScoped(new TemplateScope());
-        int callCount = 0;
-        As<UITextElement>(el).onTextChanged += (element, text) => callCount++;
-        template.perFrameBindings[0].Execute(el, ctx);
-        Assert.AreEqual(1, callCount);
-    }
-
-    [Test]
-    public void TextElement_NoEventWithoutChange() {
-        TestTarget target = new TestTarget();
-        ExpressionContext ctx = new ExpressionContext(target);
-
-        target.stringValue = "world";
-        UITextTemplate template = new UITextTemplate(null, "'hello {stringValue}!'");
-        template.Compile(dummyTemplate);
-        UIElement el = template.CreateScoped(new TemplateScope());
-        int callCount = 0;
-        As<UITextElement>(el).onTextChanged += (element, text) => callCount++;
-        template.perFrameBindings[0].Execute(el, ctx);
-        template.perFrameBindings[0].Execute(el, ctx);
-        Assert.AreEqual(1, callCount);
-    }
+//    [Test]
+//    public void TextElement_EventOnChange() {
+//        TestTarget target = new TestTarget();
+//        ExpressionContext ctx = new ExpressionContext(target);
+//        target.stringValue = "world";
+//        UITextTemplate template = new UITextTemplate(null, "'hello {stringValue}!'");
+//        template.Compile(dummyTemplate);
+//        UIElement el = template.CreateScoped(new TemplateScope());
+//        int callCount = 0;
+//        As<UITextElement>(el).onTextChanged += (element, text) => callCount++;
+//        template.perFrameBindings[0].Execute(el, ctx);
+//        Assert.AreEqual(1, callCount);
+//    }
+//
+//    [Test]
+//    public void TextElement_NoEventWithoutChange() {
+//        TestTarget target = new TestTarget();
+//        ExpressionContext ctx = new ExpressionContext(target);
+//
+//        target.stringValue = "world";
+//        UITextTemplate template = new UITextTemplate(null, "'hello {stringValue}!'");
+//        template.Compile(dummyTemplate);
+//        UIElement el = template.CreateScoped(new TemplateScope());
+//        int callCount = 0;
+//        As<UITextElement>(el).onTextChanged += (element, text) => callCount++;
+//        template.perFrameBindings[0].Execute(el, ctx);
+//        template.perFrameBindings[0].Execute(el, ctx);
+//        Assert.AreEqual(1, callCount);
+//    }
 
     [Template(TemplateType.String, @"
         <UITemplate>

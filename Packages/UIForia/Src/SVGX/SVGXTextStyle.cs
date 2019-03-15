@@ -1,5 +1,4 @@
 using TMPro;
-using UIForia.Rendering;
 using UIForia.Text;
 using UnityEngine;
 using FontStyle = UIForia.Text.FontStyle;
@@ -11,12 +10,11 @@ namespace SVGX {
     public struct SVGXTextStyle {
 
         public int fontSize;
-        public Color32 color;
         public FontStyle fontStyle;
         public TextAlignment alignment;
         public TextTransform textTransform;
         public WhitespaceMode whitespaceMode;
-        public Color32 outlineColor;
+        public Color32 outlineColor; // todo -- remove outline and make that a stroke
         public float outlineWidth;
         public float outlineSoftness;
         public float glowOuter;

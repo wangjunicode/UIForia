@@ -50,10 +50,10 @@ namespace UIForia.Animation {
                     return element.layoutResult.allocatedSize.height * transformOffset.value;
                 
                 case TransformUnit.ContentWidth:
-                    return element.layoutResult.contentRect.width * transformOffset.value;
+                    return element.layoutResult.ContentRect.width * transformOffset.value;
                 
                 case TransformUnit.ContentHeight:
-                    return element.layoutResult.contentRect.height * transformOffset.value;
+                    return element.layoutResult.ContentRect.height * transformOffset.value;
 
                 case TransformUnit.ViewportWidth:
                     return viewport.width * transformOffset.value;
@@ -87,14 +87,14 @@ namespace UIForia.Animation {
                         return viewport.width * transformOffset.value;
                     }
 
-                    return element.parent.layoutResult.contentRect.width * transformOffset.value;
+                    return element.parent.layoutResult.ContentRect.width * transformOffset.value;
                 
                 case TransformUnit.ParentContentAreaHeight:
                     if (element.parent == null) {
                         return viewport.height * transformOffset.value;
                     }
 
-                    return element.parent.layoutResult.contentRect.height * transformOffset.value;
+                    return element.parent.layoutResult.ContentRect.height * transformOffset.value;
                 
                 case TransformUnit.ScreenWidth:
                     return Screen.width * transformOffset.value;

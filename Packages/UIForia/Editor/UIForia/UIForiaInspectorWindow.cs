@@ -317,7 +317,7 @@ namespace UIForia.Editor {
                 ctx.SetFill(paddingColor);
                 if (padding.top > 0) {
                     ctx.BeginPath();
-                    ctx.Rect(x + padding.left + border.left, y + border.top, paddingHorizontalWidth, padding.top - 1);
+                    ctx.Rect(x + padding.left + border.left, y + border.top, paddingHorizontalWidth, padding.top);
                     ctx.Fill();
                 }
 
@@ -343,13 +343,13 @@ namespace UIForia.Editor {
                 
                 if (border.top > 0) {
                     ctx.BeginPath();
-                    ctx.Rect(x + border.left, y, width - border.Horizontal, border.top - 1);
+                    ctx.Rect(x + border.left, y, width - border.Horizontal, border.top);
                     ctx.Fill();
                 }
 
                 if (border.right > 0) {
                     ctx.BeginPath();
-                    ctx.Rect(x + margin.left + width - border.right, y, border.right, height);
+                    ctx.Rect(x + width - border.right, y, border.right, height);
                     ctx.Fill();
                 }
 
@@ -361,7 +361,7 @@ namespace UIForia.Editor {
 
                 if (border.bottom > 0) {
                     ctx.BeginPath();
-                    ctx.Rect(x + margin.left + border.left, y + height - border.bottom, width - border.Horizontal, border.bottom);
+                    ctx.Rect(x + border.left, y + height - border.bottom, width - border.Horizontal, border.bottom);
                     ctx.Fill();
                 }
                 
@@ -398,9 +398,9 @@ namespace UIForia.Editor {
                     return;
                 }
 
-                Rect contentRect = selectedElement.layoutResult.contentRect;
+                Rect contentRect = selectedElement.layoutResult.ContentRect;
                 
-                ctx.SetTransform(SVGXMatrix.TRS(selectedElement.layoutResult.screenPosition + selectedElement.layoutResult.contentRect.min, 0, Vector2.one));
+                ctx.SetTransform(SVGXMatrix.TRS(selectedElement.layoutResult.screenPosition + selectedElement.layoutResult.ContentRect.min, 0, Vector2.one));
                 ctx.BeginPath();
                 ctx.SetStrokeWidth(1);
                 ctx.SetStroke(Color.black);
@@ -517,7 +517,7 @@ namespace UIForia.Editor {
             EditorGUIUtility.labelWidth = 100;
 
             Rect clipRect = layoutResult.clipRect;
-            Rect contentRect = layoutResult.contentRect;
+            Rect contentRect = layoutResult.ContentRect;
 
             DrawVector2Value("Local Position", layoutResult.localPosition);
             DrawVector2Value("Screen Position", layoutResult.screenPosition);

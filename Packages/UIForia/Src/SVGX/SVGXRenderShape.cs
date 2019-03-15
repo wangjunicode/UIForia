@@ -9,9 +9,9 @@ namespace SVGX {
         public readonly SVGXShape shape;
         public readonly int zIndex;
         public readonly DrawCallType drawCallType;
-        public readonly TextInfo textInfo;
+        public readonly TextInfo2 textInfo;
         
-        public SVGXRenderShape(SVGXShape shape, int zIndex, int styleId, int matrixId, DrawCallType drawCallType, TextInfo textInfo = null) {
+        public SVGXRenderShape(SVGXShape shape, int zIndex, int styleId, int matrixId, DrawCallType drawCallType, TextInfo2 textInfo = null) {
             this.shape = shape;
             this.zIndex = zIndex;
             this.styleId = styleId;

@@ -90,33 +90,39 @@ v2f TextVertex(appdata input) {
     return o;
 }
 
+inline float contour(float d, float w) {
+    return smoothstep(0.5 - w, 0.5 + w, d);
+}
+
+inline float samp(float2 uv, float w) {
+    return contour(tex2D(_globalFontTexture, uv).a, w);
+}
+
 fixed4 TextFragment(v2f input) {
+   float c = tex2D(_globalFontTexture, input.uv.xy).a;
    
-   float c = tex2D(_globalFontTexture, float2(input.uv.xy)).a;
+   // this is the text mesh pro version of text. also requires a blend mode setting of 1 - (1 - srcAlpha)
+   if(0) {
+       // hard coded params for font size 15, change this to read from vertex output
+       float4 param = float4(0.36486, 3.69998, 0.63514, 0);
+       float	scale	= param.y;
+       float	bias	= param.z;
+       float	weight	= param.w;
+       float	sd = (bias - c) * scale;
+       float sca = 0.9;
+       float outline = 0; //(_OutlineWidth * sca) * scale;
+       float softness = 0; //(_OutlineSoftness * sca) * scale;
+       half4 faceColor = half4(1, 1, 1, 1);//_FaceColor;
+       half4 outlineColor = half4(1, 1, 1, 1); //_OutlineColor;
+       faceColor.rgb *= input.color.rgb;
+       
+       faceColor = GetColor(sd, faceColor, outlineColor, outline, softness);
+       return faceColor * input.color.a;
+   }
    
-   float smoothing = 1 / 16.0;
-   
+   float smoothing = 1 / 16.0;   
    float alpha = smoothstep(0.5 - smoothing, 0.5 + smoothing, c);
    return fixed4(input.color.rgb, input.color.a * alpha);
-
-
-   //loat alpha = smoothstep(0.5 - smoothing, 0.5 + smoothing, c);
-   //float outlineFactor = smoothstep(0.5 - smoothing, 0.5 + smoothing, c);
-   //fixed4 color = lerp(Red, input.color, outlineFactor);
-   //float alpha = smoothstep(outlineWidth - smoothing, outlineWidth + smoothing, c); 
-   //
-   //
-   //
-   //float outline = (input.fragData1.x * gScaleRatioA) * scale;
-   //float softness = (input.fragData1.y * gScaleRatioA) * scale;
-   //
-   //half4 faceColor = input.color;
-   //fixed4 outlineColor = input.secondaryColor;
-   //
-   //faceColor.rgb *= input.color.rgb;
-   //faceColor = GetColor(sd, faceColor, outlineColor, outline, softness);
-   //
-   //return faceColor * input.color.a;
 }
 
 #undef gWeightNormal

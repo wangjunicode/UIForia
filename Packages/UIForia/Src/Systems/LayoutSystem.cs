@@ -82,9 +82,9 @@ namespace UIForia.Systems {
 
             TextLayoutBox[] textLayouts = m_TextLayoutBoxes.Array;
             for (int i = 0; i < m_TextLayoutBoxes.Count; i++) {
-                if (textLayouts[i].TextInfo.LayoutDirty) {
+//                if (textLayouts[i].TextInfo.LayoutDirty) {
                     textLayouts[i].RequestContentSizeChangeLayout();
-                }
+//                }
             }
 
             for (int i = 0; i < m_Views.Count; i++) {
@@ -816,13 +816,13 @@ namespace UIForia.Systems {
                 while (ptr != null) {
                     Vector2 screenPosition = ptr.layoutResult.screenPosition;
                     if (ptr.style.OverflowX != Overflow.Visible) {
-                        if (point.x < screenPosition.x || point.x > screenPosition.x + ptr.layoutResult.AllocatedWidth) {
+                        if (point.x < screenPosition.x || point.x > screenPosition.x + ptr.layoutResult.actualSize.width) {
                             break;
                         }
                     }
 
                     if (ptr.style.OverflowY != Overflow.Visible) {
-                        if (point.y < screenPosition.y || point.y > screenPosition.y + ptr.layoutResult.AllocatedHeight) {
+                        if (point.y < screenPosition.y || point.y > screenPosition.y + ptr.layoutResult.actualSize.height) {
                             break;
                         }
                     }

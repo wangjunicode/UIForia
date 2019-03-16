@@ -476,10 +476,10 @@ namespace SVGX {
                     renderData = BitUtil.SetHighLowBits((int) renderShape.shape.type, RenderTypeText);
 
                     TextInfo2 textInfo = renderShape.textInfo;
-
-                    if (textInfo.LayoutDirty) {
-                        textInfo.Layout(Vector2.zero);
-                    }
+//   UIForia doesn't want this to do layout but raw system probably does
+//                    if (textInfo.layoutBeforeRender && textInfo.LayoutDirty) {
+//                        textInfo.Layout(Vector2.zero);
+//                    }
                     
                     CharInfo[] charInfos = textInfo.charInfoList.Array;
                     int charCount = textInfo.CharCount;

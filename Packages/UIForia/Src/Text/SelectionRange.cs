@@ -1,25 +1,5 @@
-using UnityEngine;
 
 namespace UIForia.Text {
-
-    public struct SelectionRange2 {
-
-        public readonly int cursorIndex;
-        public readonly TextEdge cursorEdge;
-        public readonly int selectionCount;
-        
-        public SelectionRange2(int cursorIndex, TextEdge cursorEdge, int selectionCount = 0) {
-            this.cursorIndex = cursorIndex;
-            this.cursorEdge = cursorEdge;
-            this.selectionCount = selectionCount;
-        }
-
-        public bool IsSelectionForward => selectionCount > 0;
-        public bool IsSelectionBackward => selectionCount < 0;
-        
-        public bool HasSelection => selectionCount != 0;
-
-    }
 
     public struct SelectionRange {
 
@@ -27,44 +7,51 @@ namespace UIForia.Text {
         public readonly int selectIndex;
         public readonly TextEdge cursorEdge;
         public readonly TextEdge selectEdge;
-        
+
         public SelectionRange(int cursorIndex, TextEdge cursorEdge, int selectIndex = -1, TextEdge selectEdge = TextEdge.Left) {
             this.cursorIndex = cursorIndex;
             this.cursorEdge = cursorEdge;
             this.selectIndex = selectIndex;
             this.selectEdge = selectEdge;
         }
-
-        // cursorIndex
-        // cursor is always before
-        // if cursor index == length
-        // cursor position = last char left
-        // if cursor index is last on line, take right edge
         
         public bool HasSelection {
             get {
-                if (selectIndex == -1) return false;
-
-                if (selectIndex == cursorIndex + 1) {
-                    // selected is larger, should be sure not to select if edges are not the same
-                    return selectEdge == TextEdge.Right && cursorEdge == TextEdge.Left;
+                if (selectIndex == -1) {
+                    return false;
                 }
 
-                if (cursorIndex == selectIndex + 1) {
-                    return selectEdge == TextEdge.Left && cursorEdge == TextEdge.Right;
-                }
-                
-                if (selectIndex == cursorIndex) {
-                    return selectEdge != cursorEdge;
-                }
+                int diff = selectIndex - cursorIndex;
 
-                return true;
+                switch (diff) {
+                    case 0:
+                        return selectEdge != cursorEdge;
+                    case 1:
+                        return cursorEdge != TextEdge.Right || selectEdge == TextEdge.Right;
+                    case -1:
+                        return cursorEdge != TextEdge.Left || selectEdge != TextEdge.Right;
+                    default:
+                        return selectIndex != cursorIndex;
+                }
             }
         }
 
+        // convert cursor to always be to the left of the target character
+        // cursor 6 right == cursor 7 left
+        // makes working with selection more consistent
+        // only case that would use 'right' is the last character on a line
+        
+        public SelectionRange NormalizeLeft() {
+            if (cursorEdge == TextEdge.Right) {
+                return new SelectionRange(cursorIndex + 1, TextEdge.Left);    
+            }
+
+            return this;
+        }
+        
         public override bool Equals(object obj) {
             if (ReferenceEquals(null, obj)) return false;
-            return obj is SelectionRange && Equals((SelectionRange) obj);
+            return obj is SelectionRange a && Equals(a);
         }
 
         public override int GetHashCode() {

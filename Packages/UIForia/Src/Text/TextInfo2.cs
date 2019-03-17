@@ -125,30 +125,39 @@ namespace UIForia.Text {
             return new SelectionRange();
         }
 
-        public SelectionRange InsertText(int spanIndex, SelectionRange selectionRange, char c) {
+        public SelectionRange InsertText(SelectionRange selectionRange, char c) {
+            return InsertText(selectionRange, c.ToString());
+        }
+
+        public SelectionRange InsertText(SelectionRange selectionRange, string c) {
             // todo this can be optimized to not re-compute the whole text metrics
-            SpanInfo2 spanInfo = spanList.Array[spanIndex];
+            SpanInfo2 spanInfo = spanList.Array[0];
+            
+            if (selectionRange.HasSelection) {
+                selectionRange = DeleteTextBackwards(selectionRange);
+            }
+            
             int cursorIndex = selectionRange.cursorIndex;
             if (selectionRange.cursorIndex == spanInfo.CharCount - 1) {
                 if (selectionRange.cursorEdge == TextEdge.Left) {
                     string text = spanInfo.inputText.Substring(0, cursorIndex);
                     string endText = spanInfo.inputText.Substring(cursorIndex);
                     string newText = text + c + endText;
-                    UpdateSpan(spanIndex, newText);
+                    UpdateSpan(0, newText);
                 }
                 else {
-                    UpdateSpan(spanIndex, spanInfo.inputText + c);
+                    UpdateSpan(0, spanInfo.inputText + c);
                     cursorIndex++;
                 }
             }
             else if (selectionRange.cursorIndex == spanInfo.charStart) {
                 if (selectionRange.cursorEdge == TextEdge.Left) {
-                    UpdateSpan(spanIndex, c + spanInfo.inputText);
+                    UpdateSpan(0, c + spanInfo.inputText);
                 }
                 else {
                     string text = spanInfo.inputText.Substring(0, cursorIndex);
                     string endText = spanInfo.inputText.Substring(cursorIndex);
-                    UpdateSpan(spanIndex, text + c + endText);
+                    UpdateSpan(0, text + c + endText);
                     cursorIndex++;
                 }
             }
@@ -161,7 +170,7 @@ namespace UIForia.Text {
                 string text = spanInfo.inputText.Substring(0, cursorIndex);
                 string endText = spanInfo.inputText.Substring(cursorIndex);
                 string newText = text + c + endText;
-                UpdateSpan(spanIndex, newText);
+                UpdateSpan(0, newText);
             }
 
             return new SelectionRange(cursorIndex, TextEdge.Right);
@@ -169,20 +178,20 @@ namespace UIForia.Text {
 
         public SelectionRange DeleteTextForwards(SelectionRange range) {
             int spanIndex = 0;
-            
+
             // todo -- fix this.
             // todo -- we need to compute span indices across the range and nuke accordingly. 
             // todo -- need to figure out if we leave empty spans or delete them, probably keep them
-            
+
             if (CharCount == 0) {
                 return range;
             }
 
             int cursorIndex = Mathf.Clamp(range.cursorIndex, 0, CharCount - 1);
-            
+
             // todo -- fix this for multi-span
             string text = spanList[0].inputText;
-            
+
             if (range.HasSelection) {
                 int min = (range.cursorIndex < range.selectIndex ? range.cursorIndex : range.selectIndex) + 1;
                 int max = (range.cursorIndex > range.selectIndex ? range.cursorIndex : range.selectIndex) + 1;
@@ -210,36 +219,36 @@ namespace UIForia.Text {
                 }
             }
         }
-        
-        public SelectionRange DeleteTextBackwards(int spanIndex, SelectionRange range) {
+
+        public SelectionRange DeleteTextBackwards(SelectionRange range) {
             if (CharCount == 0) {
                 return new SelectionRange(0, TextEdge.Left);
             }
 
-            SpanInfo2 spanInfo = spanList.Array[spanIndex];
+            SpanInfo2 spanInfo = spanList.Array[0];
 
             int cursorIndex = range.cursorIndex;
 
             if (range.HasSelection) {
-                
                 int min = (range.cursorIndex < range.selectIndex ? range.cursorIndex : range.selectIndex);
                 int max = (range.cursorIndex > range.selectIndex ? range.cursorIndex : range.selectIndex);
 
                 if (max - min == CharCount - 1) {
-                    UpdateSpan(spanIndex, string.Empty);
-                    return new SelectionRange(0, TextEdge.Left);  
+                    UpdateSpan(0, string.Empty);
+                    return new SelectionRange(0, TextEdge.Left);
                 }
 
                 if (range.cursorEdge == TextEdge.Right) {
                     max++;
                 }
-                
+
                 string part0 = spanInfo.inputText.Substring(0, min);
                 string part1 = spanInfo.inputText.Substring(max);
-                UpdateSpan(spanIndex, part0 + part1);
+                UpdateSpan(0, part0 + part1);
                 if (min == CharCount) {
                     return new SelectionRange(min - 1, TextEdge.Right);
                 }
+
                 return new SelectionRange(min, TextEdge.Left);
             }
             else {
@@ -260,13 +269,13 @@ namespace UIForia.Text {
                     return new SelectionRange(0, TextEdge.Left);
                 }
                 else if (cursorIndex == CharCount - 1) {
-                    UpdateSpan(spanIndex, spanInfo.inputText.Substring(0, spanInfo.inputText.Length - 1));
+                    UpdateSpan(0, spanInfo.inputText.Substring(0, spanInfo.inputText.Length - 1));
                     return new SelectionRange(range.cursorIndex - 1, TextEdge.Right);
                 }
                 else {
                     string part0 = spanInfo.inputText.Substring(0, cursorIndex);
                     string part1 = spanInfo.inputText.Substring(cursorIndex + 1);
-                    UpdateSpan(spanIndex, part0 + part1);
+                    UpdateSpan(0, part0 + part1);
 
                     return new SelectionRange(cursorIndex - 1, TextEdge.Right);
                 }
@@ -1043,7 +1052,6 @@ namespace UIForia.Text {
         }
 
         public Vector2 GetCursorPosition(SelectionRange selectionRange) {
-            
             if (CharCount == 0) {
                 return new Vector2(2, 0); // 2 is temp
             }
@@ -1055,7 +1063,7 @@ namespace UIForia.Text {
                     return new Vector2(charInfoList.Array[selectionRange.cursorIndex].layoutBottomRight.x, 0);
                 }
             }
-            
+
             CharInfo charInfo = charInfoList.Array[selectionRange.cursorIndex];
             LineInfo lineInfo = lineInfoList.Array[charInfo.lineIndex];
 
@@ -1108,12 +1116,12 @@ namespace UIForia.Text {
             int cursorIndex = range.cursorIndex - 1;
 
             if (cursorIndex < 0) cursorIndex = 0;
-            
+
             if (range.cursorEdge == TextEdge.Right) {
                 return new SelectionRange(cursorIndex + 1, TextEdge.Left, selectionIndex, selectionEdge);
             }
+
             return new SelectionRange(cursorIndex, TextEdge.Left, selectionIndex, selectionEdge);
-            
         }
 
         public SelectionRange MoveCursorRight(SelectionRange range, bool maintainSelection) {
@@ -1133,12 +1141,77 @@ namespace UIForia.Text {
             }
 
             int cursorIndex = range.cursorIndex;
-            
+
             if (cursorIndex == CharCount - 1) {
                 return new SelectionRange(cursorIndex, TextEdge.Right, selectionIndex, selectionEdge);
             }
-            
+
             return new SelectionRange(cursorIndex, TextEdge.Right, selectionIndex, selectionEdge).NormalizeLeft();
+        }
+
+        public SelectionRange SelectWordAtPoint(Vector2 point) {
+            int line = FindNearestLine(point);
+            int word = FindNearestWord(line, point);
+            WordInfo wordInfo = wordInfoList.Array[word];
+            if (wordInfo.spaceStart == wordInfo.charCount) {
+                return new SelectionRange(wordInfo.startChar, TextEdge.Left, wordInfo.startChar + wordInfo.spaceStart - 1, TextEdge.Right);
+            }
+
+            return new SelectionRange(wordInfo.startChar, TextEdge.Left, wordInfo.startChar + wordInfo.spaceStart, TextEdge.Left);
+        }
+
+        public SelectionRange SelectLineAtPoint(Vector2 point) {
+            int line = FindNearestLine(point);
+
+            int wordStart = lineInfoList.Array[line].wordStart;
+            int wordEnd = wordStart + lineInfoList.Array[line].wordCount;
+            WordInfo startWord = wordInfoList.Array[wordStart];
+            WordInfo endWord = wordInfoList.Array[wordEnd];
+            return new SelectionRange(startWord.startChar, TextEdge.Left, endWord.startChar + endWord.charCount, TextEdge.Left);
+        }
+
+        // todo -- support multiple spans
+        public string GetSelectedString(SelectionRange selectionRange) {
+            int start = Mathf.Min(selectionRange.cursorIndex, selectionRange.selectIndex);
+            int end = Mathf.Max(selectionRange.cursorIndex, selectionRange.selectIndex);
+
+            if (selectionRange.selectEdge == TextEdge.Right) {
+                end++;
+            }
+
+            // assume a single span for now
+
+            return spanList.Array[0].inputText.Substring(start, end - start);
+        }
+
+        public SelectionRange SelectAll() {
+            return new SelectionRange(0, TextEdge.Left, CharCount - 1, TextEdge.Right);
+        }
+
+        public SelectionRange MoveToStartOfLine(SelectionRange selectionRange) {
+            CharInfo charInfo = charInfoList.Array[selectionRange.cursorIndex];
+            int lineIdx = charInfo.lineIndex;
+            int i = selectionRange.cursorIndex;
+            while (i > 0) {
+                if (charInfoList.Array[i].lineIndex != lineIdx) {
+                    break;
+                }
+                i--;
+            }
+            return new SelectionRange(i, TextEdge.Left);
+        }
+        
+        public SelectionRange MoveToEndOfLine(SelectionRange selectionRange) {
+            CharInfo charInfo = charInfoList.Array[selectionRange.cursorIndex];
+            int lineIdx = charInfo.lineIndex;
+            int i = selectionRange.cursorIndex;
+            while (i < CharCount - 1) {
+                if (charInfoList.Array[i].lineIndex != lineIdx) {
+                    break;
+                }
+                i++;
+            }
+            return new SelectionRange(i, TextEdge.Right);
         }
 
     }

@@ -16,6 +16,9 @@ namespace UIForia.Systems {
         public DefaultInputSystem(ILayoutSystem layoutSystem)
             : base(layoutSystem) { }
 
+        // todo -- formalize clicking with different buttons
+        // todo -- fix double and triple clicking
+        
         protected override MouseState GetMouseState() {
             MouseState retn = new MouseState();
             retn.isLeftMouseDown = Input.GetMouseButton(0);
@@ -55,10 +58,6 @@ namespace UIForia.Systems {
             }
 
             // todo formalize clicking with different buttons
-//            retn.isSingleClick = (retn.isRightMouseUpThisFrame || retn.isLeftMouseUpThisFrame) && (now - m_LastMouseDownTimestamp < k_SingleClickDelay);
-//            if (retn.isSingleClick) {
-//                Debug.Log("K");
-//            }
             
             retn.mousePosition = ConvertMousePosition(Input.mousePosition);
             retn.scrollDelta = Input.mouseScrollDelta;

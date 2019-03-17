@@ -1,6 +1,5 @@
 using SVGX;
 using UIForia.Attributes;
-using UIForia.Layout;
 using UIForia.Rendering;
 using UIForia.Systems;
 using UIForia.Text;
@@ -16,7 +15,6 @@ namespace UIForia.Elements {
 
         internal TextInfo2 textInfo;
         internal string text;
-        internal string inputText;
         internal string placeholderText;
 
         public Color caretColor = Color.black;
@@ -32,6 +30,11 @@ namespace UIForia.Elements {
         public InputElement() {
             flags |= UIElementFlags.BuiltIn;
             selectionRange = new SelectionRange(0, TextEdge.Left);
+        }
+
+        protected static string clipboard {
+            get { return GUIUtility.systemCopyBuffer; }
+            set { GUIUtility.systemCopyBuffer = value; }
         }
 
         public override void OnCreate() {
@@ -62,18 +65,19 @@ namespace UIForia.Elements {
                 return;
             }
 
-            evt.StopPropagation();
             blinkStartTime = Time.unscaledTime;
             Vector2 mouse = evt.MousePosition - layoutResult.screenPosition - layoutResult.ContentRect.position;
             if (evt.IsDoubleClick) {
-                //selectionRange = textInfo.SelectWordAtPoint(mouse);
+                selectionRange = textInfo.SelectWordAtPoint(mouse);
             }
-            else if (evt.Shift) {
-                // selectionRange = textInfo.SelectToPoint(selectionRange, mouse);
+            else if (evt.IsTripleClick) {
+                selectionRange = textInfo.SelectLineAtPoint(mouse);
             }
             else {
                 selectionRange = textInfo.GetSelectionAtPoint(mouse);
             }
+
+            evt.StopPropagation();
         }
 
         [OnKeyDownWithFocus]
@@ -86,29 +90,48 @@ namespace UIForia.Elements {
                 return;
             }
 
-            selectionRange = textInfo.InsertText(0, selectionRange, c);
-
+            selectionRange = textInfo.InsertText(selectionRange, c);
+            evt.StopPropagation();
         }
 
+        [OnKeyDownWithFocus(KeyCode.Home)]
+        private void HandleHome(KeyboardInputEvent evt) {
+            if (GetAttribute("disabled") != null) return;
+            selectionRange = textInfo.MoveToStartOfLine(selectionRange);
+            blinkStartTime = Time.unscaledTime;
+            evt.StopPropagation();
+        }
+        
+        [OnKeyDownWithFocus(KeyCode.End)]
+        private void HandleEnd(KeyboardInputEvent evt) {
+            if (GetAttribute("disabled") != null) return;
+            selectionRange = textInfo.MoveToEndOfLine(selectionRange);
+            blinkStartTime = Time.unscaledTime;
+            evt.StopPropagation();
+        }
+        
         [OnKeyDownWithFocus(KeyCode.Backspace)]
         private void HandleBackspace(KeyboardInputEvent evt) {
             if (GetAttribute("disabled") != null) return;
-            selectionRange = textInfo.DeleteTextBackwards(0, selectionRange);
+            selectionRange = textInfo.DeleteTextBackwards(selectionRange);
             blinkStartTime = Time.unscaledTime;
+            evt.StopPropagation();
         }
-        
+
         [OnKeyDownWithFocus(KeyCode.Delete)]
         private void HandleDelete(KeyboardInputEvent evt) {
             if (GetAttribute("disabled") != null) return;
             selectionRange = textInfo.DeleteTextForwards(selectionRange);
             blinkStartTime = Time.unscaledTime;
+            evt.StopPropagation();
         }
-        
+
         [OnKeyDownWithFocus(KeyCode.LeftArrow)]
         private void HandleLeftArrow(KeyboardInputEvent evt) {
             if (GetAttribute("disabled") != null) return;
             selectionRange = textInfo.MoveCursorLeft(selectionRange, evt.shift);
             blinkStartTime = Time.unscaledTime;
+            evt.StopPropagation();
         }
 
         [OnKeyDownWithFocus(KeyCode.RightArrow)]
@@ -116,6 +139,42 @@ namespace UIForia.Elements {
             if (GetAttribute("disabled") != null) return;
             selectionRange = textInfo.MoveCursorRight(selectionRange, evt.shift);
             blinkStartTime = Time.unscaledTime;
+            evt.StopPropagation();
+        }
+
+        [OnKeyDownWithFocus(KeyCode.C, KeyboardModifiers.Control)]
+        private void HandleCopy(KeyboardInputEvent evt) {
+            if (evt.onlyControl && selectionRange.HasSelection) {
+                clipboard = textInfo.GetSelectedString(selectionRange);
+                Debug.Log(clipboard);
+                evt.StopPropagation();
+            }
+        }
+        
+        [OnKeyDownWithFocus(KeyCode.X, KeyboardModifiers.Control)]
+        private void HandleCut(KeyboardInputEvent evt) {
+            if (GetAttribute("disabled") != null) return;
+            if (evt.onlyControl && selectionRange.HasSelection) {
+                clipboard = textInfo.GetSelectedString(selectionRange);
+                selectionRange = textInfo.DeleteTextBackwards(selectionRange);
+            }
+        }
+
+        [OnKeyDownWithFocus(KeyCode.V, KeyboardModifiers.Control)]
+        private void HandlePaste(KeyboardInputEvent evt) {
+            if (GetAttribute("disabled") != null) return;
+            if (evt.onlyControl) {
+                textInfo.InsertText(selectionRange, clipboard);
+                evt.StopPropagation();
+            }
+        }
+        [OnKeyDownWithFocus(KeyCode.A, KeyboardModifiers.Control)]
+        private void HandleSelectAll(KeyboardInputEvent evt) {
+            if (GetAttribute("disabled") != null) return;
+            if (evt.onlyControl) {
+                selectionRange = textInfo.SelectAll();
+                evt.StopPropagation();
+            }
         }
         
         [OnDragCreate]
@@ -134,25 +193,25 @@ namespace UIForia.Elements {
 
             bool blinkState = (Time.unscaledTime - blinkStartTime) % blinkPeriod < blinkPeriod / 2;
 
-//            if (isSelecting) {
-//                ctx.BeginPath();
-//                ctx.SetStroke(caretColor);
-//                ctx.SetStrokeWidth(1f);
-//                Vector2 p = textInfo.GetSelectionPosition2(selectionRange);
-//                ctx.MoveTo(layoutResult.ContentRect.min + p + new Vector2(0, 4f)); // todo remove + 4 on y
-//                ctx.VerticalLineTo(layoutResult.ContentRect.y + p.y + style.TextFontSize);
-//                ctx.Stroke();
-//            }
-            isSelecting = false;
+            if (isSelecting) {
+                ctx.BeginPath();
+                ctx.SetStroke(caretColor);
+                ctx.SetStrokeWidth(1f);
+                Vector2 p = textInfo.GetSelectionPosition(selectionRange);
+                ctx.MoveTo(layoutResult.ContentRect.min + p + new Vector2(0, 4f)); // todo remove + 4 on y
+                ctx.VerticalLineTo(layoutResult.ContentRect.y + p.y + style.TextFontSize);
+                ctx.Stroke();
+            }
+
             if (!isSelecting && hasFocus && blinkState) {
                 ctx.BeginPath();
-                if (selectionRange.cursorEdge == TextEdge.Left) {
-//                    ctx.SetStroke(caretColor);
-                    ctx.SetStroke(Color.yellow);
-                }
-                else {
-                    ctx.SetStroke(Color.red);
-                }
+                ctx.SetStroke(caretColor);
+//                if (selectionRange.cursorEdge == TextEdge.Left) {
+//                    ctx.SetStroke(Color.yellow);
+//                }
+//                else {
+//                    ctx.SetStroke(Color.red);
+//                }
 
                 ctx.SetStrokeWidth(1f);
                 Vector2 p = textInfo.GetCursorPosition(selectionRange);
@@ -220,6 +279,7 @@ namespace UIForia.Elements {
 
             public override void OnComplete() {
                 inputElement.isSelecting = false;
+                inputElement.selectionRange = inputElement.selectionRange.Invert();
             }
 
         }

@@ -9,6 +9,7 @@
             BorderColor = blue;
             Margin = 20px;
             TextFontSize = 48;
+            Padding = 5px;
         }
         
     </Style>
@@ -16,6 +17,7 @@
     <Contents style="input-element">
 
         <InputElementText/>
+        
         <!--<Slot placeholder-visible="true" placeholder="">-->
             <!--<Text>default placeholder</Text>-->
         <!--</Slot>-->

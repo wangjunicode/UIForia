@@ -1,4 +1,3 @@
-
 namespace UIForia.Text {
 
     public struct SelectionRange {
@@ -14,7 +13,7 @@ namespace UIForia.Text {
             this.selectIndex = selectIndex;
             this.selectEdge = selectEdge;
         }
-        
+
         public bool HasSelection {
             get {
                 if (selectIndex == -1) {
@@ -40,15 +39,20 @@ namespace UIForia.Text {
         // cursor 6 right == cursor 7 left
         // makes working with selection more consistent
         // only case that would use 'right' is the last character on a line
-        
+
         public SelectionRange NormalizeLeft() {
             if (cursorEdge == TextEdge.Right) {
-                return new SelectionRange(cursorIndex + 1, TextEdge.Left);    
+                return new SelectionRange(cursorIndex + 1, TextEdge.Left);
             }
 
             return this;
         }
-        
+
+        public SelectionRange Invert() {
+            return new SelectionRange(
+                selectIndex, selectEdge, cursorIndex, cursorEdge);
+        }
+
         public override bool Equals(object obj) {
             if (ReferenceEquals(null, obj)) return false;
             return obj is SelectionRange a && Equals(a);

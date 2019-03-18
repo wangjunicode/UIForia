@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<UITemplate>
+    <Style path="Grid/RepeatALot.style" />
+    <Contents style="container">
+        <Repeat list="players">
+            <Div>{$item.id} -> {$item.name}</Div>
+        </Repeat>
+    </Contents>
+</UITemplate>

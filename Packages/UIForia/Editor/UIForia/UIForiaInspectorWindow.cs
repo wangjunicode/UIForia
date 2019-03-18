@@ -303,6 +303,7 @@ namespace UIForia.Editor {
                 float x = result.screenPosition.x;
                 float y = result.screenPosition.y;
                 
+                ctx.DisableScissorRect();
                 ctx.SetTransform(SVGXMatrix.identity);
                 ctx.SetFill(contentColor);
                 float contentX = (result.screenPosition.x) + border.left + padding.left;

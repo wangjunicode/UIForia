@@ -1,4 +1,5 @@
 using System;
+using System.Text;
 using SVGX;
 using TMPro;
 using UIForia.Layout;
@@ -187,18 +188,30 @@ namespace UIForia.Text {
                 return range;
             }
 
-            int cursorIndex = Mathf.Clamp(range.cursorIndex, 0, CharCount - 1);
+            int cursorIndex = Mathf.Clamp(range.cursorIndex, 0, CharCount);
 
             // todo -- fix this for multi-span
             string text = spanList[0].inputText;
 
             if (range.HasSelection) {
-                int min = (range.cursorIndex < range.selectIndex ? range.cursorIndex : range.selectIndex) + 1;
-                int max = (range.cursorIndex > range.selectIndex ? range.cursorIndex : range.selectIndex) + 1;
+                int min = (range.cursorIndex < range.selectIndex ? range.cursorIndex : range.selectIndex);
+                int max = (range.cursorIndex > range.selectIndex ? range.cursorIndex : range.selectIndex);
 
+                if (range.selectEdge == TextEdge.Right) {
+                    max++;
+                }
+                
                 string part0 = text.Substring(0, min);
                 string part1 = text.Substring(max);
                 UpdateSpan(spanIndex, part0 + part1);
+                
+                if (range.selectEdge == TextEdge.Right) {
+                    if (min - 1 < 0) {
+                        return new SelectionRange(0, TextEdge.Left);
+                    }
+                    return new SelectionRange(min - 1, TextEdge.Right);
+                }
+                
                 return new SelectionRange(min, TextEdge.Left);
             }
             else {
@@ -238,7 +251,7 @@ namespace UIForia.Text {
                     return new SelectionRange(0, TextEdge.Left);
                 }
 
-                if (range.cursorEdge == TextEdge.Right) {
+                if (range.selectEdge == TextEdge.Right) {
                     max++;
                 }
 
@@ -1064,6 +1077,9 @@ namespace UIForia.Text {
                 }
             }
 
+            else if (selectionRange.cursorIndex < 0 || selectionRange.cursorIndex >= CharCount) {
+                return new Vector2();
+            }
             CharInfo charInfo = charInfoList.Array[selectionRange.cursorIndex];
             LineInfo lineInfo = lineInfoList.Array[charInfo.lineIndex];
 
@@ -1212,6 +1228,27 @@ namespace UIForia.Text {
                 i++;
             }
             return new SelectionRange(i, TextEdge.Right);
+        }
+
+        private static readonly StringBuilder s_Builder = new StringBuilder(128);
+        
+        public string GetAllText() {
+            if (spanList.Count == 1) {
+                return spanList[0].inputText;
+            }
+            else {
+                s_Builder.Clear();
+                string retn = string.Empty;
+                for (int i = 0; i < spanList.Count; i++) {
+                    s_Builder.Append(spanList.Array[i].inputText);
+                }
+                return retn;
+            }
+        }
+
+        public float GetCharacterWidthAtPoint(SelectionRange selectionRange) {
+            CharInfo charInfo = charInfoList.Array[selectionRange.cursorIndex];
+            return charInfo.layoutBottomRight.x - charInfo.layoutTopLeft.x;
         }
 
     }

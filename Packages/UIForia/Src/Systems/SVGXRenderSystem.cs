@@ -90,7 +90,7 @@ namespace UIForia.Systems {
 
                 Vector2 pivot = layoutResult.pivot;
 
-                Vector2 offset = new Vector2(layoutResult.actualSize.width * pivot.x, layoutResult.actualSize.height * pivot.y);
+                Vector2 offset = new Vector2(layoutResult.allocatedSize.width * pivot.x, layoutResult.allocatedSize.height * pivot.y);
                 SVGXMatrix matrix = SVGXMatrix.TRS(layoutResult.screenPosition + offset, layoutResult.rotation, Vector2.one);
 
                 string painterName = current.style.Painter;
@@ -166,12 +166,12 @@ namespace UIForia.Systems {
             LayoutResult layoutResult = current.layoutResult;
             OffsetRect borderRect = layoutResult.border;
             Vector2 pivot = layoutResult.pivot;
-            Vector2 offset = new Vector2(layoutResult.actualSize.width * pivot.x, layoutResult.actualSize.height * pivot.y);
+            Vector2 offset = new Vector2(layoutResult.allocatedSize.width * pivot.x, layoutResult.allocatedSize.height * pivot.y);
 
             Vector4 border = current.style.ResolvedBorder;
             Vector4 resolveBorderRadius = current.style.ResolvedBorderRadius;
-            float width = layoutResult.actualSize.width;
-            float height = layoutResult.actualSize.height;
+            float width = layoutResult.allocatedSize.width;
+            float height = layoutResult.allocatedSize.height;
             bool hasUniformBorder = border.x == border.y && border.z == border.x && border.w == border.x;
             bool hasBorder = border.x > 0 || border.y > 0 || border.z > 0 || border.w > 0;
 
@@ -185,7 +185,7 @@ namespace UIForia.Systems {
             }
 
             if (resolveBorderRadius == Vector4.zero) {
-                ctx.Rect(borderRect.left - offset.x, borderRect.top - offset.y, layoutResult.actualSize.width - borderRect.Horizontal, layoutResult.actualSize.height - borderRect.Vertical);
+                ctx.Rect(borderRect.left - offset.x, borderRect.top - offset.y, layoutResult.allocatedSize.width - borderRect.Horizontal, layoutResult.allocatedSize.height - borderRect.Vertical);
 
                 if (!hasBorder) {
                     DrawNormalFill(ctx, current);

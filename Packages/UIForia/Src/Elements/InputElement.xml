@@ -10,13 +10,19 @@
             Margin = 20px;
             TextFontSize = 48;
             Padding = 5px;
+            overflow= hidden;
         }
+        
+        style input-text {
+            Painter = "none";
+        }
+        
         
     </Style>
     
     <Contents style="input-element">
 
-        <InputElementText/>
+        <InputElementText style="input-text"/>
         
         <!--<Slot placeholder-visible="true" placeholder="">-->
             <!--<Text>default placeholder</Text>-->

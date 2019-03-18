@@ -82,9 +82,9 @@ namespace UIForia.Systems {
 
             TextLayoutBox[] textLayouts = m_TextLayoutBoxes.Array;
             for (int i = 0; i < m_TextLayoutBoxes.Count; i++) {
-//                if (textLayouts[i].TextInfo.LayoutDirty) {
+                if (textLayouts[i].TextInfo.LayoutDirty) {
                     textLayouts[i].RequestContentSizeChangeLayout();
-//                }
+                }
             }
 
             for (int i = 0; i < m_Views.Count; i++) {
@@ -147,6 +147,13 @@ namespace UIForia.Systems {
                 root.BorderRight,
                 root.BorderBottom,
                 root.BorderLeft
+            );
+            
+            layoutResult.padding = new OffsetRect(
+                root.PaddingTop,
+                root.PaddingRight,
+                root.PaddingBottom,
+                root.PaddingLeft
             );
 
             CreateOrDestroyScrollbars(root);
@@ -216,7 +223,13 @@ namespace UIForia.Systems {
                         box.BorderBottom,
                         box.BorderLeft
                     );
-
+                    layoutResult.padding = new OffsetRect(
+                        box.PaddingTop,
+                        box.PaddingRight,
+                        box.PaddingBottom,
+                        box.PaddingLeft
+                    );
+     
                     // should be able to sort by view
                     Rect clipRect = new Rect(0, 0, viewportRect.width, viewportRect.height);
                     UIElement ptr = element.parent;

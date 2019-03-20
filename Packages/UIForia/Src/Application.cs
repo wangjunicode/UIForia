@@ -99,7 +99,7 @@ namespace UIForia {
             m_StyleSystem = new StyleSystem();
             m_BindingSystem = new BindingSystem();
             m_LayoutSystem = new LayoutSystem(m_StyleSystem);
-            m_InputSystem = new GameInputSystem2(m_LayoutSystem);//new DefaultInputSystem(m_LayoutSystem);
+            m_InputSystem = new GameInputSystem(m_LayoutSystem);//new DefaultInputSystem(m_LayoutSystem);
             m_RenderSystem = new SVGXRenderSystem(null, m_LayoutSystem);
             m_RoutingSystem = new RoutingSystem();
 

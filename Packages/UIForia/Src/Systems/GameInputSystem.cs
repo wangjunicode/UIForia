@@ -2,9 +2,9 @@ using UnityEngine;
 
 namespace UIForia.Systems.Input {
 
-    public class GameInputSystem2 : InputSystem {
+    public class GameInputSystem : InputSystem {
 
-        public GameInputSystem2(ILayoutSystem layoutSystem) : base(layoutSystem) { }
+        public GameInputSystem(ILayoutSystem layoutSystem) : base(layoutSystem) { }
 
         private int clickCount;
         private float lastMouseDownTime;

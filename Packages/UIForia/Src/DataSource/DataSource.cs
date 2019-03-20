@@ -1,11 +1,10 @@
 using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
-using UIForia.Util;
 
 namespace UIForia.DataSource {
 
-    public class DataSource<T> where T : class, IRecord {
+    public sealed class DataSource<T> where T : class, IRecord {
 
         private Task config;
         private readonly Adapter<T> adapter;
@@ -42,11 +41,10 @@ namespace UIForia.DataSource {
             if (result == null) {
                 return null;
             }
-            else {
-                recordStore.SetRecord(record);
-                this.onRecordAdded?.Invoke(record);
-                return record;
-            }
+
+            recordStore.SetRecord(record);
+            this.onRecordAdded?.Invoke(record);
+            return record;
         }
 
         public async Task<T> SetRecord(int id, T record) {
@@ -127,10 +125,8 @@ namespace UIForia.DataSource {
             if (localRecord == null) {
                 onRecordAdded?.Invoke(returnedRecord);
             }
-            else {
-                if (adapter.RecordChanged(localRecord, returnedRecord)) {
-                    onRecordChanged?.Invoke(returnedRecord);
-                }
+            else if (adapter.RecordChanged(localRecord, returnedRecord)) {
+               onRecordChanged?.Invoke(returnedRecord);
             }
 
             recordStore.SetRecord(returnedRecord);

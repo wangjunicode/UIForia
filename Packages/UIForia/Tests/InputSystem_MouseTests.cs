@@ -3,7 +3,7 @@ using NUnit.Framework;
 using Tests.Mocks;
 using UIForia.Attributes;
 using UIForia.Elements;
-using UIForia.Stystems.InputSystem;
+using UIForia.Systems.Input;
 using UIForia.UIInput;
 using UnityEngine;
 

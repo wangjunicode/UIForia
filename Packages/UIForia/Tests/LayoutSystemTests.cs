@@ -102,7 +102,7 @@ public class LayoutSystemTests {
         MockApplication app = new MockApplication(typeof(LayoutTestThing), template);
         LayoutTestThing root = (LayoutTestThing) app.RootElement;
         app.Update();
-        Assert.AreEqual(new Rect(0, 100, 300, 50), root.child1.layoutResult.ScreenRect);
+        Assert.AreEqual(new Rect(0, 100, 300, 50), root.child1.layoutResult.AllocatedRect);
     }
 
     [Test]
@@ -126,10 +126,10 @@ public class LayoutSystemTests {
         MockApplication app = new MockApplication(typeof(LayoutTestThing), template);
         LayoutTestThing root = (LayoutTestThing) app.RootElement;
         app.Update();
-        Assert.AreEqual(new Rect(0, 100, 300, 50), root.child1.layoutResult.ScreenRect);
+        Assert.AreEqual(new Rect(0, 100, 300, 50), root.child1.layoutResult.AllocatedRect);
         root.child1.style.SetMaxWidth(150f, StyleState.Normal);
         app.Update();
-        Assert.AreEqual(new Rect(0, 100, 150, 50), root.child1.layoutResult.ScreenRect);
+        Assert.AreEqual(new Rect(0, 100, 150, 50), root.child1.layoutResult.AllocatedRect);
     }
 
     [Test]
@@ -153,13 +153,13 @@ public class LayoutSystemTests {
         MockApplication app = new MockApplication(typeof(LayoutTestThing), template);
         LayoutTestThing root = (LayoutTestThing) app.RootElement;
         app.Update();
-        Assert.AreEqual(new Rect(0, 100, 400, 50), root.child1.layoutResult.ScreenRect);
+        Assert.AreEqual(new Rect(0, 100, 400, 50), root.child1.layoutResult.AllocatedRect);
         root.child1.style.SetMaxWidth(UIMeasurement.Content100, StyleState.Normal);
         app.Update();
-        Assert.AreEqual(new Rect(0, 100, 300, 50), root.child1.layoutResult.ScreenRect);
+        Assert.AreEqual(new Rect(0, 100, 300, 50), root.child1.layoutResult.AllocatedRect);
         root.child1.FindById("nested-child").style.SetPreferredWidth(150f, StyleState.Normal);
         app.Update();
-        Assert.AreEqual(new Rect(0, 100, 150, 50), root.child1.layoutResult.ScreenRect);
+        Assert.AreEqual(new Rect(0, 100, 150, 50), root.child1.layoutResult.AllocatedRect);
     }
 
     [Test]
@@ -184,12 +184,12 @@ public class LayoutSystemTests {
         LayoutTestThing root = (LayoutTestThing) app.RootElement;
 
         app.Update();
-        Assert.AreEqual(new Rect(0, 100, 400, 300), root.child1.layoutResult.ScreenRect);
+        Assert.AreEqual(new Rect(0, 100, 400, 300), root.child1.layoutResult.AllocatedRect);
 
         root.child1.style.SetMaxHeight(UIMeasurement.Content100, StyleState.Normal);
         app.Update();
 
-        Assert.AreEqual(new Rect(0, 100, 400, 50), root.child1.layoutResult.ScreenRect);
+        Assert.AreEqual(new Rect(0, 100, 400, 50), root.child1.layoutResult.AllocatedRect);
     }
 
     [Test]
@@ -214,12 +214,12 @@ public class LayoutSystemTests {
         LayoutTestThing root = (LayoutTestThing) app.RootElement;
 
         app.Update();
-        Assert.AreEqual(new Rect(0, 100, 400, 300), root.child1.layoutResult.ScreenRect);
+        Assert.AreEqual(new Rect(0, 100, 400, 300), root.child1.layoutResult.AllocatedRect);
 
         root.child1.style.SetMinHeight(UIMeasurement.Content100, StyleState.Normal);
         app.Update();
 
-        Assert.AreEqual(new Rect(0, 100, 400, 500), root.child1.layoutResult.ScreenRect);
+        Assert.AreEqual(new Rect(0, 100, 400, 500), root.child1.layoutResult.AllocatedRect);
     }
 
     [Test]
@@ -245,12 +245,12 @@ public class LayoutSystemTests {
         app.Update();
         LayoutTestThing root = (LayoutTestThing) app.RootElement;
         Assert.IsFalse(root.child1.FindById("nested-child-1").isEnabled);
-        Assert.AreEqual(new Rect(0, 100, 200, 50), root.child1.layoutResult.ScreenRect);
+        Assert.AreEqual(new Rect(0, 100, 200, 50), root.child1.layoutResult.AllocatedRect);
         root.child1.FindById("nested-child-1").SetEnabled(true);
         Assert.IsTrue(root.child1.FindById("nested-child-1").isEnabled);
         app.Update();
         Assert.IsTrue(root.child1.FindById("nested-child-1").isEnabled);
-        Assert.AreEqual(new Rect(0, 100, 300, 100), root.child1.layoutResult.ScreenRect);
+        Assert.AreEqual(new Rect(0, 100, 300, 100), root.child1.layoutResult.AllocatedRect);
     }
 
     [Test]
@@ -277,13 +277,13 @@ public class LayoutSystemTests {
         LayoutTestThing root = (LayoutTestThing) app.RootElement;
 
         Assert.IsTrue(root.child1.FindById("nested-child-1").isEnabled);
-        Assert.AreEqual(new Rect(0, 100, 300, 100), root.child1.layoutResult.ScreenRect);
+        Assert.AreEqual(new Rect(0, 100, 300, 100), root.child1.layoutResult.AllocatedRect);
 
         root.child1.FindById("nested-child-1").SetEnabled(false);
 
         app.Update();
         Assert.IsFalse(root.child1.FindById("nested-child-1").isEnabled);
-        Assert.AreEqual(new Rect(0, 100, 200, 50), root.child1.layoutResult.ScreenRect);
+        Assert.AreEqual(new Rect(0, 100, 200, 50), root.child1.layoutResult.AllocatedRect);
     }
 
     [Test]
@@ -312,17 +312,17 @@ public class LayoutSystemTests {
         UIElement nestedChild2 = root.child1.FindById("nested-child-2");
         app.Update();
 
-        Assert.AreEqual(new Rect(0, 100, 300, 100), root.child1.layoutResult.ScreenRect);
-        Assert.AreEqual(new Rect(0, 200, 100, 100), root.child2.layoutResult.ScreenRect);
-        Assert.AreEqual(new Rect(0, 100, 300, 50), nestedChild1.layoutResult.ScreenRect);
-        Assert.AreEqual(new Rect(0, 150, 200, 50), nestedChild2.layoutResult.ScreenRect);
+        Assert.AreEqual(new Rect(0, 100, 300, 100), root.child1.layoutResult.AllocatedRect);
+        Assert.AreEqual(new Rect(0, 200, 100, 100), root.child2.layoutResult.AllocatedRect);
+        Assert.AreEqual(new Rect(0, 100, 300, 50), nestedChild1.layoutResult.AllocatedRect);
+        Assert.AreEqual(new Rect(0, 150, 200, 50), nestedChild2.layoutResult.AllocatedRect);
 
         nestedChild1.style.SetPreferredHeight(500f, StyleState.Normal);
         app.Update();
-        Assert.AreEqual(new Rect(0, 100, 300, 550), root.child1.layoutResult.ScreenRect);
-        Assert.AreEqual(new Rect(0, 650, 100, 100), root.child2.layoutResult.ScreenRect);
-        Assert.AreEqual(new Rect(0, 100, 300, 500), nestedChild1.layoutResult.ScreenRect);
-        Assert.AreEqual(new Rect(0, 600, 200, 50), nestedChild2.layoutResult.ScreenRect);
+        Assert.AreEqual(new Rect(0, 100, 300, 550), root.child1.layoutResult.AllocatedRect);
+        Assert.AreEqual(new Rect(0, 650, 100, 100), root.child2.layoutResult.AllocatedRect);
+        Assert.AreEqual(new Rect(0, 100, 300, 500), nestedChild1.layoutResult.AllocatedRect);
+        Assert.AreEqual(new Rect(0, 600, 200, 50), nestedChild2.layoutResult.AllocatedRect);
     }
 
     [Test]

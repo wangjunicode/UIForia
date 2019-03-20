@@ -1,4 +1,4 @@
-﻿using UIForia.Stystems.InputSystem;
+﻿using UIForia.Systems.Input;
 
 namespace UIForia.UIInput {
 
@@ -6,7 +6,7 @@ namespace UIForia.UIInput {
 
         public bool isConsumed;
         public bool shouldStopPropagation;
-        
+
         public MouseState mouseState;
 
         public void Reset(MouseState mouseState) {
@@ -14,7 +14,7 @@ namespace UIForia.UIInput {
             shouldStopPropagation = false;
             isConsumed = false;
         }
-        
+
     }
 
 }

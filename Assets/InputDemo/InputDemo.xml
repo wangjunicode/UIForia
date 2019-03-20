@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="utf-8"?>
+<UITemplate>
+    
+    <Style>
+        
+        style container {
+            PreferredSize = 300px;
+            BackgroundColor = Red;
+        }
+        
+    </Style>
+    
+    <Contents style="container">
+        
+    </Contents>
+    
+</UITemplate>

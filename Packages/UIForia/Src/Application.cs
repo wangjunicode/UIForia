@@ -10,6 +10,7 @@ using UIForia.Parsing.Expression;
 using UIForia.Rendering;
 using UIForia.Routing;
 using UIForia.Systems;
+using UIForia.Systems.Input;
 using UIForia.Templates;
 using UIForia.Util;
 using UnityEngine;
@@ -65,7 +66,10 @@ namespace UIForia {
         public readonly TemplateParser templateParser;
 
         private static readonly LightList<Application> s_ApplicationList;
-
+        
+        private readonly UITaskSystem m_BeforeUpdateTaskSystem;
+        private readonly UITaskSystem m_AfterUpdateTaskSystem;
+        
         static Application() {
             ArrayPool<UIElement>.SetMaxPoolSize(64);
             s_RequiresUpdateMap = new Dictionary<Type, bool>();
@@ -95,7 +99,7 @@ namespace UIForia {
             m_StyleSystem = new StyleSystem();
             m_BindingSystem = new BindingSystem();
             m_LayoutSystem = new LayoutSystem(m_StyleSystem);
-            m_InputSystem = new DefaultInputSystem(m_LayoutSystem);
+            m_InputSystem = new GameInputSystem2(m_LayoutSystem);//new DefaultInputSystem(m_LayoutSystem);
             m_RenderSystem = new SVGXRenderSystem(null, m_LayoutSystem);
             m_RoutingSystem = new RoutingSystem();
 
@@ -109,6 +113,8 @@ namespace UIForia {
             m_Systems.Add(m_LayoutSystem);
             m_Systems.Add(m_RenderSystem);
             
+            m_BeforeUpdateTaskSystem = new UITaskSystem();
+            m_AfterUpdateTaskSystem = new UITaskSystem();
             onApplicationCreated?.Invoke(this);
             
         }
@@ -224,6 +230,9 @@ namespace UIForia {
             styleImporter.Reset();
             ResourceManager.Reset(); // todo use 1 instance per application
 
+            m_AfterUpdateTaskSystem.OnReset();
+            m_BeforeUpdateTaskSystem.OnReset();
+            
             for (int i = 0; i < m_Views.Count; i++) {
                 m_Views[i].Refresh();
                 RegisterElement(m_Views[i].RootElement);
@@ -441,6 +450,9 @@ namespace UIForia {
             m_StyleSystem.OnUpdate();
             m_LayoutSystem.OnUpdate();
             m_InputSystem.OnUpdate();
+            
+            m_BeforeUpdateTaskSystem.OnUpdate();
+            
             m_RenderSystem.OnUpdate();
 
             m_RoutingSystem.OnUpdate();
@@ -451,6 +463,8 @@ namespace UIForia {
                 element.OnUpdate();
                 return true;
             });
+
+            m_AfterUpdateTaskSystem.OnUpdate();
 
             onUpdate?.Invoke();
         }

@@ -1,6 +1,6 @@
 using JetBrains.Annotations;
-using UIForia.Stystems.InputSystem;
 using UIForia.Systems;
+using UIForia.Systems.Input;
 using UnityEngine;
 
 namespace Tests.Mocks {

@@ -2,7 +2,7 @@ using UIForia.Elements;
 using UIForia.UIInput;
 using UIForia.Util;
 
-namespace UIForia.Stystems.InputSystem {
+namespace UIForia.Systems.Input {
 
     public class KeyboardEventTreeNode : IHierarchical {
 

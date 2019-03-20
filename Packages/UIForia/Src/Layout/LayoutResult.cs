@@ -1,4 +1,5 @@
 ﻿using System;
+using UIForia.Rendering;
 using UIForia.Systems;
 using UIForia.Util;
 using UnityEngine;
@@ -30,7 +31,8 @@ namespace UIForia.Layout {
         public Size scrollbarVerticalSize;
         
         public Rect ScreenRect => new Rect(screenPosition, new Vector2(actualSize.width, actualSize.height));
-
+        public Rect AllocatedRect => new Rect(screenPosition, new Vector2(allocatedSize.width, allocatedSize.height));
+        
         public Rect LocalRect => new Rect(localPosition, new Vector2(actualSize.width, actualSize.height));
 
         public float AllocatedWidth => allocatedSize.width; // this should be size with padding & border already subtracted

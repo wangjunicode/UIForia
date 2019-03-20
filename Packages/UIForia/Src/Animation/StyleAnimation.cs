@@ -151,7 +151,6 @@ namespace UIForia.Animation {
             }
         }
 
-
         public static float ResolveWidthMeasurement(UIElement element, Rect viewport, UIMeasurement measurement) {
             switch (measurement.unit) {
                 case UIMeasurementUnit.Unset:

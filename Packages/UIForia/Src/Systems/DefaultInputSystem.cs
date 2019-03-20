@@ -1,77 +1,61 @@
-using UIForia.Stystems.InputSystem;
 using UnityEngine;
 
-namespace UIForia.Systems {
+namespace UIForia.Systems.Input {
 
-    public class DefaultInputSystem : InputSystem {
+    public class GameInputSystem2 : InputSystem {
 
-        public const float k_DoubleClickDelay = 0.5f;
-        public const float k_SingleClickDelay = 0.3f;
+        public GameInputSystem2(ILayoutSystem layoutSystem) : base(layoutSystem) { }
 
-        private Vector2 m_LastMouseDownPosition;
-        private float m_LastMouseDownTimestamp;
-        private bool m_IsDoubleClick;
-        private bool m_IsTripleClick;
+        private int clickCount;
+        private float lastMouseDownTime;
+        private Vector2 lastMouseDownPosition;
+        private const float k_ClickThreshold = 0.33f;
 
-        public DefaultInputSystem(ILayoutSystem layoutSystem)
-            : base(layoutSystem) { }
-
-        // todo -- formalize clicking with different buttons
-        // todo -- fix double and triple clicking
-        
         protected override MouseState GetMouseState() {
             MouseState retn = new MouseState();
-            retn.isLeftMouseDown = Input.GetMouseButton(0);
-            retn.isRightMouseDown = Input.GetMouseButton(1);
-            retn.isMiddleMouseDown = Input.GetMouseButton(2);
+            retn.isLeftMouseDown = UnityEngine.Input.GetMouseButton(0);
+            retn.isRightMouseDown = UnityEngine.Input.GetMouseButton(1);
+            retn.isMiddleMouseDown = UnityEngine.Input.GetMouseButton(2);
 
-            retn.isLeftMouseDownThisFrame = Input.GetMouseButtonDown(0);
-            retn.isRightMouseDownThisFrame = Input.GetMouseButtonDown(1);
-            retn.isMiddleMouseDownThisFrame = Input.GetMouseButtonDown(2);
+            retn.isLeftMouseDownThisFrame = UnityEngine.Input.GetMouseButtonDown(0);
+            retn.isRightMouseDownThisFrame = UnityEngine.Input.GetMouseButtonDown(1);
+            retn.isMiddleMouseDownThisFrame = UnityEngine.Input.GetMouseButtonDown(2);
 
-            retn.isLeftMouseUpThisFrame = Input.GetMouseButtonUp(0);
-            retn.isRightMouseUpThisFrame = Input.GetMouseButtonUp(1);
-            retn.isMiddleMouseUpThisFrame = Input.GetMouseButtonUp(2);
+            retn.isLeftMouseUpThisFrame = UnityEngine.Input.GetMouseButtonUp(0);
+            retn.isRightMouseUpThisFrame = UnityEngine.Input.GetMouseButtonUp(1);
+            retn.isMiddleMouseUpThisFrame = UnityEngine.Input.GetMouseButtonUp(2);
             retn.mouseDownPosition = m_MouseState.mouseDownPosition;
+            retn.mousePosition = ConvertMousePosition(UnityEngine.Input.mousePosition);
             float now = Time.unscaledTime;
 
-            if (retn.isLeftMouseDown || retn.isRightMouseDown) {
-                if (retn.isLeftMouseDownThisFrame || retn.isRightMouseDownThisFrame) {
-                    retn.mouseDownPosition = ConvertMousePosition(Input.mousePosition);
-                    if (now - m_LastMouseDownTimestamp <= k_DoubleClickDelay && Vector2.Distance(m_LastMouseDownPosition, retn.mouseDownPosition) <= 3f) {
-                        if (!m_IsDoubleClick) {
-                            m_IsDoubleClick = true;
-                        }
-                        else {
-                            m_IsTripleClick = true;
-                        }
-                    }
-                    m_LastMouseDownPosition = retn.mouseDownPosition;
-                    m_LastMouseDownTimestamp = Time.unscaledTime;
-                }
+            bool didClick = false;
+
+            if (retn.isLeftMouseDownThisFrame) {
+                retn.mouseDownPosition = retn.mousePosition;
+                lastMouseDownTime = now;
+                lastMouseDownPosition = retn.mouseDownPosition;
             }
-            else {
-                retn.isSingleClick = (retn.isRightMouseUpThisFrame || retn.isLeftMouseUpThisFrame) && (now - m_LastMouseDownTimestamp < k_SingleClickDelay);
-                if (!retn.isSingleClick) {
-                    retn.mouseDownPosition = new Vector2();
+            else if (retn.isLeftMouseUpThisFrame) {
+                if (now - lastMouseDownTime <= k_ClickThreshold) {
+                    if (Vector2.Distance(lastMouseDownPosition, retn.mousePosition) <= 3f) {
+                        clickCount++;
+                        didClick = true;
+                    }
                 }
+                retn.mouseDownPosition = new Vector2(-1, -1);
             }
 
-            // todo formalize clicking with different buttons
-            
-            retn.mousePosition = ConvertMousePosition(Input.mousePosition);
-            retn.scrollDelta = Input.mouseScrollDelta;
+            if (now - lastMouseDownTime > k_ClickThreshold) {
+                clickCount = 0;
+            }
+
+            retn.isSingleClick = didClick && clickCount == 1;
+            retn.isDoubleClick = didClick && clickCount == 2;
+            retn.isTripleClick = didClick && clickCount == 3;
+            retn.clickCount = clickCount;
+            retn.scrollDelta = UnityEngine.Input.mouseScrollDelta;
             retn.previousMousePosition = m_MouseState.mousePosition;
 
-            if (now - m_LastMouseDownTimestamp > k_DoubleClickDelay) {
-                m_IsDoubleClick = false;
-                m_IsTripleClick = false;
-                m_LastMouseDownPosition = new Vector2(-999f, -999f);
-            }
-
-            // only true on the frame the mouse is down
-            retn.isDoubleClick = m_IsDoubleClick;
-            retn.isTripleClick = m_IsTripleClick;
             return retn;
         }
 

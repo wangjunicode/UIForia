@@ -1,6 +1,6 @@
 using UnityEngine;
 
-namespace UIForia.Stystems.InputSystem {
+namespace UIForia.Systems.Input {
 
     public struct MouseState {
 
@@ -25,6 +25,7 @@ namespace UIForia.Stystems.InputSystem {
         public bool isDoubleClick;
         public bool isTripleClick;
         public bool isSingleClick;
+        public int clickCount;
 
         public Vector2 MouseDownDelta {
             get {

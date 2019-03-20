@@ -3,13 +3,13 @@ using System.Collections.Generic;
 using UIForia.Rendering;
 using UIForia.Elements;
 using UIForia.Expressions;
-using UIForia.Systems;
+using UIForia.Systems.Input;
 using UIForia.Templates;
 using UIForia.UIInput;
 using UIForia.Util;
 using UnityEngine;
 
-namespace UIForia.Stystems.InputSystem {
+namespace UIForia.Systems {
 
     public abstract class InputSystem : IInputSystem {
 
@@ -643,13 +643,13 @@ namespace UIForia.Stystems.InputSystem {
 
         private void HandleShiftKey(KeyCode code) {
             bool wasDown = IsKeyDown(code);
-            bool isDown = Input.GetKey(code);
-            if ((wasDown && !isDown) || Input.GetKeyUp(code)) {
+            bool isDown = UnityEngine.Input.GetKey(code);
+            if ((wasDown && !isDown) || UnityEngine.Input.GetKeyUp(code)) {
                 m_KeyStates[code] = KeyState.UpThisFrame;
                 m_UpThisFrame.Add(code);
                 ProcessKeyboardEvent(code, InputEventType.KeyUp, '\0', modifiersThisFrame);
             }
-            else if (Input.GetKeyDown(code)) {
+            else if (UnityEngine.Input.GetKeyDown(code)) {
                 m_KeyStates[code] = KeyState.DownThisFrame;
                 m_DownThisFrame.Add(code);
             }
@@ -695,61 +695,61 @@ namespace UIForia.Stystems.InputSystem {
         private void HandleModifierUp(KeyCode keyCode) {
             switch (keyCode) {
                 case KeyCode.LeftAlt:
-                    if (!Input.GetKey(KeyCode.RightAlt)) {
+                    if (!UnityEngine.Input.GetKey(KeyCode.RightAlt)) {
                         modifiersThisFrame &= ~KeyboardModifiers.Alt;
                     }
 
                     break;
                 case KeyCode.RightAlt:
-                    if (!Input.GetKey(KeyCode.LeftAlt)) {
+                    if (!UnityEngine.Input.GetKey(KeyCode.LeftAlt)) {
                         modifiersThisFrame &= ~KeyboardModifiers.Alt;
                     }
 
                     break;
                 case KeyCode.LeftControl:
-                    if (!Input.GetKey(KeyCode.RightControl)) {
+                    if (!UnityEngine.Input.GetKey(KeyCode.RightControl)) {
                         modifiersThisFrame &= ~KeyboardModifiers.Control;
                     }
 
                     break;
                 case KeyCode.RightControl:
-                    if (!Input.GetKey(KeyCode.LeftControl)) {
+                    if (!UnityEngine.Input.GetKey(KeyCode.LeftControl)) {
                         modifiersThisFrame &= ~KeyboardModifiers.Control;
                     }
 
                     break;
                 case KeyCode.LeftCommand:
-                    if (!Input.GetKey(KeyCode.RightCommand)) {
+                    if (!UnityEngine.Input.GetKey(KeyCode.RightCommand)) {
                         modifiersThisFrame &= ~KeyboardModifiers.Command;
                     }
 
                     break;
                 case KeyCode.RightCommand:
-                    if (!Input.GetKey(KeyCode.LeftCommand)) {
+                    if (!UnityEngine.Input.GetKey(KeyCode.LeftCommand)) {
                         modifiersThisFrame &= ~KeyboardModifiers.Command;
                     }
 
                     break;
                 case KeyCode.LeftWindows:
-                    if (!Input.GetKey(KeyCode.RightWindows)) {
+                    if (!UnityEngine.Input.GetKey(KeyCode.RightWindows)) {
                         modifiersThisFrame &= ~KeyboardModifiers.Windows;
                     }
 
                     break;
                 case KeyCode.RightWindows:
-                    if (!Input.GetKey(KeyCode.LeftWindows)) {
+                    if (!UnityEngine.Input.GetKey(KeyCode.LeftWindows)) {
                         modifiersThisFrame &= ~KeyboardModifiers.Windows;
                     }
 
                     break;
                 case KeyCode.LeftShift:
-                    if (!Input.GetKey(KeyCode.RightShift)) {
+                    if (!UnityEngine.Input.GetKey(KeyCode.RightShift)) {
                         modifiersThisFrame &= ~KeyboardModifiers.Shift;
                     }
 
                     break;
                 case KeyCode.RightShift:
-                    if (!Input.GetKey(KeyCode.LeftShift)) {
+                    if (!UnityEngine.Input.GetKey(KeyCode.LeftShift)) {
                         modifiersThisFrame &= ~KeyboardModifiers.Shift;
                     }
 
@@ -839,7 +839,7 @@ namespace UIForia.Stystems.InputSystem {
             }
             else if (m_MouseState.isLeftMouseUpThisFrame || m_MouseState.isRightMouseUpThisFrame) {
                 RunMouseEvents(m_ElementsThisFrame, InputEventType.MouseUp);
-                if (m_MouseState.isSingleClick) {
+                if (m_MouseState.clickCount > 0) {
                     RunMouseEvents(m_ElementsThisFrame, InputEventType.MouseClick);
                 }
             }

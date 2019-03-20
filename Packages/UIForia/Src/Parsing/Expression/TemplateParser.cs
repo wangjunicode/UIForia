@@ -43,7 +43,8 @@ namespace UIForia.Parsing.Expression {
                 return parsedTemplate;
             }
             catch (Exception e) {
-                Debug.Log($"Cannot parse file {elementType}");
+                // todo -- make this a better error message
+                Debug.Log($"Cannot parse file {elementType}, you might be missing a template attribute");
                 throw;
             }
         }

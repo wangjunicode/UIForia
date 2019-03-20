@@ -316,6 +316,8 @@ namespace UIForia.Routing {
         }
 
         private void GatherTransitions(string path) {
+            if (CurrentUrl == null) return;
+            
             for (int i = 0; i < m_Transitions.Count; i++) {
                 if (IsTransitionApplicable(m_Transitions[i], path)) {
                     m_ActiveTransitions.Add(m_Transitions[i]);

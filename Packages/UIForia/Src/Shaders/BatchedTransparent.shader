@@ -168,13 +168,7 @@ Shader "UIForia/BatchedTransparent" {
                if(color.a - 0.001 <= 0) {
                    discard;
                }
-               
-               //if(color.a > 0.7) color.a = 1;
-               
-               i.color.a *= color.a;
-               
-               return i.color;
-               
+                                            
                float t = lerp(i.uv.x, 1 - i.uv.y, GradientDirection);
                float y = GetPixelInRowUV(GradientId, _globalGradientAtlasSize);
                
@@ -182,7 +176,7 @@ Shader "UIForia/BatchedTransparent" {
                fixed4 gradientColor = tex2Dlod(_globalGradientAtlas, float4(t, y, 0, 0));
                // fixed4 tintColor = lerp(fixed4(i.color.rgb, 0), i.color.rgba, i.fragData2.z);                
                
-               textureColor = lerp(color, textureColor, 0);//i.fragData2.x);
+               textureColor = lerp(color, textureColor, i.fragData2.x);
                gradientColor = lerp(White, gradientColor, i.fragData2.y);
                // tintColor = lerp(tintColor, gradientColor, i.fragData2.w);
                

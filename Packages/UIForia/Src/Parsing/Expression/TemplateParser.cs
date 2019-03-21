@@ -389,7 +389,7 @@ namespace UIForia.Parsing.Expression {
         private UITemplate ParseInputElement(XElement element) {
             return new UIElementTemplate(
                 app,
-                typeof(InputElement),
+                typeof(UIInputFieldElement),
                 ParseNodes(element.Nodes()),
                 ParseAttributes(element.Attributes())
             );

@@ -68,12 +68,13 @@ namespace UIForia.Routing {
                 m_Routers.Add(router);
                 
             }
-            
-            else if (TryGetAttribute("route", m_ScratchAttrList, out ElementAttribute routeAttr)) {
-                
-                Router.ResolveRouterName(routeAttr.value, out string routerName, out string path);
 
-                Route route = new Route(path, element);
+            else if (TryGetAttribute("route", m_ScratchAttrList, out ElementAttribute routeAttr)) {
+
+                string path = routeAttr.value;
+                TryGetAttribute("defaultRoute", m_ScratchAttrList, out ElementAttribute defaultRouteAttr);
+
+                Route route = new Route(path, element, defaultRouteAttr.value);
 
                 if (TryGetAttribute("onRouteEnter", m_ScratchAttrList, out ElementAttribute onRouteEnterAttr)) { }
 
@@ -81,20 +82,16 @@ namespace UIForia.Routing {
 
                 if (TryGetAttribute("onRouteEnter", m_ScratchAttrList, out ElementAttribute onRouteExitAttr)) { }
 
-                Router router = null;
-                if (routerName == null) {
-                    router = FindRouterInHierarchy(element);
-                    if (router == null) {
-                        throw new Exception("Cannot resolve router in hierarchy");
-                    }
+                Router router = FindRouterInHierarchy(element);
+                if (router == null) {
+                    throw new Exception("Cannot resolve router in hierarchy");
                 }
-                else {
-                    router = FindRouter(routerName);
-                    if (router == null) {
-                        throw new Exception("Cannot resolve router with name: " + routerName);
-                    }
+
+                if (router.TryGetParentRouteFor(element, out Route parent)) {
+                    route.path = parent.path + route.path;
+                    parent.subRoutes.Add(route);
                 }
-              
+
                 router.AddRoute(route);
 
                 element.SetEnabled(false);

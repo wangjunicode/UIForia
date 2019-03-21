@@ -1,10 +1,188 @@
-//using NUnit.Framework;
-//using Tests.Mocks;
-//using UIForia;
-//using UIForia.Routing;
-//
-//[TestFixture]
-//public class RouterTests {
+using NUnit.Framework;
+using Tests.Mocks;
+using UIForia.Attributes;
+using UIForia.Elements;
+using UIForia.Routing;
+
+[TestFixture]
+public class RouterTests {
+    
+    [Template(TemplateType.String, @"
+    <UITemplate>
+        <Contents x-router=""game"" x-defaultRoute=""/user/1"">
+             
+            <Group x-route=""/user/:id"">
+                This is you
+                <Div x-id=""inner-route"" x-route=""/something/:id2"">NEST1</Div>
+            </Group>
+            <Group x-id=""friends"" x-route=""/user/:id/friends"">These are your Friends</Group>
+        </Contents>
+    </UITemplate>
+    ")]
+    private class ParsersRouterNestedThing : UIElement { }
+   
+    [Test]
+    public void ParseDefaultRouteWithParameter() {
+        MockApplication app = new MockApplication(typeof(ParsersRouterNestedThing));
+        app.Update();
+        
+        var uiElement1 = app.RootElement.GetChild(0);
+        var uiElement2 = app.RootElement.GetChild(1);
+        
+        Assert.IsInstanceOf<UIGroupElement>(uiElement1);
+        Assert.IsInstanceOf<UIGroupElement>(uiElement2);
+        
+        Router router = app.RootElement.Application.RoutingSystem.FindRouter("game");
+        string id = router.GetParameter("id");
+        
+        Assert.True(uiElement1.isEnabled);
+        Assert.AreEqual("1", id);
+        
+        Assert.True(uiElement2.isDisabled);
+    }
+
+    [Test]
+    public void ParseInnerRouteWithParameter() {
+        MockApplication app = new MockApplication(typeof(ParsersRouterNestedThing));
+        app.Update();
+        
+        var uiElement1 = app.RootElement.GetChild(0);
+        Router router = app.RootElement.Application.RoutingSystem.FindRouter("game");
+        router.GoTo("/user/2/something/23");
+        
+        app.Update();
+
+        var innerRouteElement = app.RootElement.FindById<UIElement>("inner-route");
+        var friendsElement = app.RootElement.FindById<UIElement>("friends");
+        Assert.IsInstanceOf<UIDivElement>(innerRouteElement);
+        Assert.True(uiElement1.isEnabled);
+        Assert.True(innerRouteElement.isEnabled);
+        Assert.True(friendsElement.isDisabled);
+
+        string id = router.GetParameter("id");
+        string id2 = router.GetParameter("id2");
+        Assert.AreEqual("2", id);
+        Assert.AreEqual("23", id2);
+    }
+
+    [Template(TemplateType.String, @"
+    <UITemplate>
+        <Contents x-router=""game"">
+             
+            <Group x-id=""help"" x-route=""/help"">
+                Get some help
+                <Div x-id=""faq-route1"" x-route=""/faq/1"" x-defaultRoute=""true"">fact 1</Div>
+                <Div x-id=""faq-route2"" x-route=""/faq/2"">fact 2</Div>
+                <Div x-id=""faq-route3"" x-route=""/faq/3"">fact 3</Div>
+            </Group>
+            <Group x-id=""friends"" x-route=""/user/:id/friends"">These are your Friends</Group>
+        </Contents>
+    </UITemplate>
+    ")]
+    private class RoutesWithDefaults : UIElement { }
+
+    [Test]
+    public void ParseInnerRouteWithDefaultAttribute() {
+        MockApplication app = new MockApplication(typeof(RoutesWithDefaults));
+        app.Update();
+       
+        var helpElement = app.RootElement.FindById<UIGroupElement>("help");
+        var faqRoute1 = app.RootElement.FindById<UIDivElement>("faq-route1");
+        var faqRoute2 = app.RootElement.FindById<UIDivElement>("faq-route2");
+        var faqRoute3 = app.RootElement.FindById<UIDivElement>("faq-route3");
+        
+        var friendsElement = app.RootElement.FindById<UIElement>("friends");
+        Assert.True(helpElement.isEnabled);
+        Assert.True(faqRoute1.isEnabled);
+        Assert.True(faqRoute2.isDisabled);
+        Assert.True(faqRoute3.isDisabled);
+        Assert.True(friendsElement.isDisabled);
+    }
+    
+    [Test]
+    public void GoBackAndForwards() {
+        MockApplication app = new MockApplication(typeof(RoutesWithDefaults));
+        app.Update();
+       
+        var helpElement = app.RootElement.FindById<UIGroupElement>("help");
+        var faqRoute1 = app.RootElement.FindById<UIDivElement>("faq-route1");
+        var faqRoute2 = app.RootElement.FindById<UIDivElement>("faq-route2");
+        var faqRoute3 = app.RootElement.FindById<UIDivElement>("faq-route3");
+        var friendsElement = app.RootElement.FindById<UIElement>("friends");
+        
+        // starting at faq1 and go to users friends
+        app.RootElement.Application.RoutingSystem.FindRouter("game").GoTo("/user/1/friends");
+        app.Update();
+        
+        Assert.True(helpElement.isDisabled);
+        Assert.True(faqRoute1.isDisabled);
+        Assert.True(faqRoute2.isDisabled);
+        Assert.True(faqRoute3.isDisabled);
+        
+        // just the friends are active!
+        Assert.True(friendsElement.isEnabled);
+        
+        // let's go back 
+        app.RootElement.Application.RoutingSystem.FindRouter("game").GoBack();
+        app.Update();
+        Assert.True(helpElement.isEnabled);
+        Assert.True(faqRoute1.isEnabled);
+        Assert.True(faqRoute2.isDisabled);
+        Assert.True(faqRoute3.isDisabled);
+        Assert.True(friendsElement.isDisabled);
+    }
+    
+    [Template(TemplateType.String, @"
+    <UITemplate>
+        <Contents x-router=""game"" x-defaultRoute=""/character/1"">
+            <Group x-route=""/character"">
+                This is you
+                <Div x-id=""characterDetail"" x-route=""/:characterId"">The Shredder</Div>
+            </Group>
+            <Group x-id=""friends"" x-route=""/user/:id/friends"">These are your Friends</Group>
+            <Group x-router=""chat"">
+                <Div x-id=""chatWithMatt"" x-route=""/chat/matt"" x-defaultRoute=""true"" />
+                <Div x-id=""chatWithChristian"" x-route=""/chat/christian"" />
+            </Group> 
+       </Contents>
+    </UITemplate>
+    ")]
+    private class GameViewWithLotsOfRouters : UIElement { }
+    
+    [Test]
+    public void NavigateDifferentRouters() {
+        MockApplication app = new MockApplication(typeof(GameViewWithLotsOfRouters));
+        app.Update();
+       
+        var characterDetail = app.RootElement.FindById<UIDivElement>("characterDetail");
+        var friendsElement = app.RootElement.FindById<UIGroupElement>("friends");
+        var chatWithChristian = app.RootElement.FindById<UIDivElement>("chatWithChristian");
+        var chatWithMatt = app.RootElement.FindById<UIDivElement>("chatWithMatt");
+        
+        Assert.True(characterDetail.isEnabled);
+        Assert.True(friendsElement.isDisabled);
+        Assert.True(chatWithMatt.isEnabled);
+        Assert.True(chatWithChristian.isDisabled);
+
+        var gameRouter = app.RootElement.Application.RoutingSystem.FindRouter("game");
+        var chatRouter = app.RootElement.Application.RoutingSystem.FindRouter("chat");
+        
+        gameRouter.GoTo("/user/12/friends");
+        chatRouter.GoTo("/chat/christian");
+        app.Update();
+        
+        Assert.True(characterDetail.isDisabled);
+        Assert.True(friendsElement.isEnabled);
+        Assert.True(chatWithMatt.isDisabled);
+        Assert.True(chatWithChristian.isEnabled);
+
+        string friendId = gameRouter.GetParameter("id");
+        Assert.AreEqual("12", friendId);
+        Assert.IsNull(chatRouter.GetParameter("id").value);
+    }
+
+}
+
 //
 //    [Template(TemplateType.String, @"
 //    <UITemplate>

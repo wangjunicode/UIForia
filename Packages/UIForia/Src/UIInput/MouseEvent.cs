@@ -59,7 +59,9 @@ namespace UIForia.UIInput {
         public Vector2 ScrollDelta => source.mouseState.scrollDelta;
 
         public Vector2 MousePosition => source.mouseState.mousePosition;
-        public Vector2 MouseDownPosition => source.mouseState.mouseDownPosition;
+        public Vector2 MouseDownPosition => source.mouseState.leftMouseButtonState.downPosition;
+        public Vector2 DragDelta => source.mouseState.MouseDelta;
+        
     }
 
 }

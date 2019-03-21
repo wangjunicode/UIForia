@@ -30,15 +30,23 @@ namespace UIForia.Routing {
     public struct RouteMatch {
 
         public readonly string url;
-        public readonly int matchProgress;
+        public readonly bool matches;
+        public readonly bool parentMatch;
+        public LightList<RouteParameter> routeParameters;
 
-        public RouteMatch(string url, int matchProgress = -1) {
+        public RouteMatch(string url, bool matches, bool parentMatch, LightList<RouteParameter> routeParameters) {
             this.url = url;
-            this.matchProgress = matchProgress;
+            this.matches = matches;
+            this.parentMatch = parentMatch;
+            this.routeParameters = routeParameters;
+            if (!matches) Release();
         }
 
-        public bool IsMatch => matchProgress >= 0;
-
+        public void Release() {
+            if (routeParameters != null) {
+                LightListPool<RouteParameter>.Release(ref routeParameters);
+            }
+        }
     }
 
     public class Route {
@@ -48,10 +56,15 @@ namespace UIForia.Routing {
         public event Action onRouteEnter;
         public event Action onRouteExit;
         public event Action onRouteUpdate;
+        internal readonly LightList<RouteParameter> m_RouteParameters;
+        public readonly bool isDefaultRoute;
+        internal readonly LightList<Route> subRoutes; 
 
-        public Route(string path, UIElement element) {
+        public Route(string path, UIElement element, string defaultRouteParamValue = null) {
             this.path = path;
             this.element = element;
+            this.isDefaultRoute = defaultRouteParamValue == "true";
+            this.subRoutes = new LightList<Route>();
         }
 
         public void Enter() {
@@ -68,47 +81,52 @@ namespace UIForia.Routing {
             onRouteUpdate?.Invoke();
         }
 
-        public static RouteMatch Match(string path, string matchPath, int matchPtr) {
+        public static RouteMatch Match(string path, string matchPath, bool parentMatch = false) {
             if (path == "*") {
-                return new RouteMatch(matchPath, 0);
+                return new RouteMatch(matchPath, false, parentMatch, null);
             }
+            
+            LightList<RouteParameter> routeParameters = LightListPool<RouteParameter>.Get();
 
-            int ptr = 0;
+            // note: /test/url does not match /test/url/
+            string[] pathSegments = path.Split('/');
+            string[] destinationPathSegments = matchPath.Split('/');
 
-            while (ptr < path.Length) {
-                if (matchPtr >= matchPath.Length) {
-                    return new RouteMatch(matchPath, -1);
-                }
-
-                if (ptr >= path.Length) {
-                    return new RouteMatch(matchPath, -1);
-                }
-
-                char current = path[ptr];
-                char matchCurrent = matchPath[matchPtr];
-
-                if (current == ':') {
-                    throw new NotSupportedException();
-                }
-
-                if (current == matchCurrent) {
-                    ptr++;
-                    matchPtr++;
-                    continue;
-                }
+            for (int i = 0; i < pathSegments.Length; i++) {
+                if (string.IsNullOrEmpty(pathSegments[i])) continue;
                 
-                if (current == '*') return new RouteMatch(matchPath, matchPtr);
+                if (destinationPathSegments.Length <= i) {
+                    return new RouteMatch(matchPath, false, parentMatch, routeParameters);
+                }
 
-                return new RouteMatch(matchPath, -1);
+                if (pathSegments[i] == "*" && i == pathSegments.Length - 1) {
+                    return new RouteMatch(matchPath, false, parentMatch, routeParameters);
+                }
+
+                if (pathSegments[i].StartsWith(":")) {
+                    string pathVariableName = pathSegments[i].Substring(1, pathSegments[i].Length - 1);
+                    routeParameters.Add(new RouteParameter(pathVariableName, destinationPathSegments[i]));
+                }
+                else if (pathSegments[i] != destinationPathSegments[i]) {
+                    return new RouteMatch(matchPath, false, parentMatch, routeParameters);
+                }
             }
 
-            if (matchPtr - 1 != matchPath.Length - 1) {
-                return new RouteMatch(matchPath, -1);
-            }
-
-            return new RouteMatch(matchPath, matchPtr);
+            return new RouteMatch(matchPath, destinationPathSegments.Length == pathSegments.Length, parentMatch, routeParameters);
         }
 
+        public static RouteMatch Match(Route route, string matchPath, bool parentMatch = false) {
+
+            // if a subroute matches this path then the parent shall always be active
+            for (int i = 0; i < route.subRoutes.Count; i++) {
+                RouteMatch routeMatch = Match(route.subRoutes[i], matchPath, true);
+                if (routeMatch.matches) {
+                    return routeMatch;
+                }
+            }
+
+            return Match(route.path, matchPath, parentMatch);
+        }
     }
 
     public class Router {
@@ -122,27 +140,35 @@ namespace UIForia.Routing {
         private readonly LightList<Route> m_RouteHandlers;
         private readonly LightList<RouteTransition> m_Transitions;
         private readonly LightList<RouteTransition> m_ActiveTransitions;
+        private readonly LightList<RouteParameter> m_CurrentRouteParameters;
+        private readonly LightList<Route> m_ActiveParentRoutes;
+        private readonly LightList<Route> m_TargetParentRoutes;
+
 
         private Route activeRoute;
         private Route targetRoute;
+        private RouteMatch targetRouteMatch;
 
         private string targetUrl;
-        private string defaultRoute;
+        public string defaultRoute { set; get; }
 
         internal Router(int hostId, string name, string defaultRoute = null) {
             this.hostId = hostId;
             this.name = name;
             this.defaultRoute = defaultRoute;
-            
+
             m_HistoryStack = new LightList<Route>();
             m_RouteHandlers = new LightList<Route>();
             m_Transitions = new LightList<RouteTransition>();
             m_ActiveTransitions = new LightList<RouteTransition>();
+            m_CurrentRouteParameters = new LightList<RouteParameter>();
+            m_ActiveParentRoutes = new LightList<Route>();
+            m_TargetParentRoutes = new LightList<Route>();
 
             activeRoute = null;
             targetRoute = null;
         }
-        
+
         public bool CanGoForwards => m_HistoryStack.Count > 1 && historyIndex != m_HistoryStack.Count - 1;
 
         public void GoBack() {
@@ -176,27 +202,22 @@ namespace UIForia.Routing {
             if (isInitialized) return;
             isInitialized = true;
 
-            if (defaultRoute != null) {
-                CurrentUrl = defaultRoute;
-                targetUrl = defaultRoute;
+            if (defaultRoute == null) {
 
                 for (int i = 0; i < m_RouteHandlers.Count; i++) {
-                    RouteMatch match = Route.Match(m_RouteHandlers[i].path, defaultRoute, 0);
-                    if (match.IsMatch) {
-                        targetRoute = m_RouteHandlers[i];
-
-                        if (m_ActiveTransitions.Count == 0) {
-                            EnterRoute();
-                        }
-
+                    if (m_RouteHandlers[i].isDefaultRoute) {
+                        GoTo(m_RouteHandlers[i].path);
                         return;
                     }
                 }
             }
+            else {
+                GoTo(defaultRoute);
+            }
         }
 
         private float tickElapsed;
-        
+
         public void Tick() {
             Initialize();
 
@@ -219,7 +240,7 @@ namespace UIForia.Routing {
             }
 
             if (m_ActiveTransitions.Count == 0) {
-                EnterRoute();
+                EnterRoute(targetRouteMatch);
             }
 
             tickElapsed += Time.deltaTime;
@@ -229,8 +250,14 @@ namespace UIForia.Routing {
         public void GoTo(string path) {
             targetUrl = path;
             for (int i = 0; i < m_RouteHandlers.Count; i++) {
-                RouteMatch match = Route.Match(m_RouteHandlers[i].path, path, 0);
-                if (match.IsMatch) {
+                RouteMatch match = Route.Match(m_RouteHandlers[i], path);
+
+                if (match.matches) {
+                    if (match.parentMatch) {
+                        m_TargetParentRoutes.Add(m_RouteHandlers[i]);
+                        continue;
+                    }
+
                     if (!IsTransitionAllowed(path, match.url)) {
                         return;
                     }
@@ -240,23 +267,47 @@ namespace UIForia.Routing {
                     GatherTransitions(path);
 
                     if (m_ActiveTransitions.Count == 0) {
-                        EnterRoute();
+                        EnterRoute(match);
                     }
 
                     return;
-                }
+                } 
             }
         }
 
-        private void EnterRoute() {
+        private void EnterRoute(RouteMatch match) {
+
+            for (int i = 0; i < m_ActiveParentRoutes.Count; i++) {
+                if (!m_TargetParentRoutes.Contains(m_ActiveParentRoutes[i])) {
+                    m_ActiveParentRoutes[i]?.Exit();
+                }
+            }
+            
+            for (int i = 0; i < m_TargetParentRoutes.Count; i++) {
+                if (!m_ActiveParentRoutes.Contains(m_TargetParentRoutes[i])) {
+                    m_TargetParentRoutes[i]?.Enter();
+                }
+            }
+
+            m_ActiveParentRoutes.Clear();
+            m_ActiveParentRoutes.AddRange(m_TargetParentRoutes);
+            m_TargetParentRoutes.Clear();
+            
             if (targetRoute != activeRoute) {
-                activeRoute?.Exit();
+                if (!m_ActiveParentRoutes.Contains(activeRoute)) {
+                    // only exit the currently active route if it isn't a parent of the target route
+                    activeRoute?.Exit();
+                }
                 targetRoute.Enter();
                 activeRoute = targetRoute;
             }
             else {
                 activeRoute.Update();
             }
+
+            m_CurrentRouteParameters.Clear();
+            m_CurrentRouteParameters.AddRange(match.routeParameters);
+            match.Release();
 
             historyIndex++;
             m_HistoryStack.Add(activeRoute);
@@ -265,6 +316,8 @@ namespace UIForia.Routing {
         }
 
         private void GatherTransitions(string path) {
+            if (CurrentUrl == null) return;
+            
             for (int i = 0; i < m_Transitions.Count; i++) {
                 if (IsTransitionApplicable(m_Transitions[i], path)) {
                     m_ActiveTransitions.Add(m_Transitions[i]);
@@ -273,8 +326,8 @@ namespace UIForia.Routing {
         }
 
         private bool IsTransitionApplicable(RouteTransition transition, string path) {
-            bool first = Route.Match(transition.fromPath, CurrentUrl, 0).IsMatch;
-            bool second = Route.Match(transition.toPath, path, 0).IsMatch;
+            bool first = Route.Match(transition.fromPath, CurrentUrl).matches;
+            bool second = Route.Match(transition.toPath, path).matches;
             return first && second;
         }
 
@@ -282,18 +335,33 @@ namespace UIForia.Routing {
             return true;
         }
 
-        public static void ResolveRouterName(string value, out string routerName, out string path) {
-            int idx = value.IndexOf("::", StringComparison.Ordinal);
-            if (idx != -1) {
-                routerName = value.Substring(0, idx);
-                path = value.Substring(idx + 2);
+        public RouteParameter GetParameter(string parameterName) {
+            RouteParameter[] routeParameters = m_CurrentRouteParameters.Array;
+            for (int i = 0; i < routeParameters.Length; i++) {
+                if (routeParameters[i].name == parameterName) {
+                    return routeParameters[i];
+                }
             }
-            else {
-                routerName = null;
-                path = value;
-            }
+
+            return default;
         }
 
+        internal bool TryGetParentRouteFor(UIElement element, out Route route) {
+            IHierarchical ptr = element.Parent;
+            while (ptr != null) {
+                for (int i = 0; i < m_RouteHandlers.Count; i++) {
+                    Route r = m_RouteHandlers[i];
+                    if (r.element == ptr) {
+                        route = r;
+                        return true;
+                    }
+                }
+                ptr = ptr.Parent;
+            }
+
+            route = null;
+            return false;
+        }
     }
 
 }

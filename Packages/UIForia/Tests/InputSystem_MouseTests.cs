@@ -309,8 +309,8 @@ public class InputSystemTests {
         InputSystemTestThing2 root = (InputSystemTestThing2) testView.RootElement;
         testView.Update();
         MouseState mouseState = new MouseState();
-        mouseState.isLeftMouseDown = true;
-        mouseState.isLeftMouseDownThisFrame = true;
+        mouseState.leftMouseButtonState.isDown = true;
+        mouseState.leftMouseButtonState.isDownThisFrame = true;
 
         mouseState.mousePosition = new Vector2(120, 10);
         testView.InputSystem.SetMouseState(mouseState);
@@ -326,8 +326,8 @@ public class InputSystemTests {
         InputSystemTestThing2 root = (InputSystemTestThing2) testView.RootElement;
 
         MouseState mouseState = new MouseState();
-        mouseState.isLeftMouseDown = true;
-        mouseState.isLeftMouseDownThisFrame = true;
+        mouseState.leftMouseButtonState.isDown = true;
+        mouseState.leftMouseButtonState.isDownThisFrame = true;
 
         mouseState.mousePosition = new Vector2(1200, 10);
         testView.InputSystem.SetMouseState(mouseState);
@@ -343,7 +343,7 @@ public class InputSystemTests {
         InputSystemTestThing2 root = (InputSystemTestThing2) testView.RootElement;
 
         MouseState mouseState = new MouseState();
-        mouseState.isLeftMouseUpThisFrame = true;
+        mouseState.leftMouseButtonState.isUpThisFrame = true;
         mouseState.mousePosition = new Vector2(220, 10);
         testView.InputSystem.SetMouseState(mouseState);
         testView.Update();
@@ -358,7 +358,7 @@ public class InputSystemTests {
         InputSystemTestThing2 root = (InputSystemTestThing2) testView.RootElement;
 
         MouseState mouseState = new MouseState();
-        mouseState.isLeftMouseUpThisFrame = true;
+        mouseState.leftMouseButtonState.isUpThisFrame = true;
         mouseState.mousePosition = new Vector2(220, 10);
         testView.InputSystem.SetMouseState(mouseState);
         root.shouldStopPropagation = true;
@@ -374,7 +374,7 @@ public class InputSystemTests {
         InputSystemTestThing2 root = (InputSystemTestThing2) testView.RootElement;
 
         MouseState mouseState = new MouseState();
-        mouseState.isLeftMouseUpThisFrame = true;
+        mouseState.leftMouseButtonState.isUpThisFrame = true;
         mouseState.mousePosition = new Vector2(120, 10);
         testView.InputSystem.SetMouseState(mouseState);
         root.shouldStopPropagation = true;
@@ -390,7 +390,7 @@ public class InputSystemTests {
         InputSystemTestThing2 root = (InputSystemTestThing2) testView.RootElement;
 
         MouseState mouseState = new MouseState();
-        mouseState.isLeftMouseUpThisFrame = true;
+        mouseState.leftMouseButtonState.isUpThisFrame = true;
 
         mouseState.mousePosition = new Vector2(1200, 10);
         testView.InputSystem.SetMouseState(mouseState);

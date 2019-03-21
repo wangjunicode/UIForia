@@ -95,25 +95,11 @@ namespace UIForia.Systems {
         public Vector2 ScrollDelta => m_MouseState.scrollDelta;
 
         public Vector2 MousePosition => m_MouseState.mousePosition;
-        public Vector2 MouseDownPosition => m_MouseState.mouseDownPosition;
+        public Vector2 MouseDownPosition => m_MouseState.leftMouseButtonState.downPosition;
 
         public bool IsDragging { get; protected set; }
 
         protected abstract MouseState GetMouseState();
-
-        // todo -- make this work
-        private void HandleCreateScrollbar(VirtualScrollbar scrollbar) {
-            m_DragCreatorMap.Add(scrollbar.id, new DragCreatorGroup(s_DummyContext, new DragEventCreator[] {
-                new DragEventCreator_WithEvent<VirtualScrollbar>(KeyboardModifiers.None, EventPhase.Bubble, (instance, evt) => instance.CreateDragEvent(evt)),
-            }));
-
-            m_MouseHandlerMap.Add(scrollbar.id, new MouseHandlerGroup(s_DummyContext, new MouseEventHandler[] {
-                    new MouseEventHandler_IgnoreEvent<VirtualScrollbar>(InputEventType.MouseEnter, KeyboardModifiers.None, EventPhase.Bubble, (instance) => instance.OnMouseEnter()),
-                    new MouseEventHandler_IgnoreEvent<VirtualScrollbar>(InputEventType.MouseHover, KeyboardModifiers.None, EventPhase.Bubble, (instance) => instance.OnMouseMoveOrHover()),
-                    new MouseEventHandler_IgnoreEvent<VirtualScrollbar>(InputEventType.MouseMove, KeyboardModifiers.None, EventPhase.Bubble, (instance) => instance.OnMouseMoveOrHover()),
-                    new MouseEventHandler_IgnoreEvent<VirtualScrollbar>(InputEventType.MouseExit, KeyboardModifiers.None, EventPhase.Bubble, (instance) => instance.OnMouseExit()),
-                }, InputEventType.MouseEnter | InputEventType.MouseHover | InputEventType.MouseMove | InputEventType.MouseExit));
-        }
 
         public bool RequestFocus(IFocusable target) {
             if (!(target is UIElement)) {
@@ -220,7 +206,7 @@ namespace UIForia.Systems {
 
             currentCursor = newCursor;
 
-            if (m_MouseState.isLeftMouseDownThisFrame) {
+            if (m_MouseState.AnyMouseDownThisFrame) {
                 m_MouseDownElements.AddRange(m_ElementsThisFrame);
             }
 
@@ -229,9 +215,7 @@ namespace UIForia.Systems {
 
         private void ProcessDragEvents() {
             if (IsDragging) {
-                if (m_MouseState.isLeftMouseDrag && m_MouseState.isLeftMouseUpThisFrame
-                     || m_MouseState.isMiddleMouseDrag && m_MouseState.isMiddleMouseUpThisFrame
-                     || m_MouseState.isRightMouseDrag && m_MouseState.isRightMouseUpThisFrame) {
+                if (m_MouseState.ReleasedDrag) {
                     EndDrag(InputEventType.DragDrop);
                     m_MouseDownElements.Clear();
                 }
@@ -243,10 +227,8 @@ namespace UIForia.Systems {
             }
 
             if (m_MouseState.AnyMouseDown) {
-                m_MouseState.isLeftMouseDrag = m_MouseState.isLeftMouseDown;
-                m_MouseState.isMiddleMouseDrag = m_MouseState.isMiddleMouseDown;
-                m_MouseState.isRightMouseDrag = m_MouseState.isRightMouseDown;
-                if (Vector2.Distance(m_MouseState.mouseDownPosition, m_MouseState.mousePosition) >= k_DragThreshold) {
+           
+                if (Vector2.Distance(m_MouseState.MouseDownPosition, m_MouseState.mousePosition) >= k_DragThreshold) {
                     BeginDrag();
                 }
 
@@ -285,6 +267,10 @@ namespace UIForia.Systems {
         }
 
         private void BeginDrag() {
+            m_MouseState.leftMouseButtonState.isDrag = m_MouseState.isLeftMouseDown;
+            m_MouseState.rightMouseButtonState.isDrag = m_MouseState.isRightMouseDown;
+            m_MouseState.middleMouseButtonState.isDrag = m_MouseState.isMiddleMouseDown;
+            
             IsDragging = true;
             m_EventPropagator.Reset(m_MouseState);
             MouseInputEvent mouseEvent = new MouseInputEvent(m_EventPropagator, InputEventType.DragCreate, modifiersThisFrame);
@@ -420,6 +406,8 @@ namespace UIForia.Systems {
             m_MouseHandlerMap.Clear();
             m_DragCreatorMap.Clear();
             m_DragHandlerMap.Clear();
+            m_CurrentDragEvent = null;
+            IsDragging = false;
         }
 
         public void OnDestroy() { }
@@ -839,10 +827,14 @@ namespace UIForia.Systems {
             RunMouseEvents(m_ExitedElements, InputEventType.MouseExit);
             RunMouseEvents(m_EnteredElements, InputEventType.MouseEnter);
 
-            if (m_MouseState.isLeftMouseDownThisFrame || m_MouseState.isRightMouseDownThisFrame) {
+            if (m_MouseState.scrollDelta != Vector2.zero) {
+                RunMouseEvents(m_ElementsThisFrame, InputEventType.MouseScroll);
+            }
+
+            if (m_MouseState.isLeftMouseDownThisFrame || m_MouseState.isRightMouseDownThisFrame || m_MouseState.isMiddleMouseDownThisFrame) {
                 RunMouseEvents(m_ElementsThisFrame, InputEventType.MouseDown);
             }
-            else if (m_MouseState.isLeftMouseUpThisFrame || m_MouseState.isRightMouseUpThisFrame) {
+            else if (m_MouseState.isLeftMouseUpThisFrame || m_MouseState.isRightMouseUpThisFrame || m_MouseState.isMiddleMouseUpThisFrame) {
                 RunMouseEvents(m_ElementsThisFrame, InputEventType.MouseUp);
                 if (m_MouseState.clickCount > 0) {
                     RunMouseEvents(m_ElementsThisFrame, InputEventType.MouseClick);
